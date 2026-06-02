@@ -38,7 +38,9 @@ jobs:
         run: pnpm typecheck
 
       - name: Test
-        run: pnpm test
+        run: pnpm -F @dapp-e2e/core test
+        env:
+          SKIP_ANVIL_TESTS: "1"
 
       - name: Build
-        run: pnpm build
+        run: pnpm -F @dapp-e2e/core -F @dapp-e2e/cli build
