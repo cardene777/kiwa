@@ -1,12 +1,15 @@
 # dapp-e2e
 
-dapp-e2e は anvil ベースの fork chain testing に特化した headless E2E test fixture for dApps です。
+dapp-e2e は anvil をローカルで起動して使う headless な E2E test fixture for dApps です。
 Playwright と viem を組み合わせ、ブラウザ拡張なしで `window.ethereum` を inject し、
 anvil の dev account を使った接続、署名、送金までを 1 つの fixture で通せます。
-実 MetaMask UI の確認は別ツールに任せ、本ツールは fork chain testing と CI 安定性に集中します。
+実 MetaMask UI の確認は別ツールに任せ、本ツールは CI 上で安定して動く E2E に集中します。
 比較の考え方は [docs/COMPARISON.md](./docs/COMPARISON.md) にまとめています。
 
 ## Quickstart
+
+以下の手順は v0.1.0 が npmjs.com に publish された後に動作します。
+publish 前に手元で試したい場合は、本リポジトリを clone して `pnpm install && pnpm -F @dapp-e2e/core -F @dapp-e2e/cli build` を実行し、`node packages/cli/dist/index.js init` を直接呼び出してください。
 
 ```bash
 pnpm dlx @dapp-e2e/cli init
@@ -32,11 +35,11 @@ pnpm exec playwright test
 - Node.js 20 以上
 - pnpm
 - Playwright が利用できるローカルまたは CI 環境
-- fork 元にしたい RPC URL がある場合は、利用側で環境変数や設定を渡す構成
+- `anvil` (Foundry) がインストール済みで PATH から実行できる状態
 
 ## Features
 
-- anvil を test 単位で直接 spawn し、fork chain を隔離して扱える
+- anvil を test 単位で直接 spawn し、ローカル chain を隔離して扱える
 - `eth_requestAccounts` など 9 RPC を core が直接処理し、その他は anvil JSON-RPC へ forward する
 - `viem` を peerDependency に寄せ、host project 側で version を一元管理できる
 - `dappE2e.triggerEvent()` と `connect()` `disconnect()` `switchChain()` で page 側 event を制御できる
@@ -44,9 +47,9 @@ pnpm exec playwright test
 - error envelope で EIP-1193 の `code` と `message` を page 境界の先まで保持できる
 - CLI `init` だけで fixture import 済みの雛形を作れる
 
-fork chain の再現性と headless 実行を優先しているため、
+ブラウザ拡張なしで完結する headless 実行を優先しているため、
 wallet extension の popup 操作や UI 差分の確認よりも、
-dApp 側の接続フローを安定して検証したい場面に向いています。
+dApp 側の接続フローを CI 上で安定して検証したい場面に向いています。
 
 ## Documentation
 

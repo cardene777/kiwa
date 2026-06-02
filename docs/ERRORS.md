@@ -22,6 +22,17 @@ dapp-e2e が v0.1.0 で実際に使う主要 code は `4100` `4200` `-32700` `-3
 EIP-1193 でよく見かける `4902` も周辺仕様では使われますが、
 現行 core は chain 登録テーブルを持たないため emit しません。
 
+## 実装固有 error code
+
+EIP-1193 公式に含まれないが本実装で利用する code です。
+
+| Code | 用途 |
+|---|---|
+| `3` | `eth_sendTransaction` で transaction rejected (insufficient balance / revert / signer 関連 viem error) |
+
+code `3` は `packages/core/src/tx.ts` で viem が throw した error を catch して `Eip1193Error(3, 'transaction rejected: ...')` に正規化したものです。
+page 側の catch 句で `(e as { code?: number }).code === 3` を使うと、anvil への送信時の reject を観測できます。
+
 ## dapp-e2e での主な発生条件
 
 ### `4100`

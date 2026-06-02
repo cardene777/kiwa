@@ -17,7 +17,7 @@ error の返し方は [ERRORS.md](./ERRORS.md) を参照してください。
 | `eth_signTypedData_v4` | `[address: 0x{hex}, typedDataJson: string]` | `0x${string}` | `4100` / `-32700` |
 | `wallet_switchEthereumChain` | `[{ chainId: 0x{hex} }]` | `null` | `-32602` |
 | `wallet_addEthereumChain` | `[{ chainId: 0x{hex}, ... }]` | `null` | `-32602` |
-| `eth_sendTransaction` | `[txRequest]` | `0x${string}` | `4100` / `-32603` |
+| `eth_sendTransaction` | `[txRequest]` | `0x${string}` | `3` / `4100` / `-32603` |
 
 これら 9 method は、active account と current chain を fixture の state から引いて返します。
 `eth_sendTransaction` だけは anvil への broadcast が必要なため、内部で `sendTransaction()` を呼びます。
@@ -85,6 +85,7 @@ await window.ethereum.request({
 `eth_sendTransaction` は `from` が active account と一致するかを確認し、
 anvil へ送信した tx hash を返します。
 fixture lifecycle の外で anvil port が無い場合は `-32603` で失敗します。
+viem からの transaction rejection (insufficient balance / revert / signer 関連 error) は EIP-1193 code `3` で reject されます。
 
 ```typescript
 const hash = await window.ethereum.request({
