@@ -12,6 +12,8 @@ PR #19 (3 アクション 2 段 major bump) を merge した経験で、routine 
 - AC 3: `dependency-name` の glob (`*`) が dependabot 公式仕様で動作することを yaml コメント or PR body で明示している
 - AC 4: `docs/RELEASING.md` の SHA pin 運用節に「routine group の major up も手動 SHA pin 更新」運用ルールが 1 段落 (2-4 文) で追記されている
 - AC 5: PR merge 後の dependabot daily scan で routine group の minor / patch 自動 PR は流れる前提が運用ルールに含まれている
+- AC 6: `.github/workflows/ci.yml` が削除されていること (PR 用 CI workflow をローカルテスト運用に置き換え)
+- AC 7: `docs/RELEASING.md` の CI matrix 言及がローカルテスト運用記述に書き換えられており、`release.yml` 内 5 step gate と branch protection 運用が整合していること
 
 ## スコープ境界
 
@@ -62,12 +64,12 @@ workflow yaml では `release.yml` の SHA pin 値を維持しつつ、PR 用 CI
 - リスク 4: PR 段階のテストは開発者ローカル責任になり、CI 自動チェックは GitGuardian / CodeRabbit のみになる → release.yml 内の typecheck / test / build gate で publish 経路の安全性を担保する
 - 前提 1: PR #19 で v6 系 SHA pin に更新済、本 PR merge 後の dependabot 次回 scan で routine group の major up は新たに提案されない
 - 前提 2: docs/RELEASING.md の SHA pin 運用節 (L42-46) は既に SHA pin 防御を説明済、本 PR では「routine group も同じ運用」を 1 段落追記するのみ
-- 前提 3: 軽量 PR (yaml 6 行追加 + docs 1 段落追加) で 10-15 分完結、過剰実装しない
+- 前提 3: 当初は軽量 PR 想定だったが、ci.yml 削除と release 運用整合まで含めたため最終的に 4 file / 約 30 分規模へ拡大した
 
 ## 粒度判定
 
-- AC 数: 5 (推奨 3-5 の上限、緑)
-- 影響ファイル数: 2 (推奨 5 以下、緑)
-- 推定実装時間: 約 15 分 (AC 5 × 平均 3 分、推奨 30 分以内、緑)
+- AC 数: 7 (推奨 3-5 を超過、黄)
+- 影響ファイル数: 4 (推奨 5 以下、緑)
+- 推定実装時間: 約 30 分 (AC 7 × 平均 4 分、推奨 30 分以内の上限、黄)
 
-**判定: 緑** — 単発 Issue 適正、`/issue-plan` skip して直接 `/impl` へ移行可能 (Issue #21 起票済のため Issue 本文も既に存在)。
+**判定: 黄 (警告)** — scope が ci.yml 削除追加で当初想定より拡大した。実装は本 PR 内で完結したが、本来は別 Issue として切り出すべき粒度。AC 6-7 はユーザー方針変更による追加であり、本 PR の同 scope (CI/CD config 見直し) でセットにする判断を取った。

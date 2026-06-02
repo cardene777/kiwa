@@ -15,7 +15,7 @@
 - Issue #3 / #4 / #5 / #6 / #11 全 closed (5 PR merged)
 - Issue #7 / #14 / #15 / #16 / #17 open (起票済)
 - main HEAD = da316eb (Issue #11 PR #18 merge)
-- **v0.1.0 publish 直前防御完成**、Issue #17 のユーザー側操作で初回 publish 可能
+- **v0.1.0 publish 直前防御完成** (ci.yml 削除によりローカルテスト運用へ切替、publish 経路は release.yml 内 5 step gate で担保)、Issue #17 のユーザー側操作で初回 publish 可能
 
 ## 本セッションで完了した PR (5 件)
 
@@ -76,7 +76,8 @@ Issue #17 https://github.com/cardene777/dapp-e2e/issues/17 の手順:
 2. **package 名予約確認** — npm 上で `@dapp-e2e/core` `@dapp-e2e/cli` の organization or scope が利用可能か (https://www.npmjs.com/org/dapp-e2e 確認)、衝突時は scope 名変更 Issue 起票
 3. **GitHub Secrets 登録** — Settings > Secrets and variables > Actions で `NPM_TOKEN` 追加
 4. **Workflow permissions** — Settings > Actions で Read and write permissions + Allow GHA to create PR 有効化
-5. **main branch protection** — Settings > Branches で main の required check に `test (20)` + `test (22)` を設定 (release.yml node 20 only と CI matrix node 20/22 の test surface 差異補完、docs/RELEASING.md に運用ルール明記済)
+5. **main branch protection (任意)** — Settings > Branches で PR 経由必須化のみ設定。
+   required status check は **設定しない** (PR #22 で ci.yml を削除しローカルテスト運用に切り替え、`test (20)` + `test (22)` check は存在しないため required にできない)
 6. **main push** — Changesets bot が `chore(release): version packages` PR を自動作成
 7. **version PR merge** — release.yml が `pnpm publish -r --provenance` 実行、npmjs.com に v0.1.0 公開
 8. **smoke test** — 外部 temp dir で `pnpm dlx @dapp-e2e/cli init && pnpm install && pnpm exec playwright test` 実行確認
