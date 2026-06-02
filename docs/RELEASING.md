@@ -39,6 +39,17 @@ npm 側で Automation Token を発行し、GitHub の `Settings > Secrets and va
 - publish が止まる場合は、`NPM_TOKEN` secret と workflow 権限を確認します。
 - tarball 内容を確認したい場合は、各 package で `npm pack --dry-run` を実行します。
 
+## SHA pin 運用
+
+dependabot は github-actions ecosystem を daily 監視し、`groups` 設定で全 action を 1 PR にまとめて提案します。PR は週 1 回まとめて merge する運用で、特に `changesets/action` の minor version up は内部 behavior 変化リスクがあるため手動 review を推奨します。
+SHA pin により mutable major tag (例 `@v4`) 経由の supply chain 攻撃を防ぎ、各 action の更新を意図的に行えます。
+
+## release.yml の CI gate
+
+`release.yml` は main push 直接トリガで起動しますが、`changesets/action` 起動前に install → typecheck → test (core + cli) → build → consumer typecheck の 5 step を実行する CI gate を持ちます。test fail で `changesets/action` は起動せず、publish も行われません。
+`release.yml` は node 20 のみで動作するため、CI matrix (node 20/22) との test surface 差異を埋めるために main branch protection で CI workflow を required check に設定し、CI fail の commit が main に push されないようにする運用とします。
+将来 `workflow_run` trigger (CI workflow 完了を gate) への切替も検討余地ですが、現状は同一 workflow 内 test 再走 (案 B) + branch protection でシンプルかつ確実な gate を実装しています。
+
 ## 関連リンク
 
 - [Changesets 公式](https://github.com/changesets/changesets)
