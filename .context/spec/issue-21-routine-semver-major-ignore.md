@@ -19,6 +19,7 @@ PR #19 (3 アクション 2 段 major bump) を merge した経験で、routine 
 
 - `.github/dependabot.yml` の ignore リスト拡張 (3 系統 statement)
 - `docs/RELEASING.md` の SHA pin 運用節への運用ルール 1 段落追記
+- `.github/workflows/ci.yml` の削除と、それに伴う release 運用ドキュメント整合
 - yaml lint 確認 (`actionlint` or yaml validate コマンドの実行ログ)
 
 ### out (本 Issue で対応しない)
@@ -35,11 +36,13 @@ PR #19 (3 アクション 2 段 major bump) を merge した経験で、routine 
 - 反例 2: `ignore-major` を `applies-to: version-updates` 限定する案 → 現状 security-updates は別経路で ignore せず受け取る方針なので applies-to は default のままで OK
 - 反例 3: 全 action の `version-update:semver-patch` も ignore する過剰防御 → patch 自動 PR は SHA pin の利益が一番高く、ignore する理由がない
 - 反例 4: dependabot.yml の groups 構造ごと作り直す案 → 既存 routine + changesets-action 2 group 分離が PR #18 で確立済、構造変更は SSOT 違反
+- 反例 5: `ci.yml` は手動運用に切り替え後も維持する案 → 今回のスコープは PR 用 CI の退避ではなく削除であり、release.yml 内 gate とローカル運用へ明示的に切り替える
 
 ## 影響範囲 (touched file 候補)
 
 - `.github/dependabot.yml` (AC 1-3 で ignore リスト 3 系統に拡張)
 - `docs/RELEASING.md` (AC 4-5 で SHA pin 運用節に 1 段落追記、L42 付近)
+- `.github/workflows/ci.yml` (PR 用 CI workflow を削除)
 
 grep ベース確認結果。
 
@@ -49,13 +52,14 @@ grep ベース確認結果。
 .github/workflows/ci.yml:21,29:       actions/checkout + actions/setup-node SHA pin
 ```
 
-workflow yaml 側は触らない (SHA pin 値は PR #19 で v6 系に更新済、本 PR では ignore 設定のみ追加)。
+workflow yaml では `release.yml` の SHA pin 値を維持しつつ、PR 用 CI の `ci.yml` のみ削除する。
 
 ## 既知のリスク・前提
 
 - リスク 1: dependabot の `dependency-name` glob が思った通りマッチしない (例 `actions/checkout-v2` のような変則名前空間) → 公式仕様で `*` glob は動作することを確認済 (`https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#ignore`)、影響なし
 - リスク 2: minor / patch 自動 PR が止まる誤設定 → `version-update:semver-major` のみ ignore、minor / patch は引き続き自動 PR で流れる
 - リスク 3: PR #18 で確立した 2 group 構造を壊す → 本 PR は ignore リスト追加のみ、groups 構造は触らない
+- リスク 4: PR 段階のテストは開発者ローカル責任になり、CI 自動チェックは GitGuardian / CodeRabbit のみになる → release.yml 内の typecheck / test / build gate で publish 経路の安全性を担保する
 - 前提 1: PR #19 で v6 系 SHA pin に更新済、本 PR merge 後の dependabot 次回 scan で routine group の major up は新たに提案されない
 - 前提 2: docs/RELEASING.md の SHA pin 運用節 (L42-46) は既に SHA pin 防御を説明済、本 PR では「routine group も同じ運用」を 1 段落追記するのみ
 - 前提 3: 軽量 PR (yaml 6 行追加 + docs 1 段落追加) で 10-15 分完結、過剰実装しない
