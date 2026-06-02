@@ -184,4 +184,59 @@ describe('runInit', () => {
     expect(packageJsonRaw.split('\n').some((line) => line.startsWith('\t"'))).toBe(true);
     expect(packageJsonRaw.split('\n').some((line) => line.startsWith('  "'))).toBe(false);
   });
+
+  it('T-INIT-007 既存 scripts.test:e2e がある場合は保持する (上書きしない)', async () => {
+    // Given
+    seedPackageJson(tempDir, {
+      name: 'host',
+      version: '1.0.0',
+      scripts: {
+        'test:e2e': 'vitest run e2e',
+      },
+    });
+    const { runInit } = await loadInitModule();
+
+    // When
+    runInit({ force: false, cwd: tempDir });
+    const packageJson = readPackageJson(tempDir);
+
+    // Then
+    expect(packageJson.scripts['test:e2e']).toBe('vitest run e2e');
+  });
+
+  it('T-INIT-008 既存 devDependencies の version は保持する (上書きしない)', async () => {
+    // Given
+    seedPackageJson(tempDir, {
+      name: 'host',
+      version: '1.0.0',
+      devDependencies: {
+        '@playwright/test': '^1.48.0',
+        viem: '^2.21.0',
+      },
+    });
+    const { runInit } = await loadInitModule();
+
+    // When
+    runInit({ force: false, cwd: tempDir });
+    const packageJson = readPackageJson(tempDir);
+
+    // Then
+    expect(packageJson.devDependencies['@playwright/test']).toBe('^1.48.0');
+    expect(packageJson.devDependencies.viem).toBe('^2.21.0');
+    expect(packageJson.devDependencies['@dapp-e2e/core']).toBe('^0.1.0');
+  });
+
+  it('T-INIT-009 package.json が invalid JSON の場合は rollback して created file を残さない', async () => {
+    // Given
+    fs.writeFileSync(path.join(tempDir, 'package.json'), '{ invalid json', 'utf8');
+    const { runInit } = await loadInitModule();
+
+    // When + Then
+    expect(() => runInit({ force: false, cwd: tempDir })).toThrow();
+    // template files should be removed by rollback
+    expect(fs.existsSync(path.join(tempDir, 'e2e/connect.spec.ts'))).toBe(false);
+    expect(fs.existsSync(path.join(tempDir, 'playwright.config.ts'))).toBe(false);
+    // e2e dir should be removed if it was created by runInit
+    expect(fs.existsSync(path.join(tempDir, 'e2e'))).toBe(false);
+  });
 });

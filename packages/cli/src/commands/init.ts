@@ -48,38 +48,84 @@ export function runInit(options: InitOptions): InitResult {
   }
 
   const created: string[] = [];
+  const createdDirs: string[] = [];
 
-  for (const template of TEMPLATES) {
-    const source = resolveTemplatePath(template.source);
-    const destination = path.join(options.cwd, template.dest);
-    fs.mkdirSync(path.dirname(destination), { recursive: true });
-    fs.writeFileSync(destination, fs.readFileSync(source, 'utf8'), 'utf8');
-    created.push(template.dest);
+  try {
+    for (const template of TEMPLATES) {
+      const source = resolveTemplatePath(template.source);
+      const destination = path.join(options.cwd, template.dest);
+      const destDir = path.dirname(destination);
+      if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+        createdDirs.push(destDir);
+      }
+      fs.writeFileSync(destination, fs.readFileSync(source, 'utf8'), 'utf8');
+      created.push(template.dest);
+    }
+  } catch (error) {
+    rollback(options.cwd, created, createdDirs);
+    throw error;
   }
 
   const updated: string[] = [];
   const packageJsonPath = path.join(options.cwd, 'package.json');
 
   if (fs.existsSync(packageJsonPath)) {
-    const raw = fs.readFileSync(packageJsonPath, 'utf8');
-    const indent = detectIndent(raw);
-    const packageJson = JSON.parse(raw) as Record<string, unknown>;
+    try {
+      const raw = fs.readFileSync(packageJsonPath, 'utf8');
+      const indent = detectIndent(raw);
+      const packageJson = JSON.parse(raw) as Record<string, unknown>;
 
-    const scripts = (packageJson.scripts ?? {}) as Record<string, string>;
-    scripts['test:e2e'] = 'playwright test';
-    packageJson.scripts = scripts;
+      const scripts = (packageJson.scripts ?? {}) as Record<string, string>;
+      let modified = false;
+      if (scripts['test:e2e'] === undefined) {
+        scripts['test:e2e'] = 'playwright test';
+        modified = true;
+      }
+      packageJson.scripts = scripts;
 
-    const devDependencies = (packageJson.devDependencies ?? {}) as Record<string, string>;
-    for (const [name, version] of Object.entries(DEV_DEPENDENCIES)) {
-      devDependencies[name] = version;
+      const devDependencies = (packageJson.devDependencies ?? {}) as Record<string, string>;
+      for (const [name, version] of Object.entries(DEV_DEPENDENCIES)) {
+        if (devDependencies[name] === undefined) {
+          devDependencies[name] = version;
+          modified = true;
+        }
+      }
+      packageJson.devDependencies = devDependencies;
+
+      if (modified) {
+        fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, indent)}\n`, 'utf8');
+        updated.push('package.json');
+      }
+    } catch (error) {
+      rollback(options.cwd, created, createdDirs);
+      throw error;
     }
-    packageJson.devDependencies = devDependencies;
-
-    fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, indent)}\n`, 'utf8');
-    updated.push('package.json');
   }
 
   return { created, updated };
+}
+
+function rollback(cwd: string, created: string[], createdDirs: string[]): void {
+  for (const relativePath of created) {
+    const target = path.join(cwd, relativePath);
+    if (fs.existsSync(target)) {
+      try {
+        fs.unlinkSync(target);
+      } catch {
+        // best-effort rollback; ignore errors so original throw surfaces
+      }
+    }
+  }
+  // remove dirs we created (only if empty to avoid blowing away pre-existing data)
+  const sortedDirs = [...createdDirs].sort((a, b) => b.length - a.length);
+  for (const dir of sortedDirs) {
+    try {
+      fs.rmdirSync(dir);
+    } catch {
+      // dir was not empty or already removed; ignore
+    }
+  }
 }
 
 function detectIndent(raw: string): number | string {

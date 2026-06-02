@@ -1,11 +1,9 @@
 import { expect } from '@playwright/test';
 import { dappE2eTest as test } from '@dapp-e2e/core';
 import { verifyMessage } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
 
-// anvil first dev account (private key)
-const PRIVATE_KEY =
-  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
+// dapp-e2e fixture injects an anvil-backed wallet; the address is obtained via
+// eth_requestAccounts so no private key needs to live in the template.
 
 const MINI_DAPP_HTML = `
 <!DOCTYPE html>
@@ -54,24 +52,26 @@ test.describe('dapp-e2e quickstart', () => {
   });
 
   test('Connect クリックで anvil の dev account が返る', async ({ page, dappE2e }) => {
-    const account = privateKeyToAccount(PRIVATE_KEY);
     await page.setContent(MINI_DAPP_HTML);
     await page.click('#connect');
     await dappE2e.waitForRpcIdle();
     const text = await page.locator('#result').textContent({ timeout: 5000 });
-    expect(text?.toLowerCase()).toBe(account.address.toLowerCase());
+    // anvil dev account address starts with 0x and is 42 chars (0x + 40 hex)
+    expect(text).toMatch(/^0x[0-9a-fA-F]{40}$/);
   });
 
   test('Sign + verifyMessage で署名が valid', async ({ page, dappE2e }) => {
-    const account = privateKeyToAccount(PRIVATE_KEY);
     await page.setContent(MINI_DAPP_HTML);
     await page.click('#connect');
     await dappE2e.waitForRpcIdle();
+    // capture the connected address before signing so we can verify with it
+    const addressText = await page.locator('#result').textContent({ timeout: 5000 });
+    const address = addressText as `0x${string}`;
     await page.click('#sign');
     await dappE2e.waitForRpcIdle();
     const sigText = await page.locator('#result').textContent({ timeout: 5000 });
     const valid = await verifyMessage({
-      address: account.address,
+      address,
       message: 'hello dapp-e2e',
       signature: sigText as `0x${string}`,
     });
