@@ -85,24 +85,27 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     expect(hasEthereum).toBe(true);
   });
 
-  test('T-E2E-002 #connect クリックでアドレスが #result に表示される', async ({ page }) => {
+  test('T-E2E-002 #connect クリックでアドレスが #result に表示される', async ({ page, dappE2e }) => {
     // Given
     const account = privateKeyToAccount(PRIVATE_KEY);
     await page.setContent(MINI_DAPP_HTML);
     // When
     await page.click('#connect');
+    await dappE2e.waitForRpcIdle();
     const text = await page.locator('#result').textContent({ timeout: 5000 });
     // Then
     expect(text?.toLowerCase()).toBe(account.address.toLowerCase());
   });
 
-  test('T-E2E-003 #sign クリックで返る signature が verifyMessage true になる', async ({ page }) => {
+  test('T-E2E-003 #sign クリックで返る signature が verifyMessage true になる', async ({ page, dappE2e }) => {
     // Given
     const account = privateKeyToAccount(PRIVATE_KEY);
     await page.setContent(MINI_DAPP_HTML);
     await page.click('#connect');
+    await dappE2e.waitForRpcIdle();
     // When
     await page.click('#sign');
+    await dappE2e.waitForRpcIdle();
     const sigText = await page.locator('#result').textContent({ timeout: 5000 });
     const valid = await verifyMessage({
       address: account.address,
@@ -113,13 +116,15 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     expect(valid).toBe(true);
   });
 
-  test('T-E2E-004 #sign-typed で eth_signTypedData_v4 署名が verifyTypedData で true', async ({ page }) => {
+  test('T-E2E-004 #sign-typed で eth_signTypedData_v4 署名が verifyTypedData で true', async ({ page, dappE2e }) => {
     // Given
     const account = privateKeyToAccount(PRIVATE_KEY);
     await page.setContent(MINI_DAPP_HTML);
     await page.click('#connect');
+    await dappE2e.waitForRpcIdle();
     // When
     await page.click('#sign-typed');
+    await dappE2e.waitForRpcIdle();
     const sigText = await page.locator('#result').textContent({ timeout: 5000 });
     const valid = await verifyTypedData({
       address: account.address,
@@ -146,12 +151,14 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     expect(valid).toBe(true);
   });
 
-  test('T-E2E-005 #send-tx で eth_sendTransaction が tx hash を返す', async ({ page }) => {
+  test('T-E2E-005 #send-tx で eth_sendTransaction が tx hash を返す', async ({ page, dappE2e }) => {
     // Given
     await page.setContent(MINI_DAPP_HTML);
     await page.click('#connect');
+    await dappE2e.waitForRpcIdle();
     // When
     await page.click('#send-tx');
+    await dappE2e.waitForRpcIdle();
     const hashText = await page.locator('#result').textContent({ timeout: 10000 });
     // Then
     expect(hashText).toMatch(/^0x[0-9a-fA-F]{64}$/);
@@ -161,11 +168,53 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     // Given
     await page.setContent(MINI_DAPP_HTML);
     await page.click('#register-event');
+    await dappE2e.waitForRpcIdle();
     const newAddr = '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826';
     // When
     await dappE2e.triggerEvent('accountsChanged', [newAddr]);
     const eventText = await page.locator('#event-result').textContent({ timeout: 5000 });
     // Then
     expect(eventText).toBe(`accountsChanged: ${newAddr}`);
+  });
+
+  test('T-E2E-007 eth_subscribe を page 側 catch で err.code === 4200 が観測される', async ({ page, dappE2e }) => {
+    // Given
+    await page.setContent(MINI_DAPP_HTML);
+    // When - page context で window.ethereum.request({ method: 'eth_subscribe' }) を catch
+    const errorCode = await page.evaluate(async () => {
+      try {
+        await (window as any).ethereum.request({
+          method: 'eth_subscribe',
+          params: ['newHeads'],
+        });
+        return null;
+      } catch (e) {
+        return (e as { code?: number }).code ?? null;
+      }
+    });
+    await dappE2e.waitForRpcIdle();
+    // Then - EIP-1193 method not supported code 4200 が page 境界を越えて保持される
+    expect(errorCode).toBe(4200);
+  });
+
+  test('T-E2E-008 dappE2e.waitForRpcIdle() で chained RPC 完了を待機できる', async ({ page, dappE2e }) => {
+    // Given - chained RPC を 3 つ並列発火、即座に DOM に書き込む dApp
+    await page.setContent(MINI_DAPP_HTML);
+    // When - 3 RPC を即時起動 (await しない)、すぐに waitForRpcIdle を呼ぶ
+    await page.evaluate(() => {
+      const eth = (window as any).ethereum;
+      Promise.all([
+        eth.request({ method: 'eth_accounts' }),
+        eth.request({ method: 'eth_chainId' }),
+        eth.request({ method: 'net_version' }),
+      ]).then(([accounts, chainId, netVersion]) => {
+        const el = document.getElementById('result');
+        if (el) el.textContent = `${accounts[0]}|${chainId}|${netVersion}`;
+      });
+    });
+    await dappE2e.waitForRpcIdle();
+    const text = await page.locator('#result').textContent();
+    // Then - waitForRpcIdle 後に 3 RPC 結果が DOM に揃って書き込まれている
+    expect(text).toMatch(/^0x[0-9a-fA-F]{40}\|0x7a69\|31337$/);
   });
 });

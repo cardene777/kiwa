@@ -5,7 +5,7 @@ import { startAnvil } from './anvil.js';
 import { createEventEmitter } from './event-emitter.js';
 import { createInjectorScript } from './injector-script.js';
 import { handleRpcRequest, type RpcContext } from './rpc-handlers.js';
-import type { DappE2eApi, Eip1193EventName, Hex } from './types.js';
+import { Eip1193Error, type DappE2eApi, type Eip1193EventName, type Hex } from './types.js';
 
 const DEFAULT_PRIVATE_KEY: Hex =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
@@ -18,12 +18,20 @@ interface DappE2eOptions {
 interface DappE2eFixtures {
   wallet: PrivateKeyAccount;
   anvilPort: number;
-  dappE2e: DappE2eApi;
+  dappE2e: FixtureDappE2eApi;
 }
 
 interface InternalFixtures {
   _anvilHandle: { port: number; stop: () => Promise<void> };
   _rpcContext: RpcContext;
+  _rpcTracker: {
+    pendingRpcs: Map<number, Promise<unknown>>;
+    nextId: () => number;
+  };
+}
+
+interface FixtureDappE2eApi extends DappE2eApi {
+  waitForRpcIdle(timeoutMs?: number): Promise<void>;
 }
 
 const FORWARDED_EVENTS: Eip1193EventName[] = [
@@ -62,8 +70,17 @@ export const dappE2eTest = base.extend<
     });
   },
 
-  dappE2e: async ({ page, anvilPort, _rpcContext }, use) => {
-    const api: DappE2eApi = {
+  _rpcTracker: async ({}, use) => {
+    const pendingRpcs = new Map<number, Promise<unknown>>();
+    let counter = 0;
+    await use({
+      pendingRpcs,
+      nextId: () => ++counter,
+    });
+  },
+
+  dappE2e: async ({ page, anvilPort, _rpcContext, _rpcTracker }, use) => {
+    const api: FixtureDappE2eApi = {
       async triggerEvent(event: Eip1193EventName, ...args: unknown[]) {
         await emitPageEvent(page, event, ...args);
       },
@@ -85,11 +102,14 @@ export const dappE2eTest = base.extend<
         _rpcContext.chainState.current = Number.parseInt(chainIdHex, 16);
         await emitPageEvent(page, 'chainChanged', chainIdHex);
       },
+      async waitForRpcIdle(timeoutMs = 10_000) {
+        await waitForPendingRpcs(page, _rpcTracker.pendingRpcs, timeoutMs);
+      },
     };
     await use(api);
   },
 
-  page: async ({ page, privateKey, chainId, _rpcContext }, use) => {
+  page: async ({ page, privateKey, chainId, _rpcContext, _rpcTracker }, use) => {
     const ctx = _rpcContext;
     const forwardedHandlers = FORWARDED_EVENTS.map((event) => {
       const handler = (...args: unknown[]) => {
@@ -101,43 +121,30 @@ export const dappE2eTest = base.extend<
     await page.exposeFunction(
       '__dappE2eRpc',
       async (request: { method: string; params?: unknown[] }) => {
-        try {
-          return await handleRpcRequest(ctx, request);
-        } catch (e) {
-          if (e instanceof Error) {
+        const id = _rpcTracker.nextId();
+        const promise = (async () => {
+          try {
+            const result = await handleRpcRequest(ctx, request);
+            return { ok: true as const, result };
+          } catch (e) {
             const err = e as Error & { code?: number };
-            throw Object.assign(new Error(err.message), { code: err.code });
+            return {
+              ok: false as const,
+              error: {
+                code: err.code ?? -32603,
+                message: err.message,
+              },
+            };
           }
-          throw e;
-        }
+        })();
+        _rpcTracker.pendingRpcs.set(id, promise);
+        void promise.finally(() => _rpcTracker.pendingRpcs.delete(id));
+        return promise;
       },
     );
     const script = createInjectorScript({ privateKey, chainId });
     await page.addInitScript({ content: script });
-    const originalSetContent = page.setContent.bind(page);
-    const originalClick = page.click.bind(page);
-    (page as typeof page & {
-      setContent: typeof page.setContent;
-      click: typeof page.click;
-    }).setContent = async (html, options) => {
-      await originalSetContent(html, options);
-      await page.addScriptTag({ content: script });
-    };
-    (page as typeof page & {
-      setContent: typeof page.setContent;
-      click: typeof page.click;
-    }).click = async (selector, options) => {
-      await originalClick(selector, options);
-      await page.waitForFunction(
-        () =>
-          typeof window === 'undefined' ||
-          ((window as typeof window & {
-            __dappE2ePendingRpcCount?: number;
-          }).__dappE2ePendingRpcCount ?? 0) === 0,
-        undefined,
-        { timeout: 10_000 },
-      );
-    };
+    await page.goto('about:blank');
     await use(page);
     for (const { event, handler } of forwardedHandlers) {
       ctx.emitter?.off(event, handler);
@@ -162,5 +169,34 @@ async function emitPageEvent(
       }
     },
     { evt: event, payload: args },
+  );
+}
+
+async function waitForPendingRpcs(
+  page: Page,
+  pendingRpcs: Map<number, Promise<unknown>>,
+  timeoutMs = 10_000,
+): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const start = Date.now();
+  while (pendingRpcs.size > 0) {
+    if (Date.now() - start > timeoutMs) {
+      const staleIds = Array.from(pendingRpcs.keys());
+      pendingRpcs.clear();
+      throw new Eip1193Error(
+        -32603,
+        `waitForRpcIdle timeout after ${timeoutMs}ms with ${staleIds.length} pending RPCs (IDs: ${staleIds.join(', ')})`,
+      );
+    }
+    await Promise.race([
+      Promise.allSettled([...pendingRpcs.values()]),
+      new Promise((resolve) => setTimeout(resolve, 50)),
+    ]);
+  }
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      }),
   );
 }

@@ -179,6 +179,60 @@ describe('handleRpcRequest', () => {
       message: expect.stringMatching(/method not supported/i),
     });
   });
+
+  it('T-INJ-013 eth_signTypedData_v4 で malformed JSON params は EIP-1193 code -32700 で reject', async () => {
+    // Given - JSON として壊れた typed data 文字列
+    const c = ctx();
+    const account = privateKeyToAccount(PRIVATE_KEY);
+    // When / Then
+    await expect(
+      handleRpcRequest(c, {
+        method: 'eth_signTypedData_v4',
+        params: [account.address, '{ this is not valid json }'],
+      }),
+    ).rejects.toMatchObject({
+      code: -32700,
+      message: expect.stringMatching(/parse error/i),
+    });
+  });
+
+  it('T-INJ-014 eth_blockNumber で anvilProxy 接続失敗時は EIP-1193 code -32603 で reject', async () => {
+    // Given - 空き port を取得してすぐ close、その port に anvilPort を指定して必ず ECONNREFUSED
+    const { createServer } = await import('node:net');
+    const unusedPort = await new Promise<number>((resolve, reject) => {
+      const server = createServer();
+      server.unref();
+      server.on('error', reject);
+      server.listen(0, '127.0.0.1', () => {
+        const addr = server.address();
+        const port = typeof addr === 'object' && addr ? addr.port : 0;
+        server.close(() => resolve(port));
+      });
+    });
+    const brokenCtx: RpcContext = { ...ctx(), anvilPort: unusedPort };
+    // When / Then
+    await expect(
+      handleRpcRequest(brokenCtx, { method: 'eth_blockNumber' }),
+    ).rejects.toMatchObject({
+      code: -32603,
+    });
+  });
+
+  it('T-INJ-015 personal_sign で invalid hex (0xZZ) params は EIP-1193 code -32602 で reject', async () => {
+    // Given - 0x prefix だが hex 文字でない
+    const c = ctx();
+    const account = privateKeyToAccount(PRIVATE_KEY);
+    // When / Then
+    await expect(
+      handleRpcRequest(c, {
+        method: 'personal_sign',
+        params: ['0xZZ', account.address],
+      }),
+    ).rejects.toMatchObject({
+      code: -32602,
+      message: expect.stringMatching(/invalid params/i),
+    });
+  });
 });
 
 describe('createInjectorScript', () => {

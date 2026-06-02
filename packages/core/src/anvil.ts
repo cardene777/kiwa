@@ -171,26 +171,37 @@ function stopProcess(child: ChildProcess, port: number): Promise<void> {
       resolve();
       return;
     }
-
-    const fallback = setTimeout(() => {
+    let resolved = false;
+    const finish = (leaked = false) => {
+      if (resolved) return;
+      resolved = true;
+      if (!leaked) {
+        releasePort(port);
+      }
+      resolve();
+    };
+    child.once('exit', () => finish(false));
+    const sigkillTimer = setTimeout(() => {
       safeKill(child);
-      releasePort(port);
-      resolve();
     }, SHUTDOWN_GRACE_MS);
-
+    const finalTimer = setTimeout(() => {
+      clearTimeout(sigkillTimer);
+      console.warn(
+        `[anvil] process did not exit after SIGKILL, leaking port ${port} to avoid race`,
+      );
+      finish(true);
+    }, SHUTDOWN_GRACE_MS + 2000);
     child.once('exit', () => {
-      clearTimeout(fallback);
-      releasePort(port);
-      resolve();
+      clearTimeout(sigkillTimer);
+      clearTimeout(finalTimer);
     });
-
     try {
       child.kill('SIGTERM');
     } catch {
-      clearTimeout(fallback);
+      clearTimeout(sigkillTimer);
+      clearTimeout(finalTimer);
       safeKill(child);
-      releasePort(port);
-      resolve();
+      finish(false);
     }
   });
 }

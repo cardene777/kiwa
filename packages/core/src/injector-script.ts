@@ -5,7 +5,6 @@ export function createInjectorScript(_opts: InjectorOptions): string {
 (function () {
   if (typeof window === 'undefined') return;
   if (window.ethereum && window.ethereum.__dappE2eInjected) return;
-  window.__dappE2ePendingRpcCount = window.__dappE2ePendingRpcCount || 0;
   const eventHandlers = Object.create(null);
   const provider = {
     isMetaMask: true,
@@ -14,9 +13,16 @@ export function createInjectorScript(_opts: InjectorOptions): string {
       if (!window.__dappE2eRpc) {
         return Promise.reject(new Error('dapp-e2e: __dappE2eRpc not exposed'));
       }
-      window.__dappE2ePendingRpcCount += 1;
-      return Promise.resolve(window.__dappE2eRpc(args)).finally(function () {
-        window.__dappE2ePendingRpcCount = Math.max(0, window.__dappE2ePendingRpcCount - 1);
+      return Promise.resolve(window.__dappE2eRpc(args)).then(function (envelope) {
+        if (envelope && envelope.ok === true) {
+          return envelope.result;
+        }
+        if (envelope && envelope.ok === false && envelope.error) {
+          var err = new Error(envelope.error.message);
+          err.code = envelope.error.code;
+          throw err;
+        }
+        return envelope;
       });
     },
     on: function (event, handler) {

@@ -60,4 +60,29 @@ describe.skipIf(process.env.SKIP_ANVIL_TESTS === '1')('sendTransaction with live
       code: 3,
     });
   });
+
+  it('T-TX-004 不正 anvilPort (transport error) は code -32603 で reject、revert (code 3) と区別される', async () => {
+    // Given - 空き port を取得してすぐ close、その port を anvilPort に
+    const { createServer } = await import('node:net');
+    const unusedPort = await new Promise<number>((resolve, reject) => {
+      const server = createServer();
+      server.unref();
+      server.on('error', reject);
+      server.listen(0, '127.0.0.1', () => {
+        const addr = server.address();
+        const port = typeof addr === 'object' && addr ? addr.port : 0;
+        server.close(() => resolve(port));
+      });
+    });
+    const brokenCtx: TxBroadcastCtx = {
+      privateKey: PRIVATE_KEY,
+      chainId: CHAIN_ID,
+      anvilPort: unusedPort,
+    };
+    const params = { to: TO_ADDRESS, value: 1n };
+    // When / Then - transport error (ECONNREFUSED) は code -32603 を期待
+    await expect(sendTransaction(brokenCtx, params)).rejects.toMatchObject({
+      code: -32603,
+    });
+  });
 });
