@@ -1,6 +1,18 @@
 {
   "name": "@dapp-e2e/core",
   "version": "0.0.0",
+  "description": "Headless E2E test fixture for dApps on anvil forks (Playwright + viem)",
+  "license": "MIT",
+  "keywords": ["dapp", "ethereum", "e2e", "playwright", "anvil", "viem", "testing", "fixture"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cardene777/dapp-e2e.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/cardene777/dapp-e2e#readme",
+  "bugs": {
+    "url": "https://github.com/cardene777/dapp-e2e/issues"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -11,6 +23,10 @@
     }
   },
   "files": ["dist"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 15000 --no-file-parallelism",

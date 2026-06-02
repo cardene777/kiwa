@@ -1,11 +1,27 @@
 {
   "name": "@dapp-e2e/cli",
   "version": "0.0.0",
+  "description": "CLI for dapp-e2e (init / doctor commands)",
+  "license": "MIT",
+  "keywords": ["dapp-e2e", "cli", "scaffold"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cardene777/dapp-e2e.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/cardene777/dapp-e2e#readme",
+  "bugs": {
+    "url": "https://github.com/cardene777/dapp-e2e/issues"
+  },
   "type": "module",
   "bin": {
     "dapp-e2e": "./dist/index.js"
   },
   "files": ["dist"],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean",
     "test": "vitest run --passWithNoTests",
