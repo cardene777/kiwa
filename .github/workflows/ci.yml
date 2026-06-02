@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm -F @dapp-e2e/core -F @dapp-e2e/cli typecheck
+
+      - name: Test
+        run: pnpm -F @dapp-e2e/core test
+        env:
+          SKIP_ANVIL_TESTS: "1"
+
+      - name: Build
+        run: pnpm -F @dapp-e2e/core -F @dapp-e2e/cli build
+
+      - name: Typecheck consumer (examples)
+        run: pnpm -F examples-basic-connect typecheck
