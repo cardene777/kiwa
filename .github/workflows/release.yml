@@ -49,7 +49,7 @@ jobs:
         run: pnpm -F @dapp-e2e/cli test
 
       - name: Build
-        run: pnpm build
+        run: pnpm -F @dapp-e2e/core -F @dapp-e2e/cli build
 
       - name: Typecheck consumer (examples)
         run: pnpm -F examples-basic-connect typecheck

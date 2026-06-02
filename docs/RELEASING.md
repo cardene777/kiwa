@@ -47,7 +47,8 @@ SHA pin により mutable major tag (例 `@v4`) 経由の supply chain 攻撃を
 ## release.yml の CI gate
 
 `release.yml` は main push 直接トリガで起動しますが、`changesets/action` 起動前に install → typecheck → test (core + cli) → build → consumer typecheck の 5 step を実行する CI gate を持ちます。test fail で `changesets/action` は起動せず、publish も行われません。
-将来 `workflow_run` trigger (CI workflow 完了を gate) への切替も検討余地ですが、現状は同一 workflow 内 test 再走 (案 B) でシンプルかつ確実な gate を実装しています。
+`release.yml` は node 20 のみで動作するため、CI matrix (node 20/22) との test surface 差異を埋めるために main branch protection で CI workflow を required check に設定し、CI fail の commit が main に push されないようにする運用とします。
+将来 `workflow_run` trigger (CI workflow 完了を gate) への切替も検討余地ですが、現状は同一 workflow 内 test 再走 (案 B) + branch protection でシンプルかつ確実な gate を実装しています。
 
 ## 関連リンク
 
