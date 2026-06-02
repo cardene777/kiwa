@@ -1,0 +1,171 @@
+import { expect } from '@playwright/test';
+import { dappE2eTest as test } from '@dapp-e2e/core';
+import { verifyMessage, verifyTypedData } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+
+const PRIVATE_KEY =
+  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
+
+const MINI_DAPP_HTML = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /><title>basic-connect</title></head>
+<body>
+  <button id="connect">Connect</button>
+  <button id="sign">Sign</button>
+  <button id="sign-typed">SignTypedData</button>
+  <button id="send-tx">SendTransaction</button>
+  <button id="register-event">RegisterEvent</button>
+  <pre id="result"></pre>
+  <pre id="event-result"></pre>
+  <script>
+    document.getElementById('connect').addEventListener('click', async () => {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      document.getElementById('result').textContent = accounts[0];
+    });
+    document.getElementById('sign').addEventListener('click', async () => {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      const sig = await window.ethereum.request({
+        method: 'personal_sign',
+        params: ['hello dapp-e2e', accounts[0]],
+      });
+      document.getElementById('result').textContent = sig;
+    });
+    document.getElementById('sign-typed').addEventListener('click', async () => {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      const typedData = JSON.stringify({
+        domain: { name: 'Mail', version: '1', chainId: 31337, verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC' },
+        types: {
+          EIP712Domain: [
+            { name: 'name', type: 'string' },
+            { name: 'version', type: 'string' },
+            { name: 'chainId', type: 'uint256' },
+            { name: 'verifyingContract', type: 'address' },
+          ],
+          Mail: [{ name: 'contents', type: 'string' }],
+        },
+        primaryType: 'Mail',
+        message: { contents: 'hello typed' },
+      });
+      const sig = await window.ethereum.request({
+        method: 'eth_signTypedData_v4',
+        params: [accounts[0], typedData],
+      });
+      document.getElementById('result').textContent = sig;
+    });
+    document.getElementById('send-tx').addEventListener('click', async () => {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      const hash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          from: accounts[0],
+          to: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
+          value: '0xde0b6b3a7640000',
+        }],
+      });
+      document.getElementById('result').textContent = hash;
+    });
+    document.getElementById('register-event').addEventListener('click', () => {
+      window.ethereum.on('accountsChanged', (accounts) => {
+        document.getElementById('event-result').textContent = 'accountsChanged: ' + accounts[0];
+      });
+    });
+  </script>
+</body>
+</html>
+`;
+
+test.describe('basic-connect e2e (fixture 経由)', () => {
+  test('T-E2E-001 fixture 経由で window.ethereum が定義される', async ({ page }) => {
+    // Given
+    await page.setContent(MINI_DAPP_HTML);
+    // When
+    const hasEthereum = await page.evaluate(() => typeof (window as any).ethereum !== 'undefined');
+    // Then
+    expect(hasEthereum).toBe(true);
+  });
+
+  test('T-E2E-002 #connect クリックでアドレスが #result に表示される', async ({ page }) => {
+    // Given
+    const account = privateKeyToAccount(PRIVATE_KEY);
+    await page.setContent(MINI_DAPP_HTML);
+    // When
+    await page.click('#connect');
+    const text = await page.locator('#result').textContent({ timeout: 5000 });
+    // Then
+    expect(text?.toLowerCase()).toBe(account.address.toLowerCase());
+  });
+
+  test('T-E2E-003 #sign クリックで返る signature が verifyMessage true になる', async ({ page }) => {
+    // Given
+    const account = privateKeyToAccount(PRIVATE_KEY);
+    await page.setContent(MINI_DAPP_HTML);
+    await page.click('#connect');
+    // When
+    await page.click('#sign');
+    const sigText = await page.locator('#result').textContent({ timeout: 5000 });
+    const valid = await verifyMessage({
+      address: account.address,
+      message: 'hello dapp-e2e',
+      signature: sigText as `0x${string}`,
+    });
+    // Then
+    expect(valid).toBe(true);
+  });
+
+  test('T-E2E-004 #sign-typed で eth_signTypedData_v4 署名が verifyTypedData で true', async ({ page }) => {
+    // Given
+    const account = privateKeyToAccount(PRIVATE_KEY);
+    await page.setContent(MINI_DAPP_HTML);
+    await page.click('#connect');
+    // When
+    await page.click('#sign-typed');
+    const sigText = await page.locator('#result').textContent({ timeout: 5000 });
+    const valid = await verifyTypedData({
+      address: account.address,
+      domain: {
+        name: 'Mail',
+        version: '1',
+        chainId: 31337n,
+        verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+      },
+      types: {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Mail: [{ name: 'contents', type: 'string' }],
+      },
+      primaryType: 'Mail',
+      message: { contents: 'hello typed' },
+      signature: sigText as `0x${string}`,
+    });
+    // Then
+    expect(valid).toBe(true);
+  });
+
+  test('T-E2E-005 #send-tx で eth_sendTransaction が tx hash を返す', async ({ page }) => {
+    // Given
+    await page.setContent(MINI_DAPP_HTML);
+    await page.click('#connect');
+    // When
+    await page.click('#send-tx');
+    const hashText = await page.locator('#result').textContent({ timeout: 10000 });
+    // Then
+    expect(hashText).toMatch(/^0x[0-9a-fA-F]{64}$/);
+  });
+
+  test('T-E2E-006 dappE2e.triggerEvent("accountsChanged") で page 側 handler が発火', async ({ page, dappE2e }) => {
+    // Given
+    await page.setContent(MINI_DAPP_HTML);
+    await page.click('#register-event');
+    const newAddr = '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826';
+    // When
+    await dappE2e.triggerEvent('accountsChanged', [newAddr]);
+    const eventText = await page.locator('#event-result').textContent({ timeout: 5000 });
+    // Then
+    expect(eventText).toBe(`accountsChanged: ${newAddr}`);
+  });
+});

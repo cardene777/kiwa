@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.vitest-dist/
+playwright-report/
+test-results/
+.context/local-review/
+.context/delegate/
+.claude/
+*.log
+coverage/
+.DS_Store
