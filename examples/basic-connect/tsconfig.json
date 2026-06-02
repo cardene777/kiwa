@@ -2,7 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": ".",
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@dapp-e2e/core": ["../../packages/core/dist/index.d.ts"]
+    }
   },
   "include": ["tests/**/*", "playwright.config.ts"]
 }

@@ -78,4 +78,5 @@ export interface DappE2eApi {
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   switchChain(chainIdHex: Hex): Promise<void>;
+  waitForRpcIdle?(timeoutMs?: number): Promise<void>;
 }
