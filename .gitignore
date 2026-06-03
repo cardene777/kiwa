@@ -13,4 +13,6 @@ examples/*/cache/
 examples/*/forge-out/build-info/
 examples/*/.next/
 examples/*/.env.local
+examples/*/.env
+examples/*/dist/
 examples/*/tsconfig.tsbuildinfo
