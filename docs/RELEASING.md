@@ -12,12 +12,13 @@ dapp-e2e の release は Changesets と GitHub Actions で管理します。
 4. version PR には pending changeset を集計した package version bump と `CHANGELOG.md` 更新が含まれます。
 5. version PR を merge すると `pnpm release` が走り、`pnpm publish -r --access public --provenance` で npm に公開されます。
 
-PR 作成前に確認するローカルコマンドは次の 3 つです。
+PR 作成前に、changeset が必要な変更では `pnpm changeset` を実行します。
+そのうえでローカル検証として次の 3 コマンドを必ず通します。
 
 ```bash
-pnpm changeset
 pnpm typecheck
 pnpm test
+pnpm build
 ```
 
 `pnpm version-packages` は通常ローカルでは使わず、Changesets bot が作る version PR で差分を確認します。
@@ -44,11 +45,16 @@ npm 側で Automation Token を発行し、GitHub の `Settings > Secrets and va
 dependabot は github-actions ecosystem を daily 監視し、`groups` 設定で全 action を 1 PR にまとめて提案します。PR は週 1 回まとめて merge する運用で、特に `changesets/action` の minor version up は内部 behavior 変化リスクがあるため手動 review を推奨します。
 SHA pin により mutable major tag (例 `@v4`) 経由の supply chain 攻撃を防ぎ、各 action の更新を意図的に行えます。
 
+routine group (`actions/*` + `pnpm/*`) も major up を手動レビュー運用に揃え、`dependabot.yml` の `ignore` で `version-update:semver-major` を弾く設定としています。
+自動 PR は minor / patch のみに限定し、major up が必要な場合は手動レビューのうえで SHA pin 更新 PR を起票します (SHA 検証手順は `gh api repos/{owner}/{repo}/git/refs/tags/v{version}` → `gh api commits/{SHA}` の 2 段確認です)。
+これは PR #19 で actions/checkout v4 → v6 を含む 3 アクション 2 段 major bump が自動 PR で来た経験から、routine group も `changesets/action` と同じ手動レビュー運用に揃える必要があると分かったためです。
+
 ## release.yml の CI gate
 
 `release.yml` は main push 直接トリガで起動しますが、`changesets/action` 起動前に install → typecheck → test (core + cli) → build → consumer typecheck の 5 step を実行する CI gate を持ちます。test fail で `changesets/action` は起動せず、publish も行われません。
-`release.yml` は node 20 のみで動作するため、CI matrix (node 20/22) との test surface 差異を埋めるために main branch protection で CI workflow を required check に設定し、CI fail の commit が main に push されないようにする運用とします。
-将来 `workflow_run` trigger (CI workflow 完了を gate) への切替も検討余地ですが、現状は同一 workflow 内 test 再走 (案 B) + branch protection でシンプルかつ確実な gate を実装しています。
+ローカルテスト主体運用のため、本リポジトリでは GitHub Actions の PR 用 CI workflow は保持しません。PR 提出前に開発者がローカルで `pnpm typecheck && pnpm test && pnpm build` を実行し、結果を PR 本文に記載する運用とします。
+publish 経路の test gate は `release.yml` 内部の test 再走で担保され、複数 Node version の同時検証は廃止しますが、release.yml が publish 前に typecheck / test / build を走らせるため動作確認は維持されます。
+main branch protection の required status check は本リポジトリでは設定しません (ci.yml 廃止により `test (20)` `test (22)` の status が存在しないため required にできず、設定すると PR merge が deadlock します)。代わりに「PR 経由必須」のみを branch protection で強制し、必要に応じて signed commits など review 経路の物理強制を追加します。test gate は開発者ローカル + `release.yml` 内 5 step の二段で担保する運用とします。GitGuardian Security Checks や CodeRabbit などの third-party app status は表示されますが、required check には含めません。
 
 ## 関連リンク
 
