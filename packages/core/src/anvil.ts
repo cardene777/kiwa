@@ -59,13 +59,17 @@ function getOsAllocatedPort(): Promise<number> {
 }
 
 export async function startAnvil(
-  opts: { port?: number } = {},
+  opts: { port?: number; chainId?: number } = {},
 ): Promise<AnvilHandle> {
   const attemptLimit = opts.port ? 1 : START_RETRY_COUNT;
 
   for (let attempt = 0; attempt < attemptLimit; attempt += 1) {
     const port = opts.port ?? (await getFreePort());
-    const child = spawn('anvil', ['--port', String(port), '--silent'], {
+    const args = ['--port', String(port), '--silent'];
+    if (opts.chainId !== undefined) {
+      args.push('--chain-id', String(opts.chainId));
+    }
+    const child = spawn('anvil', args, {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let fatalError: Error | null = null;
