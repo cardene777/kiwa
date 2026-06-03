@@ -1,10 +1,8 @@
+import { anvilState } from './anvil-handle';
+
 export default async function globalTeardown() {
-  const pids = (process.env.ANVIL_PIDS ?? '').split(',').filter(Boolean).map(Number);
-  for (const pid of pids) {
-    try {
-      process.kill(pid, 'SIGTERM');
-    } catch {
-      // ignore
-    }
+  for (const h of anvilState.handles) {
+    await h.stop();
   }
+  anvilState.handles = [];
 }
