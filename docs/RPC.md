@@ -13,11 +13,11 @@ error の返し方は [ERRORS.md](./ERRORS.md) を参照してください。
 | `eth_accounts` | なし | `string[]` | なし |
 | `eth_chainId` | なし | `0x${string}` | なし |
 | `net_version` | なし | `string` | なし |
-| `personal_sign` | `[message: string, address: 0x{hex}]` | `0x${string}` | `4100` / `-32602` |
-| `eth_signTypedData_v4` | `[address: 0x{hex}, typedDataJson: string]` | `0x${string}` | `4100` / `-32700` |
-| `wallet_switchEthereumChain` | `[{ chainId: 0x{hex} }]` | `null` | `-32602` |
+| `personal_sign` | `[message: string, address: 0x{hex}]` | `0x${string}` | `4001` / `4100` / `-32602` |
+| `eth_signTypedData_v4` | `[address: 0x{hex}, typedDataJson: string]` | `0x${string}` | `4001` / `4100` / `-32700` |
+| `wallet_switchEthereumChain` | `[{ chainId: 0x{hex} }]` | `null` | `4001` / `-32602` |
 | `wallet_addEthereumChain` | `[{ chainId: 0x{hex}, ... }]` | `null` | `-32602` |
-| `eth_sendTransaction` | `[txRequest]` | `0x${string}` | `3` / `4100` / `-32603` |
+| `eth_sendTransaction` | `[txRequest]` | `0x${string}` | `3` / `4001` / `4100` / `-32603` |
 
 これら 9 method は、active account と current chain を fixture の state から引いて返します。
 `eth_sendTransaction` だけは anvil への broadcast が必要なため、内部で `sendTransaction()` を呼びます。
@@ -47,6 +47,8 @@ const networkId = await window.ethereum.request({ method: 'net_version' });
 
 hex 風の文字列でも文字種が不正、または奇数長なら `-32602` を返します。
 address が active account と一致しない場合は `4100` です。
+fixture API `dappE2e.setApprovalMode('reject')` が有効な間は、
+`personal_sign` と `eth_signTypedData_v4` は `4001` (`User rejected the request.`) を返します。
 
 ```typescript
 const sig = await window.ethereum.request({
@@ -72,6 +74,8 @@ const sig = await window.ethereum.request({
 どちらも `chainId` を検証したうえで `chainState.current` を更新し、
 内部 emitter 経由で `chainChanged` を page 側へ通知します。
 v0.1.0 では chain 登録テーブルを持たないため、未登録 chain 判定による `4902` は返しません。
+ただし approval mode が `'reject'` のときは `wallet_switchEthereumChain` のみ `4001` で失敗し、
+`wallet_addEthereumChain` は従来どおり実行されます。
 
 ```typescript
 await window.ethereum.request({
@@ -86,6 +90,7 @@ await window.ethereum.request({
 anvil へ送信した tx hash を返します。
 fixture lifecycle の外で anvil port が無い場合は `-32603` で失敗します。
 viem からの transaction rejection (insufficient balance / revert / signer 関連 error) は EIP-1193 code `3` で reject されます。
+approval mode が `'reject'` のときは broadcast 前に `4001` を返します。
 
 ```typescript
 const hash = await window.ethereum.request({
@@ -97,6 +102,52 @@ const hash = await window.ethereum.request({
   }],
 });
 ```
+
+## Approval Mode (v0.2+)
+
+`dappE2e.setApprovalMode(mode)` で wallet approval 挙動を切り替えられます。
+test 側から User Reject (`EIP-1193` code `4001`) を deterministic に発火したいときに使います。
+
+### API
+
+| Mode | 挙動 |
+|---|---|
+| `'approve'` (default) | 対象 4 method を通常実行 |
+| `'reject'` | 対象 4 method が `Eip1193Error(4001, 'User rejected the request.')` を返す |
+
+### 対象 method
+
+- `personal_sign`
+- `eth_signTypedData_v4`
+- `eth_sendTransaction`
+- `wallet_switchEthereumChain`
+
+### 利用例
+
+```typescript
+import { dappE2eTest as test } from '@dapp-e2e/core';
+
+test('reject 経路の error UX 確認', async ({ page, dappE2e }) => {
+  await dappE2e.setApprovalMode('reject');
+
+  const error = await page.evaluate(async () => {
+    try {
+      await (window as any).ethereum.request({
+        method: 'personal_sign',
+        params: ['hello', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'],
+      });
+      return null;
+    } catch (e) {
+      return { code: (e as { code?: number }).code ?? null };
+    }
+  });
+
+  expect(error?.code).toBe(4001);
+});
+```
+
+read-only method (`eth_requestAccounts` / `eth_accounts` / `eth_chainId` / `net_version` など) と
+`wallet_addEthereumChain` は approval check の対象外です。
 
 ## anvilProxy fallback
 

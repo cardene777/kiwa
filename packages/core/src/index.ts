@@ -1,4 +1,5 @@
 export * from './types.js';
+export type { ApprovalMode } from './types.js';
 export { handleRpcRequest, type RpcContext } from './rpc-handlers.js';
 export { createEventEmitter } from './event-emitter.js';
 export { sendTransaction } from './tx.js';

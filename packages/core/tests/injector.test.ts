@@ -15,7 +15,11 @@ const PRIVATE_KEY =
 const CHAIN_ID = 31337;
 
 function ctx(): RpcContext {
-  return { privateKey: PRIVATE_KEY, chainState: { current: CHAIN_ID } };
+  return {
+    privateKey: PRIVATE_KEY,
+    chainState: { current: CHAIN_ID },
+    approvalMode: { current: 'approve' },
+  };
 }
 
 describe('handleRpcRequest', () => {

@@ -217,4 +217,66 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     // Then - waitForRpcIdle 後に 3 RPC 結果が DOM に揃って書き込まれている
     expect(text).toMatch(/^0x[0-9a-fA-F]{40}\|0x7a69\|31337$/);
   });
+
+  test('T-E2E-009 reject mode で personal_sign が code 4001 で reject される', async ({ page, dappE2e }) => {
+    await page.setContent(MINI_DAPP_HTML);
+    await dappE2e.setApprovalMode('reject');
+
+    const err = await page.evaluate(async () => {
+      try {
+        const accounts = await (window as any).ethereum.request({ method: 'eth_accounts' });
+        await (window as any).ethereum.request({
+          method: 'personal_sign',
+          params: ['hello', accounts[0]],
+        });
+        return null;
+      } catch (e) {
+        const error = e as { code?: number; message?: string };
+        return {
+          code: error.code ?? null,
+          message: error.message ?? null,
+        };
+      }
+    });
+    await dappE2e.waitForRpcIdle();
+
+    expect(err).toEqual({
+      code: 4001,
+      message: 'User rejected the request.',
+    });
+  });
+
+  test('T-E2E-010 reject mode で wallet_switchEthereumChain が code 4001 で reject され、chainId は維持される', async ({ page, dappE2e }) => {
+    await page.setContent(MINI_DAPP_HTML);
+    await dappE2e.setApprovalMode('reject');
+
+    const beforeChainId = await page.evaluate(
+      async () => (window as any).ethereum.request({ method: 'eth_chainId' }),
+    );
+    const err = await page.evaluate(async () => {
+      try {
+        await (window as any).ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x1' }],
+        });
+        return null;
+      } catch (e) {
+        const error = e as { code?: number; message?: string };
+        return {
+          code: error.code ?? null,
+          message: error.message ?? null,
+        };
+      }
+    });
+    await dappE2e.waitForRpcIdle();
+    const afterChainId = await page.evaluate(
+      async () => (window as any).ethereum.request({ method: 'eth_chainId' }),
+    );
+
+    expect(err).toEqual({
+      code: 4001,
+      message: 'User rejected the request.',
+    });
+    expect(afterChainId).toBe(beforeChainId);
+  });
 });

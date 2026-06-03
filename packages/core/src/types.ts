@@ -65,6 +65,8 @@ export interface TxBroadcastCtx {
 
 export type Eip1193EventHandler = (...args: unknown[]) => void;
 
+export type ApprovalMode = 'approve' | 'reject';
+
 export interface DappE2eEventEmitter {
   on(event: Eip1193EventName, handler: Eip1193EventHandler): void;
   off(event: Eip1193EventName, handler: Eip1193EventHandler): void;
@@ -78,5 +80,6 @@ export interface DappE2eApi {
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   switchChain(chainIdHex: Hex): Promise<void>;
+  setApprovalMode(mode: ApprovalMode): Promise<void>;
   waitForRpcIdle?(timeoutMs?: number): Promise<void>;
 }

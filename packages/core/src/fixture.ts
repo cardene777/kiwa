@@ -5,7 +5,13 @@ import { startAnvil } from './anvil.js';
 import { createEventEmitter } from './event-emitter.js';
 import { createInjectorScript } from './injector-script.js';
 import { handleRpcRequest, type RpcContext } from './rpc-handlers.js';
-import { Eip1193Error, type DappE2eApi, type Eip1193EventName, type Hex } from './types.js';
+import {
+  Eip1193Error,
+  type ApprovalMode,
+  type DappE2eApi,
+  type Eip1193EventName,
+  type Hex,
+} from './types.js';
 
 const DEFAULT_PRIVATE_KEY: Hex =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
@@ -65,6 +71,7 @@ export const dappE2eTest = base.extend<
     await use({
       privateKey,
       chainState: { current: chainId },
+      approvalMode: { current: 'approve' as const },
       anvilPort,
       emitter: createEventEmitter(),
     });
@@ -101,6 +108,9 @@ export const dappE2eTest = base.extend<
       async switchChain(chainIdHex: Hex) {
         _rpcContext.chainState.current = Number.parseInt(chainIdHex, 16);
         await emitPageEvent(page, 'chainChanged', chainIdHex);
+      },
+      async setApprovalMode(mode: ApprovalMode) {
+        _rpcContext.approvalMode.current = mode;
       },
       async waitForRpcIdle(timeoutMs = 10_000) {
         await waitForPendingRpcs(page, _rpcTracker.pendingRpcs, timeoutMs);
