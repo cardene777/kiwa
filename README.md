@@ -37,6 +37,40 @@ pnpm exec playwright test
 - Playwright が利用できるローカルまたは CI 環境
 - `anvil` (Foundry) がインストール済みで PATH から実行できる状態
 
+## Multi-Wallet (EIP-6963)
+
+dapp-e2e は EIP-6963 (Multi Injected Provider Discovery) に対応しており、1 page 内に複数 wallet を並走 inject できます。
+wagmi v2 / RainbowKit v2 の wallet picker UI でも正しく検出されます。
+
+### 利用例
+
+```typescript
+import { dappE2eTest } from '@dapp-e2e/core';
+
+const test = dappE2eTest.extend({
+  wallets: [
+    {
+      name: 'MetaMask',
+      rdns: 'io.metamask',
+      icon: 'data:image/svg+xml;base64,...',
+      privateKey: '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
+    },
+    {
+      name: 'Rabby',
+      rdns: 'io.rabby',
+      icon: 'data:image/svg+xml;base64,...',
+      privateKey: '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
+    },
+  ],
+});
+
+test('multi wallet picker', async ({ page, dappE2e }) => {
+  await dappE2e.wallets!['io.rabby'].connect();
+});
+```
+
+`wallets` option 未指定時は単一 MetaMask 互換 wallet で動作します (既存挙動互換)。
+
 ## Features
 
 - anvil を test 単位で直接 spawn し、ローカル chain を隔離して扱える
