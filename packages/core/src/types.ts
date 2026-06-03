@@ -20,9 +20,25 @@ export class Eip1193Error extends Error {
   }
 }
 
+export interface Eip6963ProviderInfo {
+  uuid: string;
+  name: string;
+  icon: string;
+  rdns: string;
+}
+
+export interface WalletConfig {
+  name: string;
+  rdns: string;
+  icon: string;
+  privateKey: Hex;
+  chainId?: number;
+}
+
 export interface InjectorOptions {
   privateKey: Hex;
   chainId: number;
+  wallets?: WalletConfig[];
 }
 
 export type Eip1193EventName =
@@ -67,6 +83,14 @@ export type Eip1193EventHandler = (...args: unknown[]) => void;
 
 export type ApprovalMode = 'approve' | 'reject';
 
+export interface WalletApi {
+  triggerEvent(event: Eip1193EventName, ...args: unknown[]): Promise<void>;
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  switchChain(chainIdHex: Hex): Promise<void>;
+  setApprovalMode(mode: ApprovalMode): Promise<void>;
+}
+
 export interface DappE2eEventEmitter {
   on(event: Eip1193EventName, handler: Eip1193EventHandler): void;
   off(event: Eip1193EventName, handler: Eip1193EventHandler): void;
@@ -82,4 +106,5 @@ export interface DappE2eApi {
   switchChain(chainIdHex: Hex): Promise<void>;
   setApprovalMode(mode: ApprovalMode): Promise<void>;
   waitForRpcIdle?(timeoutMs?: number): Promise<void>;
+  wallets?: Record<string, WalletApi>;
 }
