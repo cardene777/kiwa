@@ -182,8 +182,7 @@ test.describe('mint-nft e2e (ERC721 mint flow)', () => {
     await dappE2e.waitForRpcIdle();
     await page.click('#refresh-balance');
     await dappE2e.waitForRpcIdle();
-    const balance = await page.locator('#balance').textContent();
-    expect(balance).toBe('1');
+    await expect(page.locator('#balance')).toHaveText('1');
   });
 
   test('T-MN-004 mint → transfer で minter balance=0 / recipient balance=1', async ({
@@ -202,7 +201,7 @@ test.describe('mint-nft e2e (ERC721 mint flow)', () => {
     await dappE2e.waitForRpcIdle();
     await page.click('#refresh-balance');
     await dappE2e.waitForRpcIdle();
-    expect(await page.locator('#balance').textContent()).toBe('0');
-    expect(await page.locator('#recipient-balance').textContent()).toBe('1');
+    await expect(page.locator('#balance')).toHaveText('0');
+    await expect(page.locator('#recipient-balance')).toHaveText('1');
   });
 });
