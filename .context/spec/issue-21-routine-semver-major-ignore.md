@@ -43,8 +43,9 @@ PR #19 (3 アクション 2 段 major bump) を merge した経験で、routine 
 ## 影響範囲 (touched file 候補)
 
 - `.github/dependabot.yml` (AC 1-3 で ignore リスト 3 系統に拡張)
-- `docs/RELEASING.md` (AC 4-5 で SHA pin 運用節に 1 段落追記、L42 付近)
-- `.github/workflows/ci.yml` (PR 用 CI workflow を削除)
+- `docs/RELEASING.md` (AC 4-5 で SHA pin 運用節に 1 段落追記、L42 付近 + AC 7 で CI matrix 言及をローカル運用記述に書き換え + required check deadlock 注意を追記)
+- `.github/workflows/ci.yml` (AC 6 で削除)
+- `.context/spec/session-handoff-20260603.md` (Issue #17 Phase 2-3 を撤回、required status check は設定しない方針へ更新)
 
 grep ベース確認結果。
 
