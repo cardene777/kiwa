@@ -43,6 +43,63 @@ importers:
         specifier: ^2.21.0
         version: 2.52.0(typescript@5.9.3)
 
+  examples/defi-swap:
+    dependencies:
+      '@dapp-e2e/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.49.0
+        version: 1.60.0
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.19
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      viem:
+        specifier: ^2.21.0
+        version: 2.52.0(typescript@5.9.3)
+
+  examples/mint-nft:
+    dependencies:
+      '@dapp-e2e/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.49.0
+        version: 1.60.0
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.19
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      viem:
+        specifier: ^2.21.0
+        version: 2.52.0(typescript@5.9.3)
+
+  examples/nft-marketplace:
+    dependencies:
+      '@dapp-e2e/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.49.0
+        version: 1.60.0
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.19
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      viem:
+        specifier: ^2.21.0
+        version: 2.52.0(typescript@5.9.3)
+
   packages/cli:
     devDependencies:
       '@types/node':
