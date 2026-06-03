@@ -92,9 +92,12 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     // When
     await page.click('#connect');
     await dappE2e.waitForRpcIdle();
-    const text = await page.locator('#result').textContent({ timeout: 5000 });
-    // Then
-    expect(text?.toLowerCase()).toBe(account.address.toLowerCase());
+    // Then - DOM 書き込み完了まで auto-wait、大文字小文字差異を許容するため poll で lower 比較
+    await expect
+      .poll(async () => (await page.locator('#result').textContent())?.toLowerCase() ?? '', {
+        timeout: 5000,
+      })
+      .toBe(account.address.toLowerCase());
   });
 
   test('T-E2E-003 #sign クリックで返る signature が verifyMessage true になる', async ({ page, dappE2e }) => {
@@ -106,7 +109,9 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     // When
     await page.click('#sign');
     await dappE2e.waitForRpcIdle();
-    const sigText = await page.locator('#result').textContent({ timeout: 5000 });
+    // sig 形式 (0x + 130 hex) が DOM に書き込まれるまで待つ
+    await expect(page.locator('#result')).toHaveText(/^0x[0-9a-fA-F]{130}$/, { timeout: 5000 });
+    const sigText = await page.locator('#result').textContent();
     const valid = await verifyMessage({
       address: account.address,
       message: 'hello dapp-e2e',
@@ -125,7 +130,9 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     // When
     await page.click('#sign-typed');
     await dappE2e.waitForRpcIdle();
-    const sigText = await page.locator('#result').textContent({ timeout: 5000 });
+    // 0x + 130 hex の sig 形式が DOM に書き込まれるまで待つ
+    await expect(page.locator('#result')).toHaveText(/^0x[0-9a-fA-F]{130}$/, { timeout: 5000 });
+    const sigText = await page.locator('#result').textContent();
     const valid = await verifyTypedData({
       address: account.address,
       domain: {
@@ -159,9 +166,8 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     // When
     await page.click('#send-tx');
     await dappE2e.waitForRpcIdle();
-    const hashText = await page.locator('#result').textContent({ timeout: 10000 });
-    // Then
-    expect(hashText).toMatch(/^0x[0-9a-fA-F]{64}$/);
+    // Then - tx hash 形式 (0x + 64 hex) が DOM に書き込まれるまで auto-wait
+    await expect(page.locator('#result')).toHaveText(/^0x[0-9a-fA-F]{64}$/, { timeout: 10000 });
   });
 
   test('T-E2E-006 dappE2e.triggerEvent("accountsChanged") で page 側 handler が発火', async ({ page, dappE2e }) => {
@@ -172,9 +178,10 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     const newAddr = '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826';
     // When
     await dappE2e.triggerEvent('accountsChanged', [newAddr]);
-    const eventText = await page.locator('#event-result').textContent({ timeout: 5000 });
-    // Then
-    expect(eventText).toBe(`accountsChanged: ${newAddr}`);
+    // Then - event handler が DOM に書き込むまで auto-wait
+    await expect(page.locator('#event-result')).toHaveText(`accountsChanged: ${newAddr}`, {
+      timeout: 5000,
+    });
   });
 
   test('T-E2E-007 eth_subscribe を page 側 catch で err.code === 4200 が観測される', async ({ page, dappE2e }) => {
@@ -213,9 +220,10 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
       });
     });
     await dappE2e.waitForRpcIdle();
-    const text = await page.locator('#result').textContent();
-    // Then - waitForRpcIdle 後に 3 RPC 結果が DOM に揃って書き込まれている
-    expect(text).toMatch(/^0x[0-9a-fA-F]{40}\|0x7a69\|31337$/);
+    // Then - waitForRpcIdle 後に 3 RPC 結果が DOM に揃って書き込まれている、format auto-wait
+    await expect(page.locator('#result')).toHaveText(/^0x[0-9a-fA-F]{40}\|0x7a69\|31337$/, {
+      timeout: 5000,
+    });
   });
 
   test('T-E2E-009 reject mode で personal_sign が code 4001 で reject される', async ({ page, dappE2e }) => {
