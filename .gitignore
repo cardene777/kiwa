@@ -11,3 +11,6 @@ coverage/
 .DS_Store
 examples/*/cache/
 examples/*/forge-out/build-info/
+examples/*/.next/
+examples/*/.env.local
+examples/*/tsconfig.tsbuildinfo
