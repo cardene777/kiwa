@@ -29,11 +29,31 @@ export function createInjectorScript(opts: InjectorOptions): string {
   var sanitize = function (rdns) {
     return rdns.replace(/[^a-zA-Z0-9]/g, '_');
   };
-  var createUuid = function (index) {
-    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-      return window.crypto.randomUUID();
+  var createUuid = function () {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
     }
-    return 'dapp-e2e-' + Date.now() + '-' + index + '-' + Math.random().toString(16).slice(2);
+    var bytes = new Uint8Array(16);
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+      crypto.getRandomValues(bytes);
+    } else {
+      for (var i = 0; i < bytes.length; i += 1) {
+        bytes[i] = Math.floor(Math.random() * 256);
+      }
+    }
+    bytes[6] = (bytes[6] & 15) | 64;
+    bytes[8] = (bytes[8] & 63) | 128;
+    var hex = [];
+    for (var j = 0; j < bytes.length; j += 1) {
+      hex.push((bytes[j] + 256).toString(16).slice(1));
+    }
+    return (
+      hex.slice(0, 4).join('') + '-' +
+      hex.slice(4, 6).join('') + '-' +
+      hex.slice(6, 8).join('') + '-' +
+      hex.slice(8, 10).join('') + '-' +
+      hex.slice(10, 16).join('')
+    );
   };
   var unwrapEnvelope = function (envelope) {
     if (envelope && envelope.ok === true) {
@@ -49,10 +69,19 @@ export function createInjectorScript(opts: InjectorOptions): string {
   if (!window.__dappE2eEmitters) {
     window.__dappE2eEmitters = Object.create(null);
   }
+  if (!Array.isArray(window.__dappE2eEip6963Listeners)) {
+    window.__dappE2eEip6963Listeners = [];
+  }
+  while (window.__dappE2eEip6963Listeners.length > 0) {
+    window.removeEventListener(
+      'eip6963:requestProvider',
+      window.__dappE2eEip6963Listeners.pop()
+    );
+  }
   wallets.forEach(function (wallet, index) {
     var eventHandlers = Object.create(null);
     var info = Object.freeze({
-      uuid: createUuid(index),
+      uuid: createUuid(),
       name: wallet.name,
       icon: wallet.icon,
       rdns: wallet.rdns,
@@ -84,9 +113,10 @@ export function createInjectorScript(opts: InjectorOptions): string {
         var list = eventHandlers[event];
         if (!list) return;
         var args = Array.prototype.slice.call(arguments, 1);
-        for (var i = 0; i < list.length; i += 1) {
+        var snapshot = list.slice();
+        for (var i = 0; i < snapshot.length; i += 1) {
           try {
-            list[i].apply(null, args);
+            snapshot[i].apply(null, args);
           } catch (e) {
             /* swallow */
           }
@@ -99,6 +129,7 @@ export function createInjectorScript(opts: InjectorOptions): string {
       }));
     };
     window.addEventListener('eip6963:requestProvider', announce);
+    window.__dappE2eEip6963Listeners.push(announce);
     window.__dappE2eEmitters[bridgeName] = function (event) {
       var args = Array.prototype.slice.call(arguments, 1);
       provider.emit.apply(provider, [event].concat(args));

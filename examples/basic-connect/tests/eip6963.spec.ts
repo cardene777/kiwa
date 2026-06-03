@@ -151,4 +151,10 @@ test.describe('EIP-6963 multi-wallet e2e', () => {
     expect(result.firstWallet.toLowerCase()).toBe(metamaskAccount.address.toLowerCase());
     expect(result.secondWallet.toLowerCase()).toBe(rabbyAccount.address.toLowerCase());
   });
+
+  test('T-E6E-004 dappE2e.wallets の unknown rdns access は明示的に throw する', async ({
+    dappE2e,
+  }) => {
+    expect(() => dappE2e.wallets!['nonexistent.wallet']).toThrow(/nonexistent\.wallet/);
+  });
 });

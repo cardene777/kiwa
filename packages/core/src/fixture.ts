@@ -19,6 +19,8 @@ const DEFAULT_PRIVATE_KEY: Hex =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const DEFAULT_WALLET_ICON =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="16" fill="%23f6851b"/%3E%3Cpath d="M32 14l12 18-12 7-12-7 12-18zm0 25l12-7-12 18-12-18 12 7z" fill="white"/%3E%3C/svg%3E';
+const WALLET_RDNS_PATTERN = /^[a-z0-9.-]+$/i;
+const HEX_STRING_PATTERN = /^0x[0-9a-fA-F]+$/;
 
 interface DappE2eOptions {
   privateKey: Hex;
@@ -261,10 +263,51 @@ function resolveWalletConfigs(
       },
     ];
   }
+  validateWalletConfigs(normalizedWallets);
   return normalizedWallets.map((wallet) => ({
     ...wallet,
     chainId: wallet.chainId ?? chainId,
   }));
+}
+
+function validateWalletConfigs(wallets: WalletConfig[]): void {
+  const seenSanitizedRdns = new Map<string, string>();
+
+  for (const [index, wallet] of wallets.entries()) {
+    if (typeof wallet !== 'object' || wallet === null || Array.isArray(wallet)) {
+      throw new Error(`dapp-e2e: WalletConfig at index ${index} must be an object`);
+    }
+
+    const { name, rdns, icon, privateKey } = wallet as Partial<WalletConfig>;
+
+    if (typeof name !== 'string' || name.length === 0) {
+      throw new Error(`dapp-e2e: WalletConfig.name must be a non-empty string, got ${typeof name}`);
+    }
+    if (typeof rdns !== 'string' || rdns.length === 0 || !WALLET_RDNS_PATTERN.test(rdns)) {
+      throw new Error(
+        `dapp-e2e: WalletConfig.rdns must be a reverse-DNS name (alnum/./-), got "${String(rdns)}"`,
+      );
+    }
+    if (typeof icon !== 'string' || !icon.startsWith('data:')) {
+      throw new Error(
+        `dapp-e2e: WalletConfig.icon must be a data URI (data:image/...), got "${typeof icon === 'string' ? icon.slice(0, 30) : typeof icon}"`,
+      );
+    }
+    if (typeof privateKey !== 'string' || !HEX_STRING_PATTERN.test(privateKey)) {
+      throw new Error(
+        `dapp-e2e: WalletConfig.privateKey must be a 0x-prefixed hex string, got "${typeof privateKey === 'string' ? privateKey.slice(0, 20) : typeof privateKey}"`,
+      );
+    }
+
+    const sanitizedRdns = sanitizeRdns(rdns);
+    const existingRdns = seenSanitizedRdns.get(sanitizedRdns);
+    if (existingRdns !== undefined) {
+      throw new Error(
+        `dapp-e2e: wallet rdns collision after sanitization: "${rdns}" -> "${sanitizedRdns}" (already used by "${existingRdns}")`,
+      );
+    }
+    seenSanitizedRdns.set(sanitizedRdns, rdns);
+  }
 }
 
 function createRpcHandler(

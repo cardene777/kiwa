@@ -1,3 +1,4 @@
+import { createContext, runInContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { createInjectorScript } from '../src/injector-script.js';
 import type { Hex, WalletConfig } from '../src/types.js';
@@ -6,6 +7,68 @@ const PK1: Hex =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const PK2: Hex =
   '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d';
+
+class MockCustomEvent<TDetail = unknown> {
+  readonly type: string;
+  readonly detail: TDetail;
+
+  constructor(type: string, init?: { detail?: TDetail }) {
+    this.type = type;
+    this.detail = init?.detail as TDetail;
+  }
+}
+
+interface MockEventTarget {
+  __announcements: Array<{
+    info: { uuid: string; name: string; icon: string; rdns: string };
+    provider: { isMetaMask?: boolean };
+  }>;
+  __dappE2eEip6963Listeners?: Array<(event: MockCustomEvent) => void>;
+  addEventListener(type: string, handler: (event: MockCustomEvent) => void): void;
+  removeEventListener(type: string, handler: (event: MockCustomEvent) => void): void;
+  dispatchEvent(event: MockCustomEvent): boolean;
+  crypto: { randomUUID(): string };
+}
+
+function createMockWindow() {
+  let uuidCounter = 0;
+  const listeners = new Map<string, Array<(event: MockCustomEvent) => void>>();
+  const windowTarget = {
+    __announcements: [] as MockEventTarget['__announcements'],
+    crypto: {
+      randomUUID() {
+        uuidCounter += 1;
+        return `uuid-${uuidCounter}`;
+      },
+    },
+    addEventListener(type: string, handler: (event: MockCustomEvent) => void) {
+      const list = listeners.get(type) ?? [];
+      list.push(handler);
+      listeners.set(type, list);
+    },
+    removeEventListener(type: string, handler: (event: MockCustomEvent) => void) {
+      const list = listeners.get(type);
+      if (!list) {
+        return;
+      }
+      const index = list.indexOf(handler);
+      if (index >= 0) {
+        list.splice(index, 1);
+      }
+    },
+    dispatchEvent(event: MockCustomEvent) {
+      const list = listeners.get(event.type) ?? [];
+      list.slice().forEach((handler) => handler(event));
+      return true;
+    },
+  };
+
+  windowTarget.addEventListener('eip6963:announceProvider', (event) => {
+    windowTarget.__announcements.push(event.detail as MockEventTarget['__announcements'][number]);
+  });
+
+  return { windowTarget, getUuidCount: () => uuidCounter };
+}
 
 describe('createInjectorScript EIP-6963', () => {
   it('T-EIP-001 default 単一 wallet で window.ethereum inject script が生成される', () => {
@@ -84,5 +147,28 @@ describe('createInjectorScript EIP-6963', () => {
     const script = createInjectorScript({ privateKey: PK1, chainId: 31337, wallets });
 
     expect(script).toContain('__dappE2eRpc_com_coinbase_wallet');
+  });
+
+  it('T-EIP-007 runtime で info/detail が freeze され、各 wallet で個別 UUID が生成される', () => {
+    const wallets: WalletConfig[] = [
+      { name: 'MetaMask', rdns: 'io.metamask', icon: 'data:,', privateKey: PK1 },
+      { name: 'Rabby', rdns: 'io.rabby', icon: 'data:,', privateKey: PK2 },
+    ];
+    const script = createInjectorScript({ privateKey: PK1, chainId: 31337, wallets });
+    const { windowTarget, getUuidCount } = createMockWindow();
+    const context = createContext({
+      window: windowTarget,
+      crypto: windowTarget.crypto,
+      CustomEvent: MockCustomEvent,
+    });
+
+    runInContext(script, context);
+
+    const announcements = windowTarget.__announcements;
+    expect(announcements).toHaveLength(2);
+    expect(getUuidCount()).toBe(2);
+    expect(new Set(announcements.map((announcement) => announcement.info.uuid)).size).toBe(2);
+    expect(runInContext('Object.isFrozen(window.__announcements[0].info)', context)).toBe(true);
+    expect(runInContext('Object.isFrozen(window.__announcements[0])', context)).toBe(true);
   });
 });
