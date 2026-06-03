@@ -1,4 +1,5 @@
-import { createPublicClient, defineChain, http } from 'viem';
+import { createPublicClient, createWalletClient, defineChain, http, type Hex } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
 
 const ANVIL_PORT = 8545;
@@ -223,5 +224,105 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
       'tokenBalance: ',
     );
     expect(balanceAfterSecond).toBe(balanceAfterFirst);
+  });
+
+  test('T-VS-006 beneficiary 以外の第三者 wallet (bob) が release() を呼んでも payout は beneficiary に届く', async ({
+    page,
+    dappE2e,
+  }) => {
+    // 仕様: TokenVesting.release() は誰でも呼べる、payout は constructor で固定された beneficiary に届く
+    // T-VS-001〜005 では alice (beneficiary == 接続済 wallet) が release を呼ぶ経路しか検証していなかった
+    // 本 test は bob (第三者) が release を呼んでも beneficiary に payout が届く coverage gap を埋める
+
+    await page.goto('/');
+    await page.waitForLoadState('networkidle', { timeout: 30_000 });
+    await ensureConnected(page);
+    await dappE2e.waitForRpcIdle();
+    await waitLoaded(page);
+
+    // .env.local を fs で直接読む (global-setup が書き出した contract address を取得)
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const __filename = url.fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const envPath = path.resolve(__dirname, '..', '.env.local');
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    const vestingMatch = envContent.match(/NEXT_PUBLIC_VESTING=(0x[0-9a-fA-F]+)/);
+    const vestTokenMatch = envContent.match(/NEXT_PUBLIC_VEST_TOKEN=(0x[0-9a-fA-F]+)/);
+    expect(vestingMatch).not.toBeNull();
+    expect(vestTokenMatch).not.toBeNull();
+    const VESTING = vestingMatch![1] as `0x${string}`;
+    const VEST_TOKEN = vestTokenMatch![1] as `0x${string}`;
+
+    // alice = beneficiary, bob = 第三者
+    const ALICE_PK: Hex = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+    const BOB_PK: Hex = '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d';
+    const alice = privateKeyToAccount(ALICE_PK);
+    const bob = privateKeyToAccount(BOB_PK);
+
+    const localPub = createPublicClient({ chain: anvilChain, transport: http() });
+    const bobWallet = createWalletClient({ account: bob, chain: anvilChain, transport: http() });
+
+    const ERC20_BALANCE_ABI = [
+      {
+        inputs: [{ name: 'owner', type: 'address' }],
+        name: 'balanceOf',
+        outputs: [{ name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ] as const;
+    const VESTING_RELEASE_ABI = [
+      {
+        inputs: [],
+        name: 'release',
+        outputs: [{ name: 'amount', type: 'uint256' }],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+    ] as const;
+
+    // 時間を進めて期間満了
+    await increaseTime(VESTING_DURATION + 60n);
+
+    const aliceBalanceBefore = (await localPub.readContract({
+      address: VEST_TOKEN,
+      abi: ERC20_BALANCE_ABI,
+      functionName: 'balanceOf',
+      args: [alice.address],
+    })) as bigint;
+    const bobBalanceBefore = (await localPub.readContract({
+      address: VEST_TOKEN,
+      abi: ERC20_BALANCE_ABI,
+      functionName: 'balanceOf',
+      args: [bob.address],
+    })) as bigint;
+
+    // bob から release を呼ぶ
+    const releaseHash = await bobWallet.writeContract({
+      address: VESTING,
+      abi: VESTING_RELEASE_ABI,
+      functionName: 'release',
+    });
+    await localPub.waitForTransactionReceipt({ hash: releaseHash });
+
+    const aliceBalanceAfter = (await localPub.readContract({
+      address: VEST_TOKEN,
+      abi: ERC20_BALANCE_ABI,
+      functionName: 'balanceOf',
+      args: [alice.address],
+    })) as bigint;
+    const bobBalanceAfter = (await localPub.readContract({
+      address: VEST_TOKEN,
+      abi: ERC20_BALANCE_ABI,
+      functionName: 'balanceOf',
+      args: [bob.address],
+    })) as bigint;
+
+    // alice (beneficiary) の balance は全額分増える
+    expect(aliceBalanceAfter - aliceBalanceBefore).toBe(VEST_TOTAL);
+    // bob (第三者 caller) の balance は変わらない
+    expect(bobBalanceAfter).toBe(bobBalanceBefore);
   });
 });
