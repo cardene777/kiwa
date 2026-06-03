@@ -85,6 +85,50 @@ test('multi wallet picker', async ({ page, dappE2e }) => {
 wallet extension の popup 操作や UI 差分の確認よりも、
 dApp 側の接続フローを CI 上で安定して検証したい場面に向いています。
 
+## Examples
+
+`examples/` 配下に 12 個の参考実装があり、合計 64 test が全て PASS する状態で main にあります。
+自分の dApp 種別に近い example を起点に、dapp-e2e の使い方をコピペで掴めます。
+
+### Framework 統合 (Next.js / Vite から始める場合)
+
+| example | 用途 | wagmi feature | tests |
+|---|---|---|---|
+| [`examples/nextjs-wagmi-rainbow`](./examples/nextjs-wagmi-rainbow) | Next.js 14 App Router + wagmi v2 + RainbowKit で connect + mint | `useAccount` / `useReadContract` / `useWriteContract` | 3 |
+| [`examples/vite-react-wagmi`](./examples/vite-react-wagmi) | Vite 5 + React 18 + wagmi v2 + RainbowKit の SPA 版 | 同上、`vite preview` で production build を test | 3 |
+
+### dApp カテゴリ別 (NFT / DeFi / Governance / Multi-chain)
+
+| example | 用途 | wagmi feature | tests |
+|---|---|---|---|
+| [`examples/nextjs-erc1155-game`](./examples/nextjs-erc1155-game) | ERC1155 で game item 3 種 (Sword / Shield / Potion) を batch mint / transfer | `balanceOfBatch` / `mintBatch` / `safeBatchTransferFrom` | 5 |
+| [`examples/nextjs-multi-chain`](./examples/nextjs-multi-chain) | Mainnet / Optimism / Base sim 3 chain を anvil 並走で切替 | `useSwitchChain` / `useChainId` / chain 別 transport | 5 |
+| [`examples/nextjs-permit-swap`](./examples/nextjs-permit-swap) | EIP-2612 permit で gasless approve + 1 tx swap | `useSignTypedData` (EIP-712) + `useWriteContract` | 5 |
+| [`examples/nextjs-dao-vote`](./examples/nextjs-dao-vote) | Compound 風 Governor で delegate / propose / vote (for / against / abstain) | `useWriteContract` × delegate/propose/castVote | 5 |
+| [`examples/nextjs-lending`](./examples/nextjs-lending) | Aave 風 lending で supply / borrow / repay / health factor | LTV 75% / `healthFactor` / multi-step approve+supply+borrow | 6 |
+| [`examples/nextjs-staking`](./examples/nextjs-staking) | Lido / Convex 風 staking で stake / claim / unstake + reward accrual | block 経過に応じた `pendingReward` + `refetchInterval` で auto refetch | 6 |
+
+### 低レベル RPC + 単純な dApp (inline HTML、framework 抜きで動作確認したい場合)
+
+| example | 用途 | 検証範囲 | tests |
+|---|---|---|---|
+| [`examples/basic-connect`](./examples/basic-connect) | `window.ethereum` 直叩きで connect / sign / sendTx / EIP-6963 / reject 経路 | `personal_sign` / `eth_signTypedData_v4` / `eth_sendTransaction` / `eth_subscribe` reject (code 4200) / multi-wallet announce / `setApprovalMode('reject')` で code 4001 | 14 |
+| [`examples/mint-nft`](./examples/mint-nft) | ERC721 mint flow を inline HTML で | `mint` / `balanceOf` / `transferFrom` / Transfer event | 4 |
+| [`examples/nft-marketplace`](./examples/nft-marketplace) | listing + buy + seller/buyer 2 actor flow | viem 経由で 2 wallet 操作 + dapp-e2e で viewer page 検証、`InsufficientPayment` custom error revert | 4 |
+| [`examples/defi-swap`](./examples/defi-swap) | ERC20 approve → 1:1 swap + reject 経路 | `setApprovalMode('reject')` で UI レベルの user reject | 4 |
+
+### 構成パターン (実装ヒント)
+
+framework 統合 example はいずれも以下の共通構成です。
+
+- `lib/wagmi.ts` で `createConfig` + `connectorsForWallets([injectedWallet])` (MetaMask SDK を bundle から除外して webpack の Invalid token error を回避)
+- `tests/global-setup.ts` で anvil 固定 port 8545 起動 + contract deploy + `.env.local` に address 書き込み
+- `tests/fixture.ts` で `dappE2eTest` を extend し `_anvilHandle` を外部 anvil に override
+- `playwright.config.ts` で `webServer: pnpm build && pnpm start` (production server、`pnpm dev` は webpack chunk 404 を踏むため避ける)
+- 各 test 冒頭で `ensureConnected(page)` helper で RainbowKit autoConnect を待つ
+
+詳細は `examples/nextjs-wagmi-rainbow/` を Stage 1 の base、`examples/nextjs-lending/` を Stage 2 の代表として参照してください。
+
 ## Documentation
 
 - [docs/RPC.md](./docs/RPC.md) — 直接処理する 9 RPC と anvil fallback の整理
