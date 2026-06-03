@@ -31,8 +31,9 @@ function makeChain(id: number, port: number) {
 
 export default async function globalSetup() {
   const l1Handle = await startAnvil({ port: L1_PORT, chainId: L1_CHAIN_ID });
+  anvilState.handles.push(l1Handle);
   const l2Handle = await startAnvil({ port: L2_PORT, chainId: L2_CHAIN_ID });
-  anvilState.handles.push(l1Handle, l2Handle);
+  anvilState.handles.push(l2Handle);
 
   const erc20Artifact = JSON.parse(
     readFileSync(resolve(exampleRoot, 'forge-out/SimpleERC20.sol/SimpleERC20.json'), 'utf8'),
