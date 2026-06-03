@@ -24,7 +24,6 @@ export function createInjectorScript(opts: InjectorOptions): string {
   return `
 (function () {
   if (typeof window === 'undefined') return;
-  if (window.ethereum && window.ethereum.__dappE2eInjected) return;
   var wallets = ${JSON.stringify(wallets)};
   var sanitize = function (rdns) {
     return rdns.replace(/[^a-zA-Z0-9]/g, '_');
@@ -69,76 +68,103 @@ export function createInjectorScript(opts: InjectorOptions): string {
   if (!window.__dappE2eEmitters) {
     window.__dappE2eEmitters = Object.create(null);
   }
+  if (!Array.isArray(window.__dappE2eProviders)) {
+    window.__dappE2eInjected = true;
+    window.__dappE2eProviders = wallets.map(function (wallet) {
+      var eventHandlers = Object.create(null);
+      var info = Object.freeze({
+        uuid: createUuid(),
+        name: wallet.name,
+        icon: wallet.icon,
+        rdns: wallet.rdns,
+      });
+      var bridgeName = wallet.bridgeName || ('__dappE2eRpc_' + sanitize(wallet.rdns));
+      var provider = {
+        isMetaMask: true,
+        __dappE2eInjected: true,
+        request: function (args) {
+          var fn = window[bridgeName];
+          if (!fn) {
+            return Promise.reject(new Error('dapp-e2e: ' + bridgeName + ' not exposed'));
+          }
+          return Promise.resolve(fn(args)).then(unwrapEnvelope);
+        },
+        on: function (event, handler) {
+          if (!eventHandlers[event]) eventHandlers[event] = [];
+          eventHandlers[event].push(handler);
+          return provider;
+        },
+        removeListener: function (event, handler) {
+          var list = eventHandlers[event];
+          if (!list) return provider;
+          var idx = list.indexOf(handler);
+          if (idx >= 0) list.splice(idx, 1);
+          return provider;
+        },
+        emit: function (event) {
+          var list = eventHandlers[event];
+          if (!list) return;
+          var args = Array.prototype.slice.call(arguments, 1);
+          var snapshot = list.slice();
+          for (var i = 0; i < snapshot.length; i += 1) {
+            try {
+              snapshot[i].apply(null, args);
+            } catch (e) {
+              /* swallow */
+            }
+          }
+        },
+      };
+      return {
+        bridgeName: bridgeName,
+        info: info,
+        provider: provider,
+      };
+    });
+  }
   if (!Array.isArray(window.__dappE2eEip6963Listeners)) {
     window.__dappE2eEip6963Listeners = [];
   }
-  while (window.__dappE2eEip6963Listeners.length > 0) {
-    window.removeEventListener(
-      'eip6963:requestProvider',
-      window.__dappE2eEip6963Listeners.pop()
-    );
-  }
-  wallets.forEach(function (wallet, index) {
-    var eventHandlers = Object.create(null);
-    var info = Object.freeze({
-      uuid: createUuid(),
-      name: wallet.name,
-      icon: wallet.icon,
-      rdns: wallet.rdns,
-    });
-    var bridgeName = wallet.bridgeName || ('__dappE2eRpc_' + sanitize(wallet.rdns));
-    var provider = {
-      isMetaMask: true,
-      __dappE2eInjected: true,
-      request: function (args) {
-        var fn = window[bridgeName];
-        if (!fn) {
-          return Promise.reject(new Error('dapp-e2e: ' + bridgeName + ' not exposed'));
-        }
-        return Promise.resolve(fn(args)).then(unwrapEnvelope);
-      },
-      on: function (event, handler) {
-        if (!eventHandlers[event]) eventHandlers[event] = [];
-        eventHandlers[event].push(handler);
-        return provider;
-      },
-      removeListener: function (event, handler) {
-        var list = eventHandlers[event];
-        if (!list) return provider;
-        var idx = list.indexOf(handler);
-        if (idx >= 0) list.splice(idx, 1);
-        return provider;
-      },
-      emit: function (event) {
-        var list = eventHandlers[event];
-        if (!list) return;
-        var args = Array.prototype.slice.call(arguments, 1);
-        var snapshot = list.slice();
-        for (var i = 0; i < snapshot.length; i += 1) {
-          try {
-            snapshot[i].apply(null, args);
-          } catch (e) {
-            /* swallow */
-          }
-        }
-      },
-    };
-    var announce = function () {
-      window.dispatchEvent(new CustomEvent('eip6963:announceProvider', {
-        detail: Object.freeze({ info: info, provider: provider })
-      }));
-    };
-    window.addEventListener('eip6963:requestProvider', announce);
-    window.__dappE2eEip6963Listeners.push(announce);
-    window.__dappE2eEmitters[bridgeName] = function (event) {
+  var dispatchAnnounce = function (entry) {
+    window.__dappE2eOriginalDispatchEvent(new CustomEvent('eip6963:announceProvider', {
+      detail: Object.freeze({ info: entry.info, provider: entry.provider })
+    }));
+  };
+  var bindProvider = function (entry, index) {
+    window.__dappE2eEmitters[entry.bridgeName] = function (event) {
       var args = Array.prototype.slice.call(arguments, 1);
-      provider.emit.apply(provider, [event].concat(args));
+      entry.provider.emit.apply(entry.provider, [event].concat(args));
     };
-    announce();
     if (index === 0) {
-      window.ethereum = provider;
-      window.__dappE2eEmit = window.__dappE2eEmitters[bridgeName];
+      window.ethereum = entry.provider;
+      window.__dappE2eEmit = window.__dappE2eEmitters[entry.bridgeName];
     }
+  };
+  var announceAllProviders = function () {
+    window.__dappE2eProviders.forEach(function (entry, index) {
+      bindProvider(entry, index);
+      dispatchAnnounce(entry);
+    });
+  };
+  if (!window.__dappE2eOriginalDispatchEvent) {
+    window.__dappE2eOriginalDispatchEvent = window.dispatchEvent.bind(window);
+    window.dispatchEvent = function (event) {
+      if (event && event.type === 'eip6963:requestProvider') {
+        announceAllProviders();
+        return true;
+      }
+      return window.__dappE2eOriginalDispatchEvent(event);
+    };
+  }
+  window.__dappE2eProviders.forEach(function (entry, index) {
+    var announce = function () {
+      dispatchAnnounce(entry);
+    };
+    window.__dappE2eEip6963Listeners[index] = announce;
+    bindProvider(entry, index);
+    window.__dappE2eOriginalDispatchEvent(new CustomEvent('eip6963:announceProvider', {
+        detail: Object.freeze({ info: entry.info, provider: entry.provider })
+      }));
   });
 })();
 `;

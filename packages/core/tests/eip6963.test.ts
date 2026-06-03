@@ -1,5 +1,6 @@
 import { createContext, runInContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
+import { validateWalletConfigs } from '../src/fixture.js';
 import { createInjectorScript } from '../src/injector-script.js';
 import type { Hex, WalletConfig } from '../src/types.js';
 
@@ -170,5 +171,34 @@ describe('createInjectorScript EIP-6963', () => {
     expect(new Set(announcements.map((announcement) => announcement.info.uuid)).size).toBe(2);
     expect(runInContext('Object.isFrozen(window.__announcements[0].info)', context)).toBe(true);
     expect(runInContext('Object.isFrozen(window.__announcements[0])', context)).toBe(true);
+  });
+});
+
+describe('validateWalletConfigs', () => {
+  it('T-EIP-008 invalid chainId (string) で throw する', () => {
+    expect(() =>
+      validateWalletConfigs([
+        {
+          name: 'MetaMask',
+          rdns: 'io.metamask',
+          icon: 'data:,',
+          privateKey: PK1,
+          chainId: '1' as never,
+        },
+      ]),
+    ).toThrow(/chainId.*positive integer/);
+  });
+
+  it('T-EIP-009 invalid privateKey (short hex) で throw する', () => {
+    expect(() =>
+      validateWalletConfigs([
+        {
+          name: 'MetaMask',
+          rdns: 'io.metamask',
+          icon: 'data:,',
+          privateKey: '0x1' as never,
+        },
+      ]),
+    ).toThrow(/privateKey.*64-char/);
   });
 });

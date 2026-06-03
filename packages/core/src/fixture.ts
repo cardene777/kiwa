@@ -20,7 +20,7 @@ const DEFAULT_PRIVATE_KEY: Hex =
 const DEFAULT_WALLET_ICON =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="16" fill="%23f6851b"/%3E%3Cpath d="M32 14l12 18-12 7-12-7 12-18zm0 25l12-7-12 18-12-18 12 7z" fill="white"/%3E%3C/svg%3E';
 const WALLET_RDNS_PATTERN = /^[a-z0-9.-]+$/i;
-const HEX_STRING_PATTERN = /^0x[0-9a-fA-F]+$/;
+const PRIVATE_KEY_PATTERN = /^0x[0-9a-fA-F]{64}$/;
 
 interface DappE2eOptions {
   privateKey: Hex;
@@ -182,7 +182,6 @@ export const dappE2eTest = base.extend<
     });
     await page.addInitScript({ content: script });
     await page.goto('about:blank');
-    patchPageInjection(page, script);
     await use(page);
     for (const { ctx, event, handler } of forwardedHandlers) {
       ctx.emitter?.off(event, handler);
@@ -270,7 +269,7 @@ function resolveWalletConfigs(
   }));
 }
 
-function validateWalletConfigs(wallets: WalletConfig[]): void {
+export function validateWalletConfigs(wallets: WalletConfig[]): void {
   const seenSanitizedRdns = new Map<string, string>();
 
   for (const [index, wallet] of wallets.entries()) {
@@ -293,10 +292,21 @@ function validateWalletConfigs(wallets: WalletConfig[]): void {
         `dapp-e2e: WalletConfig.icon must be a data URI (data:image/...), got "${typeof icon === 'string' ? icon.slice(0, 30) : typeof icon}"`,
       );
     }
-    if (typeof privateKey !== 'string' || !HEX_STRING_PATTERN.test(privateKey)) {
+    if (typeof privateKey !== 'string' || !PRIVATE_KEY_PATTERN.test(privateKey)) {
       throw new Error(
-        `dapp-e2e: WalletConfig.privateKey must be a 0x-prefixed hex string, got "${typeof privateKey === 'string' ? privateKey.slice(0, 20) : typeof privateKey}"`,
+        `dapp-e2e: WalletConfig.privateKey at index ${index} must be a 0x-prefixed 64-char hex string (32 bytes), got "${typeof privateKey === 'string' ? privateKey.slice(0, 20) : typeof privateKey}"`,
       );
+    }
+    if (wallet.chainId !== undefined) {
+      if (
+        typeof wallet.chainId !== 'number' ||
+        !Number.isInteger(wallet.chainId) ||
+        wallet.chainId <= 0
+      ) {
+        throw new Error(
+          `dapp-e2e: WalletConfig.chainId at index ${index} must be a positive integer when specified, got ${typeof wallet.chainId === 'number' ? wallet.chainId : typeof wallet.chainId}`,
+        );
+      }
     }
 
     const sanitizedRdns = sanitizeRdns(rdns);
@@ -425,47 +435,4 @@ function normalizeWalletConfigs(wallets: unknown): WalletConfig[] | undefined {
 
 function isPlaywrightFixtureTuple(value: unknown): boolean {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function patchPageInjection(page: Page, script: string): void {
-  const pageWithOverrides = page as Page & {
-    goto: Page['goto'];
-    setContent: Page['setContent'];
-    reload: Page['reload'];
-  };
-
-  const originalGoto = page.goto.bind(page);
-  pageWithOverrides.goto = async (...args) => {
-    const result = await originalGoto(...args);
-    await injectScriptIntoPage(page, script);
-    return result;
-  };
-
-  const originalSetContent = page.setContent.bind(page);
-  pageWithOverrides.setContent = async (...args) => {
-    const result = await originalSetContent(...args);
-    await injectScriptIntoPage(page, script);
-    return result;
-  };
-
-  const originalReload = page.reload.bind(page);
-  pageWithOverrides.reload = async (...args) => {
-    const result = await originalReload(...args);
-    await injectScriptIntoPage(page, script);
-    return result;
-  };
-}
-
-async function injectScriptIntoPage(page: Page, script: string): Promise<void> {
-  await page.evaluate((content) => {
-    const w = window as unknown as {
-      ethereum?: unknown;
-      __dappE2eEmit?: unknown;
-      __dappE2eEmitters?: unknown;
-    };
-    w.ethereum = undefined;
-    w.__dappE2eEmit = undefined;
-    w.__dappE2eEmitters = undefined;
-    (0, eval)(content);
-  }, script);
 }
