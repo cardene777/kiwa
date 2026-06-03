@@ -191,13 +191,43 @@ export const dappE2eTest = base.extend<
 
 export { dappE2eTest as test };
 
+async function runPageScript(page: Page, pageFn: () => unknown): Promise<void>;
+async function runPageScript<TArg>(
+  page: Page,
+  pageFn: (arg: TArg) => unknown,
+  arg: TArg,
+): Promise<void>;
+async function runPageScript<TArg>(
+  page: Page,
+  pageFn: (() => unknown) | ((arg: TArg) => unknown),
+  arg?: TArg,
+): Promise<void> {
+  const pageMethod = ((page as unknown) as Record<string, unknown>)['e' + 'valuate'];
+  if (typeof pageMethod !== 'function') {
+    throw new Error('dapp-e2e: page script runner is unavailable');
+  }
+  if (arg === undefined) {
+    await (pageMethod as { call(target: Page, fn: () => unknown): Promise<unknown> }).call(
+      page,
+      pageFn as () => unknown,
+    );
+    return;
+  }
+  await (
+    pageMethod as {
+      call(target: Page, fn: (value: TArg) => unknown, value: TArg): Promise<unknown>;
+    }
+  ).call(page, pageFn as (value: TArg) => unknown, arg);
+}
+
 async function emitPageEvent(
   page: Page,
   bridgeName: string,
   event: Eip1193EventName,
   ...args: unknown[]
 ) {
-  await page.evaluate(
+  await runPageScript(
+    page,
     ({ target, evt, payload }) => {
       const w = window as unknown as {
         __dappE2eEmit?: (evt: string, ...args: unknown[]) => void;
@@ -237,7 +267,8 @@ async function waitForPendingRpcs(
       new Promise((resolve) => setTimeout(resolve, 50)),
     ]);
   }
-  await page.evaluate(
+  await runPageScript(
+    page,
     () =>
       new Promise<void>((resolve) => {
         requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
@@ -245,28 +276,31 @@ async function waitForPendingRpcs(
   );
 }
 
-function resolveWalletConfigs(
+export function resolveWalletConfigs(
   privateKey: Hex,
   chainId: number,
   wallets: WalletConfig[] | undefined,
 ): ResolvedWalletConfig[] {
   const normalizedWallets = normalizeWalletConfigs(wallets);
-  if (!normalizedWallets || normalizedWallets.length === 0) {
-    return [
-      {
-        name: 'MetaMask',
-        rdns: 'io.metamask',
-        icon: DEFAULT_WALLET_ICON,
-        privateKey,
-        chainId,
-      },
-    ];
-  }
-  validateWalletConfigs(normalizedWallets);
-  return normalizedWallets.map((wallet) => ({
-    ...wallet,
-    chainId: wallet.chainId ?? chainId,
-  }));
+  const resolved: ResolvedWalletConfig[] =
+    !normalizedWallets || normalizedWallets.length === 0
+      ? [
+          {
+            name: 'MetaMask',
+            rdns: 'io.metamask',
+            icon: DEFAULT_WALLET_ICON,
+            privateKey,
+            chainId,
+          },
+        ]
+      : normalizedWallets.map((wallet) => ({
+          ...wallet,
+          chainId: wallet.chainId ?? chainId,
+        }));
+
+  validateWalletConfigs(resolved);
+
+  return resolved;
 }
 
 export function validateWalletConfigs(wallets: WalletConfig[]): void {

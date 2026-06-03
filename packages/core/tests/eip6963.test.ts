@@ -1,6 +1,6 @@
 import { createContext, runInContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
-import { validateWalletConfigs } from '../src/fixture.js';
+import { resolveWalletConfigs, validateWalletConfigs } from '../src/fixture.js';
 import { createInjectorScript } from '../src/injector-script.js';
 import type { Hex, WalletConfig } from '../src/types.js';
 
@@ -200,5 +200,19 @@ describe('validateWalletConfigs', () => {
         },
       ]),
     ).toThrow(/privateKey.*64-char/);
+  });
+
+  it('T-EIP-010 default 経路 (wallets 未指定) でも top-level invalid chainId は throw する', () => {
+    expect(() =>
+      resolveWalletConfigs(PK1, 'invalid' as unknown as number, undefined),
+    ).toThrow(/chainId.*positive integer/);
+  });
+
+  it('T-EIP-011 multi-wallet 経路で wallet.chainId 未指定 + top-level invalid chainId が throw する', () => {
+    const wallets: WalletConfig[] = [
+      { name: 'MetaMask', rdns: 'io.metamask', icon: 'data:,', privateKey: PK1 },
+    ];
+
+    expect(() => resolveWalletConfigs(PK1, -1, wallets)).toThrow(/chainId.*positive integer/);
   });
 });
