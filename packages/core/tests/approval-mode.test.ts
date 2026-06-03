@@ -85,4 +85,27 @@ describe('approval mode', () => {
     expect(Array.isArray(accounts)).toBe(true);
     expect((accounts as string[])[0]?.toLowerCase()).toBe(TEST_ACCOUNT.toLowerCase());
   });
+
+  it('T-APP-006 reject mode で eth_sendTransaction が code 4001 で reject される (anvilPort 不要)', async () => {
+    const ctx = makeCtx('reject');
+
+    await expect(
+      handleRpcRequest(ctx, {
+        method: 'eth_sendTransaction',
+        params: [{ from: TEST_ACCOUNT, to: TEST_ACCOUNT, value: '0x0' }],
+      }),
+    ).rejects.toMatchObject({ code: 4001, message: 'User rejected the request.' });
+  });
+
+  it('T-APP-007 reject mode でも wallet_addEthereumChain は approval check 対象外で成功する', async () => {
+    const ctx = makeCtx('reject');
+
+    const result = await handleRpcRequest(ctx, {
+      method: 'wallet_addEthereumChain',
+      params: [{ chainId: '0x1' }],
+    });
+
+    expect(result).toBeNull();
+    expect(ctx.chainState.current).toBe(1);
+  });
 });

@@ -110,6 +110,7 @@ export const dappE2eTest = base.extend<
         await emitPageEvent(page, 'chainChanged', chainIdHex);
       },
       async setApprovalMode(mode: ApprovalMode) {
+        _rpcContext.approvalMode ??= { current: 'approve' };
         _rpcContext.approvalMode.current = mode;
       },
       async waitForRpcIdle(timeoutMs = 10_000) {

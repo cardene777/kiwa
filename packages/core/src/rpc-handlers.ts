@@ -13,7 +13,7 @@ import {
 export interface RpcContext {
   privateKey: Hex;
   chainState: { current: number };
-  approvalMode: { current: ApprovalMode };
+  approvalMode?: { current: ApprovalMode };
   anvilPort?: number;
   emitter?: DappE2eEventEmitter;
 }
@@ -59,7 +59,7 @@ export async function handleRpcRequest(
       return String(ctx.chainState.current);
 
     case 'personal_sign': {
-      assertApproved(ctx, request.method);
+      assertApproved(ctx);
       const [message, address] = params as [string, Hex];
       if (typeof address !== 'string' || address.toLowerCase() !== account.address.toLowerCase()) {
         throw new Eip1193Error(
@@ -90,7 +90,7 @@ export async function handleRpcRequest(
     }
 
     case 'eth_signTypedData_v4': {
-      assertApproved(ctx, request.method);
+      assertApproved(ctx);
       const [signerAddress, typedDataJson] = params as [Hex, string];
       assertAuthorizedAddress('requested signer', signerAddress, account.address);
       let typedData: {
@@ -121,7 +121,7 @@ export async function handleRpcRequest(
     }
 
     case 'wallet_switchEthereumChain': {
-      assertApproved(ctx, request.method);
+      assertApproved(ctx);
       const chainIdHex = getRequiredChainIdHex(params[0]);
       ctx.chainState.current = parseChainIdHex(chainIdHex);
       ctx.emitter?.emit('chainChanged', chainIdHex);
@@ -136,7 +136,7 @@ export async function handleRpcRequest(
     }
 
     case 'eth_sendTransaction': {
-      assertApproved(ctx, request.method);
+      assertApproved(ctx);
       if (!ctx.anvilPort) {
         throw new Eip1193Error(
           -32603,
@@ -163,8 +163,9 @@ export async function handleRpcRequest(
   }
 }
 
-function assertApproved(ctx: RpcContext, _method: string): void {
-  if (ctx.approvalMode.current === 'reject') {
+function assertApproved(ctx: RpcContext): void {
+  const mode = ctx.approvalMode?.current ?? 'approve';
+  if (mode === 'reject') {
     throw new Eip1193Error(4001, 'User rejected the request.');
   }
 }
