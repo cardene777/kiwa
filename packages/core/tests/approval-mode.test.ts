@@ -108,4 +108,19 @@ describe('approval mode', () => {
     expect(result).toBeNull();
     expect(ctx.chainState.current).toBe(1);
   });
+
+  it('T-APP-008 approvalMode field を完全 omit した RpcContext でも default approve で personal_sign が成功する (external caller 互換契約の構造的担保)', async () => {
+    const ctx: RpcContext = {
+      privateKey: TEST_PRIVATE_KEY,
+      chainState: { current: 31337 },
+    };
+
+    const sig = await handleRpcRequest(ctx, {
+      method: 'personal_sign',
+      params: ['hello', TEST_ACCOUNT],
+    });
+
+    expect(typeof sig).toBe('string');
+    expect(sig).toMatch(/^0x[0-9a-fA-F]+$/);
+  });
 });
