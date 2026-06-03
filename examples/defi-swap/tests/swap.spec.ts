@@ -199,9 +199,9 @@ test.describe('defi-swap e2e (ERC20 approve → swap)', () => {
     await dappE2e.waitForRpcIdle();
     await page.click('#refresh');
     await dappE2e.waitForRpcIdle();
-    expect(await page.locator('#balance-a').textContent()).toBe(USER_INITIAL.toString());
-    expect(await page.locator('#balance-b').textContent()).toBe('0');
-    expect(await page.locator('#allowance').textContent()).toBe('0');
+    await expect(page.locator('#balance-a')).toHaveText(USER_INITIAL.toString());
+    await expect(page.locator('#balance-b')).toHaveText('0');
+    await expect(page.locator('#allowance')).toHaveText('0');
   });
 
   test('T-DS-002 approve → allowance=SWAP_AMOUNT を表示', async ({
@@ -217,7 +217,7 @@ test.describe('defi-swap e2e (ERC20 approve → swap)', () => {
     await dappE2e.waitForRpcIdle();
     await page.click('#refresh');
     await dappE2e.waitForRpcIdle();
-    expect(await page.locator('#allowance').textContent()).toBe(SWAP_AMOUNT.toString());
+    await expect(page.locator('#allowance')).toHaveText(SWAP_AMOUNT.toString());
   });
 
   test('T-DS-003 approve → swap で balance-a が SWAP_AMOUNT 減、balance-b が SWAP_AMOUNT 増', async ({
@@ -235,11 +235,11 @@ test.describe('defi-swap e2e (ERC20 approve → swap)', () => {
     await dappE2e.waitForRpcIdle();
     await page.click('#refresh');
     await dappE2e.waitForRpcIdle();
-    expect(await page.locator('#balance-a').textContent()).toBe(
+    await expect(page.locator('#balance-a')).toHaveText(
       (USER_INITIAL - SWAP_AMOUNT).toString(),
     );
-    expect(await page.locator('#balance-b').textContent()).toBe(SWAP_AMOUNT.toString());
-    expect(await page.locator('#allowance').textContent()).toBe('0');
+    await expect(page.locator('#balance-b')).toHaveText(SWAP_AMOUNT.toString());
+    await expect(page.locator('#allowance')).toHaveText('0');
   });
 
   test('T-DS-004 setApprovalMode("reject") で approve が code 4001 reject される', async ({

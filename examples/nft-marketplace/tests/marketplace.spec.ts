@@ -157,10 +157,8 @@ dappE2eTest.describe('nft-marketplace e2e', () => {
     await dappE2e.waitForRpcIdle();
     await page.click('#refresh');
     await dappE2e.waitForRpcIdle();
-    expect((await page.locator('#token-owner').textContent())?.toLowerCase()).toBe(
-      seller.address.toLowerCase(),
-    );
-    expect(await page.locator('#listing-active').textContent()).toBe('false');
+    await expect(page.locator('#token-owner')).toHaveText(seller.address.toLowerCase());
+    await expect(page.locator('#listing-active')).toHaveText('false');
   });
 
   dappE2eTest('T-NM-002 seller approve + list 後 listing.active=true / price 表示', async ({
@@ -198,8 +196,8 @@ dappE2eTest.describe('nft-marketplace e2e', () => {
     await dappE2e.waitForRpcIdle();
     await page.click('#refresh');
     await dappE2e.waitForRpcIdle();
-    expect(await page.locator('#listing-active').textContent()).toBe('true');
-    expect(await page.locator('#listing-price').textContent()).toBe(parseEther('1').toString());
+    await expect(page.locator('#listing-active')).toHaveText('true');
+    await expect(page.locator('#listing-price')).toHaveText(parseEther('1').toString());
   });
 
   dappE2eTest('T-NM-003 buyer が buy → owner が buyer に移転 + listing.active=false', async ({
@@ -252,10 +250,8 @@ dappE2eTest.describe('nft-marketplace e2e', () => {
     await dappE2e.waitForRpcIdle();
     await page.click('#refresh');
     await dappE2e.waitForRpcIdle();
-    expect((await page.locator('#token-owner').textContent())?.toLowerCase()).toBe(
-      buyer.address.toLowerCase(),
-    );
-    expect(await page.locator('#listing-active').textContent()).toBe('false');
+    await expect(page.locator('#token-owner')).toHaveText(buyer.address.toLowerCase());
+    await expect(page.locator('#listing-active')).toHaveText('false');
   });
 
   dappE2eTest('T-NM-004 buy で InsufficientPayment が revert', async ({ anvilPort }) => {
