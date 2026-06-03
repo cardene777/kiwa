@@ -1,3 +1,4 @@
+import { waitForChainState } from '@dapp-e2e/core';
 import { createPublicClient, createWalletClient, defineChain, http, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
@@ -173,14 +174,41 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
     await dappE2e.waitForRpcIdle();
     await waitLoaded(page);
 
+    // .env.local から VESTING address を取得
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const __filename = url.fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const envContent = fs.readFileSync(
+      path.resolve(__dirname, '..', '.env.local'),
+      'utf8',
+    );
+    const vestingMatch = envContent.match(/NEXT_PUBLIC_VESTING=(0x[0-9a-fA-F]+)/);
+    expect(vestingMatch).not.toBeNull();
+    const VESTING = vestingMatch![1] as `0x${string}`;
+
     // duration + buffer 分進める (1 hour + 60s で確実に satisfaction)
     await increaseTime(VESTING_DURATION + 60n);
-    await page.waitForTimeout(2000);
 
     await page.getByTestId('release-button').click();
     await dappE2e.waitForRpcIdle();
-    await page.waitForTimeout(1500);
 
+    // contract 状態を直接 poll (固定 sleep ではなく決定論的 predicate)
+    const releasedAbi = [
+      { inputs: [], name: 'released', outputs: [{ name: '', type: 'uint256' }], stateMutability: 'view', type: 'function' },
+    ] as const;
+    const released = await waitForChainState<bigint>({
+      publicClient: pub,
+      address: VESTING,
+      abi: releasedAbi,
+      functionName: 'released',
+      predicate: (v) => v === VEST_TOTAL,
+      timeoutMs: 10_000,
+    });
+    expect(released).toBe(VEST_TOTAL);
+
+    // UI 表示の確認 (1.5s refetchInterval で chain state が反映されるまで待つ)
     await expect(page.getByTestId('released')).toHaveText(`released: ${VEST_TOTAL}`, {
       timeout: 10_000,
     });
