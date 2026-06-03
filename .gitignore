@@ -9,3 +9,5 @@ test-results/
 *.log
 coverage/
 .DS_Store
+examples/*/cache/
+examples/*/forge-out/build-info/
