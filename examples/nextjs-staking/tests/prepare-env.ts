@@ -6,6 +6,8 @@ import type { Hex } from 'viem';
 
 const USER_STAKE_INITIAL = 1000n * 10n ** 18n;
 const POOL_REWARD = 10000n * 10n ** 18n;
+const REWARD_RATE = 10n ** 18n;
+const CONTROLLER = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC' as const;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const exampleRoot = resolve(__dirname, '..');
@@ -44,7 +46,7 @@ await runE2EPrepareEnv({
     const pHash = await wallet.deployContract({
       abi: stakingArtifact.abi as never,
       bytecode: stakingArtifact.bytecode.object,
-      args: [stakeToken, rewardToken],
+      args: [stakeToken, rewardToken, CONTROLLER, REWARD_RATE],
     });
     const pReceipt = await publicClient.waitForTransactionReceipt({ hash: pHash });
     const staking = pReceipt.contractAddress!;
@@ -73,6 +75,7 @@ await runE2EPrepareEnv({
       NEXT_PUBLIC_STAKE_TOKEN: stakeToken,
       NEXT_PUBLIC_REWARD_TOKEN: rewardToken,
       NEXT_PUBLIC_STAKING: staking,
+      NEXT_PUBLIC_CONTROLLER: CONTROLLER,
     };
   },
 });

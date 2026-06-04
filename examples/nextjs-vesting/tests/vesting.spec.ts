@@ -413,4 +413,53 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
     expect(atEnd).toBe(VEST_TOTAL);
     expect(farFuture).toBe(VEST_TOTAL);
   });
+
+  test('T-VS-008 vesting schedule を mutate する update 系 selector が ABI に存在しない', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const __filename = url.fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const artifact = JSON.parse(
+      fs.readFileSync(
+        path.resolve(__dirname, '..', 'forge-out/TokenVesting.sol/TokenVesting.json'),
+        'utf8',
+      ),
+    ) as {
+      abi: Array<{ type: string; name?: string }>;
+      methodIdentifiers?: Record<string, string>;
+    };
+
+    const forbiddenNames = new Set([
+      'updateSchedule',
+      'setSchedule',
+      'setCliff',
+      'setDuration',
+      'setBeneficiary',
+      'setAmount',
+      'updateBeneficiary',
+      'updateAmount',
+    ]);
+    const forbiddenSignatures = [
+      'updateSchedule(uint64,uint64,address,uint256)',
+      'updateSchedule(address,uint64,uint64,uint256)',
+      'setSchedule(uint64,uint64,address,uint256)',
+      'setCliff(uint64)',
+      'setDuration(uint64)',
+      'setBeneficiary(address)',
+      'setAmount(uint256)',
+      'updateBeneficiary(address)',
+      'updateAmount(uint256)',
+    ] as const;
+
+    const abiMutators = artifact.abi.filter(
+      (entry) => entry.type === 'function' && entry.name && forbiddenNames.has(entry.name),
+    );
+
+    expect(abiMutators).toEqual([]);
+
+    for (const signature of forbiddenSignatures) {
+      expect(artifact.methodIdentifiers?.[signature]).toBeUndefined();
+    }
+  });
 });

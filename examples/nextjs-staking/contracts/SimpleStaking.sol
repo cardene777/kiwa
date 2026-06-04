@@ -9,55 +9,96 @@ interface IERC20 {
 
 /// @notice Minimal Lido / Convex 風 staking pool
 /// @dev    stake token と reward token は別物
-///         reward rate = block 毎に staked unit * REWARD_RATE_PER_BLOCK / 1e18
+///         reward は seconds 単位で rewardPerToken に蓄積する
 contract SimpleStaking {
     IERC20 public immutable stakeToken;
     IERC20 public immutable rewardToken;
+    address public immutable controller;
+    uint256 public immutable rewardRate;
 
-    /// 1e15 = 0.001 reward per staked unit per block (= 0.1% / block)
-    uint256 public constant REWARD_RATE_PER_BLOCK = 1e15;
+    uint256 public constant REWARD_PRECISION = 1e18;
+    uint256 public constant MIN_STAKE_DURATION = 7 days;
+    uint256 public constant PENALTY_RATE = 10;
 
+    uint256 public totalStaked;
+    uint256 public rewardPerTokenStored;
+    uint256 public lastUpdateTime;
     mapping(address => uint256) public stakedBalance;
-    mapping(address => uint256) public lastUpdate;
+    mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public accruedReward;
+    mapping(address => uint256) public stakeStartedAt;
 
     event Staked(address indexed user, uint256 amount);
-    event Unstaked(address indexed user, uint256 amount);
+    event Unstaked(address indexed user, uint256 amount, uint256 returnedAmount, uint256 penaltyAmount);
     event Claimed(address indexed user, uint256 amount);
+    event PenaltyPaid(address indexed user, uint256 amount, address indexed controller);
 
     error TransferFailed();
     error InsufficientStake();
     error NoReward();
 
-    constructor(address stake, address reward) {
+    constructor(address stake, address reward, address daoController, uint256 rewardRatePerSecond) {
         stakeToken = IERC20(stake);
         rewardToken = IERC20(reward);
+        controller = daoController;
+        rewardRate = rewardRatePerSecond;
+        lastUpdateTime = block.timestamp;
     }
 
-    /// @notice 経過 block 分の reward を accrued に加算し、lastUpdate を更新
+    function rewardPerToken() public view returns (uint256) {
+        if (totalStaked == 0) return rewardPerTokenStored;
+        uint256 elapsed = block.timestamp - lastUpdateTime;
+        return rewardPerTokenStored + (rewardRate * elapsed * REWARD_PRECISION) / totalStaked;
+    }
+
+    function _pendingReward(address user) internal view returns (uint256) {
+        return accruedReward[user]
+            + (stakedBalance[user] * (rewardPerToken() - userRewardPerTokenPaid[user])) / REWARD_PRECISION;
+    }
+
     function _accrue(address user) internal {
-        uint256 staked = stakedBalance[user];
-        uint256 last = lastUpdate[user];
-        if (staked > 0 && last > 0) {
-            uint256 blocks = block.number - last;
-            accruedReward[user] += (staked * blocks * REWARD_RATE_PER_BLOCK) / 1e18;
+        rewardPerTokenStored = rewardPerToken();
+        lastUpdateTime = block.timestamp;
+
+        if (user != address(0)) {
+            accruedReward[user] = _pendingReward(user);
+            userRewardPerTokenPaid[user] = rewardPerTokenStored;
         }
-        lastUpdate[user] = block.number;
     }
 
     function stake(uint256 amount) external {
-        if (!stakeToken.transferFrom(msg.sender, address(this), amount)) revert TransferFailed();
         _accrue(msg.sender);
+        if (!stakeToken.transferFrom(msg.sender, address(this), amount)) revert TransferFailed();
         stakedBalance[msg.sender] += amount;
+        totalStaked += amount;
+        stakeStartedAt[msg.sender] = block.timestamp;
         emit Staked(msg.sender, amount);
     }
 
     function unstake(uint256 amount) external {
         if (stakedBalance[msg.sender] < amount) revert InsufficientStake();
         _accrue(msg.sender);
+
         stakedBalance[msg.sender] -= amount;
-        if (!stakeToken.transfer(msg.sender, amount)) revert TransferFailed();
-        emit Unstaked(msg.sender, amount);
+        totalStaked -= amount;
+
+        uint256 penaltyAmount;
+        if (block.timestamp - stakeStartedAt[msg.sender] < MIN_STAKE_DURATION) {
+            penaltyAmount = (amount * PENALTY_RATE) / 100;
+            if (penaltyAmount > 0) {
+                if (!stakeToken.transfer(controller, penaltyAmount)) revert TransferFailed();
+                emit PenaltyPaid(msg.sender, penaltyAmount, controller);
+            }
+        }
+
+        uint256 payout = amount - penaltyAmount;
+        if (payout > 0) {
+            if (!stakeToken.transfer(msg.sender, payout)) revert TransferFailed();
+        }
+        if (stakedBalance[msg.sender] == 0) {
+            stakeStartedAt[msg.sender] = 0;
+        }
+        emit Unstaked(msg.sender, amount, payout, penaltyAmount);
     }
 
     function claim() external returns (uint256 payout) {
@@ -71,11 +112,6 @@ contract SimpleStaking {
 
     /// @notice view で現時点の pending reward を取得 (accrued + 未確定分)
     function pendingReward(address user) external view returns (uint256) {
-        uint256 staked = stakedBalance[user];
-        uint256 last = lastUpdate[user];
-        uint256 accrued = accruedReward[user];
-        if (staked == 0 || last == 0) return accrued;
-        uint256 blocks = block.number - last;
-        return accrued + (staked * blocks * REWARD_RATE_PER_BLOCK) / 1e18;
+        return _pendingReward(user);
     }
 }
