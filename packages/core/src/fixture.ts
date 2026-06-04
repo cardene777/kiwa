@@ -1,5 +1,5 @@
 import { test as base, type Page } from '@playwright/test';
-import { numberToHex } from 'viem';
+import { numberToHex, verifyMessage } from 'viem';
 import { privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts';
 import { ANVIL_DEFAULT_PRIVATE_KEYS } from './anvil-default-keys.js';
 import { startAnvil } from './anvil.js';
@@ -42,7 +42,7 @@ interface InternalFixtures {
   _rpcContext: RpcContext;
   _rpcContexts: RpcContext[];
   _rpcTracker: {
-    pendingRpcs: Map<number, Promise<unknown>>;
+    pendingRpcs: Map<number, PendingRpcEntry>;
     nextId: () => number;
   };
 }
@@ -53,6 +53,12 @@ interface FixtureDappE2eApi extends DappE2eApi {
 
 interface ResolvedWalletConfig extends WalletConfig {
   chainId: number;
+}
+
+interface PendingRpcEntry {
+  request: { method: string; params?: unknown[] };
+  startedAt: number;
+  promise: Promise<unknown>;
 }
 
 const FORWARDED_EVENTS: Eip1193EventName[] = [
@@ -97,7 +103,7 @@ export const dappE2eTest = base.extend<
         const base: RpcContext = {
           privateKey: wallet.privateKey,
           chainState: { current: wallet.chainId },
-          approvalMode: { current: 'approve' as const },
+          approvalPolicy: { current: { default: 'approve' as const } },
           anvilPort,
           emitter: createEventEmitter(),
         };
@@ -118,7 +124,7 @@ export const dappE2eTest = base.extend<
   },
 
   _rpcTracker: async ({}, use) => {
-    const pendingRpcs = new Map<number, Promise<unknown>>();
+    const pendingRpcs = new Map<number, PendingRpcEntry>();
     let counter = 0;
     await use({
       pendingRpcs,
@@ -153,6 +159,18 @@ export const dappE2eTest = base.extend<
       },
       async setApprovalMode(mode: ApprovalMode) {
         await primaryApi.setApprovalMode(mode);
+      },
+      async setApprovalModeForToken(
+        tokenAddress: Hex,
+        policy: { mode: ApprovalMode; limit?: bigint },
+      ) {
+        if (!primaryApi.setApprovalModeForToken) {
+          throw new Eip1193Error(
+            -32603,
+            'setApprovalModeForToken helper unavailable on this primary wallet',
+          );
+        }
+        await primaryApi.setApprovalModeForToken(tokenAddress, policy);
       },
       async setActiveAccount(index: number) {
         if (!primaryApi.setActiveAccount) {
@@ -279,24 +297,24 @@ async function emitPageEvent(
   );
 }
 
-async function waitForPendingRpcs(
+export async function waitForPendingRpcs(
   page: Page,
-  pendingRpcs: Map<number, Promise<unknown>>,
+  pendingRpcs: Map<number, PendingRpcEntry>,
   timeoutMs = 10_000,
 ): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
   const start = Date.now();
   while (pendingRpcs.size > 0) {
     if (Date.now() - start > timeoutMs) {
-      const staleIds = Array.from(pendingRpcs.keys());
+      const staleRpcSummaries = Array.from(pendingRpcs.values(), formatPendingRpcEntry);
       pendingRpcs.clear();
       throw new Eip1193Error(
         -32603,
-        `waitForRpcIdle timeout after ${timeoutMs}ms with ${staleIds.length} pending RPCs (IDs: ${staleIds.join(', ')})`,
+        `waitForRpcIdle timeout after ${timeoutMs}ms with ${staleRpcSummaries.length} pending RPCs: ${staleRpcSummaries.join(' | ')}`,
       );
     }
     await Promise.race([
-      Promise.allSettled([...pendingRpcs.values()]),
+      Promise.allSettled(Array.from(pendingRpcs.values(), (entry) => entry.promise)),
       new Promise((resolve) => setTimeout(resolve, 50)),
     ]);
   }
@@ -375,6 +393,14 @@ export function validateWalletConfigs(wallets: WalletConfig[]): void {
         );
       }
     }
+    if (
+      wallet.isContractAccount !== undefined &&
+      typeof wallet.isContractAccount !== 'boolean'
+    ) {
+      throw new Error(
+        `dapp-e2e: WalletConfig.isContractAccount at index ${index} must be a boolean when specified, got ${typeof wallet.isContractAccount}`,
+      );
+    }
 
     const sanitizedRdns = sanitizeRdns(rdns);
     const existingRdns = seenSanitizedRdns.get(sanitizedRdns);
@@ -387,12 +413,13 @@ export function validateWalletConfigs(wallets: WalletConfig[]): void {
   }
 }
 
-function createRpcHandler(
+export function createRpcHandler(
   ctx: RpcContext,
   tracker: InternalFixtures['_rpcTracker'],
 ): (request: { method: string; params?: unknown[] }) => Promise<unknown> {
   return async (request: { method: string; params?: unknown[] }) => {
     const id = tracker.nextId();
+    const startedAt = Date.now();
     const promise = (async () => {
       try {
         const result = await handleRpcRequest(ctx, request);
@@ -408,8 +435,13 @@ function createRpcHandler(
         };
       }
     })();
-    tracker.pendingRpcs.set(id, promise);
-    void promise.finally(() => tracker.pendingRpcs.delete(id));
+    tracker.pendingRpcs.set(id, { request, startedAt, promise });
+    void promise.finally(() => {
+      tracker.pendingRpcs.delete(id);
+      if (isRpcDebugEnabled()) {
+        console.log(formatCompletedRpcEntry({ request, startedAt }));
+      }
+    });
     return promise;
   };
 }
@@ -439,8 +471,18 @@ function createWalletApi(
       await emitPageEvent(page, bridgeName, 'chainChanged', chainIdHex);
     },
     async setApprovalMode(mode: ApprovalMode) {
-      rpcContext.approvalMode ??= { current: 'approve' };
-      rpcContext.approvalMode.current = mode;
+      rpcContext.approvalPolicy ??= { current: { default: 'approve' } };
+      rpcContext.approvalPolicy.current.default = mode;
+      if (rpcContext.approvalMode) {
+        rpcContext.approvalMode.current = mode;
+      }
+    },
+    async setApprovalModeForToken(tokenAddress: Hex, policy: { mode: ApprovalMode; limit?: bigint }) {
+      rpcContext.approvalPolicy ??= { current: { default: 'approve' } };
+      rpcContext.approvalPolicy.current.perToken ??= {};
+      rpcContext.approvalPolicy.current.perToken[
+        normalizeAddressKey(tokenAddress)
+      ] = policy.limit === undefined ? { mode: policy.mode } : policy;
     },
   };
 
@@ -500,6 +542,51 @@ function sanitizeRdns(rdns: string): string {
   return rdns.replace(/[^a-zA-Z0-9]/g, '_');
 }
 
+function normalizeAddressKey(address: Hex): Hex {
+  return address.toLowerCase() as Hex;
+}
+
+function isRpcDebugEnabled(): boolean {
+  return process.env.DEBUG?.includes('dapp-e2e:rpc') ?? false;
+}
+
+function formatRpcParams(params: unknown[] | undefined): string {
+  if (!params || params.length === 0) {
+    return '[]';
+  }
+  if (params.length === 1) {
+    return formatRpcValue(params[0]);
+  }
+  return formatRpcValue(params);
+}
+
+function formatRpcValue(value: unknown): string {
+  return inspectForRpc(value).replace(/\s+/g, ' ').trim();
+}
+
+function inspectForRpc(value: unknown): string {
+  return JSON.stringify(
+    value,
+    (_key, currentValue) =>
+      typeof currentValue === 'bigint' ? `${currentValue.toString()}n` : currentValue,
+  ) ?? String(value);
+}
+
+function formatDurationMs(durationMs: number): string {
+  if (durationMs >= 1_000) {
+    return `${(durationMs / 1_000).toFixed(1)}s`;
+  }
+  return `${durationMs}ms`;
+}
+
+function formatPendingRpcEntry(entry: PendingRpcEntry): string {
+  return `[dapp-e2e:rpc] ${entry.request.method} ${formatRpcParams(entry.request.params)} pending for ${formatDurationMs(Date.now() - entry.startedAt)}`;
+}
+
+function formatCompletedRpcEntry(entry: Pick<PendingRpcEntry, 'request' | 'startedAt'>): string {
+  return `[dapp-e2e:rpc] ${entry.request.method} ${formatRpcParams(entry.request.params)} start_time=${new Date(entry.startedAt).toISOString()} duration=${formatDurationMs(Date.now() - entry.startedAt)}`;
+}
+
 function getRequiredValue<T>(value: T | undefined, label: string): T {
   if (value === undefined) {
     throw new Error(`dapp-e2e: missing ${label}`);
@@ -528,4 +615,16 @@ function normalizeWalletConfigs(wallets: unknown): WalletConfig[] | undefined {
 
 function isPlaywrightFixtureTuple(value: unknown): boolean {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export async function verifySignature(
+  address: Hex,
+  signature: Hex,
+  message: string | { raw: Hex },
+): Promise<boolean> {
+  return verifyMessage({
+    address,
+    signature,
+    message,
+  });
 }

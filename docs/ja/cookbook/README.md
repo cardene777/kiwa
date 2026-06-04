@@ -8,6 +8,7 @@
 - [Multi-Wallet 署名検証を test する](./multi-wallet-signature.md)
 - [User reject 経路を test する](./user-reject.md)
 - [Multi-Chain (L1/L2 並走) を test する](./multi-chain.md)
+- [Token approve flow を test する](./token-approve-flow.md)
 
 ## 関連
 

@@ -6,6 +6,7 @@ const TEMPLATES = [
   { source: 'connect.spec.ts.tpl', dest: 'e2e/connect.spec.ts' },
   { source: 'playwright.config.ts.tpl', dest: 'playwright.config.ts' },
 ] as const;
+const TSCONFIG_TEMPLATE = { source: 'tsconfig.json.tpl', dest: 'tsconfig.json' } as const;
 
 const DEV_DEPENDENCIES = {
   '@dapp-e2e/core': '^0.1.0',
@@ -31,6 +32,7 @@ export interface InitOptions {
 export interface InitResult {
   created: string[];
   updated: string[];
+  warnings: string[];
 }
 
 export function runInit(options: InitOptions): InitResult {
@@ -49,6 +51,7 @@ export function runInit(options: InitOptions): InitResult {
 
   const created: string[] = [];
   const createdDirs: string[] = [];
+  const warnings: string[] = [];
 
   try {
     for (const template of TEMPLATES) {
@@ -69,6 +72,7 @@ export function runInit(options: InitOptions): InitResult {
 
   const updated: string[] = [];
   const packageJsonPath = path.join(options.cwd, 'package.json');
+  const tsconfigPath = path.join(options.cwd, TSCONFIG_TEMPLATE.dest);
 
   if (fs.existsSync(packageJsonPath)) {
     try {
@@ -103,7 +107,25 @@ export function runInit(options: InitOptions): InitResult {
     }
   }
 
-  return { created, updated };
+  if (fs.existsSync(tsconfigPath)) {
+    const strict = detectTsconfigStrict(tsconfigPath);
+    if (strict === false) {
+      warnings.push(
+        'Existing tsconfig.json has "strict": false. dapp-e2e init did not modify it.',
+      );
+    }
+  } else {
+    try {
+      const source = resolveTemplatePath(TSCONFIG_TEMPLATE.source);
+      fs.writeFileSync(tsconfigPath, fs.readFileSync(source, 'utf8'), 'utf8');
+      created.push(TSCONFIG_TEMPLATE.dest);
+    } catch (error) {
+      rollback(options.cwd, created, createdDirs);
+      throw error;
+    }
+  }
+
+  return { created, updated, warnings };
 }
 
 function rollback(cwd: string, created: string[], createdDirs: string[]): void {
@@ -166,4 +188,32 @@ function resolveTemplatePath(source: string): string {
   }
 
   throw new Error(`Template not found: ${source}`);
+}
+
+function detectTsconfigStrict(tsconfigPath: string): boolean | undefined {
+  try {
+    const raw = fs.readFileSync(tsconfigPath, 'utf8');
+    const sanitized = stripJsonComments(raw);
+    const parsed = JSON.parse(sanitized) as {
+      compilerOptions?: { strict?: unknown };
+    };
+    if (!parsed.compilerOptions || !('strict' in parsed.compilerOptions)) {
+      return undefined;
+    }
+    if (parsed.compilerOptions.strict === true) {
+      return true;
+    }
+    if (parsed.compilerOptions.strict === false) {
+      return false;
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function stripJsonComments(raw: string): string {
+  return raw
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '');
 }

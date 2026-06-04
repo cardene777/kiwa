@@ -33,6 +33,7 @@ export interface WalletConfig {
   icon: string;
   privateKey: Hex;
   chainId?: number;
+  isContractAccount?: boolean;
 }
 
 export interface InjectorOptions {
@@ -99,12 +100,21 @@ export type Eip1193EventHandler = (...args: unknown[]) => void;
 
 export type ApprovalMode = 'approve' | 'reject';
 
+export interface ApprovalPolicy {
+  default: ApprovalMode;
+  perToken?: Record<Hex, { mode: ApprovalMode; limit?: bigint }>;
+}
+
 export interface WalletApi {
   triggerEvent(event: Eip1193EventName, ...args: unknown[]): Promise<void>;
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   switchChain(chainIdHex: Hex): Promise<void>;
   setApprovalMode(mode: ApprovalMode): Promise<void>;
+  setApprovalModeForToken?(
+    tokenAddress: Hex,
+    policy: { mode: ApprovalMode; limit?: bigint },
+  ): Promise<void>;
   /**
    * 複数 account を持つ wallet で active account を切替える。
    * 範囲外 index で throw、内部で `accountsChanged` event を自動発火する。
@@ -131,6 +141,10 @@ export interface DappE2eApi {
   disconnect(): Promise<void>;
   switchChain(chainIdHex: Hex): Promise<void>;
   setApprovalMode(mode: ApprovalMode): Promise<void>;
+  setApprovalModeForToken?(
+    tokenAddress: Hex,
+    policy: { mode: ApprovalMode; limit?: bigint },
+  ): Promise<void>;
   /**
    * 複数 account を持つ wallet で active account を切替える (primary wallet 経由)。
    * 内部で `accountsChanged` event を自動発火する。

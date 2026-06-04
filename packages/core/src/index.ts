@@ -14,6 +14,11 @@ export {
 } from './rpc-handlers.js';
 export { ANVIL_DEFAULT_PRIVATE_KEYS } from './anvil-default-keys.js';
 export { createEventEmitter } from './event-emitter.js';
+export {
+  EIP1271_MAGIC_VALUE,
+  verifyEip1271Signature,
+  type VerifyEip1271SignatureParams,
+} from './eip1271.js';
 export { sendTransaction } from './tx.js';
 export {
   startAnvil,
@@ -38,7 +43,7 @@ export {
   type PidEntry,
 } from './e2e-prepare-env.js';
 export { createInjectorScript } from './injector-script.js';
-export { dappE2eTest } from './fixture.js';
+export { dappE2eTest, createRpcHandler, verifySignature, waitForPendingRpcs } from './fixture.js';
 export {
   deployContract,
   loadForgeArtifact,
