@@ -26,7 +26,7 @@ test('signMessage を reject すると error message が表示', async ({ page, 
 ### 2. test 終了前に approval mode を戻す
 
 ~~~ts
-  await dappE2e.setApprovalMode('auto'); // 後続 test に reject 状態が引きずらないよう
+  await dappE2e.setApprovalMode('approve'); // 後続 test に reject 状態が引きずらないよう
 ~~~
 
 ## Verify

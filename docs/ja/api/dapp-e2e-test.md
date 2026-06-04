@@ -17,7 +17,7 @@ const test = dappE2eTest;
 | `page` | `Page` | Playwright の `Page`、`window.ethereum` が inject 済み |
 | `dappE2e` | `DappE2eHelper` | `connect` / `personalSign` / `setApprovalMode` / `waitForRpcIdle` 等の helper |
 | `wallets` | `WalletConfig[]` (option) | EIP-6963 multi-wallet inject (`test.use({ wallets: [...] })` で指定) |
-| `approvalMode` | `'auto' \| 'reject'` (option) | RPC approval の default mode |
+| `approvalMode` | `'approve' \| 'reject'` (option) | RPC approval の default mode |
 
 ## DappE2eHelper の主要 method
 
@@ -29,7 +29,7 @@ const test = dappE2eTest;
 | `signTypedData(domain, types, value)` | `eth_signTypedData_v4` で署名 |
 | `sendTransaction(tx)` | `eth_sendTransaction` を直接発行 |
 | `switchChain(id)` | `wallet_switchEthereumChain` を発行 |
-| `setApprovalMode(mode)` | 後続 RPC を `auto` / `reject` で切替 |
+| `setApprovalMode(mode)` | 後続 RPC を `approve` / `reject` で切替 |
 | `waitForRpcIdle()` | inject wallet RPC pipe が drain するまで待つ |
 | `triggerEvent(name, args)` | wallet 側 event (`chainChanged` / `accountsChanged`) を発火 |
 

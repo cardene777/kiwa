@@ -23,6 +23,27 @@ graph TB
     H --> I[connect/sign/sendTx などを dappE2e helper で発行]
 ```
 
+## account switch event 順序
+
+`setActiveAccount()` は internal state を更新してから `accountsChanged` を page へ流すため、
+wagmi の `useAccount()` から見ると「state 更新 → event 通知 → 再 render」の順で観測できます。
+
+```mermaid
+sequenceDiagram
+    participant T as test
+    participant F as fixture
+    participant API as DappE2eApi
+    participant W as window.ethereum (inject)
+    participant App as React app (wagmi useAccount)
+
+    T->>API: setActiveAccount(1)
+    API->>F: rpcContext.activeIndex.current = 1
+    API->>W: emitPageEvent('accountsChanged', [newAddress])
+    W->>App: window.ethereum.emit('accountsChanged', [newAddress])
+    App->>App: wagmi internal: useAccount update -> re-render
+    F-->>T: accountsChanged event emitted
+```
+
 ## Example
 
 ~~~ts
@@ -30,7 +51,7 @@ import { dappE2eTest as test, expect } from '@dapp-e2e/core';
 
 const customTest = test.extend({
   // 必要に応じて wallet の private key や approval mode を override
-  approvalMode: 'auto',
+  approvalMode: 'approve',
 });
 
 customTest('connect 後に署名できる', async ({ page, dappE2e }) => {

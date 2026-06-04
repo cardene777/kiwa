@@ -5,6 +5,7 @@
 - [Connect ボタンを test する](./connect-button.md)
 - [時間操作で test する (vesting / streaming)](./time-manipulation.md)
 - [Multi-Wallet picker を test する](./multi-wallet.md)
+- [Multi-Wallet 署名検証を test する](./multi-wallet-signature.md)
 - [User reject 経路を test する](./user-reject.md)
 - [Multi-Chain (L1/L2 並走) を test する](./multi-chain.md)
 

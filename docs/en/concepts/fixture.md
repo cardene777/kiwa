@@ -24,6 +24,27 @@ graph TB
     H --> I[connect / sign / sendTx via dappE2e helpers]
 ```
 
+## Account-switch event order
+
+`setActiveAccount()` updates internal state before forwarding `accountsChanged` into the page,
+so wagmi `useAccount()` observes the flow as "state update -> event delivery -> re-render".
+
+```mermaid
+sequenceDiagram
+    participant T as test
+    participant F as fixture
+    participant API as DappE2eApi
+    participant W as window.ethereum (inject)
+    participant App as React app (wagmi useAccount)
+
+    T->>API: setActiveAccount(1)
+    API->>F: rpcContext.activeIndex.current = 1
+    API->>W: emitPageEvent('accountsChanged', [newAddress])
+    W->>App: window.ethereum.emit('accountsChanged', [newAddress])
+    App->>App: wagmi internal: useAccount update -> re-render
+    F-->>T: accountsChanged event emitted
+```
+
 ## Example
 
 ~~~ts
@@ -31,7 +52,7 @@ import { dappE2eTest as test, expect } from '@dapp-e2e/core';
 
 const customTest = test.extend({
   // Override wallet private keys or approval mode as needed
-  approvalMode: 'auto',
+  approvalMode: 'approve',
 });
 
 customTest('can sign after connect', async ({ page, dappE2e }) => {
