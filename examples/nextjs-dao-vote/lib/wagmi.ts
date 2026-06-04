@@ -51,6 +51,10 @@ function requireEnv(value: string | undefined, name: string): `0x${string}` {
 
 export const VOTE_TOKEN = requireEnv(process.env.NEXT_PUBLIC_VOTE_TOKEN, 'NEXT_PUBLIC_VOTE_TOKEN');
 export const DAO = requireEnv(process.env.NEXT_PUBLIC_DAO, 'NEXT_PUBLIC_DAO');
+export const DAO_EXECUTION_TARGET = requireEnv(
+  process.env.NEXT_PUBLIC_DAO_EXECUTION_TARGET,
+  'NEXT_PUBLIC_DAO_EXECUTION_TARGET',
+);
 
 export const VOTE_TOKEN_ABI = [
   {
@@ -124,4 +128,4 @@ export const DAO_ABI = [
   },
 ] as const;
 
-export const STATE_LABEL = ['Pending', 'Active', 'Defeated', 'Succeeded'] as const;
+export const STATE_LABEL = ['Pending', 'Active', 'Defeated', 'Succeeded', 'Queued', 'Executed'] as const;
