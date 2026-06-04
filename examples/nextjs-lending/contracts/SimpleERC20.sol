@@ -13,6 +13,9 @@ contract SimpleERC20 {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
+    error InsufficientAllowance(uint256 available, uint256 required);
+    error InsufficientBalance(uint256 available, uint256 required);
+
     constructor(string memory n, string memory s, uint256 initialSupply, address recipient) {
         name = n;
         symbol = s;
@@ -34,14 +37,15 @@ contract SimpleERC20 {
 
     function transferFrom(address from, address to, uint256 value) external returns (bool) {
         uint256 a = allowance[from][msg.sender];
-        require(a >= value, "insufficient allowance");
+        if (a < value) revert InsufficientAllowance(a, value);
         if (a != type(uint256).max) allowance[from][msg.sender] = a - value;
         _transfer(from, to, value);
         return true;
     }
 
     function _transfer(address from, address to, uint256 value) internal {
-        require(balanceOf[from] >= value, "insufficient balance");
+        uint256 balance = balanceOf[from];
+        if (balance < value) revert InsufficientBalance(balance, value);
         balanceOf[from] -= value;
         balanceOf[to] += value;
         emit Transfer(from, to, value);

@@ -413,4 +413,39 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
     expect(atEnd).toBe(VEST_TOTAL);
     expect(farFuture).toBe(VEST_TOTAL);
   });
+
+  test('T-VS-008 ABI 上の non-view 関数が allowlist と完全一致し新しい mutator を検知できる', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const __filename = url.fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const artifact = JSON.parse(
+      fs.readFileSync(
+        path.resolve(__dirname, '..', 'forge-out/TokenVesting.sol/TokenVesting.json'),
+        'utf8',
+      ),
+    ) as {
+      abi: Array<{
+        type: string;
+        name?: string;
+        stateMutability?: string;
+        inputs?: Array<{ type: string }>;
+      }>;
+    };
+
+    const allowedMutators = ['release()'];
+    const abiMutators = artifact.abi
+      .filter(
+        (entry) =>
+          entry.type === 'function' &&
+          entry.name &&
+          entry.stateMutability !== 'view' &&
+          entry.stateMutability !== 'pure',
+      )
+      .map((entry) => `${entry.name}(${(entry.inputs ?? []).map((input) => input.type).join(',')})`)
+      .sort();
+
+    expect(abiMutators).toEqual(allowedMutators);
+  });
 });
