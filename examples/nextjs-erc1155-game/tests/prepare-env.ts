@@ -2,15 +2,17 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { runE2EPrepareEnv } from '@dapp-e2e/core';
-import type { Hex } from 'viem';
+import { type Hex } from 'viem';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const exampleRoot = resolve(__dirname, '..');
+const ANVIL_PORT = 8545;
+const CHAIN_ID = 31337;
 
 await runE2EPrepareEnv({
   exampleRoot,
-  port: 8545,
-  chainId: 31337,
+  port: ANVIL_PORT,
+  chainId: CHAIN_ID,
   deploy: async ({ wallet, publicClient }) => {
     const artifact = JSON.parse(
       readFileSync(resolve(exampleRoot, 'forge-out/GameItems.sol/GameItems.json'), 'utf8'),

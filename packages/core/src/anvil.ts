@@ -5,6 +5,10 @@ const STARTUP_TIMEOUT_MS = 10_000;
 const SHUTDOWN_GRACE_MS = 2_000;
 const START_RETRY_COUNT = 10;
 const PORT_RELEASE_WAIT_MS = 200;
+const PID_POLL_INTERVAL_MS = 100;
+const SIGTERM_WAIT_MS = 2_000;
+const SIGKILL_WAIT_MS = 3_000;
+const SLEEP_BUFFER = new Int32Array(new SharedArrayBuffer(4));
 
 const reservedPorts = new Set<number>();
 let portAllocationQueue = Promise.resolve();
@@ -128,30 +132,29 @@ export async function startAnvil(opts: StartAnvilOptions = {}): Promise<AnvilHan
 
 function killAnvilProcessesOnPort(port: number): void {
   try {
-    const result = execFileSync('lsof', ['-ti', '-sTCP:LISTEN', '-P', '-n', `:${port}`], {
+    const result = execFileSync('lsof', ['-nP', `-iTCP:${port}`, '-sTCP:LISTEN'], {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
     });
-    const pids = result
+    const listeners = result
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
-      .map((line) => Number.parseInt(line, 10))
-      .filter((n) => Number.isFinite(n) && n > 0);
-    for (const pid of pids) {
+      .slice(1);
+    for (const listener of listeners) {
+      const columns = listener.split(/\s+/);
+      const command = columns[0] ?? '';
+      const pid = Number.parseInt(columns[1] ?? '', 10);
+      if (!Number.isFinite(pid) || pid <= 0) continue;
       try {
-        const execName = execFileSync('ps', ['-o', 'comm=', '-p', String(pid)], {
-          encoding: 'utf8',
-          stdio: ['ignore', 'pipe', 'ignore'],
-        }).trim();
-        const baseName = execName.split('/').pop() ?? execName;
+        const baseName = command.split('/').pop() ?? command;
         if (baseName !== 'anvil') {
           console.warn(
-            `[anvil] port ${port} occupied by non-anvil pid ${pid} (${execName}), skipping`,
+            `[anvil] port ${port} occupied by non-anvil pid ${pid} (${command}), skipping`,
           );
           continue;
         }
-        process.kill(pid, 'SIGTERM');
+        killPidWithWait(pid);
       } catch {
         // process already dead or no permission
       }
@@ -163,6 +166,50 @@ function killAnvilProcessesOnPort(port: number): void {
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function killPidWithWait(pid: number): void {
+  try {
+    process.kill(pid, 'SIGTERM');
+  } catch {
+    return;
+  }
+
+  if (waitForPidExit(pid, SIGTERM_WAIT_MS)) {
+    return;
+  }
+
+  try {
+    process.kill(pid, 'SIGKILL');
+  } catch {
+    return;
+  }
+
+  waitForPidExit(pid, SIGKILL_WAIT_MS);
+}
+
+function waitForPidExit(pid: number, timeoutMs: number): boolean {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() <= deadline) {
+    if (!isPidAlive(pid)) {
+      return true;
+    }
+    sleepSync(PID_POLL_INTERVAL_MS);
+  }
+  return !isPidAlive(pid);
+}
+
+function isPidAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function sleepSync(ms: number): void {
+  Atomics.wait(SLEEP_BUFFER, 0, 0, ms);
 }
 
 function waitForReady(
