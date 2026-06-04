@@ -32,13 +32,22 @@ const ABI = parseAbi([
   'function balanceOf(address owner) view returns (uint256)',
   'function ownerOf(uint256 tokenId) view returns (address)',
   'function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)',
+  'function tokenByIndex(uint256 index) view returns (uint256)',
   'function transferFrom(address from, address to, uint256 tokenId)',
   'function totalSupply() view returns (uint256)',
   'function MAX_SUPPLY() view returns (uint256)',
+  'function supportsInterface(bytes4 interfaceId) view returns (bool)',
   'function royaltyInfo(uint256 tokenId, uint256 salePrice) view returns (address receiver, uint256 royaltyAmount)',
   'error MaxSupplyReached(uint256 maxSupply)',
   'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
 ]);
+
+const INTERFACE_IDS = {
+  erc165: '0x01ffc9a7',
+  erc721: '0x80ac58cd',
+  erc721Enumerable: '0x780e9d63',
+  erc2981: '0x2a55205a',
+} as const;
 
 function anvilChain(port: number) {
   return defineChain({
@@ -316,5 +325,48 @@ test.describe('mint-nft e2e (ERC721 mint flow)', () => {
 
     expect(receiver.toLowerCase()).toBe(account.address.toLowerCase());
     expect(royaltyAmount).toBe(parseEther('0.05'));
+  });
+
+  test('T-MN-007 supportsInterface が ERC165 / ERC721 / ERC721Enumerable / EIP-2981 を返す', async ({
+    anvilPort,
+  }) => {
+    const contract = await deployMintNft(anvilPort);
+    const { pub } = makeClients(anvilPort);
+
+    for (const interfaceId of Object.values(INTERFACE_IDS)) {
+      const supported = await pub.readContract({
+        address: contract,
+        abi: ABI,
+        functionName: 'supportsInterface',
+        args: [interfaceId],
+      });
+      expect(supported).toBe(true);
+    }
+  });
+
+  test('T-MN-008 batchMint の extreme count は MaxSupplyReached(uint256) で revert', async ({
+    anvilPort,
+  }) => {
+    const contract = await deployMintNft(anvilPort);
+    const { account, pub } = makeClients(anvilPort);
+    const maxSupply = await pub.readContract({
+      address: contract,
+      abi: ABI,
+      functionName: 'MAX_SUPPLY',
+    });
+    const extremeCount = (1n << 256n) - 1n;
+
+    try {
+      await pub.simulateContract({
+        account: account.address,
+        address: contract as Address,
+        abi: ABI,
+        functionName: 'batchMint',
+        args: [account.address, extremeCount],
+      });
+      throw new Error('expected MaxSupplyReached revert');
+    } catch (error) {
+      expectCustomError(error, 'MaxSupplyReached', [maxSupply]);
+    }
   });
 });

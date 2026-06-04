@@ -29,6 +29,7 @@ contract SimpleMarketplace {
     IMarketNft public immutable nft;
     mapping(uint256 => Listing) public listings;
     mapping(uint256 => Offer) public offers;
+    mapping(uint256 => uint256[]) public offersByToken;
     uint256 public nextOfferId;
 
     event Listed(uint256 indexed tokenId, address indexed seller, uint256 price);
@@ -117,6 +118,7 @@ contract SimpleMarketplace {
         if (listings[offer.tokenId].active) {
             delete listings[offer.tokenId];
         }
+        _invalidateOffersForToken(offer.tokenId, offerId);
 
         nft.transferFrom(msg.sender, offer.buyer, offer.tokenId);
         _payoutWithRoyalty(offer.tokenId, msg.sender, offer.amount);
@@ -134,6 +136,7 @@ contract SimpleMarketplace {
         if (payment < l.price) revert InsufficientPayment();
 
         delete listings[tokenId];
+        _invalidateOffersForToken(tokenId, 0);
         nft.transferFrom(l.seller, buyer, tokenId);
         _payoutWithRoyalty(tokenId, l.seller, l.price);
 
@@ -161,7 +164,25 @@ contract SimpleMarketplace {
             deadline: deadline,
             active: true
         });
+        offersByToken[tokenId].push(offerId);
         emit OfferMade(offerId, tokenId, msg.sender, amount, deadline);
+    }
+
+    function _invalidateOffersForToken(uint256 tokenId, uint256 excludedOfferId) internal {
+        uint256[] memory offerIds = offersByToken[tokenId];
+        delete offersByToken[tokenId];
+
+        for (uint256 i = 0; i < offerIds.length; i++) {
+            uint256 currentOfferId = offerIds[i];
+            if (currentOfferId == excludedOfferId) continue;
+
+            Offer memory offer = offers[currentOfferId];
+            if (!offer.active) continue;
+
+            delete offers[currentOfferId];
+            (bool refunded, ) = offer.buyer.call{value: offer.amount}("");
+            if (!refunded) revert PaymentFailed();
+        }
     }
 
     function _payoutWithRoyalty(uint256 tokenId, address seller, uint256 salePrice) internal {
