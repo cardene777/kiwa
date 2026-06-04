@@ -16,11 +16,17 @@ contract SimpleToken {
 
     error NotMinter();
 
-    constructor(string memory n, string memory s, uint256 initialSupply, address recipient) {
+    constructor(
+        string memory n,
+        string memory s,
+        uint256 initialSupply,
+        address recipient,
+        address minter_
+    ) {
         name = n;
         symbol = s;
         totalSupply = initialSupply;
-        minter = recipient;
+        minter = minter_;
         balanceOf[recipient] = initialSupply;
         emit Transfer(address(0), recipient, initialSupply);
     }

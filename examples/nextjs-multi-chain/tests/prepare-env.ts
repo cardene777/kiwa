@@ -17,6 +17,9 @@ const CHAIN_CONFIGS = [
 ] as const;
 
 const INITIAL_SUPPLY = 1_000n * 10n ** 18n;
+const MINTER_KEY: Hex =
+  '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
+const MINTER = privateKeyToAccount(MINTER_KEY).address;
 const PROBE_USER = privateKeyToAccount(
   '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
 ).address;
@@ -56,7 +59,7 @@ try {
         const hash = await wallet.deployContract({
           abi: artifact.abi as never,
           bytecode: artifact.bytecode.object,
-          args: [`Token-${config.label}`, config.label, INITIAL_SUPPLY, account.address],
+          args: [`Token-${config.label}`, config.label, INITIAL_SUPPLY, account.address, MINTER],
         });
         const receipt = await publicClient.waitForTransactionReceipt({ hash });
         if (!receipt.contractAddress) throw new Error(`deploy failed on chain ${config.id}`);
@@ -85,7 +88,13 @@ try {
       const hash = await wallet.deployContract({
         abi: artifact.abi as never,
         bytecode: artifact.bytecode.object,
-        args: [`Token-${mainnetConfig.label}`, mainnetConfig.label, INITIAL_SUPPLY, account.address],
+        args: [
+          `Token-${mainnetConfig.label}`,
+          mainnetConfig.label,
+          INITIAL_SUPPLY,
+          account.address,
+          MINTER,
+        ],
       });
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
       if (!receipt.contractAddress) {

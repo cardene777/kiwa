@@ -17,8 +17,8 @@ const MAINNET_PORT = 8551;
 const OPTIMISM_PORT = 8552;
 const MAINNET_CHAIN_ID = 1;
 const OPTIMISM_CHAIN_ID = 10;
-const OPERATOR_KEY: Hex =
-  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+const MINTER_KEY: Hex =
+  '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
 
 const SIMPLE_TOKEN_ABI = parseAbi([
   'function balanceOf(address owner) view returns (uint256)',
@@ -67,9 +67,9 @@ function publicClient(chainId: number, port: number) {
   return createPublicClient({ chain: makeChain(chainId, port), transport: http() });
 }
 
-function walletClient(chainId: number, port: number) {
+function minterWalletClient(chainId: number, port: number) {
   return createWalletClient({
-    account: privateKeyToAccount(OPERATOR_KEY),
+    account: privateKeyToAccount(MINTER_KEY),
     chain: makeChain(chainId, port),
     transport: http(),
   });
@@ -92,7 +92,7 @@ async function mintOnChain(
   amount: bigint,
 ) {
   const pub = publicClient(chainId, port);
-  const hash = await walletClient(chainId, port).writeContract({
+  const hash = await minterWalletClient(chainId, port).writeContract({
     address: token,
     abi: SIMPLE_TOKEN_ABI,
     functionName: 'mint',

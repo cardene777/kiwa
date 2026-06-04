@@ -171,6 +171,35 @@ async function userBridgeBurn(amount: bigint, l1Recipient: Address) {
   await pub.waitForTransactionReceipt({ hash });
 }
 
+async function seedRoundTripLiquidity(amount: bigint, recipient: Address) {
+  const { sourceToken, sourceBridge } = getBridgeContracts();
+  const l2Balance = await readL2Balance(recipient);
+  const l1BridgeBalance = await readL1Balance(sourceBridge);
+  if (l2Balance >= amount && l1BridgeBalance >= amount) return;
+
+  const l1Pub = l1PublicClient();
+  const l1Wallet = l1WalletClient();
+  const l1NonceBefore = await readL1Nonce();
+
+  const approveHash = await l1Wallet.writeContract({
+    address: sourceToken,
+    abi: SIMPLE_ERC20_ABI,
+    functionName: 'approve',
+    args: [sourceBridge, amount],
+  });
+  await l1Pub.waitForTransactionReceipt({ hash: approveHash });
+
+  const lockHash = await l1Wallet.writeContract({
+    address: sourceBridge,
+    abi: SOURCE_BRIDGE_ABI,
+    functionName: 'bridgeLock',
+    args: [amount, recipient],
+  });
+  await l1Pub.waitForTransactionReceipt({ hash: lockHash });
+
+  await operatorRelayMint(l1NonceBefore, recipient, amount);
+}
+
 async function readL1Balance(addr: Address): Promise<bigint> {
   const { sourceToken } = getBridgeContracts();
   return (await l1PublicClient().readContract({
@@ -457,43 +486,35 @@ test.describe('Next.js Bridge (ERC20 cross-chain lock/mint/burn) e2e', () => {
 
   test('T-BR-007 replay attack protection', async () => {
     const operator = privateKeyToAccount(OPERATOR_KEY);
-    const { sourceToken, sourceBridge } = getBridgeContracts();
-    const replayNonce = 777n;
+    const { sourceBridge } = getBridgeContracts();
     const l1Pub = l1PublicClient();
-    const l1Wallet = l1WalletClient();
-    const balanceBefore = await readL1Balance(operator.address);
+    await seedRoundTripLiquidity(BRIDGE_AMOUNT, operator.address);
 
-    const approveHash = await l1Wallet.writeContract({
-      address: sourceToken,
-      abi: SIMPLE_ERC20_ABI,
-      functionName: 'approve',
-      args: [sourceBridge, BRIDGE_AMOUNT],
-    });
-    await l1Pub.waitForTransactionReceipt({ hash: approveHash });
+    const balanceBeforeUnlock = await readL1Balance(operator.address);
+    const nonceBefore = await readL2BurnNonce();
 
-    const lockHash = await l1Wallet.writeContract({
-      address: sourceBridge,
-      abi: SOURCE_BRIDGE_ABI,
-      functionName: 'bridgeLock',
-      args: [BRIDGE_AMOUNT, operator.address],
-    });
-    await l1Pub.waitForTransactionReceipt({ hash: lockHash });
+    await userBridgeBurn(BRIDGE_AMOUNT, operator.address);
 
-    await operatorUnlock(replayNonce, operator.address, BRIDGE_AMOUNT);
-    expect(await readL1Unlocked(replayNonce)).toBe(true);
+    const nonceAfter = await readL2BurnNonce();
+    expect(nonceAfter - nonceBefore).toBe(1n);
+
+    const burnedNonce = nonceAfter - 1n;
+    await operatorUnlock(burnedNonce, operator.address, BRIDGE_AMOUNT);
+
+    expect(await readL1Unlocked(burnedNonce)).toBe(true);
+    expect(await readL1Balance(operator.address)).toBe(balanceBeforeUnlock + BRIDGE_AMOUNT);
 
     await expectRevert(
       l1Pub.simulateContract({
         address: sourceBridge,
         abi: SOURCE_BRIDGE_ABI,
         functionName: 'unlock',
-        args: [replayNonce, operator.address, BRIDGE_AMOUNT],
+        args: [burnedNonce, operator.address, BRIDGE_AMOUNT],
         account: operator.address,
       }),
       'AlreadyUnlocked',
     );
-    expect(await readL1Unlocked(replayNonce)).toBe(true);
-    expect(await readL1Balance(operator.address)).toBe(balanceBefore);
+    expect(await readL1Unlocked(burnedNonce)).toBe(true);
   });
 
   test('T-BR-008 L2→L1 reverse path', async ({ page, dappE2e }) => {
@@ -501,6 +522,10 @@ test.describe('Next.js Bridge (ERC20 cross-chain lock/mint/burn) e2e', () => {
     await page.waitForLoadState('networkidle', { timeout: 30_000 });
     await ensureConnected(page);
     await dappE2e.waitForRpcIdle();
+    await dappE2e.setChainRegistry?.([
+      { chainId: '0x1', rpcUrls: [`http://127.0.0.1:${L1_PORT}`] },
+      { chainId: '0xa', rpcUrls: [`http://127.0.0.1:${L2_PORT}`] },
+    ]);
     await waitLoaded(page);
 
     const operator = privateKeyToAccount(OPERATOR_KEY);
@@ -522,9 +547,19 @@ test.describe('Next.js Bridge (ERC20 cross-chain lock/mint/burn) e2e', () => {
     );
 
     const burnNonceBefore = await readL2BurnNonce();
-    await userBridgeBurn(BRIDGE_AMOUNT, operator.address);
+    await page.getByTestId('switch-l2-button').click();
+    await dappE2e.waitForRpcIdle();
+    await expect(page.getByTestId('current-chain')).toHaveText(`chain: ${L2_CHAIN_ID}`, {
+      timeout: 15_000,
+    }).catch(() => undefined);
+    await page.getByTestId('burn-button').click();
+    await dappE2e.waitForRpcIdle();
+    await page.waitForTimeout(1500);
 
-    await operatorUnlock(burnNonceBefore, operator.address, BRIDGE_AMOUNT);
+    const burnNonceAfter = await readL2BurnNonce();
+    expect(burnNonceAfter - burnNonceBefore).toBe(1n);
+
+    await operatorUnlock(burnNonceAfter - 1n, operator.address, BRIDGE_AMOUNT);
 
     await expect(page.getByTestId('source-balance')).toHaveText(
       `sourceBalance (L1): ${beforeSource}`,
