@@ -1,6 +1,150 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import {
+  BaseError,
+  ContractFunctionRevertedError,
+  createPublicClient,
+  createWalletClient,
+  defineChain,
+  encodeFunctionData,
+  http,
+  parseAbi,
+  type Address,
+} from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
 
 const INITIAL_TOKEN = 100n * 10n ** 18n;
+const OWNER_PK =
+  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
+const SMALL_VOTER_PK =
+  '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d' as const;
+const QUORUM_VOTES = 4n * 10n ** 18n;
+const SMALL_VOTE = 3n * 10n ** 18n;
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const exampleRoot = resolve(__dirname, '..');
+
+const DAO_ABI = parseAbi([
+  'function propose(string description) returns (uint256 id)',
+  'function propose(address target, uint256 value, bytes data, string description) returns (uint256 id)',
+  'function castVote(uint256 id, uint8 support) returns (uint256 weight)',
+  'function queueProposal(uint256 id)',
+  'function executeProposal(uint256 id)',
+  'function proposalCount() view returns (uint256)',
+  'function proposalView(uint256 id) view returns (address proposer, uint256 startTime, uint256 endTime, uint256 forVotes, uint256 againstVotes, uint256 abstainVotes)',
+  'function proposalExecutionView(uint256 id) view returns (address target, uint256 value, uint256 readyAt, bool queued, bool executed)',
+  'function state(uint256 id) view returns (uint8)',
+  'function quorumVotes() view returns (uint256)',
+  'error VotingClosed()',
+  'error QuorumNotReached(uint256 voted, uint256 required)',
+  'error TimelockNotElapsed(uint256 readyAt, uint256 currentTime)',
+]);
+
+const TOKEN_ABI = parseAbi([
+  'function transfer(address to, uint256 value) returns (bool)',
+  'function delegate(address to)',
+]);
+
+const TARGET_ABI = parseAbi([
+  'function setValue(uint256 value)',
+  'function lastValue() view returns (uint256)',
+  'function executeCount() view returns (uint256)',
+]);
+
+function anvilChain(port: number) {
+  return defineChain({
+    id: 31337,
+    name: 'Anvil',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: { default: { http: [`http://127.0.0.1:${port}`] } },
+  });
+}
+
+function readEnv() {
+  const envPath = resolve(exampleRoot, '.env.local');
+  return Object.fromEntries(
+    readFileSync(envPath, 'utf8')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith('#'))
+      .map((line) => {
+        const idx = line.indexOf('=');
+        return [line.slice(0, idx), line.slice(idx + 1)];
+      }),
+  ) as Record<string, string>;
+}
+
+function makeClients(port: number, privateKey: typeof OWNER_PK | typeof SMALL_VOTER_PK) {
+  const account = privateKeyToAccount(privateKey);
+  return {
+    account,
+    wallet: createWalletClient({
+      account,
+      chain: anvilChain(port),
+      transport: http(),
+    }),
+    pub: createPublicClient({ chain: anvilChain(port), transport: http() }),
+  };
+}
+
+function expectCustomError(
+  error: unknown,
+  errorName: string,
+  expectedArgs?: readonly unknown[],
+): void {
+  if (!(error instanceof BaseError)) throw error;
+  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
+  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
+  expect(reverted.data?.errorName).toBe(errorName);
+  if (expectedArgs) {
+    expect(reverted.data?.args).toEqual(expectedArgs);
+  }
+}
+
+async function rpc(port: number, method: string, params: unknown[] = []): Promise<unknown> {
+  const pub = createPublicClient({ chain: anvilChain(port), transport: http() });
+  return await (
+    pub as unknown as {
+      request: (args: { method: string; params: unknown[] }) => Promise<unknown>;
+    }
+  ).request({ method, params });
+}
+
+async function setNextBlockTimestamp(port: number, timestamp: bigint): Promise<void> {
+  await rpc(port, 'anvil_setNextBlockTimestamp', [Number(timestamp)]);
+  await rpc(port, 'evm_mine');
+}
+
+async function createSimpleProposal(port: number) {
+  const env = readEnv();
+  const { account, wallet, pub } = makeClients(port, OWNER_PK);
+  const dao = env.NEXT_PUBLIC_DAO as Address;
+  const voteToken = env.NEXT_PUBLIC_VOTE_TOKEN as Address;
+
+  const delegateHash = await wallet.writeContract({
+    address: voteToken,
+    abi: TOKEN_ABI,
+    functionName: 'delegate',
+    args: [account.address],
+  });
+  await pub.waitForTransactionReceipt({ hash: delegateHash });
+
+  const beforeCount = await pub.readContract({
+    address: dao,
+    abi: DAO_ABI,
+    functionName: 'proposalCount',
+  });
+  const proposeHash = await wallet.writeContract({
+    address: dao,
+    abi: DAO_ABI,
+    functionName: 'propose',
+    args: [`Proposal #${Date.now()}`],
+  });
+  await pub.waitForTransactionReceipt({ hash: proposeHash });
+  return { dao, voteToken, proposalId: beforeCount + 1n, pub, wallet, account };
+}
 
 async function ensureConnected(page: import('@playwright/test').Page) {
   const connectBtn = page.getByRole('button', { name: /connect wallet/i });
@@ -114,7 +258,7 @@ test.describe('Next.js DAO Governor propose/vote e2e', () => {
     await expect(page.getByTestId('abstain-votes')).toHaveText('abstainVotes: 0');
   });
 
-  test('T-DAO-005 Vote Against / Abstain でも対応する counter が増える', async ({
+  test('Vote Against / Abstain でも対応する counter が増える', async ({
     page,
     dappE2e,
   }) => {
@@ -139,5 +283,212 @@ test.describe('Next.js DAO Governor propose/vote e2e', () => {
       timeout: 15_000,
     });
     await expect(page.getByTestId('for-votes')).toHaveText('forVotes: 0');
+  });
+
+  test('T-DAO-005 quorum 未達 proposal は executeProposal が QuorumNotReached(uint256,uint256) で revert', async ({
+    anvilPort,
+  }) => {
+    const env = readEnv();
+    const dao = env.NEXT_PUBLIC_DAO as Address;
+    const voteToken = env.NEXT_PUBLIC_VOTE_TOKEN as Address;
+    const owner = makeClients(anvilPort, OWNER_PK);
+    const smallVoter = makeClients(anvilPort, SMALL_VOTER_PK);
+
+    const transferHash = await owner.wallet.writeContract({
+      address: voteToken,
+      abi: TOKEN_ABI,
+      functionName: 'transfer',
+      args: [smallVoter.account.address, SMALL_VOTE],
+    });
+    await owner.pub.waitForTransactionReceipt({ hash: transferHash });
+
+    const delegateHash = await smallVoter.wallet.writeContract({
+      address: voteToken,
+      abi: TOKEN_ABI,
+      functionName: 'delegate',
+      args: [smallVoter.account.address],
+    });
+    await smallVoter.pub.waitForTransactionReceipt({ hash: delegateHash });
+
+    const beforeCount = await smallVoter.pub.readContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'proposalCount',
+    });
+    const proposeHash = await smallVoter.wallet.writeContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'propose',
+      args: ['low turnout proposal'],
+    });
+    await smallVoter.pub.waitForTransactionReceipt({ hash: proposeHash });
+    const proposalId = beforeCount + 1n;
+
+    const voteHash = await smallVoter.wallet.writeContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'castVote',
+      args: [proposalId, 1],
+    });
+    await smallVoter.pub.waitForTransactionReceipt({ hash: voteHash });
+
+    const [, , endTime] = await smallVoter.pub.readContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'proposalView',
+      args: [proposalId],
+    });
+    await setNextBlockTimestamp(anvilPort, endTime + 1n);
+
+    try {
+      await smallVoter.pub.simulateContract({
+        account: smallVoter.account.address,
+        address: dao,
+        abi: DAO_ABI,
+        functionName: 'executeProposal',
+        args: [proposalId],
+      });
+      throw new Error('expected QuorumNotReached revert');
+    } catch (error) {
+      expectCustomError(error, 'QuorumNotReached', [SMALL_VOTE, QUORUM_VOTES]);
+    }
+  });
+
+  test('T-DAO-006 deadline 超過後の castVote は VotingClosed() で revert', async ({ anvilPort }) => {
+    const { dao, proposalId, pub, account } = await createSimpleProposal(anvilPort);
+
+    const [, , endTime] = await pub.readContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'proposalView',
+      args: [proposalId],
+    });
+    await setNextBlockTimestamp(anvilPort, endTime + 1n);
+
+    try {
+      await pub.simulateContract({
+        account: account.address,
+        address: dao,
+        abi: DAO_ABI,
+        functionName: 'castVote',
+        args: [proposalId, 1],
+      });
+      throw new Error('expected VotingClosed revert');
+    } catch (error) {
+      expectCustomError(error, 'VotingClosed');
+    }
+  });
+
+  test('T-DAO-007 queue 後 timelock 経過で execute でき、早期 execute は TimelockNotElapsed で revert', async ({
+    anvilPort,
+  }) => {
+    const env = readEnv();
+    const dao = env.NEXT_PUBLIC_DAO as Address;
+    const target = env.NEXT_PUBLIC_DAO_EXECUTION_TARGET as Address;
+    const { account, wallet, pub } = makeClients(anvilPort, OWNER_PK);
+    const voteToken = env.NEXT_PUBLIC_VOTE_TOKEN as Address;
+
+    const delegateHash = await wallet.writeContract({
+      address: voteToken,
+      abi: TOKEN_ABI,
+      functionName: 'delegate',
+      args: [account.address],
+    });
+    await pub.waitForTransactionReceipt({ hash: delegateHash });
+
+    const beforeCount = await pub.readContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'proposalCount',
+    });
+    const setValueData = encodeFunctionData({
+      abi: TARGET_ABI,
+      functionName: 'setValue',
+      args: [42n],
+    });
+    const proposeHash = await wallet.writeContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'propose',
+      args: [target, 0n, setValueData, 'execute target'],
+    });
+    await pub.waitForTransactionReceipt({ hash: proposeHash });
+    const proposalId = beforeCount + 1n;
+
+    const voteHash = await wallet.writeContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'castVote',
+      args: [proposalId, 1],
+    });
+    await pub.waitForTransactionReceipt({ hash: voteHash });
+
+    const [, , endTime] = await pub.readContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'proposalView',
+      args: [proposalId],
+    });
+    await setNextBlockTimestamp(anvilPort, endTime + 1n);
+
+    const queueHash = await wallet.writeContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'queueProposal',
+      args: [proposalId],
+    });
+    await pub.waitForTransactionReceipt({ hash: queueHash });
+
+    const [, , readyAt] = await pub.readContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'proposalExecutionView',
+      args: [proposalId],
+    });
+    const currentTime = (await pub.getBlock()).timestamp;
+
+    try {
+      await pub.simulateContract({
+        account: account.address,
+        address: dao,
+        abi: DAO_ABI,
+        functionName: 'executeProposal',
+        args: [proposalId],
+      });
+      throw new Error('expected TimelockNotElapsed revert');
+    } catch (error) {
+      expectCustomError(error, 'TimelockNotElapsed', [readyAt, currentTime]);
+    }
+
+    await setNextBlockTimestamp(anvilPort, readyAt + 1n);
+
+    const executeHash = await wallet.writeContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'executeProposal',
+      args: [proposalId],
+    });
+    await pub.waitForTransactionReceipt({ hash: executeHash });
+
+    const lastValue = await pub.readContract({
+      address: target,
+      abi: TARGET_ABI,
+      functionName: 'lastValue',
+    });
+    const executeCount = await pub.readContract({
+      address: target,
+      abi: TARGET_ABI,
+      functionName: 'executeCount',
+    });
+    const state = await pub.readContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'state',
+      args: [proposalId],
+    });
+
+    expect(lastValue).toBe(42n);
+    expect(executeCount).toBeGreaterThanOrEqual(1n);
+    expect(state).toBe(5);
   });
 });
