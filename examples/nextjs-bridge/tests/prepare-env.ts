@@ -1,7 +1,12 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { killAnvilFromPidFile, runE2EPrepareEnv } from '@dapp-e2e/core';
+import {
+  killAnvilFromPidFile,
+  runE2EPrepareEnv,
+  writePidEntry,
+  type PidEntry,
+} from '@dapp-e2e/core';
 import type { Hex } from 'viem';
 
 const L1_PORT = 8554;
@@ -124,12 +129,28 @@ try {
     },
   });
 
-  const l1Pid = readFileSync(l1PidFilePath, 'utf8').trim();
-  const l2Pid = readFileSync(l2PidFilePath, 'utf8').trim();
-  writeFileSync(mergedPidFilePath, `${l1Pid}\n${l2Pid}\n`, 'utf8');
+  writePidEntry(mergedPidFilePath, readPidEntry(l1PidFilePath));
+  writePidEntry(mergedPidFilePath, readPidEntry(l2PidFilePath));
 } catch (error) {
   killAnvilFromPidFile(l1PidFilePath);
   killAnvilFromPidFile(l2PidFilePath);
   killAnvilFromPidFile(mergedPidFilePath);
   throw error;
+}
+
+function readPidEntry(pidFilePath: string): PidEntry {
+  const line = readFileSync(pidFilePath, 'utf8')
+    .split('\n')
+    .map((value) => value.trim())
+    .find((value) => value.length > 0);
+  if (!line) {
+    throw new Error(`PID file is empty: ${pidFilePath}`);
+  }
+
+  const parsed = JSON.parse(line) as PidEntry;
+  if (!Number.isInteger(parsed.pid) || parsed.pid <= 0) {
+    throw new Error(`Invalid PID entry in ${pidFilePath}`);
+  }
+
+  return parsed;
 }

@@ -40,14 +40,24 @@ export const wagmiConfig = createConfig({
   ssr: true,
 });
 
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as `0x${string}`;
+
 function requireEnv(value: string | undefined, name: string): `0x${string}` {
-  if (!value) {
+  if (value) {
+    return value as `0x${string}`;
+  }
+
+  if (process.env.NEXT_PUBLIC_RUNTIME_MODE === 'test') {
     throw new Error(
       `${name} is required (set by tests/prepare-env.ts before pnpm build). ` +
         `Did webServer.command run prepare-env first?`,
     );
   }
-  return value as `0x${string}`;
+
+  console.warn(
+    `[wagmi] ${name} is not set; using zero-address fallback because NEXT_PUBLIC_RUNTIME_MODE !== 'test'.`,
+  );
+  return ZERO_ADDRESS;
 }
 
 export const SOURCE_TOKEN = requireEnv(

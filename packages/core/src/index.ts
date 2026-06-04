@@ -22,11 +22,13 @@ export {
 export {
   runE2EPrepareEnv,
   killAnvilFromPidFile,
+  writePidEntry,
   type PrepareEnvDeployContext,
   type PrepareEnvDeployFn,
   type PrepareEnvOptions,
   type PrepareEnvWalletClient,
   type PrepareEnvPublicClient,
+  type PidEntry,
 } from './e2e-prepare-env.js';
 export { createInjectorScript } from './injector-script.js';
 export { dappE2eTest } from './fixture.js';

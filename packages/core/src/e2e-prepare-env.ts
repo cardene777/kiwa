@@ -1,4 +1,13 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import {
   createPublicClient,
@@ -18,6 +27,10 @@ const DEFAULT_PRIVATE_KEY: Hex =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const DEFAULT_PORT = 8545;
 const DEFAULT_CHAIN_ID = 31337;
+const PID_POLL_INTERVAL_MS = 100;
+const SIGTERM_WAIT_MS = 2_000;
+const SIGKILL_WAIT_MS = 3_000;
+const SLEEP_BUFFER = new Int32Array(new SharedArrayBuffer(4));
 
 export type PrepareEnvWalletClient = WalletClient<HttpTransport, Chain, PrivateKeyAccount>;
 export type PrepareEnvPublicClient = PublicClient<HttpTransport, Chain>;
@@ -49,6 +62,13 @@ export interface PrepareEnvOptions {
   deploy: PrepareEnvDeployFn;
 }
 
+export interface PidEntry {
+  pid: number;
+  port?: number;
+  startedAt?: string;
+  command?: string;
+}
+
 /**
  * Prepare anvil + contracts + .env.local before Next.js build.
  * Designed to be invoked from `playwright.config.ts` webServer.command as
@@ -72,6 +92,12 @@ export async function runE2EPrepareEnv(opts: PrepareEnvOptions): Promise<void> {
     detached: true,
     killExistingOnPort: true,
   });
+  const handleDetails = readProcessDetails(handle.pid);
+  const startedAt =
+    handleDetails && Number.isFinite(Date.parse(handleDetails.startedAt))
+      ? new Date(Date.parse(handleDetails.startedAt)).toISOString()
+      : new Date().toISOString();
+  const command = handleDetails?.command.split('/').pop() ?? 'anvil';
 
   try {
     const account = privateKeyToAccount(privateKey);
@@ -94,6 +120,7 @@ export async function runE2EPrepareEnv(opts: PrepareEnvOptions): Promise<void> {
     });
 
     const envContent = Object.entries({
+      NEXT_PUBLIC_RUNTIME_MODE: 'test',
       NEXT_PUBLIC_ANVIL_PORT: String(handle.port),
       ...deployEnv,
     })
@@ -109,7 +136,12 @@ export async function runE2EPrepareEnv(opts: PrepareEnvOptions): Promise<void> {
       rmSync(nextCacheDir, { recursive: true, force: true });
     }
 
-    writePidFile(pidFilePath, handle.pid);
+    writePidEntry(pidFilePath, {
+      pid: handle.pid,
+      port: handle.port,
+      startedAt,
+      command,
+    });
   } catch (error) {
     // deploy failure: kill anvil so we do not leak a process before exit
     await handle.stop();
@@ -123,31 +155,30 @@ export async function runE2EPrepareEnv(opts: PrepareEnvOptions): Promise<void> {
  * before respawn).
  */
 export function killAnvilFromPidFile(pidFilePath: string): void {
-  if (!existsSync(pidFilePath)) return;
-  for (const pid of readPidsFromFile(pidFilePath)) {
-    if (!isPidAlive(pid)) continue;
-    try {
-      process.kill(pid, 'SIGTERM');
-    } catch {
-      // already dead
-    }
-  }
-  try {
-    unlinkSync(pidFilePath);
-  } catch {
-    // already removed
-  }
+  killPidEntriesFromFile(pidFilePath);
 }
 
 function killExistingFromPidFile(pidFilePath: string): void {
+  killPidEntriesFromFile(pidFilePath);
+}
+
+export function writePidEntry(pidFilePath: string, entry: PidEntry): void {
+  const dir = dirname(pidFilePath);
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+  appendFileSync(pidFilePath, `${JSON.stringify(entry)}\n`, 'utf8');
+}
+
+function killPidEntriesFromFile(pidFilePath: string): void {
   if (!existsSync(pidFilePath)) return;
-  for (const pid of readPidsFromFile(pidFilePath)) {
-    if (!isPidAlive(pid)) continue;
-    try {
-      process.kill(pid, 'SIGTERM');
-    } catch {
-      // already dead
+  for (const entry of readPidEntriesFromFile(pidFilePath)) {
+    if (!isPidAlive(entry.pid)) continue;
+    if (!matchesPidEntry(entry)) {
+      console.warn(`[anvil] PID file stale or hijacked, skipping kill for pid ${entry.pid}`);
+      continue;
     }
+    killPidWithWait(entry.pid);
   }
   try {
     unlinkSync(pidFilePath);
@@ -156,25 +187,53 @@ function killExistingFromPidFile(pidFilePath: string): void {
   }
 }
 
-function readPidsFromFile(pidFilePath: string): number[] {
+function readPidEntriesFromFile(pidFilePath: string): PidEntry[] {
   try {
     return readFileSync(pidFilePath, 'utf8')
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
-      .map((line) => Number.parseInt(line, 10))
-      .filter((pid) => Number.isFinite(pid) && pid > 0);
+      .map(parsePidEntryLine)
+      .filter((entry): entry is PidEntry => entry !== null);
   } catch {
     return [];
   }
 }
 
-function writePidFile(pidFilePath: string, pid: number): void {
-  const dir = dirname(pidFilePath);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
+function parsePidEntryLine(line: string): PidEntry | null {
+  try {
+    const parsed = JSON.parse(line) as unknown;
+    if (typeof parsed === 'number') {
+      return Number.isInteger(parsed) && parsed > 0 ? { pid: parsed } : null;
+    }
+    if (typeof parsed === 'object' && parsed !== null) {
+      const pid = Number(
+        'pid' in parsed ? (parsed as { pid?: unknown }).pid : Number.NaN,
+      );
+      if (!Number.isInteger(pid) || pid <= 0) return null;
+      const portValue = 'port' in parsed ? (parsed as { port?: unknown }).port : undefined;
+      const startedAtValue =
+        'startedAt' in parsed ? (parsed as { startedAt?: unknown }).startedAt : undefined;
+      const commandValue =
+        'command' in parsed ? (parsed as { command?: unknown }).command : undefined;
+      const entry: PidEntry = { pid };
+      if (typeof portValue === 'number') {
+        entry.port = portValue;
+      }
+      if (typeof startedAtValue === 'string') {
+        entry.startedAt = startedAtValue;
+      }
+      if (typeof commandValue === 'string') {
+        entry.command = commandValue;
+      }
+      return entry;
+    }
+  } catch {
+    // fall through to legacy raw PID parsing
   }
-  writeFileSync(pidFilePath, String(pid), 'utf8');
+
+  const pid = Number.parseInt(line, 10);
+  return Number.isInteger(pid) && pid > 0 ? { pid } : null;
 }
 
 function isPidAlive(pid: number): boolean {
@@ -184,6 +243,93 @@ function isPidAlive(pid: number): boolean {
   } catch {
     return false;
   }
+}
+
+function matchesPidEntry(entry: PidEntry): boolean {
+  const details = readProcessDetails(entry.pid);
+  if (!details) return false;
+
+  const actualCommand = details.command.split('/').pop() ?? details.command;
+  if (actualCommand !== 'anvil') {
+    return false;
+  }
+
+  if (entry.command) {
+    const expectedCommand = entry.command.split('/').pop() ?? entry.command;
+    if (expectedCommand !== actualCommand) {
+      return false;
+    }
+  }
+
+  if (!entry.startedAt) {
+    return true;
+  }
+
+  const expectedStartedAtMs = Date.parse(entry.startedAt);
+  const actualStartedAtMs = Date.parse(details.startedAt);
+  if (!Number.isFinite(expectedStartedAtMs) || !Number.isFinite(actualStartedAtMs)) {
+    return false;
+  }
+
+  return Math.abs(expectedStartedAtMs - actualStartedAtMs) < 1_000;
+}
+
+function readProcessDetails(pid: number): { startedAt: string; command: string } | null {
+  try {
+    const result = execFileSync('ps', ['-o', 'lstart=', '-o', 'comm=', '-p', String(pid)], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .trim()
+      .split('\n')
+      .find((line) => line.trim().length > 0);
+    if (!result) return null;
+
+    const match = result.match(/^(.*?)\s+(\S+)$/);
+    if (!match) return null;
+
+    return {
+      startedAt: match[1]!.trim(),
+      command: match[2]!.trim(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function killPidWithWait(pid: number): void {
+  try {
+    process.kill(pid, 'SIGTERM');
+  } catch {
+    return;
+  }
+
+  if (waitForPidExit(pid, SIGTERM_WAIT_MS)) {
+    return;
+  }
+
+  try {
+    process.kill(pid, 'SIGKILL');
+  } catch {
+    return;
+  }
+
+  waitForPidExit(pid, SIGKILL_WAIT_MS);
+}
+
+function waitForPidExit(pid: number, timeoutMs: number): boolean {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() <= deadline) {
+    if (!isPidAlive(pid)) {
+      return true;
+    }
+    sleepSync(PID_POLL_INTERVAL_MS);
+  }
+  return !isPidAlive(pid);
+}
+
+function sleepSync(ms: number): void {
+  Atomics.wait(SLEEP_BUFFER, 0, 0, ms);
 }
 
 export type { AnvilHandle };
