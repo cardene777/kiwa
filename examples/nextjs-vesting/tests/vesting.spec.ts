@@ -414,7 +414,7 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
     expect(farFuture).toBe(VEST_TOTAL);
   });
 
-  test('T-VS-008 vesting schedule を mutate する update 系 selector が ABI に存在しない', async () => {
+  test('T-VS-008 ABI 上の non-view 関数が allowlist と完全一致し新しい mutator を検知できる', async () => {
     const fs = await import('node:fs');
     const path = await import('node:path');
     const url = await import('node:url');
@@ -426,40 +426,26 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
         'utf8',
       ),
     ) as {
-      abi: Array<{ type: string; name?: string }>;
-      methodIdentifiers?: Record<string, string>;
+      abi: Array<{
+        type: string;
+        name?: string;
+        stateMutability?: string;
+        inputs?: Array<{ type: string }>;
+      }>;
     };
 
-    const forbiddenNames = new Set([
-      'updateSchedule',
-      'setSchedule',
-      'setCliff',
-      'setDuration',
-      'setBeneficiary',
-      'setAmount',
-      'updateBeneficiary',
-      'updateAmount',
-    ]);
-    const forbiddenSignatures = [
-      'updateSchedule(uint64,uint64,address,uint256)',
-      'updateSchedule(address,uint64,uint64,uint256)',
-      'setSchedule(uint64,uint64,address,uint256)',
-      'setCliff(uint64)',
-      'setDuration(uint64)',
-      'setBeneficiary(address)',
-      'setAmount(uint256)',
-      'updateBeneficiary(address)',
-      'updateAmount(uint256)',
-    ] as const;
+    const allowedMutators = ['release()'];
+    const abiMutators = artifact.abi
+      .filter(
+        (entry) =>
+          entry.type === 'function' &&
+          entry.name &&
+          entry.stateMutability !== 'view' &&
+          entry.stateMutability !== 'pure',
+      )
+      .map((entry) => `${entry.name}(${(entry.inputs ?? []).map((input) => input.type).join(',')})`)
+      .sort();
 
-    const abiMutators = artifact.abi.filter(
-      (entry) => entry.type === 'function' && entry.name && forbiddenNames.has(entry.name),
-    );
-
-    expect(abiMutators).toEqual([]);
-
-    for (const signature of forbiddenSignatures) {
-      expect(artifact.methodIdentifiers?.[signature]).toBeUndefined();
-    }
+    expect(abiMutators).toEqual(allowedMutators);
   });
 });

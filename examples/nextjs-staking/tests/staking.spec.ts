@@ -6,6 +6,7 @@ import {
   ContractFunctionRevertedError,
   createPublicClient,
   createWalletClient,
+  decodeErrorResult,
   defineChain,
   http,
   type Hex,
@@ -16,10 +17,13 @@ import { test, expect } from './fixture';
 const ANVIL_PORT = 8545;
 const STAKE_AMOUNT = 100n * 10n ** 18n;
 const SMALL_STAKE_AMOUNT = 1n;
+const TOP_UP_AMOUNT = 1n * 10n ** 18n;
+const POOL_REWARD = 10000n * 10n ** 18n;
 const TEN_YEARS = 315_360_000n;
 const ONE_DAY = 24n * 60n * 60n;
 const EIGHT_DAYS = 8n * ONE_DAY;
 const PENALTY_AMOUNT = (STAKE_AMOUNT * 10n) / 100n;
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as const;
 const ALICE_PK =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
 const BOB_PK =
@@ -99,11 +103,23 @@ const STAKING_ABI = [
     type: 'function',
   },
   {
+    inputs: [{ name: 'user', type: 'address' }],
+    name: 'stakeStartedAt',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       { name: 'available', type: 'uint256' },
       { name: 'required', type: 'uint256' },
     ],
     name: 'InsufficientAllowance',
+    type: 'error',
+  },
+  {
+    inputs: [],
+    name: 'InvalidController',
     type: 'error',
   },
 ] as const;
@@ -154,6 +170,24 @@ function expectCustomError(
   }
 }
 
+function expectConstructorCustomError(
+  error: unknown,
+  abi: readonly unknown[],
+  errorName: string,
+  expectedArgs?: readonly unknown[],
+): void {
+  const match = /custom error (0x[a-fA-F0-9]+)/.exec(String(error));
+  if (!match) throw error;
+  const decoded = decodeErrorResult({
+    abi: abi as never,
+    data: match[1] as Hex,
+  });
+  expect(decoded.errorName).toBe(errorName);
+  if (expectedArgs) {
+    expect(decoded.args).toEqual(expectedArgs);
+  }
+}
+
 function readRuntimeEnv() {
   const envLocal = readFileSync(resolve(__dirname, '..', '.env.local'), 'utf8');
   const pairs = envLocal
@@ -179,6 +213,10 @@ function readRuntimeEnv() {
     staking: env.NEXT_PUBLIC_STAKING as `0x${string}`,
     controller: env.NEXT_PUBLIC_CONTROLLER as `0x${string}`,
   };
+}
+
+function readArtifact<T>(relativePath: string): T {
+  return JSON.parse(readFileSync(resolve(__dirname, '..', relativePath), 'utf8')) as T;
 }
 
 async function ensureConnected(page: import('@playwright/test').Page) {
@@ -535,5 +573,198 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
 
     expect(controllerAfterMature - controllerBeforeMature).toBe(0n);
     expect(stakeBalanceAfterMature - stakeBalanceBeforeMature).toBe(STAKE_AMOUNT);
+  });
+
+  test('T-ST-009 reward pool 不足時の claim は funded balance までに cap され未払い accrued を保持する', async () => {
+    const { stakeToken, rewardToken, staking } = readRuntimeEnv();
+    const aliceWallet = walletFor(ALICE_PK);
+
+    const approveHash = await aliceWallet.writeContract({
+      address: stakeToken,
+      abi: ERC20_ABI,
+      functionName: 'approve',
+      args: [staking, SMALL_STAKE_AMOUNT],
+    });
+    await pub.waitForTransactionReceipt({ hash: approveHash });
+
+    const stakeHash = await aliceWallet.writeContract({
+      address: staking,
+      abi: STAKING_ABI,
+      functionName: 'stake',
+      args: [SMALL_STAKE_AMOUNT],
+    });
+    await pub.waitForTransactionReceipt({ hash: stakeHash });
+
+    await increaseTime(TEN_YEARS);
+
+    const pendingBefore = (await pub.readContract({
+      address: staking,
+      abi: STAKING_ABI,
+      functionName: 'pendingReward',
+      args: [aliceWallet.account.address],
+    })) as bigint;
+    expect(pendingBefore).toBeGreaterThan(POOL_REWARD);
+
+    const rewardBalanceBefore = (await pub.readContract({
+      address: rewardToken,
+      abi: ERC20_ABI,
+      functionName: 'balanceOf',
+      args: [aliceWallet.account.address],
+    })) as bigint;
+
+    const claimHash = await aliceWallet.writeContract({
+      address: staking,
+      abi: STAKING_ABI,
+      functionName: 'claim',
+    });
+    await pub.waitForTransactionReceipt({ hash: claimHash });
+
+    const rewardBalanceAfter = (await pub.readContract({
+      address: rewardToken,
+      abi: ERC20_ABI,
+      functionName: 'balanceOf',
+      args: [aliceWallet.account.address],
+    })) as bigint;
+    const rewardPoolAfter = (await pub.readContract({
+      address: rewardToken,
+      abi: ERC20_ABI,
+      functionName: 'balanceOf',
+      args: [staking],
+    })) as bigint;
+    const pendingAfter = (await pub.readContract({
+      address: staking,
+      abi: STAKING_ABI,
+      functionName: 'pendingReward',
+      args: [aliceWallet.account.address],
+    })) as bigint;
+
+    expect(rewardBalanceAfter - rewardBalanceBefore).toBe(POOL_REWARD);
+    expect(rewardPoolAfter).toBe(0n);
+    expect(pendingAfter).toBeGreaterThan(0n);
+    expect(pendingAfter).toBeLessThan(pendingBefore);
+  });
+
+  test('T-ST-010 top-up stake でも stakeStartedAt は reset されず既存 penalty clock を維持する', async () => {
+    const { stakeToken, staking, controller } = readRuntimeEnv();
+    const aliceWallet = walletFor(ALICE_PK);
+    const totalStake = STAKE_AMOUNT + TOP_UP_AMOUNT;
+
+    const approveHash = await aliceWallet.writeContract({
+      address: stakeToken,
+      abi: ERC20_ABI,
+      functionName: 'approve',
+      args: [staking, totalStake],
+    });
+    await pub.waitForTransactionReceipt({ hash: approveHash });
+
+    const initialStakeHash = await aliceWallet.writeContract({
+      address: staking,
+      abi: STAKING_ABI,
+      functionName: 'stake',
+      args: [STAKE_AMOUNT],
+    });
+    await pub.waitForTransactionReceipt({ hash: initialStakeHash });
+
+    const startedAtBeforeTopUp = (await pub.readContract({
+      address: staking,
+      abi: STAKING_ABI,
+      functionName: 'stakeStartedAt',
+      args: [aliceWallet.account.address],
+    })) as bigint;
+
+    await increaseTime(EIGHT_DAYS);
+
+    const topUpHash = await aliceWallet.writeContract({
+      address: staking,
+      abi: STAKING_ABI,
+      functionName: 'stake',
+      args: [TOP_UP_AMOUNT],
+    });
+    await pub.waitForTransactionReceipt({ hash: topUpHash });
+
+    const startedAtAfterTopUp = (await pub.readContract({
+      address: staking,
+      abi: STAKING_ABI,
+      functionName: 'stakeStartedAt',
+      args: [aliceWallet.account.address],
+    })) as bigint;
+    expect(startedAtAfterTopUp).toBe(startedAtBeforeTopUp);
+
+    const controllerBefore = (await pub.readContract({
+      address: stakeToken,
+      abi: ERC20_ABI,
+      functionName: 'balanceOf',
+      args: [controller],
+    })) as bigint;
+    const stakeBalanceBefore = (await pub.readContract({
+      address: stakeToken,
+      abi: ERC20_ABI,
+      functionName: 'balanceOf',
+      args: [aliceWallet.account.address],
+    })) as bigint;
+
+    const unstakeHash = await aliceWallet.writeContract({
+      address: staking,
+      abi: STAKING_ABI,
+      functionName: 'unstake',
+      args: [totalStake],
+    });
+    await pub.waitForTransactionReceipt({ hash: unstakeHash });
+
+    const controllerAfter = (await pub.readContract({
+      address: stakeToken,
+      abi: ERC20_ABI,
+      functionName: 'balanceOf',
+      args: [controller],
+    })) as bigint;
+    const stakeBalanceAfter = (await pub.readContract({
+      address: stakeToken,
+      abi: ERC20_ABI,
+      functionName: 'balanceOf',
+      args: [aliceWallet.account.address],
+    })) as bigint;
+
+    expect(controllerAfter - controllerBefore).toBe(0n);
+    expect(stakeBalanceAfter - stakeBalanceBefore).toBe(totalStake);
+  });
+
+  test('T-ST-011 controller = zero address の deploy は InvalidController() で revert する', async () => {
+    const deployer = walletFor(ALICE_PK);
+    const erc20Artifact = readArtifact<{ abi: readonly unknown[]; bytecode: { object: Hex } }>(
+      'forge-out/SimpleERC20.sol/SimpleERC20.json',
+    );
+    const stakingArtifact = readArtifact<{ abi: readonly unknown[]; bytecode: { object: Hex } }>(
+      'forge-out/SimpleStaking.sol/SimpleStaking.json',
+    );
+
+    const stakeTokenHash = await deployer.deployContract({
+      abi: erc20Artifact.abi as never,
+      bytecode: erc20Artifact.bytecode.object,
+      args: ['StakeToken', 'STK', 1n, deployer.account.address],
+    });
+    const stakeTokenReceipt = await pub.waitForTransactionReceipt({ hash: stakeTokenHash });
+
+    const rewardTokenHash = await deployer.deployContract({
+      abi: erc20Artifact.abi as never,
+      bytecode: erc20Artifact.bytecode.object,
+      args: ['RewardToken', 'RWD', 1n, deployer.account.address],
+    });
+    const rewardTokenReceipt = await pub.waitForTransactionReceipt({ hash: rewardTokenHash });
+
+    try {
+      await deployer.deployContract({
+        abi: stakingArtifact.abi as never,
+        bytecode: stakingArtifact.bytecode.object,
+        args: [
+          stakeTokenReceipt.contractAddress!,
+          rewardTokenReceipt.contractAddress!,
+          ZERO_ADDRESS,
+          1n,
+        ],
+      });
+      throw new Error('expected constructor to revert');
+    } catch (error) {
+      expectConstructorCustomError(error, stakingArtifact.abi, 'InvalidController');
+    }
   });
 });

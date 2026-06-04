@@ -142,6 +142,11 @@ const ORACLE_ABI = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
+  {
+    inputs: [],
+    name: 'NotOwner',
+    type: 'error',
+  },
 ] as const;
 
 function walletFor(privateKey: Hex) {
@@ -564,5 +569,23 @@ test.describe('Next.js Lending (supply / borrow / repay / health factor) e2e', (
     expect(borrowerCollateralAfter).toBe(0n);
     expect(bobBorrowBefore - bobBorrowAfter).toBe(LIQUIDATION_BORROW_AMOUNT);
     expect(bobCollateralAfter - bobCollateralBefore).toBe(SUPPLY_AMOUNT);
+  });
+
+  test('T-LD-009 non-owner から setPrice を呼ぶと NotOwner() で revert する', async () => {
+    const { collateral, oracle } = readRuntimeEnv();
+    const bob = privateKeyToAccount(BOB_PK);
+
+    try {
+      await pub.simulateContract({
+        address: oracle,
+        abi: ORACLE_ABI,
+        functionName: 'setPrice',
+        args: [collateral, LIQUIDATION_PRICE],
+        account: bob.address,
+      });
+      throw new Error('expected setPrice() to revert');
+    } catch (error) {
+      expectCustomError(error, 'NotOwner');
+    }
   });
 });

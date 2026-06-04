@@ -36,8 +36,10 @@ contract SimpleStaking {
     error TransferFailed();
     error InsufficientStake();
     error NoReward();
+    error InvalidController();
 
     constructor(address stake, address reward, address daoController, uint256 rewardRatePerSecond) {
+        if (daoController == address(0)) revert InvalidController();
         stakeToken = IERC20(stake);
         rewardToken = IERC20(reward);
         controller = daoController;
@@ -68,10 +70,13 @@ contract SimpleStaking {
 
     function stake(uint256 amount) external {
         _accrue(msg.sender);
+        uint256 currentStake = stakedBalance[msg.sender];
         if (!stakeToken.transferFrom(msg.sender, address(this), amount)) revert TransferFailed();
-        stakedBalance[msg.sender] += amount;
+        stakedBalance[msg.sender] = currentStake + amount;
         totalStaked += amount;
-        stakeStartedAt[msg.sender] = block.timestamp;
+        if (currentStake == 0) {
+            stakeStartedAt[msg.sender] = block.timestamp;
+        }
         emit Staked(msg.sender, amount);
     }
 
@@ -103,9 +108,14 @@ contract SimpleStaking {
 
     function claim() external returns (uint256 payout) {
         _accrue(msg.sender);
-        payout = accruedReward[msg.sender];
-        if (payout == 0) revert NoReward();
-        accruedReward[msg.sender] = 0;
+        uint256 accrued = accruedReward[msg.sender];
+        if (accrued == 0) revert NoReward();
+
+        uint256 rewardPool = rewardToken.balanceOf(address(this));
+        if (rewardPool == 0) revert NoReward();
+
+        payout = accrued > rewardPool ? rewardPool : accrued;
+        accruedReward[msg.sender] = accrued - payout;
         if (!rewardToken.transfer(msg.sender, payout)) revert TransferFailed();
         emit Claimed(msg.sender, payout);
     }

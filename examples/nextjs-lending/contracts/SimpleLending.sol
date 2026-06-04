@@ -12,7 +12,8 @@ interface IPriceOracle {
 }
 
 /// @notice Minimal Aave/Compound 風 lending pool
-/// @dev    collateral と borrow asset の price は固定 1:1 として簡略化
+/// @dev    This example points `priceOracle` at MockPriceOracle, a test-only oracle implementation.
+///         collateral と borrow asset の price は固定 1:1 として簡略化
 ///         LTV = 75% (collateral * 75 / 100 が借入可能上限)
 contract SimpleLending {
     IERC20 public immutable collateralToken;
@@ -39,6 +40,7 @@ contract SimpleLending {
 
     error TransferFailed();
     error InsufficientCollateral();
+    /// @notice `requestedDebt` is the debt level the user is trying to maintain after the action.
     error MaxLTVExceeded(uint256 requestedDebt, uint256 maxDebt);
     error NoDebt();
     error PositionHealthy(uint256 collateralValue, uint256 liquidationThreshold);
@@ -57,8 +59,8 @@ contract SimpleLending {
 
     function borrow(uint256 amount) external {
         uint256 nextDebt = debtBalance[msg.sender] + amount;
-        uint256 maxBorrow = _maxBorrow(msg.sender);
-        if (nextDebt > maxBorrow) revert MaxLTVExceeded(nextDebt, maxBorrow);
+        uint256 maxAllowed = _maxBorrow(msg.sender);
+        if (nextDebt > maxAllowed) revert MaxLTVExceeded(nextDebt, maxAllowed);
         debtBalance[msg.sender] = nextDebt;
         if (!borrowToken.transfer(msg.sender, amount)) revert TransferFailed();
         emit Borrowed(msg.sender, amount);
@@ -75,9 +77,10 @@ contract SimpleLending {
     function withdraw(uint256 amount) external {
         if (collateralBalance[msg.sender] < amount) revert InsufficientCollateral();
         uint256 remaining = collateralBalance[msg.sender] - amount;
-        uint256 maxBorrowAfter = _maxBorrowFromCollateral(remaining);
-        if (debtBalance[msg.sender] > maxBorrowAfter) {
-            revert MaxLTVExceeded(debtBalance[msg.sender], maxBorrowAfter);
+        uint256 requestedDebt = debtBalance[msg.sender];
+        uint256 maxAllowed = _maxBorrowFromCollateral(remaining);
+        if (requestedDebt > maxAllowed) {
+            revert MaxLTVExceeded(requestedDebt, maxAllowed);
         }
         collateralBalance[msg.sender] -= amount;
         if (!collateralToken.transfer(msg.sender, amount)) revert TransferFailed();
