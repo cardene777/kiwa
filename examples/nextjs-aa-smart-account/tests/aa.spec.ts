@@ -54,13 +54,18 @@ const FACTORY_ABI = parseAbi([
 const SMART_ACCOUNT_ABI = parseAbi([
   'function executeBatch(address[] targets, uint256[] values, bytes[] data) returns (bytes[] results)',
   'function owner() view returns (address)',
+  'function ownerEpoch() view returns (uint256)',
   'function recoveryRequestCount() view returns (uint256)',
   'function proposeRecovery(address newOwner) returns (uint256 requestId)',
   'function approveRecovery(uint256 requestId)',
   'function finalizeRecovery(uint256 requestId)',
+  'function recoveryRequestView(uint256 requestId) view returns (address proposedOwner, uint256 approvals, bool finalized, uint256 requestOwnerEpoch)',
   'error BatchCallFailed(uint256 index, address target)',
   'error ThresholdNotReached(uint256 approved, uint256 required)',
   'error NotGuardian()',
+  'error InvalidNewOwner()',
+  'error RecoveryStale()',
+  'error RecoveryAlreadyFinalized()',
 ]);
 
 const TOKEN_ABI = parseAbi([
@@ -129,7 +134,7 @@ function makeClients(
   };
 }
 
-async function ensureSmartAccountDeployed() {
+async function ensureSmartAccountDeployed(salt: bigint = SALT) {
   const env = readEnv();
   const owner = makeClients(OWNER_PK);
   const factory = env.NEXT_PUBLIC_FACTORY as Address;
@@ -137,7 +142,7 @@ async function ensureSmartAccountDeployed() {
     address: factory,
     abi: FACTORY_ABI,
     functionName: 'getAddress',
-    args: [owner.account.address, SALT],
+    args: [owner.account.address, salt],
   })) as Address;
 
   const code = await owner.pub.getBytecode({ address: accountAddress });
@@ -146,7 +151,7 @@ async function ensureSmartAccountDeployed() {
       address: factory,
       abi: FACTORY_ABI,
       functionName: 'createAccount',
-      args: [owner.account.address, SALT],
+      args: [owner.account.address, salt],
     });
     await owner.pub.waitForTransactionReceipt({ hash: deployHash });
   }
@@ -497,5 +502,143 @@ test.describe('Next.js + AA Smart Account (ERC-4337 簡略版) e2e', () => {
       functionName: 'owner',
     });
     expect(updatedOwner.toLowerCase()).toBe(newOwner.toLowerCase());
+  });
+
+  test('T-AA-009 proposeRecovery(address(0)) は InvalidNewOwner() で revert', async () => {
+    const { accountAddress } = await ensureSmartAccountDeployed(2n);
+    const guardianOne = makeClients(GUARDIAN_ONE_PK);
+
+    try {
+      await guardianOne.pub.simulateContract({
+        account: guardianOne.account.address,
+        address: accountAddress,
+        abi: SMART_ACCOUNT_ABI,
+        functionName: 'proposeRecovery',
+        args: ['0x0000000000000000000000000000000000000000'],
+      });
+      throw new Error('expected InvalidNewOwner revert');
+    } catch (error) {
+      expectCustomError(error, 'InvalidNewOwner');
+    }
+  });
+
+  test('T-AA-010 owner 変更後の stale recovery request は RecoveryStale() で revert', async () => {
+    const { owner, accountAddress } = await ensureSmartAccountDeployed(3n);
+    const guardianOne = makeClients(GUARDIAN_ONE_PK);
+    const guardianTwo = makeClients(GUARDIAN_TWO_PK);
+    const guardianThree = makeClients(GUARDIAN_THREE_PK);
+    const ownerA = privateKeyToAccount(NEW_OWNER_PK).address;
+    const ownerB = privateKeyToAccount(GUARDIAN_ONE_PK).address;
+
+    const firstProposeHash = await guardianOne.wallet.writeContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'proposeRecovery',
+      args: [ownerA],
+    });
+    await guardianOne.pub.waitForTransactionReceipt({ hash: firstProposeHash });
+
+    const firstRequestId = await owner.pub.readContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'recoveryRequestCount',
+    });
+
+    const firstApproveTwoHash = await guardianTwo.wallet.writeContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'approveRecovery',
+      args: [firstRequestId],
+    });
+    await guardianTwo.pub.waitForTransactionReceipt({ hash: firstApproveTwoHash });
+
+    const firstApproveThreeHash = await guardianThree.wallet.writeContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'approveRecovery',
+      args: [firstRequestId],
+    });
+    await guardianThree.pub.waitForTransactionReceipt({ hash: firstApproveThreeHash });
+
+    const firstFinalizeHash = await guardianOne.wallet.writeContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'finalizeRecovery',
+      args: [firstRequestId],
+    });
+    await guardianOne.pub.waitForTransactionReceipt({ hash: firstFinalizeHash });
+
+    const secondProposeHash = await guardianTwo.wallet.writeContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'proposeRecovery',
+      args: [ownerB],
+    });
+    await guardianTwo.pub.waitForTransactionReceipt({ hash: secondProposeHash });
+
+    const secondRequestId = await owner.pub.readContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'recoveryRequestCount',
+    });
+
+    const secondApproveOneHash = await guardianOne.wallet.writeContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'approveRecovery',
+      args: [secondRequestId],
+    });
+    await guardianOne.pub.waitForTransactionReceipt({ hash: secondApproveOneHash });
+
+    const secondApproveThreeHash = await guardianThree.wallet.writeContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'approveRecovery',
+      args: [secondRequestId],
+    });
+    await guardianThree.pub.waitForTransactionReceipt({ hash: secondApproveThreeHash });
+
+    const secondFinalizeHash = await guardianTwo.wallet.writeContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'finalizeRecovery',
+      args: [secondRequestId],
+    });
+    await guardianTwo.pub.waitForTransactionReceipt({ hash: secondFinalizeHash });
+
+    const currentOwner = await owner.pub.readContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'owner',
+    });
+    const currentEpoch = await owner.pub.readContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'ownerEpoch',
+    });
+    const [, , firstFinalized, firstOwnerEpoch] = await owner.pub.readContract({
+      address: accountAddress,
+      abi: SMART_ACCOUNT_ABI,
+      functionName: 'recoveryRequestView',
+      args: [firstRequestId],
+    });
+
+    expect(currentOwner.toLowerCase()).toBe(ownerB.toLowerCase());
+    expect(currentEpoch).toBe(2n);
+    expect(firstFinalized).toBe(true);
+    expect(firstOwnerEpoch).toBe(0n);
+
+    try {
+      await guardianOne.pub.simulateContract({
+        account: guardianOne.account.address,
+        address: accountAddress,
+        abi: SMART_ACCOUNT_ABI,
+        functionName: 'finalizeRecovery',
+        args: [firstRequestId],
+      });
+      throw new Error('expected RecoveryStale revert');
+    } catch (error) {
+      expectCustomError(error, 'RecoveryStale');
+    }
   });
 });

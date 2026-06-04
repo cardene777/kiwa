@@ -49,6 +49,7 @@ await runE2EPrepareEnv({
     const targetHash = await wallet.deployContract({
       abi: targetArtifact.abi as never,
       bytecode: targetArtifact.bytecode.object,
+      args: [dao],
     });
     const targetReceipt = await publicClient.waitForTransactionReceipt({ hash: targetHash });
     const executionTarget = targetReceipt.contractAddress!;

@@ -11,6 +11,7 @@ import {
   http,
   parseAbi,
   type Address,
+  type Hex,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
@@ -51,6 +52,7 @@ const TARGET_ABI = parseAbi([
   'function setValue(uint256 value)',
   'function lastValue() view returns (uint256)',
   'function executeCount() view returns (uint256)',
+  'error NotDao()',
 ]);
 
 function anvilChain(port: number) {
@@ -74,6 +76,10 @@ function readEnv() {
         return [line.slice(0, idx), line.slice(idx + 1)];
       }),
   ) as Record<string, string>;
+}
+
+function readArtifact<T>(relativePath: string): T {
+  return JSON.parse(readFileSync(resolve(exampleRoot, relativePath), 'utf8')) as T;
 }
 
 function makeClients(port: number, privateKey: typeof OWNER_PK | typeof SMALL_VOTER_PK) {
@@ -352,6 +358,64 @@ test.describe('Next.js DAO Governor propose/vote e2e', () => {
     } catch (error) {
       expectCustomError(error, 'QuorumNotReached', [SMALL_VOTE, QUORUM_VOTES]);
     }
+  });
+
+  test('T-DAO-005A governance 外から execution target を直接叩くと NotDao() で revert', async ({
+    anvilPort,
+  }) => {
+    const env = readEnv();
+    const target = env.NEXT_PUBLIC_DAO_EXECUTION_TARGET as Address;
+    const { account, pub } = makeClients(anvilPort, OWNER_PK);
+
+    try {
+      await pub.simulateContract({
+        account: account.address,
+        address: target,
+        abi: TARGET_ABI,
+        functionName: 'setValue',
+        args: [99n],
+      });
+      throw new Error('expected NotDao revert');
+    } catch (error) {
+      expectCustomError(error, 'NotDao');
+    }
+  });
+
+  test('T-DAO-005B 小さい totalSupply でも non-zero quorumBps なら quorumVotes は 1 以上に切り上がる', async ({
+    anvilPort,
+  }) => {
+    const { wallet, pub, account } = makeClients(anvilPort, OWNER_PK);
+    const tokenArtifact = readArtifact<{ abi: readonly unknown[]; bytecode: { object: Hex } }>(
+      'forge-out/VoteToken.sol/VoteToken.json',
+    );
+    const daoArtifact = readArtifact<{ abi: readonly unknown[]; bytecode: { object: Hex } }>(
+      'forge-out/SimpleDao.sol/SimpleDao.json',
+    );
+
+    const tokenHash = await wallet.deployContract({
+      abi: tokenArtifact.abi as never,
+      bytecode: tokenArtifact.bytecode.object,
+      args: ['Tiny Vote', 'TVOTE', 3n, account.address],
+    });
+    const tokenReceipt = await pub.waitForTransactionReceipt({ hash: tokenHash });
+    const voteToken = tokenReceipt.contractAddress!;
+
+    const daoHash = await wallet.deployContract({
+      abi: daoArtifact.abi as never,
+      bytecode: daoArtifact.bytecode.object,
+      args: [voteToken, 100n, 1n, 0n],
+    });
+    const daoReceipt = await pub.waitForTransactionReceipt({ hash: daoHash });
+    const dao = daoReceipt.contractAddress!;
+
+    const quorumVotes = await pub.readContract({
+      address: dao,
+      abi: DAO_ABI,
+      functionName: 'quorumVotes',
+    });
+
+    expect(quorumVotes).toBeGreaterThanOrEqual(1n);
+    expect(quorumVotes).toBe(1n);
   });
 
   test('T-DAO-006 deadline 超過後の castVote は VotingClosed() で revert', async ({ anvilPort }) => {

@@ -11,11 +11,13 @@ contract SmartAccount {
     uint256 public immutable recoveryThreshold;
     uint256 public guardianCount;
     uint256 public recoveryRequestCount;
+    uint256 public ownerEpoch;
 
     struct RecoveryRequest {
         address proposedOwner;
         uint256 approvals;
         bool finalized;
+        uint256 ownerEpoch;
     }
 
     mapping(address => bool) public guardians;
@@ -35,9 +37,11 @@ contract SmartAccount {
     error InvalidGuardianConfig();
     error NotGuardian();
     error InvalidRecoveryRequest();
+    error InvalidNewOwner();
     error AlreadyApproved();
     error ThresholdNotReached(uint256 approved, uint256 required);
     error RecoveryAlreadyFinalized();
+    error RecoveryStale();
 
     constructor(
         address _owner,
@@ -94,12 +98,14 @@ contract SmartAccount {
 
     function proposeRecovery(address newOwner) external returns (uint256 requestId) {
         if (!guardians[msg.sender]) revert NotGuardian();
+        if (newOwner == address(0)) revert InvalidNewOwner();
 
         requestId = ++recoveryRequestCount;
         _recoveryRequests[requestId] = RecoveryRequest({
             proposedOwner: newOwner,
             approvals: 0,
-            finalized: false
+            finalized: false,
+            ownerEpoch: ownerEpoch
         });
 
         emit RecoveryProposed(requestId, msg.sender, newOwner);
@@ -120,6 +126,7 @@ contract SmartAccount {
 
     function finalizeRecovery(uint256 requestId) external {
         RecoveryRequest storage request = _getRecoveryRequest(requestId);
+        if (request.ownerEpoch != ownerEpoch) revert RecoveryStale();
         if (request.finalized) revert RecoveryAlreadyFinalized();
         if (request.approvals < recoveryThreshold) {
             revert ThresholdNotReached(request.approvals, recoveryThreshold);
@@ -127,6 +134,7 @@ contract SmartAccount {
 
         request.finalized = true;
         owner = request.proposedOwner;
+        ownerEpoch++;
 
         emit RecoveryFinalized(requestId, request.proposedOwner);
     }
@@ -134,10 +142,10 @@ contract SmartAccount {
     function recoveryRequestView(uint256 requestId)
         external
         view
-        returns (address proposedOwner, uint256 approvals, bool finalized)
+        returns (address proposedOwner, uint256 approvals, bool finalized, uint256 requestOwnerEpoch)
     {
         RecoveryRequest storage request = _getRecoveryRequest(requestId);
-        return (request.proposedOwner, request.approvals, request.finalized);
+        return (request.proposedOwner, request.approvals, request.finalized, request.ownerEpoch);
     }
 
     function hasApprovedRecovery(uint256 requestId, address guardian) external view returns (bool) {

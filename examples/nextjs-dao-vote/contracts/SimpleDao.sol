@@ -175,7 +175,9 @@ contract SimpleDao {
     }
 
     function quorumVotes() public view returns (uint256) {
-        return (voteToken.totalSupply() * quorumBps) / 10_000;
+        if (quorumBps == 0) return 0;
+        uint256 numerator = voteToken.totalSupply() * quorumBps;
+        return (numerator + 10_000 - 1) / 10_000;
     }
 
     function proposalView(uint256 id)
