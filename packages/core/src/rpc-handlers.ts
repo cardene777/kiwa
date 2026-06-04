@@ -1,9 +1,10 @@
-import { hexToBigInt, numberToHex } from 'viem';
+import { decodeFunctionData, hexToBigInt, numberToHex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
 import { sendTransaction } from './tx.js';
 import {
   type ApprovalMode,
+  type ApprovalPolicy,
   type ChainConfig,
   Eip1193Error,
   type DappE2eEventEmitter,
@@ -26,6 +27,7 @@ export interface RpcContext {
   activeIndex?: { current: number };
   chainState: { current: number };
   approvalMode?: { current: ApprovalMode };
+  approvalPolicy?: { current: ApprovalPolicy };
   anvilPort?: number;
   emitter?: DappE2eEventEmitter;
   /**
@@ -35,6 +37,19 @@ export interface RpcContext {
    */
   chainRegistry?: { current: ChainConfig[] };
 }
+
+const ERC20_APPROVE_ABI = [
+  {
+    type: 'function',
+    name: 'approve',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'value', type: 'uint256' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+] as const;
 
 const Eip712DomainSchema = z.object({
   name: z.string().optional(),
@@ -225,7 +240,6 @@ export async function handleRpcRequest(
     }
 
     case 'eth_sendTransaction': {
-      assertApproved(ctx);
       if (!ctx.anvilPort) {
         throw new Eip1193Error(
           -32603,
@@ -233,6 +247,7 @@ export async function handleRpcRequest(
         );
       }
       const txParams = (params[0] ?? {}) as Record<string, unknown>;
+      assertApprovedTransaction(ctx, txParams);
       const from = txParams.from;
       if (typeof from === 'string') {
         assertAuthorizedAddress('from', from as Hex, account.address);
@@ -253,9 +268,77 @@ export async function handleRpcRequest(
 }
 
 function assertApproved(ctx: RpcContext): void {
-  const mode = ctx.approvalMode?.current ?? 'approve';
+  const mode = getApprovalPolicy(ctx).default;
   if (mode === 'reject') {
     throw new Eip1193Error(4001, 'User rejected the request.');
+  }
+}
+
+function assertApprovedTransaction(ctx: RpcContext, txParams: Record<string, unknown>): void {
+  const approval = parseErc20ApproveTransaction(txParams);
+  const policy = getApprovalPolicy(ctx);
+
+  if (!approval) {
+    assertApproved(ctx);
+    return;
+  }
+
+  const tokenPolicy = policy.perToken?.[approval.tokenAddress.toLowerCase() as Hex];
+  const mode = tokenPolicy?.mode ?? policy.default;
+  if (mode === 'reject') {
+    throw new Eip1193Error(
+      4001,
+      `User rejected the request for ERC20 approve on token ${approval.tokenAddress}.`,
+    );
+  }
+  if (
+    tokenPolicy?.limit !== undefined &&
+    tokenPolicy.limit > 0n &&
+    approval.amount > tokenPolicy.limit
+  ) {
+    throw new Eip1193Error(
+      4001,
+      `User rejected the request: approve amount ${approval.amount} exceeds limit ${tokenPolicy.limit} for token ${approval.tokenAddress}.`,
+    );
+  }
+}
+
+function getApprovalPolicy(ctx: RpcContext): ApprovalPolicy {
+  if (ctx.approvalPolicy) {
+    return ctx.approvalPolicy.current;
+  }
+  return { default: ctx.approvalMode?.current ?? 'approve' };
+}
+
+function parseErc20ApproveTransaction(
+  txParams: Record<string, unknown>,
+): { tokenAddress: Hex; spender: Hex; amount: bigint } | null {
+  if (typeof txParams.to !== 'string' || typeof txParams.data !== 'string') {
+    return null;
+  }
+  const data = txParams.data as Hex;
+  if (!data.toLowerCase().startsWith('0x095ea7b3')) {
+    return null;
+  }
+  try {
+    const decoded = decodeFunctionData({
+      abi: ERC20_APPROVE_ABI,
+      data,
+    });
+    if (decoded.functionName !== 'approve') {
+      return null;
+    }
+    const [spender, amount] = decoded.args;
+    if (typeof spender !== 'string' || typeof amount !== 'bigint') {
+      return null;
+    }
+    return {
+      tokenAddress: txParams.to as Hex,
+      spender: spender as Hex,
+      amount,
+    };
+  } catch {
+    return null;
   }
 }
 

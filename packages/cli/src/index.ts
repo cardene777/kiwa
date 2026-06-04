@@ -5,7 +5,7 @@ import { InitConflictError, runInit } from './commands/init.js';
 const USAGE = `Usage: dapp-e2e <command>
 
 Commands:
-  init [--force]   Scaffold e2e/connect.spec.ts + playwright.config.ts + package.json
+  init [--force]   Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json
   doctor           Check that anvil is installed
   --help, -h       Show this message
 `;
@@ -37,6 +37,9 @@ function main(): void {
       }
       for (const file of result.updated) {
         process.stdout.write(`updated: ${file}\n`);
+      }
+      for (const warning of result.warnings) {
+        process.stderr.write(`warn: ${warning}\n`);
       }
       process.stdout.write('\nNext: pnpm install && pnpm exec playwright test\n');
       process.exit(0);

@@ -8,6 +8,7 @@ dapp-e2e usage by real scenario.
 - [Test multi-wallet signature verification](./multi-wallet-signature.md)
 - [Test the user-reject path](./user-reject.md)
 - [Test multi-chain (L1/L2 in parallel)](./multi-chain.md)
+- [Test a token approve flow](./token-approve-flow.md)
 
 ## Related
 

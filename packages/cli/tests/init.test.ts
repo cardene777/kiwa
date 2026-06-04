@@ -8,6 +8,7 @@ type InitModule = {
   runInit: (options: { force: boolean; cwd: string }) => {
     created: string[];
     updated: string[];
+    warnings: string[];
   };
 };
 
@@ -65,10 +66,12 @@ describe('runInit', () => {
     // Then
     expect(fs.existsSync(path.join(tempDir, 'e2e', 'connect.spec.ts'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'playwright.config.ts'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'tsconfig.json'))).toBe(true);
     expect(readFile(tempDir, 'e2e/connect.spec.ts')).toContain("from '@dapp-e2e/core'");
     expect(readFile(tempDir, 'playwright.config.ts')).toContain('defineConfig');
+    expect(readFile(tempDir, 'tsconfig.json')).toContain('"strict": true');
     expect(result.created).toEqual(
-      expect.arrayContaining(['e2e/connect.spec.ts', 'playwright.config.ts']),
+      expect.arrayContaining(['e2e/connect.spec.ts', 'playwright.config.ts', 'tsconfig.json']),
     );
   });
 
@@ -236,7 +239,35 @@ describe('runInit', () => {
     // template files should be removed by rollback
     expect(fs.existsSync(path.join(tempDir, 'e2e/connect.spec.ts'))).toBe(false);
     expect(fs.existsSync(path.join(tempDir, 'playwright.config.ts'))).toBe(false);
+    expect(fs.existsSync(path.join(tempDir, 'tsconfig.json'))).toBe(false);
     // e2e dir should be removed if it was created by runInit
     expect(fs.existsSync(path.join(tempDir, 'e2e'))).toBe(false);
+  });
+
+  it('T-INIT-010 既存 tsconfig.json が strict=false の場合は warning を返し上書きしない', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(
+      tempDir,
+      'tsconfig.json',
+      JSON.stringify(
+        {
+          compilerOptions: {
+            strict: false,
+            target: 'ES2020',
+          },
+        },
+        null,
+        2,
+      ),
+    );
+    const { runInit } = await loadInitModule();
+
+    const result = runInit({ force: false, cwd: tempDir });
+
+    expect(result.warnings).toContain(
+      'Existing tsconfig.json has "strict": false. dapp-e2e init did not modify it.',
+    );
+    expect(readFile(tempDir, 'tsconfig.json')).toContain('"strict": false');
+    expect(result.created).not.toContain('tsconfig.json');
   });
 });
