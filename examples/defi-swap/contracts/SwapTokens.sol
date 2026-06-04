@@ -76,8 +76,13 @@ contract SimpleSwap {
         tokenB = IErc20(b);
     }
 
+    /// @notice Backward-compatible entrypoint that defaults slippage protection to zero.
+    function swapAforB(uint256 amountIn) external returns (uint256) {
+        return swapAforB(amountIn, 0);
+    }
+
     /// @notice Swap amountIn of tokenA for the same amount of tokenB (1:1).
-    function swapAforB(uint256 amountIn, uint256 minOutputAmount) external {
+    function swapAforB(uint256 amountIn, uint256 minOutputAmount) public returns (uint256) {
         uint256 amountOut = amountIn;
         uint256 availableLiquidity = tokenB.balanceOf(address(this));
         if (availableLiquidity < amountOut) revert InsufficientLiquidity(amountOut, availableLiquidity);
@@ -85,5 +90,6 @@ contract SimpleSwap {
         if (!tokenA.transferFrom(msg.sender, address(this), amountIn)) revert TransferInFailed();
         if (!tokenB.transfer(msg.sender, amountOut)) revert TransferOutFailed();
         emit Swapped(msg.sender, amountIn, amountOut);
+        return amountOut;
     }
 }

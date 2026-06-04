@@ -1,12 +1,54 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { encodeFunctionData } from 'viem';
+import {
+  BaseError,
+  ContractFunctionRevertedError,
+  createPublicClient,
+  createWalletClient,
+  defineChain,
+  http,
+  parseAbi,
+} from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
 
+const PRIVATE_KEY =
+  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
+const ANVIL_PORT = 8546;
 const SWAP_AMOUNT = 25n * 10n ** 18n;
 const USER_INITIAL_A = 100n * 10n ** 18n;
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const account = privateKeyToAccount(PRIVATE_KEY);
+const PERMIT_TYPES = {
+  Permit: [
+    { name: 'owner', type: 'address' },
+    { name: 'spender', type: 'address' },
+    { name: 'value', type: 'uint256' },
+    { name: 'nonce', type: 'uint256' },
+    { name: 'deadline', type: 'uint256' },
+  ],
+} as const;
+const PERMIT_SWAP_ABI = parseAbi([
+  'function permitAndSwap(uint256 amountIn, uint256 deadline, uint8 v, bytes32 r, bytes32 s)',
+  'error PermitExpired()',
+]);
+
+function anvilChain() {
+  return defineChain({
+    id: 31337,
+    name: 'Anvil',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: { default: { http: [`http://127.0.0.1:${ANVIL_PORT}`] } },
+  });
+}
+
+function expectCustomError(error: unknown, errorName: string): void {
+  if (!(error instanceof BaseError)) throw error;
+  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
+  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
+  expect(reverted.data?.errorName).toBe(errorName);
+}
 
 function readRuntimeEnv() {
   const envLocal = readFileSync(resolve(__dirname, '../.env.local'), 'utf8');
@@ -166,6 +208,9 @@ test.describe('Next.js EIP-2612 Permit + 1-tx swap e2e', () => {
     dappE2e,
   }) => {
     const { tokenA, swap, tokenAName } = readRuntimeEnv();
+    const chain = anvilChain();
+    const publicClient = createPublicClient({ chain, transport: http() });
+    const walletClient = createWalletClient({ account, chain, transport: http() });
 
     await page.goto('/');
     await page.waitForLoadState('networkidle', { timeout: 30_000 });
@@ -183,119 +228,42 @@ test.describe('Next.js EIP-2612 Permit + 1-tx swap e2e', () => {
       ((await page.getByTestId('balance-b').textContent()) ?? '').replace('tokenB: ', '').trim(),
     );
 
-    const expiredPermit = await page.evaluate(
-      async ({ amountIn, currentNonce, tokenAAddress, tokenANameValue, swapAddress }) => {
-        const ethereum = (window as unknown as Window & {
-          ethereum: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
-        }).ethereum;
-        const accounts = (await ethereum.request({
-          method: 'eth_accounts',
-        })) as string[];
-        const account = accounts[0];
-        if (!account) {
-          throw new Error('No connected account');
-        }
-        const chainIdHex = (await ethereum.request({
-          method: 'eth_chainId',
-        })) as string;
-        const deadline = BigInt(Math.floor(Date.now() / 1000) - 3600);
-        const typedData = {
-          types: {
-            EIP712Domain: [
-              { name: 'name', type: 'string' },
-              { name: 'version', type: 'string' },
-              { name: 'chainId', type: 'uint256' },
-              { name: 'verifyingContract', type: 'address' },
-            ],
-            Permit: [
-              { name: 'owner', type: 'address' },
-              { name: 'spender', type: 'address' },
-              { name: 'value', type: 'uint256' },
-              { name: 'nonce', type: 'uint256' },
-              { name: 'deadline', type: 'uint256' },
-            ],
-          },
-          domain: {
-            name: tokenANameValue,
-            version: '1',
-            chainId: Number(chainIdHex),
-            verifyingContract: tokenAAddress,
-          },
-          primaryType: 'Permit',
-          message: {
-            owner: account,
-            spender: swapAddress,
-            value: amountIn,
-            nonce: currentNonce,
-            deadline: deadline.toString(),
-          },
-        };
-        const signature = (await ethereum.request({
-          method: 'eth_signTypedData_v4',
-          params: [account, JSON.stringify(typedData)],
-        })) as `0x${string}`;
-        return { account, deadline: deadline.toString(), signature };
+    const deadline = BigInt(Math.floor(Date.now() / 1000) - 3600);
+    const signature = await walletClient.signTypedData({
+      account,
+      domain: {
+        name: tokenAName,
+        version: '1',
+        chainId: chain.id,
+        verifyingContract: tokenA,
       },
-      {
-        amountIn: SWAP_AMOUNT.toString(),
-        currentNonce: beforeNonce.toString(),
-        tokenAAddress: tokenA,
-        tokenANameValue: tokenAName,
-        swapAddress: swap,
+      types: PERMIT_TYPES,
+      primaryType: 'Permit',
+      message: {
+        owner: account.address,
+        spender: swap,
+        value: SWAP_AMOUNT,
+        nonce: beforeNonce,
+        deadline,
       },
-    );
-    await dappE2e.waitForRpcIdle();
+    });
 
-    const signatureBody = expiredPermit.signature.slice(2);
+    const signatureBody = signature.slice(2);
     const v = parseInt(signatureBody.slice(128, 130), 16);
     const r = `0x${signatureBody.slice(0, 64)}` as `0x${string}`;
     const s = `0x${signatureBody.slice(64, 128)}` as `0x${string}`;
-    const permitAndSwapData = encodeFunctionData({
-      abi: [
-        {
-          type: 'function',
-          name: 'permitAndSwap',
-          stateMutability: 'nonpayable',
-          inputs: [
-            { name: 'amountIn', type: 'uint256' },
-            { name: 'deadline', type: 'uint256' },
-            { name: 'v', type: 'uint8' },
-            { name: 'r', type: 'bytes32' },
-            { name: 's', type: 'bytes32' },
-          ],
-          outputs: [],
-        },
-      ],
-      functionName: 'permitAndSwap',
-      args: [SWAP_AMOUNT, BigInt(expiredPermit.deadline), v, r, s],
-    });
-
-    const reverted = await page.evaluate(
-      async ({ data, from, to }) => {
-        const ethereum = (window as unknown as Window & {
-          ethereum: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
-        }).ethereum;
-        try {
-          await ethereum.request({
-            method: 'eth_sendTransaction',
-            params: [{ from, to, data }],
-          });
-          return null;
-        } catch (error) {
-          const rpcError = error as { code?: number; message?: string };
-          return `${String(rpcError.code ?? '')}:${String(rpcError.message ?? error)}`;
-        }
-      },
-      {
-        data: permitAndSwapData,
-        from: expiredPermit.account,
-        to: swap,
-      },
-    );
-    await dappE2e.waitForRpcIdle();
-
-    expect(reverted).not.toBeNull();
-    expect(reverted ?? '').toMatch(/PermitExpired|ExpiredSignature|expired|revert/i);
+    try {
+      await publicClient.simulateContract({
+        account: account.address,
+        address: swap,
+        abi: PERMIT_SWAP_ABI,
+        functionName: 'permitAndSwap',
+        args: [SWAP_AMOUNT, deadline, v, r, s],
+      });
+      throw new Error('expected PermitExpired revert');
+    } catch (error) {
+      expectCustomError(error, 'PermitExpired');
+    }
 
     await expect(page.getByTestId('nonce')).toHaveText(`nonce: ${beforeNonce}`, { timeout: 15_000 });
     await expect(page.getByTestId('balance-a')).toHaveText(`tokenA: ${beforeBalanceA}`, {

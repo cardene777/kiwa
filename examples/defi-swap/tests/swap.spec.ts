@@ -4,6 +4,8 @@ import { dirname, resolve } from 'node:path';
 import { expect } from '@playwright/test';
 import { dappE2eTest as test } from '@dapp-e2e/core';
 import {
+  BaseError,
+  ContractFunctionRevertedError,
   createPublicClient,
   createWalletClient,
   defineChain,
@@ -33,7 +35,10 @@ const ERC20_ABI = parseAbi([
   'function totalSupply() view returns (uint256)',
 ]);
 const SWAP_ABI = parseAbi([
-  'function swapAforB(uint256 amountIn, uint256 minOutputAmount)',
+  'function swapAforB(uint256 amountIn) returns (uint256)',
+  'function swapAforB(uint256 amountIn, uint256 minOutputAmount) returns (uint256)',
+  'error SlippageExceeded(uint256 amountOut, uint256 minOutputAmount)',
+  'error InsufficientLiquidity(uint256 amountOut, uint256 availableLiquidity)',
   'event Swapped(address indexed user, uint256 amountIn, uint256 amountOut)',
 ]);
 
@@ -49,6 +54,20 @@ function anvilChain(port: number) {
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     rpcUrls: { default: { http: [`http://127.0.0.1:${port}`] } },
   });
+}
+
+function expectCustomError(
+  error: unknown,
+  errorName: string,
+  expectedArgs?: readonly unknown[],
+): void {
+  if (!(error instanceof BaseError)) throw error;
+  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
+  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
+  expect(reverted.data?.errorName).toBe(errorName);
+  if (expectedArgs) {
+    expect(reverted.data?.args).toEqual(expectedArgs);
+  }
 }
 
 async function setupSwap(
@@ -262,17 +281,30 @@ test.describe('defi-swap e2e (ERC20 approve → swap)', () => {
     anvilPort,
     dappE2e,
   }) => {
-    const { tokenA, tokenB, swap } = await setupSwap(anvilPort);
+    const { tokenA, tokenB, swap, user } = await setupSwap(anvilPort);
+    const pub = createPublicClient({ chain: anvilChain(anvilPort), transport: http() });
     await page.setContent(makeDappHtml(tokenA, tokenB, swap));
     await page.click('#connect');
     await dappE2e.waitForRpcIdle();
     await page.click('#approve');
     await dappE2e.waitForRpcIdle();
-    await page.getByTestId('slippage-input').fill((SWAP_AMOUNT + 1n).toString());
+    const minOutputAmount = SWAP_AMOUNT + 1n;
+    await page.getByTestId('slippage-input').fill(minOutputAmount.toString());
+    try {
+      await pub.simulateContract({
+        account: user,
+        address: swap,
+        abi: SWAP_ABI,
+        functionName: 'swapAforB',
+        args: [SWAP_AMOUNT, minOutputAmount],
+      });
+      throw new Error('expected SlippageExceeded revert');
+    } catch (error) {
+      expectCustomError(error, 'SlippageExceeded', [SWAP_AMOUNT, minOutputAmount]);
+    }
     await page.click('#swap');
     await dappE2e.waitForRpcIdle();
-    const err = (await page.locator('#last-error').textContent()) ?? '';
-    expect(err).toMatch(/SlippageExceeded|execution reverted|revert/i);
+    await expect(page.locator('#last-error')).not.toHaveText('');
     await page.click('#refresh');
     await dappE2e.waitForRpcIdle();
     await expect(page.locator('#balance-a')).toHaveText(USER_INITIAL.toString());
@@ -285,42 +317,41 @@ test.describe('defi-swap e2e (ERC20 approve → swap)', () => {
     anvilPort,
     dappE2e,
   }) => {
-    const { tokenA, tokenB, swap } = await setupSwap(anvilPort, {
+    const { tokenA, tokenB, swap, user } = await setupSwap(anvilPort, {
       userInitial: LARGE_USER_INITIAL,
     });
+    const pub = createPublicClient({ chain: anvilChain(anvilPort), transport: http() });
     await page.setContent(makeDappHtml(tokenA, tokenB, swap));
     await page.click('#connect');
     await dappE2e.waitForRpcIdle();
 
-    const poolBalance = BigInt(
-      await page.evaluate(
-        async ({ tokenBAddress, swapAddress }) => {
-          const ethereum = (window as unknown as Window & {
-            ethereum: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
-          }).ethereum;
-          const pad = (addr: string) => addr.replace('0x', '').toLowerCase().padStart(64, '0');
-          const value = await ethereum.request({
-            method: 'eth_call',
-            params: [
-              { to: tokenBAddress, data: '0x70a08231' + pad(swapAddress) },
-              'latest',
-            ],
-          });
-          return BigInt(value as string).toString();
-        },
-        { tokenBAddress: tokenB, swapAddress: swap },
-      ),
-    );
+    const poolBalance = await pub.readContract({
+      address: tokenB,
+      abi: ERC20_ABI,
+      functionName: 'balanceOf',
+      args: [swap],
+    });
     const excessiveAmount = poolBalance + 1n;
 
     await page.getByTestId('swap-amount-input').fill(excessiveAmount.toString());
     await page.click('#approve');
     await dappE2e.waitForRpcIdle();
+    try {
+      await pub.simulateContract({
+        account: user,
+        address: swap,
+        abi: SWAP_ABI,
+        functionName: 'swapAforB',
+        args: [excessiveAmount, 0n],
+      });
+      throw new Error('expected InsufficientLiquidity revert');
+    } catch (error) {
+      expectCustomError(error, 'InsufficientLiquidity', [excessiveAmount, poolBalance]);
+    }
     await page.click('#swap');
     await dappE2e.waitForRpcIdle();
 
-    const err = (await page.locator('#last-error').textContent()) ?? '';
-    expect(err).toMatch(/InsufficientLiquidity|execution reverted|revert/i);
+    await expect(page.locator('#last-error')).not.toHaveText('');
 
     await page.click('#refresh');
     await dappE2e.waitForRpcIdle();
