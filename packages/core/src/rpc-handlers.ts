@@ -3,6 +3,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { sendTransaction } from './tx.js';
 import {
   type ApprovalMode,
+  type ChainConfig,
   Eip1193Error,
   type DappE2eEventEmitter,
   type Eip1193Request,
@@ -26,6 +27,12 @@ export interface RpcContext {
   approvalMode?: { current: ApprovalMode };
   anvilPort?: number;
   emitter?: DappE2eEventEmitter;
+  /**
+   * 登録済 chain の registry。
+   * `wallet_switchEthereumChain` が参照し、未登録 chainId は EIP-1193 code 4902 で reject する。
+   * 未指定 (undefined) の場合は registry チェック自体が無効化される (下位互換、従来挙動)。
+   */
+  chainRegistry?: { current: ChainConfig[] };
 }
 
 /**
@@ -164,15 +171,38 @@ export async function handleRpcRequest(
     case 'wallet_switchEthereumChain': {
       assertApproved(ctx);
       const chainIdHex = getRequiredChainIdHex(params[0]);
+      // chainRegistry が設定されている場合のみ未登録 chain を 4902 で reject (EIP-3326)
+      if (ctx.chainRegistry) {
+        const registered = ctx.chainRegistry.current.some(
+          (chain) => chain.chainId.toLowerCase() === chainIdHex.toLowerCase(),
+        );
+        if (!registered) {
+          throw new Eip1193Error(
+            4902,
+            `Unrecognized Chain ID "${chainIdHex}". Try adding the chain via wallet_addEthereumChain first.`,
+          );
+        }
+      }
       ctx.chainState.current = parseChainIdHex(chainIdHex);
       ctx.emitter?.emit('chainChanged', chainIdHex);
       return null;
     }
 
     case 'wallet_addEthereumChain': {
-      const chainIdHex = getRequiredChainIdHex(params[0]);
-      ctx.chainState.current = parseChainIdHex(chainIdHex);
-      ctx.emitter?.emit('chainChanged', chainIdHex);
+      const chainConfig = parseChainConfig(params[0]);
+      // chainRegistry が設定されている場合は registry に追加 (既存と同 chainId は上書き)
+      if (ctx.chainRegistry) {
+        const existing = ctx.chainRegistry.current.findIndex(
+          (c) => c.chainId.toLowerCase() === chainConfig.chainId.toLowerCase(),
+        );
+        if (existing >= 0) {
+          ctx.chainRegistry.current[existing] = chainConfig;
+        } else {
+          ctx.chainRegistry.current.push(chainConfig);
+        }
+      }
+      ctx.chainState.current = parseChainIdHex(chainConfig.chainId);
+      ctx.emitter?.emit('chainChanged', chainConfig.chainId);
       return null;
     }
 
@@ -315,6 +345,43 @@ function getRequiredChainIdHex(param: unknown): Hex {
 
 function parseChainIdHex(chainIdHex: Hex): number {
   return Number.parseInt(chainIdHex, 16);
+}
+
+function parseChainConfig(param: unknown): ChainConfig {
+  if (typeof param !== 'object' || param === null) {
+    throw new Eip1193Error(-32602, 'invalid params: chain config object is required');
+  }
+  const obj = param as Record<string, unknown>;
+  const chainId = obj.chainId;
+  if (typeof chainId !== 'string' || !/^0x[0-9a-fA-F]+$/.test(chainId)) {
+    throw new Eip1193Error(
+      -32602,
+      `invalid params: chainId must be 0x-prefixed hex, got ${String(chainId)}`,
+    );
+  }
+  const config: ChainConfig = { chainId: chainId as Hex };
+  if (typeof obj.chainName === 'string') config.chainName = obj.chainName;
+  if (Array.isArray(obj.rpcUrls)) {
+    config.rpcUrls = obj.rpcUrls.filter((u): u is string => typeof u === 'string');
+  }
+  if (Array.isArray(obj.blockExplorerUrls)) {
+    config.blockExplorerUrls = obj.blockExplorerUrls.filter((u): u is string => typeof u === 'string');
+  }
+  if (typeof obj.nativeCurrency === 'object' && obj.nativeCurrency !== null) {
+    const nc = obj.nativeCurrency as Record<string, unknown>;
+    if (
+      typeof nc.name === 'string' &&
+      typeof nc.symbol === 'string' &&
+      typeof nc.decimals === 'number'
+    ) {
+      config.nativeCurrency = {
+        name: nc.name,
+        symbol: nc.symbol,
+        decimals: nc.decimals,
+      };
+    }
+  }
+  return config;
 }
 
 export { BLOCKED_METHODS };

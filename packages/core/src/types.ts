@@ -41,6 +41,22 @@ export interface InjectorOptions {
   wallets?: WalletConfig[];
 }
 
+/**
+ * EIP-3085 (wallet_addEthereumChain) parameters の subset。
+ * chain registry に登録されるエントリの最小形式。
+ */
+export interface ChainConfig {
+  chainId: Hex;
+  chainName?: string;
+  rpcUrls?: readonly string[];
+  nativeCurrency?: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
+  blockExplorerUrls?: readonly string[];
+}
+
 export type Eip1193EventName =
   | 'accountsChanged'
   | 'chainChanged'
@@ -94,6 +110,11 @@ export interface WalletApi {
    * 範囲外 index で throw、内部で `accountsChanged` event を自動発火する。
    */
   setActiveAccount?(index: number): Promise<void>;
+  /**
+   * chain registry を test 内から書き換える。
+   * 以後の `wallet_switchEthereumChain` は本 registry を参照し、未登録 chainId は 4902 で reject する。
+   */
+  setChainRegistry?(chains: readonly ChainConfig[]): Promise<void>;
 }
 
 export interface DappE2eEventEmitter {
@@ -115,6 +136,11 @@ export interface DappE2eApi {
    * 内部で `accountsChanged` event を自動発火する。
    */
   setActiveAccount?(index: number): Promise<void>;
+  /**
+   * chain registry を test 内から書き換える (primary wallet 経由)。
+   * 以後の `wallet_switchEthereumChain` で未登録 chainId は EIP-1193 code 4902 で reject。
+   */
+  setChainRegistry?(chains: readonly ChainConfig[]): Promise<void>;
   waitForRpcIdle?(timeoutMs?: number): Promise<void>;
   wallets?: Record<string, WalletApi>;
 }

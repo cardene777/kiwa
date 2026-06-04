@@ -9,6 +9,7 @@ import { handleRpcRequest, type RpcContext } from './rpc-handlers.js';
 import {
   Eip1193Error,
   type ApprovalMode,
+  type ChainConfig,
   type DappE2eApi,
   type Eip1193EventName,
   type Hex,
@@ -161,6 +162,15 @@ export const dappE2eTest = base.extend<
           );
         }
         await primaryApi.setActiveAccount(index);
+      },
+      async setChainRegistry(chains: readonly ChainConfig[]) {
+        if (!primaryApi.setChainRegistry) {
+          throw new Eip1193Error(
+            -32603,
+            'setChainRegistry helper unavailable on this primary wallet',
+          );
+        }
+        await primaryApi.setChainRegistry(chains);
       },
       async waitForRpcIdle(timeoutMs = 10_000) {
         await waitForPendingRpcs(page, _rpcTracker.pendingRpcs, timeoutMs);
@@ -451,6 +461,12 @@ function createWalletApi(
       await emitPageEvent(page, bridgeName, 'accountsChanged', [newAddress]);
     };
   }
+
+  // setChainRegistry は全 wallet で expose、内部で chainRegistry を初期化する
+  api.setChainRegistry = async (chains: readonly ChainConfig[]) => {
+    rpcContext.chainRegistry ??= { current: [] };
+    rpcContext.chainRegistry.current = [...chains];
+  };
 
   return api;
 }

@@ -15,7 +15,7 @@ error の返し方は [ERRORS.md](./ERRORS.md) を参照してください。
 | `net_version` | なし | `string` | なし |
 | `personal_sign` | `[message: string, address: 0x{hex}]` | `0x${string}` | `4001` / `4100` / `-32602` |
 | `eth_signTypedData_v4` | `[address: 0x{hex}, typedDataJson: string]` | `0x${string}` | `4001` / `4100` / `-32700` |
-| `wallet_switchEthereumChain` | `[{ chainId: 0x{hex} }]` | `null` | `4001` / `-32602` |
+| `wallet_switchEthereumChain` | `[{ chainId: 0x{hex} }]` | `null` | `4001` / `4902` / `-32602` |
 | `wallet_addEthereumChain` | `[{ chainId: 0x{hex}, ... }]` | `null` | `-32602` |
 | `eth_sendTransaction` | `[txRequest]` | `0x${string}` | `3` / `4001` / `4100` / `-32603` |
 
@@ -73,8 +73,10 @@ const sig = await window.ethereum.request({
 `wallet_switchEthereumChain` と `wallet_addEthereumChain` は、
 どちらも `chainId` を検証したうえで `chainState.current` を更新し、
 内部 emitter 経由で `chainChanged` を page 側へ通知します。
-v0.1.0 では chain 登録テーブルを持たないため、未登録 chain 判定による `4902` は返しません。
-ただし approval mode が `'reject'` のときは `wallet_switchEthereumChain` のみ `4001` で失敗し、
+v0.3 から chain registry (`dappE2e.setChainRegistry(chains)`) が optional で利用可能になり、
+registry を有効化すると未登録 chain への `wallet_switchEthereumChain` で EIP-3326 の `4902 (Unrecognized Chain ID)` を返します。
+registry 未設定の場合は従来どおり常に成功 (下位互換)。
+approval mode が `'reject'` のときは `wallet_switchEthereumChain` のみ `4001` で失敗し、
 `wallet_addEthereumChain` は従来どおり実行されます。
 
 ```typescript
@@ -83,6 +85,25 @@ await window.ethereum.request({
   params: [{ chainId: '0xa86a' }],
 });
 ```
+
+#### chain registry の利用 (v0.3+)
+
+`dappE2e.setChainRegistry(chains)` で初期 chain 集合を設定すると、未登録 chain への `wallet_switchEthereumChain` が `4902` で失敗するようになります。
+
+```typescript
+await dappE2e.setChainRegistry([
+  { chainId: '0x1', chainName: 'Ethereum Mainnet' },
+  { chainId: '0xa', chainName: 'Optimism' },
+]);
+
+// 0xa86a (Avalanche) は登録されていないので 4902 で失敗
+await window.ethereum.request({
+  method: 'wallet_switchEthereumChain',
+  params: [{ chainId: '0xa86a' }],
+});
+```
+
+`wallet_addEthereumChain` を呼ぶと registry にも追加され、以後 switch 可能になります (EIP-3085 準拠)。
 
 ### transaction 系
 
