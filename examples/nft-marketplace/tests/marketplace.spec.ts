@@ -4,6 +4,8 @@ import { dirname, resolve } from 'node:path';
 import { expect } from '@playwright/test';
 import { dappE2eTest } from '@dapp-e2e/core';
 import {
+  BaseError,
+  ContractFunctionRevertedError,
   createPublicClient,
   createWalletClient,
   defineChain,
@@ -19,6 +21,10 @@ const SELLER_PK =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
 const BUYER_PK =
   '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d' as const;
+const ROYALTY_PK =
+  '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a' as const;
+const COUNTER_BUYER_PK =
+  '0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6' as const;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const nftArtifact = JSON.parse(
@@ -36,13 +42,23 @@ const NFT_ABI = parseAbi([
   'function ownerOf(uint256 tokenId) view returns (address)',
   'function approve(address to, uint256 tokenId)',
   'function balanceOf(address owner) view returns (uint256)',
+  'function royaltyInfo(uint256 tokenId, uint256 salePrice) view returns (address receiver, uint256 royaltyAmount)',
   'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
 ]);
 const MARKET_ABI = parseAbi([
   'function list(uint256 tokenId, uint256 price)',
   'function buy(uint256 tokenId) payable',
+  'function buyNft(uint256 tokenId) payable',
   'function cancel(uint256 tokenId)',
+  'function makeOffer(uint256 tokenId, uint256 amount, uint256 deadline) payable returns (uint256)',
+  'function cancelOffer(uint256 offerId)',
+  'function acceptOffer(uint256 offerId)',
   'function listings(uint256 tokenId) view returns (address seller, uint256 price, bool active)',
+  'function offers(uint256 offerId) view returns (uint256 tokenId, address buyer, uint256 amount, uint256 deadline, bool active)',
+  'function isOfferActive(uint256 offerId) view returns (bool)',
+  'error InsufficientPayment()',
+  'error AlreadyListed(uint256 tokenId)',
+  'error OfferExpired(uint256 offerId)',
   'event Listed(uint256 indexed tokenId, address indexed seller, uint256 price)',
   'event Bought(uint256 indexed tokenId, address indexed buyer, uint256 price)',
 ]);
@@ -56,10 +72,39 @@ function anvilChain(port: number) {
   });
 }
 
+function expectCustomError(
+  error: unknown,
+  errorName: string,
+  expectedArgs?: readonly unknown[],
+): void {
+  if (!(error instanceof BaseError)) throw error;
+  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
+  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
+  expect(reverted.data?.errorName).toBe(errorName);
+  if (expectedArgs) {
+    expect(reverted.data?.args).toEqual(expectedArgs);
+  }
+}
+
+async function rpc(port: number, method: string, params: unknown[] = []): Promise<unknown> {
+  const pub = createPublicClient({ chain: anvilChain(port), transport: http() });
+  return await (
+    pub as unknown as {
+      request: (args: { method: string; params: unknown[] }) => Promise<unknown>;
+    }
+  ).request({ method, params });
+}
+
+async function increaseTime(port: number, seconds: bigint): Promise<void> {
+  await rpc(port, 'evm_increaseTime', [Number(seconds)]);
+  await rpc(port, 'evm_mine');
+}
+
 async function setupMarket(
   port: number,
 ): Promise<{ nft: Address; market: Address; tokenId: bigint }> {
   const seller = privateKeyToAccount(SELLER_PK);
+  const royaltyReceiver = privateKeyToAccount(ROYALTY_PK);
   const wallet = createWalletClient({
     account: seller,
     chain: anvilChain(port),
@@ -70,6 +115,7 @@ async function setupMarket(
   const nftHash = await wallet.deployContract({
     abi: nftArtifact.abi as never,
     bytecode: nftArtifact.bytecode.object,
+    args: [royaltyReceiver.address],
   });
   const nftReceipt = await pub.waitForTransactionReceipt({ hash: nftHash });
   const nft = nftReceipt.contractAddress!;
@@ -114,7 +160,6 @@ function makeViewerHtml(nft: Address, market: Address): string {
       document.getElementById('account').textContent = accounts[0];
     });
     document.getElementById('refresh').addEventListener('click', async () => {
-      // ownerOf(uint256) sig = 0x6352211e
       const ownerData = '0x6352211e' + '0000000000000000000000000000000000000000000000000000000000000001';
       const ownerRaw = await window.ethereum.request({
         method: 'eth_call',
@@ -122,15 +167,12 @@ function makeViewerHtml(nft: Address, market: Address): string {
       });
       const owner = '0x' + ownerRaw.slice(26);
       document.getElementById('token-owner').textContent = owner.toLowerCase();
-      // listings(uint256) sig = 0xde74e57b (auto-getter for public mapping); use unique signature instead by reading raw
-      // To keep simple, compute via short call: listings(uint256)=keccak("listings(uint256)") first 4 bytes
-      // Foundry public mapping getter selector: 0xde74e57b
+
       const listingsData = '0xde74e57b' + '0000000000000000000000000000000000000000000000000000000000000001';
       const listingRaw = await window.ethereum.request({
         method: 'eth_call',
         params: [{ to: MARKET, data: listingsData }, 'latest'],
       });
-      // 3 fields: address (32 byte slot), uint256 price, bool active
       const hex = listingRaw.slice(2);
       const price = BigInt('0x' + hex.slice(64, 128)).toString();
       const active = BigInt('0x' + hex.slice(128, 192)) === 1n;
@@ -149,8 +191,7 @@ dappE2eTest.describe('nft-marketplace e2e', () => {
     anvilPort,
     dappE2e,
   }) => {
-    const { nft, market, tokenId } = await setupMarket(anvilPort);
-    void tokenId;
+    const { nft, market } = await setupMarket(anvilPort);
     const seller = privateKeyToAccount(SELLER_PK);
     await page.setContent(makeViewerHtml(nft, market));
     await page.click('#connect');
@@ -256,16 +297,10 @@ dappE2eTest.describe('nft-marketplace e2e', () => {
 
   dappE2eTest('T-NM-004 buy で InsufficientPayment が revert', async ({ anvilPort }) => {
     const { nft, market, tokenId } = await setupMarket(anvilPort);
-    void nft;
     const seller = privateKeyToAccount(SELLER_PK);
     const buyer = privateKeyToAccount(BUYER_PK);
     const sellerWallet = createWalletClient({
       account: seller,
-      chain: anvilChain(anvilPort),
-      transport: http(),
-    });
-    const buyerWallet = createWalletClient({
-      account: buyer,
       chain: anvilChain(anvilPort),
       transport: http(),
     });
@@ -288,19 +323,300 @@ dappE2eTest.describe('nft-marketplace e2e', () => {
       }),
     });
 
-    let reverted = false;
     try {
-      await buyerWallet.writeContract({
+      await pub.simulateContract({
+        account: buyer.address,
         address: market,
         abi: MARKET_ABI,
         functionName: 'buy',
         args: [tokenId],
         value: parseEther('0.5'),
       });
-    } catch (e) {
-      const msg = (e as Error).message ?? '';
-      reverted = msg.includes('InsufficientPayment') || msg.includes('revert');
+      throw new Error('expected InsufficientPayment revert');
+    } catch (error) {
+      expectCustomError(error, 'InsufficientPayment');
     }
-    expect(reverted).toBe(true);
+  });
+
+  dappE2eTest('T-NM-005 同一 tokenId の double-listing は AlreadyListed(uint256) で revert', async ({
+    anvilPort,
+  }) => {
+    const { nft, market, tokenId } = await setupMarket(anvilPort);
+    const seller = privateKeyToAccount(SELLER_PK);
+    const sellerWallet = createWalletClient({
+      account: seller,
+      chain: anvilChain(anvilPort),
+      transport: http(),
+    });
+    const pub = createPublicClient({ chain: anvilChain(anvilPort), transport: http() });
+
+    await pub.waitForTransactionReceipt({
+      hash: await sellerWallet.writeContract({
+        address: nft,
+        abi: NFT_ABI,
+        functionName: 'approve',
+        args: [market, tokenId],
+      }),
+    });
+    await pub.waitForTransactionReceipt({
+      hash: await sellerWallet.writeContract({
+        address: market,
+        abi: MARKET_ABI,
+        functionName: 'list',
+        args: [tokenId, parseEther('1')],
+      }),
+    });
+
+    try {
+      await pub.simulateContract({
+        account: seller.address,
+        address: market,
+        abi: MARKET_ABI,
+        functionName: 'list',
+        args: [tokenId, parseEther('1')],
+      });
+      throw new Error('expected AlreadyListed revert');
+    } catch (error) {
+      expectCustomError(error, 'AlreadyListed', [tokenId]);
+    }
+  });
+
+  dappE2eTest('T-NM-006 makeOffer → cancelOffer で offer が消え marketplace balance が 0 に戻る', async ({
+    anvilPort,
+  }) => {
+    const { market, tokenId } = await setupMarket(anvilPort);
+    const buyer = privateKeyToAccount(BUYER_PK);
+    const buyerWallet = createWalletClient({
+      account: buyer,
+      chain: anvilChain(anvilPort),
+      transport: http(),
+    });
+    const pub = createPublicClient({ chain: anvilChain(anvilPort), transport: http() });
+    const deadline = (await pub.getBlock()).timestamp + 3600n;
+
+    await pub.waitForTransactionReceipt({
+      hash: await buyerWallet.writeContract({
+        address: market,
+        abi: MARKET_ABI,
+        functionName: 'makeOffer',
+        args: [tokenId, parseEther('1'), deadline],
+        value: parseEther('1'),
+      }),
+    });
+
+    const marketBalanceBeforeCancel = await pub.getBalance({ address: market });
+    expect(marketBalanceBeforeCancel).toBe(parseEther('1'));
+
+    await pub.waitForTransactionReceipt({
+      hash: await buyerWallet.writeContract({
+        address: market,
+        abi: MARKET_ABI,
+        functionName: 'cancelOffer',
+        args: [1n],
+      }),
+    });
+
+    const offer = await pub.readContract({
+      address: market,
+      abi: MARKET_ABI,
+      functionName: 'offers',
+      args: [1n],
+    });
+    expect(offer[4]).toBe(false);
+    expect(await pub.getBalance({ address: market })).toBe(0n);
+  });
+
+  dappE2eTest('T-NM-007 offer / counter-offer の後 seller が counter-offer を accept できる', async ({
+    anvilPort,
+  }) => {
+    const { nft, market, tokenId } = await setupMarket(anvilPort);
+    const seller = privateKeyToAccount(SELLER_PK);
+    const buyer = privateKeyToAccount(BUYER_PK);
+    const counterBuyer = privateKeyToAccount(COUNTER_BUYER_PK);
+    const sellerWallet = createWalletClient({
+      account: seller,
+      chain: anvilChain(anvilPort),
+      transport: http(),
+    });
+    const buyerWallet = createWalletClient({
+      account: buyer,
+      chain: anvilChain(anvilPort),
+      transport: http(),
+    });
+    const counterBuyerWallet = createWalletClient({
+      account: counterBuyer,
+      chain: anvilChain(anvilPort),
+      transport: http(),
+    });
+    const pub = createPublicClient({ chain: anvilChain(anvilPort), transport: http() });
+    const deadline = (await pub.getBlock()).timestamp + 3600n;
+
+    await pub.waitForTransactionReceipt({
+      hash: await sellerWallet.writeContract({
+        address: nft,
+        abi: NFT_ABI,
+        functionName: 'approve',
+        args: [market, tokenId],
+      }),
+    });
+    await pub.waitForTransactionReceipt({
+      hash: await buyerWallet.writeContract({
+        address: market,
+        abi: MARKET_ABI,
+        functionName: 'makeOffer',
+        args: [tokenId, parseEther('1'), deadline],
+        value: parseEther('1'),
+      }),
+    });
+    await pub.waitForTransactionReceipt({
+      hash: await counterBuyerWallet.writeContract({
+        address: market,
+        abi: MARKET_ABI,
+        functionName: 'makeOffer',
+        args: [tokenId, parseEther('1.1'), deadline],
+        value: parseEther('1.1'),
+      }),
+    });
+
+    await pub.waitForTransactionReceipt({
+      hash: await sellerWallet.writeContract({
+        address: market,
+        abi: MARKET_ABI,
+        functionName: 'acceptOffer',
+        args: [2n],
+      }),
+    });
+
+    const owner = await pub.readContract({
+      address: nft,
+      abi: NFT_ABI,
+      functionName: 'ownerOf',
+      args: [tokenId],
+    });
+    expect(owner.toLowerCase()).toBe(counterBuyer.address.toLowerCase());
+  });
+
+  dappE2eTest('T-NM-008 期限切れ offer は isOfferActive=false になり acceptOffer が OfferExpired(uint256) で revert', async ({
+    anvilPort,
+  }) => {
+    const { nft, market, tokenId } = await setupMarket(anvilPort);
+    const seller = privateKeyToAccount(SELLER_PK);
+    const buyer = privateKeyToAccount(BUYER_PK);
+    const sellerWallet = createWalletClient({
+      account: seller,
+      chain: anvilChain(anvilPort),
+      transport: http(),
+    });
+    const buyerWallet = createWalletClient({
+      account: buyer,
+      chain: anvilChain(anvilPort),
+      transport: http(),
+    });
+    const pub = createPublicClient({ chain: anvilChain(anvilPort), transport: http() });
+    const deadline = (await pub.getBlock()).timestamp + 1n;
+
+    await pub.waitForTransactionReceipt({
+      hash: await sellerWallet.writeContract({
+        address: nft,
+        abi: NFT_ABI,
+        functionName: 'approve',
+        args: [market, tokenId],
+      }),
+    });
+    await pub.waitForTransactionReceipt({
+      hash: await buyerWallet.writeContract({
+        address: market,
+        abi: MARKET_ABI,
+        functionName: 'makeOffer',
+        args: [tokenId, parseEther('1'), deadline],
+        value: parseEther('1'),
+      }),
+    });
+
+    await increaseTime(anvilPort, 2n);
+
+    const active = await pub.readContract({
+      address: market,
+      abi: MARKET_ABI,
+      functionName: 'isOfferActive',
+      args: [1n],
+    });
+    expect(active).toBe(false);
+
+    try {
+      await pub.simulateContract({
+        account: seller.address,
+        address: market,
+        abi: MARKET_ABI,
+        functionName: 'acceptOffer',
+        args: [1n],
+      });
+      throw new Error('expected OfferExpired revert');
+    } catch (error) {
+      expectCustomError(error, 'OfferExpired', [1n]);
+    }
+  });
+
+  dappE2eTest('T-NM-009 buyNft 後 royalty receiver と seller に split distribution される', async ({
+    anvilPort,
+  }) => {
+    const { nft, market, tokenId } = await setupMarket(anvilPort);
+    const seller = privateKeyToAccount(SELLER_PK);
+    const buyer = privateKeyToAccount(BUYER_PK);
+    const royaltyReceiver = privateKeyToAccount(ROYALTY_PK);
+    const sellerWallet = createWalletClient({
+      account: seller,
+      chain: anvilChain(anvilPort),
+      transport: http(),
+    });
+    const buyerWallet = createWalletClient({
+      account: buyer,
+      chain: anvilChain(anvilPort),
+      transport: http(),
+    });
+    const pub = createPublicClient({ chain: anvilChain(anvilPort), transport: http() });
+    const salePrice = parseEther('1');
+
+    await pub.waitForTransactionReceipt({
+      hash: await sellerWallet.writeContract({
+        address: nft,
+        abi: NFT_ABI,
+        functionName: 'approve',
+        args: [market, tokenId],
+      }),
+    });
+    await pub.waitForTransactionReceipt({
+      hash: await sellerWallet.writeContract({
+        address: market,
+        abi: MARKET_ABI,
+        functionName: 'list',
+        args: [tokenId, salePrice],
+      }),
+    });
+
+    const [, royaltyAmount] = await pub.readContract({
+      address: nft,
+      abi: NFT_ABI,
+      functionName: 'royaltyInfo',
+      args: [tokenId, salePrice],
+    });
+    const sellerBalanceBefore = await pub.getBalance({ address: seller.address });
+    const royaltyBalanceBefore = await pub.getBalance({ address: royaltyReceiver.address });
+
+    await pub.waitForTransactionReceipt({
+      hash: await buyerWallet.writeContract({
+        address: market,
+        abi: MARKET_ABI,
+        functionName: 'buyNft',
+        args: [tokenId],
+        value: salePrice,
+      }),
+    });
+
+    const sellerBalanceAfter = await pub.getBalance({ address: seller.address });
+    const royaltyBalanceAfter = await pub.getBalance({ address: royaltyReceiver.address });
+
+    expect(royaltyBalanceAfter - royaltyBalanceBefore).toBe(royaltyAmount);
+    expect(sellerBalanceAfter - sellerBalanceBefore).toBe(salePrice - royaltyAmount);
   });
 });

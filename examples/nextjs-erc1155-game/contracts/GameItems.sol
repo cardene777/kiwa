@@ -8,6 +8,7 @@ contract GameItems {
     string public constant symbol = "DE2EGI";
 
     mapping(uint256 => mapping(address => uint256)) public balanceOf;
+    mapping(uint256 => uint256) public totalSupply;
     mapping(address => mapping(address => bool)) public isApprovedForAll;
 
     event TransferSingle(
@@ -34,6 +35,7 @@ contract GameItems {
     function mint(address to, uint256 id, uint256 amount) external {
         if (to == address(0)) revert InvalidRecipient();
         balanceOf[id][to] += amount;
+        totalSupply[id] += amount;
         emit TransferSingle(msg.sender, address(0), to, id, amount);
     }
 
@@ -42,6 +44,7 @@ contract GameItems {
         if (ids.length != amounts.length) revert LengthMismatch();
         for (uint256 i = 0; i < ids.length; i++) {
             balanceOf[ids[i]][to] += amounts[i];
+            totalSupply[ids[i]] += amounts[i];
         }
         emit TransferBatch(msg.sender, address(0), to, ids, amounts);
     }
@@ -87,5 +90,13 @@ contract GameItems {
             balanceOf[ids[i]][to] += amounts[i];
         }
         emit TransferBatch(msg.sender, from, to, ids, amounts);
+    }
+
+    function burn(address account, uint256 id, uint256 amount) external {
+        if (msg.sender != account && !isApprovedForAll[account][msg.sender]) revert NotAuthorized();
+        if (balanceOf[id][account] < amount) revert InsufficientBalance();
+        balanceOf[id][account] -= amount;
+        totalSupply[id] -= amount;
+        emit TransferSingle(msg.sender, account, address(0), id, amount);
     }
 }
