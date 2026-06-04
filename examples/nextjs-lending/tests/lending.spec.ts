@@ -185,4 +185,56 @@ test.describe('Next.js Lending (supply / borrow / repay / health factor) e2e', (
     const maxBorrow = (afterSupplied * 7500n) / 10000n;
     expect(afterDebt).toBeLessThanOrEqual(maxBorrow);
   });
+
+  test('T-LD-006 approve なしで直接 supply を呼ぶと collateral transferFrom が失敗し revert する', async () => {
+    // bob (PK2) は collateral token を持たず、かつ approve していない
+    // この状態で supply() を呼ぶと SimpleERC20.transferFrom が allowance チェックで revert する
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const { createPublicClient, defineChain, http } = await import('viem');
+    const { privateKeyToAccount } = await import('viem/accounts');
+
+    const __filename = url.fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const envContent = fs.readFileSync(
+      path.resolve(__dirname, '..', '.env.local'),
+      'utf8',
+    );
+    const lendingMatch = envContent.match(/NEXT_PUBLIC_LENDING=(0x[0-9a-fA-F]+)/);
+    expect(lendingMatch).not.toBeNull();
+    const LENDING = lendingMatch![1] as `0x${string}`;
+
+    const anvilChain = defineChain({
+      id: 31337,
+      name: 'Anvil',
+      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+      rpcUrls: { default: { http: ['http://127.0.0.1:8545'] } },
+    });
+
+    const bob = privateKeyToAccount(
+      '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
+    );
+    const pub = createPublicClient({ chain: anvilChain, transport: http() });
+
+    const SUPPLY_ABI = [
+      {
+        inputs: [{ name: 'amount', type: 'uint256' }],
+        name: 'supply',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+    ] as const;
+
+    await expect(
+      pub.simulateContract({
+        address: LENDING,
+        abi: SUPPLY_ABI,
+        functionName: 'supply',
+        args: [SUPPLY_AMOUNT],
+        account: bob.address,
+      }),
+    ).rejects.toThrow();
+  });
 });

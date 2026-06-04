@@ -176,4 +176,61 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     expect(beforeStaked - afterStaked).toBe(STAKE_AMOUNT);
     expect(afterStakeBalance - beforeStakeBalance).toBe(STAKE_AMOUNT);
   });
+
+  test('T-ST-006 approve なしで直接 stake を呼ぶと SimpleERC20 transferFrom が失敗し revert する', async () => {
+    // 別 wallet (PK2) は STAKE_TOKEN の balance 0 でかつ approve していない
+    // この状態で stake() を呼ぶと SimpleERC20.transferFrom が allowance チェックで revert する
+    // contract レベルの認可チェックを直接検証する negative path
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const { createPublicClient, createWalletClient, defineChain, http } = await import('viem');
+    const { privateKeyToAccount } = await import('viem/accounts');
+
+    const __filename = url.fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const envContent = fs.readFileSync(
+      path.resolve(__dirname, '..', '.env.local'),
+      'utf8',
+    );
+    const stakingMatch = envContent.match(/NEXT_PUBLIC_STAKING=(0x[0-9a-fA-F]+)/);
+    expect(stakingMatch).not.toBeNull();
+    const STAKING = stakingMatch![1] as `0x${string}`;
+
+    const anvilChain = defineChain({
+      id: 31337,
+      name: 'Anvil',
+      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+      rpcUrls: { default: { http: ['http://127.0.0.1:8545'] } },
+    });
+
+    // bob = PK2、STAKE_TOKEN を持たない & approve していない
+    const bob = privateKeyToAccount(
+      '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
+    );
+    const bobWallet = createWalletClient({ account: bob, chain: anvilChain, transport: http() });
+    const pub = createPublicClient({ chain: anvilChain, transport: http() });
+
+    const STAKE_ABI = [
+      {
+        inputs: [{ name: 'amount', type: 'uint256' }],
+        name: 'stake',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+    ] as const;
+
+    // simulateContract で事前 revert 確認 (writeContract 経由だと receipt まで送って revert)
+    await expect(
+      pub.simulateContract({
+        address: STAKING,
+        abi: STAKE_ABI,
+        functionName: 'stake',
+        args: [STAKE_AMOUNT],
+        account: bob.address,
+      }),
+    ).rejects.toThrow();
+    void bobWallet;
+  });
 });
