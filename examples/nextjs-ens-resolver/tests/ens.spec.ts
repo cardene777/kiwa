@@ -1,8 +1,66 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { BaseError, ContractFunctionRevertedError, createPublicClient, createWalletClient, defineChain, http, parseAbi, type Address } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
 
 const PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
+const SECOND_PRIVATE_KEY =
+  '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d' as const;
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const exampleRoot = resolve(__dirname, '..');
+
+const RESOLVER_ABI = parseAbi([
+  'function setRecord(string name, address addr)',
+  'function resolve(string name) view returns (address)',
+  'error AlreadyRegistered()',
+]);
+
+function anvilChain(port: number) {
+  return defineChain({
+    id: 31337,
+    name: 'Anvil',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: { default: { http: [`http://127.0.0.1:${port}`] } },
+  });
+}
+
+function readEnv() {
+  const envPath = resolve(exampleRoot, '.env.local');
+  return Object.fromEntries(
+    readFileSync(envPath, 'utf8')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith('#'))
+      .map((line) => {
+        const idx = line.indexOf('=');
+        return [line.slice(0, idx), line.slice(idx + 1)];
+      }),
+  ) as Record<string, string>;
+}
+
+function expectCustomError(error: unknown, errorName: string): void {
+  if (!(error instanceof BaseError)) throw error;
+  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
+  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
+  expect(reverted.data?.errorName).toBe(errorName);
+}
+
+function makeClients(port: number, privateKey: typeof PRIVATE_KEY | typeof SECOND_PRIVATE_KEY) {
+  const account = privateKeyToAccount(privateKey);
+  return {
+    account,
+    wallet: createWalletClient({
+      account,
+      chain: anvilChain(port),
+      transport: http(),
+    }),
+    pub: createPublicClient({ chain: anvilChain(port), transport: http() }),
+  };
+}
 
 async function ensureConnected(page: import('@playwright/test').Page) {
   const connectBtn = page.getByRole('button', { name: /connect wallet/i });
@@ -162,5 +220,43 @@ test.describe('Next.js ENS-like resolver (forward / reverse 名前解決) e2e', 
       'resolved: 0x0000000000000000000000000000000000000000',
       { timeout: 15_000 },
     );
+  });
+
+  test('T-ENS-006 name collision handling test', async ({ anvilPort }) => {
+    const env = readEnv();
+    const resolver = env.NEXT_PUBLIC_RESOLVER as Address;
+    const owner = makeClients(anvilPort, PRIVATE_KEY);
+    const other = makeClients(anvilPort, SECOND_PRIVATE_KEY);
+    const name = makeName('collision');
+
+    const registerHash = await owner.wallet.writeContract({
+      address: resolver,
+      abi: RESOLVER_ABI,
+      functionName: 'setRecord',
+      args: [name, owner.account.address],
+    });
+    await owner.pub.waitForTransactionReceipt({ hash: registerHash });
+
+    try {
+      await other.pub.simulateContract({
+        address: resolver,
+        abi: RESOLVER_ABI,
+        functionName: 'setRecord',
+        args: [name, other.account.address],
+        account: other.account.address,
+      });
+      throw new Error('expected AlreadyRegistered revert');
+    } catch (error) {
+      expectCustomError(error, 'AlreadyRegistered');
+    }
+
+    expect(
+      await owner.pub.readContract({
+        address: resolver,
+        abi: RESOLVER_ABI,
+        functionName: 'resolve',
+        args: [name],
+      }),
+    ).toBe(owner.account.address);
   });
 });

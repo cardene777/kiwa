@@ -18,6 +18,12 @@ await runE2EPrepareEnv({
         'utf8',
       ),
     ) as { abi: readonly unknown[]; bytecode: { object: Hex } };
+    const rangeArtifact = JSON.parse(
+      readFileSync(
+        resolve(exampleRoot, 'forge-out/RangeProofVerifier.sol/RangeProofVerifier.json'),
+        'utf8',
+      ),
+    ) as { abi: readonly unknown[]; bytecode: { object: Hex } };
 
     const hash = await wallet.deployContract({
       abi: artifact.abi as never,
@@ -26,8 +32,16 @@ await runE2EPrepareEnv({
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
     const verifier = receipt.contractAddress!;
 
+    const rangeHash = await wallet.deployContract({
+      abi: rangeArtifact.abi as never,
+      bytecode: rangeArtifact.bytecode.object,
+    });
+    const rangeReceipt = await publicClient.waitForTransactionReceipt({ hash: rangeHash });
+    const rangeVerifier = rangeReceipt.contractAddress!;
+
     return {
       NEXT_PUBLIC_VERIFIER: verifier,
+      NEXT_PUBLIC_RANGE_VERIFIER: rangeVerifier,
     };
   },
 });

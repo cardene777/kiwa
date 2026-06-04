@@ -50,6 +50,10 @@ function requireEnv(value: string | undefined, name: string): `0x${string}` {
 }
 
 export const VERIFIER = requireEnv(process.env.NEXT_PUBLIC_VERIFIER, 'NEXT_PUBLIC_VERIFIER');
+export const RANGE_VERIFIER = requireEnv(
+  process.env.NEXT_PUBLIC_RANGE_VERIFIER,
+  'NEXT_PUBLIC_RANGE_VERIFIER',
+);
 
 export const VERIFIER_ABI = [
   {
@@ -73,6 +77,65 @@ export const VERIFIER_ABI = [
     inputs: [{ internalType: 'address', name: 'who', type: 'address' }],
     name: 'commitments',
     outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'who', type: 'address' }],
+    name: 'verifiedCount',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'totalVerified',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const;
+
+export const RANGE_VERIFIER_ABI = [
+  {
+    inputs: [
+      { internalType: 'bytes32', name: 'commitment', type: 'bytes32' },
+      { internalType: 'uint256', name: 'minValue', type: 'uint256' },
+      { internalType: 'uint256', name: 'maxValue', type: 'uint256' },
+    ],
+    name: 'setRangeCommitment',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: 'value', type: 'uint256' },
+      { internalType: 'bytes32', name: 'salt', type: 'bytes32' },
+    ],
+    name: 'verifyRange',
+    outputs: [{ internalType: 'bool', name: 'success', type: 'bool' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'who', type: 'address' }],
+    name: 'rangeCommitments',
+    outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'who', type: 'address' }],
+    name: 'minValues',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'who', type: 'address' }],
+    name: 'maxValues',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
   },
