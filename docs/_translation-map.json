@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "generated_at": "2026-06-04T03:30:00Z",
+  "pairs": [
+    { "ja": "docs/ja/README.md", "en": "docs/en/README.md", "section": "Index", "owner": "auto" },
+    { "ja": "docs/ja/quickstart.md", "en": "docs/en/quickstart.md", "section": "Quickstart", "owner": "auto" },
+    { "ja": "docs/ja/concepts/README.md", "en": "docs/en/concepts/README.md", "section": "Concepts", "owner": "auto" },
+    { "ja": "docs/ja/concepts/fixture.md", "en": "docs/en/concepts/fixture.md", "section": "Concepts", "owner": "auto" },
+    { "ja": "docs/ja/concepts/eip-6963.md", "en": "docs/en/concepts/eip-6963.md", "section": "Concepts", "owner": "auto" },
+    { "ja": "docs/ja/concepts/rpc-handling.md", "en": "docs/en/concepts/rpc-handling.md", "section": "Concepts", "owner": "auto" },
+    { "ja": "docs/ja/api/README.md", "en": "docs/en/api/README.md", "section": "API", "owner": "auto" },
+    { "ja": "docs/ja/api/dapp-e2e-test.md", "en": "docs/en/api/dapp-e2e-test.md", "section": "API", "owner": "auto" },
+    { "ja": "docs/ja/api/start-anvil.md", "en": "docs/en/api/start-anvil.md", "section": "API", "owner": "auto" },
+    { "ja": "docs/ja/api/wait-for-chain-state.md", "en": "docs/en/api/wait-for-chain-state.md", "section": "API", "owner": "auto" },
+    { "ja": "docs/ja/api/get-free-port.md", "en": "docs/en/api/get-free-port.md", "section": "API", "owner": "auto" },
+    { "ja": "docs/ja/api/anvil-handle.md", "en": "docs/en/api/anvil-handle.md", "section": "API", "owner": "auto" },
+    { "ja": "docs/ja/cookbook/README.md", "en": "docs/en/cookbook/README.md", "section": "Cookbook", "owner": "auto" },
+    { "ja": "docs/ja/cookbook/connect-button.md", "en": "docs/en/cookbook/connect-button.md", "section": "Cookbook", "owner": "auto" },
+    { "ja": "docs/ja/cookbook/time-manipulation.md", "en": "docs/en/cookbook/time-manipulation.md", "section": "Cookbook", "owner": "auto" },
+    { "ja": "docs/ja/cookbook/multi-wallet.md", "en": "docs/en/cookbook/multi-wallet.md", "section": "Cookbook", "owner": "auto" },
+    { "ja": "docs/ja/cookbook/user-reject.md", "en": "docs/en/cookbook/user-reject.md", "section": "Cookbook", "owner": "auto" },
+    { "ja": "docs/ja/cookbook/multi-chain.md", "en": "docs/en/cookbook/multi-chain.md", "section": "Cookbook", "owner": "auto" },
+    { "ja": "docs/ja/faq.md", "en": "docs/en/faq.md", "section": "FAQ", "owner": "auto" }
+  ]
+}

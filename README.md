@@ -139,6 +139,13 @@ framework 統合 example はいずれも以下の共通構成です。
 
 ## Documentation
 
+公開ドキュメント (Quickstart / Concepts / API Reference / Cookbook / FAQ 5 部構成、JP/EN 1:1 対訳)。
+
+- 🇯🇵 [日本語ドキュメント](./docs/ja/README.md) — `docs/ja/` 配下
+- 🇬🇧 [English documentation](./docs/en/README.md) — `docs/en/`
+
+その他の reference。
+
 - [docs/RPC.md](./docs/RPC.md) — 直接処理する 9 RPC と anvil fallback の整理
 - [docs/EVENTS.md](./docs/EVENTS.md) — 4 event と `triggerEvent()` の使い方
 - [docs/ERRORS.md](./docs/ERRORS.md) — EIP-1193 error code と envelope 設計
