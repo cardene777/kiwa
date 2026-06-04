@@ -806,6 +806,10 @@ importers:
         version: 2.1.9(@types/node@22.19.19)
 
   packages/core:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
     devDependencies:
       '@playwright/test':
         specifier: ^1.49.0
@@ -821,7 +825,7 @@ importers:
         version: 5.9.3
       viem:
         specifier: ^2.21.0
-        version: 2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.4.3)
+        version: 2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       vitest:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@22.19.19)

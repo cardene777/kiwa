@@ -1,11 +1,28 @@
-import type { PublicClient } from 'viem';
+import type {
+  Abi,
+  ContractFunctionArgs,
+  ContractFunctionName,
+  PublicClient,
+} from 'viem';
 
-export interface WaitForChainStateOptions<TValue> {
+export interface WaitForChainStateOptions<
+  TValue,
+  TAbi extends Abi = Abi,
+  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'> = ContractFunctionName<
+    TAbi,
+    'pure' | 'view'
+  >,
+  TArgs extends ContractFunctionArgs<
+    TAbi,
+    'pure' | 'view',
+    TFunctionName
+  > = ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
+> {
   publicClient: PublicClient;
   address: `0x${string}`;
-  abi: readonly unknown[];
-  functionName: string;
-  args?: readonly unknown[];
+  abi: TAbi;
+  functionName: TFunctionName;
+  args?: TArgs;
   predicate: (value: TValue) => boolean;
   timeoutMs?: number;
   pollIntervalMs?: number;
@@ -20,8 +37,20 @@ export interface WaitForChainStateOptions<TValue> {
  *
  * @throws {Error} if the predicate is not satisfied within `timeoutMs`.
  */
-export async function waitForChainState<TValue = unknown>(
-  opts: WaitForChainStateOptions<TValue>,
+export async function waitForChainState<
+  TValue = unknown,
+  TAbi extends Abi = Abi,
+  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'> = ContractFunctionName<
+    TAbi,
+    'pure' | 'view'
+  >,
+  TArgs extends ContractFunctionArgs<
+    TAbi,
+    'pure' | 'view',
+    TFunctionName
+  > = ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
+>(
+  opts: WaitForChainStateOptions<TValue, TAbi, TFunctionName, TArgs>,
 ): Promise<TValue> {
   const {
     publicClient,
@@ -38,12 +67,19 @@ export async function waitForChainState<TValue = unknown>(
   let lastValue: TValue | undefined;
 
   while (Date.now() - start < timeoutMs) {
-    lastValue = (await publicClient.readContract({
-      address,
-      abi: abi as never,
-      functionName,
-      args: args as never,
-    })) as TValue;
+    lastValue =
+      args !== undefined
+        ? ((await publicClient.readContract({
+            address,
+            abi,
+            functionName,
+            args,
+          })) as TValue)
+        : ((await publicClient.readContract({
+            address,
+            abi,
+            functionName,
+          })) as TValue);
 
     if (predicate(lastValue)) {
       return lastValue;
@@ -52,6 +88,6 @@ export async function waitForChainState<TValue = unknown>(
   }
 
   throw new Error(
-    `waitForChainState timeout after ${timeoutMs}ms: ${functionName} did not satisfy predicate (last value: ${String(lastValue)})`,
+    `waitForChainState timeout after ${timeoutMs}ms: ${String(functionName)} did not satisfy predicate (last value: ${String(lastValue)})`,
   );
 }

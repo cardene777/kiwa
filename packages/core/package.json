@@ -32,6 +32,9 @@
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 15000 --no-file-parallelism",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
   "peerDependencies": {
     "@playwright/test": "^1.49.0",
     "viem": "^2"
