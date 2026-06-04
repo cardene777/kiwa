@@ -1,6 +1,7 @@
 import { test as base, type Page } from '@playwright/test';
 import { numberToHex } from 'viem';
 import { privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts';
+import { ANVIL_DEFAULT_PRIVATE_KEYS } from './anvil-default-keys.js';
 import { startAnvil } from './anvil.js';
 import { createEventEmitter } from './event-emitter.js';
 import { createInjectorScript } from './injector-script.js';
@@ -88,13 +89,26 @@ export const dappE2eTest = base.extend<
 
   _rpcContexts: async ({ _walletConfigs, anvilPort }, use) => {
     await use(
-      _walletConfigs.map((wallet) => ({
-        privateKey: wallet.privateKey,
-        chainState: { current: wallet.chainId },
-        approvalMode: { current: 'approve' as const },
-        anvilPort,
-        emitter: createEventEmitter(),
-      })),
+      _walletConfigs.map((wallet): RpcContext => {
+        // wallet が anvil default 10 key の先頭と一致するなら accounts 配列を有効化、
+        // それ以外 (カスタム privateKey) は accounts なしで下位互換を保つ
+        const isDefaultPrimary = wallet.privateKey === ANVIL_DEFAULT_PRIVATE_KEYS[0];
+        const base: RpcContext = {
+          privateKey: wallet.privateKey,
+          chainState: { current: wallet.chainId },
+          approvalMode: { current: 'approve' as const },
+          anvilPort,
+          emitter: createEventEmitter(),
+        };
+        if (isDefaultPrimary) {
+          return {
+            ...base,
+            accounts: ANVIL_DEFAULT_PRIVATE_KEYS,
+            activeIndex: { current: 0 },
+          };
+        }
+        return base;
+      }),
     );
   },
 
@@ -138,6 +152,15 @@ export const dappE2eTest = base.extend<
       },
       async setApprovalMode(mode: ApprovalMode) {
         await primaryApi.setApprovalMode(mode);
+      },
+      async setActiveAccount(index: number) {
+        if (!primaryApi.setActiveAccount) {
+          throw new Eip1193Error(
+            -32603,
+            'setActiveAccount is only supported when the primary wallet uses anvil default keys',
+          );
+        }
+        await primaryApi.setActiveAccount(index);
       },
       async waitForRpcIdle(timeoutMs = 10_000) {
         await waitForPendingRpcs(page, _rpcTracker.pendingRpcs, timeoutMs);
@@ -386,7 +409,7 @@ function createWalletApi(
   rpcContext: RpcContext,
   bridgeName: string,
 ): WalletApi {
-  return {
+  const api: WalletApi = {
     async triggerEvent(event: Eip1193EventName, ...args: unknown[]) {
       await emitPageEvent(page, bridgeName, event, ...args);
     },
@@ -410,6 +433,26 @@ function createWalletApi(
       rpcContext.approvalMode.current = mode;
     },
   };
+
+  // accounts / activeIndex が設定されている wallet のみ setActiveAccount を expose
+  if (rpcContext.accounts && rpcContext.activeIndex) {
+    const accounts = rpcContext.accounts;
+    const activeIndexRef = rpcContext.activeIndex;
+    api.setActiveAccount = async (index: number) => {
+      if (!Number.isInteger(index) || index < 0 || index >= accounts.length) {
+        throw new Eip1193Error(
+          -32602,
+          `invalid params: account index ${index} out of range [0, ${accounts.length - 1}]`,
+        );
+      }
+      activeIndexRef.current = index;
+      const newAddress = privateKeyToAccount(accounts[index]!).address;
+      rpcContext.emitter?.emit('accountsChanged', [newAddress]);
+      await emitPageEvent(page, bridgeName, 'accountsChanged', [newAddress]);
+    };
+  }
+
+  return api;
 }
 
 function createWalletApiRecord(

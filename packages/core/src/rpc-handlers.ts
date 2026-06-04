@@ -12,10 +12,40 @@ import {
 
 export interface RpcContext {
   privateKey: Hex;
+  /**
+   * setActiveAccount(index) で切替可能な複数 dev account の private key 配列。
+   * 未指定の場合は `[privateKey]` 相当として扱い (下位互換)、activeIndex も常に 0 に固定。
+   */
+  accounts?: readonly Hex[];
+  /**
+   * accounts 配列内の active な index。setActiveAccount で更新される。
+   * 範囲は `[0, accounts.length - 1]`、accounts 未指定なら 0 固定。
+   */
+  activeIndex?: { current: number };
   chainState: { current: number };
   approvalMode?: { current: ApprovalMode };
   anvilPort?: number;
   emitter?: DappE2eEventEmitter;
+}
+
+/**
+ * 現在 active な private key を返す。accounts / activeIndex が設定されていればそこから解決、
+ * なければ ctx.privateKey にフォールバックする (下位互換)。
+ */
+export function resolveActivePrivateKey(ctx: RpcContext): Hex {
+  const accounts = ctx.accounts;
+  const index = ctx.activeIndex?.current ?? 0;
+  if (!accounts || accounts.length === 0) {
+    return ctx.privateKey;
+  }
+  const key = accounts[index];
+  if (!key) {
+    throw new Eip1193Error(
+      -32603,
+      `internal: activeIndex ${index} out of bounds for accounts length ${accounts.length}`,
+    );
+  }
+  return key;
 }
 
 const BLOCKED_METHODS = new Set([
@@ -44,13 +74,24 @@ export async function handleRpcRequest(
     throw new Eip1193Error(4200, `method not supported: ${request.method}`);
   }
 
-  const account = privateKeyToAccount(ctx.privateKey);
+  const account = privateKeyToAccount(resolveActivePrivateKey(ctx));
   const params = (request.params ?? []) as unknown[];
 
   switch (request.method) {
     case 'eth_requestAccounts':
-    case 'eth_accounts':
-      return [account.address];
+    case 'eth_accounts': {
+      // accounts 配列が設定されている場合は active を先頭に並べた全 account を返す
+      // (MetaMask は active account を先頭に残りを後続に並べる挙動)
+      const accounts = ctx.accounts;
+      if (!accounts || accounts.length === 0) {
+        return [account.address];
+      }
+      const index = ctx.activeIndex?.current ?? 0;
+      const addresses = accounts.map((k) => privateKeyToAccount(k).address);
+      const active = addresses[index];
+      const rest = addresses.filter((_, i) => i !== index);
+      return active ? [active, ...rest] : addresses;
+    }
 
     case 'eth_chainId':
       return numberToHex(ctx.chainState.current);
@@ -150,7 +191,7 @@ export async function handleRpcRequest(
       }
       return sendTransaction(
         {
-          privateKey: ctx.privateKey,
+          privateKey: resolveActivePrivateKey(ctx),
           chainId: ctx.chainState.current,
           anvilPort: ctx.anvilPort,
         },

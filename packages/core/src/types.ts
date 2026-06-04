@@ -89,6 +89,11 @@ export interface WalletApi {
   disconnect(): Promise<void>;
   switchChain(chainIdHex: Hex): Promise<void>;
   setApprovalMode(mode: ApprovalMode): Promise<void>;
+  /**
+   * 複数 account を持つ wallet で active account を切替える。
+   * 範囲外 index で throw、内部で `accountsChanged` event を自動発火する。
+   */
+  setActiveAccount?(index: number): Promise<void>;
 }
 
 export interface DappE2eEventEmitter {
@@ -105,6 +110,11 @@ export interface DappE2eApi {
   disconnect(): Promise<void>;
   switchChain(chainIdHex: Hex): Promise<void>;
   setApprovalMode(mode: ApprovalMode): Promise<void>;
+  /**
+   * 複数 account を持つ wallet で active account を切替える (primary wallet 経由)。
+   * 内部で `accountsChanged` event を自動発火する。
+   */
+  setActiveAccount?(index: number): Promise<void>;
   waitForRpcIdle?(timeoutMs?: number): Promise<void>;
   wallets?: Record<string, WalletApi>;
 }

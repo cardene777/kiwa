@@ -5,7 +5,12 @@ export type {
   WalletApi,
   WalletConfig,
 } from './types.js';
-export { handleRpcRequest, type RpcContext } from './rpc-handlers.js';
+export {
+  handleRpcRequest,
+  resolveActivePrivateKey,
+  type RpcContext,
+} from './rpc-handlers.js';
+export { ANVIL_DEFAULT_PRIVATE_KEYS } from './anvil-default-keys.js';
 export { createEventEmitter } from './event-emitter.js';
 export { sendTransaction } from './tx.js';
 export { startAnvil, getFreePort, type AnvilHandle } from './anvil.js';
