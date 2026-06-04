@@ -29,15 +29,29 @@ export const wagmiConfig = createConfig({
   ssr: true,
 });
 
-export const STAKE_TOKEN =
-  (process.env.NEXT_PUBLIC_STAKE_TOKEN as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
-export const REWARD_TOKEN =
-  (process.env.NEXT_PUBLIC_REWARD_TOKEN as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
-export const STAKING =
-  (process.env.NEXT_PUBLIC_STAKING as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as `0x${string}`;
+
+function requireEnv(value: string | undefined, name: string): `0x${string}` {
+  if (value) {
+    return value as `0x${string}`;
+  }
+
+  if (process.env.NEXT_PUBLIC_RUNTIME_MODE === 'test') {
+    throw new Error(
+      `${name} is required (set by tests/prepare-env.ts before pnpm build). ` +
+        `Did webServer.command run prepare-env first?`,
+    );
+  }
+
+  console.warn(
+    `[wagmi] ${name} is not set; using zero-address fallback because NEXT_PUBLIC_RUNTIME_MODE !== 'test'.`,
+  );
+  return ZERO_ADDRESS;
+}
+
+export const STAKE_TOKEN = requireEnv(process.env.NEXT_PUBLIC_STAKE_TOKEN, 'NEXT_PUBLIC_STAKE_TOKEN');
+export const REWARD_TOKEN = requireEnv(process.env.NEXT_PUBLIC_REWARD_TOKEN, 'NEXT_PUBLIC_REWARD_TOKEN');
+export const STAKING = requireEnv(process.env.NEXT_PUBLIC_STAKING, 'NEXT_PUBLIC_STAKING');
 
 export const ERC20_ABI = [
   {

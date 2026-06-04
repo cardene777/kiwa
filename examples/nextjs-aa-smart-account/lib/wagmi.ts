@@ -29,15 +29,29 @@ export const wagmiConfig = createConfig({
   ssr: true,
 });
 
-export const FACTORY =
-  (process.env.NEXT_PUBLIC_FACTORY as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
-export const PAYMASTER =
-  (process.env.NEXT_PUBLIC_PAYMASTER as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
-export const COUNTER =
-  (process.env.NEXT_PUBLIC_COUNTER as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as `0x${string}`;
+
+function requireEnv(value: string | undefined, name: string): `0x${string}` {
+  if (value) {
+    return value as `0x${string}`;
+  }
+
+  if (process.env.NEXT_PUBLIC_RUNTIME_MODE === 'test') {
+    throw new Error(
+      `${name} is required (set by tests/prepare-env.ts before pnpm build). ` +
+        `Did webServer.command run prepare-env first?`,
+    );
+  }
+
+  console.warn(
+    `[wagmi] ${name} is not set; using zero-address fallback because NEXT_PUBLIC_RUNTIME_MODE !== 'test'.`,
+  );
+  return ZERO_ADDRESS;
+}
+
+export const FACTORY = requireEnv(process.env.NEXT_PUBLIC_FACTORY, 'NEXT_PUBLIC_FACTORY');
+export const PAYMASTER = requireEnv(process.env.NEXT_PUBLIC_PAYMASTER, 'NEXT_PUBLIC_PAYMASTER');
+export const COUNTER = requireEnv(process.env.NEXT_PUBLIC_COUNTER, 'NEXT_PUBLIC_COUNTER');
 
 export const FACTORY_ABI = [
   {

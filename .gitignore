@@ -16,3 +16,4 @@ examples/*/.env.local
 examples/*/.env
 examples/*/dist/
 examples/*/tsconfig.tsbuildinfo
+examples/*/.context/

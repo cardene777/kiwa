@@ -1,6 +1,10 @@
-import { anvilState } from './anvil-handle';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+import { killAnvilFromPidFile } from '@dapp-e2e/core';
 
-export default async function globalTeardown() {
-  await anvilState.handle?.stop();
-  anvilState.handle = undefined;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const exampleRoot = resolve(__dirname, '..');
+
+export default async function globalTeardown(): Promise<void> {
+  killAnvilFromPidFile(resolve(exampleRoot, '.context/anvil.pid'));
 }

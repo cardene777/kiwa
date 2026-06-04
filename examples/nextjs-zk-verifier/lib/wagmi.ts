@@ -29,9 +29,27 @@ export const wagmiConfig = createConfig({
   ssr: true,
 });
 
-export const VERIFIER =
-  (process.env.NEXT_PUBLIC_VERIFIER as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as `0x${string}`;
+
+function requireEnv(value: string | undefined, name: string): `0x${string}` {
+  if (value) {
+    return value as `0x${string}`;
+  }
+
+  if (process.env.NEXT_PUBLIC_RUNTIME_MODE === 'test') {
+    throw new Error(
+      `${name} is required (set by tests/prepare-env.ts before pnpm build). ` +
+        `Did webServer.command run prepare-env first?`,
+    );
+  }
+
+  console.warn(
+    `[wagmi] ${name} is not set; using zero-address fallback because NEXT_PUBLIC_RUNTIME_MODE !== 'test'.`,
+  );
+  return ZERO_ADDRESS;
+}
+
+export const VERIFIER = requireEnv(process.env.NEXT_PUBLIC_VERIFIER, 'NEXT_PUBLIC_VERIFIER');
 
 export const VERIFIER_ABI = [
   {
