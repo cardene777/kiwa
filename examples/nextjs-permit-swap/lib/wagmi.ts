@@ -31,16 +31,33 @@ export const wagmiConfig = createConfig({
   ssr: true,
 });
 
-export const TOKEN_A =
-  (process.env.NEXT_PUBLIC_TOKEN_A as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
-export const TOKEN_B =
-  (process.env.NEXT_PUBLIC_TOKEN_B as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
-export const SWAP =
-  (process.env.NEXT_PUBLIC_SWAP as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
-export const TOKEN_A_NAME = (process.env.NEXT_PUBLIC_TOKEN_A_NAME as string | undefined) ?? 'TokenA';
+function requireEnv(value: string | undefined, name: string): `0x${string}` {
+  if (!value) {
+    throw new Error(
+      `${name} is required (set by tests/prepare-env.ts before pnpm build). ` +
+        `Did webServer.command run prepare-env first?`,
+    );
+  }
+  return value as `0x${string}`;
+}
+
+function requireStringEnv(value: string | undefined, name: string): string {
+  if (!value) {
+    throw new Error(
+      `${name} is required (set by tests/prepare-env.ts before pnpm build). ` +
+        `Did webServer.command run prepare-env first?`,
+    );
+  }
+  return value;
+}
+
+export const TOKEN_A = requireEnv(process.env.NEXT_PUBLIC_TOKEN_A, 'NEXT_PUBLIC_TOKEN_A');
+export const TOKEN_B = requireEnv(process.env.NEXT_PUBLIC_TOKEN_B, 'NEXT_PUBLIC_TOKEN_B');
+export const SWAP = requireEnv(process.env.NEXT_PUBLIC_SWAP, 'NEXT_PUBLIC_SWAP');
+export const TOKEN_A_NAME = requireStringEnv(
+  process.env.NEXT_PUBLIC_TOKEN_A_NAME,
+  'NEXT_PUBLIC_TOKEN_A_NAME',
+);
 
 export const PERMIT_TOKEN_ABI = [
   {

@@ -49,16 +49,23 @@ export const wagmiConfig = createConfig({
   ssr: true,
 });
 
+function requireEnv(value: string | undefined, name: string): `0x${string}` {
+  if (!value) {
+    throw new Error(
+      `${name} is required (set by tests/prepare-env.ts before pnpm build). ` +
+        `Did webServer.command run prepare-env first?`,
+    );
+  }
+  return value as `0x${string}`;
+}
+
 export const CONTRACT_ADDRESS_BY_CHAIN: Record<number, `0x${string}`> = {
-  [mainnetSim.id]:
-    (process.env.NEXT_PUBLIC_MAINNET_TOKEN as `0x${string}` | undefined) ??
-    '0x0000000000000000000000000000000000000000',
-  [optimismSim.id]:
-    (process.env.NEXT_PUBLIC_OPTIMISM_TOKEN as `0x${string}` | undefined) ??
-    '0x0000000000000000000000000000000000000000',
-  [baseSim.id]:
-    (process.env.NEXT_PUBLIC_BASE_TOKEN as `0x${string}` | undefined) ??
-    '0x0000000000000000000000000000000000000000',
+  [mainnetSim.id]: requireEnv(process.env.NEXT_PUBLIC_MAINNET_TOKEN, 'NEXT_PUBLIC_MAINNET_TOKEN'),
+  [optimismSim.id]: requireEnv(
+    process.env.NEXT_PUBLIC_OPTIMISM_TOKEN,
+    'NEXT_PUBLIC_OPTIMISM_TOKEN',
+  ),
+  [baseSim.id]: requireEnv(process.env.NEXT_PUBLIC_BASE_TOKEN, 'NEXT_PUBLIC_BASE_TOKEN'),
 };
 
 export const CHAIN_LABEL: Record<number, string> = {

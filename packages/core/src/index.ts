@@ -13,7 +13,21 @@ export {
 export { ANVIL_DEFAULT_PRIVATE_KEYS } from './anvil-default-keys.js';
 export { createEventEmitter } from './event-emitter.js';
 export { sendTransaction } from './tx.js';
-export { startAnvil, getFreePort, type AnvilHandle } from './anvil.js';
+export {
+  startAnvil,
+  getFreePort,
+  type AnvilHandle,
+  type StartAnvilOptions,
+} from './anvil.js';
+export {
+  runE2EPrepareEnv,
+  killAnvilFromPidFile,
+  type PrepareEnvDeployContext,
+  type PrepareEnvDeployFn,
+  type PrepareEnvOptions,
+  type PrepareEnvWalletClient,
+  type PrepareEnvPublicClient,
+} from './e2e-prepare-env.js';
 export { createInjectorScript } from './injector-script.js';
 export { dappE2eTest } from './fixture.js';
 export {

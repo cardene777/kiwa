@@ -38,9 +38,20 @@ export const wagmiConfig = createConfig({
   ssr: true,
 });
 
-export const CONTRACT_ADDRESS =
-  (process.env.NEXT_PUBLIC_GAME_CONTRACT as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
+function requireEnv(value: string | undefined, name: string): `0x${string}` {
+  if (!value) {
+    throw new Error(
+      `${name} is required (set by tests/prepare-env.ts before pnpm build). ` +
+        `Did webServer.command run prepare-env first?`,
+    );
+  }
+  return value as `0x${string}`;
+}
+
+export const CONTRACT_ADDRESS = requireEnv(
+  process.env.NEXT_PUBLIC_GAME_CONTRACT,
+  'NEXT_PUBLIC_GAME_CONTRACT',
+);
 
 export const GAME_ITEMS_ABI = [
   {

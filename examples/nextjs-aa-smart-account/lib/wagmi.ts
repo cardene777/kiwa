@@ -29,15 +29,19 @@ export const wagmiConfig = createConfig({
   ssr: true,
 });
 
-export const FACTORY =
-  (process.env.NEXT_PUBLIC_FACTORY as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
-export const PAYMASTER =
-  (process.env.NEXT_PUBLIC_PAYMASTER as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
-export const COUNTER =
-  (process.env.NEXT_PUBLIC_COUNTER as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
+function requireEnv(value: string | undefined, name: string): `0x${string}` {
+  if (!value) {
+    throw new Error(
+      `${name} is required (set by tests/prepare-env.ts before pnpm build). ` +
+        `Did webServer.command run prepare-env first?`,
+    );
+  }
+  return value as `0x${string}`;
+}
+
+export const FACTORY = requireEnv(process.env.NEXT_PUBLIC_FACTORY, 'NEXT_PUBLIC_FACTORY');
+export const PAYMASTER = requireEnv(process.env.NEXT_PUBLIC_PAYMASTER, 'NEXT_PUBLIC_PAYMASTER');
+export const COUNTER = requireEnv(process.env.NEXT_PUBLIC_COUNTER, 'NEXT_PUBLIC_COUNTER');
 
 export const FACTORY_ABI = [
   {

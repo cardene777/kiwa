@@ -29,9 +29,17 @@ export const wagmiConfig = createConfig({
   ssr: true,
 });
 
-export const VERIFIER =
-  (process.env.NEXT_PUBLIC_VERIFIER as `0x${string}` | undefined) ??
-  '0x0000000000000000000000000000000000000000';
+function requireEnv(value: string | undefined, name: string): `0x${string}` {
+  if (!value) {
+    throw new Error(
+      `${name} is required (set by tests/prepare-env.ts before pnpm build). ` +
+        `Did webServer.command run prepare-env first?`,
+    );
+  }
+  return value as `0x${string}`;
+}
+
+export const VERIFIER = requireEnv(process.env.NEXT_PUBLIC_VERIFIER, 'NEXT_PUBLIC_VERIFIER');
 
 export const VERIFIER_ABI = [
   {
