@@ -5,7 +5,10 @@ playwright-report/
 test-results/
 .context/local-review/
 .context/delegate/
-.claude/
+.claude/.context/
+.claude/.scratch/
+.claude/settings.local.json
+.claude/.gitignore.local
 *.log
 coverage/
 .DS_Store
