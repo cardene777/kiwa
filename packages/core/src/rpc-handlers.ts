@@ -1,5 +1,6 @@
 import { hexToBigInt, numberToHex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import { z } from 'zod';
 import { sendTransaction } from './tx.js';
 import {
   type ApprovalMode,
@@ -34,6 +35,43 @@ export interface RpcContext {
    */
   chainRegistry?: { current: ChainConfig[] };
 }
+
+const Eip712DomainSchema = z.object({
+  name: z.string().optional(),
+  version: z.string().optional(),
+  chainId: z.union([z.number(), z.string()]).optional(),
+  verifyingContract: z.string().optional(),
+  salt: z.string().optional(),
+});
+
+const Eip712TypedDataSchema = z.object({
+  types: z.record(
+    z.string(),
+    z.array(
+      z.object({
+        name: z.string(),
+        type: z.string(),
+      }),
+    ),
+  ),
+  primaryType: z.string(),
+  domain: Eip712DomainSchema,
+  message: z.record(z.string(), z.unknown()),
+});
+
+type ParsedEip712TypedData = z.output<typeof Eip712TypedDataSchema>;
+type NormalizedEip712TypedData = {
+  domain: {
+    name?: string;
+    version?: string;
+    chainId?: number;
+    verifyingContract?: Hex;
+    salt?: Hex;
+  };
+  types: Record<string, ReadonlyArray<{ name: string; type: string }>>;
+  primaryType: string;
+  message: Record<string, unknown>;
+};
 
 /**
  * 現在 active な private key を返す。accounts / activeIndex が設定されていればそこから解決、
@@ -141,31 +179,8 @@ export async function handleRpcRequest(
       assertApproved(ctx);
       const [signerAddress, typedDataJson] = params as [Hex, string];
       assertAuthorizedAddress('requested signer', signerAddress, account.address);
-      let typedData: {
-        domain?: Record<string, unknown>;
-        types: Record<string, unknown>;
-        primaryType: string;
-        message: Record<string, unknown>;
-      };
-      try {
-        typedData = JSON.parse(typedDataJson) as {
-          domain?: Record<string, unknown>;
-          types: Record<string, unknown>;
-          primaryType: string;
-          message: Record<string, unknown>;
-        };
-      } catch (e) {
-        const message = e instanceof Error ? e.message : String(e);
-        throw new Eip1193Error(-32700, `parse error: ${message}`);
-      }
-      const filteredTypes = { ...typedData.types };
-      delete filteredTypes.EIP712Domain;
-      return (account.signTypedData as (...args: any[]) => Promise<Hex>)({
-        domain: typedData.domain,
-        types: filteredTypes,
-        primaryType: typedData.primaryType,
-        message: typedData.message,
-      });
+      const typedData = parseEip712TypedDataJson(typedDataJson);
+      return account.signTypedData(typedData);
     }
 
     case 'wallet_switchEthereumChain': {
@@ -184,6 +199,9 @@ export async function handleRpcRequest(
         }
       }
       ctx.chainState.current = parseChainIdHex(chainIdHex);
+      if (ctx.anvilPort !== undefined) {
+        void verifyAnvilChainId(ctx.anvilPort, ctx.chainState.current);
+      }
       ctx.emitter?.emit('chainChanged', chainIdHex);
       return null;
     }
@@ -251,6 +269,102 @@ function normalizeTxParams(p: Record<string, unknown>): SendTxParams {
   if (typeof p.gas === 'string') out.gas = hexToBigInt(p.gas as Hex);
   if (typeof p.gas === 'bigint') out.gas = p.gas;
   return out;
+}
+
+export function parseEip712TypedDataJson(typedDataJson: string): NormalizedEip712TypedData {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(typedDataJson);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    throw new Eip1193Error(-32700, `parse error: ${message}`);
+  }
+
+  const result = Eip712TypedDataSchema.safeParse(parsed);
+  if (!result.success) {
+    const issue = result.error.issues[0];
+    const detail =
+      issue?.path.length && issue.path[0] !== undefined
+        ? `${String(issue.path[0])}: ${issue.message}`
+        : issue?.message ?? 'invalid EIP-712 typed data';
+    throw new Eip1193Error(-32602, `invalid params: ${detail}`);
+  }
+
+  const filteredTypes = Object.fromEntries(
+    Object.entries(result.data.types).filter(([name]) => name !== 'EIP712Domain'),
+  );
+
+  return {
+    domain: normalizeEip712Domain(result.data.domain),
+    types: filteredTypes,
+    primaryType: result.data.primaryType,
+    message: result.data.message,
+  };
+}
+
+export async function verifyAnvilChainId(
+  anvilPort: number,
+  expectedChainId: number,
+): Promise<void> {
+  try {
+    const res = await fetch(`http://127.0.0.1:${anvilPort}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'eth_chainId',
+        params: [],
+      }),
+    });
+    if (!res.ok) return;
+    const json = (await res.json()) as { result?: string };
+    const actual = json.result ? Number.parseInt(json.result, 16) : Number.NaN;
+    if (Number.isFinite(actual) && actual !== expectedChainId) {
+      console.warn(
+        `[dapp-e2e] wallet_switchEthereumChain to ${expectedChainId} but anvil reports ${actual}`,
+      );
+    }
+  } catch {
+    // anvil unreachable; ignore
+  }
+}
+
+function normalizeEip712Domain(
+  domain: ParsedEip712TypedData['domain'],
+): NormalizedEip712TypedData['domain'] {
+  return {
+    ...(domain.name !== undefined ? { name: domain.name } : {}),
+    ...(domain.version !== undefined ? { version: domain.version } : {}),
+    ...(domain.chainId !== undefined
+      ? { chainId: normalizeEip712ChainId(domain.chainId) }
+      : {}),
+    ...(domain.verifyingContract !== undefined
+      ? { verifyingContract: normalizeEip712Hex(domain.verifyingContract, 'domain.verifyingContract') }
+      : {}),
+    ...(domain.salt !== undefined
+      ? { salt: normalizeEip712Hex(domain.salt, 'domain.salt') }
+      : {}),
+  };
+}
+
+function normalizeEip712ChainId(value: string | number): number {
+  if (typeof value === 'number') {
+    return value;
+  }
+  const radix = value.startsWith('0x') ? 16 : 10;
+  const parsed = Number.parseInt(value, radix);
+  if (!Number.isFinite(parsed)) {
+    throw new Eip1193Error(-32602, `invalid params: domain.chainId must be numeric, got ${value}`);
+  }
+  return parsed;
+}
+
+function normalizeEip712Hex(value: string, field: string): Hex {
+  if (!/^0x[0-9a-fA-F]*$/.test(value)) {
+    throw new Eip1193Error(-32602, `invalid params: ${field} must be a 0x-prefixed hex string`);
+  }
+  return value as Hex;
 }
 
 async function anvilProxy(port: number, method: string, params: unknown[]): Promise<unknown> {

@@ -1,12 +1,14 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { verifyMessage, verifyTypedData } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {
+  parseEip712TypedDataJson,
   startAnvil,
   type AnvilHandle,
   createInjectorScript,
   handleRpcRequest,
   type RpcContext,
+  verifyAnvilChainId,
 } from '../src/index.js';
 
 // anvil default key #0 - public test key, secret 扱いしない
@@ -19,6 +21,40 @@ function ctx(): RpcContext {
     privateKey: PRIVATE_KEY,
     chainState: { current: CHAIN_ID },
     approvalMode: { current: 'approve' },
+  };
+}
+
+function buildTypedData() {
+  return {
+    domain: {
+      name: 'Mail',
+      version: '1',
+      chainId: CHAIN_ID,
+      verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC' as const,
+    },
+    types: {
+      EIP712Domain: [
+        { name: 'name', type: 'string' },
+        { name: 'version', type: 'string' },
+        { name: 'chainId', type: 'uint256' },
+        { name: 'verifyingContract', type: 'address' },
+      ],
+      Person: [
+        { name: 'name', type: 'string' },
+        { name: 'wallet', type: 'address' },
+      ],
+      Mail: [
+        { name: 'from', type: 'Person' },
+        { name: 'to', type: 'Person' },
+        { name: 'contents', type: 'string' },
+      ],
+    } as const,
+    primaryType: 'Mail' as const,
+    message: {
+      from: { name: 'Alice', wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826' },
+      to: { name: 'Bob', wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB' },
+      contents: 'hello',
+    },
   };
 }
 
@@ -105,37 +141,7 @@ describe('handleRpcRequest', () => {
   it('T-INJ-010 eth_signTypedData_v4 は EIP-712 typed data を署名し verifyTypedData が true', async () => {
     // Given
     const account = privateKeyToAccount(PRIVATE_KEY);
-    const typedData = {
-      domain: {
-        name: 'Mail',
-        version: '1',
-        chainId: CHAIN_ID,
-        verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC' as const,
-      },
-      types: {
-        EIP712Domain: [
-          { name: 'name', type: 'string' },
-          { name: 'version', type: 'string' },
-          { name: 'chainId', type: 'uint256' },
-          { name: 'verifyingContract', type: 'address' },
-        ],
-        Person: [
-          { name: 'name', type: 'string' },
-          { name: 'wallet', type: 'address' },
-        ],
-        Mail: [
-          { name: 'from', type: 'Person' },
-          { name: 'to', type: 'Person' },
-          { name: 'contents', type: 'string' },
-        ],
-      } as const,
-      primaryType: 'Mail' as const,
-      message: {
-        from: { name: 'Alice', wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826' },
-        to: { name: 'Bob', wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB' },
-        contents: 'hello',
-      },
-    };
+    const typedData = buildTypedData();
     // When
     const signature = (await handleRpcRequest(ctx(), {
       method: 'eth_signTypedData_v4',
@@ -239,6 +245,54 @@ describe('handleRpcRequest', () => {
   });
 });
 
+describe('parseEip712TypedDataJson', () => {
+  it('T-INJ-016 valid typed data を parse し EIP712Domain type を除外する', () => {
+    // Given
+    const typedData = buildTypedData();
+    // When
+    const parsed = parseEip712TypedDataJson(JSON.stringify(typedData));
+    // Then
+    expect(parsed.primaryType).toBe('Mail');
+    expect(parsed.domain.name).toBe('Mail');
+    expect(parsed.types.EIP712Domain).toBeUndefined();
+    expect(parsed.types.Mail).toHaveLength(3);
+  });
+
+  it('T-INJ-017 malformed typedData shape (types invalid) は code -32602 で reject', () => {
+    // Given
+    const typedData = {
+      ...buildTypedData(),
+      types: {
+        Mail: [{ name: 'from' }],
+      },
+    };
+    // When / Then
+    expect(() => parseEip712TypedDataJson(JSON.stringify(typedData))).toThrowError(
+      expect.objectContaining({ code: -32602 }),
+    );
+  });
+
+  it('T-INJ-018 primaryType missing は code -32602 で reject', () => {
+    // Given
+    const typedData = buildTypedData() as Record<string, unknown>;
+    delete typedData.primaryType;
+    // When / Then
+    expect(() => parseEip712TypedDataJson(JSON.stringify(typedData))).toThrowError(
+      expect.objectContaining({ code: -32602 }),
+    );
+  });
+
+  it('T-INJ-019 domain missing は code -32602 で reject', () => {
+    // Given
+    const typedData = buildTypedData() as Record<string, unknown>;
+    delete typedData.domain;
+    // When / Then
+    expect(() => parseEip712TypedDataJson(JSON.stringify(typedData))).toThrowError(
+      expect.objectContaining({ code: -32602 }),
+    );
+  });
+});
+
 describe('createInjectorScript', () => {
   it('T-INJ-006 戻り値の文字列に window.ethereum セットアップが含まれる', () => {
     // Given
@@ -271,5 +325,17 @@ describe.skipIf(process.env.SKIP_ANVIL_TESTS === '1')('handleRpcRequest with liv
     })) as string;
     // Then
     expect(result).toMatch(/^0x[0-9a-fA-F]+$/);
+  });
+
+  it('T-INJ-020 verifyAnvilChainId は mismatch 時に warn を出す', async () => {
+    // Given
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    // When
+    await verifyAnvilChainId(handle!.port, 5);
+    // Then
+    expect(warn).toHaveBeenCalledWith(
+      `[dapp-e2e] wallet_switchEthereumChain to 5 but anvil reports ${CHAIN_ID}`,
+    );
+    warn.mockRestore();
   });
 });

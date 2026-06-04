@@ -99,11 +99,11 @@ export async function sendTransaction(
 
   try {
     const hash = await client.sendTransaction({
-      to: params.to ?? null,
-      value,
-      data: params.data,
-      gas,
-    } as never);
+      ...(params.to !== undefined ? { to: params.to } : {}),
+      ...(value !== undefined ? { value } : {}),
+      ...(params.data !== undefined ? { data: params.data } : {}),
+      ...(gas !== undefined ? { gas } : {}),
+    });
     return hash;
   } catch (e) {
     if (e instanceof BaseError) {

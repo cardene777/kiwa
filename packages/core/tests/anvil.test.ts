@@ -1,6 +1,12 @@
 import net from 'node:net';
 import { afterEach, describe, expect, it } from 'vitest';
-import { getFreePort, startAnvil, type AnvilHandle } from '../src/index.js';
+import {
+  getFreePort,
+  startAnvil,
+  startAnvilCluster,
+  type AnvilClusterHandle,
+  type AnvilHandle,
+} from '../src/index.js';
 
 function checkPortListening(port: number, timeoutMs: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -19,6 +25,21 @@ function checkPortListening(port: number, timeoutMs: number): Promise<boolean> {
       resolve(false);
     });
   });
+}
+
+async function getChainId(port: number): Promise<number> {
+  const res = await fetch(`http://127.0.0.1:${port}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'eth_chainId',
+      params: [],
+    }),
+  });
+  const json = (await res.json()) as { result: string };
+  return Number.parseInt(json.result, 16);
 }
 
 describe('getFreePort', () => {
@@ -72,4 +93,65 @@ describe.skipIf(process.env.SKIP_ANVIL_TESTS === '1')('startAnvil', () => {
     expect(stillListening).toBe(false);
   });
 
+});
+
+describe.skipIf(process.env.SKIP_ANVIL_TESTS === '1')('startAnvilCluster', () => {
+  let cluster: AnvilClusterHandle | null = null;
+
+  afterEach(async () => {
+    if (cluster) {
+      await cluster.stopAll().catch(() => undefined);
+      cluster = null;
+    }
+  });
+
+  it('T-ANV-005 2 chain を起動し各 anvil が期待 chainId を返す', async () => {
+    // Given
+    const [port1, port2] = await Promise.all([getFreePort(), getFreePort()]);
+    // When
+    cluster = await startAnvilCluster({
+      chains: [
+        { chainId: 31337, port: port1 },
+        { chainId: 31338, port: port2 },
+      ],
+    });
+    const chainIds = await Promise.all(cluster.chains.map((chain) => getChainId(chain.port)));
+    // Then
+    expect(chainIds).toEqual([31337, 31338]);
+  });
+
+  it('T-ANV-006 stopAll() 後に cluster の全 port が解放される', async () => {
+    // Given
+    const [port1, port2] = await Promise.all([getFreePort(), getFreePort()]);
+    cluster = await startAnvilCluster({
+      chains: [
+        { chainId: 31337, port: port1 },
+        { chainId: 31338, port: port2 },
+      ],
+    });
+    const ports = cluster.chains.map((chain) => chain.port);
+    // When
+    await cluster.stopAll();
+    cluster = null;
+    const listening = await Promise.all(ports.map((port) => checkPortListening(port, 1000)));
+    // Then
+    expect(listening).toEqual([false, false]);
+  });
+
+  it('T-ANV-007 handle に chainId metadata を保持する', async () => {
+    // Given
+    const [port1, port2] = await Promise.all([getFreePort(), getFreePort()]);
+    // When
+    cluster = await startAnvilCluster({
+      chains: [
+        { chainId: 11155111, port: port1 },
+        { chainId: 8453, port: port2 },
+      ],
+    });
+    // Then
+    expect(cluster.chains.map(({ chainId, port }) => ({ chainId, port }))).toEqual([
+      { chainId: 11155111, port: port1 },
+      { chainId: 8453, port: port2 },
+    ]);
+  });
 });
