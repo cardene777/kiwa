@@ -1,10 +1,16 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
+  BaseError,
+  ContractFunctionRevertedError,
   createPublicClient,
   createWalletClient,
   defineChain,
   http,
-  type Hex,
+  parseAbi,
   type Address,
+  type Hex,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
@@ -16,36 +22,47 @@ const L2_CHAIN_ID = 10;
 const BRIDGE_AMOUNT = 50n * 10n ** 18n;
 const OPERATOR_KEY: Hex =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+const NON_OPERATOR_KEY: Hex =
+  '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d';
 
-const DEST_TOKEN_MINT_ABI = [
-  {
-    inputs: [
-      { internalType: 'address', name: 'to', type: 'address' },
-      { internalType: 'uint256', name: 'value', type: 'uint256' },
-    ],
-    name: 'mint',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { internalType: 'address', name: 'from', type: 'address' },
-      { internalType: 'uint256', name: 'value', type: 'uint256' },
-    ],
-    name: 'burn',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [{ internalType: 'address', name: 'owner', type: 'address' }],
-    name: 'balanceOf',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-] as const;
+const SIMPLE_ERC20_ABI = parseAbi([
+  'function approve(address spender, uint256 value) returns (bool)',
+  'function balanceOf(address owner) view returns (uint256)',
+  'function totalSupply() view returns (uint256)',
+]);
+
+const SOURCE_BRIDGE_ABI = parseAbi([
+  'function bridgeLock(uint256 amount, address l2Recipient) returns (uint256 currentNonce)',
+  'function unlock(uint256 l2Nonce, address l1Recipient, uint256 amount)',
+  'function nonce() view returns (uint256)',
+  'function unlocked(uint256 l2Nonce) view returns (bool)',
+  'error NotOperator()',
+  'error AlreadyUnlocked()',
+]);
+
+const DEST_BRIDGE_ABI = parseAbi([
+  'function relayMint(uint256 l1Nonce, address to, uint256 amount)',
+  'function bridgeBurn(uint256 amount, address l1Recipient) returns (uint256 currentNonce)',
+  'function burnNonce() view returns (uint256)',
+  'error NotOperator()',
+]);
+
+const DEST_TOKEN_ABI = parseAbi([
+  'function balanceOf(address owner) view returns (uint256)',
+  'function totalSupply() view returns (uint256)',
+]);
+
+type BridgeContracts = {
+  sourceToken: Address;
+  sourceBridge: Address;
+  destToken: Address;
+  destBridge: Address;
+};
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const envPath = resolve(__dirname, '..', '.env.local');
+
+let cachedContracts: BridgeContracts | undefined;
 
 function makeChain(id: number, port: number) {
   return defineChain({
@@ -56,53 +73,167 @@ function makeChain(id: number, port: number) {
   });
 }
 
-async function operatorRelayMint(l2Recipient: Address, amount: bigint) {
-  // .env.local から DEST_TOKEN address を読む (build 時に bundle に焼き込まれている)
-  // test side では viem で l2 chain に直接接続して mint を実行する
-  const fs = await import('node:fs');
-  const path = await import('node:path');
-  const url = await import('node:url');
-  const __filename = url.fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const envPath = path.resolve(__dirname, '..', '.env.local');
-  const envText = fs.readFileSync(envPath, 'utf8');
-  const destTokenMatch = envText.match(/NEXT_PUBLIC_DEST_TOKEN=(0x[0-9a-fA-F]+)/);
-  if (!destTokenMatch) throw new Error('DEST_TOKEN not found in .env.local');
-  const destToken = destTokenMatch[1] as Address;
+function getBridgeContracts(): BridgeContracts {
+  if (cachedContracts) return cachedContracts;
 
-  const operator = privateKeyToAccount(OPERATOR_KEY);
-  const l2Chain = makeChain(L2_CHAIN_ID, L2_PORT);
-  const wallet = createWalletClient({ account: operator, chain: l2Chain, transport: http() });
-  const pub = createPublicClient({ chain: l2Chain, transport: http() });
+  const envText = readFileSync(envPath, 'utf8');
+  const readAddress = (name: string) => {
+    const match = envText.match(new RegExp(`${name}=(0x[0-9a-fA-F]+)`));
+    if (!match) throw new Error(`${name} not found in .env.local`);
+    return match[1] as Address;
+  };
 
-  const hash = await wallet.writeContract({
-    address: destToken,
-    abi: DEST_TOKEN_MINT_ABI,
-    functionName: 'mint',
-    args: [l2Recipient, amount],
+  cachedContracts = {
+    sourceToken: readAddress('NEXT_PUBLIC_SOURCE_TOKEN'),
+    sourceBridge: readAddress('NEXT_PUBLIC_SOURCE_BRIDGE'),
+    destToken: readAddress('NEXT_PUBLIC_DEST_TOKEN'),
+    destBridge: readAddress('NEXT_PUBLIC_DEST_BRIDGE'),
+  };
+  return cachedContracts;
+}
+
+function l1PublicClient() {
+  return createPublicClient({ chain: makeChain(L1_CHAIN_ID, L1_PORT), transport: http() });
+}
+
+function l2PublicClient() {
+  return createPublicClient({ chain: makeChain(L2_CHAIN_ID, L2_PORT), transport: http() });
+}
+
+function l1WalletClient(account = privateKeyToAccount(OPERATOR_KEY)) {
+  return createWalletClient({
+    account,
+    chain: makeChain(L1_CHAIN_ID, L1_PORT),
+    transport: http(),
+  });
+}
+
+function l2WalletClient(account = privateKeyToAccount(OPERATOR_KEY)) {
+  return createWalletClient({
+    account,
+    chain: makeChain(L2_CHAIN_ID, L2_PORT),
+    transport: http(),
+  });
+}
+
+function expectCustomError(error: unknown, errorName: string): void {
+  if (!(error instanceof BaseError)) throw error;
+  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
+  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
+  expect(reverted.data?.errorName).toBe(errorName);
+}
+
+async function expectRevert(
+  promise: Promise<unknown>,
+  errorName: string,
+): Promise<void> {
+  try {
+    await promise;
+    throw new Error(`expected ${errorName} revert`);
+  } catch (error) {
+    expectCustomError(error, errorName);
+  }
+}
+
+async function operatorRelayMint(l1Nonce: bigint, l2Recipient: Address, amount: bigint) {
+  const { destBridge } = getBridgeContracts();
+  const pub = l2PublicClient();
+  const hash = await l2WalletClient().writeContract({
+    address: destBridge,
+    abi: DEST_BRIDGE_ABI,
+    functionName: 'relayMint',
+    args: [l1Nonce, l2Recipient, amount],
   });
   await pub.waitForTransactionReceipt({ hash });
 }
 
-async function readL2Balance(addr: Address): Promise<bigint> {
-  const fs = await import('node:fs');
-  const path = await import('node:path');
-  const url = await import('node:url');
-  const __filename = url.fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const envPath = path.resolve(__dirname, '..', '.env.local');
-  const envText = fs.readFileSync(envPath, 'utf8');
-  const destTokenMatch = envText.match(/NEXT_PUBLIC_DEST_TOKEN=(0x[0-9a-fA-F]+)/);
-  if (!destTokenMatch) throw new Error('DEST_TOKEN not found');
-  const destToken = destTokenMatch[1] as Address;
+async function operatorUnlock(l2Nonce: bigint, l1Recipient: Address, amount: bigint) {
+  const { sourceBridge } = getBridgeContracts();
+  const pub = l1PublicClient();
+  const hash = await l1WalletClient().writeContract({
+    address: sourceBridge,
+    abi: SOURCE_BRIDGE_ABI,
+    functionName: 'unlock',
+    args: [l2Nonce, l1Recipient, amount],
+  });
+  await pub.waitForTransactionReceipt({ hash });
+}
 
-  const l2Chain = makeChain(L2_CHAIN_ID, L2_PORT);
-  const pub = createPublicClient({ chain: l2Chain, transport: http() });
-  return (await pub.readContract({
-    address: destToken,
-    abi: DEST_TOKEN_MINT_ABI,
+async function userBridgeBurn(amount: bigint, l1Recipient: Address) {
+  const { destBridge } = getBridgeContracts();
+  const pub = l2PublicClient();
+  const hash = await l2WalletClient().writeContract({
+    address: destBridge,
+    abi: DEST_BRIDGE_ABI,
+    functionName: 'bridgeBurn',
+    args: [amount, l1Recipient],
+  });
+  await pub.waitForTransactionReceipt({ hash });
+}
+
+async function readL1Balance(addr: Address): Promise<bigint> {
+  const { sourceToken } = getBridgeContracts();
+  return (await l1PublicClient().readContract({
+    address: sourceToken,
+    abi: SIMPLE_ERC20_ABI,
     functionName: 'balanceOf',
     args: [addr],
+  })) as bigint;
+}
+
+async function readL1TotalSupply(): Promise<bigint> {
+  const { sourceToken } = getBridgeContracts();
+  return (await l1PublicClient().readContract({
+    address: sourceToken,
+    abi: SIMPLE_ERC20_ABI,
+    functionName: 'totalSupply',
+  })) as bigint;
+}
+
+async function readL1Nonce(): Promise<bigint> {
+  const { sourceBridge } = getBridgeContracts();
+  return (await l1PublicClient().readContract({
+    address: sourceBridge,
+    abi: SOURCE_BRIDGE_ABI,
+    functionName: 'nonce',
+  })) as bigint;
+}
+
+async function readL1Unlocked(l2Nonce: bigint): Promise<boolean> {
+  const { sourceBridge } = getBridgeContracts();
+  return (await l1PublicClient().readContract({
+    address: sourceBridge,
+    abi: SOURCE_BRIDGE_ABI,
+    functionName: 'unlocked',
+    args: [l2Nonce],
+  })) as boolean;
+}
+
+async function readL2Balance(addr: Address): Promise<bigint> {
+  const { destToken } = getBridgeContracts();
+  return (await l2PublicClient().readContract({
+    address: destToken,
+    abi: DEST_TOKEN_ABI,
+    functionName: 'balanceOf',
+    args: [addr],
+  })) as bigint;
+}
+
+async function readL2TotalSupply(): Promise<bigint> {
+  const { destToken } = getBridgeContracts();
+  return (await l2PublicClient().readContract({
+    address: destToken,
+    abi: DEST_TOKEN_ABI,
+    functionName: 'totalSupply',
+  })) as bigint;
+}
+
+async function readL2BurnNonce(): Promise<bigint> {
+  const { destBridge } = getBridgeContracts();
+  return (await l2PublicClient().readContract({
+    address: destBridge,
+    abi: DEST_BRIDGE_ABI,
+    functionName: 'burnNonce',
   })) as bigint;
 }
 
@@ -215,10 +346,8 @@ test.describe('Next.js Bridge (ERC20 cross-chain lock/mint/burn) e2e', () => {
     const account = privateKeyToAccount(OPERATOR_KEY);
     const beforeL2 = await readL2Balance(account.address);
 
-    // operator が L2 で mint (real bridge では off-chain relayer が L1 Locked event を観測してこれを実行)
-    await operatorRelayMint(account.address, BRIDGE_AMOUNT);
+    await operatorRelayMint(0n, account.address, BRIDGE_AMOUNT);
 
-    // UI 側 dest balance refetch を待つ (refetchInterval 1.5s)
     await expect(page.getByTestId('dest-balance')).toHaveText(
       `destBalance (L2): ${beforeL2 + BRIDGE_AMOUNT}`,
       { timeout: 15_000 },
@@ -245,18 +374,16 @@ test.describe('Next.js Bridge (ERC20 cross-chain lock/mint/burn) e2e', () => {
         .trim(),
     );
     const beforeL2 = await readL2Balance(account.address);
+    const l1NonceBefore = await readL1Nonce();
 
-    // L1 で approve + lock
     await page.getByTestId('approve-button').click();
     await dappE2e.waitForRpcIdle();
     await page.getByTestId('lock-button').click();
     await dappE2e.waitForRpcIdle();
     await page.waitForTimeout(1500);
 
-    // operator が L2 で mint
-    await operatorRelayMint(account.address, BRIDGE_AMOUNT);
+    await operatorRelayMint(l1NonceBefore, account.address, BRIDGE_AMOUNT);
 
-    // 両 chain の最終 state を確認
     await expect(page.getByTestId('source-balance')).toHaveText(
       `sourceBalance (L1): ${beforeSource - BRIDGE_AMOUNT}`,
       { timeout: 15_000 },
@@ -295,5 +422,118 @@ test.describe('Next.js Bridge (ERC20 cross-chain lock/mint/burn) e2e', () => {
         .trim(),
     );
     expect(afterNonce - beforeNonce).toBe(1n);
+  });
+
+  test('T-BR-006 operator authentication validation', async () => {
+    const nonOperator = privateKeyToAccount(NON_OPERATOR_KEY);
+    const { sourceBridge, destBridge } = getBridgeContracts();
+
+    const sourceSupplyBefore = await readL1TotalSupply();
+    await expectRevert(
+      l1PublicClient().simulateContract({
+        address: sourceBridge,
+        abi: SOURCE_BRIDGE_ABI,
+        functionName: 'unlock',
+        args: [0n, nonOperator.address, BRIDGE_AMOUNT],
+        account: nonOperator.address,
+      }),
+      'NotOperator',
+    );
+    expect(await readL1TotalSupply()).toBe(sourceSupplyBefore);
+
+    const destSupplyBefore = await readL2TotalSupply();
+    await expectRevert(
+      l2PublicClient().simulateContract({
+        address: destBridge,
+        abi: DEST_BRIDGE_ABI,
+        functionName: 'relayMint',
+        args: [0n, nonOperator.address, BRIDGE_AMOUNT],
+        account: nonOperator.address,
+      }),
+      'NotOperator',
+    );
+    expect(await readL2TotalSupply()).toBe(destSupplyBefore);
+  });
+
+  test('T-BR-007 replay attack protection', async () => {
+    const operator = privateKeyToAccount(OPERATOR_KEY);
+    const { sourceToken, sourceBridge } = getBridgeContracts();
+    const replayNonce = 777n;
+    const l1Pub = l1PublicClient();
+    const l1Wallet = l1WalletClient();
+    const balanceBefore = await readL1Balance(operator.address);
+
+    const approveHash = await l1Wallet.writeContract({
+      address: sourceToken,
+      abi: SIMPLE_ERC20_ABI,
+      functionName: 'approve',
+      args: [sourceBridge, BRIDGE_AMOUNT],
+    });
+    await l1Pub.waitForTransactionReceipt({ hash: approveHash });
+
+    const lockHash = await l1Wallet.writeContract({
+      address: sourceBridge,
+      abi: SOURCE_BRIDGE_ABI,
+      functionName: 'bridgeLock',
+      args: [BRIDGE_AMOUNT, operator.address],
+    });
+    await l1Pub.waitForTransactionReceipt({ hash: lockHash });
+
+    await operatorUnlock(replayNonce, operator.address, BRIDGE_AMOUNT);
+    expect(await readL1Unlocked(replayNonce)).toBe(true);
+
+    await expectRevert(
+      l1Pub.simulateContract({
+        address: sourceBridge,
+        abi: SOURCE_BRIDGE_ABI,
+        functionName: 'unlock',
+        args: [replayNonce, operator.address, BRIDGE_AMOUNT],
+        account: operator.address,
+      }),
+      'AlreadyUnlocked',
+    );
+    expect(await readL1Unlocked(replayNonce)).toBe(true);
+    expect(await readL1Balance(operator.address)).toBe(balanceBefore);
+  });
+
+  test('T-BR-008 L2→L1 reverse path', async ({ page, dappE2e }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle', { timeout: 30_000 });
+    await ensureConnected(page);
+    await dappE2e.waitForRpcIdle();
+    await waitLoaded(page);
+
+    const operator = privateKeyToAccount(OPERATOR_KEY);
+    const beforeSource = await readL1Balance(operator.address);
+    const beforeDestSupply = await readL2TotalSupply();
+    const beforeL2Balance = await readL2Balance(operator.address);
+    const l1NonceBefore = await readL1Nonce();
+
+    await page.getByTestId('approve-button').click();
+    await dappE2e.waitForRpcIdle();
+    await page.getByTestId('lock-button').click();
+    await dappE2e.waitForRpcIdle();
+    await page.waitForTimeout(1500);
+
+    await operatorRelayMint(l1NonceBefore, operator.address, BRIDGE_AMOUNT);
+    await expect(page.getByTestId('dest-balance')).toHaveText(
+      `destBalance (L2): ${beforeL2Balance + BRIDGE_AMOUNT}`,
+      { timeout: 15_000 },
+    );
+
+    const burnNonceBefore = await readL2BurnNonce();
+    await userBridgeBurn(BRIDGE_AMOUNT, operator.address);
+
+    await operatorUnlock(burnNonceBefore, operator.address, BRIDGE_AMOUNT);
+
+    await expect(page.getByTestId('source-balance')).toHaveText(
+      `sourceBalance (L1): ${beforeSource}`,
+      { timeout: 15_000 },
+    );
+    await expect(page.getByTestId('dest-balance')).toHaveText(
+      `destBalance (L2): ${beforeL2Balance}`,
+      { timeout: 15_000 },
+    );
+    expect(await readL2TotalSupply()).toBe(beforeDestSupply);
   });
 });

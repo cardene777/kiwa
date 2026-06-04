@@ -7,6 +7,7 @@ import {
   writePidEntry,
   type PidEntry,
 } from '@dapp-e2e/core';
+import { privateKeyToAccount } from 'viem/accounts';
 import type { Hex } from 'viem';
 
 const CHAIN_CONFIGS = [
@@ -16,6 +17,9 @@ const CHAIN_CONFIGS = [
 ] as const;
 
 const INITIAL_SUPPLY = 1_000n * 10n ** 18n;
+const PROBE_USER = privateKeyToAccount(
+  '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
+).address;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const exampleRoot = resolve(__dirname, '..');
@@ -61,6 +65,7 @@ try {
         return {
           [`NEXT_PUBLIC_${config.label.toUpperCase()}_PORT`]: String(config.port),
           [`NEXT_PUBLIC_${config.label.toUpperCase()}_TOKEN`]: receipt.contractAddress,
+          NEXT_PUBLIC_PROBE_USER: PROBE_USER,
         };
       },
     });
@@ -95,6 +100,7 @@ try {
         NEXT_PUBLIC_MAINNET_TOKEN: deployedAddresses.Mainnet,
         NEXT_PUBLIC_OPTIMISM_TOKEN: deployedAddresses.Optimism,
         NEXT_PUBLIC_BASE_TOKEN: deployedAddresses.Base,
+        NEXT_PUBLIC_PROBE_USER: PROBE_USER,
       };
     },
   });
