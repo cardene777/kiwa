@@ -353,4 +353,64 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
     // bob (第三者 caller) の balance は変わらない
     expect(bobBalanceAfter).toBe(bobBalanceBefore);
   });
+
+  test('T-VS-007 vestedAmount(0) は 0、vestedAmount(start) は 0、vestedAmount(cliff-1) は 0、cliff +1s で正の値', async () => {
+    // contract レベルの境界値 / 単調性検証
+    // 時間操作なしで vestedAmount(timestamp) を直接 view 呼出することで cliff の境界を網羅
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const url = await import('node:url');
+    const __filename = url.fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const envContent = fs.readFileSync(
+      path.resolve(__dirname, '..', '.env.local'),
+      'utf8',
+    );
+    const vestingMatch = envContent.match(/NEXT_PUBLIC_VESTING=(0x[0-9a-fA-F]+)/);
+    const startMatch = envContent.match(/NEXT_PUBLIC_VEST_START=(\d+)/);
+    expect(vestingMatch).not.toBeNull();
+    expect(startMatch).not.toBeNull();
+    const VESTING = vestingMatch![1] as `0x${string}`;
+    const START = BigInt(startMatch![1]);
+
+    const localPub = createPublicClient({ chain: anvilChain, transport: http() });
+    const VESTED_AMOUNT_ABI = [
+      {
+        inputs: [{ name: 'timestamp', type: 'uint64' }],
+        name: 'vestedAmount',
+        outputs: [{ name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ] as const;
+
+    const callVestedAmount = (timestamp: bigint) =>
+      localPub.readContract({
+        address: VESTING,
+        abi: VESTED_AMOUNT_ABI,
+        functionName: 'vestedAmount',
+        args: [timestamp],
+      }) as Promise<bigint>;
+
+    const atZero = await callVestedAmount(0n);
+    const atStart = await callVestedAmount(START);
+    const beforeCliff = await callVestedAmount(START + CLIFF_DURATION - 1n);
+    const atCliff = await callVestedAmount(START + CLIFF_DURATION);
+    const afterCliff = await callVestedAmount(START + CLIFF_DURATION + 1n);
+    const atEnd = await callVestedAmount(START + VESTING_DURATION);
+    const farFuture = await callVestedAmount(START + VESTING_DURATION + 100_000n);
+
+    // timestamp < cliff は全部 0
+    expect(atZero).toBe(0n);
+    expect(atStart).toBe(0n);
+    expect(beforeCliff).toBe(0n);
+
+    // cliff 通過直後は正の値、cliff 1 秒後はさらに大きい
+    expect(atCliff).toBeGreaterThan(0n);
+    expect(afterCliff).toBeGreaterThan(atCliff);
+
+    // start + duration 以降は total に clamp
+    expect(atEnd).toBe(VEST_TOTAL);
+    expect(farFuture).toBe(VEST_TOTAL);
+  });
 });
