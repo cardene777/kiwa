@@ -68,6 +68,8 @@ contract SimpleSwap {
 
     error TransferInFailed();
     error TransferOutFailed();
+    error SlippageExceeded(uint256 amountOut, uint256 minOutputAmount);
+    error InsufficientLiquidity(uint256 amountOut, uint256 availableLiquidity);
 
     constructor(address a, address b) {
         tokenA = IErc20(a);
@@ -75,9 +77,13 @@ contract SimpleSwap {
     }
 
     /// @notice Swap amountIn of tokenA for the same amount of tokenB (1:1).
-    function swapAforB(uint256 amountIn) external {
+    function swapAforB(uint256 amountIn, uint256 minOutputAmount) external {
+        uint256 amountOut = amountIn;
+        uint256 availableLiquidity = tokenB.balanceOf(address(this));
+        if (availableLiquidity < amountOut) revert InsufficientLiquidity(amountOut, availableLiquidity);
+        if (amountOut < minOutputAmount) revert SlippageExceeded(amountOut, minOutputAmount);
         if (!tokenA.transferFrom(msg.sender, address(this), amountIn)) revert TransferInFailed();
-        if (!tokenB.transfer(msg.sender, amountIn)) revert TransferOutFailed();
-        emit Swapped(msg.sender, amountIn, amountIn);
+        if (!tokenB.transfer(msg.sender, amountOut)) revert TransferOutFailed();
+        emit Swapped(msg.sender, amountIn, amountOut);
     }
 }

@@ -1,7 +1,33 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { encodeFunctionData } from 'viem';
 import { test, expect } from './fixture';
 
 const SWAP_AMOUNT = 25n * 10n ** 18n;
 const USER_INITIAL_A = 100n * 10n ** 18n;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+function readRuntimeEnv() {
+  const envLocal = readFileSync(resolve(__dirname, '../.env.local'), 'utf8');
+  const pairs = envLocal
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith('#'))
+    .map((line) => {
+      const separatorIndex = line.indexOf('=');
+      return [line.slice(0, separatorIndex), line.slice(separatorIndex + 1)] as const;
+    });
+  const env = Object.fromEntries(pairs);
+  if (!env.NEXT_PUBLIC_TOKEN_A || !env.NEXT_PUBLIC_SWAP || !env.NEXT_PUBLIC_TOKEN_A_NAME) {
+    throw new Error('Missing required values in examples/nextjs-permit-swap/.env.local');
+  }
+  return {
+    tokenA: env.NEXT_PUBLIC_TOKEN_A as `0x${string}`,
+    swap: env.NEXT_PUBLIC_SWAP as `0x${string}`,
+    tokenAName: env.NEXT_PUBLIC_TOKEN_A_NAME,
+  };
+}
 
 async function ensureConnected(page: import('@playwright/test').Page) {
   const connectBtn = page.getByRole('button', { name: /connect wallet/i });
@@ -133,5 +159,150 @@ test.describe('Next.js EIP-2612 Permit + 1-tx swap e2e', () => {
     );
     // 期待: USER_INITIAL_A - nonce * SWAP_AMOUNT === currentA
     expect(currentA).toBe(USER_INITIAL_A - nonce * SWAP_AMOUNT);
+  });
+
+  test('T-PM-006 過去 deadline の permit signature を使うと permitAndSwap が revert する', async ({
+    page,
+    dappE2e,
+  }) => {
+    const { tokenA, swap, tokenAName } = readRuntimeEnv();
+
+    await page.goto('/');
+    await page.waitForLoadState('networkidle', { timeout: 30_000 });
+    await ensureConnected(page);
+    await dappE2e.waitForRpcIdle();
+    await waitDataLoaded(page);
+
+    const beforeNonce = BigInt(
+      ((await page.getByTestId('nonce').textContent()) ?? '').replace('nonce: ', '').trim(),
+    );
+    const beforeBalanceA = BigInt(
+      ((await page.getByTestId('balance-a').textContent()) ?? '').replace('tokenA: ', '').trim(),
+    );
+    const beforeBalanceB = BigInt(
+      ((await page.getByTestId('balance-b').textContent()) ?? '').replace('tokenB: ', '').trim(),
+    );
+
+    const expiredPermit = await page.evaluate(
+      async ({ amountIn, currentNonce, tokenAAddress, tokenANameValue, swapAddress }) => {
+        const ethereum = (window as unknown as Window & {
+          ethereum: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
+        }).ethereum;
+        const accounts = (await ethereum.request({
+          method: 'eth_accounts',
+        })) as string[];
+        const account = accounts[0];
+        if (!account) {
+          throw new Error('No connected account');
+        }
+        const chainIdHex = (await ethereum.request({
+          method: 'eth_chainId',
+        })) as string;
+        const deadline = BigInt(Math.floor(Date.now() / 1000) - 3600);
+        const typedData = {
+          types: {
+            EIP712Domain: [
+              { name: 'name', type: 'string' },
+              { name: 'version', type: 'string' },
+              { name: 'chainId', type: 'uint256' },
+              { name: 'verifyingContract', type: 'address' },
+            ],
+            Permit: [
+              { name: 'owner', type: 'address' },
+              { name: 'spender', type: 'address' },
+              { name: 'value', type: 'uint256' },
+              { name: 'nonce', type: 'uint256' },
+              { name: 'deadline', type: 'uint256' },
+            ],
+          },
+          domain: {
+            name: tokenANameValue,
+            version: '1',
+            chainId: Number(chainIdHex),
+            verifyingContract: tokenAAddress,
+          },
+          primaryType: 'Permit',
+          message: {
+            owner: account,
+            spender: swapAddress,
+            value: amountIn,
+            nonce: currentNonce,
+            deadline: deadline.toString(),
+          },
+        };
+        const signature = (await ethereum.request({
+          method: 'eth_signTypedData_v4',
+          params: [account, JSON.stringify(typedData)],
+        })) as `0x${string}`;
+        return { account, deadline: deadline.toString(), signature };
+      },
+      {
+        amountIn: SWAP_AMOUNT.toString(),
+        currentNonce: beforeNonce.toString(),
+        tokenAAddress: tokenA,
+        tokenANameValue: tokenAName,
+        swapAddress: swap,
+      },
+    );
+    await dappE2e.waitForRpcIdle();
+
+    const signatureBody = expiredPermit.signature.slice(2);
+    const v = parseInt(signatureBody.slice(128, 130), 16);
+    const r = `0x${signatureBody.slice(0, 64)}` as `0x${string}`;
+    const s = `0x${signatureBody.slice(64, 128)}` as `0x${string}`;
+    const permitAndSwapData = encodeFunctionData({
+      abi: [
+        {
+          type: 'function',
+          name: 'permitAndSwap',
+          stateMutability: 'nonpayable',
+          inputs: [
+            { name: 'amountIn', type: 'uint256' },
+            { name: 'deadline', type: 'uint256' },
+            { name: 'v', type: 'uint8' },
+            { name: 'r', type: 'bytes32' },
+            { name: 's', type: 'bytes32' },
+          ],
+          outputs: [],
+        },
+      ],
+      functionName: 'permitAndSwap',
+      args: [SWAP_AMOUNT, BigInt(expiredPermit.deadline), v, r, s],
+    });
+
+    const reverted = await page.evaluate(
+      async ({ data, from, to }) => {
+        const ethereum = (window as unknown as Window & {
+          ethereum: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
+        }).ethereum;
+        try {
+          await ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [{ from, to, data }],
+          });
+          return null;
+        } catch (error) {
+          const rpcError = error as { code?: number; message?: string };
+          return `${String(rpcError.code ?? '')}:${String(rpcError.message ?? error)}`;
+        }
+      },
+      {
+        data: permitAndSwapData,
+        from: expiredPermit.account,
+        to: swap,
+      },
+    );
+    await dappE2e.waitForRpcIdle();
+
+    expect(reverted).not.toBeNull();
+    expect(reverted ?? '').toMatch(/PermitExpired|ExpiredSignature|expired|revert/i);
+
+    await expect(page.getByTestId('nonce')).toHaveText(`nonce: ${beforeNonce}`, { timeout: 15_000 });
+    await expect(page.getByTestId('balance-a')).toHaveText(`tokenA: ${beforeBalanceA}`, {
+      timeout: 15_000,
+    });
+    await expect(page.getByTestId('balance-b')).toHaveText(`tokenB: ${beforeBalanceB}`, {
+      timeout: 15_000,
+    });
   });
 });

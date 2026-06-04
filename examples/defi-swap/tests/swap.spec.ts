@@ -33,13 +33,14 @@ const ERC20_ABI = parseAbi([
   'function totalSupply() view returns (uint256)',
 ]);
 const SWAP_ABI = parseAbi([
-  'function swapAforB(uint256 amountIn)',
+  'function swapAforB(uint256 amountIn, uint256 minOutputAmount)',
   'event Swapped(address indexed user, uint256 amountIn, uint256 amountOut)',
 ]);
 
 const POOL_LIQUIDITY = 1000n * 10n ** 18n;
 const USER_INITIAL = 100n * 10n ** 18n;
 const SWAP_AMOUNT = 25n * 10n ** 18n;
+const LARGE_USER_INITIAL = POOL_LIQUIDITY + 100n * 10n ** 18n;
 
 function anvilChain(port: number) {
   return defineChain({
@@ -52,12 +53,18 @@ function anvilChain(port: number) {
 
 async function setupSwap(
   port: number,
+  options: {
+    userInitial?: bigint;
+    poolLiquidity?: bigint;
+  } = {},
 ): Promise<{
   tokenA: Address;
   tokenB: Address;
   swap: Address;
   user: Address;
 }> {
+  const userInitial = options.userInitial ?? USER_INITIAL;
+  const poolLiquidity = options.poolLiquidity ?? POOL_LIQUIDITY;
   const account = privateKeyToAccount(PRIVATE_KEY);
   const wallet = createWalletClient({
     account,
@@ -70,7 +77,7 @@ async function setupSwap(
   const aHash = await wallet.deployContract({
     abi: erc20Artifact.abi as never,
     bytecode: erc20Artifact.bytecode.object,
-    args: ['TokenA', 'TKA', USER_INITIAL, account.address],
+    args: ['TokenA', 'TKA', userInitial, account.address],
   });
   const aReceipt = await pub.waitForTransactionReceipt({ hash: aHash });
   const tokenA = aReceipt.contractAddress!;
@@ -79,7 +86,7 @@ async function setupSwap(
   const bHash = await wallet.deployContract({
     abi: erc20Artifact.abi as never,
     bytecode: erc20Artifact.bytecode.object,
-    args: ['TokenB', 'TKB', POOL_LIQUIDITY, account.address],
+    args: ['TokenB', 'TKB', poolLiquidity, account.address],
   });
   const bReceipt = await pub.waitForTransactionReceipt({ hash: bHash });
   const tokenB = bReceipt.contractAddress!;
@@ -98,7 +105,7 @@ async function setupSwap(
     address: tokenB,
     abi: ERC20_ABI,
     functionName: 'transfer',
-    args: [swap, POOL_LIQUIDITY],
+    args: [swap, poolLiquidity],
   });
   await pub.waitForTransactionReceipt({ hash: fundHash });
 
@@ -115,6 +122,8 @@ function makeDappHtml(tokenA: Address, tokenB: Address, swap: Address): string {
   <button id="approve">Approve</button>
   <button id="swap">Swap</button>
   <button id="refresh">Refresh</button>
+  <input id="swap-amount-input" data-testid="swap-amount-input" value="${SWAP_AMOUNT.toString()}" />
+  <input id="slippage-input" data-testid="slippage-input" value="0" />
   <pre id="account"></pre>
   <pre id="balance-a"></pre>
   <pre id="balance-b"></pre>
@@ -125,8 +134,14 @@ function makeDappHtml(tokenA: Address, tokenB: Address, swap: Address): string {
     const TOKEN_A = '${tokenA}';
     const TOKEN_B = '${tokenB}';
     const SWAP = '${swap}';
-    const AMOUNT_HEX = '${SWAP_AMOUNT.toString(16).padStart(64, '0')}';
     function pad(addr) { return addr.replace('0x', '').toLowerCase().padStart(64, '0'); }
+    function uint256Hex(value) { return BigInt(value).toString(16).padStart(64, '0'); }
+    function readAmount() {
+      return document.getElementById('swap-amount-input').value;
+    }
+    function readMinOutput() {
+      return document.getElementById('slippage-input').value;
+    }
     document.getElementById('connect').addEventListener('click', async () => {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       document.getElementById('account').textContent = accounts[0];
@@ -134,7 +149,7 @@ function makeDappHtml(tokenA: Address, tokenB: Address, swap: Address): string {
     document.getElementById('approve').addEventListener('click', async () => {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       // approve(address,uint256) = 0x095ea7b3
-      const data = '0x095ea7b3' + pad(SWAP) + AMOUNT_HEX;
+      const data = '0x095ea7b3' + pad(SWAP) + uint256Hex(readAmount());
       try {
         const hash = await window.ethereum.request({
           method: 'eth_sendTransaction',
@@ -148,8 +163,8 @@ function makeDappHtml(tokenA: Address, tokenB: Address, swap: Address): string {
     });
     document.getElementById('swap').addEventListener('click', async () => {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      // swapAforB(uint256) selector = keccak256("swapAforB(uint256)")[:4]
-      const data = '0xe4f1f70a' + AMOUNT_HEX;
+      // swapAforB(uint256,uint256) selector = keccak256("swapAforB(uint256,uint256)")[:4]
+      const data = '0x140e6247' + uint256Hex(readAmount()) + uint256Hex(readMinOutput());
       try {
         const hash = await window.ethereum.request({
           method: 'eth_sendTransaction',
@@ -240,6 +255,78 @@ test.describe('defi-swap e2e (ERC20 approve → swap)', () => {
     );
     await expect(page.locator('#balance-b')).toHaveText(SWAP_AMOUNT.toString());
     await expect(page.locator('#allowance')).toHaveText('0');
+  });
+
+  test('T-DS-005 minOutputAmount を上回る最小受取量を指定すると slippage protection で revert する', async ({
+    page,
+    anvilPort,
+    dappE2e,
+  }) => {
+    const { tokenA, tokenB, swap } = await setupSwap(anvilPort);
+    await page.setContent(makeDappHtml(tokenA, tokenB, swap));
+    await page.click('#connect');
+    await dappE2e.waitForRpcIdle();
+    await page.click('#approve');
+    await dappE2e.waitForRpcIdle();
+    await page.getByTestId('slippage-input').fill((SWAP_AMOUNT + 1n).toString());
+    await page.click('#swap');
+    await dappE2e.waitForRpcIdle();
+    const err = (await page.locator('#last-error').textContent()) ?? '';
+    expect(err).toMatch(/SlippageExceeded|execution reverted|revert/i);
+    await page.click('#refresh');
+    await dappE2e.waitForRpcIdle();
+    await expect(page.locator('#balance-a')).toHaveText(USER_INITIAL.toString());
+    await expect(page.locator('#balance-b')).toHaveText('0');
+    await expect(page.locator('#allowance')).toHaveText(SWAP_AMOUNT.toString());
+  });
+
+  test('T-DS-006 pool 流動性を超える swap を試行すると revert する', async ({
+    page,
+    anvilPort,
+    dappE2e,
+  }) => {
+    const { tokenA, tokenB, swap } = await setupSwap(anvilPort, {
+      userInitial: LARGE_USER_INITIAL,
+    });
+    await page.setContent(makeDappHtml(tokenA, tokenB, swap));
+    await page.click('#connect');
+    await dappE2e.waitForRpcIdle();
+
+    const poolBalance = BigInt(
+      await page.evaluate(
+        async ({ tokenBAddress, swapAddress }) => {
+          const ethereum = (window as unknown as Window & {
+            ethereum: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
+          }).ethereum;
+          const pad = (addr: string) => addr.replace('0x', '').toLowerCase().padStart(64, '0');
+          const value = await ethereum.request({
+            method: 'eth_call',
+            params: [
+              { to: tokenBAddress, data: '0x70a08231' + pad(swapAddress) },
+              'latest',
+            ],
+          });
+          return BigInt(value as string).toString();
+        },
+        { tokenBAddress: tokenB, swapAddress: swap },
+      ),
+    );
+    const excessiveAmount = poolBalance + 1n;
+
+    await page.getByTestId('swap-amount-input').fill(excessiveAmount.toString());
+    await page.click('#approve');
+    await dappE2e.waitForRpcIdle();
+    await page.click('#swap');
+    await dappE2e.waitForRpcIdle();
+
+    const err = (await page.locator('#last-error').textContent()) ?? '';
+    expect(err).toMatch(/InsufficientLiquidity|execution reverted|revert/i);
+
+    await page.click('#refresh');
+    await dappE2e.waitForRpcIdle();
+    await expect(page.locator('#balance-a')).toHaveText(LARGE_USER_INITIAL.toString());
+    await expect(page.locator('#balance-b')).toHaveText('0');
+    await expect(page.locator('#allowance')).toHaveText(excessiveAmount.toString());
   });
 
   test('T-DS-004 setApprovalMode("reject") で approve が code 4001 reject される', async ({
