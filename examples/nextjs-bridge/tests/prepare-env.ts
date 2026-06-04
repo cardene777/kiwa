@@ -7,7 +7,7 @@ import {
   writePidEntry,
   type PidEntry,
 } from '@dapp-e2e/core';
-import type { Hex } from 'viem';
+import { getContractAddress, type Hex } from 'viem';
 
 const L1_PORT = 8554;
 const L2_PORT = 8555;
@@ -50,24 +50,30 @@ try {
         await publicClient.waitForTransactionReceipt({ hash: padHash });
       }
 
-      // dest bridge は operator を持つ必要、先に dest token deploy (operator として dest bridge address 必要だが先に dest bridge も deploy 必要 → CREATE 順序ハック)
-      // 簡略化: dest token の operator を後でセットできないため、dest bridge を deploy 後に dest token を deploy し token は bridge を operator として指定
-      // ただし dest bridge は destToken address を constructor で取る → 先に dest token 必要
-      // 妥協案: operator = EOA (deployer) として dest token を deploy、dest bridge にはこの EOA が operator として relay する形式
+      const nextNonce = BigInt(
+        await publicClient.getTransactionCount({ address: account.address }),
+      );
+      const predictedDestToken = getContractAddress({
+        from: account.address,
+        nonce: nextNonce,
+      });
+      const predictedDestBridge = getContractAddress({
+        from: account.address,
+        nonce: nextNonce + 1n,
+      });
 
-      // dest token は operator = EOA (deployer)
+      // dest token/operator と dest bridge/token の循環依存は CREATE address を先読みして解決する
       const destTokenHash = await wallet.deployContract({
         abi: destTokenArtifact.abi as never,
         bytecode: destTokenArtifact.bytecode.object,
-        args: ['DestToken', 'DST', account.address],
+        args: ['DestToken', 'DST', predictedDestBridge],
       });
       const destTokenReceipt = await publicClient.waitForTransactionReceipt({ hash: destTokenHash });
       destToken = destTokenReceipt.contractAddress!;
+      if (destToken.toLowerCase() !== predictedDestToken.toLowerCase()) {
+        throw new Error(`predicted DestToken mismatch: expected ${predictedDestToken}, got ${destToken}`);
+      }
 
-      // dest bridge は destToken の operator として EOA を渡す (bridge 自身は token を呼ぶ際 operator として token に identify される)
-      // 本構成では bridge は token の operator 権限を持たないため、bridgeBurn は test 内で operator が直接 destToken.burn() を呼ぶ形にする
-      // 簡略化のため DestBridge は不要、test では operator が直接 destToken.mint / burn を呼ぶ形式に変更する
-      // ただし e2e の demonstrative value を保つため DestBridge も deploy しておく
       const destBridgeHash = await wallet.deployContract({
         abi: destBridgeArtifact.abi as never,
         bytecode: destBridgeArtifact.bytecode.object,
@@ -77,6 +83,11 @@ try {
         hash: destBridgeHash,
       });
       destBridge = destBridgeReceipt.contractAddress!;
+      if (destBridge.toLowerCase() !== predictedDestBridge.toLowerCase()) {
+        throw new Error(
+          `predicted DestBridge mismatch: expected ${predictedDestBridge}, got ${destBridge}`,
+        );
+      }
 
       return {
         NEXT_PUBLIC_L2_PORT: String(L2_PORT),

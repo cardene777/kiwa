@@ -7,6 +7,7 @@ import {
   writePidEntry,
   type PidEntry,
 } from '@dapp-e2e/core';
+import { privateKeyToAccount } from 'viem/accounts';
 import type { Hex } from 'viem';
 
 const CHAIN_CONFIGS = [
@@ -16,6 +17,12 @@ const CHAIN_CONFIGS = [
 ] as const;
 
 const INITIAL_SUPPLY = 1_000n * 10n ** 18n;
+const MINTER_KEY: Hex =
+  '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
+const MINTER = privateKeyToAccount(MINTER_KEY).address;
+const PROBE_USER = privateKeyToAccount(
+  '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
+).address;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const exampleRoot = resolve(__dirname, '..');
@@ -52,7 +59,7 @@ try {
         const hash = await wallet.deployContract({
           abi: artifact.abi as never,
           bytecode: artifact.bytecode.object,
-          args: [`Token-${config.label}`, config.label, INITIAL_SUPPLY, account.address],
+          args: [`Token-${config.label}`, config.label, INITIAL_SUPPLY, account.address, MINTER],
         });
         const receipt = await publicClient.waitForTransactionReceipt({ hash });
         if (!receipt.contractAddress) throw new Error(`deploy failed on chain ${config.id}`);
@@ -61,6 +68,7 @@ try {
         return {
           [`NEXT_PUBLIC_${config.label.toUpperCase()}_PORT`]: String(config.port),
           [`NEXT_PUBLIC_${config.label.toUpperCase()}_TOKEN`]: receipt.contractAddress,
+          NEXT_PUBLIC_PROBE_USER: PROBE_USER,
         };
       },
     });
@@ -80,7 +88,13 @@ try {
       const hash = await wallet.deployContract({
         abi: artifact.abi as never,
         bytecode: artifact.bytecode.object,
-        args: [`Token-${mainnetConfig.label}`, mainnetConfig.label, INITIAL_SUPPLY, account.address],
+        args: [
+          `Token-${mainnetConfig.label}`,
+          mainnetConfig.label,
+          INITIAL_SUPPLY,
+          account.address,
+          MINTER,
+        ],
       });
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
       if (!receipt.contractAddress) {
@@ -95,6 +109,7 @@ try {
         NEXT_PUBLIC_MAINNET_TOKEN: deployedAddresses.Mainnet,
         NEXT_PUBLIC_OPTIMISM_TOKEN: deployedAddresses.Optimism,
         NEXT_PUBLIC_BASE_TOKEN: deployedAddresses.Base,
+        NEXT_PUBLIC_PROBE_USER: PROBE_USER,
       };
     },
   });

@@ -77,6 +77,7 @@ export const CONTRACT_ADDRESS_BY_CHAIN: Record<number, `0x${string}`> = {
   ),
   [baseSim.id]: requireEnv(process.env.NEXT_PUBLIC_BASE_TOKEN, 'NEXT_PUBLIC_BASE_TOKEN'),
 };
+export const PROBE_USER = requireEnv(process.env.NEXT_PUBLIC_PROBE_USER, 'NEXT_PUBLIC_PROBE_USER');
 
 export const CHAIN_LABEL: Record<number, string> = {
   [mainnetSim.id]: 'Mainnet',

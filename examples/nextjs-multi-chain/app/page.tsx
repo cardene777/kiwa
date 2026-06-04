@@ -1,10 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useChainId, useReadContract, useSwitchChain } from 'wagmi';
+import { useAccount, useChainId, usePublicClient, useReadContract, useSwitchChain } from 'wagmi';
 import {
   CONTRACT_ADDRESS_BY_CHAIN,
   CHAIN_LABEL,
+  PROBE_USER,
   SIMPLE_TOKEN_ABI,
   mainnetSim,
   optimismSim,
@@ -17,6 +19,8 @@ export default function Home() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChain, isPending } = useSwitchChain();
+  const publicClient = usePublicClient({ chainId });
+  const [probeBalance, setProbeBalance] = useState<string>('(loading)');
 
   const currentToken = CONTRACT_ADDRESS_BY_CHAIN[chainId] ?? '0x0';
   const currentLabel = CHAIN_LABEL[chainId] ?? `unknown(${chainId})`;
@@ -29,6 +33,36 @@ export default function Home() {
     chainId,
     query: { enabled: Boolean(address) },
   });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const readProbeBalance = async () => {
+      if (!publicClient) {
+        if (!cancelled) setProbeBalance('(loading)');
+        return;
+      }
+
+      const balance = await publicClient.readContract({
+        address: currentToken as `0x${string}`,
+        abi: SIMPLE_TOKEN_ABI,
+        functionName: 'balanceOf',
+        args: [PROBE_USER],
+      });
+
+      if (!cancelled) {
+        setProbeBalance(String(balance));
+      }
+    };
+
+    void readProbeBalance();
+    const interval = setInterval(() => void readProbeBalance(), 1500);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [currentToken, publicClient]);
 
   return (
     <main
@@ -75,6 +109,7 @@ export default function Home() {
           balance:{' '}
           {myBalance.data !== undefined ? String(myBalance.data) : '(loading)'}
         </div>
+        <div data-testid="probe-balance">probeBalance: {probeBalance}</div>
 
         <div style={{ display: 'flex', gap: 8 }}>
           {CHAINS.map((c) => (

@@ -108,6 +108,30 @@ export function resolveActivePrivateKey(ctx: RpcContext): Hex {
   return key;
 }
 
+function resolveRegistryAnvilPort(ctx: RpcContext): number | undefined {
+  const registry = ctx.chainRegistry?.current;
+  if (!registry) return undefined;
+
+  const activeChainHex = numberToHex(ctx.chainState.current).toLowerCase();
+  const chain = registry.find((entry) => entry.chainId.toLowerCase() === activeChainHex);
+  const rpcUrl = chain?.rpcUrls?.find((value) => typeof value === 'string');
+  if (!rpcUrl) return undefined;
+
+  try {
+    const parsed = new URL(rpcUrl);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return undefined;
+    if (parsed.hostname !== '127.0.0.1' && parsed.hostname !== 'localhost') return undefined;
+    const port = Number.parseInt(parsed.port, 10);
+    return Number.isInteger(port) && port > 0 ? port : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function resolveAnvilPort(ctx: RpcContext): number | undefined {
+  return resolveRegistryAnvilPort(ctx) ?? ctx.anvilPort;
+}
+
 const BLOCKED_METHODS = new Set([
   'eth_subscribe',
   'eth_unsubscribe',
@@ -214,8 +238,9 @@ export async function handleRpcRequest(
         }
       }
       ctx.chainState.current = parseChainIdHex(chainIdHex);
-      if (ctx.anvilPort !== undefined) {
-        void verifyAnvilChainId(ctx.anvilPort, ctx.chainState.current);
+      const anvilPort = resolveAnvilPort(ctx);
+      if (anvilPort !== undefined) {
+        void verifyAnvilChainId(anvilPort, ctx.chainState.current);
       }
       ctx.emitter?.emit('chainChanged', chainIdHex);
       return null;
@@ -240,7 +265,8 @@ export async function handleRpcRequest(
     }
 
     case 'eth_sendTransaction': {
-      if (!ctx.anvilPort) {
+      const anvilPort = resolveAnvilPort(ctx);
+      if (!anvilPort) {
         throw new Eip1193Error(
           -32603,
           `RPC method '${request.method}' requires anvilPort in RpcContext (not provided for live anvil tests)`,
@@ -256,7 +282,7 @@ export async function handleRpcRequest(
         {
           privateKey: resolveActivePrivateKey(ctx),
           chainId: ctx.chainState.current,
-          anvilPort: ctx.anvilPort,
+          anvilPort,
         },
         normalizeTxParams(txParams),
       );
@@ -500,13 +526,14 @@ async function proxyToAnvil(
   method: string,
   params: unknown[],
 ): Promise<unknown> {
-  if (!ctx.anvilPort) {
+  const anvilPort = resolveAnvilPort(ctx);
+  if (!anvilPort) {
     throw new Eip1193Error(
       -32603,
       `RPC method '${method}' requires anvilPort in RpcContext (not provided for live anvil tests)`,
     );
   }
-  return anvilProxy(ctx.anvilPort, method, params);
+  return anvilProxy(anvilPort, method, params);
 }
 
 function assertAuthorizedAddress(
