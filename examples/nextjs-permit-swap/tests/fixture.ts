@@ -1,6 +1,6 @@
 import { dappE2eTest } from '@dapp-e2e/core';
 
-const ANVIL_PORT = 8545;
+const ANVIL_PORT = 8546;
 
 export const test = dappE2eTest.extend({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

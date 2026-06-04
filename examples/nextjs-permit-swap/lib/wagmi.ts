@@ -5,7 +5,7 @@ import { injectedWallet } from '@rainbow-me/rainbowkit/wallets';
 import { createConfig, http } from 'wagmi';
 import { defineChain } from 'viem';
 
-const ANVIL_PORT = Number(process.env.NEXT_PUBLIC_ANVIL_PORT ?? 8545);
+const ANVIL_PORT = Number(process.env.NEXT_PUBLIC_ANVIL_PORT ?? 8546);
 
 export const anvilChain = defineChain({
   id: 31337,
