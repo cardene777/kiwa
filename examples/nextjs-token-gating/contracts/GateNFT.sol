@@ -12,11 +12,24 @@ contract GateNFT {
 
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
+    error NotOwner();
+    error InvalidRecipient();
+
     function mint() external returns (uint256 tokenId) {
         tokenId = totalSupply + 1;
         ownerOf[tokenId] = msg.sender;
         balanceOf[msg.sender] += 1;
         totalSupply = tokenId;
         emit Transfer(address(0), msg.sender, tokenId);
+    }
+
+    function transferFrom(address from, address to, uint256 tokenId) external {
+        if (ownerOf[tokenId] != from || msg.sender != from) revert NotOwner();
+        if (to == address(0)) revert InvalidRecipient();
+
+        ownerOf[tokenId] = to;
+        balanceOf[from] -= 1;
+        balanceOf[to] += 1;
+        emit Transfer(from, to, tokenId);
     }
 }

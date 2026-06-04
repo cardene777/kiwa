@@ -7,7 +7,7 @@
     "dev": "next dev -p 3044",
     "build": "next build",
     "start": "next start -p 3044",
-    "test": "pnpm -F @dapp-e2e/core build && playwright test",
+    "test": "pnpm -F @dapp-e2e/core build && node --import tsx tests/prepare-env.ts && playwright test",
     "typecheck": "tsc --noEmit",
     "forge:build": "forge build"
   },

@@ -13,10 +13,10 @@ export default defineConfig({
     headless: true,
   },
   webServer: {
-    command: 'tsx tests/prepare-env.ts && pnpm build && pnpm start',
+    command: 'pnpm dev',
     url: 'http://127.0.0.1:3044',
     timeout: 240_000,
-    reuseExistingServer: false,
+    reuseExistingServer: true,
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });

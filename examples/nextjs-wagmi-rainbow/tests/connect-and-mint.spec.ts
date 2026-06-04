@@ -69,4 +69,46 @@ test.describe('Next.js + wagmi + RainbowKit e2e', () => {
       timeout: 15_000,
     });
   });
+
+  test('T-WR-004 connection error recovery test', async ({ page, dappE2e }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle', { timeout: 30_000 });
+    await ensureConnected(page);
+    await dappE2e.waitForRpcIdle();
+
+    await expect(page.getByTestId('recovery-balance')).toHaveText(/^recoveryBalance: \d+$/, {
+      timeout: 15_000,
+    });
+    await expect(page.getByTestId('rpc-error')).toHaveText('rpcError: (none)');
+
+    await page.getByTestId('break-rpc-button').click();
+    await page.waitForFunction(
+      () => document.querySelector('[data-testid="rpc-error"]')?.textContent !== 'rpcError: (none)',
+      undefined,
+      { timeout: 15_000 },
+    );
+    await expect(page.getByTestId('recovery-balance')).toHaveText('recoveryBalance: (error)');
+
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByTestId('connection-status')).toHaveText('status: connected', {
+      timeout: 15_000,
+    });
+    await expect(page.getByTestId('rpc-mode')).toHaveText('rpcMode: broken');
+    await expect(page.getByTestId('rpc-error')).not.toHaveText('rpcError: (none)', {
+      timeout: 15_000,
+    });
+
+    await page.getByTestId('restore-rpc-button').click();
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByTestId('connection-status')).toHaveText('status: connected', {
+      timeout: 15_000,
+    });
+    await expect(page.getByTestId('rpc-mode')).toHaveText('rpcMode: healthy');
+    await expect(page.getByTestId('rpc-error')).toHaveText('rpcError: (none)', {
+      timeout: 15_000,
+    });
+    await expect(page.getByTestId('recovery-balance')).toHaveText(/^recoveryBalance: \d+$/, {
+      timeout: 15_000,
+    });
+  });
 });
