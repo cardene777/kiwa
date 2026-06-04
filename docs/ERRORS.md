@@ -51,6 +51,19 @@ page 側の catch 句で `(e as { code?: number }).code === 3` を使うと、an
 
 これらは blocked method として core 側で即時 reject されます。
 
+## BLOCKED_METHODS 一覧と理由
+
+`packages/core/src/rpc-handlers.ts` の `BLOCKED_METHODS` は、fixture が再現しない wallet 機能を
+`4200 (Unsupported Method)` で明示的に reject するための一覧です。
+
+| Method | blocked 理由 |
+|---|---|
+| `eth_subscribe` | inject provider は HTTP bridge 前提で、subscription ID の払い出しと継続 push を保持できないため |
+| `eth_unsubscribe` | `eth_subscribe` を実装していないため、解除対象の subscription state 自体が存在しないため |
+| `wallet_requestPermissions` | EIP-2255 の permission scope は request をまたぐ state 管理が必要だが、HTTP 経路ではその state を保持できないため。test fixture では allowlist / blocklist の動的管理を行わず、approval UX は `setApprovalMode('approve' | 'reject')` で代替します |
+| `wallet_getPermissions` | permission registry を内部保持していないため、wallet が返すべき permission descriptor を整合的に生成できないため |
+| `eth_sign` | raw digest 署名は wallet 実装ごとの差異が大きく、dapp-e2e では deterministic な test 対象を `personal_sign` / `eth_signTypedData_v4` に絞っているため |
+
 ### `-32700`
 
 - `eth_signTypedData_v4` の typed data 文字列が JSON として壊れている

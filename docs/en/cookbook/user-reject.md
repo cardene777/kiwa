@@ -26,7 +26,7 @@ test('rejected signMessage shows error message', async ({ page, dappE2e }) => {
 ### 2. Reset approval mode before exiting
 
 ~~~ts
-  await dappE2e.setApprovalMode('auto'); // avoid leaking reject state into subsequent tests
+  await dappE2e.setApprovalMode('approve'); // avoid leaking reject state into subsequent tests
 ~~~
 
 ## Verify

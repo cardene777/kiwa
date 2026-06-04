@@ -17,7 +17,7 @@ const test = dappE2eTest;
 | `page` | `Page` | Playwright `Page` with `window.ethereum` injected |
 | `dappE2e` | `DappE2eHelper` | Helpers: `connect` / `personalSign` / `setApprovalMode` / `waitForRpcIdle` and more |
 | `wallets` | `WalletConfig[]` (option) | EIP-6963 multi-wallet injection (set via `test.use({ wallets: [...] })`) |
-| `approvalMode` | `'auto' \| 'reject'` (option) | Default RPC approval mode |
+| `approvalMode` | `'approve' \| 'reject'` (option) | Default RPC approval mode |
 
 ## DappE2eHelper main methods
 
@@ -29,7 +29,7 @@ const test = dappE2eTest;
 | `signTypedData(domain, types, value)` | Sign with `eth_signTypedData_v4` |
 | `sendTransaction(tx)` | Send via `eth_sendTransaction` directly |
 | `switchChain(id)` | Send `wallet_switchEthereumChain` |
-| `setApprovalMode(mode)` | Switch upcoming RPC approval to `auto` / `reject` |
+| `setApprovalMode(mode)` | Switch upcoming RPC approval to `approve` / `reject` |
 | `waitForRpcIdle()` | Wait for the injected wallet RPC pipe to drain |
 | `triggerEvent(name, args)` | Fire wallet-side events (`chainChanged` / `accountsChanged`) |
 
