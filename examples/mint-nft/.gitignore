@@ -6,3 +6,8 @@ node_modules/
 test-results/
 hardhat-cache/
 hardhat-artifacts/
+coverage/
+coverage.json
+.coverage_artifacts/
+.coverage_cache/
+.coverage_contracts/

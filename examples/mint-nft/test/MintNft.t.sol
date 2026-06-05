@@ -197,4 +197,123 @@ contract MintNftTest is Test {
         assertTrue(target.supportsInterface(0x2a55205a));  // ERC2981
         assertFalse(target.supportsInterface(0xffffffff)); // 無効 ID
     }
+
+    /// TC-017 [CRITICAL]: safeTransferFrom to contract with valid onERC721Received → success
+    function test_SafeTransferFrom_ToValidReceiver_Succeeds() public {
+        ValidReceiver receiver = new ValidReceiver();
+        target.mint(alice);
+        vm.prank(alice);
+        target.safeTransferFrom(alice, address(receiver), 1);
+        assertEq(target.ownerOf(1), address(receiver));
+    }
+
+    /// TC-018 [CRITICAL]: safeTransferFrom to contract returning wrong selector → UnsafeRecipient
+    function test_SafeTransferFrom_ToBadReceiver_Reverts() public {
+        BadReceiver receiver = new BadReceiver();
+        target.mint(alice);
+        vm.prank(alice);
+        vm.expectRevert(MintNft.UnsafeRecipient.selector);
+        target.safeTransferFrom(alice, address(receiver), 1);
+    }
+
+    /// TC-019 [CRITICAL]: safeTransferFrom to contract that reverts in onERC721Received → UnsafeRecipient
+    function test_SafeTransferFrom_ToRevertingReceiver_Reverts() public {
+        RevertingReceiver receiver = new RevertingReceiver();
+        target.mint(alice);
+        vm.prank(alice);
+        vm.expectRevert(MintNft.UnsafeRecipient.selector);
+        target.safeTransferFrom(alice, address(receiver), 1);
+    }
+
+    /// TC-020 [CRITICAL]: 非 owner / 非 operator の approve 試行 → NotOwner
+    function test_Approve_Reverts_When_NotOwnerOrOperator() public {
+        target.mint(alice);
+        vm.prank(bob);  // bob は owner でも operator でもない
+        vm.expectRevert(MintNft.NotOwner.selector);
+        target.approve(carol, 1);
+    }
+
+    /// TC-021 [CRITICAL]: tokenOfOwnerByIndex で index >= balance → OwnerIndexOutOfBounds
+    function test_TokenOfOwnerByIndex_Reverts_OutOfBounds() public {
+        target.mint(alice);  // balance = 1
+        vm.expectRevert(MintNft.OwnerIndexOutOfBounds.selector);
+        target.tokenOfOwnerByIndex(alice, 1);  // index 1 は範囲外
+    }
+
+    /// TC-022 [CRITICAL]: tokenByIndex で index >= totalSupply → TokenIndexOutOfBounds
+    function test_TokenByIndex_Reverts_OutOfBounds() public {
+        target.mint(alice);  // totalSupply = 1
+        vm.expectRevert(MintNft.TokenIndexOutOfBounds.selector);
+        target.tokenByIndex(1);  // index 1 は範囲外
+    }
+
+    /// TC-023 [MAJOR]: Approval event の args 検証
+    function test_Approve_EmitsApprovalEvent() public {
+        target.mint(alice);
+        vm.expectEmit(true, true, true, true);
+        emit MintNft.Approval(alice, bob, 1);
+        vm.prank(alice);
+        target.approve(bob, 1);
+    }
+
+    /// TC-024 [MAJOR]: ApprovalForAll event の args 検証
+    function test_SetApprovalForAll_EmitsApprovalForAllEvent() public {
+        vm.expectEmit(true, true, false, true);
+        emit MintNft.ApprovalForAll(alice, carol, true);
+        vm.prank(alice);
+        target.setApprovalForAll(carol, true);
+    }
+
+    /// TC-025 [MAJOR]: operator が token owner の approve を代行できる (operator path)
+    function test_Approve_ByOperator_Succeeds() public {
+        target.mint(alice);
+        vm.prank(alice);
+        target.setApprovalForAll(carol, true);
+        // carol は operator として approve 可能
+        vm.prank(carol);
+        target.approve(bob, 1);
+        assertEq(target.getApproved(1), bob);
+    }
+
+    /// TC-026 [MINOR]: ownerOf に存在しない tokenId → require revert
+    function test_OwnerOf_Reverts_NonexistentToken() public {
+        vm.expectRevert(bytes("ERC721: nonexistent"));
+        target.ownerOf(999);
+    }
+}
+
+/// @notice ERC-721 Receiver の valid 実装 (selector を正しく返す)
+contract ValidReceiver is IERC721Receiver {
+    function onERC721Received(address, address, uint256, bytes calldata)
+        external
+        pure
+        override
+        returns (bytes4)
+    {
+        return IERC721Receiver.onERC721Received.selector;
+    }
+}
+
+/// @notice ERC-721 Receiver が不正 selector を返す (攻撃 / 設定ミス想定)
+contract BadReceiver is IERC721Receiver {
+    function onERC721Received(address, address, uint256, bytes calldata)
+        external
+        pure
+        override
+        returns (bytes4)
+    {
+        return 0xdeadbeef;  // 不正な selector
+    }
+}
+
+/// @notice ERC-721 Receiver が revert する (攻撃 / 不具合想定)
+contract RevertingReceiver is IERC721Receiver {
+    function onERC721Received(address, address, uint256, bytes calldata)
+        external
+        pure
+        override
+        returns (bytes4)
+    {
+        revert("rejected");
+    }
 }

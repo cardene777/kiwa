@@ -121,9 +121,47 @@ skill が以下を実施:
 - 不足観点 (権限の partial 検証 / multi-grantee 同時失効 / self-grant bypass) を新規 test (TC-008 以降) として `tests/gating.spec.ts` に **追記**
 - `pnpm test` を 4 round 連続 PASS 検証 (flaky 0 件、 既存 8 件 + 新規 N 件 = 全 PASS)
 
-### Step 5: test pyramid の完成形
+### Step 5: coverage 評価 (必須、 未達は完了とみなさない)
 
-後付け導入完了時点で以下の状態:
+`forge test` / `npx hardhat test` PASS だけでは完了とせず、 **coverage 計測 + threshold チェック** を必ず行う。 OSS 公開水準として default threshold は以下:
+
+| metric | default threshold | 理由 |
+|---|---|---|
+| Lines | 90% | 主要 path 全件 cover |
+| Statements | 90% | 文単位の網羅 |
+| **Branches** | **80%** | Solidity の require / revert / short-circuit で 100% 困難 |
+| Funcs | 90% | 全 public / external 関数 cover |
+
+```bash
+# Foundry
+forge coverage --report summary
+
+# Hardhat
+npx hardhat coverage
+```
+
+dapp-e2e の 3 実 example での実測値 (PR #185 で達成):
+
+| example | runner | Lines | Statements | Branches | Funcs |
+|---|---|---|---|---|---|
+| nextjs-token-gating | Foundry | 100% | 97.73% | 87.50% | 100% |
+| mint-nft | Foundry | 97.70% | 94.57% | 83.33% | 95.24% |
+| mint-nft | Hardhat | 93.75% | 92.86% | 80.56% | 100% |
+| defi-swap | Foundry | 100% | 97.62% | 87.50% | 100% |
+
+全て default threshold (Lines/Stmts/Funcs 90% + Branches 80%) を満たし、 公開可能水準。
+
+#### coverage 未達成時のアクション
+
+| 結果 | アクション |
+|---|---|
+| 全 4 metric が threshold 以上 | 完了、 test-passed marker 作成 |
+| いずれかが threshold 未満 | **完了とみなさない**。 Layer 1 spec の「不足している仕様」に「{metric} {N}% < {threshold}% で不足」を追記、 不足観点 / 未テスト error path / 未テスト event を bullet で列挙 |
+| `forge coverage` / `hardhat coverage` 失敗 | test PASS でも completion とせず原因を報告 (silent skip 禁止) |
+
+### Step 6: test pyramid の完成形
+
+Step 5 で coverage 達成完了時点で以下の状態:
 
 | layer | runner | 出力 file | 観点カバー | 既存 vs 新規 |
 |---|---|---|---|---|

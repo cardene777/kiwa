@@ -139,27 +139,49 @@ npx hardhat test 2>&1 | tail -30
 
 failure があれば spec の「期待結果」と実 contract behavior の整合確認 (`rules/quality.md` § 実装整合性確認)、 Layer 1 spec の「不足している仕様」に追加項目として記録。
 
-### Step 5: `solidity-coverage` 評価
+### Step 5: `solidity-coverage` 評価 (必須、 未達は test-passed marker 作成不可)
 
-`--coverage-threshold` で指定された line coverage 目標 (default 80%) を満たしているか評価:
+**本 step は省略不可**。 `npx hardhat test` PASS だけでは test-passed marker を作らず、 coverage 計測 + threshold チェックまで通って初めて完了とみなす (`rules/quality.md` § テスト品質 と整合)。
+
+solidity-coverage 未インストールの場合は **install を強制** (skip 不可):
 
 ```bash
+npm ls solidity-coverage >/dev/null 2>&1 || pnpm add --save-dev solidity-coverage
 npx hardhat coverage 2>&1 | tail -20
 ```
 
+`--coverage-threshold` で指定された 4 metric 目標を **全て満たしているか** 評価する。 default は OSS 公開水準として以下:
+
+| metric | default threshold | 引数 override |
+|---|---|---|
+| Statements | 90% | `--coverage-statements {N}` |
+| **Branches** | **80%** | `--coverage-branches {N}` |
+| Functions | 90% | `--coverage-functions {N}` |
+| Lines | 90% | `--coverage-lines {N}` |
+
+Branches を 80% に下げているのは Solidity の require/revert/short-circuit 評価で 100% 到達が現実的に困難なため。 残り 3 metric は 90%。
+
 | 結果 | アクション |
 |---|---|
-| coverage >= threshold | 完了、 `test-passed` marker を Write |
-| coverage < threshold | 「不足している仕様」 section に「coverage {N}% < {threshold}% で不足」を追記 |
-| `solidity-coverage` 未インストール | `npm install --save-dev solidity-coverage` を案内、 coverage は warn のみ |
+| 全 4 metric が threshold 以上 | 完了、 `test-passed` marker を Write |
+| いずれかの metric が threshold 未満 | **完了とみなさない**。 Layer 1 spec の「不足している仕様」に「{metric} {N}% < {threshold}% で不足」を追記し、 「不足観点 / 未テスト error path / 未テスト event」を bullet で列挙してユーザーに報告 |
+| `hardhat coverage` 失敗 | `npx hardhat test` PASS でも completion とせず原因を報告 (silent skip 禁止) |
+
+coverage が落ちる典型パターン (Step 4 完了時に self-check):
+
+- contract に定義された custom error 全てに `revertedWithCustomError(c, 'Error')` test があるか
+- event 全てに `.to.emit(c, 'Event').withArgs(...)` で args 検証 test があるか
+- `c.connect(signer)` で role 別の OK / revert 両方が test されているか
+- `if (condition)` の true / false 両 branch が test されているか
 
 ## 完了条件
 
 - Layer 1 spec の「自動化すべきテスト」リストの全ケースが `test/{Contract}.test.ts` に Write 済
 - `npx hardhat compile` が exit 0
 - `npx hardhat test` で全 it block PASS (failure 0 件)
-- `npx hardhat coverage` line coverage が `--coverage-threshold` 以上 (default 80%)
+- `npx hardhat coverage` で **4 metric (Statements / Branches / Functions / Lines) 全てが threshold 以上** (default Statements 90% / Branches 80% / Functions 90% / Lines 90%)
 - 観点別 grouping (`describe('観点 N: {name}', () => {...})`) が spec と一致
+- 未達成 metric は 1 つでも残れば test-passed marker を作らず、 不足理由を Layer 1 spec の「不足している仕様」に記録してユーザーに報告
 
 ## references
 

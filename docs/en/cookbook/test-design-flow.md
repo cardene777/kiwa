@@ -121,9 +121,47 @@ The skill:
 - **appends** the missing viewpoints (partial permission verification, multi-grantee simultaneous expiry, self-grant bypass) as new tests (TC-008 onwards) into `tests/gating.spec.ts`
 - runs `pnpm test` four times in a row to confirm zero flakes (all 8 existing + N new tests pass)
 
-### Step 5: The completed test pyramid
+### Step 5: Coverage evaluation (required, completion blocked on shortfall)
 
-When the retrofit completes:
+`forge test` / `npx hardhat test` passing is **not enough** for completion; the chain must also measure coverage and check thresholds. As an OSS-publication baseline the default thresholds are:
+
+| Metric | Default threshold | Rationale |
+|---|---|---|
+| Lines | 90% | Cover the primary paths fully |
+| Statements | 90% | Statement-level coverage |
+| **Branches** | **80%** | 100% on Solidity require/revert/short-circuit is impractical |
+| Funcs | 90% | Cover every public / external function |
+
+```bash
+# Foundry
+forge coverage --report summary
+
+# Hardhat
+npx hardhat coverage
+```
+
+Measured values across dapp-e2e's three real examples (achieved in PR #185):
+
+| Example | Runner | Lines | Statements | Branches | Funcs |
+|---|---|---|---|---|---|
+| nextjs-token-gating | Foundry | 100% | 97.73% | 87.50% | 100% |
+| mint-nft | Foundry | 97.70% | 94.57% | 83.33% | 95.24% |
+| mint-nft | Hardhat | 93.75% | 92.86% | 80.56% | 100% |
+| defi-swap | Foundry | 100% | 97.62% | 87.50% | 100% |
+
+All four metrics clear the default threshold (Lines/Stmts/Funcs ≥ 90%, Branches ≥ 80%), satisfying the publication baseline.
+
+#### Action when coverage falls short
+
+| Result | Action |
+|---|---|
+| All four metrics ≥ threshold | Done, write the test-passed marker |
+| Any metric below threshold | **Not done**. Append "{metric} {N}% < {threshold}% under-covered" to the Layer 1 "Insufficient spec" section, and enumerate uncovered viewpoints / error paths / events as bullets |
+| `forge coverage` / `hardhat coverage` itself fails | Do not treat the test pass as completion; report the cause (silent skip is forbidden) |
+
+### Step 6: The completed test pyramid
+
+After Step 5 coverage success:
 
 | Layer | Runner | Output file | Viewpoints covered | Existing vs new |
 |---|---|---|---|---|
