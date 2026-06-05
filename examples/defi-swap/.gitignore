@@ -1,0 +1,6 @@
+forge-out/
+lib/forge-std/
+.context/
+node_modules/
+.next/
+test-results/
