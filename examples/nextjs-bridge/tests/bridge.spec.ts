@@ -2,8 +2,12 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  BaseError,
-  ContractFunctionRevertedError,
+  expectCustomError,
+  impersonateAccount,
+  setBalance,
+  stopImpersonateAccount,
+} from '@dapp-e2e/core';
+import {
   createPublicClient,
   createWalletClient,
   defineChain,
@@ -116,13 +120,6 @@ function l2WalletClient(account = privateKeyToAccount(OPERATOR_KEY)) {
   });
 }
 
-function expectCustomError(error: unknown, errorName: string): void {
-  if (!(error instanceof BaseError)) throw error;
-  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
-  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
-  expect(reverted.data?.errorName).toBe(errorName);
-}
-
 async function expectRevert(
   promise: Promise<unknown>,
   errorName: string,
@@ -145,6 +142,35 @@ async function operatorRelayMint(l1Nonce: bigint, l2Recipient: Address, amount: 
     args: [l1Nonce, l2Recipient, amount],
   });
   await pub.waitForTransactionReceipt({ hash });
+}
+
+async function operatorRelayMintViaImpersonation(
+  l1Nonce: bigint,
+  l2Recipient: Address,
+  amount: bigint,
+): Promise<void> {
+  const { destBridge } = getBridgeContracts();
+  const pub = l2PublicClient();
+  const operator = privateKeyToAccount(OPERATOR_KEY);
+
+  await impersonateAccount(pub, operator.address);
+  try {
+    await setBalance(pub, operator.address, 10n ** 18n);
+    const wallet = createWalletClient({
+      account: operator.address,
+      chain: makeChain(L2_CHAIN_ID, L2_PORT),
+      transport: http(),
+    });
+    const hash = await wallet.writeContract({
+      address: destBridge,
+      abi: DEST_BRIDGE_ABI,
+      functionName: 'relayMint',
+      args: [l1Nonce, l2Recipient, amount],
+    });
+    await pub.waitForTransactionReceipt({ hash });
+  } finally {
+    await stopImpersonateAccount(pub, operator.address);
+  }
 }
 
 async function operatorUnlock(l2Nonce: bigint, l1Recipient: Address, amount: bigint) {
@@ -383,6 +409,35 @@ test.describe('Next.js Bridge (ERC20 cross-chain lock/mint/burn) e2e', () => {
     );
 
     const afterL2 = await readL2Balance(account.address);
+    expect(afterL2 - beforeL2).toBe(BRIDGE_AMOUNT);
+  });
+
+  test('T-BR-003A impersonate operator でも relayMint を直接実行できる', async () => {
+    const operator = privateKeyToAccount(OPERATOR_KEY);
+    const { sourceBridge, sourceToken } = getBridgeContracts();
+    const l1Pub = l1PublicClient();
+    const l1Wallet = l1WalletClient();
+    const beforeL2 = await readL2Balance(operator.address);
+    const l1NonceBefore = await readL1Nonce();
+
+    const approveHash = await l1Wallet.writeContract({
+      address: sourceToken,
+      abi: SIMPLE_ERC20_ABI,
+      functionName: 'approve',
+      args: [sourceBridge, BRIDGE_AMOUNT],
+    });
+    await l1Pub.waitForTransactionReceipt({ hash: approveHash });
+    const lockHash = await l1Wallet.writeContract({
+      address: sourceBridge,
+      abi: SOURCE_BRIDGE_ABI,
+      functionName: 'bridgeLock',
+      args: [BRIDGE_AMOUNT, operator.address],
+    });
+    await l1Pub.waitForTransactionReceipt({ hash: lockHash });
+
+    await operatorRelayMintViaImpersonation(l1NonceBefore, operator.address, BRIDGE_AMOUNT);
+
+    const afterL2 = await readL2Balance(operator.address);
     expect(afterL2 - beforeL2).toBe(BRIDGE_AMOUNT);
   });
 

@@ -1,9 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { expectCustomError } from '@dapp-e2e/core';
 import {
-  BaseError,
-  ContractFunctionRevertedError,
   createPublicClient,
   createWalletClient,
   defineChain,
@@ -58,13 +57,6 @@ function readEnv() {
         return [line.slice(0, idx), line.slice(idx + 1)];
       }),
   ) as Record<string, string>;
-}
-
-function expectCustomError(error: unknown, errorName: string): void {
-  if (!(error instanceof BaseError)) throw error;
-  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
-  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
-  expect(reverted.data?.errorName).toBe(errorName);
 }
 
 function computeRangeCommitment(value: bigint, salt: Hex): Hex {

@@ -3,9 +3,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { expect } from '@playwright/test';
 import { dappE2eTest } from '@dapp-e2e/core';
+import { expectCustomError, increaseTime } from '@dapp-e2e/core';
 import {
-  BaseError,
-  ContractFunctionRevertedError,
   createPublicClient,
   createWalletClient,
   defineChain,
@@ -78,34 +77,6 @@ function anvilChain(port: number) {
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     rpcUrls: { default: { http: [`http://127.0.0.1:${port}`] } },
   });
-}
-
-function expectCustomError(
-  error: unknown,
-  errorName: string,
-  expectedArgs?: readonly unknown[],
-): void {
-  if (!(error instanceof BaseError)) throw error;
-  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
-  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
-  expect(reverted.data?.errorName).toBe(errorName);
-  if (expectedArgs) {
-    expect(reverted.data?.args).toEqual(expectedArgs);
-  }
-}
-
-async function rpc(port: number, method: string, params: unknown[] = []): Promise<unknown> {
-  const pub = createPublicClient({ chain: anvilChain(port), transport: http() });
-  return await (
-    pub as unknown as {
-      request: (args: { method: string; params: unknown[] }) => Promise<unknown>;
-    }
-  ).request({ method, params });
-}
-
-async function increaseTime(port: number, seconds: bigint): Promise<void> {
-  await rpc(port, 'evm_increaseTime', [Number(seconds)]);
-  await rpc(port, 'evm_mine');
 }
 
 async function setupMarket(
@@ -541,7 +512,7 @@ dappE2eTest.describe('nft-marketplace e2e', () => {
       }),
     });
 
-    await increaseTime(anvilPort, 2n);
+    await increaseTime(pub, 2n);
 
     const active = await pub.readContract({
       address: market,

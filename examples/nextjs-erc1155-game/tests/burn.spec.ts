@@ -1,9 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { expectCustomError } from '@dapp-e2e/core';
 import {
-  BaseError,
-  ContractFunctionRevertedError,
   createPublicClient,
   createWalletClient,
   defineChain,
@@ -41,20 +40,6 @@ function anvilChain() {
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     rpcUrls: { default: { http: [`http://127.0.0.1:${ANVIL_PORT}`] } },
   });
-}
-
-function expectCustomError(
-  error: unknown,
-  errorName: string,
-  expectedArgs?: readonly unknown[],
-): void {
-  if (!(error instanceof BaseError)) throw error;
-  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
-  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
-  expect(reverted.data?.errorName).toBe(errorName);
-  if (expectedArgs) {
-    expect(reverted.data?.args).toEqual(expectedArgs);
-  }
 }
 
 async function deployGameItems(): Promise<{

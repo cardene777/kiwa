@@ -1,9 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { expectCustomError, increaseTime } from '@dapp-e2e/core';
 import {
-  BaseError,
-  ContractFunctionRevertedError,
   createPublicClient,
   createWalletClient,
   defineChain,
@@ -63,22 +62,6 @@ function readEnv() {
         return [line.slice(0, idx), line.slice(idx + 1)];
       }),
   ) as Record<string, string>;
-}
-
-function expectCustomError(error: unknown, errorName: string): void {
-  if (!(error instanceof BaseError)) throw error;
-  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
-  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
-  expect(reverted.data?.errorName).toBe(errorName);
-}
-
-async function rpc(port: number, method: string, params: unknown[] = []): Promise<unknown> {
-  const pub = createPublicClient({ chain: anvilChain(port), transport: http() });
-  return await (
-    pub as unknown as {
-      request: (args: { method: string; params: unknown[] }) => Promise<unknown>;
-    }
-  ).request({ method, params });
 }
 
 function makeClients(
@@ -284,8 +267,7 @@ test.describe('Next.js Token gating (NFT 所有で access control) e2e', () => {
       account: grantee.account.address,
     });
 
-    await rpc(anvilPort, 'evm_increaseTime', [61]);
-    await rpc(anvilPort, 'evm_mine');
+    await increaseTime(owner.pub, 61);
 
     expect(
       await owner.pub.readContract({

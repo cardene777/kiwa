@@ -2,13 +2,18 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  BaseError,
-  ContractFunctionRevertedError,
+  expectBalanceChange,
+  expectCustomError,
+  increaseTime,
+  revertChain,
+  snapshotChain,
+} from '@dapp-e2e/core';
+import {
   createPublicClient,
   createWalletClient,
-  decodeErrorResult,
   defineChain,
   http,
+  decodeErrorResult,
   type Hex,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -132,44 +137,6 @@ function walletFor(privateKey: Hex) {
   });
 }
 
-async function rpc(method: string, params: unknown[] = []): Promise<unknown> {
-  return await (
-    pub as unknown as { request: (args: { method: string; params: unknown[] }) => Promise<unknown> }
-  ).request({ method, params });
-}
-
-async function snapshot(): Promise<string> {
-  return (await rpc('evm_snapshot')) as string;
-}
-
-async function revertSnapshot(id: string): Promise<void> {
-  await rpc('evm_revert', [id]);
-}
-
-async function setNextBlockTimestamp(timestamp: bigint): Promise<void> {
-  await rpc('anvil_setNextBlockTimestamp', [Number(timestamp)]);
-  await rpc('evm_mine');
-}
-
-async function increaseTime(seconds: bigint): Promise<void> {
-  const latest = await pub.getBlock();
-  await setNextBlockTimestamp(latest.timestamp + seconds);
-}
-
-function expectCustomError(
-  error: unknown,
-  errorName: string,
-  expectedArgs?: readonly unknown[],
-): void {
-  if (!(error instanceof BaseError)) throw error;
-  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
-  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
-  expect(reverted.data?.errorName).toBe(errorName);
-  if (expectedArgs) {
-    expect(reverted.data?.args).toEqual(expectedArgs);
-  }
-}
-
 function expectConstructorCustomError(
   error: unknown,
   abi: readonly unknown[],
@@ -248,15 +215,15 @@ async function waitLoaded(page: import('@playwright/test').Page) {
 }
 
 test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', () => {
-  let snapshotId: string | undefined;
+  let snapshotId: Hex | undefined;
 
   test.beforeEach(async () => {
-    snapshotId = await snapshot();
+    snapshotId = await snapshotChain(pub);
   });
 
   test.afterEach(async () => {
     if (snapshotId) {
-      await revertSnapshot(snapshotId);
+      await revertChain(pub, snapshotId);
       snapshotId = undefined;
     }
   });
@@ -318,7 +285,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     await page.getByTestId('stake-button').click();
     await dappE2e.waitForRpcIdle();
 
-    await increaseTime(2n);
+    await increaseTime(pub, 2n);
     await page.waitForTimeout(2000);
     const pending = BigInt(
       ((await page.getByTestId('pending-reward').textContent()) ?? '')
@@ -342,7 +309,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     await dappE2e.waitForRpcIdle();
     await page.getByTestId('stake-button').click();
     await dappE2e.waitForRpcIdle();
-    await increaseTime(2n);
+    await increaseTime(pub, 2n);
     await page.waitForTimeout(1500);
 
     const beforeReward = BigInt(
@@ -380,7 +347,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     await dappE2e.waitForRpcIdle();
     await page.getByTestId('stake-button').click();
     await dappE2e.waitForRpcIdle();
-    await increaseTime(EIGHT_DAYS);
+    await increaseTime(pub, EIGHT_DAYS);
     await page.waitForTimeout(1500);
 
     const beforeStaked = BigInt(
@@ -446,7 +413,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     });
     await pub.waitForTransactionReceipt({ hash: stakeHash });
 
-    await increaseTime(TEN_YEARS);
+    await increaseTime(pub, TEN_YEARS);
 
     const pending = (await pub.readContract({
       address: staking,
@@ -470,7 +437,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     });
     await pub.waitForTransactionReceipt({ hash: initialApprovalHash });
 
-    const earlyScenario = await snapshot();
+    const earlyScenario = await snapshotChain(pub);
 
     const earlyStakeHash = await aliceWallet.writeContract({
       address: staking,
@@ -479,7 +446,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
       args: [STAKE_AMOUNT],
     });
     await pub.waitForTransactionReceipt({ hash: earlyStakeHash });
-    await increaseTime(ONE_DAY);
+    await increaseTime(pub, ONE_DAY);
 
     const controllerBeforeEarly = (await pub.readContract({
       address: stakeToken,
@@ -518,7 +485,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     expect(controllerAfterEarly - controllerBeforeEarly).toBe(PENALTY_AMOUNT);
     expect(stakeBalanceAfterEarly - stakeBalanceBeforeEarly).toBe(STAKE_AMOUNT - PENALTY_AMOUNT);
 
-    await revertSnapshot(earlyScenario);
+    await revertChain(pub, earlyScenario);
 
     const matureApprovalHash = await aliceWallet.writeContract({
       address: stakeToken,
@@ -535,7 +502,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
       args: [STAKE_AMOUNT],
     });
     await pub.waitForTransactionReceipt({ hash: matureStakeHash });
-    await increaseTime(EIGHT_DAYS);
+    await increaseTime(pub, EIGHT_DAYS);
 
     const controllerBeforeMature = (await pub.readContract({
       address: stakeToken,
@@ -595,7 +562,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     });
     await pub.waitForTransactionReceipt({ hash: stakeHash });
 
-    await increaseTime(TEN_YEARS);
+    await increaseTime(pub, TEN_YEARS);
 
     const pendingBefore = (await pub.readContract({
       address: staking,
@@ -605,26 +572,20 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     })) as bigint;
     expect(pendingBefore).toBeGreaterThan(POOL_REWARD);
 
-    const rewardBalanceBefore = (await pub.readContract({
-      address: rewardToken,
-      abi: ERC20_ABI,
-      functionName: 'balanceOf',
-      args: [aliceWallet.account.address],
-    })) as bigint;
-
-    const claimHash = await aliceWallet.writeContract({
-      address: staking,
-      abi: STAKING_ABI,
-      functionName: 'claim',
-    });
-    await pub.waitForTransactionReceipt({ hash: claimHash });
-
-    const rewardBalanceAfter = (await pub.readContract({
-      address: rewardToken,
-      abi: ERC20_ABI,
-      functionName: 'balanceOf',
-      args: [aliceWallet.account.address],
-    })) as bigint;
+    await expectBalanceChange(
+      pub,
+      rewardToken,
+      aliceWallet.account.address,
+      POOL_REWARD,
+      async () => {
+        const claimHash = await aliceWallet.writeContract({
+          address: staking,
+          abi: STAKING_ABI,
+          functionName: 'claim',
+        });
+        await pub.waitForTransactionReceipt({ hash: claimHash });
+      },
+    );
     const rewardPoolAfter = (await pub.readContract({
       address: rewardToken,
       abi: ERC20_ABI,
@@ -638,7 +599,6 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
       args: [aliceWallet.account.address],
     })) as bigint;
 
-    expect(rewardBalanceAfter - rewardBalanceBefore).toBe(POOL_REWARD);
     expect(rewardPoolAfter).toBe(0n);
     expect(pendingAfter).toBeGreaterThan(0n);
     expect(pendingAfter).toBeLessThan(pendingBefore);
@@ -672,7 +632,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
       args: [aliceWallet.account.address],
     })) as bigint;
 
-    await increaseTime(EIGHT_DAYS);
+    await increaseTime(pub, EIGHT_DAYS);
 
     const topUpHash = await aliceWallet.writeContract({
       address: staking,

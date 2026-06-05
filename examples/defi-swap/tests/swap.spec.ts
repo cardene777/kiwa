@@ -2,10 +2,14 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { expect } from '@playwright/test';
-import { dappE2eTest as test } from '@dapp-e2e/core';
 import {
-  BaseError,
-  ContractFunctionRevertedError,
+  dappE2eTest as test,
+  expectBalanceChange,
+  expectCustomError,
+  startAnvil,
+  startAnvilFork,
+} from '@dapp-e2e/core';
+import {
   createPublicClient,
   createWalletClient,
   defineChain,
@@ -54,20 +58,6 @@ function anvilChain(port: number) {
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     rpcUrls: { default: { http: [`http://127.0.0.1:${port}`] } },
   });
-}
-
-function expectCustomError(
-  error: unknown,
-  errorName: string,
-  expectedArgs?: readonly unknown[],
-): void {
-  if (!(error instanceof BaseError)) throw error;
-  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
-  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
-  expect(reverted.data?.errorName).toBe(errorName);
-  if (expectedArgs) {
-    expect(reverted.data?.args).toEqual(expectedArgs);
-  }
 }
 
 async function setupSwap(
@@ -259,14 +249,19 @@ test.describe('defi-swap e2e (ERC20 approve → swap)', () => {
     anvilPort,
     dappE2e,
   }) => {
-    const { tokenA, tokenB, swap } = await setupSwap(anvilPort);
+    const { tokenA, tokenB, swap, user } = await setupSwap(anvilPort);
+    const pub = createPublicClient({ chain: anvilChain(anvilPort), transport: http() });
     await page.setContent(makeDappHtml(tokenA, tokenB, swap));
     await page.click('#connect');
     await dappE2e.waitForRpcIdle();
     await page.click('#approve');
     await dappE2e.waitForRpcIdle();
-    await page.click('#swap');
-    await dappE2e.waitForRpcIdle();
+    await expectBalanceChange(pub, tokenA, user, -SWAP_AMOUNT, async () =>
+      expectBalanceChange(pub, tokenB, user, SWAP_AMOUNT, async () => {
+        await page.click('#swap');
+        await dappE2e.waitForRpcIdle();
+      }),
+    );
     await page.click('#refresh');
     await dappE2e.waitForRpcIdle();
     await expect(page.locator('#balance-a')).toHaveText(
@@ -374,5 +369,47 @@ test.describe('defi-swap e2e (ERC20 approve → swap)', () => {
     await dappE2e.waitForRpcIdle();
     const err = (await page.locator('#last-error').textContent()) ?? '';
     expect(err.startsWith('4001:')).toBe(true);
+  });
+
+  test('T-DS-007 startAnvilFork で upstream chain state を fork できる', async () => {
+    const upstream = await startAnvil();
+    let forkHandle: Awaited<ReturnType<typeof startAnvilFork>> | null = null;
+
+    try {
+      const { tokenA, user } = await setupSwap(upstream.port);
+      const upstreamPub = createPublicClient({
+        chain: anvilChain(upstream.port),
+        transport: http(),
+      });
+
+      forkHandle = await startAnvilFork({
+        forkUrl: `http://127.0.0.1:${upstream.port}`,
+      });
+
+      const forkPub = createPublicClient({
+        chain: anvilChain(forkHandle.port),
+        transport: http(),
+      });
+      const forkBalance = await forkPub.readContract({
+        address: tokenA,
+        abi: ERC20_ABI,
+        functionName: 'balanceOf',
+        args: [user],
+      });
+      expect(forkBalance).toBe(USER_INITIAL);
+
+      const upstreamBalance = await upstreamPub.readContract({
+        address: tokenA,
+        abi: ERC20_ABI,
+        functionName: 'balanceOf',
+        args: [user],
+      });
+      expect(upstreamBalance).toBe(USER_INITIAL);
+    } finally {
+      if (forkHandle) {
+        await forkHandle.stop();
+      }
+      await upstream.stop();
+    }
   });
 });
