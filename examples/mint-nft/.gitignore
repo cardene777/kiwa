@@ -4,3 +4,5 @@ lib/forge-std/
 node_modules/
 .next/
 test-results/
+hardhat-cache/
+hardhat-artifacts/
