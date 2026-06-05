@@ -1,6 +1,16 @@
 # Layer 2 連携 (Layer 1 → Layer 2 skill への引き渡し)
 
-Layer 1 (`/test-design`) が `.context/spec/test-spec-{module}.md` を Write した後、 Layer 2 skill が同 file を入力に実装を生成する経路。
+Layer 1 (`/test-design`) が `.context/spec/{layer}/test-spec-{module}.md` (`--layer all` の場合は `.context/spec/test-spec-{module}.md`) を Write した後、 Layer 2 skill が同 file を入力に実装を生成する経路。
+
+## 出力 path × Layer 2 skill 対応
+
+| 出力 path | 主要 Layer 2 skill |
+|---|---|
+| `.context/spec/contract/test-spec-{module}.md` | `/contract-test-foundry` / `/contract-test-hardhat` |
+| `.context/spec/e2e/test-spec-{module}.md` | `/dapp-e2e-test` (refactored) |
+| `.context/spec/integration/test-spec-{module}.md` | (Layer 2 未確定、 API mock + Playwright 想定) |
+| `.context/spec/unit/test-spec-{module}.md` | Vitest / Jest 汎用 unit runner |
+| `.context/spec/test-spec-{module}.md` | 全 Layer 2 skill (default、 layer 混在) |
 
 ## Layer 2 skill 一覧
 

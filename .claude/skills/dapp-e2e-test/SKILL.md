@@ -56,13 +56,13 @@ pnpm install
 - `playwright.config.ts` (webServer + fixture 設定)
 - `tests/prepare-env.ts` (anvil 起動 + contract deploy)
 
-### Step 1.5: プロジェクト読込 + test 仕様書生成 (必須)
+### Step 1.5: Layer 1 経由でテスト仕様書生成 (必須、 Phase E-3 で refactor 済)
 
-spec.ts 実装の前に必ず test 仕様書を生成し、 受入条件 (AC) を明示する。
+spec.ts 実装の前に必ず Layer 1 skill (`/test-design`) を起動し、 SSOT (`docs/SKILL-DESIGN.ja.md`) 準拠の 9 section + 9 column 仕様書を生成する。 独自 template ではなく Layer 1 出力を消費する設計に統一 (旧 template 経路は廃止、 dapp-e2e Phase E-3 refactor)。
 
 #### 1.5.A プロジェクト読込
 
-対象 dApp の contract / 既存 test / UI から **test 対象機能を構造化** する。
+対象 dApp の contract / 既存 test / UI から **test 対象機能を構造化** する (Layer 1 への入力素材を収集)。
 
 ```bash
 ls contracts/ tests/ app/ 2>/dev/null
@@ -71,50 +71,45 @@ grep -E "function |event |error |modifier " contracts/*.sol | head -30
 grep -E "^test\(|^test\.describe\(" tests/*.spec.ts | head -20
 ```
 
-#### 1.5.B test 仕様書生成
+#### 1.5.B Layer 1 (`/test-design`) 起動
 
-`docs/test-spec/{example}.md` (もしくは `tests/spec/{example}.md`) を Write。 構造は以下:
+以下を Layer 1 に渡し、 `.context/spec/e2e/test-spec-{example}.md` を Write させる。
 
-```markdown
-# test-spec-{example}.md
+```text
+/test-design --layer e2e --module {example} --input {path/to/contract.sol or app/}
 
-## 対象 dApp
-
-`{path/to/example}` — 1-2 文で「何をする dApp か」を要約
-
-## 既存 test (現状)
-
-| test 名 | 検証内容 | 状態 |
-|---|---|---|
-| T-XX-001 | ... | EXISTING / NEW |
-
-## 新規追加 test (本作業)
-
-| test 名 | 検証内容 | AC (受入条件) | 偽陽性リスク |
-|---|---|---|---|
-| T-XX-NNN | {何を assertion するか 1 文} | {test PASS の判定基準} | {`adversarial-pitfalls.md` の 9 種番号 or "なし"} |
-
-## contract 改変 (もしあれば)
-
-| file | 変更内容 | back-compat 保証 |
-|---|---|---|
-
-## scope 境界 (やらないこと明示)
-
-- ... (scope creep 防止のため列挙)
-
-## 影響範囲
-
-- 既存 test 件数 への regression 可能性
-- 他 example への影響
+入力情報:
+- 対象 dApp = {example 名} (1-2 文で機能要約)
+- 既存 contract / 既存 test の grep 結果 (1.5.A の出力)
+- contract 改変 (あれば function / event / error 単位で diff 明示)
+- scope 境界 (本作業でやらないことを 3-5 個列挙)
 ```
 
-#### 1.5.C 仕様書ベースで実装
+Layer 1 が以下 9 section の仕様書を `.context/spec/e2e/test-spec-{example}.md` に Write する (詳細は `.claude/skills/test-design/SKILL.md` § 出力フォーマット):
 
-仕様書の「新規追加 test」表 の各行を 1 つずつ spec.ts に落とし込む。 AC が曖昧なまま実装に進まない。
-test 名 (T-XX-NNN) は仕様書と spec.ts で一致させる。
+- 対象機能 / 仕様の要約 / 主な品質リスク / 推奨テスト構成 / テスト観点一覧 / テストケース一覧 / 自動化すべきテスト / 手動確認でよいテスト / 不足している仕様
 
-template: `examples/test-spec-template.md`
+#### 1.5.C 仕様書ベースで実装 (Layer 2 = 本 skill の責務)
+
+Layer 1 出力 `.context/spec/e2e/test-spec-{example}.md` を Read し、 「テストケース一覧」 section の 9 column 表を **行単位** で `tests/{example}.spec.ts` の test 関数に変換する。
+
+| Layer 1 column | spec.ts への変換 |
+|---|---|
+| `テスト ID` (TC-NNN) | `test('TC-NNN ...', async () => {...})` の関数名 |
+| `テストレベル` (E2E / 統合) | E2E → `test()`、 統合 → `test()` + mock RPC |
+| `テスト観点` (正常系 / 異常系 / 境界値 ...) | `test.describe('観点 N: {name}', () => {...})` の group block |
+| `前提条件` | test 開始時の `await fixture.setup(...)` 経路 |
+| `入力値` | wallet / contract call の args |
+| `操作手順` | `await page.click(...)` / `await wallet.writeContract(...)` 等 |
+| `期待結果` | `await expect(...)` / `await waitForChainState(...)` 等 |
+| `優先度` | spec.ts 内のコメント (高 = `// HIGH-PRIORITY`) |
+| `自動化` (推奨/手動) | 「手動」のケースは spec.ts に含めず docs に分離 |
+
+観点 → Playwright helper の完全マッピングは `.claude/skills/test-design/references/layer2-bridge.md` § Playwright を参照。
+
+#### 1.5.D 旧 template との backward-compat
+
+旧 `examples/test-spec-template.md` (独自 8 column) は Phase E-3 以前の test 仕様書を Read する場合のみ参照用に残す。 新規 test 仕様書は **必ず Layer 1 経由で 9 column 表** を生成する。
 
 ### Step 2: 3 layer 設計
 
