@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { expectEvent } from '@dapp-e2e/core';
 import {
   createPublicClient,
   createWalletClient,
-  decodeEventLog,
   defineChain,
   http,
   padHex,
@@ -267,9 +267,9 @@ test.describe('Next.js Event history (past + watchContractEvent) e2e', () => {
         args: [111n, 'other-other'],
       }),
     ];
-    for (const hash of txHashes) {
-      await owner.pub.waitForTransactionReceipt({ hash });
-    }
+    const receipts = await Promise.all(
+      txHashes.map((hash) => owner.pub.waitForTransactionReceipt({ hash })),
+    );
 
     const topics = [
       toEventSelector('Logged(address,uint256,string)'),
@@ -281,16 +281,10 @@ test.describe('Next.js Event history (past + watchContractEvent) e2e', () => {
 
     expect(logs).toHaveLength(1);
     expect(logs[0]?.topics).toEqual(topics);
-
-    const decoded = decodeEventLog({
-      abi: EMITTER_ABI,
-      data: logs[0]!.data,
-      topics: logs[0]!.topics,
+    expectEvent(receipts[0]!, EMITTER_ABI, 'Logged', {
+      sender: owner.account.address,
+      value: 111n,
+      message: 'owner-hit',
     });
-
-    expect(decoded.eventName).toBe('Logged');
-    expect(decoded.args.sender).toBe(owner.account.address);
-    expect(decoded.args.value).toBe(111n);
-    expect(decoded.args.message).toBe('owner-hit');
   });
 });

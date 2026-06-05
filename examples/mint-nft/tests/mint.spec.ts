@@ -2,10 +2,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { expect } from '@playwright/test';
-import { dappE2eTest as test } from '@dapp-e2e/core';
+import { dappE2eTest as test, expectCustomError } from '@dapp-e2e/core';
 import {
-  BaseError,
-  ContractFunctionRevertedError,
   createPublicClient,
   createWalletClient,
   defineChain,
@@ -73,20 +71,6 @@ async function deployMintNft(port: number): Promise<Hex> {
   const receipt = await pub.waitForTransactionReceipt({ hash });
   if (!receipt.contractAddress) throw new Error('mint-nft deploy failed');
   return receipt.contractAddress;
-}
-
-function expectCustomError(
-  error: unknown,
-  errorName: string,
-  expectedArgs?: readonly unknown[],
-): void {
-  if (!(error instanceof BaseError)) throw error;
-  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
-  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
-  expect(reverted.data?.errorName).toBe(errorName);
-  if (expectedArgs) {
-    expect(reverted.data?.args).toEqual(expectedArgs);
-  }
 }
 
 function makeClients(port: number, account = privateKeyToAccount(PRIVATE_KEY)) {

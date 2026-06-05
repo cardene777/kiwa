@@ -2,8 +2,11 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  BaseError,
-  ContractFunctionRevertedError,
+  expectCustomError,
+  mineBlock,
+  setNextBlockTimestamp,
+} from '@dapp-e2e/core';
+import {
   createPublicClient,
   createWalletClient,
   defineChain,
@@ -93,34 +96,6 @@ function makeClients(port: number, privateKey: typeof OWNER_PK | typeof SMALL_VO
     }),
     pub: createPublicClient({ chain: anvilChain(port), transport: http() }),
   };
-}
-
-function expectCustomError(
-  error: unknown,
-  errorName: string,
-  expectedArgs?: readonly unknown[],
-): void {
-  if (!(error instanceof BaseError)) throw error;
-  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
-  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
-  expect(reverted.data?.errorName).toBe(errorName);
-  if (expectedArgs) {
-    expect(reverted.data?.args).toEqual(expectedArgs);
-  }
-}
-
-async function rpc(port: number, method: string, params: unknown[] = []): Promise<unknown> {
-  const pub = createPublicClient({ chain: anvilChain(port), transport: http() });
-  return await (
-    pub as unknown as {
-      request: (args: { method: string; params: unknown[] }) => Promise<unknown>;
-    }
-  ).request({ method, params });
-}
-
-async function setNextBlockTimestamp(port: number, timestamp: bigint): Promise<void> {
-  await rpc(port, 'anvil_setNextBlockTimestamp', [Number(timestamp)]);
-  await rpc(port, 'evm_mine');
 }
 
 async function createSimpleProposal(port: number) {
@@ -344,7 +319,8 @@ test.describe('Next.js DAO Governor propose/vote e2e', () => {
       functionName: 'proposalView',
       args: [proposalId],
     });
-    await setNextBlockTimestamp(anvilPort, endTime + 1n);
+    await setNextBlockTimestamp(smallVoter.pub, endTime + 1n);
+    await mineBlock(smallVoter.pub);
 
     try {
       await smallVoter.pub.simulateContract({
@@ -427,7 +403,8 @@ test.describe('Next.js DAO Governor propose/vote e2e', () => {
       functionName: 'proposalView',
       args: [proposalId],
     });
-    await setNextBlockTimestamp(anvilPort, endTime + 1n);
+    await setNextBlockTimestamp(pub, endTime + 1n);
+    await mineBlock(pub);
 
     try {
       await pub.simulateContract({
@@ -493,7 +470,8 @@ test.describe('Next.js DAO Governor propose/vote e2e', () => {
       functionName: 'proposalView',
       args: [proposalId],
     });
-    await setNextBlockTimestamp(anvilPort, endTime + 1n);
+    await setNextBlockTimestamp(pub, endTime + 1n);
+    await mineBlock(pub);
 
     const queueHash = await wallet.writeContract({
       address: dao,
@@ -524,7 +502,8 @@ test.describe('Next.js DAO Governor propose/vote e2e', () => {
       expectCustomError(error, 'TimelockNotElapsed', [readyAt, currentTime]);
     }
 
-    await setNextBlockTimestamp(anvilPort, readyAt + 1n);
+    await setNextBlockTimestamp(pub, readyAt + 1n);
+    await mineBlock(pub);
 
     const executeHash = await wallet.writeContract({
       address: dao,

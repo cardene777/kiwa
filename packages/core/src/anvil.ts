@@ -74,6 +74,17 @@ export interface StartAnvilOptions {
 }
 
 export async function startAnvil(opts: StartAnvilOptions = {}): Promise<AnvilHandle> {
+  return startAnvilProcess(opts);
+}
+
+export interface StartAnvilProcessOptions extends StartAnvilOptions {
+  extraArgs?: string[];
+  requirePristineChain?: boolean;
+}
+
+export async function startAnvilProcess(
+  opts: StartAnvilProcessOptions = {},
+): Promise<AnvilHandle> {
   if (opts.port && opts.killExistingOnPort) {
     killAnvilProcessesOnPort(opts.port);
     await delay(PORT_RELEASE_WAIT_MS);
@@ -84,7 +95,7 @@ export async function startAnvil(opts: StartAnvilOptions = {}): Promise<AnvilHan
 
   for (let attempt = 0; attempt < attemptLimit; attempt += 1) {
     const port = opts.port ?? (await getFreePort());
-    const args = ['--port', String(port), '--silent'];
+    const args = ['--port', String(port), '--silent', ...(opts.extraArgs ?? [])];
     if (opts.chainId !== undefined) {
       args.push('--chain-id', String(opts.chainId));
     }
@@ -104,7 +115,14 @@ export async function startAnvil(opts: StartAnvilOptions = {}): Promise<AnvilHan
 
     let ready = false;
     try {
-      ready = await waitForReady(child, port, STARTUP_TIMEOUT_MS, () => fatalError, opts.chainId);
+      ready = await waitForReady(
+        child,
+        port,
+        STARTUP_TIMEOUT_MS,
+        () => fatalError,
+        opts.chainId,
+        opts.requirePristineChain ?? true,
+      );
     } catch (error) {
       child.off('error', onError);
       safeKill(child);
@@ -218,6 +236,7 @@ function waitForReady(
   timeoutMs: number,
   getFatalError: () => Error | null,
   expectedChainId: number | undefined,
+  requirePristineChain: boolean,
 ): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const deadline = Date.now() + timeoutMs;
@@ -257,6 +276,12 @@ function waitForReady(
           if (chainId !== expectedChainId) {
             return;
           }
+        }
+
+        if (!requirePristineChain) {
+          clearInterval(timer);
+          resolve(true);
+          return;
         }
 
         const blockRes = await fetch(`http://127.0.0.1:${port}`, {

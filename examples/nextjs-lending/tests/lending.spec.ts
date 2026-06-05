@@ -1,9 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { expectCustomError, revertChain, snapshotChain } from '@dapp-e2e/core';
 import {
-  BaseError,
-  ContractFunctionRevertedError,
   createPublicClient,
   createWalletClient,
   defineChain,
@@ -157,34 +156,6 @@ function walletFor(privateKey: Hex) {
   });
 }
 
-async function rpc(method: string, params: unknown[] = []): Promise<unknown> {
-  return await (
-    pub as unknown as { request: (args: { method: string; params: unknown[] }) => Promise<unknown> }
-  ).request({ method, params });
-}
-
-async function snapshot(): Promise<string> {
-  return (await rpc('evm_snapshot')) as string;
-}
-
-async function revertSnapshot(id: string): Promise<void> {
-  await rpc('evm_revert', [id]);
-}
-
-function expectCustomError(
-  error: unknown,
-  errorName: string,
-  expectedArgs?: readonly unknown[],
-): void {
-  if (!(error instanceof BaseError)) throw error;
-  const reverted = error.walk((cause) => cause instanceof ContractFunctionRevertedError);
-  if (!(reverted instanceof ContractFunctionRevertedError)) throw error;
-  expect(reverted.data?.errorName).toBe(errorName);
-  if (expectedArgs) {
-    expect(reverted.data?.args).toEqual(expectedArgs);
-  }
-}
-
 function readRuntimeEnv() {
   const envLocal = readFileSync(resolve(__dirname, '..', '.env.local'), 'utf8');
   const pairs = envLocal
@@ -240,15 +211,15 @@ async function waitLoaded(page: import('@playwright/test').Page) {
 }
 
 test.describe('Next.js Lending (supply / borrow / repay / health factor) e2e', () => {
-  let snapshotId: string | undefined;
+  let snapshotId: Hex | undefined;
 
   test.beforeEach(async () => {
-    snapshotId = await snapshot();
+    snapshotId = await snapshotChain(pub);
   });
 
   test.afterEach(async () => {
     if (snapshotId) {
-      await revertSnapshot(snapshotId);
+      await revertChain(pub, snapshotId);
       snapshotId = undefined;
     }
   });

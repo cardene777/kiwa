@@ -27,6 +27,10 @@ export {
   type StartAnvilOptions,
 } from './anvil.js';
 export {
+  startAnvilFork,
+  type ForkOptions,
+} from './anvil-fork.js';
+export {
   startAnvilCluster,
   type AnvilClusterConfig,
   type AnvilClusterHandle,
@@ -55,3 +59,16 @@ export {
   waitForChainState,
   type WaitForChainStateOptions,
 } from './wait-for-chain-state.js';
+export { snapshotChain, revertChain } from './snapshot.js';
+export { increaseTime, mineBlock, setNextBlockTimestamp } from './time.js';
+export {
+  impersonateAccount,
+  stopImpersonateAccount,
+  setBalance,
+} from './impersonate.js';
+export { expectCustomError } from './expect-custom-error.js';
+export { expectEvent } from './expect-event.js';
+export {
+  expectBalanceChange,
+  expectEthBalanceChange,
+} from './balance-change.js';

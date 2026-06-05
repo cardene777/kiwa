@@ -1,4 +1,9 @@
-import { waitForChainState } from '@dapp-e2e/core';
+import {
+  increaseTime,
+  revertChain,
+  snapshotChain,
+  waitForChainState,
+} from '@dapp-e2e/core';
 import { createPublicClient, createWalletClient, defineChain, http, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
@@ -16,24 +21,6 @@ const anvilChain = defineChain({
 });
 
 const pub = createPublicClient({ chain: anvilChain, transport: http() });
-
-async function rpc(method: string, params: unknown[] = []): Promise<unknown> {
-  return await (pub as unknown as { request: (a: { method: string; params: unknown[] }) => Promise<unknown> })
-    .request({ method, params });
-}
-
-async function snapshot(): Promise<string> {
-  return (await rpc('evm_snapshot')) as string;
-}
-
-async function revert(id: string): Promise<void> {
-  await rpc('evm_revert', [id]);
-}
-
-async function increaseTime(seconds: bigint): Promise<void> {
-  await rpc('evm_increaseTime', [Number(seconds)]);
-  await rpc('evm_mine');
-}
 
 async function ensureConnected(page: import('@playwright/test').Page) {
   const connectBtn = page.getByRole('button', { name: /connect wallet/i });
@@ -69,15 +56,15 @@ function bigintFromText(text: string, prefix: string): bigint {
 }
 
 test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e', () => {
-  let snapshotId: string | undefined;
+  let snapshotId: Hex | undefined;
 
   test.beforeEach(async () => {
-    snapshotId = await snapshot();
+    snapshotId = await snapshotChain(pub);
   });
 
   test.afterEach(async () => {
     if (snapshotId) {
-      await revert(snapshotId);
+      await revertChain(pub, snapshotId);
       snapshotId = undefined;
     }
   });
@@ -149,7 +136,7 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
     await waitLoaded(page);
 
     // cliff + 200s = 500s 進める (duration 3600s に対して 500/3600 = 13.8%)
-    await increaseTime(CLIFF_DURATION + 200n);
+    await increaseTime(pub, CLIFF_DURATION + 200n);
     await page.waitForTimeout(2000);
 
     await page.getByTestId('release-button').click();
@@ -189,7 +176,7 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
     const VESTING = vestingMatch![1] as `0x${string}`;
 
     // duration + buffer 分進める (1 hour + 60s で確実に satisfaction)
-    await increaseTime(VESTING_DURATION + 60n);
+    await increaseTime(pub, VESTING_DURATION + 60n);
 
     await page.getByTestId('release-button').click();
     await dappE2e.waitForRpcIdle();
@@ -228,7 +215,7 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
     await waitLoaded(page);
 
     // 1 回目 — 期間満了で全額 release
-    await increaseTime(VESTING_DURATION + 60n);
+    await increaseTime(pub, VESTING_DURATION + 60n);
     await page.waitForTimeout(2000);
     await page.getByTestId('release-button').click();
     await dappE2e.waitForRpcIdle();
@@ -312,7 +299,7 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
     ] as const;
 
     // 時間を進めて期間満了
-    await increaseTime(VESTING_DURATION + 60n);
+    await increaseTime(pub, VESTING_DURATION + 60n);
 
     const aliceBalanceBefore = (await localPub.readContract({
       address: VEST_TOKEN,
