@@ -206,6 +206,7 @@ test('multi wallet picker', async ({ page, dappE2e }) => {
 | [`docs/ERRORS.md`](./docs/ERRORS.md) | EIP-1193 error code と envelope 設計 |
 | [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.x 系の破壊的変更ポリシー |
 | [`docs/COMPARISON.md`](./docs/COMPARISON.md) | Synpress / wallet-mock との使い分け |
+| [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | wallet / SDK mock 精度仕様書 (A/B/C 3 段階 + 5 観点スコアリング) ⭐ |
 | [`docs/RELEASING.md`](./docs/RELEASING.md) | publish 手順と provenance 設定 |
 
 Claude Code 利用者向け:
