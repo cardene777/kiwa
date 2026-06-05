@@ -21,6 +21,7 @@
     { "ja": "docs/ja/cookbook/user-reject.md", "en": "docs/en/cookbook/user-reject.md", "section": "Cookbook", "owner": "auto" },
     { "ja": "docs/ja/cookbook/multi-chain.md", "en": "docs/en/cookbook/multi-chain.md", "section": "Cookbook", "owner": "auto" },
     { "ja": "docs/ja/cookbook/token-approve-flow.md", "en": "docs/en/cookbook/token-approve-flow.md", "section": "Cookbook", "owner": "auto" },
+    { "ja": "docs/ja/cookbook/test-design-flow.md", "en": "docs/en/cookbook/test-design-flow.md", "section": "Cookbook", "owner": "auto" },
     { "ja": "docs/ja/faq.md", "en": "docs/en/faq.md", "section": "FAQ", "owner": "auto" }
   ]
 }

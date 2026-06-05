@@ -12,6 +12,7 @@
 - [User reject 経路を test する](./user-reject.md)
 - [Multi-Chain (L1/L2 並走) を test する](./multi-chain.md)
 - [Token approve flow を test する](./token-approve-flow.md)
+- [3 layer テスト設計 flow (Phase E 統合)](./test-design-flow.md) ⭐ v0.5 新規 — Layer 1 (`/test-design`) → Layer 2 (Foundry / Hardhat / Playwright) chain で contract test と dApp e2e test を 1 仕様書から生成
 
 ## 関連
 

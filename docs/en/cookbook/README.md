@@ -12,6 +12,7 @@ dapp-e2e usage by real scenario.
 - [Test the user-reject path](./user-reject.md)
 - [Test multi-chain (L1/L2 in parallel)](./multi-chain.md)
 - [Test a token approve flow](./token-approve-flow.md)
+- [3-layer test design flow (Phase E integration)](./test-design-flow.md) ⭐ New in v0.5 — generates contract tests and dApp e2e tests from a single spec via Layer 1 (`/test-design`) → Layer 2 (Foundry / Hardhat / Playwright)
 
 ## Related
 
