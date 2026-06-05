@@ -206,6 +206,7 @@ Reference docs:
 | [`docs/ERRORS.md`](./docs/ERRORS.md) | EIP-1193 error code + envelope design |
 | [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.x breaking-change policy |
 | [`docs/COMPARISON.md`](./docs/COMPARISON.md) | Synpress / wallet-mock comparison |
+| [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | Wallet / SDK mock fidelity spec (A/B/C levels, scoring rubric) ⭐ |
 | [`docs/RELEASING.md`](./docs/RELEASING.md) | Publish flow + provenance |
 
 For Claude Code users:
