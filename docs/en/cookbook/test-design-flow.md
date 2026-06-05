@@ -2,114 +2,136 @@
 
 > [🇬🇧 English](./test-design-flow.md) • [🇯🇵 日本語](../../ja/cookbook/test-design-flow.md)
 
-A documented walkthrough of the "Layer 1 (test design) → Layer 2 (implementation conversion)" chain established in dapp-e2e Phase E (#171–#180). This chapter walks through generating contract tests (Foundry / Hardhat) and dApp e2e tests (Playwright) from a single spec, using the `mint-nft` example as a vehicle.
+A documented walkthrough of the "Layer 1 (test design) → Layer 2 (implementation conversion)" chain established in dapp-e2e Phase E (#171–#181), focused on **retrofitting tests into a contract / dApp that already exists and ships**. We use the real `examples/nextjs-token-gating` contracts as the worked example.
+
+The chain also works for new TDD-first development, but the primary use case is **adding tests after the fact to existing contracts / dApps**. Treat the existing implementation as the de-facto specification, infer the viewpoints from it, and fill in the missing tests.
 
 ## Overall diagram
 
 ```mermaid
 graph TD
-    A[1. Feature spec] -->|input material| B["/test-design Layer 1"]
-    B -->|--layer contract| C[.context/spec/contract/test-spec-X.md]
-    B -->|--layer e2e| D[.context/spec/e2e/test-spec-X.md]
+    A[Existing contract + dApp shipping] -->|current code| B["/test-design Layer 1"]
+    B -->|--layer contract --input *.sol| C[.context/spec/contract/test-spec-X.md]
+    B -->|--layer e2e --input app/ + tests/| D[.context/spec/e2e/test-spec-X.md]
     C -->|9-column table parse| E["/contract-test-foundry"]
     C -->|9-column table parse| F["/contract-test-hardhat"]
-    D -->|9-column table parse| G["/dapp-e2e-test"]
-    E --> H[test/X.t.sol]
-    F --> I[test/X.test.ts]
-    G --> J[tests/X.spec.ts]
-    H -->|forge test| K[forge coverage]
-    I -->|npx hardhat test| L[hardhat coverage]
-    J -->|playwright test| M[4-round flake check]
+    D -->|9-column table parse| G["/dapp-e2e-test --mode extend"]
+    E --> H[Write test/X.t.sol after the fact]
+    F --> I[Write test/X.test.ts after the fact]
+    G --> J[Write tests/X.spec.ts after the fact]
+    H -->|forge test| K[real contract behavior == test PASS]
+    I -->|npx hardhat test| L[real contract behavior == test PASS]
+    J -->|playwright test 4 rounds| M[existing UI behavior == test PASS]
 ```
 
-Core idea of the 3-layer chain — the **9-column table inside the Layer 1 output (`.context/spec/{contract,e2e}/test-spec-{module}.md`) acts as the single source of truth**. The three Layer 2 skills (Foundry / Hardhat / Playwright) read the same file and mechanically translate it into runner-specific helpers.
+Core idea of the 3-layer chain — the **9-column table inside the Layer 1 output (`.context/spec/{contract,e2e}/test-spec-{module}.md`) acts as the single source of truth**. The three Layer 2 skills (Foundry / Hardhat / Playwright) read the same file and mechanically translate it into runner-specific helpers. In the retrofit flow the "target functionality" section is populated by grep extraction from the existing code.
 
-## Full worked example: mint-nft (Phase E full chain)
+## Full worked example: nextjs-token-gating (retrofitting an existing dApp)
 
-### Step 0: Feature spec (input material)
+### Step 0: Survey the existing contract / dApp
 
-Target `mint()` / `transfer()` / `burn()` on `examples/mint-nft/contracts/MintableNFT.sol`. Any caller can mint 1 NFT for 0.01 ETH; max supply is 10000; only the owner can burn.
+`examples/nextjs-token-gating/` already contains:
 
-### Step 1: Generate a contract-side spec with Layer 1
+```bash
+ls examples/nextjs-token-gating/contracts/ tests/
+# contracts/: GateNFT.sol + GatedContent.sol
+# tests/: gating.spec.ts (existing e2e tests) + prepare-env.ts + fixture.ts
+```
+
+Functions / errors in the real contracts (what the skill greps for you):
+
+```bash
+grep -E "function |event |error " contracts/*.sol
+# GateNFT.sol: mint() / transferFrom() / NotOwner / InvalidRecipient
+# GatedContent.sol: getSecret() / grantTimedAccess(user, ttl) / hasAccess() / isGated()
+#                   NotGated / InvalidTtl / Accessed / TimedAccessGranted
+```
+
+Existing test count:
+
+```bash
+grep -cE "^test\(|^test\.describe\(" tests/*.spec.ts
+# gating.spec.ts: 8 tests (T-GT-000 through T-GT-007)
+```
+
+There is no formal spec — the "behavioral spec of the contract" is scattered across docstrings and the actual code. Retrofit testing here "writes the behavior down + adds missing viewpoints".
+
+### Step 1: Reverse-engineer a contract-side spec with Layer 1
 
 ```text
-/test-design --layer contract --module mint-nft
+/test-design --layer contract --module token-gating --input examples/nextjs-token-gating/contracts/GatedContent.sol
 
-Input material:
-- Target functions = MintableNFT.mint() / transfer() / burn() (3 functions)
-- Contract = examples/mint-nft/contracts/MintableNFT.sol
-- Failure modes = msg.value < 0.01 ETH → InvalidFee / maxSupply reached → MaxSupplyExceeded / owner check failed → NotOwner
+The Layer 1 skill:
+- reads the input .sol and greps for function / event / error
+- also inspects the sibling contract (GateNFT.sol) through the IGateNFT interface
+- reverse-engineers "target functionality" / "spec summary" / "permission model" / "failure modes" from docstrings and real code
+- scores quality risk on the 5 criteria, decides apply/skip for each of the 10 viewpoints
+- generates a 9-column table at one case per row, grouped by viewpoint, sorted by priority
 ```
 
-`.context/spec/contract/test-spec-mint-nft.md` is produced with the 9 sections + 9-column table (the `/test-design` skill renders it automatically based on the SSOT).
+`.context/spec/contract/test-spec-token-gating.md` is produced. The "Insufficient spec" section records the docstring ambiguities (cleanup timing for `timedAccessExpiry`, the duplicate-grant behavior, presence of a max supply, pause functionality).
 
-### Step 2: Generate an e2e-side spec with Layer 1
+### Step 2: Reverse-engineer an e2e-side spec with Layer 1
 
 ```text
-/test-design --layer e2e --module mint-nft
+/test-design --layer e2e --module token-gating --input examples/nextjs-token-gating/
 
-Input material:
-- Target flow = mint-nft UI flow (Connect → Mint button → display tokenId → Transfer button)
-- Target files = examples/mint-nft/app/page.tsx + tests/mint.spec.ts
-- Failure modes = wallet reject / RPC timeout / actions while paused
+The Layer 1 skill:
+- reads the existing tests/gating.spec.ts and treats the 8 existing tests as "current coverage"
+- extracts the relationship between contract and UI (app/page.tsx or the inline HTML fixture)
+- records viewpoints not covered by the existing tests (partial permission verification, multi-grantee simultaneous expiry, self-grant bypass) as "new tests to add"
 ```
 
-`.context/spec/e2e/test-spec-mint-nft.md` is produced with the same 9 sections + 9-column table.
+`.context/spec/e2e/test-spec-token-gating.md` is produced, listing existing test IDs (T-GT-NNN) alongside the new test IDs (TC-NNN).
 
-### Step 3: Implement the contract test with Layer 2 (Foundry)
+### Step 3: Write contract tests after the fact with Layer 2 (Foundry)
 
 ```text
-/contract-test-foundry --module mint-nft --gas-report
+/contract-test-foundry --module token-gating --gas-report
 ```
 
-The skill performs:
-- Reads `.context/spec/contract/test-spec-mint-nft.md`
-- Translates viewpoint groupings (1 happy-path / 2 failure-path / 3 boundary / …) into Solidity test functions with `// 観点 N: {name}` comments
-- Viewpoint 3 (boundary) → `testFuzz_*` (`vm.assume` / `bound`), viewpoint 4 (state transition) → `invariant_*` + Handler, viewpoint 10 (security) → reentrancy attacker + signature recovery
-- Writes `test/MintableNFT.t.sol`
-- Runs `forge test --gas-report` → all functions pass + gas measured
-- Runs `forge coverage --report summary` to evaluate line coverage (default threshold 80%)
+The skill:
 
-### Step 3': Implement the contract test with Layer 2 (Hardhat, consumes the same spec in parallel)
+- reads `.context/spec/contract/test-spec-token-gating.md`
+- translates viewpoint groupings (1 happy / 2 failure / 3 boundary / 4 state / 5 permission / 10 security) into Solidity test functions, annotated with `// 観点 N: {name}` comments
+- viewpoint 3 → `testFuzz_grantTimedAccess_Boundary` (`bound(ttl, 1, 365 days)`), viewpoint 4 → `invariant_TimedAccessExpiryNonZero` + Handler, viewpoint 10 → `test_SelfGrantBypassDefense` + `test_TransferRevokesAll_MultiGrantee`
+- **writes `test/GatedContent.t.sol` after the fact** (creates a new file because no prior .t.sol exists; otherwise lives alongside existing files)
+- runs `forge build` to compile, then `forge test --gas-report`
+- **tests PASS** = the current behavior of the real contract is now recorded as the test's "expected outcome"
+- **tests FAIL** = a bug surfaces (docstring vs real code mismatch, or a misreading in the spec)
+
+### Step 3': Write contract tests after the fact with Layer 2 (Hardhat, in parallel)
 
 ```text
-/contract-test-hardhat --module mint-nft --gas-report
+/contract-test-hardhat --module token-gating --gas-report
 ```
 
-The skill performs:
-- Reads the same `.context/spec/contract/test-spec-mint-nft.md`
-- Translates viewpoint groupings into `describe('観点 N: {name}', ...)` blocks in TypeScript
-- Viewpoint 3 → `fast-check` `asyncProperty`, viewpoint 4 → `loadFixture` + `describe.each(states)`, viewpoint 10 → `signTypedData` + reentrancy attacker
-- Writes `test/MintableNFT.test.ts`
-- Runs `npx hardhat test` → every `it` block passes
-- Runs `npx hardhat coverage` to evaluate line coverage
+Reads the same `.context/spec/contract/test-spec-token-gating.md` and writes `test/GatedContent.test.ts` in Hardhat shape, in parallel. Foundry-leaning and Hardhat-leaning developers can hold **parallel tests with the same test IDs** sourced from one spec. Viewpoints and case IDs (TC-001 through TC-013) line up across both layers.
 
-Because both skills **consume the same Layer 1 spec**, Foundry-leaning and Hardhat-leaning developers share an identical test specification. Viewpoints and case IDs (TC-001 etc.) line up across both layers.
-
-### Step 4: Implement the e2e test with Layer 2 (Playwright)
+### Step 4: Extend the e2e tests with Layer 2 in `extend` mode (Playwright)
 
 ```text
-/dapp-e2e-test --mode new --example mint-nft
+/dapp-e2e-test --mode extend --example nextjs-token-gating
 ```
 
-The skill performs:
-- In Step 1.5.B, reads `.context/spec/e2e/test-spec-mint-nft.md`
-- Translates viewpoint groupings into `test.describe('観点 N: {name}', ...)` blocks in Playwright
-- Viewpoint 1 happy-path → `test('TC-001 mint and display tokenId')`, viewpoint 10 security → wallet signature verification
-- Writes `tests/mint.spec.ts` + `tests/prepare-env.ts`
-- Runs `pnpm test` four times in a row to confirm zero flaky failures
+The skill:
 
-### Step 5: Integrating coverage across all layers
+- in Step 1.5.B, reads `.context/spec/e2e/test-spec-token-gating.md`
+- recognises the 8 existing tests (T-GT-000 through T-GT-007) as "current coverage" and guarantees zero regression
+- **appends** the missing viewpoints (partial permission verification, multi-grantee simultaneous expiry, self-grant bypass) as new tests (TC-008 onwards) into `tests/gating.spec.ts`
+- runs `pnpm test` four times in a row to confirm zero flakes (all 8 existing + N new tests pass)
 
-When the chain finishes, the test pyramid is complete:
+### Step 5: The completed test pyramid
 
-| Layer | Runner | Output file | Viewpoints covered |
-|---|---|---|---|
-| contract unit | Foundry | `test/MintableNFT.t.sol` | All 10 viewpoints (fuzz + invariant + reentrancy) |
-| contract unit | Hardhat (parallel) | `test/MintableNFT.test.ts` | All 10 viewpoints (fast-check + chai matchers) |
-| dApp e2e | Playwright | `tests/mint.spec.ts` | 1 (happy) / 2 (failure) / 4 (state) / 5 (permission) / 10 (security) |
+When the retrofit completes:
 
-Contract unit tests fast-fuzz and invariant-check all 10 viewpoints, while the e2e layer covers the UI route (wallet inject / button click → contract → state propagation). The same Layer 1 spec keeps test IDs in sync across layers.
+| Layer | Runner | Output file | Viewpoints covered | Existing vs new |
+|---|---|---|---|---|
+| contract unit | Foundry | `test/GatedContent.t.sol` | All 10 (fuzz + invariant) | All new (no prior .t.sol) |
+| contract unit | Hardhat | `test/GatedContent.test.ts` | All 10 (fast-check + chai) | All new (no prior .test.ts) |
+| dApp e2e | Playwright | `tests/gating.spec.ts` | 1 / 2 / 4 / 5 / 10 | 8 existing + N new (extend) |
+
+The existing e2e tests are preserved while the viewpoint gaps are filled, and brand-new contract tests are added. The same Layer 1 spec keeps test IDs in sync across both layers.
 
 ## Viewpoint × helper mapping cheat sheet
 
@@ -130,6 +152,17 @@ A quick reference for the 3 layers × 10 viewpoint helper mapping:
 
 For the full reference, see each Layer 2 skill's `references/{foundry,hardhat,playwright}-mapping.md`.
 
+## Retrofitting vs new (TDD-style) development
+
+| Comparison | New development (TDD) | Retrofitting (the primary use case in this chapter) |
+|---|---|---|
+| `/test-design` input | A feature spec document (no code yet) | Existing `.sol` / `app/` / `tests/` passed via `--input`, mined by grep |
+| Layer 1 "target functionality" section | Authored from the spec | Summarised from grep results |
+| Layer 1 "insufficient spec" section | Lists ambiguities from the spec | Lists undocumented behavior / implicit assumptions / untested paths |
+| When Layer 2 runs `forge test` | Expects RED (tests are written first) | Expects PASS (records the real behavior as canonical) |
+| When tests FAIL | Fix the implementation (TDD GREEN) | A bug surfaces (existing behavior differs from expectations) |
+| Relationship with existing tests | (n/a) | `--mode extend` guarantees zero regression on the existing test count |
+
 ## False-positive self-check checklist
 
 Hotspots where false positives can enter a 3-layer chain, plus how to defend:
@@ -139,6 +172,7 @@ Hotspots where false positives can enter a 3-layer chain, plus how to defend:
 - **Partial verification of viewpoint 5 (permissions)** — checking only `hasAccess(user)` and ignoring the `grantor` / `msg.sender` paths lets a self-grant bypass slip through. Always exercise every entry point (grantor / grantee / third party)
 - **Time-warp side effects in viewpoint 4 (state transition)** — Foundry `vm.warp` and Hardhat `time.increaseTo` both leak time into the next test if you forget to reset. Restore the fixture from `loadFixture` / `snapshotChain` in `setUp`
 - **Race conditions in parallel runs** — for viewpoint 8, prefer `Promise.allSettled` over `Promise.all` (so a single reject does not collapse the rest); Foundry is synchronous, so parallel races are not even expressible
+- **The trap of treating real behavior as canonical** — even when `forge test` passes, "the real contract has a bug and the test froze that bug into place" remains possible. Cross-check the Layer 1 "main quality risks" section and confirm with the spec author whether "real behavior == intended spec"
 
 The full nine patterns plus a five-question self-check live in `.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md`.
 
