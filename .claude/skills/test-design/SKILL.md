@@ -199,7 +199,7 @@ Layer 2 skill は仕様書の「テストケース一覧」表を行単位で読
 ## examples
 
 - `examples/test-spec-basic-connect.md` — `examples/basic-connect/` ベースの最小サンプル (wallet connect の test 設計)
-- `examples/test-spec-token-gating.md` — `examples/nextjs-token-gating/` ベースの完全な 9 section 出力例 (TC-001 〜 TC-009 を含む)
+- `examples/test-spec-token-gating.md` — `examples/nextjs-token-gating/` ベースの完全な 9 section 出力例 (TC-001 〜 TC-013 を含む)
 
 ## 関連 link
 
