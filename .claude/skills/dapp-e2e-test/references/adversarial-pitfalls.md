@@ -1,8 +1,8 @@
 # adversarial-pitfalls.md
 
-dapp-e2e MVP foundation (PR #145 #146 #147) の adversarial review で検出された 9 件の finding (CRITICAL 3 / MAJOR 4 / MINOR 2) から抽出した、 dApp test 設計の典型偽陽性パターン集。
+dapp-e2e MVP foundation の adversarial review (公開 PR 3 件 — [#145](https://github.com/cardene777/dapp-e2e/pull/145) / [#146](https://github.com/cardene777/dapp-e2e/pull/146) / [#147](https://github.com/cardene777/dapp-e2e/pull/147)) で検出された 9 件の finding (CRITICAL 3 / MAJOR 4 / MINOR 2) から抽出した、 dApp test 設計の典型偽陽性パターン集。
 
-新規 test を書くとき、 これらに該当しないか self-check する。
+新規 test を書くとき、 これらに該当しないか self-check する。 各 PR の diff は GitHub から直接読めるので、 該当 finding の修正前後のコードを参照しながらパターンを学べる。
 
 ## 1. 固定 nonce 偽陽性 (replay 検証)
 
@@ -12,7 +12,7 @@ replay 攻撃防御 test で固定値 nonce (例 `replayNonce = 777n`) を使っ
 
 ### 検出例
 
-PR #146 T-BR-007 (`examples/nextjs-bridge/tests/bridge.spec.ts:458`):
+[PR #146](https://github.com/cardene777/dapp-e2e/pull/146) T-BR-007 (`examples/nextjs-bridge/tests/bridge.spec.ts:458`):
 
 ```ts
 // ❌ 偽陽性
@@ -48,7 +48,7 @@ await expectRevert(() => operatorUnlock(burnedNonce, l1Recipient, amount), 'Alre
 
 ### 検出例
 
-PR #146 T-BR-008 (`examples/nextjs-bridge/tests/bridge.spec.ts:524`):
+[PR #146](https://github.com/cardene777/dapp-e2e/pull/146) T-BR-008 (`examples/nextjs-bridge/tests/bridge.spec.ts:524`):
 
 ```ts
 // ❌ 偽陽性
@@ -81,7 +81,7 @@ await operatorUnlock(burnedNonce, l1Recipient, amount);
 
 ### 検出例
 
-PR #147 T-GT-007 (`examples/nextjs-token-gating/contracts/GatedContent.sol:48`):
+[PR #147](https://github.com/cardene777/dapp-e2e/pull/147) T-GT-007 (`examples/nextjs-token-gating/contracts/GatedContent.sol:48`):
 
 ```sol
 // ❌ 脆弱な hasAccess
@@ -145,7 +145,7 @@ bridge / DAO / lending 等で operator 専用 path が複数 (例 `unlock` + `re
 
 ### 検出例
 
-PR #145 (DaoExecutionTarget) — DAO は `executeProposal` で hardcoded admin guard があったが、 別 path の `setValue` で msg.sender == dao を見ていなかった (CRITICAL access control bug)。
+[PR #145](https://github.com/cardene777/dapp-e2e/pull/145) (DaoExecutionTarget) — DAO は `executeProposal` で hardcoded admin guard があったが、 別 path の `setValue` で msg.sender == dao を見ていなかった (CRITICAL access control bug)。
 
 ### 正しい書き方
 
@@ -169,7 +169,7 @@ recovery request / proposal / market order が古いまま残り、 owner / stat
 
 ### 検出例
 
-PR #145 AA SmartAccount — owner が一度 recovery を完了した後も、 古い recovery request が finalize できる (stale recovery)。
+[PR #145](https://github.com/cardene777/dapp-e2e/pull/145) AA SmartAccount — owner が一度 recovery を完了した後も、 古い recovery request が finalize できる (stale recovery)。
 
 ### 対処
 
@@ -198,7 +198,7 @@ function finalizeRecovery(uint256 requestId) external {
 
 ### 検出例
 
-PR #145 SimpleDao — quorumBps=1 で totalSupply=3 だと quorum = 0 → 0 票でも執行可能 (CRITICAL ではないが governance 仕様破壊)。
+[PR #145](https://github.com/cardene777/dapp-e2e/pull/145) SimpleDao — quorumBps=1 で totalSupply=3 だと quorum = 0 → 0 票でも執行可能 (CRITICAL ではないが governance 仕様破壊)。
 
 ### 対処
 
@@ -220,7 +220,7 @@ ERC-20 / ERC-721 で `minter = initialHolder` を同一固定。 表示用初期
 
 ### 検出例
 
-PR #146 SimpleToken — `minter = recipient` で固定、 test only でも教材として誤誘導。
+[PR #146](https://github.com/cardene777/dapp-e2e/pull/146) SimpleToken — `minter = recipient` で固定、 test only でも教材として誤誘導。
 
 ### 対処
 
@@ -234,7 +234,7 @@ PR #146 SimpleToken — `minter = recipient` で固定、 test only でも教材
 
 ### 検出例
 
-PR #145 SmartAccount `proposeRecovery(newOwner)` で 0-address チェックなし。
+[PR #145](https://github.com/cardene777/dapp-e2e/pull/145) SmartAccount `proposeRecovery(newOwner)` で 0-address チェックなし。
 
 ### 対処
 
