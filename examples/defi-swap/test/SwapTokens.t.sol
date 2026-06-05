@@ -177,4 +177,126 @@ contract SwapTokensTest is Test {
 
         assertEq(tokenA.allowance(alice, address(swap)), 100 ether);  // 200 - 100
     }
+
+    /// TC-012 [CRITICAL]: 1-arg swapAforB (backward-compat) は minOutput=0 で動作
+    function test_Swap_OneArgOverload_NoSlippageCheck() public {
+        vm.prank(alice);
+        tokenA.approve(address(swap), 100 ether);
+
+        vm.prank(alice);
+        uint256 out = swap.swapAforB(100 ether);  // 1-arg overload
+        assertEq(out, 100 ether);
+        assertEq(tokenB.balanceOf(alice), 100 ether);
+    }
+
+    /// TC-013 [CRITICAL]: tokenA 側 transferFrom が false 返却 → TransferInFailed revert
+    function test_Swap_Reverts_TransferInFailed() public {
+        // FakeFalseToken は transferFrom が false を返す
+        FakeFalseToken fakeTokenA = new FakeFalseToken(alice, 1000 ether);
+        SimpleSwap swap2 = new SimpleSwap(address(fakeTokenA), address(tokenB));
+        vm.prank(lp);
+        tokenB.transfer(address(swap2), 1000 ether);
+
+        vm.prank(alice);
+        vm.expectRevert(SimpleSwap.TransferInFailed.selector);
+        swap2.swapAforB(100 ether, 0);
+    }
+
+    /// TC-014 [CRITICAL]: tokenB 側 transfer が false 返却 → TransferOutFailed revert
+    function test_Swap_Reverts_TransferOutFailed() public {
+        FakeFalseTokenForOut fakeTokenB = new FakeFalseTokenForOut(lp, 1000 ether);
+        SimpleSwap swap3 = new SimpleSwap(address(tokenA), address(fakeTokenB));
+        // LP が swap pool に tokenB 入金 (この transfer は通る)
+        vm.prank(lp);
+        fakeTokenB.transfer(address(swap3), 1000 ether);
+        // ここで swap pool の transfer を false 化する設定を入れる
+        fakeTokenB.setSwapPool(address(swap3));
+
+        vm.prank(alice);
+        tokenA.approve(address(swap3), 100 ether);
+
+        vm.prank(alice);
+        vm.expectRevert(SimpleSwap.TransferOutFailed.selector);
+        swap3.swapAforB(100 ether, 0);
+    }
+
+    /// TC-015 [MAJOR]: Swapped event の args 検証
+    function test_Swap_EmitsSwappedEvent() public {
+        vm.prank(alice);
+        tokenA.approve(address(swap), 100 ether);
+
+        vm.expectEmit(true, false, false, true);
+        emit SimpleSwap.Swapped(alice, 100 ether, 100 ether);
+        vm.prank(alice);
+        swap.swapAforB(100 ether, 0);
+    }
+
+    /// TC-016 [MAJOR]: Approval event の args 検証
+    function test_Approve_EmitsApprovalEvent() public {
+        vm.expectEmit(true, true, false, true);
+        emit Erc20.Approval(alice, bob, 50 ether);
+        vm.prank(alice);
+        tokenA.approve(bob, 50 ether);
+    }
+}
+
+/// @notice transferFrom が false を返す fake ERC-20 (transferIn 失敗を再現)
+contract FakeFalseToken {
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
+
+    constructor(address recipient, uint256 amount) {
+        balanceOf[recipient] = amount;
+    }
+
+    function approve(address spender, uint256 value) external returns (bool) {
+        allowance[msg.sender][spender] = value;
+        return true;
+    }
+
+    function transferFrom(address, address, uint256) external pure returns (bool) {
+        return false;  // 常に失敗
+    }
+
+    function transfer(address, uint256) external pure returns (bool) {
+        return true;
+    }
+}
+
+/// @notice transfer が swap pool 起点では false を返す fake ERC-20 (transferOut 失敗を再現)
+/// LP からの入金は通すが、 swap pool が user に出金する transfer は false で失敗させる
+contract FakeFalseTokenForOut {
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
+    address public swapPool;
+
+    constructor(address recipient, uint256 amount) {
+        balanceOf[recipient] = amount;
+    }
+
+    function setSwapPool(address pool) external {
+        swapPool = pool;
+    }
+
+    function approve(address spender, uint256 value) external returns (bool) {
+        allowance[msg.sender][spender] = value;
+        return true;
+    }
+
+    function transferFrom(address, address, uint256) external pure returns (bool) {
+        return true;
+    }
+
+    function transfer(address to, uint256 value) external returns (bool) {
+        // swap pool から出金する transfer は false (TransferOutFailed を発火させる)
+        if (msg.sender == swapPool && swapPool != address(0)) {
+            return false;
+        }
+        // それ以外 (LP → swap pool への入金等) は通す
+        if (balanceOf[msg.sender] >= value) {
+            balanceOf[msg.sender] -= value;
+        }
+        balanceOf[to] += value;
+        return true;
+    }
 }

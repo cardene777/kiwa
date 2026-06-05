@@ -165,5 +165,52 @@ describe('MintNft (Layer 2 Hardhat example)', () => {
       expect(await target.supportsInterface('0x2a55205a')).to.be.true;  // ERC2981
       expect(await target.supportsInterface('0xffffffff')).to.be.false;
     });
+
+    it('TC-020 [CRITICAL] 非 owner / 非 operator の approve → NotOwner revert', async () => {
+      const { target, alice, bob, carol } = await loadFixture(deployFixture);
+      await target.mint(alice.address);
+      await expect(target.connect(bob).approve(carol.address, 1))
+        .to.be.revertedWithCustomError(target, 'NotOwner');
+    });
+
+    it('TC-021 [CRITICAL] tokenOfOwnerByIndex で index 範囲外 → OwnerIndexOutOfBounds', async () => {
+      const { target, alice } = await loadFixture(deployFixture);
+      await target.mint(alice.address);
+      await expect(target.tokenOfOwnerByIndex(alice.address, 1))
+        .to.be.revertedWithCustomError(target, 'OwnerIndexOutOfBounds');
+    });
+
+    it('TC-022 [CRITICAL] tokenByIndex で index 範囲外 → TokenIndexOutOfBounds', async () => {
+      const { target, alice } = await loadFixture(deployFixture);
+      await target.mint(alice.address);
+      await expect(target.tokenByIndex(1))
+        .to.be.revertedWithCustomError(target, 'TokenIndexOutOfBounds');
+    });
+
+    it('TC-023 [MAJOR] Approval event の args 検証', async () => {
+      const { target, alice, bob } = await loadFixture(deployFixture);
+      await target.mint(alice.address);
+      await expect(target.connect(alice).approve(bob.address, 1))
+        .to.emit(target, 'Approval').withArgs(alice.address, bob.address, 1);
+    });
+
+    it('TC-024 [MAJOR] ApprovalForAll event の args 検証', async () => {
+      const { target, alice, carol } = await loadFixture(deployFixture);
+      await expect(target.connect(alice).setApprovalForAll(carol.address, true))
+        .to.emit(target, 'ApprovalForAll').withArgs(alice.address, carol.address, true);
+    });
+
+    it('TC-025 [MAJOR] operator が token approve を代行できる', async () => {
+      const { target, alice, bob, carol } = await loadFixture(deployFixture);
+      await target.mint(alice.address);
+      await target.connect(alice).setApprovalForAll(carol.address, true);
+      await target.connect(carol).approve(bob.address, 1);
+      expect(await target.getApproved(1)).to.equal(bob.address);
+    });
+
+    it('TC-026 [MINOR] ownerOf に存在しない tokenId → revert', async () => {
+      const { target } = await loadFixture(deployFixture);
+      await expect(target.ownerOf(999)).to.be.revertedWith('ERC721: nonexistent');
+    });
   });
 });

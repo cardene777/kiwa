@@ -189,4 +189,100 @@ contract GatedContentTest is Test {
         assertFalse(gatedContent.hasAccess(granteeA));
         assertFalse(gatedContent.hasAccess(granteeB));
     }
+
+    /// TC-012 [MAJOR]: 重複 grantTimedAccess の挙動 (実 contract は上書き)
+    function test_GrantTimedAccess_DuplicateGrant_Overwrites() public {
+        vm.prank(holder);
+        gateNft.mint();
+
+        vm.prank(holder);
+        uint256 first = gatedContent.grantTimedAccess(grantee, 3600);
+        assertEq(gatedContent.timedAccessExpiry(grantee), first);
+
+        // 同 grantee に再度 grant (ttl 異なる)
+        vm.warp(block.timestamp + 100);
+        vm.prank(holder);
+        uint256 second = gatedContent.grantTimedAccess(grantee, 7200);
+        assertEq(gatedContent.timedAccessExpiry(grantee), second);
+        // 上書きされており、 加算ではない (second != first + 7200)
+        assertTrue(second != first);
+        assertEq(second, block.timestamp + 7200);
+    }
+
+    /// TC-013 [MAJOR]: isGated(user) view 関数の動作確認
+    function test_IsGated_ReturnsBalanceCheck() public {
+        // NFT 未保有時は false
+        assertFalse(gatedContent.isGated(holder));
+
+        // mint 後は true
+        vm.prank(holder);
+        gateNft.mint();
+        assertTrue(gatedContent.isGated(holder));
+
+        // 他 user は依然 false
+        assertFalse(gatedContent.isGated(grantee));
+    }
+
+    /// TC-014 [MAJOR]: TimedAccessGranted event の args 検証
+    function test_GrantTimedAccess_EmitsEventWithArgs() public {
+        vm.prank(holder);
+        gateNft.mint();
+
+        uint256 expectedExpiry = block.timestamp + 3600;
+        vm.expectEmit(true, true, false, true);
+        emit GatedContent.TimedAccessGranted(holder, grantee, expectedExpiry);
+        vm.prank(holder);
+        gatedContent.grantTimedAccess(grantee, 3600);
+    }
+
+    /// TC-015 [MAJOR]: Accessed event の args 検証
+    function test_GetSecret_EmitsAccessedEvent() public {
+        vm.prank(holder);
+        gateNft.mint();
+        vm.prank(holder);
+        gatedContent.grantTimedAccess(grantee, 3600);
+
+        vm.expectEmit(true, false, false, true);
+        emit GatedContent.Accessed(grantee);
+        vm.prank(grantee);
+        gatedContent.getSecret();
+    }
+
+    /// TC-016 [MINOR]: NFT 保有者本人が getSecret も可能 (grant なしで直接アクセス)
+    function test_GetSecret_AsNftHolder_NoGrantNeeded() public {
+        vm.prank(holder);
+        gateNft.mint();
+
+        // grant なしで holder 自身が getSecret 呼べる
+        vm.prank(holder);
+        string memory secret = gatedContent.getSecret();
+        assertEq(secret, "alpha-pass-2025");
+    }
+
+    /// TC-017 [CRITICAL]: GateNFT.transferFrom by non-owner → NotOwner revert
+    function test_GateNft_TransferFrom_Reverts_NotOwner() public {
+        vm.prank(holder);
+        gateNft.mint();
+        // grantee は owner でない、 from = holder で transferFrom 試行
+        vm.prank(grantee);
+        vm.expectRevert(GateNFT.NotOwner.selector);
+        gateNft.transferFrom(holder, otherUser, 1);
+    }
+
+    /// TC-018 [CRITICAL]: GateNFT.transferFrom to address(0) → InvalidRecipient revert
+    function test_GateNft_TransferFrom_Reverts_InvalidRecipient() public {
+        vm.prank(holder);
+        gateNft.mint();
+        vm.prank(holder);
+        vm.expectRevert(GateNFT.InvalidRecipient.selector);
+        gateNft.transferFrom(holder, address(0), 1);
+    }
+
+    /// TC-019 [MINOR]: GateNFT.Transfer event の args 検証 (mint 時)
+    function test_GateNft_Mint_EmitsTransferEvent() public {
+        vm.expectEmit(true, true, true, true);
+        emit GateNFT.Transfer(address(0), holder, 1);
+        vm.prank(holder);
+        gateNft.mint();
+    }
 }
