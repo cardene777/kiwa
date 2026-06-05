@@ -5,8 +5,13 @@ import { ANVIL_DEFAULT_PRIVATE_KEYS } from './anvil-default-keys.js';
 import { startAnvil } from './anvil.js';
 import { createEventEmitter } from './event-emitter.js';
 import { createInjectorScript } from './injector-script.js';
-import { handleRpcRequest, type RpcContext } from './rpc-handlers.js';
 import {
+  DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI,
+  handleRpcRequest,
+  type RpcContext,
+} from './rpc-handlers.js';
+import {
+  type Address,
   Eip1193Error,
   type ApprovalMode,
   type ChainConfig,
@@ -106,8 +111,17 @@ export const dappE2eTest = base.extend<
           approvalPolicy: { current: { default: 'approve' as const } },
           anvilPort,
           emitter: createEventEmitter(),
+          ...(wallet.isContractAccount
+            ? {
+                contractAccount: {
+                  address: wallet.contractAccountAddress!,
+                  executeAbi:
+                    wallet.contractAccountExecuteAbi ?? DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI,
+                },
+              }
+            : {}),
         };
-        if (isDefaultPrimary) {
+        if (isDefaultPrimary && !wallet.isContractAccount) {
           return {
             ...base,
             accounts: ANVIL_DEFAULT_PRIVATE_KEYS,
@@ -399,6 +413,31 @@ export function validateWalletConfigs(wallets: WalletConfig[]): void {
     ) {
       throw new Error(
         `dapp-e2e: WalletConfig.isContractAccount at index ${index} must be a boolean when specified, got ${typeof wallet.isContractAccount}`,
+      );
+    }
+    if (
+      wallet.contractAccountAddress !== undefined &&
+      (typeof wallet.contractAccountAddress !== 'string' ||
+        !/^0x[0-9a-fA-F]{40}$/.test(wallet.contractAccountAddress))
+    ) {
+      throw new Error(
+        `dapp-e2e: WalletConfig.contractAccountAddress at index ${index} must be a 0x-prefixed 40-char address when specified, got "${typeof wallet.contractAccountAddress === 'string' ? wallet.contractAccountAddress : typeof wallet.contractAccountAddress}"`,
+      );
+    }
+    if (wallet.contractAccountExecuteAbi !== undefined) {
+      if (
+        !Array.isArray(wallet.contractAccountExecuteAbi) ||
+        wallet.contractAccountExecuteAbi.length === 0 ||
+        wallet.contractAccountExecuteAbi.some((entry) => typeof entry !== 'string')
+      ) {
+        throw new Error(
+          `dapp-e2e: WalletConfig.contractAccountExecuteAbi at index ${index} must be a non-empty string[] when specified`,
+        );
+      }
+    }
+    if (wallet.isContractAccount === true && wallet.contractAccountAddress === undefined) {
+      throw new Error(
+        `dapp-e2e: WalletConfig.contractAccountAddress at index ${index} is required when isContractAccount=true`,
       );
     }
 

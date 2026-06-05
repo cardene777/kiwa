@@ -1,4 +1,5 @@
 export type Hex = `0x${string}`;
+export type Address = `0x${string}`;
 
 export interface Eip1193Request {
   method: string;
@@ -34,6 +35,8 @@ export interface WalletConfig {
   privateKey: Hex;
   chainId?: number;
   isContractAccount?: boolean;
+  contractAccountAddress?: Address;
+  contractAccountExecuteAbi?: string[];
 }
 
 export interface InjectorOptions {
@@ -94,6 +97,11 @@ export interface TxBroadcastCtx {
   privateKey: Hex;
   chainId: number;
   anvilPort: number;
+}
+
+export interface ContractAccountRpcConfig {
+  address: Address;
+  executeAbi: readonly string[];
 }
 
 export type Eip1193EventHandler = (...args: unknown[]) => void;

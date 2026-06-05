@@ -6,6 +6,7 @@
 - [時間操作で test する (vesting / streaming)](./time-manipulation.md)
 - [Snapshot / revert で test 間隔離する](./snapshot-revert.md) ⭐ v0.2 新規
 - [Custom error revert を expectCustomError で検証する](./custom-error-revert.md) ⭐ v0.2 新規
+- [Smart wallet (AA / smart contract account) を test する](./smart-wallet-aa.md) ⭐ v0.3 新規
 - [Multi-Wallet picker を test する](./multi-wallet.md)
 - [Multi-Wallet 署名検証を test する](./multi-wallet-signature.md)
 - [User reject 経路を test する](./user-reject.md)

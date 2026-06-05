@@ -1,11 +1,23 @@
-import { decodeFunctionData, hexToBigInt, numberToHex } from 'viem';
+import {
+  decodeFunctionData,
+  encodeFunctionData,
+  hashMessage,
+  hashTypedData,
+  hexToBigInt,
+  numberToHex,
+  parseAbi,
+  type Hex as ViemHex,
+} from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { z } from 'zod';
+import { verifyEip1271Signature } from './eip1271.js';
 import { sendTransaction } from './tx.js';
 import {
+  type Address,
   type ApprovalMode,
   type ApprovalPolicy,
   type ChainConfig,
+  type ContractAccountRpcConfig,
   Eip1193Error,
   type DappE2eEventEmitter,
   type Eip1193Request,
@@ -36,7 +48,12 @@ export interface RpcContext {
    * 未指定 (undefined) の場合は registry チェック自体が無効化される (下位互換、従来挙動)。
    */
   chainRegistry?: { current: ChainConfig[] };
+  contractAccount?: ContractAccountRpcConfig;
 }
+
+export const DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI = [
+  'function execute(address target, uint256 value, bytes data) returns (bytes)',
+] as const;
 
 const ERC20_APPROVE_ABI = [
   {
@@ -108,6 +125,13 @@ export function resolveActivePrivateKey(ctx: RpcContext): Hex {
   return key;
 }
 
+export function resolveActiveAddress(ctx: RpcContext): Address {
+  if (ctx.contractAccount) {
+    return ctx.contractAccount.address;
+  }
+  return privateKeyToAccount(resolveActivePrivateKey(ctx)).address;
+}
+
 function resolveRegistryAnvilPort(ctx: RpcContext): number | undefined {
   const registry = ctx.chainRegistry?.current;
   if (!registry) return undefined;
@@ -159,11 +183,15 @@ export async function handleRpcRequest(
   }
 
   const account = privateKeyToAccount(resolveActivePrivateKey(ctx));
+  const activeAddress = resolveActiveAddress(ctx);
   const params = (request.params ?? []) as unknown[];
 
   switch (request.method) {
     case 'eth_requestAccounts':
     case 'eth_accounts': {
+      if (ctx.contractAccount) {
+        return [ctx.contractAccount.address];
+      }
       // accounts 配列が設定されている場合は active を先頭に並べた全 account を返す
       // (MetaMask は active account を先頭に残りを後続に並べる挙動)
       const accounts = ctx.accounts;
@@ -186,10 +214,10 @@ export async function handleRpcRequest(
     case 'personal_sign': {
       assertApproved(ctx);
       const [message, address] = params as [string, Hex];
-      if (typeof address !== 'string' || address.toLowerCase() !== account.address.toLowerCase()) {
+      if (typeof address !== 'string' || address.toLowerCase() !== activeAddress.toLowerCase()) {
         throw new Eip1193Error(
           4100,
-          `unauthorized: requested address ${address} does not match active account ${account.address}`,
+          `unauthorized: requested address ${address} does not match active account ${activeAddress}`,
         );
       }
       if (typeof message !== 'string') {
@@ -211,15 +239,29 @@ export async function handleRpcRequest(
       } else {
         msgInput = message;
       }
-      return account.signMessage({ message: msgInput });
+      const signature = await account.signMessage({ message: msgInput });
+      if (ctx.contractAccount) {
+        await assertValidContractAccountSignature(ctx, {
+          signature,
+          messageHash: hashMessage(msgInput),
+        });
+      }
+      return signature;
     }
 
     case 'eth_signTypedData_v4': {
       assertApproved(ctx);
       const [signerAddress, typedDataJson] = params as [Hex, string];
-      assertAuthorizedAddress('requested signer', signerAddress, account.address);
+      assertAuthorizedAddress('requested signer', signerAddress, activeAddress);
       const typedData = parseEip712TypedDataJson(typedDataJson);
-      return account.signTypedData(typedData);
+      const signature = await account.signTypedData(typedData);
+      if (ctx.contractAccount) {
+        await assertValidContractAccountSignature(ctx, {
+          signature,
+          messageHash: hashTypedData(typedData),
+        });
+      }
+      return signature;
     }
 
     case 'wallet_switchEthereumChain': {
@@ -276,7 +318,10 @@ export async function handleRpcRequest(
       assertApprovedTransaction(ctx, txParams);
       const from = txParams.from;
       if (typeof from === 'string') {
-        assertAuthorizedAddress('from', from as Hex, account.address);
+        assertAuthorizedAddress('from', from as Hex, activeAddress);
+      }
+      if (ctx.contractAccount) {
+        return sendContractAccountTransaction(ctx, txParams, anvilPort);
       }
       return sendTransaction(
         {
@@ -291,6 +336,93 @@ export async function handleRpcRequest(
     default:
       return proxyToAnvil(ctx, request.method, params);
   }
+}
+
+async function assertValidContractAccountSignature(
+  ctx: RpcContext,
+  args: { signature: Hex; messageHash: Hex },
+): Promise<void> {
+  const contractAccount = ctx.contractAccount;
+  if (!contractAccount) {
+    return;
+  }
+
+  const anvilPort = resolveAnvilPort(ctx);
+  if (!anvilPort) {
+    throw new Eip1193Error(
+      -32603,
+      'contract account signing requires anvilPort in RpcContext to verify EIP-1271',
+    );
+  }
+
+  const verified = await verifyEip1271Signature({
+    publicClient: {
+      call: async ({ to, data }) => {
+        const result = await anvilProxy(anvilPort, 'eth_call', [
+          { to, data },
+          'latest',
+        ]);
+        return {
+          data: typeof result === 'string' ? (result as ViemHex) : undefined,
+        };
+      },
+    },
+    contractAddress: contractAccount.address,
+    messageHash: args.messageHash,
+    signature: args.signature,
+  });
+
+  if (!verified) {
+    throw new Eip1193Error(-32000, 'EIP-1271 verification failed');
+  }
+}
+
+async function sendContractAccountTransaction(
+  ctx: RpcContext,
+  txParams: Record<string, unknown>,
+  anvilPort: number,
+): Promise<Hex> {
+  const contractAccount = ctx.contractAccount;
+  if (!contractAccount) {
+    throw new Eip1193Error(-32603, 'internal: missing contract account config');
+  }
+  if (typeof txParams.to !== 'string') {
+    throw new Eip1193Error(
+      -32602,
+      'invalid params: eth_sendTransaction for contract accounts requires a target address in `to`',
+    );
+  }
+
+  let executeData: Hex;
+  const executeValue = normalizeTransactionValue(txParams.value) ?? 0n;
+  const executeGas = normalizeTransactionGas(txParams.gas);
+  try {
+    executeData = encodeFunctionData({
+      abi: parseAbi(contractAccount.executeAbi),
+      functionName: 'execute',
+      args: [
+        txParams.to as Address,
+        executeValue,
+        typeof txParams.data === 'string' ? (txParams.data as Hex) : '0x',
+      ],
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Eip1193Error(-32603, `contract account execute encoding failed: ${message}`);
+  }
+
+  return sendTransaction(
+    {
+      privateKey: resolveActivePrivateKey(ctx),
+      chainId: ctx.chainState.current,
+      anvilPort,
+    },
+    {
+      to: contractAccount.address,
+      data: executeData,
+      ...(executeGas !== undefined ? { gas: executeGas } : {}),
+    },
+  );
 }
 
 function assertApproved(ctx: RpcContext): void {
@@ -373,11 +505,23 @@ function normalizeTxParams(p: Record<string, unknown>): SendTxParams {
   if (typeof p.to === 'string') out.to = p.to as Hex;
   if (typeof p.from === 'string') out.from = p.from as Hex;
   if (typeof p.data === 'string') out.data = p.data as Hex;
-  if (typeof p.value === 'string') out.value = hexToBigInt(p.value as Hex);
-  if (typeof p.value === 'bigint') out.value = p.value;
-  if (typeof p.gas === 'string') out.gas = hexToBigInt(p.gas as Hex);
-  if (typeof p.gas === 'bigint') out.gas = p.gas;
+  const value = normalizeTransactionValue(p.value);
+  if (value !== undefined) out.value = value;
+  const gas = normalizeTransactionGas(p.gas);
+  if (gas !== undefined) out.gas = gas;
   return out;
+}
+
+function normalizeTransactionValue(value: unknown): bigint | undefined {
+  if (typeof value === 'string') return hexToBigInt(value as Hex);
+  if (typeof value === 'bigint') return value;
+  return undefined;
+}
+
+function normalizeTransactionGas(value: unknown): bigint | undefined {
+  if (typeof value === 'string') return hexToBigInt(value as Hex);
+  if (typeof value === 'bigint') return value;
+  return undefined;
 }
 
 export function parseEip712TypedDataJson(typedDataJson: string): NormalizedEip712TypedData {
