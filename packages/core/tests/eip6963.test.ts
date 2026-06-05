@@ -215,4 +215,49 @@ describe('validateWalletConfigs', () => {
 
     expect(() => resolveWalletConfigs(PK1, -1, wallets)).toThrow(/chainId.*positive integer/);
   });
+
+  it('T-EIP-012 isContractAccount=true で contractAccountAddress 未指定は throw する', () => {
+    expect(() =>
+      validateWalletConfigs([
+        {
+          name: 'Simple AA',
+          rdns: 'eth.aa-simple',
+          icon: 'data:,',
+          privateKey: PK1,
+          isContractAccount: true,
+        },
+      ]),
+    ).toThrow(/contractAccountAddress.*required/i);
+  });
+
+  it('T-EIP-013 invalid contractAccountAddress は throw する', () => {
+    expect(() =>
+      validateWalletConfigs([
+        {
+          name: 'Simple AA',
+          rdns: 'eth.aa-simple',
+          icon: 'data:,',
+          privateKey: PK1,
+          isContractAccount: true,
+          contractAccountAddress: '0x1234' as Hex,
+        },
+      ]),
+    ).toThrow(/contractAccountAddress.*40-char/i);
+  });
+
+  it('T-EIP-014 invalid contractAccountExecuteAbi は throw する', () => {
+    expect(() =>
+      validateWalletConfigs([
+        {
+          name: 'Simple AA',
+          rdns: 'eth.aa-simple',
+          icon: 'data:,',
+          privateKey: PK1,
+          isContractAccount: true,
+          contractAccountAddress: '0x1111111111111111111111111111111111111111',
+          contractAccountExecuteAbi: [] as string[],
+        },
+      ]),
+    ).toThrow(/contractAccountExecuteAbi.*non-empty string\[]/i);
+  });
 });

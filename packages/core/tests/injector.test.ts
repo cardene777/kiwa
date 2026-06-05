@@ -1,20 +1,41 @@
+import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { verifyMessage, verifyTypedData } from 'viem';
+import {
+  createPublicClient,
+  createWalletClient,
+  defineChain,
+  encodeFunctionData,
+  hashMessage,
+  hashTypedData,
+  http,
+  parseAbi,
+  verifyMessage,
+  verifyTypedData,
+  type Address,
+} from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {
+  DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI,
+  deployContract,
+  loadForgeArtifact,
   parseEip712TypedDataJson,
   startAnvil,
   type AnvilHandle,
   createInjectorScript,
   handleRpcRequest,
   type RpcContext,
+  verifyEip1271Signature,
   verifyAnvilChainId,
 } from '../src/index.js';
 
 // anvil default key #0 - public test key, secret 扱いしない
 const PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
+const SECOND_PRIVATE_KEY =
+  '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d' as const;
 const CHAIN_ID = 31337;
+const repoRoot = resolve(process.cwd(), '..', '..');
+const aaExampleRoot = resolve(repoRoot, 'examples/nextjs-aa-smart-account');
 
 function ctx(): RpcContext {
   return {
@@ -56,6 +77,15 @@ function buildTypedData() {
       contents: 'hello',
     },
   };
+}
+
+function anvilChain(port: number) {
+  return defineChain({
+    id: CHAIN_ID,
+    name: 'Anvil',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: { default: { http: [`http://127.0.0.1:${port}`] } },
+  });
 }
 
 describe('handleRpcRequest', () => {
@@ -307,10 +337,50 @@ describe('createInjectorScript', () => {
 describe.skipIf(process.env.SKIP_ANVIL_TESTS === '1')('handleRpcRequest with live anvil', () => {
   let handle: AnvilHandle | null = null;
   let ctxWithPort: (RpcContext & { anvilPort: number }) | null = null;
+  let publicClient: ReturnType<typeof createPublicClient> | null = null;
+  let contractAccountAddress: Address | null = null;
+  let counterAddress: Address | null = null;
 
   beforeAll(async () => {
     handle = await startAnvil();
     ctxWithPort = { ...ctx(), anvilPort: handle.port };
+    const chain = anvilChain(handle.port);
+    const owner = privateKeyToAccount(PRIVATE_KEY);
+    const guardian = privateKeyToAccount(SECOND_PRIVATE_KEY);
+    const walletClient = createWalletClient({
+      account: owner,
+      chain,
+      transport: http(),
+    });
+    publicClient = createPublicClient({ chain, transport: http() });
+
+    const smartAccountArtifact = loadForgeArtifact({
+      exampleRoot: aaExampleRoot,
+      contractSlug: 'SmartAccount.sol/SmartAccount',
+    });
+    const counterArtifact = loadForgeArtifact({
+      exampleRoot: aaExampleRoot,
+      contractSlug: 'Counter.sol/Counter',
+    });
+
+    const deployedSmartAccount = await deployContract({
+      account: owner,
+      wallet: walletClient,
+      publicClient,
+      abi: smartAccountArtifact.abi,
+      bytecode: smartAccountArtifact.bytecode,
+      args: [owner.address, '0x0000000000000000000000000000000000000000', [guardian.address], 1n],
+    });
+    contractAccountAddress = deployedSmartAccount.address;
+
+    const deployedCounter = await deployContract({
+      account: owner,
+      wallet: walletClient,
+      publicClient,
+      abi: counterArtifact.abi,
+      bytecode: counterArtifact.bytecode,
+    });
+    counterAddress = deployedCounter.address;
   });
 
   afterAll(async () => {
@@ -337,5 +407,127 @@ describe.skipIf(process.env.SKIP_ANVIL_TESTS === '1')('handleRpcRequest with liv
       `[dapp-e2e] wallet_switchEthereumChain to 5 but anvil reports ${CHAIN_ID}`,
     );
     warn.mockRestore();
+  });
+
+  it('T-INJ-021 contract account eth_accounts は smart account address を返す', async () => {
+    const result = (await handleRpcRequest(
+      {
+        ...ctxWithPort!,
+        contractAccount: {
+          address: contractAccountAddress!,
+          executeAbi: DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI,
+        },
+      },
+      { method: 'eth_accounts' },
+    )) as Address[];
+
+    expect(result).toEqual([contractAccountAddress]);
+  });
+
+  it('T-INJ-022 contract account personal_sign は EIP-1271 で内部検証済の署名を返す', async () => {
+    const signature = (await handleRpcRequest(
+      {
+        ...ctxWithPort!,
+        contractAccount: {
+          address: contractAccountAddress!,
+          executeAbi: DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI,
+        },
+      },
+      {
+        method: 'personal_sign',
+        params: ['hello contract account', contractAccountAddress],
+      },
+    )) as `0x${string}`;
+
+    const valid = await verifyEip1271Signature({
+      publicClient: publicClient!,
+      contractAddress: contractAccountAddress!,
+      messageHash: hashMessage('hello contract account'),
+      signature,
+    });
+
+    expect(valid).toBe(true);
+  });
+
+  it('T-INJ-023 contract account eth_signTypedData_v4 は EIP-1271 で内部検証済の署名を返す', async () => {
+    const typedData = buildTypedData();
+    const signature = (await handleRpcRequest(
+      {
+        ...ctxWithPort!,
+        contractAccount: {
+          address: contractAccountAddress!,
+          executeAbi: DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI,
+        },
+      },
+      {
+        method: 'eth_signTypedData_v4',
+        params: [contractAccountAddress, JSON.stringify(typedData)],
+      },
+    )) as `0x${string}`;
+
+    const valid = await verifyEip1271Signature({
+      publicClient: publicClient!,
+      contractAddress: contractAccountAddress!,
+      messageHash: hashTypedData(typedData),
+      signature,
+    });
+
+    expect(valid).toBe(true);
+  });
+
+  it('T-INJ-024 contract account eth_sendTransaction は execute 経由で target call を行う', async () => {
+    const txHash = (await handleRpcRequest(
+      {
+        ...ctxWithPort!,
+        contractAccount: {
+          address: contractAccountAddress!,
+          executeAbi: DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI,
+        },
+      },
+      {
+        method: 'eth_sendTransaction',
+        params: [
+          {
+            from: contractAccountAddress,
+            to: counterAddress,
+            data: encodeFunctionData({
+              abi: parseAbi(['function increment()']),
+              functionName: 'increment',
+            }),
+          },
+        ],
+      },
+    )) as `0x${string}`;
+
+    await publicClient!.waitForTransactionReceipt({ hash: txHash });
+    const count = (await publicClient!.readContract({
+      address: counterAddress!,
+      abi: parseAbi(['function countByCaller(address caller) view returns (uint256)']),
+      functionName: 'countByCaller',
+      args: [contractAccountAddress!],
+    })) as bigint;
+
+    expect(count).toBe(1n);
+  });
+
+  it('T-INJ-025 invalid contract account signature は -32000 で reject する', async () => {
+    await expect(
+      handleRpcRequest(
+        {
+          ...ctxWithPort!,
+          contractAccount: {
+            address: counterAddress!,
+            executeAbi: DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI,
+          },
+        },
+        {
+          method: 'personal_sign',
+          params: ['hello invalid contract account', counterAddress],
+        },
+      ),
+    ).rejects.toMatchObject({
+      code: -32000,
+      message: 'EIP-1271 verification failed',
+    });
   });
 });

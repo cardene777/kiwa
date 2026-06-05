@@ -9,8 +9,9 @@ Playwright × viem × anvil. Inject `window.ethereum`, deploy contracts, sign ty
 [![npm version](https://img.shields.io/npm/v/@dapp-e2e/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@dapp-e2e/core)
 [![npm downloads](https://img.shields.io/npm/dm/@dapp-e2e/core?color=4ec1c0)](https://www.npmjs.com/package/@dapp-e2e/core)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
-[![tests](https://img.shields.io/badge/tests-159%20passed-success)](#testing--quality)
-[![flaky](https://img.shields.io/badge/flaky-0%2F636-success)](#testing--quality)
+[![tests](https://img.shields.io/badge/tests-166%20passed-success)](#testing--quality)
+[![flaky](https://img.shields.io/badge/flaky-0%2F664-success)](#testing--quality)
+[![ERC-4337](https://img.shields.io/badge/ERC--4337-v0.7%20supported-9333ea)](./docs/en/cookbook/smart-wallet-aa.md)
 [![typescript](https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript&logoColor=white)](./tsconfig.json)
 [![claude code](https://img.shields.io/badge/Claude%20Code-skill%20ready-d97706?logo=anthropic&logoColor=white)](./.claude/skills/dapp-e2e-test/SKILL.md)
 
@@ -86,6 +87,7 @@ That's it. Open `e2e/connect.spec.ts` and start writing tests against your dApp.
 - 🔌 **9 RPC methods handled directly** (`eth_requestAccounts` / `personal_sign` / `eth_signTypedData_v4` / `eth_sendTransaction` / `wallet_switchEthereumChain` …), the rest forwarded to anvil
 - 📡 **EIP-1193 events** — `accountsChanged` / `chainChanged` / `connect` / `disconnect` triggerable from tests
 - 👛 **EIP-6963 multi-wallet** — declare MetaMask, Rabby, Coinbase, … side-by-side
+- 🤖 **Smart contract account (AA)** — set `isContractAccount: true` and dapp-e2e reroutes `personal_sign` / `eth_signTypedData_v4` through EIP-1271, `eth_sendTransaction` through `execute()`, and `eth_accounts` to the smart account address
 - 📦 **viem as peer dep** — your project owns the version
 - ❌ **error envelope** preserves `code` and `message` across page boundaries
 
@@ -117,7 +119,7 @@ Industry-standard helpers (hardhat / foundry / viem / hardhat-chai-matchers comp
 
 ## Examples
 
-19 reference dApps live under [`examples/`](./examples/), **159 tests** total, **4 rounds back-to-back PASS** (636 assertions, 0 flake).
+20 reference dApps live under [`examples/`](./examples/), **166 tests** total (incl. full ERC-4337 v0.7 lifecycle), **4 rounds back-to-back PASS** (664 assertions, 0 flake).
 
 ### Framework integration
 
@@ -138,6 +140,7 @@ Industry-standard helpers (hardhat / foundry / viem / hardhat-chai-matchers comp
 | [`nextjs-staking`](./examples/nextjs-staking) | Stake + reward + early-unstake penalty | 12 |
 | [`nextjs-bridge`](./examples/nextjs-bridge) | L1 ↔ L2 lock / mint / burn / unlock | 10 |
 | [`nextjs-aa-smart-account`](./examples/nextjs-aa-smart-account) | ERC-4337 (simplified) + ERC-1271 + guardian recovery | 10 |
+| [`nextjs-aa-erc4337`](./examples/nextjs-aa-erc4337) ⭐ v0.3 | Full ERC-4337 v0.7 (EntryPoint + SimpleAccountFactory + UserOperation bundler stub + EIP-1271 + dappE2e isContractAccount fixture integration) | 7 |
 | [`nextjs-ens-resolver`](./examples/nextjs-ens-resolver) | ENS-like forward / reverse + collision | 7 |
 | [`nextjs-event-history`](./examples/nextjs-event-history) | Past event query + multi-indexed filter | 7 |
 | [`nextjs-token-gating`](./examples/nextjs-token-gating) | NFT-gated content + timed access + transfer revoke | 8 |
@@ -217,10 +220,10 @@ For Claude Code users:
 
 | Metric | Value |
 |---|---|
-| Total tests | **159** |
+| Total tests | **166** |
 | Round-by-round PASS | **4 / 4** (back-to-back, no flake) |
-| Total assertions | 636 |
-| Examples | 19 |
+| Total assertions | 664 |
+| Examples | 20 |
 | Adversarial review findings (resolved) | 9 (3 CRITICAL / 4 MAJOR / 2 MINOR) |
 | Avg test duration | ~50s per example |
 

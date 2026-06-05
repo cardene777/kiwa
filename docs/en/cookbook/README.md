@@ -6,6 +6,7 @@ dapp-e2e usage by real scenario.
 - [Test with time manipulation (vesting / streaming)](./time-manipulation.md)
 - [Isolate tests with snapshot / revert](./snapshot-revert.md) ⭐ New in v0.2
 - [Assert custom-error reverts with expectCustomError](./custom-error-revert.md) ⭐ New in v0.2
+- [Test smart wallets (AA / smart contract accounts)](./smart-wallet-aa.md) ⭐ New in v0.3
 - [Test a multi-wallet picker](./multi-wallet.md)
 - [Test multi-wallet signature verification](./multi-wallet-signature.md)
 - [Test the user-reject path](./user-reject.md)

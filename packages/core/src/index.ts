@@ -6,8 +6,10 @@ export type {
   WalletConfig,
 } from './types.js';
 export {
+  DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI,
   handleRpcRequest,
   parseEip712TypedDataJson,
+  resolveActiveAddress,
   resolveActivePrivateKey,
   type RpcContext,
   verifyAnvilChainId,
