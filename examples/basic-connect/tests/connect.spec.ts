@@ -287,4 +287,54 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     });
     expect(afterChainId).toBe(beforeChainId);
   });
+
+  test('T-E2E-011 reject mode で personal_sign が reject 後、 setApprovalMode("accept") で次回 personal_sign が成功する', async ({
+    page,
+    dappE2e,
+  }) => {
+    await page.setContent(MINI_DAPP_HTML);
+
+    await dappE2e.setApprovalMode('reject');
+
+    const rejectErr = await page.evaluate(async () => {
+      try {
+        const accounts = await (window as any).ethereum.request({ method: 'eth_accounts' });
+        await (window as any).ethereum.request({
+          method: 'personal_sign',
+          params: ['hello-after-reject', accounts[0]],
+        });
+        return null;
+      } catch (e) {
+        const error = e as { code?: number; message?: string };
+        return { code: error.code ?? null, message: error.message ?? null };
+      }
+    });
+    await dappE2e.waitForRpcIdle();
+
+    expect(rejectErr).toEqual({
+      code: 4001,
+      message: 'User rejected the request.',
+    });
+
+    await dappE2e.setApprovalMode('accept');
+
+    const accepted = await page.evaluate(async () => {
+      const accounts = await (window as any).ethereum.request({ method: 'eth_accounts' });
+      const signature = await (window as any).ethereum.request({
+        method: 'personal_sign',
+        params: ['hello-after-reject', accounts[0]],
+      });
+      return { account: accounts[0] as string, signature: signature as string };
+    });
+    await dappE2e.waitForRpcIdle();
+
+    expect(accepted.signature).toMatch(/^0x[0-9a-f]{130}$/i);
+
+    const valid = await verifyMessage({
+      address: accepted.account as `0x${string}`,
+      message: 'hello-after-reject',
+      signature: accepted.signature as `0x${string}`,
+    });
+    expect(valid).toBe(true);
+  });
 });
