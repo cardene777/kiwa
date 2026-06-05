@@ -1,6 +1,6 @@
 # 9 section 出力テンプレ (完全雛形)
 
-`docs/SKILL-DESIGN.md` § 出力フォーマット の 9 section を埋める完全な markdown 雛形。 skill は本 file を Read してそのまま `.context/spec/test-spec-{module}.md` の枠組みとする。
+`docs/SKILL-DESIGN.ja.md` § 出力フォーマット の 9 section (日本語版 SSOT) を埋める完全な markdown 雛形。 skill は本 file を Read してそのまま `.context/spec/test-spec-{module}.md` の枠組みとする。 英語版 SSOT (`docs/SKILL-DESIGN.md` の `## Target feature` 等) を生成する経路は本 skill の対象外。
 
 順序固定、 section 省略禁止、 該当事項なしは `(なし)` placeholder。
 
@@ -91,23 +91,23 @@
 
 ### 観点 1: 正常系
 
-| テスト ID | テストレベル | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|
-| TC-001 | E2E | wallet connected | tokenId 1 | mint() 呼び出し | owner == msg.sender、 tokenId 1 emit | 高 | 推奨 |
+| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
+|---|---|---|---|---|---|---|---|---|
+| TC-001 | E2E | 正常系 | wallet connected | tokenId 1 | mint() 呼び出し | owner == msg.sender、 tokenId 1 emit | 高 | 推奨 |
 
 ### 観点 2: 異常系
 
-| テスト ID | テストレベル | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|
-| TC-002 | 統合 | RPC 503 | tokenId 1 | mint() 呼び出し | UI に再試行ボタン表示 | 高 | 推奨 |
+| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
+|---|---|---|---|---|---|---|---|---|
+| TC-002 | 統合 | 異常系 | RPC 503 | tokenId 1 | mint() 呼び出し | UI に再試行ボタン表示 | 高 | 推奨 |
 
 ### 観点 3: 境界値
 
-| テスト ID | テストレベル | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|
-| TC-003 | 単体 | maxSupply = 100 | tokenId 100 | mint() 呼び出し | success、 tokenId 101 で revert(MaxSupplyExceeded) | 高 | 推奨 |
+| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
+|---|---|---|---|---|---|---|---|---|
+| TC-003 | 単体 | 境界値 | maxSupply = 100 | tokenId 100 | mint() 呼び出し | success、 tokenId 101 で revert(MaxSupplyExceeded) | 高 | 推奨 |
 
-{該当観点を順に列挙、 case がない観点は `(なし)`}
+{該当観点を順に列挙、 case がない観点は section 内に `(なし)` 1 行のみ}
 
 ## 自動化すべきテスト
 
