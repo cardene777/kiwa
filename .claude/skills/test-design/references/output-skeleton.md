@@ -1,8 +1,18 @@
 # 9 section 出力テンプレ (完全雛形)
 
-`docs/SKILL-DESIGN.ja.md` § 出力フォーマット の 9 section (日本語版 SSOT) を埋める完全な markdown 雛形。 skill は本 file を Read してそのまま `.context/spec/test-spec-{module}.md` の枠組みとする。 英語版 SSOT (`docs/SKILL-DESIGN.md` の `## Target feature` 等) を生成する経路は本 skill の対象外。
+`docs/SKILL-DESIGN.ja.md` § 出力フォーマット の 9 section (日本語版 SSOT) を埋める完全な markdown 雛形。 skill は本 file を Read してそのまま `--layer` で決定した出力 path (`.context/spec/{layer}/test-spec-{module}.md` または `.context/spec/test-spec-{module}.md`) の枠組みとする。 英語版 SSOT (`docs/SKILL-DESIGN.md` の `## Target feature` 等) を生成する経路は本 skill の対象外。
 
 順序固定、 section 省略禁止、 該当事項なしは `(なし)` placeholder。
+
+## 出力 path 早見
+
+| `--layer` | 出力 path |
+|---|---|
+| `contract` | `.context/spec/contract/test-spec-{module}.md` |
+| `e2e` | `.context/spec/e2e/test-spec-{module}.md` |
+| `integration` | `.context/spec/integration/test-spec-{module}.md` |
+| `unit` | `.context/spec/unit/test-spec-{module}.md` |
+| `all` (default) | `.context/spec/test-spec-{module}.md` |
 
 ## 雛形 (そのまま流用)
 
