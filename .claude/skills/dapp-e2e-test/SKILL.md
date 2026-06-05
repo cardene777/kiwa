@@ -56,6 +56,66 @@ pnpm install
 - `playwright.config.ts` (webServer + fixture 設定)
 - `tests/prepare-env.ts` (anvil 起動 + contract deploy)
 
+### Step 1.5: プロジェクト読込 + test 仕様書生成 (必須)
+
+spec.ts 実装の前に必ず test 仕様書を生成し、 受入条件 (AC) を明示する。
+
+#### 1.5.A プロジェクト読込
+
+対象 dApp の contract / 既存 test / UI から **test 対象機能を構造化** する。
+
+```bash
+ls contracts/ tests/ app/ 2>/dev/null
+wc -l contracts/*.sol tests/*.spec.ts 2>/dev/null
+grep -E "function |event |error |modifier " contracts/*.sol | head -30
+grep -E "^test\(|^test\.describe\(" tests/*.spec.ts | head -20
+```
+
+#### 1.5.B test 仕様書生成
+
+`docs/test-spec/{example}.md` (もしくは `tests/spec/{example}.md`) を Write。 構造は以下:
+
+```markdown
+# test-spec-{example}.md
+
+## 対象 dApp
+
+`{path/to/example}` — 1-2 文で「何をする dApp か」を要約
+
+## 既存 test (現状)
+
+| test 名 | 検証内容 | 状態 |
+|---|---|---|
+| T-XX-001 | ... | EXISTING / NEW |
+
+## 新規追加 test (本作業)
+
+| test 名 | 検証内容 | AC (受入条件) | 偽陽性リスク |
+|---|---|---|---|
+| T-XX-NNN | {何を assertion するか 1 文} | {test PASS の判定基準} | {`adversarial-pitfalls.md` の 9 種番号 or "なし"} |
+
+## contract 改変 (もしあれば)
+
+| file | 変更内容 | back-compat 保証 |
+|---|---|---|
+
+## scope 境界 (やらないこと明示)
+
+- ... (scope creep 防止のため列挙)
+
+## 影響範囲
+
+- 既存 test 件数 への regression 可能性
+- 他 example への影響
+```
+
+#### 1.5.C 仕様書ベースで実装
+
+仕様書の「新規追加 test」表 の各行を 1 つずつ spec.ts に落とし込む。 AC が曖昧なまま実装に進まない。
+test 名 (T-XX-NNN) は仕様書と spec.ts で一致させる。
+
+template: `examples/test-spec-template.md`
+
 ### Step 2: 3 layer 設計
 
 dApp test は以下 3 layer で構造化:
@@ -209,6 +269,7 @@ flaky 検証は 4 round 連続 PASS で固定。
 
 ## examples
 
+- `examples/test-spec-template.md` — Step 1.5 で生成する test 仕様書のサンプル (token-gating ベース)
 - `examples/single-contract.ts` — 1 contract happy path 雛形
 - `examples/multi-chain.ts` — startAnvilCluster + chain 切替雛形
 - `examples/custom-error-revert.ts` — expectCustomError パターン
