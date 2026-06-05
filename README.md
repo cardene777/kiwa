@@ -207,6 +207,7 @@ Reference docs:
 | [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.x breaking-change policy |
 | [`docs/COMPARISON.md`](./docs/COMPARISON.md) | Synpress / wallet-mock comparison |
 | [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | Wallet / SDK mock fidelity spec (A/B/C levels, scoring rubric) ⭐ |
+| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) | Test-design skill spec (5-step flow, 9-section output, 3 layers) ⭐ |
 | [`docs/RELEASING.md`](./docs/RELEASING.md) | Publish flow + provenance |
 
 For Claude Code users:

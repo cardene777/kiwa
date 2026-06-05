@@ -207,6 +207,7 @@ test('multi wallet picker', async ({ page, dappE2e }) => {
 | [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.x 系の破壊的変更ポリシー |
 | [`docs/COMPARISON.md`](./docs/COMPARISON.md) | Synpress / wallet-mock との使い分け |
 | [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | wallet / SDK mock 精度仕様書 (A/B/C 3 段階 + 5 観点スコアリング) ⭐ |
+| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) | テスト設計 skill 仕様書 (5 段階フロー + 9 section 出力 + 3 layer) ⭐ |
 | [`docs/RELEASING.md`](./docs/RELEASING.md) | publish 手順と provenance 設定 |
 
 Claude Code 利用者向け:
