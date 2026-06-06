@@ -1,10 +1,10 @@
-# 3-layer test design flow (Phase E integration cookbook)
+# Skill chain tutorial — generate contract tests + e2e tests with four skills
 
-> [🇬🇧 English](./kiwa-design-flow.md) • [🇯🇵 日本語](../../ja/cookbook/kiwa-design-flow.md)
+> [🇬🇧 English](./skill-chain-tutorial.md) • [🇯🇵 日本語](./skill-chain-tutorial.ja.md)
 
-A documented walkthrough of the "Layer 1 (test design) → Layer 2 (implementation conversion)" chain established in kiwa Phase E (#171–#181), focused on **retrofitting tests into a contract / dApp that already exists and ships**. We use the real `examples/nextjs-token-gating` contracts as the worked example.
+Walk through kiwa's skill chain (`/kiwa-design` at Layer 1 → `/kiwa-forge` / `/kiwa-hardhat` at Layer 2 → `/kiwa-play` at Layer 3) end-to-end — **generate the spec, produce contract tests + e2e tests, and run them**. The worked example uses the real `examples/nextjs-token-gating` contracts.
 
-The chain also works for new TDD-first development, but the primary use case is **adding tests after the fact to existing contracts / dApps**. Treat the existing implementation as the de-facto specification, infer the viewpoints from it, and fill in the missing tests.
+Written from the retrofit perspective (adding tests to a dApp + contracts that already ship), but the same steps apply to fresh TDD-first development too. Treat the existing implementation as the de-facto specification, infer the viewpoints from it, and fill in the missing tests.
 
 ## Overall diagram
 
@@ -216,9 +216,9 @@ The full nine patterns plus a five-question self-check live in `.claude/skills/k
 
 ## Related links
 
-- Phase E SSOT: [`docs/SKILL-DESIGN.md`](../../SKILL-DESIGN.md)
-- Layer 1: [.claude/skills/kiwa-design/SKILL.md](../../../.claude/skills/kiwa-design/SKILL.md)
-- Layer 2 Foundry: [.claude/skills/kiwa-forge/SKILL.md](../../../.claude/skills/kiwa-forge/SKILL.md)
-- Layer 2 Hardhat: [.claude/skills/kiwa-hardhat/SKILL.md](../../../.claude/skills/kiwa-hardhat/SKILL.md)
-- Layer 2 Playwright: [.claude/skills/kiwa-play/SKILL.md](../../../.claude/skills/kiwa-play/SKILL.md)
-- Related cookbook chapters: [snapshot-revert.md](./snapshot-revert.md) (snapshot pattern shared between Layer 1 / Layer 2), [custom-error-revert.md](./custom-error-revert.md) (viewpoint 2 failure-path helper)
+- Phase E SSOT: [`docs/SKILL-DESIGN.md`](../../docs/SKILL-DESIGN.md)
+- Layer 1: [.claude/skills/kiwa-design/SKILL.md](../../.claude/skills/kiwa-design/SKILL.md)
+- Layer 2 Foundry: [.claude/skills/kiwa-forge/SKILL.md](../../.claude/skills/kiwa-forge/SKILL.md)
+- Layer 2 Hardhat: [.claude/skills/kiwa-hardhat/SKILL.md](../../.claude/skills/kiwa-hardhat/SKILL.md)
+- Layer 2 Playwright: [.claude/skills/kiwa-play/SKILL.md](../../.claude/skills/kiwa-play/SKILL.md)
+- Related cookbook chapters: [snapshot-revert.md](../../docs/en/cookbook/snapshot-revert.md) (snapshot pattern shared between Layer 1 / Layer 2), [custom-error-revert.md](../../docs/en/cookbook/custom-error-revert.md) (viewpoint 2 failure-path helper)

@@ -42,7 +42,7 @@ pnpm -F examples-mint-nft test:hardhat:coverage
 
 - [Custom error revert 検証](../../docs/ja/cookbook/custom-error-revert.md)
 - [Snapshot revert](../../docs/ja/cookbook/snapshot-revert.md)
-- [テスト設計フロー](../../docs/ja/cookbook/test-design-flow.md)
+- [テスト設計フロー (skill chain tutorial)](../../tests/docs/skill-chain-tutorial.ja.md)
 
 ## 次に試す
 

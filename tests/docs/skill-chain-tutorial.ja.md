@@ -1,10 +1,10 @@
-# 3 layer テスト設計 flow (Phase E 統合 cookbook)
+# Skill chain tutorial — 4 skill で contract test + e2e test を生成 / 実走
 
-> [🇬🇧 English](../../en/cookbook/kiwa-design-flow.md) • [🇯🇵 日本語](./kiwa-design-flow.md)
+> [🇬🇧 English](./skill-chain-tutorial.md) • [🇯🇵 日本語](./skill-chain-tutorial.ja.md)
 
-kiwa Phase E (#171 〜 #181) で確立した「Layer 1 (テスト設計) → Layer 2 (実装変換)」chain で、 **既に動いている contract / dApp に後付けで test を導入する** 手順を documented する章。 `examples/nextjs-token-gating` の実 contract を題材に full flow を歩く。
+kiwa の skill chain (`/kiwa-design` Layer 1 → `/kiwa-forge` / `/kiwa-hardhat` Layer 2 → `/kiwa-play` Layer 3) で、 **仕様書から contract test + e2e test を生成 → 実走** までを 0 から歩く tutorial。 `examples/nextjs-token-gating` の実 contract を題材に full flow を歩く。
 
-新規 dApp 開発の TDD 経路でも使えるが、 第 1 用途は **「既存 contract / dApp に対する test 後付け導入」**。 既存実装をそのまま動作仕様として扱い、 そこから観点を逆算して test を埋める。
+後付け導入 (既存 dApp + contract に test を追加) を主用途として書かれているが、 新規 dApp 開発の TDD 経路でも同じ手順が使える。 既存実装をそのまま動作仕様として扱い、 そこから観点を逆算して test を埋める方針。
 
 ## 全体図
 
@@ -216,9 +216,9 @@ Step 5 で coverage 達成完了時点で以下の状態:
 
 ## 関連 link
 
-- 親 spec (Phase E SSOT): [`docs/SKILL-DESIGN.ja.md`](../../SKILL-DESIGN.ja.md)
-- Layer 1: [.claude/skills/kiwa-design/SKILL.md](../../../.claude/skills/kiwa-design/SKILL.md)
-- Layer 2 Foundry: [.claude/skills/kiwa-forge/SKILL.md](../../../.claude/skills/kiwa-forge/SKILL.md)
-- Layer 2 Hardhat: [.claude/skills/kiwa-hardhat/SKILL.md](../../../.claude/skills/kiwa-hardhat/SKILL.md)
-- Layer 2 Playwright: [.claude/skills/kiwa-play/SKILL.md](../../../.claude/skills/kiwa-play/SKILL.md)
-- 関連 cookbook 章: [snapshot-revert.md](./snapshot-revert.md) (Layer 1 / Layer 2 で snapshot pattern を共有)、 [custom-error-revert.md](./custom-error-revert.md) (観点 2 異常系 helper)
+- 親 spec (Phase E SSOT): [`docs/SKILL-DESIGN.ja.md`](../../docs/SKILL-DESIGN.ja.md)
+- Layer 1: [.claude/skills/kiwa-design/SKILL.md](../../.claude/skills/kiwa-design/SKILL.md)
+- Layer 2 Foundry: [.claude/skills/kiwa-forge/SKILL.md](../../.claude/skills/kiwa-forge/SKILL.md)
+- Layer 2 Hardhat: [.claude/skills/kiwa-hardhat/SKILL.md](../../.claude/skills/kiwa-hardhat/SKILL.md)
+- Layer 2 Playwright: [.claude/skills/kiwa-play/SKILL.md](../../.claude/skills/kiwa-play/SKILL.md)
+- 関連 cookbook 章: [snapshot-revert.md](../../docs/ja/cookbook/snapshot-revert.md) (Layer 1 / Layer 2 で snapshot pattern を共有)、 [custom-error-revert.md](../../docs/ja/cookbook/custom-error-revert.md) (観点 2 異常系 helper)

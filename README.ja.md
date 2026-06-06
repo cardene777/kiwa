@@ -60,7 +60,7 @@ graph TD
 | Coverage gate | optional、 飛ばされがち | skill 側で **必須化** (4 metric) |
 | Flake 検出 | ad-hoc | 4 round loop が組み込み |
 
-> 既に動いている contract / dApp に test を追加したい場合 — [docs/ja/cookbook/test-design-flow.md](./docs/ja/cookbook/test-design-flow.md) を参照。 chain は **後付け導入を主用途** として設計されており、 既存コードから仕様を逆算します。
+> 既に動いている contract / dApp に test を追加したい場合 — [tests/docs/retrofit-existing-dapp.ja.md](./tests/docs/retrofit-existing-dapp.ja.md) を参照。 skill chain は **後付け導入を主用途** として設計されており、 既存コードから仕様を逆算します。
 
 ---
 
@@ -382,7 +382,7 @@ Reference docs:
 |---|---|
 | [`docs/SKILL-DESIGN.ja.md`](./docs/SKILL-DESIGN.ja.md) ⭐ | **4 skill 共通 SSOT** (5 段階フロー / 9 section 出力 / 10 観点 / 5 リスク基準) |
 | [`docs/MOCK-DESIGN.ja.md`](./docs/MOCK-DESIGN.ja.md) | Wallet / SDK mock 精度仕様 (A/B/C level、 scoring rubric) |
-| [`docs/ja/cookbook/test-design-flow.md`](./docs/ja/cookbook/test-design-flow.md) ⭐ | **4 layer chain walkthrough** (後付け導入起点) |
+| [`tests/docs/skill-chain-tutorial.ja.md`](./tests/docs/skill-chain-tutorial.ja.md) ⭐ | **4 skill chain walkthrough** (後付け導入起点) |
 | [`docs/RPC.md`](./docs/RPC.md) | 9 直接対応 RPC + anvil fallback |
 | [`docs/EVENTS.md`](./docs/EVENTS.md) | 4 event + `triggerEvent()` |
 | [`docs/ERRORS.md`](./docs/ERRORS.md) | EIP-1193 error code + envelope 設計 |
