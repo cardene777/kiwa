@@ -158,6 +158,59 @@ package.json                ← test:e2e script + peer deps
 > Before `@kiwa/*` v0.1.0 is published to npm, clone this repo and run:
 > `pnpm install && pnpm -F @kiwa/core -F @kiwa/cli build && node packages/cli/dist/index.js init`
 
+### Trying kiwa before v0.1.0 is on npm
+
+Until `@kiwa/*` is published, point your test project at the local checkout with a `file:` dependency:
+
+```bash
+# 1. Clone & build kiwa
+git clone https://github.com/cardene777/kiwa.git ~/kiwa
+cd ~/kiwa
+pnpm install
+pnpm -F @kiwa/core -F @kiwa/cli build
+
+# 2. In your test project, add a file: dependency
+cd /path/to/your-dapp
+pnpm add -D file:$HOME/kiwa/packages/core file:$HOME/kiwa/packages/cli
+
+# 3. Scaffold from the locally-installed CLI
+pnpm exec kiwa init     # or: node $HOME/kiwa/packages/cli/dist/index.js init
+```
+
+After v0.1.0 publish you can switch to `pnpm dlx @kiwa/cli init` (Option B above).
+
+### Using kiwa with a CJS / Next.js 14 project
+
+`@kiwa/core` ships **both ESM and CJS builds** (`dist/index.js` + `dist/index.cjs`), so both `import` and `require` resolve correctly. You can drop it into any of:
+
+| Project type | What works out of the box |
+|---|---|
+| Pure ESM (`"type": "module"`) | `import { dappE2eTest } from '@kiwa/core'` |
+| Pure CJS (`"type": "commonjs"`) | `const { dappE2eTest } = require('@kiwa/core')` |
+| Next.js 14 (CJS host with ESM packages) | Both forms resolve; Next bundles CJS, Playwright runs ESM |
+
+If you still hit `Error: No "exports" main defined` (older toolchains), isolate the kiwa test dir as ESM with a local `package.json`:
+
+```bash
+mkdir -p tests/kiwa
+echo '{"type":"module"}' > tests/kiwa/package.json
+```
+
+Only `tests/kiwa/**.ts` is treated as ESM; the rest of your `tests/` keeps its existing CJS resolution.
+
+### Differences from MetaMask (read before shipping)
+
+`@kiwa/core` aims to be **production-realistic but explicit about deltas**. Key default behavioural differences:
+
+| Behavior | MetaMask | kiwa (default) | Override |
+|---|---|---|---|
+| `eth_accounts` before connect | returns `[]` | returns the wallet's account (always "connected") | set `dappE2e.setApprovalMode('reject')` to refuse `eth_requestAccounts` and keep accounts hidden |
+| Network add prompt | shows a popup | silent allow (no chain in store → switch fails) | call `dappE2e.addChain(config)` from the test to seed networks |
+| User reject on send | popup with reject button | rejected via `setApprovalMode('reject')` returning `code: 4001` | see [`docs/en/cookbook/user-reject.md`](./docs/en/cookbook/user-reject.md) |
+| EIP-6963 announce | announced on extension install | announced on fixture init | see [`docs/en/concepts/eip-6963.md`](./docs/en/concepts/eip-6963.md) |
+
+The full RPC fidelity matrix lives in [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) (A/B/C level scoring rubric).
+
 ---
 
 ## Features
