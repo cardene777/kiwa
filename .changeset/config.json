@@ -7,5 +7,26 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["examples-basic-connect"]
+  "ignore": [
+    "examples-basic-connect",
+    "examples-defi-swap",
+    "examples-mint-nft",
+    "examples-nextjs-aa-erc4337",
+    "examples-nextjs-aa-smart-account",
+    "examples-nextjs-bridge",
+    "examples-nextjs-dao-vote",
+    "examples-nextjs-ens-resolver",
+    "examples-nextjs-erc1155-game",
+    "examples-nextjs-event-history",
+    "examples-nextjs-lending",
+    "examples-nextjs-multi-chain",
+    "examples-nextjs-permit-swap",
+    "examples-nextjs-staking",
+    "examples-nextjs-token-gating",
+    "examples-nextjs-vesting",
+    "examples-nextjs-wagmi-rainbow",
+    "examples-nextjs-zk-verifier",
+    "examples-nft-marketplace",
+    "examples-vite-react-wagmi"
+  ]
 }

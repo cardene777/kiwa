@@ -1,5 +1,47 @@
 # Migration guide
 
+## 🎨 Rebrand notice (2026-06): dapp-e2e → kiwa
+
+本プロジェクトは `dapp-e2e` から **`kiwa`** (際) にリブランドしました。
+「際」(きわ) = 境界 / 限界 / 端 → 境界値テストの本質を体現する名前です。
+旧名から来た利用者向けに以下の対応表で移行できます。
+
+### 旧 → 新 対応表
+
+| 種別 | 旧名 | 新名 |
+|---|---|---|
+| npm package (fixture) | `@dapp-e2e/core` | `@kiwa/core` |
+| npm package (CLI) | `@dapp-e2e/cli` | `@kiwa/cli` |
+| CLI bin | `dapp-e2e` | `kiwa` |
+| init command | `pnpm dlx @dapp-e2e/cli init` | `pnpm dlx @kiwa/cli init` |
+| import fixture | `import { dappE2eTest } from '@dapp-e2e/core'` | `import { dappE2eTest } from '@kiwa/core'` (関数名は維持) |
+| GitHub repo | `cardene777/dapp-e2e` | `cardene777/kiwa` (旧 URL は自動 redirect) |
+| Claude Code skill 名 | `test-design` / `contract-test-foundry` / `contract-test-hardhat` / `dapp-e2e-test` | `kiwa-design` / `kiwa-forge` / `kiwa-hardhat` / `kiwa-play` |
+
+### 機械的な置換手順
+
+```bash
+# package.json の依存を一括置換
+sed -i.bak 's|@dapp-e2e/|@kiwa/|g' package.json && rm package.json.bak
+pnpm install
+```
+
+import 文 / CLI 呼び出しも同様に `@dapp-e2e/` を `@kiwa/` に置換するだけで動きます。
+API シグネチャ (関数名 `dappE2eTest` / option key / event name) は **一切変更していません**。 名前空間 prefix だけが変わります。
+
+### npm publish 状況
+
+- `@dapp-e2e/*` は npm に **未公開のまま** (registry 404)、 deprecate の必要なし
+- `@kiwa/*` は次回 release で `0.1.0` 初版公開予定 (changesets + GitHub Actions provenance)
+
+### GitHub URL の自動 redirect
+
+`https://github.com/cardene777/dapp-e2e/*` への URL は GitHub が自動で `https://github.com/cardene777/kiwa/*` へ redirect します。 既存の PR / Issue 番号 (#1〜#186) は そのまま新 URL でも有効です。
+
+---
+
+## Version 互換性ガイド
+
 本ドキュメントは kiwa の version 更新時に互換性の差分を確認したい利用者向けです。
 v0.x 系は public API を整えながら進める段階のため、minor 更新でも破壊的変更が入る可能性があります。
 各 release で影響範囲を短く追えるよう、この file を移行の窓口にします。
