@@ -276,6 +276,8 @@ echo '{"type":"module"}' > tests/kiwa/package.json
 
 ## Examples
 
+機能から逆引きしたい場合は [`docs/ja/examples/README.md`](./docs/ja/examples/README.md) を参照。 人気 5 件を 30 分 ~ 1 時間で順に試すツアーは [`docs/ja/examples/walkthrough.md`](./docs/ja/examples/walkthrough.md)。 個別 README は [`examples/{name}/README.md`](./examples/) 配下 (人気 5 例 — basic-connect / mint-nft / defi-swap / nextjs-wagmi-rainbow / nft-marketplace — は `README.ja.md` も併設)。
+
 ### 4 layer chain 動作実証済 example
 
 以下 3 example は **forge test + hardhat test (該当時) + playwright test 全部 4 round 連続 flake 0 + coverage gate 通過** を確認済:

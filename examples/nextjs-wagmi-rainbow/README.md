@@ -1,0 +1,49 @@
+# examples/nextjs-wagmi-rainbow
+
+Drives a Next.js + wagmi + RainbowKit dApp where the kiwa fixture injects `window.ethereum` and tests exercise `useAccount` / `useReadContract` / `useWriteContract`. A one-stop example for the framework-integration flow (anvil → forge build → forge create → `.env.local` → Playwright globalSetup).
+
+## What you can try
+
+- Pick an injected wallet from the RainbowKit Connect modal → read the address through wagmi `useAccount`
+- Observe `useReadContract(totalSupply)` transition from loading to a number
+- Send `useWriteContract(mint)` → confirm the on-chain effect via viem PublicClient
+- Inspect the four-file framework boilerplate `tests/prepare-env.ts` + `tests/global-setup.ts` + `tests/global-teardown.ts` + `tests/fixture.ts` (mirrors `kiwa init --with-deploy` output)
+- See how the Playwright globalSetup slot pairs with a `dappE2eTest` extension that overrides `_anvilHandle`
+
+## How to run
+
+Run `pnpm install` at the repo root first, then `pnpm exec playwright install chromium`. Foundry's `anvil` and `forge` must be on your PATH.
+
+```bash
+# from the repo root
+pnpm -F examples-nextjs-wagmi-rainbow test
+```
+
+Internally this:
+
+1. Builds the fixture (`pnpm -F @kiwa/core build`)
+2. Runs `node --import tsx tests/prepare-env.ts` → start anvil + `forge build` + `forge create` + write `.env.local`
+3. Launches `playwright test` → boots Next.js → runs `connect-and-mint.spec.ts`
+4. Stops anvil and cleans the pidfile in globalTeardown
+
+## Reading the tests
+
+| File | What it covers |
+|---|---|
+| `tests/connect-and-mint.spec.ts` | RainbowKit modal click → wagmi state transitions → mint flow via useReadContract / useWriteContract |
+| `tests/fixture.ts` | Extends `dappE2eTest` to point `_anvilHandle` at the anvil started by globalSetup |
+| `tests/prepare-env.ts` | anvil + forge build + forge create + `.env.local` boilerplate |
+| `tests/global-setup.ts` / `tests/global-teardown.ts` | Playwright globalSetup / globalTeardown slots |
+
+`kiwa init --with-deploy <foundry-path>` produces the same four-file shape (CLI option in PR #195).
+
+## Related cookbook entries
+
+- [Connect button test](../../docs/en/cookbook/connect-button.md)
+- [Smart wallet / AA](../../docs/en/cookbook/smart-wallet-aa.md) (advanced)
+- [Multi-wallet detection](../../docs/en/cookbook/multi-wallet.md)
+
+## Where to go next
+
+- Composite marketplace (listing + offer + royalty) → [examples/nft-marketplace](../nft-marketplace/README.md)
+- Multi-chain switching → [examples/nextjs-multi-chain](../nextjs-multi-chain/) (README pending in a follow-up)

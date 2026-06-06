@@ -6,6 +6,8 @@ It launches anvil per test run, combines Playwright and viem, injects `window.et
 ## Start here
 
 - 🚀 [Quickstart](./quickstart.md) — Run in 5 minutes
+- 🧭 [Examples](./examples/README.md) — Reverse lookup by feature
+- 🚶 [Examples Walkthrough](./examples/walkthrough.md) — Guided tour through 5 popular examples
 - 📚 [Concepts](./concepts/README.md) — Learn how it works
 - 🔧 [API Reference](./api/README.md) — Function signatures
 - 🍳 [Cookbook](./cookbook/README.md) — Real scenarios
