@@ -30,3 +30,7 @@ pnpm version-packages
 より詳しい運用ルールや FAQ は Changesets 公式 README を参照してください。
 
 - https://github.com/changesets/changesets/tree/main/packages/cli
+
+## 必要な GitHub 設定
+
+`release.yml` が `chore(release): version packages` PR を自動生成するには、 `Settings → Actions → General → Workflow permissions` の `Allow GitHub Actions to create and approve pull requests` を有効にする必要があります。 無効のままだと changesets/action が version PR の作成 step で `GitHub Actions is not permitted to create or approve pull requests` という HttpError で失敗します。
