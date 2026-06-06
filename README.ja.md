@@ -158,6 +158,59 @@ package.json                ← test:e2e script + peer deps
 > `@kiwa/*` v0.1.0 が npm 公開される前は repo を clone して以下を実行:
 > `pnpm install && pnpm -F @kiwa/core -F @kiwa/cli build && node packages/cli/dist/index.js init`
 
+### v0.1.0 公開前の試用手順
+
+`@kiwa/*` が npm 公開されるまでは、 試用先 project から **`file:` 依存**で local checkout を参照する:
+
+```bash
+# 1. kiwa を clone & build
+git clone https://github.com/cardene777/kiwa.git ~/kiwa
+cd ~/kiwa
+pnpm install
+pnpm -F @kiwa/core -F @kiwa/cli build
+
+# 2. 試用先 project で file: 依存を追加
+cd /path/to/your-dapp
+pnpm add -D file:$HOME/kiwa/packages/core file:$HOME/kiwa/packages/cli
+
+# 3. local install した CLI で scaffold
+pnpm exec kiwa init     # または: node $HOME/kiwa/packages/cli/dist/index.js init
+```
+
+v0.1.0 公開後は `pnpm dlx @kiwa/cli init` (上記 Option B) に切替可能。
+
+### CJS / Next.js 14 プロジェクトとの共存
+
+`@kiwa/core` は **ESM と CJS の両方を build 出力** (`dist/index.js` + `dist/index.cjs`) しており、 `import` / `require` どちらも解決できます。 以下いずれの project にもそのまま導入可能:
+
+| Project type | そのまま使える形式 |
+|---|---|
+| Pure ESM (`"type": "module"`) | `import { dappE2eTest } from '@kiwa/core'` |
+| Pure CJS (`"type": "commonjs"`) | `const { dappE2eTest } = require('@kiwa/core')` |
+| Next.js 14 (CJS host + ESM 依存) | 両形式とも解決、 Next は CJS bundle、 Playwright は ESM 実行 |
+
+それでも古い toolchain で `Error: No "exports" main defined` に遭遇した場合は、 kiwa test dir を局所 `package.json` で ESM 化する:
+
+```bash
+mkdir -p tests/kiwa
+echo '{"type":"module"}' > tests/kiwa/package.json
+```
+
+これにより `tests/kiwa/**.ts` だけ ESM 解釈され、 残りの `tests/` の既存 CJS 解決は影響を受けません。
+
+### MetaMask との挙動差 (公開前に確認推奨)
+
+`@kiwa/core` は **production 現実的、 ただし挙動差を明示** することを設計方針としています。 default 設定での主な挙動差:
+
+| 挙動 | MetaMask | kiwa (default) | 変更方法 |
+|---|---|---|---|
+| 接続前の `eth_accounts` | `[]` を返す | wallet の account を返す (常時 "connected") | `dappE2e.setApprovalMode('reject')` で `eth_requestAccounts` を拒否し account を隠す |
+| network 追加 prompt | popup 表示 | silent allow (store に chain がない場合 switch 失敗) | test 内で `dappE2e.addChain(config)` を呼び networks を seed |
+| 送金時の user reject | popup の reject button | `setApprovalMode('reject')` 経由で `code: 4001` を返す | [`docs/ja/cookbook/user-reject.md`](./docs/ja/cookbook/user-reject.md) 参照 |
+| EIP-6963 announce | extension install 時 announce | fixture 初期化時 announce | [`docs/ja/concepts/eip-6963.md`](./docs/ja/concepts/eip-6963.md) 参照 |
+
+完全な RPC 忠実度 matrix は [`docs/MOCK-DESIGN.ja.md`](./docs/MOCK-DESIGN.ja.md) (A/B/C level scoring rubric) を参照。
+
 ---
 
 ## Features
