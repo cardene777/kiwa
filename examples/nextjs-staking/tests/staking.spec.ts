@@ -7,7 +7,7 @@ import {
   increaseTime,
   revertChain,
   snapshotChain,
-} from '@dapp-e2e/core';
+} from '@kiwa/core';
 import {
   createPublicClient,
   createWalletClient,

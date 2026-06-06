@@ -6,7 +6,7 @@ import {
   runE2EPrepareEnv,
   writePidEntry,
   type PidEntry,
-} from '@dapp-e2e/core';
+} from '@kiwa/core';
 import { privateKeyToAccount } from 'viem/accounts';
 import type { Hex } from 'viem';
 

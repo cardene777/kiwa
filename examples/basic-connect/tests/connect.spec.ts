@@ -316,7 +316,7 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
       message: 'User rejected the request.',
     });
 
-    await dappE2e.setApprovalMode('accept');
+    await dappE2e.setApprovalMode('approve');
 
     const accepted = await page.evaluate(async () => {
       const accounts = await (window as any).ethereum.request({ method: 'eth_accounts' });

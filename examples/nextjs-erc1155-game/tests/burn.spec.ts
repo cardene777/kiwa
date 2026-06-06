@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { expectCustomError } from '@dapp-e2e/core';
+import { expectCustomError } from '@kiwa/core';
 import {
   createPublicClient,
   createWalletClient,
