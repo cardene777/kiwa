@@ -1,14 +1,40 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
-import { InitConflictError, runInit } from './commands/init.js';
+import { InitConflictError, runInit, type InitOptions } from './commands/init.js';
 
-const USAGE = `Usage: kiwa <command>
+const USAGE = `Usage: kiwa <command> [options]
 
 Commands:
-  init [--force]   Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json
+  init [options]   Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json
   doctor           Check that anvil is installed
   --help, -h       Show this message
+
+init options:
+  --force                       Overwrite existing files instead of failing on conflict
+  --testDir <path>              Place generated spec under <path> instead of e2e/ (relative)
+  --config-suffix <name>        Generate playwright.<name>.config.ts instead of playwright.config.ts
+  --script-key <key>            package.json scripts key for the generated playwright command (default test:e2e)
+  --with-deploy <foundry-path>  Also generate tests/{prepare-env,global-setup,global-teardown,fixture}.ts
+                                pointing at the given Foundry project (relative to cwd)
 `;
+
+function takeFlagValue(argv: string[], flag: string): string | undefined {
+  const eqPrefix = `${flag}=`;
+  for (let i = 0; i < argv.length; i += 1) {
+    const token = argv[i];
+    if (token === flag) {
+      const next = argv[i + 1];
+      if (next === undefined || next.startsWith('--')) {
+        throw new Error(`kiwa init: ${flag} requires a value`);
+      }
+      return next;
+    }
+    if (token !== undefined && token.startsWith(eqPrefix)) {
+      return token.slice(eqPrefix.length);
+    }
+  }
+  return undefined;
+}
 
 function main(): void {
   const cmd = process.argv[2];
@@ -28,10 +54,22 @@ function main(): void {
   }
 
   if (cmd === 'init') {
-    const force = process.argv.includes('--force');
-
+    const argv = process.argv.slice(3);
     try {
-      const result = runInit({ force, cwd: process.cwd() });
+      const testDir = takeFlagValue(argv, '--testDir');
+      const configSuffix = takeFlagValue(argv, '--config-suffix');
+      const scriptKey = takeFlagValue(argv, '--script-key');
+      const withDeploy = takeFlagValue(argv, '--with-deploy');
+      const initOptions: InitOptions = {
+        force: argv.includes('--force'),
+        cwd: process.cwd(),
+        ...(testDir !== undefined ? { testDir } : {}),
+        ...(configSuffix !== undefined ? { configSuffix } : {}),
+        ...(scriptKey !== undefined ? { scriptKey } : {}),
+        ...(withDeploy !== undefined ? { withDeploy } : {}),
+      };
+
+      const result = runInit(initOptions);
       for (const file of result.created) {
         process.stdout.write(`created: ${file}\n`);
       }

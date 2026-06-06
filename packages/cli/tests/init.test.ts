@@ -270,4 +270,106 @@ describe('runInit', () => {
     expect(readFile(tempDir, 'tsconfig.json')).toContain('"strict": false');
     expect(result.created).not.toContain('tsconfig.json');
   });
+
+  it('T-INIT-011 --testDir 指定で spec を tests/dapp-e2e/ 配下に生成し playwright.config.ts も同 dir を指す', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+
+    const result = runInit({ force: false, cwd: tempDir, testDir: 'tests/dapp-e2e' });
+
+    expect(fs.existsSync(path.join(tempDir, 'tests/dapp-e2e/connect.spec.ts'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'e2e/connect.spec.ts'))).toBe(false);
+    expect(readFile(tempDir, 'playwright.config.ts')).toContain("testDir: './tests/dapp-e2e'");
+    expect(result.created).toEqual(
+      expect.arrayContaining(['tests/dapp-e2e/connect.spec.ts', 'playwright.config.ts']),
+    );
+  });
+
+  it('T-INIT-012 --config-suffix 指定で playwright.kiwa.config.ts を生成し script は config 経由 playwright test を指す', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+
+    runInit({
+      force: false,
+      cwd: tempDir,
+      testDir: 'tests/kiwa',
+      configSuffix: 'kiwa',
+      scriptKey: 'test:kiwa',
+    });
+
+    expect(fs.existsSync(path.join(tempDir, 'playwright.kiwa.config.ts'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'playwright.config.ts'))).toBe(false);
+    expect(fs.existsSync(path.join(tempDir, 'tests/kiwa/connect.spec.ts'))).toBe(true);
+
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.scripts['test:kiwa']).toBe('playwright test --config=playwright.kiwa.config.ts');
+    expect(pkg.scripts['test:e2e']).toBeUndefined();
+  });
+
+  it('T-INIT-013 --testDir に絶対 path / ../ を指定すると Error', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+
+    expect(() => runInit({ force: false, cwd: tempDir, testDir: '/etc' })).toThrow(
+      /relative path/,
+    );
+    expect(() => runInit({ force: false, cwd: tempDir, testDir: '../escape' })).toThrow(
+      /relative path/,
+    );
+  });
+
+  it('T-INIT-014 --config-suffix に [a-zA-Z0-9_-]+ 以外を指定すると Error', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+
+    expect(() => runInit({ force: false, cwd: tempDir, configSuffix: 'bad/name' })).toThrow(
+      /config-suffix/,
+    );
+  });
+
+  it('T-INIT-015 --with-deploy 指定で tests/{prepare-env,global-setup,global-teardown,fixture}.ts を生成し FOUNDRY_PATH を埋め込む', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+
+    const result = runInit({
+      force: false,
+      cwd: tempDir,
+      withDeploy: '../contract',
+    });
+
+    const generatedFiles = [
+      'tests/prepare-env.ts',
+      'tests/global-setup.ts',
+      'tests/global-teardown.ts',
+      'tests/fixture.ts',
+    ];
+    for (const file of generatedFiles) {
+      expect(fs.existsSync(path.join(tempDir, file))).toBe(true);
+      expect(result.created).toContain(file);
+    }
+
+    const prepareEnv = readFile(tempDir, 'tests/prepare-env.ts');
+    expect(prepareEnv).toContain("const FOUNDRY_PATH = '../contract';");
+    expect(prepareEnv).toContain("import { startAnvil, deployContract } from '@kiwa/core';");
+
+    const fixture = readFile(tempDir, 'tests/fixture.ts');
+    expect(fixture).toContain("import { dappE2eTest as baseTest } from '@kiwa/core';");
+  });
+
+  it('T-INIT-016 --with-deploy 既存 tests/prepare-env.ts と衝突したら InitConflictError', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'tests/prepare-env.ts', '// existing\n');
+    const { InitConflictError, runInit } = await loadInitModule();
+
+    let thrown: (Error & { conflicts: string[] }) | null = null;
+    expect(() => {
+      try {
+        runInit({ force: false, cwd: tempDir, withDeploy: '../contract' });
+      } catch (e) {
+        thrown = e as Error & { conflicts: string[] };
+        throw e;
+      }
+    }).toThrow(InitConflictError);
+    expect(thrown?.conflicts).toContain('tests/prepare-env.ts');
+  });
 });

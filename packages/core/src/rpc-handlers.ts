@@ -49,6 +49,14 @@ export interface RpcContext {
    */
   chainRegistry?: { current: ChainConfig[] };
   contractAccount?: ContractAccountRpcConfig;
+  /**
+   * true の場合 `eth_requestAccounts` を approval policy の対象とし、
+   * approvalPolicy.default === 'reject' (または approvalMode === 'reject') のとき
+   * EIP-1193 code 4001 で reject する。connect reject UI flow の検証用 opt-in。
+   * `eth_accounts` は EIP-1193 上 read-only (現在 connected account の確認) のため対象外。
+   * 未指定 (undefined) または false の場合は従来挙動 (常に accounts を返す) を維持。
+   */
+  rejectConnect?: { current: boolean };
 }
 
 export const DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI = [
@@ -189,6 +197,14 @@ export async function handleRpcRequest(
   switch (request.method) {
     case 'eth_requestAccounts':
     case 'eth_accounts': {
+      // rejectConnect が opt-in されている場合のみ eth_requestAccounts を approval check の対象にする。
+      // EIP-1193 上 eth_accounts は read-only として現在の connected account を返すため対象外。
+      if (request.method === 'eth_requestAccounts' && ctx.rejectConnect?.current === true) {
+        const mode = getApprovalPolicy(ctx).default;
+        if (mode === 'reject') {
+          throw new Eip1193Error(4001, 'User rejected the request.');
+        }
+      }
       if (ctx.contractAccount) {
         return [ctx.contractAccount.address];
       }

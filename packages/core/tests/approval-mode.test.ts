@@ -215,6 +215,46 @@ describe('approval mode', () => {
     expect(ctx.chainState.current).toBe(1);
   });
 
+  it('T-APP-009 reject mode + rejectConnect=true で eth_requestAccounts が code 4001 で reject される', async () => {
+    const ctx = makeCtx('reject', { default: 'reject' });
+    ctx.rejectConnect = { current: true };
+
+    await expect(
+      handleRpcRequest(ctx, { method: 'eth_requestAccounts' }),
+    ).rejects.toMatchObject({ code: 4001, message: 'User rejected the request.' });
+  });
+
+  it('T-APP-010 reject mode + rejectConnect=true でも eth_accounts は read-only として accounts を返す', async () => {
+    const ctx = makeCtx('reject', { default: 'reject' });
+    ctx.rejectConnect = { current: true };
+
+    const accounts = await handleRpcRequest(ctx, { method: 'eth_accounts' });
+
+    expect(Array.isArray(accounts)).toBe(true);
+    expect((accounts as string[])[0]?.toLowerCase()).toBe(TEST_ACCOUNT.toLowerCase());
+  });
+
+  it('T-APP-011 rejectConnect 未指定 / false のときは reject mode でも eth_requestAccounts が成功する (下位互換)', async () => {
+    const ctx = makeCtx('reject', { default: 'reject' });
+
+    const accountsDefault = await handleRpcRequest(ctx, { method: 'eth_requestAccounts' });
+    expect(Array.isArray(accountsDefault)).toBe(true);
+
+    ctx.rejectConnect = { current: false };
+    const accountsExplicit = await handleRpcRequest(ctx, { method: 'eth_requestAccounts' });
+    expect(Array.isArray(accountsExplicit)).toBe(true);
+  });
+
+  it('T-APP-012 rejectConnect=true でも approve mode のときは eth_requestAccounts が成功する', async () => {
+    const ctx = makeCtx('approve', { default: 'approve' });
+    ctx.rejectConnect = { current: true };
+
+    const accounts = await handleRpcRequest(ctx, { method: 'eth_requestAccounts' });
+
+    expect(Array.isArray(accounts)).toBe(true);
+    expect((accounts as string[])[0]?.toLowerCase()).toBe(TEST_ACCOUNT.toLowerCase());
+  });
+
   it('T-APP-008 approvalMode field を完全 omit した RpcContext でも default approve で personal_sign が成功する (external caller 互換契約の構造的担保)', async () => {
     const ctx: RpcContext = {
       privateKey: TEST_PRIVATE_KEY,
