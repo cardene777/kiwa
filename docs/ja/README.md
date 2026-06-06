@@ -6,6 +6,8 @@ anvil をテスト単位で起動し、Playwright と viem を組み合わせ、
 ## 入り口
 
 - 🚀 [Quickstart](./quickstart.md) — 5 分で動かす
+- 🧭 [Examples](./examples/README.md) — 試したい機能から逆引き
+- 🚶 [Examples Walkthrough](./examples/walkthrough.md) — 人気 5 件を順に試すツアー
 - 📚 [Concepts](./concepts/README.md) — 仕組みを学ぶ
 - 🔧 [API Reference](./api/README.md) — 関数仕様
 - 🍳 [Cookbook](./cookbook/README.md) — 実シナリオ
