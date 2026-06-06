@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start -p 3044",
     "test": "pnpm -F @kiwa/core build && node --import tsx tests/prepare-env.ts && playwright test",
+    "test:hardhat": "hardhat test --config hardhat.config.cjs",
+    "test:hardhat:coverage": "hardhat coverage --config hardhat.config.cjs",
     "typecheck": "tsc --noEmit",
     "forge:build": "forge build"
   },
@@ -22,10 +24,16 @@
     "wagmi": "^2.13.0"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "chai": "^4.5.0",
+    "ethers": "^6.16.0",
+    "fast-check": "^4.8.0",
+    "hardhat": "^2.28.6",
+    "solidity-coverage": "^0.8.17",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0"
   }

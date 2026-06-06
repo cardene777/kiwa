@@ -4,3 +4,10 @@ lib/forge-std/
 node_modules/
 .next/
 test-results/
+hardhat-cache/
+hardhat-artifacts/
+coverage/
+coverage.json
+.coverage_artifacts/
+.coverage_cache/
+.coverage_contracts/
