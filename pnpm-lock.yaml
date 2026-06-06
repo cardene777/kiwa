@@ -49,12 +49,30 @@ importers:
         specifier: workspace:*
         version: link:../../packages/core
     devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(610e7aa51ddb9639b22368c5ee009257)
       '@playwright/test':
         specifier: ^1.49.0
         version: 1.60.0
       '@types/node':
         specifier: ^22.10.0
         version: 22.19.19
+      chai:
+        specifier: ^4.5.0
+        version: 4.5.0
+      ethers:
+        specifier: ^6.16.0
+        version: 6.16.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      fast-check:
+        specifier: ^4.8.0
+        version: 4.8.0
+      hardhat:
+        specifier: ^2.28.6
+        version: 2.28.6(bufferutil@4.1.0)(ts-node@10.9.2(@types/node@22.19.19)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)
+      solidity-coverage:
+        specifier: ^0.8.17
+        version: 0.8.17(hardhat@2.28.6(bufferutil@4.1.0)(ts-node@10.9.2(@types/node@22.19.19)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10))
       typescript:
         specifier: ^5.6.0
         version: 5.9.3
@@ -632,6 +650,9 @@ importers:
         specifier: ^2.13.0
         version: 2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
     devDependencies:
+      '@nomicfoundation/hardhat-toolbox':
+        specifier: ^5.0.0
+        version: 5.0.0(610e7aa51ddb9639b22368c5ee009257)
       '@playwright/test':
         specifier: ^1.49.0
         version: 1.60.0
@@ -644,6 +665,21 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.1
         version: 18.3.7(@types/react@18.3.30)
+      chai:
+        specifier: ^4.5.0
+        version: 4.5.0
+      ethers:
+        specifier: ^6.16.0
+        version: 6.16.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      fast-check:
+        specifier: ^4.8.0
+        version: 4.8.0
+      hardhat:
+        specifier: ^2.28.6
+        version: 2.28.6(bufferutil@4.1.0)(ts-node@10.9.2(@types/node@22.19.19)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)
+      solidity-coverage:
+        specifier: ^0.8.17
+        version: 0.8.17(hardhat@2.28.6(bufferutil@4.1.0)(ts-node@10.9.2(@types/node@22.19.19)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10))
       tsx:
         specifier: ^4.19.0
         version: 4.22.4
