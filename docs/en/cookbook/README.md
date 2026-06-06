@@ -13,6 +13,7 @@ kiwa usage by real scenario.
 - [Test multi-chain (L1/L2 in parallel)](./multi-chain.md)
 - [Test a token approve flow](./token-approve-flow.md)
 - [3-layer test design flow (Phase E integration)](./kiwa-design-flow.md) ⭐ New in v0.5 — generates contract tests and dApp e2e tests from a single spec via Layer 1 (`/kiwa-design`) → Layer 2 (Foundry / Hardhat / Playwright)
+- [Generate framework integration boilerplate with `kiwa init --with-deploy`](./with-deploy.md) — automates anvil + forge build + forge create + `.env.local` writing via a four-file boilerplate
 
 ## Related
 

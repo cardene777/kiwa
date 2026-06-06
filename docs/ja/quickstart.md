@@ -68,8 +68,19 @@ test('dApp が接続できる', async ({ page, dappE2e }) => {
 });
 ~~~
 
+## 既存 Foundry project と統合したい場合
+
+`init --with-deploy` で anvil 起動 + `forge build` + `forge create` + `.env.local` 書き込みの 4 file boilerplate を一括生成できる。
+
+~~~bash
+pnpm dlx @kiwa/cli init --with-deploy ../contract
+~~~
+
+詳細手順 (placeholder 置換 / Playwright config 登録 / 詰まりポイント) と reference 実装は [Cookbook: kiwa init --with-deploy](./cookbook/with-deploy.md) を参照。
+
 ## 次に読む
 
+- [Examples](./examples/README.md) — 試したい機能から逆引きで example を選ぶ
 - [Concepts](./concepts/README.md) — fixture / EIP-6963 / RPC handling の仕組み
-- [Cookbook](./cookbook/README.md) — 接続ボタン test / 時間操作 / multi-wallet
+- [Cookbook](./cookbook/README.md) — 接続ボタン test / 時間操作 / multi-wallet / `--with-deploy` の使い方
 - [API Reference](./api/README.md) — `dappE2eTest` / `startAnvil` / `waitForChainState`

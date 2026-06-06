@@ -68,8 +68,19 @@ test('dApp can connect', async ({ page, dappE2e }) => {
 });
 ~~~
 
+## Integrating with an existing Foundry project
+
+`init --with-deploy` generates a four-file boilerplate that starts anvil, runs `forge build` + `forge create`, and writes `.env.local` in one command.
+
+~~~bash
+pnpm dlx @kiwa/cli init --with-deploy ../contract
+~~~
+
+For step-by-step instructions (placeholder replacement, Playwright config wiring, common pitfalls) and the reference implementation, see [Cookbook: kiwa init --with-deploy](./cookbook/with-deploy.md).
+
 ## Next steps
 
+- [Examples](./examples/README.md) — Pick an example by feature
 - [Concepts](./concepts/README.md) — Fixture / EIP-6963 / RPC handling internals
-- [Cookbook](./cookbook/README.md) — Connect button / time manipulation / multi-wallet
+- [Cookbook](./cookbook/README.md) — Connect button / time manipulation / multi-wallet / `--with-deploy` usage
 - [API Reference](./api/README.md) — `dappE2eTest` / `startAnvil` / `waitForChainState`
