@@ -23,6 +23,11 @@ Playwright × viem × anvil. Inject `window.ethereum`, deploy contracts, sign ty
 
 ---
 
+> 🎨 **Rebrand notice**: This project was renamed from `dapp-e2e` to **kiwa** (際) in 2026-06.
+> If you arrived from `@dapp-e2e/*` packages, see [docs/MIGRATION.md § Rebrand notice](./docs/MIGRATION.md#-rebrand-notice-2026-06-dapp-e2e--kiwa) for the old → new mapping (`@dapp-e2e/core` → `@kiwa/core`, `dapp-e2e` CLI → `kiwa` CLI). The API surface itself is unchanged — only the namespace prefix moved.
+
+---
+
 ## Why kiwa?
 
 Traditional dApp E2E tests rely on browser-extension wallets (MetaMask, Rabby, …) that introduce popup flake, version drift, and CI maintenance pain. **kiwa replaces the extension with a programmable `window.ethereum`**, runs anvil per test, and gives you full control over signing, chain state, and time — straight from Playwright.

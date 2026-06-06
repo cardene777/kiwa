@@ -23,6 +23,11 @@ Playwright × viem × anvil。 `window.ethereum` の inject から contract depl
 
 ---
 
+> 🎨 **リブランド通知**: 本プロジェクトは 2026 年 6 月に `dapp-e2e` から **kiwa** (際) に改名しました。
+> 旧 `@dapp-e2e/*` パッケージから来た利用者は [docs/MIGRATION.md § Rebrand notice](./docs/MIGRATION.md#-rebrand-notice-2026-06-dapp-e2e--kiwa) で旧→新の対応表を参照してください (`@dapp-e2e/core` → `@kiwa/core`、 CLI `dapp-e2e` → `kiwa`)。 API シグネチャ自体は変更なく、 名前空間 prefix だけが変わりました。
+
+---
+
 ## なぜ kiwa か
 
 従来の dApp E2E test は MetaMask / Rabby などのブラウザ拡張に依存し、 popup flake / version drift / CI 維持コストに苦しんできました。 **kiwa は拡張機能をプログラマブルな `window.ethereum` に置き換え** 、 test ごとに anvil を起動し、 署名 / chain state / 時間操作を Playwright から完全に制御できます。
