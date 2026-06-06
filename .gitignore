@@ -20,3 +20,6 @@ examples/*/.env
 examples/*/dist/
 examples/*/tsconfig.tsbuildinfo
 examples/*/.context/
+
+# Local-only context (markers / spec drafts / scratch)
+.context/
