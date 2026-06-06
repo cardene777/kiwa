@@ -2,6 +2,8 @@
 
 A 30 minute to 1 hour tour through five popular kiwa examples. The stages ramp up gradually — starter → contract-only → framework integration → composite.
 
+The "duration" on each stage is the time it takes to read the docs and watch the behaviour. The test commands themselves take seconds to a few dozen seconds (Stage 4 is ~25s including Next.js boot; the rest are around 4s).
+
 ## Prerequisites
 
 - `pnpm install` run at the repo root
@@ -16,6 +18,8 @@ No contract, a single inline HTML page so you can feel how the kiwa fixture beha
 ```bash
 pnpm -F examples-basic-connect test
 ```
+
+Expect — 11 cases from `connect.spec.ts` + 4 from `eip6963.spec.ts` = 15 passing, end-to-end in ~4s (the chain is `pnpm -F @kiwa/core build` → `playwright test`).
 
 What to watch for.
 
@@ -44,6 +48,8 @@ pnpm -F examples-mint-nft test:hardhat
 pnpm -F examples-mint-nft test:hardhat:coverage
 ```
 
+Expect — 8 e2e + 27 Foundry + 24 Hardhat cases, Hardhat coverage at Stmts 92.86% / Branch 80.56% / Funcs 100% / Lines 93.75% (e2e ~3s / forge test ~0.1s / hardhat test ~0.4s).
+
 What to watch for.
 
 - Three lanes (e2e / forge / hardhat) against a single contract
@@ -67,6 +73,8 @@ pnpm -F examples-defi-swap test:hardhat
 pnpm -F examples-defi-swap test:hardhat:coverage
 ```
 
+Expect — 7 e2e + 23 Hardhat cases, Hardhat coverage at Stmts 100% / Branch 87.5% / Funcs 100% / Lines 100% (e2e ~4s / hardhat test ~0.3s).
+
 What to watch for.
 
 - `setApprovalModeForToken` controls per-token approve reject / limit
@@ -83,6 +91,8 @@ The framework-integration loop in one example. Next.js + wagmi + RainbowKit with
 ```bash
 pnpm -F examples-nextjs-wagmi-rainbow test
 ```
+
+Expect — 4 cases from `connect-and-mint.spec.ts`, ~25s including Next.js dev-server boot.
 
 Internally:
 
@@ -115,6 +125,8 @@ pnpm -F examples-nft-marketplace test:hardhat
 # Hardhat coverage (Stmts 98.77% / Branch 84.62% / Funcs 100% / Lines 97.25%)
 pnpm -F examples-nft-marketplace test:hardhat:coverage
 ```
+
+Expect — 12 e2e + Hardhat (MarketNft 21 + SimpleMarketplace 30) = 51 cases, Hardhat coverage at Stmts 98.77% / Branch 84.62% / Funcs 100% / Lines 97.25% (e2e ~4s / hardhat test ~0.6s).
 
 What to watch for.
 

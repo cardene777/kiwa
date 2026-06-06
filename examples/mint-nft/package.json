@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "pnpm -F @kiwa/core build && playwright test",
+    "test:hardhat": "hardhat test --config hardhat.config.cjs",
+    "test:hardhat:coverage": "hardhat coverage --config hardhat.config.cjs",
     "typecheck": "tsc --noEmit",
     "forge:build": "forge build"
   },
