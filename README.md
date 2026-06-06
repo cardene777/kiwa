@@ -2,20 +2,21 @@
 
 # kiwa
 
-**Headless E2E testing fixture for dApps — no browser extension, no MetaMask popup, no flake.**
+**Design, implement, verify — every test layer for dApps and smart contracts, from one spec.**
 
-Playwright × viem × anvil. Inject `window.ethereum`, deploy contracts, sign typed data, mine blocks — all from a single fixture.
+One Layer 1 spec → Foundry `.t.sol`, Hardhat `.test.cjs`, and Playwright `.spec.ts` in parallel. With **4 metric coverage thresholds enforced** by the skill itself.
 
 [![npm version](https://img.shields.io/npm/v/@kiwa/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa/core)
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa/core)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
-[![tests](https://img.shields.io/badge/tests-166%20passed-success)](#testing--quality)
-[![flaky](https://img.shields.io/badge/flaky-0%2F664-success)](#testing--quality)
+[![tests](https://img.shields.io/badge/tests-292%20execution%20PASS-success)](#testing--quality)
+[![flaky](https://img.shields.io/badge/flaky-0%2F292-success)](#testing--quality)
+[![coverage](https://img.shields.io/badge/coverage-Lines%2090%2B%20%2F%20Branches%2080%2B-success)](#coverage-requirement)
 [![ERC-4337](https://img.shields.io/badge/ERC--4337-v0.7%20supported-9333ea)](./docs/en/cookbook/smart-wallet-aa.md)
 [![typescript](https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript&logoColor=white)](./tsconfig.json)
-[![claude code](https://img.shields.io/badge/Claude%20Code-skill%20ready-d97706?logo=anthropic&logoColor=white)](./.claude/skills/kiwa-play/SKILL.md)
+[![claude code](https://img.shields.io/badge/Claude%20Code-4%20skills-d97706?logo=anthropic&logoColor=white)](./docs/SKILL-DESIGN.md)
 
-[**Quickstart**](#quickstart) • [**Features**](#features) • [**Examples**](#examples) • [**Docs**](./docs/en/README.md) • [**Cookbook**](./docs/en/cookbook/README.md) • [**FAQ**](./docs/en/faq.md)
+[**Quickstart**](#quickstart) • [**4 layer chain**](#4-layer-chain) • [**Features**](#features) • [**Examples**](#examples) • [**Docs**](./docs/en/README.md) • [**Cookbook**](./docs/en/cookbook/README.md) • [**FAQ**](./docs/en/faq.md)
 
 [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
@@ -24,40 +25,118 @@ Playwright × viem × anvil. Inject `window.ethereum`, deploy contracts, sign ty
 ---
 
 > 🎨 **Rebrand notice**: This project was renamed from `dapp-e2e` to **kiwa** (際) in 2026-06.
-> If you arrived from `@dapp-e2e/*` packages, see [docs/MIGRATION.md § Rebrand notice](./docs/MIGRATION.md#-rebrand-notice-2026-06-dapp-e2e--kiwa) for the old → new mapping (`@dapp-e2e/core` → `@kiwa/core`, `dapp-e2e` CLI → `kiwa` CLI). The API surface itself is unchanged — only the namespace prefix moved.
+> `dapp-e2e` was a Playwright-only E2E fixture; **kiwa** is the same fixture **plus** Layer 1 test design + Layer 2 contract test generators (Foundry / Hardhat). The Playwright fixture API itself is unchanged — see [docs/MIGRATION.md § Rebrand notice](./docs/MIGRATION.md#-rebrand-notice-2026-06-dapp-e2e--kiwa) for the package-name mapping.
 
 ---
 
 ## Why kiwa?
 
-Traditional dApp E2E tests rely on browser-extension wallets (MetaMask, Rabby, …) that introduce popup flake, version drift, and CI maintenance pain. **kiwa replaces the extension with a programmable `window.ethereum`**, runs anvil per test, and gives you full control over signing, chain state, and time — straight from Playwright.
+Writing tests for a dApp is **two jobs welded together**: testing the smart contracts (Foundry / Hardhat) and testing the UI + wallet flow (Playwright). Most teams pick one runner, write half the tests, miss critical viewpoints, and ship.
+
+**kiwa is the first toolchain that designs and generates all four test layers from a single, opinionated spec.** "kiwa" means **edge / boundary / limit** in Japanese — exactly what good tests prove.
 
 ```mermaid
-graph LR
-    A[Playwright test] --> B[kiwa fixture]
-    B --> C[Inject window.ethereum]
-    B --> D[Spawn anvil]
-    B --> E[Deploy contracts]
-    C --> F[Your dApp UI]
-    D --> F
-    E --> F
-    F --> G[Assert on state + UI]
+graph TD
+    A[Your contract.sol + dApp UI] --> B["/kiwa-design Layer 1"]
+    B --> C[.context/spec/contract/test-spec-X.md<br/>9 sections / 9 columns]
+    B --> D[.context/spec/e2e/test-spec-X.md]
+    C --> E["/kiwa-forge → Foundry .t.sol"]
+    C --> F["/kiwa-hardhat → Hardhat .test.cjs"]
+    D --> G["/kiwa-play → Playwright .spec.ts"]
+    E --> H[forge test + coverage]
+    F --> I[npx hardhat test + coverage]
+    G --> J[playwright test + 4-round flake check]
+    H --> K[Lines ≥90% · Branches ≥80%]
+    I --> K
+    J --> L[zero flake across 4 runs]
 ```
 
-| | Browser extension wallet | kiwa |
+|  | Pick one runner | kiwa (4 layers) |
 |---|---|---|
-| Setup time | Install MetaMask, seed phrase, network add … | `pnpm dlx @kiwa/cli init` |
-| Popup interaction | Required (flaky) | None |
-| Chain isolation per test | Manual | Automatic (`snapshotChain` / `revertChain`) |
-| Multi-wallet (EIP-6963) | Manual install per wallet | Declarative config |
-| Time travel (vesting / TTL) | Hard | `increaseTime(client, sec)` |
-| CI cost | High (browser + extension) | Low (headless Chromium) |
+| Test design | Manual checklist, varies by author | 10-viewpoint catalog + 5-risk scoring, deterministic |
+| Contract tests (Foundry) | Hand-written `.t.sol` | Auto-generated from Layer 1 spec |
+| Contract tests (Hardhat) | Hand-written `.test.ts` | Auto-generated, same TC IDs as Foundry |
+| dApp e2e tests | Hand-written Playwright | Auto-generated, extends existing tests safely |
+| Coverage gate | Optional, often skipped | **Enforced** by the skill itself (4 metrics) |
+| Flake detection | Ad-hoc | Built-in 4-round loop |
 
-See [docs/COMPARISON.md](./docs/COMPARISON.md) for a deeper comparison with Synpress / wallet-mock.
+> Already have a contract or dApp? See [docs/en/cookbook/test-design-flow.md](./docs/en/cookbook/test-design-flow.md) — the chain is designed **retrofit-first**, reverse-engineering specs from existing code.
+
+---
+
+## What's in the box
+
+kiwa ships in two halves that work together but stand alone:
+
+### 1. Claude Code skills (4 skills, the design + generation half)
+
+| Skill | Layer | Role |
+|---|---|---|
+| [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) | **Layer 1** | Reverse-engineer a 9-section / 9-column test spec from existing contracts, APIs, screens, or written feature specs |
+| [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) | **Layer 2** (contract) | Layer 1 spec → Foundry `.t.sol` with fuzz / invariant / `vm.prank` / custom-error reverts, run `forge test`, gate on `forge coverage` |
+| [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) | **Layer 2** (contract) | Same Layer 1 spec → Hardhat `.test.cjs` with `chai-matchers` / `fast-check` / `loadFixture`, run `npx hardhat test`, gate on `solidity-coverage` |
+| [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) | **Layer 2** (e2e) | Layer 1 spec → Playwright `.spec.ts` + `prepare-env.ts`, 4-round flake check, extends existing tests via `--mode extend` |
+
+### 2. npm packages (the runtime fixture half)
+
+| Package | Use it for |
+|---|---|
+| [`@kiwa/core`](./packages/core) | Playwright fixture: inject `window.ethereum`, spawn `anvil`, sign, mine, time-travel, EIP-6963 multi-wallet, ERC-4337 smart accounts, custom-error helpers |
+| [`@kiwa/cli`](./packages/cli) | `kiwa init` scaffolds a Playwright project wired to `@kiwa/core` |
+
+You can use the **skills alone** (no npm dependency — they just generate test files) or the **fixture alone** (no Claude — just `pnpm add @kiwa/core`), or both together for the full chain.
+
+---
+
+## 4-layer chain (retrofit example: token-gating dApp)
+
+Run the chain against [`examples/nextjs-token-gating`](./examples/nextjs-token-gating) — already contains `GatedContent.sol` + `GateNFT.sol` + existing Playwright tests.
+
+```bash
+# Step 1: Generate a contract-side spec from the existing .sol files
+/kiwa-design --layer contract --module token-gating \
+  --input examples/nextjs-token-gating/contracts/GatedContent.sol
+# → .context/spec/contract/test-spec-token-gating.md (9 sections, 11 test cases across 6 viewpoints)
+
+# Step 2: Generate Foundry tests from that spec
+/kiwa-forge --module token-gating
+# → test/GatedContent.t.sol (20 tests including fuzz)
+# → forge test → 20/20 PASS
+# → forge coverage → Lines 100% / Branches 87.50%  ✅ passes the gate
+
+# Step 2': Generate Hardhat tests from the SAME spec (parallel)
+/kiwa-hardhat --module token-gating
+# → test/GatedContent.test.cjs (24 tests with fast-check)
+# → npx hardhat test → 24/24 PASS
+# → npx hardhat coverage → Branches 80.56%  ✅ passes the gate
+
+# Step 3: Extend the existing Playwright tests using the same spec
+/kiwa-play --mode extend --example nextjs-token-gating
+# → tests/gating.spec.ts adds missing viewpoints (no regression on 8 existing tests)
+# → pnpm test x4 rounds → 4/4 PASS, 0 flake
+```
+
+Same `TC-001 … TC-020` test IDs appear in **both** Foundry and Hardhat output — your team can pick a runner per developer without fragmenting the spec.
 
 ---
 
 ## Quickstart
+
+### Option A: Claude Code user (full 4-layer chain)
+
+```bash
+# 1. Clone & install
+git clone https://github.com/cardene777/kiwa.git && cd kiwa
+pnpm install
+
+# 2. In Claude Code, invoke the 4 skills against your contracts / dApp
+/kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
+/kiwa-forge --module your-module          # Foundry
+/kiwa-hardhat --module your-module        # Hardhat (parallel)
+/kiwa-play --mode new --example your-dapp # Playwright e2e
+```
+
+### Option B: Playwright fixture only (no Claude needed)
 
 ```bash
 pnpm dlx @kiwa/cli init
@@ -65,7 +144,7 @@ pnpm install
 pnpm exec playwright test
 ```
 
-> Prerequisites: Node.js 20+ · pnpm/npm/yarn · [Foundry](https://book.getfoundry.sh/) (`anvil`) · Playwright (`pnpm exec playwright install`)
+> Prerequisites: Node.js 20+ · pnpm/npm/yarn · [Foundry](https://book.getfoundry.sh/) (`anvil` + `forge`) · Playwright (`pnpm exec playwright install`)
 
 `init` scaffolds:
 
@@ -73,94 +152,111 @@ pnpm exec playwright test
 e2e/
 ├── connect.spec.ts         ← Playwright spec wired to dappE2eTest
 playwright.config.ts        ← Headless Chromium config
-package.json                ← test:e2e script + peer deps (if package.json exists)
+package.json                ← test:e2e script + peer deps
 ```
 
-That's it. Open `e2e/connect.spec.ts` and start writing tests against your dApp.
-
-> Before v0.1.0 is published to npm, clone this repo and run:
+> Before `@kiwa/*` v0.1.0 is published to npm, clone this repo and run:
 > `pnpm install && pnpm -F @kiwa/core -F @kiwa/cli build && node packages/cli/dist/index.js init`
 
 ---
 
 ## Features
 
-### Wallet · RPC · Fixture
+### Layer 1: Test design automation (`/kiwa-design`)
+
+- 📋 **9-section unified spec** — Target / Spec summary / Quality risks / Recommended composition / Viewpoints / Cases / Automated / Manual / Insufficient spec
+- 🎯 **10-viewpoint catalog** — Happy / Failure / Boundary / State transition / Permission / Validation / Idempotency / Concurrency / Performance / Security
+- ⚖️ **5-criteria risk scoring** — Revenue / Security / Data destruction / Frequency / Past incidents → drives test priority deterministically
+- 📄 **9-column case table** — Test ID / Level / Viewpoint / Precondition / Input / Steps / Expected / Priority / Automation
+- 🔁 **Retrofit-first** — reverse-engineers specs from existing `.sol`, `app/`, `tests/`, OpenAPI specs
+
+### Layer 2: Contract test generators (`/kiwa-forge` + `/kiwa-hardhat`)
+
+- 🔨 **Foundry mapping** — fuzz / invariant + Handler / `vm.prank` / `vm.expectRevert(Error.selector)` / `vm.warp` / `--gas-report`
+- ⚒️ **Hardhat mapping** — `chai-matchers` `revertedWithCustomError` / `fast-check` `asyncProperty` / `loadFixture` / `hardhat-gas-reporter`
+- 🪞 **Mirror generation** — both runners produce the same `TC-NNN` IDs from one spec; teams can run Foundry, Hardhat, or both
+- 🛡️ **Coverage gate enforced** — Lines ≥ 90%, Statements ≥ 90%, **Branches ≥ 80%**, Funcs ≥ 90%. The skill won't write `test-passed` marker until all four metrics pass
+
+### Layer 2: dApp E2E fixture (`/kiwa-play` + `@kiwa/core`)
 
 - 🦊 **Inject `window.ethereum`** without any browser extension
 - ⚡ **Spawn anvil per test** for total chain isolation
 - 🔌 **9 RPC methods handled directly** (`eth_requestAccounts` / `personal_sign` / `eth_signTypedData_v4` / `eth_sendTransaction` / `wallet_switchEthereumChain` …), the rest forwarded to anvil
 - 📡 **EIP-1193 events** — `accountsChanged` / `chainChanged` / `connect` / `disconnect` triggerable from tests
 - 👛 **EIP-6963 multi-wallet** — declare MetaMask, Rabby, Coinbase, … side-by-side
-- 🤖 **Smart contract account (AA)** — set `isContractAccount: true` and kiwa reroutes `personal_sign` / `eth_signTypedData_v4` through EIP-1271, `eth_sendTransaction` through `execute()`, and `eth_accounts` to the smart account address
+- 🤖 **Smart contract account (AA)** — `isContractAccount: true` reroutes `personal_sign` through EIP-1271, `eth_sendTransaction` through `execute()`
 - 📦 **viem as peer dep** — your project owns the version
+- 🔁 **`--mode extend`** — appends new viewpoints without breaking existing tests, 4-round flake check built in
 - ❌ **error envelope** preserves `code` and `message` across page boundaries
 
-### Test helpers (v0.2+)
-
-Industry-standard helpers (hardhat / foundry / viem / hardhat-chai-matchers compatible) consolidated into `@kiwa/core`:
+### Industry-standard helpers (`@kiwa/core`)
 
 | Helper | Purpose |
 |---|---|
 | `snapshotChain` / `revertChain` | Per-test isolation via `evm_snapshot` / `evm_revert` |
 | `expectCustomError` | One-liner Solidity custom-error assertion |
 | `increaseTime` / `mineBlock` / `setNextBlockTimestamp` | Time travel for vesting / TTL / timelock |
-| `impersonateAccount` / `stopImpersonateAccount` / `setBalance` | Call as arbitrary EOA / contract with injected balance |
+| `impersonateAccount` / `stopImpersonateAccount` / `setBalance` | Act as arbitrary EOA / contract with injected balance |
 | `startAnvilCluster` | Multi-chain (L1 + L2 + …) anvil cluster |
 | `startAnvilFork` | `anvil --fork-url` thin wrapper (mainnet / sepolia / any RPC) |
 | `expectEvent` | `decodeEventLog` + assertion combined |
 | `expectBalanceChange` / `expectEthBalanceChange` | Balance delta assertion (hardhat-chai-matchers compatible) |
 
-### Claude Code skill
+---
 
-`.claude/skills/kiwa-play/` ships a [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) skill that walks you from project scan → **test spec generation** → implementation → 4-round flake check. Built-in references include 19-example index, fixture API, troubleshooting, and 9 adversarial-review pitfalls.
+## Coverage requirement
 
-### Out of scope (by design)
+`/kiwa-forge` and `/kiwa-hardhat` **block the `test-passed` marker** until all four coverage metrics clear thresholds. Default values (tuned for OSS-grade smart contracts):
 
-- Wallet popup UX / visual regression of extensions (use real extension tests for that)
-- Mainnet RPC traffic (use `startAnvilFork` with pinned block to cap upstream cost)
+| Metric | Default threshold | Rationale |
+|---|---|---|
+| Lines | 90 % | Cover the primary paths fully |
+| Statements | 90 % | Statement-level coverage |
+| **Branches** | **80 %** | 100% on Solidity `require` / `revert` / short-circuit is impractical |
+| Functions | 90 % | Cover every `public` / `external` function |
+
+If any metric falls short, the skill **records the under-covered viewpoints / error paths / events back into the Layer 1 spec's "Insufficient spec" section** so the next loop can address them — instead of silently signing off on weak tests.
+
+Override with `--coverage-lines 95 --coverage-branches 85` etc.
 
 ---
 
 ## Examples
 
-20 reference dApps live under [`examples/`](./examples/), **166 tests** total (incl. full ERC-4337 v0.7 lifecycle), **4 rounds back-to-back PASS** (664 assertions, 0 flake).
+### Retrofit examples with verified Foundry / Hardhat / Playwright chains
 
-### Framework integration
+These three examples have **forge test + hardhat test (where applicable) + playwright test, all in 4-round zero-flake state, with coverage gates passed**:
 
-| Example | Stack | Tests |
+| Example | Contract tests (Foundry) | Contract tests (Hardhat) | E2E tests (Playwright) | Coverage (Lines / Branches) |
+|---|---|---|---|---|
+| [`mint-nft`](./examples/mint-nft) | 27 / 27 | 24 / 24 | (covered by basic-connect) | Foundry 97.70 / 83.33 · Hardhat 93.75 / 80.56 |
+| [`defi-swap`](./examples/defi-swap) | 17 / 17 | — | (covered by basic-connect) | 100 / 87.50 |
+| [`nextjs-token-gating`](./examples/nextjs-token-gating) | 20 / 20 | — | 8 existing PASS | 100 / 87.50 |
+
+### dApp E2E reference (`@kiwa/core` fixture)
+
+20 reference dApps live under [`examples/`](./examples/), proving the fixture against a wide stack:
+
+| Example | Stack / Domain | E2E tests |
 |---|---|---|
-| [`nextjs-wagmi-rainbow`](./examples/nextjs-wagmi-rainbow) | Next.js 14 App Router + wagmi v2 + RainbowKit | 4 |
-| [`vite-react-wagmi`](./examples/vite-react-wagmi) | Vite 5 + React 18 + wagmi v2 + RainbowKit (SPA) | 3 |
-
-### dApp category
-
-| Example | Domain | Tests |
-|---|---|---|
-| [`nextjs-erc1155-game`](./examples/nextjs-erc1155-game) | ERC-1155 batch mint / transfer / burn | 8 |
+| [`basic-connect`](./examples/basic-connect) | inline HTML + EIP-6963 + reject paths | 15 |
+| [`nextjs-wagmi-rainbow`](./examples/nextjs-wagmi-rainbow) | Next.js 14 + wagmi v2 + RainbowKit | 4 |
+| [`vite-react-wagmi`](./examples/vite-react-wagmi) | Vite 5 + React 18 + wagmi v2 (SPA) | 3 |
+| [`nextjs-aa-erc4337`](./examples/nextjs-aa-erc4337) ⭐ | Full ERC-4337 v0.7 (EntryPoint + SimpleAccountFactory + UserOp bundler stub) | 7 |
+| [`nextjs-aa-smart-account`](./examples/nextjs-aa-smart-account) | Simplified ERC-4337 + ERC-1271 + guardian recovery | 10 |
 | [`nextjs-multi-chain`](./examples/nextjs-multi-chain) | 3-chain parallel anvil + chain switch | 6 |
+| [`nextjs-bridge`](./examples/nextjs-bridge) | L1 ↔ L2 lock / mint / burn / unlock | 10 |
 | [`nextjs-permit-swap`](./examples/nextjs-permit-swap) | EIP-2612 permit + deadline | 6 |
 | [`nextjs-dao-vote`](./examples/nextjs-dao-vote) | Compound-style Governor + timelock + quorum | 10 |
 | [`nextjs-lending`](./examples/nextjs-lending) | Aave-style lending + liquidation + max LTV | 10 |
 | [`nextjs-staking`](./examples/nextjs-staking) | Stake + reward + early-unstake penalty | 12 |
-| [`nextjs-bridge`](./examples/nextjs-bridge) | L1 ↔ L2 lock / mint / burn / unlock | 10 |
-| [`nextjs-aa-smart-account`](./examples/nextjs-aa-smart-account) | ERC-4337 (simplified) + ERC-1271 + guardian recovery | 10 |
-| [`nextjs-aa-erc4337`](./examples/nextjs-aa-erc4337) ⭐ v0.3 | Full ERC-4337 v0.7 (EntryPoint + SimpleAccountFactory + UserOperation bundler stub + EIP-1271 + dappE2e isContractAccount fixture integration) | 7 |
+| [`nextjs-erc1155-game`](./examples/nextjs-erc1155-game) | ERC-1155 batch mint / transfer / burn | 8 |
+| [`nextjs-vesting`](./examples/nextjs-vesting) | Cliff + linear vesting + immutability | 9 |
+| [`nextjs-token-gating`](./examples/nextjs-token-gating) | NFT-gated content + timed access + transfer revoke | 8 |
 | [`nextjs-ens-resolver`](./examples/nextjs-ens-resolver) | ENS-like forward / reverse + collision | 7 |
 | [`nextjs-event-history`](./examples/nextjs-event-history) | Past event query + multi-indexed filter | 7 |
-| [`nextjs-token-gating`](./examples/nextjs-token-gating) | NFT-gated content + timed access + transfer revoke | 8 |
 | [`nextjs-zk-verifier`](./examples/nextjs-zk-verifier) | Commit-reveal + range proof variant | 7 |
-| [`nextjs-vesting`](./examples/nextjs-vesting) | Cliff + linear vesting + immutability | 9 |
-| [`nextjs-wagmi-rainbow`](./examples/nextjs-wagmi-rainbow) | wagmi + RainbowKit + RPC reconnect | 4 |
-
-### Low-level (inline HTML, no framework)
-
-| Example | Purpose | Tests |
-|---|---|---|
-| [`basic-connect`](./examples/basic-connect) | `window.ethereum` direct + EIP-6963 + reject paths | 15 |
-| [`mint-nft`](./examples/mint-nft) | ERC-721 mint + batch + supply cap + EIP-2981 | 8 |
 | [`nft-marketplace`](./examples/nft-marketplace) | List / buy / offer / royalty split | 12 |
-| [`defi-swap`](./examples/defi-swap) | ERC-20 approve + swap + slippage / insufficient liquidity | 7 |
 
 ---
 
@@ -195,6 +291,29 @@ When `wallets` is unset, a single MetaMask-compatible wallet runs (backward comp
 
 ---
 
+## Testing & Quality
+
+Phase E rebrand snapshot (main @ `b7267a7`):
+
+| Metric | Value |
+|---|---|
+| 4-layer chain examples | **3** (mint-nft / defi-swap / nextjs-token-gating) |
+| Foundry tests across 3 examples | **64** (27 + 17 + 20) |
+| Hardhat tests (mint-nft) | **24** |
+| Playwright tests (basic-connect) | **15** |
+| **4-round execution total** | **292 PASS** (164 Foundry + 68 Hardhat + 60 Playwright) |
+| **Flaky** | **0 / 292** |
+| Coverage Lines | **93.75 – 100 %** across all chains |
+| Coverage Branches | **80.56 – 87.50 %** across all chains |
+| Coverage Functions | **95.24 – 100 %** |
+| Adversarial review findings (resolved) | 21 (5 CRITICAL / 9 MAJOR / 7 MINOR, all closed in-PR) |
+
+The 4-round flake check is mandatory before any release tag — runner at [`.context/scratch/multi-round-all-examples.sh`](./examples) (developer-side).
+
+Adversarial review patterns are catalogued in [`adversarial-pitfalls.md`](./.claude/skills/kiwa-play/references/adversarial-pitfalls.md) as a self-check checklist for false positives.
+
+---
+
 ## Documentation
 
 Full 5-section docs (Quickstart / Concepts / API / Cookbook / FAQ) maintained in **JP↔EN 1:1 translation** under [`docs/`](./docs/).
@@ -204,39 +323,24 @@ Full 5-section docs (Quickstart / Concepts / API / Cookbook / FAQ) maintained in
 
 Reference docs:
 
-| | |
+|  |  |
 |---|---|
+| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) ⭐ | **SSOT for all 4 skills** (5-step flow, 9-section output, 10 viewpoints, 5 risk criteria) |
+| [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | Wallet / SDK mock fidelity spec (A/B/C levels, scoring rubric) |
+| [`docs/en/cookbook/test-design-flow.md`](./docs/en/cookbook/test-design-flow.md) ⭐ | **4-layer chain walkthrough** (retrofit-first) |
 | [`docs/RPC.md`](./docs/RPC.md) | 9 directly-handled RPC + anvil fallback |
 | [`docs/EVENTS.md`](./docs/EVENTS.md) | 4 events + `triggerEvent()` |
 | [`docs/ERRORS.md`](./docs/ERRORS.md) | EIP-1193 error code + envelope design |
-| [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.x breaking-change policy |
+| [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.x breaking-change policy + dapp-e2e → kiwa rebrand notice |
 | [`docs/COMPARISON.md`](./docs/COMPARISON.md) | Synpress / wallet-mock comparison |
-| [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | Wallet / SDK mock fidelity spec (A/B/C levels, scoring rubric) ⭐ |
-| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) | Test-design skill spec (5-step flow, 9-section output, 3 layers) ⭐ |
 | [`docs/RELEASING.md`](./docs/RELEASING.md) | Publish flow + provenance |
 
-For Claude Code users:
+For Claude Code users — full skill reference:
 
-- [`.claude/skills/kiwa-play/SKILL.md`](./.claude/skills/kiwa-play/SKILL.md) — the `/kiwa-play` skill (spec → impl → 4-round flow)
-- [`example-patterns.md`](./.claude/skills/kiwa-play/references/example-patterns.md) — 19-example index by use case
-- [`adversarial-pitfalls.md`](./.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 9 false-positive patterns + self-check checklist
-
----
-
-## Testing & Quality
-
-| Metric | Value |
-|---|---|
-| Total tests | **166** |
-| Round-by-round PASS | **4 / 4** (back-to-back, no flake) |
-| Total assertions | 664 |
-| Examples | 20 |
-| Adversarial review findings (resolved) | 9 (3 CRITICAL / 4 MAJOR / 2 MINOR) |
-| Avg test duration | ~50s per example |
-
-All 19 examples must pass 4 rounds in a row before a release tag is cut. The runner lives at [`.context/scratch/multi-round-all-examples.sh`](./.context/scratch/multi-round-all-examples.sh) (developer-side).
-
-Adversarial review findings from Phase C-5/6/7 (PRs [#145](https://github.com/cardene777/kiwa/pull/145) / [#146](https://github.com/cardene777/kiwa/pull/146) / [#147](https://github.com/cardene777/kiwa/pull/147)) were all resolved in-PR. The patterns are catalogued in [`adversarial-pitfalls.md`](./.claude/skills/kiwa-play/references/adversarial-pitfalls.md) as a learning resource.
+- [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) — Layer 1 spec generator
+- [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) — Foundry generator
+- [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) — Hardhat generator
+- [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) — Playwright generator + 19-example index + 9 false-positive patterns
 
 ---
 
@@ -244,6 +348,7 @@ Adversarial review findings from Phase C-5/6/7 (PRs [#145](https://github.com/ca
 
 - 🐛 [Open an issue](https://github.com/cardene777/kiwa/issues)
 - 🔀 [Send a pull request](https://github.com/cardene777/kiwa/pulls)
+- 🗺️ Phase F roadmap is tracked at issues [#187 – #191](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Aenhancement+sort%3Acreated-desc)
 - 💡 Check [`docs/MIGRATION.md`](./docs/MIGRATION.md) before reporting breaking-change concerns
 
 ---
@@ -254,7 +359,7 @@ Adversarial review findings from Phase C-5/6/7 (PRs [#145](https://github.com/ca
 
 <div align="center">
 
-Made with ⚡ by the kiwa contributors.
+Made with ⚡ by the kiwa contributors. **Test to the edge.**
 
 **[⬆ Back to top](#kiwa)**
 

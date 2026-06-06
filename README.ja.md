@@ -2,20 +2,21 @@
 
 # kiwa
 
-**dApp 向けの headless E2E テスト fixture — ブラウザ拡張不要、 MetaMask popup 不要、 flake 0。**
+**設計・実装・検証 — dApp と smart contract のテスト全 layer を、 1 つの仕様書から自動化。**
 
-Playwright × viem × anvil。 `window.ethereum` の inject から contract deploy / EIP-712 署名 / block mine まで、 1 つの fixture で完結。
+1 つの Layer 1 仕様書から Foundry `.t.sol` / Hardhat `.test.cjs` / Playwright `.spec.ts` を並列生成。 **4 metric のカバレッジ閾値を skill 側で必須化**。
 
 [![npm version](https://img.shields.io/npm/v/@kiwa/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa/core)
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa/core)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
-[![tests](https://img.shields.io/badge/tests-166%20passed-success)](#testing--quality)
-[![flaky](https://img.shields.io/badge/flaky-0%2F664-success)](#testing--quality)
+[![tests](https://img.shields.io/badge/tests-292%20execution%20PASS-success)](#testing--quality)
+[![flaky](https://img.shields.io/badge/flaky-0%2F292-success)](#testing--quality)
+[![coverage](https://img.shields.io/badge/coverage-Lines%2090%2B%20%2F%20Branches%2080%2B-success)](#coverage-requirement)
 [![ERC-4337](https://img.shields.io/badge/ERC--4337-v0.7%20supported-9333ea)](./docs/ja/cookbook/smart-wallet-aa.md)
 [![typescript](https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript&logoColor=white)](./tsconfig.json)
-[![claude code](https://img.shields.io/badge/Claude%20Code-skill%20ready-d97706?logo=anthropic&logoColor=white)](./.claude/skills/kiwa-play/SKILL.md)
+[![claude code](https://img.shields.io/badge/Claude%20Code-4%20skills-d97706?logo=anthropic&logoColor=white)](./docs/SKILL-DESIGN.ja.md)
 
-[**Quickstart**](#quickstart) • [**Features**](#features) • [**Examples**](#examples) • [**Docs**](./docs/ja/README.md) • [**Cookbook**](./docs/ja/cookbook/README.md) • [**FAQ**](./docs/ja/faq.md)
+[**Quickstart**](#quickstart) • [**4 layer 連携**](#4-layer-chain) • [**機能**](#features) • [**Examples**](#examples) • [**Docs**](./docs/ja/README.md) • [**Cookbook**](./docs/ja/cookbook/README.md) • [**FAQ**](./docs/ja/faq.md)
 
 [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
@@ -24,40 +25,118 @@ Playwright × viem × anvil。 `window.ethereum` の inject から contract depl
 ---
 
 > 🎨 **リブランド通知**: 本プロジェクトは 2026 年 6 月に `dapp-e2e` から **kiwa** (際) に改名しました。
-> 旧 `@dapp-e2e/*` パッケージから来た利用者は [docs/MIGRATION.md § Rebrand notice](./docs/MIGRATION.md#-rebrand-notice-2026-06-dapp-e2e--kiwa) で旧→新の対応表を参照してください (`@dapp-e2e/core` → `@kiwa/core`、 CLI `dapp-e2e` → `kiwa`)。 API シグネチャ自体は変更なく、 名前空間 prefix だけが変わりました。
+> 旧 `dapp-e2e` は Playwright e2e fixture のみでしたが、 **kiwa** は同 fixture **+** Layer 1 テスト設計 + Layer 2 contract test 生成 (Foundry / Hardhat) を加えたツール群です。 Playwright fixture の API は変更なし。 詳細は [docs/MIGRATION.md § Rebrand notice](./docs/MIGRATION.md#-rebrand-notice-2026-06-dapp-e2e--kiwa) を参照。
 
 ---
 
 ## なぜ kiwa か
 
-従来の dApp E2E test は MetaMask / Rabby などのブラウザ拡張に依存し、 popup flake / version drift / CI 維持コストに苦しんできました。 **kiwa は拡張機能をプログラマブルな `window.ethereum` に置き換え** 、 test ごとに anvil を起動し、 署名 / chain state / 時間操作を Playwright から完全に制御できます。
+dApp の test を書くには **2 つの仕事を同時に** こなす必要があります。 smart contract の test (Foundry / Hardhat) と、 UI + wallet flow の test (Playwright)。 多くの team が片方のランナーだけ選び、 test の半分しか書かず、 重要観点を見落としたまま release します。
+
+**kiwa は 1 つの仕様書から 4 つの test layer 全てを設計・生成する初めてのツールチェーンです。** "kiwa" は日本語で **際 / 境界 / 限界** — まさに良い test が証明する場所を意味します。
 
 ```mermaid
-graph LR
-    A[Playwright test] --> B[kiwa fixture]
-    B --> C[Inject window.ethereum]
-    B --> D[Spawn anvil]
-    B --> E[Deploy contracts]
-    C --> F[Your dApp UI]
-    D --> F
-    E --> F
-    F --> G[Assert on state + UI]
+graph TD
+    A[contract.sol + dApp UI] --> B["/kiwa-design Layer 1"]
+    B --> C[.context/spec/contract/test-spec-X.md<br/>9 section / 9 column]
+    B --> D[.context/spec/e2e/test-spec-X.md]
+    C --> E["/kiwa-forge → Foundry .t.sol"]
+    C --> F["/kiwa-hardhat → Hardhat .test.cjs"]
+    D --> G["/kiwa-play → Playwright .spec.ts"]
+    E --> H[forge test + coverage]
+    F --> I[npx hardhat test + coverage]
+    G --> J[playwright test + 4 round flake check]
+    H --> K[Lines 90%+ · Branches 80%+]
+    I --> K
+    J --> L[4 round 連続 flake 0 件]
 ```
 
-| | ブラウザ拡張 wallet | kiwa |
+|  | ランナー 1 つだけ採用 | kiwa (4 layer) |
 |---|---|---|
-| セットアップ | MetaMask install / seed phrase / network 追加 ... | `pnpm dlx @kiwa/cli init` |
-| popup 操作 | 必須 (flake の元) | なし |
-| test 間 chain 隔離 | 手動 | 自動 (`snapshotChain` / `revertChain`) |
-| Multi-wallet (EIP-6963) | wallet ごとに手動 install | 宣言的 config |
-| 時間操作 (vesting / TTL) | 困難 | `increaseTime(client, sec)` |
-| CI コスト | 高 (browser + extension) | 低 (headless Chromium) |
+| テスト設計 | 手動 checklist、 担当者依存 | 10 観点 catalog + 5 リスク基準で決定論的 |
+| Contract test (Foundry) | 手書き `.t.sol` | Layer 1 仕様書から自動生成 |
+| Contract test (Hardhat) | 手書き `.test.ts` | 自動生成、 Foundry と **同 TC ID** |
+| dApp e2e test | 手書き Playwright | 自動生成、 既存 test を壊さず extend |
+| Coverage gate | optional、 飛ばされがち | skill 側で **必須化** (4 metric) |
+| Flake 検出 | ad-hoc | 4 round loop が組み込み |
 
-Synpress / wallet-mock との詳細比較は [docs/COMPARISON.md](./docs/COMPARISON.md) を参照。
+> 既に動いている contract / dApp に test を追加したい場合 — [docs/ja/cookbook/test-design-flow.md](./docs/ja/cookbook/test-design-flow.md) を参照。 chain は **後付け導入を主用途** として設計されており、 既存コードから仕様を逆算します。
+
+---
+
+## 提供物
+
+kiwa は 2 つに分かれており、 連携も単独利用もできます。
+
+### 1. Claude Code skill 群 (4 skill、 設計 + 生成側)
+
+| Skill | Layer | 役割 |
+|---|---|---|
+| [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) | **Layer 1** | 既存 contract / API / 画面 / 機能仕様から 9 section + 9 column の test 仕様書を逆算生成 |
+| [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) | **Layer 2** (contract) | Layer 1 仕様 → Foundry `.t.sol` を fuzz / invariant / `vm.prank` / custom-error revert で生成、 `forge test` 実行、 `forge coverage` で gate |
+| [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) | **Layer 2** (contract) | 同 Layer 1 仕様 → Hardhat `.test.cjs` を `chai-matchers` / `fast-check` / `loadFixture` で生成、 `npx hardhat test` 実行、 `solidity-coverage` で gate |
+| [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) | **Layer 2** (e2e) | Layer 1 仕様 → Playwright `.spec.ts` + `prepare-env.ts` 生成、 4 round flake check、 `--mode extend` で既存 test を破壊せず追加 |
+
+### 2. npm パッケージ (runtime fixture 側)
+
+| パッケージ | 用途 |
+|---|---|
+| [`@kiwa/core`](./packages/core) | Playwright fixture: `window.ethereum` inject、 anvil 起動、 sign、 mine、 time-travel、 EIP-6963 multi-wallet、 ERC-4337 smart account、 custom-error helper |
+| [`@kiwa/cli`](./packages/cli) | `kiwa init` で `@kiwa/core` と連携した Playwright project を scaffold |
+
+**skill 単独** (npm 依存なし — test file を生成するだけ) でも、 **fixture 単独** (Claude なし — `pnpm add @kiwa/core` だけ) でも、 両方併用しても OK。
+
+---
+
+## 4-layer chain (後付け導入例: token-gating dApp)
+
+[`examples/nextjs-token-gating`](./examples/nextjs-token-gating) (既存 `GatedContent.sol` + `GateNFT.sol` + 既存 Playwright test) に対して chain を実行する例。
+
+```bash
+# Step 1: 既存 .sol から contract 用仕様書を生成
+/kiwa-design --layer contract --module token-gating \
+  --input examples/nextjs-token-gating/contracts/GatedContent.sol
+# → .context/spec/contract/test-spec-token-gating.md (9 section、 6 観点で 11 ケース)
+
+# Step 2: その仕様書から Foundry test を生成
+/kiwa-forge --module token-gating
+# → test/GatedContent.t.sol (fuzz 込み 20 test)
+# → forge test → 20/20 PASS
+# → forge coverage → Lines 100% / Branches 87.50%  ✅ gate 通過
+
+# Step 2': 同じ仕様書から Hardhat test を並列生成
+/kiwa-hardhat --module token-gating
+# → test/GatedContent.test.cjs (fast-check 込み 24 test)
+# → npx hardhat test → 24/24 PASS
+# → npx hardhat coverage → Branches 80.56%  ✅ gate 通過
+
+# Step 3: 既存 Playwright test を仕様書ベースで extend
+/kiwa-play --mode extend --example nextjs-token-gating
+# → tests/gating.spec.ts に不足観点を追加 (既存 8 test に regression なし)
+# → pnpm test x4 round → 4/4 PASS、 flake 0 件
+```
+
+同 `TC-001 … TC-020` test ID が Foundry と Hardhat の出力に揃って現れ、 team 内で「Foundry 派 / Hardhat 派」が同じ仕様書を共有可能。
 
 ---
 
 ## Quickstart
+
+### Option A: Claude Code 利用 (4 layer chain 全部)
+
+```bash
+# 1. clone & install
+git clone https://github.com/cardene777/kiwa.git && cd kiwa
+pnpm install
+
+# 2. Claude Code 内で 4 skill を契約 / dApp に対して起動
+/kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
+/kiwa-forge --module your-module          # Foundry
+/kiwa-hardhat --module your-module        # Hardhat (並立)
+/kiwa-play --mode new --example your-dapp # Playwright e2e
+```
+
+### Option B: Playwright fixture だけ使う (Claude 不要)
 
 ```bash
 pnpm dlx @kiwa/cli init
@@ -65,102 +144,119 @@ pnpm install
 pnpm exec playwright test
 ```
 
-> 前提: Node.js 20+ · pnpm/npm/yarn · [Foundry](https://book.getfoundry.sh/) (`anvil`) · Playwright (`pnpm exec playwright install`)
+> 前提: Node.js 20+ · pnpm/npm/yarn · [Foundry](https://book.getfoundry.sh/) (`anvil` + `forge`) · Playwright (`pnpm exec playwright install`)
 
 `init` で生成されるもの:
 
 ```text
 e2e/
-├── connect.spec.ts         ← dappE2eTest 経由の Playwright spec
-playwright.config.ts        ← headless Chromium 設定
-package.json                ← test:e2e script + peer deps (package.json が存在する場合)
+├── connect.spec.ts         ← dappE2eTest と接続済の Playwright spec
+playwright.config.ts        ← Headless Chromium config
+package.json                ← test:e2e script + peer deps
 ```
 
-これだけで `e2e/connect.spec.ts` を開いて自分の dApp の test を書き始められます。
-
-> v0.1.0 が npm に publish される前は、 本リポを clone して以下を実行:
+> `@kiwa/*` v0.1.0 が npm 公開される前は repo を clone して以下を実行:
 > `pnpm install && pnpm -F @kiwa/core -F @kiwa/cli build && node packages/cli/dist/index.js init`
 
 ---
 
 ## Features
 
-### Wallet · RPC · Fixture
+### Layer 1: テスト設計自動化 (`/kiwa-design`)
 
-- 🦊 **`window.ethereum` を inject** — ブラウザ拡張不要
-- ⚡ **test ごとに anvil を spawn** — chain 完全隔離
-- 🔌 **9 RPC を core が直接処理** (`eth_requestAccounts` / `personal_sign` / `eth_signTypedData_v4` / `eth_sendTransaction` / `wallet_switchEthereumChain` ...)、 残りは anvil へ forward
+- 📋 **9 section 統一仕様** — 対象機能 / 仕様の要約 / 主な品質リスク / 推奨テスト構成 / テスト観点一覧 / テストケース一覧 / 自動化すべきテスト / 手動確認でよいテスト / 不足している仕様
+- 🎯 **10 観点 catalog** — 正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ
+- ⚖️ **5 基準リスク評価** — 売上影響 / セキュリティ影響 / データ破壊リスク / 利用頻度 / 過去障害 → 優先度を機械的に導出
+- 📄 **9 column ケース表** — テスト ID / テストレベル / テスト観点 / 前提条件 / 入力値 / 操作手順 / 期待結果 / 優先度 / 自動化
+- 🔁 **後付け導入が主用途** — 既存 `.sol` / `app/` / `tests/` / OpenAPI spec から逆算
+
+### Layer 2: Contract test 生成 (`/kiwa-forge` + `/kiwa-hardhat`)
+
+- 🔨 **Foundry mapping** — fuzz / invariant + Handler / `vm.prank` / `vm.expectRevert(Error.selector)` / `vm.warp` / `--gas-report`
+- ⚒️ **Hardhat mapping** — `chai-matchers` `revertedWithCustomError` / `fast-check` `asyncProperty` / `loadFixture` / `hardhat-gas-reporter`
+- 🪞 **並列生成** — 両ランナーが同じ `TC-NNN` ID で出力。 team で Foundry / Hardhat / 両方併用 を自由に選択
+- 🛡️ **Coverage gate 必須化** — Lines ≥ 90%、 Statements ≥ 90%、 **Branches ≥ 80%**、 Funcs ≥ 90%。 4 metric 全部 PASS まで skill が `test-passed` marker を作りません
+
+### Layer 2: dApp E2E fixture (`/kiwa-play` + `@kiwa/core`)
+
+- 🦊 **`window.ethereum` inject** — ブラウザ拡張不要
+- ⚡ **test ごとに anvil 起動** — chain 隔離完全
+- 🔌 **9 RPC method 直接対応** (`eth_requestAccounts` / `personal_sign` / `eth_signTypedData_v4` / `eth_sendTransaction` / `wallet_switchEthereumChain` …)、 その他は anvil に forward
 - 📡 **EIP-1193 event** — `accountsChanged` / `chainChanged` / `connect` / `disconnect` を test から trigger 可能
-- 👛 **EIP-6963 multi-wallet** — MetaMask / Rabby / Coinbase ... を同時 inject
-- 🤖 **Smart contract account (AA)** — `isContractAccount: true` を宣言するだけで `personal_sign` / `eth_signTypedData_v4` を EIP-1271 経由に、 `eth_sendTransaction` を `execute()` 経由に、 `eth_accounts` を smart account address 返却に自動振替
-- 📦 **viem を peer dependency** — version はプロジェクト側で管理
-- ❌ **error envelope** で EIP-1193 の `code` / `message` を page 境界の先まで保持
+- 👛 **EIP-6963 multi-wallet** — MetaMask、 Rabby、 Coinbase 等を並立宣言
+- 🤖 **Smart contract account (AA)** — `isContractAccount: true` で `personal_sign` を EIP-1271、 `eth_sendTransaction` を `execute()` 経由に reroute
+- 📦 **viem は peer dep** — version を user 側で固定
+- 🔁 **`--mode extend`** — 既存 test を壊さず新規観点だけ追加、 4 round flake check 内蔵
+- ❌ **error envelope** — page 境界越しに `code` と `message` を保持
 
-### Test helpers (v0.2 以降)
-
-業界標準 (hardhat / foundry / viem / hardhat-chai-matchers) と並ぶ helper を core に集約:
+### 業界標準 helper (`@kiwa/core`)
 
 | Helper | 用途 |
 |---|---|
-| `snapshotChain` / `revertChain` | `evm_snapshot` / `evm_revert` wrapper、 test 間隔離 |
-| `expectCustomError` | Solidity custom error の検証を 1 関数化 |
-| `increaseTime` / `mineBlock` / `setNextBlockTimestamp` | 時間操作 (vesting / TTL / timelock) |
-| `impersonateAccount` / `stopImpersonateAccount` / `setBalance` | 任意 EOA / contract への impersonate + balance 注入 |
-| `startAnvilCluster` | multi-chain (L1 + L2 + ...) anvil cluster |
-| `startAnvilFork` | `anvil --fork-url` の thin wrapper (mainnet / sepolia / 任意 RPC) |
-| `expectEvent` | `decodeEventLog` + assertion 統合 |
-| `expectBalanceChange` / `expectEthBalanceChange` | hardhat-chai-matchers 互換の残高差分 assertion |
+| `snapshotChain` / `revertChain` | `evm_snapshot` / `evm_revert` で test 間隔離 |
+| `expectCustomError` | Solidity custom error 1 行 assertion |
+| `increaseTime` / `mineBlock` / `setNextBlockTimestamp` | vesting / TTL / timelock の時間操作 |
+| `impersonateAccount` / `stopImpersonateAccount` / `setBalance` | 任意 EOA / contract として balance 注入で呼び出し |
+| `startAnvilCluster` | Multi-chain (L1 + L2 + …) anvil cluster |
+| `startAnvilFork` | `anvil --fork-url` 薄 wrapper (mainnet / sepolia / 任意 RPC) |
+| `expectEvent` | `decodeEventLog` + assertion 一体 |
+| `expectBalanceChange` / `expectEthBalanceChange` | Balance delta assertion (hardhat-chai-matchers 互換) |
 
-### Claude Code skill
+---
 
-`.claude/skills/kiwa-play/` に [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) skill を同梱。 Claude Code から呼び出すとプロジェクト読込 → **test 仕様書生成** → 実装 → 4 round 連続 PASS 検証までを構造化フローで進められます。 19 example 用途別 index / fixture API / troubleshooting / 偽陽性パターン 9 種 + self-check 5 問が references にあります。
+## Coverage requirement
 
-### スコープ外 (意図的)
+`/kiwa-forge` と `/kiwa-hardhat` は 4 metric の閾値を満たすまで `test-passed` marker を **作りません**。 default (OSS 公開 smart contract 向け閾値):
 
-- wallet 拡張機能の popup UX / 見た目の差分 (実拡張 test ツールに任せる)
-- mainnet RPC への過剰トラフィック (`startAnvilFork` + pinned block で upstream コスト抑制)
+| Metric | Default 閾値 | 理由 |
+|---|---|---|
+| Lines | 90 % | 主要 path 全件 cover |
+| Statements | 90 % | 文単位の網羅 |
+| **Branches** | **80 %** | Solidity の `require` / `revert` / short-circuit で 100% は現実的でない |
+| Funcs | 90 % | 全 `public` / `external` 関数 cover |
+
+未達成の metric が 1 件でもあると、 skill は **不足観点 / 未テスト error path / 未テスト event を Layer 1 仕様書の「不足している仕様」 section に逆書き戻し**、 次 loop で補完できるように案内します。 弱い test を silent に sign off しません。
+
+引数で個別 override 可: `--coverage-lines 95 --coverage-branches 85` 等。
 
 ---
 
 ## Examples
 
-[`examples/`](./examples/) 配下に 20 個の参考実装 (full ERC-4337 v0.7 lifecycle 含む)、 合計 **166 test** が **4 round 連続 PASS** (664 assertion / flake 0) で安定化済みです。
+### 4 layer chain 動作実証済 example
 
-### Framework 統合
+以下 3 example は **forge test + hardhat test (該当時) + playwright test 全部 4 round 連続 flake 0 + coverage gate 通過** を確認済:
 
-| Example | Stack | Tests |
+| Example | Foundry test | Hardhat test | Playwright e2e | Coverage (Lines / Branches) |
+|---|---|---|---|---|
+| [`mint-nft`](./examples/mint-nft) | 27 / 27 | 24 / 24 | (basic-connect でカバー) | Foundry 97.70 / 83.33 · Hardhat 93.75 / 80.56 |
+| [`defi-swap`](./examples/defi-swap) | 17 / 17 | — | (basic-connect でカバー) | 100 / 87.50 |
+| [`nextjs-token-gating`](./examples/nextjs-token-gating) | 20 / 20 | — | 既存 8 PASS | 100 / 87.50 |
+
+### dApp E2E reference (`@kiwa/core` fixture)
+
+[`examples/`](./examples/) 配下の 20 dApp で fixture を様々な stack に対して実証:
+
+| Example | Stack / 対象 | E2E test |
 |---|---|---|
-| [`nextjs-wagmi-rainbow`](./examples/nextjs-wagmi-rainbow) | Next.js 14 App Router + wagmi v2 + RainbowKit | 4 |
-| [`vite-react-wagmi`](./examples/vite-react-wagmi) | Vite 5 + React 18 + wagmi v2 + RainbowKit (SPA) | 3 |
-
-### dApp カテゴリ別
-
-| Example | Domain | Tests |
-|---|---|---|
-| [`nextjs-erc1155-game`](./examples/nextjs-erc1155-game) | ERC-1155 batch mint / transfer / burn | 8 |
-| [`nextjs-multi-chain`](./examples/nextjs-multi-chain) | 3 chain 並走 anvil + chain switch | 6 |
-| [`nextjs-permit-swap`](./examples/nextjs-permit-swap) | EIP-2612 permit + deadline | 6 |
-| [`nextjs-dao-vote`](./examples/nextjs-dao-vote) | Compound 風 Governor + timelock + quorum | 10 |
-| [`nextjs-lending`](./examples/nextjs-lending) | Aave 風 lending + liquidation + max LTV | 10 |
-| [`nextjs-staking`](./examples/nextjs-staking) | Stake + reward + 早期 unstake penalty | 12 |
+| [`basic-connect`](./examples/basic-connect) | inline HTML + EIP-6963 + reject path | 15 |
+| [`nextjs-wagmi-rainbow`](./examples/nextjs-wagmi-rainbow) | Next.js 14 + wagmi v2 + RainbowKit | 4 |
+| [`vite-react-wagmi`](./examples/vite-react-wagmi) | Vite 5 + React 18 + wagmi v2 (SPA) | 3 |
+| [`nextjs-aa-erc4337`](./examples/nextjs-aa-erc4337) ⭐ | Full ERC-4337 v0.7 (EntryPoint + SimpleAccountFactory + UserOp bundler stub) | 7 |
+| [`nextjs-aa-smart-account`](./examples/nextjs-aa-smart-account) | Simplified ERC-4337 + ERC-1271 + guardian recovery | 10 |
+| [`nextjs-multi-chain`](./examples/nextjs-multi-chain) | 3-chain 並走 anvil + chain switch | 6 |
 | [`nextjs-bridge`](./examples/nextjs-bridge) | L1 ↔ L2 lock / mint / burn / unlock | 10 |
-| [`nextjs-aa-smart-account`](./examples/nextjs-aa-smart-account) | ERC-4337 (簡略) + ERC-1271 + guardian recovery | 10 |
-| [`nextjs-aa-erc4337`](./examples/nextjs-aa-erc4337) ⭐ v0.3 | Full ERC-4337 v0.7 (EntryPoint + SimpleAccountFactory + UserOperation bundler stub + EIP-1271 + dappE2e isContractAccount fixture 統合) | 7 |
-| [`nextjs-ens-resolver`](./examples/nextjs-ens-resolver) | ENS 風 forward / reverse + collision | 7 |
-| [`nextjs-event-history`](./examples/nextjs-event-history) | 過去 event 取得 + multi-indexed filter | 7 |
+| [`nextjs-permit-swap`](./examples/nextjs-permit-swap) | EIP-2612 permit + deadline | 6 |
+| [`nextjs-dao-vote`](./examples/nextjs-dao-vote) | Compound 型 Governor + timelock + quorum | 10 |
+| [`nextjs-lending`](./examples/nextjs-lending) | Aave 型 lending + liquidation + max LTV | 10 |
+| [`nextjs-staking`](./examples/nextjs-staking) | Stake + reward + early-unstake penalty | 12 |
+| [`nextjs-erc1155-game`](./examples/nextjs-erc1155-game) | ERC-1155 batch mint / transfer / burn | 8 |
+| [`nextjs-vesting`](./examples/nextjs-vesting) | Cliff + linear vesting + immutability | 9 |
 | [`nextjs-token-gating`](./examples/nextjs-token-gating) | NFT-gated content + timed access + transfer revoke | 8 |
+| [`nextjs-ens-resolver`](./examples/nextjs-ens-resolver) | ENS 型 forward / reverse + collision | 7 |
+| [`nextjs-event-history`](./examples/nextjs-event-history) | Past event query + multi-indexed filter | 7 |
 | [`nextjs-zk-verifier`](./examples/nextjs-zk-verifier) | Commit-reveal + range proof variant | 7 |
-| [`nextjs-vesting`](./examples/nextjs-vesting) | Cliff + linear vesting + 不変性 | 9 |
-| [`nextjs-wagmi-rainbow`](./examples/nextjs-wagmi-rainbow) | wagmi + RainbowKit + RPC reconnect | 4 |
-
-### 低レベル (inline HTML、 framework 抜き)
-
-| Example | 用途 | Tests |
-|---|---|---|
-| [`basic-connect`](./examples/basic-connect) | `window.ethereum` 直叩き + EIP-6963 + reject 経路 | 15 |
-| [`mint-nft`](./examples/mint-nft) | ERC-721 mint + batch + supply cap + EIP-2981 | 8 |
 | [`nft-marketplace`](./examples/nft-marketplace) | List / buy / offer / royalty split | 12 |
-| [`defi-swap`](./examples/defi-swap) | ERC-20 approve + swap + slippage / 流動性不足 | 7 |
 
 ---
 
@@ -191,60 +287,69 @@ test('multi wallet picker', async ({ page, dappE2e }) => {
 });
 ```
 
-`wallets` 未指定時は単一 MetaMask 互換 wallet で動作 (既存挙動互換)。
-
----
-
-## Documentation
-
-公開ドキュメントは 5 部構成 (Quickstart / Concepts / API / Cookbook / FAQ)、 **JP↔EN 1:1 対訳** で [`docs/`](./docs/) に。
-
-- 🇯🇵 [日本語ドキュメント](./docs/ja/README.md)
-- 🇬🇧 [English documentation](./docs/en/README.md)
-
-その他の reference:
-
-| | |
-|---|---|
-| [`docs/RPC.md`](./docs/RPC.md) | 直接処理する 9 RPC と anvil fallback |
-| [`docs/EVENTS.md`](./docs/EVENTS.md) | 4 event と `triggerEvent()` |
-| [`docs/ERRORS.md`](./docs/ERRORS.md) | EIP-1193 error code と envelope 設計 |
-| [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.x 系の破壊的変更ポリシー |
-| [`docs/COMPARISON.md`](./docs/COMPARISON.md) | Synpress / wallet-mock との使い分け |
-| [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | wallet / SDK mock 精度仕様書 (A/B/C 3 段階 + 5 観点スコアリング) ⭐ |
-| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) | テスト設計 skill 仕様書 (5 段階フロー + 9 section 出力 + 3 layer) ⭐ |
-| [`docs/RELEASING.md`](./docs/RELEASING.md) | publish 手順と provenance 設定 |
-
-Claude Code 利用者向け:
-
-- [`.claude/skills/kiwa-play/SKILL.md`](./.claude/skills/kiwa-play/SKILL.md) — `/kiwa-play` skill (test 仕様書 → 実装 → 4 round フロー)
-- [`example-patterns.md`](./.claude/skills/kiwa-play/references/example-patterns.md) — 19 example 用途別 index
-- [`adversarial-pitfalls.md`](./.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 偽陽性パターン 9 種 + self-check 5 問
+`wallets` 未設定なら MetaMask 互換の single wallet が走る (backward 互換)。
 
 ---
 
 ## Testing & Quality
 
-| 指標 | 値 |
+Phase E リブランド時点 (main @ `b7267a7`):
+
+| 項目 | 値 |
 |---|---|
-| 合計 test 数 | **166** |
-| 4 round 連続 PASS | **4 / 4** (flake 0) |
-| 合計 assertion 数 | 664 |
-| Example 数 | 20 |
-| Adversarial review findings (解消済) | 9 件 (3 CRITICAL / 4 MAJOR / 2 MINOR) |
-| 平均 test 時間 | 約 50 秒 / example |
+| 4 layer chain 動作実証 example | **3** (mint-nft / defi-swap / nextjs-token-gating) |
+| Foundry test (3 example 合計) | **64** (27 + 17 + 20) |
+| Hardhat test (mint-nft) | **24** |
+| Playwright test (basic-connect) | **15** |
+| **4 round 累計 execution** | **292 PASS** (Foundry 164 + Hardhat 68 + Playwright 60) |
+| **Flaky** | **0 / 292** |
+| Coverage Lines | **93.75 – 100 %** 全 chain で達成 |
+| Coverage Branches | **80.56 – 87.50 %** 全 chain で達成 |
+| Coverage Functions | **95.24 – 100 %** |
+| Adversarial review findings (解消済) | 21 件 (5 CRITICAL / 9 MAJOR / 7 MINOR、 全 PR 内修正) |
 
-release tag を切る前に 19 example 全てが 4 round 連続 PASS することを必須化しています。 runner は [`.context/scratch/multi-round-all-examples.sh`](./.context/scratch/multi-round-all-examples.sh) (開発側)。
+release tag を切る前の 4 round flake check は必須。 runner は [`.context/scratch/multi-round-all-examples.sh`](./examples) (developer 側)。
 
-Phase C-5/6/7 の adversarial review findings (PR [#145](https://github.com/cardene777/kiwa/pull/145) / [#146](https://github.com/cardene777/kiwa/pull/146) / [#147](https://github.com/cardene777/kiwa/pull/147)) は全て同 PR 内で解決済。 パターンは [`adversarial-pitfalls.md`](./.claude/skills/kiwa-play/references/adversarial-pitfalls.md) に教材として集約しています。
+Adversarial review pattern は [`adversarial-pitfalls.md`](./.claude/skills/kiwa-play/references/adversarial-pitfalls.md) に偽陽性 self-check checklist として整理。
+
+---
+
+## Documentation
+
+5 section (Quickstart / Concepts / API / Cookbook / FAQ) の docs を **JP↔EN 1:1 対訳** で [`docs/`](./docs/) に維持。
+
+- 🇬🇧 [English documentation](./docs/en/README.md)
+- 🇯🇵 [日本語ドキュメント](./docs/ja/README.md)
+
+Reference docs:
+
+|  |  |
+|---|---|
+| [`docs/SKILL-DESIGN.ja.md`](./docs/SKILL-DESIGN.ja.md) ⭐ | **4 skill 共通 SSOT** (5 段階フロー / 9 section 出力 / 10 観点 / 5 リスク基準) |
+| [`docs/MOCK-DESIGN.ja.md`](./docs/MOCK-DESIGN.ja.md) | Wallet / SDK mock 精度仕様 (A/B/C level、 scoring rubric) |
+| [`docs/ja/cookbook/test-design-flow.md`](./docs/ja/cookbook/test-design-flow.md) ⭐ | **4 layer chain walkthrough** (後付け導入起点) |
+| [`docs/RPC.md`](./docs/RPC.md) | 9 直接対応 RPC + anvil fallback |
+| [`docs/EVENTS.md`](./docs/EVENTS.md) | 4 event + `triggerEvent()` |
+| [`docs/ERRORS.md`](./docs/ERRORS.md) | EIP-1193 error code + envelope 設計 |
+| [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.x breaking change policy + dapp-e2e → kiwa リブランド案内 |
+| [`docs/COMPARISON.md`](./docs/COMPARISON.md) | Synpress / wallet-mock 比較 |
+| [`docs/RELEASING.md`](./docs/RELEASING.md) | Publish flow + provenance |
+
+Claude Code 利用者向け — 4 skill 完全リファレンス:
+
+- [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) — Layer 1 仕様書生成
+- [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) — Foundry 生成
+- [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) — Hardhat 生成
+- [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) — Playwright 生成 + 19 example index + 偽陽性 9 pattern
 
 ---
 
 ## Contributing
 
-- 🐛 [Issue を起票](https://github.com/cardene777/kiwa/issues)
-- 🔀 [Pull Request を送る](https://github.com/cardene777/kiwa/pulls)
-- 💡 破壊的変更の確認は [`docs/MIGRATION.md`](./docs/MIGRATION.md) を参照
+- 🐛 [Issue を起票する](https://github.com/cardene777/kiwa/issues)
+- 🔀 [Pull request を送る](https://github.com/cardene777/kiwa/pulls)
+- 🗺️ Phase F roadmap は Issue [#187 – #191](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Aenhancement+sort%3Acreated-desc) で管理
+- 💡 Breaking change の指摘前に [`docs/MIGRATION.md`](./docs/MIGRATION.md) を確認
 
 ---
 
@@ -254,7 +359,7 @@ Phase C-5/6/7 の adversarial review findings (PR [#145](https://github.com/card
 
 <div align="center">
 
-Made with ⚡ by the kiwa contributors.
+Made with ⚡ by the kiwa contributors. **際 (きわ) まで試す。**
 
 **[⬆ トップへ戻る](#kiwa)**
 
