@@ -29,23 +29,23 @@ For exercising the framework-integration flow (`anvil + forge build + forge crea
 |---|---|---|
 | [basic-connect](../../../examples/basic-connect/README.md) | A single inline HTML page for connect / sign / sendTx / EIP-6963 multi-wallet | Ready |
 | [nextjs-wagmi-rainbow](../../../examples/nextjs-wagmi-rainbow/README.md) | Next.js + wagmi + RainbowKit, mint flow through useAccount / useReadContract / useWriteContract | Ready |
-| nextjs-aa-erc4337 | ERC-4337 Account Abstraction (Smart Account) | follow-up |
-| nextjs-aa-smart-account | Smart Account basics | follow-up |
-| nextjs-bridge | L1 ↔ L2 bridge flow | follow-up |
-| nextjs-dao-vote | DAO vote contract + UI | follow-up |
-| nextjs-ens-resolver | ENS resolver | follow-up |
-| nextjs-erc1155-game | ERC1155 game items | follow-up |
-| nextjs-event-history | Event search / history view | follow-up |
-| nextjs-lending | Lending pool + price oracle | follow-up |
-| nextjs-multi-chain | Multi-chain switch (chainRegistry) | follow-up |
-| nextjs-permit-swap | EIP-2612 permit + swap | follow-up |
-| nextjs-staking | Staking + reward distribution | follow-up |
-| nextjs-token-gating | Gated content + timed grant (F-1 wave 1) | follow-up |
-| nextjs-vesting | Token vesting schedule | follow-up |
-| nextjs-zk-verifier | zk-proof verifier | follow-up |
-| vite-react-wagmi | Vite + React + wagmi setup | follow-up |
+| [nextjs-aa-erc4337](../../../examples/nextjs-aa-erc4337/README.md) | Full ERC-4337 v0.7 Account Abstraction (EntryPoint + Smart Account) | Ready |
+| [nextjs-aa-smart-account](../../../examples/nextjs-aa-smart-account/README.md) | Simplified Smart Account (Paymaster / TokenSpender / guardian / ERC-1271) | Ready |
+| [nextjs-bridge](../../../examples/nextjs-bridge/README.md) | L1 ↔ L2 bridge (two anvils + lock/mint/burn/unlock) | Ready |
+| [nextjs-dao-vote](../../../examples/nextjs-dao-vote/README.md) | DAO vote contract + execute target | Ready |
+| [nextjs-ens-resolver](../../../examples/nextjs-ens-resolver/README.md) | ENS-style name → address resolver | Ready |
+| [nextjs-erc1155-game](../../../examples/nextjs-erc1155-game/README.md) | ERC1155 game items (inventory / burn) | Ready |
+| [nextjs-event-history](../../../examples/nextjs-event-history/README.md) | Event emit / getLogs / history rendering | Ready |
+| [nextjs-lending](../../../examples/nextjs-lending/README.md) | Lending pool + price oracle + liquidation | Ready |
+| [nextjs-multi-chain](../../../examples/nextjs-multi-chain/README.md) | 3-chain anvil cluster + chain switch | Ready |
+| [nextjs-permit-swap](../../../examples/nextjs-permit-swap/README.md) | EIP-2612 permit + gasless swap | Ready |
+| [nextjs-staking](../../../examples/nextjs-staking/README.md) | Staking + reward accrual + withdraw | Ready |
+| [nextjs-token-gating](../../../examples/nextjs-token-gating/README.md) | Gated content + timed grant (F-1 wave 1 Hardhat lane) | Ready |
+| [nextjs-vesting](../../../examples/nextjs-vesting/README.md) | Token vesting schedule + cliff / linear claim | Ready |
+| [nextjs-zk-verifier](../../../examples/nextjs-zk-verifier/README.md) | zk-proof commitment / range verifier | Ready |
+| [vite-react-wagmi](../../../examples/vite-react-wagmi/README.md) | Vite 5 + React 18 + wagmi v2 SPA | Ready |
 
-The "follow-up" rows will get their READMEs in the next Issue. This PR's scope is the five popular examples (basic-connect / mint-nft / defi-swap / nextjs-wagmi-rainbow / nft-marketplace) plus the aggregate docs.
+All 20 examples now ship with bilingual READMEs (`README.md` + `README.ja.md`).
 
 ## Reverse lookup by kiwa feature
 

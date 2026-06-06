@@ -29,23 +29,23 @@ framework 統合経路 (`anvil + forge build + forge create + .env.local`) を�
 |---|---|---|
 | [basic-connect](../../../examples/basic-connect/README.ja.md) | inline HTML 1 枚で connect / sign / sendTx / EIP-6963 multi-wallet | 整備済 |
 | [nextjs-wagmi-rainbow](../../../examples/nextjs-wagmi-rainbow/README.ja.md) | Next.js + wagmi + RainbowKit、 useAccount / useReadContract / useWriteContract で mint flow | 整備済 |
-| nextjs-aa-erc4337 | ERC-4337 Account Abstraction (Smart Account) | follow-up |
-| nextjs-aa-smart-account | Smart Account 基礎 | follow-up |
-| nextjs-bridge | L1 ↔ L2 bridge flow | follow-up |
-| nextjs-dao-vote | DAO vote contract + UI | follow-up |
-| nextjs-ens-resolver | ENS resolver | follow-up |
-| nextjs-erc1155-game | ERC1155 game item | follow-up |
-| nextjs-event-history | Event 検索 / history 表示 | follow-up |
-| nextjs-lending | Lending pool + price oracle | follow-up |
-| nextjs-multi-chain | Multi-chain switch (chainRegistry) | follow-up |
-| nextjs-permit-swap | EIP-2612 permit + swap | follow-up |
-| nextjs-staking | Staking + reward distribution | follow-up |
-| nextjs-token-gating | gated content + timed grant (F-1 第 1 弾) | follow-up |
-| nextjs-vesting | Token vesting schedule | follow-up |
-| nextjs-zk-verifier | zk-proof verifier | follow-up |
-| vite-react-wagmi | Vite + React + wagmi 構成 | follow-up |
+| [nextjs-aa-erc4337](../../../examples/nextjs-aa-erc4337/README.ja.md) | ERC-4337 v0.7 Account Abstraction (EntryPoint + Smart Account) | 整備済 |
+| [nextjs-aa-smart-account](../../../examples/nextjs-aa-smart-account/README.ja.md) | 簡易 Smart Account (Paymaster / TokenSpender / guardian / ERC-1271) | 整備済 |
+| [nextjs-bridge](../../../examples/nextjs-bridge/README.ja.md) | L1 ↔ L2 bridge (2 anvil + lock/mint/burn/unlock) | 整備済 |
+| [nextjs-dao-vote](../../../examples/nextjs-dao-vote/README.ja.md) | DAO vote contract + execute target | 整備済 |
+| [nextjs-ens-resolver](../../../examples/nextjs-ens-resolver/README.ja.md) | ENS 風 name → address resolver | 整備済 |
+| [nextjs-erc1155-game](../../../examples/nextjs-erc1155-game/README.ja.md) | ERC1155 game item (inventory / burn) | 整備済 |
+| [nextjs-event-history](../../../examples/nextjs-event-history/README.ja.md) | Event emit / getLogs / 履歴表示 | 整備済 |
+| [nextjs-lending](../../../examples/nextjs-lending/README.ja.md) | Lending pool + price oracle + liquidation | 整備済 |
+| [nextjs-multi-chain](../../../examples/nextjs-multi-chain/README.ja.md) | 3 chain anvil cluster + chain switch | 整備済 |
+| [nextjs-permit-swap](../../../examples/nextjs-permit-swap/README.ja.md) | EIP-2612 permit + gasless swap | 整備済 |
+| [nextjs-staking](../../../examples/nextjs-staking/README.ja.md) | Staking + reward accrual + withdraw | 整備済 |
+| [nextjs-token-gating](../../../examples/nextjs-token-gating/README.ja.md) | gated content + timed grant (F-1 第 1 弾 Hardhat 並立) | 整備済 |
+| [nextjs-vesting](../../../examples/nextjs-vesting/README.ja.md) | Token vesting schedule + cliff/linear claim | 整備済 |
+| [nextjs-zk-verifier](../../../examples/nextjs-zk-verifier/README.ja.md) | zk-proof commitment / range verifier | 整備済 |
+| [vite-react-wagmi](../../../examples/vite-react-wagmi/README.ja.md) | Vite 5 + React 18 + wagmi v2 SPA | 整備済 |
 
-「follow-up」は次の Issue で README 整備予定。 本 PR の scope は人気 5 例 (basic-connect / mint-nft / defi-swap / nextjs-wagmi-rainbow / nft-marketplace) + 集約 docs。
+20 example すべて bilingual README (`README.md` + `README.ja.md`) を併設済。
 
 ## 試したい kiwa 機能から逆引き
 
