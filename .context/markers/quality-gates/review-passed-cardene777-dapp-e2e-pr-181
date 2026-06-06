@@ -1,0 +1,16 @@
+schema_version: 3
+pr_number: N/A
+branch: feature/177-cookbook-test-design-flow
+head_sha: 465a9c6
+ts: 2026-06-05T10:14:01Z
+tier: light
+category: DOC
+worker_set: codex-review
+tier_decision_reason: pure docs (cookbook 章 markdown JP/EN + README link + 対訳マップ)、 light tier で codex-review 単発
+codex_status: completed
+impl_check_status: skipped (not in worker_set)
+critical: 0
+major: 0
+minor: 0
+
+findings: []

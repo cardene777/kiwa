@@ -1,19 +1,19 @@
 <div align="center">
 
-# dapp-e2e
+# kiwa
 
 **Headless E2E testing fixture for dApps — no browser extension, no MetaMask popup, no flake.**
 
 Playwright × viem × anvil. Inject `window.ethereum`, deploy contracts, sign typed data, mine blocks — all from a single fixture.
 
-[![npm version](https://img.shields.io/npm/v/@dapp-e2e/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@dapp-e2e/core)
-[![npm downloads](https://img.shields.io/npm/dm/@dapp-e2e/core?color=4ec1c0)](https://www.npmjs.com/package/@dapp-e2e/core)
+[![npm version](https://img.shields.io/npm/v/@kiwa/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa/core)
+[![npm downloads](https://img.shields.io/npm/dm/@kiwa/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa/core)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![tests](https://img.shields.io/badge/tests-166%20passed-success)](#testing--quality)
 [![flaky](https://img.shields.io/badge/flaky-0%2F664-success)](#testing--quality)
 [![ERC-4337](https://img.shields.io/badge/ERC--4337-v0.7%20supported-9333ea)](./docs/en/cookbook/smart-wallet-aa.md)
 [![typescript](https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript&logoColor=white)](./tsconfig.json)
-[![claude code](https://img.shields.io/badge/Claude%20Code-skill%20ready-d97706?logo=anthropic&logoColor=white)](./.claude/skills/dapp-e2e-test/SKILL.md)
+[![claude code](https://img.shields.io/badge/Claude%20Code-skill%20ready-d97706?logo=anthropic&logoColor=white)](./.claude/skills/kiwa-play/SKILL.md)
 
 [**Quickstart**](#quickstart) • [**Features**](#features) • [**Examples**](#examples) • [**Docs**](./docs/en/README.md) • [**Cookbook**](./docs/en/cookbook/README.md) • [**FAQ**](./docs/en/faq.md)
 
@@ -23,13 +23,13 @@ Playwright × viem × anvil. Inject `window.ethereum`, deploy contracts, sign ty
 
 ---
 
-## Why dapp-e2e?
+## Why kiwa?
 
-Traditional dApp E2E tests rely on browser-extension wallets (MetaMask, Rabby, …) that introduce popup flake, version drift, and CI maintenance pain. **dapp-e2e replaces the extension with a programmable `window.ethereum`**, runs anvil per test, and gives you full control over signing, chain state, and time — straight from Playwright.
+Traditional dApp E2E tests rely on browser-extension wallets (MetaMask, Rabby, …) that introduce popup flake, version drift, and CI maintenance pain. **kiwa replaces the extension with a programmable `window.ethereum`**, runs anvil per test, and gives you full control over signing, chain state, and time — straight from Playwright.
 
 ```mermaid
 graph LR
-    A[Playwright test] --> B[dapp-e2e fixture]
+    A[Playwright test] --> B[kiwa fixture]
     B --> C[Inject window.ethereum]
     B --> D[Spawn anvil]
     B --> E[Deploy contracts]
@@ -39,9 +39,9 @@ graph LR
     F --> G[Assert on state + UI]
 ```
 
-| | Browser extension wallet | dapp-e2e |
+| | Browser extension wallet | kiwa |
 |---|---|---|
-| Setup time | Install MetaMask, seed phrase, network add … | `pnpm dlx @dapp-e2e/cli init` |
+| Setup time | Install MetaMask, seed phrase, network add … | `pnpm dlx @kiwa/cli init` |
 | Popup interaction | Required (flaky) | None |
 | Chain isolation per test | Manual | Automatic (`snapshotChain` / `revertChain`) |
 | Multi-wallet (EIP-6963) | Manual install per wallet | Declarative config |
@@ -55,7 +55,7 @@ See [docs/COMPARISON.md](./docs/COMPARISON.md) for a deeper comparison with Synp
 ## Quickstart
 
 ```bash
-pnpm dlx @dapp-e2e/cli init
+pnpm dlx @kiwa/cli init
 pnpm install
 pnpm exec playwright test
 ```
@@ -74,7 +74,7 @@ package.json                ← test:e2e script + peer deps (if package.json exi
 That's it. Open `e2e/connect.spec.ts` and start writing tests against your dApp.
 
 > Before v0.1.0 is published to npm, clone this repo and run:
-> `pnpm install && pnpm -F @dapp-e2e/core -F @dapp-e2e/cli build && node packages/cli/dist/index.js init`
+> `pnpm install && pnpm -F @kiwa/core -F @kiwa/cli build && node packages/cli/dist/index.js init`
 
 ---
 
@@ -87,13 +87,13 @@ That's it. Open `e2e/connect.spec.ts` and start writing tests against your dApp.
 - 🔌 **9 RPC methods handled directly** (`eth_requestAccounts` / `personal_sign` / `eth_signTypedData_v4` / `eth_sendTransaction` / `wallet_switchEthereumChain` …), the rest forwarded to anvil
 - 📡 **EIP-1193 events** — `accountsChanged` / `chainChanged` / `connect` / `disconnect` triggerable from tests
 - 👛 **EIP-6963 multi-wallet** — declare MetaMask, Rabby, Coinbase, … side-by-side
-- 🤖 **Smart contract account (AA)** — set `isContractAccount: true` and dapp-e2e reroutes `personal_sign` / `eth_signTypedData_v4` through EIP-1271, `eth_sendTransaction` through `execute()`, and `eth_accounts` to the smart account address
+- 🤖 **Smart contract account (AA)** — set `isContractAccount: true` and kiwa reroutes `personal_sign` / `eth_signTypedData_v4` through EIP-1271, `eth_sendTransaction` through `execute()`, and `eth_accounts` to the smart account address
 - 📦 **viem as peer dep** — your project owns the version
 - ❌ **error envelope** preserves `code` and `message` across page boundaries
 
 ### Test helpers (v0.2+)
 
-Industry-standard helpers (hardhat / foundry / viem / hardhat-chai-matchers compatible) consolidated into `@dapp-e2e/core`:
+Industry-standard helpers (hardhat / foundry / viem / hardhat-chai-matchers compatible) consolidated into `@kiwa/core`:
 
 | Helper | Purpose |
 |---|---|
@@ -108,7 +108,7 @@ Industry-standard helpers (hardhat / foundry / viem / hardhat-chai-matchers comp
 
 ### Claude Code skill
 
-`.claude/skills/dapp-e2e-test/` ships a [`/dapp-e2e-test`](./.claude/skills/dapp-e2e-test/SKILL.md) skill that walks you from project scan → **test spec generation** → implementation → 4-round flake check. Built-in references include 19-example index, fixture API, troubleshooting, and 9 adversarial-review pitfalls.
+`.claude/skills/kiwa-play/` ships a [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) skill that walks you from project scan → **test spec generation** → implementation → 4-round flake check. Built-in references include 19-example index, fixture API, troubleshooting, and 9 adversarial-review pitfalls.
 
 ### Out of scope (by design)
 
@@ -162,7 +162,7 @@ Industry-standard helpers (hardhat / foundry / viem / hardhat-chai-matchers comp
 ## Multi-Wallet (EIP-6963)
 
 ```ts
-import { dappE2eTest } from '@dapp-e2e/core';
+import { dappE2eTest } from '@kiwa/core';
 
 const test = dappE2eTest.extend({
   wallets: [
@@ -212,9 +212,9 @@ Reference docs:
 
 For Claude Code users:
 
-- [`.claude/skills/dapp-e2e-test/SKILL.md`](./.claude/skills/dapp-e2e-test/SKILL.md) — the `/dapp-e2e-test` skill (spec → impl → 4-round flow)
-- [`example-patterns.md`](./.claude/skills/dapp-e2e-test/references/example-patterns.md) — 19-example index by use case
-- [`adversarial-pitfalls.md`](./.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md) — 9 false-positive patterns + self-check checklist
+- [`.claude/skills/kiwa-play/SKILL.md`](./.claude/skills/kiwa-play/SKILL.md) — the `/kiwa-play` skill (spec → impl → 4-round flow)
+- [`example-patterns.md`](./.claude/skills/kiwa-play/references/example-patterns.md) — 19-example index by use case
+- [`adversarial-pitfalls.md`](./.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 9 false-positive patterns + self-check checklist
 
 ---
 
@@ -231,14 +231,14 @@ For Claude Code users:
 
 All 19 examples must pass 4 rounds in a row before a release tag is cut. The runner lives at [`.context/scratch/multi-round-all-examples.sh`](./.context/scratch/multi-round-all-examples.sh) (developer-side).
 
-Adversarial review findings from Phase C-5/6/7 (PRs [#145](https://github.com/cardene777/dapp-e2e/pull/145) / [#146](https://github.com/cardene777/dapp-e2e/pull/146) / [#147](https://github.com/cardene777/dapp-e2e/pull/147)) were all resolved in-PR. The patterns are catalogued in [`adversarial-pitfalls.md`](./.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md) as a learning resource.
+Adversarial review findings from Phase C-5/6/7 (PRs [#145](https://github.com/cardene777/kiwa/pull/145) / [#146](https://github.com/cardene777/kiwa/pull/146) / [#147](https://github.com/cardene777/kiwa/pull/147)) were all resolved in-PR. The patterns are catalogued in [`adversarial-pitfalls.md`](./.claude/skills/kiwa-play/references/adversarial-pitfalls.md) as a learning resource.
 
 ---
 
 ## Contributing
 
-- 🐛 [Open an issue](https://github.com/cardene777/dapp-e2e/issues)
-- 🔀 [Send a pull request](https://github.com/cardene777/dapp-e2e/pulls)
+- 🐛 [Open an issue](https://github.com/cardene777/kiwa/issues)
+- 🔀 [Send a pull request](https://github.com/cardene777/kiwa/pulls)
 - 💡 Check [`docs/MIGRATION.md`](./docs/MIGRATION.md) before reporting breaking-change concerns
 
 ---
@@ -249,8 +249,8 @@ Adversarial review findings from Phase C-5/6/7 (PRs [#145](https://github.com/ca
 
 <div align="center">
 
-Made with ⚡ by the dapp-e2e contributors.
+Made with ⚡ by the kiwa contributors.
 
-**[⬆ Back to top](#dapp-e2e)**
+**[⬆ Back to top](#kiwa)**
 
 </div>

@@ -9,7 +9,7 @@ Test how the dApp handles user rejection (EIP-1193 code 4001) for `personal_sign
 ### 1. Switch approval mode to reject
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@dapp-e2e/core';
+import { dappE2eTest as test, expect } from '@kiwa/core';
 
 test('rejected signMessage shows error message', async ({ page, dappE2e }) => {
   await page.goto('/');

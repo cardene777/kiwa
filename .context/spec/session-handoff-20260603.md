@@ -1,6 +1,6 @@
-# Session Handoff — 2026-06-03 (dapp-e2e v0.1.0 publish 直前完成)
+# Session Handoff — 2026-06-03 (kiwa v0.1.0 publish 直前完成)
 
-本セッション (引き継ぎ "dapp-e2e v0.1.0 公開準備") の全成果と残作業を SSOT として記録する。
+本セッション (引き継ぎ "kiwa v0.1.0 公開準備") の全成果と残作業を SSOT として記録する。
 次セッションは本 file を Read することで、現状把握 + 次着手判断ができる状態。
 
 ## セッション開始時点 (2026-06-02 朝)
@@ -51,9 +51,9 @@
 
 ### CLI scaffold (Issue #5)
 
-- `pnpm dlx @dapp-e2e/cli init` で e2e/connect.spec.ts + playwright.config.ts + package.json merge 生成
+- `pnpm dlx @kiwa/cli init` で e2e/connect.spec.ts + playwright.config.ts + package.json merge 生成
 - 既存 file 上書き保護 + `--force` flag + rollback (template 失敗時に半端 scaffold 残さず)
-- 既存 scripts/devDeps merge で破壊しない (`test:e2e` / `@dapp-e2e/core` / `@playwright/test` / viem を新規追加のみ)
+- 既存 scripts/devDeps merge で破壊しない (`test:e2e` / `@kiwa/core` / `@playwright/test` / viem を新規追加のみ)
 - template 内に PRIVATE_KEY ハードコード排除 (eth_requestAccounts 経由で address 取得、secret scanner false positive 回避)
 
 ### Documentation (Issue #6)
@@ -63,24 +63,24 @@
 - [docs/EVENTS.md](../../docs/EVENTS.md) — 4 event + triggerEvent API + code 例
 - [docs/ERRORS.md](../../docs/ERRORS.md) — EIP-1193 公式 code + 実装固有 code (code 3) + error envelope + page 境界
 - [docs/MIGRATION.md](../../docs/MIGRATION.md) — v0.0 → v0.1 初版 + 将来 template
-- [docs/COMPARISON.md](../../docs/COMPARISON.md) — Synpress / wallet-mock / dapp-e2e 3 軸比較
+- [docs/COMPARISON.md](../../docs/COMPARISON.md) — Synpress / wallet-mock / kiwa 3 軸比較
 - [docs/RELEASING.md](../../docs/RELEASING.md) — release 手順 + SHA pin 運用 + CI gate + main branch protection
 
 ## 次セッションの作業候補 (優先順)
 
 ### 優先 A — v0.1.0 publish 実行 (ユーザー側操作必須)
 
-Issue #17 https://github.com/cardene777/dapp-e2e/issues/17 の手順:
+Issue #17 https://github.com/cardene777/kiwa/issues/17 の手順:
 
-1. **npm account 準備** — 2FA 設定 (Auth only) + Automation Token 発行 (`@dapp-e2e/*` scope に Read and write)
-2. **package 名予約確認** — npm 上で `@dapp-e2e/core` `@dapp-e2e/cli` の organization or scope が利用可能か (https://www.npmjs.com/org/dapp-e2e 確認)、衝突時は scope 名変更 Issue 起票
+1. **npm account 準備** — 2FA 設定 (Auth only) + Automation Token 発行 (`@kiwa/*` scope に Read and write)
+2. **package 名予約確認** — npm 上で `@kiwa/core` `@kiwa/cli` の organization or scope が利用可能か (https://www.npmjs.com/org/kiwa 確認)、衝突時は scope 名変更 Issue 起票
 3. **GitHub Secrets 登録** — Settings > Secrets and variables > Actions で `NPM_TOKEN` 追加
 4. **Workflow permissions** — Settings > Actions で Read and write permissions + Allow GHA to create PR 有効化
 5. **main branch protection (任意)** — Settings > Branches で PR 経由必須化のみ設定。
    required status check は **設定しない** (PR #22 で ci.yml を削除しローカルテスト運用に切り替え、`test (20)` + `test (22)` check は存在しないため required にできない)
 6. **main push** — Changesets bot が `chore(release): version packages` PR を自動作成
 7. **version PR merge** — release.yml が `pnpm publish -r --provenance` 実行、npmjs.com に v0.1.0 公開
-8. **smoke test** — 外部 temp dir で `pnpm dlx @dapp-e2e/cli init && pnpm install && pnpm exec playwright test` 実行確認
+8. **smoke test** — 外部 temp dir で `pnpm dlx @kiwa/cli init && pnpm install && pnpm exec playwright test` 実行確認
 
 ### 優先 B — Issue #14 (setApprovalMode) 着手
 
@@ -88,7 +88,7 @@ v0.2 マイルストーン最優先機能 (Reject 経路で実 MetaMask 損代 9
 
 - `packages/core/src/fixture.ts` に `dappE2e.setApprovalMode(mode: 'approve' | 'reject')` 追加
 - `packages/core/src/rpc-handlers.ts` の 4 method (personal_sign / eth_signTypedData_v4 / eth_sendTransaction / wallet_switchEthereumChain) で approval check
-- 起動 — `/spec /Users/cardene/Desktop/projects/dapp-e2e/.context/spec/dapp-e2e-v0.1.0-roadmap.md` の Issue #14 (本セッションで起票) から個別 spec を起こす
+- 起動 — `/spec /Users/cardene/Desktop/projects/kiwa/.context/spec/kiwa-v0.1.0-roadmap.md` の Issue #14 (本セッションで起票) から個別 spec を起こす
 
 ### 優先 C — Issue #15 / #16 / #7 (v0.3 + EIP-6963)
 
@@ -102,7 +102,7 @@ v0.1.0 publish 後の v0.2 / v0.3 マイルストーン:
 
 | file | 内容 |
 |---|---|
-| `.context/spec/dapp-e2e-v0.1.0-roadmap.md` | 親 roadmap (5 Issue 分割の元) |
+| `.context/spec/kiwa-v0.1.0-roadmap.md` | 親 roadmap (5 Issue 分割の元) |
 | `.context/spec/issue-4-changesets-ci-provenance.md` | Issue #4 spec |
 | `.context/spec/issue-5-cli-init.md` | Issue #5 spec |
 | `.context/spec/issue-6-readme-docs.md` | Issue #6 spec |

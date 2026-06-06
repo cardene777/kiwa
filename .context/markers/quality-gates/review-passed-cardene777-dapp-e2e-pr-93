@@ -1,0 +1,13 @@
+schema_version: 3
+pr_number: 93
+branch: feature/78-prebuild-env-v3
+head_sha: 88edbf7
+ts: 2026-06-04T08:50:00Z
+tier: standard
+category: CODE
+worker_set: codex-adversarial
+codex_status: completed
+impl_check_status: skipped (not in worker_set)
+critical: 0
+major: 6
+minor: 1

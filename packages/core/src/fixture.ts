@@ -269,7 +269,7 @@ async function runPageScript<TArg>(
 ): Promise<void> {
   const pageMethod = ((page as unknown) as Record<string, unknown>)['e' + 'valuate'];
   if (typeof pageMethod !== 'function') {
-    throw new Error('dapp-e2e: page script runner is unavailable');
+    throw new Error('kiwa: page script runner is unavailable');
   }
   if (arg === undefined) {
     await (pageMethod as { call(target: Page, fn: () => unknown): Promise<unknown> }).call(
@@ -373,27 +373,27 @@ export function validateWalletConfigs(wallets: WalletConfig[]): void {
 
   for (const [index, wallet] of wallets.entries()) {
     if (typeof wallet !== 'object' || wallet === null || Array.isArray(wallet)) {
-      throw new Error(`dapp-e2e: WalletConfig at index ${index} must be an object`);
+      throw new Error(`kiwa: WalletConfig at index ${index} must be an object`);
     }
 
     const { name, rdns, icon, privateKey } = wallet as Partial<WalletConfig>;
 
     if (typeof name !== 'string' || name.length === 0) {
-      throw new Error(`dapp-e2e: WalletConfig.name must be a non-empty string, got ${typeof name}`);
+      throw new Error(`kiwa: WalletConfig.name must be a non-empty string, got ${typeof name}`);
     }
     if (typeof rdns !== 'string' || rdns.length === 0 || !WALLET_RDNS_PATTERN.test(rdns)) {
       throw new Error(
-        `dapp-e2e: WalletConfig.rdns must be a reverse-DNS name (alnum/./-), got "${String(rdns)}"`,
+        `kiwa: WalletConfig.rdns must be a reverse-DNS name (alnum/./-), got "${String(rdns)}"`,
       );
     }
     if (typeof icon !== 'string' || !icon.startsWith('data:')) {
       throw new Error(
-        `dapp-e2e: WalletConfig.icon must be a data URI (data:image/...), got "${typeof icon === 'string' ? icon.slice(0, 30) : typeof icon}"`,
+        `kiwa: WalletConfig.icon must be a data URI (data:image/...), got "${typeof icon === 'string' ? icon.slice(0, 30) : typeof icon}"`,
       );
     }
     if (typeof privateKey !== 'string' || !PRIVATE_KEY_PATTERN.test(privateKey)) {
       throw new Error(
-        `dapp-e2e: WalletConfig.privateKey at index ${index} must be a 0x-prefixed 64-char hex string (32 bytes), got "${typeof privateKey === 'string' ? privateKey.slice(0, 20) : typeof privateKey}"`,
+        `kiwa: WalletConfig.privateKey at index ${index} must be a 0x-prefixed 64-char hex string (32 bytes), got "${typeof privateKey === 'string' ? privateKey.slice(0, 20) : typeof privateKey}"`,
       );
     }
     if (wallet.chainId !== undefined) {
@@ -403,7 +403,7 @@ export function validateWalletConfigs(wallets: WalletConfig[]): void {
         wallet.chainId <= 0
       ) {
         throw new Error(
-          `dapp-e2e: WalletConfig.chainId at index ${index} must be a positive integer when specified, got ${typeof wallet.chainId === 'number' ? wallet.chainId : typeof wallet.chainId}`,
+          `kiwa: WalletConfig.chainId at index ${index} must be a positive integer when specified, got ${typeof wallet.chainId === 'number' ? wallet.chainId : typeof wallet.chainId}`,
         );
       }
     }
@@ -412,7 +412,7 @@ export function validateWalletConfigs(wallets: WalletConfig[]): void {
       typeof wallet.isContractAccount !== 'boolean'
     ) {
       throw new Error(
-        `dapp-e2e: WalletConfig.isContractAccount at index ${index} must be a boolean when specified, got ${typeof wallet.isContractAccount}`,
+        `kiwa: WalletConfig.isContractAccount at index ${index} must be a boolean when specified, got ${typeof wallet.isContractAccount}`,
       );
     }
     if (
@@ -421,7 +421,7 @@ export function validateWalletConfigs(wallets: WalletConfig[]): void {
         !/^0x[0-9a-fA-F]{40}$/.test(wallet.contractAccountAddress))
     ) {
       throw new Error(
-        `dapp-e2e: WalletConfig.contractAccountAddress at index ${index} must be a 0x-prefixed 40-char address when specified, got "${typeof wallet.contractAccountAddress === 'string' ? wallet.contractAccountAddress : typeof wallet.contractAccountAddress}"`,
+        `kiwa: WalletConfig.contractAccountAddress at index ${index} must be a 0x-prefixed 40-char address when specified, got "${typeof wallet.contractAccountAddress === 'string' ? wallet.contractAccountAddress : typeof wallet.contractAccountAddress}"`,
       );
     }
     if (wallet.contractAccountExecuteAbi !== undefined) {
@@ -431,13 +431,13 @@ export function validateWalletConfigs(wallets: WalletConfig[]): void {
         wallet.contractAccountExecuteAbi.some((entry) => typeof entry !== 'string')
       ) {
         throw new Error(
-          `dapp-e2e: WalletConfig.contractAccountExecuteAbi at index ${index} must be a non-empty string[] when specified`,
+          `kiwa: WalletConfig.contractAccountExecuteAbi at index ${index} must be a non-empty string[] when specified`,
         );
       }
     }
     if (wallet.isContractAccount === true && wallet.contractAccountAddress === undefined) {
       throw new Error(
-        `dapp-e2e: WalletConfig.contractAccountAddress at index ${index} is required when isContractAccount=true`,
+        `kiwa: WalletConfig.contractAccountAddress at index ${index} is required when isContractAccount=true`,
       );
     }
 
@@ -445,7 +445,7 @@ export function validateWalletConfigs(wallets: WalletConfig[]): void {
     const existingRdns = seenSanitizedRdns.get(sanitizedRdns);
     if (existingRdns !== undefined) {
       throw new Error(
-        `dapp-e2e: wallet rdns collision after sanitization: "${rdns}" -> "${sanitizedRdns}" (already used by "${existingRdns}")`,
+        `kiwa: wallet rdns collision after sanitization: "${rdns}" -> "${sanitizedRdns}" (already used by "${existingRdns}")`,
       );
     }
     seenSanitizedRdns.set(sanitizedRdns, rdns);
@@ -568,7 +568,7 @@ function createWalletApiRecord(
       if (prop in current) {
         return Reflect.get(current, prop, receiver);
       }
-      throw new TypeError(`dapp-e2e: unknown wallet rdns "${prop}"`);
+      throw new TypeError(`kiwa: unknown wallet rdns "${prop}"`);
     },
   });
 }
@@ -586,7 +586,7 @@ function normalizeAddressKey(address: Hex): Hex {
 }
 
 function isRpcDebugEnabled(): boolean {
-  return process.env.DEBUG?.includes('dapp-e2e:rpc') ?? false;
+  return process.env.DEBUG?.includes('kiwa:rpc') ?? false;
 }
 
 function formatRpcParams(params: unknown[] | undefined): string {
@@ -619,16 +619,16 @@ function formatDurationMs(durationMs: number): string {
 }
 
 function formatPendingRpcEntry(entry: PendingRpcEntry): string {
-  return `[dapp-e2e:rpc] ${entry.request.method} ${formatRpcParams(entry.request.params)} pending for ${formatDurationMs(Date.now() - entry.startedAt)}`;
+  return `[kiwa:rpc] ${entry.request.method} ${formatRpcParams(entry.request.params)} pending for ${formatDurationMs(Date.now() - entry.startedAt)}`;
 }
 
 function formatCompletedRpcEntry(entry: Pick<PendingRpcEntry, 'request' | 'startedAt'>): string {
-  return `[dapp-e2e:rpc] ${entry.request.method} ${formatRpcParams(entry.request.params)} start_time=${new Date(entry.startedAt).toISOString()} duration=${formatDurationMs(Date.now() - entry.startedAt)}`;
+  return `[kiwa:rpc] ${entry.request.method} ${formatRpcParams(entry.request.params)} start_time=${new Date(entry.startedAt).toISOString()} duration=${formatDurationMs(Date.now() - entry.startedAt)}`;
 }
 
 function getRequiredValue<T>(value: T | undefined, label: string): T {
   if (value === undefined) {
-    throw new Error(`dapp-e2e: missing ${label}`);
+    throw new Error(`kiwa: missing ${label}`);
   }
   return value;
 }

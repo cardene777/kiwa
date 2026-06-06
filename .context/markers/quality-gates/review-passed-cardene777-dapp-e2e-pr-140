@@ -1,0 +1,14 @@
+schema_version: 3
+pr_number: 140
+branch: feature/audit-phase-b-docs
+head_sha: fcb4eae
+ts: 2026-06-04T09:39:00Z
+tier: light
+category: DOC
+worker_set: codex-review
+tier_decision_reason: docs only changes (ja/en 1:1 対訳)、コードロジック変更なし → DOC tier、overnight-mode で simple review
+codex_status: skipped (DOC worker_set)
+impl_check_status: skipped (not in worker_set)
+critical: 0
+major: 0
+minor: 0

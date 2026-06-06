@@ -11,7 +11,7 @@ release.yml の trigger は変更せず main push 直接トリガを維持、CI 
 - AC 1: `.github/dependabot.yml` を新規作成し、github-actions ecosystem を daily 監視、groups 機能で全 action を 1 つの PR にまとめる設定で、初回 dependabot scan が SUCCESS する
 - AC 2: `.github/workflows/ci.yml` の 3 箇所 (actions/checkout / pnpm/action-setup / actions/setup-node) を **full commit SHA (40 文字 hex)** に pin し、各行に `# v4.X.X` のような version tag コメントを inline で残す
 - AC 3: `.github/workflows/release.yml` の 4 箇所 (actions/checkout / pnpm/action-setup / actions/setup-node / changesets/action) を full commit SHA に pin し、version tag を inline コメントで残す
-- AC 4: `.github/workflows/release.yml` に changesets/action 起動前に `pnpm install --frozen-lockfile → pnpm typecheck → SKIP_ANVIL_TESTS=1 pnpm -F @dapp-e2e/core test → pnpm -F @dapp-e2e/cli test → pnpm -F examples-basic-connect typecheck` の test 再走 step を追加し、test fail で publish が起動しない
+- AC 4: `.github/workflows/release.yml` に changesets/action 起動前に `pnpm install --frozen-lockfile → pnpm typecheck → SKIP_ANVIL_TESTS=1 pnpm -F @kiwa/core test → pnpm -F @kiwa/cli test → pnpm -F examples-basic-connect typecheck` の test 再走 step を追加し、test fail で publish が起動しない
 - AC 5: `docs/RELEASING.md` に SHA pin 更新フロー (dependabot PR の merge 手順) と CI gate (release.yml 内 test 再走の意図) を 1 段落ずつ追記
 
 ## スコープ境界
@@ -51,13 +51,13 @@ release.yml の trigger は変更せず main push 直接トリガを維持、CI 
 
 新規 1 file:
 
-- `/Users/cardene/Desktop/projects/dapp-e2e/.github/dependabot.yml` — github-actions ecosystem daily + groups
+- `/Users/cardene/Desktop/projects/kiwa/.github/dependabot.yml` — github-actions ecosystem daily + groups
 
 修正 3 file:
 
-- `/Users/cardene/Desktop/projects/dapp-e2e/.github/workflows/ci.yml` — uses 3 行を SHA pin + version tag inline コメント
-- `/Users/cardene/Desktop/projects/dapp-e2e/.github/workflows/release.yml` — uses 4 行を SHA pin + version tag inline コメント + changesets/action 前に test 再走 step 追加 (5 step: install / typecheck / test core / test cli / consumer typecheck)
-- `/Users/cardene/Desktop/projects/dapp-e2e/docs/RELEASING.md` — SHA pin 運用 + CI gate (案 B) の説明追記
+- `/Users/cardene/Desktop/projects/kiwa/.github/workflows/ci.yml` — uses 3 行を SHA pin + version tag inline コメント
+- `/Users/cardene/Desktop/projects/kiwa/.github/workflows/release.yml` — uses 4 行を SHA pin + version tag inline コメント + changesets/action 前に test 再走 step 追加 (5 step: install / typecheck / test core / test cli / consumer typecheck)
+- `/Users/cardene/Desktop/projects/kiwa/docs/RELEASING.md` — SHA pin 運用 + CI gate (案 B) の説明追記
 
 合計 4 file (新規 1 + 修正 3)。
 

@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { dappE2eTest as test } from '@dapp-e2e/core';
+import { dappE2eTest as test } from '@kiwa/core';
 import { verifyMessage, verifyTypedData } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 
@@ -27,7 +27,7 @@ const MINI_DAPP_HTML = `
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       const sig = await window.ethereum.request({
         method: 'personal_sign',
-        params: ['hello dapp-e2e', accounts[0]],
+        params: ['hello kiwa', accounts[0]],
       });
       document.getElementById('result').textContent = sig;
     });
@@ -114,7 +114,7 @@ test.describe('basic-connect e2e (fixture 経由)', () => {
     const sigText = await page.locator('#result').textContent();
     const valid = await verifyMessage({
       address: account.address,
-      message: 'hello dapp-e2e',
+      message: 'hello kiwa',
       signature: sigText as `0x${string}`,
     });
     // Then

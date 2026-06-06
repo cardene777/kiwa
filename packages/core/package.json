@@ -1,17 +1,17 @@
 {
-  "name": "@dapp-e2e/core",
+  "name": "@kiwa/core",
   "version": "0.0.0",
   "description": "Headless E2E test fixture for dApps on anvil forks (Playwright + viem)",
   "license": "MIT",
   "keywords": ["dapp", "ethereum", "e2e", "playwright", "anvil", "viem", "testing", "fixture"],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cardene777/dapp-e2e.git",
+    "url": "git+https://github.com/cardene777/kiwa.git",
     "directory": "packages/core"
   },
-  "homepage": "https://github.com/cardene777/dapp-e2e#readme",
+  "homepage": "https://github.com/cardene777/kiwa#readme",
   "bugs": {
-    "url": "https://github.com/cardene777/dapp-e2e/issues"
+    "url": "https://github.com/cardene777/kiwa/issues"
   },
   "type": "module",
   "main": "./dist/index.js",

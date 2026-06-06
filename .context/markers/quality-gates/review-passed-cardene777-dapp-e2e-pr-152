@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: 152
+branch: feature/add-missing-helpers
+head_sha: 642d595
+ts: 2026-06-05T11:01:00Z
+tier: heavy
+category: HIGH-RISK
+worker_set: codex-impl,gap-analysis,self-check
+tier_decision_reason: 業界標準 e2e tool (hardhat / foundry / viem / hardhat-chai-matchers) との gap 分析で抽出した 7 helper を追加、 既存 export 一切壊さず back-compat 保証、 158 test × 4 round 全 PASS で regression 0 件、 偽陽性 self-check 5 問 (固定値 / UI バイパス / access partial / time-warp 副作用 / happy path only) 全項目 OK
+codex_status: completed

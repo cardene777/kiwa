@@ -1,6 +1,6 @@
 # Custom error revert を expectCustomError で検証する
 
-`@dapp-e2e/core` v0.2 で追加された `expectCustomError` を使い、 Solidity custom error の revert を簡潔に assertion する pattern。
+`@kiwa/core` v0.2 で追加された `expectCustomError` を使い、 Solidity custom error の revert を簡潔に assertion する pattern。
 
 ## 課題
 
@@ -10,7 +10,7 @@ viem の `simulateContract` は revert 時に `BaseError` を投げ、 中の `C
 
 ```ts
 import { test, expect } from './fixture';
-import { expectCustomError } from '@dapp-e2e/core';
+import { expectCustomError } from '@kiwa/core';
 import { parseAbi, type Address } from 'viem';
 
 const PROTECTED_ABI = parseAbi([

@@ -2,11 +2,11 @@
 
 > [🇬🇧 English](./MOCK-DESIGN.md) • [🇯🇵 日本語](./MOCK-DESIGN.ja.md)
 
-How dapp-e2e decides **what to mock and at what fidelity** for third-party wallets and AA SDKs (WalletConnect, Safe, thirdweb, Privy, Biconomy, …). This document is the single source of truth referenced by Phase D-3 implementation PRs.
+How kiwa decides **what to mock and at what fidelity** for third-party wallets and AA SDKs (WalletConnect, Safe, thirdweb, Privy, Biconomy, …). This document is the single source of truth referenced by Phase D-3 implementation PRs.
 
 ## TL;DR
 
-Each wallet / SDK is classified into one of **3 mock fidelity levels** based on a 5-criterion score. The classification determines whether dapp-e2e adopts the real SDK (Level A), ships a compatible mock (Level B), or only exposes a behavioral pattern (Level C).
+Each wallet / SDK is classified into one of **3 mock fidelity levels** based on a 5-criterion score. The classification determines whether kiwa adopts the real SDK (Level A), ships a compatible mock (Level B), or only exposes a behavioral pattern (Level C).
 
 | Level | Approach | SDK dependency | Fidelity | Maintenance cost |
 |---|---|---|---|---|
@@ -18,13 +18,13 @@ Each wallet / SDK is classified into one of **3 mock fidelity levels** based on 
 
 ## Why this spec exists
 
-Real dApp users adopt smart wallets (Safe, thirdweb inAppWallet, Biconomy, …) and connectors (WalletConnect v2) far beyond plain MetaMask. A naïve dapp-e2e response would be "mock everything as faithfully as possible", but that path leads to:
+Real dApp users adopt smart wallets (Safe, thirdweb inAppWallet, Biconomy, …) and connectors (WalletConnect v2) far beyond plain MetaMask. A naïve kiwa response would be "mock everything as faithfully as possible", but that path leads to:
 
 - SDK breaking changes silently rotting fixtures every quarter
 - Install size bloat (Web3Auth, Pimlico, etc. each weigh hundreds of KB)
 - False-positive risk when the mock and the real SDK diverge
 
-To stay sustainable, dapp-e2e needs a **decision protocol** for each new wallet / SDK request.
+To stay sustainable, kiwa needs a **decision protocol** for each new wallet / SDK request.
 
 ## 5-criterion scoring
 
@@ -61,13 +61,13 @@ Border cases (exactly 3) prefer Level B when install size is the main risk.
 
 ## Level A — Real SDK Integration
 
-### What dapp-e2e ships
+### What kiwa ships
 
 - The wallet / SDK is added to `peerDependencies` (the user must install it)
-- dapp-e2e fixture wraps the SDK's standard entry points
+- kiwa fixture wraps the SDK's standard entry points
 - Only the parts that depend on remote infra (relay / bundler / paymaster) are stubbed
 
-### What dapp-e2e does NOT do
+### What kiwa does NOT do
 
 - Reimplement the SDK's public API
 - Hide the SDK behind a different name
@@ -75,9 +75,9 @@ Border cases (exactly 3) prefer Level B when install size is the main risk.
 ### Example flow (WalletConnect v2)
 
 1. The user installs `@walletconnect/web3wallet` themselves
-2. dapp-e2e provides an in-memory relay stub so no real WalletConnect cloud project is required
+2. kiwa provides an in-memory relay stub so no real WalletConnect cloud project is required
 3. The user calls `walletKit.pair(...)` in their test as if connecting a real wallet
-4. dapp-e2e routes session proposals / responses through the stub
+4. kiwa routes session proposals / responses through the stub
 
 ### Trade-offs
 
@@ -85,23 +85,23 @@ Border cases (exactly 3) prefer Level B when install size is the main risk.
 |---|---|
 | Real SDK bugs are reproducible | Quarterly SDK upgrades may break tests |
 | Tests look identical to production code | Install size grows |
-| Documentation matches official SDK docs | dapp-e2e cannot ship for users who can't install the SDK |
+| Documentation matches official SDK docs | kiwa cannot ship for users who can't install the SDK |
 
 ## Level B — Compatible Mock
 
-### What dapp-e2e ships
+### What kiwa ships
 
 - A mock module that **exposes the same TypeScript interface as the real SDK** (at a coarse level)
-- Backing implementation written by dapp-e2e contributors (deploys mock contracts, returns deterministic data)
+- Backing implementation written by kiwa contributors (deploys mock contracts, returns deterministic data)
 
-### What dapp-e2e does NOT do
+### What kiwa does NOT do
 
 - Track every minor / patch release of the upstream SDK
 - Guarantee bit-for-bit compatibility with production transactions
 
 ### Example flow (Safe)
 
-1. dapp-e2e ships `examples/nextjs-safe-multisig/` with stub Safe contracts (threshold + module + guard semantics)
+1. kiwa ships `examples/nextjs-safe-multisig/` with stub Safe contracts (threshold + module + guard semantics)
 2. The fixture exposes a `useSafe()`-style hook with the same shape as `@safe-global/safe-react-hooks`
 3. Multi-sig threshold signing, module execution, and guard rejection are tested against the mock contracts
 4. Users porting tests to production-grade Safe replace the import with the real `@safe-global/safe-react-hooks`
@@ -116,19 +116,19 @@ Border cases (exactly 3) prefer Level B when install size is the main risk.
 
 ## Level C — Behavioral Pattern
 
-### What dapp-e2e ships
+### What kiwa ships
 
 - A generic helper / pattern that captures the **shape** of a wallet category (e.g. "multi-sig threshold signing", "embedded wallet with key escrow")
 - No reference to any specific SDK by name
 
-### What dapp-e2e does NOT do
+### What kiwa does NOT do
 
 - Provide drop-in compatibility with a named SDK
 - Promise that real-SDK bugs surface
 
 ### Example flow (Privy / Dynamic embedded wallets)
 
-dapp-e2e documents the general "embedded wallet" pattern (private key stored server-side, signature requests round-tripped via a stub auth endpoint) without referencing Privy or Dynamic by name. Users adapt the pattern to whichever SDK they use.
+kiwa documents the general "embedded wallet" pattern (private key stored server-side, signature requests round-tripped via a stub auth endpoint) without referencing Privy or Dynamic by name. Users adapt the pattern to whichever SDK they use.
 
 ### Trade-offs
 
@@ -140,7 +140,7 @@ dapp-e2e documents the general "embedded wallet" pattern (private key stored ser
 
 ## False-positive boundaries
 
-Each level has known divergences from real environments. We document them so users can decide whether dapp-e2e is enough or whether they also need staging tests on real infra.
+Each level has known divergences from real environments. We document them so users can decide whether kiwa is enough or whether they also need staging tests on real infra.
 
 | Boundary | Level A | Level B | Level C |
 |---|---|---|---|
@@ -150,7 +150,7 @@ Each level has known divergences from real environments. We document them so use
 | Smart account upgrade hooks | ✅ via real SDK | ⚠️ depends on mock fidelity | ❌ pattern only |
 | RPC provider rate limiting | ❌ never reproduced | ❌ same | ❌ same |
 
-Users who need to verify these boundaries should run **staging tests against real testnets** in addition to dapp-e2e CI.
+Users who need to verify these boundaries should run **staging tests against real testnets** in addition to kiwa CI.
 
 ## Decision when adding a new wallet / SDK
 
@@ -175,6 +175,6 @@ Phases are sequenced based on user-base size, not difficulty. WalletConnect v2 s
 
 ## See also
 
-- [`docs/COMPARISON.md`](./COMPARISON.md) — How dapp-e2e compares with Synpress / wallet-mock
-- [`.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md`](../.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md) — 9 false-positive patterns + self-check
+- [`docs/COMPARISON.md`](./COMPARISON.md) — How kiwa compares with Synpress / wallet-mock
+- [`.claude/skills/kiwa-play/references/adversarial-pitfalls.md`](../.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 9 false-positive patterns + self-check
 - [`docs/en/cookbook/smart-wallet-aa.md`](./en/cookbook/smart-wallet-aa.md) — Existing AA (ERC-4337) test pattern

@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: pending
+branch: feature/readme-redesign-en-base
+head_sha: pending
+ts: 2026-06-05T15:30:00Z
+tier: light
+category: DOCS
+worker_set: docs-only
+tier_decision_reason: README.md を英語ベースの awesome OSS layout に全面書き換え (バッジ 7 種 / 中央寄せヒーロー / language switcher / comparison table / mermaid 図 / TOC / 4 sub-section)、 README.ja.md を完全対訳で新規作成、 既存 docs/{ja,en}/ には影響なし、 code 変更なし
+codex_status: not_applicable

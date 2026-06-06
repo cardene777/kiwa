@@ -575,7 +575,7 @@ export async function verifyAnvilChainId(
     const actual = json.result ? Number.parseInt(json.result, 16) : Number.NaN;
     if (Number.isFinite(actual) && actual !== expectedChainId) {
       console.warn(
-        `[dapp-e2e] wallet_switchEthereumChain to ${expectedChainId} but anvil reports ${actual}`,
+        `[kiwa] wallet_switchEthereumChain to ${expectedChainId} but anvil reports ${actual}`,
       );
     }
   } catch {

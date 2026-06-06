@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: 157
+branch: feature/oss-skill-pr-links
+head_sha: cbc48fc
+ts: 2026-06-05T13:05:30Z
+tier: light
+category: DOCS
+worker_set: docs-only
+tier_decision_reason: documentation のみで code 変更なし、 158 e2e test に影響なし
+verify_status: completed

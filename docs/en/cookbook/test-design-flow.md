@@ -1,8 +1,8 @@
 # 3-layer test design flow (Phase E integration cookbook)
 
-> [🇬🇧 English](./test-design-flow.md) • [🇯🇵 日本語](../../ja/cookbook/test-design-flow.md)
+> [🇬🇧 English](./kiwa-design-flow.md) • [🇯🇵 日本語](../../ja/cookbook/kiwa-design-flow.md)
 
-A documented walkthrough of the "Layer 1 (test design) → Layer 2 (implementation conversion)" chain established in dapp-e2e Phase E (#171–#181), focused on **retrofitting tests into a contract / dApp that already exists and ships**. We use the real `examples/nextjs-token-gating` contracts as the worked example.
+A documented walkthrough of the "Layer 1 (test design) → Layer 2 (implementation conversion)" chain established in kiwa Phase E (#171–#181), focused on **retrofitting tests into a contract / dApp that already exists and ships**. We use the real `examples/nextjs-token-gating` contracts as the worked example.
 
 The chain also works for new TDD-first development, but the primary use case is **adding tests after the fact to existing contracts / dApps**. Treat the existing implementation as the de-facto specification, infer the viewpoints from it, and fill in the missing tests.
 
@@ -10,12 +10,12 @@ The chain also works for new TDD-first development, but the primary use case is 
 
 ```mermaid
 graph TD
-    A[Existing contract + dApp shipping] -->|current code| B["/test-design Layer 1"]
+    A[Existing contract + dApp shipping] -->|current code| B["/kiwa-design Layer 1"]
     B -->|--layer contract --input *.sol| C[.context/spec/contract/test-spec-X.md]
     B -->|--layer e2e --input app/ + tests/| D[.context/spec/e2e/test-spec-X.md]
-    C -->|9-column table parse| E["/contract-test-foundry"]
-    C -->|9-column table parse| F["/contract-test-hardhat"]
-    D -->|9-column table parse| G["/dapp-e2e-test --mode extend"]
+    C -->|9-column table parse| E["/kiwa-forge"]
+    C -->|9-column table parse| F["/kiwa-hardhat"]
+    D -->|9-column table parse| G["/kiwa-play --mode extend"]
     E --> H[Write test/X.t.sol after the fact]
     F --> I[Write test/X.test.ts after the fact]
     G --> J[Write tests/X.spec.ts after the fact]
@@ -59,7 +59,7 @@ There is no formal spec — the "behavioral spec of the contract" is scattered a
 ### Step 1: Reverse-engineer a contract-side spec with Layer 1
 
 ```text
-/test-design --layer contract --module token-gating --input examples/nextjs-token-gating/contracts/GatedContent.sol
+/kiwa-design --layer contract --module token-gating --input examples/nextjs-token-gating/contracts/GatedContent.sol
 
 The Layer 1 skill:
 - reads the input .sol and greps for function / event / error
@@ -74,7 +74,7 @@ The Layer 1 skill:
 ### Step 2: Reverse-engineer an e2e-side spec with Layer 1
 
 ```text
-/test-design --layer e2e --module token-gating --input examples/nextjs-token-gating/
+/kiwa-design --layer e2e --module token-gating --input examples/nextjs-token-gating/
 
 The Layer 1 skill:
 - reads the existing tests/gating.spec.ts and treats the 8 existing tests as "current coverage"
@@ -87,7 +87,7 @@ The Layer 1 skill:
 ### Step 3: Write contract tests after the fact with Layer 2 (Foundry)
 
 ```text
-/contract-test-foundry --module token-gating --gas-report
+/kiwa-forge --module token-gating --gas-report
 ```
 
 The skill:
@@ -103,7 +103,7 @@ The skill:
 ### Step 3': Write contract tests after the fact with Layer 2 (Hardhat, in parallel)
 
 ```text
-/contract-test-hardhat --module token-gating --gas-report
+/kiwa-hardhat --module token-gating --gas-report
 ```
 
 Reads the same `.context/spec/contract/test-spec-token-gating.md` and writes `test/GatedContent.test.ts` in Hardhat shape, in parallel. Foundry-leaning and Hardhat-leaning developers can hold **parallel tests with the same test IDs** sourced from one spec. Viewpoints and case IDs (TC-001 through TC-013) line up across both layers.
@@ -111,7 +111,7 @@ Reads the same `.context/spec/contract/test-spec-token-gating.md` and writes `te
 ### Step 4: Extend the e2e tests with Layer 2 in `extend` mode (Playwright)
 
 ```text
-/dapp-e2e-test --mode extend --example nextjs-token-gating
+/kiwa-play --mode extend --example nextjs-token-gating
 ```
 
 The skill:
@@ -140,7 +140,7 @@ forge coverage --report summary
 npx hardhat coverage
 ```
 
-Measured values across dapp-e2e's three real examples (achieved in PR #185):
+Measured values across kiwa's three real examples (achieved in PR #185):
 
 | Example | Runner | Lines | Statements | Branches | Funcs |
 |---|---|---|---|---|---|
@@ -194,7 +194,7 @@ For the full reference, see each Layer 2 skill's `references/{foundry,hardhat,pl
 
 | Comparison | New development (TDD) | Retrofitting (the primary use case in this chapter) |
 |---|---|---|
-| `/test-design` input | A feature spec document (no code yet) | Existing `.sol` / `app/` / `tests/` passed via `--input`, mined by grep |
+| `/kiwa-design` input | A feature spec document (no code yet) | Existing `.sol` / `app/` / `tests/` passed via `--input`, mined by grep |
 | Layer 1 "target functionality" section | Authored from the spec | Summarised from grep results |
 | Layer 1 "insufficient spec" section | Lists ambiguities from the spec | Lists undocumented behavior / implicit assumptions / untested paths |
 | When Layer 2 runs `forge test` | Expects RED (tests are written first) | Expects PASS (records the real behavior as canonical) |
@@ -212,13 +212,13 @@ Hotspots where false positives can enter a 3-layer chain, plus how to defend:
 - **Race conditions in parallel runs** — for viewpoint 8, prefer `Promise.allSettled` over `Promise.all` (so a single reject does not collapse the rest); Foundry is synchronous, so parallel races are not even expressible
 - **The trap of treating real behavior as canonical** — even when `forge test` passes, "the real contract has a bug and the test froze that bug into place" remains possible. Cross-check the Layer 1 "main quality risks" section and confirm with the spec author whether "real behavior == intended spec"
 
-The full nine patterns plus a five-question self-check live in `.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md`.
+The full nine patterns plus a five-question self-check live in `.claude/skills/kiwa-play/references/adversarial-pitfalls.md`.
 
 ## Related links
 
 - Phase E SSOT: [`docs/SKILL-DESIGN.md`](../../SKILL-DESIGN.md)
-- Layer 1: [.claude/skills/test-design/SKILL.md](../../../.claude/skills/test-design/SKILL.md)
-- Layer 2 Foundry: [.claude/skills/contract-test-foundry/SKILL.md](../../../.claude/skills/contract-test-foundry/SKILL.md)
-- Layer 2 Hardhat: [.claude/skills/contract-test-hardhat/SKILL.md](../../../.claude/skills/contract-test-hardhat/SKILL.md)
-- Layer 2 Playwright: [.claude/skills/dapp-e2e-test/SKILL.md](../../../.claude/skills/dapp-e2e-test/SKILL.md)
+- Layer 1: [.claude/skills/kiwa-design/SKILL.md](../../../.claude/skills/kiwa-design/SKILL.md)
+- Layer 2 Foundry: [.claude/skills/kiwa-forge/SKILL.md](../../../.claude/skills/kiwa-forge/SKILL.md)
+- Layer 2 Hardhat: [.claude/skills/kiwa-hardhat/SKILL.md](../../../.claude/skills/kiwa-hardhat/SKILL.md)
+- Layer 2 Playwright: [.claude/skills/kiwa-play/SKILL.md](../../../.claude/skills/kiwa-play/SKILL.md)
 - Related cookbook chapters: [snapshot-revert.md](./snapshot-revert.md) (snapshot pattern shared between Layer 1 / Layer 2), [custom-error-revert.md](./custom-error-revert.md) (viewpoint 2 failure-path helper)

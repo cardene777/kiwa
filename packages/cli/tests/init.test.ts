@@ -47,7 +47,7 @@ async function loadInitModule(): Promise<InitModule> {
 }
 
 beforeEach(() => {
-  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dapp-e2e-init-'));
+  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kiwa-init-'));
 });
 
 afterEach(() => {
@@ -67,7 +67,7 @@ describe('runInit', () => {
     expect(fs.existsSync(path.join(tempDir, 'e2e', 'connect.spec.ts'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'playwright.config.ts'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'tsconfig.json'))).toBe(true);
-    expect(readFile(tempDir, 'e2e/connect.spec.ts')).toContain("from '@dapp-e2e/core'");
+    expect(readFile(tempDir, 'e2e/connect.spec.ts')).toContain("from '@kiwa/core'");
     expect(readFile(tempDir, 'playwright.config.ts')).toContain('defineConfig');
     expect(readFile(tempDir, 'tsconfig.json')).toContain('"strict": true');
     expect(result.created).toEqual(
@@ -96,7 +96,7 @@ describe('runInit', () => {
     // Then
     expect(packageJson.scripts['test:e2e']).toBe('playwright test');
     expect(packageJson.scripts.build).toBe('echo build');
-    expect(packageJson.devDependencies['@dapp-e2e/core']).toBe('^0.1.0');
+    expect(packageJson.devDependencies['@kiwa/core']).toBe('^0.1.0');
     expect(packageJson.devDependencies['@playwright/test']).toBe('^1.49.0');
     expect(packageJson.devDependencies.viem).toBe('^2');
     expect(packageJson.devDependencies.typescript).toBe('^5.0.0');
@@ -136,7 +136,7 @@ describe('runInit', () => {
     expect(() => runInit({ force: true, cwd: tempDir })).not.toThrow();
 
     // Then
-    expect(readFile(tempDir, 'e2e/connect.spec.ts')).toContain("from '@dapp-e2e/core'");
+    expect(readFile(tempDir, 'e2e/connect.spec.ts')).toContain("from '@kiwa/core'");
     expect(readFile(tempDir, 'playwright.config.ts')).toContain('defineConfig');
   });
 
@@ -226,7 +226,7 @@ describe('runInit', () => {
     // Then
     expect(packageJson.devDependencies['@playwright/test']).toBe('^1.48.0');
     expect(packageJson.devDependencies.viem).toBe('^2.21.0');
-    expect(packageJson.devDependencies['@dapp-e2e/core']).toBe('^0.1.0');
+    expect(packageJson.devDependencies['@kiwa/core']).toBe('^0.1.0');
   });
 
   it('T-INIT-009 package.json が invalid JSON の場合は rollback して created file を残さない', async () => {
@@ -265,7 +265,7 @@ describe('runInit', () => {
     const result = runInit({ force: false, cwd: tempDir });
 
     expect(result.warnings).toContain(
-      'Existing tsconfig.json has "strict": false. dapp-e2e init did not modify it.',
+      'Existing tsconfig.json has "strict": false. kiwa init did not modify it.',
     );
     expect(readFile(tempDir, 'tsconfig.json')).toContain('"strict": false');
     expect(result.created).not.toContain('tsconfig.json');

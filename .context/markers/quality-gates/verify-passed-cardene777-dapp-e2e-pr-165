@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: 165
+branch: feature/aa-smart-wallet-d1-d2-d5
+head_sha: dc81dd3
+ts: 2026-06-05T17:10:30Z
+tier: heavy
+category: FEATURE+DOCS
+worker_set: codex-impl,playwright-e2e
+tier_decision_reason: core typecheck + build exit 0、 新 nextjs-aa-erc4337 7/7 PASS、 既存 19 example regression 0 件、 ERC-4337 v0.7 lifecycle (counterfactual / depositTo / validateUserOp / handleOps / execute) を end-to-end でカバー
+verify_status: completed

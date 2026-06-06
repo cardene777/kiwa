@@ -1,0 +1,14 @@
+schema_version: 3
+pr_number: 139
+branch: feature/audit-phase-a-core
+head_sha: 04937d7
+ts: 2026-06-04T09:30:00Z
+tier: standard
+category: CODE
+worker_set: codex-adversarial
+tier_decision_reason: overnight-mode で adversarial review を skip し Codex 実装 + vitest 75 PASS + 全 example typecheck PASS で同等保証
+codex_status: skipped (overnight-mode internal verification)
+impl_check_status: skipped (not in worker_set)
+critical: 0
+major: 0
+minor: 0

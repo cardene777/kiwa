@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: 146
+branch: feature/audit-c6-cross-chain
+head_sha: d07cbd0
+ts: 2026-06-04T22:01:00Z
+tier: heavy
+category: HIGH-RISK
+worker_set: codex-adversarial,generator-verifier
+tier_decision_reason: cross-chain example test 追加 + adversarial review 1 round で 2 MAJOR + 1 MINOR 検出、全 3 件 applied 後 再 verify で bridge 9/9 + multi-chain 6/6 PASS、READY TO MERGE
+codex_status: completed

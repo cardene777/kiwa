@@ -1,19 +1,19 @@
 <div align="center">
 
-# dapp-e2e
+# kiwa
 
 **dApp 向けの headless E2E テスト fixture — ブラウザ拡張不要、 MetaMask popup 不要、 flake 0。**
 
 Playwright × viem × anvil。 `window.ethereum` の inject から contract deploy / EIP-712 署名 / block mine まで、 1 つの fixture で完結。
 
-[![npm version](https://img.shields.io/npm/v/@dapp-e2e/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@dapp-e2e/core)
-[![npm downloads](https://img.shields.io/npm/dm/@dapp-e2e/core?color=4ec1c0)](https://www.npmjs.com/package/@dapp-e2e/core)
+[![npm version](https://img.shields.io/npm/v/@kiwa/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa/core)
+[![npm downloads](https://img.shields.io/npm/dm/@kiwa/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa/core)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![tests](https://img.shields.io/badge/tests-166%20passed-success)](#testing--quality)
 [![flaky](https://img.shields.io/badge/flaky-0%2F664-success)](#testing--quality)
 [![ERC-4337](https://img.shields.io/badge/ERC--4337-v0.7%20supported-9333ea)](./docs/ja/cookbook/smart-wallet-aa.md)
 [![typescript](https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript&logoColor=white)](./tsconfig.json)
-[![claude code](https://img.shields.io/badge/Claude%20Code-skill%20ready-d97706?logo=anthropic&logoColor=white)](./.claude/skills/dapp-e2e-test/SKILL.md)
+[![claude code](https://img.shields.io/badge/Claude%20Code-skill%20ready-d97706?logo=anthropic&logoColor=white)](./.claude/skills/kiwa-play/SKILL.md)
 
 [**Quickstart**](#quickstart) • [**Features**](#features) • [**Examples**](#examples) • [**Docs**](./docs/ja/README.md) • [**Cookbook**](./docs/ja/cookbook/README.md) • [**FAQ**](./docs/ja/faq.md)
 
@@ -23,13 +23,13 @@ Playwright × viem × anvil。 `window.ethereum` の inject から contract depl
 
 ---
 
-## なぜ dapp-e2e か
+## なぜ kiwa か
 
-従来の dApp E2E test は MetaMask / Rabby などのブラウザ拡張に依存し、 popup flake / version drift / CI 維持コストに苦しんできました。 **dapp-e2e は拡張機能をプログラマブルな `window.ethereum` に置き換え** 、 test ごとに anvil を起動し、 署名 / chain state / 時間操作を Playwright から完全に制御できます。
+従来の dApp E2E test は MetaMask / Rabby などのブラウザ拡張に依存し、 popup flake / version drift / CI 維持コストに苦しんできました。 **kiwa は拡張機能をプログラマブルな `window.ethereum` に置き換え** 、 test ごとに anvil を起動し、 署名 / chain state / 時間操作を Playwright から完全に制御できます。
 
 ```mermaid
 graph LR
-    A[Playwright test] --> B[dapp-e2e fixture]
+    A[Playwright test] --> B[kiwa fixture]
     B --> C[Inject window.ethereum]
     B --> D[Spawn anvil]
     B --> E[Deploy contracts]
@@ -39,9 +39,9 @@ graph LR
     F --> G[Assert on state + UI]
 ```
 
-| | ブラウザ拡張 wallet | dapp-e2e |
+| | ブラウザ拡張 wallet | kiwa |
 |---|---|---|
-| セットアップ | MetaMask install / seed phrase / network 追加 ... | `pnpm dlx @dapp-e2e/cli init` |
+| セットアップ | MetaMask install / seed phrase / network 追加 ... | `pnpm dlx @kiwa/cli init` |
 | popup 操作 | 必須 (flake の元) | なし |
 | test 間 chain 隔離 | 手動 | 自動 (`snapshotChain` / `revertChain`) |
 | Multi-wallet (EIP-6963) | wallet ごとに手動 install | 宣言的 config |
@@ -55,7 +55,7 @@ Synpress / wallet-mock との詳細比較は [docs/COMPARISON.md](./docs/COMPARI
 ## Quickstart
 
 ```bash
-pnpm dlx @dapp-e2e/cli init
+pnpm dlx @kiwa/cli init
 pnpm install
 pnpm exec playwright test
 ```
@@ -74,7 +74,7 @@ package.json                ← test:e2e script + peer deps (package.json が存
 これだけで `e2e/connect.spec.ts` を開いて自分の dApp の test を書き始められます。
 
 > v0.1.0 が npm に publish される前は、 本リポを clone して以下を実行:
-> `pnpm install && pnpm -F @dapp-e2e/core -F @dapp-e2e/cli build && node packages/cli/dist/index.js init`
+> `pnpm install && pnpm -F @kiwa/core -F @kiwa/cli build && node packages/cli/dist/index.js init`
 
 ---
 
@@ -108,7 +108,7 @@ package.json                ← test:e2e script + peer deps (package.json が存
 
 ### Claude Code skill
 
-`.claude/skills/dapp-e2e-test/` に [`/dapp-e2e-test`](./.claude/skills/dapp-e2e-test/SKILL.md) skill を同梱。 Claude Code から呼び出すとプロジェクト読込 → **test 仕様書生成** → 実装 → 4 round 連続 PASS 検証までを構造化フローで進められます。 19 example 用途別 index / fixture API / troubleshooting / 偽陽性パターン 9 種 + self-check 5 問が references にあります。
+`.claude/skills/kiwa-play/` に [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) skill を同梱。 Claude Code から呼び出すとプロジェクト読込 → **test 仕様書生成** → 実装 → 4 round 連続 PASS 検証までを構造化フローで進められます。 19 example 用途別 index / fixture API / troubleshooting / 偽陽性パターン 9 種 + self-check 5 問が references にあります。
 
 ### スコープ外 (意図的)
 
@@ -162,7 +162,7 @@ package.json                ← test:e2e script + peer deps (package.json が存
 ## Multi-Wallet (EIP-6963)
 
 ```ts
-import { dappE2eTest } from '@dapp-e2e/core';
+import { dappE2eTest } from '@kiwa/core';
 
 const test = dappE2eTest.extend({
   wallets: [
@@ -212,9 +212,9 @@ test('multi wallet picker', async ({ page, dappE2e }) => {
 
 Claude Code 利用者向け:
 
-- [`.claude/skills/dapp-e2e-test/SKILL.md`](./.claude/skills/dapp-e2e-test/SKILL.md) — `/dapp-e2e-test` skill (test 仕様書 → 実装 → 4 round フロー)
-- [`example-patterns.md`](./.claude/skills/dapp-e2e-test/references/example-patterns.md) — 19 example 用途別 index
-- [`adversarial-pitfalls.md`](./.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md) — 偽陽性パターン 9 種 + self-check 5 問
+- [`.claude/skills/kiwa-play/SKILL.md`](./.claude/skills/kiwa-play/SKILL.md) — `/kiwa-play` skill (test 仕様書 → 実装 → 4 round フロー)
+- [`example-patterns.md`](./.claude/skills/kiwa-play/references/example-patterns.md) — 19 example 用途別 index
+- [`adversarial-pitfalls.md`](./.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 偽陽性パターン 9 種 + self-check 5 問
 
 ---
 
@@ -231,14 +231,14 @@ Claude Code 利用者向け:
 
 release tag を切る前に 19 example 全てが 4 round 連続 PASS することを必須化しています。 runner は [`.context/scratch/multi-round-all-examples.sh`](./.context/scratch/multi-round-all-examples.sh) (開発側)。
 
-Phase C-5/6/7 の adversarial review findings (PR [#145](https://github.com/cardene777/dapp-e2e/pull/145) / [#146](https://github.com/cardene777/dapp-e2e/pull/146) / [#147](https://github.com/cardene777/dapp-e2e/pull/147)) は全て同 PR 内で解決済。 パターンは [`adversarial-pitfalls.md`](./.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md) に教材として集約しています。
+Phase C-5/6/7 の adversarial review findings (PR [#145](https://github.com/cardene777/kiwa/pull/145) / [#146](https://github.com/cardene777/kiwa/pull/146) / [#147](https://github.com/cardene777/kiwa/pull/147)) は全て同 PR 内で解決済。 パターンは [`adversarial-pitfalls.md`](./.claude/skills/kiwa-play/references/adversarial-pitfalls.md) に教材として集約しています。
 
 ---
 
 ## Contributing
 
-- 🐛 [Issue を起票](https://github.com/cardene777/dapp-e2e/issues)
-- 🔀 [Pull Request を送る](https://github.com/cardene777/dapp-e2e/pulls)
+- 🐛 [Issue を起票](https://github.com/cardene777/kiwa/issues)
+- 🔀 [Pull Request を送る](https://github.com/cardene777/kiwa/pulls)
 - 💡 破壊的変更の確認は [`docs/MIGRATION.md`](./docs/MIGRATION.md) を参照
 
 ---
@@ -249,8 +249,8 @@ Phase C-5/6/7 の adversarial review findings (PR [#145](https://github.com/card
 
 <div align="center">
 
-Made with ⚡ by the dapp-e2e contributors.
+Made with ⚡ by the kiwa contributors.
 
-**[⬆ トップへ戻る](#dapp-e2e)**
+**[⬆ トップへ戻る](#kiwa)**
 
 </div>

@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: pending
+branch: feature/skill-design-spec
+head_sha: pending
+ts: 2026-06-06T00:00:00Z
+tier: light
+category: DOCS
+worker_set: docs-only
+tier_decision_reason: docs/SKILL-DESIGN.md + docs/SKILL-DESIGN.ja.md を JP/EN 対訳で新規追加 (Phase E 実装 PR の SSOT)、 README docs 表に link 追加、 code 変更なし、 既存 166 e2e test に影響なし
+codex_status: not_applicable

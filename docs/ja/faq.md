@@ -1,9 +1,9 @@
 # FAQ
 
-## Q1: なぜ Synpress や MetaMask Test Dapp ではなく dapp-e2e なのか
+## Q1: なぜ Synpress や MetaMask Test Dapp ではなく kiwa なのか
 
 A: 既存ツールは MetaMask 拡張機能を経由する E2E が多く、CI で wallet popup の UI 操作を再現するため flaky になりがちです。
-dapp-e2e は wallet を **コード内で完結** させ、popup / approve UI を再現せず CI 安定性を最優先にします。
+kiwa は wallet を **コード内で完結** させ、popup / approve UI を再現せず CI 安定性を最優先にします。
 比較は [docs/COMPARISON.md](../COMPARISON.md) を参照してください。
 
 ## Q2: anvil が起動しない (`anvil not found in PATH`)
@@ -37,7 +37,7 @@ anvil は default 8545 共有のため、複数 example の並列実行は不可
 
 ## Q6: wagmi v2 / RainbowKit v2 ではなく ConnectKit / Reown を使いたい
 
-A: dapp-e2e は EIP-1193 / EIP-6963 標準に準拠しているため、いずれの wallet picker でも動作します。
+A: kiwa は EIP-1193 / EIP-6963 標準に準拠しているため、いずれの wallet picker でも動作します。
 特定 picker の test 対応は `examples/basic-connect/tests/eip6963.spec.ts` を参考にしてください。
 
 ## Q7: contract deploy が遅い
@@ -59,11 +59,11 @@ A: 以下を順番に確認してください。
 
 ## Q10: 公式サポート範囲
 
-A: dapp-e2e は Headless Chromium + 標準 wallet API のみサポートします。
+A: kiwa は Headless Chromium + 標準 wallet API のみサポートします。
 ブラウザ拡張 (MetaMask 等の) UI 操作、Firefox / Safari、mobile WebView は非対応です。
 
 ## Related
 
-- [GitHub Issues](https://github.com/cardene777/dapp-e2e/issues)
+- [GitHub Issues](https://github.com/cardene777/kiwa/issues)
 - [Concepts](./concepts/README.md)
 - [Cookbook](./cookbook/README.md)

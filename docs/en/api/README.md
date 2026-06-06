@@ -1,12 +1,12 @@
 # API Reference
 
-Main API exported from `@dapp-e2e/core`.
+Main API exported from `@kiwa/core`.
 
 ## Fixture / anvil
 
 | Function / Type | Role |
 |---|---|
-| [`dappE2eTest`](./dapp-e2e-test.md) | Playwright `test` extended for dApps |
+| [`dappE2eTest`](./kiwa-play.md) | Playwright `test` extended for dApps |
 | [`startAnvil`](./start-anvil.md) | Spawn anvil and wait for ready |
 | [`startAnvilCluster`](./test-helpers.md#startanvilcluster) | Spawn multiple anvil processes with distinct chain ids (multi-chain tests) |
 | [`startAnvilFork`](./test-helpers.md#startanvilfork) | Thin wrapper for `anvil --fork-url` (mainnet / sepolia fork) |

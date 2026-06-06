@@ -1,6 +1,6 @@
 # Assert custom-error reverts with expectCustomError
 
-Use `expectCustomError` added in `@dapp-e2e/core` v0.2 to concisely assert Solidity custom-error reverts.
+Use `expectCustomError` added in `@kiwa/core` v0.2 to concisely assert Solidity custom-error reverts.
 
 ## Problem
 
@@ -10,7 +10,7 @@ viem's `simulateContract` throws a `BaseError` on revert, with the custom error 
 
 ```ts
 import { test, expect } from './fixture';
-import { expectCustomError } from '@dapp-e2e/core';
+import { expectCustomError } from '@kiwa/core';
 import { parseAbi, type Address } from 'viem';
 
 const PROTECTED_ABI = parseAbi([

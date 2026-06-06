@@ -1,6 +1,6 @@
 # Smart wallet (AA / smart contract account) を test する
 
-`@dapp-e2e/core` v0.3 で追加された `WalletConfig.isContractAccount` を使い、 ERC-4337 / EIP-1271 の smart contract account を end-to-end で test する pattern。
+`@kiwa/core` v0.3 で追加された `WalletConfig.isContractAccount` を使い、 ERC-4337 / EIP-1271 の smart contract account を end-to-end で test する pattern。
 
 ## 課題
 
@@ -10,7 +10,7 @@
 - tx は `eth_sendTransaction` 直叩きでなく、 smart account の `execute(target, value, data)` 経由 (実 ERC-4337 では `eth_sendUserOperation`)
 - `eth_accounts` は owner EOA ではなく **smart account address** を返すべき
 
-これらを dApp 側 (wagmi / viem) で意識せず透過的に扱うため、 dapp-e2e が RPC handler で振替を行う。
+これらを dApp 側 (wagmi / viem) で意識せず透過的に扱うため、 kiwa が RPC handler で振替を行う。
 
 ## 解決パターン
 
@@ -18,7 +18,7 @@
 
 ```ts
 // tests/prepare-env.ts
-import { runE2EPrepareEnv, loadForgeArtifact } from '@dapp-e2e/core';
+import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa/core';
 
 await runE2EPrepareEnv({
   envFile: '.env.local',
@@ -48,7 +48,7 @@ await runE2EPrepareEnv({
 
 ```ts
 // tests/fixture.ts
-import { dappE2eTest } from '@dapp-e2e/core';
+import { dappE2eTest } from '@kiwa/core';
 import type { Address } from 'viem';
 
 const SMART_ACCOUNT_ADDRESS = process.env.NEXT_PUBLIC_SMART_ACCOUNT as Address;
@@ -67,7 +67,7 @@ export const test = dappE2eTest.extend({
 });
 ```
 
-dapp-e2e が以下を自動で振り替える:
+kiwa が以下を自動で振り替える:
 
 | RPC | EOA (従来) | smart account (`isContractAccount=true`) |
 |---|---|---|
@@ -107,7 +107,7 @@ test('T-AA-002 personal_sign の signature が isValidSignature で検証成功'
     return { signature: sig, message: 'hello AA' };
   });
 
-  // dapp-e2e 内部で isValidSignature 検証済、 返ってくる signature は EIP-1271 検証通過
+  // kiwa 内部で isValidSignature 検証済、 返ってくる signature は EIP-1271 検証通過
   expect(signature).toMatch(/^0x[0-9a-f]+$/i);
 });
 ```
@@ -132,7 +132,7 @@ test('T-AA-002 personal_sign の signature が isValidSignature で検証成功'
 - **Safe (Gnosis Safe)** — multi-sig threshold 署名
 - **Biconomy / ZeroDev / Alchemy AA SDK** — managed bundler / paymaster
 
-これらは外部 SDK 依存を `peerDependencies` で受ける形で example 化する想定 (`@dapp-e2e/aa-thirdweb` / `@dapp-e2e/aa-safe` 等の subpackage 化も検討)。
+これらは外部 SDK 依存を `peerDependencies` で受ける形で example 化する想定 (`@kiwa/aa-thirdweb` / `@kiwa/aa-safe` 等の subpackage 化も検討)。
 
 ## 偽陽性対策
 
@@ -144,6 +144,6 @@ test('T-AA-002 personal_sign の signature が isValidSignature で検証成功'
 
 ## 関連
 
-- [API: WalletConfig.isContractAccount](../api/dapp-e2e-test.md#walletconfig)
-- [Example: nextjs-aa-erc4337](https://github.com/cardene777/dapp-e2e/tree/main/examples/nextjs-aa-erc4337)
-- [Example: nextjs-aa-smart-account (簡略版)](https://github.com/cardene777/dapp-e2e/tree/main/examples/nextjs-aa-smart-account)
+- [API: WalletConfig.isContractAccount](../api/kiwa-play.md#walletconfig)
+- [Example: nextjs-aa-erc4337](https://github.com/cardene777/kiwa/tree/main/examples/nextjs-aa-erc4337)
+- [Example: nextjs-aa-smart-account (簡略版)](https://github.com/cardene777/kiwa/tree/main/examples/nextjs-aa-smart-account)

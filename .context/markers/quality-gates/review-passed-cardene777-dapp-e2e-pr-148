@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: 148
+branch: feature/add-oss-claude-skill
+head_sha: f1620d6
+ts: 2026-06-05T00:43:00Z
+tier: light
+category: DOCS
+worker_set: docs-only
+tier_decision_reason: documentation のみで adversarial review 対象外、 既存 19 example に影響なし、 self-check で内容整合確認済
+codex_status: not_applicable

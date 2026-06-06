@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: 148
+branch: feature/add-oss-claude-skill
+head_sha: f1620d6
+ts: 2026-06-05T00:42:30Z
+tier: light
+category: DOCS
+worker_set: docs-only
+tier_decision_reason: documentation のみ変更、 既存 19 example の e2e test に影響なし
+verify_status: completed

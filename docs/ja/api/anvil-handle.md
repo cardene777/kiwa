@@ -21,7 +21,7 @@ export interface AnvilHandle {
 ## Example
 
 ~~~ts
-import { startAnvil, type AnvilHandle } from '@dapp-e2e/core';
+import { startAnvil, type AnvilHandle } from '@kiwa/core';
 
 let handle: AnvilHandle | undefined;
 

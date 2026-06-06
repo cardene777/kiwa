@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](./SKILL-DESIGN.md) • [🇯🇵 日本語](./SKILL-DESIGN.ja.md)
 
-How dapp-e2e structures **Claude Code skills for automating and standardizing test design** across contract (Foundry / Hardhat) and dApp e2e (Playwright + dapp-e2e fixture) layers. This document is the single source of truth referenced by Phase E implementation PRs.
+How kiwa structures **Claude Code skills for automating and standardizing test design** across contract (Foundry / Hardhat) and dApp e2e (Playwright + kiwa fixture) layers. This document is the single source of truth referenced by Phase E implementation PRs.
 
 ## TL;DR
 
@@ -10,8 +10,8 @@ Test design is split into 3 layers:
 
 | Layer | Skill (planned) | Purpose |
 |---|---|---|
-| **1. Generic test design** | `/test-design` | Given a feature spec / API / screen / code / DB schema, produce risk list, test viewpoints, test cases, priorities, automation policy |
-| **2. Test-runner specialization** | `/contract-test-foundry`, `/contract-test-hardhat`, `/dapp-e2e-test` (refactor) | Convert Layer 1 output into actual `*.t.sol` / `*.test.ts` / `*.spec.ts` files |
+| **1. Generic test design** | `/kiwa-design` | Given a feature spec / API / screen / code / DB schema, produce risk list, test viewpoints, test cases, priorities, automation policy |
+| **2. Test-runner specialization** | `/kiwa-forge`, `/kiwa-hardhat`, `/kiwa-play` (refactor) | Convert Layer 1 output into actual `*.t.sol` / `*.test.ts` / `*.spec.ts` files |
 | **3. Documentation** | docs cookbook + skill reference | Show how to chain the layers for a complete dApp test pyramid |
 
 A single user-facing skill invocation walks the full 5-step flow:
@@ -32,7 +32,7 @@ flowchart LR
 
 Test design is fundamentally a **specification activity**, not a coding activity. The team would lose hours per feature if every developer rewrote "what to test" from scratch.
 
-dapp-e2e already proved that test-spec-first design (`Step 1.5` in `/dapp-e2e-test`) reduces false positives and accelerates implementation. Phase E generalizes that pattern across **contract / integration / e2e** layers and across **Foundry / Hardhat / Playwright** runners.
+kiwa already proved that test-spec-first design (`Step 1.5` in `/kiwa-play`) reduces false positives and accelerates implementation. Phase E generalizes that pattern across **contract / integration / e2e** layers and across **Foundry / Hardhat / Playwright** runners.
 
 Phase E does not invent new test taxonomy. It standardizes how Claude Code skills emit:
 
@@ -159,13 +159,13 @@ These 9 sections are mandatory. Order is fixed. Skills must produce empty `(none
 
 ## Layer 2 specialization
 
-When Layer 1 (`/test-design`) finishes, Layer 2 skills convert the generic output into runner-specific code:
+When Layer 1 (`/kiwa-design`) finishes, Layer 2 skills convert the generic output into runner-specific code:
 
 | Layer 2 skill | Conversion target |
 |---|---|
-| `/contract-test-foundry` | `test/*.t.sol` files, `forge test` execution, `forge coverage` evaluation |
-| `/contract-test-hardhat` | `test/*.test.ts` files, `npx hardhat test` execution, `hardhat-coverage` evaluation |
-| `/dapp-e2e-test` (refactored) | `tests/*.spec.ts` + `tests/prepare-env.ts`, Playwright execution, 4-round flake check |
+| `/kiwa-forge` | `test/*.t.sol` files, `forge test` execution, `forge coverage` evaluation |
+| `/kiwa-hardhat` | `test/*.test.ts` files, `npx hardhat test` execution, `hardhat-coverage` evaluation |
+| `/kiwa-play` (refactored) | `tests/*.spec.ts` + `tests/prepare-env.ts`, Playwright execution, 4-round flake check |
 
 Each Layer 2 skill consumes a Layer 1 spec file (`.context/spec/test-spec-{module}.md`) and writes implementation. The Layer 1 spec acts as the contract between design and implementation.
 
@@ -207,11 +207,11 @@ The same 9-section output covers all four review activities:
 | Phase | Scope | Target file |
 |---|---|---|
 | **E-1** | SKILL-DESIGN.md spec (this document) | `docs/SKILL-DESIGN.md` |
-| **E-2** | `/test-design` skill (Layer 1) | `.claude/skills/test-design/` |
-| **E-3** | `/dapp-e2e-test` refactor (Layer 2 e2e) | Existing skill, integrate Layer 1 |
-| **E-4** | `/contract-test-foundry` skill | `.claude/skills/contract-test-foundry/` |
-| **E-5** | `/contract-test-hardhat` skill | `.claude/skills/contract-test-hardhat/` |
-| **E-6** | Cookbook chapter linking the layers | `docs/{ja,en}/cookbook/test-design-flow.md` |
+| **E-2** | `/kiwa-design` skill (Layer 1) | `.claude/skills/kiwa-design/` |
+| **E-3** | `/kiwa-play` refactor (Layer 2 e2e) | Existing skill, integrate Layer 1 |
+| **E-4** | `/kiwa-forge` skill | `.claude/skills/kiwa-forge/` |
+| **E-5** | `/kiwa-hardhat` skill | `.claude/skills/kiwa-hardhat/` |
+| **E-6** | Cookbook chapter linking the layers | `docs/{ja,en}/cookbook/kiwa-design-flow.md` |
 
 Phases are sequenced D → A → B style: spec → most valuable skill (Layer 1) → integration into the existing e2e skill, then community contributions for Foundry / Hardhat runners.
 
@@ -225,5 +225,5 @@ Phases are sequenced D → A → B style: spec → most valuable skill (Layer 1)
 ## See also
 
 - [`docs/MOCK-DESIGN.md`](./MOCK-DESIGN.md) — Wallet / SDK mock fidelity spec (related concept for "what to fake")
-- [`.claude/skills/dapp-e2e-test/SKILL.md`](../.claude/skills/dapp-e2e-test/SKILL.md) — Existing e2e skill that already follows part of this flow
-- [`.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md`](../.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md) — Self-check checklist for false positives
+- [`.claude/skills/kiwa-play/SKILL.md`](../.claude/skills/kiwa-play/SKILL.md) — Existing e2e skill that already follows part of this flow
+- [`.claude/skills/kiwa-play/references/adversarial-pitfalls.md`](../.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — Self-check checklist for false positives

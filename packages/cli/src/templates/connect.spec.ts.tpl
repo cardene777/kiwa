@@ -1,14 +1,14 @@
 import { expect } from '@playwright/test';
-import { dappE2eTest as test } from '@dapp-e2e/core';
+import { dappE2eTest as test } from '@kiwa/core';
 import { verifyMessage } from 'viem';
 
-// dapp-e2e fixture injects an anvil-backed wallet; the address is obtained via
+// kiwa fixture injects an anvil-backed wallet; the address is obtained via
 // eth_requestAccounts so no private key needs to live in the template.
 
 const MINI_DAPP_HTML = `
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8" /><title>dapp-e2e quickstart</title></head>
+<head><meta charset="utf-8" /><title>kiwa quickstart</title></head>
 <body>
   <button id="connect">Connect</button>
   <button id="sign">Sign</button>
@@ -23,7 +23,7 @@ const MINI_DAPP_HTML = `
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       const sig = await window.ethereum.request({
         method: 'personal_sign',
-        params: ['hello dapp-e2e', accounts[0]],
+        params: ['hello kiwa', accounts[0]],
       });
       document.getElementById('result').textContent = sig;
     });
@@ -44,7 +44,7 @@ const MINI_DAPP_HTML = `
 </html>
 `;
 
-test.describe('dapp-e2e quickstart', () => {
+test.describe('kiwa quickstart', () => {
   test('window.ethereum が fixture 経由で inject される', async ({ page }) => {
     await page.setContent(MINI_DAPP_HTML);
     const hasEthereum = await page.evaluate(() => typeof (window as any).ethereum !== 'undefined');
@@ -72,7 +72,7 @@ test.describe('dapp-e2e quickstart', () => {
     const sigText = await page.locator('#result').textContent({ timeout: 5000 });
     const valid = await verifyMessage({
       address,
-      message: 'hello dapp-e2e',
+      message: 'hello kiwa',
       signature: sigText as `0x${string}`,
     });
     expect(valid).toBe(true);

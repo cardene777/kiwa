@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: pending
+branch: feature/aa-smart-wallet-d1-d2-d5
+head_sha: pending
+ts: 2026-06-05T17:00:00Z
+tier: heavy
+category: FEATURE+DOCS
+worker_set: codex-impl,playwright-e2e
+tier_decision_reason: Phase D-1 (isContractAccount 経路 4 RPC 振替) + Phase D-2 (nextjs-aa-erc4337 full ERC-4337 v0.7 example、 contract 5 件 + bundler stub + 7 test) + Phase D-5 (cookbook smart-wallet-aa.md JP/EN 章追加 + README/README.ja.md AA 言及 + badge ERC-4337 v0.7 追加) を統合。 新 example 7/7 PASS + 既存 19 example regression 0 件 (1 round 全 PASS)、 core typecheck/build exit 0
+codex_status: completed

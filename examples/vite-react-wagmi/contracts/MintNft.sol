@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-/// @notice Minimal ERC721 mint dApp for dapp-e2e example
+/// @notice Minimal ERC721 mint dApp for kiwa example
 /// 標準準拠の ERC721 を OpenZeppelin に依存せず実装 (例として bytecode を小さく保つ)
 contract MintNft {
     string public name = "DappE2eNFT";

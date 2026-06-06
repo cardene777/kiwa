@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: 147
+branch: feature/audit-c7-misc
+head_sha: b4295fb
+ts: 2026-06-04T22:35:00Z
+tier: heavy
+category: HIGH-RISK
+worker_set: codex-impl,codex-adversarial,playwright-e2e
+tier_decision_reason: misc example 6 件 (TTL/transfer revoke/multi-param filter/ENS collision/zk range proof/wagmi reconnect) 追加 + adversarial review 1 round で 1 CRITICAL + 1 MAJOR 検出、全 2 件 applied (GatedContent grantor 連動 revoke 実装 + T-GT-007 拡張) 後 5 example 全 PASS (token-gating 8 / event 7 / ens 7 / zk 7 / wagmi 4)
+codex_status: completed

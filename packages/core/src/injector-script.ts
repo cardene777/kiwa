@@ -85,7 +85,7 @@ export function createInjectorScript(opts: InjectorOptions): string {
         request: function (args) {
           var fn = window[bridgeName];
           if (!fn) {
-            return Promise.reject(new Error('dapp-e2e: ' + bridgeName + ' not exposed'));
+            return Promise.reject(new Error('kiwa: ' + bridgeName + ' not exposed'));
           }
           return Promise.resolve(fn(args)).then(unwrapEnvelope);
         },

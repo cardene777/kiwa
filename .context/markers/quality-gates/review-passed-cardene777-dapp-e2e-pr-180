@@ -1,0 +1,16 @@
+schema_version: 3
+pr_number: N/A
+branch: feature/176-contract-test-hardhat-skill
+head_sha: 0ed58d8
+ts: 2026-06-05T10:10:18Z
+tier: standard
+category: CODE
+worker_set: codex-adversarial
+tier_decision_reason: overnight モードで自走中、 markdown skill spec + TypeScript example で AI 振る舞い汚染リスク CODE 扱い、 logic / 暗号 / SQL なしで standard tier single round
+codex_status: completed
+impl_check_status: skipped (not in worker_set)
+critical: 0
+major: 0
+minor: 0
+
+findings: []

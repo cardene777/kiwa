@@ -23,7 +23,7 @@ user reject と unlimited approval を含めて test する。
 approve receipt を待ってから次へ進めると、allowance 更新を deterministic に扱えます。
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@dapp-e2e/core';
+import { dappE2eTest as test, expect } from '@kiwa/core';
 import { MaxUint256 } from 'viem';
 
 const ERC20_ABI = [

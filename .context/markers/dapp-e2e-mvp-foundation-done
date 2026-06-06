@@ -1,0 +1,63 @@
+schema_version: 1
+artifact: dapp-e2e-mvp-foundation
+status: done
+ts: 2026-06-04T23:30:00Z
+
+# 完了条件
+
+- Issue #78 + #94-138 のうち全 45 Issue close
+- 全 example (19 件) で e2e test PASS
+- 全 example で 4 round 連続 PASS、 flaky 0 件
+
+# 完了 PR
+
+- #93 (Phase A)
+- #139 (B-1 部分)
+- #140 (B-2 部分)
+- #141 (Phase C-1 core/cli/cookbook)
+- #142 (Phase C-2 swap 3 件)
+- #143 (Phase C-3 NFT 7 件)
+- #144 (Phase C-4 DeFi 5 件)
+- #145 (Phase C-5 governance + AA 5 件、 CRITICAL DaoExecutionTarget access control / MAJOR stale recovery 4 fix 含む)
+- #146 (Phase C-6 cross-chain 4 件、 MAJOR T-BR-007 replay false positive / T-BR-008 reverse path E2E false positive / MINOR SimpleToken minter 分離 3 fix 含む)
+- #147 (Phase C-7 misc 6 件、 CRITICAL GatedContent self-grant bypass / MAJOR T-GT-007 偽陽性 2 fix 含む)
+
+# 4 round 連続 PASS 最終検証 (2026-06-04T23:30 完了)
+
+| example | rounds | result |
+|---|---|---|
+| basic-connect | 14 passed (12.9s / 3.6s / 4.3s / 4.0s) | PASS |
+| defi-swap | 6 passed (4.2s / 3.2s / 3.1s / 3.6s) | PASS |
+| mint-nft | 8 passed (2.5s / 2.7s / 2.5s / 2.8s) | PASS |
+| nextjs-aa-smart-account | 10 passed (36.4s / 35.1s / 33.9s / 38.9s) | PASS |
+| nextjs-bridge | 9 passed (1.4m / 43.1s / 44.6s / 47.6s) | PASS |
+| nextjs-dao-vote | 10 passed (27.3s / 26.3s / 28.6s / 28.3s) | PASS |
+| nextjs-ens-resolver | 7 passed (29.8s / 32.7s / 30.2s / 30.9s) | PASS |
+| nextjs-erc1155-game | 8 passed (24.1s / 23.1s / 23.0s / 24.2s) | PASS |
+| nextjs-event-history | 7 passed (29.6s / 28.6s / 28.1s / 27.6s) | PASS |
+| nextjs-lending | 10 passed (31.7s / 31.7s / 32.7s / 34.5s) | PASS |
+| nextjs-multi-chain | 6 passed (36.9s / 46.3s / 33.7s / 25.7s) | PASS |
+| nextjs-permit-swap | 6 passed (23.8s / 23.8s / 23.8s / 23.8s) | PASS |
+| nextjs-staking | 12 passed (34.3s / 35.3s / 35.4s / 34.2s) | PASS |
+| nextjs-token-gating | 8 passed (23.9s / 24.2s / 23.9s / 23.8s) | PASS |
+| nextjs-vesting | 9 passed (37.4s / 37.4s / 37.7s / 39.7s) | PASS |
+| nextjs-wagmi-rainbow | 4 passed (21.8s / 21.5s / 21.9s / 21.8s) | PASS |
+| nextjs-zk-verifier | 7 passed (31.1s / 30.3s / 31.4s / 30.1s) | PASS |
+| nft-marketplace | 12 passed (3.1s / 2.9s / 2.9s / 3.1s) | PASS |
+| vite-react-wagmi | 3 passed (9.1s / 8.0s / 8.0s / 8.0s) | PASS |
+
+# 集計
+
+- example 数: 19
+- round 数: 4 (連続 PASS)
+- 総実行数: 76 回
+- flaky: 0 件
+- 全体 test 件数: 156 件 (1 round あたり) × 4 = 624 assertion 通過
+
+# notes
+
+- Phase C 全 7 PR (C-1 〜 C-7) で 30 件超の test/feat 追加 + 計 9 件の adversarial finding fix を吸収
+- token-gating の self-grant bypass (CRITICAL) は同 PR (#147) 内で根本修正済
+- bridge の T-BR-007 replay false positive / T-BR-008 reverse path E2E false positive (MAJOR x 2) は同 PR (#146) 内で動的 nonce + UI 経由 E2E 化で fix
+- DaoExecutionTarget の operator access control (CRITICAL) は同 PR (#145) 内で msg.sender == dao guard 追加で fix
+- AA SmartAccount の stale recovery (MAJOR) は同 PR (#145) 内で ownerEpoch 機構導入で fix

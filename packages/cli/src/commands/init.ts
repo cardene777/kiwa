@@ -9,7 +9,7 @@ const TEMPLATES = [
 const TSCONFIG_TEMPLATE = { source: 'tsconfig.json.tpl', dest: 'tsconfig.json' } as const;
 
 const DEV_DEPENDENCIES = {
-  '@dapp-e2e/core': '^0.1.0',
+  '@kiwa/core': '^0.1.0',
   '@playwright/test': '^1.49.0',
   viem: '^2',
 } as const;
@@ -111,7 +111,7 @@ export function runInit(options: InitOptions): InitResult {
     const strict = detectTsconfigStrict(tsconfigPath);
     if (strict === false) {
       warnings.push(
-        'Existing tsconfig.json has "strict": false. dapp-e2e init did not modify it.',
+        'Existing tsconfig.json has "strict": false. kiwa init did not modify it.',
       );
     }
   } else {

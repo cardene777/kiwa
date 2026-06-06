@@ -1,0 +1,14 @@
+schema_version: 3
+pr_number: 144
+branch: feature/audit-c4-defi
+head_sha: 921b847
+ts: 2026-06-04T11:00:00Z
+tier: heavy
+category: HIGH-RISK
+worker_set: codex-adversarial,generator-verifier
+tier_decision_reason: contracts/ 変更でリスク高、Codex adversarial 1 round で 1 CRITICAL + 2 MAJOR + 3 MINOR 検出、全 6 件 applied 後 全 test PASS
+codex_status: completed
+impl_check_status: completed
+critical: 1
+major: 2
+minor: 3

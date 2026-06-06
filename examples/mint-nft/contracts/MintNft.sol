@@ -14,7 +14,7 @@ interface IERC721Receiver {
         returns (bytes4);
 }
 
-/// @notice Minimal ERC721 mint dApp for dapp-e2e example
+/// @notice Minimal ERC721 mint dApp for kiwa example
 /// 標準準拠の ERC721 を OpenZeppelin に依存せず実装 (例として bytecode を小さく保つ)
 contract MintNft is IERC2981 {
     bytes4 private constant INTERFACE_ID_ERC165 = 0x01ffc9a7;

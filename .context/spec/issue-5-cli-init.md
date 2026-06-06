@@ -2,17 +2,17 @@
 
 ## タスクサマリ
 
-dapp-e2e CLI に `init` subcommand を追加し、外部 dApp プロジェクトに fixture import 済 e2e spec + playwright.config + package.json script を生成する scaffold 機能を実装する。
-`pnpm dlx @dapp-e2e/cli init` で外部プロジェクトで動作することが roadmap AC 6 (v0.1.0 publish 動作確認) の前提となる。
-既存の `dapp-e2e doctor` (PR #2) を破壊せず、CLI runtime に viem 以外の dep を追加しない (zero runtime dep 方針)。
+kiwa CLI に `init` subcommand を追加し、外部 dApp プロジェクトに fixture import 済 e2e spec + playwright.config + package.json script を生成する scaffold 機能を実装する。
+`pnpm dlx @kiwa/cli init` で外部プロジェクトで動作することが roadmap AC 6 (v0.1.0 publish 動作確認) の前提となる。
+既存の `kiwa doctor` (PR #2) を破壊せず、CLI runtime に viem 以外の dep を追加しない (zero runtime dep 方針)。
 
 ## 受入条件 (AC)
 
-- AC 1: CLI subcommand dispatch — `dapp-e2e init` / `dapp-e2e doctor` / `dapp-e2e --help` / `dapp-e2e` (unknown) の 4 経路を `packages/cli/src/index.ts` で正しく分岐し、既存 `doctor` の動作 (`OK anvil at ...` exit 0 / `ERR anvil not found` exit 1) を破壊しない
-- AC 2: `dapp-e2e init` 実行で cwd に `e2e/connect.spec.ts` + `playwright.config.ts` を新規作成し、`import { dappE2eTest as test } from '@dapp-e2e/core'` 済の TypeScript fixture テンプレが配置される (template 内 viem 連携あり、anvil 起動から sign / sendTransaction まで通る最小例)
-- AC 3: `dapp-e2e init` 実行で cwd の `package.json` に `scripts.test:e2e: "playwright test"` を追加 (既存 scripts は保持)、`devDependencies` に `@dapp-e2e/core` (`workspace:* or ^0.1.0`) `@playwright/test` (`^1.49.0`) `viem` (`^2`) の 3 つを追加。host で `pnpm install` 任せ (CLI 内では install を実行しない)
+- AC 1: CLI subcommand dispatch — `kiwa init` / `kiwa doctor` / `kiwa --help` / `kiwa` (unknown) の 4 経路を `packages/cli/src/index.ts` で正しく分岐し、既存 `doctor` の動作 (`OK anvil at ...` exit 0 / `ERR anvil not found` exit 1) を破壊しない
+- AC 2: `kiwa init` 実行で cwd に `e2e/connect.spec.ts` + `playwright.config.ts` を新規作成し、`import { dappE2eTest as test } from '@kiwa/core'` 済の TypeScript fixture テンプレが配置される (template 内 viem 連携あり、anvil 起動から sign / sendTransaction まで通る最小例)
+- AC 3: `kiwa init` 実行で cwd の `package.json` に `scripts.test:e2e: "playwright test"` を追加 (既存 scripts は保持)、`devDependencies` に `@kiwa/core` (`workspace:* or ^0.1.0`) `@playwright/test` (`^1.49.0`) `viem` (`^2`) の 3 つを追加。host で `pnpm install` 任せ (CLI 内では install を実行しない)
 - AC 4: 既存 file 上書き保護 — cwd に `e2e/connect.spec.ts` / `playwright.config.ts` のいずれかが既に存在する場合、`--force` flag なしでは上書きせず exit code 1 + stderr で衝突 file 列挙、`--force` 指定で上書き。`package.json` は merge 編集 (既存 scripts/devDeps を保持しつつ追加)
-- AC 5: template 解決経路 — bundled `dist/templates/*.tpl` を `new URL('../templates/*.tpl', import.meta.url)` + `fs.readFileSync` で解決し、`pnpm dlx @dapp-e2e/cli init` 経由でも cwd 関係なく正しく動作。vitest で 1 ケース検証 (temp dir で init 実行 → 生成 file 内容 assert + 既存衝突 → `--force` 上書き)
+- AC 5: template 解決経路 — bundled `dist/templates/*.tpl` を `new URL('../templates/*.tpl', import.meta.url)` + `fs.readFileSync` で解決し、`pnpm dlx @kiwa/cli init` 経由でも cwd 関係なく正しく動作。vitest で 1 ケース検証 (temp dir で init 実行 → 生成 file 内容 assert + 既存衝突 → `--force` 上書き)
 
 ## スコープ境界
 
@@ -47,26 +47,26 @@ dapp-e2e CLI に `init` subcommand を追加し、外部 dApp プロジェクト
 
 - 反例 1: `record` / `run` subcommand を追加する PR は roadmap 反例 3 違反 (Playwright codegen + `pnpm exec playwright test` で代替)
 - 反例 2: `packages/cli/package.json` の `dependencies` field に runtime dep (yargs / commander / kleur / chalk 等) を追加する PR は CLI zero runtime dep 方針違反、reject。node 標準 `fs` / `path` / `node:url` のみで実装
-- 反例 3: `dapp-e2e init` 内で `pnpm install` / `npm install` を自動実行する PR は副作用過大、reject (host の package manager 検出困難、scripts/devDeps 追記のみで host install 任せ)
+- 反例 3: `kiwa init` 内で `pnpm install` / `npm install` を自動実行する PR は副作用過大、reject (host の package manager 検出困難、scripts/devDeps 追記のみで host install 任せ)
 - 反例 4: 既存 file (`e2e/connect.spec.ts` / `playwright.config.ts`) を `--force` なしで上書きする PR は AC 4 違反、reject。`package.json` も既存 key を破壊する merge は禁止 (新規 key 追加のみ)
-- 反例 5: template `.tpl` 内に `record` / `run` 等の未実装 CLI subcommand への言及や `pnpm exec dapp-e2e run` 等の指示を含む PR は反例 1 と整合矛盾、reject (template は `pnpm exec playwright test` を案内)
+- 反例 5: template `.tpl` 内に `record` / `run` 等の未実装 CLI subcommand への言及や `pnpm exec kiwa run` 等の指示を含む PR は反例 1 と整合矛盾、reject (template は `pnpm exec playwright test` を案内)
 
 ## 影響範囲 (touched file 候補)
 
 新規 4 file:
 
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/cli/src/commands/init.ts` — init コマンド本体 (template 解決 + file 書き出し + 上書き保護 + package.json merge 編集)
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/cli/src/templates/connect.spec.ts.tpl` — `import { dappE2eTest as test } from '@dapp-e2e/core'` 済の e2e spec template (anvil + sign + sendTransaction の最小例)
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/cli/src/templates/playwright.config.ts.tpl` — `defineConfig({ testDir: './e2e', timeout: 30_000, fullyParallel: false, use: { headless: true } })` 相当
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/cli/tests/init.test.ts` — vitest テスト (temp dir で init → 生成 file 検証 / 衝突 → --force / package.json merge)
+- `/Users/cardene/Desktop/projects/kiwa/packages/cli/src/commands/init.ts` — init コマンド本体 (template 解決 + file 書き出し + 上書き保護 + package.json merge 編集)
+- `/Users/cardene/Desktop/projects/kiwa/packages/cli/src/templates/connect.spec.ts.tpl` — `import { dappE2eTest as test } from '@kiwa/core'` 済の e2e spec template (anvil + sign + sendTransaction の最小例)
+- `/Users/cardene/Desktop/projects/kiwa/packages/cli/src/templates/playwright.config.ts.tpl` — `defineConfig({ testDir: './e2e', timeout: 30_000, fullyParallel: false, use: { headless: true } })` 相当
+- `/Users/cardene/Desktop/projects/kiwa/packages/cli/tests/init.test.ts` — vitest テスト (temp dir で init → 生成 file 検証 / 衝突 → --force / package.json merge)
 
 修正 1 file:
 
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/cli/src/index.ts` — argv dispatch 追加 (`init` 経路 + `--help` text + unknown handling)
+- `/Users/cardene/Desktop/projects/kiwa/packages/cli/src/index.ts` — argv dispatch 追加 (`init` 経路 + `--help` text + unknown handling)
 
 設定変更 (実装で必要なら):
 
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/cli/package.json` — tsup config 追加 (`--loader .tpl=text` or `files: ["dist"]` の include 確認)、必要なら scripts 微調整
+- `/Users/cardene/Desktop/projects/kiwa/packages/cli/package.json` — tsup config 追加 (`--loader .tpl=text` or `files: ["dist"]` の include 確認)、必要なら scripts 微調整
 
 合計 5-6 file (新規 4 + 修正 1 + 暫定 1)。
 
@@ -83,8 +83,8 @@ dapp-e2e CLI に `init` subcommand を追加し、外部 dApp プロジェクト
 ### リスク
 
 - リスク 1: **tsup が `.tpl` を bundle しない** — デフォルト tsup は `.ts` のみ。tsup config で `loader: { '.tpl': 'text' }` を指定 (esbuild loader 経由で string import) する案、または `tsup --onSuccess "cp -r src/templates dist/templates"` で copy する案、どちらかを選択する必要あり。実装段階で AskUserQuestion 検討
-- リスク 2: **template 内の `@dapp-e2e/core` import** — devDeps 3 件追加 (core + playwright + viem) の version range が peerDeps と integers でない可能性 (例 core が `workspace:*` で publish 後は `^0.1.0` に変わる)。template 内は `^0.1.0` 固定で安全、publish 時の version bump は別 Issue で対応
-- リスク 3: **`pnpm dlx` 経路の cwd 解決** — `pnpm dlx @dapp-e2e/cli init` は temp dir に install して bin 実行、`process.cwd()` は呼び出し元 cwd を維持するが、template 解決の `import.meta.url` は temp dir 内 dist を指す。vitest テストで 1 ケース検証
+- リスク 2: **template 内の `@kiwa/core` import** — devDeps 3 件追加 (core + playwright + viem) の version range が peerDeps と integers でない可能性 (例 core が `workspace:*` で publish 後は `^0.1.0` に変わる)。template 内は `^0.1.0` 固定で安全、publish 時の version bump は別 Issue で対応
+- リスク 3: **`pnpm dlx` 経路の cwd 解決** — `pnpm dlx @kiwa/cli init` は temp dir に install して bin 実行、`process.cwd()` は呼び出し元 cwd を維持するが、template 解決の `import.meta.url` は temp dir 内 dist を指す。vitest テストで 1 ケース検証
 - リスク 4: **package.json merge の JSON 整形** — 既存 package.json のインデント (2 space / tab) を保持するため、`JSON.stringify(obj, null, 2)` 固定だと既存 4 space project で整形崩れる。`detect-indent` 風の自前検出 (1 line 目の最初の `"` の前の空白数で判定) を node 標準のみで実装
 - リスク 5: **既存 `doctor` の dispatch 破壊** — `index.ts` 修正で `process.argv[2]` 分岐を関数化 (`switch (cmd)` or `if/else`) する際、`doctor` の既存テスト (なければ追加) と stdout/stderr 一致を保つ
 

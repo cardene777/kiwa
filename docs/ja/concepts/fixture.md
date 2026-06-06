@@ -7,7 +7,7 @@
 ## なぜ
 
 dApp の E2E テストは「anvil 起動」「contract deploy」「wallet inject」「connect」「sign」「send tx」と多段で、毎回ボイラープレートを書くと flaky になります。
-dapp-e2e は core が anvil 起動 / EIP-1193 inject / Playwright fixture 化を 1 経路で提供し、ユーザーは `page` と `dappE2e` を受け取って test を書くだけにします。
+kiwa は core が anvil 起動 / EIP-1193 inject / Playwright fixture 化を 1 経路で提供し、ユーザーは `page` と `dappE2e` を受け取って test を書くだけにします。
 
 ## 仕組み
 
@@ -47,7 +47,7 @@ sequenceDiagram
 ## Example
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@dapp-e2e/core';
+import { dappE2eTest as test, expect } from '@kiwa/core';
 
 const customTest = test.extend({
   // 必要に応じて wallet の private key や approval mode を override
@@ -65,4 +65,4 @@ customTest('connect 後に署名できる', async ({ page, dappE2e }) => {
 ## 関連
 
 - [EIP-6963 Multi-Wallet](./eip-6963.md)
-- [API Reference: dappE2eTest](../api/dapp-e2e-test.md)
+- [API Reference: dappE2eTest](../api/kiwa-play.md)

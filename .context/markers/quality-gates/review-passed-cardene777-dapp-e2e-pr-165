@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: 165
+branch: feature/aa-smart-wallet-d1-d2-d5
+head_sha: dc81dd3
+ts: 2026-06-05T17:11:00Z
+tier: heavy
+category: FEATURE+DOCS
+worker_set: codex-impl,self-check,adversarial-pitfalls
+tier_decision_reason: isContractAccount 経路 4 RPC 振替の設計が EIP-1271 + ERC-4337 v0.7 仕様に準拠、 既存 WalletConfig back-compat 保証 (isContractAccount 未指定時は EOA 動作)、 cookbook 章で偽陽性対策 (adversarial-pitfalls #3 全 entrypoint 叩く) を明示、 bundler stub は ERC-4337 lifecycle のみ再現で実 bundler 互換は scope 外
+codex_status: completed

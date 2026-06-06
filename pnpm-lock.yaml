@@ -26,7 +26,7 @@ importers:
 
   examples/basic-connect:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
     devDependencies:
@@ -45,7 +45,7 @@ importers:
 
   examples/defi-swap:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
     devDependencies:
@@ -64,7 +64,7 @@ importers:
 
   examples/mint-nft:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
     devDependencies:
@@ -101,7 +101,7 @@ importers:
 
   examples/nextjs-aa-erc4337:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -147,7 +147,7 @@ importers:
 
   examples/nextjs-aa-smart-account:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -193,7 +193,7 @@ importers:
 
   examples/nextjs-bridge:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -239,7 +239,7 @@ importers:
 
   examples/nextjs-dao-vote:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -285,7 +285,7 @@ importers:
 
   examples/nextjs-ens-resolver:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -331,7 +331,7 @@ importers:
 
   examples/nextjs-erc1155-game:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -377,7 +377,7 @@ importers:
 
   examples/nextjs-event-history:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -423,7 +423,7 @@ importers:
 
   examples/nextjs-lending:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -469,7 +469,7 @@ importers:
 
   examples/nextjs-multi-chain:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -515,7 +515,7 @@ importers:
 
   examples/nextjs-permit-swap:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -561,7 +561,7 @@ importers:
 
   examples/nextjs-staking:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -607,7 +607,7 @@ importers:
 
   examples/nextjs-token-gating:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -653,7 +653,7 @@ importers:
 
   examples/nextjs-vesting:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -699,7 +699,7 @@ importers:
 
   examples/nextjs-wagmi-rainbow:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -745,7 +745,7 @@ importers:
 
   examples/nextjs-zk-verifier:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':
@@ -791,7 +791,7 @@ importers:
 
   examples/nft-marketplace:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
     devDependencies:
@@ -810,7 +810,7 @@ importers:
 
   examples/vite-react-wagmi:
     dependencies:
-      '@dapp-e2e/core':
+      '@kiwa/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@rainbow-me/rainbowkit':

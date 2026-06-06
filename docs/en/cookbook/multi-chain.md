@@ -9,7 +9,7 @@ Run multiple anvil instances with distinct chain IDs in parallel to test bridge 
 ### 1. Start multiple anvil instances in global-setup
 
 ~~~ts
-import { startAnvil, type AnvilHandle } from '@dapp-e2e/core';
+import { startAnvil, type AnvilHandle } from '@kiwa/core';
 
 const anvilHandles: AnvilHandle[] = [];
 

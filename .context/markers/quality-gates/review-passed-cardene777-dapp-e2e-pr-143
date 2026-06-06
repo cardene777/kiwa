@@ -1,0 +1,14 @@
+schema_version: 3
+pr_number: 143
+branch: feature/audit-c3-nft
+head_sha: de9be2e
+ts: 2026-06-04T10:40:00Z
+tier: heavy
+category: HIGH-RISK
+worker_set: codex-adversarial,generator-verifier
+tier_decision_reason: contracts/ + packages/core/ 変更でリスク高、Codex adversarial 1 round で 5 finding 検出 + 全 applied 後 全 test PASS
+codex_status: completed
+impl_check_status: completed
+critical: 0
+major: 4
+minor: 1

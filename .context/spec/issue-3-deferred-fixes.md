@@ -2,7 +2,7 @@
 
 ## タスクサマリ
 
-PR #2 で MVP merge 済の dapp-e2e core に対し、adversarial review で deferred 判定された 11 finding (F-09 / F-11〜F-20) を error 正規化 / lifecycle 堅牢化 / public surface clean-up の 3 軸で解消する。
+PR #2 で MVP merge 済の kiwa core に対し、adversarial review で deferred 判定された 11 finding (F-09 / F-11〜F-20) を error 正規化 / lifecycle 堅牢化 / public surface clean-up の 3 軸で解消する。
 public API contract (EIP-1193 error code + Playwright 標準 method 非破壊) を v0.1.0 publish 前に確定し、v0.2 以降の breaking を最小化する。
 
 ## 受入条件 (AC)
@@ -57,20 +57,20 @@ grep ベースで確認済み、6 file (5 src + 1 examples) の修正 + 4 file �
 
 ### 修正対象 (5 src + 1 examples)
 
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/core/src/injector-script.ts` (F-12 envelope unwrap, F-18 counter 削除)
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/core/src/fixture.ts` (F-09 setContent 順序, F-18 click monkey patch 撤去 + waitForRpcIdle 配線, F-12 envelope wrap)
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/core/src/rpc-handlers.ts` (F-14 JSON.parse try/catch, F-15 anvilProxy ok + shape 検証, F-20 動的 import 静的化, F-11 hex policy comment)
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/core/src/tx.ts` (F-16 viem error type で code 3 / -32603 / -32602 分岐)
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/core/src/anvil.ts` (F-13 child.on('error') 追加, F-17 SIGKILL 後 exit 待機)
-- `/Users/cardene/Desktop/projects/dapp-e2e/examples/basic-connect/package.json` (F-19 viem を dependencies → devDependencies)
+- `/Users/cardene/Desktop/projects/kiwa/packages/core/src/injector-script.ts` (F-12 envelope unwrap, F-18 counter 削除)
+- `/Users/cardene/Desktop/projects/kiwa/packages/core/src/fixture.ts` (F-09 setContent 順序, F-18 click monkey patch 撤去 + waitForRpcIdle 配線, F-12 envelope wrap)
+- `/Users/cardene/Desktop/projects/kiwa/packages/core/src/rpc-handlers.ts` (F-14 JSON.parse try/catch, F-15 anvilProxy ok + shape 検証, F-20 動的 import 静的化, F-11 hex policy comment)
+- `/Users/cardene/Desktop/projects/kiwa/packages/core/src/tx.ts` (F-16 viem error type で code 3 / -32603 / -32602 分岐)
+- `/Users/cardene/Desktop/projects/kiwa/packages/core/src/anvil.ts` (F-13 child.on('error') 追加, F-17 SIGKILL 後 exit 待機)
+- `/Users/cardene/Desktop/projects/kiwa/examples/basic-connect/package.json` (F-19 viem を dependencies → devDependencies)
 
 ### 新規 / 拡張 (4 file)
 
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/core/src/types.ts` (拡張 — `DappE2eApi.waitForRpcIdle()` シグネチャ + error envelope 型)
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/core/tests/injector.test.ts` (拡張 — malformed typed data / anvilProxy error / hex policy negative test 追加)
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/core/tests/tx.test.ts` (拡張 — revert vs transport error 区別 negative test 追加)
-- `/Users/cardene/Desktop/projects/dapp-e2e/packages/core/tests/anvil.test.ts` (拡張 — ENOENT child error 即時 reject test 追加)
-- `/Users/cardene/Desktop/projects/dapp-e2e/examples/basic-connect/tests/connect.spec.ts` (拡張 — eth_subscribe code 4200 page 側 catch + waitForRpcIdle test 追加)
+- `/Users/cardene/Desktop/projects/kiwa/packages/core/src/types.ts` (拡張 — `DappE2eApi.waitForRpcIdle()` シグネチャ + error envelope 型)
+- `/Users/cardene/Desktop/projects/kiwa/packages/core/tests/injector.test.ts` (拡張 — malformed typed data / anvilProxy error / hex policy negative test 追加)
+- `/Users/cardene/Desktop/projects/kiwa/packages/core/tests/tx.test.ts` (拡張 — revert vs transport error 区別 negative test 追加)
+- `/Users/cardene/Desktop/projects/kiwa/packages/core/tests/anvil.test.ts` (拡張 — ENOENT child error 即時 reject test 追加)
+- `/Users/cardene/Desktop/projects/kiwa/examples/basic-connect/tests/connect.spec.ts` (拡張 — eth_subscribe code 4200 page 側 catch + waitForRpcIdle test 追加)
 
 合計 — 修正 6 file (5 src + 1 examples package.json) + 拡張 5 file (1 types + 4 test) = **11 file**。
 test は新規 file ではなく既存 test ファイル拡張で対応 (Issue 粒度を抑える)。
@@ -130,7 +130,7 @@ vitest 25 → 29 (+4)、E2E 6 → 8 (+2)、計 31 → 37 test。
 
 ### 親 roadmap spec との整合
 
-本 Issue は `.context/spec/dapp-e2e-v0.1.0-roadmap.md` の Issue #3 行に対応。
+本 Issue は `.context/spec/kiwa-v0.1.0-roadmap.md` の Issue #3 行に対応。
 roadmap で示した「11 finding 解消」「v0.1.0 publish 前提」「Issue #4 (Changesets) は本 Issue merge 後着手」の依存順序を守る。
 
 ### 後続 Issue との依存

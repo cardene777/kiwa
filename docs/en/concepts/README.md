@@ -1,6 +1,6 @@
 # Concepts
 
-Core concepts behind dapp-e2e.
+Core concepts behind kiwa.
 
 - [Fixture design](./fixture.md) — Playwright fixtures provided by `dappE2eTest`
 - [Fixture composition](./fixture-composition.md) — How to combine custom fixtures, global setup, and deploy ordering

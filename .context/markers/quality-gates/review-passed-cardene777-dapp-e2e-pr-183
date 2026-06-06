@@ -1,0 +1,16 @@
+schema_version: 3
+pr_number: N/A
+branch: feature/comprehensive-validation
+head_sha: c46f0e1
+ts: 2026-06-05T11:54:14Z
+tier: standard
+category: CODE
+worker_set: codex-adversarial
+tier_decision_reason: overnight 自走中、 実 Solidity .t.sol × 2 + foundry.toml × 2 + .gitignore × 2 で CODE 扱い、 forge test 4 round × 3 example 全 PASS + Playwright 4 round 全 PASS で動作実証済、 standard tier single round
+codex_status: completed
+impl_check_status: skipped (not in worker_set)
+critical: 0
+major: 0
+minor: 0
+
+findings: []

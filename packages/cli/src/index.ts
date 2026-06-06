@@ -2,7 +2,7 @@
 import { execSync } from 'node:child_process';
 import { InitConflictError, runInit } from './commands/init.js';
 
-const USAGE = `Usage: dapp-e2e <command>
+const USAGE = `Usage: kiwa <command>
 
 Commands:
   init [--force]   Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json

@@ -1,6 +1,6 @@
 # Quickstart
 
-dapp-e2e で最初の E2E test を 5 分で動かします。
+kiwa で最初の E2E test を 5 分で動かします。
 
 ## 必須前提チェックリスト
 
@@ -31,7 +31,7 @@ dapp-e2e で最初の E2E test を 5 分で動かします。
 新規プロジェクトのセットアップ。
 
 ~~~bash
-pnpm dlx @dapp-e2e/cli init
+pnpm dlx @kiwa/cli init
 pnpm install
 pnpm exec playwright install chromium
 ~~~
@@ -59,7 +59,7 @@ Running 1 test using 1 worker
 ## 自作 test の最小例
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@dapp-e2e/core';
+import { dappE2eTest as test, expect } from '@kiwa/core';
 
 test('dApp が接続できる', async ({ page, dappE2e }) => {
   await page.goto('/');

@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: pending
+branch: feature/docs-oss-publish-ready
+head_sha: pending
+ts: 2026-06-05T15:00:00Z
+tier: light
+category: DOCS
+worker_set: docs-only
+tier_decision_reason: README + docs/{ja,en}/ を OSS 公開レベルに最新化 (159 test / 4 round / 7 helper / 2 skill 反映、 test-helpers.md + snapshot-revert.md + custom-error-revert.md 6 file 新規追加)、 既存 159 e2e test に影響なし
+codex_status: not_applicable

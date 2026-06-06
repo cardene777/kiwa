@@ -1,0 +1,10 @@
+schema_version: 3
+pr_number: 161
+branch: feature/docs-oss-publish-ready
+head_sha: ffc9e63
+ts: 2026-06-05T15:11:00Z
+tier: light
+category: DOCS
+worker_set: docs-only,self-check
+tier_decision_reason: documentation 一括更新、 既存 example test に影響なし、 7 helper docs / 2 cookbook 章で OSS 利用者の理解度向上、 PC 用 skill との重複なし (役割境界明示)
+codex_status: not_applicable
