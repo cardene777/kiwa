@@ -13,6 +13,7 @@
 - [Multi-Chain (L1/L2 並走) を test する](./multi-chain.md)
 - [Token approve flow を test する](./token-approve-flow.md)
 - [3 layer テスト設計 flow (Phase E 統合)](./kiwa-design-flow.md) ⭐ v0.5 新規 — Layer 1 (`/kiwa-design`) → Layer 2 (Foundry / Hardhat / Playwright) chain で contract test と dApp e2e test を 1 仕様書から生成
+- [kiwa init --with-deploy で framework 統合 boilerplate を生成する](./with-deploy.md) — anvil + forge build + forge create + .env.local 書き込みを 4 file boilerplate で自動化
 
 ## 関連
 
