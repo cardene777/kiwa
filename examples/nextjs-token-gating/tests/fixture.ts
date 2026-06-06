@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { dappE2eTest } from '@dapp-e2e/core';
+import { dappE2eTest } from '@kiwa/core';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const exampleRoot = resolve(__dirname, '..');

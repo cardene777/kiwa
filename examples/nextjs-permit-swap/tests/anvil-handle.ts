@@ -1,3 +1,3 @@
-import type { AnvilHandle } from '@dapp-e2e/core';
+import type { AnvilHandle } from '@kiwa/core';
 
 export const anvilState: { handle?: AnvilHandle } = {};

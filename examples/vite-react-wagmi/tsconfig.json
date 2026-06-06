@@ -14,7 +14,7 @@
     "useDefineForClassFields": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@kiwa/core": ["../../packages/core/dist/index.js"]
+      "@kiwa/core": ["../../packages/core/dist/index"]
     }
   },
   "include": ["src/**/*", "tests/**/*", "vite.config.ts"],

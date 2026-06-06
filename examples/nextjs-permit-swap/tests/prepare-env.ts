@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { runE2EPrepareEnv } from '@dapp-e2e/core';
+import { runE2EPrepareEnv } from '@kiwa/core';
 import type { Hex } from 'viem';
 
 const USER_INITIAL_A = 100n * 10n ** 18n;
