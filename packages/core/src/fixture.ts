@@ -111,6 +111,7 @@ export const dappE2eTest = base.extend<
           approvalPolicy: { current: { default: 'approve' as const } },
           anvilPort,
           emitter: createEventEmitter(),
+          rejectConnect: { current: false },
           ...(wallet.isContractAccount
             ? {
                 contractAccount: {
@@ -203,6 +204,15 @@ export const dappE2eTest = base.extend<
           );
         }
         await primaryApi.setChainRegistry(chains);
+      },
+      async setRejectConnect(enabled: boolean) {
+        if (!primaryApi.setRejectConnect) {
+          throw new Eip1193Error(
+            -32603,
+            'setRejectConnect helper unavailable on this primary wallet',
+          );
+        }
+        await primaryApi.setRejectConnect(enabled);
       },
       async waitForRpcIdle(timeoutMs = 10_000) {
         await waitForPendingRpcs(page, _rpcTracker.pendingRpcs, timeoutMs);
@@ -522,6 +532,10 @@ function createWalletApi(
       rpcContext.approvalPolicy.current.perToken[
         normalizeAddressKey(tokenAddress)
       ] = policy.limit === undefined ? { mode: policy.mode } : policy;
+    },
+    async setRejectConnect(enabled: boolean) {
+      rpcContext.rejectConnect ??= { current: false };
+      rpcContext.rejectConnect.current = enabled;
     },
   };
 

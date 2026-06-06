@@ -133,6 +133,11 @@ export interface WalletApi {
    * 以後の `wallet_switchEthereumChain` は本 registry を参照し、未登録 chainId は 4902 で reject する。
    */
   setChainRegistry?(chains: readonly ChainConfig[]): Promise<void>;
+  /**
+   * `eth_requestAccounts` を approval policy (reject mode) の対象に含めるかを切替える。
+   * 試用先で connect reject UI flow を検証するときに `true` にする。default は `false` (従来挙動)。
+   */
+  setRejectConnect?(enabled: boolean): Promise<void>;
 }
 
 export interface DappE2eEventEmitter {
@@ -163,6 +168,11 @@ export interface DappE2eApi {
    * 以後の `wallet_switchEthereumChain` で未登録 chainId は EIP-1193 code 4902 で reject。
    */
   setChainRegistry?(chains: readonly ChainConfig[]): Promise<void>;
+  /**
+   * `eth_requestAccounts` を approval policy の対象に含めるか切替える (primary wallet 経由)。
+   * `setApprovalMode('reject')` と組み合わせて connect reject UI flow を検証する。
+   */
+  setRejectConnect?(enabled: boolean): Promise<void>;
   waitForRpcIdle?(timeoutMs?: number): Promise<void>;
   wallets?: Record<string, WalletApi>;
 }

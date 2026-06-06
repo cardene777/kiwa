@@ -2,17 +2,25 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const TEMPLATES = [
-  { source: 'connect.spec.ts.tpl', dest: 'e2e/connect.spec.ts' },
-  { source: 'playwright.config.ts.tpl', dest: 'playwright.config.ts' },
-] as const;
-const TSCONFIG_TEMPLATE = { source: 'tsconfig.json.tpl', dest: 'tsconfig.json' } as const;
+interface TemplateSpec {
+  source: string;
+  dest: string;
+}
+
+const TSCONFIG_TEMPLATE: TemplateSpec = { source: 'tsconfig.json.tpl', dest: 'tsconfig.json' };
 
 const DEV_DEPENDENCIES = {
   '@kiwa/core': '^0.1.0',
   '@playwright/test': '^1.49.0',
   viem: '^2',
 } as const;
+
+const WITH_DEPLOY_TEMPLATES: ReadonlyArray<{ source: string; dest: string }> = [
+  { source: 'with-deploy/prepare-env.ts.tpl', dest: 'tests/prepare-env.ts' },
+  { source: 'with-deploy/global-setup.ts.tpl', dest: 'tests/global-setup.ts' },
+  { source: 'with-deploy/global-teardown.ts.tpl', dest: 'tests/global-teardown.ts' },
+  { source: 'with-deploy/fixture.ts.tpl', dest: 'tests/fixture.ts' },
+];
 
 export class InitConflictError extends Error {
   conflicts: string[];
@@ -27,6 +35,10 @@ export class InitConflictError extends Error {
 export interface InitOptions {
   force: boolean;
   cwd: string;
+  testDir?: string;
+  configSuffix?: string;
+  scriptKey?: string;
+  withDeploy?: string;
 }
 
 export interface InitResult {
@@ -36,12 +48,30 @@ export interface InitResult {
 }
 
 export function runInit(options: InitOptions): InitResult {
+  const testDir = normalizeTestDir(options.testDir);
+  const configFileName = resolveConfigFileName(options.configSuffix);
+  const scriptKey = options.scriptKey ?? 'test:e2e';
+
+  const templates: TemplateSpec[] = [
+    { source: 'connect.spec.ts.tpl', dest: path.posix.join(testDir, 'connect.spec.ts') },
+    { source: 'playwright.config.ts.tpl', dest: configFileName },
+  ];
+
   const conflicts: string[] = [];
 
-  for (const template of TEMPLATES) {
+  for (const template of templates) {
     const target = path.join(options.cwd, template.dest);
     if (fs.existsSync(target)) {
       conflicts.push(template.dest);
+    }
+  }
+
+  if (options.withDeploy !== undefined) {
+    for (const template of WITH_DEPLOY_TEMPLATES) {
+      const target = path.join(options.cwd, template.dest);
+      if (fs.existsSync(target)) {
+        conflicts.push(template.dest);
+      }
     }
   }
 
@@ -54,7 +84,7 @@ export function runInit(options: InitOptions): InitResult {
   const warnings: string[] = [];
 
   try {
-    for (const template of TEMPLATES) {
+    for (const template of templates) {
       const source = resolveTemplatePath(template.source);
       const destination = path.join(options.cwd, template.dest);
       const destDir = path.dirname(destination);
@@ -62,8 +92,29 @@ export function runInit(options: InitOptions): InitResult {
         fs.mkdirSync(destDir, { recursive: true });
         createdDirs.push(destDir);
       }
-      fs.writeFileSync(destination, fs.readFileSync(source, 'utf8'), 'utf8');
+      let content = fs.readFileSync(source, 'utf8');
+      if (template.source === 'playwright.config.ts.tpl') {
+        content = applyConfigTemplate(content, testDir);
+      }
+      fs.writeFileSync(destination, content, 'utf8');
       created.push(template.dest);
+    }
+
+    if (options.withDeploy !== undefined) {
+      const foundryRel = normalizeFoundryRelPath(options.withDeploy);
+      for (const template of WITH_DEPLOY_TEMPLATES) {
+        const source = resolveTemplatePath(template.source);
+        const destination = path.join(options.cwd, template.dest);
+        const destDir = path.dirname(destination);
+        if (!fs.existsSync(destDir)) {
+          fs.mkdirSync(destDir, { recursive: true });
+          createdDirs.push(destDir);
+        }
+        let content = fs.readFileSync(source, 'utf8');
+        content = content.replace(/\{\{FOUNDRY_PATH\}\}/g, foundryRel);
+        fs.writeFileSync(destination, content, 'utf8');
+        created.push(template.dest);
+      }
     }
   } catch (error) {
     rollback(options.cwd, created, createdDirs);
@@ -82,8 +133,11 @@ export function runInit(options: InitOptions): InitResult {
 
       const scripts = (packageJson.scripts ?? {}) as Record<string, string>;
       let modified = false;
-      if (scripts['test:e2e'] === undefined) {
-        scripts['test:e2e'] = 'playwright test';
+      if (scripts[scriptKey] === undefined) {
+        scripts[scriptKey] =
+          configFileName === 'playwright.config.ts'
+            ? 'playwright test'
+            : `playwright test --config=${configFileName}`;
         modified = true;
       }
       packageJson.scripts = scripts;
@@ -128,6 +182,59 @@ export function runInit(options: InitOptions): InitResult {
   return { created, updated, warnings };
 }
 
+function normalizeTestDir(value: string | undefined): string {
+  if (value === undefined || value === '') {
+    return 'e2e';
+  }
+  const normalized = value.replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+$/, '');
+  if (normalized === '' || normalized.startsWith('/') || normalized.includes('..')) {
+    throw new Error(
+      `kiwa init: --testDir must be a relative path inside the project, got "${value}"`,
+    );
+  }
+  return normalized;
+}
+
+function resolveConfigFileName(suffix: string | undefined): string {
+  if (suffix === undefined || suffix === '') {
+    return 'playwright.config.ts';
+  }
+  if (!/^[a-zA-Z0-9_-]+$/.test(suffix)) {
+    throw new Error(
+      `kiwa init: --config-suffix must match [a-zA-Z0-9_-]+, got "${suffix}"`,
+    );
+  }
+  return `playwright.${suffix}.config.ts`;
+}
+
+function applyConfigTemplate(content: string, testDir: string): string {
+  return content.replace(/testDir:\s*'[^']+'/, `testDir: '${toPosix(testDir).replace(/^\.\//, './')}'`)
+    .replace(/testDir:\s*"[^"]+"/, `testDir: "${toPosix(testDir).replace(/^\.\//, './')}"`)
+    .replace(/testDir:\s*'\.\/e2e'/, `testDir: '${prefixWithDot(testDir)}'`);
+}
+
+function prefixWithDot(p: string): string {
+  if (p.startsWith('./') || p.startsWith('/')) return p;
+  return `./${p}`;
+}
+
+function toPosix(p: string): string {
+  return prefixWithDot(p.replace(/\\/g, '/'));
+}
+
+function normalizeFoundryRelPath(value: string): string {
+  if (value === '' || value === undefined) {
+    throw new Error('kiwa init: --with-deploy requires a foundry project path');
+  }
+  const normalized = value.replace(/\\/g, '/').replace(/\/+$/, '');
+  if (path.isAbsolute(normalized)) {
+    throw new Error(
+      `kiwa init: --with-deploy must be a relative path, got absolute "${value}"`,
+    );
+  }
+  return normalized;
+}
+
 function rollback(cwd: string, created: string[], createdDirs: string[]): void {
   for (const relativePath of created) {
     const target = path.join(cwd, relativePath);
@@ -139,7 +246,6 @@ function rollback(cwd: string, created: string[], createdDirs: string[]): void {
       }
     }
   }
-  // remove dirs we created (only if empty to avoid blowing away pre-existing data)
   const sortedDirs = [...createdDirs].sort((a, b) => b.length - a.length);
   for (const dir of sortedDirs) {
     try {
