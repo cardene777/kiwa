@@ -60,7 +60,7 @@ graph TD
 | Coverage gate | Optional, often skipped | **Enforced** by the skill itself (4 metrics) |
 | Flake detection | Ad-hoc | Built-in 4-round loop |
 
-> Already have a contract or dApp? See [docs/en/cookbook/test-design-flow.md](./docs/en/cookbook/test-design-flow.md) — the chain is designed **retrofit-first**, reverse-engineering specs from existing code.
+> Already have a contract or dApp? See [tests/docs/retrofit-existing-dapp.md](./tests/docs/retrofit-existing-dapp.md) — the skill chain is designed **retrofit-first**, reverse-engineering specs from existing code.
 
 ---
 
@@ -382,7 +382,7 @@ Reference docs:
 |---|---|
 | [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) ⭐ | **SSOT for all 4 skills** (5-step flow, 9-section output, 10 viewpoints, 5 risk criteria) |
 | [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | Wallet / SDK mock fidelity spec (A/B/C levels, scoring rubric) |
-| [`docs/en/cookbook/test-design-flow.md`](./docs/en/cookbook/test-design-flow.md) ⭐ | **4-layer chain walkthrough** (retrofit-first) |
+| [`tests/docs/skill-chain-tutorial.md`](./tests/docs/skill-chain-tutorial.md) ⭐ | **4-skill chain walkthrough** (retrofit-first) |
 | [`docs/RPC.md`](./docs/RPC.md) | 9 directly-handled RPC + anvil fallback |
 | [`docs/EVENTS.md`](./docs/EVENTS.md) | 4 events + `triggerEvent()` |
 | [`docs/ERRORS.md`](./docs/ERRORS.md) | EIP-1193 error code + envelope design |

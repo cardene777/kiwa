@@ -42,7 +42,7 @@ Running the same contract through all three lanes is what `/kiwa-hardhat` skill 
 
 - [Custom error revert](../../docs/en/cookbook/custom-error-revert.md)
 - [Snapshot revert](../../docs/en/cookbook/snapshot-revert.md)
-- [Test design flow](../../docs/en/cookbook/test-design-flow.md)
+- [Test design flow (skill chain tutorial)](../../tests/docs/skill-chain-tutorial.md)
 
 ## Where to go next
 
