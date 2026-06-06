@@ -1,12 +1,12 @@
 # Snapshot / revert で test 間隔離する
 
-`@dapp-e2e/core` v0.2 で追加された `snapshotChain` / `revertChain` を使い、 anvil chain state を test ごとに完全に隔離する pattern。
+`@kiwa/core` v0.2 で追加された `snapshotChain` / `revertChain` を使い、 anvil chain state を test ごとに完全に隔離する pattern。
 
 ## 課題
 
 `evm_increaseTime` や複数 contract write を行う test は anvil 内部 state が累積し、 後続 test に副作用を残す。 4 round 連続実行で flaky 化する典型的な落とし穴。
 
-実例: 過去の dapp-e2e MVP foundation で `nextjs-token-gating` r3 だけ FAIL する flaky を検出した経験あり (前 round の anvil PID が cleanup 漏れで残留したケース)。
+実例: 過去の kiwa MVP foundation で `nextjs-token-gating` r3 だけ FAIL する flaky を検出した経験あり (前 round の anvil PID が cleanup 漏れで残留したケース)。
 
 ## 解決パターン
 
@@ -14,7 +14,7 @@
 
 ```ts
 import { test, expect } from './fixture';
-import { snapshotChain, revertChain, increaseTime } from '@dapp-e2e/core';
+import { snapshotChain, revertChain, increaseTime } from '@kiwa/core';
 import type { Hex } from 'viem';
 
 let snapshotId: Hex;

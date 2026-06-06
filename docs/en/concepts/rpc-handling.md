@@ -2,19 +2,19 @@
 
 ## TL;DR
 
-dapp-e2e core handles 9 EIP-1193 RPC methods directly and forwards the rest to anvil JSON-RPC.
+kiwa core handles 9 EIP-1193 RPC methods directly and forwards the rest to anvil JSON-RPC.
 This lets you exercise flows like `eth_requestAccounts` and `personal_sign` without reproducing wallet popups.
 
 ## Why
 
 A real wallet returns RPCs through popup / approve UIs that CI cannot reproduce.
-dapp-e2e keeps wallet behavior **inside code**, making it CI-friendly and giving switchable UX paths like `setApprovalMode('reject')` for testing rejection flows.
+kiwa keeps wallet behavior **inside code**, making it CI-friendly and giving switchable UX paths like `setApprovalMode('reject')` for testing rejection flows.
 
 ## The 9 directly-handled RPCs
 
 ```mermaid
 graph LR
-    A[dApp page.window.ethereum.request] --> B[dapp-e2e injected provider]
+    A[dApp page.window.ethereum.request] --> B[kiwa injected provider]
     B --> C{method?}
     C -->|eth_requestAccounts| D[core handler]
     C -->|personal_sign| D

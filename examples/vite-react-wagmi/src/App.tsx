@@ -58,7 +58,7 @@ export function App() {
           alignItems: 'center',
         }}
       >
-        <h1 style={{ fontSize: 24, margin: 0 }}>dapp-e2e Vite Mint Demo</h1>
+        <h1 style={{ fontSize: 24, margin: 0 }}>kiwa Vite Mint Demo</h1>
         <ConnectButton />
       </header>
 

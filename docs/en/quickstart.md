@@ -1,6 +1,6 @@
 # Quickstart
 
-Run your first dapp-e2e E2E test in 5 minutes.
+Run your first kiwa E2E test in 5 minutes.
 
 ## Required prerequisites
 
@@ -31,7 +31,7 @@ Run your first dapp-e2e E2E test in 5 minutes.
 Set up a fresh project.
 
 ~~~bash
-pnpm dlx @dapp-e2e/cli init
+pnpm dlx @kiwa/cli init
 pnpm install
 pnpm exec playwright install chromium
 ~~~
@@ -59,7 +59,7 @@ Running 1 test using 1 worker
 ## Minimal custom test
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@dapp-e2e/core';
+import { dappE2eTest as test, expect } from '@kiwa/core';
 
 test('dApp can connect', async ({ page, dappE2e }) => {
   await page.goto('/');

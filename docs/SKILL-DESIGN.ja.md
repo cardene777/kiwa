@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](./SKILL-DESIGN.md) • [🇯🇵 日本語](./SKILL-DESIGN.ja.md)
 
-dapp-e2e が **テスト設計を自動化・標準化する Claude Code skill** を contract layer (Foundry / Hardhat) と dApp e2e layer (Playwright + dapp-e2e fixture) の両方でどう構造化するかの仕様書。 Phase E 実装 PR が参照する SSOT。
+kiwa が **テスト設計を自動化・標準化する Claude Code skill** を contract layer (Foundry / Hardhat) と dApp e2e layer (Playwright + kiwa fixture) の両方でどう構造化するかの仕様書。 Phase E 実装 PR が参照する SSOT。
 
 ## TL;DR
 
@@ -10,8 +10,8 @@ dapp-e2e が **テスト設計を自動化・標準化する Claude Code skill**
 
 | Layer | Skill (予定) | 目的 |
 |---|---|---|
-| **1. 汎用テスト設計** | `/test-design` | 機能仕様 / API / 画面 / コード / DB schema を入力に、 品質リスク / テスト観点 / テストケース / 優先度 / 自動化方針を出力 |
-| **2. テストランナー特化** | `/contract-test-foundry` / `/contract-test-hardhat` / `/dapp-e2e-test` (refactor) | Layer 1 の出力を実 `*.t.sol` / `*.test.ts` / `*.spec.ts` に変換 |
+| **1. 汎用テスト設計** | `/kiwa-design` | 機能仕様 / API / 画面 / コード / DB schema を入力に、 品質リスク / テスト観点 / テストケース / 優先度 / 自動化方針を出力 |
+| **2. テストランナー特化** | `/kiwa-forge` / `/kiwa-hardhat` / `/kiwa-play` (refactor) | Layer 1 の出力を実 `*.t.sol` / `*.test.ts` / `*.spec.ts` に変換 |
 | **3. ドキュメント** | docs cookbook + skill reference | layer 連携で完全な dApp test pyramid を実現する手順を示す |
 
 1 回の skill 起動で 5 段階フローを完走:
@@ -32,7 +32,7 @@ flowchart LR
 
 テスト設計は本質的に **仕様策定の作業** であり、 コーディングではない。 各開発者が機能ごとに「何をテストするか」をゼロから書き直すと工数が爆発する。
 
-dapp-e2e は既に `/dapp-e2e-test` の `Step 1.5` で「先に仕様書を書く」設計が偽陽性を減らし実装を加速することを証明済。 Phase E はこの pattern を **contract / integration / e2e の各層** と **Foundry / Hardhat / Playwright の各ランナー** に汎用化する。
+kiwa は既に `/kiwa-play` の `Step 1.5` で「先に仕様書を書く」設計が偽陽性を減らし実装を加速することを証明済。 Phase E はこの pattern を **contract / integration / e2e の各層** と **Foundry / Hardhat / Playwright の各ランナー** に汎用化する。
 
 Phase E は新しいテスト分類を発明するわけではない。 Claude Code skill が以下を一貫して出力する基準を作る:
 
@@ -159,13 +159,13 @@ skill の最終出力には以下を追記:
 
 ## Layer 2 特化
 
-Layer 1 (`/test-design`) が完了したら、 Layer 2 skill が汎用出力をランナー固有 code に変換する:
+Layer 1 (`/kiwa-design`) が完了したら、 Layer 2 skill が汎用出力をランナー固有 code に変換する:
 
 | Layer 2 skill | 変換先 |
 |---|---|
-| `/contract-test-foundry` | `test/*.t.sol`、 `forge test` 実行、 `forge coverage` 評価 |
-| `/contract-test-hardhat` | `test/*.test.ts`、 `npx hardhat test` 実行、 `hardhat-coverage` 評価 |
-| `/dapp-e2e-test` (refactored) | `tests/*.spec.ts` + `tests/prepare-env.ts`、 Playwright 実行、 4 round flake check |
+| `/kiwa-forge` | `test/*.t.sol`、 `forge test` 実行、 `forge coverage` 評価 |
+| `/kiwa-hardhat` | `test/*.test.ts`、 `npx hardhat test` 実行、 `hardhat-coverage` 評価 |
+| `/kiwa-play` (refactored) | `tests/*.spec.ts` + `tests/prepare-env.ts`、 Playwright 実行、 4 round flake check |
 
 各 Layer 2 skill は Layer 1 の仕様 file (`.context/spec/test-spec-{module}.md`) を入力にして実装を出力。 Layer 1 の仕様 file が design と implementation の契約として機能する。
 
@@ -207,11 +207,11 @@ Layer 2 skill はこの prompt をランナー固有指示で拡張 (例: 「Lay
 | Phase | Scope | 対象 file |
 |---|---|---|
 | **E-1** | SKILL-DESIGN.md 仕様書 (本文書) | `docs/SKILL-DESIGN.md` |
-| **E-2** | `/test-design` skill (Layer 1) | `.claude/skills/test-design/` |
-| **E-3** | `/dapp-e2e-test` refactor (Layer 2 e2e) | 既存 skill に Layer 1 統合 |
-| **E-4** | `/contract-test-foundry` skill | `.claude/skills/contract-test-foundry/` |
-| **E-5** | `/contract-test-hardhat` skill | `.claude/skills/contract-test-hardhat/` |
-| **E-6** | layer 連携の cookbook 章 | `docs/{ja,en}/cookbook/test-design-flow.md` |
+| **E-2** | `/kiwa-design` skill (Layer 1) | `.claude/skills/kiwa-design/` |
+| **E-3** | `/kiwa-play` refactor (Layer 2 e2e) | 既存 skill に Layer 1 統合 |
+| **E-4** | `/kiwa-forge` skill | `.claude/skills/kiwa-forge/` |
+| **E-5** | `/kiwa-hardhat` skill | `.claude/skills/kiwa-hardhat/` |
+| **E-6** | layer 連携の cookbook 章 | `docs/{ja,en}/cookbook/kiwa-design-flow.md` |
 
 Phase は D → A → B 段階: 仕様書 → 最も価値ある skill (Layer 1) → 既存 e2e skill への統合、 その後 Foundry / Hardhat runner を community contribution で。
 
@@ -225,5 +225,5 @@ Phase は D → A → B 段階: 仕様書 → 最も価値ある skill (Layer 1)
 ## 関連
 
 - [`docs/MOCK-DESIGN.md`](./MOCK-DESIGN.md) — wallet / SDK mock 精度仕様 (「何を fake するか」の関連概念)
-- [`.claude/skills/dapp-e2e-test/SKILL.md`](../.claude/skills/dapp-e2e-test/SKILL.md) — 既存 e2e skill (既にこの flow の一部に従っている)
-- [`.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md`](../.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md) — 偽陽性 self-check
+- [`.claude/skills/kiwa-play/SKILL.md`](../.claude/skills/kiwa-play/SKILL.md) — 既存 e2e skill (既にこの flow の一部に従っている)
+- [`.claude/skills/kiwa-play/references/adversarial-pitfalls.md`](../.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 偽陽性 self-check

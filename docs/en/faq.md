@@ -1,9 +1,9 @@
 # FAQ
 
-## Q1: Why dapp-e2e over Synpress or MetaMask Test Dapp?
+## Q1: Why kiwa over Synpress or MetaMask Test Dapp?
 
 A: Existing tools mostly drive the MetaMask extension. Reproducing wallet popup UI in CI tends to be flaky.
-dapp-e2e keeps wallet behavior **inside code**, skipping popup / approve UIs, and prioritizes CI stability.
+kiwa keeps wallet behavior **inside code**, skipping popup / approve UIs, and prioritizes CI stability.
 See [docs/COMPARISON.md](../COMPARISON.md).
 
 ## Q2: anvil does not start (`anvil not found in PATH`)
@@ -37,7 +37,7 @@ Anvil shares port 8545 by default, so parallel runs across examples are not supp
 
 ## Q6: I want to use ConnectKit / Reown instead of wagmi v2 + RainbowKit v2
 
-A: dapp-e2e conforms to EIP-1193 / EIP-6963 standards, so it works with any wallet picker.
+A: kiwa conforms to EIP-1193 / EIP-6963 standards, so it works with any wallet picker.
 For specific picker testing, see `examples/basic-connect/tests/eip6963.spec.ts`.
 
 ## Q7: Contract deploys are slow
@@ -59,11 +59,11 @@ A: Check in order:
 
 ## Q10: Officially supported scope
 
-A: dapp-e2e supports headless Chromium + standard wallet APIs only.
+A: kiwa supports headless Chromium + standard wallet APIs only.
 Browser-extension UI driving (MetaMask, etc.), Firefox / Safari, and mobile WebViews are out of scope.
 
 ## Related
 
-- [GitHub Issues](https://github.com/cardene777/dapp-e2e/issues)
+- [GitHub Issues](https://github.com/cardene777/kiwa/issues)
 - [Concepts](./concepts/README.md)
 - [Cookbook](./cookbook/README.md)

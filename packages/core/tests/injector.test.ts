@@ -110,7 +110,7 @@ describe('handleRpcRequest', () => {
   it('T-INJ-003 personal_sign は viem verifyMessage が true になる署名を返す', async () => {
     // Given
     const account = privateKeyToAccount(PRIVATE_KEY);
-    const message = 'hello dapp-e2e';
+    const message = 'hello kiwa';
     // When
     const signature = (await handleRpcRequest(ctx(), {
       method: 'personal_sign',
@@ -404,7 +404,7 @@ describe.skipIf(process.env.SKIP_ANVIL_TESTS === '1')('handleRpcRequest with liv
     await verifyAnvilChainId(handle!.port, 5);
     // Then
     expect(warn).toHaveBeenCalledWith(
-      `[dapp-e2e] wallet_switchEthereumChain to 5 but anvil reports ${CHAIN_ID}`,
+      `[kiwa] wallet_switchEthereumChain to 5 but anvil reports ${CHAIN_ID}`,
     );
     warn.mockRestore();
   });

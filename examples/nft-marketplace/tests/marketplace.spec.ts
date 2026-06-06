@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { expect } from '@playwright/test';
-import { dappE2eTest } from '@dapp-e2e/core';
-import { expectCustomError, increaseTime } from '@dapp-e2e/core';
+import { dappE2eTest } from '@kiwa/core';
+import { expectCustomError, increaseTime } from '@kiwa/core';
 import {
   createPublicClient,
   createWalletClient,

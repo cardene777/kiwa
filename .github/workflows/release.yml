@@ -38,18 +38,18 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Typecheck
-        run: pnpm -F @dapp-e2e/core -F @dapp-e2e/cli typecheck
+        run: pnpm -F @kiwa/core -F @kiwa/cli typecheck
 
       - name: Test (core)
-        run: pnpm -F @dapp-e2e/core test
+        run: pnpm -F @kiwa/core test
         env:
           SKIP_ANVIL_TESTS: "1"
 
       - name: Test (cli)
-        run: pnpm -F @dapp-e2e/cli test
+        run: pnpm -F @kiwa/cli test
 
       - name: Build
-        run: pnpm -F @dapp-e2e/core -F @dapp-e2e/cli build
+        run: pnpm -F @kiwa/core -F @kiwa/cli build
 
       - name: Typecheck consumer (examples)
         run: pnpm -F examples-basic-connect typecheck

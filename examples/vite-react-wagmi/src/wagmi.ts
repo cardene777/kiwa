@@ -22,7 +22,7 @@ const connectors = connectorsForWallets(
     },
   ],
   {
-    appName: 'dapp-e2e vite-react-wagmi',
+    appName: 'kiwa vite-react-wagmi',
     projectId: '00000000000000000000000000000000',
   },
 );

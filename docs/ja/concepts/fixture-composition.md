@@ -19,7 +19,7 @@ spec は `page` と typed helper だけを見れば済みます。
 app 側ではその上に `contracts`、`factory`、`customWallet` のような fixture を追加します。
 
 ~~~ts
-import { dappE2eTest } from '@dapp-e2e/core';
+import { dappE2eTest } from '@kiwa/core';
 
 type AppFixtures = {
   customWallet: { connectAs(index: number): Promise<void> };
@@ -65,7 +65,7 @@ fixture の中で deploy 順序を 1 つの factory に閉じ込めます。
 ## 5. 完全 example
 
 ~~~ts
-import { dappE2eTest } from '@dapp-e2e/core';
+import { dappE2eTest } from '@kiwa/core';
 
 type AppFixtures = {
   customWallet: { connectAs(index: number): Promise<void> };
@@ -92,4 +92,4 @@ test('treasury account can open the vault page', async ({ page, customWallet }) 
 ## 関連
 
 - [Fixture 設計](./fixture.md)
-- [API Reference: dappE2eTest](../api/dapp-e2e-test.md)
+- [API Reference: dappE2eTest](../api/kiwa-play.md)

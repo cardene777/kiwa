@@ -9,7 +9,7 @@
 ### 1. global-setup で複数 anvil を起動
 
 ~~~ts
-import { startAnvil, type AnvilHandle } from '@dapp-e2e/core';
+import { startAnvil, type AnvilHandle } from '@kiwa/core';
 
 const anvilHandles: AnvilHandle[] = [];
 

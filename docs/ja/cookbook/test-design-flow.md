@@ -1,8 +1,8 @@
 # 3 layer テスト設計 flow (Phase E 統合 cookbook)
 
-> [🇬🇧 English](../../en/cookbook/test-design-flow.md) • [🇯🇵 日本語](./test-design-flow.md)
+> [🇬🇧 English](../../en/cookbook/kiwa-design-flow.md) • [🇯🇵 日本語](./kiwa-design-flow.md)
 
-dapp-e2e Phase E (#171 〜 #181) で確立した「Layer 1 (テスト設計) → Layer 2 (実装変換)」chain で、 **既に動いている contract / dApp に後付けで test を導入する** 手順を documented する章。 `examples/nextjs-token-gating` の実 contract を題材に full flow を歩く。
+kiwa Phase E (#171 〜 #181) で確立した「Layer 1 (テスト設計) → Layer 2 (実装変換)」chain で、 **既に動いている contract / dApp に後付けで test を導入する** 手順を documented する章。 `examples/nextjs-token-gating` の実 contract を題材に full flow を歩く。
 
 新規 dApp 開発の TDD 経路でも使えるが、 第 1 用途は **「既存 contract / dApp に対する test 後付け導入」**。 既存実装をそのまま動作仕様として扱い、 そこから観点を逆算して test を埋める。
 
@@ -10,12 +10,12 @@ dapp-e2e Phase E (#171 〜 #181) で確立した「Layer 1 (テスト設計) →
 
 ```mermaid
 graph TD
-    A[既存 contract + dApp 完成済] -->|現状コード| B["/test-design Layer 1"]
+    A[既存 contract + dApp 完成済] -->|現状コード| B["/kiwa-design Layer 1"]
     B -->|--layer contract --input *.sol| C[.context/spec/contract/test-spec-X.md]
     B -->|--layer e2e --input app/ + tests/| D[.context/spec/e2e/test-spec-X.md]
-    C -->|9 column 表 parse| E["/contract-test-foundry"]
-    C -->|9 column 表 parse| F["/contract-test-hardhat"]
-    D -->|9 column 表 parse| G["/dapp-e2e-test --mode extend"]
+    C -->|9 column 表 parse| E["/kiwa-forge"]
+    C -->|9 column 表 parse| F["/kiwa-hardhat"]
+    D -->|9 column 表 parse| G["/kiwa-play --mode extend"]
     E --> H[test/X.t.sol を後付け Write]
     F --> I[test/X.test.ts を後付け Write]
     G --> J[tests/X.spec.ts を後付け Write]
@@ -59,7 +59,7 @@ grep -cE "^test\(|^test\.describe\(" tests/*.spec.ts
 ### Step 1: Layer 1 で contract 用仕様書を逆算生成
 
 ```text
-/test-design --layer contract --module token-gating --input examples/nextjs-token-gating/contracts/GatedContent.sol
+/kiwa-design --layer contract --module token-gating --input examples/nextjs-token-gating/contracts/GatedContent.sol
 
 Layer 1 skill が以下を実施:
 - 入力 .sol を Read し function / event / error を grep 抽出
@@ -74,7 +74,7 @@ Layer 1 skill が以下を実施:
 ### Step 2: Layer 1 で e2e 用仕様書を逆算生成
 
 ```text
-/test-design --layer e2e --module token-gating --input examples/nextjs-token-gating/
+/kiwa-design --layer e2e --module token-gating --input examples/nextjs-token-gating/
 
 Layer 1 skill が以下を実施:
 - 既存 tests/gating.spec.ts を Read し既存 test 8 件を「現状カバー」として把握
@@ -87,7 +87,7 @@ Layer 1 skill が以下を実施:
 ### Step 3: Layer 2 で contract test を後付け Write (Foundry)
 
 ```text
-/contract-test-foundry --module token-gating --gas-report
+/kiwa-forge --module token-gating --gas-report
 ```
 
 skill が以下を実施:
@@ -103,7 +103,7 @@ skill が以下を実施:
 ### Step 3': Layer 2 で contract test を後付け Write (Hardhat 並立)
 
 ```text
-/contract-test-hardhat --module token-gating --gas-report
+/kiwa-hardhat --module token-gating --gas-report
 ```
 
 同 `.context/spec/contract/test-spec-token-gating.md` を Read し、 `test/GatedContent.test.ts` を Hardhat 形式で並列に Write。 Foundry 派 + Hardhat 派が同じ仕様書から **同 test ID で並立 test を持つ** ことができる。 観点 / ケース ID (TC-001 〜 TC-013) は両 layer で一致。
@@ -111,7 +111,7 @@ skill が以下を実施:
 ### Step 4: Layer 2 で e2e test を extend mode で後付け Write (Playwright)
 
 ```text
-/dapp-e2e-test --mode extend --example nextjs-token-gating
+/kiwa-play --mode extend --example nextjs-token-gating
 ```
 
 skill が以下を実施:
@@ -140,7 +140,7 @@ forge coverage --report summary
 npx hardhat coverage
 ```
 
-dapp-e2e の 3 実 example での実測値 (PR #185 で達成):
+kiwa の 3 実 example での実測値 (PR #185 で達成):
 
 | example | runner | Lines | Statements | Branches | Funcs |
 |---|---|---|---|---|---|
@@ -194,7 +194,7 @@ Step 5 で coverage 達成完了時点で以下の状態:
 
 | 比較項目 | 新規開発 (TDD) | 後付け導入 (本章の主用途) |
 |---|---|---|
-| `/test-design` の入力 | 機能仕様書 (まだコード無し) | 既存 `.sol` / `app/` / `tests/` を `--input` で渡し grep で逆算 |
+| `/kiwa-design` の入力 | 機能仕様書 (まだコード無し) | 既存 `.sol` / `app/` / `tests/` を `--input` で渡し grep で逆算 |
 | Layer 1 の「対象機能」section | 仕様書から書き起こし | grep 抽出結果を要約 |
 | Layer 1 の「不足している仕様」 | 仕様書の曖昧点を列挙 | docstring 不足 / 暗黙挙動 / 未テスト経路を列挙 |
 | Layer 2 が `forge test` 実行時 | test 先行で FAIL を期待 (RED) | test 後付けで PASS を期待 (実挙動を正と記録) |
@@ -212,13 +212,13 @@ Step 5 で coverage 達成完了時点で以下の状態:
 - **並列実行時の race** — 観点 8 で `Promise.all` を `Promise.allSettled` に置換 (1 件 reject で全体 reject にならないようにする)、 Foundry は同期実行で並行 race 自体存在しない
 - **後付け導入で実挙動を正としすぎる罠** — `forge test` が PASS しても「実 contract に bug があり、 その bug を test も含めて固定化した」可能性が残る。 Layer 1 の「主な品質リスク」 section と spec author 確認で「実挙動 = 仕様」かをレビューする
 
-詳細 9 種 + self-check 5 問は `.claude/skills/dapp-e2e-test/references/adversarial-pitfalls.md` を Read。
+詳細 9 種 + self-check 5 問は `.claude/skills/kiwa-play/references/adversarial-pitfalls.md` を Read。
 
 ## 関連 link
 
 - 親 spec (Phase E SSOT): [`docs/SKILL-DESIGN.ja.md`](../../SKILL-DESIGN.ja.md)
-- Layer 1: [.claude/skills/test-design/SKILL.md](../../../.claude/skills/test-design/SKILL.md)
-- Layer 2 Foundry: [.claude/skills/contract-test-foundry/SKILL.md](../../../.claude/skills/contract-test-foundry/SKILL.md)
-- Layer 2 Hardhat: [.claude/skills/contract-test-hardhat/SKILL.md](../../../.claude/skills/contract-test-hardhat/SKILL.md)
-- Layer 2 Playwright: [.claude/skills/dapp-e2e-test/SKILL.md](../../../.claude/skills/dapp-e2e-test/SKILL.md)
+- Layer 1: [.claude/skills/kiwa-design/SKILL.md](../../../.claude/skills/kiwa-design/SKILL.md)
+- Layer 2 Foundry: [.claude/skills/kiwa-forge/SKILL.md](../../../.claude/skills/kiwa-forge/SKILL.md)
+- Layer 2 Hardhat: [.claude/skills/kiwa-hardhat/SKILL.md](../../../.claude/skills/kiwa-hardhat/SKILL.md)
+- Layer 2 Playwright: [.claude/skills/kiwa-play/SKILL.md](../../../.claude/skills/kiwa-play/SKILL.md)
 - 関連 cookbook 章: [snapshot-revert.md](./snapshot-revert.md) (Layer 1 / Layer 2 で snapshot pattern を共有)、 [custom-error-revert.md](./custom-error-revert.md) (観点 2 異常系 helper)

@@ -1,6 +1,6 @@
-# dapp-e2e ドキュメント
+# kiwa ドキュメント
 
-dapp-e2e はブラウザ拡張なしで dApp を E2E テストするための headless fixture です。
+kiwa はブラウザ拡張なしで dApp を E2E テストするための headless fixture です。
 anvil をテスト単位で起動し、Playwright と viem を組み合わせ、`window.ethereum` を inject して接続・署名・送金までを 1 つの fixture で通します。
 
 ## 入り口
@@ -11,14 +11,14 @@ anvil をテスト単位で起動し、Playwright と viem を組み合わせ、
 - 🍳 [Cookbook](./cookbook/README.md) — 実シナリオ
 - ❓ [FAQ](./faq.md) — よくある質問
 
-## なぜ dapp-e2e か
+## なぜ kiwa か
 
 ブラウザ拡張機能を経由する従来の E2E テストは popup 操作や UI 差分で flaky になりがちです。
-dapp-e2e は CI で安定して動く接続フロー検証を最優先に設計し、wallet UI の popup や見た目の確認は対象外としています。
+kiwa は CI で安定して動く接続フロー検証を最優先に設計し、wallet UI の popup や見た目の確認は対象外としています。
 比較は [docs/COMPARISON.md](../COMPARISON.md) を参照してください。
 
 ## 関連リンク
 
-- [GitHub リポジトリ](https://github.com/cardene777/dapp-e2e)
-- [Issue Tracker](https://github.com/cardene777/dapp-e2e/issues)
+- [GitHub リポジトリ](https://github.com/cardene777/kiwa)
+- [Issue Tracker](https://github.com/cardene777/kiwa/issues)
 - [English documentation](../en/README.md)

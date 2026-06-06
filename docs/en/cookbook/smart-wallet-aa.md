@@ -1,6 +1,6 @@
 # Test smart wallets (AA / smart contract accounts)
 
-Use `WalletConfig.isContractAccount` added in `@dapp-e2e/core` v0.3 to test ERC-4337 / EIP-1271 smart contract accounts end-to-end.
+Use `WalletConfig.isContractAccount` added in `@kiwa/core` v0.3 to test ERC-4337 / EIP-1271 smart contract accounts end-to-end.
 
 ## Problem
 
@@ -10,7 +10,7 @@ Regular EOA wallets (MetaMask / Rabby) sign with ECDSA via `personal_sign` / `et
 - Transactions are not sent via `eth_sendTransaction` directly; they go through the smart account's `execute(target, value, data)` (in real ERC-4337, via `eth_sendUserOperation`).
 - `eth_accounts` should return the **smart account address**, not the owner EOA.
 
-dapp-e2e handles these differences transparently at the RPC layer so dApp code (wagmi / viem) does not need special handling.
+kiwa handles these differences transparently at the RPC layer so dApp code (wagmi / viem) does not need special handling.
 
 ## Solution pattern
 
@@ -18,7 +18,7 @@ dapp-e2e handles these differences transparently at the RPC layer so dApp code (
 
 ```ts
 // tests/prepare-env.ts
-import { runE2EPrepareEnv, loadForgeArtifact } from '@dapp-e2e/core';
+import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa/core';
 
 await runE2EPrepareEnv({
   envFile: '.env.local',
@@ -48,7 +48,7 @@ await runE2EPrepareEnv({
 
 ```ts
 // tests/fixture.ts
-import { dappE2eTest } from '@dapp-e2e/core';
+import { dappE2eTest } from '@kiwa/core';
 import type { Address } from 'viem';
 
 const SMART_ACCOUNT_ADDRESS = process.env.NEXT_PUBLIC_SMART_ACCOUNT as Address;
@@ -67,7 +67,7 @@ export const test = dappE2eTest.extend({
 });
 ```
 
-dapp-e2e automatically reroutes these RPCs:
+kiwa automatically reroutes these RPCs:
 
 | RPC | EOA (default) | smart account (`isContractAccount=true`) |
 |---|---|---|
@@ -103,7 +103,7 @@ test('T-AA-002 personal_sign signatures pass isValidSignature', async ({ page, d
     return { signature: sig, message: 'hello AA' };
   });
 
-  // dapp-e2e has already validated via isValidSignature internally
+  // kiwa has already validated via isValidSignature internally
   expect(signature).toMatch(/^0x[0-9a-f]+$/i);
 });
 ```
@@ -128,7 +128,7 @@ SDK-bound integrations land in v0.4+ (Phase D-3):
 - **Safe (Gnosis Safe)** — multi-sig threshold signatures
 - **Biconomy / ZeroDev / Alchemy AA SDK** — managed bundler / paymaster
 
-Likely shape: accept external SDKs via `peerDependencies` and ship them as subpackages (`@dapp-e2e/aa-thirdweb`, `@dapp-e2e/aa-safe`, ...).
+Likely shape: accept external SDKs via `peerDependencies` and ship them as subpackages (`@kiwa/aa-thirdweb`, `@kiwa/aa-safe`, ...).
 
 ## Avoiding false positives
 
@@ -140,6 +140,6 @@ Watch out for `adversarial-pitfalls.md` **#3 (partial access-control checks)**:
 
 ## See also
 
-- [API: WalletConfig.isContractAccount](../api/dapp-e2e-test.md#walletconfig)
-- [Example: nextjs-aa-erc4337](https://github.com/cardene777/dapp-e2e/tree/main/examples/nextjs-aa-erc4337)
-- [Example: nextjs-aa-smart-account (simplified)](https://github.com/cardene777/dapp-e2e/tree/main/examples/nextjs-aa-smart-account)
+- [API: WalletConfig.isContractAccount](../api/kiwa-play.md#walletconfig)
+- [Example: nextjs-aa-erc4337](https://github.com/cardene777/kiwa/tree/main/examples/nextjs-aa-erc4337)
+- [Example: nextjs-aa-smart-account (simplified)](https://github.com/cardene777/kiwa/tree/main/examples/nextjs-aa-smart-account)

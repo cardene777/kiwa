@@ -1,6 +1,6 @@
 # Concepts
 
-dapp-e2e の中核となる概念。
+kiwa の中核となる概念。
 
 - [Fixture 設計](./fixture.md) — `dappE2eTest` が提供する Playwright fixture
 - [Fixture Composition](./fixture-composition.md) — custom fixture / global setup / deploy 順序の組み立て方

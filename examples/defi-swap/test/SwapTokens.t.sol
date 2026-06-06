@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// /contract-test-foundry 出力 (test-spec-defi-swap.md 由来)
+// /kiwa-forge 出力 (test-spec-defi-swap.md 由来)
 // 用途: examples/defi-swap の test 後付け導入
 pragma solidity ^0.8.24;
 

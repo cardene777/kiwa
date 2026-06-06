@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "pnpm -F @dapp-e2e/core build && playwright test",
+    "test": "pnpm -F @kiwa/core build && playwright test",
     "typecheck": "tsc --noEmit",
     "forge:build": "forge build"
   },
   "dependencies": {
-    "@dapp-e2e/core": "workspace:*"
+    "@kiwa/core": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

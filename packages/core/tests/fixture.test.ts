@@ -33,7 +33,7 @@ describe('dappE2eTest fixture', () => {
     expect(valid).toBe(true);
   });
 
-  it('T-FIX-004 DEBUG=dapp-e2e:rpc で createRpcHandler が console.log を出す', async () => {
+  it('T-FIX-004 DEBUG=kiwa:rpc で createRpcHandler が console.log を出す', async () => {
     const ctx: RpcContext = {
       privateKey: PRIVATE_KEY,
       chainState: { current: 31337 },
@@ -46,12 +46,12 @@ describe('dappE2eTest fixture', () => {
     const rpcHandler = createRpcHandler(ctx, tracker);
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const prevDebug = process.env.DEBUG;
-    process.env.DEBUG = 'dapp-e2e:rpc';
+    process.env.DEBUG = 'kiwa:rpc';
 
     try {
       await rpcHandler({ method: 'eth_chainId' });
       expect(logSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/\[dapp-e2e:rpc\] eth_chainId .*duration=/),
+        expect.stringMatching(/\[kiwa:rpc\] eth_chainId .*duration=/),
       );
     } finally {
       process.env.DEBUG = prevDebug;
@@ -76,7 +76,7 @@ describe('dappE2eTest fixture', () => {
         error instanceof Error &&
         'code' in error &&
         (error as Error & { code: number }).code === -32603 &&
-        /\[dapp-e2e:rpc\] eth_call /.test(error.message) &&
+        /\[kiwa:rpc\] eth_call /.test(error.message) &&
         /pending for 12\.\ds/.test(error.message) &&
         /"to":"0xabc"/.test(error.message),
     );

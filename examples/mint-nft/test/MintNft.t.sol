@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// /contract-test-foundry 出力 (Layer 1 spec test-spec-mint-nft.md 由来)
+// /kiwa-forge 出力 (Layer 1 spec test-spec-mint-nft.md 由来)
 // 用途: examples/mint-nft の test 後付け導入
 // 観点 grouping: 1 正常系 / 2 異常系 / 3 境界値 / 4 状態遷移 / 5 権限 / 10 セキュリティ
 pragma solidity ^0.8.24;

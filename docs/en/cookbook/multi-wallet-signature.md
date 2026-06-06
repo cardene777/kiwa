@@ -23,7 +23,7 @@ Subscribe to `eip6963:announceProvider` in the page and collect providers by `rd
 
 Fetch Wallet A's address via `eth_requestAccounts`,
 then pass that same address into `personal_sign` and `eth_signTypedData_v4`.
-dapp-e2e handles both methods directly, so the test stays deterministic without popup UI.
+kiwa handles both methods directly, so the test stays deterministic without popup UI.
 
 ### 3. Recover in the test process and compare with Wallet A
 
@@ -36,7 +36,7 @@ Still, fetching Wallet B's address in the same test is useful because you can as
 `personal_sign` signs the EIP-191 message hash with the `\x19Ethereum Signed Message:\n...` prefix.
 That is why verification should use `recoverMessageAddress()` rather than raw-digest recovery.
 
-`eth_sign` is blocked in dapp-e2e.
+`eth_sign` is blocked in kiwa.
 Only use `recoverAddress({ hash, signature })` when you already have a raw-digest signature from another path.
 
 ### 5. Keep the EIP-712 domain separator identical
@@ -48,7 +48,7 @@ Reuse the exact same object for signing and verification so the domain separator
 
 ~~~ts
 import { expect } from '@playwright/test';
-import { dappE2eTest } from '@dapp-e2e/core';
+import { dappE2eTest } from '@kiwa/core';
 import { recoverMessageAddress, recoverTypedDataAddress } from 'viem';
 
 const test = dappE2eTest.extend({});
@@ -106,7 +106,7 @@ test('Wallet A signature is not confused with Wallet B', async ({ page, dappE2e 
 
     const personalSig = (await walletA.request({
       method: 'personal_sign',
-      params: ['hello dapp-e2e', walletAAddress],
+      params: ['hello kiwa', walletAAddress],
     })) as `0x${string}`;
 
     const typedSig = (await walletA.request({
@@ -120,7 +120,7 @@ test('Wallet A signature is not confused with Wallet B', async ({ page, dappE2e 
   await dappE2e.waitForRpcIdle();
 
   const recoveredPersonal = await recoverMessageAddress({
-    message: 'hello dapp-e2e',
+    message: 'hello kiwa',
     signature: result.personalSig,
   });
   const recoveredTyped = await recoverTypedDataAddress({

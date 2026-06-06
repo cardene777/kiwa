@@ -1,12 +1,12 @@
 # Isolate tests with snapshot / revert
 
-Use `snapshotChain` / `revertChain` added in `@dapp-e2e/core` v0.2 to completely isolate anvil chain state between tests.
+Use `snapshotChain` / `revertChain` added in `@kiwa/core` v0.2 to completely isolate anvil chain state between tests.
 
 ## Problem
 
 Tests that call `evm_increaseTime` or perform multiple contract writes accumulate state in anvil and leak side effects into subsequent tests. This is a classic flaky pattern that only surfaces after 4 consecutive rounds.
 
-Real example: in the dapp-e2e MVP foundation, `nextjs-token-gating` round 3 once failed due to lingering anvil PIDs from the previous round.
+Real example: in the kiwa MVP foundation, `nextjs-token-gating` round 3 once failed due to lingering anvil PIDs from the previous round.
 
 ## Solution pattern
 
@@ -14,7 +14,7 @@ Snapshot in `beforeEach`, revert in `afterEach`.
 
 ```ts
 import { test, expect } from './fixture';
-import { snapshotChain, revertChain, increaseTime } from '@dapp-e2e/core';
+import { snapshotChain, revertChain, increaseTime } from '@kiwa/core';
 import type { Hex } from 'viem';
 
 let snapshotId: Hex;
