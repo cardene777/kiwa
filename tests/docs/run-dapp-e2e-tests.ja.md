@@ -1,175 +1,199 @@
-# dApp e2e test 実走手順 (Playwright + viem)
+# dApp e2e test を skill で作って実走する手順 (Playwright + viem)
 
-> [🇬🇧 English](./run-dapp-e2e-tests.md) • [🇯🇵 日本語](./run-dapp-e2e-tests.ja.md)
+> 🇯🇵 日本語のみ (英語版は本手順をローカルで検証した後に追加予定)
 
-`examples/mint-nft` の ERC721 mint flow を題材に、 Playwright + viem (`@kiwa/core` fixture) で dApp e2e test を実走する手順。 2 つの動線を持つ。
+`examples/mint-nft` の ERC721 mint flow を題材に、 **kiwa の skill chain (`/kiwa-design` → `/kiwa-play`) を使って dApp e2e test を 0 から作って実走する** 手順を歩く。 完成形 reference (`tests/fixtures/mint-nft/e2e-test/`) は答え合わせと挙動確認用に末尾で diff 比較する。
 
-- **動線 A — 完成形 reference を実走**: `tests/fixtures/mint-nft/e2e-test/mint.spec.ts` の完成形 spec を pnpm 経由で走らせ、 期待件数 (8/8) と挙動を確認する
-- **動線 B — retrofit walkthrough を 0 から歩く**: `examples/mint-nft/tests/` を空 dir 状態から `/kiwa-design` + `/kiwa-play` の skill chain で spec を再生成し、 fixtures 完成形と diff 比較する
+## 全体図
 
-## 前提条件
+```mermaid
+graph LR
+    A[Terminal で kiwa repo に cd] --> B[claude を起動]
+    B --> C["/kiwa-design --layer e2e"]
+    C --> D[.context/spec/e2e/test-spec-mint-nft.md]
+    D --> E["/kiwa-play --mode new"]
+    E --> F[examples/mint-nft/tests/mint.spec.ts]
+    F --> G[playwright test で実走]
+    G --> H[diff で fixtures と比較]
+```
 
-repo root で以下が揃っていること。
+## Step 0 — 前提環境
+
+すでに整っているか確認。
 
 ```bash
-# 1. 依存 install
+# 1. Terminal を開いて kiwa repo に移動
+cd /Users/cardene/Desktop/projects/kiwa
+
+# 2. branch を確認
+git branch --show-current
+
+# 3. 依存 install
 pnpm install
 
-# 2. Playwright browser を install (初回 + Playwright update 時)
-pnpm --dir tests/fixtures/mint-nft exec playwright install chromium
+# 4. @kiwa/core を build (e2e fixture が使う)
+pnpm -F @kiwa/core build
 
-# 3. Foundry (anvil) が PATH 上
+# 5. Foundry (anvil) が PATH 上
 anvil --version    # anvil x.y.z
 
-# 4. Node.js 22+
+# 6. Node.js 22+
 node --version     # v22.x.x
+
+# 7. Playwright chromium を install (初回 + Playwright update 時)
+pnpm --dir examples/mint-nft exec playwright install chromium
 ```
 
-`@kiwa/core` build 状態確認 (fixture が dApp test で使われる)。
+## Step 1 — examples/mint-nft/tests が空 dir 状態であることを確認
+
+retrofit walkthrough は examples 側を空 dir から始める前提。
 
 ```bash
-pnpm -F @kiwa/core build      # packages/core を build
+ls examples/mint-nft/tests 2>&1            # "No such file" or 空
+
+# .gitignore で tests/ が tracking 対象外であることを確認
+grep -E "^tests/" examples/mint-nft/.gitignore
 ```
 
-## 動線 A — 完成形 reference を実走
+`tests/` 行が出ていれば作業台として正しい状態。
 
-`tests/fixtures/mint-nft/` は独立 pnpm workspace で、 examples 側に影響せず完結する。
+## Step 2 — Claude Code を起動
 
-### A-1. Playwright test を実走 (8/8 期待)
+別 Terminal を開き、 kiwa repo 内で claude を起動。
 
 ```bash
-pnpm --dir tests/fixtures/mint-nft test:e2e
+cd /Users/cardene/Desktop/projects/kiwa
+claude
 ```
 
-期待出力末尾。
+`claude code` が起動し prompt が出る。 ここから skill コマンドを叩く。
 
-```text
-  ✓  1 [chromium] › e2e-test/mint.spec.ts:156:3 › mint-nft e2e (ERC721 mint flow) › T-MN-001 contract deploy + connect で account 表示 (X.Xs)
-  ✓  2 [chromium] › e2e-test/mint.spec.ts:165:3 › ... T-MN-002 mint で totalSupply が 1 増え、 Transfer event が emit ...
-  ✓  3 [chromium] › e2e-test/mint.spec.ts:199:3 › ... T-MN-003 batchMint(addr, 3) で 3 NFT が mint され、 owner enumerate が連番になる ...
-  ✓  4 [chromium] › e2e-test/mint.spec.ts:241:3 › ... T-MN-004 mint → transfer で minter balance=0 / recipient balance=1 ...
-  ✓  5 [chromium] › e2e-test/mint.spec.ts:261:3 › ... T-MN-005 MAX_SUPPLY 到達後の mint は MaxSupplyReached(uint256) で revert ...
-  ✓  6 [chromium] › e2e-test/mint.spec.ts:297:3 › ... T-MN-006 royaltyInfo(1, 1 ether) は deployer receiver と 5% royalty を返す ...
-  ✓  7 [chromium] › e2e-test/mint.spec.ts:314:3 › ... T-MN-007 supportsInterface が ERC165 / ERC721 / ERC721Enumerable / EIP-2981 を返す ...
-  ✓  8 [chromium] › e2e-test/mint.spec.ts:331:3 › ... T-MN-008 batchMint の extreme count は MaxSupplyReached(uint256) で revert ...
+## Step 3 — Layer 1: e2e 用仕様書を生成 (`/kiwa-design`)
 
-  8 passed (10.4s)
-```
-
-### A-2. flaky 検査 (4 round 連続実走)
-
-```bash
-for r in 1 2 3 4; do
-  echo "=== Round $r ==="
-  pnpm --dir tests/fixtures/mint-nft test:e2e 2>&1 | tail -3
-done
-```
-
-4 round 全て `8 passed` で failing 0 ならば flaky 0。 1 round でも failing 出たら該当 test を確認 (timing 依存 / anvil 状態リーク / port 衝突)。
-
-### A-3. headed mode で見ながら実走 (debug 用)
-
-```bash
-pnpm --dir tests/fixtures/mint-nft exec playwright test --headed
-```
-
-chromium が立ち上がり click や入力が見える。 debug 中の test の前に `await page.pause()` を入れれば inspector が起動する。
-
-### A-4. specific test だけ実走
-
-```bash
-# テスト名で filter
-pnpm --dir tests/fixtures/mint-nft exec playwright test --grep "T-MN-002"
-
-# file 指定
-pnpm --dir tests/fixtures/mint-nft exec playwright test e2e-test/mint.spec.ts:165
-```
-
-## 動線 B — retrofit walkthrough を 0 から歩く
-
-`examples/mint-nft/tests/` は `.gitignore` 対象で git clone 直後は空。 skill chain で spec を再生成し、 fixtures 完成形と挙動を比較する。
-
-### B-1. 作業台が空であることを確認
-
-```bash
-ls examples/mint-nft/tests 2>/dev/null              # 空 or no such directory
-git status --short examples/mint-nft/               # tests/ は untracked / gitignored
-```
-
-### B-2. Layer 1 — e2e 用仕様書を生成
+claude prompt で以下を叩く。
 
 ```text
 /kiwa-design --layer e2e --module mint-nft --input examples/mint-nft/
 ```
 
-skill が以下を実施。
+skill が以下を実施する。
 
 - `examples/mint-nft/contracts/MintNft.sol` と `app/page.tsx` (もしくは inline HTML fixture) の対応関係を抽出
 - contract event と UI 表示要素の対応を整理
 - 観点別 (UI 表示 / wallet 接続 / contract 呼び出し / state 反映 / error 表示) で test ケースを生成
 
-出力 — `.context/spec/e2e/test-spec-mint-nft.md`。
+出力 — `.context/spec/e2e/test-spec-mint-nft.md`。 生成完了したら中身を `cat` で軽く確認。
 
-### B-3. Layer 2 — `/kiwa-play` で spec を生成
+```bash
+# 別 Terminal で確認
+cat .context/spec/e2e/test-spec-mint-nft.md | head -60
+```
+
+「対象機能」 / 「UI 要素対応」 / 「テスト観点」 / 「テストケース (9 column)」 の section が並んでいれば OK。
+
+## Step 4 — Layer 2: `/kiwa-play --mode new` で spec を生成
+
+claude prompt に戻って以下を叩く。
 
 ```text
 /kiwa-play --mode new --example mint-nft
 ```
 
-skill が以下を実施。
+skill が以下を実施する。
 
-- `.context/spec/e2e/test-spec-mint-nft.md` を Read
+- Step 3 で生成した `.context/spec/e2e/test-spec-mint-nft.md` を Read
 - 観点を Playwright + `@kiwa/core` fixture (anvil 自動起動 / wallet inject / contract deploy) に変換
 - `examples/mint-nft/tests/mint.spec.ts` を Write
-- `pnpm test:e2e` を 4 round 連続実走して flaky 0 検証
+- `prepare-env.ts` / `fixture.ts` / `global-setup.ts` 等の helper を同時生成 (必要に応じて)
+- `pnpm test:e2e` 相当を 4 round 連続実走して flaky 0 検証
 
-### B-4. 生成 spec を実走
+完了すると claude が test 件数 / PASS 数 / 4 round 結果を報告する。 期待は約 8 件全 PASS (完成形 fixtures と同数程度)。
+
+### `--mode extend` を使うケース (補足)
+
+既存 e2e test がある状態で観点だけ追加したいときは `--mode extend` を使う (本 step は new mode、 mint-nft は 0 から生成想定なので new を使う)。
+
+## Step 5 — 生成 spec を手動実走 (flaky 検査込み)
+
+claude を抜けて別 Terminal、 もしくは Bash tool で実走する。
 
 ```bash
-cd examples/mint-nft && pnpm test
+cd /Users/cardene/Desktop/projects/kiwa
+
+# 単発
+pnpm -F examples-mint-nft test
+# 期待: 8 passed (XX.Xs)
+
+# 4 round 連続で flaky 検査
+for r in 1 2 3 4; do
+  echo "=== Round $r ==="
+  pnpm -F examples-mint-nft test 2>&1 | tail -3
+done
+# 期待: 各 round 8 passed, failing 0
 ```
 
-`prepare-env.ts` が anvil 起動 + contract deploy を行い、 Playwright が chromium で UI flow を実行する。
+4 round 全て `failing 0` なら flaky 0 で合格。
 
-### B-5. fixtures 完成形と diff 比較
+### headed mode で見ながら実走 (debug 用)
 
 ```bash
+pnpm -F examples-mint-nft exec playwright test --headed
+```
+
+chromium が立ち上がり click や入力が見える。 debug 中の test の前に `await page.pause()` を入れれば inspector が起動する。
+
+### specific test だけ実走
+
+```bash
+# テスト名で filter
+pnpm -F examples-mint-nft exec playwright test --grep "T-MN-002"
+
+# file 指定
+pnpm -F examples-mint-nft exec playwright test tests/mint.spec.ts:165
+```
+
+## Step 6 — 完成形 fixtures との diff 比較 (答え合わせ)
+
+`tests/fixtures/mint-nft/e2e-test/` には完成済の reference spec が置いてある。 自分で skill chain で生成した spec と比較する。
+
+```bash
+cd /Users/cardene/Desktop/projects/kiwa
 diff -r examples/mint-nft/tests tests/fixtures/mint-nft/e2e-test
 ```
 
-完成形と完全一致するとは限らない (skill が生成する spec の test ID 順序や assert 文字列は run ごとにブレる)。 重要なのは。
+完成形と **完全一致は期待しない** (skill が生成する spec の test ID 順序や assert 文字列は run ごとにブレる)。 重要なのは以下 3 点。
 
 - 完成形 8 件 (T-MN-001 〜 T-MN-008) の観点が cover されている
-- 全 test PASS する
-- 4 round 連続 PASS (flaky 0)
+- 全 test PASS する (Step 5 で確認済)
+- 4 round 連続 PASS (Step 5 で確認済)
 
-### B-6. extend mode — 既存 spec に追加 test を生成
+### 完成形 reference を直接実走したい場合 (補足)
 
-retrofit walkthrough で既存 e2e test がある場合 (例 nextjs-token-gating)、 `/kiwa-play --mode extend` で既存 spec を **上書きせず追記** できる。
+skill chain なしで完成形だけ走らせたいなら、 fixtures 側 (独立 pnpm workspace) を直接叩ける。
 
-```text
-/kiwa-play --mode extend --example mint-nft
+```bash
+cd /Users/cardene/Desktop/projects/kiwa
+pnpm --dir tests/fixtures/mint-nft test:e2e          # 8/8
 ```
-
-skill が既存 8 件を「現状カバー」として認識し、 不足観点 (例: 権限 partial 検証 / multi-tab race / event re-emit) を新規 test (TC-NNN) として追記する。
 
 ## トラブルシューティング
 
 | 症状 | 原因 | 対処 |
 |---|---|---|
-| `Executable doesn't exist at .../chrome-headless-shell` | Playwright bundled chromium 未 install | `pnpm --dir tests/fixtures/mint-nft exec playwright install chromium` |
-| `ReferenceError: require is not defined in ES module scope` | package.json に `"type": "module"` 欠落 | fixtures 側は対応済、 自前 workspace で出たら追加 |
+| `Executable doesn't exist at .../chrome-headless-shell` | Playwright bundled chromium 未 install | `pnpm --dir examples/mint-nft exec playwright install chromium` |
+| `ReferenceError: require is not defined in ES module scope` | package.json に `"type": "module"` 欠落 | examples 側は対応済、 自前 workspace で出たら追加 |
 | `Cannot find module '@kiwa/core'` | `@kiwa/core` build 未実行 | `pnpm -F @kiwa/core build` |
 | anvil port 衝突 (`EADDRINUSE: 8545`) | 別の anvil daemon が稼働中 | `pkill -f anvil` or `lsof -ti :8545 \| xargs kill` |
 | Playwright timeout (test がハング) | UI 要素 selector ミス / anvil tx 滞留 | `--debug` で playwright inspector を起動 + `page.pause()` で停止点設定 |
 | flaky test (1 round だけ failing) | timing 依存 / state リーク | `test.describe.serial` を使う / fixture で `beforeEach` で state reset |
-| `Error: connect ECONNREFUSED 127.0.0.1:8545` | anvil 未起動 (prepare-env.ts 失敗) | `node --import tsx tests/prepare-env.ts` 単独実行で error log 確認 |
+| `Error: connect ECONNREFUSED 127.0.0.1:8545` | anvil 未起動 (`prepare-env.ts` 失敗) | `node --import tsx examples/mint-nft/tests/prepare-env.ts` 単独実行で error log 確認 |
+| skill が「既存 test あり」で skip する | `.gitignore` が効いていない | Step 1 で `.gitignore` 設定を確認 |
 
 ## 関連 docs
 
 - 完成形 reference の出自と provenance: `tests/fixtures/mint-nft/README.md`
 - retrofit walkthrough 全体 flow (token-gating 題材): `tests/docs/retrofit-existing-dapp.ja.md`
-- skill chain tutorial: `tests/docs/skill-chain-tutorial.ja.md`
+- skill chain tutorial (4 skill 連携の概念図): `tests/docs/skill-chain-tutorial.ja.md`
 - contract test 手順 (Foundry + Hardhat): `tests/docs/run-contract-tests.ja.md`
 - Layer 1 skill: `.claude/skills/kiwa-design/SKILL.md`
 - Layer 2 Playwright skill: `.claude/skills/kiwa-play/SKILL.md`
