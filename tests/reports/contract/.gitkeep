@@ -1,0 +1,2 @@
+# coverage report 保存先 (skill auto loop で生成、 commit 対象 = 開発者 / OSS user が参照する成果物)
+# 命名規約 — coverage-report-{module}.md (canonical) + coverage-report-{module}-round-{N}.md (各 round 履歴)

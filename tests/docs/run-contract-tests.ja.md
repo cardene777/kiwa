@@ -108,14 +108,14 @@ claude を再起動して uncovered 箇所を /kiwa-design spec に追記 → /k
 
 > 注 — Total 値 (test / mock 含む) が 100% 未達でも production target 100% なら PASS。 test/helper/mock は分母対象外。 詳細解釈は次 Step (Step 8) の coverage report を参照。
 
-> 注 — auto loop (skill が自動で uncovered 抽出 → 分類 → test 追加 → 再 coverage) と coverage report 自動生成 (4 section format で `.context/reports/contract/coverage-report-{module}.md` に Write) は [Issue #222](https://github.com/cardene777/kiwa/issues/222) で skill 拡張予定。 拡張完了後は本 Step 7 + Step 8 が自動化される。 それまでは上記手動 loop + 次 Step の手動 report 参照。
+> 注 — auto loop (skill が自動で uncovered 抽出 → 分類 → test 追加 → 再 coverage) と coverage report 自動生成 (4 section format で `tests/reports/contract/coverage-report-{module}.md` に Write) は [Issue #222](https://github.com/cardene777/kiwa/issues/222) で skill 拡張予定。 拡張完了後は本 Step 7 + Step 8 が自動化される。 それまでは上記手動 loop + 次 Step の手動 report 参照。
 
 ## Step 8 — Coverage report 確認 (skill 拡張後は自動生成)
 
 skill 拡張 #222 完了後、 Step 7 完了時に以下が自動生成される。
 
 ```
-.context/reports/contract/coverage-report-nft-marketplace.md
+tests/reports/contract/coverage-report-nft-marketplace.md
 ```
 
 4 section 構造:
@@ -127,7 +127,7 @@ skill 拡張 #222 完了後、 Step 7 完了時に以下が自動生成される
 | 3. 未到達 line 分類 | 削除候補 / defensive / 外部依存 / 計測除外 / 真の未踏 の 5 分類 + 理由 |
 | 4. Layer 1 spec 書き戻し提案 | 実装段で追加した test / 発見した知見を spec に反映する提案 (skill は spec 自体は書き換えない) |
 
-拡張完了までは上記 section を手動で作成して `.context/reports/contract/` 配下に保存する運用 (任意)。
+拡張完了までは上記 section を手動で作成して `tests/reports/contract/` 配下に保存する運用 (任意)。
 
 ## Step 9 — 完成形 fixtures と diff 比較
 

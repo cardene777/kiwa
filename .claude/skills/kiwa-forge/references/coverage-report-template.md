@@ -1,6 +1,6 @@
 # coverage-report-template — coverage report 4 section format SSOT
 
-`/kiwa-forge` / `/kiwa-hardhat` の Step 5c で `.context/reports/contract/coverage-report-{module}.md` を Write する際の 4 section format template。 両 skill から参照される (skill 違いを吸収して同一 report format で出力)。
+`/kiwa-forge` / `/kiwa-hardhat` の Step 5c で `tests/reports/contract/coverage-report-{module}.md` を Write する際の 4 section format template。 両 skill から参照される (skill 違いを吸収して同一 report format で出力)。
 
 ## template 全体
 
