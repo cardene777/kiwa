@@ -4,23 +4,25 @@
 
 `examples/nft-marketplace` の UI 起点で dApp e2e test を 0 から生成 → 実走 → 完成形 fixtures と diff 比較するまでの手順。 UI から呼ばれない contract function (admin / internal) は対象外。
 
-## Step 0 — 前提環境
+## Step 0 — 前提環境 (+ 途中まで進めた場合のリセット)
 
 kiwa repo を clone した root で実行。
 
 ```bash
-pnpm install
-pnpm -F @kiwa/core build
-anvil --version    # Foundry
-node --version     # 22+
-pnpm --filter examples-nft-marketplace exec playwright install chromium
+pnpm install && pnpm -F @kiwa/core build && anvil --version && node --version && pnpm --filter examples-nft-marketplace exec playwright install chromium
+```
+
+途中まで進めて再 run したい場合のリセット (生成済 spec / test / 実走結果を全削除)。
+
+```bash
+rm -rf examples/nft-marketplace/{tests,test-results,playwright-report} .context/spec/e2e/test-spec-marketplace.md
 ```
 
 ## Step 1 — 対象 dApp dir に移動 + tests/ dir が空であることを確認
 
 ```bash
-cd examples/nft-marketplace
-ls tests 2>&1            # "No such file" or 空
+cd examples/nft-marketplace && ls tests 2>&1
+# 期待: "No such file" or 空
 ```
 
 ## Step 2 — その dir で Claude Code を起動
@@ -49,19 +51,14 @@ claude prompt で叩く。
 
 ## Step 5 — spec を手動実走 (flaky 検査込み)
 
-claude を抜けて (Ctrl+D)、 repo root で実行。
+claude を抜けて (Ctrl+D) repo root で実行。
 
 ```bash
-cd ../..
-
 # 単発
 pnpm -F examples-nft-marketplace test
 
 # 4 round 連続 flaky 検査
-for r in 1 2 3 4; do
-  echo "=== Round $r ==="
-  pnpm -F examples-nft-marketplace test 2>&1 | tail -3
-done
+for r in 1 2 3 4; do echo "=== Round $r ==="; pnpm -F examples-nft-marketplace test 2>&1 | tail -3; done
 ```
 
 全 round `failing 0` で合格。

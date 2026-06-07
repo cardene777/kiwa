@@ -4,23 +4,25 @@
 
 `examples/nft-marketplace` (2 contract: `MarketNft.sol` + `SimpleMarketplace.sol`) で contract test を 0 から生成 → 実走 → 完成形 fixtures と diff 比較するまでの手順。
 
-## Step 0 — 前提環境
+## Step 0 — 前提環境 (+ 途中まで進めた場合のリセット)
 
 kiwa repo を clone した root で実行。
 
 ```bash
-pnpm install
-forge --version    # Foundry
-anvil --version
-node --version     # 22+
+pnpm install && forge --version && anvil --version && node --version
+```
+
+途中まで進めて再 run したい場合のリセット (生成済 test / spec / cache を全削除)。
+
+```bash
+rm -rf examples/nft-marketplace/{test,hardhat-test,forge-out,hardhat-cache,hardhat-artifacts,cache,coverage,coverage.json} .context/spec/contract/test-spec-nft-marketplace.md
 ```
 
 ## Step 1 — 対象 dApp dir に移動 + test dir が空であることを確認
 
 ```bash
-cd examples/nft-marketplace
-ls test 2>&1            # "No such file" or 空
-ls hardhat-test 2>&1    # "No such file" or 空
+cd examples/nft-marketplace && ls test hardhat-test 2>&1
+# 期待: "No such file" or 空
 ```
 
 ## Step 2 — その dir で Claude Code を起動
@@ -69,18 +71,14 @@ hardhat-test/
 
 ## Step 6 — 全 test を実走 (flaky 検査込み)
 
-claude を抜けて (Ctrl+D)、 examples/nft-marketplace dir で実行。
+claude を抜けて (Ctrl+D) repo root で実行。
 
 ```bash
 # Foundry — 全 contract 一括
-FOUNDRY_OFFLINE=true forge test
+(cd examples/nft-marketplace && FOUNDRY_OFFLINE=true forge test)
 
-# Hardhat — repo root に戻って 4 round 連続 (flaky 0 検査)
-cd ../..
-for r in 1 2 3 4; do
-  echo "=== Round $r ==="
-  pnpm -F examples-nft-marketplace test:hardhat 2>&1 | grep -E "passing|failing"
-done
+# Hardhat — 4 round 連続 (flaky 0 検査)
+for r in 1 2 3 4; do echo "=== Round $r ==="; pnpm -F examples-nft-marketplace test:hardhat 2>&1 | grep -E "passing|failing"; done
 ```
 
 全 round `failing 0` で合格。
@@ -89,11 +87,9 @@ done
 
 ```bash
 # Foundry
-cd examples/nft-marketplace
-FOUNDRY_OFFLINE=true forge coverage --report summary
+(cd examples/nft-marketplace && FOUNDRY_OFFLINE=true forge coverage --report summary)
 
 # Hardhat
-cd ../..
 pnpm -F examples-nft-marketplace test:hardhat:coverage
 ```
 
