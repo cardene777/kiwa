@@ -173,6 +173,8 @@ Playwright 側は既存 `gating.spec.ts` が動いているのでそのままで
 | nextjs-token-gating | 20/20 | 23/23 | 8/8 | [#196](https://github.com/cardene777/kiwa/pull/196) |
 | nft-marketplace | 30+ | 51/51 | 12/12 | [#198](https://github.com/cardene777/kiwa/pull/198) |
 
+`mint-nft` の完成形 reference suite は `tests/fixtures/mint-nft/` にあり、 example 側の test directories は retrofit walkthrough 用の gitignored 作業台として扱う。
+
 それぞれの diff を読めば本 tutorial の Step 1-4 がどう実装に落ちたか具体例で確認できる。
 
 ## 関連 docs

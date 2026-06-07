@@ -173,6 +173,8 @@ Playwright already has `gating.spec.ts` working, so leave it alone. When you wan
 | nextjs-token-gating | 20/20 | 23/23 | 8/8 | [#196](https://github.com/cardene777/kiwa/pull/196) |
 | nft-marketplace | 30+ | 51/51 | 12/12 | [#198](https://github.com/cardene777/kiwa/pull/198) |
 
+For `mint-nft`, the completed reference suite now lives in `tests/fixtures/mint-nft/`, while the example-side test directories are treated as gitignored retrofit workbench directories.
+
 The diffs of those PRs show exactly how Steps 1–4 translate into real code.
 
 ## Related docs
