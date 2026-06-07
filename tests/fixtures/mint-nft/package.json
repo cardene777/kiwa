@@ -2,8 +2,9 @@
   "name": "tests-fixtures-mint-nft",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test:foundry": "forge test",
+    "test:foundry": "FOUNDRY_OFFLINE=true forge test",
     "test:hardhat": "hardhat test --config hardhat.config.cjs",
     "test:hardhat:coverage": "hardhat coverage --config hardhat.config.cjs",
     "test:e2e": "playwright test",
