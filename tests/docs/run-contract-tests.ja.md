@@ -28,14 +28,14 @@
 
 ```mermaid
 graph LR
-    A[contracts/ <br/>複数 .sol] --> B["/kiwa-design --input contracts/"]
-    B --> C[.context/spec/contract/<br/>test-spec-{module}.md<br/>連携 scenario 含む]
-    C --> D["/kiwa-forge --module {module}"]
-    C --> E["/kiwa-hardhat --module {module}"]
-    D --> F[test/Contract1.t.sol<br/>test/Contract2.t.sol<br/>各 file 内に setUp で関連 contract deploy + scenario test]
-    E --> G[hardhat-test/Contract1.test.cjs<br/>hardhat-test/Contract2.test.cjs]
-    F --> H[forge test で全 contract 一括実走]
-    G --> I[hardhat test で全 contract 一括実走]
+    A["contracts/<br/>複数 .sol"] --> B["/kiwa-design --input contracts/"]
+    B --> C[".context/spec/contract/<br/>test-spec-MODULE.md<br/>連携 scenario 含む"]
+    C --> D["/kiwa-forge --module MODULE"]
+    C --> E["/kiwa-hardhat --module MODULE"]
+    D --> F["test/Contract1.t.sol<br/>test/Contract2.t.sol<br/>各 file 内に setUp で関連 contract deploy + scenario test"]
+    E --> G["hardhat-test/Contract1.test.cjs<br/>hardhat-test/Contract2.test.cjs"]
+    F --> H["forge test で全 contract 一括実走"]
+    G --> I["hardhat test で全 contract 一括実走"]
 ```
 
 ## 前提イメージ — 自分の dApp project の構成

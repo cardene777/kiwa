@@ -44,12 +44,12 @@ UI 起点で考えると test 対象は以下に絞られる。
 
 ```mermaid
 graph LR
-    A[app/ UI code] --> B["/kiwa-design --layer e2e<br/>--input app/"]
-    B --> C[.context/spec/e2e/<br/>test-spec-{feature}.md]
+    A["app/ UI code"] --> B["/kiwa-design --layer e2e<br/>--input app/"]
+    B --> C[".context/spec/e2e/<br/>test-spec-FEATURE.md"]
     C --> D["/kiwa-play --mode new<br/>--rounds 4"]
-    D --> E[tests/{feature}.spec.ts<br/>+ helper file]
-    E --> F[playwright test で実走]
-    F --> G[fixtures と diff 比較]
+    D --> E["tests/FEATURE.spec.ts<br/>+ helper file"]
+    E --> F["playwright test で実走"]
+    F --> G["fixtures と diff 比較"]
 ```
 
 ## 前提イメージ — dApp project の構成
