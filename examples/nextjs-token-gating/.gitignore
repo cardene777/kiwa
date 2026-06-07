@@ -11,3 +11,7 @@ coverage.json
 .coverage_artifacts/
 .coverage_cache/
 .coverage_contracts/
+# retrofit walkthrough workbench (finished suite lives in tests/fixtures/nextjs-token-gating/)
+test/
+hardhat-test/
+tests/

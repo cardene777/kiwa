@@ -11,3 +11,4 @@ coverage.json
 test-results/
 .next/
 .context/
+.env.local
