@@ -131,9 +131,22 @@ tests/reports/contract/coverage-report-nft-marketplace.md
 
 ## Step 9 — 完成形 fixtures と diff 比較
 
+> ⚠️ **重要 — nft-marketplace の fixtures は未実装** ([Issue #218](https://github.com/cardene777/kiwa/issues/218) で予定)。 本 step は `tests/fixtures/nft-marketplace/` が存在する前提だが、 現状は #218 完了まで実行不可。 動作確認したい場合は fixtures が揃っている mint-nft で代替実行 (下記参照)。
+
+#218 完了後の想定コマンド (cwd 問わず動く)。
+
 ```bash
-diff -r examples/nft-marketplace/test tests/fixtures/nft-marketplace/contract-test 2>&1 | head -30
-diff -r examples/nft-marketplace/hardhat-test tests/fixtures/nft-marketplace/hardhat-test 2>&1 | head -30
+ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/nft-marketplace/test" "$ROOT/tests/fixtures/nft-marketplace/contract-test" 2>&1 | head -30
+ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/nft-marketplace/hardhat-test" "$ROOT/tests/fixtures/nft-marketplace/hardhat-test" 2>&1 | head -30
+```
+
+### 代替 — mint-nft で diff 比較を試したい場合
+
+fixtures が既に存在する mint-nft (#215 完了済) で diff 動作確認:
+
+```bash
+ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/mint-nft/test" "$ROOT/tests/fixtures/mint-nft/contract-test" 2>&1 | head -30
+ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/mint-nft/hardhat-test" "$ROOT/tests/fixtures/mint-nft/hardhat-test" 2>&1 | head -30
 ```
 
 完全一致は期待しない (skill 生成は run ごとにブレる)。 確認するのは 3 点:
@@ -141,6 +154,8 @@ diff -r examples/nft-marketplace/hardhat-test tests/fixtures/nft-marketplace/har
 - 全 contract の function / event / error が test に含まれる
 - 全 test PASS (Step 6 で確認済)
 - coverage threshold 以上 (Step 7 で確認済)
+
+fixtures 未実装の other example (defi-swap = #216 / nextjs-token-gating = #217) も同様に当該 Issue 完了まで本 step は skip。
 
 ## トラブルシューティング
 

@@ -65,14 +65,28 @@ for r in 1 2 3 4; do echo "=== Round $r ==="; pnpm -F examples-nft-marketplace t
 
 ## Step 6 — 完成形 fixtures と diff 比較
 
+> ⚠️ **重要 — nft-marketplace の fixtures は未実装** ([Issue #218](https://github.com/cardene777/kiwa/issues/218) で予定)。 本 step は `tests/fixtures/nft-marketplace/` が存在する前提だが、 現状は #218 完了まで実行不可。 動作確認したい場合は fixtures が揃っている mint-nft で代替実行 (下記参照)。
+
+#218 完了後の想定コマンド (cwd 問わず動く)。
+
 ```bash
-diff -r examples/nft-marketplace/tests tests/fixtures/nft-marketplace/e2e-test 2>&1 | head -30
+ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/nft-marketplace/tests" "$ROOT/tests/fixtures/nft-marketplace/e2e-test" 2>&1 | head -30
+```
+
+### 代替 — mint-nft で diff 比較を試したい場合
+
+fixtures が既に存在する mint-nft (#215 完了済) で diff 動作確認:
+
+```bash
+ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/mint-nft/tests" "$ROOT/tests/fixtures/mint-nft/e2e-test" 2>&1 | head -30
 ```
 
 完全一致は期待しない。 確認するのは 2 点:
 
 - UI から操作可能な全 flow が cover されている
 - 全 test PASS / 4 round 連続 PASS (Step 5 で確認済)
+
+fixtures 未実装の other example (defi-swap = #216 / nextjs-token-gating = #217) も同様に当該 Issue 完了まで本 step は skip。
 
 ## debug 用 — headed mode / specific test
 
