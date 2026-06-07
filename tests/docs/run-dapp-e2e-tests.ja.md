@@ -122,12 +122,24 @@ claude
 
 ## Step 3 — Layer 1: `/kiwa-design` で e2e 仕様書を生成 (UI 起点)
 
-claude prompt で以下を叩く。
+claude prompt で以下を叩く。 **UX 仕様書 / 画面設計書がある場合のみ** prompt 末尾に追記する (無ければ 1 行目だけで OK)。
+
+```text
+/kiwa-design --layer e2e --module marketplace --input app/
+```
+
+引数の意味。
+
+- `--layer e2e` — 出力 path を `.context/spec/e2e/` に分岐
+- `--module marketplace` — 機能単位 (画面 / UX flow の単位、 contract 単位ではない)
+- `--input app/` — **UI code を起点に渡す** (contract は含めない)
+
+UX 仕様書 / 画面設計書 (PRD / Figma 仕様 / data-testid 一覧 等) が手元にある場合のみ、 path を `--input` 第 2 引数として渡すか prompt 末尾に書き添える。
 
 ```text
 /kiwa-design --layer e2e --module marketplace --input app/
 
-UX flow:
+UX flow (docs/PRD.md 抜粋):
 - ユーザーが marketplace を開く → listing 一覧表示
 - listing カードを click → 詳細表示
 - Buy 押下 → wallet 署名 → tx 送信 → 成功で listing から消える
@@ -137,23 +149,16 @@ UX flow:
 画面要素 (data-testid):
 - listing-card / buy-button / connect-button / account-display
 
-機能仕様 (PRD): tests/fixtures/nft-marketplace/README.md (将来) または下記要約
-- marketplace は SimpleMarketplace.list() で登録された NFT の一覧を表示
-- buy は SimpleMarketplace.buy(listingId) を叩き、 royalty 分配を含む tx を送信
-- error 表示: revert reason を toast で表示
+error 表示: revert reason を toast で表示
 ```
 
-引数の意味。
+UX 仕様書がない場合の skill 挙動 — `app/` 配下の component / button label / data-testid から skill が逆算する。 出力 spec の「不足している仕様」 section に「UX flow の意図不明 (button click 後の表示が PRD で確定済か実装値か不明)」 等が bullet 化されるが、 test 仕様書としては動く水準で生成される。
 
-- `--layer e2e` — 出力 path を `.context/spec/e2e/` に分岐
-- `--module marketplace` — 機能単位 (画面 / UX flow の単位、 contract 単位ではない)
-- `--input app/` — **UI code を起点に渡す** (contract は含めない)
-
-skill が以下を実施 (期待挙動)。
+skill が実施する内容 (引数のみの場合 / 仕様書追記の場合 共通)。
 
 - `app/` 配下を Read して `<button>` / `<form>` / `<input>` / `data-testid` を grep
 - UI から呼ばれている wagmi hook (`useReadContract` / `useWriteContract`) を逆引きして対象 contract function を特定
-- prompt 内の UX flow を test ケースに変換
+- 仕様書追記があれば UX flow を test ケースに反映 (なければ component 構造から逆算)
 - contract function のうち UI から呼ばれないものは **test 対象外** として明示 (「対象機能」section に「UI 露出 function のみ」と注記)
 - 9 column 表で test 仕様書を Write、 「期待結果」column は **UI 表示 / wallet state / 画面遷移** を中心に記述
 

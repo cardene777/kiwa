@@ -101,16 +101,10 @@ claude
 
 ## Step 3 — Layer 1: `/kiwa-design` で test 仕様書を生成 (contracts/ dir を渡す)
 
-claude prompt で以下を叩く。
+claude prompt で以下を叩く。 **仕様書 / 設計書がある場合のみ** prompt 末尾に追記する (無ければ 1 行目だけで OK)。
 
 ```text
 /kiwa-design --layer contract --module nft-marketplace --input contracts/
-
-機能仕様 (PRD 代わり):
-- MarketNft: ERC721、 owner が mint 可能、 metadata に price / royalty 含む
-- SimpleMarketplace: NFT を list / buy / cancel する、 royalty を deployer に送る、 listing 中の NFT は transfer 禁止
-- 連携 scenario: SimpleMarketplace.list() は IMarketNft.transferFrom() で NFT を escrow、 buy() で買い手に転送
-- 失敗 mode: 二重 list / cancel 後の buy / royalty 計算 overflow / listing 中の直接 transfer
 ```
 
 引数の意味。
@@ -119,12 +113,26 @@ claude prompt で以下を叩く。
 - `--module nft-marketplace` — 出力 file 名のキー
 - `--input contracts/` — **dir 指定** で複数 contract を一括 parse させる
 
-skill が以下を実施 (期待挙動)。
+仕様書 / 設計書 (PRD / アーキ docs / contract docstring 以上の意図情報) が手元にある場合のみ、 path を `--input` 第 2 引数として渡すか prompt 末尾に書き添える。
+
+```text
+/kiwa-design --layer contract --module nft-marketplace --input contracts/
+
+機能仕様 (docs/PRD.md 抜粋) もしくは設計意図:
+- MarketNft: ERC721、 owner が mint 可能、 metadata に price / royalty 含む
+- SimpleMarketplace: NFT を list / buy / cancel する、 royalty を deployer に送る、 listing 中の NFT は transfer 禁止
+- 連携 scenario: SimpleMarketplace.list() は IMarketNft.transferFrom() で NFT を escrow、 buy() で買い手に転送
+- 失敗 mode: 二重 list / cancel 後の buy / royalty 計算 overflow / listing 中の直接 transfer
+```
+
+仕様書がない場合の skill 挙動 — `contracts/` 配下の docstring と function 名から skill が逆算する。 出力 spec の「不足している仕様」 section に「royalty bps の根拠不明」 等が bullet 化されるが、 test 仕様書としては動く水準で生成される。
+
+skill が実施する内容 (引数のみの場合 / 仕様書追記の場合 共通)。
 
 - `contracts/` 配下の `.sol` 全件を Read
 - 各 contract の function / event / error を grep 抽出
 - contract 間の依存 (例 `SimpleMarketplace.sol` が `IMarketNft` interface 経由で `MarketNft.sol` を参照) を整理
-- prompt 内 「連携 scenario」 を test ケースに変換し、 主体 contract (例 `SimpleMarketplace`) の test 仕様の中に含める
+- 仕様書追記があれば 「連携 scenario」 「失敗 mode」 等を test ケースに反映 (主体 contract の test 仕様内に含める)
 - 9 section + 9 column 表で test 仕様書を Write
 
 出力 — `.context/spec/contract/test-spec-nft-marketplace.md`。
