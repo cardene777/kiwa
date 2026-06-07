@@ -32,9 +32,18 @@ $ARGUMENTS
 - `--init` — 新規 dApp プロジェクトに kiwa を導入 (`pnpm dlx @kiwa/cli init` を実行し scaffold 生成)
 - `--mode {new|extend|debug}` — `new` (新規 test 設計) / `extend` (既存 test 拡張) / `debug` (flaky / fail 解析)
 - `--rounds {N}` — N round 連続 PASS 検証 (flaky 0 件確認、 デフォルト 1)
+- `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0a で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-codex` — Codex 委譲をスキップして単独で進行 (test 件数 1-2 のみ推奨)
 
 ## 実行フロー
+
+### Step 0a: 文書生成言語の選択 (skill 起動時 1 回)
+
+AskUserQuestion で spec / report 等の文書生成言語を user に確認する。 `--lang {code}` 引数指定時は skip。
+
+選択肢 — 🇯🇵 日本語 (ja、 Recommended) / 🇬🇧 English (en) / 🌏 その他多言語 (free input、 ISO 639-1 言語コード)。 詳細仕様は `references/doc-language-selection.md` を Read。
+
+確定後の言語 `$DOC_LANG` は以降の文書生成 step (Layer 1 経由 spec 生成 / spec.ts 内コメント言語 / 将来の report 出力) で参照する。
 
 ### Step 0: kiwa セットアップ判定
 
@@ -261,6 +270,7 @@ flaky 検証は 4 round 連続 PASS で固定。
 - `references/fixture-api.md` — `@kiwa/core` 主要 export API リファレンス
 - `references/troubleshooting.md` — webServer 起動失敗・anvil port 衝突・core build race 対策
 - `references/adversarial-pitfalls.md` — 偽陽性パターン 9 種 + self-check 5 問
+- `references/doc-language-selection.md` — Step 0a 文書生成言語選択 共通 SSOT (kiwa-forge と共用、 ja / en / その他 ISO 639-1)
 
 ## examples
 

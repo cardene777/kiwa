@@ -42,6 +42,7 @@ $ARGUMENTS
 - `--module {name}` — 出力 file 名のキー (出力 path は `--layer` と組み合わせて決定)
 - `--layer {contract|e2e|integration|unit|all}` — 想定 test layer を指定 (default `all`、 出力 path と推奨観点が変わる)
 - `--input {path}` — 機能仕様 file の path (省略時は対話形式で要約を求める)
+- `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-examples` — examples/ サンプル参照をスキップ (skill 内部の参照のみで仕様書を生成)
 
 ## 出力 path の決定
@@ -61,6 +62,18 @@ $ARGUMENTS
 ## 実行フロー
 
 5 段階を順に通る。 各 step は対応する section を 上記 path に append する。 飛ばし / 順序入れ替えは禁止 (`docs/SKILL-DESIGN.md` SSOT に従う)。
+
+### Step 0: 文書生成言語の選択 (skill 起動時 1 回)
+
+AskUserQuestion で文書生成言語を user に確認する。 `--lang {code}` 引数指定時は AskUserQuestion を skip。
+
+選択肢 — 🇯🇵 日本語 (ja、 Recommended) / 🇬🇧 English (en) / 🌏 その他多言語 (free input、 ISO 639-1 言語コード)。 詳細仕様 + 出力 path 規約 + section 見出し言語切替は `references/doc-language-selection.md` を Read。
+
+確定後の言語 `$DOC_LANG` は以降の全 Write step (test 仕様書 file 名 / section 見出し言語) に反映する。 出力 path 規約:
+
+- ja → `.context/spec/{layer}/test-spec-{module}.ja.md`
+- en → `.context/spec/{layer}/test-spec-{module}.md`
+- その他 (zh / ko 等) → `.context/spec/{layer}/test-spec-{module}.{lang_code}.md`
 
 ### Step 1: 入力を整理する
 
@@ -211,6 +224,7 @@ Layer 2 skill は仕様書の「テストケース一覧」表を行単位で読
 - `references/viewpoints-catalog.md` — 10 観点のカタログ + 適用条件 + 典型 case
 - `references/output-skeleton.md` — 9 section 完全な雛形 (placeholder 含む)
 - `references/layer2-bridge.md` — Layer 2 skill への引き渡し手順 + ランナー別マッピング
+- `references/doc-language-selection.md` — Step 0 文書生成言語選択 共通 SSOT (ja / en / その他 ISO 639-1)、 4 skill 共用
 
 ## examples
 
