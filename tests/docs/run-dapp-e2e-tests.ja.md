@@ -83,42 +83,42 @@ mint-nft の場合は `app/page.tsx` 1 file + inline HTML fixture。
 
 ## Step 0 — 前提環境
 
+以下は kiwa repo を clone した root (例 `git clone` 後の `kiwa/` dir) で実行する想定。
+
 ```bash
-# 1. dApp project dir に移動 (nft-marketplace の場合)
-cd /Users/cardene/Desktop/projects/kiwa/examples/nft-marketplace
+# 1. 依存 install (repo root で実行)
+pnpm install
 
-# 2. monorepo root で依存 install
-cd /Users/cardene/Desktop/projects/kiwa && pnpm install
-cd /Users/cardene/Desktop/projects/kiwa/examples/nft-marketplace
+# 2. @kiwa/core を build (e2e fixture が使う)
+pnpm -F @kiwa/core build
 
-# 3. @kiwa/core を build (e2e fixture が使う)
-cd /Users/cardene/Desktop/projects/kiwa && pnpm -F @kiwa/core build
-cd /Users/cardene/Desktop/projects/kiwa/examples/nft-marketplace
-
-# 4. Foundry (anvil) が PATH 上 — e2e は anvil 経由で contract を deploy する
+# 3. Foundry (anvil) が PATH 上 — e2e は anvil 経由で contract を deploy する
 anvil --version
 
-# 5. Node.js 22+
+# 4. Node.js 22+
 node --version
 
-# 6. Playwright chromium を install
-pnpm exec playwright install chromium
+# 5. Playwright chromium を install
+pnpm --filter examples-nft-marketplace exec playwright install chromium
 ```
 
-## Step 1 — tests/ dir が空 (or 未存在) であることを確認
+## Step 1 — 対象 dApp dir に移動 + tests/ dir が空であることを確認
 
 ```bash
+cd examples/nft-marketplace
 pwd    # examples/nft-marketplace
 ls tests 2>&1            # "No such file" or 空
 grep -E "^tests/" .gitignore   # gitignored であること
 ```
 
-## Step 2 — Claude Code 起動
+## Step 2 — その dir で Claude Code を起動
 
 ```bash
-cd /Users/cardene/Desktop/projects/kiwa/examples/nft-marketplace
+# cwd が examples/nft-marketplace のまま claude を起動
 claude
 ```
+
+**cwd が examples/nft-marketplace であることが重要** — skill は cwd を基準に app / contract / config を探す。
 
 ## Step 3 — Layer 1: `/kiwa-design` で e2e 仕様書を生成 (UI 起点)
 
@@ -185,7 +185,7 @@ skill が以下を実施。
 ## Step 5 — 生成 spec を手動実走 (flaky 検査込み)
 
 ```bash
-cd /Users/cardene/Desktop/projects/kiwa
+cd ../..
 
 # 単発
 pnpm -F examples-nft-marketplace test
@@ -214,7 +214,7 @@ pnpm -F examples-nft-marketplace exec playwright test tests/marketplace.spec.ts:
 ## Step 6 — 完成形 fixtures との diff 比較
 
 ```bash
-cd /Users/cardene/Desktop/projects/kiwa
+cd ../..
 diff -r examples/nft-marketplace/tests tests/fixtures/nft-marketplace/e2e-test 2>&1 | head -30
 ```
 
@@ -228,7 +228,7 @@ diff -r examples/nft-marketplace/tests tests/fixtures/nft-marketplace/e2e-test 2
 `examples/mint-nft` のような単一画面 dApp も同じ flow で動く。
 
 ```bash
-cd /Users/cardene/Desktop/projects/kiwa/examples/mint-nft
+cd examples/mint-nft
 claude
 ```
 

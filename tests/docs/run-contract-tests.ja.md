@@ -66,25 +66,24 @@ examples/nft-marketplace/
 
 ## Step 0 — 前提環境
 
+以下は kiwa repo を clone した root (例 `git clone` 後の `kiwa/` dir) で実行する想定。
+
 ```bash
-# 1. dApp project dir に移動 (nft-marketplace の場合)
-cd /Users/cardene/Desktop/projects/kiwa/examples/nft-marketplace
+# 1. 依存 install (kiwa repo root で実行)
+pnpm install
 
-# 2. monorepo root で依存 install
-cd /Users/cardene/Desktop/projects/kiwa && pnpm install
-cd /Users/cardene/Desktop/projects/kiwa/examples/nft-marketplace
-
-# 3. Foundry が PATH 上
+# 2. Foundry が PATH 上 (forge / anvil)
 forge --version
 anvil --version
 
-# 4. Node.js 22+ (Hardhat 用)
+# 3. Node.js 22+ (Hardhat 用)
 node --version
 ```
 
-## Step 1 — test dir が空 or 未存在であることを確認
+## Step 1 — 対象 dApp dir に移動 + test dir が空であることを確認
 
 ```bash
+cd examples/nft-marketplace
 pwd    # examples/nft-marketplace
 ls test 2>&1            # "No such file" or 空
 ls hardhat-test 2>&1    # "No such file" or 空
@@ -94,9 +93,11 @@ grep -E "^(test|hardhat-test)/" .gitignore   # gitignored であること
 ## Step 2 — その dir で Claude Code を起動
 
 ```bash
-cd /Users/cardene/Desktop/projects/kiwa/examples/nft-marketplace
+# cwd が examples/nft-marketplace のまま claude を起動
 claude
 ```
+
+**cwd が examples/nft-marketplace であることが重要** — skill は cwd を基準に contract / config を探す。
 
 ## Step 3 — Layer 1: `/kiwa-design` で test 仕様書を生成 (contracts/ dir を渡す)
 
@@ -217,7 +218,7 @@ contract SimpleMarketplaceTest is Test {
 ### macOS で panic する場合
 
 ```bash
-cd /Users/cardene/Desktop/projects/kiwa/examples/nft-marketplace
+cd examples/nft-marketplace
 FOUNDRY_OFFLINE=true forge test
 ```
 
@@ -238,14 +239,14 @@ hardhat-test/
 ## Step 6 — 全 test を一括実走 (flaky 検査込み)
 
 ```bash
-cd /Users/cardene/Desktop/projects/kiwa/examples/nft-marketplace
+cd examples/nft-marketplace
 
 # Foundry 全 contract 一括 (forge test は test/ 配下を全件実行)
 FOUNDRY_OFFLINE=true forge test
 # 期待: 各 contract test (単体 + 連携 scenario) が PASS、 合計 N passed, 0 failed
 
 # Hardhat 全 contract 一括 (4 round で flaky 検査)
-cd /Users/cardene/Desktop/projects/kiwa
+cd ../..
 for r in 1 2 3 4; do
   echo "=== Round $r ==="
   pnpm -F examples-nft-marketplace test:hardhat 2>&1 | grep -E "passing|failing"
@@ -279,11 +280,11 @@ pnpm -F examples-nft-marketplace exec hardhat test --grep "Scenario"
 
 ```bash
 # Foundry — 全 contract 一括 coverage
-cd /Users/cardene/Desktop/projects/kiwa/examples/nft-marketplace
+cd examples/nft-marketplace
 FOUNDRY_OFFLINE=true forge coverage --report summary
 
 # Hardhat — 全 contract 一括 coverage
-cd /Users/cardene/Desktop/projects/kiwa
+cd ../..
 pnpm -F examples-nft-marketplace test:hardhat:coverage
 ```
 
@@ -305,7 +306,7 @@ pnpm -F examples-nft-marketplace test:hardhat:coverage
 `tests/fixtures/nft-marketplace/` には完成形 reference が **将来** 置かれる予定 (現在 Issue #218 で実装中)。 fixtures 化済の例として `tests/fixtures/mint-nft/` を参照。
 
 ```bash
-cd /Users/cardene/Desktop/projects/kiwa
+cd ../..
 
 # 例 (mint-nft の場合の diff、 nft-marketplace は #218 完了後に同様)
 diff -r examples/mint-nft/test tests/fixtures/mint-nft/contract-test 2>&1 | head -30
@@ -323,7 +324,7 @@ diff -r examples/mint-nft/test tests/fixtures/mint-nft/contract-test 2>&1 | head
 本手順は複数 contract が default だが、 単一 contract dApp (mint-nft = 1 contract のみ) でも同じ flow で動く。
 
 ```bash
-cd /Users/cardene/Desktop/projects/kiwa/examples/mint-nft
+cd examples/mint-nft
 claude
 ```
 
