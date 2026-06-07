@@ -2,6 +2,11 @@
 
 ERC721 (GateNFT) を hold する hold 者だけが getSecret() を読める gated content (GatedContent) を試す example。 NFT 保有者からの timed grant 経路と grantor revocation の挙動も含めて検証できる。 Phase F-1 第 1 弾で Hardhat 経路も並立。
 
+## 2 動線
+
+- 作業台: `examples/nextjs-token-gating/` は retrofit walkthrough 用 workspace。 docs を辿って `test/` / `hardhat-test/` / `tests/` を再生成する場所。
+- 完成形 fixture: 保存済みの完成 test suite は `tests/fixtures/nextjs-token-gating/` にある。
+
 ## 何が試せるか
 
 - GateNFT を hold する人だけが `GatedContent.getSecret()` を呼べる
@@ -13,14 +18,17 @@ ERC721 (GateNFT) を hold する hold 者だけが getSecret() を読める gate
 ## 動かす
 
 ```bash
-# Playwright e2e
-pnpm -F examples-nextjs-token-gating test
+# example app
+pnpm -F examples-nextjs-token-gating dev
 
-# Hardhat 単体 (F-1 第 1 弾、 観点 6 系統 23 ケース)
-pnpm -F examples-nextjs-token-gating test:hardhat
+# 完成形 Foundry fixture
+pnpm --dir tests/fixtures/nextjs-token-gating test:foundry
 
-# Hardhat coverage (Stmts 94.74% / Branch 88.89% / Funcs 100% / Lines 100%)
-pnpm -F examples-nextjs-token-gating test:hardhat:coverage
+# 完成形 Hardhat fixture
+pnpm --dir tests/fixtures/nextjs-token-gating test:hardhat
+
+# 完成形 Playwright fixture
+pnpm --dir tests/fixtures/nextjs-token-gating test:e2e
 ```
 
 Next.js dev server は port 3044。
@@ -29,8 +37,9 @@ Next.js dev server は port 3044。
 
 | File | 何を test しているか |
 |---|---|
-| `tests/gating.spec.ts` | Playwright e2e、 NFT mint → gated content access → timed grant → revoke の典型 flow |
-| `hardhat-test/GatedContent.test.cjs` | Hardhat 単体 (F-1 第 1 弾)、 観点 6 系統で 23 ケース |
+| `tests/fixtures/nextjs-token-gating/e2e-test/gating.spec.ts` | Playwright e2e、 NFT mint → gated content access → timed grant → revoke の典型 flow |
+| `tests/fixtures/nextjs-token-gating/hardhat-test/GatedContent.test.cjs` | Hardhat 単体 (F-1 第 1 弾)、 観点 6 系統で 23 ケース |
+| `tests/fixtures/nextjs-token-gating/contract-test/GatedContent.t.sol` | Foundry 単体 lane を history 付きで保存 |
 
 ## 関連 cookbook
 
