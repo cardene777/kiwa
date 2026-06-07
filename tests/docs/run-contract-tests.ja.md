@@ -129,36 +129,6 @@ tests/reports/contract/coverage-report-nft-marketplace.md
 
 拡張完了までは上記 section を手動で作成して `tests/reports/contract/` 配下に保存する運用 (任意)。
 
-## Step 9 — 完成形 fixtures と diff 比較
-
-> ⚠️ **前提 — Step 3-5 を先に走らせて `examples/{example}/test/` に生成 test が入っている状態にすること**。 空 dir のままで diff すると `Only in tests/fixtures/.../contract-test: {Contract}.t.sol` のように 「左にないが右にある」 = 「fixtures だけに test がある」 状態が表示されるだけで、 比較として意味を成さない。
-
-> ⚠️ **重要 — nft-marketplace の fixtures は #218 で実装済 (本 PR で対応)**。 `tests/fixtures/nft-marketplace/` を完成形 reference として使い、 `examples/nft-marketplace/{test,hardhat-test}/` は retrofit walkthrough の作業台として再生成結果を比較する。
-
-#218 完了後の想定コマンド (cwd 問わず動く)。
-
-```bash
-ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/nft-marketplace/test" "$ROOT/tests/fixtures/nft-marketplace/contract-test" 2>&1 | head -30
-ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/nft-marketplace/hardhat-test" "$ROOT/tests/fixtures/nft-marketplace/hardhat-test" 2>&1 | head -30
-```
-
-### 代替 — mint-nft で diff 比較を試したい場合
-
-fixtures が既に存在する mint-nft (#215 完了済) で diff 動作確認:
-
-```bash
-ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/mint-nft/test" "$ROOT/tests/fixtures/mint-nft/contract-test" 2>&1 | head -30
-ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/mint-nft/hardhat-test" "$ROOT/tests/fixtures/mint-nft/hardhat-test" 2>&1 | head -30
-```
-
-完全一致は期待しない (skill 生成は run ごとにブレる)。 確認するのは 3 点:
-
-- 全 contract の function / event / error が test に含まれる
-- 全 test PASS (Step 6 で確認済)
-- coverage threshold 以上 (Step 7 で確認済)
-
-fixtures 未実装の other example (defi-swap = #216 / nextjs-token-gating = #217) も同様に当該 Issue 完了まで本 step は skip。
-
 ## トラブルシューティング
 
 | 症状 | 対処 |
@@ -172,7 +142,6 @@ fixtures 未実装の other example (defi-swap = #216 / nextjs-token-gating = #2
 ## 関連 docs
 
 - dApp e2e test (UI 起点): `tests/docs/run-dapp-e2e-tests.ja.md`
-- 完成形 reference: `tests/fixtures/mint-nft/README.md`
 - Layer 1 skill: `.claude/skills/kiwa-design/SKILL.md`
 - Layer 2 Foundry skill: `.claude/skills/kiwa-forge/SKILL.md`
 - Layer 2 Hardhat skill: `.claude/skills/kiwa-hardhat/SKILL.md`

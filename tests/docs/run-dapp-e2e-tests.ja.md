@@ -2,26 +2,26 @@
 
 > 🇯🇵 日本語のみ (英語版は本手順をローカルで検証した後に追加予定)
 
-`examples/nft-marketplace` の UI 起点で dApp e2e test を 0 から生成 → 実走 → 完成形 fixtures と diff 比較するまでの手順。 UI から呼ばれない contract function (admin / internal) は対象外。
+`examples/nextjs-token-gating` (Next.js dApp + 2 contract: `GatedContent.sol` + `GateNFT.sol`) で UI 起点の dApp e2e test を 0 から生成 → 実走するまでの手順。 UI から呼ばれない contract function (admin / internal) は対象外。
 
 ## Step 0 — 前提環境 (+ 途中まで進めた場合のリセット)
 
 kiwa repo を clone した root で実行。
 
 ```bash
-pnpm install && pnpm -F @kiwa/core build && anvil --version && node --version && pnpm --filter examples-nft-marketplace exec playwright install chromium
+pnpm install && pnpm -F @kiwa/core build && anvil --version && node --version && pnpm --filter examples-nextjs-token-gating exec playwright install chromium
 ```
 
 途中まで進めて再 run したい場合のリセット (生成済 spec / test / 実走結果を全削除)。 cwd がどこでも動く。
 
 ```bash
-ROOT=$(git rev-parse --show-toplevel) && rm -rf "$ROOT/examples/nft-marketplace"/{tests,test-results,playwright-report} "$ROOT/.context/spec/e2e/test-spec-marketplace.md"
+ROOT=$(git rev-parse --show-toplevel) && rm -rf "$ROOT/examples/nextjs-token-gating"/{tests,test-results,playwright-report,.next} "$ROOT/.context/spec/e2e/test-spec-token-gating.md"
 ```
 
 ## Step 1 — 対象 dApp dir に移動 + tests/ dir が空であることを確認
 
 ```bash
-cd examples/nft-marketplace && ls tests 2>&1
+cd examples/nextjs-token-gating && ls tests 2>&1
 # 期待: "No such file" or 空
 ```
 
@@ -36,10 +36,10 @@ claude
 claude prompt で叩く。
 
 ```text
-/kiwa-design --layer e2e --module marketplace --input app/
+/kiwa-design --layer e2e --module token-gating --input app/
 ```
 
-出力: `.context/spec/e2e/test-spec-marketplace.md` (UI 要素 / wagmi hook 経由の contract function / UX flow を 9 column 表で生成、 UI から呼ばれない contract function は対象外)。
+出力: `.context/spec/e2e/test-spec-token-gating.md` (UI 要素 / wagmi hook 経由の contract function / UX flow を 9 column 表で生成、 UI から呼ばれない contract function は対象外)。
 
 ## Step 4 — `/kiwa-play --mode new` で Playwright spec を生成
 
@@ -47,7 +47,7 @@ claude prompt で叩く。
 /kiwa-play --mode new --rounds 4
 ```
 
-出力: `tests/marketplace.spec.ts` + `tests/prepare-env.ts` / `tests/fixture.ts` 等 helper。 skill が生成後 4 round 連続実走で flaky 0 を検証する。
+出力: `tests/token-gating.spec.ts` + `tests/prepare-env.ts` / `tests/fixture.ts` 等 helper。 skill が生成後 4 round 連続実走で flaky 0 を検証する。
 
 ## Step 5 — spec を手動実走 (flaky 検査込み)
 
@@ -55,59 +55,32 @@ claude を抜けて (Ctrl+D) repo root で実行。
 
 ```bash
 # 単発
-pnpm -F examples-nft-marketplace test
+pnpm -F examples-nextjs-token-gating test
 
 # 4 round 連続 flaky 検査
-for r in 1 2 3 4; do echo "=== Round $r ==="; pnpm -F examples-nft-marketplace test 2>&1 | tail -3; done
+for r in 1 2 3 4; do echo "=== Round $r ==="; pnpm -F examples-nextjs-token-gating test 2>&1 | tail -3; done
 ```
 
 全 round `failing 0` で合格。
-
-## Step 6 — 完成形 fixtures と diff 比較
-
-> ⚠️ **前提 — Step 3-4 を先に走らせて `examples/{example}/tests/` に生成 spec が入っている状態にすること**。 空 dir のままで diff すると `Only in tests/fixtures/.../e2e-test: {feature}.spec.ts` のように 「左にないが右にある」 = 「fixtures だけに spec がある」 状態が表示されるだけで、 比較として意味を成さない。
-
-> ⚠️ **重要 — nft-marketplace の fixtures は #218 で実装済 (本 PR で対応)**。 `tests/fixtures/nft-marketplace/` を完成形 reference として使い、 `examples/nft-marketplace/tests/` は retrofit walkthrough の作業台として再生成結果を比較する。
-
-#218 完了後の想定コマンド (cwd 問わず動く)。
-
-```bash
-ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/nft-marketplace/tests" "$ROOT/tests/fixtures/nft-marketplace/e2e-test" 2>&1 | head -30
-```
-
-### 代替 — mint-nft で diff 比較を試したい場合
-
-fixtures が既に存在する mint-nft (#215 完了済) で diff 動作確認:
-
-```bash
-ROOT=$(git rev-parse --show-toplevel) && diff -r "$ROOT/examples/mint-nft/tests" "$ROOT/tests/fixtures/mint-nft/e2e-test" 2>&1 | head -30
-```
-
-完全一致は期待しない。 確認するのは 2 点:
-
-- UI から操作可能な全 flow が cover されている
-- 全 test PASS / 4 round 連続 PASS (Step 5 で確認済)
-
-fixtures 未実装の other example (defi-swap = #216 / nextjs-token-gating = #217) も同様に当該 Issue 完了まで本 step は skip。
 
 ## debug 用 — headed mode / specific test
 
 ```bash
 # 画面を見ながら実走
-pnpm -F examples-nft-marketplace exec playwright test --headed
+pnpm -F examples-nextjs-token-gating exec playwright test --headed
 
 # テスト名で filter
-pnpm -F examples-nft-marketplace exec playwright test --grep "Buy"
+pnpm -F examples-nextjs-token-gating exec playwright test --grep "Grant"
 
 # file / 行指定
-pnpm -F examples-nft-marketplace exec playwright test tests/marketplace.spec.ts:120
+pnpm -F examples-nextjs-token-gating exec playwright test tests/token-gating.spec.ts:120
 ```
 
 ## トラブルシューティング
 
 | 症状 | 対処 |
 |---|---|
-| `Executable doesn't exist at .../chrome-headless-shell` | `pnpm --filter examples-nft-marketplace exec playwright install chromium` |
+| `Executable doesn't exist at .../chrome-headless-shell` | `pnpm --filter examples-nextjs-token-gating exec playwright install chromium` |
 | `ReferenceError: require is not defined in ES module scope` | package.json に `"type": "module"` 追加 |
 | `Cannot find module '@kiwa/core'` | repo root で `pnpm -F @kiwa/core build` |
 | anvil port 衝突 (`EADDRINUSE: 8545`) | `pkill -f anvil` or `lsof -ti :8545 \| xargs kill` |
@@ -118,7 +91,6 @@ pnpm -F examples-nft-marketplace exec playwright test tests/marketplace.spec.ts:
 ## 関連 docs
 
 - contract test (Foundry + Hardhat): `tests/docs/run-contract-tests.ja.md`
-- 完成形 reference: `tests/fixtures/mint-nft/README.md`
 - Layer 1 skill: `.claude/skills/kiwa-design/SKILL.md`
 - Layer 2 Playwright skill: `.claude/skills/kiwa-play/SKILL.md`
 - `@kiwa/core` fixture 仕様: `packages/core/src/fixture.ts`
