@@ -93,9 +93,9 @@ for r in 1 2 3 4; do echo "=== Round $r ==="; pnpm -F examples-nft-marketplace t
 pnpm -F examples-nft-marketplace test:hardhat:coverage
 ```
 
-目標: **100% 到達 or 「これ以上不可能」 が確定するまで loop**。 終了条件 2 つのいずれか。
+目標: **production target (contracts/ 配下) で 100% 到達 or 「これ以上不可能」 が確定するまで loop**。 終了条件 2 つのいずれか。
 
-1. 全 4 metric (Lines / Statements / Branches / Functions) が 100% 到達
+1. production target 全 4 metric (Lines / Statements / Branches / Functions) が 100% 到達
 2. 残 uncovered が unreachable branch / defensive code / 外部依存 (block.timestamp 等 test 再現不能) で 「test 追加不可能」 と判定済
 
 未達 (1 でも 2 でもない) なら:
@@ -106,9 +106,30 @@ claude を再起動して uncovered 箇所を /kiwa-design spec に追記 → /k
 
 これを 100% or 不可能判定 まで loop。 連続 2 round で coverage delta 0 なら「停滞」とみなし手動 review。
 
-> 注 — auto loop (skill が自動で uncovered 抽出 → test 追加 → 再 coverage を無制限 loop) は [Issue #222](https://github.com/cardene777/kiwa/issues/222) で skill 拡張予定。 拡張完了後は本 Step 7 が自動化される。 それまでは上記手動 loop。
+> 注 — Total 値 (test / mock 含む) が 100% 未達でも production target 100% なら PASS。 test/helper/mock は分母対象外。 詳細解釈は次 Step (Step 8) の coverage report を参照。
 
-## Step 8 — 完成形 fixtures と diff 比較
+> 注 — auto loop (skill が自動で uncovered 抽出 → 分類 → test 追加 → 再 coverage) と coverage report 自動生成 (4 section format で `.context/reports/contract/coverage-report-{module}.md` に Write) は [Issue #222](https://github.com/cardene777/kiwa/issues/222) で skill 拡張予定。 拡張完了後は本 Step 7 + Step 8 が自動化される。 それまでは上記手動 loop + 次 Step の手動 report 参照。
+
+## Step 8 — Coverage report 確認 (skill 拡張後は自動生成)
+
+skill 拡張 #222 完了後、 Step 7 完了時に以下が自動生成される。
+
+```
+.context/reports/contract/coverage-report-nft-marketplace.md
+```
+
+4 section 構造:
+
+| section | 内容 |
+|---|---|
+| 1. 判定サマリ | production target / Total の 2 列で 4 metric を表示 + ✅PASS / ❌FAIL 判定 |
+| 2. file 別内訳 | production / test 自身 / mock helper の カテゴリ列 + threshold 対象列 |
+| 3. 未到達 line 分類 | 削除候補 / defensive / 外部依存 / 計測除外 / 真の未踏 の 5 分類 + 理由 |
+| 4. Layer 1 spec 書き戻し提案 | 実装段で追加した test / 発見した知見を spec に反映する提案 (skill は spec 自体は書き換えない) |
+
+拡張完了までは上記 section を手動で作成して `.context/reports/contract/` 配下に保存する運用 (任意)。
+
+## Step 9 — 完成形 fixtures と diff 比較
 
 ```bash
 diff -r examples/nft-marketplace/test tests/fixtures/nft-marketplace/contract-test 2>&1 | head -30
