@@ -85,7 +85,7 @@ done
 
 全 round `failing 0` で合格。
 
-## Step 7 — Coverage 評価
+## Step 7 — Coverage 評価 (未達なら loop)
 
 ```bash
 # Foundry
@@ -97,7 +97,20 @@ cd ../..
 pnpm -F examples-nft-marketplace test:hardhat:coverage
 ```
 
-threshold: Lines 90% / Statements 90% / Branches 80% / Functions 90%。
+目標: **100% 到達 or 「これ以上不可能」 が確定するまで loop**。 終了条件 2 つのいずれか。
+
+1. 全 4 metric (Lines / Statements / Branches / Functions) が 100% 到達
+2. 残 uncovered が unreachable branch / defensive code / 外部依存 (block.timestamp 等 test 再現不能) で 「test 追加不可能」 と判定済
+
+未達 (1 でも 2 でもない) なら:
+
+```text
+claude を再起動して uncovered 箇所を /kiwa-design spec に追記 → /kiwa-forge --module nft-marketplace を再実行 → 再 coverage
+```
+
+これを 100% or 不可能判定 まで loop。 連続 2 round で coverage delta 0 なら「停滞」とみなし手動 review。
+
+> 注 — auto loop (skill が自動で uncovered 抽出 → test 追加 → 再 coverage を無制限 loop) は [Issue #222](https://github.com/cardene777/kiwa/issues/222) で skill 拡張予定。 拡張完了後は本 Step 7 が自動化される。 それまでは上記手動 loop。
 
 ## Step 8 — 完成形 fixtures と diff 比較
 
