@@ -67,7 +67,7 @@ for r in 1 2 3 4; do echo "=== Round $r ==="; pnpm -F examples-nft-marketplace t
 
 > ⚠️ **前提 — Step 3-4 を先に走らせて `examples/{example}/tests/` に生成 spec が入っている状態にすること**。 空 dir のままで diff すると `Only in tests/fixtures/.../e2e-test: {feature}.spec.ts` のように 「左にないが右にある」 = 「fixtures だけに spec がある」 状態が表示されるだけで、 比較として意味を成さない。
 
-> ⚠️ **重要 — nft-marketplace の fixtures は未実装** ([Issue #218](https://github.com/cardene777/kiwa/issues/218) で予定)。 本 step は `tests/fixtures/nft-marketplace/` が存在する前提だが、 現状は #218 完了まで実行不可。 動作確認したい場合は fixtures が揃っている mint-nft で代替実行 (下記参照)。
+> ⚠️ **重要 — nft-marketplace の fixtures は #218 で実装済 (本 PR で対応)**。 `tests/fixtures/nft-marketplace/` を完成形 reference として使い、 `examples/nft-marketplace/tests/` は retrofit walkthrough の作業台として再生成結果を比較する。
 
 #218 完了後の想定コマンド (cwd 問わず動く)。
 

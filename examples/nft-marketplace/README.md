@@ -2,6 +2,11 @@
 
 Pairs an ERC721 (`MarketNft.sol`, ERC2981 royalty) with a composite marketplace (`SimpleMarketplace.sol` — listing + offer + acceptOffer + royalty payout + offer invalidation). The most complex test dApp in kiwa, where a single example covers list / buy / cancel / makeOffer / cancelOffer / acceptOffer / royalty payout in one place.
 
+## Two paths
+
+- Retrofit workbench: `examples/nft-marketplace/{test,hardhat-test,tests}/` is intentionally gitignored. Recreate tests there via the skill chain when walking through the retrofit flow.
+- Reference fixture: `tests/fixtures/nft-marketplace/` holds the completed standalone pnpm workspace with the preserved Hardhat / Playwright history and the current Foundry baseline.
+
 ## What you can try
 
 - Automatic royalty split through ERC2981 `royaltyInfo` (500 bps = 5%), seller 95% / royalty receiver 5%
@@ -15,6 +20,16 @@ Pairs an ERC721 (`MarketNft.sol`, ERC2981 royalty) with a composite marketplace 
 ## How to run
 
 Run `pnpm install` at the repo root first, then `pnpm exec playwright install chromium`. Foundry's `anvil` and `forge` must be on your PATH.
+
+Use the fixture workspace for the stable completed test set:
+
+```bash
+pnpm --dir tests/fixtures/nft-marketplace test:foundry
+pnpm --dir tests/fixtures/nft-marketplace test:hardhat
+pnpm --dir tests/fixtures/nft-marketplace test:e2e
+```
+
+Use the example workspace only when you are regenerating tests in the retrofit walkthrough:
 
 ```bash
 # Playwright e2e (kiwa fixture)
@@ -31,6 +46,8 @@ pnpm -F examples-nft-marketplace test:hardhat:coverage
 ```
 
 ## Reading the tests
+
+`examples/nft-marketplace/*` below refers to the retrofit workbench copy. The completed reference lives under `tests/fixtures/nft-marketplace/`.
 
 | File | What it covers |
 |---|---|

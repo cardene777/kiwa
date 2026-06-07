@@ -133,7 +133,7 @@ tests/reports/contract/coverage-report-nft-marketplace.md
 
 > ⚠️ **前提 — Step 3-5 を先に走らせて `examples/{example}/test/` に生成 test が入っている状態にすること**。 空 dir のままで diff すると `Only in tests/fixtures/.../contract-test: {Contract}.t.sol` のように 「左にないが右にある」 = 「fixtures だけに test がある」 状態が表示されるだけで、 比較として意味を成さない。
 
-> ⚠️ **重要 — nft-marketplace の fixtures は未実装** ([Issue #218](https://github.com/cardene777/kiwa/issues/218) で予定)。 本 step は `tests/fixtures/nft-marketplace/` が存在する前提だが、 現状は #218 完了まで実行不可。 動作確認したい場合は fixtures が揃っている mint-nft で代替実行 (下記参照)。
+> ⚠️ **重要 — nft-marketplace の fixtures は #218 で実装済 (本 PR で対応)**。 `tests/fixtures/nft-marketplace/` を完成形 reference として使い、 `examples/nft-marketplace/{test,hardhat-test}/` は retrofit walkthrough の作業台として再生成結果を比較する。
 
 #218 完了後の想定コマンド (cwd 問わず動く)。
 

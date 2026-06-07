@@ -2,6 +2,11 @@
 
 ERC721 (MarketNft.sol、 ERC2981 royalty 対応) + 複合 marketplace contract (SimpleMarketplace.sol、 listing + offer + acceptOffer + royalty payout + offer invalidation) の組合せ。 kiwa の最も複雑な test 用 dApp で、 list / buy / cancel / makeOffer / cancelOffer / acceptOffer / royalty payout の全経路を 1 例で網羅できる。
 
+## 2 つの導線
+
+- retrofit 作業台: `examples/nft-marketplace/{test,hardhat-test,tests}/` は意図的に `.gitignore` 対象。 walkthrough ではここに skill chain で test を再生成する
+- 完成形 fixture: `tests/fixtures/nft-marketplace/` に standalone pnpm workspace として完成形 test 群を退避。 Hardhat / Playwright は history 保持、 Foundry は現 branch 上の baseline を保持
+
 ## 何が試せるか
 
 - ERC2981 royaltyInfo (500 bps = 5%) 経由の royalty 自動分配 (seller 95% / royalty receiver 5%)
@@ -15,6 +20,16 @@ ERC721 (MarketNft.sol、 ERC2981 royalty 対応) + 複合 marketplace contract (
 ## 動かす
 
 前提として repo root で `pnpm install` 済 + `pnpm exec playwright install chromium` 済 + Foundry の `anvil` / `forge` が PATH 上。
+
+完成形 test をそのまま実走する場合は fixture workspace を使う。
+
+```bash
+pnpm --dir tests/fixtures/nft-marketplace test:foundry
+pnpm --dir tests/fixtures/nft-marketplace test:hardhat
+pnpm --dir tests/fixtures/nft-marketplace test:e2e
+```
+
+retrofit walkthrough で test を再生成する時だけ examples 側を使う。
 
 ```bash
 # Playwright e2e (kiwa fixture)
@@ -31,6 +46,8 @@ pnpm -F examples-nft-marketplace test:hardhat:coverage
 ```
 
 ## test の見方
+
+以下の `examples/nft-marketplace/*` は retrofit 作業台側の path。 完成形 reference は `tests/fixtures/nft-marketplace/` にある。
 
 | File | 何を test しているか |
 |---|---|
