@@ -6,6 +6,8 @@ What lives here.
 
 - 🛠️ [skill-chain-tutorial.md](./skill-chain-tutorial.md) — Full flow through the four-skill chain (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat` → `/kiwa-play`) — from spec generation to contract test + e2e test all the way to running them
 - 🧩 [retrofit-existing-dapp.md](./retrofit-existing-dapp.md) — Bolt the skill chain onto a dApp + Foundry project that already works (walked through with the nextjs-token-gating example)
+- ⚒️ [run-contract-tests.md](./run-contract-tests.md) — Run contract tests with Foundry + Hardhat (two routes: run the completed reference, or walk the retrofit from scratch)
+- 🎭 [run-dapp-e2e-tests.md](./run-dapp-e2e-tests.md) — Run dApp e2e tests with Playwright + viem (same two routes)
 
 ## The four kiwa skills
 
