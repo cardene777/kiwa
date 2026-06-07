@@ -7,7 +7,7 @@ What lives here.
 - 🛠️ [skill-chain-tutorial.md](./skill-chain-tutorial.md) — Full flow through the four-skill chain (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat` → `/kiwa-play`) — from spec generation to contract test + e2e test all the way to running them
 - 🧩 [retrofit-existing-dapp.md](./retrofit-existing-dapp.md) — Bolt the skill chain onto a dApp + Foundry project that already works (walked through with the nextjs-token-gating example)
 
-> Note — The Japanese versions `run-contract-unit-tests.ja.md`, `run-contract-integration-tests.ja.md`, and `run-dapp-e2e-tests.ja.md` contain the step-by-step "use the skill to create tests" guides covering the three test layers (contract unit / contract integration / dApp e2e). English translations will follow once the Japanese guides have been verified end-to-end locally.
+> Note — The Japanese versions `run-contract-tests.ja.md` and `run-dapp-e2e-tests.ja.md` contain the step-by-step "use the skill to create tests" guides covering the two test surfaces (contract group / dApp e2e). English translations will follow once the Japanese guides have been verified end-to-end locally.
 
 ## The four kiwa skills
 
