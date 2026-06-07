@@ -12,10 +12,10 @@ kiwa repo を clone した root で実行。
 pnpm install && forge --version && anvil --version && node --version
 ```
 
-途中まで進めて再 run したい場合のリセット (生成済 test / spec / cache を全削除)。
+途中まで進めて再 run したい場合のリセット (生成済 test / spec / cache を全削除)。 cwd がどこでも動く。
 
 ```bash
-rm -rf examples/nft-marketplace/{test,hardhat-test,forge-out,hardhat-cache,hardhat-artifacts,cache,coverage,coverage.json} .context/spec/contract/test-spec-nft-marketplace.md
+ROOT=$(git rev-parse --show-toplevel) && rm -rf "$ROOT/examples/nft-marketplace"/{test,hardhat-test,forge-out,hardhat-cache,hardhat-artifacts,cache,coverage,coverage.json} "$ROOT/.context/spec/contract/test-spec-nft-marketplace.md"
 ```
 
 ## Step 1 — 対象 dApp dir に移動 + test dir が空であることを確認

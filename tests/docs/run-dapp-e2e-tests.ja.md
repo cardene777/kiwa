@@ -12,10 +12,10 @@ kiwa repo を clone した root で実行。
 pnpm install && pnpm -F @kiwa/core build && anvil --version && node --version && pnpm --filter examples-nft-marketplace exec playwright install chromium
 ```
 
-途中まで進めて再 run したい場合のリセット (生成済 spec / test / 実走結果を全削除)。
+途中まで進めて再 run したい場合のリセット (生成済 spec / test / 実走結果を全削除)。 cwd がどこでも動く。
 
 ```bash
-rm -rf examples/nft-marketplace/{tests,test-results,playwright-report} .context/spec/e2e/test-spec-marketplace.md
+ROOT=$(git rev-parse --show-toplevel) && rm -rf "$ROOT/examples/nft-marketplace"/{tests,test-results,playwright-report} "$ROOT/.context/spec/e2e/test-spec-marketplace.md"
 ```
 
 ## Step 1 — 対象 dApp dir に移動 + tests/ dir が空であることを確認
