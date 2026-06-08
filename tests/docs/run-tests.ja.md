@@ -106,9 +106,22 @@ tests/reports/integrated/{example}-{target}.{lang}.md
 
 4 section 構造:
 - Section 1 実行サマリ (各段階 PASS / FAIL + 件数 + score)
-- Section 2 生成 file 一覧 (spec / test / coverage / review report の path 集約)
+- Section 2 生成 file 一覧 (spec / test / coverage / review report の path 集約、 test code は Step 5.5 で退避済の `tests/fixtures/{example}/` を指す)
 - Section 3 critical / major 指摘 (子 review 集約)
 - Section 4 次アクション (PASS なら docs 更新 + PR 起票推奨、 FAIL なら修正手順)
+
+## Step 4.4 — 生成 test の永続化 (Step 5.5 で自動退避)
+
+example 側の `test/` `hardhat-test/` `tests/` は `.gitignore` で除外されているため、 そのままだと session 終了で消失する。 `/kiwa-test` は Step 5.5 で生成 test を `tests/fixtures/{example}/{contract-test, hardhat-test, e2e-test}/` に `git mv` で退避し、 PR の commit 対象に含める。
+
+```text
+退避マッピング (target に応じて 1-3 dir):
+examples/{example}/test/         → tests/fixtures/{example}/contract-test/   (target=contract or both)
+examples/{example}/hardhat-test/ → tests/fixtures/{example}/hardhat-test/    (target=contract or both)
+examples/{example}/tests/        → tests/fixtures/{example}/e2e-test/        (target=dapp or both)
+```
+
+退避先が既存 + 非空の場合は AskUserQuestion で「上書き (default) / 連番 -2 / 退避 skip」 を選択、 `--auto-cleanup` 指定時は上書き default で AskUserQuestion を skip する。
 
 Step 5b で `/kiwa-review --mode result-review` が auto 呼出され、 test 実行結果の総合品質を 5 軸 (coverage 達成度 / passing 件数 / flaky / 子 review 集約 / 後追い項目) で判定。
 
@@ -149,6 +162,7 @@ result-review or 子 review が FAIL の場合、 `/kiwa-test` Step 5c が **自
 - result-review: 8.4/10 PASS
 
 統合 report: tests/reports/integrated/nextjs-token-gating-both.ja.md
+test code 退避先: tests/fixtures/nextjs-token-gating/{contract-test, hardhat-test, e2e-test}/ (PR に含まれます)
 
 次アクション: docs 更新 + PR 起票推奨
 ```

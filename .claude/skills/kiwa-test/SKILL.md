@@ -213,9 +213,9 @@ Total duration: {sec} 秒
 |---|---|---|
 | spec (contract) | tests/spec/contract/test-spec-{example}.{lang}.md | Layer 1 出力 |
 | spec (e2e) | tests/spec/e2e/test-spec-{example}.{lang}.md | Layer 1 出力 |
-| Foundry test | examples/{example}/test/{Contract}.t.sol | Layer 2 出力 |
-| Hardhat test | examples/{example}/hardhat-test/{Contract}.test.cjs | Layer 2 出力 |
-| Playwright spec | examples/{example}/tests/{example}.spec.ts | Layer 2 出力 |
+| Foundry test (退避済) | tests/fixtures/{example}/contract-test/{Contract}.t.sol | Layer 2 出力 → Step 5.5 で退避 |
+| Hardhat test (退避済) | tests/fixtures/{example}/hardhat-test/{Contract}.test.cjs | Layer 2 出力 → Step 5.5 で退避 |
+| Playwright spec (退避済) | tests/fixtures/{example}/e2e-test/{example}.spec.ts | Layer 2 出力 → Step 5.5 で退避 |
 | coverage report (contract) | tests/reports/contract/coverage-report-{example}.{lang}.md | auto loop 結果 |
 | review report (spec / test) | tests/reports/review/{spec\|test}-review-{example}.{lang}.md | reviewer 判定 |
 
@@ -241,6 +241,63 @@ Total duration: {sec} 秒
 - test-review (Foundry / Hardhat / Playwright): `tests/reports/review/test-review-{example}-{tool}.{lang}.md`
 - coverage report: `tests/reports/contract/coverage-report-{example}.{lang}.md` / `tests/reports/e2e/coverage-report-{example}.{lang}.md`
 ```
+
+### Step 5.5: 生成 test を tests/fixtures/{example}/ に永続化 (退避)
+
+example 側の `test/` `hardhat-test/` `tests/` は `.gitignore` で除外されているため、 生成 test を commit 対象化するには `tests/fixtures/{example}/` への退避が必須。 本 step で git mv 経由で履歴保持移動し PR に test code を含める。
+
+```bash
+ROOT=$(git rev-parse --show-toplevel)
+FIXTURES_BASE="$ROOT/tests/fixtures/$EXAMPLE"
+mkdir -p "$FIXTURES_BASE"
+
+# 退避対象 (target に応じて 1-3 dir)
+declare -a MOVES=()
+[ "$TARGET" != "dapp" ] && [ -d "$ROOT/examples/$EXAMPLE/test" ] && MOVES+=("test:contract-test")
+[ "$TARGET" != "dapp" ] && [ -d "$ROOT/examples/$EXAMPLE/hardhat-test" ] && MOVES+=("hardhat-test:hardhat-test")
+[ "$TARGET" != "contract" ] && [ -d "$ROOT/examples/$EXAMPLE/tests" ] && MOVES+=("tests:e2e-test")
+```
+
+衝突回避 — 退避先 `tests/fixtures/{example}/{contract-test, hardhat-test, e2e-test}/` が既存 + 非空の場合、 AskUserQuestion で user に確認:
+
+```text
+question: "tests/fixtures/{example}/{subdir}/ が既存です。 どう処理しますか?"
+header: "fixtures 衝突"
+multiSelect: false
+
+選択肢:
+- label: "🗑️ 既存を削除して上書き (Recommended)"
+  description: "理由 — /kiwa-test の生成物が最新の完成形、 既存 fixtures は古い snapshot として上書き。 既存 file は git の履歴から復元可能。 ⭐⭐⭐⭐⭐"
+- label: "🔢 連番 suffix で並立 (-2 suffix)"
+  description: "理由 — 既存 fixtures を残しつつ新 fixtures を `{subdir}-2/` として並立。 比較・diff 用途。 ⭐⭐⭐"
+- label: "⏭️ 退避 skip (examples/ に残置)"
+  description: "理由 — 退避せず examples/ 側に残す。 session 後消失するため非推奨、 確認目的のみ。 ⭐"
+```
+
+`--auto-cleanup` 引数指定時は AskUserQuestion を skip + 上書き default。
+
+退避実行 (上書き default の場合):
+
+```bash
+for spec in "${MOVES[@]}"; do
+  src="${spec%%:*}"
+  dst="${spec##*:}"
+  src_path="$ROOT/examples/$EXAMPLE/$src"
+  dst_path="$FIXTURES_BASE/$dst"
+
+  if [ -d "$dst_path" ] && [ -n "$(ls -A "$dst_path" 2>/dev/null)" ]; then
+    rm -rf "$dst_path"
+  fi
+
+  # 履歴保持のため git mv 優先、 失敗時は plain mv で fallback (tracked でない場合)
+  git mv "examples/$EXAMPLE/$src" "tests/fixtures/$EXAMPLE/$dst" 2>/dev/null \
+    || { mkdir -p "$(dirname "$dst_path")"; mv "$src_path" "$dst_path"; git add "tests/fixtures/$EXAMPLE/$dst"; }
+
+  echo "📦 退避: examples/$EXAMPLE/$src → tests/fixtures/$EXAMPLE/$dst"
+done
+```
+
+退避後 `git status` で stage 状態を確認、 退避先 path を skill 内変数 `$FIXTURES_PATHS` に保持して Step 5 統合 report の Section 2 と Step 6 summary に明示する。
 
 ### Step 5b: kiwa-review 自動呼出 (result-review mode)
 
@@ -327,6 +384,7 @@ result-review or 子 review (spec-review / test-review) が FAIL の場合、 re
 - dapp e2e: Playwright 12/13 PASS (1 skip) / 4 round flaky 0
 
 統合 report: tests/reports/integrated/{example}-{target}.{lang}.md
+test code 退避先: tests/fixtures/{example}/{contract-test, hardhat-test, e2e-test}/ (PR に含まれます)
 
 次アクション: {recommend}
 ```
@@ -359,7 +417,8 @@ graph TD
     D2 -->|Step 9| R5["/kiwa-review --mode test-review"]
     R3 --> E["Step 5 統合 report"]
     R5 --> E
-    E --> R6["/kiwa-review --mode result-review (Step 5b)"]
+    E --> M["Step 5.5 fixtures 退避<br>(git mv examples/ → tests/fixtures/)"]
+    M --> R6["/kiwa-review --mode result-review (Step 5b)"]
     R6 -->|PASS| F["Step 6 user に summary return"]
     R6 -->|FAIL| L["Step 5c auto-fix loop"]
     L -->|spec-review FAIL| C1
@@ -373,6 +432,7 @@ graph TD
 - `--target` で指定された範囲 (contract / dapp / both) の全 step が PASS or 意図的 skip
 - `tests/reports/integrated/{example}-{target}.{$DOC_LANG}.md` が Write 済
 - 各子 skill の report path が integrated report 内に link 集約
+- 生成 test が `tests/fixtures/{example}/{contract-test, hardhat-test, e2e-test}/` に退避済 (Step 5.5、 `--target` 範囲外の subdir は対象外)
 
 ## references
 
