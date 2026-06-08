@@ -1,6 +1,6 @@
 # `/kiwa-test` 一括実行手順 (contract + dApp e2e、 1 コマンドで全 chain)
 
-> 🇯🇵 日本語のみ (英語版は本手順をローカルで検証した後に追加予定)
+> 🇬🇧 英語版あり — [run-tests.md](./run-tests.md)
 
 `/kiwa-test` で kiwa skill chain (kiwa-design → kiwa-forge / kiwa-hardhat / kiwa-play → kiwa-review) を 1 コマンドで一括実行する手順。 contract test / dApp e2e test / 両方 を起動時に選べる。 個別 skill を順次叩く負担なし。
 

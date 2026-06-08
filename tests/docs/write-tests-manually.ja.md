@@ -1,6 +1,6 @@
 # `@kiwa/core` を library として import して test を手書きする手順
 
-> 🇯🇵 日本語のみ (英語版は本手順をローカルで検証した後に追加予定)
+> 🇬🇧 英語版あり — [write-tests-manually.md](./write-tests-manually.md)
 
 skill (`/kiwa-test` / `/kiwa-play` 等) を使わず、 `@kiwa/core` を npm library として直接 import して自分で test を書く経路。 既存 dApp プロジェクトに kiwa を library として組み込む / skill 生成 test を読みづらいので自前で書きたい / 一部 fixture だけ流用したい 等の use case 向け。
 
