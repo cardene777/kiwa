@@ -34,6 +34,7 @@ $ARGUMENTS
 - `--rounds {N}` — N round 連続 PASS 検証 (flaky 0 件確認、 デフォルト 1)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0a で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-codex` — Codex 委譲をスキップして単独で進行 (test 件数 1-2 のみ推奨)
+- `--no-review` — Step 9 の kiwa-review 自動呼出 (test-review) を skip (CI / 自動化用)
 
 ## 実行フロー
 
@@ -256,6 +257,19 @@ flaky 検証は 4 round 連続 PASS で固定。
 - **time-warp の副作用** — `evm_increaseTime` で進めた時間が次 test に残ると flaky 化する → `snapshotChain` / `revertChain` で test 間隔離
 
 詳細 9 種 + self-check 5 問は `references/adversarial-pitfalls.md`。
+
+### Step 9: kiwa-review 自動呼出 (test-review mode)
+
+Step 7 (4 round 連続 PASS) 完了後、 生成 spec.ts の品質を独立 review する。 `/kiwa-review --mode test-review --module {module} --test-path tests/*.spec.ts` を内部呼出し、 spec vs spec.ts 整合 / 観点別 cover 率 / UI 起点 e2e で追加すべき test 提案 を 5 軸で判定。
+
+呼出例:
+```text
+/kiwa-review --mode test-review --module token-gating --layer e2e --lang $DOC_LANG
+```
+
+review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 report 出力先: `tests/reports/review/test-review-{module}.{$DOC_LANG}.md`。
+
+`--no-review` 引数で skip 可能 (CI 用)。
 
 ## 完了条件
 
