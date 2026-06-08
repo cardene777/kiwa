@@ -1,0 +1,13 @@
+# Metamask extension binary (license: non-commercial only, re-distribution restricted)
+# crx is downloaded on-demand by download-metamask.ts
+extension/
+*.zip
+*.crx
+
+# Playwright user data dir
+.user-data/
+
+# test artifacts
+test-results/
+test-results-debug/
+playwright-report/
