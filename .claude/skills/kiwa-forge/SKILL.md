@@ -245,6 +245,17 @@ Loop terminated: {production_100_achieved | residual_uncoverable | stalled_2roun
 | invariant 計測時の handler coverage 変動 | 「テスト観点一覧」§ 10 セキュリティ補足 | bullet 追加 |
 | mock 未使用 API (削除候補) | 「不足している仕様」 | bullet 追加 (cleanup PR の余地) |
 | 追加 test TC-{NNN} (auto loop で追加) | 「テストケース一覧」§ 観点 {N} | 9 column 表に追加 |
+| **runner 差異 (Foundry only branch)** | **「不足している仕様」§ runner 差異** | **bullet 自動追加 (Hardhat 制約検出時)** |
+
+### runner 差異 bullet の自動追加 logic (改善 4 / Issue #227)
+
+Step 5c の Section 4 で未踏 branch を判定する際、 以下のいずれかが Foundry only で cover されている branch に該当する場合、 spec の「不足している仕様 > runner 差異」 セクションに bullet 追加を提案する (実書き戻しは user 手動 or `/kiwa-design --mode update`)。
+
+| 検出 trigger | format |
+|---|---|
+| `vm.warp(0)` 等で `block.timestamp = 0` を再現している branch | `{branch_path} は Foundry vm.warp(0) でのみ再現可能、 Hardhat は block.timestamp 巻き戻し不可制約により未踏 (許容)` |
+| `vm.warp(<過去>)` で時刻巻き戻しを使う branch | `{branch_path} は Foundry vm.warp 過去時刻のみ再現可能、 Hardhat 制約により未踏 (許容)` |
+| `forge fuzz` の random 入力で再現する branch (Hardhat 側に同等 fuzz が無い場合) | `{branch_path} は Foundry forge fuzz でのみ再現可能、 Hardhat 側未踏 (許容、 fast-check 等で類似化検討余地)` |
 
 > 注 — 本 skill (Layer 2) は spec を **書き換えず**、 上記提案を report に列挙のみ。 spec への反映は user 手動 or `/kiwa-design --mode update` (別 Issue 検討予定)。
 ```

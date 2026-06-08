@@ -255,6 +255,17 @@ Loop terminated: {production_100_achieved | residual_uncoverable | stalled_2roun
 | coverage 除外スコープ (production target のみ threshold 対象) | 「不足している仕様」 | bullet 追加 |
 | mock 未使用 API (削除候補) | 「不足している仕様」 | bullet 追加 (cleanup PR の余地) |
 | 追加 test TC-{NNN} (auto loop で追加) | 「テストケース一覧」§ 観点 {N} | 9 column 表に追加 |
+| **runner 差異 (Hardhat 制約による未踏 branch)** | **「不足している仕様」§ runner 差異** | **bullet 自動追加 (block.timestamp 巻き戻し不可等を検出時)** |
+
+### runner 差異 bullet の自動追加 logic (改善 4 / Issue #227)
+
+Step 5c の Section 4 で未踏 branch を判定する際、 以下のいずれかが Hardhat の構造的制約で cover できない branch に該当する場合、 spec の「不足している仕様 > runner 差異」 セクションに bullet 追加を提案する (実書き戻しは user 手動 or `/kiwa-design --mode update`)。
+
+| 検出 trigger | format |
+|---|---|
+| `block.timestamp == 0` 等の「時刻を 0 / 過去に巻き戻す」 前提の branch | `{branch_path} は Foundry vm.warp(0) でのみ再現可能、 Hardhat は block.timestamp 巻き戻し不可制約により未踏 (許容)` |
+| `vm.prank(address(0))` 等の Hardhat 非対応 cheatcode 前提の branch | `{branch_path} は Foundry 固有 cheatcode 前提で再現、 Hardhat 側未踏 (許容、 代替アサーションで類似化検討余地)` |
+| `hardhat_setStorageAt` 等で再現可能だが現 test 未実装の branch | `{branch_path} は hardhat_setStorageAt で再現可能だが現 test 未実装、 後追い test 追加候補` (許容ではなく改善余地) |
 
 > 注 — 本 skill (Layer 2) は spec を **書き換えず**、 上記提案を report に列挙のみ。 spec への反映は user 手動 or `/kiwa-design --mode update` (別 Issue 検討予定)。
 ```

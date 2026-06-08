@@ -303,7 +303,7 @@ result-review or 子 review (spec-review / test-review) が FAIL の場合、 re
 
 #### critical 検出時の挙動
 
-以下 5 種の critical は **auto-fix 不可** として user 介入必須:
+以下 6 種の critical は **auto-fix 不可** として user 介入必須:
 
 | critical 種別 | 理由 |
 |---|---|
@@ -312,6 +312,28 @@ result-review or 子 review (spec-review / test-review) が FAIL の場合、 re
 | contract 未実装 function に対する test 提案 | test 追加でなく contract 実装が必要、 別 issue |
 | `forge build` / `hardhat compile` 失敗 (環境 / 依存問題) | skill 修正でなく環境調査必要 |
 | UI 不在で UI 起点 test 不可能 (e2e で app/ 欠落) | skill では実装不可、 user が UI 実装 or target 変更必要 |
+| **kiwa fixture 拡張前提の test (改善 6 / Issue #227)** | **`browser.newContext()` で別 PK wallet inject / `anvil_setStorageAt` storage 改変 / wallet 接続 race polling 等を必要とする test は @kiwa/core helper 拡張が前提、 auto-fix loop 内で実装すると core API の設計判断を Opus 裁量で固定するリスク。 別 Issue 化推奨** |
+
+##### 「kiwa fixture 拡張前提」 critical の判定 logic
+
+以下 grep pattern のいずれかが test code 生成提案に含まれる場合、 本 critical として分類する。
+
+| grep pattern | 拡張対象 helper |
+|---|---|
+| `browser.newContext()` を伴う multi-context test | `injectMultipleWallets` 系 helper |
+| `anvil_setStorageAt` / `hardhat_setStorageAt` の JSON-RPC を直接叩く test | `setStorageSlot` 系 helper |
+| wallet connection race を polling する独自実装 | `waitForWalletConnected` 系 helper |
+| `@walletconnect/sign-client` 等の追加 SDK 依存を要する test | wallet support 系 helper (例 #168 WalletConnect v2) |
+| Safe / Gnosis 等の specific wallet 統合を要する test | wallet support 系 helper (例 #169 Safe) |
+
+検出時のアクション。
+
+1. auto-fix loop を **即停止** (round 数に関わらず)
+2. AskUserQuestion で 3 択を user に提示:
+   - `🆕 別 Issue 化推奨 (helper 拡張 → 後追い PR)` (Recommended、 ⭐⭐⭐⭐⭐)
+   - `📝 spec の「不足している仕様」 に bullet 追加 → TC skip` (⭐⭐⭐)
+   - `🛑 中断 (user 手動判断)` (⭐⭐)
+3. 別 Issue 化を選択した場合は `gh api repos/{owner}/{repo}/issues --method POST` で Issue 起票 (template = `feat-improve`、 title は「feat(core): {helper 名} を kiwa fixture に追加して {TC 観点} を表現可能化」)
 
 検出時は `AskUserQuestion` で「修正方針を入力 / 中断 / 無視して完了 (critical 残存)」 を選択。
 
