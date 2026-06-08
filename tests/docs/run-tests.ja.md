@@ -110,13 +110,29 @@ tests/reports/integrated/{example}-{target}.{lang}.md
 - Section 3 critical / major 指摘 (子 review 集約)
 - Section 4 次アクション (PASS なら docs 更新 + PR 起票推奨、 FAIL なら修正手順)
 
-Step 5b で `/kiwa-review --mode result-review` が auto 呼出され、 test 実行結果の総合品質を 5 軸 (coverage 達成度 / passing 件数 / flaky / 子 review 集約 / 後追い項目) で判定:
+Step 5b で `/kiwa-review --mode result-review` が auto 呼出され、 test 実行結果の総合品質を 5 軸 (coverage 達成度 / passing 件数 / flaky / 子 review 集約 / 後追い項目) で判定。
 
 ```text
 tests/reports/review/result-review-{example}.{lang}.md
 ```
 
-result-review PASS なら統合 report Section 1 に「✅ result-review PASS / score」 追記、 FAIL critical あれば「⚠️ 修正必須」 警告。
+## Step 4.5 — auto-fix loop (review FAIL 時の自走修正、 上限なし)
+
+result-review or 子 review が FAIL の場合、 `/kiwa-test` Step 5c が **自動で修正 loop** を回す。 上限なし、 以下 3 条件で終了。
+
+| 終了条件 | アクション |
+|---|---|
+| ✅ PASS | result-review weighted_score >= 7.0 + critical 0 → 完了 |
+| ⏸️ 停滞 | 連続 2 round で改善なし → user 介入 (継続 / 諦め完了 / 中断) |
+| ⚠️ critical | security 関連 / 設計根本問題 / contract 未実装 等は自動修正不可 → user 介入必須 |
+
+各 round で:
+1. **failure 分類** — spec-review FAIL / test-review FAIL / result-review FAIL のいずれか
+2. **対応 skill 再走** — review 指摘 prompt 付きで `/kiwa-design` (spec FAIL) or `/kiwa-{forge|hardhat|play}` (test FAIL or coverage 不足) を再起動
+3. **再 review** — 修正後に review chain を再実行
+4. **round 別 report 累積** — `tests/reports/integrated/{example}-{target}-round-{N}.md` に各 round 履歴保存
+
+`--no-auto-fix` 引数で skip 可能 (review FAIL でも修正試行せず終了、 CI / 単発確認用)。
 
 ## Step 5 — completion summary を確認
 
