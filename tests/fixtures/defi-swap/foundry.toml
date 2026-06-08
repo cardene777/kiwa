@@ -1,0 +1,11 @@
+[profile.default]
+src = "contracts"
+out = "forge-out"
+test = "contract-test"
+libs = ["lib"]
+optimizer = true
+optimizer_runs = 200
+solc = "0.8.24"
+remappings = [
+    "forge-std/=lib/forge-std/src/",
+]
