@@ -35,6 +35,7 @@ $ARGUMENTS
 - `--no-coverage-loop` — coverage auto loop を skip (kiwa-forge / kiwa-hardhat の auto loop を 1 round で終わる)
 - `--no-codex` — kiwa-play の Codex 委譲を skip (test 件数 1-2 のみ推奨)
 - `--rounds {N}` — Playwright 4 round 連続 PASS 検証の round 数 (default 4、 kiwa-play に伝播)
+- `--auto-cleanup` — Step 2.5 既存 test 検出時の AskUserQuestion を skip + 自動削除 (CI / 自動化用)
 
 ## 実行フロー
 
@@ -88,6 +89,61 @@ node --version
 ```
 
 エラー時は skill 停止 + 原因 + 解決方法を user に return。
+
+### Step 2.5: 既存 test 検出 + 削除確認
+
+retrofit walkthrough は examples 側を空 dir 状態から開始するため、 既存 test (`examples/{example}/test/` `hardhat-test/` `tests/`) が存在する場合は user に削除確認する。
+
+```bash
+# 検出ロジック
+EXISTING=()
+[ "$TARGET" != "dapp" ] && [ -d "examples/$EXAMPLE/test" ] && [ -n "$(ls -A examples/$EXAMPLE/test 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/test")
+[ "$TARGET" != "dapp" ] && [ -d "examples/$EXAMPLE/hardhat-test" ] && [ -n "$(ls -A examples/$EXAMPLE/hardhat-test 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/hardhat-test")
+[ "$TARGET" != "contract" ] && [ -d "examples/$EXAMPLE/tests" ] && [ -n "$(ls -A examples/$EXAMPLE/tests 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/tests")
+# spec 既存 check
+[ -f "tests/spec/contract/test-spec-${EXAMPLE}.${DOC_LANG}.md" ] && EXISTING+=("tests/spec/contract/test-spec-${EXAMPLE}.${DOC_LANG}.md")
+[ -f "tests/spec/e2e/test-spec-${EXAMPLE}.${DOC_LANG}.md" ] && EXISTING+=("tests/spec/e2e/test-spec-${EXAMPLE}.${DOC_LANG}.md")
+```
+
+既存 file / dir 検出時は AskUserQuestion で 3 択:
+
+```text
+question: "examples/{example}/ と tests/spec/ に既存 file が検出されました。 どう処理しますか?"
+header: "既存 test 処理"
+multiSelect: false
+
+選択肢:
+- label: "🗑️ 削除して 0 から再生成 (Recommended)"
+  description: "理由 — skill chain を clean state で再走、 retrofit walkthrough と同じ条件。 既存 test の影響を完全排除。 削除対象 file が user に列挙される (列挙後 user 最終確認なしで削除実行)。 ⭐⭐⭐⭐⭐"
+- label: "📝 上書き許可 (skill の判定に委ねる)"
+  description: "理由 — kiwa-design は spec を新規 file で衝突回避 (-2.md として連番)、 kiwa-forge / kiwa-hardhat / kiwa-play は既存 test を上書き or extend mode に切替。 既存 test と新規 test が並立する可能性、 chain の途中で意図しない state になるリスク。 ⭐⭐⭐"
+- label: "🛑 skill chain を中断"
+  description: "理由 — 既存 test の処理方針を一旦保留し /kiwa-test を中断。 user が手動でリセットしてから再起動。 リセットコマンドは tests/docs/run-tests.ja.md Step 0 を参照。 ⭐⭐"
+```
+
+🗑️ 選択時は以下を実行 (cwd 問わず動く):
+
+```bash
+ROOT=$(git rev-parse --show-toplevel)
+for path in "${EXISTING[@]}"; do
+  if [ -d "$ROOT/$path" ]; then
+    rm -rf "$ROOT/$path"
+    echo "🗑️ removed dir: $path"
+  elif [ -f "$ROOT/$path" ]; then
+    rm -f "$ROOT/$path"
+    echo "🗑️ removed file: $path"
+  fi
+done
+
+# 関連 cache / report も削除 (再走時の混乱防止)
+[ "$TARGET" != "dapp" ] && rm -rf "$ROOT/examples/$EXAMPLE"/{forge-out,hardhat-cache,hardhat-artifacts,cache,coverage,coverage.json}
+[ "$TARGET" != "contract" ] && rm -rf "$ROOT/examples/$EXAMPLE"/{test-results,playwright-report,.next}
+rm -rf "$ROOT/tests/reports"/{contract,e2e,review,integrated}/*${EXAMPLE}* 2>/dev/null || true
+```
+
+📝 上書き許可選択時は何もせず Step 3 へ進む。 🛑 中断選択時は skill を停止 + リセットコマンドを return。
+
+`--auto-cleanup` 引数 (kiwa-test 引数追加予定) で AskUserQuestion を skip + 自動削除も可能 (CI / 自動化用)。
 
 ### Step 3: contract test chain 実行 (target=contract or both)
 
