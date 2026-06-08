@@ -65,7 +65,7 @@ Layer 1 skill が以下を実施:
 - 入力 .sol を Read し function / event / error を grep 抽出
 - 並立 contract (GateNFT.sol) も参照 (IGateNFT interface 経由)
 - 既存 docstring と実コードから「対象機能」「仕様の要約」「権限モデル」「失敗 mode」を逆算
-- 5 基準で品質リスクスコア、 10 観点で適用 / 非適用を判定
+- 5 基準で品質リスクスコア、 11 観点で適用 / 非適用を判定
 - 1 ケース 1 行で 9 column 表を生成、 観点別 group + 優先度順
 ```
 
@@ -173,7 +173,7 @@ Step 5 で coverage 達成完了時点で以下の状態:
 
 ## 観点別 helper マッピング早見
 
-3 layer × 10 観点 の helper マッピング early reference:
+3 layer × 11 観点 の helper マッピング early reference:
 
 | 観点 | Foundry | Hardhat | Playwright |
 |---|---|---|---|
