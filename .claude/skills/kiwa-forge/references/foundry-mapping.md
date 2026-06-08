@@ -1,8 +1,8 @@
-# Foundry mapping (10 観点 → forge helper)
+# Foundry mapping (11 観点 → forge helper)
 
-SSOT (`docs/SKILL-DESIGN.ja.md` § Step 3) の 10 観点を Foundry の helper / cheat code / 規約に変換する完全マッピング。 `/kiwa-forge` Step 3 で本 file を Read する。
+SSOT (`docs/SKILL-DESIGN.ja.md` § Step 3) の 11 観点を Foundry の helper / cheat code / 規約に変換する完全マッピング。 `/kiwa-forge` Step 3 で本 file を Read する。
 
-## 10 観点 × forge helper 一覧
+## 11 観点 × forge helper 一覧
 
 | # | Layer 1 観点 | forge helper | 関数命名規約 | 主要 cheat code |
 |---|---|---|---|---|
@@ -186,7 +186,7 @@ function test_PermitSignatureRecovery_RejectsForgedSig() public {
 
 ## 関連
 
-- SSOT: `docs/SKILL-DESIGN.ja.md` § Step 3 (10 観点)
+- SSOT: `docs/SKILL-DESIGN.ja.md` § Step 3 (11 観点)
 - Layer 1 spec: `.claude/skills/kiwa-design/SKILL.md`
 - fuzz / invariant 詳細: `references/fuzz-invariant-patterns.md`
 - Hardhat 並立 skill: `.claude/skills/kiwa-hardhat/SKILL.md`

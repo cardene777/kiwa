@@ -82,7 +82,7 @@
 
 ## テスト観点一覧
 
-`docs/SKILL-DESIGN.md` § Step 3 の 10 観点から選択。
+`docs/SKILL-DESIGN.md` § Step 3 の 11 観点から選択。
 
 - 1. 正常系 — 適用 (常に)
 - 2. 異常系 — 適用 ({外部依存内容})
