@@ -15,7 +15,7 @@ pnpm install && forge --version && anvil --version && node --version
 途中まで進めて再 run したい場合のリセット (生成済 test / spec / cache を全削除)。 cwd がどこでも動く。
 
 ```bash
-ROOT=$(git rev-parse --show-toplevel) && rm -rf "$ROOT/examples/nft-marketplace"/{test,hardhat-test,forge-out,hardhat-cache,hardhat-artifacts,cache,coverage,coverage.json} "$ROOT/.context/spec/contract/test-spec-nft-marketplace.md"
+ROOT=$(git rev-parse --show-toplevel) && rm -rf "$ROOT/examples/nft-marketplace"/{test,hardhat-test,forge-out,hardhat-cache,hardhat-artifacts,cache,coverage,coverage.json} "$ROOT/tests/spec/contract/test-spec-nft-marketplace.md"
 ```
 
 ## Step 1 — 対象 dApp dir に移動 + test dir が空であることを確認
@@ -39,7 +39,7 @@ claude prompt で叩く。
 /kiwa-design --layer contract --module nft-marketplace --input contracts/
 ```
 
-出力: `.context/spec/contract/test-spec-nft-marketplace.md` (両 contract の function / event / error + 連携 scenario が 9 column 表で生成)。
+出力: `tests/spec/contract/test-spec-nft-marketplace.md` (両 contract の function / event / error + 連携 scenario が 9 column 表で生成)。
 
 ## Step 4 — `/kiwa-forge` で Foundry test を生成
 
@@ -137,7 +137,7 @@ tests/reports/contract/coverage-report-nft-marketplace.md
 | `forge-std/Test.sol` not found | `git submodule update --init` |
 | Hardhat `Cannot find module` | repo root で `pnpm install` 再実行 |
 | 1 round だけ failing (flaky) | 該当 test の `time.increaseTo` / `vm.warp` を `setUp` で fixture 化 |
-| coverage 未達 | `.context/spec/contract/test-spec-nft-marketplace.md` の「不足している仕様」 section を確認、 Step 4 / Step 5 を再起動 |
+| coverage 未達 | `tests/spec/contract/test-spec-nft-marketplace.md` の「不足している仕様」 section を確認、 Step 4 / Step 5 を再起動 |
 
 ## 関連 docs
 

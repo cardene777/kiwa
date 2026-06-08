@@ -18,8 +18,8 @@ The big difference from new TDD: **the existing implementation is treated as the
 graph LR
     A[Existing dApp + Foundry project] --> B["/kiwa-design --layer contract --input contracts/X.sol"]
     A --> C["/kiwa-design --layer e2e --input app/ + tests/"]
-    B --> D[.context/spec/contract/test-spec-X.md]
-    C --> E[.context/spec/e2e/test-spec-X.md]
+    B --> D[tests/spec/contract/test-spec-X.md]
+    C --> E[tests/spec/e2e/test-spec-X.md]
     D --> F["/kiwa-forge --module X"]
     D --> G["/kiwa-hardhat --module X"]
     E --> H["/kiwa-play --mode extend --module X"]
@@ -39,7 +39,7 @@ ls examples/nextjs-token-gating/{contracts,tests,test}
 # test/:     GatedContent.t.sol (existing Foundry test)
 ```
 
-Contracts / e2e tests / Foundry tests are all there, but the Hardhat lane is missing (= F-1 wave 1 gap). No spec under `.context/spec/` yet.
+Contracts / e2e tests / Foundry tests are all there, but the Hardhat lane is missing (= F-1 wave 1 gap). No spec under `tests/spec/` yet.
 
 ### Step 1: Generate the Layer 1 spec with `/kiwa-design --layer contract --input`
 
@@ -50,7 +50,7 @@ Contracts / e2e tests / Foundry tests are all there, but the Hardhat lane is mis
 Output.
 
 ```
-.context/spec/contract/test-spec-gated-content.md
+tests/spec/contract/test-spec-gated-content.md
 ```
 
 The spec is emitted using the nine-section unified template. Key sections.
@@ -159,7 +159,7 @@ Playwright already has `gating.spec.ts` working, so leave it alone. When you wan
 
 ## Common pitfalls
 
-- **`.context/spec/contract/` is empty** — run `/kiwa-design --layer contract` first. To reuse an existing spec, drop it into `.context/spec/contract/test-spec-{module}.md` by hand and the skill will read it.
+- **`tests/spec/contract/` is empty** — run `/kiwa-design --layer contract` first. To reuse an existing spec, drop it into `tests/spec/contract/test-spec-{module}.md` by hand and the skill will read it.
 - **Hardhat compile fails** — make sure `hardhat.config.cjs`'s `solidity.version` matches the contract's `pragma solidity` and that `paths.sources` points at Foundry's `contracts/`.
 - **`pnpm -F examples-X test:hardhat` says "script not found"** — you forgot to add `test:hardhat` to `package.json`. See Step 3.
 - **Coverage falls short of 80%** — Read the uncovered-branch markup in the HTML report. The `I = if-path-not-taken` marker means the else / revert path was not taken. Add a test case for it.

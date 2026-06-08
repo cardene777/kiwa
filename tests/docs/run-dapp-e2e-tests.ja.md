@@ -15,7 +15,7 @@ pnpm install && pnpm -F @kiwa/core build && anvil --version && node --version &&
 途中まで進めて再 run したい場合のリセット (生成済 spec / test / 実走結果を全削除)。 cwd がどこでも動く。
 
 ```bash
-ROOT=$(git rev-parse --show-toplevel) && rm -rf "$ROOT/examples/nextjs-token-gating"/{tests,test-results,playwright-report,.next} "$ROOT/.context/spec/e2e/test-spec-token-gating.md"
+ROOT=$(git rev-parse --show-toplevel) && rm -rf "$ROOT/examples/nextjs-token-gating"/{tests,test-results,playwright-report,.next} "$ROOT/tests/spec/e2e/test-spec-token-gating.md"
 ```
 
 ## Step 1 — 対象 dApp dir に移動 + tests/ dir が空であることを確認
@@ -39,7 +39,7 @@ claude prompt で叩く。
 /kiwa-design --layer e2e --module token-gating --input app/
 ```
 
-出力: `.context/spec/e2e/test-spec-token-gating.md` (UI 要素 / wagmi hook 経由の contract function / UX flow を 9 column 表で生成、 UI から呼ばれない contract function は対象外)。
+出力: `tests/spec/e2e/test-spec-token-gating.md` (UI 要素 / wagmi hook 経由の contract function / UX flow を 9 column 表で生成、 UI から呼ばれない contract function は対象外)。
 
 ## Step 4 — `/kiwa-play --mode new` で Playwright spec を生成
 
