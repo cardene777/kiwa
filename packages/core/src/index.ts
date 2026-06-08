@@ -51,6 +51,20 @@ export {
 export { createInjectorScript } from './injector-script.js';
 export { dappE2eTest, createRpcHandler, verifySignature, waitForPendingRpcs } from './fixture.js';
 export {
+  waitForWalletConnected,
+  type WaitForWalletConnectedOptions,
+} from './wait-for-wallet-connected.js';
+export {
+  injectMultipleWallets,
+  type InjectMultipleWalletsEntry,
+  type InjectMultipleWalletsOptions,
+  type InjectMultipleWalletsResult,
+} from './inject-multiple-wallets.js';
+export {
+  setStorageSlot,
+  type SetStorageSlotParams,
+} from './set-storage-slot.js';
+export {
   deployContract,
   loadForgeArtifact,
   type DeployContractOptions,

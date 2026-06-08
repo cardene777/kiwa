@@ -160,6 +160,67 @@ fixture 内で使う低レベル helper。
 
 詳細は `packages/core/src/fixture.ts` を Read。
 
+### `waitForWalletConnected`
+
+`testid` 指定要素のテキストが期待値を含むまで polling 待機する。 wallet inject の race condition (connection-status が disconnected → connected に遷移する瞬間) を捕まえるために使う。 default `testId="connection-status"` / `expectedText="connected"` / `timeout=5000ms` / `pollInterval=100ms`。
+
+```ts
+import { waitForWalletConnected } from '@kiwa/core';
+
+test('wallet connection completes', async ({ page }) => {
+  await page.goto('/');
+  await waitForWalletConnected(page);
+  // ここから connected 前提の assertion を続けられる
+});
+```
+
+引数で testId / expectedText / timeout / pollInterval を上書き可能。 timeout 超過時は `lastSeen` のテキストを含めた `Error` を throw する。
+
+### `injectMultipleWallets`
+
+`Browser` から N 個の `BrowserContext` を作成し、 各 context に別 PK wallet を `addInitScript` で inject する helper。 multi-user multi-context test (例 alice / bob が同 contract に対して同時 mint を race する) で使う。
+
+```ts
+import { injectMultipleWallets, ANVIL_DEFAULT_PRIVATE_KEYS } from '@kiwa/core';
+
+test('alice and bob race to mint', async ({ browser }) => {
+  const users = await injectMultipleWallets(browser, {
+    alice: { privateKey: ANVIL_DEFAULT_PRIVATE_KEYS[0]!, chainId: 31337 },
+    bob:   { privateKey: ANVIL_DEFAULT_PRIVATE_KEYS[1]!, chainId: 31337 },
+  }, { baseUrl: 'http://127.0.0.1:3000' });
+
+  try {
+    await Promise.all([
+      users.alice.page.getByTestId('mint').click(),
+      users.bob.page.getByTestId('mint').click(),
+    ]);
+    // 片方が成功、 片方が revert する race を検証
+  } finally {
+    await users.alice.close();
+    await users.bob.close();
+  }
+});
+```
+
+引数 `entries` は `Record<string, {privateKey, chainId?, wallets?}>` で、 各 entry ごとに `BrowserContext + Page + close()` の 3 つを Record で返す。 `chainId` 省略時は `options.defaultChainId` (default 31337) が使われる。 途中で 1 つでも失敗したら作成済 context を全て close してから throw する。
+
+### `setStorageSlot`
+
+anvil の `anvil_setStorageAt` JSON-RPC を fetch で叩く wrapper。 contract storage slot を直接書き換えて UI と contract の乖離 (例 UI にハードコードされた SECRET 定数 vs contract storage の実値) を検出する test に使う。
+
+```ts
+import { setStorageSlot } from '@kiwa/core';
+
+await setStorageSlot({
+  rpcUrl: 'http://127.0.0.1:8545',
+  address: '0x1234567890123456789012345678901234567890',
+  slot: 3,                                                                              // number / bigint / hex
+  value: '0x000000000000000000000000000000000000000000000000000000000000002a',           // 32-byte hex
+});
+```
+
+引数 `slot` は `number` `bigint` `0x` 接頭辞の hex のいずれかを受け、 `value` は必ず 32 byte hex (0x + 64 hex chars)。 不正値は `Error` で throw。 RPC error 応答 (`error.code` / `error.message`) は `Error` として throw する。
+
 ## type 一覧
 
 | type | 用途 |
@@ -173,3 +234,6 @@ fixture 内で使う低レベル helper。
 | `RpcContext` | RPC handler の context |
 | `DeployContractOptions` / `DeployContractResult` | deployContract 戻り |
 | `WaitForChainStateOptions` | waitForChainState 設定 |
+| `WaitForWalletConnectedOptions` | waitForWalletConnected の testId / expectedText / timeout / pollInterval |
+| `InjectMultipleWalletsEntry` / `InjectMultipleWalletsOptions` / `InjectMultipleWalletsResult` | injectMultipleWallets の引数 / 戻り値 |
+| `SetStorageSlotParams` | setStorageSlot の引数 (rpcUrl / address / slot / value) |
