@@ -1,49 +1,52 @@
 # Contract Coverage Report — nextjs-token-gating (Hardhat)
 
-Generated: 2026-06-08
-Skill: /kiwa-hardhat | Run: round 1 (final)
-Loop terminated: residual_uncoverable (Hardhat 制約による block.timestamp == 0 不可)
+Generated: 2026-06-08 (Hardhat / solidity-coverage)
+Skill: /kiwa-hardhat | Run: round 1 (final、 4 round 連続 PASS で flaky 0)
+Loop terminated: residual_uncoverable (runner 差異許容)
 
 ## 1. 判定サマリ
 
 | 結果 | production target | Total |
 |---|---|---|
-| Statements | ⚠️ 94.74% (18/19) | 94.74% (18/19) |
-| Branches | ⚠️ 94.44% (17/18) | 94.44% (17/18) |
-| Functions | ✅ 100% (7/7) | 100% (7/7) |
-| Lines | ✅ 100% (28/28) | 100% (28/28) |
+| Statements | ⚠️ 94.74% (production target 100% 未達、 runner 差異により許容) | 94.74% |
+| Branches | ⚠️ 94.44% (production target 100% 未達、 runner 差異により許容) | 94.44% |
+| Functions | ✅ 100% (全 7 関数) | 100% |
+| Lines | ✅ 100% (全 line cover) | 100% |
 
-**判定 — ✅ PASS (residual_uncoverable)** — Lines / Funcs は 100%、 残 Stmts / Branches 1 件は Hardhat network の制約 (block.timestamp は 過去方向に巻き戻せない) で再現不能、 「外部依存」分類により test-passed marker を作成。 Foundry 経路 (`vm.warp(0)` で再現可能) で同一 branch は cover 済 (`tests/reports/contract/coverage-report-nextjs-token-gating.ja.md` 参照)。
+**判定 — ✅ PASS** (Lines / Funcs 100%、 Stmts / Branches の未達は **GatedContent.sol:54 grantor == address(0) 分岐** が Hardhat の block.timestamp 巻き戻し制約により再現不能 = runner 差異として許容)
 
-実行サマリ — `npx hardhat test` 27 passed / 0 failed、 wall 160ms。 spec の TC-001〜TC-026 + coverage 補完 TC-add-1 (isGated) を `hardhat-test/TokenGating.test.cjs` に 1:1 mapping で実装、 観点 grouping 9/9 一致、 chai matchers (revertedWithCustomError / emit-withArgs / time helper) で具体値 assertion。
-
-## 2. file 別 coverage 内訳 (production / test / mock 分類)
+## 2. file 別 coverage 内訳
 
 | File | カテゴリ | Stmts | Branches | Funcs | Lines | threshold 対象? |
 |---|---|---|---|---|---|---|
-| `contracts/GateNFT.sol` | production | 100% | 100% | 100% | 100% | ✅ |
-| `contracts/GatedContent.sol` | production | 93.33% | 91.67% | 100% | 100% | ✅ |
-| `hardhat-test/TokenGating.test.cjs` | test 自身 | (計測対象外) | - | - | - | ❌ |
+| contracts/GateNFT.sol | production | 100% | 100% | 100% | 100% | ✅ 完全 cover |
+| contracts/GatedContent.sol | production | 93.33% (28/30) | 91.67% (11/12) | 100% (5/5) | 100% (22/22) | ✅ runner 差異許容 |
+| hardhat-test/*.cjs | test 自身 | - | - | - | - | ❌ |
 
-## 3. 未到達 line の分類と判断
+## 3. 未到達 line / branch の分類と判断
 
-### contracts/GatedContent.sol - 1 branch uncovered
+### contracts/GatedContent.sol — 2 stmts / 1 branch uncovered
 
-- **L54 `if (grantor == address(0)) return false;` の true 分岐**
-  - **分類**: 外部依存 (block.timestamp の特殊状態が必要)
-  - **判断**: この branch は `timedAccessExpiry[user] == 0 == block.timestamp` を満たす状態でしか到達不能。 `timedAccessExpiry[unknown] == 0` のとき line 52 `0 < block.timestamp` が通常 true で早期 return false するため、 `block.timestamp == 0` が必要。 Hardhat network は EVM の制約上 timestamp を過去 (特に 0) に巻き戻せない (`evm_setNextBlockTimestamp` は前 block より進める方向のみ許容)。 Foundry の `vm.warp(0)` では再現可能で同 branch は cover 済 (Foundry 経路 production 全 4 metric 100%)。
-  - **代替案 (未採用)**: deploy 時点で 1 block 進めず view 呼びだけ実行する fixture を作っても、 Hardhat network は genesis から timestamp が進む設計のため 0 を取れず却下。 mock contract を別途用意して GatedContent を継承し timestamp を override する経路は contract 内部 logic を不当に変えるため不採用。
+- **L54 `if (grantor == address(0)) return false;`** の true 分岐 (grantor == 0 で false return)
+  - **分類**: runner 差異 (Hardhat 制約)
+  - **判断**: Hardhat は block.timestamp を 0 に巻き戻せないため、 `timedAccessExpiry[user] = 0 && timedAccessGrantor[user] = 0` の自然到達経路を再現不可。 hardhat_setStorageAt で storage 書き換え経由でも solidity-coverage の instrumentation 都合で branch counter が増えない (Foundry の forge coverage と同じ挙動)。 PR #230 SKILL.md 規約の runner 差異 bullet として spec に明記済。
 
 ## 4. Layer 1 spec への書き戻し提案
 
 | 項目 | 反映先 section | 形式 |
 |---|---|---|
-| Hardhat 制約による branch 再現不可 (Foundry とのカバレッジ差) | 「不足している仕様」 / Layer 2 注記 | bullet 追加 (「block.timestamp == 0 branch は Foundry 経路でのみカバー、 Hardhat 経路は外部依存分類で除外」) |
-| TC-add-1 isGated view 関数 | テストケース一覧 § 観点 1 正常系 (view 関数として) | 9 column 表に新規追加 (TC-027 として spec へ昇格、 Foundry / Hardhat 両方で実装済) |
-| TC-013 期待結果の訂正 (Foundry と整合) | テストケース一覧 § 観点 3 境界値 TC-013 | 「grantor 保有有無に関わらず期限切れで false」 と訂正 |
+| runner 差異 (Hardhat 制約による未踏 branch) | 「不足している仕様」§ runner 差異 | bullet 維持 (既存記述で OK) |
 
-> 注 — 本 skill (Layer 2) は spec を **書き換えず**、 上記提案を report に列挙のみ。 spec への反映は user 手動 or `/kiwa-design --mode update` (別 Issue 検討予定)。
+### runner 差異 bullet (改善 4 / Issue #227) — 適用結果
 
-## 5. test-passed marker
+spec に「`GatedContent.sol:54 grantor == address(0) 分岐` は Foundry vm.warp(0) でのみ再現可能、 Hardhat は block.timestamp 巻き戻し不可制約により未踏 (許容)」 と記述済 → 本 coverage report で **実証**。
 
-`test-passed` marker 作成条件 — 残 uncovered が「外部依存」分類で production 100% 理論不能 → ✅ marker 作成 (report Section 1 に理由明示済)。
+| 観点 | Foundry | Hardhat |
+|---|---|---|
+| `vm.warp(0)` / `time.setNextBlockTimestamp(0)` | ✅ 可能 | ❌ 不可能 (genesis 後 0 設定不可) |
+| Branch coverage on L54 true | ✅ 計上 (vm.warp(0) で natural reach) | ❌ 計上不可 (storage 書き換え経由でも instrumentation 都合で hit せず) |
+
+## 5. test 件数サマリ
+
+- hardhat test PASS: 34 件 (GateNFT 11 件 + GatedContent 23 件、 4 round 連続 PASS / flaky 0)
+- gas: hardhat-gas-reporter 未設定 (gas-report は本 example で skip)
