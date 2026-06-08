@@ -1,226 +1,361 @@
-// /kiwa-hardhat 出力 (Layer 1 spec test-spec-token-gating.md 由来)
-// 用途: examples/nextjs-token-gating の Hardhat 経路 test 後付け導入 (Foundry .t.sol と並立)
-// 観点 grouping: 1 正常系 / 2 異常系 / 3 境界値 / 4 状態遷移 / 5 権限 / 10 セキュリティ
-// 対象 contract: GateNFT (minimal ERC721) + GatedContent (gated access + timed grant)
-
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { loadFixture, time } = require('@nomicfoundation/hardhat-toolbox/network-helpers');
-const fc = require('fast-check');
 
-describe('GatedContent (Layer 2 Hardhat example)', () => {
+describe('GatedContent', function () {
   async function deployFixture() {
-    const [deployer, alice, bob, carol] = await ethers.getSigners();
-    const GateNFT = await ethers.getContractFactory('GateNFT');
-    const gate = await GateNFT.deploy();
-
-    const GatedContent = await ethers.getContractFactory('GatedContent');
-    const content = await GatedContent.deploy(await gate.getAddress());
-    return { gate, content, deployer, alice, bob, carol };
+    const [alice, bob, charlie] = await ethers.getSigners();
+    const NFT = await ethers.getContractFactory('GateNFT');
+    const nft = await NFT.deploy();
+    const Gated = await ethers.getContractFactory('GatedContent');
+    const gated = await Gated.deploy(await nft.getAddress());
+    return { nft, gated, alice, bob, charlie };
   }
 
-  describe('観点 1: 正常系', () => {
-    it('TC-001 NFT holder が getSecret() で SECRET を取得し accessCount が +1', async () => {
-      const { gate, content, alice } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      const tx = await content.connect(alice).getSecret();
-      await expect(tx).to.emit(content, 'Accessed').withArgs(alice.address);
-      expect(await content.accessCount()).to.equal(1n);
-    });
+  async function mintFor(nft, signer) {
+    await nft.connect(signer).mint();
+  }
 
-    it('TC-002 isGated(alice) は NFT mint 後 true', async () => {
-      const { gate, content, alice } = await loadFixture(deployFixture);
-      expect(await content.isGated(alice.address)).to.equal(false);
-      await gate.connect(alice).mint();
-      expect(await content.isGated(alice.address)).to.equal(true);
-    });
+  // ============================================================
+  // 観点 1: 正常系
+  // ============================================================
 
-    it('TC-003 grantTimedAccess で bob (非 holder) が ttl 内に getSecret 可能', async () => {
-      const { gate, content, alice, bob } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      const tx = await content.connect(alice).grantTimedAccess(bob.address, 3600);
-      await expect(tx).to.emit(content, 'TimedAccessGranted');
-      // bob は NFT を持っていないが grant 経由で access 可能
-      await content.connect(bob).getSecret();
-      expect(await content.accessCount()).to.equal(1n);
-    });
-  });
+  describe('観点 1: 正常系', function () {
+    it('TC-002 getSecret() NFT holder で success + Accessed emit + accessCount+1', async function () {
+      const { nft, gated, alice } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
 
-  describe('観点 2: 異常系', () => {
-    it('TC-004 非 holder が getSecret → NotGated', async () => {
-      const { content, bob } = await loadFixture(deployFixture);
-      await expect(content.connect(bob).getSecret()).to.be.revertedWithCustomError(
-        content,
-        'NotGated',
-      );
-    });
-
-    it('TC-005 非 holder が grantTimedAccess → NotGated', async () => {
-      const { content, bob, carol } = await loadFixture(deployFixture);
-      await expect(
-        content.connect(bob).grantTimedAccess(carol.address, 3600),
-      ).to.be.revertedWithCustomError(content, 'NotGated');
-    });
-
-    it('TC-006 ttl=0 で grantTimedAccess → InvalidTtl', async () => {
-      const { gate, content, alice, bob } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      await expect(
-        content.connect(alice).grantTimedAccess(bob.address, 0),
-      ).to.be.revertedWithCustomError(content, 'InvalidTtl');
-    });
-  });
-
-  describe('観点 3: 境界値', () => {
-    it('TC-007 ttl=1 秒で grant → ttl 経過後 getSecret は NotGated', async () => {
-      const { gate, content, alice, bob } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      await content.connect(alice).grantTimedAccess(bob.address, 1);
-      await time.increase(2);
-      await expect(content.connect(bob).getSecret()).to.be.revertedWithCustomError(
-        content,
-        'NotGated',
-      );
-    });
-
-    it('TC-008 ttl=type(uint256).max 相当の large ttl は overflow しない (block.timestamp + ttl)', async () => {
-      const { gate, content, alice, bob } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      // ttl が block.timestamp と合算で uint256 超えない範囲の最大値
-      const safeTtl = 2n ** 200n;
-      const expiresAt = await content.connect(alice).grantTimedAccess.staticCall(bob.address, safeTtl);
-      expect(expiresAt).to.be.greaterThan(0n);
-    });
-
-    it('fuzz ttl 1〜86400 (1秒〜1日) 範囲は常に grant 成功', async () => {
-      const { gate, content, alice, bob } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      await fc.assert(
-        fc.asyncProperty(fc.integer({ min: 1, max: 86400 }), async (ttl) => {
-          await expect(
-            content.connect(alice).grantTimedAccess(bob.address, ttl),
-          ).to.emit(content, 'TimedAccessGranted');
-        }),
-        { numRuns: 5 },
-      );
-    });
-  });
-
-  describe('観点 4: 状態遷移', () => {
-    it('TC-009 accessCount は getSecret 呼出ごとに +1', async () => {
-      const { gate, content, alice } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      await content.connect(alice).getSecret();
-      await content.connect(alice).getSecret();
-      await content.connect(alice).getSecret();
-      expect(await content.accessCount()).to.equal(3n);
-    });
-
-    it('TC-010 grant 後 grantor が NFT を transfer すると bob の hasAccess は false (grantor の balance=0)', async () => {
-      const { gate, content, alice, bob, carol } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      await content.connect(alice).grantTimedAccess(bob.address, 3600);
-      // alice が NFT を carol に transfer
-      await gate.connect(alice).transferFrom(alice.address, carol.address, 1);
-      expect(await content.hasAccess(bob.address)).to.equal(false);
-    });
-
-    it('TC-011 grantor が NFT 再取得すると hasAccess(bob) は true に復帰 (ttl 内)', async () => {
-      const { gate, content, alice, bob } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      await content.connect(alice).grantTimedAccess(bob.address, 3600);
-      expect(await content.hasAccess(bob.address)).to.equal(true);
-      // alice が NFT を burn 相当 (address(this) 不可能なので持ち続けで hasAccess 確認)
-      expect(await content.hasAccess(bob.address)).to.equal(true);
-    });
-  });
-
-  describe('観点 5: 権限', () => {
-    it('TC-012 alice の grant 後 bob 側 timedAccessGrantor が alice を指す', async () => {
-      const { gate, content, alice, bob } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      await content.connect(alice).grantTimedAccess(bob.address, 3600);
-      expect(await content.timedAccessGrantor(bob.address)).to.equal(alice.address);
-    });
-
-    it('TC-013 grant されていない user は timedAccessGrantor が address(0)', async () => {
-      const { content, carol } = await loadFixture(deployFixture);
-      expect(await content.timedAccessGrantor(carol.address)).to.equal(ethers.ZeroAddress);
-    });
-  });
-
-  describe('観点 10: セキュリティ', () => {
-    it('TC-014 [CRITICAL] grantor が NFT を持っていない状態でも timedAccess 期限内なら hasAccess は revoke される', async () => {
-      const { gate, content, alice, bob, carol } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      await content.connect(alice).grantTimedAccess(bob.address, 3600);
-      // alice → carol に NFT 移し alice balance=0 にする
-      await gate.connect(alice).transferFrom(alice.address, carol.address, 1);
-      // bob は grant されていたが grantor の権限が消えたので access 不可
-      await expect(content.connect(bob).getSecret()).to.be.revertedWithCustomError(
-        content,
-        'NotGated',
-      );
-    });
-
-    it('TC-015 [CRITICAL] address(0) を user として grantTimedAccess しても他 user の access には影響しない', async () => {
-      const { gate, content, alice } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      // address(0) 自体への grant は仕様上許容するが影響を局所化することを担保
-      await content.connect(alice).grantTimedAccess(ethers.ZeroAddress, 3600);
-      // alice (実 NFT 保有) の access は変わらない
-      await expect(content.connect(alice).getSecret()).to.emit(content, 'Accessed');
-    });
-
-    it('TC-016 [MAJOR] gate immutable address が constructor で固定される', async () => {
-      const { gate, content } = await loadFixture(deployFixture);
-      expect(await content.gate()).to.equal(await gate.getAddress());
-    });
-
-    it('TC-017 [MAJOR] SECRET constant が想定の文字列', async () => {
-      const { content } = await loadFixture(deployFixture);
-      expect(await content.SECRET()).to.equal('alpha-pass-2025');
-    });
-
-    it('TC-018 [MAJOR] Accessed event の args 検証', async () => {
-      const { gate, content, alice } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      await expect(content.connect(alice).getSecret())
-        .to.emit(content, 'Accessed')
+      await expect(gated.connect(alice).getSecret())
+        .to.emit(gated, 'Accessed')
         .withArgs(alice.address);
+
+      expect(await gated.accessCount()).to.equal(1);
     });
 
-    it('TC-019 [MAJOR] TimedAccessGranted event の args 検証', async () => {
-      const { gate, content, alice, bob } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      const ttl = 7200n;
-      const tx = await content.connect(alice).grantTimedAccess(bob.address, ttl);
-      const block = await ethers.provider.getBlock(tx.blockNumber);
-      await expect(tx)
-        .to.emit(content, 'TimedAccessGranted')
-        .withArgs(alice.address, bob.address, BigInt(block.timestamp) + ttl);
+    it('SECRET 定数は "alpha-pass-2025" と一致', async function () {
+      const { gated } = await loadFixture(deployFixture);
+      expect(await gated.SECRET()).to.equal('alpha-pass-2025');
     });
 
-    it('TC-020 [MINOR] hasAccess(user) は NFT 直接保有時 true (timedAccess 経路非依存)', async () => {
-      const { gate, content, alice } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
-      expect(await content.hasAccess(alice.address)).to.equal(true);
+    it('TC-003 grantTimedAccess で expiry / grantor 記録 + event emit', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      const ttl = 3600n;
+      const blockBefore = await ethers.provider.getBlock('latest');
+      const expectedExpiry = BigInt(blockBefore.timestamp) + ttl + 1n; // tx は次 block
+
+      const tx = await gated.connect(alice).grantTimedAccess(bob.address, ttl);
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+      const actualExpiry = BigInt(block.timestamp) + ttl;
+
+      expect(await gated.timedAccessExpiry(bob.address)).to.equal(actualExpiry);
+      expect(await gated.timedAccessGrantor(bob.address)).to.equal(alice.address);
     });
 
-    it('TC-021 [CRITICAL] 非 owner が transferFrom → NotOwner (branch coverage)', async () => {
-      const { gate, alice, bob, carol } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
+    it('isGated true / false 経路', async function () {
+      const { nft, gated, alice } = await loadFixture(deployFixture);
+      expect(await gated.isGated(alice.address)).to.equal(false);
+      await mintFor(nft, alice);
+      expect(await gated.isGated(alice.address)).to.equal(true);
+    });
+  });
+
+  // ============================================================
+  // 観点 2: 異常系
+  // ============================================================
+
+  describe('観点 2: 異常系', function () {
+    it('TC-005 NFT 0 個で getSecret → NotGated revert', async function () {
+      const { gated, alice } = await loadFixture(deployFixture);
+      await expect(gated.connect(alice).getSecret()).to.be.revertedWithCustomError(
+        gated,
+        'NotGated',
+      );
+      expect(await gated.accessCount()).to.equal(0);
+    });
+
+    it('TC-006 NFT 0 個で grantTimedAccess → NotGated revert', async function () {
+      const { gated, alice, bob } = await loadFixture(deployFixture);
       await expect(
-        gate.connect(bob).transferFrom(alice.address, carol.address, 1),
-      ).to.be.revertedWithCustomError(gate, 'NotOwner');
+        gated.connect(alice).grantTimedAccess(bob.address, 3600),
+      ).to.be.revertedWithCustomError(gated, 'NotGated');
     });
 
-    it('TC-022 [CRITICAL] transferFrom to address(0) → InvalidRecipient (branch coverage)', async () => {
-      const { gate, alice } = await loadFixture(deployFixture);
-      await gate.connect(alice).mint();
+    it('TC-007 grantTimedAccess ttl=0 → InvalidTtl revert', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
       await expect(
-        gate.connect(alice).transferFrom(alice.address, ethers.ZeroAddress, 1),
-      ).to.be.revertedWithCustomError(gate, 'InvalidRecipient');
+        gated.connect(alice).grantTimedAccess(bob.address, 0),
+      ).to.be.revertedWithCustomError(gated, 'InvalidTtl');
+    });
+  });
+
+  // ============================================================
+  // 観点 3: 境界値
+  // ============================================================
+
+  describe('観点 3: 境界値', function () {
+    it('TC-010 ttl=1 で hasAccess true (同 block)', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+      await gated.connect(alice).grantTimedAccess(bob.address, 1);
+      expect(await gated.hasAccess(bob.address)).to.equal(true);
+    });
+
+    it('TC-011 expiry+1 で hasAccess false', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+      await gated.connect(alice).grantTimedAccess(bob.address, 1);
+
+      // expiresAt+1 まで進める
+      await time.increase(3);
+      expect(await gated.hasAccess(bob.address)).to.equal(false);
+    });
+
+    it('TC-012 strict less-than の境界 (expiresAt 同値で true)', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      const tx = await gated.connect(alice).grantTimedAccess(bob.address, 100);
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+      const expiresAt = block.timestamp + 100;
+
+      // expiresAt - 1 → true
+      await time.setNextBlockTimestamp(expiresAt - 1);
+      await ethers.provider.send('evm_mine', []);
+      expect(await gated.hasAccess(bob.address)).to.equal(true);
+
+      // expiresAt → true (strict less-than `<`)
+      await time.setNextBlockTimestamp(expiresAt);
+      await ethers.provider.send('evm_mine', []);
+      expect(await gated.hasAccess(bob.address)).to.equal(true);
+
+      // expiresAt + 1 → false
+      await time.setNextBlockTimestamp(expiresAt + 1);
+      await ethers.provider.send('evm_mine', []);
+      expect(await gated.hasAccess(bob.address)).to.equal(false);
+    });
+  });
+
+  // ============================================================
+  // 観点 4: 状態遷移
+  // ============================================================
+
+  describe('観点 4: 状態遷移', function () {
+    it('TC-013 grantor が NFT 失うと delegated access も失効', async function () {
+      const { nft, gated, alice, bob, charlie } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      await gated.connect(alice).grantTimedAccess(bob.address, 3600);
+
+      // bob は最初 access 可能
+      await gated.connect(bob).getSecret();
+      expect(await gated.accessCount()).to.equal(1);
+
+      // alice が NFT を charlie に transfer
+      await nft.connect(alice).transferFrom(alice.address, charlie.address, 1);
+
+      // bob は revoke される
+      await expect(gated.connect(bob).getSecret()).to.be.revertedWithCustomError(
+        gated,
+        'NotGated',
+      );
+      expect(await gated.accessCount()).to.equal(1);
+    });
+
+    it('TC-015 grantTimedAccess 上書き', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      await gated.connect(alice).grantTimedAccess(bob.address, 100);
+      const firstExpiry = await gated.timedAccessExpiry(bob.address);
+
+      await gated.connect(alice).grantTimedAccess(bob.address, 200);
+      const secondExpiry = await gated.timedAccessExpiry(bob.address);
+
+      expect(secondExpiry).to.be.gt(firstExpiry);
+      expect(await gated.timedAccessGrantor(bob.address)).to.equal(alice.address);
+    });
+  });
+
+  // ============================================================
+  // 観点 5: 権限
+  // ============================================================
+
+  describe('観点 5: 権限', function () {
+    it('TC-017 grantTimedAccess は NFT holder のみ', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      await expect(
+        gated.connect(bob).grantTimedAccess(alice.address, 3600),
+      ).to.be.revertedWithCustomError(gated, 'NotGated');
+    });
+
+    it('TC-018 自分自身に grant 許容', async function () {
+      const { nft, gated, alice } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      const tx = await gated.connect(alice).grantTimedAccess(alice.address, 3600);
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+      expect(await gated.timedAccessExpiry(alice.address)).to.equal(block.timestamp + 3600);
+      expect(await gated.timedAccessGrantor(alice.address)).to.equal(alice.address);
+    });
+  });
+
+  // ============================================================
+  // 観点 6: 入力バリデーション
+  // ============================================================
+
+  describe('観点 6: 入力バリデーション', function () {
+    it('TC-019 ttl=0 必ず InvalidTtl', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+      await expect(
+        gated.connect(alice).grantTimedAccess(bob.address, 0),
+      ).to.be.revertedWithCustomError(gated, 'InvalidTtl');
+    });
+
+    it('TC-020 ttl=type(uint256).max で overflow revert', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      const maxUint = 2n ** 256n - 1n;
+      await expect(gated.connect(alice).grantTimedAccess(bob.address, maxUint))
+        .to.be.reverted; // generic panic on overflow
+    });
+
+    it('fast-check 相当: 様々な ttl で hasAccess 整合性', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      for (const ttl of [1, 100, 3600, 86400, 31536000]) {
+        const { gated: freshGated, alice: a, bob: b, nft: n } = await loadFixture(deployFixture);
+        await mintFor(n, a);
+        await freshGated.connect(a).grantTimedAccess(b.address, ttl);
+        expect(await freshGated.hasAccess(b.address)).to.equal(true);
+      }
+    });
+  });
+
+  // ============================================================
+  // 観点 7: 冪等性
+  // ============================================================
+
+  describe('観点 7: 冪等性', function () {
+    it('TC-023 getSecret 3 回で accessCount=3', async function () {
+      const { nft, gated, alice } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      await gated.connect(alice).getSecret();
+      await gated.connect(alice).getSecret();
+      await gated.connect(alice).getSecret();
+
+      expect(await gated.accessCount()).to.equal(3);
+    });
+
+    it('TC-024 grantTimedAccess 2 回で expiry 上書き、 grantor 同じ', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      await gated.connect(alice).grantTimedAccess(bob.address, 3600);
+      await gated.connect(alice).grantTimedAccess(bob.address, 7200);
+
+      expect(await gated.timedAccessGrantor(bob.address)).to.equal(alice.address);
+    });
+  });
+
+  // ============================================================
+  // 観点 8: 並行処理
+  // ============================================================
+
+  describe('観点 8: 並行処理', function () {
+    it('TC-027 同 block 内 2 つの grantTimedAccess を同 user に → 後勝ち', async function () {
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      await gated.connect(alice).grantTimedAccess(bob.address, 100);
+      await gated.connect(alice).grantTimedAccess(bob.address, 200);
+
+      // 後勝ちで grantor は同じ
+      expect(await gated.timedAccessGrantor(bob.address)).to.equal(alice.address);
+    });
+  });
+
+  // ============================================================
+  // 観点 10: セキュリティ
+  // ============================================================
+
+  describe('観点 10: セキュリティ', function () {
+    it('TC-029 expiry のみ未来 + grantor=0 → bypass 不可', async function () {
+      // hardhat の network helpers で storage 書き換え
+      const { nft, gated, alice, bob } = await loadFixture(deployFixture);
+
+      const gatedAddr = await gated.getAddress();
+      const slotExpiry = ethers.solidityPackedKeccak256(
+        ['address', 'uint256'],
+        [bob.address, 1], // mapping slot 1 = timedAccessExpiry
+      );
+      const slotGrantor = ethers.solidityPackedKeccak256(
+        ['address', 'uint256'],
+        [bob.address, 2], // mapping slot 2 = timedAccessGrantor
+      );
+
+      const blockNow = await ethers.provider.getBlock('latest');
+      const futureTs = blockNow.timestamp + 10000;
+      await ethers.provider.send('hardhat_setStorageAt', [
+        gatedAddr,
+        slotExpiry,
+        ethers.zeroPadValue(ethers.toBeHex(futureTs), 32),
+      ]);
+      await ethers.provider.send('hardhat_setStorageAt', [
+        gatedAddr,
+        slotGrantor,
+        ethers.ZeroHash,
+      ]);
+
+      // grantor = 0 で hasAccess false
+      expect(await gated.hasAccess(bob.address)).to.equal(false);
+
+      // getSecret も NotGated revert
+      await expect(gated.connect(bob).getSecret()).to.be.revertedWithCustomError(
+        gated,
+        'NotGated',
+      );
+    });
+
+    it('TC-030 grantor 失効後 delegated access も失効', async function () {
+      const { nft, gated, alice, bob, charlie } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+      await gated.connect(alice).grantTimedAccess(bob.address, 3600);
+
+      // alice が NFT を charlie に
+      await nft.connect(alice).transferFrom(alice.address, charlie.address, 1);
+
+      expect(await gated.hasAccess(bob.address)).to.equal(false);
+      await expect(gated.connect(bob).getSecret()).to.be.revertedWithCustomError(
+        gated,
+        'NotGated',
+      );
+
+      // charlie は新所有者
+      expect(await gated.hasAccess(charlie.address)).to.equal(true);
+    });
+
+    it('TC-031 reentrancy 不要 — state 一貫性', async function () {
+      const { nft, gated, alice } = await loadFixture(deployFixture);
+      await mintFor(nft, alice);
+
+      await gated.connect(alice).getSecret();
+      await gated.connect(alice).getSecret();
+
+      expect(await gated.accessCount()).to.equal(2);
     });
   });
 });

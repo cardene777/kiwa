@@ -1,7 +1,7 @@
-# Contract Coverage Report — nextjs-token-gating (Foundry)
+# Contract Coverage Report — nextjs-token-gating
 
-Generated: 2026-06-08
-Skill: /kiwa-forge | Run: round 2 (final)
+Generated: 2026-06-08 (Foundry / forge coverage)
+Skill: /kiwa-forge | Run: round 1 (final)
 Loop terminated: production_100_achieved
 
 ## 1. 判定サマリ
@@ -13,39 +13,36 @@ Loop terminated: production_100_achieved
 | Branches | ✅ 100.00% (8/8) | 100.00% (8/8) |
 | Functions | ✅ 100.00% (7/7) | 100.00% (7/7) |
 
-**判定 — ✅ PASS** (production target 全 4 metric 100% 到達、 残 uncovered 0、 auto loop 2 round で完走、 stalled なし)。
-
-実行サマリ — `forge test` 29 passed / 0 failed / 0 skipped、 wall 110ms、 `forge test --gas-report` で gas 計測も成功 (mint 平均 85,473 gas、 grantTimedAccess 平均 63,263 gas)。
+**判定 — ✅ PASS** (全 4 metric 100% 到達、 production target 完全 cover)
 
 ## 2. file 別 coverage 内訳 (production / test / mock 分類)
 
 | File | カテゴリ | Lines | Stmts | Branches | Funcs | threshold 対象? |
 |---|---|---|---|---|---|---|
-| `contracts/GateNFT.sol` | production | 100% (13/13) | 100% (15/15) | 100% (2/2) | 100% (2/2) | ✅ |
-| `contracts/GatedContent.sol` | production | 100% (22/22) | 100% (29/29) | 100% (6/6) | 100% (5/5) | ✅ |
-| `test/TokenGating.t.sol` | test 自身 | (計測対象外) | - | - | - | ❌ |
+| contracts/GateNFT.sol | production | 100% (13/13) | 100% (15/15) | 100% (2/2) | 100% (2/2) | ✅ |
+| contracts/GatedContent.sol | production | 100% (22/22) | 100% (29/29) | 100% (6/6) | 100% (5/5) | ✅ |
+| test/GateNFT.t.sol | test 自身 | - | - | - | - | ❌ |
+| test/GatedContent.t.sol | test 自身 | - | - | - | - | ❌ |
 
 ## 3. 未到達 line の分類と判断
 
-(なし) — production 全 4 metric 100% 到達のため、 分類対象なし。
-
-### Round 1 → Round 2 で解消した未踏 branch
-
-- **`GatedContent.sol:54` `if (grantor == address(0)) return false`** の true 分岐
-  - **分類**: 真の未踏 (default mapping value の view 挙動)
-  - **原因**: 通常運用では `timedAccessExpiry[unknown] == 0` で line 52 `0 < block.timestamp` が true 評価され早期 return false、 line 54 に到達しない。
-  - **追加 test**: `test_HasAccess_NeverGranted_GrantorZero` — `vm.warp(0)` で `block.timestamp == 0` に戻し line 52 を false 通過 → line 54 の grantor==0 branch に到達。
+未到達 line / branch なし。全 production target 100% 到達。
 
 ## 4. Layer 1 spec への書き戻し提案
 
 | 項目 | 反映先 section | 形式 |
 |---|---|---|
-| **TC-013 期待結果の訂正** | テストケース一覧 § 観点 3 境界値 | 「grantor が NFT 保有なら true」→ 「`expiry < ts` 早期 return で常に false (grantor 保有有無に関わらず)」 |
-| **「不足している仕様」 #4 の解消** | 不足している仕様 / テストケース一覧 | `hasAccess` の `<` 演算子で「expiry == ts は false 経路に入らず、 grantor 経由 fallback で評価される」を明示。 TC-012 / TC-013 で test 化済 |
-| **追加 TC-027 — hasAccess の default mapping branch (coverage 補完)** | テストケース一覧 § 観点 6 入力バリデーション | 9 column 表に新規追加 (TC-027: vm.warp(0) で grantor==0 branch を踏む) |
+| (該当なし) | - | - |
 
-> 注 — 本 skill (Layer 2) は spec を書き換えず、 上記提案を report に列挙のみ。 spec への反映は user 手動 or `/kiwa-design --mode update` (別 Issue 検討予定)。
+### runner 差異 bullet の自動追加 logic (改善 4 / Issue #227) — 適用結果
 
-## 5. test-passed marker
+spec 段階で「GatedContent.sol:54 grantor == address(0) 分岐は Foundry vm.warp(0) でのみ再現可能、 Hardhat は block.timestamp 巻き戻し不可制約により未踏 (許容)」 と記述したが、 **実装段階で vm.warp(0) は不要であることが判明**。 vm.store で grantor=0 を直接書き換えるだけで分岐に到達でき、 Hardhat 側でも `hardhat_setStorageAt` で同等の書き換えが可能 (runner 差異ではない)。
 
-`test-passed` marker 作成条件 — production 全 4 metric 100% 到達 → ✅ 作成済。
+**spec 訂正候補** — runner 差異 bullet を削除 or 「vm.store / hardhat_setStorageAt の storage 書き換えで両 runner cover 可能」 に書き換え。 PR #226/#227 SKILL.md 規約への発見的 feedback として記録 (修正は後続 Issue で対応)。
+
+## 5. test 件数サマリ
+
+- forge test PASS: 33 件 (GateNFT 11 件 + GatedContent 22 件)
+- fuzz test: 2 件 (testFuzz_TC021_transferFrom_RejectsZeroRecipient, testFuzz_grantTimedAccess_TtlRange)
+- fuzz runs: 256 (default)
+- 平均 gas: GateNFT mint 88k / transferFrom 30k / grantTimedAccess 88k / getSecret 24k

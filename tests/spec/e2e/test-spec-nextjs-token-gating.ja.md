@@ -1,200 +1,212 @@
-# test-spec-nextjs-token-gating.md (e2e)
+# test-spec-nextjs-token-gating.ja.md (e2e)
 
 > Layer 1 (`/kiwa-design --layer e2e`) 出力 — Layer 2 skill (`/kiwa-play`) が消費する仕様書
 
 ## 対象機能
 
-`nextjs-token-gating` (dApp e2e) — Next.js 14 App Router + wagmi + RainbowKit 構成の token-gating dApp UI。 wallet 接続 → NFT mint → gating 判定で `accessCount` / `secret` を取得・表示する一連のユーザー体験を Playwright で検証する。
+`nextjs-token-gating` — Next.js + wagmi + RainbowKit UI で GateNFT / GatedContent contract を操作する dApp。 wallet connect → NFT mint → gated content read を 1 page で完結させる token-gating デモ。
 
-対象 file:
+対象 file。
 
-- `examples/nextjs-token-gating/app/page.tsx` — メイン UI (ConnectButton / Mint NFT / Read Secret / 状態表示 6 種)
-- `examples/nextjs-token-gating/app/providers.tsx` — WagmiProvider + RainbowKit + react-query Provider
-- `examples/nextjs-token-gating/app/layout.tsx` — Next.js root layout
-- `examples/nextjs-token-gating/contracts/GateNFT.sol` / `GatedContent.sol` — 連携 contract (anvil deploy 想定)
-- 既存 e2e 基盤 (`/kiwa-play` 想定): `tests/prepare-env.ts` (anvil 起動 + contract deploy + UI wallet inject) / `tests/global-setup.ts` / `tests/global-teardown.ts`
+- `examples/nextjs-token-gating/app/page.tsx` — 全 UI ロジック (mint / read secret / 数値表示)
+- `examples/nextjs-token-gating/app/providers.tsx` — wagmi / RainbowKit provider
+- `examples/nextjs-token-gating/lib/wagmi.ts` — contract address / ABI / chain 定義
+
+UI testid 一覧。
+
+| testid | 種別 | 内容 |
+|---|---|---|
+| `connection-status` | div | `connected` / `disconnected` |
+| `nft-balance` | div | `nftBalance: N` |
+| `is-gated` | div | `isGated: true / false` |
+| `access-count` | div | `accessCount: N` |
+| `secret` | div | `secret: alpha-pass-2025` / `(none)` |
+| `error` | div | `error: <message>` / `(none)` |
+| `mint-button` | button | Mint NFT |
+| `read-secret-button` | button | Read Secret |
 
 ## 仕様の要約
 
 ### ユーザー操作
 
-- ブラウザで `http://127.0.0.1:3044` を開き、 RainbowKit の Connect ボタン (kiwa 環境では auto-inject mock wallet) で wallet 接続する。
-- 接続後、 `Mint NFT` ボタンを押す → wagmi `useWriteContract` で `GateNFT.mint()` 呼出 → tx 完了 → 1.5 秒間隔の `refetchInterval` と onSuccess の `setTimeout(800ms)` で `nftBalance` / `isGated` / `accessCount` が更新表示される。
-- NFT 保有後、 `Read Secret` ボタンを押す → `publicClient.simulateContract` で `getSecret` の revert 有無を事前 check → 通過すれば `writeContract` で getSecret tx 発行 → `secret = "alpha-pass-2025"` を state に保存し UI 表示 → onSuccess で `refetchAll` が走り `accessCount += 1`。
-- NFT 未所有で `Read Secret` を押すと simulateContract が `NotGated` revert で `setError` され、 `error` 表示要素に最初の 100 文字が出る。
+- Connect Wallet を押す → RainbowKit modal → ウォレット選択 → 接続
+- Mint NFT ボタン押下 → wagmi writeContract で GateNFT.mint() 発行 → 1.5s で refetch
+- Read Secret ボタン押下 → simulateContract → success なら getSecret() 発行 → "alpha-pass-2025" 表示
 
 ### API 契約 (HTTP / RPC)
 
-UI が叩く on-chain endpoint。 HTTP API は存在せず、 wagmi 経由で anvil JSON-RPC を呼ぶ。
-
-| 種別 | 経路 | 関数 / 用途 | 観測点 |
-|---|---|---|---|
-| read | `useReadContract` (auto poll 1.5s) | `GateNFT.balanceOf(address)` | `data-testid="nft-balance"` の number |
-| read | `useReadContract` (auto poll 1.5s) | `GatedContent.isGated(address)` | `data-testid="is-gated"` の bool |
-| read | `useReadContract` (auto poll 1.5s) | `GatedContent.accessCount()` | `data-testid="access-count"` の number |
-| simulate | `publicClient.simulateContract` | `GatedContent.getSecret()` (revert 検出) | catch で `data-testid="error"` 表示 |
-| write | `useWriteContract` | `GateNFT.mint()` | tx 成功 onSuccess で `refetchAll()` |
-| write | `useWriteContract` | `GatedContent.getSecret()` | tx 成功 onSuccess で `setSecret("alpha-pass-2025")` |
+(該当なし、 contract 直接呼出のみ)
 
 ### DB / State 更新
 
-UI 内部 React state:
+UI 側 state。
 
-| state | trigger | 観測 testid |
+| state | 触れる variable | tx 境界 |
 |---|---|---|
-| `secret` (string) | Read Secret 成功 onSuccess | `secret` |
-| `error` (string) | simulateContract / writeContract onError | `error` |
-| `tick` (number) | refetchAll の `setTick((n) => n + 1)` | (内部のみ、 強制 re-render 用) |
-
-オンチェーン state は contract spec (`tests/spec/contract/test-spec-nextjs-token-gating.ja.md`) の 7 種と同じ。
+| local | `secret` / `error` (useState) | UI イベントごと |
+| react-query cache | `balance` / `gated` / `accessCount` (useReadContract、 refetchInterval 1500ms) | 1.5s ごと再 fetch |
 
 ### 権限モデル
 
-- wallet 未接続 → Mint / Read Secret button が `disabled` (`!isConnected || isPending` 判定)。
-- wallet 接続 + NFT 未保有 → Read Secret 押下で `NotGated` revert、 mint は可。
-- NFT 保有 → Read Secret で `secret` 取得可、 accessCount 加算。
+- wallet 未接続 — Mint / Read Secret ボタン disabled
+- wallet 接続済 — Mint NFT 自由、 Read Secret は NFT 1 個以上 or grantTimedAccess 済時のみ成功
+- 未保有で Read Secret → simulateContract で revert detect → error 表示
+
+#### kiwa fixture inject 前提 (e2e layer のみ、 改善 2 / Issue #226)
+
+`--layer e2e` 時、 kiwa fixture (`tests/prepare-env.ts` 経由の `dappE2eTest`) が wallet を auto-inject する前提を必ず明示する。 Layer 2 (`/kiwa-play`) が assertion 設計時に「wallet 未接続を前提とした test」 を緩和する判断材料にする。
+
+- default 接続済 前提 — kiwa fixture が wallet auto-inject (default 1 wallet, chainId 31337)。 wallet 未接続 state を再現するには test 内で page を新しい BrowserContext で開くか、 connection-status testid を直接 disconnected 状態で render する経路を test で構築する
 
 ### 外部連携
 
-- anvil ローカル RPC (`http://127.0.0.1:8545`、 chain id 31337) を wagmi 経由で呼ぶ。
-- RainbowKit (`@rainbow-me/rainbowkit` 2.2+) は kiwa の auto-inject mock wallet (test 環境では `tests/prepare-env.ts` の wallet 注入) に置換される。
-- react-query (`@tanstack/react-query` 5.59+) の QueryClient で全 useReadContract を 1.5 秒間隔 refetch。
+- wagmi v2 + viem (RPC: anvil 127.0.0.1:8551)
+- RainbowKit (wallet inject は kiwa fixture が injector script で eth_provider 注入)
+- contract: GateNFT / GatedContent (deploy は prepare-env.ts で実施)
 
 ### 失敗 mode
 
-- wallet 接続前の操作 → button が `disabled` で UI から trigger 不可。
-- NFT 未保有で Read Secret → `publicClient.simulateContract` 段階で revert を捕捉、 `data-testid="error"` に `NotGated` 由来のメッセージを表示。
-- mint tx が wallet reject → wagmi の onError は本実装で未配線 (writeContract に onError なし)、 UI に明示的なエラー表示が出ない。 「不足している仕様」 に記録。
-- anvil 切断 / RPC 503 → wagmi の useReadContract が data undefined のまま (`(loading)` 表示)、 button は依然押せる。 タイムアウト UX が未定義。
-- `refetchAll` の `setTimeout(800ms)` 内に複数操作を連打 → state update が 800ms ずれで重畳、 表示の race あり。
-- secret 表示は contract 戻り値ではなく **UI でハードコードした文字列** (`setSecret('alpha-pass-2025')`)。 contract の `SECRET` 定数を変更しても UI 表示は連動しない。
+- simulateContract revert → catch → error message 100 文字に truncate して `error` testid に表示
+- writeContract onError → error message を `error` に表示
+- refetch race — refetchInterval 1500ms 中に状態変化があれば 800ms の `refetchAll()` で即更新
 
 ## 主な品質リスク
 
 | 入力要素 | 売上影響 | セキュリティ影響 | データ破壊 | 利用頻度 | 過去障害 | 根拠 |
 |---|---|---|---|---|---|---|
-| ConnectButton + wallet inject | 低 | 中 | 低 | 高 | 低 | dApp の入口、 wallet inject 失敗で UI 全体 disabled |
-| Mint NFT button | 低 | 中 | 中 | 高 | 低 | free mint の起点、 button disabled 制御漏れで未接続時 mint 試行が走るリスク |
-| Read Secret button | 中 | 高 | 低 | 高 | 低 | gating 判定の UX、 simulateContract bypass / UI ハードコード文字列の改ざんで secret 表示の信頼性低下 |
-| 状態表示 (6 testid) | 低 | 中 | 低 | 高 | 低 | refetchInterval / setTimeout で表示遅延、 試験で polling 完了待ち不足だと flaky |
-| エラー表示 | 中 | 高 | 低 | 中 | 低 | NotGated revert message の見せ方が 100 文字 truncate で具体 error 種別が見えにくい |
-| accessCount 表示 | 低 | 中 | 低 | 高 | 低 | gating bypass 試行を観察する key metric、 polling 1.5s で race が起きやすい |
+| Mint NFT button | 低 | 中 | 中 | 高 | 低 | 主要 flow、 NFT 取得経路 |
+| Read Secret button | 中 | 高 | 中 | 高 | 低 | gated content access、 unauthorized read で SECRET 漏洩リスク |
+| accessCount 表示 | 低 | 中 | 低 | 中 | 低 | 監査ログ的意味、 race で表示遅延 |
+| connection-status | 低 | 中 | 低 | 高 | 低 | wallet 接続状態の誤認は UX 重大 |
+
+**総合リスク = 高** (Read Secret のセキュリティ高 + Mint の利用頻度高)
 
 ## 推奨テスト構成
 
-| layer | 目的 | 観点 (Step 3 から選択) |
+| layer | 目的 | 観点 |
 |---|---|---|
-| 単体 | (本仕様書は e2e、 単体は contract 側 spec で扱う) | (該当なし) |
-| 統合 | wagmi hook 単体は test しないが、 UI と contract の橋渡し (read polling / write callback) は次の E2E で吸収 | (該当なし) |
-| E2E | wallet 接続 / mint / read secret の主要導線、 disabled 制御、 revert UX、 polling 反映、 multi-user gating | 正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / セキュリティ / 回帰 |
+| E2E (Playwright + kiwa fixture) | UI flow 完走、 testid assertion で state 確認 | 正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 並行処理 / セキュリティ |
 
 ## テスト観点一覧
 
-`docs/SKILL-DESIGN.md` § Step 3 の 11 観点から選択。
-
 - 1. 正常系 — 適用 (常に)
-- 2. 異常系 — 適用 (anvil RPC / wallet 接続失敗 / contract revert)
-- 3. 境界値 — 適用 (refetch polling 1.5s + setTimeout 800ms / accessCount のゼロ初期値)
-- 4. 状態遷移 — 適用 (disconnected → connected → minted → gated → secret-read の 5 state)
-- 5. 権限 — 適用 (wallet 未接続 / NFT 未保有 / NFT 保有 の 3 階層)
-- 6. 入力バリデーション — 適用 (button disabled、 連打防御)
-- 7. 冪等性 — 適用 (Mint / Read Secret 連打時の重複 tx 防御 / 重複表示防御)
-- 8. 並行処理 — 適用 (multi-tab で同 wallet が連続 mint、 別 user の race)
-- 9. 性能 — 非適用 (UI は 1 ページのみ、 large payload なし、 polling 1.5s も負荷無視可)
-- 10. セキュリティ — 適用 (UI 表示 secret は contract 値の re-display、 ハードコード値との乖離検出)
-- 11. 回帰 — 非適用 (現時点で既存 e2e test 不在の clean start)
+- 2. 異常系 — 適用 (simulateContract revert 経路)
+- 3. 境界値 — 適用 (NFT 0 個 / 1 個 / 複数個 で UI 表示)
+- 4. 状態遷移 — 適用 (disconnected → connected / NFT 0 → 1 / accessCount 増分)
+- 5. 権限 — 適用 (wallet 未接続でボタン disabled / NFT 0 で Read Secret revert)
+- 6. 入力バリデーション — 非適用 (UI に直接入力なし、 button click のみ)
+- 7. 冪等性 — 適用 (連続 mint で nftBalance 増分 / 連続 Read で accessCount 増分)
+- 8. 並行処理 — 適用 (refetchInterval と user 操作の race、 multi-tab)
+- 9. 性能 — 非適用 (静的 SPA、 性能 threshold 未設定)
+- 10. セキュリティ — 適用 (Read Secret 不正経路、 NFT 0 個での SECRET 取得試行)
+- 11. 回帰 — 非適用 (新規 dApp)
 
 ## テストケース一覧
 
-観点別グループ、 グループ内は優先度 (高 → 中 → 低) 順。
+総合リスク=高なので各観点 3 TC 以上を確保 (PR #230 改善 5 enforce)。
 
 ### 観点 1: 正常系
 
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
-| TC-001 | E2E | 正常系 | anvil 起動 + contract deploy + wallet inject (alice) | (なし) | UI を開く | `connection-status` が `connected` を表示、 `nft-balance` が `0`、 `is-gated` が `false`、 `access-count` が `0`、 `mint-button` / `read-secret-button` が enabled | 高 | 推奨 |
-| TC-002 | E2E | 正常系 | TC-001 完了 | (なし) | `Mint NFT` を click → tx 完了を polling で確認 | `nft-balance` が `1` に更新、 `is-gated` が `true` に更新、 `access-count` は `0` のまま | 高 | 推奨 |
-| TC-003 | E2E | 正常系 | TC-002 完了 (NFT 保有済) | (なし) | `Read Secret` を click → tx 完了を polling で確認 | `secret` が `alpha-pass-2025` を表示、 `access-count` が `1` に更新、 `error` は `(none)` のまま | 高 | 推奨 |
-| TC-004 | E2E | 正常系 | wallet 未接続 (mock inject 未実行) | (なし) | UI を開く | `connection-status` が `disconnected`、 `mint-button` / `read-secret-button` が `disabled`、 `nft-balance` / `is-gated` が `(loading)` 表示 | 中 | 推奨 |
+| TC-E001 | E2E | 正常系 | kiwa fixture wallet 接続済 | (なし) | page load 後 connection-status / nft-balance testid を確認 | connection-status=connected、 nftBalance=0、 isGated=false、 accessCount=0 | 高 | 推奨 |
+| TC-E002 | E2E | 正常系 | wallet 接続済 / NFT 0 | mint-button click | Mint NFT 押下 → 1.5s 待機 → nft-balance / is-gated 確認 | nftBalance=1、 isGated=true、 mint tx success | 高 | 推奨 |
+| TC-E003 | E2E | 正常系 | wallet 接続済 / NFT 1 個 | read-secret-button click | Read Secret 押下 → secret / access-count 確認 | secret=alpha-pass-2025、 accessCount=1、 error=(none) | 高 | 推奨 |
+| TC-E004 | E2E | 正常系 | wallet 接続済 / NFT 1 個 / Read 済 | read-secret-button click 2 回目 | 連続 Read | accessCount=2 (累積)、 secret 表示維持 | 高 | 推奨 |
 
 ### 観点 2: 異常系
 
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
-| TC-005 | E2E | 異常系 | wallet 接続済 + NFT 未保有 | (なし) | `Read Secret` を click | `error` testid に `NotGated` 由来の文字列 (例 `execution reverted: NotGated()` の頭 100 文字) が表示、 `secret` は `(none)` のまま、 `access-count` 不変 | 高 | 推奨 |
-| TC-006 | E2E | 異常系 | wallet 接続済 + NFT 未保有 + `error` 表示状態 (TC-005 完了直後) | (なし) | 続けて `Mint NFT` を click | `nft-balance` が `1` に更新、 `is-gated` が `true` に更新、 `error` は `(none)` か旧表示のまま (UI には clear 経路あり?要確認) | 中 | 推奨 |
+| TC-E005 | E2E | 異常系 | wallet 接続済 / NFT 0 | read-secret-button click | Read Secret 押下 → simulateContract revert detect | error testid に NotGated 関連 message、 secret=(none)、 accessCount 不変 | 高 | 推奨 |
+| TC-E006 | E2E | 異常系 | wallet 接続済 (anvil 停止状態) | mint-button click | Mint 押下 → RPC error | error testid に "Network" or 接続 error message、 nftBalance 不変 | 中 | 推奨 |
+| TC-E007 | E2E | 異常系 | wallet 接続済 / 不正 chainId | mint-button click | wrong chain 状態で Mint | error / nft-balance に "(loading)" 表示維持、 tx 発火しない | 中 | 推奨 |
 
 ### 観点 3: 境界値
 
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
-| TC-007 | E2E | 境界値 | wallet 接続済 | (なし) | `Mint NFT` 押下後 `refetchInterval` 1.5s + `setTimeout` 800ms の合計 (約 2.3s) 待機 | `nft-balance` が `(loading)` から `1` へ非可逆的に遷移 (途中で `0` 表示はあっても最終 `1` に固定) | 中 | 推奨 |
-| TC-008 | E2E | 境界値 | wallet 接続済 + NFT 保有済 | (なし) | `Read Secret` 押下後 1 秒以内に再度 click | 2 回目の click は wagmi `isPending` で button disabled、 重複 tx 発行されない、 `access-count` は最終 1 回分のみ加算 | 中 | 推奨 |
+| TC-E008 | E2E | 境界値 | wallet 接続済 / NFT 0 | (なし) | nftBalance=0 から isGated=false 確認 | nftBalance=0、 isGated=false、 Read Secret は disabled でなく click 可能だが error | 高 | 推奨 |
+| TC-E009 | E2E | 境界値 | wallet 接続済 / NFT 連続 mint | mint-button 3 回 click | 3 回 mint で nft-balance 表示更新 | nftBalance=3、 totalSupply=3 (UI 外)、 isGated=true | 中 | 推奨 |
+| TC-E010 | E2E | 境界値 | wallet 接続済 / accessCount=0 | Read Secret 1 回 | accessCount=0 → 1 への state transition | accessCount testid が "0" から "1" へ変化 (refetchInterval 1500ms で更新) | 中 | 推奨 |
 
 ### 観点 4: 状態遷移
 
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
-| TC-009 | E2E | 状態遷移 | clean start (anvil reset + contract redeploy) | (なし) | 全 5 state を順次たどる: `disconnected → connected (wallet inject) → minted (Mint) → gated (state 表示確認) → secret-read (Read Secret)` | 各 state で観測点 (testid) が期待値に推移する、 逆順 (例 `secret-read → disconnected`) で button が `disabled` になるかは TC-004 で別途確認 | 高 | 推奨 |
+| TC-E011 | E2E | 状態遷移 | 接続前 | wallet inject 完了 | page load → connection-status 確認 | connection-status: connected (kiwa fixture が auto-inject) | 高 | 推奨 |
+| TC-E012 | E2E | 状態遷移 | wallet 接続済 / NFT 0 | Mint → Read の full flow | (1) Mint click (2) nft-balance=1 確認 (3) Read click (4) secret 確認 | 4 step 全 success、 accessCount=1 | 高 | 推奨 |
+| TC-E013 | E2E | 状態遷移 | wallet 接続済 / NFT 1 / Read 済 | (なし) | refetchInterval 1500ms の間 mint なしで accessCount 不変 | accessCount テキスト 1500ms 間隔 polling でも変化なし | 中 | 推奨 |
 
 ### 観点 5: 権限
 
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
-| TC-010 | E2E | 権限 | wallet 未接続 | (なし) | `mint-button` / `read-secret-button` の disabled 属性を Playwright で確認 | 両 button が `disabled`、 force click でも tx 発行されない (button click 自体が DOM レベルで block される) | 高 | 推奨 |
-
-### 観点 6: 入力バリデーション
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
-| TC-011 | E2E | 入力バリデーション | wallet 接続済 | (なし) | `Mint NFT` を 3 回連打 (300ms 間隔) | `isPending` で 2 回目以降 button disabled、 tx は 1 件のみ発行、 `nft-balance` は最終 `1` (期間中の polling で連続 mint しない) | 高 | 推奨 |
+| TC-E014 | E2E | 権限 | wallet 接続済 / NFT 0 | (なし) | mint-button / read-secret-button の disabled 属性 check | 両 button enabled (isConnected=true、 isPending=false)、 disconnected 状態が test fixture では再現困難なので接続済 default で確認 | 中 | 推奨 |
+| TC-E015 | E2E | 権限 | wallet 接続済 / NFT 0 | read-secret-button click | NFT 0 で Read 試行 → error 表示 | error testid に NotGated 関連の text、 secret=(none) | 高 | 推奨 |
+| TC-E016 | E2E | 権限 | wallet 接続済 / mint 後 NFT 1 | Read Secret | NFT 取得後 Read 可能 | secret=alpha-pass-2025、 accessCount+1 | 高 | 推奨 |
 
 ### 観点 7: 冪等性
 
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
-| TC-012 | E2E | 冪等性 | wallet 接続済 + NFT 保有済 + `secret` 表示済 | (なし) | `Read Secret` を再度 click | 2 回目の tx も成功し `access-count` が `+1`、 `secret` 表示文字列は変わらず `alpha-pass-2025` のまま (idempotent UI 表示) | 中 | 推奨 |
+| TC-E017 | E2E | 冪等性 | wallet 接続済 | mint 5 回連続 | nft-balance が 5 になるまで連続 mint | nftBalance=5、 各 mint は新 tokenId 発行 (UI 上は totalSupply 非表示だがバックエンド整合) | 中 | 推奨 |
+| TC-E018 | E2E | 冪等性 | wallet 接続済 / NFT 1 | Read Secret 5 回連続 | accessCount=5 まで増分 | accessCount=5、 secret 表示維持 | 中 | 推奨 |
+| TC-E019 | E2E | 冪等性 | wallet 接続済 / NFT 1 | Mint 後即 Read | mint と read の order 入れ替えても結果同じ | nftBalance=2 (1 増分)、 accessCount=1 | 中 | 推奨 |
 
 ### 観点 8: 並行処理
 
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
-| TC-013 | E2E | 並行処理 | 2 つの browser context (alice / bob)、 双方接続済 | (なし) | alice が Mint → bob が Mint を同時実行、 双方の UI で polling 反映を観測 | alice の `nft-balance` が `1`、 bob の `nft-balance` が `1`、 双方の `is-gated` が `true`、 tokenId は別個に発行 (alice=1, bob=2 のいずれか) | 中 | 推奨 |
-| TC-014 | E2E | 並行処理 | TC-013 完了 (alice / bob が NFT 保有) | (なし) | alice が grant→bob で getSecret 経由 + 直接 bob が mint 済の経路で getSecret、 双方の `access-count` が同時に更新される | 双方の UI で `access-count` が `2` に到達 (polling 1.5s 内で順次反映)、 表示の race で `1 → 0 → 2` のような巻き戻りが無いこと | 低 | 手動 |
+| TC-E020 | E2E | 並行処理 | wallet 接続済 | mint-button 即 2 回 click | refetchInterval 1500ms 中に 2 回 mint | 2 mint tx 両方 success、 nftBalance=2 (1.5s 内に反映) | 中 | 推奨 |
+| TC-E021 | E2E | 並行処理 | wallet 接続済 / NFT 1 | Mint → Read 連打 | UI 操作 race condition (連打) | tx ordering で nftBalance=2、 accessCount=1、 error なし | 中 | 推奨 |
+| TC-E022 | E2E | 並行処理 | wallet 接続済 | page 表示中の refetch | refetchInterval 1500ms で自動 refetch する間に user mint | 自動 refetch と user-triggered refetchAll() (800ms) が干渉しても最終 state 一貫 | 低 | 推奨 |
 
 ### 観点 10: セキュリティ
 
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
-| TC-015 | E2E | セキュリティ | wallet 接続済 + NFT 未保有 | (なし) | DevTools 経由で `mint-button` の `disabled` 属性を強制削除 → click | RPC レベルでは `mint()` は誰でも実行可能なため tx は通る (free mint 設計、 UI の disabled は UX 制約のみ)、 `nft-balance` が `1` に更新、 「UI 改ざんで secret を読めるか」 は別 TC で確認 | 高 | 推奨 |
-| TC-016 | E2E | セキュリティ | wallet 接続済 + NFT 未保有 | (なし) | DevTools 経由で `read-secret-button` の `disabled` 属性を強制削除 → click | simulateContract が `NotGated` で revert、 `error` 表示、 `secret` は `(none)` のまま、 UI ハードコード `alpha-pass-2025` が DOM 出現しない | 高 | 推奨 |
-| TC-017 | E2E | セキュリティ | contract の `SECRET` 定数 を hardcode と異なる値で再 deploy (例 `"changed-pass"`) | (なし) | NFT 保有後 `Read Secret` click | UI 表示 `secret` は **UI ハードコード値 (`alpha-pass-2025`)** のまま、 contract 戻り値とは乖離 (実装上の bug、 セキュリティ的には deceptive UI) | 中 | 推奨 |
+| TC-E023 | E2E | セキュリティ | wallet 接続済 / NFT 0 | (なし) | Read Secret 試行 → simulateContract で revert detect | secret testid="(none)"、 SECRET 値が UI に絶対漏れない (revert で writeContract 自体 skip) | 高 | 推奨 |
+| TC-E024 | E2E | セキュリティ | wallet 接続済 / NFT 1 / Read 済 / その後 NFT transfer して 0 個 | Read Secret 再試行 | NFT 失った後の Read | error 表示、 secret=(none) (キャッシュも消去)、 accessCount 不変 | 高 | 推奨 |
+| TC-E025 | E2E | セキュリティ | wallet 接続済 / 別 user の NFT で grant 受領 | (なし) | grant 受領者として getSecret() | grant 経路で secret 表示可能 (UI 上は別 grant flow 未実装、 spec 要望) | 低 | 推奨 |
 
 ## 自動化すべきテスト
 
-優先度順 (高 → 中 → 低)。 Layer 2 (`/kiwa-play`) が次フェーズで `tests/{example}.spec.ts` に変換する。
+優先度順 (高 → 中 → 低)。
 
-- TC-001 / TC-002 / TC-003 (高) — 正常系: 初期状態 → mint → read secret の主要導線
-- TC-005 (高) — 異常系: NFT 未保有 + read secret で error 表示
-- TC-009 (高) — 状態遷移: 5 state 順次遷移
-- TC-010 (高) — 権限: button disabled 制御 (未接続)
-- TC-011 (高) — 入力バリデーション: 連打防御
-- TC-015 / TC-016 (高) — セキュリティ: DOM 改ざんで button disabled bypass / secret leak 防御
-- TC-004 / TC-006 (中) — 異常系の補助 / 切替直後 state
-- TC-007 / TC-008 (中) — polling 境界値 / 連打 race
-- TC-012 (中) — 冪等性: 二重 read 表示
-- TC-013 (中) — 並行処理: multi-user mint race (browser context 2 つ)
-- TC-017 (中) — セキュリティ: UI ハードコード値と contract SECRET の乖離
+- TC-E001, E002, E003, E004 (高、 正常系)
+- TC-E005 (高、 異常系)
+- TC-E011, E012 (高、 状態遷移)
+- TC-E015, E016 (高、 権限)
+- TC-E023, E024 (高、 セキュリティ)
+- TC-E006, E007 (中、 異常系)
+- TC-E008, E009, E010 (中、 境界値)
+- TC-E013 (中、 状態遷移)
+- TC-E014 (中、 権限)
+- TC-E017, E018, E019 (中、 冪等性)
+- TC-E020, E021 (中、 並行処理)
+- TC-E022 (低、 並行処理)
+- TC-E025 (低、 セキュリティ — UI 未実装で skip 候補)
 
 ## 手動確認でよいテスト
 
-- TC-014 (並行処理 — accessCount の race) — 理由: 2 user の polling タイミングが unstable で flaky になりやすい、 手動で実機確認 (browser 2 tab 開いて目視で `access-count` 推移) の方が再現性高い。
+- TC-E025 — UI に grant 受領者の flow が未実装、 contract layer test で代替 (kiwa fixture 拡張前提のため別 issue 化候補、 #224 helper を使えば実装可能)
 
 ## 不足している仕様
 
-- wagmi `useWriteContract` の `onError` が `Mint NFT` 経路で未配線、 mint tx が wallet reject されたときの UI 表示 (button reset / error 表示 / 再試行可否) が仕様で未定義。
-- `Read Secret` 成功後の `error` state clear (TC-006 ケース) の仕様が未定義、 連続操作で残存 error が view にとどまる可能性。
-- `refetchInterval: 1500` と `onSuccess` 内 `setTimeout(800ms)` の合計 wait time (約 2.3 秒) が UI 表示更新の SLA、 Playwright の `expect(...).toHaveText` polling は default 5 秒なので余裕あるが、 dev server 遅延込みの最大 wait は仕様で明示されていない (Layer 2 で expect の timeout 設定が必要)。
-- `setSecret('alpha-pass-2025')` が UI ハードコードで contract の戻り値と乖離する仕様意図が不明。 仕様上の制約か単純な実装簡略化か未確定。
-- multi-tab / multi-account の wallet inject 戦略 (`tests/prepare-env.ts` が複数 account を inject できる構成か) が確認できていない、 TC-013 / TC-014 の前提条件成立可否がここに依存。
-- DevTools 改ざん test (TC-015 / TC-016) は Playwright の `evaluate` で `button.removeAttribute('disabled')` した後 click する形を想定しているが、 React 側の `disabled={!isConnected || isPending}` が次の render で revert する可能性がある。 厳密な「DOM 改ざん」かどうかの定義を Layer 2 で確定する必要あり。
+- wallet 未接続 (disconnected) state を test で再現する方法が未定義 (kiwa fixture は default 接続済、 PR #229 で追加した別 BrowserContext 経路で代替可能)
+- grant 受領者 UI が未実装 (TC-E025 が contract 層のみ cover、 UI 拡張余地)
+- accessCount の refetchInterval 1500ms と user-triggered 800ms refetchAll() の race 仕様が docs 未定義 (実装は問題ないが test author に依存)
+- error message の truncate 100 文字制約は意図的 UX か不明 (full error log を取れる経路を追加検討)
+
+### runner 差異 (Foundry / Hardhat の制約) bullet
+
+(該当なし、 e2e layer は Playwright 単一 runner)
+
+## Layer 2 連携
+
+```text
+/kiwa-play --mode new --rounds 4 --lang ja
+```
+
+Playwright + @kiwa/core fixture で wallet inject auto。 PR #229 の 3 helper (waitForWalletConnected / injectMultipleWallets / setStorageSlot) を opt-in 利用可能 (TC-E024 / E025 で setStorageSlot / injectMultipleWallets が有用)。
