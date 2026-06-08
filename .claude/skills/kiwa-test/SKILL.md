@@ -185,6 +185,24 @@ Total duration: {sec} 秒
 - coverage report: `tests/reports/contract/coverage-report-{example}.{lang}.md` / `tests/reports/e2e/coverage-report-{example}.{lang}.md`
 ```
 
+### Step 5b: kiwa-review 自動呼出 (result-review mode)
+
+Step 5 で統合 report Write 完了後、 test 実行結果の総合品質を独立 review する。 `/kiwa-review --mode result-review --module {example}` を内部呼出し、 coverage 達成度 / passing 件数 / flaky 兆候 / 子 review 集約 / 後追い項目 を 5 軸で判定。
+
+呼出例:
+```text
+/kiwa-review --mode result-review --module {example} --lang $DOC_LANG
+```
+
+review 結果:
+- PASS (weighted_score >= 7.0) → 統合 report Section 1 に「result-review PASS / score」 追記、 chain 完了 summary に含める
+- FAIL critical なし → 統合 report Section 4 「次アクション」 に result-review 指摘を追記
+- FAIL critical あり → 統合 report Section 1 に「⚠️ critical 警告」 を明示、 user に「修正必須 / そのまま完了」 を AskUserQuestion
+
+report 出力先: `tests/reports/review/result-review-{example}.{$DOC_LANG}.md`
+
+`--no-review` 引数で本 step を skip 可能 (CI 用)。
+
 ### Step 6: 完了 summary を user に return
 
 ```text
@@ -229,7 +247,8 @@ graph TD
     D2 -->|Step 9| R5["/kiwa-review --mode test-review"]
     R3 --> E[Step 5 統合 report]
     R5 --> E
-    E --> F["Step 6 user に summary return"]
+    E --> R6["/kiwa-review --mode result-review (Step 5b)"]
+    R6 --> F["Step 6 user に summary return"]
 ```
 
 ## 完了条件
