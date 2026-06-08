@@ -4,19 +4,23 @@ Internal test docs for kiwa contributors and anyone working inside the kiwa repo
 
 What lives here.
 
+- 🚀 [run-tests.md](./run-tests.md) — **Run the full chain in one command with `/kiwa-test`** (`kiwa-design` → `kiwa-forge` / `kiwa-hardhat` / `kiwa-play` → `kiwa-review`), choosing contract / dApp / both at startup. **Start here first** (Recommended)
+- ✍️ [write-tests-manually.md](./write-tests-manually.md) — **Hand-write tests by importing `@kiwa/core` as a library instead of using skills** (retrofitting tests into an existing dApp, reusing only fixtures, swapping only some helpers over to kiwa, etc.). Includes four single-file samples (mint / marketplace / snapshot / custom error)
 - 🛠️ [skill-chain-tutorial.md](./skill-chain-tutorial.md) — Full flow through the four-skill chain (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat` → `/kiwa-play`) — from spec generation to contract test + e2e test all the way to running them
 - 🧩 [retrofit-existing-dapp.md](./retrofit-existing-dapp.md) — Bolt the skill chain onto a dApp + Foundry project that already works (walked through with the nextjs-token-gating example)
+- ⚒️ [run-contract-tests.md](./run-contract-tests.md) — Generate and run tests for **multiple contracts under `contracts/` at once** using the individual skills (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat`) (uses the two-contract nft-marketplace example; collaboration scenarios live in the primary contract test file; the same flow applies to a single contract too)
+- 🎭 [run-dapp-e2e-tests.md](./run-dapp-e2e-tests.md) — Generate and run Playwright specs using the individual skills **from the UI (`app/`) side** (`/kiwa-design --input app/` → `/kiwa-play`) (contract functions never called from the frontend are out of scope)
 
-> Note — The Japanese versions `run-tests.ja.md` (one-command full chain via `/kiwa-test`), `run-contract-tests.ja.md`, and `run-dapp-e2e-tests.ja.md` contain the step-by-step "use the skill to create tests" guides. English translations will follow once the Japanese guides have been verified end-to-end locally.
-
-## The four kiwa skills
+## The six kiwa skills
 
 | Skill | Layer | Role | SSOT |
 |---|---|---|---|
+| `/kiwa-test` | orchestrator | Run the entire skill chain in one command (contract / dApp / both) | `.claude/skills/kiwa-test/SKILL.md` |
 | `/kiwa-design` | Layer 1 | From feature spec / API / contract code, produce a nine-section unified spec | `.claude/skills/kiwa-design/SKILL.md` |
 | `/kiwa-forge` | Layer 2 contract | Convert the Layer 1 spec into Foundry `test/*.t.sol` and run `forge test` | `.claude/skills/kiwa-forge/SKILL.md` |
 | `/kiwa-hardhat` | Layer 2 contract | Convert the Layer 1 spec into Hardhat `test/*.test.cjs`, run `npx hardhat test`, gather coverage | `.claude/skills/kiwa-hardhat/SKILL.md` |
 | `/kiwa-play` | Layer 3 e2e | Design / implement / run Playwright `tests/*.spec.ts` on top of the `@kiwa/core` fixture | `.claude/skills/kiwa-play/SKILL.md` |
+| `/kiwa-review` | reviewer | Judge spec / test code / execution results in three modes (spec-review / test-review / result-review) | `.claude/skills/kiwa-review/SKILL.md` |
 
 ## Big picture
 
@@ -35,9 +39,13 @@ The whole chain hinges on **the nine-column table inside the Layer 1 output (`te
 
 ## Where to start
 
-- 🆕 **First time writing tests with kiwa** → read [skill-chain-tutorial.md](./skill-chain-tutorial.md) from the top
-- 🧩 **Adding tests to an existing dApp + Foundry project** → walk through [retrofit-existing-dapp.md](./retrofit-existing-dapp.md)
-- 📚 **Need a specific skill's full spec** → open `.claude/skills/kiwa-{design,forge,hardhat,play}/SKILL.md` directly
+- 🚀 **You want to run the full chain in one command first** (recommended entry point) → start at [run-tests.md](./run-tests.md)
+- ✍️ **You want to add tests by hand without using skills** (direct library usage) → read [write-tests-manually.md](./write-tests-manually.md)
+- 🆕 **You want to understand kiwa's skill-chain model from zero** → read [skill-chain-tutorial.md](./skill-chain-tutorial.md)
+- 🧩 **You want to retrofit tests into an existing dApp + Foundry project** → walk through [retrofit-existing-dapp.md](./retrofit-existing-dapp.md)
+- ⚒️ **You only want the contract-side procedure** (Foundry + Hardhat) → read [run-contract-tests.md](./run-contract-tests.md)
+- 🎭 **You only want the dApp e2e procedure** (Playwright + UI-first) → read [run-dapp-e2e-tests.md](./run-dapp-e2e-tests.md)
+- 📚 **You only need the full spec for a specific skill** → open `.claude/skills/kiwa-{test,design,forge,hardhat,play,review}/SKILL.md` directly
 
 ## Related docs
 
