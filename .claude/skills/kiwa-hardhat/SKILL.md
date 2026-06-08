@@ -75,6 +75,19 @@ npx hardhat compile 2>&1 | tail -10
 
 spec の function / error が実 contract に存在しなければ「不足している仕様」として記録、 Step 3 に進む前にユーザーに報告。
 
+#### Step 2b: spec 期待結果 ↔ contract logic 矛盾検出 (改善 1 / Issue #226)
+
+`/kiwa-forge` Step 2b と同じ仕様で、 spec の「期待結果」 column と contract logic を grep ベースで比較する (両 skill で共通 logic、 SSOT は `/kiwa-forge` SKILL.md § Step 2b)。
+
+判定 logic 概要。
+
+1. spec「期待結果」 column から条件 + 期待値の pair を抽出
+2. contract 該当 function を `grep -A 20 "function {name}" contracts/**/*.sol` で抽出し early return / require / event emit の矛盾を検出
+3. 矛盾検出時は report Section 4「Layer 1 spec への書き戻し提案」 に bullet 追加 (format は `/kiwa-forge` SKILL.md § Step 2b と同じ)
+4. 検出時は test code 生成を継続 (期待結果を contract 側に合わせて Write)、 report に書き戻し提案を残す
+
+詳細 format と PR #223 実例は `/kiwa-forge` SKILL.md § Step 2b を Read (本 skill では重複避けるため SSOT 参照)。
+
 ### Step 3: 観点別 Hardhat helper 変換
 
 Layer 1 spec の各ケース行を 観点別に Hardhat helper へ変換 (詳細マッピングは `references/hardhat-mapping.md`)。
