@@ -33,6 +33,7 @@ $ARGUMENTS
 - `--test-path {path}` — test code path を明示指定 (test-review mode のみ、 default は spec から推定)
 - `--lang {ja|en|<ISO 639-1>}` — report 生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-auto-call` — 他 skill からの自動呼出ではなく単体起動として動作 (chain effect 抑制)
+- `--no-issue-create` — result-review 軸 5 = 0 検出時の自動 Issue 化 AskUserQuestion を skip (CI / 自動化用、 改善 3 / Issue #226)
 
 ## 実行フロー
 
@@ -157,6 +158,40 @@ Target: {spec_path} / {test_paths}
 - FAIL critical あり → 呼出元に critical 指摘の summary を return、 user に AskUserQuestion で「無視して継続 / spec or test 修正 / chain 中断」を選ばせる
 
 `--no-auto-call` 指定時は chain return せず report Write だけで終了。
+
+#### result-review mode: 軸 5 = 0 (後追い項目残存) 検出時の自動 Issue 化 (改善 3 / Issue #226)
+
+`--mode result-review` で軸 5 (後追い項目 = spec の「不足している仕様」 bullet の Issue / TODO 紐付け率) の score = 0 を検出した場合、 後追い bullet が放置されている。 Step 4 で AskUserQuestion を強制発火する。
+
+判定 logic。
+
+1. spec file (`tests/spec/{layer}/test-spec-{module}.{lang}.md`) の「不足している仕様」 section から bullet 一覧を抽出
+2. 各 bullet について Issue 番号 (`#NNN`) / TODO 注記 (`TODO:` / `FIXME:`) の引用が末尾にあるか check
+3. 引用率 = 0 (どの bullet にも紐付けがない) なら軸 5 = 0 critical 警告となる
+
+検出時のアクション。
+
+```text
+question: "spec の「不足している仕様」 に {N} 件 bullet があるが、 Issue / TODO 紐付けが 0 件です。 どう処理しますか?"
+header: "後追い項目"
+multiSelect: false
+
+選択肢:
+- label: "🆕 全 {N} 件を別 Issue 化 (gh api で自動起票) (Recommended)"
+  description: "理由 — spec の後追い項目を恒久的に追跡可能化、 result-review 軸 5 critical を解消。 1 bullet = 1 Issue で起票、 title は「feat-improve(spec): {module} の不足仕様『{bullet 1 行目 40 字}』 を解消」、 body は bullet + 関連 spec file path を含む。 ⭐⭐⭐⭐⭐"
+- label: "📝 spec file に TODO 注記を追加 (各 bullet 末尾に TODO: 追記)"
+  description: "理由 — Issue 化までは大げさだが追跡したい、 spec 内に TODO 注記を残す。 軸 5 = 部分 score (0.5 程度) に格上げ。 ⭐⭐⭐"
+- label: "⏭️ そのまま完了 (軸 5 = 0 を許容)"
+  description: "理由 — bullet は spec author の memo として後で読めば良い、 自動追跡は不要。 result-review weighted_score が落ちることを許容。 ⭐⭐"
+```
+
+`🆕` 選択時は `gh api repos/{owner}/{repo}/issues --method POST` で N 件並列起票 (template = `feat-improve`、 `Closes` は持たず、 PR 起票時に手動連携)。 起票後 spec file 内の対応 bullet 末尾に Issue 番号を `Edit` で書き戻し、 軸 5 を再計算する。
+
+`📝` 選択時は spec file の各 bullet 末尾に ` (TODO: 後追い)` を追記し、 軸 5 を再計算。
+
+`⏭️` 選択時は何もせず Step 4 を通常 chain return で終了。
+
+`--no-issue-create` 引数 (新規追加予定) で本判定を skip 可能 (CI / 自動化用)。
 
 ## 完了条件
 

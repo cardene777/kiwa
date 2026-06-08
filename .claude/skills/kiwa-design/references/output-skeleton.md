@@ -54,6 +54,20 @@
 - {role 1} — {権限内容}
 - {role 2} — {権限内容}
 
+#### kiwa fixture inject 前提 (e2e layer のみ、 改善 2 / Issue #226)
+
+`--layer e2e` 時、 kiwa fixture (`tests/prepare-env.ts` 経由の `dappE2eTest`) が wallet を auto-inject する前提を必ず明示する。 Layer 2 (`/kiwa-play`) が assertion 設計時に「wallet 未接続を前提とした test」 を緩和する判断材料にする。
+
+format。
+
+- `{state} 前提 — kiwa fixture が wallet auto-inject (default {wallet_count} wallet, chainId {chainId})。 wallet 未接続 state を再現するには {手段} を使う`
+
+実例。
+
+- `default 接続済 前提 — kiwa fixture が wallet auto-inject (default 1 wallet, chainId 31337)。 wallet 未接続 state を再現するには test 内で wallet を switchAccount() で剥がすか、 別 BrowserContext (injectMultipleWallets を使わず素の newContext) を使う`
+
+contract layer (`--layer contract`) では本 sub-section を `(該当なし、 contract test に wallet inject 概念なし)` で埋める。
+
 ### 外部連携
 
 - {3rd-party API / blockchain RPC / webhook}

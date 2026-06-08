@@ -78,6 +78,25 @@ forge build 2>&1 | tail -10
 
 spec の function / error が実 contract に存在しなければ「不足している仕様」として記録、 Step 3 に進む前にユーザーに報告。
 
+#### Step 2b: spec 期待結果 ↔ contract logic 矛盾検出 (改善 1 / Issue #226)
+
+Step 2 で contract source を Read した後、 Layer 1 spec の各 TC の「期待結果」 column が contract の実 logic と矛盾しないかを **grep ベース** で比較する。 PR #223 で TC-013 の「expiry + 1 でも grantor 保有なら hasAccess = true」 と contract の早期 return false が矛盾していたケースを skill 規約で検出可能にする。
+
+判定 logic。
+
+1. spec の「期待結果」 column から条件 + 期待値の pair を抽出 (例「expiry + 1 で hasAccess = true」「未 mint で revert("NoAccess")」)
+2. contract 該当 function を `grep -A 20 "function {name}" contracts/**/*.sol` で抽出し、 以下の矛盾 pattern を検出:
+   - `if (X) return false;` / `if (X) revert {Error};` の early return が spec の期待値と逆
+   - `require(X, "...")` の require 条件が spec の前提条件と矛盾
+   - event emit の order / 引数が spec と異なる
+3. 矛盾検出時はそれぞれ report Section 4「Layer 1 spec への書き戻し提案」 に bullet 追加:
+
+format。
+
+- `TC-{NNN} 矛盾検出 — spec 期待結果「{spec_expectation}」 ⇄ contract 実 logic「{contract_behavior}」 (file: {path}:{line})。 spec 修正 or contract 修正のどちらが正しいか user 判断必要`
+
+検出時は **test code 生成を継続** し (期待結果を spec ではなく contract 側に合わせて test を Write)、 report に書き戻し提案を残す。 user が後から spec を訂正できる経路を担保する。
+
 ### Step 3: 観点別 forge helper 変換
 
 Layer 1 spec の各ケース行を 観点別に forge helper へ変換 (詳細マッピングは `references/foundry-mapping.md`)。
