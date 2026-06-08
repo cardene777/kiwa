@@ -1,8 +1,8 @@
-# Hardhat mapping (10 観点 → Hardhat helper)
+# Hardhat mapping (11 観点 → Hardhat helper)
 
-SSOT (`docs/SKILL-DESIGN.ja.md` § Step 3) の 10 観点を Hardhat の helper / chai matchers / 規約に変換する完全マッピング。 `/kiwa-hardhat` Step 3 で本 file を Read する。
+SSOT (`docs/SKILL-DESIGN.ja.md` § Step 3) の 11 観点を Hardhat の helper / chai matchers / 規約に変換する完全マッピング。 `/kiwa-hardhat` Step 3 で本 file を Read する。
 
-## 10 観点 × Hardhat helper 一覧
+## 11 観点 × Hardhat helper 一覧
 
 | # | Layer 1 観点 | Hardhat helper | 関数命名規約 | 主要 import |
 |---|---|---|---|---|
@@ -220,7 +220,7 @@ it('TC-NNN permit rejects forged signature', async () => {
 
 ## 関連
 
-- SSOT: `docs/SKILL-DESIGN.ja.md` § Step 3 (10 観点)
+- SSOT: `docs/SKILL-DESIGN.ja.md` § Step 3 (11 観点)
 - Layer 1 spec: `.claude/skills/kiwa-design/SKILL.md`
 - fast-check 詳細: `references/fast-check-patterns.md`
 - Foundry 並立 skill: `.claude/skills/kiwa-forge/SKILL.md`

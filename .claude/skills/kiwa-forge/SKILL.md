@@ -1,8 +1,8 @@
 ---
 name: kiwa-forge
 description: |
-  /kiwa-design (Layer 1) が出力した `.context/spec/contract/test-spec-{module}.md` を入力に、 Foundry の `test/*.t.sol` を Write して `forge test` で動作確認する Layer 2 contract test skill。
-  10 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ) を forge の helper (fuzz / invariant / vm.prank / vm.expectRevert / vm.warp / forge --gas-report) に変換し、 `forge coverage` で line coverage 評価まで一気通貫。
+  /kiwa-design (Layer 1) が出力した `tests/spec/contract/test-spec-{module}.md` を入力に、 Foundry の `test/*.t.sol` を Write して `forge test` で動作確認する Layer 2 contract test skill。
+  11 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ / 回帰) を forge の helper (fuzz / invariant / vm.prank / vm.expectRevert / vm.warp / forge --gas-report) に変換し、 `forge coverage` で line coverage 評価まで一気通貫。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -27,16 +27,30 @@ $ARGUMENTS
 
 ## オプション
 
-- `--module {name}` — Layer 1 spec の module 名 (`.context/spec/contract/test-spec-{name}.md` を Read)
+- `--module {name}` — Layer 1 spec の module 名 (`tests/spec/contract/test-spec-{name}.md` を Read)
 - `--spec-path {path}` — Layer 1 spec の path を明示 (`--module` の代替)
 - `--contract {name}` — 対象 contract 名 (省略時は spec の「対象機能」section から推定)
 - `--gas-report` — `forge test --gas-report` で gas 測定込みで実行
 - `--coverage-threshold {N}` — `forge coverage` の line coverage 目標 (default 80%)
+- `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-tests` — `forge test` 実行をスキップ (Write のみ、 dry-run 用途)
+- `--no-review` — Step 6 の kiwa-review 自動呼出 (test-review) を skip (CI / 自動化用)
 
 ## 実行フロー
 
 5 段階で Layer 1 spec → `.t.sol` → 実行 → 評価まで進む。
+
+### Step 0: 文書生成言語の選択 (skill 起動時 1 回)
+
+AskUserQuestion で coverage report の生成言語を user に確認する。 `--lang {code}` 引数指定時は skip。
+
+選択肢 — 🇯🇵 日本語 (ja、 Recommended) / 🇬🇧 English (en) / 🌏 その他多言語 (free input、 ISO 639-1 言語コード)。 詳細仕様は `references/doc-language-selection.md` を Read。
+
+確定後の言語 `$DOC_LANG` は Step 5c (coverage report Write) で参照する。 出力 path:
+
+- ja → `tests/reports/contract/coverage-report-{module}.ja.md` (+ round 別)
+- en → `tests/reports/contract/coverage-report-{module}.md`
+- その他 → `tests/reports/contract/coverage-report-{module}.{lang_code}.md`
 
 ### Step 1: Layer 1 spec 読込
 
@@ -134,56 +148,159 @@ forge test 2>&1 | tail -20
 
 failure があれば spec の「期待結果」と実 contract behavior の整合確認 (`rules/quality.md` § 実装整合性確認)、 Layer 1 spec の「不足している仕様」に追加項目として記録。
 
-### Step 5: `forge coverage` 評価 (必須、 未達は test-passed marker 作成不可)
+### Step 5: `forge coverage` 評価 + auto loop (production target 100% or 「不可能」判定まで無制限 loop)
 
-**本 step は省略不可**。 `forge test` PASS だけでは test-passed marker を作らず、 coverage 計測 + threshold チェックまで通って初めて完了とみなす (`rules/quality.md` § テスト品質 と整合)。
+**本 step は省略不可**。 `forge test` PASS だけでは test-passed marker を作らず、 coverage 計測 + auto loop + report 生成まで通って初めて完了とみなす (`rules/quality.md` § テスト品質 と整合)。
 
-`--coverage-threshold` で指定された 4 metric 目標を 全て満たしているか評価する。 default は OSS 公開水準として以下:
-
-| metric | default threshold | 引数 override |
-|---|---|---|
-| Lines | 90% | `--coverage-lines {N}` |
-| Statements | 90% | `--coverage-statements {N}` |
-| **Branches** | **80%** | `--coverage-branches {N}` |
-| Funcs | 90% | `--coverage-funcs {N}` |
-
-**Branches を 80% に下げているのは Solidity の require/revert/short-circuit 評価で 100% 到達が現実的に困難なため**、 残り 3 metric は 90%。 user が引数で個別 override 可能。
+#### Step 5a: coverage 計測 + file 分類
 
 ```bash
+forge coverage --report lcov 2>&1 | tee tests/reports/contract/coverage-{module}.lcov
 forge coverage --report summary 2>&1 | tail -10
 ```
 
-| 結果 | アクション |
+lcov 出力を file path で分類 (rule SSOT は `references/coverage-classify.md`):
+
+| file path pattern | カテゴリ | threshold 対象? |
+|---|---|---|
+| `contracts/**/*.sol` / `src/**/*.sol` | production | ✅ 対象 |
+| `test/**/*.t.sol` | test 自身 | ❌ 対象外 |
+| `test/helpers/**/*.sol` / `test/mocks/**/*.sol` | mock helper | ❌ 対象外 |
+| `script/**/*.sol` | deploy script | ❌ 対象外 |
+
+threshold は **production target に対してのみ** 適用。 default は 100% (OSS 公開水準 + 自動 loop で到達可能性高い):
+
+| metric | default threshold | 引数 override |
+|---|---|---|
+| Lines | 100% | `--coverage-lines {N}` |
+| Statements | 100% | `--coverage-statements {N}` |
+| Branches | 100% | `--coverage-branches {N}` (短絡評価 / unreachable で下回る場合は Step 5b 判定で「不可能」分類) |
+| Funcs | 100% | `--coverage-funcs {N}` |
+
+#### Step 5b: auto loop (production target threshold 未達時)
+
+production target で threshold 未達なら以下を **上限なし** で loop。
+
+1. uncovered line / branch を抽出
+2. 各 uncovered を 5 分類 (rule SSOT `references/coverage-classify.md`):
+   - **削除候補** — `test/helpers/**` の未使用 API (他 test から grep ヒット 0)
+   - **defensive code** — `require(false, "...")` / `revert "INVARIANT"` / 到達不能な assert
+   - **外部依存** — `block.timestamp` 特定値 / `blockhash` / chain-specific opcode 依存で test 再現困難
+   - **計測除外** — `invariant_*` test 関数 (`--no-match-test 'invariant_'` で除外されている場合)
+   - **真の未踏** — 上記いずれにも該当しない、 追加 test で cover 可能
+3. **真の未踏** に対して test 追加生成:
+   - Layer 1 spec (`tests/spec/contract/test-spec-{module}.md`) の「テストケース一覧」に新規 TC-NNN として追記
+   - Layer 2 で `test/{Contract}.t.sol` に新規 test 関数を Write (既存関数を上書きしない)
+   - 観点コメント (`// 観点 N: {name}`) を spec と一致させる
+4. 再 `forge test` + `forge coverage` で計測、 round 別 report を `tests/reports/contract/coverage-report-{module}-round-{N}.md` に Write
+5. loop 終了条件 (いずれか):
+   - production target 全 4 metric 100% 到達 → Step 5c へ
+   - 残 uncovered (production 側) が全て「削除候補 / defensive / 外部依存」分類 → Step 5c へ (production 100% は理論不能と確定)
+   - 前 round からの coverage delta 0 が **2 round 連続** → 「停滞」判定で Step 5c へ + report に停滞理由
+
+**loop 上限なし**。 user 介入なしで自律 loop する。
+
+#### Step 5c: coverage report Write (canonical)
+
+`tests/reports/contract/coverage-report-{module}.md` を 4 section format で Write (template SSOT `references/coverage-report-template.md`)。
+
+```markdown
+# Contract Coverage Report — {module}
+
+Generated: {ISO8601}
+Skill: /kiwa-forge | Run: round {N} (final)
+Loop terminated: {production_100_achieved | residual_uncoverable | stalled_2round}
+
+## 1. 判定サマリ
+
+| 結果 | production target | Total |
+|---|---|---|
+| Lines | ✅/❌ {pct}% ({covered}/{total}) | {pct}% ({covered}/{total}) |
+| Statements | ... | ... |
+| Branches | ... | ... |
+| Functions | ... | ... |
+
+**判定 — ✅ PASS / ❌ FAIL** ({reason})
+
+## 2. file 別 coverage 内訳 (production / test / mock 分類)
+
+| File | カテゴリ | Lines | Stmts | Branches | Funcs | threshold 対象? |
+|---|---|---|---|---|---|---|
+| {path} | {production / test 自身 / mock helper / deploy script} | ... | ... | ... | ... | ✅/❌ |
+
+## 3. 未到達 line の分類と判断
+
+### {file_path} - {N} line uncovered
+
+- L{line_range} {function_name} — 分類: {削除候補 | defensive | 外部依存 | 計測除外 | 真の未踏}
+  - **判断**: {具体理由}
+
+(全 uncovered を file ごとに集約して列挙)
+
+## 4. Layer 1 spec への書き戻し提案
+
+| 項目 | 反映先 section | 形式 |
+|---|---|---|
+| coverage 除外スコープ (production target のみ threshold 対象) | 「不足している仕様」 | bullet 追加 |
+| invariant 計測時の handler coverage 変動 | 「テスト観点一覧」§ 10 セキュリティ補足 | bullet 追加 |
+| mock 未使用 API (削除候補) | 「不足している仕様」 | bullet 追加 (cleanup PR の余地) |
+| 追加 test TC-{NNN} (auto loop で追加) | 「テストケース一覧」§ 観点 {N} | 9 column 表に追加 |
+
+> 注 — 本 skill (Layer 2) は spec を **書き換えず**、 上記提案を report に列挙のみ。 spec への反映は user 手動 or `/kiwa-design --mode update` (別 Issue 検討予定)。
+```
+
+round 別 report は `coverage-report-{module}-round-{N}.md` として累積保存、 final round の内容を canonical `coverage-report-{module}.md` に複製。
+
+#### Step 5d: test-passed marker 作成
+
+以下のいずれかで marker 作成:
+
+| 条件 | アクション |
 |---|---|
-| 全 4 metric が threshold 以上 | 完了、 `test-passed` marker を Write |
-| いずれかの metric が threshold 未満 | **完了とみなさない**。 Layer 1 spec の「不足している仕様」に「{metric} {N}% < {threshold}% で不足」を追記し、 「不足観点 / 未テスト error path / 未テスト event」を bullet で列挙してユーザーに報告。 user に「test 追加 → re-run」か「threshold 明示的に下げる」を選ばせる (AskUserQuestion 経由) |
-| `forge coverage` 失敗 (lcov 生成エラー等) | `forge test` PASS でも completion とせず原因を報告 (silent skip 禁止) |
+| production target 全 4 metric 100% 到達 | `test-passed` marker を Write |
+| production 未達だが残 uncovered が全て「不可能」分類 (削除候補 / defensive / 外部依存) | `test-passed` marker を Write (理由を report Section 1 に明示) |
+| 「停滞」判定 (delta 0 が 2 round 連続) | marker を **作らず**、 report Section 1 に「停滞、 manual review 推奨」 を明示してユーザーに報告 |
+| `forge coverage` 失敗 (lcov 生成エラー等) | marker を **作らず**、 原因を報告 (silent skip 禁止) |
 
-coverage が落ちる典型パターン (Step 4 完了時に self-check すべき):
+### Step 6: kiwa-review 自動呼出 (test-review mode)
 
-- contract に定義された custom error 全てに `vm.expectRevert(Error.selector)` test があるか
-- event 全てに `vm.expectEmit + emit Event(...)` で args 検証 test があるか
-- safeTransfer 等 callback を伴う関数で valid / invalid / reverting receiver 3 種が test されているか
-- access control (require / 修飾子) で「OK 経路 + revert 経路」両方が test されているか
-- `if (condition)` の true / false 両方の branch が test されているか
+Step 5d で test-passed marker 作成成功後、 生成 test の品質を独立 review する。 `/kiwa-review --mode test-review --module {module} --test-path test/*.t.sol` を内部呼出し、 spec vs test 整合 / 観点別 cover 率 / 追加 test 提案 を 5 軸で判定。
+
+呼出例:
+```text
+/kiwa-review --mode test-review --module nft-marketplace --layer contract --lang $DOC_LANG
+```
+
+review 結果:
+- PASS (weighted_score >= 7.0) → user に summary + report path を return
+- FAIL critical なし → review 指摘 (追加 test 提案 / assertion 抽象化箇所) を表示、 user に「修正して再生成 / そのまま完了」 を選択
+- FAIL critical あり → spec TC 大幅実装漏れ or assertion 信頼性無し、 user に「test 再生成必須」 警告
+
+report 出力先: `tests/reports/review/test-review-{module}.{$DOC_LANG}.md`
+
+`--no-review` 引数で skip 可能 (CI 用)。
 
 ## 完了条件
 
 - Layer 1 spec の「自動化すべきテスト」リストの全ケースが `test/{Contract}.t.sol` に Write 済
 - `forge build` が exit 0
 - `forge test` で全関数 PASS (failure 0 件)
-- `forge coverage` で **4 metric (Lines / Statements / Branches / Funcs) 全てが threshold 以上** (default Lines 90% / Statements 90% / Branches 80% / Funcs 90%)
+- `forge coverage` で **production target (contracts/ 配下) 全 4 metric 100% 到達** もしくは 「残 uncovered が全て不可能分類」 と report で明示
+- `tests/reports/contract/coverage-report-{module}.md` が 4 section format で Write 済 (final + round 別)
 - 観点別 grouping (`// 観点 N: {name}` コメント) が spec と一致
-- 未達成 metric は 1 つでも残れば test-passed marker を作らず、 不足理由を Layer 1 spec の「不足している仕様」に記録してユーザーに報告
+- 「停滞」判定や `forge coverage` 失敗時は test-passed marker を作らず、 report Section 1 に理由を明示してユーザーに報告
 
 ## references
 
-- `references/foundry-mapping.md` — 10 観点 → forge helper の完全マッピング + Code snippet
+- `references/foundry-mapping.md` — 11 観点 → forge helper の完全マッピング + Code snippet
 - `references/fuzz-invariant-patterns.md` — `forge fuzz` / `forge invariant` の実装パターン詳細 (vm.assume / handler 設計 / target contract 設定)
+- `references/coverage-classify.md` — file 分類 rule (production / test / mock / script) + uncovered 5 分類 (削除候補 / defensive / 外部依存 / 計測除外 / 真の未踏)
+- `references/coverage-report-template.md` — coverage report 4 section format の完全 template (`tests/reports/contract/coverage-report-{module}.md` 生成用)
+- `references/doc-language-selection.md` — Step 0 文書生成言語選択 共通 SSOT (ja / en / その他 ISO 639-1)、 4 skill 共用
 
 ## examples
 
-- `examples/example-token-gating.t.sol` — `examples/nextjs-token-gating/contracts/GatedContent.sol` ベースの完全な .t.sol サンプル (TC-001 〜 TC-013 の 10 観点 4 grouping を網羅)
+- `examples/example-token-gating.t.sol` — `examples/nextjs-token-gating/contracts/GatedContent.sol` ベースの完全な .t.sol サンプル (TC-001 〜 TC-013 の 11 観点 4 grouping を網羅)
 
 ## 関連 link
 

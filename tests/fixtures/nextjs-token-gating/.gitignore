@@ -1,0 +1,14 @@
+node_modules/
+forge-out/
+cache/
+hardhat-cache/
+hardhat-artifacts/
+coverage/
+coverage.json
+.coverage_artifacts/
+.coverage_cache/
+.coverage_contracts/
+test-results/
+.next/
+.context/
+.env.local

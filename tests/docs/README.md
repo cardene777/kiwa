@@ -7,6 +7,8 @@ What lives here.
 - 🛠️ [skill-chain-tutorial.md](./skill-chain-tutorial.md) — Full flow through the four-skill chain (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat` → `/kiwa-play`) — from spec generation to contract test + e2e test all the way to running them
 - 🧩 [retrofit-existing-dapp.md](./retrofit-existing-dapp.md) — Bolt the skill chain onto a dApp + Foundry project that already works (walked through with the nextjs-token-gating example)
 
+> Note — The Japanese versions `run-tests.ja.md` (one-command full chain via `/kiwa-test`), `run-contract-tests.ja.md`, and `run-dapp-e2e-tests.ja.md` contain the step-by-step "use the skill to create tests" guides. English translations will follow once the Japanese guides have been verified end-to-end locally.
+
 ## The four kiwa skills
 
 | Skill | Layer | Role | SSOT |
@@ -21,15 +23,15 @@ What lives here.
 ```mermaid
 graph LR
     A[contract / dApp source] --> B["/kiwa-design"]
-    B -->|.context/spec/contract/test-spec-X.md| C["/kiwa-forge"]
-    B -->|.context/spec/contract/test-spec-X.md| D["/kiwa-hardhat"]
-    B -->|.context/spec/e2e/test-spec-X.md| E["/kiwa-play"]
+    B -->|tests/spec/contract/test-spec-X.md| C["/kiwa-forge"]
+    B -->|tests/spec/contract/test-spec-X.md| D["/kiwa-hardhat"]
+    B -->|tests/spec/e2e/test-spec-X.md| E["/kiwa-play"]
     C -->|test/X.t.sol| F[forge test]
     D -->|hardhat-test/X.test.cjs| G[npx hardhat test + coverage]
     E -->|tests/X.spec.ts| H[playwright test]
 ```
 
-The whole chain hinges on **the nine-column table inside the Layer 1 output (`.context/spec/{contract,e2e}/test-spec-{module}.md`) acting as the single source of truth** — the Layer 2 / 3 skills (Foundry / Hardhat / Playwright) read it and mechanically translate it into runner-specific helpers.
+The whole chain hinges on **the nine-column table inside the Layer 1 output (`tests/spec/{contract,e2e}/test-spec-{module}.md`) acting as the single source of truth** — the Layer 2 / 3 skills (Foundry / Hardhat / Playwright) read it and mechanically translate it into runner-specific helpers.
 
 ## Where to start
 

@@ -1,0 +1,1 @@
+../../kiwa-forge/references/coverage-report-template.md

@@ -11,3 +11,8 @@ coverage.json
 .coverage_artifacts/
 .coverage_cache/
 .coverage_contracts/
+
+# retrofit walkthrough 作業台 (完成形は tests/fixtures/mint-nft/ に退避)
+test/
+hardhat-test/
+tests/

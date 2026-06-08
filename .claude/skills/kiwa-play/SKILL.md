@@ -32,9 +32,19 @@ $ARGUMENTS
 - `--init` — 新規 dApp プロジェクトに kiwa を導入 (`pnpm dlx @kiwa/cli init` を実行し scaffold 生成)
 - `--mode {new|extend|debug}` — `new` (新規 test 設計) / `extend` (既存 test 拡張) / `debug` (flaky / fail 解析)
 - `--rounds {N}` — N round 連続 PASS 検証 (flaky 0 件確認、 デフォルト 1)
+- `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0a で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-codex` — Codex 委譲をスキップして単独で進行 (test 件数 1-2 のみ推奨)
+- `--no-review` — Step 9 の kiwa-review 自動呼出 (test-review) を skip (CI / 自動化用)
 
 ## 実行フロー
+
+### Step 0a: 文書生成言語の選択 (skill 起動時 1 回)
+
+AskUserQuestion で spec / report 等の文書生成言語を user に確認する。 `--lang {code}` 引数指定時は skip。
+
+選択肢 — 🇯🇵 日本語 (ja、 Recommended) / 🇬🇧 English (en) / 🌏 その他多言語 (free input、 ISO 639-1 言語コード)。 詳細仕様は `references/doc-language-selection.md` を Read。
+
+確定後の言語 `$DOC_LANG` は以降の文書生成 step (Layer 1 経由 spec 生成 / spec.ts 内コメント言語 / 将来の report 出力) で参照する。
 
 ### Step 0: kiwa セットアップ判定
 
@@ -73,7 +83,7 @@ grep -E "^test\(|^test\.describe\(" tests/*.spec.ts | head -20
 
 #### 1.5.B Layer 1 (`/kiwa-design`) 起動
 
-以下を Layer 1 に渡し、 `.context/spec/e2e/test-spec-{example}.md` を Write させる。
+以下を Layer 1 に渡し、 `tests/spec/e2e/test-spec-{example}.md` を Write させる。
 
 ```text
 /kiwa-design --layer e2e --module {example} --input {path/to/contract.sol or app/}
@@ -85,13 +95,13 @@ grep -E "^test\(|^test\.describe\(" tests/*.spec.ts | head -20
 - scope 境界 (本作業でやらないことを 3-5 個列挙)
 ```
 
-Layer 1 が以下 9 section の仕様書を `.context/spec/e2e/test-spec-{example}.md` に Write する (詳細は `.claude/skills/kiwa-design/SKILL.md` § 出力フォーマット):
+Layer 1 が以下 9 section の仕様書を `tests/spec/e2e/test-spec-{example}.md` に Write する (詳細は `.claude/skills/kiwa-design/SKILL.md` § 出力フォーマット):
 
 - 対象機能 / 仕様の要約 / 主な品質リスク / 推奨テスト構成 / テスト観点一覧 / テストケース一覧 / 自動化すべきテスト / 手動確認でよいテスト / 不足している仕様
 
 #### 1.5.C 仕様書ベースで実装 (Layer 2 = 本 skill の責務)
 
-Layer 1 出力 `.context/spec/e2e/test-spec-{example}.md` を Read し、 「テストケース一覧」 section の 9 column 表を **行単位** で `tests/{example}.spec.ts` の test 関数に変換する。
+Layer 1 出力 `tests/spec/e2e/test-spec-{example}.md` を Read し、 「テストケース一覧」 section の 9 column 表を **行単位** で `tests/{example}.spec.ts` の test 関数に変換する。
 
 | Layer 1 column | spec.ts への変換 |
 |---|---|
@@ -248,6 +258,19 @@ flaky 検証は 4 round 連続 PASS で固定。
 
 詳細 9 種 + self-check 5 問は `references/adversarial-pitfalls.md`。
 
+### Step 9: kiwa-review 自動呼出 (test-review mode)
+
+Step 7 (4 round 連続 PASS) 完了後、 生成 spec.ts の品質を独立 review する。 `/kiwa-review --mode test-review --module {module} --test-path tests/*.spec.ts` を内部呼出し、 spec vs spec.ts 整合 / 観点別 cover 率 / UI 起点 e2e で追加すべき test 提案 を 5 軸で判定。
+
+呼出例:
+```text
+/kiwa-review --mode test-review --module token-gating --layer e2e --lang $DOC_LANG
+```
+
+review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 report 出力先: `tests/reports/review/test-review-{module}.{$DOC_LANG}.md`。
+
+`--no-review` 引数で skip 可能 (CI 用)。
+
 ## 完了条件
 
 - 新規 test の場合 — spec.ts と prepare-env.ts が記述され、 `pnpm test` で全 PASS
@@ -261,6 +284,7 @@ flaky 検証は 4 round 連続 PASS で固定。
 - `references/fixture-api.md` — `@kiwa/core` 主要 export API リファレンス
 - `references/troubleshooting.md` — webServer 起動失敗・anvil port 衝突・core build race 対策
 - `references/adversarial-pitfalls.md` — 偽陽性パターン 9 種 + self-check 5 問
+- `references/doc-language-selection.md` — Step 0a 文書生成言語選択 共通 SSOT (kiwa-forge と共用、 ja / en / その他 ISO 639-1)
 
 ## examples
 

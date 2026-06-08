@@ -1,6 +1,6 @@
 // example: 1 contract + 単純な happy path test 雛形
 // 用途 — `mint-nft` `defi-swap` 系の最小構成
-// 実例参照: examples/mint-nft/tests/mint.spec.ts
+// 実例参照: tests/fixtures/mint-nft/e2e-test/mint.spec.ts
 
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';

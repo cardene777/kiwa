@@ -11,8 +11,8 @@ kiwa の skill chain (`/kiwa-design` Layer 1 → `/kiwa-forge` / `/kiwa-hardhat`
 ```mermaid
 graph TD
     A[既存 contract + dApp 完成済] -->|現状コード| B["/kiwa-design Layer 1"]
-    B -->|--layer contract --input *.sol| C[.context/spec/contract/test-spec-X.md]
-    B -->|--layer e2e --input app/ + tests/| D[.context/spec/e2e/test-spec-X.md]
+    B -->|--layer contract --input *.sol| C[tests/spec/contract/test-spec-X.md]
+    B -->|--layer e2e --input app/ + tests/| D[tests/spec/e2e/test-spec-X.md]
     C -->|9 column 表 parse| E["/kiwa-forge"]
     C -->|9 column 表 parse| F["/kiwa-hardhat"]
     D -->|9 column 表 parse| G["/kiwa-play --mode extend"]
@@ -24,7 +24,7 @@ graph TD
     J -->|playwright test 4 round| M[既存 UI 挙動 = test PASS]
 ```
 
-3 layer 連携の核 — **Layer 1 出力 (`.context/spec/{contract,e2e}/test-spec-{module}.md`) の 9 column 表が単一 SSOT**、 Layer 2 skill 3 種 (Foundry / Hardhat / Playwright) はこれを Read して runner 特化 helper に機械的に変換する。 後付け導入時は実コードから観点を逆算するため、 仕様書の「対象機能」 section は grep 抽出結果で埋まる。
+3 layer 連携の核 — **Layer 1 出力 (`tests/spec/{contract,e2e}/test-spec-{module}.md`) の 9 column 表が単一 SSOT**、 Layer 2 skill 3 種 (Foundry / Hardhat / Playwright) はこれを Read して runner 特化 helper に機械的に変換する。 後付け導入時は実コードから観点を逆算するため、 仕様書の「対象機能」 section は grep 抽出結果で埋まる。
 
 ## 完全な実例: nextjs-token-gating (既存 dApp への後付け導入)
 
@@ -65,11 +65,11 @@ Layer 1 skill が以下を実施:
 - 入力 .sol を Read し function / event / error を grep 抽出
 - 並立 contract (GateNFT.sol) も参照 (IGateNFT interface 経由)
 - 既存 docstring と実コードから「対象機能」「仕様の要約」「権限モデル」「失敗 mode」を逆算
-- 5 基準で品質リスクスコア、 10 観点で適用 / 非適用を判定
+- 5 基準で品質リスクスコア、 11 観点で適用 / 非適用を判定
 - 1 ケース 1 行で 9 column 表を生成、 観点別 group + 優先度順
 ```
 
-`.context/spec/contract/test-spec-token-gating.md` が生成される。 「不足している仕様」 section には docstring 不明点 (timedAccessExpiry の cleanup タイミング / 重複 grant の挙動 / max supply の有無 / pause 機能の有無) が記録される。
+`tests/spec/contract/test-spec-token-gating.md` が生成される。 「不足している仕様」 section には docstring 不明点 (timedAccessExpiry の cleanup タイミング / 重複 grant の挙動 / max supply の有無 / pause 機能の有無) が記録される。
 
 ### Step 2: Layer 1 で e2e 用仕様書を逆算生成
 
@@ -82,7 +82,7 @@ Layer 1 skill が以下を実施:
 - 既存 test がカバーしていない観点 (権限 partial 検証 / multi-grantee 同時失効 / self-grant bypass 等) を「新規追加 test」として記録
 ```
 
-`.context/spec/e2e/test-spec-token-gating.md` が生成され、 既存 test ID (T-GT-NNN) と新規 test ID (TC-NNN) を併記。
+`tests/spec/e2e/test-spec-token-gating.md` が生成され、 既存 test ID (T-GT-NNN) と新規 test ID (TC-NNN) を併記。
 
 ### Step 3: Layer 2 で contract test を後付け Write (Foundry)
 
@@ -92,7 +92,7 @@ Layer 1 skill が以下を実施:
 
 skill が以下を実施:
 
-- `.context/spec/contract/test-spec-token-gating.md` を Read
+- `tests/spec/contract/test-spec-token-gating.md` を Read
 - 観点別 grouping (1 正常系 / 2 異常系 / 3 境界値 / 4 状態遷移 / 5 権限 / 10 セキュリティ) を `// 観点 N: {name}` コメントで Solidity test 関数に変換
 - 観点 3 境界値 → `testFuzz_grantTimedAccess_Boundary` (`bound(ttl, 1, 365 days)`)、 観点 4 状態遷移 → `invariant_TimedAccessExpiryNonZero` + Handler、 観点 10 セキュリティ → `test_SelfGrantBypassDefense` + `test_TransferRevokesAll_MultiGrantee`
 - `test/GatedContent.t.sol` を **後付けで** Write (既存 test ファイルが無いプロジェクトなので新規作成、 ある場合は file を分けて並立)
@@ -106,7 +106,7 @@ skill が以下を実施:
 /kiwa-hardhat --module token-gating --gas-report
 ```
 
-同 `.context/spec/contract/test-spec-token-gating.md` を Read し、 `test/GatedContent.test.ts` を Hardhat 形式で並列に Write。 Foundry 派 + Hardhat 派が同じ仕様書から **同 test ID で並立 test を持つ** ことができる。 観点 / ケース ID (TC-001 〜 TC-013) は両 layer で一致。
+同 `tests/spec/contract/test-spec-token-gating.md` を Read し、 `test/GatedContent.test.ts` を Hardhat 形式で並列に Write。 Foundry 派 + Hardhat 派が同じ仕様書から **同 test ID で並立 test を持つ** ことができる。 観点 / ケース ID (TC-001 〜 TC-013) は両 layer で一致。
 
 ### Step 4: Layer 2 で e2e test を extend mode で後付け Write (Playwright)
 
@@ -116,7 +116,7 @@ skill が以下を実施:
 
 skill が以下を実施:
 
-- Step 1.5.B で `.context/spec/e2e/test-spec-token-gating.md` を Read
+- Step 1.5.B で `tests/spec/e2e/test-spec-token-gating.md` を Read
 - 既存 test 8 件 (T-GT-000 〜 T-GT-007) を「現状カバー」として認識し regression 0 を保証
 - 不足観点 (権限の partial 検証 / multi-grantee 同時失効 / self-grant bypass) を新規 test (TC-008 以降) として `tests/gating.spec.ts` に **追記**
 - `pnpm test` を 4 round 連続 PASS 検証 (flaky 0 件、 既存 8 件 + 新規 N 件 = 全 PASS)
@@ -173,7 +173,7 @@ Step 5 で coverage 達成完了時点で以下の状態:
 
 ## 観点別 helper マッピング早見
 
-3 layer × 10 観点 の helper マッピング early reference:
+3 layer × 11 観点 の helper マッピング early reference:
 
 | 観点 | Foundry | Hardhat | Playwright |
 |---|---|---|---|

@@ -18,8 +18,8 @@
 graph LR
     A[既存 dApp + Foundry project] --> B["/kiwa-design --layer contract --input contracts/X.sol"]
     A --> C["/kiwa-design --layer e2e --input app/ + tests/"]
-    B --> D[.context/spec/contract/test-spec-X.md]
-    C --> E[.context/spec/e2e/test-spec-X.md]
+    B --> D[tests/spec/contract/test-spec-X.md]
+    C --> E[tests/spec/e2e/test-spec-X.md]
     D --> F["/kiwa-forge --module X"]
     D --> G["/kiwa-hardhat --module X"]
     E --> H["/kiwa-play --mode extend --module X"]
@@ -39,7 +39,7 @@ ls examples/nextjs-token-gating/{contracts,tests,test}
 # test/: GatedContent.t.sol (既存 Foundry test)
 ```
 
-contract / e2e test / Foundry test は揃っているが、 Hardhat 経路が無い (= F-1 第 1 弾の課題)。 仕様書も `.context/spec/` には未生成。
+contract / e2e test / Foundry test は揃っているが、 Hardhat 経路が無い (= F-1 第 1 弾の課題)。 仕様書も `tests/spec/` には未生成。
 
 ### Step 1: `/kiwa-design --layer contract --input` で Layer 1 仕様書生成
 
@@ -50,7 +50,7 @@ contract / e2e test / Foundry test は揃っているが、 Hardhat 経路が無
 出力。
 
 ```
-.context/spec/contract/test-spec-gated-content.md
+tests/spec/contract/test-spec-gated-content.md
 ```
 
 9 section 統一テンプレで仕様書が書き出される。 主要 section。
@@ -159,7 +159,7 @@ Playwright 側は既存 `gating.spec.ts` が動いているのでそのままで
 
 ## 詰まりやすい点
 
-- **`.context/spec/contract/` が無い** — `/kiwa-design --layer contract` を先に走らせる。 既存 spec を再利用したい場合は手で `.context/spec/contract/test-spec-{module}.md` に置けば skill が読む。
+- **`tests/spec/contract/` が無い** — `/kiwa-design --layer contract` を先に走らせる。 既存 spec を再利用したい場合は手で `tests/spec/contract/test-spec-{module}.md` に置けば skill が読む。
 - **Hardhat の compile が失敗** — `hardhat.config.cjs` の `solidity.version` が contract の `pragma solidity` と整合しているか確認。 `paths.sources` も Foundry の `contracts/` を指せているか。
 - **`pnpm -F examples-X test:hardhat` で script not found** — package.json に `test:hardhat` script を追加し忘れている。 上記 Step 3 参照。
 - **coverage が 80% に届かない** — uncovered branch を README で Read、 「I = if-path-not-taken」マークは else 側 / revert path が untaken。 該当する test ケースを追加。
@@ -172,6 +172,8 @@ Playwright 側は既存 `gating.spec.ts` が動いているのでそのままで
 | defi-swap | 17/17 | 23/23 | 7/7 | [#196](https://github.com/cardene777/kiwa/pull/196) |
 | nextjs-token-gating | 20/20 | 23/23 | 8/8 | [#196](https://github.com/cardene777/kiwa/pull/196) |
 | nft-marketplace | 30+ | 51/51 | 12/12 | [#198](https://github.com/cardene777/kiwa/pull/198) |
+
+`mint-nft` の完成形 reference suite は `tests/fixtures/mint-nft/` にあり、 example 側の test directories は retrofit walkthrough 用の gitignored 作業台として扱う。
 
 それぞれの diff を読めば本 tutorial の Step 1-4 がどう実装に落ちたか具体例で確認できる。
 

@@ -2,6 +2,28 @@
 
 Deploys the `MintNft.sol` ERC721 contract to anvil and runs tests through three lanes — Playwright + viem, Foundry, and Hardhat — so you can compare the kiwa dApp lane and the "Foundry + Hardhat side-by-side" workflow for contract-only tests.
 
+## Two paths in this directory
+
+### 1. Walk the retrofit tutorial (authoring path)
+
+`test/`, `hardhat-test/`, and `tests/` are `.gitignore`d and empty right after `git clone`. Run the `/kiwa-design` → `/kiwa-forge` → `/kiwa-hardhat` → `/kiwa-play` skill chain to regenerate the tests from zero. After regeneration, you can run them directly with commands such as `cd examples/mint-nft && forge test`.
+
+### 2. Read or run the completed reference
+
+The completed test suite has been relocated to `tests/fixtures/mint-nft/`. Run it from there:
+
+```bash
+pnpm --dir tests/fixtures/mint-nft test:foundry    # 27/27
+pnpm --dir tests/fixtures/mint-nft test:hardhat    # 24/24
+pnpm --dir tests/fixtures/mint-nft test:e2e        # 8/8
+```
+
+See `tests/fixtures/mint-nft/README.md` for details.
+
+### Migration note
+
+The old `cd examples/mint-nft && forge test` flow does nothing right after clone because the working directories are empty. Use `tests/fixtures/mint-nft/` when you want to run the completed reference suite.
+
 ## What you can try
 
 - `startAnvil` + `forge create`-style deploy flow wired into the Playwright fixture
@@ -15,26 +37,22 @@ Deploys the `MintNft.sol` ERC721 contract to anvil and runs tests through three 
 Run `pnpm install` at the repo root first, then `pnpm exec playwright install chromium`. Foundry's `anvil` and `forge` must be on your PATH.
 
 ```bash
-# Playwright e2e (kiwa fixture)
-pnpm -F examples-mint-nft test
+# Run the completed reference fixture
+pnpm --dir tests/fixtures/mint-nft test:foundry
+pnpm --dir tests/fixtures/mint-nft test:hardhat
+pnpm --dir tests/fixtures/mint-nft test:e2e
 
-# Foundry contract tests
+# Run the examples-side workbench only after you regenerate the tests
 cd examples/mint-nft && forge test
-
-# Hardhat contract tests
-pnpm -F examples-mint-nft test:hardhat
-
-# Hardhat coverage
-pnpm -F examples-mint-nft test:hardhat:coverage
 ```
 
 ## Reading the tests
 
 | File | What it covers |
 |---|---|
-| `tests/mint.spec.ts` | Playwright e2e lane — viem WalletClient deploy → mint → balanceOf → transferFrom |
-| `test/MintNft.t.sol` | Foundry unit lane, including invariant / fuzz cases |
-| `hardhat-test/MintNft.test.cjs` | Hardhat unit lane (added in F-1), six grouped perspectives (happy path / error / boundary / state transition / authorization / security) |
+| `tests/fixtures/mint-nft/e2e-test/mint.spec.ts` | Playwright e2e lane — viem WalletClient deploy → mint → balanceOf → transferFrom |
+| `tests/fixtures/mint-nft/contract-test/MintNft.t.sol` | Foundry unit lane, including invariant / fuzz cases |
+| `tests/fixtures/mint-nft/hardhat-test/MintNft.test.cjs` | Hardhat unit lane (added in F-1), six grouped perspectives (happy path / error / boundary / state transition / authorization / security) |
 
 Running the same contract through all three lanes is what `/kiwa-hardhat` skill leans on to prove out the Hardhat workflow.
 

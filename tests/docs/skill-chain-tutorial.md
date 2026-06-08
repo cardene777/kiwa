@@ -11,8 +11,8 @@ Written from the retrofit perspective (adding tests to a dApp + contracts that a
 ```mermaid
 graph TD
     A[Existing contract + dApp shipping] -->|current code| B["/kiwa-design Layer 1"]
-    B -->|--layer contract --input *.sol| C[.context/spec/contract/test-spec-X.md]
-    B -->|--layer e2e --input app/ + tests/| D[.context/spec/e2e/test-spec-X.md]
+    B -->|--layer contract --input *.sol| C[tests/spec/contract/test-spec-X.md]
+    B -->|--layer e2e --input app/ + tests/| D[tests/spec/e2e/test-spec-X.md]
     C -->|9-column table parse| E["/kiwa-forge"]
     C -->|9-column table parse| F["/kiwa-hardhat"]
     D -->|9-column table parse| G["/kiwa-play --mode extend"]
@@ -24,7 +24,7 @@ graph TD
     J -->|playwright test 4 rounds| M[existing UI behavior == test PASS]
 ```
 
-Core idea of the 3-layer chain — the **9-column table inside the Layer 1 output (`.context/spec/{contract,e2e}/test-spec-{module}.md`) acts as the single source of truth**. The three Layer 2 skills (Foundry / Hardhat / Playwright) read the same file and mechanically translate it into runner-specific helpers. In the retrofit flow the "target functionality" section is populated by grep extraction from the existing code.
+Core idea of the 3-layer chain — the **9-column table inside the Layer 1 output (`tests/spec/{contract,e2e}/test-spec-{module}.md`) acts as the single source of truth**. The three Layer 2 skills (Foundry / Hardhat / Playwright) read the same file and mechanically translate it into runner-specific helpers. In the retrofit flow the "target functionality" section is populated by grep extraction from the existing code.
 
 ## Full worked example: nextjs-token-gating (retrofitting an existing dApp)
 
@@ -69,7 +69,7 @@ The Layer 1 skill:
 - generates a 9-column table at one case per row, grouped by viewpoint, sorted by priority
 ```
 
-`.context/spec/contract/test-spec-token-gating.md` is produced. The "Insufficient spec" section records the docstring ambiguities (cleanup timing for `timedAccessExpiry`, the duplicate-grant behavior, presence of a max supply, pause functionality).
+`tests/spec/contract/test-spec-token-gating.md` is produced. The "Insufficient spec" section records the docstring ambiguities (cleanup timing for `timedAccessExpiry`, the duplicate-grant behavior, presence of a max supply, pause functionality).
 
 ### Step 2: Reverse-engineer an e2e-side spec with Layer 1
 
@@ -82,7 +82,7 @@ The Layer 1 skill:
 - records viewpoints not covered by the existing tests (partial permission verification, multi-grantee simultaneous expiry, self-grant bypass) as "new tests to add"
 ```
 
-`.context/spec/e2e/test-spec-token-gating.md` is produced, listing existing test IDs (T-GT-NNN) alongside the new test IDs (TC-NNN).
+`tests/spec/e2e/test-spec-token-gating.md` is produced, listing existing test IDs (T-GT-NNN) alongside the new test IDs (TC-NNN).
 
 ### Step 3: Write contract tests after the fact with Layer 2 (Foundry)
 
@@ -92,7 +92,7 @@ The Layer 1 skill:
 
 The skill:
 
-- reads `.context/spec/contract/test-spec-token-gating.md`
+- reads `tests/spec/contract/test-spec-token-gating.md`
 - translates viewpoint groupings (1 happy / 2 failure / 3 boundary / 4 state / 5 permission / 10 security) into Solidity test functions, annotated with `// 観点 N: {name}` comments
 - viewpoint 3 → `testFuzz_grantTimedAccess_Boundary` (`bound(ttl, 1, 365 days)`), viewpoint 4 → `invariant_TimedAccessExpiryNonZero` + Handler, viewpoint 10 → `test_SelfGrantBypassDefense` + `test_TransferRevokesAll_MultiGrantee`
 - **writes `test/GatedContent.t.sol` after the fact** (creates a new file because no prior .t.sol exists; otherwise lives alongside existing files)
@@ -106,7 +106,7 @@ The skill:
 /kiwa-hardhat --module token-gating --gas-report
 ```
 
-Reads the same `.context/spec/contract/test-spec-token-gating.md` and writes `test/GatedContent.test.ts` in Hardhat shape, in parallel. Foundry-leaning and Hardhat-leaning developers can hold **parallel tests with the same test IDs** sourced from one spec. Viewpoints and case IDs (TC-001 through TC-013) line up across both layers.
+Reads the same `tests/spec/contract/test-spec-token-gating.md` and writes `test/GatedContent.test.ts` in Hardhat shape, in parallel. Foundry-leaning and Hardhat-leaning developers can hold **parallel tests with the same test IDs** sourced from one spec. Viewpoints and case IDs (TC-001 through TC-013) line up across both layers.
 
 ### Step 4: Extend the e2e tests with Layer 2 in `extend` mode (Playwright)
 
@@ -116,7 +116,7 @@ Reads the same `.context/spec/contract/test-spec-token-gating.md` and writes `te
 
 The skill:
 
-- in Step 1.5.B, reads `.context/spec/e2e/test-spec-token-gating.md`
+- in Step 1.5.B, reads `tests/spec/e2e/test-spec-token-gating.md`
 - recognises the 8 existing tests (T-GT-000 through T-GT-007) as "current coverage" and guarantees zero regression
 - **appends** the missing viewpoints (partial permission verification, multi-grantee simultaneous expiry, self-grant bypass) as new tests (TC-008 onwards) into `tests/gating.spec.ts`
 - runs `pnpm test` four times in a row to confirm zero flakes (all 8 existing + N new tests pass)
