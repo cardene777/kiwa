@@ -1,5 +1,7 @@
 # startAnvil
 
+> [🇬🇧 English](../../en/api/start-anvil.md) • [🇯🇵 日本語](./start-anvil.md)
+
 anvil 子プロセスを spawn し `eth_chainId` 応答で起動完了を確認する helper。
 
 ## Signature

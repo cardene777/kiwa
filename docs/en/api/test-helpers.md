@@ -1,5 +1,7 @@
 # Test Helpers (v0.2+)
 
+> [🇬🇧 English](./test-helpers.md) • [🇯🇵 日本語](../../ja/api/test-helpers.md)
+
 API reference for the 7 test helpers added in `@kiwa/core` v0.2. These helpers cover the same scope as industry standards (hardhat / foundry / viem / hardhat-chai-matchers), eliminating duplicate definitions across examples.
 
 ## snapshotChain / revertChain

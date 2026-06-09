@@ -1,5 +1,7 @@
 # Fixture 設計
 
+> [🇬🇧 English](../../en/concepts/fixture.md) • [🇯🇵 日本語](./fixture.md)
+
 ## TL;DR
 
 `dappE2eTest` は Playwright の `test` を拡張した fixture で、anvil 起動・wallet inject・接続フローを 1 つの単位で扱える形にまとめたものです。

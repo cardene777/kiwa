@@ -1,5 +1,7 @@
 # Multi-Chain (L1/L2 並走) を test する
 
+> [🇬🇧 English](../../en/cookbook/multi-chain.md) • [🇯🇵 日本語](./multi-chain.md)
+
 ## Goal
 
 異なる chainId の anvil を並走起動し、bridge / cross-chain dApp の挙動を test する。

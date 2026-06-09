@@ -1,5 +1,7 @@
 # Generate framework integration boilerplate with `kiwa init --with-deploy`
 
+> [🇬🇧 English](./with-deploy.md) • [🇯🇵 日本語](../../ja/cookbook/with-deploy.md)
+
 ## Goal
 
 When you already have a Foundry project and a dApp, generate the `pnpm test` pre-flight boilerplate (start anvil + `forge build` + `forge create` + write `.env.local`) in one command with `kiwa init --with-deploy <foundry-path>`. The `nextjs-wagmi-rainbow` example is the reference implementation of the same shape.

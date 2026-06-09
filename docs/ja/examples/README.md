@@ -1,5 +1,7 @@
 # Examples Map
 
+> [🇬🇧 English](../../en/examples/README.md) • [🇯🇵 日本語](./README.md)
+
 kiwa の `examples/` には 20 個の test 用 dApp / contract が並んでいる。 ここでは「何を試したいか」から逆引きできるよう、 dApp 系 / Contract 単体系の 2 区分でまとめる。
 
 ツアー形式で 5 例を順に試したい場合は [walkthrough.md](./walkthrough.md) を読む。 publish 前なので、 どの example も `pnpm -F examples-{name} test` で local から直接動かせる。

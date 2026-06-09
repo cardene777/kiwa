@@ -1,5 +1,7 @@
 # Quickstart
 
+> [🇬🇧 English](./quickstart.md) • [🇯🇵 日本語](../ja/quickstart.md)
+
 Run your first kiwa E2E test in 5 minutes.
 
 ## Required prerequisites

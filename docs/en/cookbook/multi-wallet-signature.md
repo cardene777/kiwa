@@ -1,5 +1,7 @@
 # Test multi-wallet signature verification
 
+> [🇬🇧 English](./multi-wallet-signature.md) • [🇯🇵 日本語](../../ja/cookbook/multi-wallet-signature.md)
+
 ## Goal
 
 Inject two wallets through EIP-6963 and verify that a signature produced by Wallet A

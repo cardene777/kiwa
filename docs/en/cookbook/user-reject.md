@@ -1,5 +1,7 @@
 # Test the user-reject path
 
+> [🇬🇧 English](./user-reject.md) • [🇯🇵 日本語](../../ja/cookbook/user-reject.md)
+
 ## Goal
 
 Test how the dApp handles user rejection (EIP-1193 code 4001) for `personal_sign` / `eth_sendTransaction`.

@@ -1,5 +1,7 @@
 # Connect ボタンを test する
 
+> [🇬🇧 English](../../en/cookbook/connect-button.md) • [🇯🇵 日本語](./connect-button.md)
+
 ## Goal
 
 dApp の `Connect Wallet` ボタンを押下 → wallet picker / 直接接続 → `useAccount` の `address` が確定するまでを E2E で検証する。

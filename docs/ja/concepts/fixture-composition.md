@@ -1,5 +1,7 @@
 # Fixture Composition
 
+> [🇬🇧 English](../../en/concepts/fixture-composition.md) • [🇯🇵 日本語](./fixture-composition.md)
+
 ## TL;DR
 
 `dappE2eTest.extend()` を薄い結合層として使い、global setup が作った deploy 結果、

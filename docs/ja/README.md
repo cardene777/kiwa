@@ -1,5 +1,7 @@
 # kiwa ドキュメント
 
+> [🇬🇧 English](../en/README.md) • [🇯🇵 日本語](./README.md)
+
 kiwa はブラウザ拡張なしで dApp を E2E テストするための headless fixture です。
 anvil をテスト単位で起動し、Playwright と viem を組み合わせ、`window.ethereum` を inject して接続・署名・送金までを 1 つの fixture で通します。
 

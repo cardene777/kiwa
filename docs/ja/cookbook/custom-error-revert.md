@@ -1,5 +1,7 @@
 # Custom error revert を expectCustomError で検証する
 
+> [🇬🇧 English](../../en/cookbook/custom-error-revert.md) • [🇯🇵 日本語](./custom-error-revert.md)
+
 `@kiwa/core` v0.2 で追加された `expectCustomError` を使い、 Solidity custom error の revert を簡潔に assertion する pattern。
 
 ## 課題

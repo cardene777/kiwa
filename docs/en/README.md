@@ -1,5 +1,7 @@
 # kiwa Documentation
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](../ja/README.md)
+
 kiwa is a headless E2E fixture for dApps that runs without a browser extension.
 It launches anvil per test run, combines Playwright and viem, injects `window.ethereum`, and covers connect / sign / send tx in a single fixture.
 

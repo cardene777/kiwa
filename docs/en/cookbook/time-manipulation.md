@@ -1,5 +1,7 @@
 # Test with time manipulation (vesting / streaming)
 
+> [🇬🇧 English](./time-manipulation.md) • [🇯🇵 日本語](../../ja/cookbook/time-manipulation.md)
+
 ## Goal
 
 Test cliff + linear vesting or time-based token release without waiting in CI.

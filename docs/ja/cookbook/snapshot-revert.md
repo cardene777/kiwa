@@ -1,5 +1,7 @@
 # Snapshot / revert で test 間隔離する
 
+> [🇬🇧 English](../../en/cookbook/snapshot-revert.md) • [🇯🇵 日本語](./snapshot-revert.md)
+
 `@kiwa/core` v0.2 で追加された `snapshotChain` / `revertChain` を使い、 anvil chain state を test ごとに完全に隔離する pattern。
 
 ## 課題

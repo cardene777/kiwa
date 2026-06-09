@@ -1,5 +1,7 @@
 # Test a connect button
 
+> [🇬🇧 English](./connect-button.md) • [🇯🇵 日本語](../../ja/cookbook/connect-button.md)
+
 ## Goal
 
 Click a dApp `Connect Wallet` button → wallet picker / direct connect → confirm `useAccount.address` is set, end-to-end.

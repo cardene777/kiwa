@@ -1,5 +1,7 @@
 # Multi-Wallet 署名検証を test する
 
+> [🇬🇧 English](../../en/cookbook/multi-wallet-signature.md) • [🇯🇵 日本語](./multi-wallet-signature.md)
+
 ## Goal
 
 EIP-6963 で 2 つの wallet を inject し、Wallet A で署名した値が

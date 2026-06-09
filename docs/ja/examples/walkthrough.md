@@ -1,5 +1,7 @@
 # Examples Walkthrough
 
+> [🇬🇧 English](../../en/examples/walkthrough.md) • [🇯🇵 日本語](./walkthrough.md)
+
 kiwa の人気 5 example を 30 分 ~ 1 時間で順に試すツアー。 入門 → contract 単体 → framework 統合 → 複合 と段階的に難易度を上げる。
 
 各 Stage の所要時間は「読みながら挙動を観察する目安」で、 test コマンド自体の実行時間は数秒 ~ 数十秒 (Next.js boot を含む Stage 4 が約 25 秒、 他は 4 秒前後)。

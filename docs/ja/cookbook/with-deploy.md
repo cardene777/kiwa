@@ -1,5 +1,7 @@
 # kiwa init --with-deploy で framework 統合 boilerplate を生成する
 
+> [🇬🇧 English](../../en/cookbook/with-deploy.md) • [🇯🇵 日本語](./with-deploy.md)
+
 ## Goal
 
 既存 Foundry project を持つ dApp で、 `pnpm test` の前段で anvil 起動 + `forge build` + `forge create` + `.env.local` 書き込みを自動化する boilerplate を `kiwa init --with-deploy <foundry-path>` で 1 コマンド生成する。 `nextjs-wagmi-rainbow` example が同じ構成の reference 実装。

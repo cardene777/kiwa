@@ -1,5 +1,7 @@
 # Test multi-chain (L1/L2 in parallel)
 
+> [🇬🇧 English](./multi-chain.md) • [🇯🇵 日本語](../../ja/cookbook/multi-chain.md)
+
 ## Goal
 
 Run multiple anvil instances with distinct chain IDs in parallel to test bridge / cross-chain dApps.

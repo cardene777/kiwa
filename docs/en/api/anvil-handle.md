@@ -1,5 +1,7 @@
 # AnvilHandle
 
+> [🇬🇧 English](./anvil-handle.md) • [🇯🇵 日本語](../../ja/api/anvil-handle.md)
+
 Return type of `startAnvil`. Carries the port and a stop helper.
 
 ## Signature

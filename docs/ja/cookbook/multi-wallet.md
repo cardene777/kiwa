@@ -1,5 +1,7 @@
 # Multi-Wallet picker を test する
 
+> [🇬🇧 English](../../en/cookbook/multi-wallet.md) • [🇯🇵 日本語](./multi-wallet.md)
+
 ## Goal
 
 EIP-6963 で 2 以上の wallet を inject し、wallet picker UI から特定 wallet を選択して接続する経路を test する。

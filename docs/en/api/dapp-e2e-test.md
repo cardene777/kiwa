@@ -1,5 +1,7 @@
 # dappE2eTest
 
+> [🇬🇧 English](./dapp-e2e-test.md) • [🇯🇵 日本語](../../ja/api/dapp-e2e-test.md)
+
 Playwright `test` extended for dApp E2E. Receives `page` plus the `dappE2e` helper.
 
 ## Signature

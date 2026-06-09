@@ -1,5 +1,7 @@
 # Isolate tests with snapshot / revert
 
+> [🇬🇧 English](./snapshot-revert.md) • [🇯🇵 日本語](../../ja/cookbook/snapshot-revert.md)
+
 Use `snapshotChain` / `revertChain` added in `@kiwa/core` v0.2 to completely isolate anvil chain state between tests.
 
 ## Problem

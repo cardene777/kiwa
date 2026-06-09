@@ -1,5 +1,7 @@
 # Fixture design
 
+> [🇬🇧 English](./fixture.md) • [🇯🇵 日本語](../../ja/concepts/fixture.md)
+
 ## TL;DR
 
 `dappE2eTest` is a Playwright `test` extension that bundles anvil launch, wallet injection, and the connect flow into a single fixture.

@@ -1,5 +1,7 @@
 # getFreePort
 
+> [🇬🇧 English](../../en/api/get-free-port.md) • [🇯🇵 日本語](./get-free-port.md)
+
 OS allocate された free port を取得する helper。
 
 ## Signature

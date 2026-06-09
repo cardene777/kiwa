@@ -1,5 +1,7 @@
 # Quickstart
 
+> [🇬🇧 English](../en/quickstart.md) • [🇯🇵 日本語](./quickstart.md)
+
 kiwa で最初の E2E test を 5 分で動かします。
 
 ## 必須前提チェックリスト
