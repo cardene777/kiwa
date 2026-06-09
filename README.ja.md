@@ -25,7 +25,7 @@
 ---
 
 > 🎨 **リブランド通知**: 本プロジェクトは 2026 年 6 月に `dapp-e2e` から **kiwa** (際) に改名しました。
-> 旧 `dapp-e2e` は Playwright e2e fixture のみでしたが、 **kiwa** は同 fixture **+** Layer 1 テスト設計 + Layer 2 contract test 生成 (Foundry / Hardhat) を加えたツール群です。 Playwright fixture の API は変更なし。 詳細は [docs/MIGRATION.md § Rebrand notice](./docs/MIGRATION.md#-rebrand-notice-2026-06-dapp-e2e--kiwa) を参照。
+> 旧 `dapp-e2e` は Playwright e2e fixture のみでしたが、 **kiwa** は同 fixture **+** Layer 1 テスト設計 + Layer 2 contract test 生成 (Foundry / Hardhat) を加えたツール群です。 Playwright fixture の API は変更なし。 詳細は [docs/MIGRATION.md § Rebrand notice](./docs/MIGRATION.ja.md#-rebrand-notice-2026-06-dapp-e2e--kiwa) を参照。
 
 ---
 
@@ -383,12 +383,12 @@ Reference docs:
 | [`docs/SKILL-DESIGN.ja.md`](./docs/SKILL-DESIGN.ja.md) ⭐ | **4 skill 共通 SSOT** (5 段階フロー / 9 section 出力 / 10 観点 / 5 リスク基準) |
 | [`docs/MOCK-DESIGN.ja.md`](./docs/MOCK-DESIGN.ja.md) | Wallet / SDK mock 精度仕様 (A/B/C level、 scoring rubric) |
 | [`tests/docs/skill-chain-tutorial.ja.md`](./tests/docs/skill-chain-tutorial.ja.md) ⭐ | **4 skill chain walkthrough** (後付け導入起点) |
-| [`docs/RPC.md`](./docs/RPC.md) | 9 直接対応 RPC + anvil fallback |
-| [`docs/EVENTS.md`](./docs/EVENTS.md) | 4 event + `triggerEvent()` |
-| [`docs/ERRORS.md`](./docs/ERRORS.md) | EIP-1193 error code + envelope 設計 |
-| [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.x breaking change policy + dapp-e2e → kiwa リブランド案内 |
-| [`docs/COMPARISON.md`](./docs/COMPARISON.md) | Synpress / wallet-mock 比較 |
-| [`docs/RELEASING.md`](./docs/RELEASING.md) | Publish flow + provenance |
+| [`docs/RPC.ja.md`](./docs/RPC.ja.md) | 9 直接対応 RPC + anvil fallback |
+| [`docs/EVENTS.ja.md`](./docs/EVENTS.ja.md) | 4 event + `triggerEvent()` |
+| [`docs/ERRORS.ja.md`](./docs/ERRORS.ja.md) | EIP-1193 error code + envelope 設計 |
+| [`docs/MIGRATION.ja.md`](./docs/MIGRATION.ja.md) | v0.x breaking change policy + dapp-e2e → kiwa リブランド案内 |
+| [`docs/COMPARISON.ja.md`](./docs/COMPARISON.ja.md) | Synpress / wallet-mock 比較 |
+| [`docs/RELEASING.ja.md`](./docs/RELEASING.ja.md) | Publish flow + provenance |
 
 Claude Code 利用者向け — 4 skill 完全リファレンス:
 
@@ -404,7 +404,7 @@ Claude Code 利用者向け — 4 skill 完全リファレンス:
 - 🐛 [Issue を起票する](https://github.com/cardene777/kiwa/issues)
 - 🔀 [Pull request を送る](https://github.com/cardene777/kiwa/pulls)
 - 🗺️ Phase F roadmap は Issue [#187 – #191](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Aenhancement+sort%3Acreated-desc) で管理
-- 💡 Breaking change の指摘前に [`docs/MIGRATION.md`](./docs/MIGRATION.md) を確認
+- 💡 Breaking change の指摘前に [`docs/MIGRATION.ja.md`](./docs/MIGRATION.ja.md) を確認
 
 ---
 
