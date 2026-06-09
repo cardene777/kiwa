@@ -24,3 +24,26 @@ examples/*/lcov.info
 
 # Local-only context (markers / spec drafts / scratch)
 .context/
+
+# JetBrains IDE (IntelliJ IDEA / WebStorm / PyCharm 等)
+.idea/
+*.iml
+
+# VSCode (project-level settings は per-team で commit する場合もあるが、
+# default では除外し、 必要な settings は別途明示 commit する方針)
+.vscode/
+*.code-workspace
+
+# Windows OS metadata
+Thumbs.db
+Desktop.ini
+
+# Vim / Emacs / 一般エディタの swap / temp
+*.swp
+*.swo
+*~
+
+# Backup / temp files
+*.bak
+*.tmp
+.tmp/
