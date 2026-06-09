@@ -1,6 +1,6 @@
 # Contract 群の test を skill で作って実走する手順 (Foundry + Hardhat)
 
-> 🇬🇧 英語版あり — [run-contract-tests.md](./run-contract-tests.md)
+> [🇬🇧 English](./run-contract-tests.md) • [🇯🇵 日本語](./run-contract-tests.ja.md)
 
 `examples/nft-marketplace` (2 contract: `MarketNft.sol` + `SimpleMarketplace.sol`) で contract test を 0 から生成 → 実走 → 完成形 fixtures と diff 比較するまでの手順。
 

@@ -1,5 +1,7 @@
 # How to generate and run dApp e2e tests with the skills (Playwright + viem)
 
+> [🇬🇧 English](./run-dapp-e2e-tests.md) • [🇯🇵 日本語](./run-dapp-e2e-tests.ja.md)
+
 `examples/nextjs-token-gating` (a Next.js dApp plus 2 contracts: `GatedContent.sol` + `GateNFT.sol`) is used to walk through generating UI-first dApp e2e tests from scratch and running them end to end. Contract functions never called from the UI (admin / internal) are out of scope.
 
 ## Step 0 — Prerequisites (+ reset if you already started partway through)

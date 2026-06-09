@@ -1,5 +1,7 @@
 # `/kiwa-test` one-command execution guide (contract + dApp e2e, full chain in one command)
 
+> [🇬🇧 English](./run-tests.md) • [🇯🇵 日本語](./run-tests.ja.md)
+
 This guide explains how to run the entire kiwa skill chain (`kiwa-design` → `kiwa-forge` / `kiwa-hardhat` / `kiwa-play` → `kiwa-review`) in one shot with `/kiwa-test`. At startup you can choose contract tests, dApp e2e tests, or both. No need to invoke the individual skills one by one yourself.
 
 If you want to run the individual skills directly, see [run-contract-tests.md](./run-contract-tests.md) and [run-dapp-e2e-tests.md](./run-dapp-e2e-tests.md).

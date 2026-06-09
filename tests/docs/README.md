@@ -1,5 +1,7 @@
 # tests/docs
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Internal test docs for kiwa contributors and anyone working inside the kiwa repo with the skill chain. Separate from the OSS user-facing docs (`docs/`).
 
 What lives here.

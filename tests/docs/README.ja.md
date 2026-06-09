@@ -1,5 +1,7 @@
 # tests/docs
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 kiwa contributor / kiwa repo 内で skill chain を回したい人向けの内部テスト docs。 OSS user 向け入門 (`docs/`) とは分離した位置づけ。
 
 ここに置く docs。
