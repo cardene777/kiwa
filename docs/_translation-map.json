@@ -23,6 +23,7 @@
     { "ja": "docs/ja/cookbook/token-approve-flow.md", "en": "docs/en/cookbook/token-approve-flow.md", "section": "Cookbook", "owner": "auto" },
     { "ja": "docs/ja/cookbook/kiwa-design-flow.md", "en": "docs/en/cookbook/kiwa-design-flow.md", "section": "Cookbook", "owner": "auto" },
     { "ja": "docs/ja/faq.md", "en": "docs/en/faq.md", "section": "FAQ", "owner": "auto" },
+    { "ja": "docs/MIGRATION.ja.md", "en": "docs/MIGRATION.md", "section": "Migration", "owner": "auto" },
     { "ja": "docs/RELEASING.ja.md", "en": "docs/RELEASING.md", "section": "Releasing", "owner": "auto" },
     { "ja": "docs/COMPARISON.ja.md", "en": "docs/COMPARISON.md", "section": "Comparison", "owner": "auto" },
     { "ja": "docs/ERRORS.ja.md", "en": "docs/ERRORS.md", "section": "Errors", "owner": "auto" },
