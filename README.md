@@ -13,7 +13,7 @@ One Layer 1 spec → Foundry `.t.sol`, Hardhat `.test.cjs`, and Playwright `.spe
 [![flaky](https://img.shields.io/badge/flaky-0%2F292-success)](#testing--quality)
 [![coverage](https://img.shields.io/badge/coverage-Lines%2090%2B%20%2F%20Branches%2080%2B-success)](#coverage-requirement)
 [![ERC-4337](https://img.shields.io/badge/ERC--4337-v0.7%20supported-9333ea)](./docs/en/cookbook/smart-wallet-aa.md)
-[![typescript](https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript&logoColor=white)](./tsconfig.json)
+[![typescript](https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript&logoColor=white)](./tsconfig.base.json)
 [![claude code](https://img.shields.io/badge/Claude%20Code-4%20skills-d97706?logo=anthropic&logoColor=white)](./docs/SKILL-DESIGN.md)
 
 [**Quickstart**](#quickstart) • [**4 layer chain**](#4-layer-chain) • [**Features**](#features) • [**Examples**](#examples) • [**Docs**](./docs/en/README.md) • [**Cookbook**](./docs/en/cookbook/README.md) • [**FAQ**](./docs/en/faq.md)
