@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Documentation
+    url: https://github.com/cardene777/kiwa/tree/main/docs/en
+    about: Browse the kiwa documentation (English / 日本語) before opening an Issue.
+  - name: 💬 Discussions
+    url: https://github.com/cardene777/kiwa/discussions
+    about: Open-ended questions or ideas — use Discussions instead of an Issue.
+  - name: 🔒 Security
+    url: https://github.com/cardene777/kiwa/security/advisories/new
+    about: Report a security vulnerability privately (do not open a public Issue).
