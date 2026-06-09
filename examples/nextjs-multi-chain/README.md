@@ -1,5 +1,7 @@
 # examples/nextjs-multi-chain
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Boots three anvils in parallel (A / B / C) and exercises `wallet_switchEthereumChain` against a per-chain `SimpleToken`. A focused way to try `setChainRegistry` and `startAnvilCluster`.
 
 ## What you can try

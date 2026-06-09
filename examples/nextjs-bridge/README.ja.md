@@ -1,5 +1,7 @@
 # examples/nextjs-bridge
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 L1 ↔ L2 bridge を 2 anvil + 4 contract (SourceBridge / SimpleERC20 / DestBridge / DestToken) で実証する example。 lock → mint と burn → unlock の双方向経路を kiwa の multi-chain anvil cluster で回す。
 
 ## 何が試せるか

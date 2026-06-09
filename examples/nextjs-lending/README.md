@@ -1,5 +1,7 @@
 # examples/nextjs-lending
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 A simplified lending pool (`SimpleLending` + `SimpleERC20` + `MockPriceOracle`) verified through Playwright. Drives deposit → borrow → repay plus liquidation, paired with kiwa's snapshot / revert helpers.
 
 ## What you can try

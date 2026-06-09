@@ -1,5 +1,7 @@
 # examples/nextjs-vesting
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Token vesting schedule (TokenVesting + SimpleERC20) を Playwright で検証する example。 cliff → linear vesting → claim の経路を kiwa の time manipulation helper と組み合わせて回す。
 
 ## 何が試せるか

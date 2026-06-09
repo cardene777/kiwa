@@ -1,5 +1,7 @@
 # examples/vite-react-wagmi
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Vite 5 + React 18 + wagmi v2 SPA exercising the kiwa fixture. Deploys `MintNft` and runs the connect → mint flow in an SPA shape.
 
 ## What you can try

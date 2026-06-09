@@ -1,5 +1,7 @@
 # examples/nft-marketplace
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 ERC721 (MarketNft.sol、 ERC2981 royalty 対応) + 複合 marketplace contract (SimpleMarketplace.sol、 listing + offer + acceptOffer + royalty payout + offer invalidation) の組合せ。 kiwa の最も複雑な test 用 dApp で、 list / buy / cancel / makeOffer / cancelOffer / acceptOffer / royalty payout の全経路を 1 例で網羅できる。
 
 ## 2 つの導線

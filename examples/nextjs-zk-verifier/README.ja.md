@@ -1,5 +1,7 @@
 # examples/nextjs-zk-verifier
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 軽量 zk-proof verifier (CommitmentVerifier + RangeProofVerifier) を Playwright で検証する example。 proof 構築 → on-chain verify の典型 flow を kiwa fixture 上で試せる。
 
 ## 何が試せるか

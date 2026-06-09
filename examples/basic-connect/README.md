@@ -1,5 +1,7 @@
 # examples/basic-connect
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 The minimal example for first-time kiwa users. No contract, no Next.js — a single inline HTML page where `window.ethereum` is injected to exercise connect / sign / send-tx / EIP-6963 multi-wallet.
 
 ## What you can try

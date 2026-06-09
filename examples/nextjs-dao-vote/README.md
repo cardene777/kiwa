@@ -1,5 +1,7 @@
 # examples/nextjs-dao-vote
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 The minimal DAO voting path (VoteToken + SimpleDao + DaoExecutionTarget) under Playwright + viem. Lets you exercise propose → vote → execute plus quorum / timelock boundaries.
 
 ## What you can try

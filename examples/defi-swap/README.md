@@ -1,5 +1,7 @@
 # examples/defi-swap
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Deploys two ERC20 tokens plus a 1:1 swap pool (`SimpleSwap.sol` + `Erc20.sol`) and exercises approve → swap → slippage / insufficient-liquidity behaviour across Playwright + Foundry + Hardhat. Pick this when you want to play with kiwa's ERC20 approval policy and slippage protection helpers.
 
 ## What you can try

@@ -1,5 +1,7 @@
 # examples/nextjs-event-history
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Search and render `EventEmitter` events through Playwright. A good way to feel the `expectEvent` helper and the typical viem `getLogs` lane.
 
 ## What you can try

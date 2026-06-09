@@ -1,5 +1,7 @@
 # examples/nextjs-multi-chain
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 3 chain (anvil A / B / C) を並列起動し、 wallet_switchEthereumChain で chain を切替えながら SimpleToken の状態を読む example。 kiwa の `setChainRegistry` と `startAnvilCluster` の使い方を試せる。
 
 ## 何が試せるか

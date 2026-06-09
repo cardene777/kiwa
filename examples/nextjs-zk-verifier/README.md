@@ -1,5 +1,7 @@
 # examples/nextjs-zk-verifier
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Lightweight zk-proof verifier (`CommitmentVerifier` + `RangeProofVerifier`) verified through Playwright. Drives the typical proof construction → on-chain verify flow on top of the kiwa fixture.
 
 ## What you can try

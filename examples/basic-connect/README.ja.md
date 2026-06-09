@@ -1,5 +1,7 @@
 # examples/basic-connect
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 kiwa を最初に触る人向けの最小 example。 contract も Next.js も不要、 inline HTML 1 枚に `window.ethereum` を inject して接続 / 署名 / 送金 / EIP-6963 multi-wallet を試す。
 
 ## 何が試せるか

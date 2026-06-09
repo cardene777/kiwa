@@ -1,5 +1,7 @@
 # examples/nextjs-staking
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Staking pool (SimpleStaking + SimpleERC20) を Playwright で検証する example。 deposit → reward accrual → withdraw の経路を kiwa の time manipulation helper と組み合わせて試せる。
 
 ## 何が試せるか

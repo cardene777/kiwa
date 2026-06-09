@@ -1,5 +1,7 @@
 # examples/mint-nft
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Deploys the `MintNft.sol` ERC721 contract to anvil and runs tests through three lanes — Playwright + viem, Foundry, and Hardhat — so you can compare the kiwa dApp lane and the "Foundry + Hardhat side-by-side" workflow for contract-only tests.
 
 ## Two paths in this directory

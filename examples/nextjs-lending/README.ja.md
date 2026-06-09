@@ -1,5 +1,7 @@
 # examples/nextjs-lending
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 簡易 lending pool (SimpleLending + SimpleERC20 + MockPriceOracle) を Playwright で検証する example。 deposit → borrow → repay と liquidation 経路を kiwa の snapshot/revert helper と組み合わせて回す。
 
 ## 何が試せるか

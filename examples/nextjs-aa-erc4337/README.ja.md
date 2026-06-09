@@ -1,5 +1,7 @@
 # examples/nextjs-aa-erc4337
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 ERC-4337 v0.7 の Account Abstraction (EntryPoint + SimpleAccountFactory + UserOperation + MockTarget) を Next.js + Playwright で end-to-end 検証する example。 4337 全経路 (UserOp 構築 → bundler 風送信 → EntryPoint 経由 execute) を Smart Account 越しに走らせる。
 
 ## 何が試せるか

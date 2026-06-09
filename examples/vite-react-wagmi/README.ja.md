@@ -1,5 +1,7 @@
 # examples/vite-react-wagmi
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Vite 5 + React 18 + wagmi v2 の SPA dApp で kiwa fixture を試す example。 MintNft contract を deploy して connect → mint flow を SPA 構成で確認できる。
 
 ## 何が試せるか

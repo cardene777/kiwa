@@ -1,5 +1,7 @@
 # examples/nextjs-erc1155-game
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 ERC1155 game items (`GameItems`) verified through Next.js + Playwright. Drives inventory display → burn → mint with viem `WalletClient`.
 
 ## What you can try
