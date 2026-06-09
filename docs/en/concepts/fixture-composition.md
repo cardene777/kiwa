@@ -91,4 +91,4 @@ test('treasury account can open the vault page', async ({ page, customWallet }) 
 ## Related
 
 - [Fixture design](./fixture.md)
-- [API Reference: dappE2eTest](../api/kiwa-play.md)
+- [API Reference: dappE2eTest](../api/dapp-e2e-test.md)

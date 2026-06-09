@@ -60,5 +60,5 @@ pnpm exec playwright test e2e/connect.spec.ts
 
 ## Related
 
-- [API: dappE2eTest](../api/kiwa-play.md)
+- [API: dappE2eTest](../api/dapp-e2e-test.md)
 - [Cookbook: User Reject 経路](./user-reject.md)
