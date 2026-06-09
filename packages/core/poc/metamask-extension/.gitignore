@@ -1,6 +1,9 @@
 # Metamask extension binary (license: non-commercial only, re-distribution restricted)
 # crx is downloaded on-demand by download-metamask.ts
 extension/
+extension-storage/
+extension-v13-17/
+extension-v13.17.0/
 *.zip
 *.crx
 
