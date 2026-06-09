@@ -1,5 +1,7 @@
 # examples/nextjs-ens-resolver
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 ENS 風 name → address 解決を最小 contract (SimpleResolver) で試す example。 name registration / 解決 / 解除の 3 経路を Playwright で動作確認できる。
 
 ## 何が試せるか

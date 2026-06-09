@@ -1,5 +1,7 @@
 # examples/mint-nft
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 ERC721 contract (MintNft.sol) を anvil に deploy し、 Playwright + viem からだけでなく Foundry / Hardhat の 3 経路で test できる example。 kiwa の dApp 経路と「contract 単体 test の Foundry + Hardhat 並立」をまとめて確認できる。
 
 ## このディレクトリの 2 つの動線

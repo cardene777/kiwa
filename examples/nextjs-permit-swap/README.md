@@ -1,5 +1,7 @@
 # examples/nextjs-permit-swap
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Gasless approve + swap built on EIP-2612 permit. Two contracts (`PermitToken` + `PermitSwap`) give you a permit signature → swap single-step flow.
 
 ## What you can try

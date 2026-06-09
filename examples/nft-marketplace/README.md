@@ -1,5 +1,7 @@
 # examples/nft-marketplace
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Pairs an ERC721 (`MarketNft.sol`, ERC2981 royalty) with a composite marketplace (`SimpleMarketplace.sol` — listing + offer + acceptOffer + royalty payout + offer invalidation). The most complex test dApp in kiwa, where a single example covers list / buy / cancel / makeOffer / cancelOffer / acceptOffer / royalty payout in one place.
 
 ## Two paths

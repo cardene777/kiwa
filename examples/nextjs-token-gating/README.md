@@ -1,5 +1,7 @@
 # examples/nextjs-token-gating
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Gates `GatedContent.getSecret()` so only holders of the `GateNFT` ERC721 can read it. The timed-grant path and grantor revocation are part of the example. Hardhat lane added in F-1 wave 1.
 
 ## Two tracks

@@ -1,5 +1,7 @@
 # examples/nextjs-token-gating
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 ERC721 (GateNFT) を hold する hold 者だけが getSecret() を読める gated content (GatedContent) を試す example。 NFT 保有者からの timed grant 経路と grantor revocation の挙動も含めて検証できる。 Phase F-1 第 1 弾で Hardhat 経路も並立。
 
 ## 2 動線

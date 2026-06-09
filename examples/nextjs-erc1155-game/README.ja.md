@@ -1,5 +1,7 @@
 # examples/nextjs-erc1155-game
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 ERC1155 ゲームアイテム (GameItems) を Next.js + Playwright で検証する example。 inventory 表示 → burn → mint の経路を viem WalletClient と組み合わせて回す。
 
 ## 何が試せるか

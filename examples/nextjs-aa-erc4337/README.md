@@ -1,5 +1,7 @@
 # examples/nextjs-aa-erc4337
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Full ERC-4337 v0.7 Account Abstraction (EntryPoint + SimpleAccountFactory + UserOperation + MockTarget) wired into a Next.js + Playwright run. Drives the entire 4337 chain — UserOp construction → bundler-style submit → EntryPoint execute — through a Smart Account.
 
 ## What you can try

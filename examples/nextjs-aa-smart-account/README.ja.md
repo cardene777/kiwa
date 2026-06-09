@@ -1,5 +1,7 @@
 # examples/nextjs-aa-smart-account
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 簡易版 Smart Account (AccountFactory + Counter + MockToken + Paymaster + SmartAccount + TokenSpender) で AA 周りの典型 use case (Paymaster による gas 代替 / TokenSpender 経由の自動承認 / guardian recovery / ERC-1271) を試せる example。
 
 ## 何が試せるか

@@ -1,5 +1,7 @@
 # examples/nextjs-bridge
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 A two-anvil L1 ↔ L2 bridge built on four contracts (SourceBridge / SimpleERC20 / DestBridge / DestToken). The lock → mint and burn → unlock paths both run through kiwa's multi-chain anvil cluster.
 
 ## What you can try

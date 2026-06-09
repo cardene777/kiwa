@@ -1,5 +1,7 @@
 # examples/nextjs-wagmi-rainbow
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 Next.js + wagmi + RainbowKit の dApp 上で kiwa fixture が `window.ethereum` を inject し、 `useAccount` / `useReadContract` / `useWriteContract` 経由の test を回す example。 framework 統合経路 (anvil 起動 → forge build → forge create → .env.local 書き込み → playwright globalSetup) を 1 例で確認できる。
 
 本 example は `kiwa init --with-deploy <foundry-path>` で生成される 4 file 構成 (`tests/prepare-env.ts` / `global-setup.ts` / `global-teardown.ts` / `fixture.ts`) の **動く reference 実装** にもなっている。 詳細は [Cookbook: kiwa init --with-deploy](../../docs/ja/cookbook/with-deploy.md) を参照。

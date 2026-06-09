@@ -1,5 +1,7 @@
 # examples/nextjs-permit-swap
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 EIP-2612 permit を使った gasless approve + swap を検証する example。 PermitToken + PermitSwap の 2 contract で permit 署名 → swap の 1 step フローを試せる。
 
 ## 何が試せるか

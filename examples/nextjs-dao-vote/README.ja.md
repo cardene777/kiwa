@@ -1,5 +1,7 @@
 # examples/nextjs-dao-vote
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 DAO 投票の最小経路 (VoteToken + SimpleDao + DaoExecutionTarget) を Playwright + viem で検証する example。 proposal 作成 → 投票 → execute の典型 flow と quorum / timelock の境界値を試せる。
 
 ## 何が試せるか

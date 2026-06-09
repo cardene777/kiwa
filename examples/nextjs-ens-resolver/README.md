@@ -1,5 +1,7 @@
 # examples/nextjs-ens-resolver
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 An ENS-style name → address resolver on a minimal contract (`SimpleResolver`). Exercises register / resolve / unregister through Playwright.
 
 ## What you can try

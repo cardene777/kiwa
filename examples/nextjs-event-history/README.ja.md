@@ -1,5 +1,7 @@
 # examples/nextjs-event-history
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 EventEmitter contract の event を Playwright で検索 / 履歴表示する example。 `expectEvent` helper の使い方と viem `getLogs` の典型経路を試せる。
 
 ## 何が試せるか

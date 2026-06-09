@@ -1,5 +1,7 @@
 # examples/defi-swap
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 ERC20 2 種 + 1:1 swap pool (SimpleSwap.sol + Erc20.sol) を deploy し、 approve → swap → slippage / insufficient liquidity の振る舞いを Playwright + Foundry + Hardhat の 3 経路で検証する example。 ERC20 approval policy と slippage protection 周りの kiwa 機能を試したいときの起点。
 
 ## 何が試せるか
