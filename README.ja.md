@@ -401,6 +401,9 @@ Claude Code 利用者向け — 4 skill 完全リファレンス:
 
 ## Contributing
 
+- 📖 [CONTRIBUTING.md を読む](./CONTRIBUTING.md) — 開発環境 setup + skill chain 経由の test 生成 + PR checklist
+- 🤝 [Code of Conduct](./CODE_OF_CONDUCT.md) — Contributor Covenant 2.1
+- 🔒 [Security policy](./SECURITY.md) — 脆弱性は非公開経路で報告
 - 🐛 [Issue を起票する](https://github.com/cardene777/kiwa/issues)
 - 🔀 [Pull request を送る](https://github.com/cardene777/kiwa/pulls)
 - 🗺️ Phase F roadmap は Issue [#187 – #191](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Aenhancement+sort%3Acreated-desc) で管理

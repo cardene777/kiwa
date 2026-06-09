@@ -401,6 +401,9 @@ For Claude Code users — full skill reference:
 
 ## Contributing
 
+- 📖 [Read CONTRIBUTING.md](./CONTRIBUTING.md) — dev setup + skill chain workflow + PR checklist
+- 🤝 [Code of Conduct](./CODE_OF_CONDUCT.md) — Contributor Covenant 2.1
+- 🔒 [Security policy](./SECURITY.md) — Report vulnerabilities privately
 - 🐛 [Open an issue](https://github.com/cardene777/kiwa/issues)
 - 🔀 [Send a pull request](https://github.com/cardene777/kiwa/pulls)
 - 🗺️ Phase F roadmap is tracked at issues [#187 – #191](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Aenhancement+sort%3Acreated-desc)
