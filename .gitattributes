@@ -1,0 +1,28 @@
+# All text files default to LF line ending
+* text=auto eol=lf
+
+# Source code
+*.sol text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.cjs text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+
+# Documentation
+*.md text eol=lf
+
+# Binaries
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.crx binary
+*.tar binary
+*.gz binary
+
+# GitHub linguist hints (exclude these from language stats)
+pnpm-lock.yaml linguist-generated
+docs/_translation-map.json linguist-generated
