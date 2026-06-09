@@ -65,4 +65,4 @@ customTest('connect 後に署名できる', async ({ page, dappE2e }) => {
 ## 関連
 
 - [EIP-6963 Multi-Wallet](./eip-6963.md)
-- [API Reference: dappE2eTest](../api/kiwa-play.md)
+- [API Reference: dappE2eTest](../api/dapp-e2e-test.md)

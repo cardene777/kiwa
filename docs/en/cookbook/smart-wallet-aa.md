@@ -140,6 +140,6 @@ Watch out for `adversarial-pitfalls.md` **#3 (partial access-control checks)**:
 
 ## See also
 
-- [API: WalletConfig.isContractAccount](../api/kiwa-play.md#walletconfig)
+- [API: WalletConfig.isContractAccount](../api/dapp-e2e-test.md#walletconfig)
 - [Example: nextjs-aa-erc4337](https://github.com/cardene777/kiwa/tree/main/examples/nextjs-aa-erc4337)
 - [Example: nextjs-aa-smart-account (simplified)](https://github.com/cardene777/kiwa/tree/main/examples/nextjs-aa-smart-account)

@@ -144,6 +144,6 @@ test('T-AA-002 personal_sign の signature が isValidSignature で検証成功'
 
 ## 関連
 
-- [API: WalletConfig.isContractAccount](../api/kiwa-play.md#walletconfig)
+- [API: WalletConfig.isContractAccount](../api/dapp-e2e-test.md#walletconfig)
 - [Example: nextjs-aa-erc4337](https://github.com/cardene777/kiwa/tree/main/examples/nextjs-aa-erc4337)
 - [Example: nextjs-aa-smart-account (簡略版)](https://github.com/cardene777/kiwa/tree/main/examples/nextjs-aa-smart-account)

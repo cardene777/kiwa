@@ -6,7 +6,7 @@
 
 | Function / Type | 役割 |
 |---|---|
-| [`dappE2eTest`](./kiwa-play.md) | Playwright `test` を拡張した dApp 用 fixture |
+| [`dappE2eTest`](./dapp-e2e-test.md) | Playwright `test` を拡張した dApp 用 fixture |
 | [`startAnvil`](./start-anvil.md) | anvil 子プロセスを spawn し ready まで待つ |
 | [`startAnvilCluster`](./test-helpers.md#startanvilcluster) | 複数 chain id の anvil を同時起動 (multi-chain test 用) |
 | [`startAnvilFork`](./test-helpers.md#startanvilfork) | `anvil --fork-url` の thin wrapper (mainnet / sepolia fork) |

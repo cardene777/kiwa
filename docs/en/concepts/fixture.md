@@ -66,4 +66,4 @@ customTest('can sign after connect', async ({ page, dappE2e }) => {
 ## Related
 
 - [EIP-6963 Multi-Wallet](./eip-6963.md)
-- [API Reference: dappE2eTest](../api/kiwa-play.md)
+- [API Reference: dappE2eTest](../api/dapp-e2e-test.md)

@@ -60,5 +60,5 @@ Expected output.
 
 ## Related
 
-- [API: dappE2eTest](../api/kiwa-play.md)
+- [API: dappE2eTest](../api/dapp-e2e-test.md)
 - [Cookbook: User reject path](./user-reject.md)
