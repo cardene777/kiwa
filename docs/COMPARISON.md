@@ -1,97 +1,101 @@
 # Tool comparison
 
-本ドキュメントは kiwa を既存の wallet E2E 周辺ツールと比較したい利用者向けです。
-内容は v0.1.0 時点、すなわち 2026-06 時点の kiwa の機能と、
-各公式 repository / docs で公開されている役割を基準に整理しています。
-結論だけ先に言うと、kiwa は anvil を使う headless E2E の安定運用に寄せた立ち位置です。
+> [🇬🇧 English](./COMPARISON.md) • [🇯🇵 日本語](./COMPARISON.ja.md)
 
-## 比較表
+This document is intended for users who want to compare kiwa with existing wallet E2E companion tools.
+The contents are organized based on kiwa's capabilities as of v0.1.0, that is, as of 2026-06,
+and the roles described in each official repository / docs.
+The conclusion first: kiwa is positioned for stable headless E2E operation using anvil.
 
-| 観点 | Synpress | wallet-mock | kiwa |
+## Comparison table
+
+| Aspect | Synpress | wallet-mock | kiwa |
 |---|---|---|---|
-| 主対象 | 実 wallet 連携を含む E2E | headless wallet 注入 | ローカル chain 前提の dApp E2E |
-| ブラウザ側 | Playwright / Cypress + wallet 拡張連携 | Playwright へ mock wallet を注入 | Playwright へ `window.ethereum` を注入 |
-| chain backend | 実 wallet と組み合わせる任意 backend | mock 応答または任意 transport | anvil を test ごとに起動 |
-| 署名 / 送金 | wallet UI を経由 | mock または transport 経由 | anvil dev account で直接処理 |
-| CI 安定性 | 中 | 高 | 高 |
-| 向く場面 | wallet UX 確認 | provider 差し替え検証 | ローカル chain での接続フロー検証 |
+| Primary target | E2E including real wallet integration | Headless wallet injection | dApp E2E assuming a local chain |
+| Browser side | Playwright / Cypress + wallet extension integration | Inject a mock wallet into Playwright | Inject `window.ethereum` into Playwright |
+| chain backend | Any backend paired with a real wallet | Mock responses or arbitrary transport | Start anvil per test |
+| Signing / transfers | Via the wallet UI | Via mock or transport | Handled directly with anvil dev accounts |
+| CI stability | Medium | High | High |
+| Best fit | Verifying wallet UX | Verifying provider replacement | Verifying connection flows on a local chain |
 
-どれが常に上位という関係ではなく、確認したい対象が違います。
-wallet UI、provider mock、ローカル chain のどこに重心を置くかで選ぶのが実用的です。
+This is not a case where one tool is always superior.
+They target different things.
+In practice, it is best to choose based on whether your focus is wallet UI, provider mocking, or a local chain.
 
-## kiwa の位置づけ
+## Positioning of kiwa
 
-kiwa は次の 3 点を優先しています。
+kiwa prioritizes the following three points.
 
-- anvil を test 単位で直接起動できること
-- browser extension を持ち込まず headless で回せること
-- EIP-1193 の最小コアを fixture として使い回せること
+- The ability to start anvil directly per test
+- The ability to run headlessly without bringing in a browser extension
+- The ability to reuse the minimum EIP-1193 core as a fixture
 
-その代わり、wallet popup の文言確認や拡張 UI の操作再現は対象外です。
-README の先頭で「実 MetaMask UI 検証は別ツールへ分離」としている理由もここにあります。
+In exchange, it does not cover checking wallet popup copy or reproducing extension UI interactions.
+This is also why the top of the README says to separate real MetaMask UI verification into another tool.
 
-## 使い分けガイド
+## Selection guide
 
-### Synpress を選ぶ場合
+### When to choose Synpress
 
-- 実 wallet UI の接続確認、承認、拒否まで含めて見たい
-- dApp 側だけでなく browser extension 側の表示崩れも拾いたい
-- Playwright または Cypress と wallet 拡張の組み合わせを維持したい
+- You want to cover connection, approval, and rejection flows through a real wallet UI
+- You want to catch rendering issues on the browser extension side as well as in the dApp
+- You want to keep using a Playwright- or Cypress-based setup with a wallet extension
 
-Synpress は wallet 実体との統合を取り込みたいときに強い候補です。
-一方で browser setup と extension 依存が入るため、headless 実行だけを素早く回す用途では過剰になりやすいです。
+Synpress is a strong option when you want to bring in integration with a real wallet implementation.
+On the other hand, because it adds browser setup and extension dependencies,
+it often becomes more than you need when the goal is just to run headless tests quickly.
 
-### wallet-mock を選ぶ場合
+### When to choose wallet-mock
 
-- provider を headless に差し込みたい
-- mock 応答を細かく差し替えたい
-- 実 chain 接続よりも dApp 側分岐の確認を優先したい
+- You want to inject a provider headlessly
+- You want fine-grained control over mocked responses
+- You care more about verifying dApp-side branches than about connecting to a real chain
 
-wallet-mock は Playwright に wallet を注入する発想が近い一方で、
-anvil lifecycle やローカル chain の隔離は利用側で組む前提です。
-transport を自由に差し替えたい test には向きます。
+wallet-mock is close in spirit in that it injects a wallet into Playwright,
+but it assumes the consumer will build anvil lifecycle management and local-chain isolation themselves.
+It is a good fit for tests where you want full freedom to swap transports.
 
-### kiwa を選ぶ場合
+### When to choose kiwa
 
-- 自分でセットアップした anvil のローカル chain で dApp E2E を試したい
-- provider の最小面だけあれば十分で、wallet UI までは不要
-- `window.ethereum` の request / event を page から素直に叩きたい
-- Playwright fixture だけで起動、注入、終了まで閉じたい
+- You want to run dApp E2E against a local chain backed by anvil that you set up yourself
+- The minimal provider surface is enough, and you do not need wallet UI
+- You want to call `window.ethereum` requests / events directly from the page
+- You want startup, injection, and teardown to stay contained within Playwright fixtures alone
 
-kiwa は「ローカル chain 上で dApp 自体を headless に検証する」用途に最も合います。
-`eth_requestAccounts` から `eth_sendTransaction` までの流れを 1 つの fixture にまとめたいなら、
-この repo の `examples/basic-connect` が最短の導入例です。
+kiwa is the best fit for the use case of headlessly testing the dApp itself on a local chain.
+If you want to bundle the flow from `eth_requestAccounts` through `eth_sendTransaction` into one fixture,
+`examples/basic-connect` in this repository is the shortest path to get started.
 
-## 選定の目安
+## Rules of thumb
 
-1. wallet UI の真偽が重要なら Synpress
-2. provider の差し替えと mock 制御が主目的なら wallet-mock
-3. ローカル chain 上の dApp 挙動と CI 安定性を同時に欲しいなら kiwa
+1. Choose Synpress if wallet UI fidelity matters
+2. Choose wallet-mock if provider replacement and mock control are the main goal
+3. Choose kiwa if you want both local-chain dApp behavior and CI stability
 
-複数併用も現実的です。
-たとえば日常の回帰は kiwa、release 前の wallet UX 確認だけ Synpress、という分担は十分ありえます。
-wallet 層と dApp 層を別々に検証したい team ほど、この分担の効果が出やすくなります。
+Using more than one is also realistic.
+For example, using kiwa for everyday regression coverage and Synpress only for wallet UX checks before release is a perfectly reasonable split.
+The more a team wants to test the wallet layer and the dApp layer separately, the more this split pays off.
 
-## kiwa が向かないケース
+## Cases where kiwa is not a good fit
 
-- 拡張 popup のボタン文言や配置そのものを検証したい
-- 複数 wallet 拡張の競合や browser profile 差分を見たい
-- provider を完全 mock にして chain 接続を切り離したい
+- You want to verify the exact copy or placement of buttons in an extension popup
+- You want to observe conflicts between multiple wallet extensions or differences between browser profiles
+- You want to fully mock the provider and decouple it from chain connectivity
 
-この領域では、kiwa の「anvil を起点にした最小 provider」という設計がそのまま制約になります。
-wallet UI の再現性が主目的なら Synpress、
-transport 差し替えの自由度が主目的なら wallet-mock の方が設計意図に合います。
+In this area, kiwa's design as a minimum provider centered on anvil becomes a constraint directly.
+If reproducing wallet UI is the main goal, Synpress is a better fit.
+If transport-swapping flexibility is the main goal, wallet-mock aligns better with the design intent.
 
-## kiwa を選ぶときの確認項目
+## Things to confirm before choosing kiwa
 
-- anvil を利用できる環境があるか
-- ローカル anvil chain を前提に test を組めるか
-- wallet 拡張 UI の確認を別レイヤへ分離できるか
-- `viem` と Playwright を host project 側で管理したいか
+- Whether you have an environment where anvil is available
+- Whether you can structure tests around a local anvil chain
+- Whether you can separate wallet extension UI checks into another layer
+- Whether you want to manage `viem` and Playwright on the host project side
 
-この 4 点に無理がなければ、kiwa の設計と相性が良い可能性が高いです。
+If these four points are acceptable, there is a good chance kiwa's design will fit well.
 
-## 関連
+## Related
 
 - [Synpress repository](https://github.com/Synthetixio/synpress)
 - [wallet-mock repository](https://github.com/johanneskares/wallet-mock)
