@@ -1,5 +1,7 @@
 # How to hand-write tests by importing `@kiwa/core` as a library
 
+> [🇬🇧 English](./write-tests-manually.md) • [🇯🇵 日本語](./write-tests-manually.ja.md)
+
 This is the route where you do **not** use skills such as `/kiwa-test` or `/kiwa-play`, but instead import `@kiwa/core` directly as an npm library and write the tests yourself. This is for use cases like integrating kiwa into an existing dApp project as a library, preferring hand-written tests because skill-generated tests are harder to read, or reusing only selected fixtures.
 
 If you want full auto-generation from zero through the skill path, read [run-tests.md](./run-tests.md).

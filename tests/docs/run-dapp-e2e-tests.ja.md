@@ -1,6 +1,6 @@
 # dApp e2e test を skill で作って実走する手順 (Playwright + viem)
 
-> 🇬🇧 英語版あり — [run-dapp-e2e-tests.md](./run-dapp-e2e-tests.md)
+> [🇬🇧 English](./run-dapp-e2e-tests.md) • [🇯🇵 日本語](./run-dapp-e2e-tests.ja.md)
 
 `examples/nextjs-token-gating` (Next.js dApp + 2 contract: `GatedContent.sol` + `GateNFT.sol`) で UI 起点の dApp e2e test を 0 から生成 → 実走するまでの手順。 UI から呼ばれない contract function (admin / internal) は対象外。
 

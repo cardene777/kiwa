@@ -1,5 +1,7 @@
 # How to generate and run tests for a contract set with the skills (Foundry + Hardhat)
 
+> [🇬🇧 English](./run-contract-tests.md) • [🇯🇵 日本語](./run-contract-tests.ja.md)
+
 `examples/nft-marketplace` (2 contracts: `MarketNft.sol` + `SimpleMarketplace.sol`) is used to walk through generating contract tests from scratch, running them, and comparing the result against the finished fixtures.
 
 ## Step 0 — Prerequisites (+ reset if you already started partway through)
