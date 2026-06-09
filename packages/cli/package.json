@@ -17,7 +17,7 @@
   "bin": {
     "kiwa": "./dist/index.js"
   },
-  "files": ["dist"],
+  "files": ["dist", "README.md"],
   "publishConfig": {
     "access": "public",
     "provenance": true
