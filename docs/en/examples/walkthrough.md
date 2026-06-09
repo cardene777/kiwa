@@ -1,5 +1,7 @@
 # Examples Walkthrough
 
+> [🇬🇧 English](./walkthrough.md) • [🇯🇵 日本語](../../ja/examples/walkthrough.md)
+
 A 30 minute to 1 hour tour through five popular kiwa examples. The stages ramp up gradually — starter → contract-only → framework integration → composite.
 
 The "duration" on each stage is the time it takes to read the docs and watch the behaviour. The test commands themselves take seconds to a few dozen seconds (Stage 4 is ~25s including Next.js boot; the rest are around 4s).

@@ -1,5 +1,7 @@
 # dappE2eTest
 
+> [🇬🇧 English](../../en/api/dapp-e2e-test.md) • [🇯🇵 日本語](./dapp-e2e-test.md)
+
 Playwright の `test` を拡張した dApp 専用 fixture。`page` に加えて `dappE2e` ヘルパーを受け取れます。
 
 ## Signature

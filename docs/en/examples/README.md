@@ -1,5 +1,7 @@
 # Examples Map
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](../../ja/examples/README.md)
+
 The `examples/` directory contains 20 test dApps and contracts. This page is the reverse lookup — pick what you want to try, find the right example, dApp lane vs. contract-only lane laid out side by side.
 
 For a guided tour through five examples in order, read [walkthrough.md](./walkthrough.md). Until publish lands, every example can be run locally with `pnpm -F examples-{name} test`.

@@ -1,5 +1,7 @@
 # AnvilHandle
 
+> [🇬🇧 English](../../en/api/anvil-handle.md) • [🇯🇵 日本語](./anvil-handle.md)
+
 `startAnvil` の戻り値型。port と stop helper を保持します。
 
 ## Signature

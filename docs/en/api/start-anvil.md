@@ -1,5 +1,7 @@
 # startAnvil
 
+> [🇬🇧 English](./start-anvil.md) • [🇯🇵 日本語](../../ja/api/start-anvil.md)
+
 Spawn an anvil child process and verify it is ready via `eth_chainId`.
 
 ## Signature

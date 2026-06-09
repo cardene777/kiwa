@@ -1,5 +1,7 @@
 # Concepts
 
+> [🇬🇧 English](../../en/concepts/README.md) • [🇯🇵 日本語](./README.md)
+
 kiwa の中核となる概念。
 
 - [Fixture 設計](./fixture.md) — `dappE2eTest` が提供する Playwright fixture

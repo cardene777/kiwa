@@ -1,5 +1,7 @@
 # Token approve flow を test する
 
+> [🇬🇧 English](../../en/cookbook/token-approve-flow.md) • [🇯🇵 日本語](./token-approve-flow.md)
+
 ## Goal
 
 swap / stake / lending の前段にある ERC-20 `approve` flow を、

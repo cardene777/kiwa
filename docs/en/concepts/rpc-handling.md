@@ -1,5 +1,7 @@
 # RPC handling
 
+> [🇬🇧 English](./rpc-handling.md) • [🇯🇵 日本語](../../ja/concepts/rpc-handling.md)
+
 ## TL;DR
 
 kiwa core handles 9 EIP-1193 RPC methods directly and forwards the rest to anvil JSON-RPC.

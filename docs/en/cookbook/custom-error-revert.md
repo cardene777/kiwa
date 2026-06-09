@@ -1,5 +1,7 @@
 # Assert custom-error reverts with expectCustomError
 
+> [🇬🇧 English](./custom-error-revert.md) • [🇯🇵 日本語](../../ja/cookbook/custom-error-revert.md)
+
 Use `expectCustomError` added in `@kiwa/core` v0.2 to concisely assert Solidity custom-error reverts.
 
 ## Problem

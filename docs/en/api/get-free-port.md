@@ -1,5 +1,7 @@
 # getFreePort
 
+> [🇬🇧 English](./get-free-port.md) • [🇯🇵 日本語](../../ja/api/get-free-port.md)
+
 Obtain an OS-allocated free port.
 
 ## Signature

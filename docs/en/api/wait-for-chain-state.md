@@ -1,5 +1,7 @@
 # waitForChainState
 
+> [🇬🇧 English](./wait-for-chain-state.md) • [🇯🇵 日本語](../../ja/api/wait-for-chain-state.md)
+
 Poll a contract view function until a predicate returns true.
 
 ## Signature

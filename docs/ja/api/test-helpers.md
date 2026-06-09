@@ -1,5 +1,7 @@
 # Test Helpers (v0.2 以降)
 
+> [🇬🇧 English](../../en/api/test-helpers.md) • [🇯🇵 日本語](./test-helpers.md)
+
 `@kiwa/core` v0.2 で追加された 7 test helper の API リファレンス。 業界標準 (hardhat / foundry / viem / hardhat-chai-matchers) と並ぶ範囲を core に集約することで、 各 example での重複定義を解消した。
 
 ## snapshotChain / revertChain

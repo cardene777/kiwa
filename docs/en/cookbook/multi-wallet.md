@@ -1,5 +1,7 @@
 # Test a multi-wallet picker
 
+> [🇬🇧 English](./multi-wallet.md) • [🇯🇵 日本語](../../ja/cookbook/multi-wallet.md)
+
 ## Goal
 
 Inject two or more wallets via EIP-6963 and test the path of selecting a specific wallet through the picker UI.

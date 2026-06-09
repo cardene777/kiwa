@@ -1,5 +1,7 @@
 # Smart wallet (AA / smart contract account) を test する
 
+> [🇬🇧 English](../../en/cookbook/smart-wallet-aa.md) • [🇯🇵 日本語](./smart-wallet-aa.md)
+
 `@kiwa/core` v0.3 で追加された `WalletConfig.isContractAccount` を使い、 ERC-4337 / EIP-1271 の smart contract account を end-to-end で test する pattern。
 
 ## 課題

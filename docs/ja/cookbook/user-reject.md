@@ -1,5 +1,7 @@
 # User reject 経路を test する
 
+> [🇬🇧 English](../../en/cookbook/user-reject.md) • [🇯🇵 日本語](./user-reject.md)
+
 ## Goal
 
 `personal_sign` / `eth_sendTransaction` を user が拒否した場合 (EIP-1193 code 4001) の UX を test する。

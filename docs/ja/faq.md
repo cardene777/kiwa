@@ -1,5 +1,7 @@
 # FAQ
 
+> [🇬🇧 English](../en/faq.md) • [🇯🇵 日本語](./faq.md)
+
 ## Q1: なぜ Synpress や MetaMask Test Dapp ではなく kiwa なのか
 
 A: 既存ツールは MetaMask 拡張機能を経由する E2E が多く、CI で wallet popup の UI 操作を再現するため flaky になりがちです。

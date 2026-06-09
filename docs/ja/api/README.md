@@ -1,5 +1,7 @@
 # API Reference
 
+> [🇬🇧 English](../../en/api/README.md) • [🇯🇵 日本語](./README.md)
+
 `@kiwa/core` から export される主要 API。
 
 ## Fixture / anvil 起動

@@ -1,5 +1,7 @@
 # waitForChainState
 
+> [🇬🇧 English](../../en/api/wait-for-chain-state.md) • [🇯🇵 日本語](./wait-for-chain-state.md)
+
 contract view 関数を predicate が真になるまで poll する helper。
 
 ## Signature

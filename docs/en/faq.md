@@ -1,5 +1,7 @@
 # FAQ
 
+> [🇬🇧 English](./faq.md) • [🇯🇵 日本語](../ja/faq.md)
+
 ## Q1: Why kiwa over Synpress or MetaMask Test Dapp?
 
 A: Existing tools mostly drive the MetaMask extension. Reproducing wallet popup UI in CI tends to be flaky.

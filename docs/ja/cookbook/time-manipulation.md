@@ -1,5 +1,7 @@
 # 時間操作で test する (vesting / streaming)
 
+> [🇬🇧 English](../../en/cookbook/time-manipulation.md) • [🇯🇵 日本語](./time-manipulation.md)
+
 ## Goal
 
 cliff + linear vesting や時間に応じて release される token を CI で待たずに test する。

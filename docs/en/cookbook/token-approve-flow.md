@@ -1,5 +1,7 @@
 # Test a token approve flow
 
+> [🇬🇧 English](./token-approve-flow.md) • [🇯🇵 日本語](../../ja/cookbook/token-approve-flow.md)
+
 ## Goal
 
 Test the common ERC-20 `approve` flow before swap / stake / lending,

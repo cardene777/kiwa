@@ -1,5 +1,7 @@
 # Concepts
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](../../ja/concepts/README.md)
+
 Core concepts behind kiwa.
 
 - [Fixture design](./fixture.md) — Playwright fixtures provided by `dappE2eTest`

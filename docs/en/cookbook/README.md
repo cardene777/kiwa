@@ -1,5 +1,7 @@
 # Cookbook
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](../../ja/cookbook/README.md)
+
 kiwa usage by real scenario.
 
 - [Test a connect button](./connect-button.md)

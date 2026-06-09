@@ -1,5 +1,7 @@
 # Fixture composition
 
+> [🇬🇧 English](./fixture-composition.md) • [🇯🇵 日本語](../../ja/concepts/fixture-composition.md)
+
 ## TL;DR
 
 Use `dappE2eTest.extend()` as a thin composition layer that joins deploy output from global setup,
