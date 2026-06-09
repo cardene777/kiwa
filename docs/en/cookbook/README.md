@@ -19,8 +19,12 @@ kiwa usage by real scenario.
 The skill-chain flow (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat` → `/kiwa-play`) — used inside the kiwa repo to generate / run contract tests + e2e tests — is kept separate from the user-facing docs, under `tests/docs/`.
 
 - [tests/docs/README.md](../../../tests/docs/README.md) — Four-skill index + chapter navigation
+- [tests/docs/run-tests.md](../../../tests/docs/run-tests.md) — Run the full chain in one command with `/kiwa-test` (contract / dApp / both, recommended entry point)
+- [tests/docs/write-tests-manually.md](../../../tests/docs/write-tests-manually.md) — Hand-write tests by importing `@kiwa/core` as a library (four single-file samples)
 - [tests/docs/skill-chain-tutorial.md](../../../tests/docs/skill-chain-tutorial.md) — Full flow from spec to contract test + e2e test, all the way to running them
 - [tests/docs/retrofit-existing-dapp.md](../../../tests/docs/retrofit-existing-dapp.md) — Retrofit the skill chain into an existing dApp + Foundry project
+- [tests/docs/run-contract-tests.md](../../../tests/docs/run-contract-tests.md) — Generate and run contract tests with the individual skills (Foundry + Hardhat)
+- [tests/docs/run-dapp-e2e-tests.md](../../../tests/docs/run-dapp-e2e-tests.md) — Generate and run Playwright specs from the UI side with the individual skills
 
 ## Related
 
