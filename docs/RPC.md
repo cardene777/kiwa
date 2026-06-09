@@ -1,33 +1,35 @@
 # RPC reference
 
-本ドキュメントは kiwa の EIP-1193 互換 RPC を確認したい利用者向けです。
-v0.1.0 の core は `packages/core/src/rpc-handlers.ts` で 9 method を直接処理し、
-それ以外は anvil JSON-RPC へ forward します。
-error の返し方は [ERRORS.md](./ERRORS.md) を参照してください。
+> [🇬🇧 English](./RPC.md) • [🇯🇵 日本語](./RPC.ja.md)
 
-## 直接処理される 9 RPC
+This document is intended for users who want to inspect kiwa's EIP-1193-compatible RPCs.
+In v0.1.0, core handles 9 methods directly in `packages/core/src/rpc-handlers.ts`,
+and forwards everything else to anvil JSON-RPC.
+See [ERRORS.md](./ERRORS.md) for how errors are returned.
 
-| Method | Params | Returns | 主な error code |
+## Nine RPCs handled directly
+
+| Method | Params | Returns | Primary error codes |
 |---|---|---|---|
-| `eth_requestAccounts` | なし | `string[]` | なし |
-| `eth_accounts` | なし | `string[]` | なし |
-| `eth_chainId` | なし | `0x${string}` | なし |
-| `net_version` | なし | `string` | なし |
+| `eth_requestAccounts` | None | `string[]` | None |
+| `eth_accounts` | None | `string[]` | None |
+| `eth_chainId` | None | `0x${string}` | None |
+| `net_version` | None | `string` | None |
 | `personal_sign` | `[message: string, address: 0x{hex}]` | `0x${string}` | `4001` / `4100` / `-32602` |
 | `eth_signTypedData_v4` | `[address: 0x{hex}, typedDataJson: string]` | `0x${string}` | `4001` / `4100` / `-32700` |
 | `wallet_switchEthereumChain` | `[{ chainId: 0x{hex} }]` | `null` | `4001` / `4902` / `-32602` |
 | `wallet_addEthereumChain` | `[{ chainId: 0x{hex}, ... }]` | `null` | `-32602` |
 | `eth_sendTransaction` | `[txRequest]` | `0x${string}` | `3` / `4001` / `4100` / `-32603` |
 
-これら 9 method は、active account と current chain を fixture の state から引いて返します。
-`eth_sendTransaction` だけは anvil への broadcast が必要なため、内部で `sendTransaction()` を呼びます。
-sign 系は viem の account 実装を使いますが、呼び出し元からは通常の `window.ethereum.request()` と同じ形で扱えます。
+These 9 methods return values based on the fixture state for the active account and current chain.
+Only `eth_sendTransaction` needs to broadcast to anvil, so it calls `sendTransaction()` internally.
+The signing methods use viem's account implementation, but callers can treat them in the same shape as normal `window.ethereum.request()`.
 
-### account / chain 系
+### Account / chain methods
 
-`eth_requestAccounts` と `eth_accounts` は、inject 済み provider に紐づく anvil dev account を返します。
-`eth_chainId` は hex、`net_version` は 10 進文字列で返るため、
-既存 dApp の provider 初期化コードをそのまま通しやすい構成です。
+`eth_requestAccounts` and `eth_accounts` return the anvil dev account bound to the injected provider.
+`eth_chainId` returns hex, and `net_version` returns a base-10 string,
+which makes it easier to pass existing dApp provider initialization code through unchanged.
 
 ```typescript
 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -35,20 +37,20 @@ const chainId = await window.ethereum.request({ method: 'eth_chainId' });
 const networkId = await window.ethereum.request({ method: 'net_version' });
 ```
 
-戻り値は `accounts[0]` が 20 byte address、`chainId` が `0x7a69` のような hex、
-`networkId` が `31337` のような 10 進文字列になります。
+The returned values are `accounts[0]` as a 20-byte address, `chainId` as hex such as `0x7a69`,
+and `networkId` as a base-10 string such as `31337`.
 
-### sign 系
+### Signing methods
 
-`personal_sign` は 2 通りの message を受けます。
+`personal_sign` accepts two kinds of message.
 
-- `0x` で始まる偶数長 hex string
-- 通常の UTF-8 string
+- An even-length hex string starting with `0x`
+- A regular UTF-8 string
 
-hex 風の文字列でも文字種が不正、または奇数長なら `-32602` を返します。
-address が active account と一致しない場合は `4100` です。
-fixture API `dappE2e.setApprovalMode('reject')` が有効な間は、
-`personal_sign` と `eth_signTypedData_v4` は `4001` (`User rejected the request.`) を返します。
+If a hex-like string contains invalid characters or has odd length, it returns `-32602`.
+If the address does not match the active account, it returns `4100`.
+While fixture API `dappE2e.setApprovalMode('reject')` is enabled,
+`personal_sign` and `eth_signTypedData_v4` return `4001` (`User rejected the request.`).
 
 ```typescript
 const sig = await window.ethereum.request({
@@ -57,9 +59,9 @@ const sig = await window.ethereum.request({
 });
 ```
 
-`eth_signTypedData_v4` は第 2 引数に JSON string を受け取り、
-内部で `JSON.parse()` した後に `EIP712Domain` を除いた `types` を viem へ渡します。
-JSON 自体が壊れている場合は `-32700` で失敗します。
+`eth_signTypedData_v4` accepts a JSON string as its second argument,
+calls `JSON.parse()` internally, and then passes `types` excluding `EIP712Domain` to viem.
+If the JSON itself is broken, it fails with `-32700`.
 
 ```typescript
 const sig = await window.ethereum.request({
@@ -68,16 +70,15 @@ const sig = await window.ethereum.request({
 });
 ```
 
-### chain 更新系
+### Chain update methods
 
-`wallet_switchEthereumChain` と `wallet_addEthereumChain` は、
-どちらも `chainId` を検証したうえで `chainState.current` を更新し、
-内部 emitter 経由で `chainChanged` を page 側へ通知します。
-v0.3 から chain registry (`dappE2e.setChainRegistry(chains)`) が optional で利用可能になり、
-registry を有効化すると未登録 chain への `wallet_switchEthereumChain` で EIP-3326 の `4902 (Unrecognized Chain ID)` を返します。
-registry 未設定の場合は従来どおり常に成功 (下位互換)。
-approval mode が `'reject'` のときは `wallet_switchEthereumChain` のみ `4001` で失敗し、
-`wallet_addEthereumChain` は従来どおり実行されます。
+`wallet_switchEthereumChain` and `wallet_addEthereumChain` both validate `chainId`,
+update `chainState.current`, and notify the page side with `chainChanged` through the internal emitter.
+Starting in v0.3, an optional chain registry (`dappE2e.setChainRegistry(chains)`) is available.
+When the registry is enabled, `wallet_switchEthereumChain` to an unregistered chain returns EIP-3326's `4902 (Unrecognized Chain ID)`.
+When the registry is not configured, it continues to always succeed for backward compatibility.
+When approval mode is `'reject'`, only `wallet_switchEthereumChain` fails with `4001`,
+while `wallet_addEthereumChain` still executes as before.
 
 ```typescript
 await window.ethereum.request({
@@ -86,9 +87,9 @@ await window.ethereum.request({
 });
 ```
 
-#### chain registry の利用 (v0.3+)
+#### Using the chain registry (v0.3+)
 
-`dappE2e.setChainRegistry(chains)` で初期 chain 集合を設定すると、未登録 chain への `wallet_switchEthereumChain` が `4902` で失敗するようになります。
+If you set the initial chain set with `dappE2e.setChainRegistry(chains)`, `wallet_switchEthereumChain` to an unregistered chain will fail with `4902`.
 
 ```typescript
 await dappE2e.setChainRegistry([
@@ -96,22 +97,22 @@ await dappE2e.setChainRegistry([
   { chainId: '0xa', chainName: 'Optimism' },
 ]);
 
-// 0xa86a (Avalanche) は登録されていないので 4902 で失敗
+// 0xa86a (Avalanche) is not registered, so this fails with 4902
 await window.ethereum.request({
   method: 'wallet_switchEthereumChain',
   params: [{ chainId: '0xa86a' }],
 });
 ```
 
-`wallet_addEthereumChain` を呼ぶと registry にも追加され、以後 switch 可能になります (EIP-3085 準拠)。
+Calling `wallet_addEthereumChain` also adds the chain to the registry, so switching succeeds afterward (EIP-3085 compliant).
 
-### transaction 系
+### Transaction methods
 
-`eth_sendTransaction` は `from` が active account と一致するかを確認し、
-anvil へ送信した tx hash を返します。
-fixture lifecycle の外で anvil port が無い場合は `-32603` で失敗します。
-viem からの transaction rejection (insufficient balance / revert / signer 関連 error) は EIP-1193 code `3` で reject されます。
-approval mode が `'reject'` のときは broadcast 前に `4001` を返します。
+`eth_sendTransaction` checks whether `from` matches the active account
+and returns the tx hash submitted to anvil.
+If no anvil port is available outside the fixture lifecycle, it fails with `-32603`.
+Transaction rejection from viem (insufficient balance / revert / signer-related error) is rejected with EIP-1193 code `3`.
+When approval mode is `'reject'`, it returns `4001` before broadcasting.
 
 ```typescript
 const hash = await window.ethereum.request({
@@ -126,24 +127,24 @@ const hash = await window.ethereum.request({
 
 ## Approval Mode (v0.2+)
 
-`dappE2e.setApprovalMode(mode)` で wallet approval 挙動を切り替えられます。
-test 側から User Reject (`EIP-1193` code `4001`) を deterministic に発火したいときに使います。
+`dappE2e.setApprovalMode(mode)` lets you switch wallet approval behavior.
+Use it when you want to deterministically trigger User Reject (`EIP-1193` code `4001`) from tests.
 
 ### API
 
-| Mode | 挙動 |
+| Mode | Behavior |
 |---|---|
-| `'approve'` (default) | 対象 4 method を通常実行 |
-| `'reject'` | 対象 4 method が `Eip1193Error(4001, 'User rejected the request.')` を返す |
+| `'approve'` (default) | Execute the 4 target methods normally |
+| `'reject'` | The 4 target methods return `Eip1193Error(4001, 'User rejected the request.')` |
 
-### 対象 method
+### Target methods
 
 - `personal_sign`
 - `eth_signTypedData_v4`
 - `eth_sendTransaction`
 - `wallet_switchEthereumChain`
 
-### 利用例
+### Example
 
 ```typescript
 import { dappE2eTest as test } from '@kiwa/core';
@@ -167,23 +168,24 @@ test('reject 経路の error UX 確認', async ({ page, dappE2e }) => {
 });
 ```
 
-read-only method (`eth_requestAccounts` / `eth_accounts` / `eth_chainId` / `net_version` など) と
-`wallet_addEthereumChain` は approval check の対象外です。
+Read-only methods (`eth_requestAccounts` / `eth_accounts` / `eth_chainId` / `net_version` and so on) and
+`wallet_addEthereumChain` are outside approval checks.
 
 ## anvilProxy fallback
 
-上記 9 method 以外は `proxyToAnvil()` 経由で anvil JSON-RPC に forward されます。
-代表例は `eth_blockNumber` `eth_getBalance` `eth_call` `eth_estimateGas` `eth_getCode` です。
-anvil 側が通常の JSON-RPC error を返した場合、その `code` と `message` をそのまま page 側へ返します。
-接続失敗、非 200 応答、JSON 以外の応答、無効な response shape は `-32603` です。
+Methods other than the 9 above are forwarded to anvil JSON-RPC through `proxyToAnvil()`.
+Typical examples are `eth_blockNumber` `eth_getBalance` `eth_call` `eth_estimateGas` `eth_getCode`.
+If anvil returns a normal JSON-RPC error, its `code` and `message` are returned to the page side unchanged.
+Connection failure, non-200 responses, non-JSON responses, and invalid response shapes become `-32603`.
 
 ```typescript
 const blockNumber = await window.ethereum.request({ method: 'eth_blockNumber' });
 ```
-## blocked method
 
-HTTP 経路では扱わない method は core 側で先に弾きます。
-v0.1.0 の blocked method は次の 5 つです。
+## Blocked methods
+
+Methods not handled over the HTTP path are rejected in core before forwarding.
+The blocked methods in v0.1.0 are the following five.
 
 - `eth_subscribe`
 - `eth_unsubscribe`
@@ -191,12 +193,12 @@ v0.1.0 の blocked method は次の 5 つです。
 - `wallet_getPermissions`
 - `eth_sign`
 
-これらは anvil へ forward せず、常に `4200` を返します。
-page 境界をまたいだときの観測例は [ERRORS.md](./ERRORS.md) で説明しています。
+These are never forwarded to anvil and always return `4200`.
+[ERRORS.md](./ERRORS.md) explains how to observe them across the page boundary.
 
-## 関連
+## Related
 
-- [EIP-1193 仕様](https://eips.ethereum.org/EIPS/eip-1193)
+- [EIP-1193 specification](https://eips.ethereum.org/EIPS/eip-1193)
 - [viem local account docs](https://viem.sh/docs/accounts/local/privateKeyToAccount.html)
 - [EVENTS.md](./EVENTS.md)
 - [ERRORS.md](./ERRORS.md)

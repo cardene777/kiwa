@@ -1,45 +1,47 @@
 # Errors reference
 
-本ドキュメントは kiwa の error 設計を確認したい利用者向けです。
-v0.1.0 では `packages/core/src/rpc-handlers.ts` が EIP-1193 互換 code 付きの error を投げ、
-`packages/core/src/fixture.ts` が page に返す envelope へ変換します。
-injector script はそれを unwrap し、page 側の `catch` で `code` を読める形に戻します。
+> [🇬🇧 English](./ERRORS.md) • [🇯🇵 日本語](./ERRORS.ja.md)
 
-## EIP-1193 公式 error code
+This document is intended for users who want to inspect kiwa's error design.
+In v0.1.0, `packages/core/src/rpc-handlers.ts` throws errors with EIP-1193-compatible codes,
+and `packages/core/src/fixture.ts` converts them into the envelope returned to the page.
+The injector script unwraps that envelope and restores it into a form where page-side `catch` blocks can read `code`.
 
-| Code | Name | 意味 |
+## Official EIP-1193 error codes
+
+| Code | Name | Meaning |
 |---|---|---|
-| `4001` | User Rejected Request | ユーザー拒否 |
-| `4100` | Unauthorized | active account と一致しない操作 |
-| `4200` | Unsupported Method | provider が未対応の method |
-| `4900` | Disconnected | provider が切断 |
-| `4901` | Chain Disconnected | 特定 chain との接続切断 |
-| `-32700` | Parse error | JSON 文字列の parse 失敗 |
-| `-32602` | Invalid params | params の型や形式が不正 |
-| `-32603` | Internal error | 内部失敗や transport 失敗 |
+| `4001` | User Rejected Request | User rejected |
+| `4100` | Unauthorized | Operation does not match the active account |
+| `4200` | Unsupported Method | Method unsupported by the provider |
+| `4900` | Disconnected | Provider disconnected |
+| `4901` | Chain Disconnected | Disconnected from a specific chain |
+| `-32700` | Parse error | Failed to parse the JSON string |
+| `-32602` | Invalid params | Invalid param type or format |
+| `-32603` | Internal error | Internal failure or transport failure |
 
-kiwa が v0.1.0 で実際に使う主要 code は `4100` `4200` `-32700` `-32602` `-32603` です。
-EIP-1193 でよく見かける `4902` も周辺仕様では使われますが、
-現行 core は chain 登録テーブルを持たないため emit しません。
+The main codes that kiwa actually uses in v0.1.0 are `4100` `4200` `-32700` `-32602` `-32603`.
+`4902`, which is often seen around EIP-1193, is also used in surrounding specs,
+but the current core does not emit it because it does not have a chain registration table.
 
-## 実装固有 error code
+## Implementation-specific error code
 
-EIP-1193 公式に含まれないが本実装で利用する code です。
+This code is not part of the official EIP-1193 set but is used by this implementation.
 
-| Code | 用途 |
+| Code | Purpose |
 |---|---|
-| `3` | `eth_sendTransaction` で transaction rejected (insufficient balance / revert / signer 関連 viem error) |
+| `3` | `eth_sendTransaction` transaction rejected (insufficient balance / revert / signer-related viem error) |
 
-code `3` は `packages/core/src/tx.ts` で viem が throw した error を catch して `Eip1193Error(3, 'transaction rejected: ...')` に正規化したものです。
-page 側の catch 句で `(e as { code?: number }).code === 3` を使うと、anvil への送信時の reject を観測できます。
+code `3` is produced in `packages/core/src/tx.ts`, where an error thrown by viem is caught and normalized into `Eip1193Error(3, 'transaction rejected: ...')`.
+Using `(e as { code?: number }).code === 3` in a page-side `catch` block lets you observe rejection during submission to anvil.
 
-## kiwa での主な発生条件
+## Main conditions in kiwa
 
 ### `4100`
 
-- `personal_sign` の address が active account と一致しない
-- `eth_signTypedData_v4` の signer address が一致しない
-- `eth_sendTransaction` の `from` が一致しない
+- The address in `personal_sign` does not match the active account
+- The signer address in `eth_signTypedData_v4` does not match
+- `from` in `eth_sendTransaction` does not match
 
 ### `4200`
 
@@ -49,42 +51,42 @@ page 側の catch 句で `(e as { code?: number }).code === 3` を使うと、an
 - `wallet_getPermissions`
 - `eth_sign`
 
-これらは blocked method として core 側で即時 reject されます。
+These are rejected immediately in core as blocked methods.
 
-## BLOCKED_METHODS 一覧と理由
+## `BLOCKED_METHODS` list and reasons
 
-`packages/core/src/rpc-handlers.ts` の `BLOCKED_METHODS` は、fixture が再現しない wallet 機能を
-`4200 (Unsupported Method)` で明示的に reject するための一覧です。
+`BLOCKED_METHODS` in `packages/core/src/rpc-handlers.ts` is the list used to explicitly reject wallet features that the fixture does not reproduce
+with `4200 (Unsupported Method)`.
 
-| Method | blocked 理由 |
+| Method | Reason it is blocked |
 |---|---|
-| `eth_subscribe` | inject provider は HTTP bridge 前提で、subscription ID の払い出しと継続 push を保持できないため |
-| `eth_unsubscribe` | `eth_subscribe` を実装していないため、解除対象の subscription state 自体が存在しないため |
-| `wallet_requestPermissions` | EIP-2255 の permission scope は request をまたぐ state 管理が必要だが、HTTP 経路ではその state を保持できないため。test fixture では allowlist / blocklist の動的管理を行わず、approval UX は `setApprovalMode('approve' | 'reject')` で代替します |
-| `wallet_getPermissions` | permission registry を内部保持していないため、wallet が返すべき permission descriptor を整合的に生成できないため |
-| `eth_sign` | raw digest 署名は wallet 実装ごとの差異が大きく、kiwa では deterministic な test 対象を `personal_sign` / `eth_signTypedData_v4` に絞っているため |
+| `eth_subscribe` | The injected provider assumes an HTTP bridge, so it cannot keep subscription ID allocation and ongoing push delivery |
+| `eth_unsubscribe` | Because `eth_subscribe` is not implemented, there is no subscription state to cancel |
+| `wallet_requestPermissions` | EIP-2255 permission scopes require state management across requests, but the HTTP path cannot retain that state. In the test fixture, approval UX is substituted with `setApprovalMode('approve' | 'reject')` instead of dynamic allowlist / blocklist management |
+| `wallet_getPermissions` | Because there is no internal permission registry, the wallet cannot generate permission descriptors to return consistently |
+| `eth_sign` | Raw digest signing differs significantly across wallet implementations, so kiwa narrows the deterministic test surface to `personal_sign` / `eth_signTypedData_v4` |
 
 ### `-32700`
 
-- `eth_signTypedData_v4` の typed data 文字列が JSON として壊れている
+- The typed data string for `eth_signTypedData_v4` is broken as JSON
 
 ### `-32602`
 
-- `personal_sign` の message が hex 風だが文字種不正
-- `personal_sign` の message が string ではない
-- `wallet_switchEthereumChain` / `wallet_addEthereumChain` で `chainId` が無い
-- `chainId` が `0x` 形式ではない
+- The message for `personal_sign` looks like hex but contains invalid characters
+- The message for `personal_sign` is not a string
+- `wallet_switchEthereumChain` / `wallet_addEthereumChain` do not include `chainId`
+- `chainId` is not in `0x` format
 
 ### `-32603`
 
-- anvil port が無い状態で `eth_sendTransaction` や fallback RPC を呼ぶ
-- anvil への HTTP 接続失敗
-- anvil から非 200 応答や JSON 以外の応答が返る
-- core 内で EIP-1193 code を持たない例外が起きる
+- `eth_sendTransaction` or fallback RPC is called when no anvil port is available
+- HTTP connection to anvil fails
+- anvil returns a non-200 response or a non-JSON response
+- An exception without an EIP-1193 code occurs inside core
 
-## error envelope
+## Error envelope
 
-fixture は page 側へ直接 throw せず、まず plain object に詰め替えます。
+The fixture does not throw directly to the page. It first repacks the result into a plain object.
 
 ```typescript
 type Envelope<T> =
@@ -92,9 +94,9 @@ type Envelope<T> =
   | { ok: false; error: { code: number; message: string } };
 ```
 
-この envelope を作るのは `packages/core/src/fixture.ts` の `page.exposeFunction('__dappE2eRpc', ...)` です。
-`handleRpcRequest()` が `Eip1193Error` を投げた場合はその `code` と `message` を保持し、
-通常の `Error` や unknown 例外なら `-32603` を補って返します。
+This envelope is built in `page.exposeFunction('__dappE2eRpc', ...)` in `packages/core/src/fixture.ts`.
+When `handleRpcRequest()` throws `Eip1193Error`, it keeps that `code` and `message`.
+For a normal `Error` or an unknown exception, it fills in `-32603` before returning.
 
 ```typescript
 try {
@@ -109,11 +111,11 @@ try {
 }
 ```
 
-## page 境界で code を保持する仕組み
+## How `code` is preserved across the page boundary
 
-injector script は `window.__dappE2eRpc(args)` の結果を受け取り、
-`ok: false` なら新しい `Error` を作って `err.code = envelope.error.code` を付けます。
-そのうえで page 内で throw するため、`window.ethereum.request()` の `catch` で `code` を読めます。
+The injector script receives the result of `window.__dappE2eRpc(args)`.
+If `ok: false`, it creates a new `Error` and attaches `err.code = envelope.error.code`.
+It then throws inside the page, so `catch` around `window.ethereum.request()` can read `code`.
 
 ```typescript
 try {
@@ -123,22 +125,21 @@ try {
 }
 ```
 
-この方式なら Playwright の `page.evaluate()` をまたいでも、
-`err.code === 4200` のような assertion を page 側で書けます。
-実例は [examples/basic-connect/tests/connect.spec.ts](../examples/basic-connect/tests/connect.spec.ts) の
-`T-E2E-007` を参照してください。
+With this approach, even across Playwright `page.evaluate()`,
+you can write page-side assertions such as `err.code === 4200`.
+For a concrete example, see `T-E2E-007` in [examples/basic-connect/tests/connect.spec.ts](../examples/basic-connect/tests/connect.spec.ts).
 
-## event と error の関係
+## Relationship between events and errors
 
-`disconnect` event の payload code は、request の reject code と同じとは限りません。
-helper の `disconnect()` は `4900` を送るだけで、未完了 RPC を自動で失敗させる仕組みは持ちません。
-切断後の挙動を厳密に再現したい場合は、event 発火と request assertion を分けて書く方が安全です。
+The payload code of the `disconnect` event is not necessarily the same as the rejection code of a request.
+The helper `disconnect()` only sends `4900`, and it does not have a mechanism to automatically fail in-flight RPCs.
+If you need to reproduce post-disconnect behavior strictly, it is safer to write event triggering and request assertions separately.
 
-`waitForRpcIdle()` が timeout した場合も `Eip1193Error` の `-32603` を使います。
-これは provider 由来ではなく fixture 制御由来の失敗なので、
-test では timeout message を合わせて確認するのが実用的です。
+If `waitForRpcIdle()` times out, it also uses `-32603` as an `Eip1193Error`.
+That failure comes from fixture control rather than the provider itself,
+so in tests it is practical to assert the timeout message as well.
 
-## 関連
+## Related
 
 - [EIP-1193 provider errors](https://eips.ethereum.org/EIPS/eip-1193#provider-errors)
 - [RPC.md](./RPC.md)
