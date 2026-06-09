@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-06-04T03:30:00Z",
+  "generated_at": "2026-06-09T09:30:00Z",
   "pairs": [
     { "ja": "docs/ja/README.md", "en": "docs/en/README.md", "section": "Index", "owner": "auto" },
     { "ja": "docs/ja/quickstart.md", "en": "docs/en/quickstart.md", "section": "Quickstart", "owner": "auto" },
@@ -22,6 +22,15 @@
     { "ja": "docs/ja/cookbook/multi-chain.md", "en": "docs/en/cookbook/multi-chain.md", "section": "Cookbook", "owner": "auto" },
     { "ja": "docs/ja/cookbook/token-approve-flow.md", "en": "docs/en/cookbook/token-approve-flow.md", "section": "Cookbook", "owner": "auto" },
     { "ja": "docs/ja/cookbook/kiwa-design-flow.md", "en": "docs/en/cookbook/kiwa-design-flow.md", "section": "Cookbook", "owner": "auto" },
-    { "ja": "docs/ja/faq.md", "en": "docs/en/faq.md", "section": "FAQ", "owner": "auto" }
+    { "ja": "docs/ja/faq.md", "en": "docs/en/faq.md", "section": "FAQ", "owner": "auto" },
+    { "ja": "docs/RELEASING.ja.md", "en": "docs/RELEASING.md", "section": "Releasing", "owner": "auto" },
+    { "ja": "docs/COMPARISON.ja.md", "en": "docs/COMPARISON.md", "section": "Comparison", "owner": "auto" },
+    { "ja": "docs/ERRORS.ja.md", "en": "docs/ERRORS.md", "section": "Errors", "owner": "auto" },
+    { "ja": "docs/EVENTS.ja.md", "en": "docs/EVENTS.md", "section": "Events", "owner": "auto" },
+    { "ja": "docs/RPC.ja.md", "en": "docs/RPC.md", "section": "RPC", "owner": "auto" },
+    { "ja": "tests/docs/run-tests.ja.md", "en": "tests/docs/run-tests.md", "section": "TestsDocs", "owner": "auto" },
+    { "ja": "tests/docs/run-contract-tests.ja.md", "en": "tests/docs/run-contract-tests.md", "section": "TestsDocs", "owner": "auto" },
+    { "ja": "tests/docs/run-dapp-e2e-tests.ja.md", "en": "tests/docs/run-dapp-e2e-tests.md", "section": "TestsDocs", "owner": "auto" },
+    { "ja": "tests/docs/write-tests-manually.ja.md", "en": "tests/docs/write-tests-manually.md", "section": "TestsDocs", "owner": "auto" }
   ]
 }
