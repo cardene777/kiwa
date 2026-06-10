@@ -148,6 +148,38 @@ skill 起動時の判定:
 | 性能 | `forge --gas-report` | `hardhat-gas-reporter` | Playwright trace + perf metrics |
 | セキュリティ | `forge invariant` + symbolic | `ethers-rs` 検証 | E2E signature flow |
 | 回帰 | 既存 `test_*` を full suite で実行 | 既存 `it()` を full suite で実行 | 既存 `test()` を full suite で実行 |
+| **UI feature 網羅 (12)** | 非適用 | 非適用 | `getByTestId` 全 element 列挙 + button state / error 表示 / form 境界 |
+| **wallet 接続 flow (13)** | 非適用 | 非適用 | kiwa fixture mock wallet 接続 / chain switch / account switch / disconnect |
+
+## 観点 12: UI feature 網羅 (e2e layer 必須)
+
+PR #232 で nextjs-token-gating の e2e spec を再生成した際、 button disabled state / error testid 経路 / polling 動作 / refetch race / wallet 接続 flow 等の UI 機能が現行 11 観点では明示的に cover されないことが判明した。 これらは spec author が忘れた場合に Layer 2 進行で気付かれない構造的問題。
+
+本観点は **e2e layer (`--layer e2e` / `--layer all`) 時に必須適用**、 contract layer のみの場合は非適用。
+
+検証対象 (output-skeleton.md § UI feature 一覧 sub-section の元データ)。
+
+- testid / data-testid を `app/` / `src/components/` から grep 全件
+- button element の `enabled` / `disabled` / `loading` 3 state
+- form input の境界値 (0 / max / 負数 / 空文字 / 異常値)
+- state 表示 element の値遷移 (`connected` ↔ `disconnected` ↔ `pending` 等)
+- error display element (onError ハンドラ経由の表示経路)
+- polling / refetch race の収束観測
+
+実装。 `/kiwa-design --layer e2e` 起動時に Step 1 (入力整理) で `app/` 配下を grep し、 testid / button / form / state 表示要素を機械的に列挙する。 spec の「UI feature 一覧」 sub-section に転記、 各 element に対応 TC を最低 1 件以上紐付けることを spec 完了条件とする。
+
+## 観点 13: wallet 接続 flow (e2e layer 任意適用)
+
+kiwa fixture の mock wallet 接続経路 (eth_requestAccounts / eth_accounts / wallet_switchEthereumChain) を test 対象に含めるかを spec 単位で判断する。 multi-wallet / multi-chain example では適用必須、 単一 chain / 単一 wallet の minimal example では非適用で可。
+
+real wallet (MetaMask 拡張 / WalletConnect / RainbowKit) 経路は kiwa の scope 外 (`docs/COMPARISON.md`)、 本観点は **kiwa fixture mock wallet 経路に限定** する。
+
+検証対象。
+
+- mock wallet 接続 (`eth_requestAccounts` 経由)
+- chain switch (`wallet_switchEthereumChain`)
+- account switch (`accountsChanged` event)
+- disconnect flow (`disconnect()` + state cleanup)
 
 Layer 2 skill (`/kiwa-forge` 等) はこの表を読んで観点 → ランナー特化 helper に変換する。
 

@@ -94,9 +94,32 @@ contract layer (`--layer contract`) では本 sub-section を `(該当なし、 
 | 統合 | {何を integration で検証するか} | 状態遷移 / 冪等性 |
 | E2E | {何を E2E で検証するか} | 正常系 / 異常系 / 権限 |
 
+## UI feature 一覧 (e2e layer 必須、 contract layer は省略可)
+
+e2e layer (`--layer e2e` or `--layer all`) では本 sub-section を **必ず埋める**。 `app/page.tsx` を grep して testid / button / form 入力 / state 表示要素を機械的に列挙し、 各 element に対応する TC を最低 1 件以上紐付けることで「spec author が UI 要素を忘れたまま Layer 2 / 3 に進む」 構造的問題を防ぐ。
+
+| UI element 種別 | testid / 識別子 | 対応 TC | 備考 |
+|---|---|---|---|
+| button (action trigger) | `data-testid="connect-button"` | TC-001 | enabled / disabled / loading 3 state を別 TC で cover |
+| button (action trigger) | `data-testid="mint-button"` | TC-005 / TC-006 | disabled (未接続時) / enabled (接続後) を分けて検証 |
+| state display | `data-testid="status"` | TC-002 | `connected` / `disconnected` / `pending` の 3 値遷移 |
+| state display | `data-testid="balance"` | TC-007 | 残高変化を polling 経由で観測する経路 |
+| form input | `name="amount"` | TC-010 | 数値入力の境界値 (0 / max+1 / 負数) を含む |
+| error display | `data-testid="error-message"` | TC-012 | onError 経由の error 表示、 testid 経路で assert |
+
+埋め方の規約。
+
+- testid / 識別子は **`grep -rn 'data-testid' app/ src/components/'` で実 grep した結果のみ**を記載 (推測で書かない)
+- 「対応 TC」 列は当該 element を test する TC id を全件カンマ区切りで列挙 (1 件以上必須、 0 件は spec の欠落として扱う)
+- button の `enabled` / `disabled` / `loading` 3 state は **別 TC として cover** する (1 TC で 3 state 兼ねない)
+- form input は **境界値 (0 / max / 負数 / 空文字 / 異常値)** をそれぞれ別 TC で cover
+- error display は **onError ハンドラ経由の表示経路** (simulateContract revert / RPC error / user reject 等) を別 TC で cover
+
+(UI element が 1 件も無い場合 `(該当なし、 contract layer のみ)` 1 行で代替)
+
 ## テスト観点一覧
 
-`docs/SKILL-DESIGN.md` § Step 3 の 11 観点から選択。
+`docs/SKILL-DESIGN.md` § Step 3 の 11 観点から選択 + e2e layer では新規 2 観点 (12 / 13) も評価する。
 
 - 1. 正常系 — 適用 (常に)
 - 2. 異常系 — 適用 ({外部依存内容})
@@ -108,6 +131,9 @@ contract layer (`--layer contract`) では本 sub-section を `(該当なし、 
 - 8. 並行処理 — 適用 / 非適用
 - 9. 性能 — 適用 / 非適用
 - 10. セキュリティ — 適用 / 非適用
+- 11. 回帰 — 適用 / 非適用
+- 12. **UI feature 網羅 (e2e layer のみ)** — 適用必須 (testid / button state / error 表示 / form 入力境界の網羅性を検証)
+- 13. **wallet 接続 flow (e2e layer のみ)** — 適用 / 非適用 (mock wallet 接続 / chain switch / account switch / 切断 flow)
 
 ## テストケース一覧
 

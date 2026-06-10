@@ -92,6 +92,32 @@ AskUserQuestion で文書生成言語を user に確認する。 `--lang {code}`
 
 contract 改変を伴う場合は `function | event | error | modifier` 単位で対象を切り出す。
 
+#### Step 1.5: UI feature grep (e2e layer 必須)
+
+`--layer e2e` または `--layer all` 起動時に **必ず実行する**。 contract layer 単独 (`--layer contract`) の場合は skip。
+
+`app/` / `src/components/` 配下を grep して UI 要素を機械的に列挙し、 spec の「UI feature 一覧」 sub-section (`references/output-skeleton.md` § UI feature 一覧) に転記する。 button disabled state / error testid 経路 / polling 動作 / refetch race / wallet 接続 flow が現行 11 観点では明示的に cover されない構造的問題を補う (Issue #236)。
+
+grep コマンド例。
+
+```bash
+# testid / data-testid を全件列挙
+grep -rn "data-testid" app/ src/components/ 2>/dev/null | awk -F'"' '{print $2}' | sort -u
+
+# button element の state (disabled / loading) を持つ箇所
+grep -rn -E "disabled=|isLoading|isPending" app/ src/components/ 2>/dev/null
+
+# form input の name / placeholder
+grep -rn -E "name=\"[a-zA-Z]+\"|placeholder=\"" app/ src/components/ 2>/dev/null
+
+# error display (onError / catch 経由の表示)
+grep -rn -E "onError|catch|error\." app/ src/components/ 2>/dev/null | head -20
+```
+
+列挙結果は spec の `## UI feature 一覧` sub-section の表に **grep ヒット内容のみ転記** する (推測で UI element を補完しない)。 各 element には対応 TC を最低 1 件以上紐付け、 0 件の element は「spec の欠落」 として「不足している仕様」 にも追記する。
+
+新規 2 観点 (12. UI feature 網羅 / 13. wallet 接続 flow) は Step 3 で評価する (`references/viewpoints-catalog.md` § 観点 12 / 13)。
+
 ### Step 2: 品質リスクを洗い出す
 
 各入力要素を 5 基準でスコアリング (高 / 中 / 低)。 基準詳細と判定例は `references/risk-criteria.md` を Read する。
