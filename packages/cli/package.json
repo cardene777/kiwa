@@ -1,13 +1,17 @@
 {
   "name": "@kiwa-test/cli",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "CLI for kiwa (init / doctor commands)",
   "license": "MIT",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"
   },
-  "keywords": ["kiwa", "cli", "scaffold"],
+  "keywords": [
+    "kiwa",
+    "cli",
+    "scaffold"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cardene777/kiwa.git",
@@ -21,7 +25,11 @@
   "bin": {
     "kiwa": "./dist/index.js"
   },
-  "files": ["dist", "README.md", "README.ja.md"],
+  "files": [
+    "dist",
+    "README.md",
+    "README.ja.md"
+  ],
   "publishConfig": {
     "access": "public",
     "provenance": true
