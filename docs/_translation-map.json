@@ -42,6 +42,9 @@
     { "ja": "tests/docs/run-tests.ja.md", "en": "tests/docs/run-tests.md", "section": "TestsDocs", "owner": "auto" },
     { "ja": "tests/docs/run-contract-tests.ja.md", "en": "tests/docs/run-contract-tests.md", "section": "TestsDocs", "owner": "auto" },
     { "ja": "tests/docs/run-dapp-e2e-tests.ja.md", "en": "tests/docs/run-dapp-e2e-tests.md", "section": "TestsDocs", "owner": "auto" },
-    { "ja": "tests/docs/write-tests-manually.ja.md", "en": "tests/docs/write-tests-manually.md", "section": "TestsDocs", "owner": "auto" }
+    { "ja": "tests/docs/write-tests-manually.ja.md", "en": "tests/docs/write-tests-manually.md", "section": "TestsDocs", "owner": "auto" },
+    { "ja": "packages/core/README.ja.md", "en": "packages/core/README.md", "section": "Package READMEs", "owner": "auto" },
+    { "ja": "packages/cli/README.ja.md", "en": "packages/cli/README.md", "section": "Package READMEs", "owner": "auto" },
+    { "ja": "README.ja.md", "en": "README.md", "section": "Root README", "owner": "auto" }
   ]
 }

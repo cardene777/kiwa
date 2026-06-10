@@ -1,5 +1,7 @@
 # @kiwa/cli
 
+> [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
+
 CLI for [kiwa](https://github.com/cardene777/kiwa) with `init` and `doctor` commands.
 
 `@kiwa/cli` scaffolds Playwright-based dApp E2E tests that use `@kiwa/core`, and provides a quick prerequisite check for local setup.
