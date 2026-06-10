@@ -4,6 +4,28 @@
 
 ERC20 2 種 + 1:1 swap pool (SimpleSwap.sol + Erc20.sol) を deploy し、 approve → swap → slippage / insufficient liquidity の振る舞いを Playwright + Foundry + Hardhat の 3 経路で検証する example。 ERC20 approval policy と slippage protection 周りの kiwa 機能を試したいときの起点。
 
+## このディレクトリの 2 つの動線
+
+### 1. retrofit walkthrough を歩く (authoring 用)
+
+`test/` `hardhat-test/` `tests/` は `.gitignore` 対象で git clone 直後は空。 `/kiwa-design` → `/kiwa-forge` → `/kiwa-hardhat` → `/kiwa-play` の skill chain を起動して test を 0 から再生成する。 再生成後は `cd examples/defi-swap && forge test` 等で実走できる。
+
+### 2. 完成形 reference を読む / 実走する
+
+完成形 test は `tests/fixtures/defi-swap/` に退避済。 実走は以下:
+
+```bash
+pnpm --dir tests/fixtures/defi-swap test:foundry    # 17/17
+pnpm --dir tests/fixtures/defi-swap test:hardhat    # 23/23
+pnpm --dir tests/fixtures/defi-swap test:e2e        # 7/7
+```
+
+詳細は `tests/fixtures/defi-swap/README.md` を参照。
+
+### migration 注記
+
+旧 `cd examples/defi-swap && forge test` (clone 直後) は空 dir で何も実行されない。 完成形を実走したい場合は `tests/fixtures/defi-swap/` 側を使う。
+
 ## 何が試せるか
 
 - ERC20 `approve` を kiwa `setApprovalModeForToken` / token-specific approval policy で per-token reject / limit 制御
@@ -34,9 +56,9 @@ pnpm -F examples-defi-swap test:hardhat:coverage
 
 | File | 何を test しているか |
 |---|---|
-| `tests/swap.spec.ts` | Playwright e2e、 viem deploy → approve → swap、 SlippageExceeded / InsufficientLiquidity 検証 |
-| `test/SwapTokens.t.sol` | Foundry 単体 (invariant / fuzz 含む) |
-| `hardhat-test/SwapTokens.test.cjs` | Hardhat 単体 (F-1 第 1 弾)、 観点 6 系統 23 ケース |
+| `tests/fixtures/defi-swap/e2e-test/swap.spec.ts` | Playwright e2e、 viem deploy → approve → swap、 SlippageExceeded / InsufficientLiquidity 検証 |
+| `tests/fixtures/defi-swap/contract-test/SwapTokens.t.sol` | Foundry 単体 (invariant / fuzz 含む) |
+| `tests/fixtures/defi-swap/hardhat-test/SwapTokens.test.cjs` | Hardhat 単体 (F-1 第 1 弾)、 観点 6 系統 23 ケース |
 
 ## 関連 cookbook
 
