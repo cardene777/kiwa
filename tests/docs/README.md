@@ -54,6 +54,7 @@ The whole chain hinges on **the nine-column table inside the Layer 1 output (`te
 - [docs/en/quickstart.md](../../docs/en/quickstart.md) — OSS user introduction (`@kiwa/cli init` for a brand-new dApp)
 - [docs/en/cookbook/with-deploy.md](../../docs/en/cookbook/with-deploy.md) — Framework integration via the four-file `kiwa init --with-deploy` boilerplate
 - [docs/en/examples/README.md](../../docs/en/examples/README.md) — Reverse lookup over the 20 examples (reference output of the skill chain)
+- [docs/EXAMPLE-FIXTURES.md](../../docs/EXAMPLE-FIXTURES.md) — Which examples have a completed fixture under `tests/fixtures/`, and why the e2e-only examples are out of scope
 
 ## Language
 

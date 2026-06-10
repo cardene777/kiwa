@@ -56,6 +56,7 @@ graph LR
 - [docs/ja/quickstart.md](../../docs/ja/quickstart.md) — OSS user 向け入門 (`@kiwa/cli init` での新規 dApp 立ち上げ)
 - [docs/ja/cookbook/with-deploy.md](../../docs/ja/cookbook/with-deploy.md) — `kiwa init --with-deploy` の 4 file boilerplate を使った framework 統合
 - [docs/ja/examples/README.md](../../docs/ja/examples/README.md) — 20 example の機能逆引きマップ (skill chain の出力 reference)
+- [docs/EXAMPLE-FIXTURES.ja.md](../../docs/EXAMPLE-FIXTURES.ja.md) — どの example が `tests/fixtures/` に完成形 fixture を持つか、 e2e only 16 example を対象外にしている理由
 
 ## 言語
 
