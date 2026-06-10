@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](./snapshot-revert.md) • [🇯🇵 日本語](../../ja/cookbook/snapshot-revert.md)
 
-Use `snapshotChain` / `revertChain` added in `@kiwa/core` v0.2 to completely isolate anvil chain state between tests.
+Use `snapshotChain` / `revertChain` added in `@kiwa-test/core` v0.2 to completely isolate anvil chain state between tests.
 
 ## Problem
 
@@ -16,7 +16,7 @@ Snapshot in `beforeEach`, revert in `afterEach`.
 
 ```ts
 import { test, expect } from './fixture';
-import { snapshotChain, revertChain, increaseTime } from '@kiwa/core';
+import { snapshotChain, revertChain, increaseTime } from '@kiwa-test/core';
 import type { Hex } from 'viem';
 
 let snapshotId: Hex;

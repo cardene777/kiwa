@@ -209,4 +209,4 @@ UI 側 state。
 /kiwa-play --mode new --rounds 4 --lang ja
 ```
 
-Playwright + @kiwa/core fixture で wallet inject auto。 PR #229 の 3 helper (waitForWalletConnected / injectMultipleWallets / setStorageSlot) を opt-in 利用可能 (TC-E024 / E025 で setStorageSlot / injectMultipleWallets が有用)。
+Playwright + @kiwa-test/core fixture で wallet inject auto。 PR #229 の 3 helper (waitForWalletConnected / injectMultipleWallets / setStorageSlot) を opt-in 利用可能 (TC-E024 / E025 で setStorageSlot / injectMultipleWallets が有用)。

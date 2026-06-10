@@ -20,7 +20,7 @@ Run `pnpm install` at the repo root + `pnpm exec playwright install chromium`. F
 pnpm -F examples-nextjs-aa-erc4337 test
 ```
 
-Internally: `pnpm -F @kiwa/core build` refreshes the fixture dist → `playwright test` boots Next.js on port 3042 + starts anvil + deploys EntryPoint / Factory / Smart Account.
+Internally: `pnpm -F @kiwa-test/core build` refreshes the fixture dist → `playwright test` boots Next.js on port 3042 + starts anvil + deploys EntryPoint / Factory / Smart Account.
 
 ## Reading the tests
 

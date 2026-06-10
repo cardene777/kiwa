@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](../../en/cookbook/custom-error-revert.md) • [🇯🇵 日本語](./custom-error-revert.md)
 
-`@kiwa/core` v0.2 で追加された `expectCustomError` を使い、 Solidity custom error の revert を簡潔に assertion する pattern。
+`@kiwa-test/core` v0.2 で追加された `expectCustomError` を使い、 Solidity custom error の revert を簡潔に assertion する pattern。
 
 ## 課題
 
@@ -12,7 +12,7 @@ viem の `simulateContract` は revert 時に `BaseError` を投げ、 中の `C
 
 ```ts
 import { test, expect } from './fixture';
-import { expectCustomError } from '@kiwa/core';
+import { expectCustomError } from '@kiwa-test/core';
 import { parseAbi, type Address } from 'viem';
 
 const PROTECTED_ABI = parseAbi([

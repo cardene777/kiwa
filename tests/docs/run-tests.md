@@ -11,7 +11,7 @@ If you want to run the individual skills directly, see [run-contract-tests.md](.
 Run this at the root of your cloned kiwa repo.
 
 ```bash
-pnpm install && pnpm -F @kiwa/core build && forge --version && anvil --version && node --version
+pnpm install && pnpm -F @kiwa-test/core build && forge --version && anvil --version && node --version
 ```
 
 Reset when you want to rerun from the middle (delete all generated tests / specs / cache / reports). This works from any cwd.

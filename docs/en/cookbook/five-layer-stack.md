@@ -12,7 +12,7 @@
 | Contract (Hardhat) | `/kiwa-hardhat` | Same Solidity contract via `solidity-coverage` | `hardhat-test/{Contract}.test.cjs` |
 | Unit (Vitest) | `/kiwa-vitest` | TS helpers / TSX hooks under `src/lib/` / `hooks/` | `test/unit/{module}.test.{ts,tsx}` |
 | Integration (API) | `/kiwa-api` | HTTP / RPC handlers under `app/api/*/route.ts` via msw / supertest / Playwright `request` | `test/integration/{module}.test.ts` |
-| E2E (Playwright) | `/kiwa-play` | dApp flow with `@kiwa/core` fixture (browser + anvil) | `tests/{module}.spec.ts` |
+| E2E (Playwright) | `/kiwa-play` | dApp flow with `@kiwa-test/core` fixture (browser + anvil) | `tests/{module}.spec.ts` |
 
 ## When five layers pay off
 

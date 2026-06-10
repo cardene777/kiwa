@@ -4,7 +4,7 @@ kiwa test 実行時の典型エラーと対処。
 
 ## A. webServer 起動失敗 — `Cannot find module .../packages/core/dist/tx.js`
 
-原因 — `@kiwa/core` の build が race condition で壊れた。 複数 example の `pnpm test` を並列実行すると、 各 example が `pnpm -F @kiwa/core build` で `dist/` を rmSync するため race する。
+原因 — `@kiwa-test/core` の build が race condition で壊れた。 複数 example の `pnpm test` を並列実行すると、 各 example が `pnpm -F @kiwa-test/core build` で `dist/` を rmSync するため race する。
 
 対処 — 並列実行を諦めて sequential で 1 example ずつ走らせる:
 

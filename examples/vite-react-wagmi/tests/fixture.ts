@@ -1,4 +1,4 @@
-import { dappE2eTest } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
 
 const ANVIL_PORT = 8545;
 

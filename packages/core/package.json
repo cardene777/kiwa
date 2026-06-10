@@ -1,5 +1,5 @@
 {
-  "name": "@kiwa/core",
+  "name": "@kiwa-test/core",
   "version": "0.0.0",
   "description": "Headless E2E test fixture for dApps on anvil forks (Playwright + viem)",
   "license": "MIT",

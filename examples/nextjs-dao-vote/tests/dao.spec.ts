@@ -5,7 +5,7 @@ import {
   expectCustomError,
   mineBlock,
   setNextBlockTimestamp,
-} from '@kiwa/core';
+} from '@kiwa-test/core';
 import {
   createPublicClient,
   createWalletClient,

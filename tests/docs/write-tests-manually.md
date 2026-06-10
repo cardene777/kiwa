@@ -1,8 +1,8 @@
-# How to hand-write tests by importing `@kiwa/core` as a library
+# How to hand-write tests by importing `@kiwa-test/core` as a library
 
 > [🇬🇧 English](./write-tests-manually.md) • [🇯🇵 日本語](./write-tests-manually.ja.md)
 
-This is the route where you do **not** use skills such as `/kiwa-test` or `/kiwa-play`, but instead import `@kiwa/core` directly as an npm library and write the tests yourself. This is for use cases like integrating kiwa into an existing dApp project as a library, preferring hand-written tests because skill-generated tests are harder to read, or reusing only selected fixtures.
+This is the route where you do **not** use skills such as `/kiwa-test` or `/kiwa-play`, but instead import `@kiwa-test/core` directly as an npm library and write the tests yourself. This is for use cases like integrating kiwa into an existing dApp project as a library, preferring hand-written tests because skill-generated tests are harder to read, or reusing only selected fixtures.
 
 If you want full auto-generation from zero through the skill path, read [run-tests.md](./run-tests.md).
 
@@ -21,8 +21,8 @@ If you want full auto-generation from zero through the skill path, read [run-tes
 Run this at the root of your own dApp project.
 
 ```bash
-# Install @kiwa/core (main deps)
-pnpm add -D @kiwa/core @playwright/test viem
+# Install @kiwa-test/core (main deps)
+pnpm add -D @kiwa-test/core @playwright/test viem
 
 # Foundry (needed to launch anvil) must be on PATH
 anvil --version
@@ -35,7 +35,7 @@ Set `"type"` in `package.json` to `"module"` (`kiwa-core` is ESM).
 
 ## Step 1 — Write `playwright.config.ts`
 
-The `@kiwa/core` fixture extends Playwright's standard `test`, so you can keep using a normal Playwright config.
+The `@kiwa-test/core` fixture extends Playwright's standard `test`, so you can keep using a normal Playwright config.
 
 ```typescript
 // playwright.config.ts
@@ -55,11 +55,11 @@ export default defineConfig({
 
 ## Step 2 — Launch anvil + deploy contracts in `tests/prepare-env.ts`
 
-`@kiwa/core`'s `runE2EPrepareEnv` wraps anvil child-process startup, contract deployment, and `.env.local` output into one function.
+`@kiwa-test/core`'s `runE2EPrepareEnv` wraps anvil child-process startup, contract deployment, and `.env.local` output into one function.
 
 ```typescript
 // tests/prepare-env.ts
-import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa/core';
+import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa-test/core';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -104,7 +104,7 @@ Import the `dappE2eTest` fixture and write Playwright tests. The fixture injects
 ```typescript
 // tests/mint.spec.ts
 import { test, expect } from '@playwright/test';
-import { dappE2eTest } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
 import { createPublicClient, createWalletClient, http, defineChain, type Address } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { readFileSync } from 'node:fs';
@@ -160,7 +160,7 @@ dappE2eTest('TC-001 mint increases balance by 1', async ({ anvilPort, page }) =>
 
 ```typescript
 // tests/marketplace.spec.ts
-import { dappE2eTest } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
 import { expect } from '@playwright/test';
 import {
   createPublicClient, createWalletClient, http, defineChain,
@@ -230,11 +230,11 @@ dappE2eTest('TC-001 owner moves from seller to buyer after mint -> list -> buy',
 
 ### Isolating tests with snapshot / revert
 
-Use `@kiwa/core`'s `snapshotChain` / `revertChain` to isolate each test:
+Use `@kiwa-test/core`'s `snapshotChain` / `revertChain` to isolate each test:
 
 ```typescript
-import { dappE2eTest } from '@kiwa/core';
-import { snapshotChain, revertChain, increaseTime } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
+import { snapshotChain, revertChain, increaseTime } from '@kiwa-test/core';
 import { expect } from '@playwright/test';
 import type { Hex } from 'viem';
 
@@ -266,8 +266,8 @@ dappE2eTest('TC-VESTING-002 release stays at 0 before the cliff', async ({ anvil
 ### Asserting a custom-error revert
 
 ```typescript
-import { dappE2eTest } from '@kiwa/core';
-import { expectCustomError } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
+import { expectCustomError } from '@kiwa-test/core';
 
 dappE2eTest('TC-001 reverts with OnlyOwner', async ({ anvilPort }) => {
   const publicClient = makePublicClient(anvilPort);
@@ -317,7 +317,7 @@ pnpm test
 for r in 1 2 3 4; do echo "=== Round $r ==="; pnpm test 2>&1 | tail -3; done
 ```
 
-## `@kiwa/core` quick reference for the main APIs
+## `@kiwa-test/core` quick reference for the main APIs
 
 Details: [docs/en/api/README.md](../../docs/en/api/README.md).
 
@@ -353,7 +353,7 @@ Details: [docs/en/api/README.md](../../docs/en/api/README.md).
 
 | Symptom | Fix |
 |---|---|
-| `Cannot find module '@kiwa/core'` | Install with `pnpm add -D @kiwa/core`, and build with `pnpm -F @kiwa/core build` in a monorepo |
+| `Cannot find module '@kiwa-test/core'` | Install with `pnpm add -D @kiwa-test/core`, and build with `pnpm -F @kiwa-test/core build` in a monorepo |
 | `ReferenceError: require is not defined` | Add `"type": "module"` to `package.json` |
 | `Executable doesn't exist .../chrome-headless-shell` | `pnpm exec playwright install chromium` |
 | anvil port collision (`EADDRINUSE: 8545`) | Stop the existing daemon with `pkill -f anvil` or use a dynamic port via `getFreePort()` |
@@ -362,7 +362,7 @@ Details: [docs/en/api/README.md](../../docs/en/api/README.md).
 
 ## Related docs
 
-- `@kiwa/core` API reference: [docs/en/api/README.md](../../docs/en/api/README.md)
+- `@kiwa-test/core` API reference: [docs/en/api/README.md](../../docs/en/api/README.md)
 - API details: [docs/en/api/dapp-e2e-test.md](../../docs/en/api/dapp-e2e-test.md) (`dappE2eTest` fixture)
 - API details: [docs/en/api/start-anvil.md](../../docs/en/api/start-anvil.md) (start anvil)
 - API details: [docs/en/api/test-helpers.md](../../docs/en/api/test-helpers.md) (snapshot / time / event helpers)

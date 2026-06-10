@@ -1,5 +1,5 @@
 ---
-"@kiwa/core": minor
+"@kiwa-test/core": minor
 ---
 
 Phase F-1 第 1 弾として `/kiwa-hardhat` skill の動作実証範囲を 1 example (mint-nft) から 3 example に拡張 (#187)。

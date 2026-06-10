@@ -147,7 +147,7 @@ Use it when you want to deterministically trigger User Reject (`EIP-1193` code `
 ### Example
 
 ```typescript
-import { dappE2eTest as test } from '@kiwa/core';
+import { dappE2eTest as test } from '@kiwa-test/core';
 
 test('reject 経路の error UX 確認', async ({ page, dappE2e }) => {
   await dappE2e.setApprovalMode('reject');

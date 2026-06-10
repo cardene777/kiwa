@@ -8,7 +8,7 @@ import {
   expectCustomError,
   startAnvil,
   startAnvilFork,
-} from '@kiwa/core';
+} from '@kiwa-test/core';
 import {
   createPublicClient,
   createWalletClient,

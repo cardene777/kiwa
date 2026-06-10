@@ -6,7 +6,7 @@ import {
   runE2EPrepareEnv,
   writePidEntry,
   type PidEntry,
-} from '@kiwa/core';
+} from '@kiwa-test/core';
 import { privateKeyToAccount } from 'viem/accounts';
 import type { Hex } from 'viem';
 

@@ -6,7 +6,7 @@ import {
   impersonateAccount,
   setBalance,
   stopImpersonateAccount,
-} from '@kiwa/core';
+} from '@kiwa-test/core';
 import {
   createPublicClient,
   createWalletClient,

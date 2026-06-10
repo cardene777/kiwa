@@ -49,7 +49,7 @@ sign に使った object をそのまま verify に再利用し、domain separat
 
 ~~~ts
 import { expect } from '@playwright/test';
-import { dappE2eTest } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
 import { recoverMessageAddress, recoverTypedDataAddress } from 'viem';
 
 const test = dappE2eTest.extend({});

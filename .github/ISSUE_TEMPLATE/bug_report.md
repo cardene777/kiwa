@@ -1,6 +1,6 @@
 ---
 name: 🐛 Bug report
-about: Report a reproducible bug in @kiwa/core, @kiwa/cli, or the skill chain
+about: Report a reproducible bug in @kiwa-test/core, @kiwa-test/cli, or the skill chain
 labels: bug
 ---
 
@@ -13,7 +13,7 @@ labels: bug
 <!-- Provide a minimal reproducer (preferably a public repo link or copy-paste a 10-30 line snippet). -->
 
 ```ts
-// e.g. import { dappE2eTest } from "@kiwa/core"
+// e.g. import { dappE2eTest } from "@kiwa-test/core"
 // ... minimal failing case
 ```
 
@@ -31,7 +31,7 @@ labels: bug
 
 ## Environment
 
-- kiwa version: `@kiwa/core@x.y.z` / `@kiwa/cli@x.y.z`
+- kiwa version: `@kiwa-test/core@x.y.z` / `@kiwa-test/cli@x.y.z`
 - Node.js version: `node --version`
 - pnpm / npm version:
 - OS: macOS / Linux / Windows

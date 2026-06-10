@@ -26,8 +26,8 @@ labels: enhancement
 
 ## Impact
 
-- [ ] Affects `@kiwa/core` runtime fixture
-- [ ] Affects `@kiwa/cli` (init / doctor)
+- [ ] Affects `@kiwa-test/core` runtime fixture
+- [ ] Affects `@kiwa-test/cli` (init / doctor)
 - [ ] Affects skill chain (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat` / `/kiwa-play` → `/kiwa-review`)
 - [ ] Documentation only
 

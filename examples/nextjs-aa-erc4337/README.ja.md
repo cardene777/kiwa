@@ -20,7 +20,7 @@ repo root で `pnpm install` + `pnpm exec playwright install chromium` 済 + Fou
 pnpm -F examples-nextjs-aa-erc4337 test
 ```
 
-中で起こること — `pnpm -F @kiwa/core build` で fixture dist 更新 → `playwright test` (Next.js dev server を port 3042 で起動 + anvil 起動 + EntryPoint / Factory / Smart Account deploy)。
+中で起こること — `pnpm -F @kiwa-test/core build` で fixture dist 更新 → `playwright test` (Next.js dev server を port 3042 で起動 + anvil 起動 + EntryPoint / Factory / Smart Account deploy)。
 
 ## test の見方
 

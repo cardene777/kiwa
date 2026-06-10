@@ -19,7 +19,7 @@ When you already have a Foundry project and a dApp, generate the `pnpm test` pre
 
 ```bash
 # When the Foundry project lives in ../contract
-pnpm dlx @kiwa/cli init --with-deploy ../contract
+pnpm dlx @kiwa-test/cli init --with-deploy ../contract
 ```
 
 Generated files.
@@ -62,7 +62,7 @@ export default defineConfig({
 
 ### 4. Import the fixture from your spec
 
-Instead of using `dappE2eTest` from `@kiwa/core` directly, route through `tests/fixture.ts` so the spec shares the globalSetup anvil.
+Instead of using `dappE2eTest` from `@kiwa-test/core` directly, route through `tests/fixture.ts` so the spec shares the globalSetup anvil.
 
 ```ts
 import { test, expect } from './fixture';
@@ -101,7 +101,7 @@ See [examples/nextjs-wagmi-rainbow/README.md](../../../examples/nextjs-wagmi-rai
 
 ## Related
 
-- [Quickstart](../quickstart.md) — the first five minutes (the bare `pnpm dlx @kiwa/cli init` path)
+- [Quickstart](../quickstart.md) — the first five minutes (the bare `pnpm dlx @kiwa-test/cli init` path)
 - [Examples Walkthrough](../examples/walkthrough.md) — Stage 4 (nextjs-wagmi-rainbow) runs this boilerplate
 - [Connect button test](./connect-button.md) — exercise the connect flow on top of the boilerplate
 - [Token approve flow](./token-approve-flow.md) — approve flow after deploy

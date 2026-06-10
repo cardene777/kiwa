@@ -66,7 +66,7 @@ From the second release onward, the normal Changesets workflow handles the proce
 ### Phase 1 — npm-side preparation (user action)
 
 1. **Configure 2FA for your npm account** — At https://www.npmjs.com/settings/{user}/profile, select **Auth only** or **Auth and writes**. If you use an Automation Token, publishing is possible even with Auth only.
-2. **Reserve a scope (optional)** — To use `@kiwa/core` and `@kiwa/cli`, create the `@kiwa` organization (`https://www.npmjs.com/org/create`). If that scope is unavailable, consider an alternative such as `@cardene-kiwa/core`.
+2. **Reserve a scope (optional)** — To use `@kiwa-test/core` and `@kiwa-test/cli`, create the `@kiwa` organization (`https://www.npmjs.com/org/create`). If that scope is unavailable, consider an alternative such as `@cardene-kiwa/core`.
 3. **Create a Granular Access Token** — Settings > Access Tokens > Generate New Token > Granular Access Token.
    - name: `kiwa-publish`
    - expiration: 1 year (recommended)
@@ -89,13 +89,13 @@ From the second release onward, the normal Changesets workflow handles the proce
 
 ### Phase 4 — post-publish checks
 
-1. **Verify the npmjs.com pages** — Check `https://www.npmjs.com/package/@kiwa/core` and `@kiwa/cli` for the README, provenance badge, and version `0.1.0`.
-2. **smoke test** — In a separate dApp project, run `pnpm dlx @kiwa/cli init` and confirm that the generated `e2e/connect.spec.ts` passes:
+1. **Verify the npmjs.com pages** — Check `https://www.npmjs.com/package/@kiwa-test/core` and `@kiwa-test/cli` for the README, provenance badge, and version `0.1.0`.
+2. **smoke test** — In a separate dApp project, run `pnpm dlx @kiwa-test/cli init` and confirm that the generated `e2e/connect.spec.ts` passes:
 
    ~~~bash
    mkdir /tmp/kiwa-smoke && cd /tmp/kiwa-smoke
    pnpm init
-   pnpm dlx @kiwa/cli init
+   pnpm dlx @kiwa-test/cli init
    pnpm install
    pnpm exec playwright install chromium
    pnpm exec playwright test

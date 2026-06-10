@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](./smart-wallet-aa.md) • [🇯🇵 日本語](../../ja/cookbook/smart-wallet-aa.md)
 
-Use `WalletConfig.isContractAccount` added in `@kiwa/core` v0.3 to test ERC-4337 / EIP-1271 smart contract accounts end-to-end.
+Use `WalletConfig.isContractAccount` added in `@kiwa-test/core` v0.3 to test ERC-4337 / EIP-1271 smart contract accounts end-to-end.
 
 ## Problem
 
@@ -20,7 +20,7 @@ kiwa handles these differences transparently at the RPC layer so dApp code (wagm
 
 ```ts
 // tests/prepare-env.ts
-import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa/core';
+import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa-test/core';
 
 await runE2EPrepareEnv({
   envFile: '.env.local',
@@ -50,7 +50,7 @@ await runE2EPrepareEnv({
 
 ```ts
 // tests/fixture.ts
-import { dappE2eTest } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
 import type { Address } from 'viem';
 
 const SMART_ACCOUNT_ADDRESS = process.env.NEXT_PUBLIC_SMART_ACCOUNT as Address;

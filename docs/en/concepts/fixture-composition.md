@@ -21,7 +21,7 @@ so each spec only needs `page` plus a typed helper surface.
 App tests usually add fixtures such as `contracts`, `factory`, or `customWallet` on top.
 
 ~~~ts
-import { dappE2eTest } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
 
 type AppFixtures = {
   customWallet: { connectAs(index: number): Promise<void> };
@@ -66,7 +66,7 @@ This keeps specs from accidentally touching half-initialized addresses.
 ## 5. Complete example
 
 ~~~ts
-import { dappE2eTest } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
 
 type AppFixtures = {
   customWallet: { connectAs(index: number): Promise<void> };

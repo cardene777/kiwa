@@ -16,7 +16,7 @@ Click a dApp `Connect Wallet` button → wallet picker / direct connect → conf
 ### 1. Prepare the fixture helper
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@kiwa/core';
+import { dappE2eTest as test, expect } from '@kiwa-test/core';
 import type { Page } from '@playwright/test';
 
 async function ensureConnected(page: Page) {

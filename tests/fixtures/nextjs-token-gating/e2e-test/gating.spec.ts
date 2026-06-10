@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expectCustomError, increaseTime } from '@kiwa/core';
+import { expectCustomError, increaseTime } from '@kiwa-test/core';
 import {
   createPublicClient,
   createWalletClient,

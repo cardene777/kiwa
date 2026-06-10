@@ -45,7 +45,7 @@ event 発火後の `eth_chainId` と整合した状態を作れます。
 
 ```typescript
 import { expect } from '@playwright/test';
-import { dappE2eTest as test } from '@kiwa/core';
+import { dappE2eTest as test } from '@kiwa-test/core';
 
 test('accountsChanged event が page 側 handler を発火する', async ({ page, dappE2e }) => {
   await page.setContent(`

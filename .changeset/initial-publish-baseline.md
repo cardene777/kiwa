@@ -1,6 +1,6 @@
 ---
-"@kiwa/core": minor
-"@kiwa/cli": minor
+"@kiwa-test/core": minor
+"@kiwa-test/cli": minor
 ---
 
 Issue #4 — Changesets + GitHub Actions CI (node 20/22 matrix) + npm publish provenance による v0.1.0 publish 基盤を確立。

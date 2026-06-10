@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { runE2EPrepareEnv } from '@kiwa/core';
+import { runE2EPrepareEnv } from '@kiwa-test/core';
 import type { Hex } from 'viem';
 
 const SMART_ACCOUNT_SALT = 1n;

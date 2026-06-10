@@ -25,7 +25,7 @@ pnpm -F examples-nextjs-wagmi-rainbow test
 
 Internally this:
 
-1. Builds the fixture (`pnpm -F @kiwa/core build`)
+1. Builds the fixture (`pnpm -F @kiwa-test/core build`)
 2. Runs `node --import tsx tests/prepare-env.ts` → start anvil + `forge build` + `forge create` + write `.env.local`
 3. Launches `playwright test` → boots Next.js → runs `connect-and-mint.spec.ts`
 4. Stops anvil and cleans the pidfile in globalTeardown

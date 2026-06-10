@@ -43,7 +43,7 @@ pnpm --dir tests/fixtures/<name> test:e2e
 
 - `/kiwa-forge` は spec の TC 表を Foundry helper (`vm.expectRevert`、 `forge fuzz`、 `vm.warp`) に変換
 - `/kiwa-hardhat` は同表を Hardhat helper (`expect(...).to.be.reverted`、 `fast-check`、 `time.increaseTo`) に変換
-- `/kiwa-play` は e2e TC 表を Playwright + `@kiwa/core` fixture helper (`getByTestId`、 `walletClient.signTypedData`) に変換
+- `/kiwa-play` は e2e TC 表を Playwright + `@kiwa-test/core` fixture helper (`getByTestId`、 `walletClient.signTypedData`) に変換
 
 観点 × runner マッピング表は [`viewpoints-catalog.md`](../../../.claude/skills/kiwa-design/references/viewpoints-catalog.md) に列挙されており、 contributor は Layer 2 起動前にどんな test code が生成されるかを予測できる。
 

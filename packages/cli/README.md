@@ -1,29 +1,29 @@
-# @kiwa/cli
+# @kiwa-test/cli
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
 CLI for [kiwa](https://github.com/cardene777/kiwa) with `init` and `doctor` commands.
 
-`@kiwa/cli` scaffolds Playwright-based dApp E2E tests that use `@kiwa/core`, and provides a quick prerequisite check for local setup.
+`@kiwa-test/cli` scaffolds Playwright-based dApp E2E tests that use `@kiwa-test/core`, and provides a quick prerequisite check for local setup.
 
 ## Installation
 
 ```bash
-pnpm add -D @kiwa/cli
+pnpm add -D @kiwa-test/cli
 
 # or use it without installing
-pnpm dlx @kiwa/cli init
-pnpm dlx @kiwa/cli doctor
+pnpm dlx @kiwa-test/cli init
+pnpm dlx @kiwa-test/cli doctor
 ```
 
 ## Commands
 
 ### `kiwa init`
 
-Scaffolds Playwright E2E files into an existing dApp project and wires the generated test to `@kiwa/core`.
+Scaffolds Playwright E2E files into an existing dApp project and wires the generated test to `@kiwa-test/core`.
 
 ```bash
-pnpm dlx @kiwa/cli init
+pnpm dlx @kiwa-test/cli init
 # creates: e2e/connect.spec.ts + playwright.config.ts
 # also updates package.json and creates tsconfig.json if missing
 ```
@@ -35,14 +35,14 @@ Available flags include `--force`, `--testDir`, `--config-suffix`, `--script-key
 Checks that the required `anvil` binary is available in the current environment.
 
 ```bash
-pnpm dlx @kiwa/cli doctor
+pnpm dlx @kiwa-test/cli doctor
 ```
 
 ## Related
 
 - [GitHub repository](https://github.com/cardene777/kiwa)
 - [Full documentation](https://github.com/cardene777/kiwa/tree/main/docs/en)
-- [@kiwa/core](https://www.npmjs.com/package/@kiwa/core) - runtime fixture
+- [@kiwa-test/core](https://www.npmjs.com/package/@kiwa-test/core) - runtime fixture
 
 ## Author
 

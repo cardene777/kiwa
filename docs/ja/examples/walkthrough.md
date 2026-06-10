@@ -21,7 +21,7 @@ contract 不要、 inline HTML 1 枚で kiwa fixture の動きを掴む。
 pnpm -F examples-basic-connect test
 ```
 
-期待 — `connect.spec.ts` 11 件 + `eip6963.spec.ts` 4 件 = 計 15 件 PASS、 実行は約 4 秒 (内訳 — `pnpm -F @kiwa/core build` で fixture dist 更新 → playwright test)。
+期待 — `connect.spec.ts` 11 件 + `eip6963.spec.ts` 4 件 = 計 15 件 PASS、 実行は約 4 秒 (内訳 — `pnpm -F @kiwa-test/core build` で fixture dist 更新 → playwright test)。
 
 確認したいこと。
 
@@ -98,7 +98,7 @@ pnpm -F examples-nextjs-wagmi-rainbow test
 
 中で起こること。
 
-1. `pnpm -F @kiwa/core build` で fixture dist 更新
+1. `pnpm -F @kiwa-test/core build` で fixture dist 更新
 2. `tests/prepare-env.ts` 実行 (anvil 起動 + forge build + forge create + `.env.local` 書き込み)
 3. Playwright が Next.js を起動 → `connect-and-mint.spec.ts` 実行
 4. globalTeardown で anvil 停止 + pidfile cleanup
