@@ -16,6 +16,7 @@ kiwa usage by real scenario.
 - [Test a token approve flow](./token-approve-flow.md)
 - [Generate framework integration boilerplate with `kiwa init --with-deploy`](./with-deploy.md) — automates anvil + forge build + forge create + `.env.local` writing via a four-file boilerplate
 - [Stack three layers on the same contract](./three-layer-stack.md) — Foundry + Hardhat + Playwright on mint-nft / defi-swap / nextjs-token-gating (3 contract × 3 lane = 9 entries verified)
+- [Stack five test layers on a single feature](./five-layer-stack.md) — Add Vitest (unit) + msw (integration) on top of the three-layer stack for features with TS helpers and HTTP / RPC adapters (F-3)
 
 ## Contributor-facing internal test docs
 

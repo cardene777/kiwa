@@ -13,7 +13,7 @@ What lives here.
 - ⚒️ [run-contract-tests.md](./run-contract-tests.md) — Generate and run tests for **multiple contracts under `contracts/` at once** using the individual skills (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat`) (uses the two-contract nft-marketplace example; collaboration scenarios live in the primary contract test file; the same flow applies to a single contract too)
 - 🎭 [run-dapp-e2e-tests.md](./run-dapp-e2e-tests.md) — Generate and run Playwright specs using the individual skills **from the UI (`app/`) side** (`/kiwa-design --input app/` → `/kiwa-play`) (contract functions never called from the frontend are out of scope)
 
-## The six kiwa skills
+## The kiwa skills
 
 | Skill | Layer | Role | SSOT |
 |---|---|---|---|
@@ -21,6 +21,8 @@ What lives here.
 | `/kiwa-design` | Layer 1 | From feature spec / API / contract code, produce a nine-section unified spec | `.claude/skills/kiwa-design/SKILL.md` |
 | `/kiwa-forge` | Layer 2 contract | Convert the Layer 1 spec into Foundry `test/*.t.sol` and run `forge test` | `.claude/skills/kiwa-forge/SKILL.md` |
 | `/kiwa-hardhat` | Layer 2 contract | Convert the Layer 1 spec into Hardhat `test/*.test.cjs`, run `npx hardhat test`, gather coverage | `.claude/skills/kiwa-hardhat/SKILL.md` |
+| `/kiwa-vitest` | Layer 2 unit | Convert the Layer 1 spec into Vitest `test/unit/*.test.{ts,tsx}` for TS / TSX functions and hooks (F-3) | `.claude/skills/kiwa-vitest/SKILL.md` |
+| `/kiwa-api` | Layer 2 integration | Convert the Layer 1 spec into msw / supertest / Playwright `request` API integration tests (F-3) | `.claude/skills/kiwa-api/SKILL.md` |
 | `/kiwa-play` | Layer 3 e2e | Design / implement / run Playwright `tests/*.spec.ts` on top of the `@kiwa/core` fixture | `.claude/skills/kiwa-play/SKILL.md` |
 | `/kiwa-review` | reviewer | Judge spec / test code / execution results in three modes (spec-review / test-review / result-review) | `.claude/skills/kiwa-review/SKILL.md` |
 

@@ -16,6 +16,7 @@
 - [Token approve flow を test する](./token-approve-flow.md)
 - [kiwa init --with-deploy で framework 統合 boilerplate を生成する](./with-deploy.md) — anvil + forge build + forge create + .env.local 書き込みを 4 file boilerplate で自動化
 - [同じ contract に 3 layer を重ねる](./three-layer-stack.md) — Foundry + Hardhat + Playwright を mint-nft / defi-swap / nextjs-token-gating で並立 (3 contract × 3 lane = 9 entry 検証済)
+- [1 機能に 5 layer test を重ねる](./five-layer-stack.md) — 3 layer 並立に Vitest (unit) + msw (integration) を加え、 TS helper + HTTP / RPC adapter を持つ機能を 5 layer で検証 (F-3)
 
 ## kiwa contributor 向け内部 test docs
 
