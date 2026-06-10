@@ -122,6 +122,68 @@ skill 起動時の判定:
 - 既存 test file が存在 → 全観点で「retrofit / regression 追加生成」を spec 化 (新規 + 既存保持の double 構造)
 - 過去 bug 一覧 (Issue label `bug` + closed) を参照可能なら、 各 bug に対応する regression test を 1 件以上設計
 
+### 12. multi-tab race (e2e 固有、 PR #301 観点 12/13 と相補)
+
+**適用** — multi-tab で同時に同じ操作を行う流れが想定される dApp (例 NFT 大量 mint 競合 / batch tx 並行送出)。
+
+**典型 case** — 2 BrowserContext で同 wallet を使い、 `Promise.all` で同 contract function を同時 invoke、 1 tab だけ success / もう 1 tab は revert (nonce 重複) を assertion。
+
+例 (NFT mint race):
+- TC-NN — tab A + tab B が同時に mint() → tab A success、 tab B が nonce conflict で revert
+- TC-NN — tab A pending 中に tab B で disconnect → tab A の tx 状態が「user reject」 で UI 更新
+
+実装。 `kiwa fixture` の `injectMultipleWallets` で別 BrowserContext を持ち、 `Promise.all([tabA.click(), tabB.click()])` で competing call を組む。
+
+### 13. wallet account 切替 (e2e 固有)
+
+**適用** — multi-account dApp / role 別 UI / account 表示更新が想定される dApp。
+
+**典型 case** — `kiwa fixture` の `switchAccount(walletIndex)` で account を切り替え、 UI が新 account を表示 / 旧 account 関連データ (balance / ownership / role) を clear することを assertion。
+
+例 (NFT collection 表示):
+- TC-NN — account A で接続 → collection 3 件表示 → account B に切替 → collection 1 件に更新
+- TC-NN — admin role の account で表示される admin button が、 non-admin account 切替後に消える
+
+実装。 `kiwa fixture` の `walletClient.switchAccount()` 呼出 → `page.waitForLoadState` で UI 反映待機 → 新 testid assertion。
+
+### 14. RPC error mock 注入 (e2e 固有)
+
+**適用** — error fallback UX を持つ dApp (timeout 表示 / retry button / offline mode 切替)。
+
+**典型 case** — kiwa fixture の `mockRpcResponse` で特定 RPC method の応答を error / timeout に差し替え、 UI が「再試行」 / 「ネットワーク確認」 等のメッセージを表示することを assertion。
+
+例 (balance 取得 fallback):
+- TC-NN — `eth_getBalance` を 503 で mock → UI に「残高取得失敗、 再試行」 表示
+- TC-NN — `eth_call` を timeout 10s で mock → 自動 retry 3 回後に offline mode 切替
+
+実装。 `kiwa fixture` の `mockRpcResponse({ method: 'eth_getBalance', error: { code: -32603 } })` で injection、 UI assertion を `getByTestId('error-message').toBeVisible()` で確認。
+
+### 15. time-warp (e2e 固有)
+
+**適用** — 時間依存ロジックを持つ dApp (vesting cliff / voting deadline / staking lock / auction expiry)。
+
+**典型 case** — anvil の `evm_increaseTime` で時刻を進めて、 UI が時刻依存表示 (countdown / status badge) を更新することを assertion。 contract layer の境界値観点と相補。
+
+例 (vesting cliff):
+- TC-NN — cliff 直前 1 秒 で release ボタン disabled → cliff 経過後 enabled に変化
+- TC-NN — voting deadline 通過時に proposal status が `voting` → `expired` に UI 更新
+
+実装。 anvil RPC `anvil_setNextBlockTimestamp` を kiwa fixture 経由で叩き、 `page.reload()` または `page.waitForFunction` で UI 更新を観測。
+
+### 16. 視覚 regression (e2e 固有、 任意適用)
+
+**適用** — UI 重要 component の見た目変化を継続監視したい場合 (design system 更新 / theme 切替 / a11y diff)。
+
+**典型 case** — Playwright の `page.screenshot()` で baseline 画像と比較、 pixel diff threshold 超過で fail。 比較対象は主要 page / state 別 (loading / error / empty)。
+
+例 (mint flow):
+- TC-NN — mint button enabled state の screenshot baseline と一致 (diff < 0.5%)
+- TC-NN — error 表示時の error-banner screenshot が baseline と一致
+
+実装。 `expect(page).toHaveScreenshot('mint-button-enabled.png', { maxDiffPixels: 100 })` で snapshot 比較、 baseline 更新は `--update-snapshots` flag で明示。 CI で不安定なら local 限定運用も可。
+
+> 観点 12-16 は **e2e layer 固有** (contract layer では非適用)。 PR #301 で追加した観点 12 (UI feature 網羅) / 13 (wallet 接続 flow) は spec 単位での観点判断、 本観点 12-16 は spec の TC 設計 hint として使う相補関係。 観点番号の整合性は PR merge 順序で決まる、 重複が出た場合は merge 時に renumber する。
+
 ## 観点 × 優先度の決まり方
 
 観点ごとの優先度は **対象機能のリスク score** で決まる (`references/risk-criteria.md` § 優先度導出)。 観点自体に固定優先度はない。

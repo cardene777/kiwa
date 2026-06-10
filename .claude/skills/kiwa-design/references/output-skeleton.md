@@ -159,6 +159,44 @@ e2e layer (`--layer e2e` or `--layer all`) では本 sub-section を **必ず埋
 
 {該当観点を順に列挙、 case がない観点は section 内に `(なし)` 1 行のみ}
 
+## 「期待結果」 column の layer 別意味 (本 sub-section は contract / e2e で読み替え必須)
+
+9 column 表の「期待結果」 column は layer によって書くべき内容が異なる。 Layer 2 skill (`/kiwa-forge` / `/kiwa-hardhat` / `/kiwa-play`) が test code に変換する際の正確性を上げるため、 layer 別に以下の細分項目を **「期待結果」 セル内で 1-3 個カンマ区切り** で必ず明示する。
+
+### contract layer (`--layer contract`) — 4 細分項目
+
+| 細分項目 | 何を書くか | 例 |
+|---|---|---|
+| event emit | emit される event 名 + indexed param | `Transfer(from=0x0, to=msg.sender, tokenId=1)` |
+| revert error | revert される custom error 名 + arg | `revert MaxSupplyExceeded(101)` |
+| state 変化 | storage slot / mapping の before → after | `_owners[1] : address(0) → msg.sender` |
+| return 値 | function return の具体値 | `return tokenId == 1` |
+
+contract layer の「期待結果」 セル例。
+
+```
+emit Transfer(from=0x0, to=msg.sender, tokenId=1)、 _owners[1] : address(0) → msg.sender、 return tokenId == 1
+```
+
+### e2e layer (`--layer e2e`) — 4 細分項目
+
+| 細分項目 | 何を書くか | 例 |
+|---|---|---|
+| UI 表示 | locator + 期待 text or 属性 | `getByTestId('status').toHaveText('connected')` |
+| wallet state | account / chainId / balance の変化 | `walletClient.getBalance() : 1 ETH → 0.99 ETH (gas 込)` |
+| on-chain state | block / contract storage の変化 | `publicClient.readContract({ abi, address, fn: 'balanceOf', args: [addr] }) === 1n` |
+| 画面遷移 | URL or routing 変化 | `page.url() : /mint → /collection` |
+
+e2e layer の「期待結果」 セル例。
+
+```
+getByTestId('status').toHaveText('connected')、 walletClient.getBalance() : 1 ETH → 0.99 ETH、 publicClient.readContract balanceOf === 1n
+```
+
+### contract / e2e の区別が無い場合 (`--layer all` / `--layer integration` / `--layer unit`)
+
+contract / e2e 両方の細分項目を併記してよい。 ただし Layer 2 skill の変換精度が下がるため、 `--layer all` での運用は legacy compatibility 用とし、 新規 spec は `--layer contract` / `--layer e2e` のいずれかに倒すことを推奨する。
+
 ## 自動化すべきテスト
 
 優先度順 (高 → 中 → 低)。 Layer 2 skill が次フェーズで実装する。
