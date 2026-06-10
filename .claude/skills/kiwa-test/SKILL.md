@@ -69,7 +69,7 @@ multiSelect: false
 ### Step 2: 環境 + dir check
 
 ```bash
-cd /Users/cardene/Desktop/projects/kiwa    # repo root に確実に移動 (caller cwd 依存防止)
+cd "$(git rev-parse --show-toplevel)"    # repo root に確実に移動 (caller cwd 依存防止)
 
 # example dir 存在 check
 [ -d "examples/$EXAMPLE" ] || { echo "ERROR: examples/$EXAMPLE が存在しません"; exit 1; }
