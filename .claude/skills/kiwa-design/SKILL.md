@@ -39,7 +39,8 @@ $ARGUMENTS
 
 ## オプション
 
-- `--module {name}` — 出力 file 名のキー (出力 path は `--layer` と組み合わせて決定)
+- `--module {name}` — 出力 file 名のキー (出力 path は `--layer` と組み合わせて決定)、 単数指定
+- `--modules {name1,name2,name3}` — 複数 module を 1 回起動で batch 処理 (Issue #221)、 `--module` と排他、 `,` 区切り、 各 module 名は `[a-z0-9-]+` 制約。 内部実装は Step 1-5 全体を module 単位で順次回し、 module 数 N について N 個の spec を Write、 最後に「contract 間連携」 section を 1 つだけ生成する (詳細は下記 § --modules batch 起動規約 を参照)
 - `--layer {contract|e2e|integration|unit|all}` — 想定 test layer を指定 (default `all`、 出力 path と推奨観点が変わる)
 - `--input {path}` — 機能仕様 file の path (省略時は対話形式で要約を求める)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
@@ -59,6 +60,60 @@ $ARGUMENTS
 | `all` (default) | `tests/spec/test-spec-{module}.md` | 全 Layer 2 skill (旧 default 経路、 互換性維持) |
 
 出力 path 親 dir (`tests/spec/{layer}/`) は skill が `mkdir -p` で自動作成する。 既存 file がある場合は上書きせず `tests/spec/{layer}/test-spec-{module}-{n}.md` (n は 2 以降の連番) として Write、 衝突回避する。
+
+## --modules batch 起動規約 (Issue #221)
+
+`--modules {name1,name2,name3}` 指定時は 1 起動で複数 module の spec を順次生成する。 認知負荷削減 + 共通 interface (例 ERC20) の parse cache 利用が主目的。
+
+### 引数 parse
+
+- `,` 区切り、 各 module 名は `[a-z0-9-]+` 制約 (英小文字 / 数字 / hyphen)、 1-32 字
+- 重複指定は前後の duplicate を除いて先頭のみ採用 (`--modules a,b,a` → `a,b`)
+- module 名が範囲外 (大文字 / 特殊文字 / 33 字以上) なら起動時に error、 abort
+- `--module` (単数) と同時指定された場合は `--modules` 優先、 `--module` は無視
+
+### 処理 flow
+
+```mermaid
+graph LR
+    A[--modules m1,m2,m3 起動] --> B[module 一覧 parse]
+    B --> C[m1 Step 1-5 完走]
+    C --> D[m2 Step 1-5 完走<br/>共通 interface cache 利用]
+    D --> E[m3 Step 1-5 完走<br/>共通 interface cache 利用]
+    E --> F[contract 間連携 section<br/>を 1 つだけ追加生成]
+    F --> G[N + 1 file 出力]
+```
+
+### 共通 interface parse cache
+
+各 module の Step 1 (入力整理) で対象 file (`{path/to/contract.sol}` 等) を grep / Read する際、 同じ file path に対する 2 回目以降の parse 結果は **session 内 cache** に保存して再利用する (file path をキー、 parse 結果 (AST 相当 + 抽出 metadata) を値)。 これにより 3 module で同 interface (例 ERC20 token) を共有する場合の重複 read が解消される。 cache は skill 起動 1 回の生存期間、 起動間で永続化しない。
+
+### contract 間連携 section の生成
+
+batch 起動時の最終 step として、 N module 全完了後に「contract 間連携」 sub-section を 1 つだけ生成する。 contract 同士が呼び合う UX flow (例 staking が ERC20.approve → ERC20.transferFrom を経由する 2-tx flow) を以下 format で記述する。
+
+format。
+
+```markdown
+## contract 間連携 (batch 起動時のみ生成)
+
+> N module の spec を batch 起動した際に自動生成。 module 単体 spec では検出されない cross-contract flow を補う。
+
+| 連携 ID | 起点 module | 経由 contract function | 終点 module | UX flow | 対応 TC (各 spec から参照) |
+|---|---|---|---|---|---|
+| LINK-001 | staking | ERC20.approve → ERC20.transferFrom | token | user が stake ボタン押下 → wallet で approve 確認 → stake tx 送信 → balance 反映 | tests/spec/contract/test-spec-staking.md TC-005、 test-spec-token.md TC-010 |
+| LINK-002 | governance | Treasury.execute → Token.mint | token | proposal 承認 → execute → treasury から mint → 受給者 balance 更新 | test-spec-governance.md TC-008、 test-spec-token.md TC-015 |
+```
+
+連携が 0 件なら本 sub-section に `(該当なし)` 1 行のみ。
+
+### 出力 path
+
+batch 起動時の各 module は `--module` 単数経路と同じ出力 path 規約に従う (`tests/spec/{layer}/test-spec-{module}.md`)。 「contract 間連携」 section は **最初の module** の spec 末尾に追記する (例 `tests/spec/contract/test-spec-{first-module}.md` 末尾)。 これにより batch 起動かどうかが contributor から見て自然に伝わる (最初の spec を読めば連携全体が見える)。
+
+### 後方互換
+
+`--module` (単数) 経路は本拡張後も完全に維持される。 既存 skill 呼出 (`/kiwa-design --module foo --layer contract`) は何も変わらない、 cache 機構も単数経路では発動しない (cache hit が常に 0)。
 
 ## 実行フロー
 
