@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "description": "CLI for kiwa (init / doctor commands)",
   "license": "MIT",
+  "author": {
+    "name": "cardene",
+    "url": "https://github.com/cardene777"
+  },
   "keywords": ["kiwa", "cli", "scaffold"],
   "repository": {
     "type": "git",

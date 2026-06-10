@@ -12,7 +12,8 @@ we can address it before public disclosure.
 ### How to report
 Please **do not** open a public GitHub Issue for security vulnerabilities.
 Instead, contact the maintainer directly:
-- Open a private security advisory at https://github.com/cardene777/kiwa/security/advisories/new
+- Open a private security advisory at https://github.com/cardene777/kiwa/security/advisories/new (preferred)
+- DM the maintainer on X at https://x.com/cardene777 (for initial coordination only; do not include sensitive payloads)
 - Or email the maintainer (see GitHub profile for current contact)
 
 ### What to include

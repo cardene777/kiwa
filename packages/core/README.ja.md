@@ -76,6 +76,10 @@ test 側から `dappE2e.triggerEvent()` で直接 drive、 もしくは `connect
 - [Events reference (ja)](https://github.com/cardene777/kiwa/blob/main/docs/EVENTS.ja.md)
 - [RPC reference (ja)](https://github.com/cardene777/kiwa/blob/main/docs/RPC.ja.md)
 
+## 作者
+
+[cardene](https://github.com/cardene777) — [GitHub](https://github.com/cardene777) / [X](https://x.com/cardene777)
+
 ## License
 
 MIT

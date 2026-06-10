@@ -44,6 +44,10 @@ pnpm dlx @kiwa/cli doctor
 - [Full documentation (ja)](https://github.com/cardene777/kiwa/tree/main/docs/ja)
 - [@kiwa/core](https://www.npmjs.com/package/@kiwa/core) — runtime fixture
 
+## 作者
+
+[cardene](https://github.com/cardene777) — [GitHub](https://github.com/cardene777) / [X](https://x.com/cardene777)
+
 ## License
 
 MIT

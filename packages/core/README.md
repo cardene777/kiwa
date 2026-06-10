@@ -76,6 +76,10 @@ From tests, you can drive them with `dappE2e.triggerEvent()` or use higher-level
 - [Events reference](https://github.com/cardene777/kiwa/blob/main/docs/EVENTS.md)
 - [RPC reference](https://github.com/cardene777/kiwa/blob/main/docs/RPC.md)
 
+## Author
+
+[cardene](https://github.com/cardene777) — [GitHub](https://github.com/cardene777) / [X](https://x.com/cardene777)
+
 ## License
 
 MIT
