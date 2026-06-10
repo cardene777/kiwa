@@ -9,7 +9,7 @@
   "scripts": {
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "pnpm build && pnpm publish -r --access public --provenance --no-git-checks",
+    "release": "pnpm -F @kiwa-test/core -F @kiwa-test/cli build && pnpm publish --filter @kiwa-test/core --filter @kiwa-test/cli --access public --provenance --no-git-checks",
     "test": "pnpm -r test",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck"
