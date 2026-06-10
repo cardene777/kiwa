@@ -414,7 +414,7 @@ For Claude Code users — full skill reference:
 - 🔒 [Security policy](./SECURITY.md) — Report vulnerabilities privately
 - 🐛 [Open an issue](https://github.com/cardene777/kiwa/issues)
 - 🔀 [Send a pull request](https://github.com/cardene777/kiwa/pulls)
-- 🗺️ Phase F roadmap is tracked at issues [#187 – #191](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Aenhancement+sort%3Acreated-desc)
+- 🗺️ Open Issues (current roadmap): [enhancement label](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement+sort%3Acreated-desc)
 - 💡 Check [`docs/MIGRATION.md`](./docs/MIGRATION.md) before reporting breaking-change concerns
 
 ---

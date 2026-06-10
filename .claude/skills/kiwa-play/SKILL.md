@@ -133,7 +133,7 @@ dApp test は以下 3 layer で構造化:
 
 ### Step 3: 既存 example pattern 参照
 
-`@kiwa/core` のリポジトリ (https://github.com/cardene777/kiwa) には 19 example が含まれており、 用途別の典型実装を学べる。
+`@kiwa/core` のリポジトリ (https://github.com/cardene777/kiwa) には 22 example が含まれており、 用途別の典型実装を学べる。
 
 | 用途 | example | 学べるパターン |
 |---|---|---|
@@ -280,7 +280,7 @@ review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 repo
 
 ## references
 
-- `references/example-patterns.md` — 19 example の用途別 index と典型コード
+- `references/example-patterns.md` — 22 example の用途別 index と典型コード
 - `references/fixture-api.md` — `@kiwa/core` 主要 export API リファレンス
 - `references/troubleshooting.md` — webServer 起動失敗・anvil port 衝突・core build race 対策
 - `references/adversarial-pitfalls.md` — 偽陽性パターン 9 種 + self-check 5 問

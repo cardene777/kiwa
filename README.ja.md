@@ -414,7 +414,7 @@ Claude Code 利用者向け — skill 完全リファレンス:
 - 🔒 [Security policy](./SECURITY.md) — 脆弱性は非公開経路で報告
 - 🐛 [Issue を起票する](https://github.com/cardene777/kiwa/issues)
 - 🔀 [Pull request を送る](https://github.com/cardene777/kiwa/pulls)
-- 🗺️ Phase F roadmap は Issue [#187 – #191](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Aenhancement+sort%3Acreated-desc) で管理
+- 🗺️ 現行 roadmap (open Issue): [enhancement label](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement+sort%3Acreated-desc)
 - 💡 Breaking change の指摘前に [`docs/MIGRATION.ja.md`](./docs/MIGRATION.ja.md) を確認
 
 ---

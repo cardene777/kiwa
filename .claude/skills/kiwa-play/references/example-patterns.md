@@ -1,6 +1,6 @@
 # example-patterns.md
 
-kiwa リポジトリ (`cardene777/kiwa`) の `examples/` 19 件の用途別 index と典型パターン抜粋。
+kiwa リポジトリ (`cardene777/kiwa`) の `examples/` 22 件の用途別 index と典型パターン抜粋。
 
 ユーザー要件に近い example を 1 つ選び、 spec.ts と prepare-env.ts を Read してから類似構造で書く。
 
