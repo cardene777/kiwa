@@ -297,4 +297,4 @@ review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 repo
 
 - リポジトリ: https://github.com/cardene777/kiwa
 - 公式 docs (JP+EN 対訳): `docs/{ja,en}/{quickstart,concepts,api,cookbook,faq}.md`
-- npm: `@kiwa-test/core` / `@kiwa-test/cli` / `@kiwa/cookbook`
+- npm: `@kiwa-test/core` / `@kiwa-test/cli` (`@kiwa-test/cookbook` は将来の subpackage 構想)

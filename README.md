@@ -163,12 +163,11 @@ playwright.config.ts        ← Headless Chromium config
 package.json                ← test:e2e script + peer deps
 ```
 
-> Before `@kiwa/*` v0.1.0 is published to npm, clone this repo and run:
-> `pnpm install && pnpm -F @kiwa-test/core -F @kiwa-test/cli build && node packages/cli/dist/index.js init`
+> Now available on npm — `pnpm dlx @kiwa-test/cli init` works out of the box (no clone required).
 
-### Trying kiwa before v0.1.0 is on npm
+### Option C — Local checkout (for kiwa contributors)
 
-Until `@kiwa/*` is published, point your test project at the local checkout with a `file:` dependency:
+If you are hacking on kiwa itself and want to test changes against a local dApp project before publishing, link with a `file:` dependency:
 
 ```bash
 # 1. Clone & build kiwa
@@ -185,7 +184,7 @@ pnpm add -D file:$HOME/kiwa/packages/core file:$HOME/kiwa/packages/cli
 pnpm exec kiwa init     # or: node $HOME/kiwa/packages/cli/dist/index.js init
 ```
 
-After v0.1.0 publish you can switch to `pnpm dlx @kiwa-test/cli init` (Option B above).
+For everyday use, prefer Option B (`pnpm dlx @kiwa-test/cli init`) which pulls the published 0.1.0 version directly.
 
 ### Using kiwa with a CJS / Next.js 14 project
 

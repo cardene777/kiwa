@@ -163,12 +163,11 @@ playwright.config.ts        ← Headless Chromium config
 package.json                ← test:e2e script + peer deps
 ```
 
-> `@kiwa/*` v0.1.0 が npm 公開される前は repo を clone して以下を実行:
-> `pnpm install && pnpm -F @kiwa-test/core -F @kiwa-test/cli build && node packages/cli/dist/index.js init`
+> npm 公開済 — `pnpm dlx @kiwa-test/cli init` で clone 不要で導入できます。
 
-### v0.1.0 公開前の試用手順
+### Option C — local checkout (kiwa への contributor 用)
 
-`@kiwa/*` が npm 公開されるまでは、 試用先 project から **`file:` 依存**で local checkout を参照する:
+kiwa 本体に手を入れた変更を、 publish 前に local の dApp project で検証したい場合は **`file:` 依存** で local checkout を参照する:
 
 ```bash
 # 1. kiwa を clone & build
@@ -185,7 +184,7 @@ pnpm add -D file:$HOME/kiwa/packages/core file:$HOME/kiwa/packages/cli
 pnpm exec kiwa init     # または: node $HOME/kiwa/packages/cli/dist/index.js init
 ```
 
-v0.1.0 公開後は `pnpm dlx @kiwa-test/cli init` (上記 Option B) に切替可能。
+通常利用は Option B (`pnpm dlx @kiwa-test/cli init`) を推奨、 公開済 0.1.0 を直接取得します。
 
 ### CJS / Next.js 14 プロジェクトとの共存
 

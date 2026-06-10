@@ -66,12 +66,13 @@ From the second release onward, the normal Changesets workflow handles the proce
 ### Phase 1 — npm-side preparation (user action)
 
 1. **Configure 2FA for your npm account** — At https://www.npmjs.com/settings/{user}/profile, select **Auth only** or **Auth and writes**. If you use an Automation Token, publishing is possible even with Auth only.
-2. **Reserve a scope (optional)** — To use `@kiwa-test/core` and `@kiwa-test/cli`, create the `@kiwa` organization (`https://www.npmjs.com/org/create`). If that scope is unavailable, consider an alternative such as `@cardene-kiwa/core`.
+2. **Reserve a scope (optional)** — `@kiwa-test/core` and `@kiwa-test/cli` use the `@kiwa-test` npm organization (already created at https://www.npmjs.com/org/kiwa-test). If you fork kiwa and want a different scope, create your own org via `https://www.npmjs.com/org/create`.
 3. **Create a Granular Access Token** — Settings > Access Tokens > Generate New Token > Granular Access Token.
    - name: `kiwa-publish`
    - expiration: 1 year (recommended)
-   - packages: `@kiwa/*`
+   - packages: `@kiwa-test/*`
    - permissions: **Read and write** (for publishing)
+   - **Bypass two-factor authentication (2FA): ON** (required for CI publish)
    - The token is shown only once immediately after creation, so you must copy it then.
 
 ### Phase 2 — GitHub-side preparation (user action)
