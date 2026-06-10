@@ -15,6 +15,7 @@
 - [Multi-Chain (L1/L2 並走) を test する](./multi-chain.md)
 - [Token approve flow を test する](./token-approve-flow.md)
 - [kiwa init --with-deploy で framework 統合 boilerplate を生成する](./with-deploy.md) — anvil + forge build + forge create + .env.local 書き込みを 4 file boilerplate で自動化
+- [同じ contract に 3 layer を重ねる](./three-layer-stack.md) — Foundry + Hardhat + Playwright を mint-nft / defi-swap / nextjs-token-gating で並立 (3 contract × 3 lane = 9 entry 検証済)
 
 ## kiwa contributor 向け内部 test docs
 
