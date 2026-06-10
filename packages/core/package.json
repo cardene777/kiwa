@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "description": "Headless E2E test fixture for dApps on anvil forks (Playwright + viem)",
   "license": "MIT",
+  "author": {
+    "name": "cardene",
+    "url": "https://github.com/cardene777"
+  },
   "keywords": ["dapp", "ethereum", "e2e", "playwright", "anvil", "viem", "testing", "fixture"],
   "repository": {
     "type": "git",

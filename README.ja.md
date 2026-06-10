@@ -419,9 +419,20 @@ Claude Code 利用者向け — skill 完全リファレンス:
 
 ---
 
+## Contact
+
+GitHub Issue に当てはまらない質問 / フィードバック / 雑談は以下から連絡してください。
+
+- 💬 [GitHub Discussions](https://github.com/cardene777/kiwa/discussions) — 長文 / 提案
+- 🐦 [X / Twitter @cardene777](https://x.com/cardene777) — 短文 / DM 開放
+
+バグ報告は [Issue 起票](https://github.com/cardene777/kiwa/issues) に倒した方が後追い検索しやすくおすすめ。 脆弱性報告は [Security advisory](https://github.com/cardene777/kiwa/security/advisories/new) (詳細は [SECURITY.md](./SECURITY.md)) で非公開経路で受け取ります。
+
+---
+
 ## License
 
-[MIT](./LICENSE) © [cardene](https://github.com/cardene777)
+[MIT](./LICENSE) © [cardene](https://github.com/cardene777) — [GitHub](https://github.com/cardene777) / [X](https://x.com/cardene777)
 
 <div align="center">
 

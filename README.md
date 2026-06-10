@@ -403,7 +403,7 @@ For Claude Code users — full skill reference:
 - [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) — Layer 1 spec generator
 - [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) — Foundry generator
 - [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) — Hardhat generator
-- [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) — Playwright generator + 19-example index + 9 false-positive patterns
+- [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) — Playwright generator + 22-example index + 9 false-positive patterns
 
 ---
 
@@ -419,9 +419,20 @@ For Claude Code users — full skill reference:
 
 ---
 
+## Contact
+
+For questions, feedback, or general chat that does not fit a GitHub Issue, reach out via either channel below.
+
+- 💬 [GitHub Discussions](https://github.com/cardene777/kiwa/discussions) — Long-form questions / proposals
+- 🐦 [X / Twitter @cardene777](https://x.com/cardene777) — Quick replies, DMs open
+
+For bug reports, please [open an Issue](https://github.com/cardene777/kiwa/issues) instead so the discussion stays searchable. For private security disclosures, use the [Security advisory channel](https://github.com/cardene777/kiwa/security/advisories/new) (see [SECURITY.md](./SECURITY.md)).
+
+---
+
 ## License
 
-[MIT](./LICENSE) © [cardene](https://github.com/cardene777)
+[MIT](./LICENSE) © [cardene](https://github.com/cardene777) — find me on [GitHub](https://github.com/cardene777) and [X](https://x.com/cardene777).
 
 <div align="center">
 

@@ -72,6 +72,11 @@ Open an Issue at <https://github.com/cardene777/kiwa/issues> with:
 Security issues should not be reported publicly.
 Please follow [SECURITY.md](./SECURITY.md) instead.
 
+## Other channels
+
+For long-form questions or proposals that do not fit an Issue, use [GitHub Discussions](https://github.com/cardene777/kiwa/discussions).
+For quick replies / DMs, you can also reach the maintainer on X at [@cardene777](https://x.com/cardene777). Please use Discussions or Issues for anything that benefits from being searchable.
+
 ## License
 
 By contributing, you agree your contributions will be licensed under the MIT License.
