@@ -134,7 +134,7 @@ test('T-AA-002 personal_sign の signature が isValidSignature で検証成功'
 - **Safe (Gnosis Safe)** — multi-sig threshold 署名
 - **Biconomy / ZeroDev / Alchemy AA SDK** — managed bundler / paymaster
 
-これらは外部 SDK 依存を `peerDependencies` で受ける形で example 化する想定 (`@kiwa/aa-thirdweb` / `@kiwa/aa-safe` 等の subpackage 化も検討)。
+これらは外部 SDK 依存を `peerDependencies` で受ける形で example 化する想定 (`@kiwa-test/aa-thirdweb` / `@kiwa-test/aa-safe` 等の subpackage 化も検討)。
 
 ## 偽陽性対策
 

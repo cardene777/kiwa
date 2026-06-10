@@ -130,7 +130,7 @@ SDK-bound integrations land in v0.4+ (Phase D-3):
 - **Safe (Gnosis Safe)** — multi-sig threshold signatures
 - **Biconomy / ZeroDev / Alchemy AA SDK** — managed bundler / paymaster
 
-Likely shape: accept external SDKs via `peerDependencies` and ship them as subpackages (`@kiwa/aa-thirdweb`, `@kiwa/aa-safe`, ...).
+Likely shape: accept external SDKs via `peerDependencies` and ship them as subpackages (`@kiwa-test/aa-thirdweb`, `@kiwa-test/aa-safe`, ...).
 
 ## Avoiding false positives
 

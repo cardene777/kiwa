@@ -24,17 +24,17 @@
 
 ```bash
 # package.json の依存を一括置換
-sed -i.bak 's|@dapp-e2e/|@kiwa/|g' package.json && rm package.json.bak
+sed -i.bak 's|@dapp-e2e/|@kiwa-test/|g' package.json && rm package.json.bak
 pnpm install
 ```
 
-import 文 / CLI 呼び出しも同様に `@dapp-e2e/` を `@kiwa/` に置換するだけで動きます。
+import 文 / CLI 呼び出しも同様に `@dapp-e2e/` を `@kiwa-test/` に置換するだけで動きます。
 API シグネチャ (関数名 `dappE2eTest` / option key / event name) は **一切変更していません**。 名前空間 prefix だけが変わります。
 
 ### npm publish 状況
 
 - `@dapp-e2e/*` は npm に **未公開のまま** (registry 404)、 deprecate の必要なし
-- `@kiwa/*` は次回 release で `0.1.0` 初版公開予定 (changesets + GitHub Actions provenance)
+- `@kiwa-test/*` は v0.1.0 で初版公開済 (changesets + GitHub Actions provenance、 2026-06-10、 https://www.npmjs.com/package/@kiwa-test/core / https://www.npmjs.com/package/@kiwa-test/cli)
 
 ### GitHub URL の自動 redirect
 

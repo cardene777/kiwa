@@ -24,17 +24,17 @@ If you are coming from the old name, you can migrate using the mapping table bel
 
 ```bash
 # Bulk-replace dependencies in package.json
-sed -i.bak 's|@dapp-e2e/|@kiwa/|g' package.json && rm package.json.bak
+sed -i.bak 's|@dapp-e2e/|@kiwa-test/|g' package.json && rm package.json.bak
 pnpm install
 ```
 
-The same applies to import statements and CLI invocations: simply replace `@dapp-e2e/` with `@kiwa/`.
+The same applies to import statements and CLI invocations: simply replace `@dapp-e2e/` with `@kiwa-test/`.
 The API signatures, including the function name `dappE2eTest`, option keys, and event names, are **completely unchanged**. Only the namespace prefix changes.
 
 ### npm publish status
 
 - `@dapp-e2e/*` remains **unpublished** on npm (`registry 404`), so no deprecation is needed
-- `@kiwa/*` is planned to be published for the first time as `0.1.0` in the next release (changesets + GitHub Actions provenance)
+- `@kiwa-test/*` is published as `0.1.0` (changesets + GitHub Actions provenance, 2026-06-10, https://www.npmjs.com/package/@kiwa-test/core / https://www.npmjs.com/package/@kiwa-test/cli)
 
 ### Automatic redirect for GitHub URLs
 
