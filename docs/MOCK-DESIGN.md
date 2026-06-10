@@ -50,7 +50,7 @@ Border cases (exactly 3) prefer Level B when install size is the main risk.
 
 | Wallet / SDK | API stability | Users | Test mode | Size | Use cases | **Total** | **Level** | Rationale |
 |---|---|---|---|---|---|---|---|---|
-| **WalletConnect v2** | +1 | +1 | +1 | +1 | +1 | **5** | **A** | High user base, stable spec, official test wallet, manageable size |
+| **WalletConnect v2** | +1 | +1 | +1 | +1 | +1 | **5** | **B** (pivoted from A) | Score 5 originally targeted Level A, but the first implementation attempt (PR #168 cycle) showed install-size + SDK breaking-change cost outweighed the fidelity gain. Re-classified as Level B with an in-memory relay mock; see `examples/nextjs-walletconnect-v2/`. |
 | **Safe (Gnosis Safe)** | +1 | +1 | 0 | +1 | 0 | **3** | **B** (border) | API stable but heavy SDK; mock contracts give equivalent coverage |
 | **thirdweb inAppWallet** | 0 | +1 | 0 | 0 | +1 | **2** | **B** | API still evolves, large bundle; behavioral mock is safer |
 | **Privy / Dynamic** | 0 | +1 | 0 | 0 | 0 | **1** | **B** | Embedded-wallet pattern is more important than SDK specifics |
@@ -164,7 +164,7 @@ Users who need to verify these boundaries should run **staging tests against rea
 
 | Phase | Scope | Target |
 |---|---|---|
-| **D-3a** | WalletConnect v2 at Level A | `examples/nextjs-walletconnect-v2/` |
+| **D-3a** | WalletConnect v2 at Level B (compatible mock — pivoted from Level A due to install-size + SDK breaking-change cost; see `examples/nextjs-walletconnect-v2/`) | `examples/nextjs-walletconnect-v2/` |
 | **D-3b** | Safe at Level B | `examples/nextjs-safe-multisig/` |
 | **D-3c** | thirdweb at Level B | `examples/nextjs-thirdweb-aa/` |
 | **D-3d** | Privy / Dynamic at Level C | docs cookbook chapter only |
