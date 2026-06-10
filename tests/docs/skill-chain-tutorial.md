@@ -65,7 +65,7 @@ The Layer 1 skill:
 - reads the input .sol and greps for function / event / error
 - also inspects the sibling contract (GateNFT.sol) through the IGateNFT interface
 - reverse-engineers "target functionality" / "spec summary" / "permission model" / "failure modes" from docstrings and real code
-- scores quality risk on the 5 criteria, decides apply/skip for each of the 10 viewpoints
+- scores quality risk on the 5 criteria, decides apply/skip for each of the 13 viewpoints
 - generates a 9-column table at one case per row, grouped by viewpoint, sorted by priority
 ```
 
@@ -173,7 +173,7 @@ The existing e2e tests are preserved while the viewpoint gaps are filled, and br
 
 ## Viewpoint × helper mapping cheat sheet
 
-A quick reference for the 3 layers × 10 viewpoint helper mapping:
+A quick reference for the 3 layers × 13 viewpoint helper mapping:
 
 | Viewpoint | Foundry | Hardhat | Playwright |
 |---|---|---|---|

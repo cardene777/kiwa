@@ -11,7 +11,9 @@ It exists so contributors can predict, without reading commit history, whether a
 |---|---|---|---|
 | Contract-bearing fixtures | mint-nft / defi-swap / nextjs-token-gating / nft-marketplace | ✅ Yes | `examples/<name>/{test,hardhat-test,tests}/` is gitignored. The skill chain regenerates tests there. The completed reference suite lives under `tests/fixtures/<name>/`. |
 | Connection-only fixture | basic-connect | ✅ Yes (e2e-test only) | Same shape but Foundry / Hardhat lanes are not applicable because the example has no Solidity contract of its own. |
-| e2e-only examples (16) | basic-connect except / nextjs-aa-erc4337 / nextjs-aa-smart-account / nextjs-bridge / nextjs-dao-vote / nextjs-ens-resolver / nextjs-erc1155-game / nextjs-event-history / nextjs-lending / nextjs-multi-chain / nextjs-permit-swap / nextjs-staking / nextjs-vesting / nextjs-wagmi-rainbow / nextjs-zk-verifier / vite-react-wagmi | ❌ No (out of scope) | `examples/<name>/tests/` stays tracked. The retrofit walkthrough is not the recommended path for these examples. Read or fork them as-is. |
+| e2e-only examples (17) | nextjs-aa-erc4337 / nextjs-aa-smart-account / nextjs-bridge / nextjs-dao-vote / nextjs-ens-resolver / nextjs-erc1155-game / nextjs-event-history / nextjs-lending / nextjs-multi-chain / nextjs-permit-swap / nextjs-safe-multisig / nextjs-staking / nextjs-vesting / nextjs-wagmi-rainbow / nextjs-walletconnect-v2 / nextjs-zk-verifier / vite-react-wagmi | ❌ No (out of scope) | `examples/<name>/tests/` stays tracked. The retrofit walkthrough is not the recommended path for these examples. Read or fork them as-is. |
+
+> Note — `nextjs-walletconnect-v2` and `nextjs-safe-multisig` (added in PR #305 / #306) are Level B mock examples per `docs/MOCK-DESIGN.md`. They demonstrate one mock pattern each (WalletConnect v2 in-memory relay / Safe v1.4 semantics in TS) and are treated as e2e-only for the same reason as the others — no in-repo Solidity surface for `/kiwa-forge` / `/kiwa-hardhat` to own.
 
 ## Why the e2e-only examples are out of scope
 

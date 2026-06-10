@@ -202,7 +202,7 @@ test code 退避先: tests/fixtures/nextjs-token-gating/{contract-test, hardhat-
 
 - contract test 個別手順 (Foundry + Hardhat): `tests/docs/run-contract-tests.ja.md`
 - dApp e2e test 個別手順 (Playwright + viem): `tests/docs/run-dapp-e2e-tests.ja.md`
-- skill 全体像 + 6 skill 役割: `tests/docs/README.ja.md`
+- skill 全体像 + skill 役割: `tests/docs/README.ja.md`
 - Layer 1 skill: `.claude/skills/kiwa-design/SKILL.md`
 - Layer 2 Foundry skill: `.claude/skills/kiwa-forge/SKILL.md`
 - Layer 2 Hardhat skill: `.claude/skills/kiwa-hardhat/SKILL.md`

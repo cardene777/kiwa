@@ -11,7 +11,9 @@ contributor が commit 履歴を追わずとも、 各 example を「skill chain
 |---|---|---|---|
 | contract 持ち fixtures | mint-nft / defi-swap / nextjs-token-gating / nft-marketplace | ✅ 持つ | `examples/<name>/{test,hardhat-test,tests}/` は gitignore 対象。 skill chain でここに test を再生成する。 完成形 reference suite は `tests/fixtures/<name>/` 側に存在する |
 | 接続のみ fixture | basic-connect | ✅ 持つ (e2e-test のみ) | 同じ構造だが、 example が独自 Solidity contract を持たないため Foundry / Hardhat lane は不適用 |
-| e2e only 16 example | basic-connect 除く / nextjs-aa-erc4337 / nextjs-aa-smart-account / nextjs-bridge / nextjs-dao-vote / nextjs-ens-resolver / nextjs-erc1155-game / nextjs-event-history / nextjs-lending / nextjs-multi-chain / nextjs-permit-swap / nextjs-staking / nextjs-vesting / nextjs-wagmi-rainbow / nextjs-zk-verifier / vite-react-wagmi | ❌ 持たない (対象外) | `examples/<name>/tests/` は tracked のまま。 retrofit walkthrough の推奨経路ではない。 そのまま読むか fork して使う |
+| e2e only 17 example | nextjs-aa-erc4337 / nextjs-aa-smart-account / nextjs-bridge / nextjs-dao-vote / nextjs-ens-resolver / nextjs-erc1155-game / nextjs-event-history / nextjs-lending / nextjs-multi-chain / nextjs-permit-swap / nextjs-safe-multisig / nextjs-staking / nextjs-vesting / nextjs-wagmi-rainbow / nextjs-walletconnect-v2 / nextjs-zk-verifier / vite-react-wagmi | ❌ 持たない (対象外) | `examples/<name>/tests/` は tracked のまま。 retrofit walkthrough の推奨経路ではない。 そのまま読むか fork して使う |
+
+> 補足 — PR #305 / #306 で追加された `nextjs-walletconnect-v2` と `nextjs-safe-multisig` は `docs/MOCK-DESIGN.md` の Level B mock example。 mock pattern 1 例ずつ (WalletConnect v2 の in-memory relay / Safe v1.4 semantics の TS 再現) を示すが、 in-repo Solidity surface を持たないため他 example と同じく e2e only 扱い。
 
 ## e2e only example を対象外にしている理由
 
