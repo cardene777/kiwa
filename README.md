@@ -14,7 +14,7 @@ One Layer 1 spec → Foundry `.t.sol`, Hardhat `.test.cjs`, and Playwright `.spe
 [![coverage](https://img.shields.io/badge/coverage-Lines%2090%2B%20%2F%20Branches%2080%2B-success)](#coverage-requirement)
 [![ERC-4337](https://img.shields.io/badge/ERC--4337-v0.7%20supported-9333ea)](./docs/en/cookbook/smart-wallet-aa.md)
 [![typescript](https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript&logoColor=white)](./tsconfig.base.json)
-[![claude code](https://img.shields.io/badge/Claude%20Code-4%20skills-d97706?logo=anthropic&logoColor=white)](./docs/SKILL-DESIGN.md)
+[![claude code](https://img.shields.io/badge/Claude%20Code-8%20skills-d97706?logo=anthropic&logoColor=white)](./docs/SKILL-DESIGN.md)
 
 [**Quickstart**](#quickstart) • [**4 layer chain**](#4-layer-chain) • [**Features**](#features) • [**Examples**](#examples) • [**Docs**](./docs/en/README.md) • [**Cookbook**](./docs/en/cookbook/README.md) • [**FAQ**](./docs/en/faq.md)
 
@@ -68,14 +68,18 @@ graph TD
 
 kiwa ships in two halves that work together but stand alone:
 
-### 1. Claude Code skills (4 skills, the design + generation half)
+### 1. Claude Code skills (8 skills, the design + generation half)
 
 | Skill | Layer | Role |
 |---|---|---|
+| [`/kiwa-test`](./.claude/skills/kiwa-test/SKILL.md) | **orchestrator** | Run the full chain in one command (contract / dApp / both) |
 | [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) | **Layer 1** | Reverse-engineer a 9-section / 9-column test spec from existing contracts, APIs, screens, or written feature specs |
 | [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) | **Layer 2** (contract) | Layer 1 spec → Foundry `.t.sol` with fuzz / invariant / `vm.prank` / custom-error reverts, run `forge test`, gate on `forge coverage` |
 | [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) | **Layer 2** (contract) | Same Layer 1 spec → Hardhat `.test.cjs` with `chai-matchers` / `fast-check` / `loadFixture`, run `npx hardhat test`, gate on `solidity-coverage` |
-| [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) | **Layer 2** (e2e) | Layer 1 spec → Playwright `.spec.ts` + `prepare-env.ts`, 4-round flake check, extends existing tests via `--mode extend` |
+| [`/kiwa-vitest`](./.claude/skills/kiwa-vitest/SKILL.md) | **Layer 2** (unit) | Layer 1 spec → Vitest `test/unit/*.test.{ts,tsx}` for TS helpers / TSX hooks (F-3) |
+| [`/kiwa-api`](./.claude/skills/kiwa-api/SKILL.md) | **Layer 2** (integration) | Layer 1 spec → msw / supertest / Playwright `request` API integration tests (F-3) |
+| [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) | **Layer 3** (e2e) | Layer 1 spec → Playwright `.spec.ts` + `prepare-env.ts`, 4-round flake check, extends existing tests via `--mode extend` |
+| [`/kiwa-review`](./.claude/skills/kiwa-review/SKILL.md) | **reviewer** | Judge spec / test code / execution results in 3 modes (spec-review / test-review / result-review) |
 
 ### 2. npm packages (the runtime fixture half)
 
@@ -129,10 +133,14 @@ Same `TC-001 … TC-020` test IDs appear in **both** Foundry and Hardhat output 
 git clone https://github.com/cardene777/kiwa.git && cd kiwa
 pnpm install
 
-# 2. In Claude Code, invoke the 4 skills against your contracts / dApp
+# 2. In Claude Code, invoke the skills against your contracts / dApp
+/kiwa-test --module your-module           # one-shot orchestrator (contract + e2e)
+# or run individual layers:
 /kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
 /kiwa-forge --module your-module          # Foundry
 /kiwa-hardhat --module your-module        # Hardhat (parallel)
+/kiwa-vitest --module your-module         # Vitest unit (F-3, optional)
+/kiwa-api --module your-module            # API integration (F-3, optional)
 /kiwa-play --mode new --example your-dapp # Playwright e2e
 ```
 
@@ -380,9 +388,9 @@ Reference docs:
 
 |  |  |
 |---|---|
-| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) ⭐ | **SSOT for all 4 skills** (5-step flow, 9-section output, 10 viewpoints, 5 risk criteria) |
+| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) ⭐ | **SSOT for all 8 skills** (5-step flow, 9-section output, 13 viewpoints, 5 risk criteria) |
 | [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | Wallet / SDK mock fidelity spec (A/B/C levels, scoring rubric) |
-| [`tests/docs/skill-chain-tutorial.md`](./tests/docs/skill-chain-tutorial.md) ⭐ | **4-skill chain walkthrough** (retrofit-first) |
+| [`tests/docs/skill-chain-tutorial.md`](./tests/docs/skill-chain-tutorial.md) ⭐ | **skill chain walkthrough** (retrofit-first) |
 | [`docs/RPC.md`](./docs/RPC.md) | 9 directly-handled RPC + anvil fallback |
 | [`docs/EVENTS.md`](./docs/EVENTS.md) | 4 events + `triggerEvent()` |
 | [`docs/ERRORS.md`](./docs/ERRORS.md) | EIP-1193 error code + envelope design |

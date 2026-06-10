@@ -36,6 +36,8 @@
     { "ja": "docs/ERRORS.ja.md", "en": "docs/ERRORS.md", "section": "Errors", "owner": "auto" },
     { "ja": "docs/EVENTS.ja.md", "en": "docs/EVENTS.md", "section": "Events", "owner": "auto" },
     { "ja": "docs/EXAMPLE-FIXTURES.ja.md", "en": "docs/EXAMPLE-FIXTURES.md", "section": "Example fixtures policy", "owner": "auto" },
+    { "ja": "docs/MOCK-DESIGN.ja.md", "en": "docs/MOCK-DESIGN.md", "section": "Mock fidelity policy", "owner": "auto" },
+    { "ja": "docs/SKILL-DESIGN.ja.md", "en": "docs/SKILL-DESIGN.md", "section": "Skill design SSOT", "owner": "auto" },
     { "ja": "docs/RPC.ja.md", "en": "docs/RPC.md", "section": "RPC", "owner": "auto" },
     { "ja": "tests/docs/run-tests.ja.md", "en": "tests/docs/run-tests.md", "section": "TestsDocs", "owner": "auto" },
     { "ja": "tests/docs/run-contract-tests.ja.md", "en": "tests/docs/run-contract-tests.md", "section": "TestsDocs", "owner": "auto" },

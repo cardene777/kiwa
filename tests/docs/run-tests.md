@@ -202,7 +202,7 @@ For detailed procedures for standalone skill runs, see [run-contract-tests.md](.
 
 - contract-test standalone guide (Foundry + Hardhat): [run-contract-tests.md](./run-contract-tests.md)
 - dApp e2e standalone guide (Playwright + viem): [run-dapp-e2e-tests.md](./run-dapp-e2e-tests.md)
-- skill overview + 6-skill roles: [README.md](./README.md)
+- skill overview + skill roles: [README.md](./README.md)
 - Layer 1 skill: `.claude/skills/kiwa-design/SKILL.md`
 - Layer 2 Foundry skill: `.claude/skills/kiwa-forge/SKILL.md`
 - Layer 2 Hardhat skill: `.claude/skills/kiwa-hardhat/SKILL.md`

@@ -33,7 +33,7 @@
 
 dApp の test を書くには **2 つの仕事を同時に** こなす必要があります。 smart contract の test (Foundry / Hardhat) と、 UI + wallet flow の test (Playwright)。 多くの team が片方のランナーだけ選び、 test の半分しか書かず、 重要観点を見落としたまま release します。
 
-**kiwa は 1 つの仕様書から 4 つの test layer 全てを設計・生成する初めてのツールチェーンです。** "kiwa" は日本語で **際 / 境界 / 限界** — まさに良い test が証明する場所を意味します。
+**kiwa は 1 つの仕様書から 5 つの test layer (contract Foundry + contract Hardhat + unit Vitest + integration API + e2e Playwright) すべてを設計・生成するツールチェーンです。** "kiwa" は日本語で **際 / 境界 / 限界** — まさに良い test が証明する場所を意味します。
 
 ```mermaid
 graph TD
@@ -53,7 +53,7 @@ graph TD
 
 |  | ランナー 1 つだけ採用 | kiwa (4 layer) |
 |---|---|---|
-| テスト設計 | 手動 checklist、 担当者依存 | 10 観点 catalog + 5 リスク基準で決定論的 |
+| テスト設計 | 手動 checklist、 担当者依存 | 13 観点 catalog + 5 リスク基準で決定論的 |
 | Contract test (Foundry) | 手書き `.t.sol` | Layer 1 仕様書から自動生成 |
 | Contract test (Hardhat) | 手書き `.test.ts` | 自動生成、 Foundry と **同 TC ID** |
 | dApp e2e test | 手書き Playwright | 自動生成、 既存 test を壊さず extend |
@@ -68,14 +68,18 @@ graph TD
 
 kiwa は 2 つに分かれており、 連携も単独利用もできます。
 
-### 1. Claude Code skill 群 (4 skill、 設計 + 生成側)
+### 1. Claude Code skill 群 (8 skill、 設計 + 生成側)
 
 | Skill | Layer | 役割 |
 |---|---|---|
+| [`/kiwa-test`](./.claude/skills/kiwa-test/SKILL.md) | **orchestrator** | skill chain を 1 コマンドで一括実行 (contract / dApp / 両方) |
 | [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) | **Layer 1** | 既存 contract / API / 画面 / 機能仕様から 9 section + 9 column の test 仕様書を逆算生成 |
 | [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) | **Layer 2** (contract) | Layer 1 仕様 → Foundry `.t.sol` を fuzz / invariant / `vm.prank` / custom-error revert で生成、 `forge test` 実行、 `forge coverage` で gate |
 | [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) | **Layer 2** (contract) | 同 Layer 1 仕様 → Hardhat `.test.cjs` を `chai-matchers` / `fast-check` / `loadFixture` で生成、 `npx hardhat test` 実行、 `solidity-coverage` で gate |
-| [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) | **Layer 2** (e2e) | Layer 1 仕様 → Playwright `.spec.ts` + `prepare-env.ts` 生成、 4 round flake check、 `--mode extend` で既存 test を破壊せず追加 |
+| [`/kiwa-vitest`](./.claude/skills/kiwa-vitest/SKILL.md) | **Layer 2** (unit) | Layer 1 仕様 → Vitest `test/unit/*.test.{ts,tsx}` を TS helper / TSX hook 用に生成 (F-3) |
+| [`/kiwa-api`](./.claude/skills/kiwa-api/SKILL.md) | **Layer 2** (integration) | Layer 1 仕様 → msw / supertest / Playwright `request` の API integration test を生成 (F-3) |
+| [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) | **Layer 3** (e2e) | Layer 1 仕様 → Playwright `.spec.ts` + `prepare-env.ts` 生成、 4 round flake check、 `--mode extend` で既存 test を破壊せず追加 |
+| [`/kiwa-review`](./.claude/skills/kiwa-review/SKILL.md) | **reviewer** | spec / test code / 実行結果を 3 mode (spec-review / test-review / result-review) で品質判定 |
 
 ### 2. npm パッケージ (runtime fixture 側)
 
@@ -129,10 +133,14 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 git clone https://github.com/cardene777/kiwa.git && cd kiwa
 pnpm install
 
-# 2. Claude Code 内で 4 skill を契約 / dApp に対して起動
+# 2. Claude Code 内で skill を契約 / dApp に対して起動
+/kiwa-test --module your-module           # 一括 orchestrator (contract + e2e)
+# or 個別 layer を順に
 /kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
 /kiwa-forge --module your-module          # Foundry
 /kiwa-hardhat --module your-module        # Hardhat (並立)
+/kiwa-vitest --module your-module         # Vitest unit (F-3、 任意)
+/kiwa-api --module your-module            # API integration (F-3、 任意)
 /kiwa-play --mode new --example your-dapp # Playwright e2e
 ```
 
@@ -218,7 +226,7 @@ echo '{"type":"module"}' > tests/kiwa/package.json
 ### Layer 1: テスト設計自動化 (`/kiwa-design`)
 
 - 📋 **9 section 統一仕様** — 対象機能 / 仕様の要約 / 主な品質リスク / 推奨テスト構成 / テスト観点一覧 / テストケース一覧 / 自動化すべきテスト / 手動確認でよいテスト / 不足している仕様
-- 🎯 **10 観点 catalog** — 正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ
+- 🎯 **13 観点 catalog** — 正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ
 - ⚖️ **5 基準リスク評価** — 売上影響 / セキュリティ影響 / データ破壊リスク / 利用頻度 / 過去障害 → 優先度を機械的に導出
 - 📄 **9 column ケース表** — テスト ID / テストレベル / テスト観点 / 前提条件 / 入力値 / 操作手順 / 期待結果 / 優先度 / 自動化
 - 🔁 **後付け導入が主用途** — 既存 `.sol` / `app/` / `tests/` / OpenAPI spec から逆算
@@ -380,9 +388,9 @@ Reference docs:
 
 |  |  |
 |---|---|
-| [`docs/SKILL-DESIGN.ja.md`](./docs/SKILL-DESIGN.ja.md) ⭐ | **4 skill 共通 SSOT** (5 段階フロー / 9 section 出力 / 10 観点 / 5 リスク基準) |
+| [`docs/SKILL-DESIGN.ja.md`](./docs/SKILL-DESIGN.ja.md) ⭐ | **8 skill 共通 SSOT** (5 段階フロー / 9 section 出力 / 13 観点 / 5 リスク基準) |
 | [`docs/MOCK-DESIGN.ja.md`](./docs/MOCK-DESIGN.ja.md) | Wallet / SDK mock 精度仕様 (A/B/C level、 scoring rubric) |
-| [`tests/docs/skill-chain-tutorial.ja.md`](./tests/docs/skill-chain-tutorial.ja.md) ⭐ | **4 skill chain walkthrough** (後付け導入起点) |
+| [`tests/docs/skill-chain-tutorial.ja.md`](./tests/docs/skill-chain-tutorial.ja.md) ⭐ | **skill chain walkthrough** (後付け導入起点) |
 | [`docs/RPC.ja.md`](./docs/RPC.ja.md) | 9 直接対応 RPC + anvil fallback |
 | [`docs/EVENTS.ja.md`](./docs/EVENTS.ja.md) | 4 event + `triggerEvent()` |
 | [`docs/ERRORS.ja.md`](./docs/ERRORS.ja.md) | EIP-1193 error code + envelope 設計 |
@@ -390,12 +398,12 @@ Reference docs:
 | [`docs/COMPARISON.ja.md`](./docs/COMPARISON.ja.md) | Synpress / wallet-mock 比較 |
 | [`docs/RELEASING.ja.md`](./docs/RELEASING.ja.md) | Publish flow + provenance |
 
-Claude Code 利用者向け — 4 skill 完全リファレンス:
+Claude Code 利用者向け — skill 完全リファレンス:
 
 - [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) — Layer 1 仕様書生成
 - [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) — Foundry 生成
 - [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) — Hardhat 生成
-- [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) — Playwright 生成 + 19 example index + 偽陽性 9 pattern
+- [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) — Playwright 生成 + 22 example index + 偽陽性 9 pattern
 
 ---
 
