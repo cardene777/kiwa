@@ -38,18 +38,18 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Typecheck
-        run: pnpm -F @kiwa/core -F @kiwa/cli typecheck
+        run: pnpm -F @kiwa-test/core -F @kiwa-test/cli typecheck
 
       - name: Test (core)
-        run: pnpm -F @kiwa/core test
+        run: pnpm -F @kiwa-test/core test
         env:
           SKIP_ANVIL_TESTS: "1"
 
       - name: Test (cli)
-        run: pnpm -F @kiwa/cli test
+        run: pnpm -F @kiwa-test/cli test
 
       - name: Build
-        run: pnpm -F @kiwa/core -F @kiwa/cli build
+        run: pnpm -F @kiwa-test/core -F @kiwa-test/cli build
 
       - name: Typecheck consumer (examples)
         run: pnpm -F examples-basic-connect typecheck

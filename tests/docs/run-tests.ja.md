@@ -11,7 +11,7 @@
 kiwa repo を clone した root で実行。
 
 ```bash
-pnpm install && pnpm -F @kiwa/core build && forge --version && anvil --version && node --version
+pnpm install && pnpm -F @kiwa-test/core build && forge --version && anvil --version && node --version
 ```
 
 途中まで進めて再 run したい場合のリセット (生成済 test / spec / cache / report を全削除)。 cwd がどこでも動く。

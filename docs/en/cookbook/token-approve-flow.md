@@ -25,7 +25,7 @@ Most DeFi flows split into two transactions:
 Wait for the approve receipt before continuing so the dApp sees the updated allowance deterministically.
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@kiwa/core';
+import { dappE2eTest as test, expect } from '@kiwa-test/core';
 import { MaxUint256 } from 'viem';
 
 const ERC20_ABI = [

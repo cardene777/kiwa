@@ -1,22 +1,22 @@
-# @kiwa/core
+# @kiwa-test/core
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
 Headless E2E test fixture for dApps on anvil forks (Playwright + viem).
 
-`@kiwa/core` is the runtime fixture used by [kiwa](https://github.com/cardene777/kiwa)'s Playwright-based dApp E2E layer. It injects `window.ethereum` into the test page, starts an anvil-backed wallet fixture, handles the core EIP-1193 flows directly, and forwards the rest of the JSON-RPC surface to anvil.
+`@kiwa-test/core` is the runtime fixture used by [kiwa](https://github.com/cardene777/kiwa)'s Playwright-based dApp E2E layer. It injects `window.ethereum` into the test page, starts an anvil-backed wallet fixture, handles the core EIP-1193 flows directly, and forwards the rest of the JSON-RPC surface to anvil.
 
 ## Installation
 
 ```bash
-pnpm add -D @kiwa/core @playwright/test viem
+pnpm add -D @kiwa-test/core @playwright/test viem
 ```
 
 ## Quickstart
 
 ```ts
 import { expect } from "@playwright/test";
-import { dappE2eTest as test } from "@kiwa/core";
+import { dappE2eTest as test } from "@kiwa-test/core";
 
 test("window.ethereum is injected", async ({ page, dappE2e }) => {
   await page.goto("/");
@@ -42,7 +42,7 @@ test("window.ethereum is injected", async ({ page, dappE2e }) => {
 
 ## Direct RPC Methods
 
-`@kiwa/core` handles these methods directly:
+`@kiwa-test/core` handles these methods directly:
 
 - `eth_requestAccounts`
 - `eth_accounts`

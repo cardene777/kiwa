@@ -5,7 +5,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@kiwa/core": ["../../packages/core/dist/index"]
+      "@kiwa-test/core": ["../../packages/core/dist/index"]
     }
   },
   "include": ["tests/**/*", "playwright.config.ts"]

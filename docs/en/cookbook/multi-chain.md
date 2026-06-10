@@ -11,7 +11,7 @@ Run multiple anvil instances with distinct chain IDs in parallel to test bridge 
 ### 1. Start multiple anvil instances in global-setup
 
 ~~~ts
-import { startAnvil, type AnvilHandle } from '@kiwa/core';
+import { startAnvil, type AnvilHandle } from '@kiwa-test/core';
 
 const anvilHandles: AnvilHandle[] = [];
 

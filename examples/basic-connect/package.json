@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "pnpm -F @kiwa/core build && playwright test",
+    "test": "pnpm -F @kiwa-test/core build && playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*"
+    "@kiwa-test/core": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

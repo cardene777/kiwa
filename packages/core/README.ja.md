@@ -1,22 +1,22 @@
-# @kiwa/core
+# @kiwa-test/core
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
 anvil fork 上で動く dApp 向け headless E2E test fixture (Playwright + viem)。
 
-`@kiwa/core` は [kiwa](https://github.com/cardene777/kiwa) の Playwright ベース dApp E2E layer が使う runtime fixture。 test page に `window.ethereum` を inject し、 anvil ベースの wallet fixture を起動、 EIP-1193 の主要 flow を直接処理し、 残りの JSON-RPC surface は anvil に転送する。
+`@kiwa-test/core` は [kiwa](https://github.com/cardene777/kiwa) の Playwright ベース dApp E2E layer が使う runtime fixture。 test page に `window.ethereum` を inject し、 anvil ベースの wallet fixture を起動、 EIP-1193 の主要 flow を直接処理し、 残りの JSON-RPC surface は anvil に転送する。
 
 ## インストール
 
 ```bash
-pnpm add -D @kiwa/core @playwright/test viem
+pnpm add -D @kiwa-test/core @playwright/test viem
 ```
 
 ## Quickstart
 
 ```ts
 import { expect } from "@playwright/test";
-import { dappE2eTest as test } from "@kiwa/core";
+import { dappE2eTest as test } from "@kiwa-test/core";
 
 test("window.ethereum が inject される", async ({ page, dappE2e }) => {
   await page.goto("/");
@@ -42,7 +42,7 @@ test("window.ethereum が inject される", async ({ page, dappE2e }) => {
 
 ## 直接処理する RPC method
 
-`@kiwa/core` は以下 method を直接処理する。
+`@kiwa-test/core` は以下 method を直接処理する。
 
 - `eth_requestAccounts`
 - `eth_accounts`

@@ -24,7 +24,7 @@ kiwa repo 内で skill chain (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat`
 
 - [tests/docs/README.ja.md](../../../tests/docs/README.ja.md) — 4 skill 案内 + chapter 動線
 - [tests/docs/run-tests.ja.md](../../../tests/docs/run-tests.ja.md) — `/kiwa-test` 1 コマンドで全 chain 一括実行 (contract / dApp / 両方、 最初に試すならこれ)
-- [tests/docs/write-tests-manually.ja.md](../../../tests/docs/write-tests-manually.ja.md) — skill を使わず `@kiwa/core` を library として import して手書きで test を書く手順 (1 file 完結 sample 4 種)
+- [tests/docs/write-tests-manually.ja.md](../../../tests/docs/write-tests-manually.ja.md) — skill を使わず `@kiwa-test/core` を library として import して手書きで test を書く手順 (1 file 完結 sample 4 種)
 - [tests/docs/skill-chain-tutorial.ja.md](../../../tests/docs/skill-chain-tutorial.ja.md) — 仕様書から contract test + e2e test 生成 → 実走の full flow
 - [tests/docs/retrofit-existing-dapp.ja.md](../../../tests/docs/retrofit-existing-dapp.ja.md) — 既存 dApp + Foundry project に skill chain を後付け導入する手順
 - [tests/docs/run-contract-tests.ja.md](../../../tests/docs/run-contract-tests.ja.md) — 個別 skill (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat`) で contract test を生成 → 実走 (Foundry + Hardhat)

@@ -3,7 +3,7 @@ import {
   revertChain,
   snapshotChain,
   waitForChainState,
-} from '@kiwa/core';
+} from '@kiwa-test/core';
 import { createPublicClient, createWalletClient, defineChain, http, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';

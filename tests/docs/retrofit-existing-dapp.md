@@ -154,7 +154,7 @@ Playwright already has `gating.spec.ts` working, so leave it alone. When you wan
 |---|---|---|
 | invariant / fuzz / gas profile | `/kiwa-forge` | Strong Foundry `vm.*` helpers + `forge --gas-report` |
 | Four-metric coverage (Stmts / Branch / Funcs / Lines) | `/kiwa-hardhat` | `solidity-coverage` output is easy to read |
-| dApp flow through the UI (click → wallet → contract → state) | `/kiwa-play` | `@kiwa/core` fixture injects the wallet |
+| dApp flow through the UI (click → wallet → contract → state) | `/kiwa-play` | `@kiwa-test/core` fixture injects the wallet |
 | Foundry + Hardhat side by side on the same contract | `/kiwa-forge` + `/kiwa-hardhat` | Viewpoints are shared via Layer 1 |
 
 ## Common pitfalls

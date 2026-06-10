@@ -16,7 +16,7 @@ EIP-6963 で 2 以上の wallet を inject し、wallet picker UI から特定 w
 ### 1. fixture で wallets を指定
 
 ~~~ts
-import { dappE2eTest } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
 
 const test = dappE2eTest.extend({});
 

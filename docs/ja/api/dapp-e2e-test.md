@@ -7,7 +7,7 @@ Playwright の `test` を拡張した dApp 専用 fixture。`page` に加えて 
 ## Signature
 
 ~~~ts
-import { dappE2eTest } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
 
 const test = dappE2eTest;
 ~~~
@@ -38,7 +38,7 @@ const test = dappE2eTest;
 ## Example
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@kiwa/core';
+import { dappE2eTest as test, expect } from '@kiwa-test/core';
 
 test('connect 後 personal_sign で署名', async ({ page, dappE2e }) => {
   await page.goto('/');

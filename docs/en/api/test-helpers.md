@@ -2,14 +2,14 @@
 
 > [🇬🇧 English](./test-helpers.md) • [🇯🇵 日本語](../../ja/api/test-helpers.md)
 
-API reference for the 7 test helpers added in `@kiwa/core` v0.2. These helpers cover the same scope as industry standards (hardhat / foundry / viem / hardhat-chai-matchers), eliminating duplicate definitions across examples.
+API reference for the 7 test helpers added in `@kiwa-test/core` v0.2. These helpers cover the same scope as industry standards (hardhat / foundry / viem / hardhat-chai-matchers), eliminating duplicate definitions across examples.
 
 ## snapshotChain / revertChain
 
 Thin wrapper around anvil's `evm_snapshot` / `evm_revert`. Use it to isolate chain state between tests.
 
 ```ts
-import { snapshotChain, revertChain } from '@kiwa/core';
+import { snapshotChain, revertChain } from '@kiwa-test/core';
 
 test.beforeEach(async ({ publicClient }) => {
   snapshotId = await snapshotChain(publicClient);
@@ -30,7 +30,7 @@ The snapshot id is consumed by `evm_revert` (cannot be reused). Re-take with `sn
 Walks the viem `BaseError` chain for `ContractFunctionRevertedError` and asserts the `errorName` matches.
 
 ```ts
-import { expectCustomError } from '@kiwa/core';
+import { expectCustomError } from '@kiwa-test/core';
 
 try {
   await publicClient.simulateContract({
@@ -55,7 +55,7 @@ Aggregated from helpers that were duplicated across 13 examples.
 Time manipulation wrappers for vesting / TTL / timelock-driven dApps.
 
 ```ts
-import { increaseTime, mineBlock, setNextBlockTimestamp } from '@kiwa/core';
+import { increaseTime, mineBlock, setNextBlockTimestamp } from '@kiwa-test/core';
 
 await increaseTime(publicClient, 7 * 24 * 60 * 60);  // advance 7 days
 await mineBlock(publicClient, 5);                     // mine 5 blocks
@@ -73,7 +73,7 @@ await setNextBlockTimestamp(publicClient, 1_900_000_000n);
 Impersonate arbitrary EOA / contract addresses to invoke owner-only functions directly.
 
 ```ts
-import { impersonateAccount, stopImpersonateAccount, setBalance } from '@kiwa/core';
+import { impersonateAccount, stopImpersonateAccount, setBalance } from '@kiwa-test/core';
 
 await setBalance(publicClient, OWNER_ADDR, 10n ** 18n);  // inject 1 ETH
 await impersonateAccount(publicClient, OWNER_ADDR);
@@ -99,7 +99,7 @@ Common in mainnet-fork scenarios where you need to call as a known on-chain owne
 Spawn multiple anvil processes with distinct chain ids. Used for multi-chain dApps (bridges, cross-chain swaps).
 
 ```ts
-import { startAnvilCluster } from '@kiwa/core';
+import { startAnvilCluster } from '@kiwa-test/core';
 
 const cluster = await startAnvilCluster({
   chains: [
@@ -120,7 +120,7 @@ await cluster.stop();  // kill all chains at once
 Thin wrapper for `anvil --fork-url`. Use it for mainnet / sepolia / any RPC-backed fork tests.
 
 ```ts
-import { startAnvilFork } from '@kiwa/core';
+import { startAnvilFork } from '@kiwa-test/core';
 
 const fork = await startAnvilFork({
   forkUrl: process.env.ALCHEMY_MAINNET!,
@@ -138,7 +138,7 @@ Pinning `forkBlockNumber` is recommended in CI to maximize cache reuse and reduc
 Combines `decodeEventLog` and assertion into a single event-checking helper.
 
 ```ts
-import { expectEvent } from '@kiwa/core';
+import { expectEvent } from '@kiwa-test/core';
 
 const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
@@ -157,7 +157,7 @@ expectEvent(receipt, NFT_ABI, 'Transfer', {
 Assert the balance delta around an action. API-compatible with hardhat-chai-matchers' `changeTokenBalance` / `changeEtherBalance`.
 
 ```ts
-import { expectBalanceChange, expectEthBalanceChange } from '@kiwa/core';
+import { expectBalanceChange, expectEthBalanceChange } from '@kiwa-test/core';
 
 // ERC-20 balance
 await expectBalanceChange(publicClient, USDC_ADDR, USER_ADDR, 100n * 10n ** 6n, async () => {

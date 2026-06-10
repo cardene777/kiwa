@@ -67,7 +67,7 @@ All 20 examples now ship with bilingual READMEs (`README.md` + `README.ja.md`).
 
 ## Related docs
 
-- [Quickstart](../quickstart.md) — the first five minutes (the post-publish `pnpm dlx @kiwa/cli init` route — pre-publish, follow these examples docs)
+- [Quickstart](../quickstart.md) — the first five minutes (the post-publish `pnpm dlx @kiwa-test/cli init` route — pre-publish, follow these examples docs)
 - [Concepts](../concepts/README.md) — fixture / EIP-6963 / RPC handling
 - [Cookbook](../cookbook/README.md) — feature-by-feature recipes
 - [API Reference](../api/README.md) — `dappE2eTest` / `startAnvil` / friends

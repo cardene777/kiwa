@@ -1,6 +1,6 @@
 # fixture-api.md
 
-`@kiwa/core` の主要 export API リファレンス。 詳細は kiwa リポ `docs/en/api/` および `packages/core/src/index.ts` を Read。
+`@kiwa-test/core` の主要 export API リファレンス。 詳細は kiwa リポ `docs/en/api/` および `packages/core/src/index.ts` を Read。
 
 ## 主要 export
 
@@ -9,7 +9,7 @@
 Playwright `test` の派生 fixture。 `page` に加えて `anvilPort` / `walletApi` / `chainId` を提供する。
 
 ```ts
-import { dappE2eTest as test, expect } from '@kiwa/core';
+import { dappE2eTest as test, expect } from '@kiwa-test/core';
 
 test('my test', async ({ page, anvilPort, walletApi }) => {
   // page は inject 済 window.ethereum を持つ
@@ -23,7 +23,7 @@ test('my test', async ({ page, anvilPort, walletApi }) => {
 anvil 起動 → contract deploy → `.env.local` 書き出しを 1 関数で完結。
 
 ```ts
-import { runE2EPrepareEnv } from '@kiwa/core';
+import { runE2EPrepareEnv } from '@kiwa-test/core';
 
 await runE2EPrepareEnv({
   envFile: '.env.local',
@@ -73,7 +73,7 @@ await cluster.kill();
 contract deploy ヘルパー。
 
 ```ts
-import { deployContract, loadForgeArtifact } from '@kiwa/core';
+import { deployContract, loadForgeArtifact } from '@kiwa-test/core';
 
 const artifact = loadForgeArtifact({
   path: 'forge-out/MyContract.sol/MyContract.json',
@@ -126,7 +126,7 @@ const isValid = await verifyEip1271Signature({
 anvil dev account 10 件の private key 配列 (テスト用、 本番禁止)。
 
 ```ts
-import { ANVIL_DEFAULT_PRIVATE_KEYS } from '@kiwa/core';
+import { ANVIL_DEFAULT_PRIVATE_KEYS } from '@kiwa-test/core';
 const ownerPk = ANVIL_DEFAULT_PRIVATE_KEYS[0]; // 0xac0974be...
 ```
 
@@ -135,7 +135,7 @@ const ownerPk = ANVIL_DEFAULT_PRIVATE_KEYS[0]; // 0xac0974be...
 inject script 経由の RPC を local anvil に転送する処理。 wallet mock の中核。
 
 ```ts
-import { handleRpcRequest, type RpcContext } from '@kiwa/core';
+import { handleRpcRequest, type RpcContext } from '@kiwa-test/core';
 
 const ctx: RpcContext = {
   anvilPort: 8551,
@@ -165,7 +165,7 @@ fixture 内で使う低レベル helper。
 `testid` 指定要素のテキストが期待値を含むまで polling 待機する。 wallet inject の race condition (connection-status が disconnected → connected に遷移する瞬間) を捕まえるために使う。 default `testId="connection-status"` / `expectedText="connected"` / `timeout=5000ms` / `pollInterval=100ms`。
 
 ```ts
-import { waitForWalletConnected } from '@kiwa/core';
+import { waitForWalletConnected } from '@kiwa-test/core';
 
 test('wallet connection completes', async ({ page }) => {
   await page.goto('/');
@@ -181,7 +181,7 @@ test('wallet connection completes', async ({ page }) => {
 `Browser` から N 個の `BrowserContext` を作成し、 各 context に別 PK wallet を `addInitScript` で inject する helper。 multi-user multi-context test (例 alice / bob が同 contract に対して同時 mint を race する) で使う。
 
 ```ts
-import { injectMultipleWallets, ANVIL_DEFAULT_PRIVATE_KEYS } from '@kiwa/core';
+import { injectMultipleWallets, ANVIL_DEFAULT_PRIVATE_KEYS } from '@kiwa-test/core';
 
 test('alice and bob race to mint', async ({ browser }) => {
   const users = await injectMultipleWallets(browser, {
@@ -209,7 +209,7 @@ test('alice and bob race to mint', async ({ browser }) => {
 anvil の `anvil_setStorageAt` JSON-RPC を fetch で叩く wrapper。 contract storage slot を直接書き換えて UI と contract の乖離 (例 UI にハードコードされた SECRET 定数 vs contract storage の実値) を検出する test に使う。
 
 ```ts
-import { setStorageSlot } from '@kiwa/core';
+import { setStorageSlot } from '@kiwa-test/core';
 
 await setStorageSlot({
   rpcUrl: 'http://127.0.0.1:8545',

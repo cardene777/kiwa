@@ -6,8 +6,8 @@
 
 1 つの Layer 1 仕様書から Foundry `.t.sol` / Hardhat `.test.cjs` / Playwright `.spec.ts` を並列生成。 **4 metric のカバレッジ閾値を skill 側で必須化**。
 
-[![npm version](https://img.shields.io/npm/v/@kiwa/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa/core)
-[![npm downloads](https://img.shields.io/npm/dm/@kiwa/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa/core)
+[![npm version](https://img.shields.io/npm/v/@kiwa-test/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-test/core)
+[![npm downloads](https://img.shields.io/npm/dm/@kiwa-test/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-test/core)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![tests](https://img.shields.io/badge/tests-292%20execution%20PASS-success)](#testing--quality)
 [![flaky](https://img.shields.io/badge/flaky-0%2F292-success)](#testing--quality)
@@ -85,10 +85,10 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 
 | パッケージ | 用途 |
 |---|---|
-| [`@kiwa/core`](./packages/core) | Playwright fixture: `window.ethereum` inject、 anvil 起動、 sign、 mine、 time-travel、 EIP-6963 multi-wallet、 ERC-4337 smart account、 custom-error helper |
-| [`@kiwa/cli`](./packages/cli) | `kiwa init` で `@kiwa/core` と連携した Playwright project を scaffold |
+| [`@kiwa-test/core`](./packages/core) | Playwright fixture: `window.ethereum` inject、 anvil 起動、 sign、 mine、 time-travel、 EIP-6963 multi-wallet、 ERC-4337 smart account、 custom-error helper |
+| [`@kiwa-test/cli`](./packages/cli) | `kiwa init` で `@kiwa-test/core` と連携した Playwright project を scaffold |
 
-**skill 単独** (npm 依存なし — test file を生成するだけ) でも、 **fixture 単独** (Claude なし — `pnpm add @kiwa/core` だけ) でも、 両方併用しても OK。
+**skill 単独** (npm 依存なし — test file を生成するだけ) でも、 **fixture 単独** (Claude なし — `pnpm add @kiwa-test/core` だけ) でも、 両方併用しても OK。
 
 ---
 
@@ -147,7 +147,7 @@ pnpm install
 ### Option B: Playwright fixture だけ使う (Claude 不要)
 
 ```bash
-pnpm dlx @kiwa/cli init
+pnpm dlx @kiwa-test/cli init
 pnpm install
 pnpm exec playwright test
 ```
@@ -164,7 +164,7 @@ package.json                ← test:e2e script + peer deps
 ```
 
 > `@kiwa/*` v0.1.0 が npm 公開される前は repo を clone して以下を実行:
-> `pnpm install && pnpm -F @kiwa/core -F @kiwa/cli build && node packages/cli/dist/index.js init`
+> `pnpm install && pnpm -F @kiwa-test/core -F @kiwa-test/cli build && node packages/cli/dist/index.js init`
 
 ### v0.1.0 公開前の試用手順
 
@@ -175,7 +175,7 @@ package.json                ← test:e2e script + peer deps
 git clone https://github.com/cardene777/kiwa.git ~/kiwa
 cd ~/kiwa
 pnpm install
-pnpm -F @kiwa/core -F @kiwa/cli build
+pnpm -F @kiwa-test/core -F @kiwa-test/cli build
 
 # 2. 試用先 project で file: 依存を追加
 cd /path/to/your-dapp
@@ -185,16 +185,16 @@ pnpm add -D file:$HOME/kiwa/packages/core file:$HOME/kiwa/packages/cli
 pnpm exec kiwa init     # または: node $HOME/kiwa/packages/cli/dist/index.js init
 ```
 
-v0.1.0 公開後は `pnpm dlx @kiwa/cli init` (上記 Option B) に切替可能。
+v0.1.0 公開後は `pnpm dlx @kiwa-test/cli init` (上記 Option B) に切替可能。
 
 ### CJS / Next.js 14 プロジェクトとの共存
 
-`@kiwa/core` は **ESM と CJS の両方を build 出力** (`dist/index.js` + `dist/index.cjs`) しており、 `import` / `require` どちらも解決できます。 以下いずれの project にもそのまま導入可能:
+`@kiwa-test/core` は **ESM と CJS の両方を build 出力** (`dist/index.js` + `dist/index.cjs`) しており、 `import` / `require` どちらも解決できます。 以下いずれの project にもそのまま導入可能:
 
 | Project type | そのまま使える形式 |
 |---|---|
-| Pure ESM (`"type": "module"`) | `import { dappE2eTest } from '@kiwa/core'` |
-| Pure CJS (`"type": "commonjs"`) | `const { dappE2eTest } = require('@kiwa/core')` |
+| Pure ESM (`"type": "module"`) | `import { dappE2eTest } from '@kiwa-test/core'` |
+| Pure CJS (`"type": "commonjs"`) | `const { dappE2eTest } = require('@kiwa-test/core')` |
 | Next.js 14 (CJS host + ESM 依存) | 両形式とも解決、 Next は CJS bundle、 Playwright は ESM 実行 |
 
 それでも古い toolchain で `Error: No "exports" main defined` に遭遇した場合は、 kiwa test dir を局所 `package.json` で ESM 化する:
@@ -208,7 +208,7 @@ echo '{"type":"module"}' > tests/kiwa/package.json
 
 ### MetaMask との挙動差 (公開前に確認推奨)
 
-`@kiwa/core` は **production 現実的、 ただし挙動差を明示** することを設計方針としています。 default 設定での主な挙動差:
+`@kiwa-test/core` は **production 現実的、 ただし挙動差を明示** することを設計方針としています。 default 設定での主な挙動差:
 
 | 挙動 | MetaMask | kiwa (default) | 変更方法 |
 |---|---|---|---|
@@ -238,7 +238,7 @@ echo '{"type":"module"}' > tests/kiwa/package.json
 - 🪞 **並列生成** — 両ランナーが同じ `TC-NNN` ID で出力。 team で Foundry / Hardhat / 両方併用 を自由に選択
 - 🛡️ **Coverage gate 必須化** — Lines ≥ 90%、 Statements ≥ 90%、 **Branches ≥ 80%**、 Funcs ≥ 90%。 4 metric 全部 PASS まで skill が `test-passed` marker を作りません
 
-### Layer 2: dApp E2E fixture (`/kiwa-play` + `@kiwa/core`)
+### Layer 2: dApp E2E fixture (`/kiwa-play` + `@kiwa-test/core`)
 
 - 🦊 **`window.ethereum` inject** — ブラウザ拡張不要
 - ⚡ **test ごとに anvil 起動** — chain 隔離完全
@@ -250,7 +250,7 @@ echo '{"type":"module"}' > tests/kiwa/package.json
 - 🔁 **`--mode extend`** — 既存 test を壊さず新規観点だけ追加、 4 round flake check 内蔵
 - ❌ **error envelope** — page 境界越しに `code` と `message` を保持
 
-### 業界標準 helper (`@kiwa/core`)
+### 業界標準 helper (`@kiwa-test/core`)
 
 | Helper | 用途 |
 |---|---|
@@ -296,7 +296,7 @@ echo '{"type":"module"}' > tests/kiwa/package.json
 | [`defi-swap`](./examples/defi-swap) | 17 / 17 | — | (basic-connect でカバー) | 100 / 87.50 |
 | [`nextjs-token-gating`](./examples/nextjs-token-gating) | 20 / 20 | — | 既存 8 PASS | 100 / 87.50 |
 
-### dApp E2E reference (`@kiwa/core` fixture)
+### dApp E2E reference (`@kiwa-test/core` fixture)
 
 [`examples/`](./examples/) 配下の 20 dApp で fixture を様々な stack に対して実証:
 
@@ -326,7 +326,7 @@ echo '{"type":"module"}' > tests/kiwa/package.json
 ## Multi-Wallet (EIP-6963)
 
 ```ts
-import { dappE2eTest } from '@kiwa/core';
+import { dappE2eTest } from '@kiwa-test/core';
 
 const test = dappE2eTest.extend({
   wallets: [

@@ -7,11 +7,11 @@
     "dev": "next dev -p 3045",
     "build": "next build",
     "start": "next start -p 3045",
-    "test": "pnpm -F @kiwa/core build && playwright test",
+    "test": "pnpm -F @kiwa-test/core build && playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
+    "@kiwa-test/core": "workspace:*",
     "@tanstack/react-query": "^5.59.0",
     "next": "^14.2.15",
     "react": "^18.3.1",

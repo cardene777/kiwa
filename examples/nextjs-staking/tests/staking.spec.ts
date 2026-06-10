@@ -7,7 +7,7 @@ import {
   increaseTime,
   revertChain,
   snapshotChain,
-} from '@kiwa/core';
+} from '@kiwa-test/core';
 import {
   createPublicClient,
   createWalletClient,

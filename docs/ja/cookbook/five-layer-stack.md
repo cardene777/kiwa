@@ -12,7 +12,7 @@
 | Contract (Hardhat) | `/kiwa-hardhat` | 同 contract を `solidity-coverage` 経由で | `hardhat-test/{Contract}.test.cjs` |
 | Unit (Vitest) | `/kiwa-vitest` | `src/lib/` / `hooks/` の TS helper / TSX hook | `test/unit/{module}.test.{ts,tsx}` |
 | Integration (API) | `/kiwa-api` | `app/api/*/route.ts` を msw / supertest / Playwright `request` 経由 | `test/integration/{module}.test.ts` |
-| E2E (Playwright) | `/kiwa-play` | `@kiwa/core` fixture 経由の dApp flow (browser + anvil) | `tests/{module}.spec.ts` |
+| E2E (Playwright) | `/kiwa-play` | `@kiwa-test/core` fixture 経由の dApp flow (browser + anvil) | `tests/{module}.spec.ts` |
 
 ## 5 layer が引き合う場面
 

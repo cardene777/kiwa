@@ -4,7 +4,7 @@
 
 ## 対象機能
 
-`basic-connect` — kiwa fixture (@kiwa/core の `dappE2eTest`) を使う最小 wallet inject e2e example。 inline HTML を `page.setContent` で injection し、 EIP-1193 / EIP-6963 wallet API の動作を検証する。 contract / Next.js app 不要、 純粋に kiwa の fixture 機構を実証する demo。
+`basic-connect` — kiwa fixture (@kiwa-test/core の `dappE2eTest`) を使う最小 wallet inject e2e example。 inline HTML を `page.setContent` で injection し、 EIP-1193 / EIP-6963 wallet API の動作を検証する。 contract / Next.js app 不要、 純粋に kiwa の fixture 機構を実証する demo。
 
 対象 file。
 
@@ -190,6 +190,6 @@ window.ethereum 経由の EIP-1193 RPC。 anvil RPC を localhost:port で利用
 /kiwa-play --mode new --rounds 4 --lang ja
 ```
 
-Playwright + @kiwa/core fixture。 PR #229 の 3 helper のうち `waitForWalletConnected` は `connection-status` testid が UI にないため利用不可、 `injectMultipleWallets` は `test.use({ wallets: [...] })` で既に同等の multi-wallet inject が可能、 `setStorageSlot` は本 example に contract storage がないため不要。
+Playwright + @kiwa-test/core fixture。 PR #229 の 3 helper のうち `waitForWalletConnected` は `connection-status` testid が UI にないため利用不可、 `injectMultipleWallets` は `test.use({ wallets: [...] })` で既に同等の multi-wallet inject が可能、 `setStorageSlot` は本 example に contract storage がないため不要。
 
 → **PR #229 helper は本 example で発火しない** (機会なし)。 別 example (contract 起点 dApp) で発火期待。

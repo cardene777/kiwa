@@ -9,7 +9,7 @@
 kiwa repo を clone した root で実行。
 
 ```bash
-pnpm install && pnpm -F @kiwa/core build && anvil --version && node --version && pnpm --filter examples-nextjs-token-gating exec playwright install chromium
+pnpm install && pnpm -F @kiwa-test/core build && anvil --version && node --version && pnpm --filter examples-nextjs-token-gating exec playwright install chromium
 ```
 
 途中まで進めて再 run したい場合のリセット (生成済 spec / test / 実走結果を全削除)。 cwd がどこでも動く。
@@ -82,7 +82,7 @@ pnpm -F examples-nextjs-token-gating exec playwright test tests/token-gating.spe
 |---|---|
 | `Executable doesn't exist at .../chrome-headless-shell` | `pnpm --filter examples-nextjs-token-gating exec playwright install chromium` |
 | `ReferenceError: require is not defined in ES module scope` | package.json に `"type": "module"` 追加 |
-| `Cannot find module '@kiwa/core'` | repo root で `pnpm -F @kiwa/core build` |
+| `Cannot find module '@kiwa-test/core'` | repo root で `pnpm -F @kiwa-test/core build` |
 | anvil port 衝突 (`EADDRINUSE: 8545`) | `pkill -f anvil` or `lsof -ti :8545 \| xargs kill` |
 | Playwright timeout | `--debug` で inspector 起動 + spec 内に `await page.pause()` |
 | 1 round だけ failing | `test.describe.serial` を使う or fixture で `beforeEach` で state reset |
@@ -93,4 +93,4 @@ pnpm -F examples-nextjs-token-gating exec playwright test tests/token-gating.spe
 - contract test (Foundry + Hardhat): `tests/docs/run-contract-tests.ja.md`
 - Layer 1 skill: `.claude/skills/kiwa-design/SKILL.md`
 - Layer 2 Playwright skill: `.claude/skills/kiwa-play/SKILL.md`
-- `@kiwa/core` fixture 仕様: `packages/core/src/fixture.ts`
+- `@kiwa-test/core` fixture 仕様: `packages/core/src/fixture.ts`

@@ -1,6 +1,6 @@
 // kiwa init --with-deploy で生成された fixture override。
 // dappE2eTest を extend し _anvilHandle を globalSetup の anvil に向ける。
-import { dappE2eTest as baseTest } from '@kiwa/core';
+import { dappE2eTest as baseTest } from '@kiwa-test/core';
 
 interface OverrideFixtures {
   _anvilHandle: { port: number; stop: () => Promise<void> };

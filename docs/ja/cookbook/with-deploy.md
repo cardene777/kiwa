@@ -19,7 +19,7 @@
 
 ```bash
 # Foundry project が ../contract にある場合
-pnpm dlx @kiwa/cli init --with-deploy ../contract
+pnpm dlx @kiwa-test/cli init --with-deploy ../contract
 ```
 
 生成される file。
@@ -62,7 +62,7 @@ export default defineConfig({
 
 ### 4. spec から fixture を import
 
-通常 `@kiwa/core` の `dappE2eTest` をそのまま使うところを、 globalSetup 起動済 anvil を共有するため `tests/fixture.ts` 経由に切り替える。
+通常 `@kiwa-test/core` の `dappE2eTest` をそのまま使うところを、 globalSetup 起動済 anvil を共有するため `tests/fixture.ts` 経由に切り替える。
 
 ```ts
 import { test, expect } from './fixture';
@@ -101,7 +101,7 @@ pnpm test
 
 ## 関連
 
-- [Quickstart](../quickstart.md) — 最初の 5 分 (`pnpm dlx @kiwa/cli init` 単独版)
+- [Quickstart](../quickstart.md) — 最初の 5 分 (`pnpm dlx @kiwa-test/cli init` 単独版)
 - [Examples Walkthrough](../examples/walkthrough.md) — Stage 4 (nextjs-wagmi-rainbow) で本 boilerplate を実走
 - [接続ボタン test](./connect-button.md) — boilerplate 経由で接続フローを test
 - [Token approve flow](./token-approve-flow.md) — deploy 後の approve 経路

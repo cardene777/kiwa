@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expectCustomError } from '@kiwa/core';
+import { expectCustomError } from '@kiwa-test/core';
 import { createPublicClient, createWalletClient, defineChain, http, parseAbi, type Address } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';

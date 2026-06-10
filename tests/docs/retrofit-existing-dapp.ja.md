@@ -154,7 +154,7 @@ Playwright 側は既存 `gating.spec.ts` が動いているのでそのままで
 |---|---|---|
 | invariant / fuzz / gas profile | `/kiwa-forge` | Foundry の `vm.*` helper + `forge --gas-report` が強力 |
 | coverage を 4 metric (Stmts / Branch / Funcs / Lines) で見たい | `/kiwa-hardhat` | `solidity-coverage` の出力が読みやすい |
-| dApp UI 越しの flow (click → wallet → contract → state) | `/kiwa-play` | `@kiwa/core` fixture で wallet inject |
+| dApp UI 越しの flow (click → wallet → contract → state) | `/kiwa-play` | `@kiwa-test/core` fixture で wallet inject |
 | 同 contract に対する Foundry + Hardhat 並立 | `/kiwa-forge` + `/kiwa-hardhat` | 観点 grouping を Layer 1 で共有 |
 
 ## 詰まりやすい点

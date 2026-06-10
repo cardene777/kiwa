@@ -11,7 +11,7 @@
 ### 1. setApprovalMode で reject に切替
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@kiwa/core';
+import { dappE2eTest as test, expect } from '@kiwa-test/core';
 
 test('signMessage を reject すると error message が表示', async ({ page, dappE2e }) => {
   await page.goto('/');

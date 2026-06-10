@@ -43,7 +43,7 @@ The shared Layer 1 spec (`tests/spec/contract/test-spec-<name>.md` and `tests/sp
 
 - `/kiwa-forge` translates the spec's TC table into Foundry helpers (`vm.expectRevert`, `forge fuzz`, `vm.warp`).
 - `/kiwa-hardhat` translates the same table into Hardhat helpers (`expect(...).to.be.reverted`, `fast-check`, `time.increaseTo`).
-- `/kiwa-play` translates the spec's e2e TC table into Playwright + `@kiwa/core` fixture helpers (`getByTestId`, `walletClient.signTypedData`).
+- `/kiwa-play` translates the spec's e2e TC table into Playwright + `@kiwa-test/core` fixture helpers (`getByTestId`, `walletClient.signTypedData`).
 
 The viewpoint × runner mapping table in [`viewpoints-catalog.md`](../../../.claude/skills/kiwa-design/references/viewpoints-catalog.md) lists each translation per viewpoint, so a contributor can predict what the generated test will look like before invoking Layer 2.
 

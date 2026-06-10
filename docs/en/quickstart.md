@@ -33,7 +33,7 @@ Run your first kiwa E2E test in 5 minutes.
 Set up a fresh project.
 
 ~~~bash
-pnpm dlx @kiwa/cli init
+pnpm dlx @kiwa-test/cli init
 pnpm install
 pnpm exec playwright install chromium
 ~~~
@@ -61,7 +61,7 @@ Running 1 test using 1 worker
 ## Minimal custom test
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@kiwa/core';
+import { dappE2eTest as test, expect } from '@kiwa-test/core';
 
 test('dApp can connect', async ({ page, dappE2e }) => {
   await page.goto('/');
@@ -75,7 +75,7 @@ test('dApp can connect', async ({ page, dappE2e }) => {
 `init --with-deploy` generates a four-file boilerplate that starts anvil, runs `forge build` + `forge create`, and writes `.env.local` in one command.
 
 ~~~bash
-pnpm dlx @kiwa/cli init --with-deploy ../contract
+pnpm dlx @kiwa-test/cli init --with-deploy ../contract
 ~~~
 
 For step-by-step instructions (placeholder replacement, Playwright config wiring, common pitfalls) and the reference implementation, see [Cookbook: kiwa init --with-deploy](./cookbook/with-deploy.md).

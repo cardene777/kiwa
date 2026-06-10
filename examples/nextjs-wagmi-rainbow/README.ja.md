@@ -25,7 +25,7 @@ pnpm -F examples-nextjs-wagmi-rainbow test
 
 中で起こること。
 
-1. `pnpm -F @kiwa/core build` で fixture 用 dist 更新
+1. `pnpm -F @kiwa-test/core build` で fixture 用 dist 更新
 2. `node --import tsx tests/prepare-env.ts` で anvil 起動 + forge build + forge create + `.env.local` 書き込み
 3. `playwright test` で Next.js を起動 → connect-and-mint.spec.ts 実行
 4. globalTeardown で anvil 停止 + pidfile cleanup
