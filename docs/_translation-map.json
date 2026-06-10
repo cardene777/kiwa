@@ -27,6 +27,7 @@
     { "ja": "docs/ja/cookbook/multi-wallet-signature.md", "en": "docs/en/cookbook/multi-wallet-signature.md", "section": "Cookbook", "owner": "auto" },
     { "ja": "docs/ja/cookbook/smart-wallet-aa.md", "en": "docs/en/cookbook/smart-wallet-aa.md", "section": "Cookbook", "owner": "auto" },
     { "ja": "docs/ja/cookbook/with-deploy.md", "en": "docs/en/cookbook/with-deploy.md", "section": "Cookbook", "owner": "auto" },
+    { "ja": "docs/ja/cookbook/three-layer-stack.md", "en": "docs/en/cookbook/three-layer-stack.md", "section": "Cookbook", "owner": "auto" },
     { "ja": "docs/ja/faq.md", "en": "docs/en/faq.md", "section": "FAQ", "owner": "auto" },
     { "ja": "docs/MIGRATION.ja.md", "en": "docs/MIGRATION.md", "section": "Migration", "owner": "auto" },
     { "ja": "docs/RELEASING.ja.md", "en": "docs/RELEASING.md", "section": "Releasing", "owner": "auto" },
