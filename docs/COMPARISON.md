@@ -9,14 +9,14 @@ The conclusion first: kiwa is positioned for stable headless E2E operation using
 
 ## Comparison table
 
-| Aspect | Synpress | wallet-mock | kiwa |
-|---|---|---|---|
-| Primary target | E2E including real wallet integration | Headless wallet injection | dApp E2E assuming a local chain |
-| Browser side | Playwright / Cypress + wallet extension integration | Inject a mock wallet into Playwright | Inject `window.ethereum` into Playwright |
-| chain backend | Any backend paired with a real wallet | Mock responses or arbitrary transport | Start anvil per test |
-| Signing / transfers | Via the wallet UI | Via mock or transport | Handled directly with anvil dev accounts |
-| CI stability | Medium | High | High |
-| Best fit | Verifying wallet UX | Verifying provider replacement | Verifying connection flows on a local chain |
+| Aspect | Synpress | dappwright | wallet-mock | kiwa |
+|---|---|---|---|---|
+| Primary target | E2E including real wallet integration | Real MetaMask / Coinbase Wallet extension automation | Headless wallet injection | dApp E2E assuming a local chain |
+| Browser side | Playwright / Cypress + wallet extension integration | Playwright + extension download / unpack helpers | Inject a mock wallet into Playwright | Inject `window.ethereum` into Playwright |
+| chain backend | Any backend paired with a real wallet | Any backend paired with a real wallet | Mock responses or arbitrary transport | Start anvil per test |
+| Signing / transfers | Via the wallet UI | Via the wallet UI | Via mock or transport | Handled directly with anvil dev accounts |
+| CI stability | Medium | Medium (depends on MetaMask version) | High | High |
+| Best fit | Verifying wallet UX | Lightweight extension automation | Verifying provider replacement | Verifying connection flows on a local chain |
 
 This is not a case where one tool is always superior.
 They target different things.
@@ -45,6 +45,16 @@ Synpress is a strong option when you want to bring in integration with a real wa
 On the other hand, because it adds browser setup and extension dependencies,
 it often becomes more than you need when the goal is just to run headless tests quickly.
 
+### When to choose dappwright
+
+- You want a lightweight Playwright helper that automates MetaMask or Coinbase Wallet extensions
+- You only need extension download / unpack / load helpers without the full Synpress stack
+- You are comfortable pinning a specific MetaMask version that dappwright is known to support
+
+dappwright sits between Synpress and wallet-mock in terms of scope.
+It bundles extension automation as a thin Playwright helper rather than as a full E2E framework, which keeps the surface area smaller than Synpress.
+On the other hand, real MetaMask extension automation as a whole has structural fragility with recent MetaMask versions (see the next section), so the same caveats around CI stability apply.
+
 ### When to choose wallet-mock
 
 - You want to inject a provider headlessly
@@ -68,9 +78,21 @@ If you want to bundle the flow from `eth_requestAccounts` through `eth_sendTrans
 
 ## Rules of thumb
 
-1. Choose Synpress if wallet UI fidelity matters
+1. Choose Synpress or dappwright if wallet UI fidelity matters
 2. Choose wallet-mock if provider replacement and mock control are the main goal
 3. Choose kiwa if you want both local-chain dApp behavior and CI stability
+
+## Why kiwa does not own MetaMask extension automation
+
+kiwa deliberately leaves real MetaMask extension automation to Synpress and dappwright rather than implementing it in-house.
+This is the result of running ten different automation approaches end-to-end during the PoC phase and finding a common structural blocker that one OSS library cannot route around.
+
+The shared root cause across all ten attempts is that the MetaMask `chrome.sidePanel` API is undefined under automated browsers, the click handler falls through a `catch` branch, and the wallet-ready component keeps `disabled` true via its `H && q` guard so the navigation dispatch never fires.
+We tried the README onboarding flow, longer waits, bypassing `manage-default-settings`, stripping `disabled` attributes, headful Chromium, downgrading to v13.17.0, full Synpress install, vendoring the MetaMask official e2e flow, vendoring dappwright, and writing the encrypted vault straight into `chrome.storage` — all ten ran into the same blocker.
+
+The takeaway is not that any single library is broken, but that the structural blocker lives in MetaMask itself.
+A library that wants to fully automate the real MetaMask extension has to track upstream changes closely and accept brittleness against new MetaMask versions, which is a sustained maintenance cost.
+kiwa instead focuses on contract and UI logic testing on top of anvil and a minimal `window.ethereum` injection, and points users at Synpress or dappwright when they need to verify the real wallet UX.
 
 Using more than one is also realistic.
 For example, using kiwa for everyday regression coverage and Synpress only for wallet UX checks before release is a perfectly reasonable split.
@@ -98,6 +120,7 @@ If these four points are acceptable, there is a good chance kiwa's design will f
 ## Related
 
 - [Synpress repository](https://github.com/Synthetixio/synpress)
+- [dappwright repository](https://github.com/TenKeyLabs/dappwright)
 - [wallet-mock repository](https://github.com/johanneskares/wallet-mock)
 - [Foundry anvil docs](https://book.getfoundry.sh/anvil/)
 - [RPC.md](./RPC.md)
