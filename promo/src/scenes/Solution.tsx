@@ -9,7 +9,7 @@ const CANVAS_H = 760;
 const centerX = CANVAS_W / 2;
 const centerY = CANVAS_H / 2;
 const LOGO_SIZE = 200;
-const LOGO_TOP = centerY - 140;
+const LOGO_TOP = centerY - 60;
 const LOGO_CENTER_Y = LOGO_TOP + LOGO_SIZE / 2;
 const LOGO_BOTTOM = LOGO_TOP + LOGO_SIZE;
 
@@ -53,7 +53,9 @@ const branches: Branch[] = [
   },
 ];
 
-const ARROW_START_FRAME = 60;
+const ARROW_START_FRAME = 75;
+const DESCEND_DURATION = 30;
+const DESCEND_OFFSET = 60;
 
 const startPointFor = (side: Branch["side"]) => {
   if (side === "left") return { x: centerX - LOGO_SIZE / 2 - 10, y: LOGO_CENTER_Y };
@@ -71,6 +73,7 @@ const BranchSvg: React.FC<{ branch: Branch }> = ({ branch }) => {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+  const lineOpacity = frame < 0 ? 0 : 1;
   const start = startPointFor(branch.side);
   const currentX = start.x + (branch.dotX - start.x) * progress;
   const currentY = start.y + (branch.dotY - start.y) * progress;
@@ -92,6 +95,7 @@ const BranchSvg: React.FC<{ branch: Branch }> = ({ branch }) => {
         stroke={branch.accent}
         strokeWidth={4}
         strokeLinecap="round"
+        opacity={lineOpacity}
         style={{ filter: `drop-shadow(0 0 8px ${branch.accent})` }}
       />
       <circle
@@ -99,6 +103,7 @@ const BranchSvg: React.FC<{ branch: Branch }> = ({ branch }) => {
         cy={currentY}
         r={11}
         fill={branch.accent}
+        opacity={lineOpacity}
         style={{ filter: `drop-shadow(0 0 12px ${branch.accent})` }}
       />
       <text
@@ -150,6 +155,16 @@ export const Solution: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
+  const descendProgress = spring({
+    frame: frame - 35,
+    fps,
+    from: 0,
+    to: 1,
+    config: { damping: 18, mass: 1, stiffness: 90 },
+    durationInFrames: DESCEND_DURATION,
+  });
+  const descendOffset = (1 - descendProgress) * -DESCEND_OFFSET;
+
   return (
     <SceneLayout
       eyebrow={t().eyebrowSolution}
@@ -166,9 +181,10 @@ export const Solution: React.FC = () => {
           style={{
             position: "absolute",
             left: centerX - 200,
-            top: centerY - 140,
+            top: LOGO_TOP,
             width: 400,
             opacity: logoOpacity,
+            transform: `translateY(${descendOffset}px)`,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
