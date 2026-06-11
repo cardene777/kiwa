@@ -24,6 +24,10 @@ One Layer 1 spec → Foundry `.t.sol`, Hardhat `.test.cjs`, and Playwright `.spe
 
 </div>
 
+<p align="center">
+  <img src="./assets/kiwa-promo-en.gif" alt="kiwa 65s overview — contract test, dApp e2e test, and manual write paths" width="880" />
+</p>
+
 ---
 
 > 🎨 **Rebrand notice**: This project was renamed from `dapp-e2e` to **kiwa** (際) in 2026-06.

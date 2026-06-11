@@ -4,6 +4,7 @@ import { Opening } from "./scenes/Opening";
 import { Problem } from "./scenes/Problem";
 import { Solution } from "./scenes/Solution";
 import { DemoSpec } from "./scenes/DemoSpec";
+import { DemoSpecResult } from "./scenes/DemoSpecResult";
 import { DemoTest } from "./scenes/DemoTest";
 import { Coverage } from "./scenes/Coverage";
 import { Install } from "./scenes/Install";
@@ -38,37 +39,43 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="KiwaPromo"
         component={KiwaPromo}
-        durationInFrames={60 * tokens.fps}
+        durationInFrames={65 * tokens.fps}
         {...baseProps}
       />
       <Composition
         id="Opening"
         component={Opening}
-        durationInFrames={5 * tokens.fps}
+        durationInFrames={4 * tokens.fps}
         {...baseProps}
       />
       <Composition
         id="Problem"
         component={Problem}
-        durationInFrames={8 * tokens.fps}
+        durationInFrames={7 * tokens.fps}
         {...baseProps}
       />
       <Composition
         id="Solution"
         component={Solution}
-        durationInFrames={7 * tokens.fps}
+        durationInFrames={8 * tokens.fps}
         {...baseProps}
       />
       <Composition
         id="DemoSpec"
         component={DemoSpec}
-        durationInFrames={12 * tokens.fps}
+        durationInFrames={10 * tokens.fps}
+        {...baseProps}
+      />
+      <Composition
+        id="DemoSpecResult"
+        component={DemoSpecResult}
+        durationInFrames={8 * tokens.fps}
         {...baseProps}
       />
       <Composition
         id="DemoTest"
         component={DemoTest}
-        durationInFrames={10 * tokens.fps}
+        durationInFrames={9 * tokens.fps}
         {...baseProps}
       />
       <Composition
@@ -80,13 +87,13 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Install"
         component={Install}
-        durationInFrames={7 * tokens.fps}
+        durationInFrames={10 * tokens.fps}
         {...baseProps}
       />
       <Composition
         id="Outro"
         component={Outro}
-        durationInFrames={5 * tokens.fps}
+        durationInFrames={3 * tokens.fps}
         {...baseProps}
       />
     </>

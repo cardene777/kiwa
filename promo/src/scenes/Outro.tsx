@@ -8,18 +8,18 @@ export const Outro: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const npmFade = interpolate(frame, [40, 70], [0, 1], {
+  const npmFade = interpolate(frame, [25, 50], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  const linkFade = interpolate(frame, [80, 110], [0, 1], {
+  const linkFade = interpolate(frame, [55, 80], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
   const ctaScale = spring({
-    frame: frame - 40,
+    frame: frame - 25,
     fps,
     from: 0.9,
     to: 1,
@@ -28,7 +28,7 @@ export const Outro: React.FC = () => {
 
   return (
     <Background>
-      <BoundaryEffect startFrame={0} duration={120} />
+      <BoundaryEffect startFrame={0} duration={90} />
       <div
         style={{
           width: "100%",

@@ -6,9 +6,17 @@
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa overview — contract test, dApp e2e test, and manual write paths" width="640" />
+  <br />
+  <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview — this package covers the dApp e2e and manual-write paths.</sub>
+</p>
+
 Headless E2E test fixture for dApps on anvil forks (Playwright + viem).
 
 `@kiwa-test/core` is the runtime fixture used by [kiwa](https://github.com/cardene777/kiwa)'s Playwright-based dApp E2E layer. It injects `window.ethereum` into the test page, starts an anvil-backed wallet fixture, handles the core EIP-1193 flows directly, and forwards the rest of the JSON-RPC surface to anvil.
+
+You can use this package in two ways: (a) let Claude generate Playwright tests via `/kiwa-play`, or (b) import the fixture directly (`import { dappE2eTest as test } from "@kiwa-test/core"`) and write the tests by hand. See [kiwa README](https://github.com/cardene777/kiwa) for the full 3-path picture (contract test via `@kiwa-test/forge` + dApp e2e via `@kiwa-test/core` + manual write).
 
 ## Installation
 
