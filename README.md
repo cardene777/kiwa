@@ -161,8 +161,8 @@ After install, all 8 skills are available globally. Inside any dApp project, run
 /kiwa-play --mode new                      # Add new dApp e2e tests
 /kiwa-play --mode extend                   # Extend existing dApp e2e tests
 
-# Review — covers spec / test / result
-/kiwa-review --mode test-review
+# Review — covers spec / test / result (provide --module + --layer to resolve paths)
+/kiwa-review --mode test-review --module your-module --layer contract
 ```
 
 > The `--example` flag and `/kiwa-test` one-shot orchestrator are intended for the kiwa monorepo itself (which has `examples/`). Plugin users run the individual skills above directly from their project.
