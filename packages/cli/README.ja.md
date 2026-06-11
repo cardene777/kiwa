@@ -13,7 +13,7 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 概要 — contract test、dApp e2e test、手書きの 3 経路 (本 CLI は dApp e2e 経路を scaffold)" width="640" />
   <br />
-  <sub><a href="https://github.com/cardene777/kiwa">kiwa</a> 全体の概要動画 — 本 CLI は動画中の dApp e2e セットアップ部分を scaffold する。</sub>
+  <sub><a href="https://github.com/cardene777/kiwa">kiwa</a> 全体の概要動画 — 本 CLI は動画中の dApp e2e セットアップ部分を scaffold する。<a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-ja.mp4">▶ フル画質 MP4</a>。</sub>
 </p>
 
 ## インストール

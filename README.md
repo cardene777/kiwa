@@ -26,6 +26,8 @@ One Layer 1 spec → Foundry `.t.sol`, Hardhat `.test.cjs`, and Playwright `.spe
 
 <p align="center">
   <img src="./assets/kiwa-promo-en.gif" alt="kiwa 65s overview — contract test, dApp e2e test, and manual write paths" width="880" />
+  <br />
+  <sub><a href="./assets/kiwa-promo-en.mp4">▶ Watch the full-quality MP4 (8.4 MB, 1920×1080, h264)</a></sub>
 </p>
 
 ---
