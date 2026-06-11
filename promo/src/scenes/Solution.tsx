@@ -15,7 +15,7 @@ const LOGO_BOTTOM = LOGO_TOP + LOGO_SIZE;
 
 type Branch = {
   delay: number;
-  side: "left" | "right" | "bottom";
+  side: "left" | "right" | "top";
   dotX: number;
   dotY: number;
   label: string;
@@ -44,9 +44,9 @@ const branches: Branch[] = [
   },
   {
     delay: 20,
-    side: "bottom",
+    side: "top",
     dotX: centerX,
-    dotY: centerY + 220,
+    dotY: LOGO_TOP - 110,
     label: "Manual write",
     sublabel: "@kiwa-test/core",
     accent: tokens.color.accentManual,
@@ -58,7 +58,7 @@ const ARROW_START_FRAME = 60;
 const startPointFor = (side: Branch["side"]) => {
   if (side === "left") return { x: centerX - LOGO_SIZE / 2 - 10, y: LOGO_CENTER_Y };
   if (side === "right") return { x: centerX + LOGO_SIZE / 2 + 10, y: LOGO_CENTER_Y };
-  return { x: centerX, y: LOGO_BOTTOM + 10 };
+  return { x: centerX, y: LOGO_TOP - 10 };
 };
 
 const BranchSvg: React.FC<{ branch: Branch }> = ({ branch }) => {
@@ -79,7 +79,8 @@ const BranchSvg: React.FC<{ branch: Branch }> = ({ branch }) => {
     branch.side === "left" ? "end" : branch.side === "right" ? "start" : "middle";
   const labelOffsetX =
     branch.side === "left" ? -28 : branch.side === "right" ? 28 : 0;
-  const labelOffsetY = branch.side === "bottom" ? 36 : 0;
+  // top branch: stack labels ABOVE the dot so the line doesn't cross the text
+  const labelOffsetY = branch.side === "top" ? -78 : 0;
 
   return (
     <g>
