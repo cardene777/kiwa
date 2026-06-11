@@ -7,9 +7,15 @@
   "scripts": {
     "studio": "remotion studio",
     "render:opening": "remotion render Opening out/opening.mp4",
+    "render:problem": "remotion render Problem out/problem.mp4",
+    "render:solution": "remotion render Solution out/solution.mp4",
+    "render:demo-spec": "remotion render DemoSpec out/demo-spec.mp4",
+    "render:demo-test": "remotion render DemoTest out/demo-test.mp4",
+    "render:coverage": "remotion render Coverage out/coverage.mp4",
+    "render:install": "remotion render Install out/install.mp4",
     "render:outro": "remotion render Outro out/outro.mp4",
     "render:promo": "remotion render KiwaPromo out/kiwa-promo.mp4",
-    "render:all": "pnpm render:opening && pnpm render:outro && pnpm render:promo",
+    "render:all": "pnpm render:promo",
     "upgrade": "remotion upgrade",
     "typecheck": "tsc --noEmit"
   },
