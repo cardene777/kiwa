@@ -6,6 +6,10 @@
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 65 秒概要" width="720" />
+</p>
+
 [kiwa](https://github.com/cardene777/kiwa) の CLI、 `init` / `doctor` の 2 コマンドを提供。
 
 `@kiwa-test/cli` は `@kiwa-test/core` を使う Playwright ベース dApp E2E test を scaffold し、 ローカル環境の前提条件 check も行う。

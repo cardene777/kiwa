@@ -5,7 +5,7 @@ import { tokens, t } from "../tokens";
 
 const passColor = "#4ADE80";
 
-const foundryRun: TerminalLine[] = [
+const contractRun: TerminalLine[] = [
   { prompt: "$", content: "forge test", delayFrames: 0, typeSpeed: 2 },
   { content: "Compiling 2 files with Solc 0.8.24", delayFrames: 25, color: tokens.color.textMuted, typeSpeed: 3 },
   { content: "Ran 27 tests for test/TokenGating.t.sol", delayFrames: 55, typeSpeed: 3 },
@@ -18,20 +18,7 @@ const foundryRun: TerminalLine[] = [
   { content: "27 passed, 0 failed", delayFrames: 175, color: passColor, bold: true, typeSpeed: 2 },
 ];
 
-const hardhatRun: TerminalLine[] = [
-  { prompt: "$", content: "npx hardhat test", delayFrames: 0, typeSpeed: 2 },
-  { content: "TokenGating", delayFrames: 35, typeSpeed: 3 },
-  { content: "  happy path", delayFrames: 55, color: tokens.color.textMuted, typeSpeed: 3 },
-  { content: "    OK TC-001 mint emits Transfer", delayFrames: 75, color: passColor, typeSpeed: 2 },
-  { content: "    OK TC-002 transferFrom updates owner", delayFrames: 90, color: passColor, typeSpeed: 2 },
-  { content: "  boundary", delayFrames: 105, color: tokens.color.textMuted, typeSpeed: 3 },
-  { content: "    OK TC-010 ttl 0 reverts InvalidTtl", delayFrames: 125, color: passColor, typeSpeed: 2 },
-  { content: "    OK TC-013 expiry +1 returns false", delayFrames: 140, color: passColor, typeSpeed: 2 },
-  { content: "...", delayFrames: 155, color: tokens.color.textMuted, typeSpeed: 3 },
-  { content: "27 passing (160ms)", delayFrames: 175, color: passColor, bold: true, typeSpeed: 2 },
-];
-
-const playwrightRun: TerminalLine[] = [
+const e2eRun: TerminalLine[] = [
   { prompt: "$", content: "pnpm test", delayFrames: 0, typeSpeed: 2 },
   { content: "Running 14 tests on chromium", delayFrames: 30, typeSpeed: 3 },
   { content: "  OK TC-001 initial state", delayFrames: 60, color: passColor, typeSpeed: 2 },
@@ -52,47 +39,33 @@ export const DemoTest: React.FC = () => {
     >
       <div style={{ width: "100%", height: "100%", display: "flex" }}>
         <SplitScreen
-          gap={24}
+          gap={32}
           panels={[
             {
-              label: "Foundry",
-              badge: "27/27",
+              label: "Contract test",
+              badge: "forge / hardhat",
               accent: "#FF8A65",
               content: (
                 <Terminal
                   title="forge test"
-                  lines={foundryRun}
+                  lines={contractRun}
                   width="100%"
                   height="100%"
-                  fontSize={16}
+                  fontSize={20}
                 />
               ),
             },
             {
-              label: "Hardhat",
-              badge: "27/27",
-              accent: "#FFCA28",
-              content: (
-                <Terminal
-                  title="npx hardhat test"
-                  lines={hardhatRun}
-                  width="100%"
-                  height="100%"
-                  fontSize={16}
-                />
-              ),
-            },
-            {
-              label: "Playwright",
-              badge: "14/14 x 4r",
+              label: "e2e test",
+              badge: "playwright",
               accent: "#42A5F5",
               content: (
                 <Terminal
                   title="pnpm test"
-                  lines={playwrightRun}
+                  lines={e2eRun}
                   width="100%"
                   height="100%"
-                  fontSize={16}
+                  fontSize={20}
                 />
               ),
             },

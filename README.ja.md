@@ -24,6 +24,10 @@
 
 </div>
 
+<p align="center">
+  <img src="./assets/kiwa-promo-ja.gif" alt="kiwa 65 秒概要 — contract test / dApp e2e test / 手書きの 3 経路" width="880" />
+</p>
+
 ---
 
 > 🎨 **リブランド通知**: 本プロジェクトは 2026 年 6 月に `dapp-e2e` から **kiwa** (際) に改名しました。

@@ -6,6 +6,10 @@
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 65s overview" width="720" />
+</p>
+
 Headless E2E test fixture for dApps on anvil forks (Playwright + viem).
 
 `@kiwa-test/core` is the runtime fixture used by [kiwa](https://github.com/cardene777/kiwa)'s Playwright-based dApp E2E layer. It injects `window.ethereum` into the test page, starts an anvil-backed wallet fixture, handles the core EIP-1193 flows directly, and forwards the rest of the JSON-RPC surface to anvil.

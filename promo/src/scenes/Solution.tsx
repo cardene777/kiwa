@@ -1,101 +1,151 @@
-import { useCurrentFrame, interpolate } from "remotion";
+import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
-import { CodeBlock } from "../components/CodeBlock";
+import { KiwaLogo } from "../components/KiwaLogo";
 import { tokens, t } from "../tokens";
-
-const specLines = [
-  { text: "# test-spec-token-gating.md" },
-  { text: "" },
-  { text: "## Test viewpoints (11 axes)" },
-  { text: "- happy path" },
-  { text: "- failure" },
-  { text: "- boundary" },
-  { text: "- state transition" },
-  { text: "- permission / security" },
-  { text: "" },
-  { text: "## TC-001 mint happy path" },
-  { text: "level: unit" },
-  { text: "expected: owner == msg.sender" },
-];
 
 const CANVAS_W = 1760;
 const CANVAS_H = 760;
-const CODE_W = 680;
-const CODE_H = 560;
-const codeLeft = 60;
-const codeTop = (CANVAS_H - CODE_H) / 2;
-const arrowStartX = codeLeft + CODE_W + 60;
-const arrowStartY = CANVAS_H / 2;
 
-type Arrow = {
+const centerX = CANVAS_W / 2;
+const centerY = CANVAS_H / 2;
+const LOGO_SIZE = 200;
+
+type Branch = {
   delay: number;
-  endX: number;
-  endY: number;
+  side: "left" | "right" | "bottom";
+  dotX: number;
+  dotY: number;
   label: string;
   sublabel: string;
   accent: string;
 };
 
-const arrows: Arrow[] = [
-  { delay: 0, endX: arrowStartX + 420, endY: arrowStartY - 200, label: "Foundry", sublabel: ".t.sol", accent: "#FF8A65" },
-  { delay: 14, endX: arrowStartX + 460, endY: arrowStartY, label: "Hardhat", sublabel: ".test.ts", accent: "#FFCA28" },
-  { delay: 28, endX: arrowStartX + 420, endY: arrowStartY + 200, label: "Playwright", sublabel: ".spec.ts", accent: "#42A5F5" },
+const branches: Branch[] = [
+  {
+    delay: 0,
+    side: "left",
+    dotX: centerX - 380,
+    dotY: centerY + 60,
+    label: "Contract test",
+    sublabel: "forge / hardhat",
+    accent: "#FF8A65",
+  },
+  {
+    delay: 10,
+    side: "right",
+    dotX: centerX + 380,
+    dotY: centerY + 60,
+    label: "dApp e2e test",
+    sublabel: "playwright",
+    accent: "#42A5F5",
+  },
+  {
+    delay: 20,
+    side: "bottom",
+    dotX: centerX,
+    dotY: centerY + 280,
+    label: "Manual write",
+    sublabel: "@kiwa-test/core",
+    accent: "#A0E060",
+  },
 ];
 
-const ARROW_START_FRAME = 70;
+const ARROW_START_FRAME = 60;
 
-const ArrowSvg: React.FC<{ arrow: Arrow }> = ({ arrow }) => {
-  const frame = useCurrentFrame() - ARROW_START_FRAME - arrow.delay;
+const startPointFor = (side: Branch["side"]) => {
+  if (side === "left") return { x: centerX - LOGO_SIZE / 2 - 10, y: centerY + 60 };
+  if (side === "right") return { x: centerX + LOGO_SIZE / 2 + 10, y: centerY + 60 };
+  return { x: centerX, y: centerY + LOGO_SIZE / 2 + 10 };
+};
+
+const BranchSvg: React.FC<{ branch: Branch }> = ({ branch }) => {
+  const frame = useCurrentFrame() - ARROW_START_FRAME - branch.delay;
   const progress = interpolate(frame, [0, 22], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const labelOpacity = interpolate(frame, [16, 30], [0, 1], {
+  const labelOpacity = interpolate(frame, [18, 34], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const currentX = arrowStartX + (arrow.endX - arrowStartX) * progress;
-  const currentY = arrowStartY + (arrow.endY - arrowStartY) * progress;
+  const start = startPointFor(branch.side);
+  const currentX = start.x + (branch.dotX - start.x) * progress;
+  const currentY = start.y + (branch.dotY - start.y) * progress;
+
+  const labelAlign: "start" | "end" | "middle" =
+    branch.side === "left" ? "end" : branch.side === "right" ? "start" : "middle";
+  const labelOffsetX =
+    branch.side === "left" ? -28 : branch.side === "right" ? 28 : 0;
+  const labelOffsetY = branch.side === "bottom" ? 56 : 0;
 
   return (
     <g>
       <line
-        x1={arrowStartX}
-        y1={arrowStartY}
+        x1={start.x}
+        y1={start.y}
         x2={currentX}
         y2={currentY}
-        stroke={arrow.accent}
+        stroke={branch.accent}
         strokeWidth={4}
         strokeLinecap="round"
-        style={{ filter: `drop-shadow(0 0 8px ${arrow.accent})` }}
+        style={{ filter: `drop-shadow(0 0 8px ${branch.accent})` }}
       />
-      <circle cx={currentX} cy={currentY} r={10} fill={arrow.accent} style={{ filter: `drop-shadow(0 0 12px ${arrow.accent})` }} />
+      <circle
+        cx={currentX}
+        cy={currentY}
+        r={11}
+        fill={branch.accent}
+        style={{ filter: `drop-shadow(0 0 12px ${branch.accent})` }}
+      />
       <text
-        x={arrow.endX + 22}
-        y={arrow.endY - 4}
-        fill={arrow.accent}
+        x={branch.dotX + labelOffsetX}
+        y={branch.dotY - 6 + labelOffsetY}
+        fill={branch.accent}
         fontFamily={tokens.font.sans}
-        fontSize={40}
+        fontSize={44}
         fontWeight={700}
+        textAnchor={labelAlign}
         opacity={labelOpacity}
       >
-        {arrow.label}
+        {branch.label}
       </text>
       <text
-        x={arrow.endX + 22}
-        y={arrow.endY + 32}
-        fill={arrow.accent}
+        x={branch.dotX + labelOffsetX}
+        y={branch.dotY + 34 + labelOffsetY}
+        fill={branch.accent}
         fontFamily={tokens.font.mono}
-        fontSize={22}
+        fontSize={24}
+        textAnchor={labelAlign}
         opacity={labelOpacity * 0.9}
       >
-        {arrow.sublabel}
+        {branch.sublabel}
       </text>
     </g>
   );
 };
 
 export const Solution: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const logoOpacity = interpolate(frame, [0, 20], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  const textScale = spring({
+    frame: frame - 15,
+    fps,
+    from: 0.8,
+    to: 1,
+    config: { damping: 12, mass: 0.8, stiffness: 100 },
+  });
+
+  const textOpacity = interpolate(frame, [15, 40], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
   return (
     <SceneLayout
       eyebrow={t().eyebrowSolution}
@@ -111,29 +161,41 @@ export const Solution: React.FC = () => {
         <div
           style={{
             position: "absolute",
-            left: codeLeft,
-            top: codeTop,
+            left: centerX - 200,
+            top: centerY - 140,
+            width: 400,
+            opacity: logoOpacity,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: tokens.spacing.xs,
           }}
         >
-          <CodeBlock
-            title="Layer 1 spec"
-            language="markdown"
-            lines={specLines}
-            width={CODE_W}
-            height={CODE_H}
-            fontSize={22}
-            startFrame={10}
-            lineRevealSpeed={3}
-          />
+          <KiwaLogo size={LOGO_SIZE} fadeInDuration={18} scaleFrom={0.6} />
+          <div
+            style={{
+              fontFamily: tokens.font.sans,
+              fontSize: 72,
+              fontWeight: 700,
+              color: tokens.color.white,
+              letterSpacing: -2,
+              opacity: textOpacity,
+              transform: `scale(${textScale})`,
+              transformOrigin: "center",
+              lineHeight: 1,
+            }}
+          >
+            {t().productName}
+          </div>
         </div>
         <svg
           width={CANVAS_W}
           height={CANVAS_H}
           viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
-          style={{ position: "absolute", left: 0, top: 0 }}
+          style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none" }}
         >
-          {arrows.map((arrow, idx) => (
-            <ArrowSvg key={idx} arrow={arrow} />
+          {branches.map((branch, idx) => (
+            <BranchSvg key={idx} branch={branch} />
           ))}
         </svg>
       </div>
