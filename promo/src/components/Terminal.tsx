@@ -16,7 +16,6 @@ type Props = {
   width?: number | string;
   height?: number | string;
   fontSize?: number;
-  cursor?: boolean;
 };
 
 export const Terminal: React.FC<Props> = ({
@@ -24,8 +23,7 @@ export const Terminal: React.FC<Props> = ({
   lines,
   width = 1280,
   height = 720,
-  fontSize = 28,
-  cursor = true,
+  fontSize = 22,
 }) => {
   const frame = useCurrentFrame();
 
@@ -36,7 +34,8 @@ export const Terminal: React.FC<Props> = ({
         height,
         borderRadius: 16,
         overflow: "hidden",
-        boxShadow: "0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(124, 179, 66, 0.2)",
+        boxShadow:
+          "0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(124, 179, 66, 0.18)",
         display: "flex",
         flexDirection: "column",
         background: "#0B0F18",
@@ -50,6 +49,7 @@ export const Terminal: React.FC<Props> = ({
           padding: `${tokens.spacing.sm}px ${tokens.spacing.md}px`,
           background: "#161B26",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
+          flexShrink: 0,
         }}
       >
         <div style={{ display: "flex", gap: 8 }}>
@@ -76,28 +76,33 @@ export const Terminal: React.FC<Props> = ({
           padding: tokens.spacing.md,
           fontFamily: tokens.font.mono,
           fontSize,
-          lineHeight: 1.5,
+          lineHeight: 1.55,
           color: tokens.color.white,
           overflow: "hidden",
         }}
       >
         {lines.map((line, idx) => {
           const localFrame = frame - line.delayFrames;
-          const typeSpeed = line.typeSpeed ?? 1.5;
+          const typeSpeed = line.typeSpeed ?? 1.8;
           const visibleChars = Math.max(0, Math.floor(localFrame * typeSpeed));
-          const fullText = line.prompt
-            ? `${line.prompt} ${line.content}`
-            : line.content;
+          const fullText = line.prompt ? `${line.prompt} ${line.content}` : line.content;
           const shown = fullText.slice(0, visibleChars);
-          const isTyping = visibleChars > 0 && visibleChars < fullText.length;
-          const isLast = idx === lines.length - 1;
-          const showCursor = cursor && (isTyping || (isLast && visibleChars >= fullText.length));
-          const cursorBlink = Math.floor(frame / 15) % 2 === 0;
-          const opacity = interpolate(localFrame, [0, 2], [0, 1], {
+          if (visibleChars === 0) return null;
+          const opacity = interpolate(localFrame, [0, 3], [0, 1], {
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
           });
-          if (visibleChars === 0) return null;
+          const isLast = idx === lines.length - 1;
+          const isTyping = visibleChars < fullText.length;
+          const showCursor = isTyping || (isLast && visibleChars >= fullText.length);
+          const cursorBlink = Math.floor(frame / 15) % 2 === 0;
+
+          let promptPart = "";
+          let rest = shown;
+          if (line.prompt && shown.startsWith(line.prompt)) {
+            promptPart = shown.slice(0, line.prompt.length);
+            rest = shown.slice(line.prompt.length);
+          }
 
           return (
             <div
@@ -106,25 +111,21 @@ export const Terminal: React.FC<Props> = ({
                 color: line.color ?? tokens.color.white,
                 fontWeight: line.bold ? 600 : 400,
                 opacity,
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-all",
+                whiteSpace: "pre",
+                minHeight: fontSize * 1.55,
               }}
             >
-              {line.prompt && shown.startsWith(line.prompt) ? (
-                <>
-                  <span style={{ color: tokens.color.primary, fontWeight: 600 }}>
-                    {shown.slice(0, line.prompt.length)}
-                  </span>
-                  <span>{shown.slice(line.prompt.length)}</span>
-                </>
-              ) : (
-                shown
+              {promptPart && (
+                <span style={{ color: tokens.color.primary, fontWeight: 600 }}>
+                  {promptPart}
+                </span>
               )}
+              <span>{rest}</span>
               {showCursor && (
                 <span
                   style={{
                     display: "inline-block",
-                    width: fontSize * 0.55,
+                    width: fontSize * 0.5,
                     height: fontSize * 0.9,
                     background: tokens.color.primary,
                     verticalAlign: "middle",

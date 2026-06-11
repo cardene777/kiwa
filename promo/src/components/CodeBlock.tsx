@@ -3,7 +3,6 @@ import { tokens } from "../tokens";
 
 export type CodeLine = {
   text: string;
-  type?: "keyword" | "string" | "comment" | "function" | "type" | "punct" | "plain";
   indent?: number;
 };
 
@@ -18,32 +17,143 @@ type Props = {
   lineRevealSpeed?: number;
 };
 
-const colorByType: Record<NonNullable<CodeLine["type"]>, string> = {
+const palette = {
   keyword: "#FF7B72",
   string: "#A5D6FF",
   comment: "#8B949E",
+  number: "#79C0FF",
   function: "#D2A8FF",
   type: "#FFA657",
   punct: "#C9D1D9",
   plain: "#E6EDF3",
 };
 
-const renderTokens = (text: string) => {
-  const parts = text.split(/(\".*?\"|\/\/.*$|\b(function|return|const|let|if|else|import|from|export|describe|it|test|expect|new|await|async)\b|\b[A-Z][A-Za-z0-9_]*\b|\b[a-z_]+\(|[{}()\[\];,])/g);
-  return parts.filter(Boolean).map((p, i) => {
-    let color = colorByType.plain;
-    if (/^".*"$/.test(p)) color = colorByType.string;
-    else if (/^\/\//.test(p)) color = colorByType.comment;
-    else if (/^(function|return|const|let|if|else|import|from|export|describe|it|test|expect|new|await|async)$/.test(p)) color = colorByType.keyword;
-    else if (/^[A-Z][A-Za-z0-9_]*$/.test(p)) color = colorByType.type;
-    else if (/^[a-z_]+\($/.test(p)) color = colorByType.function;
-    else if (/^[{}()\[\];,]$/.test(p)) color = colorByType.punct;
-    return (
-      <span key={i} style={{ color }}>
-        {p}
-      </span>
-    );
-  });
+const KEYWORDS = new Set([
+  "function",
+  "return",
+  "const",
+  "let",
+  "var",
+  "if",
+  "else",
+  "import",
+  "from",
+  "export",
+  "describe",
+  "it",
+  "test",
+  "expect",
+  "new",
+  "await",
+  "async",
+  "contract",
+  "public",
+  "external",
+  "view",
+  "pure",
+  "returns",
+  "uint256",
+  "address",
+  "bool",
+  "string",
+  "memory",
+  "calldata",
+  "bytes",
+  "true",
+  "false",
+  "is",
+]);
+
+type Token = {
+  text: string;
+  color: string;
+  bold?: boolean;
+};
+
+const tokenize = (line: string): Token[] => {
+  const tokens: Token[] = [];
+  let i = 0;
+  const n = line.length;
+
+  const trimmed = line.trimStart();
+  if (trimmed.startsWith("//") || trimmed.startsWith("#")) {
+    return [{ text: line, color: palette.comment }];
+  }
+
+  while (i < n) {
+    const ch = line[i];
+
+    if (ch === " " || ch === "\t") {
+      let s = "";
+      while (i < n && (line[i] === " " || line[i] === "\t")) {
+        s += line[i];
+        i++;
+      }
+      tokens.push({ text: s, color: palette.plain });
+      continue;
+    }
+
+    if (ch === '"' || ch === "'") {
+      const quote = ch;
+      let s = quote;
+      i++;
+      while (i < n && line[i] !== quote) {
+        if (line[i] === "\\" && i + 1 < n) {
+          s += line[i] + line[i + 1];
+          i += 2;
+        } else {
+          s += line[i];
+          i++;
+        }
+      }
+      if (i < n) {
+        s += quote;
+        i++;
+      }
+      tokens.push({ text: s, color: palette.string });
+      continue;
+    }
+
+    if (/[a-zA-Z_$]/.test(ch)) {
+      let s = "";
+      while (i < n && /[a-zA-Z0-9_$]/.test(line[i])) {
+        s += line[i];
+        i++;
+      }
+      const next = line[i];
+      if (KEYWORDS.has(s)) {
+        tokens.push({ text: s, color: palette.keyword });
+      } else if (/^[A-Z]/.test(s)) {
+        tokens.push({ text: s, color: palette.type });
+      } else if (next === "(") {
+        tokens.push({ text: s, color: palette.function });
+      } else {
+        tokens.push({ text: s, color: palette.plain });
+      }
+      continue;
+    }
+
+    if (/[0-9]/.test(ch)) {
+      let s = "";
+      while (i < n && /[0-9_.]/.test(line[i])) {
+        s += line[i];
+        i++;
+      }
+      tokens.push({ text: s, color: palette.number });
+      continue;
+    }
+
+    if (/[{}\(\)\[\];,:.]/.test(ch)) {
+      tokens.push({ text: ch, color: palette.punct });
+      i++;
+      continue;
+    }
+
+    tokens.push({ text: ch, color: palette.plain });
+    i++;
+  }
+
+  return tokens;
 };
 
 export const CodeBlock: React.FC<Props> = ({
@@ -52,7 +162,7 @@ export const CodeBlock: React.FC<Props> = ({
   lines,
   width = 1280,
   height = 720,
-  fontSize = 26,
+  fontSize = 24,
   startFrame = 0,
   lineRevealSpeed = 4,
 }) => {
@@ -65,7 +175,7 @@ export const CodeBlock: React.FC<Props> = ({
         height,
         borderRadius: 16,
         overflow: "hidden",
-        boxShadow: "0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(124, 179, 66, 0.15)",
+        boxShadow: "0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(124, 179, 66, 0.18)",
         display: "flex",
         flexDirection: "column",
         background: "#0D1117",
@@ -83,12 +193,11 @@ export const CodeBlock: React.FC<Props> = ({
             fontFamily: tokens.font.mono,
             fontSize: 18,
             color: tokens.color.textMuted,
+            flexShrink: 0,
           }}
         >
           <span>{title}</span>
-          <span style={{ color: tokens.color.primary, fontWeight: 600 }}>
-            {language}
-          </span>
+          <span style={{ color: tokens.color.primary, fontWeight: 600 }}>{language}</span>
         </div>
       )}
       <div
@@ -98,7 +207,7 @@ export const CodeBlock: React.FC<Props> = ({
           fontFamily: tokens.font.mono,
           fontSize,
           lineHeight: 1.55,
-          color: colorByType.plain,
+          color: palette.plain,
           overflow: "hidden",
         }}
       >
@@ -108,22 +217,32 @@ export const CodeBlock: React.FC<Props> = ({
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
           });
-          const tx = interpolate(lineFrame, [0, 6], [-12, 0], {
+          const tx = interpolate(lineFrame, [0, 6], [-10, 0], {
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
           });
           if (opacity < 0.01) return null;
+          const tokensForLine = tokenize(line.text);
           return (
             <div
               key={idx}
               style={{
                 opacity,
                 transform: `translateX(${tx}px)`,
-                paddingLeft: (line.indent ?? 0) * 16,
+                paddingLeft: (line.indent ?? 0) * fontSize * 0.6,
                 whiteSpace: "pre",
+                minHeight: fontSize * 1.55,
               }}
             >
-              {renderTokens(line.text)}
+              {tokensForLine.length === 0 ? (
+                <span>&nbsp;</span>
+              ) : (
+                tokensForLine.map((t, ti) => (
+                  <span key={ti} style={{ color: t.color }}>
+                    {t.text}
+                  </span>
+                ))
+              )}
             </div>
           );
         })}
