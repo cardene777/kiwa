@@ -270,6 +270,19 @@ echo '{"type":"module"}' > tests/kiwa/package.json
 
 ---
 
+## kiwa は他ツールと何が違う?
+
+kiwa は 2 つのエコシステムの交点にあります。 要約。
+
+| 軸 | 最近接の競合 | kiwa の差別化 |
+|---|---|---|
+| dApp E2E fixture (Playwright + viem + anvil) | [`wallet-mock`](https://github.com/johanneskares/wallet-mock) / [Synpress](https://github.com/Synthetixio/synpress) / [dappwright](https://github.com/TenKeyLabs/dappwright) | wallet-mock が一番近い (headless `window.ethereum` 注入)。 Synpress / dappwright は実 MetaMask UI 自動化。 kiwa は headless を維持しつつ CLI scaffold (`pnpm dlx @kiwa-test/cli init`) と下記 skill chain を上乗せ。 |
+| 仕様書 → test 自動生成 | [hardhat-test-suite-generator](https://github.com/ahmedali8/hardhat-test-suite-generator) / Foundry / Hardhat AI plugin (2026) / [Claude Code spec-driven dev](https://www.augmentcode.com/guides/claude-code-spec-driven-development) | 1 つの 9 section / 9 column 仕様書から **4 layer** (contract / unit / integration / e2e) を駆動する競合は確認できず。 `/kiwa-design` → `/kiwa-{forge,hardhat,play,vitest,api}` → `/kiwa-review` chain が kiwa 独自の差別化。 |
+
+詳細な比較表 (Synpress / dappwright / wallet-mock / kiwa の fixture 軸 + hardhat-test-suite-generator / Foundry AI / Claude Code spec-driven dev の test 生成軸) と選定ガイド、 「kiwa が MetaMask extension 自動化を意図的に持たない理由」は [docs/COMPARISON.ja.md](./docs/COMPARISON.ja.md) を参照してください。
+
+---
+
 ## Coverage requirement
 
 `/kiwa-forge` と `/kiwa-hardhat` は 4 metric の閾値を満たすまで `test-passed` marker を **作りません**。 default (OSS 公開 smart contract 向け閾値):
@@ -400,7 +413,7 @@ Reference docs:
 | [`docs/EVENTS.ja.md`](./docs/EVENTS.ja.md) | 4 event + `triggerEvent()` |
 | [`docs/ERRORS.ja.md`](./docs/ERRORS.ja.md) | EIP-1193 error code + envelope 設計 |
 | [`docs/MIGRATION.ja.md`](./docs/MIGRATION.ja.md) | v0.x breaking change policy + dapp-e2e → kiwa リブランド案内 |
-| [`docs/COMPARISON.ja.md`](./docs/COMPARISON.ja.md) | Synpress / wallet-mock 比較 |
+| [`docs/COMPARISON.ja.md`](./docs/COMPARISON.ja.md) | Synpress / dappwright / wallet-mock 比較 + 仕様書ベース test 生成軸 (hardhat-test-suite-generator / Foundry AI / Claude Code) |
 | [`docs/RELEASING.ja.md`](./docs/RELEASING.ja.md) | Publish flow + provenance |
 
 Claude Code 利用者向け — skill 完全リファレンス:

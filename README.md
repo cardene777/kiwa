@@ -270,6 +270,19 @@ The full RPC fidelity matrix lives in [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN
 
 ---
 
+## How does kiwa compare to other tools?
+
+kiwa sits at the intersection of two ecosystems. Short version:
+
+| Axis | Closest competitor | kiwa's differentiation |
+|---|---|---|
+| dApp E2E fixture (Playwright + viem + anvil) | [`wallet-mock`](https://github.com/johanneskares/wallet-mock), [Synpress](https://github.com/Synthetixio/synpress), [dappwright](https://github.com/TenKeyLabs/dappwright) | wallet-mock is closest (headless `window.ethereum` injection). Synpress / dappwright automate the real MetaMask UI. kiwa stays headless and adds a CLI scaffold (`pnpm dlx @kiwa-test/cli init`) plus the skill chain below. |
+| Spec → test generation | [hardhat-test-suite-generator](https://github.com/ahmedali8/hardhat-test-suite-generator), Foundry / Hardhat AI plugins (2026), [Claude Code spec-driven dev](https://www.augmentcode.com/guides/claude-code-spec-driven-development) | None drive **four layers** (contract / unit / integration / e2e) from a single 9-section / 9-column spec. kiwa's `/kiwa-design` → `/kiwa-{forge,hardhat,play,vitest,api}` → `/kiwa-review` chain is the differentiator. |
+
+See [docs/COMPARISON.md](./docs/COMPARISON.md) for the full comparison tables (Synpress / dappwright / wallet-mock / kiwa on the fixture axis, plus hardhat-test-suite-generator / Foundry AI / Claude Code spec-driven dev on the test-generation axis), selection guide, and the explanation of why kiwa intentionally does not own MetaMask extension automation.
+
+---
+
 ## Coverage requirement
 
 `/kiwa-forge` and `/kiwa-hardhat` **block the `test-passed` marker** until all four coverage metrics clear thresholds. Default values (tuned for OSS-grade smart contracts):
@@ -400,7 +413,7 @@ Reference docs:
 | [`docs/EVENTS.md`](./docs/EVENTS.md) | 4 events + `triggerEvent()` |
 | [`docs/ERRORS.md`](./docs/ERRORS.md) | EIP-1193 error code + envelope design |
 | [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.x breaking-change policy + dapp-e2e → kiwa rebrand notice |
-| [`docs/COMPARISON.md`](./docs/COMPARISON.md) | Synpress / wallet-mock comparison |
+| [`docs/COMPARISON.md`](./docs/COMPARISON.md) | Synpress / dappwright / wallet-mock comparison + spec-driven test generation axis (hardhat-test-suite-generator / Foundry AI / Claude Code) |
 | [`docs/RELEASING.md`](./docs/RELEASING.md) | Publish flow + provenance |
 
 For Claude Code users — full skill reference:

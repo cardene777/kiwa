@@ -117,11 +117,54 @@ If transport-swapping flexibility is the main goal, wallet-mock aligns better wi
 
 If these four points are acceptable, there is a good chance kiwa's design will fit well.
 
+## AI / spec-driven test generation comparison
+
+The sections above compare kiwa with other dApp E2E fixtures, but kiwa also includes Claude Code skills (`/kiwa-design`, `/kiwa-forge`, `/kiwa-hardhat`, `/kiwa-play`, `/kiwa-vitest`, `/kiwa-api`, `/kiwa-review`, `/kiwa-test`) that design and generate tests across four layers (contract / unit / integration / e2e) from a single specification. This section compares that side of kiwa.
+
+| Aspect | hardhat-test-suite-generator | Foundry / Hardhat AI plugins (2026) | Claude Code spec-driven dev | kiwa skill chain |
+|---|---|---|---|---|
+| Approach | Static template scaffold from contract ABI | LLM fuzz seed / invariant suggestion as plugin | Free-form spec → test → code iteration | 11-viewpoint spec → 4-layer test code |
+| Scope | Hardhat contract test only | Contract layer (fuzz + invariant) only | General-purpose, language-agnostic | Contract + dApp e2e + unit + integration |
+| Spec format | None (ABI-driven) | None (heuristic) | Free-form markdown | Fixed 9-section / 9-column markdown |
+| Layer coverage | 1 (Hardhat) | 1 (fuzz / invariant on Foundry or Hardhat) | Determined per project | 4 (contract / unit / integration / e2e) |
+| Review loop | None | None | Manual | `/kiwa-review` checks 11 viewpoints + spec drift |
+| Best fit | Boilerplate scaffold for Hardhat | Fuzz / invariant augmentation | General LLM-assisted dev | dApp project covering contract + e2e simultaneously |
+
+### When kiwa's skill chain shines
+
+- You want spec → test → review → coverage report flowing in one command (`/kiwa-test --example {name}`)
+- You want a single 9-column spec table to drive Foundry, Hardhat, Playwright, and Vitest in parallel
+- You want the 11 viewpoints (happy / failure / boundary / state-transition / authorization / input-validation / idempotency / concurrency / performance / security / regression) explicitly applied to a dApp test suite
+
+### When other tools fit better
+
+- You only need Hardhat contract test scaffolding → `hardhat-test-suite-generator` is lighter
+- You only need fuzz seed augmentation on an existing Foundry repo → Foundry AI plugins fit
+- You want a general LLM-assisted dev loop with no dApp specifics → use Claude Code spec-driven dev as-is
+
+## What kiwa uniquely owns
+
+After comparing both axes (dApp E2E fixture and spec-driven test generation), kiwa's unique surface is the **4-layer chain in one entry point**:
+
+```
+/kiwa-design (Layer 1)
+  ├─ /kiwa-forge        → Foundry .t.sol
+  ├─ /kiwa-hardhat      → Hardhat .test.ts
+  ├─ /kiwa-play         → Playwright .spec.ts (uses @kiwa-test/core fixture)
+  ├─ /kiwa-vitest       → Vitest .test.ts (unit)
+  ├─ /kiwa-api          → Vitest + msw / supertest (integration)
+  └─ /kiwa-review       → spec vs implementation drift + 11 viewpoint coverage
+```
+
+No competitor in either axis covers all four layers (contract + unit + integration + e2e) from a single spec at the time of writing.
+
 ## Related
 
 - [Synpress repository](https://github.com/Synthetixio/synpress)
 - [dappwright repository](https://github.com/TenKeyLabs/dappwright)
 - [wallet-mock repository](https://github.com/johanneskares/wallet-mock)
+- [hardhat-test-suite-generator](https://github.com/ahmedali8/hardhat-test-suite-generator)
+- [Claude Code spec-driven development](https://www.augmentcode.com/guides/claude-code-spec-driven-development)
 - [Foundry anvil docs](https://book.getfoundry.sh/anvil/)
 - [RPC.md](./RPC.md)
 - [README.md](../README.md)
