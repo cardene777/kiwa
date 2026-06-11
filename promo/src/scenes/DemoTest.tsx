@@ -1,7 +1,7 @@
 import { SceneLayout } from "../components/SceneLayout";
 import { SplitScreen } from "../components/SplitScreen";
 import { Terminal, TerminalLine } from "../components/Terminal";
-import { tokens } from "../tokens";
+import { tokens, t } from "../tokens";
 
 const passColor = "#4ADE80";
 
@@ -47,8 +47,8 @@ const playwrightRun: TerminalLine[] = [
 export const DemoTest: React.FC = () => {
   return (
     <SceneLayout
-      eyebrow="Demo · Layer 2"
-      headline="Three runners. All green."
+      eyebrow={t().eyebrowDemoTest}
+      headline={t().headlineDemoTest}
     >
       <div style={{ width: "100%", height: "100%", display: "flex" }}>
         <SplitScreen

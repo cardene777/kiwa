@@ -2,7 +2,7 @@ import { useCurrentFrame, interpolate } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
 import { Terminal, TerminalLine } from "../components/Terminal";
 import { CodeBlock } from "../components/CodeBlock";
-import { tokens } from "../tokens";
+import { tokens, t } from "../tokens";
 
 const claudeLines: TerminalLine[] = [
   { prompt: "$", content: "claude", delayFrames: 0, typeSpeed: 2 },
@@ -90,8 +90,8 @@ export const DemoSpec: React.FC = () => {
 
   return (
     <SceneLayout
-      eyebrow="Demo · Layer 1"
-      headline="Run /kiwa-design. A spec is born."
+      eyebrow={t().eyebrowDemoSpec}
+      headline={t().headlineDemoSpec}
     >
       <div
         style={{

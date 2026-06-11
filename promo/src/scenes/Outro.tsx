@@ -2,7 +2,7 @@ import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { Background } from "../components/Background";
 import { KiwaLogo } from "../components/KiwaLogo";
 import { BoundaryEffect } from "../components/BoundaryEffect";
-import { tokens } from "../tokens";
+import { tokens, t } from "../tokens";
 
 export const Outro: React.FC = () => {
   const frame = useCurrentFrame();
@@ -64,7 +64,7 @@ export const Outro: React.FC = () => {
               boxShadow: `0 0 32px rgba(124, 179, 66, 0.3)`,
             }}
           >
-            $ {tokens.text.npmUrl}
+            $ {t().npmUrl}
           </div>
           <div
             style={{
@@ -78,7 +78,7 @@ export const Outro: React.FC = () => {
               alignItems: "center",
             }}
           >
-            <span>{tokens.text.repoUrl}</span>
+            <span>{t().repoUrl}</span>
             <span style={{ color: tokens.color.primaryDark }}>·</span>
             <span>npmjs.com/package/@kiwa-test/core</span>
           </div>

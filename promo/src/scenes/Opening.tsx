@@ -2,7 +2,7 @@ import { useCurrentFrame, interpolate, Sequence } from "remotion";
 import { Background } from "../components/Background";
 import { KiwaLogo } from "../components/KiwaLogo";
 import { BoundaryEffect } from "../components/BoundaryEffect";
-import { tokens } from "../tokens";
+import { tokens, t } from "../tokens";
 
 export const Opening: React.FC = () => {
   const frame = useCurrentFrame();
@@ -48,7 +48,7 @@ export const Opening: React.FC = () => {
             })}px)`,
           }}
         >
-          {tokens.text.productName}
+          {t().productName}
         </div>
         <div
           style={{
@@ -63,7 +63,7 @@ export const Opening: React.FC = () => {
             lineHeight: 1.4,
           }}
         >
-          {tokens.text.tagline}
+          {t().tagline}
         </div>
       </div>
       <Sequence from={80}>

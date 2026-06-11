@@ -1,4 +1,7 @@
+type Locale = "en" | "ja";
+
 export const tokens = {
+  locale: "ja" as Locale,
   color: {
     bg: "#0F1419",
     bgGradientEnd: "#1A1F2E",
@@ -10,8 +13,8 @@ export const tokens = {
     boundaryLine: "#7CB342",
   },
   font: {
-    sans: '"Inter", -apple-system, "Segoe UI", "Helvetica Neue", sans-serif',
-    mono: '"JetBrains Mono", "Menlo", "Courier New", monospace',
+    sans: '"Inter", "Noto Sans JP", -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Segoe UI", sans-serif',
+    mono: '"JetBrains Mono", "Noto Sans Mono CJK JP", "Menlo", "Courier New", monospace',
   },
   spacing: {
     xs: 8,
@@ -21,11 +24,46 @@ export const tokens = {
     xl: 128,
   },
   text: {
-    tagline: "Test every layer of your dApp — from one spec.",
-    taglineJa: "1 つの仕様書から、 dApp の全テスト layer を。",
-    productName: "kiwa",
-    npmUrl: "npm install @kiwa-test/core",
-    repoUrl: "github.com/cardene777/kiwa",
+    en: {
+      productName: "kiwa",
+      tagline: "Generate every test layer from one spec",
+      taglineJa: "1 つの仕様書から 3 layer のテストを自動生成",
+      eyebrowProblem: "The Problem",
+      headlineProblem: "Same test, three frameworks",
+      eyebrowSolution: "The Solution",
+      headlineSolution: "One spec, three test layers, generated",
+      eyebrowDemoSpec: "Demo · Layer 1",
+      headlineDemoSpec: "Generate test spec with /kiwa-design",
+      eyebrowDemoTest: "Demo · Layer 2",
+      headlineDemoTest: "Three runners, all passing",
+      eyebrowCoverage: "Coverage",
+      headlineCoverage: "4 metrics, 100%, auto-enforced",
+      eyebrowInstall: "Get Started",
+      headlineInstall: "One command, then Claude takes over",
+      npmUrl: "npm install @kiwa-test/core",
+      repoUrl: "github.com/cardene777/kiwa",
+    },
+    ja: {
+      productName: "kiwa",
+      tagline: "1 つの仕様書から 3 layer のテストを自動生成",
+      taglineJa: "1 つの仕様書から 3 layer のテストを自動生成",
+      eyebrowProblem: "課題",
+      headlineProblem: "同じテストを 3 つの framework で書く",
+      eyebrowSolution: "解決",
+      headlineSolution: "1 つの仕様書から 3 layer のテストを自動生成",
+      eyebrowDemoSpec: "デモ · Layer 1",
+      headlineDemoSpec: "/kiwa-design でテスト仕様書を生成",
+      eyebrowDemoTest: "デモ · Layer 2",
+      headlineDemoTest: "3 runner で全テスト PASS",
+      eyebrowCoverage: "カバレッジ",
+      headlineCoverage: "4 metric 全て 100% を強制",
+      eyebrowInstall: "導入",
+      headlineInstall: "1 コマンドで導入 あとは Claude にお任せ",
+      npmUrl: "npm install @kiwa-test/core",
+      repoUrl: "github.com/cardene777/kiwa",
+    },
   },
   fps: 30,
 } as const;
+
+export const t = () => tokens.text[tokens.locale];

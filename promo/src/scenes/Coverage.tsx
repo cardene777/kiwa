@@ -2,7 +2,7 @@ import { useCurrentFrame, interpolate } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
 import { CoverageBar } from "../components/CoverageBar";
 import { Terminal, TerminalLine } from "../components/Terminal";
-import { tokens } from "../tokens";
+import { tokens, t } from "../tokens";
 
 const coverageRun: TerminalLine[] = [
   { prompt: "$", content: "forge coverage --report summary", delayFrames: 0, typeSpeed: 1.5 },
@@ -25,8 +25,8 @@ export const Coverage: React.FC = () => {
 
   return (
     <SceneLayout
-      eyebrow="Coverage Gate"
-      headline="4 metrics, 100% — auto-enforced."
+      eyebrow={t().eyebrowCoverage}
+      headline={t().headlineCoverage}
     >
       <div
         style={{
