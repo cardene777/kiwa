@@ -123,7 +123,8 @@ Run the chain against [`examples/nextjs-token-gating`](./examples/nextjs-token-g
 # → npx hardhat coverage → Branches 80.56%  ✅ passes the gate
 
 # Step 3: Extend the existing Playwright tests using the same spec
-/kiwa-play --mode extend --example nextjs-token-gating
+# (run from examples/nextjs-token-gating/ — Step 0 auto-detects the dApp project)
+/kiwa-play --mode extend
 # → tests/gating.spec.ts adds missing viewpoints (no regression on 8 existing tests)
 # → pnpm test x4 rounds → 4/4 PASS, 0 flake
 ```

@@ -123,7 +123,8 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 # → npx hardhat coverage → Branches 80.56%  ✅ gate 通過
 
 # Step 3: 既存 Playwright test を仕様書ベースで extend
-/kiwa-play --mode extend --example nextjs-token-gating
+# (examples/nextjs-token-gating/ で起動 — Step 0 が dApp project を自動判定)
+/kiwa-play --mode extend
 # → tests/gating.spec.ts に不足観点を追加 (既存 8 test に regression なし)
 # → pnpm test x4 round → 4/4 PASS、 flake 0 件
 ```
