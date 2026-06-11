@@ -1,0 +1,33 @@
+{
+  "name": "kiwa-marketplace",
+  "description": "kiwa - OSS test framework for dApps. Claude 自動生成 or 手書きで contract / dApp e2e / unit / integration の全レイヤーをカバーする test skill chain。",
+  "owner": {
+    "name": "cardene777",
+    "email": "cardene777@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "kiwa",
+      "source": "./",
+      "description": "kiwa skill chain (kiwa-design / kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-api / kiwa-review / kiwa-test) を 1 plugin で同梱。 dApp project に install すると Claude Code から /kiwa-design や /kiwa-test --example {name} で test 設計 → 実装 → 実行 → review を一気通貫で実行可能。",
+      "version": "0.1.0",
+      "author": {
+        "name": "cardene777",
+        "email": "cardene777@gmail.com"
+      },
+      "homepage": "https://github.com/cardene777/kiwa",
+      "repository": "https://github.com/cardene777/kiwa",
+      "license": "MIT",
+      "category": "testing",
+      "tags": [
+        "dapp",
+        "ethereum",
+        "solidity",
+        "playwright",
+        "foundry",
+        "hardhat",
+        "vitest"
+      ]
+    }
+  ]
+}

@@ -134,14 +134,19 @@ Same `TC-001 … TC-020` test IDs appear in **both** Foundry and Hardhat output 
 
 ## Quickstart
 
-### Option A: Claude Code user (full 4-layer chain)
+### Option A: Claude Code plugin (recommended for Claude users)
+
+Install the kiwa skill chain as a Claude Code plugin — no clone required, available across **any** of your dApp projects after install.
 
 ```bash
-# 1. Clone & install
-git clone https://github.com/cardene777/kiwa.git && cd kiwa
-pnpm install
+# In Claude Code (run from any project):
+/plugin marketplace add cardene777/kiwa
+/plugin install kiwa@kiwa-marketplace
+```
 
-# 2. In Claude Code, invoke the skills against your contracts / dApp
+After install, all 8 skills are available globally:
+
+```bash
 /kiwa-test --module your-module           # one-shot orchestrator (contract + e2e)
 # or run individual layers:
 /kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
@@ -150,9 +155,23 @@ pnpm install
 /kiwa-vitest --module your-module         # Vitest unit (F-3, optional)
 /kiwa-api --module your-module            # API integration (F-3, optional)
 /kiwa-play --mode new --example your-dapp # Playwright e2e
+/kiwa-review --mode test-review            # spec / test / result review
 ```
 
-### Option B: Playwright fixture only (no Claude needed)
+Update the plugin later with `/plugin marketplace update kiwa-marketplace`.
+
+### Option B: Clone & install (for kiwa contributors)
+
+```bash
+# 1. Clone & install
+git clone https://github.com/cardene777/kiwa.git && cd kiwa
+pnpm install
+
+# 2. In Claude Code (run from the kiwa repo), the project-local skills load automatically
+/kiwa-test --module your-module
+```
+
+### Option C: Playwright fixture only (no Claude needed)
 
 ```bash
 pnpm dlx @kiwa-test/cli init
@@ -173,7 +192,7 @@ package.json                ← test:e2e script + peer deps
 
 > Now available on npm — `pnpm dlx @kiwa-test/cli init` works out of the box (no clone required).
 
-### Option C — Local checkout (for kiwa contributors)
+### Option D — Local checkout (for kiwa contributors)
 
 If you are hacking on kiwa itself and want to test changes against a local dApp project before publishing, link with a `file:` dependency:
 
@@ -192,7 +211,7 @@ pnpm add -D file:$HOME/kiwa/packages/core file:$HOME/kiwa/packages/cli
 pnpm exec kiwa init     # or: node $HOME/kiwa/packages/cli/dist/index.js init
 ```
 
-For everyday use, prefer Option B (`pnpm dlx @kiwa-test/cli init`) which pulls the published 0.1.0 version directly.
+For everyday use, prefer Option C (`pnpm dlx @kiwa-test/cli init`) which pulls the published 0.1.0 version directly.
 
 ### Using kiwa with a CJS / Next.js 14 project
 

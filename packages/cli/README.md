@@ -26,6 +26,18 @@ pnpm dlx @kiwa-test/cli init
 pnpm dlx @kiwa-test/cli doctor
 ```
 
+### Bonus — Claude Code plugin
+
+Use kiwa with Claude Code? Install the matching skill chain in **one command** — `/kiwa-test`, `/kiwa-design`, `/kiwa-play` etc. become available across any dApp project.
+
+```bash
+# In Claude Code:
+/plugin marketplace add cardene777/kiwa
+/plugin install kiwa@kiwa-marketplace
+```
+
+See [kiwa README — Option A](https://github.com/cardene777/kiwa#option-a-claude-code-plugin-recommended-for-claude-users) for the full skill list.
+
 ## Commands
 
 ### `kiwa init`

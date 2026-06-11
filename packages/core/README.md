@@ -24,6 +24,18 @@ You can use this package in two ways: (a) let Claude generate Playwright tests v
 pnpm add -D @kiwa-test/core @playwright/test viem
 ```
 
+### Bonus — Claude Code plugin
+
+If you use Claude Code, install the kiwa skill chain in **one command** to get `/kiwa-play` (Playwright e2e generation), `/kiwa-design`, `/kiwa-review` etc. across every dApp project:
+
+```bash
+# In Claude Code:
+/plugin marketplace add cardene777/kiwa
+/plugin install kiwa@kiwa-marketplace
+```
+
+See [kiwa README — Option A](https://github.com/cardene777/kiwa#option-a-claude-code-plugin-recommended-for-claude-users) for the full skill list.
+
 ## Quickstart
 
 ```ts

@@ -134,14 +134,19 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 
 ## Quickstart
 
-### Option A: Claude Code 利用 (4 layer chain 全部)
+### Option A: Claude Code plugin (Claude 利用時の推奨)
+
+kiwa の skill chain を Claude Code plugin として導入する経路。 clone 不要で、 install 後は **任意の dApp project** から skill を呼び出せる。
 
 ```bash
-# 1. clone & install
-git clone https://github.com/cardene777/kiwa.git && cd kiwa
-pnpm install
+# Claude Code 内で (任意の project から):
+/plugin marketplace add cardene777/kiwa
+/plugin install kiwa@kiwa-marketplace
+```
 
-# 2. Claude Code 内で skill を契約 / dApp に対して起動
+install 後、 8 skill が global に利用可能:
+
+```bash
 /kiwa-test --module your-module           # 一括 orchestrator (contract + e2e)
 # or 個別 layer を順に
 /kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
@@ -150,9 +155,23 @@ pnpm install
 /kiwa-vitest --module your-module         # Vitest unit (F-3、 任意)
 /kiwa-api --module your-module            # API integration (F-3、 任意)
 /kiwa-play --mode new --example your-dapp # Playwright e2e
+/kiwa-review --mode test-review           # spec / test / 結果 review
 ```
 
-### Option B: Playwright fixture だけ使う (Claude 不要)
+plugin の更新は `/plugin marketplace update kiwa-marketplace`。
+
+### Option B: clone & install (kiwa contributor 用)
+
+```bash
+# 1. clone & install
+git clone https://github.com/cardene777/kiwa.git && cd kiwa
+pnpm install
+
+# 2. Claude Code を kiwa repo 内で起動すると project-local の skill が自動 load される
+/kiwa-test --module your-module
+```
+
+### Option C: Playwright fixture だけ使う (Claude 不要)
 
 ```bash
 pnpm dlx @kiwa-test/cli init
@@ -173,7 +192,7 @@ package.json                ← test:e2e script + peer deps
 
 > npm 公開済 — `pnpm dlx @kiwa-test/cli init` で clone 不要で導入できます。
 
-### Option C — local checkout (kiwa への contributor 用)
+### Option D — local checkout (kiwa への contributor 用)
 
 kiwa 本体に手を入れた変更を、 publish 前に local の dApp project で検証したい場合は **`file:` 依存** で local checkout を参照する:
 
@@ -192,7 +211,7 @@ pnpm add -D file:$HOME/kiwa/packages/core file:$HOME/kiwa/packages/cli
 pnpm exec kiwa init     # または: node $HOME/kiwa/packages/cli/dist/index.js init
 ```
 
-通常利用は Option B (`pnpm dlx @kiwa-test/cli init`) を推奨、 公開済 0.1.0 を直接取得します。
+通常利用は Option C (`pnpm dlx @kiwa-test/cli init`) を推奨、 公開済 0.1.0 を直接取得します。
 
 ### CJS / Next.js 14 プロジェクトとの共存
 
