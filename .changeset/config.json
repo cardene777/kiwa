@@ -8,6 +8,7 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
+    "kiwa-promo",
     "examples-basic-connect",
     "examples-defi-swap",
     "examples-mint-nft",
