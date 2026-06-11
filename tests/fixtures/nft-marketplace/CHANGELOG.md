@@ -1,5 +1,12 @@
 # tests-fixtures-nft-marketplace
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [c856f93]
+  - @kiwa-test/core@0.1.2
+
 ## 0.0.2
 
 ### Patch Changes
