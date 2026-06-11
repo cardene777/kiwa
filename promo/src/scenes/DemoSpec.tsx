@@ -123,7 +123,7 @@ export const DemoSpec: React.FC = () => {
             {
               label: "Contract test spec",
               badge: "forge / hardhat",
-              accent: "#FF8A65",
+              accent: tokens.color.accentContract,
               content: (
                 <Terminal
                   title="~/kiwa — claude"
@@ -137,7 +137,7 @@ export const DemoSpec: React.FC = () => {
             {
               label: "dApp e2e test spec",
               badge: "playwright",
-              accent: "#42A5F5",
+              accent: tokens.color.accentE2e,
               content: (
                 <Terminal
                   title="~/kiwa — claude"

@@ -31,7 +31,7 @@ const branches: Branch[] = [
     dotY: centerY + 60,
     label: "Contract test",
     sublabel: "forge / hardhat",
-    accent: "#FF8A65",
+    accent: tokens.color.accentContract,
   },
   {
     delay: 10,
@@ -40,7 +40,7 @@ const branches: Branch[] = [
     dotY: centerY + 60,
     label: "dApp e2e test",
     sublabel: "playwright",
-    accent: "#42A5F5",
+    accent: tokens.color.accentE2e,
   },
   {
     delay: 20,
@@ -49,7 +49,7 @@ const branches: Branch[] = [
     dotY: centerY + 220,
     label: "Manual write",
     sublabel: "@kiwa-test/core",
-    accent: "#A0E060",
+    accent: tokens.color.accentManual,
   },
 ];
 
