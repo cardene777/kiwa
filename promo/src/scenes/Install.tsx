@@ -1,7 +1,7 @@
 import { Sequence } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
 import { Terminal, TerminalLine } from "../components/Terminal";
-import { tokens } from "../tokens";
+import { tokens, t } from "../tokens";
 
 const installRun: TerminalLine[] = [
   { prompt: "$", content: "pnpm dlx @kiwa-test/cli init", delayFrames: 0, typeSpeed: 1.6 },
@@ -20,8 +20,8 @@ const installRun: TerminalLine[] = [
 export const Install: React.FC = () => {
   return (
     <SceneLayout
-      eyebrow="Get Started"
-      headline="One command. Then let Claude do the rest."
+      eyebrow={t().eyebrowInstall}
+      headline={t().headlineInstall}
     >
       <div
         style={{

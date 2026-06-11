@@ -1,6 +1,7 @@
 import { SceneLayout } from "../components/SceneLayout";
 import { SplitScreen } from "../components/SplitScreen";
 import { CodeBlock } from "../components/CodeBlock";
+import { t } from "../tokens";
 
 const foundryLines = [
   { text: "// Foundry test" },
@@ -53,8 +54,8 @@ const playwrightLines = [
 export const Problem: React.FC = () => {
   return (
     <SceneLayout
-      eyebrow="The Problem"
-      headline="Same spec. Three rewrites."
+      eyebrow={t().eyebrowProblem}
+      headline={t().headlineProblem}
     >
       <div
         style={{

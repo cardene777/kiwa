@@ -1,4 +1,5 @@
-import { Composition } from "remotion";
+import { Composition, continueRender, delayRender } from "remotion";
+import { useEffect, useState } from "react";
 import { Opening } from "./scenes/Opening";
 import { Problem } from "./scenes/Problem";
 import { Solution } from "./scenes/Solution";
@@ -16,7 +17,22 @@ const baseProps = {
   height: 1080,
 };
 
+const useNotoSansJP = () => {
+  const [handle] = useState(() => delayRender("Loading Noto Sans JP"));
+
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap";
+    link.onload = () => continueRender(handle);
+    link.onerror = () => continueRender(handle);
+    document.head.appendChild(link);
+  }, [handle]);
+};
+
 export const RemotionRoot: React.FC = () => {
+  useNotoSansJP();
   return (
     <>
       <Composition

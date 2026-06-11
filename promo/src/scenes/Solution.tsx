@@ -1,7 +1,7 @@
 import { useCurrentFrame, interpolate } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
 import { CodeBlock } from "../components/CodeBlock";
-import { tokens } from "../tokens";
+import { tokens, t } from "../tokens";
 
 const specLines = [
   { text: "# test-spec-token-gating.md" },
@@ -98,8 +98,8 @@ const ArrowSvg: React.FC<{ arrow: Arrow }> = ({ arrow }) => {
 export const Solution: React.FC = () => {
   return (
     <SceneLayout
-      eyebrow="The Solution"
-      headline="One spec, three layers — generated."
+      eyebrow={t().eyebrowSolution}
+      headline={t().headlineSolution}
     >
       <div
         style={{
