@@ -56,7 +56,7 @@ export const DemoTest: React.FC = () => {
               ),
             },
             {
-              label: "e2e test",
+              label: "dApp e2e test",
               badge: "playwright",
               accent: "#42A5F5",
               content: (

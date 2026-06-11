@@ -7,7 +7,7 @@
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 概要 — contract test / dApp e2e test / 手書きの 3 経路" width="640" />
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 概要 — contract test、dApp e2e test、手書きの 3 経路" width="640" />
   <br />
   <sub><a href="https://github.com/cardene777/kiwa">kiwa</a> 全体の概要動画 — 本パッケージは dApp e2e と手書き経路を担う。</sub>
 </p>
