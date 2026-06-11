@@ -123,7 +123,8 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 # → npx hardhat coverage → Branches 80.56%  ✅ gate 通過
 
 # Step 3: 既存 Playwright test を仕様書ベースで extend
-/kiwa-play --mode extend --example nextjs-token-gating
+# (examples/nextjs-token-gating/ で起動 — Step 0 が dApp project を自動判定)
+/kiwa-play --mode extend
 # → tests/gating.spec.ts に不足観点を追加 (既存 8 test に regression なし)
 # → pnpm test x4 round → 4/4 PASS、 flake 0 件
 ```
@@ -134,25 +135,58 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 
 ## Quickstart
 
-### Option A: Claude Code 利用 (4 layer chain 全部)
+### Option A: Claude Code plugin (Claude 利用時の推奨)
+
+kiwa の skill chain を Claude Code plugin として導入する経路。 clone 不要で、 install 後は **任意の dApp project** から skill を呼び出せる。
+
+```bash
+# Claude Code 内で (任意の project から):
+/plugin marketplace add cardene777/kiwa
+/plugin install kiwa@kiwa-marketplace
+```
+
+install 後、 8 skill が global に利用可能。 任意の dApp project 内で個別 layer を順に呼び出す:
+
+```bash
+# Layer 1 — test 設計 (出力 — tests/spec/<layer>/test-spec-<module>.md)
+/kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
+/kiwa-design --layer unit --module your-module
+/kiwa-design --layer integration --module your-module
+
+# Layer 2 — spec から test 実装
+/kiwa-forge --module your-module          # Foundry contract test
+/kiwa-hardhat --module your-module        # Hardhat contract test (並立 runner 選択可)
+/kiwa-vitest --module your-module         # Vitest 単体 (F-3)
+/kiwa-api --module your-module            # API integration (F-3)
+/kiwa-play --init                          # 新規 dApp project に Playwright fixture を bootstrap
+/kiwa-play --mode new                      # 新規 dApp e2e test を追加
+/kiwa-play --mode extend                   # 既存 dApp e2e test を拡張
+
+# review (spec / test / 結果) — --module と --layer で path 解決
+/kiwa-review --mode test-review --module your-module --layer contract
+```
+
+> `--example` flag と `/kiwa-test` 一括 orchestrator は kiwa monorepo (`examples/` がある側) 専用。 plugin 利用者は上記の個別 skill を project 内で直接起動する。
+
+plugin の更新:
+
+```bash
+/plugin marketplace update kiwa-marketplace  # catalog の refresh
+/plugin update kiwa@kiwa-marketplace         # 新 version を適用
+```
+
+### Option B: clone & install (kiwa contributor 用)
 
 ```bash
 # 1. clone & install
 git clone https://github.com/cardene777/kiwa.git && cd kiwa
 pnpm install
 
-# 2. Claude Code 内で skill を契約 / dApp に対して起動
-/kiwa-test --module your-module           # 一括 orchestrator (contract + e2e)
-# or 個別 layer を順に
-/kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
-/kiwa-forge --module your-module          # Foundry
-/kiwa-hardhat --module your-module        # Hardhat (並立)
-/kiwa-vitest --module your-module         # Vitest unit (F-3、 任意)
-/kiwa-api --module your-module            # API integration (F-3、 任意)
-/kiwa-play --mode new --example your-dapp # Playwright e2e
+# 2. Claude Code を kiwa repo 内で起動すると project-local の skill が自動 load される
+/kiwa-test --example nextjs-token-gating   # 一括 orchestrator (kiwa repo 専用、 examples/ を参照)
 ```
 
-### Option B: Playwright fixture だけ使う (Claude 不要)
+### Option C: Playwright fixture だけ使う (Claude 不要)
 
 ```bash
 pnpm dlx @kiwa-test/cli init
@@ -173,7 +207,7 @@ package.json                ← test:e2e script + peer deps
 
 > npm 公開済 — `pnpm dlx @kiwa-test/cli init` で clone 不要で導入できます。
 
-### Option C — local checkout (kiwa への contributor 用)
+### Option D — local checkout (kiwa への contributor 用)
 
 kiwa 本体に手を入れた変更を、 publish 前に local の dApp project で検証したい場合は **`file:` 依存** で local checkout を参照する:
 
@@ -192,7 +226,7 @@ pnpm add -D file:$HOME/kiwa/packages/core file:$HOME/kiwa/packages/cli
 pnpm exec kiwa init     # または: node $HOME/kiwa/packages/cli/dist/index.js init
 ```
 
-通常利用は Option B (`pnpm dlx @kiwa-test/cli init`) を推奨、 公開済 0.1.0 を直接取得します。
+通常利用は Option C (`pnpm dlx @kiwa-test/cli init`) を推奨、 公開済 0.1.0 を直接取得します。
 
 ### CJS / Next.js 14 プロジェクトとの共存
 
