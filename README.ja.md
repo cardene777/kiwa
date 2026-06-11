@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./assets/kiwa-logo.png" alt="kiwa ロゴ" width="200" />
+
 # kiwa
 
 **設計・実装・検証 — dApp と smart contract のテスト全 layer を、 1 つの仕様書から自動化。**

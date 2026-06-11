@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-logo.png" alt="kiwa ロゴ" width="160" />
+</p>
+
 # @kiwa-test/core
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)

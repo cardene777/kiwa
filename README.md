@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./assets/kiwa-logo.png" alt="kiwa logo" width="200" />
+
 # kiwa
 
 **Design, implement, verify — every test layer for dApps and smart contracts, from one spec.**
