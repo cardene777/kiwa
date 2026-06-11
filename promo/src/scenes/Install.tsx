@@ -1,7 +1,7 @@
 import { SceneLayout } from "../components/SceneLayout";
 import { SplitScreen } from "../components/SplitScreen";
 import { Terminal, TerminalLine } from "../components/Terminal";
-import { CodeBlock } from "../components/CodeBlock";
+import { CodeBlock, CodeLine } from "../components/CodeBlock";
 import { tokens, t } from "../tokens";
 
 const installRun: TerminalLine[] = [
@@ -62,7 +62,7 @@ const installRun: TerminalLine[] = [
   },
 ];
 
-const manualLines = [
+const manualLines: CodeLine[] = [
   { text: "// tests/MyMint.spec.ts" },
   { text: 'import { test, expect } from "@playwright/test";' },
   { text: 'import { mintFixture, connect } from "@kiwa-test/core";' },
@@ -97,7 +97,7 @@ export const Install: React.FC = () => {
           panels={[
             {
               label: t().installLineClaude,
-              accent: "#7CB342",
+              accent: tokens.color.primary,
               content: (
                 <Terminal
                   title="~/your-dapp"
@@ -110,7 +110,7 @@ export const Install: React.FC = () => {
             },
             {
               label: t().installLineManual,
-              accent: "#A0E060",
+              accent: tokens.color.accentManual,
               content: (
                 <CodeBlock
                   title="tests/MyMint.spec.ts  +  test/MyToken.t.sol"

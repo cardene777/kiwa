@@ -1,7 +1,7 @@
 import { SceneLayout } from "../components/SceneLayout";
 import { SplitScreen } from "../components/SplitScreen";
 import { CodeBlock } from "../components/CodeBlock";
-import { t } from "../tokens";
+import { tokens, t } from "../tokens";
 
 const contractSpecLines = [
   { text: "# test-spec-token-gating.md  (contract)" },
@@ -59,8 +59,8 @@ export const DemoSpecResult: React.FC = () => {
           gap={32}
           panels={[
             {
-              label: "tests/spec/contract/test-spec-token-gating.md",
-              accent: "#FF8A65",
+              label: "Contract spec",
+              accent: tokens.color.accentContract,
               content: (
                 <CodeBlock
                   title="tests/spec/contract/test-spec-token-gating.md"
@@ -75,8 +75,8 @@ export const DemoSpecResult: React.FC = () => {
               ),
             },
             {
-              label: "tests/spec/e2e/test-spec-token-gating.md",
-              accent: "#42A5F5",
+              label: "dApp e2e spec",
+              accent: tokens.color.accentE2e,
               content: (
                 <CodeBlock
                   title="tests/spec/e2e/test-spec-token-gating.md"

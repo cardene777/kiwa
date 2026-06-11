@@ -44,7 +44,7 @@ export const DemoTest: React.FC = () => {
             {
               label: "Contract test",
               badge: "forge",
-              accent: "#FF8A65",
+              accent: tokens.color.accentContract,
               content: (
                 <Terminal
                   title="forge test"
@@ -58,7 +58,7 @@ export const DemoTest: React.FC = () => {
             {
               label: "dApp e2e test",
               badge: "playwright",
-              accent: "#42A5F5",
+              accent: tokens.color.accentE2e,
               content: (
                 <Terminal
                   title="pnpm test"
