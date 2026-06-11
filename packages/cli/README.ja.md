@@ -28,7 +28,7 @@ pnpm dlx @kiwa-test/cli doctor
 
 ### Bonus — Claude Code plugin
 
-Claude Code を併用するなら、 kiwa の skill chain を **1 コマンドで導入** できる。 `/kiwa-test` / `/kiwa-design` / `/kiwa-play` 等が任意の dApp project から呼び出せる。
+Claude Code を併用するなら、 kiwa の skill chain を **1 コマンドで導入** できる。 `/kiwa-design` / `/kiwa-play` / `/kiwa-forge` / `/kiwa-hardhat` / `/kiwa-vitest` / `/kiwa-api` / `/kiwa-review` が任意の dApp project から呼び出せる。 (`/kiwa-test` 一括 orchestrator は `examples/` 依存のため kiwa monorepo 専用、 plugin 経路では起動不可)
 
 ```bash
 # Claude Code 内で:

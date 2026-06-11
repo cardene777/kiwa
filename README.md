@@ -182,7 +182,7 @@ git clone https://github.com/cardene777/kiwa.git && cd kiwa
 pnpm install
 
 # 2. In Claude Code (run from the kiwa repo), the project-local skills load automatically
-/kiwa-test --module your-module
+/kiwa-test --example nextjs-token-gating   # one-shot orchestrator (kiwa repo only, uses examples/)
 ```
 
 ### Option C: Playwright fixture only (no Claude needed)

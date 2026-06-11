@@ -9,7 +9,7 @@
     {
       "name": "kiwa",
       "source": "./",
-      "description": "kiwa skill chain (kiwa-design / kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-api / kiwa-review / kiwa-test) を 1 plugin で同梱。 dApp project に install すると Claude Code から /kiwa-design や /kiwa-test --example {name} で test 設計 → 実装 → 実行 → review を一気通貫で実行可能。",
+      "description": "kiwa skill chain (kiwa-design / kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-api / kiwa-review) を 1 plugin で同梱。 dApp project に install すると Claude Code から /kiwa-design で spec 生成、 /kiwa-forge / /kiwa-hardhat で contract test、 /kiwa-play で dApp e2e、 /kiwa-vitest で unit、 /kiwa-api で integration、 /kiwa-review で review を実行可能。 統合 orchestrator /kiwa-test は examples/ ディレクトリに依存するため kiwa monorepo 専用 (plugin 同梱はするが plugin 利用者経路では起動不可)。",
       "version": "0.1.0",
       "author": {
         "name": "cardene777",

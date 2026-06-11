@@ -26,7 +26,7 @@ pnpm add -D @kiwa-test/core @playwright/test viem
 
 ### Bonus — Claude Code plugin
 
-If you use Claude Code, install the kiwa skill chain in **one command** to get `/kiwa-play` (Playwright e2e generation), `/kiwa-design`, `/kiwa-review` etc. across every dApp project:
+If you use Claude Code, install the kiwa skill chain in **one command** to get `/kiwa-play` (Playwright e2e generation), `/kiwa-design`, `/kiwa-forge`, `/kiwa-hardhat`, `/kiwa-vitest`, `/kiwa-api`, `/kiwa-review` across every dApp project. (The `/kiwa-test` one-shot orchestrator requires `examples/` and is kiwa-monorepo-only.)
 
 ```bash
 # In Claude Code:

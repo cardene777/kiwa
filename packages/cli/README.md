@@ -28,7 +28,7 @@ pnpm dlx @kiwa-test/cli doctor
 
 ### Bonus — Claude Code plugin
 
-Use kiwa with Claude Code? Install the matching skill chain in **one command** — `/kiwa-test`, `/kiwa-design`, `/kiwa-play` etc. become available across any dApp project.
+Use kiwa with Claude Code? Install the matching skill chain in **one command** — `/kiwa-design`, `/kiwa-play`, `/kiwa-forge`, `/kiwa-hardhat`, `/kiwa-vitest`, `/kiwa-api`, `/kiwa-review` become available across any dApp project. (The `/kiwa-test` one-shot orchestrator requires `examples/` and is kiwa-monorepo-only.)
 
 ```bash
 # In Claude Code:
