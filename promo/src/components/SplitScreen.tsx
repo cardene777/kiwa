@@ -12,7 +12,7 @@ type Props = {
   gap?: number;
 };
 
-export const SplitScreen: React.FC<Props> = ({ panels, gap = 32 }) => {
+export const SplitScreen: React.FC<Props> = ({ panels, gap = 24 }) => {
   return (
     <div
       style={{
@@ -20,8 +20,7 @@ export const SplitScreen: React.FC<Props> = ({ panels, gap = 32 }) => {
         height: "100%",
         display: "flex",
         gap,
-        padding: tokens.spacing.lg,
-        boxSizing: "border-box",
+        minHeight: 0,
       }}
     >
       {panels.map((panel, idx) => {
@@ -35,6 +34,7 @@ export const SplitScreen: React.FC<Props> = ({ panels, gap = 32 }) => {
               flexDirection: "column",
               gap: tokens.spacing.sm,
               minWidth: 0,
+              minHeight: 0,
             }}
           >
             <div
@@ -42,23 +42,23 @@ export const SplitScreen: React.FC<Props> = ({ panels, gap = 32 }) => {
                 display: "flex",
                 alignItems: "center",
                 gap: tokens.spacing.sm,
-                padding: `${tokens.spacing.xs}px ${tokens.spacing.sm}px`,
+                flexShrink: 0,
               }}
             >
               <div
                 style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: 6,
+                  width: 14,
+                  height: 14,
+                  borderRadius: 7,
                   background: accent,
-                  boxShadow: `0 0 12px ${accent}`,
+                  boxShadow: `0 0 14px ${accent}`,
                 }}
               />
               <div
                 style={{
                   fontFamily: tokens.font.sans,
-                  fontWeight: 600,
-                  fontSize: 22,
+                  fontWeight: 700,
+                  fontSize: 30,
                   color: tokens.color.white,
                 }}
               >
@@ -67,12 +67,14 @@ export const SplitScreen: React.FC<Props> = ({ panels, gap = 32 }) => {
               {panel.badge && (
                 <div
                   style={{
+                    marginLeft: "auto",
                     fontFamily: tokens.font.mono,
-                    fontSize: 16,
+                    fontSize: 18,
                     color: accent,
                     border: `1px solid ${accent}`,
                     borderRadius: 6,
-                    padding: "2px 8px",
+                    padding: "4px 10px",
+                    fontWeight: 600,
                   }}
                 >
                   {panel.badge}

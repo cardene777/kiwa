@@ -1,6 +1,5 @@
-import { useCurrentFrame, interpolate, Sequence } from "remotion";
-import { Background } from "../components/Background";
-import { SectionTitle } from "../components/SectionTitle";
+import { useCurrentFrame, interpolate } from "remotion";
+import { SceneLayout } from "../components/SceneLayout";
 import { CodeBlock } from "../components/CodeBlock";
 import { tokens } from "../tokens";
 
@@ -8,137 +7,136 @@ const specLines = [
   { text: "# test-spec-token-gating.md" },
   { text: "" },
   { text: "## Test viewpoints (11 axes)" },
-  { text: "- happy path / failure / boundary" },
-  { text: "- state transition / permission" },
-  { text: "- input validation / idempotency" },
-  { text: "- concurrency / security / regression" },
+  { text: "- happy path" },
+  { text: "- failure" },
+  { text: "- boundary" },
+  { text: "- state transition" },
+  { text: "- permission / security" },
   { text: "" },
   { text: "## TC-001 mint happy path" },
-  { text: "| level | input | expected |" },
-  { text: "| unit  | (none) | owner==msg.sender |" },
+  { text: "level: unit" },
+  { text: "expected: owner == msg.sender" },
 ];
 
-const ArrowLine: React.FC<{
-  startFrame: number;
+const CANVAS_W = 1760;
+const CANVAS_H = 760;
+const CODE_W = 680;
+const CODE_H = 560;
+const codeLeft = 60;
+const codeTop = (CANVAS_H - CODE_H) / 2;
+const arrowStartX = codeLeft + CODE_W + 60;
+const arrowStartY = CANVAS_H / 2;
+
+type Arrow = {
   delay: number;
-  rotate: number;
+  endX: number;
+  endY: number;
   label: string;
+  sublabel: string;
   accent: string;
-}> = ({ startFrame, delay, rotate, label, accent }) => {
-  const frame = useCurrentFrame() - startFrame - delay;
-  const opacity = interpolate(frame, [0, 12], [0, 1], {
+};
+
+const arrows: Arrow[] = [
+  { delay: 0, endX: arrowStartX + 420, endY: arrowStartY - 200, label: "Foundry", sublabel: ".t.sol", accent: "#FF8A65" },
+  { delay: 14, endX: arrowStartX + 460, endY: arrowStartY, label: "Hardhat", sublabel: ".test.ts", accent: "#FFCA28" },
+  { delay: 28, endX: arrowStartX + 420, endY: arrowStartY + 200, label: "Playwright", sublabel: ".spec.ts", accent: "#42A5F5" },
+];
+
+const ARROW_START_FRAME = 70;
+
+const ArrowSvg: React.FC<{ arrow: Arrow }> = ({ arrow }) => {
+  const frame = useCurrentFrame() - ARROW_START_FRAME - arrow.delay;
+  const progress = interpolate(frame, [0, 22], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const lineWidth = interpolate(frame, [0, 18], [0, 280], {
+  const labelOpacity = interpolate(frame, [16, 30], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const labelOpacity = interpolate(frame, [12, 22], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  const currentX = arrowStartX + (arrow.endX - arrowStartX) * progress;
+  const currentY = arrowStartY + (arrow.endY - arrowStartY) * progress;
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        left: 920,
-        top: 540,
-        transformOrigin: "left center",
-        transform: `rotate(${rotate}deg)`,
-        opacity,
-      }}
-    >
-      <div
-        style={{
-          width: lineWidth,
-          height: 3,
-          background: `linear-gradient(90deg, ${accent} 0%, ${accent} 70%, transparent 100%)`,
-          boxShadow: `0 0 12px ${accent}`,
-          position: "relative",
-        }}
+    <g>
+      <line
+        x1={arrowStartX}
+        y1={arrowStartY}
+        x2={currentX}
+        y2={currentY}
+        stroke={arrow.accent}
+        strokeWidth={4}
+        strokeLinecap="round"
+        style={{ filter: `drop-shadow(0 0 8px ${arrow.accent})` }}
       />
-      <div
-        style={{
-          position: "absolute",
-          left: 280,
-          top: -28,
-          fontFamily: tokens.font.mono,
-          fontSize: 24,
-          fontWeight: 600,
-          color: accent,
-          opacity: labelOpacity,
-          transform: `rotate(${-rotate}deg)`,
-        }}
+      <circle cx={currentX} cy={currentY} r={10} fill={arrow.accent} style={{ filter: `drop-shadow(0 0 12px ${arrow.accent})` }} />
+      <text
+        x={arrow.endX + 22}
+        y={arrow.endY - 4}
+        fill={arrow.accent}
+        fontFamily={tokens.font.sans}
+        fontSize={40}
+        fontWeight={700}
+        opacity={labelOpacity}
       >
-        {label}
-      </div>
-    </div>
+        {arrow.label}
+      </text>
+      <text
+        x={arrow.endX + 22}
+        y={arrow.endY + 32}
+        fill={arrow.accent}
+        fontFamily={tokens.font.mono}
+        fontSize={22}
+        opacity={labelOpacity * 0.9}
+      >
+        {arrow.sublabel}
+      </text>
+    </g>
   );
 };
 
 export const Solution: React.FC = () => {
   return (
-    <Background>
+    <SceneLayout
+      eyebrow="The Solution"
+      headline="One spec, three layers — generated."
+    >
       <div
         style={{
-          width: "100%",
-          height: "100%",
-          padding: tokens.spacing.lg,
-          boxSizing: "border-box",
           position: "relative",
+          width: CANVAS_W,
+          height: CANVAS_H,
         }}
       >
-        <Sequence from={0}>
-          <SectionTitle
-            eyebrow="The Solution"
-            headline="One spec, three layers, generated for you."
+        <div
+          style={{
+            position: "absolute",
+            left: codeLeft,
+            top: codeTop,
+          }}
+        >
+          <CodeBlock
+            title="Layer 1 spec"
+            language="markdown"
+            lines={specLines}
+            width={CODE_W}
+            height={CODE_H}
+            fontSize={22}
+            startFrame={10}
+            lineRevealSpeed={3}
           />
-        </Sequence>
-        <Sequence from={30}>
-          <div
-            style={{
-              position: "absolute",
-              left: tokens.spacing.lg,
-              top: 280,
-            }}
-          >
-            <CodeBlock
-              title="Layer 1 spec (input)"
-              language="markdown"
-              lines={specLines}
-              width={700}
-              height={520}
-              fontSize={22}
-              lineRevealSpeed={3}
-            />
-          </div>
-        </Sequence>
-        <Sequence from={90}>
-          <ArrowLine
-            startFrame={0}
-            delay={0}
-            rotate={-25}
-            label="Foundry .t.sol"
-            accent="#FF8A65"
-          />
-          <ArrowLine
-            startFrame={0}
-            delay={12}
-            rotate={0}
-            label="Hardhat .test.ts"
-            accent="#FFCA28"
-          />
-          <ArrowLine
-            startFrame={0}
-            delay={24}
-            rotate={25}
-            label="Playwright .spec.ts"
-            accent="#42A5F5"
-          />
-        </Sequence>
+        </div>
+        <svg
+          width={CANVAS_W}
+          height={CANVAS_H}
+          viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
+          style={{ position: "absolute", left: 0, top: 0 }}
+        >
+          {arrows.map((arrow, idx) => (
+            <ArrowSvg key={idx} arrow={arrow} />
+          ))}
+        </svg>
       </div>
-    </Background>
+    </SceneLayout>
   );
 };
