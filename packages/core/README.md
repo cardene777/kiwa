@@ -9,7 +9,7 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa overview — contract test, dApp e2e test, and manual write paths" width="640" />
   <br />
-  <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview — this package covers the dApp e2e and manual-write paths.</sub>
+  <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview — this package covers the dApp e2e and manual-write paths. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">▶ Full-quality MP4</a>.</sub>
 </p>
 
 Headless E2E test fixture for dApps on anvil forks (Playwright + viem).

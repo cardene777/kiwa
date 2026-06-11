@@ -13,7 +13,7 @@ CLI for [kiwa](https://github.com/cardene777/kiwa) with `init` and `doctor` comm
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa overview — contract test, dApp e2e test, and manual write paths (this CLI scaffolds the dApp e2e path)" width="640" />
   <br />
-  <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview — this CLI scaffolds the dApp e2e setup shown in the video.</sub>
+  <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview — this CLI scaffolds the dApp e2e setup shown in the video. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">▶ Full-quality MP4</a>.</sub>
 </p>
 
 ## Installation

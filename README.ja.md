@@ -26,6 +26,8 @@
 
 <p align="center">
   <img src="./assets/kiwa-promo-ja.gif" alt="kiwa 65 秒概要 — contract test、dApp e2e test、手書きの 3 経路" width="880" />
+  <br />
+  <sub><a href="./assets/kiwa-promo-ja.mp4">▶ フル画質 MP4 を視聴 (8.4 MB / 1920×1080 / h264)</a></sub>
 </p>
 
 ---
