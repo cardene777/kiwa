@@ -144,21 +144,35 @@ kiwa の skill chain を Claude Code plugin として導入する経路。 clone
 /plugin install kiwa@kiwa-marketplace
 ```
 
-install 後、 8 skill が global に利用可能:
+install 後、 8 skill が global に利用可能。 任意の dApp project 内で個別 layer を順に呼び出す:
 
 ```bash
-/kiwa-test --module your-module           # 一括 orchestrator (contract + e2e)
-# or 個別 layer を順に
+# Layer 1 — test 設計 (出力 — tests/spec/<layer>/test-spec-<module>.md)
 /kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
-/kiwa-forge --module your-module          # Foundry
-/kiwa-hardhat --module your-module        # Hardhat (並立)
-/kiwa-vitest --module your-module         # Vitest unit (F-3、 任意)
-/kiwa-api --module your-module            # API integration (F-3、 任意)
-/kiwa-play --mode new --example your-dapp # Playwright e2e
-/kiwa-review --mode test-review           # spec / test / 結果 review
+/kiwa-design --layer unit --module your-module
+/kiwa-design --layer integration --module your-module
+
+# Layer 2 — spec から test 実装
+/kiwa-forge --module your-module          # Foundry contract test
+/kiwa-hardhat --module your-module        # Hardhat contract test (並立 runner 選択可)
+/kiwa-vitest --module your-module         # Vitest 単体 (F-3)
+/kiwa-api --module your-module            # API integration (F-3)
+/kiwa-play --init                          # 新規 dApp project に Playwright fixture を bootstrap
+/kiwa-play --mode new                      # 新規 dApp e2e test を追加
+/kiwa-play --mode extend                   # 既存 dApp e2e test を拡張
+
+# review (spec / test / 結果)
+/kiwa-review --mode test-review
 ```
 
-plugin の更新は `/plugin marketplace update kiwa-marketplace`。
+> `--example` flag と `/kiwa-test` 一括 orchestrator は kiwa monorepo (`examples/` がある側) 専用。 plugin 利用者は上記の個別 skill を project 内で直接起動する。
+
+plugin の更新:
+
+```bash
+/plugin marketplace update kiwa-marketplace  # catalog の refresh
+/plugin update kiwa@kiwa-marketplace         # 新 version を適用
+```
 
 ### Option B: clone & install (kiwa contributor 用)
 

@@ -144,21 +144,35 @@ Install the kiwa skill chain as a Claude Code plugin — no clone required, avai
 /plugin install kiwa@kiwa-marketplace
 ```
 
-After install, all 8 skills are available globally:
+After install, all 8 skills are available globally. Inside any dApp project, run the individual layers:
 
 ```bash
-/kiwa-test --module your-module           # one-shot orchestrator (contract + e2e)
-# or run individual layers:
+# Layer 1 — design tests (output: tests/spec/<layer>/test-spec-<module>.md)
 /kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
-/kiwa-forge --module your-module          # Foundry
-/kiwa-hardhat --module your-module        # Hardhat (parallel)
-/kiwa-vitest --module your-module         # Vitest unit (F-3, optional)
-/kiwa-api --module your-module            # API integration (F-3, optional)
-/kiwa-play --mode new --example your-dapp # Playwright e2e
-/kiwa-review --mode test-review            # spec / test / result review
+/kiwa-design --layer unit --module your-module
+/kiwa-design --layer integration --module your-module
+
+# Layer 2 — implement tests from the spec
+/kiwa-forge --module your-module          # Foundry contract tests
+/kiwa-hardhat --module your-module        # Hardhat contract tests (parallel runner option)
+/kiwa-vitest --module your-module         # Vitest unit (F-3)
+/kiwa-api --module your-module            # API integration (F-3)
+/kiwa-play --init                          # Bootstrap Playwright fixture for a fresh dApp
+/kiwa-play --mode new                      # Add new dApp e2e tests
+/kiwa-play --mode extend                   # Extend existing dApp e2e tests
+
+# Review — covers spec / test / result
+/kiwa-review --mode test-review
 ```
 
-Update the plugin later with `/plugin marketplace update kiwa-marketplace`.
+> The `--example` flag and `/kiwa-test` one-shot orchestrator are intended for the kiwa monorepo itself (which has `examples/`). Plugin users run the individual skills above directly from their project.
+
+Update the plugin later:
+
+```bash
+/plugin marketplace update kiwa-marketplace  # refresh the catalog
+/plugin update kiwa@kiwa-marketplace         # apply the new version
+```
 
 ### Option B: Clone & install (for kiwa contributors)
 
