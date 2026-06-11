@@ -115,11 +115,54 @@ transport 差し替えの自由度が主目的なら wallet-mock の方が設計
 
 この 4 点に無理がなければ、kiwa の設計と相性が良い可能性が高いです。
 
+## AI / 仕様書ベース test 生成軸の比較
+
+上の節は dApp E2E fixture としての比較ですが、 kiwa は Claude Code skill (`/kiwa-design` / `/kiwa-forge` / `/kiwa-hardhat` / `/kiwa-play` / `/kiwa-vitest` / `/kiwa-api` / `/kiwa-review` / `/kiwa-test`) も持ち、 1 つの仕様書から 4 layer (contract / unit / integration / e2e) を横断して test を設計・生成します。 本節ではその側面を比較します。
+
+| 観点 | hardhat-test-suite-generator | Foundry / Hardhat AI plugin (2026) | Claude Code spec-driven dev | kiwa skill chain |
+|---|---|---|---|---|
+| アプローチ | contract ABI から静的 template scaffold | LLM で fuzz seed / invariant 提案 plugin | 自由形式 spec → test → code 反復 | 11 観点 spec → 4 layer test code |
+| scope | Hardhat contract test のみ | contract layer (fuzz + invariant) のみ | 汎用、 言語非依存 | contract + dApp e2e + unit + integration |
+| spec 形式 | なし (ABI 駆動) | なし (heuristic) | 自由形式 markdown | 固定 9 section / 9 column markdown |
+| layer cover | 1 (Hardhat) | 1 (Foundry or Hardhat の fuzz / invariant) | project ごとに決定 | 4 (contract / unit / integration / e2e) |
+| review loop | なし | なし | 手動 | `/kiwa-review` が 11 観点 + spec drift を check |
+| 適性 | Hardhat の test boilerplate scaffold | 既存 Foundry repo の fuzz / invariant 補強 | 汎用 LLM 支援開発 | contract + e2e を同時に扱う dApp project |
+
+### kiwa skill chain が活きる場面
+
+- spec → test → review → coverage report を 1 コマンド (`/kiwa-test --example {name}`) で流したい
+- 1 枚の 9 column spec 表から Foundry / Hardhat / Playwright / Vitest を並列駆動したい
+- 11 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ / 回帰) を dApp test suite に明示適用したい
+
+### 他ツールが向く場面
+
+- Hardhat contract test の scaffold だけ欲しい → `hardhat-test-suite-generator` の方が軽量
+- 既存 Foundry repo に fuzz seed を足したいだけ → Foundry AI plugin が適合
+- dApp 固有の事情がない汎用 LLM 支援 dev loop → Claude Code spec-driven dev をそのまま使う
+
+## kiwa 独自の領域
+
+両軸 (dApp E2E fixture + spec-driven test 生成) を比較した結果、 kiwa の独自性は **1 入口から 4 layer chain** をすべて回す点にあります。
+
+```
+/kiwa-design (Layer 1)
+  ├─ /kiwa-forge        → Foundry .t.sol
+  ├─ /kiwa-hardhat      → Hardhat .test.ts
+  ├─ /kiwa-play         → Playwright .spec.ts (@kiwa-test/core fixture を使用)
+  ├─ /kiwa-vitest       → Vitest .test.ts (unit)
+  ├─ /kiwa-api          → Vitest + msw / supertest (integration)
+  └─ /kiwa-review       → spec vs 実装 drift + 11 観点 cover を check
+```
+
+執筆時点で両軸どちらの競合も 4 layer (contract + unit + integration + e2e) を 1 つの spec から横断する例は確認できませんでした。
+
 ## 関連
 
 - [Synpress repository](https://github.com/Synthetixio/synpress)
 - [dappwright repository](https://github.com/TenKeyLabs/dappwright)
 - [wallet-mock repository](https://github.com/johanneskares/wallet-mock)
+- [hardhat-test-suite-generator](https://github.com/ahmedali8/hardhat-test-suite-generator)
+- [Claude Code spec-driven development](https://www.augmentcode.com/guides/claude-code-spec-driven-development)
 - [Foundry anvil docs](https://book.getfoundry.sh/anvil/)
 - [RPC.md](./RPC.md)
 - [README.md](../README.md)
