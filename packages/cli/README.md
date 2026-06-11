@@ -7,7 +7,7 @@
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa overview — full ecosystem (this CLI scaffolds the dApp e2e path)" width="640" />
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa overview — contract test, dApp e2e test, and manual write paths (this CLI scaffolds the dApp e2e path)" width="640" />
   <br />
   <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview — this CLI scaffolds the dApp e2e setup shown in the video.</sub>
 </p>
