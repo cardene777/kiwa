@@ -7,7 +7,9 @@
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 65s overview" width="720" />
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa overview — full ecosystem (this CLI scaffolds the dApp e2e path)" width="640" />
+  <br />
+  <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview — this CLI scaffolds the dApp e2e setup shown in the video.</sub>
 </p>
 
 CLI for [kiwa](https://github.com/cardene777/kiwa) with `init` and `doctor` commands.

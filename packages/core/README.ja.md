@@ -7,12 +7,16 @@
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 65 秒概要" width="720" />
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 概要 — contract test / dApp e2e test / 手書きの 3 経路" width="640" />
+  <br />
+  <sub><a href="https://github.com/cardene777/kiwa">kiwa</a> 全体の概要動画 — 本パッケージは dApp e2e と手書き経路を担う。</sub>
 </p>
 
 anvil fork 上で動く dApp 向け headless E2E test fixture (Playwright + viem)。
 
 `@kiwa-test/core` は [kiwa](https://github.com/cardene777/kiwa) の Playwright ベース dApp E2E layer が使う runtime fixture。 test page に `window.ethereum` を inject し、 anvil ベースの wallet fixture を起動、 EIP-1193 の主要 flow を直接処理し、 残りの JSON-RPC surface は anvil に転送する。
+
+使い方は 2 通り。 (a) Claude に `/kiwa-play` で Playwright test を生成させる、 (b) fixture を直接 import (`import { dappE2eTest as test } from "@kiwa-test/core"`) して手書きする。 contract test (`@kiwa-test/forge`) + dApp e2e (`@kiwa-test/core`) + 手書き の 3 経路の全体像は [kiwa README](https://github.com/cardene777/kiwa) を参照。
 
 ## インストール
 

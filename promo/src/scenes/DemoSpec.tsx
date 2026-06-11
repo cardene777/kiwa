@@ -50,7 +50,7 @@ const contractLines: TerminalLine[] = [
   },
   {
     content: "wrote tests/spec/contract/test-spec-token-gating.md",
-    delayFrames: 275,
+    delayFrames: 255,
     color: tokens.color.primary,
     bold: true,
     typeSpeed: 2,
@@ -104,7 +104,7 @@ const e2eLines: TerminalLine[] = [
   },
   {
     content: "wrote tests/spec/e2e/test-spec-token-gating.md",
-    delayFrames: 275,
+    delayFrames: 255,
     color: tokens.color.primary,
     bold: true,
     typeSpeed: 2,
@@ -117,10 +117,9 @@ export const DemoSpec: React.FC = () => {
       eyebrow={t().eyebrowDemoSpec}
       headline={t().headlineDemoSpec}
     >
-      <div style={{ width: "100%", height: "100%", display: "flex" }}>
-        <SplitScreen
-          gap={32}
-          panels={[
+      <SplitScreen
+        gap={32}
+        panels={[
             {
               label: "Contract test spec",
               badge: "forge / hardhat",
@@ -149,9 +148,8 @@ export const DemoSpec: React.FC = () => {
                 />
               ),
             },
-          ]}
-        />
-      </div>
+        ]}
+      />
     </SceneLayout>
   );
 };

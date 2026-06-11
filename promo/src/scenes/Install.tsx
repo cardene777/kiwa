@@ -75,10 +75,8 @@ const manualLines = [
   { text: '  await page.getByTestId("mint-button").click();' },
   { text: '  await expect(page.getByTestId("balance")).toHaveText("1");' },
   { text: "});" },
-  { text: "" },
   { text: "// test/MyToken.t.sol" },
   { text: 'import { kiwaHelpers } from "@kiwa-test/forge";' },
-  { text: "" },
   { text: "contract MyTokenTest is Test, kiwaHelpers {" },
   { text: "  function test_Mint_HappyPath() public {" },
   { text: "    vm.prank(alice);" },
@@ -94,8 +92,7 @@ export const Install: React.FC = () => {
       eyebrow={t().eyebrowInstall}
       headline={t().headlineInstall}
     >
-      <div style={{ width: "100%", height: "100%", display: "flex" }}>
-        <SplitScreen
+      <SplitScreen
           gap={32}
           panels={[
             {
@@ -127,9 +124,8 @@ export const Install: React.FC = () => {
                 />
               ),
             },
-          ]}
-        />
-      </div>
+        ]}
+      />
     </SceneLayout>
   );
 };

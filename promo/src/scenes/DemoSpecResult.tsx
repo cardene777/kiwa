@@ -68,7 +68,7 @@ export const DemoSpecResult: React.FC = () => {
                   lines={contractSpecLines}
                   width="100%"
                   height="100%"
-                  fontSize={22}
+                  fontSize={20}
                   startFrame={10}
                   lineRevealSpeed={4}
                 />
@@ -84,8 +84,8 @@ export const DemoSpecResult: React.FC = () => {
                   lines={e2eSpecLines}
                   width="100%"
                   height="100%"
-                  fontSize={22}
-                  startFrame={40}
+                  fontSize={20}
+                  startFrame={10}
                   lineRevealSpeed={4}
                 />
               ),

@@ -26,8 +26,7 @@ export const tokens = {
   text: {
     en: {
       productName: "kiwa",
-      tagline: "Generate contract and dApp e2e tests",
-      taglineJa: "contract と dApp e2e のテストを自動生成",
+      tagline: "Contract, dApp e2e, and manual tests — generated or written",
       eyebrowProblem: "The Problem",
       headlineProblem: "Hand-writing tests is tedious",
       eyebrowSolution: "The Solution",
@@ -49,8 +48,7 @@ export const tokens = {
     },
     ja: {
       productName: "kiwa",
-      tagline: "contract と dApp e2e のテストを自動生成",
-      taglineJa: "contract と dApp e2e のテストを自動生成",
+      tagline: "contract / dApp e2e / 手書きまで kiwa で全部書ける",
       eyebrowProblem: "課題",
       headlineProblem: "テストコードを手書きするのは大変",
       eyebrowSolution: "解決",

@@ -35,7 +35,7 @@ const codeLines = [
 export const Problem: React.FC = () => {
   const frame = useCurrentFrame();
   // 大量のコードがスクロールしながら表示される演出
-  const scrollOffset = interpolate(frame, [60, 240], [0, -300], {
+  const scrollOffset = interpolate(frame, [60, 200], [0, -300], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -67,7 +67,7 @@ export const Problem: React.FC = () => {
               language="contract + e2e"
               lines={codeLines}
               width="100%"
-              height={900}
+              height={1200}
               fontSize={22}
               startFrame={15}
               lineRevealSpeed={3}

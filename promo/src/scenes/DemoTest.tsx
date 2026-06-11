@@ -43,7 +43,7 @@ export const DemoTest: React.FC = () => {
           panels={[
             {
               label: "Contract test",
-              badge: "forge / hardhat",
+              badge: "forge",
               accent: "#FF8A65",
               content: (
                 <Terminal

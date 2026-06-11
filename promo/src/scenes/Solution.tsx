@@ -9,6 +9,9 @@ const CANVAS_H = 760;
 const centerX = CANVAS_W / 2;
 const centerY = CANVAS_H / 2;
 const LOGO_SIZE = 200;
+const LOGO_TOP = centerY - 140;
+const LOGO_CENTER_Y = LOGO_TOP + LOGO_SIZE / 2;
+const LOGO_BOTTOM = LOGO_TOP + LOGO_SIZE;
 
 type Branch = {
   delay: number;
@@ -43,7 +46,7 @@ const branches: Branch[] = [
     delay: 20,
     side: "bottom",
     dotX: centerX,
-    dotY: centerY + 280,
+    dotY: centerY + 220,
     label: "Manual write",
     sublabel: "@kiwa-test/core",
     accent: "#A0E060",
@@ -53,9 +56,9 @@ const branches: Branch[] = [
 const ARROW_START_FRAME = 60;
 
 const startPointFor = (side: Branch["side"]) => {
-  if (side === "left") return { x: centerX - LOGO_SIZE / 2 - 10, y: centerY + 60 };
-  if (side === "right") return { x: centerX + LOGO_SIZE / 2 + 10, y: centerY + 60 };
-  return { x: centerX, y: centerY + LOGO_SIZE / 2 + 10 };
+  if (side === "left") return { x: centerX - LOGO_SIZE / 2 - 10, y: LOGO_CENTER_Y };
+  if (side === "right") return { x: centerX + LOGO_SIZE / 2 + 10, y: LOGO_CENTER_Y };
+  return { x: centerX, y: LOGO_BOTTOM + 10 };
 };
 
 const BranchSvg: React.FC<{ branch: Branch }> = ({ branch }) => {
@@ -76,7 +79,7 @@ const BranchSvg: React.FC<{ branch: Branch }> = ({ branch }) => {
     branch.side === "left" ? "end" : branch.side === "right" ? "start" : "middle";
   const labelOffsetX =
     branch.side === "left" ? -28 : branch.side === "right" ? 28 : 0;
-  const labelOffsetY = branch.side === "bottom" ? 56 : 0;
+  const labelOffsetY = branch.side === "bottom" ? 36 : 0;
 
   return (
     <g>
