@@ -143,30 +143,31 @@ Install the kiwa skill chain as a Claude Code plugin — no clone required, avai
 # In Claude Code (run from any project):
 /plugin marketplace add cardene777/kiwa
 /plugin install kiwa@kiwa-marketplace
+/reload-plugins                            # activate without restarting the session
 ```
 
-After install, all 8 skills are available globally. Inside any dApp project, run the individual layers:
+After install, all 8 skills appear under the `kiwa:` namespace (Claude Code namespaces plugin skills by plugin name). Inside any dApp project, run the individual layers:
 
 ```bash
 # Layer 1 — design tests (output: tests/spec/<layer>/test-spec-<module>.md)
-/kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
-/kiwa-design --layer unit --module your-module
-/kiwa-design --layer integration --module your-module
+/kiwa:kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
+/kiwa:kiwa-design --layer unit --module your-module
+/kiwa:kiwa-design --layer integration --module your-module
 
 # Layer 2 — implement tests from the spec
-/kiwa-forge --module your-module          # Foundry contract tests
-/kiwa-hardhat --module your-module        # Hardhat contract tests (parallel runner option)
-/kiwa-vitest --module your-module         # Vitest unit (F-3)
-/kiwa-api --module your-module            # API integration (F-3)
-/kiwa-play --init                          # Bootstrap Playwright fixture for a fresh dApp
-/kiwa-play --mode new                      # Add new dApp e2e tests
-/kiwa-play --mode extend                   # Extend existing dApp e2e tests
+/kiwa:kiwa-forge --module your-module          # Foundry contract tests
+/kiwa:kiwa-hardhat --module your-module        # Hardhat contract tests (parallel runner option)
+/kiwa:kiwa-vitest --module your-module         # Vitest unit (F-3)
+/kiwa:kiwa-api --module your-module            # API integration (F-3)
+/kiwa:kiwa-play --init                          # Bootstrap Playwright fixture for a fresh dApp
+/kiwa:kiwa-play --mode new                      # Add new dApp e2e tests
+/kiwa:kiwa-play --mode extend                   # Extend existing dApp e2e tests
 
 # Review — covers spec / test / result (provide --module + --layer to resolve paths)
-/kiwa-review --mode test-review --module your-module --layer contract
+/kiwa:kiwa-review --mode test-review --module your-module --layer contract
 ```
 
-> The `--example` flag and `/kiwa-test` one-shot orchestrator are intended for the kiwa monorepo itself (which has `examples/`). Plugin users run the individual skills above directly from their project.
+> The `--example` flag and `/kiwa:kiwa-test` one-shot orchestrator are intended for the kiwa monorepo itself (which has `examples/`). Plugin users run the individual skills above directly from their project.
 
 Update the plugin later:
 

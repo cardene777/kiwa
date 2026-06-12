@@ -26,15 +26,16 @@ pnpm add -D @kiwa-test/core @playwright/test viem
 
 ### Bonus — Claude Code plugin
 
-If you use Claude Code, install the kiwa skill chain in **one command** to get `/kiwa-play` (Playwright e2e generation), `/kiwa-design`, `/kiwa-forge`, `/kiwa-hardhat`, `/kiwa-vitest`, `/kiwa-api`, `/kiwa-review` across every dApp project. (The `/kiwa-test` one-shot orchestrator requires `examples/` and is kiwa-monorepo-only.)
+If you use Claude Code, install the kiwa skill chain in **one command** to get `/kiwa:kiwa-play` (Playwright e2e generation), `/kiwa:kiwa-design`, `/kiwa:kiwa-forge`, `/kiwa:kiwa-hardhat`, `/kiwa:kiwa-vitest`, `/kiwa:kiwa-api`, `/kiwa:kiwa-review` across every dApp project. (The `/kiwa:kiwa-test` one-shot orchestrator requires `examples/` and is kiwa-monorepo-only.)
 
 ```bash
 # In Claude Code:
 /plugin marketplace add cardene777/kiwa
 /plugin install kiwa@kiwa-marketplace
+/reload-plugins
 ```
 
-See [kiwa README — Option A](https://github.com/cardene777/kiwa#option-a-claude-code-plugin-recommended-for-claude-users) for the full skill list.
+> Plugin skills are namespaced by plugin name (`/kiwa:kiwa-design`, not `/kiwa-design`). See [kiwa README — Option A](https://github.com/cardene777/kiwa#option-a-claude-code-plugin-recommended-for-claude-users) for the full skill list.
 
 ## Quickstart
 
