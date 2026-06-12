@@ -2,7 +2,7 @@
   "name": "kiwa",
   "displayName": "kiwa",
   "description": "OSS test framework for dApps. contract / dApp e2e / unit / integration の全レイヤーで Claude 自動生成 or 手書きの test を一気通貫で書ける。 skill chain (kiwa-design → kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-api → kiwa-review、 統合は kiwa-test) を同梱。",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "cardene777",
     "email": "cardene777@gmail.com"

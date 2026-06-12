@@ -7,7 +7,7 @@ description: |
 user_invocable: true
 context: conversation
 agent: general-purpose
-allowed-tools: Bash, Read, Glob, Grep, Write, Edit, Agent
+allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 ---
 
 # /kiwa-play — kiwa経由の dApp e2e テスト skill
