@@ -143,30 +143,31 @@ kiwa の skill chain を Claude Code plugin として導入する経路。 clone
 # Claude Code 内で (任意の project から):
 /plugin marketplace add cardene777/kiwa
 /plugin install kiwa@kiwa-marketplace
+/reload-plugins                            # session 再起動なしで activate
 ```
 
-install 後、 8 skill が global に利用可能。 任意の dApp project 内で個別 layer を順に呼び出す:
+install 後、 8 skill は `kiwa:` namespace 付きで global 利用可能 (Claude Code は plugin 提供 skill を plugin 名で namespace する)。 任意の dApp project 内で個別 layer を順に呼び出す:
 
 ```bash
 # Layer 1 — test 設計 (出力 — tests/spec/<layer>/test-spec-<module>.md)
-/kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
-/kiwa-design --layer unit --module your-module
-/kiwa-design --layer integration --module your-module
+/kiwa:kiwa-design --layer contract --input path/to/YourContract.sol --module your-module
+/kiwa:kiwa-design --layer unit --module your-module
+/kiwa:kiwa-design --layer integration --module your-module
 
 # Layer 2 — spec から test 実装
-/kiwa-forge --module your-module          # Foundry contract test
-/kiwa-hardhat --module your-module        # Hardhat contract test (並立 runner 選択可)
-/kiwa-vitest --module your-module         # Vitest 単体 (F-3)
-/kiwa-api --module your-module            # API integration (F-3)
-/kiwa-play --init                          # 新規 dApp project に Playwright fixture を bootstrap
-/kiwa-play --mode new                      # 新規 dApp e2e test を追加
-/kiwa-play --mode extend                   # 既存 dApp e2e test を拡張
+/kiwa:kiwa-forge --module your-module          # Foundry contract test
+/kiwa:kiwa-hardhat --module your-module        # Hardhat contract test (並立 runner 選択可)
+/kiwa:kiwa-vitest --module your-module         # Vitest 単体 (F-3)
+/kiwa:kiwa-api --module your-module            # API integration (F-3)
+/kiwa:kiwa-play --init                          # 新規 dApp project に Playwright fixture を bootstrap
+/kiwa:kiwa-play --mode new                      # 新規 dApp e2e test を追加
+/kiwa:kiwa-play --mode extend                   # 既存 dApp e2e test を拡張
 
 # review (spec / test / 結果) — --module と --layer で path 解決
-/kiwa-review --mode test-review --module your-module --layer contract
+/kiwa:kiwa-review --mode test-review --module your-module --layer contract
 ```
 
-> `--example` flag と `/kiwa-test` 一括 orchestrator は kiwa monorepo (`examples/` がある側) 専用。 plugin 利用者は上記の個別 skill を project 内で直接起動する。
+> `--example` flag と `/kiwa:kiwa-test` 一括 orchestrator は kiwa monorepo (`examples/` がある側) 専用。 plugin 利用者は上記の個別 skill を project 内で直接起動する。
 
 plugin の更新:
 
