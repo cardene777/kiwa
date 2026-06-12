@@ -6,17 +6,28 @@ interface IGatedContentForReentry {
 }
 
 /// @notice TC-036 用 mock — `GatedContent` が `IGateNFT.balanceOf` を `external view`
-/// として呼ぶため、 mock 側で state 変更や nested call を試みても EVM レベルの staticcall
-/// 制約で revert する。 本 mock の目的は **「reentrancy が view 制約により構造的に
-/// 防がれている」** ことを assertion で証明することにある (実 reentrancy 実行ではない)。
+/// として呼ぶため、 mock 側で state 変更を試みた瞬間に EVM レベルの staticcall 制約で
+/// revert する。
 ///
-/// - `balanceOf` 内で `reentryCount` への storage write を試みる → staticcall 制約で revert
-/// - 続けて `target.getSecret()` の nested call を試みる → 同上
-/// - try / catch で revert を吸収するため呼び出し元 (`GatedContent`) からは
-///   `balanceOf == 0` の view return として観測される (NotGated revert に至る)
+/// 本 mock の目的は **「reentrancy を試みる悪意ある GateNFT を `GatedContent` に
+/// 差し替えた場合、 view 制約で構造的に防がれる」** ことを assertion で示すこと。
 ///
-/// 一般的な non-view callback site (例 `transfer` hook) に対する reentrancy guard
-/// を verify したい場合は、 本 mock を non-view interface 経由で呼ぶ別 target が必要。
+/// 実 execution path の詳細。
+///
+/// 1. `GatedContent` が `gate.balanceOf(user)` を呼ぶ → EVM が staticcall を発行
+/// 2. 本 mock の `balanceOf` body 内で `reentryCount = 1` (L35) を試みる
+/// 3. 第 1 の storage write の瞬間に staticcall 制約で revert
+/// 4. その revert は呼び出し元の `gate.balanceOf(user)` まで伝播
+/// 5. 結果として `GatedContent.hasAccess` / `GatedContent.getSecret` も revert
+///
+/// L36 の `try target.getSecret()` には **到達しない** (L35 で既に revert 済)。
+/// 本来の reentrancy 試行 (nested call) は dead code として残してあるが、
+/// staticcall context では 1 命令目の state 変更で確実に revert するため、
+/// nested call 経路の verify は本 mock では不可能。
+///
+/// 一般的な non-view callback site (例 ERC721 `transferFrom` 中の `onERC721Received` hook)
+/// に対する真の reentrancy guard を verify したい場合は、 本 mock を **non-view** な
+/// entry point 経由で呼ぶ別 target が必要。
 contract ReentrantGateNFT {
     IGatedContentForReentry public target;
     address public holder;
@@ -27,9 +38,13 @@ contract ReentrantGateNFT {
         holder = holder_;
     }
 
-    /// @dev `external view` の呼び出し元 (`GatedContent`) から staticcall される。
-    /// reentryCount への write と target.getSecret() への nested call は staticcall
-    /// 制約で revert するが、 try / catch で吸収するため返り値は通常通り返る。
+    /// @dev `external view` の呼び出し元 (`GatedContent`) から **staticcall** される。
+    /// L35 の `reentryCount = 1` (storage write) を試みた瞬間に staticcall 制約で revert
+    /// し、 その revert は呼び出し元の `gate.balanceOf(user)` まで伝播する。
+    ///
+    /// L36 の `try target.getSecret()` は dead code (L35 で既に revert 済で到達しない)。
+    /// L38 の return も同様に dead code。 本 mock は **「view 制約により state 変更を
+    /// 含む reentrancy が構造的に不可能」** であることを示す test fixture。
     function balanceOf(address user) external returns (uint256) {
         if (address(target) != address(0) && reentryCount == 0 && user == holder) {
             reentryCount = 1;
