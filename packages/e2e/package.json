@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/e2e",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "End-to-end test adapter for kiwa (Playwright + setupE2eEnv with built-in HTTP serve helper)",
   "license": "MIT",
   "author": {
