@@ -32,3 +32,9 @@ export {
   type SolidTestEnvUi,
   type SolidContainerLike,
 } from './solid.js';
+export {
+  setupLitComponentEnv,
+  type SetupLitComponentEnvOptions,
+  type LitTestEnvUi,
+  type LitElementHandle,
+} from './lit.js';

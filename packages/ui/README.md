@@ -12,6 +12,7 @@ Multi-framework component test adapter for kiwa — Vitest + Testing Library + J
 | Vue 3 | `setupVueComponentEnv` | `@vue/test-utils` |
 | Svelte | `setupSvelteComponentEnv` | `@testing-library/svelte` |
 | SolidJS | `setupSolidComponentEnv` | `@solidjs/testing-library` |
+| Lit (Web Components) | `setupLitComponentEnv` | `@open-wc/testing-helpers` |
 | Browser (real Chromium) | `setupBrowserComponentEnv` | `@playwright/test` |
 
 ## Install
@@ -91,6 +92,34 @@ export default defineConfig({
   test: { environment: "jsdom" },
 });
 ```
+
+## Lit (Web Components) quickstart
+
+```ts
+import { LitElement, html } from "lit";
+import { setupLitComponentEnv } from "@kiwa-test/ui";
+
+class KiwaCounter extends LitElement {
+  static properties = { count: { state: true } };
+  declare count: number;
+  constructor() { super(); this.count = 0; }
+  render() {
+    return html`<span data-testid="value">${this.count}</span>`;
+  }
+}
+customElements.define("kiwa-counter", KiwaCounter);
+
+const env = await setupLitComponentEnv({
+  mode: "render",
+  template: html`<kiwa-counter></kiwa-counter>`,
+});
+
+const span = env.handle.shadowQuerySelector('[data-testid="value"]');
+expect(span?.textContent).toBe("0");
+await env.stop();
+```
+
+The Lit adapter relays the shadow DOM through `handle.shadowQuerySelector` for ergonomic deep queries, and exposes the upgraded element via `handle.element` (typed as `HTMLElement`; cast to `LitElement` when you need `updateComplete`).
 
 ## License
 
