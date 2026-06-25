@@ -15,21 +15,30 @@ export interface AnvilClusterHandle {
 export async function startAnvilCluster(
   opts: AnvilClusterConfig,
 ): Promise<AnvilClusterHandle> {
-  const chains: AnvilClusterHandle['chains'] = [];
-
-  try {
-    for (const chain of opts.chains) {
-      const handle = await startAnvil({
+  const results = await Promise.allSettled(
+    opts.chains.map((chain) =>
+      startAnvil({
         port: chain.port,
         chainId: chain.chainId,
         detached: true,
         killExistingOnPort: true,
-      });
-      chains.push({ ...handle, chainId: chain.chainId });
+      }).then((handle) => ({ ...handle, chainId: chain.chainId })),
+    ),
+  );
+
+  const chains: AnvilClusterHandle['chains'] = [];
+  const failures: unknown[] = [];
+  for (const result of results) {
+    if (result.status === 'fulfilled') {
+      chains.push(result.value);
+    } else {
+      failures.push(result.reason);
     }
-  } catch (error) {
+  }
+
+  if (failures.length > 0) {
     await Promise.allSettled(chains.map((chain) => chain.stop()));
-    throw error;
+    throw failures[0];
   }
 
   return {

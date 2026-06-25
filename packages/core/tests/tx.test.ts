@@ -78,11 +78,15 @@ describe.skipIf(process.env.SKIP_ANVIL_TESTS === '1')('sendTransaction with live
       privateKey: PRIVATE_KEY,
       chainId: CHAIN_ID,
       anvilPort: unusedPort,
+      transportTimeoutMs: 200,
+      transportRetryCount: 0,
     };
     const params = { to: TO_ADDRESS, value: 1n };
-    // When / Then - transport error (ECONNREFUSED) は code -32603 を期待
+    // When / Then - transport error (ECONNREFUSED) は code -32603 を期待、 200ms 以内に reject
+    const t0 = performance.now();
     await expect(sendTransaction(brokenCtx, params)).rejects.toMatchObject({
       code: -32603,
     });
+    expect(performance.now() - t0).toBeLessThan(500);
   });
 });
