@@ -14,6 +14,7 @@ Multi-framework component test adapter for kiwa — Vitest + Testing Library + J
 | SolidJS | `setupSolidComponentEnv` | `@solidjs/testing-library` |
 | Lit (Web Components) | `setupLitComponentEnv` | `@open-wc/testing-helpers` |
 | Qwik (resumable) | `setupQwikComponentEnv` | `@noma.to/qwik-testing-library` |
+| Angular | `setupAngularComponentEnv` | `@testing-library/angular` |
 | Browser (real Chromium) | `setupBrowserComponentEnv` | `@playwright/test` |
 
 ## Install
@@ -151,6 +152,57 @@ await env.stop();
 ```
 
 This package's own test suite ships a contract test (`tests/qwik.test.ts`) that asserts the adapter's missing-peer error message — full Qwik JSX rendering will land in a dedicated example project (`examples/qwik-component-poc`) in a follow-up PR.
+
+## Angular quickstart
+
+Angular requires a TestBed-aware Vitest setup file (zone.js + platformBrowserDynamic). Add to a downstream Angular consumer:
+
+```ts
+// vitest.setup.ts
+import 'zone.js';
+import 'zone.js/testing';
+import { getTestBed } from '@angular/core/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
+
+getTestBed().initTestEnvironment(
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting(),
+);
+```
+
+```ts
+// vitest.config.ts
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  test: { environment: "jsdom", setupFiles: ["./vitest.setup.ts"] },
+});
+```
+
+Then exercise standalone components with the kiwa adapter:
+
+```ts
+import { Component } from "@angular/core";
+import { setupAngularComponentEnv } from "@kiwa-test/ui";
+
+@Component({
+  standalone: true,
+  selector: "kiwa-counter",
+  template: `<span data-testid="value">{{ count }}</span>`,
+})
+class KiwaCounter {
+  count = 0;
+}
+
+const env = await setupAngularComponentEnv({ mode: "render", component: KiwaCounter });
+expect(env.result.getByTestId("value").textContent?.trim()).toBe("0");
+await env.stop();
+```
+
+As with the Qwik adapter, this package ships a contract test (`tests/angular.test.ts`) that verifies the missing-peer error message. Fully-rendered Angular tests are scoped to a follow-up `examples/angular-component-poc` PR.
 
 ## License
 
