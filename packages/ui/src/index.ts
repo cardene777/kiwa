@@ -38,3 +38,9 @@ export {
   type LitTestEnvUi,
   type LitElementHandle,
 } from './lit.js';
+export {
+  setupQwikComponentEnv,
+  type SetupQwikComponentEnvOptions,
+  type QwikTestEnvUi,
+  type QwikContainerLike,
+} from './qwik.js';
