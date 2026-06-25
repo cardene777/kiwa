@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/data",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Data pipeline / queue / cron test adapter for kiwa (in-memory queue + fake clock + delivery semantics)",
   "license": "MIT",
   "author": {
