@@ -100,6 +100,36 @@ describe('setupCliEnv (runCli)', () => {
   });
 });
 
+describe('setupCliEnv (timeout)', () => {
+  it('rejects with timeout error when the child exceeds timeoutMs', async () => {
+    const env = await setupCliEnv();
+    envs.push(env);
+    await expect(
+      env.runCli({ cmd: 'node', args: ['-e', 'setTimeout(()=>{}, 2000)'], timeoutMs: 100 }),
+    ).rejects.toThrow(/timed out/);
+  });
+
+  it('rejects when the binary does not exist', async () => {
+    const env = await setupCliEnv();
+    envs.push(env);
+    await expect(
+      env.runCli({ cmd: '/nonexistent/binary', args: [] }),
+    ).rejects.toThrow();
+  });
+
+  it('listFiles returns [] for missing relative dirs', async () => {
+    const env = await setupCliEnv();
+    envs.push(env);
+    expect(await env.listFiles('does/not/exist')).toEqual([]);
+  });
+
+  it('fileExists returns false for missing paths', async () => {
+    const env = await setupCliEnv();
+    envs.push(env);
+    expect(await env.fileExists('missing.txt')).toBe(false);
+  });
+});
+
 describe('setupCliEnv (file IO helpers)', () => {
   it('listFiles enumerates files recursively', async () => {
     const env = await setupCliEnv();

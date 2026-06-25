@@ -54,7 +54,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**' --coverage.exclude='.vitest-dist/tests/**'",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/index.js' --coverage.include='.vitest-dist/src/collect.js' --coverage.include='.vitest-dist/src/coverage.js' --coverage.include='.vitest-dist/src/dashboard.js' --coverage.include='.vitest-dist/src/flaky.js' --coverage.include='.vitest-dist/src/spec-coverage.js' --coverage.exclude='.vitest-dist/tests/**'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

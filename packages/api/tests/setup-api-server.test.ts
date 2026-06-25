@@ -118,4 +118,22 @@ describe('setupApiServer (errors)', () => {
       setupApiServer({ mode: 'live' as const }),
     ).rejects.toThrow(/app/);
   });
+
+  it('rejects hybrid mode without app', async () => {
+    await expect(
+      setupApiServer({ mode: 'hybrid' as const, mockHandlers: [] }),
+    ).rejects.toThrow(/app/);
+  });
+
+  it('rejects hybrid mode without mockHandlers', async () => {
+    await expect(
+      setupApiServer({ mode: 'hybrid' as const, app: buildLiveApp() }),
+    ).rejects.toThrow(/mockHandlers/);
+  });
+
+  it('rejects unknown mode', async () => {
+    await expect(
+      setupApiServer({ mode: 'weird' as unknown as 'mock' }),
+    ).rejects.toThrow(/unknown mode/);
+  });
 });
