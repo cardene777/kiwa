@@ -46,7 +46,7 @@ AskUserQuestion で coverage report の生成言語を user に確認する。 `
 
 選択肢 — 🇯🇵 日本語 (ja、 Recommended) / 🇬🇧 English (en) / 🌏 その他多言語 (free input、 ISO 639-1 言語コード)。 詳細仕様は `references/doc-language-selection.md` を Read。
 
-確定後の言語 `$DOC_LANG` は Step 5c (coverage report Write) で参照する。 出力 path:
+確定後の言語 `$DOC_LANG` は Step 5c (coverage report Write) で参照する。 出力 path (Issue #341 lang suffix SSOT、 `/kiwa-design` § lang suffix 規約 と整合):
 
 - ja → `tests/reports/contract/coverage-report-{module}.ja.md` (+ round 別)
 - en → `tests/reports/contract/coverage-report-{module}.md`

@@ -56,7 +56,7 @@ $ARGUMENTS
 ### Step 0: 文書生成言語の選択 (skill 起動時 1 回)
 
 AskUserQuestion で coverage report の生成言語を user に確認する。 `--lang {code}` 引数指定時は skip。
-詳細は `references/doc-language-selection.md` (kiwa-{forge,hardhat,play} 共用 SSOT)。
+詳細は `references/doc-language-selection.md` (kiwa-{forge,hardhat,play} 共用 SSOT)。 lang suffix 規約は Issue #341 SSOT (`/kiwa-design` § lang suffix 規約 と整合) ... en (default) は suffix なし、 ja は `.ja`、 その他 ISO 639-1 は `.{code}`。
 
 ### Step 1: Layer 1 spec 読込
 

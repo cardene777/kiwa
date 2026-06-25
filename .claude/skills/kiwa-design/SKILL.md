@@ -129,11 +129,23 @@ AskUserQuestion で文書生成言語を user に確認する。 `--lang {code}`
 
 選択肢 — 🇯🇵 日本語 (ja、 Recommended) / 🇬🇧 English (en) / 🌏 その他多言語 (free input、 ISO 639-1 言語コード)。 詳細仕様 + 出力 path 規約 + section 見出し言語切替は `references/doc-language-selection.md` を Read。
 
-確定後の言語 `$DOC_LANG` は以降の全 Write step (test 仕様書 file 名 / section 見出し言語) に反映する。 出力 path 規約:
+確定後の言語 `$DOC_LANG` は以降の全 Write step (test 仕様書 file 名 / section 見出し言語) に反映する。 出力 path 規約 (Issue #341 SSOT):
 
 - ja → `tests/spec/{layer}/test-spec-{module}.ja.md`
 - en → `tests/spec/{layer}/test-spec-{module}.md`
 - その他 (zh / ko 等) → `tests/spec/{layer}/test-spec-{module}.{lang_code}.md`
+
+#### lang suffix 規約 (SSOT)
+
+producer (`/kiwa-design`) と consumer (`/kiwa-test` / `/kiwa-review`) の file 名規約一致 (Issue #341):
+
+```bash
+LANG_SUFFIX=""
+[ "$DOC_LANG" != "en" ] && [ -n "$DOC_LANG" ] && LANG_SUFFIX=".${DOC_LANG}"
+# 使用例: tests/spec/{layer}/test-spec-${MODULE}${LANG_SUFFIX}.md
+```
+
+en (default) は suffix なし、 ja は `.ja`、 その他 ISO 639-1 は `.{code}`。 layer suffix (`.api` / `.ui` / `.data` / `.cli`) と直交、 lang suffix が常に末尾 (例 `test-spec-foo.api.ja.md`)。
 
 ### Step 1: 入力を整理する
 

@@ -55,6 +55,10 @@ $ARGUMENTS
 
 AskUserQuestion で coverage report 生成言語を確認。 `--lang {code}` 指定時は skip。 `references/doc-language-selection.md` (kiwa-{forge,hardhat,play,vitest} 共用 SSOT) を Read。
 
+### lang suffix 規約 (Issue #341 SSOT)
+
+producer (`/kiwa-design`) と consumer の file 名規約一致: en (default) は suffix なし / ja は `.ja` / その他 ISO 639-1 は `.{code}`。 `${LANG_SUFFIX}` 計算は `/kiwa-design` § lang suffix 規約 参照。 input spec path は `tests/spec/integration/test-spec-${MODULE}${LANG_SUFFIX}.md` (en で `.md`、 ja で `.ja.md`、 layer suffix `.api.md` と直交)。
+
 ### Step 1: Layer 1 spec 読込
 
 `tests/spec/integration/test-spec-{module}.md` を Read、 9 column 表から TC 行を全件抽出。 「API 契約」 sub-section (HTTP method / path / request / response) と「外部連携」 sub-section (3rd-party API / RPC / webhook) を併読し、 各 TC を msw handler / Playwright request の対応 helper に対応付ける map を内部で作る。
