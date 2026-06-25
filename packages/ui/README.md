@@ -1,10 +1,18 @@
 # @kiwa-test/ui
 
-React component test adapter for kiwa — Vitest + Testing Library + JSDOM under a single `setupComponentEnv` helper.
+Multi-framework component test adapter for kiwa — Vitest + Testing Library + JSDOM under a single `setupComponentEnv` family of helpers.
 
 ## Overview
 
-`@kiwa-test/ui` is the Layer 2 adapter that turns a Layer 1 kiwa-design spec (with `mode = render | interaction | snapshot`) into a runnable Vitest suite. It is React-first today but the surface is small enough to extend to Vue / Svelte in future versions.
+`@kiwa-test/ui` is the Layer 2 adapter that turns a Layer 1 kiwa-design spec (with `mode = render | interaction | snapshot`) into a runnable Vitest suite. It ships **five** component adapters that share the same lifecycle contract.
+
+| Framework | Helper | Underlying lib |
+|---|---|---|
+| React | `setupComponentEnv` | `@testing-library/react` |
+| Vue 3 | `setupVueComponentEnv` | `@vue/test-utils` |
+| Svelte | `setupSvelteComponentEnv` | `@testing-library/svelte` |
+| SolidJS | `setupSolidComponentEnv` | `@solidjs/testing-library` |
+| Browser (real Chromium) | `setupBrowserComponentEnv` | `@playwright/test` |
 
 ## Install
 
@@ -51,6 +59,38 @@ export default defineConfig({ test: { environment: "jsdom" } });
 ## Example: Counter PoC
 
 See [`examples/react-component-poc/`](../../examples/react-component-poc) for the end-to-end PoC: the Layer 1 spec (`tests/spec/integration/test-spec-counter.ui.md`) lists 7 cases (`render` / `interaction` / `snapshot`) and the Vitest suite executes all of them against a single Counter component.
+
+## SolidJS quickstart
+
+```ts
+import { createSignal, createComponent } from "solid-js";
+import { setupSolidComponentEnv } from "@kiwa-test/ui";
+
+function SolidCounter(props: { initial?: number }) {
+  const [count, setCount] = createSignal(props.initial ?? 0);
+  // ...build DOM or use JSX with a Solid-aware transform...
+}
+
+const env = await setupSolidComponentEnv({
+  mode: "render",
+  component: () => createComponent(SolidCounter, { initial: 3 }),
+});
+
+expect(env.result.getByTestId("value").textContent).toBe("3");
+await env.stop();
+```
+
+Make sure Vitest resolves the **browser** entry of `solid-js/web` when running under jsdom:
+
+```ts
+// vitest.config.ts
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  resolve: { conditions: ["browser", "development", "module", "import", "default"] },
+  test: { environment: "jsdom" },
+});
+```
 
 ## License
 
