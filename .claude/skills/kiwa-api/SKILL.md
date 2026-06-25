@@ -131,6 +131,41 @@ script 内では `process.env.ANVIL_RPC_URL` を読んで deploy + setup を 1 �
 mock / 実 anvil / load-state の選択は Layer 1 spec の「テスト経路」 column に明示する経路を SSOT 化する (`/kiwa-design --layer integration` 出力)。
 `env.stop()` は `afterAll` で必ず呼ぶ。
 
+### anvil pool で integration test 並列化 (v0.2.0+)
+
+複数 integration test が実 anvil を並列に必要とする場合は `createAnvilPool({ size })` で事前 spawn し、 `setupTestEnv({ pool })` で borrow する。
+borrow / release (anvil_reset) で 0ms 再利用、 vitest の test file 並列実行と組合せて壁時計を大幅短縮する。
+
+```ts
+import { createAnvilPool, setupTestEnv, type AnvilPool } from '@kiwa-test/core';
+
+let pool: AnvilPool;
+beforeAll(async () => { pool = await createAnvilPool({ size: 4 }); });
+afterAll(async () => { await pool.stopAll(); });
+
+it('integration with mocked HTTP + real chain', async () => {
+  const env = await setupTestEnv({ pool });
+  // msw handler + env.rpcUrl を組合せて HTTP API mock + 実 RPC を同時に verify
+  await env.stop();
+});
+```
+
+### tx 経路の transport timeout / retry (v0.2.0+)
+
+`sendTransaction` を実 anvil に投げる経路で、 不正 port / 接続失敗時の reject 時間を制御するには `TxBroadcastCtx.transportTimeoutMs` / `transportRetryCount` を渡す。
+default は `timeout=5000` / `retryCount=0` で fail-fast、 integration test では 200ms 以下に短縮して invalid-port 系の test を高速化できる。
+
+```ts
+const ctx = {
+  privateKey,
+  chainId: 31337,
+  anvilPort: brokenPort,
+  transportTimeoutMs: 200,
+  transportRetryCount: 0,
+};
+await expect(sendTransaction(ctx, params)).rejects.toMatchObject({ code: -32603 });
+```
+
 ## 完了条件
 
 - Layer 1 spec の「自動化すべきテスト」 全 TC が `test/integration/{module}.test.ts` に Write 済

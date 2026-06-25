@@ -65,6 +65,8 @@ test("window.ethereum is injected", async ({ page, dappE2e }) => {
 - approval-mode helpers for deterministic reject-flow testing
 - EIP-6963 multi-wallet injection and smart-account support
 - vitest helper (`setupTestEnv` / `withAnvil`) that boots a real anvil with `--load-state` for unit / integration tests
+- anvil pool (`createAnvilPool`) with `anvil_reset`-backed 0 ms borrow / release for parallel test suites
+- tunable transport timeout / retry on `sendTransaction` for fail-fast error-path tests
 
 ## Vitest helper (mock + real anvil with state load)
 
@@ -95,6 +97,41 @@ pnpm exec kiwa anvil seed tests/seed.ts --out tests/fixtures/state.json
 ```
 
 The seed script runs against a one-shot anvil; on exit, anvil's `--dump-state` writes the full chain state to the output path. Subsequent test runs read it back via `loadState` and reach a ready chain in ~300 ms without replaying any transactions.
+
+## Anvil pool (v0.2.0+)
+
+For test suites that need real anvil across many cases, `createAnvilPool` pre-spawns N instances and lets each test borrow/release one. Releasing runs `anvil_reset` so the next borrower sees a clean chain — borrow + release is **~0 ms** after the pool warms up.
+
+```ts
+import { createAnvilPool, setupTestEnv, type AnvilPool } from "@kiwa-test/core";
+
+let pool: AnvilPool;
+beforeAll(async () => {
+  pool = await createAnvilPool({ size: 4 });
+});
+afterAll(async () => {
+  await pool.stopAll();
+});
+
+it("borrows from pool", async () => {
+  const env = await setupTestEnv({ pool }); // borrow + lease
+  // ...
+  await env.stop(); // releases back, anvil_reset is invoked
+});
+```
+
+`setupTestEnv` cannot accept `anvil` and `pool` together — the call throws if both are passed. Polling/spawn was tuned in v0.2.0 so a fresh `setupTestEnv({ anvil: true })` returns in **~32 ms** (down from 107 ms).
+
+## Transport tuning for `sendTransaction` (v0.2.0+)
+
+`TxBroadcastCtx` accepts optional `transportTimeoutMs` (default 5000) and `transportRetryCount` (default 0). Tests that exercise transport-error paths (e.g. invalid port → ECONNREFUSED) can shrink the wait from viem's 10s default to 200 ms:
+
+```ts
+await sendTransaction(
+  { privateKey, chainId: 31337, anvilPort: brokenPort, transportTimeoutMs: 200, transportRetryCount: 0 },
+  params,
+); // rejects with code -32603 within ~200ms
+```
 
 ## Direct RPC Methods
 
