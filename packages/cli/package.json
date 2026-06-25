@@ -41,9 +41,12 @@
     "build": "tsup src/index.ts --format esm --dts --clean --onSuccess \"node -e \\\"require('node:fs').cpSync('src/templates','dist/templates',{recursive:true})\\\"\"",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --no-file-parallelism",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --no-file-parallelism --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/commands/init.js' --coverage.include='.vitest-dist/src/commands/run-watch.js' --coverage.include='.vitest-dist/src/commands/spec-to-test.js' --coverage.exclude='.vitest-dist/tests/**'",
+    "test:mutation": "stryker run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^8.7.1",
+    "@stryker-mutator/vitest-runner": "^8.7.1",
     "@types/node": "^22.10.0",
     "@vitest/coverage-v8": "^2.1.0",
     "tsup": "^8.3.0",
