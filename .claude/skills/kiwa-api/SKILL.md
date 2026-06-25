@@ -102,6 +102,35 @@ report 4 section (`tests/reports/integration/coverage-report-{module}.md`)。
 
 `/kiwa-review --mode test-review --module {module} --layer integration --test-path test/integration/*.test.ts --lang $DOC_LANG` を内部呼出し、 5 軸判定。 `--no-review` で skip 可能。
 
+## anvil 実走経路 (mock / 実 anvil / 3rd-party HTTP 経路の切り分け)
+
+integration test は経路により helper を使い分ける。
+
+| 経路 | helper | 用途 |
+|---|---|---|
+| HTTP API mock | msw handler | 外部 REST / GraphQL の mock |
+| RPC mock | viem mock transport | chain 状態を作らず RPC 経路のみ verify |
+| 実 anvil (clean) | `setupTestEnv({ anvil: true })` | contract と一緒に動かす integration、 state 構築は test 内 |
+| 実 anvil + state load | `setupTestEnv({ anvil: { loadState } })` | pre-built state で瞬時起動、 deploy + setup を毎回流さない |
+
+```ts
+import { setupTestEnv } from '@kiwa-test/core';
+
+// HTTP API mock + 実 anvil + pre-built state を同 fixture で扱う
+const env = await setupTestEnv({
+  anvil: { loadState: 'tests/fixtures/state.json', chainId: 31337 },
+});
+
+// env.rpcUrl で実 RPC へ繋ぐ、 env.privateKeys で deterministic アカウントを取得
+```
+
+state.json は **`kiwa anvil seed <script> --out tests/fixtures/state.json`** で事前生成する。
+script 内では `process.env.ANVIL_RPC_URL` を読んで deploy + setup を 1 回だけ実行、 終了時に anvil 側で `--dump-state` が走り chain 状態を一括書出する。
+以降の test は load-state で 1 file コピペ相当の瞬時セットアップ (起動 ~300ms、 再 deploy 不要)。
+
+mock / 実 anvil / load-state の選択は Layer 1 spec の「テスト経路」 column に明示する経路を SSOT 化する (`/kiwa-design --layer integration` 出力)。
+`env.stop()` は `afterAll` で必ず呼ぶ。
+
 ## 完了条件
 
 - Layer 1 spec の「自動化すべきテスト」 全 TC が `test/integration/{module}.test.ts` に Write 済
