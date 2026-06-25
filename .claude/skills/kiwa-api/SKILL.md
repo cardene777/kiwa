@@ -166,6 +166,85 @@ const ctx = {
 await expect(sendTransaction(ctx, params)).rejects.toMatchObject({ code: -32603 });
 ```
 
+## HTTP API layer 経路 (@kiwa-test/api、 v1 拡張)
+
+HTTP / REST / GraphQL を Layer 1 spec から実 test に変換する経路。
+`--layer api` で `/kiwa-design` が `tests/spec/integration/test-spec-{module}.api.md` に 9 column 表 (ID / Observation / Given / When / Then / Priority / Automation / Mode / Route) を出力する。
+本 skill は **Mode column** を `setupApiServer({ mode })` に機械変換する。
+
+### setupApiServer の 3 経路
+
+| Mode column | 経路 | 実装 |
+|---|---|---|
+| `mock` | msw 単独 | `setupApiServer({ mode: 'mock', mockHandlers })` で msw v2 RequestHandler[] が固定応答、 baseUrl `http://kiwa.mock` |
+| `live` | 実 HTTP server | `setupApiServer({ mode: 'live', app })` で Node http.Server を 127.0.0.1 で起動、 Next.js Route Handler / Express / NestJS / Fastify の fetch handler を受け取る |
+| `hybrid` | live + msw 共存 | `setupApiServer({ mode: 'hybrid', app, mockHandlers })` で live 実装を基本にしつつ msw で path 単位 override 可能 |
+
+### 9 column → @kiwa-test/api helper への mapping
+
+| spec column | Vitest + @kiwa-test/api helper への変換 |
+|---|---|
+| ID | `it('{ID} {Observation}', async () => { ... })` の test 名 |
+| Observation | test 名 + `describe` 階層 (観点別 group) |
+| Given | `setupApiServer({ mode, app, mockHandlers })` の引数 / fixture seed / DB 状態構築 |
+| When | `env.request.{get,post,put,patch,delete}(route, body)` で HTTP 操作 |
+| Then | `expect(res.status).toBe(N)` + `expect(res.json<T>()).toEqual({...})` の assertion |
+| Priority | P0/P1 は describe 内先頭、 `--coverage` threshold 計算 |
+| Automation | `yes` = 本 skill で生成、 `no` / `manual` = test code には変換しない |
+| Mode | `setupApiServer({ mode })` の引数に直接 mapping |
+| Route | `env.request.{method}(route, body)` の第 1 引数 |
+
+### 実装例 (実 PoC `examples/nextjs-api-poc/`)
+
+```ts
+import { http, HttpResponse } from 'msw';
+import { afterEach, describe, expect, it } from 'vitest';
+import { setupApiServer, type ApiTestEnv } from '@kiwa-test/api';
+import { createItemsHandler, type Item } from '../src/route.js';
+
+const envs: ApiTestEnv[] = [];
+afterEach(async () => {
+  while (envs.length > 0) {
+    const env = envs.pop();
+    if (env) await env.stop();
+  }
+});
+
+describe('items API (live mode)', () => {
+  it('T-API-002 POST 正常系: 201 + 新規 id 返却', async () => {
+    const env = await setupApiServer({ mode: 'live', app: createItemsHandler() });
+    envs.push(env);
+    const res = await env.request.post('/api/items', { name: 'first' });
+    expect(res.status).toBe(201);
+    expect(res.json<Item>()).toEqual({ id: 1, name: 'first' });
+  });
+});
+
+describe('items API (mock mode)', () => {
+  it('T-API-008 mock handler の固定応答が返る', async () => {
+    const env = await setupApiServer({
+      mode: 'mock',
+      mockHandlers: [
+        http.get('http://kiwa.mock/api/items', () =>
+          HttpResponse.json([{ id: 999, name: 'mocked' }]),
+        ),
+      ],
+    });
+    envs.push(env);
+    const res = await env.request.get('/api/items');
+    expect(res.json<Item[]>()).toEqual([{ id: 999, name: 'mocked' }]);
+  });
+});
+```
+
+### 入力 / 出力 path
+
+- 入力 spec ... `tests/spec/integration/test-spec-{module}.api.md` (`/kiwa-design --layer api` 出力)
+- 出力 test ... `tests/{module}.test.ts` (Vitest + msw + supertest)
+- 既存 dApp + 実 anvil 経路の spec (`tests/spec/integration/test-spec-{module}.md`) は `@kiwa-test/core` setupTestEnv 経路で従来通り動作
+
+`env.stop()` は `afterEach` / `afterAll` で必ず呼ぶ (live server / msw server を確実に停止する)。
+
 ## 完了条件
 
 - Layer 1 spec の「自動化すべきテスト」 全 TC が `test/integration/{module}.test.ts` に Write 済

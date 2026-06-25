@@ -1,26 +1,23 @@
 {
-  "name": "@kiwa-test/core",
-  "version": "0.2.0",
-  "description": "Headless E2E test fixture for dApps on anvil forks (Playwright + viem)",
+  "name": "@kiwa-test/spec",
+  "version": "0.0.0",
+  "description": "Common spec language + test environment abstractions for kiwa adapters (core / api / ui / data / cli)",
   "license": "MIT",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"
   },
   "keywords": [
-    "dapp",
-    "ethereum",
-    "e2e",
-    "playwright",
-    "anvil",
-    "viem",
+    "kiwa",
+    "spec",
     "testing",
-    "fixture"
+    "fixture",
+    "markdown"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cardene777/kiwa.git",
-    "directory": "packages/core"
+    "directory": "packages/spec"
   },
   "homepage": "https://github.com/cardene777/kiwa#readme",
   "bugs": {
@@ -40,22 +37,11 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
-    },
-    "./vitest": {
-      "import": {
-        "types": "./dist/vitest.d.ts",
-        "default": "./dist/vitest.js"
-      },
-      "require": {
-        "types": "./dist/vitest.d.cts",
-        "default": "./dist/vitest.cjs"
-      }
     }
   },
   "files": [
     "dist",
-    "README.md",
-    "README.ja.md"
+    "README.md"
   ],
   "publishConfig": {
     "access": "public",
@@ -66,23 +52,13 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 15000",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@kiwa-test/spec": "workspace:*",
-    "zod": "^3.23.8"
-  },
-  "peerDependencies": {
-    "@playwright/test": "^1.49.0",
-    "viem": "^2"
-  },
   "devDependencies": {
-    "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.0",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
-    "vitest": "^2.1.0",
-    "viem": "^2.21.0"
+    "vitest": "^2.1.0"
   }
 }
