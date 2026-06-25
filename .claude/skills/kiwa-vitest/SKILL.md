@@ -130,6 +130,36 @@ state.json は事前に **`kiwa anvil seed <script> --out tests/fixtures/state.j
 
 mock 経路 / 実 anvil 経路の選択は Layer 1 spec の「テスト経路」 column に明示する経路を SSOT 化する (`/kiwa-design --layer unit` 出力)。
 
+### anvil pool で test 高速化 (v0.2.0+)
+
+複数 test が実 anvil を使う場合は `createAnvilPool` で N 個事前 spawn しておくと `borrow` / `release` (anvil_reset) で 0ms 再利用できる。
+test file 並列実行と組合せて test suite の壁時計を大幅短縮する。
+
+```ts
+import { describe, it, beforeAll, afterAll, expect } from 'vitest';
+import { createAnvilPool, setupTestEnv, type AnvilPool } from '@kiwa-test/core';
+
+let pool: AnvilPool;
+
+beforeAll(async () => {
+  pool = await createAnvilPool({ size: 4 });
+});
+
+afterAll(async () => {
+  await pool.stopAll();
+});
+
+describe('integration', () => {
+  it('test 1', async () => {
+    const env = await setupTestEnv({ pool });
+    // ... test body ...
+    await env.stop(); // anvil_reset で次の borrow に備える
+  });
+});
+```
+
+`setupTestEnv` の `anvil` option と `pool` option は排他、 同時指定で hard error。
+
 ## 完了条件
 
 - Layer 1 spec の「自動化すべきテスト」 全 TC が `test/unit/{module}.test.{ts,tsx}` に Write 済
