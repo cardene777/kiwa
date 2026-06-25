@@ -66,7 +66,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 15000 --no-file-parallelism",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 15000",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

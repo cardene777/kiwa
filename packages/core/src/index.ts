@@ -39,6 +39,12 @@ export {
   type WithAnvilLifecycle,
 } from './vitest.js';
 export {
+  createAnvilPool,
+  type AnvilPool,
+  type AnvilPoolOptions,
+  type AnvilLease,
+} from './anvil-pool.js';
+export {
   startAnvilFork,
   type ForkOptions,
 } from './anvil-fork.js';
