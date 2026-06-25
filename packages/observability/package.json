@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/observability",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Observability adapter for kiwa — flaky detection + spec coverage gap analysis + markdown dashboard",
   "license": "MIT",
   "author": {
