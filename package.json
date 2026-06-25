@@ -9,7 +9,7 @@
   "scripts": {
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli build && pnpm publish --filter @kiwa-test/spec --filter @kiwa-test/core --filter @kiwa-test/api --filter @kiwa-test/ui --filter @kiwa-test/data --filter @kiwa-test/cli --access public --provenance --no-git-checks",
+    "release": "pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/cli build && pnpm publish --filter @kiwa-test/spec --filter @kiwa-test/core --filter @kiwa-test/api --filter @kiwa-test/ui --filter @kiwa-test/data --filter @kiwa-test/cli-test --filter @kiwa-test/cli --access public --provenance --no-git-checks",
     "test": "pnpm -r test",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck"

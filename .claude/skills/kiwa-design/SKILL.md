@@ -59,6 +59,7 @@ $ARGUMENTS
 | `api` | `tests/spec/integration/test-spec-{module}.api.md` | `/kiwa-api` (HTTP / REST / GraphQL 専用、 mode column 必須) |
 | `ui` | `tests/spec/integration/test-spec-{module}.ui.md` | `/kiwa-ui` (React component 専用、 render / interaction / snapshot 3 mode、 `@kiwa-test/ui`) |
 | `data` | `tests/spec/integration/test-spec-{module}.data.md` | `/kiwa-data` (queue / cron / batch 専用、 mock / live mode + fake clock、 `@kiwa-test/data`) |
+| `cli` | `tests/spec/integration/test-spec-{module}.cli.md` | `/kiwa-cli-test` (CLI / shell / file IO 専用、 isolated tempdir + stdout/stderr snapshot、 `@kiwa-test/cli-test`) |
 | `unit` | `tests/spec/unit/test-spec-{module}.md` | `/kiwa-vitest` (Vitest 汎用 unit runner) |
 | `all` (default) | `tests/spec/test-spec-{module}.md` | 全 Layer 2 skill (旧 default 経路、 互換性維持) |
 
@@ -323,6 +324,26 @@ mode column が `mock` = in-memory queue + fake clock、 `live` = 将来 SQS / K
 `/kiwa-data` Layer 2 skill が本 9 column を `@kiwa-test/data` API に機械変換する。
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.data.md` (`.data.md` suffix で `@kiwa-test/data` 経路向けと識別)。
+
+#### cli layer 専用 column (CLI / shell / file IO)
+
+`--layer cli` 指定時は CLI のセマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-test/cli-test` の `setupCliEnv` / `runCli` と直接 mapping)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-CLI-001` 等の連番 |
+| Observation | 観点 (正常 help / unknown command / 副作用 / stdin / env / file IO 等) |
+| Given | 前提 (seedFiles の中身 / env override / pathOverride / 引数) |
+| When | 操作 (`kiwa --help` / `kiwa doctor` / `kiwa init` 等の argv) |
+| Then | 期待 (`exit=0` / `stdout に X` / `stderr に Y` / `file Z が生成` 等の snapshot 比較) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Mode | `mock` / `live` (`setupCliEnv()` は両 mode 共通、 mode は live 系 CLI vs script test の区別) |
+| Topic | `help` / `doctor` / `init` 等の sub command 識別子 |
+
+`/kiwa-cli-test` Layer 2 skill が本 9 column を `@kiwa-test/cli-test` API に機械変換する。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.cli.md` (`.cli.md` suffix で `@kiwa-test/cli-test` 経路向けと識別)。
 
 例 (実装例 `examples/react-component-poc/tests/spec/integration/test-spec-counter.ui.md`):
 
