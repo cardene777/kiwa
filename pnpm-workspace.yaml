@@ -2,4 +2,5 @@ packages:
   - "packages/*"
   - "examples/*"
   - "tests/fixtures/*"
+  - "tests/release-smoke"
   - "promo"
