@@ -1,5 +1,12 @@
 # tests-fixtures-defi-swap
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [dacbc69]
+  - @kiwa-test/core@0.2.0
+
 ## 0.0.3
 
 ### Patch Changes
