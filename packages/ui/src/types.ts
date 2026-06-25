@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import type { RenderOptions, RenderResult, screen as ScreenApi } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 
-export type UiTestMode = 'render' | 'interaction' | 'snapshot';
+export type UiTestMode = 'render' | 'interaction' | 'snapshot' | 'browser';
 
 export interface SetupComponentEnvOptions<TMode extends UiTestMode = UiTestMode> {
   mode: TMode;

@@ -2,14 +2,18 @@
 import { execSync } from 'node:child_process';
 import { InitConflictError, runInit, type InitOptions } from './commands/init.js';
 import { runAnvilSeed } from './commands/anvil-seed.js';
+import { runSpecToTest } from './commands/spec-to-test.js';
+import { runWatch, type RunWatchLayer } from './commands/run-watch.js';
 
 const USAGE = `Usage: kiwa <command> [options]
 
 Commands:
-  init [options]                       Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json
-  doctor                               Check that anvil is installed
-  anvil seed <script> --out <path>     Run <script> against a fresh anvil and dump state to <path>
-  --help, -h                           Show this message
+  init [options]                                            Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json
+  doctor                                                    Check that anvil is installed
+  anvil seed <script> --out <path>                          Run <script> against a fresh anvil and dump state to <path>
+  spec-to-test --in <spec.md> --out <test.ts> [--layer L]   Generate a vitest test file from a Layer 1 spec.md
+  run --watch [--layer L]...                                Run vitest in watch mode across one or more layers (default unit + api + ui)
+  --help, -h                                                Show this message
 
 init options:
   --force                       Overwrite existing files instead of failing on conflict
@@ -23,6 +27,15 @@ anvil seed options:
   --out <path>      Path to write state json (anvil --dump-state). Required.
   --chain-id <n>    Override chain id (default 31337).
   --port <n>        Bind anvil to specific port (default: random free port).
+
+spec-to-test options:
+  --in <path>       Layer 1 spec markdown file. Required.
+  --out <path>      Output vitest test file. Required.
+  --layer <name>    Override layer (api / ui / data / cli). Default: inferred from spec meta.
+
+run --watch options:
+  --layer <name>   Layer to watch (repeat to add more): unit / api / ui / data / cli / e2e (default unit api ui).
+  --dry-run        Print the commands that would be spawned without launching them.
 `;
 
 function takeFlagValue(argv: string[], flag: string): string | undefined {
@@ -72,6 +85,74 @@ async function main(): Promise<void> {
       process.exit(0);
     } catch (error) {
       process.stderr.write(`ERR anvil seed failed: ${(error as Error).message}\n`);
+      process.exit(1);
+    }
+  }
+
+  if (cmd === 'run') {
+    const argv = process.argv.slice(3);
+    if (!argv.includes('--watch')) {
+      process.stderr.write('ERR kiwa run: only --watch is supported today\n');
+      process.exit(2);
+    }
+    const layers: RunWatchLayer[] = [];
+    for (let i = 0; i < argv.length; i += 1) {
+      if (argv[i] === '--layer') {
+        const value = argv[i + 1];
+        if (!value || value.startsWith('--')) {
+          process.stderr.write('ERR kiwa run --watch: --layer requires a value\n');
+          process.exit(2);
+        }
+        layers.push(value as RunWatchLayer);
+        i += 1;
+      }
+    }
+    const dryRun = argv.includes('--dry-run');
+    const effectiveLayers = layers.length > 0 ? layers : (['unit', 'api', 'ui'] as RunWatchLayer[]);
+    try {
+      const result = runWatch({ layers: effectiveLayers, cwd: process.cwd(), dryRun });
+      for (const plan of result.plans) {
+        process.stdout.write(`watch[${plan.layer}]: ${plan.cmd} ${plan.args.join(' ')}\n`);
+      }
+      if (dryRun) {
+        process.exit(0);
+      }
+      const promises = result.children.map(
+        (child) =>
+          new Promise<number>((resolveFn) => {
+            child.on('exit', (code) => resolveFn(code ?? 0));
+          }),
+      );
+      const codes = await Promise.all(promises);
+      process.exit(codes.find((c) => c !== 0) ?? 0);
+    } catch (error) {
+      process.stderr.write(`ERR run --watch failed: ${(error as Error).message}\n`);
+      process.exit(1);
+    }
+  }
+
+  if (cmd === 'spec-to-test') {
+    const argv = process.argv.slice(3);
+    try {
+      const inPath = takeFlagValue(argv, '--in');
+      const outPath = takeFlagValue(argv, '--out');
+      if (!inPath || !outPath) {
+        process.stderr.write('ERR kiwa spec-to-test: --in <path> and --out <path> are required\n');
+        process.exit(2);
+      }
+      const layer = takeFlagValue(argv, '--layer');
+      const result = runSpecToTest({
+        inPath,
+        outPath,
+        cwd: process.cwd(),
+        ...(layer !== undefined ? { layer } : {}),
+      });
+      process.stdout.write(
+        `OK generated ${result.count} test cases for module "${result.module}" (layer ${result.layer}) at ${result.outPath}\n`,
+      );
+      process.exit(0);
+    } catch (error) {
+      process.stderr.write(`ERR spec-to-test failed: ${(error as Error).message}\n`);
       process.exit(1);
     }
   }

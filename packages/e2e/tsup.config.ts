@@ -6,17 +6,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  external: [
-    'react',
-    'react-dom',
-    'react-dom/server',
-    '@testing-library/react',
-    '@testing-library/user-event',
-    '@playwright/test',
-    'playwright',
-    'jsdom',
-    'vitest',
-  ],
+  external: ['@playwright/test', 'playwright', 'vitest'],
   outExtension({ format }) {
     return {
       js: format === 'cjs' ? '.cjs' : '.js',
