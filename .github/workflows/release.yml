@@ -81,6 +81,9 @@ jobs:
       - name: Test (cli)
         run: pnpm -F @kiwa-test/cli test
 
+      - name: Coverage (spec + api + data + cli-test + observability)
+        run: pnpm -F @kiwa-test/spec -F @kiwa-test/api -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability run test:cov
+
       - name: Test (release-smoke)
         run: pnpm -F kiwa-release-smoke test
 

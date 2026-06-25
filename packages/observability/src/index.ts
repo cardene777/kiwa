@@ -18,3 +18,13 @@ export {
 export { detectFlaky, type DetectFlakyOptions } from './flaky.js';
 export { analyzeSpecCoverage, type AnalyzeSpecCoverageOptions } from './spec-coverage.js';
 export { renderDashboard } from './dashboard.js';
+export {
+  fromIstanbulCoverageSummary,
+  checkThresholds,
+  type CoverageMetric,
+  type CoverageFileEntry,
+  type CoverageSummary,
+  type CoverageThresholds,
+  type ThresholdCheckResult,
+  type IstanbulCoverageSummary,
+} from './coverage.js';

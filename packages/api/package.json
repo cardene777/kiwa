@@ -55,6 +55,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**' --coverage.exclude='.vitest-dist/tests/**'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -76,6 +77,7 @@
   "devDependencies": {
     "@types/node": "^22.10.0",
     "@types/supertest": "^6.0.2",
+    "@vitest/coverage-v8": "^2.1.0",
     "msw": "^2.7.0",
     "supertest": "^7.0.0",
     "tsup": "^8.3.0",
