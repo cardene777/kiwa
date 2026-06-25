@@ -49,7 +49,10 @@ jobs:
         run: pnpm -F @kiwa-test/spec build
 
       - name: Typecheck
-        run: pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/cli typecheck
+        run: pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli typecheck
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Test (spec)
         run: pnpm -F @kiwa-test/spec test
@@ -72,11 +75,14 @@ jobs:
       - name: Test (observability)
         run: pnpm -F @kiwa-test/observability test
 
+      - name: Test (e2e)
+        run: pnpm -F @kiwa-test/e2e test
+
       - name: Test (cli)
         run: pnpm -F @kiwa-test/cli test
 
       - name: Build
-        run: pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/cli build
+        run: pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli build
 
       - name: Typecheck consumer (examples)
         run: pnpm -F examples-basic-connect typecheck

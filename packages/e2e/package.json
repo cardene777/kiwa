@@ -1,7 +1,7 @@
 {
-  "name": "@kiwa-test/ui",
-  "version": "0.1.0",
-  "description": "React component test adapter for kiwa (Vitest + Testing Library + JSDOM)",
+  "name": "@kiwa-test/e2e",
+  "version": "0.0.0",
+  "description": "End-to-end test adapter for kiwa (Playwright + setupE2eEnv with built-in HTTP serve helper)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -9,17 +9,15 @@
   },
   "keywords": [
     "kiwa",
-    "ui",
-    "react",
+    "e2e",
+    "playwright",
     "testing",
-    "vitest",
-    "testing-library",
-    "jsdom"
+    "browser"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cardene777/kiwa.git",
-    "directory": "packages/ui"
+    "directory": "packages/e2e"
   },
   "homepage": "https://github.com/cardene777/kiwa#readme",
   "bugs": {
@@ -54,7 +52,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests/setup-component-env.test.js --environment jsdom && vitest run .vitest-dist/tests/browser.test.js --environment node --testTimeout 30000",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -62,37 +60,16 @@
   },
   "peerDependencies": {
     "@playwright/test": "^1.49.0",
-    "@testing-library/react": "^16",
-    "@testing-library/user-event": "^14",
-    "jsdom": "^25",
-    "react": "^18 || ^19",
-    "react-dom": "^18 || ^19",
     "vitest": "^2"
   },
   "peerDependenciesMeta": {
     "@playwright/test": {
       "optional": true
-    },
-    "@testing-library/react": {
-      "optional": true
-    },
-    "@testing-library/user-event": {
-      "optional": true
-    },
-    "jsdom": {
-      "optional": true
     }
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",
-    "@testing-library/react": "^16.1.0",
-    "@testing-library/user-event": "^14.5.2",
     "@types/node": "^22.10.0",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "jsdom": "^25.0.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
