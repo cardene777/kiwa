@@ -10,6 +10,8 @@
 
 [![npm version](https://img.shields.io/npm/v/@kiwa-test/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-test/core)
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa-test/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-test/core)
+[![packages](https://img.shields.io/badge/npm%20packages-11-cb3837?logo=npm)](#whats-in-the-box)
+[![python](https://img.shields.io/badge/PyPI-kiwa--test--py-3776ab?logo=python&logoColor=white)](./kiwa-py)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![tests](https://img.shields.io/badge/tests-292%20execution%20PASS-success)](#testing--quality)
 [![flaky](https://img.shields.io/badge/flaky-0%2F292-success)](#testing--quality)
@@ -95,6 +97,16 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 |---|---|
 | [`@kiwa-test/core`](./packages/core) | Playwright fixture: `window.ethereum` inject、 anvil 起動、 sign、 mine、 time-travel、 EIP-6963 multi-wallet、 ERC-4337 smart account、 custom-error helper |
 | [`@kiwa-test/cli`](./packages/cli) | `kiwa init` で `@kiwa-test/core` と連携した Playwright project を scaffold |
+| [`@kiwa-test/spec`](./packages/spec) | spec markdown parser (9 列の `test-spec-*.md` を `SpecDoc` に変換、 全 adapter 共通) |
+| [`@kiwa-test/api`](./packages/api) | API integration adapter (Vitest + msw + supertest + Playwright `request`) |
+| [`@kiwa-test/ui`](./packages/ui) | React component adapter (render / interaction / snapshot 3 mode) |
+| [`@kiwa-test/data`](./packages/data) | queue / cron / batch adapter (in-memory queue + fake clock + idempotency / DLQ) |
+| [`@kiwa-test/cli-test`](./packages/cli-test) | CLI / shell / file IO adapter (isolated tempdir + env override + stdout/stderr snapshot) |
+| [`@kiwa-test/e2e`](./packages/e2e) | 汎用 browser E2E adapter (Playwright + static html / fetch app) |
+| [`@kiwa-test/observability`](./packages/observability) | run history 収集 / flaky 検出 / coverage report / spec-coverage gap 解析 |
+| [`@kiwa-test/a11y`](./packages/a11y) | accessibility adapter — axe-core 統合 (jsdom + Playwright) |
+| [`@kiwa-test/visual`](./packages/visual) | visual regression adapter — pixelmatch + pngjs による PNG pixel diff |
+| [`kiwa-test-py`](./kiwa-py) (PyPI) | Python pytest adapter — `@kiwa-test/spec` の Python port + requests / httpx adapter |
 
 **skill 単独** (npm 依存なし — test file を生成するだけ) でも、 **fixture 単独** (Claude なし — `pnpm add @kiwa-test/core` だけ) でも、 両方併用しても OK。
 

@@ -10,6 +10,8 @@ One Layer 1 spec → Foundry `.t.sol`, Hardhat `.test.cjs`, and Playwright `.spe
 
 [![npm version](https://img.shields.io/npm/v/@kiwa-test/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-test/core)
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa-test/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-test/core)
+[![packages](https://img.shields.io/badge/npm%20packages-11-cb3837?logo=npm)](#what-s-in-the-box)
+[![python](https://img.shields.io/badge/PyPI-kiwa--test--py-3776ab?logo=python&logoColor=white)](./kiwa-py)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![tests](https://img.shields.io/badge/tests-292%20execution%20PASS-success)](#testing--quality)
 [![flaky](https://img.shields.io/badge/flaky-0%2F292-success)](#testing--quality)
@@ -95,6 +97,16 @@ kiwa ships in two halves that work together but stand alone:
 |---|---|
 | [`@kiwa-test/core`](./packages/core) | Playwright fixture: inject `window.ethereum`, spawn `anvil`, sign, mine, time-travel, EIP-6963 multi-wallet, ERC-4337 smart accounts, custom-error helpers |
 | [`@kiwa-test/cli`](./packages/cli) | `kiwa init` scaffolds a Playwright project wired to `@kiwa-test/core` |
+| [`@kiwa-test/spec`](./packages/spec) | Spec markdown parser shared by every adapter (9-column `test-spec-*.md` → `SpecDoc`) |
+| [`@kiwa-test/api`](./packages/api) | API integration adapter (Vitest + msw + supertest + Playwright `request`) |
+| [`@kiwa-test/ui`](./packages/ui) | React component adapter (render / interaction / snapshot modes) |
+| [`@kiwa-test/data`](./packages/data) | Queue / cron / batch adapter — in-memory queue + fake clock + idempotency / DLQ semantics |
+| [`@kiwa-test/cli-test`](./packages/cli-test) | CLI / shell / file IO adapter — isolated tempdir + env override + stdout/stderr snapshot |
+| [`@kiwa-test/e2e`](./packages/e2e) | Generic browser E2E adapter (Playwright + static html / fetch app) |
+| [`@kiwa-test/observability`](./packages/observability) | Run history collection / flaky detection / coverage report / spec-coverage gap analysis |
+| [`@kiwa-test/a11y`](./packages/a11y) | Accessibility adapter — axe-core integration for jsdom + Playwright pages |
+| [`@kiwa-test/visual`](./packages/visual) | Visual regression adapter — pixel-level PNG diff backed by pixelmatch + pngjs |
+| [`kiwa-test-py`](./kiwa-py) (PyPI) | Python pytest adapter — port of `@kiwa-test/spec` + requests / httpx adapter |
 
 You can use the **skills alone** (no npm dependency — they just generate test files) or the **fixture alone** (no Claude — just `pnpm add @kiwa-test/core`), or both together for the full chain.
 
