@@ -43,7 +43,7 @@ export const DemoTest: React.FC = () => {
           panels={[
             {
               label: "Contract test",
-              badge: "forge",
+              badge: "forge 27/27",
               accent: tokens.color.accentContract,
               content: (
                 <Terminal
@@ -57,7 +57,7 @@ export const DemoTest: React.FC = () => {
             },
             {
               label: "dApp e2e test",
-              badge: "playwright",
+              badge: "playwright 14/14",
               accent: tokens.color.accentE2e,
               content: (
                 <Terminal

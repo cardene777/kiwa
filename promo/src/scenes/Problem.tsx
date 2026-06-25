@@ -30,6 +30,7 @@ const codeLines = [
   { text: "test(\"transfer flow\", async ({ page }) => { ... });" },
   { text: "test(\"expired access\", async ({ page }) => { ... });" },
   { text: "test(\"security boundary\", async ({ page }) => { ... });" },
+  { text: "// manual: vitest describe('connector switch')" },
 ];
 
 export const Problem: React.FC = () => {

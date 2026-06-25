@@ -17,16 +17,16 @@ export const KiwaPromo: React.FC = () => {
       <Series.Sequence durationInFrames={4 * f}>
         <Opening />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={7 * f}>
+      <Series.Sequence durationInFrames={9 * f}>
         <Problem />
       </Series.Sequence>
       <Series.Sequence durationInFrames={8 * f}>
         <Solution />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={10 * f}>
+      <Series.Sequence durationInFrames={11 * f}>
         <DemoSpec />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={8 * f}>
+      <Series.Sequence durationInFrames={5 * f}>
         <DemoSpecResult />
       </Series.Sequence>
       <Series.Sequence durationInFrames={9 * f}>
