@@ -44,3 +44,9 @@ export {
   type QwikTestEnvUi,
   type QwikContainerLike,
 } from './qwik.js';
+export {
+  setupAngularComponentEnv,
+  type SetupAngularComponentEnvOptions,
+  type AngularTestEnvUi,
+  type AngularContainerLike,
+} from './angular.js';
