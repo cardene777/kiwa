@@ -1,0 +1,52 @@
+{
+  "name": "@kiwa-test/a11y",
+  "version": "0.0.0",
+  "description": "Accessibility (a11y) test adapter for kiwa — axe-core integration for jsdom + Playwright pages",
+  "license": "MIT",
+  "author": { "name": "cardene", "url": "https://github.com/cardene777" },
+  "keywords": ["kiwa", "a11y", "axe", "accessibility", "testing", "wcag"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cardene777/kiwa.git",
+    "directory": "packages/a11y"
+  },
+  "homepage": "https://github.com/cardene777/kiwa#readme",
+  "bugs": { "url": "https://github.com/cardene777/kiwa/issues" },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+      "require": { "types": "./dist/index.d.cts", "default": "./dist/index.cjs" }
+    }
+  },
+  "files": ["dist", "README.md"],
+  "publishConfig": { "access": "public", "provenance": true },
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsup",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment jsdom",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment jsdom --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/audit.js' --coverage.include='.vitest-dist/src/index.js' --coverage.exclude='.vitest-dist/tests/**'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": { "@kiwa-test/spec": "workspace:*" },
+  "peerDependencies": {
+    "axe-core": "^4",
+    "jsdom": "^25",
+    "vitest": "^2"
+  },
+  "peerDependenciesMeta": {
+    "jsdom": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "axe-core": "^4.10.2",
+    "jsdom": "^25.0.1",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

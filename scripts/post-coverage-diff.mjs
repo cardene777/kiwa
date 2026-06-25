@@ -30,6 +30,7 @@ const PACKAGES = [
   { name: '@kiwa-test/e2e', dir: 'packages/e2e' },
   { name: '@kiwa-test/cli', dir: 'packages/cli' },
   { name: '@kiwa-test/core', dir: 'packages/core' },
+  { name: '@kiwa-test/a11y', dir: 'packages/a11y' },
 ];
 
 const METRICS = ['lines', 'branches', 'functions', 'statements'];

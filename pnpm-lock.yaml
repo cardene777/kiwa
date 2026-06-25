@@ -1146,6 +1146,34 @@ importers:
         specifier: ^5.4.10
         version: 5.4.21(@types/node@22.19.19)(terser@5.48.0)
 
+  packages/a11y:
+    dependencies:
+      '@kiwa-test/spec':
+        specifier: workspace:*
+        version: link:../spec
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.19
+      '@vitest/coverage-v8':
+        specifier: ^2.1.0
+        version: 2.1.9(vitest@2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0))
+      axe-core:
+        specifier: ^4.10.2
+        version: 4.12.1
+      jsdom:
+        specifier: ^25.0.1
+        version: 25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(postcss@8.5.15)(tsx@4.22.4)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0)
+
   packages/api:
     dependencies:
       '@kiwa-test/spec':
@@ -1625,6 +1653,9 @@ importers:
 
   tests/release-smoke:
     dependencies:
+      '@kiwa-test/a11y':
+        specifier: workspace:*
+        version: link:../../packages/a11y
       '@kiwa-test/api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -4685,6 +4716,10 @@ packages:
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
+
+  axe-core@4.12.1:
+    resolution: {integrity: sha512-s7iGf5GaVMxEG0ENN9x+xTr7GFZCb1ZP/1uATUpCEK2X78nDB3RwbtFCo9pGAf9ru+VwoQ464DkaLEeRM08wJA==}
+    engines: {node: '>=4'}
 
   axios-retry@4.5.0:
     resolution: {integrity: sha512-aR99oXhpEDGo0UuAlYcn2iGRds30k366Zfa05XWScR9QaQD4JYiP3/1Qt1u7YlefUOK+cn0CcwoL1oefavQUlQ==}
@@ -13519,6 +13554,8 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.1.0
+
+  axe-core@4.12.1: {}
 
   axios-retry@4.5.0(axios@1.16.0):
     dependencies:

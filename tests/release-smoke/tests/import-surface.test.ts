@@ -66,6 +66,15 @@ describe('@kiwa-test/e2e surface', () => {
   });
 });
 
+describe('@kiwa-test/a11y surface', () => {
+  it('exports runAxe + reportViolations + expectNoViolations', async () => {
+    const mod = await import('@kiwa-test/a11y');
+    expect(typeof mod.runAxe).toBe('function');
+    expect(typeof mod.reportViolations).toBe('function');
+    expect(typeof mod.expectNoViolations).toBe('function');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');
