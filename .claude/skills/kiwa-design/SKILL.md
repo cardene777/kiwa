@@ -58,6 +58,7 @@ $ARGUMENTS
 | `integration` | `tests/spec/integration/test-spec-{module}.md` | `/kiwa-api` (Vitest + msw + supertest、 @kiwa-test/api) |
 | `api` | `tests/spec/integration/test-spec-{module}.api.md` | `/kiwa-api` (HTTP / REST / GraphQL 専用、 mode column 必須) |
 | `ui` | `tests/spec/integration/test-spec-{module}.ui.md` | `/kiwa-ui` (React component 専用、 render / interaction / snapshot 3 mode、 `@kiwa-test/ui`) |
+| `data` | `tests/spec/integration/test-spec-{module}.data.md` | `/kiwa-data` (queue / cron / batch 専用、 mock / live mode + fake clock、 `@kiwa-test/data`) |
 | `unit` | `tests/spec/unit/test-spec-{module}.md` | `/kiwa-vitest` (Vitest 汎用 unit runner) |
 | `all` (default) | `tests/spec/test-spec-{module}.md` | 全 Layer 2 skill (旧 default 経路、 互換性維持) |
 
@@ -301,6 +302,27 @@ mode column が `render` = mount + screen query のみ、 `interaction` = `userE
 `/kiwa-ui` Layer 2 skill が本 9 column を `@kiwa-test/ui/setupComponentEnv` の引数に機械変換する。
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.ui.md` (ui layer 専用拡張、 `.ui.md` suffix で `@kiwa-test/ui` 経路向けと識別)。
+
+#### data layer 専用 column (queue / cron / batch)
+
+`--layer data` 指定時は queue / cron / batch job のセマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-test/data` の `setupQueueEnv` / `createFakeClock` と直接 mapping)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-DATA-001` 等の連番 |
+| Observation | 観点 (正常配送 / DLQ / idempotency / 時刻発火 / unschedule 等) |
+| Given | 前提 (maxAmount / maxReceiveCount / cron interval / 初期 seed 等) |
+| When | 操作 (`send order(1, 500)` / `advanceMs(350)` / `nack 1 回` 等) |
+| Then | 期待 (`acceptedOrders=[1]` / `dlqSize=1` / `3 回発火` 等の state assertion) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Mode | `mock` / `live` (`setupQueueEnv({ mode })` と 1 対 1) |
+| Topic | `orders` / `cron` 等の queue / schedule 識別子 |
+
+mode column が `mock` = in-memory queue + fake clock、 `live` = 将来 SQS / Kafka / cron daemon 接続。
+`/kiwa-data` Layer 2 skill が本 9 column を `@kiwa-test/data` API に機械変換する。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.data.md` (`.data.md` suffix で `@kiwa-test/data` 経路向けと識別)。
 
 例 (実装例 `examples/react-component-poc/tests/spec/integration/test-spec-counter.ui.md`):
 
