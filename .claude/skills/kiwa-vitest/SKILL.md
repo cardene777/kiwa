@@ -105,6 +105,31 @@ report 4 section (`tests/reports/unit/coverage-report-{module}.md`)。
 
 `/kiwa-review --mode test-review --module {module} --layer unit --test-path test/unit/*.test.{ts,tsx} --lang $DOC_LANG` を内部呼出し、 spec vs test 整合 + 観点別 cover 率 + 追加 test 提案を 5 軸判定。 `--no-review` で skip 可能。
 
+## anvil 実走経路 (mock / 実 anvil 両対応)
+
+unit test は default で **mock 経路** を使う (viem の mock transport / `vi.mock` で外部依存を遮断、 anvil process は起動しない)。
+contract / real-chain と連携した動作を verify したい case (例 storage slot 直書き / time-warp / EIP-1271 / 実 RPC 経路) は `@kiwa-test/core` の `setupTestEnv` helper で **実 anvil 経路** に opt-in する。
+
+```ts
+import { setupTestEnv } from '@kiwa-test/core';
+
+// mock 経路 (default、 anvil 不起動)
+const env = await setupTestEnv();
+
+// 実 anvil clean chain
+const env = await setupTestEnv({ anvil: true });
+
+// 実 anvil + pre-built state を瞬時 load (推奨、 1 tx ずつ流す setup を不要化)
+const env = await setupTestEnv({ anvil: { loadState: 'tests/fixtures/state.json' } });
+```
+
+`env.stop()` は `afterAll` で必ず呼ぶ。 `withAnvil(opts).env()` の lifecycle ヘルパを使うと beforeAll / afterAll が auto wire される。
+
+state.json は事前に **`kiwa anvil seed <script> --out tests/fixtures/state.json`** で 1 回だけ生成する (deploy + setup を script 内で 1 回実行 → anvil 終了時に `--dump-state` で chain 状態を一括書出)。
+以降の test は load-state で 1 file コピペ相当の瞬時セットアップ (起動 ~300ms、 再 deploy 不要)。
+
+mock 経路 / 実 anvil 経路の選択は Layer 1 spec の「テスト経路」 column に明示する経路を SSOT 化する (`/kiwa-design --layer unit` 出力)。
+
 ## 完了条件
 
 - Layer 1 spec の「自動化すべきテスト」 全 TC が `test/unit/{module}.test.{ts,tsx}` に Write 済
