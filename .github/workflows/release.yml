@@ -45,6 +45,9 @@ jobs:
       - name: Verify anvil on PATH
         run: anvil --version
 
+      - name: Build (spec first for type resolution)
+        run: pnpm -F @kiwa-test/spec build
+
       - name: Typecheck
         run: pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/cli typecheck
 
