@@ -1417,6 +1417,9 @@ importers:
         specifier: workspace:*
         version: link:../spec
     devDependencies:
+      '@open-wc/testing-helpers':
+        specifier: ^3.0.1
+        version: 3.0.1
       '@playwright/test':
         specifier: ^1.49.0
         version: 1.60.0
@@ -1456,6 +1459,9 @@ importers:
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      lit:
+        specifier: ^3.3.3
+        version: 3.3.3
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -3196,6 +3202,15 @@ packages:
 
   '@open-draft/until@2.1.0':
     resolution: {integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==}
+
+  '@open-wc/dedupe-mixin@2.0.1':
+    resolution: {integrity: sha512-+R4VxvceUxHAUJXJQipkkoV9fy10vNo+OnUnGKZnVmcwxMl460KLzytnUM4S35SI073R0yZQp9ra0MbPUwVcEA==}
+
+  '@open-wc/scoped-elements@3.0.10':
+    resolution: {integrity: sha512-esE95vxq6Y7w9/8H/oPvqN9QVR+ys3F9J2/ITyuTWnlSYaJueQmcS5CR5OybJMjjm9R5pmSoOe6Vau/O7J6d2g==}
+
+  '@open-wc/testing-helpers@3.0.1':
+    resolution: {integrity: sha512-hyNysSatbgT2FNxHJsS3rGKcLEo6+HwDFu1UQL6jcSQUabp/tj3PyX7UnXL3H5YGv0lJArdYLSnvjLnjn3O2fw==}
 
   '@paralleldrive/cuid2@2.3.1':
     resolution: {integrity: sha512-XO7cAxhnTZl0Yggq6jOgjiOHhbgcO4NqFqwSmQpjK3b6TEE6Uj/jfSk6wzYyemh3+I0sHirKSetjQwn5cZktFw==}
@@ -6327,6 +6342,9 @@ packages:
 
   lit@3.3.0:
     resolution: {integrity: sha512-DGVsqsOIHBww2DqnuZzW7QsuCdahp50ojuDaBPC7jUDRpYoH0z7kHBBYZewRzer75FwtrkmkKk7iOAwSaWdBmw==}
+
+  lit@3.3.3:
+    resolution: {integrity: sha512-fycuvZg/hkpozL00lm1pEJH5nN/lr9ZXd6mJI2HSN4+Bzc+LDNdEApJ6HFbPkdFNHLvOplIIuJvxkS4XUxqirw==}
 
   load-tsconfig@0.2.5:
     resolution: {integrity: sha512-IXO6OCs9yg8tMKzfPZ1YmheJbZCiEsnBdcB03l0OcfK9prKnJb96siuHCr5Fl37/yo9DnKU+TLpxzTUspw9shg==}
@@ -10387,6 +10405,19 @@ snapshots:
       outvariant: 1.4.3
 
   '@open-draft/until@2.1.0': {}
+
+  '@open-wc/dedupe-mixin@2.0.1': {}
+
+  '@open-wc/scoped-elements@3.0.10':
+    dependencies:
+      '@open-wc/dedupe-mixin': 2.0.1
+      lit: 3.3.3
+
+  '@open-wc/testing-helpers@3.0.1':
+    dependencies:
+      '@open-wc/scoped-elements': 3.0.10
+      lit: 3.3.3
+      lit-html: 3.3.3
 
   '@paralleldrive/cuid2@2.3.1':
     dependencies:
@@ -15401,6 +15432,12 @@ snapshots:
       '@types/trusted-types': 2.0.7
 
   lit@3.3.0:
+    dependencies:
+      '@lit/reactive-element': 2.1.2
+      lit-element: 4.2.2
+      lit-html: 3.3.3
+
+  lit@3.3.3:
     dependencies:
       '@lit/reactive-element': 2.1.2
       lit-element: 4.2.2
