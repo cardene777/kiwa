@@ -82,9 +82,14 @@ export async function sendTransaction(
 ): Promise<Hex> {
   const account = privateKeyToAccount(ctx.privateKey);
   const chain = defineAnvil(ctx.chainId, ctx.anvilPort);
+  const transportTimeout = ctx.transportTimeoutMs ?? 5_000;
+  const retryCount = ctx.transportRetryCount ?? 0;
   const client = createWalletClient({
     chain,
-    transport: http(`http://127.0.0.1:${ctx.anvilPort}`),
+    transport: http(`http://127.0.0.1:${ctx.anvilPort}`, {
+      timeout: transportTimeout,
+      retryCount,
+    }),
     account,
   });
 

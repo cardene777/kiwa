@@ -97,6 +97,10 @@ export interface TxBroadcastCtx {
   privateKey: Hex;
   chainId: number;
   anvilPort: number;
+  /** viem http transport timeout in ms (default 5000) */
+  transportTimeoutMs?: number;
+  /** viem http transport retry count (default 0, fail-fast for transport errors) */
+  transportRetryCount?: number;
 }
 
 export interface ContractAccountRpcConfig {
