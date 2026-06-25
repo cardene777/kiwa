@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kiwa-test-py"
+version = "0.1.0"
+description = "kiwa: Python pytest adapter — spec markdown -> pytest case generation + requests/httpx adapter"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "cardene", email = "cardene777@gmail.com" }]
+keywords = ["kiwa", "pytest", "spec", "test", "adapter"]
+classifiers = [
+  "Framework :: Pytest",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Software Development :: Testing",
+]
+requires-python = ">=3.10"
+dependencies = [
+  "pytest>=7.0",
+  "requests>=2.28",
+  "httpx>=0.24",
+]
+
+[project.optional-dependencies]
+fastapi = ["fastapi>=0.100", "uvicorn>=0.20"]
+cov = ["pytest-cov>=4.0"]
+dev = ["pytest>=7.0", "pytest-cov>=4.0", "build", "twine"]
+
+[project.urls]
+Homepage = "https://github.com/cardene777/kiwa"
+Repository = "https://github.com/cardene777/kiwa"
+Issues = "https://github.com/cardene777/kiwa/issues"
+
+[project.entry-points.pytest11]
+kiwa_test = "kiwa_test_py.plugin"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["kiwa_test_py*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"
