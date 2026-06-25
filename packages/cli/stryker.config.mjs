@@ -4,12 +4,8 @@ export default {
   testRunnerNodeArgs: ['--max-old-space-size=4096'],
   plugins: ['@stryker-mutator/vitest-runner'],
   vitest: { configFile: 'vitest.stryker.config.mjs' },
-  /**
-   * mutate = run-watch + spec-to-test (CAR-410 follow-up #413 で spec-to-test 復活)。
-   * init.js は internal helper (template / FS / regex) が private export 不在で direct test 不可、
-   * 単独 Issue で helper export 計画 + boundary 詳細設計を別 follow-up に切り出す。
-   */
   mutate: [
+    '.vitest-dist/src/commands/init.js',
     '.vitest-dist/src/commands/run-watch.js',
     '.vitest-dist/src/commands/spec-to-test.js',
   ],

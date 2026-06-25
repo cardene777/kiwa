@@ -182,7 +182,7 @@ export function runInit(options: InitOptions): InitResult {
   return { created, updated, warnings };
 }
 
-function normalizeTestDir(value: string | undefined): string {
+export function normalizeTestDir(value: string | undefined): string {
   if (value === undefined || value === '') {
     return 'e2e';
   }
@@ -195,7 +195,7 @@ function normalizeTestDir(value: string | undefined): string {
   return normalized;
 }
 
-function resolveConfigFileName(suffix: string | undefined): string {
+export function resolveConfigFileName(suffix: string | undefined): string {
   if (suffix === undefined || suffix === '') {
     return 'playwright.config.ts';
   }
@@ -207,22 +207,22 @@ function resolveConfigFileName(suffix: string | undefined): string {
   return `playwright.${suffix}.config.ts`;
 }
 
-function applyConfigTemplate(content: string, testDir: string): string {
+export function applyConfigTemplate(content: string, testDir: string): string {
   return content.replace(/testDir:\s*'[^']+'/, `testDir: '${toPosix(testDir).replace(/^\.\//, './')}'`)
     .replace(/testDir:\s*"[^"]+"/, `testDir: "${toPosix(testDir).replace(/^\.\//, './')}"`)
     .replace(/testDir:\s*'\.\/e2e'/, `testDir: '${prefixWithDot(testDir)}'`);
 }
 
-function prefixWithDot(p: string): string {
+export function prefixWithDot(p: string): string {
   if (p.startsWith('./') || p.startsWith('/')) return p;
   return `./${p}`;
 }
 
-function toPosix(p: string): string {
+export function toPosix(p: string): string {
   return prefixWithDot(p.replace(/\\/g, '/'));
 }
 
-function normalizeFoundryRelPath(value: string): string {
+export function normalizeFoundryRelPath(value: string): string {
   if (value === '' || value === undefined) {
     throw new Error('kiwa init: --with-deploy requires a foundry project path');
   }
@@ -235,7 +235,7 @@ function normalizeFoundryRelPath(value: string): string {
   return normalized;
 }
 
-function rollback(cwd: string, created: string[], createdDirs: string[]): void {
+export function rollback(cwd: string, created: string[], createdDirs: string[]): void {
   for (const relativePath of created) {
     const target = path.join(cwd, relativePath);
     if (fs.existsSync(target)) {
@@ -256,7 +256,7 @@ function rollback(cwd: string, created: string[], createdDirs: string[]): void {
   }
 }
 
-function detectIndent(raw: string): number | string {
+export function detectIndent(raw: string): number | string {
   const lines = raw.split('\n');
 
   for (let index = 1; index < lines.length; index += 1) {
@@ -279,7 +279,7 @@ function detectIndent(raw: string): number | string {
   return 2;
 }
 
-function resolveTemplatePath(source: string): string {
+export function resolveTemplatePath(source: string): string {
   const candidates = [
     fileURLToPath(new URL(`../templates/${source}`, import.meta.url)),
     fileURLToPath(new URL(`./templates/${source}`, import.meta.url)),
@@ -296,7 +296,7 @@ function resolveTemplatePath(source: string): string {
   throw new Error(`Template not found: ${source}`);
 }
 
-function detectTsconfigStrict(tsconfigPath: string): boolean | undefined {
+export function detectTsconfigStrict(tsconfigPath: string): boolean | undefined {
   try {
     const raw = fs.readFileSync(tsconfigPath, 'utf8');
     const sanitized = stripJsonComments(raw);
@@ -318,7 +318,7 @@ function detectTsconfigStrict(tsconfigPath: string): boolean | undefined {
   }
 }
 
-function stripJsonComments(raw: string): string {
+export function stripJsonComments(raw: string): string {
   return raw
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/^\s*\/\/.*$/gm, '');
