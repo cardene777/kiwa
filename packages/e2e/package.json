@@ -53,7 +53,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000",
-    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000 --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/setup-e2e-env.js' --coverage.include='.vitest-dist/src/index.js' --coverage.exclude='.vitest-dist/tests/**'",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000 --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/setup-e2e-env.js' --coverage.include='.vitest-dist/src/index.js' --coverage.exclude='.vitest-dist/tests/**'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

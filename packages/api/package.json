@@ -55,7 +55,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/index.js' --coverage.include='.vitest-dist/src/msw-bridge.js' --coverage.include='.vitest-dist/src/request-client.js' --coverage.include='.vitest-dist/src/setup-api-server.js' --coverage.exclude='.vitest-dist/tests/**'",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/index.js' --coverage.include='.vitest-dist/src/msw-bridge.js' --coverage.include='.vitest-dist/src/request-client.js' --coverage.include='.vitest-dist/src/setup-api-server.js' --coverage.exclude='.vitest-dist/tests/**'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
