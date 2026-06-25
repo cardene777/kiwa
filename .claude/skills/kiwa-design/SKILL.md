@@ -57,6 +57,7 @@ $ARGUMENTS
 | `e2e` | `tests/spec/e2e/test-spec-{module}.md` | `/kiwa-play` |
 | `integration` | `tests/spec/integration/test-spec-{module}.md` | `/kiwa-api` (Vitest + msw + supertest、 @kiwa-test/api) |
 | `api` | `tests/spec/integration/test-spec-{module}.api.md` | `/kiwa-api` (HTTP / REST / GraphQL 専用、 mode column 必須) |
+| `ui` | `tests/spec/integration/test-spec-{module}.ui.md` | `/kiwa-ui` (React component 専用、 render / interaction / snapshot 3 mode、 `@kiwa-test/ui`) |
 | `unit` | `tests/spec/unit/test-spec-{module}.md` | `/kiwa-vitest` (Vitest 汎用 unit runner) |
 | `all` (default) | `tests/spec/test-spec-{module}.md` | 全 Layer 2 skill (旧 default 経路、 互換性維持) |
 
@@ -279,6 +280,40 @@ mode column が `mock` = msw handler で固定応答、 `live` = 実 HTTP server
 `/kiwa-api` Layer 2 skill が本 9 column を `@kiwa-test/api/setupApiServer` の引数に機械変換する。
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.api.md` (api layer 専用拡張、 `.api.md` suffix で `@kiwa-test/api` 経路向けと識別)。
+
+#### ui layer 専用 column (React component)
+
+`--layer ui` 指定時は React component セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-test/ui` の `setupComponentEnv` mode と直接 mapping するため)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-UI-001` 等の連番 |
+| Observation | 観点 (初期 render / interaction / 状態遷移 / a11y / snapshot 等) |
+| Given | 前提 (props 値 / 親 context / mock store 等) |
+| When | 操作 (`mount Counter` / `click +` / `type "abc"` 等の RTL semantic) |
+| Then | 期待 (`value が "1" を表示` / `aria-disabled=true` 等の screen query assertion) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Mode | `render` / `interaction` / `snapshot` (`setupComponentEnv({ mode })` と 1 対 1) |
+| Component | `<Counter />` 等の component 識別子 |
+
+mode column が `render` = mount + screen query のみ、 `interaction` = `userEvent` で操作 + 状態遷移 assertion、 `snapshot` = markup 文字列の正規表現 / 部分一致 / file snapshot。
+`/kiwa-ui` Layer 2 skill が本 9 column を `@kiwa-test/ui/setupComponentEnv` の引数に機械変換する。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.ui.md` (ui layer 専用拡張、 `.ui.md` suffix で `@kiwa-test/ui` 経路向けと識別)。
+
+例 (実装例 `examples/react-component-poc/tests/spec/integration/test-spec-counter.ui.md`):
+
+```markdown
+- module: counter
+- layer: ui
+
+| ID | Observation | Given | When | Then | Priority | Automation | Mode | Component |
+|---|---|---|---|---|---|---|---|---|
+| T-UI-001 | 初期 render | initial=3 | mount Counter | value が "3" を表示 | P0 | yes | render | Counter |
+| T-UI-003 | + クリックで +1 | initial=0 | click + | value が "1" になる | P0 | yes | interaction | Counter |
+| T-UI-007 | snapshot initial | initial=7 | mount Counter | markup に value 7 + ボタン群が含まれる | P1 | yes | snapshot | Counter |
+```
 
 例 (実装例 `examples/nextjs-api-poc/tests/spec/integration/test-spec-items.api.md`):
 
