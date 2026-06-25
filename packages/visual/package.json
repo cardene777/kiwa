@@ -1,37 +1,65 @@
 {
   "name": "@kiwa-test/visual",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Visual regression test adapter for kiwa — pixelmatch + PNG diff with baseline + actual snapshot management",
   "license": "MIT",
-  "author": { "name": "cardene", "url": "https://github.com/cardene777" },
-  "keywords": ["kiwa", "visual", "regression", "pixelmatch", "screenshot", "testing"],
+  "author": {
+    "name": "cardene",
+    "url": "https://github.com/cardene777"
+  },
+  "keywords": [
+    "kiwa",
+    "visual",
+    "regression",
+    "pixelmatch",
+    "screenshot",
+    "testing"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cardene777/kiwa.git",
     "directory": "packages/visual"
   },
   "homepage": "https://github.com/cardene777/kiwa#readme",
-  "bugs": { "url": "https://github.com/cardene777/kiwa/issues" },
+  "bugs": {
+    "url": "https://github.com/cardene777/kiwa/issues"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-      "require": { "types": "./dist/index.d.cts", "default": "./dist/index.cjs" }
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
-  "files": ["dist", "README.md"],
-  "publishConfig": { "access": "public", "provenance": true },
-  "engines": { "node": ">=20" },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/compare.js' --coverage.include='.vitest-dist/src/index.js' --coverage.exclude='.vitest-dist/tests/**'",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": { "@kiwa-test/spec": "workspace:*" },
+  "dependencies": {
+    "@kiwa-test/spec": "workspace:*"
+  },
   "peerDependencies": {
     "pixelmatch": "^7",
     "pngjs": "^7",
