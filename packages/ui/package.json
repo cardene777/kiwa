@@ -11,6 +11,9 @@
     "kiwa",
     "ui",
     "react",
+    "vue",
+    "svelte",
+    "solid",
     "testing",
     "vitest",
     "testing-library",
@@ -54,7 +57,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests/setup-component-env.test.js .vitest-dist/tests/vue.test.js --environment jsdom && vitest run .vitest-dist/tests/browser.test.js --environment node --testTimeout 30000",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests/setup-component-env.test.js .vitest-dist/tests/vue.test.js .vitest-dist/tests/solid.test.js --environment jsdom && vitest run .vitest-dist/tests/browser.test.js --environment node --testTimeout 30000",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests/setup-component-env.test.js .vitest-dist/tests/vue.test.js --environment jsdom --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/setup-component-env.js' --coverage.include='.vitest-dist/src/vue.js' --coverage.include='.vitest-dist/src/index.js' --coverage.exclude='.vitest-dist/tests/**'",
     "test:mutation": "stryker run",
     "typecheck": "tsc --noEmit"
@@ -64,6 +67,7 @@
   },
   "peerDependencies": {
     "@playwright/test": "^1.49.0",
+    "@solidjs/testing-library": "^0.8",
     "@testing-library/react": "^16",
     "@testing-library/svelte": "^5",
     "@testing-library/user-event": "^14",
@@ -71,12 +75,16 @@
     "jsdom": "^25",
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19",
+    "solid-js": "^1.9",
     "svelte": "^4 || ^5",
     "vitest": "^2",
     "vue": "^3"
   },
   "peerDependenciesMeta": {
     "@playwright/test": {
+      "optional": true
+    },
+    "@solidjs/testing-library": {
       "optional": true
     },
     "@testing-library/react": {
@@ -100,6 +108,9 @@
     "react-dom": {
       "optional": true
     },
+    "solid-js": {
+      "optional": true
+    },
     "svelte": {
       "optional": true
     },
@@ -109,6 +120,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",
+    "@solidjs/testing-library": "^0.8.10",
     "@stryker-mutator/core": "^8.7.1",
     "@stryker-mutator/vitest-runner": "^8.7.1",
     "@testing-library/react": "^16.1.0",
@@ -122,6 +134,7 @@
     "jsdom": "^25.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "solid-js": "^1.9.7",
     "svelte": "^4.2.19",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",

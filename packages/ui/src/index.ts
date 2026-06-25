@@ -26,3 +26,9 @@ export {
   type SvelteTestEnvUi,
   type SvelteContainerLike,
 } from './svelte.js';
+export {
+  setupSolidComponentEnv,
+  type SetupSolidComponentEnvOptions,
+  type SolidTestEnvUi,
+  type SolidContainerLike,
+} from './solid.js';
