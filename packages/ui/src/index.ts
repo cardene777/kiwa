@@ -14,3 +14,15 @@ export {
   type BrowserPageHandle,
   type BrowserLocator,
 } from './browser.js';
+export {
+  setupVueComponentEnv,
+  type SetupVueComponentEnvOptions,
+  type VueTestEnvUi,
+  type VueWrapperLike,
+} from './vue.js';
+export {
+  setupSvelteComponentEnv,
+  type SetupSvelteComponentEnvOptions,
+  type SvelteTestEnvUi,
+  type SvelteContainerLike,
+} from './svelte.js';

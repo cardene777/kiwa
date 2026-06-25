@@ -33,4 +33,5 @@ export interface DashboardInput {
   history: RunHistory;
   flaky: FlakyTest[];
   gaps: SpecCoverageGap[];
+  coverage?: import('./coverage.js').CoverageSummary;
 }

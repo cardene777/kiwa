@@ -57,6 +57,21 @@ export function renderDashboard(input: DashboardInput): string {
   }
   lines.push('');
 
+  lines.push('## Code coverage');
+  lines.push('');
+  if (!input.coverage) {
+    lines.push('No coverage data provided.');
+  } else {
+    const t = input.coverage.total;
+    lines.push('| metric | covered | total | pct |');
+    lines.push('|---|---|---|---|');
+    lines.push(`| lines | ${t.lines.covered} | ${t.lines.total} | ${t.lines.pct.toFixed(1)}% |`);
+    lines.push(`| statements | ${t.statements.covered} | ${t.statements.total} | ${t.statements.pct.toFixed(1)}% |`);
+    lines.push(`| branches | ${t.branches.covered} | ${t.branches.total} | ${t.branches.pct.toFixed(1)}% |`);
+    lines.push(`| functions | ${t.functions.covered} | ${t.functions.total} | ${t.functions.pct.toFixed(1)}% |`);
+  }
+  lines.push('');
+
   lines.push('## Spec coverage gaps');
   lines.push('');
   if (input.gaps.length === 0) {

@@ -40,10 +40,12 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean --onSuccess \"node -e \\\"require('node:fs').cpSync('src/templates','dist/templates',{recursive:true})\\\"\"",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --no-file-parallelism",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --no-file-parallelism --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**' --coverage.exclude='.vitest-dist/tests/**'",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^2.1.0",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
