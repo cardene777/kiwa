@@ -49,7 +49,7 @@ jobs:
         run: pnpm -F @kiwa-test/spec build
 
       - name: Typecheck
-        run: pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/cli typecheck
+        run: pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli typecheck
 
       - name: Test (spec)
         run: pnpm -F @kiwa-test/spec test
@@ -63,11 +63,14 @@ jobs:
       - name: Test (ui)
         run: pnpm -F @kiwa-test/ui test
 
+      - name: Test (data)
+        run: pnpm -F @kiwa-test/data test
+
       - name: Test (cli)
         run: pnpm -F @kiwa-test/cli test
 
       - name: Build
-        run: pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/cli build
+        run: pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli build
 
       - name: Typecheck consumer (examples)
         run: pnpm -F examples-basic-connect typecheck
