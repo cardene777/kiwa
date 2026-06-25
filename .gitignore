@@ -62,3 +62,11 @@ kiwa-py/**/*.pyc
 kiwa-py/build/
 kiwa-py/dist/
 kiwa-py/*.egg-info/
+
+# python-todo-poc artifacts
+examples/python-todo-poc/.venv/
+examples/python-todo-poc/**/__pycache__/
+examples/python-todo-poc/**/*.pyc
+examples/python-todo-poc/**/*.egg-info/
+examples/python-todo-poc/build/
+examples/python-todo-poc/dist/
