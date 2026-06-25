@@ -13,6 +13,7 @@ Multi-framework component test adapter for kiwa — Vitest + Testing Library + J
 | Svelte | `setupSvelteComponentEnv` | `@testing-library/svelte` |
 | SolidJS | `setupSolidComponentEnv` | `@solidjs/testing-library` |
 | Lit (Web Components) | `setupLitComponentEnv` | `@open-wc/testing-helpers` |
+| Qwik (resumable) | `setupQwikComponentEnv` | `@noma.to/qwik-testing-library` |
 | Browser (real Chromium) | `setupBrowserComponentEnv` | `@playwright/test` |
 
 ## Install
@@ -120,6 +121,36 @@ await env.stop();
 ```
 
 The Lit adapter relays the shadow DOM through `handle.shadowQuerySelector` for ergonomic deep queries, and exposes the upgraded element via `handle.element` (typed as `HTMLElement`; cast to `LitElement` when you need `updateComplete`).
+
+## Qwik quickstart
+
+Qwik requires `@builder.io/qwik/optimizer`'s Vite plugin for its JSX transform, which collides with the React JSX pipeline used by the rest of this package. The expected setup in a downstream Qwik consumer is therefore a Qwik-specific Vitest project that registers the optimizer plugin:
+
+```ts
+// qwik consumer's vitest.config.ts
+import { defineConfig } from "vitest/config";
+import { qwikVite } from "@builder.io/qwik/optimizer";
+
+export default defineConfig({
+  plugins: [qwikVite()],
+  test: { environment: "jsdom" },
+});
+```
+
+Then exercise components with the kiwa adapter:
+
+```ts
+import { component$ } from "@builder.io/qwik";
+import { setupQwikComponentEnv } from "@kiwa-test/ui";
+
+const Counter = component$(() => <span data-testid="value">0</span>);
+
+const env = await setupQwikComponentEnv({ mode: "render", component: <Counter /> });
+expect(env.result.getByTestId("value").textContent).toBe("0");
+await env.stop();
+```
+
+This package's own test suite ships a contract test (`tests/qwik.test.ts`) that asserts the adapter's missing-peer error message — full Qwik JSX rendering will land in a dedicated example project (`examples/qwik-component-poc`) in a follow-up PR.
 
 ## License
 

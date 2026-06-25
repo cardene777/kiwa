@@ -99,7 +99,7 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 | [`@kiwa-test/cli`](./packages/cli) | `kiwa init` で `@kiwa-test/core` と連携した Playwright project を scaffold |
 | [`@kiwa-test/spec`](./packages/spec) | spec markdown parser (9 列の `test-spec-*.md` を `SpecDoc` に変換、 全 adapter 共通) |
 | [`@kiwa-test/api`](./packages/api) | API integration adapter (Vitest + msw + supertest + Playwright `request`) |
-| [`@kiwa-test/ui`](./packages/ui) | React / Vue / Svelte / SolidJS / Lit / real Chromium 対応 component adapter (render / interaction / snapshot 3 mode) |
+| [`@kiwa-test/ui`](./packages/ui) | React / Vue / Svelte / SolidJS / Lit / Qwik / real Chromium 対応 component adapter (render / interaction / snapshot 3 mode) |
 | [`@kiwa-test/data`](./packages/data) | queue / cron / batch adapter (in-memory queue + fake clock + idempotency / DLQ) |
 | [`@kiwa-test/cli-test`](./packages/cli-test) | CLI / shell / file IO adapter (isolated tempdir + env override + stdout/stderr snapshot) |
 | [`@kiwa-test/e2e`](./packages/e2e) | 汎用 browser E2E adapter (Playwright + static html / fetch app) |

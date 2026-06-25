@@ -15,6 +15,7 @@
     "svelte",
     "solid",
     "lit",
+    "qwik",
     "web-components",
     "testing",
     "vitest",
@@ -59,7 +60,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests/setup-component-env.test.js .vitest-dist/tests/vue.test.js .vitest-dist/tests/solid.test.js .vitest-dist/tests/lit.test.js --environment jsdom && vitest run .vitest-dist/tests/browser.test.js --environment node --testTimeout 30000",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests/setup-component-env.test.js .vitest-dist/tests/vue.test.js .vitest-dist/tests/solid.test.js .vitest-dist/tests/lit.test.js .vitest-dist/tests/qwik.test.js --environment jsdom && vitest run .vitest-dist/tests/browser.test.js --environment node --testTimeout 30000",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests/setup-component-env.test.js .vitest-dist/tests/vue.test.js --environment jsdom --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/setup-component-env.js' --coverage.include='.vitest-dist/src/vue.js' --coverage.include='.vitest-dist/src/index.js' --coverage.exclude='.vitest-dist/tests/**'",
     "test:mutation": "stryker run",
     "typecheck": "tsc --noEmit"
@@ -68,6 +69,8 @@
     "@kiwa-test/spec": "workspace:*"
   },
   "peerDependencies": {
+    "@builder.io/qwik": "^1.12",
+    "@noma.to/qwik-testing-library": "^1.6",
     "@open-wc/testing-helpers": "^3",
     "@playwright/test": "^1.49.0",
     "@solidjs/testing-library": "^0.8",
@@ -85,6 +88,12 @@
     "vue": "^3"
   },
   "peerDependenciesMeta": {
+    "@builder.io/qwik": {
+      "optional": true
+    },
+    "@noma.to/qwik-testing-library": {
+      "optional": true
+    },
     "@open-wc/testing-helpers": {
       "optional": true
     },
