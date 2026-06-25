@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/spec -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/a11y build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000",
+    "test": "pnpm -F @kiwa-test/spec -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/a11y -F @kiwa-test/visual build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@kiwa-test/a11y": "workspace:*",
+    "@kiwa-test/visual": "workspace:*",
     "@kiwa-test/api": "workspace:*",
     "@kiwa-test/cli-test": "workspace:*",
     "@kiwa-test/data": "workspace:*",
