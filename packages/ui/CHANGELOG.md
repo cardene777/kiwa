@@ -1,5 +1,31 @@
 # @kiwa-test/ui
 
+## 0.3.0
+
+### Minor Changes
+
+- 0a07815: v6.2 — vitest coverage 統合 + observability dashboard 取込 + ui Vue 対応
+
+  ## A: vitest coverage 統合
+
+  - spec / api / ui / data / cli-test / observability / e2e / cli / core の package.json に `test:cov` script 追加
+  - `@vitest/coverage-v8` を devDep に追加
+  - v8 provider で line / branch / function / statement coverage を JSON + text reporter で出力
+
+  ## B: @kiwa-test/observability に coverage 取込 (minor)
+
+  - `fromIstanbulCoverageSummary` ... v8 / istanbul coverage-summary.json を `CoverageSummary` に正規化、 total 不在時は files から自動集計
+  - `checkThresholds` ... lines / branches / functions / statements の最低 % を gate
+  - `renderDashboard({ coverage })` に Code coverage section 追加 (total line/branch/function/statement の表)
+  - 6 件 test 追加 (合計 21 件 PASS)
+
+  ## C: @kiwa-test/ui に Vue 3 対応 (minor)
+
+  - `setupVueComponentEnv({ mode, component, props, slots })` ... `@vue/test-utils` を lazy load して mount、 jsdom 環境で動作 (PoC 2 件 PASS)
+  - `setupSvelteComponentEnv({ mode, component, props })` ... `@testing-library/svelte` を lazy load する API のみ提供 (test は PoC 側で実装)
+  - 既存 React 経路 + 実 Chromium browser mode は完全互換
+  - peer dep に `@vue/test-utils` / `vue` / `@testing-library/svelte` / `svelte` を optional 追加
+
 ## 0.2.0
 
 ### Minor Changes
