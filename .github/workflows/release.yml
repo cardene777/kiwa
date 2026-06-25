@@ -37,13 +37,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install Foundry (for anvil)
+        uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d  # v1.8.0
+        with:
+          version: stable
+
+      - name: Verify anvil on PATH
+        run: anvil --version
+
       - name: Typecheck
         run: pnpm -F @kiwa-test/core -F @kiwa-test/cli typecheck
 
       - name: Test (core)
         run: pnpm -F @kiwa-test/core test
-        env:
-          SKIP_ANVIL_TESTS: "1"
 
       - name: Test (cli)
         run: pnpm -F @kiwa-test/cli test
