@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-todo-poc"
+version = "0.0.1"
+description = "kiwa-test-py example: FastAPI todo API driven by a kiwa-design spec markdown"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.100",
+  "uvicorn>=0.20",
+]
+
+[project.optional-dependencies]
+dev = [
+  "kiwa-test-py",
+  "fastapi[all]",
+  "pytest>=7.0",
+  "httpx>=0.24",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"

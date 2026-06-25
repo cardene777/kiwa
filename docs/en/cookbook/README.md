@@ -17,6 +17,9 @@ kiwa usage by real scenario.
 - [Generate framework integration boilerplate with `kiwa init --with-deploy`](./with-deploy.md) — automates anvil + forge build + forge create + `.env.local` writing via a four-file boilerplate
 - [Stack three layers on the same contract](./three-layer-stack.md) — Foundry + Hardhat + Playwright on mint-nft / defi-swap / nextjs-token-gating (3 contract × 3 lane = 9 entries verified)
 - [Stack five test layers on a single feature](./five-layer-stack.md) — Add Vitest (unit) + msw (integration) on top of the three-layer stack for features with TS helpers and HTTP / RPC adapters (F-3)
+- [Accessibility audit with `@kiwa-test/a11y`](./a11y-axe.md) ⭐ New in v0.9 — axe-core wrapped for Vitest + jsdom and Playwright pages
+- [Visual regression with `@kiwa-test/visual`](./visual-regression.md) ⭐ New in v0.9 — pixel-level PNG diff (pixelmatch + pngjs)
+- [Python adapter with `kiwa-test-py`](./python-pytest.md) ⭐ New in v0.9 — pytest plugin + requests / httpx, same spec markdown as the TS chain
 
 ## Contributor-facing internal test docs
 
