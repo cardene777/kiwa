@@ -372,4 +372,256 @@ describe('runInit', () => {
     }).toThrow(InitConflictError);
     expect(thrown?.conflicts).toContain('tests/prepare-env.ts');
   });
+
+  it('T-INIT-017 testDir empty string defaults to "e2e"', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, testDir: '' } as Parameters<typeof runInit>[0]);
+    expect(fs.existsSync(path.join(tempDir, 'e2e'))).toBe(true);
+  });
+
+  it('T-INIT-018 testDir undefined defaults to "e2e"', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    expect(fs.existsSync(path.join(tempDir, 'e2e'))).toBe(true);
+  });
+
+  it('T-INIT-019 testDir relative subdir', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, testDir: 'src/tests/e2e' } as Parameters<typeof runInit>[0]);
+    expect(fs.existsSync(path.join(tempDir, 'src/tests/e2e'))).toBe(true);
+  });
+
+  it('T-INIT-020 testDir absolute path - rejects', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    expect(() =>
+      runInit({ force: false, cwd: tempDir, testDir: '/abs/path' } as Parameters<typeof runInit>[0]),
+    ).toThrow(/relative path/);
+  });
+
+  it('T-INIT-021 testDir contains ".." - rejects', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    expect(() =>
+      runInit({ force: false, cwd: tempDir, testDir: '../outside' } as Parameters<typeof runInit>[0]),
+    ).toThrow(/relative path/);
+  });
+
+  it('T-INIT-022 testDir trailing slash - normalized', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    const result = runInit({ force: false, cwd: tempDir, testDir: 'e2e/' } as Parameters<typeof runInit>[0]);
+    expect(result.created.some((f) => f.startsWith('e2e/'))).toBe(true);
+  });
+
+  it('T-INIT-023 testDir "./" prefix - stripped', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, testDir: './tests/e2e' } as Parameters<typeof runInit>[0]);
+    expect(fs.existsSync(path.join(tempDir, 'tests/e2e'))).toBe(true);
+  });
+
+  it('T-INIT-024 configSuffix - valid alphanumeric "ci"', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, configSuffix: 'ci' } as Parameters<typeof runInit>[0]);
+    expect(fs.existsSync(path.join(tempDir, 'playwright.ci.config.ts'))).toBe(true);
+  });
+
+  it('T-INIT-025 configSuffix - hyphen and underscore allowed', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, configSuffix: 'my-test_env' } as Parameters<typeof runInit>[0]);
+    expect(fs.existsSync(path.join(tempDir, 'playwright.my-test_env.config.ts'))).toBe(true);
+  });
+
+  it('T-INIT-026 configSuffix - period rejected', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    expect(() =>
+      runInit({ force: false, cwd: tempDir, configSuffix: 'a.b' } as Parameters<typeof runInit>[0]),
+    ).toThrow(/config-suffix/);
+  });
+
+  it('T-INIT-027 configSuffix - special char rejected', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    expect(() =>
+      runInit({ force: false, cwd: tempDir, configSuffix: 'a@b' } as Parameters<typeof runInit>[0]),
+    ).toThrow(/config-suffix/);
+  });
+
+  it('T-INIT-028 scriptKey custom - script name overrides "test:e2e"', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, scriptKey: 'my-test' } as Parameters<typeof runInit>[0]);
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.scripts['my-test']).toBeDefined();
+  });
+
+  it('T-INIT-029 default scriptKey "test:e2e"', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.scripts['test:e2e']).toBeDefined();
+  });
+
+  it('T-INIT-030 existing scriptKey not overridden', async () => {
+    seedPackageJson(tempDir, {
+      name: 'host',
+      version: '1.0.0',
+      scripts: { 'test:e2e': 'custom-cmd' },
+    });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.scripts['test:e2e']).toBe('custom-cmd');
+  });
+
+  it('T-INIT-031 devDeps not overridden when present', async () => {
+    seedPackageJson(tempDir, {
+      name: 'host',
+      version: '1.0.0',
+      devDependencies: { '@kiwa-test/core': '1.2.3' },
+    });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.devDependencies['@kiwa-test/core']).toBe('1.2.3');
+  });
+
+  it('T-INIT-032 indent detection - tab', async () => {
+    fs.writeFileSync(
+      path.join(tempDir, 'package.json'),
+      '{\n\t"name": "host",\n\t"version": "1.0.0"\n}\n',
+      'utf8',
+    );
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    const raw = fs.readFileSync(path.join(tempDir, 'package.json'), 'utf8');
+    expect(raw).toContain('\t"');
+  });
+
+  it('T-INIT-033 indent detection - 4 spaces', async () => {
+    fs.writeFileSync(
+      path.join(tempDir, 'package.json'),
+      '{\n    "name": "host",\n    "version": "1.0.0"\n}\n',
+      'utf8',
+    );
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    const raw = fs.readFileSync(path.join(tempDir, 'package.json'), 'utf8');
+    const lines = raw.split('\n');
+    expect(lines.find((line) => line.startsWith('    "'))).toBeDefined();
+  });
+
+  it('T-INIT-034 tsconfig strict false - warning emitted', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'tsconfig.json', '{ "compilerOptions": { "strict": false } }\n');
+    const { runInit } = await loadInitModule();
+    const result = runInit({ force: false, cwd: tempDir });
+    expect(result.warnings.some((w) => w.includes('strict'))).toBe(true);
+  });
+
+  it('T-INIT-035 tsconfig strict true - no warning', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'tsconfig.json', '{ "compilerOptions": { "strict": true } }\n');
+    const { runInit } = await loadInitModule();
+    const result = runInit({ force: false, cwd: tempDir });
+    expect(result.warnings.filter((w) => w.includes('strict')).length).toBe(0);
+  });
+
+  it('T-INIT-036 tsconfig with comments - strict false parsed and warning emitted', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(
+      tempDir,
+      'tsconfig.json',
+      '{\n  // comment\n  "compilerOptions": {\n    /* block */\n    "strict": false\n  }\n}\n',
+    );
+    const { runInit } = await loadInitModule();
+    const result = runInit({ force: false, cwd: tempDir });
+    expect(result.warnings.some((w) => w.includes('strict'))).toBe(true);
+  });
+
+  it('T-INIT-037 with-deploy backslash path - normalized to forward', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, withDeploy: 'contract\\sub' } as Parameters<typeof runInit>[0]);
+    const prepareEnv = readFile(tempDir, 'tests/prepare-env.ts');
+    expect(prepareEnv).toContain('contract/sub');
+  });
+
+  it('T-INIT-038 with-deploy trailing slash stripped', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, withDeploy: 'contract/' } as Parameters<typeof runInit>[0]);
+    const prepareEnv = readFile(tempDir, 'tests/prepare-env.ts');
+    expect(prepareEnv).toContain("'contract'");
+  });
+
+  it('T-INIT-039 InitConflictError message contains file list', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'e2e/connect.spec.ts', '// existing\n');
+    const { InitConflictError, runInit } = await loadInitModule();
+    let captured: Error | null = null;
+    try {
+      runInit({ force: false, cwd: tempDir });
+    } catch (e) {
+      captured = e as Error;
+    }
+    expect(captured).toBeInstanceOf(InitConflictError);
+    expect(captured?.message).toContain('Conflicting files');
+    expect(captured?.message).toContain('--force');
+  });
+
+  it('T-INIT-040 InitConflictError conflicts property contains expected paths', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'e2e/connect.spec.ts', '// existing\n');
+    writeFile(tempDir, 'playwright.config.ts', '// existing\n');
+    const { InitConflictError, runInit } = await loadInitModule();
+    let captured: (Error & { conflicts: string[] }) | null = null;
+    try {
+      runInit({ force: false, cwd: tempDir });
+    } catch (e) {
+      captured = e as Error & { conflicts: string[] };
+    }
+    expect(captured).toBeInstanceOf(InitConflictError);
+    expect(captured?.conflicts).toContain('e2e/connect.spec.ts');
+    expect(captured?.conflicts).toContain('playwright.config.ts');
+  });
+
+  it('T-INIT-041 force=true - existing file overwritten', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'e2e/connect.spec.ts', '// existing\n');
+    const { runInit } = await loadInitModule();
+    runInit({ force: true, cwd: tempDir });
+    const content = readFile(tempDir, 'e2e/connect.spec.ts');
+    expect(content).not.toBe('// existing\n');
+  });
+
+  it('T-INIT-042 no package.json - skip script/devDeps update', async () => {
+    const { runInit } = await loadInitModule();
+    const result = runInit({ force: false, cwd: tempDir });
+    expect(result.updated).not.toContain('package.json');
+  });
+
+  it('T-INIT-043 with-deploy empty string - rejects', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    expect(() =>
+      runInit({ force: false, cwd: tempDir, withDeploy: '' } as Parameters<typeof runInit>[0]),
+    ).toThrow(/with-deploy/);
+  });
+
+  it('T-INIT-044 with-deploy absolute path - rejects', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    expect(() =>
+      runInit({ force: false, cwd: tempDir, withDeploy: '/abs/contract' } as Parameters<typeof runInit>[0]),
+    ).toThrow(/relative path/);
+  });
 });
