@@ -81,6 +81,9 @@ jobs:
       - name: Test (cli)
         run: pnpm -F @kiwa-test/cli test
 
+      - name: Test (release-smoke)
+        run: pnpm -F kiwa-release-smoke test
+
       - name: Build
         run: pnpm -F @kiwa-test/spec -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli build
 
