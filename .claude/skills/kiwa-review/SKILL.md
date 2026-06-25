@@ -43,10 +43,22 @@ AskUserQuestion で review report の生成言語を確認。 `--lang {code}` �
 
 選択肢 — 🇯🇵 日本語 (ja、 Recommended) / 🇬🇧 English (en) / 🌏 その他多言語 (free input)。 詳細 `references/doc-language-selection.md`。
 
-確定後の言語 `$DOC_LANG` は Step 3 (report Write) で参照。 出力 path:
+確定後の言語 `$DOC_LANG` は Step 3 (report Write) で参照。 出力 path (Issue #341 SSOT):
 - ja → `tests/reports/review/{mode}-review-{module}.ja.md`
 - en → `tests/reports/review/{mode}-review-{module}.md`
 - その他 → `tests/reports/review/{mode}-review-{module}.{lang_code}.md`
+
+#### lang suffix 規約 (SSOT)
+
+producer (`/kiwa-design`) と consumer (`/kiwa-test` / `/kiwa-review`) の file 名規約一致:
+
+```bash
+LANG_SUFFIX=""
+[ "$DOC_LANG" != "en" ] && [ -n "$DOC_LANG" ] && LANG_SUFFIX=".${DOC_LANG}"
+# 使用例: tests/spec/{layer}/test-spec-${MODULE}${LANG_SUFFIX}.md
+```
+
+SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (en で空 / ja で `.ja` / その他で `.{code}`) に展開される。 input spec 検索時も同規約で path 解決。
 
 ### Step 1: mode 判定 + 入力読込
 

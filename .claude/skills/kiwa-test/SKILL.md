@@ -47,6 +47,26 @@ AskUserQuestion で文書生成言語を user に確認。 `--lang {code}` 引�
 
 確定後 `$DOC_LANG` を全子 skill に `--lang $DOC_LANG` で渡す。
 
+#### lang suffix 規約 (SSOT)
+
+producer (`/kiwa-design`) と consumer (`/kiwa-test` / `/kiwa-review` 等) の file 名規約一致 (Issue #341):
+
+| `$DOC_LANG` | suffix | 例 (spec file) | 例 (report file) |
+|---|---|---|---|
+| `en` (default) | (なし) | `test-spec-foo.md` | `result-review-foo.md` |
+| `ja` | `.ja` | `test-spec-foo.ja.md` | `result-review-foo.ja.md` |
+| その他 (`zh` / `ko` 等) | `.{code}` | `test-spec-foo.zh.md` | `result-review-foo.zh.md` |
+
+実装で参照する変数 `LANG_SUFFIX`:
+
+```bash
+LANG_SUFFIX=""
+[ "$DOC_LANG" != "en" ] && [ -n "$DOC_LANG" ] && LANG_SUFFIX=".${DOC_LANG}"
+# 使用例: tests/spec/contract/test-spec-${EXAMPLE}${LANG_SUFFIX}.md
+```
+
+本 SKILL.md 内の `{lang}.md` placeholder 表記は本規約に従って `${LANG_SUFFIX}.md` に展開される。
+
 ### Step 1a: runner 自動判断 (skill 起動時 1 回、 contract 関連 target のみ)
 
 `--runner` 引数指定時は skip。 省略時は LLM が project の state から自動判断する。
@@ -121,13 +141,17 @@ retrofit walkthrough は examples 側を空 dir 状態から開始するため�
 
 ```bash
 # 検出ロジック
+# lang suffix 規約 (kiwa-design SSOT 一致): en は suffix なし、 ja は ".ja"、 その他 ISO 639-1 は ".{code}"
+LANG_SUFFIX=""
+[ "$DOC_LANG" != "en" ] && [ -n "$DOC_LANG" ] && LANG_SUFFIX=".${DOC_LANG}"
+
 EXISTING=()
 [ "$TARGET" != "dapp" ] && [ -d "examples/$EXAMPLE/test" ] && [ -n "$(ls -A examples/$EXAMPLE/test 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/test")
 [ "$TARGET" != "dapp" ] && [ -d "examples/$EXAMPLE/hardhat-test" ] && [ -n "$(ls -A examples/$EXAMPLE/hardhat-test 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/hardhat-test")
 [ "$TARGET" != "contract" ] && [ -d "examples/$EXAMPLE/tests" ] && [ -n "$(ls -A examples/$EXAMPLE/tests 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/tests")
-# spec 既存 check
-[ -f "tests/spec/contract/test-spec-${EXAMPLE}.${DOC_LANG}.md" ] && EXISTING+=("tests/spec/contract/test-spec-${EXAMPLE}.${DOC_LANG}.md")
-[ -f "tests/spec/e2e/test-spec-${EXAMPLE}.${DOC_LANG}.md" ] && EXISTING+=("tests/spec/e2e/test-spec-${EXAMPLE}.${DOC_LANG}.md")
+# spec 既存 check (lang suffix 規約)
+[ -f "tests/spec/contract/test-spec-${EXAMPLE}${LANG_SUFFIX}.md" ] && EXISTING+=("tests/spec/contract/test-spec-${EXAMPLE}${LANG_SUFFIX}.md")
+[ -f "tests/spec/e2e/test-spec-${EXAMPLE}${LANG_SUFFIX}.md" ] && EXISTING+=("tests/spec/e2e/test-spec-${EXAMPLE}${LANG_SUFFIX}.md")
 ```
 
 既存 file / dir 検出時は AskUserQuestion で 3 択:

@@ -44,7 +44,7 @@ AskUserQuestion で spec / report 等の文書生成言語を user に確認す�
 
 選択肢 — 🇯🇵 日本語 (ja、 Recommended) / 🇬🇧 English (en) / 🌏 その他多言語 (free input、 ISO 639-1 言語コード)。 詳細仕様は `references/doc-language-selection.md` を Read。
 
-確定後の言語 `$DOC_LANG` は以降の文書生成 step (Layer 1 経由 spec 生成 / spec.ts 内コメント言語 / 将来の report 出力) で参照する。
+確定後の言語 `$DOC_LANG` は以降の文書生成 step (Layer 1 経由 spec 生成 / spec.ts 内コメント言語 / 将来の report 出力) で参照する。 lang suffix 規約は Issue #341 SSOT (`/kiwa-design` § lang suffix 規約) に従う ... en (default) は suffix なし、 ja は `.ja`、 その他 ISO 639-1 は `.{code}`。
 
 ### Step 0: kiwa セットアップ判定
 
