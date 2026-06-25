@@ -53,3 +53,12 @@ Desktop.ini
 mutation-report/
 .stryker-tmp/
 
+kiwa-py/.venv/
+
+# kiwa-py Python build artifacts
+kiwa-py/.venv/
+kiwa-py/**/__pycache__/
+kiwa-py/**/*.pyc
+kiwa-py/build/
+kiwa-py/dist/
+kiwa-py/*.egg-info/
