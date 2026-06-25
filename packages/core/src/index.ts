@@ -29,6 +29,16 @@ export {
   type StartAnvilOptions,
 } from './anvil.js';
 export {
+  setupTestEnv,
+  withAnvil,
+  type SetupTestEnvOptions,
+  type AnvilModeOption,
+  type TestEnv,
+  type MockTestEnv,
+  type AnvilTestEnv,
+  type WithAnvilLifecycle,
+} from './vitest.js';
+export {
   startAnvilFork,
   type ForkOptions,
 } from './anvil-fork.js';

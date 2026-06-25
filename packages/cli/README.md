@@ -61,6 +61,17 @@ Checks that the required `anvil` binary is available in the current environment.
 pnpm dlx @kiwa-test/cli doctor
 ```
 
+### `kiwa anvil seed <script> --out <path>`
+
+Runs `<script>` (any executable `.mjs` / `.js`) against a fresh anvil instance and dumps the full chain state to `<path>` via `anvil --dump-state`. The script reads `process.env.ANVIL_RPC_URL` to deploy contracts and prepare seed data; on exit, anvil writes the state file that downstream vitest tests can pass to `setupTestEnv({ anvil: { loadState: ... } })` for instant chain startup.
+
+```bash
+pnpm dlx @kiwa-test/cli anvil seed tests/seed.ts --out tests/fixtures/state.json
+# OK seeded state at /…/tests/fixtures/state.json (port 49xxx)
+```
+
+Flags: `--chain-id <n>` (default 31337), `--port <n>` (default: random free port).
+
 ## Related
 
 - [GitHub repository](https://github.com/cardene777/kiwa)

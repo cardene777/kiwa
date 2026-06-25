@@ -71,6 +71,10 @@ export interface StartAnvilOptions {
   detached?: boolean;
   /** kill existing anvil on the port before spawn (default: false) */
   killExistingOnPort?: boolean;
+  /** path to pre-built state json to load at startup (anvil --load-state) */
+  loadState?: string;
+  /** path to write state json when anvil shuts down (anvil --dump-state) */
+  dumpState?: string;
 }
 
 export async function startAnvil(opts: StartAnvilOptions = {}): Promise<AnvilHandle> {
@@ -99,6 +103,12 @@ export async function startAnvilProcess(
     if (opts.chainId !== undefined) {
       args.push('--chain-id', String(opts.chainId));
     }
+    if (opts.loadState) {
+      args.push('--load-state', opts.loadState);
+    }
+    if (opts.dumpState) {
+      args.push('--dump-state', opts.dumpState);
+    }
     const child = spawn('anvil', args, {
       stdio: opts.detached === true ? 'ignore' : ['ignore', 'pipe', 'pipe'],
       detached: opts.detached === true,
@@ -121,7 +131,7 @@ export async function startAnvilProcess(
         STARTUP_TIMEOUT_MS,
         () => fatalError,
         opts.chainId,
-        opts.requirePristineChain ?? true,
+        opts.requirePristineChain ?? !opts.loadState,
       );
     } catch (error) {
       child.off('error', onError);
