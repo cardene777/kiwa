@@ -1,5 +1,15 @@
 export * from './types.js';
 export type {
+  TestLayer,
+  TestMode,
+  TestEnvBase,
+  Lease as SpecLease,
+  Pool as SpecPool,
+  SpecDoc,
+  SpecCase,
+} from '@kiwa-test/spec';
+export { parseSpec } from '@kiwa-test/spec';
+export type {
   ApprovalMode,
   Eip6963ProviderInfo,
   WalletApi,

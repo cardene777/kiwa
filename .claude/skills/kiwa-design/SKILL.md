@@ -55,8 +55,9 @@ $ARGUMENTS
 |---|---|---|
 | `contract` | `tests/spec/contract/test-spec-{module}.md` | `/kiwa-forge` / `/kiwa-hardhat` |
 | `e2e` | `tests/spec/e2e/test-spec-{module}.md` | `/kiwa-play` |
-| `integration` | `tests/spec/integration/test-spec-{module}.md` | (Layer 2 未確定、 Playwright + API mock 想定) |
-| `unit` | `tests/spec/unit/test-spec-{module}.md` | Vitest / Jest (汎用 unit runner) |
+| `integration` | `tests/spec/integration/test-spec-{module}.md` | `/kiwa-api` (Vitest + msw + supertest、 @kiwa-test/api) |
+| `api` | `tests/spec/integration/test-spec-{module}.api.md` | `/kiwa-api` (HTTP / REST / GraphQL 専用、 mode column 必須) |
+| `unit` | `tests/spec/unit/test-spec-{module}.md` | `/kiwa-vitest` (Vitest 汎用 unit runner) |
 | `all` (default) | `tests/spec/test-spec-{module}.md` | 全 Layer 2 skill (旧 default 経路、 互換性維持) |
 
 出力 path 親 dir (`tests/spec/{layer}/`) は skill が `mkdir -p` で自動作成する。 既存 file がある場合は上書きせず `tests/spec/{layer}/test-spec-{module}-{n}.md` (n は 2 以降の連番) として Write、 衝突回避する。
@@ -257,6 +258,39 @@ multiSelect: false
 ```
 
 `--auto-cleanup` 等の自動化 flag 指定時は default 選択肢 (📝 TC 追加) を採用、 AskUserQuestion を skip する。
+
+#### api layer 専用 column (HTTP / REST / GraphQL)
+
+`--layer api` 指定時は HTTP セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-test/api` の `setupApiServer` mode と直接 mapping するため)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-API-001` 等の連番 |
+| Observation | 観点 (正常系 / 異常系 / 境界値 / 権限 / 冪等性 等) |
+| Given | 前提条件 (DB 状態 / auth / mock 設定 等) |
+| When | 操作 (`POST /api/items {name:"x"}` 等の HTTP method + path + body) |
+| Then | 期待 (`201 + {id:1,name:"x"} を返す` 等の status + body 形式) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Mode | `mock` / `live` / `hybrid` (`setupApiServer({ mode })` と 1 対 1) |
+| Route | `/api/items` 等の URL path |
+
+mode column が `mock` = msw handler で固定応答、 `live` = 実 HTTP server で実装動作、 `hybrid` = 両者共存 (live 実装 + 必要時に msw で path 上書き)。
+`/kiwa-api` Layer 2 skill が本 9 column を `@kiwa-test/api/setupApiServer` の引数に機械変換する。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.api.md` (api layer 専用拡張、 `.api.md` suffix で `@kiwa-test/api` 経路向けと識別)。
+
+例 (実装例 `examples/nextjs-api-poc/tests/spec/integration/test-spec-items.api.md`):
+
+```markdown
+- module: items
+- layer: api
+
+| ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
+|---|---|---|---|---|---|---|---|---|
+| T-API-001 | GET 正常系 | items=[] | GET /api/items | 200 + [] を返す | P0 | yes | live | /api/items |
+| T-API-008 | mock で固定応答 | (mock 上書き) | GET /api/items | mock handler の固定応答が返る | P1 | yes | mock | /api/items |
+```
 
 ### Step 5: 優先度付け + 自動化方針
 
