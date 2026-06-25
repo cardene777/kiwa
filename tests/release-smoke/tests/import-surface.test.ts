@@ -75,6 +75,14 @@ describe('@kiwa-test/a11y surface', () => {
   });
 });
 
+describe('@kiwa-test/visual surface', () => {
+  it('exports comparePngBuffers + expectNoVisualDiff', async () => {
+    const mod = await import('@kiwa-test/visual');
+    expect(typeof mod.comparePngBuffers).toBe('function');
+    expect(typeof mod.expectNoVisualDiff).toBe('function');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');

@@ -31,6 +31,7 @@ const PACKAGES = [
   '@kiwa-test/cli',
   '@kiwa-test/core',
   '@kiwa-test/a11y',
+  '@kiwa-test/visual',
 ];
 
 const PKG_DIRS = {
@@ -44,6 +45,7 @@ const PKG_DIRS = {
   '@kiwa-test/cli': 'packages/cli',
   '@kiwa-test/core': 'packages/core',
   '@kiwa-test/a11y': 'packages/a11y',
+  '@kiwa-test/visual': 'packages/visual',
 };
 
 const THRESHOLDS = {
