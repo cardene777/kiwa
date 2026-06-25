@@ -250,7 +250,7 @@ function waitForReady(
 ): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const deadline = Date.now() + timeoutMs;
-    const intervalMs = 100;
+    const intervalMs = 25;
     const timer = setInterval(async () => {
       const fatalError = getFatalError();
       if (fatalError) {
