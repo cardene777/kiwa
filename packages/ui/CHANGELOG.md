@@ -1,5 +1,14 @@
 # @kiwa-test/ui
 
+## 0.4.0
+
+### Minor Changes
+
+- 4dbb412: Add `setupAngularComponentEnv` — Angular adapter built on `@testing-library/angular`. Matches the existing React / Vue / Svelte / Solid / Lit / Qwik adapters: same `mode` (`render | interaction | snapshot`) and `stop()` contract, returns `{ kind: 'angular', result, markup }`. Requires `@angular/core` ^17–^19, `@testing-library/angular` ^17–^19, `@angular/platform-browser-dynamic` and `zone.js` as optional peer deps, plus a TestBed-aware Vitest setup file on the consumer side. See the new Angular quickstart in `packages/ui/README.md`.
+- f4fa7fd: Add `setupLitComponentEnv` — Lit (Web Components) adapter built on `@open-wc/testing-helpers`. Matches the existing React / Vue / Svelte / Solid adapters: same `mode` (`render | interaction | snapshot`) and `stop()` contract, returns `{ kind: 'lit', handle, markup }`. `handle.shadowQuerySelector` provides a one-call shortcut into the upgraded element's shadow DOM. Requires `lit` ^3 and `@open-wc/testing-helpers` ^3 as optional peer deps. See the new Lit quickstart in `packages/ui/README.md`.
+- 7f42859: Add `setupQwikComponentEnv` — Qwik (resumable framework) adapter built on `@noma.to/qwik-testing-library`. Matches the existing React / Vue / Svelte / Solid / Lit adapters: same `mode` (`render | interaction | snapshot`) and `stop()` contract, returns `{ kind: 'qwik', result, markup }`. Requires `@builder.io/qwik` ^1.12 and `@noma.to/qwik-testing-library` ^1.6 as optional peer deps, plus the `@builder.io/qwik/optimizer` Vite plugin on the consumer side. See the new Qwik quickstart in `packages/ui/README.md`.
+- 1d4ab8a: Add `setupSolidComponentEnv` — SolidJS adapter built on `@solidjs/testing-library`. Matches the existing React / Vue / Svelte adapters: same `mode` (`render | interaction | snapshot`) and `stop()` contract, returns `{ kind: 'solid', result, markup }`. Requires `solid-js` ^1.9 and `@solidjs/testing-library` ^0.8 as optional peer deps. See the new SolidJS quickstart in `packages/ui/README.md`.
+
 ## 0.3.0
 
 ### Minor Changes
