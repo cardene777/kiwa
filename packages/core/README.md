@@ -64,6 +64,37 @@ test("window.ethereum is injected", async ({ page, dappE2e }) => {
 - transaction broadcast helper for `eth_sendTransaction`
 - approval-mode helpers for deterministic reject-flow testing
 - EIP-6963 multi-wallet injection and smart-account support
+- vitest helper (`setupTestEnv` / `withAnvil`) that boots a real anvil with `--load-state` for unit / integration tests
+
+## Vitest helper (mock + real anvil with state load)
+
+`@kiwa-test/core` ships a vitest helper that lets the same test file run in either **mock mode** (no anvil process, default) or **real anvil mode** with a pre-built state file. The state file is produced once via `kiwa anvil seed`, then every test boots anvil with `--load-state` — equivalent to pasting the entire chain in one shot.
+
+```ts
+import { setupTestEnv } from "@kiwa-test/core";
+
+// mock mode (default): no anvil process, viem mock transport
+const env = await setupTestEnv();
+
+// clean anvil: spawns anvil on a free port, chainId 31337
+const env = await setupTestEnv({ anvil: true });
+
+// anvil with pre-built state: instant setup, no per-test deploy
+const env = await setupTestEnv({
+  anvil: { loadState: "tests/fixtures/state.json", chainId: 31337 },
+});
+
+await env.stop(); // call in afterAll
+```
+
+Generate the state file once with the CLI seed command:
+
+```bash
+# tests/seed.ts uses process.env.ANVIL_RPC_URL to deploy + setup
+pnpm exec kiwa anvil seed tests/seed.ts --out tests/fixtures/state.json
+```
+
+The seed script runs against a one-shot anvil; on exit, anvil's `--dump-state` writes the full chain state to the output path. Subsequent test runs read it back via `loadState` and reach a ready chain in ~300 ms without replaying any transactions.
 
 ## Direct RPC Methods
 

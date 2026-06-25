@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
 import { InitConflictError, runInit, type InitOptions } from './commands/init.js';
+import { runAnvilSeed } from './commands/anvil-seed.js';
 
 const USAGE = `Usage: kiwa <command> [options]
 
 Commands:
-  init [options]   Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json
-  doctor           Check that anvil is installed
-  --help, -h       Show this message
+  init [options]                       Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json
+  doctor                               Check that anvil is installed
+  anvil seed <script> --out <path>     Run <script> against a fresh anvil and dump state to <path>
+  --help, -h                           Show this message
 
 init options:
   --force                       Overwrite existing files instead of failing on conflict
@@ -16,6 +18,11 @@ init options:
   --script-key <key>            package.json scripts key for the generated playwright command (default test:e2e)
   --with-deploy <foundry-path>  Also generate tests/{prepare-env,global-setup,global-teardown,fixture}.ts
                                 pointing at the given Foundry project (relative to cwd)
+
+anvil seed options:
+  --out <path>      Path to write state json (anvil --dump-state). Required.
+  --chain-id <n>    Override chain id (default 31337).
+  --port <n>        Bind anvil to specific port (default: random free port).
 `;
 
 function takeFlagValue(argv: string[], flag: string): string | undefined {
@@ -36,8 +43,38 @@ function takeFlagValue(argv: string[], flag: string): string | undefined {
   return undefined;
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const cmd = process.argv[2];
+
+  if (cmd === 'anvil' && process.argv[3] === 'seed') {
+    const argv = process.argv.slice(4);
+    const scriptPath = argv.find((a) => !a.startsWith('--'));
+    if (!scriptPath) {
+      process.stderr.write('ERR kiwa anvil seed: script path is required\n');
+      process.exit(2);
+    }
+    try {
+      const out = takeFlagValue(argv, '--out');
+      if (!out) {
+        process.stderr.write('ERR kiwa anvil seed: --out <path> is required\n');
+        process.exit(2);
+      }
+      const chainIdRaw = takeFlagValue(argv, '--chain-id');
+      const portRaw = takeFlagValue(argv, '--port');
+      const result = await runAnvilSeed({
+        scriptPath,
+        outPath: out,
+        cwd: process.cwd(),
+        ...(chainIdRaw !== undefined ? { chainId: Number(chainIdRaw) } : {}),
+        ...(portRaw !== undefined ? { port: Number(portRaw) } : {}),
+      });
+      process.stdout.write(`OK seeded state at ${result.outPath} (port ${result.port})\n`);
+      process.exit(0);
+    } catch (error) {
+      process.stderr.write(`ERR anvil seed failed: ${(error as Error).message}\n`);
+      process.exit(1);
+    }
+  }
 
   if (cmd === 'doctor') {
     try {
@@ -102,4 +139,7 @@ function main(): void {
   process.exit(2);
 }
 
-main();
+main().catch((error: Error) => {
+  process.stderr.write(`ERR ${error.message}\n`);
+  process.exit(1);
+});
