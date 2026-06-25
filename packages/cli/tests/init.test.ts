@@ -624,4 +624,227 @@ describe('runInit', () => {
       runInit({ force: false, cwd: tempDir, withDeploy: '/abs/contract' } as Parameters<typeof runInit>[0]),
     ).toThrow(/relative path/);
   });
+
+  it('T-INIT-045 generated playwright config testDir matches default "./e2e"', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    const content = readFile(tempDir, 'playwright.config.ts');
+    expect(content).toMatch(/testDir:\s*['"]\.\/e2e['"]/);
+  });
+
+  it('T-INIT-046 generated playwright config testDir uses custom testDir with leading "./"', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, testDir: 'custom/e2e' } as Parameters<typeof runInit>[0]);
+    const content = readFile(tempDir, 'playwright.config.ts');
+    expect(content).toMatch(/testDir:\s*['"]\.\/custom\/e2e['"]/);
+  });
+
+  it('T-INIT-047 generated WITH_DEPLOY tests/prepare-env.ts present', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, withDeploy: 'contract' } as Parameters<typeof runInit>[0]);
+    expect(fs.existsSync(path.join(tempDir, 'tests/prepare-env.ts'))).toBe(true);
+  });
+
+  it('T-INIT-048 generated WITH_DEPLOY tests/global-setup.ts present', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, withDeploy: 'contract' } as Parameters<typeof runInit>[0]);
+    expect(fs.existsSync(path.join(tempDir, 'tests/global-setup.ts'))).toBe(true);
+  });
+
+  it('T-INIT-049 generated WITH_DEPLOY tests/global-teardown.ts present', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, withDeploy: 'contract' } as Parameters<typeof runInit>[0]);
+    expect(fs.existsSync(path.join(tempDir, 'tests/global-teardown.ts'))).toBe(true);
+  });
+
+  it('T-INIT-050 generated WITH_DEPLOY tests/fixture.ts present', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, withDeploy: 'contract' } as Parameters<typeof runInit>[0]);
+    expect(fs.existsSync(path.join(tempDir, 'tests/fixture.ts'))).toBe(true);
+  });
+
+  it('T-INIT-051 devDeps @kiwa-test/core version = ^0.1.0', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.devDependencies['@kiwa-test/core']).toBe('^0.1.0');
+  });
+
+  it('T-INIT-052 devDeps @playwright/test version = ^1.49.0', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.devDependencies['@playwright/test']).toBe('^1.49.0');
+  });
+
+  it('T-INIT-053 devDeps viem version = ^2', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.devDependencies.viem).toBe('^2');
+  });
+
+  it('T-INIT-054 default script "test:e2e" = "playwright test"', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.scripts['test:e2e']).toBe('playwright test');
+  });
+
+  it('T-INIT-055 custom configSuffix script uses --config flag', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, configSuffix: 'ci' } as Parameters<typeof runInit>[0]);
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.scripts['test:e2e']).toBe('playwright test --config=playwright.ci.config.ts');
+  });
+
+  it('T-INIT-056 tsconfig.json created when missing', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    const result = runInit({ force: false, cwd: tempDir });
+    expect(fs.existsSync(path.join(tempDir, 'tsconfig.json'))).toBe(true);
+    expect(result.created).toContain('tsconfig.json');
+  });
+
+  it('T-INIT-057 indent default 2 spaces when no leading whitespace lines', async () => {
+    fs.writeFileSync(
+      path.join(tempDir, 'package.json'),
+      '{"name":"host","version":"1.0.0"}\n',
+      'utf8',
+    );
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir });
+    const raw = fs.readFileSync(path.join(tempDir, 'package.json'), 'utf8');
+    expect(raw).toContain('  "');
+  });
+
+  it('T-INIT-058 InitConflictError preserves error name', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'e2e/connect.spec.ts', '// existing\n');
+    const { InitConflictError, runInit } = await loadInitModule();
+    try {
+      runInit({ force: false, cwd: tempDir });
+      expect.fail('should have thrown');
+    } catch (e) {
+      expect((e as Error).name).toBe('InitConflictError');
+    }
+  });
+
+  it('T-INIT-059 conflicts joined with ", " in message', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'e2e/connect.spec.ts', '// existing\n');
+    writeFile(tempDir, 'playwright.config.ts', '// existing\n');
+    const { runInit } = await loadInitModule();
+    try {
+      runInit({ force: false, cwd: tempDir });
+    } catch (e) {
+      expect((e as Error).message).toMatch(/, /);
+    }
+  });
+
+  it('T-INIT-060 with-deploy "./contract" - ./ prefix preserved in foundry path', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, withDeploy: './contract' } as Parameters<typeof runInit>[0]);
+    const prepareEnv = readFile(tempDir, 'tests/prepare-env.ts');
+    expect(prepareEnv).toMatch(/FOUNDRY_PATH = ['"]\.\/contract['"]/);
+  });
+
+  it('T-INIT-061 with-deploy normalized backslash and trailing slash combo', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, withDeploy: 'contract\\foo\\' } as Parameters<typeof runInit>[0]);
+    const prepareEnv = readFile(tempDir, 'tests/prepare-env.ts');
+    expect(prepareEnv).toContain("'contract/foo'");
+  });
+
+  it('T-INIT-062 force overwrites existing playwright.config.ts', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'playwright.config.ts', '// custom\n');
+    const { runInit } = await loadInitModule();
+    runInit({ force: true, cwd: tempDir });
+    const content = readFile(tempDir, 'playwright.config.ts');
+    expect(content).not.toBe('// custom\n');
+    expect(content).toMatch(/testDir/);
+  });
+
+  it('T-INIT-063 tsconfig with strict missing key returns no warning', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'tsconfig.json', '{ "compilerOptions": { "target": "es2022" } }\n');
+    const { runInit } = await loadInitModule();
+    const result = runInit({ force: false, cwd: tempDir });
+    expect(result.warnings.filter((w) => w.includes('strict')).length).toBe(0);
+  });
+
+  it('T-INIT-064 tsconfig without compilerOptions - no warning', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'tsconfig.json', '{ "files": ["src/index.ts"] }\n');
+    const { runInit } = await loadInitModule();
+    const result = runInit({ force: false, cwd: tempDir });
+    expect(result.warnings.filter((w) => w.includes('strict')).length).toBe(0);
+  });
+
+  it('T-INIT-065 tsconfig with strict non-boolean - no warning', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'tsconfig.json', '{ "compilerOptions": { "strict": "yes" } }\n');
+    const { runInit } = await loadInitModule();
+    const result = runInit({ force: false, cwd: tempDir });
+    expect(result.warnings.filter((w) => w.includes('strict')).length).toBe(0);
+  });
+
+  it('T-INIT-066 invalid tsconfig JSON - no error, no warning', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'tsconfig.json', '{ broken json\n');
+    const { runInit } = await loadInitModule();
+    expect(() => runInit({ force: false, cwd: tempDir })).not.toThrow();
+  });
+
+  it('T-INIT-067 with-deploy default value "" handled (rejected)', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    expect(() =>
+      runInit({ force: false, cwd: tempDir, withDeploy: '' } as Parameters<typeof runInit>[0]),
+    ).toThrow();
+  });
+
+  it('T-INIT-068 InitConflictError message includes the literal "Use --force"', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'e2e/connect.spec.ts', '// existing\n');
+    const { runInit } = await loadInitModule();
+    try {
+      runInit({ force: false, cwd: tempDir });
+    } catch (e) {
+      expect((e as Error).message).toContain('Use --force');
+    }
+  });
+
+  it('T-INIT-069 InitConflictError message starts with "Conflicting files:"', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    writeFile(tempDir, 'e2e/connect.spec.ts', '// existing\n');
+    const { runInit } = await loadInitModule();
+    try {
+      runInit({ force: false, cwd: tempDir });
+    } catch (e) {
+      expect((e as Error).message.startsWith('Conflicting files:')).toBe(true);
+    }
+  });
+
+  it('T-INIT-070 configSuffix "ci" - "playwright.ci.config.ts" exact name', async () => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+    runInit({ force: false, cwd: tempDir, configSuffix: 'ci' } as Parameters<typeof runInit>[0]);
+    expect(fs.existsSync(path.join(tempDir, 'playwright.ci.config.ts'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, 'playwright.config.ts'))).toBe(false);
+  });
 });
