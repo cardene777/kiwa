@@ -48,3 +48,8 @@ Desktop.ini
 *.bak
 *.tmp
 .tmp/
+
+# Stryker mutation report
+mutation-report/
+.stryker-tmp/
+
