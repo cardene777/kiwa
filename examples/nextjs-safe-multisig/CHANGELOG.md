@@ -1,5 +1,12 @@
 # examples-nextjs-safe-multisig
 
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies [c0f0a97]
+  - @kiwa-test/core@0.3.1
+
 ## 0.0.5
 
 ### Patch Changes
