@@ -523,14 +523,13 @@ Claude Code 利用者向け — skill 完全リファレンス:
 
 ---
 
-## Contact
+## Community
 
-GitHub Issue に当てはまらない質問 / フィードバック / 雑談は以下から連絡してください。
+- 💬 [GitHub Discussions](https://github.com/cardene777/kiwa/discussions) — 長文質問 / 提案 / Show & Tell。 まずは [v0.5 release announcement](https://github.com/cardene777/kiwa/discussions/451) から最新動向を確認できます。
+- 🐦 [X / Twitter @cardene777](https://x.com/cardene777) — 短文 / DM 開放。 release thread もこちらに流れます。
+- 📰 [Zenn @cardene777](https://zenn.dev/cardene) — 長文記事 / 技術 deep dive (v0.5 詳細記事は README badge から)。
 
-- 💬 [GitHub Discussions](https://github.com/cardene777/kiwa/discussions) — 長文 / 提案
-- 🐦 [X / Twitter @cardene777](https://x.com/cardene777) — 短文 / DM 開放
-
-バグ報告は [Issue 起票](https://github.com/cardene777/kiwa/issues) に倒した方が後追い検索しやすくおすすめ。 脆弱性報告は [Security advisory](https://github.com/cardene777/kiwa/security/advisories/new) (詳細は [SECURITY.md](./SECURITY.md)) で非公開経路で受け取ります。
+バグ報告は [Issue 起票](https://github.com/cardene777/kiwa/issues) を推奨 (後追い検索しやすい)。 脆弱性報告は [Security advisory](https://github.com/cardene777/kiwa/security/advisories/new) (詳細は [SECURITY.md](./SECURITY.md)) で非公開経路で受け取ります。
 
 ---
 

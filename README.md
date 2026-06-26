@@ -524,14 +524,13 @@ For Claude Code users — full skill reference:
 
 ---
 
-## Contact
+## Community
 
-For questions, feedback, or general chat that does not fit a GitHub Issue, reach out via either channel below.
+- 💬 [GitHub Discussions](https://github.com/cardene777/kiwa/discussions) — Long-form questions, proposals, Show & Tell. Start with the [v0.5 announcement](https://github.com/cardene777/kiwa/discussions/451) for what landed in the latest cut.
+- 🐦 [X / Twitter @cardene777](https://x.com/cardene777) — Quick replies and DMs. Release threads land here too.
+- 📰 [Zenn @cardene777](https://zenn.dev/cardene) — Long-form articles and write-ups (v0.5 deep-dive linked from the README badge).
 
-- 💬 [GitHub Discussions](https://github.com/cardene777/kiwa/discussions) — Long-form questions / proposals
-- 🐦 [X / Twitter @cardene777](https://x.com/cardene777) — Quick replies, DMs open
-
-For bug reports, please [open an Issue](https://github.com/cardene777/kiwa/issues) instead so the discussion stays searchable. For private security disclosures, use the [Security advisory channel](https://github.com/cardene777/kiwa/security/advisories/new) (see [SECURITY.md](./SECURITY.md)).
+For bug reports, please [open an Issue](https://github.com/cardene777/kiwa/issues) so the discussion stays searchable. For private security disclosures, use the [Security advisory channel](https://github.com/cardene777/kiwa/security/advisories/new) (see [SECURITY.md](./SECURITY.md)).
 
 ---
 
