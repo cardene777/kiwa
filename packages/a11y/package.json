@@ -55,6 +55,7 @@
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment jsdom",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment jsdom --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/audit.js' --coverage.include='.vitest-dist/src/index.js' --coverage.exclude='.vitest-dist/tests/**'",
+    "test:mutation": "stryker run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -71,6 +72,8 @@
     }
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^8.7.1",
+    "@stryker-mutator/vitest-runner": "^8.7.1",
     "@types/node": "^22.10.0",
     "@vitest/coverage-v8": "^2.1.0",
     "axe-core": "^4.10.2",
