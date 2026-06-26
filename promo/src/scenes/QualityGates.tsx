@@ -1,5 +1,6 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
+import { ChapterIndicator } from "../components/ChapterIndicator";
 import { CoverageBar } from "../components/CoverageBar";
 import { tokens, t } from "../tokens";
 
@@ -117,10 +118,11 @@ export const QualityGates: React.FC = () => {
   const captionY = interpolate(captionEnter, [0, 1], [16, 0]);
 
   return (
-    <SceneLayout
-      eyebrow={t().eyebrowQualityGates}
-      headline={t().headlineQualityGates}
-    >
+    <>
+      <SceneLayout
+        eyebrow={t().eyebrowQualityGates}
+        headline={t().headlineQualityGates}
+      >
       <div
         style={{
           width: 1400,
@@ -246,6 +248,8 @@ export const QualityGates: React.FC = () => {
           enforced by .github/workflows/release.yml
         </div>
       </div>
-    </SceneLayout>
+      </SceneLayout>
+      <ChapterIndicator chapter={4} name="Proof" />
+    </>
   );
 };

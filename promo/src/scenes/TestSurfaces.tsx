@@ -1,5 +1,6 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
+import { ChapterIndicator } from "../components/ChapterIndicator";
 import { tokens, t } from "../tokens";
 
 type Surface = {
@@ -164,10 +165,11 @@ const SurfaceTile: React.FC<{ surface: Surface; index: number }> = ({ surface, i
 
 export const TestSurfaces: React.FC = () => {
   return (
-    <SceneLayout
-      eyebrow={t().eyebrowSurfaces}
-      headline={t().headlineSurfaces}
-    >
+    <>
+      <SceneLayout
+        eyebrow={t().eyebrowSurfaces}
+        headline={t().headlineSurfaces}
+      >
       <div
         style={{
           position: "relative",
@@ -179,6 +181,8 @@ export const TestSurfaces: React.FC = () => {
           <SurfaceTile key={surface.title} surface={surface} index={i} />
         ))}
       </div>
-    </SceneLayout>
+      </SceneLayout>
+      <ChapterIndicator chapter={3} name="Coverage" />
+    </>
   );
 };

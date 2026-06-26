@@ -1,5 +1,6 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
+import { ChapterIndicator } from "../components/ChapterIndicator";
 import { tokens, t } from "../tokens";
 
 type Tool = {
@@ -111,10 +112,11 @@ export const Problem: React.FC = () => {
   const sublineY = interpolate(sublineEnter, [0, 1], [16, 0]);
 
   return (
-    <SceneLayout
-      eyebrow={t().eyebrowProblem}
-      headline={t().headlineProblem}
-    >
+    <>
+      <SceneLayout
+        eyebrow={t().eyebrowProblem}
+        headline={t().headlineProblem}
+      >
       <div
         style={{
           display: "flex",
@@ -168,6 +170,8 @@ export const Problem: React.FC = () => {
           </div>
         </div>
       </div>
-    </SceneLayout>
+      </SceneLayout>
+      <ChapterIndicator chapter={1} name="Hook" />
+    </>
   );
 };

@@ -1,5 +1,6 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
+import { ChapterIndicator } from "../components/ChapterIndicator";
 import { tokens, t } from "../tokens";
 
 type Terminal = {
@@ -310,10 +311,11 @@ export const Flow: React.FC = () => {
     : 0;
 
   return (
-    <SceneLayout
-      eyebrow={t().eyebrowFlow}
-      headline={t().headlineFlow}
-    >
+    <>
+      <SceneLayout
+        eyebrow={t().eyebrowFlow}
+        headline={t().headlineFlow}
+      >
       <div
         style={{
           position: "relative",
@@ -371,6 +373,8 @@ export const Flow: React.FC = () => {
           {t().flowStep3}
         </div>
       </div>
-    </SceneLayout>
+      </SceneLayout>
+      <ChapterIndicator chapter={4} name="Proof" />
+    </>
   );
 };
