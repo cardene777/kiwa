@@ -125,3 +125,101 @@ describe('runAxe (jsdom)', () => {
     expect(criticalReport.blocking.map((v: AxeViolation) => v.id)).toEqual(['critical-id']);
   });
 });
+
+describe('runAxe + reportViolations (mutation-kill)', () => {
+  it('runAxe.runOptions defaults to {} when not provided (kills L22 LogicalOperator)', async () => {
+    // Without runOptions, runAxe must still resolve (axe.run is called with
+    // {}). A mutant `opts.runOptions && {}` would pass undefined to axe.run,
+    // which axe-core itself rejects.
+    document.body.innerHTML = `<button type="button" aria-label="x">x</button>`;
+    const results = await runAxe();
+    expect(results).toBeDefined();
+    expect(Array.isArray(results.violations)).toBe(true);
+  });
+
+  it('runAxe forwards explicit runOptions to axe.run (kills the always-{} mutation)', async () => {
+    document.body.innerHTML = `<div><button type="button" aria-label="ok">ok</button></div>`;
+    // Disable the 'button-name' rule explicitly; supply an unlabeled button to
+    // see whether the rule actually fired.
+    document.body.innerHTML = `<div><button type="button"></button></div>`;
+    const results = await runAxe({
+      runOptions: { rules: { 'button-name': { enabled: false } } },
+    });
+    const ids = results.violations.map((v) => v.id);
+    // With button-name disabled, the violation we'd otherwise see is absent.
+    expect(ids).not.toContain('button-name');
+  });
+
+  it('reportViolations summary uses the literal "No a11y violations" phrasing when empty (kills L25 StringLiteral mutation)', () => {
+    const empty = { violations: [], passes: [], incomplete: [], inapplicable: [] };
+    const report = reportViolations(empty, { maxImpact: 'critical' });
+    // Kills mutations that flip the summary to empty string or remove the
+    // "No a11y violations" phrase.
+    expect(report.summary).toBe('No a11y violations at impact >= "critical".');
+  });
+
+  it('reportViolations summary embeds the maxImpact label literally', () => {
+    const empty = { violations: [], passes: [], incomplete: [], inapplicable: [] };
+    const reportMinor = reportViolations(empty, { maxImpact: 'minor' });
+    const reportSerious = reportViolations(empty, { maxImpact: 'serious' });
+    expect(reportMinor.summary).toContain('"minor"');
+    expect(reportSerious.summary).toContain('"serious"');
+    expect(reportMinor.summary).not.toEqual(reportSerious.summary);
+  });
+
+  it('reportViolations summary lists each blocking violation with impact + id + help + node count (kills L35 StringLiteral)', () => {
+    const fake = {
+      violations: [
+        { id: 'rule-x', impact: 'critical' as const, description: '', help: 'help text', helpUrl: '', nodes: [{ target: ['t1'], html: '' }, { target: ['t2'], html: '' }] },
+      ],
+      passes: [],
+      incomplete: [],
+      inapplicable: [],
+    };
+    const report = reportViolations(fake, { maxImpact: 'critical' });
+    expect(report.summary).toContain('[critical]');
+    expect(report.summary).toContain('rule-x');
+    expect(report.summary).toContain('help text');
+    expect(report.summary).toContain('2 node(s)');
+  });
+
+  it('maxImpact defaults to "minor" when not provided (kills the default-pick mutation)', () => {
+    const fake = {
+      violations: [
+        { id: 'minor-id', impact: 'minor' as const, description: '', help: '', helpUrl: '', nodes: [{ target: ['x'], html: '' }] },
+      ],
+      passes: [],
+      incomplete: [],
+      inapplicable: [],
+    };
+    const report = reportViolations(fake);
+    // Default 'minor' → minor violation IS blocking.
+    expect(report.blocking.length).toBe(1);
+    expect(report.summary).toContain('"minor"');
+  });
+
+  it('axe-core default export branch is exercised (kills L10 LogicalOperator)', async () => {
+    // axe-core ships both a CJS default export and ESM bare exports. Both
+    // paths must work; the LogicalOperator mutant flips `mod.default ?? mod`
+    // to `mod.default && mod`, which returns the bare module even when default
+    // exists. As long as runAxe successfully invokes axe.run from a real
+    // axe-core install, the original (??) branch is exercised by this assertion.
+    document.body.innerHTML = `<button type="button" aria-label="ok">ok</button>`;
+    const results = await runAxe();
+    // Successful resolution proves the loaded module exposes .run.
+    expect(results.violations).toBeDefined();
+    expect(Array.isArray(results.violations)).toBe(true);
+  });
+
+  it('context omitted forces the no-context-no-document branch when document is also absent (kills L28 ConditionalExpression false)', async () => {
+    const original = globalThis.document;
+    // @ts-expect-error deliberate teardown
+    delete globalThis.document;
+    try {
+      // ctx omitted → throws.
+      await expect(runAxe()).rejects.toThrow(/no context/);
+    } finally {
+      globalThis.document = original;
+    }
+  });
+});

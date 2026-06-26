@@ -1152,6 +1152,12 @@ importers:
         specifier: workspace:*
         version: link:../spec
     devDependencies:
+      '@stryker-mutator/core':
+        specifier: ^8.7.1
+        version: 8.7.1
+      '@stryker-mutator/vitest-runner':
+        specifier: ^8.7.1
+        version: 8.7.1(@stryker-mutator/core@8.7.1)(vitest@2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0))
       '@types/node':
         specifier: ^22.10.0
         version: 22.19.19
