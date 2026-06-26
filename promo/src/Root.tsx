@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Opening } from "./scenes/Opening";
 import { Problem } from "./scenes/Problem";
 import { Solution } from "./scenes/Solution";
+import { FrameworkMatrix } from "./scenes/FrameworkMatrix";
 import { DemoSpec } from "./scenes/DemoSpec";
 import { DemoSpecResult } from "./scenes/DemoSpecResult";
 import { DemoTest } from "./scenes/DemoTest";
@@ -39,7 +40,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="KiwaPromo"
         component={KiwaPromo}
-        durationInFrames={65 * tokens.fps}
+        durationInFrames={71 * tokens.fps}
         {...baseProps}
       />
       <Composition
@@ -58,6 +59,12 @@ export const RemotionRoot: React.FC = () => {
         id="Solution"
         component={Solution}
         durationInFrames={8 * tokens.fps}
+        {...baseProps}
+      />
+      <Composition
+        id="FrameworkMatrix"
+        component={FrameworkMatrix}
+        durationInFrames={6 * tokens.fps}
         {...baseProps}
       />
       <Composition

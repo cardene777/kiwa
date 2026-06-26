@@ -2,6 +2,7 @@ import { Series } from "remotion";
 import { Opening } from "./Opening";
 import { Problem } from "./Problem";
 import { Solution } from "./Solution";
+import { FrameworkMatrix } from "./FrameworkMatrix";
 import { DemoSpec } from "./DemoSpec";
 import { DemoSpecResult } from "./DemoSpecResult";
 import { DemoTest } from "./DemoTest";
@@ -22,6 +23,9 @@ export const KiwaPromo: React.FC = () => {
       </Series.Sequence>
       <Series.Sequence durationInFrames={8 * f}>
         <Solution />
+      </Series.Sequence>
+      <Series.Sequence durationInFrames={6 * f}>
+        <FrameworkMatrix />
       </Series.Sequence>
       <Series.Sequence durationInFrames={11 * f}>
         <DemoSpec />

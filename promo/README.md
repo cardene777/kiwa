@@ -16,8 +16,12 @@ Phase B-1 (this PR) covers scaffold + Opening + Outro. Demo scenes (Problem / So
 
 ```bash
 pnpm install
-pnpm -F kiwa-promo studio   # launches Remotion Studio at http://localhost:3000
+pnpm -F kiwa-promo studio   # launches Remotion Studio at http://localhost:3737
 ```
+
+The studio is pinned to port **3737** (see `remotion.config.ts`) so it never
+fights with a Vite or Next dev server on the usual 3000 slot. Override with
+`--port=<n>` on the CLI if you need a different one.
 
 ## Render
 

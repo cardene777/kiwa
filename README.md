@@ -15,7 +15,8 @@ One Layer 1 spec → Foundry `.t.sol`, Hardhat `.test.cjs`, and Playwright `.spe
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![tests](https://img.shields.io/badge/tests-292%20execution%20PASS-success)](#testing--quality)
 [![flaky](https://img.shields.io/badge/flaky-0%2F292-success)](#testing--quality)
-[![coverage](https://img.shields.io/badge/coverage-Lines%2090%2B%20%2F%20Branches%2080%2B-success)](#coverage-requirement)
+[![coverage](https://img.shields.io/badge/coverage-Lines%2090%2B%20%2F%20Branches%2080%2B-success)](#quality-gates)
+[![mutation](https://img.shields.io/badge/mutation%20MSI-all%2011%20packages%20%E2%89%A580%25-success)](#quality-gates)
 [![ERC-4337](https://img.shields.io/badge/ERC--4337-v0.7%20supported-9333ea)](./docs/en/cookbook/smart-wallet-aa.md)
 [![typescript](https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript&logoColor=white)](./tsconfig.base.json)
 [![claude code](https://img.shields.io/badge/Claude%20Code-8%20skills-d97706?logo=anthropic&logoColor=white)](./docs/SKILL-DESIGN.md)
@@ -27,7 +28,7 @@ One Layer 1 spec → Foundry `.t.sol`, Hardhat `.test.cjs`, and Playwright `.spe
 </div>
 
 <p align="center">
-  <img src="./assets/kiwa-promo-en.gif" alt="kiwa 65s overview — contract test, dApp e2e test, and manual write paths" width="880" />
+  <img src="./assets/kiwa-promo-en.gif" alt="kiwa 71s overview — contract test, dApp e2e test, 7 SPA framework adapters, and manual write paths" width="880" />
   <br />
   <sub><a href="./assets/kiwa-promo-en.mp4">▶ Watch the full-quality MP4 (8.4 MB, 1920×1080, h264)</a></sub>
 </p>
@@ -346,6 +347,43 @@ See [docs/COMPARISON.md](./docs/COMPARISON.md) for the full comparison tables (S
 If any metric falls short, the skill **records the under-covered viewpoints / error paths / events back into the Layer 1 spec's "Insufficient spec" section** so the next loop can address them — instead of silently signing off on weak tests.
 
 Override with `--coverage-lines 95 --coverage-branches 85` etc.
+
+---
+
+## Quality gates
+
+kiwa enforces **two independent gates** at release time so a publish can't ship without both. Both gates run inside `.github/workflows/release.yml` and fail the publish if any package regresses.
+
+### Gate 1 — Coverage (`scripts/check-coverage-gates.mjs`)
+
+Lines / Statements / Functions ≥ **90 %**, Branches ≥ **80 %**, across all 11 packages. Optional-peer-dep error paths in the adapter wrappers (msw / pixelmatch / pngjs / @testing-library/* / @vue/test-utils / @solidjs/testing-library / lit / @noma.to/qwik-testing-library / @testing-library/angular) are why Branches stays at 80 — they cannot be exercised when their peer is installed for the package-local tests.
+
+### Gate 2 — Mutation Score Indicator (`scripts/check-mutation-gates.mjs`)
+
+[Stryker](https://stryker-mutator.io/) runs against the compiled `.vitest-dist/src/` artefacts for every package and the gate computes
+`MSI = killed / (killed + survived + timeout)`. Thresholds are intentionally **per-package** — pure-logic packages hold to 90 %+, thin wrappers around third-party libs are pinned at 80 %.
+
+| Package | MSI | Threshold |
+|---|---|---|
+| [`@kiwa-test/api`](./packages/api) | **96.06 %** | 90 |
+| [`@kiwa-test/a11y`](./packages/a11y) | **93.62 %** | 90 |
+| [`@kiwa-test/ui`](./packages/ui) | **91.76 %** | 80 |
+| [`@kiwa-test/cli-test`](./packages/cli-test) | 89.69 % | 80 |
+| [`@kiwa-test/data`](./packages/data) | 86.93 % | 80 |
+| [`@kiwa-test/spec`](./packages/spec) | 85.51 % | 80 |
+| [`@kiwa-test/core`](./packages/core) | 85.09 % | 80 |
+| [`@kiwa-test/cli`](./packages/cli) | 84.44 % | 80 |
+| [`@kiwa-test/e2e`](./packages/e2e) | 84.21 % | 80 |
+| [`@kiwa-test/observability`](./packages/observability) | 84.12 % | 80 |
+| [`@kiwa-test/visual`](./packages/visual) | 83.02 % | 80 |
+
+Run both gates locally:
+
+```bash
+pnpm test:mutation                  # builds + mutates all 11 packages
+pnpm gate:mutation                  # asserts the per-package thresholds
+pnpm gate:coverage                  # asserts Lines/Branches/Functions thresholds
+```
 
 ---
 
