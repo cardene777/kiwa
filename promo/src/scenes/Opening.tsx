@@ -1,24 +1,42 @@
-import { useCurrentFrame, interpolate, Sequence } from "remotion";
-import { Background } from "../components/Background";
+import { useCurrentFrame, interpolate, spring, useVideoConfig, AbsoluteFill } from "remotion";
 import { KiwaLogo } from "../components/KiwaLogo";
 import { BoundaryEffect } from "../components/BoundaryEffect";
 import { tokens, t } from "../tokens";
 
 export const Opening: React.FC = () => {
   const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
 
-  const taglineOpacity = interpolate(frame, [40, 70], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
+  const nameEnter = spring({
+    frame: frame - 18,
+    fps,
+    from: 0,
+    to: 1,
+    config: { damping: 14, mass: 0.8, stiffness: 110 },
   });
+  const nameOpacity = interpolate(nameEnter, [0, 1], [0, 1]);
+  const nameY = interpolate(nameEnter, [0, 1], [12, 0]);
 
-  const taglineY = interpolate(frame, [40, 70], [20, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
+  const taglineEnter = spring({
+    frame: frame - 40,
+    fps,
+    from: 0,
+    to: 1,
+    config: { damping: 16, mass: 0.9, stiffness: 100 },
   });
+  const taglineOpacity = interpolate(taglineEnter, [0, 1], [0, 1]);
+  const taglineY = interpolate(taglineEnter, [0, 1], [16, 0]);
+
+  const boundaryStart = 30;
 
   return (
-    <Background>
+    <AbsoluteFill
+      style={{
+        background: `radial-gradient(circle at 50% 45%, ${tokens.color.primary}18 0%, ${tokens.color.bgGradientEnd} 35%, ${tokens.color.bg} 100%)`,
+        fontFamily: tokens.font.sans,
+        color: tokens.color.white,
+      }}
+    >
       <div
         style={{
           width: "100%",
@@ -27,25 +45,21 @@ export const Opening: React.FC = () => {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: tokens.spacing.md,
+          gap: 18,
         }}
       >
-        <KiwaLogo size={360} fadeInDuration={25} scaleFrom={0.5} />
+        <KiwaLogo size={280} fadeInDuration={22} scaleFrom={0.55} />
         <div
           style={{
             fontFamily: tokens.font.sans,
-            fontSize: 96,
-            fontWeight: 700,
+            fontSize: 128,
+            fontWeight: 800,
             color: tokens.color.white,
-            letterSpacing: -2,
-            opacity: interpolate(frame, [20, 50], [0, 1], {
-              extrapolateLeft: "clamp",
-              extrapolateRight: "clamp",
-            }),
-            transform: `translateY(${interpolate(frame, [20, 50], [10, 0], {
-              extrapolateLeft: "clamp",
-              extrapolateRight: "clamp",
-            })}px)`,
+            letterSpacing: -4,
+            lineHeight: 1,
+            opacity: nameOpacity,
+            transform: `translateY(${nameY}px)`,
+            textShadow: `0 0 40px ${tokens.color.primary}40`,
           }}
         >
           {t().productName}
@@ -53,22 +67,24 @@ export const Opening: React.FC = () => {
         <div
           style={{
             fontFamily: tokens.font.sans,
-            fontSize: 28,
-            fontWeight: 400,
-            color: tokens.color.textMuted,
+            fontSize: 34,
+            fontWeight: 500,
+            color: tokens.color.white,
             opacity: taglineOpacity,
             transform: `translateY(${taglineY}px)`,
-            maxWidth: 800,
+            maxWidth: 1100,
             textAlign: "center",
             lineHeight: 1.4,
+            letterSpacing: 0.4,
+            marginTop: 12,
           }}
         >
           {t().tagline}
         </div>
       </div>
-      <Sequence from={80}>
-        <BoundaryEffect startFrame={0} duration={40} />
-      </Sequence>
-    </Background>
+      {frame >= boundaryStart && (
+        <BoundaryEffect startFrame={0} duration={Math.max(0, frame - boundaryStart + 60)} />
+      )}
+    </AbsoluteFill>
   );
 };

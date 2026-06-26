@@ -10,19 +10,30 @@ type Ray = {
   delay: number;
 };
 
-// Symmetric layout: skip straight horizontals to keep labels off the edges.
+// 6 rays distributed on a 360° sweep BUT all label endpoints stay clear of the
+// SceneLayout header (top 200px). North pole is allowed but only as an arrow
+// (no label), south side gets 3 labels evenly.
+//   -160° upper-left  ........ Contract       (label sits to the LEFT of hub)
+//   -100° upper-left  ........ API            (label slightly left + up)
+//    -40° upper-right ......... Component     (label right + up but below header)
+//     30° lower-right ......... E2E
+//     90° south (straight down) A11y / Visual
+//    150° lower-left   ........ Data / CLI
+// 6 rays only on the horizontal axis (-30°〜+30° band) so the SceneLayout
+// header (top 180px) and Polyglot caption (bottom 60px) are kept clear of
+// any ray label.
 const rays: Ray[] = [
-  { angle: -100, label: "Contract", color: tokens.color.accentContract, delay: 0 },
-  { angle: -55, label: "API", color: tokens.color.accentApi, delay: 4 },
-  { angle: -10, label: "Component", color: tokens.color.accentComponent, delay: 8 },
-  { angle: 35, label: "E2E", color: tokens.color.accentE2e, delay: 12 },
-  { angle: 80, label: "A11y / Visual", color: tokens.color.accentA11y, delay: 16 },
-  { angle: 125, label: "Data / CLI", color: tokens.color.accentData, delay: 20 },
+  { angle: 180, label: "Contract", color: tokens.color.accentContract, delay: 0 },
+  { angle: -150, label: "API", color: tokens.color.accentApi, delay: 4 },
+  { angle: -30, label: "Component", color: tokens.color.accentComponent, delay: 8 },
+  { angle: 0, label: "E2E", color: tokens.color.accentE2e, delay: 12 },
+  { angle: 30, label: "A11y / Visual", color: tokens.color.accentA11y, delay: 16 },
+  { angle: 150, label: "Data / CLI", color: tokens.color.accentData, delay: 20 },
 ];
 
-const HUB_RADIUS = 180;
-const RAY_LENGTH = 240;
-const LABEL_OFFSET = 16;
+const HUB_RADIUS = 155;
+const RAY_LENGTH = 220;
+const LABEL_OFFSET = 18;
 
 const RaySvg: React.FC<{ ray: Ray }> = ({ ray }) => {
   const frame = useCurrentFrame();
@@ -72,10 +83,11 @@ const RaySvg: React.FC<{ ray: Ray }> = ({ ray }) => {
         y={labelY + 8}
         fill={ray.color}
         fontFamily={tokens.font.sans}
-        fontSize={28}
-        fontWeight={700}
+        fontSize={32}
+        fontWeight={800}
         textAnchor={align}
         opacity={labelOpacity}
+        style={{ filter: `drop-shadow(0 0 8px ${ray.color}90)` }}
       >
         {ray.label}
       </text>
@@ -104,49 +116,39 @@ const SpecHub: React.FC = () => {
         fill={`url(#hub-gradient)`}
         stroke={tokens.color.primary}
         strokeWidth={3}
-        style={{ filter: `drop-shadow(0 0 24px ${tokens.color.primary})` }}
+        style={{ filter: `drop-shadow(0 0 28px ${tokens.color.primary})` }}
       />
       <text
         x={0}
-        y={-40}
-        fill={tokens.color.white}
+        y={-46}
+        fill={tokens.color.textMuted}
         fontFamily={tokens.font.mono}
-        fontSize={22}
+        fontSize={18}
         fontWeight={600}
         textAnchor="middle"
-        letterSpacing={2}
+        letterSpacing={3}
+        style={{ textTransform: "uppercase" }}
       >
         Layer 1
       </text>
       <text
         x={0}
-        y={6}
+        y={20}
         fill={tokens.color.primary}
         fontFamily={tokens.font.sans}
-        fontSize={48}
+        fontSize={72}
         fontWeight={800}
         textAnchor="middle"
-        letterSpacing={-1}
+        letterSpacing={-2}
+        style={{ filter: `drop-shadow(0 0 18px ${tokens.color.primary}aa)` }}
       >
         spec
       </text>
-      <text
-        x={0}
-        y={42}
-        fill={tokens.color.textMuted}
-        fontFamily={tokens.font.mono}
-        fontSize={16}
-        fontWeight={500}
-        textAnchor="middle"
-        letterSpacing={1}
-      >
-        9 columns
-      </text>
-      <g transform="translate(0, 92)">
+      <g transform="translate(0, 80)">
         <rect
-          x={-72}
+          x={-110}
           y={-22}
-          width={144}
+          width={220}
           height={36}
           rx={18}
           fill={tokens.color.bg}
@@ -158,12 +160,12 @@ const SpecHub: React.FC = () => {
           y={4}
           fill={tokens.color.primary}
           fontFamily={tokens.font.mono}
-          fontSize={18}
+          fontSize={17}
           fontWeight={700}
           textAnchor="middle"
           letterSpacing={1.5}
         >
-          8 skills
+          9 columns · 8 skills
         </text>
       </g>
     </g>
@@ -185,8 +187,10 @@ export const OneSpec: React.FC = () => {
   const captionY = interpolate(captionEnter, [0, 1], [16, 0]);
 
   // viewBox sized so even the longest label ("A11y / Visual") clears the edge.
+  // viewBox を 1700 × 600 にして hub を画面中央に配置。
+  // ray を horizontal band に限定したので縦高はコンパクトでよい (caption 領域確保)。
   const VBW = 1700;
-  const VBH = 760;
+  const VBH = 600;
 
   return (
     <>

@@ -24,9 +24,9 @@ const tools: Tool[] = [
 
 const COLS = 3;
 const ROWS = 3;
-const TILE_W = 340;
-const TILE_H = 130;
-const GAP_X = 36;
+const TILE_W = 380;
+const TILE_H = 140;
+const GAP_X = 32;
 const GAP_Y = 26;
 const GRID_W = COLS * TILE_W + (COLS - 1) * GAP_X;
 const GRID_H = ROWS * TILE_H + (ROWS - 1) * GAP_Y;
@@ -59,26 +59,30 @@ const ToolChip: React.FC<{ tool: Tool; index: number }> = ({ tool, index }) => {
         top,
         width: TILE_W,
         height: TILE_H,
-        background: `linear-gradient(135deg, ${tool.color}22 0%, ${tool.color}05 100%)`,
-        border: `2px solid ${tool.color}`,
-        borderRadius: 14,
+        background: `linear-gradient(135deg, ${tool.color}28 0%, ${tool.color}08 100%)`,
+        border: `3px solid ${tool.color}`,
+        borderRadius: 16,
         opacity,
         transform: `translateY(${translateY}px) scale(${scale})`,
-        boxShadow: `0 4px 18px ${tool.color}40`,
+        boxShadow: `0 6px 24px ${tool.color}45, inset 0 0 0 1px ${tool.color}25`,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 6,
+        gap: 8,
+        padding: "0 16px",
+        boxSizing: "border-box",
       }}
     >
       <div
         style={{
           fontFamily: tokens.font.mono,
-          fontSize: 36,
+          fontSize: 34,
           fontWeight: 700,
           color: tool.color,
-          letterSpacing: -0.5,
+          letterSpacing: -0.3,
+          textShadow: `0 0 12px ${tool.color}80`,
+          whiteSpace: "nowrap",
         }}
       >
         {tool.label}
@@ -86,9 +90,11 @@ const ToolChip: React.FC<{ tool: Tool; index: number }> = ({ tool, index }) => {
       <div
         style={{
           fontFamily: tokens.font.sans,
-          fontSize: 20,
-          color: tokens.color.textMuted,
-          letterSpacing: 0.5,
+          fontSize: 19,
+          fontWeight: 500,
+          color: `${tool.color}c0`,
+          letterSpacing: 0.6,
+          textTransform: "uppercase",
         }}
       >
         {tool.sub}
