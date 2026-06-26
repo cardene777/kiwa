@@ -4,9 +4,9 @@
 
 # kiwa
 
-**設計・実装・検証 — dApp と smart contract のテスト全 layer を、 1 つの仕様書から自動化。**
+**あらゆる test layer · 1 つの spec · TypeScript / Python / Solidity。**
 
-1 つの Layer 1 仕様書から Foundry `.t.sol` / Hardhat `.test.cjs` / Playwright `.spec.ts` を並列生成。 **4 metric のカバレッジ閾値を skill 側で必須化**。
+1 つの Layer 1 仕様書から contract / API / component / e2e / a11y / visual test を並列生成。 **11 npm package + 1 PyPI package + Foundry / Hardhat 連携** をカバー。 Coverage + Mutation gate を `scripts/check-{coverage,mutation}-gates.mjs` で **release 時に物理 enforce**。
 
 [![npm version](https://img.shields.io/npm/v/@kiwa-test/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-test/core)
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa-test/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-test/core)
@@ -28,9 +28,9 @@
 </div>
 
 <p align="center">
-  <img src="./assets/kiwa-promo-ja.gif" alt="kiwa 71 秒概要 — contract test、 dApp e2e test、 7 SPA framework adapter、 手書きの 4 経路" width="880" />
+  <img src="./assets/kiwa-promo-ja.gif" alt="kiwa 80 秒概要 — Layer 1 spec hub、 6 test surface、 TypeScript / Python / Solidity polyglot、 Coverage + Mutation gate" width="880" />
   <br />
-  <sub><a href="./assets/kiwa-promo-ja.mp4">▶ フル画質 MP4 を視聴 (8.4 MB / 1920×1080 / h264)</a></sub>
+  <sub><a href="./assets/kiwa-promo-ja.mp4">▶ フル画質 MP4 を視聴 (7.1 MB / 1920×1080 / h264)</a></sub>
 </p>
 
 ---
@@ -42,36 +42,48 @@
 
 ## なぜ kiwa か
 
-dApp の test を書くには **2 つの仕事を同時に** こなす必要があります。 smart contract の test (Foundry / Hardhat) と、 UI + wallet flow の test (Playwright)。 多くの team が片方のランナーだけ選び、 test の半分しか書かず、 重要観点を見落としたまま release します。
+現代の stack は **test が runner ごとに散らばっています** ... contract は Foundry / Hardhat、 unit + API は Vitest、 e2e は Playwright、 component は Testing Library、 a11y は axe-core、 visual は pixelmatch、 Python service は pytest。 各 runner は独自の規約・fixture・gate を持ち、 **stack 横断の単一ソース** がありません。
 
-**kiwa は 1 つの仕様書から 5 つの test layer (contract Foundry + contract Hardhat + unit Vitest + integration API + e2e Playwright) すべてを設計・生成するツールチェーンです。** "kiwa" は日本語で **際 / 境界 / 限界** — まさに良い test が証明する場所を意味します。
+**kiwa は 1 つの Layer 1 spec から stack に必要なあらゆる test layer を生成する polyglot test toolchain です。** "kiwa" は日本語で **際 / 境界 / 限界** — まさに良い test が証明する場所を意味します。 dApp と smart contract は第一級 citizen で扱いますが、 REST API / SPA component (8 framework adapter) / CLI tool / queue worker / Python service も同じ chain で扱います。
 
 ```mermaid
 graph TD
-    A[contract.sol + dApp UI] --> B["/kiwa-design Layer 1"]
-    B --> C[.context/spec/contract/test-spec-X.md<br/>9 section / 9 column]
-    B --> D[.context/spec/e2e/test-spec-X.md]
-    C --> E["/kiwa-forge → Foundry .t.sol"]
-    C --> F["/kiwa-hardhat → Hardhat .test.cjs"]
-    D --> G["/kiwa-play → Playwright .spec.ts"]
-    E --> H[forge test + coverage]
-    F --> I[npx hardhat test + coverage]
-    G --> J[playwright test + 4 round flake check]
-    H --> K[Lines 90%+ · Branches 80%+]
-    I --> K
-    J --> L[4 round 連続 flake 0 件]
+    A[あなたのコード — TS / Python / Solidity] --> B["/kiwa-design Layer 1"]
+    B --> C[9 列 spec — 単一ソース]
+    C --> D["/kiwa-forge → Foundry .t.sol"]
+    C --> E["/kiwa-hardhat → Hardhat .test.cjs"]
+    C --> F["/kiwa-vitest → Vitest .test.ts"]
+    C --> G["/kiwa-api → msw + supertest"]
+    C --> H["/kiwa-play → Playwright .spec.ts"]
+    C --> I["a11y + visual + CLI + data adapter"]
+    D --> J[forge test]
+    E --> K[npx hardhat test]
+    F --> L[vitest run]
+    G --> L
+    H --> M[playwright test + 4 round flake check]
+    I --> L
+    J --> N[Coverage gate ≥ 90/80/90/90]
+    K --> N
+    L --> N
+    M --> N
+    N --> O[Mutation gate — package 別 MSI ≥ 80%]
+    O --> P[release publish]
 ```
 
-|  | ランナー 1 つだけ採用 | kiwa (4 layer) |
+|  | 1 runner だけ採用 | kiwa (6 surface / 1 spec) |
 |---|---|---|
-| テスト設計 | 手動 checklist、 担当者依存 | 13 観点 catalog + 5 リスク基準で決定論的 |
-| Contract test (Foundry) | 手書き `.t.sol` | Layer 1 仕様書から自動生成 |
-| Contract test (Hardhat) | 手書き `.test.ts` | 自動生成、 Foundry と **同 TC ID** |
-| dApp e2e test | 手書き Playwright | 自動生成、 既存 test を壊さず extend |
-| Coverage gate | optional、 飛ばされがち | skill 側で **必須化** (4 metric) |
+| テスト設計 | runner ごとに checklist、 担当者依存 | 10 観点 catalog + 5 リスク基準で決定論的 |
+| Contract (dApp / smart contract) | 手書き `.t.sol` / `.test.ts` | Foundry + Hardhat を 1 spec から、 同 TC ID |
+| API integration | 手書き msw / supertest | 自動生成、 mock + live 両 mode |
+| Component (8 framework) | framework ごとに runner / fixture drift | `@kiwa-test/ui` 1 package で React / Vue / Svelte / Solid / Lit / Qwik / Angular / Chromium |
+| dApp e2e | 手書き Playwright + wallet glue | 自動生成、 anvil + viem + EIP-6963 + ERC-4337 結線済 |
+| A11y / Visual | ad-hoc CI step or skip | 第一級 adapter (axe-core / pixelmatch) が同 spec を共有 |
+| Polyglot | default で TS のみ | TypeScript + Python (pytest) + Solidity (forge / hardhat) を同 skill chain で |
+| Coverage gate | optional、 飛ばされがち | release 時に **物理 enforce** ... 4 metric × 11 package |
+| Mutation gate | 滅多に走らせない | release 時に **物理 enforce** ... package 別 MSI threshold |
 | Flake 検出 | ad-hoc | 4 round loop が組み込み |
 
-> 既に動いている contract / dApp に test を追加したい場合 — [tests/docs/retrofit-existing-dapp.ja.md](./tests/docs/retrofit-existing-dapp.ja.md) を参照。 skill chain は **後付け導入を主用途** として設計されており、 既存コードから仕様を逆算します。
+> 既存コードがある場合、 kiwa は **後付け導入主軸** で設計されています。 Layer 2 generator はすべて既存 test から spec を逆算可能。 dApp 例は [tests/docs/retrofit-existing-dapp.ja.md](./tests/docs/retrofit-existing-dapp.ja.md)、 非 dApp stack は [`@kiwa-test/api`](./packages/api) / [`@kiwa-test/ui`](./packages/ui) / [`@kiwa-test/cli-test`](./packages/cli-test) を参照。
 
 ---
 
