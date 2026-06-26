@@ -1,5 +1,6 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
+import { ChapterIndicator } from "../components/ChapterIndicator";
 import { tokens, t } from "../tokens";
 
 type Column = {
@@ -83,7 +84,9 @@ const LanguageColumn: React.FC<{ column: Column; index: number }> = ({ column, i
   const left = index * (COL_W + GAP);
 
   const accent = column.planned ? `${column.color}` : column.color;
-  const baseAlpha = column.planned ? 0.5 : 1;
+  // planned column も視認可能な opacity (0.72) で表示、 dashed border + 「coming soon」 ラベルで構想中を明示。
+  // 0.5 だと暗背景で text が埋没する (layout-pitfalls.md § 10 caption contrast)
+  const baseAlpha = column.planned ? 0.72 : 1;
 
   return (
     <div
@@ -211,8 +214,9 @@ export const Polyglot: React.FC = () => {
   const captionY = interpolate(captionEnter, [0, 1], [16, 0]);
 
   return (
-    <SceneLayout
-      eyebrow={t().eyebrowPolyglot}
+    <>
+      <SceneLayout
+        eyebrow={t().eyebrowPolyglot}
       headline={t().headlinePolyglot}
     >
       <div
@@ -248,6 +252,8 @@ export const Polyglot: React.FC = () => {
           {t().polyglotCaption}
         </div>
       </div>
-    </SceneLayout>
+      </SceneLayout>
+      <ChapterIndicator chapter={3} name="Coverage" />
+    </>
   );
 };

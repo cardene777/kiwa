@@ -1,5 +1,6 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
+import { ChapterIndicator } from "../components/ChapterIndicator";
 import { tokens, t } from "../tokens";
 
 type Ray = {
@@ -188,10 +189,11 @@ export const OneSpec: React.FC = () => {
   const VBH = 760;
 
   return (
-    <SceneLayout
-      eyebrow={t().eyebrowOneSpec}
-      headline={t().headlineOneSpec}
-    >
+    <>
+      <SceneLayout
+        eyebrow={t().eyebrowOneSpec}
+        headline={t().headlineOneSpec}
+      >
       <div
         style={{
           position: "relative",
@@ -238,6 +240,8 @@ export const OneSpec: React.FC = () => {
           {t().oneSpecCaption}
         </div>
       </div>
-    </SceneLayout>
+      </SceneLayout>
+      <ChapterIndicator chapter={2} name="Concept" />
+    </>
   );
 };

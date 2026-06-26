@@ -1,4 +1,5 @@
 import { SceneLayout } from "../components/SceneLayout";
+import { ChapterIndicator } from "../components/ChapterIndicator";
 import { SplitScreen } from "../components/SplitScreen";
 import { Terminal, TerminalLine } from "../components/Terminal";
 import { CodeBlock, CodeLine } from "../components/CodeBlock";
@@ -88,10 +89,11 @@ const manualLines: CodeLine[] = [
 
 export const Install: React.FC = () => {
   return (
-    <SceneLayout
-      eyebrow={t().eyebrowInstall}
-      headline={t().headlineInstall}
-    >
+    <>
+      <SceneLayout
+        eyebrow={t().eyebrowInstall}
+        headline={t().headlineInstall}
+      >
       <SplitScreen
           gap={32}
           panels={[
@@ -126,6 +128,8 @@ export const Install: React.FC = () => {
             },
         ]}
       />
-    </SceneLayout>
+      </SceneLayout>
+      <ChapterIndicator chapter={5} name="CTA" />
+    </>
   );
 };
