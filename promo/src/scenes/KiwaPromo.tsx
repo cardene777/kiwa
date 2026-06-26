@@ -1,15 +1,25 @@
 import { Series } from "remotion";
 import { Opening } from "./Opening";
 import { Problem } from "./Problem";
-import { Solution } from "./Solution";
-import { FrameworkMatrix } from "./FrameworkMatrix";
-import { DemoSpec } from "./DemoSpec";
-import { DemoSpecResult } from "./DemoSpecResult";
-import { DemoTest } from "./DemoTest";
-import { Coverage } from "./Coverage";
+import { OneSpec } from "./OneSpec";
+import { TestSurfaces } from "./TestSurfaces";
+import { Polyglot } from "./Polyglot";
+import { Flow } from "./Flow";
+import { QualityGates } from "./QualityGates";
 import { Install } from "./Install";
 import { Outro } from "./Outro";
 import { tokens } from "../tokens";
+
+// v2 storyboard (Ch.1 Hook → Ch.8 CTA, ≈ 80s @ 30fps)
+//   Ch.1  Opening      (4s)  — tagline reveal
+//   Ch.1  Problem      (4s)  — test stack scatter
+//   Ch.2  OneSpec      (10s) — spec hub + 6 rays
+//   Ch.3  TestSurfaces (16s) — 6-layer card grid (Component badge shows 8 adapters)
+//   Ch.4  Polyglot     (8s)  — TS / Python / Solidity columns
+//   Ch.5  Flow         (16s) — spec → 5 parallel terminals → green
+//   Ch.6  QualityGates (10s) — Coverage + Mutation MSI table
+//   Ch.7  Install      (10s) — npm install + pnpm dlx kiwa init
+//   Ch.8  Outro        (2s)  — links
 
 export const KiwaPromo: React.FC = () => {
   const f = tokens.fps;
@@ -18,31 +28,28 @@ export const KiwaPromo: React.FC = () => {
       <Series.Sequence durationInFrames={4 * f}>
         <Opening />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={9 * f}>
+      <Series.Sequence durationInFrames={4 * f}>
         <Problem />
       </Series.Sequence>
+      <Series.Sequence durationInFrames={10 * f}>
+        <OneSpec />
+      </Series.Sequence>
+      <Series.Sequence durationInFrames={16 * f}>
+        <TestSurfaces />
+      </Series.Sequence>
       <Series.Sequence durationInFrames={8 * f}>
-        <Solution />
+        <Polyglot />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={6 * f}>
-        <FrameworkMatrix />
+      <Series.Sequence durationInFrames={16 * f}>
+        <Flow />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={11 * f}>
-        <DemoSpec />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={5 * f}>
-        <DemoSpecResult />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={9 * f}>
-        <DemoTest />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={6 * f}>
-        <Coverage />
+      <Series.Sequence durationInFrames={10 * f}>
+        <QualityGates />
       </Series.Sequence>
       <Series.Sequence durationInFrames={10 * f}>
         <Install />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={3 * f}>
+      <Series.Sequence durationInFrames={2 * f}>
         <Outro />
       </Series.Sequence>
     </Series>

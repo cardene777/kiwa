@@ -2,12 +2,11 @@ import { Composition, continueRender, delayRender } from "remotion";
 import { useEffect, useState } from "react";
 import { Opening } from "./scenes/Opening";
 import { Problem } from "./scenes/Problem";
-import { Solution } from "./scenes/Solution";
-import { FrameworkMatrix } from "./scenes/FrameworkMatrix";
-import { DemoSpec } from "./scenes/DemoSpec";
-import { DemoSpecResult } from "./scenes/DemoSpecResult";
-import { DemoTest } from "./scenes/DemoTest";
-import { Coverage } from "./scenes/Coverage";
+import { OneSpec } from "./scenes/OneSpec";
+import { TestSurfaces } from "./scenes/TestSurfaces";
+import { Polyglot } from "./scenes/Polyglot";
+import { Flow } from "./scenes/Flow";
+import { QualityGates } from "./scenes/QualityGates";
 import { Install } from "./scenes/Install";
 import { Outro } from "./scenes/Outro";
 import { KiwaPromo } from "./scenes/KiwaPromo";
@@ -40,7 +39,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="KiwaPromo"
         component={KiwaPromo}
-        durationInFrames={71 * tokens.fps}
+        durationInFrames={80 * tokens.fps}
         {...baseProps}
       />
       <Composition
@@ -52,43 +51,37 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Problem"
         component={Problem}
-        durationInFrames={7 * tokens.fps}
+        durationInFrames={4 * tokens.fps}
         {...baseProps}
       />
       <Composition
-        id="Solution"
-        component={Solution}
-        durationInFrames={8 * tokens.fps}
-        {...baseProps}
-      />
-      <Composition
-        id="FrameworkMatrix"
-        component={FrameworkMatrix}
-        durationInFrames={6 * tokens.fps}
-        {...baseProps}
-      />
-      <Composition
-        id="DemoSpec"
-        component={DemoSpec}
+        id="OneSpec"
+        component={OneSpec}
         durationInFrames={10 * tokens.fps}
         {...baseProps}
       />
       <Composition
-        id="DemoSpecResult"
-        component={DemoSpecResult}
+        id="TestSurfaces"
+        component={TestSurfaces}
+        durationInFrames={16 * tokens.fps}
+        {...baseProps}
+      />
+      <Composition
+        id="Polyglot"
+        component={Polyglot}
         durationInFrames={8 * tokens.fps}
         {...baseProps}
       />
       <Composition
-        id="DemoTest"
-        component={DemoTest}
-        durationInFrames={9 * tokens.fps}
+        id="Flow"
+        component={Flow}
+        durationInFrames={16 * tokens.fps}
         {...baseProps}
       />
       <Composition
-        id="Coverage"
-        component={Coverage}
-        durationInFrames={6 * tokens.fps}
+        id="QualityGates"
+        component={QualityGates}
+        durationInFrames={10 * tokens.fps}
         {...baseProps}
       />
       <Composition
@@ -100,7 +93,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Outro"
         component={Outro}
-        durationInFrames={3 * tokens.fps}
+        durationInFrames={2 * tokens.fps}
         {...baseProps}
       />
     </>
