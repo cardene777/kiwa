@@ -15,7 +15,8 @@
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![tests](https://img.shields.io/badge/tests-292%20execution%20PASS-success)](#testing--quality)
 [![flaky](https://img.shields.io/badge/flaky-0%2F292-success)](#testing--quality)
-[![coverage](https://img.shields.io/badge/coverage-Lines%2090%2B%20%2F%20Branches%2080%2B-success)](#coverage-requirement)
+[![coverage](https://img.shields.io/badge/coverage-Lines%2090%2B%20%2F%20Branches%2080%2B-success)](#quality-gates)
+[![mutation](https://img.shields.io/badge/mutation%20MSI-all%2011%20packages%20%E2%89%A580%25-success)](#quality-gates)
 [![ERC-4337](https://img.shields.io/badge/ERC--4337-v0.7%20supported-9333ea)](./docs/ja/cookbook/smart-wallet-aa.md)
 [![typescript](https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript&logoColor=white)](./tsconfig.base.json)
 [![claude code](https://img.shields.io/badge/Claude%20Code-4%20skills-d97706?logo=anthropic&logoColor=white)](./docs/SKILL-DESIGN.ja.md)
@@ -27,7 +28,7 @@
 </div>
 
 <p align="center">
-  <img src="./assets/kiwa-promo-ja.gif" alt="kiwa 65 秒概要 — contract test、dApp e2e test、手書きの 3 経路" width="880" />
+  <img src="./assets/kiwa-promo-ja.gif" alt="kiwa 71 秒概要 — contract test、 dApp e2e test、 7 SPA framework adapter、 手書きの 4 経路" width="880" />
   <br />
   <sub><a href="./assets/kiwa-promo-ja.mp4">▶ フル画質 MP4 を視聴 (8.4 MB / 1920×1080 / h264)</a></sub>
 </p>
@@ -346,6 +347,42 @@ kiwa は 2 つのエコシステムの交点にあります。 要約。
 未達成の metric が 1 件でもあると、 skill は **不足観点 / 未テスト error path / 未テスト event を Layer 1 仕様書の「不足している仕様」 section に逆書き戻し**、 次 loop で補完できるように案内します。 弱い test を silent に sign off しません。
 
 引数で個別 override 可: `--coverage-lines 95 --coverage-branches 85` 等。
+
+---
+
+## Quality gates
+
+kiwa は release 時に **独立した 2 gate** を強制し、 どちらかが落ちると publish が止まります。 両 gate とも `.github/workflows/release.yml` 内で動き、 1 つでも package が regression すると publish 失敗します。
+
+### Gate 1 — Coverage (`scripts/check-coverage-gates.mjs`)
+
+全 11 package で Lines / Statements / Functions ≥ **90 %**、 Branches ≥ **80 %**。 adapter wrapper の dynamic import error path (msw / pixelmatch / pngjs / @testing-library/* / @vue/test-utils / @solidjs/testing-library / lit / @noma.to/qwik-testing-library / @testing-library/angular) は peer 入りで package-local test 時に通れないため、 Branches は 80 維持。
+
+### Gate 2 — Mutation Score Indicator (`scripts/check-mutation-gates.mjs`)
+
+[Stryker](https://stryker-mutator.io/) が全 package の `.vitest-dist/src/` artefact に mutation を投入し、 gate が `MSI = killed / (killed + survived + timeout)` を計算します。 threshold は意図的に **package 別** — pure-logic 系は 90 %+、 thin wrapper 系は 80 % 固定です。
+
+| Package | MSI | Threshold |
+|---|---|---|
+| [`@kiwa-test/api`](./packages/api) | **96.06 %** | 90 |
+| [`@kiwa-test/a11y`](./packages/a11y) | **93.62 %** | 90 |
+| [`@kiwa-test/ui`](./packages/ui) | **91.76 %** | 80 |
+| [`@kiwa-test/cli-test`](./packages/cli-test) | 89.69 % | 80 |
+| [`@kiwa-test/data`](./packages/data) | 86.93 % | 80 |
+| [`@kiwa-test/spec`](./packages/spec) | 85.51 % | 80 |
+| [`@kiwa-test/core`](./packages/core) | 85.09 % | 80 |
+| [`@kiwa-test/cli`](./packages/cli) | 84.44 % | 80 |
+| [`@kiwa-test/e2e`](./packages/e2e) | 84.21 % | 80 |
+| [`@kiwa-test/observability`](./packages/observability) | 84.12 % | 80 |
+| [`@kiwa-test/visual`](./packages/visual) | 83.02 % | 80 |
+
+local で両 gate を回すには:
+
+```bash
+pnpm test:mutation                  # 全 11 package build + mutation 実行
+pnpm gate:mutation                  # package 別 threshold で gate 強制
+pnpm gate:coverage                  # Lines/Branches/Functions gate 強制
+```
 
 ---
 
