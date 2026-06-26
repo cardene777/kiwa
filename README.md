@@ -4,9 +4,9 @@
 
 # kiwa
 
-**Design, implement, verify — every test layer for dApps and smart contracts, from one spec.**
+**Every test layer · one spec · TypeScript / Python / Solidity.**
 
-One Layer 1 spec → Foundry `.t.sol`, Hardhat `.test.cjs`, and Playwright `.spec.ts` in parallel. With **4 metric coverage thresholds enforced** by the skill itself.
+One Layer 1 spec → contract / API / component / e2e / a11y / visual tests in parallel, across **11 npm packages + 1 PyPI package + Foundry / Hardhat bridges**. Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
 
 [![npm version](https://img.shields.io/npm/v/@kiwa-test/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-test/core)
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa-test/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-test/core)
@@ -28,9 +28,9 @@ One Layer 1 spec → Foundry `.t.sol`, Hardhat `.test.cjs`, and Playwright `.spe
 </div>
 
 <p align="center">
-  <img src="./assets/kiwa-promo-en.gif" alt="kiwa 71s overview — contract test, dApp e2e test, 7 SPA framework adapters, and manual write paths" width="880" />
+  <img src="./assets/kiwa-promo-en.gif" alt="kiwa 80s overview — Layer 1 spec hub, 6 test surfaces, TypeScript / Python / Solidity polyglot stacks, Coverage + Mutation gates" width="880" />
   <br />
-  <sub><a href="./assets/kiwa-promo-en.mp4">▶ Watch the full-quality MP4 (8.4 MB, 1920×1080, h264)</a></sub>
+  <sub><a href="./assets/kiwa-promo-en.mp4">▶ Watch the full-quality MP4 (7.0 MB, 1920×1080, h264)</a></sub>
 </p>
 
 ---
@@ -42,36 +42,48 @@ One Layer 1 spec → Foundry `.t.sol`, Hardhat `.test.cjs`, and Playwright `.spe
 
 ## Why kiwa?
 
-Writing tests for a dApp is **two jobs welded together**: testing the smart contracts (Foundry / Hardhat) and testing the UI + wallet flow (Playwright). Most teams pick one runner, write half the tests, miss critical viewpoints, and ship.
+Modern stacks scatter their tests across **mismatched runners**: Foundry / Hardhat for contracts, Vitest for unit + API, Playwright for e2e, Testing Library for components, axe-core for a11y, pixelmatch for visual, pytest for Python services. Every runner has its own conventions, fixtures, and gates — and **no single source of truth** spans them.
 
-**kiwa is the first toolchain that designs and generates all four test layers from a single, opinionated spec.** "kiwa" means **edge / boundary / limit** in Japanese — exactly what good tests prove.
+**kiwa is a polyglot test toolchain that turns one Layer 1 spec into every test layer your stack actually needs.** "kiwa" means **edge / boundary / limit** in Japanese — exactly what good tests prove. dApps and smart contracts are first-class citizens, but so are REST APIs, SPA components (8 framework adapters), CLI tools, queue workers, and Python services.
 
 ```mermaid
 graph TD
-    A[Your contract.sol + dApp UI] --> B["/kiwa-design Layer 1"]
-    B --> C[.context/spec/contract/test-spec-X.md<br/>9 sections / 9 columns]
-    B --> D[.context/spec/e2e/test-spec-X.md]
-    C --> E["/kiwa-forge → Foundry .t.sol"]
-    C --> F["/kiwa-hardhat → Hardhat .test.cjs"]
-    D --> G["/kiwa-play → Playwright .spec.ts"]
-    E --> H[forge test + coverage]
-    F --> I[npx hardhat test + coverage]
-    G --> J[playwright test + 4-round flake check]
-    H --> K[Lines ≥90% · Branches ≥80%]
-    I --> K
-    J --> L[zero flake across 4 runs]
+    A[Your code: TS / Python / Solidity] --> B["/kiwa-design Layer 1"]
+    B --> C[9-column spec — single source of truth]
+    C --> D["/kiwa-forge → Foundry .t.sol"]
+    C --> E["/kiwa-hardhat → Hardhat .test.cjs"]
+    C --> F["/kiwa-vitest → Vitest .test.ts"]
+    C --> G["/kiwa-api → msw + supertest"]
+    C --> H["/kiwa-play → Playwright .spec.ts"]
+    C --> I["a11y + visual + CLI + data adapters"]
+    D --> J[forge test]
+    E --> K[npx hardhat test]
+    F --> L[vitest run]
+    G --> L
+    H --> M[playwright test + 4-round flake check]
+    I --> L
+    J --> N[Coverage gate ≥ 90/80/90/90]
+    K --> N
+    L --> N
+    M --> N
+    N --> O[Mutation gate — per-package MSI ≥ 80%]
+    O --> P[release publish]
 ```
 
-|  | Pick one runner | kiwa (4 layers) |
+|  | One-runner approach | kiwa (6 surfaces, 1 spec) |
 |---|---|---|
-| Test design | Manual checklist, varies by author | 10-viewpoint catalog + 5-risk scoring, deterministic |
-| Contract tests (Foundry) | Hand-written `.t.sol` | Auto-generated from Layer 1 spec |
-| Contract tests (Hardhat) | Hand-written `.test.ts` | Auto-generated, same TC IDs as Foundry |
-| dApp e2e tests | Hand-written Playwright | Auto-generated, extends existing tests safely |
-| Coverage gate | Optional, often skipped | **Enforced** by the skill itself (4 metrics) |
+| Test design | Per-runner checklist, varies by author | 10-viewpoint catalog + 5-risk scoring, deterministic |
+| Contract (dApp / smart contract) | Hand-written `.t.sol` / `.test.ts` | Foundry + Hardhat from one spec, same TC IDs |
+| API integration | Hand-written msw / supertest | Auto-generated, both mock + live modes |
+| Component (8 frameworks) | Per-framework runner, drifted fixtures | One `@kiwa-test/ui` package across React / Vue / Svelte / Solid / Lit / Qwik / Angular / Chromium |
+| dApp e2e | Hand-written Playwright + wallet glue | Auto-generated, anvil + viem + EIP-6963 + ERC-4337 wired |
+| A11y / Visual | Ad-hoc CI step or skipped | First-class adapters (axe-core / pixelmatch) sharing the same spec |
+| Polyglot | TS-only by default | TypeScript + Python (pytest) + Solidity (forge / hardhat) from the same skill chain |
+| Coverage gate | Optional, often skipped | **Enforced** at release — 4 metrics × 11 packages |
+| Mutation gate | Rarely run | **Enforced** at release — per-package MSI threshold |
 | Flake detection | Ad-hoc | Built-in 4-round loop |
 
-> Already have a contract or dApp? See [tests/docs/retrofit-existing-dapp.md](./tests/docs/retrofit-existing-dapp.md) — the skill chain is designed **retrofit-first**, reverse-engineering specs from existing code.
+> Already have code? `kiwa` is designed **retrofit-first**: every Layer 2 generator can reverse-engineer a spec from existing tests. See [tests/docs/retrofit-existing-dapp.md](./tests/docs/retrofit-existing-dapp.md) for a dApp walkthrough, [`@kiwa-test/api`](./packages/api) / [`@kiwa-test/ui`](./packages/ui) / [`@kiwa-test/cli-test`](./packages/cli-test) for non-dApp stacks.
 
 ---
 
