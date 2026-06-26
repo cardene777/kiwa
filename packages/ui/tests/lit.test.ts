@@ -81,3 +81,99 @@ describe('setupLitComponentEnv (interaction)', () => {
     expect(span?.textContent).toBe('2');
   });
 });
+
+describe('setupLitComponentEnv (mutation-kill)', () => {
+  it('env.mode === "live" for opts.mode === "interaction" (kills EqualityOperator + ConditionalExpression on L22)', async () => {
+    const env = await setupLitComponentEnv({
+      mode: 'interaction',
+      template: html`<kiwa-counter></kiwa-counter>`,
+    });
+    envs.push(env);
+    expect(env.mode).toBe('live');
+  });
+
+  it('env.mode === "mock" for opts.mode === "render" (kills the false branch of L22)', async () => {
+    const env = await setupLitComponentEnv({
+      mode: 'render',
+      template: html`<kiwa-counter></kiwa-counter>`,
+    });
+    envs.push(env);
+    expect(env.mode).toBe('mock');
+  });
+
+  it('env.mode === "mock" for opts.mode === "snapshot" (mode falls through to default)', async () => {
+    const env = await setupLitComponentEnv({
+      mode: 'snapshot',
+      template: html`<kiwa-counter></kiwa-counter>`,
+    });
+    envs.push(env);
+    expect(env.mode).toBe('mock');
+  });
+
+  it('env.kind === "lit" — kills StringLiteral mutation on the kind tag', async () => {
+    const env = await setupLitComponentEnv({
+      mode: 'render',
+      template: html`<kiwa-counter></kiwa-counter>`,
+    });
+    envs.push(env);
+    expect(env.kind).toBe('lit');
+  });
+
+  it('handle.shadowRoot is the element shadowRoot when present (kills L14 LogicalOperator)', async () => {
+    const env = await setupLitComponentEnv({
+      mode: 'render',
+      template: html`<kiwa-counter></kiwa-counter>`,
+    });
+    envs.push(env);
+    // KiwaCounter uses shadow DOM by default.
+    expect(env.handle.shadowRoot).not.toBeNull();
+    expect(env.handle.shadowRoot).toBe(env.handle.element.shadowRoot);
+  });
+
+  it('handle.querySelector queries LIGHT DOM (kills L15 ArrowFunction)', async () => {
+    const env = await setupLitComponentEnv({
+      mode: 'render',
+      template: html`<kiwa-counter><span class="light-slot">hi</span></kiwa-counter>`,
+    });
+    envs.push(env);
+    // The light-slot span is not in shadow DOM — querySelector must reach it.
+    const light = env.handle.querySelector<HTMLSpanElement>('.light-slot');
+    expect(light?.textContent).toBe('hi');
+  });
+
+  it('handle.shadowQuerySelector falls back to light DOM when no shadowRoot present', async () => {
+    // A bare div has no shadowRoot. The fallback path returns the light DOM
+    // result.
+    const env = await setupLitComponentEnv({
+      mode: 'render',
+      template: html`<div><span data-testid="bare">x</span></div>`,
+    });
+    envs.push(env);
+    expect(env.handle.shadowRoot).toBeNull();
+    const span = env.handle.shadowQuerySelector<HTMLSpanElement>('[data-testid="bare"]');
+    expect(span?.textContent).toBe('x');
+  });
+
+  it('stop() removes the element from the DOM (kills L26 BlockStatement {} mutation)', async () => {
+    const env = await setupLitComponentEnv({
+      mode: 'render',
+      template: html`<kiwa-counter></kiwa-counter>`,
+    });
+    const el = env.handle.element;
+    expect(el.isConnected).toBe(true);
+    await env.stop();
+    // After stop, element MUST be detached. Kills "stop -> {}" mutation by
+    // observing the side effect.
+    expect(el.isConnected).toBe(false);
+  });
+
+  it('markup contains a serialised representation of the mounted element', async () => {
+    const env = await setupLitComponentEnv({
+      mode: 'render',
+      template: html`<kiwa-counter .initial=${7}></kiwa-counter>`,
+    });
+    envs.push(env);
+    expect(env.markup).toMatch(/kiwa-counter/i);
+    expect(env.markup.length).toBeGreaterThan(0);
+  });
+});

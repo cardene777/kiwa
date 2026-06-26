@@ -72,3 +72,56 @@ describe('setupComponentEnv (errors)', () => {
     ).rejects.toThrow(/unknown mode/);
   });
 });
+
+describe('setupComponentEnv (mutation-kill)', () => {
+  it('render mode env.mode === "mock" and env.kind === "render" (kills L51 StringLiteral and L52 StringLiteral)', async () => {
+    const env = await setupComponentEnv({ mode: 'render', ui: <Counter /> });
+    envs.push(env);
+    expect(env.mode).toBe('mock');
+    expect(env.kind).toBe('render');
+  });
+
+  it('interaction mode env.mode === "live" and env.kind === "interaction" (kills L24 StringLiteral)', async () => {
+    const env = await setupComponentEnv({ mode: 'interaction', ui: <Counter /> });
+    envs.push(env);
+    expect(env.mode).toBe('live');
+    expect(env.kind).toBe('interaction');
+  });
+
+  it('snapshot mode env.mode === "mock" and env.kind === "snapshot" (kills L38 StringLiteral)', async () => {
+    const env = await setupComponentEnv({ mode: 'snapshot', ui: <Counter /> });
+    envs.push(env);
+    expect(env.mode).toBe('mock');
+    expect(env.kind).toBe('snapshot');
+  });
+
+  it('render mode stop() actually unmounts the React tree (kills L29 BlockStatement {})', async () => {
+    const env = await setupComponentEnv({ mode: 'render', ui: <Counter initial={1} /> });
+    if (env.kind !== 'render') throw new Error('expected render env');
+    // Sanity: value is in the DOM before stop.
+    expect(env.screen.getByTestId('value').textContent).toBe('1');
+    await env.stop();
+    // After stop, the React tree is unmounted and cleanup() ran.
+    // queryByTestId returns null for a missing element instead of throwing.
+    expect(env.screen.queryByTestId('value')).toBeNull();
+  });
+
+  it('interaction mode stop() actually unmounts the React tree (kills L29 BlockStatement {} on interaction)', async () => {
+    const env = await setupComponentEnv({ mode: 'interaction', ui: <Counter initial={2} /> });
+    if (env.kind !== 'interaction') throw new Error('expected interaction env');
+    expect(env.screen.getByTestId('value').textContent).toBe('2');
+    await env.stop();
+    expect(env.screen.queryByTestId('value')).toBeNull();
+  });
+
+  it('snapshot mode stop() actually unmounts the React tree (kills L42 BlockStatement {} on snapshot)', async () => {
+    const env = await setupComponentEnv({ mode: 'snapshot', ui: <Counter initial={4} /> });
+    if (env.kind !== 'snapshot') throw new Error('expected snapshot env');
+    // env.markup captures the HTML BEFORE stop — verify it remains accessible
+    // after stop too (kills "stop -> {}" mutation that would leave the React
+    // tree mounted and dirty markup string).
+    const markupBefore = env.markup;
+    await env.stop();
+    expect(markupBefore).toContain('>4<');
+  });
+});

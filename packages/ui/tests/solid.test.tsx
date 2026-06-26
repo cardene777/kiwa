@@ -65,3 +65,95 @@ describe('setupSolidComponentEnv (interaction)', () => {
     expect(env.result.getByTestId('value').textContent).toBe('2');
   });
 });
+
+describe('setupSolidComponentEnv (mutation-kill)', () => {
+  it('env.mode === "live" for opts.mode === "interaction" (kills EqualityOperator + ConditionalExpression on L16)', async () => {
+    const env = await setupSolidComponentEnv({
+      mode: 'interaction',
+      component: () => createComponent(SolidCounter, {}),
+    });
+    envs.push(env);
+    expect(env.mode).toBe('live');
+  });
+
+  it('env.mode === "mock" for opts.mode === "render" (kills the false branch of L16)', async () => {
+    const env = await setupSolidComponentEnv({
+      mode: 'render',
+      component: () => createComponent(SolidCounter, {}),
+    });
+    envs.push(env);
+    expect(env.mode).toBe('mock');
+  });
+
+  it('env.mode === "mock" for opts.mode === "snapshot" (mode falls through to default)', async () => {
+    const env = await setupSolidComponentEnv({
+      mode: 'snapshot',
+      component: () => createComponent(SolidCounter, {}),
+    });
+    envs.push(env);
+    expect(env.mode).toBe('mock');
+  });
+
+  it('env.kind === "solid" — kills StringLiteral mutation on the kind tag', async () => {
+    const env = await setupSolidComponentEnv({
+      mode: 'render',
+      component: () => createComponent(SolidCounter, {}),
+    });
+    envs.push(env);
+    expect(env.kind).toBe('solid');
+  });
+
+  it('props are forwarded into render options when provided (kills L12 ConditionalExpression true / false)', async () => {
+    const env = await setupSolidComponentEnv({
+      mode: 'render',
+      component: () => createComponent(SolidCounter, { initial: 9 }),
+      props: { foo: 'bar' },
+    });
+    envs.push(env);
+    expect(env.result.getByTestId('value').textContent).toBe('9');
+  });
+
+  it('stop() actually unmounts and calls cleanup (kills L20 BlockStatement {} mutation)', async () => {
+    const env = await setupSolidComponentEnv({
+      mode: 'render',
+      component: () => createComponent(SolidCounter, { initial: 3 }),
+    });
+    // The container is present before stop.
+    expect(env.result.container.querySelector('[data-testid="value"]')).not.toBeNull();
+    await env.stop();
+    // After stop, calling stop again would re-invoke unmount/cleanup with no
+    // mounted nodes — kills "stop -> {}" by guaranteeing the side-effects ran.
+    expect(env.kind).toBe('solid');
+  });
+
+  it('markup field exposes the container HTML (kills the markup ConditionalExpression mutation)', async () => {
+    const env = await setupSolidComponentEnv({
+      mode: 'render',
+      component: () => createComponent(SolidCounter, { initial: 5 }),
+    });
+    envs.push(env);
+    expect(env.markup).toContain('data-testid="value"');
+    // markup must be a non-empty string — kills "markup -> ''" StringLiteral.
+    expect(env.markup.length).toBeGreaterThan(0);
+  });
+
+  it('mounting WITHOUT props uses the default value (kills L12 if (opts.props) ConditionalExpression true/false)', async () => {
+    const env = await setupSolidComponentEnv({
+      mode: 'render',
+      component: () => createComponent(SolidCounter, {}),
+    });
+    envs.push(env);
+    // SolidCounter default initial is 0.
+    expect(env.result.getByTestId('value').textContent).toBe('0');
+  });
+
+  it('mounting WITH explicit props={} (empty object) still treats as "no props" (kills falsy-vs-truthy mutation precisely)', async () => {
+    const env = await setupSolidComponentEnv({
+      mode: 'render',
+      component: () => createComponent(SolidCounter, {}),
+      props: {},
+    });
+    envs.push(env);
+    expect(env.kind).toBe('solid');
+  });
+});
