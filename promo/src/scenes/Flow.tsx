@@ -11,31 +11,31 @@ type Terminal = {
 
 const terminals: Terminal[] = [
   {
-    title: "Foundry",
+    title: "/kiwa-forge → forge test",
     cmd: "$ forge test",
     pass: "Ran 47 tests · 47 passed",
     color: tokens.color.accentContract,
   },
   {
-    title: "Hardhat",
+    title: "/kiwa-hardhat → hardhat test",
     cmd: "$ npx hardhat test",
     pass: "32 passing · 0 failing",
     color: tokens.color.accentContract,
   },
   {
-    title: "Vitest (API + UI)",
+    title: "/kiwa-vitest → vitest run",
     cmd: "$ vitest run",
     pass: "8 files · 86 tests · all passed",
     color: tokens.color.accentApi,
   },
   {
-    title: "Playwright",
+    title: "/kiwa-play → playwright test",
     cmd: "$ playwright test",
     pass: "23 specs · 4-round zero flake",
     color: tokens.color.accentE2e,
   },
   {
-    title: "pytest",
+    title: "kiwa-test-py → pytest",
     cmd: "$ pytest tests/",
     pass: "==== 14 passed in 1.2s ====",
     color: tokens.color.accentPy,
@@ -47,6 +47,18 @@ const FLOW_STEP_OFFSETS = {
   step2: 130,
   step3: 360,
 } as const;
+
+const SPEC_LINES = [
+  { text: "# tests/spec/test-spec-tokenGating.md", emphasis: "title" as const },
+  { text: "", emphasis: "blank" as const },
+  { text: "| TC ID | mode | observation | boundary | P |", emphasis: "header" as const },
+  { text: "|-------|------|-------------|----------|---|", emphasis: "rule" as const },
+  { text: "| T-001 | render | balance == 1 | 0 / 1 / max | P0 |", emphasis: "row" as const },
+  { text: "| T-002 | interaction | mint click | gas budget | P0 |", emphasis: "row" as const },
+  { text: "| T-003 | snapshot | gated DOM | logged-in / out | P1 |", emphasis: "row" as const },
+  { text: "", emphasis: "blank" as const },
+  { text: "✓ 9 columns × 47 rows generated", emphasis: "complete" as const },
+];
 
 const SpecCard: React.FC = () => {
   const frame = useCurrentFrame();
@@ -71,7 +83,7 @@ const SpecCard: React.FC = () => {
   return (
     <div
       style={{
-        width: 720,
+        width: 760,
         background: `linear-gradient(135deg, ${tokens.color.primary}18 0%, ${tokens.color.primary}03 100%)`,
         border: `2px solid ${tokens.color.primary}`,
         borderRadius: 14,
@@ -89,7 +101,7 @@ const SpecCard: React.FC = () => {
           fontWeight: 600,
           color: tokens.color.primary,
           letterSpacing: 1,
-          marginBottom: 8,
+          marginBottom: 10,
         }}
       >
         {t().flowStep1}
@@ -97,22 +109,53 @@ const SpecCard: React.FC = () => {
       <div
         style={{
           fontFamily: tokens.font.mono,
-          fontSize: 16,
-          color: tokens.color.textMuted,
-          lineHeight: 1.5,
+          fontSize: 14,
+          lineHeight: 1.55,
         }}
       >
-        # tests/spec/test-spec-tokenGating.md
-        <br />
-        | TC ID | mode | observation | boundary | priority | ...
-        <br />
-        |-------|------|-------------|----------|----------|----
-        <br />
-        | T-001 | render | balance == 1 | 0 / 1 / max | P0 | ...
-        <br />
-        | T-002 | interaction | mint click | gas budget | P0 | ...
-        <br />
-        <span style={{ color: tokens.color.primary }}>9 columns × 47 rows generated</span>
+        {SPEC_LINES.map((line, idx) => {
+          const lineFrame = frame - FLOW_STEP_OFFSETS.step1 - 12 - idx * 6;
+          const lineOpacity = interpolate(lineFrame, [0, 10], [0, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          });
+          const tx = interpolate(lineFrame, [0, 10], [-10, 0], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          });
+
+          let color: string = tokens.color.textMuted;
+          let weight = 400;
+          if (line.emphasis === "title") {
+            color = tokens.color.textSubtle;
+          } else if (line.emphasis === "header") {
+            color = tokens.color.white;
+            weight = 700;
+          } else if (line.emphasis === "rule") {
+            color = `${tokens.color.primary}80`;
+          } else if (line.emphasis === "row") {
+            color = tokens.color.white;
+          } else if (line.emphasis === "complete") {
+            color = tokens.color.primary;
+            weight = 700;
+          }
+
+          return (
+            <div
+              key={idx}
+              style={{
+                whiteSpace: "pre",
+                opacity: lineOpacity,
+                transform: `translateX(${tx}px)`,
+                color,
+                fontWeight: weight,
+                minHeight: line.emphasis === "blank" ? 8 : 22,
+              }}
+            >
+              {line.text || " "}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
