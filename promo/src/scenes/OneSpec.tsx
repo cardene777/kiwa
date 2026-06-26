@@ -9,18 +9,19 @@ type Ray = {
   delay: number;
 };
 
+// Symmetric layout: skip straight horizontals to keep labels off the edges.
 const rays: Ray[] = [
-  { angle: -90, label: "Contract", color: tokens.color.accentContract, delay: 0 },
-  { angle: -50, label: "API", color: tokens.color.accentApi, delay: 4 },
+  { angle: -100, label: "Contract", color: tokens.color.accentContract, delay: 0 },
+  { angle: -55, label: "API", color: tokens.color.accentApi, delay: 4 },
   { angle: -10, label: "Component", color: tokens.color.accentComponent, delay: 8 },
-  { angle: 30, label: "E2E", color: tokens.color.accentE2e, delay: 12 },
-  { angle: 70, label: "A11y / Visual", color: tokens.color.accentA11y, delay: 16 },
-  { angle: 110, label: "CLI / Data / Obs.", color: tokens.color.accentData, delay: 20 },
+  { angle: 35, label: "E2E", color: tokens.color.accentE2e, delay: 12 },
+  { angle: 80, label: "A11y / Visual", color: tokens.color.accentA11y, delay: 16 },
+  { angle: 125, label: "Data / CLI", color: tokens.color.accentData, delay: 20 },
 ];
 
-const HUB_RADIUS = 220;
-const RAY_LENGTH = 320;
-const LABEL_RADIUS = HUB_RADIUS + RAY_LENGTH + 40;
+const HUB_RADIUS = 180;
+const RAY_LENGTH = 240;
+const LABEL_OFFSET = 16;
 
 const RaySvg: React.FC<{ ray: Ray }> = ({ ray }) => {
   const frame = useCurrentFrame();
@@ -41,8 +42,8 @@ const RaySvg: React.FC<{ ray: Ray }> = ({ ray }) => {
   const startY = Math.sin(rad) * HUB_RADIUS;
   const endX = Math.cos(rad) * (HUB_RADIUS + RAY_LENGTH * lineProgress);
   const endY = Math.sin(rad) * (HUB_RADIUS + RAY_LENGTH * lineProgress);
-  const labelX = Math.cos(rad) * LABEL_RADIUS;
-  const labelY = Math.sin(rad) * LABEL_RADIUS;
+  const labelX = Math.cos(rad) * (HUB_RADIUS + RAY_LENGTH + LABEL_OFFSET);
+  const labelY = Math.sin(rad) * (HUB_RADIUS + RAY_LENGTH + LABEL_OFFSET);
 
   const align = Math.cos(rad) > 0.3 ? "start" : Math.cos(rad) < -0.3 ? "end" : "middle";
 
@@ -70,7 +71,7 @@ const RaySvg: React.FC<{ ray: Ray }> = ({ ray }) => {
         y={labelY + 8}
         fill={ray.color}
         fontFamily={tokens.font.sans}
-        fontSize={30}
+        fontSize={28}
         fontWeight={700}
         textAnchor={align}
         opacity={labelOpacity}
@@ -106,10 +107,10 @@ const SpecHub: React.FC = () => {
       />
       <text
         x={0}
-        y={-30}
+        y={-40}
         fill={tokens.color.white}
         fontFamily={tokens.font.mono}
-        fontSize={26}
+        fontSize={22}
         fontWeight={600}
         textAnchor="middle"
         letterSpacing={2}
@@ -121,7 +122,7 @@ const SpecHub: React.FC = () => {
         y={6}
         fill={tokens.color.primary}
         fontFamily={tokens.font.sans}
-        fontSize={42}
+        fontSize={48}
         fontWeight={800}
         textAnchor="middle"
         letterSpacing={-1}
@@ -133,13 +134,37 @@ const SpecHub: React.FC = () => {
         y={42}
         fill={tokens.color.textMuted}
         fontFamily={tokens.font.mono}
-        fontSize={18}
+        fontSize={16}
         fontWeight={500}
         textAnchor="middle"
         letterSpacing={1}
       >
         9 columns
       </text>
+      <g transform="translate(0, 92)">
+        <rect
+          x={-72}
+          y={-22}
+          width={144}
+          height={36}
+          rx={18}
+          fill={tokens.color.bg}
+          stroke={tokens.color.primary}
+          strokeWidth={2}
+        />
+        <text
+          x={0}
+          y={4}
+          fill={tokens.color.primary}
+          fontFamily={tokens.font.mono}
+          fontSize={18}
+          fontWeight={700}
+          textAnchor="middle"
+          letterSpacing={1.5}
+        >
+          8 skills
+        </text>
+      </g>
     </g>
   );
 };
@@ -149,7 +174,7 @@ export const OneSpec: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const captionEnter = spring({
-    frame: frame - 160,
+    frame: frame - 200,
     fps,
     from: 0,
     to: 1,
@@ -157,6 +182,10 @@ export const OneSpec: React.FC = () => {
   });
   const captionOpacity = interpolate(captionEnter, [0, 1], [0, 1]);
   const captionY = interpolate(captionEnter, [0, 1], [16, 0]);
+
+  // viewBox sized so even the longest label ("A11y / Visual") clears the edge.
+  const VBW = 1700;
+  const VBH = 760;
 
   return (
     <SceneLayout
@@ -166,18 +195,17 @@ export const OneSpec: React.FC = () => {
       <div
         style={{
           position: "relative",
-          width: 1400,
-          height: 680,
+          width: VBW,
+          height: VBH + 60,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
         }}
       >
         <svg
-          width={1400}
-          height={680}
-          viewBox="-700 -340 1400 680"
+          width={VBW}
+          height={VBH}
+          viewBox={`-${VBW / 2} -${VBH / 2} ${VBW} ${VBH}`}
         >
           <defs>
             <radialGradient id="hub-gradient" cx="50%" cy="50%" r="70%">
@@ -199,10 +227,12 @@ export const OneSpec: React.FC = () => {
             textAlign: "center",
             fontFamily: tokens.font.mono,
             fontSize: 26,
+            fontWeight: 600,
             color: tokens.color.primary,
-            letterSpacing: 2,
+            letterSpacing: 1.6,
             opacity: captionOpacity,
             transform: `translateY(${captionY}px)`,
+            textShadow: `0 0 18px ${tokens.color.primary}80`,
           }}
         >
           {t().oneSpecCaption}

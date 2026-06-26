@@ -1,18 +1,13 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
+import { CoverageBar } from "../components/CoverageBar";
 import { tokens, t } from "../tokens";
 
-type Metric = {
-  label: string;
-  value: string;
-  delay: number;
-};
-
-const coverageMetrics: Metric[] = [
-  { label: "Lines", value: "≥ 90 %", delay: 0 },
-  { label: "Statements", value: "≥ 90 %", delay: 4 },
-  { label: "Branches", value: "≥ 80 %", delay: 8 },
-  { label: "Functions", value: "≥ 90 %", delay: 12 },
+const coverageMetrics = [
+  { label: "Lines", target: 96.2, delayFrames: 10 },
+  { label: "Statements", target: 96.2, delayFrames: 18 },
+  { label: "Branches", target: 86.4, delayFrames: 26 },
+  { label: "Functions", target: 99.5, delayFrames: 34 },
 ];
 
 type Row = {
@@ -35,59 +30,6 @@ const mutationRows: Row[] = [
   { name: "@kiwa-test/observability", msi: 84.12, threshold: 80, delay: 54 },
   { name: "@kiwa-test/visual", msi: 83.02, threshold: 80, delay: 58 },
 ];
-
-const CoverageBadge: React.FC<{ metric: Metric }> = ({ metric }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const enter = spring({
-    frame: frame - 20 - metric.delay,
-    fps,
-    from: 0,
-    to: 1,
-    config: { damping: 14, mass: 0.7, stiffness: 105 },
-  });
-  const opacity = interpolate(enter, [0, 1], [0, 1]);
-  const translateX = interpolate(enter, [0, 1], [-24, 0]);
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        background: `linear-gradient(135deg, ${tokens.color.primary}1E 0%, ${tokens.color.primary}06 100%)`,
-        border: `2px solid ${tokens.color.primary}`,
-        borderRadius: 12,
-        padding: "14px 22px",
-        opacity,
-        transform: `translateX(${translateX}px)`,
-      }}
-    >
-      <div
-        style={{
-          fontFamily: tokens.font.sans,
-          fontSize: 24,
-          fontWeight: 700,
-          color: tokens.color.white,
-          letterSpacing: 0.3,
-        }}
-      >
-        {metric.label}
-      </div>
-      <div
-        style={{
-          fontFamily: tokens.font.mono,
-          fontSize: 26,
-          fontWeight: 800,
-          color: tokens.color.primary,
-          letterSpacing: 0.5,
-        }}
-      >
-        {metric.value}
-      </div>
-    </div>
-  );
-};
 
 const MutationRow: React.FC<{ row: Row }> = ({ row }) => {
   const frame = useCurrentFrame();
@@ -211,9 +153,7 @@ export const QualityGates: React.FC = () => {
           >
             Coverage gate
           </div>
-          {coverageMetrics.map((metric) => (
-            <CoverageBadge key={metric.label} metric={metric} />
-          ))}
+          <CoverageBar metrics={coverageMetrics} width="100%" duration={28} fontSize={26} />
           <div
             style={{
               fontFamily: tokens.font.mono,
