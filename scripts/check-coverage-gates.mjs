@@ -48,6 +48,13 @@ const PKG_DIRS = {
   '@kiwa-test/visual': 'packages/visual',
 };
 
+// Lines / functions / statements stay at 90. Branches stay at 80 because the
+// dynamic-import error paths in optional-peer-dep wrappers (msw / pixelmatch
+// / pngjs / @testing-library/* / @vue/test-utils / @solidjs/testing-library
+// / lit / @noma.to/qwik-testing-library / @testing-library/angular) cannot
+// be exercised inside the package-local tests when the peer is installed.
+// The mutation gate (check-mutation-gates.mjs) catches regressions on the
+// non-branch logic that coverage cannot.
 const THRESHOLDS = {
   lines: 90,
   statements: 90,
