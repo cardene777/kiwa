@@ -1,8 +1,23 @@
-# 🌱 kiwa v0.5 — release-time mutation gate + 8 component adapters
+# 🌱 kiwa v0.5 — polyglot test toolchain · Coverage + Mutation gates · 8 component adapters
 
-Just merged the v0.5 chain. **Highlights**:
+A scattered test stack is the default. Contract tests live in Foundry, unit + API in Vitest, e2e in Playwright, components in Testing Library, a11y in axe-core, visual in pixelmatch, Python services in pytest. Every runner has its own conventions, fixtures, and gates — and **no single source of truth** ties them together.
 
-## 1. `@kiwa-test/ui` covers 8 surfaces from one package
+kiwa v0.5 is the cut where I finally feel the toolchain solves that. **One Layer 1 spec → every test layer your stack actually needs, across TypeScript, Python, and Solidity.**
+
+## 1. Six test surfaces, one spec
+
+| Surface | Stacks |
+|---|---|
+| Contract | Foundry / Hardhat (Solidity) |
+| API integration | msw / supertest / Vitest |
+| Component | `@kiwa-test/ui` ships **8 adapters** (see § 2) |
+| E2E | Playwright + anvil + viem + EIP-6963 + ERC-4337 |
+| A11y + Visual | axe-core / pixelmatch |
+| Data + CLI + Observability | queue / cron / shell IO / flaky detection |
+
+dApps and smart contracts are first-class — but so is everything else.
+
+## 2. `@kiwa-test/ui` covers 8 component surfaces from one package
 
 | Framework | Helper |
 |---|---|
@@ -17,9 +32,25 @@ Just merged the v0.5 chain. **Highlights**:
 
 All share the same `mode (render / interaction / snapshot) + stop()` contract. Optional peer deps mean you only install what you actually use.
 
-## 2. Release-time mutation gate
+## 3. Polyglot from day one
 
-`scripts/check-mutation-gates.mjs` runs inside `.github/workflows/release.yml` and **blocks publish** if any package's [Mutation Score Indicator (MSI)](https://stryker-mutator.io/docs/mutation-testing-elements/mutation-score-indicator/) regresses below its per-package threshold.
+| Language | Packages | Notes |
+|---|---|---|
+| TypeScript | 11 npm packages | Primary surface — every adapter |
+| Python | 1 PyPI package (`kiwa-test-py`) | `@kiwa-test/spec` Python port + requests / httpx adapter |
+| Solidity | Foundry / Hardhat bridges | `/kiwa-forge` + `/kiwa-hardhat` from the same Layer 1 spec |
+
+Rust / Go on the roadmap. The point: **spec once, generate test layers across the languages your stack actually uses.**
+
+## 4. Release-time gates that actually fire
+
+`scripts/check-coverage-gates.mjs` + `scripts/check-mutation-gates.mjs` run inside `.github/workflows/release.yml` and **block publish** if any package regresses below its threshold.
+
+### Coverage gate
+
+Lines / Statements / Functions ≥ 90 %, Branches ≥ 80 %, across all 11 packages.
+
+### Mutation gate — [Mutation Score Indicator (MSI)](https://stryker-mutator.io/docs/mutation-testing-elements/mutation-score-indicator/)
 
 | Package | MSI | Threshold |
 |---|---|---|
@@ -35,29 +66,29 @@ All share the same `mode (render / interaction / snapshot) + stop()` contract. O
 | `@kiwa-test/observability` | 84.12 % | 80 |
 | `@kiwa-test/visual` | 83.02 % | 80 |
 
-Thresholds intentionally non-uniform: pure-logic packages enforce 90, thin wrappers around third-party libs hold at 80 to avoid getting trapped by equivalent mutants.
-
-## 3. Coverage gate stays in place
-
-`scripts/check-coverage-gates.mjs` continues to enforce Lines ≥ 90 / Branches ≥ 80 / Functions ≥ 90 / Statements ≥ 90 across all 11 packages.
+Per-package thresholds are intentional — pure-logic packages enforce 90; thin wrappers around third-party libs hold at 80 to avoid getting trapped by equivalent mutants.
 
 ## Try it
 
 ```bash
 npm install @kiwa-test/core
-# or
+# or for Python services
+pip install kiwa-test-py
+# scaffold everything
 pnpm dlx @kiwa-test/cli init
 ```
 
 - 📖 README · <https://github.com/cardene777/kiwa>
 - 📦 npm · <https://www.npmjs.com/package/@kiwa-test/core>
-- 🎬 71s overview · `assets/kiwa-promo-en.mp4` (see README inline)
+- 🐍 PyPI · <https://pypi.org/project/kiwa-test-py/>
+- 🎬 80s overview · `assets/kiwa-promo-en.mp4` (see README inline)
 
 ## How can you help?
 
-- Try it on your dApp / smart contract / SPA repo and file an Issue / Discussion if anything breaks.
-- Adapter contributions welcome — `@kiwa-test/ui` is purpose-built for new framework adapters (the SolidJS adapter took 1 PR and 100 lines).
-- Ideas for new test types (gRPC mock / Pact contract test / Storybook visual diff) — let's discuss in this thread or an Idea Discussion.
+- Try it on a stack with **mixed test surfaces** (dApp + API + a11y, or Python service + REST contract, or a multi-framework UI). File an Issue / Discussion if anything breaks or feels awkward.
+- Adapter contributions welcome — `@kiwa-test/ui` is purpose-built for new framework adapters (the SolidJS adapter took 1 PR and 100 LOC).
+- Polyglot bridges are the most strategic contribution surface. Rust / Go ports of `@kiwa-test/spec` are on the roadmap — let's talk in this thread if you want to drive one.
+- Ideas for new test surfaces (gRPC mock / Pact contract test / Storybook visual diff) — discuss in an Idea Discussion.
 
 Thanks for reading 🌱
 

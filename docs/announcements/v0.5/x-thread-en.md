@@ -1,36 +1,65 @@
-# x.com thread — English
+# x.com thread — English (polyglot voice)
 
 > Account ... [@cardene777](https://x.com/cardene777)
-> Voice ... maker-perspective ("I built this") in first person
-> Video ... attach `assets/kiwa-promo-en.mp4` (9.1MB / 71s) to tweet [1/7]
+> Voice ... maker first-person ("I built this")
+> Video ... attach `assets/kiwa-promo-en.mp4` (7.0MB / 80s) to tweet [1/8]
 > Limit ... ~280 chars per tweet
-> Threads ... [1/7] … [7/7]
+> Threads ... [1/8] … [8/8]
 
 ---
 
-## [1/7] (attach mp4)
+## [1/8] (attach mp4)
 
-Just shipped kiwa v0.5 — an OSS test toolchain that generates contract tests, dApp e2e tests AND component tests for **7 SPA frameworks** (React/Vue/Svelte/Solid/Lit/Qwik/Angular) from a single Layer 1 spec.
+Just shipped kiwa v0.5 — a **polyglot test toolchain** that turns one Layer 1 spec into every test layer your stack actually needs: contract, API, component, e2e, a11y, visual.
 
-71s overview ↓
+Release-time Coverage + Mutation gates enforced by GitHub Actions.
+
+80s overview ↓
 
 https://github.com/cardene777/kiwa
 
-#OSS #testing #web3
+#OSS #testing
 
 ---
 
-## [2/7]
+## [2/8]
 
-Why does this matter? Writing tests is tedious. kiwa fuses spec-driven generation + Stryker mutation gates + 8 adapters + an AI skill chain into one toolchain.
+The pain point: your test stack is **scattered across mismatched runners** — Foundry / Hardhat for contracts, Vitest for unit + API, Playwright for e2e, Testing Library for components, axe-core for a11y, pixelmatch for visual, pytest for Python services.
 
-Wires up Foundry, Hardhat, Playwright, Vitest, msw, axe-core, and pixelmatch through one spec.
+kiwa fuses them into one chain.
 
 ---
 
-## [3/7]
+## [3/8]
 
-v0.5 headline: every one of the 11 npm packages now ships behind a **release-time mutation gate** with MSI ≥ 80 enforced by GitHub Actions:
+Six test surfaces, one toolchain:
+
+1. Contract (Foundry / Hardhat)
+2. API integration (msw / supertest)
+3. Component (8 framework adapters)
+4. E2E (Playwright + anvil + viem)
+5. A11y + Visual (axe-core / pixelmatch)
+6. Data / CLI / Observability
+
+dApps and smart contracts are first-class — but so is everything else.
+
+---
+
+## [4/8]
+
+Polyglot from day one:
+
+- **TypeScript** — 11 npm packages
+- **Python** — 1 PyPI package (`kiwa-test-py`)
+- **Solidity** — Foundry / Hardhat bridges
+
+Rust / Go on the roadmap. The whole point: spec **once**, generate test layers across the languages your stack actually uses.
+
+---
+
+## [5/8]
+
+v0.5 headline: every one of the 11 npm packages now ships behind a **release-time mutation gate** with MSI ≥ 80 enforced by GitHub Actions.
 
 • @kiwa-test/api → 96.06%
 • @kiwa-test/a11y → 93.62%
@@ -41,34 +70,29 @@ Coverage gate (Lines 90+ / Branches 80+) holds too.
 
 ---
 
-## [4/7]
+## [6/8]
 
-The component-test adapter (`@kiwa-test/ui`) covers **8 surfaces** out of one package:
+The component-test adapter (`@kiwa-test/ui`) covers **8 surfaces from one package**:
 
 React / Vue 3 / Svelte / SolidJS / Lit / Qwik / Angular + real Chromium via Playwright.
 
-Same `mode + stop()` contract across `setup{Framework}ComponentEnv()`.
+Same `mode + stop()` contract. Thin wrapper design = new adapters land in ~100 LOC.
 
 ---
 
-## [5/7]
+## [7/8]
 
-Why bother covering every SPA framework? dApp UIs aren't React-only. ENS, wallet UIs, token explorers ship in Lit / Vue / Solid in the wild. kiwa keeps the test surface identical no matter which stack a team chose.
-
----
-
-## [6/7]
-
-Design decision worth calling out: per-package mutation thresholds. Pure-logic packages enforce 90 %; thin wrappers around third-party libs hold the line at 80 %. Lets you ship a tough gate without getting trapped by equivalent mutants.
+Design call worth flagging: per-package mutation thresholds. Pure-logic packages enforce 90 %; thin wrappers around third-party libs hold the line at 80 %. Lets you ship a tough gate without getting trapped by equivalent mutants.
 
 ---
 
-## [7/7]
+## [8/8]
 
-If you ship dApps, smart contracts, or rich SPAs, try kiwa:
+If your stack feels like it has too many runners and too few specs, try kiwa:
 
-📖 README https://github.com/cardene777/kiwa
-💬 Discussions https://github.com/cardene777/kiwa/discussions
+📖 README · https://github.com/cardene777/kiwa
+💬 Discussions · https://github.com/cardene777/kiwa/discussions/451
 📦 `npm install @kiwa-test/core`
+🐍 `pip install kiwa-test-py`
 
 Issues / discussions / replies welcome 🌱
