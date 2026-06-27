@@ -83,14 +83,15 @@ export const V8Pass: React.FC = () => {
         <div
           style={{
             fontFamily: tokens.font.sans,
-            fontSize: 108,
+            fontSize: 84,
             fontWeight: 700,
             color: tokens.color.white,
-            letterSpacing: -3,
+            letterSpacing: -2.5,
             textAlign: "center",
             opacity: headlineOpacity,
             transform: `translateY(${headlineY}px)`,
-            lineHeight: 1.1,
+            lineHeight: 1.18,
+            whiteSpace: "pre-line",
           }}
         >
           {t().v8PassHeadline}
