@@ -42,7 +42,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="KiwaPromo"
         component={KiwaPromo}
-        durationInFrames={102 * tokens.fps}
+        durationInFrames={100 * tokens.fps}
         {...baseProps}
       />
       <Composition
@@ -90,7 +90,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Flow"
         component={Flow}
-        durationInFrames={18 * tokens.fps}
+        durationInFrames={16 * tokens.fps}
         {...baseProps}
       />
       <Composition

@@ -1,7 +1,6 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
 import { ChapterIndicator } from "../components/ChapterIndicator";
-import { useAmbientMotion } from "../components/useAmbientMotion";
 import { tokens, t } from "../tokens";
 
 type Surface = {
@@ -74,11 +73,8 @@ const SurfaceTile: React.FC<{ surface: Surface; index: number }> = ({ surface, i
     config: { damping: 14, mass: 0.7, stiffness: 105 },
   });
   const opacity = interpolate(enter, [0, 1], [0, 1]);
-  const entranceY = interpolate(enter, [0, 1], [32, 0]);
-  const entranceScale = interpolate(enter, [0, 1], [0.92, 1]);
-
-  // Sustained breath per tile, phase index*14 keeps adjacent cards desynced.
-  const ambient = useAmbientMotion({ phase: index * 14 });
+  const translateY = interpolate(enter, [0, 1], [32, 0]);
+  const scale = interpolate(enter, [0, 1], [0.92, 1]);
 
   const col = index % COLS;
   const row = Math.floor(index / COLS);
@@ -97,8 +93,8 @@ const SurfaceTile: React.FC<{ surface: Surface; index: number }> = ({ surface, i
         border: `2px solid ${surface.color}`,
         borderRadius: 16,
         opacity,
-        transform: `translate(${ambient.driftX}px, ${entranceY + ambient.driftY}px) scale(${entranceScale * ambient.scale})`,
-        boxShadow: `0 0 ${28 * ambient.glow}px ${surface.color}${Math.round(0x44 * ambient.glow).toString(16).padStart(2, "0")}`,
+        transform: `translateY(${translateY}px) scale(${scale})`,
+        boxShadow: `0 0 28px ${surface.color}30`,
         padding: "22px 28px",
         boxSizing: "border-box",
         display: "flex",
