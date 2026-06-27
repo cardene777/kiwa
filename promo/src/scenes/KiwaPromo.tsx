@@ -13,18 +13,17 @@ import { Install } from "./Install";
 import { Outro } from "./Outro";
 import { tokens } from "../tokens";
 
-// v6 storyboard (Ch.1 → Ch.5, 102s @ 30fps)
+// v5 storyboard (Ch.1 → Ch.5, 100s @ 30fps)
 //   Ch.1 Hook (8s)
 //     Opening (4s) + Problem (4s)
 //   Ch.2 Concept (10s)
 //     OneSpec (10s)
 //   Ch.3 Coverage (30s)
 //     TestSurfaces (16s) + FrameworkMatrix (6s) + Polyglot (8s)
-//   Ch.4 Proof (35s)
-//     SkillChain (7s) + Flow (18s — screencast) + QualityGates (10s)
+//   Ch.4 Proof (33s)
+//     SkillChain (7s) + Flow (16s) + QualityGates (10s)
 //   Ch.5 CTA (19s)
 //     PackagesGrid (7s) + Install (10s) + Outro (2s)
-// All scenes also use useAmbientMotion for subtle breath / drift / glow.
 
 export const KiwaPromo: React.FC = () => {
   const f = tokens.fps;
@@ -51,7 +50,7 @@ export const KiwaPromo: React.FC = () => {
       <Series.Sequence durationInFrames={7 * f}>
         <SkillChain />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={18 * f}>
+      <Series.Sequence durationInFrames={16 * f}>
         <Flow />
       </Series.Sequence>
       <Series.Sequence durationInFrames={10 * f}>
