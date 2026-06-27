@@ -1,63 +1,51 @@
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
-import { MaskRevealText } from "../components/MaskRevealText";
+import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
+import { SceneLayout } from "../components/SceneLayout";
 import { tokens, t } from "../tokens";
 
-export const V9Coverage: React.FC = () => {
+export const V10Coverage: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const surfaces = t().v9CoverageSurfaces;
+  const surfaces = t().v10CoverageSurfaces;
 
   const footerEnter = spring({
-    frame: frame - 220,
+    frame: frame - 130,
     fps,
     from: 0,
     to: 1,
-    durationInFrames: 26,
+    durationInFrames: 24,
     config: { damping: 16, mass: 1, stiffness: 95 },
   });
   const footerOpacity = interpolate(footerEnter, [0, 1], [0, 1]);
-  const footerY = interpolate(footerEnter, [0, 1], [16, 0]);
+  const footerY = interpolate(footerEnter, [0, 1], [14, 0]);
 
   return (
-    <AbsoluteFill
-      style={{
-        background: tokens.color.bg,
-        fontFamily: tokens.font.sans,
-        color: tokens.color.white,
-      }}
+    <SceneLayout
+      eyebrow={t().v10CoverageEyebrow}
+      headline={t().v10CoverageHeadline}
     >
-      <AbsoluteFill
+      <div
         style={{
+          width: "100%",
+          height: "100%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          paddingLeft: 100,
-          paddingRight: 100,
-          gap: 48,
+          gap: 40,
         }}
       >
-        <MaskRevealText
-          text={t().v9CoverageHeadline}
-          startFrame={8}
-          fontSize={tokens.locale === "ja" ? 72 : 64}
-          fontWeight={700}
-          color={tokens.color.white}
-          letterSpacing={-1.5}
-          align="center"
-        />
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 32,
+            gap: 28,
             width: 1400,
           }}
         >
           {surfaces.map((surface, idx) => {
             const enter = spring({
-              frame: frame - 60 - idx * 14,
+              frame: frame - 30 - idx * 12,
               fps,
               from: 0,
               to: 1,
@@ -72,7 +60,7 @@ export const V9Coverage: React.FC = () => {
                 key={surface}
                 style={{
                   fontFamily: tokens.font.mono,
-                  fontSize: 60,
+                  fontSize: 64,
                   fontWeight: 700,
                   color: tokens.color.primary,
                   letterSpacing: -1,
@@ -99,12 +87,11 @@ export const V9Coverage: React.FC = () => {
             letterSpacing: 2,
             opacity: footerOpacity,
             transform: `translateY(${footerY}px)`,
-            textAlign: "center",
           }}
         >
-          {t().v9CoverageFooter}
+          {t().v10CoverageFooter}
         </div>
-      </AbsoluteFill>
-    </AbsoluteFill>
+      </div>
+    </SceneLayout>
   );
 };
