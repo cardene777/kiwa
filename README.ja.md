@@ -28,9 +28,9 @@
 </div>
 
 <p align="center">
-  <img src="./assets/kiwa-promo-ja.gif" alt="kiwa 80 秒概要 — Layer 1 spec hub、 6 test surface、 TypeScript / Python / Solidity polyglot、 Coverage + Mutation gate" width="880" />
+  <img src="./assets/kiwa-promo-ja.gif" alt="kiwa 127 秒概要 — Web (Next.js) / Contract (Solidity) / dApp (Playwright) の 3 カテゴリで仕様書生成→テスト生成→実行→レビュー→修正→カバレッジ確認の 6 step を完結" width="880" />
   <br />
-  <sub><a href="./assets/kiwa-promo-ja.mp4">▶ フル画質 MP4 を視聴 (7.1 MB / 1920×1080 / h264)</a></sub>
+  <sub><a href="./assets/kiwa-promo-ja.mp4">▶ フル画質 MP4 を視聴 (2.8 MB / 1920×1080 / h264)</a></sub>
 </p>
 
 ---
