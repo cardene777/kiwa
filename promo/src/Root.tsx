@@ -4,9 +4,12 @@ import { Opening } from "./scenes/Opening";
 import { Problem } from "./scenes/Problem";
 import { OneSpec } from "./scenes/OneSpec";
 import { TestSurfaces } from "./scenes/TestSurfaces";
+import { FrameworkMatrix } from "./scenes/FrameworkMatrix";
 import { Polyglot } from "./scenes/Polyglot";
+import { SkillChain } from "./scenes/SkillChain";
 import { Flow } from "./scenes/Flow";
 import { QualityGates } from "./scenes/QualityGates";
+import { PackagesGrid } from "./scenes/PackagesGrid";
 import { Install } from "./scenes/Install";
 import { Outro } from "./scenes/Outro";
 import { KiwaPromo } from "./scenes/KiwaPromo";
@@ -39,7 +42,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="KiwaPromo"
         component={KiwaPromo}
-        durationInFrames={80 * tokens.fps}
+        durationInFrames={100 * tokens.fps}
         {...baseProps}
       />
       <Composition
@@ -67,9 +70,21 @@ export const RemotionRoot: React.FC = () => {
         {...baseProps}
       />
       <Composition
+        id="FrameworkMatrix"
+        component={FrameworkMatrix}
+        durationInFrames={6 * tokens.fps}
+        {...baseProps}
+      />
+      <Composition
         id="Polyglot"
         component={Polyglot}
         durationInFrames={8 * tokens.fps}
+        {...baseProps}
+      />
+      <Composition
+        id="SkillChain"
+        component={SkillChain}
+        durationInFrames={7 * tokens.fps}
         {...baseProps}
       />
       <Composition
@@ -82,6 +97,12 @@ export const RemotionRoot: React.FC = () => {
         id="QualityGates"
         component={QualityGates}
         durationInFrames={10 * tokens.fps}
+        {...baseProps}
+      />
+      <Composition
+        id="PackagesGrid"
+        component={PackagesGrid}
+        durationInFrames={7 * tokens.fps}
         {...baseProps}
       />
       <Composition
