@@ -1,6 +1,7 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
 import { ChapterIndicator } from "../components/ChapterIndicator";
+import { useAmbientMotion } from "../components/useAmbientMotion";
 import { tokens, t } from "../tokens";
 
 type Skill = {
@@ -40,8 +41,11 @@ const SkillTile: React.FC<{ skill: Skill; index: number }> = ({ skill, index }) 
     config: { damping: 14, mass: 0.7, stiffness: 110 },
   });
   const opacity = interpolate(enter, [0, 1], [0, 1]);
-  const translateY = interpolate(enter, [0, 1], [18, 0]);
-  const scale = interpolate(enter, [0, 1], [0.94, 1]);
+  const entranceY = interpolate(enter, [0, 1], [18, 0]);
+  const entranceScale = interpolate(enter, [0, 1], [0.94, 1]);
+
+  // 8 skill tiles desynced with index*11.
+  const ambient = useAmbientMotion({ phase: index * 11 });
 
   const col = index % COLS;
   const row = Math.floor(index / COLS);
@@ -60,8 +64,8 @@ const SkillTile: React.FC<{ skill: Skill; index: number }> = ({ skill, index }) 
         border: `2px solid ${skill.color}`,
         borderRadius: 14,
         opacity,
-        transform: `translateY(${translateY}px) scale(${scale})`,
-        boxShadow: `0 0 22px ${skill.color}40`,
+        transform: `translate(${ambient.driftX}px, ${entranceY + ambient.driftY}px) scale(${entranceScale * ambient.scale})`,
+        boxShadow: `0 0 ${22 * ambient.glow}px ${skill.color}${Math.round(0x44 * ambient.glow).toString(16).padStart(2, "0")}`,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

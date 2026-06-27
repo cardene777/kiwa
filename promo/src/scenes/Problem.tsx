@@ -1,6 +1,7 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
 import { ChapterIndicator } from "../components/ChapterIndicator";
+import { useAmbientMotion } from "../components/useAmbientMotion";
 import { tokens, t } from "../tokens";
 
 type Tool = {
@@ -43,8 +44,12 @@ const ToolChip: React.FC<{ tool: Tool; index: number }> = ({ tool, index }) => {
     config: { damping: 13, mass: 0.6, stiffness: 115 },
   });
   const opacity = interpolate(enter, [0, 1], [0, 1]);
-  const translateY = interpolate(enter, [0, 1], [18, 0]);
-  const scale = interpolate(enter, [0, 1], [0.92, 1]);
+  const entranceY = interpolate(enter, [0, 1], [18, 0]);
+  const entranceScale = interpolate(enter, [0, 1], [0.92, 1]);
+
+  // Sustained breathing motion so each chip stays alive after the entrance.
+  // phase: index * 12 keeps adjacent chips out of sync (motion-anti-patterns.md § 3).
+  const ambient = useAmbientMotion({ phase: index * 12 });
 
   const col = index % COLS;
   const row = Math.floor(index / COLS);
@@ -63,8 +68,8 @@ const ToolChip: React.FC<{ tool: Tool; index: number }> = ({ tool, index }) => {
         border: `2px solid ${tool.color}`,
         borderRadius: 14,
         opacity,
-        transform: `translateY(${translateY}px) scale(${scale})`,
-        boxShadow: `0 4px 18px ${tool.color}40`,
+        transform: `translate(${ambient.driftX}px, ${entranceY + ambient.driftY}px) scale(${entranceScale * ambient.scale})`,
+        boxShadow: `0 4px ${18 * ambient.glow}px ${tool.color}${Math.round(0x55 * ambient.glow).toString(16).padStart(2, "0")}`,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

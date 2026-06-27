@@ -3,15 +3,24 @@ import { useCurrentFrame, useVideoConfig } from "remotion";
 type AmbientOptions = {
   /** Number of seconds the breath / drift cycle takes (default 4s). */
   cyclesSec?: number;
-  /** Subtle scale delta around 1.0 (default 0.012 = ±1.2%). */
+  /**
+   * Scale delta around 1.0 (default 0.04 = ±4%).
+   * Per motion-anti-patterns.md § 1: values below 0.02 are NOT noticed by
+   * human viewers on a 1080p video. 0.04 is the minimum to register as
+   * "breathing". Cap at 0.05 (motion-anti-patterns.md § 6).
+   */
   scaleAmplitude?: number;
-  /** Subtle Y drift in pixels (default 4px). */
+  /** Vertical drift in pixels (default 10px). 4px range is invisible. */
   driftYAmplitude?: number;
-  /** Subtle X drift in pixels (default 2px). */
+  /** Horizontal drift in pixels (default 6px). */
   driftXAmplitude?: number;
-  /** Per-element phase offset in frames (default 0). */
+  /**
+   * Per-element phase offset in frames (default 0).
+   * Use `phase: index * 12` so adjacent items don't breathe in sync
+   * (motion-anti-patterns.md § 3).
+   */
   phase?: number;
-  /** Glow opacity oscillation 0..1 (default 0.15). */
+  /** Glow opacity oscillation 0..1 (default 0.30 = ±30%). */
   glowAmplitude?: number;
 };
 
@@ -44,11 +53,11 @@ export const useAmbientMotion = (options: AmbientOptions = {}): AmbientMotionSta
   const { fps } = useVideoConfig();
   const {
     cyclesSec = 4,
-    scaleAmplitude = 0.012,
-    driftYAmplitude = 4,
-    driftXAmplitude = 2,
+    scaleAmplitude = 0.04,
+    driftYAmplitude = 10,
+    driftXAmplitude = 6,
     phase = 0,
-    glowAmplitude = 0.15,
+    glowAmplitude = 0.30,
   } = options;
 
   const cycleFrames = cyclesSec * fps;

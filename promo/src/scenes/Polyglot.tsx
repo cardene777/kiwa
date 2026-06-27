@@ -1,6 +1,7 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
 import { ChapterIndicator } from "../components/ChapterIndicator";
+import { useAmbientMotion } from "../components/useAmbientMotion";
 import { tokens, t } from "../tokens";
 
 type Column = {
@@ -78,8 +79,11 @@ const LanguageColumn: React.FC<{ column: Column; index: number }> = ({ column, i
     config: { damping: 14, mass: 0.7, stiffness: 110 },
   });
   const opacity = interpolate(enter, [0, 1], [0, 1]);
-  const translateY = interpolate(enter, [0, 1], [28, 0]);
-  const scale = interpolate(enter, [0, 1], [0.94, 1]);
+  const entranceY = interpolate(enter, [0, 1], [28, 0]);
+  const entranceScale = interpolate(enter, [0, 1], [0.94, 1]);
+
+  // 4 columns with index*18 phase offset. Wider drift fits the tall columns.
+  const ambient = useAmbientMotion({ phase: index * 18, driftYAmplitude: 8 });
 
   const left = index * (COL_W + GAP);
 
@@ -102,8 +106,8 @@ const LanguageColumn: React.FC<{ column: Column; index: number }> = ({ column, i
           : `2px solid ${accent}`,
         borderRadius: 18,
         opacity: opacity * baseAlpha,
-        transform: `translateY(${translateY}px) scale(${scale})`,
-        boxShadow: column.planned ? "none" : `0 0 30px ${accent}30`,
+        transform: `translate(${ambient.driftX}px, ${entranceY + ambient.driftY}px) scale(${entranceScale * ambient.scale})`,
+        boxShadow: column.planned ? "none" : `0 0 ${30 * ambient.glow}px ${accent}${Math.round(0x44 * ambient.glow).toString(16).padStart(2, "0")}`,
         padding: 28,
         boxSizing: "border-box",
         display: "flex",
