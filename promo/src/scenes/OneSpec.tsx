@@ -1,6 +1,7 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
 import { ChapterIndicator } from "../components/ChapterIndicator";
+import { useAmbientMotion } from "../components/useAmbientMotion";
 import { tokens, t } from "../tokens";
 
 type Ray = {
@@ -95,10 +96,16 @@ const SpecHub: React.FC = () => {
     config: { damping: 16, mass: 1, stiffness: 90 },
   });
   const opacity = interpolate(enter, [0, 1], [0, 1]);
-  const scale = interpolate(enter, [0, 1], [0.6, 1]);
+  const entranceScale = interpolate(enter, [0, 1], [0.6, 1]);
+  // Hub uses a slightly slower / softer breath so it feels like an anchor.
+  const ambient = useAmbientMotion({ scaleAmplitude: 0.025, driftYAmplitude: 6, cyclesSec: 5 });
 
   return (
-    <g style={{ opacity, transform: `scale(${scale})`, transformOrigin: "center" }}>
+    <g style={{
+      opacity,
+      transform: `translate(0, ${ambient.driftY}px) scale(${entranceScale * ambient.scale})`,
+      transformOrigin: "center",
+    }}>
       <circle
         r={HUB_RADIUS - 10}
         fill={`url(#hub-gradient)`}

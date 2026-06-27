@@ -1,6 +1,7 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
 import { ChapterIndicator } from "../components/ChapterIndicator";
+import { useAmbientMotion } from "../components/useAmbientMotion";
 import { tokens, t } from "../tokens";
 
 type Framework = {
@@ -46,8 +47,11 @@ const FrameworkTile: React.FC<{ framework: Framework; index: number }> = ({
   });
 
   const opacity = interpolate(enter, [0, 1], [0, 1]);
-  const translateY = interpolate(enter, [0, 1], [40, 0]);
-  const scale = interpolate(enter, [0, 1], [0.85, 1]);
+  const entranceY = interpolate(enter, [0, 1], [40, 0]);
+  const entranceScale = interpolate(enter, [0, 1], [0.85, 1]);
+
+  // 8 tiles desynced with index*10 frames.
+  const ambient = useAmbientMotion({ phase: index * 10 });
 
   const col = index % COLS;
   const row = Math.floor(index / COLS);
@@ -71,8 +75,8 @@ const FrameworkTile: React.FC<{ framework: Framework; index: number }> = ({
         justifyContent: "center",
         gap: tokens.spacing.sm,
         opacity,
-        transform: `translateY(${translateY}px) scale(${scale})`,
-        boxShadow: `0 0 24px ${framework.color}40`,
+        transform: `translate(${ambient.driftX}px, ${entranceY + ambient.driftY}px) scale(${entranceScale * ambient.scale})`,
+        boxShadow: `0 0 ${24 * ambient.glow}px ${framework.color}${Math.round(0x44 * ambient.glow).toString(16).padStart(2, "0")}`,
       }}
     >
       <div
