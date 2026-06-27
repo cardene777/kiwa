@@ -1,159 +1,241 @@
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { SceneLayout } from "../components/SceneLayout";
 import { ChapterIndicator } from "../components/ChapterIndicator";
+import { useAmbientMotion } from "../components/useAmbientMotion";
 import { tokens, t } from "../tokens";
 
-type Terminal = {
-  title: string;
-  cmd: string;
-  pass: string;
-  color: string;
-};
+// Screencast-style Flow scene (18s):
+//   Step 1 (0-180f / 6s)   ... user types a /kiwa-design invocation,
+//                              SpecCard reveals one markdown line at a time.
+//   Step 2 (180-360f / 6s) ... 5 terminals start, each typing its own
+//                              `/kiwa-* → tool cmd` invocation.
+//   Step 3 (360-540f / 6s) ... PASS lines (✓ 47 tests passed) appear with
+//                              a faint glow per terminal.
+//
+// Ambient motion keeps elements breathing between transitions so the video
+// never goes "static". See ../components/useAmbientMotion.ts.
 
-const terminals: Terminal[] = [
-  {
-    title: "/kiwa-forge → forge test",
-    cmd: "$ forge test",
-    pass: "Ran 47 tests · 47 passed",
-    color: tokens.color.accentContract,
-  },
-  {
-    title: "/kiwa-hardhat → hardhat test",
-    cmd: "$ npx hardhat test",
-    pass: "32 passing · 0 failing",
-    color: tokens.color.accentContract,
-  },
-  {
-    title: "/kiwa-vitest → vitest run",
-    cmd: "$ vitest run",
-    pass: "8 files · 86 tests · all passed",
-    color: tokens.color.accentApi,
-  },
-  {
-    title: "/kiwa-play → playwright test",
-    cmd: "$ playwright test",
-    pass: "23 specs · 4-round zero flake",
-    color: tokens.color.accentE2e,
-  },
-  {
-    title: "kiwa-test-py → pytest",
-    cmd: "$ pytest tests/",
-    pass: "==== 14 passed in 1.2s ====",
-    color: tokens.color.accentPy,
-  },
-];
-
-const FLOW_STEP_OFFSETS = {
-  step1: 0,
-  step2: 130,
-  step3: 360,
-} as const;
+const STEP1_END = 180;
+const STEP2_START = 180;
+const STEP3_START = 360;
 
 const SPEC_LINES = [
-  { text: "# tests/spec/test-spec-tokenGating.md", emphasis: "title" as const },
-  { text: "", emphasis: "blank" as const },
-  { text: "| TC ID | mode | observation | boundary | P |", emphasis: "header" as const },
-  { text: "|-------|------|-------------|----------|---|", emphasis: "rule" as const },
-  { text: "| T-001 | render | balance == 1 | 0 / 1 / max | P0 |", emphasis: "row" as const },
-  { text: "| T-002 | interaction | mint click | gas budget | P0 |", emphasis: "row" as const },
-  { text: "| T-003 | snapshot | gated DOM | logged-in / out | P1 |", emphasis: "row" as const },
-  { text: "", emphasis: "blank" as const },
-  { text: "✓ 9 columns × 47 rows generated", emphasis: "complete" as const },
+  "# tests/spec/test-spec-tokenGating.md",
+  "",
+  "| TC ID | mode | observation | boundary | P |",
+  "|-------|------|-------------|----------|---|",
+  "| T-001 | render | balance == 1 | 0 / 1 / max | P0 |",
+  "| T-002 | interaction | mint click | gas budget | P0 |",
+  "| T-003 | snapshot | gated DOM | logged-in / out | P1 |",
+  "",
+  "✓ 9 columns × 47 rows generated",
 ];
+
+type Term = {
+  invocation: string;
+  cmd: string;
+  outLines: string[];
+  color: string;
+  invokeStart: number;
+  cmdStart: number;
+  outStart: number;
+};
+
+const terminals: Term[] = [
+  {
+    invocation: "/kiwa-forge --spec tokenGating",
+    cmd: "$ forge test --gas-report",
+    outLines: [
+      "[PASS] testMintHappyPath() (gas: 84218)",
+      "[PASS] testMintOnlyOwner() (gas: 30142)",
+      "[PASS] testTransferFrom() (gas: 56012)",
+      "Ran 47 tests · 47 passed",
+    ],
+    color: tokens.color.accentContract,
+    invokeStart: STEP2_START,
+    cmdStart: STEP2_START + 60,
+    outStart: STEP3_START,
+  },
+  {
+    invocation: "/kiwa-hardhat --spec tokenGating",
+    cmd: "$ npx hardhat test",
+    outLines: [
+      "  TokenGating",
+      "    ✓ should mint to owner (412ms)",
+      "    ✓ should revert non-owner",
+      "32 passing · 0 failing",
+    ],
+    color: tokens.color.accentContract,
+    invokeStart: STEP2_START + 12,
+    cmdStart: STEP2_START + 72,
+    outStart: STEP3_START + 12,
+  },
+  {
+    invocation: "/kiwa-vitest --spec tokenGating.ui",
+    cmd: "$ vitest run",
+    outLines: [
+      "✓ src/Counter.test.tsx (12 tests) 240ms",
+      "✓ src/Gated.test.tsx (8 tests) 130ms",
+      "Test Files  4 passed (4)",
+      "Tests  86 passed (86)",
+    ],
+    color: tokens.color.accentApi,
+    invokeStart: STEP2_START + 24,
+    cmdStart: STEP2_START + 84,
+    outStart: STEP3_START + 24,
+  },
+  {
+    invocation: "/kiwa-play --spec tokenGating.e2e",
+    cmd: "$ playwright test",
+    outLines: [
+      "Running 23 tests using 4 workers",
+      "  23 passed (4.7s)",
+      "  round 1/4 zero flake",
+      "  ALL 4 rounds zero flake",
+    ],
+    color: tokens.color.accentE2e,
+    invokeStart: STEP2_START + 36,
+    cmdStart: STEP2_START + 96,
+    outStart: STEP3_START + 36,
+  },
+  {
+    invocation: "kiwa-test-py --spec tokenGating",
+    cmd: "$ pytest tests/",
+    outLines: [
+      "test_mint.py ........ [ 57%]",
+      "test_gated.py ..... [100%]",
+      "==== 14 passed in 1.2s ====",
+      "",
+    ],
+    color: tokens.color.accentPy,
+    invokeStart: STEP2_START + 48,
+    cmdStart: STEP2_START + 108,
+    outStart: STEP3_START + 48,
+  },
+];
+
+/**
+ * Reveals `text` one character at a time at `frame` (relative).
+ * `charsPerFrame = 2` means roughly 60 chars/second at 30fps.
+ */
+const typeWriter = (
+  text: string,
+  frame: number,
+  startFrame: number,
+  charsPerFrame = 2,
+): string => {
+  const local = frame - startFrame;
+  if (local <= 0) return "";
+  const max = Math.min(text.length, Math.floor(local * charsPerFrame));
+  return text.slice(0, max);
+};
+
+const Caret: React.FC<{ color?: string }> = ({ color = tokens.color.primary }) => {
+  const frame = useCurrentFrame();
+  const blink = Math.floor(frame / 15) % 2 === 0 ? 1 : 0.3;
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        width: 11,
+        height: 22,
+        marginLeft: 2,
+        marginBottom: -3,
+        background: color,
+        opacity: blink,
+        verticalAlign: "middle",
+      }}
+    />
+  );
+};
 
 const SpecCard: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const ambient = useAmbientMotion({ scaleAmplitude: 0.006, driftYAmplitude: 3 });
 
-  const enter = spring({
-    frame: frame - FLOW_STEP_OFFSETS.step1,
-    fps,
-    from: 0,
-    to: 1,
-    config: { damping: 14, mass: 0.8, stiffness: 95 },
+  const enter = interpolate(frame, [0, 16], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
   });
-  const opacity = interpolate(enter, [0, 1], [0, 1]);
-  const translateY = interpolate(enter, [0, 1], [16, 0]);
+  const opacity = enter;
+  const translateY = (1 - enter) * 12;
 
-  const exitFrame = frame - (FLOW_STEP_OFFSETS.step2 + 60);
-  const exitOpacity = interpolate(exitFrame, [0, 24], [1, 0.4], {
+  // Fade out toward Step 2 end so terminals get the focus.
+  const exit = interpolate(frame, [STEP2_START + 80, STEP2_START + 120], [1, 0.35], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
+  const invocationText = "/kiwa-design --feature tokenGating";
+  const typedInvocation = typeWriter(invocationText, frame, 4, 2);
+  const invocationDone = typedInvocation.length >= invocationText.length;
+
+  // After invocation finishes, start revealing spec lines.
+  const specStart = 4 + invocationText.length / 2 + 20;
+
   return (
     <div
       style={{
-        width: 760,
-        background: `linear-gradient(135deg, ${tokens.color.primary}18 0%, ${tokens.color.primary}03 100%)`,
+        width: 800,
+        background: tokens.color.bg,
         border: `2px solid ${tokens.color.primary}`,
         borderRadius: 14,
-        padding: "22px 28px",
+        padding: "20px 26px",
         boxSizing: "border-box",
-        opacity: opacity * exitOpacity,
-        transform: `translateY(${translateY}px)`,
-        boxShadow: `0 0 28px ${tokens.color.primary}40`,
+        opacity: opacity * exit,
+        transform: `translate(${ambient.driftX}px, ${translateY + ambient.driftY}px) scale(${ambient.scale})`,
+        boxShadow: `0 0 ${28 * ambient.glow}px ${tokens.color.primary}${Math.round(0x55 * ambient.glow).toString(16).padStart(2, "0")}`,
       }}
     >
       <div
         style={{
           fontFamily: tokens.font.mono,
-          fontSize: 20,
-          fontWeight: 600,
-          color: tokens.color.primary,
-          letterSpacing: 1,
-          marginBottom: 10,
+          fontSize: 17,
+          lineHeight: 1.55,
+          color: tokens.color.white,
+          minHeight: 28,
         }}
       >
-        {t().flowStep1}
+        <span style={{ color: tokens.color.textSubtle }}>$ </span>
+        <span style={{ color: tokens.color.primary, fontWeight: 600 }}>{typedInvocation}</span>
+        {!invocationDone && <Caret />}
       </div>
       <div
         style={{
+          marginTop: 14,
           fontFamily: tokens.font.mono,
           fontSize: 14,
           lineHeight: 1.55,
         }}
       >
         {SPEC_LINES.map((line, idx) => {
-          const lineFrame = frame - FLOW_STEP_OFFSETS.step1 - 12 - idx * 6;
-          const lineOpacity = interpolate(lineFrame, [0, 10], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          });
-          const tx = interpolate(lineFrame, [0, 10], [-10, 0], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          });
-
+          const lineStart = specStart + idx * 12;
+          const typed = typeWriter(line, frame, lineStart, 3);
+          const isTyping = typed.length > 0 && typed.length < line.length;
           let color: string = tokens.color.textMuted;
           let weight = 400;
-          if (line.emphasis === "title") {
-            color = tokens.color.textSubtle;
-          } else if (line.emphasis === "header") {
+          if (line.startsWith("#")) color = tokens.color.textSubtle;
+          else if (line.startsWith("| TC")) {
             color = tokens.color.white;
             weight = 700;
-          } else if (line.emphasis === "rule") {
-            color = `${tokens.color.primary}80`;
-          } else if (line.emphasis === "row") {
-            color = tokens.color.white;
-          } else if (line.emphasis === "complete") {
+          } else if (line.startsWith("|---")) color = `${tokens.color.primary}aa`;
+          else if (line.startsWith("|")) color = tokens.color.white;
+          else if (line.startsWith("✓")) {
             color = tokens.color.primary;
             weight = 700;
           }
-
           return (
             <div
               key={idx}
               style={{
                 whiteSpace: "pre",
-                opacity: lineOpacity,
-                transform: `translateX(${tx}px)`,
                 color,
                 fontWeight: weight,
-                minHeight: line.emphasis === "blank" ? 8 : 22,
+                minHeight: line === "" ? 8 : 22,
               }}
             >
-              {line.text || " "}
+              {typed || " "}
+              {isTyping && <Caret color={color} />}
             </div>
           );
         })}
@@ -162,37 +244,32 @@ const SpecCard: React.FC = () => {
   );
 };
 
-const TerminalCard: React.FC<{ terminal: Terminal; index: number; total: number }> = ({
-  terminal,
+const TerminalCard: React.FC<{ term: Term; index: number; total: number }> = ({
+  term,
   index,
   total,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const ambient = useAmbientMotion({
+    phase: index * 14,
+    scaleAmplitude: 0.008,
+    driftYAmplitude: 3,
+  });
 
-  const stagger = index * 5;
   const enter = spring({
-    frame: frame - FLOW_STEP_OFFSETS.step2 - stagger,
+    frame: frame - term.invokeStart + 8,
     fps,
     from: 0,
     to: 1,
     config: { damping: 14, mass: 0.7, stiffness: 100 },
   });
   const opacity = interpolate(enter, [0, 1], [0, 1]);
-  const translateY = interpolate(enter, [0, 1], [24, 0]);
+  const translateY = interpolate(enter, [0, 1], [18, 0]);
 
-  const passReveal = spring({
-    frame: frame - FLOW_STEP_OFFSETS.step3 - stagger,
-    fps,
-    from: 0,
-    to: 1,
-    config: { damping: 14, mass: 0.6, stiffness: 110 },
-  });
-  const passOpacity = interpolate(passReveal, [0, 1], [0, 1]);
-
-  // Layout: top row 3 terminals, bottom row 2 (centered) — total 5
+  // Layout: top row 3 + bottom row 2.
   const COL_W = 360;
-  const COL_H = 200;
+  const COL_H = 240;
   const GAP = 24;
   const isTop = index < 3;
   const row = isTop ? 0 : 1;
@@ -203,6 +280,10 @@ const TerminalCard: React.FC<{ terminal: Terminal; index: number; total: number 
   const left = leftOffset + col * (COL_W + GAP);
   const top = row * (COL_H + GAP);
 
+  const typedInvocation = typeWriter(term.invocation, frame, term.invokeStart, 3);
+  const typedCmd = typeWriter(term.cmd, frame, term.cmdStart, 4);
+  const cmdDone = typedCmd.length >= term.cmd.length;
+
   return (
     <div
       style={{
@@ -211,71 +292,76 @@ const TerminalCard: React.FC<{ terminal: Terminal; index: number; total: number 
         top,
         width: COL_W,
         height: COL_H,
-        transform: `translateX(-50%) translateY(${translateY}px)`,
+        transform: `translateX(-50%) translateY(${translateY + ambient.driftY}px) scale(${ambient.scale})`,
         opacity,
         background: tokens.color.bg,
-        border: `2px solid ${terminal.color}`,
+        border: `2px solid ${term.color}`,
         borderRadius: 10,
-        boxShadow: `0 0 22px ${terminal.color}40`,
-        padding: 18,
+        boxShadow: `0 0 ${22 * ambient.glow}px ${term.color}${Math.round(0x55 * ambient.glow).toString(16).padStart(2, "0")}`,
+        padding: 14,
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
-        gap: 10,
+        gap: 6,
       }}
     >
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
+          fontFamily: tokens.font.mono,
+          fontSize: 13,
+          color: term.color,
+          fontWeight: 600,
+          letterSpacing: 0.5,
+          minHeight: 18,
         }}
       >
-        <div
-          style={{
-            fontFamily: tokens.font.mono,
-            fontSize: 16,
-            fontWeight: 600,
-            color: terminal.color,
-            letterSpacing: 1,
-          }}
-        >
-          {terminal.title}
-        </div>
-        <div
-          style={{
-            fontFamily: tokens.font.mono,
-            fontSize: 12,
-            color: tokens.color.textSubtle,
-            background: tokens.color.bgGradientEnd,
-            padding: "2px 8px",
-            borderRadius: 4,
-          }}
-        >
-          term
-        </div>
+        <span style={{ color: tokens.color.textSubtle }}>{"> "}</span>
+        {typedInvocation}
+        {typedInvocation.length > 0 && typedInvocation.length < term.invocation.length && (
+          <Caret color={term.color} />
+        )}
       </div>
       <div
         style={{
           fontFamily: tokens.font.mono,
-          fontSize: 17,
+          fontSize: 14,
           color: tokens.color.white,
-          letterSpacing: 0.3,
+          fontWeight: 600,
+          minHeight: 20,
         }}
       >
-        {terminal.cmd}
+        {typedCmd}
+        {typedCmd.length > 0 && !cmdDone && <Caret />}
       </div>
       <div
         style={{
+          flex: 1,
           fontFamily: tokens.font.mono,
-          fontSize: 16,
-          color: tokens.color.primary,
-          opacity: passOpacity,
-          letterSpacing: 0.3,
-          marginTop: "auto",
+          fontSize: 12,
+          lineHeight: 1.45,
+          color: tokens.color.textMuted,
         }}
       >
-        ✓ {terminal.pass}
+        {term.outLines.map((line, i) => {
+          const lineStart = term.outStart + i * 14;
+          const typed = typeWriter(line, frame, lineStart, 4);
+          const isPass = line.includes("passed") || line.startsWith("✓") || line.includes("==");
+          const isTyping = typed.length > 0 && typed.length < line.length;
+          return (
+            <div
+              key={i}
+              style={{
+                whiteSpace: "pre",
+                color: isPass && typed.length === line.length ? term.color : tokens.color.textMuted,
+                fontWeight: isPass ? 700 : 400,
+                minHeight: 16,
+              }}
+            >
+              {typed || " "}
+              {isTyping && <Caret color={tokens.color.textMuted} />}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -285,30 +371,15 @@ export const Flow: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const step1Visible = frame >= FLOW_STEP_OFFSETS.step1 && frame < FLOW_STEP_OFFSETS.step2 + 100;
-  const step2Visible = frame >= FLOW_STEP_OFFSETS.step2 - 10;
-  const step3Visible = frame >= FLOW_STEP_OFFSETS.step3 - 10;
-
-  void step1Visible;
-
-  const step2Caption = step2Visible
-    ? spring({
-        frame: frame - FLOW_STEP_OFFSETS.step2,
-        fps,
-        from: 0,
-        to: 1,
-        config: { damping: 14, mass: 0.8, stiffness: 100 },
-      })
-    : 0;
-  const step3Caption = step3Visible
-    ? spring({
-        frame: frame - FLOW_STEP_OFFSETS.step3 - 30,
-        fps,
-        from: 0,
-        to: 1,
-        config: { damping: 14, mass: 0.8, stiffness: 100 },
-      })
-    : 0;
+  const step3CaptionEnter = spring({
+    frame: frame - STEP3_START - 90,
+    fps,
+    from: 0,
+    to: 1,
+    config: { damping: 14, mass: 0.9, stiffness: 100 },
+  });
+  const captionOpacity = interpolate(step3CaptionEnter, [0, 1], [0, 1]);
+  const captionY = interpolate(step3CaptionEnter, [0, 1], [16, 0]);
 
   return (
     <>
@@ -316,63 +387,64 @@ export const Flow: React.FC = () => {
         eyebrow={t().eyebrowFlow}
         headline={t().headlineFlow}
       >
-      <div
-        style={{
-          position: "relative",
-          width: 1400,
-          height: 660,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        {/* Step 1 — Spec card centered */}
         <div
           style={{
-            position: "absolute",
-            top: 20,
-            left: "50%",
-            transform: "translateX(-50%)",
+            position: "relative",
+            width: 1400,
+            height: 720,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
-          <SpecCard />
-        </div>
+          {/* Step 1: spec card centered at the top */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          >
+            <SpecCard />
+          </div>
 
-        {/* Step 2 — Parallel terminals */}
-        <div
-          style={{
-            position: "absolute",
-            top: 200,
-            left: 0,
-            right: 0,
-            height: 460,
-            opacity: step2Caption,
-          }}
-        >
-          {terminals.map((term, i) => (
-            <TerminalCard key={term.title} terminal={term} index={i} total={terminals.length} />
-          ))}
-        </div>
+          {/* Step 2-3: parallel terminals */}
+          <div
+            style={{
+              position: "absolute",
+              top: 200,
+              left: 0,
+              right: 0,
+              bottom: 50,
+            }}
+          >
+            {terminals.map((term, i) => (
+              <TerminalCard key={term.invocation} term={term} index={i} total={terminals.length} />
+            ))}
+          </div>
 
-        {/* Step 3 — Caption */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: -20,
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            fontFamily: tokens.font.sans,
-            fontSize: 30,
-            fontWeight: 700,
-            color: tokens.color.primary,
-            letterSpacing: 0.5,
-            opacity: step3Caption,
-          }}
-        >
-          {t().flowStep3}
+          {/* Final caption */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              textAlign: "center",
+              fontFamily: tokens.font.sans,
+              fontSize: 28,
+              fontWeight: 700,
+              color: tokens.color.primary,
+              letterSpacing: 1,
+              opacity: captionOpacity,
+              transform: `translateY(${captionY}px)`,
+              textShadow: `0 0 16px ${tokens.color.primary}90`,
+            }}
+          >
+            {t().flowStep3}
+          </div>
         </div>
-      </div>
       </SceneLayout>
       <ChapterIndicator chapter={4} name="Proof" />
     </>
