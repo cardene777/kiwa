@@ -28,9 +28,9 @@ One Layer 1 spec → contract / API / component / e2e / a11y / visual tests in p
 </div>
 
 <p align="center">
-  <img src="./assets/kiwa-promo-en.gif" alt="kiwa 80s overview — Layer 1 spec hub, 6 test surfaces, TypeScript / Python / Solidity polyglot stacks, Coverage + Mutation gates" width="880" />
+  <img src="./assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps: design → gen → run → review → patch → coverage" width="880" />
   <br />
-  <sub><a href="./assets/kiwa-promo-en.mp4">▶ Watch the full-quality MP4 (7.0 MB, 1920×1080, h264)</a></sub>
+  <sub><a href="./assets/kiwa-promo-en.mp4">▶ Watch the full-quality MP4 (2.9 MB, 1920×1080, h264)</a></sub>
 </p>
 
 ---
