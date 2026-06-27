@@ -1,69 +1,33 @@
 import { Series } from "remotion";
-import { Opening } from "./Opening";
-import { Problem } from "./Problem";
-import { OneSpec } from "./OneSpec";
-import { TestSurfaces } from "./TestSurfaces";
-import { FrameworkMatrix } from "./FrameworkMatrix";
-import { Polyglot } from "./Polyglot";
-import { SkillChain } from "./SkillChain";
-import { Flow } from "./Flow";
-import { QualityGates } from "./QualityGates";
-import { PackagesGrid } from "./PackagesGrid";
-import { Install } from "./Install";
-import { Outro } from "./Outro";
+import { V8Hook } from "./V8Hook";
+import { V8Idea } from "./V8Idea";
+import { V8Scale } from "./V8Scale";
+import { V8Setup } from "./V8Setup";
+import { V8Generate } from "./V8Generate";
+import { V8Pass } from "./V8Pass";
 import { tokens } from "../tokens";
-
-// v5 storyboard (Ch.1 → Ch.5, 100s @ 30fps)
-//   Ch.1 Hook (8s)
-//     Opening (4s) + Problem (4s)
-//   Ch.2 Concept (10s)
-//     OneSpec (10s)
-//   Ch.3 Coverage (30s)
-//     TestSurfaces (16s) + FrameworkMatrix (6s) + Polyglot (8s)
-//   Ch.4 Proof (33s)
-//     SkillChain (7s) + Flow (16s) + QualityGates (10s)
-//   Ch.5 CTA (19s)
-//     PackagesGrid (7s) + Install (10s) + Outro (2s)
 
 export const KiwaPromo: React.FC = () => {
   const f = tokens.fps;
   return (
     <Series>
-      <Series.Sequence durationInFrames={4 * f}>
-        <Opening />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={4 * f}>
-        <Problem />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={10 * f}>
-        <OneSpec />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={16 * f}>
-        <TestSurfaces />
-      </Series.Sequence>
       <Series.Sequence durationInFrames={6 * f}>
-        <FrameworkMatrix />
+        <V8Hook />
       </Series.Sequence>
       <Series.Sequence durationInFrames={8 * f}>
-        <Polyglot />
+        <V8Idea />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={7 * f}>
-        <SkillChain />
+      <Series.Sequence durationInFrames={11 * f}>
+        <V8Scale />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={16 * f}>
-        <Flow />
+      <Series.Sequence durationInFrames={8 * f}>
+        <V8Setup />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={10 * f}>
-        <QualityGates />
+      <Series.Sequence durationInFrames={12 * f}>
+        <V8Generate />
       </Series.Sequence>
-      <Series.Sequence durationInFrames={7 * f}>
-        <PackagesGrid />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={10 * f}>
-        <Install />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={2 * f}>
-        <Outro />
+      <Series.Sequence durationInFrames={5 * f}>
+        <V8Pass />
       </Series.Sequence>
     </Series>
   );
