@@ -47,7 +47,7 @@ const THRESHOLDS = {
 };
 
 const PKG_DIRS = {
-  '@kiwa-test/core': 'packages/spec',
+  '@kiwa-test/core': 'packages/core',
   '@kiwa-test/api': 'packages/api',
   '@kiwa-test/ui': 'packages/ui',
   '@kiwa-test/data': 'packages/data',
@@ -55,7 +55,7 @@ const PKG_DIRS = {
   '@kiwa-test/observability': 'packages/observability',
   '@kiwa-test/e2e': 'packages/e2e',
   '@kiwa-test/cli': 'packages/cli',
-  '@kiwa-test/dapp': 'packages/core',
+  '@kiwa-test/dapp': 'packages/dapp',
   '@kiwa-test/a11y': 'packages/a11y',
   '@kiwa-test/visual': 'packages/visual',
 };
