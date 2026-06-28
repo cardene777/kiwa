@@ -26,6 +26,7 @@ const FULL = {
   '@kiwa-test/dapp': { lines: 98, branches: 90, functions: 100, statements: 98 },
   '@kiwa-test/a11y': { lines: 100, branches: 95, functions: 100, statements: 100 },
   '@kiwa-test/visual': { lines: 100, branches: 85, functions: 100, statements: 100 },
+  '@kiwa-test/nextjs': { lines: 98, branches: 94, functions: 87, statements: 98 },
 };
 
 describe('scripts/post-coverage-diff.mjs', () => {
