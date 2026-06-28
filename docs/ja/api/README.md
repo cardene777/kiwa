@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](../../en/api/README.md) • [🇯🇵 日本語](./README.md)
 
-`@kiwa-test/core` から export される主要 API。
+`@kiwa-test/dapp` から export される主要 API。
 
 ## Fixture / anvil 起動
 

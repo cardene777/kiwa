@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa-test/spec';
+import type { TestEnvBase } from '@kiwa-test/core';
 
 export interface SetupCliEnvOptions {
   /** Optional initial files seeded into the isolated tempdir before tests run */

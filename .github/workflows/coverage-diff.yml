@@ -42,23 +42,23 @@ jobs:
           version: stable
 
       - name: Build (spec first)
-        run: pnpm -F @kiwa-test/spec build
+        run: pnpm -F @kiwa-test/core build
 
       - name: Capture baseline from main
         run: |
           git fetch origin main:_main_for_diff
           git checkout _main_for_diff
           pnpm install --frozen-lockfile
-          pnpm -F @kiwa-test/spec build
-          pnpm -F @kiwa-test/spec -F @kiwa-test/api -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/cli -F @kiwa-test/core -F @kiwa-test/ui -F @kiwa-test/e2e --no-bail run test:cov || true
+          pnpm -F @kiwa-test/core build
+          pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/cli -F @kiwa-test/dapp -F @kiwa-test/ui -F @kiwa-test/e2e --no-bail run test:cov || true
           node scripts/post-coverage-diff.mjs --capture > /tmp/coverage-baseline.json
           git checkout -
 
       - name: Re-run coverage on PR head
         run: |
           pnpm install --frozen-lockfile
-          pnpm -F @kiwa-test/spec build
-          pnpm -F @kiwa-test/spec -F @kiwa-test/api -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/cli -F @kiwa-test/core -F @kiwa-test/ui -F @kiwa-test/e2e --no-bail run test:cov
+          pnpm -F @kiwa-test/core build
+          pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/cli -F @kiwa-test/dapp -F @kiwa-test/ui -F @kiwa-test/e2e --no-bail run test:cov
 
       - name: Build coverage diff markdown
         run: node scripts/post-coverage-diff.mjs --baseline /tmp/coverage-baseline.json > /tmp/coverage-diff.md

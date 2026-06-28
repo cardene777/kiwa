@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/spec -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/e2e -F @kiwa-test/observability build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests/unit-todo.test.js .vitest-dist/tests/api-todo.test.js --environment node && vitest run .vitest-dist/tests/ui-todo-form.test.js --environment jsdom && vitest run .vitest-dist/tests/e2e-todo.test.js .vitest-dist/tests/observability-dashboard.test.js --environment node --testTimeout 30000 && vitest run .vitest-dist/tests/observability-roundtrip.test.js --environment node --testTimeout 60000",
+    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/e2e -F @kiwa-test/observability build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests/unit-todo.test.js .vitest-dist/tests/api-todo.test.js --environment node && vitest run .vitest-dist/tests/ui-todo-form.test.js --environment jsdom && vitest run .vitest-dist/tests/e2e-todo.test.js .vitest-dist/tests/observability-dashboard.test.js --environment node --testTimeout 30000 && vitest run .vitest-dist/tests/observability-roundtrip.test.js --environment node --testTimeout 60000",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@kiwa-test/api": "workspace:*",
     "@kiwa-test/e2e": "workspace:*",
     "@kiwa-test/observability": "workspace:*",
-    "@kiwa-test/spec": "workspace:*",
+    "@kiwa-test/core": "workspace:*",
     "@kiwa-test/ui": "workspace:*"
   },
   "devDependencies": {

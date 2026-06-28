@@ -62,7 +62,7 @@ export default defineConfig({
 
 ### 4. spec から fixture を import
 
-通常 `@kiwa-test/core` の `dappE2eTest` をそのまま使うところを、 globalSetup 起動済 anvil を共有するため `tests/fixture.ts` 経由に切り替える。
+通常 `@kiwa-test/dapp` の `dappE2eTest` をそのまま使うところを、 globalSetup 起動済 anvil を共有するため `tests/fixture.ts` 経由に切り替える。
 
 ```ts
 import { test, expect } from './fixture';

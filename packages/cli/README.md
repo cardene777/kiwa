@@ -8,7 +8,7 @@
 
 CLI for [kiwa](https://github.com/cardene777/kiwa) with `init` and `doctor` commands.
 
-`@kiwa-test/cli` scaffolds Playwright-based dApp E2E tests that use `@kiwa-test/core`, and provides a quick prerequisite check for local setup.
+`@kiwa-test/cli` scaffolds Playwright-based dApp E2E tests that use `@kiwa-test/dapp`, and provides a quick prerequisite check for local setup.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview â€” generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this CLI scaffolds the dApp e2e setup)" width="640" />
@@ -43,7 +43,7 @@ Use kiwa with Claude Code? Install the matching skill chain in **one command** â
 
 ### `kiwa init`
 
-Scaffolds Playwright E2E files into an existing dApp project and wires the generated test to `@kiwa-test/core`.
+Scaffolds Playwright E2E files into an existing dApp project and wires the generated test to `@kiwa-test/dapp`.
 
 ```bash
 pnpm dlx @kiwa-test/cli init
@@ -76,7 +76,7 @@ Flags: `--chain-id <n>` (default 31337), `--port <n>` (default: random free port
 
 - [GitHub repository](https://github.com/cardene777/kiwa)
 - [Full documentation](https://github.com/cardene777/kiwa/tree/main/docs/en)
-- [@kiwa-test/core](https://www.npmjs.com/package/@kiwa-test/core) - runtime fixture
+- [@kiwa-test/dapp](https://www.npmjs.com/package/@kiwa-test/dapp) - runtime fixture
 
 ## Author
 

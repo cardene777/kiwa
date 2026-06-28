@@ -1,0 +1,93 @@
+{
+  "name": "@kiwa-test/dapp",
+  "version": "1.0.0",
+  "description": "Headless E2E test fixture for dApps on anvil forks (Playwright + viem). Renamed from @kiwa-test/core in v1.0.",
+  "license": "MIT",
+  "author": {
+    "name": "cardene",
+    "url": "https://github.com/cardene777"
+  },
+  "keywords": [
+    "dapp",
+    "ethereum",
+    "e2e",
+    "playwright",
+    "anvil",
+    "viem",
+    "testing",
+    "fixture"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cardene777/kiwa.git",
+    "directory": "packages/dapp"
+  },
+  "homepage": "https://github.com/cardene777/kiwa#readme",
+  "bugs": {
+    "url": "https://github.com/cardene777/kiwa/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./vitest": {
+      "import": {
+        "types": "./dist/vitest.d.ts",
+        "default": "./dist/vitest.js"
+      },
+      "require": {
+        "types": "./dist/vitest.d.cts",
+        "default": "./dist/vitest.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.ja.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 15000",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 15000 --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/anvil-default-keys.js' --coverage.include='.vitest-dist/src/anvil-pool.js' --coverage.include='.vitest-dist/src/eip1271.js' --coverage.include='.vitest-dist/src/index.js' --coverage.include='.vitest-dist/src/injector-script.js' --coverage.include='.vitest-dist/src/types.js' --coverage.include='.vitest-dist/src/wait-for-wallet-connected.js' --coverage.exclude='.vitest-dist/tests/**'",
+    "test:mutation": "stryker run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "zod": "^3.23.8"
+  },
+  "peerDependencies": {
+    "@playwright/test": "^1.49.0",
+    "viem": "^2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@stryker-mutator/core": "^8.7.1",
+    "@stryker-mutator/vitest-runner": "^8.7.1",
+    "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "viem": "^2.21.0"
+  }
+}

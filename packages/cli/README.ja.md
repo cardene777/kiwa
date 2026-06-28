@@ -8,7 +8,7 @@
 
 [kiwa](https://github.com/cardene777/kiwa) の CLI、 `init` / `doctor` の 2 コマンドを提供。
 
-`@kiwa-test/cli` は `@kiwa-test/core` を使う Playwright ベース dApp E2E test を scaffold し、 ローカル環境の前提条件 check も行う。
+`@kiwa-test/cli` は `@kiwa-test/dapp` を使う Playwright ベース dApp E2E test を scaffold し、 ローカル環境の前提条件 check も行う。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 127 秒概要 — Web (Next.js) / Contract (Solidity) / dApp (Playwright) の 3 カテゴリで仕様書生成→テスト生成→実行→レビュー→修正→カバレッジ確認の 6 step を完結 (本 CLI は dApp e2e 経路を scaffold)" width="640" />
@@ -43,7 +43,7 @@ Claude Code を併用するなら、 kiwa の skill chain を **1 コマンド�
 
 ### `kiwa init`
 
-既存 dApp project に Playwright E2E file を scaffold し、 生成された test を `@kiwa-test/core` と連携させる。
+既存 dApp project に Playwright E2E file を scaffold し、 生成された test を `@kiwa-test/dapp` と連携させる。
 
 ```bash
 pnpm dlx @kiwa-test/cli init
@@ -65,7 +65,7 @@ pnpm dlx @kiwa-test/cli doctor
 
 - [GitHub repository](https://github.com/cardene777/kiwa)
 - [Full documentation (ja)](https://github.com/cardene777/kiwa/tree/main/docs/ja)
-- [@kiwa-test/core](https://www.npmjs.com/package/@kiwa-test/core) — runtime fixture
+- [@kiwa-test/dapp](https://www.npmjs.com/package/@kiwa-test/dapp) — runtime fixture
 
 ## 作者
 

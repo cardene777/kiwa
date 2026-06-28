@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/visual",
-  "version": "0.1.3",
+  "version": "1.0.0",
   "description": "Visual regression test adapter for kiwa — pixelmatch + PNG diff with baseline + actual snapshot management",
   "license": "MIT",
   "author": {
@@ -59,7 +59,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/spec": "workspace:*"
+    "@kiwa-test/core": "workspace:*"
   },
   "peerDependencies": {
     "pixelmatch": "^7",

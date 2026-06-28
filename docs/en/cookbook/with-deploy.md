@@ -62,7 +62,7 @@ export default defineConfig({
 
 ### 4. Import the fixture from your spec
 
-Instead of using `dappE2eTest` from `@kiwa-test/core` directly, route through `tests/fixture.ts` so the spec shares the globalSetup anvil.
+Instead of using `dappE2eTest` from `@kiwa-test/dapp` directly, route through `tests/fixture.ts` so the spec shares the globalSetup anvil.
 
 ```ts
 import { test, expect } from './fixture';

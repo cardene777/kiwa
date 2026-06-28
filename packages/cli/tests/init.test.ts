@@ -67,7 +67,7 @@ describe('runInit', () => {
     expect(fs.existsSync(path.join(tempDir, 'e2e', 'connect.spec.ts'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'playwright.config.ts'))).toBe(true);
     expect(fs.existsSync(path.join(tempDir, 'tsconfig.json'))).toBe(true);
-    expect(readFile(tempDir, 'e2e/connect.spec.ts')).toContain("from '@kiwa-test/core'");
+    expect(readFile(tempDir, 'e2e/connect.spec.ts')).toContain("from '@kiwa-test/dapp'");
     expect(readFile(tempDir, 'playwright.config.ts')).toContain('defineConfig');
     expect(readFile(tempDir, 'tsconfig.json')).toContain('"strict": true');
     expect(result.created).toEqual(
@@ -96,7 +96,7 @@ describe('runInit', () => {
     // Then
     expect(packageJson.scripts['test:e2e']).toBe('playwright test');
     expect(packageJson.scripts.build).toBe('echo build');
-    expect(packageJson.devDependencies['@kiwa-test/core']).toBe('^0.1.0');
+    expect(packageJson.devDependencies['@kiwa-test/dapp']).toBe('^0.1.0');
     expect(packageJson.devDependencies['@playwright/test']).toBe('^1.49.0');
     expect(packageJson.devDependencies.viem).toBe('^2');
     expect(packageJson.devDependencies.typescript).toBe('^5.0.0');
@@ -136,7 +136,7 @@ describe('runInit', () => {
     expect(() => runInit({ force: true, cwd: tempDir })).not.toThrow();
 
     // Then
-    expect(readFile(tempDir, 'e2e/connect.spec.ts')).toContain("from '@kiwa-test/core'");
+    expect(readFile(tempDir, 'e2e/connect.spec.ts')).toContain("from '@kiwa-test/dapp'");
     expect(readFile(tempDir, 'playwright.config.ts')).toContain('defineConfig');
   });
 
@@ -226,7 +226,7 @@ describe('runInit', () => {
     // Then
     expect(packageJson.devDependencies['@playwright/test']).toBe('^1.48.0');
     expect(packageJson.devDependencies.viem).toBe('^2.21.0');
-    expect(packageJson.devDependencies['@kiwa-test/core']).toBe('^0.1.0');
+    expect(packageJson.devDependencies['@kiwa-test/dapp']).toBe('^0.1.0');
   });
 
   it('T-INIT-009 package.json が invalid JSON の場合は rollback して created file を残さない', async () => {
@@ -350,10 +350,10 @@ describe('runInit', () => {
 
     const prepareEnv = readFile(tempDir, 'tests/prepare-env.ts');
     expect(prepareEnv).toContain("const FOUNDRY_PATH = '../contract';");
-    expect(prepareEnv).toContain("import { startAnvil, deployContract } from '@kiwa-test/core';");
+    expect(prepareEnv).toContain("import { startAnvil, deployContract } from '@kiwa-test/dapp';");
 
     const fixture = readFile(tempDir, 'tests/fixture.ts');
-    expect(fixture).toContain("import { dappE2eTest as baseTest } from '@kiwa-test/core';");
+    expect(fixture).toContain("import { dappE2eTest as baseTest } from '@kiwa-test/dapp';");
   });
 
   it('T-INIT-016 --with-deploy 既存 tests/prepare-env.ts と衝突したら InitConflictError', async () => {
@@ -486,12 +486,12 @@ describe('runInit', () => {
     seedPackageJson(tempDir, {
       name: 'host',
       version: '1.0.0',
-      devDependencies: { '@kiwa-test/core': '1.2.3' },
+      devDependencies: { '@kiwa-test/dapp': '1.2.3' },
     });
     const { runInit } = await loadInitModule();
     runInit({ force: false, cwd: tempDir });
     const pkg = readPackageJson(tempDir);
-    expect(pkg.devDependencies['@kiwa-test/core']).toBe('1.2.3');
+    expect(pkg.devDependencies['@kiwa-test/dapp']).toBe('1.2.3');
   });
 
   it('T-INIT-032 indent detection - tab', async () => {
@@ -669,12 +669,12 @@ describe('runInit', () => {
     expect(fs.existsSync(path.join(tempDir, 'tests/fixture.ts'))).toBe(true);
   });
 
-  it('T-INIT-051 devDeps @kiwa-test/core version = ^0.1.0', async () => {
+  it('T-INIT-051 devDeps @kiwa-test/dapp version = ^0.1.0', async () => {
     seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
     const { runInit } = await loadInitModule();
     runInit({ force: false, cwd: tempDir });
     const pkg = readPackageJson(tempDir);
-    expect(pkg.devDependencies['@kiwa-test/core']).toBe('^0.1.0');
+    expect(pkg.devDependencies['@kiwa-test/dapp']).toBe('^0.1.0');
   });
 
   it('T-INIT-052 devDeps @playwright/test version = ^1.49.0', async () => {

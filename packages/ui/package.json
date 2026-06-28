@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/ui",
-  "version": "0.4.2",
+  "version": "1.0.0",
   "description": "React component test adapter for kiwa (Vitest + Testing Library + JSDOM)",
   "license": "MIT",
   "author": {
@@ -67,7 +67,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/spec": "workspace:*"
+    "@kiwa-test/core": "workspace:*"
   },
   "peerDependencies": {
     "@angular/core": "^17 || ^18 || ^19",

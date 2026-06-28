@@ -19,7 +19,7 @@ CLI / shell / file IO test adapter for kiwa.
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/cli-test @kiwa-test/spec vitest
+pnpm add -D @kiwa-test/cli-test @kiwa-test/core vitest
 ```
 
 ## Quick start

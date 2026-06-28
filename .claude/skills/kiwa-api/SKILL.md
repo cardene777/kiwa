@@ -118,7 +118,7 @@ integration test は経路により helper を使い分ける。
 | 実 anvil + state load | `setupTestEnv({ anvil: { loadState } })` | pre-built state で瞬時起動、 deploy + setup を毎回流さない |
 
 ```ts
-import { setupTestEnv } from '@kiwa-test/core';
+import { setupTestEnv } from '@kiwa-test/dapp';
 
 // HTTP API mock + 実 anvil + pre-built state を同 fixture で扱う
 const env = await setupTestEnv({
@@ -141,7 +141,7 @@ mock / 実 anvil / load-state の選択は Layer 1 spec の「テスト経路」
 borrow / release (anvil_reset) で 0ms 再利用、 vitest の test file 並列実行と組合せて壁時計を大幅短縮する。
 
 ```ts
-import { createAnvilPool, setupTestEnv, type AnvilPool } from '@kiwa-test/core';
+import { createAnvilPool, setupTestEnv, type AnvilPool } from '@kiwa-test/dapp';
 
 let pool: AnvilPool;
 beforeAll(async () => { pool = await createAnvilPool({ size: 4 }); });
@@ -245,7 +245,7 @@ describe('items API (mock mode)', () => {
 
 - 入力 spec ... `tests/spec/integration/test-spec-{module}.api.md` (`/kiwa-design --layer api` 出力)
 - 出力 test ... `tests/{module}.test.ts` (Vitest + msw + supertest)
-- 既存 dApp + 実 anvil 経路の spec (`tests/spec/integration/test-spec-{module}.md`) は `@kiwa-test/core` setupTestEnv 経路で従来通り動作
+- 既存 dApp + 実 anvil 経路の spec (`tests/spec/integration/test-spec-{module}.md`) は `@kiwa-test/dapp` setupTestEnv 経路で従来通り動作
 
 `env.stop()` は `afterEach` / `afterAll` で必ず呼ぶ (live server / msw server を確実に停止する)。
 

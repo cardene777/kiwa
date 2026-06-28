@@ -1,4 +1,4 @@
-import { dappE2eTest } from '@kiwa-test/core';
+import { dappE2eTest } from '@kiwa-test/dapp';
 
 const L1_PORT = 8554;
 

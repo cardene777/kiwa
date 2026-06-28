@@ -61,7 +61,7 @@ Running 1 test using 1 worker
 ## Minimal custom test
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@kiwa-test/core';
+import { dappE2eTest as test, expect } from '@kiwa-test/dapp';
 
 test('dApp can connect', async ({ page, dappE2e }) => {
   await page.goto('/');

@@ -31,7 +31,7 @@ export async function startAnvil(
 ## Example
 
 ~~~ts
-import { startAnvil } from '@kiwa-test/core';
+import { startAnvil } from '@kiwa-test/dapp';
 
 const handle = await startAnvil({ port: 8545 });
 // ... run tests

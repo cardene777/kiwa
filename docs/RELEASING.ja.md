@@ -66,7 +66,7 @@ main branch protection の required status check は本リポジトリでは設�
 ### Phase 1 — npm 側準備 (ユーザー作業)
 
 1. **npm account の 2FA 設定** — https://www.npmjs.com/settings/{user}/profile で **Auth only** または **Auth and writes** を選択。Automation Token を使う場合は Auth only でも publish 可能です。
-2. **scope の確保 (任意)** — `@kiwa-test/core` `@kiwa-test/cli` は `@kiwa-test` npm organization で公開済 (https://www.npmjs.com/org/kiwa-test)。 fork して別 scope で公開したい場合は `https://www.npmjs.com/org/create` で独自 org を作成してください。
+2. **scope の確保 (任意)** — `@kiwa-test/dapp` `@kiwa-test/cli` は `@kiwa-test` npm organization で公開済 (https://www.npmjs.com/org/kiwa-test)。 fork して別 scope で公開したい場合は `https://www.npmjs.com/org/create` で独自 org を作成してください。
 3. **Granular Access Token を発行** — Settings > Access Tokens > Generate New Token > Granular Access Token。
    - name: `kiwa-publish`
    - expiration: 1 year (推奨)
@@ -90,7 +90,7 @@ main branch protection の required status check は本リポジトリでは設�
 
 ### Phase 4 — publish 後確認
 
-1. **npmjs.com で表示確認** — `https://www.npmjs.com/package/@kiwa-test/core` / `@kiwa-test/cli` で README / provenance badge / version `0.1.0` を確認。
+1. **npmjs.com で表示確認** — `https://www.npmjs.com/package/@kiwa-test/dapp` / `@kiwa-test/cli` で README / provenance badge / version `0.1.0` を確認。
 2. **smoke test** — 別の dApp project で `pnpm dlx @kiwa-test/cli init` を実行し、生成された `e2e/connect.spec.ts` が PASS することを確認:
 
    ~~~bash

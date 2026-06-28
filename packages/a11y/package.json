@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/a11y",
-  "version": "0.1.3",
+  "version": "1.0.0",
   "description": "Accessibility (a11y) test adapter for kiwa — axe-core integration for jsdom + Playwright pages",
   "license": "MIT",
   "author": {
@@ -59,7 +59,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/spec": "workspace:*"
+    "@kiwa-test/core": "workspace:*"
   },
   "peerDependencies": {
     "axe-core": "^4",

@@ -12,11 +12,11 @@
 
 | 種別 | 旧名 | 新名 |
 |---|---|---|
-| npm package (fixture) | `@dapp-e2e/core` | `@kiwa-test/core` |
+| npm package (fixture) | `@dapp-e2e/core` | `@kiwa-test/dapp` |
 | npm package (CLI) | `@dapp-e2e/cli` | `@kiwa-test/cli` |
 | CLI bin | `dapp-e2e` | `kiwa` |
 | init command | `pnpm dlx @dapp-e2e/cli init` | `pnpm dlx @kiwa-test/cli init` |
-| import fixture | `import { dappE2eTest } from '@dapp-e2e/core'` | `import { dappE2eTest } from '@kiwa-test/core'` (関数名は維持) |
+| import fixture | `import { dappE2eTest } from '@dapp-e2e/core'` | `import { dappE2eTest } from '@kiwa-test/dapp'` (関数名は維持) |
 | GitHub repo | `cardene777/dapp-e2e` | `cardene777/kiwa` (旧 URL は自動 redirect) |
 | Claude Code skill 名 | `test-design` / `contract-test-foundry` / `contract-test-hardhat` / `dapp-e2e-test` | `kiwa-design` / `kiwa-forge` / `kiwa-hardhat` / `kiwa-play` |
 
@@ -34,7 +34,7 @@ API シグネチャ (関数名 `dappE2eTest` / option key / event name) は **�
 ### npm publish 状況
 
 - `@dapp-e2e/*` は npm に **未公開のまま** (registry 404)、 deprecate の必要なし
-- `@kiwa-test/*` は v0.1.0 で初版公開済 (changesets + GitHub Actions provenance、 2026-06-10、 https://www.npmjs.com/package/@kiwa-test/core / https://www.npmjs.com/package/@kiwa-test/cli)
+- `@kiwa-test/*` は v0.1.0 で初版公開済 (changesets + GitHub Actions provenance、 2026-06-10、 https://www.npmjs.com/package/@kiwa-test/dapp / https://www.npmjs.com/package/@kiwa-test/cli)
 
 ### GitHub URL の自動 redirect
 
@@ -57,7 +57,7 @@ v1.0.0 以降は strict semver に切り替え、breaking change は major の�
 
 ### この file を更新するタイミング
 
-- `@kiwa-test/core` の API shape が変わるとき
+- `@kiwa-test/dapp` の API shape が変わるとき
 - CLI の scaffold 内容が変わるとき
 - Quickstart の手順が変わるとき
 - 既存 test code の書き換えが必要になるとき
@@ -67,7 +67,7 @@ v1.0.0 以降は strict semver に切り替え、breaking change は major の�
 v0.1.0 は kiwa の最初の public release です。
 そのため、既存利用者向けの移行作業は実質ありません。
 
-- **新規**: `@kiwa-test/core`
+- **新規**: `@kiwa-test/dapp`
   Playwright fixture、injector script、anvil lifecycle、9 RPC、4 event を提供します。
 - **新規**: `@kiwa-test/cli`
   `init` と `doctor` を提供し、最小構成の scaffold を作れます。

@@ -23,7 +23,7 @@ export interface AnvilHandle {
 ## Example
 
 ~~~ts
-import { startAnvil, type AnvilHandle } from '@kiwa-test/core';
+import { startAnvil, type AnvilHandle } from '@kiwa-test/dapp';
 
 let handle: AnvilHandle | undefined;
 

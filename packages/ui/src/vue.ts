@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa-test/spec';
+import type { TestEnvBase } from '@kiwa-test/core';
 
 /**
  * Vue 3 component test adapter. Reuses @vue/test-utils' `mount` helper while keeping
