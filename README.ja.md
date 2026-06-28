@@ -91,7 +91,7 @@ graph TD
 
 kiwa は 2 つに分かれており、 連携も単独利用もできます。
 
-### 1. Claude Code skill 群 (8 skill、 設計 + 生成側)
+### 1. Claude Code skill 群 (15 skill、 設計 + 生成側)
 
 | Skill | Layer | 役割 |
 |---|---|---|
@@ -99,9 +99,16 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 | [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) | **Layer 1** | 既存 contract / API / 画面 / 機能仕様から 9 section + 9 column の test 仕様書を逆算生成 |
 | [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) | **Layer 2** (contract) | Layer 1 仕様 → Foundry `.t.sol` を fuzz / invariant / `vm.prank` / custom-error revert で生成、 `forge test` 実行、 `forge coverage` で gate |
 | [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) | **Layer 2** (contract) | 同 Layer 1 仕様 → Hardhat `.test.cjs` を `chai-matchers` / `fast-check` / `loadFixture` で生成、 `npx hardhat test` 実行、 `solidity-coverage` で gate |
-| [`/kiwa-vitest`](./.claude/skills/kiwa-vitest/SKILL.md) | **Layer 2** (unit) | Layer 1 仕様 → Vitest `test/unit/*.test.{ts,tsx}` を TS helper / TSX hook 用に生成 (F-3) |
-| [`/kiwa-api`](./.claude/skills/kiwa-api/SKILL.md) | **Layer 2** (integration) | Layer 1 仕様 → msw / supertest / Playwright `request` の API integration test を生成 (F-3) |
-| [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) | **Layer 3** (e2e) | Layer 1 仕様 → Playwright `.spec.ts` + `prepare-env.ts` 生成、 4 round flake check、 `--mode extend` で既存 test を破壊せず追加 |
+| [`/kiwa-vitest`](./.claude/skills/kiwa-vitest/SKILL.md) | **Layer 2** (unit) | Layer 1 仕様 → Vitest `test/unit/*.test.{ts,tsx}` を TS helper / TSX hook 用に生成 |
+| [`/kiwa-api`](./.claude/skills/kiwa-api/SKILL.md) | **Layer 2** (integration) | Layer 1 仕様 → msw / supertest / Playwright `request` の API integration test を生成 |
+| [`/kiwa-ui`](./.claude/skills/kiwa-ui/SKILL.md) | **Layer 2** (ui) | Layer 1 仕様 → 8 framework (React / Vue / Svelte / SolidJS / Lit / Qwik / Angular / Browser) 対応 component test を Vitest + Testing Library で生成 |
+| [`/kiwa-e2e`](./.claude/skills/kiwa-e2e/SKILL.md) | **Layer 2** (e2e) | Layer 1 仕様 → 非 web3 文脈の汎用 browser e2e test (static html / fetch / Node handler / SSR) を Playwright で生成 |
+| [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) | **Layer 2** (dApp e2e) | Layer 1 仕様 → wallet inject / anvil / viem を使う web3 dApp e2e test を Playwright で生成 |
+| [`/kiwa-a11y`](./.claude/skills/kiwa-a11y/SKILL.md) | **Layer 2** (a11y) | Layer 1 仕様 → axe-core による accessibility test を jsdom + Playwright で生成、 WCAG 2.1 AA 違反検出 |
+| [`/kiwa-visual`](./.claude/skills/kiwa-visual/SKILL.md) | **Layer 2** (visual) | Layer 1 仕様 → pixelmatch による visual regression test を baseline / actual / diff snapshot 管理付きで生成 |
+| [`/kiwa-data`](./.claude/skills/kiwa-data/SKILL.md) | **Layer 2** (data) | Layer 1 仕様 → in-memory queue + fake clock による queue / cron / batch / DLQ test を生成 |
+| [`/kiwa-cli-test`](./.claude/skills/kiwa-cli-test/SKILL.md) | **Layer 2** (cli) | Layer 1 仕様 → isolated tempdir + stdout/stderr snapshot による CLI / shell / file IO test を生成 |
+| [`/kiwa-observe`](./.claude/skills/kiwa-observe/SKILL.md) | **observability** | vitest JSON 結果集約 → flaky 検出 + spec-coverage gap 解析 + markdown dashboard 出力 |
 | [`/kiwa-review`](./.claude/skills/kiwa-review/SKILL.md) | **reviewer** | spec / test code / 実行結果を 3 mode (spec-review / test-review / result-review) で品質判定 |
 
 ### 2. npm パッケージ (runtime fixture 側)
