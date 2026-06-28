@@ -24,6 +24,8 @@ const FULL = {
   '@kiwa-test/e2e': { lines: 100, branches: 85, functions: 100, statements: 100 },
   '@kiwa-test/cli': { lines: 94, branches: 82, functions: 100, statements: 94 },
   '@kiwa-test/dapp': { lines: 98, branches: 90, functions: 100, statements: 98 },
+  '@kiwa-test/a11y': { lines: 100, branches: 95, functions: 100, statements: 100 },
+  '@kiwa-test/visual': { lines: 100, branches: 85, functions: 100, statements: 100 },
 };
 
 describe('scripts/post-coverage-diff.mjs', () => {
@@ -59,6 +61,6 @@ describe('scripts/post-coverage-diff.mjs', () => {
     delete (partial as Record<string, unknown>)['@kiwa-test/dapp'];
     const rows = mod.buildDeltaRows(partial, FULL);
     const markdown = mod.renderMarkdown(rows);
-    expect(markdown).toMatch(/@kiwa-test\/core.*n\/a/);
+    expect(markdown).toMatch(/@kiwa-test\/dapp.*n\/a/);
   });
 });
