@@ -38,7 +38,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
       'packages/observability',
       'packages/e2e',
       'packages/cli',
-      'packages/core',
+      'packages/dapp',
       'packages/a11y',
       'packages/visual',
     ];
@@ -51,7 +51,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
       }
       const { stdout, stderr } = await execFileAsync('node', [GATE_SCRIPT], { cwd: fakeRoot });
       expect(stderr).toContain('All packages passed coverage thresholds');
-      expect(stdout).toMatch(/@kiwa-test\/spec.*✅/);
+      expect(stdout).toMatch(/@kiwa-test\/core.*✅/);
     } finally {
       rmSync(fakeRoot, { recursive: true, force: true });
     }
@@ -63,7 +63,6 @@ describe('scripts/check-coverage-gates.mjs', () => {
       const passing = buildSummary({ lines: 95, branches: 85, functions: 95, statements: 95 });
       const failing = buildSummary({ lines: 50, branches: 40, functions: 60, statements: 50 });
       for (const dir of [
-        'packages/core',
         'packages/api',
         'packages/ui',
         'packages/data',
@@ -71,6 +70,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
         'packages/observability',
         'packages/e2e',
         'packages/cli',
+        'packages/dapp',
         'packages/a11y',
         'packages/visual',
       ]) {
