@@ -26,9 +26,9 @@ importers:
 
   examples/basic-connect:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
     devDependencies:
       '@playwright/test':
         specifier: ^1.49.0
@@ -51,9 +51,9 @@ importers:
       '@kiwa-test/cli-test':
         specifier: workspace:*
         version: link:../../packages/cli-test
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../../packages/spec
+        version: link:../../packages/core
     devDependencies:
       '@types/node':
         specifier: ^22.10.0
@@ -67,9 +67,9 @@ importers:
 
   examples/defi-swap:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
     devDependencies:
       '@nomicfoundation/hardhat-toolbox':
         specifier: ^5.0.0
@@ -107,15 +107,15 @@ importers:
       '@kiwa-test/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@kiwa-test/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@kiwa-test/e2e':
         specifier: workspace:*
         version: link:../../packages/e2e
       '@kiwa-test/observability':
         specifier: workspace:*
         version: link:../../packages/observability
-      '@kiwa-test/spec':
-        specifier: workspace:*
-        version: link:../../packages/spec
       '@kiwa-test/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -156,9 +156,9 @@ importers:
 
   examples/mint-nft:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
     devDependencies:
       '@nomicfoundation/hardhat-toolbox':
         specifier: ^5.0.0
@@ -193,9 +193,9 @@ importers:
 
   examples/nextjs-aa-erc4337:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.4.3))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.4.3))(zod@4.4.3))
@@ -239,9 +239,9 @@ importers:
 
   examples/nextjs-aa-smart-account:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -288,9 +288,9 @@ importers:
       '@kiwa-test/api':
         specifier: workspace:*
         version: link:../../packages/api
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../../packages/spec
+        version: link:../../packages/core
     devDependencies:
       '@types/node':
         specifier: ^22.10.0
@@ -307,9 +307,9 @@ importers:
 
   examples/nextjs-bridge:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -353,9 +353,9 @@ importers:
 
   examples/nextjs-dao-vote:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -399,9 +399,9 @@ importers:
 
   examples/nextjs-ens-resolver:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -445,9 +445,9 @@ importers:
 
   examples/nextjs-erc1155-game:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -491,9 +491,9 @@ importers:
 
   examples/nextjs-event-history:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -537,9 +537,9 @@ importers:
 
   examples/nextjs-lending:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -583,9 +583,9 @@ importers:
 
   examples/nextjs-multi-chain:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -629,9 +629,9 @@ importers:
 
   examples/nextjs-permit-swap:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -675,9 +675,9 @@ importers:
 
   examples/nextjs-safe-multisig:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@tanstack/react-query':
         specifier: ^5.59.0
         version: 5.101.0(react@18.3.1)
@@ -715,9 +715,9 @@ importers:
 
   examples/nextjs-staking:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -761,9 +761,9 @@ importers:
 
   examples/nextjs-token-gating:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -825,9 +825,9 @@ importers:
 
   examples/nextjs-vesting:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -871,9 +871,9 @@ importers:
 
   examples/nextjs-wagmi-rainbow:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -917,9 +917,9 @@ importers:
 
   examples/nextjs-walletconnect-v2:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@tanstack/react-query':
         specifier: ^5.59.0
         version: 5.101.0(react@18.3.1)
@@ -960,9 +960,9 @@ importers:
 
   examples/nextjs-zk-verifier:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -1006,9 +1006,9 @@ importers:
 
   examples/nft-marketplace:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
     devDependencies:
       '@nomicfoundation/hardhat-toolbox':
         specifier: ^5.0.0
@@ -1043,12 +1043,12 @@ importers:
 
   examples/queue-poc:
     dependencies:
+      '@kiwa-test/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@kiwa-test/data':
         specifier: workspace:*
         version: link:../../packages/data
-      '@kiwa-test/spec':
-        specifier: workspace:*
-        version: link:../../packages/spec
     devDependencies:
       '@types/node':
         specifier: ^22.10.0
@@ -1062,9 +1062,9 @@ importers:
 
   examples/react-component-poc:
     dependencies:
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../../packages/spec
+        version: link:../../packages/core
       '@kiwa-test/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -1102,9 +1102,9 @@ importers:
 
   examples/vite-react-wagmi:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/dapp
       '@rainbow-me/rainbowkit':
         specifier: ^2.2.0
         version: 2.2.11(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(wagmi@2.19.5(@tanstack/query-core@5.101.0)(@tanstack/react-query@5.101.0(react@18.3.1))(@types/react@18.3.30)(bufferutil@4.1.0)(immer@10.0.2)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76))
@@ -1148,9 +1148,9 @@ importers:
 
   packages/a11y:
     dependencies:
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../spec
+        version: link:../core
     devDependencies:
       '@stryker-mutator/core':
         specifier: ^8.7.1
@@ -1182,9 +1182,9 @@ importers:
 
   packages/api:
     dependencies:
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../spec
+        version: link:../core
     devDependencies:
       '@stryker-mutator/core':
         specifier: ^8.7.1
@@ -1243,9 +1243,9 @@ importers:
 
   packages/cli-test:
     dependencies:
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../spec
+        version: link:../core
     devDependencies:
       '@stryker-mutator/core':
         specifier: ^8.7.1
@@ -1270,10 +1270,34 @@ importers:
         version: 2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0)
 
   packages/core:
+    devDependencies:
+      '@stryker-mutator/core':
+        specifier: ^8.7.1
+        version: 8.7.1
+      '@stryker-mutator/vitest-runner':
+        specifier: ^8.7.1
+        version: 8.7.1(@stryker-mutator/core@8.7.1)(vitest@2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0))
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.19
+      '@vitest/coverage-v8':
+        specifier: ^2.1.0
+        version: 2.1.9(vitest@2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0))
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(postcss@8.5.15)(tsx@4.22.4)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0)
+
+  packages/dapp:
     dependencies:
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../spec
+        version: link:../core
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -1308,9 +1332,9 @@ importers:
 
   packages/data:
     dependencies:
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../spec
+        version: link:../core
     devDependencies:
       '@stryker-mutator/core':
         specifier: ^8.7.1
@@ -1336,9 +1360,9 @@ importers:
 
   packages/e2e:
     dependencies:
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../spec
+        version: link:../core
     devDependencies:
       '@playwright/test':
         specifier: ^1.49.0
@@ -1367,33 +1391,9 @@ importers:
 
   packages/observability:
     dependencies:
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../spec
-    devDependencies:
-      '@stryker-mutator/core':
-        specifier: ^8.7.1
-        version: 8.7.1
-      '@stryker-mutator/vitest-runner':
-        specifier: ^8.7.1
-        version: 8.7.1(@stryker-mutator/core@8.7.1)(vitest@2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0))
-      '@types/node':
-        specifier: ^22.10.0
-        version: 22.19.19
-      '@vitest/coverage-v8':
-        specifier: ^2.1.0
-        version: 2.1.9(vitest@2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0))
-      tsup:
-        specifier: ^8.3.0
-        version: 8.5.1(postcss@8.5.15)(tsx@4.22.4)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.6.0
-        version: 5.9.3
-      vitest:
-        specifier: ^2.1.0
-        version: 2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0)
-
-  packages/spec:
+        version: link:../core
     devDependencies:
       '@stryker-mutator/core':
         specifier: ^8.7.1
@@ -1428,9 +1428,9 @@ importers:
       '@builder.io/qwik':
         specifier: ^1.12
         version: 1.20.0(vite@5.4.21(@types/node@22.19.19)(terser@5.48.0))
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../spec
+        version: link:../core
       '@noma.to/qwik-testing-library':
         specifier: ^1.6
         version: 1.6.0(@builder.io/qwik@1.20.0(vite@5.4.21(@types/node@22.19.19)(terser@5.48.0)))(@testing-library/dom@10.4.1)
@@ -1513,9 +1513,9 @@ importers:
 
   packages/visual:
     dependencies:
-      '@kiwa-test/spec':
+      '@kiwa-test/core':
         specifier: workspace:*
-        version: link:../spec
+        version: link:../core
     devDependencies:
       '@stryker-mutator/core':
         specifier: ^8.7.1
@@ -1575,9 +1575,9 @@ importers:
 
   tests/fixtures/defi-swap:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../../packages/core
+        version: link:../../../packages/dapp
     devDependencies:
       '@nomicfoundation/hardhat-toolbox':
         specifier: ^5.0.0
@@ -1612,9 +1612,9 @@ importers:
 
   tests/fixtures/mint-nft:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../../packages/core
+        version: link:../../../packages/dapp
     devDependencies:
       '@nomicfoundation/hardhat-toolbox':
         specifier: ^5.0.0
@@ -1649,9 +1649,9 @@ importers:
 
   tests/fixtures/nextjs-token-gating:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../../packages/core
+        version: link:../../../packages/dapp
     devDependencies:
       '@nomicfoundation/hardhat-toolbox':
         specifier: ^5.0.0
@@ -1689,9 +1689,9 @@ importers:
 
   tests/fixtures/nft-marketplace:
     dependencies:
-      '@kiwa-test/core':
+      '@kiwa-test/dapp':
         specifier: workspace:*
-        version: link:../../../packages/core
+        version: link:../../../packages/dapp
     devDependencies:
       '@nomicfoundation/hardhat-toolbox':
         specifier: ^5.0.0
@@ -1735,6 +1735,9 @@ importers:
       '@kiwa-test/cli-test':
         specifier: workspace:*
         version: link:../../packages/cli-test
+      '@kiwa-test/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@kiwa-test/data':
         specifier: workspace:*
         version: link:../../packages/data
@@ -1744,9 +1747,6 @@ importers:
       '@kiwa-test/observability':
         specifier: workspace:*
         version: link:../../packages/observability
-      '@kiwa-test/spec':
-        specifier: workspace:*
-        version: link:../../packages/spec
       '@kiwa-test/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -10638,13 +10638,13 @@ snapshots:
       '@remotion/timeline-utils': 4.0.475
       '@rspack/core': 1.7.11(@swc/helpers@0.5.5)
       '@rspack/plugin-react-refresh': 1.6.1(react-refresh@0.18.0)
-      css-loader: 7.1.4(@rspack/core@1.7.11(@swc/helpers@0.5.5))(webpack@5.105.0(postcss@8.5.15))
+      css-loader: 7.1.4(@rspack/core@1.7.11(@swc/helpers@0.5.5))(webpack@5.105.0(esbuild@0.28.0)(postcss@8.5.15))
       esbuild: 0.28.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-refresh: 0.18.0
       remotion: 4.0.475(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      style-loader: 4.0.0(webpack@5.105.0(postcss@8.5.15))
+      style-loader: 4.0.0(webpack@5.105.0(esbuild@0.28.0)(postcss@8.5.15))
       webpack: 5.105.0(esbuild@0.28.0)(postcss@8.5.15)
     transitivePeerDependencies:
       - '@minify-html/node'
@@ -14261,7 +14261,7 @@ snapshots:
 
   crypt@0.0.2: {}
 
-  css-loader@7.1.4(@rspack/core@1.7.11(@swc/helpers@0.5.5))(webpack@5.105.0(postcss@8.5.15)):
+  css-loader@7.1.4(@rspack/core@1.7.11(@swc/helpers@0.5.5))(webpack@5.105.0(esbuild@0.28.0)(postcss@8.5.15)):
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.15)
       postcss: 8.5.15
@@ -16982,7 +16982,7 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  style-loader@4.0.0(webpack@5.105.0(postcss@8.5.15)):
+  style-loader@4.0.0(webpack@5.105.0(esbuild@0.28.0)(postcss@8.5.15)):
     dependencies:
       webpack: 5.105.0(esbuild@0.28.0)(postcss@8.5.15)
 

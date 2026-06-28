@@ -19,7 +19,7 @@ Data pipeline / queue / cron / batch test adapter for kiwa.
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/data @kiwa-test/spec vitest
+pnpm add -D @kiwa-test/data @kiwa-test/core vitest
 ```
 
 ## Queue env

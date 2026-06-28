@@ -49,7 +49,7 @@ sequenceDiagram
 ## Example
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@kiwa-test/core';
+import { dappE2eTest as test, expect } from '@kiwa-test/dapp';
 
 const customTest = test.extend({
   // 必要に応じて wallet の private key や approval mode を override

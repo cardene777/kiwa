@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/api",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "HTTP API test adapter for kiwa (Vitest + msw + supertest)",
   "license": "MIT",
   "author": {
@@ -60,7 +60,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/spec": "workspace:*"
+    "@kiwa-test/core": "workspace:*"
   },
   "peerDependencies": {
     "msw": "^2",

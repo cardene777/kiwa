@@ -141,5 +141,5 @@ describe('Counter (interaction mode)', () => {
 ## references
 
 - `@kiwa-test/ui` API ... `packages/ui/README.md` (`/Users/cardene/Desktop/projects/kiwa/packages/ui/README.md`)
-- `@kiwa-test/spec` 共通型 ... `packages/spec/README.md`
+- `@kiwa-test/core` 共通型 ... `packages/spec/README.md`
 - 実 PoC ... `examples/react-component-poc/`

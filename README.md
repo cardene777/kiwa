@@ -8,8 +8,8 @@
 
 One Layer 1 spec → contract / API / component / e2e / a11y / visual tests in parallel, across **11 npm packages + 1 PyPI package + Foundry / Hardhat bridges**. Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
 
-[![npm version](https://img.shields.io/npm/v/@kiwa-test/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-test/core)
-[![npm downloads](https://img.shields.io/npm/dm/@kiwa-test/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-test/core)
+[![npm version](https://img.shields.io/npm/v/@kiwa-test/dapp?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-test/dapp)
+[![npm downloads](https://img.shields.io/npm/dm/@kiwa-test/dapp?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-test/dapp)
 [![packages](https://img.shields.io/badge/npm%20packages-11-cb3837?logo=npm)](#what-s-in-the-box)
 [![python](https://img.shields.io/badge/PyPI-kiwa--test--py-3776ab?logo=python&logoColor=white)](./kiwa-py)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
@@ -108,9 +108,9 @@ kiwa ships in two halves that work together but stand alone:
 
 | Package | Use it for |
 |---|---|
-| [`@kiwa-test/core`](./packages/core) | Playwright fixture: inject `window.ethereum`, spawn `anvil`, sign, mine, time-travel, EIP-6963 multi-wallet, ERC-4337 smart accounts, custom-error helpers |
-| [`@kiwa-test/cli`](./packages/cli) | `kiwa init` scaffolds a Playwright project wired to `@kiwa-test/core` |
-| [`@kiwa-test/spec`](./packages/spec) | Spec markdown parser shared by every adapter (9-column `test-spec-*.md` → `SpecDoc`) |
+| [`@kiwa-test/dapp`](./packages/core) | Playwright fixture: inject `window.ethereum`, spawn `anvil`, sign, mine, time-travel, EIP-6963 multi-wallet, ERC-4337 smart accounts, custom-error helpers |
+| [`@kiwa-test/cli`](./packages/cli) | `kiwa init` scaffolds a Playwright project wired to `@kiwa-test/dapp` |
+| [`@kiwa-test/core`](./packages/spec) | Spec markdown parser shared by every adapter (9-column `test-spec-*.md` → `SpecDoc`) |
 | [`@kiwa-test/api`](./packages/api) | API integration adapter (Vitest + msw + supertest + Playwright `request`) |
 | [`@kiwa-test/ui`](./packages/ui) | Component adapters for **React / Vue / Svelte / SolidJS / Lit / Qwik / Angular / real Chromium** (render / interaction / snapshot modes) |
 | [`@kiwa-test/data`](./packages/data) | Queue / cron / batch adapter — in-memory queue + fake clock + idempotency / DLQ semantics |
@@ -119,9 +119,9 @@ kiwa ships in two halves that work together but stand alone:
 | [`@kiwa-test/observability`](./packages/observability) | Run history collection / flaky detection / coverage report / spec-coverage gap analysis |
 | [`@kiwa-test/a11y`](./packages/a11y) | Accessibility adapter — axe-core integration for jsdom + Playwright pages |
 | [`@kiwa-test/visual`](./packages/visual) | Visual regression adapter — pixel-level PNG diff backed by pixelmatch + pngjs |
-| [`kiwa-test-py`](./kiwa-py) (PyPI) | Python pytest adapter — port of `@kiwa-test/spec` + requests / httpx adapter |
+| [`kiwa-test-py`](./kiwa-py) (PyPI) | Python pytest adapter — port of `@kiwa-test/core` + requests / httpx adapter |
 
-You can use the **skills alone** (no npm dependency — they just generate test files) or the **fixture alone** (no Claude — just `pnpm add @kiwa-test/core`), or both together for the full chain.
+You can use the **skills alone** (no npm dependency — they just generate test files) or the **fixture alone** (no Claude — just `pnpm add @kiwa-test/dapp`), or both together for the full chain.
 
 ---
 
@@ -242,7 +242,7 @@ If you are hacking on kiwa itself and want to test changes against a local dApp 
 git clone https://github.com/cardene777/kiwa.git ~/kiwa
 cd ~/kiwa
 pnpm install
-pnpm -F @kiwa-test/core -F @kiwa-test/cli build
+pnpm -F @kiwa-test/dapp -F @kiwa-test/cli build
 
 # 2. In your test project, add a file: dependency
 cd /path/to/your-dapp
@@ -256,12 +256,12 @@ For everyday use, prefer Option C (`pnpm dlx @kiwa-test/cli init`) which pulls t
 
 ### Using kiwa with a CJS / Next.js 14 project
 
-`@kiwa-test/core` ships **both ESM and CJS builds** (`dist/index.js` + `dist/index.cjs`), so both `import` and `require` resolve correctly. You can drop it into any of:
+`@kiwa-test/dapp` ships **both ESM and CJS builds** (`dist/index.js` + `dist/index.cjs`), so both `import` and `require` resolve correctly. You can drop it into any of:
 
 | Project type | What works out of the box |
 |---|---|
-| Pure ESM (`"type": "module"`) | `import { dappE2eTest } from '@kiwa-test/core'` |
-| Pure CJS (`"type": "commonjs"`) | `const { dappE2eTest } = require('@kiwa-test/core')` |
+| Pure ESM (`"type": "module"`) | `import { dappE2eTest } from '@kiwa-test/dapp'` |
+| Pure CJS (`"type": "commonjs"`) | `const { dappE2eTest } = require('@kiwa-test/dapp')` |
 | Next.js 14 (CJS host with ESM packages) | Both forms resolve; Next bundles CJS, Playwright runs ESM |
 
 If you still hit `Error: No "exports" main defined` (older toolchains), isolate the kiwa test dir as ESM with a local `package.json`:
@@ -275,7 +275,7 @@ Only `tests/kiwa/**.ts` is treated as ESM; the rest of your `tests/` keeps its e
 
 ### Differences from MetaMask (read before shipping)
 
-`@kiwa-test/core` aims to be **production-realistic but explicit about deltas**. Key default behavioural differences:
+`@kiwa-test/dapp` aims to be **production-realistic but explicit about deltas**. Key default behavioural differences:
 
 | Behavior | MetaMask | kiwa (default) | Override |
 |---|---|---|---|
@@ -305,7 +305,7 @@ The full RPC fidelity matrix lives in [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN
 - 🪞 **Mirror generation** — both runners produce the same `TC-NNN` IDs from one spec; teams can run Foundry, Hardhat, or both
 - 🛡️ **Coverage gate enforced** — Lines ≥ 90%, Statements ≥ 90%, **Branches ≥ 80%**, Funcs ≥ 90%. The skill won't write `test-passed` marker until all four metrics pass
 
-### Layer 2: dApp E2E fixture (`/kiwa-play` + `@kiwa-test/core`)
+### Layer 2: dApp E2E fixture (`/kiwa-play` + `@kiwa-test/dapp`)
 
 - 🦊 **Inject `window.ethereum`** without any browser extension
 - ⚡ **Spawn anvil per test** for total chain isolation
@@ -317,7 +317,7 @@ The full RPC fidelity matrix lives in [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN
 - 🔁 **`--mode extend`** — appends new viewpoints without breaking existing tests, 4-round flake check built in
 - ❌ **error envelope** preserves `code` and `message` across page boundaries
 
-### Industry-standard helpers (`@kiwa-test/core`)
+### Industry-standard helpers (`@kiwa-test/dapp`)
 
 | Helper | Purpose |
 |---|---|
@@ -382,8 +382,8 @@ Lines / Statements / Functions ≥ **90 %**, Branches ≥ **80 %**, across all 1
 | [`@kiwa-test/ui`](./packages/ui) | **91.76 %** | 80 |
 | [`@kiwa-test/cli-test`](./packages/cli-test) | 89.69 % | 80 |
 | [`@kiwa-test/data`](./packages/data) | 86.93 % | 80 |
-| [`@kiwa-test/spec`](./packages/spec) | 85.51 % | 80 |
-| [`@kiwa-test/core`](./packages/core) | 85.09 % | 80 |
+| [`@kiwa-test/core`](./packages/spec) | 85.51 % | 80 |
+| [`@kiwa-test/dapp`](./packages/core) | 85.09 % | 80 |
 | [`@kiwa-test/cli`](./packages/cli) | 84.44 % | 80 |
 | [`@kiwa-test/e2e`](./packages/e2e) | 84.21 % | 80 |
 | [`@kiwa-test/observability`](./packages/observability) | 84.12 % | 80 |
@@ -413,7 +413,7 @@ These three examples have **forge test + hardhat test (where applicable) + playw
 | [`defi-swap`](./examples/defi-swap) | 17 / 17 | — | (covered by basic-connect) | 100 / 87.50 |
 | [`nextjs-token-gating`](./examples/nextjs-token-gating) | 20 / 20 | — | 8 existing PASS | 100 / 87.50 |
 
-### dApp E2E reference (`@kiwa-test/core` fixture)
+### dApp E2E reference (`@kiwa-test/dapp` fixture)
 
 20 reference dApps live under [`examples/`](./examples/), proving the fixture against a wide stack:
 
@@ -443,7 +443,7 @@ These three examples have **forge test + hardhat test (where applicable) + playw
 ## Multi-Wallet (EIP-6963)
 
 ```ts
-import { dappE2eTest } from '@kiwa-test/core';
+import { dappE2eTest } from '@kiwa-test/dapp';
 
 const test = dappE2eTest.extend({
   wallets: [

@@ -3,9 +3,9 @@
 // requiring a fresh npm install — it exercises the same import paths end consumers would use.
 import { describe, expect, it } from 'vitest';
 
-describe('@kiwa-test/spec surface', () => {
+describe('@kiwa-test/core surface', () => {
   it('exports parseSpec + createPool + shared types', async () => {
-    const mod = await import('@kiwa-test/spec');
+    const mod = await import('@kiwa-test/core');
     expect(typeof mod.parseSpec).toBe('function');
     expect(typeof mod.createPool).toBe('function');
     const parsed = mod.parseSpec('- module: x\n- layer: api\n');
@@ -101,7 +101,7 @@ describe('cross-package consistency', () => {
   });
 
   it('spec → observability: parsed SpecDoc has the same TestLayer values', async () => {
-    const specMod = await import('@kiwa-test/spec');
+    const specMod = await import('@kiwa-test/core');
     const apiSpec = specMod.parseSpec('- module: x\n- layer: api\n');
     expect(apiSpec.layer).toBe('api');
     const cliSpec = specMod.parseSpec('- module: x\n- layer: cli\n');

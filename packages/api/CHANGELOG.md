@@ -6,7 +6,7 @@
 
 - c0f0a97: Lock in mutation testing across all 11 packages with a release-time gate. `scripts/check-mutation-gates.mjs` reads each package's `mutation-report/mutation.json` and enforces per-package MSI thresholds (90% for pure-logic — api / a11y / ui after PR 1-5; 80% for thin wrappers around third-party libs). Release workflow now runs `pnpm test:mutation` for every package and fails the publish if any package's MSI regresses below its threshold. Current snapshot: api 96.06 / a11y 93.62 / ui 91.76 / cli-test 89.69 / data 86.93 / spec 85.51 / core 85.09 / cli 84.44 / e2e 84.21 / observability 84.12 / visual 83.02 — all above thresholds. No public API change.
 - Updated dependencies [c0f0a97]
-  - @kiwa-test/spec@0.1.1
+  - @kiwa-test/core@0.1.1
 
 ## 0.1.1
 
@@ -21,11 +21,11 @@
 - e16898f: v1 — 汎用テストツール化 MVP: spec / api 新設 + core を spec ベースに整理
 
   kiwa を dApp E2E 専用から汎用テストツールへ拡大する v1。
-  spec 共通基盤を `@kiwa-test/spec` として新設、 HTTP API adapter を `@kiwa-test/api` として新設し、 `@kiwa-test/core` は `@kiwa-test/spec` を peer dep として依存しつつ既存 dApp E2E API を完全互換で維持する。
+  spec 共通基盤を `@kiwa-test/core` として新設、 HTTP API adapter を `@kiwa-test/api` として新設し、 `@kiwa-test/dapp` は `@kiwa-test/core` を peer dep として依存しつつ既存 dApp E2E API を完全互換で維持する。
 
   ## 新規 package
 
-  ### @kiwa-test/spec 0.1.0 (新設)
+  ### @kiwa-test/core 0.1.0 (新設)
 
   - `parseSpec(markdown)` ... kiwa-design 9 column markdown を `SpecDoc` (cases, layer, mode, route) にパース
   - `createPool({ size, acquire, reset, release })` ... 汎用 borrow / release pool、 anvil pool の基底
@@ -42,10 +42,10 @@
 
   ## 変更 package
 
-  ### @kiwa-test/core 0.2.0 → 0.3.0 (minor)
+  ### @kiwa-test/dapp 0.2.0 → 0.3.0 (minor)
 
-  - `@kiwa-test/spec` を dependency として参照、 spec の共通型 (`TestLayer` / `TestMode` / `Lease` / `Pool` / `SpecDoc`) を main entry から re-export
-  - `parseSpec` も core から re-export (既存 user が `@kiwa-test/core` の単一 install で spec parser を使える経路を確保)
+  - `@kiwa-test/core` を dependency として参照、 spec の共通型 (`TestLayer` / `TestMode` / `Lease` / `Pool` / `SpecDoc`) を main entry から re-export
+  - `parseSpec` も core から re-export (既存 user が `@kiwa-test/dapp` の単一 install で spec parser を使える経路を確保)
   - 既存 API 完全互換、 既存 118 件 test PASS
 
   ## PoC
@@ -60,4 +60,4 @@
 ### Patch Changes
 
 - Updated dependencies [e16898f]
-  - @kiwa-test/spec@0.1.0
+  - @kiwa-test/core@0.1.0

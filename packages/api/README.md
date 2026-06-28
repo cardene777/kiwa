@@ -20,7 +20,7 @@ HTTP API test adapter for kiwa — Vitest + msw + supertest under a single `setu
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/api @kiwa-test/spec msw supertest vitest
+pnpm add -D @kiwa-test/api @kiwa-test/core msw supertest vitest
 ```
 
 `msw` and `supertest` are declared as **optional peer dependencies** — install only what your specs need.

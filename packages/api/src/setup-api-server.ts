@@ -1,4 +1,4 @@
-import type { TestMode } from '@kiwa-test/spec';
+import type { TestMode } from '@kiwa-test/core';
 import { startLiveServer } from './live-server.js';
 import { startMockServer } from './msw-bridge.js';
 import { createRequestClient } from './request-client.js';

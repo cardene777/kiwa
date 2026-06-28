@@ -11,7 +11,7 @@
     "forge:build": "forge build"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*"
+    "@kiwa-test/dapp": "workspace:*"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",

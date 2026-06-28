@@ -33,7 +33,7 @@ const REPO_ROOT = process.env.KIWA_GATE_ROOT
 //   - 80: thin wrappers around third-party libs whose internal default values
 //         produce equivalent mutants outside the test surface.
 const THRESHOLDS = {
-  '@kiwa-test/spec': 80,
+  '@kiwa-test/core': 80,
   '@kiwa-test/api': 90,
   '@kiwa-test/ui': 80,
   '@kiwa-test/data': 80,
@@ -41,13 +41,13 @@ const THRESHOLDS = {
   '@kiwa-test/observability': 80,
   '@kiwa-test/e2e': 80,
   '@kiwa-test/cli': 80,
-  '@kiwa-test/core': 80,
+  '@kiwa-test/dapp': 80,
   '@kiwa-test/a11y': 90,
   '@kiwa-test/visual': 80,
 };
 
 const PKG_DIRS = {
-  '@kiwa-test/spec': 'packages/spec',
+  '@kiwa-test/core': 'packages/spec',
   '@kiwa-test/api': 'packages/api',
   '@kiwa-test/ui': 'packages/ui',
   '@kiwa-test/data': 'packages/data',
@@ -55,7 +55,7 @@ const PKG_DIRS = {
   '@kiwa-test/observability': 'packages/observability',
   '@kiwa-test/e2e': 'packages/e2e',
   '@kiwa-test/cli': 'packages/cli',
-  '@kiwa-test/core': 'packages/core',
+  '@kiwa-test/dapp': 'packages/core',
   '@kiwa-test/a11y': 'packages/a11y',
   '@kiwa-test/visual': 'packages/visual',
 };

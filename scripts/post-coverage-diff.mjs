@@ -21,7 +21,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const PACKAGES = [
-  { name: '@kiwa-test/spec', dir: 'packages/spec' },
+  { name: '@kiwa-test/core', dir: 'packages/spec' },
   { name: '@kiwa-test/api', dir: 'packages/api' },
   { name: '@kiwa-test/ui', dir: 'packages/ui' },
   { name: '@kiwa-test/data', dir: 'packages/data' },
@@ -29,7 +29,7 @@ const PACKAGES = [
   { name: '@kiwa-test/observability', dir: 'packages/observability' },
   { name: '@kiwa-test/e2e', dir: 'packages/e2e' },
   { name: '@kiwa-test/cli', dir: 'packages/cli' },
-  { name: '@kiwa-test/core', dir: 'packages/core' },
+  { name: '@kiwa-test/dapp', dir: 'packages/core' },
   { name: '@kiwa-test/a11y', dir: 'packages/a11y' },
   { name: '@kiwa-test/visual', dir: 'packages/visual' },
 ];

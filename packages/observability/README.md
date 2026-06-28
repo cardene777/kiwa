@@ -21,7 +21,7 @@ Observability adapter for kiwa — close the loop between Layer 1 spec, Layer 2 
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/observability @kiwa-test/spec vitest
+pnpm add -D @kiwa-test/observability @kiwa-test/core vitest
 ```
 
 ## Quick start

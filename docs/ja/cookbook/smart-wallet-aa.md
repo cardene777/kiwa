@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](../../en/cookbook/smart-wallet-aa.md) • [🇯🇵 日本語](./smart-wallet-aa.md)
 
-`@kiwa-test/core` v0.3 で追加された `WalletConfig.isContractAccount` を使い、 ERC-4337 / EIP-1271 の smart contract account を end-to-end で test する pattern。
+`@kiwa-test/dapp` v0.3 で追加された `WalletConfig.isContractAccount` を使い、 ERC-4337 / EIP-1271 の smart contract account を end-to-end で test する pattern。
 
 ## 課題
 
@@ -20,7 +20,7 @@
 
 ```ts
 // tests/prepare-env.ts
-import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa-test/core';
+import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa-test/dapp';
 
 await runE2EPrepareEnv({
   envFile: '.env.local',
@@ -50,7 +50,7 @@ await runE2EPrepareEnv({
 
 ```ts
 // tests/fixture.ts
-import { dappE2eTest } from '@kiwa-test/core';
+import { dappE2eTest } from '@kiwa-test/dapp';
 import type { Address } from 'viem';
 
 const SMART_ACCOUNT_ADDRESS = process.env.NEXT_PUBLIC_SMART_ACCOUNT as Address;

@@ -21,7 +21,7 @@ const REPO_ROOT = process.env.KIWA_GATE_ROOT
   : SCRIPT_ROOT;
 
 const PACKAGES = [
-  '@kiwa-test/spec',
+  '@kiwa-test/core',
   '@kiwa-test/api',
   '@kiwa-test/ui',
   '@kiwa-test/data',
@@ -29,13 +29,13 @@ const PACKAGES = [
   '@kiwa-test/observability',
   '@kiwa-test/e2e',
   '@kiwa-test/cli',
-  '@kiwa-test/core',
+  '@kiwa-test/dapp',
   '@kiwa-test/a11y',
   '@kiwa-test/visual',
 ];
 
 const PKG_DIRS = {
-  '@kiwa-test/spec': 'packages/spec',
+  '@kiwa-test/core': 'packages/spec',
   '@kiwa-test/api': 'packages/api',
   '@kiwa-test/ui': 'packages/ui',
   '@kiwa-test/data': 'packages/data',
@@ -43,7 +43,7 @@ const PKG_DIRS = {
   '@kiwa-test/observability': 'packages/observability',
   '@kiwa-test/e2e': 'packages/e2e',
   '@kiwa-test/cli': 'packages/cli',
-  '@kiwa-test/core': 'packages/core',
+  '@kiwa-test/dapp': 'packages/core',
   '@kiwa-test/a11y': 'packages/a11y',
   '@kiwa-test/visual': 'packages/visual',
 };

@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/cli-test",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "CLI / shell / file IO test adapter for kiwa (execFile + temp dir + stdout/stderr snapshot)",
   "license": "MIT",
   "author": {
@@ -59,7 +59,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/spec": "workspace:*"
+    "@kiwa-test/core": "workspace:*"
   },
   "peerDependencies": {
     "vitest": "^2"

@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/e2e",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "End-to-end test adapter for kiwa (Playwright + setupE2eEnv with built-in HTTP serve helper)",
   "license": "MIT",
   "author": {
@@ -58,7 +58,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/spec": "workspace:*"
+    "@kiwa-test/core": "workspace:*"
   },
   "peerDependencies": {
     "@playwright/test": "^1.49.0",

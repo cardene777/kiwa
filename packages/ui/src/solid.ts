@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa-test/spec';
+import type { TestEnvBase } from '@kiwa-test/core';
 
 /**
  * SolidJS component test adapter. Wraps @solidjs/testing-library's `render`

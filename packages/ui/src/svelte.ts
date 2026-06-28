@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa-test/spec';
+import type { TestEnvBase } from '@kiwa-test/core';
 
 /**
  * Svelte component test adapter. Wraps @testing-library/svelte's `render` so the

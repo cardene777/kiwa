@@ -15,7 +15,7 @@ async function loadModule() {
 }
 
 const FULL = {
-  '@kiwa-test/spec': { lines: 96, branches: 82, functions: 100, statements: 96 },
+  '@kiwa-test/core': { lines: 96, branches: 82, functions: 100, statements: 96 },
   '@kiwa-test/api': { lines: 98, branches: 91, functions: 100, statements: 98 },
   '@kiwa-test/ui': { lines: 93, branches: 81, functions: 100, statements: 93 },
   '@kiwa-test/data': { lines: 99, branches: 90, functions: 95, statements: 99 },
@@ -23,7 +23,7 @@ const FULL = {
   '@kiwa-test/observability': { lines: 99, branches: 81, functions: 100, statements: 99 },
   '@kiwa-test/e2e': { lines: 100, branches: 85, functions: 100, statements: 100 },
   '@kiwa-test/cli': { lines: 94, branches: 82, functions: 100, statements: 94 },
-  '@kiwa-test/core': { lines: 98, branches: 90, functions: 100, statements: 98 },
+  '@kiwa-test/dapp': { lines: 98, branches: 90, functions: 100, statements: 98 },
 };
 
 describe('scripts/post-coverage-diff.mjs', () => {
@@ -31,16 +31,16 @@ describe('scripts/post-coverage-diff.mjs', () => {
     const mod = await loadModule();
     const out = mod.captureBaseline(FULL);
     const parsed = JSON.parse(out);
-    expect(parsed['@kiwa-test/spec'].lines).toBe(96);
+    expect(parsed['@kiwa-test/core'].lines).toBe(96);
   });
 
   it('annotates regressions with 🔻 and improvements with 🔺', async () => {
     const mod = await loadModule();
-    const baseline = { ...FULL, '@kiwa-test/spec': { lines: 99, branches: 85, functions: 100, statements: 99 } };
+    const baseline = { ...FULL, '@kiwa-test/core': { lines: 99, branches: 85, functions: 100, statements: 99 } };
     const rows = mod.buildDeltaRows(FULL, baseline);
     const markdown = mod.renderMarkdown(rows);
     expect(markdown).toContain('## 📊 Coverage diff');
-    expect(markdown).toContain('@kiwa-test/spec');
+    expect(markdown).toContain('@kiwa-test/core');
     expect(markdown).toContain('🔻'); // regression
   });
 
@@ -56,7 +56,7 @@ describe('scripts/post-coverage-diff.mjs', () => {
   it('marks missing coverage rows as n/a', async () => {
     const mod = await loadModule();
     const partial = { ...FULL };
-    delete (partial as Record<string, unknown>)['@kiwa-test/core'];
+    delete (partial as Record<string, unknown>)['@kiwa-test/dapp'];
     const rows = mod.buildDeltaRows(partial, FULL);
     const markdown = mod.renderMarkdown(rows);
     expect(markdown).toMatch(/@kiwa-test\/core.*n\/a/);

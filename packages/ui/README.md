@@ -26,7 +26,7 @@ Multi-framework component test adapter for kiwa — Vitest + Testing Library + J
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/ui @kiwa-test/spec \
+pnpm add -D @kiwa-test/ui @kiwa-test/core \
   @testing-library/react @testing-library/user-event jsdom \
   react react-dom vitest
 ```

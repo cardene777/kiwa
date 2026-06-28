@@ -29,7 +29,7 @@ Instead, contact the maintainer directly:
 
 ## Scope
 This policy applies to:
-- `@kiwa-test/core` (npm package)
+- `@kiwa-test/dapp` (npm package)
 - `@kiwa-test/cli` (npm package)
 - The kiwa GitHub repository
 Out of scope:

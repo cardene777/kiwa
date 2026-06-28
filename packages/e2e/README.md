@@ -17,12 +17,12 @@ End-to-end test adapter for kiwa — Playwright + built-in HTTP serve helper.
 - navigates to the initial path, and
 - returns a thin `BrowserPageHandle` you can drive from vitest with `getByTestId`, `fill`, `click`, `evaluate`, etc.
 
-Unlike `@kiwa-test/core` (which is anchored on dApp + anvil), `@kiwa-test/e2e` targets generic web apps.
+Unlike `@kiwa-test/dapp` (which is anchored on dApp + anvil), `@kiwa-test/e2e` targets generic web apps.
 
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/e2e @kiwa-test/spec @playwright/test vitest
+pnpm add -D @kiwa-test/e2e @kiwa-test/core @playwright/test vitest
 pnpm exec playwright install chromium
 ```
 

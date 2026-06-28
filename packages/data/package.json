@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/data",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "Data pipeline / queue / cron test adapter for kiwa (in-memory queue + fake clock + delivery semantics)",
   "license": "MIT",
   "author": {
@@ -61,7 +61,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/spec": "workspace:*"
+    "@kiwa-test/core": "workspace:*"
   },
   "peerDependencies": {
     "vitest": "^2"

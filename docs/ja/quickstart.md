@@ -61,7 +61,7 @@ Running 1 test using 1 worker
 ## 自作 test の最小例
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@kiwa-test/core';
+import { dappE2eTest as test, expect } from '@kiwa-test/dapp';
 
 test('dApp が接続できる', async ({ page, dappE2e }) => {
   await page.goto('/');

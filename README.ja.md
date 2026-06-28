@@ -8,8 +8,8 @@
 
 1 つの Layer 1 仕様書から contract / API / component / e2e / a11y / visual test を並列生成。 **11 npm package + 1 PyPI package + Foundry / Hardhat 連携** をカバー。 Coverage + Mutation gate を `scripts/check-{coverage,mutation}-gates.mjs` で **release 時に物理 enforce**。
 
-[![npm version](https://img.shields.io/npm/v/@kiwa-test/core?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-test/core)
-[![npm downloads](https://img.shields.io/npm/dm/@kiwa-test/core?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-test/core)
+[![npm version](https://img.shields.io/npm/v/@kiwa-test/dapp?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-test/dapp)
+[![npm downloads](https://img.shields.io/npm/dm/@kiwa-test/dapp?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-test/dapp)
 [![packages](https://img.shields.io/badge/npm%20packages-11-cb3837?logo=npm)](#whats-in-the-box)
 [![python](https://img.shields.io/badge/PyPI-kiwa--test--py-3776ab?logo=python&logoColor=white)](./kiwa-py)
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
@@ -108,9 +108,9 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 
 | パッケージ | 用途 |
 |---|---|
-| [`@kiwa-test/core`](./packages/core) | Playwright fixture: `window.ethereum` inject、 anvil 起動、 sign、 mine、 time-travel、 EIP-6963 multi-wallet、 ERC-4337 smart account、 custom-error helper |
-| [`@kiwa-test/cli`](./packages/cli) | `kiwa init` で `@kiwa-test/core` と連携した Playwright project を scaffold |
-| [`@kiwa-test/spec`](./packages/spec) | spec markdown parser (9 列の `test-spec-*.md` を `SpecDoc` に変換、 全 adapter 共通) |
+| [`@kiwa-test/dapp`](./packages/core) | Playwright fixture: `window.ethereum` inject、 anvil 起動、 sign、 mine、 time-travel、 EIP-6963 multi-wallet、 ERC-4337 smart account、 custom-error helper |
+| [`@kiwa-test/cli`](./packages/cli) | `kiwa init` で `@kiwa-test/dapp` と連携した Playwright project を scaffold |
+| [`@kiwa-test/core`](./packages/spec) | spec markdown parser (9 列の `test-spec-*.md` を `SpecDoc` に変換、 全 adapter 共通) |
 | [`@kiwa-test/api`](./packages/api) | API integration adapter (Vitest + msw + supertest + Playwright `request`) |
 | [`@kiwa-test/ui`](./packages/ui) | React / Vue / Svelte / SolidJS / Lit / Qwik / Angular / real Chromium 対応 component adapter (render / interaction / snapshot 3 mode) |
 | [`@kiwa-test/data`](./packages/data) | queue / cron / batch adapter (in-memory queue + fake clock + idempotency / DLQ) |
@@ -119,9 +119,9 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 | [`@kiwa-test/observability`](./packages/observability) | run history 収集 / flaky 検出 / coverage report / spec-coverage gap 解析 |
 | [`@kiwa-test/a11y`](./packages/a11y) | accessibility adapter — axe-core 統合 (jsdom + Playwright) |
 | [`@kiwa-test/visual`](./packages/visual) | visual regression adapter — pixelmatch + pngjs による PNG pixel diff |
-| [`kiwa-test-py`](./kiwa-py) (PyPI) | Python pytest adapter — `@kiwa-test/spec` の Python port + requests / httpx adapter |
+| [`kiwa-test-py`](./kiwa-py) (PyPI) | Python pytest adapter — `@kiwa-test/core` の Python port + requests / httpx adapter |
 
-**skill 単独** (npm 依存なし — test file を生成するだけ) でも、 **fixture 単独** (Claude なし — `pnpm add @kiwa-test/core` だけ) でも、 両方併用しても OK。
+**skill 単独** (npm 依存なし — test file を生成するだけ) でも、 **fixture 単独** (Claude なし — `pnpm add @kiwa-test/dapp` だけ) でも、 両方併用しても OK。
 
 ---
 
@@ -242,7 +242,7 @@ kiwa 本体に手を入れた変更を、 publish 前に local の dApp project 
 git clone https://github.com/cardene777/kiwa.git ~/kiwa
 cd ~/kiwa
 pnpm install
-pnpm -F @kiwa-test/core -F @kiwa-test/cli build
+pnpm -F @kiwa-test/dapp -F @kiwa-test/cli build
 
 # 2. 試用先 project で file: 依存を追加
 cd /path/to/your-dapp
@@ -256,12 +256,12 @@ pnpm exec kiwa init     # または: node $HOME/kiwa/packages/cli/dist/index.js 
 
 ### CJS / Next.js 14 プロジェクトとの共存
 
-`@kiwa-test/core` は **ESM と CJS の両方を build 出力** (`dist/index.js` + `dist/index.cjs`) しており、 `import` / `require` どちらも解決できます。 以下いずれの project にもそのまま導入可能:
+`@kiwa-test/dapp` は **ESM と CJS の両方を build 出力** (`dist/index.js` + `dist/index.cjs`) しており、 `import` / `require` どちらも解決できます。 以下いずれの project にもそのまま導入可能:
 
 | Project type | そのまま使える形式 |
 |---|---|
-| Pure ESM (`"type": "module"`) | `import { dappE2eTest } from '@kiwa-test/core'` |
-| Pure CJS (`"type": "commonjs"`) | `const { dappE2eTest } = require('@kiwa-test/core')` |
+| Pure ESM (`"type": "module"`) | `import { dappE2eTest } from '@kiwa-test/dapp'` |
+| Pure CJS (`"type": "commonjs"`) | `const { dappE2eTest } = require('@kiwa-test/dapp')` |
 | Next.js 14 (CJS host + ESM 依存) | 両形式とも解決、 Next は CJS bundle、 Playwright は ESM 実行 |
 
 それでも古い toolchain で `Error: No "exports" main defined` に遭遇した場合は、 kiwa test dir を局所 `package.json` で ESM 化する:
@@ -275,7 +275,7 @@ echo '{"type":"module"}' > tests/kiwa/package.json
 
 ### MetaMask との挙動差 (公開前に確認推奨)
 
-`@kiwa-test/core` は **production 現実的、 ただし挙動差を明示** することを設計方針としています。 default 設定での主な挙動差:
+`@kiwa-test/dapp` は **production 現実的、 ただし挙動差を明示** することを設計方針としています。 default 設定での主な挙動差:
 
 | 挙動 | MetaMask | kiwa (default) | 変更方法 |
 |---|---|---|---|
@@ -305,7 +305,7 @@ echo '{"type":"module"}' > tests/kiwa/package.json
 - 🪞 **並列生成** — 両ランナーが同じ `TC-NNN` ID で出力。 team で Foundry / Hardhat / 両方併用 を自由に選択
 - 🛡️ **Coverage gate 必須化** — Lines ≥ 90%、 Statements ≥ 90%、 **Branches ≥ 80%**、 Funcs ≥ 90%。 4 metric 全部 PASS まで skill が `test-passed` marker を作りません
 
-### Layer 2: dApp E2E fixture (`/kiwa-play` + `@kiwa-test/core`)
+### Layer 2: dApp E2E fixture (`/kiwa-play` + `@kiwa-test/dapp`)
 
 - 🦊 **`window.ethereum` inject** — ブラウザ拡張不要
 - ⚡ **test ごとに anvil 起動** — chain 隔離完全
@@ -317,7 +317,7 @@ echo '{"type":"module"}' > tests/kiwa/package.json
 - 🔁 **`--mode extend`** — 既存 test を壊さず新規観点だけ追加、 4 round flake check 内蔵
 - ❌ **error envelope** — page 境界越しに `code` と `message` を保持
 
-### 業界標準 helper (`@kiwa-test/core`)
+### 業界標準 helper (`@kiwa-test/dapp`)
 
 | Helper | 用途 |
 |---|---|
@@ -381,8 +381,8 @@ kiwa は release 時に **独立した 2 gate** を強制し、 どちらかが�
 | [`@kiwa-test/ui`](./packages/ui) | **91.76 %** | 80 |
 | [`@kiwa-test/cli-test`](./packages/cli-test) | 89.69 % | 80 |
 | [`@kiwa-test/data`](./packages/data) | 86.93 % | 80 |
-| [`@kiwa-test/spec`](./packages/spec) | 85.51 % | 80 |
-| [`@kiwa-test/core`](./packages/core) | 85.09 % | 80 |
+| [`@kiwa-test/core`](./packages/spec) | 85.51 % | 80 |
+| [`@kiwa-test/dapp`](./packages/core) | 85.09 % | 80 |
 | [`@kiwa-test/cli`](./packages/cli) | 84.44 % | 80 |
 | [`@kiwa-test/e2e`](./packages/e2e) | 84.21 % | 80 |
 | [`@kiwa-test/observability`](./packages/observability) | 84.12 % | 80 |
@@ -412,7 +412,7 @@ pnpm gate:coverage                  # Lines/Branches/Functions gate 強制
 | [`defi-swap`](./examples/defi-swap) | 17 / 17 | — | (basic-connect でカバー) | 100 / 87.50 |
 | [`nextjs-token-gating`](./examples/nextjs-token-gating) | 20 / 20 | — | 既存 8 PASS | 100 / 87.50 |
 
-### dApp E2E reference (`@kiwa-test/core` fixture)
+### dApp E2E reference (`@kiwa-test/dapp` fixture)
 
 [`examples/`](./examples/) 配下の 20 dApp で fixture を様々な stack に対して実証:
 
@@ -442,7 +442,7 @@ pnpm gate:coverage                  # Lines/Branches/Functions gate 強制
 ## Multi-Wallet (EIP-6963)
 
 ```ts
-import { dappE2eTest } from '@kiwa-test/core';
+import { dappE2eTest } from '@kiwa-test/dapp';
 
 const test = dappE2eTest.extend({
   wallets: [

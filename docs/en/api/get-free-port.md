@@ -17,7 +17,7 @@ export async function getFreePort(): Promise<number>;
 ## Example
 
 ~~~ts
-import { getFreePort, startAnvil } from '@kiwa-test/core';
+import { getFreePort, startAnvil } from '@kiwa-test/dapp';
 
 const port = await getFreePort();
 const anvil = await startAnvil({ port });
