@@ -6,7 +6,7 @@
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { startAnvil, deployContract } from '@kiwa-test/core';
+import { startAnvil, deployContract } from '@kiwa-test/dapp';
 
 const FOUNDRY_PATH = '{{FOUNDRY_PATH}}';
 const CONTRACT_NAME = 'YourContract';
