@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "HTTP API test adapter for kiwa (Vitest + msw + supertest)",
   "license": "MIT",
   "author": {

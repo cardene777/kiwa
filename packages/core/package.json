@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Core spec language + test environment abstractions for kiwa adapters (dapp / api / ui / data / cli). Renamed from @kiwa-test/spec in v1.0.",
   "license": "MIT",
   "author": {

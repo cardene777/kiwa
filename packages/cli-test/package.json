@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/cli-test",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI / shell / file IO test adapter for kiwa (execFile + temp dir + stdout/stderr snapshot)",
   "license": "MIT",
   "author": {

@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/ui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React component test adapter for kiwa (Vitest + Testing Library + JSDOM)",
   "license": "MIT",
   "author": {

@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI for kiwa (init / doctor commands)",
   "license": "MIT",
   "author": {
