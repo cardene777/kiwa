@@ -3,8 +3,8 @@
 > [🇬🇧 English](./ERRORS.md) • [🇯🇵 日本語](./ERRORS.ja.md)
 
 This document is intended for users who want to inspect kiwa's error design.
-In v0.1.0, `packages/core/src/rpc-handlers.ts` throws errors with EIP-1193-compatible codes,
-and `packages/core/src/fixture.ts` converts them into the envelope returned to the page.
+In v0.1.0, `packages/dapp/src/rpc-handlers.ts` throws errors with EIP-1193-compatible codes,
+and `packages/dapp/src/fixture.ts` converts them into the envelope returned to the page.
 The injector script unwraps that envelope and restores it into a form where page-side `catch` blocks can read `code`.
 
 ## Official EIP-1193 error codes
@@ -32,7 +32,7 @@ This code is not part of the official EIP-1193 set but is used by this implement
 |---|---|
 | `3` | `eth_sendTransaction` transaction rejected (insufficient balance / revert / signer-related viem error) |
 
-code `3` is produced in `packages/core/src/tx.ts`, where an error thrown by viem is caught and normalized into `Eip1193Error(3, 'transaction rejected: ...')`.
+code `3` is produced in `packages/dapp/src/tx.ts`, where an error thrown by viem is caught and normalized into `Eip1193Error(3, 'transaction rejected: ...')`.
 Using `(e as { code?: number }).code === 3` in a page-side `catch` block lets you observe rejection during submission to anvil.
 
 ## Main conditions in kiwa
@@ -55,7 +55,7 @@ These are rejected immediately in core as blocked methods.
 
 ## `BLOCKED_METHODS` list and reasons
 
-`BLOCKED_METHODS` in `packages/core/src/rpc-handlers.ts` is the list used to explicitly reject wallet features that the fixture does not reproduce
+`BLOCKED_METHODS` in `packages/dapp/src/rpc-handlers.ts` is the list used to explicitly reject wallet features that the fixture does not reproduce
 with `4200 (Unsupported Method)`.
 
 | Method | Reason it is blocked |
@@ -94,7 +94,7 @@ type Envelope<T> =
   | { ok: false; error: { code: number; message: string } };
 ```
 
-This envelope is built in `page.exposeFunction('__dappE2eRpc', ...)` in `packages/core/src/fixture.ts`.
+This envelope is built in `page.exposeFunction('__dappE2eRpc', ...)` in `packages/dapp/src/fixture.ts`.
 When `handleRpcRequest()` throws `Eip1193Error`, it keeps that `code` and `message`.
 For a normal `Error` or an unknown exception, it fills in `-32603` before returning.
 

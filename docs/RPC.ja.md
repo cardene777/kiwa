@@ -3,7 +3,7 @@
 > [🇬🇧 English](./RPC.md) • [🇯🇵 日本語](./RPC.ja.md)
 
 本ドキュメントは kiwa の EIP-1193 互換 RPC を確認したい利用者向けです。
-v0.1.0 の core は `packages/core/src/rpc-handlers.ts` で 9 method を直接処理し、
+v0.1.0 の core は `packages/dapp/src/rpc-handlers.ts` で 9 method を直接処理し、
 それ以外は anvil JSON-RPC へ forward します。
 error の返し方は [ERRORS.md](./ERRORS.md) を参照してください。
 

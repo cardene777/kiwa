@@ -108,9 +108,9 @@ kiwa ships in two halves that work together but stand alone:
 
 | Package | Use it for |
 |---|---|
-| [`@kiwa-test/dapp`](./packages/core) | Playwright fixture: inject `window.ethereum`, spawn `anvil`, sign, mine, time-travel, EIP-6963 multi-wallet, ERC-4337 smart accounts, custom-error helpers |
+| [`@kiwa-test/dapp`](./packages/dapp) | Playwright fixture: inject `window.ethereum`, spawn `anvil`, sign, mine, time-travel, EIP-6963 multi-wallet, ERC-4337 smart accounts, custom-error helpers |
 | [`@kiwa-test/cli`](./packages/cli) | `kiwa init` scaffolds a Playwright project wired to `@kiwa-test/dapp` |
-| [`@kiwa-test/core`](./packages/spec) | Spec markdown parser shared by every adapter (9-column `test-spec-*.md` → `SpecDoc`) |
+| [`@kiwa-test/core`](./packages/core) | Spec markdown parser shared by every adapter (9-column `test-spec-*.md` → `SpecDoc`) |
 | [`@kiwa-test/api`](./packages/api) | API integration adapter (Vitest + msw + supertest + Playwright `request`) |
 | [`@kiwa-test/ui`](./packages/ui) | Component adapters for **React / Vue / Svelte / SolidJS / Lit / Qwik / Angular / real Chromium** (render / interaction / snapshot modes) |
 | [`@kiwa-test/data`](./packages/data) | Queue / cron / batch adapter — in-memory queue + fake clock + idempotency / DLQ semantics |
@@ -246,7 +246,7 @@ pnpm -F @kiwa-test/dapp -F @kiwa-test/cli build
 
 # 2. In your test project, add a file: dependency
 cd /path/to/your-dapp
-pnpm add -D file:$HOME/kiwa/packages/core file:$HOME/kiwa/packages/cli
+pnpm add -D file:$HOME/kiwa/packages/dapp file:$HOME/kiwa/packages/cli
 
 # 3. Scaffold from the locally-installed CLI
 pnpm exec kiwa init     # or: node $HOME/kiwa/packages/cli/dist/index.js init
@@ -382,8 +382,8 @@ Lines / Statements / Functions ≥ **90 %**, Branches ≥ **80 %**, across all 1
 | [`@kiwa-test/ui`](./packages/ui) | **91.76 %** | 80 |
 | [`@kiwa-test/cli-test`](./packages/cli-test) | 89.69 % | 80 |
 | [`@kiwa-test/data`](./packages/data) | 86.93 % | 80 |
-| [`@kiwa-test/core`](./packages/spec) | 85.51 % | 80 |
-| [`@kiwa-test/dapp`](./packages/core) | 85.09 % | 80 |
+| [`@kiwa-test/core`](./packages/core) | 85.51 % | 80 |
+| [`@kiwa-test/dapp`](./packages/dapp) | 85.09 % | 80 |
 | [`@kiwa-test/cli`](./packages/cli) | 84.44 % | 80 |
 | [`@kiwa-test/e2e`](./packages/e2e) | 84.21 % | 80 |
 | [`@kiwa-test/observability`](./packages/observability) | 84.12 % | 80 |

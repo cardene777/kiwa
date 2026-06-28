@@ -93,4 +93,4 @@ pnpm -F examples-nextjs-token-gating exec playwright test tests/token-gating.spe
 - contract tests (Foundry + Hardhat): [run-contract-tests.md](./run-contract-tests.md)
 - Layer 1 skill: `.claude/skills/kiwa-design/SKILL.md`
 - Layer 2 Playwright skill: `.claude/skills/kiwa-play/SKILL.md`
-- `@kiwa-test/dapp` fixture spec: `packages/core/src/fixture.ts`
+- `@kiwa-test/dapp` fixture spec: `packages/dapp/src/fixture.ts`

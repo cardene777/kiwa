@@ -2,7 +2,7 @@
 
 kiwa test 実行時の典型エラーと対処。
 
-## A. webServer 起動失敗 — `Cannot find module .../packages/core/dist/tx.js`
+## A. webServer 起動失敗 — `Cannot find module .../packages/dapp/dist/tx.js`
 
 原因 — `@kiwa-test/dapp` の build が race condition で壊れた。 複数 example の `pnpm test` を並列実行すると、 各 example が `pnpm -F @kiwa-test/dapp build` で `dist/` を rmSync するため race する。
 
@@ -94,7 +94,7 @@ function expectCustomError(error: unknown, errorName: string): void {
 
 原因 — `startAnvilCluster` で起動した 2 anvil のうち、 wallet client が片方の chain id しか知らない。
 
-対処 — `resolveAnvilPort(ctx)` で chain id から port を引く構造で wallet mock を組む (PR #146 で `packages/core/src/rpc-handlers.ts` に導入済)。
+対処 — `resolveAnvilPort(ctx)` で chain id から port を引く構造で wallet mock を組む (PR #146 で `packages/dapp/src/rpc-handlers.ts` に導入済)。
 
 ## I. wallet inject script のタイミング
 

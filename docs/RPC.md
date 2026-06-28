@@ -3,7 +3,7 @@
 > [🇬🇧 English](./RPC.md) • [🇯🇵 日本語](./RPC.ja.md)
 
 This document is intended for users who want to inspect kiwa's EIP-1193-compatible RPCs.
-In v0.1.0, core handles 9 methods directly in `packages/core/src/rpc-handlers.ts`,
+In v0.1.0, core handles 9 methods directly in `packages/dapp/src/rpc-handlers.ts`,
 and forwards everything else to anvil JSON-RPC.
 See [ERRORS.md](./ERRORS.md) for how errors are returned.
 

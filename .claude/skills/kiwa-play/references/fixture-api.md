@@ -1,6 +1,6 @@
 # fixture-api.md
 
-`@kiwa-test/dapp` の主要 export API リファレンス。 詳細は kiwa リポ `docs/en/api/` および `packages/core/src/index.ts` を Read。
+`@kiwa-test/dapp` の主要 export API リファレンス。 詳細は kiwa リポ `docs/en/api/` および `packages/dapp/src/index.ts` を Read。
 
 ## 主要 export
 
@@ -158,7 +158,7 @@ await page.addInitScript(createInjectorScript({ chainId: 31337 }));
 
 fixture 内で使う低レベル helper。
 
-詳細は `packages/core/src/fixture.ts` を Read。
+詳細は `packages/dapp/src/fixture.ts` を Read。
 
 ### `waitForWalletConnected`
 
