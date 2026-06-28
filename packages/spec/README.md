@@ -1,5 +1,11 @@
 # @kiwa-test/spec
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package powers spec parsing for every adapter)" width="640" />
+  <br />
+  <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview (127s) — this package is the spec foundation behind every category shown in the video. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">▶ Full-quality MP4 (2.9 MB)</a>.</sub>
+</p>
+
 Common spec language + test environment abstractions for kiwa adapters (core / api / ui / data / cli).
 
 ## Overview

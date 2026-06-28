@@ -1,5 +1,11 @@
 # @kiwa-test/a11y
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package covers the accessibility surface)" width="640" />
+  <br />
+  <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview (127s) — this package covers the accessibility surface shown in the video. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">▶ Full-quality MP4 (2.9 MB)</a>.</sub>
+</p>
+
 Accessibility (a11y) test adapter for the [kiwa](https://github.com/cardene777/kiwa) framework. Thin wrapper around [axe-core](https://github.com/dequelabs/axe-core) that plugs into Vitest + jsdom and Playwright page contexts.
 
 ## Install

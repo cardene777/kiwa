@@ -11,9 +11,9 @@
 `@kiwa-test/cli` は `@kiwa-test/core` を使う Playwright ベース dApp E2E test を scaffold し、 ローカル環境の前提条件 check も行う。
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 概要 — contract test、dApp e2e test、手書きの 3 経路 (本 CLI は dApp e2e 経路を scaffold)" width="640" />
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 127 秒概要 — Web (Next.js) / Contract (Solidity) / dApp (Playwright) の 3 カテゴリで仕様書生成→テスト生成→実行→レビュー→修正→カバレッジ確認の 6 step を完結 (本 CLI は dApp e2e 経路を scaffold)" width="640" />
   <br />
-  <sub><a href="https://github.com/cardene777/kiwa">kiwa</a> 全体の概要動画 — 本 CLI は動画中の dApp e2e セットアップ部分を scaffold する。<a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-ja.mp4">▶ フル画質 MP4</a>。</sub>
+  <sub><a href="https://github.com/cardene777/kiwa">kiwa</a> 全体の概要動画 (127 秒) — 本 CLI は動画中の dApp e2e セットアップ部分を scaffold する。<a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-ja.mp4">▶ フル画質 MP4 (2.8 MB)</a>。</sub>
 </p>
 
 ## インストール

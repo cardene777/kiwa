@@ -7,9 +7,9 @@
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 概要 — contract test、dApp e2e test、手書きの 3 経路" width="640" />
+  <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 127 秒概要 — Web (Next.js) / Contract (Solidity) / dApp (Playwright) の 3 カテゴリで仕様書生成→テスト生成→実行→レビュー→修正→カバレッジ確認の 6 step を完結 (本パッケージは dApp e2e と手書き経路を担う)" width="640" />
   <br />
-  <sub><a href="https://github.com/cardene777/kiwa">kiwa</a> 全体の概要動画 — 本パッケージは dApp e2e と手書き経路を担う。<a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-ja.mp4">▶ フル画質 MP4</a>。</sub>
+  <sub><a href="https://github.com/cardene777/kiwa">kiwa</a> 全体の概要動画 (127 秒) — 本パッケージは dApp e2e と手書き経路を担う。<a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-ja.mp4">▶ フル画質 MP4 (2.8 MB)</a>。</sub>
 </p>
 
 anvil fork 上で動く dApp 向け headless E2E test fixture (Playwright + viem)。
