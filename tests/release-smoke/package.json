@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/a11y -F @kiwa-test/visual build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000",
+    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -14,6 +14,7 @@
     "@kiwa-test/cli-test": "workspace:*",
     "@kiwa-test/data": "workspace:*",
     "@kiwa-test/e2e": "workspace:*",
+    "@kiwa-test/nextjs": "workspace:*",
     "@kiwa-test/observability": "workspace:*",
     "@kiwa-test/core": "workspace:*",
     "@kiwa-test/ui": "workspace:*"

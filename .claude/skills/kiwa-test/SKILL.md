@@ -28,7 +28,7 @@ $ARGUMENTS
 ## オプション
 
 - `--example {name}` — 対象 example 名 (必須、 `examples/{name}/` を参照)
-- `--target {contract|dapp|web|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 3 surface セット (`/kiwa-e2e` + `/kiwa-a11y` + `/kiwa-visual`)、 `both` は contract + dapp、 `all` は contract + dapp + web の 6 surface 全網羅
+- `--target {contract|dapp|web|nextjs|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 3 surface セット (`/kiwa-e2e` + `/kiwa-a11y` + `/kiwa-visual`)、 `nextjs` は Next.js App Router Server Actions (`/kiwa-nextjs`、 Issue #493、 RSC / middleware は #494 / #495)、 `both` は contract + dapp、 `all` は contract + dapp + web + nextjs の 7 surface 全網羅
 - `--runner {foundry|hardhat|both}` — contract test の runner 選択 (省略時は Step 1a で LLM 自動判断 + fallback で AskUserQuestion、 target=dapp 時は無視)
 - `--mode {sequential|parallel}` — target=both 時の実行順 (default `sequential`、 contract → dapp)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 全子 skill に伝播)

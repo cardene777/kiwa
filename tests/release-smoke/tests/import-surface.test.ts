@@ -83,6 +83,14 @@ describe('@kiwa-test/visual surface', () => {
   });
 });
 
+describe('@kiwa-test/nextjs surface', () => {
+  it('exports invokeServerAction + REDIRECT_SYMBOL', async () => {
+    const mod = await import('@kiwa-test/nextjs');
+    expect(typeof mod.invokeServerAction).toBe('function');
+    expect(typeof mod.REDIRECT_SYMBOL).toBe('symbol');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');
