@@ -3,8 +3,8 @@
 > [🇬🇧 English](./ERRORS.md) • [🇯🇵 日本語](./ERRORS.ja.md)
 
 本ドキュメントは kiwa の error 設計を確認したい利用者向けです。
-v0.1.0 では `packages/core/src/rpc-handlers.ts` が EIP-1193 互換 code 付きの error を投げ、
-`packages/core/src/fixture.ts` が page に返す envelope へ変換します。
+v0.1.0 では `packages/dapp/src/rpc-handlers.ts` が EIP-1193 互換 code 付きの error を投げ、
+`packages/dapp/src/fixture.ts` が page に返す envelope へ変換します。
 injector script はそれを unwrap し、page 側の `catch` で `code` を読める形に戻します。
 
 ## EIP-1193 公式 error code
@@ -32,7 +32,7 @@ EIP-1193 公式に含まれないが本実装で利用する code です。
 |---|---|
 | `3` | `eth_sendTransaction` で transaction rejected (insufficient balance / revert / signer 関連 viem error) |
 
-code `3` は `packages/core/src/tx.ts` で viem が throw した error を catch して `Eip1193Error(3, 'transaction rejected: ...')` に正規化したものです。
+code `3` は `packages/dapp/src/tx.ts` で viem が throw した error を catch して `Eip1193Error(3, 'transaction rejected: ...')` に正規化したものです。
 page 側の catch 句で `(e as { code?: number }).code === 3` を使うと、anvil への送信時の reject を観測できます。
 
 ## kiwa での主な発生条件
@@ -55,7 +55,7 @@ page 側の catch 句で `(e as { code?: number }).code === 3` を使うと、an
 
 ## BLOCKED_METHODS 一覧と理由
 
-`packages/core/src/rpc-handlers.ts` の `BLOCKED_METHODS` は、fixture が再現しない wallet 機能を
+`packages/dapp/src/rpc-handlers.ts` の `BLOCKED_METHODS` は、fixture が再現しない wallet 機能を
 `4200 (Unsupported Method)` で明示的に reject するための一覧です。
 
 | Method | blocked 理由 |
@@ -94,7 +94,7 @@ type Envelope<T> =
   | { ok: false; error: { code: number; message: string } };
 ```
 
-この envelope を作るのは `packages/core/src/fixture.ts` の `page.exposeFunction('__dappE2eRpc', ...)` です。
+この envelope を作るのは `packages/dapp/src/fixture.ts` の `page.exposeFunction('__dappE2eRpc', ...)` です。
 `handleRpcRequest()` が `Eip1193Error` を投げた場合はその `code` と `message` を保持し、
 通常の `Error` や unknown 例外なら `-32603` を補って返します。
 

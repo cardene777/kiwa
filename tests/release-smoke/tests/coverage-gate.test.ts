@@ -30,7 +30,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
   it('exit 0 + ✅ for all packages when all summaries meet the thresholds', async () => {
     const fakeRoot = mkdtempSync(join(tmpdir(), 'kiwa-gate-pass-'));
     const packages = [
-      'packages/spec',
+      'packages/core',
       'packages/api',
       'packages/ui',
       'packages/data',
@@ -63,7 +63,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
       const passing = buildSummary({ lines: 95, branches: 85, functions: 95, statements: 95 });
       const failing = buildSummary({ lines: 50, branches: 40, functions: 60, statements: 50 });
       for (const dir of [
-        'packages/spec',
+        'packages/core',
         'packages/api',
         'packages/ui',
         'packages/data',

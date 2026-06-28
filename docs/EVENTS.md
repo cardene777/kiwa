@@ -3,7 +3,7 @@
 > [🇬🇧 English](./EVENTS.md) • [🇯🇵 日本語](./EVENTS.ja.md)
 
 This document is intended for users who want to inspect kiwa's event API.
-In v0.1.0, `packages/core/src/event-emitter.ts` and `packages/core/src/fixture.ts` work together
+In v0.1.0, `packages/dapp/src/event-emitter.ts` and `packages/dapp/src/fixture.ts` work together
 to deliver the four EIP-1193 events to the page side.
 From tests, you can trigger them with `dappE2e.triggerEvent(name, payload)`.
 
