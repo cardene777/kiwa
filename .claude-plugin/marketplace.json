@@ -1,6 +1,6 @@
 {
   "name": "kiwa-marketplace",
-  "description": "kiwa - OSS test framework for dApps. Claude 自動生成 or 手書きで contract / dApp e2e / unit / integration の全レイヤーをカバーする test skill chain。",
+  "description": "kiwa - OSS test framework for dApps + web apps. Claude Code skill chain で contract / dApp e2e / 汎用 e2e / a11y / visual / api / ui / data / cli の 11 観点 × 6 surface を全レイヤーカバーする test 体制を 1 plugin で配布。",
   "owner": {
     "name": "cardene777",
     "email": "cardene777@gmail.com"
@@ -9,8 +9,8 @@
     {
       "name": "kiwa",
       "source": "./",
-      "description": "kiwa skill chain (kiwa-design / kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-api / kiwa-review) を 1 plugin で同梱。 dApp project に install すると Claude Code から /kiwa-design で spec 生成、 /kiwa-forge / /kiwa-hardhat で contract test、 /kiwa-play で dApp e2e、 /kiwa-vitest で unit、 /kiwa-api で integration、 /kiwa-review で review を実行可能。 統合 orchestrator /kiwa-test は examples/ ディレクトリに依存するため kiwa monorepo 専用 (plugin 同梱はするが plugin 利用者経路では起動不可)。",
-      "version": "0.1.1",
+      "description": "kiwa v1.0 — 15 skill chain (kiwa-design / kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-api / kiwa-ui / kiwa-data / kiwa-cli-test / kiwa-e2e / kiwa-a11y / kiwa-visual / kiwa-observe / kiwa-test / kiwa-review) を 1 plugin で同梱。 dApp project に install すると Claude Code から /kiwa-design で 11 観点の test 仕様書を 9 column 表で生成、 /kiwa-forge + /kiwa-hardhat で Foundry / Hardhat contract test、 /kiwa-play で dApp e2e (Playwright + viem + anvil)、 /kiwa-e2e で 汎用 browser e2e、 /kiwa-a11y で accessibility (axe-core)、 /kiwa-visual で visual regression (pixelmatch)、 /kiwa-api + /kiwa-ui + /kiwa-data + /kiwa-cli-test + /kiwa-vitest で各 layer の test 生成、 /kiwa-observe で flaky / spec gap 分析、 /kiwa-review で 3 mode (spec / test / result) review が実行可能。 統合 orchestrator /kiwa-test --target {contract|dapp|web|both|all} で 6 surface 全 chain を 1 コマンド実行 (web は e2e-generic + a11y + visual の 3 surface セット、 all は 6 surface 全網羅)。 runtime fixture は @kiwa-test/* npm v1.0.1 として 11 packages 全公開済。",
+      "version": "1.0.0",
       "author": {
         "name": "cardene777",
         "email": "cardene777@gmail.com"
@@ -26,7 +26,12 @@
         "playwright",
         "foundry",
         "hardhat",
-        "vitest"
+        "vitest",
+        "accessibility",
+        "axe-core",
+        "visual-regression",
+        "pixelmatch",
+        "wcag"
       ]
     }
   ]
