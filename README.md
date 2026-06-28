@@ -163,6 +163,24 @@ Run the chain against [`examples/nextjs-token-gating`](./examples/nextjs-token-g
 
 Same `TC-001 … TC-020` test IDs appear in **both** Foundry and Hardhat output — your team can pick a runner per developer without fragmenting the spec.
 
+### 6-surface chain coverage (Layer 1 → Layer 2 → Layer 3)
+
+Every kiwa surface follows the same `kiwa-design → Layer 2 generator → kiwa-review` chain. The spec format (9 sections) and the 11 viewpoints catalog are shared across all surfaces, so once you learn the contract chain you already know the dApp E2E / generic E2E / a11y / visual / API / UI chains.
+
+| Surface | Layer 1 (spec) | Layer 2 (generator) | Layer 3 (review) | runtime fixture |
+|---|---|---|---|---|
+| contract (Foundry / Hardhat) | `/kiwa-design --layer contract` | `/kiwa-forge` + `/kiwa-hardhat` | `/kiwa-review --layer contract` | `forge` / `hardhat` |
+| dApp e2e (Playwright + viem + anvil) | `/kiwa-design --layer e2e` | `/kiwa-play` | `/kiwa-review --layer e2e` | `@kiwa-test/dapp` |
+| generic browser e2e (non-web3) | `/kiwa-design --layer e2e-generic` | `/kiwa-e2e` | `/kiwa-review --layer e2e-generic` | `@kiwa-test/e2e` |
+| accessibility (WCAG 2.1 AA) | `/kiwa-design --layer a11y` | `/kiwa-a11y` | `/kiwa-review --layer a11y` | `@kiwa-test/a11y` (axe-core) |
+| visual regression (pixel diff) | `/kiwa-design --layer visual` | `/kiwa-visual` | `/kiwa-review --layer visual` | `@kiwa-test/visual` (pixelmatch) |
+| HTTP API (REST / GraphQL) | `/kiwa-design --layer api` | `/kiwa-api` | `/kiwa-review --layer api` | `@kiwa-test/api` |
+| React component | `/kiwa-design --layer ui` | `/kiwa-ui` | `/kiwa-review --layer ui` | `@kiwa-test/ui` |
+| queue / cron / batch | `/kiwa-design --layer data` | `/kiwa-data` | `/kiwa-review --layer data` | `@kiwa-test/data` |
+| CLI / shell / file IO | `/kiwa-design --layer cli` | `/kiwa-cli-test` | `/kiwa-review --layer cli` | `@kiwa-test/cli-test` |
+
+`/kiwa-test --target {contract|dapp|web|both|all}` orchestrates the chain end-to-end for any subset of surfaces — `web` runs the generic e2e / a11y / visual trio against the same `app/` source, and `all` covers all 6 web-side surfaces (contract + dapp + web). The integrated report at `tests/reports/integrated/{example}-{target}.{lang}.md` aggregates every surface's pass/fail count, coverage, and reviewer score in one table.
+
 ---
 
 ## Quickstart

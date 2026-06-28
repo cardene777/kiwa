@@ -41,7 +41,7 @@ $ARGUMENTS
 
 - `--module {name}` — 出力 file 名のキー (出力 path は `--layer` と組み合わせて決定)、 単数指定
 - `--modules {name1,name2,name3}` — 複数 module を 1 回起動で batch 処理 (Issue #221)、 `--module` と排他、 `,` 区切り、 各 module 名は `[a-z0-9-]+` 制約。 内部実装は Step 1-5 全体を module 単位で順次回し、 module 数 N について N 個の spec を Write、 最後に「contract 間連携」 section を 1 つだけ生成する (詳細は下記 § --modules batch 起動規約 を参照)
-- `--layer {contract|e2e|integration|unit|all}` — 想定 test layer を指定 (default `all`、 出力 path と推奨観点が変わる)
+- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|integration|unit|all}` — 想定 test layer を指定 (default `all`、 出力 path と推奨観点が変わる)。 `e2e` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play` 消費)、 `e2e-generic` は非 web3 汎用 browser e2e (Playwright + @kiwa-test/e2e、 `/kiwa-e2e` 消費)、 `a11y` は accessibility (axe-core + @kiwa-test/a11y、 `/kiwa-a11y` 消費)、 `visual` は visual regression (pixelmatch + @kiwa-test/visual、 `/kiwa-visual` 消費)
 - `--input {path}` — 機能仕様 file の path (省略時は対話形式で要約を求める)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-examples` — examples/ サンプル参照をスキップ (skill 内部の参照のみで仕様書を生成)
@@ -54,7 +54,10 @@ $ARGUMENTS
 | `--layer` | 出力 path | 主要消費 Layer 2 skill |
 |---|---|---|
 | `contract` | `tests/spec/contract/test-spec-{module}.md` | `/kiwa-forge` / `/kiwa-hardhat` |
-| `e2e` | `tests/spec/e2e/test-spec-{module}.md` | `/kiwa-play` |
+| `e2e` | `tests/spec/e2e/test-spec-{module}.md` | `/kiwa-play` (dApp e2e、 wallet inject / contract deploy / multi-chain 対応) |
+| `e2e-generic` | `tests/spec/integration/test-spec-{module}.e2e.md` | `/kiwa-e2e` (汎用 browser e2e、 static html / fetch app / SSR、 web3 非依存) |
+| `a11y` | `tests/spec/integration/test-spec-{module}.a11y.md` | `/kiwa-a11y` (axe-core + WCAG 2.1 AA、 jsdom / playwright 2 mode) |
+| `visual` | `tests/spec/integration/test-spec-{module}.visual.md` | `/kiwa-visual` (pixelmatch + threshold + mask、 Playwright screenshot / DOM snapshot) |
 | `integration` | `tests/spec/integration/test-spec-{module}.md` | `/kiwa-api` (Vitest + msw + supertest、 @kiwa-test/api) |
 | `api` | `tests/spec/integration/test-spec-{module}.api.md` | `/kiwa-api` (HTTP / REST / GraphQL 専用、 mode column 必須) |
 | `ui` | `tests/spec/integration/test-spec-{module}.ui.md` | `/kiwa-ui` (React component 専用、 render / interaction / snapshot 3 mode、 `@kiwa-test/ui`) |
@@ -381,6 +384,68 @@ mode column が `mock` = in-memory queue + fake clock、 `live` = 将来 SQS / K
 | T-API-001 | GET 正常系 | items=[] | GET /api/items | 200 + [] を返す | P0 | yes | live | /api/items |
 | T-API-008 | mock で固定応答 | (mock 上書き) | GET /api/items | mock handler の固定応答が返る | P1 | yes | mock | /api/items |
 ```
+
+#### e2e-generic layer 専用 column (汎用 browser e2e)
+
+`--layer e2e-generic` 指定時は 非 web3 文脈の browser e2e セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-test/e2e` の `setupE2eEnv` mode と直接 mapping するため、 dApp 文脈の `--layer e2e` (`/kiwa-play` 消費) とは独立)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-E2E-001` 等の連番 |
+| Observation | 観点 (正常導線 / form 入力 / 認証 / error 表示 / 遷移 等) |
+| Given | 前提 (URL / 初期 state / fetch mock seed / cookie 等) |
+| When | 操作 (`goto /login` / `fill email` / `click submit` 等の Playwright semantic) |
+| Then | 期待 (`url が /dashboard` / `text "ようこそ" が見える` 等の page assertion) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Mode | `static` / `fetch` / `node` / `ssr` (`setupE2eEnv({ mode })` と 1 対 1) |
+| Route | `/login` / `/dashboard` 等の URL path |
+
+mode column が `static` = file:// or static html、 `fetch` = client side fetch を mock、 `node` = node サーバ起動 + browser から接続、 `ssr` = Next.js / Nuxt 等 SSR 框架 dev server。
+`/kiwa-e2e` Layer 2 skill が本 9 column を `@kiwa-test/e2e/setupE2eEnv` の引数に機械変換する。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.e2e.md` (`.e2e.md` suffix で `@kiwa-test/e2e` 経路向けと識別、 dApp の `tests/spec/e2e/test-spec-{module}.md` とは path で区別)。
+
+#### a11y layer 専用 column (accessibility)
+
+`--layer a11y` 指定時は WCAG 2.1 AA セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-test/a11y` の `runAxe` / `expectNoViolations` と直接 mapping)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-A11Y-001` 等の連番 |
+| Observation | 観点 (color-contrast / keyboard-nav / aria-label / role / form-label 等) |
+| Component | `<LoginForm />` / `#main` 等の対象要素識別子 |
+| WCAG-rule | `color-contrast` / `label` / `button-name` 等 axe-core rule ID |
+| Severity | `critical` / `serious` / `moderate` / `minor` (axe-core impact 値と一致) |
+| Expected | 期待 (`違反 0 件` / `すべて pass` 等の axe 結果 assertion) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Mode | `jsdom` / `playwright` (`runAxe({ mode })` と 1 対 1) |
+
+mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `playwright` = 実 browser に @axe-core/playwright を inject して評価。
+`/kiwa-a11y` Layer 2 skill が本 9 column を `@kiwa-test/a11y` API に機械変換する。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.a11y.md` (`.a11y.md` suffix で `@kiwa-test/a11y` 経路向けと識別)。
+
+#### visual layer 専用 column (visual regression)
+
+`--layer visual` 指定時は pixel-level 比較セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-test/visual` の `comparePngBuffers` / `expectNoVisualDiff` と直接 mapping)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-VIS-001` 等の連番 |
+| State | screenshot 対象状態 (`default` / `hover` / `error` / `loading` 等) |
+| Component | `<Button />` / `header` 等の対象要素識別子 |
+| Viewport | `375x667` / `1280x720` 等の解像度 (mobile / tablet / desktop) |
+| Threshold | 許容 diff 比率 (`0.001` / `0.01` 等の pixelmatch threshold) |
+| Mask | 動的領域 mask セレクタ (時刻 / カウンタ / アバター等を `[data-testid=ts]` で除外) |
+| Expected | 期待 (`baseline と diff ≦ threshold` 等の assertion) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+
+`/kiwa-visual` Layer 2 skill が本 9 column を `@kiwa-test/visual` API に機械変換する。 baseline 画像は `tests/visual/baseline/` 配下、 diff 失敗時は `tests/visual/diff/` に actual / expected / diff の 3 枚を生成する。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.visual.md` (`.visual.md` suffix で `@kiwa-test/visual` 経路向けと識別)。
 
 ### Step 5: 優先度付け + 自動化方針
 
