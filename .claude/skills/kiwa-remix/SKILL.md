@@ -1,9 +1,9 @@
 ---
 name: kiwa-remix
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.remix.md` / `.remix-action.md`) を Remix v2 / React Router v7 の loader + action + Resource Routes test (Vitest + @kiwa-test/remix) に変換する Layer 2 skill。
-  `loader({ request, params, context })` を `invokeLoader` で direct invoke、 `action({ request, params, context })` を `invokeAction` で invoke、 Response (200 / 3xx redirect) を自動 normalize して assert 可能化する。
-  `/kiwa-design --layer remix-loader` / `--layer remix-action` が出力する 9 column 表を `@kiwa-test/remix` の API に機械的に変換する。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.{remix|remix-action|resource}.md`) を Remix v2 / React Router v7 の 3 mode (loader + action + Resource Routes) test (Vitest + @kiwa-test/remix) に変換する Layer 2 skill。
+  `loader({ request, params, context })` を `invokeLoader` で direct invoke、 `action({ request, params, context })` を `invokeAction` で invoke、 Resource Routes は `invokeResourceRoute` で HTTP method dispatch (GET/HEAD → loader、 POST/PUT/PATCH/DELETE → action) + 該当 export 不在は 405 + allow header + methodNotAllowed signal 自動 return、 Response (200 / 3xx redirect / binary download / json) を自動 normalize して assert 可能化する。
+  `/kiwa-design --layer remix-loader` / `--layer remix-action` / `--layer remix-resource-route` が出力する 9 column 表を `@kiwa-test/remix` v1.0.2+ の API に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -83,9 +83,63 @@ it('{ID} {Observation}', async () => {
 });
 ```
 
+## Resource Routes mode (Issue #523、 v1.0.2+)
+
+Resource Routes は UI を return しない route module (`{ loader?, action? }`) で、 HTTP method dispatch によって loader / action を使い分け、 binary download / CSV / JSON / 405 response を直接生成する。 `invokeResourceRoute({ route, url, method, params?, context?, headers?, formData?, jsonBody? })` で method 別に dispatch + 該当 export 不在は 405 + `allow: 'GET, HEAD'` 等の header + `RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL` branded signal を自動 return する。 既存 `invokeLoader` / `invokeAction` の Response normalize / redirect signal を内部で reuse。
+
+### 9 column 拡張表 (`/kiwa-design --layer remix-resource-route`)
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-RR-001` 等の連番 |
+| Observation | 観点 (GET → loader / POST → action / 405 method-not-allowed / case-insensitive method / binary download / redirect / formData / jsonBody / params 伝搬 等) |
+| Given | URL + method + params + headers + context + body (formData / jsonBody) seed |
+| Method | HTTP method (`GET` / `HEAD` / `POST` / `PUT` / `PATCH` / `DELETE`、 case-insensitive) |
+| Then | 期待 (`dispatch==='loader'`、 `dispatch==='action'`、 `dispatch==='method-not-allowed'`、 `response.status===405`、 `methodNotAllowed.allow===['GET','HEAD']`、 `response.headers.get('allow')==='GET, HEAD'`、 `await response.arrayBuffer()` binary 一致) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Route | 対象 resource route の identifier (`app/routes/api.export.csv.ts` / `app/routes/api.items.ts` 等) |
+| Module | 提供する export 群 (`loader` / `action` / `loader+action`) |
+
+### test 生成 template
+
+```ts
+import { invokeResourceRoute, RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL } from '@kiwa-test/remix';
+import * as exportRoute from '../app/routes/api.export.csv.js';
+
+it('{ID} {Observation}', async () => {
+  const { dispatch, response, redirect, methodNotAllowed, error } = await invokeResourceRoute({
+    route: exportRoute, // { loader, action } module
+    url: 'http://localhost{Given.url}',
+    method: '{Method}',
+    params: {Given.params},
+    headers: {Given.headers},
+    formData: {Given.formData},  // or jsonBody: {...}
+  });
+  {Then を expect(dispatch).toBe('loader') や expect(methodNotAllowed?.allow).toEqual(['POST','PUT']) に展開}
+});
+```
+
+### 11 観点 → invokeResourceRoute mapping
+
+| 観点 | 使い方 |
+|---|---|
+| 正常系 | GET + loader → `dispatch==='loader'`、 `response.status===200` |
+| 異常系 | action throw → `dispatch==='action'`、 `error` に Error |
+| 境界値 | empty module (`{}`) → 405 + empty allow list、 case-insensitive method (`get`) → loader dispatch |
+| 状態遷移 | POST → action → 動作後 GET → loader で state read (resource lifecycle) |
+| 権限 | header 不在 → action 内 `throw redirect('/login', 302)` → `redirect` capture |
+| 入力バリデーション | 不正 jsonBody → action 内 4xx response → `response.status===400` |
+| 冪等性 | GET 2 回呼んで `response.body` 一致 |
+| 性能 | binary download の大 size response、 `performance.now()` で wrap |
+| セキュリティ | content-type sniff、 unsafe header injection 防止 |
+| 回帰 | 既知 405 dispatch bug の retry 経路 |
+
+出力 path 規約 ... `tests/spec/integration/test-spec-{module}.resource.md`。
+
 ## 関連
 
-- 上流 ... `/kiwa-design --layer remix-loader` / `--layer remix-action`
-- runtime fixture ... `@kiwa-test/remix` v1.0+ (`packages/remix/`)
-- 下流 ... `/kiwa-review --layer remix-loader` / `--layer remix-action`
+- 上流 ... `/kiwa-design --layer {remix-loader|remix-action|remix-resource-route}`
+- runtime fixture ... `@kiwa-test/remix` v1.0.2+ (`packages/remix/`)
+- 下流 ... `/kiwa-review --layer {remix-loader|remix-action|remix-resource-route}`
 - client component (React) ... `/kiwa-ui` (React mode)
