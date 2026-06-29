@@ -1,5 +1,12 @@
 # examples-nextjs-rsc-poc
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [5c3ad4b]
+  - @kiwa-test/nextjs@1.0.5
+
 ## 0.0.1
 
 ### Patch Changes

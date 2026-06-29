@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/remix",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Remix v2 / React Router v7 loader + action + Resource Routes test adapter for kiwa — invoke loaders / actions / Resource Route modules in isolation with simulated Request / params / context, dispatch by HTTP method, and capture redirect / json / binary / 405 method-not-allowed without a running Remix server (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {
