@@ -370,6 +370,37 @@ See [docs/COMPARISON.md](./docs/COMPARISON.md) for the full comparison tables (S
 
 ---
 
+## Runtime support
+
+`@kiwa-test/*` packages target **Node.js 22+** as the production baseline. **Bun** (`bun.sh`) is also supported for the entire 19-package matrix — all packages pass Vitest under Bun without modification.
+
+| Runtime | Status | Verification |
+|---|---|---|
+| Node.js 22+ | ✅ primary | Main `release.yml` workflow runs Vitest + coverage + mutation gates |
+| Bun 1.3+ | ✅ supported (v1.2+) | `.github/workflows/test-bun.yml` runs `bunx --bun vitest run` over all 19 packages |
+| Deno | ❌ tracked in v1.2 | [#521](https://github.com/cardene777/kiwa/issues/521) |
+| Cloudflare Workers / Vercel Edge | ✅ via [`@kiwa-test/edge`](./packages/edge) | KV mock + `invokeEdgeHandler` (Miniflare 不要) |
+
+### Running tests under Bun locally
+
+```bash
+# install deps (still requires pnpm)
+pnpm install
+
+# run a single package's tests under Bun
+cd packages/edge
+bunx --bun vitest run
+
+# loop over every package
+for pkg in core api ui data cli-test observability e2e cli a11y visual nextjs nuxt sveltekit remix astro solidstart qwikcity edge; do
+  (cd packages/$pkg && bunx --bun vitest run)
+done
+```
+
+Vitest itself doesn't need a Bun-specific runner — Vitest's Node compat surface is exercised through Bun's Node API shim. `bun test` (Bun's native runner) is NOT used because Vitest's API surface (`describe` / `it` / `vi.mock`) is incompatible with Bun's native runner.
+
+---
+
 ## Coverage requirement
 
 `/kiwa-forge` and `/kiwa-hardhat` **block the `test-passed` marker** until all four coverage metrics clear thresholds. Default values (tuned for OSS-grade smart contracts):
@@ -595,7 +626,8 @@ Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested thro
 | **SolidStart Server Functions + API Routes** | ✅ shipped in v1.0.0 — `/kiwa-solidstart` + `invokeServerFunction` / `invokeApiRoute` | (n/a, fully supported) | [#518](https://github.com/cardene777/kiwa/issues/518) ✅ resolved |
 | **Qwik City routeAction + routeLoader + Endpoints** | ✅ shipped in v1.0.0 — `/kiwa-qwikcity` + `invokeRouteAction` / `invokeRouteLoader` / `invokeEndpoint` | (n/a, fully supported) | [#519](https://github.com/cardene777/kiwa/issues/519) ✅ resolved |
 | **Python pytest adapter (PyPI publish)** | ✅ shipped in v1.0.0 — `pip install kiwa-test-py` | (n/a, fully supported) | [#492](https://github.com/cardene777/kiwa/issues/492) ✅ resolved |
-| **Bun / Deno runtimes** | ❌ targets Node.js 22+ only | Use Node compatibility | (tracked in v1.2) |
+| **Bun runtime (`bun.sh`)** | ✅ shipped in v1.2 — all 19 packages pass Vitest under Bun via `bunx --bun vitest run` (verified locally + CI workflow `.github/workflows/test-bun.yml`) | (n/a, pnpm install + bunx vitest) | [#520](https://github.com/cardene777/kiwa/issues/520) ✅ resolved |
+| **Deno runtime** | ❌ targets Node.js 22+ / Bun only | Use Node or Bun compatibility | [#521](https://github.com/cardene777/kiwa/issues/521) (v1.2) |
 | **Edge runtime (Cloudflare Workers / Vercel Edge)** | ✅ shipped in v1.0.0 — `/kiwa-edge` + `invokeEdgeHandler` + `createKvNamespace` (Miniflare 不要、 pure JS mock) | (n/a, fetch handler + KV fully supported; R2 / D1 / DurableObject は test 側 vi.fn() で対応) | [#522](https://github.com/cardene777/kiwa/issues/522) ✅ resolved |
 | **Desktop (Electron / Tauri) / mobile (React Native / Expo)** | ❌ out of scope | Use platform-native test tooling | not on roadmap |
 | **ORM (Drizzle / Prisma / Kysely) query test layer** | ❌ no dedicated adapter | Use `/kiwa-vitest` + testcontainers | (tracked in v1.2) |
