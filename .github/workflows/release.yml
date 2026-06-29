@@ -108,8 +108,8 @@ jobs:
       - name: Coverage gate (fail if any package < 90/80/90/90)
         run: node scripts/check-coverage-gates.mjs
 
-      - name: Mutation (all 11 packages)
-        run: pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/dapp -F @kiwa-test/a11y -F @kiwa-test/visual --no-bail run test:mutation
+      - name: Mutation (all 16 packages)
+        run: pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/dapp -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/remix -F @kiwa-test/astro --no-bail run test:mutation
 
       - name: Mutation gate (fail if any package MSI < per-package threshold)
         run: node scripts/check-mutation-gates.mjs
