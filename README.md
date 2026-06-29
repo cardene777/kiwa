@@ -576,6 +576,7 @@ kiwa v1.0 ships **complete coverage for the layers below**. The table is exhaust
 | Remix v2 / React Router v7 loader + action | ✅ production-ready (v1.0.0+) | `/kiwa-remix` (`--layer remix-loader` / `--layer remix-action`) | `@kiwa-test/remix` v1.0.0 |
 | Astro Server Endpoints (`pages/api/*.ts`) | ✅ production-ready (v1.0.0+) | `/kiwa-astro` (`--layer astro-endpoint`) | `@kiwa-test/astro` v1.0.0 |
 | SolidStart Server Functions + API Routes | ✅ production-ready (v1.0.0+) | `/kiwa-solidstart` (`--layer solidstart-server-function` / `--layer solidstart-api-route`) | `@kiwa-test/solidstart` v1.0.0 |
+| Qwik City routeAction + routeLoader + Endpoints | ✅ production-ready (v1.0.0+) | `/kiwa-qwikcity` (`--layer qwikcity-action` / `--layer qwikcity-loader` / `--layer qwikcity-endpoint`) | `@kiwa-test/qwikcity` v1.0.0 |
 
 Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested through `/kiwa-ui` (React / Vue / Svelte component layer) plus `/kiwa-e2e` (browser layer). Next.js **API Routes** under `app/api/*/route.ts` are tested through `/kiwa-api` (`examples/nextjs-api-poc/` is a working reference).
 
@@ -591,7 +592,7 @@ Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested thro
 | **Remix / React Router v7 loader / action** | ✅ shipped in v1.0.0 — `/kiwa-remix` + `invokeLoader` / `invokeAction` | (n/a, loader + action fully supported including Response normalize) | [#498](https://github.com/cardene777/kiwa/issues/498) ✅ resolved |
 | **Astro Server Endpoints** | ✅ shipped in v1.0.0 — `/kiwa-astro` + `invokeEndpoint` | (n/a, Server Endpoints fully supported; Islands → kiwa-ui framework adapter; `.astro` rendering → Astro Container API direct) | [#499](https://github.com/cardene777/kiwa/issues/499) ✅ resolved |
 | **SolidStart Server Functions + API Routes** | ✅ shipped in v1.0.0 — `/kiwa-solidstart` + `invokeServerFunction` / `invokeApiRoute` | (n/a, fully supported) | [#518](https://github.com/cardene777/kiwa/issues/518) ✅ resolved |
-| **Qwik City actions** | ❌ no skill | Hand-write | [#519](https://github.com/cardene777/kiwa/issues/519) (v1.2) |
+| **Qwik City routeAction + routeLoader + Endpoints** | ✅ shipped in v1.0.0 — `/kiwa-qwikcity` + `invokeRouteAction` / `invokeRouteLoader` / `invokeEndpoint` | (n/a, fully supported) | [#519](https://github.com/cardene777/kiwa/issues/519) ✅ resolved |
 | **Python pytest adapter (PyPI publish)** | ✅ shipped in v1.0.0 — `pip install kiwa-test-py` | (n/a, fully supported) | [#492](https://github.com/cardene777/kiwa/issues/492) ✅ resolved |
 | **Bun / Deno runtimes** | ❌ targets Node.js 22+ only | Use Node compatibility | (tracked in v1.2) |
 | **Edge runtime (Cloudflare Workers / Vercel Edge)** | ❌ not tested | Hand-write Miniflare | (tracked in v1.2) |

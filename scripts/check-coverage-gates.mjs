@@ -38,6 +38,7 @@ const PACKAGES = [
   '@kiwa-test/remix',
   '@kiwa-test/astro',
   '@kiwa-test/solidstart',
+  '@kiwa-test/qwikcity',
 ];
 
 const PKG_DIRS = {
@@ -58,6 +59,7 @@ const PKG_DIRS = {
   '@kiwa-test/remix': 'packages/remix',
   '@kiwa-test/astro': 'packages/astro',
   '@kiwa-test/solidstart': 'packages/solidstart',
+  '@kiwa-test/qwikcity': 'packages/qwikcity',
 };
 
 // Lines / functions / statements stay at 90. Branches stay at 80 because the
