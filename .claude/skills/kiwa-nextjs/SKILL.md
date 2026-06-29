@@ -1,9 +1,9 @@
 ---
 name: kiwa-nextjs
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.nextjs.md` / `.middleware.md` / `.rsc.md`) を Next.js App Router の Server Actions + middleware + RSC test (Vitest + @kiwa-test/nextjs) に変換する Layer 2 skill。
-  Server Actions (`'use server'`) は `invokeServerAction` で direct invoke、 middleware は `invokeMiddleware` で simulated request 経由で捕捉、 RSC は `renderServerComponent` で async server component を await + element tree を `findAll` / `textContent` で検証、 全 mode で redirect / not-found / forbidden の throw signal も捕捉する。
-  `/kiwa-design --layer nextjs-server-action` / `--layer nextjs-middleware` / `--layer nextjs-rsc` が出力する 9 column 表を `@kiwa-test/nextjs` の API に機械的に変換する。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.nextjs.md` / `.middleware.md` / `.rsc.md` / `.parallel.md`) を Next.js App Router の 4 mode (Server Actions + middleware + RSC + Parallel Routes + Intercepting Routes) test (Vitest + @kiwa-test/nextjs) に変換する Layer 2 skill。
+  Server Actions (`'use server'`) は `invokeServerAction` で direct invoke、 middleware は `invokeMiddleware` で simulated request 経由で捕捉、 RSC は `renderServerComponent` で async server component を await + element tree を `findAll` / `textContent` で検証、 Parallel Routes は `invokeParallelRoutes` で全 slot 並列 await + per-slot error isolation + Intercepting variant 切替を捕捉、 全 mode で redirect / not-found / forbidden の throw signal も捕捉する。
+  `/kiwa-design --layer nextjs-server-action` / `--layer nextjs-middleware` / `--layer nextjs-rsc` / `--layer nextjs-parallel-route` が出力する 9 column 表を `@kiwa-test/nextjs` v1.0.4+ の API に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -215,3 +215,63 @@ it('{ID} {Observation}', async () => {
 ```
 
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.rsc.md`。
+
+## Parallel Routes mode (Issue #523、 v1.0.4+)
+
+App Router の Parallel Routes (`layout({ children, @modal, @sidebar })`) と Intercepting Routes (`(.)` / `(..)` / `(...)`) を `invokeParallelRoutes({ layout, children, slots })` で render する。 全 slot は `Promise.all` で並列 await (slow slot が fast slot を block しない)、 per-slot error は `slotResults[]` に capture (broken slot が layout 全体を倒さない)。 Intercepting Routes の soft-vs-hard navigation 切替は `intercepting: { variant: 'intercepted' | 'default', url, distance }` で表現、 `variant: 'default'` 時は `defaultFallback` を強制 render する (hard-nav 経路を test 内で再現)。
+
+### 9 column 拡張表 (`/kiwa-design --layer nextjs-parallel-route`)
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-PR-001` 等の連番 |
+| Observation | 観点 (multi-slot render / parallel await / per-slot error isolation / default fallback / intercepting variant / zero slots edge case 等) |
+| Layout | 対象 layout 関数の identifier (`DashboardLayout` / `PhotoFeedLayout` 等) |
+| Slots | slot 配列 (`[{ slot: 'modal', component: PhotoModal, defaultFallback?, intercepting? }, { slot: 'sidebar', component: Sidebar }]`) |
+| Children | `children` slot の component + props (`{ component: PostsPage, props: { page: 1 } }`) |
+| Then | 期待 (`tree.tag==='layout'` / `slotResults[0].tree===...` / `slotResults[0].error.message==='boom'` / `slotResults[0].interception.variant==='intercepted'` / `slotResults[0].usedDefault===true`) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Variant | Intercepting 動作 (`none` / `intercepted` (soft-nav) / `default` (hard-nav)) |
+
+### Intercepting Routes 対応
+
+`intercepting.variant === 'intercepted'` → component を render しつつ `InterceptionMatch` を `slotResults[].interception` に capture (soft-nav 経路の test)。 `intercepting.variant === 'default'` → component を無視して `defaultFallback` を強制 render (hard-nav 経路 = full-page reload で `default.tsx` が選ばれる動作を test)。 `distance` は `'sibling'` (default) / `'parent'` / `'root'` で URL match の階層を表現。
+
+### test 生成 template
+
+```ts
+import { invokeParallelRoutes, PARALLEL_INTERCEPTION_SYMBOL } from '@kiwa-test/nextjs';
+import DashboardLayout from '../app/dashboard/layout.js';
+import PhotoModal from '../app/dashboard/@modal/photo/page.js';
+import Sidebar from '../app/dashboard/@sidebar/page.js';
+import PostsPage from '../app/dashboard/posts/page.js';
+
+it('{ID} {Observation}', async () => {
+  const { tree, slotResults, childrenError, layoutError } = await invokeParallelRoutes({
+    layout: DashboardLayout,
+    children: PostsPage,
+    childrenProps: {Children.props を展開},
+    slots: [
+      { slot: 'modal', component: PhotoModal{Variant が intercepted/default なら intercepting field 追加} },
+      { slot: 'sidebar', component: Sidebar },
+    ],
+  });
+  {Then を expect(slotResults[0].tree).toBeDefined() や expect(slotResults[0].interception?.variant).toBe('intercepted') 等に展開}
+});
+```
+
+### 11 観点 → invokeParallelRoutes mapping
+
+| 観点 | 使い方 |
+|---|---|
+| 正常系 | 全 slot 正常 component → `slotResults.every(s => s.error === undefined)` |
+| 異常系 | broken slot 注入 → `slotResults[idx].error` 捕捉、 他 slot は影響なし |
+| 境界値 | zero slots / null component + defaultFallback / empty children |
+| 状態遷移 | intercepting.variant 切替で soft-vs-hard nav の render result 差分検証 |
+| 並行処理 | slow + fast slot 混在 → 完了順を sequence で記録、 fast が先 (parallel 確認) |
+| 入力バリデーション | defaultFallback 無しで component=null → `error` 捕捉 |
+| 性能 | slow slot wall time を `performance.now()` で計測、 sequential なら sum、 parallel なら max |
+| 回帰 | Intercepting Routes 既知 bug 再現 URL → expected variant + distance |
+
+出力 path 規約 ... `tests/spec/integration/test-spec-{module}.parallel.md`。
