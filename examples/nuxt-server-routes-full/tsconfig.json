@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["node", "vitest"]
+  },
+  "include": ["server/**/*.ts", "middleware/**/*.ts", "pages/**/*.ts"],
+  "exclude": ["node_modules", "dist", ".vitest-dist", ".nuxt", "tests/**", "playwright.config.ts"]
+}

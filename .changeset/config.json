@@ -34,6 +34,7 @@
     "examples-nextjs-wagmi-rainbow",
     "examples-nextjs-zk-verifier",
     "examples-nft-marketplace",
-    "examples-vite-react-wagmi"
+    "examples-vite-react-wagmi",
+    "examples-nuxt-server-routes-full"
   ]
 }

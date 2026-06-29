@@ -512,6 +512,18 @@ These three examples have **forge test + hardhat test (where applicable) + playw
 | [`nextjs-zk-verifier`](./examples/nextjs-zk-verifier) | Commit-reveal + range proof variant | 7 |
 | [`nft-marketplace`](./examples/nft-marketplace) | List / buy / offer / royalty split | 12 |
 
+### Framework full server PoC (real dev server + kiwa helper unit test + Playwright e2e の 2 軸構成)
+
+`@kiwa-test/{framework}` の helper を **実 framework dev server** で動かす reference 実装。 Pattern A (Dependency Injection) で thin wrapper / pure logic を分離、 unit test (kiwa helper、 Nitro 不要) と e2e test (Playwright + 実 dev server) を **同じ pure logic** に対して別 angle で走らせる構成。 OSS contributor が自プロジェクトに kiwa を導入する際の参考に。
+
+| Example | Stack / 対象 helper | Unit tests (kiwa) | E2E tests (Playwright) |
+|---|---|---|---|
+| [`nuxt-server-routes-full`](./examples/nuxt-server-routes-full) ⭐ | Nuxt 3 + `@kiwa-test/nuxt` v1.0.4+ (3 helper 全 demo) | 20 (Server Routes 8 + route middleware 6 + Nitro plugin 6) | 4 (real `nuxt dev` :3030) |
+| `examples/sveltekit-full` | (v1.2 #525-2 で追加予定) | — | — |
+| `examples/remix-full` | (v1.2 #525-3 で追加予定) | — | — |
+| `examples/astro-server-endpoints-full` | (v1.2 #525-4 で追加予定) | — | — |
+| `examples/nextjs-app-router-full` | (v1.2 #525-5 で追加予定) | — | — |
+
 ---
 
 ## Multi-Wallet (EIP-6963)
