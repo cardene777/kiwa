@@ -46,6 +46,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
       'packages/sveltekit',
       'packages/remix',
       'packages/astro',
+      'packages/solidstart',
     ];
     try {
       const passing = buildSummary({ lines: 95, branches: 85, functions: 95, statements: 95 });
@@ -83,6 +84,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
         'packages/sveltekit',
         'packages/remix',
         'packages/astro',
+        'packages/solidstart',
       ]) {
         const covDir = resolve(fakeRoot, dir, 'coverage');
         mkdirSync(covDir, { recursive: true });
