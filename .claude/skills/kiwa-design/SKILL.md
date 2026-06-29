@@ -41,7 +41,7 @@ $ARGUMENTS
 
 - `--module {name}` — 出力 file 名のキー (出力 path は `--layer` と組み合わせて決定)、 単数指定
 - `--modules {name1,name2,name3}` — 複数 module を 1 回起動で batch 処理 (Issue #221)、 `--module` と排他、 `,` 区切り、 各 module 名は `[a-z0-9-]+` 制約。 内部実装は Step 1-5 全体を module 単位で順次回し、 module 数 N について N 個の spec を Write、 最後に「contract 間連携」 section を 1 つだけ生成する (詳細は下記 § --modules batch 起動規約 を参照)
-- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|nextjs-server-action|nextjs-middleware|integration|unit|all}` — 想定 test layer を指定 (default `all`、 出力 path と推奨観点が変わる)。 `e2e` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play` 消費)、 `e2e-generic` は非 web3 汎用 browser e2e (Playwright + @kiwa-test/e2e、 `/kiwa-e2e` 消費)、 `a11y` は accessibility (axe-core + @kiwa-test/a11y、 `/kiwa-a11y` 消費)、 `visual` は visual regression (pixelmatch + @kiwa-test/visual、 `/kiwa-visual` 消費)、 `nextjs-server-action` は Next.js App Router の `'use server'` action (Vitest + @kiwa-test/nextjs、 `/kiwa-nextjs` 消費、 v1.0+ Issue #493)、 `nextjs-middleware` は Next.js `middleware.ts` (Vitest + @kiwa-test/nextjs、 `/kiwa-nextjs` 消費、 v1.0.2+ Issue #495)
+- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|nextjs-server-action|nextjs-middleware|nextjs-rsc|integration|unit|all}` — 想定 test layer を指定 (default `all`、 出力 path と推奨観点が変わる)。 `e2e` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play` 消費)、 `e2e-generic` は非 web3 汎用 browser e2e (Playwright + @kiwa-test/e2e、 `/kiwa-e2e` 消費)、 `a11y` は accessibility (axe-core + @kiwa-test/a11y、 `/kiwa-a11y` 消費)、 `visual` は visual regression (pixelmatch + @kiwa-test/visual、 `/kiwa-visual` 消費)、 `nextjs-server-action` は Next.js App Router の `'use server'` action (Vitest + @kiwa-test/nextjs、 `/kiwa-nextjs` 消費、 v1.0+ Issue #493)、 `nextjs-middleware` は Next.js `middleware.ts` (Vitest + @kiwa-test/nextjs、 `/kiwa-nextjs` 消費、 v1.0.2+ Issue #495)、 `nextjs-rsc` は Next.js React Server Components (Vitest + @kiwa-test/nextjs、 `/kiwa-nextjs` 消費、 v1.0.3+ Issue #494)
 - `--input {path}` — 機能仕様 file の path (省略時は対話形式で要約を求める)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-examples` — examples/ サンプル参照をスキップ (skill 内部の参照のみで仕様書を生成)
@@ -65,6 +65,7 @@ $ARGUMENTS
 | `cli` | `tests/spec/integration/test-spec-{module}.cli.md` | `/kiwa-cli-test` (CLI / shell / file IO 専用、 isolated tempdir + stdout/stderr snapshot、 `@kiwa-test/cli-test`) |
 | `nextjs-server-action` | `tests/spec/integration/test-spec-{module}.nextjs.md` | `/kiwa-nextjs` (Next.js App Router `'use server'` action 専用、 `invokeServerAction` で redirect / cookies / headers 捕捉、 `@kiwa-test/nextjs`) |
 | `nextjs-middleware` | `tests/spec/integration/test-spec-{module}.middleware.md` | `/kiwa-nextjs` (Next.js `middleware.ts` 専用、 `invokeMiddleware` で auth gate / locale rewrite / geo block / response header inject 捕捉、 `@kiwa-test/nextjs`) |
+| `nextjs-rsc` | `tests/spec/integration/test-spec-{module}.rsc.md` | `/kiwa-nextjs` (Next.js async React Server Components 専用、 `renderServerComponent` で direct await + `findAll` / `textContent` で element tree 検証、 notFound / forbidden / redirect signal 捕捉、 `@kiwa-test/nextjs`) |
 | `unit` | `tests/spec/unit/test-spec-{module}.md` | `/kiwa-vitest` (Vitest 汎用 unit runner) |
 | `all` (default) | `tests/spec/test-spec-{module}.md` | 全 Layer 2 skill (旧 default 経路、 互換性維持) |
 
@@ -488,6 +489,26 @@ mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `pla
 `/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa-test/nextjs/invokeMiddleware` の引数に機械変換する。 middleware は `NextResponse.redirect()` 等を直接 import せず、 kiwa の `middlewareActions.{next,redirect,rewrite,json}()` を return する形に refactor 済みであることが前提 (Pattern A 同等)。
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.middleware.md` (`.middleware.md` suffix で middleware test 経路向けと識別)。
+
+#### nextjs-rsc layer 専用 column (Next.js React Server Components)
+
+`--layer nextjs-rsc` 指定時は Next.js async server component のセマンティクスを表現する **9 column 拡張表** を使う (`@kiwa-test/nextjs` の `renderServerComponent` と直接 mapping、 Issue #494)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-RSC-001` 等の連番 |
+| Observation | 観点 (初期 render / async data fetch / notFound / forbidden / redirect / props 分岐 / search params 等) |
+| Component | 対象 server component の identifier (`UserPage` / `ProductList` / `Dashboard` 等) |
+| Props | `params` / `searchParams` / fetched data 等の props seed (`{slug:'kiwa'}` / `{q:'foo'}`) |
+| Then | 期待 (`textContent(tree)` の文字列、 `findAll(tree, n => n.type==='li').length`、 `signal[NOT_FOUND_SYMBOL]===true`、 `signal.url==='/login'` 等) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Mode | `direct` (renderServerComponent 直 await) / `withFetch` (component 内 fetch を vi.stubGlobal で mock) |
+| Signal | 期待 throw signal (`none` / `notFound` / `forbidden` / `redirect`) |
+
+`/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa-test/nextjs/renderServerComponent` の引数に機械変換する。 server component は `notFound()` / `forbidden()` / `redirect()` を直接 import せず、 kiwa の `NOT_FOUND_SYMBOL` / `FORBIDDEN_SYMBOL` / `RSC_REDIRECT_SYMBOL` を持つ object を throw する形に refactor 済みであることが前提 (Pattern A 同等)。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.rsc.md` (`.rsc.md` suffix で RSC test 経路向けと識別)。
 
 ### Step 5: 優先度付け + 自動化方針
 

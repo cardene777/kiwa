@@ -28,7 +28,7 @@ $ARGUMENTS
 
 - `--mode {spec-review|test-review|result-review}` — review mode (必須)
 - `--module {name}` — 対象 module 名 (spec / test file の特定キー)
-- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|nextjs-server-action|nextjs-middleware|integration|unit|all}` — spec layer (default `all`、 spec path 解決に使用)。 `e2e` は dApp e2e (`tests/spec/e2e/test-spec-{module}.md`、 `/kiwa-play` 出力)、 `e2e-generic` は汎用 browser e2e (`tests/spec/integration/test-spec-{module}.e2e.md`、 `/kiwa-e2e` 出力)、 `a11y` は accessibility (`tests/spec/integration/test-spec-{module}.a11y.md`、 `/kiwa-a11y` 出力)、 `visual` は visual regression (`tests/spec/integration/test-spec-{module}.visual.md`、 `/kiwa-visual` 出力)、 `nextjs-server-action` は Next.js Server Actions (`tests/spec/integration/test-spec-{module}.nextjs.md`、 `/kiwa-nextjs` 出力、 Issue #493)、 `nextjs-middleware` は Next.js middleware (`tests/spec/integration/test-spec-{module}.middleware.md`、 `/kiwa-nextjs` 出力、 Issue #495)。 spec path 規約は `/kiwa-design § 出力 path の決定` SSOT と一致、 spec-review / test-review / result-review 3 mode は全 layer に対応
+- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|nextjs-server-action|nextjs-middleware|nextjs-rsc|integration|unit|all}` — spec layer (default `all`、 spec path 解決に使用)。 `e2e` は dApp e2e (`tests/spec/e2e/test-spec-{module}.md`、 `/kiwa-play` 出力)、 `e2e-generic` は汎用 browser e2e (`tests/spec/integration/test-spec-{module}.e2e.md`、 `/kiwa-e2e` 出力)、 `a11y` は accessibility (`tests/spec/integration/test-spec-{module}.a11y.md`、 `/kiwa-a11y` 出力)、 `visual` は visual regression (`tests/spec/integration/test-spec-{module}.visual.md`、 `/kiwa-visual` 出力)、 `nextjs-server-action` は Next.js Server Actions (`tests/spec/integration/test-spec-{module}.nextjs.md`、 `/kiwa-nextjs` 出力、 Issue #493)、 `nextjs-middleware` は Next.js middleware (`tests/spec/integration/test-spec-{module}.middleware.md`、 `/kiwa-nextjs` 出力、 Issue #495)、 `nextjs-rsc` は Next.js React Server Components (`tests/spec/integration/test-spec-{module}.rsc.md`、 `/kiwa-nextjs` 出力、 Issue #494)。 spec path 規約は `/kiwa-design § 出力 path の決定` SSOT と一致、 spec-review / test-review / result-review 3 mode は全 layer に対応
 - `--spec-path {path}` — spec file path を明示指定 (`--module` の代替)
 - `--test-path {path}` — test code path を明示指定 (test-review mode のみ、 default は spec から推定)
 - `--lang {ja|en|<ISO 639-1>}` — report 生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
@@ -83,6 +83,7 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
   - visual (`--layer visual`): `{example}/tests/*.visual.test.ts` or `tests/fixtures/{example}/visual-test/*.test.ts`
   - Next.js Server Actions (`--layer nextjs-server-action`): `{example}/tests/*.nextjs.test.ts` or `{example}/tests/integration/*.nextjs.test.ts`
   - Next.js middleware (`--layer nextjs-middleware`): `{example}/tests/*.middleware.test.ts` or `{example}/tests/integration/*.middleware.test.ts`
+  - Next.js RSC (`--layer nextjs-rsc`): `{example}/tests/*.rsc.test.ts` or `{example}/tests/integration/*.rsc.test.ts`
 - 11 観点 catalog (`.claude/skills/kiwa-design/references/viewpoints-catalog.md`) を Read
 - 新 3 layer 専用観点の追加 SSOT
   - `e2e-generic`: 9 column (Mode `static`/`fetch`/`node`/`ssr` + Route + Action + Expected) を Layer 2 mapping と照合

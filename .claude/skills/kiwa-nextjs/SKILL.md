@@ -1,9 +1,9 @@
 ---
 name: kiwa-nextjs
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.nextjs.md` / `.middleware.md`) を Next.js App Router の Server Actions + middleware test (Vitest + @kiwa-test/nextjs) に変換する Layer 2 skill。
-  Server Actions (`'use server'`) は `invokeServerAction({ action, formData, cookies, headers, args })` で direct invoke、 middleware は `invokeMiddleware({ middleware, url, cookies, headers, geo })` で simulated request 経由で捕捉、 双方とも redirect / cookie / header の side-effect を assertion 可能化する。
-  `/kiwa-design --layer nextjs-server-action` または `--layer nextjs-middleware` が出力する 9 column 表を `@kiwa-test/nextjs` の API に機械的に変換する。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.nextjs.md` / `.middleware.md` / `.rsc.md`) を Next.js App Router の Server Actions + middleware + RSC test (Vitest + @kiwa-test/nextjs) に変換する Layer 2 skill。
+  Server Actions (`'use server'`) は `invokeServerAction` で direct invoke、 middleware は `invokeMiddleware` で simulated request 経由で捕捉、 RSC は `renderServerComponent` で async server component を await + element tree を `findAll` / `textContent` で検証、 全 mode で redirect / not-found / forbidden の throw signal も捕捉する。
+  `/kiwa-design --layer nextjs-server-action` / `--layer nextjs-middleware` / `--layer nextjs-rsc` が出力する 9 column 表を `@kiwa-test/nextjs` の API に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -14,12 +14,11 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 `/kiwa-design --layer nextjs-server-action` または `/kiwa-design --layer nextjs-middleware` が出力した 9 column 表を、 `@kiwa-test/nextjs` v1.0+ の `invokeServerAction` / `invokeMiddleware` を使った Vitest test に機械変換する。
 
-対象は以下 2 mode ...
+対象は以下 3 mode ...
 
 - **Server Actions** (`'use server'` directive) ... `--layer nextjs-server-action`、 `tests/spec/integration/test-spec-{module}.nextjs.md`
 - **middleware.ts** ... `--layer nextjs-middleware` (Issue #495)、 `tests/spec/integration/test-spec-{module}.middleware.md`
-
-React Server Components (RSC、 `--layer nextjs-rsc` 予定 #494) は本 skill のスコープ外。
+- **React Server Components (RSC)** ... `--layer nextjs-rsc` (Issue #494、 v1.0.3+)、 `tests/spec/integration/test-spec-{module}.rsc.md`
 
 ## 前提
 
@@ -126,9 +125,9 @@ describe('{MODULE} server action', () => {
 - runtime fixture ... `@kiwa-test/nextjs` v1.0+ (`packages/nextjs/`)
 - 下流 (review) ... `/kiwa-review --layer nextjs-server-action`
 - 統合 chain ... `/kiwa-test --target nextjs`
-- RSC test ... `--layer nextjs-rsc` (#494、 別 PR)
+- RSC test ... 下記 § RSC mode (#494、 v1.0.3+ 対応済)
 - middleware test ... 下記 § middleware mode (#495、 v1.0.2+ 対応済)
-- PoC ... `examples/nextjs-server-actions-poc/`、 `examples/nextjs-middleware-poc/`
+- PoC ... `examples/nextjs-server-actions-poc/`、 `examples/nextjs-middleware-poc/`、 `examples/nextjs-rsc-poc/`
 
 ---
 
@@ -174,3 +173,45 @@ it('{ID} {Observation}', async () => {
 ```
 
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.middleware.md`。
+
+---
+
+## RSC mode (Issue #494、 v1.0.3+)
+
+App Router の async React Server Components (`async function Page(props): Promise<JSX.Element>`) を `renderServerComponent({ component, props })` で direct await + return tree を捕捉する。 jsx-runtime や React import は不要、 element を `{ type, props, key }` 形式の plain object として扱う軽量 helper (full RSC flight payload format は対象外、 server component の return value semantics のみ検証する)。
+
+### 9 column 拡張表 (`/kiwa-design --layer nextjs-rsc`)
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-RSC-001` 等の連番 |
+| Observation | 観点 (初期 render / async data fetch / notFound / forbidden / redirect / props 分岐 / search params 等) |
+| Component | 対象 server component の identifier (`UserPage` / `ProductList` 等) |
+| Props | `params` / `searchParams` / fetched data 等の props seed (`{slug:'kiwa'}` / `{q:'foo'}`) |
+| Then | 期待 (`textContent(tree).toBe('Hello kiwa')` / `findAll(tree, n => n.type==='li').length===3` / `signal[NOT_FOUND_SYMBOL]===true` / `signal.url==='/login'`) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Mode | `direct` (renderServerComponent 直 await) / `withFetch` (component 内で await fetch、 vitest の `vi.stubGlobal('fetch', ...)` で mock) |
+| Signal | 期待 throw signal の種類 (`none` / `notFound` / `forbidden` / `redirect`) |
+
+### signal helper
+
+`next/navigation` の `notFound()` / `forbidden()` / `redirect()` を直接 import せず、 kiwa の signal symbol (`NOT_FOUND_SYMBOL` / `FORBIDDEN_SYMBOL` / `RSC_REDIRECT_SYMBOL`) を持つ object を throw する形に refactor 済みであることが前提 (Pattern A 同等)。
+
+### test 生成 template
+
+```ts
+import { renderServerComponent, findAll, textContent, NOT_FOUND_SYMBOL } from '@kiwa-test/nextjs';
+import { UserPage } from '../app/users/[slug]/page.js';
+
+it('{ID} {Observation}', async () => {
+  const { tree, signal, error } = await renderServerComponent({
+    component: UserPage,
+    props: {Props を展開},
+  });
+  {Then を expect(textContent(tree)).toBe(...) や findAll(tree, ...).length === N に展開}
+  {Signal が "notFound" なら expect(signal?.[NOT_FOUND_SYMBOL]).toBe(true)、 "redirect" なら expect(signal.url).toBe('/login') 等}
+});
+```
+
+出力 path 規約 ... `tests/spec/integration/test-spec-{module}.rsc.md`。
