@@ -1,20 +1,25 @@
 ---
 name: kiwa-nextjs
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.nextjs.md`) を Next.js Server Actions test (Vitest + @kiwa-test/nextjs) に変換する Layer 2 skill。
-  `'use server'` async function を `invokeServerAction({ action, formData, cookies, headers, args })` 経由で direct invoke し、 redirect / cookie / header / revalidate の side-effect を捕捉して assertion 可能化する。
-  `/kiwa-design --layer nextjs-server-action` が出力する 9 column 表を `@kiwa-test/nextjs` の `invokeServerAction` の引数に機械的に変換する。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.nextjs.md` / `.middleware.md`) を Next.js App Router の Server Actions + middleware test (Vitest + @kiwa-test/nextjs) に変換する Layer 2 skill。
+  Server Actions (`'use server'`) は `invokeServerAction({ action, formData, cookies, headers, args })` で direct invoke、 middleware は `invokeMiddleware({ middleware, url, cookies, headers, geo })` で simulated request 経由で捕捉、 双方とも redirect / cookie / header の side-effect を assertion 可能化する。
+  `/kiwa-design --layer nextjs-server-action` または `--layer nextjs-middleware` が出力する 9 column 表を `@kiwa-test/nextjs` の API に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
 allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 ---
 
-# /kiwa-nextjs — Next.js Server Actions test 生成 (Layer 2)
+# /kiwa-nextjs — Next.js Server Actions + middleware test 生成 (Layer 2)
 
-`/kiwa-design --layer nextjs-server-action` が出力した `tests/spec/integration/test-spec-{module}.nextjs.md` の 9 column 表を、 `@kiwa-test/nextjs` v1.0+ の `invokeServerAction` を使った Vitest test に機械変換する。
+`/kiwa-design --layer nextjs-server-action` または `/kiwa-design --layer nextjs-middleware` が出力した 9 column 表を、 `@kiwa-test/nextjs` v1.0+ の `invokeServerAction` / `invokeMiddleware` を使った Vitest test に機械変換する。
 
-App Router の **Server Actions (`'use server'` directive)** が対象。 React Server Components (RSC、 `--layer nextjs-rsc` 予定 #494) と `middleware.ts` (`--layer nextjs-middleware` 予定 #495) は本 skill のスコープ外。
+対象は以下 2 mode ...
+
+- **Server Actions** (`'use server'` directive) ... `--layer nextjs-server-action`、 `tests/spec/integration/test-spec-{module}.nextjs.md`
+- **middleware.ts** ... `--layer nextjs-middleware` (Issue #495)、 `tests/spec/integration/test-spec-{module}.middleware.md`
+
+React Server Components (RSC、 `--layer nextjs-rsc` 予定 #494) は本 skill のスコープ外。
 
 ## 前提
 
@@ -120,7 +125,52 @@ describe('{MODULE} server action', () => {
 - 上流 (Layer 1) ... `/kiwa-design --layer nextjs-server-action`
 - runtime fixture ... `@kiwa-test/nextjs` v1.0+ (`packages/nextjs/`)
 - 下流 (review) ... `/kiwa-review --layer nextjs-server-action`
-- 統合 chain ... `/kiwa-test --target nextjs` (#493 完了後に追加予定)
-- RSC test ... `/kiwa-nextjs-rsc` (#494、 別 PR)
-- middleware test ... `/kiwa-nextjs-middleware` (#495、 別 PR)
-- PoC ... `examples/nextjs-server-actions-poc/`
+- 統合 chain ... `/kiwa-test --target nextjs`
+- RSC test ... `--layer nextjs-rsc` (#494、 別 PR)
+- middleware test ... 下記 § middleware mode (#495、 v1.0.2+ 対応済)
+- PoC ... `examples/nextjs-server-actions-poc/`、 `examples/nextjs-middleware-poc/`
+
+---
+
+## middleware mode (Issue #495、 v1.0.2+)
+
+App Router の `middleware.ts` を `invokeMiddleware({ middleware, url, method, headers, cookies, geo })` で simulated request 経由で invoke + outgoing response headers / cookies / action (`next` / `redirect` / `rewrite` / `json`) を捕捉する。
+
+### 9 column 拡張表 (`/kiwa-design --layer nextjs-middleware`)
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-MW-001` 等の連番 |
+| Observation | 観点 (auth gate / locale rewrite / geo block / header inject / csp 等) |
+| Given | URL + initial cookies/headers/geo seed (`url=https://x/foo`、 `cookies={session:'sid'}`、 `geo={country:'JP'}`) |
+| Method | HTTP method (`GET` / `POST` 等、 default GET) |
+| Headers | request headers (case-insensitive、 `Authorization=Bearer ...`) |
+| Then | 期待 (`env.action.kind==='redirect'` + `env.action.url==='/login'`、 `env.responseHeaders.get('x-csp')==='...'`、 `env.responseCookies.get('tid')==='...'`) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Middleware | 対象 middleware の identifier (default 1 つだけ、 多 middleware 構成は entry 別に行を分ける) |
+
+### action helper
+
+middleware は `NextResponse.redirect()` 等を直接 import せず、 kiwa の `middlewareActions.{next,redirect,rewrite,json}()` を return する形に refactor 済みであることが前提 (Pattern A 同等)。 これにより production code と test の両方で同 shape の return value が成立する。
+
+### test 生成 template
+
+```ts
+import { invokeMiddleware, middlewareActions } from '@kiwa-test/nextjs';
+import { middleware } from '../middleware.js';
+
+it('{ID} {Observation}', async () => {
+  const { env, error } = await invokeMiddleware({
+    middleware,
+    url: '{Given.url}',
+    method: '{Method}',
+    headers: {Headers を object に展開},
+    cookies: {Given.cookies を object に展開},
+    geo: {Given.geo を object に展開},
+  });
+  {Then を expect(env.action.kind).toBe(...) 等に展開}
+});
+```
+
+出力 path 規約 ... `tests/spec/integration/test-spec-{module}.middleware.md`。

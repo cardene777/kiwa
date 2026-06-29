@@ -89,6 +89,16 @@ describe('@kiwa-test/nextjs surface', () => {
     expect(typeof mod.invokeServerAction).toBe('function');
     expect(typeof mod.REDIRECT_SYMBOL).toBe('symbol');
   });
+
+  it('exports invokeMiddleware + middlewareActions + MIDDLEWARE_ACTION_SYMBOL (v1.0.2+)', async () => {
+    const mod = await import('@kiwa-test/nextjs');
+    expect(typeof mod.invokeMiddleware).toBe('function');
+    expect(typeof mod.middlewareActions.next).toBe('function');
+    expect(typeof mod.middlewareActions.redirect).toBe('function');
+    expect(typeof mod.middlewareActions.rewrite).toBe('function');
+    expect(typeof mod.middlewareActions.json).toBe('function');
+    expect(typeof mod.MIDDLEWARE_ACTION_SYMBOL).toBe('symbol');
+  });
 });
 
 describe('cross-package consistency', () => {
