@@ -99,6 +99,16 @@ describe('@kiwa-test/nextjs surface', () => {
     expect(typeof mod.middlewareActions.json).toBe('function');
     expect(typeof mod.MIDDLEWARE_ACTION_SYMBOL).toBe('symbol');
   });
+
+  it('exports renderServerComponent + findAll + textContent + RSC signals (v1.0.3+)', async () => {
+    const mod = await import('@kiwa-test/nextjs');
+    expect(typeof mod.renderServerComponent).toBe('function');
+    expect(typeof mod.findAll).toBe('function');
+    expect(typeof mod.textContent).toBe('function');
+    expect(typeof mod.NOT_FOUND_SYMBOL).toBe('symbol');
+    expect(typeof mod.FORBIDDEN_SYMBOL).toBe('symbol');
+    expect(typeof mod.RSC_REDIRECT_SYMBOL).toBe('symbol');
+  });
 });
 
 describe('cross-package consistency', () => {

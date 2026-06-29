@@ -570,6 +570,7 @@ kiwa v1.0 ships **complete coverage for the layers below**. The table is exhaust
 | Flaky / spec-coverage observability | ✅ production-ready | `/kiwa-observe` | `@kiwa-test/observability` v1.0.1 |
 | Next.js Server Actions (`'use server'`) | ✅ production-ready (v1.0.1+) | `/kiwa-nextjs` | `@kiwa-test/nextjs` v1.0.1 |
 | Next.js middleware (`middleware.ts`) | ✅ production-ready (v1.0.2+) | `/kiwa-nextjs` (`--layer nextjs-middleware`) | `@kiwa-test/nextjs` v1.0.2 |
+| Next.js React Server Components (async server component) | ✅ production-ready (v1.0.3+) | `/kiwa-nextjs` (`--layer nextjs-rsc`) | `@kiwa-test/nextjs` v1.0.3 |
 
 Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested through `/kiwa-ui` (React / Vue / Svelte component layer) plus `/kiwa-e2e` (browser layer). Next.js **API Routes** under `app/api/*/route.ts` are tested through `/kiwa-api` (`examples/nextjs-api-poc/` is a working reference).
 
@@ -578,7 +579,7 @@ Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested thro
 | Layer | Status | Workaround for v1.0 | Tracking |
 |---|---|---|---|
 | **Next.js Server Actions** (`'use server'`) | ✅ shipped in v1.0.1 — `/kiwa-nextjs` skill + `@kiwa-test/nextjs` runtime | (n/a, fully supported) | [#493](https://github.com/cardene777/kiwa/issues/493) ✅ resolved |
-| **Next.js React Server Components (RSC)** | ❌ no skill, no runtime helper | Hand-write with `vitest-environment-rsc` (community) | [#494](https://github.com/cardene777/kiwa/issues/494) |
+| **Next.js React Server Components (RSC)** | ✅ shipped in v1.0.3 — `/kiwa-nextjs --layer nextjs-rsc` + `renderServerComponent` + `findAll` + `textContent` | (n/a, fully supported) | [#494](https://github.com/cardene777/kiwa/issues/494) ✅ resolved |
 | **Next.js middleware.ts** | ✅ shipped in v1.0.2 — `/kiwa-nextjs --layer nextjs-middleware` + `invokeMiddleware` | (n/a, fully supported) | [#495](https://github.com/cardene777/kiwa/issues/495) ✅ resolved |
 | **Nuxt 3 Server Routes / nitro / composables** | ❌ no skill | Hand-write with Nuxt Test Utils | [#496](https://github.com/cardene777/kiwa/issues/496) |
 | **SvelteKit load / form actions / hooks.server.ts** | ❌ no skill | Hand-write with SvelteKit Test Utils | [#497](https://github.com/cardene777/kiwa/issues/497) |

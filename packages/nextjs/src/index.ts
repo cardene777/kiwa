@@ -21,3 +21,20 @@ export {
   type MiddlewareAction,
   type MiddlewareActionKind,
 } from './invoke-middleware.js';
+
+export {
+  renderServerComponent,
+  findAll,
+  textContent,
+  NOT_FOUND_SYMBOL,
+  FORBIDDEN_SYMBOL,
+  RSC_REDIRECT_SYMBOL,
+  type RenderServerComponentOptions,
+  type RenderServerComponentResult,
+  type RscElement,
+  type RscNode,
+  type RscSignal,
+  type NotFoundSignal,
+  type ForbiddenSignal,
+  type RscRedirectSignal,
+} from './render-server-component.js';
