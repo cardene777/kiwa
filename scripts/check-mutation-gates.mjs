@@ -44,6 +44,11 @@ const THRESHOLDS = {
   '@kiwa-test/dapp': 80,
   '@kiwa-test/a11y': 90,
   '@kiwa-test/visual': 80,
+  '@kiwa-test/nextjs': 80,
+  '@kiwa-test/nuxt': 80,
+  '@kiwa-test/sveltekit': 80,
+  '@kiwa-test/remix': 80,
+  '@kiwa-test/astro': 80,
 };
 
 const PKG_DIRS = {
@@ -58,6 +63,11 @@ const PKG_DIRS = {
   '@kiwa-test/dapp': 'packages/dapp',
   '@kiwa-test/a11y': 'packages/a11y',
   '@kiwa-test/visual': 'packages/visual',
+  '@kiwa-test/nextjs': 'packages/nextjs',
+  '@kiwa-test/nuxt': 'packages/nuxt',
+  '@kiwa-test/sveltekit': 'packages/sveltekit',
+  '@kiwa-test/remix': 'packages/remix',
+  '@kiwa-test/astro': 'packages/astro',
 };
 
 const PACKAGES = Object.keys(THRESHOLDS);
