@@ -1,5 +1,13 @@
 # @kiwa-test/qwikcity
 
+## 1.0.2
+
+### Patch Changes
+
+- re-publish 3 packages with version 1.0.2 — previous 1.0.1 publish + unpublish の履歴により同 version 再 publish 不可、 1.0.2 へ bump して registry に再登録。
+
+  実装変更なし、 package.json version + CHANGELOG.md だけの patch bump。 npm registry に v1.0.2 として appear し、 v1.2 milestone (Issue #518/#519/#522) の publish 完了状態化する。
+
 ## 1.0.1
 
 ### Patch Changes
