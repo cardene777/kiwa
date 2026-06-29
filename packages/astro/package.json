@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/astro",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Astro Server Endpoints (`pages/api/*.ts`) test adapter for kiwa — invoke endpoint functions with simulated APIContext and capture Response without a running Astro dev server (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {

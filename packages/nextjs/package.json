@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/nextjs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Next.js App Router test adapter for kiwa (Server Actions / RSC / middleware) — invoke Server Actions with FormData / headers / cookies and assert redirect / revalidate behavior",
   "license": "MIT",
   "author": {

@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/sveltekit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SvelteKit load + form actions + server endpoints test adapter for kiwa — invoke +page.server.ts / +server.ts callbacks in isolation and capture redirect / cookies / response headers without a running SvelteKit dev server (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {
