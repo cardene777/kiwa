@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/edge",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Edge runtime fetch handler test adapter for kiwa — invoke Cloudflare Workers / Vercel Edge / generic edge handlers with simulated env (KV / R2 / D1 / DurableObject minimal mocks) + ExecutionContext (waitUntil / passThroughOnException) without a running Miniflare or workerd (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {

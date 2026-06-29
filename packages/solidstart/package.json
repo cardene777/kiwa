@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/solidstart",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "SolidStart Server Functions + API Routes test adapter for kiwa — invoke `'use server'` async functions + `routes/api/*.ts` handlers with simulated APIEvent and capture Response without a running SolidStart dev server (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {
