@@ -133,6 +133,17 @@ describe('@kiwa-test/sveltekit surface', () => {
   });
 });
 
+describe('@kiwa-test/remix surface', () => {
+  it('exports invokeLoader + invokeAction + redirect + json + REMIX_REDIRECT_SYMBOL (v1.0.0)', async () => {
+    const mod = await import('@kiwa-test/remix');
+    expect(typeof mod.invokeLoader).toBe('function');
+    expect(typeof mod.invokeAction).toBe('function');
+    expect(typeof mod.redirect).toBe('function');
+    expect(typeof mod.json).toBe('function');
+    expect(typeof mod.REMIX_REDIRECT_SYMBOL).toBe('symbol');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');
