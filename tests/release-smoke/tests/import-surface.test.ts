@@ -151,6 +151,18 @@ describe('@kiwa-test/astro surface', () => {
   });
 });
 
+describe('@kiwa-test/solidstart surface', () => {
+  it('exports invokeServerFunction + invokeApiRoute + helpers (v1.0.0)', async () => {
+    const mod = await import('@kiwa-test/solidstart');
+    expect(typeof mod.invokeServerFunction).toBe('function');
+    expect(typeof mod.invokeApiRoute).toBe('function');
+    expect(typeof mod.redirect).toBe('function');
+    expect(typeof mod.redirectResponse).toBe('function');
+    expect(typeof mod.json).toBe('function');
+    expect(typeof mod.SOLIDSTART_REDIRECT_SYMBOL).toBe('symbol');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');

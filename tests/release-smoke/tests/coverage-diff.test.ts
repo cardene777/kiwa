@@ -31,6 +31,7 @@ const FULL = {
   '@kiwa-test/sveltekit': { lines: 100, branches: 100, functions: 100, statements: 100 },
   '@kiwa-test/remix': { lines: 95, branches: 94, functions: 100, statements: 95 },
   '@kiwa-test/astro': { lines: 100, branches: 100, functions: 100, statements: 100 },
+  '@kiwa-test/solidstart': { lines: 100, branches: 97, functions: 100, statements: 100 },
 };
 
 describe('scripts/post-coverage-diff.mjs', () => {
