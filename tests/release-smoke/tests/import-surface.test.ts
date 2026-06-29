@@ -144,6 +144,13 @@ describe('@kiwa-test/remix surface', () => {
   });
 });
 
+describe('@kiwa-test/astro surface', () => {
+  it('exports invokeEndpoint (v1.0.0)', async () => {
+    const mod = await import('@kiwa-test/astro');
+    expect(typeof mod.invokeEndpoint).toBe('function');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');
