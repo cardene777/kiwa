@@ -119,6 +119,20 @@ describe('@kiwa-test/nuxt surface', () => {
   });
 });
 
+describe('@kiwa-test/sveltekit surface', () => {
+  it('exports invokeLoad + invokeAction + redirect + error + fail + 3 signals (v1.0.0)', async () => {
+    const mod = await import('@kiwa-test/sveltekit');
+    expect(typeof mod.invokeLoad).toBe('function');
+    expect(typeof mod.invokeAction).toBe('function');
+    expect(typeof mod.redirect).toBe('function');
+    expect(typeof mod.error).toBe('function');
+    expect(typeof mod.fail).toBe('function');
+    expect(typeof mod.SK_REDIRECT_SYMBOL).toBe('symbol');
+    expect(typeof mod.SK_ERROR_SYMBOL).toBe('symbol');
+    expect(typeof mod.SK_FAIL_SYMBOL).toBe('symbol');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');
