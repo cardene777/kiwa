@@ -1,8 +1,8 @@
 {
   "name": "kiwa",
   "displayName": "kiwa",
-  "description": "OSS test framework for dApps + web apps (v1.0)。 contract / dApp e2e / 汎用 e2e / a11y / visual / api / ui / data / cli の 11 観点 × 6 surface を全レイヤーで Claude 自動生成 or 手書きの test として一気通貫で書ける。 15 skill chain (kiwa-design → kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-api / kiwa-ui / kiwa-data / kiwa-cli-test / kiwa-e2e / kiwa-a11y / kiwa-visual → kiwa-observe → kiwa-review、 統合 orchestrator は kiwa-test --target {contract|dapp|web|both|all}) を同梱。 runtime fixture は @kiwa-test/* npm v1.0.1 として 11 packages 全公開済 (core / dapp / api / ui / data / e2e / a11y / visual / cli-test / observability / cli)。",
-  "version": "1.0.0",
+  "description": "OSS test framework for dApps + web apps (v1.0)。 contract / dApp e2e / 汎用 e2e / a11y / visual / api / ui / data / cli / Next.js Server Actions の 11 観点 × 7 surface を全レイヤーで Claude 自動生成 or 手書きの test として一気通貫で書ける。 16 skill chain (kiwa-design → kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-api / kiwa-ui / kiwa-data / kiwa-cli-test / kiwa-e2e / kiwa-a11y / kiwa-visual / kiwa-nextjs → kiwa-observe → kiwa-review、 統合 orchestrator は kiwa-test --target {contract|dapp|web|nextjs|both|all}) を同梱。 runtime fixture は @kiwa-test/* npm v1.0.1 として 12 packages 全公開済 (core / dapp / api / ui / data / e2e / a11y / visual / cli-test / observability / cli / nextjs)。",
+  "version": "1.0.1",
   "author": {
     "name": "cardene777",
     "email": "cardene777@gmail.com"
@@ -26,6 +26,10 @@
     "visual-regression",
     "pixelmatch",
     "wcag",
+    "nextjs",
+    "next.js",
+    "app-router",
+    "server-actions",
     "kiwa"
   ],
   "skills": "./.claude/skills"
