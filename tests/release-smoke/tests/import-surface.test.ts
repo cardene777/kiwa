@@ -111,6 +111,14 @@ describe('@kiwa-test/nextjs surface', () => {
   });
 });
 
+describe('@kiwa-test/nuxt surface', () => {
+  it('exports invokeEventHandler + NUXT_REDIRECT_SYMBOL (v1.0.0)', async () => {
+    const mod = await import('@kiwa-test/nuxt');
+    expect(typeof mod.invokeEventHandler).toBe('function');
+    expect(typeof mod.NUXT_REDIRECT_SYMBOL).toBe('symbol');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');
