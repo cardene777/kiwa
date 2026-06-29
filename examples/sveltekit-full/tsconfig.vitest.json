@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": ".vitest-dist",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["node", "vitest"],
+    "noEmit": false,
+    "paths": {
+      "$lib": ["./src/lib"],
+      "$lib/*": ["./src/lib/*"]
+    }
+  },
+  "include": [
+    "src/lib/_kiwa/**/*.ts",
+    "src/routes/**/_kiwa/**/*.ts",
+    "tests/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist", ".vitest-dist", ".svelte-kit", "tests/e2e/**", "playwright.config.ts"]
+}

@@ -1,0 +1,9 @@
+node_modules
+.svelte-kit
+.vitest-dist
+dist
+build
+.output
+test-results
+playwright-report
+playwright/.cache
