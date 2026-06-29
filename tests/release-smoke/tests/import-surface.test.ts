@@ -175,6 +175,14 @@ describe('@kiwa-test/qwikcity surface', () => {
   });
 });
 
+describe('@kiwa-test/edge surface', () => {
+  it('exports invokeEdgeHandler + createKvNamespace (v1.0.0)', async () => {
+    const mod = await import('@kiwa-test/edge');
+    expect(typeof mod.invokeEdgeHandler).toBe('function');
+    expect(typeof mod.createKvNamespace).toBe('function');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');
