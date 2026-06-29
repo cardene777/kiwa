@@ -41,7 +41,7 @@ $ARGUMENTS
 
 - `--module {name}` — 出力 file 名のキー (出力 path は `--layer` と組み合わせて決定)、 単数指定
 - `--modules {name1,name2,name3}` — 複数 module を 1 回起動で batch 処理 (Issue #221)、 `--module` と排他、 `,` 区切り、 各 module 名は `[a-z0-9-]+` 制約。 内部実装は Step 1-5 全体を module 単位で順次回し、 module 数 N について N 個の spec を Write、 最後に「contract 間連携」 section を 1 つだけ生成する (詳細は下記 § --modules batch 起動規約 を参照)
-- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|nextjs-server-action|nextjs-middleware|nextjs-rsc|nuxt-server-route|sveltekit-load|sveltekit-action|remix-loader|remix-action|astro-endpoint|solidstart-server-function|solidstart-api-route|integration|unit|all}` — 想定 test layer を指定 (default `all`、 出力 path と推奨観点が変わる)。 dApp e2e / 汎用 browser e2e / a11y / visual / Next.js (Server Actions + middleware + RSC) / Nuxt 3 Server Routes / SvelteKit load + actions / Remix v2 + React Router v7 loader + action / Astro Server Endpoints / SolidStart Server Functions + API Routes の各 framework 対応 (詳細は各 layer 別 9 column 拡張表 section)
+- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|nextjs-server-action|nextjs-middleware|nextjs-rsc|nuxt-server-route|sveltekit-load|sveltekit-action|remix-loader|remix-action|astro-endpoint|solidstart-server-function|solidstart-api-route|qwikcity-action|qwikcity-loader|qwikcity-endpoint|integration|unit|all}` — 想定 test layer を指定 (default `all`、 出力 path と推奨観点が変わる)。 dApp e2e / 汎用 browser e2e / a11y / visual / Next.js / Nuxt 3 / SvelteKit / Remix / Astro / SolidStart / Qwik City の各 framework 対応 (詳細は各 layer 別 9 column 拡張表 section)
 - `--input {path}` — 機能仕様 file の path (省略時は対話形式で要約を求める)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-examples` — examples/ サンプル参照をスキップ (skill 内部の参照のみで仕様書を生成)
@@ -74,6 +74,9 @@ $ARGUMENTS
 | `astro-endpoint` | `tests/spec/integration/test-spec-{module}.astro.md` | `/kiwa-astro` (Astro Server Endpoints `pages/api/*.ts` 専用、 `invokeEndpoint` で simulated APIContext (request / params / cookies / locals / site) + Response を normalize 捕捉、 `@kiwa-test/astro`) |
 | `solidstart-server-function` | `tests/spec/integration/test-spec-{module}.solidstart.md` | `/kiwa-solidstart` (SolidStart `'use server'` function 専用、 `invokeServerFunction` で args / headers / cookies + redirect signal 捕捉、 `@kiwa-test/solidstart`) |
 | `solidstart-api-route` | `tests/spec/integration/test-spec-{module}.solidstart-api.md` | `/kiwa-solidstart` (SolidStart `routes/api/*.ts` 専用、 `invokeApiRoute` で simulated APIEvent (request / params / locals) + Response を normalize 捕捉、 `@kiwa-test/solidstart`) |
+| `qwikcity-action` | `tests/spec/integration/test-spec-{module}.qwik-action.md` | `/kiwa-qwikcity` (Qwik City `routeAction$` 専用、 `invokeRouteAction` で formValues + cookies + headers + fail / redirect signal 捕捉、 `@kiwa-test/qwikcity`) |
+| `qwikcity-loader` | `tests/spec/integration/test-spec-{module}.qwik.md` | `/kiwa-qwikcity` (Qwik City `routeLoader$` 専用、 `invokeRouteLoader` で url / params / cookies / platform + redirect signal 捕捉、 `@kiwa-test/qwikcity`) |
+| `qwikcity-endpoint` | `tests/spec/integration/test-spec-{module}.qwik-endpoint.md` | `/kiwa-qwikcity` (Qwik City Endpoints `onGet` / `onPost` 専用、 `invokeEndpoint` で simulated RequestEvent (json / text / redirect / setHeader / status) + Response shape 捕捉、 `@kiwa-test/qwikcity`) |
 | `unit` | `tests/spec/unit/test-spec-{module}.md` | `/kiwa-vitest` (Vitest 汎用 unit runner) |
 | `all` (default) | `tests/spec/test-spec-{module}.md` | 全 Layer 2 skill (旧 default 経路、 互換性維持) |
 

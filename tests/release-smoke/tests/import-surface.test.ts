@@ -163,6 +163,18 @@ describe('@kiwa-test/solidstart surface', () => {
   });
 });
 
+describe('@kiwa-test/qwikcity surface', () => {
+  it('exports invokeRouteAction + invokeRouteLoader + invokeEndpoint + 3 signals (v1.0.0)', async () => {
+    const mod = await import('@kiwa-test/qwikcity');
+    expect(typeof mod.invokeRouteAction).toBe('function');
+    expect(typeof mod.invokeRouteLoader).toBe('function');
+    expect(typeof mod.invokeEndpoint).toBe('function');
+    expect(typeof mod.QWIK_FAIL_SYMBOL).toBe('symbol');
+    expect(typeof mod.QWIK_REDIRECT_SYMBOL).toBe('symbol');
+    expect(typeof mod.QWIK_ENDPOINT_REDIRECT_SYMBOL).toBe('symbol');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');
