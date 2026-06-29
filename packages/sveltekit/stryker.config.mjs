@@ -7,6 +7,7 @@ export default {
   mutate: [
     '.vitest-dist/src/invoke-load.js',
     '.vitest-dist/src/invoke-action.js',
+    '.vitest-dist/src/invoke-hooks.js',
   ],
   thresholds: { high: 90, low: 80, break: 80 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],

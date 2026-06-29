@@ -131,6 +131,13 @@ describe('@kiwa-test/sveltekit surface', () => {
     expect(typeof mod.SK_ERROR_SYMBOL).toBe('symbol');
     expect(typeof mod.SK_FAIL_SYMBOL).toBe('symbol');
   });
+
+  it('exports invokeHandle + invokeHandleFetch + invokeHandleError (v1.0.1+)', async () => {
+    const mod = await import('@kiwa-test/sveltekit');
+    expect(typeof mod.invokeHandle).toBe('function');
+    expect(typeof mod.invokeHandleFetch).toBe('function');
+    expect(typeof mod.invokeHandleError).toBe('function');
+  });
 });
 
 describe('@kiwa-test/remix surface', () => {
