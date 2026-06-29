@@ -573,6 +573,7 @@ kiwa v1.0 ships **complete coverage for the layers below**. The table is exhaust
 | Next.js React Server Components (async server component) | ✅ production-ready (v1.0.3+) | `/kiwa-nextjs` (`--layer nextjs-rsc`) | `@kiwa-test/nextjs` v1.0.3 |
 | Nuxt 3 Server Routes (`defineEventHandler`) | ✅ production-ready (v1.0.0+) | `/kiwa-nuxt` (`--layer nuxt-server-route`) | `@kiwa-test/nuxt` v1.0.0 |
 | SvelteKit load + form actions | ✅ production-ready (v1.0.0+) | `/kiwa-sveltekit` (`--layer sveltekit-load` / `--layer sveltekit-action`) | `@kiwa-test/sveltekit` v1.0.0 |
+| Remix v2 / React Router v7 loader + action | ✅ production-ready (v1.0.0+) | `/kiwa-remix` (`--layer remix-loader` / `--layer remix-action`) | `@kiwa-test/remix` v1.0.0 |
 
 Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested through `/kiwa-ui` (React / Vue / Svelte component layer) plus `/kiwa-e2e` (browser layer). Next.js **API Routes** under `app/api/*/route.ts` are tested through `/kiwa-api` (`examples/nextjs-api-poc/` is a working reference).
 
@@ -585,7 +586,7 @@ Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested thro
 | **Next.js middleware.ts** | ✅ shipped in v1.0.2 — `/kiwa-nextjs --layer nextjs-middleware` + `invokeMiddleware` | (n/a, fully supported) | [#495](https://github.com/cardene777/kiwa/issues/495) ✅ resolved |
 | **Nuxt 3 Server Routes** | ✅ shipped in v1.0.0 — `/kiwa-nuxt --layer nuxt-server-route` + `invokeEventHandler` | (n/a, Server Routes fully supported; nitro plugin lifecycle still tracked) | [#496](https://github.com/cardene777/kiwa/issues/496) ✅ resolved (composables → kiwa-ui Vue mode) |
 | **SvelteKit load / form actions** | ✅ shipped in v1.0.0 — `/kiwa-sveltekit` + `invokeLoad` / `invokeAction` | (n/a, load + actions fully supported; `hooks.server.ts` still tracked) | [#497](https://github.com/cardene777/kiwa/issues/497) ✅ resolved |
-| **Remix / React Router v7 loader / action** | ❌ no skill | Hand-write | [#498](https://github.com/cardene777/kiwa/issues/498) |
+| **Remix / React Router v7 loader / action** | ✅ shipped in v1.0.0 — `/kiwa-remix` + `invokeLoader` / `invokeAction` | (n/a, loader + action fully supported including Response normalize) | [#498](https://github.com/cardene777/kiwa/issues/498) ✅ resolved |
 | **Astro Server Endpoints / Islands** | ❌ no skill | Hand-write | [#499](https://github.com/cardene777/kiwa/issues/499) |
 | **SolidStart Server Functions / Qwik City actions** | ❌ no skill | Hand-write | (tracked in v1.2) |
 | **Python pytest adapter (PyPI publish)** | ✅ shipped in v1.0.0 — `pip install kiwa-test-py` | (n/a, fully supported) | [#492](https://github.com/cardene777/kiwa/issues/492) ✅ resolved |
