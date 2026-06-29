@@ -4,20 +4,25 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kiwa-test-py"
-version = "0.1.0"
-description = "kiwa: Python pytest adapter — spec markdown -> pytest case generation + requests/httpx adapter"
+version = "1.0.0"
+description = "kiwa Python pytest adapter — port of @kiwa-test/core spec markdown parser + requests/httpx HTTP test adapter. Part of the kiwa test framework family (https://github.com/cardene777/kiwa)."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "cardene", email = "cardene777@gmail.com" }]
-keywords = ["kiwa", "pytest", "spec", "test", "adapter"]
+keywords = ["kiwa", "pytest", "spec", "test", "adapter", "requests", "httpx", "fastapi"]
 classifiers = [
+  "Development Status :: 5 - Production/Stable",
   "Framework :: Pytest",
+  "Intended Audience :: Developers",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "License :: OSI Approved :: MIT License",
   "Topic :: Software Development :: Testing",
+  "Topic :: Software Development :: Testing :: Acceptance",
+  "Typing :: Typed",
 ]
 requires-python = ">=3.10"
 dependencies = [

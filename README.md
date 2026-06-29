@@ -4,9 +4,9 @@
 
 # kiwa
 
-**Every test layer · one spec · TypeScript / Solidity (Python experimental).**
+**Every test layer · one spec · TypeScript / Solidity / Python.**
 
-One Layer 1 spec → contract / API / component / e2e / a11y / visual tests in parallel, across **11 npm packages + Foundry / Hardhat bridges** (TypeScript & Solidity production-ready, Python adapter in `kiwa-py/` is experimental, not yet on PyPI — see [Limitations](#limitations)). Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
+One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js (Server Actions / middleware / RSC) tests in parallel, across **12 npm packages + 1 PyPI package + Foundry / Hardhat bridges**. Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
 
 [![npm version](https://img.shields.io/npm/v/@kiwa-test/dapp?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-test/dapp)
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa-test/dapp?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-test/dapp)
@@ -44,7 +44,7 @@ One Layer 1 spec → contract / API / component / e2e / a11y / visual tests in p
 
 Modern stacks scatter their tests across **mismatched runners**: Foundry / Hardhat for contracts, Vitest for unit + API, Playwright for e2e, Testing Library for components, axe-core for a11y, pixelmatch for visual, pytest for Python services. Every runner has its own conventions, fixtures, and gates — and **no single source of truth** spans them.
 
-**kiwa is a test toolchain that turns one Layer 1 spec into every test layer your stack actually needs.** "kiwa" means **edge / boundary / limit** in Japanese — exactly what good tests prove. dApps and smart contracts are first-class citizens, alongside REST APIs (msw / supertest / Playwright request), SPA components (8 framework adapters), CLI tools, queue workers, generic browser e2e (Playwright), accessibility (axe-core), and visual regression (pixelmatch). Python pytest adapter (`kiwa-py/`) is experimental and not yet on PyPI — see [Limitations](#limitations) for full scope.
+**kiwa is a test toolchain that turns one Layer 1 spec into every test layer your stack actually needs.** "kiwa" means **edge / boundary / limit** in Japanese — exactly what good tests prove. dApps and smart contracts are first-class citizens, alongside REST APIs (msw / supertest / Playwright request), SPA components (8 framework adapters), CLI tools, queue workers, generic browser e2e (Playwright), accessibility (axe-core), visual regression (pixelmatch), Next.js App Router (Server Actions / middleware / RSC), and Python pytest (port of the spec parser + requests/httpx adapter, published as `kiwa-test-py` on PyPI).
 
 ```mermaid
 graph TD
@@ -78,7 +78,7 @@ graph TD
 | Component (8 frameworks) | Per-framework runner, drifted fixtures | One `@kiwa-test/ui` package across React / Vue / Svelte / Solid / Lit / Qwik / Angular / Chromium |
 | dApp e2e | Hand-written Playwright + wallet glue | Auto-generated, anvil + viem + EIP-6963 + ERC-4337 wired |
 | A11y / Visual | Ad-hoc CI step or skipped | First-class adapters (axe-core / pixelmatch) sharing the same spec |
-| Polyglot | TS-only by default | TypeScript + Solidity (forge / hardhat) from the same skill chain, Python (pytest) experimental in `kiwa-py/` (not yet on PyPI) |
+| Polyglot | TS-only by default | TypeScript + Solidity (forge / hardhat) + Python (pytest, `pip install kiwa-test-py`) from the same skill chain |
 | Coverage gate | Optional, often skipped | **Enforced** at release — 4 metrics × 11 packages |
 | Mutation gate | Rarely run | **Enforced** at release — per-package MSI threshold |
 | Flake detection | Ad-hoc | Built-in 4-round loop |
@@ -126,7 +126,7 @@ kiwa ships in two halves that work together but stand alone:
 | [`@kiwa-test/observability`](./packages/observability) | Run history collection / flaky detection / coverage report / spec-coverage gap analysis |
 | [`@kiwa-test/a11y`](./packages/a11y) | Accessibility adapter — axe-core integration for jsdom + Playwright pages |
 | [`@kiwa-test/visual`](./packages/visual) | Visual regression adapter — pixel-level PNG diff backed by pixelmatch + pngjs |
-| [`kiwa-test-py`](./kiwa-py) (experimental, not yet on PyPI) | Python pytest adapter — port of `@kiwa-test/core` + requests / httpx adapter, **PyPI publish targeted for v1.1** ([#492](https://github.com/cardene777/kiwa/issues/492)) |
+| [`kiwa-test-py`](./kiwa-py) (PyPI, v1.0.0+) | Python pytest adapter — port of `@kiwa-test/core` + requests / httpx adapter, `pip install kiwa-test-py` |
 
 You can use the **skills alone** (no npm dependency — they just generate test files) or the **fixture alone** (no Claude — just `pnpm add @kiwa-test/dapp`), or both together for the full chain.
 
@@ -586,7 +586,7 @@ Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested thro
 | **Remix / React Router v7 loader / action** | ❌ no skill | Hand-write | [#498](https://github.com/cardene777/kiwa/issues/498) |
 | **Astro Server Endpoints / Islands** | ❌ no skill | Hand-write | [#499](https://github.com/cardene777/kiwa/issues/499) |
 | **SolidStart Server Functions / Qwik City actions** | ❌ no skill | Hand-write | (tracked in v1.2) |
-| **Python pytest adapter (PyPI publish)** | ⚠️ implementation exists in `kiwa-py/`, not on PyPI | Clone & `pip install -e ./kiwa-py` | [#492](https://github.com/cardene777/kiwa/issues/492) |
+| **Python pytest adapter (PyPI publish)** | ✅ shipped in v1.0.0 — `pip install kiwa-test-py` | (n/a, fully supported) | [#492](https://github.com/cardene777/kiwa/issues/492) ✅ resolved |
 | **Bun / Deno runtimes** | ❌ targets Node.js 22+ only | Use Node compatibility | (tracked in v1.2) |
 | **Edge runtime (Cloudflare Workers / Vercel Edge)** | ❌ not tested | Hand-write Miniflare | (tracked in v1.2) |
 | **Desktop (Electron / Tauri) / mobile (React Native / Expo)** | ❌ out of scope | Use platform-native test tooling | not on roadmap |
