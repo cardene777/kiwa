@@ -109,6 +109,12 @@ describe('@kiwa-test/nextjs surface', () => {
     expect(typeof mod.FORBIDDEN_SYMBOL).toBe('symbol');
     expect(typeof mod.RSC_REDIRECT_SYMBOL).toBe('symbol');
   });
+
+  it('exports invokeParallelRoutes + PARALLEL_INTERCEPTION_SYMBOL (v1.0.4+)', async () => {
+    const mod = await import('@kiwa-test/nextjs');
+    expect(typeof mod.invokeParallelRoutes).toBe('function');
+    expect(typeof mod.PARALLEL_INTERCEPTION_SYMBOL).toBe('symbol');
+  });
 });
 
 describe('@kiwa-test/nuxt surface', () => {
@@ -116,6 +122,18 @@ describe('@kiwa-test/nuxt surface', () => {
     const mod = await import('@kiwa-test/nuxt');
     expect(typeof mod.invokeEventHandler).toBe('function');
     expect(typeof mod.NUXT_REDIRECT_SYMBOL).toBe('symbol');
+  });
+
+  it('exports invokeRouteMiddleware + NUXT_MIDDLEWARE_REDIRECT_SYMBOL + NUXT_MIDDLEWARE_ABORT_SYMBOL (v1.0.2+)', async () => {
+    const mod = await import('@kiwa-test/nuxt');
+    expect(typeof mod.invokeRouteMiddleware).toBe('function');
+    expect(typeof mod.NUXT_MIDDLEWARE_REDIRECT_SYMBOL).toBe('symbol');
+    expect(typeof mod.NUXT_MIDDLEWARE_ABORT_SYMBOL).toBe('symbol');
+  });
+
+  it('exports invokeNitroPlugin (v1.0.3+)', async () => {
+    const mod = await import('@kiwa-test/nuxt');
+    expect(typeof mod.invokeNitroPlugin).toBe('function');
   });
 });
 
@@ -149,12 +167,27 @@ describe('@kiwa-test/remix surface', () => {
     expect(typeof mod.json).toBe('function');
     expect(typeof mod.REMIX_REDIRECT_SYMBOL).toBe('symbol');
   });
+
+  it('exports invokeResourceRoute + RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL (v1.0.2+)', async () => {
+    const mod = await import('@kiwa-test/remix');
+    expect(typeof mod.invokeResourceRoute).toBe('function');
+    expect(typeof mod.RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL).toBe('symbol');
+  });
 });
 
 describe('@kiwa-test/astro surface', () => {
   it('exports invokeEndpoint (v1.0.0)', async () => {
     const mod = await import('@kiwa-test/astro');
     expect(typeof mod.invokeEndpoint).toBe('function');
+  });
+
+  it('exports renderAstroPage + kiwaAstroNotFound + 3 signals (v1.0.2+)', async () => {
+    const mod = await import('@kiwa-test/astro');
+    expect(typeof mod.renderAstroPage).toBe('function');
+    expect(typeof mod.kiwaAstroNotFound).toBe('function');
+    expect(typeof mod.ASTRO_REDIRECT_SYMBOL).toBe('symbol');
+    expect(typeof mod.ASTRO_NOT_FOUND_SYMBOL).toBe('symbol');
+    expect(typeof mod.ASTRO_REWRITE_SYMBOL).toBe('symbol');
   });
 });
 

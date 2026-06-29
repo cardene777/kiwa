@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/nextjs",
-  "version": "1.0.3",
-  "description": "Next.js App Router test adapter for kiwa (Server Actions / RSC / middleware) — invoke Server Actions with FormData / headers / cookies and assert redirect / revalidate behavior",
+  "version": "1.0.4",
+  "description": "Next.js App Router test adapter for kiwa (Server Actions / RSC / middleware / Parallel Routes + Intercepting Routes) — invoke Server Actions with FormData / headers / cookies, render parallel-route layouts with named slots + intercepting URL matchers, and assert redirect / revalidate behavior",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -16,6 +16,8 @@
     "rsc",
     "react-server-components",
     "middleware",
+    "parallel-routes",
+    "intercepting-routes",
     "testing",
     "vitest"
   ],
@@ -58,7 +60,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/invoke-server-action.js' --coverage.include='.vitest-dist/src/invoke-middleware.js' --coverage.include='.vitest-dist/src/render-server-component.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js'",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/invoke-server-action.js' --coverage.include='.vitest-dist/src/invoke-middleware.js' --coverage.include='.vitest-dist/src/render-server-component.js' --coverage.include='.vitest-dist/src/invoke-parallel-routes.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js'",
     "test:mutation": "stryker run",
     "typecheck": "tsc --noEmit"
   },
