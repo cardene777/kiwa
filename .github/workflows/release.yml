@@ -49,7 +49,7 @@ jobs:
         run: pnpm -F @kiwa-test/core build
 
       - name: Typecheck
-        run: pnpm -F @kiwa-test/core -F @kiwa-test/dapp -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit typecheck
+        run: pnpm -F @kiwa-test/core -F @kiwa-test/dapp -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/astro typecheck
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
@@ -96,8 +96,11 @@ jobs:
       - name: Test (sveltekit)
         run: pnpm -F @kiwa-test/sveltekit test
 
-      - name: Coverage (all 14 packages)
-        run: pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/dapp -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit --no-bail run test:cov
+      - name: Test (astro)
+        run: pnpm -F @kiwa-test/astro test
+
+      - name: Coverage (all 15 packages)
+        run: pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/dapp -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/astro --no-bail run test:cov
 
       - name: Coverage gate (fail if any package < 90/80/90/90)
         run: node scripts/check-coverage-gates.mjs
@@ -112,7 +115,7 @@ jobs:
         run: pnpm -F kiwa-release-smoke test
 
       - name: Build
-        run: pnpm -F @kiwa-test/core -F @kiwa-test/dapp -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit build
+        run: pnpm -F @kiwa-test/core -F @kiwa-test/dapp -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/astro build
 
       - name: Typecheck consumer (examples)
         run: pnpm -F examples-basic-connect typecheck
