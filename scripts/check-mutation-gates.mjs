@@ -51,6 +51,7 @@ const THRESHOLDS = {
   '@kiwa-test/astro': 80,
   '@kiwa-test/solidstart': 80,
   '@kiwa-test/qwikcity': 80,
+  '@kiwa-test/edge': 80,
 };
 
 const PKG_DIRS = {
@@ -72,6 +73,7 @@ const PKG_DIRS = {
   '@kiwa-test/astro': 'packages/astro',
   '@kiwa-test/solidstart': 'packages/solidstart',
   '@kiwa-test/qwikcity': 'packages/qwikcity',
+  '@kiwa-test/edge': 'packages/edge',
 };
 
 const PACKAGES = Object.keys(THRESHOLDS);

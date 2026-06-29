@@ -49,7 +49,7 @@ jobs:
         run: pnpm -F @kiwa-test/core build
 
       - name: Typecheck
-        run: pnpm -F @kiwa-test/core -F @kiwa-test/dapp -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/remix -F @kiwa-test/astro -F @kiwa-test/solidstart -F @kiwa-test/qwikcity typecheck
+        run: pnpm -F @kiwa-test/core -F @kiwa-test/dapp -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/remix -F @kiwa-test/astro -F @kiwa-test/solidstart -F @kiwa-test/qwikcity -F @kiwa-test/edge typecheck
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
@@ -108,14 +108,17 @@ jobs:
       - name: Test (qwikcity)
         run: pnpm -F @kiwa-test/qwikcity test
 
-      - name: Coverage (all 18 packages)
-        run: pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/dapp -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/remix -F @kiwa-test/astro -F @kiwa-test/solidstart -F @kiwa-test/qwikcity --no-bail run test:cov
+      - name: Test (edge)
+        run: pnpm -F @kiwa-test/edge test
+
+      - name: Coverage (all 19 packages)
+        run: pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/dapp -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/remix -F @kiwa-test/astro -F @kiwa-test/solidstart -F @kiwa-test/qwikcity -F @kiwa-test/edge --no-bail run test:cov
 
       - name: Coverage gate (fail if any package < 90/80/90/90)
         run: node scripts/check-coverage-gates.mjs
 
-      - name: Mutation (all 18 packages)
-        run: pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/dapp -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/remix -F @kiwa-test/astro -F @kiwa-test/solidstart -F @kiwa-test/qwikcity --no-bail run test:mutation
+      - name: Mutation (all 19 packages)
+        run: pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/dapp -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/remix -F @kiwa-test/astro -F @kiwa-test/solidstart -F @kiwa-test/qwikcity -F @kiwa-test/edge --no-bail run test:mutation
 
       - name: Mutation gate (fail if any package MSI < per-package threshold)
         run: node scripts/check-mutation-gates.mjs
@@ -124,7 +127,7 @@ jobs:
         run: pnpm -F kiwa-release-smoke test
 
       - name: Build
-        run: pnpm -F @kiwa-test/core -F @kiwa-test/dapp -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/remix -F @kiwa-test/astro -F @kiwa-test/solidstart -F @kiwa-test/qwikcity build
+        run: pnpm -F @kiwa-test/core -F @kiwa-test/dapp -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/cli -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/remix -F @kiwa-test/astro -F @kiwa-test/solidstart -F @kiwa-test/qwikcity -F @kiwa-test/edge build
 
       - name: Typecheck consumer (examples)
         run: pnpm -F examples-basic-connect typecheck
