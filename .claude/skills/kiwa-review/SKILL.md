@@ -28,7 +28,7 @@ $ARGUMENTS
 
 - `--mode {spec-review|test-review|result-review}` — review mode (必須)
 - `--module {name}` — 対象 module 名 (spec / test file の特定キー)
-- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|nextjs-server-action|nextjs-middleware|nextjs-rsc|nuxt-server-route|sveltekit-load|sveltekit-action|remix-loader|remix-action|astro-endpoint|solidstart-server-function|solidstart-api-route|qwikcity-action|qwikcity-loader|qwikcity-endpoint|edge-handler|integration|unit|all}` — spec layer (default `all`、 spec path 解決に使用、 詳細は `/kiwa-design § 出力 path の決定` SSOT)。 spec-review / test-review / result-review 3 mode は全 layer に対応
+- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|nextjs-server-action|nextjs-middleware|nextjs-rsc|nuxt-server-route|sveltekit-load|sveltekit-action|sveltekit-handle|sveltekit-handle-fetch|sveltekit-handle-error|remix-loader|remix-action|astro-endpoint|solidstart-server-function|solidstart-api-route|qwikcity-action|qwikcity-loader|qwikcity-endpoint|edge-handler|integration|unit|all}` — spec layer (default `all`、 spec path 解決に使用、 詳細は `/kiwa-design § 出力 path の決定` SSOT)。 spec-review / test-review / result-review 3 mode は全 layer に対応
 - `--spec-path {path}` — spec file path を明示指定 (`--module` の代替)
 - `--test-path {path}` — test code path を明示指定 (test-review mode のみ、 default は spec から推定)
 - `--lang {ja|en|<ISO 639-1>}` — report 生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
@@ -85,7 +85,7 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
   - Next.js middleware (`--layer nextjs-middleware`): `{example}/tests/*.middleware.test.ts` or `{example}/tests/integration/*.middleware.test.ts`
   - Next.js RSC (`--layer nextjs-rsc`): `{example}/tests/*.rsc.test.ts` or `{example}/tests/integration/*.rsc.test.ts`
   - Nuxt 3 Server Routes (`--layer nuxt-server-route`): `{example}/tests/*.nuxt.test.ts` or `{example}/tests/integration/*.nuxt.test.ts`
-  - SvelteKit load + actions (`--layer sveltekit-load` / `--layer sveltekit-action`): `{example}/tests/*.svk.test.ts` or `{example}/src/**/*.test.ts`
+  - SvelteKit load + actions + hooks (`--layer sveltekit-load` / `--layer sveltekit-action` / `--layer sveltekit-handle` / `--layer sveltekit-handle-fetch` / `--layer sveltekit-handle-error`): `{example}/tests/*.svk.test.ts` or `{example}/src/**/*.test.ts` or `{example}/tests/hooks.server.test.ts`
   - Remix v2 / React Router v7 (`--layer remix-loader` / `--layer remix-action`): `{example}/tests/*.remix.test.ts` or `{example}/app/**/*.test.ts`
   - Astro Server Endpoints (`--layer astro-endpoint`): `{example}/tests/*.astro.test.ts` or `{example}/src/pages/api/*.test.ts`
   - SolidStart Server Functions + API Routes (`--layer solidstart-server-function` / `--layer solidstart-api-route`): `{example}/tests/*.solidstart.test.ts` or `{example}/src/lib/**/*.test.ts` or `{example}/src/routes/api/*.test.ts`

@@ -22,3 +22,22 @@ export {
   type SimulatedActionEvent,
   type SvelteKitFailSignal,
 } from './invoke-action.js';
+
+export {
+  invokeHandle,
+  invokeHandleFetch,
+  invokeHandleError,
+  type HandleFunction,
+  type HandleFetchFunction,
+  type HandleErrorFunction,
+  type HandleArgs,
+  type HandleFetchArgs,
+  type HandleErrorArgs,
+  type InvokeHandleOptions,
+  type InvokeHandleResult,
+  type InvokeHandleFetchOptions,
+  type InvokeHandleFetchResult,
+  type InvokeHandleErrorOptions,
+  type InvokeHandleErrorResult,
+  type SimulatedHookRequestEvent,
+} from './invoke-hooks.js';
