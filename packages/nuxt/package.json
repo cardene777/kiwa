@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/nuxt",
-  "version": "1.0.1",
-  "description": "Nuxt 3 Server Routes test adapter for kiwa — invoke defineEventHandler in isolation and capture redirect / cookies / response headers / body without a running Nitro server (part of the kiwa test framework family)",
+  "version": "1.0.3",
+  "description": "Nuxt 3 Server Routes + route middleware + Nitro plugin lifecycle test adapter for kiwa — invoke defineEventHandler / defineNuxtRouteMiddleware / defineNitroPlugin in isolation and capture redirect / cookies / response headers / body / hook registration without a running Nitro server (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -14,6 +14,8 @@
     "nitro",
     "h3",
     "server-routes",
+    "route-middleware",
+    "nitro-plugin",
     "testing",
     "vitest"
   ],
@@ -56,7 +58,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/invoke-event-handler.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js'",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/invoke-event-handler.js' --coverage.include='.vitest-dist/src/invoke-route-middleware.js' --coverage.include='.vitest-dist/src/invoke-nitro-plugin.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js'",
     "test:mutation": "stryker run",
     "typecheck": "tsc --noEmit"
   },

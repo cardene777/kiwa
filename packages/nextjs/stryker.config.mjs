@@ -8,6 +8,7 @@ export default {
     '.vitest-dist/src/invoke-server-action.js',
     '.vitest-dist/src/invoke-middleware.js',
     '.vitest-dist/src/render-server-component.js',
+    '.vitest-dist/src/invoke-parallel-routes.js',
   ],
   thresholds: { high: 90, low: 80, break: 80 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],

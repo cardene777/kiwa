@@ -38,3 +38,17 @@ export {
   type ForbiddenSignal,
   type RscRedirectSignal,
 } from './render-server-component.js';
+
+export {
+  invokeParallelRoutes,
+  PARALLEL_INTERCEPTION_SYMBOL,
+  type InvokeParallelRoutesOptions,
+  type InvokeParallelRoutesResult,
+  type ParallelLayoutFunction,
+  type ParallelLayoutChildren,
+  type SlotComponent,
+  type SlotInput,
+  type SlotRenderResult,
+  type DefaultFallbackComponent,
+  type InterceptionMatch,
+} from './invoke-parallel-routes.js';
