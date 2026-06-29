@@ -601,11 +601,11 @@ If your stack falls outside the ✅ list above, kiwa is **still useful for the l
 
 ## Roadmap
 
-| Milestone | Scope | Target | Tracking |
+| Milestone | Scope | Status | Tracking |
 |---|---|---|---|
-| **v1.1** | Next.js Server Actions / RSC / middleware skill + runtime, PyPI publish for `kiwa-test-py`, Nuxt 3 + SvelteKit Server Route adapters | Q1 2027 | [v1.1 label](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Av1.1) |
-| **v1.2** | Remix / React Router v7 + Astro + SolidStart + Qwik City Server adapters, Bun / Deno runtime support, Edge runtime (Miniflare) | Q2 2027 | [v1.2 label](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Av1.2) |
-| **v2.0** | ORM query test adapter, Storybook integration, multi-version Vitest, full-stack framework matrix CI | tbd | [v2.0 label](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Av2.0) |
+| ✅ **v1.1** | Next.js Server Actions / RSC / middleware skill + runtime, PyPI publish for `kiwa-test-py`, Nuxt 3 / SvelteKit / Remix v2 / Astro Server Route adapters | **8/8 resolved** ([#492](https://github.com/cardene777/kiwa/issues/492) [#493](https://github.com/cardene777/kiwa/issues/493) [#494](https://github.com/cardene777/kiwa/issues/494) [#495](https://github.com/cardene777/kiwa/issues/495) [#496](https://github.com/cardene777/kiwa/issues/496) [#497](https://github.com/cardene777/kiwa/issues/497) [#498](https://github.com/cardene777/kiwa/issues/498) [#499](https://github.com/cardene777/kiwa/issues/499)) | [v1.1 label](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Av1.1) |
+| **v1.2** | SolidStart / Qwik City Server adapters, Bun / Deno runtime support, Edge runtime (Cloudflare Workers via Miniflare), SvelteKit `hooks.server.ts`, framework sub-features (Next.js Parallel Routes / Nuxt route middleware / Astro `.astro` SSR), ORM (Drizzle / Prisma / Kysely) + testcontainers, mutation gate extension to 16 packages, full-stack `examples/*` for each framework | 10 issues open ([#518](https://github.com/cardene777/kiwa/issues/518)-[#527](https://github.com/cardene777/kiwa/issues/527)) | [v1.2 label](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Av1.2) |
+| **v2.0** | Storybook integration, multi-version Vitest matrix CI, desktop (Electron / Tauri) + mobile (React Native / Expo) adapters, coverage 100% milestone, all-framework CI matrix | tbd | [v2.0 label](https://github.com/cardene777/kiwa/issues?q=is%3Aissue+label%3Av2.0) |
 
 Contributions welcome — pick an issue from the milestone label list above and follow [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
