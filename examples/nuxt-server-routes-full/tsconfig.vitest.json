@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": ".vitest-dist",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["node", "vitest"],
+    "noEmit": false
+  },
+  "include": [
+    "server/api/_kiwa/**/*.ts",
+    "middleware/_kiwa/**/*.ts",
+    "server/plugins/_kiwa/**/*.ts",
+    "tests/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist", ".vitest-dist", ".nuxt", "tests/e2e/**", "playwright.config.ts"]
+}
