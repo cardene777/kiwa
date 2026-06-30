@@ -41,13 +41,19 @@ export async function expectQuery<TRow = unknown>(
     return;
   }
   if (env.dialect === 'postgres') {
-    // live mode (Postgres) — postgres.js returns a thenable Result.
-    const rows = (await env.raw.unsafe(sql)) as unknown as TRow[];
+    if (env.orm === 'kysely') {
+      // Kysely Postgres uses pg.Pool — query(sql) returns { rows: T[] }.
+      const result = (await (env.raw as unknown as { query: (sql: string) => Promise<{ rows: TRow[] }> }).query(sql));
+      expect(result.rows).toEqual(expected);
+      return;
+    }
+    // live mode (Drizzle Postgres) — postgres.js returns a thenable Result.
+    const rows = (await (env.raw as import('postgres').Sql).unsafe(sql)) as unknown as TRow[];
     expect([...rows]).toEqual(expected);
     return;
   }
-  // live mode (MySQL) — mysql2 `query` returns [rows, fields].
-  const [rows] = (await env.raw.query(sql)) as unknown as [TRow[], unknown];
+  // live mode (MySQL) — mysql2 `query` returns [rows, fields]. Same for Kysely + Drizzle.
+  const [rows] = (await (env.raw as import('mysql2/promise').Pool).query(sql)) as unknown as [TRow[], unknown];
   expect(rows).toEqual(expected);
 }
 
@@ -74,12 +80,17 @@ export async function expectRowCount(
   }
   if (env.dialect === 'postgres') {
     const safe = `"${String(table).replace(/"/g, '""')}"`;
-    const rows = (await env.raw.unsafe(`SELECT COUNT(*)::int AS c FROM ${safe}`)) as unknown as Array<{ c: number }>;
+    if (env.orm === 'kysely') {
+      const result = await (env.raw as unknown as { query: (sql: string) => Promise<{ rows: Array<{ c: number }> }> }).query(`SELECT COUNT(*)::int AS c FROM ${safe}`);
+      expect(result.rows[0]?.c).toBe(expected);
+      return;
+    }
+    const rows = (await (env.raw as import('postgres').Sql).unsafe(`SELECT COUNT(*)::int AS c FROM ${safe}`)) as unknown as Array<{ c: number }>;
     expect(rows[0]?.c).toBe(expected);
     return;
   }
   // MySQL identifier quoting uses backticks.
   const safe = `\`${String(table).replace(/`/g, '``')}\``;
-  const [rows] = (await env.raw.query(`SELECT COUNT(*) AS c FROM ${safe}`)) as unknown as [Array<{ c: number | bigint }>, unknown];
+  const [rows] = (await (env.raw as import('mysql2/promise').Pool).query(`SELECT COUNT(*) AS c FROM ${safe}`)) as unknown as [Array<{ c: number | bigint }>, unknown];
   expect(Number(rows[0]?.c)).toBe(expected);
 }

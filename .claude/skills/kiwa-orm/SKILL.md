@@ -2,8 +2,8 @@
 name: kiwa-orm
 description: |
   Layer 1 spec (`tests/spec/integration/test-spec-{module}.orm.md`) を ORM query test (Vitest + @kiwa-test/orm) に変換する Layer 2 skill。
-  v0.1 = Drizzle + SQLite (mock)、 v0.2 = Drizzle + Postgres (testcontainers)、 v0.2.1 = Drizzle + MySQL (testcontainers)、 v0.3 = Prisma + SQLite (tempdir) を対象に `setupOrmEnv` + `expectQuery` + `expectRowCount` を 9 column 表から機械変換する。
-  Kysely / file-based migration / Prisma + testcontainers 対応は follow-up Issue (CAR-294 / CAR-295 + CAR-293 残) で順次拡張。
+  v0.1-0.2.1 = Drizzle (SQLite mock + Postgres/MySQL testcontainers)、 v0.3 = Prisma + SQLite tempdir、 v0.4 = Kysely (SQLite mock + Postgres/MySQL testcontainers) を対象に `setupOrmEnv` + `expectQuery` + `expectRowCount` を 9 column 表から機械変換する。
+  file-based migration / Prisma + testcontainers 対応は follow-up Issue (CAR-295 / CAR-293 残) で順次拡張。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -103,7 +103,7 @@ it('{ID} {Observation}', async () => {
 | セキュリティ | SQL injection 経路 → drizzle parameterized query で防御確認 |
 | 回帰 | 既知 bug 再現 input |
 
-## v0.3 受入 matrix
+## v0.4 受入 matrix
 
 | mode | orm | dialect | 状態 |
 |---|---|---|---|
@@ -111,8 +111,10 @@ it('{ID} {Observation}', async () => {
 | `live` | `drizzle` | `postgres` | v0.2 (testcontainers Postgres) |
 | `live` | `drizzle` | `mysql` | v0.2.1 (testcontainers MySQL) |
 | `mock` | `prisma` | `sqlite` | v0.3 (tempdir SQLite + prisma db push) |
+| `mock` | `kysely` | `sqlite` | v0.4 (in-memory better-sqlite3) |
+| `live` | `kysely` | `postgres` | v0.4 (testcontainers Postgres + pg) |
+| `live` | `kysely` | `mysql` | v0.4 (testcontainers MySQL + mysql2) |
 | `live` | `prisma` | `postgres` / `mysql` | CAR-293 残 (Prisma + testcontainers) |
-| `*` | `kysely` | `*` | CAR-294 (#527-4) |
 
 未対応の組合せは `setupOrmEnv` が説明的 Error を throw。
 
