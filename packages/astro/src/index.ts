@@ -27,7 +27,7 @@ export {
   type SetupAstroViewTransitionEnvOptions,
   type AstroViewTransitionEnv,
   type AstroViewTransitionEvent,
-  type AstroViewTransitionEventBase,
+  type AstroViewTransitionEventPayload,
   type AstroViewTransitionEventType,
   type AstroViewTransitionListener,
   type AstroBeforePreparationEvent,

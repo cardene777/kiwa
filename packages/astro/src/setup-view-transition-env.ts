@@ -3,30 +3,38 @@
 // Astro v5 が提供する View Transitions API (`<ViewTransitions />` component) は SPA-like な
 // page navigation を実現するため、 4 つの lifecycle event を window に dispatch する ...
 //
-//   - astro:before-preparation  ... 新 document 取得開始前 (loader 起動 / cancellation 可)
-//   - astro:after-preparation   ... 新 document fetch 完了直後 (newDocument 作成済)
-//   - astro:before-swap         ... DOM swap 直前 (newDocument を mutate 可、 viewTransition 制御)
-//   - astro:after-swap          ... DOM swap 直後 (focus restore / scroll 復元前)
+//   - astro:before-preparation  ... TransitionBeforePreparationEvent 派生 (cancelable、 from/to/loader 公開)
+//   - astro:after-preparation   ... 公式 router は plain Event として dispatch、 payload なし
+//   - astro:before-swap         ... TransitionBeforeSwapEvent 派生 (newDocument 公開 + swap function)
+//   - astro:after-swap          ... 公式 router は plain Event として dispatch、 payload なし
 //
-// 公式実装は `astro:transitions/client` の navigate() を起点に上記 4 event を順に dispatch する。
-// kiwa は real browser を起動せず、 minimal な synthetic event dispatcher を提供して
-// 各 listener (page 内 `<script>` / framework hook) の挙動を unit test できる形にする。
+// 公式 router 動作 (Astro v5 / node_modules/astro/dist/transitions/{router.js,events.js}) ...
 //
-// 4 event は Astro v5 source code の `astro/packages/astro/src/transitions/router.ts` に準拠 ...
-//   TransitionBeforePreparationEvent  (cancelable, defaultPrevented で nav 中止)
-//   TransitionAfterPreparationEvent   (not cancelable)
-//   TransitionBeforeSwapEvent         (not cancelable, newDocument / swap function 公開)
-//   plus a plain Event for 'astro:after-swap'
+//   * `<ViewTransitions />` が page に含まれる場合 (= transitionEnabledOnThisPage) は
+//     navigationType を問わず必ず doPreparation() を実行する。 supportsViewTransitions
+//     (= !!document.startViewTransition) は preparation event の dispatch 有無には影響せず、
+//     swap 部分で startViewTransition() を使うか fallback animate 経路を使うかだけを決める。
+//   * doSwap() は listener dispatch 後に必ず event.swap() を呼ぶ。 listener 内で event.swap()
+//     を override すれば早期 swap も可能だが、 router 側は post-listener で **必ず** event.swap()
+//     を呼ぶため、 listener が swap() を呼んでいた場合は **2 回 swap される**。 これは
+//     listener 側で `event.swap = () => {}` 等で no-op 化することを期待する設計。
+//   * triggerEvent(TRANSITION_AFTER_PREPARATION) と triggerEvent(TRANSITION_AFTER_SWAP) は
+//     plain Event を dispatch する (from/to/newDocument 等の payload は持たない)。 listener は
+//     event.type だけ見て document.location.href 経由で nav 後 URL を取得する。
 //
-// Cross-document fallback (browser が View Transitions API 未対応) は
-// `supportsViewTransitions` flag で expose する。 false 時は kiwa が直接 swap を実行し、
-// before-swap / after-swap のみ dispatch する (公式 router 同等の fallback path)。
+// kiwa は real browser を起動せず synthetic dispatcher を提供して各 listener (page 内 script /
+// framework hook) の挙動を unit test できる形にする。 公式 router の挙動に **厳密に** 合わせる ...
+//
+//   - supportsViewTransitions=false でも before-preparation / after-preparation は dispatch する
+//   - after-preparation / after-swap event は plain (type のみ) で from/to/etc 非公開
+//   - swap() は post-listener で必ず 1 回呼ぶ (listener も呼んでいれば計 2 回、 swapCallCount で観測可)
 //
 // Out of scope on purpose:
 //   - real document.startViewTransition() の visual transition (jsdom 不在)
 //   - prefetch event (astro:before-prefetch) — Astro Container API 経由で別途 cover
+//   - transitionEnabledOnThisPage()=false の full-reload 経路 (location.href=to、 event 一切 dispatch なし)
 
-export interface AstroViewTransitionEventBase {
+export interface AstroViewTransitionEventPayload {
   readonly from: URL;
   readonly to: URL;
   readonly navigationType: 'traverse' | 'push' | 'replace';
@@ -38,7 +46,7 @@ export interface AstroViewTransitionEventBase {
   readonly formData: FormData | undefined;
 }
 
-export interface AstroBeforePreparationEvent extends AstroViewTransitionEventBase {
+export interface AstroBeforePreparationEvent extends AstroViewTransitionEventPayload {
   readonly type: 'astro:before-preparation';
   defaultPrevented: boolean;
   preventDefault(): void;
@@ -46,20 +54,31 @@ export interface AstroBeforePreparationEvent extends AstroViewTransitionEventBas
   loader: (() => Promise<void>) | undefined;
 }
 
-export interface AstroAfterPreparationEvent extends AstroViewTransitionEventBase {
+/**
+ * Astro 公式 router は `triggerEvent(TRANSITION_AFTER_PREPARATION)` で plain `Event` を dispatch する。
+ * listener は `e.type` だけ参照可能で、 from / to / newDocument は持たない。
+ */
+export interface AstroAfterPreparationEvent {
   readonly type: 'astro:after-preparation';
 }
 
-export interface AstroBeforeSwapEvent extends AstroViewTransitionEventBase {
+export interface AstroBeforeSwapEvent extends AstroViewTransitionEventPayload {
   readonly type: 'astro:before-swap';
-  /** DOM swap 関数 (公式 router 互換)、 listener が override 可 */
+  /**
+   * DOM swap 関数 (公式 router 互換)。 listener が override 可。
+   * 公式 router は listener dispatch 後に必ず event.swap() を 1 回呼ぶため、
+   * listener が swap() を呼ぶと swap が計 2 回実行される (swapCallCount で観測可能)。
+   * listener が swap を no-op 化したい場合は `event.swap = () => {}` で上書きする。
+   */
   swap: () => void;
 }
 
+/**
+ * Astro 公式 router は `triggerEvent(TRANSITION_AFTER_SWAP)` で plain `Event` を dispatch する。
+ * listener は `e.type` だけ参照可能で、 from / to は持たない (nav 後 URL は `document.location.href`)。
+ */
 export interface AstroAfterSwapEvent {
   readonly type: 'astro:after-swap';
-  readonly from: URL;
-  readonly to: URL;
 }
 
 export type AstroViewTransitionEvent =
@@ -88,9 +107,10 @@ export interface SetupAstroViewTransitionEnvOptions {
   /** from-page side で初期表示される HTML (default は最小の `<html><body></body></html>`) */
   readonly fromHtml?: string;
   /**
-   * browser の View Transitions API support flag (default `true`)
-   * false 時は cross-document fallback path に入り、 before-preparation / after-preparation
-   * は dispatch されず before-swap → after-swap のみ流れる。
+   * browser の View Transitions API support flag (default `true`)。
+   * 公式 router 動作と整合 ... preparation event は support 有無に **関係なく** dispatch される。
+   * 本 flag は before-swap event の `viewTransition` field 公開有無のみ制御する
+   * (= `document.startViewTransition()` を browser が持つかどうか、 視覚 transition 用)。
    */
   readonly supportsViewTransitions?: boolean;
   /** Astro form submission event 由来 — submit data を formData として公開 */
@@ -128,8 +148,8 @@ export interface AstroViewTransitionEnv {
   ): void;
   /**
    * 4 event を順に dispatch ... before-preparation → after-preparation → before-swap → after-swap。
-   * supportsViewTransitions=false 時は before-swap → after-swap のみ。
-   * before-preparation で preventDefault() / loader override された場合の挙動は公式 router に準拠。
+   * before-preparation で preventDefault() / signal abort された場合は preparation 経路を中断
+   * (公式 `doPreparation` 同等、 router は event を return するが後続 transition は走らない)。
    */
   dispatchAll(): Promise<AstroViewTransitionDispatchResult>;
   /** 個別 event のみ dispatch (sequence 検証用) */
@@ -150,9 +170,14 @@ export interface AstroViewTransitionDispatchResult {
   readonly afterPreparation: AstroAfterPreparationEvent | null;
   readonly beforeSwap: AstroBeforeSwapEvent | null;
   readonly afterSwap: AstroAfterSwapEvent | null;
-  readonly swapCalled: boolean;
+  /**
+   * swap() が呼ばれた回数。 公式 router は listener dispatch 後に必ず 1 回呼ぶため、
+   * listener が swap() を呼ばなければ 1、 listener も呼べば 2 になる。
+   * 2 を期待しない user code は double-swap bug 候補。
+   */
+  readonly swapCallCount: number;
+  /** before-preparation で preventDefault された場合 true (preparation 中断) */
   readonly cancelled: boolean;
-  readonly fellBackToCrossDocument: boolean;
 }
 
 export interface AstroViewTransitionDomDiff {
@@ -166,8 +191,10 @@ export interface AstroViewTransitionDomDiff {
 
 /**
  * Minimal HTML parser — `<body>` 内の最上位 element tag を string 抽出する fallback parser。
- * 完全な DOM 構築は不要 (assertion は tag-name 列の差分で完結する)、 jsdom / happy-dom 等の
- * browser DOM lib なしで動作する。 後で real Document が必要になったら呼び側で別途生成する。
+ * void element (`<img>` / `<br>` / `<hr>` / `<input>` / `<link>` / `<meta>` / `<area>` /
+ * `<base>` / `<col>` / `<embed>` / `<source>` / `<track>` / `<wbr>`) と自己終端形 (`<x />`) を
+ * 識別して、 depth カウンタを正しく増減させる。 完全な DOM 構築は不要 (assertion は tag-name
+ * 列の差分で完結する)、 jsdom / happy-dom 等の browser DOM lib なしで動作する。
  */
 interface MinimalDocument {
   readonly body: {
@@ -177,29 +204,40 @@ interface MinimalDocument {
   readonly documentElement: { outerHTML: string };
 }
 
+const VOID_TAGS = new Set([
+  'AREA', 'BASE', 'BR', 'COL', 'EMBED', 'HR', 'IMG', 'INPUT',
+  'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR',
+]);
+
 function parseDocument(html: string): MinimalDocument {
   const bodyMatch = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(html);
   const bodyInner = bodyMatch ? bodyMatch[1] ?? '' : html;
-  const childTagRegex = /<([a-z][a-z0-9-]*)\b[^>]*>/gi;
+  // comment / CDATA / DOCTYPE を除去 (top-level tag 検出に干渉するため)
+  const stripped = bodyInner
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, '')
+    .replace(/<!DOCTYPE[^>]*>/gi, '');
+  const tokenRegex = /<(\/)?([a-z][a-z0-9-]*)\b([^>]*)>/gi;
   const children: { readonly tagName: string }[] = [];
   let depth = 0;
-  let cursor = 0;
-  const closeRegex = /<\/([a-z][a-z0-9-]*)\s*>/gi;
-  while (cursor < bodyInner.length) {
-    childTagRegex.lastIndex = cursor;
-    closeRegex.lastIndex = cursor;
-    const open = childTagRegex.exec(bodyInner);
-    const close = closeRegex.exec(bodyInner);
-    if (!open && !close) break;
-    if (open && (!close || open.index < close.index)) {
-      if (depth === 0) {
-        children.push({ tagName: (open[1] ?? '').toUpperCase() });
-      }
-      depth++;
-      cursor = (open.index ?? 0) + (open[0]?.length ?? 0);
-    } else if (close) {
+  let match: RegExpExecArray | null;
+  while ((match = tokenRegex.exec(stripped)) !== null) {
+    const isClose = match[1] === '/';
+    const tagName = (match[2] ?? '').toUpperCase();
+    const attrs = match[3] ?? '';
+    const selfClose = /\/\s*$/.test(attrs);
+    const isVoid = VOID_TAGS.has(tagName);
+    if (isClose) {
       depth = Math.max(0, depth - 1);
-      cursor = (close.index ?? 0) + (close[0]?.length ?? 0);
+      continue;
+    }
+    // open tag
+    if (depth === 0) {
+      children.push({ tagName });
+    }
+    // void / self-close は depth を増やさない (続く sibling が top-level として認識されるため)
+    if (!isVoid && !selfClose) {
+      depth++;
     }
   }
   let innerHTMLValue = bodyInner;
@@ -245,7 +283,7 @@ export function setupAstroViewTransitionEnv(
     'astro:after-swap': [],
   };
 
-  function buildBase(): AstroViewTransitionEventBase {
+  function buildPayload(): AstroViewTransitionEventPayload {
     return {
       from: fromUrl,
       to: toUrl,
@@ -254,16 +292,18 @@ export function setupAstroViewTransitionEnv(
       sourceElement: options.sourceElement,
       info: options.info,
       newDocument,
+      // viewTransition は browser の startViewTransition() support 有無を反映、
+      // 未対応 browser では undefined (公式 router の `viewTransition = null` 経路相当)
       viewTransition: supportsViewTransitions ? { skipTransition: () => {} } : undefined,
       formData: currentFormData,
     };
   }
 
   function buildBeforePreparation(): AstroBeforePreparationEvent {
-    const base = buildBase();
+    const payload = buildPayload();
     const event: AstroBeforePreparationEvent = {
       type: 'astro:before-preparation',
-      ...base,
+      ...payload,
       defaultPrevented: false,
       preventDefault() {
         event.defaultPrevented = true;
@@ -274,14 +314,14 @@ export function setupAstroViewTransitionEnv(
   }
 
   function buildAfterPreparation(): AstroAfterPreparationEvent {
-    return { type: 'astro:after-preparation', ...buildBase() };
+    return { type: 'astro:after-preparation' };
   }
 
   function buildBeforeSwap(): AstroBeforeSwapEvent {
-    const base = buildBase();
+    const payload = buildPayload();
     return {
       type: 'astro:before-swap',
-      ...base,
+      ...payload,
       swap() {
         // default no-op、 dispatchAll() で外側から override される
       },
@@ -289,7 +329,7 @@ export function setupAstroViewTransitionEnv(
   }
 
   function buildAfterSwap(): AstroAfterSwapEvent {
-    return { type: 'astro:after-swap', from: fromUrl, to: toUrl };
+    return { type: 'astro:after-swap' };
   }
 
   async function runListeners<TType extends AstroViewTransitionEventType>(
@@ -349,43 +389,46 @@ export function setupAstroViewTransitionEnv(
       let beforeSwap: AstroBeforeSwapEvent | null = null;
       let afterSwap: AstroAfterSwapEvent | null = null;
       let cancelled = false;
-      let swapCalled = false;
-      let fellBackToCrossDocument = !supportsViewTransitions;
+      let swapCallCount = 0;
 
-      if (supportsViewTransitions) {
-        beforePreparation = buildBeforePreparation();
-        await runListeners('astro:before-preparation', beforePreparation);
-        if (beforePreparation.defaultPrevented) {
-          cancelled = true;
-          return {
-            beforePreparation,
-            afterPreparation,
-            beforeSwap,
-            afterSwap,
-            swapCalled,
-            cancelled,
-            fellBackToCrossDocument,
-          };
-        }
-        if (typeof beforePreparation.loader === 'function') {
-          await beforePreparation.loader();
-        }
-        afterPreparation = buildAfterPreparation();
-        await runListeners('astro:after-preparation', afterPreparation);
+      // 公式 router 動作 ... transitionEnabledOnThisPage() が true なら supportsViewTransitions
+      // の有無にかかわらず必ず doPreparation() を実行する。 本 helper は常に preparation 経路を
+      // 走らせ、 supportsViewTransitions=false は before-swap.viewTransition を undefined にする
+      // ことで visual transition の有無のみ表現する。
+      beforePreparation = buildBeforePreparation();
+      await runListeners('astro:before-preparation', beforePreparation);
+      // 公式 router は loader を defaultPrevented 判定の前に await する (doPreparation 内 ...
+      // `if (document.dispatchEvent(event)) { await event.loader(); ... }`)、
+      // しかし dispatchEvent は preventDefault された場合 false を返すため、
+      // preventDefault された場合は loader も走らせない実装が正確。
+      if (beforePreparation.defaultPrevented) {
+        cancelled = true;
+        return {
+          beforePreparation,
+          afterPreparation,
+          beforeSwap,
+          afterSwap,
+          swapCallCount,
+          cancelled,
+        };
       }
+      if (typeof beforePreparation.loader === 'function') {
+        await beforePreparation.loader();
+      }
+      afterPreparation = buildAfterPreparation();
+      await runListeners('astro:after-preparation', afterPreparation);
 
       beforeSwap = buildBeforeSwap();
-      // swap default impl ... before-swap listener が override しなければ kiwa が呼出
-      const originalSwap = beforeSwap.swap;
+      // 公式 router の doSwap 動作 ... listener dispatch 後に必ず event.swap() を 1 回呼ぶ。
+      // listener が swap() を呼べば計 2 回呼ばれる (swapCallCount で観測可)。
+      const swapOriginal = beforeSwap.swap;
       beforeSwap.swap = () => {
-        swapCalled = true;
-        originalSwap();
+        swapCallCount++;
+        swapOriginal();
       };
       await runListeners('astro:before-swap', beforeSwap);
-      if (!swapCalled) {
-        // listener が明示的に swap を呼ばなかった場合、 router 側で default swap を実行
-        beforeSwap.swap();
-      }
+      // 公式 router 必須 ... listener が呼んだかどうか **関係なく** post-listener で 1 回呼ぶ
+      beforeSwap.swap();
 
       afterSwap = buildAfterSwap();
       await runListeners('astro:after-swap', afterSwap);
@@ -395,9 +438,8 @@ export function setupAstroViewTransitionEnv(
         afterPreparation,
         beforeSwap,
         afterSwap,
-        swapCalled,
+        swapCallCount,
         cancelled,
-        fellBackToCrossDocument,
       };
     },
     diffDom() {

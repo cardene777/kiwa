@@ -4,6 +4,11 @@
 // unified helper。 既存 invokeEndpoint / renderAstroPage は backward compat 維持、
 // setupAstroViewTransitionEnv は v1.1+ 新 entry。
 //
+// 公式 router 動作 (Astro v5 / node_modules/astro/dist/transitions/router.js + events.js) に
+// 準拠 ... preparation event は supportsViewTransitions に関係なく必ず dispatch、
+// after-preparation / after-swap は plain Event (payload なし)、 swap() は post-listener で
+// 必ず 1 回呼ばれる (listener も呼べば計 2 回)。
+//
 // 11 観点 cover ... 正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力 / 冪等性 /
 //                    並行 / 性能 / セキュリティ / 回帰 (各観点を T-AVT-NNN で番号付け)。
 
@@ -39,12 +44,11 @@ describe('setupAstroViewTransitionEnv', () => {
       'astro:before-swap',
       'astro:after-swap',
     ]);
-    expect(result.swapCalled).toBe(true);
+    expect(result.swapCallCount).toBe(1);
     expect(result.cancelled).toBe(false);
-    expect(result.fellBackToCrossDocument).toBe(false);
   });
 
-  it('T-AVT-002 正常系: from/to URL が listener に正しく渡る', async () => {
+  it('T-AVT-002 正常系: from/to URL が before-preparation listener に正しく渡る', async () => {
     const env = setupAstroViewTransitionEnv({
       fromPath: '/products',
       toPath: '/products/42',
@@ -96,6 +100,7 @@ describe('setupAstroViewTransitionEnv', () => {
     expect(result.afterPreparation).toBeNull();
     expect(result.beforeSwap).toBeNull();
     expect(result.afterSwap).toBeNull();
+    expect(result.swapCallCount).toBe(0);
     expect(seenSwap.before).toBe(false);
     expect(seenSwap.after).toBe(false);
   });
@@ -121,10 +126,10 @@ describe('setupAstroViewTransitionEnv', () => {
     expect(result.afterPreparation).not.toBeNull();
     expect(result.beforeSwap).not.toBeNull();
     expect(result.afterSwap).not.toBeNull();
-    expect(result.swapCalled).toBe(true);
+    expect(result.swapCallCount).toBe(1);
   });
 
-  it('T-AVT-008 状態遷移: cross-document fallback 時は before-preparation / after-preparation がスキップ', async () => {
+  it('T-AVT-008 状態遷移: supportsViewTransitions=false でも preparation event は dispatch される (公式 router 動作)', async () => {
     const env = setupAstroViewTransitionEnv({
       fromPath: '/legacy',
       toPath: '/modern',
@@ -144,10 +149,25 @@ describe('setupAstroViewTransitionEnv', () => {
       seen.push(e.type);
     });
     const result = await env.dispatchAll();
-    expect(seen).toEqual(['astro:before-swap', 'astro:after-swap']);
-    expect(result.fellBackToCrossDocument).toBe(true);
-    expect(result.beforePreparation).toBeNull();
-    expect(result.afterPreparation).toBeNull();
+    expect(seen).toEqual([
+      'astro:before-preparation',
+      'astro:after-preparation',
+      'astro:before-swap',
+      'astro:after-swap',
+    ]);
+    // supportsViewTransitions=false は before-swap.viewTransition を undefined にする
+    expect(result.beforeSwap?.viewTransition).toBeUndefined();
+  });
+
+  it('T-AVT-008-2 状態遷移: supportsViewTransitions=true は before-swap.viewTransition を expose', async () => {
+    const env = setupAstroViewTransitionEnv({
+      fromPath: '/',
+      toPath: '/x',
+      supportsViewTransitions: true,
+    });
+    const result = await env.dispatchAll();
+    expect(result.beforeSwap?.viewTransition).toBeDefined();
+    expect(typeof result.beforeSwap?.viewTransition?.skipTransition).toBe('function');
   });
 
   it('T-AVT-009 状態遷移: dispatchAll() 後の reset() で listener / state が初期化される', async () => {
@@ -268,7 +288,7 @@ describe('setupAstroViewTransitionEnv', () => {
     expect(order).toEqual(['A', 'B']);
   });
 
-  it('T-AVT-016 並行: before-preparation の loader override が await される', async () => {
+  it('T-AVT-016 並行: before-preparation の loader override が await される (preventDefault されない場合)', async () => {
     const env = setupAstroViewTransitionEnv({
       fromPath: '/',
       toPath: '/slow',
@@ -309,8 +329,6 @@ describe('setupAstroViewTransitionEnv', () => {
       toPath: '/x',
       toHtml: '<!doctype html><html><body><main><h1>x</h1></main></body></html>',
     });
-    // env が公開する property は限定的 ... fromUrl / toUrl / transitionName /
-    // supportsViewTransitions / newDocument + 4 method (on / off / dispatch / dispatchAll / diffDom / reset)
     const exposed = Object.keys(env).sort();
     expect(exposed).toContain('fromUrl');
     expect(exposed).toContain('toUrl');
@@ -329,6 +347,7 @@ describe('setupAstroViewTransitionEnv', () => {
     expect(doc).toBeDefined();
     // env を介さずに internal storage を入れ替える経路はない
     expect(() => {
+      'use strict';
       (env as unknown as { newDocument: unknown }).newDocument = null;
     }).toThrow();
   });
@@ -358,12 +377,83 @@ describe('setupAstroViewTransitionEnv', () => {
     expect(e.newDocument).toBeDefined();
   });
 
-  it('T-AVT-022 回帰: before-swap の swap() を listener が呼ばなくても router default で 1 回呼ばれる', async () => {
+  it('T-AVT-022 回帰: before-swap の swap() は post-listener で必ず 1 回呼ばれる (listener が呼ばない場合 swapCallCount=1)', async () => {
     const env = setupAstroViewTransitionEnv({
       fromPath: '/',
       toPath: '/x',
     });
     const result = await env.dispatchAll();
-    expect(result.swapCalled).toBe(true);
+    expect(result.swapCallCount).toBe(1);
+  });
+
+  it('T-AVT-023 回帰: listener が swap() を呼ぶと post-listener default swap と合わせて計 2 回 (double-swap 検出)', async () => {
+    const env = setupAstroViewTransitionEnv({
+      fromPath: '/',
+      toPath: '/x',
+    });
+    env.on('astro:before-swap', (e) => {
+      e.swap();
+    });
+    const result = await env.dispatchAll();
+    expect(result.swapCallCount).toBe(2);
+  });
+
+  it('T-AVT-024 回帰: listener が swap を no-op 化すれば post-listener 経由のみで swapCallCount=1 維持', async () => {
+    const env = setupAstroViewTransitionEnv({
+      fromPath: '/',
+      toPath: '/x',
+    });
+    env.on('astro:before-swap', (e) => {
+      // listener が swap を no-op 化 → post-listener の swap も no-op になる
+      e.swap = () => {};
+    });
+    const result = await env.dispatchAll();
+    expect(result.swapCallCount).toBe(0);
+  });
+
+  it('T-AVT-025 回帰: diffDom() が void element (<img>) を top-level として正しく認識', () => {
+    const env = setupAstroViewTransitionEnv({
+      fromPath: '/',
+      toPath: '/x',
+      fromHtml: '<!doctype html><html><body><img alt="a"><main></main></body></html>',
+      toHtml: '<!doctype html><html><body><img alt="b"><article></article></body></html>',
+    });
+    const diff = env.diffDom();
+    expect(diff.removed).toEqual(['MAIN']);
+    expect(diff.added).toEqual(['ARTICLE']);
+    expect(diff.kept).toEqual(['IMG']);
+  });
+
+  it('T-AVT-026 回帰: HTML comment / DOCTYPE / 自己終端形 (<x />) は top-level tag 検出に干渉しない', () => {
+    const env = setupAstroViewTransitionEnv({
+      fromPath: '/',
+      toPath: '/x',
+      fromHtml:
+        '<!doctype html><html><body><!-- comment --><header></header><br><main></main></body></html>',
+      toHtml:
+        '<!doctype html><html><body><header></header><br /><article></article></body></html>',
+    });
+    const diff = env.diffDom();
+    expect(diff.kept.sort()).toEqual(['BR', 'HEADER']);
+    expect(diff.removed).toEqual(['MAIN']);
+    expect(diff.added).toEqual(['ARTICLE']);
+  });
+
+  it('T-AVT-027 回帰: after-preparation / after-swap event は plain (type のみ) — 公式 router 動作準拠', async () => {
+    const env = setupAstroViewTransitionEnv({
+      fromPath: '/',
+      toPath: '/x',
+    });
+    let afterPrepKeys: string[] = [];
+    let afterSwapKeys: string[] = [];
+    env.on('astro:after-preparation', (e) => {
+      afterPrepKeys = Object.keys(e);
+    });
+    env.on('astro:after-swap', (e) => {
+      afterSwapKeys = Object.keys(e);
+    });
+    await env.dispatchAll();
+    expect(afterPrepKeys).toEqual(['type']);
+    expect(afterSwapKeys).toEqual(['type']);
   });
 });
