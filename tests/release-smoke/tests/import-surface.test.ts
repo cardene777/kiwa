@@ -201,6 +201,11 @@ describe('@kiwa-test/astro surface', () => {
     expect(typeof mod.ASTRO_NOT_FOUND_SYMBOL).toBe('symbol');
     expect(typeof mod.ASTRO_REWRITE_SYMBOL).toBe('symbol');
   });
+
+  it('exports setupAstroViewTransitionEnv (v1.1.0+)', async () => {
+    const mod = await import('@kiwa-test/astro');
+    expect(typeof mod.setupAstroViewTransitionEnv).toBe('function');
+  });
 });
 
 describe('@kiwa-test/solidstart surface', () => {

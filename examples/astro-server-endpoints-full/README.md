@@ -22,12 +22,17 @@ astro-server-endpoints-full/
 │           └── _kiwa/
 │               ├── items-endpoint.ts    # kiwa-testable pure GET + POST handler
 │               └── counter-endpoint.ts  # kiwa-testable counter + locals echo
+├── src/pages/blog/
+│   ├── index.astro              # View Transitions PoC 起点 (transition:name="site-header")
+│   └── [slug].astro             # 遷移先 page (article 部分のみ swap)
 ├── tests/
 │   ├── items-get.test.ts         # invokeEndpoint 8 test (GET)
 │   ├── items-post.test.ts        # invokeEndpoint 7 test (POST)
 │   ├── counter.test.ts           # invokeEndpoint 5 test (multi-method + locals)
 │   ├── auth.test.ts              # session resolver 4 test
-│   └── e2e/astro-server.spec.ts  # Playwright e2e 7 test (real `astro dev` 経由)
+│   ├── view-transitions.test.ts  # setupAstroViewTransitionEnv 5 test (v1.1+)
+│   ├── e2e/astro-server.spec.ts  # Playwright e2e 7 test (real `astro dev` 経由)
+│   └── e2e/astro-view-transitions.spec.ts  # Playwright e2e 3 test (View Transitions、 v1.1+)
 ├── playwright.config.ts          # Playwright config (webServer auto-launch :3060)
 ├── package.json
 ├── tsconfig.json
@@ -59,7 +64,7 @@ pnpm -F examples-astro-server-endpoints-full build  # 依存 @kiwa-test/astro + 
 
 ```bash
 pnpm -F examples-astro-server-endpoints-full test
-# → 24 test (items GET 8 + items POST 7 + counter 5 + auth 4) 全 pass、 1 秒未満で完了
+# → 29 test (items GET 8 + items POST 7 + counter 5 + auth 4 + view-transitions 5) 全 pass、 1 秒未満で完了
 ```
 
 `invokeEndpoint` を使った 24 test が pass し、 each API Route の動作仕様を Astro / @astrojs/node runtime なしで確認できる。

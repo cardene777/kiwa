@@ -1,0 +1,44 @@
+---
+// blog/index.astro — Astro v5 View Transitions PoC の起点 page。
+// `<ViewTransitions />` component で同 origin nav を SPA-like に切替、
+// 4 lifecycle event (before-preparation / after-preparation / before-swap / after-swap)
+// を window listener で観測する。 e2e test は kiwa-vt-trace 属性で観測結果を assertion する。
+import { ViewTransitions } from 'astro:transitions';
+const posts = [
+  { slug: '2026-06-30', title: 'kiwa v1.3 milestone start' },
+  { slug: '2026-06-15', title: 'Astro v5 view transitions overview' },
+];
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>kiwa blog — Astro View Transitions PoC</title>
+    <ViewTransitions />
+  </head>
+  <body>
+    <header transition:name="site-header">
+      <h1>kiwa blog (View Transitions PoC)</h1>
+    </header>
+    <main>
+      <ul>
+        {posts.map((post) => (
+          <li>
+            <a href={`/blog/${post.slug}`} data-kiwa-link="post">{post.title}</a>
+          </li>
+        ))}
+      </ul>
+    </main>
+    <script>
+      // Astro v5 lifecycle event の観測 — body 属性に dispatch 履歴を残し、
+      // Playwright e2e 側で document.body.dataset.kiwaVtTrace を assertion する。
+      function appendTrace(eventName: string) {
+        const prior = document.body.dataset.kiwaVtTrace ?? '';
+        document.body.dataset.kiwaVtTrace = prior ? `${prior}|${eventName}` : eventName;
+      }
+      document.addEventListener('astro:before-preparation', () => appendTrace('before-preparation'));
+      document.addEventListener('astro:after-preparation', () => appendTrace('after-preparation'));
+      document.addEventListener('astro:before-swap', () => appendTrace('before-swap'));
+      document.addEventListener('astro:after-swap', () => appendTrace('after-swap'));
+    </script>
+  </body>
+</html>
