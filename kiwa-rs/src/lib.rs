@@ -19,12 +19,18 @@
 //! ## Modules
 //!
 //! - [`mod@unit`] — unit test fixture (`setup_env` + `KiwaEnv` + `Mode`).
+//! - [`mod@integration`] — hyper-based mock server + request recorder for
+//!   integration tests (`reqwest` / `hyper` client → kiwa mock endpoint).
+//!   Gated behind the `integration` feature (enabled by default).
 //! - assertion macros — exported at crate root.
 
 #![deny(missing_docs)]
 #![warn(rust_2018_idioms)]
 
 pub mod unit;
+
+#[cfg(feature = "integration")]
+pub mod integration;
 
 mod assertions;
 
