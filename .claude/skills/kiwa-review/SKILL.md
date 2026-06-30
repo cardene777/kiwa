@@ -1,9 +1,10 @@
 ---
 name: kiwa-review
 description: |
-  kiwa skill chain で生成された test 仕様書 (`/kiwa-design` 出力) と test code (`/kiwa-forge` `/kiwa-hardhat` `/kiwa-play` 出力) を review する skill。
+  kiwa skill chain で生成された test 仕様書 (`/kiwa-design` 出力) と test code (`/kiwa-forge` `/kiwa-hardhat` `/kiwa-play` `/kiwa-rust` `/kiwa-go` 出力) を review する skill。
   3 mode — `spec-review` (生成 spec の 11 観点網羅 / 優先度妥当性 / 不足観点を判定) / `test-review` (spec vs 実装 test の整合 / 観点別 cover 率 / 追加すべき test を提案) / `result-review` (test 実行結果 / coverage 数値 / flaky 検出 / 統合 report 全体を集約 review)。
-  単体起動 + 他 kiwa skill (kiwa-design / kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-test) の完了 step から自動呼出。 report は `tests/reports/review/` に Write。
+  v1.4-6 (Issue #581) で polyglot 4 layer (rust-unit / rust-integration / go-unit / go-integration) 対応追加、 5 言語 (TS / Python / Solidity / Rust / Go) の spec vs test 整合 review を統一経路で扱う。
+  単体起動 + 他 kiwa skill (kiwa-design / kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-rust / kiwa-go / kiwa-test) の完了 step から自動呼出。 report は `tests/reports/review/` に Write。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -28,7 +29,7 @@ $ARGUMENTS
 
 - `--mode {spec-review|test-review|result-review}` — review mode (必須)
 - `--module {name}` — 対象 module 名 (spec / test file の特定キー)
-- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nuxt-server-route|nuxt-route-middleware|nuxt-nitro-plugin|sveltekit-load|sveltekit-action|sveltekit-handle|sveltekit-handle-fetch|sveltekit-handle-error|sveltekit-hooks-chain|remix-loader|remix-action|remix-resource-route|remix-nested-route-chain|astro-endpoint|astro-ssr|astro-view-transitions|solidstart-server-function|solidstart-api-route|qwikcity-action|qwikcity-loader|qwikcity-endpoint|edge-handler|integration|unit|all}` — spec layer (default `all`、 spec path 解決に使用、 詳細は `/kiwa-design § 出力 path の決定` SSOT)。 spec-review / test-review / result-review 3 mode は全 layer に対応 (5 framework sub-feature は v1.2 milestone Issue #523 で追加、 v1.3-2 SvelteKit hooks chain は Issue #559 で追加、 v1.3-3 Astro view transitions は Issue #560 で追加、 v1.3-4 Remix nested route chain は Issue #561 で追加)
+- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nuxt-server-route|nuxt-route-middleware|nuxt-nitro-plugin|sveltekit-load|sveltekit-action|sveltekit-handle|sveltekit-handle-fetch|sveltekit-handle-error|sveltekit-hooks-chain|remix-loader|remix-action|remix-resource-route|remix-nested-route-chain|astro-endpoint|astro-ssr|astro-view-transitions|solidstart-server-function|solidstart-api-route|qwikcity-action|qwikcity-loader|qwikcity-endpoint|edge-handler|rust-unit|rust-integration|go-unit|go-integration|integration|unit|all}` — spec layer (default `all`、 spec path 解決に使用、 詳細は `/kiwa-design § 出力 path の決定` SSOT)。 spec-review / test-review / result-review 3 mode は全 layer に対応 (5 framework sub-feature は v1.2 milestone Issue #523 で追加、 v1.3-2 SvelteKit hooks chain は Issue #559 で追加、 v1.3-3 Astro view transitions は Issue #560 で追加、 v1.3-4 Remix nested route chain は Issue #561 で追加、 v1.4-6 polyglot Rust / Go 4 layer は Issue #581 で追加)
 - `--spec-path {path}` — spec file path を明示指定 (`--module` の代替)
 - `--test-path {path}` — test code path を明示指定 (test-review mode のみ、 default は spec から推定)
 - `--lang {ja|en|<ISO 639-1>}` — report 生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
@@ -98,6 +99,10 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
   - SolidStart Server Functions + API Routes (`--layer solidstart-server-function` / `--layer solidstart-api-route`): `{example}/tests/*.solidstart.test.ts` or `{example}/src/lib/**/*.test.ts` or `{example}/src/routes/api/*.test.ts`
   - Qwik City routeAction + routeLoader + Endpoints (`--layer qwikcity-action` / `--layer qwikcity-loader` / `--layer qwikcity-endpoint`): `{example}/tests/*.qwik.test.ts` or `{example}/src/routes/**/*.test.ts`
   - Edge runtime fetch handler (`--layer edge-handler`): `{example}/tests/*.edge.test.ts` or `{example}/src/index.test.ts`
+  - Rust cargo test unit (`--layer rust-unit`、 Issue #581 v1.4-6): `examples/{example}/tests/*.rs` (cargo の integration test 慣習、 1 file = 1 crate)
+  - Rust cargo test integration (`--layer rust-integration`、 Issue #581 v1.4-6): `examples/{example}/tests/*_integration.rs` or `examples/{example}/tests/*.rs` (mock_server 経路、 unit と同 dir、 file 名 suffix or test 関数 prefix で識別)
+  - Go testing.T unit (`--layer go-unit`、 Issue #581 v1.4-6): `examples/{example}/*_test.go` (Go 同 package test 慣習、 black-box test は `{pkg}_test` package suffix)
+  - Go testing.T integration (`--layer go-integration`、 Issue #581 v1.4-6): `examples/{example}/integration/*_test.go` (別 sub-package、 `package integration_test` で mock_server 経路を分離)
 - 11 観点 catalog (`.claude/skills/kiwa-design/references/viewpoints-catalog.md`) を Read
 - 新 3 layer 専用観点の追加 SSOT
   - `e2e-generic`: 9 column (Mode `static`/`fetch`/`node`/`ssr` + Route + Action + Expected) を Layer 2 mapping と照合

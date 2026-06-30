@@ -91,15 +91,17 @@ graph TD
 
 kiwa ships in two halves that work together but stand alone:
 
-### 1. Claude Code skills (25 skills, the design + generation half)
+### 1. Claude Code skills (27 skills, the design + generation half)
 
 | Skill | Layer | Role |
 |---|---|---|
-| [`/kiwa-test`](./.claude/skills/kiwa-test/SKILL.md) | **orchestrator** | Run the full chain in one command (`--target {contract\|dapp\|web\|both\|all}`, where `web` runs the generic-e2e + a11y + visual trio against the same `app/` source and `all` covers all 6 web-side surfaces) |
+| [`/kiwa-test`](./.claude/skills/kiwa-test/SKILL.md) | **orchestrator** | Run the full chain in one command (`--target {contract\|dapp\|web\|nextjs\|rust\|go\|both\|all}`, where `web` runs the generic-e2e + a11y + visual trio against the same `app/` source, `rust`/`go` cover polyglot Rust / Go layers via `/kiwa-rust` / `/kiwa-go`, and `all` covers every surface) |
 | [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) | **Layer 1** | Reverse-engineer a 9-section / 9-column test spec from existing contracts, APIs, screens, or written feature specs |
 | [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) | **Layer 2** (contract) | Layer 1 spec → Foundry `.t.sol` with fuzz / invariant / `vm.prank` / custom-error reverts, run `forge test`, gate on `forge coverage` |
 | [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) | **Layer 2** (contract) | Same Layer 1 spec → Hardhat `.test.cjs` with `chai-matchers` / `fast-check` / `loadFixture`, run `npx hardhat test`, gate on `solidity-coverage` |
 | [`/kiwa-vitest`](./.claude/skills/kiwa-vitest/SKILL.md) | **Layer 2** (unit) | Layer 1 spec → Vitest `test/unit/*.test.{ts,tsx}` for TS helpers / TSX hooks |
+| [`/kiwa-rust`](./.claude/skills/kiwa-rust/SKILL.md) | **Layer 2** (polyglot Rust) | Layer 1 spec (`rust-unit` / `rust-integration`) → cargo test `tests/*.rs` driven by `kiwa-test-rs` (`setup_env`, `assert_kiwa_eq!`, `mock_server` + `reqwest`), runs `cargo test` and gates on `cargo llvm-cov` |
+| [`/kiwa-go`](./.claude/skills/kiwa-go/SKILL.md) | **Layer 2** (polyglot Go) | Layer 1 spec (`go-unit` / `go-integration`) → `testing.T` `*_test.go` driven by `kiwa-test-go` (`SetupUnitEnv`, `AssertEqual`, `NewMockServer` + `http.Client`), runs `go test` and gates on `go test -cover` |
 | [`/kiwa-api`](./.claude/skills/kiwa-api/SKILL.md) | **Layer 2** (integration) | Layer 1 spec → msw / supertest / Playwright `request` API integration tests |
 | [`/kiwa-ui`](./.claude/skills/kiwa-ui/SKILL.md) | **Layer 2** (ui) | Layer 1 spec → Vitest + Testing Library component tests for 8 frameworks (React / Vue / Svelte / SolidJS / Lit / Qwik / Angular / Browser) |
 | [`/kiwa-e2e`](./.claude/skills/kiwa-e2e/SKILL.md) | **Layer 2** (e2e) | Layer 1 spec → Playwright generic browser e2e tests (static html / fetch / Node handler / SSR app) for non-web3 contexts |
@@ -197,7 +199,7 @@ Install the kiwa skill chain as a Claude Code plugin — no clone required, avai
 /reload-plugins                            # activate without restarting the session
 ```
 
-After install, all 25 skills appear under the `kiwa:` namespace (Claude Code namespaces plugin skills by plugin name). Inside any dApp project, run the individual layers:
+After install, all 27 skills appear under the `kiwa:` namespace (Claude Code namespaces plugin skills by plugin name). Inside any dApp project, run the individual layers:
 
 ```bash
 # Layer 1 — design tests (output: tests/spec/<layer>/test-spec-<module>.md)
@@ -592,7 +594,7 @@ Reference docs:
 
 |  |  |
 |---|---|
-| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) ⭐ | **SSOT for all 25 skills** (5-step flow, 9-section output, 13 viewpoints, 5 risk criteria) |
+| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) ⭐ | **SSOT for all 27 skills** (5-step flow, 9-section output, 13 viewpoints, 5 risk criteria) |
 | [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | Wallet / SDK mock fidelity spec (A/B/C levels, scoring rubric) |
 | [`tests/docs/skill-chain-tutorial.md`](./tests/docs/skill-chain-tutorial.md) ⭐ | **skill chain walkthrough** (retrofit-first) |
 | [`docs/RPC.md`](./docs/RPC.md) | 9 directly-handled RPC + anvil fallback |
