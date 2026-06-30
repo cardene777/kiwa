@@ -185,6 +185,15 @@ describe('@kiwa-test/remix surface', () => {
     expect(typeof mod.invokeResourceRoute).toBe('function');
     expect(typeof mod.RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL).toBe('symbol');
   });
+
+  it('exports setupRemixNestedRouteEnv + defer + resolveDeferred + isDeferred + DEFERRED_DATA_SYMBOL (v1.1+)', async () => {
+    const mod = await import('@kiwa-test/remix');
+    expect(typeof mod.setupRemixNestedRouteEnv).toBe('function');
+    expect(typeof mod.defer).toBe('function');
+    expect(typeof mod.resolveDeferred).toBe('function');
+    expect(typeof mod.isDeferred).toBe('function');
+    expect(typeof mod.DEFERRED_DATA_SYMBOL).toBe('symbol');
+  });
 });
 
 describe('@kiwa-test/astro surface', () => {
