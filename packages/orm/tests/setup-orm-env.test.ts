@@ -162,16 +162,16 @@ describe('setupOrmEnv (drizzle + sqlite + in-memory)', () => {
     await envB.stop();
   });
 
-  it('T-ORM-009: rejects unsupported orm at runtime (Prisma / Kysely tracked in CAR-293 / CAR-294)', async () => {
+  it('T-ORM-009: rejects unsupported orm at runtime (Kysely tracked in CAR-294)', async () => {
     await expect(
       // Cast to bypass overloads — runtime validation is the contract under test.
       (setupOrmEnv as unknown as (o: unknown) => Promise<unknown>)({
         mode: 'mock',
-        orm: 'prisma',
+        orm: 'kysely',
         dialect: 'sqlite',
         schema,
       }),
-    ).rejects.toThrow(/v0\.2\.1 only supports orm='drizzle'/);
+    ).rejects.toThrow(/v0\.3 only supports orm='drizzle' or 'prisma'/);
   });
 
   it('T-ORM-010: expectQuery + expectRowCount helpers assert raw SQL state', async () => {

@@ -28,6 +28,13 @@ export async function expectQuery<TRow = unknown>(
   expected: ReadonlyArray<TRow>,
   expect: MinimalExpect,
 ): Promise<void> {
+  if (env.mode === 'mock' && env.orm === 'prisma') {
+    // Prisma raw SQL — `$queryRawUnsafe` returns a Promise<TRow[]>.
+    const client = env.client as unknown as { $queryRawUnsafe: (sql: string) => Promise<TRow[]> };
+    const rows = await client.$queryRawUnsafe(sql);
+    expect(rows).toEqual(expected);
+    return;
+  }
   if (env.mode === 'mock') {
     const rows = env.raw.prepare(sql).all() as TRow[];
     expect(rows).toEqual(expected);
@@ -51,6 +58,14 @@ export async function expectRowCount(
   expected: number,
   expect: MinimalExpect,
 ): Promise<void> {
+  if (env.mode === 'mock' && env.orm === 'prisma') {
+    // Prisma raw `$queryRawUnsafe` — SQLite identifier quoting.
+    const safe = `"${String(table).replace(/"/g, '""')}"`;
+    const client = env.client as unknown as { $queryRawUnsafe: (sql: string) => Promise<Array<{ c: number | bigint }>> };
+    const rows = await client.$queryRawUnsafe(`SELECT COUNT(*) AS c FROM ${safe}`);
+    expect(Number(rows[0]?.c)).toBe(expected);
+    return;
+  }
   if (env.mode === 'mock') {
     const safe = `"${String(table).replace(/"/g, '""')}"`;
     const row = env.raw.prepare(`SELECT COUNT(*) AS c FROM ${safe}`).get() as { c: number };
