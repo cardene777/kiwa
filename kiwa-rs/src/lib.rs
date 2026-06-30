@@ -22,6 +22,8 @@
 //! - [`mod@integration`] — hyper-based mock server + request recorder for
 //!   integration tests (`reqwest` / `hyper` client → kiwa mock endpoint).
 //!   Gated behind the `integration` feature (enabled by default).
+//! - [`mod@axum`] — axum `Router` test adapter (`test_app` + in-process
+//!   `oneshot` invocation). Gated behind the `axum` feature (opt-in).
 //! - assertion macros — exported at crate root.
 
 #![deny(missing_docs)]
@@ -31,6 +33,9 @@ pub mod unit;
 
 #[cfg(feature = "integration")]
 pub mod integration;
+
+#[cfg(feature = "axum")]
+pub mod axum;
 
 mod assertions;
 

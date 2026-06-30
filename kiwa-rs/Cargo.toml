@@ -1,9 +1,9 @@
 [package]
 name = "kiwa-test-rs"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 rust-version = "1.75"
-description = "kiwa Rust cargo test adapter — port of @kiwa-test/core deterministic fixture + assert macro + Drop-based cleanup. Part of the kiwa polyglot test framework family (https://github.com/cardene777/kiwa)."
+description = "kiwa Rust cargo test adapter — deterministic fixture + assert macro + Drop-based cleanup + hyper mock server + axum Router test app. Part of the kiwa polyglot test framework family (https://github.com/cardene777/kiwa)."
 license = "MIT"
 authors = ["cardene <cardene777@gmail.com>"]
 repository = "https://github.com/cardene777/kiwa"
@@ -30,7 +30,19 @@ integration = [
   "dep:bytes",
   "dep:http",
 ]
-# proc-macro support (#[kiwa_test] attribute) — enabled via separate kiwa-test-rs-macro crate planned in v0.2
+# axum Router test adapter — `kiwa::axum::test_app(router)` drives the Router
+# in-process through `tower::Service::oneshot`, no real port bind needed. Opt-in
+# because not every kiwa-test-rs user pulls in axum.
+axum = [
+  "dep:axum",
+  "dep:tower",
+  "dep:http",
+  "dep:http-body-util",
+  "dep:bytes",
+  "dep:tokio",
+  "dep:serde_json",
+]
+# proc-macro support (#[kiwa_test] attribute) — enabled via separate kiwa-test-rs-macro crate planned in v0.3
 macro = []
 
 [dependencies]
@@ -40,7 +52,16 @@ http-body-util = { version = "0.1", optional = true }
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "net", "sync", "macros", "time"], optional = true }
 bytes = { version = "1", optional = true }
 http = { version = "1", optional = true }
+axum = { version = "0.8", default-features = false, features = ["json", "tokio"], optional = true }
+tower = { version = "0.5", features = ["util"], optional = true }
+# Used by `TestResponse::json()` — pulled in only when the axum feature is on.
+serde_json = { version = "1", optional = true }
 
 [dev-dependencies]
 # Sync HTTP client for blocking integration tests against `kiwa::integration::mock_server`.
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
+# axum adapter tests construct Router with json / query / path handlers.
+axum = { version = "0.8", default-features = false, features = ["json", "tokio", "query", "matched-path"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }

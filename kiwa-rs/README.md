@@ -12,18 +12,26 @@ server with a request recorder (`kiwa::integration::mock_server`).
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = "0.1"
+kiwa-test-rs = "0.2"
 ```
 
 Requires Rust >= 1.75 (edition 2021).
 
-The `integration` feature (mock server + request recorder) is enabled by
-default. Drop it if you only want the unit fixture and want to avoid pulling
-in `hyper` / `tokio`:
+The `integration` feature (hyper-based mock server + request recorder) is
+enabled by default. Drop it if you only want the unit fixture and want to
+avoid pulling in `hyper` / `tokio`:
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = { version = "0.1", default-features = false }
+kiwa-test-rs = { version = "0.2", default-features = false }
+```
+
+The `axum` feature adds an in-process axum `Router` test adapter
+(`kiwa::axum::test_app`). Opt in when your service is built on axum:
+
+```toml
+[dev-dependencies]
+kiwa-test-rs = { version = "0.2", features = ["axum"] }
 ```
 
 After publish to crates.io (planned during v1.4 close-out):
@@ -150,18 +158,57 @@ can be used alongside `kiwa::unit::setup_env`.
 [`httpmock`]: https://crates.io/crates/httpmock
 [`wiremock-rs`]: https://crates.io/crates/wiremock
 
+### `kiwa::axum::test_app` — in-process axum Router adapter
+
+Wrap an `axum::Router` in a `TestApp` and drive requests through
+`tower::Service::oneshot` — no port bind, no manual tokio runtime, no
+`TIME_WAIT` flakiness on parallel cargo test runs.
+
+```rust
+use axum::{routing::get, Router};
+use kiwa::axum::{test_app, HttpMethod};
+
+#[test]
+fn health_endpoint_responds() {
+    let app = Router::new().route("/health", get(|| async { "ok" }));
+    let test = test_app(app);
+
+    let resp = test.request(HttpMethod::Get, "/health").send();
+    assert_eq!(resp.status(), 200);
+    assert_eq!(resp.body_str(), "ok");
+}
+```
+
+`TestApp` API surface:
+
+- `request(method, path)` returns a chainable `RequestBuilder` with
+  `.header(k, v)` / `.body(bytes)` / `.json(pre_serialised_bytes)` / `.send()`.
+- `TestResponse` exposes `status()` / `headers()` / `body()` / `body_str()`
+  / `json()` (the JSON helper returns `Option<serde_json::Value>`).
+- `TestApp` `Drop` releases the tokio runtime so each test releases resources
+  deterministically — same Drop discipline as `mock_server`.
+
+`kiwa::axum::test_app` composes with `kiwa::integration::mock_server` when
+the Router under test proxies to an external service — point the upstream
+URL at the mock server's `base_url()` and the two adapters share the same
+fixture contract end-to-end. See
+`examples/rust-axum-poc/tests/counter.rs` for the full Counter API PoC and
+`kiwa-rs/tests/axum_test_app.rs` for the interop case (axum Router →
+`spawn_blocking` reqwest → kiwa mock).
+
 ## Roadmap
 
-- v0.1 (this release) — `setup_env` + Mode (Mock / Live) + assert macros + Drop cleanup, **plus** `kiwa::integration::mock_server` (hyper + request recorder) shipped together via Issue [#577](https://github.com/cardene777/kiwa/issues/577).
-- v0.2 — richer matchers (regex / header / JSON-path), response sequencing, optional WebSocket upgrade.
+- v0.1 — `setup_env` + Mode (Mock / Live) + assert macros + Drop cleanup, **plus** `kiwa::integration::mock_server` (hyper + request recorder) shipped together via Issue [#577](https://github.com/cardene777/kiwa/issues/577).
+- v0.2 (this release) — `kiwa::axum::test_app` in-process `Router` adapter via Issue [#592](https://github.com/cardene777/kiwa/issues/592); richer mock_server matchers / actix-web adapter planned in follow-up v1.5 sub-Issues.
 - v0.3+ — proc-macro `#[kiwa_test]` (split into `kiwa-test-rs-macro` crate), Layer 1 spec → `.rs` codegen (kiwa-design polyglot extension, Issue [#580](https://github.com/cardene777/kiwa/issues/580)).
 
 ## Related
 
-- Parent v1.4 milestone — [#575](https://github.com/cardene777/kiwa/issues/575) (Rust + Go polyglot)
+- Parent v1.5 milestone — [#591](https://github.com/cardene777/kiwa/issues/591) (Rust + Go web framework adapters)
 - TypeScript core — [`@kiwa-test/core`](https://github.com/cardene777/kiwa/tree/main/packages/core)
 - Python sibling — [`kiwa-test-py`](https://github.com/cardene777/kiwa/tree/main/kiwa-py)
-- PoC — [`examples/rust-cargo-poc/`](https://github.com/cardene777/kiwa/tree/main/examples/rust-cargo-poc)
+- PoC (unit + mock_server) — [`examples/rust-cargo-poc/`](https://github.com/cardene777/kiwa/tree/main/examples/rust-cargo-poc)
+- PoC (axum) — [`examples/rust-axum-poc/`](https://github.com/cardene777/kiwa/tree/main/examples/rust-axum-poc)
 
 ## License
 
