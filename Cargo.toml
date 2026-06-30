@@ -9,4 +9,5 @@ resolver = "2"
 members = [
   "kiwa-rs",
   "examples/rust-cargo-poc",
+  "examples/rust-axum-poc",
 ]
