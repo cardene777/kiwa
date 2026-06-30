@@ -3,10 +3,14 @@ export type {
   SqlDialect,
   DrizzleSchema,
   DrizzleSqliteDb,
+  DrizzlePostgresDb,
   MigrationSource,
+  MockSqliteOptions,
+  LivePostgresOptions,
   SetupOrmEnvOptions,
   OrmTestEnv,
   OrmTestEnvMock,
+  OrmTestEnvLive,
 } from './types.js';
 
 export { setupOrmEnv } from './setup-orm-env.js';

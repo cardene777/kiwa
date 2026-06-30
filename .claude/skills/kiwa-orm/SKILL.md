@@ -2,8 +2,8 @@
 name: kiwa-orm
 description: |
   Layer 1 spec (`tests/spec/integration/test-spec-{module}.orm.md`) を ORM query test (Vitest + @kiwa-test/orm) に変換する Layer 2 skill。
-  v0.1 では Drizzle ORM + in-memory SQLite を対象に `setupOrmEnv` + `expectQuery` + `expectRowCount` を 9 column 表から機械変換する。
-  Postgres / MySQL (testcontainers) / Prisma / Kysely 対応は follow-up Issue (#527-2 .. #527-5) で順次拡張。
+  v0.1 では Drizzle ORM + in-memory SQLite、 v0.2 では Drizzle + Postgres (testcontainers) を対象に `setupOrmEnv` + `expectQuery` + `expectRowCount` を 9 column 表から機械変換する。
+  MySQL (testcontainers) / Prisma / Kysely / file-based migration 対応は follow-up Issue (#527-2 残 / #527-3 / #527-4 / #527-5) で順次拡張。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -103,12 +103,49 @@ it('{ID} {Observation}', async () => {
 | セキュリティ | SQL injection 経路 → drizzle parameterized query で防御確認 |
 | 回帰 | 既知 bug 再現 input |
 
-## v0.1 制約
+## v0.2 受入 matrix
 
-- `mode` は `'mock'` のみ (Postgres / MySQL は #527-2 で testcontainers 対応)
-- `orm` は `'drizzle'` のみ (Prisma / Kysely は #527-3 / #527-4)
-- `dialect` は `'sqlite'` のみ
-- 違反すると `setupOrmEnv` が説明的 Error を throw
+| mode | orm | dialect | 状態 |
+|---|---|---|---|
+| `mock` | `drizzle` | `sqlite` | v0.1 (in-memory) |
+| `live` | `drizzle` | `postgres` | v0.2 (testcontainers Postgres) |
+| `live` | `drizzle` | `mysql` | follow-up CAR-292 残 (MySQL testcontainers) |
+| `*` | `prisma` | `*` | CAR-293 (#527-3) |
+| `*` | `kysely` | `*` | CAR-294 (#527-4) |
+
+未対応の組合せは `setupOrmEnv` が説明的 Error を throw。
+
+## live mode 用 template (v0.2、 Postgres)
+
+```ts
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { eq } from 'drizzle-orm';
+import { pgTable, serial, text } from 'drizzle-orm/pg-core';
+import { setupOrmEnv } from '@kiwa-test/orm';
+import type { OrmTestEnvLive } from '@kiwa-test/orm';
+
+const users = pgTable('users', { id: serial('id').primaryKey(), email: text('email').notNull().unique() });
+const schema = { users };
+
+let dockerAvailable = false;
+beforeAll(async () => {
+  try { const { default: Docker } = await import('dockerode'); await new Docker().ping(); dockerAvailable = true; } catch { dockerAvailable = false; }
+}, 30_000);
+
+let env: OrmTestEnvLive<typeof schema> | null = null;
+afterEach(async () => { if (env) { await env.stop(); env = null; } }, 30_000);
+
+it('{ID} {Observation}', async () => {
+  if (!dockerAvailable) return;
+  env = await setupOrmEnv({
+    mode: 'live', orm: 'drizzle', dialect: 'postgres', schema,
+    migrations: '{初期 SQL}',
+    seed: async (db) => { {Given.seed} },
+  });
+  {Query を env.db.* で展開}
+  {Then を expect(...).toEqual(...) に展開}
+}, 120_000);
+```
 
 ## 関連
 
