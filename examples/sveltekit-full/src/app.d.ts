@@ -6,6 +6,7 @@ declare global {
   namespace App {
     interface Locals {
       user: { id: string; role: 'admin' | 'guest' } | null;
+      requestId?: string;
     }
   }
 }

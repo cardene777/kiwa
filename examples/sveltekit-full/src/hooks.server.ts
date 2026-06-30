@@ -1,16 +1,32 @@
-// hooks.server.ts — 実 SvelteKit hooks runtime entry point (thin wrapper)。
+// hooks.server.ts — 実 SvelteKit hooks runtime entry point。
 //
-// 純粋ロジックは src/lib/_kiwa/auth-handle.ts に切り出し、 kiwa-test/sveltekit の
-// invokeHandle で direct invoke できるようにしてある。
+// Issue #559 で 4 hook (handle / handleFetch / handleError / locals injection)
+// 全てを PoC 化。 純粋ロジックは src/lib/_kiwa/ 配下に切り出し、
+// kiwa-test/sveltekit の setupSvelteKitHooksEnv / sequence / invokeHandle*
+// で direct invoke できるようにしてある。
 
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, HandleFetch, HandleServerError } from '@sveltejs/kit';
+import { sequence as kiwaSequence } from '@kiwa-test/sveltekit';
 import { authHandle } from '$lib/_kiwa/auth-handle.js';
+import { requestIdHandle } from '$lib/_kiwa/request-id-handle.js';
+import { apiFetchHandle } from '$lib/_kiwa/api-fetch-handle.js';
+import { errorLoggerHandle } from '$lib/_kiwa/error-logger-handle.js';
 
-export const handle: Handle = async ({ event, resolve }) => {
-  // SvelteKit Handle と kiwa の HandleFunction は同 shape (event/resolve)、
-  // resolve(event) を直接 await + locals は AuthLocals に narrow。
-  return authHandle({
-    event: event as unknown as Parameters<typeof authHandle>[0]['event'],
-    resolve: resolve as unknown as Parameters<typeof authHandle>[0]['resolve'],
-  });
-};
+// handle (sequence) — request middleware chain。
+//   requestIdHandle → authHandle → resolve
+// 各 handle の locals 書込は後続 handle / downstream load から観測可能。
+export const handle: Handle = kiwaSequence(
+  // SvelteKit Handle と kiwa の HandleFunction は同 shape。 cast で narrow 化。
+  requestIdHandle as unknown as Parameters<typeof kiwaSequence>[0],
+  authHandle as unknown as Parameters<typeof kiwaSequence>[0],
+) as unknown as Handle;
+
+// handleFetch — event.fetch hijack chain。
+export const handleFetch: HandleFetch = (async (args) => {
+  return apiFetchHandle(args as unknown as Parameters<typeof apiFetchHandle>[0]);
+}) as unknown as HandleFetch;
+
+// handleError — server error logger chain。
+export const handleError: HandleServerError = ((args) => {
+  return errorLoggerHandle(args as unknown as Parameters<typeof errorLoggerHandle>[0]);
+}) as unknown as HandleServerError;

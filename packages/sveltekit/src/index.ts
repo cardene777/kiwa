@@ -41,3 +41,15 @@ export {
   type InvokeHandleErrorResult,
   type SimulatedHookRequestEvent,
 } from './invoke-hooks.js';
+
+export {
+  setupSvelteKitHooksEnv,
+  sequence,
+  type SetupSvelteKitHooksEnvOptions,
+  type SvelteKitHooksEnv,
+  type RunHandleResult,
+  type RunHandleFetchOptions,
+  type RunHandleFetchResult,
+  type RunHandleErrorOptions,
+  type RunHandleErrorResult,
+} from './setup-hooks-env.js';
