@@ -39,13 +39,18 @@ export type DrizzleMysqlDb<TSchema extends DrizzleSchema = DrizzleSchema> =
   MySql2Database<TSchema>;
 
 /**
- * Migration source — either a raw SQL string or an explicit array of SQL
- * statements. Statements are split on `;` followed by a newline so standard
- * `CREATE TABLE ...; CREATE INDEX ...;` files parse correctly.
+ * Migration source.
  *
- * file-based migrations (drizzle-orm/migrator) land in CAR-295.
+ * - `string` — raw SQL applied as-is (statements split on `;` followed by newline).
+ * - `string[]` — explicit array of SQL statements applied sequentially.
+ * - `{ folder }` — drizzle-orm/migrator file-based migration. kiwa imports the
+ *   dialect-appropriate `migrate` (drizzle-orm/better-sqlite3/migrator etc.) and
+ *   invokes it with `{ migrationsFolder: folder }`. Drizzle-only (v0.5).
  */
-export type MigrationSource = string | ReadonlyArray<string>;
+export type MigrationSource =
+  | string
+  | ReadonlyArray<string>
+  | { readonly folder: string };
 
 export interface MockSqliteOptions<TSchema extends DrizzleSchema = DrizzleSchema> {
   readonly mode: 'mock';

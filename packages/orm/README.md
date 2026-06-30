@@ -16,9 +16,10 @@ ORM query test adapter for kiwa.
 - **v0.2** — Drizzle ORM + Postgres via testcontainers.
 - **v0.2.1** — Drizzle ORM + MySQL via testcontainers.
 - **v0.3** — Prisma + tempdir SQLite + `prisma db push`.
-- **v0.4** (this release) — Kysely query builder across SQLite (in-memory) + Postgres / MySQL (testcontainers). All 3 dialects in one bump.
+- **v0.4** — Kysely query builder across SQLite (in-memory) + Postgres / MySQL (testcontainers).
+- **v0.5** (this release) — file-based migration via `drizzle-orm/migrator` (`migrations: { folder }`). Drizzle-only.
 
-**Roadmap** — Prisma + testcontainers Postgres/MySQL (rest of CAR-293), file-based migration (CAR-295).
+**Roadmap** — Prisma + testcontainers Postgres/MySQL (rest of CAR-293).
 
 ## Install
 
