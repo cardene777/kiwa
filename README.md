@@ -522,7 +522,7 @@ These three examples have **forge test + hardhat test (where applicable) + playw
 | [`sveltekit-full`](./examples/sveltekit-full) ⭐ | SvelteKit 2 + `@kiwa-test/sveltekit` v1.0.x (3 helper 全 demo) | 19 (load 8 + actions 6 + handle 5) | 4 (real `vite dev` :3040) |
 | [`remix-full`](./examples/remix-full) ⭐ | Remix v2 + `@kiwa-test/remix` v1.0.x (loader + action + Resource Route + 共通 auth) | 26 (loader 8 + action 7 + resource 6 + auth 5) | 7 (real `remix vite:dev` :3050) |
 | [`astro-server-endpoints-full`](./examples/astro-server-endpoints-full) ⭐ | Astro v5 SSR + `@kiwa-test/astro` v1.0.x (APIRoute GET/POST + middleware locals) | 24 (items GET 8 + items POST 7 + counter 5 + auth 4) | 7 (real `astro dev` :3060) |
-| `examples/nextjs-app-router-full` | (v1.2 #525-5 で追加予定) | — | — |
+| [`nextjs-app-router-full`](./examples/nextjs-app-router-full) ⭐ | Next.js v15 App Router + `@kiwa-test/nextjs` v1.0.x (Server Actions + middleware + RSC + Route Handler の 4 layer) | 21 (action 6 + middleware 5 + RSC 5 + route 5) | 7 (real `next dev` :3070) |
 
 ---
 
