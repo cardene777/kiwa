@@ -18,10 +18,29 @@ name = "kiwa"
 path = "src/lib.rs"
 
 [features]
-default = []
+default = ["integration"]
+# Integration test helpers (hyper-based mock server + request recorder).
+# Pulls in hyper / hyper-util / tokio / http-body-util / bytes; users that only
+# need unit fixtures can opt out with `default-features = false`.
+integration = [
+  "dep:hyper",
+  "dep:hyper-util",
+  "dep:http-body-util",
+  "dep:tokio",
+  "dep:bytes",
+  "dep:http",
+]
 # proc-macro support (#[kiwa_test] attribute) — enabled via separate kiwa-test-rs-macro crate planned in v0.2
 macro = []
 
 [dependencies]
+hyper = { version = "1", features = ["server", "http1"], optional = true }
+hyper-util = { version = "0.1", features = ["tokio"], optional = true }
+http-body-util = { version = "0.1", optional = true }
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "net", "sync", "macros", "time"], optional = true }
+bytes = { version = "1", optional = true }
+http = { version = "1", optional = true }
 
 [dev-dependencies]
+# Sync HTTP client for blocking integration tests against `kiwa::integration::mock_server`.
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
