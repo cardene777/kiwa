@@ -38,4 +38,4 @@ package kiwa
 
 // Version is the kiwa-test-go module version, kept in sync with the git tag
 // used for pkg.go.dev publish.
-const Version = "0.1.0"
+const Version = "0.2.0"
