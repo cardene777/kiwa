@@ -12,8 +12,11 @@
 //   2. parent / child の `headers()` export を Remix 公式 router (server-runtime
 //      headers.js の getDocumentHeaders 経路) と同じ accumulation logic で merge
 //      し、 結果の Headers (loaderHeaders / parentHeaders を含む) を assertion 可能
-//   3. Set-Cookie の prependCookies 互換 merge (子が同 cookie を持つ場合は子優先、
-//      持たない場合は親 cookie を child Headers に append)
+//   3. Set-Cookie の prependCookies 互換 merge — Remix 公式 server-runtime
+//      `headers.ts` の `prependCookies` は文字列単位 dedupe であり、 同 cookie 名で値違いは
+//      両方が `Set-Cookie` として merged Headers に残る (browser 側 cookie jar が
+//      RFC 6265 § 5.3 step 11 で last-write-wins する semantics に依存)。
+//      kiwa env も同 semantics に揃えて exact-string only dedupe で merge する。
 //   4. defer() return 時の resolved / pending key を 1 step で resolve、 streaming
 //      timing を deterministic に追跡 (defer の中身は real `Promise` を await)
 
@@ -74,20 +77,100 @@ function extractResponseHeaders(result: InvokeRouteResult): Headers {
   if (result.response instanceof Response) {
     return new Headers(result.response.headers);
   }
+  // defer() return 時は ResponseInit.headers を Headers として抽出する
+  // (Remix 公式 `getDocumentHeaders` は deferred loader の headers も merge / cookie store 反映するため、
+  // 同 semantics を kiwa env でも保証する、 MAJOR 2 fix)
+  if (typeof result.result === 'object' && result.result !== null && isDeferred(result.result)) {
+    const init = result.result.init;
+    if (typeof init !== 'undefined' && typeof init.headers !== 'undefined') {
+      return new Headers(init.headers);
+    }
+  }
   return new Headers();
 }
 
 /**
- * Remix 公式 server-runtime `prependCookies` 互換 — `source` Headers の
- * `Set-Cookie` を `target` Headers に append、 同一 cookie 文字列が既存なら skip する。
- * (`@remix-run/server-runtime/dist/esm/headers.js` の prependCookies と同 logic)
+ * `splitSetCookieString` — `cookie-es` / `set-cookie-parser` の `splitCookiesString` 互換実装。
+ * Remix 公式 server-runtime `headers.ts` の `prependCookies` が `parentHeaders.get("Set-Cookie")` で
+ * comma-folded 1 行に combined された Set-Cookie 文字列を取り、 これを `splitSetCookieString` で
+ * 1 cookie 毎に split している (`packages/react-router/lib/server-runtime/headers.ts` SSOT)。
+ *
+ * 公式 algorithm — 文字列を pos で走査、 ',' を見つけたら直後の空白を skip し次の文字列が
+ * `name=` 形式 (= 次の cookie 開始) になっているかを判定、 そうなら現位置で split。
+ * これにより `Expires=Thu, 01 Jan 2025 ...` 内の comma は date attribute 内として split されない。
+ *
+ * native `Headers.getSetCookie()` (Node 18.14+) は 1 つの API call で複数 set ごとに array を返すので
+ * 単独でも multi-cookie に対応するが、 公式 `getDocumentHeaders` は `get("Set-Cookie")` で folded
+ * 文字列を取得 → split する経路で組まれており、 これに揃えないと「Headers builder 内で set('Set-Cookie', a) と
+ * append('Set-Cookie', b) を交互に呼んで combined した時の getSetCookie() 結果」 が environment 依存で割れる
+ * (MAJOR 1 fix)。
+ */
+function splitSetCookieString(combined: string): string[] {
+  if (combined.length === 0) return [];
+  const cookies: string[] = [];
+  let pos = 0;
+  let start = 0;
+  let lastComma = 0;
+  const skipWhitespace = (): void => {
+    while (pos < combined.length && (combined[pos] === ' ' || combined[pos] === '\t')) {
+      pos += 1;
+    }
+  };
+  const notSpecialChar = (): boolean => combined[pos] !== '=' && combined[pos] !== ';' && combined[pos] !== ',';
+  while (pos < combined.length) {
+    if (combined[pos] === ',') {
+      lastComma = pos;
+      pos += 1;
+      skipWhitespace();
+      // 次の chunk が `name=` 形式 (新 cookie 開始) なら split、 そうでなければ Expires 等の date 内 comma
+      const nextCookieStart = pos;
+      while (pos < combined.length && notSpecialChar()) {
+        pos += 1;
+      }
+      if (pos < combined.length && combined[pos] === '=') {
+        cookies.push(combined.slice(start, lastComma).trim());
+        start = nextCookieStart;
+      } else {
+        pos = lastComma + 1;
+      }
+    } else {
+      pos += 1;
+    }
+  }
+  if (start < combined.length) {
+    const tail = combined.slice(start).trim();
+    if (tail.length > 0) cookies.push(tail);
+  }
+  return cookies;
+}
+
+function readSetCookies(headers: Headers): string[] {
+  // 公式 prependCookies と同経路 ... `get("Set-Cookie")` で combined 文字列 → splitSetCookieString
+  // で逐次 split。 これで folded multi-cookie / appended multi-cookie のどちらでも安定して 1 cookie ずつ扱える。
+  // Node 18.14+ の getSetCookie() も fallback で読むが、 公式準拠の get() 経路を primary とする (MAJOR 1 fix)。
+  const combined = headers.get('Set-Cookie');
+  if (combined !== null && combined.length > 0) {
+    return splitSetCookieString(combined);
+  }
+  return headers.getSetCookie?.() ?? [];
+}
+
+/**
+ * Remix 公式 server-runtime `prependCookies` 互換 — `source` Headers の `Set-Cookie` を
+ * `target` Headers に append、 exact 文字列同一なら skip する (公式 `headers.ts` SSOT)。
+ *
+ * 公式 implementation は文字列単位 dedupe であり「同 cookie 名で値違い」 は両方残す。
+ * これは server-runtime 階層で intentionally chosen された semantics、 cookie 名単位の
+ * override は browser 側 cookie jar 受信時の RFC 6265 § 5.3 step 11 で実施される (last write wins)。
+ * kiwa env も公式に揃えて exact-string only dedupe で merge、 docstring / test も同 semantics に統一する
+ * (MINOR 6 fix — 旧 docstring「child の同名が勝つ」 は公式と乖離、 「文字列同一で重複 append 抑止」 に修正)。
  */
 function prependSetCookies(source: Headers, target: Headers): void {
-  const sourceSetCookies = source.getSetCookie?.() ?? [];
-  if (sourceSetCookies.length === 0) return;
-  const existing = new Set(target.getSetCookie?.() ?? []);
-  for (const cookie of sourceSetCookies) {
-    if (!existing.has(cookie)) {
+  const sourceCookies = readSetCookies(source);
+  if (sourceCookies.length === 0) return;
+  const existingExact = new Set(readSetCookies(target));
+  for (const cookie of sourceCookies) {
+    if (!existingExact.has(cookie)) {
       target.append('Set-Cookie', cookie);
     }
   }
@@ -155,11 +238,53 @@ function parseSetCookieName(setCookieValue: string): { name: string; value: stri
   return { name, value };
 }
 
+/**
+ * Set-Cookie の attribute から expiration を判定する。 `Max-Age=0` (整数 0 / 負数) / 過去 `Expires`
+ * は cookie 削除指示 (RFC 6265 § 5.3 step 11)、 これらを cookieStore に「上書き保存」 すると
+ * 削除した cookie が次の `runLoaderChain()` で resurrect する (MAJOR 5 fix)。
+ *
+ * 公式 Remix `Cookie` API は cookie object に `maxAge: -1` を渡すと client に削除 cookie を送出する、
+ * server 側 cookie store (= request 経由で next loader が見る Cookie header) も同じ削除 semantics を
+ * model する必要がある。
+ *
+ * 戻り値 ... `true` = この cookie は失効済 (store から削除すべき) / `false` = 生存 (store 上書き保存)
+ */
+function isExpiredSetCookie(setCookieValue: string): boolean {
+  // attribute pair は `;` 区切り、 attribute 名は大小文字 insensitive
+  const eqValue = setCookieValue.indexOf('=');
+  if (eqValue === -1) return false;
+  const attrs = setCookieValue.slice(eqValue + 1).split(';').slice(1);
+  let maxAge: number | null = null;
+  let expires: number | null = null;
+  for (const raw of attrs) {
+    const eq = raw.indexOf('=');
+    if (eq === -1) continue;
+    const name = raw.slice(0, eq).trim().toLowerCase();
+    const val = raw.slice(eq + 1).trim();
+    if (name === 'max-age') {
+      const n = Number.parseInt(val, 10);
+      if (Number.isFinite(n)) maxAge = n;
+    } else if (name === 'expires') {
+      const t = Date.parse(val);
+      if (Number.isFinite(t)) expires = t;
+    }
+  }
+  // Max-Age が指定されていれば Expires より優先 (RFC 6265 § 4.1.2.2)
+  if (maxAge !== null) return maxAge <= 0;
+  if (expires !== null) return expires <= Date.now();
+  return false;
+}
+
 function updateCookieStoreFromSetCookies(store: Map<string, string>, headers: Headers): void {
-  const setCookies = headers.getSetCookie?.() ?? [];
+  const setCookies = readSetCookies(headers);
   for (const sc of setCookies) {
     const parsed = parseSetCookieName(sc);
     if (parsed === null) continue;
+    if (isExpiredSetCookie(sc)) {
+      // Max-Age=0 / 過去 Expires は削除指示 → store から取り除き、 次の runLoaderChain で resurrect させない
+      store.delete(parsed.name);
+      continue;
+    }
     store.set(parsed.name, parsed.value);
   }
 }
@@ -232,7 +357,10 @@ export function setupRemixNestedRouteEnv(
       parentData: parentDataForChild,
     };
     const childHeaders: Record<string, string> = { ...(options.headers ?? {}) };
-    if (cookieStore.size > 0) {
+    // parent request と同じ explicit precedence ... user が `options.headers.cookie` を渡していたら
+    // 尊重し、 cookieStore で勝手に上書きしない。 parent loader 経由で更新された cookie は
+    // 「user 明示指定なしの場合のみ」 child に反映する (MAJOR 4 fix — inconsistency 解消、 T-NR-015 と整合)
+    if (cookieStore.size > 0 && typeof childHeaders.cookie === 'undefined') {
       childHeaders.cookie = buildCookieHeader(cookieStore);
     }
 

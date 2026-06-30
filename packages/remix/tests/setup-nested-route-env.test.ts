@@ -305,7 +305,7 @@ describe('setupRemixNestedRouteEnv — headers() merge (Remix 公式 prependCook
     expect(result.mergedHeaders.get('x-parent-tag')).toBe('p');
   });
 
-  it('T-NR-009: child が同 cookie name を返したら child 側を優先 (parent は skip)', async () => {
+  it('T-NR-009: 同 cookie 名の parent / child を別文字列で両方 merge (公式 prependCookies 文字列単位 dedupe、 MINOR 6 fix)', async () => {
     const parent: RemixNestedRouteDefinition = {
       id: 'routes/parent',
       loader: async () => new Response(null, {
@@ -325,9 +325,12 @@ describe('setupRemixNestedRouteEnv — headers() merge (Remix 公式 prependCook
     });
     const result = await env.runLoaderChain();
     const cookies = result.mergedHeaders.getSetCookie();
-    // child 側が両方 set される (cookie 名は同じだが文字列が違うので両方 append される)
+    // MINOR 6 fix ... 公式 Remix `headers.ts:prependCookies` は文字列単位 dedupe、
+    // 同 cookie 名で値違いは両方残す (browser cookie jar が RFC 6265 § 5.3 step 11 で last-write-wins する semantics に依存)。
+    // kiwa env も公式に揃え、 docstring / test を「両方残る」 で明示固定する。
     expect(cookies).toContain('session=child; Path=/');
     expect(cookies).toContain('session=parent; Path=/');
+    expect(cookies.length).toBe(2);
   });
 
   it('T-NR-010: parent の headers が HeadersInit (object 形式) でも merge する', async () => {
@@ -562,5 +565,232 @@ describe('setupRemixNestedRouteEnv — type narrowing edge', () => {
     const r = await env.runLoaderChain();
     expect(r.parent.result).toEqual({ ok: true });
     expect(r.child.result).toEqual({ ok: true });
+  });
+});
+
+// v1.1.1 follow-up (Issue #568) — Codex adversarial review で検出した
+// 5 MAJOR + 1 MINOR の Remix 仕様乖離 fix を unit test 化する block。
+// 1 MAJOR = 1 describe + 1 〜複数 it で構造化、 公式 semantics と integration 同等の挙動を固定する。
+describe('setupRemixNestedRouteEnv — MAJOR 1 fix: folded Set-Cookie の split merge', () => {
+  it('T-NR-023: parent Headers に comma-folded で combined された複数 Set-Cookie を child に正しく split merge', async () => {
+    // ResponseInit.headers に combined `set-cookie` を渡しても Headers の挙動 implementation に依存するが、
+    // 実 production では `headers.set("Set-Cookie", "a=1, b=2")` 経路で folded されるケースがあり、
+    // 公式 `prependCookies` は `get("Set-Cookie") + splitSetCookieString` でこれを 1 cookie 毎に分解する。
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      loader: async () => {
+        // Headers の `append` を 2 回呼ぶと 1 entry に combined される
+        const h = new Headers();
+        h.append('set-cookie', 'a=1; Path=/');
+        h.append('set-cookie', 'b=2; Path=/');
+        return new Response(null, { headers: h });
+      },
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      loader: async () => new Response(null, {}),
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+    });
+    const result = await env.runLoaderChain();
+    const cookies = result.mergedHeaders.getSetCookie();
+    // 2 cookie 個別に分解されて merged Headers に乗る (公式互換)
+    expect(cookies).toContain('a=1; Path=/');
+    expect(cookies).toContain('b=2; Path=/');
+  });
+
+  it('T-NR-024: Expires 内の comma (RFC 1123 date format) を境界に誤 split しない', async () => {
+    // Expires=Thu, 01 Jan 2099 12:34:56 GMT は内部 comma 1 つを含む date 形式、
+    // 公式 splitSetCookieString は `name=` 形式の peek で comma 後 cookie 開始判定するため
+    // date 内 comma で split されない。
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      loader: async () => {
+        const h = new Headers();
+        h.append('set-cookie', 'session=v1; Expires=Thu, 01 Jan 2099 12:34:56 GMT; Path=/');
+        h.append('set-cookie', 'extra=v2; Path=/');
+        return new Response(null, { headers: h });
+      },
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      loader: async () => new Response(null, {}),
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+    });
+    const result = await env.runLoaderChain();
+    const cookies = result.mergedHeaders.getSetCookie();
+    // session= の Expires 内 comma で誤 split されず、 session 全文 + extra= が独立 cookie になる
+    expect(cookies).toEqual(
+      expect.arrayContaining([
+        'session=v1; Expires=Thu, 01 Jan 2099 12:34:56 GMT; Path=/',
+        'extra=v2; Path=/',
+      ]),
+    );
+  });
+});
+
+describe('setupRemixNestedRouteEnv — MAJOR 2 fix: defer() の ResponseInit.headers 反映', () => {
+  it('T-NR-025: parent loader が defer(data, { headers }) を return すると Set-Cookie が child cookie store / merged Headers に伝播', async () => {
+    let childCookieHeader: string | null = null;
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      loader: async () =>
+        defer(
+          { initial: 'now' },
+          {
+            headers: {
+              'set-cookie': 'deferred=ok; Path=/',
+              'x-deferred-tag': 'parent',
+            },
+          },
+        ),
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      loader: async ({ request }) => {
+        childCookieHeader = request.headers.get('cookie');
+        return new Response('ok');
+      },
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+    });
+    const result = await env.runLoaderChain();
+    // deferred loader の Set-Cookie が cookieStore に persist し child request の Cookie header に乗る
+    expect(childCookieHeader).toContain('deferred=ok');
+    expect(env.cookies.get('deferred')).toBe('ok');
+    // merged Headers にも反映される (Remix 公式 getDocumentHeaders 経路と整合)
+    expect(result.mergedHeaders.getSetCookie()).toContain('deferred=ok; Path=/');
+  });
+});
+
+describe('setupRemixNestedRouteEnv — MAJOR 4 fix: child request の explicit cookie precedence', () => {
+  it('T-NR-026: options.headers.cookie が指定されていれば child request も cookieStore に上書きされず尊重される', async () => {
+    let parentObserved: string | null = null;
+    let childObserved: string | null = null;
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      loader: async ({ request }) => {
+        parentObserved = request.headers.get('cookie');
+        // Set-Cookie を返して cookieStore を膨らませる
+        return new Response(null, { headers: { 'set-cookie': 'newCookie=set; Path=/' } });
+      },
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      loader: async ({ request }) => {
+        childObserved = request.headers.get('cookie');
+        return new Response('ok');
+      },
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+      headers: { cookie: 'override=yes' },
+      cookies: { ignored: 'no' },
+    });
+    await env.runLoaderChain();
+    // parent / child 両方で同じ explicit precedence が適用される (inconsistency 解消)
+    expect(parentObserved).toBe('override=yes');
+    expect(childObserved).toBe('override=yes');
+  });
+});
+
+describe('setupRemixNestedRouteEnv — MAJOR 5 fix: Max-Age=0 / 期限切れ Expires honor', () => {
+  it('T-NR-027: Set-Cookie の Max-Age=0 は cookieStore から削除され次 chain で resurrect しない', async () => {
+    const observedCookies: Array<string | null> = [];
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      loader: async ({ request }) => {
+        observedCookies.push(request.headers.get('cookie'));
+        // 1 回目で `session=v1` を set、 2 回目以降は削除指示
+        return new Response(null, {
+          headers: { 'set-cookie': 'session=v1; Path=/' },
+        });
+      },
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      loader: async () => new Response(null, {
+        // child が同 cookie の削除指示 (Max-Age=0) を返す
+        headers: { 'set-cookie': 'session=; Path=/; Max-Age=0' },
+      }),
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+    });
+    await env.runLoaderChain();
+    // 1 回目 ... session=v1 が set される (parent loader 経由)、 child は Max-Age=0 で同 cookie を削除
+    expect(env.cookies.get('session')).toBeUndefined();
+    // 2 回目 ... 削除済の session= が next chain の parent loader request に乗っていない
+    await env.runLoaderChain();
+    // 2 回 chain したので observedCookies は 2 件、 どちらも session=v1 を含まない (resurrect なし)
+    expect(observedCookies.length).toBe(2);
+    for (const observed of observedCookies) {
+      if (observed !== null) {
+        expect(observed).not.toContain('session=v1');
+      }
+    }
+  });
+
+  it('T-NR-028: Set-Cookie の過去 Expires も cookieStore から削除される', async () => {
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      loader: async () => new Response(null, {
+        // 1 回目 ... `flash=tmp` を set
+        headers: { 'set-cookie': 'flash=tmp; Path=/' },
+      }),
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      // child は過去 Expires で同 cookie を削除
+      loader: async () => new Response(null, {
+        headers: { 'set-cookie': 'flash=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT' },
+      }),
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+    });
+    await env.runLoaderChain();
+    expect(env.cookies.get('flash')).toBeUndefined();
+  });
+});
+
+describe('invokeLoader — MAJOR 3 fix: undefined return を throw', () => {
+  it('T-NR-029: parent loader が undefined を return すると child は parent.error を経由 (chain は完走、 error は捕捉)', async () => {
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      // explicit undefined return ... Remix 公式仕様で禁止 → invokeLoader が throw して error に捕捉される
+      loader: async () => undefined as unknown as Record<string, unknown>,
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      loader: async () => ({ ok: true }),
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+    });
+    const result = await env.runLoaderChain();
+    // parent.error が公式 Remix の error message と等価 (MAJOR 3 fix)
+    expect((result.parent.error as Error).message).toContain('loader');
+    expect((result.parent.error as Error).message.toLowerCase()).toContain('return');
+    // child は parent.error を素通し走り、 自身の result を返す
+    expect(result.child.result).toEqual({ ok: true });
   });
 });

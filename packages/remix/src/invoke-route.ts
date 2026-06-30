@@ -96,6 +96,18 @@ async function normalizeResult(value: unknown): Promise<InvokeRouteResult> {
   return { result: value, response: null, redirect: null, error: undefined };
 }
 
+/**
+ * Remix 公式 `callRouteLoader` 仕様 ... loader が `undefined` を return した場合は
+ * `Error("You defined a loader for route ... but didn't return anything from your loader function.")` を throw する
+ * (`packages/react-router/lib/server-runtime/data.ts` SSOT)。
+ * kiwa env でも同じ semantics に揃えて、 loader 実装漏れ (`return` 文の書き忘れ)
+ * を unit test 段階で fail 検出可能にする (MAJOR 3 fix)。
+ *
+ * 例外 ... `action` は undefined return を許容している (Remix v2 仕様)、 本 helper は `invokeLoader` のみで適用する。
+ */
+const LOADER_UNDEFINED_RETURN_MESSAGE =
+  'You defined a loader but didn\'t return anything from your loader function. Please return a value or `null`.';
+
 export async function invokeLoader(opts: InvokeLoaderOptions): Promise<InvokeRouteResult> {
   const reqOpts: { readonly url: string; readonly method?: string; readonly headers?: Record<string, string> } = {
     url: opts.url,
@@ -110,6 +122,10 @@ export async function invokeLoader(opts: InvokeLoaderOptions): Promise<InvokeRou
   };
   try {
     const value = await opts.loader(args);
+    if (typeof value === 'undefined') {
+      // Remix 公式 callRouteLoader 互換 ... explicit undefined return は throw (MAJOR 3 fix)
+      throw new Error(LOADER_UNDEFINED_RETURN_MESSAGE);
+    }
     return await normalizeResult(value);
   } catch (caught) {
     if (isRedirect(caught)) {
