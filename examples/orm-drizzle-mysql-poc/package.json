@@ -1,0 +1,25 @@
+{
+  "name": "examples-orm-drizzle-mysql-poc",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/orm -F @kiwa-test/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/orm": "workspace:*",
+    "@testcontainers/mysql": "^10.16.0",
+    "drizzle-orm": "^0.36.0",
+    "mysql2": "^3.11.0",
+    "testcontainers": "^10.16.0"
+  },
+  "devDependencies": {
+    "@types/dockerode": "^3.3.0",
+    "@types/node": "^22.10.0",
+    "dockerode": "^4.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

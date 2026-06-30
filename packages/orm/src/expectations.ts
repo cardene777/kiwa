@@ -33,9 +33,15 @@ export async function expectQuery<TRow = unknown>(
     expect(rows).toEqual(expected);
     return;
   }
-  // live mode (Postgres) — postgres.js returns a thenable Result.
-  const rows = (await env.raw.unsafe(sql)) as unknown as TRow[];
-  expect([...rows]).toEqual(expected);
+  if (env.dialect === 'postgres') {
+    // live mode (Postgres) — postgres.js returns a thenable Result.
+    const rows = (await env.raw.unsafe(sql)) as unknown as TRow[];
+    expect([...rows]).toEqual(expected);
+    return;
+  }
+  // live mode (MySQL) — mysql2 `query` returns [rows, fields].
+  const [rows] = (await env.raw.query(sql)) as unknown as [TRow[], unknown];
+  expect(rows).toEqual(expected);
 }
 
 /** Assert that the row count of `table` equals `expected`. */
@@ -46,15 +52,19 @@ export async function expectRowCount(
   expect: MinimalExpect,
 ): Promise<void> {
   if (env.mode === 'mock') {
-    // SQLite identifier quoting — wrap in double quotes so reserved words +
-    // mixed-case names work. The caller passes the bare table name.
     const safe = `"${String(table).replace(/"/g, '""')}"`;
     const row = env.raw.prepare(`SELECT COUNT(*) AS c FROM ${safe}`).get() as { c: number };
     expect(row.c).toBe(expected);
     return;
   }
-  // Postgres — same double-quote identifier quoting works.
-  const safe = `"${String(table).replace(/"/g, '""')}"`;
-  const rows = (await env.raw.unsafe(`SELECT COUNT(*)::int AS c FROM ${safe}`)) as unknown as Array<{ c: number }>;
-  expect(rows[0]?.c).toBe(expected);
+  if (env.dialect === 'postgres') {
+    const safe = `"${String(table).replace(/"/g, '""')}"`;
+    const rows = (await env.raw.unsafe(`SELECT COUNT(*)::int AS c FROM ${safe}`)) as unknown as Array<{ c: number }>;
+    expect(rows[0]?.c).toBe(expected);
+    return;
+  }
+  // MySQL identifier quoting uses backticks.
+  const safe = `\`${String(table).replace(/`/g, '``')}\``;
+  const [rows] = (await env.raw.query(`SELECT COUNT(*) AS c FROM ${safe}`)) as unknown as [Array<{ c: number | bigint }>, unknown];
+  expect(Number(rows[0]?.c)).toBe(expected);
 }

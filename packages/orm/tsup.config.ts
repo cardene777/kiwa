@@ -11,8 +11,10 @@ export default defineConfig({
     'better-sqlite3',
     'drizzle-orm',
     'postgres',
+    'mysql2',
     'testcontainers',
     '@testcontainers/postgresql',
+    '@testcontainers/mysql',
   ],
   outExtension({ format }) {
     return {
