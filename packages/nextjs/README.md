@@ -65,11 +65,63 @@ The returned `ServerActionResult` exposes `result` (the resolved value), `error`
 
 Throw a `{ [REDIRECT_SYMBOL]: true, url, type }` from your action to signal a redirect. The helper normalizes it into `env.redirect` instead of leaking it as an error. Production code keeps using `redirect()` from `next/navigation` — only the test seam differs.
 
+## RSC streaming + Suspense boundary (v1.1+, Issue #558)
+
+`setupNextRscEnv` extends the RSC seam to streaming chunks and Suspense boundary transitions — the cases `renderServerComponent` (leaf-level + signal capture) does not model.
+
+```ts
+import { describe, expect, it } from 'vitest';
+import { setupNextRscEnv } from '@kiwa-test/nextjs';
+
+async function* streamItems() {
+  yield { type: 'div', key: null, props: { children: 'partial: 1 item' } };
+  yield { type: 'div', key: null, props: { children: 'partial: 2 items' } };
+  yield { type: 'ul', key: null, props: { children: ['a', 'b', 'c'] } };
+}
+
+const fallback = { type: 'div', key: null, props: { children: 'loading…' } };
+
+describe('streamItems', () => {
+  it('captures fallback then resolved subtree in order', async () => {
+    const env = await setupNextRscEnv({
+      dataSource: streamItems(),
+      suspenseFallback: fallback,
+      streamingTimeout: 1000,
+    });
+    expect(env.fallback).toBe(fallback);
+    expect(env.chunks).toHaveLength(4); // fallback + 3 yields
+    expect(env.chunks[0]).toBe(fallback);
+    expect(env.resolved).not.toBeNull();
+    expect(env.errorBoundary).toBeNull();
+    expect(env.timedOut).toBe(false);
+  });
+
+  it('routes a thrown chunk into errorBoundary', async () => {
+    async function* broken() {
+      yield fallback;
+      throw new Error('stream broken');
+    }
+    const env = await setupNextRscEnv({ dataSource: broken() });
+    expect(env.errorBoundary).not.toBeNull();
+    expect((env.errorBoundary?.error as Error).message).toBe('stream broken');
+    expect(env.resolved).toBeNull();
+  });
+});
+```
+
+| `env` field | Type | Meaning |
+|---|---|---|
+| `chunks` | `RscNode[]` | All chunks in arrival order. `chunks[0]` is the Suspense fallback when one is provided. |
+| `fallback` | `RscNode \| null` | The fallback markup the helper captured before streaming started. |
+| `resolved` | `RscNode \| null` | The last chunk yielded by the source — what a real page settles on. `null` when the source threw or only the fallback was emitted. |
+| `errorBoundary` | `RscErrorBoundarySignal \| null` | Set when component / stream throws or `injectError` is provided. Mirrors what `error.tsx` would see. |
+| `timedOut` | `boolean` | `true` when `streamingTimeout` elapsed before the source completed. |
+
 ## Out of scope (tracked separately)
 
-- **React Server Components (RSC) render assertions** — [#494](https://github.com/cardene777/kiwa/issues/494)
-- **`middleware.ts` invocation** — [#495](https://github.com/cardene777/kiwa/issues/495)
-- **End-to-end browser flow after the action** — use `/kiwa-e2e` or `/kiwa-play` instead
+- **Real React `renderToReadableStream` rendering / flight payload byte format** — leaf-level coverage lives in `renderServerComponent`, full wire protocol stays out of scope.
+- **Multiple concurrent Suspense boundaries interleaving** — one boundary per `setupNextRscEnv` call.
+- **End-to-end browser flow after the action** — use `/kiwa-e2e` or `/kiwa-play` instead.
 
 ## License
 

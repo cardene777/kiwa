@@ -115,6 +115,12 @@ describe('@kiwa-test/nextjs surface', () => {
     expect(typeof mod.invokeParallelRoutes).toBe('function');
     expect(typeof mod.PARALLEL_INTERCEPTION_SYMBOL).toBe('symbol');
   });
+
+  it('exports setupNextRscEnv + RSC_ERROR_BOUNDARY_SYMBOL (v1.0.6+, Issue #558)', async () => {
+    const mod = await import('@kiwa-test/nextjs');
+    expect(typeof mod.setupNextRscEnv).toBe('function');
+    expect(typeof mod.RSC_ERROR_BOUNDARY_SYMBOL).toBe('symbol');
+  });
 });
 
 describe('@kiwa-test/nuxt surface', () => {

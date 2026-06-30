@@ -52,3 +52,12 @@ export {
   type DefaultFallbackComponent,
   type InterceptionMatch,
 } from './invoke-parallel-routes.js';
+
+export {
+  setupNextRscEnv,
+  RSC_ERROR_BOUNDARY_SYMBOL,
+  type SetupNextRscEnvOptions,
+  type SetupNextRscEnvResult,
+  type RscStreamSource,
+  type RscErrorBoundarySignal,
+} from './setup-next-rsc-env.js';
