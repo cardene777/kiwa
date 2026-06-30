@@ -8,8 +8,17 @@ import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import type { MySql2Database } from 'drizzle-orm/mysql2';
 
-/** ORM brand discriminator. v0.3 adds 'prisma'. */
-export type OrmBrand = 'drizzle' | 'prisma';
+/** ORM brand discriminator. v0.4 adds 'kysely'. */
+export type OrmBrand = 'drizzle' | 'prisma' | 'kysely';
+
+/**
+ * Phantom-typed `Database` interface for Kysely (caller-supplied).
+ *
+ * Kysely's own `Database` is an interface with table names → row shape,
+ * so we accept any object type here without an index signature requirement.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type KyselyDatabase = any;
 
 /** SQL dialect. v0.2.1 adds 'mysql'. */
 export type SqlDialect = 'sqlite' | 'postgres' | 'mysql';
@@ -183,12 +192,75 @@ export interface OrmTestEnvMockPrisma<TClient = unknown>
   readonly datasourceUrl: string;
 }
 
+export interface MockKyselySqliteOptions<TDatabase extends KyselyDatabase = KyselyDatabase> {
+  readonly mode: 'mock';
+  readonly orm: 'kysely';
+  readonly dialect: 'sqlite';
+  /** Phantom-typed `Database` interface — Kysely uses it for query type narrowing. */
+  readonly schema: TDatabase;
+  readonly migrations?: MigrationSource;
+  readonly seed?: (db: import('kysely').Kysely<TDatabase>) => Promise<void> | void;
+}
+
+export interface LiveKyselyPostgresOptions<TDatabase extends KyselyDatabase = KyselyDatabase> {
+  readonly mode: 'live';
+  readonly orm: 'kysely';
+  readonly dialect: 'postgres';
+  readonly schema: TDatabase;
+  readonly migrations?: MigrationSource;
+  readonly seed?: (db: import('kysely').Kysely<TDatabase>) => Promise<void> | void;
+  readonly containerImage?: string;
+}
+
+export interface LiveKyselyMysqlOptions<TDatabase extends KyselyDatabase = KyselyDatabase> {
+  readonly mode: 'live';
+  readonly orm: 'kysely';
+  readonly dialect: 'mysql';
+  readonly schema: TDatabase;
+  readonly migrations?: MigrationSource;
+  readonly seed?: (db: import('kysely').Kysely<TDatabase>) => Promise<void> | void;
+  readonly containerImage?: string;
+}
+
+export interface OrmTestEnvMockKysely<TDatabase extends KyselyDatabase = KyselyDatabase>
+  extends TestEnvBase<'mock'> {
+  readonly orm: 'kysely';
+  readonly dialect: 'sqlite';
+  readonly db: import('kysely').Kysely<TDatabase>;
+  readonly raw: import('better-sqlite3').Database;
+}
+
+export interface OrmTestEnvLiveKyselyPostgres<TDatabase extends KyselyDatabase = KyselyDatabase>
+  extends TestEnvBase<'live'> {
+  readonly orm: 'kysely';
+  readonly dialect: 'postgres';
+  readonly db: import('kysely').Kysely<TDatabase>;
+  readonly raw: import('pg').Pool;
+  readonly connectionUri: string;
+}
+
+export interface OrmTestEnvLiveKyselyMysql<TDatabase extends KyselyDatabase = KyselyDatabase>
+  extends TestEnvBase<'live'> {
+  readonly orm: 'kysely';
+  readonly dialect: 'mysql';
+  readonly db: import('kysely').Kysely<TDatabase>;
+  readonly raw: import('mysql2/promise').Pool;
+  readonly connectionUri: string;
+}
+
 /**
  * Discriminated union. Tests narrow with `env.mode` / `env.orm` / `env.dialect`
  * to access the appropriate ORM client + raw driver shape.
  */
-export type OrmTestEnv<TSchema extends DrizzleSchema = DrizzleSchema, TPrismaClient = unknown> =
+export type OrmTestEnv<
+  TSchema extends DrizzleSchema = DrizzleSchema,
+  TPrismaClient = unknown,
+  TKyselyDatabase extends KyselyDatabase = KyselyDatabase,
+> =
   | OrmTestEnvMock<TSchema>
   | OrmTestEnvLive<TSchema>
   | OrmTestEnvLiveMysql<TSchema>
-  | OrmTestEnvMockPrisma<TPrismaClient>;
+  | OrmTestEnvMockPrisma<TPrismaClient>
+  | OrmTestEnvMockKysely<TKyselyDatabase>
+  | OrmTestEnvLiveKyselyPostgres<TKyselyDatabase>
+  | OrmTestEnvLiveKyselyMysql<TKyselyDatabase>;

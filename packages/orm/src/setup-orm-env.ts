@@ -7,9 +7,13 @@
 
 import type {
   DrizzleSchema,
+  KyselyDatabase,
+  LiveKyselyMysqlOptions,
+  LiveKyselyPostgresOptions,
   LiveMysqlOptions,
   LivePostgresOptions,
   MigrationSource,
+  MockKyselySqliteOptions,
   MockPrismaSqliteOptions,
   MockSqliteOptions,
   OrmTestEnv,
@@ -261,6 +265,175 @@ async function setupMockPrismaSqlite<TClient>(
   };
 }
 
+async function setupMockKyselySqlite<TDatabase extends KyselyDatabase>(
+  opts: MockKyselySqliteOptions<TDatabase>,
+): Promise<OrmTestEnv<DrizzleSchema, unknown, TDatabase>> {
+  const { default: Database } = await import('better-sqlite3');
+  const { Kysely, SqliteDialect } = await import('kysely');
+
+  const raw = new Database(':memory:');
+  raw.pragma('foreign_keys = ON');
+  const db = new Kysely<TDatabase>({ dialect: new SqliteDialect({ database: raw }) });
+
+  if (typeof opts.migrations !== 'undefined') {
+    for (const stmt of splitSqlStatements(opts.migrations)) {
+      raw.exec(stmt);
+    }
+  }
+  if (typeof opts.seed === 'function') {
+    await opts.seed(db);
+  }
+  return {
+    mode: 'mock',
+    orm: 'kysely',
+    dialect: 'sqlite',
+    db,
+    raw,
+    stop: async () => {
+      await db.destroy();
+      raw.close();
+    },
+  };
+}
+
+async function setupLiveKyselyPostgres<TDatabase extends KyselyDatabase>(
+  opts: LiveKyselyPostgresOptions<TDatabase>,
+): Promise<OrmTestEnv<DrizzleSchema, unknown, TDatabase>> {
+  let containerModule: typeof import('@testcontainers/postgresql');
+  let pgModule: { default?: unknown } & Record<string, unknown>;
+  let kyselyModule: typeof import('kysely');
+  try {
+    containerModule = await import('@testcontainers/postgresql');
+    pgModule = (await import('pg')) as unknown as { default?: unknown } & Record<string, unknown>;
+    kyselyModule = await import('kysely');
+  } catch (caught) {
+    throw new Error(
+      "@kiwa-test/orm: live Kysely (Postgres) mode requires '@testcontainers/postgresql' + 'pg' + 'kysely'. Install with `pnpm add -D @testcontainers/postgresql pg kysely`. Original error: " +
+        (caught instanceof Error ? caught.message : String(caught)),
+    );
+  }
+
+  const image = opts.containerImage ?? 'postgres:16-alpine';
+  let container: import('@testcontainers/postgresql').StartedPostgreSqlContainer;
+  try {
+    container = await new containerModule.PostgreSqlContainer(image).start();
+  } catch (caught) {
+    const msg = caught instanceof Error ? caught.message : String(caught);
+    throw new Error(
+      `@kiwa-test/orm: failed to start Postgres testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
+    );
+  }
+
+  const connectionUri = container.getConnectionUri();
+  const PoolCtor = ((pgModule as { default?: { Pool?: unknown } }).default?.Pool ?? (pgModule as { Pool?: unknown }).Pool) as new (config: { connectionString: string; max?: number }) => import('pg').Pool;
+  const raw = new PoolCtor({ connectionString: connectionUri, max: 4 });
+  const db = new kyselyModule.Kysely<TDatabase>({ dialect: new kyselyModule.PostgresDialect({ pool: raw }) });
+
+  if (typeof opts.migrations !== 'undefined') {
+    for (const stmt of splitSqlStatements(opts.migrations)) {
+      await raw.query(stmt);
+    }
+  }
+  if (typeof opts.seed === 'function') {
+    await opts.seed(db);
+  }
+
+  return {
+    mode: 'live',
+    orm: 'kysely',
+    dialect: 'postgres',
+    db,
+    raw,
+    connectionUri,
+    stop: async () => {
+      try {
+        await db.destroy();
+      } finally {
+        try {
+          await raw.end();
+        } finally {
+          await container.stop();
+        }
+      }
+    },
+  };
+}
+
+async function setupLiveKyselyMysql<TDatabase extends KyselyDatabase>(
+  opts: LiveKyselyMysqlOptions<TDatabase>,
+): Promise<OrmTestEnv<DrizzleSchema, unknown, TDatabase>> {
+  let containerModule: typeof import('@testcontainers/mysql');
+  let mysql2Module: { default?: unknown } & Record<string, unknown>;
+  let kyselyModule: typeof import('kysely');
+  try {
+    containerModule = await import('@testcontainers/mysql');
+    mysql2Module = (await import('mysql2/promise')) as unknown as { default?: unknown } & Record<string, unknown>;
+    kyselyModule = await import('kysely');
+  } catch (caught) {
+    throw new Error(
+      "@kiwa-test/orm: live Kysely (MySQL) mode requires '@testcontainers/mysql' + 'mysql2' + 'kysely'. Install with `pnpm add -D @testcontainers/mysql mysql2 kysely`. Original error: " +
+        (caught instanceof Error ? caught.message : String(caught)),
+    );
+  }
+
+  const image = opts.containerImage ?? 'mysql:8.4';
+  let container: import('@testcontainers/mysql').StartedMySqlContainer;
+  try {
+    container = await new containerModule.MySqlContainer(image).start();
+  } catch (caught) {
+    const msg = caught instanceof Error ? caught.message : String(caught);
+    throw new Error(
+      `@kiwa-test/orm: failed to start MySQL testcontainer (image=${image}). Verify the Docker daemon is running. Original error: ${msg}`,
+    );
+  }
+
+  const connectionUri = container.getConnectionUri();
+  const directCreatePool = (mysql2Module as unknown as { createPool?: unknown }).createPool;
+  const defaultExport = (mysql2Module as unknown as { default?: { createPool?: unknown } }).default;
+  const createPoolFn = (typeof directCreatePool === 'function' ? directCreatePool : defaultExport?.createPool) as unknown as (
+    uri: string,
+  ) => import('mysql2/promise').Pool;
+  if (typeof createPoolFn !== 'function') {
+    throw new Error('@kiwa-test/orm: could not resolve mysql2/promise createPool export.');
+  }
+  const raw = createPoolFn(connectionUri);
+  // Kysely MysqlDialect expects a mysql2 callback-pool. The promise pool from
+  // `mysql2/promise` is the same underlying object with a different facade,
+  // so cast through unknown — the runtime contract holds.
+  const db = new kyselyModule.Kysely<TDatabase>({
+    dialect: new kyselyModule.MysqlDialect({ pool: raw } as unknown as ConstructorParameters<typeof kyselyModule.MysqlDialect>[0]),
+  });
+
+  if (typeof opts.migrations !== 'undefined') {
+    for (const stmt of splitSqlStatements(opts.migrations)) {
+      await raw.query(stmt);
+    }
+  }
+  if (typeof opts.seed === 'function') {
+    await opts.seed(db);
+  }
+
+  return {
+    mode: 'live',
+    orm: 'kysely',
+    dialect: 'mysql',
+    db,
+    raw,
+    connectionUri,
+    stop: async () => {
+      try {
+        await db.destroy();
+      } finally {
+        try {
+          await raw.end();
+        } finally {
+          await container.stop();
+        }
+      }
+    },
+  };
+}
+
 /**
  * Set up an isolated ORM test environment.
  *
@@ -268,14 +441,19 @@ async function setupMockPrismaSqlite<TClient>(
  * - `mode='live' + orm='drizzle' + dialect='postgres'` (v0.2) — testcontainers Postgres
  * - `mode='live' + orm='drizzle' + dialect='mysql'` (v0.2.1) — testcontainers MySQL
  * - `mode='mock' + orm='prisma' + dialect='sqlite'` (v0.3) — Prisma + tempdir SQLite
+ * - `mode='mock' + orm='kysely' + dialect='sqlite'` (v0.4) — Kysely + in-memory SQLite
+ * - `mode='live' + orm='kysely' + dialect='postgres'|'mysql'` (v0.4) — Kysely + testcontainers
  *
  * Other combinations throw a descriptive Error so callers know which
  * follow-up Issue tracks the missing capability.
  */
 import type {
   OrmTestEnvLive as OrmTestEnvLiveT,
+  OrmTestEnvLiveKyselyMysql as OrmTestEnvLiveKyselyMysqlT,
+  OrmTestEnvLiveKyselyPostgres as OrmTestEnvLiveKyselyPostgresT,
   OrmTestEnvLiveMysql as OrmTestEnvLiveMysqlT,
   OrmTestEnvMock as OrmTestEnvMockT,
+  OrmTestEnvMockKysely as OrmTestEnvMockKyselyT,
   OrmTestEnvMockPrisma as OrmTestEnvMockPrismaT,
 } from './types.js';
 
@@ -295,28 +473,54 @@ export function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
 export function setupOrmEnv<TClient>(
   opts: MockPrismaSqliteOptions<TClient>,
 ): Promise<OrmTestEnvMockPrismaT<TClient>>;
+// Kysely SQLite overload — `seed` receives Kysely<TDatabase>.
+export function setupOrmEnv<TDatabase extends KyselyDatabase>(
+  opts: MockKyselySqliteOptions<TDatabase>,
+): Promise<OrmTestEnvMockKyselyT<TDatabase>>;
+// Kysely Postgres overload.
+export function setupOrmEnv<TDatabase extends KyselyDatabase>(
+  opts: LiveKyselyPostgresOptions<TDatabase>,
+): Promise<OrmTestEnvLiveKyselyPostgresT<TDatabase>>;
+// Kysely MySQL overload.
+export function setupOrmEnv<TDatabase extends KyselyDatabase>(
+  opts: LiveKyselyMysqlOptions<TDatabase>,
+): Promise<OrmTestEnvLiveKyselyMysqlT<TDatabase>>;
 // Implementation signature — accepts the union and dispatches at runtime.
-// The return is widened via the overload signatures above; here we use a
-// loose return shape and cast at the implementation level so the public
-// overloads stay precise.
 export async function setupOrmEnv(
   opts:
     | MockSqliteOptions<DrizzleSchema>
     | LivePostgresOptions<DrizzleSchema>
     | LiveMysqlOptions<DrizzleSchema>
-    | MockPrismaSqliteOptions<unknown>,
-): Promise<OrmTestEnv<DrizzleSchema, unknown>> {
+    | MockPrismaSqliteOptions<unknown>
+    | MockKyselySqliteOptions<KyselyDatabase>
+    | LiveKyselyPostgresOptions<KyselyDatabase>
+    | LiveKyselyMysqlOptions<KyselyDatabase>,
+): Promise<OrmTestEnv<DrizzleSchema, unknown, KyselyDatabase>> {
   if (opts.orm === 'prisma') {
     if (opts.mode === 'mock' && opts.dialect === 'sqlite') {
       return setupMockPrismaSqlite(opts);
     }
     throw new Error(
-      `@kiwa-test/orm v0.3: prisma adapter currently only supports mode='mock' + dialect='sqlite' (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}'). Postgres / MySQL via Prisma + testcontainers ships in CAR-293 follow-up.`,
+      `@kiwa-test/orm v0.4: prisma adapter currently only supports mode='mock' + dialect='sqlite' (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}'). Postgres / MySQL via Prisma + testcontainers ships in CAR-293 follow-up.`,
+    );
+  }
+  if (opts.orm === 'kysely') {
+    if (opts.mode === 'mock' && opts.dialect === 'sqlite') {
+      return setupMockKyselySqlite(opts);
+    }
+    if (opts.mode === 'live' && opts.dialect === 'postgres') {
+      return setupLiveKyselyPostgres(opts);
+    }
+    if (opts.mode === 'live' && opts.dialect === 'mysql') {
+      return setupLiveKyselyMysql(opts);
+    }
+    throw new Error(
+      `@kiwa-test/orm v0.4: kysely adapter only supports mock+sqlite / live+postgres / live+mysql (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}').`,
     );
   }
   if (opts.orm !== 'drizzle') {
     throw new Error(
-      `@kiwa-test/orm v0.3 only supports orm='drizzle' or 'prisma' (received '${(opts as { orm: string }).orm}'). Kysely adapter lands in CAR-294.`,
+      `@kiwa-test/orm v0.4 only supports orm='drizzle' / 'prisma' / 'kysely' (received '${(opts as { orm: string }).orm}').`,
     );
   }
   if (opts.mode === 'mock' && opts.dialect === 'sqlite') {
@@ -329,6 +533,6 @@ export async function setupOrmEnv(
     return setupLiveMysql(opts);
   }
   throw new Error(
-    `@kiwa-test/orm v0.3: unsupported combination mode='${(opts as { mode: string }).mode}' / orm='${(opts as { orm: string }).orm}' / dialect='${(opts as { dialect: string }).dialect}'. See README for the supported matrix.`,
+    `@kiwa-test/orm v0.4: unsupported combination mode='${(opts as { mode: string }).mode}' / orm='${(opts as { orm: string }).orm}' / dialect='${(opts as { dialect: string }).dialect}'. See README for the supported matrix.`,
   );
 }

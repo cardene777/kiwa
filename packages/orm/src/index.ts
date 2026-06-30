@@ -5,11 +5,15 @@ export type {
   DrizzleSqliteDb,
   DrizzlePostgresDb,
   DrizzleMysqlDb,
+  KyselyDatabase,
   MigrationSource,
   MockSqliteOptions,
   LivePostgresOptions,
   LiveMysqlOptions,
   MockPrismaSqliteOptions,
+  MockKyselySqliteOptions,
+  LiveKyselyPostgresOptions,
+  LiveKyselyMysqlOptions,
   PrismaClientCtor,
   SetupOrmEnvOptions,
   OrmTestEnv,
@@ -17,6 +21,9 @@ export type {
   OrmTestEnvLive,
   OrmTestEnvLiveMysql,
   OrmTestEnvMockPrisma,
+  OrmTestEnvMockKysely,
+  OrmTestEnvLiveKyselyPostgres,
+  OrmTestEnvLiveKyselyMysql,
 } from './types.js';
 
 export { setupOrmEnv } from './setup-orm-env.js';

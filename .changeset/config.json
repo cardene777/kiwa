@@ -43,6 +43,7 @@
     "examples-orm-drizzle-sqlite-poc",
     "examples-orm-drizzle-postgres-poc",
     "examples-orm-drizzle-mysql-poc",
-    "examples-orm-prisma-sqlite-poc"
+    "examples-orm-prisma-sqlite-poc",
+    "examples-orm-kysely-sqlite-poc"
   ]
 }
