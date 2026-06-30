@@ -35,6 +35,11 @@
     "examples-nextjs-zk-verifier",
     "examples-nft-marketplace",
     "examples-vite-react-wagmi",
-    "examples-nuxt-server-routes-full"
+    "examples-nuxt-server-routes-full",
+    "examples-sveltekit-full",
+    "examples-remix-full",
+    "examples-astro-server-endpoints-full",
+    "examples-nextjs-app-router-full",
+    "examples-orm-drizzle-sqlite-poc"
   ]
 }
