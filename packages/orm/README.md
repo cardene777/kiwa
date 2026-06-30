@@ -18,9 +18,8 @@ ORM query test adapter for kiwa.
 - **v0.3** — Prisma + tempdir SQLite + `prisma db push`.
 - **v0.4** — Kysely query builder across SQLite (in-memory) + Postgres / MySQL (testcontainers).
 - **v0.5** — file-based migration via `drizzle-orm/migrator` (`migrations: { folder }`).
-- **v0.6** (this release) — Prisma + testcontainers Postgres (`mode: 'live' + orm: 'prisma' + dialect: 'postgres'`). **v1.2 ORM milestone (CAR-291 #527) 完遂版**。
-
-**Roadmap** — Prisma + MySQL testcontainers (future follow-up).
+- **v0.6** — Prisma + testcontainers Postgres (`mode: 'live' + orm: 'prisma' + dialect: 'postgres'`). **v1.2 ORM milestone (CAR-291 #527) 完遂版**。
+- **v0.7** (this release) — Prisma + testcontainers MySQL (`mode: 'live' + orm: 'prisma' + dialect: 'mysql'`) + Kysely Migrator (`migrations: { folder }` via `kysely.Migrator` + `FileMigrationProvider`). **v1.3 ORM follow-up (#563) 完遂版**。
 
 ## Install
 
@@ -94,8 +93,8 @@ await env.stop(); // closes pool + stops container
 | `'mock'` | `'kysely'` | `'sqlite'` | v0.4 — in-memory better-sqlite3 |
 | `'live'` | `'kysely'` | `'postgres'` | v0.4 — testcontainers Postgres + pg |
 | `'live'` | `'kysely'` | `'mysql'` | v0.4 — testcontainers MySQL + mysql2 |
-| `'live'` | `'prisma'` | `'postgres'` | v0.6 — testcontainers Postgres + prisma db push (this release) |
-| `'live'` | `'prisma'` | `'mysql'` | future follow-up |
+| `'live'` | `'prisma'` | `'postgres'` | v0.6 — testcontainers Postgres + prisma db push |
+| `'live'` | `'prisma'` | `'mysql'` | v0.7 — testcontainers MySQL + prisma db push (this release) |
 
 Common options:
 
@@ -120,17 +119,17 @@ Asserts that the row count of `table` equals `expected`.
 
 Production code stays thin around the ORM client; tests inject a fresh `setupOrmEnv` per test (isolation by default). Swapping `'mock'` → `'live'` in CI keeps the test API identical — only the dialect-specific SQL and error patterns differ.
 
-## Limitations (v0.4)
+## Limitations (v0.7)
 
-- All 3 ORM brands supported (Drizzle / Prisma / Kysely). Prisma + testcontainers (Postgres/MySQL) lands in CAR-293 residual.
-- Accepted combinations: `mock+drizzle+sqlite`, `live+drizzle+postgres`, `live+drizzle+mysql`, `mock+prisma+sqlite`, `mock+kysely+sqlite`, `live+kysely+postgres`, `live+kysely+mysql`. Other combinations throw a descriptive Error.
-- Drizzle / Kysely migrations are SQL strings split on `;` followed by newline. Prisma migrations are applied via `prisma db push --schema=<schemaPath>`. File-based Drizzle migrations land in CAR-295.
+- All 3 ORM brands supported (Drizzle / Prisma / Kysely) across the full mock + live matrix.
+- Accepted combinations: `mock+drizzle+sqlite`, `live+drizzle+postgres`, `live+drizzle+mysql`, `mock+prisma+sqlite`, `live+prisma+postgres`, `live+prisma+mysql`, `mock+kysely+sqlite`, `live+kysely+postgres`, `live+kysely+mysql`. Other combinations throw a descriptive Error.
+- Migration sources — SQL string / SQL `string[]` work for every adapter. The `{ folder }` form runs `drizzle-orm/migrator` for Drizzle and `kysely.Migrator` + `FileMigrationProvider` for Kysely (v0.7). Prisma migrations are applied via `prisma db push --schema=<schemaPath>` regardless of dialect.
 - live mode requires a Docker daemon. CI runners that disable Docker should restrict their suite to `mode: 'mock'`.
 - Prisma mode requires the caller to run `prisma generate` ahead of time and pass the resulting `PrismaClient` constructor — kiwa never invokes `prisma generate` itself.
-- Kysely mode requires the caller to supply the phantom-typed `Database` interface (hand-written or `kysely-codegen` output).
+- Kysely mode requires the caller to supply the phantom-typed `Database` interface (hand-written or `kysely-codegen` output). Kysely Migrator file-based migrations require each migration file to export `up(db)` (and optionally `down(db)`); file name alphabetical order determines execution order.
 
 ## Related
 
 - Skill: `/kiwa-orm` — generate Vitest tests from a Layer 1 spec.
 - Layer 1: `/kiwa-design --layer orm-query`.
-- Tracking Issue: [#527](https://github.com/cardene777/kiwa/issues/527) / Linear CAR-291.
+- Tracking Issues: [#527](https://github.com/cardene777/kiwa/issues/527) (v1.2 ORM milestone) / [#563](https://github.com/cardene777/kiwa/issues/563) (v1.3 ORM follow-up — Prisma + MySQL / Kysely Migrator).
