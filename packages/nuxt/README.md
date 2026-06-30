@@ -54,11 +54,40 @@ describe('GET /api/secure', () => {
 
 Returns `{ result, redirect, error, env }` where `env` exposes `responseHeaders` / `responseCookies` / `status` Maps captured during the call. Redirects throw `NUXT_REDIRECT_SYMBOL`-branded objects which the helper normalizes into `result.redirect`.
 
+## Route middleware (v1.1)
+
+`setupNuxtMiddlewareEnv` is a higher-level wrapper around `invokeRouteMiddleware` that adds spy capture, a user-session fixture, and chain execution for `global` + route-specific middleware.
+
+```ts
+import { setupNuxtMiddlewareEnv } from '@kiwa-test/nuxt';
+import { globalAuthGuard, adminRouteGuard } from '../middleware/_kiwa/route-guard.js';
+
+it('admin route — non-admin user is forbidden', async () => {
+  const env = await setupNuxtMiddlewareEnv({
+    middleware: [globalAuthGuard, adminRouteGuard],
+    to: { path: '/admin/users' },
+    user: { state: 'authenticated', userId: 'u-1', role: 'user' },
+  });
+  expect(env.aborted).toBe(true);
+  expect(env.outcome.abort?.statusCode).toBe(403);
+  expect(env.outcome.executed).toEqual([0, 1]);
+});
+```
+
+### `setupNuxtMiddlewareEnv(opts)`
+
+| `opts` field | Type | Default | Meaning |
+|---|---|---|---|
+| `middleware` | `RouteMiddlewareFunction \| readonly RouteMiddlewareFunction[]` | required | Single middleware or ordered chain (global first, route-specific after). Halts at the first redirect / abort / `false` / non-signal throw. |
+| `to` | `RouteLocationInput` | required | Navigation target (path + optional name / params / query / hash / meta) |
+| `from` | `RouteLocationInput` | `{ path: '/' }` | Source route |
+| `user` | `NuxtMiddlewareUserFixture` | omitted | Session fixture merged into `to.meta.userSession` (`'authenticated'` / `'expired'` / `'anonymous'`). Anonymous skips the meta write. |
+
+Returns `{ outcome, navigateToCalls, abortNavigationCalls, redirectedTo, aborted }`. `outcome.executed` / `outcome.skipped` expose which middlewares in the chain ran or were halted. `navigateToCalls` / `abortNavigationCalls` aggregate every spy invocation across the chain.
+
 ## Out of scope (tracked separately)
 
 - Nuxt composables (`useFetch` / `useState` / `useNuxtApp`) — covered by `@kiwa-test/ui` Vue mode for the client side
-- Nitro plugin lifecycle — file a separate issue if needed
-- Route middleware (server-side prepass) — future Issue
 - Full HTTP round-trip — use Playwright + `@kiwa-test/e2e` for E2E coverage
 
 ## License

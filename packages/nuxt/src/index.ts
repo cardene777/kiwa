@@ -24,6 +24,15 @@ export {
 } from './invoke-route-middleware.js';
 
 export {
+  setupNuxtMiddlewareEnv,
+  type SetupNuxtMiddlewareEnvOptions,
+  type SetupNuxtMiddlewareEnvResult,
+  type NuxtMiddlewareUserFixture,
+  type NuxtMiddlewareNavigateCall,
+  type NuxtMiddlewareAbortCall,
+} from './setup-route-middleware-env.js';
+
+export {
   invokeNitroPlugin,
   type InvokeNitroPluginOptions,
   type InvokeNitroPluginResult,
