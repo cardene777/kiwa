@@ -8,8 +8,8 @@ import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import type { MySql2Database } from 'drizzle-orm/mysql2';
 
-/** ORM brand discriminator. */
-export type OrmBrand = 'drizzle';
+/** ORM brand discriminator. v0.3 adds 'prisma'. */
+export type OrmBrand = 'drizzle' | 'prisma';
 
 /** SQL dialect. v0.2.1 adds 'mysql'. */
 export type SqlDialect = 'sqlite' | 'postgres' | 'mysql';
@@ -70,6 +70,44 @@ export interface LiveMysqlOptions<TSchema extends DrizzleSchema = DrizzleSchema>
 }
 
 /**
+ * Constructor signature for `@prisma/client` `PrismaClient` (kept loose so
+ * callers can pass their generated client without importing the type here).
+ * The generic `TClient` is the caller's narrowed PrismaClient instance type.
+ */
+export type PrismaClientCtor<TClient = unknown> = new (options?: {
+  datasourceUrl?: string;
+  datasources?: { db: { url: string } };
+}) => TClient;
+
+export interface MockPrismaSqliteOptions<TClient = unknown> {
+  readonly mode: 'mock';
+  readonly orm: 'prisma';
+  readonly dialect: 'sqlite';
+  /**
+   * The generated `PrismaClient` constructor exported from the caller's
+   * `@prisma/client` (i.e. `import { PrismaClient } from '@prisma/client'`).
+   * kiwa never invokes `prisma generate` itself; the caller manages codegen
+   * as part of their normal Prisma workflow.
+   */
+  readonly prismaClient: PrismaClientCtor<TClient>;
+  /**
+   * Path to the schema.prisma file. The schema's `datasource db { url = env(...) }`
+   * env var name is overridden via the `datasourceUrlEnv` field below.
+   */
+  readonly schemaPath: string;
+  /**
+   * Name of the env var the schema's `datasource db { url = env(...) }`
+   * references. kiwa sets this env var to the temp SQLite file URL before
+   * invoking `prisma db push --schema=<schemaPath>`. Default `DATABASE_URL`.
+   */
+  readonly datasourceUrlEnv?: string;
+  /**
+   * Optional seed callback. Receives the live PrismaClient instance.
+   */
+  readonly seed?: (client: TClient) => Promise<void> | void;
+}
+
+/**
  * Union of all currently-supported v0.2 configurations.
  *
  * Generic parameters (TMode / TOrm / TDialect) are retained so future
@@ -79,19 +117,27 @@ export interface LiveMysqlOptions<TSchema extends DrizzleSchema = DrizzleSchema>
  */
 export type SetupOrmEnvOptions<
   TMode extends TestMode = TestMode,
-  _TOrm extends OrmBrand = 'drizzle',
+  TOrm extends OrmBrand = 'drizzle',
   TDialect extends SqlDialect = SqlDialect,
   TSchema extends DrizzleSchema = DrizzleSchema,
 > = TMode extends 'mock'
-  ? TDialect extends 'sqlite'
-    ? MockSqliteOptions<TSchema>
-    : never
-  : TMode extends 'live'
-    ? TDialect extends 'postgres'
-      ? LivePostgresOptions<TSchema>
-      : TDialect extends 'mysql'
-        ? LiveMysqlOptions<TSchema>
+  ? TOrm extends 'drizzle'
+    ? TDialect extends 'sqlite'
+      ? MockSqliteOptions<TSchema>
+      : never
+    : TOrm extends 'prisma'
+      ? TDialect extends 'sqlite'
+        ? MockPrismaSqliteOptions
         : never
+      : never
+  : TMode extends 'live'
+    ? TOrm extends 'drizzle'
+      ? TDialect extends 'postgres'
+        ? LivePostgresOptions<TSchema>
+        : TDialect extends 'mysql'
+          ? LiveMysqlOptions<TSchema>
+          : never
+      : never
     : never;
 
 export interface OrmTestEnvMock<TSchema extends DrizzleSchema = DrizzleSchema>
@@ -125,11 +171,24 @@ export interface OrmTestEnvLiveMysql<TSchema extends DrizzleSchema = DrizzleSche
   readonly connectionUri: string;
 }
 
+export interface OrmTestEnvMockPrisma<TClient = unknown>
+  extends TestEnvBase<'mock'> {
+  readonly orm: 'prisma';
+  readonly dialect: 'sqlite';
+  /** Live PrismaClient instance constructed against the isolated tempdir DB. */
+  readonly client: TClient;
+  /** Absolute path to the tempdir-hosted SQLite file. */
+  readonly dbPath: string;
+  /** `file:` URL form of `dbPath` — same value injected into `datasourceUrlEnv`. */
+  readonly datasourceUrl: string;
+}
+
 /**
- * Discriminated union. Tests narrow with `env.mode` or `env.dialect` to access
- * the appropriate Drizzle / raw driver shape.
+ * Discriminated union. Tests narrow with `env.mode` / `env.orm` / `env.dialect`
+ * to access the appropriate ORM client + raw driver shape.
  */
-export type OrmTestEnv<TSchema extends DrizzleSchema = DrizzleSchema> =
+export type OrmTestEnv<TSchema extends DrizzleSchema = DrizzleSchema, TPrismaClient = unknown> =
   | OrmTestEnvMock<TSchema>
   | OrmTestEnvLive<TSchema>
-  | OrmTestEnvLiveMysql<TSchema>;
+  | OrmTestEnvLiveMysql<TSchema>
+  | OrmTestEnvMockPrisma<TPrismaClient>;

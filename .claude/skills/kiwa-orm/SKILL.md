@@ -2,8 +2,8 @@
 name: kiwa-orm
 description: |
   Layer 1 spec (`tests/spec/integration/test-spec-{module}.orm.md`) を ORM query test (Vitest + @kiwa-test/orm) に変換する Layer 2 skill。
-  v0.1 = Drizzle + in-memory SQLite (mock)、 v0.2 = Drizzle + Postgres (testcontainers)、 v0.2.1 = Drizzle + MySQL (testcontainers) を対象に `setupOrmEnv` + `expectQuery` + `expectRowCount` を 9 column 表から機械変換する。
-  Prisma / Kysely / file-based migration 対応は follow-up Issue (CAR-293 / CAR-294 / CAR-295) で順次拡張。
+  v0.1 = Drizzle + SQLite (mock)、 v0.2 = Drizzle + Postgres (testcontainers)、 v0.2.1 = Drizzle + MySQL (testcontainers)、 v0.3 = Prisma + SQLite (tempdir) を対象に `setupOrmEnv` + `expectQuery` + `expectRowCount` を 9 column 表から機械変換する。
+  Kysely / file-based migration / Prisma + testcontainers 対応は follow-up Issue (CAR-294 / CAR-295 + CAR-293 残) で順次拡張。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -103,17 +103,43 @@ it('{ID} {Observation}', async () => {
 | セキュリティ | SQL injection 経路 → drizzle parameterized query で防御確認 |
 | 回帰 | 既知 bug 再現 input |
 
-## v0.2.1 受入 matrix
+## v0.3 受入 matrix
 
 | mode | orm | dialect | 状態 |
 |---|---|---|---|
 | `mock` | `drizzle` | `sqlite` | v0.1 (in-memory) |
 | `live` | `drizzle` | `postgres` | v0.2 (testcontainers Postgres) |
 | `live` | `drizzle` | `mysql` | v0.2.1 (testcontainers MySQL) |
-| `*` | `prisma` | `*` | CAR-293 (#527-3) |
+| `mock` | `prisma` | `sqlite` | v0.3 (tempdir SQLite + prisma db push) |
+| `live` | `prisma` | `postgres` / `mysql` | CAR-293 残 (Prisma + testcontainers) |
 | `*` | `kysely` | `*` | CAR-294 (#527-4) |
 
 未対応の組合せは `setupOrmEnv` が説明的 Error を throw。
+
+## Prisma mode template (v0.3)
+
+```ts
+import { afterEach, describe, expect, it } from 'vitest';
+import { resolve } from 'node:path';
+import { setupOrmEnv } from '@kiwa-test/orm';
+import type { OrmTestEnvMockPrisma } from '@kiwa-test/orm';
+import { PrismaClient } from '../prisma/generated/index.js';
+
+const SCHEMA_PATH = resolve(process.cwd(), 'prisma/schema.prisma');
+let env: OrmTestEnvMockPrisma<PrismaClient> | null = null;
+afterEach(async () => { if (env) { await env.stop(); env = null; } });
+
+it('{ID} {Observation}', async () => {
+  env = await setupOrmEnv({
+    mode: 'mock', orm: 'prisma', dialect: 'sqlite',
+    prismaClient: PrismaClient,
+    schemaPath: SCHEMA_PATH,
+    seed: async (client) => { {Given.seed} },
+  });
+  {Query を env.client.user.* で展開}
+  {Then を expect(...).toEqual(...) に展開}
+}, 60_000);
+```
 
 ## live mode 用 template (v0.2、 Postgres)
 

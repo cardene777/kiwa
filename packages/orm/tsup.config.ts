@@ -15,6 +15,8 @@ export default defineConfig({
     'testcontainers',
     '@testcontainers/postgresql',
     '@testcontainers/mysql',
+    '@prisma/client',
+    'prisma',
   ],
   outExtension({ format }) {
     return {

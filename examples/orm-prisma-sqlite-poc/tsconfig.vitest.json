@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": ".vitest-dist",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["node", "vitest"],
+    "noEmit": false
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts", "prisma/generated/index.d.ts"],
+  "exclude": ["node_modules", "dist", ".vitest-dist"]
+}

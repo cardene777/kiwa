@@ -14,9 +14,10 @@ ORM query test adapter for kiwa.
 
 - **v0.1** — Drizzle ORM + in-memory SQLite (`mode: 'mock'`). Fast, Docker-free, type-safe.
 - **v0.2** — Drizzle ORM + Postgres via testcontainers (`mode: 'live' + dialect: 'postgres'`). Real SQL dialect parity.
-- **v0.2.1** (this release) — Drizzle ORM + MySQL via testcontainers (`mode: 'live' + dialect: 'mysql'`). Real InnoDB FK + collation semantics.
+- **v0.2.1** — Drizzle ORM + MySQL via testcontainers (`mode: 'live' + dialect: 'mysql'`). Real InnoDB FK + collation semantics.
+- **v0.3** (this release) — Prisma + tempdir SQLite (`mode: 'mock' + orm: 'prisma' + dialect: 'sqlite'`). caller's `PrismaClient` + isolated tempdir DB + auto `prisma db push`.
 
-**Roadmap** — Prisma adapter (CAR-293), Kysely adapter (CAR-294), file-based migration (CAR-295).
+**Roadmap** — Prisma + testcontainers Postgres/MySQL (rest of CAR-293), Kysely adapter (CAR-294), file-based migration (CAR-295).
 
 ## Install
 
@@ -85,8 +86,10 @@ await env.stop(); // closes pool + stops container
 |---|---|---|---|
 | `'mock'` | `'drizzle'` | `'sqlite'` | v0.1 — in-memory better-sqlite3 |
 | `'live'` | `'drizzle'` | `'postgres'` | v0.2 — testcontainers Postgres |
-| `'live'` | `'drizzle'` | `'mysql'` | v0.2.1 — testcontainers MySQL (this release) |
-| `*` | `'prisma'` / `'kysely'` | `*` | follow-up (CAR-293 / CAR-294) |
+| `'live'` | `'drizzle'` | `'mysql'` | v0.2.1 — testcontainers MySQL |
+| `'mock'` | `'prisma'` | `'sqlite'` | v0.3 — tempdir SQLite + `prisma db push` (this release) |
+| `'live'` | `'prisma'` | `'postgres'` / `'mysql'` | follow-up (CAR-293 残) |
+| `*` | `'kysely'` | `*` | follow-up (CAR-294) |
 
 Common options:
 
@@ -111,12 +114,13 @@ Asserts that the row count of `table` equals `expected`.
 
 Production code stays thin around the ORM client; tests inject a fresh `setupOrmEnv` per test (isolation by default). Swapping `'mock'` → `'live'` in CI keeps the test API identical — only the dialect-specific SQL and error patterns differ.
 
-## Limitations (v0.2.1)
+## Limitations (v0.3)
 
-- Only Drizzle ORM is supported. Prisma / Kysely land in CAR-293 / CAR-294.
-- Accepted combinations: `mock + sqlite`, `live + postgres`, `live + mysql`. Other ORMs / dialects throw a descriptive Error.
-- Migrations are SQL strings split on `;` followed by newline. File-based migrations (drizzle-orm/migrator) land in CAR-295.
+- Drizzle (all dialects v0.1-v0.2.1) + Prisma SQLite (v0.3) are supported. Kysely lands in CAR-294. Prisma + testcontainers in CAR-293 follow-up.
+- Accepted combinations: `mock+drizzle+sqlite`, `live+drizzle+postgres`, `live+drizzle+mysql`, `mock+prisma+sqlite`. Other combinations throw a descriptive Error.
+- Drizzle migrations are SQL strings split on `;` followed by newline. Prisma migrations are applied via `prisma db push --schema=<schemaPath>` (kiwa spawns the CLI). File-based Drizzle migrations land in CAR-295.
 - live mode requires a Docker daemon. CI runners that disable Docker should restrict their suite to `mode: 'mock'`.
+- Prisma mode requires the caller to run `prisma generate` ahead of time and pass the resulting `PrismaClient` constructor — kiwa never invokes `prisma generate` itself.
 
 ## Related
 

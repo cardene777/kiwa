@@ -10,6 +10,7 @@ import type {
   LiveMysqlOptions,
   LivePostgresOptions,
   MigrationSource,
+  MockPrismaSqliteOptions,
   MockSqliteOptions,
   OrmTestEnv,
 } from './types.js';
@@ -194,12 +195,79 @@ async function setupLiveMysql<TSchema extends DrizzleSchema>(
   };
 }
 
+async function setupMockPrismaSqlite<TClient>(
+  opts: MockPrismaSqliteOptions<TClient>,
+): Promise<OrmTestEnv<DrizzleSchema, TClient>> {
+  const { mkdtemp, rm } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { spawnSync } = await import('node:child_process');
+
+  const tmpDir = await mkdtemp(join(tmpdir(), 'kiwa-orm-prisma-'));
+  const dbPath = join(tmpDir, 'test.db');
+  const datasourceUrl = `file:${dbPath}`;
+  const envName = opts.datasourceUrlEnv ?? 'DATABASE_URL';
+  const previousEnv = process.env[envName];
+  process.env[envName] = datasourceUrl;
+
+  // Push the schema to the empty SQLite file (creates the tables without
+  // requiring a migration history). `prisma` CLI is resolved via the
+  // caller's local install — kiwa never bundles it.
+  const result = spawnSync(
+    'pnpm',
+    ['exec', 'prisma', 'db', 'push', `--schema=${opts.schemaPath}`, '--skip-generate', '--accept-data-loss'],
+    {
+      stdio: 'pipe',
+      env: { ...process.env, [envName]: datasourceUrl },
+      encoding: 'utf8',
+    },
+  );
+  if (result.status !== 0) {
+    if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
+    else delete process.env[envName];
+    await rm(tmpDir, { recursive: true, force: true });
+    throw new Error(
+      `@kiwa-test/orm: prisma db push failed (status=${result.status}). stderr=${result.stderr ?? ''} stdout=${result.stdout ?? ''}`,
+    );
+  }
+
+  const client = new opts.prismaClient({ datasourceUrl });
+  if (typeof opts.seed === 'function') {
+    await opts.seed(client);
+  }
+
+  return {
+    mode: 'mock',
+    orm: 'prisma',
+    dialect: 'sqlite',
+    client,
+    dbPath,
+    datasourceUrl,
+    stop: async () => {
+      // PrismaClient exposes `$disconnect`; type as loose since TClient is
+      // a generic placeholder for the caller's narrowed instance.
+      const maybeDisconnect = (client as unknown as { $disconnect?: () => Promise<void> }).$disconnect;
+      if (typeof maybeDisconnect === 'function') {
+        try {
+          await maybeDisconnect.call(client);
+        } catch {
+          /* swallow disconnect errors — tempdir cleanup below is the priority */
+        }
+      }
+      if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
+      else delete process.env[envName];
+      await rm(tmpDir, { recursive: true, force: true });
+    },
+  };
+}
+
 /**
  * Set up an isolated ORM test environment.
  *
  * - `mode='mock' + orm='drizzle' + dialect='sqlite'` (v0.1) — in-memory better-sqlite3
  * - `mode='live' + orm='drizzle' + dialect='postgres'` (v0.2) — testcontainers Postgres
  * - `mode='live' + orm='drizzle' + dialect='mysql'` (v0.2.1) — testcontainers MySQL
+ * - `mode='mock' + orm='prisma' + dialect='sqlite'` (v0.3) — Prisma + tempdir SQLite
  *
  * Other combinations throw a descriptive Error so callers know which
  * follow-up Issue tracks the missing capability.
@@ -208,6 +276,7 @@ import type {
   OrmTestEnvLive as OrmTestEnvLiveT,
   OrmTestEnvLiveMysql as OrmTestEnvLiveMysqlT,
   OrmTestEnvMock as OrmTestEnvMockT,
+  OrmTestEnvMockPrisma as OrmTestEnvMockPrismaT,
 } from './types.js';
 
 // Mock SQLite overload — `seed` receives the SQLite client (no union).
@@ -222,13 +291,32 @@ export function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
 export function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
   opts: LiveMysqlOptions<TSchema>,
 ): Promise<OrmTestEnvLiveMysqlT<TSchema>>;
+// Prisma SQLite overload — `seed` receives the caller's PrismaClient.
+export function setupOrmEnv<TClient>(
+  opts: MockPrismaSqliteOptions<TClient>,
+): Promise<OrmTestEnvMockPrismaT<TClient>>;
 // Implementation signature — accepts the union and dispatches at runtime.
-export async function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
-  opts: MockSqliteOptions<TSchema> | LivePostgresOptions<TSchema> | LiveMysqlOptions<TSchema>,
-): Promise<OrmTestEnv<TSchema>> {
+// The return is widened via the overload signatures above; here we use a
+// loose return shape and cast at the implementation level so the public
+// overloads stay precise.
+export async function setupOrmEnv(
+  opts:
+    | MockSqliteOptions<DrizzleSchema>
+    | LivePostgresOptions<DrizzleSchema>
+    | LiveMysqlOptions<DrizzleSchema>
+    | MockPrismaSqliteOptions<unknown>,
+): Promise<OrmTestEnv<DrizzleSchema, unknown>> {
+  if (opts.orm === 'prisma') {
+    if (opts.mode === 'mock' && opts.dialect === 'sqlite') {
+      return setupMockPrismaSqlite(opts);
+    }
+    throw new Error(
+      `@kiwa-test/orm v0.3: prisma adapter currently only supports mode='mock' + dialect='sqlite' (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}'). Postgres / MySQL via Prisma + testcontainers ships in CAR-293 follow-up.`,
+    );
+  }
   if (opts.orm !== 'drizzle') {
     throw new Error(
-      `@kiwa-test/orm v0.2.1 only supports orm='drizzle' (received '${(opts as { orm: string }).orm}'). Prisma / Kysely adapters land in CAR-293 / CAR-294.`,
+      `@kiwa-test/orm v0.3 only supports orm='drizzle' or 'prisma' (received '${(opts as { orm: string }).orm}'). Kysely adapter lands in CAR-294.`,
     );
   }
   if (opts.mode === 'mock' && opts.dialect === 'sqlite') {
@@ -241,6 +329,6 @@ export async function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>
     return setupLiveMysql(opts);
   }
   throw new Error(
-    `@kiwa-test/orm v0.2.1: unsupported combination mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}'. Use mode='mock' + dialect='sqlite' (v0.1), mode='live' + dialect='postgres' (v0.2), or mode='live' + dialect='mysql' (v0.2.1).`,
+    `@kiwa-test/orm v0.3: unsupported combination mode='${(opts as { mode: string }).mode}' / orm='${(opts as { orm: string }).orm}' / dialect='${(opts as { dialect: string }).dialect}'. See README for the supported matrix.`,
   );
 }

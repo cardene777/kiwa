@@ -9,11 +9,14 @@ export type {
   MockSqliteOptions,
   LivePostgresOptions,
   LiveMysqlOptions,
+  MockPrismaSqliteOptions,
+  PrismaClientCtor,
   SetupOrmEnvOptions,
   OrmTestEnv,
   OrmTestEnvMock,
   OrmTestEnvLive,
   OrmTestEnvLiveMysql,
+  OrmTestEnvMockPrisma,
 } from './types.js';
 
 export { setupOrmEnv } from './setup-orm-env.js';
