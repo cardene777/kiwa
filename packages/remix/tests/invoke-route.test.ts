@@ -101,6 +101,25 @@ describe('invokeLoader edge cases', () => {
     expect(r.redirect?.status).toBe(301);
     expect(r.redirect?.location).toBe('');
   });
+
+  it('T-RX-009b 異常系: loader returns undefined → throws Remix-compatible error (MAJOR 3 fix, Issue #568)', async () => {
+    // Remix 公式 callRouteLoader 仕様 ... explicit undefined return は throw する。
+    // kiwa env でも同 semantics に揃えて、 loader 実装漏れを unit test で fail 検出可能にする。
+    const loader: LoaderFunction = async () => undefined as unknown as Record<string, unknown>;
+    const r = await invokeLoader({ loader, url: 'http://localhost/' });
+    expect(r.error).toBeInstanceOf(Error);
+    const msg = (r.error as Error).message;
+    expect(msg).toContain('loader');
+    expect(msg.toLowerCase()).toContain('return');
+  });
+
+  it('T-RX-009c 異常系: loader returns null は OK (undefined と区別、 公式仕様 RR 6.11+)', async () => {
+    // null return は React Router 6.11+ では explicit 許容、 undefined のみが禁止対象。
+    const loader: LoaderFunction = async () => null;
+    const r = await invokeLoader({ loader, url: 'http://localhost/' });
+    expect(r.error).toBeUndefined();
+    expect(r.result).toBeNull();
+  });
 });
 
 describe('invokeAction', () => {
