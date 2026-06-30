@@ -43,9 +43,14 @@ export type DrizzleMysqlDb<TSchema extends DrizzleSchema = DrizzleSchema> =
  *
  * - `string` — raw SQL applied as-is (statements split on `;` followed by newline).
  * - `string[]` — explicit array of SQL statements applied sequentially.
- * - `{ folder }` — drizzle-orm/migrator file-based migration. kiwa imports the
- *   dialect-appropriate `migrate` (drizzle-orm/better-sqlite3/migrator etc.) and
- *   invokes it with `{ migrationsFolder: folder }`. Drizzle-only (v0.5).
+ * - `{ folder }` — folder-based migration.
+ *   - Drizzle (v0.5+) — kiwa imports the dialect-appropriate `migrate`
+ *     (drizzle-orm/better-sqlite3/migrator etc.) and invokes it with
+ *     `{ migrationsFolder: folder }`.
+ *   - Kysely (v0.7+) — kiwa drives `kysely.Migrator` + `FileMigrationProvider`
+ *     against the supplied folder; each migration file must export `up(db)`
+ *     (and optionally `down(db)`).
+ *   - Prisma — N/A (`prisma db push --schema=<schemaPath>` is the migration path).
  */
 export type MigrationSource =
   | string
@@ -122,6 +127,35 @@ export interface LivePrismaPostgresOptions<TClient = unknown> {
   readonly containerImage?: string;
 }
 
+export interface LivePrismaMysqlOptions<TClient = unknown> {
+  readonly mode: 'live';
+  readonly orm: 'prisma';
+  readonly dialect: 'mysql';
+  /**
+   * The generated `PrismaClient` constructor exported from the caller's
+   * `@prisma/client`. Caller's schema.prisma must use `provider = "mysql"`.
+   */
+  readonly prismaClient: PrismaClientCtor<TClient>;
+  /**
+   * Path to the schema.prisma file (must have `provider = "mysql"` +
+   * `url = env("DATABASE_URL")` style datasource).
+   */
+  readonly schemaPath: string;
+  /**
+   * Env var name the schema references. kiwa sets it to the testcontainers
+   * MySQL connection URI before invoking `prisma db push`.
+   */
+  readonly datasourceUrlEnv?: string;
+  /**
+   * Optional seed callback that receives the live PrismaClient instance.
+   */
+  readonly seed?: (client: TClient) => Promise<void> | void;
+  /**
+   * Optional Docker image override. Default `mysql:8.4`.
+   */
+  readonly containerImage?: string;
+}
+
 export interface MockPrismaSqliteOptions<TClient = unknown> {
   readonly mode: 'mock';
   readonly orm: 'prisma';
@@ -183,7 +217,9 @@ export type SetupOrmEnvOptions<
       : TOrm extends 'prisma'
         ? TDialect extends 'postgres'
           ? LivePrismaPostgresOptions
-          : never
+          : TDialect extends 'mysql'
+            ? LivePrismaMysqlOptions
+            : never
         : never
     : never;
 
@@ -237,6 +273,16 @@ export interface OrmTestEnvLivePrismaPostgres<TClient = unknown>
   /** Live PrismaClient instance constructed against the testcontainers Postgres. */
   readonly client: TClient;
   /** Connection URI assigned by the testcontainers Postgres instance. */
+  readonly connectionUri: string;
+}
+
+export interface OrmTestEnvLivePrismaMysql<TClient = unknown>
+  extends TestEnvBase<'live'> {
+  readonly orm: 'prisma';
+  readonly dialect: 'mysql';
+  /** Live PrismaClient instance constructed against the testcontainers MySQL. */
+  readonly client: TClient;
+  /** Connection URI assigned by the testcontainers MySQL instance. */
   readonly connectionUri: string;
 }
 
@@ -310,6 +356,7 @@ export type OrmTestEnv<
   | OrmTestEnvLiveMysql<TSchema>
   | OrmTestEnvMockPrisma<TPrismaClient>
   | OrmTestEnvLivePrismaPostgres<TPrismaClient>
+  | OrmTestEnvLivePrismaMysql<TPrismaClient>
   | OrmTestEnvMockKysely<TKyselyDatabase>
   | OrmTestEnvLiveKyselyPostgres<TKyselyDatabase>
   | OrmTestEnvLiveKyselyMysql<TKyselyDatabase>;

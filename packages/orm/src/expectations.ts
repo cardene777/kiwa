@@ -59,7 +59,15 @@ export async function expectQuery<TRow = unknown>(
     expect([...rows]).toEqual(expected);
     return;
   }
-  // live mode (MySQL) — mysql2 `query` returns [rows, fields]. Same for Kysely + Drizzle.
+  // live mode (MySQL).
+  if (env.orm === 'prisma') {
+    // Prisma live MySQL — $queryRawUnsafe routes via PrismaClient.
+    const client = (env as unknown as { client: { $queryRawUnsafe: (sql: string) => Promise<TRow[]> } }).client;
+    const rows = await client.$queryRawUnsafe(sql);
+    expect(rows).toEqual(expected);
+    return;
+  }
+  // mysql2 `query` returns [rows, fields]. Same for Kysely + Drizzle.
   const [rows] = (await ((env as unknown as { raw: import('mysql2/promise').Pool }).raw).query(sql)) as unknown as [TRow[], unknown];
   expect(rows).toEqual(expected);
 }
@@ -104,6 +112,12 @@ export async function expectRowCount(
   }
   // MySQL identifier quoting uses backticks.
   const safe = `\`${String(table).replace(/`/g, '``')}\``;
+  if (env.orm === 'prisma') {
+    const client = (env as unknown as { client: { $queryRawUnsafe: (sql: string) => Promise<Array<{ c: number | bigint }>> } }).client;
+    const rows = await client.$queryRawUnsafe(`SELECT COUNT(*) AS c FROM ${safe}`);
+    expect(Number(rows[0]?.c)).toBe(expected);
+    return;
+  }
   const [rows] = (await ((env as unknown as { raw: import('mysql2/promise').Pool }).raw).query(`SELECT COUNT(*) AS c FROM ${safe}`)) as unknown as [Array<{ c: number | bigint }>, unknown];
   expect(Number(rows[0]?.c)).toBe(expected);
 }

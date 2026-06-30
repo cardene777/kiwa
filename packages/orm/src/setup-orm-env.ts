@@ -12,6 +12,7 @@ import type {
   LiveKyselyPostgresOptions,
   LiveMysqlOptions,
   LivePostgresOptions,
+  LivePrismaMysqlOptions,
   LivePrismaPostgresOptions,
   MigrationSource,
   MockKyselySqliteOptions,
@@ -360,6 +361,119 @@ async function setupLivePrismaPostgres<TClient>(
   };
 }
 
+async function setupLivePrismaMysql<TClient>(
+  opts: LivePrismaMysqlOptions<TClient>,
+): Promise<OrmTestEnv<DrizzleSchema, TClient>> {
+  const { spawnSync } = await import('node:child_process');
+  let containerModule: typeof import('@testcontainers/mysql');
+  try {
+    containerModule = await import('@testcontainers/mysql');
+  } catch (caught) {
+    throw new Error(
+      "@kiwa-test/orm: live Prisma MySQL mode requires '@testcontainers/mysql'. Install with `pnpm add -D @testcontainers/mysql`. Original error: " +
+        (caught instanceof Error ? caught.message : String(caught)),
+    );
+  }
+
+  const image = opts.containerImage ?? 'mysql:8.4';
+  let container: import('@testcontainers/mysql').StartedMySqlContainer;
+  try {
+    container = await new containerModule.MySqlContainer(image).start();
+  } catch (caught) {
+    const msg = caught instanceof Error ? caught.message : String(caught);
+    throw new Error(
+      `@kiwa-test/orm: failed to start MySQL testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
+    );
+  }
+
+  const connectionUri = container.getConnectionUri();
+  const envName = opts.datasourceUrlEnv ?? 'DATABASE_URL';
+  const previousEnv = process.env[envName];
+  process.env[envName] = connectionUri;
+
+  const result = spawnSync(
+    'pnpm',
+    ['exec', 'prisma', 'db', 'push', `--schema=${opts.schemaPath}`, '--skip-generate', '--accept-data-loss'],
+    {
+      stdio: 'pipe',
+      env: { ...process.env, [envName]: connectionUri },
+      encoding: 'utf8',
+    },
+  );
+  if (result.status !== 0) {
+    if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
+    else delete process.env[envName];
+    await container.stop();
+    throw new Error(
+      `@kiwa-test/orm: prisma db push failed against testcontainers MySQL (status=${result.status}). Verify the schema.prisma datasource has provider="mysql" + url = env("${envName}"). stderr=${result.stderr ?? ''}`,
+    );
+  }
+
+  const client = new opts.prismaClient({ datasourceUrl: connectionUri });
+  if (typeof opts.seed === 'function') {
+    await opts.seed(client);
+  }
+
+  return {
+    mode: 'live',
+    orm: 'prisma',
+    dialect: 'mysql',
+    client,
+    connectionUri,
+    stop: async () => {
+      const maybeDisconnect = (client as unknown as { $disconnect?: () => Promise<void> }).$disconnect;
+      if (typeof maybeDisconnect === 'function') {
+        try {
+          await maybeDisconnect.call(client);
+        } catch {
+          /* swallow */
+        }
+      }
+      if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
+      else delete process.env[envName];
+      await container.stop();
+    },
+  };
+}
+
+/**
+ * Apply Kysely folder-based migrations via `kysely.Migrator` + `FileMigrationProvider`.
+ *
+ * Caller's migration folder must contain Kysely `Migration` modules (each
+ * exporting an `up(db)` function and optionally `down(db)`). Migration order
+ * is the alphabetical order of file names — same contract as Kysely's own
+ * `FileMigrationProvider`.
+ */
+async function applyKyselyFolderMigrations(
+  db: import('kysely').Kysely<KyselyDatabase>,
+  folder: string,
+): Promise<void> {
+  const kyselyModule = await import('kysely');
+  const FileMigrationProvider =
+    (kyselyModule as unknown as { FileMigrationProvider?: unknown }).FileMigrationProvider;
+  if (typeof FileMigrationProvider !== 'function') {
+    throw new Error(
+      "@kiwa-test/orm v0.7: kysely FileMigrationProvider is not exposed by the installed kysely build. Ensure kysely >= 0.27 is installed.",
+    );
+  }
+  const fs = await import('node:fs/promises');
+  const path = await import('node:path');
+  const ProviderCtor = FileMigrationProvider as new (props: {
+    fs: typeof fs;
+    path: typeof path;
+    migrationFolder: string;
+  }) => import('kysely').MigrationProvider;
+  const provider = new ProviderCtor({ fs, path, migrationFolder: folder });
+  const migrator = new kyselyModule.Migrator({ db, provider });
+  const { error, results } = await migrator.migrateToLatest();
+  if (typeof error !== 'undefined') {
+    const failed = results?.filter((r) => r.status === 'Error').map((r) => r.migrationName) ?? [];
+    throw new Error(
+      `@kiwa-test/orm v0.7: kysely Migrator.migrateToLatest failed (folder=${folder}, failed=[${failed.join(', ')}]). Original error: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
 async function setupMockKyselySqlite<TDatabase extends KyselyDatabase>(
   opts: MockKyselySqliteOptions<TDatabase>,
 ): Promise<OrmTestEnv<DrizzleSchema, unknown, TDatabase>> {
@@ -372,12 +486,11 @@ async function setupMockKyselySqlite<TDatabase extends KyselyDatabase>(
 
   if (typeof opts.migrations !== 'undefined') {
     if (isFolderMigration(opts.migrations)) {
-      throw new Error(
-        "@kiwa-test/orm v0.5: folder-based migrations are Drizzle-only (drizzle-orm/migrator). Kysely callers should use Kysely's own Migrator class with their FileMigrationProvider.",
-      );
-    }
-    for (const stmt of splitSqlStatements(opts.migrations)) {
-      raw.exec(stmt);
+      await applyKyselyFolderMigrations(db as unknown as import('kysely').Kysely<KyselyDatabase>, opts.migrations.folder);
+    } else {
+      for (const stmt of splitSqlStatements(opts.migrations)) {
+        raw.exec(stmt);
+      }
     }
   }
   if (typeof opts.seed === 'function') {
@@ -431,12 +544,11 @@ async function setupLiveKyselyPostgres<TDatabase extends KyselyDatabase>(
 
   if (typeof opts.migrations !== 'undefined') {
     if (isFolderMigration(opts.migrations)) {
-      throw new Error(
-        "@kiwa-test/orm v0.5: folder-based migrations are Drizzle-only. Kysely callers should use Kysely's own Migrator class.",
-      );
-    }
-    for (const stmt of splitSqlStatements(opts.migrations)) {
-      await raw.query(stmt);
+      await applyKyselyFolderMigrations(db as unknown as import('kysely').Kysely<KyselyDatabase>, opts.migrations.folder);
+    } else {
+      for (const stmt of splitSqlStatements(opts.migrations)) {
+        await raw.query(stmt);
+      }
     }
   }
   if (typeof opts.seed === 'function') {
@@ -511,12 +623,11 @@ async function setupLiveKyselyMysql<TDatabase extends KyselyDatabase>(
 
   if (typeof opts.migrations !== 'undefined') {
     if (isFolderMigration(opts.migrations)) {
-      throw new Error(
-        "@kiwa-test/orm v0.5: folder-based migrations are Drizzle-only. Kysely callers should use Kysely's own Migrator class.",
-      );
-    }
-    for (const stmt of splitSqlStatements(opts.migrations)) {
-      await raw.query(stmt);
+      await applyKyselyFolderMigrations(db as unknown as import('kysely').Kysely<KyselyDatabase>, opts.migrations.folder);
+    } else {
+      for (const stmt of splitSqlStatements(opts.migrations)) {
+        await raw.query(stmt);
+      }
     }
   }
   if (typeof opts.seed === 'function') {
@@ -587,6 +698,10 @@ export function setupOrmEnv<TClient>(
 export function setupOrmEnv<TClient>(
   opts: LivePrismaPostgresOptions<TClient>,
 ): Promise<import('./types.js').OrmTestEnvLivePrismaPostgres<TClient>>;
+// Prisma MySQL overload — testcontainers + caller's PrismaClient.
+export function setupOrmEnv<TClient>(
+  opts: LivePrismaMysqlOptions<TClient>,
+): Promise<import('./types.js').OrmTestEnvLivePrismaMysql<TClient>>;
 // Kysely SQLite overload — `seed` receives Kysely<TDatabase>.
 export function setupOrmEnv<TDatabase extends KyselyDatabase>(
   opts: MockKyselySqliteOptions<TDatabase>,
@@ -607,6 +722,7 @@ export async function setupOrmEnv(
     | LiveMysqlOptions<DrizzleSchema>
     | MockPrismaSqliteOptions<unknown>
     | LivePrismaPostgresOptions<unknown>
+    | LivePrismaMysqlOptions<unknown>
     | MockKyselySqliteOptions<KyselyDatabase>
     | LiveKyselyPostgresOptions<KyselyDatabase>
     | LiveKyselyMysqlOptions<KyselyDatabase>,
@@ -618,8 +734,11 @@ export async function setupOrmEnv(
     if (opts.mode === 'live' && opts.dialect === 'postgres') {
       return setupLivePrismaPostgres(opts);
     }
+    if (opts.mode === 'live' && opts.dialect === 'mysql') {
+      return setupLivePrismaMysql(opts);
+    }
     throw new Error(
-      `@kiwa-test/orm v0.6: prisma adapter supports mode='mock'+dialect='sqlite' and mode='live'+dialect='postgres' (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}'). Prisma + MySQL is a future follow-up.`,
+      `@kiwa-test/orm v0.7: prisma adapter supports mode='mock'+dialect='sqlite', mode='live'+dialect='postgres', and mode='live'+dialect='mysql' (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}').`,
     );
   }
   if (opts.orm === 'kysely') {
@@ -633,12 +752,12 @@ export async function setupOrmEnv(
       return setupLiveKyselyMysql(opts);
     }
     throw new Error(
-      `@kiwa-test/orm v0.4: kysely adapter only supports mock+sqlite / live+postgres / live+mysql (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}').`,
+      `@kiwa-test/orm v0.7: kysely adapter only supports mock+sqlite / live+postgres / live+mysql (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}').`,
     );
   }
   if (opts.orm !== 'drizzle') {
     throw new Error(
-      `@kiwa-test/orm v0.4 only supports orm='drizzle' / 'prisma' / 'kysely' (received '${(opts as { orm: string }).orm}').`,
+      `@kiwa-test/orm v0.7 only supports orm='drizzle' / 'prisma' / 'kysely' (received '${(opts as { orm: string }).orm}').`,
     );
   }
   if (opts.mode === 'mock' && opts.dialect === 'sqlite') {
@@ -651,6 +770,6 @@ export async function setupOrmEnv(
     return setupLiveMysql(opts);
   }
   throw new Error(
-    `@kiwa-test/orm v0.4: unsupported combination mode='${(opts as { mode: string }).mode}' / orm='${(opts as { orm: string }).orm}' / dialect='${(opts as { dialect: string }).dialect}'. See README for the supported matrix.`,
+    `@kiwa-test/orm v0.7: unsupported combination mode='${(opts as { mode: string }).mode}' / orm='${(opts as { orm: string }).orm}' / dialect='${(opts as { dialect: string }).dialect}'. See README for the supported matrix.`,
   );
 }
