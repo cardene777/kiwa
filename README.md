@@ -379,9 +379,9 @@ See [docs/COMPARISON.md](./docs/COMPARISON.md) for the full comparison tables (S
 
 | Runtime | Status | Verification |
 |---|---|---|
-| Node.js 22+ | ✅ primary | Main `release.yml` workflow runs Vitest + coverage + mutation gates |
-| Bun 1.3+ | ✅ supported (v1.2+) | `.github/workflows/test-bun.yml` runs `bunx --bun vitest run` over all 19 packages |
-| Deno 2.x | ✅ supported (v1.2+) | `.github/workflows/test-deno.yml` runs `deno run --allow-all npm:vitest run` over all 19 packages |
+| Node.js 22+ | ✅ primary | local `/verify` skill runs Vitest + coverage + mutation gates pre-merge |
+| Bun 1.3+ | ✅ supported (v1.2+) | local `bunx --bun vitest run` over all 19 packages (`Running tests under Bun locally` 参照) |
+| Deno 2.x | ✅ supported (v1.2+) | local `deno run --allow-all npm:vitest run` over all 19 packages (`Running tests under Deno locally` 参照) |
 | Cloudflare Workers / Vercel Edge | ✅ via [`@kiwa-test/edge`](./packages/edge) | KV mock + `invokeEdgeHandler` (Miniflare 不要) |
 
 ### Running tests under Bun locally
@@ -441,7 +441,7 @@ Override with `--coverage-lines 95 --coverage-branches 85` etc.
 
 ## Quality gates
 
-kiwa enforces **two independent gates** at release time so a publish can't ship without both. Both gates run inside `.github/workflows/release.yml` and fail the publish if any package regresses.
+kiwa enforces **two independent gates** at release time so a publish can't ship without both. Both gates run via local `/verify` skill (pre-merge) and `scripts/check-{coverage,mutation}-gates.mjs` (pre-publish) and fail if any package regresses.
 
 ### Gate 1 — Coverage (`scripts/check-coverage-gates.mjs`)
 
@@ -672,8 +672,8 @@ Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested thro
 | **SolidStart Server Functions + API Routes** | ✅ shipped in v1.0.0 — `/kiwa-solidstart` + `invokeServerFunction` / `invokeApiRoute` | (n/a, fully supported) | [#518](https://github.com/cardene777/kiwa/issues/518) ✅ resolved |
 | **Qwik City routeAction + routeLoader + Endpoints** | ✅ shipped in v1.0.0 — `/kiwa-qwikcity` + `invokeRouteAction` / `invokeRouteLoader` / `invokeEndpoint` | (n/a, fully supported) | [#519](https://github.com/cardene777/kiwa/issues/519) ✅ resolved |
 | **Python pytest adapter (PyPI publish)** | ✅ shipped in v1.0.0 — `pip install kiwa-test-py` | (n/a, fully supported) | [#492](https://github.com/cardene777/kiwa/issues/492) ✅ resolved |
-| **Bun runtime (`bun.sh`)** | ✅ shipped in v1.2 — all 19 packages pass Vitest under Bun via `bunx --bun vitest run` (verified locally + CI workflow `.github/workflows/test-bun.yml`) | (n/a, pnpm install + bunx vitest) | [#520](https://github.com/cardene777/kiwa/issues/520) ✅ resolved |
-| **Deno runtime** | ✅ shipped in v1.2 — all 19 packages pass Vitest under Deno via `deno run --allow-all npm:vitest run` (verified locally + CI workflow `.github/workflows/test-deno.yml`) | (n/a, pnpm install + deno run) | [#521](https://github.com/cardene777/kiwa/issues/521) ✅ resolved |
+| **Bun runtime (`bun.sh`)** | ✅ shipped in v1.2 — all 19 packages pass Vitest under Bun via `bunx --bun vitest run` (verified locally pre-merge via `/verify` skill) | (n/a, pnpm install + bunx vitest) | [#520](https://github.com/cardene777/kiwa/issues/520) ✅ resolved |
+| **Deno runtime** | ✅ shipped in v1.2 — all 19 packages pass Vitest under Deno via `deno run --allow-all npm:vitest run` (verified locally pre-merge via `/verify` skill) | (n/a, pnpm install + deno run) | [#521](https://github.com/cardene777/kiwa/issues/521) ✅ resolved |
 | **Edge runtime (Cloudflare Workers / Vercel Edge)** | ✅ shipped in v1.0.0 — `/kiwa-edge` + `invokeEdgeHandler` + `createKvNamespace` (Miniflare 不要、 pure JS mock) | (n/a, fetch handler + KV fully supported; R2 / D1 / DurableObject は test 側 vi.fn() で対応) | [#522](https://github.com/cardene777/kiwa/issues/522) ✅ resolved |
 | **Desktop (Electron / Tauri) / mobile (React Native / Expo)** | ❌ out of scope | Use platform-native test tooling | not on roadmap |
 | **ORM (Drizzle / Prisma / Kysely) query test layer** | ❌ no dedicated adapter | Use `/kiwa-vitest` + testcontainers | (tracked in v1.2) |
