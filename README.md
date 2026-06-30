@@ -520,7 +520,7 @@ These three examples have **forge test + hardhat test (where applicable) + playw
 |---|---|---|---|
 | [`nuxt-server-routes-full`](./examples/nuxt-server-routes-full) ⭐ | Nuxt 3 + `@kiwa-test/nuxt` v1.0.4+ (3 helper 全 demo) | 20 (Server Routes 8 + route middleware 6 + Nitro plugin 6) | 4 (real `nuxt dev` :3030) |
 | [`sveltekit-full`](./examples/sveltekit-full) ⭐ | SvelteKit 2 + `@kiwa-test/sveltekit` v1.0.x (3 helper 全 demo) | 19 (load 8 + actions 6 + handle 5) | 4 (real `vite dev` :3040) |
-| `examples/remix-full` | (v1.2 #525-3 で追加予定) | — | — |
+| [`remix-full`](./examples/remix-full) ⭐ | Remix v2 + `@kiwa-test/remix` v1.0.x (loader + action + Resource Route + 共通 auth) | 26 (loader 8 + action 7 + resource 6 + auth 5) | 7 (real `remix vite:dev` :3050) |
 | `examples/astro-server-endpoints-full` | (v1.2 #525-4 で追加予定) | — | — |
 | `examples/nextjs-app-router-full` | (v1.2 #525-5 で追加予定) | — | — |
 
