@@ -1,60 +1,80 @@
 // types.ts — public type definitions for @kiwa-test/orm.
 //
-// MVP scope: Drizzle + better-sqlite3 in-memory only (mode = 'mock').
-// Postgres / MySQL via testcontainers + Prisma / Kysely adapters land in
-// follow-up Issues #527-2 .. #527-5.
+// v0.1 (mock + drizzle + sqlite) + v0.2 (live + drizzle + postgres).
+// MySQL / Prisma / Kysely adapters land in follow-up Issues CAR-292.1 / CAR-293 / CAR-294.
 
 import type { TestEnvBase, TestMode } from '@kiwa-test/core';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
-/** ORM brand discriminator. Extensible to 'prisma' / 'kysely' in follow-ups. */
+/** ORM brand discriminator. */
 export type OrmBrand = 'drizzle';
 
-/** SQL dialect. Extensible to 'postgres' / 'mysql' in follow-ups. */
-export type SqlDialect = 'sqlite';
+/** SQL dialect. v0.2 adds 'postgres'. */
+export type SqlDialect = 'sqlite' | 'postgres';
 
-/** Drizzle schema is the object exported from `schema.ts` (table records). */
+/** Drizzle schema = the object exported from `schema.ts` (table records). */
 export type DrizzleSchema = Record<string, unknown>;
 
 /** Drizzle client returned by `drizzle(better-sqlite3 instance, { schema })`. */
 export type DrizzleSqliteDb<TSchema extends DrizzleSchema = DrizzleSchema> =
   BetterSQLite3Database<TSchema>;
 
+/** Drizzle client returned by `drizzle(postgres(uri), { schema })`. */
+export type DrizzlePostgresDb<TSchema extends DrizzleSchema = DrizzleSchema> =
+  PostgresJsDatabase<TSchema>;
+
 /**
  * Migration source — either a raw SQL string or an explicit array of SQL
- * statements. In v0.1 each statement is applied sequentially against the
- * in-memory better-sqlite3 connection; future versions will add Drizzle's
- * own `migrate()` helper from `drizzle-orm/better-sqlite3/migrator` once
- * the example PoC verifies the migration file workflow.
+ * statements. Statements are split on `;` followed by a newline so standard
+ * `CREATE TABLE ...; CREATE INDEX ...;` files parse correctly.
+ *
+ * file-based migrations (drizzle-orm/migrator) land in CAR-295.
  */
 export type MigrationSource = string | ReadonlyArray<string>;
 
-export interface SetupOrmEnvOptions<
-  TMode extends TestMode = 'mock',
-  TOrm extends OrmBrand = 'drizzle',
-  TDialect extends SqlDialect = 'sqlite',
-  TSchema extends DrizzleSchema = DrizzleSchema,
-> {
-  /** Test mode. MVP only accepts 'mock' (in-memory SQLite). */
-  readonly mode: TMode;
-  /** ORM brand. MVP only accepts 'drizzle'. */
-  readonly orm: TOrm;
-  /** SQL dialect. MVP only accepts 'sqlite'. */
-  readonly dialect: TDialect;
-  /** Drizzle schema object — pass the namespace import from your schema file. */
+export interface MockSqliteOptions<TSchema extends DrizzleSchema = DrizzleSchema> {
+  readonly mode: 'mock';
+  readonly orm: 'drizzle';
+  readonly dialect: 'sqlite';
   readonly schema: TSchema;
-  /**
-   * Optional SQL migration source(s). Applied sequentially before `seed`.
-   * Statements are split on semicolons that are followed by a newline so
-   * standard `CREATE TABLE ...; CREATE INDEX ...;` files parse correctly.
-   */
   readonly migrations?: MigrationSource;
-  /**
-   * Optional seed function invoked after migrations. Receives the live
-   * Drizzle client so production-shape inserts can be reused.
-   */
   readonly seed?: (db: DrizzleSqliteDb<TSchema>) => Promise<void> | void;
 }
+
+export interface LivePostgresOptions<TSchema extends DrizzleSchema = DrizzleSchema> {
+  readonly mode: 'live';
+  readonly orm: 'drizzle';
+  readonly dialect: 'postgres';
+  readonly schema: TSchema;
+  readonly migrations?: MigrationSource;
+  readonly seed?: (db: DrizzlePostgresDb<TSchema>) => Promise<void> | void;
+  /** Optional Docker image override. Default `postgres:16-alpine`. */
+  readonly containerImage?: string;
+}
+
+/**
+ * Union of all currently-supported v0.2 configurations.
+ *
+ * Generic parameters (TMode / TOrm / TDialect) are retained so future
+ * adapters can extend the union without breaking type signatures. The
+ * generic form is intentionally less precise; prefer the discrete
+ * `MockSqliteOptions` / `LivePostgresOptions` types when authoring tests.
+ */
+export type SetupOrmEnvOptions<
+  TMode extends TestMode = TestMode,
+  _TOrm extends OrmBrand = 'drizzle',
+  TDialect extends SqlDialect = SqlDialect,
+  TSchema extends DrizzleSchema = DrizzleSchema,
+> = TMode extends 'mock'
+  ? TDialect extends 'sqlite'
+    ? MockSqliteOptions<TSchema>
+    : never
+  : TMode extends 'live'
+    ? TDialect extends 'postgres'
+      ? LivePostgresOptions<TSchema>
+      : never
+    : never;
 
 export interface OrmTestEnvMock<TSchema extends DrizzleSchema = DrizzleSchema>
   extends TestEnvBase<'mock'> {
@@ -65,6 +85,21 @@ export interface OrmTestEnvMock<TSchema extends DrizzleSchema = DrizzleSchema>
   readonly raw: import('better-sqlite3').Database;
 }
 
-/** Discriminated union — extends with live / hybrid variants in follow-ups. */
+export interface OrmTestEnvLive<TSchema extends DrizzleSchema = DrizzleSchema>
+  extends TestEnvBase<'live'> {
+  readonly orm: 'drizzle';
+  readonly dialect: 'postgres';
+  readonly db: DrizzlePostgresDb<TSchema>;
+  /** Raw `postgres` (postgres.js) connection — exposed for `expectQuery` raw-SQL paths. */
+  readonly raw: import('postgres').Sql;
+  /** Connection URI assigned by the testcontainers Postgres instance. */
+  readonly connectionUri: string;
+}
+
+/**
+ * Discriminated union. Tests can narrow with `env.mode === 'mock'` or
+ * `env.dialect === 'postgres'` to access the appropriate client shape.
+ */
 export type OrmTestEnv<TSchema extends DrizzleSchema = DrizzleSchema> =
-  OrmTestEnvMock<TSchema>;
+  | OrmTestEnvMock<TSchema>
+  | OrmTestEnvLive<TSchema>;

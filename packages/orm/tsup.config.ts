@@ -6,7 +6,14 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  external: ['vitest', 'better-sqlite3', 'drizzle-orm'],
+  external: [
+    'vitest',
+    'better-sqlite3',
+    'drizzle-orm',
+    'postgres',
+    'testcontainers',
+    '@testcontainers/postgresql',
+  ],
   outExtension({ format }) {
     return {
       js: format === 'cjs' ? '.cjs' : '.js',

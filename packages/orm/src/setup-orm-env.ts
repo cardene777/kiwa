@@ -1,16 +1,16 @@
-// setup-orm-env.ts — entry point for @kiwa-test/orm v0.1 (Drizzle + SQLite MVP).
+// setup-orm-env.ts — entry point for @kiwa-test/orm.
 //
-// The helper accepts the same shape that future Postgres / MySQL / Prisma /
-// Kysely adapters will accept, so callers can swap `mode` / `orm` / `dialect`
-// without rewriting tests when follow-up issues land.
+// v0.1: Drizzle + better-sqlite3 in-memory (mode='mock' + dialect='sqlite').
+// v0.2: Drizzle + Postgres via testcontainers (mode='live' + dialect='postgres').
+// follow-up: MySQL via testcontainers (CAR-292.1), Prisma (CAR-293), Kysely (CAR-294),
+// file-based migration (CAR-295).
 
-import Database from 'better-sqlite3';
-import { drizzle, type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import type {
   DrizzleSchema,
+  LivePostgresOptions,
   MigrationSource,
+  MockSqliteOptions,
   OrmTestEnv,
-  SetupOrmEnvOptions,
 } from './types.js';
 
 function splitSqlStatements(source: MigrationSource): string[] {
@@ -25,47 +25,24 @@ function splitSqlStatements(source: MigrationSource): string[] {
   return out;
 }
 
-/**
- * Set up an isolated, in-memory ORM test environment.
- *
- * MVP (v0.1): always returns a Drizzle + better-sqlite3 mock environment.
- * Future versions will branch on `opts.mode` / `opts.orm` / `opts.dialect`
- * to dispatch to Postgres / MySQL via testcontainers + Prisma / Kysely
- * adapters. Callers that hard-code those options today will keep working
- * once the dispatch lands because every adapter returns the same
- * `TestEnvBase` shape (mode + stop) plus an ORM-specific `db` handle.
- */
-export async function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
-  opts: SetupOrmEnvOptions<'mock', 'drizzle', 'sqlite', TSchema>,
+async function setupMockSqlite<TSchema extends DrizzleSchema>(
+  opts: MockSqliteOptions<TSchema>,
 ): Promise<OrmTestEnv<TSchema>> {
-  if (opts.mode !== 'mock') {
-    throw new Error(`@kiwa-test/orm v0.1 only supports mode='mock' (received '${opts.mode}'). Postgres / MySQL via testcontainers land in follow-up Issue #527-2.`);
-  }
-  if (opts.orm !== 'drizzle') {
-    throw new Error(`@kiwa-test/orm v0.1 only supports orm='drizzle' (received '${opts.orm}'). Prisma / Kysely adapters land in follow-up Issues #527-3 / #527-4.`);
-  }
-  if (opts.dialect !== 'sqlite') {
-    throw new Error(`@kiwa-test/orm v0.1 only supports dialect='sqlite' (received '${opts.dialect}'). Postgres / MySQL land with the testcontainers follow-up.`);
-  }
+  const { default: Database } = await import('better-sqlite3');
+  const { drizzle } = await import('drizzle-orm/better-sqlite3');
 
   const raw = new Database(':memory:');
-  // Foreign keys are off by default in SQLite; enable so test schemas behave
-  // closer to Postgres / MySQL where FK enforcement is implicit.
   raw.pragma('foreign_keys = ON');
-
-  const db = drizzle(raw, { schema: opts.schema }) as BetterSQLite3Database<TSchema>;
+  const db = drizzle(raw, { schema: opts.schema });
 
   if (typeof opts.migrations !== 'undefined') {
-    const statements = splitSqlStatements(opts.migrations);
-    for (const stmt of statements) {
+    for (const stmt of splitSqlStatements(opts.migrations)) {
       raw.exec(stmt);
     }
   }
-
   if (typeof opts.seed === 'function') {
     await opts.seed(db);
   }
-
   return {
     mode: 'mock',
     orm: 'drizzle',
@@ -76,4 +53,115 @@ export async function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>
       raw.close();
     },
   };
+}
+
+async function setupLivePostgres<TSchema extends DrizzleSchema>(
+  opts: LivePostgresOptions<TSchema>,
+): Promise<OrmTestEnv<TSchema>> {
+  let containerModule: typeof import('@testcontainers/postgresql');
+  let postgresModule: { default?: unknown } & Record<string, unknown>;
+  let drizzleModule: typeof import('drizzle-orm/postgres-js');
+  try {
+    containerModule = await import('@testcontainers/postgresql');
+    // postgres v3.x ships both `default` and named exports; type as a loose
+    // record so we can pick whichever shape the bundler emits.
+    postgresModule = (await import('postgres')) as unknown as { default?: unknown } & Record<string, unknown>;
+    drizzleModule = await import('drizzle-orm/postgres-js');
+  } catch (caught) {
+    throw new Error(
+      "@kiwa-test/orm: live mode requires '@testcontainers/postgresql' + 'postgres' + 'drizzle-orm/postgres-js'. Install with `pnpm add -D @testcontainers/postgresql postgres drizzle-orm`. Original error: " +
+        (caught instanceof Error ? caught.message : String(caught)),
+    );
+  }
+
+  const image = opts.containerImage ?? 'postgres:16-alpine';
+  let container: import('@testcontainers/postgresql').StartedPostgreSqlContainer;
+  try {
+    container = await new containerModule.PostgreSqlContainer(image).start();
+  } catch (caught) {
+    const msg = caught instanceof Error ? caught.message : String(caught);
+    throw new Error(
+      `@kiwa-test/orm: failed to start Postgres testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
+    );
+  }
+
+  const connectionUri = container.getConnectionUri();
+  // postgres.js default ESM export = the factory function. Bundlers may
+  // wrap it under `.default` or expose it directly; handle both.
+  const maybeDefault = postgresModule.default;
+  const sqlFactoryRaw = typeof maybeDefault === 'function' ? maybeDefault : postgresModule;
+  const sqlFactory = sqlFactoryRaw as unknown as (
+    url: string,
+    opts: { max: number; onnotice?: () => void },
+  ) => import('postgres').Sql;
+  const raw = sqlFactory(connectionUri, { max: 4, onnotice: () => undefined });
+  const db = drizzleModule.drizzle(raw, { schema: opts.schema });
+
+  if (typeof opts.migrations !== 'undefined') {
+    for (const stmt of splitSqlStatements(opts.migrations)) {
+      // postgres.js `sql.unsafe` accepts arbitrary DDL and returns a Promise.
+      await raw.unsafe(stmt);
+    }
+  }
+  if (typeof opts.seed === 'function') {
+    await opts.seed(db);
+  }
+
+  return {
+    mode: 'live',
+    orm: 'drizzle',
+    dialect: 'postgres',
+    db,
+    raw,
+    connectionUri,
+    stop: async () => {
+      try {
+        await raw.end({ timeout: 5 });
+      } finally {
+        await container.stop();
+      }
+    },
+  };
+}
+
+/**
+ * Set up an isolated ORM test environment.
+ *
+ * - `mode='mock' + orm='drizzle' + dialect='sqlite'` (v0.1) — in-memory better-sqlite3
+ * - `mode='live' + orm='drizzle' + dialect='postgres'` (v0.2) — testcontainers Postgres
+ *
+ * Other combinations throw a descriptive Error so callers know which
+ * follow-up Issue tracks the missing capability.
+ */
+import type {
+  OrmTestEnvLive as OrmTestEnvLiveT,
+  OrmTestEnvMock as OrmTestEnvMockT,
+} from './types.js';
+
+// Mock SQLite overload — `seed` receives the SQLite client (no union).
+export function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
+  opts: MockSqliteOptions<TSchema>,
+): Promise<OrmTestEnvMockT<TSchema>>;
+// Live Postgres overload — `seed` receives the Postgres client.
+export function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
+  opts: LivePostgresOptions<TSchema>,
+): Promise<OrmTestEnvLiveT<TSchema>>;
+// Implementation signature — accepts the union and dispatches at runtime.
+export async function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
+  opts: MockSqliteOptions<TSchema> | LivePostgresOptions<TSchema>,
+): Promise<OrmTestEnv<TSchema>> {
+  if (opts.orm !== 'drizzle') {
+    throw new Error(
+      `@kiwa-test/orm v0.2 only supports orm='drizzle' (received '${(opts as { orm: string }).orm}'). Prisma / Kysely adapters land in CAR-293 / CAR-294.`,
+    );
+  }
+  if (opts.mode === 'mock' && opts.dialect === 'sqlite') {
+    return setupMockSqlite(opts);
+  }
+  if (opts.mode === 'live' && opts.dialect === 'postgres') {
+    return setupLivePostgres(opts);
+  }
+  throw new Error(
+    `@kiwa-test/orm v0.2: unsupported combination mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}'. Use mode='mock' + dialect='sqlite' (v0.1) or mode='live' + dialect='postgres' (v0.2).`,
+  );
 }

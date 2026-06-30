@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { setupOrmEnv, expectQuery, expectRowCount } from '../src/index.js';
-import type { OrmTestEnv } from '../src/index.js';
+import type { OrmTestEnvMock } from '../src/index.js';
 
 // Drizzle schema for the tests — exercises a text id, indexed unique field,
 // and an integer FK back to the same table to verify FK pragma is on.
@@ -25,7 +25,7 @@ CREATE TABLE users (
 CREATE INDEX users_email_idx ON users(email);
 `;
 
-let env: OrmTestEnv<AppSchema> | null = null;
+let env: OrmTestEnvMock<AppSchema> | null = null;
 
 afterEach(async () => {
   if (env !== null) {
@@ -162,36 +162,16 @@ describe('setupOrmEnv (drizzle + sqlite + in-memory)', () => {
     await envB.stop();
   });
 
-  it('T-ORM-009: rejects mode/orm/dialect outside the v0.1 MVP', async () => {
+  it('T-ORM-009: rejects unsupported orm at runtime (Prisma / Kysely tracked in CAR-293 / CAR-294)', async () => {
     await expect(
-      setupOrmEnv({
-        // @ts-expect-error — v0.1 only accepts 'mock'
-        mode: 'live',
-        orm: 'drizzle',
-        dialect: 'sqlite',
-        schema,
-      }),
-    ).rejects.toThrow(/v0\.1 only supports mode='mock'/);
-
-    await expect(
-      setupOrmEnv({
+      // Cast to bypass overloads — runtime validation is the contract under test.
+      (setupOrmEnv as unknown as (o: unknown) => Promise<unknown>)({
         mode: 'mock',
-        // @ts-expect-error — v0.1 only accepts 'drizzle'
         orm: 'prisma',
         dialect: 'sqlite',
         schema,
       }),
-    ).rejects.toThrow(/v0\.1 only supports orm='drizzle'/);
-
-    await expect(
-      setupOrmEnv({
-        mode: 'mock',
-        orm: 'drizzle',
-        // @ts-expect-error — v0.1 only accepts 'sqlite'
-        dialect: 'postgres',
-        schema,
-      }),
-    ).rejects.toThrow(/v0\.1 only supports dialect='sqlite'/);
+    ).rejects.toThrow(/v0\.2 only supports orm='drizzle'/);
   });
 
   it('T-ORM-010: expectQuery + expectRowCount helpers assert raw SQL state', async () => {
@@ -206,7 +186,7 @@ describe('setupOrmEnv (drizzle + sqlite + in-memory)', () => {
         db.insert(users).values({ id: 2, email: 'b@x', parentId: null }).run();
       },
     });
-    expectRowCount(env, 'users', 2, expect);
-    expectQuery(env, 'SELECT email FROM users ORDER BY id', [{ email: 'a@x' }, { email: 'b@x' }], expect);
+    await expectRowCount(env, 'users', 2, expect);
+    await expectQuery(env, 'SELECT email FROM users ORDER BY id', [{ email: 'a@x' }, { email: 'b@x' }], expect);
   });
 });

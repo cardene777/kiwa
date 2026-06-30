@@ -2,7 +2,8 @@
 //
 // Helpers are framework-agnostic: they accept a Vitest-shaped `expect`
 // argument so test files keep their assertion library intact. The helpers
-// do not throw on their own — they delegate to `expect(...)`.
+// dispatch internally based on `env.mode` so the same assertion call works
+// against both in-memory SQLite (v0.1) and a testcontainers Postgres (v0.2).
 
 import type { OrmTestEnv } from './types.js';
 
@@ -16,35 +17,44 @@ export interface MinimalExpect {
 }
 
 /**
- * Run a raw SQL query against the underlying better-sqlite3 connection and
- * assert that the returned rows deeply equal `expected`. Used when the test
- * wants to verify a query result without committing to a particular Drizzle
- * query shape (helpful for ad-hoc inspection of intermediate state).
- *
- * For type-safe Drizzle assertions, call `env.db.select().from(table).all()`
- * directly and assert with your own expect chain — this helper only exists
- * for raw-SQL convenience.
+ * Run a raw SQL query against the underlying driver and assert that the
+ * returned rows deeply equal `expected`. SQLite mock uses better-sqlite3's
+ * synchronous `prepare(...).all()`; Postgres live uses postgres.js's
+ * tagged template via `sql.unsafe(...)`.
  */
-export function expectQuery<TRow = unknown>(
-  env: Pick<OrmTestEnv, 'raw'>,
+export async function expectQuery<TRow = unknown>(
+  env: OrmTestEnv,
   sql: string,
   expected: ReadonlyArray<TRow>,
   expect: MinimalExpect,
-): void {
-  const rows = env.raw.prepare(sql).all() as TRow[];
-  expect(rows).toEqual(expected);
+): Promise<void> {
+  if (env.mode === 'mock') {
+    const rows = env.raw.prepare(sql).all() as TRow[];
+    expect(rows).toEqual(expected);
+    return;
+  }
+  // live mode (Postgres) — postgres.js returns a thenable Result.
+  const rows = (await env.raw.unsafe(sql)) as unknown as TRow[];
+  expect([...rows]).toEqual(expected);
 }
 
 /** Assert that the row count of `table` equals `expected`. */
-export function expectRowCount(
-  env: Pick<OrmTestEnv, 'raw'>,
+export async function expectRowCount(
+  env: OrmTestEnv,
   table: string,
   expected: number,
   expect: MinimalExpect,
-): void {
-  // SQLite identifier quoting — wrap in double quotes so reserved words +
-  // mixed-case names work. The caller passes the bare table name.
+): Promise<void> {
+  if (env.mode === 'mock') {
+    // SQLite identifier quoting — wrap in double quotes so reserved words +
+    // mixed-case names work. The caller passes the bare table name.
+    const safe = `"${String(table).replace(/"/g, '""')}"`;
+    const row = env.raw.prepare(`SELECT COUNT(*) AS c FROM ${safe}`).get() as { c: number };
+    expect(row.c).toBe(expected);
+    return;
+  }
+  // Postgres — same double-quote identifier quoting works.
   const safe = `"${String(table).replace(/"/g, '""')}"`;
-  const row = env.raw.prepare(`SELECT COUNT(*) AS c FROM ${safe}`).get() as { c: number };
-  expect(row.c).toBe(expected);
+  const rows = (await env.raw.unsafe(`SELECT COUNT(*)::int AS c FROM ${safe}`)) as unknown as Array<{ c: number }>;
+  expect(rows[0]?.c).toBe(expected);
 }

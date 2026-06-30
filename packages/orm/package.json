@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/orm",
-  "version": "0.1.0",
-  "description": "ORM query test adapter for kiwa — setup an in-memory Drizzle + SQLite environment, apply migrations, seed fixtures, and assert query results without a running database (Postgres / MySQL via testcontainers planned for v0.2)",
+  "version": "0.2.0",
+  "description": "ORM query test adapter for kiwa — setup Drizzle environments against either in-memory SQLite (v0.1, mock mode) or a real Postgres started by testcontainers (v0.2, live mode), apply migrations, seed fixtures, and assert query results with consistent shape (MySQL via testcontainers + Prisma + Kysely planned for v0.3)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -12,6 +12,8 @@
     "orm",
     "drizzle",
     "sqlite",
+    "postgres",
+    "testcontainers",
     "query",
     "database",
     "testing"
@@ -62,20 +64,31 @@
     "@kiwa-test/core": "workspace:*"
   },
   "peerDependencies": {
+    "@testcontainers/postgresql": ">=10",
     "better-sqlite3": ">=11",
     "drizzle-orm": ">=0.36",
+    "postgres": ">=3.4",
+    "testcontainers": ">=10",
     "vitest": "^2"
   },
   "peerDependenciesMeta": {
-    "better-sqlite3": { "optional": false },
-    "drizzle-orm": { "optional": false }
+    "@testcontainers/postgresql": { "optional": true },
+    "better-sqlite3": { "optional": true },
+    "drizzle-orm": { "optional": false },
+    "postgres": { "optional": true },
+    "testcontainers": { "optional": true }
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "^10.16.0",
     "@types/better-sqlite3": "^7.6.0",
+    "@types/dockerode": "^3.3.0",
     "@types/node": "^22.10.0",
     "@vitest/coverage-v8": "^2.1.0",
     "better-sqlite3": "^11.7.0",
+    "dockerode": "^4.0.0",
     "drizzle-orm": "^0.36.0",
+    "postgres": "^3.4.0",
+    "testcontainers": "^10.16.0",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
