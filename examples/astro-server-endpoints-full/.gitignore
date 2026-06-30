@@ -1,0 +1,8 @@
+node_modules
+dist
+.vitest-dist
+.astro
+.cache
+test-results
+playwright-report
+playwright/.cache
