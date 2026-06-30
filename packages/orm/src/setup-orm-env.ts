@@ -19,7 +19,11 @@ import type {
   OrmTestEnv,
 } from './types.js';
 
-function splitSqlStatements(source: MigrationSource): string[] {
+function isFolderMigration(source: MigrationSource): source is { readonly folder: string } {
+  return typeof source === 'object' && source !== null && !Array.isArray(source) && typeof (source as { folder?: unknown }).folder === 'string';
+}
+
+function splitSqlStatements(source: Exclude<MigrationSource, { folder: string }>): string[] {
   const sources = typeof source === 'string' ? [source] : source.slice();
   const out: string[] = [];
   for (const block of sources) {
@@ -42,8 +46,13 @@ async function setupMockSqlite<TSchema extends DrizzleSchema>(
   const db = drizzle(raw, { schema: opts.schema });
 
   if (typeof opts.migrations !== 'undefined') {
-    for (const stmt of splitSqlStatements(opts.migrations)) {
-      raw.exec(stmt);
+    if (isFolderMigration(opts.migrations)) {
+      const { migrate } = await import('drizzle-orm/better-sqlite3/migrator');
+      migrate(db, { migrationsFolder: opts.migrations.folder });
+    } else {
+      for (const stmt of splitSqlStatements(opts.migrations)) {
+        raw.exec(stmt);
+      }
     }
   }
   if (typeof opts.seed === 'function') {
@@ -104,9 +113,14 @@ async function setupLivePostgres<TSchema extends DrizzleSchema>(
   const db = drizzleModule.drizzle(raw, { schema: opts.schema });
 
   if (typeof opts.migrations !== 'undefined') {
+    if (isFolderMigration(opts.migrations)) {
+      const { migrate } = await import('drizzle-orm/postgres-js/migrator');
+      await migrate(db, { migrationsFolder: opts.migrations.folder });
+    } else {
     for (const stmt of splitSqlStatements(opts.migrations)) {
       // postgres.js `sql.unsafe` accepts arbitrary DDL and returns a Promise.
       await raw.unsafe(stmt);
+    }
     }
   }
   if (typeof opts.seed === 'function') {
@@ -173,9 +187,14 @@ async function setupLiveMysql<TSchema extends DrizzleSchema>(
   const db = drizzleModule.drizzle(raw, { schema: opts.schema, mode: 'default' });
 
   if (typeof opts.migrations !== 'undefined') {
+    if (isFolderMigration(opts.migrations)) {
+      const { migrate } = await import('drizzle-orm/mysql2/migrator');
+      await migrate(db, { migrationsFolder: opts.migrations.folder });
+    } else {
     for (const stmt of splitSqlStatements(opts.migrations)) {
       // mysql2 `query` accepts arbitrary DDL.
       await raw.query(stmt);
+    }
     }
   }
   if (typeof opts.seed === 'function') {
@@ -276,6 +295,11 @@ async function setupMockKyselySqlite<TDatabase extends KyselyDatabase>(
   const db = new Kysely<TDatabase>({ dialect: new SqliteDialect({ database: raw }) });
 
   if (typeof opts.migrations !== 'undefined') {
+    if (isFolderMigration(opts.migrations)) {
+      throw new Error(
+        "@kiwa-test/orm v0.5: folder-based migrations are Drizzle-only (drizzle-orm/migrator). Kysely callers should use Kysely's own Migrator class with their FileMigrationProvider.",
+      );
+    }
     for (const stmt of splitSqlStatements(opts.migrations)) {
       raw.exec(stmt);
     }
@@ -330,6 +354,11 @@ async function setupLiveKyselyPostgres<TDatabase extends KyselyDatabase>(
   const db = new kyselyModule.Kysely<TDatabase>({ dialect: new kyselyModule.PostgresDialect({ pool: raw }) });
 
   if (typeof opts.migrations !== 'undefined') {
+    if (isFolderMigration(opts.migrations)) {
+      throw new Error(
+        "@kiwa-test/orm v0.5: folder-based migrations are Drizzle-only. Kysely callers should use Kysely's own Migrator class.",
+      );
+    }
     for (const stmt of splitSqlStatements(opts.migrations)) {
       await raw.query(stmt);
     }
@@ -405,6 +434,11 @@ async function setupLiveKyselyMysql<TDatabase extends KyselyDatabase>(
   });
 
   if (typeof opts.migrations !== 'undefined') {
+    if (isFolderMigration(opts.migrations)) {
+      throw new Error(
+        "@kiwa-test/orm v0.5: folder-based migrations are Drizzle-only. Kysely callers should use Kysely's own Migrator class.",
+      );
+    }
     for (const stmt of splitSqlStatements(opts.migrations)) {
       await raw.query(stmt);
     }

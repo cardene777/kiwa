@@ -2,8 +2,8 @@
 name: kiwa-orm
 description: |
   Layer 1 spec (`tests/spec/integration/test-spec-{module}.orm.md`) を ORM query test (Vitest + @kiwa-test/orm) に変換する Layer 2 skill。
-  v0.1-0.2.1 = Drizzle (SQLite mock + Postgres/MySQL testcontainers)、 v0.3 = Prisma + SQLite tempdir、 v0.4 = Kysely (SQLite mock + Postgres/MySQL testcontainers) を対象に `setupOrmEnv` + `expectQuery` + `expectRowCount` を 9 column 表から機械変換する。
-  file-based migration / Prisma + testcontainers 対応は follow-up Issue (CAR-295 / CAR-293 残) で順次拡張。
+  v0.1-0.2.1 = Drizzle (SQLite mock + Postgres/MySQL testcontainers)、 v0.3 = Prisma + SQLite tempdir、 v0.4 = Kysely (SQLite mock + Postgres/MySQL testcontainers)、 v0.5 = file-based migration (drizzle-orm/migrator { folder } 形式) を対象に `setupOrmEnv` + `expectQuery` + `expectRowCount` を 9 column 表から機械変換する。
+  Prisma + testcontainers 対応は follow-up Issue (CAR-293 残) で順次拡張。
 user_invocable: true
 context: conversation
 agent: general-purpose

@@ -178,7 +178,7 @@ Every kiwa surface follows the same `kiwa-design → Layer 2 generator → kiwa-
 | React component | `/kiwa-design --layer ui` | `/kiwa-ui` | `/kiwa-review --layer ui` | `@kiwa-test/ui` |
 | queue / cron / batch | `/kiwa-design --layer data` | `/kiwa-data` | `/kiwa-review --layer data` | `@kiwa-test/data` |
 | CLI / shell / file IO | `/kiwa-design --layer cli` | `/kiwa-cli-test` | `/kiwa-review --layer cli` | `@kiwa-test/cli-test` |
-| ORM query (Drizzle + Prisma + Kysely 全 3 ORM × SQLite mock + Postgres/MySQL testcontainers、 v0.4) | `/kiwa-design --layer orm-query` | `/kiwa-orm` | `/kiwa-review --layer orm-query` | `@kiwa-test/orm` (Prisma + testcontainers / file migration は follow-up Issue CAR-293 残 / CAR-295) |
+| ORM query (Drizzle + Prisma + Kysely 全 3 ORM × SQLite mock + Postgres/MySQL testcontainers + drizzle-orm/migrator folder migration、 v0.5) | `/kiwa-design --layer orm-query` | `/kiwa-orm` | `/kiwa-review --layer orm-query` | `@kiwa-test/orm` (Prisma + testcontainers は follow-up Issue CAR-293 残) |
 
 `/kiwa-test --target {contract|dapp|web|both|all}` orchestrates the chain end-to-end for any subset of surfaces — `web` runs the generic e2e / a11y / visual trio against the same `app/` source, and `all` covers all 6 web-side surfaces (contract + dapp + web). The integrated report at `tests/reports/integrated/{example}-{target}.{lang}.md` aggregates every surface's pass/fail count, coverage, and reviewer score in one table.
 
