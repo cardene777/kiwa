@@ -1,0 +1,83 @@
+{
+  "name": "@kiwa-test/orm",
+  "version": "0.1.0",
+  "description": "ORM query test adapter for kiwa — setup an in-memory Drizzle + SQLite environment, apply migrations, seed fixtures, and assert query results without a running database (Postgres / MySQL via testcontainers planned for v0.2)",
+  "license": "MIT",
+  "author": {
+    "name": "cardene",
+    "url": "https://github.com/cardene777"
+  },
+  "keywords": [
+    "kiwa",
+    "orm",
+    "drizzle",
+    "sqlite",
+    "query",
+    "database",
+    "testing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cardene777/kiwa.git",
+    "directory": "packages/orm"
+  },
+  "homepage": "https://github.com/cardene777/kiwa#readme",
+  "bugs": {
+    "url": "https://github.com/cardene777/kiwa/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/index.js' --coverage.include='.vitest-dist/src/setup-orm-env.js' --coverage.include='.vitest-dist/src/expectations.js' --coverage.exclude='.vitest-dist/tests/**'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "better-sqlite3": ">=11",
+    "drizzle-orm": ">=0.36",
+    "vitest": "^2"
+  },
+  "peerDependenciesMeta": {
+    "better-sqlite3": { "optional": false },
+    "drizzle-orm": { "optional": false }
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "better-sqlite3": "^11.7.0",
+    "drizzle-orm": "^0.36.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
