@@ -10,4 +10,5 @@ members = [
   "kiwa-rs",
   "examples/rust-cargo-poc",
   "examples/rust-axum-poc",
+  "examples/rust-actix-web-poc",
 ]
