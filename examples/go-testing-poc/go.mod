@@ -1,6 +1,6 @@
 module github.com/cardene777/kiwa/examples/go-testing-poc
 
-go 1.21
+go 1.25.0
 
 require github.com/cardene777/kiwa-test-go v0.1.0
 

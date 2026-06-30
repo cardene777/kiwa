@@ -1,8 +1,11 @@
-module github.com/cardene777/kiwa-test-go
+module github.com/cardene777/kiwa/examples/go-gin-poc
 
 go 1.25.0
 
-require github.com/gin-gonic/gin v1.12.0
+require (
+	github.com/cardene777/kiwa-test-go v0.2.0
+	github.com/gin-gonic/gin v1.12.0
+)
 
 require (
 	github.com/bytedance/gopkg v0.1.3 // indirect
@@ -35,3 +38,10 @@ require (
 	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
+
+// Use the in-repo kiwa-test-go module during development, before pkg.go.dev
+// publish (#594 / v1.5 milestone). After `git tag kiwa-go/v0.2.0 && git push --tags`
+// is run on the kiwa repo the replace directive should stay so the example
+// keeps tracking local development. Production users `go mod edit -dropreplace`
+// to verify the published tag resolves.
+replace github.com/cardene777/kiwa-test-go => ../../kiwa-go
