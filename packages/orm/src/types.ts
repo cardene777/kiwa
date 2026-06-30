@@ -93,6 +93,35 @@ export type PrismaClientCtor<TClient = unknown> = new (options?: {
   datasources?: { db: { url: string } };
 }) => TClient;
 
+export interface LivePrismaPostgresOptions<TClient = unknown> {
+  readonly mode: 'live';
+  readonly orm: 'prisma';
+  readonly dialect: 'postgres';
+  /**
+   * The generated `PrismaClient` constructor exported from the caller's
+   * `@prisma/client`. Caller's schema.prisma must use `provider = "postgresql"`.
+   */
+  readonly prismaClient: PrismaClientCtor<TClient>;
+  /**
+   * Path to the schema.prisma file (must have `provider = "postgresql"` +
+   * `url = env("DATABASE_URL")` style datasource).
+   */
+  readonly schemaPath: string;
+  /**
+   * Env var name the schema references. kiwa sets it to the testcontainers
+   * Postgres connection URI before invoking `prisma db push`.
+   */
+  readonly datasourceUrlEnv?: string;
+  /**
+   * Optional seed callback that receives the live PrismaClient instance.
+   */
+  readonly seed?: (client: TClient) => Promise<void> | void;
+  /**
+   * Optional Docker image override. Default `postgres:16-alpine`.
+   */
+  readonly containerImage?: string;
+}
+
 export interface MockPrismaSqliteOptions<TClient = unknown> {
   readonly mode: 'mock';
   readonly orm: 'prisma';
@@ -151,7 +180,11 @@ export type SetupOrmEnvOptions<
         : TDialect extends 'mysql'
           ? LiveMysqlOptions<TSchema>
           : never
-      : never
+      : TOrm extends 'prisma'
+        ? TDialect extends 'postgres'
+          ? LivePrismaPostgresOptions
+          : never
+        : never
     : never;
 
 export interface OrmTestEnvMock<TSchema extends DrizzleSchema = DrizzleSchema>
@@ -195,6 +228,16 @@ export interface OrmTestEnvMockPrisma<TClient = unknown>
   readonly dbPath: string;
   /** `file:` URL form of `dbPath` — same value injected into `datasourceUrlEnv`. */
   readonly datasourceUrl: string;
+}
+
+export interface OrmTestEnvLivePrismaPostgres<TClient = unknown>
+  extends TestEnvBase<'live'> {
+  readonly orm: 'prisma';
+  readonly dialect: 'postgres';
+  /** Live PrismaClient instance constructed against the testcontainers Postgres. */
+  readonly client: TClient;
+  /** Connection URI assigned by the testcontainers Postgres instance. */
+  readonly connectionUri: string;
 }
 
 export interface MockKyselySqliteOptions<TDatabase extends KyselyDatabase = KyselyDatabase> {
@@ -266,6 +309,7 @@ export type OrmTestEnv<
   | OrmTestEnvLive<TSchema>
   | OrmTestEnvLiveMysql<TSchema>
   | OrmTestEnvMockPrisma<TPrismaClient>
+  | OrmTestEnvLivePrismaPostgres<TPrismaClient>
   | OrmTestEnvMockKysely<TKyselyDatabase>
   | OrmTestEnvLiveKyselyPostgres<TKyselyDatabase>
   | OrmTestEnvLiveKyselyMysql<TKyselyDatabase>;
