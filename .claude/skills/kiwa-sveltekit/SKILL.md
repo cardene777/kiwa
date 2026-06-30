@@ -144,11 +144,49 @@ it('{ID} {Observation}', async () => {
 
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.svk-hooks.md`。
 
+## hooks-chain mode (Issue #559、 v1.1+)
+
+`hooks.server.ts` で `sequence(...handles)` を使う chain 構造、 および 4 hook 種 (handle / handleFetch / handleError / locals injection) を 1 env 内で共有する経路を test する。 v1.1 で追加された `setupSvelteKitHooksEnv` + `sequence` API を直接利用する。
+
+### test 観点 (9 column 拡張表)
+
+| ID | Given (env / chain) | When (run*) | Then (response / locals / cookies / order) | 優先度 | E2E | Unit | Mutation | Fuzz | Property |
+|---|---|---|---|---|---|---|---|---|---|
+| H-C-1 | `setupSvelteKitHooksEnv({locals})` + `sequence(h1, h2)` | `runHandle(seq)` | 全 hook 実行 + locals 書込が outer → inner → resolve → inner-after → outer-after の順序で観測 | P0 | - | Vitest | - | - | - |
+| H-C-2 | env locals 注入 + chain 内 handle が locals 書込 | `runHandle(seq)` 2 回 | `env.reset()` で 2 回目は初期状態 / 未 reset なら mutate persist | P0 | - | Vitest | - | - | - |
+| H-C-3 | env + chain 中段で short-circuit (403) | `runHandle(seq)` | inner 後段は呼ばれない + outer after は走る (`response.headers` 付与は実行される) | P0 | - | Vitest | - | - | - |
+| H-C-4 | 同 env で `runHandle` → `runHandleFetch` → `runHandleError` を順次 | 3 連続 invoke | locals / cookies が 3 hook で共有 + `reset` で初期化 | P1 | - | Vitest | - | - | - |
+| H-C-5 | `sequence()` 引数なし (no-op) | `runHandle(seq)` | resolve(event) を直接 invoke + 200 default response | P2 | - | Vitest | - | - | - |
+
+### template
+
+```typescript
+import { describe, expect, it, beforeEach } from 'vitest';
+import { setupSvelteKitHooksEnv, sequence } from '@kiwa-test/sveltekit';
+import { {h1}, {h2} } from '../src/lib/_kiwa/{file}.ts';
+
+describe('{module} hooks chain', () => {
+  it('{T-id} {Given}', async () => {
+    const env = setupSvelteKitHooksEnv<{Locals}>({
+      url: '{url}',
+      cookies: { {seed} },
+      locals: { {seed} },
+    });
+    const { response, resolveCalled, localsAtResolve } = await env.runHandle(
+      sequence<{Locals}>({h1}, {h2}),
+    );
+    {Then 展開}
+  });
+});
+```
+
+出力 path 規約 ... `tests/spec/integration/test-spec-{module}.svk-hooks-chain.md`。
+
 ---
 
 ## 関連
 
-- 上流 ... `/kiwa-design --layer sveltekit-load` / `--layer sveltekit-action` / `--layer sveltekit-handle` / `--layer sveltekit-handle-fetch` / `--layer sveltekit-handle-error`
-- runtime fixture ... `@kiwa-test/sveltekit` v1.0.1+ (`packages/sveltekit/`)
-- 下流 (review) ... `/kiwa-review --layer sveltekit-{load,action,handle,handle-fetch,handle-error}`
+- 上流 ... `/kiwa-design --layer sveltekit-load` / `--layer sveltekit-action` / `--layer sveltekit-handle` / `--layer sveltekit-handle-fetch` / `--layer sveltekit-handle-error` / `--layer sveltekit-hooks-chain`
+- runtime fixture ... `@kiwa-test/sveltekit` v1.1+ (`packages/sveltekit/`、 v1.0.1 は単発 invoke、 v1.1+ は `setupSvelteKitHooksEnv` + `sequence` chain 対応)
+- 下流 (review) ... `/kiwa-review --layer sveltekit-{load,action,handle,handle-fetch,handle-error,hooks-chain}`
 - client component (Svelte) ... `/kiwa-ui` (Svelte mode)

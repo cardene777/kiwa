@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/sveltekit",
-  "version": "1.0.2",
-  "description": "SvelteKit load + form actions + server endpoints test adapter for kiwa — invoke +page.server.ts / +server.ts callbacks in isolation and capture redirect / cookies / response headers without a running SvelteKit dev server (part of the kiwa test framework family)",
+  "version": "1.1.0",
+  "description": "SvelteKit load + form actions + server endpoints + hooks (handle / handleFetch / handleError + sequence chain) test adapter for kiwa — invoke +page.server.ts / +server.ts / hooks.server.ts callbacks in isolation, share locals / cookies across hook chain, and capture redirect / cookies / response headers without a running SvelteKit dev server (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -56,7 +56,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/invoke-load.js' --coverage.include='.vitest-dist/src/invoke-action.js' --coverage.include='.vitest-dist/src/invoke-hooks.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js'",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/invoke-load.js' --coverage.include='.vitest-dist/src/invoke-action.js' --coverage.include='.vitest-dist/src/invoke-hooks.js' --coverage.include='.vitest-dist/src/setup-hooks-env.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js'",
     "test:mutation": "stryker run",
     "typecheck": "tsc --noEmit"
   },

@@ -162,6 +162,12 @@ describe('@kiwa-test/sveltekit surface', () => {
     expect(typeof mod.invokeHandleFetch).toBe('function');
     expect(typeof mod.invokeHandleError).toBe('function');
   });
+
+  it('exports setupSvelteKitHooksEnv + sequence (v1.1+)', async () => {
+    const mod = await import('@kiwa-test/sveltekit');
+    expect(typeof mod.setupSvelteKitHooksEnv).toBe('function');
+    expect(typeof mod.sequence).toBe('function');
+  });
 });
 
 describe('@kiwa-test/remix surface', () => {
