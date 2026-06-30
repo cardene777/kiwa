@@ -1,0 +1,9 @@
+node_modules
+.next
+.vitest-dist
+dist
+out
+test-results
+playwright-report
+playwright/.cache
+next-env.d.ts
