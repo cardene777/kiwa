@@ -21,3 +21,19 @@ export {
   type AstroNotFoundSignal,
   type AstroRewriteSignal,
 } from './render-astro-page.js';
+
+export {
+  setupAstroViewTransitionEnv,
+  type SetupAstroViewTransitionEnvOptions,
+  type AstroViewTransitionEnv,
+  type AstroViewTransitionEvent,
+  type AstroViewTransitionEventPayload,
+  type AstroViewTransitionEventType,
+  type AstroViewTransitionListener,
+  type AstroBeforePreparationEvent,
+  type AstroAfterPreparationEvent,
+  type AstroBeforeSwapEvent,
+  type AstroAfterSwapEvent,
+  type AstroViewTransitionDispatchResult,
+  type AstroViewTransitionDomDiff,
+} from './setup-view-transition-env.js';

@@ -1,5 +1,37 @@
 # @kiwa-test/astro
 
+## 1.1.0
+
+### Minor Changes
+
+- Astro v5 View Transitions API の 4 lifecycle event を 1 env で capture できる test helper を追加 (Issue #560、 v1.3-3).
+
+  ## What's added
+
+  - `setupAstroViewTransitionEnv({ fromPath, toPath, transitionName, navigationType, direction, fromHtml, toHtml, supportsViewTransitions, formData, sourceElement, info })` — 1 度 env を build して 4 lifecycle event (`astro:before-preparation` / `astro:after-preparation` / `astro:before-swap` / `astro:after-swap`) を `dispatchAll()` で順次 dispatch、 個別 event は `dispatch(type)` で単発 invoke 可。 listener は `on(type, listener)` 登録 / `off(type, listener)` 解除。
+  - 公式 router 動作 (Astro v5 / `node_modules/astro/dist/transitions/{router.js,events.js}`) と厳密に整合 ... `supportsViewTransitions` flag は preparation event の dispatch 有無に **影響せず**、 `before-swap.viewTransition` を `undefined` にするだけ (= 視覚 transition の有無のみ表現)。 `after-preparation` / `after-swap` event は plain (`type` のみ、 `from` / `to` / `newDocument` は持たない)。 `before-swap.swap()` は post-listener で **必ず** 1 回呼ばれ、 listener が呼べば計 2 回 (`swapCallCount` で観測可能、 listener が swap を no-op 化したい場合は `event.swap = () => {}`)。
+  - `before-preparation.preventDefault()` で nav cancellation (preparation 中断)、 `loader = async () => {...}` で loader override (公式 `doPreparation` 互換)。
+  - `env.diffDom()` — from-page と to-page の top-level tag 差分 (added / removed / kept) を抽出、 void element (`<img>` / `<br>` / `<hr>` / `<input>` 等 14 種) / 自己終端形 (`<x />`) / HTML comment / DOCTYPE / CDATA を識別する parser、 named view transition (`transition:name`) 起点の DOM 移動を assertion 可能。
+  - 12 type を export — `SetupAstroViewTransitionEnvOptions` / `AstroViewTransitionEnv` / `AstroViewTransitionEvent` / `AstroViewTransitionEventPayload` / `AstroBeforePreparationEvent` / `AstroAfterPreparationEvent` / `AstroBeforeSwapEvent` / `AstroAfterSwapEvent` / `AstroViewTransitionEventType` / `AstroViewTransitionListener` / `AstroViewTransitionDispatchResult` / `AstroViewTransitionDomDiff`.
+
+  ## Coverage
+
+  28 new unit tests (T-AVT-001 .. T-AVT-027 + T-AVT-008-2)、 astro package 全体 coverage `lines 97.92 / branches 91.80 / functions 90.69 / statements 97.92` (gate 90/80/90/90 全クリア)。
+
+  ## Companion
+
+  - skill update (`/kiwa-astro --layer astro-view-transitions` mode 追加、 9 column 表 + template + 11 観点 mapping)
+  - `kiwa-design` / `kiwa-review` の `--layer` enum に `astro-view-transitions` 追加
+  - stryker `mutate` + coverage `--coverage.include` に `setup-view-transition-env.js` 追加
+  - release-smoke `import-surface.test.ts` に v1.1+ export 検証 (`setupAstroViewTransitionEnv`) 追加
+  - PoC ... `examples/astro-server-endpoints-full/src/pages/blog/` に View Transitions 起点 + 遷移先 page 追加、 `tests/view-transitions.test.ts` で `setupAstroViewTransitionEnv` 5 test (unit) + `tests/e2e/astro-view-transitions.spec.ts` で Playwright e2e 3 test (real `<ViewTransitions />`)
+
+  ## Out of scope (separate Issues)
+
+  - Real browser の `document.startViewTransition()` による visual transition (CSS animation / pseudo-element timing) — Playwright e2e で別途 cover。
+  - Astro prefetch event (`astro:before-prefetch`) — 需要次第で別 Issue。
+  - HTML perfect diff (`from.body.innerHTML` vs `to.body.innerHTML` の文字列単位差分) — `env.diffDom()` の top-level tag 比較で大半の use case を cover、 詳細は jsdom / happy-dom を別途 setup して assertion。
+
 ## 1.0.3
 
 ### Patch Changes

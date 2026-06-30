@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/astro",
-  "version": "1.0.3",
-  "description": "Astro Server Endpoints (`pages/api/*.ts`) + `.astro` page SSR test adapter for kiwa — invoke endpoint functions with simulated APIContext and render `.astro` pages with redirect / notFound / rewrite capture without a running Astro dev server (part of the kiwa test framework family)",
+  "version": "1.1.0",
+  "description": "Astro Server Endpoints (`pages/api/*.ts`) + `.astro` page SSR + View Transitions API test adapter for kiwa — invoke endpoint functions with simulated APIContext, render `.astro` pages with redirect / notFound / rewrite capture, and dispatch View Transitions lifecycle events (astro:before-preparation / after-preparation / before-swap / after-swap) without a running Astro dev server (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -15,6 +15,7 @@
     "api",
     "astro-page",
     "ssr",
+    "view-transitions",
     "testing",
     "vitest"
   ],
@@ -57,7 +58,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/invoke-endpoint.js' --coverage.include='.vitest-dist/src/render-astro-page.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js'",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/invoke-endpoint.js' --coverage.include='.vitest-dist/src/render-astro-page.js' --coverage.include='.vitest-dist/src/setup-view-transition-env.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js'",
     "test:mutation": "stryker run",
     "typecheck": "tsc --noEmit"
   },
