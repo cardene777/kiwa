@@ -14,11 +14,13 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 `/kiwa-design --layer nextjs-server-action` または `/kiwa-design --layer nextjs-middleware` が出力した 9 column 表を、 `@kiwa-test/nextjs` v1.0+ の `invokeServerAction` / `invokeMiddleware` を使った Vitest test に機械変換する。
 
-対象は以下 3 mode ...
+対象は以下 5 mode ...
 
 - **Server Actions** (`'use server'` directive) ... `--layer nextjs-server-action`、 `tests/spec/integration/test-spec-{module}.nextjs.md`
 - **middleware.ts** ... `--layer nextjs-middleware` (Issue #495)、 `tests/spec/integration/test-spec-{module}.middleware.md`
 - **React Server Components (RSC)** ... `--layer nextjs-rsc` (Issue #494、 v1.0.3+)、 `tests/spec/integration/test-spec-{module}.rsc.md`
+- **Parallel Routes + Intercepting Routes** ... `--layer nextjs-parallel-route` (Issue #523、 v1.0.4+)、 `tests/spec/integration/test-spec-{module}.parallel.md`
+- **RSC streaming + Suspense boundary** ... `--layer nextjs-rsc-streaming` (Issue #558、 v1.1+)、 `tests/spec/integration/test-spec-{module}.rsc-streaming.md`
 
 ## 前提
 
@@ -275,3 +277,53 @@ it('{ID} {Observation}', async () => {
 | 回帰 | Intercepting Routes 既知 bug 再現 URL → expected variant + distance |
 
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.parallel.md`。
+
+## RSC streaming + Suspense boundary 拡張 (`--layer nextjs-rsc-streaming`、 Issue #558)
+
+RSC streaming chunk + Suspense boundary 遷移を `setupNextRscEnv({ component?, dataSource?, suspenseFallback?, streamingTimeout?, injectError?, props? })` で test する。 既存 `renderServerComponent` (leaf-level + signal capture) の補完で、 streaming + Suspense に焦点を絞る。
+
+### 9 column 拡張表 (`/kiwa-design --layer nextjs-rsc-streaming`)
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-RST-001` 等の連番 |
+| Observation | 観点 (single-chunk / streaming order / Suspense fallback / fallback-only / component throw / mid-stream throw / injectError / streamingTimeout / dataSource precedence 等) |
+| Source | dataSource async generator の identifier (`streamItems()` / `slowSource()`) または component の identifier (`Page` / `ItemsPageRSC`) |
+| Fallback | `suspenseFallback` markup (`<Skeleton />` 相当の RscNode) または `none` |
+| Timeout | `streamingTimeout` (ms、 default 5000)、 `0` は fail-fast |
+| ErrorMode | `none` / `injectError` / `component-throw` / `stream-throw` のいずれか |
+| Then | 期待 (`chunks.length===N` / `chunks[0]===fallback` / `resolved===<Item />` / `errorBoundary?.error.message==='...'` / `timedOut===true`) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+
+### test 生成 template
+
+```ts
+import { setupNextRscEnv, RSC_ERROR_BOUNDARY_SYMBOL } from '@kiwa-test/nextjs';
+import { streamItems, itemsSkeleton } from '../app/items/_kiwa/items-streaming.js';
+
+it('{ID} {Observation}', async () => {
+  const env = await setupNextRscEnv({
+    dataSource: streamItems({Source の引数を展開}),
+    suspenseFallback: itemsSkeleton(),
+    streamingTimeout: {Timeout},
+    {ErrorMode==='injectError' なら injectError: new Error('...') を追加},
+  });
+  {Then を expect(env.chunks).toHaveLength(N) や expect(env.resolved).toEqual(...) 等に展開}
+});
+```
+
+### 11 観点 → setupNextRscEnv mapping
+
+| 観点 | 使い方 |
+|---|---|
+| 正常系 | dataSource yields → `env.errorBoundary===null` + `env.resolved` 一致 |
+| 異常系 | dataSource throw / component throw / injectError → `env.errorBoundary?.error` 検証 |
+| 境界値 | empty stream (yield 0 times) → `env.resolved===null` / `chunks===[fallback]` |
+| 状態遷移 | fallback → resolved 遷移は `chunks[0]===fallback` + `chunks[N-1]===resolved` |
+| 並行処理 | streamingTimeout で wall clock 上限制約、 hung stream に test が止まらない |
+| 入力バリデーション | no component + no dataSource → empty env (`chunks===[]`) |
+| 性能 | streamingTimeout で SLA 上限 enforcement、 `timedOut===true` を assertion |
+| 回帰 | 既知 streaming bug 再現 source → expected chunk 配列 |
+
+出力 path 規約 ... `tests/spec/integration/test-spec-{module}.rsc-streaming.md`。
