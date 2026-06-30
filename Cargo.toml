@@ -1,0 +1,12 @@
+# Cargo workspace root for the kiwa monorepo.
+#
+# kiwa is primarily a TypeScript / Python monorepo; the Rust workspace below
+# is scoped to the polyglot extension landed in v1.4 (Issue #575) and only
+# enumerates the Rust crates. Node / Python packages stay under their own
+# pnpm workspace / setuptools tree.
+[workspace]
+resolver = "2"
+members = [
+  "kiwa-rs",
+  "examples/rust-cargo-poc",
+]
