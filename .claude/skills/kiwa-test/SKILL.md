@@ -28,7 +28,7 @@ $ARGUMENTS
 ## オプション
 
 - `--example {name}` — 対象 example 名 (必須、 `examples/{name}/` を参照)
-- `--target {contract|dapp|web|nextjs|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 3 surface セット (`/kiwa-e2e` + `/kiwa-a11y` + `/kiwa-visual`)、 `nextjs` は Next.js App Router Server Actions (`/kiwa-nextjs`、 Issue #493、 RSC / middleware は #494 / #495)、 `both` は contract + dapp、 `all` は contract + dapp + web + nextjs の 7 surface 全網羅
+- `--target {contract|dapp|web|nextjs|rust|go|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 3 surface セット (`/kiwa-e2e` + `/kiwa-a11y` + `/kiwa-visual`)、 `nextjs` は Next.js App Router Server Actions (`/kiwa-nextjs`、 Issue #493、 RSC / middleware は #494 / #495)、 `rust` は polyglot Rust test 2 layer (rust-unit + rust-integration、 `/kiwa-rust`、 Issue #581 v1.4-6)、 `go` は polyglot Go test 2 layer (go-unit + go-integration、 `/kiwa-go`、 Issue #581 v1.4-6)、 `both` は contract + dapp、 `all` は contract + dapp + web + nextjs + rust + go の 9 surface 全網羅
 - `--runner {foundry|hardhat|both}` — contract test の runner 選択 (省略時は Step 1a で LLM 自動判断 + fallback で AskUserQuestion、 target=dapp 時は無視)
 - `--mode {sequential|parallel}` — target=both 時の実行順 (default `sequential`、 contract → dapp)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 全子 skill に伝播)
@@ -110,6 +110,10 @@ multiSelect: false
   description: "理由 — full coverage check。 contract ($RUNNER) → dApp の順で順次実行 (--mode sequential が default)。 実行時間目安 15-30 分。 ⭐⭐⭐⭐"
 - label: "🌈 6 surface 全網羅 (contract + dApp + web)"
   description: "理由 — 動画 v10 で謳う 11 観点 × 6 surface 完全網羅。 contract / dapp / web (e2e-generic + a11y + visual) を順次実行、 統合 report に 6 surface 全 result を集約。 実行時間目安 25-45 分。 ⭐⭐⭐"
+- label: "🦀 Rust polyglot (rust-unit + rust-integration、 v1.4-6)"
+  description: "理由 — polyglot test toolchain の Rust 経路 (Issue #581)。 kiwa-design (--layer rust-unit / rust-integration) → kiwa-rust → kiwa-review の 3 step、 cargo test + mock_server で 2 layer 同時生成。 実行時間目安 5-10 分。 ⭐⭐⭐⭐"
+- label: "🐹 Go polyglot (go-unit + go-integration、 v1.4-6)"
+  description: "理由 — polyglot test toolchain の Go 経路 (Issue #581)。 kiwa-design (--layer go-unit / go-integration) → kiwa-go → kiwa-review の 3 step、 testing.T + httptest で 2 layer 同時生成。 実行時間目安 5-10 分。 ⭐⭐⭐⭐"
 ```
 
 確定後 `$TARGET` を skill 内変数に保持 (`contract` / `dapp` / `both`)。
@@ -280,6 +284,56 @@ target=web (汎用 web 3 surface セット) または target=all の場合に実
 ```
 
 3 surface の result は Step 5 統合 report の「web (e2e-generic / a11y / visual)」 section に集約する。
+
+### Step 4r: Rust polyglot chain 実行 (target=rust or all、 Issue #581 v1.4-6)
+
+target=rust または target=all の場合に実行する。 cargo project は dApp / web 系と独立しているため Step 3 / 4 / 4w と並走可能 (内部実装で同 example dir を Read するだけ、 file 書込 path は別)。
+
+```text
+[Step 4r-unit-a] /kiwa-design --layer rust-unit --module {example} --input examples/{example}/src/ --lang $DOC_LANG [--no-review]
+  ↓ tests/spec/unit/test-spec-{example}.rs.md Write
+
+[Step 4r-unit-b] /kiwa-rust --module {example} --layer rust-unit --example {example} --lang $DOC_LANG [--no-review]
+  ↓ examples/{example}/tests/{module}.rs 生成 + cargo test 全 PASS + cargo llvm-cov coverage 評価
+  ↓ tests/reports/rust/coverage-report-{example}.{lang}.md Write
+  ↓ kiwa-review --mode test-review --layer rust-unit 自動呼出
+  ↓ tests/reports/review/test-review-{example}.rust-unit.{lang}.md Write
+
+[Step 4r-integration-a] /kiwa-design --layer rust-integration --module {example}-api --input examples/{example}/src/ --lang $DOC_LANG [--no-review]
+  ↓ tests/spec/integration/test-spec-{example}-api.rs.md Write
+
+[Step 4r-integration-b] /kiwa-rust --module {example}-api --layer rust-integration --example {example} --lang $DOC_LANG [--no-review]
+  ↓ examples/{example}/tests/{module}_integration.rs 生成 + cargo test --features integration 全 PASS
+  ↓ kiwa-review --mode test-review --layer rust-integration 自動呼出
+  ↓ tests/reports/review/test-review-{example}-api.rust-integration.{lang}.md Write
+```
+
+cargo project 不在時 (`Cargo.toml` なし) は skip + 統合 report に "skipped (no Cargo.toml)" 明示。
+
+### Step 4g: Go polyglot chain 実行 (target=go or all、 Issue #581 v1.4-6)
+
+target=go または target=all の場合に実行する。 Go module は cargo と独立で並走可能。
+
+```text
+[Step 4g-unit-a] /kiwa-design --layer go-unit --module {example} --input examples/{example}/ --lang $DOC_LANG [--no-review]
+  ↓ tests/spec/unit/test-spec-{example}.go.md Write
+
+[Step 4g-unit-b] /kiwa-go --module {example} --layer go-unit --example {example} --lang $DOC_LANG [--no-review]
+  ↓ examples/{example}/{module}_test.go 生成 + go test 全 PASS + go test -cover coverage 評価
+  ↓ tests/reports/go/coverage-report-{example}.{lang}.md Write
+  ↓ kiwa-review --mode test-review --layer go-unit 自動呼出
+  ↓ tests/reports/review/test-review-{example}.go-unit.{lang}.md Write
+
+[Step 4g-integration-a] /kiwa-design --layer go-integration --module {example}-api --input examples/{example}/ --lang $DOC_LANG [--no-review]
+  ↓ tests/spec/integration/test-spec-{example}-api.go.md Write
+
+[Step 4g-integration-b] /kiwa-go --module {example}-api --layer go-integration --example {example} --lang $DOC_LANG [--no-review]
+  ↓ examples/{example}/integration/{module}_test.go 生成 + go test ./integration 全 PASS
+  ↓ kiwa-review --mode test-review --layer go-integration 自動呼出
+  ↓ tests/reports/review/test-review-{example}-api.go-integration.{lang}.md Write
+```
+
+Go module 不在時 (`go.mod` なし) は skip + 統合 report に "skipped (no go.mod)" 明示。
 
 ### Step 5: 統合 report Write
 
