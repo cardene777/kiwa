@@ -1,0 +1,13 @@
+[package]
+name = "rust-cargo-poc"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "PoC — kiwa-test-rs v0.1 usage example (4 tests covering setup_env / Mode / assert macros). Part of the kiwa polyglot test framework family."
+
+[lib]
+name = "rust_cargo_poc"
+path = "src/lib.rs"
+
+[dev-dependencies]
+kiwa-test-rs = { path = "../../kiwa-rs", version = "0.1" }
