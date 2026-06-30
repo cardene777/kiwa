@@ -1,0 +1,9 @@
+node_modules
+build
+.vitest-dist
+dist
+public/build
+test-results
+playwright-report
+playwright/.cache
+.cache
