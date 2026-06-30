@@ -12,6 +12,7 @@ import type {
   LiveKyselyPostgresOptions,
   LiveMysqlOptions,
   LivePostgresOptions,
+  LivePrismaPostgresOptions,
   MigrationSource,
   MockKyselySqliteOptions,
   MockPrismaSqliteOptions,
@@ -284,6 +285,81 @@ async function setupMockPrismaSqlite<TClient>(
   };
 }
 
+async function setupLivePrismaPostgres<TClient>(
+  opts: LivePrismaPostgresOptions<TClient>,
+): Promise<OrmTestEnv<DrizzleSchema, TClient>> {
+  const { spawnSync } = await import('node:child_process');
+  let containerModule: typeof import('@testcontainers/postgresql');
+  try {
+    containerModule = await import('@testcontainers/postgresql');
+  } catch (caught) {
+    throw new Error(
+      "@kiwa-test/orm: live Prisma Postgres mode requires '@testcontainers/postgresql'. Install with `pnpm add -D @testcontainers/postgresql`. Original error: " +
+        (caught instanceof Error ? caught.message : String(caught)),
+    );
+  }
+
+  const image = opts.containerImage ?? 'postgres:16-alpine';
+  let container: import('@testcontainers/postgresql').StartedPostgreSqlContainer;
+  try {
+    container = await new containerModule.PostgreSqlContainer(image).start();
+  } catch (caught) {
+    const msg = caught instanceof Error ? caught.message : String(caught);
+    throw new Error(
+      `@kiwa-test/orm: failed to start Postgres testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
+    );
+  }
+
+  const connectionUri = container.getConnectionUri();
+  const envName = opts.datasourceUrlEnv ?? 'DATABASE_URL';
+  const previousEnv = process.env[envName];
+  process.env[envName] = connectionUri;
+
+  const result = spawnSync(
+    'pnpm',
+    ['exec', 'prisma', 'db', 'push', `--schema=${opts.schemaPath}`, '--skip-generate', '--accept-data-loss'],
+    {
+      stdio: 'pipe',
+      env: { ...process.env, [envName]: connectionUri },
+      encoding: 'utf8',
+    },
+  );
+  if (result.status !== 0) {
+    if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
+    else delete process.env[envName];
+    await container.stop();
+    throw new Error(
+      `@kiwa-test/orm: prisma db push failed against testcontainers Postgres (status=${result.status}). Verify the schema.prisma datasource has provider="postgresql" + url = env("${envName}"). stderr=${result.stderr ?? ''}`,
+    );
+  }
+
+  const client = new opts.prismaClient({ datasourceUrl: connectionUri });
+  if (typeof opts.seed === 'function') {
+    await opts.seed(client);
+  }
+
+  return {
+    mode: 'live',
+    orm: 'prisma',
+    dialect: 'postgres',
+    client,
+    connectionUri,
+    stop: async () => {
+      const maybeDisconnect = (client as unknown as { $disconnect?: () => Promise<void> }).$disconnect;
+      if (typeof maybeDisconnect === 'function') {
+        try {
+          await maybeDisconnect.call(client);
+        } catch {
+          /* swallow */
+        }
+      }
+      if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
+      else delete process.env[envName];
+      await container.stop();
+    },
+  };
+}
+
 async function setupMockKyselySqlite<TDatabase extends KyselyDatabase>(
   opts: MockKyselySqliteOptions<TDatabase>,
 ): Promise<OrmTestEnv<DrizzleSchema, unknown, TDatabase>> {
@@ -507,6 +583,10 @@ export function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
 export function setupOrmEnv<TClient>(
   opts: MockPrismaSqliteOptions<TClient>,
 ): Promise<OrmTestEnvMockPrismaT<TClient>>;
+// Prisma Postgres overload — testcontainers + caller's PrismaClient.
+export function setupOrmEnv<TClient>(
+  opts: LivePrismaPostgresOptions<TClient>,
+): Promise<import('./types.js').OrmTestEnvLivePrismaPostgres<TClient>>;
 // Kysely SQLite overload — `seed` receives Kysely<TDatabase>.
 export function setupOrmEnv<TDatabase extends KyselyDatabase>(
   opts: MockKyselySqliteOptions<TDatabase>,
@@ -526,6 +606,7 @@ export async function setupOrmEnv(
     | LivePostgresOptions<DrizzleSchema>
     | LiveMysqlOptions<DrizzleSchema>
     | MockPrismaSqliteOptions<unknown>
+    | LivePrismaPostgresOptions<unknown>
     | MockKyselySqliteOptions<KyselyDatabase>
     | LiveKyselyPostgresOptions<KyselyDatabase>
     | LiveKyselyMysqlOptions<KyselyDatabase>,
@@ -534,8 +615,11 @@ export async function setupOrmEnv(
     if (opts.mode === 'mock' && opts.dialect === 'sqlite') {
       return setupMockPrismaSqlite(opts);
     }
+    if (opts.mode === 'live' && opts.dialect === 'postgres') {
+      return setupLivePrismaPostgres(opts);
+    }
     throw new Error(
-      `@kiwa-test/orm v0.4: prisma adapter currently only supports mode='mock' + dialect='sqlite' (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}'). Postgres / MySQL via Prisma + testcontainers ships in CAR-293 follow-up.`,
+      `@kiwa-test/orm v0.6: prisma adapter supports mode='mock'+dialect='sqlite' and mode='live'+dialect='postgres' (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}'). Prisma + MySQL is a future follow-up.`,
     );
   }
   if (opts.orm === 'kysely') {

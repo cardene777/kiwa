@@ -17,9 +17,10 @@ ORM query test adapter for kiwa.
 - **v0.2.1** — Drizzle ORM + MySQL via testcontainers.
 - **v0.3** — Prisma + tempdir SQLite + `prisma db push`.
 - **v0.4** — Kysely query builder across SQLite (in-memory) + Postgres / MySQL (testcontainers).
-- **v0.5** (this release) — file-based migration via `drizzle-orm/migrator` (`migrations: { folder }`). Drizzle-only.
+- **v0.5** — file-based migration via `drizzle-orm/migrator` (`migrations: { folder }`).
+- **v0.6** (this release) — Prisma + testcontainers Postgres (`mode: 'live' + orm: 'prisma' + dialect: 'postgres'`). **v1.2 ORM milestone (CAR-291 #527) 完遂版**。
 
-**Roadmap** — Prisma + testcontainers Postgres/MySQL (rest of CAR-293).
+**Roadmap** — Prisma + MySQL testcontainers (future follow-up).
 
 ## Install
 
@@ -90,10 +91,11 @@ await env.stop(); // closes pool + stops container
 | `'live'` | `'drizzle'` | `'postgres'` | v0.2 — testcontainers Postgres |
 | `'live'` | `'drizzle'` | `'mysql'` | v0.2.1 — testcontainers MySQL |
 | `'mock'` | `'prisma'` | `'sqlite'` | v0.3 — tempdir SQLite + `prisma db push` |
-| `'mock'` | `'kysely'` | `'sqlite'` | v0.4 — in-memory better-sqlite3 (this release) |
-| `'live'` | `'kysely'` | `'postgres'` | v0.4 — testcontainers Postgres + pg (this release) |
-| `'live'` | `'kysely'` | `'mysql'` | v0.4 — testcontainers MySQL + mysql2 (this release) |
-| `'live'` | `'prisma'` | `'postgres'` / `'mysql'` | follow-up (CAR-293 残) |
+| `'mock'` | `'kysely'` | `'sqlite'` | v0.4 — in-memory better-sqlite3 |
+| `'live'` | `'kysely'` | `'postgres'` | v0.4 — testcontainers Postgres + pg |
+| `'live'` | `'kysely'` | `'mysql'` | v0.4 — testcontainers MySQL + mysql2 |
+| `'live'` | `'prisma'` | `'postgres'` | v0.6 — testcontainers Postgres + prisma db push (this release) |
+| `'live'` | `'prisma'` | `'mysql'` | future follow-up |
 
 Common options:
 

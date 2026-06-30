@@ -1,0 +1,29 @@
+// Prisma schema for the orm-prisma-postgres-poc.
+// provider = "postgresql" + url = env("DATABASE_URL") の testcontainers 経路。
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int    @id @default(autoincrement())
+  email       String @unique
+  displayName String @map("display_name")
+  posts       Post[]
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  authorId  Int     @map("author_id")
+  title     String
+  published Boolean @default(false)
+  author    User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+}
