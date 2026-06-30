@@ -4,13 +4,16 @@ export type {
   DrizzleSchema,
   DrizzleSqliteDb,
   DrizzlePostgresDb,
+  DrizzleMysqlDb,
   MigrationSource,
   MockSqliteOptions,
   LivePostgresOptions,
+  LiveMysqlOptions,
   SetupOrmEnvOptions,
   OrmTestEnv,
   OrmTestEnvMock,
   OrmTestEnvLive,
+  OrmTestEnvLiveMysql,
 } from './types.js';
 
 export { setupOrmEnv } from './setup-orm-env.js';

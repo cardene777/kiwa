@@ -7,6 +7,7 @@
 
 import type {
   DrizzleSchema,
+  LiveMysqlOptions,
   LivePostgresOptions,
   MigrationSource,
   MockSqliteOptions,
@@ -124,17 +125,88 @@ async function setupLivePostgres<TSchema extends DrizzleSchema>(
   };
 }
 
+async function setupLiveMysql<TSchema extends DrizzleSchema>(
+  opts: LiveMysqlOptions<TSchema>,
+): Promise<OrmTestEnv<TSchema>> {
+  let containerModule: typeof import('@testcontainers/mysql');
+  let mysql2Module: { default?: unknown } & Record<string, unknown>;
+  let drizzleModule: typeof import('drizzle-orm/mysql2');
+  try {
+    containerModule = await import('@testcontainers/mysql');
+    mysql2Module = (await import('mysql2/promise')) as unknown as { default?: unknown } & Record<string, unknown>;
+    drizzleModule = await import('drizzle-orm/mysql2');
+  } catch (caught) {
+    throw new Error(
+      "@kiwa-test/orm: live MySQL mode requires '@testcontainers/mysql' + 'mysql2' + 'drizzle-orm/mysql2'. Install with `pnpm add -D @testcontainers/mysql mysql2 drizzle-orm`. Original error: " +
+        (caught instanceof Error ? caught.message : String(caught)),
+    );
+  }
+
+  const image = opts.containerImage ?? 'mysql:8.4';
+  let container: import('@testcontainers/mysql').StartedMySqlContainer;
+  try {
+    container = await new containerModule.MySqlContainer(image).start();
+  } catch (caught) {
+    const msg = caught instanceof Error ? caught.message : String(caught);
+    throw new Error(
+      `@kiwa-test/orm: failed to start MySQL testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
+    );
+  }
+
+  const connectionUri = container.getConnectionUri();
+  // mysql2/promise exposes `createPool` either as a named export or under
+  // `.default.createPool` depending on the bundler; handle both.
+  const directCreatePool = (mysql2Module as unknown as { createPool?: unknown }).createPool;
+  const defaultExport = (mysql2Module as unknown as { default?: { createPool?: unknown } }).default;
+  const createPoolFn = (typeof directCreatePool === 'function' ? directCreatePool : defaultExport?.createPool) as unknown as (
+    uri: string,
+  ) => import('mysql2/promise').Pool;
+  if (typeof createPoolFn !== 'function') {
+    throw new Error('@kiwa-test/orm: could not resolve mysql2/promise createPool export.');
+  }
+  const raw = createPoolFn(connectionUri);
+  const db = drizzleModule.drizzle(raw, { schema: opts.schema, mode: 'default' });
+
+  if (typeof opts.migrations !== 'undefined') {
+    for (const stmt of splitSqlStatements(opts.migrations)) {
+      // mysql2 `query` accepts arbitrary DDL.
+      await raw.query(stmt);
+    }
+  }
+  if (typeof opts.seed === 'function') {
+    await opts.seed(db);
+  }
+
+  return {
+    mode: 'live',
+    orm: 'drizzle',
+    dialect: 'mysql',
+    db,
+    raw,
+    connectionUri,
+    stop: async () => {
+      try {
+        await raw.end();
+      } finally {
+        await container.stop();
+      }
+    },
+  };
+}
+
 /**
  * Set up an isolated ORM test environment.
  *
  * - `mode='mock' + orm='drizzle' + dialect='sqlite'` (v0.1) — in-memory better-sqlite3
  * - `mode='live' + orm='drizzle' + dialect='postgres'` (v0.2) — testcontainers Postgres
+ * - `mode='live' + orm='drizzle' + dialect='mysql'` (v0.2.1) — testcontainers MySQL
  *
  * Other combinations throw a descriptive Error so callers know which
  * follow-up Issue tracks the missing capability.
  */
 import type {
   OrmTestEnvLive as OrmTestEnvLiveT,
+  OrmTestEnvLiveMysql as OrmTestEnvLiveMysqlT,
   OrmTestEnvMock as OrmTestEnvMockT,
 } from './types.js';
 
@@ -146,13 +218,17 @@ export function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
 export function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
   opts: LivePostgresOptions<TSchema>,
 ): Promise<OrmTestEnvLiveT<TSchema>>;
+// Live MySQL overload — `seed` receives the MySQL client.
+export function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
+  opts: LiveMysqlOptions<TSchema>,
+): Promise<OrmTestEnvLiveMysqlT<TSchema>>;
 // Implementation signature — accepts the union and dispatches at runtime.
 export async function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(
-  opts: MockSqliteOptions<TSchema> | LivePostgresOptions<TSchema>,
+  opts: MockSqliteOptions<TSchema> | LivePostgresOptions<TSchema> | LiveMysqlOptions<TSchema>,
 ): Promise<OrmTestEnv<TSchema>> {
   if (opts.orm !== 'drizzle') {
     throw new Error(
-      `@kiwa-test/orm v0.2 only supports orm='drizzle' (received '${(opts as { orm: string }).orm}'). Prisma / Kysely adapters land in CAR-293 / CAR-294.`,
+      `@kiwa-test/orm v0.2.1 only supports orm='drizzle' (received '${(opts as { orm: string }).orm}'). Prisma / Kysely adapters land in CAR-293 / CAR-294.`,
     );
   }
   if (opts.mode === 'mock' && opts.dialect === 'sqlite') {
@@ -161,7 +237,10 @@ export async function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>
   if (opts.mode === 'live' && opts.dialect === 'postgres') {
     return setupLivePostgres(opts);
   }
+  if (opts.mode === 'live' && opts.dialect === 'mysql') {
+    return setupLiveMysql(opts);
+  }
   throw new Error(
-    `@kiwa-test/orm v0.2: unsupported combination mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}'. Use mode='mock' + dialect='sqlite' (v0.1) or mode='live' + dialect='postgres' (v0.2).`,
+    `@kiwa-test/orm v0.2.1: unsupported combination mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}'. Use mode='mock' + dialect='sqlite' (v0.1), mode='live' + dialect='postgres' (v0.2), or mode='live' + dialect='mysql' (v0.2.1).`,
   );
 }

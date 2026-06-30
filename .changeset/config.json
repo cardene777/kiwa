@@ -41,6 +41,7 @@
     "examples-astro-server-endpoints-full",
     "examples-nextjs-app-router-full",
     "examples-orm-drizzle-sqlite-poc",
-    "examples-orm-drizzle-postgres-poc"
+    "examples-orm-drizzle-postgres-poc",
+    "examples-orm-drizzle-mysql-poc"
   ]
 }

@@ -171,7 +171,7 @@ describe('setupOrmEnv (drizzle + sqlite + in-memory)', () => {
         dialect: 'sqlite',
         schema,
       }),
-    ).rejects.toThrow(/v0\.2 only supports orm='drizzle'/);
+    ).rejects.toThrow(/v0\.2\.1 only supports orm='drizzle'/);
   });
 
   it('T-ORM-010: expectQuery + expectRowCount helpers assert raw SQL state', async () => {

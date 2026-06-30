@@ -13,9 +13,10 @@ ORM query test adapter for kiwa.
 `@kiwa-test/orm` provides deterministic primitives for testing ORM-backed query layers.
 
 - **v0.1** — Drizzle ORM + in-memory SQLite (`mode: 'mock'`). Fast, Docker-free, type-safe.
-- **v0.2** (this release) — Drizzle ORM + Postgres via testcontainers (`mode: 'live'`). Real SQL dialect parity, real FK / UNIQUE semantics, isolated container per env.
+- **v0.2** — Drizzle ORM + Postgres via testcontainers (`mode: 'live' + dialect: 'postgres'`). Real SQL dialect parity.
+- **v0.2.1** (this release) — Drizzle ORM + MySQL via testcontainers (`mode: 'live' + dialect: 'mysql'`). Real InnoDB FK + collation semantics.
 
-**Roadmap** — MySQL via testcontainers (rest of CAR-292), Prisma adapter (CAR-293), Kysely adapter (CAR-294), file-based migration (CAR-295).
+**Roadmap** — Prisma adapter (CAR-293), Kysely adapter (CAR-294), file-based migration (CAR-295).
 
 ## Install
 
@@ -83,9 +84,9 @@ await env.stop(); // closes pool + stops container
 | `mode` | `orm` | `dialect` | Notes |
 |---|---|---|---|
 | `'mock'` | `'drizzle'` | `'sqlite'` | v0.1 — in-memory better-sqlite3 |
-| `'live'` | `'drizzle'` | `'postgres'` | v0.2 — testcontainers Postgres (this release) |
-| `'live'` | `'drizzle'` | `'mysql'` | follow-up |
-| `*` | `'prisma'` / `'kysely'` | `*` | follow-up |
+| `'live'` | `'drizzle'` | `'postgres'` | v0.2 — testcontainers Postgres |
+| `'live'` | `'drizzle'` | `'mysql'` | v0.2.1 — testcontainers MySQL (this release) |
+| `*` | `'prisma'` / `'kysely'` | `*` | follow-up (CAR-293 / CAR-294) |
 
 Common options:
 
@@ -110,10 +111,10 @@ Asserts that the row count of `table` equals `expected`.
 
 Production code stays thin around the ORM client; tests inject a fresh `setupOrmEnv` per test (isolation by default). Swapping `'mock'` → `'live'` in CI keeps the test API identical — only the dialect-specific SQL and error patterns differ.
 
-## Limitations (v0.2)
+## Limitations (v0.2.1)
 
 - Only Drizzle ORM is supported. Prisma / Kysely land in CAR-293 / CAR-294.
-- Only `mock + sqlite` and `live + postgres` combinations are accepted. MySQL via testcontainers lands in the rest of CAR-292.
+- Accepted combinations: `mock + sqlite`, `live + postgres`, `live + mysql`. Other ORMs / dialects throw a descriptive Error.
 - Migrations are SQL strings split on `;` followed by newline. File-based migrations (drizzle-orm/migrator) land in CAR-295.
 - live mode requires a Docker daemon. CI runners that disable Docker should restrict their suite to `mode: 'mock'`.
 

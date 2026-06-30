@@ -6,12 +6,13 @@
 import type { TestEnvBase, TestMode } from '@kiwa-test/core';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import type { MySql2Database } from 'drizzle-orm/mysql2';
 
 /** ORM brand discriminator. */
 export type OrmBrand = 'drizzle';
 
-/** SQL dialect. v0.2 adds 'postgres'. */
-export type SqlDialect = 'sqlite' | 'postgres';
+/** SQL dialect. v0.2.1 adds 'mysql'. */
+export type SqlDialect = 'sqlite' | 'postgres' | 'mysql';
 
 /** Drizzle schema = the object exported from `schema.ts` (table records). */
 export type DrizzleSchema = Record<string, unknown>;
@@ -23,6 +24,10 @@ export type DrizzleSqliteDb<TSchema extends DrizzleSchema = DrizzleSchema> =
 /** Drizzle client returned by `drizzle(postgres(uri), { schema })`. */
 export type DrizzlePostgresDb<TSchema extends DrizzleSchema = DrizzleSchema> =
   PostgresJsDatabase<TSchema>;
+
+/** Drizzle client returned by `drizzle(mysql2Pool, { schema, mode: 'default' })`. */
+export type DrizzleMysqlDb<TSchema extends DrizzleSchema = DrizzleSchema> =
+  MySql2Database<TSchema>;
 
 /**
  * Migration source — either a raw SQL string or an explicit array of SQL
@@ -53,6 +58,17 @@ export interface LivePostgresOptions<TSchema extends DrizzleSchema = DrizzleSche
   readonly containerImage?: string;
 }
 
+export interface LiveMysqlOptions<TSchema extends DrizzleSchema = DrizzleSchema> {
+  readonly mode: 'live';
+  readonly orm: 'drizzle';
+  readonly dialect: 'mysql';
+  readonly schema: TSchema;
+  readonly migrations?: MigrationSource;
+  readonly seed?: (db: DrizzleMysqlDb<TSchema>) => Promise<void> | void;
+  /** Optional Docker image override. Default `mysql:8.4`. */
+  readonly containerImage?: string;
+}
+
 /**
  * Union of all currently-supported v0.2 configurations.
  *
@@ -73,7 +89,9 @@ export type SetupOrmEnvOptions<
   : TMode extends 'live'
     ? TDialect extends 'postgres'
       ? LivePostgresOptions<TSchema>
-      : never
+      : TDialect extends 'mysql'
+        ? LiveMysqlOptions<TSchema>
+        : never
     : never;
 
 export interface OrmTestEnvMock<TSchema extends DrizzleSchema = DrizzleSchema>
@@ -96,10 +114,22 @@ export interface OrmTestEnvLive<TSchema extends DrizzleSchema = DrizzleSchema>
   readonly connectionUri: string;
 }
 
+export interface OrmTestEnvLiveMysql<TSchema extends DrizzleSchema = DrizzleSchema>
+  extends TestEnvBase<'live'> {
+  readonly orm: 'drizzle';
+  readonly dialect: 'mysql';
+  readonly db: DrizzleMysqlDb<TSchema>;
+  /** Raw `mysql2` Pool — exposed for `expectQuery` raw-SQL paths. */
+  readonly raw: import('mysql2/promise').Pool;
+  /** Connection URI assigned by the testcontainers MySQL instance. */
+  readonly connectionUri: string;
+}
+
 /**
- * Discriminated union. Tests can narrow with `env.mode === 'mock'` or
- * `env.dialect === 'postgres'` to access the appropriate client shape.
+ * Discriminated union. Tests narrow with `env.mode` or `env.dialect` to access
+ * the appropriate Drizzle / raw driver shape.
  */
 export type OrmTestEnv<TSchema extends DrizzleSchema = DrizzleSchema> =
   | OrmTestEnvMock<TSchema>
-  | OrmTestEnvLive<TSchema>;
+  | OrmTestEnvLive<TSchema>
+  | OrmTestEnvLiveMysql<TSchema>;
