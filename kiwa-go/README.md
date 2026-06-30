@@ -13,12 +13,16 @@ go get github.com/cardene777/kiwa-test-go@v0.2.0
 
 # Gin adapter (opt-in subpackage, pulls gin as a transitive dep)
 go get github.com/cardene777/kiwa-test-go/gin@v0.2.0
+
+# Echo adapter (opt-in subpackage, pulls echo/v4 as a transitive dep)
+go get github.com/cardene777/kiwa-test-go/echo@v0.2.0
 ```
 
 Requires Go >= 1.25 from v0.2 onwards (gin v1.12 raised the floor; the
 core unit + integration helpers themselves still need only the standard
 library). The core package keeps zero runtime dependencies — only the
-optional `gin` subpackage pulls gin into your test binary.
+optional `gin` / `echo` subpackages pull their respective framework
+into your test binary.
 
 ## Usage
 
@@ -186,6 +190,65 @@ Gin handler under test can call out to a kiwa mock for upstream traffic
 and both recorders capture independently (see
 [`gin/gin_test.go`](gin/gin_test.go) `TestInteropWithKiwaMockServer`).
 
+### `kiwa_echo.NewTestServer(t, e)` — Echo web framework adapter (v0.2)
+
+Wraps `*echo.Echo` in a `TestServer` that drives requests **in-process**
+through `e.ServeHTTP` — same trade-off as the Gin adapter (no real port,
+no `TIME_WAIT` flakiness, no parallel `go test` port clashes). Mirrors
+the Rust `kiwa::axum::test_app` API and the Gin adapter contract so the
+same Layer 1 spec compiles to Go (Echo / Gin) and Rust (axum) test files.
+
+```go
+import (
+    "io"
+    "net/http"
+    "testing"
+
+    "github.com/labstack/echo/v4"
+
+    "github.com/cardene777/kiwa-test-go"
+    kiwa_echo "github.com/cardene777/kiwa-test-go/echo"
+)
+
+func TestHealth(t *testing.T) {
+    e := echo.New()
+    e.HideBanner = true
+    e.HidePort = true
+    e.Logger.SetOutput(io.Discard)
+    e.GET("/health", func(c echo.Context) error {
+        return c.String(http.StatusOK, "ok")
+    })
+
+    srv := kiwa_echo.NewTestServer(t, e)
+    resp := srv.Request(kiwa.MethodGET, "/health").Send()
+    kiwa.AssertEqual(t, resp.StatusCode(), 200)
+    kiwa.AssertEqual(t, resp.BodyString(), "ok")
+}
+```
+
+Contract.
+
+- `kiwa_echo.NewTestServer(t, e)` accepts any `*echo.Echo` (built via
+  `echo.New()`) and registers `t.Cleanup` for harness release.
+- `srv.Request(method, path).Header(k, v).Body(b).JSON(b).Send()` is the
+  typed request builder. The chainable shape mirrors v1.4
+  `kiwa.NewMockServer` and the `kiwa_gin` adapter so polyglot specs
+  read the same.
+- `*Response` exposes `StatusCode() / Headers() / Body() / BodyString() /
+  JSON(target)` — buffered up-front so assertions stay race-free.
+- `srv.RecordedRequests()` returns `[]kiwa.RecordedRequest` (the v1.4
+  shape, re-exported) so the recorder is identical across the three
+  adapters (`kiwa.NewMockServer` / `kiwa_gin` / `kiwa_echo`).
+- The adapter does **not** mutate echo globals — silence the access /
+  error logger per instance via `e.Logger.SetOutput(io.Discard)` (and
+  `e.HideBanner = true` / `e.HidePort = true`) once in your test
+  package init if you want a quiet `go test` log.
+
+`kiwa_echo.NewTestServer` composes with v1.4 `kiwa.NewMockServer`: the
+Echo handler under test can call out to a kiwa mock for upstream traffic
+and both recorders capture independently (see
+[`echo/echo_test.go`](echo/echo_test.go) `TestInteropWithKiwaMockServer`).
+
 ### Differentiation vs raw `net/http/httptest`
 
 `httptest.NewServer` is already a correct, minimal wrapper around
@@ -220,12 +283,14 @@ same helpers can be reused in benchmarks and fuzz tests without rewrite.
 - v0.1 integration (shipped) — `NewMockServer` + `Route` table +
   `RecordedRequest` recorder + 404 fallback for unmatched routes, shipped
   via Issue [#579](https://github.com/cardene777/kiwa/issues/579).
-- v0.2 Gin adapter (this release) — `kiwa_gin.NewTestServer` +
+- v0.2 Gin adapter (shipped) — `kiwa_gin.NewTestServer` +
   in-process `engine.ServeHTTP` driver + typed Request / Response
   builders + `kiwa.RecordedRequest` recorder, shipped via Issue
   [#594](https://github.com/cardene777/kiwa/issues/594).
-- v0.2 Echo adapter (next) — `kiwa_echo.NewTestServer` (Issue
-  [#595](https://github.com/cardene777/kiwa/issues/595)).
+- v0.2 Echo adapter (this release) — `kiwa_echo.NewTestServer` +
+  in-process `e.ServeHTTP` driver + typed Request / Response builders
+  + `kiwa.RecordedRequest` recorder, shipped via Issue
+  [#595](https://github.com/cardene777/kiwa/issues/595).
 - v0.3+ — Layer 1 spec → `_test.go` codegen polyglot expansion and Layer
   2 `kiwa-go` skill chain (Issue
   [#581](https://github.com/cardene777/kiwa/issues/581)).
@@ -236,6 +301,7 @@ same helpers can be reused in benchmarks and fuzz tests without rewrite.
 - Parent v1.4 milestone — [#575](https://github.com/cardene777/kiwa/issues/575)
 - PoC (unit + integration) — [`examples/go-testing-poc/`](../examples/go-testing-poc)
 - PoC (Gin Counter API) — [`examples/go-gin-poc/`](../examples/go-gin-poc)
+- PoC (Echo Counter API) — [`examples/go-echo-poc/`](../examples/go-echo-poc)
 - TypeScript core — [`@kiwa-test/core`](../packages/core)
 - Rust sibling — [`kiwa-test-rs`](../kiwa-rs)
 - Python sibling — [`kiwa-test-py`](../kiwa-py)
