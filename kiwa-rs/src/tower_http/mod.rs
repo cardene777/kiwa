@@ -4,7 +4,7 @@
 //!
 //! ## Contract
 //!
-//! - [`test_chain(layers, router)`] applies a tower [`ServiceBuilder`] layer
+//! - [`test_chain`] applies a tower `ServiceBuilder` layer
 //!   stack to the supplied axum [`Router`] via [`axum::Router::layer`], then
 //!   hands the layered Router to [`crate::axum::test_app`] so callers get the
 //!   same [`TestApp`] surface (identical `request()` / `send()` /

@@ -11,4 +11,5 @@ members = [
   "examples/rust-cargo-poc",
   "examples/rust-axum-poc",
   "examples/rust-actix-web-poc",
+  "examples/rust-tower-http-poc",
 ]
