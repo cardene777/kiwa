@@ -26,6 +26,9 @@
 //!   `oneshot` invocation). Gated behind the `axum` feature (opt-in).
 //! - [`mod@actix`] — actix-web `App` test adapter (`test_app` + in-process
 //!   `call_service` invocation). Gated behind the `actix-web` feature (opt-in).
+//! - [`mod@tower_http`] — tower-http middleware chain adapter
+//!   (`test_chain(layers, router)` + `Layer<S>` stack drive). Gated behind
+//!   the `tower-http` feature (opt-in), depends on the axum adapter.
 //! - assertion macros — exported at crate root.
 
 #![deny(missing_docs)]
@@ -41,6 +44,9 @@ pub mod axum;
 
 #[cfg(feature = "actix-web")]
 pub mod actix;
+
+#[cfg(feature = "tower-http")]
+pub mod tower_http;
 
 // Internal recorder helpers shared by the integration / axum / actix
 // adapters. v1.6-5 (Issue #611) SSOT for the previously-inlined header

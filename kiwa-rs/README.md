@@ -12,7 +12,7 @@ server with a request recorder (`kiwa::integration::mock_server`).
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = "0.2"
+kiwa-test-rs = "0.4"
 ```
 
 Requires Rust >= 1.75 (edition 2021).
@@ -23,7 +23,7 @@ avoid pulling in `hyper` / `tokio`:
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = { version = "0.2", default-features = false }
+kiwa-test-rs = { version = "0.4", default-features = false }
 ```
 
 The `axum` feature adds an in-process axum `Router` test adapter
@@ -31,7 +31,7 @@ The `axum` feature adds an in-process axum `Router` test adapter
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = { version = "0.2", features = ["axum"] }
+kiwa-test-rs = { version = "0.4", features = ["axum"] }
 ```
 
 The `actix-web` feature adds an in-process actix-web `App` test adapter
@@ -39,7 +39,7 @@ The `actix-web` feature adds an in-process actix-web `App` test adapter
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = { version = "0.2", features = ["actix-web"] }
+kiwa-test-rs = { version = "0.4", features = ["actix-web"] }
 ```
 
 After publish to crates.io (planned during v1.4 close-out):
@@ -274,12 +274,100 @@ See `examples/rust-actix-web-poc/tests/counter.rs` for the full Counter API
 PoC and `kiwa-rs/tests/actix_test_app.rs` for the interop case (actix App →
 `spawn_blocking` reqwest → kiwa mock).
 
+### `kiwa::tower_http::test_chain` — middleware chain over axum
+
+Wrap a `tower::ServiceBuilder` layer stack around an `axum::Router` and
+drive requests through the same in-process path as
+`kiwa::axum::test_app`. Middleware (CORS / Trace / Timeout / SetHeader /
+compression / auth / rate limit / …) executes ahead of the routed handler
+without binding a real socket, so middleware regression tests share the
+axum adapter's TIME_WAIT / port-clash freedom.
+
+Enable the feature in `Cargo.toml` (it automatically pulls in the `axum`
+feature it wraps):
+
+```toml
+[dev-dependencies]
+kiwa-test-rs = { version = "0.4", features = ["tower-http"] }
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.6", features = ["cors", "trace", "timeout", "set-header"] }
+```
+
+Basic usage:
+
+```rust
+use axum::http::{HeaderName, HeaderValue, StatusCode};
+use axum::response::IntoResponse;
+use axum::routing::get;
+use axum::Router;
+use kiwa::axum::HttpMethod;
+use kiwa::tower_http::test_chain;
+use std::time::Duration;
+use tower::ServiceBuilder;
+use tower_http::cors::{Any, CorsLayer};
+use tower_http::set_header::SetResponseHeaderLayer;
+use tower_http::timeout::TimeoutLayer;
+
+#[test]
+fn middleware_chain_stamps_response_header_and_enforces_timeout() {
+    let router = Router::new().route("/health", get(|| async { "ok" }));
+    let layers = ServiceBuilder::new()
+        .layer(SetResponseHeaderLayer::overriding(
+            HeaderName::from_static("x-kiwa-chain"),
+            HeaderValue::from_static("engaged"),
+        ))
+        .layer(TimeoutLayer::with_status_code(
+            StatusCode::REQUEST_TIMEOUT,
+            Duration::from_secs(1),
+        ))
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_methods(Any)
+                .allow_headers(Any),
+        );
+
+    let test = test_chain(layers, router);
+    let resp = test.request(HttpMethod::Get, "/health").send();
+    assert_eq!(resp.status(), 200);
+    assert_eq!(
+        resp.headers().get("x-kiwa-chain").map(String::as_str),
+        Some("engaged"),
+    );
+}
+```
+
+Contract highlights:
+
+- `test_chain(ServiceBuilder + Router)` returns the **same `TestApp`
+  handle** as `kiwa::axum::test_app` — the `request()` / `send()` /
+  `TestResponse` API stays identical (v1.5 axum contract carries through
+  unchanged).
+- The `ServiceBuilder` layer stack is applied to the Router via
+  `axum::Router::layer` so any middleware that satisfies axum's own
+  `Layer<Route>` bound composes out of the box (`CorsLayer`, `TraceLayer`,
+  `TimeoutLayer`, `CompressionLayer`, `SetResponseHeaderLayer`, custom
+  auth / rate-limit middleware, …).
+- `Drop` teardown, `TestApp::stop()` idempotency, and the post-stop
+  `send()` panic gate are inherited from the axum adapter — the wrapper
+  adds middleware chain composition without touching the runtime
+  discipline.
+- `test_chain` is opt-in behind the `tower-http` feature which itself
+  enables the `axum` feature it wraps; a build without the feature does
+  not compile the module.
+
+See `kiwa-rs/tests/tower_http_test_chain.rs` for the full 10-test suite
+(smoke / SetResponseHeader / CORS preflight / composed layers / Timeout /
+Trace passthrough / Drop / post-stop panic / request-header echo / body
+extractor).
+
 ## Roadmap
 
 - v0.1 — `setup_env` + Mode (Mock / Live) + assert macros + Drop cleanup, **plus** `kiwa::integration::mock_server` (hyper + request recorder) shipped together via Issue [#577](https://github.com/cardene777/kiwa/issues/577).
 - v0.2 — `kiwa::axum::test_app` in-process `Router` adapter via Issue [#592](https://github.com/cardene777/kiwa/issues/592) + `kiwa::actix::test_app` in-process actix-web `App` adapter via Issue [#593](https://github.com/cardene777/kiwa/issues/593); richer mock_server matchers planned in follow-up v1.5 sub-Issues.
 - v0.3 (v1.6 quality milestone) — multi-value response header retention via new `headers_all()` accessor ([#607](https://github.com/cardene777/kiwa/issues/607)), defensive body copy sweep ([#608](https://github.com/cardene777/kiwa/issues/608)), `TestApp::stop()` lifecycle activation ([#609](https://github.com/cardene777/kiwa/issues/609)), `fold_headers` recorder dedup ([#611](https://github.com/cardene777/kiwa/issues/611)). Fully source-compatible with v0.2 for adopters — existing `headers()` / `headers` accessors keep the same `HashMap<String, String>` shape. See [CHANGELOG.md](CHANGELOG.md).
-- v0.4+ — proc-macro `#[kiwa_test]` (split into `kiwa-test-rs-macro` crate), Layer 1 spec → `.rs` codegen (kiwa-design polyglot extension, Issue [#580](https://github.com/cardene777/kiwa/issues/580)).
+- v0.4 (v1.7 polyglot 継続深化) — `kiwa::tower_http::test_chain` (tower-http middleware chain adapter over the axum Router) via Issue [#622](https://github.com/cardene777/kiwa/issues/622). `ServiceBuilder<...>` layer stack drives through the same `TestApp` contract as `kiwa::axum::test_app`. Opt-in behind the `tower-http` feature (default OFF).
+- v0.5+ — proc-macro `#[kiwa_test]` (split into `kiwa-test-rs-macro` crate), Layer 1 spec → `.rs` codegen (kiwa-design polyglot extension, Issue [#580](https://github.com/cardene777/kiwa/issues/580)).
 
 ## Related
 
