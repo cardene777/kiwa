@@ -3,7 +3,7 @@
 //!
 //! ## Contract
 //!
-//! - [`test_app(router)`] wraps an [`axum::Router`] in a [`TestApp`] that owns
+//! - [`test_app`] wraps an [`axum::Router`] in a [`TestApp`] that owns
 //!   a single-thread tokio runtime (so the calling cargo test stays sync).
 //! - [`TestApp::request`] returns a [`RequestBuilder`] that builds an
 //!   [`http::Request`] and drives the Router through

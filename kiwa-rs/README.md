@@ -42,6 +42,18 @@ The `actix-web` feature adds an in-process actix-web `App` test adapter
 kiwa-test-rs = { version = "0.4", features = ["actix-web"] }
 ```
 
+The `tower-http` feature adds a middleware chain adapter for axum
+(`kiwa::tower_http::test_chain`) plus six middleware-specific helpers
+(`kiwa::tower_http::{cors, trace, compression, auth, rate_limit, timeout}`).
+The feature transitively enables `axum` because the chain wraps an axum
+`Router`. Opt in when your service composes tower-http middleware
+(CORS / Trace / Compression / Auth / RateLimit / Timeout / …):
+
+```toml
+[dev-dependencies]
+kiwa-test-rs = { version = "0.4", features = ["tower-http"] }
+```
+
 After publish to crates.io (planned during v1.4 close-out):
 
 ```bash
@@ -359,7 +371,10 @@ Contract highlights:
 See `kiwa-rs/tests/tower_http_test_chain.rs` for the full 10-test suite
 (smoke / SetResponseHeader / CORS preflight / composed layers / Timeout /
 Trace passthrough / Drop / post-stop panic / request-header echo / body
-extractor).
+extractor). For an end-to-end usage example against a production-shaped
+axum Router + full six-middleware chain, see
+[`examples/rust-tower-http-poc/`](../examples/rust-tower-http-poc)
+(v1.7-3, Issue [#624](https://github.com/cardene777/kiwa/issues/624)).
 
 ### `kiwa::tower_http::{cors, trace, compression, auth, rate_limit, timeout}` — middleware-specific helpers
 
