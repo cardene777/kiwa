@@ -471,3 +471,73 @@ func TestRecordedRequestHeadersAllOnGinAdapter(t *testing.T) {
 		t.Fatalf("Headers[x-multi] = %q, want a", got)
 	}
 }
+
+// 13) RecordedRequest.Body is a defensive copy — mutating the caller's
+// request buffer between successive Send calls (a common pattern when a
+// benchmark loop reuses a scratch slice) must not retroactively rewrite an
+// earlier RecordedRequest.Body entry. Regression coverage for v1.5-3
+// inline fix (PR #601) generalised under v1.6-2 (Issue #608).
+func TestRecordedRequestBodyIsDefensiveCopy(t *testing.T) {
+	engine := newEngine()
+	engine.POST("/echo", func(c *gin.Context) {
+		body, _ := io.ReadAll(c.Request.Body)
+		c.Data(http.StatusOK, "application/octet-stream", body)
+	})
+	srv := kiwa_gin.NewTestServer(t, engine)
+
+	// Reuse one 10-byte scratch slice across two Sends.
+	buf := []byte("first-body")
+	srv.Request(kiwa.MethodPOST, "/echo").Body(buf).Send()
+
+	// Overwrite the caller's buffer in-place — the recorder's snapshot of
+	// the first request must have already been captured via bodyCopy so
+	// this mutation cannot leak into recorded[0].Body.
+	for i := range buf {
+		buf[i] = 'X'
+	}
+
+	// Second request with a distinct payload — the recorder log must have
+	// two entries with the exact bodies dispatched.
+	srv.Request(kiwa.MethodPOST, "/echo").Body([]byte("second-body")).Send()
+
+	recorded := srv.RecordedRequests()
+	if len(recorded) != 2 {
+		t.Fatalf("recorded len = %d, want 2", len(recorded))
+	}
+	if got := string(recorded[0].Body); got != "first-body" {
+		t.Fatalf("recorded[0].Body = %q, want first-body (caller buffer reuse leaked into recorder)", got)
+	}
+	if got := string(recorded[1].Body); got != "second-body" {
+		t.Fatalf("recorded[1].Body = %q, want second-body", got)
+	}
+}
+
+// 14) Response.Body() is a defensive copy — mutating the returned slice must
+// not corrupt subsequent Body() / BodyString() / JSON() reads on the same
+// Response. Regression coverage for v1.5-3 inline fix (PR #601) generalised
+// under v1.6-2 (Issue #608).
+func TestResponseBodyIsDefensiveCopy(t *testing.T) {
+	engine := newEngine()
+	engine.GET("/payload", func(c *gin.Context) {
+		c.Data(http.StatusOK, "application/octet-stream", []byte("original"))
+	})
+	srv := kiwa_gin.NewTestServer(t, engine)
+
+	resp := srv.Request(kiwa.MethodGET, "/payload").Send()
+
+	body := resp.Body()
+	if string(body) != "original" {
+		t.Fatalf("Body() = %q, want original", string(body))
+	}
+	// Mutate the returned slice in place.
+	for i := range body {
+		body[i] = 'X'
+	}
+	// Fresh Body() call must observe the un-mutated payload.
+	if got := string(resp.Body()); got != "original" {
+		t.Fatalf("Body() after caller mutation = %q, want original", got)
+	}
+	if got := resp.BodyString(); got != "original" {
+		t.Fatalf("BodyString() after caller mutation = %q, want original", got)
+	}
+}

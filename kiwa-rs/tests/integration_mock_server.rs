@@ -310,6 +310,57 @@ fn recorded_request_headers_all_preserves_multi_value() {
     assert!(recorded[0].headers_all_values("x-absent").is_none());
 }
 
+// v1.6-2 (Issue #608) — RecordedRequest.body is stored as an owned Vec<u8>
+// and recorded_requests() clones the entire log so callers can iterate or
+// mutate their snapshot without racing the server thread and without leaking
+// caller-side buffer mutations back into the recorder log. This test
+// exercises both directions: mutating the returned snapshot must not
+// affect a subsequent recorded_requests() call, and firing a second request
+// with a distinct payload must never rewrite the first entry.
+#[test]
+fn recorded_request_body_is_defensive_copy() {
+    let server = mock_server(MockServerOpts::default().with_route(Route::new(
+        HttpMethod::Post,
+        "/echo",
+        |_req: &RecordedRequest| MockResponse::ok(b"ok".to_vec()),
+    )));
+
+    let client = reqwest::blocking::Client::new();
+    client
+        .post(format!("{}/echo", server.base_url()))
+        .body("first-body")
+        .send()
+        .expect("first send");
+    client
+        .post(format!("{}/echo", server.base_url()))
+        .body("second-body-x")
+        .send()
+        .expect("second send");
+
+    // Snapshot 1 — capture the log, then mutate the returned body.
+    let mut snapshot = server.recorded_requests();
+    assert_eq!(snapshot.len(), 2);
+    assert_eq!(snapshot[0].body_str(), "first-body");
+    assert_eq!(snapshot[1].body_str(), "second-body-x");
+    for byte in snapshot[0].body.iter_mut() {
+        *byte = b'X';
+    }
+    assert_eq!(snapshot[0].body_str(), "XXXXXXXXXX");
+
+    // Snapshot 2 — the recorder log must be unaffected by the first
+    // snapshot's in-place mutation because recorded_requests() cloned the
+    // log deeply (RecordedRequest is Clone, and Vec<u8>'s Clone impl
+    // allocates a fresh buffer).
+    let fresh = server.recorded_requests();
+    assert_eq!(fresh.len(), 2);
+    assert_eq!(
+        fresh[0].body_str(),
+        "first-body",
+        "fresh snapshot must not alias the mutated snapshot"
+    );
+    assert_eq!(fresh[1].body_str(), "second-body-x");
+}
+
 #[test]
 fn multiple_routes_match_first_registered() {
     let server = mock_server(

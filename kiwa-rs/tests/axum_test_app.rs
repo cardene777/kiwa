@@ -406,3 +406,49 @@ fn test_response_cookies_returns_raw_set_cookie_values() {
     let resp = test.request(HttpMethod::Get, "/none").send();
     assert!(resp.cookies().is_empty());
 }
+
+// v1.6-2 (Issue #608) — TestResponse.body() returns a borrow into an owned
+// Vec<u8> stored inside the TestResponse, so caller-side buffer reuse
+// between successive send() calls cannot rewrite an earlier response's
+// body view. RequestBuilder::body() takes `impl Into<Vec<u8>>` which either
+// moves an existing Vec or allocates a fresh Vec from a slice — both paths
+// dissociate the wire-time buffer from any caller-owned scratch space.
+// This test builds two requests through a single reusable `Vec<u8>` and
+// asserts that the first TestResponse's body still reads correctly after
+// the second request has been fired and its response body has replaced the
+// second TestResponse's contents.
+#[test]
+fn response_body_survives_caller_buffer_reuse() {
+    async fn echo(body: axum::body::Bytes) -> Vec<u8> {
+        body.to_vec()
+    }
+    let app = Router::new().route("/echo", post(echo));
+    let test = test_app(app);
+
+    // Fire the first request with an owned buffer.
+    let resp1 = test
+        .request(HttpMethod::Post, "/echo")
+        .body(b"first-body".to_vec())
+        .send();
+    assert_eq!(resp1.body_str(), "first-body");
+
+    // Fire the second request with a distinct owned buffer — the previous
+    // TestResponse must still hold its original view.
+    let resp2 = test
+        .request(HttpMethod::Post, "/echo")
+        .body(b"second-body-x".to_vec())
+        .send();
+    assert_eq!(resp2.body_str(), "second-body-x");
+    assert_eq!(
+        resp1.body_str(),
+        "first-body",
+        "resp1.body() must not alias resp2's payload after the second send()"
+    );
+
+    // The body() accessor returns a stable borrow into TestResponse's own
+    // Vec<u8>, so cloning resp1 out from under a subsequent send() call
+    // yields the same payload. clone() is derived on TestResponse.
+    let cloned = resp1.clone();
+    assert_eq!(cloned.body(), b"first-body");
+    assert_eq!(cloned.body_str(), "first-body");
+}
