@@ -61,7 +61,6 @@ package kiwa_gin
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -214,9 +213,16 @@ func (r *Request) JSON(body []byte) *Request {
 // returned *Response fails loudly with a nil-pointer stack instead of
 // silently reading the retired engine.
 //
-// Send panics with a self-describing message on http.NewRequest failures
-// so the test fails fast with a clear stack instead of bubbling errors
-// through every assertion call site.
+// Send routes http.NewRequest failures (malformed method / path, unparseable
+// URL, etc.) through the captured testing.TB Fatalf handle so the failure
+// surfaces as a diagnostic test result with a clean stack — matching the
+// v1.6-3 post-Stop path and v1.4 NewMockServer failure ergonomics. Panic
+// escapes go test's per-test isolation and prints a runtime stack rather
+// than a test failure; t.Fatalf gives the developer the file:line of the
+// offending Send call and lets the harness report through the standard
+// test-failure channel. Send returns nil in that path so any accidental
+// chained assertion on the returned *Response fails loudly with a
+// nil-pointer stack instead of continuing with a half-built request.
 func (r *Request) Send() *Response {
 	if r.server.IsStopped() {
 		r.server.t.Helper()
@@ -229,7 +235,12 @@ func (r *Request) Send() *Response {
 
 	req, err := http.NewRequest(r.method.String(), r.path, bytes.NewReader(r.body))
 	if err != nil {
-		panic(fmt.Sprintf("kiwa-gin: build request %s %s: %v", r.method.String(), r.path, err))
+		r.server.t.Helper()
+		r.server.t.Fatalf(
+			"kiwa-gin: build request %s %s: %v",
+			r.method.String(), r.path, err,
+		)
+		return nil
 	}
 	for k, v := range r.headers {
 		req.Header.Set(k, v)
