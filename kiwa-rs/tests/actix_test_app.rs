@@ -465,12 +465,18 @@ fn test_app_is_stopped_reflects_lifecycle() {
     }
     let mut test = test_app(|| App::new().route("/health", web::get().to(health)));
 
-    assert!(!test.is_stopped(), "is_stopped before stop() should be false");
+    assert!(
+        !test.is_stopped(),
+        "is_stopped before stop() should be false"
+    );
     test.stop();
     assert!(test.is_stopped(), "is_stopped after stop() should be true");
     test.stop(); // idempotent
     test.stop();
-    assert!(test.is_stopped(), "is_stopped after triple stop() should stay true");
+    assert!(
+        test.is_stopped(),
+        "is_stopped after triple stop() should stay true"
+    );
 }
 
 // 2) Post-Stop send() panics with a self-describing message that names
@@ -503,7 +509,11 @@ fn test_app_send_after_stop_panics_with_diagnostic_message() {
     let message = payload
         .downcast_ref::<String>()
         .cloned()
-        .or_else(|| payload.downcast_ref::<&'static str>().map(|s| s.to_string()))
+        .or_else(|| {
+            payload
+                .downcast_ref::<&'static str>()
+                .map(|s| s.to_string())
+        })
         .expect("panic payload should be a string");
 
     assert!(

@@ -10,6 +10,19 @@
 //!   same [`TestApp`] surface (identical `request()` / `send()` /
 //!   `TestResponse` ergonomics as v1.5 axum feature — the AC 4 requirement to
 //!   keep the "v1.5 axum feature と同じ TestApp 契約継続").
+//! - Middleware-specific helpers live in six sibling submodules
+//!   ([`mod@cors`] / [`mod@trace`] / [`mod@compression`] / [`mod@auth`] /
+//!   [`mod@rate_limit`] / [`mod@timeout`]) that wrap the raw `test_chain`
+//!   call with intent-revealing constructors + assertions. Each helper is
+//!   deliberately thin — it composes a single tower-http `Layer` on the
+//!   supplied [`Router`], hands the pair to `test_chain`, and exposes an
+//!   assertion (`assert_preflight_ok`, `assert_compressed`,
+//!   `assert_timed_out`, …) that reads the observable middleware effect
+//!   from a [`crate::axum::TestResponse`]. The submodules stay
+//!   dependency-symmetric with the shared [`TestApp`] contract — none of
+//!   them owns a runtime, none of them clones a Router twice, and none of
+//!   them assumes middleware order (that stays in the caller's
+//!   `ServiceBuilder` chain).
 //! - The middleware chain runs in-process (no port bind, no real socket) so
 //!   middleware regression tests share the same TIME_WAIT / port-clash
 //!   freedom the axum adapter already offers.
@@ -108,3 +121,15 @@ where
     // the v1.5 axum adapter).
     test_app(router.layer(layers))
 }
+
+// v1.7-2 (Issue #623) — six middleware-specific helper submodules. Each
+// wraps a single tower-http `Layer` on top of the `test_chain` primitive
+// and exposes an intent-revealing constructor + assertion. Order matches
+// the AC scope list in the issue body (cors / trace / compression / auth
+// / rate_limit / timeout).
+pub mod auth;
+pub mod compression;
+pub mod cors;
+pub mod rate_limit;
+pub mod timeout;
+pub mod trace;
