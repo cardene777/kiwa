@@ -10,6 +10,7 @@ test-results/
 .claude/.scratch/
 .claude/settings.local.json
 .claude/.gitignore.local
+.mcp.json
 *.log
 coverage/
 .DS_Store

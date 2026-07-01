@@ -28,3 +28,22 @@ export type {
 export { setupInngestEnv } from './inngest/setup-inngest-env.js';
 export { createStubInngestEnv } from './inngest/stub-inngest.js';
 export { createDevServerInngestEnv } from './inngest/dev-server-inngest.js';
+
+// Cloudflare Queues adapter surface (v1.9-3, GH #654).
+export type {
+  CloudflareQueueBatch,
+  CloudflareQueueConsumer,
+  CloudflareQueueConsumerRegistration,
+  CloudflareQueueMessage,
+  CloudflareQueueMessageSnapshot,
+  CloudflareQueueMessageState,
+  CloudflareQueueSendOptions,
+  CloudflareQueuesMiniflareOptions,
+  CloudflareQueuesMode,
+  CloudflareQueuesTestEnv,
+  CloudflareQueuesWranglerOptions,
+  SetupCloudflareQueuesEnvOptions,
+} from './cloudflare-queues/types.js';
+export { setupCloudflareQueuesEnv } from './cloudflare-queues/setup-cloudflare-queues-env.js';
+export { createMiniflareCloudflareQueuesEnv } from './cloudflare-queues/miniflare-cloudflare-queues.js';
+export { createWranglerCloudflareQueuesEnv } from './cloudflare-queues/wrangler-cloudflare-queues.js';
