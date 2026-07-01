@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/queue",
   "version": "0.1.0",
-  "description": "Queue test adapter for kiwa — BullMQ (Redis-backed) sandbox (in-memory) + testcontainers Redis env with job assertion helpers (waitForJob / assertProcessed / assertFailed / assertRetried / assertQueueDrained)",
+  "description": "Queue test adapter for kiwa — BullMQ (Redis-backed) sandbox (in-memory) + testcontainers Redis env + Inngest (event-driven) dev-server + stub env, with job / run assertion helpers (waitForJob / assertProcessed / assertFailed / assertRetried / assertQueueDrained / assertFunctionRan / assertStepRan)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -16,6 +16,9 @@
     "sandbox",
     "job",
     "worker",
+    "inngest",
+    "event-driven",
+    "dev-server",
     "testing",
     "vitest"
   ],
@@ -66,12 +69,16 @@
   },
   "peerDependencies": {
     "bullmq": "^5",
+    "inngest": "^3",
     "ioredis": "^5",
     "testcontainers": ">=10",
     "vitest": "^2"
   },
   "peerDependenciesMeta": {
     "bullmq": {
+      "optional": true
+    },
+    "inngest": {
       "optional": true
     },
     "ioredis": {
