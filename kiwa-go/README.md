@@ -16,13 +16,16 @@ go get github.com/cardene777/kiwa-test-go/gin@v0.2.0
 
 # Echo adapter (opt-in subpackage, pulls echo/v4 as a transitive dep)
 go get github.com/cardene777/kiwa-test-go/echo@v0.2.0
+
+# Fiber adapter (opt-in subpackage, pulls fiber/v2 + fasthttp as transitive deps)
+go get github.com/cardene777/kiwa-test-go/fiber@v0.2.0
 ```
 
 Requires Go >= 1.25 from v0.2 onwards (gin v1.12 raised the floor; the
 core unit + integration helpers themselves still need only the standard
 library). The core package keeps zero runtime dependencies — only the
-optional `gin` / `echo` subpackages pull their respective framework
-into your test binary.
+optional `gin` / `echo` / `fiber` subpackages pull their respective
+framework into your test binary.
 
 ## Usage
 
@@ -289,6 +292,87 @@ Contract.
 Echo handler under test can call out to a kiwa mock for upstream traffic
 and both recorders capture independently (see
 [`echo/echo_test.go`](echo/echo_test.go) `TestInteropWithKiwaMockServer`).
+
+### `kiwa_fiber.NewTestServer(t, app)` — Fiber web framework adapter (v1.7)
+
+Wraps `*fiber.App` in a `TestServer` that drives requests **in-process**
+through Fiber's built-in `*App.Test(*http.Request)` hook (which routes an
+in-memory `net.Conn` through the fasthttp server underneath — see the
+[Fiber testing docs](https://docs.gofiber.io/api/app/#test)). Same
+trade-off as the Gin / Echo adapters (no real port, no `TIME_WAIT`
+flakiness, no parallel `go test` port clashes) with a Fiber-idiomatic
+transport, so the same Layer 1 spec compiles to Go (Fiber / Gin / Echo)
+and Rust (axum / actix-web) test files.
+
+```go
+import (
+    "testing"
+
+    "github.com/gofiber/fiber/v2"
+
+    "github.com/cardene777/kiwa-test-go"
+    kiwa_fiber "github.com/cardene777/kiwa-test-go/fiber"
+)
+
+func TestHealth(t *testing.T) {
+    app := fiber.New(fiber.Config{DisableStartupMessage: true})
+    app.Get("/health", func(c *fiber.Ctx) error {
+        return c.SendString("ok")
+    })
+
+    srv := kiwa_fiber.NewTestServer(t, app)
+    resp := srv.Request(kiwa.MethodGET, "/health").Send()
+    kiwa.AssertEqual(t, resp.StatusCode(), 200)
+    kiwa.AssertEqual(t, resp.BodyString(), "ok")
+}
+```
+
+Contract.
+
+- `kiwa_fiber.NewTestServer(t, app)` accepts any `*fiber.App` (built via
+  `fiber.New(cfg)`) and registers `t.Cleanup` for harness release. A nil
+  app fails the test through `t.Fatalf` up-front instead of panicking on
+  the first `.Send()`.
+- `srv.Request(method, path).Header(k, v).Body(b).JSON(b).Timeout(ms).Send()`
+  is the typed request builder. `.Timeout(ms)` is Fiber-specific — it
+  overrides the framework's default 1 s ms ceiling passed to `App.Test`.
+  Pass `-1` to disable the timeout entirely (values below `-1` clamp to
+  `-1` so a caller cannot accidentally build an unreachable negative
+  budget).
+- `*Response` exposes `StatusCode() / Headers() / HeadersAll() /
+  HeadersAllValues(key) / Cookies() / Body() / BodyString() /
+  JSON(target)` — buffered up-front so assertions stay race-free.
+- `srv.RecordedRequests()` returns `[]kiwa.RecordedRequest` (the v1.4
+  shape, re-exported) so the recorder is identical across the four
+  adapters (`kiwa.NewMockServer` / `kiwa_gin` / `kiwa_echo` /
+  `kiwa_fiber`).
+- **Why a separate adapter?** Fiber sits on `fasthttp`, not `net/http`,
+  so the `httptest.NewRecorder + engine.ServeHTTP` pattern the Gin / Echo
+  adapters use cannot drive a Fiber handler. The Fiber adapter goes
+  through `*fiber.App.Test` (which accepts a standard `*http.Request`
+  and returns an `*http.Response`) so the kiwa contract stays identical
+  at the surface even though the transport differs underneath.
+- `srv.Stop()` activates the same lifecycle boundary as the Gin / Echo
+  adapters — `srv.Request(...).Send()` after `Stop()` fails the test
+  with `t.Fatalf("kiwa-fiber: Send() called after Stop() ...")`. `Stop`
+  is a stop-bit flip on the harness; the adapter deliberately does not
+  fire `app.Shutdown` because Fiber's `Shutdown` runs user-registered
+  `OnShutdown` hooks even without a bound listener, which would fire
+  lifecycle callbacks the test never opted into. `App.Test` drives an
+  in-memory `net.Conn` so there is no bound listener to release.
+- `Send()` does not `panic()` on unrecoverable errors (build failure,
+  dispatch timeout, malformed method / path). It calls `t.Fatalf` on
+  the captured `testing.TB` so `recover()` in a downstream handler
+  cannot swallow the failure.
+- Multi-value response headers are retained via `resp.HeadersAll()` and
+  `srv.RecordedRequests()[i].HeadersAll` — same shape as the Gin / Echo
+  adapters. The existing `resp.Headers()` (`map[string]string`) stays
+  source-compatible for the last-value case.
+
+`kiwa_fiber.NewTestServer` composes with v1.4 `kiwa.NewMockServer`: the
+Fiber handler under test can call out to a kiwa mock for upstream traffic
+and both recorders capture independently (see
+[`fiber/fiber_test.go`](fiber/fiber_test.go) `TestInteropWithKiwaMockServer`).
 
 ### Differentiation vs raw `net/http/httptest`
 
