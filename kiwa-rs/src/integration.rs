@@ -84,6 +84,15 @@ impl HttpMethod {
 ///
 /// The recorder stores a `Vec<RecordedRequest>` and hands the test a clone so
 /// assertions cannot race with the server task.
+///
+/// Two header views coexist so multi-value headers (`Set-Cookie`,
+/// `WWW-Authenticate`, `Vary`, `Link`, …) survive the recording round trip
+/// while ergonomic single-value access stays cheap:
+///
+/// - [`headers`](Self::headers) — last-write-wins `HashMap<String, String>`,
+///   retained for backward compatibility with pre-v1.6 assertions.
+/// - [`headers_all`](Self::headers_all) — `HashMap<String, Vec<String>>` that
+///   preserves every recorded value in wire order.
 #[derive(Clone, Debug)]
 pub struct RecordedRequest {
     /// Request method (`GET` / `POST` / …).
@@ -91,7 +100,13 @@ pub struct RecordedRequest {
     /// Request path including query (e.g. `/users?id=1`).
     pub path: String,
     /// Request headers (lowercased keys, last-write-wins on duplicates).
+    /// Retained for backward compatibility — new assertions that need
+    /// multi-value semantics should read [`headers_all`](Self::headers_all).
     pub headers: HashMap<String, String>,
+    /// Request headers (lowercased keys) preserving every value in wire order.
+    /// Populated alongside [`headers`](Self::headers) so callers can pick the
+    /// shape that fits without paying a second recorder pass.
+    pub headers_all: HashMap<String, Vec<String>>,
     /// Request body bytes (empty `Vec` if the client sent no body).
     pub body: Vec<u8>,
 }
@@ -101,15 +116,35 @@ impl RecordedRequest {
     pub fn body_str(&self) -> String {
         String::from_utf8_lossy(&self.body).into_owned()
     }
+
+    /// Return every recorded value for `key` (case-insensitive) in wire
+    /// order. Returns `None` when the header was not observed so callers can
+    /// distinguish "absent" from "present but empty".
+    pub fn headers_all_values(&self, key: &str) -> Option<Vec<String>> {
+        self.headers_all.get(&key.to_lowercase()).cloned()
+    }
 }
 
 /// Response a [`Route`] handler returns.
+///
+/// Two header views coexist: [`headers`](Self::headers) writes a single value
+/// per key (mirroring the pre-v1.6 shape), [`headers_all`](Self::headers_all)
+/// writes every value in wire order so multi-value headers (`Set-Cookie`,
+/// `WWW-Authenticate`, `Vary`, `Link`, …) can be emitted verbatim.
+/// [`build_response`] merges the two — `headers_all` entries are added first
+/// (append per line), then `headers` entries via `header()` add — matching
+/// `http::Response::builder` semantics and preserving the pre-v1.6 behaviour
+/// for callers that only fill `headers`.
 #[derive(Clone, Debug)]
 pub struct MockResponse {
     /// HTTP status code (defaults to `200`).
     pub status: u16,
-    /// Response headers.
+    /// Response headers (single value per key).
     pub headers: HashMap<String, String>,
+    /// Response headers when multiple values per key are required
+    /// (`Set-Cookie` in particular). Values are appended in slice order via
+    /// `http::Response::builder().header()` so the wire keeps every entry.
+    pub headers_all: HashMap<String, Vec<String>>,
     /// Response body bytes.
     pub body: Vec<u8>,
 }
@@ -119,6 +154,7 @@ impl Default for MockResponse {
         MockResponse {
             status: 200,
             headers: HashMap::new(),
+            headers_all: HashMap::new(),
             body: Vec::new(),
         }
     }
@@ -130,6 +166,7 @@ impl MockResponse {
         MockResponse {
             status: 200,
             headers: HashMap::new(),
+            headers_all: HashMap::new(),
             body: body.into(),
         }
     }
@@ -142,6 +179,7 @@ impl MockResponse {
         MockResponse {
             status: 200,
             headers,
+            headers_all: HashMap::new(),
             body: body.into(),
         }
     }
@@ -152,9 +190,27 @@ impl MockResponse {
         self
     }
 
-    /// Insert a response header.
+    /// Insert a response header (single value; overrides any prior value for
+    /// this key on the wire).
     pub fn with_header(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
         self.headers.insert(key.into().to_lowercase(), value.into());
+        self
+    }
+
+    /// Append every value in `values` to the multi-value slot for `key`
+    /// (case-insensitive). Chain multiple calls to emit multiple `Set-Cookie`
+    /// / `WWW-Authenticate` / `Vary` / `Link` lines on the wire. Matches
+    /// `http::HeaderMap::append` semantics.
+    pub fn with_header_values<I, S>(mut self, key: impl Into<String>, values: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>,
+    {
+        let key = key.into().to_lowercase();
+        let entry = self.headers_all.entry(key).or_default();
+        for v in values {
+            entry.push(v.into());
+        }
         self
     }
 }
@@ -398,9 +454,15 @@ async fn handle_request(
     let path_only = req.uri().path().to_string();
 
     let mut headers = HashMap::with_capacity(req.headers().len());
+    let mut headers_all: HashMap<String, Vec<String>> = HashMap::with_capacity(req.headers().len());
     for (name, value) in req.headers().iter() {
         if let Ok(v) = value.to_str() {
-            headers.insert(name.as_str().to_lowercase(), v.to_string());
+            let key = name.as_str().to_lowercase();
+            // Last-write-wins single-value view — retained for backward compat.
+            headers.insert(key.clone(), v.to_string());
+            // Multi-value view — preserves every value in wire order so
+            // Set-Cookie / WWW-Authenticate / Vary / Link survive.
+            headers_all.entry(key).or_default().push(v.to_string());
         }
     }
 
@@ -422,6 +484,7 @@ async fn handle_request(
         method: method.as_str().to_string(),
         path: path_and_query,
         headers,
+        headers_all,
         body: body_bytes,
     };
     {
@@ -455,7 +518,22 @@ async fn handle_request(
 fn build_response(resp: MockResponse) -> Response<Full<Bytes>> {
     let status = StatusCode::from_u16(resp.status).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
     let mut builder = Response::builder().status(status);
+    // headers_all is applied first; each value becomes a distinct header line
+    // via http::Response::builder().header() (which append-appends when the
+    // same key is added multiple times).
+    for (k, values) in resp.headers_all.iter() {
+        for v in values {
+            builder = builder.header(k, v);
+        }
+    }
+    // headers overrides any prior value on the same key so callers who only
+    // fill `headers` keep the pre-v1.6 single-value behaviour on the wire.
+    // We do this by removing prior entries in the builder headers_mut view
+    // and re-adding a single value.
     for (k, v) in resp.headers.iter() {
+        if let Some(hmap) = builder.headers_mut() {
+            hmap.remove(k.as_str());
+        }
         builder = builder.header(k, v);
     }
     builder

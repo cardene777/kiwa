@@ -126,7 +126,11 @@ trait ErasedService {
         &self,
         runtime: &actix_web::rt::Runtime,
         request: Request,
-    ) -> (actix_web::http::StatusCode, actix_web::http::header::HeaderMap, Bytes);
+    ) -> (
+        actix_web::http::StatusCode,
+        actix_web::http::header::HeaderMap,
+        Bytes,
+    );
 }
 
 struct ErasedServiceImpl<S, B>
@@ -146,7 +150,11 @@ where
         &self,
         runtime: &actix_web::rt::Runtime,
         request: Request,
-    ) -> (actix_web::http::StatusCode, actix_web::http::header::HeaderMap, Bytes) {
+    ) -> (
+        actix_web::http::StatusCode,
+        actix_web::http::header::HeaderMap,
+        Bytes,
+    ) {
         runtime.block_on(async {
             let resp: ServiceResponse<B> = call_service(&self.service, request).await;
             let status = resp.status();
@@ -262,16 +270,23 @@ impl<'a> RequestBuilder<'a> {
 
         let (status, headers, body_bytes) = inner.service.call_once(&inner.runtime, request);
 
+        // Build single-value view (last-write-wins) and multi-value view
+        // (every value in wire order) in one pass so multi-value headers
+        // like Set-Cookie survive alongside the pre-v1.6 shape.
+        let mut headers_map: HashMap<String, String> = HashMap::with_capacity(headers.len());
+        let mut headers_all: HashMap<String, Vec<String>> = HashMap::with_capacity(headers.len());
+        for (k, v) in headers.iter() {
+            if let Ok(val) = v.to_str() {
+                let key = k.as_str().to_lowercase();
+                headers_map.insert(key.clone(), val.to_string());
+                headers_all.entry(key).or_default().push(val.to_string());
+            }
+        }
+
         TestResponse {
             status: status.as_u16(),
-            headers: headers
-                .iter()
-                .filter_map(|(k, v)| {
-                    v.to_str()
-                        .ok()
-                        .map(|val| (k.as_str().to_lowercase(), val.to_string()))
-                })
-                .collect(),
+            headers: headers_map,
+            headers_all,
             body: body_bytes.to_vec(),
         }
     }
@@ -280,10 +295,19 @@ impl<'a> RequestBuilder<'a> {
 /// Response surface returned by [`RequestBuilder::send`]. Identical shape to
 /// [`crate::axum::TestResponse`] so test code can switch between adapters by
 /// changing one `use` line.
+///
+/// Two header views coexist: [`headers`](Self::headers) is a single-value
+/// `HashMap<String, String>` (last-write-wins on duplicates) kept for
+/// backward compatibility with pre-v1.6 assertions,
+/// [`headers_all`](Self::headers_all) is a `HashMap<String, Vec<String>>`
+/// that preserves every recorded value in wire order so multi-value headers
+/// (`Set-Cookie`, `WWW-Authenticate`, `Vary`, `Link`, …) can be asserted
+/// verbatim.
 #[derive(Clone, Debug)]
 pub struct TestResponse {
     status: u16,
     headers: HashMap<String, String>,
+    headers_all: HashMap<String, Vec<String>>,
     body: Vec<u8>,
 }
 
@@ -294,8 +318,37 @@ impl TestResponse {
     }
 
     /// Response headers (lowercased keys, last-write-wins on duplicates).
+    /// Retained for backward compatibility — for multi-value headers reach
+    /// for [`headers_all`](Self::headers_all) or
+    /// [`headers_all_values`](Self::headers_all_values).
     pub fn headers(&self) -> &HashMap<String, String> {
         &self.headers
+    }
+
+    /// Every recorded header value in wire order, keys lowercased. Backs
+    /// assertions on `Set-Cookie`, `WWW-Authenticate`, `Vary`, `Link`, …
+    /// where a single last-write-wins map would collapse the payload.
+    pub fn headers_all(&self) -> &HashMap<String, Vec<String>> {
+        &self.headers_all
+    }
+
+    /// Every recorded value for `key` (case-insensitive) in wire order.
+    /// Returns `None` when the header was not observed so callers can
+    /// distinguish "absent" from "present but empty".
+    pub fn headers_all_values(&self, key: &str) -> Option<Vec<String>> {
+        self.headers_all.get(&key.to_lowercase()).cloned()
+    }
+
+    /// Every `Set-Cookie` value on the response, in wire order. Values are
+    /// returned as raw strings (unparsed) so callers pick their own cookie
+    /// parser (`cookie::Cookie::parse`, `reqwest::cookie`, …) — kiwa stays
+    /// dependency-light. Returns an empty `Vec` if no cookies were set so
+    /// callers can `iter()` without a `None` check.
+    pub fn cookies(&self) -> Vec<String> {
+        self.headers_all
+            .get("set-cookie")
+            .cloned()
+            .unwrap_or_default()
     }
 
     /// Response body bytes.
@@ -346,8 +399,8 @@ where
         > + 'static,
     B: MessageBody + 'static,
 {
-    let runtime =
-        actix_web::rt::Runtime::new().expect("kiwa actix test_app: failed to build actix-rt runtime");
+    let runtime = actix_web::rt::Runtime::new()
+        .expect("kiwa actix test_app: failed to build actix-rt runtime");
 
     let service = runtime.block_on(async move {
         let app = factory();

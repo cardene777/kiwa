@@ -197,20 +197,28 @@ func (r *Request) Send() *Response {
 	result := w.Result()
 	defer result.Body.Close()
 	bodyBytes, _ := io.ReadAll(result.Body)
+	cookies := result.Cookies()
 
 	headers := make(map[string]string, len(result.Header))
+	headersAll := make(map[string][]string, len(result.Header))
 	for k, v := range result.Header {
 		if len(v) == 0 {
 			continue
 		}
+		lowerKey := strings.ToLower(k)
 		// Last-write-wins on duplicates — same semantics as the v1.4
 		// recorder so polyglot specs compare equal across languages.
-		headers[strings.ToLower(k)] = v[len(v)-1]
+		headers[lowerKey] = v[len(v)-1]
+		valuesCopy := make([]string, len(v))
+		copy(valuesCopy, v)
+		headersAll[lowerKey] = valuesCopy
 	}
 
 	return &Response{
 		statusCode: result.StatusCode,
 		headers:    headers,
+		headersAll: headersAll,
+		cookies:    cookies,
 		body:       bodyBytes,
 	}
 }
@@ -218,9 +226,19 @@ func (r *Request) Send() *Response {
 // Response is the buffered result of a single Send call. All fields are
 // captured up-front so assertions can be re-read across goroutines without
 // racing the Echo handler that produced them.
+//
+// Two header views coexist: Headers is a single-value map[string]string kept
+// for backward compatibility with pre-v1.6 assertions, HeadersAll is a
+// map[string][]string that preserves every recorded value in wire order so
+// multi-value headers (Set-Cookie, WWW-Authenticate, Vary, Link, ...) can be
+// asserted verbatim. Cookies is parsed from the Set-Cookie lines via
+// net/http/httptest.ResultRecorder.Cookies so callers can assert on cookie
+// attributes without re-parsing the header string.
 type Response struct {
 	statusCode int
 	headers    map[string]string
+	headersAll map[string][]string
+	cookies    []*http.Cookie
 	body       []byte
 }
 
@@ -229,13 +247,51 @@ func (r *Response) StatusCode() int {
 	return r.statusCode
 }
 
-// Headers returns the response headers with lowercased keys — matching the
-// v1.4 RecordedRequest shape so polyglot specs read the same field.
+// Headers returns the response headers with lowercased keys, last-write-wins
+// on duplicates — matches the v1.4 RecordedRequest shape so polyglot specs
+// read the same field. For multi-value headers (Set-Cookie in particular)
+// use HeadersAll or Cookies.
 func (r *Response) Headers() map[string]string {
 	out := make(map[string]string, len(r.headers))
 	for k, v := range r.headers {
 		out[k] = v
 	}
+	return out
+}
+
+// HeadersAll returns every recorded header value in wire order, keys
+// lowercased. Returns a fresh map + slices so callers can mutate the result
+// without corrupting the recorder view of the same Response.
+func (r *Response) HeadersAll() map[string][]string {
+	out := make(map[string][]string, len(r.headersAll))
+	for k, v := range r.headersAll {
+		valuesCopy := make([]string, len(v))
+		copy(valuesCopy, v)
+		out[k] = valuesCopy
+	}
+	return out
+}
+
+// HeadersAllValues returns every recorded value for key (case-insensitive
+// match) in wire order. Returns nil (not an empty slice) when the header was
+// not observed so callers can distinguish "absent" from "present but empty".
+func (r *Response) HeadersAllValues(key string) []string {
+	values, ok := r.headersAll[strings.ToLower(key)]
+	if !ok {
+		return nil
+	}
+	out := make([]string, len(values))
+	copy(out, values)
+	return out
+}
+
+// Cookies returns every Set-Cookie value on the response parsed via
+// net/http Response.Cookies, so callers can assert on cookie name / value /
+// Path / Domain / attributes without re-parsing the raw header string. The
+// returned slice is a fresh copy so callers can mutate it safely.
+func (r *Response) Cookies() []*http.Cookie {
+	out := make([]*http.Cookie, len(r.cookies))
+	copy(out, r.cookies)
 	return out
 }
 
@@ -290,15 +346,24 @@ func (r *requestRecorder) count() int {
 // kiwa.RecordedRequest. The body is taken from the caller-provided slice
 // (not re-read from req.Body) so the recorder captures the exact bytes
 // dispatched even when the request body reader is single-shot.
+//
+// Headers is a single-value view (last-write-wins on duplicates); HeadersAll
+// preserves every value in wire order so multi-value headers survive the
+// recording round trip.
 func recordRequest(req *http.Request, body []byte) kiwa.RecordedRequest {
 	headers := make(map[string]string, len(req.Header))
+	headersAll := make(map[string][]string, len(req.Header))
 	for k, v := range req.Header {
 		if len(v) == 0 {
 			continue
 		}
+		lowerKey := strings.ToLower(k)
 		// Last-write-wins on duplicate keys — same semantics as the
 		// v1.4 recorder so polyglot specs compare equal.
-		headers[strings.ToLower(k)] = v[len(v)-1]
+		headers[lowerKey] = v[len(v)-1]
+		valuesCopy := make([]string, len(v))
+		copy(valuesCopy, v)
+		headersAll[lowerKey] = valuesCopy
 	}
 
 	path := req.URL.Path
@@ -313,10 +378,11 @@ func recordRequest(req *http.Request, body []byte) kiwa.RecordedRequest {
 	copy(bodyCopy, body)
 
 	return kiwa.RecordedRequest{
-		Method:  req.Method,
-		Path:    path,
-		Headers: headers,
-		Body:    bodyCopy,
+		Method:     req.Method,
+		Path:       path,
+		Headers:    headers,
+		HeadersAll: headersAll,
+		Body:       bodyCopy,
 	}
 }
 
