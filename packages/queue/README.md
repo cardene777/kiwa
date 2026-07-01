@@ -6,16 +6,17 @@
   <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview (127s) — this package covers the Queue surface. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">Full-quality MP4 (2.9 MB)</a>.</sub>
 </p>
 
-Queue test adapter for kiwa — BullMQ sandbox (in-memory) + testcontainers Redis env with job assertion helpers under a single `setupBullMQEnv` API, plus an event-driven Inngest env (`setupInngestEnv`) with stub + dev-server backends.
+Queue test adapter for kiwa — BullMQ sandbox (in-memory) + testcontainers Redis env with job assertion helpers under a single `setupBullMQEnv` API, plus an event-driven Inngest env (`setupInngestEnv`) with stub + dev-server backends, plus a Cloudflare Queues env (`setupCloudflareQueuesEnv`) with miniflare + wrangler backends.
 
 ## Overview
 
-`@kiwa-test/queue` is the Layer 2 adapter that turns a queue-shaped Layer 1 spec into a runnable Vitest suite. It ships two factories:
+`@kiwa-test/queue` is the Layer 2 adapter that turns a queue-shaped Layer 1 spec into a runnable Vitest suite. It ships three factories:
 
 - **`setupBullMQEnv`** — BullMQ (Redis-backed job queue) with `sandbox` (in-process) + `testcontainers` (real Redis + BullMQ + ioredis) backends.
 - **`setupInngestEnv`** — Inngest (SaaS event-driven) with `stub` (in-process, deterministic) + `dev-server` (real Inngest dev-server HTTP round-trip) backends.
+- **`setupCloudflareQueuesEnv`** — Cloudflare Queues (edge queue) with `miniflare` (in-process, deterministic) + `wrangler` (real `wrangler dev` process) backends.
 
-Backend selection is a one-argument change (`mode: '...'`) and both factories share the same `TestEnvBase<TMode>` shape so switching lanes never rewrites the assertion surface.
+Backend selection is a one-argument change (`mode: '...'`) and all three factories share the same `TestEnvBase<TMode>` shape so switching lanes never rewrites the assertion surface.
 
 ## Install
 
@@ -25,9 +26,13 @@ pnpm add -D @kiwa-test/queue @kiwa-test/core vitest
 pnpm add -D bullmq ioredis testcontainers
 # Inngest dev-server mode also needs:
 pnpm add -D inngest
+# Cloudflare Queues wrangler mode also needs:
+pnpm add -D wrangler
+# Cloudflare Queues miniflare mode (optional external instance) also needs:
+pnpm add -D miniflare
 ```
 
-`bullmq`, `ioredis`, `testcontainers`, and `inngest` are optional peer dependencies — none of them is imported by the sandbox / stub paths, so the fast lanes run with zero infrastructure.
+`bullmq`, `ioredis`, `testcontainers`, `inngest`, `miniflare`, and `wrangler` are optional peer dependencies — none of them is imported by the sandbox / stub / miniflare paths, so the fast lanes run with zero infrastructure.
 
 ## Quick start — sandbox
 
@@ -217,6 +222,111 @@ Live under [`examples/queue-inngest-poc/`](../../examples/queue-inngest-poc/) �
 
 ```bash
 pnpm -F examples-queue-inngest-poc test
+```
+
+## Cloudflare Queues env — `setupCloudflareQueuesEnv`
+
+`setupCloudflareQueuesEnv` covers the edge-queue slot in the `@kiwa-test/queue` family. Producers push messages by queue name + body; a registered consumer receives a `queue(batch, env, ctx)`-shaped batch object with `msg.ack()` / `msg.retry()` / `batch.ackAll()` / `batch.retryAll()` — the same surface production Workers see.
+
+### Quick start — miniflare
+
+```ts
+import { setupCloudflareQueuesEnv } from "@kiwa-test/queue";
+
+const env = await setupCloudflareQueuesEnv();          // defaults to mode: "miniflare"
+env.registerConsumer<{ userId: string }>({
+  queue: "webhook-events",
+  maxBatchSize: 10,
+  maxRetries: 3,
+  deadLetterQueue: "webhook-dlq",
+  handler: async (batch) => {
+    for (const msg of batch.messages) {
+      try {
+        await forwardToAuditSink(msg.body);
+        msg.ack();
+      } catch {
+        msg.retry();
+      }
+    }
+  },
+});
+
+await env.send("webhook-events", { userId: "u-1" });
+const snap = await env.assertAcknowledged("webhook-events");
+snap.state;     // "ack"
+snap.attempts;  // 1 (or higher if the handler called msg.retry())
+
+await env.stop();
+```
+
+### Quick start — wrangler
+
+```ts
+import { setupCloudflareQueuesEnv } from "@kiwa-test/queue";
+
+const env = await setupCloudflareQueuesEnv({
+  mode: "wrangler",
+  // Optional: point at an existing wrangler dev process; omit to auto-spawn
+  // `npx wrangler@latest dev --local`.
+  wrangler: { url: process.env.WRANGLER_URL },
+  consumers: [webhookConsumer],
+});
+
+await env.send("webhook-events", { userId: "u-1" });
+await env.assertAcknowledged("webhook-events");
+
+await env.stop();  // shuts down the wrangler subprocess if we spawned it
+```
+
+### Assertion helpers
+
+The `CloudflareQueuesTestEnv` surface bundles five assertion helpers so tests never poll internals directly:
+
+| Helper | Contract |
+|---|---|
+| `waitForMessage(queueName, { timeoutMs? })` | Waits for the first message on `queueName` to reach a terminal state (`ack` / `dead`). Rejects on timeout (default 5s). |
+| `assertAcknowledged(queueName, { attempts? })` | Awaits terminal state, throws if the message did not `ack`, and (optionally) checks the observed attempt count. |
+| `assertDeadLettered(queueName, { dlq?, reasonMatch?, attempts? })` | Awaits terminal state, throws if the message did not dead-letter, and (optionally) checks the DLQ name / `failedReason` regex / attempt count. |
+| `assertRetried(queueName, expectedRetries)` | Awaits terminal state and checks the observed `attempts`. |
+| `assertQueueDrained(queueName?)` | Passes when the queue (or every queue when `queueName` is omitted) has zero `pending` / `delivered` / `retrying` messages. |
+
+`listMessages(queueName?)` returns every snapshot the env has seen (in insertion order). `listDeadLetters(dlqName?)` returns every message that has been routed to a dead-letter queue.
+
+### Options
+
+```ts
+type SetupCloudflareQueuesEnvOptions = {
+  mode?: "miniflare" | "wrangler";                       // default: "miniflare"
+  queues?: string[];                                     // pre-provision queues (optional)
+  consumers?: CloudflareQueueConsumerRegistration[];     // pre-register consumers (optional)
+  miniflare?: { pollIntervalMs?: number; miniflare?: unknown };
+  wrangler?: { url?: string; port?: number; startupTimeoutMs?: number };
+};
+```
+
+`CloudflareQueueConsumerRegistration` mirrors the [[queues.consumers]] entry in `wrangler.toml`: `queue`, `handler`, optional `maxBatchSize`, `maxBatchTimeoutMs`, `maxRetries`, `deadLetterQueue`.
+
+### Miniflare semantics (v0.2 scope)
+
+The miniflare backend covers the following Cloudflare Queues semantics deterministically:
+
+- `send(queueName, body, { delaySeconds? })` → `pending` (or delayed until visibility opens)
+- `pending` → `delivered` when the scheduler flushes a batch
+- `delivered` → `ack` on `msg.ack()`
+- `delivered` → `retrying` on `msg.retry()` or unacked messages (up to `maxRetries`)
+- `retrying` → `dead` after `maxRetries` exhausted (routed to `deadLetterQueue` when set)
+- Handler `throw` → every message in the batch retries (partial acks are preserved otherwise)
+- `maxBatchSize` chunking — pending messages beyond the cap flush across multiple batches
+- `retry()` overrides a subsequent `ack()` on the same message (matches production)
+
+Out of scope for v0.2: `maxBatchTimeoutMs` partial-batch flush timers, `retryDelay` backoff, cross-DC replication semantics, `consumer.consumerConcurrency`. Those semantics are best exercised through the wrangler backend against a real dev-server binding.
+
+### Reference — the Cloudflare Queues PoC
+
+Live under [`examples/queue-cloudflare-poc/`](../../examples/queue-cloudflare-poc/) — 8 tests that thread a webhook audit pipeline through `setupCloudflareQueuesEnv` end to end (happy path, batch coalescing, transient retry, dead-letter, mixed batch partial success, orphan messages, stop cleanup, timeout guard).
+
+```bash
+pnpm -F examples-queue-cloudflare-poc test
 ```
 
 ## License

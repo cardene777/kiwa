@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/queue",
-  "version": "0.1.0",
-  "description": "Queue test adapter for kiwa — BullMQ (Redis-backed) sandbox (in-memory) + testcontainers Redis env + Inngest (event-driven) dev-server + stub env, with job / run assertion helpers (waitForJob / assertProcessed / assertFailed / assertRetried / assertQueueDrained / assertFunctionRan / assertStepRan)",
+  "version": "0.2.0",
+  "description": "Queue test adapter for kiwa — BullMQ (Redis-backed) sandbox (in-memory) + testcontainers Redis env + Inngest (event-driven) dev-server + stub env + Cloudflare Queues (miniflare + wrangler) env, with job / run / message assertion helpers (waitForJob / assertProcessed / assertFailed / assertRetried / assertQueueDrained / assertFunctionRan / assertStepRan / assertAcknowledged / assertDeadLettered)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -19,6 +19,10 @@
     "inngest",
     "event-driven",
     "dev-server",
+    "cloudflare-queues",
+    "miniflare",
+    "wrangler",
+    "edge",
     "testing",
     "vitest"
   ],
@@ -71,8 +75,10 @@
     "bullmq": "^5",
     "inngest": "^3",
     "ioredis": "^5",
+    "miniflare": ">=3",
     "testcontainers": ">=10",
-    "vitest": "^2"
+    "vitest": "^2",
+    "wrangler": ">=3"
   },
   "peerDependenciesMeta": {
     "bullmq": {
@@ -84,7 +90,13 @@
     "ioredis": {
       "optional": true
     },
+    "miniflare": {
+      "optional": true
+    },
     "testcontainers": {
+      "optional": true
+    },
+    "wrangler": {
       "optional": true
     }
   },
