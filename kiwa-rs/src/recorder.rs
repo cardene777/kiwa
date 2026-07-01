@@ -79,13 +79,13 @@ mod tests {
 
     #[test]
     fn multi_value_preserves_wire_order() {
-        let pairs = vec![
-            ("Set-Cookie", "session=abc"),
-            ("Set-Cookie", "csrf=xyz"),
-        ];
+        let pairs = vec![("Set-Cookie", "session=abc"), ("Set-Cookie", "csrf=xyz")];
         let (_, multi) = fold_headers(pairs, 1);
         let cookies = multi.get("set-cookie").expect("set-cookie recorded");
-        assert_eq!(cookies, &vec!["session=abc".to_string(), "csrf=xyz".to_string()]);
+        assert_eq!(
+            cookies,
+            &vec!["session=abc".to_string(), "csrf=xyz".to_string()]
+        );
     }
 
     #[test]

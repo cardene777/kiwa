@@ -61,6 +61,8 @@ actix-web = [
 # expressed via the `tower::Layer` trait already pulled in by the axum feature.
 tower-http = [
   "axum",
+  "dep:base64",
+  "dep:tower-http",
 ]
 # proc-macro support (#[kiwa_test] attribute) — enabled via separate kiwa-test-rs-macro crate planned in v0.3
 macro = []
@@ -81,6 +83,19 @@ serde_json = { version = "1", optional = true }
 # `test_app<F, B>` bound without re-exporting the trait through `actix-web`.
 actix-web = { version = "4", default-features = false, features = ["macros"], optional = true }
 actix-http = { version = "3", default-features = false, optional = true }
+# base64 backs `kiwa::tower_http::auth::with_basic(user, pass)` — the helper
+# formats `Basic <base64(user:pass)>` at call time so tests can attach the
+# header without pulling a base64 crate into their own dev-dep matrix. Kept
+# optional + gated behind the `tower-http` feature so consumers who do not
+# opt into tower-http do not pay for it.
+base64 = { version = "0.22", optional = true }
+# tower-http itself — opt-in via the `tower-http` feature. Named as an
+# optional runtime dep (not a dev-dep) because the 6 middleware helpers
+# (cors / trace / compression / auth / rate_limit / timeout) reference
+# `CorsLayer` / `TimeoutLayer` / `TraceLayer` / `CompressionLayer` type
+# names in their public signatures — the AC 1 requirement in Issue #623.
+# The feature set matches the middleware surface the helpers expose.
+tower-http = { version = "0.6", features = ["cors", "trace", "timeout", "compression-gzip", "validate-request", "limit", "set-header", "auth"], optional = true }
 
 [dev-dependencies]
 # Sync HTTP client for blocking integration tests against `kiwa::integration::mock_server`.
@@ -92,12 +107,24 @@ axum = { version = "0.8", default-features = false, features = ["json", "tokio",
 # `cookies` feature (which transitively breaks on `cookie 0.16.2` × `time 0.3.52`
 # upstream API drift). `macros` + `compress-*` are not required by our tests.
 actix-web = { version = "4", default-features = false, features = ["macros"] }
-# tower + tower-http drive the middleware chain adapter tests. `ServiceBuilder`
-# lives in `tower::ServiceBuilder`, the middleware layers we exercise
-# (CorsLayer / TraceLayer / TimeoutLayer / SetResponseHeaderLayer) live in
-# tower-http submodules gated by tower-http features.
-tower = { version = "0.5", features = ["util"] }
-tower-http = { version = "0.6", features = ["cors", "trace", "timeout", "set-header"] }
+# `tower` drives the middleware chain adapter tests; `ServiceBuilder` lives
+# in `tower::ServiceBuilder`. `tower-http` itself is an optional lib dep
+# (see [dependencies]) so `cargo test --features tower-http` picks it up
+# transitively — the middleware helper tests reach `CorsLayer` /
+# `TimeoutLayer` / `TraceLayer` / `CompressionLayer` /
+# `ValidateRequestHeaderLayer` / `RequestBodyLimitLayer` through the lib
+# feature set without a separate dev-dep declaration.
+tower = { version = "0.5", features = ["util", "limit"] }
+# `flate2` decodes the CompressionLayer output in the compression helper
+# tests — tower-http itself only encodes. The read-side dev-dep stays
+# scoped to test code so no runtime consumer pays for it.
+flate2 = "1"
+# `base64` is available at the runtime dep layer through the `tower-http`
+# feature (see [dependencies]), but the auth helper test wants the same
+# `base64::engine::general_purpose::STANDARD` in a decode-only context.
+# Naming it as a dev-dep keeps the intent obvious in tests and avoids
+# feature-gate cross-talk when the runtime dep is re-organised.
+base64 = "0.22"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }

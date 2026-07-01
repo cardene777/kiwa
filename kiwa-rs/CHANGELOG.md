@@ -28,7 +28,48 @@ chain test helper を追加、 v1.5 axum feature と同じ `TestApp` 契約を�
   `Cargo.toml` の [features] section で `tower-http = ["axum"]` として宣言、
   build tree に tower-http crate を直接 depend せず、 test 側で
   `dev-dependencies` に `tower` + `tower-http` を指定する構成を採る (kiwa 側は
-  middleware 実装を持たず薄い adapter に留める)。
+  middleware 実装を持たず薄い adapter に留める)。 v1.7-2 で構成変更、
+  `tower-http` crate を feature-gated optional runtime dep に昇格
+  (下記 v1.7-2 参照)。
+- v1.7-2 (Issue [#623](https://github.com/cardene777/kiwa/issues/623)) —
+  6 middleware 専用 helper 追加。 v1.7-1 の raw `test_chain` primitive の上に、
+  intent-revealing な constructor + assertion を用意する 6 sibling submodule
+  (`cors` / `trace` / `compression` / `auth` / `rate_limit` / `timeout`)。
+  各 helper は tower-http 0.6 の具体 Layer 型 (`CorsLayer`, `TimeoutLayer`,
+  `TraceLayer`, `CompressionLayer`, `ValidateRequestHeaderLayer` (auth),
+  `RequestBodyLimitLayer` (rate_limit)) を signature に受け、 `test_chain`
+  経路に delegate する。 assertion helper は observable な副作用
+  (`Access-Control-Allow-Origin`, `Content-Encoding`, 408 / 503 timeout
+  status, span header stamp) を single-call で検証する。
+  - `kiwa::tower_http::cors::test_cors(layer, router)` +
+    `assert_preflight_ok(&resp, expected_origin)` +
+    `assert_actual_allow_origin(&resp, expected_origin)`
+  - `kiwa::tower_http::trace::test_trace(layer, router)` +
+    `assert_trace_layer_active(&resp, header)`
+    (span 直接観測は tracing_test crate に外出し、 kiwa は sibling
+    `SetResponseHeaderLayer` の header stamp を SSOT として検証する)
+  - `kiwa::tower_http::compression::test_compression(layer, router)` +
+    `assert_compressed(&resp, encoding)` (content-encoding + non-empty
+    body を two-fold で assert)
+  - `kiwa::tower_http::auth::with_bearer(token)` +
+    `with_basic(user, pass)` — request-side の `Authorization` header pair
+    を返す helper (base64 encoding は kiwa 側で行い consumer は base64
+    crate 不要)
+  - `kiwa::tower_http::rate_limit::exhaust(app, method, path, n)` —
+    n 回 send loop で最後の response を返す driver。 layer 構築は caller
+    の `ServiceBuilder` chain に任せて Clone-not-implemented な
+    `RateLimitLayer` / `RequestBodyLimitLayer` 双方に対応
+  - `kiwa::tower_http::timeout::test_timeout(layer, router)` +
+    `assert_timed_out(&resp, expected_status)` (`REQUEST_TIMEOUT` /
+    `SERVICE_UNAVAILABLE` 等 caller 指定 status を検証)
+- 構成変更 (v1.7-2) — `tower-http` crate を optional runtime dep に昇格。
+  6 middleware helper の public signature が `CorsLayer` / `TimeoutLayer` /
+  `TraceLayer` / `CompressionLayer` 型名を露出するため、 `tower-http`
+  feature を有効にすると tower-http v0.6 (features `cors + trace + timeout
+  + set-header + compression-gzip + validate-request + limit + auth`) が
+  transitive に build tree へ入る。 default feature 使用時は従来通り
+  tower-http は含まれない。 auth helper が `base64` を必要とするため
+  `dep:base64` も feature に追加している。
 
 ## v0.3.0 — v1.6 milestone (unreleased)
 
