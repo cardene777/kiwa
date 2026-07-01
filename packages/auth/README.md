@@ -6,25 +6,27 @@
   <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview (127s) — this package covers the Auth surface. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">▶ Full-quality MP4 (2.9 MB)</a>.</sub>
 </p>
 
-Auth test adapter for kiwa — NextAuth v5 (Auth.js) and Lucia v3 session / provider / database mocks under a shared package.
+Auth test adapter for kiwa — NextAuth v5 (Auth.js), Lucia v3, and Better Auth session / provider / database mocks under a shared package.
 
 ## Overview
 
-`@kiwa-test/auth` is the Layer 2 adapter that turns an auth-shaped Layer 1 spec into a runnable Vitest suite. It ships two independent helpers:
+`@kiwa-test/auth` is the Layer 2 adapter that turns an auth-shaped Layer 1 spec into a runnable Vitest suite. It ships three independent helpers:
 
 - **`setupNextAuthEnv`** — NextAuth v5 (Auth.js) session / provider / database mocks.
 - **`setupLuciaEnv`** — Lucia v3 password + OAuth flows across SQLite / PostgreSQL adapter shapes.
+- **`setupBetterAuthEnv`** — Better Auth email/password + magic link + 2FA (TOTP) + social sign-in + organizations / passkey plugins across Prisma / Drizzle / Kysely adapter shapes.
 
 ## Install
 
 ```bash
 pnpm add -D @kiwa-test/auth @kiwa-test/core vitest
-# and, per stack, either / both of:
+# and, per stack, any of:
 pnpm add -D next-auth        # for setupNextAuthEnv
 pnpm add -D lucia            # for setupLuciaEnv
+pnpm add -D better-auth      # for setupBetterAuthEnv
 ```
 
-Both `next-auth` and `lucia` are declared as **optional peer dependencies** — neither helper imports from the real library, so the peer is only required if you assert against the real types in your suite.
+`next-auth`, `lucia`, and `better-auth` are declared as **optional peer dependencies** — none of the helpers imports from the real library, so the peer is only required if you assert against the real types in your suite.
 
 ## Quick start — NextAuth v5
 
@@ -135,6 +137,91 @@ env.database.kind;                       // "postgresql"
 ## Example: Lucia v3 PoC
 
 See [`examples/auth-lucia-poc/`](../../examples/auth-lucia-poc) for the end-to-end bare-metal handler PoC: 8 tests cover password / Google / GitHub / rolling session refresh across SQLite and PostgreSQL adapter shapes.
+
+## Quick start — Better Auth
+
+```ts
+import { setupBetterAuthEnv, generateTotpCode } from "@kiwa-test/auth";
+
+const env = await setupBetterAuthEnv({
+  providers: ["google", "github"],
+  plugins: ["emailAndPassword", "magicLink", "twoFactor", "organizations", "passkey"],
+  sessionExpiration: 60 * 60 * 24 * 7, // 7 days
+  database: { kind: "prisma" },          // or "drizzle" / "kysely"
+});
+
+// 1) Password sign-up — same generic error on bad email OR bad password.
+const signed = await env.signUpWithPassword({
+  email: "alice@example.test",
+  password: "correct-horse-battery-staple",
+});
+signed.session.token;                    // 40-char url-safe bearer token
+
+// 2) Magic link — the token would go in the click-through URL.
+const { token } = await env.sendMagicLink({ email: "alice@example.test" });
+await env.consumeMagicLink({ email: "alice@example.test", token });
+
+// 3) 2FA / TOTP — enroll, then verify against a code the authenticator app emits.
+const { secret } = await env.enrollTwoFactor({ userId: signed.user.id });
+const code = generateTotpCode(secret);
+await env.verifyTwoFactorCode({ userId: signed.user.id, code });
+
+// 4) Social sign-in — Google / GitHub mocks share the same profile shape.
+await env.signInWithOAuth("google", { sub: "g-42", email: "…" });
+
+// 5) Organizations plugin — creator is auto-added as owner.
+const org = await env.createOrganization({
+  name: "Acme",
+  slug: "acme",
+  userId: signed.user.id,
+});
+await env.inviteToOrganization({ organizationId: org.id, userId: "…", role: "admin" });
+
+// 6) Passkey plugin — records the WebAuthn credential shape without the ceremony.
+await env.registerPasskey({
+  userId: signed.user.id,
+  credentialId: "cred-abc",
+  publicKey: "pk-xyz",
+});
+
+// 7) Validate / invalidate.
+await env.validateSession(signed.session.token);
+await env.invalidateSession(signed.session.token);
+await env.invalidateUserSessions(signed.user.id);
+
+// 8) Reset between tests.
+await env.stop();
+```
+
+## Prisma / Drizzle / Kysely adapter compat
+
+`createInMemoryBetterAuthAdapter` matches the operation surface of `better-auth/adapters/prisma`, `better-auth/adapters/drizzle`, and `better-auth/adapters/kysely`. All three official adapters funnel through the same operation set at the Better Auth layer, so the mock is a drop-in for any of them — the `kind` tag is the only observable difference:
+
+```ts
+import { createInMemoryBetterAuthAdapter, setupBetterAuthEnv } from "@kiwa-test/auth";
+
+const shared = createInMemoryBetterAuthAdapter("drizzle");
+const env = await setupBetterAuthEnv({ database: shared });
+env.database.kind;                       // "drizzle"
+```
+
+## Plugin surface
+
+Plugins are opt-in — a helper method rejects with a `requires the "<plugin>" plugin to be enabled` error when the corresponding entry is missing from `plugins`.
+
+| Plugin | Unlocks |
+|---|---|
+| `emailAndPassword` | `signUpWithPassword` / `signInWithPassword` |
+| `magicLink` | `sendMagicLink` / `consumeMagicLink` |
+| `twoFactor` | `enrollTwoFactor` / `verifyTwoFactorCode` + `generateTotpCode` for consumer tests |
+| `organizations` | `createOrganization` / `inviteToOrganization` |
+| `passkey` | `registerPasskey` |
+
+Social sign-in (`signInWithOAuth`) is always available and configured through `providers`.
+
+## Example: Better Auth PoC
+
+See [`examples/auth-better-auth-poc/`](../../examples/auth-better-auth-poc) for the end-to-end bare-metal handler PoC: 8 tests cover password / magic link / 2FA / Google / GitHub across Prisma / Drizzle / Kysely adapter shapes.
 
 ## License
 

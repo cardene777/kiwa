@@ -48,3 +48,47 @@ export {
   validateSessionId,
 } from './lucia/session.js';
 export { hashPassword, verifyPassword } from './lucia/password.js';
+
+// Better Auth adapter surface.
+export type {
+  BetterAuthAccount,
+  BetterAuthDatabaseAdapter,
+  BetterAuthDatabaseKind,
+  BetterAuthMembership,
+  BetterAuthOAuthProfile,
+  BetterAuthOrganization,
+  BetterAuthPasskey,
+  BetterAuthPluginKind,
+  BetterAuthProviderKind,
+  BetterAuthProviderMock,
+  BetterAuthSession,
+  BetterAuthTestEnv,
+  BetterAuthUser,
+  BetterAuthVerification,
+  SetupBetterAuthEnvOptions,
+} from './better-auth/types.js';
+export {
+  generateTotpCode,
+  setupBetterAuthEnv,
+} from './better-auth/setup-better-auth-env.js';
+export { createInMemoryBetterAuthAdapter } from './better-auth/adapter.js';
+export {
+  buildBetterAuthProviderRegistry,
+  createBetterAuthGithubProviderMock,
+  createBetterAuthGoogleProviderMock,
+} from './better-auth/providers.js';
+export {
+  createSessionFor as createBetterAuthSessionFor,
+  generateSessionId as generateBetterAuthSessionId,
+  generateSessionToken as generateBetterAuthSessionToken,
+  invalidateSessionsForUser as invalidateBetterAuthSessionsForUser,
+  validateSessionByToken as validateBetterAuthSessionByToken,
+} from './better-auth/session.js';
+export {
+  hashPassword as hashBetterAuthPassword,
+  verifyPassword as verifyBetterAuthPassword,
+} from './better-auth/password.js';
+export {
+  generateTotpSecret,
+  verifyTotpCode,
+} from './better-auth/totp.js';

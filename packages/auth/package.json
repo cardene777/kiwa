@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/auth",
   "version": "0.1.0",
-  "description": "Auth test adapter for kiwa (NextAuth v5 / Auth.js + Lucia v3 — session + provider + DB adapter mocks)",
+  "description": "Auth test adapter for kiwa (NextAuth v5 / Auth.js + Lucia v3 + Better Auth — session + provider + DB adapter mocks)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -14,10 +14,16 @@
     "auth.js",
     "lucia",
     "lucia-auth",
+    "better-auth",
+    "magic-link",
+    "totp",
+    "2fa",
+    "passkey",
     "testing",
     "vitest",
     "prisma",
     "drizzle",
+    "kysely",
     "sqlite",
     "postgresql"
   ],
@@ -69,6 +75,7 @@
   "peerDependencies": {
     "next-auth": ">=5.0.0-beta.0 <6",
     "lucia": "^3",
+    "better-auth": ">=1.0.0-beta.0",
     "vitest": "^2"
   },
   "peerDependenciesMeta": {
@@ -76,6 +83,9 @@
       "optional": true
     },
     "lucia": {
+      "optional": true
+    },
+    "better-auth": {
       "optional": true
     }
   },
