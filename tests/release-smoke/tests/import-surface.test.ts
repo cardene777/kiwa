@@ -249,6 +249,31 @@ describe('@kiwa-test/edge surface', () => {
   });
 });
 
+describe('@kiwa-test/auth surface', () => {
+  it('exports setupNextAuthEnv + createInMemoryAdapter + provider factories (v0.1.0, Issue #637)', async () => {
+    const mod = await import('@kiwa-test/auth');
+    expect(typeof mod.setupNextAuthEnv).toBe('function');
+    expect(typeof mod.createInMemoryAdapter).toBe('function');
+    expect(typeof mod.buildProviderRegistry).toBe('function');
+    expect(typeof mod.createGoogleProviderMock).toBe('function');
+    expect(typeof mod.createGithubProviderMock).toBe('function');
+    expect(typeof mod.createEmailProviderMock).toBe('function');
+    expect(typeof mod.issueSession).toBe('function');
+    expect(typeof mod.upsertUserFromProfile).toBe('function');
+  });
+
+  it('setupNextAuthEnv env exposes jwt session strategy defaults + 3 providers', async () => {
+    const mod = await import('@kiwa-test/auth');
+    const env = await mod.setupNextAuthEnv();
+    expect(env.mode).toBe('mock');
+    expect(env.session.strategy).toBe('jwt');
+    expect(env.providers.google.id).toBe('google');
+    expect(env.providers.github.id).toBe('github');
+    expect(env.providers.email.id).toBe('email');
+    await env.stop();
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');
