@@ -452,3 +452,76 @@ fn response_body_survives_caller_buffer_reuse() {
     assert_eq!(cloned.body(), b"first-body");
     assert_eq!(cloned.body_str(), "first-body");
 }
+
+// v1.6-3 lifecycle activation — post-Stop send() must panic loudly, and
+// `is_stopped` must expose the flip so specs can observe stopped state
+// without trapping the panic.
+
+// 1) `is_stopped()` starts false, flips true after `stop()`, and stays
+//    true across repeated `stop()` calls (idempotency).
+#[test]
+fn test_app_is_stopped_reflects_lifecycle() {
+    let app = Router::new().route("/health", get(|| async { "ok" }));
+    let mut test = test_app(app);
+
+    assert!(!test.is_stopped(), "is_stopped before stop() should be false");
+    test.stop();
+    assert!(test.is_stopped(), "is_stopped after stop() should be true");
+    test.stop(); // idempotent
+    test.stop();
+    assert!(test.is_stopped(), "is_stopped after triple stop() should stay true");
+}
+
+// 2) Post-Stop send() panics with a self-describing message that names
+//    the lifecycle contract and echoes the request coordinates.
+#[test]
+fn test_app_send_after_stop_panics_with_diagnostic_message() {
+    let app = Router::new().route("/health", get(|| async { "ok" }));
+    let mut test = test_app(app);
+
+    // Warm exercise — pre-Stop request must succeed so we know the panic
+    // path is specific to post-Stop and not a spurious failure elsewhere.
+    let resp = test.request(HttpMethod::Get, "/health").send();
+    assert_eq!(resp.status(), 200);
+
+    test.stop();
+
+    // catch_unwind isolates the panic so this test can assert on the
+    // message. AssertUnwindSafe wraps the closure because TestApp does not
+    // impl UnwindSafe (the tokio Runtime is not UnwindSafe) — we only care
+    // that the closure body itself does not observe partially-updated
+    // state after the panic, which is true here (the closure just calls
+    // send() and returns).
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        test.request(HttpMethod::Get, "/health").send();
+    }));
+
+    let payload = result.expect_err("post-Stop send() should panic");
+    let message = payload
+        .downcast_ref::<String>()
+        .cloned()
+        .or_else(|| payload.downcast_ref::<&'static str>().map(|s| s.to_string()))
+        .expect("panic payload should be a string");
+
+    assert!(
+        message.contains("send() called after stop()"),
+        "panic message = {message:?}, want it to mention post-Stop lifecycle",
+    );
+    assert!(
+        message.contains("/health") && message.contains("Get"),
+        "panic message = {message:?}, want request coordinates GET /health",
+    );
+}
+
+// 3) Explicit stop() followed by end-of-scope Drop must not double-drop
+//    the runtime or double-panic.
+#[test]
+fn test_app_explicit_stop_then_drop_is_safe() {
+    let app = Router::new().route("/health", get(|| async { "ok" }));
+    let mut test = test_app(app);
+
+    test.request(HttpMethod::Get, "/health").send();
+    test.stop();
+    // Drop fires here as `test` goes out of scope — must not panic and
+    // must not attempt to shut a runtime down twice.
+}

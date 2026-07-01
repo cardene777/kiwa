@@ -81,11 +81,28 @@ import (
 // request the harness dispatches (both routed and unrouted). The recorder
 // is guarded by a mutex so parallel test bodies firing Send() concurrently
 // cannot tear writes against RecordedRequests() reads.
+//
+// # Lifecycle
+//
+// The kiwa fixture contract is build → exercise → Stop (mirrors v1.4
+// kiwa.NewMockServer). Callers can either call Stop explicitly or rely on
+// the t.Cleanup handler registered by NewTestServer. Stop is idempotent.
+// Once Stop has run subsequent Send() calls report the lifecycle
+// violation through t.Fatalf so post-Stop traffic surfaces as a diagnostic
+// test failure instead of silently hitting the retired Echo instance —
+// matching the v1.4 mock_server contract where post-Stop traffic hits a
+// closed port and fails at the transport layer.
 type TestServer struct {
 	echo     *echo.Echo
 	recorder *requestRecorder
-	stopped  bool
-	stopMu   sync.Mutex
+	// t is the testing.TB handle captured at NewTestServer so Send() can
+	// route post-Stop lifecycle violations through t.Fatalf. Storing it
+	// on the server (rather than passing it through the RequestBuilder)
+	// keeps the fluent .Request(...).Send() call chain unchanged while
+	// still giving Send() a way to fail the test with a full stack.
+	t       testing.TB
+	stopped bool
+	stopMu  sync.Mutex
 }
 
 // Echo returns the wrapped *echo.Echo so tests can register additional
@@ -107,11 +124,26 @@ func (s *TestServer) RequestCount() int {
 	return s.recorder.count()
 }
 
+// IsStopped reports whether Stop has run (either explicitly or through
+// the t.Cleanup handler registered by NewTestServer). Test bodies rarely
+// need this — it exists so specs that exercise the lifecycle contract
+// explicitly do not have to trap the post-Stop t.Fatalf inside Send() to
+// observe stopped state.
+func (s *TestServer) IsStopped() bool {
+	s.stopMu.Lock()
+	defer s.stopMu.Unlock()
+	return s.stopped
+}
+
 // Stop releases the harness. Idempotent — t.Cleanup invokes this too, so
 // an explicit Stop followed by cleanup is safe. v0.2 has no real port to
 // release; Stop is kept on the surface so the lifecycle matches v1.4
 // kiwa.NewMockServer (build → exercise → Stop) and future versions can
 // add resources without breaking the contract.
+//
+// Once Stop has run subsequent Send() calls fail the test with
+// t.Fatalf so post-Stop traffic surfaces as a diagnostic failure — see
+// the TestServer godoc "Lifecycle" section.
 func (s *TestServer) Stop() {
 	s.stopMu.Lock()
 	defer s.stopMu.Unlock()
@@ -173,10 +205,29 @@ func (r *Request) JSON(body []byte) *Request {
 // response. The recorder captures the outbound request before dispatch
 // so a panicking handler does not lose the trace.
 //
+// If the wrapping TestServer has already been stopped (either via an
+// explicit srv.Stop() call or through the t.Cleanup handler registered by
+// NewTestServer) Send() reports the lifecycle violation through
+// t.Fatalf — post-Stop traffic is a bug in the test and surfacing it as a
+// diagnostic failure matches the v1.4 mock_server contract where
+// post-Stop traffic hits a closed port and fails at the transport layer.
+// Send returns nil in that path so any accidental chained assertion on the
+// returned *Response fails loudly with a nil-pointer stack instead of
+// silently reading the retired engine.
+//
 // Send panics with a self-describing message on http.NewRequest failures
 // so the test fails fast with a clear stack instead of bubbling errors
 // through every assertion call site.
 func (r *Request) Send() *Response {
+	if r.server.IsStopped() {
+		r.server.t.Helper()
+		r.server.t.Fatalf(
+			"kiwa-echo: Send() called after Stop() — lifecycle contract requires build → exercise → Stop, post-Stop traffic is a bug (request: %s %s)",
+			r.method.String(), r.path,
+		)
+		return nil
+	}
+
 	req, err := http.NewRequest(r.method.String(), r.path, bytes.NewReader(r.body))
 	if err != nil {
 		panic(fmt.Sprintf("kiwa-echo: build request %s %s: %v", r.method.String(), r.path, err))
@@ -416,6 +467,7 @@ func NewTestServer(t testing.TB, e *echo.Echo) *TestServer {
 	srv := &TestServer{
 		echo:     e,
 		recorder: &requestRecorder{},
+		t:        t,
 	}
 	t.Cleanup(srv.Stop)
 	return srv
