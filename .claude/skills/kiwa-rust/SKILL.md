@@ -1,8 +1,8 @@
 ---
 name: kiwa-rust
 description: |
-  Layer 1 spec (`tests/spec/unit/test-spec-{module}.rs.md` / `tests/spec/integration/test-spec-{module}.rs.md`) を `kiwa-test-rs` の Rust test file (`tests/*.rs`) に変換する Layer 2 polyglot test skill。
-  v1.4-5 で追加された `--layer rust-unit` / `--layer rust-integration` が出力する 9 column 拡張表を Rust の cargo test 文法 (`#[test]` / `assert_kiwa_eq!` / `assert_kiwa_close!` / `#[should_panic]`) と `kiwa::unit::setup_env` / `kiwa::integration::mock_server` API に機械的に変換し、 `cargo test` 自動実行 + `cargo llvm-cov` coverage 評価まで一気通貫で担当する。
+  Layer 1 spec (`tests/spec/unit/test-spec-{module}.rs.md` / `tests/spec/integration/test-spec-{module}.rs.md` / `tests/spec/integration/test-spec-{module}.rust-axum.md` / `tests/spec/integration/test-spec-{module}.rust-actix.md`) を `kiwa-test-rs` の Rust test file (`tests/*.rs`) に変換する Layer 2 polyglot test skill。
+  v1.4-5 で追加された `--layer rust-unit` / `--layer rust-integration` に加え、 v1.5-6 で追加された `--mode axum` / `--mode actix-web` で `kiwa-test-rs` v0.2 の `kiwa::axum::test_app(router)` / `kiwa::actix::test_app(factory)` + `TestApp::request(HttpMethod, path)` chain と直接 mapping する 9 column 拡張表を Rust の cargo test 文法 (`#[test]` / `assert_kiwa_eq!` / `assert_kiwa_close!` / `#[should_panic]`) と `kiwa::unit::setup_env` / `kiwa::integration::mock_server` / `kiwa::axum::test_app` / `kiwa::actix::test_app` API に機械的に変換し、 `cargo test` 自動実行 + `cargo llvm-cov` coverage 評価まで一気通貫で担当する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -11,8 +11,8 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /kiwa-rust — Layer 2 Rust polyglot test skill
 
-`/kiwa-design --layer rust-unit` / `--layer rust-integration` (Issue #580 v1.4-5、 PR #587) が出力する 9 column 拡張表を、 `kiwa-test-rs` v0.1 (Issue #576 / #577、 PR #583 / #584) の API surface に sync させた Layer 2 generator skill。
-TS / Vitest 経路の `/kiwa-vitest`、 Python / pytest 経路の `kiwa-test-py` と並ぶ polyglot test toolchain の Rust 側 land。
+`/kiwa-design --layer rust-unit` / `--layer rust-integration` (Issue #580 v1.4-5、 PR #587) + `--layer rust-axum` / `--layer rust-actix-web` (Issue #596 v1.5-5、 PR #603) が出力する 9 column 拡張表を、 `kiwa-test-rs` v0.1 (Issue #576 / #577、 PR #583 / #584) + v0.2 (Issue #592 / #593、 PR #599 / #600) の API surface に sync させた Layer 2 generator skill。
+TS / Vitest 経路の `/kiwa-vitest`、 Python / pytest 経路の `kiwa-test-py` と並ぶ polyglot test toolchain の Rust 側 land。 v1.5-6 (Issue #597) で `--mode {axum|actix-web}` flag を追加し、 4 layer (rust-unit / rust-integration / rust-axum / rust-actix-web) → 4 test file 生成の automation を成立させる。
 
 ## 入力の trust boundary
 
@@ -22,10 +22,15 @@ trust boundary 違反検出時は spec 末尾「不足している仕様」 に 
 
 ## 前提
 
-- Layer 1 spec (`tests/spec/unit/test-spec-{module}.rs.md` or `tests/spec/integration/test-spec-{module}.rs.md`) が存在 (`/kiwa-design --module {name} --layer rust-unit` or `--layer rust-integration` で生成)
-- 対象 example に `Cargo.toml` が存在し、 `kiwa-test-rs` が dev-dependency で利用可能 (未追加なら `[dev-dependencies]` セクションに `kiwa-test-rs = { path = "../../kiwa-rs", version = "0.1" }` を Edit 追加)
+- Layer 1 spec が存在 (`/kiwa-design --module {name} --layer {rust-unit|rust-integration|rust-axum|rust-actix-web}` で生成)
+  - rust-unit ... `tests/spec/unit/test-spec-{module}.rs.md`
+  - rust-integration ... `tests/spec/integration/test-spec-{module}.rs.md`
+  - rust-axum ... `tests/spec/integration/test-spec-{module}.rust-axum.md` (`--mode axum` 前提)
+  - rust-actix-web ... `tests/spec/integration/test-spec-{module}.rust-actix.md` (`--mode actix-web` 前提)
+- 対象 example に `Cargo.toml` が存在し、 `kiwa-test-rs` が dev-dependency で利用可能 (未追加なら `[dev-dependencies]` セクションに `kiwa-test-rs = { path = "../../kiwa-rs", version = "0.2" }` を Edit 追加)
+- axum mode は `[features]` で `axum` opt-in、 actix-web mode は `actix-web` opt-in が必要 (`kiwa-test-rs = { path = "...", version = "0.2", features = ["axum"] }` or `["actix-web"]`)
 - 対象 file (`src/lib.rs` / `src/{module}.rs`) が存在
-- 出力先 `tests/{module}.rs` (cargo の integration test 慣習、 unit / integration どちらも `tests/` に置く) への Write 権限
+- 出力先 `tests/{module}.rs` (cargo の integration test 慣習、 unit / integration / axum / actix-web 全て `tests/` に置く、 mode 別に file 名 suffix で分離) への Write 権限
 
 ## ユーザーのリクエスト
 
@@ -34,8 +39,9 @@ $ARGUMENTS
 ## オプション
 
 - `--module {name}` — 対象 module 名 (Layer 1 spec の file 名と一致、 例 `counter` / `counter-api`)
-- `--layer {rust-unit|rust-integration}` — 入力 spec の layer (省略時は spec file の存在を Glob で確認して推定、 両方存在なら AskUserQuestion)
-- `--input-spec {path}` — Layer 1 spec の path (省略時は layer から推定)
+- `--layer {rust-unit|rust-integration|rust-axum|rust-actix-web}` — 入力 spec の layer (省略時は spec file の存在を Glob で確認して推定、 複数存在なら AskUserQuestion)。 `--mode` と組み合わせも許容 (`--mode axum` は `--layer rust-axum` の syntactic sugar)
+- `--mode {axum|actix-web}` — v1.5-6 で追加、 web framework mode flag。 `--mode axum` = `--layer rust-axum` (`kiwa::axum::test_app(router)` 経路)、 `--mode actix-web` = `--layer rust-actix-web` (`kiwa::actix::test_app(factory)` 経路)。 `--layer` と併用時は `--mode` 優先 (framework mode を明示的に選ぶ意図と解釈)、 両者が矛盾する場合は起動時 error で abort
+- `--input-spec {path}` — Layer 1 spec の path (省略時は layer / mode から推定)
 - `--target {path}` — 対象実装 file (`src/lib.rs` 等、 grep で識別)
 - `--example {name}` — `examples/{name}/` の Rust example 名 (省略時は cwd が example 内なら自動推定、 root なら AskUserQuestion)
 - `--coverage-threshold {N}` — cargo llvm-cov coverage 目標 (default 80%、 `cargo llvm-cov` 未 install なら Step 5 で警告のみ出して skip)
@@ -46,11 +52,13 @@ $ARGUMENTS
 
 | 観点 | 出力 path |
 |---|---|
-| Rust test file (unit / integration 共通) | `examples/{example}/tests/{module}.rs` |
+| Rust test file (rust-unit / rust-integration) | `examples/{example}/tests/{module}.rs` |
+| Rust test file (rust-axum、 `--mode axum`) | `examples/{example}/tests/{module}_axum.rs` |
+| Rust test file (rust-actix-web、 `--mode actix-web`) | `examples/{example}/tests/{module}_actix.rs` |
 | coverage report | `tests/reports/rust/coverage-report-{module}.{lang}.md` |
 | round 別 coverage | `tests/reports/rust/coverage-report-{module}-round-{N}.{lang}.md` |
 
-cargo の慣習 ... `tests/` 配下は integration test 扱い、 1 file = 1 crate。 unit / integration どちらも本 skill では `tests/{module}.rs` に揃える (`src/` 内 `#[cfg(test)] mod tests` 経路は本 skill scope 外、 module 内 test は人手 maintain)。
+cargo の慣習 ... `tests/` 配下は integration test 扱い、 1 file = 1 crate。 unit / integration どちらも本 skill では `tests/{module}.rs` に揃える (`src/` 内 `#[cfg(test)] mod tests` 経路は本 skill scope 外、 module 内 test は人手 maintain)。 web framework mode (`--mode axum` / `--mode actix-web`) は同 module に対して 4 framework 並列 test を成立させるため file 名 suffix (`_axum` / `_actix`) で分離 (`--mode gin` / `--mode echo` 経路の `/kiwa-go` と同思想)。
 
 ## 実行フロー
 
@@ -62,15 +70,24 @@ AskUserQuestion で coverage report の生成言語を user に確認する。 `
 
 ### Step 1: Layer 1 spec 読込 + layer 判定
 
-`--layer` 指定なしなら `tests/spec/unit/test-spec-{module}.rs.md` と `tests/spec/integration/test-spec-{module}.rs.md` を Glob 確認、 片方のみなら自動判定、 両方なら AskUserQuestion。
+`--mode` 指定時は layer を確定する ... `--mode axum` → `rust-axum`、 `--mode actix-web` → `rust-actix-web`。 spec path も確定する (`tests/spec/integration/test-spec-{module}.rust-axum.md` / `tests/spec/integration/test-spec-{module}.rust-actix.md`)。 `--layer` と同時指定で矛盾があれば起動時 error abort。
+
+`--mode` / `--layer` 指定なしなら 4 spec path を Glob 確認 (`tests/spec/unit/test-spec-{module}.rs.md` / `tests/spec/integration/test-spec-{module}.rs.md` / `tests/spec/integration/test-spec-{module}.rust-axum.md` / `tests/spec/integration/test-spec-{module}.rust-actix.md`)、 単一のみなら自動判定、 複数なら AskUserQuestion。
 
 Read 後、 9 column 拡張表から TC 行を全件抽出 (id / observation / given / when / then / priority / automation / mode / target)。 各 TC の (テストレベル / 観点 / 前提 / 入力 / 操作 / 期待結果) を Rust cargo test 文法に対応付ける map を内部で作る。
 
+- rust-unit / rust-integration ... 従来通り `kiwa::unit::setup_env` / `kiwa::integration::mock_server` にマッピング
+- rust-axum ... 9 column の Route / Extractor / Handler / State / Middleware / Then を `kiwa::axum::test_app(router)` + `TestApp::request(...).send()` にマッピング
+- rust-actix-web ... 9 column の Route / Extractor / Handler / AppData / Middleware / Then を `kiwa::actix::test_app(|| App::new()...)` (factory closure、 `App` は `!Clone`) + `TestApp::request(...).send()` にマッピング
+
 ### Step 2: 対象実装 file 確認
 
-`--target` で指定された file (or `--module {name}` から推測した `src/lib.rs` / `src/{module}.rs`) を Read。 公開 API を grep し、 TC の「Target」 column で参照されている関数 / struct / method が実在することを確認する。
+`--target` で指定された file (or `--module {name}` から推測した `src/lib.rs` / `src/{module}.rs`) を Read。 公開 API を grep し、 TC の「Target」 / 「Route」 column で参照されている関数 / struct / method / handler / Route が実在することを確認する。
 
-不在の関数 / struct / method は spec の「不足している仕様」 に bullet 追加して飛ばさず止める。
+- rust-axum ... `Router::new().route(...)` の登録 handler / `Router::with_state(...)` の state type が実装 file に存在するか grep
+- rust-actix-web ... `App::new()...service(...)` の登録 handler / `App::app_data(web::Data::new(...))` の state type が実装 file に存在するか grep
+
+不在の関数 / struct / method / handler / Route は spec の「不足している仕様」 に bullet 追加して飛ばさず止める。
 
 ### Step 3: 観点別 cargo test helper 変換
 
@@ -93,10 +110,24 @@ Read 後、 9 column 拡張表から TC 行を全件抽出 (id / observation / g
 | mock_server 経路 (integration) | `kiwa::integration::mock_server(opts.with_route(Route::new(HttpMethod::Get, "/path", \|_req\| MockResponse::json(...))))` |
 | recorder 検証 (integration) | `server.recorded_requests()` + `server.request_count()` で method / path / body 確認 |
 | multi-route 並列 (integration) | `std::thread::spawn` × N で並列 reqwest send、 順序非依存で全 200 確認 |
+| axum Router 経路 (rust-axum) | `kiwa::axum::test_app(router)` で `TestApp` を起動 → `test.request(HttpMethod::Get, "/path").send()` chain で `TestResponse` を取得、 `resp.status()` / `resp.json::<Dto>()` / `resp.body_str()` / `resp.headers()` で assertion |
+| axum state injection (rust-axum) | `Router::new().route(...).with_state(Arc::new(state))` で state を注入し `test_app(router)` で同じ Router を駆動、 in-process の tokio runtime + `tower::Service::oneshot` 経路で real port なし |
+| axum middleware layer (rust-axum) | `Router::new().route(...).layer(auth_middleware)` で middleware を積み `test.request(...).header("Authorization", "Bearer x").send()` で gate 検証、 未認証は 401 assertion |
+| actix-web App 経路 (rust-actix-web) | `kiwa::actix::test_app(\|\| App::new().service(...))` (factory closure 必須、 `App` は `!Clone`) → `test.request(HttpMethod::Get, "/path").send()` chain、 surface は axum adapter と 1:1 (`resp.status()` / `resp.json::<Dto>()` / `resp.body_str()` / `resp.headers()`) |
+| actix-web app_data 注入 (rust-actix-web) | `App::new().app_data(web::Data::new(state))` を factory 内で注入、 `test_app(\|\| App::new().app_data(...).service(...))` で駆動、 actix-rt runtime auto-drop |
+| actix-web middleware wrap (rust-actix-web) | `App::new().wrap(HttpAuthentication::bearer(validator)).service(...)` で middleware を積み `test.request(...).header(...).send()` で gate 検証、 axum と同一 assertion pattern |
 
-### Step 4: `tests/{module}.rs` Write + `cargo test` 実行
+### Step 4: `tests/{module}[_suffix].rs` Write + `cargo test` 実行
 
 各 TC を `#[test] fn {snake_case}() { ... }` 1 関数に変換、 観点別に `mod` でグループ化する (cargo test は `mod` 階層を `--` で filter 可能、 `cargo test happy_path::` で観点絞り込み)。
+
+出力 file 名は layer / mode で分岐する。
+
+- rust-unit / rust-integration ... `tests/{module}.rs`
+- rust-axum (`--mode axum`) ... `tests/{module}_axum.rs`
+- rust-actix-web (`--mode actix-web`) ... `tests/{module}_actix.rs`
+
+同 module に対して 4 framework 並列 test を成立させるため、 web framework mode は file 名 suffix で分離する。
 
 出力 file template (unit)。
 
@@ -163,7 +194,78 @@ fn t_rs_i_001_get_counter_returns_200_with_value() {
 }
 ```
 
-Write 後に Bash で `cargo test --manifest-path examples/{example}/Cargo.toml --test {module}` を実行し、 失敗 TC は flag、 全 PASS で次へ。 `Cargo.toml` 直下 example の場合は `--manifest-path` を例えば `examples/rust-cargo-poc/Cargo.toml` で指定する。
+出力 file template (rust-axum、 `--mode axum`)。
+
+```rust
+//! Generated by /kiwa-rust --mode axum from tests/spec/integration/test-spec-{module}.rust-axum.md
+//! `kiwa::axum::test_app(router)` + `TestApp::request(HttpMethod, path).send()` 経路。
+
+use kiwa::axum::{test_app, HttpMethod};
+use kiwa::assert_kiwa_eq;
+use {example_crate}::router;
+
+mod happy_path {
+    use super::*;
+
+    #[test]
+    fn t_rs_ax_001_get_counter_returns_200_with_value() {
+        let test = test_app(router());
+        let resp = test.request(HttpMethod::Get, "/counter").send();
+        assert_kiwa_eq!(resp.status(), 200_u16);
+        let body = resp.json().expect("json body");
+        assert_kiwa_eq!(body["value"], serde_json::json!(0));
+    }
+}
+
+mod error_path {
+    use super::*;
+
+    #[test]
+    fn t_rs_ax_005_unknown_path_returns_404() {
+        let test = test_app(router());
+        let resp = test.request(HttpMethod::Get, "/unknown").send();
+        assert_kiwa_eq!(resp.status(), 404_u16);
+    }
+}
+```
+
+出力 file template (rust-actix-web、 `--mode actix-web`)。
+
+```rust
+//! Generated by /kiwa-rust --mode actix-web from tests/spec/integration/test-spec-{module}.rust-actix.md
+//! `kiwa::actix::test_app(factory)` + `TestApp::request(HttpMethod, path).send()` 経路。
+//! `App` は `!Clone` のため factory closure 必須。
+
+use kiwa::actix::{test_app, HttpMethod};
+use kiwa::assert_kiwa_eq;
+use actix_web::{web, App};
+use {example_crate}::{get_counter, increment_counter, decrement_counter, reset_counter, AppState};
+
+mod happy_path {
+    use super::*;
+
+    #[test]
+    fn t_rs_actix_001_get_counter_returns_200_with_value() {
+        let test = test_app(|| {
+            App::new()
+                .app_data(web::Data::new(AppState::default()))
+                .route("/counter", web::get().to(get_counter))
+        });
+        let resp = test.request(HttpMethod::Get, "/counter").send();
+        assert_kiwa_eq!(resp.status(), 200_u16);
+        let body = resp.json().expect("json body");
+        assert_kiwa_eq!(body["value"], serde_json::json!(0));
+    }
+}
+```
+
+Write 後に Bash で mode 別 cargo test コマンドを実行し、 失敗 TC は flag、 全 PASS で次へ。 `Cargo.toml` 直下 example の場合は `--manifest-path` を例えば `examples/rust-axum-poc/Cargo.toml` で指定する。
+
+- rust-unit / rust-integration ... `cargo test --manifest-path examples/{example}/Cargo.toml --test {module}`
+- rust-axum ... `cargo test --manifest-path examples/{example}/Cargo.toml --features kiwa/axum --test {module}_axum` (kiwa-test-rs の `axum` feature 有効化必須)
+- rust-actix-web ... `cargo test --manifest-path examples/{example}/Cargo.toml --features kiwa/actix-web --test {module}_actix` (kiwa-test-rs の `actix-web` feature 有効化必須)
+
+feature 名は `kiwa-test-rs` v0.2 の `[features]` (`axum` / `actix-web`) に一致する。 example の `Cargo.toml` で `kiwa-test-rs = { path = "...", features = ["axum"] }` 等で pre-enable している場合は `--features` 省略可能。
 
 ### Step 5: coverage 評価 + auto loop + report
 
@@ -178,9 +280,9 @@ report 4 section (`tests/reports/rust/coverage-report-{module}.{lang}.md`)。
 
 ### Step 6: kiwa-review 自動呼出 (test-review mode)
 
-`/kiwa-review --mode test-review --module {module} --layer {rust-unit|rust-integration} --test-path examples/{example}/tests/{module}.rs --lang $DOC_LANG` を内部呼出し、 spec vs test 整合 + 観点別 cover 率 + 追加 test 提案を 5 軸判定。 `--no-review` で skip 可能。
+`/kiwa-review --mode test-review --module {module} --layer {rust-unit|rust-integration|rust-axum|rust-actix-web} --test-path examples/{example}/tests/{module}[_suffix].rs --lang $DOC_LANG` を内部呼出し、 spec vs test 整合 + 観点別 cover 率 + 追加 test 提案を 5 軸判定。 `--no-review` で skip 可能。 mode / layer 別 `--test-path` は Step 4 の出力 path 早見表 (`_axum` / `_actix` suffix) を使う。
 
-## kiwa-test-rs API surface (v0.1 sync、 PR #583 / #584)
+## kiwa-test-rs API surface (v0.1 + v0.2 sync、 PR #583 / #584 / #599 / #600)
 
 unit (`kiwa::unit`)。
 
@@ -199,10 +301,28 @@ integration (`kiwa::integration`、 `--features integration` で有効、 PR #58
 - `server.base_url()` / `server.port()` / `server.recorded_requests()` / `server.request_count()`
 - `RecordedRequest { method: String, path: String, headers: HashMap<String, String>, body: Vec<u8> }`
 
+axum (`kiwa::axum`、 `--features axum` で有効、 v0.2 PR #599)。
+
+- `test_app(router: Router) -> TestApp` — axum Router を private tokio runtime + `tower::Service::oneshot` 経由で in-process 駆動、 real port なし + TIME_WAIT flakiness 回避
+- `TestApp::request(method: HttpMethod, path: impl Into<String>) -> RequestBuilder<'_>` — request builder chain の開始
+- `RequestBuilder::header(k, v)` / `.body(bytes)` / `.json(bytes)` / `.send() -> TestResponse`
+- `TestResponse::status() -> u16` / `.headers() -> &HashMap<String, String>` / `.body() -> &[u8]` / `.body_str() -> String` / `.json() -> Option<serde_json::Value>`
+- `HttpMethod::Get` / `Post` / `Put` / `Delete` / `Patch` (integration module と再定義、 axum 経路専用)
+
+actix-web (`kiwa::actix`、 `--features actix-web` で有効、 v0.2 PR #600)。
+
+- `test_app<F, T, B>(factory: F) -> TestApp` — factory closure `F: Fn() -> App<T>` (actix-web `App` は `!Clone` のため closure 必須) を受け取り `actix_web::test::call_service` 経路で in-process 駆動、 actix-rt runtime auto-drop
+- `TestApp::request(method: HttpMethod, path: impl Into<String>) -> RequestBuilder<'_>` — surface は axum adapter と 1:1
+- `RequestBuilder::header(k, v)` / `.body(bytes)` / `.json(bytes)` / `.send() -> TestResponse`
+- `TestResponse::status()` / `.headers()` / `.body()` / `.body_str()` / `.json()` — surface は axum adapter と 1:1、 test code の framework 間切替が最小差分で成立
+
 ## 完了条件
 
-- Layer 1 spec の「自動化すべきテスト」 全 TC が `examples/{example}/tests/{module}.rs` に Write 済
-- `cargo test --manifest-path examples/{example}/Cargo.toml --test {module}` 全 PASS (failure 0 件)
+- Layer 1 spec の「自動化すべきテスト」 全 TC が mode / layer 別 test file に Write 済
+  - rust-unit / rust-integration ... `examples/{example}/tests/{module}.rs`
+  - rust-axum (`--mode axum`) ... `examples/{example}/tests/{module}_axum.rs`
+  - rust-actix-web (`--mode actix-web`) ... `examples/{example}/tests/{module}_actix.rs`
+- 該当 mode の `cargo test` 全 PASS (failure 0 件、 rust-axum / rust-actix-web 経路は `--features kiwa/axum` / `--features kiwa/actix-web` opt-in が必要)
 - coverage threshold 達成 (default 80%、 `cargo llvm-cov` 未 install 環境では skip + 警告)
 - `tests/reports/rust/coverage-report-{module}.{lang}.md` が 4 section format で Write 済 (coverage skip 時は section 1 のみ「skip 理由」 で fill)
 - 観点別 `mod` ブロックが spec の観点一覧と一致
