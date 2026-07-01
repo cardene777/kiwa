@@ -6,15 +6,16 @@
   <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview (127s) — this package covers the Auth surface. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">▶ Full-quality MP4 (2.9 MB)</a>.</sub>
 </p>
 
-Auth test adapter for kiwa — NextAuth v5 (Auth.js), Lucia v3, and Better Auth session / provider / database mocks under a shared package.
+Auth test adapter for kiwa — NextAuth v5 (Auth.js), Lucia v3, Better Auth, and Clerk session / provider / database mocks under a shared package.
 
 ## Overview
 
-`@kiwa-test/auth` is the Layer 2 adapter that turns an auth-shaped Layer 1 spec into a runnable Vitest suite. It ships three independent helpers:
+`@kiwa-test/auth` is the Layer 2 adapter that turns an auth-shaped Layer 1 spec into a runnable Vitest suite. It ships four independent helpers:
 
 - **`setupNextAuthEnv`** — NextAuth v5 (Auth.js) session / provider / database mocks.
 - **`setupLuciaEnv`** — Lucia v3 password + OAuth flows across SQLite / PostgreSQL adapter shapes.
 - **`setupBetterAuthEnv`** — Better Auth email/password + magic link + 2FA (TOTP) + social sign-in + organizations / passkey plugins across Prisma / Drizzle / Kysely adapter shapes.
+- **`setupClerkEnv`** — Clerk hosted-auth mock with JWT verification, `users` / `sessions` / `organizations` APIs mirroring `@clerk/backend`, and multi-tenant org roles (owner / admin / member).
 
 ## Install
 
@@ -24,9 +25,10 @@ pnpm add -D @kiwa-test/auth @kiwa-test/core vitest
 pnpm add -D next-auth        # for setupNextAuthEnv
 pnpm add -D lucia            # for setupLuciaEnv
 pnpm add -D better-auth      # for setupBetterAuthEnv
+pnpm add -D @clerk/backend   # for setupClerkEnv (optional — mock is standalone)
 ```
 
-`next-auth`, `lucia`, and `better-auth` are declared as **optional peer dependencies** — none of the helpers imports from the real library, so the peer is only required if you assert against the real types in your suite.
+`next-auth`, `lucia`, `better-auth`, and `@clerk/backend` are declared as **optional peer dependencies** — none of the helpers imports from the real library, so the peer is only required if you assert against the real types in your suite.
 
 ## Quick start — NextAuth v5
 
@@ -222,6 +224,79 @@ Social sign-in (`signInWithOAuth`) is always available and configured through `p
 ## Example: Better Auth PoC
 
 See [`examples/auth-better-auth-poc/`](../../examples/auth-better-auth-poc) for the end-to-end bare-metal handler PoC: 8 tests cover password / magic link / 2FA / Google / GitHub across Prisma / Drizzle / Kysely adapter shapes.
+
+## Quick start — Clerk
+
+```ts
+import { setupClerkEnv } from "@kiwa-test/auth";
+
+const env = await setupClerkEnv({
+  users: [{ primaryEmailAddress: "alice@example.test" }],
+  orgs: [
+    { name: "Acme", slug: "acme", createdByEmail: "alice@example.test" },
+  ],
+  tokens: [{ userEmail: "alice@example.test", organizationSlug: "acme" }],
+});
+
+// 1) Seeded token — ready to drop into an Authorization header.
+const seeded = env.seededTokens["alice@example.test"];
+seeded.token;                            // signed JWT
+
+// 2) Verify the token — mirrors @clerk/backend `verifyToken`.
+const claims = await env.verifyToken(seeded.token);
+claims.sub;                              // "user_000001"
+claims.org_id;                           // "org_000001"
+claims.org_role;                         // "owner"
+
+// 3) Ad-hoc signIn.
+const signed = await env.signIn({ email: "alice@example.test" });
+signed.token;                            // fresh JWT for a new session
+
+// 4) Users / sessions / organizations API mirror @clerk/backend.
+await env.users.getUser(signed.user.id);
+await env.sessions.revokeSession(signed.session.id);
+await env.organizations.createMembership({
+  organizationId: claims.org_id!,
+  userId: signed.user.id,
+  role: "admin",
+});
+
+// 5) Reset between tests.
+await env.stop();
+```
+
+## `@clerk/backend` API surface
+
+`env.users` / `env.sessions` / `env.organizations` match the shape of `@clerk/backend`'s client. The mock is drop-in for call sites that pass around a Clerk client — swap `createClerkClient({ secretKey })` for the env in the test setup and every call resolves against the in-memory store.
+
+| Surface | Methods |
+|---|---|
+| `env.users` | `createUser` / `getUser` / `getUserByEmail` / `updateUser` / `deleteUser` / `listUsers` |
+| `env.sessions` | `createSession` / `getSession` / `revokeSession` / `listSessionsForUser` |
+| `env.organizations` | `createOrganization` / `getOrganization` / `getOrganizationBySlug` / `createMembership` / `getOrganizationMembership` / `listMembershipsForUser` / `listMembershipsForOrganization` / `updateMembership` / `deleteMembership` |
+
+## JWT session claims
+
+`env.verifyToken` returns Clerk-shaped session claims:
+
+```ts
+{
+  sub: "user_000001",     // Clerk user id
+  sid: "sess_000001",     // Clerk session id
+  org_id: "org_000001",   // active organization (when scoped)
+  org_role: "owner",      // owner | admin | member
+  org_slug: "acme",       // active organization slug
+  iat: 1699999999,        // issued at (seconds since epoch)
+  exp: 1700604799,        // expires at
+  iss: "https://mock.clerk.accounts.dev",
+}
+```
+
+The mock signs tokens with HS256 (real Clerk uses RS256) — the on-the-wire shape is identical, and every consumer that decodes with `base64url` sees the same three-segment structure. Tokens issued by one env cannot be verified by another (per-env signing secret), which matches Clerk's per-instance signing key semantics.
+
+## Example: Clerk PoC
+
+See [`examples/auth-clerk-poc/`](../../examples/auth-clerk-poc) for the end-to-end bare-metal handler PoC: 8 tests cover token verification, session revocation, multi-tenant org role gating, and seeded-token flows.
 
 ## License
 

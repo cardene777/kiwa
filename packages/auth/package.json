@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/auth",
-  "version": "0.1.0",
-  "description": "Auth test adapter for kiwa (NextAuth v5 / Auth.js + Lucia v3 + Better Auth — session + provider + DB adapter mocks)",
+  "version": "0.2.0-0",
+  "description": "Auth test adapter for kiwa (NextAuth v5 / Auth.js + Lucia v3 + Better Auth + Clerk — session + provider + DB adapter mocks)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -15,6 +15,10 @@
     "lucia",
     "lucia-auth",
     "better-auth",
+    "clerk",
+    "jwt",
+    "organizations",
+    "multi-tenant",
     "magic-link",
     "totp",
     "2fa",
@@ -76,6 +80,7 @@
     "next-auth": ">=5.0.0-beta.0 <6",
     "lucia": "^3",
     "better-auth": ">=1.0.0-beta.0",
+    "@clerk/backend": ">=1.0.0",
     "vitest": "^2"
   },
   "peerDependenciesMeta": {
@@ -86,6 +91,9 @@
       "optional": true
     },
     "better-auth": {
+      "optional": true
+    },
+    "@clerk/backend": {
       "optional": true
     }
   },

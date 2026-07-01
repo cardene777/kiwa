@@ -92,3 +92,24 @@ export {
   generateTotpSecret,
   verifyTotpCode,
 } from './better-auth/totp.js';
+
+// Clerk adapter surface.
+export type {
+  ClerkEmailAddress,
+  ClerkExternalAccount,
+  ClerkOrganization,
+  ClerkOrganizationMembership,
+  ClerkOrganizationRole,
+  ClerkPhoneNumber,
+  ClerkSession,
+  ClerkSessionClaims,
+  ClerkTestEnv,
+  ClerkUser,
+  SetupClerkEnvOptions,
+} from './clerk/types.js';
+export { setupClerkEnv } from './clerk/setup-clerk-env.js';
+export {
+  generateSigningSecret as generateClerkSigningSecret,
+  signClerkJwt,
+  verifyClerkJwt,
+} from './clerk/jwt.js';
