@@ -59,6 +59,7 @@
 //! ```
 
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 
 use actix_http::body::MessageBody;
@@ -88,6 +89,18 @@ pub enum HttpMethod {
 /// In-process actix-web test harness — owns the initialised service and a
 /// private actix-rt runtime so the cargo test thread can stay synchronous.
 ///
+/// # Lifecycle
+///
+/// The kiwa fixture contract is `build → exercise → stop` (mirrors v1.4
+/// [`crate::integration::mock_server`]). Callers may call [`TestApp::stop`]
+/// explicitly to release the runtime early; otherwise Drop tears it down at
+/// end of scope. `stop` is idempotent (safe to call after Drop-time
+/// shutdown), and once `stop` has run subsequent
+/// [`RequestBuilder::send`] calls **panic** with a self-describing message
+/// so post-Stop traffic surfaces as a loud test failure instead of silently
+/// hitting the retired service — matching the v1.4 mock_server contract
+/// where post-Stop traffic hits a closed port.
+///
 /// Build with [`test_app`]. Drop releases the runtime.
 ///
 /// The trait bound (`Service<Request, Response = ServiceResponse<B>, Error = Error>`)
@@ -96,6 +109,15 @@ pub enum HttpMethod {
 /// chain that their factory returns.
 pub struct TestApp {
     inner: Mutex<Option<TestAppInner>>,
+    /// `true` once `stop()` (or Drop-time shutdown) has retired the
+    /// runtime. Read on `send()` to panic loudly on post-Stop traffic.
+    ///
+    /// `AtomicBool` gives interior mutability without `&mut self` on
+    /// `request()`/`send()` while keeping the struct `Sync` (matches the
+    /// pre-v1.6 `Mutex<Option<TestAppInner>>` surface, which was already
+    /// Sync). The actual runtime teardown still runs through the outer
+    /// mutex so shutdown ordering is unchanged.
+    stopped: AtomicBool,
 }
 
 /// Internal handle to the actix-rt runtime + initialised service.
@@ -181,10 +203,36 @@ impl TestApp {
             body: Bytes::new(),
         }
     }
-}
 
-impl Drop for TestApp {
-    fn drop(&mut self) {
+    /// Whether [`stop`](Self::stop) (or Drop-time shutdown) has already run.
+    ///
+    /// Test bodies rarely need to read this — it is exposed so specs that
+    /// exercise the lifecycle contract explicitly (`stop` then re-check
+    /// invariants) do not have to catch the post-Stop `send` panic to
+    /// observe stopped state.
+    pub fn is_stopped(&self) -> bool {
+        // `Acquire` pairs with the `Release` swap inside `stop()`. The
+        // ordering only publishes writes that happen *before* the swap —
+        // runtime teardown runs after, so observers cannot assume the
+        // runtime is already gone. That is fine here because callers of
+        // `is_stopped` (and the panic gate inside `send()`) never touch
+        // the runtime once the flag reads true; they just refuse to enter
+        // the dispatch path.
+        self.stopped.load(Ordering::Acquire)
+    }
+
+    /// Retire the harness — drop the actix-rt runtime and mark the app
+    /// stopped so subsequent [`RequestBuilder::send`] calls panic.
+    ///
+    /// Idempotent. Drop calls this too, so an explicit `stop()` followed by
+    /// end-of-scope teardown is safe.
+    pub fn stop(&mut self) {
+        // `swap` returns the previous value — if it was already `true` the
+        // runtime is already down, so we bail without touching the mutex
+        // guard again.
+        if self.stopped.swap(true, Ordering::Release) {
+            return;
+        }
         if let Ok(mut guard) = self.inner.lock() {
             // Dropping `TestAppInner` first releases the service trait object,
             // then the runtime — the runtime drop joins worker tasks so any
@@ -192,6 +240,15 @@ impl Drop for TestApp {
             // assertion path returns.
             *guard = None;
         }
+    }
+}
+
+impl Drop for TestApp {
+    fn drop(&mut self) {
+        // Route Drop through `stop()` so the stopped flag flips even on
+        // implicit end-of-scope teardown and the runtime shutdown lives in
+        // one place.
+        self.stop();
     }
 }
 
@@ -236,6 +293,12 @@ impl<'a> RequestBuilder<'a> {
     /// Panics with a self-describing message on invalid header names, invalid
     /// paths, or runtime-level failures so the test fails fast with a clear
     /// stack instead of bubbling `Result` chains through every assertion.
+    ///
+    /// Also panics if the wrapping [`TestApp`] has already been stopped
+    /// (either via [`TestApp::stop`] or implicit Drop) — post-Stop traffic
+    /// is a lifecycle violation and surfacing it as a panic matches the
+    /// v1.4 mock_server contract where a client hitting a closed port sees
+    /// a hard connection failure.
     pub fn send(self) -> TestResponse {
         let RequestBuilder {
             app,
@@ -244,6 +307,13 @@ impl<'a> RequestBuilder<'a> {
             headers,
             body,
         } = self;
+
+        if app.stopped.load(Ordering::Acquire) {
+            panic!(
+                "kiwa actix test_app: send() called after stop() — lifecycle contract requires build → exercise → stop, post-Stop traffic is a bug (request: {:?} {})",
+                method, path,
+            );
+        }
 
         let mut builder = match method {
             HttpMethod::Get => TestRequest::get(),
@@ -414,5 +484,6 @@ where
             runtime,
             service: erased,
         })),
+        stopped: AtomicBool::new(false),
     }
 }
