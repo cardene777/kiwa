@@ -6,7 +6,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  external: ['bullmq', 'ioredis', 'testcontainers', 'vitest'],
+  external: ['bullmq', 'ioredis', 'testcontainers', 'inngest', 'vitest'],
   outExtension({ format }) {
     return {
       js: format === 'cjs' ? '.cjs' : '.js',

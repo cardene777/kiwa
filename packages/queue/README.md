@@ -6,26 +6,28 @@
   <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview (127s) — this package covers the Queue surface. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">Full-quality MP4 (2.9 MB)</a>.</sub>
 </p>
 
-Queue test adapter for kiwa — BullMQ sandbox (in-memory) + testcontainers Redis env with job assertion helpers under a single `setupBullMQEnv` API.
+Queue test adapter for kiwa — BullMQ sandbox (in-memory) + testcontainers Redis env with job assertion helpers under a single `setupBullMQEnv` API, plus an event-driven Inngest env (`setupInngestEnv`) with stub + dev-server backends.
 
 ## Overview
 
-`@kiwa-test/queue` is the Layer 2 adapter that turns a queue-shaped Layer 1 spec into a runnable Vitest suite. It exposes one factory (`setupBullMQEnv`) with two backends chosen by the `mode` flag:
+`@kiwa-test/queue` is the Layer 2 adapter that turns a queue-shaped Layer 1 spec into a runnable Vitest suite. It ships two factories:
 
-- **`mode: 'sandbox'`** — in-process, offline, deterministic. No Docker, no Redis. Ideal for the fast unit-test lane.
-- **`mode: 'testcontainers'`** — real BullMQ + ioredis wired to a testcontainers-managed Redis container. Ideal for the integration lane that needs prod-shape parity.
+- **`setupBullMQEnv`** — BullMQ (Redis-backed job queue) with `sandbox` (in-process) + `testcontainers` (real Redis + BullMQ + ioredis) backends.
+- **`setupInngestEnv`** — Inngest (SaaS event-driven) with `stub` (in-process, deterministic) + `dev-server` (real Inngest dev-server HTTP round-trip) backends.
 
-Both backends share the same `BullMQTestEnv` surface, so switching between them is a one-argument change.
+Backend selection is a one-argument change (`mode: '...'`) and both factories share the same `TestEnvBase<TMode>` shape so switching lanes never rewrites the assertion surface.
 
 ## Install
 
 ```bash
 pnpm add -D @kiwa-test/queue @kiwa-test/core vitest
-# testcontainers mode also needs:
+# BullMQ testcontainers mode also needs:
 pnpm add -D bullmq ioredis testcontainers
+# Inngest dev-server mode also needs:
+pnpm add -D inngest
 ```
 
-`bullmq`, `ioredis`, and `testcontainers` are optional peer dependencies — none of them is imported by the sandbox path, so the sandbox lane runs with zero infrastructure.
+`bullmq`, `ioredis`, `testcontainers`, and `inngest` are optional peer dependencies — none of them is imported by the sandbox / stub paths, so the fast lanes run with zero infrastructure.
 
 ## Quick start — sandbox
 
@@ -112,12 +114,109 @@ The sandbox backend covers the following BullMQ semantics deterministically:
 
 Out of scope for v0.1: worker `concurrency > 1`, `backoff`, `removeOnComplete`, `removeOnFail`, priority queues, rate limiting, `getFlow`. Those semantics are best exercised through the testcontainers backend against real BullMQ.
 
-## Reference — the PoC
+## Reference — the BullMQ PoC
 
 Live under [`examples/queue-bullmq-poc/`](../../examples/queue-bullmq-poc/) — 8 tests that thread a mocked email-sending flow through `setupBullMQEnv` end to end (happy path, retry, exhaustion, drain, delay, jobId, stop cleanup, timeout guard).
 
 ```bash
 pnpm -F examples-queue-bullmq-poc test
+```
+
+## Inngest env — `setupInngestEnv`
+
+`setupInngestEnv` is the event-driven counterpart to `setupBullMQEnv`. Event senders push events by name + payload; matching function definitions execute the handler, optionally through a `step.run(...)` trace that assertions can observe.
+
+### Quick start — stub
+
+```ts
+import { setupInngestEnv } from "@kiwa-test/queue";
+
+const env = await setupInngestEnv();                 // defaults to mode: "stub"
+env.registerFunction({
+  id: "signup-completed",
+  event: "user/signup.completed",
+  retries: 3,
+  handler: async ({ event, step }) => {
+    await step.run("send-welcome-email", () => sendEmail(event.data.userId));
+    await step.sleep("wait-for-reminder", 24 * 60 * 60 * 1000);
+    return { ok: true };
+  },
+});
+
+await env.sendEvent("user/signup.completed", { userId: "u-1", plan: "pro" });
+const snap = await env.assertFunctionRan("signup-completed");
+snap.stepsRun;      // ["send-welcome-email", "wait-for-reminder"]
+snap.attemptsMade;  // 1 (or higher if the handler threw)
+
+await env.stop();
+```
+
+### Quick start — dev-server
+
+```ts
+import { setupInngestEnv } from "@kiwa-test/queue";
+
+const env = await setupInngestEnv({
+  mode: "dev-server",
+  // Optional: point at an existing dev-server; omit to auto-spawn
+  // `npx inngest-cli@latest dev`.
+  devServer: { url: process.env.INNGEST_DEV_URL },
+  functions: [signupCompletedFn],
+});
+
+await env.sendEvent("user/signup.completed", { userId: "u-1", plan: "pro" });
+await env.assertFunctionRan("signup-completed");
+
+await env.stop();  // closes the dev-server subprocess if we spawned it
+```
+
+### Assertion helpers
+
+The `InngestTestEnv` surface bundles six assertion helpers so tests never poll internals directly:
+
+| Helper | Contract |
+|---|---|
+| `waitForRun(functionId, { timeoutMs? })` | Waits for the first run of `functionId` to reach a terminal state (`completed` / `failed` / `cancelled`). Rejects on timeout (default 5s). |
+| `assertFunctionRan(functionId, { returnValue? })` | Awaits terminal state, throws if the run did not `complete`, and (optionally) checks the `returnValue`. |
+| `assertFunctionFailed(functionId, { attempts?, reasonMatch? })` | Awaits terminal state, throws if the run did not `fail`, and (optionally) checks the observed attempt count + `failedReason` regex. |
+| `assertRetried(functionId, expectedAttempts)` | Awaits terminal state and checks the observed `attemptsMade`. |
+| `assertStepRan(functionId, stepId)` | Awaits terminal state and asserts the run executed the named step. |
+| `assertQueueDrained()` | Passes when the env has zero `queued` / `running` runs. |
+
+`listRuns()` returns every snapshot the env has seen (in registration order).
+
+### Options
+
+```ts
+type SetupInngestEnvOptions = {
+  mode?: "stub" | "dev-server";                          // default: "stub"
+  functions?: InngestFunctionDefinition[];               // pre-register at creation time
+  devServer?: { url?: string; port?: number; startupTimeoutMs?: number };
+  appId?: string;                                        // default: "kiwa-test-app"
+};
+```
+
+`InngestFunctionDefinition` mirrors `inngest.createFunction`: `id`, `event`, optional `retries`, optional `concurrency`, and a `handler` receiving `{ event, step, attempt }`.
+
+### Stub semantics (v0.1 scope)
+
+The stub backend covers the following Inngest semantics deterministically:
+
+- `sendEvent` → `queued` (state) → `running` → `completed` on handler return
+- `running` → `queued` on handler throw (until `retries` is exhausted)
+- `running` → `failed` on the final attempt
+- `step.run(stepId, fn)` — records `stepId` in `snap.stepsRun`; step traces reset on each retry attempt
+- `step.sleep(stepId, ms)` — records `stepId` without advancing real time
+- `concurrency: N` — caps in-flight runs per function, queued events wait for a slot
+
+Out of scope for v0.1: distributed step memoisation, event fan-out to `bufferSize`, batching, cron triggers. Those semantics are best exercised through the dev-server backend against real Inngest.
+
+### Reference — the Inngest PoC
+
+Live under [`examples/queue-inngest-poc/`](../../examples/queue-inngest-poc/) — 8 tests that thread a signup-completed notification pipeline through `setupInngestEnv` end to end (happy path, retry, exhaustion, concurrency, step assertion, orphan events, stop cleanup, timeout guard).
+
+```bash
+pnpm -F examples-queue-inngest-poc test
 ```
 
 ## License
