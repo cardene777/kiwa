@@ -354,9 +354,12 @@ Contract.
   at the surface even though the transport differs underneath.
 - `srv.Stop()` activates the same lifecycle boundary as the Gin / Echo
   adapters — `srv.Request(...).Send()` after `Stop()` fails the test
-  with `t.Fatalf("kiwa-fiber: Send() called after Stop() ...")` and
-  calls `app.Shutdown` best-effort so the fasthttp server behind Fiber
-  releases its internal state.
+  with `t.Fatalf("kiwa-fiber: Send() called after Stop() ...")`. `Stop`
+  is a stop-bit flip on the harness; the adapter deliberately does not
+  fire `app.Shutdown` because Fiber's `Shutdown` runs user-registered
+  `OnShutdown` hooks even without a bound listener, which would fire
+  lifecycle callbacks the test never opted into. `App.Test` drives an
+  in-memory `net.Conn` so there is no bound listener to release.
 - `Send()` does not `panic()` on unrecoverable errors (build failure,
   dispatch timeout, malformed method / path). It calls `t.Fatalf` on
   the captured `testing.TB` so `recover()` in a downstream handler

@@ -20,9 +20,11 @@
   `RecordedRequests()` + `HeadersAll` / `Cookies` accessor) は gin / echo と同一。
   Fiber 固有 `.Timeout(ms)` builder step で `App.Test` の 1s default ceiling
   を上書き可、 `-1` で timeout 完全解除、 `<-1` は `-1` に clamp。
-- `Stop()` は `app.Shutdown()` を best-effort で呼び出し、 fasthttp server の
-  internal state を解放する (`App.Test` 経路は listener を持たないため Shutdown は
-  "server is not running" を返すが、 error は idempotent 保証のため swallow)。
+- `Stop()` は gin / echo と同じく harness の stop bit flip のみ、 `app.Shutdown()`
+  は意図的に呼ばない (Fiber の Shutdown は listener 未 bind でも user 登録の
+  OnShutdown hook を発火してしまい、 gin / echo contract から drift するため)。
+  App.Test は in-memory net.Conn を driver するため release すべき listener は
+  存在しない。
 
 ## v0.3.0 — v1.6 milestone (unreleased)
 

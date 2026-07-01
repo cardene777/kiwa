@@ -93,13 +93,15 @@ const defaultTimeoutMs = 1000
 // The kiwa fixture contract is build → exercise → Stop (mirrors v1.4
 // kiwa.NewMockServer). Callers can either call Stop explicitly or rely on
 // the t.Cleanup handler registered by NewTestServer. Stop is idempotent
-// and invokes app.Shutdown so the fasthttp server behind Fiber releases
-// its internal resources when the test ends. Once Stop has run
-// subsequent Send() calls report the lifecycle violation through
-// t.Fatalf so post-Stop traffic surfaces as a diagnostic test failure
-// instead of silently hitting the retired app — matching the v1.4
-// mock_server contract where post-Stop traffic hits a closed port and
-// fails at the transport layer.
+// and flips an internal stop bit — App.Test drives an in-memory net.Conn
+// so there is no bound listener to release, and the harness deliberately
+// does not fire app.Shutdown (which would run user-registered
+// OnShutdown hooks even without a listener, drifting from the Gin / Echo
+// contract). Once Stop has run subsequent Send() calls report the
+// lifecycle violation through t.Fatalf so post-Stop traffic surfaces as
+// a diagnostic test failure instead of silently hitting the retired
+// app — matching the v1.4 mock_server contract where post-Stop traffic
+// hits a closed port and fails at the transport layer.
 type TestServer struct {
 	app      *fiber.App
 	recorder *recorder.Log
@@ -146,11 +148,15 @@ func (s *TestServer) IsStopped() bool {
 }
 
 // Stop releases the harness. Idempotent — t.Cleanup invokes this too, so
-// an explicit Stop followed by cleanup is safe. Calls app.Shutdown so
-// the fasthttp server backing Fiber releases its internal state; the
-// error is ignored because App.Test does not start the listener path
-// (Shutdown returns "server is not running" in that case), matching
-// Fiber's own testing example.
+// an explicit Stop followed by cleanup is safe. v1.7-4 has no real port
+// to release (App.Test drives an in-memory net.Conn, never binds a
+// listener) so Stop is a stop-bit flip that mirrors the Gin / Echo
+// adapters exactly — the harness deliberately does not call
+// app.Shutdown because Fiber's Shutdown runs user-registered
+// OnShutdown hooks even without a bound listener
+// (github.com/gofiber/fiber/v2 app.go:887-897 + hooks.go:194-199), which
+// would fire lifecycle callbacks the test never opted into and drifts
+// from the Gin / Echo contract where Stop is a no-op on the framework.
 //
 // Once Stop has run subsequent Send() calls fail the test with
 // t.Fatalf so post-Stop traffic surfaces as a diagnostic failure — see
@@ -161,11 +167,6 @@ func (s *TestServer) Stop() {
 	if s.stopped {
 		return
 	}
-	// Best-effort shutdown so ancillary fasthttp state (if any) is
-	// released. App.Test does not bind a listener so Shutdown will
-	// commonly return "server is not running" — that error is expected
-	// and swallowed here to keep Stop idempotent.
-	_ = s.app.Shutdown()
 	s.stopped = true
 }
 

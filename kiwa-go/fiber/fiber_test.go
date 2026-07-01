@@ -5,8 +5,10 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -572,43 +574,85 @@ func TestRequestBodyIngressDefensiveCopy(t *testing.T) {
 	}
 }
 
-// 19) Timeout(-1) disables Fiber's default 1s ceiling so a slow handler
-// finishes normally instead of returning "test: timeout error". This
-// covers the Fiber-specific .Timeout builder step and gives users a
-// documented escape hatch for handlers that legitimately exceed the
-// default budget (streaming responses, large file reads, batch APIs).
+// 19) Timeout(-1) disables Fiber's default 1s ceiling so a genuinely
+// slow handler finishes normally instead of returning "test: timeout
+// error". The handler sleeps past the 1s default to prove the builder
+// value actually reaches App.Test — a regression that silently ignored
+// .Timeout(-1) and reverted to the default would time out and Fatalf.
 func TestTimeoutDisableAllowsSlowHandlerToComplete(t *testing.T) {
 	app := newApp()
-	// A handler that just returns cannot exceed 1s; the test asserts the
-	// builder step compiles and passes -1 through to *fiber.App.Test.
-	// Behavioural coverage of the disabled-timeout path lives here — if
-	// the builder silently ignored the caller value the .Timeout(-1)
-	// chain would not surface a regression.
-	app.Get("/fast", func(c *fiber.Ctx) error { return c.SendString("ok") })
+	// Sleep 1200ms — well over Fiber's 1000ms default. If .Timeout(-1) is
+	// silently ignored the builder falls back to 1000ms, App.Test returns
+	// "test: timeout error", Send Fatalfs on the outer *testing.T and
+	// the test fails — the exact regression we want to trap.
+	app.Get("/slow", func(c *fiber.Ctx) error {
+		time.Sleep(1200 * time.Millisecond)
+		return c.SendString("late")
+	})
 
 	srv := kiwa_fiber.NewTestServer(t, app)
-	resp := srv.Request(kiwa.MethodGET, "/fast").Timeout(-1).Send()
+	resp := srv.Request(kiwa.MethodGET, "/slow").Timeout(-1).Send()
 
 	if resp.StatusCode() != 200 {
 		t.Fatalf("status = %d, want 200 with disabled timeout", resp.StatusCode())
 	}
-	if got := resp.BodyString(); got != "ok" {
-		t.Fatalf("body = %q, want ok", got)
+	if got := resp.BodyString(); got != "late" {
+		t.Fatalf("body = %q, want late", got)
 	}
 }
 
-// 20) Timeout(ms) below -1 is clamped to -1 so a negative value like
-// Timeout(-999) cannot silently pin an unreachable ceiling. Guards the
-// clamp branch in Timeout() so a future refactor cannot delete it
-// without a failing test.
+// 20) Timeout(50) with a slow handler surfaces the underlying App.Test
+// timeout through Fatalf on the captured testing.TB. Uses the spy TB
+// so the outer test survives the Fatalf and can assert on the message.
+// This is the failing-timeout counterpart to TestTimeoutDisable — it
+// proves .Timeout(ms) actually shrinks the budget instead of quietly
+// pinning the default.
+func TestTimeoutPositiveMillisEnforcesShortBudget(t *testing.T) {
+	app := newApp()
+	app.Get("/slow", func(c *fiber.Ctx) error {
+		time.Sleep(500 * time.Millisecond)
+		return c.SendString("late")
+	})
+
+	spy := &spyTB{TB: t}
+	srv := kiwa_fiber.NewTestServer(spy, app)
+
+	runInGoroutine(func() {
+		srv.Request(kiwa.MethodGET, "/slow").Timeout(50).Send()
+	})
+
+	if !spy.DidFatal() {
+		t.Fatalf(".Timeout(50) with a 500ms handler did not surface Fatalf — builder likely ignored the caller value")
+	}
+	msg := spy.LastFatal()
+	if !strings.Contains(msg, "kiwa-fiber: dispatch") {
+		t.Fatalf("Fatalf message = %q, want kiwa-fiber dispatch prefix", msg)
+	}
+	if !strings.Contains(msg, "timeout") {
+		t.Fatalf("Fatalf message = %q, want it to mention timeout", msg)
+	}
+}
+
+// 21) Timeout(ms) below -1 is clamped to -1 so a negative value like
+// Timeout(-999) cannot silently pin an unreachable ceiling. The handler
+// exercises the clamp with a slow path: if .Timeout(-999) failed to
+// clamp and fell through to a negative literal, App.Test would treat
+// the request as "disable timeout" only for -1 exactly and produce a
+// dispatch error for other negatives, tripping the test.
 func TestTimeoutClampsBelowMinusOne(t *testing.T) {
 	app := newApp()
-	app.Get("/fast", func(c *fiber.Ctx) error { return c.SendString("ok") })
+	app.Get("/slow", func(c *fiber.Ctx) error {
+		time.Sleep(1200 * time.Millisecond)
+		return c.SendString("late")
+	})
 
 	srv := kiwa_fiber.NewTestServer(t, app)
-	resp := srv.Request(kiwa.MethodGET, "/fast").Timeout(-999).Send()
+	resp := srv.Request(kiwa.MethodGET, "/slow").Timeout(-999).Send()
 
 	if resp.StatusCode() != 200 {
-		t.Fatalf("status = %d, want 200 (Timeout(-999) must clamp to -1, not silently break dispatch)", resp.StatusCode())
+		t.Fatalf("status = %d, want 200 (Timeout(-999) must clamp to -1 so slow handler completes)", resp.StatusCode())
+	}
+	if got := resp.BodyString(); got != "late" {
+		t.Fatalf("body = %q, want late (clamp path failed to reach slow handler)", got)
 	}
 }
