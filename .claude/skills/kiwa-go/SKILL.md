@@ -1,8 +1,8 @@
 ---
 name: kiwa-go
 description: |
-  Layer 1 spec (`tests/spec/unit/test-spec-{module}.go.md` / `tests/spec/integration/test-spec-{module}.go.md` / `tests/spec/integration/test-spec-{module}.go-gin.md` / `tests/spec/integration/test-spec-{module}.go-echo.md`) を `kiwa-test-go` の Go test file (`*_test.go`) に変換する Layer 2 polyglot test skill。
-  v1.4-5 で追加された `--layer go-unit` / `--layer go-integration` に加え、 v1.5-6 で追加された `--mode gin` / `--mode echo` で `kiwa-test-go` v0.2 の `kiwa_gin.NewTestServer(t, engine)` / `kiwa_echo.NewTestServer(t, e)` + `srv.Request(method, path)` chain と直接 mapping する 9 column 拡張表を Go の `testing.T` 文法 (`func TestXxx(t *testing.T)` / `kiwa.AssertEqual` / `t.Cleanup` / `t.Parallel`) と `kiwa.SetupUnitEnv` / `kiwa.NewMockServer` / `kiwa_gin.NewTestServer` / `kiwa_echo.NewTestServer` API に機械的に変換し、 `go test` 自動実行 + `go test -cover` coverage 評価まで一気通貫で担当する。
+  Layer 1 spec (`tests/spec/unit/test-spec-{module}.go.md` / `tests/spec/integration/test-spec-{module}.go.md` / `tests/spec/integration/test-spec-{module}.go-gin.md` / `tests/spec/integration/test-spec-{module}.go-echo.md` / `tests/spec/integration/test-spec-{module}.go-fiber.md`) を `kiwa-test-go` の Go test file (`*_test.go`) に変換する Layer 2 polyglot test skill。
+  v1.4-5 で追加された `--layer go-unit` / `--layer go-integration` + v1.5-6 で追加された `--mode gin` / `--mode echo` に加え、 v1.7-6 で追加された `--mode fiber` で `kiwa-test-go` v0.4 の `kiwa_fiber.NewTestServer(t, app)` + `srv.Request(method, path)` chain と直接 mapping する 9 column 拡張表を Go の `testing.T` 文法 (`func TestXxx(t *testing.T)` / `kiwa.AssertEqual` / `t.Cleanup` / `t.Parallel`) と `kiwa.SetupUnitEnv` / `kiwa.NewMockServer` / `kiwa_gin.NewTestServer` / `kiwa_echo.NewTestServer` / `kiwa_fiber.NewTestServer` API に機械的に変換し、 `go test` 自動実行 + `go test -cover` coverage 評価まで一気通貫で担当する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -11,8 +11,8 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /kiwa-go — Layer 2 Go polyglot test skill
 
-`/kiwa-design --layer go-unit` / `--layer go-integration` (Issue #580 v1.4-5、 PR #587) + `--layer go-gin` / `--layer go-echo` (Issue #596 v1.5-5、 PR #603) が出力する 9 column 拡張表を、 `kiwa-test-go` v0.1 (Issue #578 / #579、 PR #585 / #586) + v0.2 (Issue #594 / #595、 PR #601 / #602) の API surface に sync させた Layer 2 generator skill。
-TS / Vitest 経路の `/kiwa-vitest`、 Python / pytest 経路の `kiwa-test-py`、 Rust / cargo test 経路の `/kiwa-rust` と並ぶ polyglot test toolchain の Go 側 land。 v1.5-6 (Issue #597) で `--mode {gin|echo}` flag を追加し、 4 layer (go-unit / go-integration / go-gin / go-echo) → 4 test file 生成の automation を成立させる。
+`/kiwa-design --layer go-unit` / `--layer go-integration` (Issue #580 v1.4-5、 PR #587) + `--layer go-gin` / `--layer go-echo` (Issue #596 v1.5-5、 PR #603) + `--layer go-fiber` (Issue #627 v1.7-6) が出力する 9 column 拡張表を、 `kiwa-test-go` v0.1 (Issue #578 / #579、 PR #585 / #586) + v0.2 (Issue #594 / #595、 PR #601 / #602) + v0.4 (Issue #625 / #626、 PR #632 / #633) の API surface に sync させた Layer 2 generator skill。
+TS / Vitest 経路の `/kiwa-vitest`、 Python / pytest 経路の `kiwa-test-py`、 Rust / cargo test 経路の `/kiwa-rust` と並ぶ polyglot test toolchain の Go 側 land。 v1.5-6 (Issue #597) で `--mode {gin|echo}` flag、 v1.7-6 (Issue #627) で `--mode fiber` flag を追加し、 5 layer (go-unit / go-integration / go-gin / go-echo / go-fiber) → 5 test file 生成の automation を成立させる。
 
 ## 入力の trust boundary
 
@@ -22,15 +22,16 @@ trust boundary 違反検出時は spec 末尾「不足している仕様」 に 
 
 ## 前提
 
-- Layer 1 spec が存在 (`/kiwa-design --module {name} --layer {go-unit|go-integration|go-gin|go-echo}` で生成)
+- Layer 1 spec が存在 (`/kiwa-design --module {name} --layer {go-unit|go-integration|go-gin|go-echo|go-fiber}` で生成)
   - go-unit ... `tests/spec/unit/test-spec-{module}.go.md`
   - go-integration ... `tests/spec/integration/test-spec-{module}.go.md`
   - go-gin ... `tests/spec/integration/test-spec-{module}.go-gin.md` (`--mode gin` 前提)
   - go-echo ... `tests/spec/integration/test-spec-{module}.go-echo.md` (`--mode echo` 前提)
-- 対象 example に `go.mod` が存在し、 `kiwa-test-go` が require / replace 経由で解決可能 (未追加なら `go.mod` に `require github.com/cardene777/kiwa-test-go v0.2.0` + `replace` directive を Edit 追加)
-- gin mode は `github.com/cardene777/kiwa-test-go/gin` subpackage 経由 (`import kiwa_gin "github.com/cardene777/kiwa-test-go/gin"`)、 echo mode は `github.com/cardene777/kiwa-test-go/echo` subpackage 経由 (`import kiwa_echo "github.com/cardene777/kiwa-test-go/echo"`) が必要
+  - go-fiber ... `tests/spec/integration/test-spec-{module}.go-fiber.md` (`--mode fiber` 前提)
+- 対象 example に `go.mod` が存在し、 `kiwa-test-go` が require / replace 経由で解決可能 (未追加なら `go.mod` に `require github.com/cardene777/kiwa-test-go v0.4.0` + `replace` directive を Edit 追加)
+- gin mode は `github.com/cardene777/kiwa-test-go/gin` subpackage 経由 (`import kiwa_gin "github.com/cardene777/kiwa-test-go/gin"`)、 echo mode は `github.com/cardene777/kiwa-test-go/echo` subpackage 経由 (`import kiwa_echo "github.com/cardene777/kiwa-test-go/echo"`)、 fiber mode は `github.com/cardene777/kiwa-test-go/fiber` subpackage 経由 (`import kiwa_fiber "github.com/cardene777/kiwa-test-go/fiber"`) が必要
 - 対象 file (`{module}.go` / `internal/{module}.go`) が存在
-- 出力先 `{module}_test.go` (Go の同 package test 慣習) or `integration/{module}_test.go` or web framework mode の場合 `{module}_gin_test.go` / `{module}_echo_test.go` への Write 権限
+- 出力先 `{module}_test.go` (Go の同 package test 慣習) or `integration/{module}_test.go` or web framework mode の場合 `{module}_gin_test.go` / `{module}_echo_test.go` / `{module}_fiber_test.go` への Write 権限
 
 ## ユーザーのリクエスト
 
@@ -39,8 +40,8 @@ $ARGUMENTS
 ## オプション
 
 - `--module {name}` — 対象 module 名 (Layer 1 spec の file 名と一致、 例 `counter` / `counter-api`)
-- `--layer {go-unit|go-integration|go-gin|go-echo}` — 入力 spec の layer (省略時は spec file の存在を Glob で確認して推定、 複数存在なら AskUserQuestion)。 `--mode` と組み合わせも許容 (`--mode gin` は `--layer go-gin` の syntactic sugar)
-- `--mode {gin|echo}` — v1.5-6 で追加、 web framework mode flag。 `--mode gin` = `--layer go-gin` (`kiwa_gin.NewTestServer(t, engine)` 経路)、 `--mode echo` = `--layer go-echo` (`kiwa_echo.NewTestServer(t, e)` 経路)。 `--layer` と併用時は `--mode` 優先 (framework mode を明示的に選ぶ意図と解釈)、 両者が矛盾する場合は起動時 error で abort
+- `--layer {go-unit|go-integration|go-gin|go-echo|go-fiber}` — 入力 spec の layer (省略時は spec file の存在を Glob で確認して推定、 複数存在なら AskUserQuestion)。 `--mode` と組み合わせも許容 (`--mode gin` は `--layer go-gin` の syntactic sugar、 `--mode fiber` は `--layer go-fiber` の syntactic sugar)
+- `--mode {gin|echo|fiber}` — v1.5-6 で `gin` / `echo`、 v1.7-6 で `fiber` を追加、 web framework mode flag。 `--mode gin` = `--layer go-gin` (`kiwa_gin.NewTestServer(t, engine)` 経路)、 `--mode echo` = `--layer go-echo` (`kiwa_echo.NewTestServer(t, e)` 経路)、 `--mode fiber` = `--layer go-fiber` (`kiwa_fiber.NewTestServer(t, app)` 経路、 fasthttp base のため `*App.Test(*http.Request)` hook 経由)。 `--layer` と併用時は `--mode` 優先 (framework mode を明示的に選ぶ意図と解釈)、 両者が矛盾する場合は起動時 error で abort
 - `--input-spec {path}` — Layer 1 spec の path (省略時は layer / mode から推定)
 - `--target {path}` — 対象実装 file (`{module}.go` 等、 grep で識別)
 - `--example {name}` — `examples/{name}/` の Go example 名 (省略時は cwd が example 内なら自動推定、 root なら AskUserQuestion)
@@ -56,10 +57,11 @@ $ARGUMENTS
 | Go integration test file (go-integration) | `examples/{example}/integration/{module}_test.go` |
 | Go Gin test file (`--mode gin`) | `examples/{example}/{module}_gin_test.go` |
 | Go Echo test file (`--mode echo`) | `examples/{example}/{module}_echo_test.go` |
+| Go Fiber test file (`--mode fiber`) | `examples/{example}/{module}_fiber_test.go` |
 | coverage report | `tests/reports/go/coverage-report-{module}.{lang}.md` |
 | round 別 coverage | `tests/reports/go/coverage-report-{module}-round-{N}.{lang}.md` |
 
-Go の慣習 ... unit test は同 package (`package {pkg}` の `_test.go`) or `package {pkg}_test` (black-box test、 公開 API のみ)、 integration test は別 sub-package (`package integration_test` の `integration/{module}_test.go`)。 本 skill は go-unit を black-box test (`{pkg}_test` package suffix)、 go-integration を別 sub-dir に分離する default を採る。 web framework mode (`--mode gin` / `--mode echo`) は同 module に対して 4 framework 並列 test を成立させるため file 名 suffix (`_gin_test.go` / `_echo_test.go`) で分離 (`--mode axum` / `--mode actix-web` 経路の `/kiwa-rust` と同思想)、 package は go-integration と同じ black-box (`{pkg}_test`) 系。
+Go の慣習 ... unit test は同 package (`package {pkg}` の `_test.go`) or `package {pkg}_test` (black-box test、 公開 API のみ)、 integration test は別 sub-package (`package integration_test` の `integration/{module}_test.go`)。 本 skill は go-unit を black-box test (`{pkg}_test` package suffix)、 go-integration を別 sub-dir に分離する default を採る。 web framework mode (`--mode gin` / `--mode echo` / `--mode fiber`) は同 module に対して 3+ framework 並列 test を成立させるため file 名 suffix (`_gin_test.go` / `_echo_test.go` / `_fiber_test.go`) で分離 (`--mode axum` / `--mode actix-web` / `--mode tower-http` 経路の `/kiwa-rust` と同思想)、 package は go-integration と同じ black-box (`{pkg}_test`) 系。
 
 ## 実行フロー
 
@@ -71,15 +73,16 @@ AskUserQuestion で coverage report の生成言語を user に確認する。 `
 
 ### Step 1: Layer 1 spec 読込 + layer 判定
 
-`--mode` 指定時は layer を確定する ... `--mode gin` → `go-gin`、 `--mode echo` → `go-echo`。 spec path も確定する (`tests/spec/integration/test-spec-{module}.go-gin.md` / `tests/spec/integration/test-spec-{module}.go-echo.md`)。 `--layer` と同時指定で矛盾があれば起動時 error abort。
+`--mode` 指定時は layer を確定する ... `--mode gin` → `go-gin`、 `--mode echo` → `go-echo`、 `--mode fiber` → `go-fiber`。 spec path も確定する (`tests/spec/integration/test-spec-{module}.go-gin.md` / `tests/spec/integration/test-spec-{module}.go-echo.md` / `tests/spec/integration/test-spec-{module}.go-fiber.md`)。 `--layer` と同時指定で矛盾があれば起動時 error abort。
 
-`--mode` / `--layer` 指定なしなら 4 spec path を Glob 確認 (`tests/spec/unit/test-spec-{module}.go.md` / `tests/spec/integration/test-spec-{module}.go.md` / `tests/spec/integration/test-spec-{module}.go-gin.md` / `tests/spec/integration/test-spec-{module}.go-echo.md`)、 単一のみなら自動判定、 複数なら AskUserQuestion。
+`--mode` / `--layer` 指定なしなら 5 spec path を Glob 確認 (`tests/spec/unit/test-spec-{module}.go.md` / `tests/spec/integration/test-spec-{module}.go.md` / `tests/spec/integration/test-spec-{module}.go-gin.md` / `tests/spec/integration/test-spec-{module}.go-echo.md` / `tests/spec/integration/test-spec-{module}.go-fiber.md`)、 単一のみなら自動判定、 複数なら AskUserQuestion。
 
 Read 後、 9 column 拡張表から TC 行を全件抽出 (id / observation / given / when / then / priority / automation / mode / target)。 各 TC を `testing.T` 文法に対応付ける map を内部で作る。
 
 - go-unit / go-integration ... 従来通り `kiwa.SetupUnitEnv` / `kiwa.NewMockServer` にマッピング
 - go-gin ... 9 column の Route / Handler / Middleware / Group / Then を `kiwa_gin.NewTestServer(t, engine)` + `srv.Request(method, path)` chain (`Header(k, v)` / `Body(b)` / `JSON(b)` / `Send()`) にマッピング
 - go-echo ... 9 column の Route / Handler / Middleware / Group / Then を `kiwa_echo.NewTestServer(t, e)` + `srv.Request(method, path)` chain にマッピング (surface は gin adapter と 1:1、 同 spec を framework 切替で並行 test 化可能)
+- go-fiber ... 9 column の Route / Handler / Middleware / Group / Then を `kiwa_fiber.NewTestServer(t, app)` + `srv.Request(method, path)` chain にマッピング (surface は gin / echo adapter と 1:1、 内部は fasthttp base のため `*App.Test(*http.Request)` hook 経由、 assertion code は 3 Go framework 共通再利用可能)
 
 ### Step 2: 対象実装 file 確認
 
@@ -87,6 +90,7 @@ Read 後、 9 column 拡張表から TC 行を全件抽出 (id / observation / g
 
 - go-gin ... `engine.GET(path, handler)` / `engine.POST(...)` / `engine.Group(...)` / `engine.Use(middleware)` の handler / middleware が実装 file に存在するか grep
 - go-echo ... `e.GET(path, handler)` / `e.POST(...)` / `e.Group(...)` / `e.Use(middleware)` の handler / middleware が実装 file に存在するか grep
+- go-fiber ... `app.Get(path, handler)` / `app.Post(...)` / `app.Group(...)` / `app.Use(middleware)` の handler / middleware が実装 file に存在するか grep (Fiber v2 は method 名が Gin / Echo と capitalize が違う ... `Get` / `Post` / `Put` / `Delete` / `Patch`)
 
 不在の関数 / struct / method / handler / Route は spec の「不足している仕様」 に bullet 追加して飛ばさず止める。
 
@@ -117,7 +121,10 @@ Read 後、 9 column 拡張表から TC 行を全件抽出 (id / observation / g
 | Gin route group (go-gin) | `api := engine.Group("/api"); api.GET("/counter", ...)` で prefix 化、 `srv.Request(kiwa.MethodGET, "/api/counter").Send()` で group 内 handler 検証 |
 | Echo engine 経路 (go-echo) | `e := echo.New(); e.GET(path, handler)` で engine 構築、 `srv := kiwa_echo.NewTestServer(t, e)` で起動 (import `kiwa_echo "github.com/cardene777/kiwa-test-go/echo"`)、 `srv.Request(kiwa.MethodGET, "/path").Send()` chain で `*Response` 取得、 surface は Gin adapter と 1:1 (`resp.StatusCode()` / `resp.JSON(&dto)` / `resp.BodyString()` / `resp.Headers()`) |
 | Echo middleware (go-echo) | `e.Use(authMiddleware)` で全 route 通過、 gin adapter と同一 assertion pattern (test code の framework 間切替が最小差分で成立) |
-| recorder 検証 (go-gin / go-echo) | `srv.RecordedRequests()` で `[]kiwa.RecordedRequest` を取得、 v1.4 `kiwa.RecordedRequest` shape (Method / Path / Headers / Body) と互換、 `kiwa.AssertEqual(t, len(reqs), N)` / `reqs[0].Headers.Get("Authorization")` 等で method / path / body / header を検証 |
+| Fiber App 経路 (go-fiber) | `app := fiber.New(fiber.Config{DisableStartupMessage: true}); app.Get(path, handler)` で App 構築、 `srv := kiwa_fiber.NewTestServer(t, app)` で起動 (import `kiwa_fiber "github.com/cardene777/kiwa-test-go/fiber"`)、 `srv.Request(kiwa.MethodGET, "/path").Send()` chain で `*Response` 取得、 surface は Gin / Echo adapter と 1:1 (`resp.StatusCode()` / `resp.JSON(&dto)` / `resp.BodyString()` / `resp.Headers()`)、 fasthttp base のため内部は `*App.Test(*http.Request)` hook 経由 (net/http `httptest.NewRecorder` 経路は fasthttp と非互換のため不使用) |
+| Fiber middleware (go-fiber) | `app.Use(func(c *fiber.Ctx) error { ...; return c.Next() })` で全 route 通過、 `app.Use(compress.New())` / `app.Use(cors.New())` / `app.Use(recover.New())` の fiber 公式 middleware も同じ pattern、 gin / echo adapter と同一 assertion pattern |
+| Fiber route group (go-fiber) | `api := app.Group("/api"); api.Get("/counter", handler)` で prefix 化、 `srv.Request(kiwa.MethodGET, "/api/counter").Send()` で group 内 handler 検証 |
+| recorder 検証 (go-gin / go-echo / go-fiber) | `srv.RecordedRequests()` で `[]kiwa.RecordedRequest` を取得、 v1.4 `kiwa.RecordedRequest` shape (Method / Path / Headers / Body) と互換、 `kiwa.AssertEqual(t, len(reqs), N)` / `reqs[0].Headers.Get("Authorization")` 等で method / path / body / header を検証 |
 
 ### Step 4: `*_test.go` Write + `go test` 実行
 
@@ -129,8 +136,9 @@ Read 後、 9 column 拡張表から TC 行を全件抽出 (id / observation / g
 - go-integration ... `integration/{module}_test.go` (`package integration_test` sub-dir)
 - go-gin (`--mode gin`) ... `{module}_gin_test.go` (black-box `{pkg}_test` package)
 - go-echo (`--mode echo`) ... `{module}_echo_test.go` (black-box `{pkg}_test` package)
+- go-fiber (`--mode fiber`) ... `{module}_fiber_test.go` (black-box `{pkg}_test` package)
 
-同 module に対して 4 framework 並列 test を成立させるため、 web framework mode は file 名 suffix で分離する。
+同 module に対して 3+ framework 並列 test を成立させるため、 web framework mode は file 名 suffix で分離する。
 
 出力 file template (unit、 black-box `{pkg}_test` package)。
 
@@ -273,7 +281,50 @@ func TestGetCounterReturns200(t *testing.T) {
 }
 ```
 
-Write 後に Bash で `go test ./...` (cwd が example 内) or `go test -C examples/{example} ./...` を実行し、 失敗 TC は flag、 全 PASS で次へ。 gin / echo mode でも同じ実行コマンドで済む (subpackage import で足りる、 build tag / feature flag なし)。
+出力 file template (go-fiber、 `--mode fiber`)。
+
+```go
+// Generated by /kiwa-go --mode fiber from tests/spec/integration/test-spec-{module}.go-fiber.md
+package counter_test
+
+import (
+	"testing"
+
+	"github.com/gofiber/fiber/v2"
+
+	"github.com/cardene777/kiwa-test-go"
+	kiwa_fiber "github.com/cardene777/kiwa-test-go/fiber"
+
+	counter "github.com/cardene777/kiwa/examples/go-fiber-poc"
+)
+
+func setup(t *testing.T) (*counter.Counter, *kiwa_fiber.TestServer) {
+	t.Helper()
+	c := counter.NewCounter()
+	app := counter.NewApp(c)
+	return c, kiwa_fiber.NewTestServer(t, app)
+}
+
+func TestGetCounterReturns200(t *testing.T) {
+	_, srv := setup(t)
+	resp := srv.Request(kiwa.MethodGET, "/count").Send()
+
+	kiwa.AssertEqual(t, resp.StatusCode(), 200)
+	var dto map[string]int
+	if err := resp.JSON(&dto); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	kiwa.AssertEqual(t, dto["count"], 0)
+}
+
+func TestUnknownPathReturns404(t *testing.T) {
+	_, srv := setup(t)
+	resp := srv.Request(kiwa.MethodGET, "/unknown").Send()
+	kiwa.AssertEqual(t, resp.StatusCode(), 404)
+}
+```
+
+Write 後に Bash で `go test ./...` (cwd が example 内) or `go test -C examples/{example} ./...` を実行し、 失敗 TC は flag、 全 PASS で次へ。 gin / echo / fiber mode でも同じ実行コマンドで済む (subpackage import で足りる、 build tag / feature flag なし)。
 
 ### Step 5: coverage 評価 + auto loop + report
 
@@ -288,9 +339,9 @@ report 4 section (`tests/reports/go/coverage-report-{module}.{lang}.md`)。
 
 ### Step 6: kiwa-review 自動呼出 (test-review mode)
 
-`/kiwa-review --mode test-review --module {module} --layer {go-unit|go-integration|go-gin|go-echo} --test-path examples/{example}/{module}[_gin|_echo]_test.go --lang $DOC_LANG` を内部呼出し、 spec vs test 整合 + 観点別 cover 率 + 追加 test 提案を 5 軸判定。 `--no-review` で skip 可能。 mode / layer 別 `--test-path` は Step 4 の出力 path 早見表 (`_gin_test.go` / `_echo_test.go` suffix) を使う。
+`/kiwa-review --mode test-review --module {module} --layer {go-unit|go-integration|go-gin|go-echo|go-fiber} --test-path examples/{example}/{module}[_gin|_echo|_fiber]_test.go --lang $DOC_LANG` を内部呼出し、 spec vs test 整合 + 観点別 cover 率 + 追加 test 提案を 5 軸判定。 `--no-review` で skip 可能。 mode / layer 別 `--test-path` は Step 4 の出力 path 早見表 (`_gin_test.go` / `_echo_test.go` / `_fiber_test.go` suffix) を使う。
 
-## kiwa-test-go API surface (v0.1 + v0.2 sync、 PR #585 / #586 / #601 / #602)
+## kiwa-test-go API surface (v0.1 + v0.2 + v0.4 sync、 PR #585 / #586 / #601 / #602 / #632 / #633)
 
 unit (`github.com/cardene777/kiwa-test-go` package `kiwa`)。
 
@@ -325,6 +376,19 @@ echo (`github.com/cardene777/kiwa-test-go/echo` subpackage、 v0.2 PR #602)。
 - `Response.StatusCode()` / `.Headers()` / `.Body()` / `.BodyString()` / `.JSON(target any) error` — surface は gin adapter と 1:1、 test code の framework 間切替が最小差分で成立
 - `TestServer.Echo() *echo.Echo` / `.RecordedRequests()` / `.RequestCount()` / `.Stop()` — v1.4 互換 recorder shape
 
+fiber (`github.com/cardene777/kiwa-test-go/fiber` subpackage、 v0.4 PR #632 / #633)。
+
+- `NewTestServer(t testing.TB, app *fiber.App) *TestServer` — Fiber App を Fiber の `*App.Test(*http.Request)` hook (fasthttp base + in-memory net conn) 経由で in-process 駆動、 `t.Cleanup` で auto-release
+- `TestServer.Request(method kiwa.HTTPMethod, path string) *Request` — surface は gin / echo adapter と 1:1
+- `Request.Header(k, v)` / `.Body(b)` / `.JSON(b)` / `.Send() *Response`
+- `Response.StatusCode()` / `.Headers()` / `.Body()` / `.BodyString()` / `.JSON(target any) error` — surface は gin / echo adapter と 1:1、 test code の framework 間切替が最小差分で成立
+- `TestServer.App() *fiber.App` / `.RecordedRequests()` / `.RequestCount()` / `.Stop()` — v1.4 互換 recorder shape、 App access で advanced route grouping、 明示 Stop も可能 (通常は t.Cleanup で足りる)
+
+fasthttp 互換 API (`kiwa_fiber` 経由 re-export、 v0.4 PR #633)。
+
+- `NormalizeRequest(req *http.Request) *http.Request` — kiwa 契約に合わせて request を normalize (headers case-insensitive、 body defensive copy)
+- `NormalizeResponse(resp *http.Response) *http.Response` — response を normalize (Content-Length 一致 + Set-Cookie multi-value 保持)
+
 ## 完了条件
 
 - Layer 1 spec の「自動化すべきテスト」 全 TC が mode / layer 別 test file に Write 済
@@ -332,6 +396,7 @@ echo (`github.com/cardene777/kiwa-test-go/echo` subpackage、 v0.2 PR #602)。
   - go-integration ... `examples/{example}/integration/{module}_test.go`
   - go-gin (`--mode gin`) ... `examples/{example}/{module}_gin_test.go`
   - go-echo (`--mode echo`) ... `examples/{example}/{module}_echo_test.go`
+  - go-fiber (`--mode fiber`) ... `examples/{example}/{module}_fiber_test.go`
 - `go test -C examples/{example} ./...` 全 PASS (failure 0 件、 全 mode 共通コマンド)
 - `go test -C examples/{example} -coverprofile=coverage.out ./...` の coverage threshold 達成 (default 80%)
 - `tests/reports/go/coverage-report-{module}.{lang}.md` が 4 section format で Write 済
