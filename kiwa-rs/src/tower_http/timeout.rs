@@ -74,14 +74,21 @@ pub fn assert_timed_out(resp: &TestResponse, expected: StatusCode) {
     if actual == expected.as_u16() {
         return;
     }
-    let body_preview = {
-        let s = resp.body_str();
-        if s.len() > 120 {
-            format!("{}…", &s[..120])
-        } else {
-            s
-        }
-    };
+    // Truncate the body preview at a UTF-8 codepoint boundary so a multi-byte
+    // response payload does not panic the panic-building path (`str::split_at`
+    // panics on non-boundary indices). 120 char cap keeps the message short
+    // while covering typical text responses; `truncate` before format keeps
+    // the code branch-free.
+    let mut body_preview = resp.body_str();
+    if body_preview.chars().count() > 120 {
+        let cut: usize = body_preview
+            .char_indices()
+            .nth(120)
+            .map(|(i, _)| i)
+            .unwrap_or(body_preview.len());
+        body_preview.truncate(cut);
+        body_preview.push('…');
+    }
     panic!(
         "kiwa timeout helper: expected TimeoutLayer status {} but got {} (body preview: {:?}) — the handler probably completed inside the budget, or a sibling layer overrode the status",
         expected.as_u16(),
