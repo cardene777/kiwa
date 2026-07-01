@@ -508,3 +508,88 @@ func TestRecordedRequestBodyIsDefensiveCopy(t *testing.T) {
 		t.Fatalf("recorded[1].Body = %q, want second-body", got)
 	}
 }
+
+// 16) MockResponse constructors defensively copy the body slice at
+// ingress so a route handler mutating its scratch buffer after
+// returning the response cannot corrupt the wire payload. Regression
+// coverage for v1.6-2 (Issue #608) hazard 1 — the pre-v1.6-5
+// implementation stored the caller slice by reference in
+// MockResponse.Body, so a handler that formatted the response into a
+// per-request scratch []byte and mutated it later leaked the mutation
+// onto the wire.
+func TestMockResponseIngressDefensiveCopy(t *testing.T) {
+	// The handler scratch buffer is captured in the outer scope so the
+	// test body can mutate it after the response has been served.
+	var scratch []byte
+	srv := kiwa.NewMockServer(t, kiwa.MockServerOpts{}.WithRoute(
+		kiwa.NewRoute(kiwa.MethodGET, "/echo", func(_ kiwa.RecordedRequest) kiwa.MockResponse {
+			scratch = []byte("pristine")
+			return kiwa.OK(scratch)
+		}),
+	))
+
+	// First request drives the handler and observes the pristine body.
+	resp, err := http.Get(srv.URL() + "/echo")
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if string(body) != "pristine" {
+		t.Fatalf("response body = %q, want pristine", body)
+	}
+
+	// Mutate the scratch buffer that the handler passed to OK. If OK
+	// stored the slice by reference the second response would leak the
+	// mutation onto the wire.
+	for i := range scratch {
+		scratch[i] = 'X'
+	}
+
+	resp2, err := http.Get(srv.URL() + "/echo")
+	if err != nil {
+		t.Fatalf("Get 2: %v", err)
+	}
+	body2, _ := io.ReadAll(resp2.Body)
+	resp2.Body.Close()
+	if string(body2) != "pristine" {
+		t.Fatalf("second response body = %q, want pristine (MockResponse leaked caller mutation)", body2)
+	}
+}
+
+// 17) requestRecorder.Snapshot() (now Log.Snapshot) is a deep copy —
+// a caller mutating the returned RecordedRequest.Body must not
+// corrupt the recorder log so a subsequent Snapshot call still
+// observes the original bytes. Regression coverage for v1.6-2
+// (Issue #608) hazard 2 — the pre-v1.6-5 Go implementation shallow-
+// copied the outer slice only, which left RecordedRequest.Body
+// aliased against the server-side recorder log.
+func TestRecorderSnapshotIsDeepCopy(t *testing.T) {
+	srv := kiwa.NewMockServer(t, kiwa.MockServerOpts{}.WithRoute(
+		kiwa.NewRoute(kiwa.MethodPOST, "/log", func(_ kiwa.RecordedRequest) kiwa.MockResponse {
+			return kiwa.OK([]byte("ok"))
+		}),
+	))
+
+	resp, err := http.Post(srv.URL()+"/log", "text/plain", bytes.NewReader([]byte("original")))
+	if err != nil {
+		t.Fatalf("Post: %v", err)
+	}
+	_, _ = io.Copy(io.Discard, resp.Body)
+	resp.Body.Close()
+
+	first := srv.RecordedRequests()
+	if len(first) != 1 {
+		t.Fatalf("first Snapshot len = %d, want 1", len(first))
+	}
+	// Mutate the returned Body in place — if Snapshot returned a
+	// shallow copy this leaks into the recorder log.
+	for i := range first[0].Body {
+		first[0].Body[i] = 'X'
+	}
+
+	second := srv.RecordedRequests()
+	if got := string(second[0].Body); got != "original" {
+		t.Fatalf("second Snapshot Body = %q, want original (Snapshot returned shallow copy)", got)
+	}
+}

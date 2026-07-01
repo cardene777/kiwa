@@ -29,14 +29,14 @@
 package kiwa
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"sync"
 	"testing"
+
+	"github.com/cardene777/kiwa-test-go/internal/recorder"
 )
 
 // HTTPMethod is a Route's HTTP method, expressed as a kiwa-owned enum so test
@@ -91,52 +91,13 @@ func (m HTTPMethod) matches(wireMethod string) bool {
 // RecordedRequest is a snapshot of a single inbound HTTP request observed by
 // the mock server.
 //
-// Headers keys are lowercased. Two views are exposed so multi-value headers
-// (Set-Cookie, WWW-Authenticate, Vary, Link, ...) survive the round trip
-// while ergonomic single-value access stays cheap:
-//
-//   - Headers ... last-write-wins map[string]string, kept for backward
-//     compatibility with pre-v1.6 assertions.
-//   - HeadersAll ... map[string][]string that preserves every recorded value
-//     in wire order. Empty header slots are still elided.
-type RecordedRequest struct {
-	// Method is the wire HTTP method (e.g. "GET").
-	Method string
-	// Path is the request path including query string (e.g. "/users?id=1").
-	Path string
-	// Headers are the request headers, keys lowercased, last-write-wins on
-	// duplicates. Retained for backward compatibility — new assertions that
-	// need multi-value semantics should read HeadersAll instead.
-	Headers map[string]string
-	// HeadersAll are the request headers, keys lowercased, preserving every
-	// value in wire order. Populated alongside Headers so callers can pick
-	// the shape that fits without paying a second recorder pass.
-	HeadersAll map[string][]string
-	// Body is the raw request body bytes (empty slice if the client sent
-	// no body).
-	Body []byte
-}
-
-// BodyString returns Body interpreted as UTF-8.
-func (r RecordedRequest) BodyString() string {
-	return string(r.Body)
-}
-
-// HeadersAllValues returns every recorded value for key (lowercased match)
-// in wire order. Returns nil (not an empty slice) when the header was not
-// observed so callers can distinguish "absent" from "present but empty".
-func (r RecordedRequest) HeadersAllValues(key string) []string {
-	if r.HeadersAll == nil {
-		return nil
-	}
-	values, ok := r.HeadersAll[strings.ToLower(key)]
-	if !ok {
-		return nil
-	}
-	out := make([]string, len(values))
-	copy(out, values)
-	return out
-}
+// The struct definition lives in the internal recorder package
+// (v1.6-5 dedup, Issue #611) — this alias keeps the pre-v1.6-5 name on
+// the exported kiwa surface so existing callers do not have to change
+// their imports. Both header views (single-value Headers, multi-value
+// HeadersAll) and the always-defensively-copied Body semantics are
+// documented on the underlying recorder.Snapshot type.
+type RecordedRequest = recorder.Snapshot
 
 // MockResponse is the response a Route handler returns.
 //
@@ -185,17 +146,25 @@ func (r MockResponse) WithHeaderValues(key string, values ...string) MockRespons
 }
 
 // OK builds a 200 OK response with the given body.
+//
+// The body slice is defensively copied at ingress so route handlers
+// scratch-buffer reuse (a common pattern when a handler formats the
+// response body into a per-request bytes.Buffer or an sync.Pool-backed
+// slice) cannot retroactively mutate the wire payload after OK
+// returns. v1.6-2 (Issue #608) hazard 1.
 func OK(body []byte) MockResponse {
-	return MockResponse{Status: http.StatusOK, Body: body}
+	return MockResponse{Status: http.StatusOK, Body: cloneBody(body)}
 }
 
 // JSON builds a 200 OK response with Content-Type: application/json. The
 // caller serialises the value; we merely set the header.
+//
+// Same ingress defensive copy discipline as OK — see the OK godoc.
 func JSON(body []byte) MockResponse {
 	return MockResponse{
 		Status:  http.StatusOK,
 		Headers: map[string]string{"Content-Type": "application/json"},
-		Body:    body,
+		Body:    cloneBody(body),
 	}
 }
 
@@ -203,6 +172,30 @@ func JSON(body []byte) MockResponse {
 func (r MockResponse) WithStatus(status int) MockResponse {
 	r.Status = status
 	return r
+}
+
+// WithBody returns a copy of r with the body replaced. The body slice
+// is defensively copied at ingress so caller scratch-buffer reuse
+// cannot retroactively mutate the wire payload after WithBody returns
+// — same discipline as OK / JSON (v1.6-2 hazard 1). Callers who prefer
+// to spell out the response as a struct literal can still do so; those
+// paths will get ingress copy discipline when the response is written
+// (see writeResponse and the defensive copy in newMockResponse below).
+func (r MockResponse) WithBody(body []byte) MockResponse {
+	r.Body = cloneBody(body)
+	return r
+}
+
+// cloneBody defensively copies a response body slice at MockResponse
+// ingress so caller-side buffer reuse (typically a bytes.Buffer or
+// sync.Pool-backed scratch slice inside the route handler) cannot
+// retroactively mutate the wire payload. Returns a fresh []byte even
+// for a nil input so downstream serialisation code can iterate without
+// a nil check. v1.6-2 (Issue #608) hazard 1.
+func cloneBody(body []byte) []byte {
+	out := make([]byte, len(body))
+	copy(out, body)
+	return out
 }
 
 // WithHeader returns a copy of r with header (key, value) inserted. The
@@ -267,7 +260,7 @@ func (o MockServerOpts) WithRoute(route Route) MockServerOpts {
 // reads from the test goroutine.
 type MockServer struct {
 	server   *httptest.Server
-	recorder *requestRecorder
+	recorder *recorder.Log
 	stopped  bool
 	stopMu   sync.Mutex
 }
@@ -278,15 +271,17 @@ func (s *MockServer) URL() string {
 }
 
 // RecordedRequests returns a snapshot of every request the server has seen
-// so far. The slice is freshly allocated so callers may iterate without
-// racing the server goroutines that own the underlying log.
+// so far. The slice is freshly allocated and every Body / HeadersAll value
+// is deep-copied so callers may iterate and mutate without racing the
+// server goroutines that own the underlying log — parity with kiwa-rs
+// Vec<u8>::clone (v1.6-2 hazard 2).
 func (s *MockServer) RecordedRequests() []RecordedRequest {
-	return s.recorder.snapshot()
+	return s.recorder.Snapshot()
 }
 
 // RequestCount reports how many requests the server has received.
 func (s *MockServer) RequestCount() int {
-	return s.recorder.count()
+	return s.recorder.Count()
 }
 
 // Stop releases the underlying httptest.Server. Idempotent — t.Cleanup
@@ -299,33 +294,6 @@ func (s *MockServer) Stop() {
 	}
 	s.stopped = true
 	s.server.Close()
-}
-
-// requestRecorder owns the captured-request log behind a sync.Mutex so
-// concurrent inbound requests cannot tear writes.
-type requestRecorder struct {
-	mu       sync.Mutex
-	captured []RecordedRequest
-}
-
-func (r *requestRecorder) append(req RecordedRequest) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.captured = append(r.captured, req)
-}
-
-func (r *requestRecorder) snapshot() []RecordedRequest {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	out := make([]RecordedRequest, len(r.captured))
-	copy(out, r.captured)
-	return out
-}
-
-func (r *requestRecorder) count() int {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return len(r.captured)
 }
 
 // NewMockServer spins up an httptest.Server bound to a fresh ephemeral port
@@ -348,16 +316,16 @@ func (r *requestRecorder) count() int {
 func NewMockServer(t testing.TB, opts MockServerOpts) *MockServer {
 	t.Helper()
 
-	recorder := &requestRecorder{}
+	log := &recorder.Log{}
 	// Clone the route table so caller-side mutation of opts.Routes after
 	// NewMockServer returns does not affect server behaviour.
 	routes := make([]Route, len(opts.Routes))
 	copy(routes, opts.Routes)
 
-	handler := buildHandler(recorder, routes)
+	handler := buildHandler(log, routes)
 	server := httptest.NewServer(handler)
 
-	mock := &MockServer{server: server, recorder: recorder}
+	mock := &MockServer{server: server, recorder: log}
 	t.Cleanup(mock.Stop)
 	return mock
 }
@@ -366,12 +334,16 @@ func NewMockServer(t testing.TB, opts MockServerOpts) *MockServer {
 // Factored out so unit tests can exercise the dispatcher without binding a
 // real port (currently only end-to-end tests exercise it; the factoring
 // keeps the option open).
-func buildHandler(recorder *requestRecorder, routes []Route) http.Handler {
+//
+// Request-to-Snapshot conversion (header case-folding, body defensive
+// copy, path+query composition) is delegated to internal/recorder.FromServer
+// — the single SSOT shared with kiwa/gin and kiwa/echo (v1.6-5, Issue #611).
+func buildHandler(log *recorder.Log, routes []Route) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		// Capture the request before invoking the handler so the recorder
 		// reflects observed traffic even if the handler panics or 404s.
-		recorded := recordRequest(req)
-		recorder.append(recorded)
+		recorded := recorder.FromServer(req)
+		log.Append(recorded)
 
 		for _, route := range routes {
 			if route.Method.matches(req.Method) && route.Path == req.URL.Path {
@@ -387,65 +359,6 @@ func buildHandler(recorder *requestRecorder, routes []Route) http.Handler {
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = io.WriteString(w, body)
 	})
-}
-
-// recordRequest converts an *http.Request into a RecordedRequest. The body
-// is fully read; net/http closes the body after the handler returns, so the
-// recorder must capture it before that happens.
-//
-// Headers is a single-value view (last-write-wins on duplicates). HeadersAll
-// preserves every value in wire order so multi-value headers (Set-Cookie,
-// WWW-Authenticate, Vary, Link, ...) survive the recording round trip.
-func recordRequest(req *http.Request) RecordedRequest {
-	headers := make(map[string]string, len(req.Header))
-	headersAll := make(map[string][]string, len(req.Header))
-	for k, v := range req.Header {
-		if len(v) == 0 {
-			continue
-		}
-		lowerKey := strings.ToLower(k)
-		// Last-write-wins on duplicate keys — same semantics as the Rust
-		// recorder so polyglot specs compare equal.
-		headers[lowerKey] = v[len(v)-1]
-		valuesCopy := make([]string, len(v))
-		copy(valuesCopy, v)
-		headersAll[lowerKey] = valuesCopy
-	}
-
-	var body []byte
-	if req.Body != nil {
-		// Reading the body fully is safe: httptest gives us the raw body
-		// reader and the handler is the last consumer.
-		buf, err := io.ReadAll(req.Body)
-		if err == nil {
-			body = buf
-		}
-		// Restore the body so downstream handlers (currently none, but the
-		// recorder may be reused) can re-read it without surprises.
-		req.Body = io.NopCloser(bytes.NewReader(body))
-	}
-
-	// Defensive copy so the RecordedRequest.Body slice never aliases the
-	// buffer we handed back to req.Body (which downstream readers may drain
-	// into a shared backing array) or the internal io.ReadAll allocation.
-	// Same discipline as the gin/echo subpackages (v1.5-3 / v1.5-4) so all
-	// three adapters guarantee that caller buffer reuse or downstream re-read
-	// cannot retroactively mutate a recorded snapshot.
-	bodyCopy := make([]byte, len(body))
-	copy(bodyCopy, body)
-
-	path := req.URL.Path
-	if raw := req.URL.RawQuery; raw != "" {
-		path = path + "?" + raw
-	}
-
-	return RecordedRequest{
-		Method:     req.Method,
-		Path:       path,
-		Headers:    headers,
-		HeadersAll: headersAll,
-		Body:       bodyCopy,
-	}
 }
 
 // writeResponse serialises a MockResponse onto the http.ResponseWriter.

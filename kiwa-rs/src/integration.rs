@@ -453,18 +453,16 @@ async fn handle_request(
         .unwrap_or_else(|| req.uri().path().to_string());
     let path_only = req.uri().path().to_string();
 
-    let mut headers = HashMap::with_capacity(req.headers().len());
-    let mut headers_all: HashMap<String, Vec<String>> = HashMap::with_capacity(req.headers().len());
-    for (name, value) in req.headers().iter() {
-        if let Ok(v) = value.to_str() {
-            let key = name.as_str().to_lowercase();
-            // Last-write-wins single-value view — retained for backward compat.
-            headers.insert(key.clone(), v.to_string());
-            // Multi-value view — preserves every value in wire order so
-            // Set-Cookie / WWW-Authenticate / Vary / Link survive.
-            headers_all.entry(key).or_default().push(v.to_string());
-        }
-    }
+    // Decode header values with to_str() at the boundary (invalid UTF-8
+    // values are dropped) and delegate the two-view construction to the
+    // shared recorder helper — the SSOT with kiwa::axum + kiwa::actix
+    // (v1.6-5, Issue #611).
+    let hint = req.headers().len();
+    let pairs = req
+        .headers()
+        .iter()
+        .filter_map(|(name, value)| value.to_str().ok().map(|v| (name.as_str(), v)));
+    let (headers, headers_all) = crate::recorder::fold_headers(pairs, hint);
 
     // Collect the request body (with optional timeout) so the recorder sees the
     // full payload before we hand it to the route handler.

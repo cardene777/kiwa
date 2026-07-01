@@ -268,18 +268,14 @@ impl<'a> RequestBuilder<'a> {
             .unwrap_or_default();
 
         // Build the single-value view (last-write-wins) and the multi-value
-        // view (every value in wire order) in one pass so multi-value headers
-        // like Set-Cookie survive alongside the pre-v1.6 shape.
-        let mut headers: HashMap<String, String> = HashMap::with_capacity(parts.headers.len());
-        let mut headers_all: HashMap<String, Vec<String>> =
-            HashMap::with_capacity(parts.headers.len());
-        for (k, v) in parts.headers.iter() {
-            if let Ok(val) = v.to_str() {
-                let key = k.as_str().to_lowercase();
-                headers.insert(key.clone(), val.to_string());
-                headers_all.entry(key).or_default().push(val.to_string());
-            }
-        }
+        // view (every value in wire order) via the shared recorder helper
+        // — the SSOT with kiwa::integration + kiwa::actix (v1.6-5, Issue #611).
+        let hint = parts.headers.len();
+        let pairs = parts
+            .headers
+            .iter()
+            .filter_map(|(k, v)| v.to_str().ok().map(|val| (k.as_str(), val)));
+        let (headers, headers_all) = crate::recorder::fold_headers(pairs, hint);
 
         TestResponse {
             status: parts.status,

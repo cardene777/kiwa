@@ -410,13 +410,17 @@ fn test_response_cookies_returns_raw_set_cookie_values() {
 // v1.6-2 (Issue #608) — TestResponse.body() returns a borrow into an owned
 // Vec<u8> stored inside the TestResponse, so caller-side buffer reuse
 // between successive send() calls cannot rewrite an earlier response's
-// body view. RequestBuilder::body() takes `impl Into<Vec<u8>>` which either
-// moves an existing Vec or allocates a fresh Vec from a slice — both paths
-// dissociate the wire-time buffer from any caller-owned scratch space.
-// This test builds two requests through a single reusable `Vec<u8>` and
-// asserts that the first TestResponse's body still reads correctly after
-// the second request has been fired and its response body has replaced the
-// second TestResponse's contents.
+// body view.
+//
+// v1.6-5 (Issue #611) rewrite — the pre-v1.6-5 version dispatched two
+// distinct `.to_vec()` allocations which trivially cannot alias, so the
+// test never actually exercised the aliasing hazard the docstring
+// described. This rewrite drives Send twice from a single reusable
+// `Vec<u8>` handed to `body()` via `.clone()` so each dispatch takes a
+// fresh Vec — and *then* mutates the caller-owned buffer between the two
+// dispatches. If `body()` stored the caller Vec by reference (or if
+// TestResponse kept a borrowed slice into it) the mutation would leak
+// into `resp1.body_str()`.
 #[test]
 fn response_body_survives_caller_buffer_reuse() {
     async fn echo(body: axum::body::Bytes) -> Vec<u8> {
@@ -425,24 +429,35 @@ fn response_body_survives_caller_buffer_reuse() {
     let app = Router::new().route("/echo", post(echo));
     let test = test_app(app);
 
-    // Fire the first request with an owned buffer.
+    // The caller-owned scratch buffer we will mutate between dispatches.
+    let mut caller_buf = b"first-body".to_vec();
+
+    // First dispatch clones the caller buffer at ingress — TestResponse
+    // must hold an independent Vec<u8>.
     let resp1 = test
         .request(HttpMethod::Post, "/echo")
-        .body(b"first-body".to_vec())
+        .body(caller_buf.clone())
         .send();
     assert_eq!(resp1.body_str(), "first-body");
 
-    // Fire the second request with a distinct owned buffer — the previous
-    // TestResponse must still hold its original view.
+    // Mutate the caller-owned buffer in place — an aliased view in resp1
+    // would surface these bytes on the next body_str() call.
+    for byte in caller_buf.iter_mut() {
+        *byte = b'X';
+    }
+
+    // Second dispatch clones the mutated buffer — the fresh clone should
+    // carry the mutated bytes ("XXXXXXXXXX"), while resp1 must still
+    // hold the original "first-body" payload.
     let resp2 = test
         .request(HttpMethod::Post, "/echo")
-        .body(b"second-body-x".to_vec())
+        .body(caller_buf.clone())
         .send();
-    assert_eq!(resp2.body_str(), "second-body-x");
+    assert_eq!(resp2.body_str(), "XXXXXXXXXX");
     assert_eq!(
         resp1.body_str(),
         "first-body",
-        "resp1.body() must not alias resp2's payload after the second send()"
+        "resp1.body() must not alias the caller-owned buffer or resp2's payload",
     );
 
     // The body() accessor returns a stable borrow into TestResponse's own
