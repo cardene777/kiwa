@@ -410,13 +410,13 @@ fn test_response_cookies_returns_raw_set_cookie_values() {
 // v1.6-2 (Issue #608) — TestResponse.body() returns a borrow into an owned
 // Vec<u8> stored inside the TestResponse, so caller-side buffer reuse
 // between successive send() calls cannot rewrite an earlier response's
-// body view. RequestBuilder::body() takes `impl Into<Vec<u8>>` which either
-// moves an existing Vec or allocates a fresh Vec from a slice — both paths
-// dissociate the wire-time buffer from any caller-owned scratch space.
-// This test builds two requests through a single reusable `Vec<u8>` and
-// asserts that the first TestResponse's body still reads correctly after
-// the second request has been fired and its response body has replaced the
-// second TestResponse's contents.
+// body view.
+//
+// v1.6-5 (Issue #611) rewrite — the pre-v1.6-5 version dispatched two
+// distinct `.to_vec()` allocations which trivially cannot alias. This
+// rewrite drives Send twice from a single reusable `Vec<u8>` and mutates
+// the caller-owned buffer between the two dispatches so an aliased view
+// inside TestResponse would surface the mutated bytes.
 #[test]
 fn response_body_survives_caller_buffer_reuse() {
     async fn echo(body: WebBytes) -> HttpResponse {
@@ -424,29 +424,29 @@ fn response_body_survives_caller_buffer_reuse() {
     }
     let test = test_app(|| App::new().route("/echo", web::post().to(echo)));
 
-    // Fire the first request with an owned buffer.
+    let mut caller_buf = b"first-body".to_vec();
+
     let resp1 = test
         .request(HttpMethod::Post, "/echo")
-        .body(b"first-body".to_vec())
+        .body(caller_buf.clone())
         .send();
     assert_eq!(resp1.body_str(), "first-body");
 
-    // Fire the second request with a distinct owned buffer — the previous
-    // TestResponse must still hold its original view.
+    for byte in caller_buf.iter_mut() {
+        *byte = b'X';
+    }
+
     let resp2 = test
         .request(HttpMethod::Post, "/echo")
-        .body(b"second-body-x".to_vec())
+        .body(caller_buf.clone())
         .send();
-    assert_eq!(resp2.body_str(), "second-body-x");
+    assert_eq!(resp2.body_str(), "XXXXXXXXXX");
     assert_eq!(
         resp1.body_str(),
         "first-body",
-        "resp1.body() must not alias resp2's payload after the second send()"
+        "resp1.body() must not alias the caller-owned buffer or resp2's payload",
     );
 
-    // The body() accessor returns a stable borrow into TestResponse's own
-    // Vec<u8>, so cloning resp1 out from under a subsequent send() call
-    // yields the same payload. clone() is derived on TestResponse.
     let cloned = resp1.clone();
     assert_eq!(cloned.body(), b"first-body");
     assert_eq!(cloned.body_str(), "first-body");

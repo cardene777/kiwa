@@ -72,6 +72,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/cardene777/kiwa-test-go"
+	"github.com/cardene777/kiwa-test-go/internal/recorder"
 )
 
 // TestServer is the running Echo test harness returned by NewTestServer.
@@ -93,7 +94,7 @@ import (
 // closed port and fails at the transport layer.
 type TestServer struct {
 	echo     *echo.Echo
-	recorder *requestRecorder
+	recorder *recorder.Log
 	// t is the testing.TB handle captured at NewTestServer so Send() can
 	// route post-Stop lifecycle violations through t.Fatalf. Storing it
 	// on the server (rather than passing it through the RequestBuilder)
@@ -112,15 +113,17 @@ func (s *TestServer) Echo() *echo.Echo {
 }
 
 // RecordedRequests returns a snapshot of every request the harness has
-// dispatched so far. The slice is freshly allocated so callers may iterate
-// without racing concurrent Send() calls.
+// dispatched so far. The slice is freshly allocated and every Body /
+// HeadersAll value is deep-copied so callers may iterate and mutate
+// without racing concurrent Send() calls or corrupting the recorder
+// log (parity with kiwa-rs Vec<u8>::clone, v1.6-2 hazard 2).
 func (s *TestServer) RecordedRequests() []kiwa.RecordedRequest {
-	return s.recorder.snapshot()
+	return s.recorder.Snapshot()
 }
 
 // RequestCount reports how many requests the harness has dispatched.
 func (s *TestServer) RequestCount() int {
-	return s.recorder.count()
+	return s.recorder.Count()
 }
 
 // IsStopped reports whether Stop has run (either explicitly or through
@@ -186,18 +189,34 @@ func (r *Request) Header(key, value string) *Request {
 }
 
 // Body sets the request body from raw bytes.
+//
+// The body slice is defensively copied at ingress so callers reusing the
+// underlying buffer between .Body(buf) and .Send() (or across multiple
+// Send() calls) cannot retroactively mutate the wire payload the
+// recorder captured. v1.6-2 (Issue #608) hazard 3.
 func (r *Request) Body(body []byte) *Request {
-	r.body = body
+	r.body = cloneRequestBody(body)
 	return r
 }
 
 // JSON sets the request body to a pre-serialised JSON payload and adds the
 // Content-Type header. Callers serialise the value themselves with
 // encoding/json so the adapter stays dependency-light.
+//
+// Same ingress defensive copy discipline as Body — see the Body godoc.
 func (r *Request) JSON(body []byte) *Request {
-	r.body = body
+	r.body = cloneRequestBody(body)
 	r.headers[http.CanonicalHeaderKey("Content-Type")] = "application/json"
 	return r
+}
+
+// cloneRequestBody defensively copies the caller's request body slice at
+// builder ingress so buffer reuse between .Body/.JSON and .Send cannot
+// retroactively mutate the wire payload (v1.6-2 hazard 3).
+func cloneRequestBody(body []byte) []byte {
+	out := make([]byte, len(body))
+	copy(out, body)
+	return out
 }
 
 // Send drives the Echo instance with the built request and buffers the
@@ -248,10 +267,11 @@ func (r *Request) Send() *Response {
 	}
 
 	// Record the request before dispatch so the recorder reflects observed
-	// traffic even if the handler panics. We capture from the freshly built
-	// *http.Request to mirror the v1.4 server-side recorder shape.
-	recorded := recordRequest(req, r.body)
-	r.server.recorder.append(recorded)
+	// traffic even if the handler panics. Request-to-Snapshot conversion
+	// is delegated to internal/recorder.FromClient — the single SSOT
+	// shared with kiwa root and kiwa/gin (v1.6-5, Issue #611).
+	recorded := recorder.FromClient(req, r.body)
+	r.server.recorder.Append(recorded)
 
 	w := httptest.NewRecorder()
 	r.server.echo.ServeHTTP(w, req)
@@ -377,77 +397,6 @@ func (r *Response) JSON(target any) error {
 	return json.Unmarshal(r.body, target)
 }
 
-// requestRecorder owns the dispatched-request log behind a sync.Mutex so
-// concurrent Send calls cannot tear writes.
-type requestRecorder struct {
-	mu       sync.Mutex
-	captured []kiwa.RecordedRequest
-}
-
-func (r *requestRecorder) append(req kiwa.RecordedRequest) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.captured = append(r.captured, req)
-}
-
-func (r *requestRecorder) snapshot() []kiwa.RecordedRequest {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	out := make([]kiwa.RecordedRequest, len(r.captured))
-	copy(out, r.captured)
-	return out
-}
-
-func (r *requestRecorder) count() int {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return len(r.captured)
-}
-
-// recordRequest converts an *http.Request + raw body bytes into a
-// kiwa.RecordedRequest. The body is taken from the caller-provided slice
-// (not re-read from req.Body) so the recorder captures the exact bytes
-// dispatched even when the request body reader is single-shot.
-//
-// Headers is a single-value view (last-write-wins on duplicates); HeadersAll
-// preserves every value in wire order so multi-value headers survive the
-// recording round trip.
-func recordRequest(req *http.Request, body []byte) kiwa.RecordedRequest {
-	headers := make(map[string]string, len(req.Header))
-	headersAll := make(map[string][]string, len(req.Header))
-	for k, v := range req.Header {
-		if len(v) == 0 {
-			continue
-		}
-		lowerKey := strings.ToLower(k)
-		// Last-write-wins on duplicate keys — same semantics as the
-		// v1.4 recorder so polyglot specs compare equal.
-		headers[lowerKey] = v[len(v)-1]
-		valuesCopy := make([]string, len(v))
-		copy(valuesCopy, v)
-		headersAll[lowerKey] = valuesCopy
-	}
-
-	path := req.URL.Path
-	if raw := req.URL.RawQuery; raw != "" {
-		path = path + "?" + raw
-	}
-
-	// Defensive copy of the body so callers reusing the underlying buffer
-	// across Send calls cannot retroactively mutate already-captured
-	// RecordedRequest.Body entries.
-	bodyCopy := make([]byte, len(body))
-	copy(bodyCopy, body)
-
-	return kiwa.RecordedRequest{
-		Method:     req.Method,
-		Path:       path,
-		Headers:    headers,
-		HeadersAll: headersAll,
-		Body:       bodyCopy,
-	}
-}
-
 // NewTestServer wraps e in a TestServer and registers t.Cleanup to
 // release the harness when the test finishes.
 //
@@ -477,7 +426,7 @@ func NewTestServer(t testing.TB, e *echo.Echo) *TestServer {
 
 	srv := &TestServer{
 		echo:     e,
-		recorder: &requestRecorder{},
+		recorder: &recorder.Log{},
 		t:        t,
 	}
 	t.Cleanup(srv.Stop)

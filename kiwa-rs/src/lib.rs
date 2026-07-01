@@ -42,6 +42,14 @@ pub mod axum;
 #[cfg(feature = "actix-web")]
 pub mod actix;
 
+// Internal recorder helpers shared by the integration / axum / actix
+// adapters. v1.6-5 (Issue #611) SSOT for the previously-inlined header
+// case-folding + multi-value view construction. Gated behind the
+// integration OR axum OR actix-web feature so a build with none of the
+// three adapters does not pay for it.
+#[cfg(any(feature = "integration", feature = "axum", feature = "actix-web"))]
+mod recorder;
+
 mod assertions;
 
 /// Crate version (semver), kept in sync with `Cargo.toml`.

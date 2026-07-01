@@ -541,3 +541,37 @@ func TestResponseBodyIsDefensiveCopy(t *testing.T) {
 		t.Fatalf("BodyString() after caller mutation = %q, want original", got)
 	}
 }
+
+// 16) Body(buf) captures a defensive copy at ingress so mutating buf
+// between .Body(buf) and .Send() (a caller-visible window that the
+// pre-v1.6-5 implementation ignored) cannot rewrite the wire payload.
+// Regression coverage for v1.6-2 (Issue #608) minor 1 — the earlier
+// TestRecordedRequestBodyIsDefensiveCopy only exercised mutation
+// *after* Send() completed and would still pass if Body(buf) stored
+// the slice by reference.
+func TestRequestBodyIngressDefensiveCopy(t *testing.T) {
+	engine := newEngine()
+	engine.POST("/echo", func(c *gin.Context) {
+		body, _ := io.ReadAll(c.Request.Body)
+		c.Data(http.StatusOK, "application/octet-stream", body)
+	})
+	srv := kiwa_gin.NewTestServer(t, engine)
+
+	// Bind the builder to a scratch buffer, then mutate the buffer
+	// before Send() so any store-by-reference implementation ships
+	// the mutated bytes down the wire.
+	buf := []byte("pristine")
+	req := srv.Request(kiwa.MethodPOST, "/echo").Body(buf)
+	for i := range buf {
+		buf[i] = 'X'
+	}
+	resp := req.Send()
+	if got := resp.BodyString(); got != "pristine" {
+		t.Fatalf("dispatched body = %q, want pristine (Body() failed to copy at ingress)", got)
+	}
+	// The recorder must also carry the pristine payload.
+	recorded := srv.RecordedRequests()
+	if got := string(recorded[0].Body); got != "pristine" {
+		t.Fatalf("recorded[0].Body = %q, want pristine", got)
+	}
+}

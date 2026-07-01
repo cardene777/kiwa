@@ -553,3 +553,29 @@ func TestResponseBodyIsDefensiveCopy(t *testing.T) {
 		t.Fatalf("BodyString() after caller mutation = %q, want original", got)
 	}
 }
+
+// 16) Body(buf) captures a defensive copy at ingress so mutating buf
+// between .Body(buf) and .Send() cannot rewrite the wire payload.
+// Regression coverage for v1.6-2 (Issue #608) minor 1.
+func TestRequestBodyIngressDefensiveCopy(t *testing.T) {
+	e := newEcho()
+	e.POST("/echo", func(c echo.Context) error {
+		body, _ := io.ReadAll(c.Request().Body)
+		return c.Blob(http.StatusOK, "application/octet-stream", body)
+	})
+	srv := kiwa_echo.NewTestServer(t, e)
+
+	buf := []byte("pristine")
+	req := srv.Request(kiwa.MethodPOST, "/echo").Body(buf)
+	for i := range buf {
+		buf[i] = 'X'
+	}
+	resp := req.Send()
+	if got := resp.BodyString(); got != "pristine" {
+		t.Fatalf("dispatched body = %q, want pristine (Body() failed to copy at ingress)", got)
+	}
+	recorded := srv.RecordedRequests()
+	if got := string(recorded[0].Body); got != "pristine" {
+		t.Fatalf("recorded[0].Body = %q, want pristine", got)
+	}
+}
