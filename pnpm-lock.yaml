@@ -52,6 +52,25 @@ importers:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0)
 
+  examples/auth-lucia-poc:
+    dependencies:
+      '@kiwa-test/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@kiwa-test/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.19
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0)
+
   examples/auth-nextjs-nextauth-poc:
     dependencies:
       '@kiwa-test/auth':
@@ -1793,6 +1812,9 @@ importers:
       '@kiwa-test/core':
         specifier: workspace:*
         version: link:../core
+      lucia:
+        specifier: ^3
+        version: 3.2.2
       next-auth:
         specifier: '>=5.0.0-beta.0 <6'
         version: 5.0.0-beta.31(next@15.5.19(@playwright/test@1.60.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
@@ -4911,6 +4933,15 @@ packages:
 
   '@open-wc/testing-helpers@3.0.1':
     resolution: {integrity: sha512-hyNysSatbgT2FNxHJsS3rGKcLEo6+HwDFu1UQL6jcSQUabp/tj3PyX7UnXL3H5YGv0lJArdYLSnvjLnjn3O2fw==}
+
+  '@oslojs/asn1@1.0.0':
+    resolution: {integrity: sha512-zw/wn0sj0j0QKbIXfIlnEcTviaCzYOY3V5rAyjR6YtOByFtJiT574+8p9Wlach0lZH9fddD4yb9laEAIl4vXQA==}
+
+  '@oslojs/binary@1.0.0':
+    resolution: {integrity: sha512-9RCU6OwXU6p67H4NODbuxv2S3eenuQ4/WFLrsq+K/k682xrznH5EVWA7N4VFk9VYVcbFtKqur5YQQZc0ySGhsQ==}
+
+  '@oslojs/crypto@1.0.1':
+    resolution: {integrity: sha512-7n08G8nWjAr/Yu3vu9zzrd0L9XnrJfpMioQcvCMxBIiF5orECHe5/3J0jmXRVvgfqMm/+4oxlQ+Sq39COYLcNQ==}
 
   '@oslojs/encoding@1.1.0':
     resolution: {integrity: sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ==}
@@ -10193,6 +10224,10 @@ packages:
 
   lru_map@0.3.3:
     resolution: {integrity: sha512-Pn9cox5CsMYngeDbmChANltQl+5pi6XmTrraMSzhPmMBbmgcxmqWry0U3PGapCU1yB4/LqCcom7qhHZiF/jGfQ==}
+
+  lucia@3.2.2:
+    resolution: {integrity: sha512-P1FlFBGCMPMXu+EGdVD9W4Mjm0DqsusmKgO7Xc33mI5X1bklmsQb0hfzPhXomQr9waWIBDsiOjvr1e6BTaUqpA==}
+    deprecated: This package has been deprecated. Please see https://lucia-auth.com/lucia-v3/migrate.
 
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
@@ -16997,6 +17032,17 @@ snapshots:
       '@open-wc/scoped-elements': 3.0.10
       lit: 3.3.3
       lit-html: 3.3.3
+
+  '@oslojs/asn1@1.0.0':
+    dependencies:
+      '@oslojs/binary': 1.0.0
+
+  '@oslojs/binary@1.0.0': {}
+
+  '@oslojs/crypto@1.0.1':
+    dependencies:
+      '@oslojs/asn1': 1.0.0
+      '@oslojs/binary': 1.0.0
 
   '@oslojs/encoding@1.1.0': {}
 
@@ -24266,6 +24312,11 @@ snapshots:
   lru.min@1.1.4: {}
 
   lru_map@0.3.3: {}
+
+  lucia@3.2.2:
+    dependencies:
+      '@oslojs/crypto': 1.0.1
+      '@oslojs/encoding': 1.1.0
 
   lz-string@1.5.0: {}
 
