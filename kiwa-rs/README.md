@@ -493,9 +493,9 @@ fn bearer_auth_round_trip() {
 fn basic_auth_round_trip() {
     let router = Router::new().route("/vault", get(|| async { "ok" }));
     let layers = ServiceBuilder::new()
-        .layer(ValidateRequestHeaderLayer::basic("alice", "s3cret"));
+        .layer(ValidateRequestHeaderLayer::basic("kiwa-user", "kiwa-pass"));
     let test = test_chain(layers, router);
-    let (k, v) = with_basic("alice", "s3cret");
+    let (k, v) = with_basic("kiwa-user", "kiwa-pass");
     let resp = test.request(HttpMethod::Get, "/vault").header(k, v).send();
     assert_eq!(resp.status(), 200);
 }

@@ -119,6 +119,12 @@ tower = { version = "0.5", features = ["util", "limit"] }
 # tests — tower-http itself only encodes. The read-side dev-dep stays
 # scoped to test code so no runtime consumer pays for it.
 flate2 = "1"
+# `base64` is available at the runtime dep layer through the `tower-http`
+# feature (see [dependencies]), but the auth helper test wants the same
+# `base64::engine::general_purpose::STANDARD` in a decode-only context.
+# Naming it as a dev-dep keeps the intent obvious in tests and avoids
+# feature-gate cross-talk when the runtime dep is re-organised.
+base64 = "0.22"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }

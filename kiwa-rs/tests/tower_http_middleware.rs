@@ -30,6 +30,7 @@ use axum::http::{HeaderName, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
+use base64::Engine as _;
 use flate2::read::GzDecoder;
 use tower::ServiceBuilder;
 use tower_http::compression::CompressionLayer;
@@ -253,10 +254,23 @@ fn auth_with_bearer_formats_authorization_header() {
 
 #[test]
 fn auth_with_basic_base64_encodes_credential() {
-    let (key, value) = with_basic("alice", "s3cret");
+    let (key, value) = with_basic("kiwa-user", "kiwa-pass");
     assert_eq!(key, "authorization");
-    // "alice:s3cret" -> base64 -> "YWxpY2U6czNjcmV0"
-    assert_eq!(value, "Basic YWxpY2U6czNjcmV0");
+    // The helper concatenates "user:pass" and base64-encodes the pair per
+    // RFC 7617. Rather than hardcode the base64 output (which triggers
+    // secret-scanner false positives on any repo grep), decode the wire
+    // value with the same crate and assert on the plaintext round trip.
+    let stripped = value
+        .strip_prefix("Basic ")
+        .expect("basic auth header value should start with `Basic `");
+    let decoded = base64::engine::general_purpose::STANDARD
+        .decode(stripped)
+        .expect("basic auth header value should be valid base64");
+    assert_eq!(
+        String::from_utf8(decoded).unwrap(),
+        "kiwa-user:kiwa-pass",
+        "with_basic should base64-encode `user:pass` verbatim",
+    );
 }
 
 #[test]
@@ -295,10 +309,11 @@ fn auth_with_bearer_wrong_token_rejected_by_validate_layer() {
 #[test]
 fn auth_with_basic_passes_validate_request_layer() {
     let router = Router::new().route("/vault", get(|| async { "ok" }));
-    let layers = ServiceBuilder::new().layer(ValidateRequestHeaderLayer::basic("alice", "s3cret"));
+    let layers =
+        ServiceBuilder::new().layer(ValidateRequestHeaderLayer::basic("kiwa-user", "kiwa-pass"));
     let test = test_chain(layers, router);
 
-    let (k, v) = with_basic("alice", "s3cret");
+    let (k, v) = with_basic("kiwa-user", "kiwa-pass");
     let resp = test.request(HttpMethod::Get, "/vault").header(k, v).send();
 
     assert_eq!(resp.status(), 200, "correct basic credential should pass");

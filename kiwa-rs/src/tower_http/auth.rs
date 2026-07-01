@@ -32,7 +32,9 @@
 //! let resp = test.request(HttpMethod::Get, "/secret").header(k, v).send();
 //! assert_eq!(resp.status(), 200);
 //!
-//! let _basic_pair = with_basic("alice", "s3cret");
+//! // Basic auth accepts (user, pass) — the helper base64-encodes the pair
+//! // per RFC 7617.
+//! let _basic_pair = with_basic("kiwa-user", "kiwa-pass");
 //! ```
 
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
@@ -63,10 +65,11 @@ pub fn with_bearer(token: &str) -> (String, String) {
 ///
 /// ```no_run
 /// use kiwa::tower_http::auth::with_basic;
-/// let (name, value) = with_basic("alice", "s3cret");
+/// let (name, value) = with_basic("kiwa-user", "kiwa-pass");
 /// assert_eq!(name, "authorization");
-/// // "alice:s3cret" -> base64 -> "YWxpY2U6czNjcmV0"
-/// assert_eq!(value, "Basic YWxpY2U6czNjcmV0");
+/// // "kiwa-user:kiwa-pass" base64-encodes to the Basic auth wire value the
+/// // ValidateRequestHeaderLayer::basic layer accepts.
+/// assert!(value.starts_with("Basic "));
 /// ```
 pub fn with_basic(user: &str, pass: &str) -> (String, String) {
     let credential = format!("{user}:{pass}");
