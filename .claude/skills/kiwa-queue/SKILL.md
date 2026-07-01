@@ -2,7 +2,7 @@
 name: kiwa-queue
 description: |
   /kiwa-design (Layer 1) が出力した `tests/spec/integration/test-spec-{module}.queue.md` を入力に、 `@kiwa-test/queue` を使う `test/*.queue.test.ts` を Write して `vitest` で動作確認する Layer 2 queue test skill。
-  11 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ / 回帰) を BullMQ (`setupBullMQEnv`、 sandbox / testcontainers) + Inngest (`setupInngestEnv`、 stub / dev-server) の 2 backend に変換し、 job add / process / retry / fail / drain / delay + event send / step function / concurrency の 8 sub-feature を 1 spec で cover する。
+  11 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ / 回帰) を 4 provider (`setupBullMQEnv` BullMQ / `setupInngestEnv` Inngest / `setupCloudflareQueuesEnv` Cloudflare Queues / `setupSQSEnv` AWS SQS) × 各 provider 2 backend に変換し、 job add / process / retry / fail / drain / delay + event send / step function / concurrency + queue send / consumer batch / DLQ + SQS FIFO / batch / long polling / visibility timeout の sub-feature を 1 spec で cover する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -29,8 +29,8 @@ $ARGUMENTS
 
 - `--module {name}` — Layer 1 spec の module 名 (`tests/spec/integration/test-spec-{name}.queue.md` を Read)
 - `--spec-path {path}` — Layer 1 spec の path を明示 (`--module` の代替)
-- `--backend {bullmq|inngest|all}` — 生成対象 backend (default `all`)
-- `--mode {sandbox|testcontainers|stub|dev-server|auto}` — backend 内の mode 選択 (default `auto` = sandbox / stub を優先し、 spec が testcontainers / dev-server を要求する TC のみ切替)
+- `--provider {bullmq|inngest|cloudflare|sqs|all}` — 生成対象 provider (default `all`、 v1.9-3 で `cloudflare`、 v1.9-4 で `sqs` 追加)
+- `--mode {sandbox|testcontainers|stub|dev-server|miniflare|wrangler|localstack|auto}` — provider 内の mode 選択 (default `auto` = 高速 backend (sandbox / stub / miniflare) を優先し、 spec が testcontainers / dev-server / wrangler / localstack を要求する TC のみ切替)
 - `--output {path}` — test file 出力先 (default `tests/{module}.queue.test.ts`)
 - `--lang {ja|en|<ISO 639-1>}` — report 生成言語
 - `--no-run` — `vitest` 実行を skip (Write のみ)
