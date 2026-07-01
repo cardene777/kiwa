@@ -47,3 +47,23 @@ export type {
 export { setupCloudflareQueuesEnv } from './cloudflare-queues/setup-cloudflare-queues-env.js';
 export { createMiniflareCloudflareQueuesEnv } from './cloudflare-queues/miniflare-cloudflare-queues.js';
 export { createWranglerCloudflareQueuesEnv } from './cloudflare-queues/wrangler-cloudflare-queues.js';
+
+// AWS SQS adapter surface (v1.9-4, GH #655).
+export type {
+  SetupSQSEnvOptions,
+  SQSBatchDeleteEntry,
+  SQSBatchSendEntry,
+  SQSLocalstackOptions,
+  SQSMessageSnapshot,
+  SQSMessageState,
+  SQSMode,
+  SQSQueueKind,
+  SQSQueueSpec,
+  SQSReceiveOptions,
+  SQSReceivedMessage,
+  SQSSendOptions,
+  SQSTestEnv,
+} from './sqs/types.js';
+export { setupSQSEnv } from './sqs/setup-sqs-env.js';
+export { createStubSQSEnv } from './sqs/stub-sqs.js';
+export { createLocalstackSQSEnv } from './sqs/localstack-sqs.js';

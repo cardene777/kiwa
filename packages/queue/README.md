@@ -6,17 +6,18 @@
   <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview (127s) — this package covers the Queue surface. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">Full-quality MP4 (2.9 MB)</a>.</sub>
 </p>
 
-Queue test adapter for kiwa — BullMQ sandbox (in-memory) + testcontainers Redis env with job assertion helpers under a single `setupBullMQEnv` API, plus an event-driven Inngest env (`setupInngestEnv`) with stub + dev-server backends, plus a Cloudflare Queues env (`setupCloudflareQueuesEnv`) with miniflare + wrangler backends.
+Queue test adapter for kiwa — BullMQ sandbox (in-memory) + testcontainers Redis env with job assertion helpers under a single `setupBullMQEnv` API, plus an event-driven Inngest env (`setupInngestEnv`) with stub + dev-server backends, plus a Cloudflare Queues env (`setupCloudflareQueuesEnv`) with miniflare + wrangler backends, plus an AWS SQS env (`setupSQSEnv`) with stub + localstack backends.
 
 ## Overview
 
-`@kiwa-test/queue` is the Layer 2 adapter that turns a queue-shaped Layer 1 spec into a runnable Vitest suite. It ships three factories:
+`@kiwa-test/queue` is the Layer 2 adapter that turns a queue-shaped Layer 1 spec into a runnable Vitest suite. It ships four factories:
 
 - **`setupBullMQEnv`** — BullMQ (Redis-backed job queue) with `sandbox` (in-process) + `testcontainers` (real Redis + BullMQ + ioredis) backends.
 - **`setupInngestEnv`** — Inngest (SaaS event-driven) with `stub` (in-process, deterministic) + `dev-server` (real Inngest dev-server HTTP round-trip) backends.
 - **`setupCloudflareQueuesEnv`** — Cloudflare Queues (edge queue) with `miniflare` (in-process, deterministic) + `wrangler` (real `wrangler dev` process) backends.
+- **`setupSQSEnv`** — AWS SQS (standard + FIFO queue) with `stub` (in-process, deterministic) + `localstack` (real LocalStack endpoint) backends.
 
-Backend selection is a one-argument change (`mode: '...'`) and all three factories share the same `TestEnvBase<TMode>` shape so switching lanes never rewrites the assertion surface.
+Backend selection is a one-argument change (`mode: '...'`) and all four factories share the same `TestEnvBase<TMode>` shape so switching lanes never rewrites the assertion surface.
 
 ## Install
 
@@ -327,6 +328,104 @@ Live under [`examples/queue-cloudflare-poc/`](../../examples/queue-cloudflare-po
 
 ```bash
 pnpm -F examples-queue-cloudflare-poc test
+```
+
+## SQS env — `setupSQSEnv`
+
+`setupSQSEnv` covers the AWS-standard queue slot in the `@kiwa-test/queue` family. Producers `send` messages by queue name; consumers `receive` them, either `delete` on success or let the visibility timeout expire so the message returns to the queue. FIFO queues honour `messageGroupId` + `messageDeduplicationId`; standard queues honour delayed sends + long polling + DLQ redrive policy.
+
+### Quick start — stub
+
+```ts
+import { setupSQSEnv } from "@kiwa-test/queue";
+
+const env = await setupSQSEnv({                        // defaults to mode: "stub"
+  queues: [
+    {
+      name: "orders",
+      visibilityTimeoutSeconds: 30,
+      redrivePolicy: { deadLetterTargetArn: "orders-dlq", maxReceiveCount: 3 },
+    },
+    { name: "orders-dlq" },
+  ],
+});
+
+await env.send("orders", { orderId: "o-1", amount: 100 });
+const [received] = await env.receive<{ orderId: string; amount: number }>("orders");
+received.delete();
+const snap = await env.assertDeleted("orders", { receiveCount: 1 });
+snap.state;         // "deleted"
+snap.receiveCount;  // 1
+
+await env.stop();
+```
+
+### Quick start — localstack
+
+```ts
+import { setupSQSEnv } from "@kiwa-test/queue";
+
+const env = await setupSQSEnv({
+  mode: "localstack",
+  localstack: { endpoint: process.env.LOCALSTACK_URL ?? "http://localhost:4566" },
+  queues: [{ name: "orders" }],
+});
+
+await env.send("orders", { orderId: "o-1", amount: 100 });
+await env.assertDeleted("orders");
+
+await env.stop();
+```
+
+### Assertion helpers
+
+The `SQSTestEnv` surface bundles four assertion helpers so tests never poll internals directly:
+
+| Helper | Contract |
+|---|---|
+| `waitForMessage(queueName, { timeoutMs? })` | Waits for the first message on `queueName` to reach a terminal state (`deleted` / `dead`). Rejects on timeout (default 5s). |
+| `assertDeleted(queueName, { receiveCount? })` | Awaits terminal state, throws if the message was not `deleted`, and (optionally) checks the observed receive count. |
+| `assertDeadLettered(queueName, { dlq?, receiveCount? })` | Awaits terminal state, throws if the message did not dead-letter, and (optionally) checks the DLQ name / receive count. |
+| `assertQueueDrained(queueName?)` | Passes when the queue (or every queue when `queueName` is omitted) has zero `pending` / `inflight` messages. |
+
+`listMessages(queueName?)` returns every snapshot the env has seen. `listDeadLetters(dlqName?)` returns every message that has been routed to a dead-letter queue.
+
+### Options
+
+```ts
+type SetupSQSEnvOptions = {
+  mode?: "stub" | "localstack";                          // default: "stub"
+  queues?: SQSQueueSpec[];                               // pre-provision queues (optional)
+  credentials?: { accessKeyId: string; secretAccessKey: string };
+  localstack?: { image?: string; endpoint?: string; region?: string; startupTimeoutMs?: number };
+};
+```
+
+`SQSQueueSpec` — `name`, optional `kind` (`standard` | `fifo`, defaults to `standard`), optional `visibilityTimeoutSeconds` (default 30), optional `redrivePolicy` (`deadLetterTargetArn` + `maxReceiveCount`).
+
+### Stub semantics (v0.2 scope)
+
+The stub backend covers the following SQS semantics deterministically:
+
+- `send(queueName, body, { delaySeconds?, messageGroupId?, messageDeduplicationId? })` → `pending` (or delayed until visibility opens)
+- `sendBatch(queueName, entries)` — up to 10 entries per call, mirrors `SendMessageBatch`
+- `receive(queueName, { maxMessages?, visibilityTimeoutSeconds?, waitTimeSeconds? })` — long polling honours `waitTimeSeconds`; returns up to 10 messages
+- `pending` → `inflight` on `receive`, `visibleAt` = now + `visibilityTimeoutSeconds`
+- `inflight` → `pending` when the visibility timeout expires (message becomes redeliverable)
+- `inflight` → `deleted` on `msg.delete()`
+- `inflight` → `dead` when `receiveCount` exceeds `redrivePolicy.maxReceiveCount` (routed to `deadLetterTargetArn`)
+- `msg.changeVisibility(seconds)` — extends the in-flight window
+- FIFO queues honour `messageGroupId` (required) + `messageDeduplicationId` (returns the existing message on duplicate dedup id)
+- `deleteBatch(queueName, entries)` — up to 10 entries per call, mirrors `DeleteMessageBatch`
+
+Out of scope for v0.2: content-based deduplication, dead-letter redrive-to-source rewind (`StartMessageMoveTask`), attribute-based filtering, encrypted queues (KMS), delay queues (queue-level `DelaySeconds`), throughput quotas. Those semantics are best exercised through the localstack backend against a real LocalStack container.
+
+### Reference — the SQS PoC
+
+Live under [`examples/queue-sqs-poc/`](../../examples/queue-sqs-poc/) — 8 tests that thread a customer-order processing pipeline through `setupSQSEnv` end to end (happy path, batch send / delete, transient retry, DLQ routing, mixed batch, FIFO ordering, FIFO deduplication, long polling).
+
+```bash
+pnpm -F examples-queue-sqs-poc test
 ```
 
 ## License

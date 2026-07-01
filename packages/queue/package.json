@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/queue",
   "version": "0.2.0",
-  "description": "Queue test adapter for kiwa — BullMQ (Redis-backed) sandbox (in-memory) + testcontainers Redis env + Inngest (event-driven) dev-server + stub env + Cloudflare Queues (miniflare + wrangler) env, with job / run / message assertion helpers (waitForJob / assertProcessed / assertFailed / assertRetried / assertQueueDrained / assertFunctionRan / assertStepRan / assertAcknowledged / assertDeadLettered)",
+  "description": "Queue test adapter for kiwa — BullMQ (Redis-backed) sandbox (in-memory) + testcontainers Redis env + Inngest (event-driven) dev-server + stub env + Cloudflare Queues (miniflare + wrangler) env + AWS SQS (stub + localstack) env, with job / run / message assertion helpers (waitForJob / assertProcessed / assertFailed / assertRetried / assertQueueDrained / assertFunctionRan / assertStepRan / assertAcknowledged / assertDeadLettered / assertDeleted)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -23,6 +23,10 @@
     "miniflare",
     "wrangler",
     "edge",
+    "sqs",
+    "aws-sqs",
+    "localstack",
+    "fifo",
     "testing",
     "vitest"
   ],
