@@ -6,7 +6,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  external: ['ioredis', 'redis', 'testcontainers', 'vitest'],
+  external: ['ioredis', 'redis', 'testcontainers', 'memjs', 'memcached', 'vitest'],
   outExtension({ format }) {
     return {
       js: format === 'cjs' ? '.cjs' : '.js',
