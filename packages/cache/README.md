@@ -6,16 +6,16 @@
   <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview (127s) — this package covers the Cache surface. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">Full-quality MP4 (2.9 MB)</a>.</sub>
 </p>
 
-Cache test adapter for kiwa — Redis (testcontainers) live env + in-memory sandbox env under a single `setupCacheEnv` API, with TTL / Pub/Sub / expiry assertion helpers.
+Cache test adapter for kiwa — Redis (testcontainers) live env + in-memory sandbox env + Memcached (stub + testcontainers) env with TTL / Pub/Sub / expiry / consistent-hash assertion helpers under two factories (`setupCacheEnv` for Redis, `setupMemcachedEnv` for Memcached).
 
 ## Overview
 
-`@kiwa-test/cache` is the Layer 2 adapter that turns a cache-shaped Layer 1 spec into a runnable Vitest suite. One factory (`setupCacheEnv`) exposes two backends:
+`@kiwa-test/cache` is the Layer 2 adapter that turns a cache-shaped Layer 1 spec into a runnable Vitest suite. Two factories cover the dominant cache providers:
 
-- **`mode: 'in-memory'`** (default) — in-process Redis-shaped fake. Deterministic, offline, zero peer dependencies.
-- **`mode: 'testcontainers'`** — real Redis under Docker via `testcontainers`, wired to either `ioredis` (default) or `redis` (node-redis v4).
+- **`setupCacheEnv`** — Redis (in-process + testcontainers), assertion surface for TTL / Pub/Sub / expiry.
+- **`setupMemcachedEnv`** — Memcached (in-process stub + testcontainers), 8 core commands + TTL + multi-server consistent hashing.
 
-Backend selection is a one-argument change and the assertion surface is identical across both.
+Both factories share the same `TestEnvBase<TMode>` shape so switching lanes never rewrites the assertion surface. Redis backends are `'in-memory' | 'testcontainers'`; Memcached backends are `'stub' | 'testcontainers'`.
 
 ## Install
 
@@ -86,6 +86,76 @@ await env.stop();                           // stops container + closes client
 - Two environments created from the same test file are fully namespace-isolated — one env's `flushAll()` never touches another's keys, and one env's `publish` never delivers to another env's subscribers.
 - `testcontainers` mode always requires a real Redis (image tag configurable) unless an external `redis.url` is supplied.
 
-## Coverage snapshot (v0.1.0)
+## Memcached env — `setupMemcachedEnv`
 
-The in-memory backend is covered by 32 unit tests + 8 signup-flow PoC tests inside `examples/cache-redis-poc/`. TTL semantics use a 1-second real timer to prove eventual expiry.
+`setupMemcachedEnv` covers the Memcached slot. Producers exercise the 8 core commands (`get` / `set` / `delete` / `add` / `replace` / `increment` / `decrement` / `flush`) plus TTL introspection and multi-server consistent hashing — the surface consumers see when they wire `memjs` / `memcached` in prod.
+
+### Quick start — stub
+
+```ts
+import { setupMemcachedEnv } from "@kiwa-test/cache";
+
+const env = await setupMemcachedEnv({           // defaults to mode: "stub"
+  servers: ["stub-a", "stub-b", "stub-c"],
+});
+
+await env.set("session:1", "token", { ttlSeconds: 60 });
+await env.assertTTL("session:1", { atLeast: 59, atMost: 60 });
+
+// consistent hashing — same key always lands on the same server
+const owner = env.serverFor("session:1");
+
+// atomic counters — Memcached clamps decr at 0
+await env.set("counter", "10");
+await env.increment("counter", 5);              // returns 15
+await env.decrement("counter", 100);            // returns 0 (clamp)
+
+await env.stop();
+```
+
+### Quick start — testcontainers
+
+```ts
+import { setupMemcachedEnv } from "@kiwa-test/cache";
+
+const env = await setupMemcachedEnv({
+  mode: "testcontainers",
+  testcontainers: { url: process.env.MEMCACHED_URL },
+  servers: ["node-a", "node-b"],
+});
+
+await env.set("k", "v", { ttlSeconds: 30 });
+await env.assertTTL("k", { atLeast: 29, atMost: 30 });
+
+await env.stop();
+```
+
+### API surface (Memcached)
+
+| Helper | Purpose |
+|---|---|
+| `env.get(key)` | Read a key. Returns `null` when unset / expired. |
+| `env.set(key, value, { ttlSeconds })` | Write unconditionally. `ttlSeconds=0` = no expiry. |
+| `env.delete(key)` | Remove a key. Returns `true` if the key existed. |
+| `env.add(key, value, { ttlSeconds })` | Write only if the key is missing. |
+| `env.replace(key, value, { ttlSeconds })` | Write only if the key already exists. |
+| `env.increment(key, delta?)` | Atomically add delta. Returns new value or `null`. |
+| `env.decrement(key, delta?)` | Atomically subtract delta. Clamps at 0. |
+| `env.flush()` | Wipe every key across every server. |
+| `env.ttl(key)` | Read the TTL. `-1` = no expiry, `-2` = missing. |
+| `env.assertTTL(key, { seconds \| atLeast \| atMost })` | Assert a TTL match. |
+| `env.serverFor(key)` | Return which server owns the key on the hash ring. |
+| `env.listEntries()` | Introspection — every entry across every server. |
+
+### Reference — the Memcached PoC
+
+Live under [`examples/cache-memcached-poc/`](../../examples/cache-memcached-poc/) — 8 tests that thread a session-cache pipeline through `setupMemcachedEnv` (register / duplicate register / pageview counter / rotate / logout / expiry / consistent-hash distribution / flush).
+
+```bash
+pnpm -F examples-cache-memcached-poc test
+```
+
+## Coverage snapshot (v0.2.0)
+
+- Redis backend: 32 unit tests + 8 signup-flow PoC tests (`examples/cache-redis-poc/`).
+- Memcached backend: 34 unit tests + 8 session-cache PoC tests (`examples/cache-memcached-poc/`).

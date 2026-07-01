@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/cache",
-  "version": "0.1.0",
-  "description": "Cache test adapter for kiwa — Redis (testcontainers) live env + in-memory sandbox env, with TTL / Pub/Sub / expiry assertion helpers (assertTTL / subscribe / assertPublished)",
+  "version": "0.2.0",
+  "description": "Cache test adapter for kiwa — Redis (testcontainers) live env + in-memory sandbox env + Memcached (stub + testcontainers) env, with TTL / Pub/Sub / expiry / consistent-hash assertion helpers (assertTTL / subscribe / assertPublished / serverFor)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -18,6 +18,9 @@
     "ttl",
     "pubsub",
     "publish-subscribe",
+    "memcached",
+    "memjs",
+    "consistent-hashing",
     "testing",
     "vitest"
   ],
@@ -70,6 +73,8 @@
     "ioredis": "^5",
     "redis": "^4",
     "testcontainers": ">=10",
+    "memjs": "^1",
+    "memcached": "^2",
     "vitest": "^2"
   },
   "peerDependenciesMeta": {
@@ -80,6 +85,12 @@
       "optional": true
     },
     "testcontainers": {
+      "optional": true
+    },
+    "memjs": {
+      "optional": true
+    },
+    "memcached": {
       "optional": true
     }
   },
