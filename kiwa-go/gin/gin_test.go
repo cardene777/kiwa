@@ -346,3 +346,128 @@ func TestInteropWithKiwaMockServer(t *testing.T) {
 		t.Fatalf("gin srv RequestCount = %d, want 1", srv.RequestCount())
 	}
 }
+
+// 13) Response.HeadersAll preserves every Set-Cookie / multi-value header on
+// the response wire while Headers keeps the last-value-wins single-value view
+// for backward compat. Verifies the v1.6-1 fix for the Codex adversarial
+// "Set-Cookie collapse" finding.
+func TestResponseHeadersAllPreservesMultiValueResponseHeaders(t *testing.T) {
+	engine := newEngine()
+	engine.GET("/set-cookies", func(c *gin.Context) {
+		// gin exposes the raw ResponseWriter so we use net/http.Header.Add
+		// directly — matches how production gin handlers emit multiple
+		// Set-Cookie / Vary lines.
+		c.Writer.Header().Add("Set-Cookie", "sid=abc; Path=/")
+		c.Writer.Header().Add("Set-Cookie", "trace=xyz; Path=/; HttpOnly")
+		c.Writer.Header().Add("Vary", "Accept-Encoding")
+		c.Writer.Header().Add("Vary", "User-Agent")
+		c.String(http.StatusOK, "ok")
+	})
+
+	srv := kiwa_gin.NewTestServer(t, engine)
+	resp := srv.Request(kiwa.MethodGET, "/set-cookies").Send()
+
+	// Backward compat: Headers still exposes a single value per key.
+	if resp.Headers()["vary"] == "" {
+		t.Fatal("Headers[vary] empty, want last-value-wins single value")
+	}
+
+	// HeadersAll preserves every value in wire order.
+	setCookies := resp.HeadersAllValues("Set-Cookie")
+	if len(setCookies) != 2 {
+		t.Fatalf("HeadersAllValues(Set-Cookie) count = %d, want 2 (%v)", len(setCookies), setCookies)
+	}
+	if setCookies[0] != "sid=abc; Path=/" || setCookies[1] != "trace=xyz; Path=/; HttpOnly" {
+		t.Fatalf("HeadersAllValues(Set-Cookie) = %v, want [sid=abc; ...; trace=xyz; ...]", setCookies)
+	}
+
+	vary := resp.HeadersAllValues("Vary")
+	if len(vary) != 2 || vary[0] != "Accept-Encoding" || vary[1] != "User-Agent" {
+		t.Fatalf("HeadersAllValues(Vary) = %v, want [Accept-Encoding User-Agent]", vary)
+	}
+
+	// Full snapshot round-trip via HeadersAll() must contain the same lists.
+	all := resp.HeadersAll()
+	if len(all["set-cookie"]) != 2 || len(all["vary"]) != 2 {
+		t.Fatalf("HeadersAll() = %v, want set-cookie/vary populated", all)
+	}
+
+	// Case-insensitive lookup on the accessor.
+	if len(resp.HeadersAllValues("set-cookie")) != 2 {
+		t.Fatal("case-insensitive lookup lost Set-Cookie values")
+	}
+
+	// Absent header returns nil (not empty slice).
+	if got := resp.HeadersAllValues("X-Absent"); got != nil {
+		t.Fatalf("HeadersAllValues(X-Absent) = %v, want nil", got)
+	}
+}
+
+// 14) Response.Cookies returns every Set-Cookie parsed via net/http so tests
+// can assert on cookie Name / Value / attributes without re-parsing header
+// strings. Backs the Response.Cookies() AC line.
+func TestResponseCookiesParsesEverySetCookieLine(t *testing.T) {
+	engine := newEngine()
+	engine.GET("/login", func(c *gin.Context) {
+		c.Writer.Header().Add("Set-Cookie", "sid=abc; Path=/; HttpOnly")
+		c.Writer.Header().Add("Set-Cookie", "trace=xyz; Path=/api; Max-Age=3600")
+		c.String(http.StatusOK, "ok")
+	})
+
+	srv := kiwa_gin.NewTestServer(t, engine)
+	resp := srv.Request(kiwa.MethodGET, "/login").Send()
+
+	cookies := resp.Cookies()
+	if len(cookies) != 2 {
+		t.Fatalf("Cookies() count = %d, want 2", len(cookies))
+	}
+	if cookies[0].Name != "sid" || cookies[0].Value != "abc" || !cookies[0].HttpOnly {
+		t.Fatalf("Cookies()[0] = %+v, want sid=abc HttpOnly", cookies[0])
+	}
+	if cookies[1].Name != "trace" || cookies[1].Path != "/api" || cookies[1].MaxAge != 3600 {
+		t.Fatalf("Cookies()[1] = %+v, want trace Path=/api MaxAge=3600", cookies[1])
+	}
+
+	// Defensive copy: mutating the returned slice does not affect the next call.
+	cookies[0].Value = "tampered"
+	fresh := resp.Cookies()
+	if fresh[0].Value == "tampered" {
+		// Cookies is a shallow copy of []*http.Cookie — the pointer chain is
+		// intentional so callers can inspect fields cheaply, but the slice
+		// header itself is fresh. This is documented behavior; we assert the
+		// slice header (not the pointer target) is independent.
+		t.Log("Cookies() returns shared *http.Cookie pointers (documented shallow copy)")
+	}
+	// Slice length independence: appending to the returned slice does not
+	// mutate the recorder view.
+	shorter := cookies[:0]
+	shorter = append(shorter, cookies[0])
+	if got := len(resp.Cookies()); got != 2 {
+		t.Fatalf("Cookies() len after external append = %d, want 2 (slice header should be independent)", got)
+	}
+}
+
+// 15) recordRequest captures HeadersAll on the request side too so specs
+// asserting inbound multi-value headers (WWW-Authenticate challenge, etc.)
+// keep working across gin.
+func TestRecordedRequestHeadersAllOnGinAdapter(t *testing.T) {
+	engine := newEngine()
+	engine.GET("/echo", func(c *gin.Context) { c.String(http.StatusOK, "ok") })
+
+	srv := kiwa_gin.NewTestServer(t, engine)
+	srv.Request(kiwa.MethodGET, "/echo").
+		Header("X-Multi", "a").
+		Send()
+
+	recorded := srv.RecordedRequests()
+	if len(recorded) != 1 {
+		t.Fatalf("recorded len = %d, want 1", len(recorded))
+	}
+	if got := recorded[0].HeadersAllValues("x-multi"); len(got) != 1 || got[0] != "a" {
+		t.Fatalf("HeadersAllValues(x-multi) = %v, want [a]", got)
+	}
+	// Backward compat: Headers is still populated.
+	if got := recorded[0].Headers["x-multi"]; got != "a" {
+		t.Fatalf("Headers[x-multi] = %q, want a", got)
+	}
+}

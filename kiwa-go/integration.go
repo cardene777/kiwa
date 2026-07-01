@@ -91,16 +91,27 @@ func (m HTTPMethod) matches(wireMethod string) bool {
 // RecordedRequest is a snapshot of a single inbound HTTP request observed by
 // the mock server.
 //
-// Headers keys are lowercased (last-write-wins on duplicates) to mirror the
-// Rust kiwa-test-rs RecordedRequest shape so a polyglot Layer 1 spec can
-// assert identical fields across languages.
+// Headers keys are lowercased. Two views are exposed so multi-value headers
+// (Set-Cookie, WWW-Authenticate, Vary, Link, ...) survive the round trip
+// while ergonomic single-value access stays cheap:
+//
+//   - Headers ... last-write-wins map[string]string, kept for backward
+//     compatibility with pre-v1.6 assertions.
+//   - HeadersAll ... map[string][]string that preserves every recorded value
+//     in wire order. Empty header slots are still elided.
 type RecordedRequest struct {
 	// Method is the wire HTTP method (e.g. "GET").
 	Method string
 	// Path is the request path including query string (e.g. "/users?id=1").
 	Path string
-	// Headers are the request headers, keys lowercased.
+	// Headers are the request headers, keys lowercased, last-write-wins on
+	// duplicates. Retained for backward compatibility — new assertions that
+	// need multi-value semantics should read HeadersAll instead.
 	Headers map[string]string
+	// HeadersAll are the request headers, keys lowercased, preserving every
+	// value in wire order. Populated alongside Headers so callers can pick
+	// the shape that fits without paying a second recorder pass.
+	HeadersAll map[string][]string
 	// Body is the raw request body bytes (empty slice if the client sent
 	// no body).
 	Body []byte
@@ -111,18 +122,66 @@ func (r RecordedRequest) BodyString() string {
 	return string(r.Body)
 }
 
+// HeadersAllValues returns every recorded value for key (lowercased match)
+// in wire order. Returns nil (not an empty slice) when the header was not
+// observed so callers can distinguish "absent" from "present but empty".
+func (r RecordedRequest) HeadersAllValues(key string) []string {
+	if r.HeadersAll == nil {
+		return nil
+	}
+	values, ok := r.HeadersAll[strings.ToLower(key)]
+	if !ok {
+		return nil
+	}
+	out := make([]string, len(values))
+	copy(out, values)
+	return out
+}
+
 // MockResponse is the response a Route handler returns.
 //
 // The zero value is a 200 OK with no headers and an empty body — matching
 // httptest defaults so callers only spell out the fields they care about.
+//
+// Two header views coexist: Headers writes a single value per key (mirroring
+// the pre-v1.6 shape), HeadersAll writes every value in wire order so
+// multi-value headers (Set-Cookie, WWW-Authenticate, Vary, Link, ...) can be
+// emitted verbatim. writeResponse merges the two — HeadersAll entries add to
+// the response, then Headers entries Set (replacing anything HeadersAll wrote
+// for that key) so callers who only fill Headers keep the previous behaviour.
 type MockResponse struct {
 	// Status is the HTTP status code. Zero is treated as 200.
 	Status int
 	// Headers are the response headers (mixed-case keys preserved; net/http
-	// normalises them on the wire).
+	// normalises them on the wire). Single value per key.
 	Headers map[string]string
+	// HeadersAll are the response headers when multiple values per key are
+	// required (Set-Cookie in particular). Values are written in slice order
+	// via http.Header.Add so the wire keeps every entry.
+	HeadersAll map[string][]string
 	// Body is the raw response body bytes.
 	Body []byte
+}
+
+// WithHeaderValues returns a copy of r with every value in values appended
+// to HeadersAll[key] (the existing HeadersAll map is cloned so callers can
+// chain safely). Use this for Set-Cookie / WWW-Authenticate / Vary / Link
+// where multiple header lines matter.
+func (r MockResponse) WithHeaderValues(key string, values ...string) MockResponse {
+	cloned := make(map[string][]string, len(r.HeadersAll)+1)
+	for k, v := range r.HeadersAll {
+		copied := make([]string, len(v))
+		copy(copied, v)
+		cloned[k] = copied
+	}
+	// Append instead of overwriting so the caller can chain WithHeaderValues
+	// per line — matches http.Header.Add semantics.
+	appended := make([]string, 0, len(cloned[key])+len(values))
+	appended = append(appended, cloned[key]...)
+	appended = append(appended, values...)
+	cloned[key] = appended
+	r.HeadersAll = cloned
+	return r
 }
 
 // OK builds a 200 OK response with the given body.
@@ -333,15 +392,24 @@ func buildHandler(recorder *requestRecorder, routes []Route) http.Handler {
 // recordRequest converts an *http.Request into a RecordedRequest. The body
 // is fully read; net/http closes the body after the handler returns, so the
 // recorder must capture it before that happens.
+//
+// Headers is a single-value view (last-write-wins on duplicates). HeadersAll
+// preserves every value in wire order so multi-value headers (Set-Cookie,
+// WWW-Authenticate, Vary, Link, ...) survive the recording round trip.
 func recordRequest(req *http.Request) RecordedRequest {
 	headers := make(map[string]string, len(req.Header))
+	headersAll := make(map[string][]string, len(req.Header))
 	for k, v := range req.Header {
 		if len(v) == 0 {
 			continue
 		}
+		lowerKey := strings.ToLower(k)
 		// Last-write-wins on duplicate keys — same semantics as the Rust
 		// recorder so polyglot specs compare equal.
-		headers[strings.ToLower(k)] = v[len(v)-1]
+		headers[lowerKey] = v[len(v)-1]
+		valuesCopy := make([]string, len(v))
+		copy(valuesCopy, v)
+		headersAll[lowerKey] = valuesCopy
 	}
 
 	var body []byte
@@ -363,16 +431,28 @@ func recordRequest(req *http.Request) RecordedRequest {
 	}
 
 	return RecordedRequest{
-		Method:  req.Method,
-		Path:    path,
-		Headers: headers,
-		Body:    body,
+		Method:     req.Method,
+		Path:       path,
+		Headers:    headers,
+		HeadersAll: headersAll,
+		Body:       body,
 	}
 }
 
 // writeResponse serialises a MockResponse onto the http.ResponseWriter.
 // Headers must be written before WriteHeader; body comes last.
+//
+// HeadersAll is added first (Add per value so multi-line headers like
+// Set-Cookie survive on the wire). Headers is applied afterwards with Set,
+// which replaces any HeadersAll entry for the same key — so callers who only
+// fill Headers keep the pre-v1.6 last-write-wins behaviour, and callers who
+// only fill HeadersAll get every value on the wire in slice order.
 func writeResponse(w http.ResponseWriter, resp MockResponse) {
+	for k, values := range resp.HeadersAll {
+		for _, v := range values {
+			w.Header().Add(k, v)
+		}
+	}
 	for k, v := range resp.Headers {
 		w.Header().Set(k, v)
 	}

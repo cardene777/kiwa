@@ -50,11 +50,20 @@ fn test_app_covers_all_http_methods() {
     assert_eq!(test.request(HttpMethod::Get, "/m").send().body_str(), "g");
     assert_eq!(test.request(HttpMethod::Post, "/m").send().body_str(), "p");
     assert_eq!(test.request(HttpMethod::Put, "/m").send().body_str(), "u");
-    assert_eq!(test.request(HttpMethod::Patch, "/m").send().body_str(), "ptch");
-    assert_eq!(test.request(HttpMethod::Delete, "/m").send().body_str(), "d");
+    assert_eq!(
+        test.request(HttpMethod::Patch, "/m").send().body_str(),
+        "ptch"
+    );
+    assert_eq!(
+        test.request(HttpMethod::Delete, "/m").send().body_str(),
+        "d"
+    );
     // HEAD returns the same status as the registered handler with an empty body.
     assert_eq!(test.request(HttpMethod::Head, "/m").send().status(), 200);
-    assert_eq!(test.request(HttpMethod::Options, "/m").send().body_str(), "o");
+    assert_eq!(
+        test.request(HttpMethod::Options, "/m").send().body_str(),
+        "o"
+    );
 }
 
 // AC 3 — request headers reach the handler verbatim. axum extracts the
@@ -132,7 +141,13 @@ fn test_app_json_round_trip() {
 
     assert_eq!(resp.status(), 201);
     let parsed: CreatedUser = serde_json::from_slice(resp.body()).expect("parse CreatedUser");
-    assert_eq!(parsed, CreatedUser { id: 42, name: "sora".into() });
+    assert_eq!(
+        parsed,
+        CreatedUser {
+            id: 42,
+            name: "sora".into()
+        }
+    );
 
     // `TestResponse::json()` shortcut returns a `serde_json::Value` snapshot.
     let json = resp.json().expect("response body should parse as JSON");
@@ -299,4 +314,95 @@ fn test_app_composes_with_mock_server_for_external_calls() {
     assert_eq!(recorded.len(), 1);
     assert_eq!(recorded[0].method, "GET");
     assert_eq!(recorded[0].path, "/upstream/users");
+}
+
+// v1.6-1 — TestResponse.headers_all preserves every multi-value response
+// header (Set-Cookie / Vary / …) so tests can assert on cookie / negotiation
+// payloads that a last-write-wins single-value view would collapse. Backs
+// the "全 adapter で test 追加" AC line for Rust axum.
+#[test]
+fn test_response_headers_all_preserves_multi_value_response_headers() {
+    async fn set_cookies() -> axum::response::Response {
+        let mut resp = axum::response::Response::new(axum::body::Body::from("ok"));
+        let headers = resp.headers_mut();
+        headers.append("set-cookie", "sid=abc; Path=/".parse().unwrap());
+        headers.append("set-cookie", "trace=xyz; Path=/; HttpOnly".parse().unwrap());
+        headers.append("vary", "Accept-Encoding".parse().unwrap());
+        headers.append("vary", "User-Agent".parse().unwrap());
+        resp
+    }
+    let app = Router::new().route("/set-cookies", get(set_cookies));
+    let test = test_app(app);
+
+    let resp = test.request(HttpMethod::Get, "/set-cookies").send();
+
+    // Backward compat: headers() still exposes a single value per key.
+    assert!(resp.headers().get("vary").is_some());
+
+    // headers_all preserves every value in wire order.
+    let cookies = resp
+        .headers_all_values("Set-Cookie")
+        .expect("set-cookie should be present");
+    assert_eq!(cookies.len(), 2, "cookies: {:?}", cookies);
+    assert_eq!(cookies[0], "sid=abc; Path=/");
+    assert_eq!(cookies[1], "trace=xyz; Path=/; HttpOnly");
+
+    let vary = resp
+        .headers_all_values("Vary")
+        .expect("vary should be present");
+    assert_eq!(
+        vary,
+        vec!["Accept-Encoding".to_string(), "User-Agent".to_string()]
+    );
+
+    // Full snapshot via headers_all() contains the same lists.
+    let all = resp.headers_all();
+    assert_eq!(all.get("set-cookie").map(|v| v.len()), Some(2));
+    assert_eq!(all.get("vary").map(|v| v.len()), Some(2));
+
+    // Case-insensitive lookup on the accessor.
+    assert_eq!(
+        resp.headers_all_values("set-cookie").map(|v| v.len()),
+        Some(2)
+    );
+
+    // Absent header returns None so callers can distinguish "absent" from
+    // "present but empty".
+    assert!(resp.headers_all_values("x-absent").is_none());
+}
+
+// v1.6-1 — TestResponse.cookies returns the raw Set-Cookie values in wire
+// order. kiwa stays dependency-light so downstream tests pick their own
+// cookie parser (`cookie::Cookie::parse`, `reqwest::cookie`, …).
+#[test]
+fn test_response_cookies_returns_raw_set_cookie_values() {
+    async fn login() -> axum::response::Response {
+        let mut resp = axum::response::Response::new(axum::body::Body::from("ok"));
+        let headers = resp.headers_mut();
+        headers.append("set-cookie", "sid=abc; Path=/; HttpOnly".parse().unwrap());
+        headers.append(
+            "set-cookie",
+            "trace=xyz; Path=/api; Max-Age=3600".parse().unwrap(),
+        );
+        resp
+    }
+    let app = Router::new().route("/login", get(login));
+    let test = test_app(app);
+
+    let resp = test.request(HttpMethod::Get, "/login").send();
+    let cookies = resp.cookies();
+    assert_eq!(cookies.len(), 2);
+    assert!(cookies[0].starts_with("sid=abc"));
+    assert!(cookies[0].contains("HttpOnly"));
+    assert!(cookies[1].starts_with("trace=xyz"));
+    assert!(cookies[1].contains("Max-Age=3600"));
+
+    // Route with no cookies returns an empty Vec (not None).
+    async fn no_cookies() -> &'static str {
+        "no cookies here"
+    }
+    let app = Router::new().route("/none", get(no_cookies));
+    let test = test_app(app);
+    let resp = test.request(HttpMethod::Get, "/none").send();
+    assert!(resp.cookies().is_empty());
 }

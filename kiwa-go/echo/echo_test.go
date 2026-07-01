@@ -376,3 +376,110 @@ func TestInteropWithKiwaMockServer(t *testing.T) {
 		t.Fatalf("echo srv RequestCount = %d, want 1", srv.RequestCount())
 	}
 }
+
+// 13) Response.HeadersAll preserves every Set-Cookie / multi-value header on
+// the response wire while Headers keeps the last-value-wins single-value view
+// for backward compat. Verifies the v1.6-1 fix for the Codex adversarial
+// "Set-Cookie collapse" finding.
+func TestResponseHeadersAllPreservesMultiValueResponseHeaders(t *testing.T) {
+	e := newEcho()
+	e.GET("/set-cookies", func(c echo.Context) error {
+		// Echo exposes the raw ResponseWriter via c.Response().Header so we
+		// use net/http.Header.Add directly — matches how production Echo
+		// handlers emit multiple Set-Cookie / Vary lines.
+		c.Response().Header().Add("Set-Cookie", "sid=abc; Path=/")
+		c.Response().Header().Add("Set-Cookie", "trace=xyz; Path=/; HttpOnly")
+		c.Response().Header().Add("Vary", "Accept-Encoding")
+		c.Response().Header().Add("Vary", "User-Agent")
+		return c.String(http.StatusOK, "ok")
+	})
+
+	srv := kiwa_echo.NewTestServer(t, e)
+	resp := srv.Request(kiwa.MethodGET, "/set-cookies").Send()
+
+	// Backward compat: Headers still exposes a single value per key.
+	if resp.Headers()["vary"] == "" {
+		t.Fatal("Headers[vary] empty, want last-value-wins single value")
+	}
+
+	// HeadersAll preserves every value in wire order.
+	setCookies := resp.HeadersAllValues("Set-Cookie")
+	if len(setCookies) != 2 {
+		t.Fatalf("HeadersAllValues(Set-Cookie) count = %d, want 2 (%v)", len(setCookies), setCookies)
+	}
+	if setCookies[0] != "sid=abc; Path=/" || setCookies[1] != "trace=xyz; Path=/; HttpOnly" {
+		t.Fatalf("HeadersAllValues(Set-Cookie) = %v, want [sid=abc; ...; trace=xyz; ...]", setCookies)
+	}
+
+	vary := resp.HeadersAllValues("Vary")
+	if len(vary) != 2 || vary[0] != "Accept-Encoding" || vary[1] != "User-Agent" {
+		t.Fatalf("HeadersAllValues(Vary) = %v, want [Accept-Encoding User-Agent]", vary)
+	}
+
+	// Full snapshot round-trip via HeadersAll() must contain the same lists.
+	all := resp.HeadersAll()
+	if len(all["set-cookie"]) != 2 || len(all["vary"]) != 2 {
+		t.Fatalf("HeadersAll() = %v, want set-cookie/vary populated", all)
+	}
+
+	// Case-insensitive lookup on the accessor.
+	if len(resp.HeadersAllValues("set-cookie")) != 2 {
+		t.Fatal("case-insensitive lookup lost Set-Cookie values")
+	}
+
+	// Absent header returns nil (not empty slice).
+	if got := resp.HeadersAllValues("X-Absent"); got != nil {
+		t.Fatalf("HeadersAllValues(X-Absent) = %v, want nil", got)
+	}
+}
+
+// 14) Response.Cookies returns every Set-Cookie parsed via net/http so tests
+// can assert on cookie Name / Value / attributes without re-parsing header
+// strings. Backs the Response.Cookies() AC line.
+func TestResponseCookiesParsesEverySetCookieLine(t *testing.T) {
+	e := newEcho()
+	e.GET("/login", func(c echo.Context) error {
+		c.Response().Header().Add("Set-Cookie", "sid=abc; Path=/; HttpOnly")
+		c.Response().Header().Add("Set-Cookie", "trace=xyz; Path=/api; Max-Age=3600")
+		return c.String(http.StatusOK, "ok")
+	})
+
+	srv := kiwa_echo.NewTestServer(t, e)
+	resp := srv.Request(kiwa.MethodGET, "/login").Send()
+
+	cookies := resp.Cookies()
+	if len(cookies) != 2 {
+		t.Fatalf("Cookies() count = %d, want 2", len(cookies))
+	}
+	if cookies[0].Name != "sid" || cookies[0].Value != "abc" || !cookies[0].HttpOnly {
+		t.Fatalf("Cookies()[0] = %+v, want sid=abc HttpOnly", cookies[0])
+	}
+	if cookies[1].Name != "trace" || cookies[1].Path != "/api" || cookies[1].MaxAge != 3600 {
+		t.Fatalf("Cookies()[1] = %+v, want trace Path=/api MaxAge=3600", cookies[1])
+	}
+}
+
+// 15) recordRequest captures HeadersAll on the request side too so specs
+// asserting inbound multi-value headers (WWW-Authenticate challenge, etc.)
+// keep working across Echo.
+func TestRecordedRequestHeadersAllOnEchoAdapter(t *testing.T) {
+	e := newEcho()
+	e.GET("/echo", func(c echo.Context) error { return c.String(http.StatusOK, "ok") })
+
+	srv := kiwa_echo.NewTestServer(t, e)
+	srv.Request(kiwa.MethodGET, "/echo").
+		Header("X-Multi", "a").
+		Send()
+
+	recorded := srv.RecordedRequests()
+	if len(recorded) != 1 {
+		t.Fatalf("recorded len = %d, want 1", len(recorded))
+	}
+	if got := recorded[0].HeadersAllValues("x-multi"); len(got) != 1 || got[0] != "a" {
+		t.Fatalf("HeadersAllValues(x-multi) = %v, want [a]", got)
+	}
+	// Backward compat: Headers is still populated.
+	if got := recorded[0].Headers["x-multi"]; got != "a" {
+		t.Fatalf("Headers[x-multi] = %q, want a", got)
+	}
+}

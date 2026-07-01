@@ -300,6 +300,134 @@ func TestMockResponseZeroValueDefaultsTo200(t *testing.T) {
 	}
 }
 
+// 11a) RecordedRequest.HeadersAll preserves every value in wire order while
+// Headers keeps the last-write-wins single-value view for backward compat.
+// Motivated by v1.6-1 Codex adversarial review (Set-Cookie collapse).
+func TestRecordedRequestHeadersAllPreservesMultiValue(t *testing.T) {
+	srv := kiwa.NewMockServer(t, kiwa.MockServerOpts{}.WithRoute(
+		kiwa.NewRoute(kiwa.MethodGET, "/echo-headers", func(req kiwa.RecordedRequest) kiwa.MockResponse {
+			return kiwa.OK([]byte("ok"))
+		}),
+	))
+
+	req, err := http.NewRequest(http.MethodGet, srv.URL()+"/echo-headers", nil)
+	if err != nil {
+		t.Fatalf("NewRequest: %v", err)
+	}
+	// net/http canonicalises the key, so both Add calls hit the same slot
+	// and produce a multi-value header on the wire.
+	req.Header.Add("X-Multi", "a")
+	req.Header.Add("X-Multi", "b")
+	req.Header.Add("X-Multi", "c")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("Do: %v", err)
+	}
+	defer resp.Body.Close()
+
+	recorded := srv.RecordedRequests()
+	if len(recorded) != 1 {
+		t.Fatalf("recorded len = %d, want 1", len(recorded))
+	}
+
+	// Backward compat: Headers still exposes the last value.
+	if got := recorded[0].Headers["x-multi"]; got != "c" {
+		t.Fatalf("Headers[x-multi] = %q, want c (last-write-wins)", got)
+	}
+
+	// New: HeadersAll preserves every value in wire order.
+	all := recorded[0].HeadersAllValues("X-Multi")
+	if len(all) != 3 || all[0] != "a" || all[1] != "b" || all[2] != "c" {
+		t.Fatalf("HeadersAllValues(X-Multi) = %v, want [a b c]", all)
+	}
+
+	// Case-insensitive lookup on the accessor.
+	if got := recorded[0].HeadersAllValues("x-multi"); len(got) != 3 {
+		t.Fatalf("case-insensitive lookup lost values: %v", got)
+	}
+
+	// Absent header returns nil (not empty slice) so callers can distinguish.
+	if got := recorded[0].HeadersAllValues("X-Absent"); got != nil {
+		t.Fatalf("HeadersAllValues(X-Absent) = %v, want nil", got)
+	}
+}
+
+// 11b) MockResponse.HeadersAll emits every value on the wire so callers can
+// return multiple Set-Cookie / WWW-Authenticate / Vary / Link lines from a
+// route handler. Backward compat: Headers (single-value) still wins on
+// overlap with HeadersAll so pre-v1.6 callers see no behavior change.
+func TestMockResponseHeadersAllEmitsMultiValueOnWire(t *testing.T) {
+	srv := kiwa.NewMockServer(t, kiwa.MockServerOpts{}.WithRoute(
+		kiwa.NewRoute(kiwa.MethodGET, "/set-cookies", func(_ kiwa.RecordedRequest) kiwa.MockResponse {
+			return kiwa.OK([]byte("ok")).
+				WithHeaderValues("Set-Cookie", "sid=abc; Path=/", "trace=xyz; Path=/; HttpOnly").
+				WithHeaderValues("Vary", "Accept-Encoding").
+				WithHeaderValues("Vary", "User-Agent")
+		}),
+	))
+
+	resp, err := http.Get(srv.URL() + "/set-cookies")
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Two Set-Cookie header lines survive the round trip.
+	cookies := resp.Header.Values("Set-Cookie")
+	if len(cookies) != 2 {
+		t.Fatalf("Set-Cookie count = %d, want 2 (values=%v)", len(cookies), cookies)
+	}
+	if !strings.Contains(cookies[0], "sid=abc") || !strings.Contains(cookies[1], "trace=xyz") {
+		t.Fatalf("Set-Cookie values in wrong order: %v", cookies)
+	}
+
+	// Vary was populated across two WithHeaderValues chained calls; each
+	// call appends without overwriting the previous line.
+	vary := resp.Header.Values("Vary")
+	if len(vary) != 2 || vary[0] != "Accept-Encoding" || vary[1] != "User-Agent" {
+		t.Fatalf("Vary values = %v, want [Accept-Encoding User-Agent]", vary)
+	}
+
+	// net/http parses Set-Cookie via *http.Cookie so downstream assertions
+	// can read cookie name / value / attributes without re-parsing.
+	parsedCookies := resp.Cookies()
+	if len(parsedCookies) != 2 {
+		t.Fatalf("parsed cookies = %d, want 2", len(parsedCookies))
+	}
+	if parsedCookies[0].Name != "sid" || parsedCookies[0].Value != "abc" {
+		t.Fatalf("cookie[0] = %+v, want sid=abc", parsedCookies[0])
+	}
+	if !parsedCookies[1].HttpOnly {
+		t.Fatalf("cookie[1] HttpOnly not preserved: %+v", parsedCookies[1])
+	}
+}
+
+// 11c) MockResponse.Headers overrides HeadersAll for the same key so callers
+// who only fill Headers keep the pre-v1.6 last-write-wins behaviour on the
+// wire — verified by populating both and asserting Headers wins.
+func TestMockResponseHeadersOverridesHeadersAllOnSameKey(t *testing.T) {
+	srv := kiwa.NewMockServer(t, kiwa.MockServerOpts{}.WithRoute(
+		kiwa.NewRoute(kiwa.MethodGET, "/override", func(_ kiwa.RecordedRequest) kiwa.MockResponse {
+			return kiwa.OK([]byte("ok")).
+				WithHeaderValues("X-Precedence", "from-headersAll-a", "from-headersAll-b").
+				WithHeader("X-Precedence", "from-headers")
+		}),
+	))
+
+	resp, err := http.Get(srv.URL() + "/override")
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Only one value survives — Headers.Set replaced whatever HeadersAll
+	// wrote for the same key.
+	values := resp.Header.Values("X-Precedence")
+	if len(values) != 1 || values[0] != "from-headers" {
+		t.Fatalf("X-Precedence values = %v, want [from-headers]", values)
+	}
+}
+
 // 11) HTTPMethod String labels match net/http canonical names.
 func TestHTTPMethodStringLabels(t *testing.T) {
 	cases := []struct {

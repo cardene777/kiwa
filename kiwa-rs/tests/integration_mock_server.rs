@@ -176,6 +176,140 @@ fn explicit_stop_then_drop_is_safe() {
     server.stop();
 }
 
+// v1.6-1: multi-value response header array preservation. Verifies the fix
+// for the Codex adversarial "Set-Cookie collapse" finding — a route emitting
+// two Set-Cookie / Vary lines must arrive on the wire as two separate values
+// (not the last one only), and RecordedRequest must expose the same for
+// inbound multi-value headers.
+#[test]
+fn mock_response_headers_all_emits_multi_value_on_wire() {
+    let server = mock_server(MockServerOpts::default().with_route(Route::new(
+        HttpMethod::Get,
+        "/set-cookies",
+        |_req: &RecordedRequest| {
+            MockResponse::ok(b"ok".to_vec())
+                .with_header_values(
+                    "Set-Cookie",
+                    ["sid=abc; Path=/", "trace=xyz; Path=/; HttpOnly"],
+                )
+                .with_header_values("Vary", ["Accept-Encoding"])
+                .with_header_values("Vary", ["User-Agent"])
+        },
+    )));
+
+    let client = reqwest::blocking::Client::new();
+    let resp = client
+        .get(format!("{}/set-cookies", server.base_url()))
+        .send()
+        .expect("send");
+
+    // Two Set-Cookie header lines survive the round trip.
+    let cookies: Vec<String> = resp
+        .headers()
+        .get_all("set-cookie")
+        .iter()
+        .map(|v| v.to_str().unwrap().to_string())
+        .collect();
+    assert_eq!(
+        cookies.len(),
+        2,
+        "Set-Cookie count should be 2 (values={:?})",
+        cookies
+    );
+    assert!(cookies[0].contains("sid=abc"));
+    assert!(cookies[1].contains("trace=xyz"));
+
+    // Vary was populated across two with_header_values chained calls — each
+    // call appends without overwriting the previous line.
+    let vary: Vec<String> = resp
+        .headers()
+        .get_all("vary")
+        .iter()
+        .map(|v| v.to_str().unwrap().to_string())
+        .collect();
+    assert_eq!(vary, vec!["Accept-Encoding", "User-Agent"]);
+}
+
+// v1.6-1: MockResponse.with_header overrides with_header_values on the same
+// key so callers who only fill `headers` keep the pre-v1.6 last-write-wins
+// behaviour — verified by populating both and asserting `headers` wins.
+#[test]
+fn mock_response_headers_overrides_headers_all_on_same_key() {
+    let server = mock_server(MockServerOpts::default().with_route(Route::new(
+        HttpMethod::Get,
+        "/override",
+        |_req: &RecordedRequest| {
+            MockResponse::ok(b"ok".to_vec())
+                .with_header_values("X-Precedence", ["from-headers-all-a", "from-headers-all-b"])
+                .with_header("X-Precedence", "from-headers")
+        },
+    )));
+
+    let client = reqwest::blocking::Client::new();
+    let resp = client
+        .get(format!("{}/override", server.base_url()))
+        .send()
+        .expect("send");
+
+    let values: Vec<String> = resp
+        .headers()
+        .get_all("x-precedence")
+        .iter()
+        .map(|v| v.to_str().unwrap().to_string())
+        .collect();
+    assert_eq!(
+        values,
+        vec!["from-headers"],
+        "with_header should replace with_header_values entries for the same key"
+    );
+}
+
+// v1.6-1: RecordedRequest.headers_all preserves multi-value inbound headers
+// while `headers` stays as the single-value last-write-wins view for
+// backward compat.
+#[test]
+fn recorded_request_headers_all_preserves_multi_value() {
+    let server = mock_server(MockServerOpts::default().with_route(Route::new(
+        HttpMethod::Get,
+        "/echo-headers",
+        |_req: &RecordedRequest| MockResponse::ok(b"ok".to_vec()),
+    )));
+
+    let client = reqwest::blocking::Client::new();
+    let _ = client
+        .get(format!("{}/echo-headers", server.base_url()))
+        // reqwest coalesces same-key .header calls into a multi-value header
+        // on the wire.
+        .header("x-multi", "a")
+        .header("x-multi", "b")
+        .header("x-multi", "c")
+        .send()
+        .expect("send");
+
+    let recorded = server.recorded_requests();
+    assert_eq!(recorded.len(), 1);
+
+    // Backward compat: headers still exposes the last value.
+    assert_eq!(
+        recorded[0].headers.get("x-multi").map(String::as_str),
+        Some("c"),
+    );
+
+    // New: headers_all preserves every value in wire order.
+    let all = recorded[0]
+        .headers_all_values("X-Multi")
+        .expect("x-multi should be present");
+    assert_eq!(all, vec!["a".to_string(), "b".to_string(), "c".to_string()]);
+
+    // Case-insensitive lookup on the accessor.
+    let lower = recorded[0].headers_all_values("x-multi").unwrap();
+    assert_eq!(lower.len(), 3);
+
+    // Absent header returns None so callers can distinguish "absent" from
+    // "present but empty".
+    assert!(recorded[0].headers_all_values("x-absent").is_none());
+}
+
 #[test]
 fn multiple_routes_match_first_registered() {
     let server = mock_server(
