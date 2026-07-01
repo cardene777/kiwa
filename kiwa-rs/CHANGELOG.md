@@ -3,6 +3,33 @@
 このファイルは [Keep a Changelog](https://keepachangelog.com/) スタイルで、
 `kiwa-test-rs` crate の破壊的変更 / 追加機能 / 修正を release 単位で追う。
 
+## v0.4.0 — v1.7 milestone (unreleased)
+
+`kiwa-test-rs` v0.4.0 は v1.7 polyglot 継続深化 release。 tower-http middleware
+chain test helper を追加、 v1.5 axum feature と同じ `TestApp` 契約を継続する。
+
+### 破壊的変更
+
+- なし。 v0.3 との source compatibility は維持 (既存 `test_app` / `TestApp` /
+  `TestResponse` API 変更なし、 tower-http は新 module + 新 feature の追加のみ)。
+
+### 追加機能
+
+- `kiwa::tower_http::test_chain(layers, router)` 追加 — tower の `ServiceBuilder`
+  layer stack を `axum::Router` に適用し、 v1.5 axum feature と同じ `TestApp`
+  handle を返す middleware chain test helper
+  ([#622](https://github.com/cardene777/kiwa/issues/622))。 内部で
+  `Router::layer(layers)` を呼び `kiwa::axum::test_app` に delegate、 中間 layer
+  (CorsLayer / TraceLayer / TimeoutLayer / CompressionLayer / SetResponseHeaderLayer /
+  Auth / RateLimit 等) を in-process `oneshot` 経路で drive する。 `tower-http`
+  feature で opt-in、 default OFF、 feature 内部で `axum` feature を自動有効化する
+  ため tower-http 単独指定で ServiceBuilder + Router が完動する。
+- `tower-http` feature 追加 — `axum` feature に依存する上乗せ opt-in flag。
+  `Cargo.toml` の [features] section で `tower-http = ["axum"]` として宣言、
+  build tree に tower-http crate を直接 depend せず、 test 側で
+  `dev-dependencies` に `tower` + `tower-http` を指定する構成を採る (kiwa 側は
+  middleware 実装を持たず薄い adapter に留める)。
+
 ## v0.3.0 — v1.6 milestone (unreleased)
 
 `kiwa-test-rs` v0.3.0 は v1.5 Codex adversarial review の findings 5 件を
