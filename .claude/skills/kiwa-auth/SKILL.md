@@ -2,7 +2,7 @@
 name: kiwa-auth
 description: |
   /kiwa-design (Layer 1) が出力した `tests/spec/integration/test-spec-{module}.auth.md` を入力に、 `@kiwa-test/auth` を使う `test/*.auth.test.ts` を Write して `vitest` で動作確認する Layer 2 auth test skill。
-  11 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ / 回帰) を NextAuth v5 (`setupNextAuthEnv`) / Lucia v3 (`setupLuciaEnv`) / Better Auth (`setupBetterAuthEnv`) の 3 backend に変換し、 session mock + OAuth provider mock + email/password + magic link + 2FA + passkey + organizations の 6 sub-feature を 1 spec で cover する。
+  11 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ / 回帰) を 5 provider (`setupNextAuthEnv` NextAuth v5 / `setupLuciaEnv` Lucia v3 / `setupBetterAuthEnv` Better Auth / `setupClerkEnv` Clerk / `setupAuth0Env` Auth0) に変換し、 session mock + OAuth provider mock + email/password + magic link + 2FA + passkey + organizations + Clerk orgs + Auth0 tenant + rules + Management API mock の sub-feature を 1 spec で cover する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -29,7 +29,7 @@ $ARGUMENTS
 
 - `--module {name}` — Layer 1 spec の module 名 (`tests/spec/integration/test-spec-{name}.auth.md` を Read)
 - `--spec-path {path}` — Layer 1 spec の path を明示 (`--module` の代替)
-- `--backend {nextauth|lucia|better-auth|all}` — 生成対象 backend (default `all`、 3 backend 全てを 1 test file で cover)
+- `--provider {nextauth|lucia|better-auth|clerk|auth0|all}` — 生成対象 provider (default `all`、 v1.9-1/-2 で `clerk` / `auth0` 追加、 5 provider 全てを 1 test file で cover)
 - `--output {path}` — test file 出力先 (default `tests/{module}.auth.test.ts`)
 - `--lang {ja|en|<ISO 639-1>}` — report 生成言語 (省略時は Step 0 で AskUserQuestion)
 - `--no-run` — `vitest` 実行を skip (Write のみ)

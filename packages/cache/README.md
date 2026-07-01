@@ -6,16 +6,17 @@
   <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview (127s) — this package covers the Cache surface. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">Full-quality MP4 (2.9 MB)</a>.</sub>
 </p>
 
-Cache test adapter for kiwa — Redis (testcontainers) live env + in-memory sandbox env + Memcached (stub + testcontainers) env with TTL / Pub/Sub / expiry / consistent-hash assertion helpers under two factories (`setupCacheEnv` for Redis, `setupMemcachedEnv` for Memcached).
+Cache test adapter for kiwa — Redis (testcontainers) live env + in-memory sandbox env + Memcached (stub + testcontainers) env + KeyDB (stub + testcontainers) env with TTL / Pub/Sub / expiry / consistent-hash / multi-master replication assertion helpers under three factories (`setupCacheEnv` for Redis, `setupMemcachedEnv` for Memcached, `setupKeyDBEnv` for KeyDB).
 
 ## Overview
 
-`@kiwa-test/cache` is the Layer 2 adapter that turns a cache-shaped Layer 1 spec into a runnable Vitest suite. Two factories cover the dominant cache providers:
+`@kiwa-test/cache` is the Layer 2 adapter that turns a cache-shaped Layer 1 spec into a runnable Vitest suite. Three factories cover the dominant cache providers:
 
 - **`setupCacheEnv`** — Redis (in-process + testcontainers), assertion surface for TTL / Pub/Sub / expiry.
 - **`setupMemcachedEnv`** — Memcached (in-process stub + testcontainers), 8 core commands + TTL + multi-server consistent hashing.
+- **`setupKeyDBEnv`** — KeyDB (in-process stub + testcontainers), Redis-compatible surface + multi-master replication + cross-region Pub/Sub.
 
-Both factories share the same `TestEnvBase<TMode>` shape so switching lanes never rewrites the assertion surface. Redis backends are `'in-memory' | 'testcontainers'`; Memcached backends are `'stub' | 'testcontainers'`.
+All three factories share the same `TestEnvBase<TMode>` shape so switching lanes never rewrites the assertion surface. Redis backends are `'in-memory' | 'testcontainers'`; Memcached / KeyDB backends are `'stub' | 'testcontainers'`.
 
 ## Install
 
@@ -155,7 +156,59 @@ Live under [`examples/cache-memcached-poc/`](../../examples/cache-memcached-poc/
 pnpm -F examples-cache-memcached-poc test
 ```
 
+## KeyDB env — `setupKeyDBEnv`
+
+`setupKeyDBEnv` covers the KeyDB slot. KeyDB is Redis-compatible on the wire (ioredis / redis clients work unchanged) so the assertion surface mirrors `setupCacheEnv`, plus KeyDB-specific multi-master replication (`{ master }` option on `set` / `publish`) and cross-region Pub/Sub.
+
+### Quick start — stub
+
+```ts
+import { setupKeyDBEnv } from "@kiwa-test/cache";
+
+const env = await setupKeyDBEnv({                // defaults to mode: "stub"
+  cluster: ["us-east", "us-west", "eu-central"],
+});
+
+// Write on us-east — replicates synchronously to every other master.
+await env.set("session:1", "user-1", { ttlSeconds: 60, master: "us-east" });
+expect(await env.get("session:1", { master: "eu-central" })).toBe("user-1");
+
+// Cross-region Pub/Sub — publish from us-west, receive on us-east subscriber.
+const sub = await env.subscribe("cache-invalidate");
+await env.publish("cache-invalidate", "session:1", { master: "us-west" });
+const msg = await sub.next();
+msg.master;   // "us-west"
+msg.message;  // "session:1"
+
+await sub.close();
+await env.stop();
+```
+
+### Quick start — replication lag
+
+```ts
+const env = await setupKeyDBEnv({
+  cluster: ["us-east", "us-west"],
+  stub: { replicationLagMs: 50 },  // Simulate 50ms cross-region lag.
+});
+
+await env.set("k", "v", { master: "us-east" });
+expect(await env.get("k", { master: "us-east" })).toBe("v");
+expect(await env.get("k", { master: "us-west" })).toBeNull();  // lagging
+await new Promise((r) => setTimeout(r, 80));
+expect(await env.get("k", { master: "us-west" })).toBe("v");   // caught up
+```
+
+### Reference — the KeyDB PoC
+
+Live under [`examples/cache-keydb-poc/`](../../examples/cache-keydb-poc/) — 8 tests that thread a multi-region rate-limit cache through `setupKeyDBEnv` (bump / replication / broadcastInvalidate / TTL / lag / concurrent bumps / cross-region Pub/Sub / regex assertPublished).
+
+```bash
+pnpm -F examples-cache-keydb-poc test
+```
+
 ## Coverage snapshot (v0.2.0)
 
 - Redis backend: 32 unit tests + 8 signup-flow PoC tests (`examples/cache-redis-poc/`).
 - Memcached backend: 34 unit tests + 8 session-cache PoC tests (`examples/cache-memcached-poc/`).
+- KeyDB backend: 30 unit tests + 8 multi-region PoC tests (`examples/cache-keydb-poc/`).
