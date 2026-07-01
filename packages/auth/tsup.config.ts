@@ -6,7 +6,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  external: ['next-auth', 'lucia', 'better-auth', '@clerk/backend', 'vitest'],
+  external: ['next-auth', 'lucia', 'better-auth', '@clerk/backend', 'auth0', 'vitest'],
   outExtension({ format }) {
     return {
       js: format === 'cjs' ? '.cjs' : '.js',

@@ -6,16 +6,17 @@
   <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview (127s) — this package covers the Auth surface. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">▶ Full-quality MP4 (2.9 MB)</a>.</sub>
 </p>
 
-Auth test adapter for kiwa — NextAuth v5 (Auth.js), Lucia v3, Better Auth, and Clerk session / provider / database mocks under a shared package.
+Auth test adapter for kiwa — NextAuth v5 (Auth.js), Lucia v3, Better Auth, Clerk, and Auth0 session / provider / database mocks under a shared package.
 
 ## Overview
 
-`@kiwa-test/auth` is the Layer 2 adapter that turns an auth-shaped Layer 1 spec into a runnable Vitest suite. It ships four independent helpers:
+`@kiwa-test/auth` is the Layer 2 adapter that turns an auth-shaped Layer 1 spec into a runnable Vitest suite. It ships five independent helpers:
 
 - **`setupNextAuthEnv`** — NextAuth v5 (Auth.js) session / provider / database mocks.
 - **`setupLuciaEnv`** — Lucia v3 password + OAuth flows across SQLite / PostgreSQL adapter shapes.
 - **`setupBetterAuthEnv`** — Better Auth email/password + magic link + 2FA (TOTP) + social sign-in + organizations / passkey plugins across Prisma / Drizzle / Kysely adapter shapes.
 - **`setupClerkEnv`** — Clerk hosted-auth mock with JWT verification, `users` / `sessions` / `organizations` APIs mirroring `@clerk/backend`, and multi-tenant org roles (owner / admin / member).
+- **`setupAuth0Env`** — Auth0 enterprise-tenant mock with id_token + access_token issuance, `users` (Management API) + `authenticate` (Authentication API) surfaces, rules pipeline, and actions triggers (post-login / pre-user-registration / post-user-registration / post-change-password).
 
 ## Install
 
@@ -26,9 +27,10 @@ pnpm add -D next-auth        # for setupNextAuthEnv
 pnpm add -D lucia            # for setupLuciaEnv
 pnpm add -D better-auth      # for setupBetterAuthEnv
 pnpm add -D @clerk/backend   # for setupClerkEnv (optional — mock is standalone)
+pnpm add -D auth0            # for setupAuth0Env  (optional — mock is standalone)
 ```
 
-`next-auth`, `lucia`, `better-auth`, and `@clerk/backend` are declared as **optional peer dependencies** — none of the helpers imports from the real library, so the peer is only required if you assert against the real types in your suite.
+`next-auth`, `lucia`, `better-auth`, `@clerk/backend`, and `auth0` are declared as **optional peer dependencies** — none of the helpers imports from the real library, so the peer is only required if you assert against the real types in your suite.
 
 ## Quick start — NextAuth v5
 
@@ -297,6 +299,102 @@ The mock signs tokens with HS256 (real Clerk uses RS256) — the on-the-wire sha
 ## Example: Clerk PoC
 
 See [`examples/auth-clerk-poc/`](../../examples/auth-clerk-poc) for the end-to-end bare-metal handler PoC: 8 tests cover token verification, session revocation, multi-tenant org role gating, and seeded-token flows.
+
+## Quick start — Auth0
+
+```ts
+import { setupAuth0Env } from "@kiwa-test/auth";
+
+const env = await setupAuth0Env({
+  tenant: "kiwa-test",
+  audience: "https://api.kiwa.test/",
+  users: [{ email: "alice@example.test", password: "pw-1", app_metadata: { role: "admin" } }],
+  actions: {
+    "post-login": [
+      (event, api) => {
+        const role = event.user.app_metadata?.role;
+        if (role) api.accessToken.setCustomClaim("https://kiwa.test/roles", [role]);
+      },
+    ],
+  },
+});
+
+// 1) signIn returns id_token + access_token (both JWTs).
+const { id_token, access_token, user } = await env.authenticate.signIn({
+  email: "alice@example.test",
+  password: "pw-1",
+});
+
+// 2) Verify tokens — mirrors express-jwt + jwks-rsa in real backends.
+const idClaims = await env.verifyIdToken(id_token);
+idClaims.sub;                    // "auth0|000000000000000000000001"
+idClaims.aud;                    // env.clientId
+idClaims.iss;                    // "https://kiwa-test.auth0.com/"
+
+const accessClaims = await env.verifyAccessToken(access_token);
+accessClaims.aud;                // "https://api.kiwa.test/"
+accessClaims["https://kiwa.test/roles"];  // ["admin"] — injected by the post-login action
+
+// 3) signUp creates a new user + issues fresh tokens.
+const signup = await env.authenticate.signUp({
+  email: "new@example.test",
+  password: "pw-signup",
+  user_metadata: { locale: "ja" },
+});
+
+// 4) Reset between tests.
+await env.stop();
+```
+
+## `auth0` SDK API surface
+
+`env.users` mirrors `ManagementClient.users.*` and `env.authenticate` mirrors `AuthenticationClient.*` from the real `auth0` node SDK. The mock is drop-in for call sites that pass around either client — swap the constructors for the env in the test setup and every call resolves against the in-memory tenant.
+
+| Surface | Methods |
+|---|---|
+| `env.users` (Management API) | `create` / `get` / `getByEmail` / `update` / `delete` / `list` |
+| `env.authenticate` (Authentication API) | `signIn` / `signUp` |
+| `env.rules` (legacy pipeline) | `add` / `list` / `clear` |
+| `env.actions` (triggers) | `add(trigger, action)` / `list(trigger)` / `clear(trigger?)` |
+| `env.verifyIdToken` / `env.verifyAccessToken` | HS256 JWT verify against per-env signing secret |
+
+Supported action triggers ... `post-login` / `pre-user-registration` / `post-user-registration` / `post-change-password`. The `api` object mirrors Auth0's real Actions runtime — `api.idToken.setCustomClaim` / `api.accessToken.setCustomClaim` / `api.accessToken.addScope` / `api.user.setAppMetadata` / `api.user.setUserMetadata` / `api.redirect.sendUserTo` / `api.access.deny`.
+
+## JWT token claims
+
+`env.verifyIdToken` / `env.verifyAccessToken` return Auth0-shaped claims:
+
+```ts
+// id_token
+{
+  sub: "auth0|000000000000000000000001",
+  aud: "mock-client-id",             // client id
+  iss: "https://kiwa-test.auth0.com/",
+  iat: 1699999999,
+  exp: 1700086399,
+  azp: "mock-client-id",
+  email: "alice@example.test",
+  email_verified: true,
+  // + namespaced custom claims from rules / actions
+}
+
+// access_token
+{
+  sub: "auth0|000000000000000000000001",
+  aud: "https://api.kiwa.test/",     // API audience
+  iss: "https://kiwa-test.auth0.com/",
+  iat: 1699999999,
+  exp: 1700086399,
+  azp: "mock-client-id",
+  permissions: ["read:profile"],     // Auth0 RBAC (from api.accessToken.addScope)
+}
+```
+
+The mock signs tokens with HS256 (real Auth0 uses RS256 + JWKS) — the on-the-wire shape is identical, and every consumer that decodes with `base64url` sees the same three-segment structure. Tokens issued by one env cannot be verified by another (per-env signing secret), which matches Auth0's per-tenant signing key semantics.
+
+## Example: Auth0 PoC
+
+See [`examples/auth-auth0-poc/`](../../examples/auth-auth0-poc) for the end-to-end bare-metal handler PoC: 8 tests cover access_token verification, cross-tenant rejection, rules + actions role injection, and signUp round trips.
 
 ## License
 
