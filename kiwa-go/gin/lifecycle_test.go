@@ -150,7 +150,61 @@ func TestRequestCountFrozenAfterStop_Gin(t *testing.T) {
 	}
 }
 
-//  3. IsStopped starts false, flips true after Stop, and stays true across
+//  3. Send() reports http.NewRequest failures through the captured
+//     testing.TB Fatalf handle instead of panicking, so a malformed path
+//     surfaces as a diagnostic test failure with request coordinates.
+//     A control character in the path is the minimum reproducible trigger
+//     for http.NewRequest to fail (net/url rejects control chars before
+//     the request is constructed).
+func TestSendReportsNewRequestFailureThroughFatalf_Gin(t *testing.T) {
+	engine := newEngine()
+
+	spy := &spyTB{TB: t}
+	srv := kiwa_gin.NewTestServer(spy, engine)
+
+	// Control character in path — url.Parse rejects it so http.NewRequest
+	// returns an error before we ever call into gin.
+	badPath := "/ok\x7f"
+
+	runInGoroutine(func() {
+		srv.Request(kiwa.MethodGET, badPath).Send()
+	})
+
+	if !spy.DidFatal() {
+		t.Fatalf("Send() with malformed path did not call Fatalf on the captured TB")
+	}
+	msg := spy.LastFatal()
+	if !strings.Contains(msg, "kiwa-gin: build request") {
+		t.Fatalf("Fatalf message = %q, want it to mention build request", msg)
+	}
+	if !strings.Contains(msg, "GET") {
+		t.Fatalf("Fatalf message = %q, want request method GET", msg)
+	}
+	if !strings.Contains(msg, "invalid control character") {
+		t.Fatalf("Fatalf message = %q, want net/url error mention", msg)
+	}
+}
+
+//  4. On http.NewRequest failure the recorder does not observe the
+//     rejected request — the recorder captures dispatch, not build failure.
+func TestRecorderFrozenAfterNewRequestFailure_Gin(t *testing.T) {
+	engine := newEngine()
+
+	spy := &spyTB{TB: t}
+	srv := kiwa_gin.NewTestServer(spy, engine)
+
+	before := srv.RequestCount()
+	runInGoroutine(func() {
+		srv.Request(kiwa.MethodGET, "/ok\x7f").Send()
+	})
+
+	after := srv.RequestCount()
+	if after != before {
+		t.Fatalf("post-failure RequestCount = %d, want %d (recorder must not advance across rejected Send)", after, before)
+	}
+}
+
+//  5. IsStopped starts false, flips true after Stop, and stays true across
 //     repeated Stop calls (idempotency).
 func TestIsStoppedReflectsLifecycle_Gin(t *testing.T) {
 	engine := newEngine()
