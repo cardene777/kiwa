@@ -3,6 +3,27 @@
 このファイルは [Keep a Changelog](https://keepachangelog.com/) スタイルで、
 `kiwa-test-go` module の破壊的変更 / 追加機能 / 修正を release 単位で追う。
 
+## v0.4.0 — v1.7 milestone (unreleased)
+
+`kiwa-test-go` v0.4.0 は Fiber (fasthttp) 対応を軸にした polyglot 継続深化 release。
+`kiwa-test-go/fiber` subpackage を追加、 gin / echo と同一 `TestServer` contract
+を fasthttp 経由で成立させる。
+
+### 追加機能
+
+- Fiber adapter (`kiwa-test-go/fiber`) 追加 — `kiwa_fiber.NewTestServer(t, app)` +
+  in-process `*fiber.App.Test(*http.Request)` driver
+  ([#625](https://github.com/cardene777/kiwa/issues/625))。 Fiber は net/http では
+  なく fasthttp 上に載っているため `httptest.NewRecorder + engine.ServeHTTP` の
+  gin / echo pattern が使えず、 framework 標準 `App.Test` を経由する。 surface
+  contract (`Request(method, path).Header/.Body/.JSON.Send()` builder chain +
+  `RecordedRequests()` + `HeadersAll` / `Cookies` accessor) は gin / echo と同一。
+  Fiber 固有 `.Timeout(ms)` builder step で `App.Test` の 1s default ceiling
+  を上書き可、 `-1` で timeout 完全解除、 `<-1` は `-1` に clamp。
+- `Stop()` は `app.Shutdown()` を best-effort で呼び出し、 fasthttp server の
+  internal state を解放する (`App.Test` 経路は listener を持たないため Shutdown は
+  "server is not running" を返すが、 error は idempotent 保証のため swallow)。
+
 ## v0.3.0 — v1.6 milestone (unreleased)
 
 `kiwa-test-go` v0.3.0 は v1.5 Codex adversarial review の findings 5 件を
