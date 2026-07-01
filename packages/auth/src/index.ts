@@ -113,3 +113,28 @@ export {
   signClerkJwt,
   verifyClerkJwt,
 } from './clerk/jwt.js';
+
+// Auth0 adapter surface.
+export type {
+  Auth0AccessTokenClaims,
+  Auth0Action,
+  Auth0ActionApi,
+  Auth0ActionEvent,
+  Auth0ActionTrigger,
+  Auth0Connection,
+  Auth0Identity,
+  Auth0IdTokenClaims,
+  Auth0Rule,
+  Auth0RuleContext,
+  Auth0TestEnv,
+  Auth0User,
+  SetupAuth0EnvOptions,
+} from './auth0/types.js';
+export { setupAuth0Env } from './auth0/setup-auth0-env.js';
+export {
+  generateAuth0SigningSecret,
+  signAuth0AccessToken,
+  signAuth0IdToken,
+  verifyAuth0AccessToken,
+  verifyAuth0IdToken,
+} from './auth0/jwt.js';
