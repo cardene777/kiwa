@@ -425,6 +425,15 @@ func recordRequest(req *http.Request) RecordedRequest {
 		req.Body = io.NopCloser(bytes.NewReader(body))
 	}
 
+	// Defensive copy so the RecordedRequest.Body slice never aliases the
+	// buffer we handed back to req.Body (which downstream readers may drain
+	// into a shared backing array) or the internal io.ReadAll allocation.
+	// Same discipline as the gin/echo subpackages (v1.5-3 / v1.5-4) so all
+	// three adapters guarantee that caller buffer reuse or downstream re-read
+	// cannot retroactively mutate a recorded snapshot.
+	bodyCopy := make([]byte, len(body))
+	copy(bodyCopy, body)
+
 	path := req.URL.Path
 	if raw := req.URL.RawQuery; raw != "" {
 		path = path + "?" + raw
@@ -435,7 +444,7 @@ func recordRequest(req *http.Request) RecordedRequest {
 		Path:       path,
 		Headers:    headers,
 		HeadersAll: headersAll,
-		Body:       body,
+		Body:       bodyCopy,
 	}
 }
 

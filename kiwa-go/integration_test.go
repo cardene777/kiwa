@@ -449,3 +449,62 @@ func TestHTTPMethodStringLabels(t *testing.T) {
 		}
 	}
 }
+
+// 15) RecordedRequest.Body is a defensive copy — mutating the caller's
+// request buffer between successive Send calls must not retroactively
+// rewrite an earlier RecordedRequest.Body entry. Regression coverage for
+// v1.6-2 (Issue #608): io.ReadAll returns a fresh buffer today, but the
+// recorder still owes an explicit copy so future refactors (e.g. reusing a
+// pooled reader) cannot silently reintroduce aliasing between the recorder
+// log and the caller's request buffer.
+func TestRecordedRequestBodyIsDefensiveCopy(t *testing.T) {
+	srv := kiwa.NewMockServer(t, kiwa.MockServerOpts{}.WithRoute(
+		kiwa.NewRoute(kiwa.MethodPOST, "/echo", func(_ kiwa.RecordedRequest) kiwa.MockResponse {
+			return kiwa.OK([]byte("ok"))
+		}),
+	))
+
+	// First request: send "first-body" through a reusable buffer.
+	buf := []byte("first-body")
+	req1, err := http.NewRequest(http.MethodPost, srv.URL()+"/echo", bytes.NewReader(buf))
+	if err != nil {
+		t.Fatalf("NewRequest 1: %v", err)
+	}
+	resp1, err := http.DefaultClient.Do(req1)
+	if err != nil {
+		t.Fatalf("Do 1: %v", err)
+	}
+	_, _ = io.Copy(io.Discard, resp1.Body)
+	resp1.Body.Close()
+
+	// Overwrite the caller's buffer in-place — the recorder's snapshot of
+	// the first request must have already been captured by an explicit copy
+	// so this mutation is invisible to recorded[0].Body.
+	for i := range buf {
+		buf[i] = 'X'
+	}
+
+	// Second request with a distinct payload — the recorder log must have
+	// two entries with the exact bodies dispatched, not a shared array view.
+	req2, err := http.NewRequest(http.MethodPost, srv.URL()+"/echo", bytes.NewReader([]byte("second-body")))
+	if err != nil {
+		t.Fatalf("NewRequest 2: %v", err)
+	}
+	resp2, err := http.DefaultClient.Do(req2)
+	if err != nil {
+		t.Fatalf("Do 2: %v", err)
+	}
+	_, _ = io.Copy(io.Discard, resp2.Body)
+	resp2.Body.Close()
+
+	recorded := srv.RecordedRequests()
+	if len(recorded) != 2 {
+		t.Fatalf("recorded len = %d, want 2", len(recorded))
+	}
+	if got := string(recorded[0].Body); got != "first-body" {
+		t.Fatalf("recorded[0].Body = %q, want first-body (caller buffer reuse leaked into recorder)", got)
+	}
+	if got := string(recorded[1].Body); got != "second-body" {
+		t.Fatalf("recorded[1].Body = %q, want second-body", got)
+	}
+}
