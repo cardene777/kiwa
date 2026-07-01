@@ -137,6 +137,18 @@ Contract highlights:
   hanging.
 - `mock_server` is sync: tests stay sync, and parallel cases each get their
   own ephemeral port.
+- **v0.3+** — `MockServer::stop()` activates a hard lifecycle boundary.
+  Any HTTP request against `server.base_url()` after `stop()` fails at the
+  socket layer (the underlying listener is dropped); the recorder is
+  frozen at the moment `stop()` fires and returns the same snapshot on
+  subsequent calls.
+- **v0.3+** — multi-value response headers are retained via new
+  `TestResponse::headers_all()` (`HashMap<String, Vec<String>>`) and
+  `RecordedRequest::headers_all` (same shape). `Set-Cookie` no longer
+  collapses to the last value. Existing single-value accessors
+  (`TestResponse::headers()` / `RecordedRequest::headers`) stay
+  source-compatible for the last-value case; call `headers_all()` when
+  you need the full list.
 
 See `examples/rust-cargo-poc/tests/poc_integration.rs` for a domain wrapper
 (`UsersClient`) exercised through the mock server.
@@ -195,6 +207,14 @@ fn health_endpoint_responds() {
   / `json()` (the JSON helper returns `Option<serde_json::Value>`).
 - `TestApp` `Drop` releases the tokio runtime so each test releases resources
   deterministically — same Drop discipline as `mock_server`.
+- **v0.3+** — `TestApp::stop()` activates a hard lifecycle boundary.
+  `test.request(...).send()` after `stop()` panics with
+  `"kiwa: TestApp already stopped"` so post-stop traffic surfaces as a
+  test failure instead of silent success (Rust has no `t.Fatalf` analogue,
+  so panic is the closest test-runtime-safe signal).
+- **v0.3+** — multi-value response headers are retained via new
+  `TestResponse::headers_all()` (`HashMap<String, Vec<String>>`).
+  Single-value `headers()` stays unchanged for source compatibility.
 
 `kiwa::axum::test_app` composes with `kiwa::integration::mock_server` when
 the Router under test proxies to an external service — point the upstream
@@ -236,6 +256,14 @@ fn health_endpoint_responds() {
 - `TestApp` `Drop` releases the actix-rt runtime so each test releases
   resources deterministically — same Drop discipline as `mock_server` and
   the axum adapter.
+- **v0.3+** — `TestApp::stop()` activates a hard lifecycle boundary.
+  `test.request(...).send()` after `stop()` panics with
+  `"kiwa: TestApp already stopped"` so post-stop traffic surfaces as a
+  test failure instead of silent success (identical semantics to the
+  axum adapter).
+- **v0.3+** — multi-value response headers are retained via new
+  `TestResponse::headers_all()` (`HashMap<String, Vec<String>>`).
+  Single-value `headers()` stays unchanged for source compatibility.
 
 `test_app` accepts a **factory closure** (`Fn() -> App<T>`) instead of the
 App directly because `actix_web::App` is intentionally non-`Clone` — handing
@@ -249,11 +277,13 @@ PoC and `kiwa-rs/tests/actix_test_app.rs` for the interop case (actix App →
 ## Roadmap
 
 - v0.1 — `setup_env` + Mode (Mock / Live) + assert macros + Drop cleanup, **plus** `kiwa::integration::mock_server` (hyper + request recorder) shipped together via Issue [#577](https://github.com/cardene777/kiwa/issues/577).
-- v0.2 (this release) — `kiwa::axum::test_app` in-process `Router` adapter via Issue [#592](https://github.com/cardene777/kiwa/issues/592) + `kiwa::actix::test_app` in-process actix-web `App` adapter via Issue [#593](https://github.com/cardene777/kiwa/issues/593); richer mock_server matchers planned in follow-up v1.5 sub-Issues.
-- v0.3+ — proc-macro `#[kiwa_test]` (split into `kiwa-test-rs-macro` crate), Layer 1 spec → `.rs` codegen (kiwa-design polyglot extension, Issue [#580](https://github.com/cardene777/kiwa/issues/580)).
+- v0.2 — `kiwa::axum::test_app` in-process `Router` adapter via Issue [#592](https://github.com/cardene777/kiwa/issues/592) + `kiwa::actix::test_app` in-process actix-web `App` adapter via Issue [#593](https://github.com/cardene777/kiwa/issues/593); richer mock_server matchers planned in follow-up v1.5 sub-Issues.
+- v0.3 (v1.6 quality milestone) — multi-value response header retention via new `headers_all()` accessor ([#607](https://github.com/cardene777/kiwa/issues/607)), defensive body copy sweep ([#608](https://github.com/cardene777/kiwa/issues/608)), `TestApp::stop()` lifecycle activation ([#609](https://github.com/cardene777/kiwa/issues/609)), `fold_headers` recorder dedup ([#611](https://github.com/cardene777/kiwa/issues/611)). Fully source-compatible with v0.2 for adopters — existing `headers()` / `headers` accessors keep the same `HashMap<String, String>` shape. See [CHANGELOG.md](CHANGELOG.md).
+- v0.4+ — proc-macro `#[kiwa_test]` (split into `kiwa-test-rs-macro` crate), Layer 1 spec → `.rs` codegen (kiwa-design polyglot extension, Issue [#580](https://github.com/cardene777/kiwa/issues/580)).
 
 ## Related
 
+- Parent v1.6 milestone — [#606](https://github.com/cardene777/kiwa/issues/606) (v1.5 findings 5 件消化 + docs 整合化)
 - Parent v1.5 milestone — [#591](https://github.com/cardene777/kiwa/issues/591) (Rust + Go web framework adapters)
 - TypeScript core — [`@kiwa-test/core`](https://github.com/cardene777/kiwa/tree/main/packages/core)
 - Python sibling — [`kiwa-test-py`](https://github.com/cardene777/kiwa/tree/main/kiwa-py)

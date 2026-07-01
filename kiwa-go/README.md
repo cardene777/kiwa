@@ -132,7 +132,15 @@ Contract.
   lowercased `Headers`, `Body` bytes) on every call so assertions cannot
   race the server goroutines.
 - `srv.Stop()` is idempotent; `t.Cleanup` invokes it automatically so the
-  port is released even when the test fails with `t.Fatalf`.
+  port is released even when the test fails with `t.Fatalf`. **v0.3+** —
+  invoking any HTTP request against `srv.URL()` after `Stop()` returns a
+  connection-refused error (the underlying `httptest.Server` is closed);
+  the recorder is frozen at the moment `Stop()` fires and returns the same
+  snapshot on subsequent calls.
+- **v0.3+** — multi-value request headers are retained via
+  `srv.RecordedRequests()[i].HeadersAll` (`map[string][]string`). The
+  existing `Headers` (`map[string]string`) stays source-compatible for the
+  last-value case.
 
 ### `kiwa_gin.NewTestServer(t, engine)` — Gin web framework adapter (v0.2)
 
@@ -184,6 +192,22 @@ Contract.
 - The adapter does **not** mutate `gin.SetMode` — call
   `gin.SetMode(gin.TestMode)` once in your test package `init` if you
   want to silence gin's debug logging.
+- **v0.3+** — `srv.Stop()` activates a hard lifecycle boundary.
+  `srv.Request(...).Send()` after `Stop()` fails the test with
+  `t.Fatalf("kiwa-gin: Send() called after Stop() ...")` instead of
+  silently succeeding. This closes the v1.5 finding where a stale
+  reference to a stopped `TestServer` could still exercise handlers.
+- **v0.3+** — `Send()` no longer `panic()`s on unrecoverable errors
+  (nil server, unsupported method, marshal failure). It now calls
+  `t.Fatalf` on the captured `testing.TB` so `recover()` in a downstream
+  handler cannot swallow the failure. Migration is a no-op provided
+  `NewTestServer(t, engine)` receives a real `testing.TB`.
+- **v0.3+** — multi-value response headers are retained via new
+  `resp.HeadersAll()` (`map[string][]string`) and
+  `srv.RecordedRequests()[i].HeadersAll` (same shape). The existing
+  `resp.Headers()` (`map[string]string`) stays source-compatible for the
+  last-value case — call `HeadersAll()` when you need the full list
+  (e.g. multiple `Set-Cookie` values).
 
 `kiwa_gin.NewTestServer` composes with v1.4 `kiwa.NewMockServer`: the
 Gin handler under test can call out to a kiwa mock for upstream traffic
@@ -239,10 +263,27 @@ Contract.
 - `srv.RecordedRequests()` returns `[]kiwa.RecordedRequest` (the v1.4
   shape, re-exported) so the recorder is identical across the three
   adapters (`kiwa.NewMockServer` / `kiwa_gin` / `kiwa_echo`).
-- The adapter does **not** mutate echo globals — silence the access /
-  error logger per instance via `e.Logger.SetOutput(io.Discard)` (and
-  `e.HideBanner = true` / `e.HidePort = true`) once in your test
-  package init if you want a quiet `go test` log.
+- The adapter does **not** mutate echo globals — echo has no global-mode
+  toggle equivalent to `gin.SetMode`, so silencing has to happen **per
+  instance** via `e.Logger.SetOutput(io.Discard)` (and
+  `e.HideBanner = true` / `e.HidePort = true`) inside the helper that
+  builds each `*echo.Echo` if you want a quiet `go test` log.
+- **v0.3+** — `srv.Stop()` activates a hard lifecycle boundary.
+  `srv.Request(...).Send()` after `Stop()` fails the test with
+  `t.Fatalf("kiwa-echo: Send() called after Stop() ...")` instead of
+  silently succeeding. This closes the v1.5 finding where a stale
+  reference to a stopped `TestServer` could still exercise handlers.
+- **v0.3+** — `Send()` no longer `panic()`s on unrecoverable errors
+  (nil server, unsupported method, marshal failure). It now calls
+  `t.Fatalf` on the captured `testing.TB` so `recover()` in a downstream
+  handler cannot swallow the failure. Migration is a no-op provided
+  `NewTestServer(t, e)` receives a real `testing.TB`.
+- **v0.3+** — multi-value response headers are retained via new
+  `resp.HeadersAll()` (`map[string][]string`) and
+  `srv.RecordedRequests()[i].HeadersAll` (same shape). The existing
+  `resp.Headers()` (`map[string]string`) stays source-compatible for the
+  last-value case — call `HeadersAll()` when you need the full list
+  (e.g. multiple `Set-Cookie` values).
 
 `kiwa_echo.NewTestServer` composes with v1.4 `kiwa.NewMockServer`: the
 Echo handler under test can call out to a kiwa mock for upstream traffic
@@ -287,16 +328,30 @@ same helpers can be reused in benchmarks and fuzz tests without rewrite.
   in-process `engine.ServeHTTP` driver + typed Request / Response
   builders + `kiwa.RecordedRequest` recorder, shipped via Issue
   [#594](https://github.com/cardene777/kiwa/issues/594).
-- v0.2 Echo adapter (this release) — `kiwa_echo.NewTestServer` +
+- v0.2 Echo adapter — `kiwa_echo.NewTestServer` +
   in-process `e.ServeHTTP` driver + typed Request / Response builders
   + `kiwa.RecordedRequest` recorder, shipped via Issue
   [#595](https://github.com/cardene777/kiwa/issues/595).
-- v0.3+ — Layer 1 spec → `_test.go` codegen polyglot expansion and Layer
+- v0.3 (v1.6 quality milestone) — multi-value response header retention
+  ([#607](https://github.com/cardene777/kiwa/issues/607)), defensive body
+  copy sweep ([#608](https://github.com/cardene777/kiwa/issues/608)),
+  `TestServer.Stop()` lifecycle activation
+  ([#609](https://github.com/cardene777/kiwa/issues/609)), `Send()`
+  panic → `t.Fatalf` migration
+  ([#610](https://github.com/cardene777/kiwa/issues/610)),
+  `internal/recorder` dedup
+  ([#611](https://github.com/cardene777/kiwa/issues/611)) and Echo
+  logger docs consistency
+  ([#612](https://github.com/cardene777/kiwa/issues/612)). Contains one
+  breaking change — `Send()` no longer panics but calls `t.Fatalf`; see
+  [CHANGELOG.md](CHANGELOG.md).
+- v0.4+ — Layer 1 spec → `_test.go` codegen polyglot expansion and Layer
   2 `kiwa-go` skill chain (Issue
   [#581](https://github.com/cardene777/kiwa/issues/581)).
 
 ## Related
 
+- Parent v1.6 milestone — [#606](https://github.com/cardene777/kiwa/issues/606)
 - Parent v1.5 milestone — [#591](https://github.com/cardene777/kiwa/issues/591)
 - Parent v1.4 milestone — [#575](https://github.com/cardene777/kiwa/issues/575)
 - PoC (unit + integration) — [`examples/go-testing-poc/`](../examples/go-testing-poc)
@@ -309,7 +364,7 @@ same helpers can be reused in benchmarks and fuzz tests without rewrite.
 ## Publish (maintainers)
 
 ```bash
-git tag kiwa-go/v0.2.0
+git tag kiwa-go/v0.3.0
 git push --tags
 # pkg.go.dev auto-indexes the new tag within minutes.
 ```

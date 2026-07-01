@@ -92,13 +92,16 @@ Codex reviewed the Rust + Go web framework code across 10 angles once the initia
 - Go module floor consistency (`go 1.25.0`)
 - Import alias correctness (`kiwa_gin` / `kiwa_echo` matching actual `package` names)
 
-The remaining findings go to v0.3+ follow-up:
+The remaining 5 findings were consumed during the v1.6 milestone (`kiwa-test-rs` v0.3 + `kiwa-test-go` v0.3) — all resolved before v1.6 close-out:
 
-- Multi-value response header collapse (Set-Cookie loses all but the last value)
-- `Stop()` lifecycle activation (currently a no-op flag)
-- `Send()` panic → `t.Fatalf` migration (needs `testing.TB` plumbing)
-- `recordRequest` deduplication vs `integration.go`
-- v0.2 docs wording for per-instance Echo logger config
+- Multi-value response header collapse (Set-Cookie now retained as array) — Issue [#607](https://github.com/cardene777/kiwa/issues/607) shipped in v1.6-1
+- Defensive body copy re-check across every v1.4 + v1.5 adapter — Issue [#608](https://github.com/cardene777/kiwa/issues/608) shipped in v1.6-2
+- `Stop()` lifecycle activation (post-Stop `Send()` now returns an explicit error) — Issue [#609](https://github.com/cardene777/kiwa/issues/609) shipped in v1.6-3
+- `Send()` panic → `t.Fatalf` migration (Go `gin` / `echo` adapters, `testing.TB` plumbing) — Issue [#610](https://github.com/cardene777/kiwa/issues/610) shipped in v1.6-4
+- `recordRequest` deduplication vs `integration.go` (Go `internal/recorder` + Rust `fold_headers`) — Issue [#611](https://github.com/cardene777/kiwa/issues/611) shipped in v1.6-5
+- v0.2 docs wording for per-instance Echo logger config — Issue [#612](https://github.com/cardene777/kiwa/issues/612) shipped in v1.6-6
+
+The v1.6 milestone therefore closes v1.5 findings **completely** and introduces breaking changes only in Go (`kiwa-test-go` v0.3, `Send()` no longer panics but calls `t.Fatalf`); Rust (`kiwa-test-rs` v0.3) stays source-compatible with v0.2.
 
 ## 6. Claude Code plugin — 27 skills
 

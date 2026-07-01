@@ -404,8 +404,10 @@ func (r *Response) JSON(target any) error {
 // *testing.B, and *testing.F bodies, and calls t.Helper so failure stack
 // frames point at the caller.
 //
-// Echo logs to stdout by default; tests that want silence can set
-// e.Logger.SetOutput(io.Discard) once in the test package init — kiwa
+// Echo logs to stdout by default; tests that want silence can call
+// e.Logger.SetOutput(io.Discard) per Echo instance (typically inside the
+// test helper that builds each *echo.Echo). Unlike gin.SetMode, echo has
+// no global-mode toggle, so silencing must happen per instance — kiwa
 // does not touch echo's logger so production behaviour stays untouched.
 //
 // # Example
