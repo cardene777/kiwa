@@ -15,7 +15,10 @@
     "gate:coverage": "node scripts/check-coverage-gates.mjs",
     "gate:mutation": "node scripts/check-mutation-gates.mjs",
     "build": "pnpm -r build",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
