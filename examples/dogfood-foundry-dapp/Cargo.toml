@@ -1,0 +1,13 @@
+[package]
+name = "dogfood-foundry-dapp"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "Dogfood app 3 (v1.11-4) — a Solidity ERC20 project driven from Rust through kiwa-test-rs contract::foundry + contract::alloy. Provides a real-vs-mock harness that runs against the Foundry CLI when installed (KIWA_MODE=real) and against kiwa's graceful skip shape otherwise (KIWA_MODE=mock). Feeds behavioural fidelity into @kiwa-test/quality-metrics."
+
+[lib]
+name = "dogfood_foundry_dapp"
+path = "src/lib.rs"
+
+[dependencies]
+kiwa-test-rs = { path = "../../kiwa-rs", version = "0.4", features = ["contract-foundry", "contract-alloy"] }
