@@ -1,17 +1,21 @@
 import type {
+  AccuracyMetric,
+  CostMetric,
   CoverageMetric,
   FidelityMetric,
+  LatencyMetric,
   MutationMetric,
   PerfMetric,
   QualityReport,
   TestCountMetric,
+  TokenMetric,
 } from './types.js';
 
 /**
  * Collector helpers — each helper normalises raw inputs (c8 JSON, vitest
- * reporter output, stryker HTML report, etc) into the harness's 5-axis
- * shape. The helpers are pure functions so downstream consumers can also
- * build custom sources.
+ * reporter output, stryker HTML report, LLM API bills, etc) into the harness's
+ * 11-axis shape. The helpers are pure functions so downstream consumers can
+ * also build custom sources.
  */
 
 /**
@@ -87,20 +91,12 @@ export function fidelityFromMethodCounts(input: {
  * copy of the samples.
  */
 export function perfFromSamples(samplesMs: number[]): PerfMetric {
-  if (samplesMs.length === 0) {
-    return { p50Ms: 0, p95Ms: 0, p99Ms: 0, samples: 0 };
-  }
-  for (const s of samplesMs) {
-    if (typeof s !== 'number' || Number.isNaN(s) || s < 0) {
-      throw new Error(`perfFromSamples: invalid sample ${s} (must be non-negative number)`);
-    }
-  }
-  const sorted = [...samplesMs].sort((a, b) => a - b);
+  const p = percentilesFromSamples(samplesMs);
   return {
-    p50Ms: nearestRank(sorted, 50),
-    p95Ms: nearestRank(sorted, 95),
-    p99Ms: nearestRank(sorted, 99),
-    samples: sorted.length,
+    p50Ms: p.p50Ms,
+    p95Ms: p.p95Ms,
+    p99Ms: p.p99Ms,
+    samples: p.samples,
   };
 }
 
@@ -130,8 +126,105 @@ export function mutationFromCounts(input: {
 }
 
 /**
+ * Build a {@link CostMetric} from an array of per-request US$ samples.
+ * Returns the arithmetic mean as `perRequestUsd`, sum as `totalUsd`, and the
+ * sample count. Empty input yields all-zero.
+ */
+export function costFromSamples(samplesUsd: number[]): CostMetric {
+  if (samplesUsd.length === 0) {
+    return { perRequestUsd: 0, totalUsd: 0, requests: 0 };
+  }
+  for (const s of samplesUsd) {
+    if (typeof s !== 'number' || Number.isNaN(s) || s < 0) {
+      throw new Error(`costFromSamples: invalid sample ${s} (must be non-negative number)`);
+    }
+  }
+  const totalUsd = samplesUsd.reduce((acc, v) => acc + v, 0);
+  return {
+    perRequestUsd: totalUsd / samplesUsd.length,
+    totalUsd,
+    requests: samplesUsd.length,
+  };
+}
+
+/**
+ * Build a {@link LatencyMetric} from an array of raw end-to-end LLM latency
+ * samples (ms)。 shape は {@link perfFromSamples} と同一だが、 対象は
+ * user-facing LLM response 全体 (streaming 込)。
+ */
+export function latencyFromSamples(samplesMs: number[]): LatencyMetric {
+  const p = percentilesFromSamples(samplesMs);
+  return {
+    p50Ms: p.p50Ms,
+    p95Ms: p.p95Ms,
+    p99Ms: p.p99Ms,
+    samples: p.samples,
+  };
+}
+
+/**
+ * Build a {@link TokenMetric} from parallel arrays of prompt / completion
+ * token samples。 両 array の長さは一致必須、 request 数 = 配列長。
+ */
+export function tokenFromSamples(input: {
+  promptTokens: number[];
+  completionTokens: number[];
+}): TokenMetric {
+  if (input.promptTokens.length !== input.completionTokens.length) {
+    throw new Error(
+      `tokenFromSamples: promptTokens.length (${input.promptTokens.length}) !== completionTokens.length (${input.completionTokens.length})`,
+    );
+  }
+  const requests = input.promptTokens.length;
+  if (requests === 0) {
+    return { promptTokens: 0, completionTokens: 0, totalTokens: 0, requests: 0 };
+  }
+  for (const v of input.promptTokens) assertNonNegativeInteger(v, 'promptTokens[]');
+  for (const v of input.completionTokens) assertNonNegativeInteger(v, 'completionTokens[]');
+  const sumPrompt = input.promptTokens.reduce((acc, v) => acc + v, 0);
+  const sumCompletion = input.completionTokens.reduce((acc, v) => acc + v, 0);
+  return {
+    promptTokens: sumPrompt / requests,
+    completionTokens: sumCompletion / requests,
+    totalTokens: (sumPrompt + sumCompletion) / requests,
+    requests,
+  };
+}
+
+/**
+ * Build an {@link AccuracyMetric} from an array of 0.0-1.0 similarity
+ * samples。 `method` field で「どの計測方法か」 を明示 (cosine / bleu /
+ * exact-match / custom)、 score は平均。
+ */
+export function accuracyFromSamples(input: {
+  samples: number[];
+  method: string;
+}): AccuracyMetric {
+  if (!input.method) throw new Error('accuracyFromSamples: method is required');
+  if (input.samples.length === 0) {
+    return { score: 0, samples: 0, method: input.method };
+  }
+  for (const s of input.samples) {
+    if (typeof s !== 'number' || Number.isNaN(s) || s < 0 || s > 1) {
+      throw new Error(
+        `accuracyFromSamples: invalid sample ${s} (must be number in [0, 1])`,
+      );
+    }
+  }
+  const score = input.samples.reduce((acc, v) => acc + v, 0) / input.samples.length;
+  return {
+    score,
+    samples: input.samples.length,
+    method: input.method,
+  };
+}
+
+/**
  * Assemble a full {@link QualityReport} from pre-computed axes. Fills the
  * `reportedAt` timestamp with the current UTC ISO string.
+ *
+ * AI-LLM 4 軸 (cost / latency / token / accuracy) は provider が
+ * `@kiwa-test/ai-*` のときのみ意味を持つ (それ以外は undefined でも通る)。
  */
 export function assembleReport(input: {
   provider: string;
@@ -141,6 +234,10 @@ export function assembleReport(input: {
   fidelity: FidelityMetric;
   perf: PerfMetric;
   mutation: MutationMetric;
+  cost?: CostMetric;
+  latency?: LatencyMetric;
+  token?: TokenMetric;
+  accuracy?: AccuracyMetric;
   notes?: string;
 }): QualityReport {
   if (!input.provider) throw new Error('assembleReport: provider is required');
@@ -155,6 +252,10 @@ export function assembleReport(input: {
     perf: input.perf,
     mutation: input.mutation,
   };
+  if (input.cost !== undefined) report.cost = input.cost;
+  if (input.latency !== undefined) report.latency = input.latency;
+  if (input.token !== undefined) report.token = input.token;
+  if (input.accuracy !== undefined) report.accuracy = input.accuracy;
   if (input.notes !== undefined) report.notes = input.notes;
   return report;
 }
@@ -175,6 +276,33 @@ function assertNonNegativeInteger(v: number, label: string): void {
   if (v < 0 || !Number.isInteger(v)) {
     throw new Error(`${label}: expected non-negative integer, got ${v}`);
   }
+}
+
+/**
+ * 内部 helper — samples array を p50 / p95 / p99 の 4 field に変換。
+ * {@link perfFromSamples} / {@link latencyFromSamples} 共通化用。
+ */
+function percentilesFromSamples(samplesMs: number[]): {
+  p50Ms: number;
+  p95Ms: number;
+  p99Ms: number;
+  samples: number;
+} {
+  if (samplesMs.length === 0) {
+    return { p50Ms: 0, p95Ms: 0, p99Ms: 0, samples: 0 };
+  }
+  for (const s of samplesMs) {
+    if (typeof s !== 'number' || Number.isNaN(s) || s < 0) {
+      throw new Error(`percentilesFromSamples: invalid sample ${s} (must be non-negative number)`);
+    }
+  }
+  const sorted = [...samplesMs].sort((a, b) => a - b);
+  return {
+    p50Ms: nearestRank(sorted, 50),
+    p95Ms: nearestRank(sorted, 95),
+    p99Ms: nearestRank(sorted, 99),
+    samples: sorted.length,
+  };
 }
 
 function nearestRank(sorted: number[], percentile: number): number {

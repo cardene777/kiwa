@@ -1,11 +1,12 @@
 import type { QualityReport, ReleaseGateVerdict } from './types.js';
 import type { QualityReportDiff } from './types.js';
+import { isAiLlmProvider } from './types.js';
 
 /**
  * Emit a human-readable markdown report from a {@link QualityReport}. The
  * output shape mirrors what `docs/quality-reports/{package}-{version}.md`
  * consumers expect. When `verdict` is supplied, an additional release-gate
- * section is appended.
+ * section is appended. AI-LLM provider の場合は 4 軸行が追加される。
  */
 export function emitMarkdown(input: {
   report: QualityReport;
@@ -13,13 +14,15 @@ export function emitMarkdown(input: {
   diff?: QualityReportDiff;
 }): string {
   const { report, verdict, diff } = input;
+  const isAi = isAiLlmProvider(report.provider);
   const lines: string[] = [];
   lines.push(`# Quality Report — ${report.provider} @ ${report.version}`);
   lines.push('');
   lines.push(`_Reported at ${report.reportedAt}._`);
   lines.push('');
 
-  lines.push('## 5-axis summary');
+  const axesLabel = isAi ? '11-axis' : '5-axis';
+  lines.push(`## ${axesLabel} summary`);
   lines.push('');
   lines.push('| axis | value |');
   lines.push('|---|---|');
@@ -40,6 +43,23 @@ export function emitMarkdown(input: {
   lines.push(`| perf — samples | ${report.perf.samples} |`);
   lines.push(`| mutation — killRate | ${report.mutation.killRate.toFixed(2)}% (${report.mutation.killed}/${report.mutation.mutations}) |`);
   lines.push(`| mutation — survived | ${report.mutation.survived} |`);
+
+  if (isAi) {
+    if (report.cost) {
+      lines.push(`| cost — perRequestUsd | $${report.cost.perRequestUsd.toFixed(4)} (${report.cost.requests} requests, total $${report.cost.totalUsd.toFixed(4)}) |`);
+    }
+    if (report.latency) {
+      lines.push(`| latency — p50 | ${report.latency.p50Ms.toFixed(2)}ms |`);
+      lines.push(`| latency — p95 | ${report.latency.p95Ms.toFixed(2)}ms |`);
+      lines.push(`| latency — p99 | ${report.latency.p99Ms.toFixed(2)}ms |`);
+    }
+    if (report.token) {
+      lines.push(`| token — total | ${report.token.totalTokens.toFixed(0)} (prompt ${report.token.promptTokens.toFixed(0)} + completion ${report.token.completionTokens.toFixed(0)}) |`);
+    }
+    if (report.accuracy) {
+      lines.push(`| accuracy — score | ${report.accuracy.score.toFixed(4)} (${report.accuracy.method}, ${report.accuracy.samples} samples) |`);
+    }
+  }
   lines.push('');
 
   if (verdict) {
@@ -74,6 +94,18 @@ export function emitMarkdown(input: {
     lines.push(`| fidelity.ratio | ${formatDelta(diff.fidelity.ratio)} |`);
     lines.push(`| perf.p95Ms | ${formatDelta(diff.perf.p95Ms)} (negative is better) |`);
     lines.push(`| mutation.killRate | ${formatDelta(diff.mutation.killRate)} |`);
+    if (diff.cost) {
+      lines.push(`| cost.perRequestUsd | ${formatDelta(diff.cost.perRequestUsd)} (negative is better) |`);
+    }
+    if (diff.latency) {
+      lines.push(`| latency.p95Ms | ${formatDelta(diff.latency.p95Ms)} (negative is better) |`);
+    }
+    if (diff.token) {
+      lines.push(`| token.totalTokens | ${formatDelta(diff.token.totalTokens)} (negative is better) |`);
+    }
+    if (diff.accuracy) {
+      lines.push(`| accuracy.score | ${formatDelta(diff.accuracy.score)} |`);
+    }
     lines.push('');
   }
 
@@ -98,7 +130,8 @@ export function emitJson(report: QualityReport): string {
 /**
  * Compute a diff between two reports for the same provider. Values are
  * (`current - previous`) so callers can render "improved" / "regressed"
- * labels next to each axis.
+ * labels next to each axis. AI-LLM 4 軸は両 report が該当 field を持つ場合
+ * のみ diff を計算する。
  */
 export function diffReports(previous: QualityReport, current: QualityReport): QualityReportDiff {
   if (previous.provider !== current.provider) {
@@ -106,7 +139,7 @@ export function diffReports(previous: QualityReport, current: QualityReport): Qu
       `diffReports: provider mismatch — ${previous.provider} vs ${current.provider}`,
     );
   }
-  return {
+  const out: QualityReportDiff = {
     provider: current.provider,
     from: previous.version,
     to: current.version,
@@ -134,6 +167,19 @@ export function diffReports(previous: QualityReport, current: QualityReport): Qu
       killRate: current.mutation.killRate - previous.mutation.killRate,
     },
   };
+  if (previous.cost && current.cost) {
+    out.cost = { perRequestUsd: current.cost.perRequestUsd - previous.cost.perRequestUsd };
+  }
+  if (previous.latency && current.latency) {
+    out.latency = { p95Ms: current.latency.p95Ms - previous.latency.p95Ms };
+  }
+  if (previous.token && current.token) {
+    out.token = { totalTokens: current.token.totalTokens - previous.token.totalTokens };
+  }
+  if (previous.accuracy && current.accuracy) {
+    out.accuracy = { score: current.accuracy.score - previous.accuracy.score };
+  }
+  return out;
 }
 
 function formatDelta(v: number): string {

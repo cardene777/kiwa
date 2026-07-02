@@ -18,7 +18,7 @@ function passingReport(): QualityReport {
   };
 }
 
-describe('evaluateReleaseGate — pass', () => {
+describe('evaluateReleaseGate — pass (non AI-LLM)', () => {
   it('T-QM-GT-001 passes when every axis clears defaults', () => {
     const verdict = evaluateReleaseGate(passingReport());
     expect(verdict.passed).toBe(true);
@@ -26,7 +26,7 @@ describe('evaluateReleaseGate — pass', () => {
     expect(verdict.axesEvaluated).toBe(7);
   });
 
-  it('T-QM-GT-002 exposes stable default thresholds SSOT', () => {
+  it('T-QM-GT-002 exposes stable default thresholds SSOT (11 軸)', () => {
     expect(DEFAULT_RELEASE_GATE_THRESHOLDS).toEqual({
       coverageLine: 85,
       coverageBranch: 80,
@@ -35,6 +35,10 @@ describe('evaluateReleaseGate — pass', () => {
       perfP95Ms: 100,
       mutationKillRate: 60,
       behaviorTests: 10,
+      costPerRequestUsd: 0.1,
+      latencyP95Ms: 3000,
+      totalTokens: 4000,
+      accuracyScore: 0.8,
     });
   });
 });
@@ -114,5 +118,13 @@ describe('evaluateReleaseGate — fail', () => {
     expect(verdict.passed).toBe(false);
     expect(verdict.blockers[0]?.axis).toBe('coverage.line');
     expect(verdict.blockers[0]?.threshold).toBe(99);
+  });
+
+  it('T-QM-GT-012 non AI-LLM provider does not require AI-LLM 4 axes', () => {
+    // AI-LLM 4 軸を含まない report が非 AI-LLM provider では pass する。
+    const verdict = evaluateReleaseGate(passingReport());
+    expect(verdict.passed).toBe(true);
+    expect(verdict.axesEvaluated).toBe(7);
+    expect(verdict.blockers.find((b) => b.axis === 'cost.perRequestUsd')).toBeUndefined();
   });
 });

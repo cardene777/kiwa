@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
+  accuracyFromSamples,
   assembleReport,
+  costFromSamples,
   coverageFromV8Summary,
   fidelityFromMethodCounts,
+  latencyFromSamples,
   mutationFromCounts,
   perfFromSamples,
   testCountFromCategories,
+  tokenFromSamples,
 } from '../src/index.js';
 
 describe('coverageFromV8Summary', () => {
@@ -197,5 +201,125 @@ describe('assembleReport', () => {
       notes: 'ships v0.1',
     });
     expect(report.notes).toBe('ships v0.1');
+  });
+
+  it('T-QM-COL-025 propagates AI-LLM 4 axes when supplied', () => {
+    const report = assembleReport({
+      provider: '@kiwa-test/ai-llm',
+      version: '0.1.0',
+      coverage: { line: 100, branch: 100, function: 100 },
+      testCount: { behavior: 1, integration: 0, e2e: 0, total: 1 },
+      fidelity: { mockCoveredMethods: 1, realTotalMethods: 1, ratio: 100 },
+      perf: { p50Ms: 0, p95Ms: 0, p99Ms: 0, samples: 0 },
+      mutation: { mutations: 0, killed: 0, survived: 0, killRate: 0 },
+      cost: costFromSamples([0.05, 0.06]),
+      latency: latencyFromSamples([100, 200, 300]),
+      token: tokenFromSamples({ promptTokens: [100, 200], completionTokens: [50, 60] }),
+      accuracy: accuracyFromSamples({ samples: [0.9, 0.95], method: 'cosine' }),
+    });
+    expect(report.cost?.perRequestUsd).toBeCloseTo(0.055);
+    expect(report.latency?.p50Ms).toBeGreaterThan(0);
+    expect(report.token?.totalTokens).toBeCloseTo(205);
+    expect(report.accuracy?.score).toBeCloseTo(0.925);
+    expect(report.accuracy?.method).toBe('cosine');
+  });
+});
+
+describe('costFromSamples', () => {
+  it('T-QM-COL-026 returns zero when samples is empty', () => {
+    const c = costFromSamples([]);
+    expect(c).toEqual({ perRequestUsd: 0, totalUsd: 0, requests: 0 });
+  });
+
+  it('T-QM-COL-027 computes mean cost per request and total', () => {
+    const c = costFromSamples([0.1, 0.2, 0.3, 0.4]);
+    expect(c.totalUsd).toBeCloseTo(1.0);
+    expect(c.perRequestUsd).toBeCloseTo(0.25);
+    expect(c.requests).toBe(4);
+  });
+
+  it('T-QM-COL-028 rejects negative cost samples', () => {
+    expect(() => costFromSamples([0.1, -0.2])).toThrow(/must be non-negative number/);
+  });
+
+  it('T-QM-COL-029 rejects NaN cost samples', () => {
+    expect(() => costFromSamples([0.1, Number.NaN])).toThrow(/invalid sample/);
+  });
+});
+
+describe('latencyFromSamples', () => {
+  it('T-QM-COL-030 mirrors perfFromSamples for percentile math', () => {
+    const l = latencyFromSamples(Array.from({ length: 100 }, (_, i) => i + 1));
+    expect(l.p50Ms).toBe(50);
+    expect(l.p95Ms).toBe(95);
+    expect(l.p99Ms).toBe(99);
+    expect(l.samples).toBe(100);
+  });
+
+  it('T-QM-COL-031 returns zeros for empty samples', () => {
+    const l = latencyFromSamples([]);
+    expect(l).toEqual({ p50Ms: 0, p95Ms: 0, p99Ms: 0, samples: 0 });
+  });
+});
+
+describe('tokenFromSamples', () => {
+  it('T-QM-COL-032 averages prompt / completion / total tokens across requests', () => {
+    const t = tokenFromSamples({
+      promptTokens: [1000, 2000],
+      completionTokens: [500, 700],
+    });
+    expect(t.promptTokens).toBe(1500);
+    expect(t.completionTokens).toBe(600);
+    expect(t.totalTokens).toBe(2100);
+    expect(t.requests).toBe(2);
+  });
+
+  it('T-QM-COL-033 returns zeros for empty input', () => {
+    const t = tokenFromSamples({ promptTokens: [], completionTokens: [] });
+    expect(t).toEqual({ promptTokens: 0, completionTokens: 0, totalTokens: 0, requests: 0 });
+  });
+
+  it('T-QM-COL-034 rejects mismatched input lengths', () => {
+    expect(() =>
+      tokenFromSamples({ promptTokens: [1, 2], completionTokens: [1] }),
+    ).toThrow(/promptTokens\.length/);
+  });
+
+  it('T-QM-COL-035 rejects non-integer token counts', () => {
+    expect(() =>
+      tokenFromSamples({ promptTokens: [1.5], completionTokens: [1] }),
+    ).toThrow(/non-negative integer/);
+  });
+});
+
+describe('accuracyFromSamples', () => {
+  it('T-QM-COL-036 averages 0-1 similarity samples', () => {
+    const a = accuracyFromSamples({ samples: [0.8, 0.9, 1.0], method: 'cosine' });
+    expect(a.score).toBeCloseTo(0.9);
+    expect(a.samples).toBe(3);
+    expect(a.method).toBe('cosine');
+  });
+
+  it('T-QM-COL-037 returns 0 score for empty samples with method still set', () => {
+    const a = accuracyFromSamples({ samples: [], method: 'bleu' });
+    expect(a).toEqual({ score: 0, samples: 0, method: 'bleu' });
+  });
+
+  it('T-QM-COL-038 rejects samples above 1.0', () => {
+    expect(() =>
+      accuracyFromSamples({ samples: [0.5, 1.2], method: 'cosine' }),
+    ).toThrow(/must be number in \[0, 1\]/);
+  });
+
+  it('T-QM-COL-039 rejects negative samples', () => {
+    expect(() =>
+      accuracyFromSamples({ samples: [-0.1], method: 'cosine' }),
+    ).toThrow(/must be number in \[0, 1\]/);
+  });
+
+  it('T-QM-COL-040 rejects empty method label', () => {
+    expect(() => accuracyFromSamples({ samples: [0.5], method: '' })).toThrow(
+      /method is required/,
+    );
   });
 });

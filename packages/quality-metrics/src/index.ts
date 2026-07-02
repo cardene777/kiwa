@@ -1,6 +1,9 @@
 export type {
+  AccuracyMetric,
+  CostMetric,
   CoverageMetric,
   FidelityMetric,
+  LatencyMetric,
   MutationMetric,
   PerfMetric,
   QualityReport,
@@ -9,15 +12,22 @@ export type {
   ReleaseGateThresholds,
   ReleaseGateVerdict,
   TestCountMetric,
+  TokenMetric,
 } from './types.js';
 
+export { isAiLlmProvider } from './types.js';
+
 export {
+  accuracyFromSamples,
   assembleReport,
+  costFromSamples,
   coverageFromV8Summary,
   fidelityFromMethodCounts,
+  latencyFromSamples,
   mutationFromCounts,
   perfFromSamples,
   testCountFromCategories,
+  tokenFromSamples,
 } from './collect.js';
 
 export {
