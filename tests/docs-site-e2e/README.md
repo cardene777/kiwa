@@ -10,11 +10,21 @@ pnpm playwright test tests/docs-site-e2e
 
 ## Pages under test
 
+### Canonical (v1.11 baseline)
+
 - `/` — landing hero + feature grid
 - `/tutorials/` — tutorial index
 - `/tutorials/01-supabase-auth-first-test` — first tutorial body
-- `/migrations/v1.10-to-v1.11` — most recent migration guide
+- `/migrations/v1.10-to-v1.11` — v1.10 → v1.11 migration guide
 - `/quality/release-gate` — release-gate SSOT
+
+### v1.12 additions (Issue #700)
+
+- `/tutorials/06-anthropic-chatbot-streaming` — Anthropic streaming + tool_use
+- `/tutorials/07-openai-tool-agent` — OpenAI function calling + parallel tool calls
+- `/tutorials/08-vercel-ai-rag` — Vercel AI SDK + LangChain RAG
+- `/concepts/ai-llm-testing` — non-determinism SSOT
+- `/migrations/v1.11-to-v1.12` — v1.11 → v1.12 migration guide
 
 ## Assertions
 

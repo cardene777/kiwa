@@ -21,6 +21,19 @@ const CANONICAL_PAGES = [
   { path: '/quality/release-gate', title: 'kiwa release gate' },
 ];
 
+// v1.12 pages — new tutorials + concept doc + migration guide added under the
+// AI-LLM 縦軸 milestone (Issue #700). Same skip-if-dist-missing pattern as the
+// canonical suite above so the tests pass on a fresh clone without a full docs
+// build. Each page asserts an anchor phrase that a rendered VitePress build
+// will always include in <main>.
+const V1_12_PAGES = [
+  { path: '/tutorials/06-anthropic-chatbot-streaming', title: 'Anthropic chatbot streaming' },
+  { path: '/tutorials/07-openai-tool-agent', title: 'OpenAI tool-use agent' },
+  { path: '/tutorials/08-vercel-ai-rag', title: 'Vercel AI SDK' },
+  { path: '/concepts/ai-llm-testing', title: 'non-determinism' },
+  { path: '/migrations/v1.11-to-v1.12', title: 'v1.11 → v1.12' },
+];
+
 test.describe('docs site — canonical pages render', () => {
   for (const p of CANONICAL_PAGES) {
     test(`page ${p.path} renders with expected title`, async ({ page }) => {
@@ -29,6 +42,21 @@ test.describe('docs site — canonical pages render', () => {
         return;
       }
       const url = `file://${join(distDir, p.path === '/' ? 'index.html' : `${p.path.replace(/\/$/, '')}.html`)}`;
+      await page.goto(url);
+      const body = await page.locator('main').innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.12 pages render', () => {
+  for (const p of V1_12_PAGES) {
+    test(`v1.12 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const url = `file://${join(distDir, `${p.path.replace(/\/$/, '')}.html`)}`;
       await page.goto(url);
       const body = await page.locator('main').innerText();
       expect(body).toContain(p.title);
