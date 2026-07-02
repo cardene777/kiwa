@@ -1,0 +1,13 @@
+[package]
+name = "contract-rust-alloy-poc"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "PoC — kiwa-test-rs v0.4 contract::alloy integration example (ABI parser + selector + signer / provider enums + call encoding). Part of the kiwa polyglot test framework family."
+
+[lib]
+name = "contract_rust_alloy_poc"
+path = "src/lib.rs"
+
+[dependencies]
+kiwa-test-rs = { path = "../../kiwa-rs", version = "0.4", features = ["contract-alloy"] }

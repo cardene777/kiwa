@@ -13,3 +13,6 @@
 
 #[cfg(feature = "contract-foundry")]
 pub mod foundry;
+
+#[cfg(feature = "contract-alloy")]
+pub mod alloy;

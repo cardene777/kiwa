@@ -52,7 +52,7 @@ pub mod actix;
 #[cfg(feature = "tower-http")]
 pub mod tower_http;
 
-#[cfg(feature = "contract-foundry")]
+#[cfg(any(feature = "contract-foundry", feature = "contract-alloy"))]
 pub mod contract;
 
 // Internal recorder helpers shared by the integration / axum / actix
