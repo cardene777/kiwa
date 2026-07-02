@@ -1,0 +1,61 @@
+import type { AgentLoopResult, AgentLoopStep, AgentToolCall } from './interface.js';
+
+/**
+ * Small helpers shared between the mock and real OpenAI adapters. Kept
+ * lightweight — anything OpenAI-shape-specific stays in the adapter that
+ * owns it, but the tool_call parsing and step-total roll-up logic is
+ * identical either way.
+ */
+
+interface RawToolCall {
+  id: string;
+  type: 'function';
+  function: { name: string; arguments: string };
+}
+
+/**
+ * Parse an OpenAI-shape tool_call into the internal {@link AgentToolCall}
+ * form. Invalid JSON in `function.arguments` collapses to an empty object
+ * but sets `argumentsRaw` to the untouched string and marks `argsParseError`
+ * so downstream (test / executor / harness) can flag the bad model output
+ * rather than silently routing tools with defaults.
+ */
+export function parseToolCall(tc: RawToolCall): AgentToolCall {
+  let parsed: Record<string, unknown> = {};
+  let argsParseError: string | undefined;
+  try {
+    parsed = JSON.parse(tc.function.arguments) as Record<string, unknown>;
+  } catch (err) {
+    argsParseError = (err as Error).message;
+  }
+  const out: AgentToolCall = {
+    id: tc.id,
+    name: tc.function.name,
+    argumentsRaw: tc.function.arguments,
+    args: parsed,
+  };
+  if (argsParseError !== undefined) out.argsParseError = argsParseError;
+  return out;
+}
+
+/**
+ * Aggregate cost / latency / usage across a completed sequence of steps.
+ * Both `runToolLoop` and `runParallelToolCall` in each adapter roll up
+ * results with the same reducer — this helper is the single source of
+ * truth for that math.
+ */
+export function summariseSteps(
+  steps: AgentLoopStep[],
+): Pick<AgentLoopResult, 'totalCostUsd' | 'totalLatencyMs' | 'totalUsage'> {
+  const totalCostUsd = steps.reduce((s, x) => s + x.costUsd, 0);
+  const totalLatencyMs = steps.reduce((s, x) => s + x.latencyMs, 0);
+  const totalUsage = steps.reduce(
+    (acc, x) => ({
+      promptTokens: acc.promptTokens + x.usage.promptTokens,
+      completionTokens: acc.completionTokens + x.usage.completionTokens,
+      totalTokens: acc.totalTokens + x.usage.totalTokens,
+    }),
+    { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+  );
+  return { totalCostUsd, totalLatencyMs, totalUsage };
+}
