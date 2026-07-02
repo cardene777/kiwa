@@ -6,6 +6,8 @@
   "description": "Dogfood app 2 (v1.13-4) — an Ably shared cursor + broadcast + history rewind app that exercises high-frequency cursor position broadcast, client-side 60fps throttle, and history rewind (channel.history) across a provider-neutral interface, drivable in both KIWA_MODE=real (calls ably when ABLY_API_KEY is set) and KIWA_MODE=mock (@kiwa-test/realtime createAblyMock) so behavioural fidelity feeds @kiwa-test/quality-metrics 7-axis release gate.",
   "scripts": {
     "test": "pnpm -F @kiwa-test/realtime -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "pretest:perf": "pnpm -F @kiwa-test/realtime -F @kiwa-test/core -F @kiwa-test/quality-metrics -F @kiwa-test/perf-harness build",
+    "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -14,6 +16,7 @@
     "@kiwa-test/realtime": "workspace:*"
   },
   "devDependencies": {
+    "@kiwa-test/perf-harness": "workspace:*",
     "@types/node": "^22.10.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
