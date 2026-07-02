@@ -22,6 +22,11 @@ export interface AgentToolCall {
   argumentsRaw: string;
   /** Parsed args when the model returned valid JSON, empty object otherwise. */
   args: Record<string, unknown>;
+  /**
+   * Set when `argumentsRaw` could not be JSON-parsed — downstream can flag
+   * bad model output instead of silently routing the tool with defaults.
+   */
+  argsParseError?: string;
 }
 
 /** One iteration of the tool-use loop — an assistant turn + resolved tools. */

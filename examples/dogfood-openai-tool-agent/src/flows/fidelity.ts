@@ -121,6 +121,34 @@ function compareTraces(mock: TraceEvent[], real: TraceEvent[]): TraceEvent[] {
         },
       });
     }
+    // Detail-level divergence: when both adapters recorded success, compare
+    // the trace `detail` payload we captured on each op — the tool call
+    // order + parallel batch shape are directly diffable. This lifts the
+    // harness from "op success" to "op observable behaviour".
+    if (mockOk && realOk) {
+      const mockOk1 = mockEntries.find((e) => e.ok);
+      const realOk1 = realEntries.find((e) => e.ok);
+      const mockOrder = extractToolCallOrder(mockOk1);
+      const realOrder = extractToolCallOrder(realOk1);
+      if (mockOrder !== undefined && realOrder !== undefined && !arraysEqual(mockOrder, realOrder)) {
+        divergences.push({
+          op,
+          ok: false,
+          errorKind: 'TOOL_ORDER_DIVERGENCE',
+          detail: { mockOrder, realOrder },
+        });
+      }
+      const mockBatches = extractParallelBatches(mockOk1);
+      const realBatches = extractParallelBatches(realOk1);
+      if (mockBatches !== undefined && realBatches !== undefined && !arraysEqual(mockBatches, realBatches)) {
+        divergences.push({
+          op,
+          ok: false,
+          errorKind: 'PARALLEL_SHAPE_DIVERGENCE',
+          detail: { mockBatches, realBatches },
+        });
+      }
+    }
   }
   for (const [op, realEntries] of realByOp) {
     if (!mockByOp.has(op)) {
@@ -133,6 +161,26 @@ function compareTraces(mock: TraceEvent[], real: TraceEvent[]): TraceEvent[] {
     }
   }
   return divergences;
+}
+
+function extractToolCallOrder(event: TraceEvent | undefined): string[] | undefined {
+  const value = event?.detail?.['toolCallOrder'];
+  return Array.isArray(value) && value.every((v) => typeof v === 'string')
+    ? (value as string[])
+    : undefined;
+}
+
+function extractParallelBatches(event: TraceEvent | undefined): number[] | undefined {
+  const value = event?.detail?.['parallelBatches'];
+  return Array.isArray(value) && value.every((v) => typeof v === 'number')
+    ? (value as number[])
+    : undefined;
+}
+
+function arraysEqual<T>(a: T[], b: T[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) return false;
+  return true;
 }
 
 function groupByOp(events: TraceEvent[]): Map<string, TraceEvent[]> {

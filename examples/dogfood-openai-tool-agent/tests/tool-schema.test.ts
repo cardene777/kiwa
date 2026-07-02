@@ -51,4 +51,27 @@ describe('dogfood-openai-tool-agent — tool schema validation (Task 3.1)', () =
       }
     }
   });
+
+  it('T-DFO-SC-005 parseToolCall flags malformed JSON args via argsParseError', async () => {
+    const { parseToolCall } = await import('../src/adapters/shared.js');
+    const call = parseToolCall({
+      id: 'call_bad',
+      type: 'function',
+      function: { name: 'get_weather', arguments: '{not-json' },
+    });
+    expect(call.args).toEqual({});
+    expect(call.argsParseError).toBeDefined();
+    expect(call.argumentsRaw).toBe('{not-json');
+  });
+
+  it('T-DFO-SC-006 parseToolCall preserves round-trip for well-formed args', async () => {
+    const { parseToolCall } = await import('../src/adapters/shared.js');
+    const call = parseToolCall({
+      id: 'call_ok',
+      type: 'function',
+      function: { name: 'get_weather', arguments: JSON.stringify({ location: 'Tokyo' }) },
+    });
+    expect(call.args).toEqual({ location: 'Tokyo' });
+    expect(call.argsParseError).toBeUndefined();
+  });
 });

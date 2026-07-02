@@ -224,6 +224,7 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): AgentAdapter {
       let finalText = '';
       let finish: AgentLoopResult['finishReason'] = 'iteration_cap';
 
+      let breakReason: 'ok' | 'empty_choices' = 'ok';
       for (let iter = 0; iter < maxIter; iter += 1) {
         let called: { response: OpenAiCompletionResponse; latencyMs: number; costUsd: number };
         try {
@@ -236,6 +237,7 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): AgentAdapter {
         const choice = response.choices[0];
         if (!choice) {
           record('runToolLoop', false, { errorKind: 'EMPTY_CHOICES', detail: { iter } });
+          breakReason = 'empty_choices';
           break;
         }
         const toolCalls = (choice.message.tool_calls ?? []).map(parseToolCall);
@@ -285,14 +287,16 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): AgentAdapter {
         steps.push(step);
       }
 
-      record('runToolLoop', true, {
-        detail: {
-          iterations: steps.length,
-          toolCallOrder,
-          parallelBatches,
-          finish,
-        },
-      });
+      if (breakReason === 'ok') {
+        record('runToolLoop', true, {
+          detail: {
+            iterations: steps.length,
+            toolCallOrder,
+            parallelBatches,
+            finish,
+          },
+        });
+      }
 
       return {
         finalText,
@@ -310,12 +314,16 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): AgentAdapter {
       ];
       const first = await completionCall(conversation, input.tools);
       const choice = first.response.choices[0];
-      const toolCalls = (choice?.message.tool_calls ?? []).map(parseToolCall);
+      if (!choice) {
+        record('runParallelToolCall', false, { errorKind: 'EMPTY_CHOICES' });
+        throw new Error('OpenAI parallel tool call turn 0 returned no choices');
+      }
+      const toolCalls = (choice.message.tool_calls ?? []).map(parseToolCall);
       const step1: AgentLoopStep = {
         iteration: 0,
         toolCalls,
         toolResults: [],
-        finishReason: choice?.finish_reason ?? 'tool_calls',
+        finishReason: choice.finish_reason,
         costUsd: first.costUsd,
         latencyMs: first.latencyMs,
         usage: {
@@ -324,6 +332,27 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): AgentAdapter {
           totalTokens: first.response.usage.total_tokens,
         },
       };
+      // If the model chose not to call any tool on turn 0, treat step 1 as
+      // the terminal turn and return without forcing a synthetic follow-up.
+      if (toolCalls.length === 0 || choice.finish_reason !== 'tool_calls') {
+        record('runParallelToolCall', false, {
+          errorKind: 'NO_PARALLEL_TOOL_CALLS',
+          detail: { finishReason: choice.finish_reason },
+        });
+        const steps = [step1];
+        return {
+          finalText: choice.message.content ?? '',
+          steps,
+          toolCallOrder: [],
+          parallelBatches: [],
+          ...summariseSteps(steps),
+          finishReason: choice.finish_reason === 'length'
+            ? 'length'
+            : choice.finish_reason === 'content_filter'
+              ? 'content_filter'
+              : 'stop',
+        };
+      }
       const settled = await Promise.all(
         toolCalls.map(async (call) => ({
           call,
@@ -335,9 +364,9 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): AgentAdapter {
       }
       const parAssistantMsg: ConversationMessage = {
         role: 'assistant',
-        content: choice?.message.content ?? null,
+        content: choice.message.content,
       };
-      if (choice?.message.tool_calls !== undefined) {
+      if (choice.message.tool_calls !== undefined) {
         parAssistantMsg.tool_calls = choice.message.tool_calls;
       }
       conversation.push(parAssistantMsg);
@@ -349,12 +378,17 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): AgentAdapter {
         });
       }
       const second = await completionCall(conversation, input.tools);
-      const finalText = second.response.choices[0]?.message.content ?? '';
+      const secondChoice = second.response.choices[0];
+      if (!secondChoice) {
+        record('runParallelToolCall', false, { errorKind: 'EMPTY_CHOICES_FINALISER' });
+        throw new Error('OpenAI parallel tool call finaliser turn returned no choices');
+      }
+      const finalText = secondChoice.message.content ?? '';
       const step2: AgentLoopStep = {
         iteration: 1,
         toolCalls: [],
         toolResults: [],
-        finishReason: 'stop',
+        finishReason: secondChoice.finish_reason,
         costUsd: second.costUsd,
         latencyMs: second.latencyMs,
         usage: {
@@ -376,7 +410,11 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): AgentAdapter {
         toolCallOrder: toolCalls.map((c) => c.name),
         parallelBatches: [toolCalls.length],
         ...summariseSteps(steps),
-        finishReason: 'stop',
+        finishReason: secondChoice.finish_reason === 'length'
+          ? 'length'
+          : secondChoice.finish_reason === 'content_filter'
+            ? 'content_filter'
+            : 'stop',
       };
     },
 

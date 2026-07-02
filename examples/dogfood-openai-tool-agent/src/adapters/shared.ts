@@ -16,21 +16,26 @@ interface RawToolCall {
 /**
  * Parse an OpenAI-shape tool_call into the internal {@link AgentToolCall}
  * form. Invalid JSON in `function.arguments` collapses to an empty object
- * so the tool loop can still route the call to an executor.
+ * but sets `argumentsRaw` to the untouched string and marks `argsParseError`
+ * so downstream (test / executor / harness) can flag the bad model output
+ * rather than silently routing tools with defaults.
  */
 export function parseToolCall(tc: RawToolCall): AgentToolCall {
   let parsed: Record<string, unknown> = {};
+  let argsParseError: string | undefined;
   try {
     parsed = JSON.parse(tc.function.arguments) as Record<string, unknown>;
-  } catch {
-    parsed = {};
+  } catch (err) {
+    argsParseError = (err as Error).message;
   }
-  return {
+  const out: AgentToolCall = {
     id: tc.id,
     name: tc.function.name,
     argumentsRaw: tc.function.arguments,
     args: parsed,
   };
+  if (argsParseError !== undefined) out.argsParseError = argsParseError;
+  return out;
 }
 
 /**

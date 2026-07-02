@@ -112,6 +112,7 @@ export function makeMockAdapter(): AgentAdapter {
 
       let finalText = '';
       let finish: AgentLoopResult['finishReason'] = 'iteration_cap';
+      let breakReason: 'ok' | 'empty_choices' = 'ok';
 
       for (let iter = 0; iter < maxIter; iter += 1) {
         const client = createOpenAIMock({
@@ -129,6 +130,7 @@ export function makeMockAdapter(): AgentAdapter {
         const choice = res.choices[0];
         if (!choice) {
           record('runToolLoop', false, { errorKind: 'EMPTY_CHOICES', detail: { iter } });
+          breakReason = 'empty_choices';
           break;
         }
         const toolCalls = (choice.message.tool_calls ?? []).map(parseToolCall);
@@ -184,14 +186,16 @@ export function makeMockAdapter(): AgentAdapter {
         steps.push(step);
       }
 
-      record('runToolLoop', true, {
-        detail: {
-          iterations: steps.length,
-          toolCallOrder,
-          parallelBatches,
-          finish,
-        },
-      });
+      if (breakReason === 'ok') {
+        record('runToolLoop', true, {
+          detail: {
+            iterations: steps.length,
+            toolCallOrder,
+            parallelBatches,
+            finish,
+          },
+        });
+      }
 
       return {
         finalText,
@@ -220,12 +224,16 @@ export function makeMockAdapter(): AgentAdapter {
       })) as OpenAiChatCompletionsResponse;
       absorbResponse(res1);
       const choice = res1.choices[0];
-      const toolCalls = (choice?.message.tool_calls ?? []).map(parseToolCall);
+      if (!choice) {
+        record('runParallelToolCall', false, { errorKind: 'EMPTY_CHOICES' });
+        throw new Error('mock parallel tool call turn 0 returned no choices');
+      }
+      const toolCalls = (choice.message.tool_calls ?? []).map(parseToolCall);
       const step1: AgentLoopStep = {
         iteration: 0,
         toolCalls,
         toolResults: [],
-        finishReason: choice?.finish_reason ?? 'tool_calls',
+        finishReason: choice.finish_reason,
         costUsd: res1._kiwa.costUsd,
         latencyMs: res1._kiwa.latencyMs,
         usage: {
@@ -234,6 +242,28 @@ export function makeMockAdapter(): AgentAdapter {
           totalTokens: res1.usage.total_tokens,
         },
       };
+      // If the mock chose not to call any tool on turn 0 the test surface
+      // does not expect a finaliser — terminate on step 1 so the trace
+      // records the divergence rather than papering it over.
+      if (toolCalls.length === 0 || choice.finish_reason !== 'tool_calls') {
+        record('runParallelToolCall', false, {
+          errorKind: 'NO_PARALLEL_TOOL_CALLS',
+          detail: { finishReason: choice.finish_reason },
+        });
+        const steps = [step1];
+        return {
+          finalText: choice.message.content ?? '',
+          steps,
+          toolCallOrder: [],
+          parallelBatches: [],
+          ...summariseSteps(steps),
+          finishReason: choice.finish_reason === 'length'
+            ? 'length'
+            : choice.finish_reason === 'content_filter'
+              ? 'content_filter'
+              : 'stop',
+        };
+      }
 
       // Resolve all tool_calls concurrently to prove the mock preserves
       // parallel-safe semantics — the executor runs each call independently
@@ -249,9 +279,9 @@ export function makeMockAdapter(): AgentAdapter {
       }
       const parAssistantMsg: OpenAiChatCompletionsRequest['messages'][number] = {
         role: 'assistant',
-        content: choice?.message.content ?? null,
+        content: choice.message.content,
       };
-      if (choice?.message.tool_calls !== undefined) {
+      if (choice.message.tool_calls !== undefined) {
         parAssistantMsg.tool_calls = choice.message.tool_calls;
       }
       conversation.push(parAssistantMsg);
@@ -275,12 +305,17 @@ export function makeMockAdapter(): AgentAdapter {
         max_tokens: 512,
       })) as OpenAiChatCompletionsResponse;
       absorbResponse(res2);
-      const finalText = res2.choices[0]?.message.content ?? '';
+      const secondChoice = res2.choices[0];
+      if (!secondChoice) {
+        record('runParallelToolCall', false, { errorKind: 'EMPTY_CHOICES_FINALISER' });
+        throw new Error('mock parallel tool call finaliser turn returned no choices');
+      }
+      const finalText = secondChoice.message.content ?? '';
       const step2: AgentLoopStep = {
         iteration: 1,
         toolCalls: [],
         toolResults: [],
-        finishReason: 'stop',
+        finishReason: secondChoice.finish_reason,
         costUsd: res2._kiwa.costUsd,
         latencyMs: res2._kiwa.latencyMs,
         usage: {
@@ -303,7 +338,11 @@ export function makeMockAdapter(): AgentAdapter {
         toolCallOrder: toolCalls.map((c) => c.name),
         parallelBatches: [toolCalls.length],
         ...summariseSteps(steps),
-        finishReason: 'stop',
+        finishReason: secondChoice.finish_reason === 'length'
+          ? 'length'
+          : secondChoice.finish_reason === 'content_filter'
+            ? 'content_filter'
+            : 'stop',
       };
     },
 
