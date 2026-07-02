@@ -1,6 +1,6 @@
 [package]
 name = "kiwa-test-rs"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 rust-version = "1.75"
 description = "kiwa Rust cargo test adapter — deterministic fixture + assert macro + Drop-based cleanup + hyper mock server + axum Router test app + actix-web App test app + tower-http middleware chain helper. Part of the kiwa polyglot test framework family (https://github.com/cardene777/kiwa)."
@@ -64,6 +64,14 @@ tower-http = [
   "dep:base64",
   "dep:tower-http",
 ]
+# Foundry contract-testing integration — drives `forge` / `cast` / `anvil` via
+# subprocess with a Drop-based `Anvil` handle and a coverage-report parser.
+# Pulls no new dependencies (subprocess plumbing lives in `std::process`),
+# only gates the `kiwa::contract::foundry` module. Requires the Foundry CLI
+# on PATH at runtime; when absent, helpers return `skipped` outputs so test
+# suites can skip gracefully in CI without provisioning the toolchain.
+contract-foundry = []
+
 # proc-macro support (#[kiwa_test] attribute) — enabled via separate kiwa-test-rs-macro crate planned in v0.3
 macro = []
 
