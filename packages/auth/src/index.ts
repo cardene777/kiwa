@@ -158,3 +158,35 @@ export {
   signSupabaseAccessToken,
   verifySupabaseAccessToken,
 } from './supabase/jwt.js';
+
+// Supabase Auth advanced adapter surface (v1.10-2, GH #668).
+export type {
+  MfaAal,
+  MfaBackupCode,
+  MfaChallenge,
+  MfaFactor,
+  MfaFactorKind,
+  RlsCheckInput,
+  RlsCheckOutcome,
+  RlsCommand,
+  RlsPolicy,
+  RlsPolicyContext,
+  SamlAssertion,
+  SamlAuthnRequest,
+  SamlIdentityProvider,
+  SetupSupabaseAdvancedEnvOptions,
+  SiweChallenge,
+  SiweMessage,
+  SupabaseAdvancedTestEnv,
+} from './supabase-advanced/types.js';
+export {
+  buildOtpAuthUri as buildSupabaseOtpAuthUri,
+  deriveMockAddress as deriveSupabaseMockAddress,
+  generateBackupCodes as generateSupabaseBackupCodes,
+  generateSiweNonce as generateSupabaseSiweNonce,
+  generateTotpCode as generateSupabaseTotpCode,
+  generateTotpSecret as generateSupabaseTotpSecret,
+  serializeSiweMessage as serializeSupabaseSiweMessage,
+  setupSupabaseAdvancedEnv,
+  verifyTotpCode as verifySupabaseTotpCode,
+} from './supabase-advanced/setup-supabase-advanced-env.js';
