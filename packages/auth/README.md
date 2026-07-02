@@ -6,17 +6,18 @@
   <sub>Full <a href="https://github.com/cardene777/kiwa">kiwa</a> overview (127s) — this package covers the Auth surface. <a href="https://github.com/cardene777/kiwa/blob/main/assets/kiwa-promo-en.mp4">▶ Full-quality MP4 (2.9 MB)</a>.</sub>
 </p>
 
-Auth test adapter for kiwa — NextAuth v5 (Auth.js), Lucia v3, Better Auth, Clerk, and Auth0 session / provider / database mocks under a shared package.
+Auth test adapter for kiwa — NextAuth v5 (Auth.js), Lucia v3, Better Auth, Clerk, Auth0, and Supabase Auth core session / provider / database mocks under a shared package.
 
 ## Overview
 
-`@kiwa-test/auth` is the Layer 2 adapter that turns an auth-shaped Layer 1 spec into a runnable Vitest suite. It ships five independent helpers:
+`@kiwa-test/auth` is the Layer 2 adapter that turns an auth-shaped Layer 1 spec into a runnable Vitest suite. It ships six independent helpers:
 
 - **`setupNextAuthEnv`** — NextAuth v5 (Auth.js) session / provider / database mocks.
 - **`setupLuciaEnv`** — Lucia v3 password + OAuth flows across SQLite / PostgreSQL adapter shapes.
 - **`setupBetterAuthEnv`** — Better Auth email/password + magic link + 2FA (TOTP) + social sign-in + organizations / passkey plugins across Prisma / Drizzle / Kysely adapter shapes.
 - **`setupClerkEnv`** — Clerk hosted-auth mock with JWT verification, `users` / `sessions` / `organizations` APIs mirroring `@clerk/backend`, and multi-tenant org roles (owner / admin / member).
 - **`setupAuth0Env`** — Auth0 enterprise-tenant mock with id_token + access_token issuance, `users` (Management API) + `authenticate` (Authentication API) surfaces, rules pipeline, and actions triggers (post-login / pre-user-registration / post-user-registration / post-change-password).
+- **`setupSupabaseAuthEnv`** — Supabase Auth (GoTrue) core mock — email/password + OAuth (Google / GitHub / Apple) PKCE + magic link + SMS OTP + JWT session (HS256 access_token / opaque refresh_token) mirroring `@supabase/supabase-js`'s `client.auth.*` + `admin.*` API. RLS / MFA / SSO SAML / Web3 wallet auth are covered by the advanced adapter in v1.10-2.
 
 ## Install
 
@@ -26,8 +27,9 @@ pnpm add -D @kiwa-test/auth @kiwa-test/core vitest
 pnpm add -D next-auth        # for setupNextAuthEnv
 pnpm add -D lucia            # for setupLuciaEnv
 pnpm add -D better-auth      # for setupBetterAuthEnv
-pnpm add -D @clerk/backend   # for setupClerkEnv (optional — mock is standalone)
-pnpm add -D auth0            # for setupAuth0Env  (optional — mock is standalone)
+pnpm add -D @clerk/backend           # for setupClerkEnv (optional — mock is standalone)
+pnpm add -D auth0                    # for setupAuth0Env  (optional — mock is standalone)
+pnpm add -D @supabase/supabase-js    # for setupSupabaseAuthEnv (optional — mock is standalone)
 ```
 
 `next-auth`, `lucia`, `better-auth`, `@clerk/backend`, and `auth0` are declared as **optional peer dependencies** — none of the helpers imports from the real library, so the peer is only required if you assert against the real types in your suite.
@@ -395,6 +397,91 @@ The mock signs tokens with HS256 (real Auth0 uses RS256 + JWKS) — the on-the-w
 ## Example: Auth0 PoC
 
 See [`examples/auth-auth0-poc/`](../../examples/auth-auth0-poc) for the end-to-end bare-metal handler PoC: 8 tests cover access_token verification, cross-tenant rejection, rules + actions role injection, and signUp round trips.
+
+## Quick start — Supabase Auth core
+
+```ts
+import { setupSupabaseAuthEnv } from "@kiwa-test/auth";
+
+const env = await setupSupabaseAuthEnv({
+  projectUrl: "https://my.supabase.co",
+  users: [
+    { email: "alice@example.test", password: "secret", emailConfirmed: true },
+  ],
+});
+
+// Password sign-in — returns a full session (access_token + refresh_token).
+const { session } = await env.auth.signInWithPassword({
+  email: "alice@example.test",
+  password: "secret",
+});
+
+// Magic-link OTP flow.
+const { otp } = await env.auth.signInWithOtp({ email: "new@example.test" });
+otp.magicLink;   // "https://my.supabase.co/auth/v1/verify?token=..."
+otp.code;        // "654321" — 6-digit OTP surfaced for direct verification
+await env.auth.verifyOtp({
+  email: "new@example.test",
+  token: otp.code,
+  type: "magiclink",
+});
+
+// OAuth PKCE flow.
+const authUrl = await env.auth.signInWithOAuth({ provider: "github" });
+const { session: ghSession } = await env.auth.exchangeCodeForSession({
+  code: authUrl.code,
+  codeVerifier: authUrl.codeVerifier,
+});
+
+// JWT verification — access_token is HS256-signed with a per-env secret.
+const claims = await env.verifyToken(session.accessToken);
+claims.sub;                // Supabase user id
+claims.role;               // "authenticated"
+claims.amr[0]?.method;     // "password" / "oauth:github" / "otp:magiclink" / "refresh_token"
+
+// Admin (service-role) API — mirrors @supabase/supabase-js's admin surface.
+const created = await env.admin.createUser({
+  email: "admin-created@example.test",
+  password: "x",
+  emailConfirm: true,
+  appMetadata: { role: "internal" },
+});
+
+// Introspection — every OTP delivery + pending OAuth URL is captured so tests
+// never have to mock the email / SMS inbox.
+env.listOtpDeliveries("email").length;   // number of magic links sent
+env.listOAuthPending().length;            // number of authorization URLs in flight
+
+await env.stop();
+```
+
+`setupSupabaseAuthEnv` is standalone — no `@supabase/supabase-js` install needed to drive the mock. Real Supabase clients can be layered on top by pointing them at the exposed access / refresh tokens.
+
+### JWT claim shape
+
+```ts
+// access_token — HS256-signed, verifiable with env.verifyToken.
+{
+  sub: "user-1",
+  aud: "authenticated",
+  role: "authenticated",              // "authenticated" | "anon" | "service_role"
+  email: "alice@example.test",
+  phone: undefined,
+  app_metadata: { provider: "email" },  // writeable only via admin API
+  user_metadata: { firstName: "Alice" },
+  session_id: "session-1",              // links access + refresh tokens
+  iat: 1699999999,
+  exp: 1700003599,                       // default 1h expiration
+  iss: "https://my.supabase.co/auth/v1",
+  amr: [{ method: "password", timestamp: 1699999999 }],
+}
+```
+
+Real Supabase signs tokens with HS256 by default (the project-level `JWT_SECRET`) — the on-the-wire shape is identical. Tokens issued by one env cannot be verified by another (per-env signing secret), matching Supabase's per-project JWT_SECRET separation.
+
+## Example: Supabase Auth core PoC
+
+See [`examples/auth-supabase-core-poc/`](../../examples/auth-supabase-core-poc) for the end-to-end signup flow PoC: 8 tests cover signUp + magic link + verifyOtp, OAuth PKCE callback, session verification middleware, and session refresh + revocation.
 
 ## License
 

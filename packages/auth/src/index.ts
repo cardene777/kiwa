@@ -138,3 +138,23 @@ export {
   verifyAuth0AccessToken,
   verifyAuth0IdToken,
 } from './auth0/jwt.js';
+
+// Supabase Auth core adapter surface (v1.10-1, GH #667).
+export type {
+  SetupSupabaseAuthEnvOptions,
+  SupabaseAccessTokenClaims,
+  SupabaseAuthTestEnv,
+  SupabaseIdentity,
+  SupabaseIdentityProvider,
+  SupabaseOAuthAuthorizationUrl,
+  SupabaseOtpDelivery,
+  SupabaseSession,
+  SupabaseUser,
+} from './supabase/types.js';
+export { setupSupabaseAuthEnv } from './supabase/setup-supabase-auth-env.js';
+export {
+  generateSupabaseSigningSecret,
+  generateSupabaseRefreshToken,
+  signSupabaseAccessToken,
+  verifySupabaseAccessToken,
+} from './supabase/jwt.js';
