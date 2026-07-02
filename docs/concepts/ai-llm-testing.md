@@ -89,7 +89,7 @@ expect(fidelityReport.summary.avgAccuracyScore).toBeGreaterThan(0.80);
 }
 ```
 
-The four numbers feed the 4 AI-LLM axes 1-to-1 — `avgCostDiffUsd` → `cost.perRequestUsd`, `avgLatencyDiffMs` → `latency.p95Ms`, `avgTokenDiffTotal` → `token.totalTokens`, `avgAccuracyScore` → `accuracy.score`. The `buildAiLlmReport` helper wraps the aggregation so a consumer does not have to hand-wire the mapping — pass the `fidelity` result and it produces a `QualityReport` ready for `evaluateReleaseGate`.
+The four numbers give a top-line signal, but the 4 AI-LLM axes on the `QualityReport` are aggregated from the **per-prompt mock-side raw samples** — `mock.costUsd`, `mock.latencyMs`, `mock.usage.promptTokens + completionTokens`, and per-prompt `accuracyScore` — not from the `avg*Diff*` aggregates. That means the cost / latency / token axes describe the mock's absolute distribution across the prompt set (what a v1.13 test written against the mock will actually experience), and the accuracy axis describes the per-prompt distance to real. The `buildAiLlmReport` helper (exported from `packages/ai-llm/src/report.ts`) wraps this aggregation so a consumer does not have to hand-wire the mapping — pass the `fidelity` result and it produces a `QualityReport` ready for `evaluateReleaseGate`.
 
 **Fidelity is not "mock == real"**. It is "mock stays inside a bounded distance from real, per axis, on a defined prompt set". That distance is the release gate's job to enforce.
 
@@ -126,7 +126,8 @@ The mock's role is to give the gate a deterministic baseline — "the real cost 
 - **Provider dispatch** — [`packages/quality-metrics/src/types.ts`](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts) `isAiLlmProvider(provider)` (1-line predicate)
 - **Verdict shape** — `ReleaseGateVerdict.axesEvaluated` is `7` for non-AI providers, `11` for AI-LLM providers; the same 7 axes are enforced in both branches, plus 4 AI-LLM axes in the AI-LLM branch
 - **Metric constructors** — `costFromSamples`, `latencyFromSamples`, `tokenFromSamples`, `accuracyFromSamples` in `packages/quality-metrics/src/collect.ts`
-- **Fidelity harness** — [`packages/ai-llm/src/fidelity.ts`](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts) `runFidelityCheck`, `buildAiLlmReport`
+- **Fidelity harness** — [`packages/ai-llm/src/fidelity.ts`](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts) `runFidelityCheck`
+- **Report adapter** — [`packages/ai-llm/src/report.ts`](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/report.ts) `buildAiLlmReport`, `buildAiLlmReportFromMock`
 - **Report emit** — `emitMarkdown` + `emitJson` in `packages/quality-metrics/src/emit.ts` (both branches render only the axes actually evaluated)
 
 ## When to use the AI-LLM branch
