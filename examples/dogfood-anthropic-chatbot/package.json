@@ -1,0 +1,21 @@
+{
+  "name": "examples-dogfood-anthropic-chatbot",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app 1 (v1.12-2) — an Anthropic Messages API chatbot that exercises streaming, system prompt, tool_use and cost tracking, drivable in both KIWA_MODE=real (calls @anthropic-ai/sdk when ANTHROPIC_API_KEY is set) and KIWA_MODE=mock (@kiwa-test/ai-llm createAnthropicMock) so behavioural fidelity feeds @kiwa-test/quality-metrics 11-axis release gate.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/ai-llm -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/ai-llm": "workspace:*",
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
