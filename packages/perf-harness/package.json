@@ -1,7 +1,7 @@
 {
-  "name": "@kiwa-test/ai-llm",
-  "version": "0.1.0-0",
-  "description": "AI-LLM test harness for kiwa — unified mock across 4 SDKs (Anthropic Messages API + OpenAI Chat Completions + Vercel AI SDK + LangChain) with streaming / tool-use / system prompt support, cost / latency / token / accuracy tracking, and real-vs-mock fidelity harness. Feeds v1.12 dogfood app suite and @kiwa-test/quality-metrics 11-axis release gate.",
+  "name": "@kiwa-test/perf-harness",
+  "version": "0.1.0",
+  "description": "Generic performance harness — p50/p95/p99 measurement + regression detection + baseline persistence + 11-axis release gate integration",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -9,27 +9,16 @@
   },
   "keywords": [
     "kiwa",
-    "ai",
-    "llm",
-    "anthropic",
-    "claude",
-    "openai",
-    "gpt",
-    "vercel-ai-sdk",
-    "langchain",
-    "streaming",
-    "tool-use",
-    "function-calling",
-    "mock",
-    "fidelity",
-    "cost-tracking",
-    "token-counting",
-    "testing"
+    "perf",
+    "harness",
+    "benchmark",
+    "regression",
+    "release-gate"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cardene777/kiwa.git",
-    "directory": "packages/ai-llm"
+    "directory": "packages/perf-harness"
   },
   "homepage": "https://github.com/cardene777/kiwa#readme",
   "bugs": {
@@ -63,11 +52,13 @@
     "node": ">=20"
   },
   "scripts": {
+    "prebuild": "pnpm -F @kiwa-test/core -F @kiwa-test/quality-metrics build",
     "build": "tsup",
+    "pretest": "pnpm -F @kiwa-test/core -F @kiwa-test/quality-metrics build",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "pretest:perf": "pnpm -F @kiwa-test/core -F @kiwa-test/quality-metrics -F @kiwa-test/perf-harness build",
-    "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
+    "pretest:cov": "pnpm -F @kiwa-test/core -F @kiwa-test/quality-metrics build",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**'",
+    "pretypecheck": "pnpm -F @kiwa-test/core -F @kiwa-test/quality-metrics build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -75,7 +66,6 @@
     "@kiwa-test/quality-metrics": "workspace:*"
   },
   "devDependencies": {
-    "@kiwa-test/perf-harness": "workspace:*",
     "@types/node": "^22.10.0",
     "@vitest/coverage-v8": "^2.1.0",
     "tsup": "^8.3.0",

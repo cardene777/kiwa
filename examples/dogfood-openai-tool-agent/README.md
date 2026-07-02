@@ -39,7 +39,7 @@ tests/
 ## Emit a fidelity report
 
 ```bash
-pnpm --filter examples-dogfood-openai-tool-agent test
+pnpm --filter dogfood-openai-tool-agent test
 cat examples/dogfood-openai-tool-agent/quality-report/fidelity-latest.md
 cat examples/dogfood-openai-tool-agent/quality-report/fidelity-latest.json
 ```
