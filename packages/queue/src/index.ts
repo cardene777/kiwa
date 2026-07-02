@@ -88,3 +88,17 @@ export type {
 export { setupRabbitMQEnv } from './rabbitmq/setup-rabbitmq-env.js';
 export { createStubRabbitMQEnv } from './rabbitmq/stub-rabbitmq.js';
 export { createTestcontainersRabbitMQEnv } from './rabbitmq/testcontainers-rabbitmq.js';
+
+// RabbitMQ advanced adapter surface (v1.10-4, GH #670).
+export type {
+  RabbitMQAdvancedQueueSpec,
+  RabbitMQAdvancedTestEnv,
+  RabbitMQClusterNode,
+  RabbitMQDeadLetterSnapshot,
+  RabbitMQDelayedExchangeSpec,
+  RabbitMQDelayedMessageSnapshot,
+  RabbitMQFederationLink,
+  RabbitMQFederationUpstream,
+  SetupRabbitMQAdvancedEnvOptions,
+} from './rabbitmq-advanced/types.js';
+export { setupRabbitMQAdvancedEnv } from './rabbitmq-advanced/setup-rabbitmq-advanced-env.js';
