@@ -29,6 +29,10 @@
 //! - [`mod@tower_http`] — tower-http middleware chain adapter
 //!   (`test_chain(layers, router)` + `Layer<S>` stack drive). Gated behind
 //!   the `tower-http` feature (opt-in), depends on the axum adapter.
+//! - [`mod@contract`] — smart-contract testing adapters. Currently ships
+//!   Foundry (forge / cast / anvil) integration behind the
+//!   `contract-foundry` feature (opt-in), for driving Solidity tests from
+//!   Rust without hand-rolling subprocess plumbing.
 //! - assertion macros — exported at crate root.
 
 #![deny(missing_docs)]
@@ -47,6 +51,9 @@ pub mod actix;
 
 #[cfg(feature = "tower-http")]
 pub mod tower_http;
+
+#[cfg(feature = "contract-foundry")]
+pub mod contract;
 
 // Internal recorder helpers shared by the integration / axum / actix
 // adapters. v1.6-5 (Issue #611) SSOT for the previously-inlined header
