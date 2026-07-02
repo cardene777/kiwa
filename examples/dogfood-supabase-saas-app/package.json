@@ -1,6 +1,6 @@
 {
   "name": "examples-dogfood-supabase-saas-app",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "description": "Dogfood app 1 (v1.11-2) — SaaS onboarding + protected doc list + MFA + SSO SAML + Web3 SIWE, drivable in both KIWA_MODE=real (Supabase Local) and KIWA_MODE=mock (@kiwa-test/auth) so behavioural fidelity feeds @kiwa-test/quality-metrics.",

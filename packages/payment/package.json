@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/payment",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Payment webhook mock harness for kiwa — unified Stripe + Paddle + Lemon Squeezy webhook mocks with signature verify + event dispatch + fixture builder + release-gate integration.",
   "license": "MIT",
   "author": {

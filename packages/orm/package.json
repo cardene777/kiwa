@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/orm",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "ORM query test adapter for kiwa — setup Drizzle, Prisma, or Kysely environments against in-memory SQLite (mock) or testcontainers Postgres/MySQL (live), apply SQL string / SQL string[] / drizzle-kit-generated `{ folder }` migrations, seed fixtures, and assert query results with a consistent setupOrmEnv API",
   "license": "MIT",
   "author": {
@@ -81,17 +81,39 @@
     "vitest": "^2"
   },
   "peerDependenciesMeta": {
-    "@prisma/client": { "optional": true },
-    "@testcontainers/mysql": { "optional": true },
-    "@testcontainers/postgresql": { "optional": true },
-    "better-sqlite3": { "optional": true },
-    "drizzle-orm": { "optional": true },
-    "kysely": { "optional": true },
-    "mysql2": { "optional": true },
-    "pg": { "optional": true },
-    "postgres": { "optional": true },
-    "prisma": { "optional": true },
-    "testcontainers": { "optional": true }
+    "@prisma/client": {
+      "optional": true
+    },
+    "@testcontainers/mysql": {
+      "optional": true
+    },
+    "@testcontainers/postgresql": {
+      "optional": true
+    },
+    "better-sqlite3": {
+      "optional": true
+    },
+    "drizzle-orm": {
+      "optional": true
+    },
+    "kysely": {
+      "optional": true
+    },
+    "mysql2": {
+      "optional": true
+    },
+    "pg": {
+      "optional": true
+    },
+    "postgres": {
+      "optional": true
+    },
+    "prisma": {
+      "optional": true
+    },
+    "testcontainers": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@prisma/client": "^5.22.0",

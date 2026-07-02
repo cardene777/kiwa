@@ -1,0 +1,34 @@
+# @kiwa-test/auth
+
+## 0.3.0
+
+### Minor Changes
+
+- dffb701: `@kiwa-test/auth` v0.1.0 新規 (Issue #637、 v1.8-1)。 NextAuth v5 (Auth.js) 用の test adapter。
+
+  ## What's added
+
+  - `@kiwa-test/auth` package 新規 (`packages/auth/`)、 peer dep `next-auth@>=5.0.0-beta.0 <6` (Auth.js v5 は beta 継続中のため beta constraint、 stable 到達時に `^5` へ引き上げ)。
+  - `setupNextAuthEnv({ providers?, session?, database? })` — sign-in / getSession / signOut を 1 helper に集約。 内部で provider mock + in-memory adapter + session issuance を wire。
+  - Provider mock 3 種 — `createGoogleProviderMock` / `createGithubProviderMock` / `createEmailProviderMock` (Magic Link)、 `buildProviderRegistry(kinds)` で bundle。
+  - `createInMemoryAdapter()` — Auth.js `Adapter` 契約と一致する API (createUser / getUser / getUserByEmail / getUserByAccount / updateUser / deleteUser / linkAccount / unlinkAccount / createSession / getSessionAndUser / updateSession / deleteSession / createVerificationToken / useVerificationToken)、 Prisma (`@auth/prisma-adapter`) / Drizzle (`@auth/drizzle-adapter`) 両対応の drop-in。
+  - Session strategy 両対応 — jwt (stateless、 session token に userId embed) / database (session row 永続、 signOut で invalidate、 期限切れ null 返却)。
+  - 12 type export — `NextAuthTestEnv` / `SetupNextAuthEnvOptions` / `AuthDatabaseAdapter` / `AuthProfile` / `AuthUser` / `AuthAccount` / `AuthSession` / `VerificationToken` / `ProviderKind` / `ProviderMock` / `SessionStrategy` 等。
+
+  ## Coverage
+
+  - `tests/setup-nextauth-env.test.ts` で 24 test all pass、 defaults / jwt strategy / database strategy / provider mocks / adapter contract / errors 6 group cover。
+  - 3 provider (Google / GitHub / Email) 全動作、 stop() で in-memory reset、 expired session の null 返却、 単発 verificationToken の使い切りまで検証。
+
+  ## Companion
+
+  - PoC ... `examples/auth-nextjs-nextauth-poc/` 新規 (Next.js App Router 相当の Route Handler + `@kiwa-test/auth` env、 8 test T-AUTH-001 .. T-AUTH-008 all pass)。
+  - 3 provider × 2 strategy × adapter contract 経路を PoC で E2E carbon-copy。
+
+  ## Out of scope (separate Issues)
+
+  - 実 Next.js runtime 起動 / cookie roundtrip / CSRF token 検証 → 別 Issue 候補 (v1.8 後続)
+  - Credentials provider / OIDC generic provider → 別 Issue 候補
+  - Prisma / Drizzle 実 DB integration test → 別 Issue 候補 (`@kiwa-test/orm` と統合)
+
+  関連: GitHub #637 (本 sub) / 親 #636 v1.8 milestone。

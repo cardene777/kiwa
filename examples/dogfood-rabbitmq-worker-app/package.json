@@ -1,6 +1,6 @@
 {
   "name": "examples-dogfood-rabbitmq-worker-app",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "description": "Dogfood app 2 (v1.11-3) — order-processing worker driven by @kiwa-test/queue (RabbitMQ basic + advanced) in `KIWA_MODE=mock` and by amqplib against a live rabbitmq:3-management broker in `KIWA_MODE=real`; behavioural fidelity feeds @kiwa-test/quality-metrics.",

@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/realtime",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Realtime test harness for kiwa — unified mock across 4 realtime providers (Supabase Realtime + Ably + Pusher + Socket.io/SSE) covering presence / broadcast / postgres_changes / room / reconnect semantics, with real-vs-mock fidelity harness and quality-metrics 11-axis integration.",
   "license": "MIT",
   "author": {

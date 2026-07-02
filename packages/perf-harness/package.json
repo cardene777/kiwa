@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/perf-harness",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Generic performance harness — p50/p95/p99 measurement + regression detection + baseline persistence + 11-axis release gate integration",
   "license": "MIT",
   "author": {
