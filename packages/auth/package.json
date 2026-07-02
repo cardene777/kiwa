@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/auth",
-  "version": "0.2.0-0",
-  "description": "Auth test adapter for kiwa (NextAuth v5 / Auth.js + Lucia v3 + Better Auth + Clerk + Auth0 — session + provider + DB adapter mocks)",
+  "version": "0.3.0-0",
+  "description": "Auth test adapter for kiwa (NextAuth v5 / Auth.js + Lucia v3 + Better Auth + Clerk + Auth0 + Supabase Auth core — session + provider + DB adapter mocks)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -17,6 +17,10 @@
     "better-auth",
     "clerk",
     "auth0",
+    "supabase",
+    "supabase-auth",
+    "gotrue",
+    "pkce",
     "jwt",
     "organizations",
     "multi-tenant",
