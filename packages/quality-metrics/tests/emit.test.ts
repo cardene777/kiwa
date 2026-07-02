@@ -1,0 +1,116 @@
+import { describe, expect, it } from 'vitest';
+import {
+  diffReports,
+  emitJson,
+  emitMarkdown,
+  evaluateReleaseGate,
+  type QualityReport,
+} from '../src/index.js';
+
+function baseReport(overrides?: Partial<QualityReport>): QualityReport {
+  return {
+    provider: '@kiwa-test/example',
+    version: '0.1.0',
+    reportedAt: '2026-07-02T00:00:00Z',
+    coverage: { line: 90, branch: 82, function: 95 },
+    testCount: { behavior: 20, integration: 5, e2e: 2, total: 27 },
+    fidelity: { mockCoveredMethods: 8, realTotalMethods: 10, ratio: 80 },
+    perf: { p50Ms: 5, p95Ms: 50, p99Ms: 80, samples: 100 },
+    mutation: { mutations: 40, killed: 28, survived: 12, killRate: 70 },
+    ...overrides,
+  };
+}
+
+describe('emitMarkdown', () => {
+  it('T-QM-EM-001 renders a 5-axis summary table', () => {
+    const md = emitMarkdown({ report: baseReport() });
+    expect(md).toContain('# Quality Report');
+    expect(md).toContain('coverage — line');
+    expect(md).toContain('coverage — branch');
+    expect(md).toContain('coverage — function');
+    expect(md).toContain('test count — total');
+    expect(md).toContain('fidelity — ratio');
+    expect(md).toContain('perf — p95');
+    expect(md).toContain('mutation — killRate');
+  });
+
+  it('T-QM-EM-002 renders release gate section when verdict is supplied', () => {
+    const report = baseReport();
+    const verdict = evaluateReleaseGate(report);
+    const md = emitMarkdown({ report, verdict });
+    expect(md).toContain('## Release gate');
+    expect(md).toContain('verdict: **PASS**');
+  });
+
+  it('T-QM-EM-003 lists blockers when gate fails', () => {
+    const report = baseReport({
+      coverage: { line: 20, branch: 20, function: 20 },
+    });
+    const verdict = evaluateReleaseGate(report);
+    const md = emitMarkdown({ report, verdict });
+    expect(md).toContain('verdict: **FAIL**');
+    expect(md).toContain('### Blockers');
+    expect(md).toContain('coverage.line');
+  });
+
+  it('T-QM-EM-004 renders diff section when supplied', () => {
+    const prev = baseReport();
+    const cur = baseReport({ version: '0.2.0', coverage: { line: 95, branch: 90, function: 98 } });
+    const diff = diffReports(prev, cur);
+    const md = emitMarkdown({ report: cur, diff });
+    expect(md).toContain('## Trend vs prior version');
+    expect(md).toContain('coverage.line');
+    expect(md).toContain('+5.00');
+  });
+
+  it('T-QM-EM-005 renders behavioralDivergences when present', () => {
+    const report = baseReport();
+    report.fidelity.behavioralDivergences = 4;
+    const md = emitMarkdown({ report });
+    expect(md).toContain('behavioralDivergences');
+    expect(md).toContain('| 4 |');
+  });
+
+  it('T-QM-EM-006 renders notes when present', () => {
+    const md = emitMarkdown({ report: baseReport({ notes: 'first release' }) });
+    expect(md).toContain('## Notes');
+    expect(md).toContain('first release');
+  });
+});
+
+describe('emitJson', () => {
+  it('T-QM-EM-007 emits pretty-printed JSON that round-trips', () => {
+    const report = baseReport();
+    const json = emitJson(report);
+    expect(json).toContain('\n  "provider"');
+    expect(JSON.parse(json)).toEqual(report);
+  });
+});
+
+describe('diffReports', () => {
+  it('T-QM-EM-008 computes delta values across all axes', () => {
+    const prev = baseReport();
+    const cur = baseReport({
+      version: '0.2.0',
+      coverage: { line: 95, branch: 90, function: 98 },
+      testCount: { behavior: 30, integration: 8, e2e: 3, total: 41 },
+      fidelity: { mockCoveredMethods: 9, realTotalMethods: 10, ratio: 90 },
+      perf: { p50Ms: 3, p95Ms: 30, p99Ms: 60, samples: 100 },
+      mutation: { mutations: 50, killed: 45, survived: 5, killRate: 90 },
+    });
+    const diff = diffReports(prev, cur);
+    expect(diff.from).toBe('0.1.0');
+    expect(diff.to).toBe('0.2.0');
+    expect(diff.coverage.line).toBe(5);
+    expect(diff.testCount.total).toBe(14);
+    expect(diff.fidelity.ratio).toBe(10);
+    expect(diff.perf.p95Ms).toBe(-20);
+    expect(diff.mutation.killRate).toBe(20);
+  });
+
+  it('T-QM-EM-009 refuses diffing across different providers', () => {
+    const a = baseReport({ provider: '@kiwa-test/one' });
+    const b = baseReport({ provider: '@kiwa-test/two' });
+    expect(() => diffReports(a, b)).toThrow(/provider mismatch/);
+  });
+});
