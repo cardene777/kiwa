@@ -19,7 +19,7 @@ features:
   - title: 11-axis release gate (v1.12)
     details: 7 common axes (coverage + test count + fidelity + perf p95 + mutation) plus 4 AI-LLM axes (cost + latency + token + accuracy) — the AI-LLM branch activates automatically when the provider prefix matches @kiwa-test/ai-*. Release when the gate says PASS.
   - title: Real-vs-mock dogfood
-    details: Every provider has an example that runs against the real service AND against the kiwa mock. Divergences feed the fidelity axis of the release gate. AI-LLM providers (Anthropic + OpenAI + Vercel AI SDK + LangChain) join in v1.12.
+    details: Every provider has an example that runs against the real service AND against the kiwa mock. Divergences feed the fidelity axis of the release gate. AI-LLM providers (Anthropic + OpenAI + Vercel AI SDK + LangChain) joined in v1.12; realtime providers (Supabase Realtime + Ably + Pusher + Socket.io) join in v1.13.
   - title: Polyglot from day 1
     details: TypeScript, Rust, Go, Python, Solidity — the same test skill chain drives all five languages.
 ---
@@ -44,12 +44,12 @@ Then read [Your first Supabase Auth test in 5 min](/tutorials/01-supabase-auth-f
 
 ## Latest release
 
-**v1.12 — AI-LLM axis expansion** (2026-07-02).
+**v1.13 — Realtime + perf harness** (2026-07-03).
 
-- `@kiwa-test/quality-metrics` v0.2 — release gate expanded from 7 to 11 axes (cost / latency / token / accuracy added for `@kiwa-test/ai-*` providers only)
-- `@kiwa-test/ai-llm` v0.1 — new package with unified mocks for Anthropic Messages API + OpenAI Chat Completions + Vercel AI SDK + LangChain, plus a real-vs-mock fidelity harness
-- 3 dogfood apps under `examples/dogfood-{anthropic-chatbot,openai-tool-agent,vercel-ai-rag}/`
-- New tutorials 06 – 08 + concept doc [`ai-llm-testing.md`](/concepts/ai-llm-testing) + [migration guide](/migrations/v1.11-to-v1.12)
+- `@kiwa-test/realtime` v0.1 — new package with unified mocks for Supabase Realtime + Ably + Pusher + Socket.io / SSE, plus a real-vs-mock fidelity harness scoped to 5 realtime scenarios (chat broadcast, presence join/leave, postgres CDC, room subscribe race, reconnect with pending)
+- `@kiwa-test/perf-harness` v0.1 — new package with a 5-target perf benchmark helper (p50 / p95 / p99 + regression detection) feeding the release gate's `perf.p95Ms` axis
+- 3 dogfood apps under `examples/dogfood-{supabase-realtime-chat,ably-collab-cursor,socketio-notification}/`
+- New tutorials 09 – 11 + concept doc [`realtime-testing.md`](/concepts/realtime-testing) + [migration guide](/migrations/v1.12-to-v1.13)
 
 See the [Roadmap](https://github.com/cardene777/kiwa#roadmap) for full milestone details.
 
@@ -60,4 +60,5 @@ See the [Roadmap](https://github.com/cardene777/kiwa#roadmap) for full milestone
 | v1.9 | ✅ | Multi-provider baseline |
 | v1.10 | ✅ | Supabase Auth + RabbitMQ + Rust contract layer |
 | v1.11 | ✅ | Quality metrics harness + dogfood app pattern + GitHub Pages |
-| v1.12 | ✅ 6/6 | AI-LLM axis expansion — 11-axis release gate + `@kiwa-test/ai-llm` + 3 dogfood apps |
+| v1.12 | ✅ | AI-LLM axis expansion — 11-axis release gate + `@kiwa-test/ai-llm` + 3 dogfood apps |
+| v1.13 | ✅ 6/6 | Realtime + perf harness — `@kiwa-test/realtime` v0.1 (4 provider mocks + fidelity harness) + `@kiwa-test/perf-harness` v0.1 + 3 dogfood apps (chat / cursor / notification) |

@@ -72,12 +72,21 @@ export default defineConfig({
             { text: '08 — Vercel AI SDK + LangChain RAG', link: '/tutorials/08-vercel-ai-rag' },
           ],
         },
+        {
+          text: 'Realtime (v1.13)',
+          items: [
+            { text: '09 — Supabase Realtime chat + presence + typing debounce', link: '/tutorials/09-supabase-realtime-chat' },
+            { text: '10 — Ably shared cursor + 60 fps throttle + history rewind', link: '/tutorials/10-ably-collab-cursor' },
+            { text: '11 — Socket.io notification + reconnect + backpressure', link: '/tutorials/11-socketio-notification' },
+          ],
+        },
       ],
       '/concepts/': [
         {
           text: 'Concepts',
           items: [
             { text: 'AI-LLM testing (non-determinism SSOT)', link: '/concepts/ai-llm-testing' },
+            { text: 'Realtime testing (time-axis mock SSOT)', link: '/concepts/realtime-testing' },
           ],
         },
       ],
@@ -89,6 +98,7 @@ export default defineConfig({
             { text: 'v1.9 → v1.10', link: '/migrations/v1.9-to-v1.10' },
             { text: 'v1.10 → v1.11', link: '/migrations/v1.10-to-v1.11' },
             { text: 'v1.11 → v1.12', link: '/migrations/v1.11-to-v1.12' },
+            { text: 'v1.12 → v1.13', link: '/migrations/v1.12-to-v1.13' },
           ],
         },
       ],
