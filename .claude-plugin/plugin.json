@@ -1,8 +1,8 @@
 {
   "name": "kiwa",
   "displayName": "kiwa",
-  "description": "OSS test framework for dApps + web apps + full-stack frameworks (v1.10)。 Solidity contract / dApp e2e / 汎用 e2e / a11y / visual / api / ui / data / cli + Next.js App Router / Nuxt 3 / SvelteKit / Remix v2 / Astro / SolidStart / Qwik City / Edge runtime / ORM query (Drizzle / Prisma / Kysely × SQLite / Postgres / MySQL、 11 組合せ matrix) / Python pytest / Rust cargo test (unit + hyper mock_server integration + axum + actix-web + tower-http + contract::foundry + contract::alloy) / Go testing.T (unit + httptest integration + Gin + Echo + Fiber) / auth (6 provider: NextAuth v5 + Lucia v3 + Better Auth + Clerk + Auth0 + Supabase Auth (core + advanced with RLS + MFA + SSO SAML + Web3 SIWE)) / job queue (5 provider: BullMQ + Inngest + Cloudflare Queues + AWS SQS + RabbitMQ (basic + advanced with DLX + delayed message + cluster + federation + auto-reconnect)) / cache (3 provider: Redis + Memcached + KeyDB) の 11 観点 × 全 framework を Claude 自動生成 or 手書きの test として一気通貫で書ける。 30 skill chain (kiwa-design → kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-rust / kiwa-go / kiwa-api / kiwa-ui / kiwa-data / kiwa-cli-test / kiwa-e2e / kiwa-a11y / kiwa-visual / kiwa-nextjs / kiwa-nuxt / kiwa-sveltekit / kiwa-remix / kiwa-astro / kiwa-solidstart / kiwa-qwikcity / kiwa-edge / kiwa-orm / kiwa-auth / kiwa-queue / kiwa-cache → kiwa-observe → kiwa-review、 auth / queue / cache は `--provider` flag で provider 別生成、 統合 orchestrator は kiwa-test --target) を同梱。 runtime fixture は @kiwa-test/* npm v1.0+ として 23 packages 全公開済 (auth v0.3 + queue v0.3 に更新)、 Python は kiwa-test-py v1.0.0、 Rust は kiwa-test-rs v0.4.2 (contract-foundry + contract-alloy feature 追加)、 Go は kiwa-test-go v0.1。 Node.js / Bun 1.3+ / Deno 2.x の 3 runtime + Cloudflare Workers / Vercel Edge runtime 対応。 v1.10 では 3 軸並行拡張として SaaS teams (Supabase Auth 2 sub) + self-host teams (RabbitMQ 2 sub) + dApp Rust teams (Foundry-rs + alloy.rs 2 sub) の 6 sub 全 land (親 Issue #666、 sub #667-#672)。",
-  "version": "1.10.0",
+  "description": "OSS test framework for dApps + web apps + full-stack frameworks (v1.11)。 Solidity contract / dApp e2e / 汎用 e2e / a11y / visual / api / ui / data / cli + Next.js App Router / Nuxt 3 / SvelteKit / Remix v2 / Astro / SolidStart / Qwik City / Edge runtime / ORM query (Drizzle / Prisma / Kysely × SQLite / Postgres / MySQL、 11 組合せ matrix) / Python pytest / Rust cargo test (unit + hyper mock_server integration + axum + actix-web + tower-http + contract::foundry + contract::alloy) / Go testing.T (unit + httptest integration + Gin + Echo + Fiber) / auth (6 provider: NextAuth v5 + Lucia v3 + Better Auth + Clerk + Auth0 + Supabase Auth (core + advanced with RLS + MFA + SSO SAML + Web3 SIWE)) / job queue (5 provider: BullMQ + Inngest + Cloudflare Queues + AWS SQS + RabbitMQ (basic + advanced with DLX + delayed message + cluster + federation + auto-reconnect)) / cache (3 provider: Redis + Memcached + KeyDB) + quality gate (@kiwa-test/quality-metrics 5 軸 harness + release gate SSOT + dogfood 3 app + docs 3 pillars + GitHub Pages) の 11 観点 × 全 framework を Claude 自動生成 or 手書きの test として一気通貫で書ける。 30 skill chain + 2 docs skill (kiwa-design → kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-rust / kiwa-go / kiwa-api / kiwa-ui / kiwa-data / kiwa-cli-test / kiwa-e2e / kiwa-a11y / kiwa-visual / kiwa-nextjs / kiwa-nuxt / kiwa-sveltekit / kiwa-remix / kiwa-astro / kiwa-solidstart / kiwa-qwikcity / kiwa-edge / kiwa-orm / kiwa-auth / kiwa-queue / kiwa-cache → kiwa-observe → kiwa-review + docs-generate + docs-publish、 auth / queue / cache は `--provider` flag で provider 別生成、 統合 orchestrator は kiwa-test --target) を同梱。 runtime fixture は @kiwa-test/* npm v1.0+ として 24 packages 全公開済 (quality-metrics v0.1 追加)、 Python は kiwa-test-py v1.0.0、 Rust は kiwa-test-rs v0.4.2、 Go は kiwa-test-go v0.1。 Node.js / Bun 1.3+ / Deno 2.x の 3 runtime + Cloudflare Workers / Vercel Edge runtime 対応。 v1.11 では quality gate 補強に思想シフト、 5 軸統一 harness + dogfood 3 app + docs site + GitHub Pages で release 品質を数値で判断可能に (親 Issue #680、 sub #681-#686)。",
+  "version": "1.11.0",
   "author": {
     "name": "cardene777",
     "email": "cardene777@gmail.com"
@@ -74,6 +74,16 @@
     "alloy",
     "alloy-rs",
     "contract-test",
+    "quality-metrics",
+    "release-gate",
+    "fidelity",
+    "mutation-testing",
+    "dogfood",
+    "vitepress",
+    "typedoc",
+    "cargo-doc",
+    "forge-doc",
+    "github-pages",
     "kiwa"
   ],
   "skills": "./.claude/skills"
