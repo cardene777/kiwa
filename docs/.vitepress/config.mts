@@ -80,6 +80,15 @@ export default defineConfig({
             { text: '11 — Socket.io notification + reconnect + backpressure', link: '/tutorials/11-socketio-notification' },
           ],
         },
+        {
+          text: '横軸拡張 (v1.14)',
+          items: [
+            { text: '12 — Payment webhook mock (Stripe / Paddle / Lemon Squeezy)', link: '/tutorials/12-payment' },
+            { text: '13 — Search mock (Meilisearch / Algolia / Typesense)', link: '/tutorials/13-search' },
+            { text: '14 — Telemetry mock (OpenTelemetry / Datadog / Sentry)', link: '/tutorials/14-observability' },
+            { text: '15 — kiwa-test-go v0.5 Iris + Chi', link: '/tutorials/15-go-iris-chi' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -87,6 +96,9 @@ export default defineConfig({
           items: [
             { text: 'AI-LLM testing (non-determinism SSOT)', link: '/concepts/ai-llm-testing' },
             { text: 'Realtime testing (time-axis mock SSOT)', link: '/concepts/realtime-testing' },
+            { text: 'Payment testing (webhook signature SSOT)', link: '/concepts/payment-testing' },
+            { text: 'Search testing (ranking + typo tolerance SSOT)', link: '/concepts/search-testing' },
+            { text: 'Telemetry testing (span + metric + log aggregation SSOT)', link: '/concepts/telemetry-testing' },
           ],
         },
       ],
@@ -99,6 +111,7 @@ export default defineConfig({
             { text: 'v1.10 → v1.11', link: '/migrations/v1.10-to-v1.11' },
             { text: 'v1.11 → v1.12', link: '/migrations/v1.11-to-v1.12' },
             { text: 'v1.12 → v1.13', link: '/migrations/v1.12-to-v1.13' },
+            { text: 'v1.13 → v1.14', link: '/migrations/v1.13-to-v1.14' },
           ],
         },
       ],
