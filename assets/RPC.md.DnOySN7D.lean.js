@@ -1,0 +1,1 @@
+import{_ as i,o as a,c as e,a2 as t}from"./chunks/framework.CyZTVJbV.js";const c=JSON.parse('{"title":"RPC reference","description":"","frontmatter":{},"headers":[],"relativePath":"RPC.md","filePath":"RPC.md"}'),n={name:"RPC.md"};function h(d,s,l,p,r,o){return a(),e("div",null,[...s[0]||(s[0]=[t("",45)])])}const E=i(n,[["render",h]]);export{c as __pageData,E as default};
