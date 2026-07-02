@@ -28,3 +28,18 @@ export {
   type ThresholdCheckResult,
   type IstanbulCoverageSummary,
 } from './coverage.js';
+export {
+  TelemetryCollector,
+  createOtelMock,
+  createDatadogMock,
+  createSentryMock,
+  type TelemetryProvider,
+  type SpanRecord,
+  type MetricRecord,
+  type LogRecord,
+  type ExceptionRecord,
+  type TransactionRecord,
+  type OtelMock,
+  type DatadogMock,
+  type SentryMock,
+} from './telemetry.js';
