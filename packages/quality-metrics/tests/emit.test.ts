@@ -114,3 +114,92 @@ describe('diffReports', () => {
     expect(() => diffReports(a, b)).toThrow(/provider mismatch/);
   });
 });
+
+function aiLlmReport(overrides?: Partial<QualityReport>): QualityReport {
+  return {
+    ...baseReport({ provider: '@kiwa-test/ai-llm' }),
+    cost: { perRequestUsd: 0.05, totalUsd: 5.0, requests: 100 },
+    latency: { p50Ms: 500, p95Ms: 1500, p99Ms: 2500, samples: 100 },
+    token: { promptTokens: 800, completionTokens: 400, totalTokens: 1200, requests: 100 },
+    accuracy: { score: 0.92, samples: 50, method: 'cosine' },
+    ...overrides,
+  };
+}
+
+describe('emitMarkdown — AI-LLM provider', () => {
+  it('T-QM-EM-010 renders 11-axis label and cost / latency / token / accuracy rows', () => {
+    const md = emitMarkdown({ report: aiLlmReport() });
+    expect(md).toContain('11-axis summary');
+    expect(md).toContain('cost — perRequestUsd');
+    expect(md).toContain('$0.0500');
+    expect(md).toContain('latency — p95');
+    expect(md).toContain('token — total');
+    expect(md).toContain('accuracy — score');
+    expect(md).toContain('cosine');
+  });
+
+  it('T-QM-EM-011 renders release gate section with 11 axes for AI-LLM', () => {
+    const report = aiLlmReport();
+    const verdict = evaluateReleaseGate(report);
+    const md = emitMarkdown({ report, verdict });
+    expect(md).toContain('verdict: **PASS**');
+    expect(md).toContain('axes evaluated: 11');
+  });
+
+  it('T-QM-EM-012 renders blocker rows for AI-LLM failures', () => {
+    const report = aiLlmReport({
+      accuracy: { score: 0.3, samples: 50, method: 'cosine' },
+    });
+    const verdict = evaluateReleaseGate(report);
+    const md = emitMarkdown({ report, verdict });
+    expect(md).toContain('accuracy.score');
+    expect(md).toContain('verdict: **FAIL**');
+  });
+
+  it('T-QM-EM-013 renders diff section with AI-LLM delta rows', () => {
+    const prev = aiLlmReport();
+    const cur = aiLlmReport({
+      version: '0.2.0',
+      cost: { perRequestUsd: 0.03, totalUsd: 3.0, requests: 100 },
+      latency: { p50Ms: 300, p95Ms: 1000, p99Ms: 2000, samples: 100 },
+      token: { promptTokens: 500, completionTokens: 300, totalTokens: 800, requests: 100 },
+      accuracy: { score: 0.95, samples: 50, method: 'cosine' },
+    });
+    const diff = diffReports(prev, cur);
+    const md = emitMarkdown({ report: cur, diff });
+    expect(md).toContain('cost.perRequestUsd');
+    expect(md).toContain('latency.p95Ms');
+    expect(md).toContain('token.totalTokens');
+    expect(md).toContain('accuracy.score');
+    // cost decreased by 0.02 → -0.02
+    expect(md).toContain('-0.02');
+  });
+});
+
+describe('diffReports — AI-LLM 4 axes', () => {
+  it('T-QM-EM-014 emits cost / latency / token / accuracy diffs when both reports have them', () => {
+    const prev = aiLlmReport();
+    const cur = aiLlmReport({
+      version: '0.2.0',
+      cost: { perRequestUsd: 0.08, totalUsd: 8.0, requests: 100 },
+      latency: { p50Ms: 600, p95Ms: 1600, p99Ms: 2700, samples: 100 },
+      token: { promptTokens: 900, completionTokens: 500, totalTokens: 1400, requests: 100 },
+      accuracy: { score: 0.95, samples: 50, method: 'cosine' },
+    });
+    const diff = diffReports(prev, cur);
+    expect(diff.cost?.perRequestUsd).toBeCloseTo(0.03);
+    expect(diff.latency?.p95Ms).toBe(100);
+    expect(diff.token?.totalTokens).toBe(200);
+    expect(diff.accuracy?.score).toBeCloseTo(0.03);
+  });
+
+  it('T-QM-EM-015 omits AI-LLM diff when either report is missing the axis', () => {
+    const prev = baseReport({ provider: '@kiwa-test/ai-llm' });
+    const cur = aiLlmReport();
+    const diff = diffReports(prev, cur);
+    expect(diff.cost).toBeUndefined();
+    expect(diff.latency).toBeUndefined();
+    expect(diff.token).toBeUndefined();
+    expect(diff.accuracy).toBeUndefined();
+  });
+});

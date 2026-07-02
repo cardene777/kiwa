@@ -1,8 +1,10 @@
-# kiwa release gate — 5 軸 SSOT (v1.11+)
+# kiwa release gate — 11 軸 SSOT (v1.12+)
 
-kiwa provider が「release 可」 と判定される 5 軸の閾値 SSOT。 `@kiwa-test/quality-metrics` package の `DEFAULT_RELEASE_GATE_THRESHOLDS` と 1:1 で対応する。 provider 個別に上書き可能だが、 その場合は overrides 理由を該当 provider の PR body に明記する。
+kiwa provider が「release 可」 と判定される 11 軸の閾値 SSOT。 `@kiwa-test/quality-metrics` package の `DEFAULT_RELEASE_GATE_THRESHOLDS` と 1:1 で対応する。 provider 個別に上書き可能だが、 その場合は overrides 理由を該当 provider の PR body に明記する。
 
-## SSOT 表
+v1.11 で確立した共通 7 軸 (Issue #681) に、 v1.12 milestone (Issue #695) で AI-LLM 4 軸 (cost / latency / token / accuracy) を追加、 合計 11 軸に拡張した。 AI-LLM 4 軸は provider prefix `@kiwa-test/ai-*` の場合のみ強制 (それ以外の provider は 7 軸のまま、 breaking change なし)。
+
+## SSOT 表 — 共通 7 軸 (全 provider)
 
 | 軸 | 閾値 | 比較 | 根拠 |
 |---|---|---|---|
@@ -14,9 +16,20 @@ kiwa provider が「release 可」 と判定される 5 軸の閾値 SSOT。 `@k
 | mutation — killRate | 60% | ≥ | mutation testing の「6 割は殺せる」 test suite の bar |
 | test count — behavior | 10 | ≥ | 最低 10 個の behavior test で API 網羅 |
 
-7 軸全て clear で「release 可」、 1 軸でも不足なら release blocker として PR に明示する。
+## SSOT 表 — AI-LLM 4 軸 (`@kiwa-test/ai-*` provider のみ強制)
+
+| 軸 | 閾値 | 比較 | 根拠 |
+|---|---|---|---|
+| cost — perRequestUsd | $0.10 | ≤ | Anthropic Claude Haiku / OpenAI gpt-4o-mini 実勢価格帯の bar (bulk 呼出時のコスト暴騰検出) |
+| latency — p95 ms | 3000ms | ≤ | streaming LLM の user-facing 「体感許容 3 秒」 bar |
+| token — totalTokens | 4000 | ≤ | 4k context model 前提の context bloat 検出 |
+| accuracy — score | 0.80 | ≥ | embedding cosine similarity 0.80 = 意味的に近いと判定される bar |
+
+非 AI-LLM provider は 7 軸全て clear で「release 可」、 AI-LLM provider は 11 軸全て clear で「release 可」。 1 軸でも不足なら release blocker として PR に明示する。
 
 ## 使い方
+
+### 共通 7 軸 (非 AI-LLM provider)
 
 ```ts
 import {
@@ -30,7 +43,6 @@ import {
   testCountFromCategories,
 } from '@kiwa-test/quality-metrics';
 
-// 5 軸を collect
 const report = assembleReport({
   provider: '@kiwa-test/auth',
   version: '0.3.0',
@@ -41,29 +53,66 @@ const report = assembleReport({
   mutation: mutationFromCounts({ mutations: 200, killed: 130 }),
 });
 
-// release gate 判定
 const verdict = evaluateReleaseGate(report);
 if (!verdict.passed) {
   console.error('blockers:', verdict.blockers);
   process.exit(1);
 }
-
-// markdown report 出力
 console.log(emitMarkdown({ report, verdict }));
 ```
+
+### AI-LLM 11 軸 (`@kiwa-test/ai-*` provider)
+
+```ts
+import {
+  accuracyFromSamples,
+  assembleReport,
+  costFromSamples,
+  evaluateReleaseGate,
+  latencyFromSamples,
+  tokenFromSamples,
+} from '@kiwa-test/quality-metrics';
+
+const report = assembleReport({
+  provider: '@kiwa-test/ai-llm',
+  version: '0.1.0',
+  coverage: covMetric,
+  testCount: testMetric,
+  fidelity: fidelityMetric,
+  perf: perfMetric,
+  mutation: mutationMetric,
+  cost: costFromSamples(costSamplesUsd),
+  latency: latencyFromSamples(endToEndLatencyMs),
+  token: tokenFromSamples({ promptTokens, completionTokens }),
+  accuracy: accuracyFromSamples({ samples: cosineSims, method: 'cosine' }),
+});
+
+const verdict = evaluateReleaseGate(report);
+// verdict.axesEvaluated === 11
+```
+
+`@kiwa-test/ai-llm` 使用時は `buildAiLlmReport` / `buildAiLlmReportFromMock` で `runFidelityCheck` の結果から直接 `QualityReport` を組み立てられる (詳細 = `packages/ai-llm/README.md`)。
+
+## AI-LLM 分岐の判定
+
+`isAiLlmProvider(provider: string): boolean` が SSOT。 `@kiwa-test/quality-metrics` から export、 判定は `provider.startsWith('@kiwa-test/ai-')` の 1 行。 downstream consumer (dogfood app 等) は本 helper を import して同一判定を使う。
 
 ## overrides の運用
 
 provider 特性で default 閾値を満たせない場合、 overrides を `evaluateReleaseGate(report, { ... })` で渡す。 overrides は provider の PR body で「なぜ default から外れるのか」 を必ず明記する。
 
+例 ... 「高精度モデル使用のため `costPerRequestUsd: 0.5` に緩和、 accuracy 0.95 まで押上げる代償」。
+
 ## release gate 未達での handling
 
 - 3 軸以上 fail ... **release 停止**、 該当 PR は draft に戻す
 - 1-2 軸 fail ... **release 継続可**、 ただし次 minor version で改善する task を issue 起票する
-- 全 pass ... **release 可**、 quality-reports/{package}-{version}.md に emit して PR に添付
+- 全 pass ... **release 可**、 `docs/quality-reports/{package}-{version}.md` に emit して PR に添付
 
 ## 参考
 
 - v1.10 milestone 完遂 (親 #666、 2026-07-02)
-- v1.11 milestone 親 Issue #680、 sub #681 (本 SSOT の源)
-- `@kiwa-test/quality-metrics` v0.1 (packages/quality-metrics)
+- v1.11 milestone 親 Issue #680、 sub #681 (7 軸 SSOT の源、 2026-07-02)
+- v1.12 milestone 親 Issue #694、 sub #695 (AI-LLM 4 軸拡張、 本 SSOT 更新の源)
+- `@kiwa-test/quality-metrics` v0.2 (`packages/quality-metrics`)
+- `@kiwa-test/ai-llm` v0.1 (`packages/ai-llm`)

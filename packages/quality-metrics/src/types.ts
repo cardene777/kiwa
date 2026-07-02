@@ -1,23 +1,33 @@
 /**
- * Quality metrics harness — unified 5-axis score for every kiwa provider.
+ * Quality metrics harness — unified 11-axis score for every kiwa provider.
  *
  * v1.10 まで kiwa は「provider 数を増やす」 直交軸で拡張してきたが、
  * v1.11 (Issue #680 / #681) からは「release 品質を数値で判断可能にする」
- * 縦軸に思想シフトする。 本 harness は全 provider adapter が同一 shape の
- * quality score を出す統一 API を提供する。
+ * 縦軸に思想シフトした。 v1.12 (Issue #694 / #695) では AI-LLM 領域に
+ * 特有の non-determinism を release gate で扱えるよう 4 軸を追加し、
+ * 合計 11 軸に拡張する。
  *
- * ## 5 測定軸
+ * ## 11 測定軸
  *
+ * 共通 7 軸 (全 provider) ...
  * - {@link CoverageMetric} — line / branch / function coverage %
  * - {@link TestCountMetric} — behavior test / integration test / e2e test count
  * - {@link FidelityMetric} — real provider の API surface vs mock cover 率
  * - {@link PerfMetric} — 100 回実行の p95 ms、 setup / teardown 分離
  * - {@link MutationMetric} — mutation testing kill rate (stryker / cargo-mutants)
  *
+ * AI-LLM 4 軸 (provider prefix `@kiwa-test/ai-` のみ強制) ...
+ * - {@link CostMetric} — 1 request 当たりの US$ 実測 (LLM API 課金想定)
+ * - {@link LatencyMetric} — p50 / p95 / p99 ms (non-deterministic 前提の end-to-end)
+ * - {@link TokenMetric} — prompt / completion / total token 数
+ * - {@link AccuracyMetric} — golden 出力に対する 0.0-1.0 similarity score
+ *
  * ## release gate 数値化
  *
- * {@link ReleaseGateThresholds} で 5 軸の閾値 SSOT を定義、
+ * {@link ReleaseGateThresholds} で 11 軸の閾値 SSOT を定義、
  * {@link evaluateReleaseGate} で `passed` / `blockers` を判定する。
+ * AI-LLM provider (`@kiwa-test/ai-*`) のみ 4 軸を追加検査、 それ以外の
+ * provider は既存 7 軸のまま (breaking change なし)。
  */
 
 /** Line / branch / function coverage percentages, all 0–100. */
@@ -100,12 +110,82 @@ export interface MutationMetric {
 }
 
 /**
- * Full quality report for a single provider (or subject under test). All 5
- * axes are captured together so downstream consumers can diff two reports
- * from the same provider across versions.
+ * Cost metric for AI-LLM providers — 1 request 当たりの US$ 実測。
+ *
+ * `perRequestUsd` は「1 request 当たり単価の観測値」、 `totalUsd` は
+ * ベンチ全体の合算。 release gate は `perRequestUsd` の平均で判定
+ * (bulk 呼出時のコスト暴騰を検出する用途)。
+ */
+export interface CostMetric {
+  /** 1 request 当たりの平均コスト (US$)。 */
+  perRequestUsd: number;
+  /** ベンチ全体の合算コスト (US$)。 */
+  totalUsd: number;
+  /** コスト計測に含まれた request 数。 */
+  requests: number;
+}
+
+/**
+ * Latency metric for AI-LLM providers — non-deterministic 前提の end-to-end
+ * response time (ms)。 {@link PerfMetric} と shape は同じだが、
+ * PerfMetric は unit-scope adapter setup + call の bar (100ms 上限)、
+ * LatencyMetric は user-facing LLM response 全体の bar (3000ms 上限) と
+ * 役割が異なる。
+ */
+export interface LatencyMetric {
+  /** 50th percentile end-to-end latency (ms)。 */
+  p50Ms: number;
+  /** 95th percentile end-to-end latency (ms)。 */
+  p95Ms: number;
+  /** 99th percentile end-to-end latency (ms)。 */
+  p99Ms: number;
+  /** Sample count that fed the percentiles. */
+  samples: number;
+}
+
+/**
+ * Token metric for AI-LLM providers — 1 request 当たりの token 使用量。
+ *
+ * `promptTokens` は input side、 `completionTokens` は output side、
+ * `totalTokens` は `promptTokens + completionTokens`。 release gate は
+ * `totalTokens` の平均で判定 (context bloat 検出)。
+ */
+export interface TokenMetric {
+  /** 1 request 当たりの平均 prompt (input) token 数。 */
+  promptTokens: number;
+  /** 1 request 当たりの平均 completion (output) token 数。 */
+  completionTokens: number;
+  /** 1 request 当たりの平均総 token 数 (prompt + completion)。 */
+  totalTokens: number;
+  /** token 計測に含まれた request 数。 */
+  requests: number;
+}
+
+/**
+ * Accuracy metric for AI-LLM providers — golden 出力に対する 0.0-1.0
+ * similarity score。 embedding cosine similarity, BLEU, exact match など
+ * 計測 method は provider adapter が選択、 shape のみ SSOT。
+ */
+export interface AccuracyMetric {
+  /**
+   * 0.0-1.0 の similarity score (1.0 = golden と完全一致)。
+   * embedding cosine / BLEU / exact-match のいずれかで算出、
+   * `method` field で計測方法を明示する。
+   */
+  score: number;
+  /** score の計測に使った sample 数。 */
+  samples: number;
+  /** score 算出 method (`cosine` / `bleu` / `exact-match` / free-form)。 */
+  method: string;
+}
+
+/**
+ * Full quality report for a single provider (or subject under test). 共通 5 軸 +
+ * AI-LLM 4 軸 (optional) を同一 shape で保持、 downstream consumer が provider
+ * prefix で軸を選別する。
  */
 export interface QualityReport {
-  /** Provider / package identifier — e.g. `@kiwa-test/auth`. */
+  /** Provider / package identifier — e.g. `@kiwa-test/auth` or `@kiwa-test/ai-llm`. */
   provider: string;
   /** Version string as declared in package.json. */
   version: string;
@@ -116,16 +196,19 @@ export interface QualityReport {
   fidelity: FidelityMetric;
   perf: PerfMetric;
   mutation: MutationMetric;
+  /** AI-LLM 4 軸 — provider が `@kiwa-test/ai-*` のときのみ必須。 */
+  cost?: CostMetric | undefined;
+  latency?: LatencyMetric | undefined;
+  token?: TokenMetric | undefined;
+  accuracy?: AccuracyMetric | undefined;
   /** Optional free-form notes surfaced in the emitted markdown report. */
   notes?: string | undefined;
 }
 
 /**
- * Release gate thresholds — the 5-axis SSOT that governs whether a provider
- * can graduate to a release. All fields are floors (must be at or above).
- *
- * These are conservative defaults chosen for the v1.11 milestone; a provider
- * can tighten by supplying overrides to {@link evaluateReleaseGate}.
+ * Release gate thresholds — 11 軸 SSOT。 共通 7 軸 (全 provider) + AI-LLM 4 軸
+ * (`@kiwa-test/ai-*` provider のみ強制) の閾値。 provider は overrides で
+ * 個別調整可能。
  */
 export interface ReleaseGateThresholds {
   /** Minimum line coverage percentage (default 85). */
@@ -142,6 +225,14 @@ export interface ReleaseGateThresholds {
   mutationKillRate: number;
   /** Minimum behavior test count (default 10). */
   behaviorTests: number;
+  /** AI-LLM 上限 — 1 request 当たり平均コスト (US$、 default 0.10)。 */
+  costPerRequestUsd: number;
+  /** AI-LLM 上限 — end-to-end p95 latency (ms、 default 3000)。 */
+  latencyP95Ms: number;
+  /** AI-LLM 上限 — 1 request 当たり平均総 token 数 (default 4000)。 */
+  totalTokens: number;
+  /** AI-LLM 下限 — golden vs 実出力 similarity score (default 0.80)。 */
+  accuracyScore: number;
 }
 
 /** Reason a report failed the release gate. Each blocker names the axis. */
@@ -160,15 +251,16 @@ export interface ReleaseGateBlocker {
 export interface ReleaseGateVerdict {
   passed: boolean;
   blockers: ReleaseGateBlocker[];
-  /** Number of axes evaluated. */
+  /** Number of axes evaluated (7 for non-AI-LLM, 11 for AI-LLM). */
   axesEvaluated: number;
 }
 
 /**
  * Trend delta between two reports for the same provider — used by
  * {@link diffReports}. Values are (`current - previous`) so positive numbers
- * mean improvement for `coverage` / `test count` / `fidelity` / `mutation`,
- * and negative numbers mean improvement for `perf`.
+ * mean improvement for `coverage` / `test count` / `fidelity` / `mutation` /
+ * `accuracy`, and negative numbers mean improvement for `perf` / `latency` /
+ * `cost` / `token`.
  */
 export interface QualityReportDiff {
   provider: string;
@@ -179,4 +271,17 @@ export interface QualityReportDiff {
   fidelity: Pick<FidelityMetric, 'ratio'>;
   perf: PerfMetric;
   mutation: Pick<MutationMetric, 'killRate'>;
+  /** AI-LLM 4 軸 diff (両 report とも AI-LLM のときのみ設定)。 */
+  cost?: Pick<CostMetric, 'perRequestUsd'> | undefined;
+  latency?: Pick<LatencyMetric, 'p95Ms'> | undefined;
+  token?: Pick<TokenMetric, 'totalTokens'> | undefined;
+  accuracy?: Pick<AccuracyMetric, 'score'> | undefined;
+}
+
+/**
+ * `@kiwa-test/ai-*` provider か判定する helper。 release gate と emit が
+ * AI-LLM 4 軸の有無を分岐する SSOT。
+ */
+export function isAiLlmProvider(provider: string): boolean {
+  return provider.startsWith('@kiwa-test/ai-');
 }
