@@ -335,6 +335,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/realtime
     devDependencies:
+      '@kiwa-test/perf-harness':
+        specifier: workspace:*
+        version: link:../../packages/perf-harness
       '@types/node':
         specifier: ^22.10.0
         version: 22.19.19
@@ -429,6 +432,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/realtime
     devDependencies:
+      '@kiwa-test/perf-harness':
+        specifier: workspace:*
+        version: link:../../packages/perf-harness
       '@types/node':
         specifier: ^22.10.0
         version: 22.19.19
@@ -451,6 +457,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/realtime
     devDependencies:
+      '@kiwa-test/perf-harness':
+        specifier: workspace:*
+        version: link:../../packages/perf-harness
       '@types/node':
         specifier: ^22.10.0
         version: 22.19.19
@@ -2860,6 +2869,9 @@ importers:
         specifier: workspace:*
         version: link:../quality-metrics
     devDependencies:
+      '@kiwa-test/perf-harness':
+        specifier: workspace:*
+        version: link:../perf-harness
       '@types/node':
         specifier: ^22.10.0
         version: 22.19.19
