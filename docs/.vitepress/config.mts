@@ -38,6 +38,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Tutorials', link: '/tutorials/' },
+      { text: 'Concepts', link: '/concepts/ai-llm-testing' },
       { text: 'Migrations', link: '/migrations/' },
       { text: 'Quality', link: '/quality/release-gate' },
       { text: 'API Reference', link: '/api/' },
@@ -63,6 +64,22 @@ export default defineConfig({
             { text: '05 — Multi-provider auth', link: '/tutorials/05-multi-provider-auth' },
           ],
         },
+        {
+          text: 'AI-LLM (v1.12)',
+          items: [
+            { text: '06 — Anthropic chatbot streaming + tool_use', link: '/tutorials/06-anthropic-chatbot-streaming' },
+            { text: '07 — OpenAI tool-use agent', link: '/tutorials/07-openai-tool-agent' },
+            { text: '08 — Vercel AI SDK + LangChain RAG', link: '/tutorials/08-vercel-ai-rag' },
+          ],
+        },
+      ],
+      '/concepts/': [
+        {
+          text: 'Concepts',
+          items: [
+            { text: 'AI-LLM testing (non-determinism SSOT)', link: '/concepts/ai-llm-testing' },
+          ],
+        },
       ],
       '/migrations/': [
         {
@@ -71,6 +88,7 @@ export default defineConfig({
             { text: 'Overview', link: '/migrations/' },
             { text: 'v1.9 → v1.10', link: '/migrations/v1.9-to-v1.10' },
             { text: 'v1.10 → v1.11', link: '/migrations/v1.10-to-v1.11' },
+            { text: 'v1.11 → v1.12', link: '/migrations/v1.11-to-v1.12' },
           ],
         },
       ],
