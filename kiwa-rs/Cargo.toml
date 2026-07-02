@@ -1,6 +1,6 @@
 [package]
 name = "kiwa-test-rs"
-version = "0.4.1"
+version = "0.4.2"
 edition = "2021"
 rust-version = "1.75"
 description = "kiwa Rust cargo test adapter — deterministic fixture + assert macro + Drop-based cleanup + hyper mock server + axum Router test app + actix-web App test app + tower-http middleware chain helper. Part of the kiwa polyglot test framework family (https://github.com/cardene777/kiwa)."
@@ -71,6 +71,16 @@ tower-http = [
 # on PATH at runtime; when absent, helpers return `skipped` outputs so test
 # suites can skip gracefully in CI without provisioning the toolchain.
 contract-foundry = []
+
+# alloy.rs (Solidity ABI 型生成 + signer + provider) integration — pure Rust
+# helper for parsing Foundry ABI JSON into a `SolAbi` shape, computing 4-byte
+# function selectors via a built-in keccak-256 implementation, and
+# enumerating the four signer / three provider paths kiwa users test
+# against. Does NOT pull the alloy crate family (30+ MiB transitive tree);
+# users who want the `sol!`-generated Rust structs pull the alloy crates
+# themselves and consume this module's `SolAbi` output as input to their
+# alloy setup.
+contract-alloy = []
 
 # proc-macro support (#[kiwa_test] attribute) — enabled via separate kiwa-test-rs-macro crate planned in v0.3
 macro = []

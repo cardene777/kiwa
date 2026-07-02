@@ -13,4 +13,5 @@ members = [
   "examples/rust-actix-web-poc",
   "examples/rust-tower-http-poc",
   "examples/contract-rust-foundry-poc",
+  "examples/contract-rust-alloy-poc",
 ]
