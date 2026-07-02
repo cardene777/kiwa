@@ -320,6 +320,28 @@ importers:
         specifier: ^2.21.0
         version: 2.52.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.4.3)
 
+  examples/dogfood-rabbitmq-worker-app:
+    dependencies:
+      '@kiwa-test/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@kiwa-test/quality-metrics':
+        specifier: workspace:*
+        version: link:../../packages/quality-metrics
+      '@kiwa-test/queue':
+        specifier: workspace:*
+        version: link:../../packages/queue
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.19
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0)
+
   examples/dogfood-supabase-saas-app:
     dependencies:
       '@kiwa-test/auth':
