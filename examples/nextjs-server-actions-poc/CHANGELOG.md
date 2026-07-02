@@ -1,5 +1,12 @@
 # examples-nextjs-server-actions-poc
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [9f92567]
+  - @kiwa-test/nextjs@1.1.0
+
 ## 0.0.4
 
 ### Patch Changes

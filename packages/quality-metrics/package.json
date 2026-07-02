@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/quality-metrics",
-  "version": "0.2.0-0",
+  "version": "0.2.0",
   "description": "Quality metrics harness for kiwa — unified 11-axis score (coverage / test count / fidelity / perf p95 / mutation kill + AI-LLM cost / latency / token / accuracy) with release gate SSOT and per-provider report emit. Feeds provider fidelity from v1.11 dogfood app suite and v1.12 AI-LLM harness.",
   "license": "MIT",
   "author": {

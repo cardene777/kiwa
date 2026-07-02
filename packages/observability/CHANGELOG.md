@@ -1,5 +1,11 @@
 # @kiwa-test/observability
 
+## 1.2.0
+
+### Minor Changes
+
+- v1.1: telemetry provider mocks added (OpenTelemetry + Datadog + Sentry). Unified `TelemetryCollector` shape (spans / metrics / logs / exceptions / transactions) so assertions read the same regardless of provider. Sentry fingerprint dedupe + breadcrumb lifecycle match the real SDK. Existing v1.0 API (flaky / spec-coverage / dashboard / coverage) unchanged.
+
 ## 1.0.1
 
 ### Patch Changes

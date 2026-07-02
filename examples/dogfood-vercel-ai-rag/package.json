@@ -1,6 +1,6 @@
 {
   "name": "dogfood-vercel-ai-rag",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "description": "Dogfood app 3 (v1.12-4) — a Vercel AI SDK + LangChain retriever + embedding + RAG pipeline that exercises document ingestion, chunking, embedding, vector-store search, retrieval and streaming LLM generation, drivable in both KIWA_MODE=real (Vercel AI SDK generateText / streamText against real provider + LangChain OpenAIEmbeddings + Pinecone-shaped vector store when RAG_VECTOR_STORE_URL is set) and KIWA_MODE=mock (@kiwa-test/ai-llm createVercelAiMock + createLangchainMock + in-memory vector store) so retrieval / embedding / final-answer fidelity feeds @kiwa-test/quality-metrics 11-axis release gate.",
