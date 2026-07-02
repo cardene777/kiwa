@@ -14,4 +14,5 @@ members = [
   "examples/rust-tower-http-poc",
   "examples/contract-rust-foundry-poc",
   "examples/contract-rust-alloy-poc",
+  "examples/dogfood-foundry-dapp",
 ]
