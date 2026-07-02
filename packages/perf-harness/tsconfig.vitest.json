@@ -5,6 +5,5 @@
     "outDir": ".vitest-dist",
     "noEmit": false
   },
-  "include": ["src/**/*", "tests/**/*"],
-  "exclude": ["tests/perf/**/*"]
+  "include": ["src/**/*", "tests/**/*"]
 }

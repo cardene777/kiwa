@@ -45,7 +45,7 @@ Wiring the real env re-runs the same computation against `text-embedding-3-small
 ## Reproduction
 
 ```bash
-pnpm --filter examples-dogfood-vercel-ai-rag test
+pnpm --filter dogfood-vercel-ai-rag test
 cat examples/dogfood-vercel-ai-rag/quality-report/fidelity-latest.md
 ```
 
@@ -58,7 +58,7 @@ export OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 export RAG_VECTOR_STORE_URL=https://<index>.pinecone.io
 export RAG_VECTOR_STORE_API_KEY=<pinecone key>
 export RAG_VECTOR_STORE_INDEX=kiwa-dogfood
-pnpm --filter examples-dogfood-vercel-ai-rag test
+pnpm --filter dogfood-vercel-ai-rag test
 ```
 
 ## Ops under measurement

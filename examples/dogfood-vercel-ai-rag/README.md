@@ -48,7 +48,7 @@ tests/
 ## Emit a fidelity report
 
 ```bash
-pnpm --filter examples-dogfood-vercel-ai-rag test
+pnpm --filter dogfood-vercel-ai-rag test
 cat examples/dogfood-vercel-ai-rag/quality-report/fidelity-latest.md
 cat examples/dogfood-vercel-ai-rag/quality-report/fidelity-latest.json
 ```

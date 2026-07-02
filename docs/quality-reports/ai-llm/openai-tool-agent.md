@@ -33,7 +33,7 @@ Accuracy is the mean Jaccard similarity between the real and mock final texts. I
 ## Reproduction
 
 ```bash
-pnpm --filter examples-dogfood-openai-tool-agent test
+pnpm --filter dogfood-openai-tool-agent test
 cat examples/dogfood-openai-tool-agent/quality-report/fidelity-latest.md
 ```
 
@@ -42,7 +42,7 @@ Live real-mode.
 ```bash
 export OPENAI_API_KEY=sk-...
 export OPENAI_MODEL=gpt-4o-mini
-pnpm --filter examples-dogfood-openai-tool-agent test
+pnpm --filter dogfood-openai-tool-agent test
 ```
 
 ## Ops under measurement

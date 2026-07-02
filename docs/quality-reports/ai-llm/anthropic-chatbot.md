@@ -33,7 +33,7 @@ Accuracy is the mean Jaccard similarity between the real and mock text replies. 
 ## Reproduction
 
 ```bash
-pnpm --filter examples-dogfood-anthropic-chatbot test
+pnpm --filter dogfood-anthropic-chatbot test
 cat examples/dogfood-anthropic-chatbot/quality-report/fidelity-latest.md
 ```
 
@@ -42,7 +42,7 @@ Live real-mode.
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 export ANTHROPIC_MODEL=claude-3-5-sonnet-latest
-pnpm --filter examples-dogfood-anthropic-chatbot test
+pnpm --filter dogfood-anthropic-chatbot test
 ```
 
 ## Ops under measurement
