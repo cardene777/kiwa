@@ -67,3 +67,24 @@ export type {
 export { setupSQSEnv } from './sqs/setup-sqs-env.js';
 export { createStubSQSEnv } from './sqs/stub-sqs.js';
 export { createLocalstackSQSEnv } from './sqs/localstack-sqs.js';
+
+// RabbitMQ adapter surface (v1.10-3, GH #669).
+export type {
+  RabbitMQBindingSpec,
+  RabbitMQConsumeOptions,
+  RabbitMQConsumer,
+  RabbitMQDelivery,
+  RabbitMQExchangeSpec,
+  RabbitMQExchangeType,
+  RabbitMQMessageSnapshot,
+  RabbitMQMessageState,
+  RabbitMQMode,
+  RabbitMQPublishOptions,
+  RabbitMQQueueSpec,
+  RabbitMQTestEnv,
+  RabbitMQTestcontainersOptions,
+  SetupRabbitMQEnvOptions,
+} from './rabbitmq/types.js';
+export { setupRabbitMQEnv } from './rabbitmq/setup-rabbitmq-env.js';
+export { createStubRabbitMQEnv } from './rabbitmq/stub-rabbitmq.js';
+export { createTestcontainersRabbitMQEnv } from './rabbitmq/testcontainers-rabbitmq.js';
