@@ -3,6 +3,40 @@
 このファイルは [Keep a Changelog](https://keepachangelog.com/) スタイルで、
 `kiwa-test-go` module の破壊的変更 / 追加機能 / 修正を release 単位で追う。
 
+## v0.5.0 — v1.14 milestone (unreleased)
+
+`kiwa-test-go` v0.5.0 は Iris (`kataras/iris/v12`) + go-chi (`go-chi/chi/v5`)
+対応を軸にした polyglot 深化 release。 `kiwa-test-go/iris` +
+`kiwa-test-go/chi` subpackage を追加、 v1.5+ の gin / echo / fiber と同一
+`TestServer` contract を http.Handler 経由 (chi) と iris.Application.ServeHTTP
+経由 (iris) で成立させる。
+
+### 追加機能
+
+- Iris adapter (`kiwa-test-go/iris`) 追加 — `kiwa_iris.NewTestServer(t, app)` +
+  in-process `app.ServeHTTP(w, req)` driver、 iris の routing engine を
+  `app.Build()` で一度だけ compile して再利用する lazy build 実装
+- Chi adapter (`kiwa-test-go/chi`) 追加 — `kiwa_chi.NewTestServer(t, r)` +
+  in-process `r.ServeHTTP(w, req)` driver、 chi.Router を http.Handler 経由で
+  直接 dispatch (net/http 標準 handler で最軽量な subpackage)
+
+### Contract 継続
+
+Iris / Chi ともに v1.5+ の gin / echo / fiber と同 API contract。
+
+- `srv.Request(method, path)` chain builder (`Header` / `Body` / `JSON` / `Send`)
+- `Response` helper (`StatusCode` / `Headers` / `HeadersAll` / `HeadersAllValues` /
+  `Cookies` / `Body` / `BodyString` / `JSON`)
+- `srv.RecordedRequests()` / `srv.RequestCount()` recorder
+- `srv.Stop()` idempotent + post-Stop `Send()` → `t.Fatalf`
+- `t.Cleanup(srv.Stop)` 自動 register
+- Body 大量再利用時の defensive copy (v1.6-2 hazard 3 対応済)
+
+### 依存追加
+
+- `github.com/kataras/iris/v12` v12.2.11
+- `github.com/go-chi/chi/v5` v5.3.0
+
 ## v0.4.0 — v1.7 milestone (unreleased)
 
 `kiwa-test-go` v0.4.0 は Fiber (fasthttp) 対応を軸にした polyglot 継続深化 release。
