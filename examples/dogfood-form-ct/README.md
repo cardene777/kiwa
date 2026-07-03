@@ -7,7 +7,7 @@ Playwright Component Testing dogfood for kiwa v1.16-3 (Issue #765).
 ## What runs
 
 ```
-pnpm --filter dogfood-form-ct test        # 49 behavior tests + fidelity emit
+pnpm --filter dogfood-form-ct test        # 54 behavior tests + fidelity emit
 pnpm --filter dogfood-form-ct test:perf   # 3-layer perf gate (serial + concurrent + memory)
 ```
 
@@ -38,6 +38,7 @@ tests/
   validation.test.ts          # 11 tests — validation-error axis
   submit.test.ts              # 11 tests — submit-success axis
   a11y.test.ts                # 9 tests — a11y-violation axis
+  interact.test.ts            # 5 tests — input handler wiring (fireEvent)
   e2e-mock-mode.test.ts       # 5 tests — full 4-flow trace coherence
   fidelity-report.test.ts     # 4 tests — fidelity harness contract
   emit-fidelity-report.test.ts # 1 test — writes quality-report/{json,md}

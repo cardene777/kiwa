@@ -22,7 +22,7 @@ axes       : 7 (component branch — no AI-LLM cost / latency / token / accuracy
 | fidelity.ratio | 100.00% (4/4) | 70% | pass |
 | perf.p95Ms | ~0.60 ms | 100 ms | pass |
 | mutation.killRate | 73.33% (22/30) | 60% | pass |
-| testCount.behavior | 45 | 10 | pass |
+| testCount.behavior | 50 | 10 | pass |
 
 Fidelity ratio counts mock-covered ops vs the real Playwright CT surface (4 total — `mount` / `interactValidation` / `interactSubmit` / `checkA11y`). Divergences count all 4 because the real adapter is skipped when `PW_CT_ENDPOINT` is absent — that is by design, wiring the env promotes the report to the real baseline.
 

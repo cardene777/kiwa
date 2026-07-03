@@ -49,7 +49,7 @@ describe('dogfood-form-ct — emit fidelity report to quality-report/', () => {
         branches: { pct: 88 },
         functions: { pct: 95 },
       },
-      testCount: { behavior: 45, integration: 5, e2e: 5 },
+      testCount: { behavior: 50, integration: 5, e2e: 5 },
       mutation: { mutations: 30, killed: 22 },
       surfaceCoverage: { mockCoveredMethods: 4, realTotalMethods: 4 },
     });
