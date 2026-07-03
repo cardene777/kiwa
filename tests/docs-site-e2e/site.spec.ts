@@ -61,6 +61,18 @@ const V1_13_PAGES = [
   { path: '/migrations/v1.12-to-v1.13', title: 'v1.12 → v1.13' },
 ];
 
+// v1.16 pages — new tutorials + concept doc + migration guide added under the
+// Component test 縦軸 milestone (Issue #767). Mirrors the v1.12 / v1.13 anchor
+// phrase pattern. Each phrase is a substring the rendered VitePress <main>
+// will always include.
+const V1_16_PAGES = [
+  { path: '/tutorials/19-storybook-design-system', title: 'Storybook 8 design system' },
+  { path: '/tutorials/20-playwright-ct', title: 'Playwright CT for 5 form patterns' },
+  { path: '/tutorials/21-visual-regression', title: 'Visual regression baseline / diff / accept' },
+  { path: '/concepts/component-testing', title: 'story registration, CT mount, visual diff' },
+  { path: '/migrations/v1.15-to-v1.16', title: 'v1.15 → v1.16' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -100,6 +112,20 @@ test.describe('docs site — v1.12 pages render', () => {
 test.describe('docs site — v1.13 pages render', () => {
   for (const p of V1_13_PAGES) {
     test(`v1.13 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.16 pages render', () => {
+  for (const p of V1_16_PAGES) {
+    test(`v1.16 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;

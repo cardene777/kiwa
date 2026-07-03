@@ -97,6 +97,14 @@ export default defineConfig({
             { text: '18 — Agent orchestration (LangGraph + Assistants v2)', link: '/tutorials/18-agent-orchestration' },
           ],
         },
+        {
+          text: 'Component test (v1.16)',
+          items: [
+            { text: '19 — Storybook 8 design system', link: '/tutorials/19-storybook-design-system' },
+            { text: '20 — Playwright CT for 5 form patterns', link: '/tutorials/20-playwright-ct' },
+            { text: '21 — Visual regression baseline / diff / accept', link: '/tutorials/21-visual-regression' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -108,6 +116,7 @@ export default defineConfig({
             { text: 'Payment testing (webhook signature SSOT)', link: '/concepts/payment-testing' },
             { text: 'Search testing (ranking + typo tolerance SSOT)', link: '/concepts/search-testing' },
             { text: 'Telemetry testing (span + metric + log aggregation SSOT)', link: '/concepts/telemetry-testing' },
+            { text: 'Component testing (story + CT + visual diff SSOT)', link: '/concepts/component-testing' },
           ],
         },
       ],
@@ -122,6 +131,7 @@ export default defineConfig({
             { text: 'v1.12 → v1.13', link: '/migrations/v1.12-to-v1.13' },
             { text: 'v1.13 → v1.14', link: '/migrations/v1.13-to-v1.14' },
             { text: 'v1.14 → v1.15', link: '/migrations/v1.14-to-v1.15' },
+            { text: 'v1.15 → v1.16', link: '/migrations/v1.15-to-v1.16' },
           ],
         },
       ],
