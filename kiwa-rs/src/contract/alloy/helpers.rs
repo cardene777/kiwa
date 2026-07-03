@@ -196,6 +196,14 @@ fn encode_field_value(f: &Eip712Field) -> Result<[u8; 32], String> {
         }
         t if t.starts_with("uint") || t.starts_with("int") => {
             let bytes = hex_decode(&f.value)?;
+            if bytes.len() > 32 {
+                return Err(format!(
+                    "Eip712Field '{}' value '{}' exceeds 32 bytes (got {})",
+                    f.name,
+                    f.value,
+                    bytes.len()
+                ));
+            }
             let mut w = [0u8; 32];
             let start = 32 - bytes.len();
             w[start..].copy_from_slice(&bytes);
@@ -204,6 +212,13 @@ fn encode_field_value(f: &Eip712Field) -> Result<[u8; 32], String> {
         t if t.starts_with("bytes") => {
             // Fixed-size bytesN — left-aligned.
             let bytes = hex_decode(&f.value)?;
+            if bytes.len() > 32 {
+                return Err(format!(
+                    "Eip712Field '{}' fixed bytesN value exceeds 32 bytes (got {})",
+                    f.name,
+                    bytes.len()
+                ));
+            }
             let mut w = [0u8; 32];
             w[..bytes.len()].copy_from_slice(&bytes);
             Ok(w)
@@ -444,32 +459,39 @@ pub struct Permit2Encoded {
 
 /// Encode a Permit2 `permitWitnessTransferFrom` call and return the
 /// corresponding EIP-712 witness digest.
+///
+/// Signature encoded — matches Uniswap Permit2 v1 canonical form:
+/// `permitWitnessTransferFrom(((address,uint256),uint256,uint256),(address,uint256),address,bytes32,string,bytes)`
+/// where the first tuple nests `TokenPermissions = (address token, uint256 amount)`
+/// inside `PermitTransferFrom = (TokenPermissions permitted, uint256 nonce, uint256 deadline)`.
 pub fn encode_permit2_witness_transfer(
     input: &Permit2PermitTransfer,
     domain: &Eip712Domain,
 ) -> Result<Permit2Encoded, String> {
     validate_domain(domain)?;
+    // Canonical Uniswap Permit2 selector for permitWitnessTransferFrom.
+    // First tuple is nested: PermitTransferFrom(TokenPermissions permitted, uint256 nonce, uint256 deadline)
+    // where TokenPermissions = (address token, uint256 amount).
     let selector = keccak_selector_hex(
-        "permitWitnessTransferFrom((address,uint256,uint256,uint256),(address,uint256),address,bytes32,string,bytes)",
+        "permitWitnessTransferFrom(((address,uint256),uint256,uint256),(address,uint256),address,bytes32,string,bytes)",
     );
     let mut buf = Vec::new();
     buf.extend_from_slice(&hex_decode(&selector)?);
-    // Struct-of-structs are ABI-encoded in-place — no offsets needed for the
-    // static portion. Layout:
-    //   TokenPermissions.token   (address)
-    //   TokenPermissions.amount  (uint256)
-    //   TokenPermissions.nonce   (uint256)
-    //   TokenPermissions.deadline(uint256)
-    //   TransferDetails.to       (address)
-    //   TransferDetails.amount   (uint256, mirrors permitted amount)
-    //   owner                    (address)
-    //   witness                  (bytes32)
-    //   witnessTypeString offset (uint256)  → dynamic tail
-    //   signature offset         (uint256)  → dynamic tail
+    // Static-portion ABI-encoded layout — all sub-tuples are static because
+    // they contain no dynamic types, so they inline in place:
+    //   PermitTransferFrom.permitted.token       (address)
+    //   PermitTransferFrom.permitted.amount      (uint256)
+    //   PermitTransferFrom.nonce                 (uint256)
+    //   PermitTransferFrom.deadline              (uint256)
+    //   SignatureTransferDetails.to              (address)
+    //   SignatureTransferDetails.requestedAmount (uint256, mirrors permitted amount)
+    //   owner                                    (address)
+    //   witness                                  (bytes32)
+    //   witnessTypeString offset                 (uint256)  → dynamic tail
+    //   signature offset                         (uint256)  → dynamic tail
     // Dynamic tail carries witnessTypeString + signature length-prefixed.
-    // We omit the signature bytes (caller appends after signing), but reserve
-    // a zero-length placeholder so the layout stays valid; callers replace
-    // the trailing zero with a 65-byte signature when signing completes.
+    // We reserve a zero-length signature placeholder; callers replace it
+    // with the 65-byte signature after signing.
     buf.extend_from_slice(&address_to_word(&input.token)?);
     buf.extend_from_slice(&hex_to_word(&input.amount_hex)?);
     buf.extend_from_slice(&hex_to_word(&input.nonce_hex)?);

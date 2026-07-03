@@ -311,6 +311,82 @@ fn t_permit2_006_witness_type_string_embedded_in_calldata() {
     assert!(out.data_hex.contains(&ws_hex));
 }
 
+#[test]
+fn t_permit2_007_selector_matches_canonical_permit2_signature() {
+    // Canonical Uniswap Permit2 permitWitnessTransferFrom uses nested
+    // TokenPermissions inside PermitTransferFrom. The selector is derived
+    // from `permitWitnessTransferFrom(((address,uint256),uint256,uint256),
+    // (address,uint256),address,bytes32,string,bytes)` — the first inner
+    // tuple must be `(address,uint256)`, not a flat 4-field one.
+    let out =
+        encode_permit2_witness_transfer(&permit2_input(), &permit2_domain()).unwrap();
+    // Selector must NOT match the flat 4-field variant.
+    let flat_selector = kiwa::contract::alloy::keccak_selector_hex(
+        "permitWitnessTransferFrom((address,uint256,uint256,uint256),(address,uint256),address,bytes32,string,bytes)",
+    );
+    assert_ne!(
+        out.selector_hex, flat_selector,
+        "selector must not match the flat (non-nested) variant"
+    );
+    // Selector MUST match the nested variant.
+    let nested_selector = kiwa::contract::alloy::keccak_selector_hex(
+        "permitWitnessTransferFrom(((address,uint256),uint256,uint256),(address,uint256),address,bytes32,string,bytes)",
+    );
+    assert_eq!(out.selector_hex, nested_selector);
+}
+
+#[test]
+fn t_eip712_007_rejects_uint_value_exceeding_32_bytes() {
+    // Regression guard: encode_field_value used to panic on hex payloads
+    // whose byte length exceeded 32. The current path returns Err instead.
+    let domain = Eip712Domain {
+        name: "X".to_string(),
+        version: "1".to_string(),
+        chain_id: 1,
+        verifying_contract: "0x1111111111111111111111111111111111111111".to_string(),
+    };
+    let mut overlarge = String::from("0x");
+    for _ in 0..33 {
+        overlarge.push_str("aa");
+    }
+    let err = build_eip712_typed_data(
+        domain,
+        "T",
+        vec![Eip712Field {
+            name: "n".to_string(),
+            sol_type: "uint256".to_string(),
+            value: overlarge,
+        }],
+    )
+    .unwrap_err();
+    assert!(err.contains("exceeds 32 bytes"));
+}
+
+#[test]
+fn t_eip712_008_rejects_bytesN_value_exceeding_32_bytes() {
+    let domain = Eip712Domain {
+        name: "X".to_string(),
+        version: "1".to_string(),
+        chain_id: 1,
+        verifying_contract: "0x1111111111111111111111111111111111111111".to_string(),
+    };
+    let mut overlarge = String::from("0x");
+    for _ in 0..40 {
+        overlarge.push_str("11");
+    }
+    let err = build_eip712_typed_data(
+        domain,
+        "T",
+        vec![Eip712Field {
+            name: "h".to_string(),
+            sol_type: "bytes32".to_string(),
+            value: overlarge,
+        }],
+    )
+    .unwrap_err();
+    assert!(err.contains("exceeds 32 bytes"));
+}
+
 // -----------------------------------------------------------------------------
 // Cross-check between EIP-712 helper and Permit2 encoder.
 // -----------------------------------------------------------------------------
