@@ -1,0 +1,13 @@
+[package]
+name = "dogfood-reth-node-test"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "Dogfood app (v1.18-2) — Reth (Rust Ethereum Execution client) NodeBuilder dev chain driven from Rust through kiwa-test-rs contract::reth + contract::alloy + contract::foundry. Runs three scenarios (ERC-20 transfer / 3-block reorg / event history) as a mock/real fidelity harness. Real mode spawns a `reth node --dev` subprocess when `reth` is on PATH; mock mode never touches the network and stays deterministic on every host. Feeds behavioural fidelity into @kiwa-test/quality-metrics."
+
+[lib]
+name = "dogfood_reth_node_test"
+path = "src/lib.rs"
+
+[dependencies]
+kiwa-test-rs = { path = "../../kiwa-rs", version = "0.5", features = ["contract-reth", "contract-alloy", "contract-foundry"] }
