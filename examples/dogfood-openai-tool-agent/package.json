@@ -1,6 +1,6 @@
 {
   "name": "dogfood-openai-tool-agent",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app 2 (v1.12-3) — an OpenAI Chat Completions tool-use agent that exercises function calling, multi-tool orchestration (weather / calculator / search), and parallel tool calls, drivable in both KIWA_MODE=real (calls the real OpenAI chat/completions endpoint when OPENAI_API_KEY is set) and KIWA_MODE=mock (@kiwa-test/ai-llm createOpenAIMock) so behavioural fidelity feeds @kiwa-test/quality-metrics 11-axis release gate.",

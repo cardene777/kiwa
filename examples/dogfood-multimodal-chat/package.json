@@ -1,6 +1,6 @@
 {
   "name": "dogfood-multimodal-chat",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app (v1.15-4) — a multimodal Anthropic vision chat that exercises image upload (base64 + url), streaming response, cost tracking and multi-image comparison, drivable in both KIWA_MODE=real (calls Anthropic Messages API with image content blocks when ANTHROPIC_API_KEY is set) and KIWA_MODE=mock (@kiwa-test/ai-llm createAnthropicMock with multimodal parts) so behavioural fidelity feeds @kiwa-test/quality-metrics 11-axis release gate.",
