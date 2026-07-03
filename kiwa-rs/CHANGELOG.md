@@ -3,6 +3,55 @@
 このファイルは [Keep a Changelog](https://keepachangelog.com/) スタイルで、
 `kiwa-test-rs` crate の破壊的変更 / 追加機能 / 修正を release 単位で追う。
 
+## v0.5.0 — v1.18 milestone (Blockchain 深化)
+
+`kiwa-test-rs` v0.5.0 は v1.18 Blockchain 深化 release。
+Reth (Rust EL client) integration + Foundry invariant / fuzz runner +
+Alloy EIP-712 / Multicall3 / Permit2 helper の 3 領域を追加、
+v0.4 の contract layer をさらに縦深化する ([#793](https://github.com/cardene777/kiwa/issues/793))。
+
+### 破壊的変更
+
+- なし。 v0.4 との source compatibility は維持
+  (`kiwa::contract::foundry` / `kiwa::contract::alloy` の既存公開 API
+  変更なし、 `foundry.rs` / `alloy.rs` は同名 module 配下の submodule
+  ディレクトリに移動しただけで公開 path は不変)。
+
+### 追加機能
+
+- `kiwa::contract::reth` module (feature `contract-reth`、 default OFF) —
+  `reth node --dev` を subprocess spawn する `RethNode` handle
+  (`Drop`-based tear-down)、 `RethBinary::detect` で reth CLI の PATH 存在確認、
+  `reth_reorg(endpoint, blocks)` で `debug_setHead` JSON-RPC 経由の
+  N-block reorg simulation、 `fidelity_matrix()` で anvil ↔ reth の
+  7 methods 期待突合 case 集 (`eth_blockNumber` / `eth_chainId` /
+  `eth_getBalance` / `eth_gasPrice` / `eth_call` / `net_version` /
+  `web3_clientVersion`) を提供。 pure Rust、 alloy crate family 依存なし、
+  reth binary 不在時は `skipped` shape で graceful degradation。
+- `kiwa::contract::foundry::invariant` submodule (v0.5 で `foundry.rs`
+  → `foundry/mod.rs` + `foundry/invariant.rs` に再構成) — `invariant_run`
+  で `forge test --match-contract Invariant*` を wrap、 `InvariantOptions`
+  で 10 000 runs default + deterministic seed 経路 (`FOUNDRY_INVARIANT_SEED`
+  + `FOUNDRY_FUZZ_SEED` env plumbing)、 `parse_invariant_shrink` で
+  Foundry の `[FAIL. Reason: ...]` header + shrunk sequence を parse、
+  `forge_script` で `forge script <path> --rpc-url <rpc> [--broadcast]`
+  wrapper (default dry-run) を追加。 v0.4 の `FoundryEnv` 契約はそのまま。
+- `kiwa::contract::alloy::helpers` submodule (v0.5 で `alloy.rs`
+  → `alloy/mod.rs` + `alloy/helpers.rs` に再構成) — `build_eip712_typed_data`
+  で EIP-712 v4 の `domainSeparator + typeHash + hashStruct` digest 計算 +
+  `eth_signTypedData_v4` 互換 JSON envelope 生成、 `encode_multicall3`
+  で Multicall3 `aggregate3((address,bool,bytes)[])` calldata batch encoder、
+  `encode_permit2_witness_transfer` で Uniswap Permit2 の
+  `permitWitnessTransferFrom` calldata + EIP-712 witness digest 生成。
+  v0.4 の `SolAbi` + `keccak256` を再利用、 pure Rust。
+
+### 検証
+
+- 39 新規 test 追加 (contract_reth.rs 11 + contract_foundry_invariant.rs 10
+  + contract_alloy_helpers.rs 18)、 全 pass。 CI (feature: contract-reth /
+  contract-foundry / contract-alloy) で `skipped` shape 経路も網羅、
+  reth / forge binary 不在環境でも full green。
+
 ## v0.4.0 — v1.7 milestone (unreleased)
 
 `kiwa-test-rs` v0.4.0 は v1.7 polyglot 継続深化 release。 tower-http middleware

@@ -26,6 +26,13 @@
 
 use std::collections::BTreeMap;
 
+pub mod helpers;
+pub use helpers::{
+    build_eip712_typed_data, encode_multicall3, encode_permit2_witness_transfer,
+    Eip712Domain, Eip712Field, Eip712TypedData, Multicall3Call, Multicall3Encoded,
+    Permit2Encoded, Permit2PermitTransfer,
+};
+
 /// A parsed Solidity ABI item — mirrors the shape Foundry emits in
 /// `out/<Contract>.json` under the `abi` array. Only the fields kiwa users
 /// need for `sol!` code-gen and selector computation are surfaced.
