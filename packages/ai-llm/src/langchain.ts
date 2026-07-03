@@ -1,4 +1,5 @@
 import { MockEngine } from './engine.js';
+import type { MessagePart } from './multimodal.js';
 import type {
   AiLlmMock,
   ChatCompletion,
@@ -20,9 +21,26 @@ import type {
  * 本 mock は real LangChain SDK は import せず、 shape のみ互換を提供。
  * dogfood app 側で `BaseChatModel` として dependency inject 可能。
  */
+/**
+ * LangChain content block (v0.2、 real @langchain/core 0.3+ 準拠)。 image_url
+ * は OpenAI vision と同じ shape、 media は Google/Anthropic multimodal 用。
+ */
+export type LangchainContentBlock =
+  | { type: 'text'; text: string }
+  | {
+      type: 'image_url';
+      image_url: string | { url: string; detail?: 'low' | 'high' | 'auto' };
+    }
+  | {
+      type: 'media';
+      /** base64 data。 */
+      data: string;
+      mimeType: string;
+    };
+
 export interface LangchainInputMessage {
   role: 'system' | 'human' | 'ai' | 'tool';
-  content: string;
+  content: string | LangchainContentBlock[];
   name?: string;
   tool_call_id?: string;
 }
@@ -112,12 +130,26 @@ function toChatInput(messages: LangchainInputMessage[]): ChatInput {
   const out: ChatMessage[] = [];
   let systemPrompt: string | undefined;
   for (const m of messages) {
-    if (m.role === 'system') {
-      systemPrompt = m.content;
+    const role = m.role === 'human' ? 'user' : m.role === 'ai' ? 'assistant' : m.role === 'tool' ? 'tool' : 'system';
+    if (typeof m.content === 'string') {
+      if (m.role === 'system') {
+        systemPrompt = m.content;
+        continue;
+      }
+      const msg: ChatMessage = { role, content: m.content };
+      if (m.tool_call_id !== undefined) msg.toolCallId = m.tool_call_id;
+      if (m.name !== undefined) msg.name = m.name;
+      out.push(msg);
       continue;
     }
-    const role = m.role === 'human' ? 'user' : m.role === 'ai' ? 'assistant' : 'tool';
-    const msg: ChatMessage = { role, content: m.content };
+    // multimodal
+    const converted = convertLangchainBlocksToMessageParts(m.content);
+    if (m.role === 'system') {
+      systemPrompt = converted.text;
+      continue;
+    }
+    const msg: ChatMessage = { role, content: converted.text };
+    if (converted.parts.length > 0) msg.parts = converted.parts;
     if (m.tool_call_id !== undefined) msg.toolCallId = m.tool_call_id;
     if (m.name !== undefined) msg.name = m.name;
     out.push(msg);
@@ -125,6 +157,48 @@ function toChatInput(messages: LangchainInputMessage[]): ChatInput {
   const chatInput: ChatInput = { messages: out };
   if (systemPrompt !== undefined) chatInput.systemPrompt = systemPrompt;
   return chatInput;
+}
+
+function convertLangchainBlocksToMessageParts(
+  content: LangchainContentBlock[],
+): { parts: MessagePart[]; text: string } {
+  const parts: MessagePart[] = [];
+  let text = '';
+  for (const c of content) {
+    if (c.type === 'text') {
+      parts.push({ type: 'text', text: c.text });
+      text += c.text;
+    } else if (c.type === 'image_url') {
+      const url = typeof c.image_url === 'string' ? c.image_url : c.image_url.url;
+      const detail = typeof c.image_url === 'string' ? undefined : c.image_url.detail;
+      const dataMatch = url.match(/^data:([^;]+);base64,(.*)$/);
+      const source = dataMatch
+        ? { kind: 'base64' as const, mediaType: dataMatch[1]!, data: dataMatch[2]! }
+        : /^https?:\/\//.test(url)
+          ? { kind: 'url' as const, url }
+          : { kind: 'base64' as const, mediaType: 'image/jpeg', data: url };
+      const imagePart: MessagePart = { type: 'image', source };
+      if (detail !== undefined) {
+        (imagePart as { detail?: 'low' | 'high' | 'auto' }).detail = detail;
+      }
+      parts.push(imagePart);
+    } else if (c.type === 'media') {
+      const isAudio = c.mimeType.startsWith('audio/');
+      if (isAudio) {
+        parts.push({
+          type: 'audio',
+          source: { kind: 'base64', mediaType: c.mimeType, data: c.data },
+          purpose: 'chat',
+        });
+      } else if (c.mimeType.startsWith('image/')) {
+        parts.push({
+          type: 'image',
+          source: { kind: 'base64', mediaType: c.mimeType, data: c.data },
+        });
+      }
+    }
+  }
+  return { parts, text };
 }
 
 function toAIMessage(completion: ChatCompletion, model: string): LangchainAIMessage {

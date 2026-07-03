@@ -1,4 +1,5 @@
 import { MockEngine } from './engine.js';
+import type { MessagePart } from './multimodal.js';
 import type {
   AiLlmMock,
   ChatCompletion,
@@ -21,11 +22,46 @@ import type {
  * {@link MockEngine} を呼出す。 real Anthropic SDK は import せず、
  * shape のみ互換を保つ。
  */
+/**
+ * Anthropic content block union (v0.2 で image 追加、 real API 準拠)。
+ *
+ * text / image は well-typed、 tool_use / tool_result は real SDK の柔軟な
+ * shape を保つため field を optional にしてある。 dogfood app が段階的に
+ * request を組み立てる経路 (id / name を後で埋める) を許容する。
+ */
+export type AnthropicContentBlock =
+  | { type: 'text'; text: string }
+  | {
+      type: 'image';
+      source:
+        | { type: 'base64'; media_type: string; data: string }
+        | { type: 'url'; url: string };
+    }
+  | {
+      type: 'tool_use';
+      id?: string;
+      name?: string;
+      input: Record<string, unknown>;
+    }
+  | {
+      type: 'tool_result';
+      tool_use_id: string;
+      content: string;
+    }
+  | {
+      // 逃げ道 — v0.1 で許容していた「type: string」 の柔軟な shape。
+      type: string;
+      text?: string;
+      tool_use_id?: string;
+      content?: string;
+      input?: unknown;
+    };
+
 export interface AnthropicMessagesRequest {
   model?: string;
   messages: Array<{
     role: 'user' | 'assistant';
-    content: string | Array<{ type: string; text?: string; tool_use_id?: string; content?: string; input?: unknown }>;
+    content: string | AnthropicContentBlock[];
   }>;
   system?: string;
   tools?: Array<{
@@ -51,6 +87,9 @@ export interface AnthropicMessagesResponse {
   usage: {
     input_tokens: number;
     output_tokens: number;
+    /** cache read / write は Anthropic real API v0.2 で shape 互換保持。 */
+    cache_read_input_tokens?: number;
+    cache_creation_input_tokens?: number;
   };
   /** kiwa 拡張 — mock 実測 cost / latency を SDK response に添付。 */
   _kiwa: {
@@ -116,14 +155,38 @@ export function createAnthropicMock(config: MockConfig = {}): AnthropicMock {
 }
 
 function toChatInput(req: AnthropicMessagesRequest): ChatInput {
-  const messages: ChatMessage[] = req.messages.map((m) => ({
-    role: m.role,
-    content: typeof m.content === 'string'
-      ? m.content
-      : m.content
-          .map((c) => (c.type === 'text' ? c.text ?? '' : ''))
-          .join(''),
-  }));
+  const messages: ChatMessage[] = req.messages.map((m) => {
+    if (typeof m.content === 'string') {
+      return { role: m.role, content: m.content };
+    }
+    // content blocks を text 抽出 + parts に分解 (multimodal 対応)。
+    const parts: MessagePart[] = [];
+    let textContent = '';
+    for (const c of m.content) {
+      if (c.type === 'text' && typeof (c as { text?: unknown }).text === 'string') {
+        const txt = (c as { text: string }).text;
+        parts.push({ type: 'text', text: txt });
+        textContent += txt;
+      } else if (c.type === 'image' && 'source' in c && c.source) {
+        const src = c.source as
+          | { type: 'base64'; media_type: string; data: string }
+          | { type: 'url'; url: string };
+        const source =
+          src.type === 'base64'
+            ? {
+                kind: 'base64' as const,
+                mediaType: src.media_type,
+                data: src.data,
+              }
+            : { kind: 'url' as const, url: src.url };
+        parts.push({ type: 'image', source });
+      }
+      // tool_use / tool_result / その他 loose shape は既存 field で扱うため parts 化しない
+    }
+    const msg: ChatMessage = { role: m.role, content: textContent };
+    if (parts.length > 0) msg.parts = parts;
+    return msg;
+  });
   const out: ChatInput = { messages };
   if (req.system !== undefined) out.systemPrompt = req.system;
   if (req.max_tokens !== undefined) out.maxTokens = req.max_tokens;

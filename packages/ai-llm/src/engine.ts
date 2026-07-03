@@ -1,3 +1,4 @@
+import { estimateMultimodalTokens } from './multimodal.js';
 import type {
   AiLlmMock,
   ChatCompletion,
@@ -20,6 +21,9 @@ interface ResolvedConfig {
   model: string;
   defaultResponse: string;
   responses?: Record<string, MockResponse>;
+  /** multimodal token 換算 (v0.2)。 */
+  imageTokenCost: number;
+  audioTokenCost: number;
 }
 
 export class MockEngine {
@@ -37,6 +41,8 @@ export class MockEngine {
       costPer1kTokens: config.costPer1kTokens ?? { prompt: 0.00025, completion: 0.00125 },
       model: config.model ?? 'mock-model',
       defaultResponse: config.defaultResponse ?? 'mock default response',
+      imageTokenCost: config.imageTokenCost ?? 1500,
+      audioTokenCost: config.audioTokenCost ?? 500,
     };
     if (config.responses !== undefined) resolved.responses = config.responses;
     this.config = resolved;
@@ -127,9 +133,14 @@ export class MockEngine {
   private buildUsage(input: ChatInput, resp: MockResponse): Usage {
     // 明示指定がある場合はそれを尊重、 なければ「4 文字 ≈ 1 token」 の
     // ざっくり概算 (実 LLM tokenizer と厳密には一致しない、 mock の
-    // fidelity 計測用には十分)。
-    const promptTokens = resp.usage?.promptTokens
-      ?? Math.max(1, Math.floor(estimatePromptCharCount(input) / 4));
+    // fidelity 計測用には十分)。 multimodal parts (image / audio) は
+    // 別途 fixed token cost で加算する (real API の課金モデルに近似)。
+    const textTokens = Math.max(1, Math.floor(estimatePromptCharCount(input) / 4));
+    const multimodalTokens = estimateMultimodalPromptTokens(input, {
+      imageTokenCost: this.config.imageTokenCost,
+      audioTokenCost: this.config.audioTokenCost,
+    });
+    const promptTokens = resp.usage?.promptTokens ?? textTokens + multimodalTokens;
     const completionTokens = resp.usage?.completionTokens
       ?? Math.max(1, Math.floor(resp.content.length / 4));
     return {
@@ -176,7 +187,21 @@ function estimatePromptCharCount(input: ChatInput): number {
   let total = 0;
   if (input.systemPrompt) total += input.systemPrompt.length;
   for (const m of input.messages) {
+    // adapter は multimodal 経路で `content` を parts の text 合成に揃える。
+    // parts がある場合は content 経由でカウント済なので二重加算しない。
     total += m.content.length;
+  }
+  return total;
+}
+
+function estimateMultimodalPromptTokens(
+  input: ChatInput,
+  cfg: { imageTokenCost: number; audioTokenCost: number },
+): number {
+  let total = 0;
+  for (const m of input.messages) {
+    if (!m.parts) continue;
+    total += estimateMultimodalTokens(m.parts, cfg);
   }
   return total;
 }

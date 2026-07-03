@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/ai-llm",
-  "version": "0.1.0",
-  "description": "AI-LLM test harness for kiwa — unified mock across 4 SDKs (Anthropic Messages API + OpenAI Chat Completions + Vercel AI SDK + LangChain) with streaming / tool-use / system prompt support, cost / latency / token / accuracy tracking, and real-vs-mock fidelity harness. Feeds v1.12 dogfood app suite and @kiwa-test/quality-metrics 11-axis release gate.",
+  "version": "0.2.0",
+  "description": "AI-LLM test harness for kiwa — unified mock across 4 SDKs (Anthropic Messages API + OpenAI Chat Completions + Vercel AI SDK + LangChain) with streaming / tool-use / system prompt / multimodal (image + audio) input + Whisper transcription mock support, cost / latency / token / accuracy tracking, and real-vs-mock fidelity harness. Feeds v1.12 dogfood app suite and @kiwa-test/quality-metrics 11-axis release gate.",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -20,6 +20,12 @@
     "streaming",
     "tool-use",
     "function-calling",
+    "multimodal",
+    "vision",
+    "image",
+    "audio",
+    "whisper",
+    "transcription",
     "mock",
     "fidelity",
     "cost-tracking",
