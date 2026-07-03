@@ -1,0 +1,42 @@
+import { describe, expect, it } from 'vitest';
+import { measureMemory } from '../src/index.js';
+
+describe('measureMemory', () => {
+  it('reports iteration count + delta shape', async () => {
+    const result = await measureMemory({
+      fn: async () => {
+        // allocate a small transient object; may or may not survive GC
+        const buf = Buffer.alloc(128);
+        return buf.length;
+      },
+      iterations: 50,
+    });
+    expect(result.iterationCount).toBe(50);
+    expect(Number.isFinite(result.heapUsedDeltaBytes)).toBe(true);
+    expect(Number.isFinite(result.rssDeltaBytes)).toBe(true);
+    expect(result.heapUsedDeltaPerIterationBytes).toBe(result.heapUsedDeltaBytes / 50);
+  });
+
+  it('rejects iterations < 1', async () => {
+    await expect(measureMemory({ fn: () => {}, iterations: 0 })).rejects.toThrow(
+      /iterations must be >= 1/,
+    );
+  });
+
+  it('detects heap growth on obvious leak (arrayBuffers axis, GC-independent)', async () => {
+    const leak: Buffer[] = [];
+    const result = await measureMemory({
+      fn: async () => {
+        // intentional retained allocation via Buffer -> ArrayBuffer view
+        leak.push(Buffer.alloc(10 * 1024)); // 10 KiB per call
+      },
+      iterations: 200,
+    });
+    // Retained Buffer allocations show up on arrayBuffers regardless of GC
+    // exposure — heap axis can flap without --expose-gc so we assert on the
+    // stable channel. 200 * 10 KiB = 2 MiB minimum retained.
+    expect(result.arrayBuffersDeltaBytes).toBeGreaterThan(1024 * 1024);
+    // exercise leak variable so lint/ts do not flag it as unused
+    expect(leak.length).toBe(200);
+  });
+});
