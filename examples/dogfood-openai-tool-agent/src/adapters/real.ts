@@ -1,3 +1,4 @@
+import { costForTokens } from '@kiwa-test/ai-llm';
 import type {
   AgentAdapter,
   AgentLoopResult,
@@ -24,12 +25,6 @@ export interface RealAdapterEnv {
 
 const DEFAULT_MODEL = 'gpt-4o-mini';
 const DEFAULT_BASE_URL = 'https://api.openai.com';
-
-/** gpt-4o-mini price table (US$ / 1k tokens) — refreshed 2026-07. */
-const PRICE_PER_1K = {
-  prompt: 0.00015,
-  completion: 0.0006,
-};
 
 export function detectRealEnv(): RealAdapterEnv | null {
   const apiKey = process.env['OPENAI_API_KEY'];
@@ -163,7 +158,7 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): AgentAdapter {
       throw new Error(`OpenAI completion failed ${res.status}: ${errText}`);
     }
     const response = (await res.json()) as OpenAiCompletionResponse;
-    const costUsd = costFor(response.usage);
+    const costUsd = costFor(response.usage, env.model);
     totalCostUsd += costUsd;
     totalPromptTokens += response.usage.prompt_tokens;
     totalCompletionTokens += response.usage.completion_tokens;
@@ -438,6 +433,12 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): AgentAdapter {
   };
 }
 
-function costFor(u: { prompt_tokens: number; completion_tokens: number }): number {
-  return (u.prompt_tokens * PRICE_PER_1K.prompt + u.completion_tokens * PRICE_PER_1K.completion) / 1000;
+// Finding 3 — cost lookup deferred to the shared @kiwa-test/ai-llm price
+// table so a model swap (gpt-4o-mini → gpt-4o → gpt-4-turbo) picks up
+// the right rate without touching each dogfood adapter individually.
+function costFor(
+  u: { prompt_tokens: number; completion_tokens: number },
+  model: string,
+): number {
+  return costForTokens(model, u.prompt_tokens, u.completion_tokens);
 }
