@@ -1,104 +1,81 @@
 # Perf Suite — dogfood-anthropic-chatbot
 
-| op | p95 | gate | regression | blockers |
+Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+
+## Serial p95 (concurrency = 1)
+
+| op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| reply | 9.27ms | PASS | n/a | none |
-| replyStream | 17.06ms | PASS | n/a | none |
-| toolLoop | 18.44ms | PASS | n/a | none |
+| reply | 9.15ms | 30ms | PASS | n/a (baseline seeded) |
+| replyStream | 15.35ms | 50ms | PASS | n/a (baseline seeded) |
+| toolLoop | 18.25ms | 100ms | PASS | n/a (baseline seeded) |
 
-## reply
+## Concurrent p95 (concurrency = 10, 50 iter each)
 
-# Perf Report — reply
+| op | p95 | cap | gate |
+|---|---|---|---|
+| reply | 9.26ms | 60ms | PASS |
+| replyStream | 15.47ms | 100ms | PASS |
+| toolLoop | 18.46ms | 200ms | PASS |
+
+## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
+
+| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
+|---|---|---|---|---|
+| reply | -4565704 B | -2796 B | 102400 B | PASS |
+| replyStream | -4284352 B | 0 B | 102400 B | PASS |
+| toolLoop | -543168 B | 0 B | 102400 B | PASS |
+
+## Detailed serial reports
+
+### reply
+
+# Perf Report — reply.serial
 
 | metric | value |
 |---|---|
-| iterations | 100 |
+| iterations | 60 |
 | warmup | 5 |
-| p50 | 9.11ms |
-| p95 | 9.27ms |
-| p99 | 9.35ms |
-| mean | 9.02ms |
-| stdev | 0.32ms |
-| min | 7.78ms |
-| max | 9.45ms |
-| total | 902.29ms |
+| p50 | 9.07ms |
+| p95 | 9.15ms |
+| p99 | 9.20ms |
+| mean | 8.96ms |
+| stdev | 0.28ms |
+| min | 8.02ms |
+| max | 9.20ms |
+| total | 537.73ms |
 
-## Samples histogram
+### replyStream
 
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 7.78-7.95 | 2 | # |
-| 2 | 7.95-8.12 | 3 | # |
-| 3 | 8.12-8.28 | 2 | # |
-| 4 | 8.28-8.45 | 0 |  |
-| 5 | 8.45-8.62 | 3 | # |
-| 6 | 8.62-8.78 | 3 | # |
-| 7 | 8.78-8.95 | 2 | # |
-| 8 | 8.95-9.11 | 39 | ######### |
-| 9 | 9.11-9.28 | 43 | ########## |
-| 10 | 9.28-9.45 | 3 | # |
-
-## replyStream
-
-# Perf Report — replyStream
+# Perf Report — replyStream.serial
 
 | metric | value |
 |---|---|
-| iterations | 30 |
+| iterations | 60 |
 | warmup | 5 |
-| p50 | 15.55ms |
-| p95 | 17.06ms |
-| p99 | 17.72ms |
-| mean | 15.49ms |
-| stdev | 0.99ms |
-| min | 13.27ms |
-| max | 17.72ms |
-| total | 464.71ms |
+| p50 | 15.08ms |
+| p95 | 15.35ms |
+| p99 | 16.27ms |
+| mean | 14.86ms |
+| stdev | 0.66ms |
+| min | 12.64ms |
+| max | 16.27ms |
+| total | 891.32ms |
 
-## Samples histogram
+### toolLoop
 
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 13.27-13.72 | 1 | ## |
-| 2 | 13.72-14.16 | 2 | ### |
-| 3 | 14.16-14.61 | 4 | ####### |
-| 4 | 14.61-15.05 | 1 | ## |
-| 5 | 15.05-15.50 | 6 | ########## |
-| 6 | 15.50-15.94 | 6 | ########## |
-| 7 | 15.94-16.39 | 5 | ######## |
-| 8 | 16.39-16.83 | 3 | ##### |
-| 9 | 16.83-17.28 | 1 | ## |
-| 10 | 17.28-17.72 | 1 | ## |
-
-## toolLoop
-
-# Perf Report — toolLoop
+# Perf Report — toolLoop.serial
 
 | metric | value |
 |---|---|
-| iterations | 30 |
+| iterations | 60 |
 | warmup | 5 |
-| p50 | 18.14ms |
-| p95 | 18.44ms |
-| p99 | 18.58ms |
-| mean | 17.97ms |
-| stdev | 0.51ms |
-| min | 16.46ms |
-| max | 18.58ms |
-| total | 538.98ms |
-
-## Samples histogram
-
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 16.46-16.68 | 2 | ## |
-| 2 | 16.68-16.89 | 0 |  |
-| 3 | 16.89-17.10 | 1 | # |
-| 4 | 17.10-17.31 | 0 |  |
-| 5 | 17.31-17.52 | 2 | ## |
-| 6 | 17.52-17.73 | 1 | # |
-| 7 | 17.73-17.94 | 1 | # |
-| 8 | 17.94-18.15 | 9 | ######## |
-| 9 | 18.15-18.37 | 12 | ########## |
-| 10 | 18.37-18.58 | 2 | ## |
+| p50 | 18.12ms |
+| p95 | 18.25ms |
+| p99 | 18.31ms |
+| mean | 17.91ms |
+| stdev | 0.43ms |
+| min | 16.61ms |
+| max | 18.31ms |
+| total | 1074.78ms |
 

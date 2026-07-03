@@ -1,137 +1,101 @@
 # Perf Suite — dogfood-supabase-realtime-chat
 
-| op | p95 | gate | regression | blockers |
+Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+
+## Serial p95 (concurrency = 1)
+
+| op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| joinRoom | 3.48ms | PASS | n/a | none |
-| sendMessage | 0.00ms | PASS | n/a | none |
-| getPresence | 0.00ms | PASS | n/a | none |
-| sendTyping | 0.00ms | PASS | n/a | none |
+| joinRoom | 3.50ms | 50ms | PASS | n/a (baseline seeded) |
+| sendMessage | 3.49ms | 30ms | PASS | n/a (baseline seeded) |
+| getPresence | 0.01ms | 30ms | PASS | n/a (baseline seeded) |
+| sendTyping | 3.45ms | 100ms | PASS | n/a (baseline seeded) |
 
-## joinRoom
+## Concurrent p95 (concurrency = 10, 50 iter each)
 
-# Perf Report — joinRoom
+| op | p95 | cap | gate |
+|---|---|---|---|
+| joinRoom | 3.62ms | 100ms | PASS |
+| sendMessage | 3.54ms | 60ms | PASS |
+| getPresence | 0.02ms | 60ms | PASS |
+| sendTyping | 3.47ms | 200ms | PASS |
+
+## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
+
+| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
+|---|---|---|---|---|
+| joinRoom | -5007800 B | -2217 B | 102400 B | PASS |
+| sendMessage | 921928 B | 0 B | 102400 B | PASS |
+| getPresence | 997688 B | 0 B | 102400 B | PASS |
+| sendTyping | 1029872 B | 0 B | 102400 B | PASS |
+
+## Detailed serial reports
+
+### joinRoom
+
+# Perf Report — joinRoom.serial
 
 | metric | value |
 |---|---|
-| iterations | 60 |
-| warmup | 3 |
+| iterations | 40 |
+| warmup | 5 |
 | p50 | 3.43ms |
-| p95 | 3.48ms |
-| p99 | 3.51ms |
-| mean | 3.41ms |
-| stdev | 0.15ms |
+| p95 | 3.50ms |
+| p99 | 3.52ms |
+| mean | 3.44ms |
+| stdev | 0.04ms |
+| min | 3.25ms |
+| max | 3.52ms |
+| total | 137.55ms |
+
+### sendMessage
+
+# Perf Report — sendMessage.serial
+
+| metric | value |
+|---|---|
+| iterations | 40 |
+| warmup | 5 |
+| p50 | 3.43ms |
+| p95 | 3.49ms |
+| p99 | 3.68ms |
+| mean | 3.39ms |
+| stdev | 0.25ms |
 | min | 2.30ms |
-| max | 3.51ms |
-| total | 204.60ms |
+| max | 3.68ms |
+| total | 135.70ms |
 
-## Samples histogram
+### getPresence
 
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 2.30-2.42 | 1 | # |
-| 2 | 2.42-2.55 | 0 |  |
-| 3 | 2.55-2.67 | 0 |  |
-| 4 | 2.67-2.79 | 0 |  |
-| 5 | 2.79-2.91 | 0 |  |
-| 6 | 2.91-3.03 | 0 |  |
-| 7 | 3.03-3.15 | 0 |  |
-| 8 | 3.15-3.27 | 1 | # |
-| 9 | 3.27-3.39 | 1 | # |
-| 10 | 3.39-3.51 | 57 | ########## |
-
-## sendMessage
-
-# Perf Report — sendMessage
+# Perf Report — getPresence.serial
 
 | metric | value |
 |---|---|
-| iterations | 100 |
+| iterations | 40 |
 | warmup | 5 |
 | p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
+| p95 | 0.01ms |
+| p99 | 0.02ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.06ms |
+| max | 0.02ms |
+| total | 0.08ms |
 
-## Samples histogram
+### sendTyping
 
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 0.00-0.00 | 88 | ########## |
-| 2 | 0.00-0.00 | 6 | # |
-| 3 | 0.00-0.00 | 3 | # |
-| 4 | 0.00-0.00 | 1 | # |
-| 5 | 0.00-0.00 | 1 | # |
-| 6 | 0.00-0.00 | 0 |  |
-| 7 | 0.00-0.00 | 0 |  |
-| 8 | 0.00-0.01 | 0 |  |
-| 9 | 0.01-0.01 | 0 |  |
-| 10 | 0.01-0.01 | 1 | # |
-
-## getPresence
-
-# Perf Report — getPresence
+# Perf Report — sendTyping.serial
 
 | metric | value |
 |---|---|
-| iterations | 100 |
+| iterations | 40 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.00ms |
-| total | 0.05ms |
-
-## Samples histogram
-
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 0.00-0.00 | 92 | ########## |
-| 2 | 0.00-0.00 | 4 | # |
-| 3 | 0.00-0.00 | 1 | # |
-| 4 | 0.00-0.00 | 2 | # |
-| 5 | 0.00-0.00 | 0 |  |
-| 6 | 0.00-0.00 | 0 |  |
-| 7 | 0.00-0.00 | 0 |  |
-| 8 | 0.00-0.00 | 0 |  |
-| 9 | 0.00-0.00 | 0 |  |
-| 10 | 0.00-0.00 | 1 | # |
-
-## sendTyping
-
-# Perf Report — sendTyping
-
-| metric | value |
-|---|---|
-| iterations | 30 |
-| warmup | 3 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.00ms |
-| total | 0.03ms |
-
-## Samples histogram
-
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 0.00-0.00 | 14 | ########## |
-| 2 | 0.00-0.00 | 4 | ### |
-| 3 | 0.00-0.00 | 3 | ## |
-| 4 | 0.00-0.00 | 0 |  |
-| 5 | 0.00-0.00 | 1 | # |
-| 6 | 0.00-0.00 | 3 | ## |
-| 7 | 0.00-0.00 | 1 | # |
-| 8 | 0.00-0.00 | 2 | # |
-| 9 | 0.00-0.00 | 0 |  |
-| 10 | 0.00-0.00 | 2 | # |
+| p50 | 3.42ms |
+| p95 | 3.45ms |
+| p99 | 3.50ms |
+| mean | 3.41ms |
+| stdev | 0.08ms |
+| min | 2.98ms |
+| max | 3.50ms |
+| total | 136.33ms |
 
