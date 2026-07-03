@@ -17,5 +17,6 @@ Per-milestone migration guides that walk you through the code changes needed to 
 | [v1.13 → v1.14](./v1.13-to-v1.14) | ✅ | Additive-only | Horizontal expansion — payment + search + observability + Go framework adapters |
 | [v1.14 → v1.15](./v1.14-to-v1.15) | ✅ | Additive-only | `@kiwa-test/ai-llm` v0.2 (multimodal + Whisper) + `@kiwa-test/mcp` v0.1 + `@kiwa-test/agent` v0.1 |
 | [v1.15 → v1.16](./v1.15-to-v1.16) | ✅ | Additive-only | `@kiwa-test/component` v0.1 (Storybook 8 + Playwright CT + Chromatic unified mock) + 3 dogfood apps (design-system / form-ct / visual-regression) |
+| [v1.16 → v1.17](./v1.16-to-v1.17) | ✅ | Additive-only | `@kiwa-test/observability` v2.0 (dashboard + alert + trace flame graph + log correlation) + 3 dogfood apps (dashboard / alert-orchestrator / trace-flame-graph) |
 
 See [`docs/migrations/README.md`](./README) for the style guide and legacy migration content.

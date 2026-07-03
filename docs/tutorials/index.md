@@ -31,6 +31,9 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 19 | [Storybook 8 design system](./19-storybook-design-system) | Node.js / vitest | 12 min |
 | 20 | [Playwright CT for 5 form patterns](./20-playwright-ct) | Node.js / vitest | 12 min |
 | 21 | [Visual regression baseline / diff / accept](./21-visual-regression) | Node.js / vitest | 12 min |
+| 22 | [Observability dashboard (panel + refresh + badge)](./22-observability-dashboard) | Node.js / vitest | 10 min |
+| 23 | [Alert orchestrator (rule + route + silence + escalation)](./23-alert-orchestrator) | Node.js / vitest | 12 min |
+| 24 | [Trace flame graph (span tree + drill-down + log correlation)](./24-trace-flame-graph) | Node.js / vitest | 12 min |
 
 ## AI-LLM tutorials (v1.12)
 
@@ -43,3 +46,7 @@ Tutorials 09 – 11 exercise the new [`@kiwa-test/realtime`](https://github.com/
 ## Component test tutorials (v1.16)
 
 Tutorials 19 – 21 exercise the new [`@kiwa-test/component`](https://github.com/cardene777/kiwa/blob/main/packages/component/README.md) harness — one for each of Storybook 8 (story registration + args + play + a11y), Playwright Component Testing (mount + interact + assert), and Chromatic (baseline / diff / accept / reject). See [`docs/concepts/component-testing.md`](../concepts/component-testing) for the 3 surfaces + 6 semantic axes that component tests need beyond the request/response mocks of v1.11 + v1.12 + v1.13.
+
+## Observability v2 tutorials (v1.17)
+
+Tutorials 22 – 24 exercise the v2.0 additions to [`@kiwa-test/observability`](https://github.com/cardene777/kiwa/blob/main/packages/observability/README.md) — one for each of Grafana-style dashboards (panel refresh + threshold badge), Prometheus AlertManager (rule / route / silence / escalation lifecycle), and Jaeger flame graphs (span tree + drill-down + log correlation). See [`docs/concepts/observability-v2-testing.md`](../concepts/observability-v2-testing) for the 4 axes v2 adds on top of the v1.1 `TelemetryCollector` and where the fidelity harness fits in.
