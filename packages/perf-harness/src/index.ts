@@ -23,3 +23,10 @@ export {
   type RunPerf3LayerResult,
   type OpOutcome,
 } from './three-layer.js';
+export {
+  runPerf3LayerLive,
+  type LivePerfOpSpec,
+  type LiveOpOutcome,
+  type RunPerf3LayerLiveInput,
+  type RunPerf3LayerLiveResult,
+} from './live.js';

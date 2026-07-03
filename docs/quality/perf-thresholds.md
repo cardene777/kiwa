@@ -59,7 +59,25 @@ Threshold: **20 % p95 delta** vs stored baseline (`.perf-baseline/{module}.json`
 
 ## Real-API measurement mode
 
-Live-mode perf tests exist for the 4 AI-LLM SDKs and 4 realtime providers. Set the env var (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `SUPABASE_URL` + `SUPABASE_ANON_KEY`, `ABLY_API_KEY`, `SOCKETIO_URL`) and rerun the perf suite. Missing env vars trigger the skip path (report emits with a `LIVE_ENV_MISSING` marker instead of failing).
+Live-mode perf tests coexist with mock perf tests under `tests/perf/`. The `*.live.perf.ts` files use `runPerf3LayerLive` from `@kiwa-test/perf-harness` and declare their required env vars via the `requiredEnv` option. Missing env vars trigger the skip path — the run still emits a report, but with `LIVE_ENV_MISSING` markers instead of gate results. This keeps CI-less environments honest: an empty report row is attributed to missing credentials, not silent success.
+
+Enable live mode by setting the required env vars and rerunning the perf suite:
+
+```bash
+# Live mode for one provider
+export ANTHROPIC_API_KEY=sk-ant-...
+pnpm --filter dogfood-anthropic-chatbot test:perf
+# Mock 3-layer runs alongside; live 3-layer runs against the real API
+
+# All 6 dogfood live envs
+export ANTHROPIC_API_KEY=sk-ant-... OPENAI_API_KEY=sk-... \
+  SUPABASE_URL=https://... SUPABASE_ANON_KEY=... \
+  ABLY_API_KEY=... SOCKETIO_URL=https://... \
+  RAG_VECTOR_STORE_URL=https://... RAG_VECTOR_STORE_API_KEY=...
+pnpm -r --parallel run test:perf --if-present
+```
+
+Live iteration count defaults to 10 (vs 200 for mock) — live calls cost money and are slow, so a full pass fits in a coffee break. Concurrency defaults to 3 to avoid rate-limiting.
 
 Live thresholds are provider-SLA sourced — not mock-invariant — and sit at the provider's own p95 target:
 
