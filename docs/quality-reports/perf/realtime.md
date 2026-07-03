@@ -1,79 +1,39 @@
 # Perf Suite — realtime
 
-| op | p95 | gate | regression | blockers |
+Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+
+## Serial p95 (concurrency = 1, 200 iter)
+
+| op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| supabasePresenceTrack | 5.86ms | PASS | n/a | none |
-| ablyPublish | 0.00ms | PASS | n/a | none |
-| pusherSubscribeChannel | 0.00ms | PASS | n/a | none |
-| socketioEmit | 0.00ms | PASS | n/a | none |
+| supabasePresenceTrack | 0.00ms | 20ms | PASS | stable |
+| ablyPublish | 0.00ms | 20ms | PASS | stable |
+| pusherSubscribeChannel | 0.00ms | 20ms | PASS | stable |
+| socketioEmit | 0.00ms | 20ms | PASS | stable |
 
-## supabasePresenceTrack
+## Concurrent p95 (concurrency = 10, 50 iter each = 500 samples)
 
-# Perf Report — supabase.channel.track
-
-| metric | value |
-|---|---|
-| iterations | 200 |
-| warmup | 5 |
-| p50 | 5.69ms |
-| p95 | 5.86ms |
-| p99 | 5.94ms |
-| mean | 5.66ms |
-| stdev | 0.21ms |
-| min | 4.55ms |
-| max | 6.20ms |
-| total | 1131.83ms |
-
-## Samples histogram
-
-| bin | range ms | count | bar |
+| op | p95 | cap | gate |
 |---|---|---|---|
-| 1 | 4.55-4.72 | 4 | # |
-| 2 | 4.72-4.88 | 1 | # |
-| 3 | 4.88-5.05 | 0 |  |
-| 4 | 5.05-5.21 | 3 | # |
-| 5 | 5.21-5.38 | 10 | # |
-| 6 | 5.38-5.54 | 4 | # |
-| 7 | 5.54-5.71 | 96 | ########## |
-| 8 | 5.71-5.87 | 74 | ######## |
-| 9 | 5.87-6.04 | 7 | # |
-| 10 | 6.04-6.20 | 1 | # |
+| supabasePresenceTrack | 0.02ms | 40ms | PASS |
+| ablyPublish | 0.01ms | 40ms | PASS |
+| pusherSubscribeChannel | 0.01ms | 40ms | PASS |
+| socketioEmit | 0.01ms | 40ms | PASS |
 
-## ablyPublish
+## Memory retention (200 iter, arrayBuffers axis is the gate; heap axis is informational)
 
-# Perf Report — ably.channel.publish
-
-| metric | value |
-|---|---|
-| iterations | 200 |
-| warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.01ms |
-| total | 0.21ms |
-
-## Samples histogram
-
-| bin | range ms | count | bar |
+| op | heapUsed Δ | arrayBuffers Δ | verdict (arrayBuffers) |
 |---|---|---|---|
-| 1 | 0.00-0.00 | 176 | ########## |
-| 2 | 0.00-0.00 | 12 | # |
-| 3 | 0.00-0.00 | 4 | # |
-| 4 | 0.00-0.00 | 2 | # |
-| 5 | 0.00-0.00 | 2 | # |
-| 6 | 0.00-0.01 | 0 |  |
-| 7 | 0.01-0.01 | 1 | # |
-| 8 | 0.01-0.01 | 2 | # |
-| 9 | 0.01-0.01 | 0 |  |
-| 10 | 0.01-0.01 | 1 | # |
+| supabasePresenceTrack | 570496 B | 0 B | PASS |
+| ablyPublish | 303624 B | 0 B | PASS |
+| pusherSubscribeChannel | 78872 B | 0 B | PASS |
+| socketioEmit | 233152 B | 0 B | PASS |
 
-## pusherSubscribeChannel
+## Detailed serial reports
 
-# Perf Report — pusher.subscribeChannel
+### supabasePresenceTrack
+
+# Perf Report — supabasePresenceTrack.serial
 
 | metric | value |
 |---|---|
@@ -86,26 +46,23 @@
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.02ms |
-| total | 0.35ms |
+| total | 0.37ms |
 
-## Samples histogram
+## Baseline diff
 
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 0.00-0.00 | 181 | ########## |
-| 2 | 0.00-0.00 | 9 | # |
-| 3 | 0.00-0.01 | 7 | # |
-| 4 | 0.01-0.01 | 1 | # |
-| 5 | 0.01-0.01 | 0 |  |
-| 6 | 0.01-0.01 | 0 |  |
-| 7 | 0.01-0.01 | 1 | # |
-| 8 | 0.01-0.02 | 0 |  |
-| 9 | 0.02-0.02 | 0 |  |
-| 10 | 0.02-0.02 | 1 | # |
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | +0.00ms | +12.85% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +56.42% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +10.49% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +13.75% |
+| min | 0.00ms | 0.00ms | +0.00ms | +13.82% |
+| max | 0.02ms | 0.01ms | +0.00ms | +25.50% |
+| total | 0.37ms | 0.32ms | +0.04ms | +13.75% |
 
-## socketioEmit
+### ablyPublish
 
-# Perf Report — socketio.emit
+# Perf Report — ablyPublish.serial
 
 | metric | value |
 |---|---|
@@ -120,18 +77,73 @@
 | max | 0.01ms |
 | total | 0.09ms |
 
-## Samples histogram
+## Baseline diff
 
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 0.00-0.00 | 178 | ########## |
-| 2 | 0.00-0.00 | 11 | # |
-| 3 | 0.00-0.00 | 6 | # |
-| 4 | 0.00-0.00 | 2 | # |
-| 5 | 0.00-0.00 | 0 |  |
-| 6 | 0.00-0.00 | 0 |  |
-| 7 | 0.00-0.00 | 1 | # |
-| 8 | 0.00-0.00 | 1 | # |
-| 9 | 0.00-0.01 | 0 |  |
-| 10 | 0.01-0.01 | 1 | # |
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | +0.00ms | +12.61% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +25.08% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +40.71% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +9.17% |
+| min | 0.00ms | 0.00ms | +0.00ms | +16.40% |
+| max | 0.01ms | 0.01ms | -0.00ms | -19.19% |
+| total | 0.09ms | 0.09ms | +0.01ms | +9.17% |
+
+### pusherSubscribeChannel
+
+# Perf Report — pusherSubscribeChannel.serial
+
+| metric | value |
+|---|---|
+| iterations | 200 |
+| warmup | 5 |
+| p50 | 0.00ms |
+| p95 | 0.00ms |
+| p99 | 0.00ms |
+| mean | 0.00ms |
+| stdev | 0.00ms |
+| min | 0.00ms |
+| max | 0.00ms |
+| total | 0.03ms |
+
+## Baseline diff
+
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | +0.00ms | +32.80% |
+| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +18.34% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +12.29% |
+| min | 0.00ms | 0.00ms | +0.00ms | +50.60% |
+| max | 0.00ms | 0.00ms | -0.00ms | -39.10% |
+| total | 0.03ms | 0.03ms | +0.00ms | +12.29% |
+
+### socketioEmit
+
+# Perf Report — socketioEmit.serial
+
+| metric | value |
+|---|---|
+| iterations | 200 |
+| warmup | 5 |
+| p50 | 0.00ms |
+| p95 | 0.00ms |
+| p99 | 0.00ms |
+| mean | 0.00ms |
+| stdev | 0.00ms |
+| min | 0.00ms |
+| max | 0.00ms |
+| total | 0.08ms |
+
+## Baseline diff
+
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | +0.00ms | +0.30% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +22.40% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +25.96% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +18.38% |
+| min | 0.00ms | 0.00ms | +0.00ms | +14.43% |
+| max | 0.00ms | 0.00ms | +0.00ms | +26.09% |
+| total | 0.08ms | 0.07ms | +0.01ms | +18.38% |
 

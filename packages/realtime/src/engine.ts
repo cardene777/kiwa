@@ -140,7 +140,7 @@ export class RealtimeEngine {
     // connection state event を初期通知
     this.deliverToChannel(channel, { kind: 'connection', state: 'connected', timestamp: Date.now() });
     const latency = Math.max(0, Date.now() - start);
-    this.metrics.subscribeLatencyMs.push(latency);
+    pushBounded(this.metrics.subscribeLatencyMs, latency, 1000);
     return {
       channel,
       unsubscribe: async () => {
@@ -180,7 +180,7 @@ export class RealtimeEngine {
     };
     this.deliverToChannel(channel, { kind: 'broadcast', ...bev });
     const latency = Math.max(0, Date.now() - start);
-    this.metrics.publishLatencyMs.push(latency);
+    pushBounded(this.metrics.publishLatencyMs, latency, 1000);
   }
 
   async trackPresence(
@@ -393,5 +393,17 @@ export class RealtimeEngine {
   private sleep(ms: number): Promise<void> {
     if (ms <= 0) return Promise.resolve();
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+}
+
+/**
+ * pushBounded — append `value` to `arr`; if length exceeds `cap`, drop the
+ * oldest sample. Used for latency sample arrays so long-running mocks do
+ * not retain unbounded heap.
+ */
+function pushBounded<T>(arr: T[], value: T, cap: number): void {
+  arr.push(value);
+  if (arr.length > cap) {
+    arr.splice(0, arr.length - cap);
   }
 }
