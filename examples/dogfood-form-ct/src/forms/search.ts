@@ -5,7 +5,7 @@ import {
   buildSelect,
   buildSubmitButton,
 } from './builders.js';
-import type { FormRender, SearchFormArgs } from './types.js';
+import type { FormRender } from './types.js';
 
 /**
  * Search form — a single required query text input + an optional filter

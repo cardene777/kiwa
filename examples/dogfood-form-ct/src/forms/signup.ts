@@ -5,7 +5,7 @@ import {
   buildField,
   buildSubmitButton,
 } from './builders.js';
-import type { FormRender, SignupFormArgs } from './types.js';
+import type { FormRender } from './types.js';
 
 /**
  * Signup form — email + password + password confirmation + accepted terms.

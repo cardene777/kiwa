@@ -5,7 +5,7 @@ import {
   buildField,
   buildSubmitButton,
 } from './builders.js';
-import type { FormRender, LoginFormArgs } from './types.js';
+import type { FormRender } from './types.js';
 
 /**
  * Login form — email + password + remember me. email + password are required;

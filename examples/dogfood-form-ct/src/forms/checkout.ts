@@ -4,7 +4,7 @@ import {
   buildField,
   buildSubmitButton,
 } from './builders.js';
-import type { CheckoutFormArgs, FormRender } from './types.js';
+import type { FormRender } from './types.js';
 
 /**
  * Checkout form — 5 required fields (fullName / address / city / postalCode /

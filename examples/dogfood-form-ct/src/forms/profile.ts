@@ -5,7 +5,7 @@ import {
   buildSubmitButton,
   buildTextArea,
 } from './builders.js';
-import type { FormRender, ProfileFormArgs } from './types.js';
+import type { FormRender } from './types.js';
 
 /**
  * Profile form — displayName (required) + bio (optional textarea) + websiteUrl

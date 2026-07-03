@@ -1,4 +1,4 @@
-import type { ComponentRender, MockEvent } from '@kiwa-test/component';
+import type { ComponentRender } from '@kiwa-test/component';
 
 /**
  * Provider-neutral form contract — every form renders through a `ComponentRender`
@@ -86,10 +86,6 @@ export type FormArgsMap = {
 };
 
 export type FormKind = keyof FormArgsMap;
-
-/** MockEvent alias re-export so downstream form modules do not need to reach
- *  back into `@kiwa-test/component`. */
-export type FormMockEvent = MockEvent;
 
 /** Type alias so form modules can express `ComponentRender<TArgs>` succinctly. */
 export type FormRender<K extends FormKind> = ComponentRender<FormArgsMap[K]>;
