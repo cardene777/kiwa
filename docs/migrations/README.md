@@ -8,6 +8,10 @@ Per-milestone migration guides that walk you through the code changes needed to 
 |---|---|---|---|
 | [v1.9 → v1.10](./v1.9-to-v1.10.md) | ✅ | Additive-only | Supabase Auth + RabbitMQ + Rust contract layer |
 | [v1.10 → v1.11](./v1.10-to-v1.11.md) | ✅ | Additive-only | Quality metrics harness + dogfood app pattern + GitHub Pages |
+| [v1.11 → v1.12](./v1.11-to-v1.12.md) | ✅ | Additive-only | AI-LLM 4 SDK mocks + 11-axis release gate + fidelity harness |
+| [v1.12 → v1.13](./v1.12-to-v1.13.md) | ✅ | Additive-only | Realtime 4 provider mocks + time-axis SSOT + perf-harness |
+| [v1.13 → v1.14](./v1.13-to-v1.14.md) | ✅ | Additive-only | Payment + Search + Telemetry + Go Iris/Chi |
+| [v1.14 → v1.15](./v1.14-to-v1.15.md) | ✅ | Additive-only | AI-LLM multimodal + MCP + agent orchestration |
 
 ## Style
 

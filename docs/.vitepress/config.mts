@@ -89,12 +89,21 @@ export default defineConfig({
             { text: '15 — kiwa-test-go v0.5 Iris + Chi', link: '/tutorials/15-go-iris-chi' },
           ],
         },
+        {
+          text: 'AI-LLM 深化 (v1.15)',
+          items: [
+            { text: '16 — Multimodal chat (image + audio + Whisper)', link: '/tutorials/16-multimodal-chat' },
+            { text: '17 — MCP tool-use agent (JSON-RPC 2.0 chain)', link: '/tutorials/17-mcp-tool-agent' },
+            { text: '18 — Agent orchestration (LangGraph + Assistants v2)', link: '/tutorials/18-agent-orchestration' },
+          ],
+        },
       ],
       '/concepts/': [
         {
           text: 'Concepts',
           items: [
             { text: 'AI-LLM testing (non-determinism SSOT)', link: '/concepts/ai-llm-testing' },
+            { text: 'AI-LLM multimodal testing (image + audio + MCP + agent SSOT)', link: '/concepts/ai-llm-multimodal-testing' },
             { text: 'Realtime testing (time-axis mock SSOT)', link: '/concepts/realtime-testing' },
             { text: 'Payment testing (webhook signature SSOT)', link: '/concepts/payment-testing' },
             { text: 'Search testing (ranking + typo tolerance SSOT)', link: '/concepts/search-testing' },
@@ -112,6 +121,7 @@ export default defineConfig({
             { text: 'v1.11 → v1.12', link: '/migrations/v1.11-to-v1.12' },
             { text: 'v1.12 → v1.13', link: '/migrations/v1.12-to-v1.13' },
             { text: 'v1.13 → v1.14', link: '/migrations/v1.13-to-v1.14' },
+            { text: 'v1.14 → v1.15', link: '/migrations/v1.14-to-v1.15' },
           ],
         },
       ],
