@@ -1,0 +1,3 @@
+.vitest-dist/
+quality-report/
+node_modules/
