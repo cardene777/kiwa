@@ -1,116 +1,78 @@
 # Perf Suite — dogfood-socketio-notification
 
-| op | p95 | gate | regression | blockers |
+Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+
+## Serial p95 (concurrency = 1)
+
+| op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| subscribeRoom | 3.58ms | PASS | n/a | none |
-| deliverNotification | 3.47ms | PASS | n/a | none |
-| getPending | 0.00ms | PASS | n/a | none |
-| simulateReconnect | 0.00ms | PASS | n/a | none |
+| subscribeRoom | 3.48ms | 50ms | PASS | n/a (baseline seeded) |
+| deliverNotification | 3.68ms | 30ms | PASS | n/a (baseline seeded) |
+| getPending | 0.00ms | 30ms | PASS | n/a (baseline seeded) |
+| simulateReconnect | 0.00ms | 100ms | PASS | n/a (baseline seeded) |
 
-## subscribeRoom
+## Concurrent p95 (concurrency = 10, 50 iter each)
 
-# Perf Report — subscribeRoom
-
-| metric | value |
-|---|---|
-| iterations | 60 |
-| warmup | 3 |
-| p50 | 3.52ms |
-| p95 | 3.58ms |
-| p99 | 3.66ms |
-| mean | 3.43ms |
-| stdev | 0.26ms |
-| min | 2.35ms |
-| max | 3.66ms |
-| total | 206.05ms |
-
-## Samples histogram
-
-| bin | range ms | count | bar |
+| op | p95 | cap | gate |
 |---|---|---|---|
-| 1 | 2.35-2.48 | 2 | # |
-| 2 | 2.48-2.61 | 1 | # |
-| 3 | 2.61-2.75 | 0 |  |
-| 4 | 2.75-2.88 | 0 |  |
-| 5 | 2.88-3.01 | 0 |  |
-| 6 | 3.01-3.14 | 1 | # |
-| 7 | 3.14-3.27 | 4 | # |
-| 8 | 3.27-3.40 | 2 | # |
-| 9 | 3.40-3.53 | 29 | ########## |
-| 10 | 3.53-3.66 | 21 | ####### |
+| subscribeRoom | 3.80ms | 100ms | PASS |
+| deliverNotification | 3.53ms | 60ms | PASS |
+| getPending | 0.01ms | 60ms | PASS |
+| simulateReconnect | 0.01ms | 200ms | PASS |
 
-## deliverNotification
+## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-# Perf Report — deliverNotification
+| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
+|---|---|---|---|---|
+| subscribeRoom | 1426936 B | 0 B | 102400 B | PASS |
+| deliverNotification | 853112 B | 0 B | 102400 B | PASS |
+| getPending | 584800 B | 0 B | 102400 B | PASS |
+| simulateReconnect | 431376 B | 0 B | 102400 B | PASS |
 
-| metric | value |
-|---|---|
-| iterations | 100 |
-| warmup | 5 |
-| p50 | 3.43ms |
-| p95 | 3.47ms |
-| p99 | 3.49ms |
-| mean | 3.34ms |
-| stdev | 0.28ms |
-| min | 2.28ms |
-| max | 3.49ms |
-| total | 333.97ms |
+## Detailed serial reports
 
-## Samples histogram
+### subscribeRoom
 
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 2.28-2.40 | 6 | # |
-| 2 | 2.40-2.52 | 0 |  |
-| 3 | 2.52-2.65 | 0 |  |
-| 4 | 2.65-2.77 | 0 |  |
-| 5 | 2.77-2.89 | 0 |  |
-| 6 | 2.89-3.01 | 0 |  |
-| 7 | 3.01-3.13 | 3 | # |
-| 8 | 3.13-3.25 | 6 | # |
-| 9 | 3.25-3.37 | 3 | # |
-| 10 | 3.37-3.49 | 82 | ########## |
-
-## getPending
-
-# Perf Report — getPending
-
-| metric | value |
-|---|---|
-| iterations | 100 |
-| warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.01ms |
-| total | 0.04ms |
-
-## Samples histogram
-
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 0.00-0.00 | 93 | ########## |
-| 2 | 0.00-0.00 | 1 | # |
-| 3 | 0.00-0.00 | 3 | # |
-| 4 | 0.00-0.00 | 0 |  |
-| 5 | 0.00-0.00 | 2 | # |
-| 6 | 0.00-0.00 | 0 |  |
-| 7 | 0.00-0.00 | 0 |  |
-| 8 | 0.00-0.00 | 0 |  |
-| 9 | 0.00-0.00 | 0 |  |
-| 10 | 0.00-0.01 | 1 | # |
-
-## simulateReconnect
-
-# Perf Report — simulateReconnect
+# Perf Report — subscribeRoom.serial
 
 | metric | value |
 |---|---|
 | iterations | 40 |
-| warmup | 3 |
+| warmup | 5 |
+| p50 | 3.44ms |
+| p95 | 3.48ms |
+| p99 | 3.48ms |
+| mean | 3.40ms |
+| stdev | 0.18ms |
+| min | 2.31ms |
+| max | 3.48ms |
+| total | 136.15ms |
+
+### deliverNotification
+
+# Perf Report — deliverNotification.serial
+
+| metric | value |
+|---|---|
+| iterations | 40 |
+| warmup | 5 |
+| p50 | 3.46ms |
+| p95 | 3.68ms |
+| p99 | 3.78ms |
+| mean | 3.40ms |
+| stdev | 0.31ms |
+| min | 2.32ms |
+| max | 3.78ms |
+| total | 136.18ms |
+
+### getPending
+
+# Perf Report — getPending.serial
+
+| metric | value |
+|---|---|
+| iterations | 40 |
+| warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
 | p99 | 0.01ms |
@@ -118,20 +80,22 @@
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.03ms |
+| total | 0.05ms |
 
-## Samples histogram
+### simulateReconnect
 
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 0.00-0.00 | 31 | ########## |
-| 2 | 0.00-0.00 | 4 | # |
-| 3 | 0.00-0.00 | 2 | # |
-| 4 | 0.00-0.00 | 1 | # |
-| 5 | 0.00-0.00 | 0 |  |
-| 6 | 0.00-0.00 | 0 |  |
-| 7 | 0.00-0.00 | 1 | # |
-| 8 | 0.00-0.00 | 0 |  |
-| 9 | 0.00-0.00 | 0 |  |
-| 10 | 0.00-0.01 | 1 | # |
+# Perf Report — simulateReconnect.serial
+
+| metric | value |
+|---|---|
+| iterations | 40 |
+| warmup | 5 |
+| p50 | 0.00ms |
+| p95 | 0.00ms |
+| p99 | 0.01ms |
+| mean | 0.00ms |
+| stdev | 0.00ms |
+| min | 0.00ms |
+| max | 0.01ms |
+| total | 0.06ms |
 

@@ -1,152 +1,73 @@
-import { makeMockAdapter } from '../../src/adapters/mock.js';
-import {
-  defaultBaselinePath,
-  detectRegression,
-  emitPerfReport,
-  evaluatePerfGate,
-  measure,
-  type MeasureResult,
-} from '@kiwa-test/perf-harness';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-test/perf-harness';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { makeMockAdapter } from '../../src/adapters/mock.js';
 
 const MODULE = 'dogfood-ably-collab-cursor';
-const BASELINE_PATH = defaultBaselinePath(MODULE);
 const REPORT_PATH = path.join(
-  resolveRepoRoot(process.cwd()),
+  resolveKiwaRepoRoot(process.cwd()),
   'docs/quality-reports/perf',
   `${MODULE}.md`,
 );
-const WRITE_BASELINE = process.argv.includes('--baseline');
-const COMPARE_BASELINE = process.argv.includes('--compare');
-
-type BaselineMap = Record<string, MeasureResult>;
 
 describe(MODULE, () => {
   it(
-    'measures cursor board 4 ops and emits a perf report',
+    '3-layer perf: joinBoard / moveCursor / rewindHistory / getPresence',
     async () => {
       const adapter = makeMockAdapter();
-
-      const joinBoard = await measure({
-        name: 'joinBoard',
-        iterations: 60,
-        warmup: 3,
-        fn: async () => {
-          await adapter.joinBoard({
-            board: `board-${Math.random()}`,
-            userId: `u${Math.random()}`,
-          });
-        },
-      });
-
-      // one shared board for the rest so we exercise the same channel repeatedly
       const sharedBoard = 'board-shared';
       await adapter.joinBoard({ board: sharedBoard, userId: 'u1' });
 
-      const moveCursor = await measure({
-        name: 'moveCursor',
-        iterations: 40,
-        warmup: 3,
-        fn: async () => {
-          await adapter.moveCursor({
-            board: sharedBoard,
-            userId: 'u1',
-            moveIntervalsMs: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-          });
-        },
+      let joinCounter = 0;
+      const result = await runPerf3Layer({
+        moduleName: MODULE,
+        reportPath: REPORT_PATH,
+        ops: [
+          {
+            name: 'joinBoard',
+            serialP95CapMs: 50,
+            fn: async () => {
+              // bounded rotation over 5 boards to exercise the join path
+              const boardKey = `board-perf-${(joinCounter += 1) % 5}`;
+              await adapter.joinBoard({ board: boardKey, userId: 'u-perf' });
+            },
+          },
+          {
+            name: 'moveCursor',
+            serialP95CapMs: 100,
+            fn: async () => {
+              await adapter.moveCursor({
+                board: sharedBoard,
+                userId: 'u1',
+                moveIntervalsMs: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+              });
+            },
+          },
+          {
+            name: 'rewindHistory',
+            serialP95CapMs: 30,
+            fn: async () => {
+              await adapter.rewindHistory({ board: sharedBoard, limit: 20 });
+            },
+          },
+          {
+            name: 'getPresence',
+            serialP95CapMs: 30,
+            fn: async () => {
+              await adapter.getPresence({ board: sharedBoard });
+            },
+          },
+        ],
+        serialIterations: 40,
       });
 
-      const rewindHistory = await measure({
-        name: 'rewindHistory',
-        iterations: 60,
-        warmup: 3,
-        fn: async () => {
-          await adapter.rewindHistory({ board: sharedBoard, limit: 20 });
-        },
-      });
-
-      const getPresence = await measure({
-        name: 'getPresence',
-        iterations: 100,
-        warmup: 5,
-        fn: async () => {
-          await adapter.getPresence({ board: sharedBoard });
-        },
-      });
-
-      const results: BaselineMap = { joinBoard, moveCursor, rewindHistory, getPresence };
-      const baseline = loadBaselineMap(BASELINE_PATH);
-      if (COMPARE_BASELINE && baseline === null) {
-        throw new Error(`Missing perf baseline for ${MODULE}: ${BASELINE_PATH}`);
+      for (const outcome of result.outcomes) {
+        expect.soft(outcome.serialGatePassed, `${outcome.name} serial p95`).toBe(true);
+        expect.soft(outcome.concurrentGatePassed, `${outcome.name} concurrent p95`).toBe(true);
+        expect.soft(outcome.memoryGatePassed, `${outcome.name} memory arrayBuffers`).toBe(true);
       }
-
-      const gates = {
-        joinBoard: evaluatePerfGate({ result: joinBoard, thresholds: { p95Ms: 50 } }),
-        moveCursor: evaluatePerfGate({ result: moveCursor, thresholds: { p95Ms: 100 } }),
-        rewindHistory: evaluatePerfGate({ result: rewindHistory, thresholds: { p95Ms: 30 } }),
-        getPresence: evaluatePerfGate({ result: getPresence, thresholds: { p95Ms: 30 } }),
-      };
-
-      const lines: string[] = [
-        `# Perf Suite — ${MODULE}`,
-        '',
-        '| op | p95 | gate | regression | blockers |',
-        '|---|---|---|---|---|',
-      ];
-      for (const [name, result] of Object.entries(results)) {
-        const prior = baseline?.[name];
-        const regression = prior
-          ? detectRegression({ current: result, baseline: prior, threshold: 0.2 })
-          : null;
-        if (COMPARE_BASELINE && regression?.regressed) {
-          throw new Error(`${MODULE}/${name} regressed by ${(regression.deltaPct * 100).toFixed(2)}%`);
-        }
-        const gate = gates[name as keyof typeof gates];
-        lines.push(
-          `| ${name} | ${result.p95.toFixed(2)}ms | ${gate.verdict.passed ? 'PASS' : 'FAIL'} | ${regression?.verdict ?? 'n/a'} | ${formatBlockers(gate.verdict.blockers)} |`,
-        );
-      }
-      lines.push('');
-      for (const [name, result] of Object.entries(results)) {
-        lines.push(`## ${name}`);
-        lines.push('');
-        lines.push(emitPerfReport(result, { baseline: baseline?.[name], includeSamples: true }));
-      }
-      writeReport(REPORT_PATH, lines.join('\n'));
-      if (WRITE_BASELINE || baseline === null) saveBaselineMap(BASELINE_PATH, results);
-      expect(existsSync(REPORT_PATH)).toBe(true);
+      expect(result.allPassed).toBe(true);
     },
-    120_000,
+    180_000,
   );
 });
-
-function loadBaselineMap(filePath: string): BaselineMap | null {
-  if (!existsSync(filePath)) return null;
-  return JSON.parse(readFileSync(filePath, 'utf8')) as BaselineMap;
-}
-function saveBaselineMap(filePath: string, value: BaselineMap): void {
-  mkdirSync(path.dirname(filePath), { recursive: true });
-  writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
-}
-function writeReport(filePath: string, markdown: string): void {
-  mkdirSync(path.dirname(filePath), { recursive: true });
-  writeFileSync(filePath, `${markdown}\n`, 'utf8');
-}
-function formatBlockers(blockers: Array<{ axis: string }>): string {
-  return blockers.length === 0 ? 'none' : blockers.map((b) => b.axis).join(', ');
-}
-function resolveRepoRoot(start: string): string {
-  let current = start;
-  while (true) {
-    const pkgPath = path.join(current, 'package.json');
-    if (existsSync(pkgPath)) {
-      const m = JSON.parse(readFileSync(pkgPath, 'utf8')) as { name?: string };
-      if (m.name === 'kiwa-monorepo') return current;
-    }
-    const parent = path.dirname(current);
-    if (parent === current) throw new Error(`Could not resolve repo root from ${start}`);
-    current = parent;
-  }
-}

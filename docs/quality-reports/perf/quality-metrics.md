@@ -1,17 +1,40 @@
 # Perf Suite — quality-metrics
 
-| op | p95 | gate | regression | blockers |
+Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+
+## Serial p95 (concurrency = 1)
+
+| op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| evaluateReleaseGate | 0.00ms | PASS | n/a | none |
-| diffReports | 0.00ms | PASS | n/a | none |
+| evaluateReleaseGate_7axis | 0.00ms | 5ms | PASS | n/a (baseline seeded) |
+| evaluateReleaseGate_11axis | 0.00ms | 5ms | PASS | n/a (baseline seeded) |
+| diffReports | 0.00ms | 5ms | PASS | n/a (baseline seeded) |
 
-## evaluateReleaseGate
+## Concurrent p95 (concurrency = 10, 50 iter each)
 
-# Perf Report — evaluateReleaseGate
+| op | p95 | cap | gate |
+|---|---|---|---|
+| evaluateReleaseGate_7axis | 0.01ms | 10ms | PASS |
+| evaluateReleaseGate_11axis | 0.01ms | 10ms | PASS |
+| diffReports | 0.01ms | 10ms | PASS |
+
+## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
+
+| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
+|---|---|---|---|---|
+| evaluateReleaseGate_7axis | 79960 B | 0 B | 102400 B | PASS |
+| evaluateReleaseGate_11axis | 224424 B | 0 B | 102400 B | PASS |
+| diffReports | 253256 B | 0 B | 102400 B | PASS |
+
+## Detailed serial reports
+
+### evaluateReleaseGate_7axis
+
+# Perf Report — evaluateReleaseGate_7axis.serial
 
 | metric | value |
 |---|---|
-| iterations | 100 |
+| iterations | 200 |
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
@@ -20,30 +43,32 @@
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.07ms |
+| total | 0.13ms |
 
-## Samples histogram
+### evaluateReleaseGate_11axis
 
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 0.00-0.00 | 93 | ########## |
-| 2 | 0.00-0.00 | 4 | # |
-| 3 | 0.00-0.00 | 1 | # |
-| 4 | 0.00-0.00 | 0 |  |
-| 5 | 0.00-0.01 | 0 |  |
-| 6 | 0.01-0.01 | 0 |  |
-| 7 | 0.01-0.01 | 0 |  |
-| 8 | 0.01-0.01 | 0 |  |
-| 9 | 0.01-0.01 | 0 |  |
-| 10 | 0.01-0.01 | 2 | # |
-
-## diffReports
-
-# Perf Report — diffReports
+# Perf Report — evaluateReleaseGate_11axis.serial
 
 | metric | value |
 |---|---|
-| iterations | 100 |
+| iterations | 200 |
+| warmup | 5 |
+| p50 | 0.00ms |
+| p95 | 0.00ms |
+| p99 | 0.00ms |
+| mean | 0.00ms |
+| stdev | 0.00ms |
+| min | 0.00ms |
+| max | 0.00ms |
+| total | 0.08ms |
+
+### diffReports
+
+# Perf Report — diffReports.serial
+
+| metric | value |
+|---|---|
+| iterations | 200 |
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
@@ -52,20 +77,5 @@
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.07ms |
-
-## Samples histogram
-
-| bin | range ms | count | bar |
-|---|---|---|---|
-| 1 | 0.00-0.00 | 93 | ########## |
-| 2 | 0.00-0.00 | 1 | # |
-| 3 | 0.00-0.00 | 0 |  |
-| 4 | 0.00-0.00 | 4 | # |
-| 5 | 0.00-0.00 | 0 |  |
-| 6 | 0.00-0.01 | 0 |  |
-| 7 | 0.01-0.01 | 0 |  |
-| 8 | 0.01-0.01 | 1 | # |
-| 9 | 0.01-0.01 | 0 |  |
-| 10 | 0.01-0.01 | 1 | # |
+| total | 0.14ms |
 
