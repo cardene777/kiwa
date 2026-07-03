@@ -1,6 +1,6 @@
 {
   "name": "dogfood-observability-dashboard",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app (v1.17-2) — Next.js App Router style Grafana dashboard driven behind a provider-neutral surface. 5 panels (line / bar / gauge / stat / table) execute PromQL-style queries against @kiwa-test/observability DashboardMock (KIWA_MODE=mock, default) or a real Prometheus HTTP API (KIWA_MODE=real, PROMETHEUS_URL set). The fidelity harness diffs metric query results + panel renders + refresh timing across mock vs real, feeding @kiwa-test/quality-metrics 7-axis release gate.",
