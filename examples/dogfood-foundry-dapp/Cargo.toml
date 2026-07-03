@@ -10,4 +10,4 @@ name = "dogfood_foundry_dapp"
 path = "src/lib.rs"
 
 [dependencies]
-kiwa-test-rs = { path = "../../kiwa-rs", version = "0.4", features = ["contract-foundry", "contract-alloy"] }
+kiwa-test-rs = { path = "../../kiwa-rs", version = "0.5", features = ["contract-foundry", "contract-alloy"] }

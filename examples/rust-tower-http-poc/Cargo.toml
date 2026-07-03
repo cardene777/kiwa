@@ -23,7 +23,7 @@ tower = { version = "0.5", features = ["util"] }
 tower-http = { version = "0.6", features = ["cors", "trace", "timeout", "compression-gzip", "validate-request", "limit", "set-header", "auth"] }
 
 [dev-dependencies]
-kiwa-test-rs = { path = "../../kiwa-rs", version = "0.4", features = ["tower-http"] }
+kiwa-test-rs = { path = "../../kiwa-rs", version = "0.5", features = ["tower-http"] }
 # `flate2` decodes the CompressionLayer output in the round-trip PoC test —
 # the runtime crate itself only encodes, matching the kiwa-rs dev-dep pattern
 # in `kiwa-rs/Cargo.toml`.

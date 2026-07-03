@@ -47,6 +47,12 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
 
+pub mod invariant;
+pub use invariant::{
+    forge_script, invariant_run, parse_invariant_shrink, InvariantOptions, InvariantOutcome,
+    InvariantRunReport, ScriptBroadcastReport, ShrinkResult,
+};
+
 /// Available Foundry CLI binaries and their resolved paths on PATH.
 #[derive(Debug, Clone)]
 pub struct FoundryEnv {

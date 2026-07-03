@@ -10,4 +10,4 @@ name = "contract_rust_foundry_poc"
 path = "src/lib.rs"
 
 [dependencies]
-kiwa-test-rs = { path = "../../kiwa-rs", version = "0.4", features = ["contract-foundry"] }
+kiwa-test-rs = { path = "../../kiwa-rs", version = "0.5", features = ["contract-foundry"] }

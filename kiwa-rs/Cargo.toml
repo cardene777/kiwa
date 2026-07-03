@@ -1,6 +1,6 @@
 [package]
 name = "kiwa-test-rs"
-version = "0.4.2"
+version = "0.5.0"
 edition = "2021"
 rust-version = "1.75"
 description = "kiwa Rust cargo test adapter — deterministic fixture + assert macro + Drop-based cleanup + hyper mock server + axum Router test app + actix-web App test app + tower-http middleware chain helper. Part of the kiwa polyglot test framework family (https://github.com/cardene777/kiwa)."
@@ -80,7 +80,24 @@ contract-foundry = []
 # users who want the `sol!`-generated Rust structs pull the alloy crates
 # themselves and consume this module's `SolAbi` output as input to their
 # alloy setup.
+# v0.5 adds `alloy::helpers` — EIP-712 typed data builder, Multicall3 batch
+# encoder, and Permit2 PermitWitnessTransferFrom encoder. Same principle:
+# pure Rust, no alloy crate dependency; consumers plug the encoded bytes
+# into whichever Provider they build outside kiwa.
 contract-alloy = []
+
+# Reth (Rust Ethereum Execution client) integration — subprocess wrapper
+# around `reth node --dev` with a Drop-based `RethNode` handle, a helper
+# for N-block reorg simulation through the standard `anvil_reorg` /
+# `debug_setHead` JSON-RPC methods (which reth exposes in dev mode), and
+# a fidelity-comparison surface enumerating the RPC methods where anvil
+# and reth are expected to agree. Requires the `reth` CLI on PATH at
+# runtime; when absent, helpers return `skipped` outputs so test suites
+# can skip gracefully in environments without the toolchain provisioned.
+# Pulls no new dependencies — subprocess plumbing lives in `std::process`
+# and the JSON-RPC payloads are hand-encoded strings so kiwa-test-rs does
+# not gain the alloy transport crate tree.
+contract-reth = []
 
 # proc-macro support (#[kiwa_test] attribute) — enabled via separate kiwa-test-rs-macro crate planned in v0.3
 macro = []
