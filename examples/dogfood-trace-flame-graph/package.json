@@ -1,6 +1,6 @@
 {
   "name": "dogfood-trace-flame-graph",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app (v1.17-4) — trace flame graph explorer (React-style component tree modelled in pure TS for headless test) driven behind a provider-neutral surface. 10 canonical traces (nested span shapes; 100 spans + 34 logs across the set) build into span trees + collapsed flame graphs; drill-down extracts a subtree; log correlation joins logs to spans and back via traceId + spanId. @kiwa-test/observability buildSpanTree + renderFlameGraph + LogCorrelationIndex back the mock adapter (KIWA_MODE=mock, default); the real adapter fetches traces from a live Jaeger HTTP API (KIWA_MODE=real, JAEGER_URL set). The fidelity harness diffs trace exploration events (loadTrace / renderFlame / drillDown / joinLogs / filterByName) across mock vs real, feeding @kiwa-test/quality-metrics 7-axis release gate.",

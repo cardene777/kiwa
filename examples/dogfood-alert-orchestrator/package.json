@@ -1,6 +1,6 @@
 {
   "name": "dogfood-alert-orchestrator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app (v1.17-3) — Node.js Prometheus AlertManager style alert orchestrator driven behind a provider-neutral surface. 10 alert rules (threshold / rate / anomaly) evaluated + 3-level routing tree (severity → team → channel) + time-based silence with regex matcher + escalation ladder (L1 30s → L2 5min → L3 30min). @kiwa-test/observability AlertRouter backs the mock adapter (KIWA_MODE=mock, default); the real adapter posts fires to a live Prometheus AlertManager HTTP API (KIWA_MODE=real, ALERTMANAGER_URL set). The fidelity harness diffs alert lifecycle traces (fire → route → silence → escalate → resolve) across mock vs real, feeding @kiwa-test/quality-metrics 7-axis release gate.",
