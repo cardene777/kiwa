@@ -84,3 +84,18 @@ export {
   buildAiLlmReportFromMock,
   type BuildAiLlmReportInput,
 } from './report.js';
+
+export {
+  PRICE_ALIASES,
+  PRICE_TABLE,
+  costForTokens,
+  lookupModelPrice,
+  type ModelPrice,
+  type PriceLookupResult,
+} from './pricing.js';
+
+export {
+  makeSeededRandom,
+  samplePoisson,
+  sampleZipf,
+} from './sampling.js';

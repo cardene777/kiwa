@@ -1,3 +1,4 @@
+import { costForTokens } from '@kiwa-test/ai-llm';
 import type {
   ChatbotAdapter,
   ChatResult,
@@ -30,12 +31,6 @@ export interface RealAdapterEnv {
 const DEFAULT_MODEL = 'claude-3-5-sonnet-latest';
 const DEFAULT_BASE_URL = 'https://api.anthropic.com';
 const ANTHROPIC_VERSION = '2023-06-01';
-
-/** Sonnet 3.5 price table (USD / 1k tokens) — updated 2026-07. */
-const PRICE_PER_1K = {
-  prompt: 0.003,
-  completion: 0.015,
-};
 
 export function detectRealEnv(): RealAdapterEnv | null {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -149,7 +144,7 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): ChatbotAdapter {
         .filter((c): c is { type: 'text'; text: string } => c.type === 'text')
         .map((c) => c.text)
         .join('');
-      const costUsd = costFor(json.usage);
+      const costUsd = costFor(json.usage, env.model);
       totalCostUsd += costUsd;
       totalPromptTokens += json.usage.input_tokens;
       totalCompletionTokens += json.usage.output_tokens;
@@ -203,12 +198,26 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): ChatbotAdapter {
             const d = evt.data['delta'] as { type: string; text?: string };
             if (d.type === 'text_delta' && d.text) chunks.push(d.text);
           }
+          // Finding 1 — input_tokens ships in message_start.message.usage per
+          // Anthropic Messages Streaming spec; message_delta only carries the
+          // cumulative output_tokens. Reading input_tokens off message_delta
+          // (previous behaviour) silently under-reports prompt cost when the
+          // server omits it in the delta event.
+          if (evt.type === 'message_start' && evt.data?.['message']) {
+            const m = evt.data['message'] as {
+              usage?: { input_tokens?: number; output_tokens?: number };
+            };
+            if (m.usage?.input_tokens !== undefined) {
+              promptTokens = m.usage.input_tokens;
+            }
+            if (m.usage?.output_tokens !== undefined) {
+              completionTokens = m.usage.output_tokens;
+            }
+          }
           if (evt.type === 'message_delta' && evt.data?.['usage']) {
             const u = evt.data['usage'] as {
-              input_tokens?: number;
               output_tokens: number;
             };
-            promptTokens = u.input_tokens ?? promptTokens;
             completionTokens = u.output_tokens;
           }
           idx = buf.indexOf('\n\n');
@@ -216,7 +225,10 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): ChatbotAdapter {
       }
       const latency = performance.now() - start;
       latencies.push(latency);
-      const costUsd = costFor({ input_tokens: promptTokens, output_tokens: completionTokens });
+      const costUsd = costFor(
+        { input_tokens: promptTokens, output_tokens: completionTokens },
+        env.model,
+      );
       totalCostUsd += costUsd;
       totalPromptTokens += promptTokens;
       totalCompletionTokens += completionTokens;
@@ -279,7 +291,7 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): ChatbotAdapter {
         };
         promptTokens += json.usage.input_tokens;
         completionTokens += json.usage.output_tokens;
-        costUsd += costFor(json.usage);
+        costUsd += costFor(json.usage, env.model);
 
         const toolUses = json.content.filter(
           (c): c is { type: 'tool_use'; id: string; name: string; input: Record<string, unknown> } =>
@@ -342,8 +354,12 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): ChatbotAdapter {
   };
 }
 
-function costFor(u: { input_tokens: number; output_tokens: number }): number {
-  return (u.input_tokens * PRICE_PER_1K.prompt + u.output_tokens * PRICE_PER_1K.completion) / 1000;
+// Finding 3 — cost lookup deferred to the shared @kiwa-test/ai-llm price
+// table so a model swap (Sonnet → Haiku → Opus) picks up the right rate
+// without touching every dogfood adapter. Callers pass the vendor's raw
+// token counts unchanged so the migration is drop-in.
+function costFor(u: { input_tokens: number; output_tokens: number }, model: string): number {
+  return costForTokens(model, u.input_tokens, u.output_tokens);
 }
 
 function mapStop(stop: string): ChatResult['finishReason'] {
@@ -353,14 +369,27 @@ function mapStop(stop: string): ChatResult['finishReason'] {
   return 'stop';
 }
 
-function parseSseEvent(raw: string): { type: string | undefined; data: Record<string, unknown> | undefined } {
+/**
+ * SSE event parser. Finding 4 — the SSE spec (WHATWG "Server-Sent
+ * Events" § 9.2.6) mandates that multiple `data:` field lines within a
+ * single event are joined with a literal LF between them; the previous
+ * implementation concatenated them with no separator so a payload like
+ *   data: {"foo":\n
+ *   data: 1}
+ * would parse to `{"foo":1}` instead of a syntax error, masking real
+ * spec drift and occasionally corrupting valid JSON. LF join now matches
+ * the spec.
+ */
+export function parseSseEvent(raw: string): { type: string | undefined; data: Record<string, unknown> | undefined } {
   let type: string | undefined;
-  let dataStr = '';
+  const dataLines: string[] = [];
   for (const line of raw.split('\n')) {
     if (line.startsWith('event: ')) type = line.slice(7).trim();
-    else if (line.startsWith('data: ')) dataStr += line.slice(6);
+    else if (line.startsWith('data: ')) dataLines.push(line.slice(6));
+    else if (line === 'data:') dataLines.push('');
   }
-  if (!dataStr) return { type, data: undefined };
+  if (dataLines.length === 0) return { type, data: undefined };
+  const dataStr = dataLines.join('\n');
   try {
     return { type, data: JSON.parse(dataStr) as Record<string, unknown> };
   } catch {
