@@ -1,4 +1,5 @@
 import { MockEngine } from './engine.js';
+import type { MessagePart } from './multimodal.js';
 import type {
   AiLlmMock,
   ChatCompletion,
@@ -19,10 +20,31 @@ import type {
  * 本 mock は real Vercel AI SDK と同じ shape の戻り値を提供、 dogfood app
  * で real / mock 切替可能にする。
  */
+/**
+ * Vercel AI SDK v3+ multimodal content part (v0.2、 real SDK 準拠)。
+ * SDK は `content: string` + `content: Array<{type:'text'|'image', ...}>` の
+ * 両方を受け入れる。 image は URL string or Uint8Array or base64 string。
+ */
+export type VercelContentPart =
+  | { type: 'text'; text: string }
+  | {
+      type: 'image';
+      /** URL string or base64 string or data URI。 mock は URL / base64 のみ扱う。 */
+      image: string;
+      /** mediaType hint。 */
+      mimeType?: string;
+    }
+  | {
+      type: 'file';
+      /** audio / image / pdf 汎用 file (Vercel AI v4)、 mock は audio として扱う。 */
+      data: string;
+      mimeType: string;
+    };
+
 export interface VercelAiRequest {
   messages: Array<{
     role: 'system' | 'user' | 'assistant' | 'tool';
-    content: string;
+    content: string | VercelContentPart[];
   }>;
   system?: string;
   temperature?: number;
@@ -108,10 +130,18 @@ function toChatInput(req: VercelAiRequest): ChatInput {
   let systemPrompt: string | undefined = req.system;
   for (const m of req.messages) {
     if (m.role === 'system') {
-      systemPrompt = m.content;
+      systemPrompt = typeof m.content === 'string' ? m.content : extractTextFromVercelParts(m.content);
       continue;
     }
-    messages.push({ role: m.role, content: m.content });
+    if (typeof m.content === 'string') {
+      messages.push({ role: m.role, content: m.content });
+      continue;
+    }
+    // multimodal parts
+    const converted = convertVercelPartsToMessageParts(m.content);
+    const msg: ChatMessage = { role: m.role, content: converted.text };
+    if (converted.parts.length > 0) msg.parts = converted.parts;
+    messages.push(msg);
   }
   const out: ChatInput = { messages };
   if (systemPrompt !== undefined) out.systemPrompt = systemPrompt;
@@ -131,6 +161,51 @@ function toChatInput(req: VercelAiRequest): ChatInput {
     }));
   }
   return out;
+}
+
+function convertVercelPartsToMessageParts(
+  content: VercelContentPart[],
+): { parts: MessagePart[]; text: string } {
+  const parts: MessagePart[] = [];
+  let text = '';
+  for (const c of content) {
+    if (c.type === 'text') {
+      parts.push({ type: 'text', text: c.text });
+      text += c.text;
+    } else if (c.type === 'image') {
+      const dataMatch = c.image.match(/^data:([^;]+);base64,(.*)$/);
+      const source = dataMatch
+        ? { kind: 'base64' as const, mediaType: dataMatch[1]!, data: dataMatch[2]! }
+        : /^https?:\/\//.test(c.image)
+          ? { kind: 'url' as const, url: c.image }
+          : {
+              kind: 'base64' as const,
+              mediaType: c.mimeType ?? 'image/jpeg',
+              data: c.image,
+            };
+      parts.push({ type: 'image', source });
+    } else if (c.type === 'file') {
+      // Vercel AI file part → audio (mock は audio 用途に限定)。
+      const isAudio = c.mimeType.startsWith('audio/');
+      if (isAudio) {
+        parts.push({
+          type: 'audio',
+          source: { kind: 'base64', mediaType: c.mimeType, data: c.data },
+          purpose: 'chat',
+        });
+      } else {
+        // 未対応 mime は無視 (text token に含めない)。
+      }
+    }
+  }
+  return { parts, text };
+}
+
+function extractTextFromVercelParts(content: VercelContentPart[]): string {
+  return content
+    .filter((c): c is { type: 'text'; text: string } => c.type === 'text')
+    .map((c) => c.text)
+    .join('');
 }
 
 function toGenerateTextResult(completion: ChatCompletion): VercelGenerateTextResult {

@@ -1,8 +1,10 @@
 # `@kiwa-test/ai-llm`
 
-AI-LLM test harness for kiwa — a unified mock across 4 SDKs (Anthropic Messages API + OpenAI Chat Completions + Vercel AI SDK + LangChain) with streaming, tool-use, system-prompt support, cost / latency / token / accuracy tracking, and a real-vs-mock fidelity harness.
+AI-LLM test harness for kiwa — a unified mock across 4 SDKs (Anthropic Messages API + OpenAI Chat Completions + Vercel AI SDK + LangChain) with streaming, tool-use, system-prompt, **multimodal (image + audio)** support, cost / latency / token / accuracy tracking, and a real-vs-mock fidelity harness.
 
 Feeds the v1.12 dogfood app suite (`examples/dogfood-anthropic-chatbot`, `examples/dogfood-openai-tool-agent`, `examples/dogfood-vercel-ai-rag`) and the 11-axis release gate in `@kiwa-test/quality-metrics` (v0.2+).
+
+**v0.2 (v1.15-1, Issue #746)** — multimodal input mock (image + audio、 4 SDK 全対応) + Whisper transcription mock。
 
 ## Install
 
@@ -100,6 +102,107 @@ const msg = await chatModel.invoke([
 console.log(msg.content, msg.usage_metadata, msg._kiwa);
 ```
 
+## Multimodal input (v0.2)
+
+Image + audio を 4 SDK 全部で統一 mock。 `parts` field (`content: string` に加えて optional) に `MessagePart[]` を渡す。
+
+### Anthropic vision
+
+```ts
+const res = await client.messages.create({
+  model: 'claude-3-5-sonnet',
+  max_tokens: 200,
+  messages: [
+    {
+      role: 'user',
+      content: [
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: '...base64...' } },
+        { type: 'text', text: 'What is in this image?' },
+      ],
+    },
+  ],
+});
+```
+
+### OpenAI vision + audio
+
+```ts
+// vision
+await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [
+    {
+      role: 'user',
+      content: [
+        { type: 'text', text: 'OCR this' },
+        { type: 'image_url', image_url: { url: 'data:image/png;base64,...', detail: 'high' } },
+      ],
+    },
+  ],
+});
+
+// input_audio (gpt-4o-audio)
+await client.chat.completions.create({
+  model: 'gpt-4o-audio',
+  messages: [
+    {
+      role: 'user',
+      content: [
+        { type: 'text', text: 'summarize' },
+        { type: 'input_audio', input_audio: { data: '...base64...', format: 'wav' } },
+      ],
+    },
+  ],
+});
+
+// Whisper transcription
+const trans = await client.audio.transcriptions.create({
+  file: 'https://example.com/audio.wav',
+  model: 'whisper-1',
+  response_format: 'verbose_json',
+});
+console.log(trans.text, trans.language, trans.segments);
+```
+
+### Vercel AI SDK multimodal
+
+```ts
+await client.generateText({
+  messages: [
+    {
+      role: 'user',
+      content: [
+        { type: 'text', text: 'describe' },
+        { type: 'image', image: 'https://example.com/x.jpg' },
+      ],
+    },
+  ],
+});
+```
+
+### LangChain multimodal
+
+```ts
+await chatModel.invoke([
+  {
+    role: 'human',
+    content: [
+      { type: 'text', text: 'describe' },
+      { type: 'image_url', image_url: { url: 'data:image/png;base64,...', detail: 'high' } },
+    ],
+  },
+]);
+```
+
+### Multimodal token cost
+
+Mock は image を fixed cost で prompt token に加算 (Anthropic ~1600 / 1024×1024、 OpenAI vision 1105 detail=high 相当の近似)。 audio は 500 token / 30 s、 30 s 超は比例増分。
+
+- `imageTokenCost` — default `1500` (detail=high → 1500、 auto → 1200、 low → 750)
+- `audioTokenCost` — default `500` (durationSeconds ≤ 30 → 500、 60 s → 1000 等)
+- `transcriptions` — Whisper 用 dict、 key は `toTranscriptionKey(source)` 経由 (`base64:{hash}` or `url:{url}`)
+- `defaultTranscription` — Whisper dict miss 時 fallback (default `'transcribed audio'`)
+
 ## Fidelity harness (real vs mock)
 
 Real API vs mock diff for 4 metrics (cost / latency / token / accuracy).
@@ -164,6 +267,10 @@ The gate uses the SSOT `docs/quality/release-gate.md` thresholds — 11 axes (7 
 | `artificialLatencyMs` | simulated response latency | `10` |
 | `costPer1kTokens` | `{ prompt, completion }` USD per 1k tokens | Claude Haiku rate `{ prompt: 0.00025, completion: 0.00125 }` |
 | `model` | model identifier stitched into responses | `"mock-model"` |
+| `transcriptions` (v0.2) | Whisper 用 dict `key → { text, language?, segments? }` | `undefined` |
+| `defaultTranscription` (v0.2) | Whisper dict miss 時 fallback | `"transcribed audio"` |
+| `imageTokenCost` (v0.2) | image 1 個の base prompt token 換算 (detail で係数調整) | `1500` |
+| `audioTokenCost` (v0.2) | audio 1 個の base prompt token 換算 (30 s 超は比例増分) | `500` |
 
 Each mock exposes `getMetrics()` (cumulative cost / token / latency / requests), `reset()`, and low-level `chat` / `stream` matching the shared `AiLlmMock` interface — same API across all 4 SDKs.
 
@@ -173,7 +280,10 @@ See `docs/quality/release-gate.md` for the 11-axis thresholds. AI-LLM axes are o
 
 ## Version
 
-v0.1.0 (Issue #695, v1.12 milestone). See `.changeset/` for the release note.
+- v0.1.0 (Issue #695, v1.12 milestone) — 4 SDK 統一 mock 初 land
+- v0.2.0 (Issue #746, v1.15-1 milestone) — multimodal (image + audio) 対応 + Whisper transcription mock
+
+See `.changeset/` for the release notes.
 
 ## License
 

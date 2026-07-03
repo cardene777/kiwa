@@ -16,10 +16,20 @@ export type MessageRole = 'system' | 'user' | 'assistant' | 'tool';
 /**
  * Provider agnostic chat message。 tool_call / tool_result は
  * `toolCalls` / `toolCallId` field で表現する。
+ *
+ * v0.2 (Issue #746) で multimodal 対応追加。 `parts` optional field に
+ * image / audio を含む `MessagePart[]` を渡せる。 `parts` 指定時は adapter
+ * が SDK 固有の image/audio shape に変換、 未指定時は従来通り
+ * `content: string` を使う (完全後方互換)。
  */
 export interface ChatMessage {
   role: MessageRole;
   content: string;
+  /**
+   * multimodal input — image / audio / text を混在させる場合の順序保持
+   * 配列。 未指定時は従来通り `content: string` のみで処理。
+   */
+  parts?: import('./multimodal.js').MessagePart[];
   /** assistant message が tool_use を持つ場合の呼出 payload。 */
   toolCalls?: ToolCall[];
   /** role === 'tool' のとき、 元の tool_call を紐付ける id。 */
@@ -90,6 +100,10 @@ export interface StreamEvent {
  * `defaultResponse` を返す。 tool_calls / streaming も `responses` で
  * 制御 (同じ user prompt に対し tool_use → 次 turn で最終応答、 等の
  * multi-turn シナリオも表現可能)。
+ *
+ * v0.2 (Issue #746) で multimodal 対応追加。
+ * - `transcriptions` = audio → text の期待値 dict (Whisper mock)。
+ * - `imageTokenCost` / `audioTokenCost` = multimodal token 計算 override。
  */
 export interface MockConfig {
   /** default response (dict miss 時のフォールバック)。 */
@@ -105,6 +119,17 @@ export interface MockConfig {
   costPer1kTokens?: { prompt: number; completion: number };
   /** provider / model 識別子 (report 用、 default 'mock-model')。 */
   model?: string;
+  /**
+   * Whisper transcription 期待値。 key は `toTranscriptionKey(source)` 形式
+   * (`base64:{hash}` or `url:{url}`)。 hit なしは `defaultTranscription` へ。
+   */
+  transcriptions?: Record<string, import('./multimodal.js').MockTranscription>;
+  /** transcription dict miss 時の fallback (未指定 = 'transcribed audio')。 */
+  defaultTranscription?: string;
+  /** image 1 件あたりの prompt token 換算 (default 1500)。 */
+  imageTokenCost?: number;
+  /** audio 1 件あたりの prompt token 換算 (default 500、 durationSeconds > 30 で比例増分)。 */
+  audioTokenCost?: number;
 }
 
 /** MockConfig.responses の 1 entry。 */
