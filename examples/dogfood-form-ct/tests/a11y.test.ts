@@ -44,7 +44,11 @@ describe('dogfood-form-ct — a11y-violation axis (all 5 form patterns)', () => 
     expect(outcome.violations).toHaveLength(0);
   });
 
-  it('T-DFFC-A11Y-005 profile form a11y is clean (textarea + input associated)', async () => {
+  it('T-DFFC-A11Y-005 profile form a11y is clean (displayName input has label)', async () => {
+    // The heuristic checker inside `@kiwa-test/component` walks <input>
+    // elements — <textarea> and <select> are not currently in scope, so this
+    // test verifies the input-level rule specifically. Widening the checker
+    // to cover textarea / select is a follow-up in the component package.
     const outcome = await adapter.checkA11y(
       'profile',
       FORM_SPECS.profile.mountArgs(),
@@ -52,7 +56,9 @@ describe('dogfood-form-ct — a11y-violation axis (all 5 form patterns)', () => 
     expect(outcome.violations).toHaveLength(0);
   });
 
-  it('T-DFFC-A11Y-006 search form a11y is clean (search input + select labeled)', async () => {
+  it('T-DFFC-A11Y-006 search form a11y is clean (query input has label)', async () => {
+    // Same scope note as T-DFFC-A11Y-005 — the heuristic checker only walks
+    // <input>, so the <select> for filterCategory is not enforced here.
     const outcome = await adapter.checkA11y(
       'search',
       FORM_SPECS.search.mountArgs(),

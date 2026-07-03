@@ -3,7 +3,7 @@ import { buildLoginForm } from './login.js';
 import { buildProfileForm } from './profile.js';
 import { buildSearchForm } from './search.js';
 import { buildSignupForm } from './signup.js';
-import type { FormArgsMap, FormKind } from './types.js';
+import type { FormArgsMap, FormKind, FormRender } from './types.js';
 
 /** Canonical 5 form kinds — the CT flow iterates this array so the count stays
  *  wired into the SSOT. */
@@ -27,7 +27,7 @@ export const FORM_KINDS: readonly FormKind[] = [
  */
 export type FormSpec<K extends FormKind> = {
   kind: K;
-  render: (args: FormArgsMap[K]) => ReturnType<typeof buildLoginForm>;
+  render: FormRender<K>;
   mountArgs: () => FormArgsMap[K];
   validationArgs: () => FormArgsMap[K];
   submitArgs: () => FormArgsMap[K];

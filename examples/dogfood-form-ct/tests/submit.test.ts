@@ -92,9 +92,12 @@ describe('dogfood-form-ct — submit-success axis (all 5 form patterns)', () => 
     expect(adapter.metrics().submitInvocations).toBe(5);
   });
 
-  it('T-DFFC-SUB-010 metrics.handlersInvoked >= 5 (1 onSubmit per form)', async () => {
+  it('T-DFFC-SUB-010 metrics.handlersInvoked = 5 (exactly 1 onSubmit per form)', async () => {
+    // Tight equality — a regression that fires onSubmit twice (e.g. the
+    // form re-fires after the callback returns) would silently pass a
+    // greater-than-or-equal assertion.
     await submitAllForms(adapter);
-    expect(adapter.metrics().handlersInvoked).toBeGreaterThanOrEqual(5);
+    expect(adapter.metrics().handlersInvoked).toBe(5);
   });
 
   it('T-DFFC-SUB-011 submit payload formId echoes the input args.formId', async () => {

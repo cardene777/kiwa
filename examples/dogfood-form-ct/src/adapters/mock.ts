@@ -126,17 +126,22 @@ export function makeMockAdapter(): FormCTAdapter {
       return timed('interactValidation', async () => {
         const spec = FORM_SPECS[kind];
         const cy = ensureCT();
-        let capturedError: FormValidationError | null = null;
-        let submitCount = 0;
+        // Captured state lives on an object so TS narrows through `.error`
+        // reads without needing a cast — closure-captured `let` variables
+        // lose their narrowing across the async boundary.
+        const captured: {
+          error: FormValidationError | null;
+          submitCount: number;
+        } = { error: null, submitCount: 0 };
         const instrumentedArgs = {
           ...args,
           onValidationError: (err: FormValidationError) => {
-            capturedError = err;
+            captured.error = err;
             metricsAgg.handlersInvoked += 1;
             args.onValidationError?.(err);
           },
           onSubmit: (payload: FormSubmitPayload) => {
-            submitCount += 1;
+            captured.submitCount += 1;
             metricsAgg.handlersInvoked += 1;
             args.onSubmit?.(payload);
           },
@@ -156,19 +161,19 @@ export function makeMockAdapter(): FormCTAdapter {
             formId: args.formId,
             kind,
             errorText,
-            missingFieldIds: capturedError
-              ? (capturedError as FormValidationError).missingFieldIds
+            missingFieldIds: captured.error
+              ? captured.error.missingFieldIds
               : [],
-            submitCount,
+            submitCount: captured.submitCount,
           },
         });
         locator.unmount();
         return {
           formId: args.formId,
           kind,
-          error: capturedError,
+          error: captured.error,
           errorText,
-          submitCallbackCount: submitCount,
+          submitCallbackCount: captured.submitCount,
         };
       });
     },
@@ -180,17 +185,19 @@ export function makeMockAdapter(): FormCTAdapter {
       return timed('interactSubmit', async () => {
         const spec = FORM_SPECS[kind];
         const cy = ensureCT();
-        let capturedSubmit: FormSubmitPayload | null = null;
-        let validationCount = 0;
+        const captured: {
+          submit: FormSubmitPayload | null;
+          validationCount: number;
+        } = { submit: null, validationCount: 0 };
         const instrumentedArgs = {
           ...args,
           onSubmit: (payload: FormSubmitPayload) => {
-            capturedSubmit = payload;
+            captured.submit = payload;
             metricsAgg.handlersInvoked += 1;
             args.onSubmit?.(payload);
           },
           onValidationError: (err: FormValidationError) => {
-            validationCount += 1;
+            captured.validationCount += 1;
             metricsAgg.handlersInvoked += 1;
             args.onValidationError?.(err);
           },
@@ -207,19 +214,19 @@ export function makeMockAdapter(): FormCTAdapter {
           detail: {
             formId: args.formId,
             kind,
-            payloadKeys: capturedSubmit
-              ? Object.keys((capturedSubmit as FormSubmitPayload).values)
+            payloadKeys: captured.submit
+              ? Object.keys(captured.submit.values)
               : [],
-            validationCount,
+            validationCount: captured.validationCount,
           },
         });
         locator.unmount();
         return {
           formId: args.formId,
           kind,
-          submit: capturedSubmit,
-          submitCallbackCount: capturedSubmit ? 1 : 0,
-          validationErrorCount: validationCount,
+          submit: captured.submit,
+          submitCallbackCount: captured.submit ? 1 : 0,
+          validationErrorCount: captured.validationCount,
         };
       });
     },

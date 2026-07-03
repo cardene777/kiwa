@@ -92,11 +92,11 @@ describe('dogfood-form-ct — validation-error axis (all 5 form patterns)', () =
     expect(adapter.metrics().validationInvocations).toBe(5);
   });
 
-  it('T-DFFC-VAL-011 metrics.handlersInvoked >= 5 (1 onValidationError per form)', async () => {
+  it('T-DFFC-VAL-011 metrics.handlersInvoked = 5 (exactly 1 onValidationError per form)', async () => {
+    // Tight equality — a regression where the submit path fires
+    // onValidationError *and* onSubmit for the same click would inflate
+    // handlersInvoked, and a greater-than-or-equal assertion would miss it.
     await validateAllForms(adapter);
-    // Each validation branch fires onValidationError once. Because the
-    // fidelity harness instruments both onSubmit + onValidationError, the
-    // counter is incremented by the mock adapter regardless.
-    expect(adapter.metrics().handlersInvoked).toBeGreaterThanOrEqual(5);
+    expect(adapter.metrics().handlersInvoked).toBe(5);
   });
 });
