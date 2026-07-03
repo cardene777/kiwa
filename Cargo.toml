@@ -15,4 +15,5 @@ members = [
   "examples/contract-rust-foundry-poc",
   "examples/contract-rust-alloy-poc",
   "examples/dogfood-foundry-dapp",
+  "examples/dogfood-reth-node-test",
 ]
