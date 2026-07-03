@@ -1,6 +1,6 @@
 {
   "name": "dogfood-storybook-design-system",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app (v1.16-2) — a React design-system Storybook 8 harness that registers 12 components (Button / Input / Card / Modal / Dropdown / Tabs / Toast / Table / Tooltip / Badge / Avatar / Icon) as StoryObj (CSF3) + play function + a11y parameters, drivable in both KIWA_MODE=real (spawns @storybook/react preview with a real story loader via env-skip when STORYBOOK_URL is not set) and KIWA_MODE=mock (@kiwa-test/component createStoryRegistry + play + a11y). Behavioural fidelity feeds @kiwa-test/quality-metrics 7-axis release gate.",

@@ -1,6 +1,6 @@
 {
   "name": "dogfood-visual-regression",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app (v1.16-4) — Chromatic-style visual regression flow with baseline seed + pixel diff + accept / reject review workflow. 10 UI scenes (5 primitives × light + dark) run through a mock adapter (@kiwa-test/component createChromaticVisualMock + hashMarkup) and a skipped real adapter (chromatic-cli sim, env-gated on CHROMATIC_PROJECT_TOKEN). Each scene is asserted on 4 axes — seed / capture / diff-on-intent-change / accept-restores-baseline — with a bonus reject axis. Fidelity feeds @kiwa-test/quality-metrics 7-axis release gate + latency samples from perf-harness for the 3-layer perf report.",
