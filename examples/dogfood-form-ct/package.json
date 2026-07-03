@@ -1,0 +1,24 @@
+{
+  "name": "dogfood-form-ct",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app (v1.16-3) — 5 form Playwright Component Testing patterns (login / signup / checkout / profile / search) driven through a mock adapter (@kiwa-test/component createPlaywrightCTMock + mount + interact) and a real adapter (@playwright/experimental-ct-react, env-skip when PW_CT_ENDPOINT is unset). Each form is asserted on 4 axes — mount + validation error + submit success + a11y violation count = 0. Fidelity feeds @kiwa-test/quality-metrics 7-axis release gate + 4 latency samples from perf-harness for the 3-layer perf report.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/component -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "pretest:perf": "pnpm -F @kiwa-test/component -F @kiwa-test/core -F @kiwa-test/quality-metrics -F @kiwa-test/perf-harness build",
+    "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/component": "workspace:*",
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@kiwa-test/perf-harness": "workspace:*",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
