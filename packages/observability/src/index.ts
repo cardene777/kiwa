@@ -43,3 +43,56 @@ export {
   type DatadogMock,
   type SentryMock,
 } from './telemetry.js';
+export {
+  DashboardMock,
+  buildDashboardMock,
+  type DashboardConfig,
+  type PanelConfig,
+  type PanelKind,
+  type PanelResult,
+  type PanelThreshold,
+  type MetricQuery,
+  type MetricAggregation,
+} from './dashboard-mock.js';
+export {
+  AlertRouter,
+  metricsForRule,
+  type AlertRule,
+  type AlertOperator,
+  type AlertSeverity,
+  type AlertState,
+  type AlertFire,
+  type AlertReceiverEvent,
+  type EscalationStep,
+  type RouteEntry,
+  type Silence,
+} from './alert.js';
+export {
+  buildSpanTree,
+  renderFlameGraph,
+  drillDown,
+  flattenFlame,
+  type SpanNode,
+  type FlameNode,
+} from './trace-flame.js';
+export {
+  LogCorrelationIndex,
+  correlateLogsAndSpans,
+  type CorrelationKeys,
+  type LogSpanLink,
+} from './log-correlation.js';
+export {
+  panel_httpErrorRate,
+  panel_p99Latency,
+  panel_queueDepth,
+  rule_errorRateCritical,
+  rule_latencyDegraded,
+  rule_queueBackpressure,
+  defaultRoute,
+  escalation_pagerDutyTwoStep,
+  silence_maintenanceWindow,
+  trace_httpHandler,
+  trace_fanoutParallel,
+  trace_nestedRetry,
+  logs_forHttpTrace,
+} from './fixtures.js';

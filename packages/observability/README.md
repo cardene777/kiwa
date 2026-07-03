@@ -18,6 +18,21 @@ Observability adapter for kiwa — close the loop between Layer 1 spec, Layer 2 
 - `analyzeSpecCoverage({ specMarkdown, testCode })` — compare spec TC IDs with `it('T-XXX-NNN ...')` strings in test code and surface gaps both ways.
 - `renderDashboard({ history, flaky, gaps })` — print a markdown dashboard suitable for PR comments, README badges, or `decisions/` archives.
 
+### v1.1 — telemetry provider mocks
+
+- `createOtelMock()` / `createDatadogMock()` / `createSentryMock()` — in-memory mock for OpenTelemetry / Datadog / Sentry SDKs, all writing into a shared `TelemetryCollector` shape (spans / metrics / logs / exceptions / transactions).
+
+### v2.0 — runtime observability axes
+
+Four additional axes for asserting on runtime SaaS observability output during kiwa tests:
+
+- `DashboardMock` / `buildDashboardMock` — Grafana-style dashboard with N panels. Each panel runs a `MetricQuery` (`sum` / `avg` / `max` / `min` / `count` / `last`, optional `tagFilter` + time window) against a `TelemetryCollector.metrics` sink; optional `PanelThreshold[]` selects an `ok` / `warn` / `critical` badge. `refresh()` re-queries and increments `refreshCount`.
+- `AlertRouter` — Prometheus AlertManager style rule engine. Register `AlertRule[]`, walk a nested `RouteEntry` tree (deepest match wins), suppress with `Silence`, escalate with `setEscalation` + `tickEscalation` state machine (pending → firing → escalated → resolved).
+- `buildSpanTree` + `renderFlameGraph` + `drillDown` + `flattenFlame` — pure transforms over `SpanRecord[]` that rebuild parent chains, compute `totalMs` / `selfMs`, collapse siblings by name into `FlameNode`, and extract a subtree by name.
+- `LogCorrelationIndex` / `correlateLogsAndSpans` — bidirectional index over `LogRecord[]` + `SpanRecord[]`, keyed by `trace_id` / `span_id` attributes (configurable, with `altTraceIdKeys` fallback for Datadog / Sentry conventions).
+
+Named fixture builders (`panel_httpErrorRate` / `rule_errorRateCritical` / `trace_httpHandler` / `logs_forHttpTrace` etc.) let test authors bootstrap a realistic scenario in one call.
+
 ## Install
 
 ```bash
