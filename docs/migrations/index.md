@@ -14,5 +14,8 @@ Per-milestone migration guides that walk you through the code changes needed to 
 | [v1.10 → v1.11](./v1.10-to-v1.11) | ✅ | Additive-only | Quality metrics harness + dogfood app pattern + GitHub Pages |
 | [v1.11 → v1.12](./v1.11-to-v1.12) | ⚠️ AI-LLM only | 7 → 11 axis release gate + `@kiwa-test/ai-llm` v0.1 (Anthropic + OpenAI + Vercel AI SDK + LangChain mocks) + 3 dogfood apps |
 | [v1.12 → v1.13](./v1.12-to-v1.13) | ✅ | Additive-only | `@kiwa-test/realtime` v0.1 (Supabase Realtime + Ably + Pusher + Socket.io/SSE mocks) + `@kiwa-test/perf-harness` v0.1 + 3 dogfood apps (chat / cursor / notification) |
+| [v1.13 → v1.14](./v1.13-to-v1.14) | ✅ | Additive-only | Horizontal expansion — payment + search + observability + Go framework adapters |
+| [v1.14 → v1.15](./v1.14-to-v1.15) | ✅ | Additive-only | `@kiwa-test/ai-llm` v0.2 (multimodal + Whisper) + `@kiwa-test/mcp` v0.1 + `@kiwa-test/agent` v0.1 |
+| [v1.15 → v1.16](./v1.15-to-v1.16) | ✅ | Additive-only | `@kiwa-test/component` v0.1 (Storybook 8 + Playwright CT + Chromatic unified mock) + 3 dogfood apps (design-system / form-ct / visual-regression) |
 
 See [`docs/migrations/README.md`](./README) for the style guide and legacy migration content.
