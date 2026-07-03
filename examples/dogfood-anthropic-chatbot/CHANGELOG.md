@@ -1,5 +1,12 @@
 # dogfood-anthropic-chatbot
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [93758e0]
+  - @kiwa-test/ai-llm@0.3.0
+
 ## 0.0.1
 
 ### Patch Changes

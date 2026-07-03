@@ -1,6 +1,6 @@
 {
   "name": "dogfood-mcp-tool-agent",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app (v1.15-5) — a Node.js MCP tool-use agent that exposes 3 tools (weather / calculator / search) via a Model Context Protocol server and drives an Anthropic Claude client through the JSON-RPC 2.0 initialize -> tools/list -> tools/call chain, drivable in both KIWA_MODE=real (spawns @modelcontextprotocol/sdk stdio server + optional real Anthropic Messages API when ANTHROPIC_API_KEY is set) and KIWA_MODE=mock (@kiwa-test/mcp in-process McpServer + @kiwa-test/ai-llm createAnthropicMock) so behavioural fidelity feeds @kiwa-test/quality-metrics 11-axis release gate.",
