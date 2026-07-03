@@ -113,6 +113,14 @@ export default defineConfig({
             { text: '24 — Trace flame graph (span tree + drill-down + log correlation)', link: '/tutorials/24-trace-flame-graph' },
           ],
         },
+        {
+          text: 'Blockchain 深化 (v1.18)',
+          items: [
+            { text: '25 — Reth node test (dev chain + reorg + fidelity matrix)', link: '/tutorials/25-reth-node-test' },
+            { text: '26 — Foundry invariant + fuzz runner (10 000 runs + shrink parser)', link: '/tutorials/26-foundry-invariant-fuzz' },
+            { text: '27 — dApp e2e reorg (snapshot + revert + refetch across 4 scenarios)', link: '/tutorials/27-dapp-e2e-reorg' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -126,6 +134,7 @@ export default defineConfig({
             { text: 'Telemetry testing (span + metric + log aggregation SSOT)', link: '/concepts/telemetry-testing' },
             { text: 'Component testing (story + CT + visual diff SSOT)', link: '/concepts/component-testing' },
             { text: 'Observability v2 testing (dashboard + alert + trace + correlation SSOT)', link: '/concepts/observability-v2-testing' },
+            { text: 'Blockchain testing (chain state / EL client / fuzz / reorg SSOT)', link: '/concepts/blockchain-testing' },
           ],
         },
       ],
@@ -142,6 +151,7 @@ export default defineConfig({
             { text: 'v1.14 → v1.15', link: '/migrations/v1.14-to-v1.15' },
             { text: 'v1.15 → v1.16', link: '/migrations/v1.15-to-v1.16' },
             { text: 'v1.16 → v1.17', link: '/migrations/v1.16-to-v1.17' },
+            { text: 'v1.17 → v1.18', link: '/migrations/v1.17-to-v1.18' },
           ],
         },
       ],
