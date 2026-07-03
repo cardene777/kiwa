@@ -52,6 +52,7 @@ const THRESHOLDS = {
   '@kiwa-test/solidstart': 80,
   '@kiwa-test/qwikcity': 80,
   '@kiwa-test/edge': 80,
+  '@kiwa-test/solidjs': 80,
 };
 
 const PKG_DIRS = {
@@ -74,6 +75,7 @@ const PKG_DIRS = {
   '@kiwa-test/solidstart': 'packages/solidstart',
   '@kiwa-test/qwikcity': 'packages/qwikcity',
   '@kiwa-test/edge': 'packages/edge',
+  '@kiwa-test/solidjs': 'packages/solidjs',
 };
 
 const PACKAGES = Object.keys(THRESHOLDS);

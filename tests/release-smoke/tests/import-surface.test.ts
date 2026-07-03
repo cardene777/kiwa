@@ -249,6 +249,44 @@ describe('@kiwa-test/edge surface', () => {
   });
 });
 
+describe('@kiwa-test/solidjs surface', () => {
+  it('exports mockSignal + mockEffect + batch + track + createResourceStub + brand symbols (v0.1.0, Issue #813)', async () => {
+    const mod = await import('@kiwa-test/solidjs');
+    expect(typeof mod.mockSignal).toBe('function');
+    expect(typeof mod.mockEffect).toBe('function');
+    expect(typeof mod.batch).toBe('function');
+    expect(typeof mod.track).toBe('function');
+    expect(typeof mod.createResourceStub).toBe('function');
+    expect(typeof mod.SIGNAL_SYMBOL).toBe('symbol');
+    expect(typeof mod.EFFECT_SYMBOL).toBe('symbol');
+    expect(typeof mod.RESOURCE_SYMBOL).toBe('symbol');
+  });
+
+  it('exports renderSolid + hydrate + createRoot + h + stringify + findElements (v0.1.0)', async () => {
+    const mod = await import('@kiwa-test/solidjs');
+    expect(typeof mod.renderSolid).toBe('function');
+    expect(typeof mod.hydrate).toBe('function');
+    expect(typeof mod.createRoot).toBe('function');
+    expect(typeof mod.h).toBe('function');
+    expect(typeof mod.stringify).toBe('function');
+    expect(typeof mod.findElements).toBe('function');
+    expect(typeof mod.SOLID_ELEMENT_SYMBOL).toBe('symbol');
+  });
+
+  it('exports invokeSolidRoute + renderWithSuspense + errorBoundary + redirect + notFound + suspense/error signals (v0.1.0)', async () => {
+    const mod = await import('@kiwa-test/solidjs');
+    expect(typeof mod.invokeSolidRoute).toBe('function');
+    expect(typeof mod.renderWithSuspense).toBe('function');
+    expect(typeof mod.errorBoundary).toBe('function');
+    expect(typeof mod.redirect).toBe('function');
+    expect(typeof mod.notFound).toBe('function');
+    expect(typeof mod.SOLID_REDIRECT_SYMBOL).toBe('symbol');
+    expect(typeof mod.SOLID_NOT_FOUND_SYMBOL).toBe('symbol');
+    expect(typeof mod.SUSPENSE_BOUNDARY_SYMBOL).toBe('symbol');
+    expect(typeof mod.ERROR_BOUNDARY_SYMBOL).toBe('symbol');
+  });
+});
+
 describe('@kiwa-test/auth surface', () => {
   it('exports setupNextAuthEnv + createInMemoryAdapter + provider factories (v0.1.0, Issue #637)', async () => {
     const mod = await import('@kiwa-test/auth');
