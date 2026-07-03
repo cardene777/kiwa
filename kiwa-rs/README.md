@@ -12,7 +12,7 @@ server with a request recorder (`kiwa::integration::mock_server`).
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = "0.4"
+kiwa-test-rs = "0.5"
 ```
 
 Requires Rust >= 1.75 (edition 2021).
@@ -23,7 +23,7 @@ avoid pulling in `hyper` / `tokio`:
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = { version = "0.4", default-features = false }
+kiwa-test-rs = { version = "0.5", default-features = false }
 ```
 
 The `axum` feature adds an in-process axum `Router` test adapter
@@ -31,7 +31,7 @@ The `axum` feature adds an in-process axum `Router` test adapter
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = { version = "0.4", features = ["axum"] }
+kiwa-test-rs = { version = "0.5", features = ["axum"] }
 ```
 
 The `actix-web` feature adds an in-process actix-web `App` test adapter
@@ -39,7 +39,7 @@ The `actix-web` feature adds an in-process actix-web `App` test adapter
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = { version = "0.4", features = ["actix-web"] }
+kiwa-test-rs = { version = "0.5", features = ["actix-web"] }
 ```
 
 The `tower-http` feature adds a middleware chain adapter for axum
@@ -51,7 +51,7 @@ The feature transitively enables `axum` because the chain wraps an axum
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = { version = "0.4", features = ["tower-http"] }
+kiwa-test-rs = { version = "0.5", features = ["tower-http"] }
 ```
 
 After publish to crates.io (planned during v1.4 close-out):
@@ -300,7 +300,7 @@ feature it wraps):
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = { version = "0.4", features = ["tower-http"] }
+kiwa-test-rs = { version = "0.5", features = ["tower-http"] }
 tower = { version = "0.5", features = ["util"] }
 tower-http = { version = "0.6", features = ["cors", "trace", "timeout", "set-header"] }
 ```
@@ -392,7 +392,7 @@ set:
 
 ```toml
 [dev-dependencies]
-kiwa-test-rs = { version = "0.4", features = ["tower-http"] }
+kiwa-test-rs = { version = "0.5", features = ["tower-http"] }
 tower = { version = "0.5", features = ["util"] }
 # `tower-http` itself is pulled in transitively by the kiwa `tower-http`
 # feature — you only need to name it explicitly if a test binary uses

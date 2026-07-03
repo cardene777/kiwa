@@ -86,6 +86,19 @@ const V1_17_PAGES = [
   { path: '/migrations/v1.16-to-v1.17', title: 'v1.16 → v1.17' },
 ];
 
+// v1.18 pages — new tutorials + concept doc + migration guide added under the
+// Blockchain 深化 milestone (Issue #797 land + this publish PR). Mirrors the
+// v1.12 / v1.13 / v1.16 / v1.17 anchor phrase pattern. Each phrase is a
+// substring the rendered VitePress <main> will always include (checked
+// against the actual page headings + body text — not frontmatter titles).
+const V1_18_PAGES = [
+  { path: '/tutorials/25-reth-node-test', title: 'Reth node test' },
+  { path: '/tutorials/26-foundry-invariant-fuzz', title: 'Foundry invariant + fuzz runner' },
+  { path: '/tutorials/27-dapp-e2e-reorg', title: 'dApp e2e reorg' },
+  { path: '/concepts/blockchain-testing', title: 'Blockchain testing' },
+  { path: '/migrations/v1.17-to-v1.18', title: 'v1.17 → v1.18' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -153,6 +166,20 @@ test.describe('docs site — v1.16 pages render', () => {
 test.describe('docs site — v1.17 pages render', () => {
   for (const p of V1_17_PAGES) {
     test(`v1.17 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.18 pages render', () => {
+  for (const p of V1_18_PAGES) {
+    test(`v1.18 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
