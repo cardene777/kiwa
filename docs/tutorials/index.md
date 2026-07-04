@@ -40,6 +40,9 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 28 | [SolidJS Signal + Effect + Resource + Suspense (fine-grained reactivity)](./28-solidjs-signal-app) | Node.js / vitest | 10 min |
 | 29 | [Fresh Islands + Route Handler + Head normalize (Deno partial hydration)](./29-fresh-islands) | Node.js / vitest | 10 min |
 | 30 | [HonoJS + hc RPC type-safe client + Workers env (KV / D1 / R2)](./30-hono-workers-rpc) | Node.js / vitest | 12 min |
+| 31 | [Kafka event pipeline (producer + consumer group + exactly-once + DLQ)](./31-kafka-event-pipeline) | Node.js / vitest | 12 min |
+| 32 | [Redpanda + schema registry (Avro schemas + evolution + compatibility)](./32-redpanda-schema-registry) | Node.js / vitest | 12 min |
+| 33 | [NATS JetStream (persistent streams + KV + Object store + subject routing)](./33-nats-jetstream) | Node.js / vitest | 12 min |
 
 ## AI-LLM tutorials (v1.12)
 
@@ -64,3 +67,7 @@ Tutorials 25 – 27 exercise the v0.5 additions to [`kiwa-test-rs`](https://gith
 ## Framework 深化 tutorials (v1.19)
 
 Tutorials 28 – 30 exercise the three new modern web framework adapters — [`@kiwa-test/solidjs`](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/README.md), [`@kiwa-test/fresh`](https://github.com/cardene777/kiwa/blob/main/packages/fresh/README.md), and [`@kiwa-test/hono`](https://github.com/cardene777/kiwa/blob/main/packages/hono/README.md). Each cuts down to a single vitest suite that walks the framework's characteristic runtime contract without booting the real runtime — SolidJS Signal-based fine-grained reactivity + Suspense-shaped resources (`mockSignal` / `mockEffect` / `batch` / `createResourceStub` / `renderWithSuspense`), Deno Fresh Islands architecture + Route Handler + Head normalize (`invokeFreshHandler` / `defineIsland` / `hydrateIslands` / `mergeHead`), and Cloudflare Workers-style HonoJS + hc typed RPC + KV / D1 / R2 mocks (`createHonoApp` / `createRpcClient` / `mockKVNamespace` / `mockD1Database` / `mockR2Bucket`). See [`docs/concepts/modern-web-framework-testing.md`](../concepts/modern-web-framework-testing) for the 4 axes v1.19 adds on top of the v1.14 horizontal framework baseline.
+
+## Streaming 深化 tutorials (v1.20)
+
+Tutorials 31 – 33 exercise the new [`@kiwa-test/streaming`](https://github.com/cardene777/kiwa/blob/main/packages/streaming/README.md) unified mock — one for each of Kafka (kafkajs-shaped producer / consumer group / transactional producer / DLQ), Redpanda (Kafka API compat + colocated schema registry with BACKWARD / FORWARD / FULL compatibility gates), and NATS JetStream (persistent streams + KV Store + Object Store + subject-based routing with `*` single-token and `>` trailing-multi-token wildcards). See [`docs/concepts/streaming-testing.md`](../concepts/streaming-testing) for the 5 semantics (producer / consumer / exactly-once / DLQ / schema-registry) that streaming tests need beyond the time-axis mocks of v1.13.

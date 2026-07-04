@@ -20,5 +20,6 @@ Per-milestone migration guides that walk you through the code changes needed to 
 | [v1.16 → v1.17](./v1.16-to-v1.17) | ✅ | Additive-only | `@kiwa-test/observability` v2.0 (dashboard + alert + trace flame graph + log correlation) + 3 dogfood apps (dashboard / alert-orchestrator / trace-flame-graph) |
 | [v1.17 → v1.18](./v1.17-to-v1.18) | ✅ | Additive-only | `kiwa-test-rs` v0.5 (Blockchain 深化 — `contract::reth` + `contract::foundry::invariant` + `contract::alloy::helpers`) + `@kiwa-test/dapp` reorg helpers + 3 dogfood apps (reth-node-test / foundry-invariant-fuzz / dapp-e2e-reorg) |
 | [v1.18 → v1.19](./v1.18-to-v1.19) | ✅ | Additive-only | `@kiwa-test/solidjs` v0.1 (Signal + Effect + Resource + Suspense) + `@kiwa-test/fresh` v0.1 (Islands + Route Handler + Head normalize) + `@kiwa-test/hono` v0.1 (Cloudflare Workers + hc RPC + KV / D1 / R2) + 3 dogfood apps (solidjs-signal-app / fresh-islands / hono-workers-rpc) |
+| [v1.19 → v1.20](./v1.19-to-v1.20) | ✅ | Additive-only | `@kiwa-test/streaming` v0.1 (Kafka + Redpanda + NATS unified mock — producer / consumer / exactly-once / DLQ / schema-registry 5 semantics + JetStream + KV + Object stores) + 3 dogfood apps (kafka-event-pipeline / redpanda-schema-registry / nats-jetstream) |
 
 See [`docs/migrations/README.md`](./README) for the style guide and legacy migration content.
