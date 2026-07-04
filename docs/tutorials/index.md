@@ -48,6 +48,9 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 36 | [OIDC provider + Federation (Discovery + DCR + id_token + trust chain)](./36-oidc-federation) | Node.js / vitest | 12 min |
 | 37 | [Real driver testing (Keycloak + oauth2-mock-server testcontainers)](./37-real-driver-testing) | Node.js / vitest + Docker | 15 min |
 | 38 | [Passkey caBLE hybrid transport (QR + BLE + WebSocket tunnel)](./38-passkey-cable-flow) | Node.js / vitest | 15 min |
+| 39 | [Stripe advanced billing (subscription + 3DS + dunning)](./39-stripe-billing) | Node.js / vitest | 15 min |
+| 40 | [Paddle merchant-of-record (inline checkout + tier + VAT/GST auto-calc)](./40-paddle-merchant) | Node.js / vitest | 15 min |
+| 41 | [Lemon Squeezy refund + chargeback dispute lifecycle](./41-lemon-squeezy-license) | Node.js / vitest | 15 min |
 
 ## AI-LLM tutorials (v1.12)
 
@@ -84,3 +87,7 @@ Tutorials 34 – 36 exercise the four new protocol adapters in [`@kiwa-test/auth
 ## Real driver tutorials (v1.22)
 
 Tutorials 37 – 38 exercise the v1.22 real driver layer on top of the v1.21 4 protocol mocks — Keycloak testcontainers wiring for OIDC + Federation, oauth2-mock-server testcontainers for OAuth 2.1, Chrome caBLE hybrid transport for Passkey. Tutorial 37 walks the 3 execution modes (`mock only` / `real-optional` / `real-required`) end-to-end with a Keycloak container; tutorial 38 walks the CTAP2 hybrid transport 5-axis fidelity harness (QR generation / BLE advertisement handshake / WebSocket tunnel establishment / credential migration payload / signature roundtrip). See [`docs/concepts/real-driver-testing.md`](../concepts/real-driver-testing) for the 3 execution modes SSOT + the fidelity axis catalog across all 3 v1.22 dogfood apps.
+
+## Payment 深化 tutorials (v1.23)
+
+Tutorials 39 – 41 exercise the v0.3 additions to [`@kiwa-test/payment`](https://github.com/cardene777/kiwa/blob/main/packages/payment/README.md) — 9 axes of advanced billing semantics (dunning / retry / 3DS v2 / SCA / PSD2 mandate / subscription lifecycle / invoice lifecycle / VAT-GST-sales-tax / chargeback dispute) — one for each of the 3 target providers Stripe (Next.js 15 subscription + 3DS + Smart Retries dunning), Paddle (Nuxt 3 merchant-of-record + inline checkout + tier upgrade + VAT/GST auto-calc), and Lemon Squeezy (SvelteKit hosted checkout + license key + refund + chargeback dispute). See [`docs/concepts/billing-semantics.md`](../concepts/billing-semantics) for the 9-axis SSOT + provider-specific fidelity surface reference across all 3 v1.23 dogfood merchant apps.

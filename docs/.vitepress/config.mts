@@ -152,6 +152,14 @@ export default defineConfig({
             { text: '38 — Passkey caBLE hybrid transport (QR + BLE + WebSocket tunnel)', link: '/tutorials/38-passkey-cable-flow' },
           ],
         },
+        {
+          text: 'Payment 深化 (v1.23)',
+          items: [
+            { text: '39 — Stripe advanced billing (subscription + 3DS + dunning)', link: '/tutorials/39-stripe-billing' },
+            { text: '40 — Paddle merchant-of-record (inline checkout + tier + VAT/GST auto-calc)', link: '/tutorials/40-paddle-merchant' },
+            { text: '41 — Lemon Squeezy refund + chargeback dispute lifecycle', link: '/tutorials/41-lemon-squeezy-license' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -170,6 +178,7 @@ export default defineConfig({
             { text: 'Streaming testing (producer / consumer / exactly-once / DLQ / schema-registry SSOT)', link: '/concepts/streaming-testing' },
             { text: 'Auth protocol testing (virtual authenticator / PKCE+DPoP / id_token / discovery+federation SSOT)', link: '/concepts/auth-protocol-testing' },
             { text: 'Real driver testing (mock only / real-optional / real-required 3 execution modes SSOT)', link: '/concepts/real-driver-testing' },
+            { text: 'Advanced billing semantics (9-axis SSOT — dunning / retry / 3DS / SCA / PSD2 / subscription / invoice / tax / chargeback)', link: '/concepts/billing-semantics' },
           ],
         },
       ],
@@ -191,6 +200,7 @@ export default defineConfig({
             { text: 'v1.19 → v1.20', link: '/migrations/v1.19-to-v1.20' },
             { text: 'v1.20 → v1.21', link: '/migrations/v1.20-to-v1.21' },
             { text: 'v1.21 → v1.22', link: '/migrations/v1.21-to-v1.22' },
+            { text: 'v1.22 → v1.23', link: '/migrations/v1.22-to-v1.23' },
           ],
         },
       ],
