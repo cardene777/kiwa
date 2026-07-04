@@ -14,10 +14,12 @@
  */
 
 import type {
+  AuthenticatorAssertionResponse,
   AuthenticatorAttestationResponse,
   AuthenticatorSelectionCriteria,
   WebAuthnAttestationConveyancePreference,
   WebAuthnCredential,
+  WebAuthnUserVerificationRequirement,
 } from '@kiwa-test/auth';
 
 /**
@@ -48,12 +50,47 @@ export interface RegisterResult {
 }
 
 /**
+ * Input the RP consumes at the start of the assertion (signin) ceremony.
+ * Mirrors the fields a real client passes to `navigator.credentials.get({
+ * publicKey })`. `allowCredentialIds` is optional — an empty / omitted list
+ * lets the authenticator surface any discoverable (resident-key) credential
+ * per WebAuthn L3 §5.5 step 3.
+ */
+export interface SigninInput {
+  rpId: string;
+  challenge: string;
+  allowCredentialIds?: string[];
+  userVerification?: WebAuthnUserVerificationRequirement;
+}
+
+/**
+ * Output the RP produces after a successful assertion.
+ *
+ * Includes the raw {@link AuthenticatorAssertionResponse} from the
+ * authenticator (`clientDataJSON` / `authenticatorData` / `signature`) plus
+ * the RP-side `verifiedCredential` snapshot — post-increment `signCount` +
+ * `lastUsedAt` — so the fidelity harness can diff monotonic counter movement
+ * across mock and real adapters.
+ */
+export interface SigninResult {
+  assertionResponse: AuthenticatorAssertionResponse;
+  verifiedCredential: WebAuthnCredential;
+  /**
+   * `signCount` value the RP had persisted **before** this assertion. Real
+   * WebAuthn RPs use `previousSignCount < signCount` as the clone-detection
+   * check (§6.1.1) — surfacing both sides lets the harness assert the
+   * monotonic bump without re-reading the store.
+   */
+  previousSignCount: number;
+}
+
+/**
  * Trace event — every adapter method appends one entry to a shared trace
  * buffer. Downstream tests diff the trace across the two adapters to detect
  * behavioural divergences.
  */
 export interface TraceEvent {
-  op: 'register' | 'listCredentials' | 'deleteCredential' | 'reset';
+  op: 'register' | 'signin' | 'listCredentials' | 'deleteCredential' | 'reset';
   ok: boolean;
   errorKind?: string | undefined;
   detail?: Record<string, unknown> | undefined;
@@ -71,6 +108,17 @@ export interface WebAuthnRPAdapter {
    * compared.
    */
   register(input: RegisterInput): Promise<RegisterResult>;
+
+  /**
+   * Drive a full assertion (signin) ceremony. WebAuthn L3 §7.2 —
+   * authenticator produces an `AuthenticatorAssertionResponse`, RP verifies
+   * `clientData.type === 'webauthn.get'`, challenge match, origin match,
+   * `signCount` monotonic bump, and updates the persisted credential. Both
+   * adapters must return the same {@link SigninResult} shape so Sub-Issue
+   * #857 fidelity axes (signature format / counter increment / credential id
+   * match) can be diffed side-by-side.
+   */
+  signin(input: SigninInput): Promise<SigninResult>;
 
   /**
    * Snapshot of every persisted credential the RP is currently tracking.

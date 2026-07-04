@@ -19,6 +19,8 @@ import {
 import type {
   RegisterInput,
   RegisterResult,
+  SigninInput,
+  SigninResult,
   TraceEvent,
   WebAuthnRPAdapter,
 } from './interface.js';
@@ -48,6 +50,25 @@ function classifyCredentialCreationError(err: unknown): string {
   if (message.includes('excludeCredentials matched')) return 'excluded_credential_reused';
   if (message.includes('challenge is required')) return 'missing_challenge';
   return 'credential_creation_failed';
+}
+
+/**
+ * Map a kiwa `credentialAssertion` rejection to a stable trace `errorKind`.
+ * Sub-Issue #858 (userVerification 4 pattern) will build on this — assertion
+ * rejections map to a stable vocabulary so downstream tests do not scrape
+ * error messages.
+ */
+function classifyCredentialAssertionError(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  if (message.includes('userVerification=required')) return 'user_verification_unsupported';
+  if (message.includes('allowCredentials matched no stored credential')) {
+    return 'allow_credentials_no_match';
+  }
+  if (message.includes('no credentials are registered')) return 'no_credentials_registered';
+  if (message.includes('no user-present authenticator')) return 'no_user_present_authenticator';
+  if (message.includes('challenge is required')) return 'missing_challenge';
+  if (message.includes('rpId is required')) return 'missing_rp_id';
+  return 'credential_assertion_failed';
 }
 
 export function makeMockAdapter(opts: MakeMockAdapterOptions = {}): WebAuthnRPAdapter & {
@@ -131,6 +152,108 @@ export function makeMockAdapter(opts: MakeMockAdapterOptions = {}): WebAuthnRPAd
         record('register', false, { errorKind });
         throw err;
       }
+    },
+
+    async signin(input: SigninInput): Promise<SigninResult> {
+      // Validate the RP-facing input up-front so trace errorKind stays
+      // stable no matter what the underlying kiwa primitive checks first.
+      // WebAuthn L3 §7.2 step 5 requires the RP to have `challenge`
+      // available and to know the target `rpId` before invoking the
+      // authenticator.
+      if (!input.rpId) {
+        record('signin', false, { errorKind: 'missing_rp_id' });
+        throw new Error('makeMockAdapter.signin: rpId is required');
+      }
+      if (!input.challenge) {
+        record('signin', false, { errorKind: 'missing_challenge' });
+        throw new Error('makeMockAdapter.signin: challenge is required');
+      }
+      const kiwaEnv = await getEnv();
+      // Look up the stored credential(s) the caller is asserting against so
+      // the RP can (a) surface the pre-assertion `signCount` for the fidelity
+      // harness and (b) reject up-front when the credential id does not
+      // resolve. WebAuthn L3 §7.2 step 3 requires this lookup.
+      const allowIds = input.allowCredentialIds ?? [];
+      const candidateIds = allowIds.length
+        ? allowIds
+        : server.listCredentials().map((cred) => cred.credentialId);
+      if (candidateIds.length === 0) {
+        record('signin', false, { errorKind: 'no_credentials_registered' });
+        throw new Error('makeMockAdapter.signin: no credentials are registered');
+      }
+      // Pre-assertion snapshot — mirrors what the RP would read from its
+      // database before dispatching to the authenticator. §6.1.1 clone
+      // detection compares this against the assertion's `signCount`.
+      const preSnapshots = new Map<string, number>();
+      for (const id of candidateIds) {
+        const stored = server.getCredential(id);
+        if (stored) preSnapshots.set(id, stored.signCount);
+      }
+
+      let assertionResponse;
+      try {
+        assertionResponse = await kiwaEnv.credentialAssertion({
+          rpId: input.rpId,
+          challenge: input.challenge,
+          userVerification: input.userVerification ?? 'preferred',
+          ...(allowIds.length
+            ? { allowCredentials: allowIds.map((id) => ({ id, type: 'public-key' as const })) }
+            : {}),
+        });
+      } catch (err) {
+        // kiwa's credentialAssertion rejects on allowCredentials mismatch,
+        // no user-present authenticator, and UV=required + no-UV-support.
+        // Map to a stable errorKind so downstream Sub-Issues can assert on
+        // the trace.
+        record('signin', false, { errorKind: classifyCredentialAssertionError(err) });
+        throw err;
+      }
+
+      const previousSignCount = preSnapshots.get(assertionResponse.credentialId) ?? 0;
+      // The kiwa mock mutates the credential registry it shares with the env;
+      // pull the freshly bumped credential so the RP-side store stays in sync
+      // with the authenticator side.
+      const bumped = kiwaEnv.getCredential(assertionResponse.credentialId);
+      if (!bumped) {
+        record('signin', false, {
+          errorKind: 'credential_not_persisted',
+          detail: { credentialId: assertionResponse.credentialId },
+        });
+        throw new Error(
+          `makeMockAdapter.signin: kiwa env lost credential "${assertionResponse.credentialId}" mid-assertion`,
+        );
+      }
+      // WebAuthn L3 §7.2 step 21 — RP MUST verify `signCount > storedSignCount`
+      // (or storedSignCount === 0). Surface a stable errorKind for the
+      // clone-detection scenario Sub-Issue #859 will build on, and record
+      // both sides of the counter so the failure is diagnosable off the
+      // trace alone.
+      if (bumped.signCount <= previousSignCount) {
+        record('signin', false, {
+          errorKind: 'sign_count_regressed',
+          detail: {
+            credentialId: bumped.credentialId,
+            previousSignCount,
+            signCount: bumped.signCount,
+          },
+        });
+        throw new Error(
+          `makeMockAdapter.signin: signCount did not advance (previous=${previousSignCount}, new=${bumped.signCount})`,
+        );
+      }
+      server.persistCredential(bumped);
+      record('signin', true, {
+        detail: {
+          credentialId: bumped.credentialId,
+          previousSignCount,
+          signCount: bumped.signCount,
+        },
+      });
+      return {
+        assertionResponse,
+        verifiedCredential: bumped,
+        previousSignCount,
+      };
     },
 
     listCredentials(): WebAuthnCredential[] {
