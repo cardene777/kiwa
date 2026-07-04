@@ -1,6 +1,6 @@
 {
   "name": "dogfood-fresh-islands",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app (v1.19-3) — a Deno Fresh Islands + Route Handler + partial hydration + edge runtime harness that exercises 4 flows (route Handler dispatch / defineRoute page tree / island mount + interaction / Head merge + edge env) inside GreetRoute / Counter Island / TodoList Island / SiteHead components. Drivable in both KIWA_MODE=real (spawns real Deno Fresh + fresh-testing-library through env-skip when DENO_INSTALLED=1) and KIWA_MODE=mock (@kiwa-test/fresh invokeFreshHandler / invokeDefineRoute / hydrateIslands / mergeHead). Behavioural fidelity feeds @kiwa-test/quality-metrics 7-axis release gate.",
