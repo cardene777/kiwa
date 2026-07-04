@@ -7,16 +7,20 @@
  * built-in fetch-shaped invoker) or by mounting the handlers into a bare
  * Node HTTP server without booting a real Cloudflare Worker.
  *
- * Route mapping (Sub-Issue v1.21-3a, this file):
+ * Route mapping:
  *   GET  /.well-known/openid-configuration → adapter.discovery()
- *   GET  /authorize                        → adapter.authorize(...)
- *   POST /token                            → adapter.token(...)
+ *   GET  /authorize                        → assertAuthorizeQueryPkce(...) → adapter.authorize(...)
+ *   POST /token                            → assertTokenPkce(...) → adapter.token(...)
  *   POST /revoke                           → adapter.revoke(...)
  *   POST /introspect                       → adapter.introspect(...)
  *
- * PKCE + DPoP + refresh rotation + revocation cascade are validated by
- * the underlying kiwa AS — the Hono handler is a translation layer
- * between Hono's `Context` and the shared adapter contract.
+ * Sub-Issue v1.21-3a landed the routes + OAuth 2.1 hardening for
+ * `response_type` + `grant_type`. Sub-Issue v1.21-3b (this file) added
+ * the PKCE pre-flight guards at `/authorize` (method + challenge) and
+ * `/token` (verifier format). Cryptographic verifier ↔ challenge
+ * matching stays inside the kiwa AS because the recorded challenge
+ * lives there; the pre-flight guards keep the error-kind surface
+ * uniform across mock + real drivers.
  */
 
 import { Hono } from 'hono';
@@ -25,6 +29,9 @@ import type {
   TokenRequest,
 } from '@kiwa-test/auth';
 import type { OAuth21ASAdapter } from '../adapters/interface.js';
+import { assertAuthorizeQueryPkce } from '../app/authorize/route.js';
+import { assertTokenPkce } from '../app/token/route.js';
+import { PkceValidationError, type PkceRejectionKind } from './pkce.js';
 
 export interface CreateHonoAppOptions {
   adapter: OAuth21ASAdapter;
@@ -87,17 +94,23 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
         400,
       );
     }
-    // OAuth 2.1 forbids `plain` PKCE outright. Refuse before touching
-    // the AS so the error is deterministic even when the AS is not
-    // provisioned.
-    if (codeChallengeMethod && codeChallengeMethod !== 'S256') {
-      return c.json(
-        {
-          error: 'invalid_request',
-          error_description: `code_challenge_method "${codeChallengeMethod}" refused — RFC 9700 §2.1.1 requires S256`,
-        },
-        400,
-      );
+    // OAuth 2.1 forbids `plain` PKCE + missing method + missing challenge.
+    // Run the guard on the raw query values first — if it succeeds the
+    // method is proven to be `S256` and the AS-facing request can be
+    // built with the narrow type.
+    try {
+      assertAuthorizeQueryPkce({ codeChallenge, codeChallengeMethod });
+    } catch (err) {
+      if (err instanceof PkceValidationError) {
+        return c.json(
+          {
+            error: mapPkceKindToAuthorizeCode(err.kind),
+            error_description: err.message,
+          },
+          400,
+        );
+      }
+      throw err;
     }
 
     const request: AuthorizationRequest = {
@@ -106,7 +119,7 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
       redirectUri,
       state: state ?? '',
       ...(scope !== undefined ? { scope } : {}),
-      codeChallenge: codeChallenge ?? '',
+      codeChallenge: codeChallenge as string,
       codeChallengeMethod: 'S256',
       ...(resource !== undefined ? { resource } : {}),
     };
@@ -224,6 +237,7 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
     }
 
     try {
+      assertTokenPkce(request);
       const response = adapter.token(request);
       // RFC 6749 §5.1 — token response uses snake_case keys.
       return c.json(
@@ -237,6 +251,15 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
         200,
       );
     } catch (err) {
+      if (err instanceof PkceValidationError) {
+        return c.json(
+          {
+            error: mapPkceKindToTokenCode(err.kind),
+            error_description: err.message,
+          },
+          400,
+        );
+      }
       const message = err instanceof Error ? err.message : String(err);
       return c.json(
         {
@@ -365,4 +388,46 @@ function classifyTokenErrorCode(message: string): string {
   if (message.includes('DPoP')) return 'invalid_dpop_proof';
   if (message.includes('refresh_token')) return 'invalid_grant';
   return 'invalid_request';
+}
+
+/**
+ * Map a {@link PkceRejectionKind} raised at `/authorize` to the OAuth 2.1
+ * error code the client should observe. RFC 6749 §4.1.2.1 —
+ * `invalid_request` covers malformed / missing parameters (missing method
+ * / plain refused / unknown method / missing challenge).
+ */
+function mapPkceKindToAuthorizeCode(kind: PkceRejectionKind): string {
+  switch (kind) {
+    case 'method_plain_refused':
+    case 'method_missing_refused':
+    case 'method_unknown_refused':
+    case 'verifier_too_short':
+    case 'verifier_too_long':
+    case 'verifier_invalid_charset':
+      return 'invalid_request';
+    // verifier_mismatch cannot happen at /authorize (no verifier at that
+    // stage) but is included so the switch is exhaustive.
+    case 'verifier_mismatch':
+      return 'invalid_grant';
+  }
+}
+
+/**
+ * Map a {@link PkceRejectionKind} raised at `/token` to the OAuth 2.1
+ * error code. RFC 6749 §5.2 — `invalid_grant` for verifier mismatch (the
+ * grant is invalid), `invalid_request` for the pre-flight format
+ * failures (missing / malformed verifier).
+ */
+function mapPkceKindToTokenCode(kind: PkceRejectionKind): string {
+  switch (kind) {
+    case 'verifier_mismatch':
+      return 'invalid_grant';
+    case 'verifier_too_short':
+    case 'verifier_too_long':
+    case 'verifier_invalid_charset':
+    case 'method_plain_refused':
+    case 'method_missing_refused':
+    case 'method_unknown_refused':
+      return 'invalid_request';
+  }
 }
