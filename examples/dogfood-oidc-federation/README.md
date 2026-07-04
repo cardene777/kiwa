@@ -1,6 +1,9 @@
 # dogfood-oidc-federation
 
-Dogfood app for `@kiwa-test/auth` v1.21-1d (OIDC adapter). A Deno + Hono self-hosted OpenID Provider (OP) that exercises the OIDC Core 1.0 + Discovery 1.0 + RFC 7591 DCR + JWKS rotation + Federation 1.0 §7 endpoint surface. Sub-Issue v1.21-4a lands the skeleton; v1.21-4b layers the RFC 7591 DCR fidelity harness (3 auth methods + dropped-grant refusal + software_statement JWS + redirect_uris validation); v1.21-4c layers the id_token verification fidelity harness (JWS signature + claims 一致 + nonce echo + hash chain) + a Nuxt 3 Relying Party (RP) skeleton under `rp/`. Sub-Issue v1.21-4d (this state) layers the OpenID Federation 1.0 §7 trust-chain axes + the JWKS rotation e2e axes, closing the parent Issue #845.
+Dogfood app for `@kiwa-test/auth` v1.21-1d (OIDC adapter)。
+Deno + Hono self-hosted OpenID Provider (OP) が OIDC Core 1.0 + Discovery 1.0 + RFC 7591 DCR + JWKS rotation + Federation 1.0 §7 endpoint surface を exercise する。
+
+Sub-Issue 積層 = v1.21-4a skeleton → v1.21-4b RFC 7591 DCR fidelity harness (3 auth method + dropped-grant refusal + `software_statement` JWS + `redirect_uris` validation) → v1.21-4c `id_token` verification fidelity harness (JWS signature + claims 一致 + nonce echo + hash chain) + Nuxt 3 Relying Party (RP) skeleton under `rp/` → v1.21-4d (this state) OpenID Federation 1.0 §7 trust-chain axes + JWKS rotation e2e axes、 親 Issue #845 close。
 
 - `KIWA_MODE=real` — Keycloak deployment gated by `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL`. Deferred to the v1.22 milestone. Until then every ceremony beyond `discovery()` refuses with `KIWA_OIDC_ENV_MISSING`.
 - `KIWA_MODE=mock` — `@kiwa-test/auth` `setupOidcEnv` deterministic mock. Always runs.

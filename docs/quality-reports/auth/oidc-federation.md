@@ -1,8 +1,12 @@
 # OIDC Federation Dogfood — integrated fidelity report (v1.21-4)
 
-Terminal (v1.21-4d, Sub-Issue #875) quality report for `examples/dogfood-oidc-federation`. Closes the sub-issue split for `v1.21-4` (parent #845) by layering the OpenID Federation 1.0 §7 trust-chain axes + the JWKS rotation e2e axes on top of Sub-Issues #872 (Deno OP skeleton + Discovery + JWKS surface), #873 (RFC 7591 DCR + 3 auth methods + `software_statement` JWS), and #874 (Nuxt 3 RP + authorization-code flow + `id_token` verify).
+Terminal (v1.21-4d, Sub-Issue #875) quality report for `examples/dogfood-oidc-federation`.
+Closes the sub-issue split for `v1.21-4` (parent #845).
+OpenID Federation 1.0 §7 trust-chain axes と JWKS rotation e2e axes を、 Sub-Issue #872 (Deno OP skeleton + Discovery + JWKS surface) と #873 (RFC 7591 DCR + 3 auth method + `software_statement` JWS) と #874 (Nuxt 3 RP + authorization-code flow + `id_token` verify) の上に積む。
 
-This document is the release-gate report for the whole v1.21-4 fidelity harness: it aggregates the four sub-issue reports into a single 16-axis matrix and pins the release-gate 7 軸 (typecheck / test / build / lint / coverage / docs / a11y) verdict.
+本 document は v1.21-4 fidelity harness 全体の release-gate report。
+4 sub-issue report を単一の 16-axis matrix に集約し、 release-gate 7 軸 verdict を pin する。
+7 軸 = typecheck、 test、 build、 lint、 coverage、 docs、 a11y。
 
 ## Sub-Issue split (v1.21-4 = #845)
 
@@ -69,7 +73,7 @@ Until the real driver is provisioned, the mock coverage is the sole gate. The fi
 | lint | PASS | No `pnpm lint` script on this package — it inherits the workspace-level lint. TypeScript strict mode is exercised via `tsconfig.base.json` (extended by both tsconfigs). No `any` / `unknown` narrowing failures. |
 | coverage | PASS | vitest runs without `--coverage` in the release gate — behavioural coverage is measured by the 16-axis fidelity matrix + the 106-test count. Every axis has ≥ 3 tests; every wrapper file (`discovery.ts` / `jwks.ts` / `dcr.ts` / `id-token.ts` / `federation.ts`) has ≥ 1 covering spec file. |
 | docs | PASS | Four sub-issue reports (`oidc-federation-discovery.md` / `oidc-federation-dcr.md` / `oidc-federation-id-token.md` / this file) landed. README covers the sub-issue split table + the axis matrix. |
-| a11y | N/A | The example ships a Nuxt 3 RP skeleton (`rp/`) but no user-facing UI beyond a login button + userinfo panel. a11y gate deferred to the v1.22 milestone when a full user flow is wired. Recorded as N/A rather than PASS to prevent silent gate skipping. |
+| a11y | N/A | Nuxt 3 RP skeleton (`rp/`) の login button と userinfo panel は user-facing UI に該当するが、 full login flow が stub 状態で reachable な user journey が未配線。 axe-core 走査 target が login button 単独では意味を持たないため v1.22 で RP flow 完成後に gate 化。 silent gate skipping 防止のため PASS ではなく N/A 明示。 |
 
 Release gate verdict: **PASS** (6/7 軸 PASS + 1 軸 N/A recorded).
 
