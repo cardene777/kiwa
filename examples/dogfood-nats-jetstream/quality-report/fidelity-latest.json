@@ -1,0 +1,35 @@
+{
+  "provider": "@kiwa-test/streaming/nats-jetstream-dogfood",
+  "version": "0.1.0",
+  "reportedAt": "2026-07-04T04:09:02.482Z",
+  "coverage": {
+    "line": 92,
+    "branch": 88,
+    "function": 95
+  },
+  "testCount": {
+    "behavior": 29,
+    "integration": 7,
+    "e2e": 7,
+    "total": 43
+  },
+  "fidelity": {
+    "mockCoveredMethods": 5,
+    "realTotalMethods": 5,
+    "ratio": 100,
+    "behavioralDivergences": 5
+  },
+  "perf": {
+    "p50Ms": 0.05462500000004411,
+    "p95Ms": 1.4893329999999878,
+    "p99Ms": 1.4893329999999878,
+    "samples": 2
+  },
+  "mutation": {
+    "mutations": 25,
+    "killed": 18,
+    "survived": 7,
+    "killRate": 72
+  },
+  "notes": "Observed 5 divergences across 5 ops:\n- driveJetStream: BEHAVIORAL_DIVERGENCE\n- driveKV: BEHAVIORAL_DIVERGENCE\n- driveObject: BEHAVIORAL_DIVERGENCE\n- driveRouting: BEHAVIORAL_DIVERGENCE\n- emitFidelity: BEHAVIORAL_DIVERGENCE"
+}
