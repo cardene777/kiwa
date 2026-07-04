@@ -6,6 +6,7 @@
   "description": "Dogfood app v1.21-2 — a WebAuthn + Passkey RP for Next.js 15 App Router that exercises credential creation + attestation + assertion + userVerification + residentKey. Drivable in both KIWA_MODE=real (Chrome Virtual Authenticator + SimpleWebAuthn-shaped RP server) and KIWA_MODE=mock (@kiwa-test/auth setupWebAuthnEnv) so behavioural fidelity feeds the release gate.",
   "scripts": {
     "test": "pnpm -F @kiwa-test/auth -F @kiwa-test/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -13,6 +14,7 @@
     "@kiwa-test/core": "workspace:*"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"

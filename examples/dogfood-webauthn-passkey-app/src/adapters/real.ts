@@ -17,6 +17,8 @@ import type { WebAuthnCredential } from '@kiwa-test/auth';
 import type {
   RegisterInput,
   RegisterResult,
+  SigninInput,
+  SigninResult,
   TraceEvent,
   WebAuthnRPAdapter,
 } from './interface.js';
@@ -37,10 +39,13 @@ export function detectRealEnvMissing(): string | null {
   if (process.platform === 'linux' && !process.env['DISPLAY']) {
     return 'DISPLAY unset';
   }
-  // In Sub-Issue #857 we replace this stub with `chromium.executablePath()`
-  // resolution against `@playwright/test`. Until then the real adapter is
-  // never runnable — the mode remains real, but every ceremony errors out
-  // with MISSING_ENV_ERROR.
+  // The `KIWA_WEBAUTHN_REAL_READY=1` env flag opts in to real ceremonies once
+  // Playwright + Chrome Virtual Authenticator wiring is in place. Until it is
+  // set every ceremony errors out with MISSING_ENV_ERROR — Sub-Issue #857
+  // (this one) ships the Playwright e2e that flips the flag inside a
+  // BrowserContext driven by Chrome DevTools Protocol's
+  // `WebAuthn.addVirtualAuthenticator`.
+  if (process.env['KIWA_WEBAUTHN_REAL_READY'] === '1') return null;
   return MISSING_ENV_ERROR;
 }
 
@@ -67,6 +72,14 @@ export function makeRealAdapter(): WebAuthnRPAdapter {
 
     async register(_input: RegisterInput): Promise<RegisterResult> {
       throw envError('register');
+    },
+
+    async signin(_input: SigninInput): Promise<SigninResult> {
+      // Sub-Issue #857 wires this to Playwright + Chrome Virtual Authenticator;
+      // without `KIWA_WEBAUTHN_REAL_READY=1` the ceremony refuses so the
+      // fidelity harness reports env-missing rather than silently returning a
+      // fabricated response.
+      throw envError('signin');
     },
 
     listCredentials(): WebAuthnCredential[] {
