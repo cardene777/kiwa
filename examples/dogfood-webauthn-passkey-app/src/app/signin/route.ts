@@ -30,7 +30,12 @@
  * comment pointing at #859.
  */
 
-import type { SigninInput, WebAuthnRPAdapter } from '../../adapters/interface.js';
+import {
+  DOGFOOD_USER_VERIFICATION_VALUES,
+  type SigninInput,
+  type WebAuthnRPAdapter,
+} from '../../adapters/interface.js';
+import { parseUserVerification } from '../register/route.js';
 
 export interface SigninRouteBody {
   rpId: string;
@@ -75,12 +80,26 @@ export function createSigninHandler(
       });
     }
 
+    // Sub-Issue #858 — accept `?uv=` query override same as `/register` so
+    // both routes carry the userVerification vocabulary consistently. Query
+    // wins over body when both are set.
+    const url = safeParseSigninUrl(req.url);
+    const queryUV = parseUserVerification(url?.searchParams.get('uv') ?? null);
+    const bodyUV = parseUserVerification(body.userVerification ?? null);
+    if (queryUV === 'invalid' || bodyUV === 'invalid') {
+      return jsonResponse(400, {
+        error: 'invalid_user_verification',
+        message: `userVerification must be one of ${DOGFOOD_USER_VERIFICATION_VALUES.join(', ')}`,
+      });
+    }
+    const effectiveUV = queryUV ?? bodyUV;
+
     try {
       const input: SigninInput = {
         rpId: body.rpId,
         challenge: body.challenge,
         ...(body.allowCredentialIds ? { allowCredentialIds: body.allowCredentialIds } : {}),
-        ...(body.userVerification ? { userVerification: body.userVerification } : {}),
+        ...(effectiveUV ? { userVerification: effectiveUV } : {}),
       };
       const result = await adapter.signin(input);
       const responseBody: SigninRouteResponse = {
@@ -123,6 +142,10 @@ function classifySigninHttpStatus(message: string): number {
     'allowCredentials matched no stored credential',
     'no user-present authenticator',
     'userVerification=required',
+    // `userVerification=impossible` (Sub-Issue #858) is a client-side bad
+    // request — RP asked for a value the WebAuthn spec does not define. Same
+    // 400 semantics as the other user errors.
+    'userVerification=impossible',
     'rpId is required',
     'challenge is required',
   ];
@@ -130,6 +153,14 @@ function classifySigninHttpStatus(message: string): number {
     if (message.includes(needle)) return 400;
   }
   return 500;
+}
+
+function safeParseSigninUrl(raw: string): URL | null {
+  try {
+    return new URL(raw);
+  } catch {
+    return null;
+  }
 }
 
 function jsonResponse(status: number, body: unknown): Response {

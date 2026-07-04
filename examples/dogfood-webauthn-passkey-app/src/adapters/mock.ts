@@ -13,10 +13,14 @@
 
 import {
   setupWebAuthnEnv,
+  type AuthenticatorSelectionCriteria,
   type WebAuthnCredential,
   type WebAuthnTestEnv,
+  type WebAuthnUserVerificationRequirement,
 } from '@kiwa-test/auth';
 import type {
+  DogfoodAuthenticatorSelectionCriteria,
+  DogfoodUserVerification,
   RegisterInput,
   RegisterResult,
   SigninInput,
@@ -25,6 +29,43 @@ import type {
   WebAuthnRPAdapter,
 } from './interface.js';
 import { createWebAuthnServer, type WebAuthnServer } from '../lib/webauthn-server.js';
+
+/**
+ * Narrow the dogfood UV vocabulary to the three spec values kiwa accepts.
+ * Returns null when the caller passed either `impossible` (already rejected
+ * by the caller before this runs) or omitted the field.
+ */
+function toKiwaUserVerification(
+  value: DogfoodUserVerification | undefined,
+): WebAuthnUserVerificationRequirement | null {
+  if (value === 'required' || value === 'preferred' || value === 'discouraged') {
+    return value;
+  }
+  return null;
+}
+
+/**
+ * Build a kiwa-compatible `AuthenticatorSelectionCriteria` from the dogfood
+ * variant. Drops the `impossible` sentinel + honours
+ * `exactOptionalPropertyTypes` by omitting undefined fields rather than
+ * assigning them.
+ */
+function buildKiwaAuthenticatorSelection(
+  input: DogfoodAuthenticatorSelectionCriteria,
+  uv: DogfoodUserVerification | undefined,
+): AuthenticatorSelectionCriteria {
+  const out: AuthenticatorSelectionCriteria = {};
+  if (input.authenticatorAttachment !== undefined) {
+    out.authenticatorAttachment = input.authenticatorAttachment;
+  }
+  if (input.residentKey !== undefined) out.residentKey = input.residentKey;
+  if (input.requireResidentKey !== undefined) {
+    out.requireResidentKey = input.requireResidentKey;
+  }
+  const kiwaUV = toKiwaUserVerification(uv);
+  if (kiwaUV) out.userVerification = kiwaUV;
+  return out;
+}
 
 export interface MakeMockAdapterOptions {
   /**
@@ -44,6 +85,7 @@ export interface MakeMockAdapterOptions {
  */
 function classifyCredentialCreationError(err: unknown): string {
   const message = err instanceof Error ? err.message : String(err);
+  if (message.includes('userVerification=impossible')) return 'user_verification_impossible';
   if (message.includes('userVerification=required')) return 'user_verification_unsupported';
   if (message.includes('authenticatorAttachment')) return 'attachment_mismatch';
   if (message.includes('residentKey=required')) return 'resident_key_unsupported';
@@ -60,6 +102,7 @@ function classifyCredentialCreationError(err: unknown): string {
  */
 function classifyCredentialAssertionError(err: unknown): string {
   const message = err instanceof Error ? err.message : String(err);
+  if (message.includes('userVerification=impossible')) return 'user_verification_impossible';
   if (message.includes('userVerification=required')) return 'user_verification_unsupported';
   if (message.includes('allowCredentials matched no stored credential')) {
     return 'allow_credentials_no_match';
@@ -109,7 +152,27 @@ export function makeMockAdapter(opts: MakeMockAdapterOptions = {}): WebAuthnRPAd
     server: () => server,
 
     async register(input: RegisterInput): Promise<RegisterResult> {
+      // Sub-Issue #858 — the RP rejects the kiwa-only sentinel
+      // `userVerification=impossible` before invoking the authenticator.
+      // Real SimpleWebAuthn drivers reject this at the schema layer because
+      // `UserVerificationRequirement` is a closed enum; the mock mirrors that
+      // behaviour so downstream fidelity harnesses can diff the rejection.
+      const requestedUV = input.authenticatorSelection?.userVerification;
+      if (requestedUV === 'impossible') {
+        record('register', false, { errorKind: 'user_verification_impossible' });
+        throw new Error(
+          'makeMockAdapter.register: userVerification=impossible is not a WebAuthn L3 §5.4.6 value',
+        );
+      }
       const kiwaEnv = await getEnv();
+      // Strip the kiwa sentinel before handing the selection to the kiwa
+      // primitive — the kiwa `AuthenticatorSelectionCriteria` type only
+      // accepts the three spec values. `exactOptionalPropertyTypes` means we
+      // must omit the field when it is undefined rather than assigning
+      // undefined explicitly, so build the object piecewise.
+      const authenticatorSelection = input.authenticatorSelection
+        ? buildKiwaAuthenticatorSelection(input.authenticatorSelection, requestedUV)
+        : undefined;
       // The RP issues its own challenge, then hands it to the authenticator.
       // We honour the caller-supplied challenge because tests exercise
       // known-challenge scenarios; production RPs would call
@@ -120,9 +183,7 @@ export function makeMockAdapter(opts: MakeMockAdapterOptions = {}): WebAuthnRPAd
           user: input.user,
           challenge: input.challenge,
           attestation: input.attestation ?? 'none',
-          ...(input.authenticatorSelection
-            ? { authenticatorSelection: input.authenticatorSelection }
-            : {}),
+          ...(authenticatorSelection ? { authenticatorSelection } : {}),
         });
         // credentialCreation writes into the shared registry — pull the
         // canonical stored credential + persist it into our RP-side store.
@@ -168,6 +229,14 @@ export function makeMockAdapter(opts: MakeMockAdapterOptions = {}): WebAuthnRPAd
         record('signin', false, { errorKind: 'missing_challenge' });
         throw new Error('makeMockAdapter.signin: challenge is required');
       }
+      // Sub-Issue #858 — reject the kiwa sentinel before touching the kiwa
+      // env so the trace errorKind is stable regardless of internal ordering.
+      if (input.userVerification === 'impossible') {
+        record('signin', false, { errorKind: 'user_verification_impossible' });
+        throw new Error(
+          'makeMockAdapter.signin: userVerification=impossible is not a WebAuthn L3 §5.4.6 value',
+        );
+      }
       const kiwaEnv = await getEnv();
       // Look up the stored credential(s) the caller is asserting against so
       // the RP can (a) surface the pre-assertion `signCount` for the fidelity
@@ -191,11 +260,18 @@ export function makeMockAdapter(opts: MakeMockAdapterOptions = {}): WebAuthnRPAd
       }
 
       let assertionResponse;
+      // Strip the kiwa sentinel — `impossible` was already rejected above, so
+      // any surviving value is guaranteed to be one of the three spec enums
+      // the kiwa `PublicKeyCredentialRequestOptions` type accepts. Defaults
+      // to `preferred` when the caller omitted the field (matches WebAuthn
+      // L3 §5.5.4 default).
+      const kiwaUserVerification: WebAuthnUserVerificationRequirement =
+        toKiwaUserVerification(input.userVerification) ?? 'preferred';
       try {
         assertionResponse = await kiwaEnv.credentialAssertion({
           rpId: input.rpId,
           challenge: input.challenge,
-          userVerification: input.userVerification ?? 'preferred',
+          userVerification: kiwaUserVerification,
           ...(allowIds.length
             ? { allowCredentials: allowIds.map((id) => ({ id, type: 'public-key' as const })) }
             : {}),

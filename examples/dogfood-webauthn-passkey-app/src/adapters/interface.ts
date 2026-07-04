@@ -23,16 +23,53 @@ import type {
 } from '@kiwa-test/auth';
 
 /**
+ * userVerification value accepted at the dogfood RP boundary. Extends the
+ * WebAuthn L3 §5.4.6 vocabulary with a kiwa-only sentinel `impossible` used by
+ * Sub-Issue #858 to exercise the "RP asked for a value the spec forbids"
+ * rejection path. Real SimpleWebAuthn deployments reject `impossible` because
+ * `PublicKeyCredentialRequestOptions.userVerification` is a
+ * `UserVerificationRequirement` enum — the mock mirrors that behaviour so the
+ * fidelity harness can diff it.
+ */
+export type DogfoodUserVerification =
+  | WebAuthnUserVerificationRequirement
+  | 'impossible';
+
+/**
+ * Set of valid userVerification values the RP will accept from a client. The
+ * route handlers gate on this so `?uv=xxx` query strings that are not one of
+ * the four supported patterns fail fast with `invalid_user_verification`.
+ */
+export const DOGFOOD_USER_VERIFICATION_VALUES = [
+  'required',
+  'preferred',
+  'discouraged',
+  'impossible',
+] as const;
+
+/**
  * Input the RP consumes at the start of the registration ceremony. Mirrors
  * the fields a real client passes to `navigator.credentials.create({
  * publicKey })`.
  */
+/**
+ * `authenticatorSelection` variant with the dogfood-widened
+ * userVerification vocabulary. Extends
+ * {@link AuthenticatorSelectionCriteria} so callers can request
+ * `userVerification=impossible` — Sub-Issue #858 uses this to prove the RP
+ * rejects spec-invalid values before dispatching to the authenticator.
+ */
+export interface DogfoodAuthenticatorSelectionCriteria
+  extends Omit<AuthenticatorSelectionCriteria, 'userVerification'> {
+  userVerification?: DogfoodUserVerification;
+}
+
 export interface RegisterInput {
   rp: { id: string; name: string };
   user: { id: string; name: string; displayName: string };
   challenge: string;
   attestation?: WebAuthnAttestationConveyancePreference;
-  authenticatorSelection?: AuthenticatorSelectionCriteria;
+  authenticatorSelection?: DogfoodAuthenticatorSelectionCriteria;
 }
 
 /**
@@ -60,7 +97,7 @@ export interface SigninInput {
   rpId: string;
   challenge: string;
   allowCredentialIds?: string[];
-  userVerification?: WebAuthnUserVerificationRequirement;
+  userVerification?: DogfoodUserVerification;
 }
 
 /**
