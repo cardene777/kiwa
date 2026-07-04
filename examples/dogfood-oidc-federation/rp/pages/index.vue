@@ -33,12 +33,28 @@ const errorMessage = ref<string>('');
 
 async function signIn(): Promise<void> {
   errorMessage.value = '';
-  const target = await $fetch<{ authorizeUrl: string }>('/api/authorize');
-  window.location.href = target.authorizeUrl;
+  try {
+    const target = await $fetch<{ authorizeUrl: string }>('/api/authorize');
+    window.location.href = target.authorizeUrl;
+  } catch {
+    // /api/authorize failed — surface an accessible error rather than a
+    // silent no-op so the user knows the button did not hang.
+    errorMessage.value = describeIndexError('other');
+  }
 }
 
 async function signOut(): Promise<void> {
-  await $fetch('/api/logout', { method: 'POST' });
+  // Best-effort logout — flip the UI state even if the network call fails,
+  // because the client has no way to recover a locally-stuck signed-in state
+  // otherwise. A user-visible failure would offer no useful action beyond
+  // "try again", which is what the reset achieves.
+  try {
+    await $fetch('/api/logout', { method: 'POST' });
+  } catch {
+    // Silent — the cookie may already be gone (session timeout) or the
+    // server may be transiently unreachable. Either way, resetting the UI
+    // is the safest behaviour.
+  }
   userinfo.value = null;
   state.value = 'signed-out';
   errorMessage.value = '';
