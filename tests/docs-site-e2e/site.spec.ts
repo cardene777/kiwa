@@ -144,6 +144,18 @@ const V1_21_PAGES = [
   { path: '/migrations/v1.20-to-v1.21', title: 'v1.20 → v1.21' },
 ];
 
+// v1.22 pages — new tutorials + concept doc + migration guide added under the
+// Auth 深化 II milestone (Issue #892 publish PR). Mirrors the v1.21 anchor
+// phrase pattern. Each phrase is a substring the rendered VitePress <main>
+// will always include (checked against the actual page headings + body text —
+// not frontmatter titles).
+const V1_22_PAGES = [
+  { path: '/tutorials/37-real-driver-testing', title: 'Real driver testing' },
+  { path: '/tutorials/38-passkey-cable-flow', title: 'Passkey caBLE hybrid transport' },
+  { path: '/concepts/real-driver-testing', title: 'Real driver testing' },
+  { path: '/migrations/v1.21-to-v1.22', title: 'v1.21 → v1.22' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -267,6 +279,20 @@ test.describe('docs site — v1.20 pages render', () => {
 test.describe('docs site — v1.21 pages render', () => {
   for (const p of V1_21_PAGES) {
     test(`v1.21 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.22 pages render', () => {
+  for (const p of V1_22_PAGES) {
+    test(`v1.22 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
