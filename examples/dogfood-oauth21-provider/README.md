@@ -34,8 +34,11 @@ src/
     revoke/route.ts    # createRevokeHandler delegate (RFC 7009 §2.2 idempotency)
     introspect/route.ts # createIntrospectHandler delegate (RFC 7662 §2.2 `{active: false}` sentinel)
     well-known/route.ts # createWellKnownHandler delegate — discovery metadata
+  lib/
+    pkce.ts            # PKCE helpers (createPkceChallenge / deriveChallengeS256 / verifyChallenge / assertVerifierFormat / assertMethodAllowed) — thin wrapper around @kiwa-test/auth's PKCE primitives
 tests/
   endpoints-skeleton.spec.ts # 4 fidelity axes: discovery metadata / OAuth 2.1 hardening / grant allowlist / revoke+introspect contract
+  pkce-flow.spec.ts          # 4 fidelity axes: verifier entropy / challenge derivation / S256 method enforcement / verifier mismatch rejection
 ```
 
 The Hono routes in `src/lib/hono-app.ts` are the primary integration point; each `src/app/**/route.ts` file exposes a pure framework-agnostic delegate for callers that want to drive the AS without HTTP plumbing (fidelity harness in Sub-Issue v1.21-3d compares mock vs real without spinning up either runtime).
@@ -48,6 +51,17 @@ pnpm typecheck     # tsc --noEmit
 ```
 
 ## Fidelity axes
+
+### PKCE-flow (Sub-Issue #865)
+
+| axis | mock (`@kiwa-test/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
+|---|---|---|---|
+| 1. verifier entropy | `createPkceChallenge` emits 43-char base64url; `assertVerifierFormat` refuses < 43 / > 128 / reserved chars | oauth2-mock-server accepts any 43-128 char verifier and rejects malformed at `/token` | RFC 7636 §4.1 length + charset invariants enforced pre-flight (`invalid_request` kind). |
+| 2. challenge derivation | `deriveChallengeS256(verifier)` = `base64url(SHA-256(verifier))`, no padding, hand-verified via `node:crypto` | oauth2-mock-server rederives server-side using the same encoder | Cross-driver derivation matches byte-for-byte; padding / `+` / `/` signals downgrade. |
+| 3. S256 method enforcement | `assertMethodAllowed` refuses `plain` / unknown / missing; `/authorize` returns 400 `invalid_request` | oauth2-mock-server refuses same methods with `invalid_request` at HTTP layer | RFC 9700 §2.1.1 — no `plain` default, no unknown methods. |
+| 4. verifier mismatch | AS rederives challenge from submitted verifier; mismatch → `invalid_grant` | oauth2-mock-server same behaviour | RFC 6749 §5.2 — mismatch = `invalid_grant`, malformed = `invalid_request` (distinct kinds). |
+
+See `docs/quality-reports/auth/oauth21-provider-pkce.md` for the full report.
 
 ### Endpoints-skeleton (Sub-Issue #864)
 

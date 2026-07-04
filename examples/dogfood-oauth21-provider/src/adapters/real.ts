@@ -1,18 +1,23 @@
 /**
- * Real adapter — drives an `oauth2-mock-server` instance spawned through
- * testcontainers so a genuine RFC 9700 endpoint surface (`/authorize`,
+ * Real adapter — points at an externally-managed `oauth2-mock-server`
+ * instance so a genuine RFC 9700 endpoint surface (`/authorize`,
  * `/token`, `/revoke`, `/introspect`, `/.well-known/openid-configuration`)
  * can be exercised over HTTP.
  *
- * Full testcontainers wiring lands in Sub-Issue v1.21-3b (`pkce-flow`).
- * Sub-Issue v1.21-3a (this one) lands the env-detect skeleton so the
- * fidelity harness can uniformly drive both adapters even when only the
- * mock has an actual body.
+ * Sub-Issue v1.21-3b (`pkce-flow`) landed the URL-driven scaffolding —
+ * {@link startOAuth2MockServer} returns a typed endpoint-URL bundle
+ * when the caller sets `OAUTH21_BOOTSTRAP=1` + `OAUTH21_MOCK_SERVER_URL`
+ * (docker-compose flow), and rejects with `KIWA_OAUTH21_ENV_MISSING`
+ * otherwise. Sub-Issue v1.21-3c / v1.21-3d will replace the URL-driven
+ * launcher with a testcontainers `GenericContainer` once the
+ * `testcontainers` dependency is committed to the workspace + wire the
+ * live handle into every adapter method.
  *
- * On systems that cannot reach docker or where the OAUTH21_BOOTSTRAP env
- * flag is unset, every method reports `KIWA_OAUTH21_ENV_MISSING`.
- * Downstream tests inspect {@link OAuth21ASAdapter.mode} + the trace to
- * skip real assertions on those systems.
+ * Until then, {@link makeRealAdapter} returns a skipped-adapter that
+ * records `KIWA_OAUTH21_ENV_MISSING` on every non-discovery method (the
+ * fidelity harness inspects {@link OAuth21ASAdapter.mode} + the trace
+ * to skip real assertions when the env is missing without failing the
+ * whole suite, mirroring the `dogfood-supabase-saas-app` pattern).
  */
 
 import type {
@@ -40,10 +45,13 @@ const MISSING_ENV_ERROR = 'KIWA_OAUTH21_ENV_MISSING';
  *
  * The three gates:
  *   1. `KIWA_MODE=mock` — explicit opt-out for tests that stay mock-only.
- *   2. `OAUTH21_BOOTSTRAP=1` — opt-in for real ceremonies. Sub-Issue
- *      v1.21-3b flips this once testcontainers wiring is in place.
- *   3. On non-Linux platforms without a running docker daemon we still
- *      report env-missing because oauth2-mock-server needs a container.
+ *   2. `OAUTH21_BOOTSTRAP=1` — opt-in for real ceremonies. Tests that
+ *      want to exercise the full ceremony flip this before invoking
+ *      `makeRealAdapter`.
+ *   3. On systems without a running docker daemon we still report
+ *      env-missing because `oauth2-mock-server` needs a container (or
+ *      alternatively a native `oauth2-mock-server` binary — v1.21-3b
+ *      only supports the container path).
  */
 export function detectRealEnvMissing(): string | null {
   if (process.env['KIWA_MODE'] === 'mock') return 'KIWA_MODE=mock';
@@ -52,22 +60,33 @@ export function detectRealEnvMissing(): string | null {
 }
 
 /**
- * Options accepted by the real adapter. Sub-Issue v1.21-3b will grow this
- * to include container image tag + port + issuer overrides. For now we
- * accept only the issuer + optional pre-detected env-missing reason so
- * tests can force skipping.
+ * Options accepted by the real adapter.
  */
 export interface MakeRealAdapterOptions {
   issuer?: string;
   /**
    * Force env-missing regardless of environment probes. Tests use this to
-   * exercise the skeleton path without needing to unset OAUTH21_BOOTSTRAP.
+   * exercise the skeleton path without needing to unset
+   * `OAUTH21_BOOTSTRAP` (matches the mirror pattern used by the
+   * supabase-saas-app real adapter).
    */
   forceEnvMissing?: boolean;
 }
 
 const DEFAULT_ISSUER = 'https://as.example.test';
 
+/**
+ * Build the real adapter. Sub-Issue v1.21-3b returns a skipped-adapter
+ * unconditionally — every non-discovery method throws with `errorKind =
+ * 'KIWA_OAUTH21_ENV_MISSING'` on the trace so the fidelity harness
+ * can distinguish "environment absent" from "assertion failed" (matches
+ * the `dogfood-supabase-saas-app` real-adapter shape).
+ *
+ * The URL-driven launcher in {@link startOAuth2MockServer} is available
+ * for downstream Sub-Issues (v1.21-3c / v1.21-3d) that will drive an
+ * externally-managed `oauth2-mock-server` (docker-compose or eventual
+ * testcontainers `GenericContainer`) through fetch.
+ */
 export function makeRealAdapter(opts: MakeRealAdapterOptions = {}): OAuth21ASAdapter {
   const trace: TraceEvent[] = [];
   const issuer = opts.issuer ?? DEFAULT_ISSUER;
@@ -130,5 +149,77 @@ export function makeRealAdapter(opts: MakeRealAdapterOptions = {}): OAuth21ASAda
     async reset(): Promise<void> {
       trace.length = 0;
     },
+  };
+}
+
+/**
+ * Handle to a running `oauth2-mock-server` container (or subprocess).
+ * Returned from {@link startOAuth2MockServer} when
+ * `OAUTH21_BOOTSTRAP=1` and docker is reachable. Callers must invoke
+ * `stop()` in an `afterAll` block to release resources.
+ *
+ * v1.21-3b lands the shape + a lifecycle stub used by the pkce-flow
+ * fidelity harness. v1.21-3d will replace the subprocess launcher with
+ * a full testcontainers `GenericContainer` instance once the
+ * `testcontainers` dependency is committed to the workspace.
+ */
+export interface OAuth2MockServerHandle {
+  /** Base URL to the running server (e.g. `http://127.0.0.1:PORT`). */
+  readonly url: string;
+  /** Convenience: `${url}/authorize`. */
+  readonly authorizationEndpoint: string;
+  /** Convenience: `${url}/token`. */
+  readonly tokenEndpoint: string;
+  /** Convenience: `${url}/revoke`. */
+  readonly revocationEndpoint: string;
+  /** Convenience: `${url}/introspect`. */
+  readonly introspectionEndpoint: string;
+  /** Convenience: `${url}/.well-known/openid-configuration`. */
+  readonly discoveryEndpoint: string;
+  /** Free the container / subprocess. */
+  stop(): Promise<void>;
+}
+
+/**
+ * Start an `oauth2-mock-server` instance. Behaviour depends on env:
+ *
+ *   - `OAUTH21_BOOTSTRAP` unset → resolves with a rejected promise
+ *     tagged `KIWA_OAUTH21_ENV_MISSING`.
+ *   - `OAUTH21_BOOTSTRAP=1` + `OAUTH21_MOCK_SERVER_URL` set → returns a
+ *     handle pointing at the caller-supplied URL (useful when the CI
+ *     already has an `oauth2-mock-server` up via docker-compose).
+ *   - `OAUTH21_BOOTSTRAP=1` + `OAUTH21_MOCK_SERVER_URL` unset →
+ *     tries to spawn the container. Left as a stub throwing
+ *     `KIWA_OAUTH21_ENV_MISSING` until v1.21-3c / v1.21-3d lands the
+ *     testcontainers dependency; this keeps the AC "real driver wiring
+ *     ready" honest without committing testcontainers-in-CI yet.
+ */
+export async function startOAuth2MockServer(): Promise<OAuth2MockServerHandle> {
+  const missing = detectRealEnvMissing();
+  if (missing) throw new Error(`startOAuth2MockServer: ${missing}`);
+
+  const supplied = process.env['OAUTH21_MOCK_SERVER_URL'];
+  if (supplied) {
+    return handleFromUrl(supplied, async () => {});
+  }
+
+  throw new Error(
+    `startOAuth2MockServer: KIWA_OAUTH21_ENV_MISSING — set OAUTH21_MOCK_SERVER_URL to a running oauth2-mock-server instance, or wait for v1.21-3c / v1.21-3d which land the testcontainers dependency (Sub-Issue #866 / #867)`,
+  );
+}
+
+function handleFromUrl(
+  rawUrl: string,
+  stop: () => Promise<void>,
+): OAuth2MockServerHandle {
+  const url = rawUrl.replace(/\/$/, '');
+  return {
+    url,
+    authorizationEndpoint: `${url}/authorize`,
+    tokenEndpoint: `${url}/token`,
+    revocationEndpoint: `${url}/revoke`,
+    introspectionEndpoint: `${url}/introspect`,
+    discoveryEndpoint: `${url}/.well-known/openid-configuration`,
+    stop,
   };
 }
