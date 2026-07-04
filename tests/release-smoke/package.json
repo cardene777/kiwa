@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/remix -F @kiwa-test/astro -F @kiwa-test/solidstart -F @kiwa-test/qwikcity -F @kiwa-test/edge -F @kiwa-test/auth -F @kiwa-test/solidjs build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000",
+    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/api -F @kiwa-test/ui -F @kiwa-test/data -F @kiwa-test/cli-test -F @kiwa-test/observability -F @kiwa-test/e2e -F @kiwa-test/a11y -F @kiwa-test/visual -F @kiwa-test/nextjs -F @kiwa-test/nuxt -F @kiwa-test/sveltekit -F @kiwa-test/remix -F @kiwa-test/astro -F @kiwa-test/solidstart -F @kiwa-test/qwikcity -F @kiwa-test/edge -F @kiwa-test/auth -F @kiwa-test/solidjs -F @kiwa-test/fresh build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -26,7 +26,8 @@
     "@kiwa-test/core": "workspace:*",
     "@kiwa-test/ui": "workspace:*",
     "@kiwa-test/auth": "workspace:*",
-    "@kiwa-test/solidjs": "workspace:*"
+    "@kiwa-test/solidjs": "workspace:*",
+    "@kiwa-test/fresh": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",
