@@ -252,3 +252,50 @@ export {
   setupPasskeyEnv,
   syncCredentials as syncPasskeyCredentials,
 } from './passkey/index.js';
+
+// OAuth 2.1 adapter surface (v1.21-1c, GH #850). Mock Authorization Server
+// covering RFC 9700 (OAuth 2.1) + RFC 9449 (DPoP) + RFC 7636 (PKCE S256) +
+// RFC 7009 (revocation) + RFC 7662 (introspection). Rejects the historical
+// grants OAuth 2.1 dropped — `implicit`, `password`, `client_credentials`
+// grant paths refuse at the type level and at runtime.
+export type {
+  AccessToken,
+  AuthorizationRequest,
+  AuthorizationResponse,
+  AuthorizationServer,
+  AuthorizationServerOptions,
+  AuthorizationUser,
+  ClientRegistration,
+  DpopJwk,
+  DpopProof,
+  DpopProofInput,
+  IntrospectionResponse,
+  OAuth21GrantType,
+  OAuth21TestEnv,
+  PkceChallenge,
+  PkceChallengeMethod,
+  RefreshToken,
+  SetupOAuth21EnvOptions,
+  TokenRequest,
+  TokenResponse,
+} from './oauth21/types.js';
+export {
+  __resetDpopCounters,
+  __resetOAuth21Counters,
+  __resetPkceCounter,
+  __resetTokenCounters,
+  computeJkt as computeDpopJkt,
+  createAuthorizationServer,
+  createDpopProof,
+  createMockDpopJwk,
+  createPkceChallenge,
+  deriveCodeChallenge,
+  generateCodeVerifier,
+  mintAccessToken,
+  mintRefreshToken,
+  parseDpopProof,
+  rotateRefreshToken,
+  setupOAuth21Env,
+  verifyCodeChallenge,
+  verifyDpopProof,
+} from './oauth21/index.js';
