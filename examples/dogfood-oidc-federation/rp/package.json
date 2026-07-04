@@ -1,0 +1,17 @@
+{
+  "name": "dogfood-oidc-federation-rp",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Nuxt 3 Relying Party (RP) for the dogfood-oidc-federation app. Sub-Issue v1.21-4c wires the authorization code flow — /authorize builds the request (state + nonce + PKCE), /callback receives the code + state and exchanges it for an id_token + userinfo. Sub-Issue v1.21-4d layers JWKS rotation e2e on top.",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "typecheck": "nuxt prepare && tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "nuxt": "^3.14.0",
+    "typescript": "^5.6.0"
+  }
+}
