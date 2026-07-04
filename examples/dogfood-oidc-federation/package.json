@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.21-4 — a Deno + Hono self-hosted OpenID Provider (OP) that exercises the OIDC Core 1.0 + Discovery 1.0 + RFC 7591 DCR + JWKS rotation + Federation 1.0 §7 endpoint surface. Sub-Issues a/b landed the OP surface + DCR fidelity harness; Sub-Issue v1.21-4c (this state) layers the id_token verification fidelity harness (JWS signature + claims + nonce + hash chain) + a Nuxt 3 RP skeleton under rp/. Sub-Issue d wires Federation trust chain + JWKS rotation e2e + real Keycloak. Drivable in both KIWA_MODE=real (spawns Keycloak through testcontainers, env-skip via KIWA_OIDC_ENV_MISSING) and KIWA_MODE=mock (@kiwa-test/auth setupOidcEnv). Behavioural fidelity between the two drivers feeds the release gate.",
+  "description": "Dogfood app v1.21-4 — a Deno + Hono self-hosted OpenID Provider (OP) that exercises the OIDC Core 1.0 + Discovery 1.0 + RFC 7591 DCR + JWKS rotation + Federation 1.0 §7 endpoint surface. Sub-Issues a/b/c landed the OP surface + DCR fidelity harness + id_token verify + Nuxt 3 RP; Sub-Issue v1.21-4d (this state) layers the Federation trust chain (axes 13-16) + JWKS rotation e2e (axes 4a-4d escalation of axis 4) + the integrated release-gate report at docs/quality-reports/auth/oidc-federation.md, closing the parent Issue #845. Drivable under KIWA_MODE=mock (@kiwa-test/auth setupOidcEnv) today; KIWA_MODE=real (Keycloak Federation deployment) deferred to v1.22 milestone.",
   "scripts": {
     "test": "pnpm -F @kiwa-test/auth -F @kiwa-test/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"

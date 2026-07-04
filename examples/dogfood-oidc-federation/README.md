@@ -1,11 +1,11 @@
 # dogfood-oidc-federation
 
-Dogfood app for `@kiwa-test/auth` v1.21-1d (OIDC adapter). A Deno + Hono self-hosted OpenID Provider (OP) that exercises the OIDC Core 1.0 + Discovery 1.0 + RFC 7591 DCR + JWKS rotation + Federation 1.0 §7 endpoint surface. Sub-Issue v1.21-4a lands the skeleton; Sub-Issue v1.21-4b layers the RFC 7591 DCR fidelity harness (3 auth methods + dropped-grant refusal + software_statement JWS + redirect_uris validation). Sub-Issue v1.21-4c (this state) layers the id_token verification fidelity harness (JWS signature + claims 一致 + nonce echo + hash chain) + a Nuxt 3 Relying Party (RP) skeleton under `rp/` that walks the authorization code flow.
+Dogfood app for `@kiwa-test/auth` v1.21-1d (OIDC adapter). A Deno + Hono self-hosted OpenID Provider (OP) that exercises the OIDC Core 1.0 + Discovery 1.0 + RFC 7591 DCR + JWKS rotation + Federation 1.0 §7 endpoint surface. Sub-Issue v1.21-4a lands the skeleton; v1.21-4b layers the RFC 7591 DCR fidelity harness (3 auth methods + dropped-grant refusal + software_statement JWS + redirect_uris validation); v1.21-4c layers the id_token verification fidelity harness (JWS signature + claims 一致 + nonce echo + hash chain) + a Nuxt 3 Relying Party (RP) skeleton under `rp/`. Sub-Issue v1.21-4d (this state) layers the OpenID Federation 1.0 §7 trust-chain axes + the JWKS rotation e2e axes, closing the parent Issue #845.
 
-- `KIWA_MODE=real` — Keycloak spawned through testcontainers when `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL` set. Skipped when the environment cannot reach docker. Full wiring lands in Sub-Issues v1.21-4b/c/d.
+- `KIWA_MODE=real` — Keycloak deployment gated by `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL`. Deferred to the v1.22 milestone. Until then every ceremony beyond `discovery()` refuses with `KIWA_OIDC_ENV_MISSING`.
 - `KIWA_MODE=mock` — `@kiwa-test/auth` `setupOidcEnv` deterministic mock. Always runs.
 
-Behavioural fidelity between the two drivers feeds the release gate (`docs/quality-reports/auth/oidc-federation-discovery.md` + `oidc-federation-dcr.md` + siblings).
+Behavioural fidelity between the two drivers feeds the release gate (`docs/quality-reports/auth/oidc-federation.md` — integrated 16-axis report — plus the four sub-issue reports).
 
 ## Sub-Issue split (v1.21-4 = #845)
 
@@ -16,7 +16,7 @@ Behavioural fidelity between the two drivers feeds the release gate (`docs/quali
 | #874 (c) | Nuxt 3 RP + authorization code flow + `id_token` verify (JWS + claims + nonce + hash chain) | `rp/**` + `src/lib/id-token.ts` + `tests/id-token-verify.spec.ts` |
 | #875 (d) | Federation trust chain + JWKS rotation e2e + real Keycloak fidelity + release gate + docs | `src/lib/federation.ts` + `tests/federation-trust-chain.spec.ts` + `tests/jwks-rotation-e2e.spec.ts` + `docs/quality-reports/auth/oidc-federation.md` |
 
-Sub-Issue **a** landed the shared surface — Hono OP, adapter interface, `KIWA_MODE` split, discovery + JWKS skeleton fidelity harness (4 axes). Sub-Issue **b** layered the DCR fidelity harness (axes 5–8: auth method 3 shapes + dropped-grant refusal + software_statement JWS verification + redirect_uris URL validation). Sub-Issue **c** (this state) layers the id_token verification fidelity harness (axes 9–12: JWS signature + claims 一致 + nonce echo + hash chain) + a Nuxt 3 RP skeleton under `rp/` that walks the authorization code flow. Sub-Issue **d** grows the harness to 16 axes with Federation trust chain + JWKS rotation e2e + real Keycloak fidelity gate.
+Sub-Issue **a** landed the shared surface — Hono OP, adapter interface, `KIWA_MODE` split, discovery + JWKS skeleton fidelity harness (4 axes). Sub-Issue **b** layered the DCR fidelity harness (axes 5–8: auth method 3 shapes + dropped-grant refusal + software_statement JWS verification + redirect_uris URL validation). Sub-Issue **c** layered the id_token verification fidelity harness (axes 9–12: JWS signature + claims 一致 + nonce echo + hash chain) + a Nuxt 3 RP skeleton under `rp/`. Sub-Issue **d** (this state) grows the harness to 16 axes with Federation trust chain (axes 13–16) + JWKS rotation e2e (axes 4a–4d escalation of axis 4) + the integrated release-gate report at `docs/quality-reports/auth/oidc-federation.md`.
 
 ## Layout
 
@@ -31,6 +31,7 @@ src/
     jwks.ts            # assertKeyShape + assertJwksDocumentShape + pickActiveKey + pickRetiredKeys
     dcr.ts             # handleRegistration — RFC 7591 fidelity wrapper (3 auth methods + dropped-grant refusal + software_statement JWS + redirect_uris validation)
     id-token.ts        # verifyIdToken + mustVerifyIdToken + parseIdTokenHeader — OIDC Core §3.1.3.6-§3.1.3.7 verification wrapper (axes 9-12)
+    federation.ts      # resolveTrustChain + mustResolveTrustChain + assertAnchorMatches + describeChain — Federation 1.0 §7 chain-walk wrapper (axes 13-16)
     deno-op.ts         # createOpApp — Hono routes for `.well-known/openid-configuration` / `/jwks` / `/jwks/rotate` / `/register`
 rp/                    # Nuxt 3 Relying Party skeleton (v1.21-4c)
   nuxt.config.ts
@@ -41,6 +42,8 @@ tests/
   hono-op-http.spec.ts             # HTTP integration smoke tests for Hono routes
   dcr-flow.spec.ts                 # axes 5–8: auth method 3 shapes / dropped-grant refusal / software_statement JWS / redirect_uris validation
   id-token-verify.spec.ts          # axes 9-12: JWS signature / claims 一致 / nonce echo / hash chain
+  federation-trust-chain.spec.ts   # axes 13-16: 3-step chain / broken link / expired / cycle
+  jwks-rotation-e2e.spec.ts        # axes 4a-4d escalation of axis 4: sign → rotate → verify e2e
 ```
 
 The Hono routes in `src/lib/deno-op.ts` are the primary HTTP integration point; the fidelity harness in `tests/**` drives the adapter directly without booting Hono so `KIWA_MODE=mock` vs `KIWA_MODE=real` diffs can be measured without HTTP round-trip noise.
@@ -54,7 +57,36 @@ pnpm typecheck     # tsc --noEmit
 
 ## Fidelity axes
 
-### id-token-verify (Sub-Issue #874, this state)
+### Fidelity axes aggregate (Sub-Issues a/b/c/d)
+
+| axis group | axes | scope | quality report |
+|---|---|---|---|
+| discovery + JWKS skeleton | 1–4 | Discovery metadata + issuer 一致 + JWKS shape + rotation retention shape | `oidc-federation-discovery.md` |
+| DCR | 5–8 | Auth methods + dropped grants + software_statement + redirect_uris | `oidc-federation-dcr.md` |
+| id_token verify | 9–12 | JWS signature + claims 一致 + nonce echo + hash chain | `oidc-federation-id-token.md` |
+| Federation + rotation e2e | 13–16 (+ 4a–4d) | Trust chain resolve + broken link + expired + cycle + sign → rotate → verify e2e | `oidc-federation.md` (integrated) |
+
+Total 106 tests across six spec files, all pass under `KIWA_MODE=mock`. See `docs/quality-reports/auth/oidc-federation.md` for the integrated release-gate 7 軸 verdict + the real-vs-mock measurement plan.
+
+### federation-trust-chain (Sub-Issue #875, this state)
+
+| axis | mock (`@kiwa-test/auth` via `src/lib/federation.ts` wrapper) | real (Keycloak Federation, deferred to v1.22) | assertion |
+|---|---|---|---|
+| 13. 3-step chain | `resolveTrustChain({leaf, intermediates, anchor})` returns ordered `chain = [leaf, intermediate]`; resolved `anchor.entity_id` matches expected anchor; `describeChain` renders `leafSub -> intermediateSub -> anchor` | Keycloak Federation resolves via `/entity-configuration` + `/statement` | OpenID Federation 1.0 §7.2 遵守 |
+| 14. broken link | Intermediate whose `sub` does not match previous step's `iss` refuses; empty intermediates + non-anchor leaf `iss` refuses; axis === `broken_link` | Keycloak 4xx on chain resolution failure | OIDF §7.2 — chain break |
+| 15. expired intermediate | Intermediate `exp <= now` refuses with `axis=expired_intermediate`; leaf `exp <= now` refuses with `axis=expired_leaf`; `exp === now` refuses on boundary | Keycloak refuses on expired Entity Statement | OIDF §7.2 — every statement MUST have `exp > now` |
+| 16. cycle detection | Intermediate cycle refuses without looping; walker terminates within `intermediates.length + 2` steps | Keycloak aborts on cycles | OIDF §7.2 — cycle detection to bound resolution time |
+
+### jwks-rotation-e2e (Sub-Issue #875, this state — escalation of axis 4)
+
+| axis | mock coverage | real coverage (deferred) | assertion |
+|---|---|---|---|
+| 4a. sign → rotate → verify inside window | id_token signed under `k001` still verifies after rotation to `k002`; `mustVerifyIdToken` returns claims | Keycloak `/certs` retains old kid; verifier accepts | OIDC Core §3.1.3.7 — signed id_tokens remain verifiable until retention elapses |
+| 4b. verify past retention | Advance clock past `retiredAt` drops kid; verifier refuses with `axis=signature`; `mustVerifyIdToken` throws | Keycloak `/certs` drops old kid; verifier refuses | OIDC Core §3.1.3.7 — kids past retention MUST NOT verify |
+| 4c. multi-rotation retention | Two consecutive rotations retain both previous kids; retired kids drop one at a time as deadlines fire independently | Keycloak retains multiple retired kids per rotation policy | Rotation invariant — multi-rotation windows independent |
+| 4d. fresh active key after rotation | id_token minted under new active key verifies immediately; rotation preserves alg family | Keycloak same behaviour | Rotation invariant — new active key functional as signer without bootstrap delay |
+
+### id-token-verify (Sub-Issue #874)
 
 | axis | mock (`@kiwa-test/auth` via `src/lib/id-token.ts` wrapper) | real (Keycloak) | assertion |
 |---|---|---|---|
@@ -85,5 +117,5 @@ pnpm typecheck     # tsc --noEmit
 ## Environment gating
 
 - `KIWA_MODE=mock` — forces the mock adapter; every test always runs.
-- `OIDC_BOOTSTRAP=1` — opt-in for real ceremonies. Sub-Issue v1.21-4d wires Keycloak through testcontainers behind this gate; until then the real adapter refuses every DCR call with `KIWA_OIDC_ENV_MISSING`.
-- Without `OIDC_BOOTSTRAP=1`, the real adapter's `discovery()` returns a valid metadata document (static shape derived from `issuer`); every other method (including `registerClient` per axes 5–8) reports `KIWA_OIDC_ENV_MISSING`.
+- `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL=...` — opt-in for real ceremonies. Deferred to the v1.22 milestone (Keycloak Federation deployment). Until then the real adapter refuses every ceremony beyond `discovery()` with `KIWA_OIDC_ENV_MISSING`.
+- Without `OIDC_BOOTSTRAP=1`, the real adapter's `discovery()` returns a valid metadata document (static shape derived from `issuer`); every other method (including `registerClient` per axes 5–8 + federation ceremonies per axes 13–16) reports `KIWA_OIDC_ENV_MISSING`.
