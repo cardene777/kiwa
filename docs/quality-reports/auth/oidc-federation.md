@@ -1,14 +1,15 @@
-# OIDC Federation Dogfood — integrated fidelity report (v1.22-1)
+# OIDC Federation Dogfood — integrated fidelity report (v1.22-3)
 
-Integrated (v1.22-1, Sub-Issue GH #887 / CAR-442) quality report for `examples/dogfood-oidc-federation`.
+Integrated (v1.22-3, Sub-Issue GH #889) quality report for `examples/dogfood-oidc-federation`.
 
 Timeline:
 
 - **v1.21-4** (Sub-Issues #872 / #873 / #874 / #875) — landed the 16-axis mock fidelity harness across Discovery + JWKS + DCR + id_token verify + Federation §7 trust chain + rotation e2e.
-- **v1.22-1** (this state) — layers the Keycloak testcontainers real driver on top of the v1.21-4 scaffold. `src/adapters/real.ts` now boots `quay.io/keycloak/keycloak:26.0` through `testcontainers` when `OIDC_BOOTSTRAP=1` is set + docker is reachable, provisions the `kiwa` realm through the admin REST API, and exposes discovery + JWKS through Keycloak's OIDC endpoints. Live coverage activates on axes 1 (discovery metadata shape) + 3 (JWKS active key shape); axes 2 / 4-16 stay on the mock-as-reference matrix with documented Sub-Issue v1.22-N follow-ups.
+- **v1.22-1** (Sub-Issue GH #887 / CAR-442) — layered the Keycloak testcontainers real driver on top of the v1.21-4 scaffold. `src/adapters/real.ts` now boots `quay.io/keycloak/keycloak:26.0` through `testcontainers` when `OIDC_BOOTSTRAP=1` is set + docker is reachable, provisions the `kiwa` realm through the admin REST API, and exposes discovery + JWKS through Keycloak's OIDC endpoints. Live coverage activates on axes 1 (discovery metadata shape) + 3 (JWKS active key shape); axes 2 / 4-16 stay on the mock-as-reference matrix with documented Sub-Issue v1.22-N follow-ups.
+- **v1.22-3** (this state, Sub-Issue GH #889) — escalates the Nuxt 3 RP `rp/` skeleton into a full login journey (signed-out + signed-in + error banner + logout) and adds a jsdom + axe-core WCAG 2.1 AA a11y gate over every visible state of the pages. Release gate 7 軸の a11y N/A → PASS。
 
-本 document は v1.22-1 fidelity harness 全体の release-gate report。
-5 sub-issue report を単一の 16-axis matrix に集約し、 release-gate 7 軸 verdict を pin する。
+本 document は v1.22-3 fidelity harness 全体の release-gate report。
+6 sub-issue report を単一の 16-axis matrix に集約し、 release-gate 7 軸 verdict を pin する。
 7 軸 = typecheck、 test、 build、 lint、 coverage、 docs、 a11y。
 
 ## Sub-Issue split
@@ -27,6 +28,12 @@ Timeline:
 | Sub-Issue | scope | files touched | axes | quality report |
 |---|---|---|---|---|
 | GH #887 | Keycloak testcontainers wiring in real adapter + env-skip semantics + real coverage matrix | `src/adapters/real.ts` + `tests/keycloak-real-driver.spec.ts` + this report (§ Real driver coverage / § Real coverage matrix — v1.22-1) | 1 / 3 (live) + doc SSOT for 2 / 4-16 (deferred) | this file |
+
+### v1.22-3 = GH #889 (Nuxt 3 RP full flow + a11y axe-core gate)
+
+| Sub-Issue | scope | files touched | axes | quality report |
+|---|---|---|---|---|
+| GH #889 | Nuxt 3 RP full journey (signed-out → OP → callback → userinfo → logout) + `role=alert` / `role=status` structured error banners + logout endpoint + jsdom + axe-core WCAG 2.1 AA gate over every visible RP state (12 axe scans across 5 UI states + 4 error kinds) | `rp/lib/pages-templates.ts` + `rp/pages/index.vue` + `rp/pages/callback.vue` + `rp/server/api/logout.post.ts` + `tests/rp-full-flow-a11y.spec.ts` + `tests/rp-full-journey-flow.spec.ts` + this report (§ RP a11y coverage — v1.22-3) | RP UI axis (a11y N/A → PASS) + full-journey state machine | this file |
 
 ## Fidelity axes (v1.21-4d additions)
 
@@ -61,9 +68,11 @@ The Sub-Issue #872 axis 4 (`jwks-rotation-retention`) pins the rotation shape (f
 | `tests/federation-trust-chain.spec.ts` | 19 | axes 13–16 (3-step chain / broken link / expired / cycle) |
 | `tests/jwks-rotation-e2e.spec.ts` | 11 | axes 4a–4d (rotation e2e retention) |
 | `tests/keycloak-real-driver.spec.ts` | 15 (11 always-on + 4 live opt-in) | v1.22-1 real driver env-skip semantics + Keycloak live coverage (axes 1 / 3) |
-| **total** | **123** (119 default + 4 live opt-in) | v1.22-1 dogfood fidelity + integration |
+| `tests/rp-full-flow-a11y.spec.ts` | 34 | v1.22-3 RP full-flow a11y (WCAG 2.1 AA + WAI-ARIA) — DOM structure + axe-core over 12 UI states |
+| `tests/rp-full-journey-flow.spec.ts` | 13 | v1.22-3 RP full-journey state machine (authorize → OP → callback → userinfo → logout + 5 error branches) |
+| **total** | **170** (166 default + 4 live opt-in) | v1.22-3 dogfood fidelity + integration + RP a11y |
 
-All 119 tests pass under `KIWA_MODE=mock` (default). Setting `OIDC_BOOTSTRAP=1` boots a Keycloak testcontainer (see next section) so the additional 4 live tests activate, taking the pass count to 123.
+All 166 tests pass under `KIWA_MODE=mock` (default). Setting `OIDC_BOOTSTRAP=1` boots a Keycloak testcontainer (see next section) so the additional 4 live tests activate, taking the pass count to 170. The RP a11y spec runs in `jsdom` env via the `// @vitest-environment jsdom` pragma so it coexists with the node-env fidelity harness inside one `pnpm test` run.
 
 ## Real driver coverage (v1.22-1)
 
@@ -133,9 +142,43 @@ The mock (`@kiwa-test/auth` `setupOidcEnv`) is the release-gate reference for v1
 | lint | PASS | No `pnpm lint` script on this package — it inherits the workspace-level lint. TypeScript strict mode is exercised via `tsconfig.base.json` (extended by both tsconfigs). No `any` / `unknown` narrowing failures. |
 | coverage | PASS | vitest runs without `--coverage` in the release gate — behavioural coverage is measured by the 16-axis fidelity matrix + the 123-test count. Every axis has ≥ 3 tests; every wrapper file (`discovery.ts` / `jwks.ts` / `dcr.ts` / `id-token.ts` / `federation.ts`) has ≥ 1 covering spec file. Axes 1 + 3 gain live Keycloak coverage in v1.22-1 (4 additional tests under `OIDC_BOOTSTRAP=1`). |
 | docs | PASS | Four sub-issue reports (`oidc-federation-discovery.md` / `oidc-federation-dcr.md` / `oidc-federation-id-token.md` / this file) landed. README covers the sub-issue split table + the axis matrix. This report layers § Real driver coverage (v1.22-1) + § Real coverage matrix — v1.22-1 + § Real vs mock fidelity — sig-only filtering for the Keycloak testcontainers wiring. |
-| a11y | N/A | Nuxt 3 RP skeleton (`rp/`) の login button と userinfo panel は user-facing UI に該当するが、 full login flow が stub 状態で reachable な user journey が未配線。 axe-core 走査 target が login button 単独では意味を持たないため v1.22 で RP flow 完成後に gate 化。 silent gate skipping 防止のため PASS ではなく N/A 明示。 |
+| a11y | PASS | v1.22-3 (GH #889) escalates the Nuxt 3 RP into a full login journey and adds `tests/rp-full-flow-a11y.spec.ts` (34 tests) that runs axe-core (WCAG 2.1 AA + WAI-ARIA best-practice tag sets) over every visible RP state — signed-out / signed-out with error banner (3 kinds) / signed-in with full userinfo / signed-in with only sub / callback exchanging / callback success / callback error (4 kinds). Every scan reports 0 violations at impact >= minor. The `color-contrast` rule is disabled in jsdom (needs a real canvas backend) — the fidelity report flags contrast as a Playwright-native gate that runs in browser env when the RP CI has one available (v1.22-N follow-up). |
 
-Release gate verdict: **PASS** (6/7 軸 PASS + 1 軸 N/A recorded).
+Release gate verdict: **PASS** (7/7 軸 PASS — v1.22-3 が a11y 軸 N/A → PASS を成立).
+
+## RP a11y coverage — v1.22-3
+
+Sub-Issue GH #889 escalates the Nuxt 3 RP skeleton into a full login journey and lands the WCAG 2.1 AA + WAI-ARIA a11y gate. The gate has three tiers —
+
+1. **Template renderer SSOT** (`rp/lib/pages-templates.ts`) — pure functions that emit the DOM string every RP page produces. `renderIndex({state, opDisplayName, userinfo, errorMessage})` covers signed-out / signed-in / signed-out-with-error; `renderCallback({status, errorKind, errorDetail})` covers exchanging / success / error. The Vue SFCs in `rp/pages/*.vue` mirror the same markup character-for-character so the a11y verdict transfers as long as the pairing holds.
+2. **jsdom + axe-core scan** (`tests/rp-full-flow-a11y.spec.ts`) — loads each rendered DOM string into jsdom via `document.open() / write() / close()`, then runs axe-core with the `wcag2a` / `wcag2aa` / `wcag21a` / `wcag21aa` / `best-practice` tag sets enabled. Every scan asserts 0 violations at impact >= minor. The `color-contrast` rule is disabled because jsdom does not implement `HTMLCanvasElement.getContext`; a Playwright-native contrast gate lives in the v1.22-N follow-up list.
+3. **Server-route journey** (`tests/rp-full-journey-flow.spec.ts`) — exercises the authorize → OP → callback → userinfo → logout state machine at the behavioural boundary (state / nonce / PKCE / id_token verification / CSRF / cookie drop). The five error branches the callback page can render (invalid_grant / expired_token / user_cancel / OP access_denied / missing code+state) each get a template-shape assertion so the a11y contract stays paired with the server contract.
+
+### Accessibility surface — Vue SFC ↔ renderer parity
+
+The a11y verdict from tier 2 only transfers when the Vue SFCs stay in lock-step with the renderer's DOM string. The parity contract:
+
+| element | renderer output | SFC template |
+|---|---|---|
+| `<main aria-labelledby="rp-title">` | index page landmark | `pages/index.vue` `<main>` opening tag |
+| `<h1 id="rp-title">` | main page heading | same |
+| `role="alert" aria-live="assertive"` error banner | shown when `errorMessage.length > 0` | `<div v-if="errorMessage.length > 0" role="alert" aria-live="assertive">` |
+| `<section aria-labelledby="signed-out-heading">` | signed-out panel | `<section v-if="state === 'signed-out'" aria-labelledby="signed-out-heading">` |
+| `<button id="signin-button" aria-label="Sign in with {op}">` | sign-in CTA | `<button ... aria-label="Sign in with {display name}">` |
+| `<section aria-labelledby="signed-in-heading">` | signed-in panel | `<section v-else aria-labelledby="signed-in-heading">` |
+| `<dl>` with `<dt>Subject</dt><dd>…</dd>` × 3 | userinfo | same |
+| `<button id="signout-button" aria-label="Sign out of the RP session">` | logout CTA | same |
+| `<main aria-labelledby="callback-title">` on callback | callback landmark | `pages/callback.vue` `<main>` |
+| `<p role="status" aria-live="polite">` | exchanging / success live region | same |
+| `<div role="alert" aria-live="assertive">` + `<a href="/" id="home-link">` | callback error banner + recovery link | same |
+
+Divergence between the two is the regression signal — a future PR that adds e.g. a new button to the SFC without adding it to the renderer would surface as a `rp-full-journey-flow.spec.ts` template-shape assertion diff.
+
+### Follow-ups
+
+- **Color-contrast gate** — the current a11y scan disables `color-contrast` because jsdom does not implement `HTMLCanvasElement.getContext`. A Playwright-based scan against `nuxt build && node .output/server/index.mjs` would exercise the real Chromium canvas backend; deferred to a v1.22-N Sub-Issue that wires the RP into the release-smoke Playwright fleet.
+- **OpenID Connect RP-Initiated Logout 1.0** — the current `/api/logout` route drops the local RP session cookie only. Walking the OP's `end_session_endpoint` (Keycloak `/protocol/openid-connect/logout`) is a v1.22-N follow-up; the UI copy already reads "Sign out of the RP session" to distinguish local vs global logout.
+- **RP-side federation bootstrap + real id_token verify** — flagged in the v1.22-3 report as v1.22-N follow-ups; no scope change from v1.22-1.
 
 ## Wrapper contract additions (v1.21-4d)
 
@@ -163,4 +206,5 @@ The v1.21-4d PR review flagged the substring-based classifier as fragile — rea
 - **v1.22-N** — id_token verify parity (axes 9-12 live). Wires a `jose`-based verifier through the fetched Keycloak JWKS so the mock's placeholder crypto shape does not artificially block the real-driver diff.
 - **v1.22-N** — DCR live coverage (axes 5-8). Layers async `registerClientLive()` on top of Keycloak's `/realms/{realm}/clients-registrations/default` + provisions the anonymous DCR policy on the realm.
 - **v1.22-N** — Federation §7 live coverage (axes 13-16). Provisions the Keycloak OpenID Federation SPI on the container image so the trust-chain walker diffs against Keycloak's `/entity-configuration` + `/statement` endpoints.
-- **v1.22-N** — RP a11y gate. Extends the Nuxt 3 skeleton with a full login journey (WCAG 2.1 AA + axe-core report) so the release-gate a11y 軸 upgrades from N/A → PASS.
+- **v1.22-3 (GH #889, delivered)** — RP a11y gate. Extended the Nuxt 3 skeleton with a full login journey + jsdom + axe-core WCAG 2.1 AA gate over 12 UI states; release-gate a11y 軸 = PASS. See § RP a11y coverage — v1.22-3.
+- **v1.22-N** — RP a11y color-contrast gate (Playwright + Chromium canvas). Extends the current jsdom-based scan with a real browser pass so the `color-contrast` rule activates.
