@@ -43,6 +43,7 @@ const PACKAGES = [
   '@kiwa-test/solidjs',
   '@kiwa-test/fresh',
   '@kiwa-test/hono',
+  '@kiwa-test/streaming',
 ];
 
 const PKG_DIRS = {
@@ -68,6 +69,7 @@ const PKG_DIRS = {
   '@kiwa-test/solidjs': 'packages/solidjs',
   '@kiwa-test/fresh': 'packages/fresh',
   '@kiwa-test/hono': 'packages/hono',
+  '@kiwa-test/streaming': 'packages/streaming',
 };
 
 // Lines / functions / statements stay at 90. Branches stay at 80 because the

@@ -114,6 +114,21 @@ const V1_19_PAGES = [
   { path: '/migrations/v1.18-to-v1.19', title: 'v1.18 → v1.19' },
 ];
 
+// v1.20 pages — new tutorials + concept doc + migration guide added under the
+// Streaming 深化 milestone (Issue #831 land + this publish PR). Mirrors the
+// v1.12 / v1.13 / v1.16 / v1.17 / v1.18 / v1.19 anchor phrase pattern. Each
+// phrase is a substring the rendered VitePress <main> will always include
+// (checked against the actual page headings + body text — not frontmatter
+// titles). Coverage adds Kafka event pipeline + Redpanda schema registry +
+// NATS JetStream as 3 new streaming provider tutorials.
+const V1_20_PAGES = [
+  { path: '/tutorials/31-kafka-event-pipeline', title: 'Kafka event pipeline' },
+  { path: '/tutorials/32-redpanda-schema-registry', title: 'Redpanda + schema registry' },
+  { path: '/tutorials/33-nats-jetstream', title: 'NATS JetStream' },
+  { path: '/concepts/streaming-testing', title: 'Streaming testing' },
+  { path: '/migrations/v1.19-to-v1.20', title: 'v1.19 → v1.20' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -209,6 +224,20 @@ test.describe('docs site — v1.18 pages render', () => {
 test.describe('docs site — v1.19 pages render', () => {
   for (const p of V1_19_PAGES) {
     test(`v1.19 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.20 pages render', () => {
+  for (const p of V1_20_PAGES) {
+    test(`v1.20 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;

@@ -50,6 +50,9 @@ describe('scripts/check-coverage-gates.mjs', () => {
       'packages/qwikcity',
       'packages/edge',
       'packages/solidjs',
+      'packages/fresh',
+      'packages/hono',
+      'packages/streaming',
     ];
     try {
       const passing = buildSummary({ lines: 95, branches: 85, functions: 95, statements: 95 });
@@ -91,6 +94,9 @@ describe('scripts/check-coverage-gates.mjs', () => {
         'packages/qwikcity',
         'packages/edge',
         'packages/solidjs',
+        'packages/fresh',
+        'packages/hono',
+        'packages/streaming',
       ]) {
         const covDir = resolve(fakeRoot, dir, 'coverage');
         mkdirSync(covDir, { recursive: true });
