@@ -253,6 +253,31 @@ export {
   syncCredentials as syncPasskeyCredentials,
 } from './passkey/index.js';
 
+// Passkey caBLE (CTAP2 hybrid transport) surface (v1.22-4, GH #890). Adds
+// QR code + BLE advertisement handshake + WebSocket tunnel establishment +
+// credential migration + signature roundtrip on top of the passkey adapter
+// so the fidelity harness can walk the phone → laptop cross-device flow
+// end-to-end without driving a real Bluetooth stack.
+export type {
+  CaBLEBLEHandshake,
+  CaBLECredentialMigration,
+  CaBLEQRCodePayload,
+  CaBLESession,
+  CaBLESessionOptions,
+  CaBLESignatureRoundtrip,
+  CaBLEStep,
+  CaBLEWebSocketTunnel,
+} from './passkey/caBLE/index.js';
+export {
+  encodeCaBLEQRURI,
+  establishWebSocketTunnel,
+  generateCaBLEQRCode,
+  migrateCredential,
+  performBLEHandshake,
+  performSignatureRoundtrip,
+  runCaBLESession,
+} from './passkey/caBLE/index.js';
+
 // OAuth 2.1 adapter surface (v1.21-1c, GH #850). Mock Authorization Server
 // covering RFC 9700 (OAuth 2.1) + RFC 9449 (DPoP) + RFC 7636 (PKCE S256) +
 // RFC 7009 (revocation) + RFC 7662 (introspection). Rejects the historical

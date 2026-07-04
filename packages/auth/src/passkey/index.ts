@@ -33,3 +33,22 @@ export {
   __resetPasskeyCounters,
   setupPasskeyEnv,
 } from './setup-passkey-env.js';
+export type {
+  CaBLEBLEHandshake,
+  CaBLECredentialMigration,
+  CaBLEQRCodePayload,
+  CaBLESession,
+  CaBLESessionOptions,
+  CaBLESignatureRoundtrip,
+  CaBLEStep,
+  CaBLEWebSocketTunnel,
+} from './caBLE/index.js';
+export {
+  encodeCaBLEQRURI,
+  establishWebSocketTunnel,
+  generateCaBLEQRCode,
+  migrateCredential,
+  performBLEHandshake,
+  performSignatureRoundtrip,
+  runCaBLESession,
+} from './caBLE/index.js';
