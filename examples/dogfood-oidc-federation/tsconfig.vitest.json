@@ -5,5 +5,5 @@
     "outDir": ".vitest-dist",
     "noEmit": false
   },
-  "include": ["src/**/*", "tests/**/*"]
+  "include": ["src/**/*", "tests/**/*", "rp/lib/**/*"]
 }
