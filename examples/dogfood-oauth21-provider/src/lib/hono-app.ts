@@ -26,6 +26,7 @@
 import { Hono } from 'hono';
 import type {
   AuthorizationRequest,
+  AuthorizationServer,
   DpopProof,
   TokenRequest,
 } from '@kiwa-test/auth';
@@ -42,6 +43,7 @@ import {
   classifyRefreshTokenError,
   type RefreshRotationRejectionKind,
 } from './refresh-rotation.js';
+import { cascadeRevoke } from './revocation-cascade.js';
 
 export interface CreateHonoAppOptions {
   adapter: OAuth21ASAdapter;
@@ -52,6 +54,15 @@ export interface CreateHonoAppOptions {
    * implementing login. Default = `user-1`.
    */
   authenticatedSubject?: string;
+  /**
+   * Direct handle to the underlying kiwa AS. When supplied `/revoke`
+   * runs the cascade helper ({@link cascadeRevoke}) so a compromised
+   * token tears down every access + active refresh in the
+   * `(clientId, subject)` family (RFC 9700 §2.2.2). When omitted
+   * `/revoke` falls back to the RFC 7009 single-token path via
+   * `adapter.revoke(...)`.
+   */
+  cascadeAs?: AuthorizationServer;
 }
 
 /**
@@ -63,6 +74,7 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
   const app = new Hono();
   const adapter = opts.adapter;
   const subject = opts.authenticatedSubject ?? 'user-1';
+  const cascadeAs = opts.cascadeAs;
 
   // RFC 8414 §3 — discovery metadata. Fixed shape, no request parameters.
   app.get('/.well-known/openid-configuration', (c) => {
@@ -379,8 +391,17 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
         400,
       );
     }
+    // RFC 9700 §2.2.2 — when a direct AS handle is available, cascade the
+    // revocation across the `(clientId, subject)` family so a compromised
+    // token cannot ripple into follow-up refreshes. Legacy callers that
+    // did not supply the AS handle fall back to RFC 7009 single-token
+    // revocation via the adapter.
     try {
-      adapter.revoke(token, clientId);
+      if (cascadeAs) {
+        cascadeRevoke(cascadeAs, token, clientId);
+      } else {
+        adapter.revoke(token, clientId);
+      }
     } catch {
       // RFC 7009 §2.2 — revocation is idempotent. Silently swallow the
       // AS's rejection so a client that reuses a revoke request doesn't
