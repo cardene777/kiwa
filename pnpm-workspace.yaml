@@ -1,6 +1,7 @@
 packages:
   - "packages/*"
   - "examples/*"
+  - "examples/dogfood-oidc-federation/rp"
   - "tests/fixtures/*"
   - "tests/release-smoke"
   - "promo"

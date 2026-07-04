@@ -1,6 +1,6 @@
 # dogfood-oidc-federation
 
-Dogfood app for `@kiwa-test/auth` v1.21-1d (OIDC adapter). A Deno + Hono self-hosted OpenID Provider (OP) that exercises the OIDC Core 1.0 + Discovery 1.0 + RFC 7591 DCR + JWKS rotation + Federation 1.0 §7 endpoint surface. Sub-Issue v1.21-4a lands the skeleton — OP interface, Discovery + JWKS, adapter split, fidelity harness scaffold. Sub-Issue v1.21-4b (this state) layers the RFC 7591 DCR fidelity harness (3 auth methods + dropped-grant refusal + software_statement JWS + redirect_uris validation).
+Dogfood app for `@kiwa-test/auth` v1.21-1d (OIDC adapter). A Deno + Hono self-hosted OpenID Provider (OP) that exercises the OIDC Core 1.0 + Discovery 1.0 + RFC 7591 DCR + JWKS rotation + Federation 1.0 §7 endpoint surface. Sub-Issue v1.21-4a lands the skeleton; Sub-Issue v1.21-4b layers the RFC 7591 DCR fidelity harness (3 auth methods + dropped-grant refusal + software_statement JWS + redirect_uris validation). Sub-Issue v1.21-4c (this state) layers the id_token verification fidelity harness (JWS signature + claims 一致 + nonce echo + hash chain) + a Nuxt 3 Relying Party (RP) skeleton under `rp/` that walks the authorization code flow.
 
 - `KIWA_MODE=real` — Keycloak spawned through testcontainers when `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL` set. Skipped when the environment cannot reach docker. Full wiring lands in Sub-Issues v1.21-4b/c/d.
 - `KIWA_MODE=mock` — `@kiwa-test/auth` `setupOidcEnv` deterministic mock. Always runs.
@@ -16,7 +16,7 @@ Behavioural fidelity between the two drivers feeds the release gate (`docs/quali
 | #874 (c) | Nuxt 3 RP + authorization code flow + `id_token` verify (JWS + claims + nonce + hash chain) | `rp/**` + `src/lib/id-token.ts` + `tests/id-token-verify.spec.ts` |
 | #875 (d) | Federation trust chain + JWKS rotation e2e + real Keycloak fidelity + release gate + docs | `src/lib/federation.ts` + `tests/federation-trust-chain.spec.ts` + `tests/jwks-rotation-e2e.spec.ts` + `docs/quality-reports/auth/oidc-federation.md` |
 
-Sub-Issue **a** landed the shared surface — Hono OP, adapter interface, `KIWA_MODE` split, discovery + JWKS skeleton fidelity harness (4 axes). Sub-Issue **b** (this state) layers the DCR fidelity harness on top (axes 5–8: auth method 3 shapes + dropped-grant refusal + software_statement JWS verification + redirect_uris URL validation). Sub-Issues **c**/**d** grow the harness to 12 → 16 axes with id_token verification + Federation trust chain.
+Sub-Issue **a** landed the shared surface — Hono OP, adapter interface, `KIWA_MODE` split, discovery + JWKS skeleton fidelity harness (4 axes). Sub-Issue **b** layered the DCR fidelity harness (axes 5–8: auth method 3 shapes + dropped-grant refusal + software_statement JWS verification + redirect_uris URL validation). Sub-Issue **c** (this state) layers the id_token verification fidelity harness (axes 9–12: JWS signature + claims 一致 + nonce echo + hash chain) + a Nuxt 3 RP skeleton under `rp/` that walks the authorization code flow. Sub-Issue **d** grows the harness to 16 axes with Federation trust chain + JWKS rotation e2e + real Keycloak fidelity gate.
 
 ## Layout
 
@@ -30,11 +30,17 @@ src/
     discovery.ts       # assertIssuerMatchesFetchUrl + assertRequiredDiscoveryFields + assertOAuth21Restrictions
     jwks.ts            # assertKeyShape + assertJwksDocumentShape + pickActiveKey + pickRetiredKeys
     dcr.ts             # handleRegistration — RFC 7591 fidelity wrapper (3 auth methods + dropped-grant refusal + software_statement JWS + redirect_uris validation)
+    id-token.ts        # verifyIdToken + mustVerifyIdToken + parseIdTokenHeader — OIDC Core §3.1.3.6-§3.1.3.7 verification wrapper (axes 9-12)
     deno-op.ts         # createOpApp — Hono routes for `.well-known/openid-configuration` / `/jwks` / `/jwks/rotate` / `/register`
+rp/                    # Nuxt 3 Relying Party skeleton (v1.21-4c)
+  nuxt.config.ts
+  pages/{index,callback}.vue
+  server/api/{authorize.get,callback.post,userinfo.get}.ts
 tests/
   discovery-jwks-skeleton.spec.ts  # axes 1–4: discovery metadata / issuer match / JWKS shape / JWKS rotation retention
   hono-op-http.spec.ts             # HTTP integration smoke tests for Hono routes
   dcr-flow.spec.ts                 # axes 5–8: auth method 3 shapes / dropped-grant refusal / software_statement JWS / redirect_uris validation
+  id-token-verify.spec.ts          # axes 9-12: JWS signature / claims 一致 / nonce echo / hash chain
 ```
 
 The Hono routes in `src/lib/deno-op.ts` are the primary HTTP integration point; the fidelity harness in `tests/**` drives the adapter directly without booting Hono so `KIWA_MODE=mock` vs `KIWA_MODE=real` diffs can be measured without HTTP round-trip noise.
@@ -48,7 +54,16 @@ pnpm typecheck     # tsc --noEmit
 
 ## Fidelity axes
 
-### DCR-flow (Sub-Issue #873, this state)
+### id-token-verify (Sub-Issue #874, this state)
+
+| axis | mock (`@kiwa-test/auth` via `src/lib/id-token.ts` wrapper) | real (Keycloak) | assertion |
+|---|---|---|---|
+| 9. JWS signature | header + payload + kid recompute must match signature; wrong kid / tampering / unknown kid / alg mismatch refuse; rotated-but-in-window kid still verifies | Keycloak `/token` mints RS256 / ES256 signed id_tokens; RP verifies against `/certs` | OIDC Core 1.0 §3.1.3.7 遵守 |
+| 10. claims 一致 | iss / aud must match; exp within skew accepts, beyond refuses; iat in future beyond skew refuses (clock-drift attack) | Keycloak same claims check | OIDC Core 1.0 §3.1.3.7 遵守 |
+| 11. nonce echo | authorization request `nonce` = id_token `nonce` claim; mismatch refuses; missing claim when expectation present refuses | Keycloak echoes `nonce` from `/authorize` | OIDC Core 1.0 §3.1.2.1 遵守 |
+| 12. hash chain | `at_hash` = SHA-256(access_token)[0..15] base64url; `c_hash` = SHA-256(code)[0..15] base64url; mismatch refuses | Keycloak same hash recipe | OIDC Core 1.0 §3.1.3.6 遵守 |
+
+### DCR-flow (Sub-Issue #873)
 
 | axis | mock (`@kiwa-test/auth` via `src/lib/dcr.ts`) | real (Keycloak + testcontainers) | assertion |
 |---|---|---|---|
@@ -58,6 +73,7 @@ pnpm typecheck     # tsc --noEmit
 | 8. redirect_uris validation | Missing / empty / non-URL entries refuse; multiple valid URLs echo verbatim | Keycloak refuses on the same conditions | RFC 7591 §2 — `redirect_uris` mandatory + every entry must be a valid URL |
 
 ### Discovery-JWKS-skeleton (Sub-Issue #872)
+
 
 | axis | mock (`@kiwa-test/auth`) | real (Keycloak + testcontainers, gated by `OIDC_BOOTSTRAP=1`) | assertion |
 |---|---|---|---|
