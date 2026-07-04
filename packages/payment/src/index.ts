@@ -14,3 +14,6 @@ export {
   paymentFailed,
   refunded,
 } from './fixture.js';
+
+// v0.3 advanced billing semantics — 9 axis SSOT
+export * from './semantics/index.js';
