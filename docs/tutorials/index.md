@@ -37,6 +37,9 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 25 | [Reth node test (dev chain + reorg + fidelity matrix)](./25-reth-node-test) | Rust / cargo | 10 min |
 | 26 | [Foundry invariant + fuzz runner (10 000 runs + shrink parser)](./26-foundry-invariant-fuzz) | Rust / cargo | 12 min |
 | 27 | [dApp e2e reorg (snapshot + revert + refetch across 4 scenarios)](./27-dapp-e2e-reorg) | Node.js / Playwright | 12 min |
+| 28 | [SolidJS Signal + Effect + Resource + Suspense (fine-grained reactivity)](./28-solidjs-signal-app) | Node.js / vitest | 10 min |
+| 29 | [Fresh Islands + Route Handler + Head normalize (Deno partial hydration)](./29-fresh-islands) | Node.js / vitest | 10 min |
+| 30 | [HonoJS + hc RPC type-safe client + Workers env (KV / D1 / R2)](./30-hono-workers-rpc) | Node.js / vitest | 12 min |
 
 ## AI-LLM tutorials (v1.12)
 
@@ -57,3 +60,7 @@ Tutorials 22 – 24 exercise the v2.0 additions to [`@kiwa-test/observability`](
 ## Blockchain 深化 tutorials (v1.18)
 
 Tutorials 25 – 27 exercise the v0.5 additions to [`kiwa-test-rs`](https://github.com/cardene777/kiwa/blob/main/kiwa-rs/README.md) and the reorg helpers in [`@kiwa-test/dapp`](https://github.com/cardene777/kiwa/blob/main/packages/dapp/README.md) — one for each of Reth NodeBuilder dev chain integration (`RethNode::spawn_dev` + `reth_reorg` + 7-row fidelity matrix), Foundry invariant + fuzz runner (10 000 runs with deterministic seed and shrink parser), and Playwright dApp reorg regression (`snapshotChain` / `revertChain` across 4 scenarios). See [`docs/concepts/blockchain-testing.md`](../concepts/blockchain-testing) for the 4 axes v1.18 adds on top of the v1.10 `contract::foundry` + `contract::alloy` base and where each axis lands in the release-gate fidelity ratio.
+
+## Framework 深化 tutorials (v1.19)
+
+Tutorials 28 – 30 exercise the three new modern web framework adapters — [`@kiwa-test/solidjs`](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/README.md), [`@kiwa-test/fresh`](https://github.com/cardene777/kiwa/blob/main/packages/fresh/README.md), and [`@kiwa-test/hono`](https://github.com/cardene777/kiwa/blob/main/packages/hono/README.md). Each cuts down to a single vitest suite that walks the framework's characteristic runtime contract without booting the real runtime — SolidJS Signal-based fine-grained reactivity + Suspense-shaped resources (`mockSignal` / `mockEffect` / `batch` / `createResourceStub` / `renderWithSuspense`), Deno Fresh Islands architecture + Route Handler + Head normalize (`invokeFreshHandler` / `defineIsland` / `hydrateIslands` / `mergeHead`), and Cloudflare Workers-style HonoJS + hc typed RPC + KV / D1 / R2 mocks (`createHonoApp` / `createRpcClient` / `mockKVNamespace` / `mockD1Database` / `mockR2Bucket`). See [`docs/concepts/modern-web-framework-testing.md`](../concepts/modern-web-framework-testing) for the 4 axes v1.19 adds on top of the v1.14 horizontal framework baseline.
