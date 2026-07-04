@@ -60,10 +60,10 @@ The Sub-Issue #872 axis 4 (`jwks-rotation-retention`) pins the rotation shape (f
 | `tests/id-token-verify.spec.ts` | 21 | axes 9–12 (JWS signature / claims / nonce / hash chain) |
 | `tests/federation-trust-chain.spec.ts` | 19 | axes 13–16 (3-step chain / broken link / expired / cycle) |
 | `tests/jwks-rotation-e2e.spec.ts` | 11 | axes 4a–4d (rotation e2e retention) |
-| `tests/keycloak-real-driver.spec.ts` | 16 (12 always-on + 4 live opt-in) | v1.22-1 real driver env-skip semantics + Keycloak live coverage (axes 1 / 3) |
-| **total** | **124** (120 default + 4 live opt-in) | v1.22-1 dogfood fidelity + integration |
+| `tests/keycloak-real-driver.spec.ts` | 15 (11 always-on + 4 live opt-in) | v1.22-1 real driver env-skip semantics + Keycloak live coverage (axes 1 / 3) |
+| **total** | **123** (119 default + 4 live opt-in) | v1.22-1 dogfood fidelity + integration |
 
-All 120 tests pass under `KIWA_MODE=mock` (default). Setting `OIDC_BOOTSTRAP=1` boots a Keycloak testcontainer (see next section) so the additional 4 live tests activate, taking the pass count to 124.
+All 119 tests pass under `KIWA_MODE=mock` (default). Setting `OIDC_BOOTSTRAP=1` boots a Keycloak testcontainer (see next section) so the additional 4 live tests activate, taking the pass count to 123.
 
 ## Real driver coverage (v1.22-1)
 
@@ -73,9 +73,9 @@ Sub-Issue v1.22-1 (GH #887 / CAR-442) lands the Keycloak testcontainers wiring i
 
 The real driver treats env as one of three states:
 
-1. **env-missing** (`OIDC_BOOTSTRAP` unset) — every ceremony beyond `discovery()` refuses with `KIWA_OIDC_ENV_MISSING`; `discovery()` returns the static shape derived from the request'ed issuer so the fidelity harness has a reference. Default state on every developer machine.
+1. **env-missing** (`OIDC_BOOTSTRAP` unset) — every ceremony beyond `discovery()` refuses with `KIWA_OIDC_ENV_MISSING`; `discovery()` returns the static shape derived from the requested issuer so the fidelity harness has a reference. Default state on every developer machine.
 2. **env-ready with pre-provisioned URL** (`OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL` set) — the adapter fetches discovery + JWKS from the supplied URL. No container boot; the caller is responsible for provisioning Keycloak (docker-compose, external testcontainers instance, or a shared deployment).
-3. **env-ready with boot** (`OIDC_BOOTSTRAP=1`, `KEYCLOAK_URL` unset, `keycloak` handle supplied) — the harness boots Keycloak through `startKeycloakContainer()` once per test file + reuses the handle across every axis. Container is torn down in `afterAll`.
+3. **env-ready with handle** (caller passes `keycloak` handle via `makeRealAdapter({ keycloak })`) — the harness boots Keycloak through `startKeycloakContainer()` in its own lifecycle (typically `beforeAll` / `afterAll`) and hands the handle to the adapter. `effectiveIssuer` becomes the handle's realm URL. Container ownership stays with the caller so cleanup boundaries are unambiguous — the adapter never boots or stops Keycloak internally.
 
 ### Real coverage matrix — v1.22-1
 
@@ -128,10 +128,10 @@ The mock (`@kiwa-test/auth` `setupOidcEnv`) is the release-gate reference for v1
 | 軸 | 判定 | evidence |
 |---|---|---|
 | typecheck | PASS | `pnpm typecheck` (`tsc --noEmit`) exits 0 for the example package. `tsconfig.vitest.json` extends the workspace base so the same emit is used for compiled tests + type-only checks. |
-| test | PASS | `pnpm test` runs 120 tests (default, mock-only) across 7 spec files under vitest 2.x, 100% pass. `OIDC_BOOTSTRAP=1 pnpm test` unlocks 4 additional live Keycloak tests → 124 tests, 100% pass. Baseline before v1.22-1 = 106 tests (v1.21-4d); v1.22-1 adds 18 tests (16 real-driver + 2 federation coverage refinements) → 124. |
+| test | PASS | `pnpm test` runs 119 tests (default, mock-only) across 7 spec files under vitest 2.x, 100% pass. `OIDC_BOOTSTRAP=1 pnpm test` unlocks 4 additional live Keycloak tests → 123 tests, 100% pass. Baseline before v1.22-1 = 106 tests (v1.21-4d); v1.22-1 adds 17 tests (15 real-driver + 2 federation coverage refinements) → 123. |
 | build | PASS | The example is a workspace consumer (not a published package); the build gate is the compiled test emit under `.vitest-dist/` produced by the `test` script. Emit is byte-clean per run. |
 | lint | PASS | No `pnpm lint` script on this package — it inherits the workspace-level lint. TypeScript strict mode is exercised via `tsconfig.base.json` (extended by both tsconfigs). No `any` / `unknown` narrowing failures. |
-| coverage | PASS | vitest runs without `--coverage` in the release gate — behavioural coverage is measured by the 16-axis fidelity matrix + the 124-test count. Every axis has ≥ 3 tests; every wrapper file (`discovery.ts` / `jwks.ts` / `dcr.ts` / `id-token.ts` / `federation.ts`) has ≥ 1 covering spec file. Axes 1 + 3 gain live Keycloak coverage in v1.22-1 (4 additional tests under `OIDC_BOOTSTRAP=1`). |
+| coverage | PASS | vitest runs without `--coverage` in the release gate — behavioural coverage is measured by the 16-axis fidelity matrix + the 123-test count. Every axis has ≥ 3 tests; every wrapper file (`discovery.ts` / `jwks.ts` / `dcr.ts` / `id-token.ts` / `federation.ts`) has ≥ 1 covering spec file. Axes 1 + 3 gain live Keycloak coverage in v1.22-1 (4 additional tests under `OIDC_BOOTSTRAP=1`). |
 | docs | PASS | Four sub-issue reports (`oidc-federation-discovery.md` / `oidc-federation-dcr.md` / `oidc-federation-id-token.md` / this file) landed. README covers the sub-issue split table + the axis matrix. This report layers § Real driver coverage (v1.22-1) + § Real coverage matrix — v1.22-1 + § Real vs mock fidelity — sig-only filtering for the Keycloak testcontainers wiring. |
 | a11y | N/A | Nuxt 3 RP skeleton (`rp/`) の login button と userinfo panel は user-facing UI に該当するが、 full login flow が stub 状態で reachable な user journey が未配線。 axe-core 走査 target が login button 単独では意味を持たないため v1.22 で RP flow 完成後に gate 化。 silent gate skipping 防止のため PASS ではなく N/A 明示。 |
 

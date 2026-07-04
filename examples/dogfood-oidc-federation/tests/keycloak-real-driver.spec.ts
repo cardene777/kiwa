@@ -44,7 +44,6 @@ import {
   fetchJwksFromKeycloak,
   isEnvReady,
   makeRealAdapter,
-  shouldBootContainer,
   startKeycloakContainer,
   type KeycloakHandle,
 } from '../src/adapters/real.js';
@@ -55,7 +54,7 @@ import { assertRequiredDiscoveryFields } from '../src/lib/discovery.js';
 const ISSUER = 'https://op.example.test';
 const LIVE_CONTAINER_ENABLED = process.env['OIDC_BOOTSTRAP'] === '1';
 
-describe('env detection helpers', () => {
+describe('env detection helper', () => {
   it('isEnvReady returns true only when both OIDC_BOOTSTRAP=1 and KEYCLOAK_URL are set', () => {
     expect(isEnvReady({})).toBe(false);
     expect(isEnvReady({ OIDC_BOOTSTRAP: '1' })).toBe(false);
@@ -67,18 +66,6 @@ describe('env detection helpers', () => {
     expect(
       isEnvReady({ OIDC_BOOTSTRAP: 'true', KEYCLOAK_URL: 'http://x' }),
     ).toBe(false);
-  });
-
-  it('shouldBootContainer returns true when OIDC_BOOTSTRAP=1 and KEYCLOAK_URL is unset', () => {
-    // Pre-provisioned URL path skips the boot; the harness reuses an
-    // externally-supplied container.
-    expect(shouldBootContainer({ OIDC_BOOTSTRAP: '1' })).toBe(true);
-    // Empty string is treated as "provided" and skips boot.
-    expect(
-      shouldBootContainer({ OIDC_BOOTSTRAP: '1', KEYCLOAK_URL: 'http://x' }),
-    ).toBe(false);
-    // Without OIDC_BOOTSTRAP=1 the adapter never boots.
-    expect(shouldBootContainer({})).toBe(false);
   });
 });
 

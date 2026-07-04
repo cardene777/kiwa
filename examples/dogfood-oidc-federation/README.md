@@ -56,8 +56,8 @@ The Hono routes in `src/lib/deno-op.ts` are the primary HTTP integration point; 
 ## Running
 
 ```sh
-pnpm test                       # vitest (mock always, 4 live tests skipped when OIDC_BOOTSTRAP unset — 120/124 tests run)
-OIDC_BOOTSTRAP=1 pnpm test      # boots Keycloak testcontainer + runs the full 124-test suite (docker required)
+pnpm test                       # vitest (mock always, 4 live tests skipped when OIDC_BOOTSTRAP unset — 119/123 tests run)
+OIDC_BOOTSTRAP=1 pnpm test      # boots Keycloak testcontainer + runs the full 123-test suite (docker required)
 pnpm typecheck                  # tsc --noEmit
 ```
 
@@ -122,6 +122,7 @@ Total 106 tests across six spec files, all pass under `KIWA_MODE=mock`. See `doc
 
 ## Environment gating
 
-- `KIWA_MODE=mock` — forces the mock adapter; every test always runs.
-- `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL=...` — opt-in for real ceremonies. Deferred to the v1.22 milestone (Keycloak Federation deployment). Until then the real adapter refuses every ceremony beyond `discovery()` with `KIWA_OIDC_ENV_MISSING`.
-- Without `OIDC_BOOTSTRAP=1`, the real adapter's `discovery()` returns a valid metadata document (static shape derived from `issuer`); every other method (including `registerClient` per axes 5–8 + federation ceremonies per axes 13–16) reports `KIWA_OIDC_ENV_MISSING`.
+- `KIWA_MODE=mock` — forces the mock adapter; every test always runs. Default state.
+- `OIDC_BOOTSTRAP=1` alone (v1.22-1+) — the caller invokes `startKeycloakContainer()` to boot `quay.io/keycloak/keycloak:26.0` through `testcontainers` (docker required) and hands the returned `KeycloakHandle` to `makeRealAdapter({ keycloak })`. `refreshLiveDiscovery()` + `refreshLiveJwks()` fetch live documents; the sync interface serves the cached document on subsequent calls (mock parity).
+- `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL=...` — the caller has provisioned Keycloak externally (docker-compose / shared deployment / separate testcontainers lifecycle). The adapter fetches directly from the supplied URL; no boot.
+- `OIDC_BOOTSTRAP` unset — the real adapter's `discovery()` returns a valid metadata document (static shape derived from `issuer`); every other method (including `registerClient` per axes 5–8 + federation ceremonies per axes 13–16 + `rotateJwks` per axis 4 / 4a-4d) reports `KIWA_OIDC_ENV_MISSING`. Full detail on the sync interface parity refusal contract lives in `docs/quality-reports/auth/oidc-federation.md` § Real driver API surface.

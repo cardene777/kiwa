@@ -1,27 +1,33 @@
 /**
  * Real adapter — drives a live Keycloak instance so the fidelity harness can
  * diff mock vs real behaviour side-by-side. v1.22-1 (CAR-442 / GH #887) wires
- * the testcontainers path so `OIDC_BOOTSTRAP=1` boots a `quay.io/keycloak/keycloak`
- * container, imports the `kiwa` realm, and exposes discovery + JWKS + DCR through
- * Keycloak's OIDC endpoints. When docker is unreachable or the env vars are
- * unset, every ceremony beyond `discovery()` refuses with
- * `KIWA_OIDC_ENV_MISSING` — the fidelity harness inspects the trace to distinguish
- * "environment absent" from "assertion failed" (mirrors the `dogfood-oauth21-provider`
- * pattern for provider parity).
+ * the testcontainers path so a caller who invokes {@link startKeycloakContainer}
+ * boots a `quay.io/keycloak/keycloak` container, imports the `kiwa` realm, and
+ * exposes discovery + JWKS through Keycloak's OIDC endpoints. When Docker is
+ * unreachable or the env vars are unset, every ceremony beyond `discovery()`
+ * refuses with `KIWA_OIDC_ENV_MISSING` — the fidelity harness inspects the trace
+ * to distinguish "environment absent" from "assertion failed" (mirrors the
+ * `dogfood-oauth21-provider` pattern for provider parity).
  *
- * The env is considered ready when one of the following holds:
- *   1. `OIDC_BOOTSTRAP=1` AND `KEYCLOAK_URL` is populated — the caller has
- *      already provisioned Keycloak (docker-compose, testcontainers external
- *      instance, or a real deployment). The adapter fetches discovery + JWKS
- *      directly through fetch.
- *   2. `OIDC_BOOTSTRAP=1` AND docker is reachable — the adapter boots Keycloak
- *      through {@link startKeycloakContainer} on the first non-discovery call
- *      and reuses the handle for the lifetime of the adapter.
+ * Two env-ready states are supported (both surfaced through the same async
+ * live-fetch helpers, `refreshLiveDiscovery` + `refreshLiveJwks`):
+ *   1. `keycloak` option supplied — the caller booted the container through
+ *      {@link startKeycloakContainer} (typically in a vitest `beforeAll` so
+ *      one container is shared across every axis) and hands the handle to
+ *      the adapter. `effectiveIssuer` becomes the handle's realm URL.
+ *   2. `OIDC_BOOTSTRAP=1` AND `KEYCLOAK_URL` populated — the caller has
+ *      already provisioned Keycloak externally (docker-compose, testcontainers
+ *      driven from a separate lifecycle, or a shared deployment). The adapter
+ *      fetches discovery + JWKS from the supplied URL.
+ *
+ * The adapter does NOT boot Keycloak lazily inside `makeRealAdapter` — the
+ * container lifecycle stays with the caller so the `stop()` boundary is
+ * unambiguous (avoids the "who owns cleanup?" trap when the adapter is torn
+ * down mid-request). Callers who want a lazy boot invoke
+ * {@link startKeycloakContainer} explicitly + wrap it in their own lifecycle.
  *
  * The env-detect runs eagerly at construction so vitest `--isolate` tests can
- * override `env` per suite without touching `process.env`. Container startup is
- * lazy so the constructor never awaits docker unless a caller actually invokes
- * an async ceremony.
+ * override `env` per suite without touching `process.env`.
  */
 
 import type {
@@ -126,21 +132,14 @@ function buildStaticDiscovery(issuer: string): OpenIdProviderMetadata {
 }
 
 /**
- * Detect whether the environment is ready to talk to Keycloak. Both env
- * vars are inspected lazily so tests can override them per suite without
- * touching `process.env`.
+ * Detect whether the environment is ready to talk to a pre-provisioned
+ * Keycloak instance through fetch. Requires both `OIDC_BOOTSTRAP=1` +
+ * `KEYCLOAK_URL` to be set. When the caller instead supplies a
+ * pre-booted {@link KeycloakHandle} through the adapter options, the env
+ * check is bypassed — the handle is authoritative.
  */
 export function isEnvReady(env: Record<string, string | undefined>): boolean {
   return env['OIDC_BOOTSTRAP'] === '1' && Boolean(env['KEYCLOAK_URL']);
-}
-
-/**
- * Whether the caller has asked us to spin up Keycloak through testcontainers
- * (as opposed to pointing at a pre-provisioned URL). When `OIDC_BOOTSTRAP=1`
- * but `KEYCLOAK_URL` is unset, the adapter boots a container on first use.
- */
-export function shouldBootContainer(env: Record<string, string | undefined>): boolean {
-  return env['OIDC_BOOTSTRAP'] === '1' && !env['KEYCLOAK_URL'];
 }
 
 /**
@@ -469,7 +468,7 @@ export async function makeRealAdapter(
   const keycloakHandle = options.keycloak;
   // When a handle is supplied the effective issuer is Keycloak's realm URL
   // so downstream diffs use Keycloak's actual metadata. Without a handle the
-  // env-URL takes precedence over the request'ed issuer (mirrors the
+  // env-URL takes precedence over the requested issuer (mirrors the
   // env-injected wiring pattern).
   const effectiveIssuer = keycloakHandle
     ? keycloakHandle.issuer
