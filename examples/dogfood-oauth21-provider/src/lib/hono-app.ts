@@ -26,12 +26,22 @@
 import { Hono } from 'hono';
 import type {
   AuthorizationRequest,
+  DpopProof,
   TokenRequest,
 } from '@kiwa-test/auth';
 import type { OAuth21ASAdapter } from '../adapters/interface.js';
 import { assertAuthorizeQueryPkce } from '../app/authorize/route.js';
 import { assertTokenPkce } from '../app/token/route.js';
+import {
+  DpopValidationError,
+  parseDpopHeader,
+  type DpopRejectionKind,
+} from './dpop.js';
 import { PkceValidationError, type PkceRejectionKind } from './pkce.js';
+import {
+  classifyRefreshTokenError,
+  type RefreshRotationRejectionKind,
+} from './refresh-rotation.js';
 
 export interface CreateHonoAppOptions {
   adapter: OAuth21ASAdapter;
@@ -194,6 +204,35 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
       );
     }
 
+    // RFC 9449 §4 — the client sends the DPoP proof through the `DPoP`
+    // HTTP header (case-insensitive). Parse it up-front so a malformed
+    // proof surfaces as `invalid_dpop_proof` before the AS is invoked.
+    // The header is optional at this layer — a plain-bearer client that
+    // has never bound a DPoP key can still exchange codes for tokens,
+    // and the AS records the resulting token as `token_type=Bearer`.
+    const dpopHeader = c.req.header('DPoP') ?? c.req.header('dpop');
+    let dpopProof: DpopProof | undefined;
+    if (dpopHeader !== undefined && dpopHeader !== '') {
+      try {
+        dpopProof = parseDpopHeader(dpopHeader);
+      } catch (err) {
+        if (err instanceof DpopValidationError) {
+          return c.json(
+            {
+              error: 'invalid_dpop_proof',
+              error_description: err.message,
+              // RFC 9449 §5.2 — surface the rejection kind so a client can
+              // tell "your proof is malformed" apart from "your proof is
+              // replaying an already-seen jti".
+              kind: err.kind,
+            },
+            400,
+          );
+        }
+        throw err;
+      }
+    }
+
     let request: TokenRequest;
     if (grantType === 'authorization_code') {
       const code = body['code'];
@@ -215,6 +254,7 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
         redirectUri,
         clientId,
         codeVerifier,
+        ...(dpopProof !== undefined ? { dpop: dpopProof } : {}),
       };
     } else {
       const refreshToken = body['refresh_token'];
@@ -233,6 +273,7 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
         refreshToken,
         clientId,
         ...(body['scope'] !== undefined ? { scope: body['scope'] } : {}),
+        ...(dpopProof !== undefined ? { dpop: dpopProof } : {}),
       };
     }
 
@@ -260,7 +301,49 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
           400,
         );
       }
+      if (err instanceof DpopValidationError) {
+        return c.json(
+          {
+            error: mapDpopKindToTokenCode(err.kind),
+            error_description: err.message,
+            kind: err.kind,
+          },
+          400,
+        );
+      }
       const message = err instanceof Error ? err.message : String(err);
+      // RFC 9449 §5.2 — DPoP proof verification failures surface from
+      // the kiwa AS with a `verifyDpopProof:` prefix. Route them to
+      // `invalid_dpop_proof` so a client can tell "your proof is
+      // broken" apart from "your grant is broken".
+      const dpopKind = classifyDpopAsError(message);
+      if (dpopKind !== null) {
+        return c.json(
+          {
+            error: 'invalid_dpop_proof',
+            error_description: message,
+            kind: dpopKind,
+          },
+          400,
+        );
+      }
+      // RFC 9700 §2.2 — refresh rotation compromise surfaces with a
+      // distinct AS-level message. The classifier maps every
+      // rotation-family rejection to `invalid_grant` (RFC 6749 §5.2)
+      // but keeps the `kind` on the response body so a client can
+      // distinguish reuse (`refresh_token_reused` — family torn down)
+      // from a plain unknown token (`unknown_refresh_token`).
+      const rotationKind = classifyRefreshTokenError(message);
+      if (rotationKind !== null) {
+        return c.json(
+          {
+            error: mapRotationKindToTokenCode(rotationKind),
+            error_description: message,
+            kind: rotationKind,
+          },
+          400,
+        );
+      }
       return c.json(
         {
           error: classifyTokenErrorCode(message),
@@ -429,5 +512,72 @@ function mapPkceKindToTokenCode(kind: PkceRejectionKind): string {
     case 'method_missing_refused':
     case 'method_unknown_refused':
       return 'invalid_request';
+  }
+}
+
+/**
+ * Classify a kiwa AS-side rejection message from `verifyDpopProof(...)`
+ * into a {@link DpopRejectionKind}. The kiwa AS invokes the verifier
+ * inside `handleAuthorizationCode` + `handleRefreshToken`, so the
+ * rejection surfaces at the outer `adapter.token(...)` call with a
+ * `verifyDpopProof:` prefix — the classifier translates each prefix
+ * into a stable OAuth error code without duplicating the switch in
+ * every route handler.
+ */
+function classifyDpopAsError(message: string): DpopRejectionKind | null {
+  if (!message.includes('verifyDpopProof')) return null;
+  if (message.includes('htm mismatch')) return 'payload_htm_mismatch';
+  if (message.includes('htu mismatch')) return 'payload_htu_mismatch';
+  if (message.includes('iat outside allowed skew')) return 'payload_iat_skew';
+  if (message.includes('proof missing jti')) return 'payload_jti_missing';
+  if (message.includes('replay detected')) return 'payload_jti_replay';
+  return 'header_malformed';
+}
+
+/**
+ * Map a {@link DpopRejectionKind} raised at `/token` to the OAuth 2.1
+ * error code. RFC 9449 §5.2 — every DPoP proof failure surfaces as
+ * `invalid_dpop_proof`; the wrapper keeps the exhaustive switch so
+ * adding a new kind forces the caller to decide which OAuth code to
+ * emit.
+ */
+function mapDpopKindToTokenCode(kind: DpopRejectionKind): string {
+  switch (kind) {
+    case 'header_missing':
+    case 'header_malformed':
+    case 'header_typ_refused':
+    case 'header_alg_refused':
+    case 'header_jwk_refused':
+    case 'payload_htm_mismatch':
+    case 'payload_htu_mismatch':
+    case 'payload_iat_skew':
+    case 'payload_jti_missing':
+    case 'payload_jti_replay':
+    case 'thumbprint_mismatch':
+      return 'invalid_dpop_proof';
+  }
+}
+
+/**
+ * Map a {@link RefreshRotationRejectionKind} raised at `/token` to the
+ * OAuth 2.1 error code. RFC 6749 §5.2 — all rotation-family failures
+ * surface as `invalid_grant`; RFC 9449 §5.2 — DPoP binding failures on
+ * a refresh token surface as `invalid_dpop_proof` so the client can
+ * tell "grant is broken" from "your DPoP key is wrong".
+ */
+function mapRotationKindToTokenCode(
+  kind: RefreshRotationRejectionKind,
+): string {
+  switch (kind) {
+    case 'unknown_refresh_token':
+    case 'refresh_token_revoked':
+    case 'refresh_token_expired':
+    case 'refresh_token_reused':
+    case 'client_id_mismatch':
+    case 'scope_widened':
+      return 'invalid_grant';
+    case 'dpop_binding_missing':
+    case 'dpop_binding_mismatch':
+      return 'invalid_dpop_proof';
   }
 }

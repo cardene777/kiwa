@@ -36,9 +36,14 @@ src/
     well-known/route.ts # createWellKnownHandler delegate — discovery metadata
   lib/
     pkce.ts            # PKCE helpers (createPkceChallenge / deriveChallengeS256 / verifyChallenge / assertVerifierFormat / assertMethodAllowed) — thin wrapper around @kiwa-test/auth's PKCE primitives
+  lib/
+    dpop.ts            # DPoP helpers (parseDpopHeader / assertDpopHeaderShape / verifyDpopProofBinding / computeJkt) — thin wrapper around @kiwa-test/auth's DPoP primitives
+    refresh-rotation.ts # Refresh-rotation helpers (rotateAndMint / classifyRefreshTokenError / RefreshRotationError) — thin wrapper around @kiwa-test/auth's rotateRefreshToken
 tests/
   endpoints-skeleton.spec.ts # 4 fidelity axes: discovery metadata / OAuth 2.1 hardening / grant allowlist / revoke+introspect contract
   pkce-flow.spec.ts          # 4 fidelity axes: verifier entropy / challenge derivation / S256 method enforcement / verifier mismatch rejection
+  dpop-flow.spec.ts          # 4 fidelity axes: DPoP header alg / htm+htu binding / iat skew tolerance / jti replay guard
+  refresh-rotation.spec.ts   # 4 fidelity axes: rotation on use / re-use detection / expiry enforcement / binding preservation
 ```
 
 The Hono routes in `src/lib/hono-app.ts` are the primary integration point; each `src/app/**/route.ts` file exposes a pure framework-agnostic delegate for callers that want to drive the AS without HTTP plumbing (fidelity harness in Sub-Issue v1.21-3d compares mock vs real without spinning up either runtime).
@@ -51,6 +56,21 @@ pnpm typecheck     # tsc --noEmit
 ```
 
 ## Fidelity axes
+
+### DPoP-flow + refresh-rotation (Sub-Issue #866)
+
+| axis | mock (`@kiwa-test/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
+|---|---|---|---|
+| DPoP 1. header alg | `parseDpopHeader` refuses missing / comma-folded / non-`ES256` / non-`dpop+jwt` / non-EC-P256 headers with `header_missing` / `header_malformed` / `header_alg_refused` / `header_typ_refused` / `header_jwk_refused`; `/token` returns `invalid_dpop_proof` | oauth2-mock-server refuses same with `invalid_dpop_proof` at HTTP layer | RFC 9449 §4.2 — every downgrade path refused before AS is invoked; valid proof mints `token_type=DPoP`, absent proof mints `token_type=Bearer`. |
+| DPoP 2. htm + htu binding | `verifyDpopProofBinding` rejects wrong `htm` (uppercase HTTP method) or wrong `htu` (absolute URL) with `payload_htm_mismatch` / `payload_htu_mismatch`; `/token` surfaces as `invalid_dpop_proof` | oauth2-mock-server enforces same binding | RFC 9449 §4.3 — proof pinned to request; a proof intended for `/introspect` cannot be replayed at `/token`. |
+| DPoP 3. iat skew tolerance | `dpopIatSkewSec` window (default 60 s) enforced by the kiwa AS; wrapper surfaces failure as `payload_iat_skew` | oauth2-mock-server same window | RFC 9449 §4.3 — clock skew ≤ 60 s accepted, past + future proofs outside window refused. Boundary case (exactly at window edge) still accepted. |
+| DPoP 4. jti replay guard | Kiwa AS `seenJtis` registry — second use of a `jti` throws `payload_jti_replay`; `/token` surfaces as `invalid_dpop_proof`. Distinct jtis pass consecutively (no false positives). | oauth2-mock-server same registry | RFC 9449 §4.3 — replay-defeated regardless of how the JWK / htm / htu look; distinct jtis mint distinct token pairs. |
+| Rotation 1. rotation on use | Every `/token` `grant_type=refresh_token` mints a fresh refresh_token whose `rotationCount = previous + 1`; kiwa AS drops the previous from the active map | oauth2-mock-server rotates on every use | RFC 9700 §2.2 — every use mints a new token; 5-step chain produces 6 distinct refresh_tokens. |
+| Rotation 2. re-use detection | Reuse of a rotated refresh_token surfaces as `invalid_grant` with `kind=refresh_token_reused` (family torn down); `unknown_refresh_token` is a distinct kind | oauth2-mock-server same reuse rejection | RFC 9700 §2.2.2 — reuse tears down the family regardless of which client presents it. |
+| Rotation 3. expiry enforcement | `expiresAt` boundary — exact boundary still valid; past-boundary refused with `invalid_grant` + `kind=refresh_token_expired` | oauth2-mock-server same expiry check | RFC 6749 §5.1 — expired refresh_token refused before rotation, no new tokens minted. |
+| Rotation 4. binding preservation | DPoP-bound refresh token inherits `jkt`; proof pinned to a different key refused with `invalid_dpop_proof` + `kind=dpop_binding_mismatch`; no proof on a bound token refused with `kind=dpop_binding_missing` | oauth2-mock-server same DPoP binding enforcement | RFC 9449 §4.3 — rotation preserves sender-constrained binding; attacker with exfiltrated refresh_token cannot rebind to their own key. |
+
+See `docs/quality-reports/auth/oauth21-provider-dpop-refresh.md` for the full report.
 
 ### PKCE-flow (Sub-Issue #865)
 
@@ -80,6 +100,4 @@ See `docs/quality-reports/auth/oauth21-provider-pkce.md` for the full report.
 
 ## Known follow-ups
 
-- Sub-Issue #865 — real `oauth2-mock-server` wiring through testcontainers + PKCE `code_verifier` + `code_challenge` + `S256` fidelity axes (verifier entropy / S256 derivation / method enforcement / mismatch rejection).
-- Sub-Issue #866 — DPoP proof binding (`Authorization: DPoP <access_token>` + `DPoP` header) + refresh token rotation (RFC 9700 §2.2 re-use detection tears down the token family).
-- Sub-Issue #867 — Revocation cascade (revoking an access_token invalidates the whole refresh family), real vs mock fidelity harness across every endpoint (5 endpoints × 4 axes = 20 comparison points), release gate 7-axis integrated report.
+- Sub-Issue #867 — Revocation cascade (revoking an access_token invalidates the whole refresh family), real vs mock fidelity harness across every endpoint (5 endpoints × 4 axes = 20 comparison points), release gate 7-axis integrated report, testcontainers-driven `oauth2-mock-server` wiring (replaces the `OAUTH21_MOCK_SERVER_URL` docker-compose flow with an in-process launcher).
