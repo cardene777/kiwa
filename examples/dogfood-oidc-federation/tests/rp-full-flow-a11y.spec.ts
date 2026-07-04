@@ -118,10 +118,6 @@ describe('renderIndex — DOM structure', () => {
   });
 
   it('renders the sign-in button with an accessible name that includes the OP display name', () => {
-    renderIndex({
-      opDisplayName: 'kiwa dogfood OP',
-      state: 'signed-out',
-    });
     const html = renderIndex({
       opDisplayName: 'kiwa dogfood OP',
       state: 'signed-out',
