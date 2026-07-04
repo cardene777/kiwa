@@ -1,0 +1,24 @@
+{
+  "name": "dogfood-hono-workers-rpc",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app (v1.19-4) — a Cloudflare Workers + Hono app + hc RPC type-safe client + middleware chain + KV/D1/R2 bindings harness that exercises 4 flows (route invoke through middleware chain / hc client request / Workers env KV+D1+R2 access / ExecutionContext waitUntil scheduling) inside 5 routes (health / greet / kv-counter / d1-list / r2-upload) with a 5-layer middleware chain (cors + auth + logger + rate-limit + validator). Drivable in both KIWA_MODE=real (spawns miniflare through env-skip when CF_ACCOUNT_ID=1) and KIWA_MODE=mock (@kiwa-test/hono createHonoApp / invokeRoute / createRpcClient / createWorkersEnv / createExecutionContext). Behavioural fidelity feeds @kiwa-test/quality-metrics 7-axis release gate.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/hono -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "pretest:perf": "pnpm -F @kiwa-test/hono -F @kiwa-test/core -F @kiwa-test/quality-metrics -F @kiwa-test/perf-harness build",
+    "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/hono": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@kiwa-test/perf-harness": "workspace:*",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
