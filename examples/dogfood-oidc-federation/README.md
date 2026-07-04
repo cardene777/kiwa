@@ -3,10 +3,11 @@
 Dogfood app for `@kiwa-test/auth` v1.21-1d (OIDC adapter)。
 Deno + Hono self-hosted OpenID Provider (OP) が OIDC Core 1.0 + Discovery 1.0 + RFC 7591 DCR + JWKS rotation + Federation 1.0 §7 endpoint surface を exercise する。
 
-Sub-Issue 積層 = v1.21-4a skeleton → v1.21-4b RFC 7591 DCR fidelity harness (3 auth method + dropped-grant refusal + `software_statement` JWS + `redirect_uris` validation) → v1.21-4c `id_token` verification fidelity harness (JWS signature + claims 一致 + nonce echo + hash chain) + Nuxt 3 Relying Party (RP) skeleton under `rp/` → v1.21-4d (this state) OpenID Federation 1.0 §7 trust-chain axes + JWKS rotation e2e axes、 親 Issue #845 close。
+Sub-Issue 積層 = v1.21-4a skeleton → v1.21-4b RFC 7591 DCR fidelity harness (3 auth method + dropped-grant refusal + `software_statement` JWS + `redirect_uris` validation) → v1.21-4c `id_token` verification fidelity harness (JWS signature + claims 一致 + nonce echo + hash chain) + Nuxt 3 Relying Party (RP) skeleton under `rp/` → v1.21-4d OpenID Federation 1.0 §7 trust-chain axes + JWKS rotation e2e axes (親 Issue #845 close) → v1.22-1 (this state) Keycloak testcontainers real driver で axes 1 / 3 に live coverage を追加 (GH #887 / CAR-442)。
 
-- `KIWA_MODE=real` — Keycloak deployment gated by `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL`. Deferred to the v1.22 milestone. Until then every ceremony beyond `discovery()` refuses with `KIWA_OIDC_ENV_MISSING`.
-- `KIWA_MODE=mock` — `@kiwa-test/auth` `setupOidcEnv` deterministic mock. Always runs.
+- `KIWA_MODE=mock` — `@kiwa-test/auth` `setupOidcEnv` deterministic mock. Always runs. Default state.
+- `OIDC_BOOTSTRAP=1` (v1.22-1+) — boots `quay.io/keycloak/keycloak:26.0` through `testcontainers` (docker required) so `axis 1 (discovery metadata shape)` + `axis 3 (JWKS active key shape)` gain live coverage. Falls back to `KEYCLOAK_URL` when the caller provisions Keycloak externally.
+- `OIDC_BOOTSTRAP` unset — every real-driver ceremony beyond `discovery()` refuses with `KIWA_OIDC_ENV_MISSING`. Discovery still returns the static shape derived from `issuer` so the fidelity harness always has a reference.
 
 Behavioural fidelity between the two drivers feeds the release gate (`docs/quality-reports/auth/oidc-federation.md` — integrated 16-axis report — plus the four sub-issue reports).
 
@@ -28,7 +29,7 @@ src/
   adapters/
     interface.ts       # OIDCOPAdapter contract (discovery / jwks / rotateJwks / registerClient with ExtendedClientRegistrationRequest)
     mock.ts            # makeMockAdapter — @kiwa-test/auth setupOidcEnv + handleRegistration wrapper for DCR
-    real.ts            # makeRealAdapter — Keycloak via testcontainers (env-detect skeleton, refuses until v1.21-4d)
+    real.ts            # makeRealAdapter — Keycloak via testcontainers (env-skip + live boot, v1.22-1 GH #887 / CAR-442)
   lib/
     discovery.ts       # assertIssuerMatchesFetchUrl + assertRequiredDiscoveryFields + assertOAuth21Restrictions
     jwks.ts            # assertKeyShape + assertJwksDocumentShape + pickActiveKey + pickRetiredKeys
@@ -47,6 +48,7 @@ tests/
   id-token-verify.spec.ts          # axes 9-12: JWS signature / claims 一致 / nonce echo / hash chain
   federation-trust-chain.spec.ts   # axes 13-16: 3-step chain / broken link / expired / cycle
   jwks-rotation-e2e.spec.ts        # axes 4a-4d escalation of axis 4: sign → rotate → verify e2e
+  keycloak-real-driver.spec.ts     # v1.22-1 real driver env-skip semantics + Keycloak live coverage (axes 1 / 3, opt-in via OIDC_BOOTSTRAP=1)
 ```
 
 The Hono routes in `src/lib/deno-op.ts` are the primary HTTP integration point; the fidelity harness in `tests/**` drives the adapter directly without booting Hono so `KIWA_MODE=mock` vs `KIWA_MODE=real` diffs can be measured without HTTP round-trip noise.
@@ -54,8 +56,9 @@ The Hono routes in `src/lib/deno-op.ts` are the primary HTTP integration point; 
 ## Running
 
 ```sh
-pnpm test          # vitest (mock always, real skipped when OIDC_BOOTSTRAP unset)
-pnpm typecheck     # tsc --noEmit
+pnpm test                       # vitest (mock always, 4 live tests skipped when OIDC_BOOTSTRAP unset — 119/123 tests run)
+OIDC_BOOTSTRAP=1 pnpm test      # boots Keycloak testcontainer + runs the full 123-test suite (docker required)
+pnpm typecheck                  # tsc --noEmit
 ```
 
 ## Fidelity axes
@@ -119,6 +122,7 @@ Total 106 tests across six spec files, all pass under `KIWA_MODE=mock`. See `doc
 
 ## Environment gating
 
-- `KIWA_MODE=mock` — forces the mock adapter; every test always runs.
-- `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL=...` — opt-in for real ceremonies. Deferred to the v1.22 milestone (Keycloak Federation deployment). Until then the real adapter refuses every ceremony beyond `discovery()` with `KIWA_OIDC_ENV_MISSING`.
-- Without `OIDC_BOOTSTRAP=1`, the real adapter's `discovery()` returns a valid metadata document (static shape derived from `issuer`); every other method (including `registerClient` per axes 5–8 + federation ceremonies per axes 13–16) reports `KIWA_OIDC_ENV_MISSING`.
+- `KIWA_MODE=mock` — forces the mock adapter; every test always runs. Default state.
+- `OIDC_BOOTSTRAP=1` alone (v1.22-1+) — the caller invokes `startKeycloakContainer()` to boot `quay.io/keycloak/keycloak:26.0` through `testcontainers` (docker required) and hands the returned `KeycloakHandle` to `makeRealAdapter({ keycloak })`. `refreshLiveDiscovery()` + `refreshLiveJwks()` fetch live documents; the sync interface serves the cached document on subsequent calls (mock parity).
+- `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL=...` — the caller has provisioned Keycloak externally (docker-compose / shared deployment / separate testcontainers lifecycle). The adapter fetches directly from the supplied URL; no boot.
+- `OIDC_BOOTSTRAP` unset — the real adapter's `discovery()` returns a valid metadata document (static shape derived from `issuer`); every other method (including `registerClient` per axes 5–8 + federation ceremonies per axes 13–16 + `rotateJwks` per axis 4 / 4a-4d) reports `KIWA_OIDC_ENV_MISSING`. Full detail on the sync interface parity refusal contract lives in `docs/quality-reports/auth/oidc-federation.md` § Real driver API surface.
