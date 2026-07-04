@@ -96,8 +96,8 @@ export function createPkceChallenge(): PkceChallenge {
 
 /**
  * Derive `code_challenge = base64url(SHA-256(code_verifier))` per RFC 7636
- * §4.2. Rejects any method other than S256 (defensively — the kiwa helper
- * already does the same, but re-checking keeps the error kind stable).
+ * §4.2. Method is fixed to `S256` — the dogfood app does not expose a
+ * plain-PKCE code path, so the caller never picks the method.
  */
 export function deriveChallengeS256(verifier: string): string {
   return kiwaDeriveCodeChallenge(verifier, 'S256');
