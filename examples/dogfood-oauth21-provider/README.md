@@ -1,22 +1,23 @@
 # dogfood-oauth21-provider
 
-Dogfood app for `@kiwa-test/auth` v1.21-1c (OAuth 2.1 adapter). A Hono + Cloudflare Workers Authorization Server (AS) that exercises the RFC 9700 endpoint surface — `/authorize`, `/token`, `/revoke`, `/introspect`, `/.well-known/openid-configuration` — with four spec-critical flows: PKCE always mandatory, DPoP-bound tokens, refresh token rotation, revocation cascade.
+Dogfood app for `@kiwa-test/auth` v1.22-2 (OAuth 2.1 adapter). A Hono + Cloudflare Workers Authorization Server (AS) that exercises the RFC 9700 endpoint surface — `/authorize`, `/token`, `/revoke`, `/introspect`, `/.well-known/openid-configuration` — with four spec-critical flows: PKCE always mandatory, DPoP-bound tokens, refresh token rotation, revocation cascade.
 
-- `KIWA_MODE=real` — `oauth2-mock-server` spawned through testcontainers. Skipped when the environment cannot reach docker (`OAUTH21_BOOTSTRAP` unset). Full wiring lands in Sub-Issue v1.21-3b.
+- `KIWA_MODE=real` — `oauth2-mock-server` (Navikt `ghcr.io/navikt/mock-oauth2-server`) spawned through testcontainers. Skipped when the environment cannot reach docker (`OAUTH21_BOOTSTRAP` unset). v1.22-2 (`#888`) wires the testcontainers boot path so the discovery axis gets live coverage.
 - `KIWA_MODE=mock` — `@kiwa-test/auth` `setupOAuth21Env` + `createAuthorizationServer` deterministic mock. Always runs.
 
-Behavioural fidelity between the two drivers feeds the release gate (`docs/quality-reports/auth/oauth21-provider-endpoints.md` + siblings).
+Behavioural fidelity between the two drivers feeds the release gate (`docs/quality-reports/auth/oauth21-provider.md`).
 
-## Sub-Issue split (v1.21-3 = #844)
+## Sub-Issue split (v1.21-3 = #844, v1.22-2 = #888)
 
 | Sub-Issue | scope | routes touched | status |
 |---|---|---|---|
 | #864 (a) | Hono + Cloudflare Workers skeleton + 5 endpoint surface (endpoints-skeleton) | `src/lib/hono-app.ts` + `src/app/**/route.ts` | landed |
-| #865 (b) | PKCE `code_verifier` + `code_challenge` + `S256` + oauth2-mock-server real driver | `src/lib/pkce.ts` + `src/adapters/real.ts` | landed |
+| #865 (b) | PKCE `code_verifier` + `code_challenge` + `S256` + oauth2-mock-server real driver scaffolding | `src/lib/pkce.ts` + `src/adapters/real.ts` | landed |
 | #866 (c) | DPoP proof binding + refresh token rotation | `src/lib/dpop.ts` + `src/lib/refresh-rotation.ts` | landed |
 | #867 (d) | Revocation cascade + real vs mock fidelity + release gate 7 axes + docs | `src/lib/revocation-cascade.ts` + `src/app/revoke/route.ts` + `tests/revocation-cascade.spec.ts` + `tests/fidelity-harness.spec.ts` + `docs/quality-reports/auth/oauth21-provider.md` | landed |
+| #888 (v1.22-2) | oauth2-mock-server testcontainers real driver + RFC 6749 §4.1.2.1 redirect fidelity fix (Bug 1) | `src/adapters/real.ts` + `src/lib/hono-app.ts` + `tests/authorize-error-redirect.spec.ts` + `tests/oauth2-mock-real-driver.spec.ts` + `docs/quality-reports/auth/oauth21-provider.md` | landed |
 
-Sub-Issue **a** landed the shared surface — Hono app, adapter interface, `KIWA_MODE` split, endpoints-skeleton fidelity harness. Sub-Issues **b** / **c** / **d** layer PKCE / DPoP / refresh rotation / revocation cascade on top. Fidelity harness grew from 4 axes (endpoints-skeleton, #864) → 24 axes (full flow: 4 endpoints + 4 PKCE + 8 DPoP-rotation + 4 revocation + 20 real-vs-mock comparison points = 136 tests, #867).
+Sub-Issue **a** landed the shared surface — Hono app, adapter interface, `KIWA_MODE` split, endpoints-skeleton fidelity harness. Sub-Issues **b** / **c** / **d** layer PKCE / DPoP / refresh rotation / revocation cascade on top. **v1.22-2** wires the testcontainers boot path (`startOAuth2MockServerContainer()`) so the discovery axis gets live coverage against the Navikt oauth2-mock-server + surfaced and fixed **Bug 1** — the pre-v1.22-2 `/authorize` handler returned JSON on post-adapter refusals instead of the RFC 6749 §4.1.2.1-mandated 302 redirect to `redirect_uri?error=...&state=...`. Real IdPs all redirect, so the mock's JSON response would have failed the fidelity harness under the real driver.
 
 ## Layout
 
@@ -54,8 +55,9 @@ The Hono routes in `src/lib/hono-app.ts` are the primary integration point; each
 ## Running
 
 ```sh
-pnpm test          # vitest (mock always, real skipped when OAUTH21_BOOTSTRAP unset)
-pnpm typecheck     # tsc --noEmit
+pnpm test                                # vitest — mock always (~155 pass), real testcontainers skipped
+OAUTH21_BOOTSTRAP=1 pnpm test            # vitest — mock + Navikt oauth2-mock-server container live (~158 pass, ~10s cold pull)
+pnpm typecheck                           # tsc --noEmit
 ```
 
 ## Fidelity axes

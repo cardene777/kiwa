@@ -241,7 +241,9 @@ describe('axis 3 — S256 method enforcement (RFC 9700 §2.1.1)', () => {
     }
   });
 
-  it('/authorize refuses code_challenge_method=plain with invalid_request', async () => {
+  it('/authorize refuses code_challenge_method=plain with invalid_request (RFC 6749 §4.1.2.1 redirect)', async () => {
+    // v1.22-2 Bug 1 fix — PKCE pre-flight rejection redirects because
+    // redirect_uri is validly formed.
     const { app } = await bootstrap();
     const url = new URL('https://as.example.test/authorize');
     url.searchParams.set('response_type', 'code');
@@ -250,14 +252,19 @@ describe('axis 3 — S256 method enforcement (RFC 9700 §2.1.1)', () => {
     url.searchParams.set('state', 'state-plain');
     url.searchParams.set('code_challenge', 'irrelevant-challenge-value-x');
     url.searchParams.set('code_challenge_method', 'plain');
-    const res = await app.request(url.pathname + url.search);
-    expect(res.status).toBe(400);
-    const body = (await res.json()) as Record<string, string>;
-    expect(body['error']).toBe('invalid_request');
-    expect(body['error_description']).toContain('plain');
+    const res = await app.request(url.pathname + url.search, {
+      redirect: 'manual',
+    });
+    expect(res.status).toBe(302);
+    const location = res.headers.get('location');
+    expect(location).toBeTruthy();
+    const parsed = new URL(location as string);
+    expect(parsed.searchParams.get('error')).toBe('invalid_request');
+    expect(parsed.searchParams.get('error_description')).toContain('plain');
+    expect(parsed.searchParams.get('state')).toBe('state-plain');
   });
 
-  it('/authorize refuses a request without code_challenge_method (no plain default)', async () => {
+  it('/authorize refuses a request without code_challenge_method (no plain default, RFC 6749 §4.1.2.1 redirect)', async () => {
     const { app } = await bootstrap();
     const url = new URL('https://as.example.test/authorize');
     url.searchParams.set('response_type', 'code');
@@ -266,13 +273,17 @@ describe('axis 3 — S256 method enforcement (RFC 9700 §2.1.1)', () => {
     url.searchParams.set('state', 'state-nomethod');
     url.searchParams.set('code_challenge', 'irrelevant-challenge-value-x');
     // no code_challenge_method — OAuth 2.1 forbids defaulting to plain.
-    const res = await app.request(url.pathname + url.search);
-    expect(res.status).toBe(400);
-    const body = (await res.json()) as Record<string, string>;
-    expect(body['error']).toBe('invalid_request');
+    const res = await app.request(url.pathname + url.search, {
+      redirect: 'manual',
+    });
+    expect(res.status).toBe(302);
+    const location = res.headers.get('location');
+    const parsed = new URL(location as string);
+    expect(parsed.searchParams.get('error')).toBe('invalid_request');
+    expect(parsed.searchParams.get('state')).toBe('state-nomethod');
   });
 
-  it('/authorize refuses a request without a code_challenge', async () => {
+  it('/authorize refuses a request without a code_challenge (RFC 6749 §4.1.2.1 redirect)', async () => {
     const { app } = await bootstrap();
     const url = new URL('https://as.example.test/authorize');
     url.searchParams.set('response_type', 'code');
@@ -281,11 +292,17 @@ describe('axis 3 — S256 method enforcement (RFC 9700 §2.1.1)', () => {
     url.searchParams.set('state', 'state-nochallenge');
     url.searchParams.set('code_challenge_method', 'S256');
     // no code_challenge — RFC 9700 §2.1 mandates it.
-    const res = await app.request(url.pathname + url.search);
-    expect(res.status).toBe(400);
-    const body = (await res.json()) as Record<string, string>;
-    expect(body['error']).toBe('invalid_request');
-    expect(body['error_description']).toContain('code_challenge');
+    const res = await app.request(url.pathname + url.search, {
+      redirect: 'manual',
+    });
+    expect(res.status).toBe(302);
+    const location = res.headers.get('location');
+    const parsed = new URL(location as string);
+    expect(parsed.searchParams.get('error')).toBe('invalid_request');
+    expect(parsed.searchParams.get('error_description')).toContain(
+      'code_challenge',
+    );
+    expect(parsed.searchParams.get('state')).toBe('state-nochallenge');
   });
 
   it('assertAuthorizePkce accepts a well-formed request', () => {

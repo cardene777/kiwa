@@ -24,6 +24,7 @@
  */
 
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 import type {
   AuthorizationRequest,
   AuthorizationServer,
@@ -85,6 +86,19 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
   // RFC 6749 §4.1.1 — authorization request. RFC 9700 §2.1 mandates PKCE.
   // OAuth 2.1 refuses `response_type=token` (implicit) and any
   // `code_challenge_method` other than `S256`.
+  //
+  // RFC 6749 §4.1.2.1 — error redirect fidelity:
+  //   - If the request is missing / invalid client_id or redirect_uri, the
+  //     AS MUST NOT redirect (the URI cannot be trusted). Return JSON so
+  //     the developer sees the error inline; a real AS would render an
+  //     error page to the resource owner.
+  //   - If client_id + redirect_uri are validly formed AND the AS's later
+  //     rejection is not client_id/redirect_uri specific (missing state,
+  //     bad PKCE method, unsupported response_type after redirect_uri is
+  //     available, adapter refuses for scope / etc.), the AS MUST redirect
+  //     back to redirect_uri with `error` + `error_description` + `state`.
+  //   - Adapter rejections tagged as unknown_client / redirect_uri
+  //     mismatch stay JSON because we cannot trust the URI.
   app.get('/authorize', (c) => {
     const responseType = c.req.query('response_type');
     const clientId = c.req.query('client_id');
@@ -95,6 +109,9 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
     const codeChallengeMethod = c.req.query('code_challenge_method');
     const resource = c.req.query('resource');
 
+    // Pre-flight validity of redirect_uri controls whether later errors
+    // can safely redirect. `client_id + redirect_uri` missing → JSON (RFC
+    // §4.1.2.1 explicitly refuses trusting the URI).
     if (!responseType || !clientId || !redirectUri) {
       return c.json(
         {
@@ -104,16 +121,37 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
         400,
       );
     }
+    // Validate `redirect_uri` is a parseable absolute URL before we use it
+    // as the redirect target — otherwise a malformed URI cannot be trusted
+    // and we stay on JSON.
+    let redirectSafe: URL;
+    try {
+      redirectSafe = new URL(redirectUri);
+    } catch {
+      return c.json(
+        {
+          error: 'invalid_request',
+          error_description: 'redirect_uri must be an absolute URL',
+        },
+        400,
+      );
+    }
+
+    // From here on the redirect_uri is parseable, so any subsequent error
+    // MUST redirect back per RFC 6749 §4.1.2.1. `state` is round-tripped
+    // even when empty so the client can correlate the error.
+    const redirectStateForErr = state ?? '';
+
     // OAuth 2.1 refuses implicit / hybrid up-front so a client cannot
     // discover the refusal only by inspecting the AS's error response —
     // discovery already advertises `response_types_supported: ['code']`.
     if (responseType !== 'code') {
-      return c.json(
-        {
-          error: 'unsupported_response_type',
-          error_description: `response_type "${responseType}" refused — OAuth 2.1 mandates "code"`,
-        },
-        400,
+      return errorRedirect(
+        c,
+        redirectSafe,
+        'unsupported_response_type',
+        `response_type "${responseType}" refused — OAuth 2.1 mandates "code"`,
+        redirectStateForErr,
       );
     }
     // OAuth 2.1 forbids `plain` PKCE + missing method + missing challenge.
@@ -124,12 +162,12 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
       assertAuthorizeQueryPkce({ codeChallenge, codeChallengeMethod });
     } catch (err) {
       if (err instanceof PkceValidationError) {
-        return c.json(
-          {
-            error: mapPkceKindToAuthorizeCode(err.kind),
-            error_description: err.message,
-          },
-          400,
+        return errorRedirect(
+          c,
+          redirectSafe,
+          mapPkceKindToAuthorizeCode(err.kind),
+          err.message,
+          redirectStateForErr,
         );
       }
       throw err;
@@ -155,13 +193,29 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
       return c.redirect(redirectUrl.toString(), 302);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      const status = classifyAuthorizeErrorStatus(message);
-      return c.json(
-        {
-          error: classifyAuthorizeErrorCode(message),
-          error_description: message,
-        },
-        status,
+      const errorCode = classifyAuthorizeErrorCode(message);
+      // RFC 6749 §4.1.2.1 — unknown_client / redirect_uri mismatch cannot
+      // safely redirect back to the untrusted URI. Everything else that
+      // came in with a validly-formed redirect_uri MUST redirect.
+      if (
+        message.includes('unknown client_id') ||
+        message.includes('redirect_uri')
+      ) {
+        const status = classifyAuthorizeErrorStatus(message);
+        return c.json(
+          {
+            error: errorCode,
+            error_description: message,
+          },
+          status,
+        );
+      }
+      return errorRedirect(
+        c,
+        redirectSafe,
+        errorCode,
+        message,
+        redirectStateForErr,
       );
     }
   });
@@ -449,6 +503,37 @@ export function createHonoApp(opts: CreateHonoAppOptions): Hono {
   });
 
   return app;
+}
+
+/**
+ * Redirect the user-agent back to `redirect_uri` with an RFC 6749 §4.1.2.1
+ * error response. The AS returns a 302 whose Location header carries
+ * `error`, `error_description` and `state` as query parameters — every
+ * parameter is round-tripped from the request so the client can correlate
+ * the failure with its outbound state cookie.
+ *
+ * This is the "trusted-uri" branch of the /authorize error path. The
+ * caller MUST have already validated that `redirect_uri` is a parseable
+ * absolute URL before invoking this helper; otherwise the AS would leak
+ * information into an untrusted destination.
+ *
+ * Behavioural fidelity — mock and real drivers must return the same
+ * 302 + Location shape for the release gate. Real IdPs (Keycloak, Auth0,
+ * oauth2-mock-server) all redirect per §4.1.2.1; JSON here would produce a
+ * cross-driver divergence flagged by `tests/authorize-error-redirect.spec.ts`.
+ */
+function errorRedirect(
+  c: Context,
+  redirectSafe: URL,
+  errorCode: string,
+  description: string,
+  state: string,
+): Response {
+  const target = new URL(redirectSafe.toString());
+  target.searchParams.set('error', errorCode);
+  target.searchParams.set('error_description', description);
+  target.searchParams.set('state', state);
+  return c.redirect(target.toString(), 302);
 }
 
 /**

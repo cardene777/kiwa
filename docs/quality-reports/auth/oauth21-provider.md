@@ -41,9 +41,32 @@ The gate is passed when every axis has an assertion contract with mock coverage 
 
 ## Real-adapter scaffolding
 
-The env-skip contract established in Sub-Issue `#865` carries forward unchanged — `startOAuth2MockServer()` in `src/adapters/real.ts` still routes through `OAUTH21_BOOTSTRAP=1` + optional `OAUTH21_MOCK_SERVER_URL=<url>`. The testcontainers-driven container path was factored into a follow-up Issue (see § Known follow-ups) so the release gate can close on `#867` without adding docker-in-CI dependency to the vitest suite.
+The env-skip contract established in Sub-Issue `#865` carries forward unchanged — `startOAuth2MockServer()` in `src/adapters/real.ts` still routes through `OAUTH21_BOOTSTRAP=1` + optional `OAUTH21_MOCK_SERVER_URL=<url>` for the pre-v1.22-2 docker-compose flow. Sub-Issue v1.22-2 (`#888`) layered a testcontainers boot path (`startOAuth2MockServerContainer()`) that boots `ghcr.io/navikt/mock-oauth2-server` in-process so the release-gate leg gets live coverage without needing an external docker-compose harness.
 
 `makeRealAdapter` continues to record every failed method call with `errorKind='KIWA_OAUTH21_ENV_MISSING'` so the fidelity harness captures "environment absent" rather than "assertion failed"; every axis in the fidelity grid adds an env-skip smoke test that pins this behaviour.
+
+## Real driver coverage (v1.22-2)
+
+Sub-Issue v1.22-2 (`#888`) wires the testcontainers path so the `discovery` axis gets live coverage against a real oauth2-mock-server. The other axes stay on the mock-as-reference matrix documented in § Real coverage matrix below — the sync `OAuth21ASAdapter` interface cannot express the HTTP round-trip required by `/authorize` / `/token` / `/revoke` / `/introspect` through a live driver; those axes need a Sub-Issue v1.22-N follow-up that extends the interface with async counterparts.
+
+The v1.22-2 real driver also exposed **Bug 1** in the pre-v1.22-2 `/authorize` handler — the AS returned JSON on post-adapter refusals instead of the RFC 6749 §4.1.2.1-mandated 302 redirect. Because real IdPs (Navikt oauth2-mock-server, Keycloak, Auth0) all redirect, the mock's JSON response would have failed the fidelity harness under the real driver. The fix redirects to `redirect_uri?error=<code>&error_description=<msg>&state=<state>` for every refusal whose `redirect_uri` + `client_id` are validly formed; untrusted URI cases (missing / malformed / unregistered redirect_uri) stay on JSON per §4.1.2.1's "cannot trust the URI" caveat.
+
+### Real coverage matrix
+
+| axis | mock (release gate reference) | real (testcontainers `ghcr.io/navikt/mock-oauth2-server`) | v1.22-2 status |
+|---|---|---|---|
+| discovery metadata shape | `endpoints-skeleton.spec.ts` axis 1 pins the RFC 8414 §2 shape (`issuer`, `authorization_endpoint`, `token_endpoint`, `revocation_endpoint`, `introspection_endpoint`, `jwks_uri`, `response_types_supported=[code]`, `grant_types_supported=[authorization_code, refresh_token]`, `code_challenge_methods_supported=[S256]`, `dpop_signing_alg_values_supported=[ES256]`) | `oauth2-mock-real-driver.spec.ts` (opt-in `OAUTH21_BOOTSTRAP=1`) — real driver fetches Keycloak-shaped discovery from Navikt mock, kiwa contract narrows on the OAuth 2.1 hardened subset. Both drivers advertise `response_types_supported=[code]` + `code_challenge_methods_supported=[S256]` — the invariants OAuth 2.1 refuses to compromise on | **LIVE** — axis 1 |
+| /authorize error redirect (RFC 6749 §4.1.2.1) | `authorize-error-redirect.spec.ts` — 302 redirect fidelity for missing code_challenge / missing state / bad response_type; JSON fallback for untrusted URI | Navikt oauth2-mock-server redirects per §4.1.2.1 — kiwa mock now matches after v1.22-2 Bug 1 fix. Sync interface cannot fetch live so the release-gate reference stays on the mock's 302 assertion | mock-as-reference (contract diff verified statically) |
+| /authorize ceremony | `fidelity-harness.spec.ts` endpoint 2 (shape / trace / contract / env-skip) — mock returns 302 + code + state | Interface parity refuse — sync `authorize()` on real driver throws `KIWA_OAUTH21_ENV_MISSING` even in env-ready mode with a distinguishable "sync interface + async HTTP ceremony" detail | mock-as-reference (async surface follow-up) |
+| /token ceremony | `fidelity-harness.spec.ts` endpoint 3 + `pkce-flow.spec.ts` + `dpop-flow.spec.ts` + `refresh-rotation.spec.ts` | Interface parity refuse — same as `/authorize` | mock-as-reference (async surface follow-up) |
+| /revoke ceremony | `fidelity-harness.spec.ts` endpoint 4 + `revocation-cascade.spec.ts` | Interface parity refuse | mock-as-reference |
+| /introspect ceremony | `fidelity-harness.spec.ts` endpoint 5 + `revocation-cascade.spec.ts` | Interface parity refuse | mock-as-reference |
+
+### Real vs mock fidelity — measurement plan
+
+- Discovery axis runs live under `OAUTH21_BOOTSTRAP=1` — the kiwa `DiscoveryMetadata` contract is narrowed onto Navikt's superset in `fetchDiscoveryFromMock()`, so the diff is on the fields the release gate cares about (RFC 8414 mandatory + OAuth 2.1 hardened subset). Endpoint URL differences (Navikt hosts at `/{issuer}/authorization` vs kiwa mock's `/authorize`) are legitimate driver-specific and DO NOT count as a divergence — the assertion narrows to `response_types_supported` + `code_challenge_methods_supported` + `grant_types_supported` which OAuth 2.1 refuses to compromise on.
+- Ceremonial endpoints stay on the mock-as-reference matrix because the sync interface cannot host the HTTP round-trip. The v1.22-2 fixture verifies interface parity — every ceremonial method refuses in env-ready mode with a "sync interface + async HTTP ceremony" detail, so no silent divergence is possible.
+- Bug 1 fix (§4.1.2.1 redirect) was surfaced by asking "what does Navikt's mock do?" during the v1.22-2 wiring. The static contract check in `authorize-error-redirect.spec.ts` pins the 302 shape without needing a live container — the release gate stays deterministic even without docker-in-CI.
 
 ## Test coverage summary (integrated)
 
@@ -55,21 +78,27 @@ The env-skip contract established in Sub-Issue `#865` carries forward unchanged 
 | `tests/refresh-rotation.spec.ts` | 4 axes + real env-skip | 20 | rotation on use / reuse detection / expiry / binding preservation |
 | `tests/revocation-cascade.spec.ts` | 4 axes + real env-skip | 22 | access revoke / cascade to refresh / reuse-after-revoke / idempotency |
 | `tests/fidelity-harness.spec.ts` | 5 endpoints × 4 axes + grid summary | 21 | shape / trace / contract / env-skip across every RFC 9700 endpoint |
+| `tests/authorize-error-redirect.spec.ts` (v1.22-2) | 4 tests | 4 | RFC 6749 §4.1.2.1 redirect fidelity (missing code_challenge / missing state / bad response_type / untrusted URI JSON fallback) |
+| `tests/oauth2-mock-real-driver.spec.ts` (v1.22-2) | env-detect + env-missing + env-ready parity + network-error + opt-in live coverage | 15 always-on + 3 opt-in | env-skip semantics + sync interface parity + discovery axis live diff |
 
-**Total: 136 tests across the 6 spec files. All passing on the mock adapter; real assertions gated by `OAUTH21_BOOTSTRAP=1`.**
+**Total: 155 always-on tests + 3 opt-in live tests across the 8 spec files. `pnpm test` (mock-only) reports 155 pass / 3 skipped. `OAUTH21_BOOTSTRAP=1 pnpm test` (live) reports 158 pass with the Navikt container booted (~10s on warm cache).**
 
 ## Environment gating
 
 - `KIWA_MODE=mock` — forces the mock adapter; every axis runs unconditionally.
-- `OAUTH21_BOOTSTRAP=1` — opt-in for real ceremonies. Combined with `OAUTH21_MOCK_SERVER_URL=<url>` the harness can drive an externally-managed `oauth2-mock-server` (docker-compose flow).
+- `OAUTH21_BOOTSTRAP=1` — opt-in for real ceremonies. Two paths:
+  - `OAUTH21_MOCK_SERVER_URL=<url>` — the harness targets an externally-managed oauth2-mock-server (docker-compose flow, pre-v1.22-2)
+  - No URL set — v1.22-2 `oauth2-mock-real-driver.spec.ts` boots the container itself through `startOAuth2MockServerContainer()`
 - Without `OAUTH21_BOOTSTRAP=1`, the real adapter's `discovery()` still returns a valid metadata document (static shape derived from `issuer`); every other method reports `KIWA_OAUTH21_ENV_MISSING`.
 
 ## Release gate decision — PASS
 
-All 7 axes have mock coverage that runs unconditionally + a real column that either runs live or documents the env-skip contract. The v1.21-3 milestone (`#844`) is closed on the mock adapter alone; the real driver wiring is tracked as a follow-up (see below) but is not on the critical path for release.
+All 7 axes have mock coverage that runs unconditionally + a real column that either runs live (discovery under v1.22-2 opt-in) or documents the env-skip contract. The v1.21-3 milestone (`#844`) closed on the mock adapter; v1.22-2 (`#888`) extends real coverage to the discovery axis + fixes Bug 1 (§4.1.2.1 redirect fidelity).
 
 ## Known follow-ups
 
-- **testcontainers container path** — replaces the `OAUTH21_MOCK_SERVER_URL` docker-compose flow with an in-process launcher, unlocks the real column of every fidelity axis. Kept as a separate Sub-Issue because committing the testcontainers dependency to the workspace + adding docker-in-CI is a scope-broader task than what `#867` needs to close the milestone.
-- **v1.21-4 (`dogfood-oidc-federation`)** — layers OpenID Connect on top of OAuth 2.1 (discovery + dynamic client registration + JWKS rotation + id_token verification). The OAuth 2.1 endpoints established in `#844` are the base layer; OIDC extends the discovery document + adds `/userinfo` + JWKS endpoints.
-- **v1.21-5 (docs)** + **v1.21-6 (publish)** — tutorial 34-36, migration v1.20→v1.21, concept doc `auth-protocol-testing.md`, VitePress sidebar + gh-pages, plugin.json `1.20.0 → 1.21.0`, `@kiwa-test/auth` minor bump npm publish.
+- **Ceremonial endpoint live coverage** — extend `OAuth21ASAdapter` with async counterparts (`authorizeLive()` / `tokenLive()` / `revokeLive()` / `introspectLive()`) so the ceremonial axes get live diffs against Navikt's mock. Kept as a separate Sub-Issue because the sync interface preserves parity with the kiwa mock's in-process contract; wiring async live methods requires re-designing the fidelity grid.
+- **v1.22-3 (`dogfood-oidc-federation`) Nuxt 3 RP full flow + a11y axe-core gate** — layers the RP-side journey on top of v1.22-1's real Keycloak driver.
+- **v1.22-4 (Passkey caBLE)** — CTAP2 hybrid transport real device flow.
+- **v1.22-5 (Federation JWKS rotation real e2e)** — real Keycloak OP + Nuxt 3 RP + real JWKS endpoint for the rotation ceremony.
+- **v1.22-6 (docs + release publish)** — tutorial 37-38, migration v1.21→v1.22, plugin.json `1.21.0 → 1.22.0`, npm + gh-pages publish.

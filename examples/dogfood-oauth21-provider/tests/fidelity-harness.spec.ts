@@ -175,7 +175,12 @@ describe('endpoint 2 — /authorize fidelity', () => {
     expect(authorizeEvents[0]?.ok).toBe(true);
   });
 
-  it('contract — mock authorize refuses response_type=token per OAuth 2.1', async () => {
+  it('contract — mock authorize refuses response_type=token per OAuth 2.1 with RFC 6749 §4.1.2.1 redirect', async () => {
+    // v1.22-2 Bug 1 fix — when redirect_uri + client_id are validly formed,
+    // an `unsupported_response_type` refusal MUST 302 redirect back to the
+    // client with `error` + `error_description` + `state` per RFC 6749
+    // §4.1.2.1. Real IdPs (Keycloak / oauth2-mock-server / Auth0) all
+    // redirect here; JSON would produce a cross-driver fidelity divergence.
     const mock = await makeMock();
     const app = createHonoApp({ adapter: mock, authenticatedSubject: USER.subject });
     const url = new URL(`${ISSUER}/authorize`);
@@ -183,10 +188,15 @@ describe('endpoint 2 — /authorize fidelity', () => {
     url.searchParams.set('client_id', CLIENT.clientId);
     url.searchParams.set('redirect_uri', REDIRECT);
     url.searchParams.set('state', 'implicit-refused');
-    const res = await app.request(url.pathname + url.search);
-    expect(res.status).toBe(400);
-    const body = (await res.json()) as Record<string, string>;
-    expect(body['error']).toBe('unsupported_response_type');
+    const res = await app.request(url.pathname + url.search, {
+      redirect: 'manual',
+    });
+    expect(res.status).toBe(302);
+    const location = res.headers.get('location');
+    expect(location).toBeTruthy();
+    const parsed = new URL(location as string);
+    expect(parsed.searchParams.get('error')).toBe('unsupported_response_type');
+    expect(parsed.searchParams.get('state')).toBe('implicit-refused');
   });
 
   it('env-skip — real adapter authorize refuses with KIWA_OAUTH21_ENV_MISSING', () => {
