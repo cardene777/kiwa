@@ -312,6 +312,46 @@ describe('@kiwa-test/auth surface', () => {
   });
 });
 
+describe('@kiwa-test/fresh surface', () => {
+  it('exports invokeFreshHandler + defineRoute + redirect + notFound + h + stringify + findNodes (v0.1.0, Issue #814)', async () => {
+    const mod = await import('@kiwa-test/fresh');
+    expect(typeof mod.invokeFreshHandler).toBe('function');
+    expect(typeof mod.invokeDefineRoute).toBe('function');
+    expect(typeof mod.defineRoute).toBe('function');
+    expect(typeof mod.redirect).toBe('function');
+    expect(typeof mod.notFound).toBe('function');
+    expect(typeof mod.h).toBe('function');
+    expect(typeof mod.stringify).toBe('function');
+    expect(typeof mod.findNodes).toBe('function');
+    expect(typeof mod.FRESH_REDIRECT_SYMBOL).toBe('symbol');
+    expect(typeof mod.FRESH_NOT_FOUND_SYMBOL).toBe('symbol');
+    expect(typeof mod.FRESH_ROUTE_SYMBOL).toBe('symbol');
+  });
+
+  it('exports defineIsland + mountIsland + hydrateIslands + simulateInteraction + islandPlaceholder + brand symbols (v0.1.0)', async () => {
+    const mod = await import('@kiwa-test/fresh');
+    expect(typeof mod.defineIsland).toBe('function');
+    expect(typeof mod.mountIsland).toBe('function');
+    expect(typeof mod.hydrateIslands).toBe('function');
+    expect(typeof mod.simulateInteraction).toBe('function');
+    expect(typeof mod.islandPlaceholder).toBe('function');
+    expect(typeof mod.isIslandDefinition).toBe('function');
+    expect(typeof mod.isIslandMount).toBe('function');
+    expect(typeof mod.ISLAND_SYMBOL).toBe('symbol');
+    expect(typeof mod.ISLAND_MOUNT_SYMBOL).toBe('symbol');
+  });
+
+  it('exports defineHead + mergeHead + renderHead + extractHead + HEAD_SYMBOL (v0.1.0)', async () => {
+    const mod = await import('@kiwa-test/fresh');
+    expect(typeof mod.defineHead).toBe('function');
+    expect(typeof mod.mergeHead).toBe('function');
+    expect(typeof mod.renderHead).toBe('function');
+    expect(typeof mod.extractHead).toBe('function');
+    expect(typeof mod.isHeadFragment).toBe('function');
+    expect(typeof mod.HEAD_SYMBOL).toBe('symbol');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');
