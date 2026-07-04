@@ -25,10 +25,12 @@
  *    revoked is a no-op that still walks the family so any lingering
  *    siblings are cleaned up (defence in depth against partial cascades on
  *    earlier failures).
- *  - Trace preserved — the caller's adapter records one `revoke` trace
- *    event per call, so a cascade that touches N tokens surfaces as N-1
- *    `revoke` invocations on the trace. Tests can observe cascade fan-out
- *    by counting trace entries after a single cascade call.
+ *  - Cascade delegates directly to the AS handle, bypassing the adapter
+ *    trace. Tests observe cascade fan-out through the AS state
+ *    (`listAccessTokens()` + `listRefreshTokens()`) or the
+ *    {@link CascadeRevocationReport} return value — not through the
+ *    adapter's trace buffer. This keeps cascade a pure AS-state operation
+ *    so a caller can drive it outside the Hono route as well.
  */
 
 import type { AuthorizationServer } from '@kiwa-test/auth';
