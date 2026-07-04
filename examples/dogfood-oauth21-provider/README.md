@@ -9,14 +9,14 @@ Behavioural fidelity between the two drivers feeds the release gate (`docs/quali
 
 ## Sub-Issue split (v1.21-3 = #844)
 
-| Sub-Issue | scope | routes touched |
-|---|---|---|
-| #864 (a) | Hono + Cloudflare Workers skeleton + 5 endpoint surface (endpoints-skeleton) | `src/lib/hono-app.ts` + `src/app/**/route.ts` |
-| #865 (b) | PKCE `code_verifier` + `code_challenge` + `S256` + oauth2-mock-server real driver | `src/lib/pkce.ts` + `src/adapters/real.ts` |
-| #866 (c) | DPoP proof binding + refresh token rotation | `src/lib/dpop.ts` + `src/lib/refresh-rotation.ts` |
-| #867 (d) | Revocation cascade + real vs mock fidelity + release gate 7 axes + docs | `src/app/revoke/route.ts` + `docs/quality-reports/auth/oauth21-provider.md` |
+| Sub-Issue | scope | routes touched | status |
+|---|---|---|---|
+| #864 (a) | Hono + Cloudflare Workers skeleton + 5 endpoint surface (endpoints-skeleton) | `src/lib/hono-app.ts` + `src/app/**/route.ts` | landed |
+| #865 (b) | PKCE `code_verifier` + `code_challenge` + `S256` + oauth2-mock-server real driver | `src/lib/pkce.ts` + `src/adapters/real.ts` | landed |
+| #866 (c) | DPoP proof binding + refresh token rotation | `src/lib/dpop.ts` + `src/lib/refresh-rotation.ts` | landed |
+| #867 (d) | Revocation cascade + real vs mock fidelity + release gate 7 axes + docs | `src/lib/revocation-cascade.ts` + `src/app/revoke/route.ts` + `tests/revocation-cascade.spec.ts` + `tests/fidelity-harness.spec.ts` + `docs/quality-reports/auth/oauth21-provider.md` | landed |
 
-Sub-Issue **a** (this state) landed the shared surface — Hono app, adapter interface, `KIWA_MODE` split, endpoints-skeleton fidelity harness. Sub-Issues **b**/**c**/**d** layer PKCE / DPoP / refresh rotation / revocation cascade on top and grow the fidelity harness from 4 axes (endpoints-skeleton) to 24 axes (full flow).
+Sub-Issue **a** landed the shared surface — Hono app, adapter interface, `KIWA_MODE` split, endpoints-skeleton fidelity harness. Sub-Issues **b** / **c** / **d** layer PKCE / DPoP / refresh rotation / revocation cascade on top. Fidelity harness grew from 4 axes (endpoints-skeleton, #864) → 24 axes (full flow: 4 endpoints + 4 PKCE + 8 DPoP-rotation + 4 revocation + 20 real-vs-mock comparison points = 136 tests, #867).
 
 ## Layout
 
@@ -39,11 +39,14 @@ src/
   lib/
     dpop.ts            # DPoP helpers (parseDpopHeader / assertDpopHeaderShape / verifyDpopProofBinding / computeJkt) — thin wrapper around @kiwa-test/auth's DPoP primitives
     refresh-rotation.ts # Refresh-rotation helpers (rotateAndMint / classifyRefreshTokenError / RefreshRotationError) — thin wrapper around @kiwa-test/auth's rotateRefreshToken
+    revocation-cascade.ts # Cascade helper — cascadeRevoke tears down every access + refresh in the (clientId, subject) family per RFC 9700 §2.2.2
 tests/
   endpoints-skeleton.spec.ts # 4 fidelity axes: discovery metadata / OAuth 2.1 hardening / grant allowlist / revoke+introspect contract
   pkce-flow.spec.ts          # 4 fidelity axes: verifier entropy / challenge derivation / S256 method enforcement / verifier mismatch rejection
   dpop-flow.spec.ts          # 4 fidelity axes: DPoP header alg / htm+htu binding / iat skew tolerance / jti replay guard
   refresh-rotation.spec.ts   # 4 fidelity axes: rotation on use / re-use detection / expiry enforcement / binding preservation
+  revocation-cascade.spec.ts # 4 fidelity axes: access_token revoke / cascade to refresh / reuse after revoke / idempotency
+  fidelity-harness.spec.ts   # 5 endpoints × 4 axes = 20 comparison points across shape / trace / contract / env-skip
 ```
 
 The Hono routes in `src/lib/hono-app.ts` are the primary integration point; each `src/app/**/route.ts` file exposes a pure framework-agnostic delegate for callers that want to drive the AS without HTTP plumbing (fidelity harness in Sub-Issue v1.21-3d compares mock vs real without spinning up either runtime).
@@ -56,6 +59,29 @@ pnpm typecheck     # tsc --noEmit
 ```
 
 ## Fidelity axes
+
+### Revocation-cascade + release gate (Sub-Issue #867)
+
+| axis | mock (`@kiwa-test/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
+|---|---|---|---|
+| Revocation 1. access_token revoke | `/revoke` on an access_token deletes it from the AS active registry; `/introspect` returns `{active: false}`; body is empty (200) per RFC 7009 §2.2 | oauth2-mock-server same delete + introspect flip | RFC 7009 §2 — the state transition is observable through `/introspect` immediately after `/revoke` succeeds. |
+| Revocation 2. cascade to refresh | Revoking any single token invalidates every sibling (access + active refresh) in the `(clientId, subject)` family; subsequent refresh on the sibling fails with `invalid_grant`; cascade fans out across multiple grants sharing the same identity | oauth2-mock-server tears down family with the same fan-out | RFC 9700 §2.2.2 — any signal of compromise tears down the full family; cascade scope is deliberately `(clientId, subject)` not `(clientId, subject, scope)` so partial scope reuse can't survive. |
+| Revocation 3. reuse after revoke | Revoked refresh_token cannot mint fresh pairs (`invalid_grant`); revoked access_token flips `/introspect` to `active=false` permanently; cross-client revoke is refused silently (RFC 7009 §2.1) so an attacker cannot revoke a legitimate token under a different client_id | oauth2-mock-server same refusal semantics | Revocation state is authoritative — the AS's answer to `/introspect` is the resource server's SSOT for whether a token can still authorize a request. |
+| Revocation 4. idempotency | Double revoke returns 200 both times; `cascadeRevoke` on an already-torn-down family reports zero fan-out (`accessTokensRevoked=0`, `refreshTokensRevoked=0`, `family=null`); `createCascadeRevokeHandler` swallows unknown tokens with an empty report | oauth2-mock-server same idempotent shape | RFC 7009 §2.2 — a client that retries a revoke request must not observe a 400 the second time; cascade preserves this contract while still fanning out across the family on the first call. |
+
+### Real vs mock fidelity harness (Sub-Issue #867)
+
+5 endpoints × 4 axes = 20 comparison points asserted in `tests/fidelity-harness.spec.ts`:
+
+| endpoint | shape | trace | contract | env-skip |
+|---|---|---|---|---|
+| `/.well-known/openid-configuration` | RFC 8414 §2 shape | discovery trace entry | mock = real shape | mock ok + real ok (discovery is static per issuer) |
+| `/authorize` | 302 redirect with `code` + `state` | authorize trace entry | `response_type=token` refused | mock ok + real skipped with `KIWA_OAUTH21_ENV_MISSING` |
+| `/token` | RFC 6749 §5.1 body | token trace entry | `grant_type=password` refused | mock ok + real skipped |
+| `/revoke` | 200 empty body | cascade fan-out at AS state | RFC 7009 idempotency | mock ok + real skipped |
+| `/introspect` | RFC 7662 §2.2 body | introspect trace entry | `active` flips to false after revoke | mock ok + real skipped |
+
+See `docs/quality-reports/auth/oauth21-provider.md` for the integrated release gate report (7 axes: behavioural fidelity / performance / discovery completeness / OAuth 2.1 hardening / DPoP binding / refresh rotation / revocation cascade).
 
 ### DPoP-flow + refresh-rotation (Sub-Issue #866)
 
@@ -100,4 +126,5 @@ See `docs/quality-reports/auth/oauth21-provider-pkce.md` for the full report.
 
 ## Known follow-ups
 
-- Sub-Issue #867 — Revocation cascade (revoking an access_token invalidates the whole refresh family), real vs mock fidelity harness across every endpoint (5 endpoints × 4 axes = 20 comparison points), release gate 7-axis integrated report, testcontainers-driven `oauth2-mock-server` wiring (replaces the `OAUTH21_MOCK_SERVER_URL` docker-compose flow with an in-process launcher).
+- **testcontainers `oauth2-mock-server` wiring** — replace the `OAUTH21_MOCK_SERVER_URL` docker-compose flow in `src/adapters/real.ts` `startOAuth2MockServer` with an in-process `GenericContainer` launcher so the real column of every fidelity axis can run in CI without external orchestration. Kept as a separate follow-up because committing testcontainers to the workspace + adding docker-in-CI is a scope-broader task than closing v1.21-3.
+- **v1.21-4 (`dogfood-oidc-federation`)** — layers OIDC on top of the OAuth 2.1 endpoints (discovery + dynamic client registration + JWKS rotation + id_token verification).
