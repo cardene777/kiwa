@@ -129,6 +129,21 @@ const V1_20_PAGES = [
   { path: '/migrations/v1.19-to-v1.20', title: 'v1.19 → v1.20' },
 ];
 
+// v1.21 pages — new tutorials + concept doc + migration guide added under the
+// Auth 深化 milestone (Issue #846 land + this publish PR). Mirrors the
+// v1.12 / v1.13 / v1.16 / v1.17 / v1.18 / v1.19 / v1.20 anchor phrase pattern.
+// Each phrase is a substring the rendered VitePress <main> will always include
+// (checked against the actual page headings + body text — not frontmatter
+// titles). Coverage adds WebAuthn L3 + Passkey + OAuth 2.1 + OIDC + Federation
+// as 3 new web-auth protocol tutorials.
+const V1_21_PAGES = [
+  { path: '/tutorials/34-webauthn-passkey', title: 'WebAuthn L3 + Passkey' },
+  { path: '/tutorials/35-oauth21-provider', title: 'OAuth 2.1 provider' },
+  { path: '/tutorials/36-oidc-federation', title: 'OIDC provider + Federation' },
+  { path: '/concepts/auth-protocol-testing', title: 'Auth protocol testing' },
+  { path: '/migrations/v1.20-to-v1.21', title: 'v1.20 → v1.21' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -238,6 +253,20 @@ test.describe('docs site — v1.19 pages render', () => {
 test.describe('docs site — v1.20 pages render', () => {
   for (const p of V1_20_PAGES) {
     test(`v1.20 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.21 pages render', () => {
+  for (const p of V1_21_PAGES) {
+    test(`v1.21 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
