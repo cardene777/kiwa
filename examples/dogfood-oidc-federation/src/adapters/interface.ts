@@ -20,12 +20,14 @@
  */
 
 import type {
-  ClientRegistrationRequest,
-  ClientRegistrationResponse,
   JwksDocument,
   JwksKey,
   OpenIdProviderMetadata,
 } from '@kiwa-test/auth';
+import type {
+  ExtendedClientRegistrationRequest,
+  ExtendedClientRegistrationResponse,
+} from '../lib/dcr.js';
 
 /**
  * Trace event — every adapter method appends one entry to a shared trace
@@ -86,14 +88,18 @@ export interface OIDCOPAdapter {
   rotateJwks(): JwksKey;
 
   /**
-   * Register a client through the DCR endpoint. Sub-Issue v1.21-4a stubs
-   * this out at the interface level — the mock implements it (delegates to
-   * the underlying `dynamicClientRegistration` helper) so downstream
-   * Sub-Issues can extend the fidelity harness without changing the
-   * interface. The real driver throws `KIWA_OIDC_ENV_MISSING` until
-   * Sub-Issue v1.21-4b wires Keycloak `/registrations`.
+   * Register a client through the DCR endpoint. The request shape extends
+   * the RFC 7591 core with the dogfood-specific JWKS source pair
+   * (`jwks_uri` + inline `jwks`) so Sub-Issue v1.21-4b's `pk_jwt` client
+   * authentication method can be exercised end-to-end. The mock delegates
+   * to `handleRegistration` (`src/lib/dcr.ts`) which layers the four DCR
+   * fidelity axes on top of the underlying `dynamicClientRegistration`
+   * helper. The real driver throws `KIWA_OIDC_ENV_MISSING` until Keycloak
+   * `/registrations` is wired.
    */
-  registerClient(request: ClientRegistrationRequest): ClientRegistrationResponse;
+  registerClient(
+    request: ExtendedClientRegistrationRequest,
+  ): ExtendedClientRegistrationResponse;
 
   reset(): Promise<void>;
 }

@@ -15,12 +15,14 @@
  */
 
 import type {
-  ClientRegistrationRequest,
-  ClientRegistrationResponse,
   JwksDocument,
   JwksKey,
   OpenIdProviderMetadata,
 } from '@kiwa-test/auth';
+import type {
+  ExtendedClientRegistrationRequest,
+  ExtendedClientRegistrationResponse,
+} from '../lib/dcr.js';
 import {
   KIWA_OIDC_ENV_MISSING,
   type OIDCOPAdapter,
@@ -156,8 +158,13 @@ export async function makeRealAdapter(
   }
 
   function registerClient(
-    _request: ClientRegistrationRequest,
-  ): ClientRegistrationResponse {
+    _request: ExtendedClientRegistrationRequest,
+  ): ExtendedClientRegistrationResponse {
+    // Sub-Issue v1.21-4b (this state) still refuses on env-missing — Keycloak
+    // `/registrations` wiring is scoped to the release-gate work when
+    // `OIDC_BOOTSTRAP=1` + docker are available. Downstream Sub-Issues that
+    // spawn Keycloak will POST to `${KEYCLOAK_URL}/realms/{realm}/clients-registrations/default`
+    // + fold the response back through the same `ExtendedClientRegistrationResponse` shape.
     push({
       op: 'registerClient',
       ok: false,

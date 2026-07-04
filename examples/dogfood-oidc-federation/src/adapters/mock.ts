@@ -4,11 +4,13 @@
  * docker container. Both mock + real adapters satisfy {@link OIDCOPAdapter}
  * so the fidelity harness can diff them side-by-side.
  *
- * Sub-Issue v1.21-4a (this state) wires the discovery + JWKS + DCR portion
- * of `setupOidcEnv`. Sub-Issues b/c/d add authorize + token + id_token
- * verify + federation calls onto the same env — the mock env already has
- * every helper, so extending the interface is a plumbing change, not a
- * new env boot.
+ * Sub-Issue v1.21-4a wires the discovery + JWKS + DCR skeleton portion
+ * of `setupOidcEnv`. Sub-Issue v1.21-4b (this state) layers the RFC 7591
+ * DCR fidelity harness through `handleRegistration` (`src/lib/dcr.ts`) —
+ * three auth methods, dropped-grant refusal, software_statement JWS
+ * verification, and redirect_uris URL validation all funnel through the
+ * same delegate. Sub-Issues c/d add authorize + token + id_token verify +
+ * federation calls onto the same env.
  *
  * Every method appends a trace event so downstream tests can assert on the
  * OP's behavioural sequence + errorKind without regexing the underlying
@@ -25,6 +27,11 @@ import {
   type OidcTestEnv,
   type OpenIdProviderMetadata,
 } from '@kiwa-test/auth';
+import {
+  handleRegistration,
+  type ExtendedClientRegistrationRequest,
+  type ExtendedClientRegistrationResponse,
+} from '../lib/dcr.js';
 import type {
   OIDCOPAdapter,
   TraceEvent,
@@ -54,6 +61,14 @@ export interface MakeMockAdapterOptions {
    * Deterministic clock. When omitted the mock uses `Date.now()`.
    */
   now?: () => number;
+  /**
+   * Trust anchor used to verify `software_statement` JWS signatures. When
+   * omitted the mock refuses every registration that carries a
+   * `software_statement`. Sub-Issue v1.21-4b (dcr-flow) wires this so the
+   * fidelity harness can drive the verified-vs-tampered surfaces without
+   * cracking real JWS crypto.
+   */
+  softwareStatementTrustAnchor?: string;
 }
 
 const DEFAULT_ISSUER = 'https://op.example.test';
@@ -97,6 +112,9 @@ export async function makeMockAdapter(
         ? {}
         : { jwksRetentionSec: options.jwksRetentionSec }),
       ...(nowFn === undefined ? {} : { now: nowFn }),
+      ...(options.softwareStatementTrustAnchor === undefined
+        ? {}
+        : { softwareStatementIssuer: options.softwareStatementTrustAnchor }),
     });
   };
 
@@ -144,21 +162,38 @@ export async function makeMockAdapter(
   }
 
   function registerClient(
-    request: ClientRegistrationRequest,
-  ): ClientRegistrationResponse {
-    try {
-      const response = env.registerClient(request);
+    request: ExtendedClientRegistrationRequest,
+  ): ExtendedClientRegistrationResponse {
+    const outcome = handleRegistration(
+      (underlying: ClientRegistrationRequest): ClientRegistrationResponse =>
+        env.registerClient(underlying),
+      request,
+    );
+    if (outcome.ok) {
       push({
         op: 'registerClient',
         ok: true,
-        detail: { client_id: response.client_id },
+        detail: {
+          client_id: outcome.response.client_id,
+          ...(outcome.detail.auth_method === undefined
+            ? {}
+            : { auth_method: outcome.detail.auth_method }),
+          ...(outcome.detail.software_statement === undefined
+            ? {}
+            : { software_statement: outcome.detail.software_statement }),
+        },
       });
-      return response;
-    } catch (err) {
-      const errorKind = classifyError(err);
-      push({ op: 'registerClient', ok: false, errorKind });
-      throw err;
+      return outcome.response;
     }
+    push({
+      op: 'registerClient',
+      ok: false,
+      errorKind: outcome.detail.errorKind ?? classifyError(outcome.error),
+      ...(outcome.detail.software_statement === undefined
+        ? {}
+        : { detail: { software_statement: outcome.detail.software_statement } }),
+    });
+    throw outcome.error;
   }
 
   async function reset(): Promise<void> {
