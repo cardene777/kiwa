@@ -95,25 +95,37 @@ describe('axis 2 — /authorize OAuth 2.1 hardening', () => {
     __resetOAuth21Counters();
   });
 
-  it('refuses response_type=token with unsupported_response_type', async () => {
+  it('refuses response_type=token with unsupported_response_type (RFC 6749 §4.1.2.1 redirect)', async () => {
+    // v1.22-2 Bug 1 fix — RFC 6749 §4.1.2.1 mandates a 302 redirect to
+    // redirect_uri with error + state when the URI is validly formed.
     const { app } = await bootstrap();
     const res = await app.request(
       '/authorize?response_type=token&client_id=dogfood-client&redirect_uri=https%3A%2F%2Fclient.example.test%2Fcallback&state=xyz',
+      { redirect: 'manual' },
     );
-    expect(res.status).toBe(400);
-    const body = (await res.json()) as Record<string, string>;
-    expect(body['error']).toBe('unsupported_response_type');
+    expect(res.status).toBe(302);
+    const location = res.headers.get('location');
+    expect(location).toBeTruthy();
+    const parsed = new URL(location as string);
+    expect(parsed.searchParams.get('error')).toBe('unsupported_response_type');
+    expect(parsed.searchParams.get('state')).toBe('xyz');
   });
 
-  it('refuses code_challenge_method=plain with invalid_request', async () => {
+  it('refuses code_challenge_method=plain with invalid_request (RFC 6749 §4.1.2.1 redirect)', async () => {
+    // v1.22-2 Bug 1 fix — PKCE pre-flight rejection also redirects because
+    // redirect_uri is validly formed. `S256` note lands in error_description.
     const { app } = await bootstrap();
     const res = await app.request(
       '/authorize?response_type=code&client_id=dogfood-client&redirect_uri=https%3A%2F%2Fclient.example.test%2Fcallback&state=xyz&code_challenge=abc&code_challenge_method=plain',
+      { redirect: 'manual' },
     );
-    expect(res.status).toBe(400);
-    const body = (await res.json()) as Record<string, string>;
-    expect(body['error']).toBe('invalid_request');
-    expect(body['error_description']).toContain('S256');
+    expect(res.status).toBe(302);
+    const location = res.headers.get('location');
+    expect(location).toBeTruthy();
+    const parsed = new URL(location as string);
+    expect(parsed.searchParams.get('error')).toBe('invalid_request');
+    expect(parsed.searchParams.get('error_description')).toContain('S256');
+    expect(parsed.searchParams.get('state')).toBe('xyz');
   });
 
   it('returns 302 with code + state for a valid PKCE authorization request', async () => {
