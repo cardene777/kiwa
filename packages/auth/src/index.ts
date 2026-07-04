@@ -299,3 +299,49 @@ export {
   verifyCodeChallenge,
   verifyDpopProof,
 } from './oauth21/index.js';
+
+// OIDC adapter surface (v1.21-1d, GH #851). Mock OpenID Provider covering
+// OpenID Connect Core 1.0 (§2 id_token + §3.1.3.6-7 hashes) + Discovery 1.0
+// + RFC 7591 Dynamic Client Registration + JWKS rotation w/ retention
+// window + OpenID Federation 1.0 §7 trust-chain resolution. Layers on top
+// of the OAuth 2.1 adapter (v1.21-1c) — the OP is really the OAuth 2.1 AS
+// with the OIDC extensions bolted on. The mock re-uses the OAuth 2.1
+// authorization_code + PKCE + DPoP flow verbatim and adds the id_token /
+// discovery / DCR / JWKS / federation surface on top.
+export type {
+  ClientRegistrationRequest,
+  ClientRegistrationResponse,
+  DiscoveryEndpoint,
+  EntityStatement as OidcEntityStatement,
+  IdToken,
+  IdTokenClaims,
+  JwksDocument,
+  JwksEndpoint,
+  JwksKey,
+  OidcTestEnv,
+  OpenIdProviderMetadata,
+  ResolveTrustChainInput,
+  SetupOidcEnvOptions,
+  SignIdTokenInput,
+  TrustAnchor,
+  TrustChainResult,
+  VerifyIdTokenOptions,
+  VerifyIdTokenResult,
+} from './oidc/types.js';
+export {
+  __resetDcrCounter,
+  __resetIdTokenCounter,
+  __resetJwksCounter,
+  __resetOidcCounters,
+  computeTokenHash,
+  createDcrEndpoint,
+  createDiscoveryEndpoint,
+  createEntityStatement as createOidcEntityStatement,
+  createIdTokenSigner,
+  createJwksEndpoint,
+  createTrustAnchor as createOidcTrustAnchor,
+  dynamicClientRegistration,
+  mintSoftwareStatement,
+  resolveTrustChain as resolveOidcTrustChain,
+  setupOidcEnv,
+} from './oidc/index.js';
