@@ -46,6 +46,8 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 34 | [WebAuthn L3 + Passkey (virtual authenticator + attestation + sync fabric)](./34-webauthn-passkey) | Node.js / vitest | 12 min |
 | 35 | [OAuth 2.1 provider (PKCE + DPoP + refresh rotation + revocation)](./35-oauth21-provider) | Node.js / vitest | 12 min |
 | 36 | [OIDC provider + Federation (Discovery + DCR + id_token + trust chain)](./36-oidc-federation) | Node.js / vitest | 12 min |
+| 37 | [Real driver testing (Keycloak + oauth2-mock-server testcontainers)](./37-real-driver-testing) | Node.js / vitest + Docker | 15 min |
+| 38 | [Passkey caBLE hybrid transport (QR + BLE + WebSocket tunnel)](./38-passkey-cable-flow) | Node.js / vitest | 15 min |
 
 ## AI-LLM tutorials (v1.12)
 
@@ -78,3 +80,7 @@ Tutorials 31 – 33 exercise the new [`@kiwa-test/streaming`](https://github.com
 ## Auth 深化 tutorials (v1.21)
 
 Tutorials 34 – 36 exercise the four new protocol adapters in [`@kiwa-test/auth`](https://github.com/cardene777/kiwa/blob/main/packages/auth/README.md) — `setupWebAuthnEnv` (WebAuthn L3 virtual authenticator + attestation), `setupPasskeyEnv` (Passkey sync fabric backup + restore), `setupOAuth21Env` (OAuth 2.1 mock AS with PKCE + DPoP + refresh rotation + revocation), and `setupOidcEnv` (OIDC mock OP with Discovery + DCR + `id_token` sign / verify + JWKS rotation + OpenID Federation trust-chain resolution). See [`docs/concepts/auth-protocol-testing.md`](../concepts/auth-protocol-testing) for the 4 axes (virtual authenticator / PKCE+DPoP / id_token / discovery+federation) that interactive auth tests need beyond the session-shaped mocks of v1.10-2.
+
+## Real driver tutorials (v1.22)
+
+Tutorials 37 – 38 exercise the v1.22 real driver layer on top of the v1.21 4 protocol mocks — Keycloak testcontainers wiring for OIDC + Federation, oauth2-mock-server testcontainers for OAuth 2.1, Chrome caBLE hybrid transport for Passkey. Tutorial 37 walks the 3 execution modes (`mock only` / `real-optional` / `real-required`) end-to-end with a Keycloak container; tutorial 38 walks the CTAP2 hybrid transport 5-axis fidelity harness (QR generation / BLE advertisement handshake / WebSocket tunnel establishment / credential migration payload / signature roundtrip). See [`docs/concepts/real-driver-testing.md`](../concepts/real-driver-testing) for the 3 execution modes SSOT + the fidelity axis catalog across all 3 v1.22 dogfood apps.

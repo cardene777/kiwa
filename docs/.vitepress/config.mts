@@ -145,6 +145,13 @@ export default defineConfig({
             { text: '36 — OIDC provider + Federation (Discovery + DCR + id_token + trust chain)', link: '/tutorials/36-oidc-federation' },
           ],
         },
+        {
+          text: 'Real driver (v1.22)',
+          items: [
+            { text: '37 — Real driver testing (Keycloak + oauth2-mock-server testcontainers)', link: '/tutorials/37-real-driver-testing' },
+            { text: '38 — Passkey caBLE hybrid transport (QR + BLE + WebSocket tunnel)', link: '/tutorials/38-passkey-cable-flow' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -162,6 +169,7 @@ export default defineConfig({
             { text: 'Modern web framework testing (Signal reactivity / Islands / edge runtime + RPC type-safety SSOT)', link: '/concepts/modern-web-framework-testing' },
             { text: 'Streaming testing (producer / consumer / exactly-once / DLQ / schema-registry SSOT)', link: '/concepts/streaming-testing' },
             { text: 'Auth protocol testing (virtual authenticator / PKCE+DPoP / id_token / discovery+federation SSOT)', link: '/concepts/auth-protocol-testing' },
+            { text: 'Real driver testing (mock only / real-optional / real-required 3 execution modes SSOT)', link: '/concepts/real-driver-testing' },
           ],
         },
       ],
@@ -182,6 +190,7 @@ export default defineConfig({
             { text: 'v1.18 → v1.19', link: '/migrations/v1.18-to-v1.19' },
             { text: 'v1.19 → v1.20', link: '/migrations/v1.19-to-v1.20' },
             { text: 'v1.20 → v1.21', link: '/migrations/v1.20-to-v1.21' },
+            { text: 'v1.21 → v1.22', link: '/migrations/v1.21-to-v1.22' },
           ],
         },
       ],
