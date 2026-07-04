@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/streaming",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Streaming test adapter for kiwa — Kafka (kafkajs API 互換 producer / consumer / admin) + Redpanda (Kafka API 互換 + schema-registry client) + NATS (nats.js API 互換 + JetStream + KV / Object Store) unified mock, with 5 semantics support (producer / consumer / exactly-once / DLQ / schema-registry)",
   "license": "MIT",
   "author": {

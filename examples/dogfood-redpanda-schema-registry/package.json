@@ -1,6 +1,6 @@
 {
   "name": "dogfood-redpanda-schema-registry",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app (v1.20-3) — a Redpanda + Confluent-shaped schema-registry pipeline that exercises 4 patterns (register 3 Avro schemas across 3 subjects + subject naming strategy / schema evolution across 2 versions of User with a backward-compatible added optional field / BACKWARD vs FORWARD vs FULL compatibility rejection surface / producer publishes payloads that fail-fast on incompatible schema register before publish) driven by @kiwa-test/streaming's RedpandaMock + SchemaRegistry mock in KIWA_MODE=mock and testcontainers-driven live Redpanda + Confluent SR in KIWA_MODE=real (env-skip REDPANDA_BOOTSTRAP + SCHEMA_REGISTRY_URL). Behavioural fidelity feeds @kiwa-test/quality-metrics 7-axis release gate.",

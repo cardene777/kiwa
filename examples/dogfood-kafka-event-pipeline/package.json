@@ -1,6 +1,6 @@
 {
   "name": "dogfood-kafka-event-pipeline",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app (v1.20-2) — a Kafka event pipeline that exercises 4 patterns (idempotent producer with partition key + batch / consumer group with offset commit + rebalance callback / exactly-once transactional producer + read-committed consumer / DLQ with retry policy + poison message quarantine + DLQ topic subscribe) driven by @kiwa-test/streaming in KIWA_MODE=mock and kafkajs against a real Kafka broker in KIWA_MODE=real (env-skip KAFKA_BOOTSTRAP). Behavioural fidelity feeds @kiwa-test/quality-metrics 7-axis release gate.",
