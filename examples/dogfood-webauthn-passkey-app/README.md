@@ -16,7 +16,7 @@ Behavioural fidelity between the two drivers feeds the release gate (`quality-re
 | #858 (c) | userVerification 4 pattern (`required` / `preferred` / `discouraged` / `impossible`) | `?uv=` query on register + signin |
 | #859 (d) | residentKey + `/manage` (list + delete) + release gate 7 axes | `src/app/manage/` |
 
-Sub-Issue **a** landed the shared surface (RP server, adapter interface, `KIWA_MODE` split, register-attestation fidelity harness). Sub-Issue **b** (this state) layers `/signin` on top — assertion ceremony + Playwright + Chrome Virtual Authenticator e2e that round-trips real browser signatures through the RP mock verifier.
+Sub-Issue **a** landed the shared surface (RP server, adapter interface, `KIWA_MODE` split, register-attestation fidelity harness). Sub-Issue **b** layered `/signin` on top — assertion ceremony + Playwright + Chrome Virtual Authenticator e2e. Sub-Issue **c** landed the userVerification 4 pattern (`?uv=` query + fidelity axis on the UV bit). Sub-Issue **d** (this state) closes v1.21-2 by adding `residentKey=required` discoverable credentials, the `/manage` route (list + delete), the full-flow Playwright e2e (register → list → signin → delete → signin) and the release gate 7-axis integrated report.
 
 ## Layout
 
@@ -33,15 +33,19 @@ src/
       route.ts          # Next.js 15 App Router POST handler wrapping WebAuthnRPAdapter.register()
     signin/
       route.ts          # Next.js 15 App Router POST handler wrapping WebAuthnRPAdapter.signin()
+    manage/
+      route.ts          # Next.js 15 App Router GET (list) + DELETE (revoke) handlers wrapping WebAuthnRPAdapter.listCredentials/deleteCredential
 tests/
   register-attestation.spec.ts   # 4 fidelity axes: attestationObject / clientDataJSON / signature format / signCount=0
   signin-assertion.spec.ts       # 3 fidelity axes: assertion signature / signCount monotonic bump / credentialId consistency
   user-verification.spec.ts      # userVerification 4 pattern (required / preferred / discouraged / impossible) × register + signin + route validation + UV bit fidelity
+  resident-key.spec.ts           # residentKey 4 value × creation / discovery / delete + /manage GET/DELETE + full lifecycle
   e2e/
     passkey-signin.spec.ts       # Playwright + Chrome Virtual Authenticator — real browser drives /register + /signin through the RP mock
+    passkey-full-flow.spec.ts    # Playwright full flow — register → list → signin (discovery) → delete → signin (empty) + clear-all
 ```
 
-`src/app/{register,signin}/route.ts` follows the Next.js 15 App Router route handler convention (`export async function POST(req: Request)`), but each handler is a thin wrapper around the adapter — the RP logic itself is Next.js-independent and the Playwright e2e mounts the handlers into a bare Node HTTP server to avoid booting Next.js.
+`src/app/{register,signin,manage}/route.ts` follows the Next.js 15 App Router route handler convention (`export async function POST(req: Request)` / `GET` / `DELETE`), but each handler is a thin wrapper around the adapter — the RP logic itself is Next.js-independent and the Playwright e2e mounts the handlers into a bare Node HTTP server to avoid booting Next.js.
 
 ## Running
 
@@ -50,8 +54,6 @@ pnpm test          # vitest (mock always, real skipped when KIWA_WEBAUTHN_REAL_R
 pnpm test:e2e      # Playwright + Chrome Virtual Authenticator (skips when browsers not cached)
 pnpm typecheck     # tsc --noEmit
 ```
-
-Sub-Issue **c** (#858) layers the userVerification 4 pattern (`required` / `preferred` / `discouraged` / `impossible`) on top of `/register` and `/signin`.
 
 ## Fidelity axes
 
@@ -83,4 +85,19 @@ The userVerification harness diffs mock vs real on the four patterns the RP acce
 
 Query param support — both routes accept `?uv=required|preferred|discouraged|impossible`, which overrides the body value when both are present.
 
-Divergence on any axis fails the release gate.
+### residentKey + `/manage` (Sub-Issue #859)
+
+The residentKey + `/manage` harness (`docs/quality-reports/auth/webauthn-passkey-app-resident-key.md`) covers six fidelity axes:
+
+1. Creation with `residentKey=required` on a resident-key-capable authenticator — credential is discoverable (WebAuthn L3 §5.4.6)
+2. Creation with `residentKey=required` on a non-resident-key authenticator — rejected with `resident_key_unsupported`
+3. Creation with `residentKey=preferred` on a capable authenticator — discoverable (same as `required`)
+4. Creation with `residentKey=discouraged` — credential is legacy (`discoverable=false`) even on a capable authenticator
+5. Discovery-mode signin — signin with omitted / empty `allowCredentialIds` succeeds via resident-key lookup
+6. Delete — `/manage?credentialId=...` removes the credential from both the RP store and the authenticator-side registry so a subsequent signin fails with `no_credentials_registered`
+
+`/manage` route handlers — `GET /manage` returns the credential summary list (drops `publicKey`), `GET /manage?discoverable=true|false` narrows the filter, `DELETE /manage?credentialId=...` removes a single credential, `DELETE /manage?confirm=true` clears every credential (opt-in behind the query flag so a stray browser request cannot wipe the store).
+
+### v1.21-2 release gate (Sub-Issue #859)
+
+The integrated release gate SSOT (`docs/quality-reports/auth/webauthn-passkey-app.md`) rolls up the four patterns onto seven axes: `lint` / `typecheck` / `build` / `test` / `test:cov` / `test:e2e` / `fidelity`. Every axis must be green before parent Issue #843 closes. Divergence on any axis fails the release gate.
