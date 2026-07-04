@@ -1,0 +1,24 @@
+{
+  "name": "dogfood-kafka-event-pipeline",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app (v1.20-2) — a Kafka event pipeline that exercises 4 patterns (idempotent producer with partition key + batch / consumer group with offset commit + rebalance callback / exactly-once transactional producer + read-committed consumer / DLQ with retry policy + poison message quarantine + DLQ topic subscribe) driven by @kiwa-test/streaming in KIWA_MODE=mock and kafkajs against a real Kafka broker in KIWA_MODE=real (env-skip KAFKA_BOOTSTRAP). Behavioural fidelity feeds @kiwa-test/quality-metrics 7-axis release gate.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/streaming -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "pretest:perf": "pnpm -F @kiwa-test/streaming -F @kiwa-test/core -F @kiwa-test/quality-metrics -F @kiwa-test/perf-harness build",
+    "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/streaming": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@kiwa-test/perf-harness": "workspace:*",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

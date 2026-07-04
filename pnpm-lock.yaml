@@ -522,6 +522,31 @@ importers:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0)
 
+  examples/dogfood-kafka-event-pipeline:
+    dependencies:
+      '@kiwa-test/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@kiwa-test/quality-metrics':
+        specifier: workspace:*
+        version: link:../../packages/quality-metrics
+      '@kiwa-test/streaming':
+        specifier: workspace:*
+        version: link:../../packages/streaming
+    devDependencies:
+      '@kiwa-test/perf-harness':
+        specifier: workspace:*
+        version: link:../../packages/perf-harness
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.19
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0)
+
   examples/dogfood-mcp-tool-agent:
     dependencies:
       '@kiwa-test/ai-llm':
