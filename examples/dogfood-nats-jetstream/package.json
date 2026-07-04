@@ -1,6 +1,6 @@
 {
   "name": "dogfood-nats-jetstream",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "description": "Dogfood app (v1.20-4) — a NATS JetStream + KV + Object Store + subject routing pipeline that exercises 4 patterns (JetStream persistent stream + durable consumer + ack / redelivery / KV Store put + get + watch + delete + versioning / Object Store put + get + delete + chunk metadata / subject-based routing with wildcard subject + queue group) driven by @kiwa-test/streaming NATS mock in KIWA_MODE=mock and a live nats.js client in KIWA_MODE=real (env-skip NATS_URL). Behavioural fidelity feeds @kiwa-test/quality-metrics 7-axis release gate.",
