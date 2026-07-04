@@ -121,8 +121,16 @@ export function credentialAssertion(
   const clientDataJSON = base64UrlEncode(JSON.stringify(clientData));
   const clientDataDigest = clientDataHash(JSON.stringify(clientData));
 
+  // WebAuthn L3 §5.4.6 — `discouraged` explicitly asks the authenticator to
+  // skip user verification. The mock therefore clears the UV bit even on a
+  // UV-capable authenticator so RPs that gate features on UV can observe the
+  // caller's intent, not merely the authenticator's capability. `required`
+  // has already been checked above; `preferred` falls through to authenticator
+  // capability (`uvSatisfied`).
+  const uvBitSet =
+    userVerification === 'discouraged' ? false : uvSatisfied;
   let flags = FLAG_USER_PRESENT;
-  if (uvSatisfied) flags |= FLAG_USER_VERIFIED;
+  if (uvBitSet) flags |= FLAG_USER_VERIFIED;
   // Monotonic increment on every successful assertion (§6.1.1).
   credential.signCount += 1;
   credential.lastUsedAt = Date.now();

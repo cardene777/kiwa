@@ -36,6 +36,7 @@ src/
 tests/
   register-attestation.spec.ts   # 4 fidelity axes: attestationObject / clientDataJSON / signature format / signCount=0
   signin-assertion.spec.ts       # 3 fidelity axes: assertion signature / signCount monotonic bump / credentialId consistency
+  user-verification.spec.ts      # userVerification 4 pattern (required / preferred / discouraged / impossible) × register + signin + route validation + UV bit fidelity
   e2e/
     passkey-signin.spec.ts       # Playwright + Chrome Virtual Authenticator — real browser drives /register + /signin through the RP mock
 ```
@@ -70,5 +71,16 @@ The signin-assertion harness diffs mock vs real on three axes:
 1. Assertion signature format — mock + real both emit base64url-clean `signature` / `clientDataJSON` / `authenticatorData` so the RP can decode without re-encoding
 2. `signCount` monotonic increment — every successful assertion bumps the RP-side counter by exactly +1, satisfies WebAuthn L3 §7.2 step 21 clone-detection
 3. `credentialId` consistency — the assertion `credentialId` matches the persisted RP credential (round-trip through `WebAuthnServer.getCredential`)
+
+### userVerification 4 pattern (Sub-Issue #858)
+
+The userVerification harness diffs mock vs real on the four patterns the RP accepts. See `docs/quality-reports/auth/webauthn-passkey-app-user-verification.md` for the full UV bit fidelity table.
+
+1. `required` — succeeds on UV-capable authenticator (UV bit = 1), rejects on non-UV authenticator (`user_verification_unsupported`)
+2. `preferred` — succeeds on both; UV bit tracks authenticator capability (fallback semantics per §5.4.6)
+3. `discouraged` — UV bit = 0 even on UV-capable authenticator (spec-mandated)
+4. `impossible` — kiwa-only sentinel; RP rejects with 400 `invalid_user_verification` before dispatch
+
+Query param support — both routes accept `?uv=required|preferred|discouraged|impossible`, which overrides the body value when both are present.
 
 Divergence on any axis fails the release gate.

@@ -29,5 +29,5 @@ Full mock vs real fidelity numbers are filled in as `/manage` + `/signin` land i
 ## Known follow-ups
 
 - Sub-Issue #857 — real Chrome Virtual Authenticator wiring + `/signin` credential assertion + Playwright e2e that exercises the register + signin round-trip end to end.
-- Sub-Issue #858 — userVerification 4 pattern (`required` / `preferred` / `discouraged` / `impossible`) + fidelity assertion on UV bit.
+- Sub-Issue #858 — userVerification 4 pattern (`required` / `preferred` / `discouraged` / `impossible`) + fidelity assertion on UV bit. **Landed** — see `webauthn-passkey-app-user-verification.md` for the UV bit fidelity table.
 - Sub-Issue #859 — `residentKey=required` discoverable credential + `/manage` route + release gate 7 axes.
