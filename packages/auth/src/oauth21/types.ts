@@ -1,0 +1,362 @@
+import type { TestEnvBase } from '@kiwa-test/core';
+
+/**
+ * OAuth 2.1 grant type. The mock intentionally exposes only the RFC 9700
+ * "OAuth 2.1" allowlisted grants — `authorization_code` (with PKCE always
+ * required) + `refresh_token`. The historical `implicit` and `password`
+ * grants that OAuth 2.0 permitted were dropped by 2.1 and the mock rejects
+ * them at parse time so tests catch a downgrade attack immediately.
+ */
+export type OAuth21GrantType = 'authorization_code' | 'refresh_token';
+
+/**
+ * PKCE code challenge method. RFC 9700 §2.1.1 mandates `S256` for OAuth 2.1
+ * and forbids `plain` — every parse path in the mock rejects `plain`
+ * explicitly rather than silently downgrading.
+ */
+export type PkceChallengeMethod = 'S256';
+
+/**
+ * PKCE challenge produced by `generateCodeVerifier` + `deriveCodeChallenge`.
+ * The verifier is the high-entropy secret the client keeps; the challenge is
+ * the SHA-256 hash the client sends to the Authorization Server on
+ * `/authorize`, and later proves possession of by sending the verifier on
+ * `/token`.
+ */
+export interface PkceChallenge {
+  /** High-entropy secret. Kept by the client. */
+  codeVerifier: string;
+  /**
+   * SHA-256 hash of the verifier, base64url encoded. Sent by the client on
+   * `/authorize`; the AS records it against the issued code and, on `/token`,
+   * re-hashes the verifier the client sends to compare.
+   */
+  codeChallenge: string;
+  /** Method used to derive the challenge. Always `S256` in OAuth 2.1. */
+  codeChallengeMethod: PkceChallengeMethod;
+}
+
+/**
+ * DPoP proof JWT parameters. RFC 9449 defines a Demonstration of Proof of
+ * Possession JWT that binds an access token to the client's asymmetric key,
+ * defeating bearer-token exfiltration. The mock uses ES256 (P-256 ECDSA) as
+ * the only supported alg — matching the alg advertised in the DPoP spec's
+ * default deployment.
+ */
+export interface DpopProofInput {
+  /** Uppercase HTTP method (`GET` / `POST` / `PUT` / `DELETE`). */
+  htm: string;
+  /** Absolute request URL, no query or fragment. */
+  htu: string;
+  /**
+   * Issued-at timestamp in seconds since epoch. Callers can set this
+   * explicitly (deterministic tests) or accept the default `Date.now()/1000`.
+   */
+  iat?: number;
+  /**
+   * Unique proof identifier. When omitted the mock generates a monotonic id
+   * so replay attacks trip the AS's jti registry. Callers wanting to simulate
+   * a replay pass an already-used `jti`.
+   */
+  jti?: string;
+  /**
+   * Public JWK the AS records as the client's DPoP key. When omitted the
+   * mock provisions a fresh mock JWK; test suites that want to link multiple
+   * proofs to the same key pass an existing `jwk`.
+   */
+  jwk?: DpopJwk;
+}
+
+/**
+ * Public JWK embedded in the DPoP proof header. The mock represents the P-256
+ * key as an opaque thumbprint so tests can compare identity without cracking
+ * the JWK fields.
+ */
+export interface DpopJwk {
+  /** Key type. Always `EC` for the ES256 alg the mock supports. */
+  kty: 'EC';
+  /** Curve. Always `P-256`. */
+  crv: 'P-256';
+  /** Base64url-encoded x-coordinate placeholder. */
+  x: string;
+  /** Base64url-encoded y-coordinate placeholder. */
+  y: string;
+}
+
+/**
+ * DPoP proof JWT structure. The mock represents the JWT as a compact
+ * `header.payload.signature` string but exposes the parsed header + payload
+ * for assertions.
+ */
+export interface DpopProof {
+  /** Full compact-serialized JWT string (`header.payload.signature`). */
+  jwt: string;
+  header: {
+    /** Always `dpop+jwt` per RFC 9449 §4.2. */
+    typ: 'dpop+jwt';
+    /** Always `ES256`. */
+    alg: 'ES256';
+    /** Public JWK the AS binds the access token to. */
+    jwk: DpopJwk;
+  };
+  payload: {
+    htm: string;
+    htu: string;
+    iat: number;
+    jti: string;
+  };
+}
+
+/**
+ * Authorization request submitted to `/authorize`. RFC 9700 §2.1 requires
+ * PKCE parameters on every request — `code_challenge` + `code_challenge_method`
+ * are mandatory even for confidential clients.
+ */
+export interface AuthorizationRequest {
+  responseType: 'code';
+  clientId: string;
+  redirectUri: string;
+  state: string;
+  scope?: string;
+  codeChallenge: string;
+  codeChallengeMethod: PkceChallengeMethod;
+  /**
+   * Optional resource indicator (RFC 8707). When present the AS records it on
+   * the issued code so `/token` can bind the resulting access token to that
+   * resource.
+   */
+  resource?: string;
+}
+
+/**
+ * Response to a successful `/authorize` call. Real deployments 302-redirect
+ * the browser to `redirectUri?code=...&state=...`; the mock returns the
+ * parsed shape directly so tests can assert `code` and `state` without HTTP
+ * plumbing.
+ */
+export interface AuthorizationResponse {
+  code: string;
+  state: string;
+  redirectUri: string;
+}
+
+/**
+ * Token request submitted to `/token`. RFC 6749 §4.1.3 dictates the shape;
+ * OAuth 2.1 adds mandatory PKCE (`code_verifier`) and RFC 9449 optionally
+ * adds `DPoP` header for sender-constrained tokens.
+ */
+export type TokenRequest =
+  | {
+      grantType: 'authorization_code';
+      code: string;
+      redirectUri: string;
+      clientId: string;
+      codeVerifier: string;
+      /** DPoP proof for sender-constrained access tokens. Optional. */
+      dpop?: DpopProof;
+    }
+  | {
+      grantType: 'refresh_token';
+      refreshToken: string;
+      clientId: string;
+      /** DPoP proof for sender-constrained access tokens. Optional. */
+      dpop?: DpopProof;
+      /**
+       * Explicit scope narrowing (RFC 6749 §6). When omitted the refreshed
+       * token inherits the original grant's scope.
+       */
+      scope?: string;
+    };
+
+/**
+ * Access token minted by `/token`. Contains just enough state for the mock
+ * to answer `/introspect` and `/revoke` — a real JWT would encode this into
+ * claims, the mock keeps a plain record for test ergonomics.
+ */
+export interface AccessToken {
+  token: string;
+  tokenType: 'Bearer' | 'DPoP';
+  expiresAt: number;
+  scope: string;
+  clientId: string;
+  subject: string;
+  /**
+   * SHA-256 thumbprint of the DPoP public JWK the token is bound to. Absent
+   * when the token is a plain bearer.
+   */
+  dpopJkt?: string;
+  /** Resource indicator (RFC 8707) the token is bound to, when supplied. */
+  resource?: string;
+}
+
+/**
+ * Refresh token minted alongside every access token. RFC 9700 §2.2 mandates
+ * refresh token rotation — every use of a refresh token invalidates the
+ * previous token and issues a fresh one. The mock records a monotonic
+ * `rotationCount` so tests can assert the rotation happened.
+ */
+export interface RefreshToken {
+  token: string;
+  clientId: string;
+  subject: string;
+  scope: string;
+  rotationCount: number;
+  expiresAt: number;
+  /** Set to `true` after `/revoke` or a rotation. Prevents reuse. */
+  revoked: boolean;
+  /** SHA-256 thumbprint of the DPoP key, when bound. */
+  dpopJkt?: string;
+  /** Resource indicator, when bound. */
+  resource?: string;
+}
+
+/**
+ * Response to a successful `/token` call. Mirrors the RFC 6749 token response
+ * body verbatim so a caller wiring the mock behind a real HTTP client can
+ * treat it as-is.
+ */
+export interface TokenResponse {
+  accessToken: string;
+  tokenType: 'Bearer' | 'DPoP';
+  expiresIn: number;
+  refreshToken: string;
+  scope: string;
+}
+
+/**
+ * Introspection response per RFC 7662. The mock returns the minimal shape a
+ * resource server needs to authorize a request.
+ */
+export interface IntrospectionResponse {
+  active: boolean;
+  scope?: string;
+  clientId?: string;
+  sub?: string;
+  exp?: number;
+  tokenType?: 'Bearer' | 'DPoP';
+  resource?: string;
+}
+
+/**
+ * Client registration accepted by the mock AS. Real deployments manage
+ * clients through a Dynamic Client Registration endpoint (RFC 7591); the
+ * mock accepts the client shape at env construction to keep tests hermetic.
+ */
+export interface ClientRegistration {
+  clientId: string;
+  redirectUris: readonly string[];
+  scopes?: readonly string[];
+  /** Public / confidential distinction. `public` requires PKCE (still). */
+  clientType?: 'public' | 'confidential';
+}
+
+/**
+ * User account preseeded on the mock AS. Every user has a subject id and a
+ * canonical set of scopes the AS is allowed to grant.
+ */
+export interface AuthorizationUser {
+  subject: string;
+  scopes?: readonly string[];
+}
+
+/**
+ * `AuthorizationServer` return shape from `createAuthorizationServer`.
+ * Exposes the RFC 6749 / 9700 / 7662 endpoint surface as plain methods.
+ */
+export interface AuthorizationServer {
+  readonly issuer: string;
+  /** Register an additional client after env construction. */
+  registerClient(client: ClientRegistration): void;
+  /** Register an additional user after env construction. */
+  registerUser(user: AuthorizationUser): void;
+  /** Handle an authorization request. Called by tests as if driving `/authorize`. */
+  authorize(request: AuthorizationRequest, subject: string): AuthorizationResponse;
+  /** Handle a token request. Called by tests as if driving `/token`. */
+  token(request: TokenRequest): TokenResponse;
+  /** Handle a token revocation. Called by tests as if driving `/revoke`. */
+  revoke(token: string, clientId: string): void;
+  /** Introspect a token per RFC 7662. */
+  introspect(token: string): IntrospectionResponse;
+  /**
+   * Snapshot every currently-active access token. Test-only inspection —
+   * production ASes never expose this.
+   */
+  listAccessTokens(): readonly AccessToken[];
+  /** Snapshot every refresh token, including revoked ones. */
+  listRefreshTokens(): readonly RefreshToken[];
+  /** Snapshot the set of jti values the AS has seen. */
+  listSeenJtis(): readonly string[];
+  /** Reset every token, code, and jti registry without disposing the AS. */
+  reset(): void;
+}
+
+/**
+ * Options accepted by `createAuthorizationServer`.
+ */
+export interface AuthorizationServerOptions {
+  issuer?: string;
+  clients?: readonly ClientRegistration[];
+  users?: readonly AuthorizationUser[];
+  /**
+   * Access token lifetime in seconds. Defaults to 3600 (RFC 6749 §5.1
+   * `expires_in` convention). Tests wanting near-expiry paths pass a small
+   * number.
+   */
+  accessTokenLifetimeSec?: number;
+  /**
+   * Refresh token lifetime in seconds. Defaults to 86400.
+   */
+  refreshTokenLifetimeSec?: number;
+  /**
+   * DPoP proof `iat` skew tolerance in seconds. RFC 9449 §4.3 recommends 60
+   * seconds; the mock uses that as default. Callers wanting deterministic
+   * tests can override.
+   */
+  dpopIatSkewSec?: number;
+  /** Deterministic clock. When omitted the mock uses `Date.now()`. */
+  now?: () => number;
+}
+
+/**
+ * Options accepted by `setupOAuth21Env`. Composes the AS options with helpers
+ * for PKCE + DPoP.
+ */
+export interface SetupOAuth21EnvOptions extends AuthorizationServerOptions {}
+
+/**
+ * `setupOAuth21Env` return shape. Exposes the AS plus the standalone helpers
+ * so a test can drive PKCE + DPoP without importing the module leaves.
+ */
+export interface OAuth21TestEnv extends TestEnvBase<'mock'> {
+  readonly server: AuthorizationServer;
+  /**
+   * Generate a fresh PKCE code verifier. Deterministic within a single env
+   * (monotonic counter) so tests reading the verifier get reproducible
+   * output.
+   */
+  generateCodeVerifier(): string;
+  /**
+   * Derive the S256 challenge for a given verifier. Rejects `plain`.
+   */
+  deriveCodeChallenge(verifier: string, method?: PkceChallengeMethod): string;
+  /**
+   * Build a complete `PkceChallenge` (verifier + challenge). Convenience
+   * wrapper.
+   */
+  createPkceChallenge(): PkceChallenge;
+  /**
+   * Mint a DPoP proof for a given HTTP method + URL. Returns the parsed
+   * proof; the client sends `proof.jwt` in the `DPoP` header.
+   */
+  createDpopProof(input: DpopProofInput): DpopProof;
+  /**
+   * Rotate the current refresh token. Convenience wrapper around
+   * `server.token({grantType: 'refresh_token', ...})`.
+   */
+  refreshToken(refreshToken: string, clientId: string, dpop?: DpopProof): TokenResponse;
+  /**
+   * Reset every fabricated PKCE / DPoP artifact and the AS registry. Does
+   * not dispose the env — call `stop` for that.
+   */
+  reset(): void;
+}
