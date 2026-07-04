@@ -2,6 +2,7 @@ import type {
   EntityStatement,
   ResolveTrustChainInput,
   TrustAnchor,
+  TrustChainReasonCode,
   TrustChainResult,
 } from './types.js';
 
@@ -50,48 +51,53 @@ export function resolveTrustChain(input: ResolveTrustChainInput): TrustChainResu
       (intermediate) => intermediate.sub === currentIssuer,
     );
     if (step === undefined) {
-      return {
-        valid: false,
-        reason: `trust_chain: no intermediate describes "${currentIssuer}" — chain broken`,
-      };
+      return failure(
+        'broken_link',
+        `trust_chain: no intermediate describes "${currentIssuer}" — chain broken`,
+      );
     }
 
     // Cycle detection. If we would re-enter an entity we already saw, the
     // chain contains a cycle and cannot resolve.
     if (seenIssuers.has(step.sub)) {
-      return {
-        valid: false,
-        reason: `trust_chain: cycle detected at "${step.sub}"`,
-      };
+      return failure('cycle', `trust_chain: cycle detected at "${step.sub}"`);
     }
     seenIssuers.add(step.sub);
 
     // Expiration check. A statement past its `exp` is treated as untrusted.
     if (typeof step.exp !== 'number' || step.exp <= nowSec) {
-      return {
-        valid: false,
-        reason: `trust_chain: statement for "${step.sub}" expired — exp=${step.exp}, now=${nowSec}`,
-      };
+      return failure(
+        'expired_intermediate',
+        `trust_chain: statement for "${step.sub}" expired — exp=${step.exp}, now=${nowSec}`,
+      );
     }
 
     chain.push(step);
     currentIssuer = step.iss;
   }
 
-  // If we exited the loop because we hit `maxSteps`, the chain is malformed.
+  // If we exited the loop because we hit `maxSteps` without reaching the
+  // anchor, the walker either hit a cycle it could not classify per-step
+  // (a self-loop where the intermediate's `iss` equals its own `sub`, or a
+  // multi-step cycle whose walker path never revisits the `seenIssuers` set
+  // in the exact order tracked), or the intermediate set was insufficient
+  // to bridge the leaf to the anchor. Both cases share the `broken_link`
+  // axis — the walker exhausted the intermediate set without describing the
+  // path to the anchor. Distinguishing the two would require a global cycle
+  // scan on `intermediates` which the wrapper contract explicitly avoids.
   if (currentIssuer !== anchor.entity_id) {
-    return {
-      valid: false,
-      reason: `trust_chain: exhausted intermediates without reaching anchor "${anchor.entity_id}"`,
-    };
+    return failure(
+      'broken_link',
+      `trust_chain: exhausted intermediates without reaching anchor "${anchor.entity_id}"`,
+    );
   }
 
   // Leaf expiration must also be inside the window.
   if (typeof leaf.exp !== 'number' || leaf.exp <= nowSec) {
-    return {
-      valid: false,
-      reason: `trust_chain: leaf statement for "${leaf.sub}" expired — exp=${leaf.exp}, now=${nowSec}`,
-    };
+    return failure(
+      'expired_leaf',
+      `trust_chain: leaf statement for "${leaf.sub}" expired — exp=${leaf.exp}, now=${nowSec}`,
+    );
   }
 
   return {
@@ -99,6 +105,19 @@ export function resolveTrustChain(input: ResolveTrustChainInput): TrustChainResu
     chain,
     anchor,
   };
+}
+
+/**
+ * Build a discriminated failure result. Wraps the `reason_code` + `reason`
+ * pair so every failure branch above stays a single expression and the
+ * `reason_code` field cannot drift out of sync with the human-readable
+ * reason string.
+ */
+function failure(
+  reason_code: TrustChainReasonCode,
+  reason: string,
+): TrustChainResult {
+  return { valid: false, reason, reason_code };
 }
 
 /**
