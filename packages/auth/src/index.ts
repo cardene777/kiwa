@@ -190,3 +190,34 @@ export {
   setupSupabaseAdvancedEnv,
   verifyTotpCode as verifySupabaseTotpCode,
 } from './supabase-advanced/setup-supabase-advanced-env.js';
+
+// WebAuthn L3 protocol adapter surface (v1.21-1a, GH #848).
+export type {
+  AuthenticatorAssertionResponse,
+  AuthenticatorAttestationResponse,
+  AuthenticatorSelectionCriteria,
+  PublicKeyCredentialCreationOptionsInit,
+  PublicKeyCredentialRequestOptionsInit,
+  SetupWebAuthnEnvOptions,
+  VirtualAuthenticator,
+  VirtualAuthenticatorOptions,
+  WebAuthnAttestationConveyancePreference,
+  WebAuthnAuthenticatorAttachment,
+  WebAuthnCredential,
+  WebAuthnResidentKeyRequirement,
+  WebAuthnTestEnv,
+  WebAuthnTransport,
+  WebAuthnUserVerificationRequirement,
+} from './webauthn/types.js';
+export {
+  __resetWebAuthnCounters,
+  base64UrlDecode as base64UrlDecodeWebAuthn,
+  base64UrlEncode as base64UrlEncodeWebAuthn,
+  clientDataHash as webAuthnClientDataHash,
+  createVirtualAuthenticator,
+  credentialAssertion as webAuthnCredentialAssertion,
+  credentialCreation as webAuthnCredentialCreation,
+  mockSignature as webAuthnMockSignature,
+  normalizeChallenge as webAuthnNormalizeChallenge,
+  setupWebAuthnEnv,
+} from './webauthn/index.js';
