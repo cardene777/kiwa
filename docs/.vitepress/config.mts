@@ -137,6 +137,14 @@ export default defineConfig({
             { text: '33 — NATS JetStream (persistent streams + KV + Object store + subject routing)', link: '/tutorials/33-nats-jetstream' },
           ],
         },
+        {
+          text: 'Auth 深化 (v1.21)',
+          items: [
+            { text: '34 — WebAuthn L3 + Passkey (virtual authenticator + attestation + sync fabric)', link: '/tutorials/34-webauthn-passkey' },
+            { text: '35 — OAuth 2.1 provider (PKCE + DPoP + refresh rotation + revocation)', link: '/tutorials/35-oauth21-provider' },
+            { text: '36 — OIDC provider + Federation (Discovery + DCR + id_token + trust chain)', link: '/tutorials/36-oidc-federation' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -153,6 +161,7 @@ export default defineConfig({
             { text: 'Blockchain testing (chain state / EL client / fuzz / reorg SSOT)', link: '/concepts/blockchain-testing' },
             { text: 'Modern web framework testing (Signal reactivity / Islands / edge runtime + RPC type-safety SSOT)', link: '/concepts/modern-web-framework-testing' },
             { text: 'Streaming testing (producer / consumer / exactly-once / DLQ / schema-registry SSOT)', link: '/concepts/streaming-testing' },
+            { text: 'Auth protocol testing (virtual authenticator / PKCE+DPoP / id_token / discovery+federation SSOT)', link: '/concepts/auth-protocol-testing' },
           ],
         },
       ],
@@ -172,6 +181,7 @@ export default defineConfig({
             { text: 'v1.17 → v1.18', link: '/migrations/v1.17-to-v1.18' },
             { text: 'v1.18 → v1.19', link: '/migrations/v1.18-to-v1.19' },
             { text: 'v1.19 → v1.20', link: '/migrations/v1.19-to-v1.20' },
+            { text: 'v1.20 → v1.21', link: '/migrations/v1.20-to-v1.21' },
           ],
         },
       ],
