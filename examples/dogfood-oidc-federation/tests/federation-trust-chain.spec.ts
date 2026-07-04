@@ -29,6 +29,7 @@ import {
 } from '@kiwa-test/auth';
 import {
   assertAnchorMatches,
+  classifyFederationReason,
   describeChain,
   FederationChainError,
   mustResolveTrustChain,
@@ -105,7 +106,7 @@ describe('axis 13 — 3-step chain resolution', () => {
     expect(() => assertAnchorMatches(outcome, anchor)).not.toThrow();
   });
 
-  it('assertAnchorMatches throws when resolved anchor differs from expected anchor', () => {
+  it('assertAnchorMatches throws FederationChainError with axis=anchor_mismatch when resolved anchor differs from expected anchor', () => {
     const leaf = buildLeaf();
     const intermediate = buildIntermediate();
     const anchor = buildAnchor();
@@ -118,8 +119,17 @@ describe('axis 13 — 3-step chain resolution', () => {
     });
     // The resolver was fed the real anchor so it returns `ok:true` with the
     // real anchor. `assertAnchorMatches` compares that against the impostor
-    // reference and throws.
-    expect(() => assertAnchorMatches(outcome, impostor)).toThrow(FederationChainError);
+    // reference and throws with the `anchor_mismatch` axis pinned — this is
+    // the sole live wrapper path that surfaces this axis since the
+    // underlying resolver never emits `reason_code === 'anchor_mismatch'`
+    // (walker exit paths collapse to `broken_link`).
+    try {
+      assertAnchorMatches(outcome, impostor);
+      throw new Error('expected FederationChainError');
+    } catch (err) {
+      expect(err).toBeInstanceOf(FederationChainError);
+      expect((err as FederationChainError).issue.axis).toBe('anchor_mismatch');
+    }
   });
 
   it('mustResolveTrustChain returns chain + anchor for the happy path', () => {
@@ -264,36 +274,18 @@ describe('axis 15 — expired intermediate', () => {
 });
 
 describe('axis 16 — cycle detection', () => {
-  it('intermediate whose sub cycles back to a previously-seen entity refuses', () => {
-    // Build a set where the leaf's iss cycles: leaf.iss = INTERMEDIATE
-    // intermediate.sub = INTERMEDIATE  intermediate.iss = RP_ID  (points back
-    // to the leaf's sub). The walker sees the RP already, detects the cycle,
-    // and refuses.
+  it('two-step cycle A ↔ B triggers the cycle detector (walker path revisits INTERMEDIATE)', () => {
+    // Build a set that forces the walker to actually enter its cycle-detect
+    // branch: leaf.iss = INTERMEDIATE, intermediate A describes INTERMEDIATE
+    // and issues to `other`, intermediate B describes `other` and issues back
+    // to INTERMEDIATE. Walker path — step 1 picks A (sub=INTERMEDIATE),
+    // records INTERMEDIATE in seenIssuers, advances currentIssuer→other;
+    // step 2 picks B (sub=other), records other, advances currentIssuer
+    // →INTERMEDIATE; step 3 picks A again (sub=INTERMEDIATE), seenIssuers
+    // already has INTERMEDIATE, cycle-detect fires. Prior to CAR-432 this
+    // test tolerated `cycle | broken_link` because the substring classifier
+    // could not distinguish the two — reason_code now pins it.
     const leaf = buildLeaf();
-    const cyclingIntermediate = buildIntermediate({ iss: RP_ID });
-    const anchor = buildAnchor();
-    const outcome = resolveTrustChain({
-      leaf,
-      intermediates: [cyclingIntermediate],
-      anchor,
-      now: nowFn,
-    });
-    expect(outcome.ok).toBe(false);
-    if (!outcome.ok) {
-      // The upstream chain walker treats an entity re-appearing in the
-      // sequence as a cycle — it either surfaces as `cycle` (when the
-      // walker reads a duplicate `sub`) or as `broken_link` (when the
-      // walker exhausts intermediates without reaching the anchor). Both
-      // classifications flow through the wrapper's axis discriminator.
-      expect(['cycle', 'broken_link']).toContain(outcome.issue.axis);
-    }
-  });
-
-  it('two-step cycle: intermediates A ↔ B point at each other, walker refuses', () => {
-    const leaf = buildLeaf();
-    // Intermediate A describes INTERMEDIATE and issues to itself via
-    // intermediate B, which describes an intermediate C but issues back to
-    // INTERMEDIATE — a two-step cycle.
     const other = 'https://intermediate-b.example.test';
     const a = buildIntermediate({ iss: other });
     const b = buildIntermediate({ sub: other, iss: INTERMEDIATE_ID });
@@ -306,12 +298,48 @@ describe('axis 16 — cycle detection', () => {
     });
     expect(outcome.ok).toBe(false);
     if (!outcome.ok) {
-      expect(['cycle', 'broken_link']).toContain(outcome.issue.axis);
+      expect(outcome.issue.axis).toBe('cycle');
+      expect(outcome.issue.reason).toMatch(/cycle detected/);
     }
   });
 
-  it('cycle detection terminates without exhausting max steps', () => {
-    // Build a large cycling set and prove the walker refuses in bounded time.
+  it('walker path revisiting an entity fires cycle-detect even with a large intermediate set', () => {
+    // Extended path — same A ↔ B pattern with two extra intermediates
+    // (C, D) that also participate in the cycle. Walker path is
+    // INTERMEDIATE → other → c → d → INTERMEDIATE, and cycle-detect fires on
+    // the fifth step (finding stepA again with seenIssuers already holding
+    // INTERMEDIATE). maxSteps = intermediates.length + 2 = 6 so the walker
+    // has room to complete the loop before the exhaustion guard. Proves the
+    // cycle detector works even when the walker traverses several hops
+    // before revisiting a seen entity.
+    const leaf = buildLeaf();
+    const other = 'https://intermediate-b.example.test';
+    const c = 'https://intermediate-c.example.test';
+    const d = 'https://intermediate-d.example.test';
+    const stepA = buildIntermediate({ iss: other });
+    const stepB = buildIntermediate({ sub: other, iss: c });
+    const stepC = buildIntermediate({ sub: c, iss: d });
+    const stepD = buildIntermediate({ sub: d, iss: INTERMEDIATE_ID });
+    const anchor = buildAnchor();
+    const outcome = resolveTrustChain({
+      leaf,
+      intermediates: [stepA, stepB, stepC, stepD],
+      anchor,
+      now: nowFn,
+    });
+    expect(outcome.ok).toBe(false);
+    if (!outcome.ok) {
+      expect(outcome.issue.axis).toBe('cycle');
+      expect(outcome.issue.reason).toMatch(/cycle detected/);
+    }
+  });
+
+  it('cycle where no intermediate describes the leaf iss surfaces as broken_link (walker never enters cycle)', () => {
+    // Build a 10-node cycle among intermediates none of which describes the
+    // leaf's issuer (INTERMEDIATE). Walker cannot find a step matching
+    // currentIssuer = INTERMEDIATE and returns immediately — the cycle
+    // never fires because the walker never enters the cycle path. This
+    // pins the `broken_link` axis for the "disconnected cycle" case.
     const leaf = buildLeaf();
     const cycles: OidcEntityStatement[] = [];
     for (let i = 0; i < 10; i += 1) {
@@ -329,23 +357,19 @@ describe('axis 16 — cycle detection', () => {
       anchor,
       now: nowFn,
     });
-    // Either broken_link (walker exhausted intermediates trying to find one
-    // matching the leaf's iss) or cycle (walker actually entered a cycle).
-    // Both are acceptable — the important invariant is that resolution
-    // terminates instead of looping forever.
     expect(outcome.ok).toBe(false);
     if (!outcome.ok) {
-      expect(['cycle', 'broken_link']).toContain(outcome.issue.axis);
+      expect(outcome.issue.axis).toBe('broken_link');
     }
   });
 });
 
 describe('federation wrapper — cross-axis integration', () => {
-  it('resolveTrustChain outcome ok=false always carries a classified axis', () => {
-    // Feed the wrapper an entirely mismatched input and prove the outcome
-    // still carries a classifiable axis (never leaks through as `structural`
-    // in the happy paths — the happy paths always hit a specific known
-    // failure mode).
+  it('resolveTrustChain outcome ok=false pins the axis onto the failure mode (empty intermediates → broken_link)', () => {
+    // Feed the wrapper an empty intermediates set and pin the failure axis
+    // to `broken_link` — the walker cannot describe the leaf's issuer so
+    // the resolver refuses immediately. This test formerly used a tolerant
+    // `.not.toBe('structural')` assertion which masked axis drift.
     const leaf = buildLeaf();
     const anchor = buildAnchor();
     const outcome = resolveTrustChain({
@@ -356,8 +380,7 @@ describe('federation wrapper — cross-axis integration', () => {
     });
     expect(outcome.ok).toBe(false);
     if (!outcome.ok) {
-      // Should not fall through to structural on any valid input shape.
-      expect(outcome.issue.axis).not.toBe('structural');
+      expect(outcome.issue.axis).toBe('broken_link');
     }
   });
 
@@ -378,5 +401,24 @@ describe('federation wrapper — cross-axis integration', () => {
       expect(description).toContain(INTERMEDIATE_ID);
       expect(description).toContain(ANCHOR_ID);
     }
+  });
+
+  it('classifyFederationReason forwards every upstream reason_code 1:1', () => {
+    // Pin the 5-way discriminator forwarding contract. Every upstream
+    // `reason_code` must map onto the wrapper's identical-named axis so a
+    // future upstream axis addition surfaces as a TypeScript compile error
+    // instead of a silent `structural` fall-through.
+    expect(classifyFederationReason('broken_link')).toBe('broken_link');
+    expect(classifyFederationReason('cycle')).toBe('cycle');
+    expect(classifyFederationReason('expired_intermediate')).toBe('expired_intermediate');
+    expect(classifyFederationReason('expired_leaf')).toBe('expired_leaf');
+    expect(classifyFederationReason('anchor_mismatch')).toBe('anchor_mismatch');
+  });
+
+  it('classifyFederationReason falls back to structural when reason_code is undefined', () => {
+    // Safety net — an upstream resolver that never populates `reason_code`
+    // (e.g., a hand-rolled `TrustChainResult` from a downstream shim) must
+    // still classify as `structural` so the wrapper contract stays total.
+    expect(classifyFederationReason(undefined)).toBe('structural');
   });
 });

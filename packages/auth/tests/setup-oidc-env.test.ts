@@ -504,9 +504,11 @@ describe('OIDC Federation trust chain (OIDF 1.0 §7)', () => {
     expect(result.chain?.[0]?.sub).toBe('https://leaf.example.test');
     expect(result.chain?.[1]?.sub).toBe('https://intermediate.example.test');
     expect(result.anchor?.entity_id).toBe('https://anchor.example.test');
+    // Happy path — no reason_code.
+    expect(result.reason_code).toBeUndefined();
   });
 
-  it('rejects a chain with a broken intermediate link', () => {
+  it('rejects a chain with a broken intermediate link (reason_code=broken_link)', () => {
     const anchor = createOidcTrustAnchor({ entity_id: 'https://anchor.example.test' });
     const leaf = createOidcEntityStatement({
       iss: 'https://missing-intermediate.example.test',
@@ -515,9 +517,10 @@ describe('OIDC Federation trust chain (OIDF 1.0 §7)', () => {
     const result = resolveOidcTrustChain({ leaf, intermediates: [], anchor });
     expect(result.valid).toBe(false);
     expect(result.reason).toMatch(/no intermediate describes/);
+    expect(result.reason_code).toBe('broken_link');
   });
 
-  it('rejects a chain where an intermediate has expired', () => {
+  it('rejects a chain where an intermediate has expired (reason_code=expired_intermediate)', () => {
     const anchor = createOidcTrustAnchor({ entity_id: 'https://anchor.example.test' });
     const now = () => 1_700_000_000_000;
     const intermediate = createOidcEntityStatement({
@@ -539,9 +542,35 @@ describe('OIDC Federation trust chain (OIDF 1.0 §7)', () => {
     });
     expect(result.valid).toBe(false);
     expect(result.reason).toMatch(/expired/);
+    expect(result.reason_code).toBe('expired_intermediate');
   });
 
-  it('rejects a chain that never reaches the anchor', () => {
+  it('rejects a chain where the leaf has expired (reason_code=expired_leaf)', () => {
+    const anchor = createOidcTrustAnchor({ entity_id: 'https://anchor.example.test' });
+    const now = () => 1_700_000_000_000;
+    const intermediate = createOidcEntityStatement({
+      iss: 'https://anchor.example.test',
+      sub: 'https://intermediate.example.test',
+      now,
+    });
+    const leaf = createOidcEntityStatement({
+      iss: 'https://intermediate.example.test',
+      sub: 'https://leaf.example.test',
+      now,
+      exp: 100, // way in the past
+    });
+    const result = resolveOidcTrustChain({
+      leaf,
+      intermediates: [intermediate],
+      anchor,
+      now,
+    });
+    expect(result.valid).toBe(false);
+    expect(result.reason).toMatch(/leaf statement/);
+    expect(result.reason_code).toBe('expired_leaf');
+  });
+
+  it('rejects a chain that never reaches the anchor (reason_code=broken_link)', () => {
     const anchor = createOidcTrustAnchor({ entity_id: 'https://anchor.example.test' });
     const misdirected = createOidcEntityStatement({
       iss: 'https://other-anchor.example.test',
@@ -560,13 +589,18 @@ describe('OIDC Federation trust chain (OIDF 1.0 §7)', () => {
     // The walker follows the intermediate one step (leaf.iss → misdirected.sub
     // matches), then finds that misdirected.iss ("other-anchor") has no
     // describing statement in the remaining intermediates and refuses.
+    // Both walker exit paths (immediate no-match + exhausted intermediates)
+    // collapse onto `broken_link` — reason_code pins the axis.
     expect(result.reason).toMatch(/no intermediate describes|exhausted intermediates/);
+    expect(result.reason_code).toBe('broken_link');
   });
 
-  it('detects cycles in the chain', () => {
+  it('detects cycles in the chain (reason_code=cycle)', () => {
     const anchor = createOidcTrustAnchor({ entity_id: 'https://anchor.example.test' });
-    // Two intermediates that describe each other — the walker would loop
-    // without cycle detection.
+    // Walker path: leaf.iss = node-a → matches nodeA (sub=node-a, iss=node-b),
+    // records node-a, advances to node-b → matches nodeB (sub=node-b,
+    // iss=node-a), records node-b, advances to node-a → matches nodeA again,
+    // and cycle detect fires because node-a is already in seenIssuers.
     const nodeA = createOidcEntityStatement({
       iss: 'https://node-b.example.test',
       sub: 'https://node-a.example.test',
@@ -585,9 +619,8 @@ describe('OIDC Federation trust chain (OIDF 1.0 §7)', () => {
       anchor,
     });
     expect(result.valid).toBe(false);
-    // Depending on walker order the failure is either "cycle detected" or
-    // "exhausted intermediates" — both are correct terminations.
-    expect(result.reason).toMatch(/cycle detected|exhausted intermediates/);
+    expect(result.reason).toMatch(/cycle detected/);
+    expect(result.reason_code).toBe('cycle');
   });
 });
 

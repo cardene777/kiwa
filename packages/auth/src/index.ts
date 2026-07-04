@@ -324,6 +324,7 @@ export type {
   SetupOidcEnvOptions,
   SignIdTokenInput,
   TrustAnchor,
+  TrustChainReasonCode,
   TrustChainResult,
   VerifyIdTokenOptions,
   VerifyIdTokenResult,

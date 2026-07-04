@@ -5,9 +5,15 @@
  * axes end-to-end. The wrapper does not re-implement chain traversal — the
  * underlying `resolveOidcTrustChain` already walks `iss` → `sub` linkage,
  * checks `exp > now`, and detects cycles. The wrapper adds:
- *   - a structured {@link FederationIssue} discriminator so tests can pin the
- *     failure axis (`broken_link` / `expired_intermediate` / `cycle` /
- *     `anchor_mismatch`) without grepping the underlying reason string;
+ *   - a `FederationIssue` discriminator that forwards the upstream
+ *     `TrustChainReasonCode` tag (`broken_link` / `cycle` /
+ *     `expired_intermediate` / `expired_leaf`) 1:1 to the wrapper's
+ *     `FederationChainAxis` so tests pin the failure axis without grepping
+ *     the underlying reason string (v1.21 follow-up — GH #880 / CAR-432);
+ *   - `anchor_mismatch` axis that only `assertAnchorMatches` constructs
+ *     (walker exit paths inside `@kiwa-test/auth` collapse onto
+ *     `broken_link` when they exhaust intermediates, so this axis lives on
+ *     the wrapper side alone);
  *   - a `mustResolveTrustChain` variant that throws on failure so the RP
  *     bootstrap path can treat the return value as an always-valid chain;
  *   - a `describeChain` helper that renders the chain as a human-readable
@@ -32,6 +38,7 @@ import {
   type OidcEntityStatement,
   type ResolveTrustChainInput,
   type TrustAnchor,
+  type TrustChainReasonCode,
   type TrustChainResult,
 } from '@kiwa-test/auth';
 
@@ -72,33 +79,28 @@ export type FederationResolveOutcome =
   | { ok: false; issue: FederationIssue };
 
 /**
- * Classify a `reason` string from the underlying resolver onto one of the
- * federation fidelity axes. The mock resolver emits reasons that start with
- * `trust_chain:` and mention the failing sub-cause — matching on the sub-cause
- * substring is cheaper and more robust than a full grammar.
+ * Classify a failure result from the underlying resolver onto one of the
+ * federation fidelity axes. Consumes the structured `reason_code`
+ * discriminator emitted by `@kiwa-test/auth`'s `resolveTrustChain` since
+ * v1.21 — the `reason_code` axis tag is upstream SSOT, the wrapper is a
+ * 1:1 forwarder。
+ *
+ * `reason_code` が undefined の場合 (未来の upstream regression or 手動生成の
+ * `TrustChainResult` を受けた場合) の safety net として `structural` を返す。
+ * 通常の resolver は必ず `reason_code` を emit するため実運用では起きない。
+ *
+ * `anchor_mismatch` は underlying resolver からは emit されない (walker が
+ * 到達点の anchor 検査を行うため常に broken_link に集約される)。 wrapper
+ * 上の `anchor_mismatch` axis は `assertAnchorMatches` が別 anchor を
+ * expected として渡された時に別経路で構築される — 詳細は同関数を参照。
  */
-export function classifyFederationReason(reason: string): FederationChainAxis {
-  if (reason.includes('cycle')) {
-    return 'cycle';
+export function classifyFederationReason(
+  reason_code: TrustChainReasonCode | undefined,
+): FederationChainAxis {
+  if (reason_code === undefined) {
+    return 'structural';
   }
-  if (reason.includes('expired')) {
-    // The upstream resolver distinguishes leaf-expiry vs intermediate-expiry
-    // via the phrase "leaf statement" — see resolveTrustChain in @kiwa-test/auth.
-    if (reason.includes('leaf statement')) {
-      return 'expired_leaf';
-    }
-    return 'expired_intermediate';
-  }
-  if (reason.includes('no intermediate describes') || reason.includes('exhausted intermediates')) {
-    return 'broken_link';
-  }
-  if (reason.includes('anchor')) {
-    return 'anchor_mismatch';
-  }
-  // Fallback — a resolver reason that does not match any known sub-cause.
-  // Tests do not assert on this axis directly; it exists so a hypothetical
-  // downstream regression (new reason string) still classifies.
-  return 'structural';
+  return reason_code;
 }
 
 /**
@@ -116,7 +118,7 @@ export function resolveTrustChain(input: ResolveTrustChainInput): FederationReso
   return {
     ok: false,
     issue: {
-      axis: classifyFederationReason(reason),
+      axis: classifyFederationReason(result.reason_code),
       reason,
     },
   };

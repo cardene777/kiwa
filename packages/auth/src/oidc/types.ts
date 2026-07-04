@@ -296,15 +296,42 @@ export interface EntityStatement {
 }
 
 /**
+ * Structured discriminator for `TrustChainResult.reason`. Downstream wrappers
+ * (dogfood-oidc-federation の `classifyFederationReason` 等) が reason string の
+ * substring match で failure axis を判定する fragile 依存を除去するため、
+ * underlying resolver 側で 5 種の failure axis を tag 付けする。
+ *
+ * `broken_link` — chain step が previous step の `iss` を describe しない
+ * (walker が該当 intermediate を見つけられず exhausted、 または cycle 検出前に
+ * exhaust)、 `cycle` — walker が既訪 entity を再訪、
+ * `expired_intermediate` — intermediate statement の `exp <= now`、
+ * `expired_leaf` — leaf statement の `exp <= now`、
+ * `anchor_mismatch` — chain 到達点の `iss` が指定 trust anchor と一致しない。
+ */
+export type TrustChainReasonCode =
+  | 'broken_link'
+  | 'cycle'
+  | 'expired_intermediate'
+  | 'expired_leaf'
+  | 'anchor_mismatch';
+
+/**
  * Trust chain returned by `resolveTrustChain`. The chain is ordered from the
  * leaf (index 0) to the trust anchor (last index). `valid` false always
- * carries a `reason`.
+ * carries a `reason` + `reason_code` — the `reason_code` は failure axis を
+ * pin する structured tag、 `reason` は human-readable diagnostic string。
  */
 export interface TrustChainResult {
   valid: boolean;
   chain?: readonly EntityStatement[];
   anchor?: TrustAnchor;
   reason?: string;
+  /**
+   * Failure axis を pin する structured tag。 `valid === false` の時のみ
+   * 存在する。 wrapper が substring match せず discriminated union として
+   * failure mode を分岐できるようにする (undefined 許容で backward compat)。
+   */
+  reason_code?: TrustChainReasonCode;
 }
 
 /**
