@@ -352,6 +352,51 @@ describe('@kiwa-test/fresh surface', () => {
   });
 });
 
+describe('@kiwa-test/hono surface', () => {
+  it('exports createHonoApp + invokeRoute + createContext + buildRequest + route helpers + brand symbols (v0.1.0, Issue #815)', async () => {
+    const mod = await import('@kiwa-test/hono');
+    expect(typeof mod.createHonoApp).toBe('function');
+    expect(typeof mod.invokeRoute).toBe('function');
+    expect(typeof mod.createContext).toBe('function');
+    expect(typeof mod.buildRequest).toBe('function');
+    expect(typeof mod.compileRoute).toBe('function');
+    expect(typeof mod.matchRoute).toBe('function');
+    expect(typeof mod.isHonoApp).toBe('function');
+    expect(typeof mod.isHonoContext).toBe('function');
+    expect(typeof mod.HONO_APP_SYMBOL).toBe('symbol');
+    expect(typeof mod.HONO_CONTEXT_SYMBOL).toBe('symbol');
+    expect(typeof mod.HONO_ROUTE_SYMBOL).toBe('symbol');
+  });
+
+  it('exports createRpcClient + defineRpcApp + isHcResponse + brand symbols (v0.1.0)', async () => {
+    const mod = await import('@kiwa-test/hono');
+    expect(typeof mod.createRpcClient).toBe('function');
+    expect(typeof mod.defineRpcApp).toBe('function');
+    expect(typeof mod.isHcResponse).toBe('function');
+    expect(typeof mod.HC_CLIENT_SYMBOL).toBe('symbol');
+    expect(typeof mod.HC_REQUEST_SYMBOL).toBe('symbol');
+  });
+
+  it('exports createWorkersEnv + createExecutionContext + KV / D1 / R2 mocks + brand symbols (v0.1.0)', async () => {
+    const mod = await import('@kiwa-test/hono');
+    expect(typeof mod.createWorkersEnv).toBe('function');
+    expect(typeof mod.createExecutionContext).toBe('function');
+    expect(typeof mod.mockKVNamespace).toBe('function');
+    expect(typeof mod.mockD1Database).toBe('function');
+    expect(typeof mod.mockR2Bucket).toBe('function');
+    expect(typeof mod.isWorkersEnv).toBe('function');
+    expect(typeof mod.isExecutionContextMock).toBe('function');
+    expect(typeof mod.isKVNamespaceMock).toBe('function');
+    expect(typeof mod.isD1DatabaseMock).toBe('function');
+    expect(typeof mod.isR2BucketMock).toBe('function');
+    expect(typeof mod.WORKERS_ENV_SYMBOL).toBe('symbol');
+    expect(typeof mod.EXECUTION_CTX_SYMBOL).toBe('symbol');
+    expect(typeof mod.KV_NAMESPACE_SYMBOL).toBe('symbol');
+    expect(typeof mod.D1_DATABASE_SYMBOL).toBe('symbol');
+    expect(typeof mod.R2_BUCKET_SYMBOL).toBe('symbol');
+  });
+});
+
 describe('cross-package consistency', () => {
   it('spec → api: ApiTestEnv mode is one of the TestMode values from spec', async () => {
     const apiMod = await import('@kiwa-test/api');
