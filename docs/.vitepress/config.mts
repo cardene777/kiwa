@@ -121,6 +121,14 @@ export default defineConfig({
             { text: '27 — dApp e2e reorg (snapshot + revert + refetch across 4 scenarios)', link: '/tutorials/27-dapp-e2e-reorg' },
           ],
         },
+        {
+          text: 'Framework 深化 (v1.19)',
+          items: [
+            { text: '28 — SolidJS Signal + Effect + Resource + Suspense (fine-grained reactivity)', link: '/tutorials/28-solidjs-signal-app' },
+            { text: '29 — Fresh Islands + Route Handler + Head normalize (Deno partial hydration)', link: '/tutorials/29-fresh-islands' },
+            { text: '30 — HonoJS + hc RPC type-safe client + Workers env (KV / D1 / R2)', link: '/tutorials/30-hono-workers-rpc' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -135,6 +143,7 @@ export default defineConfig({
             { text: 'Component testing (story + CT + visual diff SSOT)', link: '/concepts/component-testing' },
             { text: 'Observability v2 testing (dashboard + alert + trace + correlation SSOT)', link: '/concepts/observability-v2-testing' },
             { text: 'Blockchain testing (chain state / EL client / fuzz / reorg SSOT)', link: '/concepts/blockchain-testing' },
+            { text: 'Modern web framework testing (Signal reactivity / Islands / edge runtime + RPC type-safety SSOT)', link: '/concepts/modern-web-framework-testing' },
           ],
         },
       ],
@@ -152,6 +161,7 @@ export default defineConfig({
             { text: 'v1.15 → v1.16', link: '/migrations/v1.15-to-v1.16' },
             { text: 'v1.16 → v1.17', link: '/migrations/v1.16-to-v1.17' },
             { text: 'v1.17 → v1.18', link: '/migrations/v1.17-to-v1.18' },
+            { text: 'v1.18 → v1.19', link: '/migrations/v1.18-to-v1.19' },
           ],
         },
       ],
