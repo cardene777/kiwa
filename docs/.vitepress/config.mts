@@ -129,6 +129,14 @@ export default defineConfig({
             { text: '30 — HonoJS + hc RPC type-safe client + Workers env (KV / D1 / R2)', link: '/tutorials/30-hono-workers-rpc' },
           ],
         },
+        {
+          text: 'Streaming 深化 (v1.20)',
+          items: [
+            { text: '31 — Kafka event pipeline (producer + consumer group + exactly-once + DLQ)', link: '/tutorials/31-kafka-event-pipeline' },
+            { text: '32 — Redpanda + schema registry (Avro schemas + evolution + compatibility)', link: '/tutorials/32-redpanda-schema-registry' },
+            { text: '33 — NATS JetStream (persistent streams + KV + Object store + subject routing)', link: '/tutorials/33-nats-jetstream' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -144,6 +152,7 @@ export default defineConfig({
             { text: 'Observability v2 testing (dashboard + alert + trace + correlation SSOT)', link: '/concepts/observability-v2-testing' },
             { text: 'Blockchain testing (chain state / EL client / fuzz / reorg SSOT)', link: '/concepts/blockchain-testing' },
             { text: 'Modern web framework testing (Signal reactivity / Islands / edge runtime + RPC type-safety SSOT)', link: '/concepts/modern-web-framework-testing' },
+            { text: 'Streaming testing (producer / consumer / exactly-once / DLQ / schema-registry SSOT)', link: '/concepts/streaming-testing' },
           ],
         },
       ],
@@ -162,6 +171,7 @@ export default defineConfig({
             { text: 'v1.16 → v1.17', link: '/migrations/v1.16-to-v1.17' },
             { text: 'v1.17 → v1.18', link: '/migrations/v1.17-to-v1.18' },
             { text: 'v1.18 → v1.19', link: '/migrations/v1.18-to-v1.19' },
+            { text: 'v1.19 → v1.20', link: '/migrations/v1.19-to-v1.20' },
           ],
         },
       ],
