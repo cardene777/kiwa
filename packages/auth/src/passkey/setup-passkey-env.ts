@@ -19,6 +19,7 @@ import {
   requireFabric,
   syncCredentials as syncPure,
 } from './credential-sync.js';
+import { __resetCaBLESessionCounter } from './caBLE/qr-code.js';
 import { createPlatformAuthenticator } from './platform.js';
 import { createRoamingAuthenticator } from './roaming.js';
 import { createSyncFabric } from './sync-fabric.js';
@@ -41,6 +42,7 @@ import type {
 export function __resetPasskeyCounters(): void {
   __resetAuthenticatorCounter();
   __resetCredentialCounter();
+  __resetCaBLESessionCounter();
 }
 
 /**
