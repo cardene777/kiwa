@@ -221,3 +221,34 @@ export {
   normalizeChallenge as webAuthnNormalizeChallenge,
   setupWebAuthnEnv,
 } from './webauthn/index.js';
+
+// Passkey adapter surface (v1.21-1b, GH #849). Layered on top of the WebAuthn
+// L3 primitives — adds device grouping, platform / roaming authenticator
+// specialization, and sync fabric semantics (iCloud Keychain / Google
+// Password Manager backup + restore).
+export type {
+  PasskeyCredential,
+  PasskeyTestEnv,
+  PlatformAuthenticator,
+  PlatformAuthenticatorOptions,
+  PlatformBiometricModality,
+  RoamingAuthenticator,
+  RoamingAuthenticatorKind,
+  RoamingAuthenticatorOptions,
+  SetupPasskeyEnvDeviceOptions,
+  SetupPasskeyEnvOptions,
+  SyncFabric,
+  SyncFabricVendor,
+} from './passkey/types.js';
+export {
+  __resetPasskeyCounters,
+  backupCredential as backupPasskeyCredential,
+  createPlatformAuthenticator,
+  createRoamingAuthenticator,
+  createSyncFabric,
+  findFabricHolding as findPasskeyFabricHolding,
+  requireFabric as requirePasskeyFabric,
+  restoreCredential as restorePasskeyCredential,
+  setupPasskeyEnv,
+  syncCredentials as syncPasskeyCredentials,
+} from './passkey/index.js';
