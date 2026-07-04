@@ -76,16 +76,28 @@ const DEFAULT_REALM = 'kiwa';
 export const KEYCLOAK_IMAGE = 'quay.io/keycloak/keycloak:26.0';
 
 /**
- * Handle to a running Keycloak instance. `baseUrl` points at the realm's
+ * Handle to a running Keycloak instance. `issuer` points at the realm's
  * OIDC issuer (e.g. `http://127.0.0.1:PORT/realms/kiwa`). `stop()` releases
  * the container when the adapter is done. Consumers must invoke `stop()` in
  * an `afterAll` block to avoid leaked containers.
+ *
+ * `baseUrl` + `adminUsername` + `adminPassword` are exposed for callers that
+ * drive the Keycloak admin REST API directly (e.g. the v1.22-5 JWKS rotation
+ * real e2e harness manipulates realm key components through `/admin/realms/{realm}/components`).
+ * The fidelity adapter never uses these — they exist to support the e2e
+ * rotation surface without a second boot path.
  */
 export interface KeycloakHandle {
   /** Base issuer URL (e.g. `http://127.0.0.1:8080/realms/kiwa`). */
   readonly issuer: string;
   /** Realm name (default `kiwa`). */
   readonly realm: string;
+  /** Container base URL without the realm suffix (e.g. `http://127.0.0.1:8080`). */
+  readonly baseUrl: string;
+  /** Admin username (master realm) — needed for admin REST API. */
+  readonly adminUsername: string;
+  /** Admin password (master realm) — needed for admin REST API. */
+  readonly adminPassword: string;
   /** Free the container. Idempotent. */
   stop(): Promise<void>;
 }
@@ -349,6 +361,9 @@ export async function startKeycloakContainer(
   return {
     issuer,
     realm,
+    baseUrl,
+    adminUsername,
+    adminPassword,
     stop: async () => {
       await started.stop();
     },
@@ -368,7 +383,7 @@ interface EnsureRealmOptions {
  * boots of the same container reuse the existing realm.
  */
 async function ensureRealm(options: EnsureRealmOptions): Promise<void> {
-  const token = await obtainAdminToken(options);
+  const token = await obtainKeycloakAdminToken(options);
   const response = await fetch(`${options.baseUrl}/admin/realms`, {
     method: 'POST',
     headers: {
@@ -392,16 +407,24 @@ async function ensureRealm(options: EnsureRealmOptions): Promise<void> {
 }
 
 /**
- * Obtain an admin bearer token through the `master` realm's password
- * grant. Used to provision the target realm on first boot.
+ * Obtain an admin bearer token bound to the `master` realm through the
+ * `admin-cli` client's password grant. The token is realm-agnostic (bound
+ * to the master realm regardless of which realm the caller wants to
+ * mutate), so any object carrying `baseUrl` + admin credentials suffices.
+ * Used to provision the target realm on first boot + as the SSOT for
+ * admin ops driven by v1.22-5 JWKS rotation e2e helpers. Exported so
+ * external callers (e.g. the e2e spec's kid ↔ component correlation
+ * lookup) can reuse the same handshake without duplicating the fetch shape.
  */
-async function obtainAdminToken(options: EnsureRealmOptions): Promise<string> {
-  const url = `${options.baseUrl}/realms/master/protocol/openid-connect/token`;
+export async function obtainKeycloakAdminToken(
+  handle: { baseUrl: string; adminUsername: string; adminPassword: string },
+): Promise<string> {
+  const url = `${handle.baseUrl}/realms/master/protocol/openid-connect/token`;
   const body = new URLSearchParams({
     grant_type: 'password',
     client_id: 'admin-cli',
-    username: options.adminUsername,
-    password: options.adminPassword,
+    username: handle.adminUsername,
+    password: handle.adminPassword,
   });
   const response = await fetch(url, {
     method: 'POST',
@@ -421,6 +444,307 @@ async function obtainAdminToken(options: EnsureRealmOptions): Promise<string> {
     );
   }
   return parsed.access_token;
+}
+
+/**
+ * v1.22-5 JWKS rotation e2e surface.
+ *
+ * Keycloak's key rotation lives on the admin REST API (`/admin/realms/{realm}/components`).
+ * Each realm carries one or more key providers; `rsa-generated` providers own an
+ * RS256 signing key + emit them into `/protocol/openid-connect/certs`. The active
+ * signing key is the enabled provider with the highest `priority` config value.
+ *
+ * The helpers below drive that surface so the v1.22-5 real e2e harness can:
+ *
+ *   - list the current realm key components (introspection)
+ *   - create a fresh `rsa-generated` component with a higher priority (rotate:
+ *     old provider stays enabled, so its key remains in `/certs` — this is
+ *     Keycloak's built-in retention window)
+ *   - delete a realm key component (simulate past retention: the provider's key
+ *     drops out of `/certs`)
+ *   - obtain an id_token via password grant (Keycloak signs with the active key)
+ *
+ * These helpers are intentionally NOT wired into the `OIDCOPAdapter` interface —
+ * the sync interface stays parity with the mock (see § Real driver coverage
+ * matrix in `docs/quality-reports/auth/oidc-federation.md`). The rotation e2e
+ * harness invokes them directly against a live {@link KeycloakHandle}.
+ */
+
+/**
+ * Shape of a Keycloak realm key component as returned by the admin REST API
+ * `/admin/realms/{realm}/components` endpoint. Keycloak's response is a
+ * superset — the fields captured here are the ones the rotation e2e harness
+ * asserts on.
+ */
+export interface KeycloakRealmKeyComponent {
+  readonly id: string;
+  readonly name: string;
+  readonly providerId: string;
+  readonly providerType: string;
+  readonly config: Record<string, readonly string[]>;
+}
+
+/**
+ * List every `KeyProvider` component on the realm. Returns them sorted by
+ * their `priority` config in descending order so the caller can treat the
+ * first item as the current active provider (Keycloak selects the highest-
+ * priority enabled provider as the active signer).
+ */
+export async function listKeycloakRealmKeyComponents(
+  handle: KeycloakHandle,
+): Promise<readonly KeycloakRealmKeyComponent[]> {
+  const token = await obtainKeycloakAdminToken(handle);
+  const url = `${handle.baseUrl}/admin/realms/${handle.realm}/components?type=org.keycloak.keys.KeyProvider`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(
+      `${KIWA_OIDC_ENV_MISSING}: keycloak list key components failed ${response.status}: ${text}`,
+    );
+  }
+  const rows = (await response.json()) as readonly KeycloakRealmKeyComponent[];
+  const withPriority = rows.map((row) => ({
+    row,
+    priority: Number(row.config?.['priority']?.[0] ?? '0'),
+  }));
+  withPriority.sort((a, b) => b.priority - a.priority);
+  return withPriority.map((entry) => entry.row);
+}
+
+/**
+ * Create a fresh `rsa-generated` realm key component with a priority higher
+ * than every existing component. Keycloak treats the highest-priority
+ * enabled provider as the active signer — this call performs the rotation
+ * without disabling the previous provider so its key stays in `/certs`
+ * (Keycloak's built-in retention window).
+ *
+ * Returns the newly-created component so the caller can capture the
+ * component id (for eventual deletion when simulating past retention).
+ */
+export async function createKeycloakRealmKeyComponent(
+  handle: KeycloakHandle,
+  options: { name?: string; priority?: number } = {},
+): Promise<KeycloakRealmKeyComponent> {
+  const existing = await listKeycloakRealmKeyComponents(handle);
+  const maxPriority = existing.reduce((max, component) => {
+    const value = Number(component.config?.['priority']?.[0] ?? '0');
+    return value > max ? value : max;
+  }, 0);
+  const priority = options.priority ?? maxPriority + 100;
+  const name = options.name ?? `kiwa-e2e-rotate-${Date.now()}-${priority}`;
+
+  const token = await obtainKeycloakAdminToken(handle);
+  const url = `${handle.baseUrl}/admin/realms/${handle.realm}/components`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name,
+      providerId: 'rsa-generated',
+      providerType: 'org.keycloak.keys.KeyProvider',
+      config: {
+        priority: [String(priority)],
+        enabled: ['true'],
+        active: ['true'],
+        algorithm: ['RS256'],
+        keySize: ['2048'],
+      },
+    }),
+  });
+  if (response.status !== 201) {
+    const text = await response.text();
+    throw new Error(
+      `${KIWA_OIDC_ENV_MISSING}: keycloak create key component failed ${response.status}: ${text}`,
+    );
+  }
+  // Keycloak's Location header carries the new component id.
+  const location = response.headers.get('location');
+  const id = location?.split('/').pop() ?? '';
+  if (!id) {
+    throw new Error(
+      `${KIWA_OIDC_ENV_MISSING}: keycloak create key component response missing Location header`,
+    );
+  }
+  // Re-list so the caller receives the fully-populated shape (Keycloak's
+  // POST response body is empty; the config/kid gets minted server-side).
+  const refreshed = await listKeycloakRealmKeyComponents(handle);
+  const created = refreshed.find((component) => component.id === id);
+  if (!created) {
+    throw new Error(
+      `${KIWA_OIDC_ENV_MISSING}: keycloak created key component ${id} missing from re-list`,
+    );
+  }
+  return created;
+}
+
+/**
+ * Delete a realm key component through the admin REST API. Removes the
+ * provider (and its key) from `/certs` — used to simulate rotation past
+ * the retention window (axes 4b / 4c drop-boundary tests).
+ */
+export async function deleteKeycloakRealmKeyComponent(
+  handle: KeycloakHandle,
+  componentId: string,
+): Promise<void> {
+  const token = await obtainKeycloakAdminToken(handle);
+  const url = `${handle.baseUrl}/admin/realms/${handle.realm}/components/${componentId}`;
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (response.status !== 204 && response.status !== 404) {
+    const text = await response.text();
+    throw new Error(
+      `${KIWA_OIDC_ENV_MISSING}: keycloak delete key component ${componentId} failed ${response.status}: ${text}`,
+    );
+  }
+}
+
+/**
+ * Options for {@link ensureKeycloakConfidentialClient}. The rotation e2e
+ * harness needs a confidential client + a user to mint id_tokens through
+ * the resource-owner password credentials grant (RFC 6749 §4.3). The grant
+ * is deprecated in OAuth 2.1 for production use, but Keycloak still
+ * supports it under `directAccessGrantsEnabled`, and it is the cleanest
+ * path to obtain an id_token in a fully headless test.
+ */
+export interface EnsureKeycloakClientOptions {
+  readonly clientId: string;
+  readonly clientSecret: string;
+  readonly username: string;
+  readonly password: string;
+  readonly email?: string;
+}
+
+/**
+ * Provision a confidential client + user pair on the realm. Idempotent —
+ * repeated calls with the same options are a no-op (409 responses from
+ * Keycloak are treated as success). Returns nothing; callers subsequently
+ * invoke {@link mintIdTokenFromKeycloak} to obtain an id_token.
+ */
+export async function ensureKeycloakConfidentialClient(
+  handle: KeycloakHandle,
+  options: EnsureKeycloakClientOptions,
+): Promise<void> {
+  const token = await obtainKeycloakAdminToken(handle);
+  // Create the client. If it already exists (409), Keycloak returns a
+  // conflict response which we treat as idempotent success.
+  const clientResponse = await fetch(
+    `${handle.baseUrl}/admin/realms/${handle.realm}/clients`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        clientId: options.clientId,
+        secret: options.clientSecret,
+        directAccessGrantsEnabled: true,
+        publicClient: false,
+        serviceAccountsEnabled: false,
+        // Standard flow is enabled by default; leaving it on so a follow-up
+        // code-flow test can reuse the same client.
+        standardFlowEnabled: true,
+        // Force `client_secret_basic` — matches the mock's default DCR
+        // auth method (see fidelity axis 5).
+        clientAuthenticatorType: 'client-secret',
+      }),
+    },
+  );
+  if (clientResponse.status !== 201 && clientResponse.status !== 409) {
+    const text = await clientResponse.text();
+    throw new Error(
+      `${KIWA_OIDC_ENV_MISSING}: keycloak client provision failed ${clientResponse.status}: ${text}`,
+    );
+  }
+
+  // Create the user with a permanent password. Same 409-as-success rule
+  // for idempotent reboots. `requiredActions: []` explicitly clears any
+  // profile-completion flags Keycloak adds by default (e.g. "Verify
+  // Profile") — without this, the password grant refuses with
+  // `Account is not fully set up`. `firstName` / `lastName` satisfy
+  // Keycloak's default user profile schema so realm attribute validation
+  // does not require an interactive completion round-trip.
+  const userResponse = await fetch(
+    `${handle.baseUrl}/admin/realms/${handle.realm}/users`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: options.username,
+        enabled: true,
+        emailVerified: true,
+        email: options.email ?? `${options.username}@kiwa.example.test`,
+        firstName: options.username,
+        lastName: 'kiwa-e2e',
+        requiredActions: [],
+        credentials: [
+          {
+            type: 'password',
+            value: options.password,
+            temporary: false,
+          },
+        ],
+      }),
+    },
+  );
+  if (userResponse.status !== 201 && userResponse.status !== 409) {
+    const text = await userResponse.text();
+    throw new Error(
+      `${KIWA_OIDC_ENV_MISSING}: keycloak user provision failed ${userResponse.status}: ${text}`,
+    );
+  }
+}
+
+/**
+ * Mint an id_token from Keycloak via the resource-owner password credentials
+ * grant. Returns the raw id_token JWT + the access_token so callers can
+ * decode / verify. Fails hard on any non-200 response so the axes trip
+ * with a diagnosable message instead of a silent `undefined`.
+ */
+export async function mintIdTokenFromKeycloak(
+  handle: KeycloakHandle,
+  options: EnsureKeycloakClientOptions & { scope?: string },
+): Promise<{ id_token: string; access_token: string }> {
+  const url = `${handle.issuer}/protocol/openid-connect/token`;
+  const body = new URLSearchParams({
+    grant_type: 'password',
+    client_id: options.clientId,
+    client_secret: options.clientSecret,
+    username: options.username,
+    password: options.password,
+    scope: options.scope ?? 'openid',
+  });
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(
+      `${KIWA_OIDC_ENV_MISSING}: keycloak password grant failed ${response.status}: ${text}`,
+    );
+  }
+  const parsed = (await response.json()) as {
+    id_token?: string;
+    access_token?: string;
+  };
+  if (!parsed.id_token || !parsed.access_token) {
+    throw new Error(
+      `${KIWA_OIDC_ENV_MISSING}: keycloak password grant response missing id_token/access_token`,
+    );
+  }
+  return { id_token: parsed.id_token, access_token: parsed.access_token };
 }
 
 /**
