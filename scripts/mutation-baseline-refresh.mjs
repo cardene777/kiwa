@@ -25,12 +25,20 @@ const REPO_ROOT = process.env.KIWA_BASELINE_ROOT
   : SCRIPT_ROOT;
 
 /**
- * v1.27-2 scope: 9 core-layer + 11 framework-layer packages.
+ * v1.27-2 + v1.27-3 scope: 33 packages across four tiers.
+ *
+ * v1.27-2 landed 9 core + 11 framework baselines. v1.27-3 extends to the
+ * remaining 13 packages: 3 test-type packages (a11y / visual / component) +
+ * 10 SaaS adapters (auth / queue / cache / orm / payment / streaming /
+ * search / mcp / agent / realtime). The remaining `ai-llm` slot is deferred
+ * to v1.27-4 where release gate integration lands.
+ *
  * Tier + threshold values are read from the pre-existing baseline stub
  * (`.mutation-baseline/<pkg>.json`) so this writer never diverges from
  * `docs/quality/mutation-thresholds.md`.
  */
 const PACKAGES = {
+  // v1.27-2 scope (kept for `--all` refresh + backward compat).
   '@kiwa-test/core': 'packages/core',
   '@kiwa-test/dapp': 'packages/dapp',
   '@kiwa-test/api': 'packages/api',
@@ -51,6 +59,21 @@ const PACKAGES = {
   '@kiwa-test/solidjs': 'packages/solidjs',
   '@kiwa-test/fresh': 'packages/fresh',
   '@kiwa-test/hono': 'packages/hono',
+  // v1.27-3 scope: test-type layer (3 packages).
+  '@kiwa-test/a11y': 'packages/a11y',
+  '@kiwa-test/visual': 'packages/visual',
+  '@kiwa-test/component': 'packages/component',
+  // v1.27-3 scope: SaaS layer (10 packages).
+  '@kiwa-test/auth': 'packages/auth',
+  '@kiwa-test/queue': 'packages/queue',
+  '@kiwa-test/cache': 'packages/cache',
+  '@kiwa-test/orm': 'packages/orm',
+  '@kiwa-test/payment': 'packages/payment',
+  '@kiwa-test/streaming': 'packages/streaming',
+  '@kiwa-test/search': 'packages/search',
+  '@kiwa-test/mcp': 'packages/mcp',
+  '@kiwa-test/agent': 'packages/agent',
+  '@kiwa-test/realtime': 'packages/realtime',
 };
 
 /**

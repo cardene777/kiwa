@@ -6,12 +6,1633 @@
     "low": 50,
     "break": 40
   },
-  "killRate": null,
-  "killed": null,
-  "survived": null,
-  "timeout": null,
-  "error": null,
-  "mutants": [],
-  "capturedAt": "2026-07-05T17:47:38Z",
-  "note": "Initial baseline stub; kill-rate is null until first `pnpm test:mutation` PR run."
+  "killRate": 67.22,
+  "totalMsi": 67.22,
+  "coveredMsi": 67.78,
+  "killed": 482,
+  "survived": 231,
+  "timeout": 4,
+  "noCoverage": 66,
+  "error": 0,
+  "mutants": [
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 21,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 22,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 41,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 74,
+      "column": 25,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 75,
+      "column": 94,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 75,
+      "column": 36,
+      "mutator": "OptionalChaining",
+      "replacement": "options.name"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 76,
+      "column": 33,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 74,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 80,
+      "column": 60,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 93,
+      "column": 14,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 93,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 94,
+      "column": 15,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 95,
+      "column": 23,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 95,
+      "column": 91,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 98,
+      "column": 22,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 100,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 129,
+      "column": 33,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 148,
+      "column": 12,
+      "mutator": "MethodExpression",
+      "replacement": "node.children.map(c => c.text ?? '').join('')"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 149,
+      "column": 14,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 150,
+      "column": 15,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 147,
+      "column": 16,
+      "mutator": "MethodExpression",
+      "replacement": "node.text"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 160,
+      "column": 14,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 158,
+      "column": 14,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 162,
+      "column": 14,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 163,
+      "column": 14,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 164,
+      "column": 14,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 165,
+      "column": 14,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 167,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "case 'input':"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 167,
+      "column": 23,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 168,
+      "column": 26,
+      "mutator": "LogicalOperator",
+      "replacement": "node.attrs['type'] && 'text'"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 168,
+      "column": 37,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 169,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 169,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 171,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 171,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 173,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 173,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 173,
+      "column": 17,
+      "mutator": "LogicalOperator",
+      "replacement": "type === 'submit' && type === 'button'"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 173,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 173,
+      "column": 38,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 173,
+      "column": 47,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 177,
+      "column": 14,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 179,
+      "column": 14,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 181,
+      "column": 14,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 183,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "default:"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 203,
+      "column": 41,
+      "mutator": "Regex",
+      "replacement": "/\\s/"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 203,
+      "column": 19,
+      "mutator": "MethodExpression",
+      "replacement": "selector"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 207,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 207,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 207,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "candidates.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 207,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "candidates.length <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 211,
+      "column": 31,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 211,
+      "column": 31,
+      "mutator": "EqualityOperator",
+      "replacement": "candidates.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 211,
+      "column": 31,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 211,
+      "column": 31,
+      "mutator": "EqualityOperator",
+      "replacement": "candidates.length <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 207,
+      "column": 44,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 232,
+      "column": 33,
+      "mutator": "Regex",
+      "replacement": "/\\[([a-zA-Z0-9_-]+)(=(\\\"[^\\\"]*\\\"|'[^']*'|[^\\]]+))?\\]/"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 232,
+      "column": 33,
+      "mutator": "Regex",
+      "replacement": "/^\\[([a-zA-Z0-9_-]+)(=(\\\"[\\\"]*\\\"|'[^']*'|[^\\]]+))?\\]/"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 232,
+      "column": 33,
+      "mutator": "Regex",
+      "replacement": "/^\\[([a-zA-Z0-9_-]+)(=(\\\"[^\\\"]*\\\"|'[^']*'|[^\\]]+))\\]/"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 232,
+      "column": 33,
+      "mutator": "Regex",
+      "replacement": "/^\\[([a-zA-Z0-9_-]+)(=(\\\"[^\\\"]\\\"|'[^']*'|[^\\]]+))?\\]/"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 232,
+      "column": 33,
+      "mutator": "Regex",
+      "replacement": "/^\\[([a-zA-Z0-9_-]+)(=(\\\"[^\\\"]*\\\"|'[^']'|[^\\]]+))?\\]/"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 232,
+      "column": 33,
+      "mutator": "Regex",
+      "replacement": "/^\\[([a-zA-Z0-9_-]+)(=(\\\"[^\\\"]*\\\"|'[']*'|[^\\]]+))?\\]/"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 236,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 241,
+      "column": 46,
+      "mutator": "Regex",
+      "replacement": "/[\"']|[\"']$/g"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 241,
+      "column": 46,
+      "mutator": "Regex",
+      "replacement": "/^[\"']|[\"']/g"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 248,
+      "column": 32,
+      "mutator": "Regex",
+      "replacement": "/\\.([a-zA-Z0-9_-]+)/"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 250,
+      "column": 33,
+      "mutator": "MethodExpression",
+      "replacement": "(node.attrs['class'] ?? '').split(/\\s+/)"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 250,
+      "column": 67,
+      "mutator": "Regex",
+      "replacement": "/\\s/"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 250,
+      "column": 57,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 256,
+      "column": 31,
+      "mutator": "Regex",
+      "replacement": "/#([a-zA-Z0-9_-]+)/"
+    },
+    {
+      "file": ".vitest-dist/src/dom.js",
+      "line": 257,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 10,
+      "column": 15,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 12,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 29,
+      "column": 57,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 29,
+      "column": 48,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 29,
+      "column": 39,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 31,
+      "column": 39,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 37,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 38,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 40,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 40,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 41,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 41,
+      "column": 34,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 42,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 42,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 46,
+      "column": 16,
+      "mutator": "LogicalOperator",
+      "replacement": "args.value && ''"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 46,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 59,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 60,
+      "column": 16,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 59,
+      "column": 37,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 60,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 60,
+      "column": 39,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 63,
+      "column": 16,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 63,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 73,
+      "column": 44,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 73,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 73,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 73,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "field.type === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 74,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 74,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 74,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "field.required === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 74,
+      "column": 48,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 77,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 75,
+      "column": 20,
+      "mutator": "LogicalOperator",
+      "replacement": "field.value && ''"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 75,
+      "column": 35,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 85,
+      "column": 16,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 86,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 87,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 89,
+      "column": 35,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 98,
+      "column": 17,
+      "mutator": "OptionalChaining",
+      "replacement": "args.onSubmit(Object.fromEntries(fieldValues))"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 116,
+      "column": 33,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 117,
+      "column": 16,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 117,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 117,
+      "column": 49,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 119,
+      "column": 36,
+      "mutator": "OptionalChaining",
+      "replacement": "args.onClose()"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 122,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 124,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 127,
+      "column": 32,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 130,
+      "column": 32,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 131,
+      "column": 16,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 131,
+      "column": 22,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 131,
+      "column": 44,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 134,
+      "column": 34,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 134,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 135,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 135,
+      "column": 16,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 140,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 141,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 144,
+      "column": 15,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 145,
+      "column": 49,
+      "mutator": "OptionalChaining",
+      "replacement": "args.onClose()"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 158,
+      "column": 37,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 162,
+      "column": 32,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 163,
+      "column": 16,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 166,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 163,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 167,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 167,
+      "column": 16,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 174,
+      "column": 20,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 174,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 62,
+      "column": 49,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 62,
+      "column": 49,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 62,
+      "column": 49,
+      "mutator": "EqualityOperator",
+      "replacement": "name === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 62,
+      "column": 70,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 66,
+      "column": 49,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 66,
+      "column": 49,
+      "mutator": "EqualityOperator",
+      "replacement": "name === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 66,
+      "column": 49,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 71,
+      "column": 63,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 71,
+      "column": 63,
+      "mutator": "EqualityOperator",
+      "replacement": "name === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 71,
+      "column": 63,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 75,
+      "column": 57,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 75,
+      "column": 57,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 75,
+      "column": 57,
+      "mutator": "EqualityOperator",
+      "replacement": "name === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 77,
+      "column": 58,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 77,
+      "column": 58,
+      "mutator": "EqualityOperator",
+      "replacement": "name === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 77,
+      "column": 58,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 84,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 97,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 102,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/playwright-ct.js",
+      "line": 102,
+      "column": 12,
+      "mutator": "MethodExpression",
+      "replacement": "parts.join('')"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 11,
+      "column": 22,
+      "mutator": "Regex",
+      "replacement": "/[^a-z0-9]/g"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 12,
+      "column": 32,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 29,
+      "column": 25,
+      "mutator": "LogicalOperator",
+      "replacement": "meta.parameters && {}"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 30,
+      "column": 25,
+      "mutator": "LogicalOperator",
+      "replacement": "story.parameters && {}"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 31,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 31,
+      "column": 25,
+      "mutator": "LogicalOperator",
+      "replacement": "meta.parameters?.chromatic && story.parameters?.chromatic"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 39,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 39,
+      "column": 25,
+      "mutator": "LogicalOperator",
+      "replacement": "meta.parameters?.a11y && story.parameters?.a11y"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 39,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 40,
+      "column": 27,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 42,
+      "column": 37,
+      "mutator": "LogicalOperator",
+      "replacement": "meta.parameters?.a11y && {}"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 43,
+      "column": 37,
+      "mutator": "OptionalChaining",
+      "replacement": "story.parameters.a11y"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 79,
+      "column": 53,
+      "mutator": "LogicalOperator",
+      "replacement": "args && {}"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 79,
+      "column": 32,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 90,
+      "column": 49,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 100,
+      "column": 37,
+      "mutator": "MethodExpression",
+      "replacement": "steps.some(s => s.ok)"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 111,
+      "column": 73,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 124,
+      "column": 24,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 125,
+      "column": 45,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 127,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 130,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 131,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 132,
+      "column": 24,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 132,
+      "column": 25,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 132,
+      "column": 35,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 132,
+      "column": 36,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 132,
+      "column": 53,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 136,
+      "column": 42,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 148,
+      "column": 33,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 149,
+      "column": 22,
+      "mutator": "LogicalOperator",
+      "replacement": "input.attrs['type'] && 'text'"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 149,
+      "column": 34,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "(type === 'hidden' || type === 'submit') && type === 'button'"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "type === 'hidden' && type === 'submit'"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 22,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "type !== 'hidden'"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 34,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 55,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 34,
+      "mutator": "EqualityOperator",
+      "replacement": "type !== 'submit'"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 43,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 55,
+      "mutator": "EqualityOperator",
+      "replacement": "type !== 'button'"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 150,
+      "column": 64,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 152,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 152,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "!input.attrs['aria-label'] || !input.attrs['aria-labelledby']"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 152,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 152,
+      "column": 13,
+      "mutator": "BooleanLiteral",
+      "replacement": "input.attrs['aria-label']"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 152,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 152,
+      "column": 43,
+      "mutator": "BooleanLiteral",
+      "replacement": "input.attrs['aria-labelledby']"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 152,
+      "column": 56,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 163,
+      "column": 34,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 164,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 166,
+      "column": 18,
+      "mutator": "MethodExpression",
+      "replacement": "collectText(node)"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 167,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 164,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 171,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 176,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 171,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 180,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 183,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 182,
+      "column": 44,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/storybook.js",
+      "line": 183,
+      "column": 12,
+      "mutator": "EqualityOperator",
+      "replacement": "labels.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/chromatic.js",
+      "line": 12,
+      "column": 34,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/chromatic.js",
+      "line": 37,
+      "column": 35,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/chromatic.js",
+      "line": 39,
+      "column": 30,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/chromatic.js",
+      "line": 38,
+      "column": 34,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/chromatic.js",
+      "line": 51,
+      "column": 29,
+      "mutator": "LogicalOperator",
+      "replacement": "input.now && nowFn()"
+    },
+    {
+      "file": ".vitest-dist/src/chromatic.js",
+      "line": 88,
+      "column": 31,
+      "mutator": "OptionalChaining",
+      "replacement": "input.entry.parameters.chromatic?.viewports.length"
+    },
+    {
+      "file": ".vitest-dist/src/chromatic.js",
+      "line": 91,
+      "column": 25,
+      "mutator": "LogicalOperator",
+      "replacement": "input.now && nowFn()"
+    },
+    {
+      "file": ".vitest-dist/src/chromatic.js",
+      "line": 105,
+      "column": 29,
+      "mutator": "LogicalOperator",
+      "replacement": "input.reviewedAt && nowFn()"
+    }
+  ],
+  "capturedAt": "2026-07-05T12:00:19Z",
+  "note": "Total MSI 67.22% / Covered MSI 67.78% (threshold high=60 / low=50 / break=40)."
 }

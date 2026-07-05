@@ -41,10 +41,10 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-test/auth` | Framework | 70 / 60 / 50 | Adapter wraps NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth — SSR + RSC + provider drift. |
 | `@kiwa-test/ai-llm` | SaaS | 65 / 55 / 50 | Anthropic / OpenAI / Vercel AI SDK / LangChain — provider API surfaces evolve rapidly. |
 | `@kiwa-test/payment` | SaaS | 65 / 55 / 50 | Stripe / Paddle / Lemon Squeezy — webhook shape + billing semantics drift. |
-| `@kiwa-test/queue` | SaaS | 65 / 55 / 50 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ — provider transport + semantics drift. |
-| `@kiwa-test/cache` | SaaS | 65 / 55 / 50 | Redis / KeyDB / Memcached — client library + protocol drift. |
+| `@kiwa-test/queue` | SaaS | 65 / 55 / 50 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ — provider transport + semantics drift. v1.27-3 baseline mutates `sandbox-queue.js` only; `testcontainers-queue.js` is excluded because its assertions only fire against live containers (0 covered mutants under the unit suite). |
+| `@kiwa-test/cache` | SaaS | 65 / 55 / 50 | Redis / KeyDB / Memcached — client library + protocol drift. v1.27-3 baseline mutates `in-memory-cache.js` only; `testcontainers-cache.js` is excluded for the same reason as queue. |
 | `@kiwa-test/streaming` | SaaS | 65 / 55 / 50 | Kafka / NATS / Redpanda with DLQ + exactly-once semantics. |
-| `@kiwa-test/realtime` | SaaS | 65 / 55 / 50 | Supabase Realtime / Ably / Pusher / Socket.io — WebSocket API drift. |
+| `@kiwa-test/realtime` | SaaS | 65 / 55 / 50 | Supabase Realtime / Ably / Pusher / Socket.io — WebSocket API drift. v1.27-3 baseline mutates `engine.js` / `fidelity.js` / `ably.js` only; `pusher.js` + `socketio.js` require a live provider socket to exercise, and `report.js` is a thin adapter over `@kiwa-test/quality-metrics` (mutation-tested there). |
 | `@kiwa-test/mcp` | SaaS | 65 / 55 / 50 | MCP JSON-RPC protocol + transport drift. |
 | `@kiwa-test/agent` | SaaS | 65 / 55 / 50 | LangGraph + OpenAI Assistants v2 — graph + polling semantics drift. |
 | `@kiwa-test/search` | SaaS | 65 / 55 / 50 | Algolia / Meilisearch / Typesense — index + query fidelity drift. |

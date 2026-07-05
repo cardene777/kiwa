@@ -1,8 +1,11 @@
 /**
  * Mutation testing config for @kiwa-test/cache.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — cache adapter targets
- * in-memory + testcontainers backends (KeyDB / Memcached) with provider-
- * specific mock + real API differences.
+ * the in-memory backend. testcontainers-cache.js is excluded because its
+ * assertions only fire when a live KeyDB / Memcached container is running,
+ * which the mutation run does not spin up (the file scored 0 % / 0 covered
+ * mutants in the v1.27-3 baseline sweep). Testcontainers coverage is handled
+ * by the container fixture suite in @kiwa-test/dapp-integration, not here.
  * SSOT: docs/quality/mutation-thresholds.md § SaaS tier.
  */
 export default {
@@ -13,7 +16,6 @@ export default {
   vitest: { configFile: 'vitest.stryker.config.mjs' },
   mutate: [
     '.vitest-dist/src/in-memory-cache.js',
-    '.vitest-dist/src/testcontainers-cache.js',
   ],
   thresholds: { high: 65, low: 55, break: 50 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],

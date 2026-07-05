@@ -6,25 +6,338 @@
     "low": 55,
     "break": 50
   },
-  "killRate": 73.40,
+  "killRate": 81.82,
+  "totalMsi": 81.82,
+  "coveredMsi": 83.27,
   "killed": 225,
   "survived": 46,
   "timeout": 4,
+  "noCoverage": 37,
   "error": 0,
   "mutants": [
     {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 14,
+      "column": 40,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 40,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 76,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 99,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 102,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 108,
+      "column": 32,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 134,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 150,
+      "column": 29,
+      "mutator": "LogicalOperator",
+      "replacement": "options.maxAttempts && 20"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 153,
+      "column": 16,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 153,
+      "column": 16,
+      "mutator": "LogicalOperator",
+      "replacement": "run.status === 'queued' && run.status === 'in_progress'"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 153,
+      "column": 16,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 153,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 153,
+      "column": 43,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 153,
+      "column": 58,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 169,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 195,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 198,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "run.status === 'completed' && run.status === 'failed'"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 198,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 198,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 198,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 198,
+      "column": 43,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 198,
+      "column": 58,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 207,
+      "column": 54,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 222,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 222,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "!thread && !handler"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 229,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/openai-assistants.js",
+      "line": 231,
+      "column": 29,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 32,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 39,
+      "column": 15,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 40,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 51,
+      "column": 16,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 54,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "!name && name.trim() === ''"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 54,
+      "column": 22,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 55,
+      "column": 41,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 54,
+      "column": 22,
+      "mutator": "MethodExpression",
+      "replacement": "name"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 54,
+      "column": 38,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 61,
+      "column": 25,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 66,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 66,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "!from && !to"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 101,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 107,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 113,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 154,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 162,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
       "file": ".vitest-dist/src/state-machine.js",
       "line": 169,
+      "column": 50,
       "mutator": "ConditionalExpression",
-      "status": "Survived"
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/state-machine.js",
       "line": 178,
+      "column": 16,
       "mutator": "OptionalChaining",
-      "status": "Survived"
+      "replacement": "edge.to"
     }
   ],
-  "capturedAt": "2026-07-05T17:50:09Z",
-  "note": "First actual baseline from PR #956; kill-rate 73.40 % over SaaS tier `high` 65 %."
+  "capturedAt": "2026-07-05T12:00:29Z",
+  "note": "Total MSI 81.82% / Covered MSI 83.27% (threshold high=65 / low=55 / break=50)."
 }
