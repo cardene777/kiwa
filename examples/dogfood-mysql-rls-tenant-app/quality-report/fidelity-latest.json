@@ -1,0 +1,35 @@
+{
+  "provider": "@kiwa-test/orm/mysql-rls-dogfood",
+  "version": "0.1.0",
+  "reportedAt": "2026-07-05T07:34:22.814Z",
+  "coverage": {
+    "line": 92,
+    "branch": 88,
+    "function": 95
+  },
+  "testCount": {
+    "behavior": 24,
+    "integration": 6,
+    "e2e": 5,
+    "total": 35
+  },
+  "fidelity": {
+    "mockCoveredMethods": 5,
+    "realTotalMethods": 5,
+    "ratio": 100,
+    "behavioralDivergences": 5
+  },
+  "perf": {
+    "p50Ms": 0.04145900000000324,
+    "p95Ms": 0.8879579999999976,
+    "p99Ms": 0.8879579999999976,
+    "samples": 2
+  },
+  "mutation": {
+    "mutations": 30,
+    "killed": 22,
+    "survived": 8,
+    "killRate": 73.33333333333333
+  },
+  "notes": "Observed 5 divergences across 5 ops:\n- driveTenantInjection: BEHAVIORAL_DIVERGENCE\n- driveCrossTenantRefuse: BEHAVIORAL_DIVERGENCE\n- driveBypassAudit: BEHAVIORAL_DIVERGENCE\n- driveAuditIntegrity: BEHAVIORAL_DIVERGENCE\n- emitFidelity: BEHAVIORAL_DIVERGENCE"
+}
