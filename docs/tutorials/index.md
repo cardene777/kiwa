@@ -54,6 +54,8 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 42 | [Cloudflare Workers Durable Object (realtime chat + Hibernation + storage)](./42-cloudflare-durable-object) | Node.js / vitest | 15 min |
 | 43 | [Vercel Edge streaming (Next.js 15 middleware + geo routing + SSE backpressure)](./43-vercel-edge-streaming) | Node.js / vitest | 15 min |
 | 44 | [Deno Deploy geo (Deno KV + read-your-writes + Cron trigger)](./44-deno-deploy-geo) | Node.js / vitest | 15 min |
+| 45 | [Perf-harness baseline (p95 baseline + regression detection walkthrough)](./45-perf-harness-baseline) | Node.js / vitest | 15 min |
+| 46 | [Perf baseline migration (3 package → 33 package transfer methodology)](./46-perf-baseline-migration) | Node.js / vitest | 15 min |
 
 ## AI-LLM tutorials (v1.12)
 
@@ -98,3 +100,7 @@ Tutorials 39 – 41 exercise the v0.3 additions to [`@kiwa-test/payment`](https:
 ## Edge/Serverless 深化 tutorials (v1.24)
 
 Tutorials 42 – 44 exercise the v0.2 additions to [`@kiwa-test/edge`](https://github.com/cardene777/kiwa/blob/main/packages/edge/README.md) — 8 axes of advanced edge semantics (Durable Object / WebSocket edge / edge KV / geo-replicated / Cron trigger / subrequest limit / CPU time limit / streaming Response) — one for each of the 3 target platforms Cloudflare Workers (realtime chat via Durable Objects + Hibernation API + storage transactional + WebSocket edge broadcast), Vercel Edge (Next.js 15 middleware + geo routing + edge KV cache invalidation + SSE streaming with backpressure), and Deno Deploy (Fresh + multi-region Deno KV write + read-your-writes consistency + Deno Deploy Cron + queue trigger). See [`docs/concepts/edge-runtime-testing.md`](../concepts/edge-runtime-testing) for the 8-axis SSOT + platform-specific fidelity surface reference across all 3 v1.24 dogfood edge apps.
+
+## Perf-harness sweep tutorials (v1.25)
+
+Tutorials 45 – 46 exercise the v0.2 rollout of [`@kiwa-test/perf-harness`](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/README.md) — the p50 / p95 / p99 measurement + baseline persistence + regression detection primitives from v1.13-1 now applied to every kiwa package (33 total). Tutorial 45 walks the primitive stack (`measure` + `saveBaseline` + `loadBaseline` + `detectRegression` + `evaluatePerfGate`) against a trivial pure function so the numbers are easy to reason about; tutorial 46 documents the 6-step migration recipe used across the v1.25-1 through v1.25-4 sub-milestones to add a perf suite to any new package in under 15 minutes. See [`docs/concepts/perf-testing-ssot.md`](../concepts/perf-testing-ssot) for the p50 / p95 / p99 SSOT + 3-layer harness rules (3 warmup + 100 iteration + 20 % threshold) + the 33 package coverage grid across core / framework adapter / test type / SaaS layer.
