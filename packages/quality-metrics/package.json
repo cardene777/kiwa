@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/quality-metrics",
-  "version": "0.2.0",
-  "description": "Quality metrics harness for kiwa — unified 11-axis score (coverage / test count / fidelity / perf p95 / mutation kill + AI-LLM cost / latency / token / accuracy) with release gate SSOT and per-provider report emit. Feeds provider fidelity from v1.11 dogfood app suite and v1.12 AI-LLM harness.",
+  "version": "0.3.0",
+  "description": "Quality metrics harness for kiwa — unified 12-axis score (coverage / test count / fidelity / perf p95 / mutation kill / mutation tier + AI-LLM cost / latency / token / accuracy) with release gate SSOT, tier-aware mutation gate (Core 80 / Framework 70 / SaaS 65 / Test type 60), and per-provider report emit. v0.3 adds `DEFAULT_MUTATION_TIER_THRESHOLDS` + `resolveMutationTier` + `assertMutationTier` + `MutationTier` type + `ReleaseGateContext` type on top of v0.2. Feeds provider fidelity from v1.11 dogfood app suite and v1.12 AI-LLM harness.",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -14,7 +14,13 @@
     "coverage",
     "fidelity",
     "mutation",
+    "mutation-testing",
+    "mutation-tier",
+    "kill-rate",
+    "stryker",
     "release-gate",
+    "12-axis-release-gate",
+    "tier-aware",
     "quality-harness",
     "testing"
   ],
