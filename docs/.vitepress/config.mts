@@ -198,6 +198,12 @@ export default defineConfig({
             { text: '54 — HTTP/3 multiplex (stream priority + HPACK + 0-RTT walkthrough)', link: '/tutorials/54-http3-multiplex' },
           ],
         },
+        {
+          text: 'Release invariants (v1.29)',
+          items: [
+            { text: '55 — Release script filter SSOT (systematic root cause pattern walkthrough)', link: '/tutorials/55-release-script-filter-ssot' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -222,6 +228,7 @@ export default defineConfig({
             { text: 'Db advanced testing SSOT (8 axis — replication / CDC / logical replication / MVCC / RLS / connection pool / partitioning / vector store)', link: '/concepts/db-advanced-testing' },
             { text: 'Mutation testing SSOT (kill rate + 4-tier threshold + baseline persistence + 12-axis release gate)', link: '/concepts/mutation-testing-ssot' },
             { text: 'WebRTC / WebTransport / HTTP/3 testing (8-axis SSOT + P2P vs SFU + ICE trickle vs half-trickle + WebTransport vs WebSocket)', link: '/concepts/webrtc-webtransport-testing' },
+            { text: 'Release invariants (3-invariant SSOT — release script filter symmetry + provenance flag absence + gate script package coverage)', link: '/concepts/release-invariants' },
           ],
         },
       ],
@@ -249,6 +256,7 @@ export default defineConfig({
             { text: 'v1.25 → v1.26', link: '/migrations/v1.25-to-v1.26' },
             { text: 'v1.26 → v1.27', link: '/migrations/v1.26-to-v1.27' },
             { text: 'v1.27 → v1.28', link: '/migrations/v1.27-to-v1.28' },
+            { text: 'v1.28 → v1.29', link: '/migrations/v1.28-to-v1.29' },
           ],
         },
       ],
