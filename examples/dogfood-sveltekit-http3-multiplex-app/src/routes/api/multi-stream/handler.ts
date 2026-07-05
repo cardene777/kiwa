@@ -152,12 +152,21 @@ export function validateMultiStreamRequest(
         kind,
         connectionId: b['connectionId'] as string,
       };
-      if (
-        typeof b['priority'] === 'number' &&
-        b['priority'] >= 0 &&
-        b['priority'] <= 255
-      ) {
-        value.priority = b['priority'];
+      // F4 (Issue #981) — open-stream must reject a non-integer / NaN
+      // priority the same way concurrent-send does so the two paths stay in
+      // sync. A caller that omits priority still gets the mock default (128).
+      const priority = b['priority'];
+      if (priority !== undefined) {
+        if (
+          typeof priority !== 'number' ||
+          !Number.isFinite(priority) ||
+          !Number.isInteger(priority) ||
+          priority < 0 ||
+          priority > 255
+        ) {
+          return { ok: false, errorKind: 'invalid_priority' };
+        }
+        value.priority = priority;
       }
       if (
         typeof b['direction'] === 'string' &&
@@ -177,17 +186,31 @@ export function validateMultiStreamRequest(
           return { ok: false, errorKind: 'invalid_stream_entry' };
         }
         const it = item as Record<string, unknown>;
+        // F4 (Issue #981) — HTTP/3 stream priority is an 8-bit urgency field
+        // (RFC 9218 §4 + nginx-quic default), so accepting `-1`, `999`, or
+        // `NaN` here would let a malformed client sneak an out-of-range
+        // priority into the scheduler. Reject anything that is not a finite
+        // integer in [0, 255] on the same errorKind the missing / non-number
+        // cases already use so the fidelity harness sees one rejection axis.
+        const priority = it['priority'];
         if (
-          typeof it['priority'] !== 'number' ||
-          typeof it['byteLength'] !== 'number' ||
-          it['byteLength'] < 0
+          typeof priority !== 'number' ||
+          !Number.isFinite(priority) ||
+          !Number.isInteger(priority) ||
+          priority < 0 ||
+          priority > 255
         ) {
           return { ok: false, errorKind: 'invalid_stream_entry' };
         }
-        streams.push({
-          priority: it['priority'] as number,
-          byteLength: it['byteLength'] as number,
-        });
+        const byteLength = it['byteLength'];
+        if (
+          typeof byteLength !== 'number' ||
+          !Number.isFinite(byteLength) ||
+          byteLength < 0
+        ) {
+          return { ok: false, errorKind: 'invalid_stream_entry' };
+        }
+        streams.push({ priority, byteLength });
       }
       return {
         ok: true,

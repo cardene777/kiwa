@@ -120,6 +120,53 @@ describe('mock adapter — 0-RTT resumption + anti-replay', () => {
     expect(rejected).toHaveLength(1);
     expect(rejected[0]?.errorKind).toBe('connection_not_found');
   });
+
+  it('axis 6 (Issue #981 F3): 0-RTT tickets are origin-bound so cross-origin resumption cold-starts', async () => {
+    // TLS 1.3 §4.6.1 + §8 bind the resumption ticket to the origin that
+    // issued it, so a second connection to a DIFFERENT origin must cold-start
+    // even if the caller opted in to 0-RTT. The previous mock reused the
+    // ticket the moment connectionSeq > 1, which would let cross-origin early
+    // data land on the wrong server — a serious protocol invariant break.
+    const firstA = await mock.openConnection({
+      connectionId: 'origin-a-1',
+      url: 'https://origin-a.example/h3',
+      zeroRtt: true,
+      earlyDataBytes: 2048,
+    });
+    // Even with zeroRtt: true, the first connection to origin-a has no prior
+    // ticket so it cold-starts.
+    expect(firstA.zeroRttUsed).toBe(false);
+    expect(firstA.earlyDataAccepted).toBe(0);
+
+    // A second connection to a DIFFERENT origin must not reuse origin-a's
+    // ticket — the fix is guarded by a per-origin ticket Set.
+    const firstB = await mock.openConnection({
+      connectionId: 'origin-b-1',
+      url: 'https://origin-b.example/h3',
+      zeroRtt: true,
+      earlyDataBytes: 2048,
+    });
+    expect(firstB.zeroRttUsed).toBe(false);
+    expect(firstB.earlyDataAccepted).toBe(0);
+
+    // A second connection to origin-a (which now has a ticket) MUST reuse it.
+    // This proves the fix does not over-tighten — same-origin resumption still
+    // works exactly as before.
+    const secondA = await mock.openConnection({
+      connectionId: 'origin-a-2',
+      url: 'https://origin-a.example/h3',
+      zeroRtt: true,
+      earlyDataBytes: 4096,
+    });
+    expect(secondA.zeroRttUsed).toBe(true);
+    expect(secondA.earlyDataAccepted).toBe(4096);
+
+    const metrics = mock.metrics();
+    // Only one accepted 0-RTT resumption (secondA); firstA + firstB both cold-
+    // started so the counter must be 1, not 3.
+    expect(metrics.zeroRttUses).toBe(1);
+    expect(metrics.zeroRttEarlyDataAccepted).toBe(4096);
+  });
 });
 
 describe('/api/0-rtt — resume handler', () => {

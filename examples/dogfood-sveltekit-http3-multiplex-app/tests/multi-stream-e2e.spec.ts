@@ -175,6 +175,47 @@ describe('mock adapter — multi-stream + priority scheduling', () => {
     expect(rejected).toHaveLength(1);
     expect(rejected[0]?.errorKind).toBe('connection_not_found');
   });
+
+  it('axis 8 (Issue #981 F1): closeStream releases the stream so re-write / re-read fail with stream_not_found', async () => {
+    // HTTP/3 emits FIN + releases the stream on close (RFC 9114 §4.1). The
+    // adapter must forget the stream id so a subsequent write / read on the
+    // same id lands on stream_not_found — otherwise a caller could buffer
+    // bytes into a phantom stream that the peer never observes.
+    await mock.openConnection({
+      connectionId: 'c-fin',
+      url: 'https://origin.example/h3',
+    });
+    const stream = await mock.openStream({ connectionId: 'c-fin' });
+    await mock.closeStream({
+      connectionId: 'c-fin',
+      streamId: stream.streamId,
+    });
+
+    await expect(
+      mock.writeStream({
+        connectionId: 'c-fin',
+        streamId: stream.streamId,
+        data: encoder.encode('after-fin'),
+      }),
+    ).rejects.toThrow(/stream.*not.*(open|found)|stream_not_found/);
+
+    await expect(
+      mock.readStream({
+        connectionId: 'c-fin',
+        streamId: stream.streamId,
+      }),
+    ).rejects.toThrow(/stream.*not.*(open|found)|stream_not_found/);
+
+    const traces = mock.traces();
+    const writeFail = traces.find(
+      (t) => t.op === 'writeStream' && !t.ok && t.errorKind === 'stream_not_found',
+    );
+    const readFail = traces.find(
+      (t) => t.op === 'readStream' && !t.ok && t.errorKind === 'stream_not_found',
+    );
+    expect(writeFail).toBeDefined();
+    expect(readFail).toBeDefined();
+  });
 });
 
 describe('/api/multi-stream — handler routing', () => {
@@ -258,6 +299,52 @@ describe('/api/multi-stream — handler routing', () => {
     expect(res.streamIds).toHaveLength(2);
     expect(res.drainOrder).toHaveLength(2);
     expect(res.totalBytes).toBe(300);
+  });
+
+  it('Issue #981 F4: rejects out-of-range priority on concurrent-send with invalid_stream_entry', () => {
+    // RFC 9218 §4 caps stream priority urgency at 8 bits (0..255) and nginx-quic
+    // rejects anything outside that range. The handler must catch `-1`, `999`,
+    // and `NaN` at the validation boundary so a malformed payload never reaches
+    // the scheduler. Otherwise the mock happily records a priority that no
+    // nginx-quic peer would agree to, silently drifting the fidelity harness.
+    const cases: unknown[] = [-1, 999, Number.NaN, 3.14, Number.POSITIVE_INFINITY];
+    for (const badPriority of cases) {
+      const res = validateMultiStreamRequest({
+        connectionId: 'c-1',
+        kind: 'concurrent-send',
+        streams: [{ priority: badPriority, byteLength: 4 }],
+      });
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.errorKind).toBe('invalid_stream_entry');
+      }
+    }
+
+    // Boundary values 0 and 255 must still validate — the fix must not
+    // over-tighten the accepted range.
+    const okLow = validateMultiStreamRequest({
+      connectionId: 'c-1',
+      kind: 'concurrent-send',
+      streams: [{ priority: 0, byteLength: 4 }],
+    });
+    expect(okLow.ok).toBe(true);
+    const okHigh = validateMultiStreamRequest({
+      connectionId: 'c-1',
+      kind: 'concurrent-send',
+      streams: [{ priority: 255, byteLength: 4 }],
+    });
+    expect(okHigh.ok).toBe(true);
+
+    // open-stream mirrors the same rule so the two paths stay aligned.
+    const badOpen = validateMultiStreamRequest({
+      connectionId: 'c-1',
+      kind: 'open-stream',
+      priority: -5,
+    });
+    expect(badOpen.ok).toBe(false);
+    if (!badOpen.ok) {
+      expect(badOpen.errorKind).toBe('invalid_priority');
+    }
   });
 });
 
