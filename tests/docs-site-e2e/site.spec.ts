@@ -249,6 +249,18 @@ const V1_28_PAGES = [
   { path: '/migrations/v1.27-to-v1.28', title: 'v1.27 → v1.28' },
 ];
 
+// v1.29 pages — new tutorial 55 + concept doc + migration guide added under
+// the release script filter systematic root cause SSOT milestone (Issue
+// #988). Same skip-if-dist-missing pattern as the canonical suite above so
+// the tests pass on a fresh clone without a full docs build. Each page
+// asserts an anchor phrase that a rendered VitePress build will always
+// include in <main>.
+const V1_29_PAGES = [
+  { path: '/tutorials/55-release-script-filter-ssot', title: 'Release script filter SSOT' },
+  { path: '/concepts/release-invariants', title: 'Release invariants SSOT' },
+  { path: '/migrations/v1.28-to-v1.29', title: 'v1.28 → v1.29' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -470,6 +482,20 @@ test.describe('docs site — v1.27 pages render', () => {
 test.describe('docs site — v1.28 pages render', () => {
   for (const p of V1_28_PAGES) {
     test(`v1.28 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.29 pages render', () => {
+  for (const p of V1_29_PAGES) {
+    test(`v1.29 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
