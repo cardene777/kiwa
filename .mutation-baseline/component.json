@@ -1,0 +1,17 @@
+{
+  "package": "@kiwa-test/component",
+  "tier": "Test type",
+  "thresholds": {
+    "high": 60,
+    "low": 50,
+    "break": 40
+  },
+  "killRate": null,
+  "killed": null,
+  "survived": null,
+  "timeout": null,
+  "error": null,
+  "mutants": [],
+  "capturedAt": "2026-07-05T17:47:38Z",
+  "note": "Initial baseline stub; kill-rate is null until first `pnpm test:mutation` PR run."
+}

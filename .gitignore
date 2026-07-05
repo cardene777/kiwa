@@ -14,6 +14,8 @@ test-results/
 *.log
 coverage/
 .perf-baseline/
+.stryker-tmp/
+mutation-report/
 .DS_Store
 examples/*/cache/
 examples/*/forge-out/build-info/

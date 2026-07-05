@@ -1,0 +1,17 @@
+{
+  "package": "@kiwa-test/astro",
+  "tier": "Framework",
+  "thresholds": {
+    "high": 70,
+    "low": 60,
+    "break": 50
+  },
+  "killRate": null,
+  "killed": null,
+  "survived": null,
+  "timeout": null,
+  "error": null,
+  "mutants": [],
+  "capturedAt": "2026-07-05T17:47:38Z",
+  "note": "Initial baseline stub; kill-rate is null until first `pnpm test:mutation` PR run."
+}
