@@ -48,6 +48,24 @@ This doc pins **every** perf threshold in kiwa to one of three grounded rational
 | `dogfood-socketio-notification` | `deliverNotification` | 30 ms | Nielsen "instant" |
 | `dogfood-socketio-notification` | `getPending` | 30 ms | Nielsen "instant" |
 | `dogfood-socketio-notification` | `simulateReconnect` | 100 ms | reconnect ceremony (disconnect + queue drain + reconnect) |
+| `@kiwa-test/core` | `parseSpec` | 5 ms | mock-invariant (linear scan over meta lines + one table walk) |
+| `@kiwa-test/core` | `createPool` (size 4) | 5 ms | mock-invariant (Promise.all fan-out over 4 acquires + one borrow/release) |
+| `@kiwa-test/dapp` | `eventEmitterEmit` | 5 ms | mock-invariant (node:events dispatch + listener count) |
+| `@kiwa-test/dapp` | `anvilKeyLookup` | 5 ms | mock-invariant (readonly array indexing) |
+| `@kiwa-test/api` | `requestClientGet` | 5 ms | mock-invariant (url join + Response snapshot with stub fetcher) |
+| `@kiwa-test/api` | `requestClientPost` | 5 ms | mock-invariant (adds JSON.stringify encode over the GET path) |
+| `@kiwa-test/ui` | `setupComponentEnvSnapshot` | 30 ms | jsdom mount + React render + innerHTML capture — the lightest UI test path |
+| `@kiwa-test/ui` | `setupComponentEnvRender` | 30 ms | same jsdom + React mount cost baseline as snapshot |
+| `@kiwa-test/data` | `queueSend` | 5 ms | mock-invariant (dedup Set lookup + array push + consumer notify) |
+| `@kiwa-test/data` | `fakeClockAdvance` | 5 ms | mock-invariant (walk 2-entry cron table + fire due callbacks) |
+| `@kiwa-test/cli-test` | `writeFile` | 20 ms | fs write syscall + relative path resolution over an isolated tempdir |
+| `@kiwa-test/cli-test` | `readFile` | 10 ms | fs read syscall over an isolated tempdir |
+| `@kiwa-test/observability` | `collectRunHistory` | 5 ms | O(N) walk + per-test cap map over 200 records |
+| `@kiwa-test/observability` | `detectFlaky` | 5 ms | O(N) aggregation over 200 records |
+| `@kiwa-test/observability` | `checkThresholds` | 5 ms | mock-invariant (fixed 4-metric compare) |
+| `@kiwa-test/observability` | `renderDashboard` | 5 ms | markdown string concat over a 200-record summary |
+| `@kiwa-test/e2e` | `fetchOverLoopback` | 20 ms | node http server dispatch + fetch-handler adapter over loopback (no network) |
+| `@kiwa-test/cli` | `runSpecToTest` | 20 ms | md read + parseSpec + template render + file write |
 
 ## Regression detection defaults
 
