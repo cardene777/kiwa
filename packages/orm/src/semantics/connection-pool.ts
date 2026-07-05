@@ -154,6 +154,11 @@ export function idleTimeout(
   session: PoolSession,
   input: { clientId: string; at: number },
 ): AxisStep<PoolState> {
+  if (session.state === 'cancelled' || session.state === 'evicted') {
+    throw new Error(
+      `idleTimeout: pool session is ${session.state} (terminal), cannot evict from terminal state`,
+    );
+  }
   const handle = session.active.get(input.clientId);
   if (!handle) {
     throw new Error(`idleTimeout: unknown client id ${input.clientId}`);
@@ -189,6 +194,11 @@ export function statementTimeout(
   session: PoolSession,
   input: { clientId: string; elapsedMs: number },
 ): AxisStep<PoolState> {
+  if (session.state === 'cancelled' || session.state === 'evicted') {
+    throw new Error(
+      `statementTimeout: pool session is ${session.state} (terminal), cannot cancel from terminal state`,
+    );
+  }
   const handle = session.active.get(input.clientId);
   if (!handle) {
     throw new Error(

@@ -177,4 +177,21 @@ describe('replication axis — 3 provider × 3 backend', () => {
       'replication.promoted',
     ]);
   });
+
+  it('symmetric regression [finding 11]: markReplicaLagged refuses when session is promoted (post-fix symmetric with primaryWrite guard)', () => {
+    const session = createReplicationSession({
+      primaryId: 'p1',
+      provider: 'drizzle',
+      backend: 'postgres',
+      replicaIds: ['r1', 'r2'],
+    });
+    primaryWrite(session, { bytes: 100 });
+    startFailover(session, { reason: 'crash' });
+    promoteReplica(session, { replicaId: 'r1' });
+    expect(session.state).toBe('promoted');
+    expect(() =>
+      markReplicaLagged(session, { replicaId: 'r2', appliedLsn: 50 }),
+    ).toThrow(/promoted/);
+    expect(session.state).toBe('promoted');
+  });
 });

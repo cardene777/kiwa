@@ -145,4 +145,46 @@ describe('connection-pool axis — 3 provider × 3 backend', () => {
     expect(step.state).toBe('in-use');
     expect(session.active.has('c2')).toBe(true);
   });
+
+  it('symmetric regression [finding 9]: idleTimeout refuses when pool is cancelled/evicted (post-fix symmetric with acquire guard)', () => {
+    const cancelledSession = createPoolSession(opts('drizzle', 'postgres'));
+    acquire(cancelledSession, { clientId: 'c1', at: 0 });
+    acquire(cancelledSession, { clientId: 'c2', at: 0 });
+    statementTimeout(cancelledSession, { clientId: 'c1', elapsedMs: 800 });
+    expect(cancelledSession.state).toBe('cancelled');
+    expect(() =>
+      idleTimeout(cancelledSession, { clientId: 'c2', at: 300 }),
+    ).toThrow(/cancelled/);
+    expect(cancelledSession.state).toBe('cancelled');
+
+    const evictedSession = createPoolSession(opts('drizzle', 'postgres'));
+    acquire(evictedSession, { clientId: 'c1', at: 0 });
+    idleTimeout(evictedSession, { clientId: 'c1', at: 200 });
+    expect(evictedSession.state).toBe('evicted');
+    expect(() =>
+      idleTimeout(evictedSession, { clientId: 'c1', at: 400 }),
+    ).toThrow(/evicted/);
+    expect(evictedSession.state).toBe('evicted');
+  });
+
+  it('symmetric regression [finding 10]: statementTimeout refuses when pool is cancelled/evicted (post-fix symmetric with acquire guard)', () => {
+    const cancelledSession = createPoolSession(opts('drizzle', 'postgres'));
+    acquire(cancelledSession, { clientId: 'c1', at: 0 });
+    acquire(cancelledSession, { clientId: 'c2', at: 0 });
+    statementTimeout(cancelledSession, { clientId: 'c1', elapsedMs: 800 });
+    expect(cancelledSession.state).toBe('cancelled');
+    expect(() =>
+      statementTimeout(cancelledSession, { clientId: 'c2', elapsedMs: 900 }),
+    ).toThrow(/cancelled/);
+    expect(cancelledSession.state).toBe('cancelled');
+
+    const evictedSession = createPoolSession(opts('drizzle', 'postgres'));
+    acquire(evictedSession, { clientId: 'c1', at: 0 });
+    idleTimeout(evictedSession, { clientId: 'c1', at: 200 });
+    expect(evictedSession.state).toBe('evicted');
+    expect(() =>
+      statementTimeout(evictedSession, { clientId: 'c1', elapsedMs: 900 }),
+    ).toThrow(/evicted/);
+    expect(evictedSession.state).toBe('evicted');
+  });
 });
