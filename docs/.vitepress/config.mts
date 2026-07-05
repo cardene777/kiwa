@@ -175,6 +175,14 @@ export default defineConfig({
             { text: '46 — Perf baseline migration (3 package → 33 package transfer methodology)', link: '/tutorials/46-perf-baseline-migration' },
           ],
         },
+        {
+          text: 'Database 深化 (v1.26)',
+          items: [
+            { text: '47 — Postgres CDC + outbox pattern (change data capture walkthrough)', link: '/tutorials/47-postgres-cdc-outbox' },
+            { text: '48 — MySQL RLS + multi-tenant (row-level security walkthrough)', link: '/tutorials/48-mysql-rls-tenant' },
+            { text: '49 — pgvector + hybrid search (semantic + keyword retrieval walkthrough)', link: '/tutorials/49-vector-search-pgvector' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -196,6 +204,7 @@ export default defineConfig({
             { text: 'Advanced billing semantics (9-axis SSOT — dunning / retry / 3DS / SCA / PSD2 / subscription / invoice / tax / chargeback)', link: '/concepts/billing-semantics' },
             { text: 'Edge runtime testing (8-axis SSOT — Durable Object / WebSocket / edge KV / geo-replicated / Cron / subrequest / CPU / streaming)', link: '/concepts/edge-runtime-testing' },
             { text: 'Perf-testing SSOT (p50 / p95 / p99 + baseline persistence + regression detection + 3-layer harness + 33 package coverage)', link: '/concepts/perf-testing-ssot' },
+            { text: 'Db advanced testing SSOT (8 axis — replication / CDC / logical replication / MVCC / RLS / connection pool / partitioning / vector store)', link: '/concepts/db-advanced-testing' },
           ],
         },
       ],
@@ -220,6 +229,7 @@ export default defineConfig({
             { text: 'v1.22 → v1.23', link: '/migrations/v1.22-to-v1.23' },
             { text: 'v1.23 → v1.24', link: '/migrations/v1.23-to-v1.24' },
             { text: 'v1.24 → v1.25', link: '/migrations/v1.24-to-v1.25' },
+            { text: 'v1.25 → v1.26', link: '/migrations/v1.25-to-v1.26' },
           ],
         },
       ],

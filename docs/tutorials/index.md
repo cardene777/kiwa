@@ -56,6 +56,9 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 44 | [Deno Deploy geo (Deno KV + read-your-writes + Cron trigger)](./44-deno-deploy-geo) | Node.js / vitest | 15 min |
 | 45 | [Perf-harness baseline (p95 baseline + regression detection walkthrough)](./45-perf-harness-baseline) | Node.js / vitest | 15 min |
 | 46 | [Perf baseline migration (3 package → 33 package transfer methodology)](./46-perf-baseline-migration) | Node.js / vitest | 15 min |
+| 47 | [Postgres CDC + outbox pattern (change data capture walkthrough)](./47-postgres-cdc-outbox) | Node.js / vitest | 15 min |
+| 48 | [MySQL RLS + multi-tenant (row-level security walkthrough)](./48-mysql-rls-tenant) | Node.js / vitest | 15 min |
+| 49 | [pgvector + hybrid search (semantic + keyword retrieval walkthrough)](./49-vector-search-pgvector) | Node.js / vitest | 15 min |
 
 ## AI-LLM tutorials (v1.12)
 
@@ -104,3 +107,7 @@ Tutorials 42 – 44 exercise the v0.2 additions to [`@kiwa-test/edge`](https://g
 ## Perf-harness sweep tutorials (v1.25)
 
 Tutorials 45 – 46 exercise the v0.2 rollout of [`@kiwa-test/perf-harness`](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/README.md) — the p50 / p95 / p99 measurement + baseline persistence + regression detection primitives from v1.13-1 now applied to every kiwa package (33 total). Tutorial 45 walks the primitive stack (`measure` + `saveBaseline` + `loadBaseline` + `detectRegression` + `evaluatePerfGate`) against a trivial pure function so the numbers are easy to reason about; tutorial 46 documents the 6-step migration recipe used across the v1.25-1 through v1.25-4 sub-milestones to add a perf suite to any new package in under 15 minutes. See [`docs/concepts/perf-testing-ssot.md`](../concepts/perf-testing-ssot) for the p50 / p95 / p99 SSOT + 3-layer harness rules (3 warmup + 100 iteration + 20 % threshold) + the 33 package coverage grid across core / framework adapter / test type / SaaS layer.
+
+## Database 深化 tutorials (v1.26)
+
+Tutorials 47 – 49 exercise the v0.9 additions to [`@kiwa-test/orm`](https://github.com/cardene777/kiwa/blob/main/packages/orm/README.md) — 8 axes of advanced db semantics (replication / CDC / logical replication / MVCC / RLS / connection pool / partitioning / vector store) layered on top of the v0.8 `setupOrmEnv` — one for each of the 3 target dogfood app combinations Postgres CDC + outbox (Next.js 15 + drizzle + Postgres 16 logical replication + Debezium-style outbox + Redis Streams consumer), MySQL RLS + multi-tenant (Nuxt 3 + Prisma + MySQL 8 row-level security policy + tenant isolation + audit log), and pgvector + hybrid search (SvelteKit + kysely + Postgres 16 + pgvector IVFFlat / HNSW + hybrid ranking). See [`docs/concepts/db-advanced-testing.md`](../concepts/db-advanced-testing) for the 8-axis SSOT + provider × backend fidelity table + 3 × 3 × 8 = 72 row coverage grid across all 3 v1.26 dogfood db apps.
