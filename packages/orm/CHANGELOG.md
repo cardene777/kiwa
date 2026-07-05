@@ -1,6 +1,31 @@
 # @kiwa-test/orm
 
-## 0.8.0
+## 0.9.0
+
+### Minor Changes
+
+- 🆕 feat(orm): `@kiwa-test/orm` v0.9.0 — advanced db semantics 8 axis (3 provider × 3 backend × 8 axis = 72 grid coverage)
+
+  v0.8 orm mocks が `setupOrmEnv` (schema + migration + seed) の 3 provider (drizzle / prisma / kysely) × 3 backend (postgres / mysql / sqlite) しか持たなかった状態から、 8 production db semantics を追加。 各 axis は provider / backend の payload dialect を知らずに driven 可能な pure state-machine helper として実装、 v1.24-1 (`@kiwa-test/edge` v0.2 advanced edge semantics) と同じ neutral-event + dialect map + fidelity harness の三本柱。
+
+  追加 axis 一覧 (32 neutral event = 8 × 4)。
+
+  - `replication` (createReplicationSession / primaryWrite / markReplicaLagged / startFailover / promoteReplica) ... streaming replication + read replica lag + failover + promoted replica
+  - `cdc` (createCdcSession / decodeEvent / appendOutbox / markEventOrdered / confirmDelivery) ... logical decoding + wal2json / Debezium-style outbox + LSN 順序 + at-least-once delivery
+  - `logical-replication` (createLogicalRepSession / createPublication / syncSubscription / resolveConflict / heartbeat) ... publication + subscription + conflict resolution + heartbeat
+  - `mvcc` (createMvccSession / takeSnapshot / abortSerializable / blockPhantom / detectDeadlock) ... snapshot isolation + serializable + phantom read + deadlock detection
+  - `rls` (createRlsSession / installPolicy / filterTenant / bypassRls / logAudit) ... row-level security + tenant isolation + bypass_rls + audit trail
+  - `connection-pool` (createPoolSession / acquire / waitInQueue / idleTimeout / statementTimeout) ... max_connections + idle_timeout + statement_timeout + wait queue
+  - `partitioning` (createPartitioningSession / declarePartition / prunePartitions / partitionWiseJoin / routeInsert) ... declarative partitioning + partition pruning + partition-wise join + range/list/hash routing
+  - `vector-store` (createVectorStoreSession / buildIndex / knnSearch / hybridSearch / computeDistance) ... pgvector / HeatWave / sqlite-vec + IVFFlat + HNSW + cosine/L2/inner-product + hybrid search
+
+  Fidelity harness は `collectFidelityCoverage({ providers, backends })` で 3 × 3 × 8 = 72 row grid を返す。 backend / provider dialect は `backendEventName(backend, neutral, provider?)` 経由。 SQLite は server-only axes (streaming replication / CDC / statement_timeout etc.) で neutral 名 fallback。 Prisma provider overlay で `pool.acquired` などが `prisma.pool.acquired` に translate される。
+
+  222 semantics test 追加 (既存 28 test は完全 backward compatible)、 typecheck / test / build all pass。
+
+  関連: Issue #940 / Linear CAR-530、 parent v1.26 milestone (#939)。
+
+
 
 ### Minor Changes
 

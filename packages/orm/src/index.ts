@@ -32,3 +32,7 @@ export type {
 
 export { setupOrmEnv } from './setup-orm-env.js';
 export { expectQuery, expectRowCount, type MinimalExpect } from './expectations.js';
+
+// v0.9 advanced db semantics — 8 axis production semantics for
+// 3 provider (drizzle / prisma / kysely) × 3 backend (postgres / mysql / sqlite).
+export * from './semantics/index.js';
