@@ -160,6 +160,14 @@ export default defineConfig({
             { text: '41 — Lemon Squeezy refund + chargeback dispute lifecycle', link: '/tutorials/41-lemon-squeezy-license' },
           ],
         },
+        {
+          text: 'Edge/Serverless 深化 (v1.24)',
+          items: [
+            { text: '42 — Cloudflare Workers Durable Object (realtime chat + Hibernation + storage)', link: '/tutorials/42-cloudflare-durable-object' },
+            { text: '43 — Vercel Edge streaming (Next.js 15 middleware + geo routing + SSE backpressure)', link: '/tutorials/43-vercel-edge-streaming' },
+            { text: '44 — Deno Deploy geo (Deno KV + read-your-writes + Cron trigger)', link: '/tutorials/44-deno-deploy-geo' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -179,6 +187,7 @@ export default defineConfig({
             { text: 'Auth protocol testing (virtual authenticator / PKCE+DPoP / id_token / discovery+federation SSOT)', link: '/concepts/auth-protocol-testing' },
             { text: 'Real driver testing (mock only / real-optional / real-required 3 execution modes SSOT)', link: '/concepts/real-driver-testing' },
             { text: 'Advanced billing semantics (9-axis SSOT — dunning / retry / 3DS / SCA / PSD2 / subscription / invoice / tax / chargeback)', link: '/concepts/billing-semantics' },
+            { text: 'Edge runtime testing (8-axis SSOT — Durable Object / WebSocket / edge KV / geo-replicated / Cron / subrequest / CPU / streaming)', link: '/concepts/edge-runtime-testing' },
           ],
         },
       ],
@@ -201,6 +210,7 @@ export default defineConfig({
             { text: 'v1.20 → v1.21', link: '/migrations/v1.20-to-v1.21' },
             { text: 'v1.21 → v1.22', link: '/migrations/v1.21-to-v1.22' },
             { text: 'v1.22 → v1.23', link: '/migrations/v1.22-to-v1.23' },
+            { text: 'v1.23 → v1.24', link: '/migrations/v1.23-to-v1.24' },
           ],
         },
       ],

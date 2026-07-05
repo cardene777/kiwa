@@ -51,6 +51,9 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 39 | [Stripe advanced billing (subscription + 3DS + dunning)](./39-stripe-billing) | Node.js / vitest | 15 min |
 | 40 | [Paddle merchant-of-record (inline checkout + tier + VAT/GST auto-calc)](./40-paddle-merchant) | Node.js / vitest | 15 min |
 | 41 | [Lemon Squeezy refund + chargeback dispute lifecycle](./41-lemon-squeezy-license) | Node.js / vitest | 15 min |
+| 42 | [Cloudflare Workers Durable Object (realtime chat + Hibernation + storage)](./42-cloudflare-durable-object) | Node.js / vitest | 15 min |
+| 43 | [Vercel Edge streaming (Next.js 15 middleware + geo routing + SSE backpressure)](./43-vercel-edge-streaming) | Node.js / vitest | 15 min |
+| 44 | [Deno Deploy geo (Deno KV + read-your-writes + Cron trigger)](./44-deno-deploy-geo) | Node.js / vitest | 15 min |
 
 ## AI-LLM tutorials (v1.12)
 
@@ -91,3 +94,7 @@ Tutorials 37 – 38 exercise the v1.22 real driver layer on top of the v1.21 4 p
 ## Payment 深化 tutorials (v1.23)
 
 Tutorials 39 – 41 exercise the v0.3 additions to [`@kiwa-test/payment`](https://github.com/cardene777/kiwa/blob/main/packages/payment/README.md) — 9 axes of advanced billing semantics (dunning / retry / 3DS v2 / SCA / PSD2 mandate / subscription lifecycle / invoice lifecycle / VAT-GST-sales-tax / chargeback dispute) — one for each of the 3 target providers Stripe (Next.js 15 subscription + 3DS + Smart Retries dunning), Paddle (Nuxt 3 merchant-of-record + inline checkout + tier upgrade + VAT/GST auto-calc), and Lemon Squeezy (SvelteKit hosted checkout + license key + refund + chargeback dispute). See [`docs/concepts/billing-semantics.md`](../concepts/billing-semantics) for the 9-axis SSOT + provider-specific fidelity surface reference across all 3 v1.23 dogfood merchant apps.
+
+## Edge/Serverless 深化 tutorials (v1.24)
+
+Tutorials 42 – 44 exercise the v0.2 additions to [`@kiwa-test/edge`](https://github.com/cardene777/kiwa/blob/main/packages/edge/README.md) — 8 axes of advanced edge semantics (Durable Object / WebSocket edge / edge KV / geo-replicated / Cron trigger / subrequest limit / CPU time limit / streaming Response) — one for each of the 3 target platforms Cloudflare Workers (realtime chat via Durable Objects + Hibernation API + storage transactional + WebSocket edge broadcast), Vercel Edge (Next.js 15 middleware + geo routing + edge KV cache invalidation + SSE streaming with backpressure), and Deno Deploy (Fresh + multi-region Deno KV write + read-your-writes consistency + Deno Deploy Cron + queue trigger). See [`docs/concepts/edge-runtime-testing.md`](../concepts/edge-runtime-testing) for the 8-axis SSOT + platform-specific fidelity surface reference across all 3 v1.24 dogfood edge apps.
