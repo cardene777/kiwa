@@ -6,12 +6,56 @@
     "low": 50,
     "break": 40
   },
-  "killRate": null,
-  "killed": null,
-  "survived": null,
-  "timeout": null,
-  "error": null,
-  "mutants": [],
-  "capturedAt": "2026-07-05T17:47:38Z",
-  "note": "Initial baseline stub; kill-rate is null until first `pnpm test:mutation` PR run."
+  "killRate": 84.21,
+  "killed": 32,
+  "survived": 6,
+  "timeout": 0,
+  "noCoverage": 0,
+  "error": 0,
+  "mutants": [
+    {
+      "file": ".vitest-dist/src/setup-e2e-env.js",
+      "line": 8,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/setup-e2e-env.js",
+      "line": 20,
+      "column": 54,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/setup-e2e-env.js",
+      "line": 20,
+      "column": 66,
+      "mutator": "LogicalOperator",
+      "replacement": "opts.headless && true"
+    },
+    {
+      "file": ".vitest-dist/src/setup-e2e-env.js",
+      "line": 20,
+      "column": 83,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/setup-e2e-env.js",
+      "line": 23,
+      "column": 40,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/setup-e2e-env.js",
+      "line": 25,
+      "column": 33,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    }
+  ],
+  "capturedAt": "2026-07-05T09:08:09Z",
+  "note": "Kill rate 84.21% (threshold high=60 / low=50 / break=40)."
 }

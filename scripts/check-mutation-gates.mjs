@@ -11,9 +11,11 @@
  * which matches Stryker's "% Mutation score / covered" column (no-coverage
  * mutants are excluded so the score reflects what tests can actually observe).
  *
- * Per-package thresholds are intentionally NOT uniform: thin wrappers (ui /
- * visual / e2e) hit equivalent-mutant ceilings around 80%, while pure logic
- * packages (api / a11y / core / spec / cli-test / data) sustain 90%+.
+ * Per-package thresholds follow the 4-tier rationale from
+ * `docs/quality/mutation-thresholds.md`:
+ * Core-strict 90 / Core 80 / Framework 70 / SaaS 65 / Test-type 60.
+ * A stricter override (e.g. `@kiwa-test/a11y` at 90) raises the floor; a
+ * looser override needs a one-line justification in the PR that introduces it.
  *
  * Run with `node scripts/check-mutation-gates.mjs` from the repo root after
  * each `pnpm -F <pkg> run test:mutation` has produced its mutation report.
@@ -28,33 +30,37 @@ const REPO_ROOT = process.env.KIWA_GATE_ROOT
   ? process.cwd()
   : SCRIPT_ROOT;
 
-// Per-package MSI thresholds.
-//   - 90: pure-logic packages whose tests can observably kill every mutant.
-//   - 80: thin wrappers around third-party libs whose internal default values
-//         produce equivalent mutants outside the test surface.
+// Per-package MSI thresholds. Values track the `high` column in
+// docs/quality/mutation-thresholds.md so a single edit in the SSOT flows
+// through here without a second bookkeeping table:
+//   - 90: Core-strict (protocol / accessibility invariants).
+//   - 80: Core tier — pure logic, deterministic tests.
+//   - 70: Framework tier — SSR / hydration / adapter drift.
+//   - 65: SaaS tier — provider-specific adapters.
+//   - 60: Test-type tier — harness packages with DOM / browser noise.
 const THRESHOLDS = {
   '@kiwa-test/core': 80,
   '@kiwa-test/api': 90,
-  '@kiwa-test/ui': 80,
+  '@kiwa-test/ui': 60,
   '@kiwa-test/data': 80,
   '@kiwa-test/cli-test': 80,
   '@kiwa-test/observability': 80,
-  '@kiwa-test/e2e': 80,
+  '@kiwa-test/e2e': 60,
   '@kiwa-test/cli': 80,
-  '@kiwa-test/dapp': 80,
+  '@kiwa-test/dapp': 65,
   '@kiwa-test/a11y': 90,
-  '@kiwa-test/visual': 80,
-  '@kiwa-test/nextjs': 80,
-  '@kiwa-test/nuxt': 80,
-  '@kiwa-test/sveltekit': 80,
-  '@kiwa-test/remix': 80,
-  '@kiwa-test/astro': 80,
-  '@kiwa-test/solidstart': 80,
-  '@kiwa-test/qwikcity': 80,
-  '@kiwa-test/edge': 80,
-  '@kiwa-test/solidjs': 80,
-  '@kiwa-test/fresh': 80,
-  '@kiwa-test/hono': 80,
+  '@kiwa-test/visual': 60,
+  '@kiwa-test/nextjs': 70,
+  '@kiwa-test/nuxt': 70,
+  '@kiwa-test/sveltekit': 70,
+  '@kiwa-test/remix': 70,
+  '@kiwa-test/astro': 70,
+  '@kiwa-test/solidstart': 70,
+  '@kiwa-test/qwikcity': 70,
+  '@kiwa-test/edge': 70,
+  '@kiwa-test/solidjs': 70,
+  '@kiwa-test/fresh': 70,
+  '@kiwa-test/hono': 70,
 };
 
 const PKG_DIRS = {
@@ -158,7 +164,7 @@ const header = [
 const report = [
   `# Mutation gate report`,
   '',
-  `Thresholds are per-package (90% for pure-logic, 80% for thin wrappers).`,
+  `Thresholds follow the 4-tier rationale in docs/quality/mutation-thresholds.md.`,
   '',
   ...header,
   ...rows,

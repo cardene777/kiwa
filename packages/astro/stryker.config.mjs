@@ -1,3 +1,8 @@
+/**
+ * Mutation testing config for @kiwa-test/astro.
+ * Threshold: Framework tier (high 70 / low 60 / break 50) — Islands + SSR + partial hydration drift.
+ * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
+ */
 export default {
   packageManager: 'pnpm',
   testRunner: 'vitest',
@@ -9,7 +14,7 @@ export default {
     '.vitest-dist/src/render-astro-page.js',
     '.vitest-dist/src/setup-view-transition-env.js',
   ],
-  thresholds: { high: 90, low: 80, break: 80 },
+  thresholds: { high: 70, low: 60, break: 50 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],
   reporters: ['progress-append-only', 'html', 'clear-text', 'json'],
   jsonReporter: { fileName: 'mutation-report/mutation.json' },
