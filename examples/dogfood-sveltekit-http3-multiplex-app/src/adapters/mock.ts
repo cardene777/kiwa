@@ -101,6 +101,32 @@ export function makeMockAdapter(
   const writeLatencySamplesMs: number[] = [];
   const concurrentSendLatencySamplesMs: number[] = [];
   let requests = 0;
+  // F2 (Issue #981) — HPACK metrics must survive closeConnection because the
+  // fidelity harness aggregates across the whole run. Track the highest
+  // observed table size + a cumulative raw / compressed byte pair so the
+  // ratio does not collapse when a connection is torn down mid-run. Nginx-quic
+  // reports the peak table size + steady-state compression ratio across the
+  // process lifetime, so aggregating post-close is the closest match.
+  let hpackTableSizeAggregate = 0;
+  let hpackRawBytesAggregate = 0;
+  let hpackCompressedBytesAggregate = 0;
+  // F3 (Issue #981) — 0-RTT resumption tickets are keyed by origin (RFC 8446
+  // §4.6.1 + §8). Cross-origin reuse would violate the same-origin invariant
+  // + open the door to session-fixation attacks. Track which origins have a
+  // ticket available so only same-origin resumption paths flip zeroRttUsed on.
+  const originTickets = new Set<string>();
+
+  function originOf(url: string): string {
+    try {
+      const u = new URL(url);
+      return `${u.protocol}//${u.host}`;
+    } catch {
+      // A malformed URL cannot carry a ticket — treat as a fresh origin so
+      // 0-RTT never accepts on invalid input. The openConnection path already
+      // records the invalid URL as a normal request; we just gate resumption.
+      return url;
+    }
+  }
 
   function record(op: TraceEvent['op'], ok: boolean, extra?: Partial<TraceEvent>): void {
     const entry: TraceEvent = { op, ok };
@@ -139,8 +165,9 @@ export function makeMockAdapter(
   function totalHpackTableSize(): number {
     // Aggregate across every open connection — nginx-quic reports a
     // per-connection table but the fidelity harness rolls up to a single
-    // observed maximum.
-    let max = 0;
+    // observed maximum. F2 (Issue #981) — fold in torn-down connections'
+    // peak table size so closeConnection does not zero the observed maximum.
+    let max = hpackTableSizeAggregate;
     for (const conn of connections.values()) {
       if (conn.mock.hpackTableSize > max) max = conn.mock.hpackTableSize;
     }
@@ -148,8 +175,11 @@ export function makeMockAdapter(
   }
 
   function averageCompressionRatio(): number {
-    let raw = 0;
-    let compressed = 0;
+    // F2 (Issue #981) — seed with the aggregate byte counters so torn-down
+    // connections continue to weight the observed ratio. Without this the
+    // ratio collapses to zero the moment the caller closes every connection.
+    let raw = hpackRawBytesAggregate;
+    let compressed = hpackCompressedBytesAggregate;
     for (const conn of connections.values()) {
       raw += conn.hpackRawBytes;
       compressed += conn.hpackCompressedBytes;
@@ -174,10 +204,14 @@ export function makeMockAdapter(
       const conn = createConnection(input.url);
       const wantZeroRtt = input.zeroRtt === true;
       const allowZeroRtt = opts.allowZeroRtt ?? true;
-      // Simulate 0-RTT resumption acceptance — a fresh connection (no prior
-      // ticket in memory) always cold-starts, subsequent connections on the
-      // same origin may reuse the ticket if the caller opted in.
-      conn.zeroRttUsed = wantZeroRtt && allowZeroRtt && connectionSeq > 1;
+      // F3 (Issue #981) — 0-RTT resumption is bound to the origin that issued
+      // the ticket (RFC 8446 §4.6.1). Cross-origin resumption would violate
+      // the same-origin invariant, so gate acceptance on a per-origin ticket
+      // Map instead of the global connectionSeq counter. A fresh origin
+      // always cold-starts even if other origins have prior tickets.
+      const origin = originOf(input.url);
+      const hasTicketForOrigin = originTickets.has(origin);
+      conn.zeroRttUsed = wantZeroRtt && allowZeroRtt && hasTicketForOrigin;
       if (conn.zeroRttUsed) {
         // Early data acceptance is capped by nginx-quic's default 16 KB
         // early-data limit; anything above is queued for post-handshake.
@@ -189,6 +223,9 @@ export function makeMockAdapter(
         // trace records the resumption alongside the adapter trace.
         await conn.mock.resumeWithZeroRtt();
       }
+      // Record the origin ticket after handshake — the second (and later)
+      // connections against the same origin can now reuse it.
+      originTickets.add(origin);
       connections.set(input.connectionId, conn);
       connectionsOpened += 1;
       const latencyMs = Date.now() - t0;
@@ -225,6 +262,15 @@ export function makeMockAdapter(
           await sr.handle.close();
         }
       }
+      // F2 (Issue #981) — snapshot HPACK observables into the aggregate
+      // before tearing down the underlying mock. Without this the metrics
+      // ratio + tableSize collapse to zero the moment every connection is
+      // closed, even though the harness inserted headers earlier in the run.
+      if (conn.mock.hpackTableSize > hpackTableSizeAggregate) {
+        hpackTableSizeAggregate = conn.mock.hpackTableSize;
+      }
+      hpackRawBytesAggregate += conn.hpackRawBytes;
+      hpackCompressedBytesAggregate += conn.hpackCompressedBytes;
       conn.streams.clear();
       conn.mock.reset();
       connections.delete(input.connectionId);
@@ -418,6 +464,12 @@ export function makeMockAdapter(
         );
       }
       await stream.handle.close();
+      // F1 (Issue #981) — HTTP/3 emits FIN and releases the stream on close,
+      // so subsequent write / read against the same streamId must fail with
+      // stream_not_found. Removing the record from the connection Map is the
+      // stream_not_found gate; without this a caller could write to a closed
+      // stream and the mock would happily buffer bytes into a phantom queue.
+      conn.streams.delete(input.streamId);
       streamsClosed += 1;
       const latencyMs = Date.now() - t0;
       record('closeStream', true, {
@@ -553,6 +605,14 @@ export function makeMockAdapter(
       writeLatencySamplesMs.length = 0;
       concurrentSendLatencySamplesMs.length = 0;
       requests = 0;
+      // F2 / F3 (Issue #981) — clear the HPACK aggregate + origin ticket
+      // Map so a reset returns to the fresh-adapter baseline; otherwise
+      // resumption tickets and header table peaks would leak across the
+      // reset boundary.
+      hpackTableSizeAggregate = 0;
+      hpackRawBytesAggregate = 0;
+      hpackCompressedBytesAggregate = 0;
+      originTickets.clear();
       trace.length = 0;
       record('reset', true);
     },

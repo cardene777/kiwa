@@ -164,6 +164,41 @@ describe('mock adapter — HPACK dynamic table', () => {
     expect(traces[0]?.detail?.['tableSize']).toBe(1);
     expect(typeof traces[0]?.detail?.['compressionRatio']).toBe('number');
   });
+
+  it('axis 6 (Issue #981 F2): closeConnection preserves HPACK metrics for post-teardown aggregation', async () => {
+    // The fidelity harness aggregates HPACK observables across the whole run
+    // so a caller that inserts headers then tears the connection down should
+    // still see a non-zero tableSize + ratio in metrics(). Without snapshotting
+    // on closeConnection the aggregate collapses to zero the instant every
+    // connection is closed — the harness would report perfect compression on a
+    // freshly wiped table, hiding real drift.
+    await mock.openConnection({
+      connectionId: 'h-td',
+      url: 'https://origin.example/h3',
+    });
+    for (let i = 0; i < 6; i += 1) {
+      await mock.insertHpackHeader({
+        connectionId: 'h-td',
+        name: `x-hdr-${i}`,
+        value: 'v'.repeat(32),
+      });
+    }
+    const beforeClose = mock.metrics();
+    expect(beforeClose.hpackTableSize).toBeGreaterThan(0);
+    expect(beforeClose.hpackCompressionRatio).toBeGreaterThan(1);
+
+    await mock.closeConnection({ connectionId: 'h-td' });
+
+    const afterClose = mock.metrics();
+    // inserts counter always survived — the regression is that tableSize +
+    // ratio previously dropped to zero. Both must now stay above zero so the
+    // aggregate is meaningful.
+    expect(afterClose.hpackInserts).toBe(6);
+    expect(afterClose.hpackTableSize).toBeGreaterThanOrEqual(
+      beforeClose.hpackTableSize,
+    );
+    expect(afterClose.hpackCompressionRatio).toBeGreaterThan(1);
+  });
 });
 
 describe('/api/hpack — insert handler', () => {
