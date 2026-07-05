@@ -190,6 +190,14 @@ export default defineConfig({
             { text: '51 — Mutation baseline migration (22 → 33 package sweep methodology)', link: '/tutorials/51-mutation-baseline-migration' },
           ],
         },
+        {
+          text: 'Advanced realtime transport (v1.28)',
+          items: [
+            { text: '52 — WebRTC video call (signaling + ICE + simulcast + ICE restart walkthrough)', link: '/tutorials/52-webrtc-video-signaling' },
+            { text: '53 — WebTransport stream (uni / bi / Datagram / migration walkthrough)', link: '/tutorials/53-webtransport-stream' },
+            { text: '54 — HTTP/3 multiplex (stream priority + HPACK + 0-RTT walkthrough)', link: '/tutorials/54-http3-multiplex' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -213,6 +221,7 @@ export default defineConfig({
             { text: 'Perf-testing SSOT (p50 / p95 / p99 + baseline persistence + regression detection + 3-layer harness + 33 package coverage)', link: '/concepts/perf-testing-ssot' },
             { text: 'Db advanced testing SSOT (8 axis — replication / CDC / logical replication / MVCC / RLS / connection pool / partitioning / vector store)', link: '/concepts/db-advanced-testing' },
             { text: 'Mutation testing SSOT (kill rate + 4-tier threshold + baseline persistence + 12-axis release gate)', link: '/concepts/mutation-testing-ssot' },
+            { text: 'WebRTC / WebTransport / HTTP/3 testing (8-axis SSOT + P2P vs SFU + ICE trickle vs half-trickle + WebTransport vs WebSocket)', link: '/concepts/webrtc-webtransport-testing' },
           ],
         },
       ],
@@ -239,6 +248,7 @@ export default defineConfig({
             { text: 'v1.24 → v1.25', link: '/migrations/v1.24-to-v1.25' },
             { text: 'v1.25 → v1.26', link: '/migrations/v1.25-to-v1.26' },
             { text: 'v1.26 → v1.27', link: '/migrations/v1.26-to-v1.27' },
+            { text: 'v1.27 → v1.28', link: '/migrations/v1.27-to-v1.28' },
           ],
         },
       ],
