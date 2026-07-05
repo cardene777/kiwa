@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/edge",
-  "version": "1.0.2",
-  "description": "Edge runtime fetch handler test adapter for kiwa — invoke Cloudflare Workers / Vercel Edge / generic edge handlers with simulated env (KV / R2 / D1 / DurableObject minimal mocks) + ExecutionContext (waitUntil / passThroughOnException) without a running Miniflare or workerd (part of the kiwa test framework family)",
+  "version": "1.1.0",
+  "description": "Edge runtime fetch handler test adapter for kiwa with advanced edge semantics — invoke Cloudflare Workers / Vercel Edge / generic edge handlers with simulated env (KV / R2 / D1 / DurableObject minimal mocks) + ExecutionContext (waitUntil / passThroughOnException) without a running Miniflare or workerd (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {
     "name": "cardene",
@@ -57,7 +57,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/invoke-edge-handler.js' --coverage.include='.vitest-dist/src/kv-mock.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js'",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/invoke-edge-handler.js' --coverage.include='.vitest-dist/src/kv-mock.js' --coverage.include='.vitest-dist/src/semantics/**' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js' --coverage.exclude='.vitest-dist/src/semantics/index.js'",
     "test:mutation": "stryker run",
     "typecheck": "tsc --noEmit"
   },

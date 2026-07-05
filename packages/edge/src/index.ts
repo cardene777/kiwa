@@ -15,3 +15,5 @@ export {
   type KVNamespaceListResult,
   type KVMockEntry,
 } from './kv-mock.js';
+
+export * from './semantics/index.js';
