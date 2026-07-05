@@ -1,0 +1,21 @@
+{
+  "name": "dogfood-deno-deploy-geo-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.24-4 — a Deno Fresh app on Deno Deploy that exercises the geo-replicated axis (Deno KV strong consistency + multi-region write + eventual consistency observation) + edge-kv axis (read-your-writes + range query) + cron-trigger axis (Deno Deploy Cron scheduled + queue trigger + 24h retention purge) end-to-end. Drivable in both KIWA_MODE=real (Deno Deploy sandbox + DENO_DEPLOY_KEY env-gate) and KIWA_MODE=mock (@kiwa-test/edge v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/edge -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/edge": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

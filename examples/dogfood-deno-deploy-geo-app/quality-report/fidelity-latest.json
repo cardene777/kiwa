@@ -1,0 +1,35 @@
+{
+  "provider": "@kiwa-test/edge/deno-deploy-geo",
+  "version": "0.1.0",
+  "reportedAt": "2026-07-05T02:04:47.720Z",
+  "coverage": {
+    "line": 92,
+    "branch": 86,
+    "function": 95
+  },
+  "testCount": {
+    "behavior": 30,
+    "integration": 6,
+    "e2e": 6,
+    "total": 42
+  },
+  "fidelity": {
+    "mockCoveredMethods": 8,
+    "realTotalMethods": 8,
+    "ratio": 100,
+    "behavioralDivergences": 8
+  },
+  "perf": {
+    "p50Ms": 0.052500000000009095,
+    "p95Ms": 0.11716700000002334,
+    "p99Ms": 0.11716700000002334,
+    "samples": 8
+  },
+  "mutation": {
+    "mutations": 40,
+    "killed": 28,
+    "survived": 12,
+    "killRate": 70
+  },
+  "notes": "Observed 8 divergences across 8 ops:\n- driveGeoRoute: BEHAVIORAL_DIVERGENCE\n- driveGeoPrimaryWrite: BEHAVIORAL_DIVERGENCE\n- driveGeoReplicaSync: BEHAVIORAL_DIVERGENCE\n- driveKvWrite: BEHAVIORAL_DIVERGENCE\n- driveKvRangeQuery: BEHAVIORAL_DIVERGENCE\n- driveReadYourWrites: BEHAVIORAL_DIVERGENCE\n- driveCronSchedule: BEHAVIORAL_DIVERGENCE\n- driveCronComplete: BEHAVIORAL_DIVERGENCE"
+}
