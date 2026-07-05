@@ -1,0 +1,30 @@
+{
+  "package": "@kiwa-test/agent",
+  "tier": "SaaS",
+  "thresholds": {
+    "high": 65,
+    "low": 55,
+    "break": 50
+  },
+  "killRate": 73.40,
+  "killed": 225,
+  "survived": 46,
+  "timeout": 4,
+  "error": 0,
+  "mutants": [
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 169,
+      "mutator": "ConditionalExpression",
+      "status": "Survived"
+    },
+    {
+      "file": ".vitest-dist/src/state-machine.js",
+      "line": 178,
+      "mutator": "OptionalChaining",
+      "status": "Survived"
+    }
+  ],
+  "capturedAt": "2026-07-05T17:50:09Z",
+  "note": "First actual baseline from PR #956; kill-rate 73.40 % over SaaS tier `high` 65 %."
+}

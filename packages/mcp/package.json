@@ -62,6 +62,7 @@
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "pretest:perf": "pnpm -F @kiwa-test/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
+    "test:mutation": "stryker run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -70,6 +71,8 @@
   },
   "devDependencies": {
     "@kiwa-test/perf-harness": "workspace:*",
+    "@stryker-mutator/core": "^8.7.1",
+    "@stryker-mutator/vitest-runner": "^8.7.1",
     "@types/node": "^22.10.0",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",

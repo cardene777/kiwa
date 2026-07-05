@@ -1,0 +1,17 @@
+{
+  "package": "@kiwa-test/nextjs",
+  "tier": "Framework",
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 80
+  },
+  "killRate": null,
+  "killed": null,
+  "survived": null,
+  "timeout": null,
+  "error": null,
+  "mutants": [],
+  "capturedAt": "2026-07-05T17:47:38Z",
+  "note": "Initial baseline stub; kill-rate is null until first `pnpm test:mutation` PR run."
+}
