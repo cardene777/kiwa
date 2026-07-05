@@ -217,6 +217,21 @@ const V1_26_PAGES = [
   { path: '/migrations/v1.25-to-v1.26', title: 'v1.25 → v1.26' },
 ];
 
+// v1.27 pages — new tutorials + concept doc + migration guide added under the
+// Mutation testing sweep milestone (Issue #961 publish PR). Mirrors the v1.21 /
+// v1.22 / v1.23 / v1.24 / v1.25 / v1.26 anchor phrase pattern. Each phrase is
+// a substring the rendered VitePress <main> will always include (checked
+// against the actual page headings + body text — not frontmatter titles).
+// Coverage adds Stryker rollout across 33 packages via kill-rate baseline
+// walkthrough (tutorial 50) + 22 → 33 sweep methodology (tutorial 51) + SSOT
+// concept doc + v1.26 → v1.27 migration.
+const V1_27_PAGES = [
+  { path: '/tutorials/50-mutation-testing-baseline', title: 'Mutation testing baseline' },
+  { path: '/tutorials/51-mutation-baseline-migration', title: 'Mutation baseline migration' },
+  { path: '/concepts/mutation-testing-ssot', title: 'Mutation testing SSOT' },
+  { path: '/migrations/v1.26-to-v1.27', title: 'v1.26 → v1.27' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -410,6 +425,20 @@ test.describe('docs site — v1.25 pages render', () => {
 test.describe('docs site — v1.26 pages render', () => {
   for (const p of V1_26_PAGES) {
     test(`v1.26 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.27 pages render', () => {
+  for (const p of V1_27_PAGES) {
+    test(`v1.27 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
