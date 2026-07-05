@@ -133,4 +133,41 @@ describe('dogfood-postgres-cdc-outbox-app — fidelity harness', () => {
     await mock.reset();
     await real.reset();
   });
+
+  it('T-DPF-004 v1.27-4 mutation tier context adds an 8th axis when opted in', async () => {
+    // The postgres-cdc-outbox-app wraps @kiwa-test/orm (SaaS tier, default
+    // 65 %). Passing `mutationTier: 'saas'` opts the app into the 12-axis
+    // release gate; the base harness stays 7-axis for backward compat when
+    // the field is omitted (see T-DPF-001).
+    const mock = makeMockAdapter();
+    const real = await makeRealAdapter();
+    const matrix = await runAdapterMatrix({
+      mock,
+      real,
+      run: runFull,
+    });
+    // 22 / 30 = 73.3 %, above SaaS 65 tier threshold.
+    const output = runFidelityHarness({
+      provider: '@kiwa-test/orm/postgres-cdc-dogfood',
+      version: '0.1.0',
+      mockTraces: matrix.mockTraces,
+      realTraces: matrix.realTraces,
+      opsUnderTest: [...OPS_UNDER_TEST],
+      perfSamplesMs: matrix.perfSamplesMs,
+      coverageSummary: {
+        lines: { pct: 90 },
+        branches: { pct: 85 },
+        functions: { pct: 92 },
+      },
+      testCount: { behavior: 24, integration: 6, e2e: 5 },
+      mutation: { mutations: 30, killed: 22 },
+      mutationTier: 'saas',
+    });
+    expect(output.verdict.axesEvaluated).toBe(8);
+    expect(
+      output.verdict.blockers.find((b) => b.axis === 'mutation.tier'),
+    ).toBeUndefined();
+    await mock.reset();
+    await real.reset();
+  });
 });

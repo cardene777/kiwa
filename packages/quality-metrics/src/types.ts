@@ -110,6 +110,20 @@ export interface MutationMetric {
 }
 
 /**
+ * 4-tier mutation threshold classification — v1.27-4 SSOT。
+ *
+ * `core` = pure logic (deterministic tests、 no framework noise)、
+ * `framework` = SSR / hydration / adapter drift、
+ * `saas` = provider-specific adapter (external API drift 前提)、
+ * `test-type` = DOM / browser noise を含む harness package。
+ *
+ * baseline JSON (`docs/quality/mutation-thresholds.md` に verbal `Core` /
+ * `Framework` / `SaaS` / `Test type` で書かれる) は
+ * {@link resolveMutationTier} で本 enum に正規化する。
+ */
+export type MutationTier = 'core' | 'framework' | 'saas' | 'test-type';
+
+/**
  * Cost metric for AI-LLM providers — 1 request 当たりの US$ 実測。
  *
  * `perRequestUsd` は「1 request 当たり単価の観測値」、 `totalUsd` は
@@ -237,7 +251,10 @@ export interface ReleaseGateThresholds {
 
 /** Reason a report failed the release gate. Each blocker names the axis. */
 export interface ReleaseGateBlocker {
-  /** Axis name that failed — e.g. `coverage.line`, `perf.p95Ms`. */
+  /**
+   * Axis name that failed — e.g. `coverage.line`, `perf.p95Ms`,
+   * `mutation.tier` (v1.27-4 tier-aware kill rate check).
+   */
   axis: string;
   /** Threshold that was violated. */
   threshold: number;
@@ -251,8 +268,33 @@ export interface ReleaseGateBlocker {
 export interface ReleaseGateVerdict {
   passed: boolean;
   blockers: ReleaseGateBlocker[];
-  /** Number of axes evaluated (7 for non-AI-LLM, 11 for AI-LLM). */
+  /**
+   * Number of axes evaluated:
+   * - 7 for non-AI-LLM without tier,
+   * - 8 for non-AI-LLM with tier (v1.27-4),
+   * - 11 for AI-LLM without tier,
+   * - 12 for AI-LLM with tier (v1.27-4).
+   */
   axesEvaluated: number;
+}
+
+/**
+ * Optional context that opts a report into the 12-axis mutation tier check.
+ * Passed as the third argument of {@link evaluateReleaseGate}. Absent =
+ * legacy 7 / 11 axis behaviour (backward compatible).
+ */
+export interface ReleaseGateContext {
+  /**
+   * Mutation tier of the package under evaluation. When set, a 12th axis
+   * `mutation.tier` is added that enforces {@link MUTATION_TIER_THRESHOLDS}
+   * unless {@link mutationTierThreshold} overrides it.
+   */
+  mutationTier?: MutationTier;
+  /**
+   * Optional per-package looser override for the tier default (e.g. auth 65
+   * on Framework tier). Documented per-baseline in `.mutation-baseline/*.json`.
+   */
+  mutationTierThreshold?: number;
 }
 
 /**

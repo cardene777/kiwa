@@ -122,4 +122,37 @@ describe('dogfood-vector-search-app — fidelity harness', () => {
     await mock.reset();
     await real.reset();
   });
+
+  it('T-DVF-004 v1.27-4 mutation tier context adds an 8th axis when opted in', async () => {
+    // The vector-search-app wraps @kiwa-test/orm (SaaS tier, default 65 %).
+    // Passing `mutationTier: 'saas'` opts the app into the 12-axis release
+    // gate; the base harness stays 7-axis for backward compat when the field
+    // is omitted (see T-DVF-001).
+    const mock = makeMockAdapter();
+    const shadow = makeMockAdapter();
+    const matrix = await runAdapterMatrix({ mock, real: shadow, run: runFull });
+    // 22 / 30 = 73.3 %, above SaaS 65 tier threshold.
+    const output = runFidelityHarness({
+      provider: '@kiwa-test/orm/vector-search-dogfood',
+      version: '0.1.0',
+      mockTraces: matrix.mockTraces,
+      realTraces: matrix.realTraces,
+      opsUnderTest: [...OPS_UNDER_TEST],
+      perfSamplesMs: matrix.perfSamplesMs,
+      coverageSummary: {
+        lines: { pct: 92 },
+        branches: { pct: 88 },
+        functions: { pct: 95 },
+      },
+      testCount: { behavior: 25, integration: 6, e2e: 4 },
+      mutation: { mutations: 30, killed: 22 },
+      mutationTier: 'saas',
+    });
+    expect(output.verdict.axesEvaluated).toBe(8);
+    expect(
+      output.verdict.blockers.find((b) => b.axis === 'mutation.tier'),
+    ).toBeUndefined();
+    await mock.reset();
+    await shadow.reset();
+  });
 });

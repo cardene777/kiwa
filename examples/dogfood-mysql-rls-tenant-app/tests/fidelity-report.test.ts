@@ -128,4 +128,77 @@ describe('dogfood-mysql-rls-tenant-app — fidelity harness', () => {
     await mock.reset();
     await real.reset();
   });
+
+  it('T-DMF-004 v1.27-4 mutation tier context adds an 8th axis when opted in', async () => {
+    // The mysql-rls-tenant-app wraps @kiwa-test/orm (SaaS tier, default 65 %).
+    // Passing `mutationTier: 'saas'` opts the app into the 12-axis release
+    // gate; the base harness stays 7-axis for backward compat when the field
+    // is omitted (see T-DMF-001).
+    const mock = makeMockAdapter();
+    const shadow = makeMockAdapter();
+    const matrix = await runAdapterMatrix({
+      mock,
+      real: shadow,
+      run: runFull,
+    });
+    // 22 / 30 = 73.3 %, above SaaS 65 tier threshold.
+    const output = runFidelityHarness({
+      provider: '@kiwa-test/orm/mysql-rls-dogfood',
+      version: '0.1.0',
+      mockTraces: matrix.mockTraces,
+      realTraces: matrix.realTraces,
+      opsUnderTest: [...OPS_UNDER_TEST],
+      perfSamplesMs: matrix.perfSamplesMs,
+      coverageSummary: {
+        lines: { pct: 92 },
+        branches: { pct: 88 },
+        functions: { pct: 95 },
+      },
+      testCount: { behavior: 24, integration: 6, e2e: 5 },
+      mutation: { mutations: 30, killed: 22 },
+      mutationTier: 'saas',
+    });
+    expect(output.verdict.axesEvaluated).toBe(8);
+    expect(
+      output.verdict.blockers.find((b) => b.axis === 'mutation.tier'),
+    ).toBeUndefined();
+    await mock.reset();
+    await shadow.reset();
+  });
+
+  it('T-DMF-005 v1.27-4 tier context blocks release when kill rate below tier default', async () => {
+    // 15 / 30 = 50 %, below SaaS 65 tier threshold — the harness must surface
+    // a `mutation.tier` blocker so the release stops.
+    const mock = makeMockAdapter();
+    const shadow = makeMockAdapter();
+    const matrix = await runAdapterMatrix({
+      mock,
+      real: shadow,
+      run: runFull,
+    });
+    const output = runFidelityHarness({
+      provider: '@kiwa-test/orm/mysql-rls-dogfood',
+      version: '0.1.0',
+      mockTraces: matrix.mockTraces,
+      realTraces: matrix.realTraces,
+      opsUnderTest: [...OPS_UNDER_TEST],
+      perfSamplesMs: matrix.perfSamplesMs,
+      coverageSummary: {
+        lines: { pct: 92 },
+        branches: { pct: 88 },
+        functions: { pct: 95 },
+      },
+      testCount: { behavior: 24, integration: 6, e2e: 5 },
+      mutation: { mutations: 30, killed: 15 },
+      mutationTier: 'saas',
+    });
+    const blocker = output.verdict.blockers.find(
+      (b) => b.axis === 'mutation.tier',
+    );
+    expect(blocker).toBeDefined();
+    expect(blocker?.threshold).toBe(65);
+    expect(blocker?.op).toBe('>=');
+    await mock.reset();
+    await shadow.reset();
+  });
 });
