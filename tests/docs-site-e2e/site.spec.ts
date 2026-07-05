@@ -232,6 +232,23 @@ const V1_27_PAGES = [
   { path: '/migrations/v1.26-to-v1.27', title: 'v1.26 → v1.27' },
 ];
 
+// v1.28 pages — new tutorials + concept doc + migration guide added under the
+// Realtime depth II milestone (Issue #976 publish PR). Mirrors the v1.21 /
+// v1.22 / v1.23 / v1.24 / v1.25 / v1.26 / v1.27 anchor phrase pattern. Each
+// phrase is a substring the rendered VitePress <main> will always include
+// (checked against the actual page headings + body text — not frontmatter
+// titles). Coverage adds WebRTC video call signaling walkthrough (tutorial 52)
+// + WebTransport stream walkthrough (tutorial 53) + HTTP/3 multiplex + HPACK +
+// 0-RTT walkthrough (tutorial 54) + 8-axis SSOT concept doc + v1.27 → v1.28
+// migration.
+const V1_28_PAGES = [
+  { path: '/tutorials/52-webrtc-video-signaling', title: 'WebRTC video call' },
+  { path: '/tutorials/53-webtransport-stream', title: 'WebTransport stream' },
+  { path: '/tutorials/54-http3-multiplex', title: 'HTTP/3 multiplex' },
+  { path: '/concepts/webrtc-webtransport-testing', title: 'WebRTC / WebTransport / HTTP/3 testing SSOT' },
+  { path: '/migrations/v1.27-to-v1.28', title: 'v1.27 → v1.28' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -439,6 +456,20 @@ test.describe('docs site — v1.26 pages render', () => {
 test.describe('docs site — v1.27 pages render', () => {
   for (const p of V1_27_PAGES) {
     test(`v1.27 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.28 pages render', () => {
+  for (const p of V1_28_PAGES) {
+    test(`v1.28 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
