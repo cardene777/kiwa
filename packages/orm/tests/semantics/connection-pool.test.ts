@@ -113,6 +113,30 @@ describe('connection-pool axis — 3 provider × 3 backend', () => {
     expect(step.metadata.limitMs).toBe(500);
   });
 
+  it('regression [finding 7] acquire rejected from terminal cancelled / evicted state', () => {
+    // adversarial review found: acquire had no guard for terminal `cancelled`
+    // (from statementTimeout) or `evicted` (from idleTimeout) — silently
+    // reviving a terminal pool session masked the prior fault.
+    const cancelledSession = createPoolSession(opts('drizzle', 'postgres'));
+    acquire(cancelledSession, { clientId: 'c1', at: 0 });
+    statementTimeout(cancelledSession, { clientId: 'c1', elapsedMs: 800 });
+    expect(cancelledSession.state).toBe('cancelled');
+    expect(() =>
+      acquire(cancelledSession, { clientId: 'c2', at: 100 }),
+    ).toThrow(/cancelled/);
+    // terminal state preserved
+    expect(cancelledSession.state).toBe('cancelled');
+
+    const evictedSession = createPoolSession(opts('drizzle', 'postgres'));
+    acquire(evictedSession, { clientId: 'c1', at: 0 });
+    idleTimeout(evictedSession, { clientId: 'c1', at: 200 });
+    expect(evictedSession.state).toBe('evicted');
+    expect(() =>
+      acquire(evictedSession, { clientId: 'c2', at: 300 }),
+    ).toThrow(/evicted/);
+    expect(evictedSession.state).toBe('evicted');
+  });
+
   it('idleTimeout returns pool to "in-use" when other clients remain', () => {
     const session = createPoolSession(opts('drizzle', 'postgres'));
     acquire(session, { clientId: 'c1', at: 0 });

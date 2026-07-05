@@ -75,11 +75,21 @@ export function createPoolSession(input: {
  * {@link waitInQueue} first when saturation is expected. Emits
  * `pool.acquired` and moves the session into 'in-use' (or 'saturated' when
  * the acquisition tips the pool over the cap).
+ *
+ * Rejects when the session is in a terminal outcome (`cancelled` from
+ * `statementTimeout` or `evicted` from `idleTimeout`) — silently reviving
+ * a cancelled / evicted session masks the prior fault and breaks the
+ * telemetry invariant that a terminal pool session stays terminal.
  */
 export function acquire(
   session: PoolSession,
   input: { clientId: string; at: number },
 ): AxisStep<PoolState> {
+  if (session.state === 'cancelled' || session.state === 'evicted') {
+    throw new Error(
+      `acquire: pool session is ${session.state} (terminal), start a new session`,
+    );
+  }
   if (session.active.size >= session.maxConnections) {
     throw new Error(
       `acquire: pool saturated (${session.active.size}/${session.maxConnections})`,

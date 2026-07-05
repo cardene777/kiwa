@@ -67,6 +67,12 @@ export function createLogicalRepSession(input: {
 /**
  * Create a publication over one or more tables. Moves the session into
  * 'published'. Emits `logical.publication-created`.
+ *
+ * Rejects when the session already has a live subscription
+ * (`synced` / `conflict-resolved`) — overwriting the publication under a
+ * live topology silently orphans subscribers from the new publication and
+ * corrupts the replication invariant. Callers must drop subscribers first
+ * or start a new session.
  */
 export function createPublication(
   session: LogicalRepSession,
@@ -74,6 +80,11 @@ export function createPublication(
 ): AxisStep<LogicalRepState> {
   if (input.tables.length === 0) {
     throw new Error('createPublication: at least one table is required');
+  }
+  if (session.state === 'synced' || session.state === 'conflict-resolved') {
+    throw new Error(
+      `createPublication: cannot overwrite publication under live topology (state=${session.state})`,
+    );
   }
   session.publication = { name: input.name, tables: [...input.tables] };
   session.state = 'published';

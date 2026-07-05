@@ -131,6 +131,38 @@ describe('logical-replication axis — 3 provider × 3 backend', () => {
     expect(() => heartbeat(session, { at: 50 })).toThrow(/monotonically/);
   });
 
+  it('regression [finding 4] createPublication rejects overwrite under live topology', () => {
+    // adversarial review found: createPublication silently overwrote a live
+    // synced / conflict-resolved topology, orphaning subscribers from the new
+    // publication.
+    const session = createLogicalRepSession({
+      publisherId: 'p',
+      provider: 'drizzle',
+      backend: 'postgres',
+    });
+    createPublication(session, { name: 'pub_a', tables: ['users'] });
+    syncSubscription(session, { subscriberId: 'sub_1' });
+    expect(session.state).toBe('synced');
+    // second createPublication under live synced topology must reject
+    expect(() =>
+      createPublication(session, { name: 'pub_b', tables: ['orders'] }),
+    ).toThrow(/live topology/);
+    // original publication preserved
+    expect(session.publication?.name).toBe('pub_a');
+    expect(session.publication?.tables).toEqual(['users']);
+
+    // also rejected from conflict-resolved
+    resolveConflict(session, {
+      subscriberId: 'sub_1',
+      strategy: 'last-write-wins',
+      winner: 'publisher',
+    });
+    expect(session.state).toBe('conflict-resolved');
+    expect(() =>
+      createPublication(session, { name: 'pub_c', tables: ['x'] }),
+    ).toThrow(/live topology/);
+  });
+
   it('resolveConflict "primary-wins" and "last-write-wins" both allow publisher / subscriber winner', () => {
     const session = createLogicalRepSession({
       publisherId: 'p',

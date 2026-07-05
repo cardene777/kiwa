@@ -93,13 +93,24 @@ export function decodeEvent(
 /**
  * Append the last decoded event (or an explicitly supplied one) to the
  * Debezium-style outbox table. Emits `cdc.outbox-appended`. Requires the
- * session to be 'decoding' or 'ordered' — an idle session with no decoded
- * events cannot append silently.
+ * session to be 'decoding', 'buffered', or 'ordered' — an idle session or a
+ * session already 'delivered' cannot append silently, so the JSDoc-declared
+ * precondition is enforced at runtime to prevent silent state regression
+ * (e.g. `delivered → buffered`).
  */
 export function appendOutbox(
   session: CdcSession,
   input: { event?: CdcEvent },
 ): AxisStep<CdcState> {
+  if (
+    session.state !== 'decoding' &&
+    session.state !== 'buffered' &&
+    session.state !== 'ordered'
+  ) {
+    throw new Error(
+      `appendOutbox: requires decoding / buffered / ordered state (got ${session.state})`,
+    );
+  }
   const event = input.event ?? session.decoded[session.decoded.length - 1];
   if (!event) {
     throw new Error('appendOutbox: no event to append (decoded buffer is empty)');
@@ -154,6 +165,10 @@ export function markEventOrdered(session: CdcSession): AxisStep<CdcState> {
  * Confirm at-least-once delivery up to a given LSN. Requires prior
  * `markEventOrdered` so that ordering is asserted before ack. Emits
  * `cdc.at-least-once-delivered` and advances `confirmedLsn`.
+ *
+ * Rejects when `upToLsn` exceeds the outbox high-water mark (the max LSN
+ * currently in the outbox) — acknowledging events that were never appended
+ * silently corrupts the delivery invariant.
  */
 export function confirmDelivery(
   session: CdcSession,
@@ -167,6 +182,12 @@ export function confirmDelivery(
   if (input.upToLsn < session.confirmedLsn) {
     throw new Error(
       `confirmDelivery: upToLsn ${input.upToLsn} regresses confirmedLsn ${session.confirmedLsn}`,
+    );
+  }
+  const highWaterLsn = session.outbox.reduce((max, e) => (e.lsn > max ? e.lsn : max), 0);
+  if (input.upToLsn > highWaterLsn) {
+    throw new Error(
+      `confirmDelivery: upToLsn ${input.upToLsn} exceeds outbox high-water ${highWaterLsn}`,
     );
   }
   session.confirmedLsn = input.upToLsn;
