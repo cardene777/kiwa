@@ -39,17 +39,14 @@ const REPO_ROOT = process.env.KIWA_GATE_ROOT
 //   - 65: SaaS tier — provider-specific adapters.
 //   - 60: Test-type tier — harness packages with DOM / browser noise.
 const THRESHOLDS = {
+  // Core tier (pure logic, deterministic tests).
   '@kiwa-test/core': 80,
   '@kiwa-test/api': 90,
-  '@kiwa-test/ui': 60,
   '@kiwa-test/data': 80,
   '@kiwa-test/cli-test': 80,
   '@kiwa-test/observability': 80,
-  '@kiwa-test/e2e': 60,
   '@kiwa-test/cli': 80,
-  '@kiwa-test/dapp': 65,
-  '@kiwa-test/a11y': 90,
-  '@kiwa-test/visual': 60,
+  // Framework tier (SSR / hydration / adapter drift).
   '@kiwa-test/nextjs': 70,
   '@kiwa-test/nuxt': 70,
   '@kiwa-test/sveltekit': 70,
@@ -61,20 +58,36 @@ const THRESHOLDS = {
   '@kiwa-test/solidjs': 70,
   '@kiwa-test/fresh': 70,
   '@kiwa-test/hono': 70,
+  '@kiwa-test/auth': 70,
+  // SaaS tier (provider-specific adapters).
+  '@kiwa-test/ai-llm': 65,
+  '@kiwa-test/payment': 65,
+  '@kiwa-test/queue': 65,
+  '@kiwa-test/cache': 65,
+  '@kiwa-test/streaming': 65,
+  '@kiwa-test/realtime': 65,
+  '@kiwa-test/mcp': 65,
+  '@kiwa-test/agent': 65,
+  '@kiwa-test/search': 65,
+  '@kiwa-test/orm': 65,
+  '@kiwa-test/dapp': 65,
+  // Test-type tier (DOM / measurement noise).
+  '@kiwa-test/ui': 60,
+  '@kiwa-test/a11y': 90,
+  '@kiwa-test/visual': 60,
+  '@kiwa-test/component': 60,
+  '@kiwa-test/e2e': 60,
 };
 
 const PKG_DIRS = {
+  // Core tier.
   '@kiwa-test/core': 'packages/core',
   '@kiwa-test/api': 'packages/api',
-  '@kiwa-test/ui': 'packages/ui',
   '@kiwa-test/data': 'packages/data',
   '@kiwa-test/cli-test': 'packages/cli-test',
   '@kiwa-test/observability': 'packages/observability',
-  '@kiwa-test/e2e': 'packages/e2e',
   '@kiwa-test/cli': 'packages/cli',
-  '@kiwa-test/dapp': 'packages/dapp',
-  '@kiwa-test/a11y': 'packages/a11y',
-  '@kiwa-test/visual': 'packages/visual',
+  // Framework tier.
   '@kiwa-test/nextjs': 'packages/nextjs',
   '@kiwa-test/nuxt': 'packages/nuxt',
   '@kiwa-test/sveltekit': 'packages/sveltekit',
@@ -86,6 +99,25 @@ const PKG_DIRS = {
   '@kiwa-test/solidjs': 'packages/solidjs',
   '@kiwa-test/fresh': 'packages/fresh',
   '@kiwa-test/hono': 'packages/hono',
+  '@kiwa-test/auth': 'packages/auth',
+  // SaaS tier.
+  '@kiwa-test/ai-llm': 'packages/ai-llm',
+  '@kiwa-test/payment': 'packages/payment',
+  '@kiwa-test/queue': 'packages/queue',
+  '@kiwa-test/cache': 'packages/cache',
+  '@kiwa-test/streaming': 'packages/streaming',
+  '@kiwa-test/realtime': 'packages/realtime',
+  '@kiwa-test/mcp': 'packages/mcp',
+  '@kiwa-test/agent': 'packages/agent',
+  '@kiwa-test/search': 'packages/search',
+  '@kiwa-test/orm': 'packages/orm',
+  '@kiwa-test/dapp': 'packages/dapp',
+  // Test-type tier.
+  '@kiwa-test/ui': 'packages/ui',
+  '@kiwa-test/a11y': 'packages/a11y',
+  '@kiwa-test/visual': 'packages/visual',
+  '@kiwa-test/component': 'packages/component',
+  '@kiwa-test/e2e': 'packages/e2e',
 };
 
 const PACKAGES = Object.keys(THRESHOLDS);
