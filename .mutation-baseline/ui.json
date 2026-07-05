@@ -6,12 +6,63 @@
     "low": 50,
     "break": 40
   },
-  "killRate": null,
-  "killed": null,
-  "survived": null,
-  "timeout": null,
-  "error": null,
-  "mutants": [],
-  "capturedAt": "2026-07-05T17:47:38Z",
-  "note": "Initial baseline stub; kill-rate is null until first `pnpm test:mutation` PR run."
+  "killRate": 91.76,
+  "killed": 78,
+  "survived": 7,
+  "timeout": 0,
+  "noCoverage": 10,
+  "error": 0,
+  "mutants": [
+    {
+      "file": ".vitest-dist/src/setup-component-env.js",
+      "line": 42,
+      "column": 31,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/solid.js",
+      "line": 12,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/solid.js",
+      "line": 12,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/solid.js",
+      "line": 20,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/vue.js",
+      "line": 12,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/vue.js",
+      "line": 14,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/vue.js",
+      "line": 22,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    }
+  ],
+  "capturedAt": "2026-07-05T09:08:09Z",
+  "note": "Kill rate 91.76% (threshold high=60 / low=50 / break=40)."
 }

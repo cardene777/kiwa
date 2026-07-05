@@ -6,12 +6,49 @@
     "low": 80,
     "break": 80
   },
-  "killRate": null,
-  "killed": null,
-  "survived": null,
-  "timeout": null,
-  "error": null,
-  "mutants": [],
-  "capturedAt": "2026-07-05T17:47:38Z",
-  "note": "Initial baseline stub; kill-rate is null until first `pnpm test:mutation` PR run."
+  "killRate": 96.06,
+  "killed": 122,
+  "survived": 5,
+  "timeout": 0,
+  "noCoverage": 5,
+  "error": 0,
+  "mutants": [
+    {
+      "file": ".vitest-dist/src/msw-bridge.js",
+      "line": 15,
+      "column": 16,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/setup-api-server.js",
+      "line": 45,
+      "column": 95,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/request-client.js",
+      "line": 10,
+      "column": 16,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/request-client.js",
+      "line": 32,
+      "column": 17,
+      "mutator": "LogicalOperator",
+      "replacement": "init && {}"
+    },
+    {
+      "file": ".vitest-dist/src/request-client.js",
+      "line": 36,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    }
+  ],
+  "capturedAt": "2026-07-05T09:08:09Z",
+  "note": "Kill rate 96.06% (threshold high=90 / low=80 / break=80)."
 }

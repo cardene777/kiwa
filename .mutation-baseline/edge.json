@@ -6,12 +6,161 @@
     "low": 60,
     "break": 50
   },
-  "killRate": null,
-  "killed": null,
-  "survived": null,
-  "timeout": null,
-  "error": null,
-  "mutants": [],
-  "capturedAt": "2026-07-05T17:47:38Z",
-  "note": "Initial baseline stub; kill-rate is null until first `pnpm test:mutation` PR run."
+  "killRate": 83.97,
+  "killed": 110,
+  "survived": 21,
+  "timeout": 0,
+  "noCoverage": 0,
+  "error": 0,
+  "mutants": [
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 24,
+      "column": 13,
+      "mutator": "BooleanLiteral",
+      "replacement": "headers.has('content-type')"
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 24,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 24,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 25,
+      "column": 41,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 28,
+      "column": 34,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 52,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 52,
+      "column": 36,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 53,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 53,
+      "column": 37,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 54,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 54,
+      "column": 38,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 55,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 55,
+      "column": 38,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 64,
+      "column": 39,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 64,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "response.status > 300"
+    },
+    {
+      "file": ".vitest-dist/src/invoke-edge-handler.js",
+      "line": 64,
+      "column": 39,
+      "mutator": "EqualityOperator",
+      "replacement": "response.status <= 400"
+    },
+    {
+      "file": ".vitest-dist/src/kv-mock.js",
+      "line": 24,
+      "column": 20,
+      "mutator": "MethodExpression",
+      "replacement": "enc.buffer"
+    },
+    {
+      "file": ".vitest-dist/src/kv-mock.js",
+      "line": 34,
+      "column": 28,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/kv-mock.js",
+      "line": 34,
+      "column": 48,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/kv-mock.js",
+      "line": 48,
+      "column": 27,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/kv-mock.js",
+      "line": 48,
+      "column": 53,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    }
+  ],
+  "capturedAt": "2026-07-05T09:08:09Z",
+  "note": "Kill rate 83.97% (threshold high=70 / low=60 / break=50)."
 }

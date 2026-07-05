@@ -1,3 +1,8 @@
+/**
+ * Mutation testing config for @kiwa-test/edge.
+ * Threshold: Framework tier (high 70 / low 60 / break 50) — Workers / Deno / Bun edge runtimes with divergent APIs.
+ * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
+ */
 export default {
   packageManager: 'pnpm',
   testRunner: 'vitest',
@@ -8,7 +13,7 @@ export default {
     '.vitest-dist/src/invoke-edge-handler.js',
     '.vitest-dist/src/kv-mock.js',
   ],
-  thresholds: { high: 90, low: 80, break: 80 },
+  thresholds: { high: 70, low: 60, break: 50 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],
   reporters: ['progress-append-only', 'html', 'clear-text', 'json'],
   jsonReporter: { fileName: 'mutation-report/mutation.json' },
