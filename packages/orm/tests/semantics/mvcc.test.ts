@@ -142,6 +142,44 @@ describe('mvcc axis — 3 provider × 3 backend', () => {
     expect(step.metadata.victim).toBe('txn_1');
   });
 
+  it('regression [finding 5] takeSnapshot rejected from phantom-blocked state', () => {
+    // adversarial review found: takeSnapshot permitted `phantom-blocked →
+    // snapshot-held` transition, masquerading a blocked predicate lock as
+    // isolation.
+    const session = createMvccSession({
+      txnId: 'txn_1',
+      provider: 'drizzle',
+      backend: 'postgres',
+      isolation: 'repeatable-read',
+    });
+    takeSnapshot(session, { snapshotId: 1 });
+    blockPhantom(session, { predicate: 'id > 100', blockingTxn: 'txn_2' });
+    expect(session.state).toBe('phantom-blocked');
+    expect(() => takeSnapshot(session, { snapshotId: 2 })).toThrow(/phantom-blocked/);
+    // state stays phantom-blocked, snapshot id not bumped
+    expect(session.state).toBe('phantom-blocked');
+    expect(session.snapshotId).toBe(1);
+  });
+
+  it('regression [finding 6] detectDeadlock rejects overwrite of terminal aborted state', () => {
+    // adversarial review found: detectDeadlock silently overwrote a terminal
+    // `aborted` transaction with `deadlocked`, erasing the true termination
+    // cause and breaking the post-mortem invariant.
+    const session = createMvccSession({
+      txnId: 'txn_1',
+      provider: 'drizzle',
+      backend: 'postgres',
+      isolation: 'serializable',
+    });
+    abortSerializable(session, { reason: 'serialization failure' });
+    expect(session.state).toBe('aborted');
+    expect(() =>
+      detectDeadlock(session, { cycle: ['txn_1', 'txn_2'] }),
+    ).toThrow(/terminal state/);
+    // state stays aborted, true termination cause preserved
+    expect(session.state).toBe('aborted');
+  });
+
   it('re-taking snapshot bumps snapshotId while remaining snapshot-held', () => {
     const session = createMvccSession({
       txnId: 'txn_1',

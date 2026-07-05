@@ -55,7 +55,9 @@ describe('cdc axis — 3 provider × 3 backend', () => {
 
   it('appendOutbox with empty decoded buffer throws', () => {
     const session = createCdcSession({ slotName: 's', provider: 'drizzle', backend: 'postgres' });
-    expect(() => appendOutbox(session, {})).toThrow(/empty/);
+    // idle session with empty decoded buffer — the state-precondition guard
+    // fires first, rejecting the idle state before the empty-buffer check.
+    expect(() => appendOutbox(session, {})).toThrow(/decoding|empty/);
   });
 
   it('markEventOrdered rejects out-of-order lsn', () => {
@@ -99,6 +101,35 @@ describe('cdc axis — 3 provider × 3 backend', () => {
     markEventOrdered(session);
     const second = confirmDelivery(session, { upToLsn: 20 });
     expect(second.metadata.confirmedLsn).toBe(20);
+  });
+
+  it('regression [finding 2] appendOutbox rejected from idle state with explicit event', () => {
+    // adversarial review found: appendOutbox ignored the JSDoc precondition
+    // (`decoding` / `ordered`) — passing an explicit event from `idle` silently
+    // promoted the session to `buffered` without a preceding decode.
+    const session = createCdcSession({ slotName: 's', provider: 'drizzle', backend: 'postgres' });
+    expect(session.state).toBe('idle');
+    expect(() =>
+      appendOutbox(session, {
+        event: { lsn: 1, kind: 'insert', table: 't', payload: {} },
+      }),
+    ).toThrow(/requires decoding/);
+    // idle state preserved, no event was appended
+    expect(session.state).toBe('idle');
+    expect(session.outbox.length).toBe(0);
+  });
+
+  it('regression [finding 3] confirmDelivery rejects upToLsn beyond outbox high-water', () => {
+    // adversarial review found: confirmDelivery permitted `upToLsn` values that
+    // exceeded the outbox high-water mark, acknowledging events that were
+    // never appended and silently corrupting the delivery invariant.
+    const session = createCdcSession({ slotName: 's', provider: 'drizzle', backend: 'postgres' });
+    decodeEvent(session, { event: { lsn: 10, kind: 'insert', table: 't', payload: {} } });
+    appendOutbox(session, {});
+    markEventOrdered(session);
+    // outbox contains lsn=10, so high-water=10; upToLsn=999 must reject.
+    expect(() => confirmDelivery(session, { upToLsn: 999 })).toThrow(/exceeds outbox high-water/);
+    expect(session.confirmedLsn).toBe(0);
   });
 
   it('appendOutbox with explicit event overrides last decoded', () => {

@@ -79,6 +79,10 @@ export function createReplicationSession(input: {
  * Record a primary write. Bumps primary LSN by `bytes` and marks the session
  * 'streaming' unless it is currently in a failover flow. Emits
  * `replication.primary-write`.
+ *
+ * Rejects when the session has been promoted — the old primary is terminal
+ * after `promoteReplica` and cannot resume writes. Regressing a terminal
+ * `promoted` state to `streaming` corrupts the failover invariant.
  */
 export function primaryWrite(
   session: ReplicationSession,
@@ -86,6 +90,9 @@ export function primaryWrite(
 ): AxisStep<ReplicationState> {
   if (session.state === 'failover-in-progress') {
     throw new Error('primaryWrite: failover in progress, primary is unavailable');
+  }
+  if (session.state === 'promoted') {
+    throw new Error('primaryWrite: session is promoted (terminal), primary was demoted');
   }
   if (input.bytes <= 0) {
     throw new Error('primaryWrite: bytes must be positive');

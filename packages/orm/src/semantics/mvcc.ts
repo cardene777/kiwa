@@ -65,6 +65,10 @@ export function createMvccSession(input: {
  * Take a snapshot. Requires the txn to be 'active' or already
  * 'snapshot-held' (re-taking a snapshot at a new LSN is legal). Emits
  * `mvcc.snapshot-taken`.
+ *
+ * Rejects when the txn is blocked on a phantom read (`phantom-blocked`) —
+ * silently promoting a blocked txn to `snapshot-held` corrupts the
+ * predicate lock invariant and would masquerade as isolation.
  */
 export function takeSnapshot(
   session: MvccSession,
@@ -72,6 +76,9 @@ export function takeSnapshot(
 ): AxisStep<MvccState> {
   if (session.state === 'aborted' || session.state === 'deadlocked') {
     throw new Error(`takeSnapshot: txn is ${session.state}`);
+  }
+  if (session.state === 'phantom-blocked') {
+    throw new Error('takeSnapshot: txn is phantom-blocked, resolve the predicate lock first');
   }
   session.snapshotId = input.snapshotId;
   session.state = 'snapshot-held';
@@ -161,6 +168,11 @@ export function blockPhantom(
  * Detect a deadlock involving this txn. Emits `mvcc.deadlock-detected` and
  * moves the txn into 'deadlocked'. The caller supplies the deadlock cycle
  * (an array of participating txn ids) so telemetry can identify the ring.
+ *
+ * Rejects when the txn is already in a terminal outcome (`aborted` /
+ * `deadlocked`) — overwriting the terminal state with `deadlocked` erases
+ * the true termination cause (e.g. `aborted → deadlocked`) and breaks the
+ * post-mortem invariant that a txn ends exactly once.
  */
 export function detectDeadlock(
   session: MvccSession,
@@ -173,6 +185,9 @@ export function detectDeadlock(
     throw new Error(
       `detectDeadlock: session txn ${session.txnId} not in cycle`,
     );
+  }
+  if (session.state === 'aborted' || session.state === 'deadlocked') {
+    throw new Error(`detectDeadlock: txn already ${session.state}, cannot overwrite terminal state`);
   }
   session.state = 'deadlocked';
   return record(session, {

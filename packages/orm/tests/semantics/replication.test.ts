@@ -141,6 +141,24 @@ describe('replication axis — 3 provider × 3 backend', () => {
     expect(() => promoteReplica(session, { replicaId: 'r99' })).toThrow(/unknown replica/);
   });
 
+  it('regression [finding 1] primaryWrite rejected in terminal promoted state', () => {
+    // adversarial review found: primaryWrite silently regressed terminal
+    // `promoted` state back to `streaming`, corrupting the failover invariant.
+    const session = createReplicationSession({
+      primaryId: 'p1',
+      provider: 'drizzle',
+      backend: 'postgres',
+      replicaIds: ['r1'],
+    });
+    primaryWrite(session, { bytes: 10 });
+    startFailover(session, { reason: 'crash' });
+    promoteReplica(session, { replicaId: 'r1' });
+    expect(session.state).toBe('promoted');
+    expect(() => primaryWrite(session, { bytes: 5 })).toThrow(/promoted/);
+    // state stays terminal, primary lsn unchanged from promotion
+    expect(session.state).toBe('promoted');
+  });
+
   it('history accumulates one step per operation', () => {
     const session = createReplicationSession({
       primaryId: 'p1',

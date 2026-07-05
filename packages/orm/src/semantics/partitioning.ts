@@ -154,6 +154,12 @@ export function prunePartitions(
  * another partitioned table on the same key. Requires both sides to have
  * matching partition counts (Postgres constraint). Emits
  * `partition.wise-joined`.
+ *
+ * Rejects when `matchedBuckets` is strictly less than the declared bucket
+ * count — Postgres partition-wise join requires **all** buckets on both
+ * sides to match (a partial match falls back to a global join plan and is
+ * not partition-wise). Permitting partial matches silently mislabels a
+ * non-partition-wise plan as `joined`.
  */
 export function partitionWiseJoin(
   session: PartitioningSession,
@@ -168,6 +174,11 @@ export function partitionWiseJoin(
   if (input.matchedBuckets > session.buckets.length) {
     throw new Error(
       `partitionWiseJoin: matchedBuckets ${input.matchedBuckets} exceeds declared ${session.buckets.length}`,
+    );
+  }
+  if (input.matchedBuckets < session.buckets.length) {
+    throw new Error(
+      `partitionWiseJoin: matchedBuckets ${input.matchedBuckets} below declared ${session.buckets.length}, partial matches are not partition-wise`,
     );
   }
   session.state = 'joined';

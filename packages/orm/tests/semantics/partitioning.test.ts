@@ -174,6 +174,26 @@ describe('partitioning axis — 3 provider × 3 backend', () => {
     );
   });
 
+  it('regression [finding 8] partitionWiseJoin rejects partial bucket match', () => {
+    // adversarial review found: partitionWiseJoin permitted `matchedBuckets <
+    // declared bucket count`, silently mislabeling a non-partition-wise plan
+    // (Postgres falls back to a global join when not all buckets match).
+    const session = createPartitioningSession({
+      tableId: 't',
+      provider: 'drizzle',
+      backend: 'postgres',
+    });
+    declarePartition(session, { name: 'b1', strategy: 'list', bounds: { values: [1] } });
+    declarePartition(session, { name: 'b2', strategy: 'list', bounds: { values: [2] } });
+    declarePartition(session, { name: 'b3', strategy: 'list', bounds: { values: [3] } });
+    // 3 declared buckets, but only 2 matched — must reject as partial
+    expect(() =>
+      partitionWiseJoin(session, { otherTable: 'x', matchedBuckets: 2 }),
+    ).toThrow(/partial matches are not partition-wise/);
+    // state stays declared, not joined
+    expect(session.state).toBe('declared');
+  });
+
   it('routeInsert picks correct list / hash bucket', () => {
     const session = createPartitioningSession({
       tableId: 't',
