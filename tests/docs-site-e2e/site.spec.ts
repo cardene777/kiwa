@@ -186,6 +186,21 @@ const V1_24_PAGES = [
   { path: '/migrations/v1.23-to-v1.24', title: 'v1.23 → v1.24' },
 ];
 
+// v1.25 pages — new tutorials + concept doc + migration guide added under the
+// Perf-harness sweep milestone (Issue #932 publish PR). Mirrors the v1.21 /
+// v1.22 / v1.23 / v1.24 anchor phrase pattern. Each phrase is a substring the
+// rendered VitePress <main> will always include (checked against the actual
+// page headings + body text — not frontmatter titles). Coverage adds
+// 33 package perf-harness rollout — p95 baseline walkthrough (tutorial 45) +
+// 3 → 33 package migration methodology (tutorial 46) + SSOT concept doc + the
+// v1.24 → v1.25 migration guide.
+const V1_25_PAGES = [
+  { path: '/tutorials/45-perf-harness-baseline', title: 'Perf-harness baseline' },
+  { path: '/tutorials/46-perf-baseline-migration', title: 'Perf baseline migration' },
+  { path: '/concepts/perf-testing-ssot', title: 'Perf testing SSOT' },
+  { path: '/migrations/v1.24-to-v1.25', title: 'v1.24 → v1.25' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -351,6 +366,20 @@ test.describe('docs site — v1.23 pages render', () => {
 test.describe('docs site — v1.24 pages render', () => {
   for (const p of V1_24_PAGES) {
     test(`v1.24 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.25 pages render', () => {
+  for (const p of V1_25_PAGES) {
+    test(`v1.25 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
