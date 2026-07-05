@@ -1,0 +1,23 @@
+{
+  "name": "dogfood-sveltekit-http3-multiplex-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.28-4 — a SvelteKit + nginx-quic HTTP/3 + QUIC stream multiplex + priority scheduling + HPACK dynamic table + 0-RTT resumption experience that exercises the QUIC multiplex axes across a provider-neutral Http3MultiplexAdapter, drivable in both KIWA_MODE=real (calls nginx-quic testcontainers when HTTP3_KEY=1) and KIWA_MODE=mock (@kiwa-test/realtime v0.2 createQuicMultiplexMock + createHttp3PushMock) so behavioural fidelity feeds @kiwa-test/quality-metrics 12-axis release gate.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/realtime -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*",
+    "@kiwa-test/realtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
