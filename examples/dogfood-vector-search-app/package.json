@@ -1,0 +1,24 @@
+{
+  "name": "dogfood-vector-search-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app (v1.26-4) — a SvelteKit + Kysely + Postgres 16 pgvector + Redis embedding cache app that exercises 4 patterns (IVFFlat / HNSW index build with dimension guard / semantic k-NN search with cosine + L2 distance / hybrid semantic + BM25 keyword search with tunable weight / embedding cache hit-rate observation with on-demand re-index) driven by @kiwa-test/orm's vector-store semantics in KIWA_MODE=mock and testcontainers Postgres 16 + pgvector + Redis 7 in KIWA_MODE=real (env-skip VECTOR_KEY). Behavioural fidelity feeds @kiwa-test/quality-metrics 7-axis release gate.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/orm -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "pretest:perf": "pnpm -F @kiwa-test/orm -F @kiwa-test/core -F @kiwa-test/quality-metrics -F @kiwa-test/perf-harness build",
+    "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/orm": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@kiwa-test/perf-harness": "workspace:*",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
