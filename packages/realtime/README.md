@@ -4,6 +4,8 @@ Realtime test harness for kiwa — a unified mock across 4 realtime providers (S
 
 v0.1 lays the foundation for the v1.13 milestone dogfood apps (chat / collaboration / dashboards).
 
+v0.2 adds 8 advanced-transport semantics across 3 protocols (WebRTC / WebTransport / HTTP/3-QUIC) and a real-driver env-gate that lifts the 4 provider mocks to real-vs-mock parity when `KIWA_MODE=real` and the provider secrets are set.
+
 ## Install
 
 ```sh
@@ -141,6 +143,68 @@ Maps the realtime harness onto the AI-LLM 4 axes (`cost / latency / token / accu
 | PostgresChanges   | Supabase-style `INSERT / UPDATE / DELETE` CDC events; filter by schema + table            |
 | Room              | Socket.io namespace + room 2-level pub/sub, normalized into a single engine channel key   |
 | ReconnectPolicy   | Exponential backoff + jitter, pending-event queue with configurable `backpressureLimit`   |
+
+## v0.2 advanced semantics — 3 protocol × 8 axis matrix
+
+| Protocol      | Axis                    | Purpose                                                                                          |
+| ------------- | ----------------------- | ------------------------------------------------------------------------------------------------ |
+| WebRTC        | `webrtc-signaling`      | Offer / answer + SDP negotiation + ICE candidate exchange + renegotiation                       |
+| WebRTC        | `webrtc-data-channel`   | Ordered / unordered + reliable / unreliable + `maxRetransmits` + `binaryType`                    |
+| WebRTC        | `webrtc-track`          | `getUserMedia` + `MediaStream` + track add / remove + simulcast layers                           |
+| WebRTC        | `webrtc-ice`            | Candidate gathering + connectivity check + TURN relay + trickle ICE                              |
+| WebTransport  | `webtransport-uni`      | Unidirectional stream + Datagram + reset stream                                                  |
+| WebTransport  | `webtransport-bi`       | Bidirectional stream + flow control window + backpressure + close                                |
+| HTTP/3-QUIC   | `http3-push`            | Server push + prioritization + `push_promise` + cancellation                                     |
+| HTTP/3-QUIC   | `quic-multiplex`        | Stream multiplex + stream priority + HPACK dynamic table + 0-RTT resumption                      |
+
+```ts
+import {
+  createWebRtcSignalingMock,
+  createWebRtcDataChannelMock,
+  createWebRtcTrackMock,
+  createWebRtcIceMock,
+  createWebTransportUniMock,
+  createWebTransportBiMock,
+  createHttp3PushMock,
+  createQuicMultiplexMock,
+  measureSemanticsGrid,
+  SEMANTICS_GRID,
+} from '@kiwa-test/realtime';
+
+const signaling = createWebRtcSignalingMock();
+signaling.onEvent((event) => console.log(event.kind, event.payload));
+const offer = await signaling.createOffer();
+const answer = await signaling.createAnswer(offer);
+await signaling.emitIceCandidates(3);
+
+// 24 row visual matrix — applicable rows only 8 (each axis lives on its canonical protocol)
+console.log(SEMANTICS_GRID.filter((row) => row.applicable).length); // 8
+```
+
+`measureSemanticsGrid` runs a caller-supplied `scenario` per axis and returns a 24-row `SemanticsFidelityRow[]` — `applicable=true` rows carry live event counts, and the remaining 16 rows stay as `applicable=false` placeholders so the visual matrix keeps its 3 × 8 shape.
+
+## Real driver env-gate
+
+```ts
+import { resolveRealtimeDriverByProvider } from '@kiwa-test/realtime';
+
+const { driver, isReal, reason } = resolveRealtimeDriverByProvider(
+  'supabase',
+  (env) => createRealSupabaseDriver({ url: env.SUPABASE_URL, key: env.SUPABASE_ANON_KEY }),
+  () => createMockSupabaseDriver(),
+);
+
+if (isReal) console.log('real driver active —', reason);
+```
+
+`KIWA_MODE=real` + the provider's default env keys (`REAL_DRIVER_REQUIRED_KEYS`) selects the real driver; anything else falls back to the mock driver so tests never accidentally hit an external service.
+
+| Provider   | Required env keys                                                     |
+| ---------- | --------------------------------------------------------------------- |
+| supabase   | `SUPABASE_URL`, `SUPABASE_ANON_KEY`                                   |
+| ably       | `ABLY_API_KEY`                                                        |
+| pusher     | `PUSHER_APP_ID`, `PUSHER_KEY`, `PUSHER_SECRET`, `PUSHER_CLUSTER`      |
+| socketio   | `SOCKETIO_URL`                                                        |
 
 ## Related packages
 
