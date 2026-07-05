@@ -1,8 +1,11 @@
 /**
  * Mutation testing config for @kiwa-test/queue.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — queue adapter targets
- * sandbox + testcontainers backends (RabbitMQ / Cloudflare Queues / Inngest)
- * with provider-specific fidelity.
+ * the sandbox backend. testcontainers-queue.js is excluded because its
+ * assertions only fire when a live RabbitMQ / Cloudflare Queues / Inngest
+ * container is running, which the mutation run does not spin up (the file
+ * scored 0 % / 0 covered mutants in the v1.27-3 baseline sweep). Live-provider
+ * coverage lives in the dogfood adapter tests, not the mutation baseline.
  * SSOT: docs/quality/mutation-thresholds.md § SaaS tier.
  */
 export default {
@@ -13,7 +16,6 @@ export default {
   vitest: { configFile: 'vitest.stryker.config.mjs' },
   mutate: [
     '.vitest-dist/src/sandbox-queue.js',
-    '.vitest-dist/src/testcontainers-queue.js',
   ],
   thresholds: { high: 65, low: 55, break: 50 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],
