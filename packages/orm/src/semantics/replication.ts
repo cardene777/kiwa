@@ -118,6 +118,11 @@ export function markReplicaLagged(
   session: ReplicationSession,
   input: { replicaId: string; appliedLsn: number },
 ): AxisStep<ReplicationState> {
+  if (session.state === 'promoted') {
+    throw new Error(
+      `markReplicaLagged: session is promoted (terminal), primary was demoted`,
+    );
+  }
   const replica = session.replicas.get(input.replicaId);
   if (!replica) {
     throw new Error(`markReplicaLagged: unknown replica id ${input.replicaId}`);
