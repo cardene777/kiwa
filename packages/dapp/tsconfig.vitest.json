@@ -8,5 +8,11 @@
     "sourceMap": false,
     "noCheck": true
   },
-  "include": ["src/**/*", "tests/**/*"]
+  "include": [
+    "src/**/*",
+    "tests/**/*"
+  ],
+  "exclude": [
+    "tests/perf/**/*"
+  ]
 }
