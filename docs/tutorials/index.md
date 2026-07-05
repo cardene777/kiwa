@@ -59,6 +59,8 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 47 | [Postgres CDC + outbox pattern (change data capture walkthrough)](./47-postgres-cdc-outbox) | Node.js / vitest | 15 min |
 | 48 | [MySQL RLS + multi-tenant (row-level security walkthrough)](./48-mysql-rls-tenant) | Node.js / vitest | 15 min |
 | 49 | [pgvector + hybrid search (semantic + keyword retrieval walkthrough)](./49-vector-search-pgvector) | Node.js / vitest | 15 min |
+| 50 | [Mutation testing baseline (Stryker + kill-rate baseline + tier gate walkthrough)](./50-mutation-testing-baseline) | Node.js / vitest + Stryker | 15 min |
+| 51 | [Mutation baseline migration (22 → 33 package sweep methodology)](./51-mutation-baseline-migration) | Node.js / vitest + Stryker | 15 min |
 
 ## AI-LLM tutorials (v1.12)
 
@@ -111,3 +113,7 @@ Tutorials 45 – 46 exercise the v0.2 rollout of [`@kiwa-test/perf-harness`](htt
 ## Database 深化 tutorials (v1.26)
 
 Tutorials 47 – 49 exercise the v0.9 additions to [`@kiwa-test/orm`](https://github.com/cardene777/kiwa/blob/main/packages/orm/README.md) — 8 axes of advanced db semantics (replication / CDC / logical replication / MVCC / RLS / connection pool / partitioning / vector store) layered on top of the v0.8 `setupOrmEnv` — one for each of the 3 target dogfood app combinations Postgres CDC + outbox (Next.js 15 + drizzle + Postgres 16 logical replication + Debezium-style outbox + Redis Streams consumer), MySQL RLS + multi-tenant (Nuxt 3 + Prisma + MySQL 8 row-level security policy + tenant isolation + audit log), and pgvector + hybrid search (SvelteKit + kysely + Postgres 16 + pgvector IVFFlat / HNSW + hybrid ranking). See [`docs/concepts/db-advanced-testing.md`](../concepts/db-advanced-testing) for the 8-axis SSOT + provider × backend fidelity table + 3 × 3 × 8 = 72 row coverage grid across all 3 v1.26 dogfood db apps.
+
+## Mutation testing sweep tutorials (v1.27)
+
+Tutorials 50 – 51 exercise the v0.3 additions to [`@kiwa-test/quality-metrics`](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/README.md) — the 4-tier mutation SSOT (`DEFAULT_MUTATION_TIER_THRESHOLDS` + `resolveMutationTier` + `assertMutationTier`) + 12-axis release gate (`evaluateReleaseGate({ mutationTier })`) — layered on top of the v0.2 7 / 11-axis release gate — now applied to every kiwa package across the 4 layers Core / Framework / SaaS / Test type. Tutorial 50 walks the primitive stack (Stryker `stryker.config.mjs` + baseline JSON persistence + `assertMutationTier` + `evaluateReleaseGate` 12-axis path) against a trivial pure function so the mutants are easy to reason about; tutorial 51 documents the 6-step migration recipe used across the v1.27-1 through v1.27-3 sub-milestones to add a mutation baseline + tier gate to any new package in under 15 minutes. See [`docs/concepts/mutation-testing-ssot.md`](../concepts/mutation-testing-ssot) for the kill rate + 4-tier threshold SSOT + baseline persistence + 12-axis release gate integration + 3-layer harness alignment across the 33 package coverage grid.

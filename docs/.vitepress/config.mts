@@ -183,6 +183,13 @@ export default defineConfig({
             { text: '49 — pgvector + hybrid search (semantic + keyword retrieval walkthrough)', link: '/tutorials/49-vector-search-pgvector' },
           ],
         },
+        {
+          text: 'Mutation testing sweep (v1.27)',
+          items: [
+            { text: '50 — Mutation testing baseline (Stryker + kill-rate baseline + tier gate walkthrough)', link: '/tutorials/50-mutation-testing-baseline' },
+            { text: '51 — Mutation baseline migration (22 → 33 package sweep methodology)', link: '/tutorials/51-mutation-baseline-migration' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -205,6 +212,7 @@ export default defineConfig({
             { text: 'Edge runtime testing (8-axis SSOT — Durable Object / WebSocket / edge KV / geo-replicated / Cron / subrequest / CPU / streaming)', link: '/concepts/edge-runtime-testing' },
             { text: 'Perf-testing SSOT (p50 / p95 / p99 + baseline persistence + regression detection + 3-layer harness + 33 package coverage)', link: '/concepts/perf-testing-ssot' },
             { text: 'Db advanced testing SSOT (8 axis — replication / CDC / logical replication / MVCC / RLS / connection pool / partitioning / vector store)', link: '/concepts/db-advanced-testing' },
+            { text: 'Mutation testing SSOT (kill rate + 4-tier threshold + baseline persistence + 12-axis release gate)', link: '/concepts/mutation-testing-ssot' },
           ],
         },
       ],
@@ -230,6 +238,7 @@ export default defineConfig({
             { text: 'v1.23 → v1.24', link: '/migrations/v1.23-to-v1.24' },
             { text: 'v1.24 → v1.25', link: '/migrations/v1.24-to-v1.25' },
             { text: 'v1.25 → v1.26', link: '/migrations/v1.25-to-v1.26' },
+            { text: 'v1.26 → v1.27', link: '/migrations/v1.26-to-v1.27' },
           ],
         },
       ],
