@@ -55,10 +55,22 @@ const PACKAGES = {
 
 /**
  * Aggregate a Stryker mutation report into a baseline record.
- * The MSI here matches `check-mutation-gates.mjs`:
- *   MSI (covered) = (killed + timeout) / (killed + survived + timeout)
- * so NoCoverage mutants are excluded from the denominator, giving the
- * "what tests can observe" score used by the gate.
+ *
+ * Two scores are returned so downstream consumers can pick the right one:
+ *
+ *   totalMsi   = killed / (killed + survived + timeout + error)
+ *     -- SSOT from `docs/quality/mutation-thresholds.md` (line 18). Includes
+ *        CompileError / RuntimeError / Ignored mutants in the denominator so
+ *        the score does not silently improve when a mutant stops compiling.
+ *        This is the value written to `killRate` in each baseline JSON.
+ *
+ *   coveredMsi = (killed + timeout) / (killed + survived + timeout)
+ *     -- Stryker's "covered" column that `check-mutation-gates.mjs` uses. It
+ *        excludes NoCoverage + error mutants so the gate reflects only what
+ *        the test suite can actually observe, matching Stryker's HTML report.
+ *
+ * Persisting both fields lets the CI gate and the SSOT stay decoupled: raise
+ * the gate against `coveredMsi`, communicate progress against `totalMsi`.
  */
 export function summariseReport(raw) {
   let killed = 0;
@@ -101,9 +113,15 @@ export function summariseReport(raw) {
       }
     }
   }
-  const denominator = killed + survived + timeout;
-  const killRate = denominator === 0 ? 0 : ((killed + timeout) / denominator) * 100;
-  return { killRate, killed, survived, timeout, noCoverage, error, survivors };
+  const totalDenominator = killed + survived + timeout + error;
+  const coveredDenominator = killed + survived + timeout;
+  const totalMsi = totalDenominator === 0 ? 0 : (killed / totalDenominator) * 100;
+  const coveredMsi = coveredDenominator === 0 ? 0 : ((killed + timeout) / coveredDenominator) * 100;
+  // `killRate` is kept for backward compatibility with any downstream reader
+  // that pre-dates the totalMsi / coveredMsi split; it now equals totalMsi so
+  // the SSOT formula is the authoritative value at rest.
+  const killRate = totalMsi;
+  return { killRate, totalMsi, coveredMsi, killed, survived, timeout, noCoverage, error, survivors };
 }
 
 function summarise(reportPath) {
@@ -143,7 +161,12 @@ function refreshBaseline(pkg, pkgDir) {
     package: pkg,
     tier,
     thresholds,
-    killRate: Number(stats.killRate.toFixed(2)),
+    // killRate now equals totalMsi (SSOT formula, includes error mutants in
+    // the denominator). Kept for backward compatibility with pre-v1.27-3
+    // readers.
+    killRate: Number(stats.totalMsi.toFixed(2)),
+    totalMsi: Number(stats.totalMsi.toFixed(2)),
+    coveredMsi: Number(stats.coveredMsi.toFixed(2)),
     killed: stats.killed,
     survived: stats.survived,
     timeout: stats.timeout,
@@ -151,12 +174,20 @@ function refreshBaseline(pkg, pkgDir) {
     error: stats.error,
     mutants: stats.survivors,
     capturedAt: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
-    note: `Kill rate ${stats.killRate.toFixed(2)}% (threshold high=${thresholds.high} / low=${thresholds.low} / break=${thresholds.break}).`,
+    note: `Total MSI ${stats.totalMsi.toFixed(2)}% / Covered MSI ${stats.coveredMsi.toFixed(2)}% (threshold high=${thresholds.high} / low=${thresholds.low} / break=${thresholds.break}).`,
   };
 
   mkdirSync(dirname(baselinePath), { recursive: true });
   writeFileSync(baselinePath, `${JSON.stringify(record, null, 2)}\n`);
-  return { pkg, ok: true, killRate: record.killRate, survived: record.survived, mutants: record.mutants.length };
+  return {
+    pkg,
+    ok: true,
+    killRate: record.killRate,
+    totalMsi: record.totalMsi,
+    coveredMsi: record.coveredMsi,
+    survived: record.survived,
+    mutants: record.mutants.length,
+  };
 }
 
 // Skip the CLI when imported (e.g. from tests) so summariseReport can be
@@ -181,18 +212,18 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const result = refreshBaseline(pkg, pkgDir);
     if (result.ok) {
       rows.push(
-        `| ${pkg} | ${result.killRate.toFixed(2)}% | survivors=${result.survived} |`,
+        `| ${pkg} | ${result.totalMsi.toFixed(2)}% | ${result.coveredMsi.toFixed(2)}% | survivors=${result.survived} |`,
       );
     } else if (result.skipped) {
-      rows.push(`| ${pkg} | n/a | skipped: ${result.reason} |`);
+      rows.push(`| ${pkg} | n/a | n/a | skipped: ${result.reason} |`);
     } else {
       hardFailure = true;
-      rows.push(`| ${pkg} | n/a | FAILED: ${result.reason} |`);
+      rows.push(`| ${pkg} | n/a | n/a | FAILED: ${result.reason} |`);
     }
   }
 
   process.stdout.write(
-    ['| package | kill rate | note |', '|---|---|---|', ...rows, ''].join('\n'),
+    ['| package | total MSI | covered MSI | note |', '|---|---|---|---|', ...rows, ''].join('\n'),
   );
 
   process.exit(hardFailure ? 1 : 0);

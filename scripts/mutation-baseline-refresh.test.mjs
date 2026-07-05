@@ -33,6 +33,8 @@ const mixedReport = {
 test('summariseReport handles an empty report without dividing by zero', () => {
   const summary = summariseReport(emptyReport);
   assert.equal(summary.killRate, 0);
+  assert.equal(summary.totalMsi, 0);
+  assert.equal(summary.coveredMsi, 0);
   assert.equal(summary.killed, 0);
   assert.equal(summary.survived, 0);
   assert.equal(summary.timeout, 0);
@@ -50,12 +52,26 @@ test('summariseReport counts each mutant status into its bucket', () => {
   assert.equal(summary.error, 1, 'one CompileError counted as error');
 });
 
-test('summariseReport killRate excludes NoCoverage from the denominator', () => {
+test('summariseReport totalMsi matches SSOT formula: killed / (killed + survived + timeout + error)', () => {
+  // SSOT (docs/quality/mutation-thresholds.md line 18): CompileError / etc.
+  // is included in the denominator so a mutant that stops compiling does not
+  // silently improve the score.
+  // denominator = 2 killed + 2 survived + 1 timeout + 1 error = 6
+  // numerator = 2 killed
+  // score = 33.33...
+  const summary = summariseReport(mixedReport);
+  assert.equal(Number(summary.totalMsi.toFixed(2)), 33.33);
+  // killRate mirrors totalMsi for backward compatibility.
+  assert.equal(summary.killRate, summary.totalMsi);
+});
+
+test('summariseReport coveredMsi excludes NoCoverage + error from the denominator', () => {
+  // Stryker "covered" column formula that check-mutation-gates.mjs uses.
   // covered denominator = killed + survived + timeout = 2 + 2 + 1 = 5
   // numerator = killed + timeout = 3
   // score = 60
   const summary = summariseReport(mixedReport);
-  assert.equal(summary.killRate, 60);
+  assert.equal(summary.coveredMsi, 60);
 });
 
 test('summariseReport records survivor location + mutator + trimmed replacement', () => {

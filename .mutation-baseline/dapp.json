@@ -6,7 +6,9 @@
     "low": 55,
     "break": 50
   },
-  "killRate": 85.09,
+  "killRate": 84.21,
+  "totalMsi": 84.21,
+  "coveredMsi": 85.09,
   "killed": 96,
   "survived": 17,
   "timeout": 1,
@@ -133,6 +135,6 @@
       "replacement": "\"Stryker was here!\""
     }
   ],
-  "capturedAt": "2026-07-05T09:08:09Z",
-  "note": "Kill rate 85.09% (threshold high=65 / low=55 / break=50)."
+  "capturedAt": "2026-07-05T11:40:26Z",
+  "note": "Total MSI 84.21% / Covered MSI 85.09% (threshold high=65 / low=55 / break=50)."
 }

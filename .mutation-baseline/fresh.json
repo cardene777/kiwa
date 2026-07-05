@@ -6,7 +6,9 @@
     "low": 60,
     "break": 50
   },
-  "killRate": 72.21,
+  "killRate": 72.09,
+  "totalMsi": 72.09,
+  "coveredMsi": 72.21,
   "killed": 594,
   "survived": 229,
   "timeout": 1,
@@ -1617,6 +1619,6 @@
       "replacement": "\"\""
     }
   ],
-  "capturedAt": "2026-07-05T09:14:51Z",
-  "note": "Kill rate 72.21% (threshold high=70 / low=60 / break=50)."
+  "capturedAt": "2026-07-05T11:40:26Z",
+  "note": "Total MSI 72.09% / Covered MSI 72.21% (threshold high=70 / low=60 / break=50)."
 }

@@ -2,9 +2,10 @@
  * Mutation testing config for @kiwa-test/nextjs.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — SSR + RSC + Server
  * Actions + Middleware invariants; the initial v1.27-1 rollout used the
- * aspirational 90 / 80 / 80 override, but the v1.27-2 baseline sweep showed
- * total MSI 79.35 (covered 80.00), so the config now sits at the Framework
- * default. A follow-up PR raises the bar back once tests reach 90 %.
+ * aspirational 90 / 80 / 80 override, but the v1.27-2 baseline sweep landed at
+ * ~80 % total MSI (SSOT formula: killed / (killed + survived + timeout + error)),
+ * so the config now sits at the Framework default. A follow-up PR raises the
+ * bar back once tests reach 90 %.
  * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
  */
 export default {
