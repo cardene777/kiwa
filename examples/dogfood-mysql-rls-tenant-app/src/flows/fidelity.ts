@@ -19,6 +19,7 @@ import {
   mutationFromCounts,
   perfFromSamples,
   testCountFromCategories,
+  type MutationTier,
   type QualityReport,
   type ReleaseGateVerdict,
 } from '@kiwa-test/quality-metrics';
@@ -41,6 +42,15 @@ export interface FidelityRunInput {
   };
   testCount: { behavior: number; integration: number; e2e: number };
   mutation: { mutations: number; killed: number };
+  /**
+   * v1.27-4 12-axis release gate — mutation tier of the upstream package
+   * (`@kiwa-test/orm` = `saas` here). When present, `evaluateReleaseGate`
+   * adds a `mutation.tier` axis using the SSOT threshold table. Absent =
+   * legacy 7-axis behaviour (backward compat).
+   */
+  mutationTier?: MutationTier;
+  /** Optional looser per-package override (documented in `.mutation-baseline/`). */
+  mutationTierThreshold?: number;
 }
 
 export interface FidelityRunOutput {
@@ -68,7 +78,18 @@ export function runFidelityHarness(input: FidelityRunInput): FidelityRunOutput {
     mutation: mutationFromCounts(input.mutation),
     notes: renderNotes(divergences, input.opsUnderTest),
   });
-  const verdict = evaluateReleaseGate(report);
+  const verdict = evaluateReleaseGate(
+    report,
+    {},
+    input.mutationTier === undefined
+      ? {}
+      : {
+          mutationTier: input.mutationTier,
+          ...(input.mutationTierThreshold === undefined
+            ? {}
+            : { mutationTierThreshold: input.mutationTierThreshold }),
+        },
+  );
   return {
     divergences,
     report,

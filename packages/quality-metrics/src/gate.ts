@@ -1,10 +1,80 @@
 import type {
+  MutationMetric,
+  MutationTier,
   QualityReport,
   ReleaseGateBlocker,
+  ReleaseGateContext,
   ReleaseGateThresholds,
   ReleaseGateVerdict,
 } from './types.js';
 import { isAiLlmProvider } from './types.js';
+
+/**
+ * 4-tier mutation kill-rate SSOT — v1.27-4。 各 tier の値は
+ * `docs/quality/mutation-thresholds.md` の `high` 列 (green threshold)。
+ * per-package looser override は {@link ReleaseGateContext.mutationTierThreshold}
+ * または {@link assertMutationTier} 引数で個別指定する。
+ */
+export const DEFAULT_MUTATION_TIER_THRESHOLDS: Readonly<Record<MutationTier, number>> = Object.freeze({
+  core: 80,
+  framework: 70,
+  saas: 65,
+  'test-type': 60,
+});
+
+/**
+ * baseline JSON の verbal tier label (`Core` / `Framework` / `SaaS` /
+ * `Test type`) を machine-friendly {@link MutationTier} enum に正規化する。
+ * baseline (`docs/quality/mutation-thresholds.md`) と runtime gate 経路を
+ * 1 経路に集約する SSOT helper。
+ *
+ * case-insensitive + trim 対応。 未知 label は throw して silent drift を防ぐ。
+ */
+export function resolveMutationTier(label: string): MutationTier {
+  const key = label.trim().toLowerCase();
+  switch (key) {
+    case 'core':
+      return 'core';
+    case 'framework':
+      return 'framework';
+    case 'saas':
+      return 'saas';
+    case 'test type':
+    case 'test-type':
+      return 'test-type';
+    default:
+      throw new Error(
+        `resolveMutationTier: unknown mutation tier label "${label}" (expected Core / Framework / SaaS / Test type)`,
+      );
+  }
+}
+
+/**
+ * 単一 {@link MutationMetric} を tier default threshold (または override) と
+ * 突合して pass / fail を判定する helper。 fail 時は actual + threshold +
+ * tier を error message に含めて actionable にする (rules/quality.md AC 具体表現)。
+ *
+ * `metric.mutations === 0` は「no signal」 として fail 扱い。 空 test suite の
+ * 0/0 = 0% が silent pass するのを防ぐ。
+ */
+export function assertMutationTier(input: {
+  metric: MutationMetric;
+  tier: MutationTier;
+  threshold?: number;
+}): void {
+  const threshold = input.threshold ?? DEFAULT_MUTATION_TIER_THRESHOLDS[input.tier];
+  if (input.metric.mutations === 0) {
+    throw new Error(
+      `assertMutationTier: no mutation signal (0 mutations) for tier "${input.tier}" — empty suite would slip past a 0/0 = 0% gate`,
+    );
+  }
+  const actual = input.metric.killRate;
+  if (actual + 0.0001 < threshold) {
+    throw new Error(
+      `assertMutationTier: mutation kill rate ${actual.toFixed(2)}% below "${input.tier}" tier threshold ${threshold}%`,
+    );
+  }
+}
 
 /**
  * Default release-gate thresholds (11 軸)。 共通 7 軸は v1.11 milestone の
@@ -49,10 +119,16 @@ export const DEFAULT_RELEASE_GATE_THRESHOLDS: ReleaseGateThresholds = {
  * latency / token / accuracy) を追加検査、 4 軸のうち report にない field
  * は blocker として扱う (欠損 = 未計測 = 未満)。 それ以外の provider は
  * 7 軸のまま (breaking change なし)。
+ *
+ * v1.27-4 で 12 番目 axis `mutation.tier` を optional 追加。 `context.mutationTier`
+ * が指定された場合のみ 4-tier threshold (Core 80 / Framework 70 / SaaS 65 /
+ * Test type 60) と kill rate を突合、 これは既存 `mutation.killRate` axis と
+ * **並存** する (置換ではない)、 legacy overrides もそのまま機能する。
  */
 export function evaluateReleaseGate(
   report: QualityReport,
   overrides: Partial<ReleaseGateThresholds> = {},
+  context: ReleaseGateContext = {},
 ): ReleaseGateVerdict {
   const thresholds: ReleaseGateThresholds = {
     ...DEFAULT_RELEASE_GATE_THRESHOLDS,
@@ -92,6 +168,14 @@ export function evaluateReleaseGate(
     check('latency.p95Ms', latencyActual, thresholds.latencyP95Ms, '<=');
     check('token.totalTokens', tokenActual, thresholds.totalTokens, '<=');
     check('accuracy.score', accuracyActual, thresholds.accuracyScore, '>=');
+  }
+
+  if (context.mutationTier !== undefined) {
+    axesEvaluated += 1;
+    const tierThreshold =
+      context.mutationTierThreshold ??
+      DEFAULT_MUTATION_TIER_THRESHOLDS[context.mutationTier];
+    check('mutation.tier', report.mutation.killRate, tierThreshold, '>=');
   }
 
   return {

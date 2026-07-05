@@ -11,11 +11,19 @@
  * which matches Stryker's "% Mutation score / covered" column (no-coverage
  * mutants are excluded so the score reflects what tests can actually observe).
  *
+ * v1.27-4: the per-package threshold table below has been reshaped into a
+ * **tier + override** SSOT that mirrors `docs/quality/mutation-thresholds.md`
+ * and `packages/quality-metrics/src/gate.ts` DEFAULT_MUTATION_TIER_THRESHOLDS.
+ * Each package picks a tier (Core 80 / Framework 70 / SaaS 65 / Test type 60)
+ * and may declare a looser `override` that must stay above the tier's
+ * `break` bar. A stricter override (e.g. `@kiwa-test/api` = Core-strict 90)
+ * just raises the floor.
+ *
  * Per-package thresholds follow the 4-tier rationale from
  * `docs/quality/mutation-thresholds.md`:
  * Core-strict 90 / Core 80 / Framework 70 / SaaS 65 / Test-type 60.
- * A stricter override (e.g. `@kiwa-test/a11y` at 90) raises the floor; a
- * looser override needs a one-line justification in the PR that introduces it.
+ * A stricter override raises the floor; a looser override needs a one-line
+ * justification in the PR that introduces it.
  *
  * Run with `node scripts/check-mutation-gates.mjs` from the repo root after
  * each `pnpm -F <pkg> run test:mutation` has produced its mutation report.
@@ -30,73 +38,94 @@ const REPO_ROOT = process.env.KIWA_GATE_ROOT
   ? process.cwd()
   : SCRIPT_ROOT;
 
-// Per-package MSI thresholds. Values track the `high` column in
-// docs/quality/mutation-thresholds.md so a single edit in the SSOT flows
-// through here without a second bookkeeping table:
-//   - 90: Core-strict (protocol / accessibility invariants).
-//   - 80: Core tier — pure logic, deterministic tests.
-//   - 70: Framework tier — SSR / hydration / adapter drift.
-//   - 65: SaaS tier — provider-specific adapters.
-//   - 60: Test-type tier — harness packages with DOM / browser noise.
-//
-// Looser per-package overrides are allowed when the tier's break threshold
-// still holds (docs/quality/mutation-thresholds.md § Overrides). Each looser
-// override must name the follow-up work that brings it back to tier default.
-const THRESHOLDS = {
+/**
+ * 4-tier default threshold SSOT — mirrors `docs/quality/mutation-thresholds.md`
+ * and `packages/quality-metrics/src/gate.ts` DEFAULT_MUTATION_TIER_THRESHOLDS.
+ * Every package's `high` bar is derived from its tier unless it declares an
+ * override below.
+ */
+export const TIER_THRESHOLD = Object.freeze({
+  core: 80,
+  framework: 70,
+  saas: 65,
+  'test-type': 60,
+});
+
+/**
+ * Per-package tier + optional override. `override` documents both the value
+ * and the reason. A stricter override (raising the floor) needs no reason;
+ * a looser override cites the follow-up work that brings it back to tier
+ * default.
+ *
+ * NOTE: keep this table sorted by tier so review can spot a mis-tiered
+ * addition at a glance.
+ */
+export const PACKAGE_TIER = Object.freeze({
   // Core tier (pure logic, deterministic tests).
-  '@kiwa-test/core': 80,
-  '@kiwa-test/api': 90,
-  '@kiwa-test/data': 80,
-  '@kiwa-test/cli-test': 80,
-  '@kiwa-test/observability': 80,
-  '@kiwa-test/cli': 80,
+  '@kiwa-test/core': { tier: 'core' },
+  '@kiwa-test/api': { tier: 'core', override: 90, reason: 'Core-strict — HTTP request client + MSW bridge, protocol invariants.' },
+  '@kiwa-test/data': { tier: 'core' },
+  '@kiwa-test/cli-test': { tier: 'core' },
+  '@kiwa-test/observability': { tier: 'core' },
+  '@kiwa-test/cli': { tier: 'core' },
   // Framework tier (SSR / hydration / adapter drift).
-  '@kiwa-test/nextjs': 70,
-  '@kiwa-test/nuxt': 70,
-  '@kiwa-test/sveltekit': 70,
-  '@kiwa-test/remix': 70,
-  '@kiwa-test/astro': 70,
-  '@kiwa-test/solidstart': 70,
-  '@kiwa-test/qwikcity': 70,
-  '@kiwa-test/edge': 70,
-  '@kiwa-test/solidjs': 70,
-  '@kiwa-test/fresh': 70,
-  '@kiwa-test/hono': 70,
+  '@kiwa-test/nextjs': { tier: 'framework' },
+  '@kiwa-test/nuxt': { tier: 'framework' },
+  '@kiwa-test/sveltekit': { tier: 'framework' },
+  '@kiwa-test/remix': { tier: 'framework' },
+  '@kiwa-test/astro': { tier: 'framework' },
+  '@kiwa-test/solidstart': { tier: 'framework' },
+  '@kiwa-test/qwikcity': { tier: 'framework' },
+  '@kiwa-test/edge': { tier: 'framework' },
+  '@kiwa-test/solidjs': { tier: 'framework' },
+  '@kiwa-test/fresh': { tier: 'framework' },
+  '@kiwa-test/hono': { tier: 'framework' },
   // auth landed at 68.86 % covered MSI in the v1.27-3 first sweep (adapter.js
   // 65.75 / providers.js 80.70 / session.js 56.76). Held at 65 % — one point
   // below tier low — until follow-up session.js tests raise it back to 70.
-  '@kiwa-test/auth': 65,
+  '@kiwa-test/auth': { tier: 'framework', override: 65, reason: 'session.js 56.76 % — follow-up test raises back to 70.' },
   // SaaS tier (provider-specific adapters).
   // ai-llm has no baseline in v1.27-3 (scope belongs to v1.27-4 release-gate
   // integration). Threshold left at tier default so the gate stays honest
   // once the baseline lands.
-  '@kiwa-test/ai-llm': 65,
-  '@kiwa-test/payment': 65,
-  '@kiwa-test/queue': 65,
+  '@kiwa-test/ai-llm': { tier: 'saas' },
+  '@kiwa-test/payment': { tier: 'saas' },
+  '@kiwa-test/queue': { tier: 'saas' },
   // cache landed at 62.68 % covered MSI on `in-memory-cache.js` (the sole
   // mutated file after excluding testcontainers-cache.js). Held at 60 % —
   // above tier break 50 — until follow-up covers the TTL + eviction edge
   // cases surfaced by the surviving mutant list.
-  '@kiwa-test/cache': 60,
-  '@kiwa-test/streaming': 65,
+  '@kiwa-test/cache': { tier: 'saas', override: 60, reason: 'in-memory-cache.js TTL + eviction follow-up.' },
+  '@kiwa-test/streaming': { tier: 'saas' },
   // realtime landed at 62.31 % covered MSI across engine / fidelity / ably
   // (pusher / socketio / report excluded, see stryker.config.mjs). Held at
   // 60 % until follow-up fidelity tests raise it back to 65.
-  '@kiwa-test/realtime': 60,
-  '@kiwa-test/mcp': 65,
-  '@kiwa-test/agent': 65,
-  '@kiwa-test/search': 65,
+  '@kiwa-test/realtime': { tier: 'saas', override: 60, reason: 'fidelity follow-up raises back to 65.' },
+  '@kiwa-test/mcp': { tier: 'saas' },
+  '@kiwa-test/agent': { tier: 'saas' },
+  '@kiwa-test/search': { tier: 'saas' },
   // orm landed at 61.84 % covered MSI on `expectations.js`. Held at 60 %
   // until follow-up query-planner tests raise it back to 65.
-  '@kiwa-test/orm': 60,
-  '@kiwa-test/dapp': 65,
+  '@kiwa-test/orm': { tier: 'saas', override: 60, reason: 'query-planner follow-up raises back to 65.' },
+  '@kiwa-test/dapp': { tier: 'saas' },
   // Test-type tier (DOM / measurement noise).
-  '@kiwa-test/ui': 60,
-  '@kiwa-test/a11y': 90,
-  '@kiwa-test/visual': 60,
-  '@kiwa-test/component': 60,
-  '@kiwa-test/e2e': 60,
-};
+  '@kiwa-test/ui': { tier: 'test-type' },
+  '@kiwa-test/a11y': { tier: 'test-type', override: 90, reason: 'axe-core WCAG 2.1 AA — protocol invariants, historic high bar.' },
+  '@kiwa-test/visual': { tier: 'test-type' },
+  '@kiwa-test/component': { tier: 'test-type' },
+  '@kiwa-test/e2e': { tier: 'test-type' },
+});
+
+/** Effective threshold = override ?? tier default. */
+export function thresholdFor(pkg) {
+  const entry = PACKAGE_TIER[pkg];
+  if (!entry) return undefined;
+  return entry.override ?? TIER_THRESHOLD[entry.tier];
+}
+
+const THRESHOLDS = Object.fromEntries(
+  Object.keys(PACKAGE_TIER).map((pkg) => [pkg, thresholdFor(pkg)]),
+);
 
 const PKG_DIRS = {
   // Core tier.
@@ -196,58 +225,64 @@ function loadMsi(pkgDir) {
   };
 }
 
-const failures = [];
-const rows = [];
-for (const pkg of PACKAGES) {
-  const dir = PKG_DIRS[pkg];
-  const threshold = THRESHOLDS[pkg];
-  const result = loadMsi(dir);
-  if (!result.ok) {
-    if (DEFERRED.has(pkg)) {
-      rows.push(`| ${pkg} | deferred | ${threshold} | 🟡 baseline deferred to a later milestone |`);
+// Skip the CLI when imported (e.g. from unit tests). The module-level exports
+// stay reachable so consumers can cross-check the tier table SSOT.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const failures = [];
+  const rows = [];
+  for (const pkg of PACKAGES) {
+    const dir = PKG_DIRS[pkg];
+    const threshold = THRESHOLDS[pkg];
+    const tierInfo = PACKAGE_TIER[pkg];
+    const tierLabel = tierInfo.tier + (tierInfo.override !== undefined ? ` (override ${tierInfo.override})` : '');
+    const result = loadMsi(dir);
+    if (!result.ok) {
+      if (DEFERRED.has(pkg)) {
+        rows.push(`| ${pkg} | ${tierLabel} | deferred | ${threshold} | 🟡 baseline deferred to a later milestone |`);
+        continue;
+      }
+      failures.push({ pkg, reason: result.reason });
+      rows.push(`| ${pkg} | ${tierLabel} | n/a | ${threshold} | ❌ ${result.reason} |`);
       continue;
     }
-    failures.push({ pkg, reason: result.reason });
-    rows.push(`| ${pkg} | n/a | ${threshold} | ❌ ${result.reason} |`);
-    continue;
-  }
-  const passed = result.msi + 0.0001 >= threshold;
-  rows.push(
-    `| ${pkg} | ${result.msi.toFixed(2)} | ${threshold} | ${passed ? '✅' : '❌'} (killed=${result.killed}, survived=${result.survived}, timeout=${result.timeout}) |`,
-  );
-  if (!passed) {
-    failures.push({ pkg, threshold, msi: result.msi, ...result });
-  }
-}
-
-const header = [
-  '| package | MSI % | threshold % | status |',
-  '|---|---|---|---|',
-];
-const report = [
-  `# Mutation gate report`,
-  '',
-  `Thresholds follow the 4-tier rationale in docs/quality/mutation-thresholds.md.`,
-  '',
-  ...header,
-  ...rows,
-  '',
-];
-process.stdout.write(report.join('\n'));
-
-if (failures.length === 0) {
-  process.stderr.write('\nAll packages passed mutation thresholds.\n');
-  process.exit(0);
-}
-
-process.stderr.write('\nMutation gate failed for:\n');
-for (const f of failures) {
-  if (f.msi !== undefined) {
-    process.stderr.write(
-      `  - ${f.pkg}: MSI=${f.msi.toFixed(2)}% (need ${f.threshold}%, killed=${f.killed}/survived=${f.survived})\n`,
+    const passed = result.msi + 0.0001 >= threshold;
+    rows.push(
+      `| ${pkg} | ${tierLabel} | ${result.msi.toFixed(2)} | ${threshold} | ${passed ? '✅' : '❌'} (killed=${result.killed}, survived=${result.survived}, timeout=${result.timeout}) |`,
     );
-  } else {
-    process.stderr.write(`  - ${f.pkg}: ${f.reason}\n`);
+    if (!passed) {
+      failures.push({ pkg, threshold, msi: result.msi, ...result });
+    }
   }
+
+  const header = [
+    '| package | tier | MSI % | threshold % | status |',
+    '|---|---|---|---|---|',
+  ];
+  const report = [
+    `# Mutation gate report`,
+    '',
+    `12-axis release gate — mutation.tier axis, threshold table SSOT: docs/quality/mutation-thresholds.md.`,
+    '',
+    ...header,
+    ...rows,
+    '',
+  ];
+  process.stdout.write(report.join('\n'));
+
+  if (failures.length === 0) {
+    process.stderr.write('\nAll packages passed mutation thresholds.\n');
+    process.exit(0);
+  }
+
+  process.stderr.write('\nMutation gate failed for:\n');
+  for (const f of failures) {
+    if (f.msi !== undefined) {
+      process.stderr.write(
+        `  - ${f.pkg}: MSI=${f.msi.toFixed(2)}% (need ${f.threshold}%, killed=${f.killed}/survived=${f.survived})\n`,
+      );
+    } else {
+      process.stderr.write(`  - ${f.pkg}: ${f.reason}\n`);
+    }
+  }
+  process.exit(1);
 }
-process.exit(1);
