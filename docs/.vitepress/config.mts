@@ -243,6 +243,14 @@ export default defineConfig({
             { text: '69 — Storybook 8 MDX (CSF3 + MDX doc + interaction runner + coverage report walkthrough)', link: '/tutorials/69-storybook-8-mdx' },
           ],
         },
+        {
+          text: 'Observability 深化 (v1.35)',
+          items: [
+            { text: '70 — SLO burn rate (error budget + multi-window multi-burn-rate alert walkthrough)', link: '/tutorials/70-slo-burn-rate' },
+            { text: '71 — OpenTelemetry exemplar (trace-to-metric + metric-to-trace + baggage + W3C context walkthrough)', link: '/tutorials/71-otel-exemplar' },
+            { text: '72 — Continuous profiling (CPU + memory + off-CPU flame graph + depth-first flatten walkthrough)', link: '/tutorials/72-continuous-profiling' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -273,6 +281,7 @@ export default defineConfig({
             { text: 'Database real-driver testing (16 axis SSOT + 3 provider × 3 backend × 16 axis = 144 cell grid + testcontainers pattern + KIWA_MODE=real env-gate)', link: '/concepts/database-real-driver-testing' },
             { text: 'Payment real-driver testing (8 axis SSOT + 3 provider × 8 axis = 24 cell grid + testcontainers-shaped env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/payment-real-driver-testing' },
             { text: 'Frontend real-driver testing (8 axis SSOT + 3 target × 8 axis = 24 cell grid + browser-shaped env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/frontend-real-driver-testing' },
+            { text: 'Observability real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/observability-real-driver-testing' },
           ],
         },
       ],
@@ -306,6 +315,7 @@ export default defineConfig({
             { text: 'v1.31 → v1.32', link: '/migrations/v1.31-to-v1.32' },
             { text: 'v1.32 → v1.33', link: '/migrations/v1.32-to-v1.33' },
             { text: 'v1.33 → v1.34', link: '/migrations/v1.33-to-v1.34' },
+            { text: 'v1.34 → v1.35', link: '/migrations/v1.34-to-v1.35' },
           ],
         },
       ],
