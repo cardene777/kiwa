@@ -318,6 +318,27 @@ const V1_32_PAGES = [
   { path: '/migrations/v1.31-to-v1.32', title: 'v1.31 → v1.32' },
 ];
 
+// v1.33 pages — new tutorials 64-66 + concept doc + migration guide added
+// under the payment deepening II milestone (Issue #1041). Same
+// skip-if-dist-missing pattern as the canonical suite above so the tests pass
+// on a fresh clone without a full docs build. Each page asserts an anchor
+// phrase that a rendered VitePress build will always include in <main>.
+// Coverage adds payment orchestration (multi-provider routing + failover +
+// retry ladder + circuit breaker walkthrough) tutorial 64 + Stripe Connect
+// marketplace (dispute + refund + webhook idempotency + DAC7 walkthrough)
+// tutorial 65 + Paddle Billing v2 (grace period + proration + coupon
+// stacking + recovery + vault migration walkthrough) tutorial 66 + Payment
+// real-driver testing SSOT (8 axis × 3 provider = 24 cell grid +
+// testcontainers-shaped env-gate pattern) concept doc + v1.32 → v1.33
+// additive-only migration guide.
+const V1_33_PAGES = [
+  { path: '/tutorials/64-payment-orchestration', title: 'Payment orchestration' },
+  { path: '/tutorials/65-stripe-connect-marketplace', title: 'Stripe Connect marketplace' },
+  { path: '/tutorials/66-paddle-billing-v2', title: 'Paddle Billing v2' },
+  { path: '/concepts/payment-real-driver-testing', title: 'Payment real-driver testing' },
+  { path: '/migrations/v1.32-to-v1.33', title: 'v1.32 → v1.33' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -595,6 +616,20 @@ test.describe('docs site — v1.31 pages render', () => {
 test.describe('docs site — v1.32 pages render', () => {
   for (const p of V1_32_PAGES) {
     test(`v1.32 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.33 pages render', () => {
+  for (const p of V1_33_PAGES) {
+    test(`v1.33 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
