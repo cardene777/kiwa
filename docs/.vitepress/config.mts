@@ -235,6 +235,14 @@ export default defineConfig({
             { text: '66 — Paddle Billing v2 (grace period + proration + coupon stacking + recovery + vault migration walkthrough)', link: '/tutorials/66-paddle-billing-v2' },
           ],
         },
+        {
+          text: 'Frontend 深化 (v1.34)',
+          items: [
+            { text: '67 — RSC streaming SSR (Server Components + Suspense + selective hydration + view transitions walkthrough)', link: '/tutorials/67-rsc-streaming-ssr' },
+            { text: '68 — Server Action + optimistic UI (form action + useFormStatus + useOptimistic + revalidatePath + revalidateTag + redirect walkthrough)', link: '/tutorials/68-server-action-optimistic' },
+            { text: '69 — Storybook 8 MDX (CSF3 + MDX doc + interaction runner + coverage report walkthrough)', link: '/tutorials/69-storybook-8-mdx' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -264,6 +272,7 @@ export default defineConfig({
             { text: 'Streaming real-driver testing (8 axis SSOT + 3 provider × 8 axis = 24 cell grid + testcontainers pattern + KIWA_MODE=real env-gate)', link: '/concepts/streaming-real-driver-testing' },
             { text: 'Database real-driver testing (16 axis SSOT + 3 provider × 3 backend × 16 axis = 144 cell grid + testcontainers pattern + KIWA_MODE=real env-gate)', link: '/concepts/database-real-driver-testing' },
             { text: 'Payment real-driver testing (8 axis SSOT + 3 provider × 8 axis = 24 cell grid + testcontainers-shaped env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/payment-real-driver-testing' },
+            { text: 'Frontend real-driver testing (8 axis SSOT + 3 target × 8 axis = 24 cell grid + browser-shaped env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/frontend-real-driver-testing' },
           ],
         },
       ],
@@ -296,6 +305,7 @@ export default defineConfig({
             { text: 'v1.30 → v1.31', link: '/migrations/v1.30-to-v1.31' },
             { text: 'v1.31 → v1.32', link: '/migrations/v1.31-to-v1.32' },
             { text: 'v1.32 → v1.33', link: '/migrations/v1.32-to-v1.33' },
+            { text: 'v1.33 → v1.34', link: '/migrations/v1.33-to-v1.34' },
           ],
         },
       ],
