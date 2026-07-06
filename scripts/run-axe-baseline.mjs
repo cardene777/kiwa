@@ -38,8 +38,16 @@ import { pathToFileURL } from 'node:url';
  * Validate an `.axe-config.mjs` default export against the 4-tier SSOT.
  * Pure function so behaviour tests can call it without hitting the FS.
  *
+ * The optional `providers` field enumerates provider adapters the package
+ * sweeps under one baseline (auth 6 + 4 protocol / queue 5 / cache 3 /
+ * payment 3 × 9 / streaming 3 × 5 / orm 3 × 3 × 8 — the SaaS-tier packages
+ * added in v1.30-3). Each provider is an object with `name` required plus
+ * any subset of `protocol` / `semantics` / `backend` / `axis` optional
+ * strings. The runner passes the list through to the baseline so downstream
+ * gates can prove the sweep considered every provider.
+ *
  * @param {unknown} config — the default export from `.axe-config.mjs`
- * @returns {{ok: true, thresholds: object, baselinePath: string, fixtures?: object, layers?: object} | {ok: false, error: string}}
+ * @returns {{ok: true, thresholds: object, baselinePath: string, fixtures?: object, layers?: object, providers?: Array<object>} | {ok: false, error: string}}
  */
 export function validateAxeConfig(config) {
   if (!config || typeof config !== 'object') {
@@ -59,13 +67,50 @@ export function validateAxeConfig(config) {
   if (typeof baselinePath !== 'string' || baselinePath.length === 0) {
     return { ok: false, error: '.axe-config.mjs is missing "baselinePath".' };
   }
+  const providers = cfg.providers;
+  if (providers !== undefined) {
+    if (!Array.isArray(providers)) {
+      return { ok: false, error: '.axe-config.mjs "providers" must be an array when set.' };
+    }
+    for (let i = 0; i < providers.length; i++) {
+      const p = providers[i];
+      if (!p || typeof p !== 'object' || typeof p.name !== 'string' || p.name.length === 0) {
+        return {
+          ok: false,
+          error: `.axe-config.mjs "providers[${i}]" must be an object with a non-empty "name" string.`,
+        };
+      }
+    }
+  }
   return {
     ok: true,
     thresholds,
     baselinePath,
     fixtures: cfg.fixtures,
     layers: cfg.layers,
+    providers,
   };
+}
+
+/**
+ * Normalise a providers list into a stable, JSON-safe array. Each entry
+ * keeps `name` (required) plus any of the optional provenance strings the
+ * SaaS-tier configs use (`protocol` / `semantics` / `backend` / `axis`).
+ * Unknown fields are dropped so the baseline shape is bounded.
+ *
+ * @param {Array<object> | undefined} providers
+ * @returns {Array<{name: string, protocol?: string, semantics?: string, backend?: string, axis?: string}>}
+ */
+export function normalizeProviders(providers) {
+  if (!Array.isArray(providers)) return [];
+  return providers.map((p) => {
+    const out = { name: p.name };
+    if (typeof p.protocol === 'string') out.protocol = p.protocol;
+    if (typeof p.semantics === 'string') out.semantics = p.semantics;
+    if (typeof p.backend === 'string') out.backend = p.backend;
+    if (typeof p.axis === 'string') out.axis = p.axis;
+    return out;
+  });
 }
 
 /** Empty impact bucket shared with the harness. */
@@ -83,13 +128,18 @@ const ABSENT_REASONS = Object.freeze({
  * package has no fixtures wired. Every layer records `applicable: false`
  * so downstream readers know the harness ran but had nothing to scan.
  *
+ * When `providers` is passed the resulting baseline records the normalised
+ * list so downstream gates can prove the sweep considered every provider
+ * (SaaS-tier packages in v1.30-3 declare 6 to 72 providers each).
+ *
  * Pure function apart from `generatedAt` — pass `now` to make tests
  * deterministic.
  *
  * @param {string} pkgName
  * @param {Date} [now]
+ * @param {Array<object>} [providers]
  */
-export function buildLayersAbsentBaseline(pkgName, now = new Date()) {
+export function buildLayersAbsentBaseline(pkgName, now = new Date(), providers) {
   const absent = (layer) => ({
     layer,
     applicable: false,
@@ -97,7 +147,7 @@ export function buildLayersAbsentBaseline(pkgName, now = new Date()) {
     violations: { ...ZERO_IMPACTS },
     surviving: [],
   });
-  return {
+  const baseline = {
     package: pkgName,
     generatedAt: now.toISOString(),
     layers: {
@@ -108,6 +158,11 @@ export function buildLayersAbsentBaseline(pkgName, now = new Date()) {
     totals: { ...ZERO_IMPACTS },
     ok: true,
   };
+  const normalized = normalizeProviders(providers);
+  if (normalized.length > 0) {
+    baseline.providers = normalized;
+  }
+  return baseline;
 }
 
 /**
@@ -287,7 +342,7 @@ async function main() {
     process.exit(1);
   }
 
-  const { thresholds, baselinePath, fixtures } = result;
+  const { thresholds, baselinePath, fixtures, providers } = result;
   const pkgName = readPkgName(cwd);
   const absBaseline = resolve(cwd, baselinePath);
   mkdirSync(dirname(absBaseline), { recursive: true });
@@ -295,10 +350,13 @@ async function main() {
   // Default path — no fixtures wired → land a layers-absent baseline.
   // Fixture-wired packages replace this with a real harness run.
   if (!hasAnyFixture(fixtures)) {
-    const baseline = buildLayersAbsentBaseline(pkgName);
+    const baseline = buildLayersAbsentBaseline(pkgName, new Date(), providers);
     persistBaseline(absBaseline, baseline);
+    const normalized = normalizeProviders(providers);
+    const providerSuffix =
+      normalized.length > 0 ? ` [providers: ${normalized.length}]` : '';
     console.log(
-      `[a11y] ${pkgName}: layers-absent baseline written to ${baselinePath} (no fixtures declared — Core / Framework tier no-DOM package).`,
+      `[a11y] ${pkgName}: layers-absent baseline written to ${baselinePath} (no fixtures declared — Core / Framework tier no-DOM package)${providerSuffix}.`,
     );
     console.log(
       `[a11y] ${pkgName}: config OK (critical ${thresholds.critical}, serious ${formatThreshold(thresholds.serious)}, moderate ${formatThreshold(thresholds.moderate)}).`,
@@ -324,6 +382,10 @@ async function main() {
     process.exit(1);
   }
   const report = await runLayerHarness(pkgName, fixtures);
+  const normalizedProviders = normalizeProviders(providers);
+  if (normalizedProviders.length > 0) {
+    report.providers = normalizedProviders;
+  }
   persistBaseline(absBaseline, report);
 
   const breaches = tierBreaches(report.totals, thresholds);

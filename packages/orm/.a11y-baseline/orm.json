@@ -1,0 +1,411 @@
+{
+  "package": "@kiwa-test/orm",
+  "generatedAt": "2026-07-06T01:52:04.757Z",
+  "layers": {
+    "jsdom": {
+      "layer": "jsdom",
+      "applicable": false,
+      "reason": "no jsdom fixture — package produces no static DOM output.",
+      "violations": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "surviving": []
+    },
+    "playwright": {
+      "layer": "playwright",
+      "applicable": false,
+      "reason": "no playwright fixture — package has no browser-runtime surface.",
+      "violations": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "surviving": []
+    },
+    "ssrHydration": {
+      "layer": "ssrHydration",
+      "applicable": false,
+      "reason": "no ssrHydration fixture — package emits no SSR string.",
+      "violations": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "surviving": []
+    }
+  },
+  "totals": {
+    "critical": 0,
+    "serious": 0,
+    "moderate": 0,
+    "minor": 0
+  },
+  "ok": true,
+  "providers": [
+    {
+      "name": "drizzle",
+      "backend": "postgres",
+      "axis": "cdc"
+    },
+    {
+      "name": "drizzle",
+      "backend": "postgres",
+      "axis": "replication"
+    },
+    {
+      "name": "drizzle",
+      "backend": "postgres",
+      "axis": "mvcc"
+    },
+    {
+      "name": "drizzle",
+      "backend": "postgres",
+      "axis": "partitioning"
+    },
+    {
+      "name": "drizzle",
+      "backend": "postgres",
+      "axis": "connection-pool"
+    },
+    {
+      "name": "drizzle",
+      "backend": "postgres",
+      "axis": "logical-replication"
+    },
+    {
+      "name": "drizzle",
+      "backend": "postgres",
+      "axis": "rls"
+    },
+    {
+      "name": "drizzle",
+      "backend": "postgres",
+      "axis": "vector-store"
+    },
+    {
+      "name": "drizzle",
+      "backend": "mysql",
+      "axis": "cdc"
+    },
+    {
+      "name": "drizzle",
+      "backend": "mysql",
+      "axis": "replication"
+    },
+    {
+      "name": "drizzle",
+      "backend": "mysql",
+      "axis": "mvcc"
+    },
+    {
+      "name": "drizzle",
+      "backend": "mysql",
+      "axis": "partitioning"
+    },
+    {
+      "name": "drizzle",
+      "backend": "mysql",
+      "axis": "connection-pool"
+    },
+    {
+      "name": "drizzle",
+      "backend": "mysql",
+      "axis": "logical-replication"
+    },
+    {
+      "name": "drizzle",
+      "backend": "mysql",
+      "axis": "rls"
+    },
+    {
+      "name": "drizzle",
+      "backend": "mysql",
+      "axis": "vector-store"
+    },
+    {
+      "name": "drizzle",
+      "backend": "sqlite",
+      "axis": "cdc"
+    },
+    {
+      "name": "drizzle",
+      "backend": "sqlite",
+      "axis": "replication"
+    },
+    {
+      "name": "drizzle",
+      "backend": "sqlite",
+      "axis": "mvcc"
+    },
+    {
+      "name": "drizzle",
+      "backend": "sqlite",
+      "axis": "partitioning"
+    },
+    {
+      "name": "drizzle",
+      "backend": "sqlite",
+      "axis": "connection-pool"
+    },
+    {
+      "name": "drizzle",
+      "backend": "sqlite",
+      "axis": "logical-replication"
+    },
+    {
+      "name": "drizzle",
+      "backend": "sqlite",
+      "axis": "rls"
+    },
+    {
+      "name": "drizzle",
+      "backend": "sqlite",
+      "axis": "vector-store"
+    },
+    {
+      "name": "prisma",
+      "backend": "postgres",
+      "axis": "cdc"
+    },
+    {
+      "name": "prisma",
+      "backend": "postgres",
+      "axis": "replication"
+    },
+    {
+      "name": "prisma",
+      "backend": "postgres",
+      "axis": "mvcc"
+    },
+    {
+      "name": "prisma",
+      "backend": "postgres",
+      "axis": "partitioning"
+    },
+    {
+      "name": "prisma",
+      "backend": "postgres",
+      "axis": "connection-pool"
+    },
+    {
+      "name": "prisma",
+      "backend": "postgres",
+      "axis": "logical-replication"
+    },
+    {
+      "name": "prisma",
+      "backend": "postgres",
+      "axis": "rls"
+    },
+    {
+      "name": "prisma",
+      "backend": "postgres",
+      "axis": "vector-store"
+    },
+    {
+      "name": "prisma",
+      "backend": "mysql",
+      "axis": "cdc"
+    },
+    {
+      "name": "prisma",
+      "backend": "mysql",
+      "axis": "replication"
+    },
+    {
+      "name": "prisma",
+      "backend": "mysql",
+      "axis": "mvcc"
+    },
+    {
+      "name": "prisma",
+      "backend": "mysql",
+      "axis": "partitioning"
+    },
+    {
+      "name": "prisma",
+      "backend": "mysql",
+      "axis": "connection-pool"
+    },
+    {
+      "name": "prisma",
+      "backend": "mysql",
+      "axis": "logical-replication"
+    },
+    {
+      "name": "prisma",
+      "backend": "mysql",
+      "axis": "rls"
+    },
+    {
+      "name": "prisma",
+      "backend": "mysql",
+      "axis": "vector-store"
+    },
+    {
+      "name": "prisma",
+      "backend": "sqlite",
+      "axis": "cdc"
+    },
+    {
+      "name": "prisma",
+      "backend": "sqlite",
+      "axis": "replication"
+    },
+    {
+      "name": "prisma",
+      "backend": "sqlite",
+      "axis": "mvcc"
+    },
+    {
+      "name": "prisma",
+      "backend": "sqlite",
+      "axis": "partitioning"
+    },
+    {
+      "name": "prisma",
+      "backend": "sqlite",
+      "axis": "connection-pool"
+    },
+    {
+      "name": "prisma",
+      "backend": "sqlite",
+      "axis": "logical-replication"
+    },
+    {
+      "name": "prisma",
+      "backend": "sqlite",
+      "axis": "rls"
+    },
+    {
+      "name": "prisma",
+      "backend": "sqlite",
+      "axis": "vector-store"
+    },
+    {
+      "name": "kysely",
+      "backend": "postgres",
+      "axis": "cdc"
+    },
+    {
+      "name": "kysely",
+      "backend": "postgres",
+      "axis": "replication"
+    },
+    {
+      "name": "kysely",
+      "backend": "postgres",
+      "axis": "mvcc"
+    },
+    {
+      "name": "kysely",
+      "backend": "postgres",
+      "axis": "partitioning"
+    },
+    {
+      "name": "kysely",
+      "backend": "postgres",
+      "axis": "connection-pool"
+    },
+    {
+      "name": "kysely",
+      "backend": "postgres",
+      "axis": "logical-replication"
+    },
+    {
+      "name": "kysely",
+      "backend": "postgres",
+      "axis": "rls"
+    },
+    {
+      "name": "kysely",
+      "backend": "postgres",
+      "axis": "vector-store"
+    },
+    {
+      "name": "kysely",
+      "backend": "mysql",
+      "axis": "cdc"
+    },
+    {
+      "name": "kysely",
+      "backend": "mysql",
+      "axis": "replication"
+    },
+    {
+      "name": "kysely",
+      "backend": "mysql",
+      "axis": "mvcc"
+    },
+    {
+      "name": "kysely",
+      "backend": "mysql",
+      "axis": "partitioning"
+    },
+    {
+      "name": "kysely",
+      "backend": "mysql",
+      "axis": "connection-pool"
+    },
+    {
+      "name": "kysely",
+      "backend": "mysql",
+      "axis": "logical-replication"
+    },
+    {
+      "name": "kysely",
+      "backend": "mysql",
+      "axis": "rls"
+    },
+    {
+      "name": "kysely",
+      "backend": "mysql",
+      "axis": "vector-store"
+    },
+    {
+      "name": "kysely",
+      "backend": "sqlite",
+      "axis": "cdc"
+    },
+    {
+      "name": "kysely",
+      "backend": "sqlite",
+      "axis": "replication"
+    },
+    {
+      "name": "kysely",
+      "backend": "sqlite",
+      "axis": "mvcc"
+    },
+    {
+      "name": "kysely",
+      "backend": "sqlite",
+      "axis": "partitioning"
+    },
+    {
+      "name": "kysely",
+      "backend": "sqlite",
+      "axis": "connection-pool"
+    },
+    {
+      "name": "kysely",
+      "backend": "sqlite",
+      "axis": "logical-replication"
+    },
+    {
+      "name": "kysely",
+      "backend": "sqlite",
+      "axis": "rls"
+    },
+    {
+      "name": "kysely",
+      "backend": "sqlite",
+      "axis": "vector-store"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "package": "@kiwa-test/queue",
+  "generatedAt": "2026-07-06T01:52:04.731Z",
+  "layers": {
+    "jsdom": {
+      "layer": "jsdom",
+      "applicable": false,
+      "reason": "no jsdom fixture — package produces no static DOM output.",
+      "violations": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "surviving": []
+    },
+    "playwright": {
+      "layer": "playwright",
+      "applicable": false,
+      "reason": "no playwright fixture — package has no browser-runtime surface.",
+      "violations": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "surviving": []
+    },
+    "ssrHydration": {
+      "layer": "ssrHydration",
+      "applicable": false,
+      "reason": "no ssrHydration fixture — package emits no SSR string.",
+      "violations": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "surviving": []
+    }
+  },
+  "totals": {
+    "critical": 0,
+    "serious": 0,
+    "moderate": 0,
+    "minor": 0
+  },
+  "ok": true,
+  "providers": [
+    {
+      "name": "bullmq"
+    },
+    {
+      "name": "inngest"
+    },
+    {
+      "name": "cloudflare-queues"
+    },
+    {
+      "name": "sqs"
+    },
+    {
+      "name": "rabbitmq"
+    }
+  ]
+}

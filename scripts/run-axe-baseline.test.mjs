@@ -12,6 +12,7 @@ import {
   tierBreaches,
   needsJsdom,
   hasAnyFixture,
+  normalizeProviders,
 } from './run-axe-baseline.mjs';
 
 test('validateAxeConfig accepts a Core-tier config', () => {
@@ -191,4 +192,91 @@ test('hasAnyFixture is false when no fixture field is present', () => {
   assert.equal(hasAnyFixture(undefined), false);
   assert.equal(hasAnyFixture(null), false);
   assert.equal(hasAnyFixture({}), false);
+});
+
+test('validateAxeConfig accepts an optional providers list of SaaS provenance objects', () => {
+  const config = {
+    thresholds: { critical: 0, serious: 0, moderate: 0 },
+    baselinePath: '.a11y-baseline/auth.json',
+    providers: [
+      { name: 'nextauth', protocol: 'oauth2' },
+      { name: 'lucia', protocol: 'session' },
+    ],
+  };
+  const result = validateAxeConfig(config);
+  assert.equal(result.ok, true);
+  assert.equal(result.providers.length, 2);
+  assert.equal(result.providers[0].name, 'nextauth');
+});
+
+test('validateAxeConfig rejects providers that are not an array', () => {
+  const result = validateAxeConfig({
+    thresholds: { critical: 0, serious: 0, moderate: 0 },
+    baselinePath: '.a11y-baseline/x.json',
+    providers: 'nextauth,lucia',
+  });
+  assert.equal(result.ok, false);
+  assert.match(result.error, /"providers" must be an array/);
+});
+
+test('validateAxeConfig rejects a provider entry missing a name', () => {
+  const result = validateAxeConfig({
+    thresholds: { critical: 0, serious: 0, moderate: 0 },
+    baselinePath: '.a11y-baseline/x.json',
+    providers: [{ protocol: 'oauth2' }],
+  });
+  assert.equal(result.ok, false);
+  assert.match(result.error, /providers\[0\]/);
+  assert.match(result.error, /name/);
+});
+
+test('normalizeProviders keeps name plus the four optional provenance strings', () => {
+  const normalized = normalizeProviders([
+    {
+      name: 'stripe',
+      protocol: 'rest',
+      semantics: 'invoice',
+      backend: 'psql',
+      axis: 'retry',
+      extra: 'dropped',
+    },
+    { name: 'paddle' },
+  ]);
+  assert.deepEqual(normalized[0], {
+    name: 'stripe',
+    protocol: 'rest',
+    semantics: 'invoice',
+    backend: 'psql',
+    axis: 'retry',
+  });
+  assert.deepEqual(normalized[1], { name: 'paddle' });
+});
+
+test('normalizeProviders returns an empty array for missing / non-array input', () => {
+  assert.deepEqual(normalizeProviders(undefined), []);
+  assert.deepEqual(normalizeProviders(null), []);
+  assert.deepEqual(normalizeProviders('nextauth'), []);
+});
+
+test('buildLayersAbsentBaseline records providers when supplied', () => {
+  const baseline = buildLayersAbsentBaseline(
+    '@kiwa-test/auth',
+    new Date('2026-07-06T00:00:00Z'),
+    [
+      { name: 'nextauth', protocol: 'oauth2' },
+      { name: 'lucia', protocol: 'session' },
+    ],
+  );
+  assert.equal(baseline.providers.length, 2);
+  assert.equal(baseline.providers[0].name, 'nextauth');
+  assert.equal(baseline.providers[1].protocol, 'session');
+});
+
+test('buildLayersAbsentBaseline omits providers when list is empty', () => {
+  const baseline = buildLayersAbsentBaseline(
+    '@kiwa-test/core',
+    new Date('2026-07-06T00:00:00Z'),
+    [],
+  );
+  assert.equal('providers' in baseline, false);
 });
