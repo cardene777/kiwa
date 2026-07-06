@@ -297,6 +297,27 @@ const V1_31_PAGES = [
   { path: '/migrations/v1.30-to-v1.31', title: 'v1.30 → v1.31' },
 ];
 
+// v1.32 pages — new tutorials 61-63 + concept doc + migration guide added
+// under the database deepening II milestone (Issue #1021). Same
+// skip-if-dist-missing pattern as the canonical suite above so the tests pass
+// on a fresh clone without a full docs build. Each page asserts an anchor
+// phrase that a rendered VitePress build will always include in <main>.
+// Coverage adds Postgres logical replication advanced (streaming start +
+// replication origin + two-safe commit + cascaded subscription walkthrough)
+// tutorial 61 + MySQL group replication (member join + primary election +
+// conflict detection + member leave walkthrough) tutorial 62 + SQLite WAL +
+// FTS5 (journal_mode switch + wal_checkpoint + virtual table + tokenizer +
+// BM25 rank walkthrough) tutorial 63 + Database real-driver testing SSOT
+// (16 axis × 3 provider × 3 backend = 144 cell grid + testcontainers
+// pattern) concept doc + v1.31 → v1.32 additive-only migration guide.
+const V1_32_PAGES = [
+  { path: '/tutorials/61-postgres-logical-replication-advanced', title: 'Postgres logical replication advanced' },
+  { path: '/tutorials/62-mysql-group-replication', title: 'MySQL group replication' },
+  { path: '/tutorials/63-sqlite-wal-fts5', title: 'SQLite WAL + FTS5' },
+  { path: '/concepts/database-real-driver-testing', title: 'Database real-driver testing' },
+  { path: '/migrations/v1.31-to-v1.32', title: 'v1.31 → v1.32' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -560,6 +581,20 @@ test.describe('docs site — v1.30 pages render', () => {
 test.describe('docs site — v1.31 pages render', () => {
   for (const p of V1_31_PAGES) {
     test(`v1.31 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.32 pages render', () => {
+  for (const p of V1_32_PAGES) {
+    test(`v1.32 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
