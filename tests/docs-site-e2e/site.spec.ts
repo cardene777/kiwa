@@ -277,6 +277,26 @@ const V1_30_PAGES = [
   { path: '/migrations/v1.29-to-v1.30', title: 'v1.29 → v1.30' },
 ];
 
+// v1.31 pages — new tutorials 58-60 + concept doc + migration guide added
+// under the streaming deepening II milestone (Issue #1008). Same
+// skip-if-dist-missing pattern as the canonical suite above so the tests pass
+// on a fresh clone without a full docs build. Each page asserts an anchor
+// phrase that a rendered VitePress build will always include in <main>.
+// Coverage adds Kafka raw protocol (KIP-98 idempotent + txn coordinator +
+// fetch session + ISR walkthrough) tutorial 58 + Redpanda schema evolution
+// (BACKWARD / FORWARD / FULL + subject naming + references walkthrough)
+// tutorial 59 + NATS JetStream durable consumer (ack_wait + max_deliver +
+// backoff + quarantine walkthrough) tutorial 60 + Streaming real-driver
+// testing SSOT (8 axis × 3 provider = 24 cell grid + testcontainers pattern)
+// concept doc + v1.30 → v1.31 additive-only migration guide.
+const V1_31_PAGES = [
+  { path: '/tutorials/58-kafka-raw-protocol', title: 'Kafka raw-protocol' },
+  { path: '/tutorials/59-redpanda-schema-evolution', title: 'Redpanda schema evolution' },
+  { path: '/tutorials/60-nats-jetstream-durable', title: 'NATS JetStream durable consumer' },
+  { path: '/concepts/streaming-real-driver-testing', title: 'Streaming real-driver testing' },
+  { path: '/migrations/v1.30-to-v1.31', title: 'v1.30 → v1.31' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -526,6 +546,20 @@ test.describe('docs site — v1.29 pages render', () => {
 test.describe('docs site — v1.30 pages render', () => {
   for (const p of V1_30_PAGES) {
     test(`v1.30 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.31 pages render', () => {
+  for (const p of V1_31_PAGES) {
+    test(`v1.31 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
