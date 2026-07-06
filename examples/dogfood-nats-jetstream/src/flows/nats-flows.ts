@@ -1,11 +1,19 @@
 /**
  * Higher-level flows that compose the adapter ops. These are the driver
  * functions that both the mock-mode tests and the fidelity harness run.
+ *
+ * v2 (v1.31-4) adds 4 more driver functions (durable / kv-revision / object-
+ * chunking / testcontainers-probe) so the fidelity harness can exercise
+ * every op through a uniform driver + observation shape.
  */
 
 import type {
+  JetStreamDurableObservation,
+  KvRevisionObservation,
   NatsJetStreamAdapter,
+  ObjectChunkingObservation,
   OrderEvent,
+  TestcontainersProbeObservation,
   UserProfile,
 } from '../adapters/interface.js';
 
@@ -66,4 +74,33 @@ export async function driveRoutingFlow(
 
 export async function driveFidelityFlow(adapter: NatsJetStreamAdapter): Promise<void> {
   await adapter.emitFidelity();
+}
+
+// -----------------------------------------------------------------------------
+// v2 (v1.31-4) — durable consumer + KV revision + Object chunking + testcontainers
+// probe.
+// -----------------------------------------------------------------------------
+
+export async function driveJetStreamDurableFlow(
+  adapter: NatsJetStreamAdapter,
+): Promise<JetStreamDurableObservation> {
+  return adapter.driveJetStreamDurable();
+}
+
+export async function driveKvRevisionFlow(
+  adapter: NatsJetStreamAdapter,
+): Promise<KvRevisionObservation> {
+  return adapter.driveKvRevision();
+}
+
+export async function driveObjectChunkingFlow(
+  adapter: NatsJetStreamAdapter,
+): Promise<ObjectChunkingObservation> {
+  return adapter.driveObjectChunking();
+}
+
+export async function driveTestcontainersProbeFlow(
+  adapter: NatsJetStreamAdapter,
+): Promise<TestcontainersProbeObservation> {
+  return adapter.driveTestcontainersProbe();
 }
