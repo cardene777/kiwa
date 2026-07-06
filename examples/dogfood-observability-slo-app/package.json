@@ -1,0 +1,21 @@
+{
+  "name": "dogfood-observability-slo-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.35-2 — an SLO / SLI / error budget + burn rate + multi-window multi-burn-rate alerting harness driven behind a provider-neutral surface backed by @kiwa-test/observability v2.1 semantics (SLO axis) + real-driver env-gate. Two adapter implementations satisfy the same 14-op contract: makeMockAdapter walks the observability v2.1 SLO state machine deterministically without any backend; makeRealAdapter emits PromQL query + Alertmanager route requests through the KIWA_MODE=real testcontainers-driven Grafana OSS + Prometheus stack when KIWA_PROMETHEUS_URL / KIWA_GRAFANA_URL are wired, and otherwise reports KIWA_SLO_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 3 SLO target objectives (99.9 / 99.95 / 99.99) × 4 canonical burn-rate windows (fast 1h/5m + slow 6h/30m Google SRE MWMBR pattern) so behavioural drift between mock semantics and real Prometheus + Alertmanager stays observable and feeds the @kiwa-test/quality-metrics 13-axis release gate.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/observability -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/observability": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
