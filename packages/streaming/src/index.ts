@@ -110,3 +110,6 @@ export {
   type SchemaRegistry,
   type SchemaRegistryConfig,
 } from './schema-registry.js';
+
+// v0.3.0 advanced-semantics surface — 8 axis grid + fidelity harness.
+export * from './semantics/index.js';
