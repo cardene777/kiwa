@@ -219,6 +219,14 @@ export default defineConfig({
             { text: '60 — NATS JetStream durable consumer (ack_wait + max_deliver + backoff + quarantine walkthrough)', link: '/tutorials/60-nats-jetstream-durable' },
           ],
         },
+        {
+          text: 'Database 深化 II (v1.32)',
+          items: [
+            { text: '61 — Postgres logical replication advanced (streaming + origin + two-safe + cascade walkthrough)', link: '/tutorials/61-postgres-logical-replication-advanced' },
+            { text: '62 — MySQL group replication (member join + primary election + conflict detection + member leave walkthrough)', link: '/tutorials/62-mysql-group-replication' },
+            { text: '63 — SQLite WAL + FTS5 (journal_mode + checkpoint + virtual table + tokenizer + BM25 rank walkthrough)', link: '/tutorials/63-sqlite-wal-fts5' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -246,6 +254,7 @@ export default defineConfig({
             { text: 'Release invariants (3-invariant SSOT — release script filter symmetry + provenance flag absence + gate script package coverage)', link: '/concepts/release-invariants' },
             { text: 'A11y testing SSOT (WCAG 2.1 AA + 4-tier threshold + baseline persistence + 3-layer harness + 13-axis release gate)', link: '/concepts/a11y-testing-ssot' },
             { text: 'Streaming real-driver testing (8 axis SSOT + 3 provider × 8 axis = 24 cell grid + testcontainers pattern + KIWA_MODE=real env-gate)', link: '/concepts/streaming-real-driver-testing' },
+            { text: 'Database real-driver testing (16 axis SSOT + 3 provider × 3 backend × 16 axis = 144 cell grid + testcontainers pattern + KIWA_MODE=real env-gate)', link: '/concepts/database-real-driver-testing' },
           ],
         },
       ],
@@ -276,6 +285,7 @@ export default defineConfig({
             { text: 'v1.28 → v1.29', link: '/migrations/v1.28-to-v1.29' },
             { text: 'v1.29 → v1.30', link: '/migrations/v1.29-to-v1.30' },
             { text: 'v1.30 → v1.31', link: '/migrations/v1.30-to-v1.31' },
+            { text: 'v1.31 → v1.32', link: '/migrations/v1.31-to-v1.32' },
           ],
         },
       ],
