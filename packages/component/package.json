@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/component",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Component test mock harness for kiwa — unified Storybook 8 + Playwright Component Testing + Chromatic mocks with story registration, args resolution, play function runner, mount + interact API, and visual regression baseline/diff/accept workflow.",
   "license": "MIT",
   "author": {

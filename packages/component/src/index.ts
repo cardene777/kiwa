@@ -81,3 +81,13 @@ export type {
   InputArgs,
   ModalArgs,
 } from './fixture.js';
+
+// ---- v0.3 advanced component semantics ----
+export * from './semantics/index.js';
+export {
+  assertMode,
+  resolveAllModes,
+  resolveMode,
+  type KiwaTestMode,
+  type ResolvedMode,
+} from './real-driver.js';

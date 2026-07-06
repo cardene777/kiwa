@@ -1,5 +1,13 @@
 # @kiwa-test/nextjs
 
+## 1.2.0 — 2026-07-06
+
+### Minor Changes — v1.34-1 advanced Next.js 4 axis
+
+- 4 new Next.js semantic axes: server-action-advanced (form action + revalidatePath + revalidateTag + redirect), partial-prerendering (static shell + dynamic hole + streaming boundary), interception-routes (`(.)` / `(..)` / `(...)` intercept + modal pattern), parallel-routes-advanced (`default.tsx` + loading state + error boundary + slot navigation).
+- Fidelity harness added for 3 target × 4 axis = 12 rows across App Router, Pages Router, and Edge Runtime, with target-specific event dialects.
+- Real-driver env-gate (`KIWA_MODE=real` + `NEXT_APP_URL` / `NEXT_PAGES_URL` / `EDGE_RUNTIME_URL`) reports mock vs real mode per target without adding runtime dependencies.
+
 ## 1.1.0
 
 ### Minor Changes
