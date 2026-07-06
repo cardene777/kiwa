@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-test/orm",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "ORM query test adapter for kiwa — setup Drizzle, Prisma, or Kysely environments against in-memory SQLite (mock) or testcontainers Postgres/MySQL (live), apply SQL string / SQL string[] / drizzle-kit-generated `{ folder }` migrations, seed fixtures, and assert query results with a consistent setupOrmEnv API",
   "license": "MIT",
   "author": {
