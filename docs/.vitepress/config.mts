@@ -204,6 +204,13 @@ export default defineConfig({
             { text: '55 — Release script filter SSOT (systematic root cause pattern walkthrough)', link: '/tutorials/55-release-script-filter-ssot' },
           ],
         },
+        {
+          text: 'A11y sweep (v1.30)',
+          items: [
+            { text: '56 — A11y baseline (axe-core + WCAG 2.1 AA gate + 3-layer harness walkthrough)', link: '/tutorials/56-a11y-baseline' },
+            { text: '57 — A11y baseline migration (0 → 34 package sweep methodology)', link: '/tutorials/57-a11y-baseline-migration' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -229,6 +236,7 @@ export default defineConfig({
             { text: 'Mutation testing SSOT (kill rate + 4-tier threshold + baseline persistence + 12-axis release gate)', link: '/concepts/mutation-testing-ssot' },
             { text: 'WebRTC / WebTransport / HTTP/3 testing (8-axis SSOT + P2P vs SFU + ICE trickle vs half-trickle + WebTransport vs WebSocket)', link: '/concepts/webrtc-webtransport-testing' },
             { text: 'Release invariants (3-invariant SSOT — release script filter symmetry + provenance flag absence + gate script package coverage)', link: '/concepts/release-invariants' },
+            { text: 'A11y testing SSOT (WCAG 2.1 AA + 4-tier threshold + baseline persistence + 3-layer harness + 13-axis release gate)', link: '/concepts/a11y-testing-ssot' },
           ],
         },
       ],
@@ -257,6 +265,7 @@ export default defineConfig({
             { text: 'v1.26 → v1.27', link: '/migrations/v1.26-to-v1.27' },
             { text: 'v1.27 → v1.28', link: '/migrations/v1.27-to-v1.28' },
             { text: 'v1.28 → v1.29', link: '/migrations/v1.28-to-v1.29' },
+            { text: 'v1.29 → v1.30', link: '/migrations/v1.29-to-v1.30' },
           ],
         },
       ],
