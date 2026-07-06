@@ -1,5 +1,26 @@
 # @kiwa-test/orm
 
+## 0.10.0
+
+### Minor Changes
+
+- 🆕 feat(orm): `@kiwa-test/orm` v0.10.0 — advanced db semantics 8 axis 追加 (3 provider × 3 backend × 16 axis = 144 grid coverage)
+
+  v0.9 の 8 production db semantics は完全 backward compatible に維持しつつ、 advanced 8 axis を別 file として追加。 各 axis は既存 semantics と同じ pure state-machine helper + neutral-event + backend dialect envelope pattern で実装。
+
+  追加 axis 一覧 (32 neutral event = 8 × 4)。
+
+  - `logical-replication-advanced` (createLogicalReplicationAdvancedSession / startLogicalStreaming / trackReplicationOrigin / confirmTwoSafeCommit / syncCascadedSubscription) ... streaming replication protocol + replication origin + two-safe confirmation + cascaded subscription
+  - `mvcc-advanced` (createMvccAdvancedSession / checkTupleVisibility / measureBloat / applyHotUpdate / detectXidWraparound) ... tuple visibility + vacuum bloat tracking + HOT update chain + XID wraparound
+  - `mysql-cluster` (createMysqlClusterSession / joinClusterMember / electClusterPrimary / detectClusterConflict / leaveClusterMember) ... MySQL Group Replication + primary election + conflict detection + group membership
+  - `binlog` (createBinlogSession / advanceBinlogPosition / updateGtidSet / negotiateBinlogFormat / detectGtidGap) ... binlog position + GTID set + ROW/STATEMENT/MIXED format + GTID gap detection
+  - `sqlite-wal` (createSqliteWalSession / switchJournalMode / crossWalSizeThreshold / triggerWalCheckpoint / mapSharedMemory) ... WAL journal mode + size threshold + checkpoint + shared-memory wal-index
+  - `fts5` (createFts5Session / createFts5VirtualTable / tokenizeFts5Document / matchFts5Query / inspectFts5Vocab) ... SQLite FTS5 virtual table + tokenizer + MATCH rank + vocab table
+  - `txn-isolation` (createTxnIsolationSession / setTxnIsolationLevel / blockDirtyRead / blockNonRepeatableRead / blockPhantomRead) ... 4 isolation levels + dirty / non-repeatable / phantom read blocking
+  - `pool-advanced` (createPoolAdvancedSession / runPoolHealthCheck / warmPoolConnections / drainPoolGracefully / exportPoolMetrics) ... pool health check + connection warmup + graceful drain + metrics export
+
+  Fidelity harness は `collectFidelityCoverage({ providers, backends })` で 3 × 3 × 16 = 144 row grid を返す。 8 test file 追加で advanced axis の 3×3 happy path、 backend dialect、 guard、 axis 固有 state 遷移を検証。
+
 ## 0.9.0
 
 ### Minor Changes

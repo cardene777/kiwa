@@ -10,7 +10,7 @@ import {
  * Fidelity harness — collects the provider × backend × axis coverage grid
  * that downstream release-gate reports on. Not a runner (no side effect
  * emit); pure inspection so tests / release-gate can assert
- * "3 provider × 3 backend × 8 axis = 72 row" grid without walking every
+ * "3 provider × 3 backend × 16 axis = 144 row" grid without walking every
  * neutral event by hand.
  */
 export interface FidelityRow {
@@ -82,6 +82,54 @@ export const AXIS_TO_EVENTS: Record<OrmAxis, NeutralEventName[]> = {
     'vector.hybrid-searched',
     'vector.distance-computed',
   ],
+  'logical-replication-advanced': [
+    'logical-advanced.streaming-started',
+    'logical-advanced.origin-tracked',
+    'logical-advanced.two-safe-confirmed',
+    'logical-advanced.cascade-synced',
+  ],
+  'mvcc-advanced': [
+    'mvcc-advanced.tuple-visibility-checked',
+    'mvcc-advanced.bloat-measured',
+    'mvcc-advanced.hot-updated',
+    'mvcc-advanced.xid-wraparound-detected',
+  ],
+  'mysql-cluster': [
+    'cluster.member-joined',
+    'cluster.primary-elected',
+    'cluster.conflict-detected',
+    'cluster.member-left',
+  ],
+  binlog: [
+    'binlog.position-advanced',
+    'binlog.gtid-set-updated',
+    'binlog.format-negotiated',
+    'binlog.gap-detected',
+  ],
+  'sqlite-wal': [
+    'wal.checkpoint-triggered',
+    'wal.size-threshold-crossed',
+    'wal.shared-memory-mapped',
+    'wal.journal-mode-switched',
+  ],
+  fts5: [
+    'fts5.virtual-table-created',
+    'fts5.tokenized',
+    'fts5.matched',
+    'fts5.vocab-inspected',
+  ],
+  'txn-isolation': [
+    'txn.level-set',
+    'txn.dirty-read-blocked',
+    'txn.non-repeatable-read-blocked',
+    'txn.phantom-read-blocked',
+  ],
+  'pool-advanced': [
+    'pool-advanced.health-checked',
+    'pool-advanced.warmed-up',
+    'pool-advanced.drained',
+    'pool-advanced.metrics-exported',
+  ],
 };
 
 /**
@@ -89,7 +137,7 @@ export const AXIS_TO_EVENTS: Record<OrmAxis, NeutralEventName[]> = {
  * providers + backends to inspect — usually all 3 × 3.
  *
  * The output row count is `providers.length * backends.length * axes.length`
- * (72 for the default 3 × 3 × 8 grid) plus roll-up lists so callers can
+ * (144 for the default 3 × 3 × 16 grid) plus roll-up lists so callers can
  * assert on grid dimensions.
  */
 export function collectFidelityCoverage(input: {

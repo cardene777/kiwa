@@ -23,7 +23,15 @@ export type OrmAxis =
   | 'rls'
   | 'connection-pool'
   | 'partitioning'
-  | 'vector-store';
+  | 'vector-store'
+  | 'logical-replication-advanced'
+  | 'mvcc-advanced'
+  | 'mysql-cluster'
+  | 'binlog'
+  | 'sqlite-wal'
+  | 'fts5'
+  | 'txn-isolation'
+  | 'pool-advanced';
 
 /**
  * Platform-neutral event names used inside the axis helpers. Real backends
@@ -73,7 +81,53 @@ export type NeutralEventName =
   | 'vector.indexed'
   | 'vector.knn-searched'
   | 'vector.hybrid-searched'
-  | 'vector.distance-computed';
+  | 'vector.distance-computed'
+  // Postgres logical replication advanced
+  | 'logical-advanced.streaming-started'
+  | 'logical-advanced.origin-tracked'
+  | 'logical-advanced.two-safe-confirmed'
+  | 'logical-advanced.cascade-synced'
+  // MVCC advanced
+  | 'mvcc-advanced.tuple-visibility-checked'
+  | 'mvcc-advanced.bloat-measured'
+  | 'mvcc-advanced.hot-updated'
+  | 'mvcc-advanced.xid-wraparound-detected'
+  // MySQL cluster / group replication
+  | 'cluster.member-joined'
+  | 'cluster.primary-elected'
+  | 'cluster.conflict-detected'
+  | 'cluster.member-left'
+  // MySQL binlog
+  | 'binlog.position-advanced'
+  | 'binlog.gtid-set-updated'
+  | 'binlog.format-negotiated'
+  | 'binlog.gap-detected'
+  // SQLite WAL
+  | 'wal.checkpoint-triggered'
+  | 'wal.size-threshold-crossed'
+  | 'wal.shared-memory-mapped'
+  | 'wal.journal-mode-switched'
+  // SQLite FTS5
+  | 'fts5.virtual-table-created'
+  | 'fts5.tokenized'
+  | 'fts5.matched'
+  | 'fts5.vocab-inspected'
+  // transaction isolation
+  | 'txn.level-set'
+  | 'txn.dirty-read-blocked'
+  | 'txn.non-repeatable-read-blocked'
+  | 'txn.phantom-read-blocked'
+  // connection pool advanced
+  | 'pool-advanced.health-checked'
+  | 'pool-advanced.warmed-up'
+  | 'pool-advanced.drained'
+  | 'pool-advanced.metrics-exported'
+  // Existing staged Postgres-specific helper events.
+  | 'pglr.publication-created'
+  | 'pglr.slot-allocated'
+  | 'pglr.subscription-synced'
+  | 'pglr.streaming'
+  | 'pglr.disconnected';
 
 /**
  * Backend-specific event name lookup. When a backend has a distinct string
@@ -119,6 +173,38 @@ const dialect: Record<OrmBackend, Partial<Record<NeutralEventName, string>>> = {
     'vector.knn-searched': 'pgvector.knn',
     'vector.hybrid-searched': 'pgvector.hybrid',
     'vector.distance-computed': 'pgvector.cosine_distance',
+    'logical-advanced.streaming-started': 'pgoutput.start_replication',
+    'logical-advanced.origin-tracked': 'pg_replication_origin.progress',
+    'logical-advanced.two-safe-confirmed': 'synchronous_commit.remote_apply',
+    'logical-advanced.cascade-synced': 'pg_subscription.cascade_synced',
+    'mvcc-advanced.tuple-visibility-checked': 'heap_tuple_infomask.visible',
+    'mvcc-advanced.bloat-measured': 'pg_stat_user_tables.n_dead_tup',
+    'mvcc-advanced.hot-updated': 'pg_stat_all_tables.n_tup_hot_upd',
+    'mvcc-advanced.xid-wraparound-detected': 'pg_database.xid_wraparound_warning',
+    'cluster.member-joined': 'patroni.member_joined',
+    'cluster.primary-elected': 'patroni.leader_elected',
+    'cluster.conflict-detected': 'patroni.split_brain_detected',
+    'cluster.member-left': 'patroni.member_left',
+    'binlog.position-advanced': 'pg_wal_lsn_advanced',
+    'binlog.gtid-set-updated': 'pg_replication_slot.confirmed_flush_lsn',
+    'binlog.format-negotiated': 'pg_waldecoding.output_plugin',
+    'binlog.gap-detected': 'pg_wal.timeline_gap',
+    'wal.checkpoint-triggered': 'pg_wal_checkpoint.triggered',
+    'wal.size-threshold-crossed': 'pg_wal.size_threshold',
+    'wal.shared-memory-mapped': 'pg_wal.shared_buffers_mapped',
+    'wal.journal-mode-switched': 'pg_wal.enabled',
+    'fts5.virtual-table-created': 'pg_tsvector.index_created',
+    'fts5.tokenized': 'pg_to_tsvector.tokenized',
+    'fts5.matched': 'pg_tsquery.matched',
+    'fts5.vocab-inspected': 'pg_statistic_ext.tsvector_vocab',
+    'txn.level-set': 'set_transaction_isolation',
+    'txn.dirty-read-blocked': 'pg_isolation.dirty_read_blocked',
+    'txn.non-repeatable-read-blocked': 'pg_isolation.non_repeatable_read_blocked',
+    'txn.phantom-read-blocked': 'pg_predicate_lock.phantom_blocked',
+    'pool-advanced.health-checked': 'pgbouncer.server_check',
+    'pool-advanced.warmed-up': 'pgbouncer.pool_warmup',
+    'pool-advanced.drained': 'pgbouncer_admin_pause',
+    'pool-advanced.metrics-exported': 'pgbouncer.stats_exported',
   },
   mysql: {
     'replication.primary-write': 'binlog.write',
@@ -154,6 +240,38 @@ const dialect: Record<OrmBackend, Partial<Record<NeutralEventName, string>>> = {
     'vector.knn-searched': 'heatwave.knn',
     'vector.hybrid-searched': 'heatwave.hybrid',
     'vector.distance-computed': 'heatwave.euclidean_distance',
+    'logical-advanced.streaming-started': 'group_replication.stream_started',
+    'logical-advanced.origin-tracked': 'group_replication.origin_tracked',
+    'logical-advanced.two-safe-confirmed': 'group_replication.two_safe_ack',
+    'logical-advanced.cascade-synced': 'group_replication.cascade_synced',
+    'mvcc-advanced.tuple-visibility-checked': 'innodb.trx_visibility_checked',
+    'mvcc-advanced.bloat-measured': 'innodb.table_bloat_estimated',
+    'mvcc-advanced.hot-updated': 'innodb.secondary_index_unchanged_update',
+    'mvcc-advanced.xid-wraparound-detected': 'innodb.trx_id_wraparound_warning',
+    'cluster.member-joined': 'group_replication.member_joined',
+    'cluster.primary-elected': 'group_replication.primary_elected',
+    'cluster.conflict-detected': 'performance_schema.replication_conflict_detected',
+    'cluster.member-left': 'group_replication.member_left',
+    'binlog.position-advanced': 'binlog.position_advanced',
+    'binlog.gtid-set-updated': 'gtid_executed.updated',
+    'binlog.format-negotiated': 'binlog_format.negotiated',
+    'binlog.gap-detected': 'gtid.gap_detected',
+    'wal.checkpoint-triggered': 'innodb.redo_checkpoint',
+    'wal.size-threshold-crossed': 'innodb.redo_size_threshold',
+    'wal.shared-memory-mapped': 'innodb.buffer_pool_mapped',
+    'wal.journal-mode-switched': 'innodb.redo_log_enabled',
+    'fts5.virtual-table-created': 'fulltext.index_created',
+    'fts5.tokenized': 'fulltext.tokenized',
+    'fts5.matched': 'match_against.ranked',
+    'fts5.vocab-inspected': 'information_schema.innodb_ft_index_table',
+    'txn.level-set': 'set_transaction_isolation',
+    'txn.dirty-read-blocked': 'innodb.dirty_read_blocked',
+    'txn.non-repeatable-read-blocked': 'innodb.non_repeatable_read_blocked',
+    'txn.phantom-read-blocked': 'innodb.next_key_lock.phantom_blocked',
+    'pool-advanced.health-checked': 'proxysql.health_check',
+    'pool-advanced.warmed-up': 'proxysql.connection_warmup',
+    'pool-advanced.drained': 'proxysql.graceful_drain',
+    'pool-advanced.metrics-exported': 'proxysql_stats_conn.exported',
   },
   sqlite: {
     // SQLite has no server-side replication/CDC/heartbeat/failover etc.
@@ -180,6 +298,38 @@ const dialect: Record<OrmBackend, Partial<Record<NeutralEventName, string>>> = {
     'vector.knn-searched': 'sqlite_vec.knn',
     'vector.hybrid-searched': 'sqlite_vec.hybrid',
     'vector.distance-computed': 'sqlite_vec.cosine',
+    'logical-advanced.streaming-started': 'sqlite.session_stream_started',
+    'logical-advanced.origin-tracked': 'sqlite.session_origin_tracked',
+    'logical-advanced.two-safe-confirmed': 'sqlite.session_two_safe_confirmed',
+    'logical-advanced.cascade-synced': 'sqlite.session_cascade_synced',
+    'mvcc-advanced.tuple-visibility-checked': 'sqlite.snapshot_tuple_visible',
+    'mvcc-advanced.bloat-measured': 'sqlite.freelist_bloat_measured',
+    'mvcc-advanced.hot-updated': 'sqlite.rowid_update_chain',
+    'mvcc-advanced.xid-wraparound-detected': 'sqlite.transaction_id_wraparound',
+    'cluster.member-joined': 'sqlite.cluster_member_joined',
+    'cluster.primary-elected': 'sqlite.cluster_primary_elected',
+    'cluster.conflict-detected': 'sqlite.cluster_conflict_detected',
+    'cluster.member-left': 'sqlite.cluster_member_left',
+    'binlog.position-advanced': 'sqlite.wal_position_advanced',
+    'binlog.gtid-set-updated': 'sqlite.changeset_gtid_updated',
+    'binlog.format-negotiated': 'sqlite.changeset_format_negotiated',
+    'binlog.gap-detected': 'sqlite.changeset_gap_detected',
+    'wal.checkpoint-triggered': 'pragma_wal_checkpoint',
+    'wal.size-threshold-crossed': 'wal.size_threshold',
+    'wal.shared-memory-mapped': 'wal_index.shm_mapped',
+    'wal.journal-mode-switched': 'pragma_journal_mode.wal',
+    'fts5.virtual-table-created': 'fts5.virtual_table_created',
+    'fts5.tokenized': 'fts5.tokenizer_configured',
+    'fts5.matched': 'fts5.bm25_rank',
+    'fts5.vocab-inspected': 'fts5vocab.inspected',
+    'txn.level-set': 'pragma_locking_mode',
+    'txn.dirty-read-blocked': 'sqlite.read_uncommitted_disabled',
+    'txn.non-repeatable-read-blocked': 'sqlite.transaction_snapshot',
+    'txn.phantom-read-blocked': 'sqlite.immediate_transaction',
+    'pool-advanced.health-checked': 'sqlite3_status.health_check',
+    'pool-advanced.warmed-up': 'sqlite3_db_config.warmup',
+    'pool-advanced.drained': 'sqlite3_close_v2.drain',
+    'pool-advanced.metrics-exported': 'sqlite3_status.metrics',
   },
 };
 

@@ -11,13 +11,13 @@ import {
 const providers: OrmProvider[] = ['drizzle', 'prisma', 'kysely'];
 const backends: OrmBackend[] = ['postgres', 'mysql', 'sqlite'];
 
-describe('fidelity harness — 3 × 3 × 8 = 72 grid', () => {
-  it('collects 72 rows for default 3 provider × 3 backend', () => {
+describe('fidelity harness — 3 × 3 × 16 = 144 grid', () => {
+  it('collects 144 rows for default 3 provider × 3 backend', () => {
     const coverage = collectFidelityCoverage({ providers, backends });
     expect(coverage.providers).toEqual(providers);
     expect(coverage.backends).toEqual(backends);
-    expect(coverage.axes.length).toBe(8);
-    expect(coverage.rows.length).toBe(3 * 3 * 8);
+    expect(coverage.axes.length).toBe(16);
+    expect(coverage.rows.length).toBe(3 * 3 * 16);
   });
 
   it('every axis has exactly 4 neutral events', () => {
@@ -42,14 +42,15 @@ describe('fidelity harness — 3 × 3 × 8 = 72 grid', () => {
       providers: ['drizzle'],
       backends: ['postgres', 'mysql'],
     });
-    expect(coverage.rows.length).toBe(1 * 2 * 8);
+    expect(coverage.rows.length).toBe(1 * 2 * 16);
     expect(coverage.rows.every((r) => r.provider === 'drizzle')).toBe(true);
   });
 
-  it('all 8 axes appear in the rows', () => {
+  it('all 16 axes appear in the rows', () => {
     const coverage = collectFidelityCoverage({ providers, backends });
     const seen = new Set(coverage.rows.map((r) => r.axis));
-    expect(seen.size).toBe(8);
+    expect(seen.size).toBe(16);
+    expect(seen).toEqual(new Set(Object.keys(AXIS_TO_EVENTS) as OrmAxis[]));
   });
 
   it('SQLite falls back to neutral for server-only axes', () => {
