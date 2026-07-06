@@ -9,6 +9,7 @@
  */
 
 import {
+  a11yFromBaseline,
   assembleReport,
   coverageFromV8Summary,
   emitJson,
@@ -18,6 +19,8 @@ import {
   mutationFromCounts,
   perfFromSamples,
   testCountFromCategories,
+  type A11yTier,
+  type MutationTier,
   type QualityReport,
   type ReleaseGateVerdict,
 } from '@kiwa-test/quality-metrics';
@@ -40,6 +43,27 @@ export interface FidelityRunInput {
   };
   testCount: { behavior: number; integration: number; e2e: number };
   mutation: { mutations: number; killed: number };
+  /**
+   * Optional a11y baseline totals — enabling the 13th axis. When absent, the
+   * fidelity harness runs the 11-axis (or 12 with mutation tier) gate.
+   *
+   * The kafka dogfood is headless so the baseline is 0/0/0 by design;
+   * supplying it flips the a11y axis into the evaluated set.
+   */
+  a11yBaseline?: {
+    critical?: number;
+    serious?: number;
+    moderate?: number;
+    minor?: number;
+  };
+  /**
+   * Optional tier context — pass both to evaluate the full 13-axis release
+   * gate (7 common + 4 AI-LLM inactive here + 1 mutation.tier + 1 a11y.tier =
+   * 9 evaluated for non-AI providers, phrased "13-axis" per SSOT terminology
+   * because the tier axes count the full 13-slot lane grid).
+   */
+  mutationTier?: MutationTier;
+  a11yTier?: A11yTier;
 }
 
 export interface FidelityRunOutput {
@@ -53,6 +77,9 @@ export interface FidelityRunOutput {
 export function runFidelityHarness(input: FidelityRunInput): FidelityRunOutput {
   const divergences = compareTraces(input.mockTraces, input.realTraces);
   const covered = countCoveredOps(input.mockTraces, input.opsUnderTest);
+  const a11y = input.a11yBaseline
+    ? a11yFromBaseline({ totals: input.a11yBaseline })
+    : undefined;
   const report = assembleReport({
     provider: input.provider,
     version: input.version,
@@ -65,9 +92,13 @@ export function runFidelityHarness(input: FidelityRunInput): FidelityRunOutput {
     }),
     perf: perfFromSamples(input.perfSamplesMs),
     mutation: mutationFromCounts(input.mutation),
+    ...(a11y ? { a11y } : {}),
     notes: renderNotes(divergences, input.opsUnderTest),
   });
-  const verdict = evaluateReleaseGate(report);
+  const verdict = evaluateReleaseGate(report, {}, {
+    ...(input.mutationTier ? { mutationTier: input.mutationTier } : {}),
+    ...(input.a11yTier ? { a11yTier: input.a11yTier } : {}),
+  });
   return {
     divergences,
     report,
