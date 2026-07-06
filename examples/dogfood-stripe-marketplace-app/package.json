@@ -1,0 +1,22 @@
+{
+  "name": "dogfood-stripe-marketplace-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v2 — a Stripe Connect marketplace RP for Next.js 15 App Router that exercises express onboarding + destination charges + application fees + multi-party payouts + tax reports in both KIWA_MODE=mock and env-gated KIWA_MODE=real.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/payment -F @kiwa-test/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test:e2e": "playwright test",
+    "typecheck": "pnpm -F @kiwa-test/payment -F @kiwa-test/core build && tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/payment": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
