@@ -1,0 +1,21 @@
+{
+  "name": "dogfood-otel-exemplar-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.35-3 — an OpenTelemetry Collector + exemplar tracing (trace-to-metric / metric-to-trace) + baggage propagation + W3C context propagation harness driven behind a provider-neutral surface backed by @kiwa-test/observability v2.1 semantics (exemplar + otel-advanced axes) + real-driver env-gate. Two adapter implementations satisfy the same 16-op contract: makeMockAdapter walks the observability v2.1 exemplar + otel-advanced state machines deterministically without any backend; makeRealAdapter emits OTLP HTTP export + Collector pipeline requests through the KIWA_MODE=real testcontainers-driven OpenTelemetry Collector + Jaeger + Prometheus stack when KIWA_OTEL_COLLECTOR_URL / KIWA_JAEGER_URL / KIWA_PROMETHEUS_URL are wired, and otherwise reports KIWA_OTEL_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 3 pipeline profiles (traces / metrics / logs) × 4 baggage entry sets so behavioural drift between mock semantics and the real OpenTelemetry Collector stays observable and feeds the @kiwa-test/quality-metrics 13-axis release gate.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/observability -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/observability": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

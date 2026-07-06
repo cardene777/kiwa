@@ -1,0 +1,35 @@
+{
+  "provider": "@kiwa-test/observability/otel-exemplar",
+  "version": "2.1.0",
+  "reportedAt": "2026-07-06T15:06:39.984Z",
+  "coverage": {
+    "line": 92,
+    "branch": 88,
+    "function": 95
+  },
+  "testCount": {
+    "behavior": 55,
+    "integration": 3,
+    "e2e": 0,
+    "total": 58
+  },
+  "fidelity": {
+    "mockCoveredMethods": 15,
+    "realTotalMethods": 15,
+    "ratio": 100,
+    "behavioralDivergences": 0
+  },
+  "perf": {
+    "p50Ms": 1.4446660000000406,
+    "p95Ms": 1.4446660000000406,
+    "p99Ms": 1.4446660000000406,
+    "samples": 1
+  },
+  "mutation": {
+    "mutations": 50,
+    "killed": 38,
+    "survived": 12,
+    "killRate": 76
+  },
+  "notes": "No behavioral divergences observed across 14 ops (OTEL_EXEMPLAR_HARNESS_OPS)."
+}
