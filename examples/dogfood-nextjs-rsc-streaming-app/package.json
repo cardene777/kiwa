@@ -1,0 +1,24 @@
+{
+  "name": "dogfood-nextjs-rsc-streaming-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.34-2 — a Next.js 15.4 + React 19.1 App Router app that drives RSC render + Suspense + streaming HTML chunks + selective hydration + view transitions across a provider-neutral surface backed by @kiwa-test/component v0.3 semantics, runnable in both KIWA_MODE=real (Playwright + Chromium headless when RSC_STREAMING_BROWSER_READY=1) and KIWA_MODE=mock (in-memory session harness) so behavioural fidelity feeds @kiwa-test/quality-metrics.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/component -F @kiwa-test/core -F @kiwa-test/nextjs -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/component": "workspace:*",
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/nextjs": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
