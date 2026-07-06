@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-test/realtime/nextjs-webrtc-video-app",
   "version": "0.2.0",
-  "reportedAt": "2026-07-05T13:40:40.798Z",
+  "reportedAt": "2026-07-06T02:44:15.072Z",
   "coverage": {
     "line": 92,
     "branch": 88,
@@ -30,6 +30,12 @@
     "killed": 28,
     "survived": 12,
     "killRate": 70
+  },
+  "a11y": {
+    "critical": 0,
+    "serious": 0,
+    "moderate": 0,
+    "minor": 0
   },
   "notes": "Observed 8 divergences across 8 ops:\n- joinRoom: BEHAVIORAL_DIVERGENCE\n- publishTrack: BEHAVIORAL_DIVERGENCE\n- selectLayer: BEHAVIORAL_DIVERGENCE\n- muteTrack: BEHAVIORAL_DIVERGENCE\n- unmuteTrack: BEHAVIORAL_DIVERGENCE\n- iceRestart: BEHAVIORAL_DIVERGENCE\n- unpublishTrack: BEHAVIORAL_DIVERGENCE\n- leaveRoom: BEHAVIORAL_DIVERGENCE"
 }

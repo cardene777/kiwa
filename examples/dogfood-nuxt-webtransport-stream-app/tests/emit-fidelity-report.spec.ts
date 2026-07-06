@@ -98,9 +98,19 @@ describe('fidelity report — WebTransport dogfood', () => {
       testCount: { behavior: 22, integration: 6, e2e: 3 },
       mutation: { mutations: 40, killed: 28 },
       surfaceCoverage: { mockCoveredMethods: 9, realTotalMethods: 9 },
+      // v1.30-4 (Issue #995) — 13-axis release gate: WebTransport is a
+      // transport primitive with no DOM, so it opts into the SaaS-tier a11y
+      // gate (strict 0/0/0). Any violation would fail the gate; the totals
+      // stay all-zero so the 13th axis passes silently.
+      a11y: {
+        totals: { critical: 0, serious: 0, moderate: 0, minor: 0 },
+        tier: 'saas',
+      },
     });
 
     expect(output.verdict.passed).toBe(true);
+    // 8 axes = 7 base + a11y.tier (SaaS provider, no AI-LLM axes).
+    expect(output.verdict.axesEvaluated).toBe(8);
     expect(output.divergences.length).toBeGreaterThan(0);
 
     if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });

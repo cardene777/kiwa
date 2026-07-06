@@ -1,4 +1,7 @@
 export type {
+  A11yMetric,
+  A11yThreshold,
+  A11yTier,
   AccuracyMetric,
   CostMetric,
   CoverageMetric,
@@ -20,6 +23,7 @@ export type {
 export { isAiLlmProvider } from './types.js';
 
 export {
+  a11yFromBaseline,
   accuracyFromSamples,
   assembleReport,
   costFromSamples,
@@ -33,10 +37,13 @@ export {
 } from './collect.js';
 
 export {
+  DEFAULT_A11Y_TIER_THRESHOLDS,
   DEFAULT_MUTATION_TIER_THRESHOLDS,
   DEFAULT_RELEASE_GATE_THRESHOLDS,
+  assertA11yTier,
   assertMutationTier,
   evaluateReleaseGate,
+  resolveA11yTier,
   resolveMutationTier,
 } from './gate.js';
 

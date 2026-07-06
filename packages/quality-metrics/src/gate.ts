@@ -1,4 +1,7 @@
 import type {
+  A11yMetric,
+  A11yThreshold,
+  A11yTier,
   MutationMetric,
   MutationTier,
   QualityReport,
@@ -77,6 +80,91 @@ export function assertMutationTier(input: {
 }
 
 /**
+ * 4-tier a11y (axe-core WCAG 2.1 AA) threshold SSOT — v1.30-4。 各 tier の
+ * 3 impact ceiling (critical / serious / moderate) は
+ * `docs/quality/a11y-thresholds.md` § Tier table SSOT を写しである。 `critical`
+ * は常に 0 (SSOT invariant, "No override may ever raise the critical bar")、
+ * `minor` は release gate 判定外なので閾値表に入れない (team review 用)。
+ *
+ * per-package looser override は {@link ReleaseGateContext.a11yTierThreshold}
+ * または {@link assertA11yTier} 引数で個別指定する。 stricter override (floor
+ * を上げる) は承認不要、 looser override は PR body に one-line justification
+ * を残す運用 (SSOT § Overrides)。
+ */
+export const DEFAULT_A11Y_TIER_THRESHOLDS: Readonly<Record<A11yTier, A11yThreshold>> = Object.freeze({
+  core: { critical: 0, serious: 0, moderate: 3 },
+  framework: { critical: 0, serious: 3, moderate: 10 },
+  saas: { critical: 0, serious: 0, moderate: 0 },
+  'test-type': { critical: 0, serious: 3, moderate: 10 },
+});
+
+/**
+ * baseline JSON の verbal tier label (`Core` / `Framework` / `SaaS` /
+ * `Test type`) を machine-friendly {@link A11yTier} enum に正規化する。
+ * baseline (`docs/quality/a11y-thresholds.md`) と runtime gate 経路を 1
+ * 経路に集約する SSOT helper。 shape / 動作は {@link resolveMutationTier}
+ * と統一 (1 pattern review)。
+ *
+ * case-insensitive + trim 対応。 未知 label は throw して silent drift を防ぐ。
+ */
+export function resolveA11yTier(label: string): A11yTier {
+  const key = label.trim().toLowerCase();
+  switch (key) {
+    case 'core':
+      return 'core';
+    case 'framework':
+      return 'framework';
+    case 'saas':
+      return 'saas';
+    case 'test type':
+    case 'test-type':
+      return 'test-type';
+    default:
+      throw new Error(
+        `resolveA11yTier: unknown a11y tier label "${label}" (expected Core / Framework / SaaS / Test type)`,
+      );
+  }
+}
+
+/**
+ * 単一 {@link A11yMetric} を tier default threshold (または override) と
+ * 突合して pass / fail を判定する helper。 3 impact (critical / serious /
+ * moderate) を独立にチェック、 fail 時は impact + actual + threshold + tier
+ * を error message に含めて actionable にする (rules/quality.md AC 具体表現)。
+ *
+ * mutation tier と異なり、 zero-violation metric (0/0/0) は pass 扱い
+ * — a11y は「違反 0 が理想状態」 なので silent success で良い
+ * (SSOT: docs/quality/a11y-thresholds.md § 13-axis release gate integration
+ * "Empty-violation metrics do not throw")。
+ *
+ * `critical` は SSOT invariant で常に 0、 override で 0 以外にできない
+ * 型契約は {@link A11yThreshold} の `critical: 0` literal で保証済み。
+ */
+export function assertA11yTier(input: {
+  metric: A11yMetric;
+  tier: A11yTier;
+  threshold?: A11yThreshold;
+}): void {
+  const threshold = input.threshold ?? DEFAULT_A11Y_TIER_THRESHOLDS[input.tier];
+  const { critical, serious, moderate } = input.metric;
+  if (critical > threshold.critical) {
+    throw new Error(
+      `assertA11yTier: critical impact ${critical} > ${threshold.critical} — "${input.tier}" tier does not allow critical > 0 (SSOT: docs/quality/a11y-thresholds.md)`,
+    );
+  }
+  if (serious > threshold.serious) {
+    throw new Error(
+      `assertA11yTier: serious impact ${serious} > ${threshold.serious} — "${input.tier}" tier ceiling breached`,
+    );
+  }
+  if (moderate > threshold.moderate) {
+    throw new Error(
+      `assertA11yTier: moderate impact ${moderate} > ${threshold.moderate} — "${input.tier}" tier ceiling breached`,
+    );
+  }
+}
+
+/**
  * Default release-gate thresholds (11 軸)。 共通 7 軸は v1.11 milestone の
  * 業界標準基準、 AI-LLM 4 軸は v1.12 milestone (Issue #695) で新設。
  *
@@ -124,6 +212,13 @@ export const DEFAULT_RELEASE_GATE_THRESHOLDS: ReleaseGateThresholds = {
  * が指定された場合のみ 4-tier threshold (Core 80 / Framework 70 / SaaS 65 /
  * Test type 60) と kill rate を突合、 これは既存 `mutation.killRate` axis と
  * **並存** する (置換ではない)、 legacy overrides もそのまま機能する。
+ *
+ * v1.30-4 で 13 番目 axis `a11y.tier` を optional 追加。 `context.a11yTier`
+ * が指定された場合のみ 4-tier threshold (Core 0/0/3 / Framework 0/3/10 /
+ * SaaS 0/0/0 / Test type 0/3/10) と report.a11y の 3 impact (critical /
+ * serious / moderate) を突合、 fail 時は impact 毎に個別 blocker を積む。
+ * report.a11y が undefined の場合は critical Infinity fallback で必ず fail
+ * (silent "no data" pass を防止)。
  */
 export function evaluateReleaseGate(
   report: QualityReport,
@@ -176,6 +271,47 @@ export function evaluateReleaseGate(
       context.mutationTierThreshold ??
       DEFAULT_MUTATION_TIER_THRESHOLDS[context.mutationTier];
     check('mutation.tier', report.mutation.killRate, tierThreshold, '>=');
+  }
+
+  if (context.a11yTier !== undefined) {
+    // 13th axis emits at most 1 blocker per fail; axesEvaluated counts the
+    // single a11y.tier lane regardless of how many impact ceilings were
+    // breached (mirrors mutation.tier: 1 tier check = 1 axis).
+    axesEvaluated += 1;
+    const a11yThreshold =
+      context.a11yTierThreshold ?? DEFAULT_A11Y_TIER_THRESHOLDS[context.a11yTier];
+    // 欠損時は critical Infinity で必ず fail、 silent "no a11y data" pass 防止
+    // (AI-LLM axis の Number.POSITIVE_INFINITY / NEGATIVE_INFINITY fallback
+    // と同じ設計)。
+    const critical = report.a11y?.critical ?? Number.POSITIVE_INFINITY;
+    const serious = report.a11y?.serious ?? Number.POSITIVE_INFINITY;
+    const moderate = report.a11y?.moderate ?? Number.POSITIVE_INFINITY;
+    // 優先順位で最初に breach した impact を 1 件だけ blocker に積む
+    // (critical > serious > moderate)。 axis 数 = tier lane 単位で数える
+    // ため、 blocker 数と axesEvaluated は独立。 downstream の error
+    // message は blocker.threshold + blocker.actual + blocker.op で十分。
+    if (critical > a11yThreshold.critical) {
+      blockers.push({
+        axis: 'a11y.tier',
+        threshold: a11yThreshold.critical,
+        actual: critical,
+        op: '<=',
+      });
+    } else if (serious > a11yThreshold.serious) {
+      blockers.push({
+        axis: 'a11y.tier',
+        threshold: a11yThreshold.serious,
+        actual: serious,
+        op: '<=',
+      });
+    } else if (moderate > a11yThreshold.moderate) {
+      blockers.push({
+        axis: 'a11y.tier',
+        threshold: a11yThreshold.moderate,
+        actual: moderate,
+        op: '<=',
+      });
+    }
   }
 
   return {

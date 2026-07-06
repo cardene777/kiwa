@@ -21,7 +21,13 @@ export function emitMarkdown(input: {
   lines.push(`_Reported at ${report.reportedAt}._`);
   lines.push('');
 
-  const axesLabel = isAi ? '11-axis' : '5-axis';
+  // Base axis count in the summary section (7 mandatory axes minus 2 that
+  // fit into a single row each = 5 rows for non-AI-LLM). AI-LLM adds 4 more.
+  // v1.30-4: a11y adds 1 row when present; other tier-aware axes (mutation
+  // tier context) do not add rows because they reuse the mutation.killRate row.
+  const baseRows = isAi ? 11 : 5;
+  const a11yRows = report.a11y ? 1 : 0;
+  const axesLabel = `${baseRows + a11yRows}-axis`;
   lines.push(`## ${axesLabel} summary`);
   lines.push('');
   lines.push('| axis | value |');
@@ -59,6 +65,14 @@ export function emitMarkdown(input: {
     if (report.accuracy) {
       lines.push(`| accuracy — score | ${report.accuracy.score.toFixed(4)} (${report.accuracy.method}, ${report.accuracy.samples} samples) |`);
     }
+  }
+  // v1.30-4: a11y axis (WCAG 2.1 AA impact counts) — present on any provider
+  // that opts into the tier-aware gate, not just AI-LLM。 critical / serious /
+  // moderate は release gate 判定対象、 minor は team review 用に併記する。
+  if (report.a11y) {
+    lines.push(
+      `| a11y — critical / serious / moderate | ${report.a11y.critical} / ${report.a11y.serious} / ${report.a11y.moderate} (minor ${report.a11y.minor}) |`,
+    );
   }
   lines.push('');
 
@@ -105,6 +119,11 @@ export function emitMarkdown(input: {
     }
     if (diff.accuracy) {
       lines.push(`| accuracy.score | ${formatDelta(diff.accuracy.score)} |`);
+    }
+    if (diff.a11y) {
+      lines.push(`| a11y.critical | ${formatDelta(diff.a11y.critical)} (negative is better) |`);
+      lines.push(`| a11y.serious | ${formatDelta(diff.a11y.serious)} (negative is better) |`);
+      lines.push(`| a11y.moderate | ${formatDelta(diff.a11y.moderate)} (negative is better) |`);
     }
     lines.push('');
   }
@@ -178,6 +197,17 @@ export function diffReports(previous: QualityReport, current: QualityReport): Qu
   }
   if (previous.accuracy && current.accuracy) {
     out.accuracy = { score: current.accuracy.score - previous.accuracy.score };
+  }
+  if (previous.a11y && current.a11y) {
+    // v1.30-4: negative delta = fewer violations = improvement (mirrors perf
+    // / latency / cost / token direction convention). Only 3 impact axes
+    // release gate checks; minor is team-review only and skipped from the
+    // diff shape (QualityReportDiff.a11y type).
+    out.a11y = {
+      critical: current.a11y.critical - previous.a11y.critical,
+      serious: current.a11y.serious - previous.a11y.serious,
+      moderate: current.a11y.moderate - previous.a11y.moderate,
+    };
   }
   return out;
 }
