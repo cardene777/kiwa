@@ -16,13 +16,34 @@ Event streaming testing has been fragmented across providers — Kafka uses `kaf
 - **Redpanda** — Kafka API compat + bundled schema-registry
 - **NATS** — subject-based routing + JetStream + KV + Object Store
 
-## 5 semantics
+## 5 base semantics
 
 - **producer** — publish + partition key + batch send
 - **consumer** — subscribe + consumer group + offset commit + rebalance
 - **exactly-once** — idempotent producer (dedup by sequence) + transactional producer (begin / commit / abort)
 - **DLQ** — retry policy + poison message quarantine
 - **schema-registry** — Avro / Protobuf / JSON schema + compatibility check + subject naming
+
+## 8 advanced-semantics axes (v0.3.0)
+
+Layered on top of the 5 base semantics. See `src/semantics/` and the 3 provider × 8 axis fidelity harness.
+
+- **kafka-raw-protocol** — KIP-98 producer id + epoch fencing, txn coordinator state machine, KIP-227 fetch session, ISR + high-watermark advance
+- **kafka-consumer-group** — JoinGroup / SyncGroup / Heartbeat, static membership (KIP-345), cooperative (KIP-429) incremental rebalance with `reassignedMembers` diff
+- **redpanda-schema-evolution** — 7 compat modes (BACKWARD / FORWARD / FULL and *_TRANSITIVE / NONE), subject reference graph, 3 subject naming strategies
+- **redpanda-transactions** — TxnCoordinator + `guardEpoch()` fencing + auto-abort on transaction timeout
+- **nats-jetstream-durable** — durable consumer + ack-pending window + max-deliver quarantine + backoff schedule + `sweepExpired()` ack-wait handling
+- **nats-kv-object** — KV history + delete tombstones + watch, Object chunked writes + FNV-1a digest + optional LZ4-tagged compression + reassembly
+- **exactly-once (cross-provider)** — provider-agnostic transactional batch + `read-committed` / `read-uncommitted` filter, records tagged with `x-kiwa-txn-id` header
+- **consumer-lag-telemetry** — `highWatermark` / `committedOffset` / `offsetLag` / `timeLagMs`, `snapshotAll()`, `aggregateGroupLag()` — the SRE dashboard shape
+
+### Fidelity harness
+
+`createFidelityHarness()` returns the 3 provider × 8 axis grid (24 cells). Each cell is `implemented`, `not-applicable` (e.g. NATS has no Kafka wire protocol), or `planned`. Tests iterate the grid to prove every axis is either covered or explicitly excluded.
+
+### Real driver env-gate
+
+Set `KIWA_MODE=real` and per-axis credentials (`KAFKA_KEY` / `REDPANDA_KEY` / `NATS_KEY`) to run tests against the real driver in addition to the mock. `isRealDriverMode(env)` + `requiredKeyFor(axis)` gate this in-suite.
 
 ## Quick start
 
