@@ -14,10 +14,14 @@ import { detectRealEnv, makeRealAdapter, SkippedError } from '../src/adapters/re
 describe('real adapter — POSTGRES_BOOTSTRAP env gate', () => {
   const savedBootstrap = process.env.POSTGRES_BOOTSTRAP;
   const savedClientId = process.env.POSTGRES_CLIENT_ID;
+  const savedPostgresImage = process.env.POSTGRES_IMAGE;
+  const savedPgvectorImage = process.env.PGVECTOR_IMAGE;
 
   beforeEach(() => {
     delete process.env.POSTGRES_BOOTSTRAP;
     delete process.env.POSTGRES_CLIENT_ID;
+    delete process.env.POSTGRES_IMAGE;
+    delete process.env.PGVECTOR_IMAGE;
   });
 
   afterEach(() => {
@@ -25,6 +29,10 @@ describe('real adapter — POSTGRES_BOOTSTRAP env gate', () => {
     else process.env.POSTGRES_BOOTSTRAP = savedBootstrap;
     if (savedClientId === undefined) delete process.env.POSTGRES_CLIENT_ID;
     else process.env.POSTGRES_CLIENT_ID = savedClientId;
+    if (savedPostgresImage === undefined) delete process.env.POSTGRES_IMAGE;
+    else process.env.POSTGRES_IMAGE = savedPostgresImage;
+    if (savedPgvectorImage === undefined) delete process.env.PGVECTOR_IMAGE;
+    else process.env.PGVECTOR_IMAGE = savedPgvectorImage;
   });
 
   it('T-DPR-ENV-001 detectRealEnv returns null when POSTGRES_BOOTSTRAP is missing', () => {
@@ -46,11 +54,17 @@ describe('real adapter — POSTGRES_BOOTSTRAP env gate', () => {
     await adapter.reset();
   });
 
-  it('T-DPR-ENV-003 detectRealEnv respects POSTGRES_CLIENT_ID override', () => {
+  it('T-DPR-ENV-003 detectRealEnv respects POSTGRES_CLIENT_ID + image overrides', () => {
     process.env.POSTGRES_BOOTSTRAP = 'localhost:5432';
     process.env.POSTGRES_CLIENT_ID = 'test-client';
     const env = detectRealEnv();
-    expect(env).toEqual({ bootstrap: 'localhost:5432', clientId: 'test-client' });
+    expect(env).toMatchObject({
+      bootstrap: 'localhost:5432',
+      clientId: 'test-client',
+    });
+    // v1.32-2 adds postgres + pgvector image tags (default fallbacks).
+    expect(env?.postgresImage).toBe('postgres:16-alpine');
+    expect(env?.pgvectorImage).toBe('pgvector/pgvector:pg16');
   });
 
   it('T-DPR-ENV-004 connected adapter probes but reports REAL_ADAPTER_NOT_IMPLEMENTED for high-level ops', async () => {

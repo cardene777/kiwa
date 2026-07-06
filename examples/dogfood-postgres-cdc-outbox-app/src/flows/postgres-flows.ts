@@ -2,9 +2,24 @@
  * Higher-level flows that compose the adapter ops. Both the mock-mode tests
  * and the fidelity harness drive these functions so the trace comparison
  * runs against identical call sequences.
+ *
+ * v1 (v1.26-2) — 5 flows: outbox / cdc pickup / replication / at-least-once
+ * / fidelity emit.
+ * v2 (v1.32-2) — 4 additional flows: logical-replication advanced / slot
+ * advance / pgvector / testcontainers probe. Each returns a compact subset
+ * of the underlying observation shape so callers can assert on the exact
+ * fields that matter to their scenario without pulling in the whole
+ * observation surface.
  */
 
-import type { OrderRow, PostgresCdcOutboxAdapter } from '../adapters/interface.js';
+import type {
+  LogicalReplicationAdvancedObservation,
+  OrderRow,
+  PgvectorObservation,
+  PostgresCdcOutboxAdapter,
+  SlotAdvanceObservation,
+  TestcontainersProbeObservation,
+} from '../adapters/interface.js';
 
 export async function driveOutboxFlow(
   adapter: PostgresCdcOutboxAdapter,
@@ -65,4 +80,35 @@ export async function driveAtLeastOnceFlow(
 
 export async function driveFidelityFlow(adapter: PostgresCdcOutboxAdapter): Promise<void> {
   await adapter.emitFidelity();
+}
+
+// -----------------------------------------------------------------------------
+// v2 (v1.32-2) flows — logical replication advanced + slot advance + pgvector
+// + testcontainers probe. Each drives the sibling adapter op + returns the
+// full observation because the observation shapes are small enough that
+// callers routinely want every field.
+// -----------------------------------------------------------------------------
+
+export async function driveLogicalReplicationAdvancedFlow(
+  adapter: PostgresCdcOutboxAdapter,
+): Promise<LogicalReplicationAdvancedObservation> {
+  return adapter.driveLogicalReplicationAdvanced();
+}
+
+export async function driveSlotAdvanceFlow(
+  adapter: PostgresCdcOutboxAdapter,
+): Promise<SlotAdvanceObservation> {
+  return adapter.driveSlotAdvance();
+}
+
+export async function drivePgvectorFlow(
+  adapter: PostgresCdcOutboxAdapter,
+): Promise<PgvectorObservation> {
+  return adapter.drivePgvector();
+}
+
+export async function driveTestcontainersProbeFlow(
+  adapter: PostgresCdcOutboxAdapter,
+): Promise<TestcontainersProbeObservation> {
+  return adapter.driveTestcontainersProbe();
 }

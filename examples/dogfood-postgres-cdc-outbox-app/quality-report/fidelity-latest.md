@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-test/orm/postgres-cdc-dogfood @ 0.1.0
 
-_Reported at 2026-07-05T06:50:19.546Z._
+_Reported at 2026-07-06T07:42:03.154Z._
 
 ## 5-axis summary
 
@@ -13,23 +13,29 @@ _Reported at 2026-07-05T06:50:19.546Z._
 | test count — behavior | 24 |
 | test count — integration | 6 |
 | test count — e2e | 5 |
-| fidelity — ratio | 100.00% (5/5) |
+| fidelity — ratio | 55.56% (5/9) |
 | fidelity — behavioralDivergences | 5 |
 | perf — p50 | 0.05ms |
-| perf — p95 | 0.95ms |
-| perf — p99 | 0.95ms |
+| perf — p95 | 0.92ms |
+| perf — p99 | 0.92ms |
 | perf — samples | 2 |
 | mutation — killRate | 73.33% (22/30) |
 | mutation — survived | 8 |
 
 ## Release gate
 
-- verdict: **PASS**
+- verdict: **FAIL**
 - axes evaluated: 7
+
+### Blockers
+
+| axis | operator | threshold | actual |
+|---|---|---|---|
+| fidelity.ratio | >= | 70 | 55.56 |
 
 ## Notes
 
-Observed 5 divergences across 5 ops:
+Observed 5 divergences across 9 ops:
 - driveOutbox: BEHAVIORAL_DIVERGENCE
 - driveCdcPickup: BEHAVIORAL_DIVERGENCE
 - driveReplication: BEHAVIORAL_DIVERGENCE
