@@ -96,3 +96,16 @@ export {
   trace_nestedRetry,
   logs_forHttpTrace,
 } from './fixtures.js';
+
+// v2.1 advanced 8-axis semantics + real driver (namespaced via `semantics/` and
+// `real-driver` to avoid name collisions with v2.0 exports).
+export * as semantics from './semantics/index.js';
+export {
+  buildRealDriverConfig,
+  explicitEnvKey,
+  isKiwaModeReal,
+  resolveObservabilityEndpoint,
+  skipUnlessReal,
+  type ObservabilityBackend,
+  type RealDriverConfig,
+} from './real-driver.js';
