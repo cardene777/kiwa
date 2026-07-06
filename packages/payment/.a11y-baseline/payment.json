@@ -1,0 +1,159 @@
+{
+  "package": "@kiwa-test/payment",
+  "generatedAt": "2026-07-06T01:52:04.729Z",
+  "layers": {
+    "jsdom": {
+      "layer": "jsdom",
+      "applicable": false,
+      "reason": "no jsdom fixture — package produces no static DOM output.",
+      "violations": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "surviving": []
+    },
+    "playwright": {
+      "layer": "playwright",
+      "applicable": false,
+      "reason": "no playwright fixture — package has no browser-runtime surface.",
+      "violations": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "surviving": []
+    },
+    "ssrHydration": {
+      "layer": "ssrHydration",
+      "applicable": false,
+      "reason": "no ssrHydration fixture — package emits no SSR string.",
+      "violations": {
+        "critical": 0,
+        "serious": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "surviving": []
+    }
+  },
+  "totals": {
+    "critical": 0,
+    "serious": 0,
+    "moderate": 0,
+    "minor": 0
+  },
+  "ok": true,
+  "providers": [
+    {
+      "name": "stripe",
+      "axis": "invoice"
+    },
+    {
+      "name": "stripe",
+      "axis": "retry"
+    },
+    {
+      "name": "stripe",
+      "axis": "subscription-lifecycle"
+    },
+    {
+      "name": "stripe",
+      "axis": "chargeback"
+    },
+    {
+      "name": "stripe",
+      "axis": "dunning"
+    },
+    {
+      "name": "stripe",
+      "axis": "tax"
+    },
+    {
+      "name": "stripe",
+      "axis": "three-ds"
+    },
+    {
+      "name": "stripe",
+      "axis": "sca"
+    },
+    {
+      "name": "stripe",
+      "axis": "psd2"
+    },
+    {
+      "name": "paddle",
+      "axis": "invoice"
+    },
+    {
+      "name": "paddle",
+      "axis": "retry"
+    },
+    {
+      "name": "paddle",
+      "axis": "subscription-lifecycle"
+    },
+    {
+      "name": "paddle",
+      "axis": "chargeback"
+    },
+    {
+      "name": "paddle",
+      "axis": "dunning"
+    },
+    {
+      "name": "paddle",
+      "axis": "tax"
+    },
+    {
+      "name": "paddle",
+      "axis": "three-ds"
+    },
+    {
+      "name": "paddle",
+      "axis": "sca"
+    },
+    {
+      "name": "paddle",
+      "axis": "psd2"
+    },
+    {
+      "name": "lemonsqueezy",
+      "axis": "invoice"
+    },
+    {
+      "name": "lemonsqueezy",
+      "axis": "retry"
+    },
+    {
+      "name": "lemonsqueezy",
+      "axis": "subscription-lifecycle"
+    },
+    {
+      "name": "lemonsqueezy",
+      "axis": "chargeback"
+    },
+    {
+      "name": "lemonsqueezy",
+      "axis": "dunning"
+    },
+    {
+      "name": "lemonsqueezy",
+      "axis": "tax"
+    },
+    {
+      "name": "lemonsqueezy",
+      "axis": "three-ds"
+    },
+    {
+      "name": "lemonsqueezy",
+      "axis": "sca"
+    },
+    {
+      "name": "lemonsqueezy",
+      "axis": "psd2"
+    }
+  ]
+}

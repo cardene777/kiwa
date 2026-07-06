@@ -143,6 +143,23 @@ A package that intentionally does not participate in a layer omits the field, an
 
 The harness lives in `packages/a11y/src/layer-harness.ts` and is exported from `@kiwa-test/a11y` as `runLayerHarness`. Unit tests exhaust every branch — union dedupe, absent-layer reasons, tier breach detection, missing-document fallback — so the driver in `scripts/run-axe-baseline.mjs` stays thin.
 
+## Provider provenance (v1.30-3)
+
+SaaS-tier packages that wrap multiple provider SDKs (`auth` / `queue` / `cache` / `orm` / `payment` / `streaming`) declare an optional `providers` array on their `.axe-config.mjs`. The runner passes the list through to `.a11y-baseline/{pkg}.json` as a top-level `providers` field so downstream gates can prove the sweep considered every provider even when the baseline is layers-absent (no-DOM adapter has no violations to record but still needs provenance).
+
+Each entry is an object with `name` required plus any of `protocol` / `semantics` / `backend` / `axis` optional strings — enough shape to record the AC's provider × axis matrices (`payment` = 3 × 9, `streaming` = 3 × 5, `orm` = 3 × 3 × 8, `auth` = 6 + 4 protocol).
+
+| Package | Entry count | Shape |
+|---|---|---|
+| `@kiwa-test/auth` | 10 | 6 provider (auth0 / better-auth / clerk / lucia / supabase / supabase-advanced) + 4 protocol (oauth21 / oidc / passkey / webauthn). |
+| `@kiwa-test/queue` | 5 | bullmq / inngest / cloudflare-queues / sqs / rabbitmq. `rabbitmq-advanced` is an axis of `rabbitmq`. |
+| `@kiwa-test/cache` | 3 | in-memory / keydb / memcached. |
+| `@kiwa-test/payment` | 27 | 3 brand (stripe / paddle / lemonsqueezy) × 9 axis (invoice / retry / subscription-lifecycle / chargeback / dunning / tax / three-ds / sca / psd2). |
+| `@kiwa-test/streaming` | 15 | 3 brand (kafka / nats / redpanda) × 5 semantics (dlq / exactly-once / schema-registry / partition / retention). |
+| `@kiwa-test/orm` | 72 | 3 brand (drizzle / prisma / kysely) × 3 backend (postgres / mysql / sqlite) × 8 axis (cdc / replication / mvcc / partitioning / connection-pool / logical-replication / rls / vector-store). |
+
+Non-SaaS packages omit the field; the baseline shape is unchanged (no `providers` key). Adding a new provider adapter is a two-file edit — append to `.axe-config.mjs` `providers` and re-run `pnpm test:a11y` to refresh the baseline — no other config changes needed.
+
 ## 13-axis release gate integration (v1.30-4)
 
 v1.30-4 promotes the a11y violation count to a first-class 13th axis in the release gate (the 12th, mutation kill rate, was added in v1.27-4).
