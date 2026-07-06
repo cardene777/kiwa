@@ -301,6 +301,35 @@ function persistBaseline(absBaseline, next) {
  * surfaced as an actionable install hint rather than a downstream stack
  * trace.
  */
+/**
+ * Import `.axe-config.mjs` with a lazy jsdom-boot fallback. Most configs
+ * import cleanly on raw Node (they only build fixtures inside async
+ * factories or from strings); a config that captures a live jsdom Element
+ * at module top level throws `ReferenceError: document is not defined`
+ * before we can inspect the fixtures field. On that specific error we
+ * boot jsdom and retry once — every other error is rethrown so real
+ * config bugs still surface (N4 regression fix).
+ *
+ * @param {string} configPath
+ */
+async function loadAxeConfigWithJsdomFallback(configPath) {
+  const url = pathToFileURL(configPath).href;
+  try {
+    return await import(url);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const referenceMiss =
+      err instanceof ReferenceError &&
+      /(document|window|Element|HTMLElement|Node) is not defined/.test(message);
+    if (!referenceMiss) throw err;
+    await ensureJsdomGlobal();
+    // The failing import populates Node's ESM cache with a rejected
+    // record — the retry must bypass the cache with a query string so the
+    // config re-evaluates against the freshly-booted jsdom globals.
+    return await import(`${url}?jsdom-retry=${Date.now()}`);
+  }
+}
+
 async function ensureJsdomGlobal() {
   if (typeof globalThis.document !== 'undefined') return;
   let JSDOM;
@@ -334,7 +363,14 @@ async function main() {
     process.exit(1);
   }
 
-  const mod = await import(pathToFileURL(configPath).href);
+  // Import `.axe-config.mjs`. If it captures a jsdom-owned Element at
+  // module top level (e.g. `const host = document.createElement('div')`),
+  // the raw import throws `document is not defined` before we know the
+  // package needs jsdom. Catch that specific ReferenceError, boot a jsdom
+  // global (which pulls the `jsdom` peerDep — packages that don't ship
+  // jsdom cannot reach this branch because their config imports cleanly),
+  // and retry the import (N4 regression fix).
+  const mod = await loadAxeConfigWithJsdomFallback(configPath);
   const config = mod.default ?? mod;
   const result = validateAxeConfig(config);
   if (!result.ok) {
@@ -364,9 +400,12 @@ async function main() {
     process.exit(0);
   }
 
-  // Fixture-wired path: boot jsdom when needed, then import the a11y harness
-  // from the workspace and run it against the declared fixtures. The harness
-  // itself is unit-tested exhaustively in
+  // Fixture-wired path: import the a11y harness from the workspace and run
+  // it against the declared fixtures. `ensureJsdomGlobal` is idempotent, so
+  // this call is a no-op when the config-load fallback already booted jsdom
+  // above (N4 regression) and a fresh boot for configs that declare
+  // jsdom / SSR fixtures but never touch `document` at module top level.
+  // The harness itself is unit-tested exhaustively in
   // `packages/a11y/tests/layer-harness.test.ts`, so this driver is
   // deliberately thin.
   if (needsJsdom(fixtures)) {

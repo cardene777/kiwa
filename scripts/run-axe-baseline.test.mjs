@@ -3,6 +3,10 @@
 //   node --test scripts/run-axe-baseline.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, writeFileSync, rmSync, copyFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import {
   validateAxeConfig,
@@ -14,6 +18,8 @@ import {
   hasAnyFixture,
   normalizeProviders,
 } from './run-axe-baseline.mjs';
+
+const RUNNER = fileURLToPath(new URL('./run-axe-baseline.mjs', import.meta.url));
 
 test('validateAxeConfig accepts a Core-tier config', () => {
   const config = {
@@ -279,4 +285,58 @@ test('buildLayersAbsentBaseline omits providers when list is empty', () => {
     [],
   );
   assert.equal('providers' in baseline, false);
+});
+
+test('N4 — .axe-config.mjs that touches document.createElement at module top level does not crash the runner (jsdom booted before import)', () => {
+  // v1.30-3 adversarial-review N4 — the runner used to import
+  // `.axe-config.mjs` before calling `ensureJsdomGlobal()`, so any config
+  // that captured a jsdom-owned Element at module top level threw
+  // `document is not defined`. Booting jsdom first must let the config
+  // load cleanly.
+  //
+  // The runner does `await import('jsdom')` which Node resolves relative to
+  // the runner file's location, not the fixture cwd. pnpm strict-mode
+  // isolates `jsdom` to packages that declare it as a dependency, so a
+  // fresh fixture dir under `packages/a11y/` also needs a copy of the
+  // runner script placed inside `packages/a11y/` for import resolution to
+  // find `jsdom` in the a11y-scoped node_modules tree.
+  const repoRoot = fileURLToPath(new URL('..', import.meta.url));
+  const dir = mkdtempSync(join(repoRoot, 'packages/a11y/.tmp-n4-'));
+  try {
+    writeFileSync(
+      join(dir, 'package.json'),
+      JSON.stringify({ name: '@kiwa-test/n4-fixture' }),
+    );
+    // Config touches `document.createElement` at module top level — this
+    // exercises the jsdom-before-config-import ordering fix.
+    writeFileSync(
+      join(dir, '.axe-config.mjs'),
+      `const topLevelFixture = document.createElement('div');
+topLevelFixture.innerHTML = '<button type="button" aria-label="ok">ok</button>';
+export default {
+  thresholds: { critical: 0, serious: 0, moderate: 0 },
+  baselinePath: '.a11y-baseline/n4-fixture.json',
+};
+`,
+    );
+    // Copy the runner into the a11y-scoped fixture dir so `import('jsdom')`
+    // resolves against `packages/a11y/node_modules/jsdom` (workspace
+    // isolation prevents the repo-root scripts/ path from finding it).
+    const runnerCopy = join(dir, 'runner.mjs');
+    copyFileSync(RUNNER, runnerCopy);
+    const res = spawnSync(process.execPath, [runnerCopy], {
+      cwd: dir,
+      encoding: 'utf8',
+      env: { ...process.env, NODE_OPTIONS: '' },
+    });
+    assert.equal(
+      res.status,
+      0,
+      `runner exited with ${res.status}. stdout=${res.stdout} stderr=${res.stderr}`,
+    );
+    assert.doesNotMatch(res.stderr, /document is not defined/);
+    assert.match(res.stdout, /layers-absent baseline written/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

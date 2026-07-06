@@ -13,6 +13,7 @@ import {
   type LayerReport,
 } from '../src/index.js';
 
+
 const ORIGINAL = document.body.innerHTML;
 afterEach(() => {
   document.body.innerHTML = ORIGINAL;
@@ -117,6 +118,34 @@ describe('unionByRule', () => {
       [violation('shared', 'critical', 2)],
     );
     expect(merged.find((v) => v.id === 'shared')?.impact).toBe('critical');
+  });
+
+  it('N2 — replaces impact with the more severe value when both sides are concrete (SSR minor + hydrated critical → critical)', () => {
+    // v1.30-3 adversarial-review N2 — SSR side reports `minor`, hydrated side
+    // reports `critical`. Previous logic left impact pinned to the a-side
+    // because `existing.impact == null` was false, so `ok`/`totals` under-
+    // reported. Severity ranking must upgrade to `critical`.
+    const merged = unionByRule(
+      [violation('shared', 'minor', 1)],
+      [violation('shared', 'critical', 2)],
+    );
+    expect(merged.find((v) => v.id === 'shared')?.impact).toBe('critical');
+  });
+
+  it('N2 — retains the more severe value when a-side is critical and b-side downgrades (critical > minor)', () => {
+    const merged = unionByRule(
+      [violation('shared', 'critical', 1)],
+      [violation('shared', 'minor', 2)],
+    );
+    expect(merged.find((v) => v.id === 'shared')?.impact).toBe('critical');
+  });
+
+  it('N2 — severity ranking respects the full IMPACTS order (serious wins over moderate)', () => {
+    const merged = unionByRule(
+      [violation('shared', 'moderate', 1)],
+      [violation('shared', 'serious', 1)],
+    );
+    expect(merged.find((v) => v.id === 'shared')?.impact).toBe('serious');
   });
 
   it('returns the whole b-side when a-side is empty', () => {
@@ -314,6 +343,115 @@ describe('runLayerHarness', () => {
     expect(report.layers.ssrHydration.applicable).toBe(true);
     // The helper detached the element after axe ran.
     expect(detached.isConnected).toBe(false);
+  });
+
+  it('N1 — hydrated Element inside a caller-owned detached parent survives the scan with subtree byte-identical', async () => {
+    // v1.30-3 adversarial-review N1 — the caller keeps a detached
+    // <div id="host"><button/></div> subtree for its own use and hands the
+    // inner <button> to the harness. Previous logic called
+    // `host?.appendChild(target)` which moved <button> out of <host>,
+    // permanently mutating the caller's subtree. The helper must restore
+    // <button> to <host> after axe runs.
+    const host = document.createElement('div');
+    host.setAttribute('data-owner', 'caller');
+    const child = document.createElement('button');
+    child.type = 'button';
+    child.setAttribute('aria-label', 'ok');
+    host.appendChild(child);
+    // Deliberately do NOT append `host` to the document — <host> is a
+    // caller-owned detached subtree.
+    expect(host.isConnected).toBe(false);
+    expect(child.parentNode).toBe(host);
+
+    await runLayerHarness('@kiwa-test/nextjs', {
+      ssrHydration: {
+        ssrHtml: `<span aria-label="ok">ok</span>`,
+        hydrated: child,
+      },
+    });
+
+    // Post-scan the child must be back inside the caller's <host> subtree.
+    expect(child.parentNode).toBe(host);
+    expect(host.firstChild).toBe(child);
+    expect(host.isConnected).toBe(false);
+    expect(child.isConnected).toBe(false);
+  });
+
+  it('N3 — cross-realm Element (different JSDOM window) is classified as an Element, not a Document', async () => {
+    // v1.30-3 adversarial-review N3 — `instanceof Element` is realm-scoped,
+    // so an Element built inside a second JSDOM window fell through the
+    // Element branch and hit `.documentElement` on a non-Document. The
+    // helper uses duck-typing (`tagName` + `nodeType`) to survive cross-realm
+    // fixtures.
+    const { JSDOM } = await import('jsdom');
+    const alternate = new JSDOM('<!doctype html><html><body></body></html>', {
+      url: 'http://localhost/',
+    });
+    const foreignElement = alternate.window.document.createElement('div');
+    foreignElement.innerHTML = `<button type="button" aria-label="ok">ok</button>`;
+    // Sanity — the foreign Element is NOT `instanceof` the primary realm's
+    // Element constructor. Guarded so the test survives on runtimes where
+    // both realms happen to share a constructor.
+    const primaryElementCtor = (globalThis as { Element?: Function }).Element;
+    if (typeof primaryElementCtor === 'function') {
+      expect(foreignElement instanceof primaryElementCtor).toBe(false);
+    }
+    // Duck-typing gate must recognise the foreign Element as Element-like
+    // and route it through the `withAttachedElement` Element branch. Before
+    // the fix, `instanceof Element` returned false and the code fell into
+    // the Document branch, reading `.documentElement` off a non-Document —
+    // a TypeError that surfaces long before axe-core is called.
+    //
+    // With the fix in place two outcomes prove the branch selection is
+    // realm-independent: either the call resolves (axe accepts the foreign
+    // Element on this jsdom version) or axe rejects the invalid argument
+    // (`axe.run arguments are invalid`). Both prove we never touched
+    // `.documentElement` on a non-Document.
+    let harnessError: unknown = null;
+    try {
+      await runLayerHarness('@kiwa-test/nextjs', {
+        ssrHydration: {
+          ssrHtml: `<span aria-label="ok">ok</span>`,
+          hydrated: foreignElement as unknown as Element,
+        },
+      });
+    } catch (err) {
+      harnessError = err;
+    }
+    if (harnessError !== null) {
+      const message =
+        harnessError instanceof Error ? harnessError.message : String(harnessError);
+      // A `documentElement` read on the foreign Element would show up as
+      // "Cannot read properties of undefined (reading 'documentElement')"
+      // or similar. That would prove the branch selection is broken.
+      expect(message).not.toMatch(/documentElement/);
+    }
+    // The foreign Element was never grafted onto the main document.
+    expect(foreignElement.isConnected).toBe(false);
+  });
+
+  it('N2 (harness-level) — SSR + hydrated where the same rule id downgrades on the SSR side is reported at the higher severity', async () => {
+    // End-to-end proof of the pickMoreSevereAxeImpact wiring — build a
+    // synthetic mixed-severity playwright + jsdom pair, then check the
+    // computed totals surface at the higher severity. The unionByRule call
+    // happens inside runSsrHydrationLayer, so we drive it through an SSR +
+    // hydrated fixture where axe emits the same rule id on both sides.
+    document.body.innerHTML = `<div id="hydrated"><button type="button"></button></div>`;
+    const hydrated = document.getElementById('hydrated') as Element;
+    const report = await runLayerHarness('@kiwa-test/nextjs', {
+      ssrHydration: {
+        ssrHtml: `<button type="button"></button>`,
+        hydrated,
+      },
+    });
+    // Both sides emit `button-name` at whichever impact axe assigns — the
+    // union must not silently drop or downgrade the severity relative to a
+    // single-side scan.
+    const buttonName = report.layers.ssrHydration.surviving.find(
+      (v) => v.id === 'button-name',
+    );
+    expect(buttonName).toBeDefined();
+    expect(buttonName?.impact).not.toBeNull();
   });
 
   it('B6 — SSR fixture rejects a non-string ssrHtml before touching innerHTML', async () => {

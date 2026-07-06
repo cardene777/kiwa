@@ -158,9 +158,7 @@ export function unionByRule(
       continue;
     }
     existing.nodes = [...existing.nodes, ...v.nodes];
-    if (existing.impact == null && v.impact != null) {
-      existing.impact = v.impact;
-    }
+    existing.impact = pickMoreSevereImpact(existing.impact, v.impact);
   }
   return [...seen.values()];
 }
@@ -236,27 +234,53 @@ function runPlaywrightLayer(
 }
 
 /**
+ * True when the value quacks like a live DOM `Element` — has a string
+ * `tagName` and an `ownerDocument`. Realm-independent (a caller can hand
+ * us an Element from a different JSDOM window and the check still fires),
+ * unlike `instanceof Element` which is pinned to whichever `Element`
+ * constructor lived on `globalThis` at import time (N3 regression).
+ */
+function isElementLike(value: unknown): value is Element {
+  if (value === null || typeof value !== 'object') return false;
+  const el = value as { tagName?: unknown; nodeType?: unknown };
+  return typeof el.tagName === 'string' && el.nodeType === 1;
+}
+
+/**
  * Run axe against an Element / Document, attaching it to the live document
- * beforehand and detaching afterwards when the caller handed us a detached
- * node. axe-core requires the scanned Element to already be in the document
- * tree, otherwise it raises
+ * beforehand and restoring it afterwards when the caller handed us a
+ * detached node. axe-core requires the scanned Element to already be in
+ * the document tree, otherwise it raises
  * "No elements found for include in page Context".
  *
  * The Element / Document is left in the state the caller handed it. If the
  * node is already attached, this helper leaves it in place. If it is
- * detached, the helper appends it to `document.body` and removes it in a
- * `finally` block, even when axe throws.
+ * detached, the helper records the original parent + next sibling, re-parents
+ * the node to `document.body` for the axe run, and moves it back to its
+ * original position in a `finally` block, even when axe throws.
+ *
+ * The parent restoration matters because the caller may have handed us a
+ * detached _subtree_ — for example `<div id="host"><button/></div>` where the
+ * caller wants `button` scanned but keeps `host` for its own use. Previous
+ * implementations called `host.appendChild(target)` which moves the target
+ * out of its original parent, permanently mutating the caller's subtree
+ * (N1 regression). Recording + restoring the parent leaves the caller's
+ * subtree byte-identical.
+ *
+ * `instanceof Element` is avoided so cross-realm Elements (different JSDOM
+ * window) survive the branch selection (N3 regression).
  */
 async function withAttachedElement(
   element: Element | Document,
   runOptions: AuditOptions['runOptions'] | undefined,
 ): Promise<AxeResults> {
   const owner = element.ownerDocument ?? (element as Document);
-  const target: Element =
-    element instanceof Element
-      ? element
-      : ((element as Document).documentElement as Element);
+  const target: Element = isElementLike(element)
+    ? element
+    : ((element as Document).documentElement as Element);
   const wasAttached = target.isConnected;
+  const originalParent = target.parentNode;
+  const originalNextSibling = target.nextSibling;
   if (!wasAttached) {
     const host = owner.body ?? owner.documentElement;
     host?.appendChild(target);
@@ -265,7 +289,14 @@ async function withAttachedElement(
     return await runAxe(buildAuditOptions(element, runOptions));
   } finally {
     if (!wasAttached) {
-      target.remove();
+      if (originalParent) {
+        // Restore the target to its original parent + sibling position so a
+        // caller-owned detached subtree is left byte-identical after the
+        // scan (N1 regression).
+        originalParent.insertBefore(target, originalNextSibling);
+      } else {
+        target.remove();
+      }
     }
   }
 }
@@ -406,14 +437,30 @@ export function summariseHarness(report: HarnessReport): string {
 }
 
 /**
- * Pick whichever impact is more severe between two values. `null` loses to
- * any concrete impact; between two concrete impacts the one earlier in
- * `IMPACTS` (critical > serious > moderate > minor) wins.
+ * Pick whichever impact is more severe between two values. `null` /
+ * `undefined` / non-`Impact` strings lose to any concrete `Impact`;
+ * between two concrete impacts the one earlier in `IMPACTS`
+ * (critical > serious > moderate > minor) wins.
+ *
+ * Overloaded so `summariseHarness` can round-trip `Impact | null` cleanly
+ * while `unionByRule` — which handles raw axe `AxeViolation['impact']`
+ * (`Impact | null | undefined`) — reuses the same ranking logic. Sharing
+ * the implementation guarantees `unionByRule` never silently downgrades
+ * severity (N2 regression — SSR minor + hydrated critical must surface
+ * as critical, not stay pinned to whichever side landed first).
  */
-function pickMoreSevereImpact(a: Impact | null, b: Impact | null): Impact | null {
-  if (a === null) return b;
-  if (b === null) return a;
-  const rankA = IMPACTS.indexOf(a);
-  const rankB = IMPACTS.indexOf(b);
+function pickMoreSevereImpact(a: Impact | null, b: Impact | null): Impact | null;
+function pickMoreSevereImpact(
+  a: AxeViolation['impact'],
+  b: AxeViolation['impact'],
+): AxeViolation['impact'];
+function pickMoreSevereImpact(
+  a: AxeViolation['impact'],
+  b: AxeViolation['impact'],
+): AxeViolation['impact'] {
+  const rankA = a != null && IMPACTS.includes(a as Impact) ? IMPACTS.indexOf(a as Impact) : -1;
+  const rankB = b != null && IMPACTS.includes(b as Impact) ? IMPACTS.indexOf(b as Impact) : -1;
+  if (rankA === -1) return b;
+  if (rankB === -1) return a;
   return rankA <= rankB ? a : b;
 }
