@@ -1,8 +1,8 @@
 # Quality Report — @kiwa-test/realtime/sveltekit-http3-multiplex-app @ 0.2.0
 
-_Reported at 2026-07-05T15:36:40.376Z._
+_Reported at 2026-07-06T02:44:27.838Z._
 
-## 5-axis summary
+## 6-axis summary
 
 | axis | value |
 |---|---|
@@ -21,11 +21,12 @@ _Reported at 2026-07-05T15:36:40.376Z._
 | perf — samples | 4 |
 | mutation — killRate | 70.00% (28/40) |
 | mutation — survived | 12 |
+| a11y — critical / serious / moderate | 0 / 0 / 0 (minor 0) |
 
 ## Release gate
 
 - verdict: **PASS**
-- axes evaluated: 7
+- axes evaluated: 8
 
 ## Notes
 

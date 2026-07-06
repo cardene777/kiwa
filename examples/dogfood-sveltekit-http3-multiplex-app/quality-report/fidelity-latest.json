@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-test/realtime/sveltekit-http3-multiplex-app",
   "version": "0.2.0",
-  "reportedAt": "2026-07-05T15:36:40.376Z",
+  "reportedAt": "2026-07-06T02:44:27.838Z",
   "coverage": {
     "line": 92,
     "branch": 88,
@@ -30,6 +30,12 @@
     "killed": 28,
     "survived": 12,
     "killRate": 70
+  },
+  "a11y": {
+    "critical": 0,
+    "serious": 0,
+    "moderate": 0,
+    "minor": 0
   },
   "notes": "Observed 9 divergences across 9 ops:\n- openConnection: BEHAVIORAL_DIVERGENCE\n- openStream: BEHAVIORAL_DIVERGENCE\n- writeStream: BEHAVIORAL_DIVERGENCE\n- readStream: BEHAVIORAL_DIVERGENCE\n- concurrentSend: BEHAVIORAL_DIVERGENCE\n- insertHpackHeader: BEHAVIORAL_DIVERGENCE\n- resumeZeroRtt: BEHAVIORAL_DIVERGENCE\n- closeStream: BEHAVIORAL_DIVERGENCE\n- closeConnection: BEHAVIORAL_DIVERGENCE"
 }

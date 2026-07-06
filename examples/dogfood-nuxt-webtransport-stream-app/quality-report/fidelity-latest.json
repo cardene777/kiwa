@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-test/realtime/nuxt-webtransport-stream-app",
   "version": "0.2.0",
-  "reportedAt": "2026-07-05T15:10:27.025Z",
+  "reportedAt": "2026-07-06T02:44:24.241Z",
   "coverage": {
     "line": 92,
     "branch": 88,
@@ -20,9 +20,9 @@
     "behavioralDivergences": 9
   },
   "perf": {
-    "p50Ms": 0,
-    "p95Ms": 6,
-    "p99Ms": 6,
+    "p50Ms": 1,
+    "p95Ms": 2,
+    "p99Ms": 2,
     "samples": 6
   },
   "mutation": {
@@ -30,6 +30,12 @@
     "killed": 28,
     "survived": 12,
     "killRate": 70
+  },
+  "a11y": {
+    "critical": 0,
+    "serious": 0,
+    "moderate": 0,
+    "minor": 0
   },
   "notes": "Observed 9 divergences across 9 ops:\n- openSession: BEHAVIORAL_DIVERGENCE\n- openUniStream: BEHAVIORAL_DIVERGENCE\n- writeStream: BEHAVIORAL_DIVERGENCE\n- openBiStream: BEHAVIORAL_DIVERGENCE\n- readStream: BEHAVIORAL_DIVERGENCE\n- sendDatagram: BEHAVIORAL_DIVERGENCE\n- resetStream: BEHAVIORAL_DIVERGENCE\n- migrateConnection: BEHAVIORAL_DIVERGENCE\n- closeSession: BEHAVIORAL_DIVERGENCE"
 }

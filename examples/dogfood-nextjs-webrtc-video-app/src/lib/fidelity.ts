@@ -2,7 +2,7 @@
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
  * (missing ops, unmatched behaviour) into `@kiwa-test/quality-metrics`
- * 12-axis release gate, and emits a JSON + markdown report so the release
+ * 13-axis release gate, and emits a JSON + markdown report so the release
  * process can consume it.
  *
  * The dogfood app is the source of truth for whether the kiwa Realtime v0.2
@@ -11,13 +11,15 @@
  * adapter contract exposes so any divergence surfaces the op that broke.
  *
  * Realtime dogfoods use the common 7 axes (coverage 3 / fidelity / perf p95
- * / mutation / behavior test count). The AI-LLM 4 axes (cost / latency /
- * token / accuracy) do not apply — WebRTC is a media / transport primitive,
- * not a token-priced generative call. Join / publish / iceRestart latency
- * samples feed `perf.p95Ms` so realtime performance stays visible.
+ * / mutation / behavior test count) + optional a11y axis (v1.30-4, SaaS-tier
+ * strict 0/0/0 because WebRTC is a transport primitive with no DOM). The
+ * AI-LLM 4 axes (cost / latency / token / accuracy) do not apply. Join /
+ * publish / iceRestart latency samples feed `perf.p95Ms` so realtime
+ * performance stays visible.
  */
 
 import {
+  a11yFromBaseline,
   assembleReport,
   coverageFromV8Summary,
   emitJson,
@@ -27,6 +29,7 @@ import {
   mutationFromCounts,
   perfFromSamples,
   testCountFromCategories,
+  type A11yTier,
   type QualityReport,
   type ReleaseGateVerdict,
 } from '@kiwa-test/quality-metrics';
@@ -55,6 +58,22 @@ export interface FidelityRunInput {
    * are the AC scope of Sub-Issue #972.
    */
   surfaceCoverage: { mockCoveredMethods: number; realTotalMethods: number };
+  /**
+   * A11y baseline totals + tier for the 13th release gate axis (v1.30-4,
+   * Issue #995). Absent = keep legacy 7-axis behaviour so this test suite
+   * does not regress before the app declares an axe-config baseline. The
+   * transport-primitive apps map to the SaaS tier (strict 0/0/0) by default
+   * because they emit no DOM.
+   */
+  a11y?: {
+    totals: {
+      critical?: number;
+      serious?: number;
+      moderate?: number;
+      minor?: number;
+    };
+    tier?: A11yTier;
+  };
 }
 
 export interface FidelityRunOutput {
@@ -69,7 +88,9 @@ export function runFidelityHarness(input: FidelityRunInput): FidelityRunOutput {
   const divergences = compareTraces(input.mockTraces, input.realTraces);
   const covered = countCoveredOps(input.mockTraces, input.opsUnderTest);
 
-  const report = assembleReport({
+  // exactOptionalPropertyTypes: true — spread only when defined so `a11y`
+  // stays absent from the report object rather than being present-with-undefined.
+  const assembleInput: Parameters<typeof assembleReport>[0] = {
     provider: input.provider,
     version: input.version,
     coverage: coverageFromV8Summary(input.coverageSummary),
@@ -82,9 +103,22 @@ export function runFidelityHarness(input: FidelityRunInput): FidelityRunOutput {
     perf: perfFromSamples(input.mockLatencySamplesMs),
     mutation: mutationFromCounts(input.mutation),
     notes: renderNotes(divergences, input.opsUnderTest),
-  });
+  };
+  if (input.a11y) {
+    assembleInput.a11y = a11yFromBaseline({ totals: input.a11y.totals });
+  }
+  const report = assembleReport(assembleInput);
 
-  const verdict = evaluateReleaseGate(report);
+  // v1.30-4 (Issue #995) — pass a11yTier through so the 13th axis kicks in
+  // for baseline-declaring apps. Absent = keep the legacy 7-axis behaviour
+  // (`evaluateReleaseGate` is backward compatible when the context field is
+  // undefined). Default tier for these transport-primitive dogfoods is
+  // SaaS (strict 0/0/0) because they emit no DOM.
+  const verdict = evaluateReleaseGate(
+    report,
+    {},
+    input.a11y ? { a11yTier: input.a11y.tier ?? 'saas' } : {},
+  );
   return {
     divergences,
     report,

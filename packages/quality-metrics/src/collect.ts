@@ -1,4 +1,5 @@
 import type {
+  A11yMetric,
   AccuracyMetric,
   CostMetric,
   CoverageMetric,
@@ -220,11 +221,51 @@ export function accuracyFromSamples(input: {
 }
 
 /**
+ * Build an {@link A11yMetric} from a `.a11y-baseline/{pkg}.json` `totals`
+ * block (v1.30-4)。 baseline JSON は
+ * `{ package, generatedAt, layers, totals: { critical, serious, moderate, minor }, ok }`
+ * shape、 このヘルパは totals を A11yMetric 型に coerce する pure function。
+ *
+ * 層が全部 layers-absent (Core / Framework の no-DOM adapter) の baseline は
+ * 全 impact が 0 になる、 その場合も metric は shape 通り返す
+ * (release gate が 0/0/0 を pass 判定する SSOT)。
+ *
+ * 部分欠損 (`totals: { critical: 0 }` のみ等) は 0 default で埋める、
+ * silent NaN / undefined を防ぐ (負値 / NaN は throw で拒否)。
+ */
+export function a11yFromBaseline(input: {
+  totals: {
+    critical?: number;
+    serious?: number;
+    moderate?: number;
+    minor?: number;
+  };
+}): A11yMetric {
+  const pick = (field: 'critical' | 'serious' | 'moderate' | 'minor'): number => {
+    const raw = input.totals[field];
+    if (raw === undefined) return 0;
+    if (typeof raw !== 'number' || Number.isNaN(raw) || raw < 0 || !Number.isFinite(raw)) {
+      throw new Error(`a11yFromBaseline: invalid ${field} count ${raw} (must be non-negative finite number)`);
+    }
+    return raw;
+  };
+  return {
+    critical: pick('critical'),
+    serious: pick('serious'),
+    moderate: pick('moderate'),
+    minor: pick('minor'),
+  };
+}
+
+/**
  * Assemble a full {@link QualityReport} from pre-computed axes. Fills the
  * `reportedAt` timestamp with the current UTC ISO string.
  *
  * AI-LLM 4 軸 (cost / latency / token / accuracy) は provider が
  * `@kiwa-test/ai-*` のときのみ意味を持つ (それ以外は undefined でも通る)。
+ * a11y 軸 (v1.30-4) は tier-aware release gate が有効な package のみ渡す、
+ * 未渡しは release gate 判定外 (context.a11yTier 指定時に critical Infinity
+ * fallback で fail-safe)。
  */
 export function assembleReport(input: {
   provider: string;
@@ -238,6 +279,7 @@ export function assembleReport(input: {
   latency?: LatencyMetric;
   token?: TokenMetric;
   accuracy?: AccuracyMetric;
+  a11y?: A11yMetric;
   notes?: string;
 }): QualityReport {
   if (!input.provider) throw new Error('assembleReport: provider is required');
@@ -256,6 +298,7 @@ export function assembleReport(input: {
   if (input.latency !== undefined) report.latency = input.latency;
   if (input.token !== undefined) report.token = input.token;
   if (input.accuracy !== undefined) report.accuracy = input.accuracy;
+  if (input.a11y !== undefined) report.a11y = input.a11y;
   if (input.notes !== undefined) report.notes = input.notes;
   return report;
 }

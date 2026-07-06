@@ -114,9 +114,22 @@ describe('fidelity report', () => {
       testCount: { behavior: 22, integration: 6, e2e: 3 },
       mutation: { mutations: 40, killed: 28 },
       surfaceCoverage: { mockCoveredMethods: 8, realTotalMethods: 8 },
+      // v1.30-4 (Issue #995) — 13-axis release gate: WebRTC is a transport
+      // primitive with no DOM, so it opts into the SaaS-tier a11y gate
+      // (strict 0/0/0). Any violation would fail the gate; the app's mock +
+      // real adapters emit no HTML, so the totals stay all-zero and the
+      // 13th axis passes silently. This asserts the wiring is intact.
+      a11y: {
+        totals: { critical: 0, serious: 0, moderate: 0, minor: 0 },
+        tier: 'saas',
+      },
     });
 
     expect(output.verdict.passed).toBe(true);
+    // v1.30-4: axes evaluated grows to 8 when a11yTier is set on a non-AI-LLM
+    // provider (7 base + 1 a11y.tier), proving the a11y axis actually joined
+    // the run instead of being silently skipped.
+    expect(output.verdict.axesEvaluated).toBe(8);
     // The real adapter reports env-missing on every op — those show up as
     // BEHAVIORAL_DIVERGENCE entries. Each op in OPS_UNDER_TEST that mock
     // covered but real refused should appear as a divergence.

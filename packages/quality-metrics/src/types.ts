@@ -1,13 +1,14 @@
 /**
- * Quality metrics harness — unified 11-axis score for every kiwa provider.
+ * Quality metrics harness — unified 13-axis release gate for every kiwa provider.
  *
  * v1.10 まで kiwa は「provider 数を増やす」 直交軸で拡張してきたが、
  * v1.11 (Issue #680 / #681) からは「release 品質を数値で判断可能にする」
  * 縦軸に思想シフトした。 v1.12 (Issue #694 / #695) では AI-LLM 領域に
- * 特有の non-determinism を release gate で扱えるよう 4 軸を追加し、
- * 合計 11 軸に拡張する。
+ * 特有の non-determinism を release gate で扱えるよう 4 軸を追加、 v1.27-4
+ * で mutation.tier (12 番目)、 v1.30-4 (Issue #995) で a11y.tier (13 番目)
+ * を追加し、 合計 13 軸に拡張する。
  *
- * ## 11 測定軸
+ * ## 13 測定軸
  *
  * 共通 7 軸 (全 provider) ...
  * - {@link CoverageMetric} — line / branch / function coverage %
@@ -22,12 +23,18 @@
  * - {@link TokenMetric} — prompt / completion / total token 数
  * - {@link AccuracyMetric} — golden 出力に対する 0.0-1.0 similarity score
  *
+ * tier-aware optional 2 軸 (release gate context 指定時のみ) ...
+ * - {@link MutationTier} — 4-tier mutation kill rate (v1.27-4)
+ * - {@link A11yTier} — 4-tier a11y violation count (v1.30-4)
+ *
  * ## release gate 数値化
  *
  * {@link ReleaseGateThresholds} で 11 軸の閾値 SSOT を定義、
  * {@link evaluateReleaseGate} で `passed` / `blockers` を判定する。
  * AI-LLM provider (`@kiwa-test/ai-*`) のみ 4 軸を追加検査、 それ以外の
- * provider は既存 7 軸のまま (breaking change なし)。
+ * provider は既存 7 軸のまま (breaking change なし)。 tier-aware 2 軸は
+ * `context.mutationTier` / `context.a11yTier` 明示時のみ加算 (backward
+ * compatible)。
  */
 
 /** Line / branch / function coverage percentages, all 0–100. */
@@ -124,6 +131,58 @@ export interface MutationMetric {
 export type MutationTier = 'core' | 'framework' | 'saas' | 'test-type';
 
 /**
+ * A11y (axe-core WCAG 2.1 AA) violation counts per impact — v1.30-4 SSOT。
+ *
+ * shape は axe-core の `impact` field (`critical` / `serious` / `moderate` /
+ * `minor`) をそのまま持ち、 `.a11y-baseline/{pkg}.json` の `totals` block
+ * から {@link a11yFromBaseline} で構築する。 `critical` は SSOT 不変で
+ * どの tier でも 0 が bar (docs/quality/a11y-thresholds.md § Overrides)。
+ * `minor` は release gate では判定しないが shape 一貫性のため保持する
+ * (team review 用)。
+ */
+export interface A11yMetric {
+  /** WCAG 2.1 AA critical impact violation count (SSOT: 常に 0 が bar)。 */
+  critical: number;
+  /** WCAG 2.1 AA serious impact violation count。 */
+  serious: number;
+  /** WCAG 2.1 AA moderate impact violation count。 */
+  moderate: number;
+  /** WCAG 2.1 AA minor impact violation count (release gate 判定外)。 */
+  minor: number;
+}
+
+/**
+ * 4-tier a11y threshold classification — v1.30-4 SSOT。 shape / 意味は
+ * {@link MutationTier} と統一 (SSOT: docs/quality/a11y-thresholds.md § Tier table)。
+ *
+ * - `core` = pure logic packages with no DOM output (bar 0/0/3)
+ * - `framework` = SSR / hydration / adapter wrapper (bar 0/3/10)
+ * - `saas` = provider-specific adapter (bar 0/0/0, strict)
+ * - `test-type` = test harness with DOM measurement noise (bar 0/3/10)
+ *
+ * baseline JSON (`docs/quality/a11y-thresholds.md` に verbal `Core` /
+ * `Framework` / `SaaS` / `Test type` で書かれる) は {@link resolveA11yTier}
+ * で本 enum に正規化する。
+ */
+export type A11yTier = 'core' | 'framework' | 'saas' | 'test-type';
+
+/**
+ * A11y threshold per tier — 3 impact ceiling (critical / serious / moderate)。
+ * `minor` は release gate 判定外なので閾値表にも入れない。
+ *
+ * SSOT invariant: `critical` は常に 0 (docs/quality/a11y-thresholds.md §
+ * Overrides "No override may ever raise the critical bar")。
+ */
+export interface A11yThreshold {
+  /** Critical impact ceiling — SSOT invariant 0。 */
+  critical: 0;
+  /** Serious impact ceiling — tier 毎の許容上限 (Core 0 / Framework 3 / SaaS 0 / Test type 3)。 */
+  serious: number;
+  /** Moderate impact ceiling — tier 毎の許容上限 (Core 3 / Framework 10 / SaaS 0 / Test type 10)。 */
+  moderate: number;
+}
+
+/**
  * Cost metric for AI-LLM providers — 1 request 当たりの US$ 実測。
  *
  * `perRequestUsd` は「1 request 当たり単価の観測値」、 `totalUsd` は
@@ -215,6 +274,12 @@ export interface QualityReport {
   latency?: LatencyMetric | undefined;
   token?: TokenMetric | undefined;
   accuracy?: AccuracyMetric | undefined;
+  /**
+   * A11y 4 impact 軸 (v1.30-4) — `.a11y-baseline/{pkg}.json` の totals から
+   * {@link a11yFromBaseline} で構築。 {@link ReleaseGateContext.a11yTier}
+   * 指定時のみ release gate が参照する。
+   */
+  a11y?: A11yMetric | undefined;
   /** Optional free-form notes surfaced in the emitted markdown report. */
   notes?: string | undefined;
 }
@@ -269,32 +334,50 @@ export interface ReleaseGateVerdict {
   passed: boolean;
   blockers: ReleaseGateBlocker[];
   /**
-   * Number of axes evaluated:
-   * - 7 for non-AI-LLM without tier,
-   * - 8 for non-AI-LLM with tier (v1.27-4),
-   * - 11 for AI-LLM without tier,
-   * - 12 for AI-LLM with tier (v1.27-4).
+   * Number of axes evaluated. Base counts:
+   * - 7 for non-AI-LLM without any tier axis,
+   * - 11 for AI-LLM without any tier axis.
+   *
+   * Each of `context.mutationTier` (v1.27-4) and `context.a11yTier` (v1.30-4)
+   * adds 1 axis independently, so a caller can end up with 7 / 8 / 9 base or
+   * 11 / 12 / 13 with AI-LLM.
    */
   axesEvaluated: number;
 }
 
 /**
- * Optional context that opts a report into the 12-axis mutation tier check.
- * Passed as the third argument of {@link evaluateReleaseGate}. Absent =
- * legacy 7 / 11 axis behaviour (backward compatible).
+ * Optional context that opts a report into the tier-aware axes (mutation.tier
+ * v1.27-4 + a11y.tier v1.30-4). Passed as the third argument of
+ * {@link evaluateReleaseGate}. Absent fields = legacy 7 / 11 axis behaviour
+ * (backward compatible).
  */
 export interface ReleaseGateContext {
   /**
-   * Mutation tier of the package under evaluation. When set, a 12th axis
-   * `mutation.tier` is added that enforces {@link MUTATION_TIER_THRESHOLDS}
+   * Mutation tier of the package under evaluation. When set, a `mutation.tier`
+   * axis is added that enforces {@link DEFAULT_MUTATION_TIER_THRESHOLDS}
    * unless {@link mutationTierThreshold} overrides it.
    */
   mutationTier?: MutationTier;
   /**
-   * Optional per-package looser override for the tier default (e.g. auth 65
-   * on Framework tier). Documented per-baseline in `.mutation-baseline/*.json`.
+   * Optional per-package looser override for the mutation tier default (e.g.
+   * auth 65 on Framework tier). Documented per-baseline in
+   * `.mutation-baseline/*.json`.
    */
   mutationTierThreshold?: number;
+  /**
+   * A11y tier of the package under evaluation (v1.30-4). When set, an
+   * `a11y.tier` axis is added that enforces {@link DEFAULT_A11Y_TIER_THRESHOLDS}
+   * unless {@link a11yTierThreshold} overrides it. If the report has no
+   * `a11y` field the axis fails safe (critical = Infinity) so silent
+   * "no data" runs cannot pass.
+   */
+  a11yTier?: A11yTier;
+  /**
+   * Optional per-package looser override for the a11y tier default (e.g.
+   * component overrides moderate to 0 while staying Test type tier).
+   * `critical` is always 0 — SSOT invariant, never overridable.
+   */
+  a11yTierThreshold?: A11yThreshold;
 }
 
 /**
@@ -318,6 +401,8 @@ export interface QualityReportDiff {
   latency?: Pick<LatencyMetric, 'p95Ms'> | undefined;
   token?: Pick<TokenMetric, 'totalTokens'> | undefined;
   accuracy?: Pick<AccuracyMetric, 'score'> | undefined;
+  /** A11y 3 impact diff (v1.30-4、 両 report とも a11y を持つときのみ設定)。 */
+  a11y?: Pick<A11yMetric, 'critical' | 'serious' | 'moderate'> | undefined;
 }
 
 /**
