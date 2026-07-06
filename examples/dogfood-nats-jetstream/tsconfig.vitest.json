@@ -6,5 +6,5 @@
     "noEmit": false
   },
   "include": ["src/**/*", "tests/**/*"],
-  "exclude": ["tests/perf/**/*"]
+  "exclude": ["tests/perf/**/*", "tests/e2e/**/*"]
 }

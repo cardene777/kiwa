@@ -1,22 +1,37 @@
 /**
- * Mock adapter — spins up 1 NatsMock and wires the 4 dogfood flows
- * (JetStream / KV / Object / Routing) against it. Every op appends 1
- * latency sample and 1 trace event so the fidelity harness never reads
- * as 0-sample.
+ * Mock adapter — spins up 1 NatsMock and wires the 9 dogfood flows (5 v1
+ * + 4 v2) against it. Every op appends 1 latency sample and 1 trace event
+ * so the fidelity harness never reads as 0-sample.
+ *
+ * v2 (v1.31-4) adds a durable-consumer walk + KV revision history + Object
+ * Store chunk boundary + testcontainers probe placeholders. The durable
+ * consumer + KV revision + Object chunking flows are backed by the shared
+ * streaming v0.3 semantics (`createNatsJetStreamDurable` +
+ * `createNatsKvObject`) rather than the base NatsMock's JetStream / KV /
+ * Object surfaces — those cover the coarse-grained v1 patterns, the v0.3
+ * semantics cover the fine-grained retry / revision / chunk behaviour the
+ * v2 axes assert against.
  */
 
 import { createNatsMock, type NatsMock } from '@kiwa-test/streaming';
 import { createJetStreamRun, simulateRedelivery } from '../jetstream/index.js';
+import { driveDurableConsumer } from '../jetstream/durable.js';
 import { createKVRun } from '../kv/index.js';
+import { driveKvRevision as driveKvRevisionFlow } from '../kv/revision.js';
 import { createObjectRun } from '../object/index.js';
+import { driveObjectChunking as driveObjectChunkingFlow } from '../object/chunking.js';
 import { createRoutingRun } from '../routing/index.js';
 import type {
+  JetStreamDurableObservation,
   JetStreamObservation,
+  KvRevisionObservation,
   KVObservation,
   NatsJetStreamAdapter,
+  ObjectChunkingObservation,
   ObjectObservation,
   OrderEvent,
   RoutingObservation,
+  TestcontainersProbeObservation,
   TraceEvent,
   UserProfile,
 } from './interface.js';
@@ -30,7 +45,11 @@ const ORDERS_SUBJECTS = ['orders.>'];
 const KV_BUCKET = 'user-profiles';
 const OBJECT_BUCKET = 'invoices';
 
-/** Build the mock adapter. All 4 flow runs share one NATS mock instance. */
+/** Deterministic mock endpoints exposed by `driveTestcontainersProbe`. */
+export const MOCK_NATS_URL = 'nats://nats-mock:4222';
+export const NATS_IMAGE_DEFAULT = 'nats:2.10.20-alpine';
+
+/** Build the mock adapter. All 4 v1 flow runs share one NATS mock instance. */
 export function makeMockAdapter(opts: MockAdapterOptions = {}): NatsJetStreamAdapter {
   const config = {
     clientName: opts.clientName ?? 'dogfood-nats-jetstream',
@@ -44,6 +63,11 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): NatsJetStreamAda
     kvOperations: 0,
     objectBytesStored: 0,
     routingDeliveries: 0,
+    durableDeliveries: 0,
+    durableQuarantined: 0,
+    kvRevisionsWritten: 0,
+    objectChunksWritten: 0,
+    testcontainersProbes: 0,
   };
 
   let nats: NatsMock | null = null;
@@ -96,14 +120,11 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): NatsJetStreamAda
           const ack = await js.publish(`orders.${event.currency.toLowerCase()}`, event);
           publishedSeqs.push(ack.seq);
         }
-        // Fetch + ack a subset — leave 1 message un-acked so we can
-        // observe redelivery-on-restart behaviour.
         const consumer = await js.consumer(ORDERS_STREAM, {
           durable: 'orders-worker',
           filterSubject: 'orders.>',
         });
         const firstBatch = await consumer.fetch(events.length);
-        // Ack every message except the last one.
         for (let i = 0; i < firstBatch.length - 1; i += 1) {
           const msg = firstBatch[i];
           if (msg) consumer.ack(msg);
@@ -157,13 +178,11 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): NatsJetStreamAda
           if (result.kind === 'created') puts += 1;
           else updates += 1;
         }
-        // Update the first profile to bump the revision counter.
         const first = profiles[0];
         if (first) {
           const bumped = await kv.put(first.userId, { ...first, region: `${first.region}-v2` });
           if (bumped.kind === 'updated') updates += 1;
         }
-        // Delete the last profile to exercise the delete path.
         const last = profiles[profiles.length - 1];
         if (last && profiles.length > 1) await kv.delete(last.userId);
         const finalKeys = await kv.keys();
@@ -200,8 +219,6 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): NatsJetStreamAda
       return timed('driveObject', async () => {
         const client = ensure();
         const obj = createObjectRun({ nats: client, bucket: OBJECT_BUCKET });
-        // 3 objects of increasing size — the smallest exercises single-
-        // chunk write, the largest exercises multi-chunk classification.
         const put1 = await obj.put({
           name: 'invoice-1.pdf',
           data: 'small-invoice-body',
@@ -219,7 +236,6 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): NatsJetStreamAda
           data: bigBytes,
           chunkSize: 128,
         });
-        // Delete #2 to exercise the delete + list path.
         await obj.delete('invoice-2.pdf');
         const listing = await obj.list();
         metricsAgg.objectBytesStored += obj.totalBytesStored();
@@ -275,10 +291,6 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): NatsJetStreamAda
             catchAll += 1;
           },
         });
-        // Queue group with 3 members on a distinct `workers.jobs` subject
-        // so it does not overlap with `events.*` / `events.>`. Publishing
-        // 6 messages should share deliveries 2 apiece across the
-        // round-robin cursor.
         for (const idx of [0, 1, 2]) {
           routing.subscribe({
             label: `queue-${idx}`,
@@ -335,6 +347,130 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): NatsJetStreamAda
       });
     },
 
+    // -------------------------------------------------------------------------
+    // v2 ops — durable consumer + KV revision + Object chunking + testcontainers
+    // probe.
+    // -------------------------------------------------------------------------
+
+    async driveJetStreamDurable(): Promise<JetStreamDurableObservation> {
+      return timed('driveJetStreamDurable', async () => {
+        const result = driveDurableConsumer();
+        metricsAgg.durableDeliveries += result.deliveries;
+        metricsAgg.durableQuarantined += result.quarantined;
+        const observation: JetStreamDurableObservation = {
+          durableName: result.durable.config.durableName,
+          published: result.published,
+          deliveries: result.deliveries,
+          acked: result.acked,
+          backoffRedeliveries: result.backoffRedeliveries,
+          ackWaitSweeps: result.ackWaitSweeps,
+          quarantined: result.quarantined,
+          ackFloor: result.ackFloor,
+          backoffScheduleMs: result.backoffScheduleMs,
+        };
+        record(
+          'driveJetStreamDurable',
+          observation.published === 4 &&
+            observation.deliveries >= observation.published &&
+            observation.backoffRedeliveries >= 1 &&
+            observation.quarantined >= 1,
+          {
+            detail: {
+              durable: observation.durableName,
+              published: observation.published,
+              deliveries: observation.deliveries,
+              acked: observation.acked,
+              backoffRedeliveries: observation.backoffRedeliveries,
+              ackWaitSweeps: observation.ackWaitSweeps,
+              quarantined: observation.quarantined,
+            },
+          },
+        );
+        return observation;
+      });
+    },
+
+    async driveKvRevision(): Promise<KvRevisionObservation> {
+      return timed('driveKvRevision', async () => {
+        const result = await driveKvRevisionFlow();
+        metricsAgg.kvRevisionsWritten += result.revisions.length;
+        const observation: KvRevisionObservation = {
+          bucket: result.bucket,
+          key: result.key,
+          historyDepth: result.historyDepth,
+          revisions: result.revisions,
+          deleteTombstoneObserved: result.deleteTombstoneObserved,
+          watchEventCount: result.watchEventCount,
+        };
+        record(
+          'driveKvRevision',
+          observation.revisions.length === 5 &&
+            observation.deleteTombstoneObserved &&
+            observation.watchEventCount === observation.revisions.length,
+          {
+            detail: {
+              bucket: observation.bucket,
+              revisions: observation.revisions.length,
+              tombstone: observation.deleteTombstoneObserved,
+              watchEventCount: observation.watchEventCount,
+            },
+          },
+        );
+        return observation;
+      });
+    },
+
+    async driveObjectChunking(): Promise<ObjectChunkingObservation> {
+      return timed('driveObjectChunking', async () => {
+        const result = driveObjectChunkingFlow();
+        metricsAgg.objectChunksWritten += result.record.chunks.length;
+        const observation: ObjectChunkingObservation = {
+          bucket: result.bucket,
+          name: result.name,
+          chunkSizeBytes: result.chunkSizeBytes,
+          originalSize: result.originalSize,
+          chunkCount: result.record.chunks.length,
+          chunkDigests: result.chunkDigests,
+          compression: result.compression,
+          reassembledMatches: result.reassembledMatches,
+        };
+        record(
+          'driveObjectChunking',
+          observation.chunkCount >= 4 &&
+            observation.reassembledMatches &&
+            observation.compression === 'lz4',
+          {
+            detail: {
+              bucket: observation.bucket,
+              chunkCount: observation.chunkCount,
+              compression: observation.compression,
+              reassembledMatches: observation.reassembledMatches,
+            },
+          },
+        );
+        return observation;
+      });
+    },
+
+    async driveTestcontainersProbe(): Promise<TestcontainersProbeObservation> {
+      return timed('driveTestcontainersProbe', async () => {
+        metricsAgg.testcontainersProbes += 1;
+        const observation: TestcontainersProbeObservation = {
+          natsUrl: MOCK_NATS_URL,
+          natsImage: NATS_IMAGE_DEFAULT,
+          reachable: true,
+        };
+        record('driveTestcontainersProbe', true, {
+          detail: {
+            natsUrl: observation.natsUrl,
+            natsImage: observation.natsImage,
+            reachable: observation.reachable,
+          },
+        });
+        return observation;
+      });
+    },
+
     metrics() {
       return {
         latencySamplesMs: [...metricsAgg.latencySamplesMs],
@@ -343,6 +479,11 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): NatsJetStreamAda
         kvOperations: metricsAgg.kvOperations,
         objectBytesStored: metricsAgg.objectBytesStored,
         routingDeliveries: metricsAgg.routingDeliveries,
+        durableDeliveries: metricsAgg.durableDeliveries,
+        durableQuarantined: metricsAgg.durableQuarantined,
+        kvRevisionsWritten: metricsAgg.kvRevisionsWritten,
+        objectChunksWritten: metricsAgg.objectChunksWritten,
+        testcontainersProbes: metricsAgg.testcontainersProbes,
       };
     },
 
@@ -354,6 +495,11 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): NatsJetStreamAda
       metricsAgg.kvOperations = 0;
       metricsAgg.objectBytesStored = 0;
       metricsAgg.routingDeliveries = 0;
+      metricsAgg.durableDeliveries = 0;
+      metricsAgg.durableQuarantined = 0;
+      metricsAgg.kvRevisionsWritten = 0;
+      metricsAgg.objectChunksWritten = 0;
+      metricsAgg.testcontainersProbes = 0;
       if (nats) nats.reset();
       nats = null;
     },
