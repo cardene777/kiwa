@@ -211,6 +211,14 @@ export default defineConfig({
             { text: '57 — A11y baseline migration (0 → 34 package sweep methodology)', link: '/tutorials/57-a11y-baseline-migration' },
           ],
         },
+        {
+          text: 'Streaming 深化 II (v1.31)',
+          items: [
+            { text: '58 — Kafka raw protocol (KIP-98 idempotent + txn coordinator + fetch session + ISR walkthrough)', link: '/tutorials/58-kafka-raw-protocol' },
+            { text: '59 — Redpanda schema evolution (BACKWARD / FORWARD / FULL + subject naming + references walkthrough)', link: '/tutorials/59-redpanda-schema-evolution' },
+            { text: '60 — NATS JetStream durable consumer (ack_wait + max_deliver + backoff + quarantine walkthrough)', link: '/tutorials/60-nats-jetstream-durable' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -237,6 +245,7 @@ export default defineConfig({
             { text: 'WebRTC / WebTransport / HTTP/3 testing (8-axis SSOT + P2P vs SFU + ICE trickle vs half-trickle + WebTransport vs WebSocket)', link: '/concepts/webrtc-webtransport-testing' },
             { text: 'Release invariants (3-invariant SSOT — release script filter symmetry + provenance flag absence + gate script package coverage)', link: '/concepts/release-invariants' },
             { text: 'A11y testing SSOT (WCAG 2.1 AA + 4-tier threshold + baseline persistence + 3-layer harness + 13-axis release gate)', link: '/concepts/a11y-testing-ssot' },
+            { text: 'Streaming real-driver testing (8 axis SSOT + 3 provider × 8 axis = 24 cell grid + testcontainers pattern + KIWA_MODE=real env-gate)', link: '/concepts/streaming-real-driver-testing' },
           ],
         },
       ],
@@ -266,6 +275,7 @@ export default defineConfig({
             { text: 'v1.27 → v1.28', link: '/migrations/v1.27-to-v1.28' },
             { text: 'v1.28 → v1.29', link: '/migrations/v1.28-to-v1.29' },
             { text: 'v1.29 → v1.30', link: '/migrations/v1.29-to-v1.30' },
+            { text: 'v1.30 → v1.31', link: '/migrations/v1.30-to-v1.31' },
           ],
         },
       ],
