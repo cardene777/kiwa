@@ -1,0 +1,35 @@
+{
+  "provider": "@kiwa-test/orm/sqlite-wal-fts-dogfood",
+  "version": "0.1.0",
+  "reportedAt": "2026-07-06T08:14:26.235Z",
+  "coverage": {
+    "line": 92,
+    "branch": 88,
+    "function": 95
+  },
+  "testCount": {
+    "behavior": 18,
+    "integration": 4,
+    "e2e": 3,
+    "total": 25
+  },
+  "fidelity": {
+    "mockCoveredMethods": 5,
+    "realTotalMethods": 5,
+    "ratio": 100,
+    "behavioralDivergences": 5
+  },
+  "perf": {
+    "p50Ms": 0.05916700000000219,
+    "p95Ms": 0.6436669999999935,
+    "p99Ms": 0.6436669999999935,
+    "samples": 2
+  },
+  "mutation": {
+    "mutations": 20,
+    "killed": 15,
+    "survived": 5,
+    "killRate": 75
+  },
+  "notes": "Observed 5 divergences across 5 ops:\n- driveWalFullJourney: BEHAVIORAL_DIVERGENCE\n- driveFts5FullJourney: BEHAVIORAL_DIVERGENCE\n- driveEdgeRoundtrip: BEHAVIORAL_DIVERGENCE\n- driveTestcontainersProbe: BEHAVIORAL_DIVERGENCE\n- emitFidelity: BEHAVIORAL_DIVERGENCE"
+}
