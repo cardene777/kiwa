@@ -10,6 +10,7 @@ import {
   zeroImpacts,
   type AxeViolation,
   type HarnessReport,
+  type LayerReport,
 } from '../src/index.js';
 
 const ORIGINAL = document.body.innerHTML;
@@ -29,6 +30,23 @@ function violation(
     help: `help ${id}`,
     helpUrl: '',
     nodes: Array.from({ length: nodes }, () => ({ target: [`.${id}`], html: '' })),
+  };
+}
+
+function absent(layer: LayerReport['layer']): LayerReport {
+  return { layer, applicable: false, reason: '', violations: zeroImpacts(), surviving: [] };
+}
+
+function applicable(
+  layer: LayerReport['layer'],
+  counts: Partial<Record<keyof ReturnType<typeof zeroImpacts>, number>>,
+  surviving: LayerReport['surviving'] = [],
+): LayerReport {
+  return {
+    layer,
+    applicable: true,
+    violations: { ...zeroImpacts(), ...counts },
+    surviving,
   };
 }
 
@@ -60,16 +78,45 @@ describe('bucketViolations', () => {
     expect(result.counts).toEqual(zeroImpacts());
     expect(result.surviving).toEqual([]);
   });
+
+  it('B5 — prototype-chain impact names (toString / constructor) do not corrupt counts', () => {
+    // `impact` should never be a prototype-chain key at runtime, but a
+    // malformed axe adapter could hand us one. Object.hasOwn gates the
+    // counts write.
+    const rogue = violation('rogue', 'toString' as AxeViolation['impact']);
+    const result = bucketViolations([rogue]);
+    expect(result.counts).toEqual(zeroImpacts());
+  });
 });
 
 describe('unionByRule', () => {
-  it('deduplicates by rule id — first occurrence wins', () => {
+  it('deduplicates by rule id and sums node counts across sides (B1)', () => {
     const merged = unionByRule(
       [violation('shared', 'critical', 3), violation('ssr-only', 'moderate')],
-      [violation('shared', 'critical', 99), violation('hydrated-only', 'serious')],
+      [violation('shared', 'critical', 5), violation('hydrated-only', 'serious')],
     );
     expect(merged.map((v) => v.id)).toEqual(['shared', 'ssr-only', 'hydrated-only']);
-    expect(merged.find((v) => v.id === 'shared')?.nodes).toHaveLength(3);
+    // Node arrays are concatenated so hydration counts survive.
+    expect(merged.find((v) => v.id === 'shared')?.nodes).toHaveLength(8);
+  });
+
+  it('B1 — preserves node identity across sides (both sides contribute)', () => {
+    const merged = unionByRule(
+      [violation('shared', 'critical', 2)],
+      [violation('shared', 'critical', 3)],
+    );
+    const shared = merged.find((v) => v.id === 'shared');
+    expect(shared?.nodes).toHaveLength(5);
+    // The first two targets come from the a-side.
+    expect(shared?.nodes.slice(0, 2).every((n) => n.target[0] === '.shared')).toBe(true);
+  });
+
+  it('takes impact from the b-side when a-side reports null', () => {
+    const merged = unionByRule(
+      [violation('shared', null, 1)],
+      [violation('shared', 'critical', 2)],
+    );
+    expect(merged.find((v) => v.id === 'shared')?.impact).toBe('critical');
   });
 
   it('returns the whole b-side when a-side is empty', () => {
@@ -86,34 +133,18 @@ describe('unionByRule', () => {
 describe('computeTotals', () => {
   it('sums applicable layers only', () => {
     const layers: HarnessReport['layers'] = {
-      jsdom: {
-        layer: 'jsdom',
-        applicable: true,
-        violations: { critical: 0, serious: 1, moderate: 2, minor: 0 },
-        surviving: [],
-      },
-      playwright: {
-        layer: 'playwright',
-        applicable: false,
-        reason: 'no fixture',
-        violations: { critical: 99, serious: 99, moderate: 99, minor: 99 },
-        surviving: [],
-      },
-      ssrHydration: {
-        layer: 'ssrHydration',
-        applicable: true,
-        violations: { critical: 0, serious: 0, moderate: 1, minor: 3 },
-        surviving: [],
-      },
+      jsdom: applicable('jsdom', { serious: 1, moderate: 2 }),
+      playwright: absent('playwright'),
+      ssrHydration: applicable('ssrHydration', { moderate: 1, minor: 3 }),
     };
     expect(computeTotals(layers)).toEqual({ critical: 0, serious: 1, moderate: 3, minor: 3 });
   });
 
   it('returns zeros when every layer is absent', () => {
     const layers: HarnessReport['layers'] = {
-      jsdom: { layer: 'jsdom', applicable: false, reason: '', violations: zeroImpacts(), surviving: [] },
-      playwright: { layer: 'playwright', applicable: false, reason: '', violations: zeroImpacts(), surviving: [] },
-      ssrHydration: { layer: 'ssrHydration', applicable: false, reason: '', violations: zeroImpacts(), surviving: [] },
+      jsdom: absent('jsdom'),
+      playwright: absent('playwright'),
+      ssrHydration: absent('ssrHydration'),
     };
     expect(computeTotals(layers)).toEqual(zeroImpacts());
   });
@@ -122,37 +153,45 @@ describe('computeTotals', () => {
 describe('isHarnessOk', () => {
   it('treats an absent layer as passing', () => {
     const layers: HarnessReport['layers'] = {
-      jsdom: { layer: 'jsdom', applicable: false, reason: '', violations: zeroImpacts(), surviving: [] },
-      playwright: { layer: 'playwright', applicable: false, reason: '', violations: zeroImpacts(), surviving: [] },
-      ssrHydration: { layer: 'ssrHydration', applicable: false, reason: '', violations: zeroImpacts(), surviving: [] },
+      jsdom: absent('jsdom'),
+      playwright: absent('playwright'),
+      ssrHydration: absent('ssrHydration'),
     };
     expect(isHarnessOk(layers)).toBe(true);
   });
 
   it('fails when any applicable layer has critical > 0', () => {
     const layers: HarnessReport['layers'] = {
-      jsdom: {
-        layer: 'jsdom',
-        applicable: true,
-        violations: { critical: 1, serious: 0, moderate: 0, minor: 0 },
-        surviving: [],
-      },
-      playwright: { layer: 'playwright', applicable: false, reason: '', violations: zeroImpacts(), surviving: [] },
-      ssrHydration: { layer: 'ssrHydration', applicable: false, reason: '', violations: zeroImpacts(), surviving: [] },
+      jsdom: applicable('jsdom', { critical: 1 }),
+      playwright: absent('playwright'),
+      ssrHydration: absent('ssrHydration'),
     };
     expect(isHarnessOk(layers)).toBe(false);
   });
 
-  it('passes when applicable layers are all critical-clean, even with serious hits', () => {
+  it('B2 — fails when any applicable layer has serious > 0 (was silently passing)', () => {
     const layers: HarnessReport['layers'] = {
-      jsdom: {
-        layer: 'jsdom',
-        applicable: true,
-        violations: { critical: 0, serious: 3, moderate: 0, minor: 0 },
-        surviving: [],
-      },
-      playwright: { layer: 'playwright', applicable: false, reason: '', violations: zeroImpacts(), surviving: [] },
-      ssrHydration: { layer: 'ssrHydration', applicable: false, reason: '', violations: zeroImpacts(), surviving: [] },
+      jsdom: applicable('jsdom', { serious: 3 }),
+      playwright: absent('playwright'),
+      ssrHydration: absent('ssrHydration'),
+    };
+    expect(isHarnessOk(layers)).toBe(false);
+  });
+
+  it('B2 — fails when any applicable layer has moderate > 0', () => {
+    const layers: HarnessReport['layers'] = {
+      jsdom: applicable('jsdom', { moderate: 2 }),
+      playwright: absent('playwright'),
+      ssrHydration: absent('ssrHydration'),
+    };
+    expect(isHarnessOk(layers)).toBe(false);
+  });
+
+  it('passes when only minor violations are present (minor never gates ok)', () => {
+    const layers: HarnessReport['layers'] = {
+      jsdom: applicable('jsdom', { minor: 5 }),
+      playwright: absent('playwright'),
+      ssrHydration: absent('ssrHydration'),
     };
     expect(isHarnessOk(layers)).toBe(true);
   });
@@ -209,6 +248,33 @@ describe('runLayerHarness', () => {
     expect(report.layers.playwright.surviving[0]?.id).toBe('color-contrast');
   });
 
+  it('B7 — playwright fixture with malformed results.violations is treated as empty, not a throw', async () => {
+    const report = await runLayerHarness('@kiwa-test/e2e', {
+      playwright: {
+        // Deliberately malformed — .results.violations is missing.
+        results: {} as any,
+      },
+    });
+    expect(report.layers.playwright.applicable).toBe(true);
+    expect(report.layers.playwright.violations).toEqual(zeroImpacts());
+    expect(report.layers.playwright.surviving).toEqual([]);
+  });
+
+  it('B7 — playwright fixture with entirely absent results is treated as empty, not a throw', async () => {
+    const report = await runLayerHarness('@kiwa-test/e2e', {
+      playwright: {
+        results: undefined as unknown as {
+          violations: AxeViolation[];
+          passes: [];
+          incomplete: [];
+          inapplicable: [];
+        },
+      },
+    });
+    expect(report.layers.playwright.applicable).toBe(true);
+    expect(report.layers.playwright.violations).toEqual(zeroImpacts());
+  });
+
   it('with an SSR string, parses it, runs axe, and records violations', async () => {
     const report = await runLayerHarness('@kiwa-test/nextjs', {
       ssrHydration: {
@@ -235,6 +301,31 @@ describe('runLayerHarness', () => {
     expect(buttonNameCount).toBe(1);
   });
 
+  it('B4 — SSR + detached hydrated Element does not throw (helper attaches then detaches)', async () => {
+    const detached = document.createElement('div');
+    detached.innerHTML = `<button type="button"></button>`;
+    // Deliberately do NOT append `detached` to the document.
+    const report = await runLayerHarness('@kiwa-test/nextjs', {
+      ssrHydration: {
+        ssrHtml: `<span aria-label="ok">ok</span>`,
+        hydrated: detached,
+      },
+    });
+    expect(report.layers.ssrHydration.applicable).toBe(true);
+    // The helper detached the element after axe ran.
+    expect(detached.isConnected).toBe(false);
+  });
+
+  it('B6 — SSR fixture rejects a non-string ssrHtml before touching innerHTML', async () => {
+    await expect(
+      runLayerHarness('@kiwa-test/nextjs', {
+        ssrHydration: {
+          ssrHtml: undefined as unknown as string,
+        },
+      }),
+    ).rejects.toThrow(/string ssrHtml fixture/);
+  });
+
   it('records aggregate totals across applicable layers', async () => {
     document.body.innerHTML = `<div id="root"><button type="button"></button></div>`;
     const report = await runLayerHarness('@kiwa-test/mixed', {
@@ -248,8 +339,6 @@ describe('runLayerHarness', () => {
         },
       },
     });
-    // jsdom emits button-name (serious/critical impact varies by axe version);
-    // playwright layer adds 1 serious. Total serious >= 1.
     expect(report.totals.serious).toBeGreaterThanOrEqual(1);
   });
 });
@@ -265,9 +354,41 @@ describe('summariseHarness', () => {
     const report = await runLayerHarness('@kiwa-test/ui', {
       jsdom: { context: document.body },
     });
-    // The summary uses reportViolations' phrasing.
     const summary = summariseHarness(report);
     expect(summary.length).toBeGreaterThan(0);
+  });
+
+  it('B3 — cross-layer duplicate rule ids are collapsed to one line in the summary', async () => {
+    // Build a synthetic report where two applicable layers both surface the
+    // same rule id — the summary should not double-count it.
+    const layers: HarnessReport['layers'] = {
+      jsdom: {
+        layer: 'jsdom',
+        applicable: true,
+        violations: { critical: 0, serious: 1, moderate: 0, minor: 0 },
+        surviving: [{ id: 'button-name', impact: 'serious', help: 'help', nodes: 2 }],
+      },
+      playwright: absent('playwright'),
+      ssrHydration: {
+        layer: 'ssrHydration',
+        applicable: true,
+        violations: { critical: 0, serious: 1, moderate: 0, minor: 0 },
+        surviving: [{ id: 'button-name', impact: 'critical', help: 'help', nodes: 3 }],
+      },
+    };
+    const report: HarnessReport = {
+      package: '@kiwa-test/nextjs',
+      generatedAt: new Date().toISOString(),
+      layers,
+      totals: computeTotals(layers),
+      ok: false,
+    };
+    const summary = summariseHarness(report);
+    const matches = summary.match(/button-name/g) ?? [];
+    // The rule id surfaces exactly once even though both layers reported it.
+    expect(matches.length).toBe(1);
+    // The more-severe impact (critical) wins on cross-layer merge.
+    expect(summary).toMatch(/\[critical\]/);
   });
 });
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * A11y baseline runner (v1.30-2 3-layer harness).
+ * A11y baseline runner (3-layer harness driver).
  *
  * Reads each package's `.axe-config.mjs`, validates the shape against the
  * 4-tier SSOT in `docs/quality/a11y-thresholds.md`, executes the 3-layer
@@ -8,15 +8,19 @@
  * in the config, and rewrites `.a11y-baseline/{pkg}.json` with the aggregated
  * result.
  *
- * v1.30-1 scope: infra only (config validation + baseline stub creation).
- * v1.30-2 scope: real harness execution + per-layer baselines.
- *
  * A package that participates in no layer (its `.axe-config.mjs` omits the
  * whole `fixtures` field, or declares every layer absent) produces a
  * `layers-absent` baseline — every layer records `applicable: false` with an
  * explicit reason. This is the expected state for every current kiwa
  * `@kiwa-test/*` package because they are test-adapter infrastructure that
  * emit no runtime DOM.
+ *
+ * Fixture-wired path — packages that supply a jsdom or SSR-hydration fixture
+ * need a jsdom global before importing the harness because `runLayerHarness`
+ * expects `document` to be defined. This driver boots a jsdom global from
+ * the `jsdom` peerDep when a fixture requires it; if `jsdom` is not
+ * installed the driver exits with a clear message rather than a
+ * `document is not defined` reference error.
  *
  * Usage (from a package directory, wired via `test:a11y` in package.json):
  *   node ../../scripts/run-axe-baseline.mjs
@@ -64,6 +68,16 @@ export function validateAxeConfig(config) {
   };
 }
 
+/** Empty impact bucket shared with the harness. */
+const ZERO_IMPACTS = Object.freeze({ critical: 0, serious: 0, moderate: 0, minor: 0 });
+
+/** SSOT reason strings — matches the harness `ABSENT_REASONS` map. */
+const ABSENT_REASONS = Object.freeze({
+  jsdom: 'no jsdom fixture — package produces no static DOM output.',
+  playwright: 'no playwright fixture — package has no browser-runtime surface.',
+  ssrHydration: 'no ssrHydration fixture — package emits no SSR string.',
+});
+
 /**
  * Build the layers-absent baseline payload for a package — used when the
  * package has no fixtures wired. Every layer records `applicable: false`
@@ -76,23 +90,22 @@ export function validateAxeConfig(config) {
  * @param {Date} [now]
  */
 export function buildLayersAbsentBaseline(pkgName, now = new Date()) {
-  const zeroImpacts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
-  const absent = (layer, reason) => ({
+  const absent = (layer) => ({
     layer,
     applicable: false,
-    reason,
-    violations: { ...zeroImpacts },
+    reason: ABSENT_REASONS[layer],
+    violations: { ...ZERO_IMPACTS },
     surviving: [],
   });
   return {
     package: pkgName,
     generatedAt: now.toISOString(),
     layers: {
-      jsdom: absent('jsdom', 'no jsdom fixture — package produces no static DOM output.'),
-      playwright: absent('playwright', 'no playwright fixture — package has no browser-runtime surface.'),
-      ssrHydration: absent('ssrHydration', 'no ssrHydration fixture — package emits no SSR string.'),
+      jsdom: absent('jsdom'),
+      playwright: absent('playwright'),
+      ssrHydration: absent('ssrHydration'),
     },
-    totals: { ...zeroImpacts },
+    totals: { ...ZERO_IMPACTS },
     ok: true,
   };
 }
@@ -150,6 +163,28 @@ export function tierBreaches(totals, thresholds) {
   return breaches;
 }
 
+/**
+ * Decide whether the fixtures declared in `.axe-config.mjs` require a jsdom
+ * global. Playwright-only fixtures do not (they already carry axe results),
+ * jsdom + SSR-hydration fixtures do (the harness scans a DOM).
+ *
+ * @param {object | undefined} fixtures
+ */
+export function needsJsdom(fixtures) {
+  if (!fixtures || typeof fixtures !== 'object') return false;
+  return Boolean(fixtures.jsdom) || Boolean(fixtures.ssrHydration);
+}
+
+/**
+ * True when any fixture field is populated.
+ *
+ * @param {object | undefined} fixtures
+ */
+export function hasAnyFixture(fixtures) {
+  if (!fixtures || typeof fixtures !== 'object') return false;
+  return Boolean(fixtures.jsdom || fixtures.playwright || fixtures.ssrHydration);
+}
+
 function readPkgName(dir) {
   const pkgPath = resolve(dir, 'package.json');
   if (!existsSync(pkgPath)) return dir;
@@ -159,6 +194,79 @@ function readPkgName(dir) {
   } catch {
     return dir;
   }
+}
+
+/**
+ * Read the existing baseline `generatedAt` so we can preserve it when the
+ * new report is otherwise identical. This avoids a spurious git diff every
+ * time the runner is executed.
+ *
+ * @param {string} absBaseline
+ * @returns {string | null}
+ */
+function readPreviousGeneratedAt(absBaseline) {
+  if (!existsSync(absBaseline)) return null;
+  try {
+    const prev = JSON.parse(readFileSync(absBaseline, 'utf8'));
+    return typeof prev?.generatedAt === 'string' ? prev.generatedAt : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Persist a baseline payload, preserving the previous `generatedAt` when
+ * every other field is unchanged so identical runs do not churn the git
+ * diff.
+ *
+ * @param {string} absBaseline
+ * @param {{generatedAt: string} & object} next
+ */
+function persistBaseline(absBaseline, next) {
+  const previousGeneratedAt = readPreviousGeneratedAt(absBaseline);
+  let payload = next;
+  if (previousGeneratedAt !== null) {
+    const candidate = { ...next, generatedAt: previousGeneratedAt };
+    const existingRaw = existsSync(absBaseline)
+      ? readFileSync(absBaseline, 'utf8')
+      : '';
+    const candidateSerialized = JSON.stringify(candidate, null, 2) + '\n';
+    if (existingRaw === candidateSerialized) {
+      payload = candidate;
+    }
+  }
+  writeFileSync(absBaseline, JSON.stringify(payload, null, 2) + '\n');
+}
+
+/**
+ * Boot a jsdom global (`document` / `window`) when the current runtime does
+ * not have one. The harness expects `document` on `globalThis` for jsdom
+ * and SSR-hydration layers; raw Node lacks it. Callers only reach this
+ * branch when fixtures require it, so an unresolved `jsdom` peerDep is
+ * surfaced as an actionable install hint rather than a downstream stack
+ * trace.
+ */
+async function ensureJsdomGlobal() {
+  if (typeof globalThis.document !== 'undefined') return;
+  let JSDOM;
+  try {
+    ({ JSDOM } = await import('jsdom'));
+  } catch (err) {
+    throw new Error(
+      'run-axe-baseline: fixture-wired baseline requires the `jsdom` peerDep. ' +
+        'Install it with `pnpm add -D jsdom` in the package under test. ' +
+        (err instanceof Error ? err.message : String(err)),
+    );
+  }
+  const dom = new JSDOM('<!doctype html><html><body></body></html>', {
+    url: 'http://localhost/',
+    pretendToBeVisual: true,
+  });
+  globalThis.window = dom.window;
+  globalThis.document = dom.window.document;
+  globalThis.Element = dom.window.Element;
+  globalThis.HTMLElement = dom.window.HTMLElement;
+  globalThis.Node = dom.window.Node;
 }
 
 async function main() {
@@ -184,17 +292,11 @@ async function main() {
   const absBaseline = resolve(cwd, baselinePath);
   mkdirSync(dirname(absBaseline), { recursive: true });
 
-  // v1.30-2 default path: no fixtures wired → land a layers-absent baseline.
-  // Fixture-wired packages will replace this with a real harness run once
-  // v1.30-3 (test-type + SaaS sweep) lands them.
-  const hasFixtures =
-    fixtures &&
-    typeof fixtures === 'object' &&
-    (fixtures.jsdom || fixtures.playwright || fixtures.ssrHydration);
-
-  if (!hasFixtures) {
+  // Default path — no fixtures wired → land a layers-absent baseline.
+  // Fixture-wired packages replace this with a real harness run.
+  if (!hasAnyFixture(fixtures)) {
     const baseline = buildLayersAbsentBaseline(pkgName);
-    writeFileSync(absBaseline, JSON.stringify(baseline, null, 2) + '\n');
+    persistBaseline(absBaseline, baseline);
     console.log(
       `[a11y] ${pkgName}: layers-absent baseline written to ${baselinePath} (no fixtures declared — Core / Framework tier no-DOM package).`,
     );
@@ -204,11 +306,14 @@ async function main() {
     process.exit(0);
   }
 
-  // Fixture-wired path: import the a11y harness from the workspace and run
-  // it against the declared fixtures. This branch is exercised once
-  // packages start supplying real fixtures; the harness itself is unit-tested
-  // exhaustively in `packages/a11y/tests/layer-harness.test.ts`, so this
-  // driver is deliberately thin.
+  // Fixture-wired path: boot jsdom when needed, then import the a11y harness
+  // from the workspace and run it against the declared fixtures. The harness
+  // itself is unit-tested exhaustively in
+  // `packages/a11y/tests/layer-harness.test.ts`, so this driver is
+  // deliberately thin.
+  if (needsJsdom(fixtures)) {
+    await ensureJsdomGlobal();
+  }
   let runLayerHarness;
   try {
     ({ runLayerHarness } = await import('@kiwa-test/a11y'));
@@ -219,7 +324,7 @@ async function main() {
     process.exit(1);
   }
   const report = await runLayerHarness(pkgName, fixtures);
-  writeFileSync(absBaseline, JSON.stringify(report, null, 2) + '\n');
+  persistBaseline(absBaseline, report);
 
   const breaches = tierBreaches(report.totals, thresholds);
   if (breaches.length > 0) {

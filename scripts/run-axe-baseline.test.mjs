@@ -1,4 +1,4 @@
-// Behaviour tests for run-axe-baseline.mjs helpers (v1.30-2 3-layer runner).
+// Behaviour tests for run-axe-baseline.mjs helpers (3-layer runner).
 // Runs with Node's built-in test runner (no vitest dependency at repo root):
 //   node --test scripts/run-axe-baseline.test.mjs
 import { test } from 'node:test';
@@ -10,6 +10,8 @@ import {
   ceilingOf,
   formatThreshold,
   tierBreaches,
+  needsJsdom,
+  hasAnyFixture,
 } from './run-axe-baseline.mjs';
 
 test('validateAxeConfig accepts a Core-tier config', () => {
@@ -159,4 +161,34 @@ test('tierBreaches treats an undefined ceiling as "no cap" (minor is never enfor
     { critical: 0, serious: 0, moderate: 0 },
   );
   assert.deepEqual(breaches, []);
+});
+
+test('needsJsdom is true when jsdom fixture is present', () => {
+  assert.equal(needsJsdom({ jsdom: { context: '#root' } }), true);
+});
+
+test('needsJsdom is true when ssrHydration fixture is present', () => {
+  assert.equal(needsJsdom({ ssrHydration: { ssrHtml: '<div/>' } }), true);
+});
+
+test('needsJsdom is false when only playwright fixture is present (no DOM parsing needed)', () => {
+  assert.equal(needsJsdom({ playwright: { results: { violations: [] } } }), false);
+});
+
+test('needsJsdom is false for missing / non-object fixtures', () => {
+  assert.equal(needsJsdom(undefined), false);
+  assert.equal(needsJsdom(null), false);
+  assert.equal(needsJsdom({}), false);
+});
+
+test('hasAnyFixture is true when at least one layer fixture is present', () => {
+  assert.equal(hasAnyFixture({ jsdom: { context: '#root' } }), true);
+  assert.equal(hasAnyFixture({ playwright: { results: { violations: [] } } }), true);
+  assert.equal(hasAnyFixture({ ssrHydration: { ssrHtml: '<x/>' } }), true);
+});
+
+test('hasAnyFixture is false when no fixture field is present', () => {
+  assert.equal(hasAnyFixture(undefined), false);
+  assert.equal(hasAnyFixture(null), false);
+  assert.equal(hasAnyFixture({}), false);
 });

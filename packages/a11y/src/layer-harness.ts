@@ -1,5 +1,5 @@
 /**
- * 3-layer a11y harness (v1.30-2).
+ * 3-layer a11y harness.
  *
  * Every kiwa package publishes an `.axe-config.mjs` whose `layers` field
  * enumerates which of the three audit layers a package participates in:
@@ -14,7 +14,7 @@
  * A package with no runtime DOM (all `@kiwa-test/*` packages currently — every
  * one of them is a test-adapter package that returns lightweight JSX-like
  * trees, not real DOM) marks each layer `applicable: false`. axe still needs
- * to *run* at least once per layer to prove the harness is wired, so an
+ * to run at least once per layer to prove the harness is wired, so an
  * `absent` layer records an explicit `absent` reason instead of running axe.
  *
  * SSOT: docs/quality/a11y-thresholds.md § 3-layer harness.
@@ -58,7 +58,11 @@ export interface HarnessReport {
   };
   /** Sum of all impact counts across every applicable layer. */
   totals: Record<Impact, number>;
-  /** True when every layer either passed axe or is explicitly absent. */
+  /**
+   * True when every applicable layer has zero critical, zero serious, and
+   * zero moderate violations. `minor` never gates `ok`. Absent layers do
+   * not affect `ok`.
+   */
   ok: boolean;
 }
 
@@ -83,7 +87,7 @@ export interface HarnessFixtures {
      * time (Playwright is a peerDep, not a dep, so requiring it at import
      * time would break Node-only consumers).
      */
-     results: AxeResults;
+    results: AxeResults;
   };
   ssrHydration?: {
     /** SSR HTML string produced by the framework adapter under test. */
@@ -108,6 +112,10 @@ export function zeroImpacts(): Record<Impact, number> {
  * Bucket a set of axe violations by impact, returning the same shape as
  * `LayerReport.violations`. Exported so tests can call it without hitting
  * axe-core.
+ *
+ * `Object.hasOwn` gates the `counts` write to protect against prototype
+ * chain contamination — a violation whose `impact` accidentally names
+ * `toString` or `constructor` cannot corrupt the counts record.
  */
 export function bucketViolations(
   violations: AxeViolation[],
@@ -116,7 +124,7 @@ export function bucketViolations(
   const surviving: LayerReport['surviving'] = [];
   for (const v of violations) {
     const impact = (v.impact ?? null) as Impact | null;
-    if (impact !== null && impact in counts) {
+    if (impact !== null && Object.hasOwn(counts, impact)) {
       counts[impact] += 1;
     }
     surviving.push({
@@ -131,8 +139,12 @@ export function bucketViolations(
 
 /**
  * Merge the SSR-parsed violation set with the hydrated violation set,
- * dedupliated by rule id (an SSR-only violation, a hydration-only violation
- * and a shared violation each surface once). Exposed for tests.
+ * deduplicated by rule id. Node arrays are concatenated across sides so a
+ * rule that fires against 3 nodes in SSR and 5 nodes in the hydrated tree
+ * is recorded with 8 nodes rather than dropped to whichever side landed
+ * first. Impact is taken from whichever side reports a non-null value
+ * first, so hydration-only impact metadata surfaces even when the SSR side
+ * reports null. Exposed for tests.
  */
 export function unionByRule(
   a: AxeViolation[],
@@ -140,8 +152,14 @@ export function unionByRule(
 ): AxeViolation[] {
   const seen = new Map<string, AxeViolation>();
   for (const v of [...a, ...b]) {
-    if (!seen.has(v.id)) {
-      seen.set(v.id, v);
+    const existing = seen.get(v.id);
+    if (!existing) {
+      seen.set(v.id, { ...v, nodes: [...v.nodes] });
+      continue;
+    }
+    existing.nodes = [...existing.nodes, ...v.nodes];
+    if (existing.impact == null && v.impact != null) {
+      existing.impact = v.impact;
     }
   }
   return [...seen.values()];
@@ -201,41 +219,84 @@ async function runJsdomLayer(
   return applicableLayer('jsdom', results.violations);
 }
 
+/**
+ * Playwright layer records the pre-computed axe results verbatim. Guards
+ * malformed fixture payloads: `fixture.results` or `fixture.results.violations`
+ * may be missing when the caller wired the harness before the browser run
+ * completed. Missing violations are treated as an empty axe run rather than
+ * a thrown TypeError.
+ */
 function runPlaywrightLayer(
   fixture: HarnessFixtures['playwright'],
 ): LayerReport {
   if (!fixture) return absentLayer('playwright');
-  return applicableLayer('playwright', fixture.results.violations);
+  const rawViolations = fixture.results?.violations;
+  const violations = Array.isArray(rawViolations) ? rawViolations : [];
+  return applicableLayer('playwright', violations);
+}
+
+/**
+ * Run axe against an Element / Document, attaching it to the live document
+ * beforehand and detaching afterwards when the caller handed us a detached
+ * node. axe-core requires the scanned Element to already be in the document
+ * tree, otherwise it raises
+ * "No elements found for include in page Context".
+ *
+ * The Element / Document is left in the state the caller handed it. If the
+ * node is already attached, this helper leaves it in place. If it is
+ * detached, the helper appends it to `document.body` and removes it in a
+ * `finally` block, even when axe throws.
+ */
+async function withAttachedElement(
+  element: Element | Document,
+  runOptions: AuditOptions['runOptions'] | undefined,
+): Promise<AxeResults> {
+  const owner = element.ownerDocument ?? (element as Document);
+  const target: Element =
+    element instanceof Element
+      ? element
+      : ((element as Document).documentElement as Element);
+  const wasAttached = target.isConnected;
+  if (!wasAttached) {
+    const host = owner.body ?? owner.documentElement;
+    host?.appendChild(target);
+  }
+  try {
+    return await runAxe(buildAuditOptions(element, runOptions));
+  } finally {
+    if (!wasAttached) {
+      target.remove();
+    }
+  }
 }
 
 async function runSsrHydrationLayer(
   fixture: HarnessFixtures['ssrHydration'],
 ): Promise<LayerReport> {
   if (!fixture) return absentLayer('ssrHydration');
-  // Parse the SSR string into a jsdom Element without pulling `jsdom` at
-  // build time (it's a peerDep). Callers running under vitest with
-  // environment=jsdom already have `document` on globalThis, which is the
-  // supported entrypoint for this layer.
+  // jsdom-like global document is required (vitest env=jsdom or a caller
+  // that already booted jsdom). Guard early so an unclear axe-core error
+  // does not surface upstream.
   if (typeof document === 'undefined') {
     throw new Error(
       'ssrHydration layer requires a jsdom-like global document (vitest env=jsdom).',
     );
   }
-  // axe-core requires the scanned Element to be attached to the document,
-  // otherwise it raises "No elements found for include in page Context".
-  // Attach the SSR host, scan, then detach — the DOM is left in the state
-  // the caller handed it.
+  // Guard non-string `ssrHtml`. Assigning `undefined` to `innerHTML` coerces
+  // to the literal string "undefined" and axe would then scan a bogus DOM,
+  // so reject the fixture up front with a caller-actionable error.
+  if (typeof fixture.ssrHtml !== 'string') {
+    throw new Error(
+      'ssrHydration layer requires a string ssrHtml fixture — got ' +
+        typeof fixture.ssrHtml +
+        '.',
+    );
+  }
   const ssrHost = document.createElement('div');
   ssrHost.innerHTML = fixture.ssrHtml;
-  document.body.appendChild(ssrHost);
-  let ssrResults: AxeResults;
-  try {
-    ssrResults = await runAxe(buildAuditOptions(ssrHost, fixture.runOptions));
-  } finally {
-    ssrHost.remove();
-  }
+  const ssrResults = await withAttachedElement(ssrHost, fixture.runOptions);
   const hydratedResults = fixture.hydrated
-    ? await runAxe(buildAuditOptions(fixture.hydrated, fixture.runOptions))
+    ? await withAttachedElement(fixture.hydrated, fixture.runOptions)
     : null;
   const union = unionByRule(ssrResults.violations, hydratedResults?.violations ?? []);
   return applicableLayer('ssrHydration', union);
@@ -259,14 +320,20 @@ export function computeTotals(
 }
 
 /**
- * True iff every layer either produced a zero-violation axe run or is
- * explicitly absent. `critical` is the hard gate; non-critical impact
- * accounting stays in the totals so tier thresholds can still cap them.
+ * True iff every applicable layer has zero critical + zero serious + zero
+ * moderate violations. `minor` never gates `ok`. Absent layers pass.
+ *
+ * Critical, serious, and moderate all block because a downstream tier
+ * threshold breach at any of the three levels should never flip
+ * `report.ok` to true. `minor` is excluded because it is unbounded on
+ * every current tier (SSOT: docs/quality/a11y-thresholds.md).
  */
 export function isHarnessOk(layers: HarnessReport['layers']): boolean {
   for (const layer of Object.values(layers)) {
     if (!layer.applicable) continue;
     if (layer.violations.critical > 0) return false;
+    if (layer.violations.serious > 0) return false;
+    if (layer.violations.moderate > 0) return false;
   }
   return true;
 }
@@ -299,30 +366,54 @@ export async function runLayerHarness(
 }
 
 /**
- * Convenience — turn a `HarnessReport` into the summary string
- * `reportViolations` produces, unioned across every applicable layer.
- * Kept for symmetry with the single-layer API in `audit.ts`.
+ * Turn a `HarnessReport` into a `reportViolations`-style summary string,
+ * unioned across every applicable layer with cross-layer dedup by rule id.
+ * A rule that fires in both `jsdom` and `ssrHydration` surfaces once with
+ * node counts summed and the most severe impact preserved.
  */
 export function summariseHarness(report: HarnessReport): string {
   const applicable = Object.values(report.layers).filter((l) => l.applicable);
   if (applicable.length === 0) {
-    return `${report.package}: no applicable layers (Core-tier no-DOM package).`;
+    return report.package + ': no applicable layers (Core-tier no-DOM package).';
   }
-  const all: AxeViolation[] = [];
+  const merged = new Map<
+    string,
+    { id: string; impact: Impact | null; help: string; nodes: number }
+  >();
   for (const layer of applicable) {
     for (const v of layer.surviving) {
-      all.push({
-        id: v.id,
-        impact: v.impact,
-        description: '',
-        help: v.help,
-        helpUrl: '',
-        nodes: Array.from({ length: v.nodes }, () => ({ target: [], html: '' })),
-      });
+      const existing = merged.get(v.id);
+      if (!existing) {
+        merged.set(v.id, { ...v });
+        continue;
+      }
+      existing.nodes += v.nodes;
+      existing.impact = pickMoreSevereImpact(existing.impact, v.impact);
     }
   }
+  const all: AxeViolation[] = Array.from(merged.values(), (v) => ({
+    id: v.id,
+    impact: v.impact,
+    description: '',
+    help: v.help,
+    helpUrl: '',
+    nodes: Array.from({ length: v.nodes }, () => ({ target: [], html: '' })),
+  }));
   return reportViolations(
     { violations: all, passes: [], incomplete: [], inapplicable: [] },
     { maxImpact: 'minor' },
   ).summary;
+}
+
+/**
+ * Pick whichever impact is more severe between two values. `null` loses to
+ * any concrete impact; between two concrete impacts the one earlier in
+ * `IMPACTS` (critical > serious > moderate > minor) wins.
+ */
+function pickMoreSevereImpact(a: Impact | null, b: Impact | null): Impact | null {
+  if (a === null) return b;
+  if (b === null) return a;
+  const rankA = IMPACTS.indexOf(a);
+  const rankB = IMPACTS.indexOf(b);
+  return rankA <= rankB ? a : b;
 }
