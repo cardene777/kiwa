@@ -124,10 +124,24 @@ No override may ever raise the `critical` bar.
 
 ## Baseline snapshots
 
-Each package writes a per-package baseline JSON to `.a11y-baseline/<pkg>.json` (folder is tracked, files are `.gitignore`d until baseline lands).
-The baseline records the last known green a11y report — violation counts per impact + surviving-violation list + timestamp.
-`pnpm test:a11y` compares against the baseline to surface regressions.
+Each package writes a per-package baseline JSON to `.a11y-baseline/<pkg>.json`.
+The baseline records the last known green a11y report — a 3-layer harness envelope (v1.30-2, `docs/quality/a11y-thresholds.md § 3-layer harness`) recording violation counts per impact + surviving-violation list per layer + timestamp.
+`pnpm test:a11y` rewrites the baseline every run, and fails the run if the tier ceiling was breached (critical > 0 in every tier, serious > tier max, moderate > tier max).
 Baseline refresh happens in-PR when violation counts drop, and is written by the same PR that improves the underlying markup — never as a standalone commit.
+
+## 3-layer harness (v1.30-2)
+
+Every applicable package participates in three layers, each running axe-core once and recording its verdict separately in the baseline.
+
+| Layer | What it scans | Fixture shape |
+|---|---|---|
+| `jsdom` | Static DOM audit — a jsdom Element / Document that the package produces without spinning up a browser. Fastest of the three, catches every non-runtime rule. | `.axe-config.mjs > fixtures.jsdom.context: Element \| Document \| string` |
+| `playwright` | Dynamic browser audit — axe-core inside a real Playwright page. Catches contrast + layout rules that jsdom's incomplete CSSOM cannot resolve. | `.axe-config.mjs > fixtures.playwright.results: AxeResults` (caller runs the Playwright evaluation, harness aggregates) |
+| `ssrHydration` | SSR + hydration diff — axe-core over the SSR HTML string plus an optional post-hydration Element. Violations are unioned by rule id so SSR-only + hydration-only + shared violations each surface once. | `.axe-config.mjs > fixtures.ssrHydration.ssrHtml: string` (+ optional `hydrated: Element`) |
+
+A package that intentionally does not participate in a layer omits the field, and the baseline records `applicable: false` with an explicit reason. Every current `@kiwa-test/*` core + framework adapter (v1.30-2 scope) is a test-adapter package that emits no runtime DOM, so its baseline records `layers-absent` — every layer is `applicable: false`, `totals` is zero, `ok` is `true`. The harness ran, proved the wiring is intact, and left the tier ceilings in force for the day a fixture is added.
+
+The harness lives in `packages/a11y/src/layer-harness.ts` and is exported from `@kiwa-test/a11y` as `runLayerHarness`. Unit tests exhaust every branch — union dedupe, absent-layer reasons, tier breach detection, missing-document fallback — so the driver in `scripts/run-axe-baseline.mjs` stays thin.
 
 ## 13-axis release gate integration (v1.30-4)
 
