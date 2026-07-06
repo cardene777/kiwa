@@ -227,6 +227,14 @@ export default defineConfig({
             { text: '63 — SQLite WAL + FTS5 (journal_mode + checkpoint + virtual table + tokenizer + BM25 rank walkthrough)', link: '/tutorials/63-sqlite-wal-fts5' },
           ],
         },
+        {
+          text: 'Payment 深化 II (v1.33)',
+          items: [
+            { text: '64 — Payment orchestration (multi-provider routing + failover + retry ladder + circuit breaker walkthrough)', link: '/tutorials/64-payment-orchestration' },
+            { text: '65 — Stripe Connect marketplace (dispute + refund + webhook idempotency + DAC7 walkthrough)', link: '/tutorials/65-stripe-connect-marketplace' },
+            { text: '66 — Paddle Billing v2 (grace period + proration + coupon stacking + recovery + vault migration walkthrough)', link: '/tutorials/66-paddle-billing-v2' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -255,6 +263,7 @@ export default defineConfig({
             { text: 'A11y testing SSOT (WCAG 2.1 AA + 4-tier threshold + baseline persistence + 3-layer harness + 13-axis release gate)', link: '/concepts/a11y-testing-ssot' },
             { text: 'Streaming real-driver testing (8 axis SSOT + 3 provider × 8 axis = 24 cell grid + testcontainers pattern + KIWA_MODE=real env-gate)', link: '/concepts/streaming-real-driver-testing' },
             { text: 'Database real-driver testing (16 axis SSOT + 3 provider × 3 backend × 16 axis = 144 cell grid + testcontainers pattern + KIWA_MODE=real env-gate)', link: '/concepts/database-real-driver-testing' },
+            { text: 'Payment real-driver testing (8 axis SSOT + 3 provider × 8 axis = 24 cell grid + testcontainers-shaped env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/payment-real-driver-testing' },
           ],
         },
       ],
@@ -286,6 +295,7 @@ export default defineConfig({
             { text: 'v1.29 → v1.30', link: '/migrations/v1.29-to-v1.30' },
             { text: 'v1.30 → v1.31', link: '/migrations/v1.30-to-v1.31' },
             { text: 'v1.31 → v1.32', link: '/migrations/v1.31-to-v1.32' },
+            { text: 'v1.32 → v1.33', link: '/migrations/v1.32-to-v1.33' },
           ],
         },
       ],
