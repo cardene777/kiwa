@@ -53,3 +53,84 @@ export { openChargeback, submitEvidence, resolveChargeback } from './chargeback.
 
 export type { FidelityCoverage, FidelityRow } from './fidelity.js';
 export { collectFidelityCoverage } from './fidelity.js';
+
+// v0.4 — advanced billing II 8 axis
+export type {
+  OrchestrationConfig,
+  OrchestrationSession,
+  OrchestrationState,
+} from './orchestration.js';
+export { startOrchestration, routeCharge, probeCircuit } from './orchestration.js';
+
+export type { RecoveryConfig, RecoverySession, RecoveryState } from './revenue-recovery.js';
+export {
+  startRecovery,
+  scheduleSmartRetry,
+  advanceCascade,
+  applyCardUpdate,
+  applyNetworkToken,
+  finalizeRecovery,
+} from './revenue-recovery.js';
+
+export type { RefundPolicy, RefundSession, RefundState } from './refund-advanced.js';
+export {
+  startRefund,
+  partialRefund,
+  fullRefund,
+  denyByPolicy,
+  markWindowExpired,
+  preventChargeback,
+} from './refund-advanced.js';
+
+export type { DisputeSession, DisputeState } from './dispute.js';
+export {
+  openDispute,
+  submitDisputeEvidence,
+  representDispute,
+  escalateArbitration,
+  shiftLiability,
+  finalizeDispute,
+} from './dispute.js';
+
+export type {
+  WebhookIdempotencyConfig,
+  WebhookIdempotencySession,
+  WebhookState,
+} from './webhook-idempotency.js';
+export {
+  startIdempotency,
+  deliver,
+  reportFailure,
+  rotateSignature,
+} from './webhook-idempotency.js';
+
+export type {
+  TaxJurisdiction,
+  TaxKindLocalized,
+  TaxLocalizationInput,
+  TaxLocalizationLine,
+  TaxLocalizationState,
+} from './tax-localization.js';
+export { calculateLocalizedTax, reportDac7 } from './tax-localization.js';
+
+export type {
+  CouponEntry,
+  SubscriptionMachineSession,
+  SubscriptionMachineState,
+} from './subscription-state-machine.js';
+export {
+  startSubscriptionMachine,
+  enterGracePeriod,
+  exitGracePeriod,
+  applyProration,
+  stackCoupon,
+} from './subscription-state-machine.js';
+
+export type { VaultSession, VaultState, VaultToken } from './payment-method-vault.js';
+export {
+  startVault,
+  tokenizeCard,
+  revokeToken,
+  migrateToken,
+  verifyPciScope,
+} from './payment-method-vault.js';

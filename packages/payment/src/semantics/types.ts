@@ -11,6 +11,7 @@ import type { PaymentProvider } from '../types.js';
  * tests can drive the axis without knowing the provider's payload dialect.
  */
 export type BillingAxis =
+  // v0.3 — 9 axis
   | 'dunning'
   | 'retry'
   | '3ds'
@@ -19,7 +20,16 @@ export type BillingAxis =
   | 'subscription-lifecycle'
   | 'invoice'
   | 'tax'
-  | 'chargeback';
+  | 'chargeback'
+  // v0.4 — advanced billing II 8 axis
+  | 'orchestration'
+  | 'revenue-recovery'
+  | 'refund-advanced'
+  | 'dispute'
+  | 'webhook-idempotency-advanced'
+  | 'tax-localization'
+  | 'subscription-state-machine'
+  | 'payment-method-vault';
 
 /**
  * Provider-neutral event names used inside the axis helpers. Real providers
@@ -73,7 +83,47 @@ export type NeutralEventName =
   | 'chargeback.opened'
   | 'chargeback.evidence_submitted'
   | 'chargeback.won'
-  | 'chargeback.lost';
+  | 'chargeback.lost'
+  // v0.4 — orchestration (multi-provider routing)
+  | 'orchestration.routed'
+  | 'orchestration.failed_over'
+  | 'orchestration.circuit_opened'
+  | 'orchestration.circuit_closed'
+  // v0.4 — revenue recovery
+  | 'recovery.smart_retry_scheduled'
+  | 'recovery.dunning_cascade_step'
+  | 'recovery.card_updated'
+  | 'recovery.network_tokenized'
+  // v0.4 — refund advanced
+  | 'refund.partial'
+  | 'refund.full'
+  | 'refund.window_expired'
+  | 'refund.policy_denied'
+  // v0.4 — dispute lifecycle
+  | 'dispute.evidence_submitted'
+  | 'dispute.represented'
+  | 'dispute.arbitration_opened'
+  | 'dispute.liability_shifted'
+  // v0.4 — webhook idempotency advanced
+  | 'webhook.dedup_hit'
+  | 'webhook.replay_blocked'
+  | 'webhook.signature_rotated'
+  | 'webhook.poison_queued'
+  // v0.4 — tax localization
+  | 'tax.vat_calculated'
+  | 'tax.gst_calculated'
+  | 'tax.sales_tax_calculated'
+  | 'tax.dac7_reported'
+  // v0.4 — subscription state machine
+  | 'subscription.grace_period_entered'
+  | 'subscription.grace_period_exited'
+  | 'subscription.proration_applied'
+  | 'subscription.coupon_stacked'
+  // v0.4 — payment method vault
+  | 'vault.token_created'
+  | 'vault.token_revoked'
+  | 'vault.migrated'
+  | 'vault.pci_scope_verified';
 
 /**
  * Provider-specific event name lookup. When a real provider uses a distinct
@@ -115,6 +165,39 @@ const dialect: Record<PaymentProvider, Partial<Record<NeutralEventName, string>>
     'chargeback.evidence_submitted': 'charge.dispute.updated',
     'chargeback.won': 'charge.dispute.closed',
     'chargeback.lost': 'charge.dispute.closed',
+    // v0.4
+    'orchestration.routed': 'payment_intent.created',
+    'orchestration.failed_over': 'payment_intent.processing',
+    'orchestration.circuit_opened': 'radar.early_fraud_warning.created',
+    'orchestration.circuit_closed': 'radar.early_fraud_warning.updated',
+    'recovery.smart_retry_scheduled': 'invoice.payment_action_required',
+    'recovery.dunning_cascade_step': 'invoice.payment_failed',
+    'recovery.card_updated': 'payment_method.card_automatically_updated',
+    'recovery.network_tokenized': 'setup_intent.succeeded',
+    'refund.partial': 'charge.refunded',
+    'refund.full': 'charge.refunded',
+    'refund.window_expired': 'refund.updated',
+    'refund.policy_denied': 'refund.failed',
+    'dispute.evidence_submitted': 'charge.dispute.updated',
+    'dispute.represented': 'charge.dispute.updated',
+    'dispute.arbitration_opened': 'charge.dispute.updated',
+    'dispute.liability_shifted': 'charge.dispute.funds_reinstated',
+    'webhook.dedup_hit': 'invoice.upcoming',
+    'webhook.replay_blocked': 'invoice.upcoming',
+    'webhook.signature_rotated': 'webhook_endpoint.updated',
+    'webhook.poison_queued': 'invoice.upcoming',
+    'tax.vat_calculated': 'tax.calculation_created',
+    'tax.gst_calculated': 'tax.calculation_created',
+    'tax.sales_tax_calculated': 'tax.calculation_created',
+    'tax.dac7_reported': 'tax.settings.updated',
+    'subscription.grace_period_entered': 'customer.subscription.updated',
+    'subscription.grace_period_exited': 'customer.subscription.updated',
+    'subscription.proration_applied': 'invoice.upcoming',
+    'subscription.coupon_stacked': 'coupon.updated',
+    'vault.token_created': 'payment_method.attached',
+    'vault.token_revoked': 'payment_method.detached',
+    'vault.migrated': 'payment_method.updated',
+    'vault.pci_scope_verified': 'setup_intent.succeeded',
   },
   paddle: {
     'dunning.attempt': 'transaction.payment_failed',
@@ -149,6 +232,39 @@ const dialect: Record<PaymentProvider, Partial<Record<NeutralEventName, string>>
     'chargeback.evidence_submitted': 'transaction.chargeback_updated',
     'chargeback.won': 'transaction.chargeback_won',
     'chargeback.lost': 'transaction.chargeback_lost',
+    // v0.4
+    'orchestration.routed': 'transaction.created',
+    'orchestration.failed_over': 'transaction.updated',
+    'orchestration.circuit_opened': 'transaction.updated',
+    'orchestration.circuit_closed': 'transaction.updated',
+    'recovery.smart_retry_scheduled': 'transaction.updated',
+    'recovery.dunning_cascade_step': 'transaction.payment_failed',
+    'recovery.card_updated': 'payment_method.saved',
+    'recovery.network_tokenized': 'payment_method.saved',
+    'refund.partial': 'adjustment.created',
+    'refund.full': 'adjustment.created',
+    'refund.window_expired': 'adjustment.updated',
+    'refund.policy_denied': 'adjustment.updated',
+    'dispute.evidence_submitted': 'transaction.chargeback_updated',
+    'dispute.represented': 'transaction.chargeback_updated',
+    'dispute.arbitration_opened': 'transaction.chargeback_updated',
+    'dispute.liability_shifted': 'transaction.chargeback_won',
+    'webhook.dedup_hit': 'transaction.updated',
+    'webhook.replay_blocked': 'transaction.updated',
+    'webhook.signature_rotated': 'notification.updated',
+    'webhook.poison_queued': 'transaction.updated',
+    'tax.vat_calculated': 'transaction.updated',
+    'tax.gst_calculated': 'transaction.updated',
+    'tax.sales_tax_calculated': 'transaction.updated',
+    'tax.dac7_reported': 'transaction.updated',
+    'subscription.grace_period_entered': 'subscription.past_due',
+    'subscription.grace_period_exited': 'subscription.updated',
+    'subscription.proration_applied': 'transaction.updated',
+    'subscription.coupon_stacked': 'discount.updated',
+    'vault.token_created': 'payment_method.saved',
+    'vault.token_revoked': 'payment_method.deleted',
+    'vault.migrated': 'payment_method.updated',
+    'vault.pci_scope_verified': 'payment_method.saved',
   },
   lemonsqueezy: {
     'dunning.attempt': 'subscription_payment_failed',
@@ -183,6 +299,39 @@ const dialect: Record<PaymentProvider, Partial<Record<NeutralEventName, string>>
     'chargeback.evidence_submitted': 'order_refunded',
     'chargeback.won': 'order_refunded',
     'chargeback.lost': 'order_refunded',
+    // v0.4
+    'orchestration.routed': 'order_created',
+    'orchestration.failed_over': 'order_created',
+    'orchestration.circuit_opened': 'order_refunded',
+    'orchestration.circuit_closed': 'order_created',
+    'recovery.smart_retry_scheduled': 'subscription_payment_failed',
+    'recovery.dunning_cascade_step': 'subscription_payment_failed',
+    'recovery.card_updated': 'subscription_updated',
+    'recovery.network_tokenized': 'subscription_updated',
+    'refund.partial': 'order_refunded',
+    'refund.full': 'order_refunded',
+    'refund.window_expired': 'order_refunded',
+    'refund.policy_denied': 'order_refunded',
+    'dispute.evidence_submitted': 'order_refunded',
+    'dispute.represented': 'order_refunded',
+    'dispute.arbitration_opened': 'order_refunded',
+    'dispute.liability_shifted': 'order_refunded',
+    'webhook.dedup_hit': 'order_created',
+    'webhook.replay_blocked': 'order_created',
+    'webhook.signature_rotated': 'order_created',
+    'webhook.poison_queued': 'order_created',
+    'tax.vat_calculated': 'order_created',
+    'tax.gst_calculated': 'order_created',
+    'tax.sales_tax_calculated': 'order_created',
+    'tax.dac7_reported': 'order_created',
+    'subscription.grace_period_entered': 'subscription_paused',
+    'subscription.grace_period_exited': 'subscription_resumed',
+    'subscription.proration_applied': 'subscription_updated',
+    'subscription.coupon_stacked': 'subscription_updated',
+    'vault.token_created': 'subscription_created',
+    'vault.token_revoked': 'subscription_cancelled',
+    'vault.migrated': 'subscription_updated',
+    'vault.pci_scope_verified': 'subscription_created',
   },
 };
 
