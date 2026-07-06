@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-test/orm/postgres-cdc-dogfood",
   "version": "0.1.0",
-  "reportedAt": "2026-07-05T06:50:19.546Z",
+  "reportedAt": "2026-07-06T07:42:03.154Z",
   "coverage": {
     "line": 92,
     "branch": 88,
@@ -15,14 +15,14 @@
   },
   "fidelity": {
     "mockCoveredMethods": 5,
-    "realTotalMethods": 5,
-    "ratio": 100,
+    "realTotalMethods": 9,
+    "ratio": 55.55555555555556,
     "behavioralDivergences": 5
   },
   "perf": {
-    "p50Ms": 0.05154200000001197,
-    "p95Ms": 0.9499580000000094,
-    "p99Ms": 0.9499580000000094,
+    "p50Ms": 0.048082999999962794,
+    "p95Ms": 0.9159999999999968,
+    "p99Ms": 0.9159999999999968,
     "samples": 2
   },
   "mutation": {
@@ -31,5 +31,5 @@
     "survived": 8,
     "killRate": 73.33333333333333
   },
-  "notes": "Observed 5 divergences across 5 ops:\n- driveOutbox: BEHAVIORAL_DIVERGENCE\n- driveCdcPickup: BEHAVIORAL_DIVERGENCE\n- driveReplication: BEHAVIORAL_DIVERGENCE\n- driveAtLeastOnce: BEHAVIORAL_DIVERGENCE\n- emitFidelity: BEHAVIORAL_DIVERGENCE"
+  "notes": "Observed 5 divergences across 9 ops:\n- driveOutbox: BEHAVIORAL_DIVERGENCE\n- driveCdcPickup: BEHAVIORAL_DIVERGENCE\n- driveReplication: BEHAVIORAL_DIVERGENCE\n- driveAtLeastOnce: BEHAVIORAL_DIVERGENCE\n- emitFidelity: BEHAVIORAL_DIVERGENCE"
 }

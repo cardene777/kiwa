@@ -4,11 +4,15 @@ import { makeRealAdapter } from '../src/adapters/real.js';
 import { OPS_UNDER_TEST, sampleOrderRow } from '../src/adapters/interface.js';
 import { runAdapterMatrix, runFidelityHarness } from '../src/flows/fidelity.js';
 import {
+  driveAtLeastOnceFlow,
   driveCdcPickupFlow,
   driveFidelityFlow,
+  driveLogicalReplicationAdvancedFlow,
   driveOutboxFlow,
+  drivePgvectorFlow,
   driveReplicationFlow,
-  driveAtLeastOnceFlow,
+  driveSlotAdvanceFlow,
+  driveTestcontainersProbeFlow,
 } from '../src/flows/postgres-flows.js';
 
 async function runFull(adapter: Parameters<typeof driveOutboxFlow>[0]): Promise<void> {
@@ -30,13 +34,19 @@ async function runFull(adapter: Parameters<typeof driveOutboxFlow>[0]): Promise<
       duplicateOrders: [],
     });
     await driveFidelityFlow(adapter);
+    // v2 flows — driven so the mock adapter records all 9 ops of the OPS_UNDER_TEST
+    // surface. Real adapter records well-defined divergences (env-missing).
+    await driveLogicalReplicationAdvancedFlow(adapter);
+    await driveSlotAdvanceFlow(adapter);
+    await drivePgvectorFlow(adapter);
+    await driveTestcontainersProbeFlow(adapter);
   } catch {
     // divergences captured in traces
   }
 }
 
 describe('dogfood-postgres-cdc-outbox-app — fidelity harness', () => {
-  it('T-DPF-001 mock adapter covers all 5 ops when driven end-to-end', async () => {
+  it('T-DPF-001 mock adapter covers all 9 ops when driven end-to-end', async () => {
     const mock = makeMockAdapter();
     const real = await makeRealAdapter();
     const matrix = await runAdapterMatrix({
@@ -59,7 +69,7 @@ describe('dogfood-postgres-cdc-outbox-app — fidelity harness', () => {
       testCount: { behavior: 24, integration: 6, e2e: 5 },
       mutation: { mutations: 30, killed: 22 },
     });
-    // Mock covered every op — the ok flag is set on all 5 emitted events.
+    // Mock covered every op — the ok flag is set on all 9 emitted events.
     expect(output.report.fidelity.mockCoveredMethods).toBe(OPS_UNDER_TEST.length);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     await mock.reset();

@@ -1,12 +1,21 @@
 /**
  * Mock adapter — spins up 1 outbox run, 1 CDC publication run, 1 Redis
- * Streams consumer, and 1 replication session against `@kiwa-test/orm`'s
- * mock semantics. Every op appends 1 latency sample and 1 trace event so
- * the fidelity harness never reads as 0-sample.
+ * Streams consumer, 1 replication session, and 4 orm v0.10 advanced
+ * sessions (logical replication + slot + pgvector) against
+ * `@kiwa-test/orm`'s mock semantics. Every op appends 1 latency sample
+ * and 1 trace event so the fidelity harness never reads as 0-sample.
  *
  * The mock is drivable from tests deterministically — LSN counters are
  * monotonic, artificial latency is bounded, and no wall-clock scheduling
  * is used.
+ *
+ * v2 (v1.32-2) adds 4 flows: `driveLogicalReplicationAdvanced`,
+ * `driveSlotAdvance`, `drivePgvector`, `driveTestcontainersProbe`. The
+ * advanced logical replication + pgvector flows sit on top of the orm
+ * v0.10 semantics rather than the coarse-grained v1 replication /
+ * publication runs — those cover the coarse-grained CDC v1 patterns, the
+ * v0.10 semantics cover the fine-grained protocol / origin / two-safe /
+ * ANN behaviour the v2 axes assert against.
  */
 
 import {
@@ -21,10 +30,14 @@ import type {
   AdapterMetrics,
   AtLeastOnceObservation,
   CdcObservation,
+  LogicalReplicationAdvancedObservation,
   OrderRow,
   OutboxObservation,
+  PgvectorObservation,
   PostgresCdcOutboxAdapter,
   ReplicationObservation,
+  SlotAdvanceObservation,
+  TestcontainersProbeObservation,
   TraceEvent,
 } from './interface.js';
 import { OPS_UNDER_TEST } from './interface.js';
@@ -34,6 +47,14 @@ import {
   createStreamsConsumerRun,
   type StreamsConsumerRun,
 } from '../consumer/index.js';
+import { driveLogicalReplicationFlow } from '../logical-replication/index.js';
+import { driveSlotAdvanceFlow } from '../slot-advance/index.js';
+import { drivePgvectorFlow } from '../pgvector/index.js';
+
+/** Deterministic mock endpoints exposed by `driveTestcontainersProbe`. */
+export const MOCK_POSTGRES_URL = 'postgresql://postgres:postgres@postgres-mock:5432/orders';
+export const POSTGRES_IMAGE_DEFAULT = 'postgres:16-alpine';
+export const PGVECTOR_IMAGE_DEFAULT = 'pgvector/pgvector:pg16';
 
 export interface MockAdapterOptions {
   readonly slotName?: string;
@@ -65,6 +86,10 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): PostgresCdcOutbo
     replicationBytes: 0,
     atLeastOnceDeliveries: 0,
     duplicatesHandled: 0,
+    logicalReplicationSteps: 0,
+    slotAdvanceOps: 0,
+    pgvectorSearches: 0,
+    testcontainersProbes: 0,
   };
 
   let outboxRun: OutboxRun | null = null;
@@ -293,6 +318,93 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): PostgresCdcOutbo
       });
     },
 
+    // -------------------------------------------------------------------------
+    // v2 ops — logical replication advanced + slot advance + pgvector +
+    // testcontainers probe.
+    // -------------------------------------------------------------------------
+
+    async driveLogicalReplicationAdvanced(): Promise<LogicalReplicationAdvancedObservation> {
+      return timed('driveLogicalReplicationAdvanced', async () => {
+        const { observation, session } = driveLogicalReplicationFlow();
+        metricsAgg.logicalReplicationSteps += session.history.length;
+        const ok =
+          observation.finalState === 'cascade-synced' &&
+          observation.cascadedSubscribers >= 1 &&
+          observation.confirmedFlushLsn >= observation.startLsn;
+        record('driveLogicalReplicationAdvanced', ok, {
+          detail: {
+            startLsn: observation.startLsn,
+            originId: observation.originId,
+            confirmedFlushLsn: observation.confirmedFlushLsn,
+            cascadedSubscribers: observation.cascadedSubscribers,
+            finalState: observation.finalState,
+          },
+        });
+        return observation;
+      });
+    },
+
+    async driveSlotAdvance(): Promise<SlotAdvanceObservation> {
+      return timed('driveSlotAdvance', async () => {
+        const { observation } = driveSlotAdvanceFlow();
+        metricsAgg.slotAdvanceOps += 1;
+        const ok =
+          observation.dropped &&
+          observation.advancedLsn > observation.retainedLsn &&
+          observation.recycledBytes > 0;
+        record('driveSlotAdvance', ok, {
+          detail: {
+            slotName: observation.slotName,
+            retainedLsn: observation.retainedLsn,
+            advancedLsn: observation.advancedLsn,
+            recycledBytes: observation.recycledBytes,
+          },
+        });
+        return observation;
+      });
+    },
+
+    async drivePgvector(): Promise<PgvectorObservation> {
+      return timed('drivePgvector', async () => {
+        const { observation } = drivePgvectorFlow();
+        metricsAgg.pgvectorSearches += observation.searchCount;
+        const ok =
+          observation.searchCount >= 2 &&
+          observation.bothSearchesRecorded &&
+          Number.isFinite(observation.computedDistance);
+        record('drivePgvector', ok, {
+          detail: {
+            indexKind: observation.indexKind,
+            dimensions: observation.dimensions,
+            searchCount: observation.searchCount,
+            computedDistance: observation.computedDistance,
+          },
+        });
+        return observation;
+      });
+    },
+
+    async driveTestcontainersProbe(): Promise<TestcontainersProbeObservation> {
+      return timed('driveTestcontainersProbe', async () => {
+        metricsAgg.testcontainersProbes += 1;
+        const observation: TestcontainersProbeObservation = {
+          postgresUrl: MOCK_POSTGRES_URL,
+          postgresImage: POSTGRES_IMAGE_DEFAULT,
+          pgvectorImage: PGVECTOR_IMAGE_DEFAULT,
+          reachable: true,
+        };
+        record('driveTestcontainersProbe', true, {
+          detail: {
+            postgresUrl: observation.postgresUrl,
+            postgresImage: observation.postgresImage,
+            pgvectorImage: observation.pgvectorImage,
+            reachable: observation.reachable,
+          },
+        });
+        return observation;
+      });
+    },
+
     metrics(): AdapterMetrics {
       return { ...metricsAgg, latencySamplesMs: [...metricsAgg.latencySamplesMs] };
     },
@@ -305,6 +417,10 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): PostgresCdcOutbo
       metricsAgg.replicationBytes = 0;
       metricsAgg.atLeastOnceDeliveries = 0;
       metricsAgg.duplicatesHandled = 0;
+      metricsAgg.logicalReplicationSteps = 0;
+      metricsAgg.slotAdvanceOps = 0;
+      metricsAgg.pgvectorSearches = 0;
+      metricsAgg.testcontainersProbes = 0;
       outboxRun = null;
       publicationRun = null;
       consumerRun?.reset();

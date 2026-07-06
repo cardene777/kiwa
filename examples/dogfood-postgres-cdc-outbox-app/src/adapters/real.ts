@@ -4,35 +4,51 @@
  * missing, the adapter reports every op as `POSTGRES_ENV_MISSING` so the
  * fidelity harness records the gap.
  *
- * Even when `POSTGRES_BOOTSTRAP` is set, the v1.26-2 scope only wires the
- * connectivity aliveness probe + a `REAL_ADAPTER_NOT_IMPLEMENTED` marker
- * for higher-level ops. The point of this milestone is fidelity harness
- * bring-up + testcontainers hand-off, not a production wal2json client.
- * The v1.26-6 publish milestone can extend `makeConnectedRealAdapter` with
- * an actual `pg` + Debezium wire once the harness is proved on mock.
+ * v1.32-2 scope: the connectivity aliveness probe + a
+ * `REAL_ADAPTER_NOT_IMPLEMENTED` marker for higher-level ops. The point of
+ * this milestone is v2 flow bring-up + testcontainers hand-off, not a
+ * production wal2json / pgvector wire client. The v1.32-6 publish
+ * milestone can extend `makeConnectedRealAdapter` with an actual `pg` +
+ * pgoutput + pgvector client once the harness is proved on mock.
+ *
+ * The testcontainers probe op is the only real op that returns a
+ * populated observation when the env is set — it echoes the Postgres +
+ * pgvector image tag pair so the fidelity harness can confirm the boot
+ * path is wired before the higher-level clients arrive.
  */
 
 import type {
   AdapterMetrics,
   AtLeastOnceObservation,
   CdcObservation,
+  LogicalReplicationAdvancedObservation,
   OrderRow,
   OutboxObservation,
+  PgvectorObservation,
   PostgresCdcOutboxAdapter,
   ReplicationObservation,
+  SlotAdvanceObservation,
+  TestcontainersProbeObservation,
   TraceEvent,
 } from './interface.js';
+
+export const POSTGRES_IMAGE_DEFAULT = 'postgres:16-alpine';
+export const PGVECTOR_IMAGE_DEFAULT = 'pgvector/pgvector:pg16';
 
 export interface RealEnv {
   readonly bootstrap: string;
   readonly clientId: string;
+  readonly postgresImage: string;
+  readonly pgvectorImage: string;
 }
 
 export function detectRealEnv(): RealEnv | null {
   const bootstrap = process.env.POSTGRES_BOOTSTRAP;
   if (!bootstrap) return null;
   const clientId = process.env.POSTGRES_CLIENT_ID ?? 'dogfood-postgres-cdc-outbox-app';
-  return { bootstrap, clientId };
+  const postgresImage = process.env.POSTGRES_IMAGE ?? POSTGRES_IMAGE_DEFAULT;
+  const pgvectorImage = process.env.PGVECTOR_IMAGE ?? PGVECTOR_IMAGE_DEFAULT;
+  return { bootstrap, clientId, postgresImage, pgvectorImage };
 }
 
 export class SkippedError extends Error {
@@ -56,6 +72,10 @@ function emptyMetrics(): AdapterMetrics {
     replicationBytes: 0,
     atLeastOnceDeliveries: 0,
     duplicatesHandled: 0,
+    logicalReplicationSteps: 0,
+    slotAdvanceOps: 0,
+    pgvectorSearches: 0,
+    testcontainersProbes: 0,
   };
 }
 
@@ -77,6 +97,14 @@ function makeSkippedRealAdapter(): PostgresCdcOutboxAdapter {
     async emitFidelity() {
       trace.push({ op: 'emitFidelity', ok: false, errorKind: 'POSTGRES_ENV_MISSING' });
     },
+    // v2 ops — every skipped variant records a well-defined divergence so
+    // the fidelity harness treats them uniformly with the v1 ops.
+    driveLogicalReplicationAdvanced: async () =>
+      fail<LogicalReplicationAdvancedObservation>('driveLogicalReplicationAdvanced'),
+    driveSlotAdvance: async () => fail<SlotAdvanceObservation>('driveSlotAdvance'),
+    drivePgvector: async () => fail<PgvectorObservation>('drivePgvector'),
+    driveTestcontainersProbe: async () =>
+      fail<TestcontainersProbeObservation>('driveTestcontainersProbe'),
     metrics: () => emptyMetrics(),
     async reset() {
       trace.length = 0;
@@ -89,6 +117,11 @@ function makeSkippedRealAdapter(): PostgresCdcOutboxAdapter {
  * `probe.ok` trace when the string looks valid (host:port or a Postgres
  * URL), then reports every higher-level op as `REAL_ADAPTER_NOT_IMPLEMENTED`
  * so the fidelity harness records a well-defined divergence.
+ *
+ * `driveTestcontainersProbe` is the exception: it returns a populated
+ * observation echoing the bootstrap + image tags so v1.32-6 can wire the
+ * higher-level clients against the same boot path without changing the
+ * observation shape.
  */
 function makeConnectedRealAdapter(env: RealEnv): PostgresCdcOutboxAdapter {
   const trace: TraceEvent[] = [];
@@ -101,7 +134,7 @@ function makeConnectedRealAdapter(env: RealEnv): PostgresCdcOutboxAdapter {
 
   function notImplemented<T>(op: string): T {
     trace.push({ op, ok: false, errorKind: 'REAL_ADAPTER_NOT_IMPLEMENTED' });
-    throw new Error(`${op}: REAL_ADAPTER_NOT_IMPLEMENTED in v1.26-2 scope`);
+    throw new Error(`${op}: REAL_ADAPTER_NOT_IMPLEMENTED in v1.32-2 scope`);
   }
 
   const metrics: AdapterMetrics = emptyMetrics();
@@ -117,6 +150,30 @@ function makeConnectedRealAdapter(env: RealEnv): PostgresCdcOutboxAdapter {
     driveAtLeastOnce: async () => notImplemented<AtLeastOnceObservation>('driveAtLeastOnce'),
     async emitFidelity() {
       trace.push({ op: 'emitFidelity', ok: false, errorKind: 'REAL_ADAPTER_NOT_IMPLEMENTED' });
+    },
+    driveLogicalReplicationAdvanced: async () =>
+      notImplemented<LogicalReplicationAdvancedObservation>('driveLogicalReplicationAdvanced'),
+    driveSlotAdvance: async () => notImplemented<SlotAdvanceObservation>('driveSlotAdvance'),
+    drivePgvector: async () => notImplemented<PgvectorObservation>('drivePgvector'),
+    async driveTestcontainersProbe(): Promise<TestcontainersProbeObservation> {
+      metrics.testcontainersProbes += 1;
+      const observation: TestcontainersProbeObservation = {
+        postgresUrl: env.bootstrap,
+        postgresImage: env.postgresImage,
+        pgvectorImage: env.pgvectorImage,
+        reachable: probeOk,
+      };
+      trace.push({
+        op: 'driveTestcontainersProbe',
+        ok: probeOk,
+        detail: {
+          postgresUrl: observation.postgresUrl,
+          postgresImage: observation.postgresImage,
+          pgvectorImage: observation.pgvectorImage,
+          reachable: observation.reachable,
+        },
+      });
+      return observation;
     },
     metrics: () => ({ ...metrics, latencySamplesMs: [...metrics.latencySamplesMs] }),
     async reset() {
