@@ -15,3 +15,10 @@ export {
   USER_V2_SCHEMA_STRING,
   type UserV2,
 } from './user-v2.js';
+export {
+  USER_V3_SCHEMA_JSON,
+  USER_V3_SCHEMA_STRING,
+  USER_V3_TRANSITIVE_BREAK_SCHEMA_JSON,
+  USER_V3_TRANSITIVE_BREAK_SCHEMA_STRING,
+  type UserV3,
+} from './user-v3.js';
