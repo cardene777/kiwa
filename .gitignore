@@ -14,6 +14,7 @@ test-results/
 *.log
 coverage/
 .perf-baseline/
+.a11y-baseline/
 .stryker-tmp/
 mutation-report/
 .DS_Store
