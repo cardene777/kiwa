@@ -7,12 +7,16 @@ import {
   driveConsumerGroupFlow,
   driveDlqFlow,
   driveFidelityFlow,
+  driveIsrHighWatermarkFlow,
   driveProducerFlow,
+  driveRawProtocolFlow,
+  driveSchemaRegistryFlow,
+  driveTestcontainersProbeFlow,
   driveTransactionFlow,
 } from '../src/flows/kafka-flows.js';
 
 describe('dogfood-kafka-event-pipeline — fidelity harness', () => {
-  it('T-DKF-001 mock adapter covers all 5 ops when driven end-to-end', async () => {
+  it('T-DKF-001 mock adapter covers all 9 ops when driven end-to-end', async () => {
     const mock = makeMockAdapter();
     const real = await makeRealAdapter();
     const matrix = await runAdapterMatrix({
@@ -28,6 +32,13 @@ describe('dogfood-kafka-event-pipeline — fidelity harness', () => {
             { orderId: 'ok', valid: true },
           ]);
           await driveFidelityFlow(adapter);
+          await driveRawProtocolFlow(adapter);
+          await driveIsrHighWatermarkFlow(adapter, 'topic-isr', 0, 10);
+          await driveSchemaRegistryFlow(adapter, {
+            subject: 'topic-schema',
+            compatibility: 'BACKWARD',
+          });
+          await driveTestcontainersProbeFlow(adapter);
         } catch {
           // divergences captured in traces
         }
@@ -35,20 +46,20 @@ describe('dogfood-kafka-event-pipeline — fidelity harness', () => {
     });
     const output = runFidelityHarness({
       provider: '@kiwa-test/streaming/kafka-dogfood',
-      version: '0.1.0',
+      version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
       opsUnderTest: [...OPS_UNDER_TEST],
       perfSamplesMs: matrix.perfSamplesMs,
       coverageSummary: {
-        lines: { pct: 92 },
-        branches: { pct: 88 },
-        functions: { pct: 95 },
+        lines: { pct: 93 },
+        branches: { pct: 89 },
+        functions: { pct: 96 },
       },
-      testCount: { behavior: 32, integration: 7, e2e: 7 },
-      mutation: { mutations: 30, killed: 22 },
+      testCount: { behavior: 52, integration: 8, e2e: 7 },
+      mutation: { mutations: 40, killed: 32 },
     });
-    // Mock covered every op — the ok flag is set on all 5 emitted events.
+    // Mock covered every op — the ok flag is set on all 9 emitted events.
     expect(output.report.fidelity.mockCoveredMethods).toBe(OPS_UNDER_TEST.length);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     await mock.reset();
@@ -124,6 +135,10 @@ describe('dogfood-kafka-event-pipeline — fidelity harness', () => {
     await driveTransactionFlow(mock, 'topic-tx', ['x'], ['y']);
     await driveDlqFlow(mock, [{ orderId: 'p', valid: false }]);
     await driveFidelityFlow(mock);
+    await driveRawProtocolFlow(mock);
+    await driveIsrHighWatermarkFlow(mock, 'topic-isr', 0, 5);
+    await driveSchemaRegistryFlow(mock, { subject: 't', compatibility: 'BACKWARD' });
+    await driveTestcontainersProbeFlow(mock);
     const output = runFidelityHarness({
       provider: '@kiwa-test/streaming/kafka-dogfood',
       version: '0.1.0',

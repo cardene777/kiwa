@@ -4,12 +4,16 @@ import {
   driveConsumerGroupFlow,
   driveDlqFlow,
   driveFidelityFlow,
+  driveIsrHighWatermarkFlow,
   driveProducerFlow,
+  driveRawProtocolFlow,
+  driveSchemaRegistryFlow,
+  driveTestcontainersProbeFlow,
   driveTransactionFlow,
 } from '../src/flows/kafka-flows.js';
 
 describe('end-to-end mock-mode integration', () => {
-  it('T-DKE-M-001 5-op surface produces 5 ok trace entries', async () => {
+  it('T-DKE-M-001 9-op surface produces 9 ok trace entries', async () => {
     const adapter = makeMockAdapter();
     await driveProducerFlow(adapter, [
       sampleOrderEvent({ orderId: 'o1' }),
@@ -22,6 +26,13 @@ describe('end-to-end mock-mode integration', () => {
       { orderId: 'd2', valid: false },
     ]);
     await driveFidelityFlow(adapter);
+    await driveRawProtocolFlow(adapter);
+    await driveIsrHighWatermarkFlow(adapter, 'topic-isr', 0, 5);
+    await driveSchemaRegistryFlow(adapter, {
+      subject: 'topic-schema',
+      compatibility: 'BACKWARD',
+    });
+    await driveTestcontainersProbeFlow(adapter);
 
     const okOps = adapter.traces().filter((t) => t.ok).map((t) => t.op);
     for (const op of [
@@ -30,6 +41,10 @@ describe('end-to-end mock-mode integration', () => {
       'driveTransaction',
       'driveDlq',
       'emitFidelity',
+      'driveRawProtocol',
+      'driveIsrHighWatermark',
+      'driveSchemaRegistry',
+      'driveTestcontainersProbe',
     ]) {
       expect(okOps).toContain(op);
     }
@@ -107,6 +122,24 @@ describe('end-to-end mock-mode integration', () => {
     for (const c of out.consumers) {
       expect(c.assignedPartitions.length).toBeGreaterThan(0);
     }
+    await adapter.reset();
+  });
+
+  it('T-DKE-M-008 v2 metrics counters accumulate independently from v1 counters', async () => {
+    const adapter = makeMockAdapter();
+    await driveProducerFlow(adapter, [sampleOrderEvent({ orderId: 'o1' })]);
+    await driveRawProtocolFlow(adapter);
+    await driveIsrHighWatermarkFlow(adapter, 'topic-v2', 0, 3);
+    await driveSchemaRegistryFlow(adapter, { subject: 'v2', compatibility: 'BACKWARD' });
+    await driveTestcontainersProbeFlow(adapter);
+    const m = adapter.metrics();
+    // v1 counter still advanced.
+    expect(m.producerRecordsSent).toBe(1);
+    // v2 counters all incremented once each.
+    expect(m.rawProtocolFences).toBe(1);
+    expect(m.isrAdvances).toBe(1);
+    expect(m.schemaRegistryChecks).toBe(1);
+    expect(m.testcontainersProbes).toBe(1);
     await adapter.reset();
   });
 });

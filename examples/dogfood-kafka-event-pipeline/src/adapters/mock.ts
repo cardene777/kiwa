@@ -5,13 +5,25 @@
  * as 0-sample.
  */
 
-import { createKafkaMock, type KafkaMock, type StreamingMessage } from '@kiwa-test/streaming';
+import {
+  createKafkaMock,
+  createKafkaRawProtocol,
+  createRedpandaSchemaEvolution,
+  type KafkaMock,
+  type KafkaRawProtocol,
+  type RedpandaSchemaEvolution,
+  type StreamingMessage,
+} from '@kiwa-test/streaming';
 import type {
   ConsumerObservation,
   DlqObservation,
+  IsrHighWatermarkObservation,
   KafkaEventPipelineAdapter,
   OrderEvent,
   ProducerObservation,
+  RawProtocolObservation,
+  SchemaRegistryObservation,
+  TestcontainersProbeObservation,
   TraceEvent,
   TransactionObservation,
 } from './interface.js';
@@ -19,6 +31,12 @@ import { createProducerRun } from '../producer/index.js';
 import { createConsumerRun } from '../consumer/index.js';
 import { createTransactionRun } from '../transaction/index.js';
 import { createDlqRun, type WorkPayload } from '../dlq/index.js';
+
+/** Deterministic mock endpoints exposed by `driveTestcontainersProbe`. */
+export const MOCK_KAFKA_BOOTSTRAP = 'kafka-mock:9092';
+export const MOCK_SCHEMA_REGISTRY_URL = 'http://schema-registry-mock:8081';
+export const KAFKA_IMAGE_DEFAULT = 'confluentinc/cp-kafka:7.5.0';
+export const SCHEMA_REGISTRY_IMAGE_DEFAULT = 'confluentinc/cp-schema-registry:7.5.0';
 
 export interface MockAdapterOptions {
   readonly defaultPartitionCount?: number;
@@ -45,14 +63,39 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): KafkaEventPipeli
     transactionsCommitted: 0,
     transactionsAborted: 0,
     dlqQuarantined: 0,
+    // v2 counters — surfaced next to the v1 counters in the fidelity report.
+    rawProtocolFences: 0,
+    isrAdvances: 0,
+    schemaRegistryChecks: 0,
+    testcontainersProbes: 0,
   };
 
   let kafka: KafkaMock | null = null;
+  let rawProtocol: KafkaRawProtocol | null = null;
+  let schemaRegistry: RedpandaSchemaEvolution | null = null;
 
   function ensure(): KafkaMock {
     if (kafka) return kafka;
     kafka = createKafkaMock(config);
     return kafka;
+  }
+
+  function ensureRawProtocol(): KafkaRawProtocol {
+    if (rawProtocol) return rawProtocol;
+    rawProtocol = createKafkaRawProtocol({
+      replicationFactor: 3,
+      minInSyncReplicas: 2,
+    });
+    return rawProtocol;
+  }
+
+  function ensureSchemaRegistry(): RedpandaSchemaEvolution {
+    if (schemaRegistry) return schemaRegistry;
+    schemaRegistry = createRedpandaSchemaEvolution({
+      defaultCompatibility: 'BACKWARD',
+      subjectNamingStrategy: 'topic-name',
+    });
+    return schemaRegistry;
   }
 
   function record(op: string, ok: boolean, extra?: Partial<TraceEvent>): void {
@@ -342,6 +385,151 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): KafkaEventPipeli
       });
     },
 
+    async driveRawProtocol(): Promise<RawProtocolObservation> {
+      return timed('driveRawProtocol', async () => {
+        const p = ensureRawProtocol();
+        // KIP-98 producer id + epoch fencing — a coordinator re-init bumps
+        // epoch so the previous identity is fenced with INVALID_PRODUCER_EPOCH.
+        const initial = p.initProducerId();
+        const fenced = p.fenceProducer(initial.producerId);
+        metricsAgg.rawProtocolFences += 1;
+        // Walk the txn coordinator state machine one full commit cycle so the
+        // observation carries a validated trajectory.
+        const states: string[] = [p.transactionState()];
+        p.transitionTransaction('Empty', 'Ongoing');
+        states.push(p.transactionState());
+        p.transitionTransaction('Ongoing', 'PrepareCommit');
+        states.push(p.transactionState());
+        p.transitionTransaction('PrepareCommit', 'CompleteCommit');
+        states.push(p.transactionState());
+        p.transitionTransaction('CompleteCommit', 'Empty');
+        states.push(p.transactionState());
+        // Incremental fetch session (KIP-227) — open then bump one epoch so the
+        // caller can assert the epoch monotonicity.
+        const session = p.openFetchSession();
+        const epoch = p.bumpFetchSession(session.sessionId);
+        const observation: RawProtocolObservation = {
+          producerId: initial.producerId,
+          initialEpoch: initial.epoch,
+          fencedEpoch: fenced.epoch,
+          txnStates: states,
+          fetchSessionId: session.sessionId,
+          fetchSessionEpoch: epoch,
+        };
+        record(
+          'driveRawProtocol',
+          fenced.epoch === initial.epoch + 1 && states[states.length - 1] === 'Empty',
+          {
+            detail: {
+              producerId: initial.producerId,
+              fencedEpoch: fenced.epoch,
+              txnStateCount: states.length,
+              fetchSessionEpoch: epoch,
+            },
+          },
+        );
+        return observation;
+      });
+    },
+
+    async driveIsrHighWatermark(
+      topic: string,
+      partition: number,
+      targetOffset: number,
+    ): Promise<IsrHighWatermarkObservation> {
+      return timed('driveIsrHighWatermark', async () => {
+        const p = ensureRawProtocol();
+        // Attach 3 brokers so ISR size == replicationFactor and the HW can
+        // advance past minInSyncReplicas=2. Idempotent add across repeated
+        // drives — check membership first because the underlying axis rejects
+        // any addition that would exceed replicationFactor.
+        const currentIsr = new Set(p.getIsr(topic, partition));
+        for (const brokerId of [1, 2, 3]) {
+          if (!currentIsr.has(brokerId)) p.addToIsr(topic, partition, brokerId);
+        }
+        const previous = p.getHighWatermark(topic, partition);
+        const advancedTo = p.advanceHighWatermark(topic, partition, targetOffset);
+        const advanced = advancedTo > previous;
+        if (advanced) metricsAgg.isrAdvances += 1;
+        const observation: IsrHighWatermarkObservation = {
+          topic,
+          partition,
+          isrSize: p.getIsr(topic, partition).length,
+          highWatermark: advancedTo,
+          advanced,
+        };
+        record(
+          'driveIsrHighWatermark',
+          advanced && observation.isrSize >= 2,
+          {
+            detail: { topic, partition, targetOffset, advancedTo, previous },
+          },
+        );
+        return observation;
+      });
+    },
+
+    async driveSchemaRegistry(input): Promise<SchemaRegistryObservation> {
+      return timed('driveSchemaRegistry', async () => {
+        const r = ensureSchemaRegistry();
+        // Register a v1 schema then attempt a compatible follow-up (optional
+        // add is always safe under BACKWARD / FORWARD / FULL). The compat mode
+        // is dictated by the caller so tests can exercise both compatible +
+        // incompatible axes.
+        r.setCompatibility(input.subject, input.compatibility);
+        const v1 = r.register({
+          subject: input.subject,
+          kind: 'avro',
+          schema: 'OrderSchema{OPTIONAL_ADD:field_v1}',
+        });
+        const check = r.check({
+          subject: input.subject,
+          kind: 'avro',
+          schema: 'OrderSchema{OPTIONAL_ADD:field_v1,OPTIONAL_ADD:field_v2}',
+        });
+        metricsAgg.schemaRegistryChecks += 1;
+        const observation: SchemaRegistryObservation = {
+          subject: input.subject,
+          compatibility: input.compatibility,
+          compatible: check.compatible,
+          registeredSchemaId: v1.id,
+        };
+        record('driveSchemaRegistry', check.compatible, {
+          detail: {
+            subject: input.subject,
+            compatibility: input.compatibility,
+            registeredSchemaId: v1.id,
+            reasons: check.reasons.length,
+          },
+        });
+        return observation;
+      });
+    },
+
+    async driveTestcontainersProbe(): Promise<TestcontainersProbeObservation> {
+      return timed('driveTestcontainersProbe', async () => {
+        // Mock mode always reports deterministic endpoints — the real adapter
+        // path is the only one that boots a container. This keeps the
+        // fidelity diff meaningful (mock ok, real ok-when-env-present).
+        metricsAgg.testcontainersProbes += 1;
+        const observation: TestcontainersProbeObservation = {
+          bootstrap: MOCK_KAFKA_BOOTSTRAP,
+          schemaRegistryUrl: MOCK_SCHEMA_REGISTRY_URL,
+          kafkaImage: KAFKA_IMAGE_DEFAULT,
+          schemaRegistryImage: SCHEMA_REGISTRY_IMAGE_DEFAULT,
+          reachable: true,
+        };
+        record('driveTestcontainersProbe', true, {
+          detail: {
+            bootstrap: observation.bootstrap,
+            schemaRegistryUrl: observation.schemaRegistryUrl,
+            kafkaImage: observation.kafkaImage,
+          },
+        });
+        return observation;
+      });
+    },
+
     metrics() {
       return {
         latencySamplesMs: [...metricsAgg.latencySamplesMs],
@@ -350,6 +538,10 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): KafkaEventPipeli
         transactionsCommitted: metricsAgg.transactionsCommitted,
         transactionsAborted: metricsAgg.transactionsAborted,
         dlqQuarantined: metricsAgg.dlqQuarantined,
+        rawProtocolFences: metricsAgg.rawProtocolFences,
+        isrAdvances: metricsAgg.isrAdvances,
+        schemaRegistryChecks: metricsAgg.schemaRegistryChecks,
+        testcontainersProbes: metricsAgg.testcontainersProbes,
       };
     },
 
@@ -361,8 +553,16 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): KafkaEventPipeli
       metricsAgg.transactionsCommitted = 0;
       metricsAgg.transactionsAborted = 0;
       metricsAgg.dlqQuarantined = 0;
+      metricsAgg.rawProtocolFences = 0;
+      metricsAgg.isrAdvances = 0;
+      metricsAgg.schemaRegistryChecks = 0;
+      metricsAgg.testcontainersProbes = 0;
       if (kafka) kafka.reset();
+      if (rawProtocol) rawProtocol.reset();
+      if (schemaRegistry) schemaRegistry.reset();
       kafka = null;
+      rawProtocol = null;
+      schemaRegistry = null;
     },
   };
 }

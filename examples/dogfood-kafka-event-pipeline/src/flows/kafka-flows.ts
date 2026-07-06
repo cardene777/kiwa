@@ -58,3 +58,55 @@ export async function driveDlqFlow(
 export async function driveFidelityFlow(adapter: KafkaEventPipelineAdapter): Promise<void> {
   await adapter.emitFidelity();
 }
+
+// -----------------------------------------------------------------------------
+// v2 flows (v1.31-2) — thin wrappers over the 4 new adapter ops so the
+// e2e + fidelity tests read the same way as the v1 flows.
+// -----------------------------------------------------------------------------
+
+export async function driveRawProtocolFlow(
+  adapter: KafkaEventPipelineAdapter,
+): Promise<{ producerId: number; fencedEpoch: number; txnStates: readonly string[] }> {
+  const out = await adapter.driveRawProtocol();
+  return {
+    producerId: out.producerId,
+    fencedEpoch: out.fencedEpoch,
+    txnStates: out.txnStates,
+  };
+}
+
+export async function driveIsrHighWatermarkFlow(
+  adapter: KafkaEventPipelineAdapter,
+  topic: string,
+  partition: number,
+  targetOffset: number,
+): Promise<{ isrSize: number; highWatermark: number; advanced: boolean }> {
+  const out = await adapter.driveIsrHighWatermark(topic, partition, targetOffset);
+  return {
+    isrSize: out.isrSize,
+    highWatermark: out.highWatermark,
+    advanced: out.advanced,
+  };
+}
+
+export async function driveSchemaRegistryFlow(
+  adapter: KafkaEventPipelineAdapter,
+  input: { subject: string; compatibility: 'BACKWARD' | 'FORWARD' | 'FULL' },
+): Promise<{ compatible: boolean; registeredSchemaId: number }> {
+  const out = await adapter.driveSchemaRegistry(input);
+  return {
+    compatible: out.compatible,
+    registeredSchemaId: out.registeredSchemaId,
+  };
+}
+
+export async function driveTestcontainersProbeFlow(
+  adapter: KafkaEventPipelineAdapter,
+): Promise<{ bootstrap: string; schemaRegistryUrl: string; reachable: boolean }> {
+  const out = await adapter.driveTestcontainersProbe();
+  return {
+    bootstrap: out.bootstrap,
+    schemaRegistryUrl: out.schemaRegistryUrl,
+    reachable: out.reachable,
+  };
+}
