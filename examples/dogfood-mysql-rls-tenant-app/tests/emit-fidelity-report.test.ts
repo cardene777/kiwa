@@ -7,10 +7,14 @@ import { OPS_UNDER_TEST, sampleOrgRow } from '../src/adapters/interface.js';
 import { runAdapterMatrix, runFidelityHarness } from '../src/flows/fidelity.js';
 import {
   driveAuditIntegrityFlow,
+  driveBinlogAdvanceFlow,
   driveBypassAuditFlow,
   driveCrossTenantRefuseFlow,
   driveFidelityFlow,
+  driveGroupReplicationFlow,
+  driveRouterSplitFlow,
   driveTenantInjectionFlow,
+  driveTestcontainersProbeFlow,
 } from '../src/flows/mysql-flows.js';
 
 describe('dogfood-mysql-rls-tenant-app — emit fidelity report to quality-report/', () => {
@@ -42,6 +46,13 @@ describe('dogfood-mysql-rls-tenant-app — emit fidelity report to quality-repor
           });
           await driveAuditIntegrityFlow(adapter);
           await driveFidelityFlow(adapter);
+          // v2 flows — advance the mock adapter surface from 5 → 9 ops
+          // so the emitted quality-report snapshot mirrors the fidelity
+          // harness assertions in fidelity-report.test.ts.
+          await driveGroupReplicationFlow(adapter);
+          await driveBinlogAdvanceFlow(adapter);
+          await driveRouterSplitFlow(adapter);
+          await driveTestcontainersProbeFlow(adapter);
         } catch {
           // divergences captured
         }
