@@ -1,5 +1,17 @@
 # @kiwa-test/observability
 
+## 2.1.0
+
+### Minor Changes
+
+- feat: v2.1 advanced 8-axis observability semantics (縦深化 pair 第 7 pair 連続化)。 追加 axis = SLO/SLI/error budget (burn rate + multi-window multi-burn-rate) / RED-USE/four golden signals / exemplar tracing (metric↔trace 双方向) / OpenTelemetry advanced (batch processor + resource detection + baggage + W3C context) / log correlation advanced (structured log + trace_id/span_id + LogQL/PromQL join) / alert routing advanced (silence + inhibit + escalation chain + oncall) / continuous profiling (CPU/memory/off-CPU + flame graph) / cardinality control (high-cardinality detection + label reduction + histogram bucket)。
+  - 4 provider target (Grafana OSS / Prometheus / Loki / OpenTelemetry Collector) x 8 axis = 32 grid fidelity harness (`semantics.collectFidelityCoverage()`)。
+  - Provider-neutral event 名 (`slo.burn_rate_evaluated` 等) と provider-specific dialect (`grafana.slo.burn.eval` 等) を `providerEventName()` で切替、 テストは neutral 名で assert、 実配線は dialect で観測。
+  - Real driver env-gate (`isKiwaModeReal()` + `resolveObservabilityEndpoint()` + `skipUnlessReal()`) が KIWA_MODE=real 時に Grafana OSS/Prometheus/Loki/OTel Collector backend endpoint を解決。 KIWA_MODE≠real 時は skip=true を返して mock semantics に fallback。
+  - namespaced export ... `semantics/*` は `import { semantics } from '@kiwa-test/observability'` 経由、 v2.0 の `Silence` / `EscalationStep` / `FlameNode` と競合しない構造で追加。
+  - v2.0 の既存 API (dashboard-mock / alert / trace-flame / log-correlation) と v1.1 telemetry mock は無変更、 v1.0 flaky/coverage も無変更。
+  - Refs #1061 (v1.35-1、 CAR-798)、 #1060 (v1.35 parent)、 縦深化 pair 第 7 pair 連続化 (v1.14 base → v1.17 v2 → v1.35 v2.1)。
+
 ## 2.0.0
 
 ### Major Changes
