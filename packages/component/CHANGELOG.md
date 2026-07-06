@@ -1,5 +1,13 @@
 # @kiwa-test/component
 
+## 0.3.0 — 2026-07-06
+
+### Minor Changes — v1.34-1 advanced component 4 axis
+
+- 4 new component semantic axes: rsc-harness (React Server Component render + suspense boundary + streaming HTML chunk), streaming-ssr (Suspense + ErrorBoundary + progressive hydration + selective hydration), view-transitions (element transition + document transition + animation testing), form-action-advanced (useFormStatus + useOptimistic + progressive enhancement).
+- Fidelity harness added for 3 target × 4 axis = 12 rows across Storybook 8, Playwright Component Testing, and Chromatic, with target-specific event dialects.
+- Real-driver env-gate (`KIWA_MODE=real` + `STORYBOOK_URL` / `PLAYWRIGHT_CT_URL` / `CHROMATIC_TOKEN`) reports mock vs real mode per target without adding runtime dependencies.
+
 ## 0.2.0
 
 ### Minor Changes

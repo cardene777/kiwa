@@ -61,3 +61,12 @@ export {
   type RscStreamSource,
   type RscErrorBoundarySignal,
 } from './setup-next-rsc-env.js';
+
+export * from './semantics/index.js';
+export {
+  assertMode,
+  resolveAllModes,
+  resolveMode,
+  type KiwaTestMode,
+  type ResolvedMode,
+} from './real-driver.js';
