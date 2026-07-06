@@ -1,12 +1,20 @@
 /**
  * Mock adapter — spins up 1 RLS session per policy, 1 organization store,
- * and 1 audit-log chain against `@kiwa-test/orm`'s RLS semantics. Every
- * op appends 1 latency sample and 1 trace event so the fidelity harness
- * never reads as 0-sample.
+ * 1 audit-log chain, and 3 orm v0.10 advanced sessions (group replication
+ * + binlog + router-split pool) against `@kiwa-test/orm`'s semantics.
+ * Every op appends 1 latency sample and 1 trace event so the fidelity
+ * harness never reads as 0-sample.
  *
  * The mock is drivable from tests deterministically — audit chain hashes
  * are pure functions of their input, RLS state transitions are inspected
  * from the neutral event stream, and no wall-clock scheduling is used.
+ *
+ * v2 (v1.32-3) adds 4 flows: `driveGroupReplication`, `driveBinlogAdvance`,
+ * `driveRouterSplit`, `driveTestcontainersProbe`. The advanced flows sit
+ * on top of the orm v0.10 semantics rather than the coarse-grained v1
+ * RLS session — the RLS session covers the coarse-grained multi-tenant
+ * patterns, the v0.10 semantics cover the fine-grained cluster / binlog
+ * / pool behaviour the v2 axes assert against.
  */
 
 import { createAuditLog, drainSessionAudit, type AuditLog } from '../audit/index.js';
@@ -15,13 +23,25 @@ import { createRlsGate, tryCrossTenantRead, type RlsGate } from '../rls/index.js
 import type {
   AdapterMetrics,
   AuditIntegrityObservation,
+  BinlogAdvanceObservation,
   BypassAuditObservation,
   CrossTenantObservation,
+  GroupReplicationObservation,
   MysqlRlsTenantAdapter,
+  RouterSplitObservation,
   TenantInjectionObservation,
+  TestcontainersProbeObservation,
   TraceEvent,
 } from './interface.js';
 import { OPS_UNDER_TEST } from './interface.js';
+import { driveGroupReplicationFlow } from '../group-replication/index.js';
+import { driveBinlogAdvanceFlow } from '../binlog-advance/index.js';
+import { driveRouterSplitFlow } from '../router-split/index.js';
+
+/** Deterministic mock endpoints exposed by `driveTestcontainersProbe`. */
+export const MOCK_MYSQL_URL = 'mysql://mysql:mysql@mysql-mock:3306/kiwa';
+export const MYSQL_IMAGE_DEFAULT = 'mysql:8.4';
+export const ROUTER_IMAGE_DEFAULT = 'mysql/mysql-router:8.4';
 
 export interface MockAdapterOptions {
   readonly policyName?: string;
@@ -49,6 +69,10 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): MysqlRlsTenantAd
     bypassOps: 0,
     auditRecords: 0,
     policiesInstalled: 0,
+    groupReplicationSteps: 0,
+    binlogAdvanceOps: 0,
+    routerSplitOps: 0,
+    testcontainersProbes: 0,
   };
 
   let gate: RlsGate | null = null;
@@ -301,6 +325,98 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): MysqlRlsTenantAd
       });
     },
 
+    // -------------------------------------------------------------------------
+    // v2 ops — group replication + binlog advance + router split +
+    // testcontainers probe.
+    // -------------------------------------------------------------------------
+
+    async driveGroupReplication(): Promise<GroupReplicationObservation> {
+      return timed('driveGroupReplication', async () => {
+        const { observation, session } = driveGroupReplicationFlow();
+        metricsAgg.groupReplicationSteps += session.history.length;
+        const ok =
+          observation.finalState === 'member-left' &&
+          observation.primaryId !== '' &&
+          observation.peakMemberCount >= 2 &&
+          observation.conflictCount >= 1;
+        record('driveGroupReplication', ok, {
+          detail: {
+            groupName: observation.groupName,
+            primaryId: observation.primaryId,
+            peakMemberCount: observation.peakMemberCount,
+            conflictCount: observation.conflictCount,
+            finalState: observation.finalState,
+          },
+        });
+        return observation;
+      });
+    },
+
+    async driveBinlogAdvance(): Promise<BinlogAdvanceObservation> {
+      return timed('driveBinlogAdvance', async () => {
+        const { observation, session } = driveBinlogAdvanceFlow();
+        metricsAgg.binlogAdvanceOps += session.history.length;
+        const ok =
+          observation.gapDetected &&
+          observation.binlogPosition > 0 &&
+          observation.gtidCount >= 1 &&
+          observation.format === 'ROW';
+        record('driveBinlogAdvance', ok, {
+          detail: {
+            serverId: observation.serverId,
+            binlogFile: observation.binlogFile,
+            binlogPosition: observation.binlogPosition,
+            format: observation.format,
+            gtidCount: observation.gtidCount,
+            gapDetected: observation.gapDetected,
+          },
+        });
+        return observation;
+      });
+    },
+
+    async driveRouterSplit(): Promise<RouterSplitObservation> {
+      return timed('driveRouterSplit', async () => {
+        const { observation } = driveRouterSplitFlow();
+        metricsAgg.routerSplitOps += 1;
+        const ok =
+          observation.finalState === 'metrics-exported' &&
+          observation.readHits + observation.writeHits > 0 &&
+          observation.warmedConnections > 0;
+        record('driveRouterSplit', ok, {
+          detail: {
+            poolId: observation.poolId,
+            readHits: observation.readHits,
+            writeHits: observation.writeHits,
+            warmedConnections: observation.warmedConnections,
+            finalState: observation.finalState,
+          },
+        });
+        return observation;
+      });
+    },
+
+    async driveTestcontainersProbe(): Promise<TestcontainersProbeObservation> {
+      return timed('driveTestcontainersProbe', async () => {
+        metricsAgg.testcontainersProbes += 1;
+        const observation: TestcontainersProbeObservation = {
+          mysqlUrl: MOCK_MYSQL_URL,
+          mysqlImage: MYSQL_IMAGE_DEFAULT,
+          routerImage: ROUTER_IMAGE_DEFAULT,
+          reachable: true,
+        };
+        record('driveTestcontainersProbe', true, {
+          detail: {
+            mysqlUrl: observation.mysqlUrl,
+            mysqlImage: observation.mysqlImage,
+            routerImage: observation.routerImage,
+            reachable: observation.reachable,
+          },
+        });
+        return observation;
+      });
+    },
+
     metrics(): AdapterMetrics {
       return { ...metricsAgg, latencySamplesMs: [...metricsAgg.latencySamplesMs] };
     },
@@ -313,6 +429,10 @@ export function makeMockAdapter(opts: MockAdapterOptions = {}): MysqlRlsTenantAd
       metricsAgg.bypassOps = 0;
       metricsAgg.auditRecords = 0;
       metricsAgg.policiesInstalled = 0;
+      metricsAgg.groupReplicationSteps = 0;
+      metricsAgg.binlogAdvanceOps = 0;
+      metricsAgg.routerSplitOps = 0;
+      metricsAgg.testcontainersProbes = 0;
       gate = null;
       store?.reset();
       store = null;

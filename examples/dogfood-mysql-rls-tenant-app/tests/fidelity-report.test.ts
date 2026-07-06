@@ -5,10 +5,14 @@ import { OPS_UNDER_TEST, sampleOrgRow } from '../src/adapters/interface.js';
 import { runAdapterMatrix, runFidelityHarness } from '../src/flows/fidelity.js';
 import {
   driveAuditIntegrityFlow,
+  driveBinlogAdvanceFlow,
   driveBypassAuditFlow,
   driveCrossTenantRefuseFlow,
   driveFidelityFlow,
+  driveGroupReplicationFlow,
+  driveRouterSplitFlow,
   driveTenantInjectionFlow,
+  driveTestcontainersProbeFlow,
 } from '../src/flows/mysql-flows.js';
 
 async function runFull(
@@ -31,6 +35,13 @@ async function runFull(
     });
     await driveAuditIntegrityFlow(adapter);
     await driveFidelityFlow(adapter);
+    // v2 flows — driven so the mock adapter records all 9 ops of the
+    // OPS_UNDER_TEST surface. Real adapter records well-defined
+    // divergences (env-missing / not-implemented).
+    await driveGroupReplicationFlow(adapter);
+    await driveBinlogAdvanceFlow(adapter);
+    await driveRouterSplitFlow(adapter);
+    await driveTestcontainersProbeFlow(adapter);
   } catch {
     // divergences captured in traces
   }
@@ -61,8 +72,8 @@ describe('dogfood-mysql-rls-tenant-app — fidelity harness', () => {
       mutation: { mutations: 30, killed: 22 },
     });
 
-    expect(output.report.fidelity.mockCoveredMethods).toBe(5);
-    expect(output.report.fidelity.realTotalMethods).toBe(5);
+    expect(output.report.fidelity.mockCoveredMethods).toBe(OPS_UNDER_TEST.length);
+    expect(output.report.fidelity.realTotalMethods).toBe(OPS_UNDER_TEST.length);
     expect(output.verdict.axesEvaluated).toBe(7);
     await mock.reset();
     await real.reset();

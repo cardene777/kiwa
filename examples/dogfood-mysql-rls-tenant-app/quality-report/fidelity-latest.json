@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-test/orm/mysql-rls-dogfood",
   "version": "0.1.0",
-  "reportedAt": "2026-07-05T07:34:22.814Z",
+  "reportedAt": "2026-07-06T07:59:19.188Z",
   "coverage": {
     "line": 92,
     "branch": 88,
@@ -14,15 +14,15 @@
     "total": 35
   },
   "fidelity": {
-    "mockCoveredMethods": 5,
-    "realTotalMethods": 5,
+    "mockCoveredMethods": 9,
+    "realTotalMethods": 9,
     "ratio": 100,
-    "behavioralDivergences": 5
+    "behavioralDivergences": 9
   },
   "perf": {
-    "p50Ms": 0.04145900000000324,
-    "p95Ms": 0.8879579999999976,
-    "p99Ms": 0.8879579999999976,
+    "p50Ms": 0.04058399999996709,
+    "p95Ms": 1.6659579999999892,
+    "p99Ms": 1.6659579999999892,
     "samples": 2
   },
   "mutation": {
@@ -31,5 +31,5 @@
     "survived": 8,
     "killRate": 73.33333333333333
   },
-  "notes": "Observed 5 divergences across 5 ops:\n- driveTenantInjection: BEHAVIORAL_DIVERGENCE\n- driveCrossTenantRefuse: BEHAVIORAL_DIVERGENCE\n- driveBypassAudit: BEHAVIORAL_DIVERGENCE\n- driveAuditIntegrity: BEHAVIORAL_DIVERGENCE\n- emitFidelity: BEHAVIORAL_DIVERGENCE"
+  "notes": "Observed 9 divergences across 9 ops:\n- driveTenantInjection: BEHAVIORAL_DIVERGENCE\n- driveCrossTenantRefuse: BEHAVIORAL_DIVERGENCE\n- driveBypassAudit: BEHAVIORAL_DIVERGENCE\n- driveAuditIntegrity: BEHAVIORAL_DIVERGENCE\n- emitFidelity: BEHAVIORAL_DIVERGENCE\n- driveGroupReplication: BEHAVIORAL_DIVERGENCE\n- driveBinlogAdvance: BEHAVIORAL_DIVERGENCE\n- driveRouterSplit: BEHAVIORAL_DIVERGENCE\n- driveTestcontainersProbe: BEHAVIORAL_DIVERGENCE"
 }
