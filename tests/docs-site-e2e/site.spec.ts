@@ -261,6 +261,22 @@ const V1_29_PAGES = [
   { path: '/migrations/v1.28-to-v1.29', title: 'v1.28 → v1.29' },
 ];
 
+// v1.30 pages — new tutorials 56-57 + concept doc + migration guide added
+// under the a11y horizontal sweep milestone (Issue #991). Same
+// skip-if-dist-missing pattern as the canonical suite above so the tests pass
+// on a fresh clone without a full docs build. Each page asserts an anchor
+// phrase that a rendered VitePress build will always include in <main>.
+// Coverage adds axe-core + WCAG 2.1 AA gate + 3-layer harness walkthrough
+// (tutorial 56) + 0 → 34 package migration methodology (tutorial 57) +
+// WCAG 2.1 AA SSOT + 4-tier threshold + 3-layer harness concept doc
+// (a11y-testing-ssot) + v1.29 → v1.30 additive-only migration guide.
+const V1_30_PAGES = [
+  { path: '/tutorials/56-a11y-baseline', title: 'A11y baseline' },
+  { path: '/tutorials/57-a11y-baseline-migration', title: 'A11y baseline migration' },
+  { path: '/concepts/a11y-testing-ssot', title: 'A11y testing SSOT' },
+  { path: '/migrations/v1.29-to-v1.30', title: 'v1.29 → v1.30' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -496,6 +512,20 @@ test.describe('docs site — v1.28 pages render', () => {
 test.describe('docs site — v1.29 pages render', () => {
   for (const p of V1_29_PAGES) {
     test(`v1.29 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.30 pages render', () => {
+  for (const p of V1_30_PAGES) {
+    test(`v1.30 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
