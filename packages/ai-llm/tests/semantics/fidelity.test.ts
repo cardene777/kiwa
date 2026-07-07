@@ -17,20 +17,30 @@ const ALL_AXES: AiLlmAxis[] = [
   'agent-orchestration',
   'fine-tuning-eval',
   'cost-latency-sla',
+  'multi-agent-orchestration',
+  'agent-swarm',
+  'code-interpreter',
+  'fine-tuning-pipeline',
+  'llm-ops',
+  'prompt-engineering-advanced',
+  'rag-iii',
+  'cost-optimization',
 ];
+const TOTAL_AXES = ALL_AXES.length;
+const TOTAL_ROWS = ALL_PROVIDERS.length * TOTAL_AXES;
 
 describe('AI_LLM_AXIS_TO_EVENTS', () => {
-  it('has 8 axes', () => {
-    expect(Object.keys(AI_LLM_AXIS_TO_EVENTS)).toHaveLength(8);
+  it('has all axes (v0.4 + v0.5)', () => {
+    expect(Object.keys(AI_LLM_AXIS_TO_EVENTS)).toHaveLength(TOTAL_AXES);
   });
 
   it.each(ALL_AXES)('%s axis has at least 4 neutral events', (axis) => {
     expect(AI_LLM_AXIS_TO_EVENTS[axis].length).toBeGreaterThanOrEqual(4);
   });
 
-  it('has at least 32 total neutral events (baseline 4 × 8 axis)', () => {
+  it('has at least the baseline total neutral events', () => {
     const total = Object.values(AI_LLM_AXIS_TO_EVENTS).reduce((s, arr) => s + arr.length, 0);
-    expect(total).toBeGreaterThanOrEqual(32);
+    expect(total).toBeGreaterThanOrEqual(TOTAL_AXES * 4);
   });
 
   it('all neutral events are unique across axes', () => {
@@ -41,9 +51,9 @@ describe('AI_LLM_AXIS_TO_EVENTS', () => {
 });
 
 describe('collectFidelityCoverage', () => {
-  it('produces 32 rows for 4 provider × 8 axis grid', () => {
+  it('produces N rows for provider × axis grid', () => {
     const cov = collectFidelityCoverage();
-    expect(cov.rows).toHaveLength(32);
+    expect(cov.rows).toHaveLength(TOTAL_ROWS);
   });
 
   it('includes all 4 provider targets by default', () => {
@@ -51,15 +61,15 @@ describe('collectFidelityCoverage', () => {
     expect(cov.providers).toEqual(ALL_PROVIDERS);
   });
 
-  it('includes all 8 axes', () => {
+  it('includes all axes', () => {
     const cov = collectFidelityCoverage();
     expect(cov.axes.sort()).toEqual([...ALL_AXES].sort());
   });
 
-  it.each(ALL_PROVIDERS)('emits 8 rows per provider (%s)', (provider) => {
+  it.each(ALL_PROVIDERS)('emits axes rows per provider (%s)', (provider) => {
     const cov = collectFidelityCoverage();
     const rows = cov.rows.filter((r) => r.provider === provider);
-    expect(rows).toHaveLength(8);
+    expect(rows).toHaveLength(TOTAL_AXES);
   });
 
   it.each(ALL_AXES)('emits 4 rows per axis (%s)', (axis) => {
@@ -99,7 +109,7 @@ describe('collectFidelityCoverage', () => {
 
   it('accepts subset of providers', () => {
     const cov = collectFidelityCoverage(['anthropic']);
-    expect(cov.rows).toHaveLength(8);
+    expect(cov.rows).toHaveLength(TOTAL_AXES);
     expect(cov.providers).toEqual(['anthropic']);
   });
 
@@ -110,7 +120,7 @@ describe('collectFidelityCoverage', () => {
 });
 
 describe('providerEventName', () => {
-  it.each(ALL_PROVIDERS)('%s dialect covers all 32 neutral events', (target) => {
+  it.each(ALL_PROVIDERS)('%s dialect covers all neutral events', (target) => {
     for (const events of Object.values(AI_LLM_AXIS_TO_EVENTS)) {
       for (const neutral of events) {
         const pe = providerEventName(target, neutral);
