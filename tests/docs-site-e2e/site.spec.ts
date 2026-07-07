@@ -516,6 +516,18 @@ const V1_43_PAGES = [
   { path: '/migrations/v1.42-to-v1.43', title: 'v1.42 → v1.43' },
 ];
 
+// v1.44 introduces Auth Passwordless UX III (pair 1 depth 3 achievement).
+// 3 new dogfood apps + 3 tutorials (97 Passwordless UX + 98 Step-up MFA
+// + 99 Risk-based auth) + auth-advanced-III-testing concept doc + v1.43
+// → v1.44 additive-only migration guide.
+const V1_44_PAGES = [
+  { path: '/tutorials/97-passwordless-ux', title: 'Passwordless UX' },
+  { path: '/tutorials/98-step-up-mfa', title: 'Step-up MFA' },
+  { path: '/tutorials/99-risk-based-auth', title: 'Risk-based auth' },
+  { path: '/concepts/auth-advanced-III-testing', title: 'Auth advanced III testing' },
+  { path: '/migrations/v1.43-to-v1.44', title: 'v1.43 → v1.44' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -933,6 +945,20 @@ test.describe('docs site — v1.42 pages render', () => {
 test.describe('docs site — v1.43 pages render', () => {
   for (const p of V1_43_PAGES) {
     test(`v1.43 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.44 pages render', () => {
+  for (const p of V1_44_PAGES) {
+    test(`v1.44 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
