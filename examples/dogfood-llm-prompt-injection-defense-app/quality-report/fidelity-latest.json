@@ -1,0 +1,57 @@
+{
+  "provider": "@kiwa-test/ai-llm/dogfood-prompt-injection-defense-app",
+  "version": "0.1.0",
+  "reportedAt": "2026-07-07T05:13:06.954Z",
+  "coverage": {
+    "line": 92,
+    "branch": 87,
+    "function": 94
+  },
+  "testCount": {
+    "behavior": 66,
+    "integration": 4,
+    "e2e": 4,
+    "total": 74
+  },
+  "fidelity": {
+    "mockCoveredMethods": 14,
+    "realTotalMethods": 14,
+    "ratio": 100,
+    "behavioralDivergences": 14
+  },
+  "perf": {
+    "p50Ms": 1,
+    "p95Ms": 1,
+    "p99Ms": 1,
+    "samples": 9
+  },
+  "mutation": {
+    "mutations": 40,
+    "killed": 28,
+    "survived": 12,
+    "killRate": 70
+  },
+  "cost": {
+    "perRequestUsd": 0,
+    "totalUsd": 0,
+    "requests": 9
+  },
+  "latency": {
+    "p50Ms": 1,
+    "p95Ms": 1,
+    "p99Ms": 1,
+    "samples": 9
+  },
+  "token": {
+    "promptTokens": 10,
+    "completionTokens": 0,
+    "totalTokens": 10,
+    "requests": 9
+  },
+  "accuracy": {
+    "score": 1,
+    "samples": 9,
+    "method": "deterministic-classifier-parity"
+  },
+  "notes": "Observed 14 divergences across 14 ops:\n- startInjection: BEHAVIORAL_DIVERGENCE\n- analyzeInjection: BEHAVIORAL_DIVERGENCE\n- classifyDirect: BEHAVIORAL_DIVERGENCE\n- blockJailbreak: BEHAVIORAL_DIVERGENCE\n- blockRoleHijack: BEHAVIORAL_DIVERGENCE\n- closeInjection: BEHAVIORAL_DIVERGENCE\n- startGuardrail: BEHAVIORAL_DIVERGENCE\n- validateSchema: BEHAVIORAL_DIVERGENCE\n- blockToxicity: BEHAVIORAL_DIVERGENCE\n- redactPii: BEHAVIORAL_DIVERGENCE\n- checkConstitutional: BEHAVIORAL_DIVERGENCE\n- closeGuardrail: BEHAVIORAL_DIVERGENCE\n- startPipeline: BEHAVIORAL_DIVERGENCE\n- runPipeline: BEHAVIORAL_DIVERGENCE"
+}
