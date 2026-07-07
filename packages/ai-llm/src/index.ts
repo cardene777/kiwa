@@ -99,3 +99,13 @@ export {
   samplePoisson,
   sampleZipf,
 } from './sampling.js';
+
+/**
+ * v0.4 advanced semantics — provider-neutral 8 axis SSOT。
+ *
+ * 4 provider (anthropic / openai / vercel-ai / langchain) × 8 axis
+ * (prompt-injection / hallucination / llm-eval / guardrails / rag-advanced /
+ * agent-orchestration / fine-tuning-eval / cost-latency-sla) = 32 combination
+ * fidelity harness。 real driver 経路は KIWA_MODE=real + budget guard。
+ */
+export * from './semantics/index.js';
