@@ -416,6 +416,26 @@ const V1_38_PAGES = [
   { path: '/migrations/v1.37-to-v1.38', title: 'v1.37 → v1.38' },
 ];
 
+// V1.39-5 (Issue #1121 / CAR-867) — docs 補強 for the Security 深化 II milestone
+// pair 2 段拡張 (v1.37 v0.1 base → v1.39 v0.2 advanced II). Same
+// skip-if-dist-missing pattern so the tests pass on a fresh clone without a
+// full docs build. Coverage adds mTLS + Zero-trust (handshake + SPKI pin + OCSP
+// + CT + device posture + risk score + JIT + micro-segmentation walkthrough)
+// tutorial 82 + SIEM audit + Incident response (structured logging +
+// tamper-evident seal + retention + correlation + playbook + severity +
+// escalation + forensics + post-mortem walkthrough) tutorial 83 + Supply chain
+// SLSA (SLSA level verification + reproducible build + signed provenance +
+// attestation walkthrough) tutorial 84 + Security advanced II testing SSOT
+// (v0.2 8 axis × 4 provider = 32 advanced cell grid + provider _URL / _TOKEN
+// env-gate pattern) concept doc + v1.38 → v1.39 additive-only migration guide.
+const V1_39_PAGES = [
+  { path: '/tutorials/82-mtls-zero-trust', title: 'mTLS + Zero-trust' },
+  { path: '/tutorials/83-siem-incident-response', title: 'SIEM audit + Incident response' },
+  { path: '/tutorials/84-supply-chain-slsa', title: 'Supply chain SLSA' },
+  { path: '/concepts/security-advanced-II-testing', title: 'Security advanced II testing' },
+  { path: '/migrations/v1.38-to-v1.39', title: 'v1.38 → v1.39' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -763,6 +783,20 @@ test.describe('docs site — v1.36 pages render', () => {
 test.describe('docs site — v1.38 pages render', () => {
   for (const p of V1_38_PAGES) {
     test(`v1.38 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.39 pages render', () => {
+  for (const p of V1_39_PAGES) {
+    test(`v1.39 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
