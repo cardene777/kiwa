@@ -1,0 +1,57 @@
+{
+  "provider": "@kiwa-test/ai-llm/dogfood-multi-agent-swarm-app",
+  "version": "0.1.0",
+  "reportedAt": "2026-07-07T11:14:48.901Z",
+  "coverage": {
+    "line": 93,
+    "branch": 88,
+    "function": 95
+  },
+  "testCount": {
+    "behavior": 90,
+    "integration": 3,
+    "e2e": 4,
+    "total": 97
+  },
+  "fidelity": {
+    "mockCoveredMethods": 13,
+    "realTotalMethods": 13,
+    "ratio": 100,
+    "behavioralDivergences": 13
+  },
+  "perf": {
+    "p50Ms": 1,
+    "p95Ms": 1,
+    "p99Ms": 1,
+    "samples": 9
+  },
+  "mutation": {
+    "mutations": 40,
+    "killed": 28,
+    "survived": 12,
+    "killRate": 70
+  },
+  "cost": {
+    "perRequestUsd": 0,
+    "totalUsd": 0,
+    "requests": 9
+  },
+  "latency": {
+    "p50Ms": 1,
+    "p95Ms": 1,
+    "p99Ms": 1,
+    "samples": 9
+  },
+  "token": {
+    "promptTokens": 10,
+    "completionTokens": 0,
+    "totalTokens": 10,
+    "requests": 9
+  },
+  "accuracy": {
+    "score": 1,
+    "samples": 9,
+    "method": "deterministic-delegation-parity"
+  },
+  "notes": "Observed 13 divergences across 13 ops:\n- startMao: BEHAVIORAL_DIVERGENCE\n- assembleCrew: BEHAVIORAL_DIVERGENCE\n- delegateBySupervisor: BEHAVIORAL_DIVERGENCE\n- transitionGraph: BEHAVIORAL_DIVERGENCE\n- completeRound: BEHAVIORAL_DIVERGENCE\n- closeMao: BEHAVIORAL_DIVERGENCE\n- startSwarm: BEHAVIORAL_DIVERGENCE\n- assignRoles: BEHAVIORAL_DIVERGENCE\n- allocateTasks: BEHAVIORAL_DIVERGENCE\n- reachConsensus: BEHAVIORAL_DIVERGENCE\n- tolerateByzantine: BEHAVIORAL_DIVERGENCE\n- closeSwarm: BEHAVIORAL_DIVERGENCE\n- runPipeline: BEHAVIORAL_DIVERGENCE"
+}
