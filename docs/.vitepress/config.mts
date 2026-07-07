@@ -259,6 +259,14 @@ export default defineConfig({
             { text: '75 — OpenSearch relevance tuning (BM25 + TF-IDF + custom ranking + A/B + synonym advanced + rolling reindex walkthrough)', link: '/tutorials/75-opensearch-relevance-tuning' },
           ],
         },
+        {
+          text: 'Security 深化 (v1.37)',
+          items: [
+            { text: '76 — CSP strict-dynamic (nonce + hash + strict-dynamic + trusted-types + report-only walkthrough)', link: '/tutorials/76-csp-strict-dynamic' },
+            { text: '77 — RBAC + ABAC policy (role hierarchy + combining algorithms + combined RBAC + ABAC walkthrough)', link: '/tutorials/77-rbac-abac-policy' },
+            { text: '78 — SBOM + license + secrets scanning (CycloneDX + SPDX + OSV advisory + Gitleaks entropy gate walkthrough)', link: '/tutorials/78-sbom-license-scanning' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -291,6 +299,7 @@ export default defineConfig({
             { text: 'Frontend real-driver testing (8 axis SSOT + 3 target × 8 axis = 24 cell grid + browser-shaped env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/frontend-real-driver-testing' },
             { text: 'Observability real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/observability-real-driver-testing' },
             { text: 'Search real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL / _KEY env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/search-real-driver-testing' },
+            { text: 'Security real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL / _PATH env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/security-real-driver-testing' },
           ],
         },
       ],
@@ -326,6 +335,7 @@ export default defineConfig({
             { text: 'v1.33 → v1.34', link: '/migrations/v1.33-to-v1.34' },
             { text: 'v1.34 → v1.35', link: '/migrations/v1.34-to-v1.35' },
             { text: 'v1.35 → v1.36', link: '/migrations/v1.35-to-v1.36' },
+            { text: 'v1.36 → v1.37', link: '/migrations/v1.36-to-v1.37' },
           ],
         },
       ],
