@@ -275,6 +275,14 @@ export default defineConfig({
             { text: '81 — Agent orchestration (ReAct + ToT + reflection + tool selection + budget + latency + routing + fallback walkthrough)', link: '/tutorials/81-agent-orchestration' },
           ],
         },
+        {
+          text: 'Security 深化 II (v1.39)',
+          items: [
+            { text: '82 — mTLS + Zero-trust (handshake + SPKI pin + OCSP + CT + device posture + risk score + JIT + micro-segmentation walkthrough)', link: '/tutorials/82-mtls-zero-trust' },
+            { text: '83 — SIEM audit + Incident response (structured logging + tamper-evident seal + retention + correlation + playbook + severity + escalation + forensics + post-mortem walkthrough)', link: '/tutorials/83-siem-incident-response' },
+            { text: '84 — Supply chain SLSA (SLSA level verification + reproducible build + signed provenance + attestation walkthrough)', link: '/tutorials/84-supply-chain-slsa' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -309,6 +317,7 @@ export default defineConfig({
             { text: 'Search real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL / _KEY env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/search-real-driver-testing' },
             { text: 'Security real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL / _PATH env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/security-real-driver-testing' },
             { text: 'AI-LLM real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _API_KEY + KIWA_LLM_BUDGET_USD budget guard + KIWA_MODE=real env-gate)', link: '/concepts/ai-llm-real-driver-testing' },
+            { text: 'Security advanced II testing (v0.2 8 axis SSOT + 4 provider × 8 axis = 32 advanced cell grid + provider _URL / _TOKEN env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/security-advanced-II-testing' },
           ],
         },
       ],
@@ -346,6 +355,7 @@ export default defineConfig({
             { text: 'v1.35 → v1.36', link: '/migrations/v1.35-to-v1.36' },
             { text: 'v1.36 → v1.37', link: '/migrations/v1.36-to-v1.37' },
             { text: 'v1.37 → v1.38', link: '/migrations/v1.37-to-v1.38' },
+            { text: 'v1.38 → v1.39', link: '/migrations/v1.38-to-v1.39' },
           ],
         },
       ],
