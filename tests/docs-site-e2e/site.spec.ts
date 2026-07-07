@@ -396,6 +396,25 @@ const V1_36_PAGES = [
   { path: '/migrations/v1.35-to-v1.36', title: 'v1.35 → v1.36' },
 ];
 
+// v1.37 pages — new tutorials 76-78 + concept doc + migration guide added
+// under the security deepening milestone (Issue #1086). Same skip-if-dist-missing
+// pattern as the canonical suite above so the tests pass on a fresh clone
+// without a full docs build. Coverage adds CSP strict-dynamic (nonce + hash +
+// strict-dynamic + trusted-types + report-only walkthrough) tutorial 76 +
+// RBAC + ABAC policy (role hierarchy + combining algorithms + combined
+// RBAC + ABAC walkthrough) tutorial 77 + SBOM + license + secrets scanning
+// (CycloneDX + SPDX + OSV advisory + Gitleaks entropy gate walkthrough)
+// tutorial 78 + Security real-driver testing SSOT (8 axis × 4 provider = 32
+// cell grid + provider _URL / _PATH env-gate pattern) concept doc + v1.36 →
+// v1.37 additive-only migration guide.
+const V1_37_PAGES = [
+  { path: '/tutorials/76-csp-strict-dynamic', title: 'CSP strict-dynamic' },
+  { path: '/tutorials/77-rbac-abac-policy', title: 'RBAC + ABAC' },
+  { path: '/tutorials/78-sbom-license-scanning', title: 'SBOM + license' },
+  { path: '/concepts/security-real-driver-testing', title: 'Security real-driver testing' },
+  { path: '/migrations/v1.36-to-v1.37', title: 'v1.36 → v1.37' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -729,6 +748,20 @@ test.describe('docs site — v1.35 pages render', () => {
 test.describe('docs site — v1.36 pages render', () => {
   for (const p of V1_36_PAGES) {
     test(`v1.36 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.37 pages render', () => {
+  for (const p of V1_37_PAGES) {
+    test(`v1.37 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
