@@ -283,6 +283,14 @@ export default defineConfig({
             { text: '84 — Supply chain SLSA (SLSA level verification + reproducible build + signed provenance + attestation walkthrough)', link: '/tutorials/84-supply-chain-slsa' },
           ],
         },
+        {
+          text: 'AI-LLM 深化 III (v1.40)',
+          items: [
+            { text: '85 — Multi-agent orchestration + Agent swarm (CrewAI + LangGraph supervisor + role-based swarm + PBFT-lite Byzantine consensus walkthrough)', link: '/tutorials/85-multi-agent-swarm' },
+            { text: '86 — Code interpreter + Fine-tuning pipeline (sandboxed REPL + tool use + rollback + RLHF/DPO + drift detection walkthrough)', link: '/tutorials/86-code-interpreter-fine-tuning' },
+            { text: '87 — LLM ops + Prompt engineering + RAG III + Cost optimization (model registry + rollout + A/B + canary + shadow + CoT + few-shot + caching + versioning + GraphRAG + agentic + self-query + parent doc + batch + cascade + semantic cache walkthrough)', link: '/tutorials/87-llm-ops-rag-iii-cost' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -318,6 +326,7 @@ export default defineConfig({
             { text: 'Security real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL / _PATH env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/security-real-driver-testing' },
             { text: 'AI-LLM real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _API_KEY + KIWA_LLM_BUDGET_USD budget guard + KIWA_MODE=real env-gate)', link: '/concepts/ai-llm-real-driver-testing' },
             { text: 'Security advanced II testing (v0.2 8 axis SSOT + 4 provider × 8 axis = 32 advanced cell grid + provider _URL / _TOKEN env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/security-advanced-II-testing' },
+            { text: 'AI-LLM advanced III testing (v0.5 8 axis SSOT + 4 provider × 8 axis = 32 advanced III cell grid + 16-axis combined harness + pair 深度 4 段 record + KIWA_MODE=real env-gate)', link: '/concepts/ai-llm-advanced-III-testing' },
           ],
         },
       ],
@@ -356,6 +365,7 @@ export default defineConfig({
             { text: 'v1.36 → v1.37', link: '/migrations/v1.36-to-v1.37' },
             { text: 'v1.37 → v1.38', link: '/migrations/v1.37-to-v1.38' },
             { text: 'v1.38 → v1.39', link: '/migrations/v1.38-to-v1.39' },
+            { text: 'v1.39 → v1.40', link: '/migrations/v1.39-to-v1.40' },
           ],
         },
       ],

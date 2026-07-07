@@ -436,6 +436,28 @@ const V1_39_PAGES = [
   { path: '/migrations/v1.38-to-v1.39', title: 'v1.38 → v1.39' },
 ];
 
+// V1.40-5 (Issue #1135 / CAR-892) — docs 補強 for the AI-LLM 深化 III milestone
+// pair 深度 4 段拡張 (v1.12 v0.1 base → v1.15 v0.2 multimodal → v1.38 v0.4
+// advanced → v1.40 v0.5 advanced III). Same skip-if-dist-missing pattern so the
+// tests pass on a fresh clone without a full docs build. Coverage adds
+// Multi-agent orchestration + Agent swarm (CrewAI + LangGraph supervisor +
+// role-based swarm + PBFT-lite Byzantine consensus walkthrough) tutorial 85 +
+// Code interpreter + Fine-tuning pipeline (sandboxed REPL + tool use + rollback
+// + RLHF/DPO + drift detection walkthrough) tutorial 86 + LLM ops + Prompt
+// engineering + RAG III + Cost optimization (model registry + rollout + A/B +
+// canary + shadow + CoT + few-shot + caching + versioning + GraphRAG + agentic
+// + self-query + parent doc + batch + cascade + semantic cache walkthrough)
+// tutorial 87 + AI-LLM advanced III testing SSOT (v0.5 8 axis × 4 provider =
+// 32 advanced III cell grid + 16-axis combined harness + pair 深度 4 段 record)
+// concept doc + v1.39 → v1.40 additive-only migration guide.
+const V1_40_PAGES = [
+  { path: '/tutorials/85-multi-agent-swarm', title: 'Multi-agent orchestration + Agent swarm' },
+  { path: '/tutorials/86-code-interpreter-fine-tuning', title: 'Code interpreter + Fine-tuning pipeline' },
+  { path: '/tutorials/87-llm-ops-rag-iii-cost', title: 'LLM ops + Prompt engineering + RAG III + Cost optimization' },
+  { path: '/concepts/ai-llm-advanced-III-testing', title: 'AI-LLM advanced III testing' },
+  { path: '/migrations/v1.39-to-v1.40', title: 'v1.39 → v1.40' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -797,6 +819,20 @@ test.describe('docs site — v1.38 pages render', () => {
 test.describe('docs site — v1.39 pages render', () => {
   for (const p of V1_39_PAGES) {
     test(`v1.39 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.40 pages render', () => {
+  for (const p of V1_40_PAGES) {
+    test(`v1.40 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
