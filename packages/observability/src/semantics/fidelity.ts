@@ -19,6 +19,7 @@ export interface FidelityCoverage {
 }
 
 export const OBSERVABILITY_AXIS_TO_EVENTS: Record<ObservabilityAxis, NeutralEventName[]> = {
+  // v2.1 baseline
   slo: [
     'slo.window_opened',
     'slo.error_budget_computed',
@@ -66,6 +67,55 @@ export const OBSERVABILITY_AXIS_TO_EVENTS: Record<ObservabilityAxis, NeutralEven
     'cardinality.high_cardinality_detected',
     'cardinality.label_reduced',
     'cardinality.histogram_bucketed',
+  ],
+  // v2.2 advanced III
+  iac: [
+    'iac.plan_captured',
+    'iac.drift_detected',
+    'iac.policy_evaluated',
+    'iac.cost_attributed',
+  ],
+  'service-mesh': [
+    'mesh.mtls_handshaked',
+    'mesh.sidecar_injected',
+    'mesh.circuit_breaker_tripped',
+    'mesh.traffic_split_applied',
+  ],
+  'ebpf-iii': [
+    'ebpf.userspace_probed',
+    'ebpf.kernel_traced',
+    'ebpf.syscall_recorded',
+    'ebpf.network_flow_captured',
+  ],
+  'llm-observability': [
+    'llmobs.token_counted',
+    'llmobs.prompt_logged',
+    'llmobs.hallucination_flagged',
+    'llmobs.budget_checked',
+  ],
+  finops: [
+    'finops.cost_per_request_recorded',
+    'finops.team_attributed',
+    'finops.rightsizing_recommended',
+    'finops.spot_optimized',
+  ],
+  chaos: [
+    'chaos.fault_injected',
+    'chaos.blast_radius_computed',
+    'chaos.rollback_triggered',
+    'chaos.game_day_recorded',
+  ],
+  'data-pipeline': [
+    'pipeline.lineage_captured',
+    'pipeline.freshness_evaluated',
+    'pipeline.schema_drift_detected',
+    'pipeline.data_quality_scored',
+  ],
+  aiops: [
+    'aiops.anomaly_detected',
+    'aiops.remediation_executed',
+    'aiops.root_cause_analyzed',
+    'aiops.alerts_correlated',
   ],
 };
 
