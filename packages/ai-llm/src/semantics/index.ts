@@ -106,6 +106,15 @@ export {
   type SlaState,
 } from './cost-latency-sla.js';
 
+export * from './multi-agent-orchestration.js';
+export * from './agent-swarm.js';
+export * from './code-interpreter.js';
+export * from './fine-tuning-pipeline.js';
+export * from './llm-ops.js';
+export * from './prompt-engineering-advanced.js';
+export * from './rag-iii.js';
+export * from './cost-optimization.js';
+
 export {
   AI_LLM_AXIS_TO_EVENTS,
   collectFidelityCoverage,

@@ -64,6 +64,55 @@ export const AI_LLM_AXIS_TO_EVENTS: Record<AiLlmAxis, NeutralEventName[]> = {
     'sla.model_routed',
     'sla.fallback_engaged',
   ],
+  'multi-agent-orchestration': [
+    'mao.crew_assembled',
+    'mao.supervisor_delegated',
+    'mao.graph_transitioned',
+    'mao.round_completed',
+  ],
+  'agent-swarm': [
+    'swarm.roles_assigned',
+    'swarm.tasks_allocated',
+    'swarm.consensus_reached',
+    'swarm.byzantine_tolerated',
+  ],
+  'code-interpreter': [
+    'ci.sandbox_started',
+    'ci.code_executed',
+    'ci.tool_used',
+    'ci.rolled_back',
+  ],
+  'fine-tuning-pipeline': [
+    'ftp.dataset_prepared',
+    'ftp.rlhf_stepped',
+    'ftp.eval_loop_ran',
+    'ftp.drift_detected',
+  ],
+  'llm-ops': [
+    'ops.registry_updated',
+    'ops.rollout_advanced',
+    'ops.ab_evaluated',
+    'ops.canary_promoted',
+    'ops.shadow_compared',
+  ],
+  'prompt-engineering-advanced': [
+    'pea.chain_of_thought_expanded',
+    'pea.few_shot_selected',
+    'pea.cached',
+    'pea.version_pinned',
+  ],
+  'rag-iii': [
+    'rag3.graph_traversed',
+    'rag3.agentic_stepped',
+    'rag3.self_queried',
+    'rag3.parent_expanded',
+  ],
+  'cost-optimization': [
+    'co.batch_submitted',
+    'co.prompt_compressed',
+    'co.cascade_stepped',
+    'co.semantic_cached',
+  ],
 };
 
 export function collectFidelityCoverage(
