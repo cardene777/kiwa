@@ -478,6 +478,29 @@ const V1_41_PAGES = [
   { path: '/migrations/v1.40-to-v1.41', title: 'v1.40 → v1.41' },
 ];
 
+// V1.42-5 (Issue #1161 / CAR-1050) — docs 補強 for the Observability III 深化
+// milestone pair 深度 4 段拡張 3 例目 (v1.14 v2.0 baseline → v1.17 v2.0 advanced
+// base 4 axis → v1.35 v2.1 advanced 8 axis → v1.42 v2.2 advanced III 8 axis).
+// Same skip-if-dist-missing pattern so the tests pass on a fresh clone without
+// a full docs build. Coverage adds IaC + Service mesh + eBPF profiling III
+// (Terraform drift + OPA + mTLS + sidecar + circuit breaker + uprobe + kprobe
+// + LSM + syscall + netflow walkthrough) tutorial 91 + LLM observability +
+// FinOps (token counting + prompt log + hallucination + budget + CPR + team
+// attribution + rightsizing + spot walkthrough) tutorial 92 + Chaos + Data
+// pipeline + AIOps (fault + blast radius + rollback + game day + lineage +
+// freshness + schema drift + DQ + anomaly + remediation + RCA + correlation
+// walkthrough) tutorial 93 + Observability advanced III testing SSOT (v2.2
+// 8 axis × 4 provider = 32 advanced III cell grid + 16-axis combined harness
+// + pair 深度 4 段 3 例目 record) concept doc + v1.41 → v1.42 additive-only
+// migration guide.
+const V1_42_PAGES = [
+  { path: '/tutorials/91-iac-servicemesh-ebpf', title: 'IaC + Service mesh + eBPF profiling III' },
+  { path: '/tutorials/92-llm-observability-finops', title: 'LLM observability + FinOps' },
+  { path: '/tutorials/93-chaos-datapipeline-aiops', title: 'Chaos engineering + Data pipeline + AIOps' },
+  { path: '/concepts/observability-advanced-III-testing', title: 'Observability advanced III testing' },
+  { path: '/migrations/v1.41-to-v1.42', title: 'v1.41 → v1.42' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -867,6 +890,20 @@ test.describe('docs site — v1.40 pages render', () => {
 test.describe('docs site — v1.41 pages render', () => {
   for (const p of V1_41_PAGES) {
     test(`v1.41 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.42 pages render', () => {
+  for (const p of V1_42_PAGES) {
+    test(`v1.42 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
