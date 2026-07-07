@@ -377,6 +377,25 @@ const V1_35_PAGES = [
   { path: '/migrations/v1.34-to-v1.35', title: 'v1.34 → v1.35' },
 ];
 
+// v1.36 pages — new tutorials 73-75 + concept doc + migration guide added
+// under the search deepening milestone (Issue #1079). Same skip-if-dist-missing
+// pattern as the canonical suite above so the tests pass on a fresh clone
+// without a full docs build. Coverage adds Vector search (kNN + HNSW + hybrid
+// fusion + recall@k walkthrough) tutorial 73 + Faceted geo search (nested
+// facet + bounding box + radius + polygon + isochrone walkthrough) tutorial 74
+// + OpenSearch relevance tuning (BM25 + TF-IDF + custom ranking + A/B +
+// synonym advanced + rolling reindex walkthrough) tutorial 75 + Search real-
+// driver testing SSOT (8 axis × 4 provider = 32 cell grid + provider _URL /
+// _KEY env-gate pattern) concept doc + v1.35 → v1.36 additive-only migration
+// guide.
+const V1_36_PAGES = [
+  { path: '/tutorials/73-vector-search-hybrid', title: 'Vector search' },
+  { path: '/tutorials/74-faceted-geo-search', title: 'Faceted geo search' },
+  { path: '/tutorials/75-opensearch-relevance-tuning', title: 'OpenSearch relevance tuning' },
+  { path: '/concepts/search-real-driver-testing', title: 'Search real-driver testing' },
+  { path: '/migrations/v1.35-to-v1.36', title: 'v1.35 → v1.36' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -696,6 +715,20 @@ test.describe('docs site — v1.34 pages render', () => {
 test.describe('docs site — v1.35 pages render', () => {
   for (const p of V1_35_PAGES) {
     test(`v1.35 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.36 pages render', () => {
+  for (const p of V1_36_PAGES) {
+    test(`v1.36 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
