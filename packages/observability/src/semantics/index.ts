@@ -112,3 +112,108 @@ export {
   type FidelityCoverage,
   type FidelityRow,
 } from './fidelity.js';
+
+// v2.2 advanced III
+
+export {
+  attributeCost,
+  capturePlan,
+  detectDrift,
+  evaluatePolicy,
+  startIacSession,
+  type IacCostAttribution,
+  type IacPolicyResult,
+  type IacResourceChange,
+  type IacSession,
+  type IacState,
+} from './iac.js';
+
+export {
+  applyTrafficSplit,
+  handshakeMtls,
+  injectSidecar,
+  startMeshSession,
+  tripCircuitBreaker,
+  type MeshMtlsHandshake,
+  type MeshSession,
+  type MeshSidecarInjection,
+  type MeshState,
+  type MeshTrafficSplit,
+} from './service-mesh.js';
+
+export {
+  captureNetworkFlow,
+  probeUserspace,
+  recordSyscall,
+  startEbpfIiiSession,
+  traceKernel,
+  type EbpfIiiSession,
+  type EbpfIiiState,
+  type EbpfNetworkFlow,
+  type EbpfProbe,
+} from './ebpf-iii.js';
+
+export {
+  checkBudget,
+  countTokens,
+  flagHallucination,
+  logPrompt,
+  startLlmObsSession,
+  type LlmHallucinationSignal,
+  type LlmObsSession,
+  type LlmObsState,
+  type LlmPromptRecord,
+  type LlmTokenUsage,
+} from './llm-observability.js';
+
+export {
+  attributeTeam,
+  optimizeSpot,
+  recommendRightsizing,
+  recordCostPerRequest,
+  startFinopsSession,
+  type FinopsRightsizingRecommendation,
+  type FinopsSession,
+  type FinopsState,
+  type FinopsTeamCost,
+} from './finops.js';
+
+export {
+  computeBlastRadius,
+  injectFault,
+  recordGameDay,
+  startChaosSession,
+  triggerRollback,
+  type ChaosFault,
+  type ChaosFaultKind,
+  type ChaosGameDayLog,
+  type ChaosSession,
+  type ChaosState,
+} from './chaos.js';
+
+export {
+  captureLineage,
+  detectSchemaDrift,
+  evaluateFreshness,
+  scoreDataQuality,
+  startPipelineSession,
+  type PipelineDataQualityCheck,
+  type PipelineLineageEdge,
+  type PipelineSchemaColumn,
+  type PipelineSession,
+  type PipelineState,
+} from './data-pipeline.js';
+
+export {
+  analyzeRootCause,
+  correlateAlerts,
+  detectAnomaly,
+  executeRemediation,
+  startAiopsSession,
+  type AiopsAlert,
+  type AiopsAnomalyPoint,
+  type AiopsDependencyEdge,
+  type AiopsRemediationAction,
+  type AiopsSession,
+  type AiopsState,
+} from './aiops.js';

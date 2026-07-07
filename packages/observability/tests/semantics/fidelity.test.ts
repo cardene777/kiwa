@@ -7,11 +7,11 @@ import {
 } from '../../src/semantics/index.js';
 
 describe('observability fidelity coverage', () => {
-  it('collects 4 targets x 8 axes = 32 grid', () => {
+  it('collects 4 targets x 16 axes = 64 grid', () => {
     const coverage = collectFidelityCoverage();
     expect(coverage.providers).toEqual(['grafana-oss', 'prometheus', 'loki', 'otel-collector']);
-    expect(coverage.axes).toHaveLength(8);
-    expect(coverage.rows).toHaveLength(32);
+    expect(coverage.axes).toHaveLength(16);
+    expect(coverage.rows).toHaveLength(64);
   });
 
   it('maps every axis to four neutral events', () => {
@@ -20,9 +20,10 @@ describe('observability fidelity coverage', () => {
     }
   });
 
-  it('keeps the combined 8-axis story in one grid', () => {
+  it('keeps the combined 16-axis story in one grid', () => {
     const axes = Object.keys(OBSERVABILITY_AXIS_TO_EVENTS) as ObservabilityAxis[];
     expect(axes).toEqual([
+      // v2.1 baseline
       'slo',
       'red-use',
       'exemplar',
@@ -31,6 +32,15 @@ describe('observability fidelity coverage', () => {
       'alert-routing-advanced',
       'profiling',
       'cardinality',
+      // v2.2 advanced III
+      'iac',
+      'service-mesh',
+      'ebpf-iii',
+      'llm-observability',
+      'finops',
+      'chaos',
+      'data-pipeline',
+      'aiops',
     ]);
   });
 
@@ -48,7 +58,7 @@ describe('observability fidelity coverage', () => {
 
   it('supports subset target collection', () => {
     const coverage = collectFidelityCoverage(['loki']);
-    expect(coverage.rows).toHaveLength(8);
+    expect(coverage.rows).toHaveLength(16);
     expect(coverage.rows.every((row) => row.provider === 'loki')).toBe(true);
   });
 
@@ -77,5 +87,22 @@ describe('observability fidelity coverage', () => {
       const unique = new Set(events);
       expect(unique.size).toBe(events.length);
     }
+  });
+
+  it('v2.2 advanced III axes translate for grafana-oss', () => {
+    expect(providerEventName('grafana-oss', 'iac.drift_detected')).toBe('grafana.iac.drift');
+    expect(providerEventName('grafana-oss', 'mesh.mtls_handshaked')).toBe('grafana.mesh.mtls');
+    expect(providerEventName('grafana-oss', 'llmobs.token_counted')).toBe('grafana.llmobs.tokens');
+    expect(providerEventName('grafana-oss', 'aiops.anomaly_detected')).toBe('grafana.aiops.anomaly');
+  });
+
+  it('v2.2 advanced III axes translate for prometheus', () => {
+    expect(providerEventName('prometheus', 'chaos.fault_injected')).toBe('prom.chaos.faults_total');
+    expect(providerEventName('prometheus', 'pipeline.freshness_evaluated')).toBe(
+      'prom.pipeline.freshness.seconds',
+    );
+    expect(providerEventName('prometheus', 'finops.cost_per_request_recorded')).toBe(
+      'prom.finops.cost_per_request',
+    );
   });
 });
