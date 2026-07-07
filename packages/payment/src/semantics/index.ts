@@ -134,3 +134,112 @@ export {
   migrateToken,
   verifyPciScope,
 } from './payment-method-vault.js';
+
+// v0.5 — advanced billing III 8 axis
+export type {
+  EmbeddedFinanceConfig,
+  EmbeddedFinanceSession,
+  EmbeddedFinanceState,
+  KycStatus,
+} from './embedded-finance.js';
+export {
+  openAccount,
+  verifyKyc,
+  verifyKyb,
+  issueCard,
+  closeAccount,
+} from './embedded-finance.js';
+
+export type { BnplConfig, BnplSession, BnplState } from './bnpl.js';
+export {
+  createBnplPlan,
+  scheduleInstallment,
+  scoreRisk,
+  chargeLateFee,
+  markInstallmentPaid,
+} from './bnpl.js';
+
+export type {
+  Chain,
+  CryptoInvoiceConfig,
+  CryptoPaymentSession,
+  CryptoPaymentState,
+  Stablecoin,
+} from './crypto-payment.js';
+export {
+  createCryptoInvoice,
+  confirmTx,
+  abstractGas,
+  linkWallet,
+} from './crypto-payment.js';
+
+export type {
+  FxConfig,
+  FxRateQuote,
+  FxSession,
+  FxState,
+  SettlementRail,
+} from './fx-cross-border.js';
+export {
+  startFxTransfer,
+  lockRate,
+  initiateSettlement,
+  completeSettlement,
+  expireRate,
+} from './fx-cross-border.js';
+
+export type {
+  RecurringRevenueSession,
+  RecurringRevenueSnapshot,
+  RecurringRevenueState,
+} from './recurring-revenue-advanced.js';
+export {
+  startRecurringRevenue,
+  computeMrr,
+  recordChurn,
+  recordExpansion,
+  computeNrr,
+  recordContraction,
+} from './recurring-revenue-advanced.js';
+
+export type {
+  OrchestrationIIConfig,
+  OrchestrationIISession,
+  OrchestrationIIState,
+} from './payment-orchestration-ii.js';
+export {
+  startOrchestrationII,
+  smartRoute,
+  scoreMl,
+  triggerFallback,
+} from './payment-orchestration-ii.js';
+
+export type {
+  FraudDetectionConfig,
+  FraudDetectionSession,
+  FraudDetectionState,
+  FraudVerdict,
+} from './fraud-detection-advanced.js';
+export {
+  startFraudDetection,
+  scoreDevice,
+  verifyBiometric,
+  flagVelocity,
+  scoreMlBlock,
+} from './fraud-detection-advanced.js';
+
+export type {
+  Regulator,
+  RegulatoryReportingSession,
+  RegulatoryReportingState,
+  ReportPeriod,
+  ReportRecord,
+} from './regulatory-reporting.js';
+export {
+  startRegulatoryReporting,
+  reportPci,
+  reportPsd2,
+  reportDora,
+  fileSar,
+  lockForAudit,
+} from './regulatory-reporting.js';

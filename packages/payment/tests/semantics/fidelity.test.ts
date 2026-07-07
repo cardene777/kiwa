@@ -6,8 +6,8 @@ import {
   createStripeMock,
 } from '../../src/index.js';
 
-describe('fidelity harness — 3 provider × 17 axis grid (v0.3 9 + v0.4 8)', () => {
-  it('produces 51 rows (3 provider × 17 axis)', () => {
+describe('fidelity harness — 3 provider × 25 axis grid (v0.3 9 + v0.4 8 + v0.5 8)', () => {
+  it('produces 75 rows (3 provider × 25 axis)', () => {
     const coverage = collectFidelityCoverage([
       createStripeMock(),
       createPaddleMock(),
@@ -34,8 +34,17 @@ describe('fidelity harness — 3 provider × 17 axis grid (v0.3 9 + v0.4 8)', ()
       'tax-localization',
       'subscription-state-machine',
       'payment-method-vault',
+      // v0.5
+      'embedded-finance',
+      'bnpl',
+      'crypto-payment',
+      'fx-cross-border',
+      'recurring-revenue-advanced',
+      'payment-orchestration-ii',
+      'fraud-detection-advanced',
+      'regulatory-reporting',
     ]);
-    expect(coverage.rows).toHaveLength(51);
+    expect(coverage.rows).toHaveLength(75);
   });
 
   it('v0.4 slice is 3 provider × 8 axis = 24 combination', () => {
@@ -71,10 +80,118 @@ describe('fidelity harness — 3 provider × 17 axis grid (v0.3 9 + v0.4 8)', ()
     }
   });
 
-  it('single provider slice returns 17 rows', () => {
+  it('single provider slice returns 25 rows', () => {
     const stripeOnly = collectFidelityCoverage([createStripeMock()]);
-    expect(stripeOnly.rows).toHaveLength(17);
+    expect(stripeOnly.rows).toHaveLength(25);
     expect(stripeOnly.providers).toEqual(['stripe']);
+  });
+
+  it('v0.5 slice is 3 provider × 8 axis = 24 combination', () => {
+    const coverage = collectFidelityCoverage([
+      createStripeMock(),
+      createPaddleMock(),
+      createLemonSqueezyMock(),
+    ]);
+    const v05Axes = [
+      'embedded-finance',
+      'bnpl',
+      'crypto-payment',
+      'fx-cross-border',
+      'recurring-revenue-advanced',
+      'payment-orchestration-ii',
+      'fraud-detection-advanced',
+      'regulatory-reporting',
+    ];
+    const v05Rows = coverage.rows.filter((r) => v05Axes.includes(r.axis));
+    expect(v05Rows).toHaveLength(24);
+  });
+
+  it('embedded-finance axis covers 4 neutral events', () => {
+    const coverage = collectFidelityCoverage([createStripeMock()]);
+    const row = coverage.rows.find((r) => r.axis === 'embedded-finance');
+    expect(row?.neutralEvents).toEqual([
+      'embedded.account_opened',
+      'embedded.card_issued',
+      'embedded.kyc_verified',
+      'embedded.kyb_verified',
+    ]);
+  });
+
+  it('bnpl axis covers 4 neutral events', () => {
+    const coverage = collectFidelityCoverage([createPaddleMock()]);
+    const row = coverage.rows.find((r) => r.axis === 'bnpl');
+    expect(row?.neutralEvents).toEqual([
+      'bnpl.plan_created',
+      'bnpl.installment_scheduled',
+      'bnpl.risk_scored',
+      'bnpl.late_fee_charged',
+    ]);
+  });
+
+  it('crypto-payment axis covers 4 neutral events', () => {
+    const coverage = collectFidelityCoverage([createLemonSqueezyMock()]);
+    const row = coverage.rows.find((r) => r.axis === 'crypto-payment');
+    expect(row?.neutralEvents).toEqual([
+      'crypto.invoice_created',
+      'crypto.tx_confirmed',
+      'crypto.gas_abstracted',
+      'crypto.wallet_linked',
+    ]);
+  });
+
+  it('fx-cross-border axis covers 4 neutral events', () => {
+    const coverage = collectFidelityCoverage([createStripeMock()]);
+    const row = coverage.rows.find((r) => r.axis === 'fx-cross-border');
+    expect(row?.neutralEvents).toEqual([
+      'fx.rate_locked',
+      'fx.settlement_initiated',
+      'fx.settlement_completed',
+      'fx.rate_expired',
+    ]);
+  });
+
+  it('recurring-revenue-advanced axis covers 4 neutral events', () => {
+    const coverage = collectFidelityCoverage([createPaddleMock()]);
+    const row = coverage.rows.find((r) => r.axis === 'recurring-revenue-advanced');
+    expect(row?.neutralEvents).toEqual([
+      'rr.mrr_computed',
+      'rr.churn_recorded',
+      'rr.expansion_recorded',
+      'rr.nrr_computed',
+    ]);
+  });
+
+  it('payment-orchestration-ii axis covers 4 neutral events', () => {
+    const coverage = collectFidelityCoverage([createLemonSqueezyMock()]);
+    const row = coverage.rows.find((r) => r.axis === 'payment-orchestration-ii');
+    expect(row?.neutralEvents).toEqual([
+      'po2.smart_routed',
+      'po2.ml_scored',
+      'po2.fallback_triggered',
+      'po2.cascade_exhausted',
+    ]);
+  });
+
+  it('fraud-detection-advanced axis covers 4 neutral events', () => {
+    const coverage = collectFidelityCoverage([createStripeMock()]);
+    const row = coverage.rows.find((r) => r.axis === 'fraud-detection-advanced');
+    expect(row?.neutralEvents).toEqual([
+      'fraud.device_scored',
+      'fraud.biometric_verified',
+      'fraud.velocity_flagged',
+      'fraud.ml_blocked',
+    ]);
+  });
+
+  it('regulatory-reporting axis covers 4 neutral events', () => {
+    const coverage = collectFidelityCoverage([createPaddleMock()]);
+    const row = coverage.rows.find((r) => r.axis === 'regulatory-reporting');
+    expect(row?.neutralEvents).toEqual([
+      'reg.pci_reported',
+      'reg.psd2_reported',
+      'reg.dora_reported',
+      'reg.sar_filed',
+    ]);
   });
 
   it('subscription-lifecycle axis covers all 7 neutral events', () => {
