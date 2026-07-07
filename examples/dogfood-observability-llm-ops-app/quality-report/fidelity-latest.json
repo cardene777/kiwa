@@ -1,0 +1,41 @@
+{
+  "provider": "@kiwa-test/observability/dogfood-llm-ops-app",
+  "version": "2.2.0",
+  "reportedAt": "2026-07-07T15:04:37.764Z",
+  "coverage": {
+    "line": 92,
+    "branch": 87,
+    "function": 94
+  },
+  "testCount": {
+    "behavior": 40,
+    "integration": 4,
+    "e2e": 1,
+    "total": 45
+  },
+  "fidelity": {
+    "mockCoveredMethods": 10,
+    "realTotalMethods": 10,
+    "ratio": 100,
+    "behavioralDivergences": 10
+  },
+  "perf": {
+    "p50Ms": 0,
+    "p95Ms": 0,
+    "p99Ms": 0,
+    "samples": 4
+  },
+  "mutation": {
+    "mutations": 40,
+    "killed": 28,
+    "survived": 12,
+    "killRate": 70
+  },
+  "a11y": {
+    "critical": 0,
+    "serious": 0,
+    "moderate": 0,
+    "minor": 0
+  },
+  "notes": "Observed 10 divergences across 10 ops:\n- startToken: BEHAVIORAL_DIVERGENCE\n- countTokens: BEHAVIORAL_DIVERGENCE\n- closeToken: BEHAVIORAL_DIVERGENCE\n- startPrompt: BEHAVIORAL_DIVERGENCE\n- logPrompt: BEHAVIORAL_DIVERGENCE\n- flagHallucination: BEHAVIORAL_DIVERGENCE\n- closePrompt: BEHAVIORAL_DIVERGENCE\n- startBudget: BEHAVIORAL_DIVERGENCE\n- checkBudget: BEHAVIORAL_DIVERGENCE\n- closeBudget: BEHAVIORAL_DIVERGENCE"
+}
