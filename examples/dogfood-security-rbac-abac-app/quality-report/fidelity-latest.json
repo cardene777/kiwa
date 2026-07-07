@@ -1,0 +1,41 @@
+{
+  "provider": "@kiwa-test/security/dogfood-rbac-abac-app",
+  "version": "0.1.0",
+  "reportedAt": "2026-07-07T03:13:23.534Z",
+  "coverage": {
+    "line": 92,
+    "branch": 87,
+    "function": 94
+  },
+  "testCount": {
+    "behavior": 60,
+    "integration": 6,
+    "e2e": 4,
+    "total": 70
+  },
+  "fidelity": {
+    "mockCoveredMethods": 15,
+    "realTotalMethods": 15,
+    "ratio": 100,
+    "behavioralDivergences": 15
+  },
+  "perf": {
+    "p50Ms": 0,
+    "p95Ms": 0,
+    "p99Ms": 0,
+    "samples": 8
+  },
+  "mutation": {
+    "mutations": 40,
+    "killed": 28,
+    "survived": 12,
+    "killRate": 70
+  },
+  "a11y": {
+    "critical": 0,
+    "serious": 0,
+    "moderate": 0,
+    "minor": 0
+  },
+  "notes": "Observed 15 divergences across 15 ops:\n- startRbac: BEHAVIORAL_DIVERGENCE\n- attachRole: BEHAVIORAL_DIVERGENCE\n- expandRoles: BEHAVIORAL_DIVERGENCE\n- checkPermission: BEHAVIORAL_DIVERGENCE\n- closeRbac: BEHAVIORAL_DIVERGENCE\n- startAbac: BEHAVIORAL_DIVERGENCE\n- attachRule: BEHAVIORAL_DIVERGENCE\n- evaluateAbac: BEHAVIORAL_DIVERGENCE\n- evaluateCombined: BEHAVIORAL_DIVERGENCE\n- closeAbac: BEHAVIORAL_DIVERGENCE\n- startPolicyStore: BEHAVIORAL_DIVERGENCE\n- publishPolicy: BEHAVIORAL_DIVERGENCE\n- activatePolicy: BEHAVIORAL_DIVERGENCE\n- rollbackPolicy: BEHAVIORAL_DIVERGENCE\n- closePolicyStore: BEHAVIORAL_DIVERGENCE"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "dogfood-security-rbac-abac-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.37-3 — a Casbin-style Authorization service (RBAC role hierarchy + ABAC attribute matching + combined policy engine + policy versioning + rollback) that drives an Authorization surface backed by @kiwa-test/security v0.1 authorization semantics, runnable in both KIWA_MODE=real (KIWA_POLICY_STORE_URL policy store) and KIWA_MODE=mock (in-memory policy engine) so behavioural fidelity feeds @kiwa-test/quality-metrics.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/security -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*",
+    "@kiwa-test/security": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
