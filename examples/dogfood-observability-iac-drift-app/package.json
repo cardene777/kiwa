@@ -1,0 +1,23 @@
+{
+  "name": "dogfood-observability-iac-drift-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.42-2 — a Terraform + OPA + drift detection + cost attribution IaC observability harness driven behind a provider-neutral surface backed by @kiwa-test/observability v2.2 advanced III semantics (IaC axis: capturePlan + detectDrift + evaluatePolicy + attributeCost) + real-driver env-gate. Two adapter implementations satisfy the same 15-op contract: makeMockAdapter walks the observability v2.2 IaC state machine deterministically without any backend; makeRealAdapter emits `terraform plan` + OPA `eval` + cost API requests through the KIWA_MODE=real testcontainers-driven stack when KIWA_TERRAFORM_STATE_URL / KIWA_OPA_URL / KIWA_COST_API_URL are wired, and otherwise reports KIWA_IAC_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 3 IaC lifecycle stages (plan / drift / policy / cost) × 4 observability targets (grafana-oss / prometheus / loki / otel-collector) so behavioural drift between mock semantics and real Terraform + OPA stays observable and feeds the @kiwa-test/quality-metrics 13-axis release gate.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/observability -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/observability": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
