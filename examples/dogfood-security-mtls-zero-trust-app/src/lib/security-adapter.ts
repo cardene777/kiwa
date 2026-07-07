@@ -1,0 +1,33 @@
+/**
+ * Adapter resolver — reads `KIWA_MODE` + `MTLS_STACK_READY` and returns
+ * the correct Security adapter for the current environment.
+ *
+ * The resolver is the single place that inspects env keys — every other
+ * module accepts an already-constructed adapter so tests can inject either
+ * flavor without polluting process.env.
+ */
+
+import { makeMockAdapter, type MakeMockAdapterOptions } from '../adapters/mock.js';
+import { makeRealAdapter } from '../adapters/real.js';
+import type { SecurityAdapter } from '../adapters/interface.js';
+
+export interface ResolveAdapterOptions {
+  /** override — force a specific mode regardless of env. */
+  mode?: 'real' | 'mock';
+  /** forwarded to `makeMockAdapter` when the resolved mode is mock. */
+  mockOptions?: MakeMockAdapterOptions;
+}
+
+export function resolveAdapter(opts: ResolveAdapterOptions = {}): SecurityAdapter {
+  const explicit = opts.mode ?? envMode();
+  if (explicit === 'real') {
+    return makeRealAdapter();
+  }
+  return makeMockAdapter(opts.mockOptions ?? {});
+}
+
+function envMode(): 'real' | 'mock' {
+  const kiwaMode = process.env['KIWA_MODE'];
+  if (kiwaMode === 'real') return 'real';
+  return 'mock';
+}
