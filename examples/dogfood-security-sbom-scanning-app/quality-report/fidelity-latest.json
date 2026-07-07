@@ -1,0 +1,41 @@
+{
+  "provider": "@kiwa-test/security/dogfood-sbom-scanning-app",
+  "version": "0.1.0",
+  "reportedAt": "2026-07-07T03:29:45.088Z",
+  "coverage": {
+    "line": 92,
+    "branch": 87,
+    "function": 94
+  },
+  "testCount": {
+    "behavior": 55,
+    "integration": 6,
+    "e2e": 4,
+    "total": 65
+  },
+  "fidelity": {
+    "mockCoveredMethods": 14,
+    "realTotalMethods": 14,
+    "ratio": 100,
+    "behavioralDivergences": 14
+  },
+  "perf": {
+    "p50Ms": 0,
+    "p95Ms": 0,
+    "p99Ms": 0,
+    "samples": 12
+  },
+  "mutation": {
+    "mutations": 40,
+    "killed": 28,
+    "survived": 12,
+    "killRate": 70
+  },
+  "a11y": {
+    "critical": 0,
+    "serious": 0,
+    "moderate": 0,
+    "minor": 0
+  },
+  "notes": "Observed 14 divergences across 14 ops:\n- startSbom: BEHAVIORAL_DIVERGENCE\n- addComponent: BEHAVIORAL_DIVERGENCE\n- emitCycloneDx: BEHAVIORAL_DIVERGENCE\n- emitSpdx: BEHAVIORAL_DIVERGENCE\n- validateSbom: BEHAVIORAL_DIVERGENCE\n- evaluateLicense: BEHAVIORAL_DIVERGENCE\n- closeSbom: BEHAVIORAL_DIVERGENCE\n- startSecrets: BEHAVIORAL_DIVERGENCE\n- scanSource: BEHAVIORAL_DIVERGENCE\n- trackRotation: BEHAVIORAL_DIVERGENCE\n- markRotated: BEHAVIORAL_DIVERGENCE\n- lookupAdvisories: BEHAVIORAL_DIVERGENCE\n- buildReport: BEHAVIORAL_DIVERGENCE\n- closeSecrets: BEHAVIORAL_DIVERGENCE"
+}
