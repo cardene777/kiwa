@@ -4,10 +4,18 @@
  * v0.1 edge mocks only carried fetch invocation + lightweight KV helpers.
  * v0.2 adds 8 production semantics that edge runtimes expose differently —
  * Durable Objects, websocket upgrades, edge KV, geo replication, cron triggers,
- * subrequest limits, CPU time limits, and streaming responses. Each axis is
- * expressed as a small pure state-machine helper that returns a neutral
- * envelope, so downstream tests can drive the axis without knowing the
- * platform's payload dialect.
+ * subrequest limits, CPU time limits, and streaming responses.
+ * v1.2 adds 8 advanced production semantics — cold-start (serverless
+ * function warm/cold path + provisioned concurrency), middleware-chain
+ * (edge middleware auth → rewrite → cache → transform chain), KV eventual
+ * consistency (read-your-writes / monotonic-reads), R2 multipart upload
+ * (resumable + integrity check), D1 read replica (lag detection + failover),
+ * DurableObject state migration (schema versioning + zero-downtime rollout),
+ * WebSocket hibernation (resume + reconnect state), and global routing
+ * (Anycast + geo + latency-based failover). Each axis is expressed as a
+ * small pure state-machine helper that returns a neutral envelope, so
+ * downstream tests can drive the axis without knowing the platform's
+ * payload dialect.
  */
 export type EdgePlatform = 'cloudflare' | 'vercel' | 'deno';
 
@@ -19,7 +27,15 @@ export type EdgeAxis =
   | 'cron-trigger'
   | 'subrequest-limit'
   | 'cpu-time-limit'
-  | 'streaming-response';
+  | 'streaming-response'
+  | 'cold-start'
+  | 'middleware-chain'
+  | 'kv-eventual-consistency'
+  | 'r2-multipart'
+  | 'd1-read-replica'
+  | 'do-state-migration'
+  | 'websocket-hibernation'
+  | 'global-routing';
 
 /**
  * Platform-neutral event names used inside the axis helpers. Real edge
@@ -69,7 +85,48 @@ export type NeutralEventName =
   | 'stream.opened'
   | 'stream.chunk-sent'
   | 'stream.backpressure'
-  | 'stream.closed';
+  | 'stream.closed'
+  // v1.2 advanced axis
+  // cold-start
+  | 'cold-start.invoked'
+  | 'cold-start.cache-hit'
+  | 'cold-start.provisioned-hit'
+  | 'cold-start.warmed'
+  // middleware-chain
+  | 'middleware.entered'
+  | 'middleware.rewritten'
+  | 'middleware.short-circuited'
+  | 'middleware.completed'
+  // kv-eventual-consistency
+  | 'kv-consistency.write-quorum'
+  | 'kv-consistency.stale-read'
+  | 'kv-consistency.read-your-writes'
+  | 'kv-consistency.monotonic-violation'
+  // r2-multipart
+  | 'r2.multipart-initiated'
+  | 'r2.part-uploaded'
+  | 'r2.checksum-verified'
+  | 'r2.multipart-completed'
+  // d1-read-replica
+  | 'd1.primary-write'
+  | 'd1.replica-read'
+  | 'd1.replica-lagged'
+  | 'd1.replica-failover'
+  // do-state-migration
+  | 'do-migration.initiated'
+  | 'do-migration.schema-bumped'
+  | 'do-migration.data-migrated'
+  | 'do-migration.rolled-out'
+  // websocket-hibernation
+  | 'ws-hibernation.entered'
+  | 'ws-hibernation.resumed'
+  | 'ws-hibernation.state-restored'
+  | 'ws-hibernation.reconnected'
+  // global-routing
+  | 'routing.anycast-received'
+  | 'routing.geo-matched'
+  | 'routing.latency-selected'
+  | 'routing.failover-triggered';
 
 /**
  * Platform-specific event name lookup. When a runtime has a distinct string
@@ -111,6 +168,38 @@ const dialect: Record<EdgePlatform, Partial<Record<NeutralEventName, string>>> =
     'stream.chunk-sent': 'response_stream.chunk',
     'stream.backpressure': 'response_stream.backpressure',
     'stream.closed': 'response_stream.closed',
+    'cold-start.invoked': 'worker.cold_start.invoked',
+    'cold-start.cache-hit': 'worker.cold_start.warm_hit',
+    'cold-start.provisioned-hit': 'worker.cold_start.always_on',
+    'cold-start.warmed': 'worker.cold_start.warmed',
+    'middleware.entered': 'workers.middleware.entered',
+    'middleware.rewritten': 'workers.middleware.rewritten',
+    'middleware.short-circuited': 'workers.middleware.terminated',
+    'middleware.completed': 'workers.middleware.completed',
+    'kv-consistency.write-quorum': 'kv.write_quorum',
+    'kv-consistency.stale-read': 'kv.stale_read',
+    'kv-consistency.read-your-writes': 'kv.read_your_writes',
+    'kv-consistency.monotonic-violation': 'kv.monotonic_violation',
+    'r2.multipart-initiated': 'r2.multipart.initiated',
+    'r2.part-uploaded': 'r2.multipart.part_uploaded',
+    'r2.checksum-verified': 'r2.multipart.checksum_verified',
+    'r2.multipart-completed': 'r2.multipart.completed',
+    'd1.primary-write': 'd1.primary_write',
+    'd1.replica-read': 'd1.replica_read',
+    'd1.replica-lagged': 'd1.replica_lagged',
+    'd1.replica-failover': 'd1.replica_failover',
+    'do-migration.initiated': 'durable_object.migration.initiated',
+    'do-migration.schema-bumped': 'durable_object.migration.schema_bumped',
+    'do-migration.data-migrated': 'durable_object.migration.data_migrated',
+    'do-migration.rolled-out': 'durable_object.migration.rolled_out',
+    'ws-hibernation.entered': 'websocket.hibernation.entered',
+    'ws-hibernation.resumed': 'websocket.hibernation.resumed',
+    'ws-hibernation.state-restored': 'websocket.hibernation.state_restored',
+    'ws-hibernation.reconnected': 'websocket.hibernation.reconnected',
+    'routing.anycast-received': 'anycast.received',
+    'routing.geo-matched': 'anycast.geo_matched',
+    'routing.latency-selected': 'anycast.latency_selected',
+    'routing.failover-triggered': 'anycast.failover_triggered',
   },
   vercel: {
     'durable-object.created': 'edge_function.session_affinity.created',
@@ -145,6 +234,38 @@ const dialect: Record<EdgePlatform, Partial<Record<NeutralEventName, string>>> =
     'stream.chunk-sent': 'edge_function.stream_chunk',
     'stream.backpressure': 'edge_function.stream_backpressure',
     'stream.closed': 'edge_function.stream_closed',
+    'cold-start.invoked': 'serverless.cold_start.invoked',
+    'cold-start.cache-hit': 'serverless.cold_start.warm_hit',
+    'cold-start.provisioned-hit': 'serverless.cold_start.provisioned',
+    'cold-start.warmed': 'serverless.cold_start.warmed',
+    'middleware.entered': 'edge_middleware.entered',
+    'middleware.rewritten': 'edge_middleware.rewrite',
+    'middleware.short-circuited': 'edge_middleware.terminated',
+    'middleware.completed': 'edge_middleware.completed',
+    'kv-consistency.write-quorum': 'edge_config.write_quorum',
+    'kv-consistency.stale-read': 'edge_config.stale_read',
+    'kv-consistency.read-your-writes': 'edge_config.read_your_writes',
+    'kv-consistency.monotonic-violation': 'edge_config.monotonic_violation',
+    'r2.multipart-initiated': 'blob.multipart.initiated',
+    'r2.part-uploaded': 'blob.multipart.part_uploaded',
+    'r2.checksum-verified': 'blob.multipart.checksum_verified',
+    'r2.multipart-completed': 'blob.multipart.completed',
+    'd1.primary-write': 'postgres.primary_write',
+    'd1.replica-read': 'postgres.replica_read',
+    'd1.replica-lagged': 'postgres.replica_lagged',
+    'd1.replica-failover': 'postgres.replica_failover',
+    'do-migration.initiated': 'edge_function.session_affinity.migration_initiated',
+    'do-migration.schema-bumped': 'edge_function.session_affinity.schema_bumped',
+    'do-migration.data-migrated': 'edge_function.session_affinity.data_migrated',
+    'do-migration.rolled-out': 'edge_function.session_affinity.rolled_out',
+    'ws-hibernation.entered': 'edge_websocket.hibernation.entered',
+    'ws-hibernation.resumed': 'edge_websocket.hibernation.resumed',
+    'ws-hibernation.state-restored': 'edge_websocket.hibernation.state_restored',
+    'ws-hibernation.reconnected': 'edge_websocket.hibernation.reconnected',
+    'routing.anycast-received': 'edge_network.anycast_received',
+    'routing.geo-matched': 'edge_network.geo_matched',
+    'routing.latency-selected': 'edge_network.latency_selected',
+    'routing.failover-triggered': 'edge_network.failover_triggered',
   },
   deno: {
     'durable-object.created': 'deploy.stateful_object.created',
@@ -179,6 +300,38 @@ const dialect: Record<EdgePlatform, Partial<Record<NeutralEventName, string>>> =
     'stream.chunk-sent': 'deploy.stream.chunk',
     'stream.backpressure': 'deploy.stream.backpressure',
     'stream.closed': 'deploy.stream.closed',
+    'cold-start.invoked': 'deploy.cold_start.invoked',
+    'cold-start.cache-hit': 'deploy.cold_start.warm_hit',
+    'cold-start.provisioned-hit': 'deploy.cold_start.provisioned',
+    'cold-start.warmed': 'deploy.cold_start.warmed',
+    'middleware.entered': 'deploy.middleware.entered',
+    'middleware.rewritten': 'deploy.middleware.rewritten',
+    'middleware.short-circuited': 'deploy.middleware.terminated',
+    'middleware.completed': 'deploy.middleware.completed',
+    'kv-consistency.write-quorum': 'deno_kv.write_quorum',
+    'kv-consistency.stale-read': 'deno_kv.stale_read',
+    'kv-consistency.read-your-writes': 'deno_kv.read_your_writes',
+    'kv-consistency.monotonic-violation': 'deno_kv.monotonic_violation',
+    'r2.multipart-initiated': 'deploy.blob.multipart.initiated',
+    'r2.part-uploaded': 'deploy.blob.multipart.part_uploaded',
+    'r2.checksum-verified': 'deploy.blob.multipart.checksum_verified',
+    'r2.multipart-completed': 'deploy.blob.multipart.completed',
+    'd1.primary-write': 'deno_kv.primary_write',
+    'd1.replica-read': 'deno_kv.replica_read',
+    'd1.replica-lagged': 'deno_kv.replica_lagged',
+    'd1.replica-failover': 'deno_kv.replica_failover',
+    'do-migration.initiated': 'deploy.stateful_object.migration_initiated',
+    'do-migration.schema-bumped': 'deploy.stateful_object.schema_bumped',
+    'do-migration.data-migrated': 'deploy.stateful_object.data_migrated',
+    'do-migration.rolled-out': 'deploy.stateful_object.rolled_out',
+    'ws-hibernation.entered': 'deno_websocket.hibernation.entered',
+    'ws-hibernation.resumed': 'deno_websocket.hibernation.resumed',
+    'ws-hibernation.state-restored': 'deno_websocket.hibernation.state_restored',
+    'ws-hibernation.reconnected': 'deno_websocket.hibernation.reconnected',
+    'routing.anycast-received': 'deploy.anycast_received',
+    'routing.geo-matched': 'deploy.anycast_geo_matched',
+    'routing.latency-selected': 'deploy.anycast_latency_selected',
+    'routing.failover-triggered': 'deploy.anycast_failover_triggered',
   },
 };
 
