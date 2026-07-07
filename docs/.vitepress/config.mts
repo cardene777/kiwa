@@ -299,6 +299,14 @@ export default defineConfig({
             { text: '90 — Recurring revenue + Orchestration II + Fraud detection + Regulatory reporting (MRR/NRR + smart route + ML fraud + PCI/PSD2/DORA/SAR walkthrough)', link: '/tutorials/90-recurring-orchestration-fraud-regulatory' },
           ],
         },
+        {
+          text: 'Observability 深化 III (v1.42)',
+          items: [
+            { text: '91 — IaC + Service mesh + eBPF profiling III (Terraform drift + OPA policy + Istio/Linkerd mTLS + sidecar + circuit breaker + user-space + kernel + LSM + syscall + network flow walkthrough)', link: '/tutorials/91-iac-servicemesh-ebpf' },
+            { text: '92 — LLM observability + FinOps (token counting + prompt log + hallucination detection + budget check + cost per request + team attribution + rightsizing + spot optimization walkthrough)', link: '/tutorials/92-llm-observability-finops' },
+            { text: '93 — Chaos engineering + Data pipeline + AIOps (fault injection + blast radius + auto-rollback + game day + lineage capture + freshness + schema drift + data quality + anomaly + auto-remediation + RCA + alert correlation walkthrough)', link: '/tutorials/93-chaos-datapipeline-aiops' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -336,6 +344,7 @@ export default defineConfig({
             { text: 'Security advanced II testing (v0.2 8 axis SSOT + 4 provider × 8 axis = 32 advanced cell grid + provider _URL / _TOKEN env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/security-advanced-II-testing' },
             { text: 'AI-LLM advanced III testing (v0.5 8 axis SSOT + 4 provider × 8 axis = 32 advanced III cell grid + 16-axis combined harness + pair 深度 4 段 record + KIWA_MODE=real env-gate)', link: '/concepts/ai-llm-advanced-III-testing' },
             { text: 'Payment advanced III testing (v0.5 8 axis SSOT + 3 provider × 8 axis = 24 advanced III cell grid + 25-axis combined harness + pair 深度 4 段 2 例目 record + KIWA_MODE=real env-gate)', link: '/concepts/payment-advanced-III-testing' },
+            { text: 'Observability advanced III testing (v2.2 8 axis SSOT + 4 provider × 8 axis = 32 advanced III cell grid + 16-axis combined harness + pair 深度 4 段 3 例目 record + KIWA_MODE=real env-gate)', link: '/concepts/observability-advanced-III-testing' },
           ],
         },
       ],
@@ -376,6 +385,7 @@ export default defineConfig({
             { text: 'v1.38 → v1.39', link: '/migrations/v1.38-to-v1.39' },
             { text: 'v1.39 → v1.40', link: '/migrations/v1.39-to-v1.40' },
             { text: 'v1.40 → v1.41', link: '/migrations/v1.40-to-v1.41' },
+            { text: 'v1.41 → v1.42', link: '/migrations/v1.41-to-v1.42' },
           ],
         },
       ],
