@@ -1,0 +1,21 @@
+{
+  "name": "dogfood-search-opensearch-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.36-4 — an OpenSearch-OSS-anchored relevance-tuning + synonym-advanced + rolling-reindex harness driven behind a provider-neutral 17-op contract backed by @kiwa-test/search v0.3 semantics (relevance + synonym-advanced + index-management axes) + real-driver env-gate against an OpenSearch OSS cluster (testcontainers-friendly). Two adapter implementations satisfy the same contract: makeMockAdapter walks the search v0.3 relevance + synonym + index-mgmt state machines deterministically without any backend; makeRealAdapter models the wire surface for the OpenSearch OSS HTTP API behind the KIWA_MODE=real env-gate (KIWA_OPENSEARCH_URL + OPENSEARCH_KEY) and otherwise reports KIWA_SEARCH_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 3 fixture sets (articles / multilingual / cluster) x BM25 + TF-IDF + custom ranking + A/B variant + multi-language expansion + phonetic + stemmer + typo + shard allocate + replica promote + rolling reindex + zero-downtime swap so behavioural drift between mock semantics and the real OpenSearch OSS wire surface stays observable and feeds the @kiwa-test/quality-metrics 13-axis release gate.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/search -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/search": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
