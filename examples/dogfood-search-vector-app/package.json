@@ -1,0 +1,21 @@
+{
+  "name": "dogfood-search-vector-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.36-2 — a vector + semantic + hybrid search + kNN + HNSW harness driven behind a provider-neutral 14-op contract backed by @kiwa-test/search v0.3 semantics (vector + semantic axes) + real-driver env-gate against Meilisearch + Typesense backends. Two adapter implementations satisfy the same contract: makeMockAdapter walks the search v0.3 vector + semantic state machines deterministically without any backend; makeRealAdapter models the wire surface for Meilisearch + Typesense HTTP APIs behind the KIWA_MODE=real env-gate (KIWA_MEILI_URL + KIWA_TYPESENSE_URL) and otherwise reports KIWA_SEARCH_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 2 backends x 5 hybrid configs x 3 fixture sets so behavioural drift between mock semantics and the real Meilisearch + Typesense wire surface stays observable and feeds the @kiwa-test/quality-metrics 13-axis release gate.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/search -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/search": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
