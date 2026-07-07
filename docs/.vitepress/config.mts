@@ -267,6 +267,14 @@ export default defineConfig({
             { text: '78 — SBOM + license + secrets scanning (CycloneDX + SPDX + OSV advisory + Gitleaks entropy gate walkthrough)', link: '/tutorials/78-sbom-license-scanning' },
           ],
         },
+        {
+          text: 'AI-LLM 深化 (v1.38)',
+          items: [
+            { text: '79 — Prompt injection defense (direct + indirect + jailbreak + role-hijack + Constitutional AI + PII redaction walkthrough)', link: '/tutorials/79-prompt-injection-defense' },
+            { text: '80 — LLM eval + hallucination (self-consistency + factuality + citation + LLM-as-judge + rubric + preference + Elo walkthrough)', link: '/tutorials/80-llm-eval-hallucination' },
+            { text: '81 — Agent orchestration (ReAct + ToT + reflection + tool selection + budget + latency + routing + fallback walkthrough)', link: '/tutorials/81-agent-orchestration' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -300,6 +308,7 @@ export default defineConfig({
             { text: 'Observability real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/observability-real-driver-testing' },
             { text: 'Search real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL / _KEY env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/search-real-driver-testing' },
             { text: 'Security real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL / _PATH env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/security-real-driver-testing' },
+            { text: 'AI-LLM real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _API_KEY + KIWA_LLM_BUDGET_USD budget guard + KIWA_MODE=real env-gate)', link: '/concepts/ai-llm-real-driver-testing' },
           ],
         },
       ],
@@ -336,6 +345,7 @@ export default defineConfig({
             { text: 'v1.34 → v1.35', link: '/migrations/v1.34-to-v1.35' },
             { text: 'v1.35 → v1.36', link: '/migrations/v1.35-to-v1.36' },
             { text: 'v1.36 → v1.37', link: '/migrations/v1.36-to-v1.37' },
+            { text: 'v1.37 → v1.38', link: '/migrations/v1.37-to-v1.38' },
           ],
         },
       ],
