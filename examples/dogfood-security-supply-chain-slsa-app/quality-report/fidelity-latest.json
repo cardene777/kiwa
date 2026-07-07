@@ -1,0 +1,41 @@
+{
+  "provider": "@kiwa-test/security/dogfood-supply-chain-slsa-app",
+  "version": "0.2.0",
+  "reportedAt": "2026-07-07T07:37:44.772Z",
+  "coverage": {
+    "line": 92,
+    "branch": 87,
+    "function": 94
+  },
+  "testCount": {
+    "behavior": 60,
+    "integration": 5,
+    "e2e": 3,
+    "total": 68
+  },
+  "fidelity": {
+    "mockCoveredMethods": 13,
+    "realTotalMethods": 13,
+    "ratio": 100,
+    "behavioralDivergences": 13
+  },
+  "perf": {
+    "p50Ms": 0,
+    "p95Ms": 0,
+    "p99Ms": 0,
+    "samples": 5
+  },
+  "mutation": {
+    "mutations": 40,
+    "killed": 28,
+    "survived": 12,
+    "killRate": 70
+  },
+  "a11y": {
+    "critical": 0,
+    "serious": 0,
+    "moderate": 0,
+    "minor": 0
+  },
+  "notes": "Observed 13 divergences across 13 ops:\n- startSlsa: BEHAVIORAL_DIVERGENCE\n- verifySlsaLevel: BEHAVIORAL_DIVERGENCE\n- closeSlsa: BEHAVIORAL_DIVERGENCE\n- startReproducible: BEHAVIORAL_DIVERGENCE\n- matchReproducibleBuild: BEHAVIORAL_DIVERGENCE\n- closeReproducible: BEHAVIORAL_DIVERGENCE\n- startAttestation: BEHAVIORAL_DIVERGENCE\n- signProvenance: BEHAVIORAL_DIVERGENCE\n- verifyAttestation: BEHAVIORAL_DIVERGENCE\n- closeAttestation: BEHAVIORAL_DIVERGENCE\n- startOrchestrator: BEHAVIORAL_DIVERGENCE\n- orchestrateDecision: BEHAVIORAL_DIVERGENCE\n- closeOrchestrator: BEHAVIORAL_DIVERGENCE"
+}
