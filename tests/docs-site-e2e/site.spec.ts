@@ -396,23 +396,24 @@ const V1_36_PAGES = [
   { path: '/migrations/v1.35-to-v1.36', title: 'v1.35 → v1.36' },
 ];
 
-// v1.37 pages — new tutorials 76-78 + concept doc + migration guide added
-// under the security deepening milestone (Issue #1086). Same skip-if-dist-missing
+// v1.38 pages — new tutorials 79-81 + concept doc + migration guide added
+// under the AI/LLM deepening II milestone (Issue #1099). Same skip-if-dist-missing
 // pattern as the canonical suite above so the tests pass on a fresh clone
-// without a full docs build. Coverage adds CSP strict-dynamic (nonce + hash +
-// strict-dynamic + trusted-types + report-only walkthrough) tutorial 76 +
-// RBAC + ABAC policy (role hierarchy + combining algorithms + combined
-// RBAC + ABAC walkthrough) tutorial 77 + SBOM + license + secrets scanning
-// (CycloneDX + SPDX + OSV advisory + Gitleaks entropy gate walkthrough)
-// tutorial 78 + Security real-driver testing SSOT (8 axis × 4 provider = 32
-// cell grid + provider _URL / _PATH env-gate pattern) concept doc + v1.36 →
-// v1.37 additive-only migration guide.
-const V1_37_PAGES = [
-  { path: '/tutorials/76-csp-strict-dynamic', title: 'CSP strict-dynamic' },
-  { path: '/tutorials/77-rbac-abac-policy', title: 'RBAC + ABAC' },
-  { path: '/tutorials/78-sbom-license-scanning', title: 'SBOM + license' },
-  { path: '/concepts/security-real-driver-testing', title: 'Security real-driver testing' },
-  { path: '/migrations/v1.36-to-v1.37', title: 'v1.36 → v1.37' },
+// without a full docs build. Coverage adds Prompt injection defense (direct +
+// indirect + jailbreak + role-hijack + Constitutional AI + PII redaction
+// walkthrough) tutorial 79 + LLM eval + hallucination (self-consistency +
+// factuality + citation + LLM-as-judge + rubric + preference + Elo
+// walkthrough) tutorial 80 + Agent orchestration (ReAct + ToT + reflection +
+// tool selection + budget + latency + routing + fallback walkthrough)
+// tutorial 81 + AI-LLM real-driver testing SSOT (8 axis × 4 provider = 32
+// cell grid + provider _API_KEY env-gate pattern) concept doc + v1.37 →
+// v1.38 additive-only migration guide.
+const V1_38_PAGES = [
+  { path: '/tutorials/79-prompt-injection-defense', title: 'Prompt injection defense' },
+  { path: '/tutorials/80-llm-eval-hallucination', title: 'LLM eval' },
+  { path: '/tutorials/81-agent-orchestration', title: 'Agent orchestration' },
+  { path: '/concepts/ai-llm-real-driver-testing', title: 'AI-LLM real-driver testing' },
+  { path: '/migrations/v1.37-to-v1.38', title: 'v1.37 → v1.38' },
 ];
 
 /**
@@ -759,9 +760,9 @@ test.describe('docs site — v1.36 pages render', () => {
   }
 });
 
-test.describe('docs site — v1.37 pages render', () => {
-  for (const p of V1_37_PAGES) {
-    test(`v1.37 page ${p.path} renders with expected title`, async ({ page }) => {
+test.describe('docs site — v1.38 pages render', () => {
+  for (const p of V1_38_PAGES) {
+    test(`v1.38 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
