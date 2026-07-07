@@ -1,0 +1,57 @@
+{
+  "provider": "@kiwa-test/ai-llm/dogfood-code-interpreter-app",
+  "version": "0.1.0",
+  "reportedAt": "2026-07-07T11:28:27.360Z",
+  "coverage": {
+    "line": 93,
+    "branch": 88,
+    "function": 95
+  },
+  "testCount": {
+    "behavior": 65,
+    "integration": 3,
+    "e2e": 4,
+    "total": 72
+  },
+  "fidelity": {
+    "mockCoveredMethods": 7,
+    "realTotalMethods": 7,
+    "ratio": 100,
+    "behavioralDivergences": 7
+  },
+  "perf": {
+    "p50Ms": 1,
+    "p95Ms": 1,
+    "p99Ms": 1,
+    "samples": 6
+  },
+  "mutation": {
+    "mutations": 40,
+    "killed": 28,
+    "survived": 12,
+    "killRate": 70
+  },
+  "cost": {
+    "perRequestUsd": 0,
+    "totalUsd": 0,
+    "requests": 6
+  },
+  "latency": {
+    "p50Ms": 1,
+    "p95Ms": 1,
+    "p99Ms": 1,
+    "samples": 6
+  },
+  "token": {
+    "promptTokens": 10,
+    "completionTokens": 0,
+    "totalTokens": 10,
+    "requests": 6
+  },
+  "accuracy": {
+    "score": 1,
+    "samples": 6,
+    "method": "deterministic-sandbox-parity"
+  },
+  "notes": "Observed 7 divergences across 7 ops:\n- startCi: BEHAVIORAL_DIVERGENCE\n- startSandbox: BEHAVIORAL_DIVERGENCE\n- executeCode: BEHAVIORAL_DIVERGENCE\n- useTool: BEHAVIORAL_DIVERGENCE\n- rollback: BEHAVIORAL_DIVERGENCE\n- closeCi: BEHAVIORAL_DIVERGENCE\n- runPipeline: BEHAVIORAL_DIVERGENCE"
+}
