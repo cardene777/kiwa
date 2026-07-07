@@ -291,6 +291,14 @@ export default defineConfig({
             { text: '87 — LLM ops + Prompt engineering + RAG III + Cost optimization (model registry + rollout + A/B + canary + shadow + CoT + few-shot + caching + versioning + GraphRAG + agentic + self-query + parent doc + batch + cascade + semantic cache walkthrough)', link: '/tutorials/87-llm-ops-rag-iii-cost' },
           ],
         },
+        {
+          text: 'Payment 深化 III (v1.41)',
+          items: [
+            { text: '88 — Embedded finance + BNPL (BaaS + card + KYC/KYB + installment + risk + late fee walkthrough)', link: '/tutorials/88-embedded-finance-bnpl' },
+            { text: '89 — Crypto payment + FX cross-border (stablecoin + on-chain + gas abstraction + rate lock + SWIFT/SEPA walkthrough)', link: '/tutorials/89-crypto-payment-fx' },
+            { text: '90 — Recurring revenue + Orchestration II + Fraud detection + Regulatory reporting (MRR/NRR + smart route + ML fraud + PCI/PSD2/DORA/SAR walkthrough)', link: '/tutorials/90-recurring-orchestration-fraud-regulatory' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -327,6 +335,7 @@ export default defineConfig({
             { text: 'AI-LLM real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _API_KEY + KIWA_LLM_BUDGET_USD budget guard + KIWA_MODE=real env-gate)', link: '/concepts/ai-llm-real-driver-testing' },
             { text: 'Security advanced II testing (v0.2 8 axis SSOT + 4 provider × 8 axis = 32 advanced cell grid + provider _URL / _TOKEN env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/security-advanced-II-testing' },
             { text: 'AI-LLM advanced III testing (v0.5 8 axis SSOT + 4 provider × 8 axis = 32 advanced III cell grid + 16-axis combined harness + pair 深度 4 段 record + KIWA_MODE=real env-gate)', link: '/concepts/ai-llm-advanced-III-testing' },
+            { text: 'Payment advanced III testing (v0.5 8 axis SSOT + 3 provider × 8 axis = 24 advanced III cell grid + 25-axis combined harness + pair 深度 4 段 2 例目 record + KIWA_MODE=real env-gate)', link: '/concepts/payment-advanced-III-testing' },
           ],
         },
       ],
@@ -366,6 +375,7 @@ export default defineConfig({
             { text: 'v1.37 → v1.38', link: '/migrations/v1.37-to-v1.38' },
             { text: 'v1.38 → v1.39', link: '/migrations/v1.38-to-v1.39' },
             { text: 'v1.39 → v1.40', link: '/migrations/v1.39-to-v1.40' },
+            { text: 'v1.40 → v1.41', link: '/migrations/v1.40-to-v1.41' },
           ],
         },
       ],

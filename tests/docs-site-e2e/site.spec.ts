@@ -458,6 +458,26 @@ const V1_40_PAGES = [
   { path: '/migrations/v1.39-to-v1.40', title: 'v1.39 → v1.40' },
 ];
 
+// V1.41-5 (Issue #1148 / CAR-981) — docs 補強 for the Payment 深化 III milestone
+// pair 深度 4 段拡張 2 例目 (v1.14 v0.1 base → v1.19 v0.2 advanced → v1.33 v0.4
+// advanced II → v1.41 v0.5 advanced III). Same skip-if-dist-missing pattern so
+// the tests pass on a fresh clone without a full docs build. Coverage adds
+// Embedded finance + BNPL (BaaS + card + KYC/KYB + installment + risk + late
+// fee walkthrough) tutorial 88 + Crypto payment + FX cross-border (stablecoin
+// + on-chain + gas abstraction + rate lock + SWIFT/SEPA walkthrough) tutorial
+// 89 + Recurring revenue + Orchestration II + Fraud detection + Regulatory
+// reporting (MRR/NRR + smart route + ML fraud + PCI/PSD2/DORA/SAR walkthrough)
+// tutorial 90 + Payment advanced III testing SSOT (v0.5 8 axis × 3 provider =
+// 24 advanced III cell grid + 25-axis combined harness + pair 深度 4 段 2 例目
+// record) concept doc + v1.40 → v1.41 additive-only migration guide.
+const V1_41_PAGES = [
+  { path: '/tutorials/88-embedded-finance-bnpl', title: 'Embedded finance + BNPL' },
+  { path: '/tutorials/89-crypto-payment-fx', title: 'Crypto payment + FX cross-border' },
+  { path: '/tutorials/90-recurring-orchestration-fraud-regulatory', title: 'Recurring revenue + Payment orchestration II + Fraud detection + Regulatory reporting' },
+  { path: '/concepts/payment-advanced-III-testing', title: 'Payment advanced III testing' },
+  { path: '/migrations/v1.40-to-v1.41', title: 'v1.40 → v1.41' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -833,6 +853,20 @@ test.describe('docs site — v1.39 pages render', () => {
 test.describe('docs site — v1.40 pages render', () => {
   for (const p of V1_40_PAGES) {
     test(`v1.40 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.41 pages render', () => {
+  for (const p of V1_41_PAGES) {
+    test(`v1.41 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
