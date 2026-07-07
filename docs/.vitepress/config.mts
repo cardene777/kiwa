@@ -315,6 +315,14 @@ export default defineConfig({
             { text: '96 — Global routing (Anycast + geo matching + latency-based failover + D1 read replica affinity walkthrough)', link: '/tutorials/96-global-routing' },
           ],
         },
+        {
+          text: 'Auth Passwordless UX III 深化 (v1.44)',
+          items: [
+            { text: '97 — Passwordless UX (device-bound passkey + conditional UI + cross-device flow walkthrough)', link: '/tutorials/97-passwordless-ux' },
+            { text: '98 — Step-up MFA (AAL escalation + trust cache + auth continuity walkthrough)', link: '/tutorials/98-step-up-mfa' },
+            { text: '99 — Risk-based auth (score aggregation + policy + telemetry + hijack detection walkthrough)', link: '/tutorials/99-risk-based-auth' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -354,6 +362,7 @@ export default defineConfig({
             { text: 'Payment advanced III testing (v0.5 8 axis SSOT + 3 provider × 8 axis = 24 advanced III cell grid + 25-axis combined harness + pair 深度 4 段 2 例目 record + KIWA_MODE=real env-gate)', link: '/concepts/payment-advanced-III-testing' },
             { text: 'Observability advanced III testing (v2.2 8 axis SSOT + 4 provider × 8 axis = 32 advanced III cell grid + 16-axis combined harness + pair 深度 4 段 3 例目 record + KIWA_MODE=real env-gate)', link: '/concepts/observability-advanced-III-testing' },
             { text: 'Edge / Serverless advanced testing (v1.2 8 axis SSOT + 3 platform × 8 axis = 24 advanced cell grid + 16-axis combined harness + pair 第 12 新規 base pair 導入 + KIWA_MODE=real env-gate)', link: '/concepts/edge-serverless-advanced-testing' },
+            { text: 'Auth advanced III testing (v0.6 8 axis SSOT + 3 platform × 8 axis = 24 advanced cell grid + pair 第 1 pair 3 段拡張達成 record + KIWA_MODE=real env-gate)', link: '/concepts/auth-advanced-III-testing' },
           ],
         },
       ],
@@ -396,6 +405,7 @@ export default defineConfig({
             { text: 'v1.40 → v1.41', link: '/migrations/v1.40-to-v1.41' },
             { text: 'v1.41 → v1.42', link: '/migrations/v1.41-to-v1.42' },
             { text: 'v1.42 → v1.43', link: '/migrations/v1.42-to-v1.43' },
+            { text: 'v1.43 → v1.44', link: '/migrations/v1.43-to-v1.44' },
           ],
         },
       ],
