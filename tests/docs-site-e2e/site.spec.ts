@@ -501,6 +501,21 @@ const V1_42_PAGES = [
   { path: '/migrations/v1.41-to-v1.42', title: 'v1.41 → v1.42' },
 ];
 
+// v1.43 introduces Edge / Serverless deepening pair 第 12 新規 base pair
+// (first new pair base since v1.37 Security, 5 milestones ago). Advanced 8
+// axis semantics on top of the existing 8-axis base (16 total axis).
+// 3 new dogfood apps + 3 new tutorials (94 Serverless cold-start + 95
+// DurableObject state migration + 96 Global routing) + Edge / Serverless
+// advanced testing SSOT concept doc + v1.42 → v1.43 additive-only
+// migration guide.
+const V1_43_PAGES = [
+  { path: '/tutorials/94-serverless-cold-start', title: 'Serverless cold-start' },
+  { path: '/tutorials/95-durable-object-migration', title: 'DurableObject state migration' },
+  { path: '/tutorials/96-global-routing', title: 'Global routing' },
+  { path: '/concepts/edge-serverless-advanced-testing', title: 'Edge / Serverless advanced testing' },
+  { path: '/migrations/v1.42-to-v1.43', title: 'v1.42 → v1.43' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -904,6 +919,20 @@ test.describe('docs site — v1.41 pages render', () => {
 test.describe('docs site — v1.42 pages render', () => {
   for (const p of V1_42_PAGES) {
     test(`v1.42 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.43 pages render', () => {
+  for (const p of V1_43_PAGES) {
+    test(`v1.43 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
