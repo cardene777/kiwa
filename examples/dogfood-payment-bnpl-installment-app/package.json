@@ -1,0 +1,23 @@
+{
+  "name": "dogfood-payment-bnpl-installment-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.41-3 — a Klarna + Affirm + Afterpay style Buy-Now-Pay-Later orchestrator (installment plan creation + per-installment schedule + soft credit-check risk scoring + late fee collection + settle / default terminal states) that drives a BNPL-as-a-platform surface backed by @kiwa-test/payment v0.5 bnpl semantics, runnable in both KIWA_MODE=real (KIWA_KLARNA_API_KEY + KIWA_AFFIRM_API_URL + KIWA_AFTERPAY_API_URL + KIWA_CREDIT_BUREAU_URL provider endpoints) and KIWA_MODE=mock (in-memory state machine) so behavioural fidelity feeds @kiwa-test/quality-metrics.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/payment -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/payment": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
