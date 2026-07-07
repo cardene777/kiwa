@@ -54,3 +54,74 @@ export { startCpuBudget, startCpu, tickCpu, completeCpu } from './cpu-time-limit
 
 export type { StreamState, StreamKind, StreamSession } from './streaming-response.js';
 export { openStream, sendChunk, resumeStream, closeStream } from './streaming-response.js';
+
+export type { ColdStartClass, ColdStartSession } from './cold-start.js';
+export {
+  startColdStartPool,
+  invokeColdStart,
+  preWarmInstance,
+  evictExpired,
+} from './cold-start.js';
+
+export type { MiddlewareState, MiddlewareStage, MiddlewareSession } from './middleware-chain.js';
+export {
+  startMiddlewareChain,
+  enterMiddleware,
+  rewriteRequest,
+  shortCircuit,
+  completeMiddleware,
+} from './middleware-chain.js';
+
+export type {
+  KvConsistencyState,
+  KvConsistencySession,
+} from './kv-eventual-consistency.js';
+export {
+  startKvConsistency,
+  recordWriteQuorum,
+  observeRead,
+  forceConvergence,
+} from './kv-eventual-consistency.js';
+
+export type { R2State, R2Part, R2MultipartSession } from './r2-multipart.js';
+export {
+  initiateMultipart,
+  uploadPart,
+  verifyChecksum,
+  completeMultipart,
+} from './r2-multipart.js';
+
+export type { D1RoutingState, D1Replica, D1Session } from './d1-read-replica.js';
+export {
+  startD1,
+  writeToPrimary,
+  readFromReplica,
+  reportLag,
+} from './d1-read-replica.js';
+
+export type { DoMigrationState, DoMigrationSession } from './do-state-migration.js';
+export {
+  initiateMigration,
+  bumpSchema,
+  migrateInstance,
+  completeRollout,
+  rollbackMigration,
+} from './do-state-migration.js';
+
+export type { WsHibernationState, WsHibernationSession } from './websocket-hibernation.js';
+export {
+  startHibernationSession,
+  hibernate,
+  resume,
+  restoreState,
+  completeReconnect,
+} from './websocket-hibernation.js';
+
+export type { RoutingState, Pop, RoutingSession } from './global-routing.js';
+export {
+  startRoutingPool,
+  receiveAnycast,
+  matchGeo,
+  selectByLatency,
+  markUnhealthy,
+} from './global-routing.js';

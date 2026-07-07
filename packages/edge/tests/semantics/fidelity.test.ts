@@ -5,8 +5,8 @@ import {
   type EdgeAxis,
 } from '../../src/index.js';
 
-describe('fidelity harness — 3 platform × 8 axis grid', () => {
-  it('produces 24 rows (3 platform × 8 axis)', () => {
+describe('fidelity harness — 3 platform × 16 axis grid', () => {
+  it('produces 48 rows (3 platform × 16 axis) — v0.2 8 + v1.2 advanced 8', () => {
     const coverage = collectFidelityCoverage(['cloudflare', 'vercel', 'deno']);
     expect(coverage.platforms).toEqual(['cloudflare', 'vercel', 'deno']);
     expect(coverage.axes).toEqual([
@@ -18,8 +18,16 @@ describe('fidelity harness — 3 platform × 8 axis grid', () => {
       'subrequest-limit',
       'cpu-time-limit',
       'streaming-response',
+      'cold-start',
+      'middleware-chain',
+      'kv-eventual-consistency',
+      'r2-multipart',
+      'd1-read-replica',
+      'do-state-migration',
+      'websocket-hibernation',
+      'global-routing',
     ]);
-    expect(coverage.rows).toHaveLength(24);
+    expect(coverage.rows).toHaveLength(48);
   });
 
   it('every row has neutral events mapped to platform events', () => {
@@ -31,10 +39,44 @@ describe('fidelity harness — 3 platform × 8 axis grid', () => {
     }
   });
 
-  it('single platform slice returns 8 rows', () => {
+  it('single platform slice returns 16 rows', () => {
     const cloudflareOnly = collectFidelityCoverage(['cloudflare']);
-    expect(cloudflareOnly.rows).toHaveLength(8);
+    expect(cloudflareOnly.rows).toHaveLength(16);
     expect(cloudflareOnly.platforms).toEqual(['cloudflare']);
+  });
+
+  it('v1.2 advanced axes are present in coverage grid', () => {
+    const coverage = collectFidelityCoverage(['cloudflare']);
+    const advancedAxes = [
+      'cold-start',
+      'middleware-chain',
+      'kv-eventual-consistency',
+      'r2-multipart',
+      'd1-read-replica',
+      'do-state-migration',
+      'websocket-hibernation',
+      'global-routing',
+    ];
+    for (const axis of advancedAxes) {
+      const row = coverage.rows.find((r) => r.axis === axis);
+      expect(row).toBeDefined();
+      expect(row?.neutralEvents.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('v1.2 platform dialect mapping is unique per platform', () => {
+    const cf = collectFidelityCoverage(['cloudflare']).rows.find(
+      (r) => r.axis === 'cold-start',
+    );
+    const vc = collectFidelityCoverage(['vercel']).rows.find(
+      (r) => r.axis === 'cold-start',
+    );
+    const dn = collectFidelityCoverage(['deno']).rows.find(
+      (r) => r.axis === 'cold-start',
+    );
+    expect(cf?.platformEvents[0]).toContain('worker.');
+    expect(vc?.platformEvents[0]).toContain('serverless.');
+    expect(dn?.platformEvents[0]).toContain('deploy.');
   });
 
   it('each axis neutral event list matches the AXIS_TO_EVENTS spec', () => {
