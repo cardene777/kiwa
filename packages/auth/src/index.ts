@@ -371,3 +371,12 @@ export {
   resolveTrustChain as resolveOidcTrustChain,
   setupOidcEnv,
 } from './oidc/index.js';
+
+// v0.6 advanced Passwordless UX semantics (v1.44).
+export * as semantics from './semantics/index.js';
+export type {
+  AuthAxis,
+  AuthPlatform,
+  AxisStep as SemanticsAxisStep,
+  NeutralEventName as SemanticsNeutralEventName,
+} from './semantics/types.js';
