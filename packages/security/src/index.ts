@@ -3,6 +3,12 @@
 // secrets-scan / SBOM / security-headers advanced) unified across 4 providers
 // (helmet / express-rate-limit / casbin / coraza) with 4 x 8 = 32 combination
 // fidelity harness and KIWA_MODE=real env-gate.
+//
+// v0.2 adds advanced II 8 axis (mTLS / zero-trust / SIEM-audit /
+// incident-response / crypto-advanced / container-k8s / supply-chain /
+// web-vitals-security) unified across 4 providers (istio / opa / siem-splunk /
+// vault) with a second 4 x 8 = 32 combination fidelity grid, re-exported via
+// `./semantics/index.js`.
 
 // Shared types.
 export type {
@@ -166,3 +172,12 @@ export {
   type RealDriverGateInput,
   type RealDriverGateResult,
 } from './real-driver.js';
+
+/**
+ * v0.2 advanced II semantics — 4 provider (istio / opa / siem-splunk / vault)
+ * x 8 axis (mtls / zero-trust / siem-audit / incident-response /
+ * crypto-advanced / container-k8s / supply-chain / web-vitals-security) SSOT.
+ *
+ * v0.1 axis と直交する 2 段目の fidelity grid + KIWA_MODE=real gate。
+ */
+export * from './semantics/index.js';
