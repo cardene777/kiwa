@@ -1,0 +1,106 @@
+{
+  "name": "@kiwa-test/security",
+  "version": "0.1.0",
+  "description": "Security test harness for kiwa — 8 axis (CSP + Rate limit + Authorization + WAF + Threat model + Secrets scanning + SBOM + Security headers advanced) unified across 4 providers (helmet + express-rate-limit + casbin + coraza) with 4 provider × 8 axis fidelity harness (32 combination grid), real driver env-gate (KIWA_MODE=real + testcontainers), and quality-metrics 11-axis integration.",
+  "license": "MIT",
+  "author": {
+    "name": "cardene",
+    "url": "https://github.com/cardene777"
+  },
+  "keywords": [
+    "kiwa",
+    "security",
+    "csp",
+    "content-security-policy",
+    "nonce",
+    "trusted-types",
+    "rate-limit",
+    "token-bucket",
+    "leaky-bucket",
+    "sliding-window",
+    "authorization",
+    "rbac",
+    "abac",
+    "casbin",
+    "waf",
+    "coraza",
+    "owasp-crs",
+    "threat-model",
+    "stride",
+    "pasta",
+    "dread",
+    "secrets-scanning",
+    "trufflehog",
+    "gitleaks",
+    "sbom",
+    "cyclonedx",
+    "spdx",
+    "osv",
+    "nvd",
+    "security-headers",
+    "hsts",
+    "permissions-policy",
+    "helmet",
+    "mock",
+    "fidelity",
+    "testing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cardene777/kiwa.git",
+    "directory": "packages/security"
+  },
+  "homepage": "https://github.com/cardene777/kiwa#readme",
+  "bugs": {
+    "url": "https://github.com/cardene777/kiwa/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**'",
+    "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
+    "test:mutation": "stryker run",
+    "test:a11y": "node ../../scripts/run-axe-baseline.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@kiwa-test/perf-harness": "workspace:*",
+    "@stryker-mutator/core": "^8.7.1",
+    "@stryker-mutator/vitest-runner": "^8.7.1",
+    "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
