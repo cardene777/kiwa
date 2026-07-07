@@ -835,7 +835,7 @@ describe('tutorial 66 — finalizeRecovery lost outcome', () => {
 // ---------------------------------------------------------------------------
 
 describe('concept doc — fidelity coverage grid', () => {
-  it('exposes 3 provider × 17 axis = 51 rows with 8 v0.4 axes present (concept: fidelity-grid snippet)', () => {
+  it('exposes 3 provider × 25 axis = 75 rows with 8 v0.4 axes present (concept: fidelity-grid snippet, v1.33 tutorial revalidated under v0.5 grid)', () => {
     const coverage = collectFidelityCoverage([
       createStripeMock({ secret: 'whsec_stripe' }),
       createPaddleMock({ secret: 'whsec_paddle' }),
@@ -843,8 +843,12 @@ describe('concept doc — fidelity coverage grid', () => {
     ]);
 
     expect(coverage.providers).toEqual(['stripe', 'paddle', 'lemonsqueezy']);
-    expect(coverage.rows.length).toBe(51); // 3 provider × 17 axis
-    expect(coverage.axes.length).toBe(17); // 9 v0.3 + 8 v0.4
+    // v0.5 extends fidelity grid: 9 v0.3 + 8 v0.4 + 8 v0.5 = 25 axis × 3 provider = 75 rows.
+    // Prior to v0.5 this was 17 axis × 3 = 51 rows; the v1.33 tutorial's 8 v0.4 axes
+    // still each appear on all 3 providers with ≥ 3 neutral events, so the tutorial
+    // invariant (v0.4 axis coverage) holds even though the total grid grew.
+    expect(coverage.rows.length).toBe(75); // 3 provider × 25 axis (v0.5 grid)
+    expect(coverage.axes.length).toBe(25); // 9 v0.3 + 8 v0.4 + 8 v0.5
 
     const v04Axes = [
       'orchestration',

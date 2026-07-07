@@ -4,9 +4,10 @@ import { providerEventName, type BillingAxis, type NeutralEventName } from './ty
 /**
  * Fidelity harness — collects the provider × axis coverage grid that
  * downstream release-gate reports on. Not a runner (no side effect emit);
- * pure inspection so tests / release-gate can assert "3 provider × 17 axis"
- * (v0.3 9 axis + v0.4 8 axis) without walking every neutral event by hand.
- * The v0.4 slice alone is 3 provider × 8 axis = 24 combination.
+ * pure inspection so tests / release-gate can assert "3 provider × 25 axis"
+ * (v0.3 9 axis + v0.4 8 axis + v0.5 8 axis) without walking every neutral
+ * event by hand. The v0.5 slice alone is 3 provider × 8 axis = 24
+ * combination, extending the v0.4 total from 51 rows to 75 rows.
  */
 export interface FidelityRow {
   provider: PaymentProvider;
@@ -101,6 +102,55 @@ const AXIS_TO_EVENTS: Record<BillingAxis, NeutralEventName[]> = {
     'vault.migrated',
     'vault.pci_scope_verified',
   ],
+  // v0.5 — advanced billing III 8 axis
+  'embedded-finance': [
+    'embedded.account_opened',
+    'embedded.card_issued',
+    'embedded.kyc_verified',
+    'embedded.kyb_verified',
+  ],
+  bnpl: [
+    'bnpl.plan_created',
+    'bnpl.installment_scheduled',
+    'bnpl.risk_scored',
+    'bnpl.late_fee_charged',
+  ],
+  'crypto-payment': [
+    'crypto.invoice_created',
+    'crypto.tx_confirmed',
+    'crypto.gas_abstracted',
+    'crypto.wallet_linked',
+  ],
+  'fx-cross-border': [
+    'fx.rate_locked',
+    'fx.settlement_initiated',
+    'fx.settlement_completed',
+    'fx.rate_expired',
+  ],
+  'recurring-revenue-advanced': [
+    'rr.mrr_computed',
+    'rr.churn_recorded',
+    'rr.expansion_recorded',
+    'rr.nrr_computed',
+  ],
+  'payment-orchestration-ii': [
+    'po2.smart_routed',
+    'po2.ml_scored',
+    'po2.fallback_triggered',
+    'po2.cascade_exhausted',
+  ],
+  'fraud-detection-advanced': [
+    'fraud.device_scored',
+    'fraud.biometric_verified',
+    'fraud.velocity_flagged',
+    'fraud.ml_blocked',
+  ],
+  'regulatory-reporting': [
+    'reg.pci_reported',
+    'reg.psd2_reported',
+    'reg.dora_reported',
+    'reg.sar_filed',
+  ],
 };
 
 /**
@@ -108,10 +158,10 @@ const AXIS_TO_EVENTS: Record<BillingAxis, NeutralEventName[]> = {
  * adapters to inspect — usually all 3 (`createStripeMock()`,
  * `createPaddleMock()`, `createLemonSqueezyMock()`).
  *
- * The output is a flat row list `adapters.length * 17 = 51` for the default
- * setup (3 provider × 9 v0.3 axis + 3 provider × 8 v0.4 axis), plus
- * `providers` + `axes` roll-up lists so callers can assert on the grid
- * dimensions.
+ * The output is a flat row list `adapters.length * 25 = 75` for the default
+ * setup (9 v0.3 axis + 8 v0.4 axis + 8 v0.5 axis = 25 axis × 3 provider),
+ * plus `providers` + `axes` roll-up lists so callers can assert on the
+ * grid dimensions.
  */
 export function collectFidelityCoverage(adapters: PaymentAdapter[]): FidelityCoverage {
   const providers = adapters.map((a) => a.provider);

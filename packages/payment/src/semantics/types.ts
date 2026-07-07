@@ -29,7 +29,19 @@ export type BillingAxis =
   | 'webhook-idempotency-advanced'
   | 'tax-localization'
   | 'subscription-state-machine'
-  | 'payment-method-vault';
+  | 'payment-method-vault'
+  // v0.5 — advanced billing III 8 axis (embedded finance / BNPL / crypto /
+  // FX / recurring revenue analytics / orchestration II / fraud detection /
+  // regulatory reporting). Extends the v0.4 fidelity harness from 3 × 17 to
+  // 3 × 25 = 75 combination.
+  | 'embedded-finance'
+  | 'bnpl'
+  | 'crypto-payment'
+  | 'fx-cross-border'
+  | 'recurring-revenue-advanced'
+  | 'payment-orchestration-ii'
+  | 'fraud-detection-advanced'
+  | 'regulatory-reporting';
 
 /**
  * Provider-neutral event names used inside the axis helpers. Real providers
@@ -123,7 +135,47 @@ export type NeutralEventName =
   | 'vault.token_created'
   | 'vault.token_revoked'
   | 'vault.migrated'
-  | 'vault.pci_scope_verified';
+  | 'vault.pci_scope_verified'
+  // v0.5 — embedded finance (BaaS + card issuance + KYC/KYB)
+  | 'embedded.account_opened'
+  | 'embedded.card_issued'
+  | 'embedded.kyc_verified'
+  | 'embedded.kyb_verified'
+  // v0.5 — BNPL (installment + risk + credit + late fee)
+  | 'bnpl.plan_created'
+  | 'bnpl.installment_scheduled'
+  | 'bnpl.risk_scored'
+  | 'bnpl.late_fee_charged'
+  // v0.5 — crypto payment (stablecoin + on-chain + gas abstraction)
+  | 'crypto.invoice_created'
+  | 'crypto.tx_confirmed'
+  | 'crypto.gas_abstracted'
+  | 'crypto.wallet_linked'
+  // v0.5 — FX / cross-border (multi-currency + rate lock + SWIFT/SEPA)
+  | 'fx.rate_locked'
+  | 'fx.settlement_initiated'
+  | 'fx.settlement_completed'
+  | 'fx.rate_expired'
+  // v0.5 — recurring revenue advanced (MRR/ARR + churn + expansion + NRR)
+  | 'rr.mrr_computed'
+  | 'rr.churn_recorded'
+  | 'rr.expansion_recorded'
+  | 'rr.nrr_computed'
+  // v0.5 — payment orchestration II (smart routing + ML + fallback)
+  | 'po2.smart_routed'
+  | 'po2.ml_scored'
+  | 'po2.fallback_triggered'
+  | 'po2.cascade_exhausted'
+  // v0.5 — fraud detection advanced (device fingerprint + biometrics + velocity + ML)
+  | 'fraud.device_scored'
+  | 'fraud.biometric_verified'
+  | 'fraud.velocity_flagged'
+  | 'fraud.ml_blocked'
+  // v0.5 — regulatory reporting (PCI DSS + PSD2 SCA + DORA + AML/KYC + SAR)
+  | 'reg.pci_reported'
+  | 'reg.psd2_reported'
+  | 'reg.dora_reported'
+  | 'reg.sar_filed';
 
 /**
  * Provider-specific event name lookup. When a real provider uses a distinct
@@ -198,6 +250,39 @@ const dialect: Record<PaymentProvider, Partial<Record<NeutralEventName, string>>
     'vault.token_revoked': 'payment_method.detached',
     'vault.migrated': 'payment_method.updated',
     'vault.pci_scope_verified': 'setup_intent.succeeded',
+    // v0.5
+    'embedded.account_opened': 'treasury.financial_account.created',
+    'embedded.card_issued': 'issuing.card.created',
+    'embedded.kyc_verified': 'identity.verification_session.verified',
+    'embedded.kyb_verified': 'account.updated',
+    'bnpl.plan_created': 'payment_intent.created',
+    'bnpl.installment_scheduled': 'invoice.upcoming',
+    'bnpl.risk_scored': 'radar.early_fraud_warning.updated',
+    'bnpl.late_fee_charged': 'invoice.payment_failed',
+    'crypto.invoice_created': 'payment_intent.created',
+    'crypto.tx_confirmed': 'payment_intent.succeeded',
+    'crypto.gas_abstracted': 'payment_intent.processing',
+    'crypto.wallet_linked': 'payment_method.attached',
+    'fx.rate_locked': 'quote.accepted',
+    'fx.settlement_initiated': 'payout.created',
+    'fx.settlement_completed': 'payout.paid',
+    'fx.rate_expired': 'quote.canceled',
+    'rr.mrr_computed': 'invoice.upcoming',
+    'rr.churn_recorded': 'customer.subscription.deleted',
+    'rr.expansion_recorded': 'customer.subscription.updated',
+    'rr.nrr_computed': 'invoice.upcoming',
+    'po2.smart_routed': 'payment_intent.created',
+    'po2.ml_scored': 'radar.early_fraud_warning.updated',
+    'po2.fallback_triggered': 'payment_intent.processing',
+    'po2.cascade_exhausted': 'payment_intent.canceled',
+    'fraud.device_scored': 'radar.early_fraud_warning.created',
+    'fraud.biometric_verified': 'identity.verification_session.verified',
+    'fraud.velocity_flagged': 'radar.early_fraud_warning.updated',
+    'fraud.ml_blocked': 'radar.early_fraud_warning.updated',
+    'reg.pci_reported': 'reporting.report_type.updated',
+    'reg.psd2_reported': 'reporting.report_type.updated',
+    'reg.dora_reported': 'reporting.report_type.updated',
+    'reg.sar_filed': 'reporting.report_type.updated',
   },
   paddle: {
     'dunning.attempt': 'transaction.payment_failed',
@@ -265,6 +350,39 @@ const dialect: Record<PaymentProvider, Partial<Record<NeutralEventName, string>>
     'vault.token_revoked': 'payment_method.deleted',
     'vault.migrated': 'payment_method.updated',
     'vault.pci_scope_verified': 'payment_method.saved',
+    // v0.5
+    'embedded.account_opened': 'business.entity_created',
+    'embedded.card_issued': 'business.card_created',
+    'embedded.kyc_verified': 'business.entity_verified',
+    'embedded.kyb_verified': 'business.entity_verified',
+    'bnpl.plan_created': 'transaction.created',
+    'bnpl.installment_scheduled': 'transaction.updated',
+    'bnpl.risk_scored': 'transaction.updated',
+    'bnpl.late_fee_charged': 'transaction.payment_failed',
+    'crypto.invoice_created': 'transaction.created',
+    'crypto.tx_confirmed': 'transaction.completed',
+    'crypto.gas_abstracted': 'transaction.updated',
+    'crypto.wallet_linked': 'payment_method.saved',
+    'fx.rate_locked': 'transaction.updated',
+    'fx.settlement_initiated': 'payout.created',
+    'fx.settlement_completed': 'payout.completed',
+    'fx.rate_expired': 'transaction.updated',
+    'rr.mrr_computed': 'report.updated',
+    'rr.churn_recorded': 'subscription.canceled',
+    'rr.expansion_recorded': 'subscription.updated',
+    'rr.nrr_computed': 'report.updated',
+    'po2.smart_routed': 'transaction.created',
+    'po2.ml_scored': 'transaction.updated',
+    'po2.fallback_triggered': 'transaction.updated',
+    'po2.cascade_exhausted': 'transaction.canceled',
+    'fraud.device_scored': 'transaction.updated',
+    'fraud.biometric_verified': 'transaction.updated',
+    'fraud.velocity_flagged': 'transaction.updated',
+    'fraud.ml_blocked': 'transaction.canceled',
+    'reg.pci_reported': 'report.updated',
+    'reg.psd2_reported': 'report.updated',
+    'reg.dora_reported': 'report.updated',
+    'reg.sar_filed': 'report.updated',
   },
   lemonsqueezy: {
     'dunning.attempt': 'subscription_payment_failed',
@@ -332,6 +450,39 @@ const dialect: Record<PaymentProvider, Partial<Record<NeutralEventName, string>>
     'vault.token_revoked': 'subscription_cancelled',
     'vault.migrated': 'subscription_updated',
     'vault.pci_scope_verified': 'subscription_created',
+    // v0.5
+    'embedded.account_opened': 'subscription_created',
+    'embedded.card_issued': 'order_created',
+    'embedded.kyc_verified': 'order_created',
+    'embedded.kyb_verified': 'subscription_created',
+    'bnpl.plan_created': 'order_created',
+    'bnpl.installment_scheduled': 'subscription_created',
+    'bnpl.risk_scored': 'order_created',
+    'bnpl.late_fee_charged': 'subscription_payment_failed',
+    'crypto.invoice_created': 'order_created',
+    'crypto.tx_confirmed': 'order_created',
+    'crypto.gas_abstracted': 'order_created',
+    'crypto.wallet_linked': 'subscription_created',
+    'fx.rate_locked': 'order_created',
+    'fx.settlement_initiated': 'order_created',
+    'fx.settlement_completed': 'order_created',
+    'fx.rate_expired': 'order_refunded',
+    'rr.mrr_computed': 'subscription_updated',
+    'rr.churn_recorded': 'subscription_cancelled',
+    'rr.expansion_recorded': 'subscription_updated',
+    'rr.nrr_computed': 'subscription_updated',
+    'po2.smart_routed': 'order_created',
+    'po2.ml_scored': 'order_created',
+    'po2.fallback_triggered': 'order_created',
+    'po2.cascade_exhausted': 'order_refunded',
+    'fraud.device_scored': 'order_created',
+    'fraud.biometric_verified': 'order_created',
+    'fraud.velocity_flagged': 'order_created',
+    'fraud.ml_blocked': 'order_refunded',
+    'reg.pci_reported': 'order_created',
+    'reg.psd2_reported': 'order_created',
+    'reg.dora_reported': 'order_created',
+    'reg.sar_filed': 'order_created',
   },
 };
 
