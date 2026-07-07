@@ -1021,6 +1021,18 @@
     "execution-history",
     "tool-call-ledger",
     "dogfood-llm-code-interpreter-app",
+    "llm-ops",
+    "model-registry",
+    "rollout-percentage",
+    "ab-testing",
+    "canary-promotion",
+    "shadow-mode",
+    "shadow-comparison",
+    "error-rate-gate",
+    "launchdarkly",
+    "statsig",
+    "github-deployments",
+    "dogfood-llm-ops-registry-app",
     "kiwa"
   ],
   "skills": "./.claude/skills"
