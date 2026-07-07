@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-test/security/dogfood-rbac-abac-app",
   "version": "0.1.0",
-  "reportedAt": "2026-07-07T03:11:53.900Z",
+  "reportedAt": "2026-07-07T03:13:23.534Z",
   "coverage": {
     "line": 92,
     "branch": 87,
