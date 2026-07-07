@@ -1,0 +1,23 @@
+{
+  "name": "dogfood-observability-chaos-aiops-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.42-4 — a chaos engineering + AIOps observability harness driven behind a provider-neutral surface backed by @kiwa-test/observability v2.2 advanced III semantics (chaos axis: injectFault + computeBlastRadius + triggerRollback + recordGameDay; aiops axis: detectAnomaly + executeRemediation + analyzeRootCause + correlateAlerts) + real-driver env-gate. Two adapter implementations satisfy the same 12-op contract: makeMockAdapter walks the observability v2.2 chaos + aiops state machines deterministically without any backend; makeRealAdapter emits an LitmusChaos + Gremlin + PagerDuty AIOps style fault injection + anomaly + runbook API sequence through the KIWA_MODE=real testcontainers-driven stack when KIWA_CHAOS_ENGINE_URL / KIWA_AIOPS_API_URL / KIWA_RUNBOOK_URL are wired, and otherwise reports KIWA_CHAOS_AIOPS_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 3 lifecycle stages (chaos / remediation / rca) x 4 observability targets (grafana-oss / prometheus / loki / otel-collector) so behavioural drift between mock semantics and real chaos-engine + AIOps + runbook APIs stays observable and feeds the @kiwa-test/quality-metrics 13-axis release gate.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/observability -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/observability": "workspace:*",
+    "@kiwa-test/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
