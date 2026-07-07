@@ -226,7 +226,7 @@ import {
 describe('secrets-scan — signatures', () => {
   it('flags an AWS access key by prefix', () => {
     const findings = scanSecrets(
-      'const key = "AKIAABCDEFGHIJKLMNOP";',
+      'const key = "AKIAIOSFODNN7EXAMPLE";',
     );
     expect(findings).toHaveLength(1);
     expect(findings[0]?.kind).toBe('aws-access-key');
@@ -235,14 +235,14 @@ describe('secrets-scan — signatures', () => {
 
   it('flags a GitHub personal access token', () => {
     const findings = scanSecrets(
-      'const t = "ghp_abcdefghijklmnopqrstuvwxyz0123456789";',
+      'const t = "ghp_EXAMPLEexampleEXAMPLEexampleEXAMPLE1";',
     );
     expect(findings.some((f) => f.kind === 'github-token')).toBe(true);
   });
 
   it('flags a Stripe secret key (sk_live / sk_test)', () => {
     const findings = scanSecrets(
-      'const s = "sk_live_1234567890abcdefghij";',
+      'const s = "sk_live_EXAMPLEexampleEXAMPL";',
     );
     expect(findings.some((f) => f.kind === 'stripe-key')).toBe(true);
   });
@@ -259,7 +259,7 @@ describe('secrets-scan — signatures', () => {
   });
 
   it('reports 1-indexed line and column for each finding', () => {
-    const src = ['// header', 'const k = "AKIAABCDEFGHIJKLMNOP";'].join('\n');
+    const src = ['// header', 'const k = "AKIAIOSFODNN7EXAMPLE";'].join('\n');
     const findings = scanSecrets(src);
     expect(findings[0]?.line).toBe(2);
     expect(findings[0]?.column).toBeGreaterThan(1);
