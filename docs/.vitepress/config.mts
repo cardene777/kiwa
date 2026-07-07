@@ -251,6 +251,14 @@ export default defineConfig({
             { text: '72 — Continuous profiling (CPU + memory + off-CPU flame graph + depth-first flatten walkthrough)', link: '/tutorials/72-continuous-profiling' },
           ],
         },
+        {
+          text: 'Search 深化 (v1.36)',
+          items: [
+            { text: '73 — Vector search (kNN + HNSW + hybrid fusion + recall@k walkthrough)', link: '/tutorials/73-vector-search-hybrid' },
+            { text: '74 — Faceted geo search (nested facet + bounding box + radius + polygon + isochrone walkthrough)', link: '/tutorials/74-faceted-geo-search' },
+            { text: '75 — OpenSearch relevance tuning (BM25 + TF-IDF + custom ranking + A/B + synonym advanced + rolling reindex walkthrough)', link: '/tutorials/75-opensearch-relevance-tuning' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -282,6 +290,7 @@ export default defineConfig({
             { text: 'Payment real-driver testing (8 axis SSOT + 3 provider × 8 axis = 24 cell grid + testcontainers-shaped env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/payment-real-driver-testing' },
             { text: 'Frontend real-driver testing (8 axis SSOT + 3 target × 8 axis = 24 cell grid + browser-shaped env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/frontend-real-driver-testing' },
             { text: 'Observability real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/observability-real-driver-testing' },
+            { text: 'Search real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL / _KEY env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/search-real-driver-testing' },
           ],
         },
       ],
@@ -316,6 +325,7 @@ export default defineConfig({
             { text: 'v1.32 → v1.33', link: '/migrations/v1.32-to-v1.33' },
             { text: 'v1.33 → v1.34', link: '/migrations/v1.33-to-v1.34' },
             { text: 'v1.34 → v1.35', link: '/migrations/v1.34-to-v1.35' },
+            { text: 'v1.35 → v1.36', link: '/migrations/v1.35-to-v1.36' },
           ],
         },
       ],
