@@ -528,6 +528,18 @@ const V1_44_PAGES = [
   { path: '/migrations/v1.43-to-v1.44', title: 'v1.43 → v1.44' },
 ];
 
+// v1.45 introduces Realtime III (pair 2 depth 3 achievement、 3rd example).
+// 3 new dogfood apps + 3 tutorials (100 MoQ+WebCodecs + 101 voice streaming
+// + 102 SVC adaptive) + realtime-advanced-III-testing concept doc + v1.44
+// → v1.45 additive-only migration guide.
+const V1_45_PAGES = [
+  { path: '/tutorials/100-moq-webcodecs', title: 'MoQ + WebCodecs' },
+  { path: '/tutorials/101-voice-streaming', title: 'LLM voice streaming' },
+  { path: '/tutorials/102-svc-adaptive', title: 'SVC layer selection' },
+  { path: '/concepts/realtime-advanced-III-testing', title: 'Realtime advanced III testing' },
+  { path: '/migrations/v1.44-to-v1.45', title: 'v1.44 → v1.45' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -959,6 +971,20 @@ test.describe('docs site — v1.43 pages render', () => {
 test.describe('docs site — v1.44 pages render', () => {
   for (const p of V1_44_PAGES) {
     test(`v1.44 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      await page.goto(pageUrl(p.path));
+      const body = await page.locator(CONTENT_LOCATOR).innerText();
+      expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.45 pages render', () => {
+  for (const p of V1_45_PAGES) {
+    test(`v1.45 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
