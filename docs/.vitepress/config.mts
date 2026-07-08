@@ -331,6 +331,13 @@ export default defineConfig({
             { text: '102 — SVC adaptive (SVC layer selection + WebCodecs decoder + MoQ datagram FEC walkthrough)', link: '/tutorials/102-svc-adaptive' },
           ],
         },
+        {
+          text: 'Quality gate integrity + DevSecOps library (v1.46)',
+          items: [
+            { text: '103 — DevSecOps 6 axis (SAST + SCA + Secret + IaC + DAST + Container walkthrough)', link: '/tutorials/103-security-devsecops' },
+            { text: '104 — Perf strict mode (iter 400 + Welch |t|>3 + delta 10% + fail-fast release gate walkthrough)', link: '/tutorials/104-perf-strict' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -372,6 +379,7 @@ export default defineConfig({
             { text: 'Edge / Serverless advanced testing (v1.2 8 axis SSOT + 3 platform × 8 axis = 24 advanced cell grid + 16-axis combined harness + pair 第 12 新規 base pair 導入 + KIWA_MODE=real env-gate)', link: '/concepts/edge-serverless-advanced-testing' },
             { text: 'Auth advanced III testing (v0.6 8 axis SSOT + 3 platform × 8 axis = 24 advanced cell grid + pair 第 1 pair 3 段拡張達成 record + KIWA_MODE=real env-gate)', link: '/concepts/auth-advanced-III-testing' },
             { text: 'Realtime advanced III testing (v0.3 8 axis SSOT + 3 protocol MoQ / WebCodecs / AI-media × 8 axis + pair 第 2 pair 3 段拡張達成 record + KIWA_MODE=real env-gate)', link: '/concepts/realtime-advanced-III-testing' },
+            { text: 'DevSecOps library integration (v0.1 6 axis SAST + SCA + Secret + IaC + DAST + Container + 4 skill 置換 pattern SSOT + 段階的移行 Phase 1-3)', link: '/concepts/security-devsecops-library-integration' },
           ],
         },
       ],
@@ -416,6 +424,7 @@ export default defineConfig({
             { text: 'v1.42 → v1.43', link: '/migrations/v1.42-to-v1.43' },
             { text: 'v1.43 → v1.44', link: '/migrations/v1.43-to-v1.44' },
             { text: 'v1.44 → v1.45', link: '/migrations/v1.44-to-v1.45' },
+            { text: 'v1.45 → v1.46', link: '/migrations/v1.45-to-v1.46' },
           ],
         },
       ],
