@@ -186,3 +186,14 @@ export {
   type WhisperStreamingMock,
   type WhisperTranscript,
 } from './semantics/index.js';
+
+// v2.1 session-orchestrator export (v2.4)
+export {
+  startSession,
+  dispatchEvent,
+  summarizeSession,
+  type RealtimeSessionState,
+  type RealtimeEvent,
+  type RealtimeSession,
+  type RealtimeSessionSummary,
+} from './semantics/session-orchestrator.js';
