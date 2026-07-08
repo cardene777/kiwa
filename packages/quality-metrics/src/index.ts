@@ -62,3 +62,11 @@ export {
   type MetricSnapshot,
   type TrendReport,
 } from './history.js';
+
+// v2.1 Adaptive drift threshold learning
+export {
+  learnAdaptiveThreshold,
+  pickThresholdForAxis,
+  type AdaptiveThreshold,
+  type AdaptiveThresholdReport,
+} from './threshold-learning.js';
