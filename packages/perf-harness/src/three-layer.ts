@@ -279,6 +279,32 @@ function writeReport(input: WriteReportInput): void {
 }
 
 /**
+ * runPerf3LayerStrict — v0.3 strict variant。 iter 2 倍 + Welch |t|>3 +
+ * delta 10%。 test 漏れゼロを狙う fail-fast mode。
+ *
+ * defaults ...
+ * - serialIterations: 400 (v0.2 200)
+ * - serialWarmup: 10 (v0.2 5)
+ * - concurrency: 20 (v0.2 10)
+ * - iterationsPerWorker: 100 (v0.2 50)
+ * - memoryIterations: 400 (v0.2 200)
+ *
+ * regression 判定は detectRegressionStrict 経由 (|t|>3 + delta 10%)。
+ */
+export async function runPerf3LayerStrict(
+  input: RunPerf3LayerInput,
+): Promise<RunPerf3LayerResult> {
+  return runPerf3Layer({
+    ...input,
+    serialIterations: input.serialIterations ?? 400,
+    serialWarmup: input.serialWarmup ?? 10,
+    concurrency: input.concurrency ?? 20,
+    iterationsPerWorker: input.iterationsPerWorker ?? 100,
+    memoryIterations: input.memoryIterations ?? 400,
+  });
+}
+
+/**
  * resolveKiwaRepoRoot — walk upward from `start` until finding a package.json
  * whose `name` matches `kiwa-monorepo`. Used by every kiwa perf test to
  * resolve the report path regardless of vitest cwd.

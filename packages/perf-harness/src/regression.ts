@@ -7,6 +7,7 @@ import type {
 
 export function detectRegression(input: RegressionInput): RegressionResult {
   const threshold = input.threshold ?? 0.2;
+  const tCritical = input.tCritical ?? 2;
   const current = normalize(input.current);
   const baseline = normalize(input.baseline);
 
@@ -16,7 +17,7 @@ export function detectRegression(input: RegressionInput): RegressionResult {
       : Number.POSITIVE_INFINITY
     : (current.p95 - baseline.p95) / baseline.p95;
   const welchT = welchTScore(current.samples, baseline.samples);
-  const significant = Math.abs(welchT) > 2;
+  const significant = Math.abs(welchT) > tCritical;
 
   let verdict: RegressionResult['verdict'] = 'stable';
   if (significant && deltaPct >= threshold) {
@@ -32,6 +33,20 @@ export function detectRegression(input: RegressionInput): RegressionResult {
     significant,
     verdict,
   };
+}
+
+/**
+ * v0.3 strict mode — |t|>3 + 10% delta。 test 漏れゼロを狙う厳化版。
+ *
+ * v0.2 default (|t|>2 + 20% delta) より false negative を減らす方針。
+ * strict mode で regression 検知失敗なら、 実 code 変更 or baseline 再生成が必要。
+ */
+export function detectRegressionStrict(input: RegressionInput): RegressionResult {
+  return detectRegression({
+    ...input,
+    threshold: input.threshold ?? 0.1,
+    tCritical: input.tCritical ?? 3,
+  });
 }
 
 function normalize(result: MeasureResult): MeasureResult {

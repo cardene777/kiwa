@@ -30,6 +30,10 @@ export interface RegressionInput {
   current: MeasureResult;
   baseline: MeasureResult;
   threshold?: number;
+  /**
+   * Welch t-test critical value. v0.2 default 2、 v0.3 strict では 3。
+   */
+  tCritical?: number;
 }
 
 export interface RegressionResult {
