@@ -358,6 +358,12 @@ export default defineConfig({
             { text: '109 — Islands + Turbopack HMR + PE (Islands architecture + fast refresh walkthrough)', link: '/tutorials/109-islands-turbopack-hmr' },
           ],
         },
+        {
+          text: 'Mobile new-base pair 第 13 (v1.50、 41 package 到達)',
+          items: [
+            { text: '110 — Mobile testing baseline (React Native + Expo + Metro walkthrough)', link: '/tutorials/110-mobile-testing' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -401,6 +407,7 @@ export default defineConfig({
             { text: 'Realtime advanced III testing (v0.3 8 axis SSOT + 3 protocol MoQ / WebCodecs / AI-media × 8 axis + pair 第 2 pair 3 段拡張達成 record + KIWA_MODE=real env-gate)', link: '/concepts/realtime-advanced-III-testing' },
             { text: 'DevSecOps library integration (v0.1 6 axis SAST + SCA + Secret + IaC + DAST + Container + 4 skill 置換 pattern SSOT + 段階的移行 Phase 1-3)', link: '/concepts/security-devsecops-library-integration' },
             { text: 'Frontend advanced III testing (v1.49 6 axis SSOT + pair 深度 3 段 4 例目)', link: '/concepts/frontend-advanced-III-testing' },
+            { text: 'Mobile testing baseline (v1.50 3 axis SSOT + new-base pair 第 13 + 41 package 到達)', link: '/concepts/mobile-testing-baseline' },
           ],
         },
       ],
@@ -449,6 +456,7 @@ export default defineConfig({
             { text: 'v1.46 → v1.47', link: '/migrations/v1.46-to-v1.47' },
             { text: 'v1.47 → v1.48', link: '/migrations/v1.47-to-v1.48' },
             { text: 'v1.48 → v1.49', link: '/migrations/v1.48-to-v1.49' },
+            { text: 'v1.49 → v1.50', link: '/migrations/v1.49-to-v1.50' },
           ],
         },
       ],
