@@ -57,6 +57,7 @@ import {
   updateTrayTooltip,
   writeClipboard,
 } from '../semantics/index.js';
+import { REAL_AXIS_RUNNERS } from './real-runner.js';
 import type { AdapterInvocation, AdapterResult, DesktopAdapter } from './types.js';
 
 function extractNeutralEvents(steps: AxisStep<string>[]): NeutralEventName[] {
@@ -256,7 +257,9 @@ export function makeRealAdapter(axis: DesktopAxis): DesktopAdapter {
   return {
     axis,
     async scan(inv) {
-      return AXIS_RUNNERS[axis]({ ...inv, mode: 'real' });
+      // v0.7 = real 経路は REAL_AXIS_RUNNERS 経由で behavior 差別化
+      // shape 契約 preserving (neutralEvents + eventCount 一致) + metadata / state 差別化
+      return REAL_AXIS_RUNNERS[axis]({ ...inv, mode: 'real' });
     },
   };
 }
