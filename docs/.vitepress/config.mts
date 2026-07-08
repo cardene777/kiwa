@@ -338,6 +338,12 @@ export default defineConfig({
             { text: '104 — Perf strict mode (iter 400 + Welch |t|>3 + delta 10% + fail-fast release gate walkthrough)', link: '/tutorials/104-perf-strict' },
           ],
         },
+        {
+          text: 'DevSecOps adapter integration Phase 2 (v1.47)',
+          items: [
+            { text: '105 — DevSecOps adapter (6 axis × mock/real pair + env-gate + fidelity harness walkthrough)', link: '/tutorials/105-security-adapter' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -425,6 +431,7 @@ export default defineConfig({
             { text: 'v1.43 → v1.44', link: '/migrations/v1.43-to-v1.44' },
             { text: 'v1.44 → v1.45', link: '/migrations/v1.44-to-v1.45' },
             { text: 'v1.45 → v1.46', link: '/migrations/v1.45-to-v1.46' },
+            { text: 'v1.46 → v1.47', link: '/migrations/v1.46-to-v1.47' },
           ],
         },
       ],
