@@ -1,0 +1,20 @@
+{
+  "name": "dogfood-security-devsecops-adapter-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.47-3 — 6 axis × mock/real adapter pair fidelity harness backed by @kiwa-test/security-devsecops v0.2 adapter interface。 KIWA_SECURITY_MODE=real で real driver 走査 opt-in、 それ以外は mock adapter で deterministic replay。",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/security-devsecops build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/security-devsecops": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
