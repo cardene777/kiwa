@@ -382,6 +382,12 @@ export default defineConfig({
             { text: '113 — Mobile real driver adapter (11 axis × mock/real + fidelity harness walkthrough)', link: '/tutorials/113-mobile-real-driver' },
           ],
         },
+        {
+          text: 'Mobile 深化 V (v1.54、 pair 第 13 の 5 段目 Phase 5、 pair 深度 5 段拡張 1 例目 candidate depth-5 pattern 新設、 32 milestone streak)',
+          items: [
+            { text: '114 — Mobile v0.5 spawn stub (child_process.spawn 契約層 + 6 CLI stub + env-gate + fail-closed walkthrough)', link: '/tutorials/114-mobile-real-cli' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -429,6 +435,7 @@ export default defineConfig({
             { text: 'Mobile testing advanced II (v1.51 7 axis SSOT + real driver env-gate + pair 第 13 2 段目)', link: '/concepts/mobile-testing-advanced' },
             { text: 'Mobile testing advanced III (v1.52 11 axis SSOT + pair 深度 3 段記録 5 例目 + 30 milestone streak 突入)', link: '/concepts/mobile-testing-advanced-III' },
             { text: 'Mobile real driver adapter (v1.53 adapter interface SSOT + 66 combination + pair 深度 4 段記録 4 例目 depth-4)', link: '/concepts/mobile-testing-real-driver' },
+            { text: 'Mobile spawn stub 契約層 (v1.54 spawn-driver SSOT + 6 CLI stub + pair 深度 5 段拡張 1 例目 candidate depth-5 pattern 新設)', link: '/concepts/mobile-testing-real-cli' },
           ],
         },
       ],
@@ -481,6 +488,7 @@ export default defineConfig({
             { text: 'v1.50 → v1.51', link: '/migrations/v1.50-to-v1.51' },
             { text: 'v1.51 → v1.52', link: '/migrations/v1.51-to-v1.52' },
             { text: 'v1.52 → v1.53', link: '/migrations/v1.52-to-v1.53' },
+            { text: 'v1.53 → v1.54', link: '/migrations/v1.53-to-v1.54' },
           ],
         },
       ],
