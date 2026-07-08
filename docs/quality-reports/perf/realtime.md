@@ -6,10 +6,10 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| supabasePresenceTrack | 0.00ms | 20ms | PASS | n/a (baseline seeded) |
-| ablyPublish | 0.00ms | 20ms | PASS | n/a (baseline seeded) |
-| pusherSubscribeChannel | 0.00ms | 20ms | PASS | n/a (baseline seeded) |
-| socketioEmit | 0.00ms | 20ms | PASS | n/a (baseline seeded) |
+| supabasePresenceTrack | 0.00ms | 20ms | PASS | stable |
+| ablyPublish | 0.00ms | 20ms | PASS | stable |
+| pusherSubscribeChannel | 0.00ms | 20ms | PASS | stable |
+| socketioEmit | 0.00ms | 20ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -17,17 +17,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|---|---|
 | supabasePresenceTrack | 0.02ms | 40ms | PASS |
 | ablyPublish | 0.01ms | 40ms | PASS |
-| pusherSubscribeChannel | 0.00ms | 40ms | PASS |
+| pusherSubscribeChannel | 0.01ms | 40ms | PASS |
 | socketioEmit | 0.01ms | 40ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
 |---|---|---|---|---|
-| supabasePresenceTrack | 648200 B | 0 B | 102400 B | PASS |
-| ablyPublish | 380512 B | 0 B | 102400 B | PASS |
-| pusherSubscribeChannel | 406600 B | 0 B | 102400 B | PASS |
-| socketioEmit | 309992 B | 0 B | 102400 B | PASS |
+| supabasePresenceTrack | 647728 B | 0 B | 102400 B | PASS |
+| ablyPublish | 289328 B | 0 B | 102400 B | PASS |
+| pusherSubscribeChannel | 155776 B | 0 B | 102400 B | PASS |
+| socketioEmit | 309968 B | 0 B | 102400 B | PASS |
 
 ## Detailed serial reports
 
@@ -41,12 +41,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.00ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.29ms |
+| total | 0.34ms |
+
+## Baseline diff
+
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | +0.00ms | +11.11% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +14.10% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +36.63% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +15.45% |
+| min | 0.00ms | 0.00ms | +0.00ms | +0.09% |
+| max | 0.01ms | 0.01ms | +0.00ms | +7.31% |
+| total | 0.34ms | 0.29ms | +0.05ms | +15.45% |
 
 ### ablyPublish
 
@@ -63,7 +75,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.10ms |
+| total | 0.11ms |
+
+## Baseline diff
+
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | +0.00ms | +0.30% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +16.10% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -11.77% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +5.99% |
+| min | 0.00ms | 0.00ms | +0.00ms | +16.40% |
+| max | 0.01ms | 0.01ms | 0.00ms | 0.00% |
+| total | 0.11ms | 0.10ms | +0.01ms | +5.99% |
 
 ### pusherSubscribeChannel
 
@@ -77,10 +101,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.00ms |
 | p99 | 0.00ms |
 | mean | 0.00ms |
-| stdev | 0.00ms |
+| stdev | 0.03ms |
 | min | 0.00ms |
-| max | 0.00ms |
-| total | 0.06ms |
+| max | 0.38ms |
+| total | 0.44ms |
+
+## Baseline diff
+
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | -0.00ms | -19.71% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +3.93% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -15.89% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +645.72% |
+| min | 0.00ms | 0.00ms | +0.00ms | +32.80% |
+| max | 0.38ms | 0.00ms | +0.38ms | +9163.64% |
+| total | 0.44ms | 0.06ms | +0.39ms | +645.72% |
 
 ### socketioEmit
 
@@ -98,4 +134,16 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | min | 0.00ms |
 | max | 0.00ms |
 | total | 0.09ms |
+
+## Baseline diff
+
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | -0.00ms | -12.31% |
+| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +104.92% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +6.73% |
+| min | 0.00ms | 0.00ms | -0.00ms | -14.09% |
+| max | 0.00ms | 0.00ms | +0.00ms | +34.11% |
+| total | 0.09ms | 0.09ms | +0.01ms | +6.73% |
 

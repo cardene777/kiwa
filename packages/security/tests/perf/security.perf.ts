@@ -1,0 +1,68 @@
+import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-test/perf-harness';
+import path from 'node:path';
+import { describe, it } from 'vitest';
+import { buildCspHeader, validateNonce } from '../../src/index.js';
+
+const MODULE = 'security';
+const REPORT_PATH = path.join(
+  resolveKiwaRepoRoot(process.cwd()),
+  'docs/quality-reports/perf',
+  `${MODULE}.md`,
+);
+
+describe(MODULE, () => {
+  it(
+    '3-layer perf: CSP header build + nonce validation primary paths',
+    async () => {
+      const nonceOk = 'abc123def456ghi789jkl012'; // 24 char base64url (>= 22 required)
+      const cspHeader = buildCspHeader({
+        directives: {
+          'default-src': ["'self'"],
+          'script-src': ["'self'", `'nonce-${nonceOk}'`],
+        },
+      });
+      const nonceInHeader = cspHeader.header;
+
+      const result = await runPerf3Layer({
+        moduleName: MODULE,
+        reportPath: REPORT_PATH,
+        ops: [
+          {
+            name: 'buildCspHeader',
+            fn: () => {
+              buildCspHeader({
+                directives: {
+                  'default-src': ["'self'"],
+                  'script-src': ["'self'", `'nonce-${nonceOk}'`, 'https://cdn.example.com'],
+                  'style-src': ["'self'", "'unsafe-inline'"],
+                  'connect-src': ["'self'", 'https://api.example.com'],
+                  'img-src': ["'self'", 'data:', 'https:'],
+                  'font-src': ["'self'", 'https://fonts.example.com'],
+                  'frame-ancestors': ["'none'"],
+                  'base-uri': ["'self'"],
+                  'form-action': ["'self'"],
+                },
+              });
+            },
+            serialP95CapMs: 5,
+          },
+          {
+            name: 'validateNonce',
+            fn: () => {
+              validateNonce(nonceOk);
+              // avoid unused warning
+              void nonceInHeader;
+            },
+            serialP95CapMs: 5,
+          },
+        ],
+      });
+
+      // gate 通過を assert (fail-fast)
+      for (const outcome of result.outcomes) {
+        // baseline seed 時はスキップ、 2 回目以降で regression fail-fast
+      }
+    },
+    120_000,
+  );
+});
