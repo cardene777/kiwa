@@ -38,3 +38,6 @@ export type {
 export { setupKeyDBEnv } from './keydb/setup-keydb-env.js';
 export { createStubKeyDBEnv } from './keydb/stub-keydb.js';
 export { createTestcontainersKeyDBEnv } from './keydb/testcontainers-keydb.js';
+
+// v0.6 cache-lifecycle-orchestrator = 3 provider (Redis + Memcached + KeyDB) 継続合成 layer
+export * from './semantics/index.js';
