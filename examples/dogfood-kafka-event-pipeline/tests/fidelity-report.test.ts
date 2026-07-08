@@ -45,7 +45,7 @@ describe('dogfood-kafka-event-pipeline — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/streaming/kafka-dogfood',
+      provider: '@kiwa/streaming/kafka-dogfood',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -81,7 +81,7 @@ describe('dogfood-kafka-event-pipeline — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/streaming/kafka-dogfood',
+      provider: '@kiwa/streaming/kafka-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -107,7 +107,7 @@ describe('dogfood-kafka-event-pipeline — fidelity harness', () => {
     const real = await makeRealAdapter();
     const matrix = await runAdapterMatrix({ mock, real, run: async () => undefined });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/streaming/kafka-dogfood',
+      provider: '@kiwa/streaming/kafka-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -140,7 +140,7 @@ describe('dogfood-kafka-event-pipeline — fidelity harness', () => {
     await driveSchemaRegistryFlow(mock, { subject: 't', compatibility: 'BACKWARD' });
     await driveTestcontainersProbeFlow(mock);
     const output = runFidelityHarness({
-      provider: '@kiwa-test/streaming/kafka-dogfood',
+      provider: '@kiwa/streaming/kafka-dogfood',
       version: '0.1.0',
       mockTraces: mock.traces(),
       realTraces: real.traces(),

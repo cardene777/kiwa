@@ -1,5 +1,5 @@
 /**
- * Vector index gate — wraps `@kiwa-test/orm`'s vector-store semantics
+ * Vector index gate — wraps `@kiwa/orm`'s vector-store semantics
  * into a small helper that models the production Kysely + pgvector
  * layer:
  *
@@ -30,7 +30,7 @@ import {
   type VectorIndex,
   type VectorIndexKind,
   type VectorStoreSession,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 export interface VectorIndexGate {
   readonly session: VectorStoreSession;

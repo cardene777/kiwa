@@ -10,17 +10,17 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 import type { FormCTAdapter, TraceEvent } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares a Playwright CT form run under
  * `makeMockAdapter` against one under `makeRealAdapter`, feeds the divergence
- * count (missing ops, unmatched behaviour) into the `@kiwa-test/quality-metrics`
+ * count (missing ops, unmatched behaviour) into the `@kiwa/quality-metrics`
  * 7-axis release gate, and emits a JSON + markdown report.
  *
  * The dogfood app is the source of truth for whether the kiwa
- * `@kiwa-test/component` `createPlaywrightCTMock` tracks real Playwright CT
+ * `@kiwa/component` `createPlaywrightCTMock` tracks real Playwright CT
  * closely enough to be trusted in unit tests — this harness is where that
  * trust is measured.
  *

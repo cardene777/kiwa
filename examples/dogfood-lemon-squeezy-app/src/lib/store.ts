@@ -6,7 +6,7 @@
  *
  * Mirrors the surface a real database + audit log deployment would expose so
  * the same SvelteKit endpoints can flip between the real Lemon Squeezy
- * sandbox driver and the `@kiwa-test/payment` mock without knowing which is
+ * sandbox driver and the `@kiwa/payment` mock without knowing which is
  * in play.
  *
  * The store is in-memory + per-instance; production RPs swap this for a
@@ -19,7 +19,7 @@ import type {
   Invoice as SemanticInvoice,
   PaymentWebhookEvent,
   Subscription as SemanticSubscription,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 /**
  * Lemon Squeezy hosted checkout session. Real Lemon Squeezy returns a

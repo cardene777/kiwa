@@ -7,7 +7,7 @@
  *    broker (KIWA_ISTIO_URL + KIWA_OPA_URL + KIWA_MTLS_CA_PATH) when
  *    `KIWA_MODE=real` + `MTLS_STACK_READY=1` are set; otherwise every op
  *    reports `KIWA_MTLS_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/security` v0.2
+ *  - {@link makeMockAdapter} — backed by `@kiwa/security` v0.2
  *    mtls + zero-trust semantics (startMtlsSession / completeHandshake /
  *    verifyPin / verifyOcsp / checkCtLog / startZeroTrustSession /
  *    evaluatePosture / scoreRisk / requestJit / enforceMicroSegment).

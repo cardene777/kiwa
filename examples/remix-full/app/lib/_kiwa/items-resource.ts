@@ -6,7 +6,7 @@
 // Pattern A (Dependency Injection) — 実 Remix 側は app/routes/api.items.tsx で
 // export const loader / action を直接 re-export する。
 
-import { json, type ResourceRouteModule, type SimulatedRouteArgs } from '@kiwa-test/remix';
+import { json, type ResourceRouteModule, type SimulatedRouteArgs } from '@kiwa/remix';
 import { resolveUser } from '../../utils/_kiwa/auth.js';
 
 interface CountState {

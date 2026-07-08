@@ -6,7 +6,7 @@
 // この loader 結果を読む or kiwa の setupRemixNestedRouteEnv で context.parentData
 // として受け取って unit test できる。
 
-import { json, type SimulatedRouteArgs } from '@kiwa-test/remix';
+import { json, type SimulatedRouteArgs } from '@kiwa/remix';
 import { resolveUser } from '../../utils/_kiwa/auth.js';
 
 export interface DashboardLayoutData {

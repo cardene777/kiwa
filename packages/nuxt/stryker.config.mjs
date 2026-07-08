@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/nuxt.
+ * Mutation testing config for @kiwa/nuxt.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — SSR + hydration + Nitro adapter drift.
  * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
  */

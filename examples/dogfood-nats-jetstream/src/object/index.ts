@@ -12,7 +12,7 @@
  * mock needing to model the real wire protocol.
  */
 
-import type { NatsMock, ObjectEntry, ObjectInfo, ObjectStore } from '@kiwa-test/streaming';
+import type { NatsMock, ObjectEntry, ObjectInfo, ObjectStore } from '@kiwa/streaming';
 
 export interface ObjectRun {
   readonly bucket: string;

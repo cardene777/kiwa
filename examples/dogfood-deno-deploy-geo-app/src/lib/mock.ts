@@ -1,6 +1,6 @@
 /**
  * Mock adapter — drives the Deno Deploy harness directly using
- * `@kiwa-test/edge` v0.2 8 axis semantics helpers on 3 axes
+ * `@kiwa/edge` v0.2 8 axis semantics helpers on 3 axes
  * (geo-replicated / edge-kv / cron-trigger). Always runs; no environment
  * gate.
  *
@@ -29,7 +29,7 @@ import {
   type CronSession,
   type EdgeKvSession,
   type GeoReplicatedSession,
-} from '@kiwa-test/edge';
+} from '@kiwa/edge';
 import {
   REGION_CATALOG,
   normalizeCronSpec,

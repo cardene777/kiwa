@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/ai-llm",
+  "package": "@kiwa/ai-llm",
   "tier": "SaaS",
   "thresholds": {
     "high": 65,

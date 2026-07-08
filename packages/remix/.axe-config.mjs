@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/remix.
+ * A11y (axe-core) config for @kiwa/remix.
  * Tier: Framework tier (critical 0 / serious 0-3 / moderate 0-10) — SSR + loader / action + client hydration. Serious tolerance for Remix-owned markup.
  * SSOT: docs/quality/a11y-thresholds.md § Framework tier.
  */

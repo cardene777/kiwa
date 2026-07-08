@@ -15,7 +15,7 @@
  * The Nitro `defineEventHandler` runtime is not booted (that would require
  * `nuxt build` + a live server). Instead, the spec exercises the RP
  * behavioural contract by replaying the same state + nonce + PKCE flow
- * against the `@kiwa-test/auth` mock OP that the fidelity harness uses in
+ * against the `@kiwa/auth` mock OP that the fidelity harness uses in
  * `id-token-verify.spec.ts`. This gives us behavioural coverage of the
  * full journey without the Nuxt runtime startup cost.
  *
@@ -28,7 +28,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { createHash, randomBytes } from 'node:crypto';
-import { setupOidcEnv } from '@kiwa-test/auth';
+import { setupOidcEnv } from '@kiwa/auth';
 import { verifyIdToken } from '../src/lib/id-token.js';
 import { renderCallback, renderIndex } from '../rp/lib/pages-templates.js';
 

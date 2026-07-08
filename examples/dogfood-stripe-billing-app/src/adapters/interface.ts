@@ -7,7 +7,7 @@
  *  - {@link makeRealAdapter} (drives a real Stripe API / Stripe
  *    testcontainers-shaped mock server, skipped when the environment cannot
  *    reach `STRIPE_KEY` + `KIWA_MODE=real`)
- *  - {@link makeMockAdapter} (backed by `@kiwa-test/payment`'s
+ *  - {@link makeMockAdapter} (backed by `@kiwa/payment`'s
  *    `createStripeMock` + 9-axis semantics)
  *
  * Both must satisfy the same contract so behavioural fidelity between real
@@ -33,7 +33,7 @@ import type {
   DunningSession,
   PaymentWebhookEvent,
   WebhookVerifyResult,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 /**
  * Input for a checkout session creation. Mirrors the fields a real client

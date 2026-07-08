@@ -4,13 +4,13 @@
  *
  * The dogfood talks to Kafka only through this interface. Two
  * implementations exist: {@link makeMockAdapter} (backed by
- * `@kiwa-test/streaming`'s Kafka + exactly-once + DLQ mocks) and
+ * `@kiwa/streaming`'s Kafka + exactly-once + DLQ mocks) and
  * {@link makeRealAdapter} (drives `kafkajs` against a live broker when
  * `KAFKA_BOOTSTRAP` is set, else returns a `skipped` variant whose every
  * method records a `KAFKA_ENV_MISSING` trace).
  *
  * Both satisfy the same 5-op surface so behavioural fidelity between real
- * vs mock can be measured side-by-side and fed to `@kiwa-test/quality-metrics`
+ * vs mock can be measured side-by-side and fed to `@kiwa/quality-metrics`
  * 7-axis release gate.
  */
 

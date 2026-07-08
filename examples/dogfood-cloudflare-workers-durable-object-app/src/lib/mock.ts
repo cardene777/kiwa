@@ -1,6 +1,6 @@
 /**
  * Mock adapter — drives the chat-room Durable Object registry + WebSocket
- * registry directly using `@kiwa-test/edge` v0.2 8 axis semantics helpers.
+ * registry directly using `@kiwa/edge` v0.2 8 axis semantics helpers.
  * Always runs; no environment gate.
  *
  * Emits axis events on both durable-object (created / requested /

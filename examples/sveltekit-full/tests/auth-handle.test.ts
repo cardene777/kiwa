@@ -1,11 +1,11 @@
 // kiwa unit test for src/lib/_kiwa/auth-handle.ts
-// — invokes the pure handle hook through @kiwa-test/sveltekit's invokeHandle.
+// — invokes the pure handle hook through @kiwa/sveltekit's invokeHandle.
 
 import { describe, expect, it } from 'vitest';
-import { invokeHandle } from '@kiwa-test/sveltekit';
+import { invokeHandle } from '@kiwa/sveltekit';
 import { authHandle, type AuthLocals } from '../src/lib/_kiwa/auth-handle.js';
 
-describe('authHandle via @kiwa-test/sveltekit invokeHandle', () => {
+describe('authHandle via @kiwa/sveltekit invokeHandle', () => {
   it('T-SF-201: session=admin で locals.user 注入 + downstream に到達 + header attach', async () => {
     const { response, resolveCalled, localsAtResolve } = await invokeHandle<AuthLocals>({
       handle: authHandle,

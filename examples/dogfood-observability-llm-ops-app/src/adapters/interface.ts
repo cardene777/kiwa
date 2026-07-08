@@ -9,7 +9,7 @@
  *    KIWA_LLM_BUDGET_API_URL) when `KIWA_MODE=real` +
  *    `LLM_STACK_READY=1` are set; otherwise every op reports
  *    `KIWA_LLM_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/observability` v2.2
+ *  - {@link makeMockAdapter} — backed by `@kiwa/observability` v2.2
  *    LLM-obs semantics (countTokens / logPrompt / flagHallucination /
  *    checkBudget).
  *
@@ -29,7 +29,7 @@
  * report can point at the ops that diverged.
  */
 
-import type { semantics } from '@kiwa-test/observability';
+import type { semantics } from '@kiwa/observability';
 
 /** Re-export from observability semantics namespace. */
 export type ObservabilityTarget = semantics.ObservabilityTarget;

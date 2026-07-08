@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-test/perf-harness';
+import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa/perf-harness';
 import { renderSolid, h } from '../../src/render.js';
 import { mockSignal, mockEffect } from '../../src/signal.js';
 

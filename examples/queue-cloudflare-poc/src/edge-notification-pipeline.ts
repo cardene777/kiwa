@@ -2,7 +2,7 @@ import type {
   CloudflareQueueBatch,
   CloudflareQueueConsumerRegistration,
   CloudflareQueuesTestEnv,
-} from '@kiwa-test/queue';
+} from '@kiwa/queue';
 
 /**
  * A small edge-runtime notification pipeline stitched together so the PoC can

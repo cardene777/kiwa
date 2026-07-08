@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.43-2 — a serverless cold-start observability harness driven behind a provider-neutral surface backed by @kiwa-test/edge v1.2 advanced cold-start semantics (invokeColdStart + preWarmInstance + evictExpired + provisioned pool) + real-driver env-gate. Two adapter implementations satisfy the same 12-op contract: makeMockAdapter walks the edge cold-start + middleware + routing state machines deterministically without any backend; makeRealAdapter emits a Cloudflare Workers + Vercel Edge + AWS Lambda style function invocation + warm pool + provisioned concurrency API sequence through the KIWA_MODE=real testcontainers-driven stack when KIWA_EDGE_FN_URL / KIWA_EDGE_WARM_POOL_URL / KIWA_EDGE_PROVISIONED_URL are wired, and otherwise reports KIWA_EDGE_COLD_START_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 3 lifecycle stages (cold / warm / provisioned) x 3 edge platforms (cloudflare / vercel / deno) so behavioural drift between mock semantics and real function invocation APIs stays observable and feeds the @kiwa-test/quality-metrics 13-axis release gate.",
+  "description": "Dogfood app v1.43-2 — a serverless cold-start observability harness driven behind a provider-neutral surface backed by @kiwa/edge v1.2 advanced cold-start semantics (invokeColdStart + preWarmInstance + evictExpired + provisioned pool) + real-driver env-gate. Two adapter implementations satisfy the same 12-op contract: makeMockAdapter walks the edge cold-start + middleware + routing state machines deterministically without any backend; makeRealAdapter emits a Cloudflare Workers + Vercel Edge + AWS Lambda style function invocation + warm pool + provisioned concurrency API sequence through the KIWA_MODE=real testcontainers-driven stack when KIWA_EDGE_FN_URL / KIWA_EDGE_WARM_POOL_URL / KIWA_EDGE_PROVISIONED_URL are wired, and otherwise reports KIWA_EDGE_COLD_START_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 3 lifecycle stages (cold / warm / provisioned) x 3 edge platforms (cloudflare / vercel / deno) so behavioural drift between mock semantics and real function invocation APIs stays observable and feeds the @kiwa/quality-metrics 13-axis release gate.",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/edge build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/core -F @kiwa/edge build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/edge": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/edge": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

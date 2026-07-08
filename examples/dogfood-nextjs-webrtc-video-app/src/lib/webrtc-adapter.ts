@@ -1,6 +1,6 @@
 /**
  * WebRTC adapter routing — the entry point the Next.js app uses to pick
- * between real (mediasoup + coturn) and mock (@kiwa-test/realtime v0.2) at
+ * between real (mediasoup + coturn) and mock (@kiwa/realtime v0.2) at
  * runtime. Inherits the 8-axis routing shape from v1.28-1 so downstream
  * dogfoods can reuse this pattern with a one-liner switch on the axis.
  *

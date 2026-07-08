@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/release-invariants",
+  "package": "@kiwa/release-invariants",
   "generatedAt": "2026-07-06T01:47:54.901Z",
   "layers": {
     "jsdom": {

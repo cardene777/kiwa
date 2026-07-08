@@ -1,7 +1,7 @@
 import {
   setupRabbitMQAdvancedEnv,
   type RabbitMQAdvancedTestEnv,
-} from '@kiwa-test/queue';
+} from '@kiwa/queue';
 import type {
   AutoReconnectOutcome,
   FederationIngestResult,

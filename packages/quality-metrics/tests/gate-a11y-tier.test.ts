@@ -33,7 +33,7 @@ import {
 
 function baseReport(): QualityReport {
   return {
-    provider: '@kiwa-test/example',
+    provider: '@kiwa/example',
     version: '0.1.0',
     reportedAt: '2026-07-06T00:00:00Z',
     coverage: { line: 90, branch: 82, function: 95 },
@@ -260,7 +260,7 @@ describe('evaluateReleaseGate — 13-axis mode via a11yTier', () => {
   it('T-QM-AT-022 tier + AI-LLM + a11yTier together evaluates 13 axes (11 + 2 tiers)', () => {
     const report: QualityReport = {
       ...baseReport(),
-      provider: '@kiwa-test/ai-llm',
+      provider: '@kiwa/ai-llm',
       cost: { perRequestUsd: 0.05, totalUsd: 5, requests: 100 },
       latency: { p50Ms: 500, p95Ms: 1500, p99Ms: 2500, samples: 100 },
       token: { promptTokens: 800, completionTokens: 400, totalTokens: 1200, requests: 100 },

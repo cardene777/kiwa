@@ -7,7 +7,7 @@
  * spinning up Next.js.
  *
  * The catalog surface pairs the parent v1.34-1 `streaming-ssr` axis with
- * `setupNextRscEnv` from `@kiwa-test/nextjs` v1.2 — every op has a neutral
+ * `setupNextRscEnv` from `@kiwa/nextjs` v1.2 — every op has a neutral
  * event counterpart the fidelity harness can compare across mock vs real.
  */
 

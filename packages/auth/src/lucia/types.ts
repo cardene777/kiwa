@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa-test/core';
+import type { TestEnvBase } from '@kiwa/core';
 
 /**
  * Lucia v3 supports two database dialects out of the box through the official

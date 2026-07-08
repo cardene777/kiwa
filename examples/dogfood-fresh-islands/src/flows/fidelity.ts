@@ -10,18 +10,18 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 import type { FreshAdapter, TraceEvent } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares a Deno Fresh run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into the `@kiwa-test/quality-metrics`
+ * (missing ops, unmatched behaviour) into the `@kiwa/quality-metrics`
  * 7-axis release gate, and emits a JSON + markdown report so the release
  * process can consume it.
  *
  * The dogfood app is the source of truth for whether the kiwa
- * `@kiwa-test/fresh` mock tracks real Deno Fresh closely enough to be
+ * `@kiwa/fresh` mock tracks real Deno Fresh closely enough to be
  * trusted in unit tests — this harness is where that trust is measured.
  *
  * Framework dogfoods use the common 7 axes (coverage 3 / fidelity / perf

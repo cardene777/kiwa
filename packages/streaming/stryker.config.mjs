@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/streaming.
+ * Mutation testing config for @kiwa/streaming.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — streaming adapter
  * covers Kafka / NATS / Redpanda with dead-letter queue + exactly-once
  * semantics; provider mocks have partial fidelity.

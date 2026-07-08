@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa-test/streaming/nats-jetstream-dogfood",
+  "provider": "@kiwa/streaming/nats-jetstream-dogfood",
   "version": "0.2.0",
   "reportedAt": "2026-07-06T05:33:38.699Z",
   "coverage": {

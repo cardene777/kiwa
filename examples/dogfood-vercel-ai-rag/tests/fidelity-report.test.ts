@@ -38,7 +38,7 @@ describe('dogfood-vercel-ai-rag — fidelity harness (Task 3.4)', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/vercel-ai-rag',
+      provider: '@kiwa/ai-llm/vercel-ai-rag',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -62,7 +62,7 @@ describe('dogfood-vercel-ai-rag — fidelity harness (Task 3.4)', () => {
       embeddingSimilaritySamples: [0.98, 0.97, 0.99],
       retrievalF1Samples: [1.0, 0.9, 0.95],
     });
-    expect(output.report.provider).toBe('@kiwa-test/ai-llm/vercel-ai-rag');
+    expect(output.report.provider).toBe('@kiwa/ai-llm/vercel-ai-rag');
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThanOrEqual(5);
     expect(output.verdict.axesEvaluated).toBe(11);
     expect(output.extras.embeddingMeanSimilarity).toBeGreaterThan(0.9);
@@ -91,7 +91,7 @@ describe('dogfood-vercel-ai-rag — fidelity harness (Task 3.4)', () => {
         },
       });
       const output = runFidelityHarness({
-        provider: '@kiwa-test/ai-llm/vercel-ai-rag',
+        provider: '@kiwa/ai-llm/vercel-ai-rag',
         version: '0.1.0',
         mockTraces: matrix.mockTraces,
         realTraces: matrix.realTraces,
@@ -136,7 +136,7 @@ describe('dogfood-vercel-ai-rag — fidelity harness (Task 3.4)', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/vercel-ai-rag',
+      provider: '@kiwa/ai-llm/vercel-ai-rag',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

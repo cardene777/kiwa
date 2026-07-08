@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { runSpecToTest } from '../../src/commands/spec-to-test.js';
-import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-test/perf-harness';
+import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa/perf-harness';
 import { describe, expect, it } from 'vitest';
 
 const MODULE = 'cli';
@@ -46,7 +46,7 @@ describe(MODULE, () => {
         memoryIterations: 100,
         ops: [
           {
-            // runSpecToTest reads md, parses via @kiwa-test/core parseSpec,
+            // runSpecToTest reads md, parses via @kiwa/core parseSpec,
             // renders a test template, writes .ts file. Measures the full
             // parse + render + write pipeline.
             name: 'runSpecToTest',

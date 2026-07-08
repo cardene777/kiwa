@@ -31,7 +31,7 @@
  * `docs/quality-reports/auth/webauthn-passkey-app-resident-key.md`.
  */
 
-import type { WebAuthnCredential } from '@kiwa-test/auth';
+import type { WebAuthnCredential } from '@kiwa/auth';
 import type { WebAuthnRPAdapter } from '../../adapters/interface.js';
 
 /**

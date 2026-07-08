@@ -16,7 +16,7 @@
  * idempotent single-token revocation.
  */
 
-import type { AuthorizationServer } from '@kiwa-test/auth';
+import type { AuthorizationServer } from '@kiwa/auth';
 import type { OAuth21ASAdapter } from '../../adapters/interface.js';
 import {
   cascadeRevoke,

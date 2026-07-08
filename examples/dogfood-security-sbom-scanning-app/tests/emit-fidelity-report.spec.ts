@@ -14,7 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import type { Advisory } from '@kiwa-test/security';
+import type { Advisory } from '@kiwa/security';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { makeRealAdapter } from '../src/adapters/real.js';
 import { runAdapterMatrix, runFidelityHarness } from '../src/lib/fidelity.js';
@@ -166,7 +166,7 @@ describe('emit fidelity-latest report', () => {
     const matrix = await runAdapterMatrix({ mock, real, run: driveFlows });
 
     const output = runFidelityHarness({
-      provider: '@kiwa-test/security/dogfood-sbom-scanning-app',
+      provider: '@kiwa/security/dogfood-sbom-scanning-app',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

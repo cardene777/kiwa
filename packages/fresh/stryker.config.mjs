@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/fresh.
+ * Mutation testing config for @kiwa/fresh.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — Deno Fresh islands + SSR drift.
  * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
  */

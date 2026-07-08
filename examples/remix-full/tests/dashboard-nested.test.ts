@@ -7,7 +7,7 @@
 // store に persist、 headers は Remix 公式 prependCookies 互換 logic で merge する。
 
 import { describe, expect, it } from 'vitest';
-import { setupRemixNestedRouteEnv, resolveDeferred, isDeferred } from '@kiwa-test/remix';
+import { setupRemixNestedRouteEnv, resolveDeferred, isDeferred } from '@kiwa/remix';
 import {
   dashboardLayoutLoader,
   dashboardLayoutHeaders,
@@ -45,7 +45,7 @@ describe('PoC #561: /dashboard nested → /dashboard/profile', () => {
     expect(parentBody.user.role).toBe('admin');
     // child loader = defer({ username, unread, badges })
     expect(isDeferred(r.child.result)).toBe(true);
-    const resolved = await resolveDeferred(r.child.result as ReturnType<typeof import('@kiwa-test/remix').defer>);
+    const resolved = await resolveDeferred(r.child.result as ReturnType<typeof import('@kiwa/remix').defer>);
     expect(resolved.resolved.username).toBe('u1');
     expect(resolved.resolved.unread).toBe(7);
     expect(resolved.resolved.badges).toEqual(['core-contributor', 'beta-tester']);

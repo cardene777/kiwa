@@ -10,7 +10,7 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 
 /**
  * PoC — a small "quality report builder" that a v1.10 provider (auth /

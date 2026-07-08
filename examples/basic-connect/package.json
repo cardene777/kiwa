@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/dapp build && playwright test",
+    "test": "pnpm -F @kiwa/dapp build && playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/dapp": "workspace:*"
+    "@kiwa/dapp": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

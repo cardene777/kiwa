@@ -47,7 +47,7 @@ describe('dogfood-solidjs-signal-app — emit fidelity report to quality-report/
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/solidjs/signal-app',
+      provider: '@kiwa/solidjs/signal-app',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -75,7 +75,7 @@ describe('dogfood-solidjs-signal-app — emit fidelity report to quality-report/
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThan(0);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     expect(output.markdown).toContain('Quality Report');
-    // Framework provider (@kiwa-test/solidjs/...) is not an AI-LLM prefix,
+    // Framework provider (@kiwa/solidjs/...) is not an AI-LLM prefix,
     // so the 7-axis gate must have run.
     expect(output.verdict.axesEvaluated).toBe(7);
     await mock.reset();

@@ -6,10 +6,10 @@
  * `STORYBOOK_URL` env + `STORYBOOK_MDX_READY=1` gate, else returns a
  * `skipped` adapter whose every method records
  * `STORYBOOK_MDX_REAL_ENV_MISSING`) and {@link makeMockAdapter} (backed by
- * `@kiwa-test/component` `createStoryRegistry` + in-process MdxRegistry +
+ * `@kiwa/component` `createStoryRegistry` + in-process MdxRegistry +
  * InteractionRunner + CoverageReporter). Both satisfy the same contract so
  * behavioural fidelity between real vs mock can be measured side-by-side and
- * fed to `@kiwa-test/quality-metrics` 7-axis release gate.
+ * fed to `@kiwa/quality-metrics` 7-axis release gate.
  *
  * The 8 ops mirror the AC in Issue #1051 — story registration + args
  * resolution + mount + MDX render + interaction (click / type / assert) +
@@ -19,7 +19,7 @@
  * system を base に、 MDX + interaction test + coverage の 3 axis を追加。
  */
 
-import type { A11yViolation, StoryMeta } from '@kiwa-test/component';
+import type { A11yViolation, StoryMeta } from '@kiwa/component';
 
 /** Registered story identifier (Storybook 8 SB URL param compatible). */
 export interface StoryDescriptor {

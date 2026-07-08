@@ -2,16 +2,16 @@
  * Provider-neutral trace flame graph explorer surface.
  *
  * The app talks to its trace source (real Jaeger HTTP API in real mode,
- * the kiwa `@kiwa-test/observability` `buildSpanTree` +
+ * the kiwa `@kiwa/observability` `buildSpanTree` +
  * `renderFlameGraph` + `LogCorrelationIndex` in mock mode) only through
  * this interface. Two implementations exist — {@link makeRealAdapter}
  * (fetches traces from a Jaeger `/api/traces` endpoint when
  * `JAEGER_URL` is set, otherwise reports each op as
  * `JAEGER_ENV_MISSING`) and {@link makeMockAdapter} (backed by the
- * `@kiwa-test/observability` span tree + flame graph + log correlation
+ * `@kiwa/observability` span tree + flame graph + log correlation
  * helpers). Both satisfy the same contract so behavioural fidelity
  * between real vs mock can be measured side-by-side and fed to
- * `@kiwa-test/quality-metrics` release gate.
+ * `@kiwa/quality-metrics` release gate.
  *
  * The 5 ops below cover the trace exploration lifecycle end-to-end.
  *
@@ -129,7 +129,7 @@ export interface TraceEvent {
   detail?: string;
 }
 
-/** Adapter-level metrics — the fidelity harness feeds load + render latency into `@kiwa-test/quality-metrics`. */
+/** Adapter-level metrics — the fidelity harness feeds load + render latency into `@kiwa/quality-metrics`. */
 export interface FlameExplorerMetrics {
   loadCount: number;
   renderCount: number;

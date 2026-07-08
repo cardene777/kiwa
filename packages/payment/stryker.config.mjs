@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/payment.
+ * Mutation testing config for @kiwa/payment.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — payment adapter wraps
  * Stripe / Paddle / LemonSqueezy with provider-specific mocks and permitted
  * live API drift for compatibility signatures.

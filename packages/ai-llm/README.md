@@ -1,15 +1,15 @@
-# `@kiwa-test/ai-llm`
+# `@kiwa/ai-llm`
 
 AI-LLM test harness for kiwa — a unified mock across 4 SDKs (Anthropic Messages API + OpenAI Chat Completions + Vercel AI SDK + LangChain) with streaming, tool-use, system-prompt, **multimodal (image + audio)** support, cost / latency / token / accuracy tracking, and a real-vs-mock fidelity harness.
 
-Feeds the v1.12 dogfood app suite (`examples/dogfood-anthropic-chatbot`, `examples/dogfood-openai-tool-agent`, `examples/dogfood-vercel-ai-rag`) and the 11-axis release gate in `@kiwa-test/quality-metrics` (v0.2+).
+Feeds the v1.12 dogfood app suite (`examples/dogfood-anthropic-chatbot`, `examples/dogfood-openai-tool-agent`, `examples/dogfood-vercel-ai-rag`) and the 11-axis release gate in `@kiwa/quality-metrics` (v0.2+).
 
 **v0.2 (v1.15-1, Issue #746)** — multimodal input mock (image + audio、 4 SDK 全対応) + Whisper transcription mock。
 
 ## Install
 
 ```sh
-pnpm add -D @kiwa-test/ai-llm @kiwa-test/quality-metrics
+pnpm add -D @kiwa/ai-llm @kiwa/quality-metrics
 ```
 
 ## Quick start — 4 SDK mocks
@@ -17,7 +17,7 @@ pnpm add -D @kiwa-test/ai-llm @kiwa-test/quality-metrics
 ### Anthropic
 
 ```ts
-import { createAnthropicMock } from '@kiwa-test/ai-llm';
+import { createAnthropicMock } from '@kiwa/ai-llm';
 
 const client = createAnthropicMock({
   responses: {
@@ -37,7 +37,7 @@ console.log(res._kiwa);   // { costUsd, latencyMs }
 ### OpenAI
 
 ```ts
-import { createOpenAIMock } from '@kiwa-test/ai-llm';
+import { createOpenAIMock } from '@kiwa/ai-llm';
 
 const client = createOpenAIMock({
   responses: {
@@ -63,7 +63,7 @@ for await (const chunk of stream) {
 ### Vercel AI SDK
 
 ```ts
-import { createVercelAiMock } from '@kiwa-test/ai-llm';
+import { createVercelAiMock } from '@kiwa/ai-llm';
 
 const client = createVercelAiMock({
   responses: {
@@ -87,7 +87,7 @@ console.log(await stream.text);
 ### LangChain
 
 ```ts
-import { createLangchainMock } from '@kiwa-test/ai-llm';
+import { createLangchainMock } from '@kiwa/ai-llm';
 
 const chatModel = createLangchainMock({
   responses: {
@@ -208,7 +208,7 @@ Mock は image を fixed cost で prompt token に加算 (Anthropic ~1600 / 1024
 Real API vs mock diff for 4 metrics (cost / latency / token / accuracy).
 
 ```ts
-import { runFidelityCheck, createAnthropicMock } from '@kiwa-test/ai-llm';
+import { runFidelityCheck, createAnthropicMock } from '@kiwa/ai-llm';
 
 const mock = createAnthropicMock({
   responses: {
@@ -233,14 +233,14 @@ console.log(report.summary);
 
 ## `QualityReport` adapter (11-axis release gate)
 
-Aggregate fidelity records into a `QualityReport` for `@kiwa-test/quality-metrics`.
+Aggregate fidelity records into a `QualityReport` for `@kiwa/quality-metrics`.
 
 ```ts
-import { buildAiLlmReport } from '@kiwa-test/ai-llm';
-import { evaluateReleaseGate, emitMarkdown } from '@kiwa-test/quality-metrics';
+import { buildAiLlmReport } from '@kiwa/ai-llm';
+import { evaluateReleaseGate, emitMarkdown } from '@kiwa/quality-metrics';
 
 const report = buildAiLlmReport({
-  provider: '@kiwa-test/ai-llm',
+  provider: '@kiwa/ai-llm',
   version: '0.1.0',
   fidelity,             // from runFidelityCheck
   testCount: { behavior: 20, integration: 5, e2e: 3 },
@@ -256,7 +256,7 @@ if (!verdict.passed) {
 console.log(emitMarkdown({ report, verdict }));
 ```
 
-The gate uses the SSOT `docs/quality/release-gate.md` thresholds — 11 axes (7 common + 4 AI-LLM). AI-LLM providers (any package whose name starts with `@kiwa-test/ai-`) are the only ones that need the 4 AI-LLM axes.
+The gate uses the SSOT `docs/quality/release-gate.md` thresholds — 11 axes (7 common + 4 AI-LLM). AI-LLM providers (any package whose name starts with `@kiwa/ai-`) are the only ones that need the 4 AI-LLM axes.
 
 ## Mock configuration surface
 
@@ -276,7 +276,7 @@ Each mock exposes `getMetrics()` (cumulative cost / token / latency / requests),
 
 ## Release gate SSOT
 
-See `docs/quality/release-gate.md` for the 11-axis thresholds. AI-LLM axes are only enforced when `provider.startsWith("@kiwa-test/ai-")`.
+See `docs/quality/release-gate.md` for the 11-axis thresholds. AI-LLM axes are only enforced when `provider.startsWith("@kiwa/ai-")`.
 
 ## Version
 

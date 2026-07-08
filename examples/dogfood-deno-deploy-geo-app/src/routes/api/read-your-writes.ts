@@ -1,7 +1,7 @@
 /**
  * `/api/read-your-writes` Fresh route handler — write immediately
  * followed by read to verify the read-your-writes consistency guarantee.
- * Uses the `@kiwa-test/edge` v0.2 `edge-kv` axis (`kv.write` + `kv.read`
+ * Uses the `@kiwa/edge` v0.2 `edge-kv` axis (`kv.write` + `kv.read`
  * emissions) via the adapter's `driveReadYourWrites` op.
  *
  * Deno KV documents strong consistency at the primary region and

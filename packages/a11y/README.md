@@ -1,4 +1,4 @@
-# @kiwa-test/a11y
+# @kiwa/a11y
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package covers the accessibility surface)" width="640" />
@@ -11,7 +11,7 @@ Accessibility (a11y) test adapter for the [kiwa](https://github.com/cardene777/k
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/a11y axe-core
+pnpm add -D @kiwa/a11y axe-core
 # Playwright も使う場合
 pnpm add -D @playwright/test
 ```
@@ -22,7 +22,7 @@ pnpm add -D @playwright/test
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runAxe, expectNoViolations } from '@kiwa-test/a11y';
+import { runAxe, expectNoViolations } from '@kiwa/a11y';
 
 describe('Counter component', () => {
   it('has no critical / serious a11y violations', async () => {
@@ -42,7 +42,7 @@ describe('Counter component', () => {
 
 ```ts
 import { test, expect } from '@playwright/test';
-import { reportViolations } from '@kiwa-test/a11y';
+import { reportViolations } from '@kiwa/a11y';
 
 test('home is accessible', async ({ page }) => {
   await page.goto('/');

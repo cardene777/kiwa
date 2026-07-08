@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/core.
+ * A11y (axe-core) config for @kiwa/core.
  * Tier: Core tier (critical 0 / serious 0 / moderate 0-3) — Pure parser + pool logic every adapter depends on. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § Core tier.
  */

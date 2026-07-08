@@ -5,7 +5,7 @@
  * 12-op contract — 3 axes × 4 ops (device-bound / conditional-ui / cross-device).
  */
 
-import type { AuthPlatform as AuthAuthPlatform } from '@kiwa-test/auth';
+import type { AuthPlatform as AuthAuthPlatform } from '@kiwa/auth';
 export type AuthPlatform = AuthAuthPlatform;
 
 export type UxStage = 'device-bound' | 'conditional-ui' | 'cross-device';

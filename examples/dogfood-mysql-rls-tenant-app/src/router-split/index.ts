@@ -19,7 +19,7 @@ import {
   runPoolHealthCheck,
   warmPoolConnections,
   type PoolAdvancedSession,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 import type { RouterSplitObservation } from '../adapters/interface.js';
 
 export interface DriveRouterSplitInput {

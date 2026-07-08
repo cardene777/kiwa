@@ -16,7 +16,7 @@ const distDir = resolve(here, '..', '..', 'docs', '.vitepress', 'dist');
 const pagePath = '/migrations/v1.12-to-v1.13';
 
 test.describe('v1.13 migration — v1.12 → v1.13', () => {
-  test('renders headline + @kiwa-test/realtime anchor', async ({ page }) => {
+  test('renders headline + @kiwa/realtime anchor', async ({ page }) => {
     if (!existsSync(join(distDir, 'index.html'))) {
       test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
       return;
@@ -25,6 +25,6 @@ test.describe('v1.13 migration — v1.12 → v1.13', () => {
     await page.goto(url);
     const body = await page.locator('.VPContent').innerText();
     expect(body).toContain('v1.12 → v1.13');
-    expect(body).toContain('@kiwa-test/realtime');
+    expect(body).toContain('@kiwa/realtime');
   });
 });

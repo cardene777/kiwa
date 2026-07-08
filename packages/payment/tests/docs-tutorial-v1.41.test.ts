@@ -1,6 +1,6 @@
 /**
  * v1.41-5 docs 補強 (Issue #1148 / CAR-981) — tutorial 88-90 code snippet
- * validation for `@kiwa-test/payment` v0.5 advanced III 8 axis (Embedded
+ * validation for `@kiwa/payment` v0.5 advanced III 8 axis (Embedded
  * finance + BNPL + Crypto payment + FX cross-border + Recurring revenue
  * advanced + Payment orchestration II + Fraud detection advanced +
  * Regulatory reporting).

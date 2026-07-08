@@ -1,4 +1,4 @@
-# @kiwa-test/ui
+# @kiwa/ui
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package covers the Web component test surface across 8 frameworks)" width="640" />
@@ -10,7 +10,7 @@ Multi-framework component test adapter for kiwa — Vitest + Testing Library + J
 
 ## Overview
 
-`@kiwa-test/ui` is the Layer 2 adapter that turns a Layer 1 kiwa-design spec (with `mode = render | interaction | snapshot`) into a runnable Vitest suite. It ships **five** component adapters that share the same lifecycle contract.
+`@kiwa/ui` is the Layer 2 adapter that turns a Layer 1 kiwa-design spec (with `mode = render | interaction | snapshot`) into a runnable Vitest suite. It ships **five** component adapters that share the same lifecycle contract.
 
 | Framework | Helper | Underlying lib |
 |---|---|---|
@@ -26,7 +26,7 @@ Multi-framework component test adapter for kiwa — Vitest + Testing Library + J
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/ui @kiwa-test/core \
+pnpm add -D @kiwa/ui @kiwa/core \
   @testing-library/react @testing-library/user-event jsdom \
   react react-dom vitest
 ```
@@ -36,7 +36,7 @@ pnpm add -D @kiwa-test/ui @kiwa-test/core \
 ## Three modes
 
 ```tsx
-import { setupComponentEnv } from "@kiwa-test/ui";
+import { setupComponentEnv } from "@kiwa/ui";
 
 // 1) render mode — mount + screen queries, no interaction.
 const renderEnv = await setupComponentEnv({ mode: "render", ui: <Counter /> });
@@ -73,7 +73,7 @@ See [`examples/react-component-poc/`](../../examples/react-component-poc) for th
 
 ```ts
 import { createSignal, createComponent } from "solid-js";
-import { setupSolidComponentEnv } from "@kiwa-test/ui";
+import { setupSolidComponentEnv } from "@kiwa/ui";
 
 function SolidCounter(props: { initial?: number }) {
   const [count, setCount] = createSignal(props.initial ?? 0);
@@ -105,7 +105,7 @@ export default defineConfig({
 
 ```ts
 import { LitElement, html } from "lit";
-import { setupLitComponentEnv } from "@kiwa-test/ui";
+import { setupLitComponentEnv } from "@kiwa/ui";
 
 class KiwaCounter extends LitElement {
   static properties = { count: { state: true } };
@@ -148,7 +148,7 @@ Then exercise components with the kiwa adapter:
 
 ```ts
 import { component$ } from "@builder.io/qwik";
-import { setupQwikComponentEnv } from "@kiwa-test/ui";
+import { setupQwikComponentEnv } from "@kiwa/ui";
 
 const Counter = component$(() => <span data-testid="value">0</span>);
 
@@ -192,7 +192,7 @@ Then exercise standalone components with the kiwa adapter:
 
 ```ts
 import { Component } from "@angular/core";
-import { setupAngularComponentEnv } from "@kiwa-test/ui";
+import { setupAngularComponentEnv } from "@kiwa/ui";
 
 @Component({
   standalone: true,

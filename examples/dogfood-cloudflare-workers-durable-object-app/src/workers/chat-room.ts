@@ -1,5 +1,5 @@
 /**
- * Chat room Durable Object implementation. Uses `@kiwa-test/edge` v0.2
+ * Chat room Durable Object implementation. Uses `@kiwa/edge` v0.2
  * durable-object axis semantics (createDurableObject / requestDurableObject /
  * fireAlarm / writeStorage) for the state-machine backing, plus a small
  * per-room registry of members, message transcript, and scheduled alarm.
@@ -24,7 +24,7 @@ import {
   fireAlarm,
   writeStorage,
   type DurableObjectSession,
-} from '@kiwa-test/edge';
+} from '@kiwa/edge';
 
 /**
  * Per-room state. `members` tracks live occupants (added on JOIN, removed

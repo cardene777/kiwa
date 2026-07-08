@@ -3,7 +3,7 @@
 // Next.js 公式 cookies() API は server-only。 kiwa では env.cookies に inject
 // される CookieJar (kiwa-test/nextjs の CookieJar 型) から session を読む。
 
-import type { CookieJar } from '@kiwa-test/nextjs';
+import type { CookieJar } from '@kiwa/nextjs';
 
 export type Role = 'admin' | 'guest' | 'banned';
 

@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa-test/realtime/nuxt-webtransport-stream-app",
+  "provider": "@kiwa/realtime/nuxt-webtransport-stream-app",
   "version": "0.2.0",
   "reportedAt": "2026-07-06T02:44:24.241Z",
   "coverage": {

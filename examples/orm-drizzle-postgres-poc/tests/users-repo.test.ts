@@ -1,9 +1,9 @@
-// PoC tests — @kiwa-test/orm v0.2 (Drizzle + Postgres via testcontainers).
+// PoC tests — @kiwa/orm v0.2 (Drizzle + Postgres via testcontainers).
 
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { setupOrmEnv, expectRowCount } from '@kiwa-test/orm';
-import type { OrmTestEnvLive } from '@kiwa-test/orm';
+import { setupOrmEnv, expectRowCount } from '@kiwa/orm';
+import type { OrmTestEnvLive } from '@kiwa/orm';
 import { posts, schema, type Schema } from '../src/schema.js';
 import { INITIAL_MIGRATION } from '../src/migration.sql.js';
 import { UsersRepository } from '../src/users-repo.js';
@@ -25,7 +25,7 @@ afterEach(async () => {
   if (env) { await env.stop(); env = null; }
 }, 30_000);
 
-describe('UsersRepository via @kiwa-test/orm (postgres testcontainers)', () => {
+describe('UsersRepository via @kiwa/orm (postgres testcontainers)', () => {
   it('T-PG-001: create + findByEmail round-trip on real Postgres', async () => {
     if (!dockerAvailable) return;
     env = await setupOrmEnv({

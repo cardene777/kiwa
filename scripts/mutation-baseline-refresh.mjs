@@ -3,7 +3,7 @@
  * Refresh `.mutation-baseline/<pkg>.json` snapshots from Stryker JSON reports.
  *
  * Reads each package's `mutation-report/mutation.json` (produced by
- * `pnpm -F @kiwa-test/<pkg> run test:mutation`) and rewrites the matching
+ * `pnpm -F @kiwa/<pkg> run test:mutation`) and rewrites the matching
  * `.mutation-baseline/<pkg>.json` with the current kill-rate, mutant counts,
  * threshold snapshot, and the survivor mutant list.
  *
@@ -39,41 +39,41 @@ const REPO_ROOT = process.env.KIWA_BASELINE_ROOT
  */
 const PACKAGES = {
   // v1.27-2 scope (kept for `--all` refresh + backward compat).
-  '@kiwa-test/core': 'packages/core',
-  '@kiwa-test/dapp': 'packages/dapp',
-  '@kiwa-test/api': 'packages/api',
-  '@kiwa-test/ui': 'packages/ui',
-  '@kiwa-test/data': 'packages/data',
-  '@kiwa-test/cli-test': 'packages/cli-test',
-  '@kiwa-test/observability': 'packages/observability',
-  '@kiwa-test/e2e': 'packages/e2e',
-  '@kiwa-test/cli': 'packages/cli',
-  '@kiwa-test/nextjs': 'packages/nextjs',
-  '@kiwa-test/nuxt': 'packages/nuxt',
-  '@kiwa-test/sveltekit': 'packages/sveltekit',
-  '@kiwa-test/remix': 'packages/remix',
-  '@kiwa-test/astro': 'packages/astro',
-  '@kiwa-test/solidstart': 'packages/solidstart',
-  '@kiwa-test/qwikcity': 'packages/qwikcity',
-  '@kiwa-test/edge': 'packages/edge',
-  '@kiwa-test/solidjs': 'packages/solidjs',
-  '@kiwa-test/fresh': 'packages/fresh',
-  '@kiwa-test/hono': 'packages/hono',
+  '@kiwa/core': 'packages/core',
+  '@kiwa/dapp': 'packages/dapp',
+  '@kiwa/api': 'packages/api',
+  '@kiwa/ui': 'packages/ui',
+  '@kiwa/data': 'packages/data',
+  '@kiwa/cli-test': 'packages/cli-test',
+  '@kiwa/observability': 'packages/observability',
+  '@kiwa/e2e': 'packages/e2e',
+  '@kiwa/cli': 'packages/cli',
+  '@kiwa/nextjs': 'packages/nextjs',
+  '@kiwa/nuxt': 'packages/nuxt',
+  '@kiwa/sveltekit': 'packages/sveltekit',
+  '@kiwa/remix': 'packages/remix',
+  '@kiwa/astro': 'packages/astro',
+  '@kiwa/solidstart': 'packages/solidstart',
+  '@kiwa/qwikcity': 'packages/qwikcity',
+  '@kiwa/edge': 'packages/edge',
+  '@kiwa/solidjs': 'packages/solidjs',
+  '@kiwa/fresh': 'packages/fresh',
+  '@kiwa/hono': 'packages/hono',
   // v1.27-3 scope: test-type layer (3 packages).
-  '@kiwa-test/a11y': 'packages/a11y',
-  '@kiwa-test/visual': 'packages/visual',
-  '@kiwa-test/component': 'packages/component',
+  '@kiwa/a11y': 'packages/a11y',
+  '@kiwa/visual': 'packages/visual',
+  '@kiwa/component': 'packages/component',
   // v1.27-3 scope: SaaS layer (10 packages).
-  '@kiwa-test/auth': 'packages/auth',
-  '@kiwa-test/queue': 'packages/queue',
-  '@kiwa-test/cache': 'packages/cache',
-  '@kiwa-test/orm': 'packages/orm',
-  '@kiwa-test/payment': 'packages/payment',
-  '@kiwa-test/streaming': 'packages/streaming',
-  '@kiwa-test/search': 'packages/search',
-  '@kiwa-test/mcp': 'packages/mcp',
-  '@kiwa-test/agent': 'packages/agent',
-  '@kiwa-test/realtime': 'packages/realtime',
+  '@kiwa/auth': 'packages/auth',
+  '@kiwa/queue': 'packages/queue',
+  '@kiwa/cache': 'packages/cache',
+  '@kiwa/orm': 'packages/orm',
+  '@kiwa/payment': 'packages/payment',
+  '@kiwa/streaming': 'packages/streaming',
+  '@kiwa/search': 'packages/search',
+  '@kiwa/mcp': 'packages/mcp',
+  '@kiwa/agent': 'packages/agent',
+  '@kiwa/realtime': 'packages/realtime',
 };
 
 /**
@@ -219,7 +219,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const argv = process.argv.slice(2);
   const requestedPkgs = argv.length === 0
     ? Object.keys(PACKAGES)
-    : argv.map((raw) => (raw.startsWith('@kiwa-test/') ? raw : `@kiwa-test/${raw}`));
+    : argv.map((raw) => (raw.startsWith('@kiwa/') ? raw : `@kiwa/${raw}`));
 
   for (const requested of requestedPkgs) {
     if (!(requested in PACKAGES)) {

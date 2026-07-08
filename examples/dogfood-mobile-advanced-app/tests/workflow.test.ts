@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   assertMobileRealDriverAvailable,
   readMobileRealDriverEnv,
-} from '@kiwa-test/mobile';
+} from '@kiwa/mobile';
 import {
   runAsyncStorageAxis,
   runFullAdvancedWorkflow,

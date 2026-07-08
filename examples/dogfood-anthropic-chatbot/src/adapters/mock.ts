@@ -3,7 +3,7 @@ import {
   type AnthropicMock,
   type AnthropicMessagesRequest,
   type MockResponse,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 import type {
   ChatbotAdapter,
   ChatResult,
@@ -13,7 +13,7 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — drives the `@kiwa-test/ai-llm` Anthropic mock so the same
+ * Mock adapter — drives the `@kiwa/ai-llm` Anthropic mock so the same
  * app code exercises {@link AnthropicMock} without touching the network. The
  * mock returns deterministic responses so fidelity tests can assert on the
  * shape of streaming, system prompt and tool_use behaviour.
@@ -27,7 +27,7 @@ export function makeMockAdapter(): ChatbotAdapter {
   const client = createAnthropicMock({
     model: 'claude-3-5-sonnet-mock',
     defaultResponse:
-      'This is a deterministic mock reply produced by @kiwa-test/ai-llm createAnthropicMock. The dogfood harness diffs this against a real Anthropic response.',
+      'This is a deterministic mock reply produced by @kiwa/ai-llm createAnthropicMock. The dogfood harness diffs this against a real Anthropic response.',
     responses: buildResponseBank(),
     artificialLatencyMs: 8,
     costPer1kTokens: { prompt: 0.003, completion: 0.015 }, // Sonnet-style pricing so cost tracking has realistic magnitudes

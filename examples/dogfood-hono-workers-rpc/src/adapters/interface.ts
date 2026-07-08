@@ -3,14 +3,14 @@
  * hono-workers-rpc dogfood.
  *
  * The dogfood talks to Hono only through this interface. Two implementations
- * exist: {@link makeMockAdapter} (backed by `@kiwa-test/hono` createHonoApp
+ * exist: {@link makeMockAdapter} (backed by `@kiwa/hono` createHonoApp
  * + invokeRoute + createRpcClient + createWorkersEnv + createExecutionContext)
  * and {@link makeRealAdapter} (drives a real `miniflare` runtime when
  * `CF_ACCOUNT_ID=1` is set, else returns a `skipped` variant whose every
  * method records a `HONO_REAL_ENV_MISSING` trace).
  *
  * Both satisfy the same 6-op surface so behavioural fidelity between real vs
- * mock can be measured side-by-side and fed to `@kiwa-test/quality-metrics`
+ * mock can be measured side-by-side and fed to `@kiwa/quality-metrics`
  * 7-axis release gate.
  */
 

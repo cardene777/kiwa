@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa-test/security/dogfood-csp-headers-app",
+  "provider": "@kiwa/security/dogfood-csp-headers-app",
   "version": "0.1.0",
   "reportedAt": "2026-07-07T02:56:51.802Z",
   "coverage": {

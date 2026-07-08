@@ -93,7 +93,7 @@ describe('fidelity report — HTTP/3 multiplex dogfood', () => {
     const matrix = await runAdapterMatrix({ mock, real, run: driveFlows });
 
     const output = runFidelityHarness({
-      provider: '@kiwa-test/realtime/sveltekit-http3-multiplex-app',
+      provider: '@kiwa/realtime/sveltekit-http3-multiplex-app',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -133,7 +133,7 @@ describe('fidelity report — HTTP/3 multiplex dogfood', () => {
     const matrix = await runAdapterMatrix({ mock, real, run: driveFlows });
 
     const output = runFidelityHarness({
-      provider: '@kiwa-test/realtime/sveltekit-http3-multiplex-app',
+      provider: '@kiwa/realtime/sveltekit-http3-multiplex-app',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

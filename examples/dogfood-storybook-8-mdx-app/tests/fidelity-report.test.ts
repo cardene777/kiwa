@@ -43,7 +43,7 @@ describe('dogfood-storybook-8-mdx-app — fidelity harness (7-axis release gate)
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/component/storybook-8-mdx',
+      provider: '@kiwa/component/storybook-8-mdx',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -86,7 +86,7 @@ describe('dogfood-storybook-8-mdx-app — fidelity harness (7-axis release gate)
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/component/storybook-8-mdx',
+      provider: '@kiwa/component/storybook-8-mdx',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

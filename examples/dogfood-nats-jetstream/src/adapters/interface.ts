@@ -4,7 +4,7 @@
  *
  * The dogfood talks to NATS only through this interface. Two
  * implementations exist: {@link makeMockAdapter} (backed by
- * `@kiwa-test/streaming`'s NatsMock + JetStream + KV + Object Store) and
+ * `@kiwa/streaming`'s NatsMock + JetStream + KV + Object Store) and
  * {@link makeRealAdapter} (probes a live NATS via `NATS_URL`; env-skip
  * variant otherwise).
  *
@@ -43,7 +43,7 @@
  *
  * All 9 ops (5 v1 + 4 v2) satisfy the same "op → observation → trace"
  * shape so behavioural fidelity between real vs mock can be measured side-
- * by-side and fed to `@kiwa-test/quality-metrics` 13-axis release gate.
+ * by-side and fed to `@kiwa/quality-metrics` 13-axis release gate.
  */
 
 /** Sample OrderEvent payload the dogfood publishes onto JetStream. */

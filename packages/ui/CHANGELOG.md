@@ -1,4 +1,4 @@
-# @kiwa-test/ui
+# @kiwa/ui
 
 ## 1.0.1
 
@@ -6,30 +6,30 @@
 
 - 32a6c10: 📦 11 packages initial v1.0.x npm publish (改名後初回)。
 
-  PR #476 で `@kiwa-test/core` ↔ `@kiwa-test/spec` swap rename + dApp 改名 + v1.0 major bump を local で実施したが、 npm への publish が未実行のため npm 上では旧 0.x 系のまま停滞していた。
+  PR #476 で `@kiwa/core` ↔ `@kiwa/spec` swap rename + dApp 改名 + v1.0 major bump を local で実施したが、 npm への publish が未実行のため npm 上では旧 0.x 系のまま停滞していた。
 
   本 changeset で全 11 packages を v1.0.1 へ patch bump して publish を発火させ、 改名後の v1.0 系を npm に反映する。
 
   ## 影響範囲
 
-  - 旧 `@kiwa-test/core` (0.3.1) は dApp E2E fixture の名残、 v1.0.1 では新 spec として publish
-  - 旧 `@kiwa-test/spec` は廃止 (`@kiwa-test/core` に統合)
-  - 新 `@kiwa-test/dapp` (404 → v1.0.1 として初公開)
+  - 旧 `@kiwa/core` (0.3.1) は dApp E2E fixture の名残、 v1.0.1 では新 spec として publish
+  - 旧 `@kiwa/spec` は廃止 (`@kiwa/core` に統合)
+  - 新 `@kiwa/dapp` (404 → v1.0.1 として初公開)
   - 既存 9 adapter (api / ui / data / e2e / a11y / cli-test / observability / visual / cli) は v1.0.1 patch bump で公開
   - v1.0.0 → v1.0.1 patch bump (PR #476 の v1.0.0 内部 bump を上書きせず継続)
 
   ## 確認方法
 
   ```bash
-  npm view @kiwa-test/core version    # → 1.0.1
-  npm view @kiwa-test/dapp version    # → 1.0.1 (新規公開)
-  npm view @kiwa-test/e2e version     # → 1.0.1
-  npm view @kiwa-test/a11y version    # → 1.0.1
-  npm view @kiwa-test/visual version  # → 1.0.1
+  npm view @kiwa/core version    # → 1.0.1
+  npm view @kiwa/dapp version    # → 1.0.1 (新規公開)
+  npm view @kiwa/e2e version     # → 1.0.1
+  npm view @kiwa/a11y version    # → 1.0.1
+  npm view @kiwa/visual version  # → 1.0.1
   ```
 
 - Updated dependencies [32a6c10]
-  - @kiwa-test/core@1.0.1
+  - @kiwa/core@1.0.1
 
 ## 0.4.2
 
@@ -37,13 +37,13 @@
 
 - c0f0a97: Lock in mutation testing across all 11 packages with a release-time gate. `scripts/check-mutation-gates.mjs` reads each package's `mutation-report/mutation.json` and enforces per-package MSI thresholds (90% for pure-logic — api / a11y / ui after PR 1-5; 80% for thin wrappers around third-party libs). Release workflow now runs `pnpm test:mutation` for every package and fails the publish if any package's MSI regresses below its threshold. Current snapshot: api 96.06 / a11y 93.62 / ui 91.76 / cli-test 89.69 / data 86.93 / spec 85.51 / core 85.09 / cli 84.44 / e2e 84.21 / observability 84.12 / visual 83.02 — all above thresholds. No public API change.
 - Updated dependencies [c0f0a97]
-  - @kiwa-test/core@0.1.1
+  - @kiwa/core@0.1.1
 
 ## 0.4.1
 
 ### Patch Changes
 
-- ecbedd1: Strengthen `@kiwa-test/ui` mutation test coverage. MSI raised from 76.92% to **82.11%** by adding 24 mutation-kill tests across React (`setup-component-env`), Vue, Solid, and Lit adapters. Stryker config updated to mutate all 4 active adapters (Svelte / Qwik / Angular are excluded because their framework-specific compilers don't run inside the package-local Vitest pipeline). MSI per file: Lit 90.00% / setup-component-env 87.18% / Vue 73.68% / Solid 70.59% — Vue and Solid are thin wrappers around `@vue/test-utils` and `@solidjs/testing-library` whose internal cleanup makes additional mutants equivalent. No public API change.
+- ecbedd1: Strengthen `@kiwa/ui` mutation test coverage. MSI raised from 76.92% to **82.11%** by adding 24 mutation-kill tests across React (`setup-component-env`), Vue, Solid, and Lit adapters. Stryker config updated to mutate all 4 active adapters (Svelte / Qwik / Angular are excluded because their framework-specific compilers don't run inside the package-local Vitest pipeline). MSI per file: Lit 90.00% / setup-component-env 87.18% / Vue 73.68% / Solid 70.59% — Vue and Solid are thin wrappers around `@vue/test-utils` and `@solidjs/testing-library` whose internal cleanup makes additional mutants equivalent. No public API change.
 
 ## 0.4.0
 
@@ -66,14 +66,14 @@
   - `@vitest/coverage-v8` を devDep に追加
   - v8 provider で line / branch / function / statement coverage を JSON + text reporter で出力
 
-  ## B: @kiwa-test/observability に coverage 取込 (minor)
+  ## B: @kiwa/observability に coverage 取込 (minor)
 
   - `fromIstanbulCoverageSummary` ... v8 / istanbul coverage-summary.json を `CoverageSummary` に正規化、 total 不在時は files から自動集計
   - `checkThresholds` ... lines / branches / functions / statements の最低 % を gate
   - `renderDashboard({ coverage })` に Code coverage section 追加 (total line/branch/function/statement の表)
   - 6 件 test 追加 (合計 21 件 PASS)
 
-  ## C: @kiwa-test/ui に Vue 3 対応 (minor)
+  ## C: @kiwa/ui に Vue 3 対応 (minor)
 
   - `setupVueComponentEnv({ mode, component, props, slots })` ... `@vue/test-utils` を lazy load して mount、 jsdom 環境で動作 (PoC 2 件 PASS)
   - `setupSvelteComponentEnv({ mode, component, props })` ... `@testing-library/svelte` を lazy load する API のみ提供 (test は PoC 側で実装)
@@ -88,19 +88,19 @@
 
   ## 新規
 
-  ### @kiwa-test/e2e v0.1.0 (新設)
+  ### @kiwa/e2e v0.1.0 (新設)
 
   - `setupE2eEnv({ app | staticHtml, browser, initialPath })` ... 実 HTTP server を free port で起動 + Playwright (chromium/firefox/webkit) headless で navigate
   - `BrowserPageHandle` / `BrowserLocator` / `startServer` を export
   - @playwright/test を optional peer dep
 
-  ### @kiwa-test/ui browser mode (minor)
+  ### @kiwa/ui browser mode (minor)
 
   - `setupBrowserComponentEnv({ ui, browser, headless })` ... React 要素を SSR renderToStaticMarkup + Playwright 実 Chromium に load
   - 既存 jsdom 経路は変更なし
   - @playwright/test を optional peer dep に追加
 
-  ### @kiwa-test/cli (minor)
+  ### @kiwa/cli (minor)
 
   - `kiwa spec-to-test --in {spec.md} --out {test.ts} [--layer {layer}]` ... markdown 9 column を実 vitest test code に変換 (api / ui / data / cli 全 layer 対応)
   - `kiwa run --watch [--layer L]...` ... 複数 layer を並列 vitest watch daemon として spawn (default unit api ui、 --dry-run で plan 確認)
@@ -113,10 +113,10 @@
 
 ### Minor Changes
 
-- 1d58d62: v2 — @kiwa-test/ui v0.1.0 新設: React component test adapter (Vitest + Testing Library + JSDOM)
+- 1d58d62: v2 — @kiwa/ui v0.1.0 新設: React component test adapter (Vitest + Testing Library + JSDOM)
 
   kiwa 汎用テストツール化 v2 (UI adapter)。
-  React component の Layer 1 spec (kiwa-design markdown 9 column) → Layer 2 test code 経路を `@kiwa-test/ui` adapter で確立する。
+  React component の Layer 1 spec (kiwa-design markdown 9 column) → Layer 2 test code 経路を `@kiwa/ui` adapter で確立する。
 
   ## 新規 API
 

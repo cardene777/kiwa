@@ -17,7 +17,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { Advisory } from '@kiwa-test/security';
+import type { Advisory } from '@kiwa/security';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { detectRealEnvMissing, makeRealAdapter } from '../src/adapters/real.js';
 import {

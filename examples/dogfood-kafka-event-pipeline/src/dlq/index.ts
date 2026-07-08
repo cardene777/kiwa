@@ -15,8 +15,8 @@ import type {
   DeadLetterQueue,
   KafkaMock,
   StreamingMessage,
-} from '@kiwa-test/streaming';
-import { createDeadLetterQueue } from '@kiwa-test/streaming';
+} from '@kiwa/streaming';
+import { createDeadLetterQueue } from '@kiwa/streaming';
 
 export interface WorkPayload {
   readonly orderId: string;

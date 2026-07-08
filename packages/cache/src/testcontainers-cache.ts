@@ -87,7 +87,7 @@ async function startRedisContainer(image: string): Promise<{
     container = new testcontainers.GenericContainer(image).withExposedPorts(6379);
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/cache: testcontainers mode requires the 'testcontainers' peer dependency. Install with `pnpm add -D testcontainers`. Original error: " +
+      "@kiwa/cache: testcontainers mode requires the 'testcontainers' peer dependency. Install with `pnpm add -D testcontainers`. Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }
@@ -128,7 +128,7 @@ async function buildIoRedisDriver(url: string): Promise<CacheDriver> {
     ioredis = (await import('ioredis')) as unknown as IoRedisModule;
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/cache: testcontainers + client='ioredis' requires the 'ioredis' peer dependency. Install with `pnpm add -D ioredis`. Original error: " +
+      "@kiwa/cache: testcontainers + client='ioredis' requires the 'ioredis' peer dependency. Install with `pnpm add -D ioredis`. Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }
@@ -200,7 +200,7 @@ async function buildNodeRedisDriver(url: string): Promise<CacheDriver> {
     redis = (await import('redis')) as unknown as NodeRedisModule;
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/cache: testcontainers + client='node-redis' requires the 'redis' peer dependency. Install with `pnpm add -D redis`. Original error: " +
+      "@kiwa/cache: testcontainers + client='node-redis' requires the 'redis' peer dependency. Install with `pnpm add -D redis`. Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }

@@ -9,7 +9,7 @@
  * ため、 snippet と実 API の乖離を CI で検知する。 v1.17 / v1.19 / v1.20 /
  * v1.21 / v1.22 / v1.23 / v1.24 の docs-tutorial-v*.test.ts と同 pattern。
  *
- * v1.25 は @kiwa-test/perf-harness v0.2 の 33 package coverage sweep を扱う。
+ * v1.25 は @kiwa/perf-harness v0.2 の 33 package coverage sweep を扱う。
  * runPerf3Layer 系 API は既に他 package の perf test で covered のため、
  * 本 test では tutorial に載る measure / saveBaseline / loadBaseline /
  * detectRegression / evaluatePerfGate primitive に focus する。

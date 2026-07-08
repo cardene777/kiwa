@@ -1,4 +1,4 @@
-# @kiwa-test/dapp
+# @kiwa/dapp
 
 ## 1.0.1
 
@@ -6,30 +6,30 @@
 
 - 32a6c10: 📦 11 packages initial v1.0.x npm publish (改名後初回)。
 
-  PR #476 で `@kiwa-test/core` ↔ `@kiwa-test/spec` swap rename + dApp 改名 + v1.0 major bump を local で実施したが、 npm への publish が未実行のため npm 上では旧 0.x 系のまま停滞していた。
+  PR #476 で `@kiwa/core` ↔ `@kiwa/spec` swap rename + dApp 改名 + v1.0 major bump を local で実施したが、 npm への publish が未実行のため npm 上では旧 0.x 系のまま停滞していた。
 
   本 changeset で全 11 packages を v1.0.1 へ patch bump して publish を発火させ、 改名後の v1.0 系を npm に反映する。
 
   ## 影響範囲
 
-  - 旧 `@kiwa-test/core` (0.3.1) は dApp E2E fixture の名残、 v1.0.1 では新 spec として publish
-  - 旧 `@kiwa-test/spec` は廃止 (`@kiwa-test/core` に統合)
-  - 新 `@kiwa-test/dapp` (404 → v1.0.1 として初公開)
+  - 旧 `@kiwa/core` (0.3.1) は dApp E2E fixture の名残、 v1.0.1 では新 spec として publish
+  - 旧 `@kiwa/spec` は廃止 (`@kiwa/core` に統合)
+  - 新 `@kiwa/dapp` (404 → v1.0.1 として初公開)
   - 既存 9 adapter (api / ui / data / e2e / a11y / cli-test / observability / visual / cli) は v1.0.1 patch bump で公開
   - v1.0.0 → v1.0.1 patch bump (PR #476 の v1.0.0 内部 bump を上書きせず継続)
 
   ## 確認方法
 
   ```bash
-  npm view @kiwa-test/core version    # → 1.0.1
-  npm view @kiwa-test/dapp version    # → 1.0.1 (新規公開)
-  npm view @kiwa-test/e2e version     # → 1.0.1
-  npm view @kiwa-test/a11y version    # → 1.0.1
-  npm view @kiwa-test/visual version  # → 1.0.1
+  npm view @kiwa/core version    # → 1.0.1
+  npm view @kiwa/dapp version    # → 1.0.1 (新規公開)
+  npm view @kiwa/e2e version     # → 1.0.1
+  npm view @kiwa/a11y version    # → 1.0.1
+  npm view @kiwa/visual version  # → 1.0.1
   ```
 
 - Updated dependencies [32a6c10]
-  - @kiwa-test/core@1.0.1
+  - @kiwa/core@1.0.1
 
 ## 0.3.1
 
@@ -37,7 +37,7 @@
 
 - c0f0a97: Lock in mutation testing across all 11 packages with a release-time gate. `scripts/check-mutation-gates.mjs` reads each package's `mutation-report/mutation.json` and enforces per-package MSI thresholds (90% for pure-logic — api / a11y / ui after PR 1-5; 80% for thin wrappers around third-party libs). Release workflow now runs `pnpm test:mutation` for every package and fails the publish if any package's MSI regresses below its threshold. Current snapshot: api 96.06 / a11y 93.62 / ui 91.76 / cli-test 89.69 / data 86.93 / spec 85.51 / core 85.09 / cli 84.44 / e2e 84.21 / observability 84.12 / visual 83.02 — all above thresholds. No public API change.
 - Updated dependencies [c0f0a97]
-  - @kiwa-test/core@0.1.1
+  - @kiwa/core@0.1.1
 
 ## 0.3.0
 
@@ -46,17 +46,17 @@
 - e16898f: v1 — 汎用テストツール化 MVP: spec / api 新設 + core を spec ベースに整理
 
   kiwa を dApp E2E 専用から汎用テストツールへ拡大する v1。
-  spec 共通基盤を `@kiwa-test/core` として新設、 HTTP API adapter を `@kiwa-test/api` として新設し、 `@kiwa-test/dapp` は `@kiwa-test/core` を peer dep として依存しつつ既存 dApp E2E API を完全互換で維持する。
+  spec 共通基盤を `@kiwa/core` として新設、 HTTP API adapter を `@kiwa/api` として新設し、 `@kiwa/dapp` は `@kiwa/core` を peer dep として依存しつつ既存 dApp E2E API を完全互換で維持する。
 
   ## 新規 package
 
-  ### @kiwa-test/core 0.1.0 (新設)
+  ### @kiwa/core 0.1.0 (新設)
 
   - `parseSpec(markdown)` ... kiwa-design 9 column markdown を `SpecDoc` (cases, layer, mode, route) にパース
   - `createPool({ size, acquire, reset, release })` ... 汎用 borrow / release pool、 anvil pool の基底
   - `TestEnvBase<TMode>` / `Lease` / `Pool` / `TestLayer` / `TestMode` ... 全 adapter 共通の型
 
-  ### @kiwa-test/api 0.1.0 (新設)
+  ### @kiwa/api 0.1.0 (新設)
 
   - `setupApiServer({ mode })` ... HTTP API テストの 3 経路統合 helper
     - `mode: 'mock'` ... msw v2 handler で固定応答
@@ -67,10 +67,10 @@
 
   ## 変更 package
 
-  ### @kiwa-test/dapp 0.2.0 → 0.3.0 (minor)
+  ### @kiwa/dapp 0.2.0 → 0.3.0 (minor)
 
-  - `@kiwa-test/core` を dependency として参照、 spec の共通型 (`TestLayer` / `TestMode` / `Lease` / `Pool` / `SpecDoc`) を main entry から re-export
-  - `parseSpec` も core から re-export (既存 user が `@kiwa-test/dapp` の単一 install で spec parser を使える経路を確保)
+  - `@kiwa/core` を dependency として参照、 spec の共通型 (`TestLayer` / `TestMode` / `Lease` / `Pool` / `SpecDoc`) を main entry から re-export
+  - `parseSpec` も core から re-export (既存 user が `@kiwa/dapp` の単一 install で spec parser を使える経路を確保)
   - 既存 API 完全互換、 既存 118 件 test PASS
 
   ## PoC
@@ -80,12 +80,12 @@
   ## skill SSOT
 
   - `.claude/skills/kiwa-design/SKILL.md` ... `--layer api` の出力 path (`tests/spec/integration/test-spec-{module}.api.md`) + api 専用 9 column 表 (Mode / Route 追加) を追記
-  - `.claude/skills/kiwa-api/SKILL.md` ... `@kiwa-test/api` 経路 + msw / supertest mapping + 実装例を追記
+  - `.claude/skills/kiwa-api/SKILL.md` ... `@kiwa/api` 経路 + msw / supertest mapping + 実装例を追記
 
 ### Patch Changes
 
 - Updated dependencies [e16898f]
-  - @kiwa-test/core@0.1.0
+  - @kiwa/core@0.1.0
 
 ## 0.2.0
 
@@ -98,7 +98,7 @@
 
   ## 新規機能
 
-  ### @kiwa-test/dapp
+  ### @kiwa/dapp
 
   - `setupTestEnv` / `withAnvil` ... vitest test 内で mock 経路 (anvil 不起動) と 実 anvil 経路 (clean / state-load) を同 API で切替 (#350)
   - `StartAnvilOptions.loadState` / `dumpState` ... anvil の `--load-state` / `--dump-state` flag を透過、 deploy + setup を 1 回だけ実行して state.json を一括コピペ可能 (#350)
@@ -106,7 +106,7 @@
   - `setupTestEnv({ pool })` ... pool 経由経路の opt-in、 `anvil` option と排他 (#354)
   - `TxBroadcastCtx.transportTimeoutMs` / `transportRetryCount` ... viem http transport の timeout / retry を制御、 fail-fast (#356)
 
-  ### @kiwa-test/cli
+  ### @kiwa/cli
 
   - `kiwa anvil seed <script> --out <path>` ... seed script で deploy + setup を 1 回実行 → anvil 終了時に `--dump-state` で chain 状態を一括書出する CLI sub-command (#350)
 
@@ -131,7 +131,7 @@
 
 ### Patch Changes
 
-- c856f93: README の v7 promo gif (10fps / 800px / 4.5-4.7MB、 npm camo 5MB 制限内) と 3 経路 brand statement (`@kiwa-test/forge` + `@kiwa-test/dapp` + 手書き) 言及を npm registry に届けるための patch bump。 code 変更なし、 README の同期目的のみ。
+- c856f93: README の v7 promo gif (10fps / 800px / 4.5-4.7MB、 npm camo 5MB 制限内) と 3 経路 brand statement (`@kiwa/forge` + `@kiwa/dapp` + 手書き) 言及を npm registry に届けるための patch bump。 code 変更なし、 README の同期目的のみ。
 
   詳細は PR #326 (v7 fix commit e401595) を参照。
 
@@ -147,9 +147,9 @@
 
 ### Minor Changes
 
-- 40dc74b: `@kiwa-test/cli` の `init` 命令に 4 option (`--testDir <path>` / `--config-suffix <name>` / `--script-key <key>` / `--with-deploy <foundry-path>`) を追加 (#150 / #154)。
+- 40dc74b: `@kiwa/cli` の `init` 命令に 4 option (`--testDir <path>` / `--config-suffix <name>` / `--script-key <key>` / `--with-deploy <foundry-path>`) を追加 (#150 / #154)。
   既存 Playwright 構成を持つ project への共存導入と、Foundry boilerplate (`tests/prepare-env.ts` / `global-setup.ts` / `global-teardown.ts` / `fixture.ts`) の自動生成が可能になった。
-  `@kiwa-test/dapp` の `RpcContext` に opt-in `rejectConnect` flag を追加し、 `setApprovalMode('reject')` 時に `eth_requestAccounts` を EIP-1193 code 4001 で reject 可能に (#156)。 `eth_accounts` は read-only として従来挙動を維持し下位互換を保つ。 `WalletApi` / `DappE2eApi` に `setRejectConnect(enabled)` setter を expose。
+  `@kiwa/dapp` の `RpcContext` に opt-in `rejectConnect` flag を追加し、 `setApprovalMode('reject')` 時に `eth_requestAccounts` を EIP-1193 code 4001 で reject 可能に (#156)。 `eth_accounts` は read-only として従来挙動を維持し下位互換を保つ。 `WalletApi` / `DappE2eApi` に `setRejectConnect(enabled)` setter を expose。
 - 4104571: Issue #4 — Changesets + GitHub Actions CI (node 20/22 matrix) + npm publish provenance による v0.1.0 publish 基盤を確立。
   各 package に publishConfig (access public + provenance true) + repository + license MIT + keywords を追加し、`.npmignore` と `files: ["dist"]` で公開 tarball を dist のみに限定。
   本 changeset は次回 release.yml 起動時の version PR に集約され、v0.0.0 → v0.1.0 bump の起点となる (実 publish は NPM_TOKEN 配布後)。

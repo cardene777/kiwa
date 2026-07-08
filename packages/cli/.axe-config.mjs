@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/cli.
+ * A11y (axe-core) config for @kiwa/cli.
  * Tier: Core tier (critical 0 / serious 0 / moderate 0-3) — CLI runtime for kiwa init / scaffold. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § Core tier.
  */

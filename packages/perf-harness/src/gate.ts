@@ -3,7 +3,7 @@ import {
   type QualityReport,
   type ReleaseGateBlocker,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 import type {
   PerfGateInput,
   PerfGateResult,
@@ -90,7 +90,7 @@ function buildReport(
         samples: input.result.samples.length,
       };
   const report: QualityReport = {
-    provider: `@kiwa-test/perf-harness/${input.result.name}`,
+    provider: `@kiwa/perf-harness/${input.result.name}`,
     version: '0.1.0',
     reportedAt: new Date().toISOString(),
     coverage: { line: 0, branch: 0, function: 0 },

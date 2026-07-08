@@ -51,7 +51,7 @@ describe('dogfood-vector-search-app — fidelity harness', () => {
     const real = await makeRealAdapter();
     const matrix = await runAdapterMatrix({ mock, real, run: runFull });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/orm/vector-search-dogfood',
+      provider: '@kiwa/orm/vector-search-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -78,7 +78,7 @@ describe('dogfood-vector-search-app — fidelity harness', () => {
     const shadow = makeMockAdapter();
     const matrix = await runAdapterMatrix({ mock, real: shadow, run: runFull });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/orm/vector-search-dogfood',
+      provider: '@kiwa/orm/vector-search-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -103,7 +103,7 @@ describe('dogfood-vector-search-app — fidelity harness', () => {
     const real = await makeRealAdapter();
     const matrix = await runAdapterMatrix({ mock, real, run: runFull });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/orm/vector-search-dogfood',
+      provider: '@kiwa/orm/vector-search-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -124,7 +124,7 @@ describe('dogfood-vector-search-app — fidelity harness', () => {
   });
 
   it('T-DVF-004 v1.27-4 mutation tier context adds an 8th axis when opted in', async () => {
-    // The vector-search-app wraps @kiwa-test/orm (SaaS tier, default 65 %).
+    // The vector-search-app wraps @kiwa/orm (SaaS tier, default 65 %).
     // Passing `mutationTier: 'saas'` opts the app into the 12-axis release
     // gate; the base harness stays 7-axis for backward compat when the field
     // is omitted (see T-DVF-001).
@@ -133,7 +133,7 @@ describe('dogfood-vector-search-app — fidelity harness', () => {
     const matrix = await runAdapterMatrix({ mock, real: shadow, run: runFull });
     // 22 / 30 = 73.3 %, above SaaS 65 tier threshold.
     const output = runFidelityHarness({
-      provider: '@kiwa-test/orm/vector-search-dogfood',
+      provider: '@kiwa/orm/vector-search-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

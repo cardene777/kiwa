@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/release-invariants.
+ * A11y (axe-core) config for @kiwa/release-invariants.
  * Tier: Core tier (critical 0 / serious 0 / moderate 0-3) — Release script filter + provenance flag + gate script checkers. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § Core tier.
  */

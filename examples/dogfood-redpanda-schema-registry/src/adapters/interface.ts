@@ -4,7 +4,7 @@
  *
  * The dogfood talks to Redpanda + Confluent SR only through this interface.
  * Two implementations exist: {@link makeMockAdapter} (backed by
- * `@kiwa-test/streaming`'s RedpandaMock + SchemaRegistry) and
+ * `@kiwa/streaming`'s RedpandaMock + SchemaRegistry) and
  * {@link makeRealAdapter} (probes a live Redpanda broker via
  * `REDPANDA_BOOTSTRAP` + Confluent SR via `SCHEMA_REGISTRY_URL`; env-skip
  * variant otherwise).
@@ -41,10 +41,10 @@
  *
  * All 9 ops (5 v1 + 4 v2) satisfy the same "op → observation → trace"
  * shape so behavioural fidelity between real vs mock can be measured side-by-
- * side and fed to `@kiwa-test/quality-metrics` 13-axis release gate.
+ * side and fed to `@kiwa/quality-metrics` 13-axis release gate.
  */
 
-import type { CompatibilityMode } from '@kiwa-test/streaming';
+import type { CompatibilityMode } from '@kiwa/streaming';
 
 /** Sample User payload the dogfood publishes. */
 export interface UserPayload {

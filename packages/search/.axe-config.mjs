@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/search.
+ * A11y (axe-core) config for @kiwa/search.
  * Tier: SaaS tier (critical 0 / serious 0 / moderate 0) — Algolia / Meilisearch / Typesense. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § SaaS tier.
  */

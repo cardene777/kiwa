@@ -1,4 +1,4 @@
-// Live-mode tests for @kiwa-test/orm v0.2 (Drizzle + Postgres via testcontainers).
+// Live-mode tests for @kiwa/orm v0.2 (Drizzle + Postgres via testcontainers).
 //
 // Each test starts a fresh Postgres container (postgres:16-alpine). Startup
 // overhead ~3-5s per container, so the suite is intentionally focused on
@@ -33,7 +33,7 @@ CREATE INDEX users_email_idx ON users(email);
 
 // Detect whether the local Docker daemon is reachable. We probe once at
 // suite startup and skip the live suite cleanly otherwise so contributors
-// without Docker can still run `pnpm -F @kiwa-test/orm test` for mock mode.
+// without Docker can still run `pnpm -F @kiwa/orm test` for mock mode.
 let dockerAvailable = false;
 
 beforeAll(async () => {

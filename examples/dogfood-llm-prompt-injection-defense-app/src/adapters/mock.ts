@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/ai-llm` v0.4 prompt-injection +
+ * Mock adapter — drives `@kiwa/ai-llm` v0.4 prompt-injection +
  * guardrails semantics so the same app code exercises a deterministic
  * defense ceremony without a real Anthropic API call. Both mock and real
  * adapters satisfy {@link LlmSafetyAdapter}, so the fidelity harness can
@@ -31,7 +31,7 @@ import {
   type GuardrailSession,
   type InjectionSession,
   type SimpleSchema,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 import type {
   ConstitutionalCheckResult,
   DefensePipelineResult,

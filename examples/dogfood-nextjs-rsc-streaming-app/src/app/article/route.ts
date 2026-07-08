@@ -6,7 +6,7 @@
  * and real without spinning up Next.js.
  *
  * The article surface pairs the parent v1.34-1 `rsc-harness` axis with
- * `renderServerComponent` from `@kiwa-test/nextjs` v1.2 — every op has a
+ * `renderServerComponent` from `@kiwa/nextjs` v1.2 — every op has a
  * neutral event counterpart the fidelity harness can compare across mock
  * vs real.
  */

@@ -1,4 +1,4 @@
-# @kiwa-test/component
+# @kiwa/component
 
 ## 0.3.0 — 2026-07-06
 
@@ -12,7 +12,7 @@
 
 ### Minor Changes
 
-- 9b85ce4: feat: introduce `@kiwa-test/component` v0.1 — 3 統合統一 mock harness for Storybook 8 + Playwright Component Testing + Chromatic.
+- 9b85ce4: feat: introduce `@kiwa/component` v0.1 — 3 統合統一 mock harness for Storybook 8 + Playwright Component Testing + Chromatic.
 
   - `createStoryRegistry` — Storybook 8 CSF3 互換の story registration + args resolution (meta / story deep merge) + play function runner + `parameters.chromatic` / `parameters.a11y` 透過 + heuristic a11y checker (button-name / image-alt / label rule)
   - `createPlaywrightCTMock` — Playwright CT の `mount + getByText + getByRole + click + fill + textContent + count` API 互換の in-memory locator (framework agnostic、 browser 起動なし)

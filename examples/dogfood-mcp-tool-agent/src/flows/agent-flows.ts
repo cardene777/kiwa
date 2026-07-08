@@ -5,7 +5,7 @@ import { ALL_TOOLS } from '../tools/schema.js';
  * User-facing MCP tool-agent flows the dogfood app exposes. Each flow talks
  * only through {@link McpAgentAdapter} so the same code powers both
  * `KIWA_MODE=real` (real MCP server + real Anthropic) and `KIWA_MODE=mock`
- * (`@kiwa-test/mcp` in-process + `@kiwa-test/ai-llm` `createAnthropicMock`).
+ * (`@kiwa/mcp` in-process + `@kiwa/ai-llm` `createAnthropicMock`).
  *
  * The 3 flows below mirror the AC in Issue #750 —
  * Task 1: MCP handshake + tools/list assertion
@@ -132,7 +132,7 @@ function defaultArgsFor(name: string): Record<string, unknown> {
 }
 
 function extractText(
-  result: import('@kiwa-test/mcp').ToolCallResult,
+  result: import('@kiwa/mcp').ToolCallResult,
 ): string {
   return result.content
     .filter((c): c is { type: 'text'; text: string } => c.type === 'text')

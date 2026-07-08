@@ -96,7 +96,7 @@ describe('fidelity report', () => {
     const matrix = await runAdapterMatrix({ mock, real, run: driveFlows });
 
     const output = runFidelityHarness({
-      provider: '@kiwa-test/realtime/nextjs-webrtc-video-app',
+      provider: '@kiwa/realtime/nextjs-webrtc-video-app',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

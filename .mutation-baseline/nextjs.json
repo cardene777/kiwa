@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/nextjs",
+  "package": "@kiwa/nextjs",
   "tier": "Framework",
   "thresholds": {
     "high": 70,

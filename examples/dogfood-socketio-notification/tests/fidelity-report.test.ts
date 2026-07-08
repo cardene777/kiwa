@@ -41,7 +41,7 @@ describe('dogfood-socketio-notification — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/realtime/socketio-notification',
+      provider: '@kiwa/realtime/socketio-notification',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -56,7 +56,7 @@ describe('dogfood-socketio-notification — fidelity harness', () => {
       mutation: { mutations: 40, killed: 28 },
       surfaceCoverage: { mockCoveredMethods: 4, realTotalMethods: 4 },
     });
-    expect(output.report.provider).toBe('@kiwa-test/realtime/socketio-notification');
+    expect(output.report.provider).toBe('@kiwa/realtime/socketio-notification');
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThanOrEqual(4);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     await mock.reset();
@@ -74,7 +74,7 @@ describe('dogfood-socketio-notification — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/realtime/socketio-notification',
+      provider: '@kiwa/realtime/socketio-notification',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -107,7 +107,7 @@ describe('dogfood-socketio-notification — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/realtime/socketio-notification',
+      provider: '@kiwa/realtime/socketio-notification',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

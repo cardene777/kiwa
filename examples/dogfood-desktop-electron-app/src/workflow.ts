@@ -51,7 +51,7 @@ import {
   updateTrayTooltip,
   writeClipboard,
   type DesktopTarget,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 export interface WorkflowResult {
   target: DesktopTarget;

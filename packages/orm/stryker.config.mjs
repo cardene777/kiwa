@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/orm.
+ * Mutation testing config for @kiwa/orm.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — ORM adapter targets
  * Prisma / Drizzle / Kysely expectation semantics; SQL dialect + query
  * planner drift expected across providers.

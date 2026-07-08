@@ -31,7 +31,7 @@ describe('dogfood-mcp-tool-agent — emit fidelity report to quality-report/', (
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/mcp-tool-agent',
+      provider: '@kiwa/ai-llm/mcp-tool-agent',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

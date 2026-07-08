@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/edge.
+ * Mutation testing config for @kiwa/edge.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — Workers / Deno / Bun edge runtimes with divergent APIs.
  * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
  */

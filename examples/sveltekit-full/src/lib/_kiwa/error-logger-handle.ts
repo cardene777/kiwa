@@ -5,7 +5,7 @@
 // この PoC では event.locals.user.id (admin の場合) を含む structured log を
 // 出力し、 client には汎用 message のみ露出する。
 
-import type { HandleErrorFunction } from '@kiwa-test/sveltekit';
+import type { HandleErrorFunction } from '@kiwa/sveltekit';
 import type { AuthLocals } from './auth-handle.js';
 
 export interface ErrorLogEntry {

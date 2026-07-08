@@ -1,8 +1,8 @@
-// PoC tests — @kiwa-test/orm v0.4 (Kysely + in-memory SQLite).
+// PoC tests — @kiwa/orm v0.4 (Kysely + in-memory SQLite).
 
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupOrmEnv, expectRowCount } from '@kiwa-test/orm';
-import type { OrmTestEnvMockKysely } from '@kiwa-test/orm';
+import { setupOrmEnv, expectRowCount } from '@kiwa/orm';
+import type { OrmTestEnvMockKysely } from '@kiwa/orm';
 import { schema, type Database } from '../src/schema.js';
 import { INITIAL_MIGRATION } from '../src/migration.sql.js';
 import { UsersRepository } from '../src/users-repo.js';
@@ -22,7 +22,7 @@ async function newEnv(): Promise<OrmTestEnvMockKysely<Database>> {
   });
 }
 
-describe('UsersRepository via @kiwa-test/orm (kysely + in-memory SQLite)', () => {
+describe('UsersRepository via @kiwa/orm (kysely + in-memory SQLite)', () => {
   it('T-KY-001: create + findByEmail round-trip via Kysely', async () => {
     env = await newEnv();
     const repo = new UsersRepository(env.db);

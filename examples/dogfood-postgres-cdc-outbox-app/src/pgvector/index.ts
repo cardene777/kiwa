@@ -17,7 +17,7 @@ import {
   hybridSearch,
   knnSearch,
   type VectorStoreSession,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 import type { PgvectorObservation } from '../adapters/interface.js';
 
 export interface DrivePgvectorInput {

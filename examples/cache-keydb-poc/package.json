@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/cache -F @kiwa-test/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/cache -F @kiwa/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/cache": "workspace:*",
-    "@kiwa-test/core": "workspace:*"
+    "@kiwa/cache": "workspace:*",
+    "@kiwa/core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

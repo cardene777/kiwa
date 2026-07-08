@@ -7,7 +7,7 @@
  *  - {@link makeRealAdapter} — drives the OpenAI Chat Completions API
  *    when `KIWA_MODE=real` + `OPENAI_API_KEY` + `KIWA_LLM_BUDGET_USD`
  *    are set; otherwise every op reports `KIWA_LLM_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/ai-llm` v0.4
+ *  - {@link makeMockAdapter} — backed by `@kiwa/ai-llm` v0.4
  *    hallucination + LLM eval semantics (scoreSelfConsistency /
  *    checkFactuality / verifyCitation / scoreConfidence /
  *    judgeCandidates / applyRubric / rankPreference / updateElo).
@@ -131,7 +131,7 @@ export interface TraceEvent {
   detail?: unknown;
 }
 
-/** Rubric criterion input (aligned with @kiwa-test/ai-llm RubricCriterion). */
+/** Rubric criterion input (aligned with @kiwa/ai-llm RubricCriterion). */
 export interface RubricCriterionInput {
   key: string;
   weight: number;

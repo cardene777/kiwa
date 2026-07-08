@@ -1,7 +1,7 @@
 // users-repo.ts — production-shape Postgres repository wrapping Drizzle queries.
 
 import { eq } from 'drizzle-orm';
-import type { DrizzlePostgresDb } from '@kiwa-test/orm';
+import type { DrizzlePostgresDb } from '@kiwa/orm';
 import { posts, schema, users, type Schema } from './schema.js';
 
 export interface CreateUserInput {

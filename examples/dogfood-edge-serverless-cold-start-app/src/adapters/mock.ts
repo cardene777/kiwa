@@ -1,13 +1,13 @@
 /**
  * Mock adapter — walks the edge cold-start + middleware + routing state
- * machines from @kiwa-test/edge v1.2 semantics deterministically.
+ * machines from @kiwa/edge v1.2 semantics deterministically.
  */
 import {
   invokeColdStart,
   preWarmInstance,
   startColdStartPool,
   type ColdStartSession,
-} from '@kiwa-test/edge';
+} from '@kiwa/edge';
 import type {
   EdgeColdStartAdapter,
   EdgePlatform,

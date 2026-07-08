@@ -5,7 +5,7 @@ import {
   type MoqDatagramMediaMock,
   type SimulcastSvcMock,
   type WebCodecsDecoderMock,
-} from '@kiwa-test/realtime';
+} from '@kiwa/realtime';
 import type { AdaptiveSession, AdaptiveStep, Platform, RealtimeAdaptiveAdapter } from './interface.js';
 
 interface MockContext {

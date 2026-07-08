@@ -7,8 +7,8 @@ export type {
   Pool as SpecPool,
   SpecDoc,
   SpecCase,
-} from '@kiwa-test/core';
-export { parseSpec } from '@kiwa-test/core';
+} from '@kiwa/core';
+export { parseSpec } from '@kiwa/core';
 export type {
   ApprovalMode,
   Eip6963ProviderInfo,

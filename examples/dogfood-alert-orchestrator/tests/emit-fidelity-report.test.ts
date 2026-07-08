@@ -34,7 +34,7 @@ describe('dogfood-alert-orchestrator — emit fidelity report to quality-report/
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/observability/alert',
+      provider: '@kiwa/observability/alert',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

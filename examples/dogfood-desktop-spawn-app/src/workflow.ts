@@ -4,7 +4,7 @@ import {
   type DesktopAxis,
   type DesktopCliCommand,
   type SpawnResult,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 const ALL_CLIS: DesktopCliCommand[] = [
   'electron-builder',

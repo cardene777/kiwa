@@ -33,7 +33,7 @@ describe('dogfood-visual-regression — emit fidelity report to quality-report/'
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/component/visual-regression',
+      provider: '@kiwa/component/visual-regression',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

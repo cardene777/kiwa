@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa-test/component/nextjs-server-action-app",
+  "provider": "@kiwa/component/nextjs-server-action-app",
   "version": "0.3.0",
   "reportedAt": "2026-07-06T13:13:21.490Z",
   "coverage": {

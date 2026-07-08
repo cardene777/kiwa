@@ -21,7 +21,7 @@ import {
   isKiwaModeReal,
   resolveObservabilityEndpoint,
   semantics,
-} from '@kiwa-test/observability';
+} from '@kiwa/observability';
 import {
   KIWA_OTEL_ENV_MISSING,
   type DetectResourceResult,

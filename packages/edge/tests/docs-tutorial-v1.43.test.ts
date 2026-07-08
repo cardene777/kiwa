@@ -13,7 +13,7 @@
  * v1.39 / v1.40 / v1.41 / v1.42 と同 pattern (21 milestone 連続 snippet
  * validation streak = v1.23 → v1.43)。
  *
- * v1.43 は @kiwa-test/edge v1.2 advanced 8 axis を扱う (cold-start /
+ * v1.43 は @kiwa/edge v1.2 advanced 8 axis を扱う (cold-start /
  * middleware-chain / kv-eventual-consistency / r2-multipart / d1-read-replica /
  * do-state-migration / websocket-hibernation / global-routing)。 mock 部分の
  * 動作検証のみ行う (real driver = Cloudflare Workers + Vercel Edge + AWS Lambda +

@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/hono.
+ * Mutation testing config for @kiwa/hono.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — Hono edge + node adapter drift.
  * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
  */

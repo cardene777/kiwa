@@ -17,7 +17,7 @@
 import type {
   AuthorizationRequest,
   AuthorizationResponse,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 import type { OAuth21ASAdapter } from '../../adapters/interface.js';
 import { assertMethodAllowed, PkceValidationError } from '../../lib/pkce.js';
 

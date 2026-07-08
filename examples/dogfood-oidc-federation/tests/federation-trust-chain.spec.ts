@@ -4,7 +4,7 @@
  * Layers OpenID Federation 1.0 §7 chain-walk axes on top of the Sub-Issue
  * v1.21-4a/b/c stack. The wrapper in `src/lib/federation.ts` sits between the
  * dogfood app's Relying Party bootstrap path + the underlying
- * `@kiwa-test/auth` `resolveTrustChain`. The harness exercises the four
+ * `@kiwa/auth` `resolveTrustChain`. The harness exercises the four
  * Federation §7.2 chain-walk axes —
  *
  *   13. 3-step chain — leaf → intermediate → anchor resolves to a full ordered
@@ -26,7 +26,7 @@ import {
   createOidcTrustAnchor,
   type OidcEntityStatement,
   type TrustAnchor,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 import {
   assertAnchorMatches,
   classifyFederationReason,

@@ -8,7 +8,7 @@
  *   2. Sets `SET @app_tenant_id = ?` on the Prisma client
  *   3. Runs the query against a table with an RLS policy on `tenant_id`
  *
- * The mock reproduces steps 2 + 3 through `@kiwa-test/orm`'s RLS session
+ * The mock reproduces steps 2 + 3 through `@kiwa/orm`'s RLS session
  * semantics — `installPolicy` mounts the policy on the `organizations`
  * table, `filterTenant` gates each read/write. Cross-tenant access without
  * a `bypass_rls` role is refused.

@@ -1,5 +1,5 @@
 // Real Nuxt 3 global middleware — thin wrapper around `_kiwa/auth-middleware.ts`.
-// The pure middleware is unit-testable via @kiwa-test/nuxt's invokeRouteMiddleware
+// The pure middleware is unit-testable via @kiwa/nuxt's invokeRouteMiddleware
 // helper while the production code path still flows through `defineNuxtRouteMiddleware`.
 
 import { authMiddleware } from './_kiwa/auth-middleware.js';

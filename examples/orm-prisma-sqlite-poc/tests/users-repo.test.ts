@@ -1,9 +1,9 @@
-// PoC tests — @kiwa-test/orm v0.3 (Prisma + SQLite via tempdir).
+// PoC tests — @kiwa/orm v0.3 (Prisma + SQLite via tempdir).
 
 import { afterEach, describe, expect, it } from 'vitest';
 import { resolve } from 'node:path';
-import { setupOrmEnv, expectRowCount } from '@kiwa-test/orm';
-import type { OrmTestEnvMockPrisma } from '@kiwa-test/orm';
+import { setupOrmEnv, expectRowCount } from '@kiwa/orm';
+import type { OrmTestEnvMockPrisma } from '@kiwa/orm';
 import { PrismaClient } from '../prisma/generated/index.js';
 import { UsersRepository } from '../src/users-repo.js';
 
@@ -26,7 +26,7 @@ async function newEnv(): Promise<OrmTestEnvMockPrisma<PrismaClient>> {
   });
 }
 
-describe('UsersRepository via @kiwa-test/orm (prisma + tempdir SQLite)', () => {
+describe('UsersRepository via @kiwa/orm (prisma + tempdir SQLite)', () => {
   it('T-PR-001: create + findByEmail round-trip via Prisma client', async () => {
     env = await newEnv();
     const repo = new UsersRepository(env.client);

@@ -12,7 +12,7 @@
  * docs-tutorial-v*.test.ts と同 pattern。 6 milestone 連続 pattern
  * (v1.23-v1.28) を確立する。
  *
- * v1.28 は @kiwa-test/realtime v0.2 の 3 protocol × 8 axis low-layer transport
+ * v1.28 は @kiwa/realtime v0.2 の 3 protocol × 8 axis low-layer transport
  * mocks + 24-row SEMANTICS_GRID + resolveRealtimeDriver env-gate を扱う。
  * tutorial 52 は WebRTC video call (signaling + ICE + track + simulcast +
  * iceRestart)、 tutorial 53 は WebTransport (uni + bi + backpressure + reset +

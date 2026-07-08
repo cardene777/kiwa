@@ -28,8 +28,8 @@ import {
   createDpopProof as kiwaCreateDpopProof,
   createMockDpopJwk,
   createPkceChallenge,
-} from '@kiwa-test/auth';
-import type { ClientRegistration, DpopJwk } from '@kiwa-test/auth';
+} from '@kiwa/auth';
+import type { ClientRegistration, DpopJwk } from '@kiwa/auth';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { makeRealAdapter } from '../src/adapters/real.js';
 import { createHonoApp } from '../src/lib/hono-app.js';

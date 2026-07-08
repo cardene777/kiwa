@@ -6,7 +6,7 @@
  * without spinning up a Klarna / Affirm / Afterpay account.
  *
  * The plan surface pairs the parent v1.41-1 `bnpl` axis (createBnplPlan +
- * scheduleInstallment) with `@kiwa-test/payment` v0.5 — every op has a
+ * scheduleInstallment) with `@kiwa/payment` v0.5 — every op has a
  * neutral event counterpart the fidelity harness can compare across mock
  * vs real.
  */

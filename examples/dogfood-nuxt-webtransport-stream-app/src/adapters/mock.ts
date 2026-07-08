@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/realtime` v0.2's
+ * Mock adapter — drives `@kiwa/realtime` v0.2's
  * `createWebTransportUniMock` + `createWebTransportBiMock` so the same app
  * code exercises a deterministic WebTransport ceremony without touching an
  * HTTP/3 server or a Chromium instance running the origin-trial flag. Both
@@ -19,7 +19,7 @@ import {
   type UniStreamHandle,
   type WebTransportBiMock,
   type WebTransportUniMock,
-} from '@kiwa-test/realtime';
+} from '@kiwa/realtime';
 import type {
   MigrateConnectionResult,
   OpenBiStreamResult,

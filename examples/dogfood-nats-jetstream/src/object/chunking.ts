@@ -1,6 +1,6 @@
 /**
  * Object Store chunking flow (v1.31-4) — wraps
- * `@kiwa-test/streaming`'s `createNatsKvObject` object surface so the
+ * `@kiwa/streaming`'s `createNatsKvObject` object surface so the
  * dogfood can exercise chunk-boundary splitting + LZ4-tagged compression
  * + reassembly round-trip.
  *
@@ -18,7 +18,7 @@ import {
   createNatsKvObject,
   type NatsKvObject,
   type ObjectRecord,
-} from '@kiwa-test/streaming';
+} from '@kiwa/streaming';
 
 export interface ObjectChunkingFlowInput {
   readonly bucket?: string;

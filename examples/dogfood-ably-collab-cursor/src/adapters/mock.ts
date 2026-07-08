@@ -2,7 +2,7 @@ import {
   createAblyMock,
   type AblyChannel,
   type AblyMock,
-} from '@kiwa-test/realtime';
+} from '@kiwa/realtime';
 import type {
   CursorBoardAdapter,
   CursorPosition,
@@ -11,7 +11,7 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — drives the `@kiwa-test/realtime` Ably mock so the same
+ * Mock adapter — drives the `@kiwa/realtime` Ably mock so the same
  * app code exercises {@link AblyMock} without touching Ably.
  *
  * The mock returns deterministic behaviour so fidelity tests can assert on

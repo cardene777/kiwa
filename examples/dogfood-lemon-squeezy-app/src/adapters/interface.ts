@@ -6,7 +6,7 @@
  *  - {@link makeRealAdapter} (drives a real Lemon Squeezy sandbox / Lemon
  *    Squeezy REST API, skipped when the environment cannot reach
  *    `LEMONSQUEEZY_KEY` + `KIWA_MODE=real`)
- *  - {@link makeMockAdapter} (backed by `@kiwa-test/payment`'s
+ *  - {@link makeMockAdapter} (backed by `@kiwa/payment`'s
  *    `createLemonSqueezyMock` + 8-axis semantics)
  *
  * Both must satisfy the same contract so behavioural fidelity between real
@@ -38,7 +38,7 @@ import type {
   PaymentWebhookEvent,
   Subscription as SemanticSubscription,
   WebhookVerifyResult,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 import type { LicenseKeyRecord, RefundRecord } from '../lib/store.js';
 
 /**

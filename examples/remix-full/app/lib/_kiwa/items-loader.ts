@@ -3,7 +3,7 @@
 // Pattern A (Dependency Injection) — 実 Remix 側は app/routes/items.tsx で
 // export const loader = (args) => itemsLoader(args) として thin wrap する。
 
-import { json, redirect, type SimulatedRouteArgs } from '@kiwa-test/remix';
+import { json, redirect, type SimulatedRouteArgs } from '@kiwa/remix';
 import { resolveUser } from '../../utils/_kiwa/auth.js';
 
 export interface Item {

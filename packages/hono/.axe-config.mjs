@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/hono.
+ * A11y (axe-core) config for @kiwa/hono.
  * Tier: Framework tier (critical 0 / serious 0-3 / moderate 0-10) — Hono edge + node adapter drift.
  * SSOT: docs/quality/a11y-thresholds.md § Framework tier.
  */

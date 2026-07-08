@@ -1,4 +1,4 @@
-# @kiwa-test/core
+# @kiwa/core
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package powers spec parsing for every adapter)" width="640" />
@@ -10,25 +10,25 @@ Common spec language + test environment abstractions for kiwa adapters (core / a
 
 ## Overview
 
-`@kiwa-test/core` provides the foundational primitives that every kiwa adapter shares:
+`@kiwa/core` provides the foundational primitives that every kiwa adapter shares:
 
 - `parseSpec(markdown)` — turn a kiwa-design 9-column markdown spec into a typed `SpecDoc` (cases, layer, mode, route, etc.)
 - `createPool({ size, acquire, reset, release })` — a generic borrow/release pool with `anvil_reset`-style reuse semantics
 - `TestEnvBase<TMode>` — the structural type every `setupTestEnv`-style helper returns (`mode`, `stop()`, plus adapter-specific extensions)
 - `TestLayer` / `TestMode` / `Lease` / `Pool` — shared type vocabulary
 
-Adapters (`@kiwa-test/dapp` for dApp E2E, `@kiwa-test/api` for HTTP) depend on this package so that specs, environments, and pools share the same shape regardless of which adapter is running them.
+Adapters (`@kiwa/dapp` for dApp E2E, `@kiwa/api` for HTTP) depend on this package so that specs, environments, and pools share the same shape regardless of which adapter is running them.
 
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/core
+pnpm add -D @kiwa/core
 ```
 
 ## Parse a kiwa-design spec
 
 ```ts
-import { parseSpec } from "@kiwa-test/core";
+import { parseSpec } from "@kiwa/core";
 import { readFileSync } from "node:fs";
 
 const doc = parseSpec(readFileSync("tests/spec/integration/test-spec-items.api.md", "utf8"));
@@ -42,7 +42,7 @@ The parser reads the meta block (`- module:` / `- layer:`) and the first 9-colum
 ## Build a borrow/release pool
 
 ```ts
-import { createPool } from "@kiwa-test/core";
+import { createPool } from "@kiwa/core";
 
 const pool = await createPool({
   size: 4,
@@ -60,7 +60,7 @@ try {
 await pool.stopAll();
 ```
 
-`@kiwa-test/dapp`'s `createAnvilPool` is built on top of this primitive so the same lifecycle pattern works for anvil instances, HTTP servers, headless browsers, queue workers, or anything else.
+`@kiwa/dapp`'s `createAnvilPool` is built on top of this primitive so the same lifecycle pattern works for anvil instances, HTTP servers, headless browsers, queue workers, or anything else.
 
 ## License
 

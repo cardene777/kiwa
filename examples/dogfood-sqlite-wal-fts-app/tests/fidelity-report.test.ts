@@ -17,7 +17,7 @@ describe('dogfood-sqlite-wal-fts-app — fidelity harness', () => {
     const real = await makeRealAdapter();
     const matrix = await runAdapterMatrix({ mock, real, run: runFullSurface });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/orm/sqlite-wal-fts-dogfood',
+      provider: '@kiwa/orm/sqlite-wal-fts-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -47,7 +47,7 @@ describe('dogfood-sqlite-wal-fts-app — fidelity harness', () => {
     const shadow = makeMockAdapter();
     const matrix = await runAdapterMatrix({ mock, real: shadow, run: runFullSurface });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/orm/sqlite-wal-fts-dogfood',
+      provider: '@kiwa/orm/sqlite-wal-fts-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -73,7 +73,7 @@ describe('dogfood-sqlite-wal-fts-app — fidelity harness', () => {
     const real = await makeRealAdapter();
     const matrix = await runAdapterMatrix({ mock, real, run: runFullSurface });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/orm/sqlite-wal-fts-dogfood',
+      provider: '@kiwa/orm/sqlite-wal-fts-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

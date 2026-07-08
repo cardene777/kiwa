@@ -24,7 +24,7 @@ import { chromium, expect, test, type BrowserContext, type Page } from '@playwri
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { existsSync } from 'node:fs';
-import { __resetWebAuthnCounters } from '@kiwa-test/auth';
+import { __resetWebAuthnCounters } from '@kiwa/auth';
 import { makeMockAdapter } from '../../src/adapters/mock.js';
 import { createRegisterHandler } from '../../src/app/register/route.js';
 import { createSigninHandler } from '../../src/app/signin/route.js';

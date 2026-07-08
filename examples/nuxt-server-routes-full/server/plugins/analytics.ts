@@ -1,6 +1,6 @@
 // Real Nuxt 3 / Nitro plugin — wires the pure `createAnalyticsPlugin` factory
 // with a console-backed logger and an incrementing request-id generator. The
-// pure factory is unit-testable via @kiwa-test/nuxt's invokeNitroPlugin helper.
+// pure factory is unit-testable via @kiwa/nuxt's invokeNitroPlugin helper.
 
 import { createAnalyticsPlugin, type AnalyticsContext } from './_kiwa/analytics-plugin.js';
 

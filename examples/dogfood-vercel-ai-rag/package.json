@@ -3,20 +3,20 @@
   "version": "0.0.2",
   "private": true,
   "type": "module",
-  "description": "Dogfood app 3 (v1.12-4) — a Vercel AI SDK + LangChain retriever + embedding + RAG pipeline that exercises document ingestion, chunking, embedding, vector-store search, retrieval and streaming LLM generation, drivable in both KIWA_MODE=real (Vercel AI SDK generateText / streamText against real provider + LangChain OpenAIEmbeddings + Pinecone-shaped vector store when RAG_VECTOR_STORE_URL is set) and KIWA_MODE=mock (@kiwa-test/ai-llm createVercelAiMock + createLangchainMock + in-memory vector store) so retrieval / embedding / final-answer fidelity feeds @kiwa-test/quality-metrics 11-axis release gate.",
+  "description": "Dogfood app 3 (v1.12-4) — a Vercel AI SDK + LangChain retriever + embedding + RAG pipeline that exercises document ingestion, chunking, embedding, vector-store search, retrieval and streaming LLM generation, drivable in both KIWA_MODE=real (Vercel AI SDK generateText / streamText against real provider + LangChain OpenAIEmbeddings + Pinecone-shaped vector store when RAG_VECTOR_STORE_URL is set) and KIWA_MODE=mock (@kiwa/ai-llm createVercelAiMock + createLangchainMock + in-memory vector store) so retrieval / embedding / final-answer fidelity feeds @kiwa/quality-metrics 11-axis release gate.",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/ai-llm -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "pretest:perf": "pnpm -F @kiwa-test/ai-llm -F @kiwa-test/core -F @kiwa-test/quality-metrics -F @kiwa-test/perf-harness build",
+    "test": "pnpm -F @kiwa/ai-llm -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "pretest:perf": "pnpm -F @kiwa/ai-llm -F @kiwa/core -F @kiwa/quality-metrics -F @kiwa/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/ai-llm": "workspace:*",
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/quality-metrics": "workspace:*"
+    "@kiwa/ai-llm": "workspace:*",
+    "@kiwa/core": "workspace:*",
+    "@kiwa/quality-metrics": "workspace:*"
   },
   "devDependencies": {
-    "@kiwa-test/perf-harness": "workspace:*",
+    "@kiwa/perf-harness": "workspace:*",
     "@types/node": "^22.10.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"

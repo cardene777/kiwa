@@ -28,8 +28,8 @@ import {
   __resetOAuth21Counters,
   createPkceChallenge as kiwaCreatePkceChallenge,
   generateCodeVerifier as kiwaGenerateCodeVerifier,
-} from '@kiwa-test/auth';
-import type { AuthorizationRequest, TokenRequest } from '@kiwa-test/auth';
+} from '@kiwa/auth';
+import type { AuthorizationRequest, TokenRequest } from '@kiwa/auth';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import {
   detectRealEnvMissing,

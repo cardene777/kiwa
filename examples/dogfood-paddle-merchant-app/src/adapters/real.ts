@@ -19,7 +19,7 @@ import type {
   Subscription as SemanticSubscription,
   DunningSession,
   TaxLine,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 import type {
   CheckoutInput,
   CheckoutResult,

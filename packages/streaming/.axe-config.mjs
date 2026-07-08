@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/streaming.
+ * A11y (axe-core) config for @kiwa/streaming.
  * Tier: SaaS tier (critical 0 / serious 0 / moderate 0) — Kafka / NATS / Redpanda. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § SaaS tier.
  *

@@ -7,7 +7,7 @@ import {
   textContent,
   NOT_FOUND_SYMBOL,
   type RscElement,
-} from '@kiwa-test/nextjs';
+} from '@kiwa/nextjs';
 import { UserPage, UserList } from '../src/user-page.js';
 
 describe('UserPage', () => {

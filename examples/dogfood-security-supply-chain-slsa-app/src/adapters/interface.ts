@@ -9,7 +9,7 @@
  *    KIWA_REKOR_URL + KIWA_COSIGN_TRUST_ROOT) when `KIWA_MODE=real` +
  *    `COSIGN_STACK_READY=1` are set; otherwise every op reports
  *    `KIWA_COSIGN_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/security` v0.2
+ *  - {@link makeMockAdapter} — backed by `@kiwa/security` v0.2
  *    supply-chain semantics (startSupplyChainSession / verifySlsaLevel /
  *    matchReproducibleBuild / signProvenance / verifyAttestation).
  *

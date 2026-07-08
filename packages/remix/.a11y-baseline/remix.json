@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/remix",
+  "package": "@kiwa/remix",
   "generatedAt": "2026-07-06T01:15:07.756Z",
   "layers": {
     "jsdom": {

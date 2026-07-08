@@ -28,8 +28,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { __resetOAuth21Counters, createPkceChallenge } from '@kiwa-test/auth';
-import type { AuthorizationRequest } from '@kiwa-test/auth';
+import { __resetOAuth21Counters, createPkceChallenge } from '@kiwa/auth';
+import type { AuthorizationRequest } from '@kiwa/auth';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { detectRealEnvMissing, makeRealAdapter } from '../src/adapters/real.js';
 import { createHonoApp } from '../src/lib/hono-app.js';

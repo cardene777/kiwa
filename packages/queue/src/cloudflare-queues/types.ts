@@ -1,4 +1,4 @@
-import type { TestEnvBase, TestMode } from '@kiwa-test/core';
+import type { TestEnvBase, TestMode } from '@kiwa/core';
 
 /**
  * Cloudflare Queues backend selection.

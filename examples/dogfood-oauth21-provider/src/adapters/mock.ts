@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/auth`'s `setupOAuth21Env` +
+ * Mock adapter — drives `@kiwa/auth`'s `setupOAuth21Env` +
  * `createAuthorizationServer` so the same Hono app exercises a
  * deterministic OAuth 2.1 flow without spawning `oauth2-mock-server` or a
  * docker container. Both mock and real adapters satisfy
@@ -23,7 +23,7 @@ import {
   type OAuth21TestEnv,
   type TokenRequest,
   type TokenResponse,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 import type {
   DiscoveryMetadata,
   OAuth21ASAdapter,

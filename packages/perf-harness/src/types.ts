@@ -2,7 +2,7 @@ import type {
   QualityReport,
   ReleaseGateBlocker,
   ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 
 export interface MeasureInput {
   name: string;

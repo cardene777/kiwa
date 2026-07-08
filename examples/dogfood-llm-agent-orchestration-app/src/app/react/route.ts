@@ -6,7 +6,7 @@
  * Vercel AI SDK client.
  *
  * The ReAct surface pairs the parent v1.38-1 `agent-orchestration` axis
- * (ReAct trace) with `@kiwa-test/ai-llm` v0.4 — every op has a neutral
+ * (ReAct trace) with `@kiwa/ai-llm` v0.4 — every op has a neutral
  * event counterpart the fidelity harness can compare across mock vs
  * real.
  */

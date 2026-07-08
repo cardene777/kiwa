@@ -4,7 +4,7 @@
  * policy. Refunds inside the window can be full or partial; refunds
  * outside the window are rejected with `refund_window_expired`.
  *
- * Wraps @kiwa-test/payment refund-advanced axis conceptually (window +
+ * Wraps @kiwa/payment refund-advanced axis conceptually (window +
  * policy caps) with a dogfood-scope surface — the routes call these
  * helpers instead of the raw axis so tests can pin against clear return
  * shapes and error kinds.
@@ -21,7 +21,7 @@ export const THIRTY_DAY_MS = 30 * 24 * 60 * 60 * 1000;
 
 /**
  * Refund window + amount policy configuration. `chargebackPrevention`
- * mirrors the @kiwa-test/payment axis flag — when true, the merchant is
+ * mirrors the @kiwa/payment axis flag — when true, the merchant is
  * willing to refund even outside the window to head off chargeback fees.
  */
 export interface RefundWindowPolicy {

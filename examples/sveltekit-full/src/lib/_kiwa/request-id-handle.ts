@@ -5,7 +5,7 @@
 // deterministic に挙動再現可能。 SvelteKit 公式 hooks.server.ts では typically
 // `sequence(requestIdHandle, authHandle)` の形で組み合わせる。
 
-import type { HandleFunction } from '@kiwa-test/sveltekit';
+import type { HandleFunction } from '@kiwa/sveltekit';
 import type { AuthLocals } from './auth-handle.js';
 
 export interface RequestIdLocals extends AuthLocals {

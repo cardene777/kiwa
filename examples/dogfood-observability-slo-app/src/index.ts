@@ -1,7 +1,7 @@
 /**
  * Public surface for dogfood-observability-slo-app v0.0.1 (v1.35-2).
  *
- * A dogfood app that drives the `@kiwa-test/observability` v2.1 SLO
+ * A dogfood app that drives the `@kiwa/observability` v2.1 SLO
  * axis (session start → open window → query request counts → record
  * → compute error budget → evaluate burn rate → fire MWMBR alert →
  * evaluate error-budget policy → route alert → silence) behind a
@@ -9,7 +9,7 @@
  * mock adapter and a `KIWA_MODE=real` testcontainers-driven Grafana
  * OSS + Prometheus + Alertmanager real adapter. The fidelity harness
  * diffs both traces and feeds the divergence count into the
- * `@kiwa-test/quality-metrics` 13-axis release gate.
+ * `@kiwa/quality-metrics` 13-axis release gate.
  */
 
 export { makeMockAdapter } from './adapters/mock.js';

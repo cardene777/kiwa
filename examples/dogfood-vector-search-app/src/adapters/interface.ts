@@ -5,7 +5,7 @@
  *
  * The dogfood talks to the vector-search pipeline only through this
  * interface. Two implementations exist: {@link makeMockAdapter} (backed
- * by `@kiwa-test/orm`'s vector-store semantics + an in-memory document
+ * by `@kiwa/orm`'s vector-store semantics + an in-memory document
  * store + an in-memory embedding cache) and {@link makeRealAdapter}
  * (probes a Postgres 16 + pgvector + Redis 7 broker via `VECTOR_KEY`
  * when set, else returns a skipped variant whose every method records a
@@ -13,7 +13,7 @@
  *
  * Both satisfy the same 5-op surface so behavioural fidelity between
  * real vs mock can be measured side-by-side and fed to
- * `@kiwa-test/quality-metrics` 7-axis release gate.
+ * `@kiwa/quality-metrics` 7-axis release gate.
  */
 
 import type { DocumentRow } from '../document/index.js';

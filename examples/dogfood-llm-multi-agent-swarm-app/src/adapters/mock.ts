@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/ai-llm` v0.5 multi-agent-orchestration
+ * Mock adapter — drives `@kiwa/ai-llm` v0.5 multi-agent-orchestration
  * + agent-swarm semantics so the same app code exercises a deterministic
  * planning + delegation + consensus ceremony without a real Anthropic /
  * Vercel AI SDK call. Both mock and real adapters satisfy
@@ -35,7 +35,7 @@ import {
   type MaoDelegation,
   type MaoSession,
   type SwarmSession,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 import type {
   AllocateTasksResult,
   AssembleCrewResult,

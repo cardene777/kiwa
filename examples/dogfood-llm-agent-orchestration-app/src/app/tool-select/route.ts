@@ -4,7 +4,7 @@
  * and real symmetrically.
  *
  * The tool-select surface pairs the parent v1.38-1 `agent-orchestration`
- * axis (tool selection) with `@kiwa-test/ai-llm` v0.4 — every op has a
+ * axis (tool selection) with `@kiwa/ai-llm` v0.4 — every op has a
  * neutral event counterpart the fidelity harness can compare across
  * mock vs real.
  */

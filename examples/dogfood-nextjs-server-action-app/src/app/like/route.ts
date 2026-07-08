@@ -6,8 +6,8 @@
  * exercise mock and real without spinning up Next.js.
  *
  * The like surface pairs the parent v1.34-1 `form-action-advanced` axis
- * with `@kiwa-test/component` v0.3 form-action-advanced helpers +
- * `@kiwa-test/nextjs` v1.2 server-action-advanced helpers — every op has a
+ * with `@kiwa/component` v0.3 form-action-advanced helpers +
+ * `@kiwa/nextjs` v1.2 server-action-advanced helpers — every op has a
  * neutral event counterpart the fidelity harness can compare across mock
  * vs real.
  */

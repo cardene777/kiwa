@@ -7,7 +7,7 @@
  *
  * The hallucination surface pairs the parent v1.38-1 `hallucination`
  * axis (self-consistency + factuality + citation + confidence +
- * hedging) with `@kiwa-test/ai-llm` v0.4 — every op has a neutral event
+ * hedging) with `@kiwa/ai-llm` v0.4 — every op has a neutral event
  * counterpart the fidelity harness can compare across mock vs real.
  */
 

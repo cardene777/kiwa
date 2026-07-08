@@ -144,7 +144,7 @@ describe('emit fidelity-latest report', () => {
     const matrix = await runAdapterMatrix({ mock, real, run: driveFlows });
 
     const output = runFidelityHarness({
-      provider: '@kiwa-test/payment/dogfood-embedded-finance-app',
+      provider: '@kiwa/payment/dogfood-embedded-finance-app',
       version: '0.5.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

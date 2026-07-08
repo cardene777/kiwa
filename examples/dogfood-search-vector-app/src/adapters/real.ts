@@ -22,7 +22,7 @@ import {
   semantics,
   type RealDriverConfig,
   type SearchBackend,
-} from '@kiwa-test/search';
+} from '@kiwa/search';
 import {
   KIWA_SEARCH_ENV_MISSING,
   type AddVectorsResult,
@@ -624,6 +624,6 @@ function providerEventFor(target: SearchTarget, neutralEvent: string): string {
 
 /**
  * Re-export type used by callers to determine the SearchBackend union
- * without importing from `@kiwa-test/search` directly.
+ * without importing from `@kiwa/search` directly.
  */
 export type { SearchBackend };

@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.33-4 — Lemon Squeezy Merchant-of-Record RP focused on license key (issue + activation + per-seat / per-machine bind) + affiliate program (referral link + commission + tier) + refund window (30 day money-back guarantee + partial refund) + webhook (order created / license activated / refund issued). Drives @kiwa-test/payment v0.4 refund-advanced + payment-method-vault axes through a mock adapter, with real driver env-gate (KIWA_MODE=real + LEMONSQUEEZY_API_KEY) surfacing KIWA_LEMONSQUEEZY_ENV_MISSING until a sandbox fixture is wired.",
+  "description": "Dogfood app v1.33-4 — Lemon Squeezy Merchant-of-Record RP focused on license key (issue + activation + per-seat / per-machine bind) + affiliate program (referral link + commission + tier) + refund window (30 day money-back guarantee + partial refund) + webhook (order created / license activated / refund issued). Drives @kiwa/payment v0.4 refund-advanced + payment-method-vault axes through a mock adapter, with real driver env-gate (KIWA_MODE=real + LEMONSQUEEZY_API_KEY) surfacing KIWA_LEMONSQUEEZY_ENV_MISSING until a sandbox fixture is wired.",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/payment -F @kiwa-test/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/payment -F @kiwa/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/payment": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/payment": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

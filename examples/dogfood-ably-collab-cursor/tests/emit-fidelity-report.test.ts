@@ -38,7 +38,7 @@ describe('dogfood-ably-collab-cursor — emit fidelity report to quality-report/
     await twoUsersCollab(twoUserMock);
     const mergedMockTraces = [...matrix.mockTraces, ...twoUserMock.traces()];
     const output = runFidelityHarness({
-      provider: '@kiwa-test/realtime/ably-collab-cursor',
+      provider: '@kiwa/realtime/ably-collab-cursor',
       version: '0.1.0',
       mockTraces: mergedMockTraces,
       realTraces: matrix.realTraces,

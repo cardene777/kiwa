@@ -3,21 +3,21 @@
   "version": "0.0.3",
   "private": true,
   "type": "module",
-  "description": "Dogfood app (v1.31-2) — a Kafka event pipeline that exercises 4 v1 patterns (idempotent producer with partition key + batch / consumer group with offset commit + rebalance callback / exactly-once transactional producer + read-committed consumer / DLQ with retry policy + poison message quarantine + DLQ topic subscribe) + 4 v2 axes (KIP-98 raw protocol producer id/epoch fencing + txn coordinator state machine / ISR + high-watermark advance / Redpanda Schema Registry evolution check / confluent-kafka + Schema Registry testcontainers probe) driven by @kiwa-test/streaming v0.3 in KIWA_MODE=mock and a confluent-kafka 3.7 testcontainers pair in KIWA_MODE=real (env-gated on KAFKA_KEY). Behavioural fidelity feeds @kiwa-test/quality-metrics 13-axis release gate + Playwright e2e for producer / consumer / txn / idempotent flows.",
+  "description": "Dogfood app (v1.31-2) — a Kafka event pipeline that exercises 4 v1 patterns (idempotent producer with partition key + batch / consumer group with offset commit + rebalance callback / exactly-once transactional producer + read-committed consumer / DLQ with retry policy + poison message quarantine + DLQ topic subscribe) + 4 v2 axes (KIP-98 raw protocol producer id/epoch fencing + txn coordinator state machine / ISR + high-watermark advance / Redpanda Schema Registry evolution check / confluent-kafka + Schema Registry testcontainers probe) driven by @kiwa/streaming v0.3 in KIWA_MODE=mock and a confluent-kafka 3.7 testcontainers pair in KIWA_MODE=real (env-gated on KAFKA_KEY). Behavioural fidelity feeds @kiwa/quality-metrics 13-axis release gate + Playwright e2e for producer / consumer / txn / idempotent flows.",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/streaming -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "pretest:perf": "pnpm -F @kiwa-test/streaming -F @kiwa-test/core -F @kiwa-test/quality-metrics -F @kiwa-test/perf-harness build",
+    "test": "pnpm -F @kiwa/streaming -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "pretest:perf": "pnpm -F @kiwa/streaming -F @kiwa/core -F @kiwa/quality-metrics -F @kiwa/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/streaming": "workspace:*",
-    "@kiwa-test/quality-metrics": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/streaming": "workspace:*",
+    "@kiwa/quality-metrics": "workspace:*"
   },
   "devDependencies": {
-    "@kiwa-test/perf-harness": "workspace:*",
+    "@kiwa/perf-harness": "workspace:*",
     "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.0",
     "typescript": "^5.6.0",

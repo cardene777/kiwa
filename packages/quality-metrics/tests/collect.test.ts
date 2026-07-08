@@ -158,7 +158,7 @@ describe('mutationFromCounts', () => {
 describe('assembleReport', () => {
   it('T-QM-COL-022 assembles a full report with a timestamp', () => {
     const report = assembleReport({
-      provider: '@kiwa-test/example',
+      provider: '@kiwa/example',
       version: '0.1.0',
       coverage: { line: 90, branch: 85, function: 92 },
       testCount: testCountFromCategories({ behavior: 20, integration: 5, e2e: 2 }),
@@ -166,7 +166,7 @@ describe('assembleReport', () => {
       perf: perfFromSamples([10, 20, 30, 40, 50, 60, 70, 80, 90, 100]),
       mutation: mutationFromCounts({ mutations: 40, killed: 26 }),
     });
-    expect(report.provider).toBe('@kiwa-test/example');
+    expect(report.provider).toBe('@kiwa/example');
     expect(report.version).toBe('0.1.0');
     expect(report.testCount.total).toBe(27);
     expect(report.fidelity.ratio).toBe(80);
@@ -191,7 +191,7 @@ describe('assembleReport', () => {
 
   it('T-QM-COL-024 propagates notes when supplied', () => {
     const report = assembleReport({
-      provider: '@kiwa-test/example',
+      provider: '@kiwa/example',
       version: '0.1.0',
       coverage: { line: 100, branch: 100, function: 100 },
       testCount: { behavior: 1, integration: 0, e2e: 0, total: 1 },
@@ -205,7 +205,7 @@ describe('assembleReport', () => {
 
   it('T-QM-COL-025 propagates AI-LLM 4 axes when supplied', () => {
     const report = assembleReport({
-      provider: '@kiwa-test/ai-llm',
+      provider: '@kiwa/ai-llm',
       version: '0.1.0',
       coverage: { line: 100, branch: 100, function: 100 },
       testCount: { behavior: 1, integration: 0, e2e: 0, total: 1 },

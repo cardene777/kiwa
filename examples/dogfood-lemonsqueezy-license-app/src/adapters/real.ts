@@ -11,7 +11,7 @@
  * dogfood app exercises the env-gate + fallback contract only.
  */
 
-import { resolveMode } from '@kiwa-test/payment';
+import { resolveMode } from '@kiwa/payment';
 import type {
   AffiliateConvertInput,
   AffiliateRegisterInput,

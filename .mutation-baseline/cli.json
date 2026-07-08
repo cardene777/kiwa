@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/cli",
+  "package": "@kiwa/cli",
   "tier": "Core",
   "thresholds": {
     "high": 80,

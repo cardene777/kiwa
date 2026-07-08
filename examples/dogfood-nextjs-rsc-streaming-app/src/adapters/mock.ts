@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/component` v0.3 rsc-harness + streaming-
+ * Mock adapter — drives `@kiwa/component` v0.3 rsc-harness + streaming-
  * ssr + view-transitions + form-action-advanced semantics helpers so the
  * same app code exercises a deterministic RSC + streaming SSR + view
  * transitions ceremony without launching Chromium. Both mock and real
@@ -39,7 +39,7 @@ import {
   startViewTransitionSession,
   streamHtmlChunk,
   assertAnimation as assertViewAnimation,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 import type {
   RenderArticleResult,
   RscStreamingAdapter,

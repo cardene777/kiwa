@@ -8,7 +8,7 @@
  *    KIWA_COLUMN_API_URL + KIWA_KYC_PROVIDER_URL) when `KIWA_MODE=real` +
  *    `EMBEDDED_FINANCE_STACK_READY=1` are set; otherwise every op reports
  *    `KIWA_EMBEDDED_FINANCE_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/payment` v0.5
+ *  - {@link makeMockAdapter} — backed by `@kiwa/payment` v0.5
  *    embedded-finance semantics (openAccount / verifyKyc / verifyKyb /
  *    issueCard / closeAccount).
  *

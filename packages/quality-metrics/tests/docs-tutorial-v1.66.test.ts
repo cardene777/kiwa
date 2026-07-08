@@ -16,7 +16,7 @@ function makeReport(overrides?: {
   perfP95Ms?: number;
 }): QualityReport {
   return {
-    provider: '@kiwa-test/example',
+    provider: '@kiwa/example',
     version: '0.1.0',
     reportedAt: '2026-07-08T00:00:00Z',
     coverage: { line: overrides?.coverageLine ?? 90, branch: 82, function: 95 },

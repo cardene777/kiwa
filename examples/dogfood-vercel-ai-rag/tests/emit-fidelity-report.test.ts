@@ -15,7 +15,7 @@ import {
   runEmbeddingFlow,
   runRetrievalFlow,
 } from '../src/flows/rag-flows.js';
-import { jaccardSimilarity } from '@kiwa-test/ai-llm';
+import { jaccardSimilarity } from '@kiwa/ai-llm';
 
 const opsUnderTest = ['ingest', 'embed', 'retrieve', 'answer', 'answerStream'];
 
@@ -74,7 +74,7 @@ describe('dogfood-vercel-ai-rag — emit fidelity report to quality-report/', ()
     });
 
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/vercel-ai-rag',
+      provider: '@kiwa/ai-llm/vercel-ai-rag',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

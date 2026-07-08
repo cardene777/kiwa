@@ -1,4 +1,4 @@
-# `@kiwa-test/component`
+# `@kiwa/component`
 
 Component test mock harness for kiwa — 3 unified integrations across Storybook 8, Playwright Component Testing, and Chromatic. One API for story registration + args resolution + play function runner, mount + interact, and visual regression baseline / diff / accept workflow.
 
@@ -7,7 +7,7 @@ v0.1 lays the foundation for the v1.16 milestone dogfood apps (design system + f
 ## Install
 
 ```sh
-pnpm add -D @kiwa-test/component @kiwa-test/quality-metrics
+pnpm add -D @kiwa/component @kiwa/quality-metrics
 ```
 
 ## Quick start — 3 unified mocks
@@ -18,7 +18,7 @@ pnpm add -D @kiwa-test/component @kiwa-test/quality-metrics
 import {
   createStoryRegistry,
   buildButton,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 
 const registry = createStoryRegistry();
 registry.register({
@@ -52,7 +52,7 @@ Supports `StoryObj.args + play + parameters`, meta / story deep merge, `paramete
 import {
   createPlaywrightCTMock,
   buildForm,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 
 const ct = createPlaywrightCTMock();
 let submitted: Record<string, string> | null = null;
@@ -82,7 +82,7 @@ import {
   createChromaticVisualMock,
   createStoryRegistry,
   buildCard,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 
 const chromatic = createChromaticVisualMock();
 const registry = createStoryRegistry();
@@ -127,7 +127,7 @@ Framework agnostic renderers usable from stories / component tests / visual capt
 | `buildCard` | title + body + optional footer + variant class |
 
 ```ts
-import { componentFixtures } from '@kiwa-test/component';
+import { componentFixtures } from '@kiwa/component';
 
 // batch register every fixture
 const registry = createStoryRegistry();
@@ -149,5 +149,5 @@ for (const [name, render] of Object.entries(componentFixtures)) {
 
 ## Related packages
 
-- `@kiwa-test/quality-metrics` — 11-axis release gate that this harness will feed component test results into (Chromatic `status=failed` and a11y violations map to axes).
-- `@kiwa-test/e2e` — Playwright browser-driven end-to-end tests. Complement, not replacement — CT covers component surface, e2e covers page flows.
+- `@kiwa/quality-metrics` — 11-axis release gate that this harness will feed component test results into (Chromatic `status=failed` and a11y violations map to axes).
+- `@kiwa/e2e` — Playwright browser-driven end-to-end tests. Complement, not replacement — CT covers component surface, e2e covers page flows.

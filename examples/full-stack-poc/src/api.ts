@@ -1,5 +1,5 @@
 import { validateTitle, type Todo } from './todo.js';
-import type { ApiHandlerSource } from '@kiwa-test/api';
+import type { ApiHandlerSource } from '@kiwa/api';
 
 export interface TodoStore {
   list: () => Todo[];

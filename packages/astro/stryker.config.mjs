@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/astro.
+ * Mutation testing config for @kiwa/astro.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — Islands + SSR + partial hydration drift.
  * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
  */

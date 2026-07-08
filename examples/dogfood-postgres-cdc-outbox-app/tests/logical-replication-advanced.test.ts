@@ -3,7 +3,7 @@
  *
  * Asserts the 4-state walk (streaming → origin-tracked → two-safe-confirmed
  * → cascade-synced) records the expected observation for downstream fidelity
- * comparison. The mock semantics from `@kiwa-test/orm` v0.10 enforce state
+ * comparison. The mock semantics from `@kiwa/orm` v0.10 enforce state
  * ordering + LSN monotonicity so we can pin the exact final state without
  * flaky timing.
  */

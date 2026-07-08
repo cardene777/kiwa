@@ -1,7 +1,7 @@
 /**
  * Fidelity harness — walks both mock and real adapters through the same
  * lifecycle inputs and returns a divergence report that plugs into the
- * `@kiwa-test/quality-metrics` 13-axis release gate.
+ * `@kiwa/quality-metrics` 13-axis release gate.
  *
  * Fidelity model — the harness diffs the ordered sequence of neutral
  * events (op + neutralEvent + bucket) between mock and real. Any missing

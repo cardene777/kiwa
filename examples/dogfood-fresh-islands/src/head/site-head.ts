@@ -5,7 +5,7 @@ import {
   type HeadFragment,
   type HeadLinkTag,
   type HeadMetaTag,
-} from '@kiwa-test/fresh';
+} from '@kiwa/fresh';
 
 /**
  * Site-wide Head fragment factories — every fragment is small on purpose so

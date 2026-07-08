@@ -1,4 +1,4 @@
-// setup-orm-env.ts — entry point for @kiwa-test/orm.
+// setup-orm-env.ts — entry point for @kiwa/orm.
 //
 // v0.1: Drizzle + better-sqlite3 in-memory (mode='mock' + dialect='sqlite').
 // v0.2: Drizzle + Postgres via testcontainers (mode='live' + dialect='postgres').
@@ -86,7 +86,7 @@ async function setupLivePostgres<TSchema extends DrizzleSchema>(
     drizzleModule = await import('drizzle-orm/postgres-js');
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/orm: live mode requires '@testcontainers/postgresql' + 'postgres' + 'drizzle-orm/postgres-js'. Install with `pnpm add -D @testcontainers/postgresql postgres drizzle-orm`. Original error: " +
+      "@kiwa/orm: live mode requires '@testcontainers/postgresql' + 'postgres' + 'drizzle-orm/postgres-js'. Install with `pnpm add -D @testcontainers/postgresql postgres drizzle-orm`. Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }
@@ -98,7 +98,7 @@ async function setupLivePostgres<TSchema extends DrizzleSchema>(
   } catch (caught) {
     const msg = caught instanceof Error ? caught.message : String(caught);
     throw new Error(
-      `@kiwa-test/orm: failed to start Postgres testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
+      `@kiwa/orm: failed to start Postgres testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
     );
   }
 
@@ -158,7 +158,7 @@ async function setupLiveMysql<TSchema extends DrizzleSchema>(
     drizzleModule = await import('drizzle-orm/mysql2');
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/orm: live MySQL mode requires '@testcontainers/mysql' + 'mysql2' + 'drizzle-orm/mysql2'. Install with `pnpm add -D @testcontainers/mysql mysql2 drizzle-orm`. Original error: " +
+      "@kiwa/orm: live MySQL mode requires '@testcontainers/mysql' + 'mysql2' + 'drizzle-orm/mysql2'. Install with `pnpm add -D @testcontainers/mysql mysql2 drizzle-orm`. Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }
@@ -170,7 +170,7 @@ async function setupLiveMysql<TSchema extends DrizzleSchema>(
   } catch (caught) {
     const msg = caught instanceof Error ? caught.message : String(caught);
     throw new Error(
-      `@kiwa-test/orm: failed to start MySQL testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
+      `@kiwa/orm: failed to start MySQL testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
     );
   }
 
@@ -183,7 +183,7 @@ async function setupLiveMysql<TSchema extends DrizzleSchema>(
     uri: string,
   ) => import('mysql2/promise').Pool;
   if (typeof createPoolFn !== 'function') {
-    throw new Error('@kiwa-test/orm: could not resolve mysql2/promise createPool export.');
+    throw new Error('@kiwa/orm: could not resolve mysql2/promise createPool export.');
   }
   const raw = createPoolFn(connectionUri);
   const db = drizzleModule.drizzle(raw, { schema: opts.schema, mode: 'default' });
@@ -252,7 +252,7 @@ async function setupMockPrismaSqlite<TClient>(
     else delete process.env[envName];
     await rm(tmpDir, { recursive: true, force: true });
     throw new Error(
-      `@kiwa-test/orm: prisma db push failed (status=${result.status}). stderr=${result.stderr ?? ''} stdout=${result.stdout ?? ''}`,
+      `@kiwa/orm: prisma db push failed (status=${result.status}). stderr=${result.stderr ?? ''} stdout=${result.stdout ?? ''}`,
     );
   }
 
@@ -295,7 +295,7 @@ async function setupLivePrismaPostgres<TClient>(
     containerModule = await import('@testcontainers/postgresql');
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/orm: live Prisma Postgres mode requires '@testcontainers/postgresql'. Install with `pnpm add -D @testcontainers/postgresql`. Original error: " +
+      "@kiwa/orm: live Prisma Postgres mode requires '@testcontainers/postgresql'. Install with `pnpm add -D @testcontainers/postgresql`. Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }
@@ -307,7 +307,7 @@ async function setupLivePrismaPostgres<TClient>(
   } catch (caught) {
     const msg = caught instanceof Error ? caught.message : String(caught);
     throw new Error(
-      `@kiwa-test/orm: failed to start Postgres testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
+      `@kiwa/orm: failed to start Postgres testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
     );
   }
 
@@ -330,7 +330,7 @@ async function setupLivePrismaPostgres<TClient>(
     else delete process.env[envName];
     await container.stop();
     throw new Error(
-      `@kiwa-test/orm: prisma db push failed against testcontainers Postgres (status=${result.status}). Verify the schema.prisma datasource has provider="postgresql" + url = env("${envName}"). stderr=${result.stderr ?? ''}`,
+      `@kiwa/orm: prisma db push failed against testcontainers Postgres (status=${result.status}). Verify the schema.prisma datasource has provider="postgresql" + url = env("${envName}"). stderr=${result.stderr ?? ''}`,
     );
   }
 
@@ -370,7 +370,7 @@ async function setupLivePrismaMysql<TClient>(
     containerModule = await import('@testcontainers/mysql');
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/orm: live Prisma MySQL mode requires '@testcontainers/mysql'. Install with `pnpm add -D @testcontainers/mysql`. Original error: " +
+      "@kiwa/orm: live Prisma MySQL mode requires '@testcontainers/mysql'. Install with `pnpm add -D @testcontainers/mysql`. Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }
@@ -382,7 +382,7 @@ async function setupLivePrismaMysql<TClient>(
   } catch (caught) {
     const msg = caught instanceof Error ? caught.message : String(caught);
     throw new Error(
-      `@kiwa-test/orm: failed to start MySQL testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
+      `@kiwa/orm: failed to start MySQL testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
     );
   }
 
@@ -405,7 +405,7 @@ async function setupLivePrismaMysql<TClient>(
     else delete process.env[envName];
     await container.stop();
     throw new Error(
-      `@kiwa-test/orm: prisma db push failed against testcontainers MySQL (status=${result.status}). Verify the schema.prisma datasource has provider="mysql" + url = env("${envName}"). stderr=${result.stderr ?? ''}`,
+      `@kiwa/orm: prisma db push failed against testcontainers MySQL (status=${result.status}). Verify the schema.prisma datasource has provider="mysql" + url = env("${envName}"). stderr=${result.stderr ?? ''}`,
     );
   }
 
@@ -453,7 +453,7 @@ async function applyKyselyFolderMigrations(
     (kyselyModule as unknown as { FileMigrationProvider?: unknown }).FileMigrationProvider;
   if (typeof FileMigrationProvider !== 'function') {
     throw new Error(
-      "@kiwa-test/orm v0.7: kysely FileMigrationProvider is not exposed by the installed kysely build. Ensure kysely >= 0.27 is installed.",
+      "@kiwa/orm v0.7: kysely FileMigrationProvider is not exposed by the installed kysely build. Ensure kysely >= 0.27 is installed.",
     );
   }
   const fs = await import('node:fs/promises');
@@ -469,7 +469,7 @@ async function applyKyselyFolderMigrations(
   if (typeof error !== 'undefined') {
     const failed = results?.filter((r) => r.status === 'Error').map((r) => r.migrationName) ?? [];
     throw new Error(
-      `@kiwa-test/orm v0.7: kysely Migrator.migrateToLatest failed (folder=${folder}, failed=[${failed.join(', ')}]). Original error: ${error instanceof Error ? error.message : String(error)}`,
+      `@kiwa/orm v0.7: kysely Migrator.migrateToLatest failed (folder=${folder}, failed=[${failed.join(', ')}]). Original error: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
@@ -521,7 +521,7 @@ async function setupLiveKyselyPostgres<TDatabase extends KyselyDatabase>(
     kyselyModule = await import('kysely');
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/orm: live Kysely (Postgres) mode requires '@testcontainers/postgresql' + 'pg' + 'kysely'. Install with `pnpm add -D @testcontainers/postgresql pg kysely`. Original error: " +
+      "@kiwa/orm: live Kysely (Postgres) mode requires '@testcontainers/postgresql' + 'pg' + 'kysely'. Install with `pnpm add -D @testcontainers/postgresql pg kysely`. Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }
@@ -533,7 +533,7 @@ async function setupLiveKyselyPostgres<TDatabase extends KyselyDatabase>(
   } catch (caught) {
     const msg = caught instanceof Error ? caught.message : String(caught);
     throw new Error(
-      `@kiwa-test/orm: failed to start Postgres testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
+      `@kiwa/orm: failed to start Postgres testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
     );
   }
 
@@ -588,7 +588,7 @@ async function setupLiveKyselyMysql<TDatabase extends KyselyDatabase>(
     kyselyModule = await import('kysely');
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/orm: live Kysely (MySQL) mode requires '@testcontainers/mysql' + 'mysql2' + 'kysely'. Install with `pnpm add -D @testcontainers/mysql mysql2 kysely`. Original error: " +
+      "@kiwa/orm: live Kysely (MySQL) mode requires '@testcontainers/mysql' + 'mysql2' + 'kysely'. Install with `pnpm add -D @testcontainers/mysql mysql2 kysely`. Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }
@@ -600,7 +600,7 @@ async function setupLiveKyselyMysql<TDatabase extends KyselyDatabase>(
   } catch (caught) {
     const msg = caught instanceof Error ? caught.message : String(caught);
     throw new Error(
-      `@kiwa-test/orm: failed to start MySQL testcontainer (image=${image}). Verify the Docker daemon is running. Original error: ${msg}`,
+      `@kiwa/orm: failed to start MySQL testcontainer (image=${image}). Verify the Docker daemon is running. Original error: ${msg}`,
     );
   }
 
@@ -611,7 +611,7 @@ async function setupLiveKyselyMysql<TDatabase extends KyselyDatabase>(
     uri: string,
   ) => import('mysql2/promise').Pool;
   if (typeof createPoolFn !== 'function') {
-    throw new Error('@kiwa-test/orm: could not resolve mysql2/promise createPool export.');
+    throw new Error('@kiwa/orm: could not resolve mysql2/promise createPool export.');
   }
   const raw = createPoolFn(connectionUri);
   // Kysely MysqlDialect expects a mysql2 callback-pool. The promise pool from
@@ -738,7 +738,7 @@ export async function setupOrmEnv(
       return setupLivePrismaMysql(opts);
     }
     throw new Error(
-      `@kiwa-test/orm v0.7: prisma adapter supports mode='mock'+dialect='sqlite', mode='live'+dialect='postgres', and mode='live'+dialect='mysql' (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}').`,
+      `@kiwa/orm v0.7: prisma adapter supports mode='mock'+dialect='sqlite', mode='live'+dialect='postgres', and mode='live'+dialect='mysql' (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}').`,
     );
   }
   if (opts.orm === 'kysely') {
@@ -752,12 +752,12 @@ export async function setupOrmEnv(
       return setupLiveKyselyMysql(opts);
     }
     throw new Error(
-      `@kiwa-test/orm v0.7: kysely adapter only supports mock+sqlite / live+postgres / live+mysql (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}').`,
+      `@kiwa/orm v0.7: kysely adapter only supports mock+sqlite / live+postgres / live+mysql (received mode='${(opts as { mode: string }).mode}' / dialect='${(opts as { dialect: string }).dialect}').`,
     );
   }
   if (opts.orm !== 'drizzle') {
     throw new Error(
-      `@kiwa-test/orm v0.7 only supports orm='drizzle' / 'prisma' / 'kysely' (received '${(opts as { orm: string }).orm}').`,
+      `@kiwa/orm v0.7 only supports orm='drizzle' / 'prisma' / 'kysely' (received '${(opts as { orm: string }).orm}').`,
     );
   }
   if (opts.mode === 'mock' && opts.dialect === 'sqlite') {
@@ -770,6 +770,6 @@ export async function setupOrmEnv(
     return setupLiveMysql(opts);
   }
   throw new Error(
-    `@kiwa-test/orm v0.7: unsupported combination mode='${(opts as { mode: string }).mode}' / orm='${(opts as { orm: string }).orm}' / dialect='${(opts as { dialect: string }).dialect}'. See README for the supported matrix.`,
+    `@kiwa/orm v0.7: unsupported combination mode='${(opts as { mode: string }).mode}' / orm='${(opts as { orm: string }).orm}' / dialect='${(opts as { dialect: string }).dialect}'. See README for the supported matrix.`,
   );
 }

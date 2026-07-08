@@ -12,7 +12,7 @@ dApp e2e で頻出する MetaMask / WalletConnect 操作は Playwright 標準 AP
 - 操作失敗時の retry / recovery が手動、 flaky test 増加
 - MetaMask popup の promise 制御が Playwright API 経由では非同期タイミングずれ
 
-Browser Use 3.0 が提案する CDP 直結経路は上記 3 問題を根本解決する可能性、 kiwa の `@kiwa-test/dapp` fixture に統合する価値を検討する。
+Browser Use 3.0 が提案する CDP 直結経路は上記 3 問題を根本解決する可能性、 kiwa の `@kiwa/dapp` fixture に統合する価値を検討する。
 
 ## Browser Use 3.0 の 3 要素
 
@@ -42,7 +42,7 @@ kiwa の core 設計は「Playwright + viem + anvil のスタック」 (`package
 | レベル | 対象 | 統合コスト |
 |---|---|---|
 | L1 高度な操作のみ CDP | MetaMask popup 制御 / Extension 内部状態取得 | 低 (既存 API と併用) |
-| L2 domain-skill を fixture 化 | Connect Wallet / Sign / Approve / Switch Chain | 中 (`@kiwa-test/dapp` 新 helper 追加) |
+| L2 domain-skill を fixture 化 | Connect Wallet / Sign / Approve / Switch Chain | 中 (`@kiwa/dapp` 新 helper 追加) |
 | L3 self-healing を全 fixture に配線 | 全 dApp 操作の retry + fallback selector | 高 (既存 fixture 全面改修) |
 
 L1 が最小コストで最大効果、 L2 は再利用性向上、 L3 は既存 fixture を壊す risk あり慎重に。
@@ -67,7 +67,7 @@ Playwright API では MetaMask popup の promise 完了検知が困難、 CDP �
 ### API 案
 
 ```ts
-import { withCdpMetamask } from '@kiwa-test/dapp/cdp-metamask';
+import { withCdpMetamask } from '@kiwa/dapp/cdp-metamask';
 
 test('CDP MetaMask popup 制御', async ({ page }) => {
   await withCdpMetamask(page, async (metamask) => {
@@ -99,7 +99,7 @@ dApp 頻出操作 4 種を skill として蓄積、 kiwa 全 e2e で再利用可
 ### API 案
 
 ```ts
-import { connectWallet, signTransaction, approveToken, switchChain } from '@kiwa-test/dapp/skills';
+import { connectWallet, signTransaction, approveToken, switchChain } from '@kiwa/dapp/skills';
 
 test('dApp flow with 4 skills', async ({ page, wallet }) => {
   await connectWallet(page, wallet);

@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/security.
+ * Mutation testing config for @kiwa/security.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — security harness
  * covers CSP / rate-limit / authorization / WAF / threat-model /
  * secrets-scanning / SBOM / security-headers-advanced across 4 providers;

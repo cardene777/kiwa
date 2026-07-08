@@ -262,7 +262,7 @@ export function a11yFromBaseline(input: {
  * `reportedAt` timestamp with the current UTC ISO string.
  *
  * AI-LLM 4 軸 (cost / latency / token / accuracy) は provider が
- * `@kiwa-test/ai-*` のときのみ意味を持つ (それ以外は undefined でも通る)。
+ * `@kiwa/ai-*` のときのみ意味を持つ (それ以外は undefined でも通る)。
  * a11y 軸 (v1.30-4) は tier-aware release gate が有効な package のみ渡す、
  * 未渡しは release gate 判定外 (context.a11yTier 指定時に critical Infinity
  * fallback で fail-safe)。

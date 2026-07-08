@@ -8,7 +8,7 @@
  *
  * The sandbox surface pairs the v1.40-1 `code-interpreter` axis
  * (sandboxed Python REPL + tool use + rollback state machine) with
- * `@kiwa-test/ai-llm` v0.5 — every op has a neutral event counterpart
+ * `@kiwa/ai-llm` v0.5 — every op has a neutral event counterpart
  * the fidelity harness can compare across mock vs real.
  */
 

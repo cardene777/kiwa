@@ -1,15 +1,15 @@
 // kiwa unit test for src/pages/api/_kiwa/items-endpoint.ts (GET)
-// — invokes the pure APIRoute through @kiwa-test/astro's invokeEndpoint.
+// — invokes the pure APIRoute through @kiwa/astro's invokeEndpoint.
 
 import { describe, expect, it } from 'vitest';
-import { invokeEndpoint } from '@kiwa-test/astro';
+import { invokeEndpoint } from '@kiwa/astro';
 import { itemsGetEndpoint } from '../src/pages/api/_kiwa/items-endpoint.js';
 
 async function readJson(response: Response): Promise<unknown> {
   return await response.clone().json();
 }
 
-describe('itemsGetEndpoint via @kiwa-test/astro invokeEndpoint', () => {
+describe('itemsGetEndpoint via @kiwa/astro invokeEndpoint', () => {
   it('T-AF-001: session=admin で 200 + 全 items + cache-control header 注入', async () => {
     const { response, redirect } = await invokeEndpoint({
       endpoint: itemsGetEndpoint,

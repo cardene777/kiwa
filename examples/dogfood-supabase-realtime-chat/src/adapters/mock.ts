@@ -2,7 +2,7 @@ import {
   createSupabaseRealtimeMock,
   type SupabaseChannel,
   type SupabaseMock,
-} from '@kiwa-test/realtime';
+} from '@kiwa/realtime';
 import type {
   ChatMessage,
   ChatRoomAdapter,
@@ -11,7 +11,7 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — drives the `@kiwa-test/realtime` Supabase Realtime mock so
+ * Mock adapter — drives the `@kiwa/realtime` Supabase Realtime mock so
  * the same app code exercises {@link SupabaseMock} without touching Supabase.
  *
  * The mock returns deterministic behaviour so fidelity tests can assert on

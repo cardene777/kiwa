@@ -4,7 +4,7 @@
  *
  * RFC 9449 defines the mechanism, RFC 9700 §3 hardens it for OAuth 2.1 by
  * mandating sender-constrained access tokens whenever the client can hold
- * a DPoP keypair. The `@kiwa-test/auth` package ships the primitive
+ * a DPoP keypair. The `@kiwa/auth` package ships the primitive
  * helpers (`parseDpopProof`, `verifyDpopProof`, `computeJkt`) that this
  * module re-exports plus adds dogfood-level guard helpers so route
  * handlers can reject a malformed proof before the AS ever sees it.
@@ -40,7 +40,7 @@ import {
   verifyDpopProof as kiwaVerifyDpopProof,
   type DpopJwk,
   type DpopProof,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 
 /**
  * RFC 9449 §4.2 — DPoP proof header MUST carry `typ=dpop+jwt`.
@@ -183,7 +183,7 @@ export function assertDpopHeaderShape(proof: DpopProof): void {
  *
  * Wraps {@link kiwaComputeJkt} without extra logic — kept as a
  * dogfood-level named export so callers do not import from
- * `@kiwa-test/auth` directly (keeps the dependency surface obvious).
+ * `@kiwa/auth` directly (keeps the dependency surface obvious).
  */
 export function computeJkt(jwk: DpopJwk): string {
   return kiwaComputeJkt(jwk);
@@ -262,6 +262,6 @@ function classifyVerifyError(message: string): DpopValidationError {
 
 /**
  * Re-export the `DpopJwk` + `DpopProof` types so callers depending on
- * the dogfood dpop module do not have to reach into `@kiwa-test/auth`.
+ * the dogfood dpop module do not have to reach into `@kiwa/auth`.
  */
 export type { DpopJwk, DpopProof };

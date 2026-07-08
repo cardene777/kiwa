@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/observability` v2.1
+ * Mock adapter — drives `@kiwa/observability` v2.1
  * `semantics/exemplar` + `semantics/otel-advanced` +
  * `semantics/log-correlation-advanced` state machines deterministically
  * without any backend. The same app code exercises a full OTel Collector
@@ -12,13 +12,13 @@
  * Collector keeps per-pipeline state in production.
  *
  * The mock adapter piggy-backs on the same neutral event vocabulary
- * that `@kiwa-test/observability` v2.1 exemplar + otel-advanced semantics
+ * that `@kiwa/observability` v2.1 exemplar + otel-advanced semantics
  * emit — every op appends the matching neutral event onto the trace so
  * the fidelity harness can assert both adapters produce identical event
  * orderings.
  */
 
-import { semantics } from '@kiwa-test/observability';
+import { semantics } from '@kiwa/observability';
 import {
   type DetectResourceResult,
   type EnqueueSpanResult,

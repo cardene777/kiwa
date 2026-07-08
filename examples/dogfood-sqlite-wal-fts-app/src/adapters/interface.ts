@@ -4,7 +4,7 @@
  *
  * The dogfood talks to the SQLite-backed notebook only through this
  * interface. Two implementations exist: {@link makeMockAdapter} (backed by
- * `@kiwa-test/orm`'s v0.10 SQLite WAL + FTS5 semantics) and
+ * `@kiwa/orm`'s v0.10 SQLite WAL + FTS5 semantics) and
  * {@link makeRealAdapter} (probes a libsql / turso edge broker via
  * `SQLITE_KEY` when set, else returns a skipped variant whose every method
  * records a `SQLITE_ENV_MISSING` trace).
@@ -35,7 +35,7 @@
  *
  * All 5 ops satisfy the same "op → observation → trace" shape so behavioural
  * fidelity between real vs mock can be measured side-by-side and fed to
- * `@kiwa-test/quality-metrics` 13-axis release gate.
+ * `@kiwa/quality-metrics` 13-axis release gate.
  */
 
 export const OPS_UNDER_TEST = [

@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/qwikcity.
+ * A11y (axe-core) config for @kiwa/qwikcity.
  * Tier: Framework tier (critical 0 / serious 0-3 / moderate 0-10) — Resumability + SSR + route loader drift.
  * SSOT: docs/quality/a11y-thresholds.md § Framework tier.
  */

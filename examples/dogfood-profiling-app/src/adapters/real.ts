@@ -16,7 +16,7 @@
  * reached.
  */
 
-import { isKiwaModeReal, semantics } from '@kiwa-test/observability';
+import { isKiwaModeReal, semantics } from '@kiwa/observability';
 import {
   KIWA_PROFILING_ENV_MISSING,
   type BuildFlameGraphResult,

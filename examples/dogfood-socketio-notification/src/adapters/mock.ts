@@ -2,7 +2,7 @@ import {
   createSocketioMock,
   type SocketIoMock,
   type SubscriptionHandle,
-} from '@kiwa-test/realtime';
+} from '@kiwa/realtime';
 import type {
   NotificationAdapter,
   NotificationEvent,
@@ -10,7 +10,7 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — drives the `@kiwa-test/realtime` Socket.io mock so the
+ * Mock adapter — drives the `@kiwa/realtime` Socket.io mock so the
  * same app code exercises {@link SocketIoMock} without touching a real
  * Socket.io server (or the SSE endpoint).
  *

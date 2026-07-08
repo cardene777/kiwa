@@ -2,7 +2,7 @@
 // — multi-method (GET / POST) + locals.requestId injection を検証。
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { invokeEndpoint } from '@kiwa-test/astro';
+import { invokeEndpoint } from '@kiwa/astro';
 import {
   counterGetEndpoint,
   counterPostEndpoint,
@@ -13,7 +13,7 @@ async function readJson(response: Response): Promise<unknown> {
   return await response.clone().json();
 }
 
-describe('counterEndpoint via @kiwa-test/astro invokeEndpoint', () => {
+describe('counterEndpoint via @kiwa/astro invokeEndpoint', () => {
   beforeEach(() => {
     resetCounterState(0);
   });

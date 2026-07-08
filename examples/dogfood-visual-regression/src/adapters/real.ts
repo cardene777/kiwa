@@ -1,4 +1,4 @@
-import type { VisualReviewEntry } from '@kiwa-test/component';
+import type { VisualReviewEntry } from '@kiwa/component';
 import type {
   BaselineSeedOutcome,
   CaptureOutcome,

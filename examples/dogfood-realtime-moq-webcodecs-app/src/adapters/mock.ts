@@ -5,7 +5,7 @@ import {
   type MoqFetchMock,
   type SimulcastSvcMock,
   type WebCodecsEncoderMock,
-} from '@kiwa-test/realtime';
+} from '@kiwa/realtime';
 import type { MediaSession, MediaStep, Platform, RealtimeMediaAdapter } from './interface.js';
 
 interface MockContext {

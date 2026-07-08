@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { costForTokens, lookupModelPrice } from '@kiwa-test/ai-llm';
+import { costForTokens, lookupModelPrice } from '@kiwa/ai-llm';
 
 // -----------------------------------------------------------------------------
 // § pricing migration — Finding 3 (dogfood cross-cutting fix)
@@ -7,7 +7,7 @@ import { costForTokens, lookupModelPrice } from '@kiwa-test/ai-llm';
 //
 // The real OpenAI adapter previously hardcoded gpt-4o-mini's price
 // (0.15 / 0.60 USD per 1M tokens) inside the module. Migration moves the
-// lookup to `@kiwa-test/ai-llm.costForTokens` so a model swap
+// lookup to `@kiwa/ai-llm.costForTokens` so a model swap
 // (gpt-4o-mini → gpt-4o → gpt-4-turbo) picks up the correct rate without
 // editing the adapter. These regression tests pin the historical values
 // so the migration is drop-in for the default model and reject silent

@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/queue.
+ * Mutation testing config for @kiwa/queue.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — queue adapter targets
  * the sandbox backend. testcontainers-queue.js is excluded because its
  * assertions only fire when a live RabbitMQ / Cloudflare Queues / Inngest

@@ -1,9 +1,9 @@
-// PoC tests — @kiwa-test/orm v0.7 (file-based migration via Kysely Migrator).
+// PoC tests — @kiwa/orm v0.7 (file-based migration via Kysely Migrator).
 
 import { afterEach, describe, expect, it } from 'vitest';
 import { resolve } from 'node:path';
-import { setupOrmEnv, expectRowCount } from '@kiwa-test/orm';
-import type { OrmTestEnvMockKysely } from '@kiwa-test/orm';
+import { setupOrmEnv, expectRowCount } from '@kiwa/orm';
+import type { OrmTestEnvMockKysely } from '@kiwa/orm';
 import { schema, type Database } from '../src/schema.js';
 
 const MIGRATION_FOLDER = resolve(process.cwd(), 'migrations');
@@ -13,7 +13,7 @@ afterEach(async () => {
   if (env) { await env.stop(); env = null; }
 });
 
-describe('Kysely Migrator via @kiwa-test/orm (mock + sqlite + { folder } migration)', () => {
+describe('Kysely Migrator via @kiwa/orm (mock + sqlite + { folder } migration)', () => {
   it('T-KM-001: { folder } 形式の Kysely migration が両 file 適用される (users + posts 生成)', async () => {
     env = await setupOrmEnv({
       mode: 'mock',

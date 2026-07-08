@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/realtime` v0.2's `createQuicMultiplexMock`
+ * Mock adapter — drives `@kiwa/realtime` v0.2's `createQuicMultiplexMock`
  * so the same app code exercises a deterministic HTTP/3 multiplex ceremony
  * without touching an nginx-quic container or a Chromium instance running
  * the QUIC origin trial. Both mock and real adapters satisfy
@@ -27,7 +27,7 @@ import {
   createQuicMultiplexMock,
   type QuicMultiplexMock,
   type QuicStreamHandle,
-} from '@kiwa-test/realtime';
+} from '@kiwa/realtime';
 import type {
   CloseStreamResult,
   ConcurrentSendResult,

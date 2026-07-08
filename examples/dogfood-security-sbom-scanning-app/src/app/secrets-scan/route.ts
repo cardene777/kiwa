@@ -7,7 +7,7 @@
  *
  * The secrets-scan surface pairs the parent v1.37-1 `secrets-scan` axis
  * (TruffleHog signature + Gitleaks style rule + rotation policy) with
- * `@kiwa-test/security` v0.1 — every op has a neutral event counterpart
+ * `@kiwa/security` v0.1 — every op has a neutral event counterpart
  * the fidelity harness can compare across mock vs real.
  */
 

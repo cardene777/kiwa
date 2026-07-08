@@ -1,6 +1,6 @@
 /**
  * v1.36-5 docs 補強 (Issue #1079 / CAR-814) — tutorial 73-75 code snippet validation
- * for `@kiwa-test/search` v0.3 advanced 8 axis (Vector + Semantic + Faceted advanced +
+ * for `@kiwa/search` v0.3 advanced 8 axis (Vector + Semantic + Faceted advanced +
  * Geo + Relevance + Synonym advanced + Index management + Query DSL).
  *
  * `docs/tutorials/73-vector-search-hybrid.md` / `docs/tutorials/74-faceted-geo-search.md` /

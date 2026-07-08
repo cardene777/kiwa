@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa-test/orm/vector-search-dogfood",
+  "provider": "@kiwa/orm/vector-search-dogfood",
   "version": "0.1.0",
   "reportedAt": "2026-07-05T07:51:27.945Z",
   "coverage": {

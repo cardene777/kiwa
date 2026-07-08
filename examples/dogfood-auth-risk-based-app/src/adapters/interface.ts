@@ -1,4 +1,4 @@
-import type { AuthPlatform as AuthAuthPlatform } from '@kiwa-test/auth';
+import type { AuthPlatform as AuthAuthPlatform } from '@kiwa/auth';
 export type AuthPlatform = AuthAuthPlatform;
 
 export type RiskStage = 'risk' | 'telemetry' | 'hijack';

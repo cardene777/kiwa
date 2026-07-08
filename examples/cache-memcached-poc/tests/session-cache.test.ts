@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupMemcachedEnv, type MemcachedTestEnv } from '@kiwa-test/cache';
+import { setupMemcachedEnv, type MemcachedTestEnv } from '@kiwa/cache';
 import { createSessionCache } from '../src/session-cache.js';
 
 const envs: MemcachedTestEnv[] = [];

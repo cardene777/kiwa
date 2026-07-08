@@ -16,7 +16,7 @@
  * and `packages/quality-metrics/src/gate.ts` DEFAULT_MUTATION_TIER_THRESHOLDS.
  * Each package picks a tier (Core 80 / Framework 70 / SaaS 65 / Test type 60)
  * and may declare a looser `override` that must stay above the tier's
- * `break` bar. A stricter override (e.g. `@kiwa-test/api` = Core-strict 90)
+ * `break` bar. A stricter override (e.g. `@kiwa/api` = Core-strict 90)
  * just raises the floor.
  *
  * Per-package thresholds follow the 4-tier rationale from
@@ -62,58 +62,58 @@ export const TIER_THRESHOLD = Object.freeze({
  */
 export const PACKAGE_TIER = Object.freeze({
   // Core tier (pure logic, deterministic tests).
-  '@kiwa-test/core': { tier: 'core' },
-  '@kiwa-test/api': { tier: 'core', override: 90, reason: 'Core-strict — HTTP request client + MSW bridge, protocol invariants.' },
-  '@kiwa-test/data': { tier: 'core' },
-  '@kiwa-test/cli-test': { tier: 'core' },
-  '@kiwa-test/observability': { tier: 'core' },
-  '@kiwa-test/cli': { tier: 'core' },
+  '@kiwa/core': { tier: 'core' },
+  '@kiwa/api': { tier: 'core', override: 90, reason: 'Core-strict — HTTP request client + MSW bridge, protocol invariants.' },
+  '@kiwa/data': { tier: 'core' },
+  '@kiwa/cli-test': { tier: 'core' },
+  '@kiwa/observability': { tier: 'core' },
+  '@kiwa/cli': { tier: 'core' },
   // Framework tier (SSR / hydration / adapter drift).
-  '@kiwa-test/nextjs': { tier: 'framework' },
-  '@kiwa-test/nuxt': { tier: 'framework' },
-  '@kiwa-test/sveltekit': { tier: 'framework' },
-  '@kiwa-test/remix': { tier: 'framework' },
-  '@kiwa-test/astro': { tier: 'framework' },
-  '@kiwa-test/solidstart': { tier: 'framework' },
-  '@kiwa-test/qwikcity': { tier: 'framework' },
-  '@kiwa-test/edge': { tier: 'framework' },
-  '@kiwa-test/solidjs': { tier: 'framework' },
-  '@kiwa-test/fresh': { tier: 'framework' },
-  '@kiwa-test/hono': { tier: 'framework' },
+  '@kiwa/nextjs': { tier: 'framework' },
+  '@kiwa/nuxt': { tier: 'framework' },
+  '@kiwa/sveltekit': { tier: 'framework' },
+  '@kiwa/remix': { tier: 'framework' },
+  '@kiwa/astro': { tier: 'framework' },
+  '@kiwa/solidstart': { tier: 'framework' },
+  '@kiwa/qwikcity': { tier: 'framework' },
+  '@kiwa/edge': { tier: 'framework' },
+  '@kiwa/solidjs': { tier: 'framework' },
+  '@kiwa/fresh': { tier: 'framework' },
+  '@kiwa/hono': { tier: 'framework' },
   // auth landed at 68.86 % covered MSI in the v1.27-3 first sweep (adapter.js
   // 65.75 / providers.js 80.70 / session.js 56.76). Held at 65 % — one point
   // below tier low — until follow-up session.js tests raise it back to 70.
-  '@kiwa-test/auth': { tier: 'framework', override: 65, reason: 'session.js 56.76 % — follow-up test raises back to 70.' },
+  '@kiwa/auth': { tier: 'framework', override: 65, reason: 'session.js 56.76 % — follow-up test raises back to 70.' },
   // SaaS tier (provider-specific adapters).
   // ai-llm has no baseline in v1.27-3 (scope belongs to v1.27-4 release-gate
   // integration). Threshold left at tier default so the gate stays honest
   // once the baseline lands.
-  '@kiwa-test/ai-llm': { tier: 'saas' },
-  '@kiwa-test/payment': { tier: 'saas' },
-  '@kiwa-test/queue': { tier: 'saas' },
+  '@kiwa/ai-llm': { tier: 'saas' },
+  '@kiwa/payment': { tier: 'saas' },
+  '@kiwa/queue': { tier: 'saas' },
   // cache landed at 62.68 % covered MSI on `in-memory-cache.js` (the sole
   // mutated file after excluding testcontainers-cache.js). Held at 60 % —
   // above tier break 50 — until follow-up covers the TTL + eviction edge
   // cases surfaced by the surviving mutant list.
-  '@kiwa-test/cache': { tier: 'saas', override: 60, reason: 'in-memory-cache.js TTL + eviction follow-up.' },
-  '@kiwa-test/streaming': { tier: 'saas' },
+  '@kiwa/cache': { tier: 'saas', override: 60, reason: 'in-memory-cache.js TTL + eviction follow-up.' },
+  '@kiwa/streaming': { tier: 'saas' },
   // realtime landed at 62.31 % covered MSI across engine / fidelity / ably
   // (pusher / socketio / report excluded, see stryker.config.mjs). Held at
   // 60 % until follow-up fidelity tests raise it back to 65.
-  '@kiwa-test/realtime': { tier: 'saas', override: 60, reason: 'fidelity follow-up raises back to 65.' },
-  '@kiwa-test/mcp': { tier: 'saas' },
-  '@kiwa-test/agent': { tier: 'saas' },
-  '@kiwa-test/search': { tier: 'saas' },
+  '@kiwa/realtime': { tier: 'saas', override: 60, reason: 'fidelity follow-up raises back to 65.' },
+  '@kiwa/mcp': { tier: 'saas' },
+  '@kiwa/agent': { tier: 'saas' },
+  '@kiwa/search': { tier: 'saas' },
   // orm landed at 61.84 % covered MSI on `expectations.js`. Held at 60 %
   // until follow-up query-planner tests raise it back to 65.
-  '@kiwa-test/orm': { tier: 'saas', override: 60, reason: 'query-planner follow-up raises back to 65.' },
-  '@kiwa-test/dapp': { tier: 'saas' },
+  '@kiwa/orm': { tier: 'saas', override: 60, reason: 'query-planner follow-up raises back to 65.' },
+  '@kiwa/dapp': { tier: 'saas' },
   // Test-type tier (DOM / measurement noise).
-  '@kiwa-test/ui': { tier: 'test-type' },
-  '@kiwa-test/a11y': { tier: 'test-type', override: 90, reason: 'axe-core WCAG 2.1 AA — protocol invariants, historic high bar.' },
-  '@kiwa-test/visual': { tier: 'test-type' },
-  '@kiwa-test/component': { tier: 'test-type' },
-  '@kiwa-test/e2e': { tier: 'test-type' },
+  '@kiwa/ui': { tier: 'test-type' },
+  '@kiwa/a11y': { tier: 'test-type', override: 90, reason: 'axe-core WCAG 2.1 AA — protocol invariants, historic high bar.' },
+  '@kiwa/visual': { tier: 'test-type' },
+  '@kiwa/component': { tier: 'test-type' },
+  '@kiwa/e2e': { tier: 'test-type' },
 });
 
 /** Effective threshold = override ?? tier default. */
@@ -129,43 +129,43 @@ const THRESHOLDS = Object.fromEntries(
 
 const PKG_DIRS = {
   // Core tier.
-  '@kiwa-test/core': 'packages/core',
-  '@kiwa-test/api': 'packages/api',
-  '@kiwa-test/data': 'packages/data',
-  '@kiwa-test/cli-test': 'packages/cli-test',
-  '@kiwa-test/observability': 'packages/observability',
-  '@kiwa-test/cli': 'packages/cli',
+  '@kiwa/core': 'packages/core',
+  '@kiwa/api': 'packages/api',
+  '@kiwa/data': 'packages/data',
+  '@kiwa/cli-test': 'packages/cli-test',
+  '@kiwa/observability': 'packages/observability',
+  '@kiwa/cli': 'packages/cli',
   // Framework tier.
-  '@kiwa-test/nextjs': 'packages/nextjs',
-  '@kiwa-test/nuxt': 'packages/nuxt',
-  '@kiwa-test/sveltekit': 'packages/sveltekit',
-  '@kiwa-test/remix': 'packages/remix',
-  '@kiwa-test/astro': 'packages/astro',
-  '@kiwa-test/solidstart': 'packages/solidstart',
-  '@kiwa-test/qwikcity': 'packages/qwikcity',
-  '@kiwa-test/edge': 'packages/edge',
-  '@kiwa-test/solidjs': 'packages/solidjs',
-  '@kiwa-test/fresh': 'packages/fresh',
-  '@kiwa-test/hono': 'packages/hono',
-  '@kiwa-test/auth': 'packages/auth',
+  '@kiwa/nextjs': 'packages/nextjs',
+  '@kiwa/nuxt': 'packages/nuxt',
+  '@kiwa/sveltekit': 'packages/sveltekit',
+  '@kiwa/remix': 'packages/remix',
+  '@kiwa/astro': 'packages/astro',
+  '@kiwa/solidstart': 'packages/solidstart',
+  '@kiwa/qwikcity': 'packages/qwikcity',
+  '@kiwa/edge': 'packages/edge',
+  '@kiwa/solidjs': 'packages/solidjs',
+  '@kiwa/fresh': 'packages/fresh',
+  '@kiwa/hono': 'packages/hono',
+  '@kiwa/auth': 'packages/auth',
   // SaaS tier.
-  '@kiwa-test/ai-llm': 'packages/ai-llm',
-  '@kiwa-test/payment': 'packages/payment',
-  '@kiwa-test/queue': 'packages/queue',
-  '@kiwa-test/cache': 'packages/cache',
-  '@kiwa-test/streaming': 'packages/streaming',
-  '@kiwa-test/realtime': 'packages/realtime',
-  '@kiwa-test/mcp': 'packages/mcp',
-  '@kiwa-test/agent': 'packages/agent',
-  '@kiwa-test/search': 'packages/search',
-  '@kiwa-test/orm': 'packages/orm',
-  '@kiwa-test/dapp': 'packages/dapp',
+  '@kiwa/ai-llm': 'packages/ai-llm',
+  '@kiwa/payment': 'packages/payment',
+  '@kiwa/queue': 'packages/queue',
+  '@kiwa/cache': 'packages/cache',
+  '@kiwa/streaming': 'packages/streaming',
+  '@kiwa/realtime': 'packages/realtime',
+  '@kiwa/mcp': 'packages/mcp',
+  '@kiwa/agent': 'packages/agent',
+  '@kiwa/search': 'packages/search',
+  '@kiwa/orm': 'packages/orm',
+  '@kiwa/dapp': 'packages/dapp',
   // Test-type tier.
-  '@kiwa-test/ui': 'packages/ui',
-  '@kiwa-test/a11y': 'packages/a11y',
-  '@kiwa-test/visual': 'packages/visual',
-  '@kiwa-test/component': 'packages/component',
-  '@kiwa-test/e2e': 'packages/e2e',
+  '@kiwa/ui': 'packages/ui',
+  '@kiwa/a11y': 'packages/a11y',
+  '@kiwa/visual': 'packages/visual',
+  '@kiwa/component': 'packages/component',
+  '@kiwa/e2e': 'packages/e2e',
 };
 
 // Packages whose baseline is deferred to a later milestone. The gate lists
@@ -173,7 +173,7 @@ const PKG_DIRS = {
 // is worse than a marker — but they do not block release.
 // Remove entries here as each milestone lands the baseline.
 const DEFERRED = new Set([
-  '@kiwa-test/ai-llm', // v1.27-4 release-gate integration scope.
+  '@kiwa/ai-llm', // v1.27-4 release-gate integration scope.
 ]);
 
 const PACKAGES = Object.keys(THRESHOLDS);

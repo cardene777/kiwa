@@ -3,7 +3,7 @@
  *
  * The dogfood app drives an SLO harness through this contract only.
  * Two implementations exist —
- *  - {@link makeMockAdapter} — walks the `@kiwa-test/observability` v2.1
+ *  - {@link makeMockAdapter} — walks the `@kiwa/observability` v2.1
  *    `semantics/slo` state machine deterministically without any backend.
  *    Every op emits the neutral event onto the trace so the fidelity
  *    harness can diff ordering against the real adapter.
@@ -22,7 +22,7 @@
  * and the real Prometheus + Alertmanager pipeline.
  */
 
-import type { semantics } from '@kiwa-test/observability';
+import type { semantics } from '@kiwa/observability';
 
 /** Re-export from observability semantics namespace. */
 export type ObservabilityTarget = semantics.ObservabilityTarget;

@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/dapp.
+ * Mutation testing config for @kiwa/dapp.
  * Excludes test files that require forge artefacts / nextjs-bridge fixtures
  * (anvil-deploy-contract path) which Stryker's dry-run can't construct on its own.
  */

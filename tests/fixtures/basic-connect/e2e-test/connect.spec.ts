@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { dappE2eTest as test } from '@kiwa-test/dapp';
+import { dappE2eTest as test } from '@kiwa/dapp';
 import { verifyMessage, verifyTypedData } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 

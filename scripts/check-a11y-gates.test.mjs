@@ -48,12 +48,12 @@ test('A11Y_PACKAGE_TIER covers the 37-package release set', () => {
 });
 
 test('thresholdFor returns tier default when no override', () => {
-  // @kiwa-test/core is a Core-tier package with no override.
-  assert.deepEqual(thresholdFor('@kiwa-test/core'), { critical: 0, serious: 0, moderate: 3 });
+  // @kiwa/core is a Core-tier package with no override.
+  assert.deepEqual(thresholdFor('@kiwa/core'), { critical: 0, serious: 0, moderate: 3 });
 });
 
 test('thresholdFor returns undefined for unknown package', () => {
-  assert.equal(thresholdFor('@kiwa-test/nonexistent'), undefined);
+  assert.equal(thresholdFor('@kiwa/nonexistent'), undefined);
 });
 
 test('computeBreaches returns empty for zero violations', () => {
@@ -134,7 +134,7 @@ test('CLI reports FAIL when any baseline breaches its tier ceiling', () => {
       mkdirSync(dir, { recursive: true });
       // Fail one Framework tier package with critical=1 (SSOT invariant hit).
       const totals =
-        pkg === '@kiwa-test/nextjs'
+        pkg === '@kiwa/nextjs'
           ? { critical: 1, serious: 0, moderate: 0, minor: 0 }
           : { critical: 0, serious: 0, moderate: 0, minor: 0 };
       writeFileSync(

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { evaluateReleaseGate } from '@kiwa-test/quality-metrics';
+import { evaluateReleaseGate } from '@kiwa/quality-metrics';
 import {
   buildAiLlmReport,
   buildAiLlmReportFromMock,
@@ -38,7 +38,7 @@ describe('buildAiLlmReport', () => {
       prompts,
     });
     const report = buildAiLlmReport({
-      provider: '@kiwa-test/ai-llm',
+      provider: '@kiwa/ai-llm',
       version: '0.1.0',
       fidelity,
       surfaceCoverage: { mockCoveredMethods: 4, realTotalMethods: 4 },
@@ -51,7 +51,7 @@ describe('buildAiLlmReport', () => {
       mutation: { mutations: 50, killed: 40 },
       perfSamplesMs: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
     });
-    expect(report.provider).toBe('@kiwa-test/ai-llm');
+    expect(report.provider).toBe('@kiwa/ai-llm');
     expect(report.cost?.requests).toBe(15);
     expect(report.latency?.samples).toBe(15);
     expect(report.token?.requests).toBe(15);
@@ -77,7 +77,7 @@ describe('buildAiLlmReport', () => {
       prompts,
     });
     const report = buildAiLlmReport({
-      provider: '@kiwa-test/ai-llm',
+      provider: '@kiwa/ai-llm',
       version: '0.1.0',
       fidelity,
       testCount: { behavior: 15, integration: 0, e2e: 0 },
@@ -106,7 +106,7 @@ describe('buildAiLlmReport', () => {
       })),
     });
     const report = buildAiLlmReport({
-      provider: '@kiwa-test/ai-llm',
+      provider: '@kiwa/ai-llm',
       version: '0.1.0',
       fidelity,
       testCount: { behavior: 15, integration: 0, e2e: 0 },
@@ -137,7 +137,7 @@ describe('buildAiLlmReportFromMock', () => {
     await mock.messages.create({ messages: [{ role: 'user', content: 'q' }] });
     await mock.messages.create({ messages: [{ role: 'user', content: 'q' }] });
     const report = buildAiLlmReportFromMock({
-      provider: '@kiwa-test/ai-llm',
+      provider: '@kiwa/ai-llm',
       version: '0.1.0',
       mock,
       accuracyScore: 0.9,

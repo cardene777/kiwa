@@ -10,12 +10,12 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 import type { AuthAdapter, TraceEvent } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares the trace of a mock adapter run vs a real
- * adapter run, feeds the divergence count into `@kiwa-test/quality-metrics`
+ * adapter run, feeds the divergence count into `@kiwa/quality-metrics`
  * and emits a JSON + markdown fidelity report the release-gate can consume.
  *
  * The fidelity ratio expresses "how much of the real API surface the mock

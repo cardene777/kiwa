@@ -1,16 +1,16 @@
-# @kiwa-test/fresh
+# @kiwa/fresh
 
 ## 0.2.0
 
 ### Minor Changes
 
-- cb53fae: New package `@kiwa-test/fresh` v0.1 — Deno Fresh Islands + Route Handler + Head normalization test adapter (Issue #814, v1.19-1b). Provides `invokeFreshHandler` + `defineRoute` + `invokeDefineRoute` + `defineIsland` + `mountIsland` + `hydrateIslands` + `simulateInteraction` + `defineHead` + `mergeHead` + `renderHead` + `extractHead` + JSX-shaped helpers (`h` / `stringify` / `findNodes`) + brand symbols (`FRESH_REDIRECT_SYMBOL` / `FRESH_NOT_FOUND_SYMBOL` / `FRESH_ROUTE_SYMBOL` / `ISLAND_SYMBOL` / `ISLAND_MOUNT_SYMBOL` / `HEAD_SYMBOL`). 58 unit tests passing (route 26 + islands 16 + head 16), coverage 97.5% lines / 92.3% branches / 91.2% functions, release gate 7 軸 pass.
+- cb53fae: New package `@kiwa/fresh` v0.1 — Deno Fresh Islands + Route Handler + Head normalization test adapter (Issue #814, v1.19-1b). Provides `invokeFreshHandler` + `defineRoute` + `invokeDefineRoute` + `defineIsland` + `mountIsland` + `hydrateIslands` + `simulateInteraction` + `defineHead` + `mergeHead` + `renderHead` + `extractHead` + JSX-shaped helpers (`h` / `stringify` / `findNodes`) + brand symbols (`FRESH_REDIRECT_SYMBOL` / `FRESH_NOT_FOUND_SYMBOL` / `FRESH_ROUTE_SYMBOL` / `ISLAND_SYMBOL` / `ISLAND_MOUNT_SYMBOL` / `HEAD_SYMBOL`). 58 unit tests passing (route 26 + islands 16 + head 16), coverage 97.5% lines / 92.3% branches / 91.2% functions, release gate 7 軸 pass.
 
 ## 0.1.0
 
 ### Minor Changes
 
-- New package `@kiwa-test/fresh` v0.1 — Deno Fresh Islands + Route Handler + Head normalization test adapter (Issue #814, v1.19-1b).
+- New package `@kiwa/fresh` v0.1 — Deno Fresh Islands + Route Handler + Head normalization test adapter (Issue #814, v1.19-1b).
 
   ## What's in the box
 
@@ -33,13 +33,13 @@
   - `_app.tsx` / `_layout.tsx` nesting → separate Issue
   - real esbuild islands bundle compilation → tests operate on virtual trees
   - real DOM (synthetic events don't bubble) → `simulateInteraction` captures handler invocations only
-  - Signal-based reactive graph → see `@kiwa-test/solidjs` for that shape
+  - Signal-based reactive graph → see `@kiwa/solidjs` for that shape
 
   ## Companion
 
   - v1.19-1 (#807) は SolidJS (#813) + 本 pkg + Hono (#8xx) の 3 分割で 1 pkg = 1 PR 化.
   - `packages/fresh/{stryker.config.mjs,vitest.stryker.config.mjs}` 配置で mutation gate 統合準備.
-  - `scripts/check-coverage-gates.mjs` + `scripts/check-mutation-gates.mjs` に `@kiwa-test/fresh` 行追加.
+  - `scripts/check-coverage-gates.mjs` + `scripts/check-mutation-gates.mjs` に `@kiwa/fresh` 行追加.
   - `tests/release-smoke/tests/import-surface.test.ts` に new export block 追加.
   - root README Roadmap v1.19 行にカウント.
 

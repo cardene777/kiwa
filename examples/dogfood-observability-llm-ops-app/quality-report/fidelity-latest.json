@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa-test/observability/dogfood-llm-ops-app",
+  "provider": "@kiwa/observability/dogfood-llm-ops-app",
   "version": "2.2.0",
   "reportedAt": "2026-07-07T15:04:37.764Z",
   "coverage": {

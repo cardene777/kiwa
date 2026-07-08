@@ -1,10 +1,10 @@
-# @kiwa-test/orm
+# @kiwa/orm
 
 ## 0.10.0
 
 ### Minor Changes
 
-- 🆕 feat(orm): `@kiwa-test/orm` v0.10.0 — advanced db semantics 8 axis 追加 (3 provider × 3 backend × 16 axis = 144 grid coverage)
+- 🆕 feat(orm): `@kiwa/orm` v0.10.0 — advanced db semantics 8 axis 追加 (3 provider × 3 backend × 16 axis = 144 grid coverage)
 
   v0.9 の 8 production db semantics は完全 backward compatible に維持しつつ、 advanced 8 axis を別 file として追加。 各 axis は既存 semantics と同じ pure state-machine helper + neutral-event + backend dialect envelope pattern で実装。
 
@@ -25,9 +25,9 @@
 
 ### Minor Changes
 
-- 🆕 feat(orm): `@kiwa-test/orm` v0.9.0 — advanced db semantics 8 axis (3 provider × 3 backend × 8 axis = 72 grid coverage)
+- 🆕 feat(orm): `@kiwa/orm` v0.9.0 — advanced db semantics 8 axis (3 provider × 3 backend × 8 axis = 72 grid coverage)
 
-  v0.8 orm mocks が `setupOrmEnv` (schema + migration + seed) の 3 provider (drizzle / prisma / kysely) × 3 backend (postgres / mysql / sqlite) しか持たなかった状態から、 8 production db semantics を追加。 各 axis は provider / backend の payload dialect を知らずに driven 可能な pure state-machine helper として実装、 v1.24-1 (`@kiwa-test/edge` v0.2 advanced edge semantics) と同じ neutral-event + dialect map + fidelity harness の三本柱。
+  v0.8 orm mocks が `setupOrmEnv` (schema + migration + seed) の 3 provider (drizzle / prisma / kysely) × 3 backend (postgres / mysql / sqlite) しか持たなかった状態から、 8 production db semantics を追加。 各 axis は provider / backend の payload dialect を知らずに driven 可能な pure state-machine helper として実装、 v1.24-1 (`@kiwa/edge` v0.2 advanced edge semantics) と同じ neutral-event + dialect map + fidelity harness の三本柱。
 
   追加 axis 一覧 (32 neutral event = 8 × 4)。
 
@@ -50,7 +50,7 @@
 
 ### Minor Changes
 
-- b58118c: 🆕 feat(orm): `@kiwa-test/orm` v0.2.0 — live mode with testcontainers Postgres
+- b58118c: 🆕 feat(orm): `@kiwa/orm` v0.2.0 — live mode with testcontainers Postgres
 
   Drizzle ORM + Postgres (`mode: 'live' + dialect: 'postgres'`) を `setupOrmEnv` で受け入れ、 testcontainers (`@testcontainers/postgresql`) で Postgres 16 container を per-env で起動する。 既存 v0.1 (mock SQLite) は完全 backward compatible。
 
@@ -60,7 +60,7 @@
 
   関連: Linear CAR-291 (parent) / CAR-292 (#527-2 testcontainers)、 PoC `examples/orm-drizzle-postgres-poc/`、 残 follow-up = MySQL (CAR-292 残) / Prisma (CAR-293) / Kysely (CAR-294) / file migration (CAR-295)。
 
-- 7465a3b: 🆕 feat(orm): `@kiwa-test/orm` v0.3.0 — Prisma adapter (SQLite + tempdir)
+- 7465a3b: 🆕 feat(orm): `@kiwa/orm` v0.3.0 — Prisma adapter (SQLite + tempdir)
 
   `OrmBrand` に `'prisma'` を追加し、 `mode: 'mock' + orm: 'prisma' + dialect: 'sqlite'` を `setupOrmEnv` で受け入れる。 既存 Drizzle 経路 (v0.1 mock SQLite / v0.2 live Postgres / v0.2.1 live MySQL) は完全 backward compatible。
 
@@ -70,7 +70,7 @@
 
   関連: Linear CAR-293 (#527-3 Prisma adapter)、 PoC `examples/orm-prisma-sqlite-poc/`、 残 follow-up = Prisma + testcontainers (CAR-293 残) / Kysely (CAR-294) / file migration (CAR-295)。
 
-- e7c3621: 🆕 feat(orm): `@kiwa-test/orm` v0.6.0 — Prisma + testcontainers Postgres (v1.2 ORM milestone 完遂)
+- e7c3621: 🆕 feat(orm): `@kiwa/orm` v0.6.0 — Prisma + testcontainers Postgres (v1.2 ORM milestone 完遂)
 
   `setupOrmEnv({ mode: 'live', orm: 'prisma', dialect: 'postgres', prismaClient, schemaPath })` を受入、 testcontainers Postgres を起動し `DATABASE_URL` を `process.env` に inject + `prisma db push` を spawn して schema 適用、 caller の PrismaClient を `{ datasourceUrl }` で構築する。 既存 v0.1-v0.5 経路は完全 backward compatible。
 
@@ -80,7 +80,7 @@
 
   関連: Linear CAR-305 (#527-3 follow-up Prisma + testcontainers Postgres)、 PoC `examples/orm-prisma-postgres-poc/`、 parent CAR-291 完遂。
 
-- 82f4006: 🆕 feat(orm): `@kiwa-test/orm` v0.4.0 — Kysely adapter (SQLite + Postgres + MySQL)
+- 82f4006: 🆕 feat(orm): `@kiwa/orm` v0.4.0 — Kysely adapter (SQLite + Postgres + MySQL)
 
   `OrmBrand` に `'kysely'` を追加、 `mode: 'mock' + orm: 'kysely' + dialect: 'sqlite'` / `mode: 'live' + orm: 'kysely' + dialect: 'postgres'|'mysql'` の 3 dialect 一気に受入。 既存 Drizzle (v0.1-v0.2.1) / Prisma (v0.3) 経路は完全 backward compatible。
 
@@ -90,7 +90,7 @@
 
   関連: Linear CAR-294 (#527-4 Kysely adapter)、 PoC `examples/orm-kysely-sqlite-poc/`、 残 follow-up = Prisma + testcontainers (CAR-293 残) / file migration (CAR-295)。
 
-- d977ea4: 🆕 feat(orm): `@kiwa-test/orm` v0.5.0 — file-based migration (drizzle-orm/migrator)
+- d977ea4: 🆕 feat(orm): `@kiwa/orm` v0.5.0 — file-based migration (drizzle-orm/migrator)
 
   `MigrationSource` を `string | string[] | { folder: string }` の union に拡張、 `{ folder }` 形式を渡すと kiwa が dialect 別に drizzle-orm/migrator (`drizzle-orm/better-sqlite3/migrator` / `drizzle-orm/postgres-js/migrator` / `drizzle-orm/mysql2/migrator`) を import + `migrate(db, { migrationsFolder })` を実行する。 既存 `string` / `string[]` 形式は完全 backward compatible。
 
@@ -98,7 +98,7 @@
 
   関連: Linear CAR-295 (#527-5 file-based migration)、 PoC `examples/orm-drizzle-file-migration-poc/`、 残 follow-up = Prisma + testcontainers (CAR-293 残)。
 
-- 9468a99: 🆕 feat(orm): `@kiwa-test/orm` v0.1.0 — ORM query test adapter MVP
+- 9468a99: 🆕 feat(orm): `@kiwa/orm` v0.1.0 — ORM query test adapter MVP
 
   Drizzle ORM + in-memory SQLite を対象に `setupOrmEnv({ mode: 'mock', orm: 'drizzle', dialect: 'sqlite', schema, migrations?, seed? })` + `expectQuery(env, sql, expected, expect)` + `expectRowCount(env, table, n, expect)` を提供する Layer 2 fixture。 Docker 不要、 type-safe、 並行 env 隔離を保証する。
 
@@ -108,7 +108,7 @@
 
 ### Patch Changes
 
-- 2079284: 🆕 feat(orm): `@kiwa-test/orm` v0.2.1 — MySQL dialect via testcontainers
+- 2079284: 🆕 feat(orm): `@kiwa/orm` v0.2.1 — MySQL dialect via testcontainers
 
   Drizzle ORM + MySQL (`mode: 'live' + dialect: 'mysql'`) を `setupOrmEnv` で受け入れ、 testcontainers (`@testcontainers/mysql`) で MySQL 8.x container を per-env で起動する。 既存 v0.1 (mock SQLite) / v0.2 (live Postgres) は完全 backward compatible。
 

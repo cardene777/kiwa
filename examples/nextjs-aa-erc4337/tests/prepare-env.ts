@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { deployContract, loadForgeArtifact, runE2EPrepareEnv } from '@kiwa-test/dapp';
+import { deployContract, loadForgeArtifact, runE2EPrepareEnv } from '@kiwa/dapp';
 import { type Address } from 'viem';
 
 const OWNER_PK =

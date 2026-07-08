@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/security` v0.2 siem-audit +
+ * Mock adapter — drives `@kiwa/security` v0.2 siem-audit +
  * incident-response semantics (startSiemAuditSession / structureEvent /
  * sealEvents / applyRetention / correlate / startIncidentSession /
  * triggerPlaybook / classifySeverity / escalate / captureForensics /
@@ -37,7 +37,7 @@ import {
   type IncidentSeverity,
   type SecurityAdvTarget,
   type SiemAuditSession,
-} from '@kiwa-test/security';
+} from '@kiwa/security';
 import type {
   IrEscalationResult,
   IrForensicsResult,

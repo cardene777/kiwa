@@ -7,7 +7,7 @@
  * a real Vercel AI SDK client or deployment control plane.
  *
  * The registry surface pairs the v1.40-1 `llm-ops` axis (model
- * registry + version activation state machine) with `@kiwa-test/ai-llm`
+ * registry + version activation state machine) with `@kiwa/ai-llm`
  * v0.5 — every op has a neutral event counterpart the fidelity harness
  * can compare across mock vs real.
  */

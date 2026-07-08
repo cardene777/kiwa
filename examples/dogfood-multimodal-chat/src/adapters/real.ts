@@ -1,4 +1,4 @@
-import { costForTokens } from '@kiwa-test/ai-llm';
+import { costForTokens } from '@kiwa/ai-llm';
 import type {
   ImageRef,
   StreamedVisionResult,
@@ -361,7 +361,7 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): VisionChatAdapter {
 
 /**
  * Pre-flight image token estimate — mirrors
- * `estimateMultimodalTokens` from `@kiwa-test/ai-llm` so mock and real
+ * `estimateMultimodalTokens` from `@kiwa/ai-llm` so mock and real
  * report the same `imageTokenEstimate` on the response object. The real
  * usage arrives after the API round-trip; this estimate lets the UI
  * render a cost hint before the request completes.
@@ -374,7 +374,7 @@ function estimateImageTokens(
   return Math.floor(images.length * IMAGE_TOKEN_BASE * factor);
 }
 
-// Finding 3 — cost lookup deferred to the shared @kiwa-test/ai-llm price
+// Finding 3 — cost lookup deferred to the shared @kiwa/ai-llm price
 // table so a model swap (Sonnet → Haiku → Opus) picks up the right rate
 // without touching every dogfood adapter. Callers pass the vendor's raw
 // token counts unchanged so the migration is drop-in.

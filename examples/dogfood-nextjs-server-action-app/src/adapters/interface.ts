@@ -7,8 +7,8 @@
  *  - {@link makeRealAdapter} — drives Playwright + Chromium headless when
  *    `KIWA_MODE=real` + `SERVER_ACTION_BROWSER_READY=1` are set; otherwise
  *    every op reports `KIWA_SERVER_ACTION_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/component` v0.3 form-
- *    action-advanced semantics + `@kiwa-test/nextjs` v1.2 server-action-
+ *  - {@link makeMockAdapter} — backed by `@kiwa/component` v0.3 form-
+ *    action-advanced semantics + `@kiwa/nextjs` v1.2 server-action-
  *    advanced semantics.
  *
  * Both must satisfy the same 15-op contract so behavioural fidelity between

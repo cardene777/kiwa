@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/component",
+  "package": "@kiwa/component",
   "tier": "Test type",
   "thresholds": {
     "high": 60,

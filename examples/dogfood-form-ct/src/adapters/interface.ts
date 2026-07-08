@@ -1,4 +1,4 @@
-import type { A11yViolation } from '@kiwa-test/component';
+import type { A11yViolation } from '@kiwa/component';
 import type {
   FormArgsMap,
   FormKind,
@@ -11,14 +11,14 @@ import type {
  * dogfood. The app talks to Playwright CT only through this interface. Two
  * implementations exist —
  *
- * - `makeMockAdapter` (backed by `@kiwa-test/component`
+ * - `makeMockAdapter` (backed by `@kiwa/component`
  *   `createPlaywrightCTMock`)
  * - `makeRealAdapter` (drives `@playwright/experimental-ct-react` when
  *   `PW_CT_ENDPOINT` is set, else returns a `skipped` variant whose every
  *   method records a `PW_CT_REAL_ENV_MISSING` trace)
  *
  * Both satisfy the same contract so behavioural fidelity between real vs
- * mock can be measured side-by-side and fed to `@kiwa-test/quality-metrics`
+ * mock can be measured side-by-side and fed to `@kiwa/quality-metrics`
  * 7-axis release gate. Ops match the AC in Issue #765 — mount + validation
  * error + submit success + a11y violation count = 0, generalised across the
  * 5 form kinds.
@@ -106,7 +106,7 @@ export interface FormCTAdapter {
 
   /**
    * Run the a11y checker for 1 form (mock uses the heuristic checker in
-   * `@kiwa-test/component`; real would call axe-core through the Playwright
+   * `@kiwa/component`; real would call axe-core through the Playwright
    * CT preview). Callers assert `violations.length === 0`.
    */
   checkA11y<K extends FormKind>(

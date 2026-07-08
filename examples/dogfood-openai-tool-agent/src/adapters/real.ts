@@ -1,4 +1,4 @@
-import { costForTokens } from '@kiwa-test/ai-llm';
+import { costForTokens } from '@kiwa/ai-llm';
 import type {
   AgentAdapter,
   AgentLoopResult,
@@ -433,7 +433,7 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): AgentAdapter {
   };
 }
 
-// Finding 3 — cost lookup deferred to the shared @kiwa-test/ai-llm price
+// Finding 3 — cost lookup deferred to the shared @kiwa/ai-llm price
 // table so a model swap (gpt-4o-mini → gpt-4o → gpt-4-turbo) picks up
 // the right rate without touching each dogfood adapter individually.
 function costFor(

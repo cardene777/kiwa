@@ -6,7 +6,7 @@
 //     https://internal.api.example.com)
 //   - `authorization` header に locals.user.id 由来 token を注入 (admin のみ)
 
-import type { HandleFetchFunction } from '@kiwa-test/sveltekit';
+import type { HandleFetchFunction } from '@kiwa/sveltekit';
 import type { AuthLocals } from './auth-handle.js';
 
 const PUBLIC_HOST = 'public.api.example.com';

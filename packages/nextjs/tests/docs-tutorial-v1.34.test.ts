@@ -1,10 +1,10 @@
 /**
  * v1.34-5 docs 補強 (Issue #1052 / CAR-788) — tutorial 68 code snippet validation
- * for the server-side (`@kiwa-test/nextjs` v1.2 server-action-advanced axis).
+ * for the server-side (`@kiwa/nextjs` v1.2 server-action-advanced axis).
  *
  * `docs/tutorials/68-server-action-optimistic.md` に載っている
  * server-action-advanced snippet が実際に動作することを担保する。
- * client 側 (`@kiwa-test/component` v0.3 form-action-advanced) の snippet は
+ * client 側 (`@kiwa/component` v0.3 form-action-advanced) の snippet は
  * `packages/component/tests/docs-tutorial-v1.34.test.ts` で cover。
  *
  * v1.23 → v1.34 で 12 milestone 連続 snippet validation streak を延伸。

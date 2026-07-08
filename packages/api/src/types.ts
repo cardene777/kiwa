@@ -1,4 +1,4 @@
-import type { TestEnvBase, TestMode } from '@kiwa-test/core';
+import type { TestEnvBase, TestMode } from '@kiwa/core';
 
 export type ApiHandlerSource =
   | { kind: 'fetch'; handler: (req: Request) => Promise<Response> | Response }

@@ -40,7 +40,7 @@ async function pingDevServer(url: string, timeoutMs: number): Promise<void> {
     });
   }
   throw new Error(
-    `@kiwa-test/queue: Inngest dev-server did not respond at ${probeUrl} within ${timeoutMs}ms`,
+    `@kiwa/queue: Inngest dev-server did not respond at ${probeUrl} within ${timeoutMs}ms`,
   );
 }
 
@@ -53,7 +53,7 @@ async function spawnDevServer(
     child_process = await import('node:child_process');
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/queue: dev-server mode requires node:child_process (Node >= 20). Original error: " +
+      "@kiwa/queue: dev-server mode requires node:child_process (Node >= 20). Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }
@@ -134,7 +134,7 @@ export async function createDevServerInngestEnv(
     if (!response.ok) {
       const body = await response.text().catch(() => '');
       throw new Error(
-        `@kiwa-test/queue: dev-server rejected event "${event.name}" (HTTP ${response.status}): ${body}`,
+        `@kiwa/queue: dev-server rejected event "${event.name}" (HTTP ${response.status}): ${body}`,
       );
     }
     try {

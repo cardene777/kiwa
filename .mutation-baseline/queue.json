@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/queue",
+  "package": "@kiwa/queue",
   "tier": "SaaS",
   "thresholds": {
     "high": 65,

@@ -3,7 +3,7 @@ import {
   generateTotpCode,
   setupBetterAuthEnv,
   type BetterAuthTestEnv,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 import { createProtectedRoute, type ProtectedProfile } from '../src/route.js';
 
 const envs: BetterAuthTestEnv[] = [];

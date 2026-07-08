@@ -9,7 +9,7 @@
  *    KIWA_AFTERPAY_API_URL + KIWA_CREDIT_BUREAU_URL) when `KIWA_MODE=real`
  *    + `BNPL_STACK_READY=1` are set; otherwise every op reports
  *    `KIWA_BNPL_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/payment` v0.5 bnpl
+ *  - {@link makeMockAdapter} — backed by `@kiwa/payment` v0.5 bnpl
  *    semantics (createBnplPlan / scheduleInstallment / scoreRisk /
  *    chargeLateFee / markInstallmentPaid).
  *

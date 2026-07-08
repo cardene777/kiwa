@@ -1,4 +1,4 @@
-import { createRedpandaMock } from '@kiwa-test/streaming';
+import { createRedpandaMock } from '@kiwa/streaming';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createRegistryRun } from '../src/registry/index.js';
 import {

@@ -4,7 +4,7 @@
  * Meilisearch v1.x + Typesense are the 2 backends the AC anchors this
  * v1.36-2 dogfood on — both ship native hybrid search (vector + keyword)
  * with production-grade HNSW / IVF indexes and are the pair
- * `@kiwa-test/search` v0.3 vector + semantic axes were designed to
+ * `@kiwa/search` v0.3 vector + semantic axes were designed to
  * match. Algolia + OpenSearch OSS are covered by sibling apps in the
  * v1.36-3 / v1.36-4 releases.
  */

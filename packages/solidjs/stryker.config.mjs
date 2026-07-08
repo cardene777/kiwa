@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/solidjs.
+ * Mutation testing config for @kiwa/solidjs.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — Solid signal + resource + SSR drift.
  * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
  */

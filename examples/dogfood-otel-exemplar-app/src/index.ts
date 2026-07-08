@@ -1,7 +1,7 @@
 /**
  * Public surface for dogfood-otel-exemplar-app v0.0.1 (v1.35-3).
  *
- * A dogfood app that drives the `@kiwa-test/observability` v2.1
+ * A dogfood app that drives the `@kiwa/observability` v2.1
  * exemplar + otel-advanced axes (pipeline start → resource detection
  * → span enqueue → batch flush → exemplar record → attach trace →
  * resolve metric↔trace → baggage propagation → W3C context extraction
@@ -10,7 +10,7 @@
  * deterministic mock adapter and a `KIWA_MODE=real` testcontainers-driven
  * OpenTelemetry Collector + Jaeger + Prometheus + Loki real adapter.
  * The fidelity harness diffs both traces and feeds the divergence count
- * into the `@kiwa-test/quality-metrics` 13-axis release gate.
+ * into the `@kiwa/quality-metrics` 13-axis release gate.
  */
 
 export { makeMockAdapter } from './adapters/mock.js';

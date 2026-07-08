@@ -3,7 +3,7 @@
  *
  * Layers DCR-specific behavioural fidelity axes on top of the Sub-Issue
  * v1.21-4a skeleton. The registration handler in `src/lib/dcr.ts` sits
- * between the Hono OP + the underlying `@kiwa-test/auth`
+ * between the Hono OP + the underlying `@kiwa/auth`
  * `dynamicClientRegistration` helper. The layer adds:
  *   - three RFC 7591 auth methods (client_secret_basic / client_secret_post /
  *     JWT-based client auth via `pk_jwt`), with the JWT-based path enforcing
@@ -12,7 +12,7 @@
  *   - explicit OAuth 2.1 dropped-grant refusal (implicit / password /
  *     client_credentials);
  *   - `software_statement` JWS signature verification via the shared trust
- *     anchor from `@kiwa-test/auth`;
+ *     anchor from `@kiwa/auth`;
  *   - `redirect_uris` presence + URL validation.
  *
  * Every axis has a matching real-driver env-missing assertion so the harness
@@ -20,7 +20,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { mintSoftwareStatement } from '@kiwa-test/auth';
+import { mintSoftwareStatement } from '@kiwa/auth';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { makeRealAdapter } from '../src/adapters/real.js';
 import { KIWA_OIDC_ENV_MISSING } from '../src/adapters/interface.js';

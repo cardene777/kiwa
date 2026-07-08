@@ -34,7 +34,7 @@ import {
   type CaBLESessionOptions,
   type PasskeyCredential,
   type PasskeyTestEnv,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 
 const envs: PasskeyTestEnv[] = [];
 

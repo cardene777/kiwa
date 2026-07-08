@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/payment` v0.5 crypto-payment +
+ * Mock adapter — drives `@kiwa/payment` v0.5 crypto-payment +
  * fx-cross-border semantics (createCryptoInvoice / confirmTx / abstractGas /
  * linkWallet / startFxTransfer / lockRate / initiateSettlement /
  * completeSettlement / expireRate) so the same app code exercises a
@@ -35,7 +35,7 @@ import {
   type CryptoPaymentSession,
   type FxSession,
   type PaymentAdapter as PaymentWebhookAdapter,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 import type {
   FxCompleteSettlementResult,
   FxExpireRateResult,

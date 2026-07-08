@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/a11y.
+ * A11y (axe-core) config for @kiwa/a11y.
  * Tier: Test type tier (critical 0 / serious 0-3 / moderate 0-10) — axe-core WCAG 2.1 AA wrapper. Self-tests exercise DOM fixtures.
  * SSOT: docs/quality/a11y-thresholds.md § Test type tier.
  */

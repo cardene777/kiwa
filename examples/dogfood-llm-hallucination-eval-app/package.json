@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.38-3 — a Hallucination detection + LLM eval service that drives an LLM answer-quality surface backed by @kiwa-test/ai-llm v0.4 semantics (hallucination self-consistency/factuality/citation/confidence + llm-eval judge/rubric/preference/Elo), runnable in both KIWA_MODE=real (OpenAI Chat Completions API when OPENAI_API_KEY + budget guard are set) and KIWA_MODE=mock (in-memory scorer + judge pipeline) so behavioural fidelity feeds @kiwa-test/quality-metrics 11-axis release gate.",
+  "description": "Dogfood app v1.38-3 — a Hallucination detection + LLM eval service that drives an LLM answer-quality surface backed by @kiwa/ai-llm v0.4 semantics (hallucination self-consistency/factuality/citation/confidence + llm-eval judge/rubric/preference/Elo), runnable in both KIWA_MODE=real (OpenAI Chat Completions API when OPENAI_API_KEY + budget guard are set) and KIWA_MODE=mock (in-memory scorer + judge pipeline) so behavioural fidelity feeds @kiwa/quality-metrics 11-axis release gate.",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/ai-llm -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/ai-llm -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/ai-llm": "workspace:*",
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/quality-metrics": "workspace:*"
+    "@kiwa/ai-llm": "workspace:*",
+    "@kiwa/core": "workspace:*",
+    "@kiwa/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

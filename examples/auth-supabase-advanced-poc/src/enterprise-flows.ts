@@ -3,8 +3,8 @@ import type {
   MfaFactor,
   SamlAssertion,
   SamlIdentityProvider,
-} from '@kiwa-test/auth';
-import { deriveSupabaseMockAddress, generateSupabaseTotpCode } from '@kiwa-test/auth';
+} from '@kiwa/auth';
+import { deriveSupabaseMockAddress, generateSupabaseTotpCode } from '@kiwa/auth';
 
 /**
  * Enterprise + dApp advanced flows tied together for the PoC. Real Supabase

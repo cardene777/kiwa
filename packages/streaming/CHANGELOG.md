@@ -1,4 +1,4 @@
-# @kiwa-test/streaming
+# @kiwa/streaming
 
 ## 0.3.0
 
@@ -23,7 +23,7 @@
 
 ### Minor Changes
 
-- 1fab5c4: Initial release of `@kiwa-test/streaming` v0.1.0 — unified Kafka + Redpanda + NATS testing mock covering the 5 streaming semantics (producer / consumer / exactly-once / DLQ / schema-registry) in one API surface.
+- 1fab5c4: Initial release of `@kiwa/streaming` v0.1.0 — unified Kafka + Redpanda + NATS testing mock covering the 5 streaming semantics (producer / consumer / exactly-once / DLQ / schema-registry) in one API surface.
 
   - `createKafkaMock({ defaultPartitionCount })` — kafkajs-shaped broker + producer + consumer + admin trio with deterministic djb2 key-hash partitioner, per-partition offset log, `partitionAssigner: 'range' | 'round-robin'` consumer groups, `sendBatch`, `commitOffsets`, `seek`, `getCommittedOffset`, rebalance.
   - `createRedpandaMock({ schemaRegistry: true })` — Kafka API 互換 broker with colocated `SchemaRegistry` covering `registerAvro` / `registerProtobuf` / `registerJson`, three compatibility modes (`BACKWARD` / `FORWARD` / `FULL`), schema evolution, fail-fast publish gating.

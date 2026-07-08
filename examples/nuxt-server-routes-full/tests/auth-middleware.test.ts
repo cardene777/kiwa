@@ -1,5 +1,5 @@
 // kiwa unit test for middleware/_kiwa/auth-middleware.ts
-// — invokes the pure middleware through @kiwa-test/nuxt's invokeRouteMiddleware.
+// — invokes the pure middleware through @kiwa/nuxt's invokeRouteMiddleware.
 // navigateTo / abortNavigation の throw を branded signal として全捕捉、 実 Nuxt router 不要。
 
 import { describe, expect, it } from 'vitest';
@@ -7,10 +7,10 @@ import {
   invokeRouteMiddleware,
   NUXT_MIDDLEWARE_REDIRECT_SYMBOL,
   NUXT_MIDDLEWARE_ABORT_SYMBOL,
-} from '@kiwa-test/nuxt';
+} from '@kiwa/nuxt';
 import { authMiddleware } from '../middleware/_kiwa/auth-middleware.js';
 
-describe('authMiddleware via @kiwa-test/nuxt invokeRouteMiddleware', () => {
+describe('authMiddleware via @kiwa/nuxt invokeRouteMiddleware', () => {
   it('T-NF-101: requiresAuth=false の route は素通り (redirect / abort なし)', async () => {
     const result = await invokeRouteMiddleware({
       middleware: authMiddleware,

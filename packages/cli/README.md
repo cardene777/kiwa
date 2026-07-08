@@ -2,13 +2,13 @@
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-logo.png" alt="kiwa logo" width="160" />
 </p>
 
-# @kiwa-test/cli
+# @kiwa/cli
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
 CLI for [kiwa](https://github.com/cardene777/kiwa) with `init` and `doctor` commands.
 
-`@kiwa-test/cli` scaffolds Playwright-based dApp E2E tests that use `@kiwa-test/dapp`, and provides a quick prerequisite check for local setup.
+`@kiwa/cli` scaffolds Playwright-based dApp E2E tests that use `@kiwa/dapp`, and provides a quick prerequisite check for local setup.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this CLI scaffolds the dApp e2e setup)" width="640" />
@@ -19,11 +19,11 @@ CLI for [kiwa](https://github.com/cardene777/kiwa) with `init` and `doctor` comm
 ## Installation
 
 ```bash
-pnpm add -D @kiwa-test/cli
+pnpm add -D @kiwa/cli
 
 # or use it without installing
-pnpm dlx @kiwa-test/cli init
-pnpm dlx @kiwa-test/cli doctor
+pnpm dlx @kiwa/cli init
+pnpm dlx @kiwa/cli doctor
 ```
 
 ### Bonus — Claude Code plugin
@@ -43,10 +43,10 @@ Use kiwa with Claude Code? Install the matching skill chain in **one command** �
 
 ### `kiwa init`
 
-Scaffolds Playwright E2E files into an existing dApp project and wires the generated test to `@kiwa-test/dapp`.
+Scaffolds Playwright E2E files into an existing dApp project and wires the generated test to `@kiwa/dapp`.
 
 ```bash
-pnpm dlx @kiwa-test/cli init
+pnpm dlx @kiwa/cli init
 # creates: e2e/connect.spec.ts + playwright.config.ts
 # also updates package.json and creates tsconfig.json if missing
 ```
@@ -58,7 +58,7 @@ Available flags include `--force`, `--testDir`, `--config-suffix`, `--script-key
 Checks that the required `anvil` binary is available in the current environment.
 
 ```bash
-pnpm dlx @kiwa-test/cli doctor
+pnpm dlx @kiwa/cli doctor
 ```
 
 ### `kiwa anvil seed <script> --out <path>`
@@ -66,7 +66,7 @@ pnpm dlx @kiwa-test/cli doctor
 Runs `<script>` (any executable `.mjs` / `.js`) against a fresh anvil instance and dumps the full chain state to `<path>` via `anvil --dump-state`. The script reads `process.env.ANVIL_RPC_URL` to deploy contracts and prepare seed data; on exit, anvil writes the state file that downstream vitest tests can pass to `setupTestEnv({ anvil: { loadState: ... } })` for instant chain startup.
 
 ```bash
-pnpm dlx @kiwa-test/cli anvil seed tests/seed.ts --out tests/fixtures/state.json
+pnpm dlx @kiwa/cli anvil seed tests/seed.ts --out tests/fixtures/state.json
 # OK seeded state at /…/tests/fixtures/state.json (port 49xxx)
 ```
 
@@ -76,7 +76,7 @@ Flags: `--chain-id <n>` (default 31337), `--port <n>` (default: random free port
 
 - [GitHub repository](https://github.com/cardene777/kiwa)
 - [Full documentation](https://github.com/cardene777/kiwa/tree/main/docs/en)
-- [@kiwa-test/dapp](https://www.npmjs.com/package/@kiwa-test/dapp) - runtime fixture
+- [@kiwa/dapp](https://www.npmjs.com/package/@kiwa/dapp) - runtime fixture
 
 ## Author
 

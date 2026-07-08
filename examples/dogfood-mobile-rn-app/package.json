@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.50-2 — Mobile 3 axis × 3 target workflow backed by @kiwa-test/mobile v0.1。 React Native + Expo + Metro を横断的に扱う reference。",
+  "description": "Dogfood app v1.50-2 — Mobile 3 axis × 3 target workflow backed by @kiwa/mobile v0.1。 React Native + Expo + Metro を横断的に扱う reference。",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/mobile build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/core -F @kiwa/mobile build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/mobile": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/mobile": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

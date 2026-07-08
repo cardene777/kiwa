@@ -6,7 +6,7 @@ import {
   type FlameNode,
   type SpanNode,
   type SpanRecord,
-} from '@kiwa-test/observability';
+} from '@kiwa/observability';
 import type {
   AdapterLog,
   AdapterSpan,
@@ -22,7 +22,7 @@ import type {
 import { TraceLogIndex } from '../correlation/index.js';
 
 /**
- * Mock adapter — drives the `@kiwa-test/observability` span tree +
+ * Mock adapter — drives the `@kiwa/observability` span tree +
  * flame graph + log correlation helpers so the same app code exercises
  * the Jaeger surface without needing a live Jaeger process. Every
  * trace served here is one of the 10 seeded fixtures from

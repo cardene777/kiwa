@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { CachedNativeInvokeResult } from '@kiwa-test/desktop';
+import type { CachedNativeInvokeResult } from '@kiwa/desktop';
 import {
   createDefaultCache,
   invalidateAndRefetch,

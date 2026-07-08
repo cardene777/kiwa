@@ -1,5 +1,5 @@
 {
-  "name": "@kiwa-test/cache",
+  "name": "@kiwa/cache",
   "version": "0.2.0",
   "description": "Cache test adapter for kiwa — Redis (testcontainers) live env + in-memory sandbox env + Memcached (stub + testcontainers) env + KeyDB (stub + testcontainers) env, with TTL / Pub/Sub / expiry / consistent-hash / multi-master replication assertion helpers (assertTTL / subscribe / assertPublished / serverFor / listEntries)",
   "license": "MIT",
@@ -66,7 +66,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "pretest:perf": "pnpm -F @kiwa-test/perf-harness build",
+    "pretest:perf": "pnpm -F @kiwa/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**'",
     "test:mutation": "stryker run",
@@ -74,7 +74,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*"
+    "@kiwa/core": "workspace:*"
   },
   "peerDependencies": {
     "ioredis": "^5",
@@ -102,7 +102,7 @@
     }
   },
   "devDependencies": {
-    "@kiwa-test/perf-harness": "workspace:*",
+    "@kiwa/perf-harness": "workspace:*",
     "@stryker-mutator/core": "^8.7.1",
     "@stryker-mutator/vitest-runner": "^8.7.1",
     "@types/node": "^22.10.0",

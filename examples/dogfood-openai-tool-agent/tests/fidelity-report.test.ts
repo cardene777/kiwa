@@ -24,7 +24,7 @@ describe('dogfood-openai-tool-agent — fidelity harness (Task 3.4)', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/openai-tool-agent',
+      provider: '@kiwa/ai-llm/openai-tool-agent',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -48,7 +48,7 @@ describe('dogfood-openai-tool-agent — fidelity harness (Task 3.4)', () => {
       mutation: { mutations: 40, killed: 28 },
       surfaceCoverage: { mockCoveredMethods: 3, realTotalMethods: 3 },
     });
-    expect(output.report.provider).toBe('@kiwa-test/ai-llm/openai-tool-agent');
+    expect(output.report.provider).toBe('@kiwa/ai-llm/openai-tool-agent');
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThanOrEqual(3);
     expect(output.verdict.axesEvaluated).toBe(11);
     await mock.reset();
@@ -66,7 +66,7 @@ describe('dogfood-openai-tool-agent — fidelity harness (Task 3.4)', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/openai-tool-agent',
+      provider: '@kiwa/ai-llm/openai-tool-agent',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -108,7 +108,7 @@ describe('dogfood-openai-tool-agent — fidelity harness (Task 3.4)', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/openai-tool-agent',
+      provider: '@kiwa/ai-llm/openai-tool-agent',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

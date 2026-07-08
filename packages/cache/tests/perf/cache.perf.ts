@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-test/perf-harness';
+import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa/perf-harness';
 import { setupCacheEnv, setupKeyDBEnv, setupMemcachedEnv } from '../../src/index.js';
 
 // SaaS layer baseline を .perf-baseline/saas/{name}.json に分離 (v1.25-4)。
