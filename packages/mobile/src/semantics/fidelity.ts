@@ -32,6 +32,31 @@ export const MOBILE_AXIS_TO_EVENTS: Record<MobileAxis, NeutralEventName[]> = {
     'metro.hmr_applied',
     'metro.bundle_completed',
   ],
+  // v1.51 advanced II
+  navigation: [
+    'navigation.stack_pushed',
+    'navigation.tab_switched',
+    'navigation.modal_opened',
+    'navigation.deep_link_navigated',
+  ],
+  reanimated: [
+    'reanimated.shared_value_updated',
+    'reanimated.worklet_executed',
+    'reanimated.animation_started',
+    'reanimated.animation_completed',
+  ],
+  'async-storage': [
+    'async-storage.item_set',
+    'async-storage.item_read',
+    'async-storage.item_removed',
+    'async-storage.batch_flushed',
+  ],
+  'secure-storage': [
+    'secure-storage.credential_stored',
+    'secure-storage.credential_retrieved',
+    'secure-storage.biometric_challenged',
+    'secure-storage.credential_removed',
+  ],
 };
 
 export function collectFidelityCoverage(

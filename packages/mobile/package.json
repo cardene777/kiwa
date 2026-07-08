@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/mobile",
-  "version": "0.1.0",
-  "description": "Mobile test harness for kiwa v0.1 — 3 axis (React Native + Expo + Metro) unified as target-neutral state machine。 React Native component + native module + gesture / Expo build config + linking + push notification / Metro bundler + HMR + resolver。 v1.50 で kiwa 縦深化 pair 第 13 新規 base pair 導入、 41 package 到達。",
+  "version": "0.2.0",
+  "description": "Mobile test harness for kiwa v0.2 — 7 axis (React Native + Expo + Metro + Navigation + Reanimated + AsyncStorage + SecureStorage) unified as target-neutral state machine + real driver env-gate opt-in。 v0.1 (v1.50) 3 axis base に加えて v0.2 (v1.51) advanced II 4 new axis (navigation / reanimated / async-storage / secure-storage) + real driver env-gate (KIWA_MOBILE_MODE=real) を追加、 backward compat 絶対維持。 pair 第 13 の 2 段目 (Phase 2)。",
   "license": "MIT",
   "author": {
     "name": "cardene",

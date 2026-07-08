@@ -39,3 +39,44 @@ export {
   type FidelityCoverage,
   type FidelityRow,
 } from './fidelity.js';
+
+// v1.51 advanced II axis exports
+export {
+  initNavigation,
+  navigateDeepLink,
+  openNavigationModal,
+  pushNavigationStack,
+  switchNavigationTab,
+  type NavigationSession,
+  type NavigationState,
+} from './navigation.js';
+
+export {
+  completeReanimatedAnimation,
+  executeWorklet,
+  initReanimated,
+  startReanimatedAnimation,
+  updateSharedValue,
+  type ReanimatedSession,
+  type ReanimatedState,
+} from './reanimated.js';
+
+export {
+  flushAsyncStorageBatch,
+  initAsyncStorage,
+  readAsyncStorageItem,
+  removeAsyncStorageItem,
+  setAsyncStorageItem,
+  type AsyncStorageSession,
+  type AsyncStorageState,
+} from './async-storage.js';
+
+export {
+  challengeBiometric,
+  initSecureStorage,
+  removeCredential,
+  retrieveCredential,
+  storeCredential,
+  type SecureStorageSession,
+  type SecureStorageState,
+} from './secure-storage.js';
