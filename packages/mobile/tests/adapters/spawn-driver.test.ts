@@ -31,7 +31,7 @@ describe('v1.54-1 spawn-driver stub (pair 深度 5 段拡張 1 例目 candidate)
       invokeMobileCli({
         command: 'metro bundle',
         args: new Array(33).fill('x'),
-        env: { KIWA_MOBILE_MODE: 'real' },
+        env: { KIWA_MOBILE_MODE: 'real', KIWA_MOBILE_SPAWN: 'dry-run' },
       }),
     ).rejects.toThrow(/args exceeds max 32/);
   });
@@ -40,13 +40,13 @@ describe('v1.54-1 spawn-driver stub (pair 深度 5 段拡張 1 例目 candidate)
     const r = await invokeMobileCli({
       command: 'expo build',
       args: ['--platform', 'ios'],
-      env: { KIWA_MOBILE_MODE: 'real' },
+      env: { KIWA_MOBILE_MODE: 'real', KIWA_MOBILE_SPAWN: 'dry-run' },
     });
     expect(r.invoked).toBe(true);
     expect(r.command).toBe('expo build');
     expect(r.args).toEqual(['--platform', 'ios']);
     expect(r.exitCode).toBe(0);
-    expect(r.stdout).toContain('v0.5 spawn stub');
+    expect(r.stdout).toContain('v0.6 dry-run');
     expect(r.durationMs).toBeGreaterThanOrEqual(0);
   });
 
@@ -55,7 +55,7 @@ describe('v1.54-1 spawn-driver stub (pair 深度 5 段拡張 1 例目 candidate)
       const r = await invokeMobileCli({
         command: cmd,
         args: [],
-        env: { KIWA_MOBILE_MODE: 'real' },
+        env: { KIWA_MOBILE_MODE: 'real', KIWA_MOBILE_SPAWN: 'dry-run' },
       });
       expect(r.command).toBe(cmd);
       expect(r.invoked).toBe(true);

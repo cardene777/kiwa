@@ -1,11 +1,15 @@
 /**
- * Mobile spawn driver (v0.5、 pair 深度 5 段拡張 1 例目 candidate)。
+ * Mobile spawn driver (v0.6、 depth-5 pattern 実装完成)。
  *
- * v0.4 で mock/real adapter interface を確立、 v0.5 で real 経路の
- * child_process.spawn 契約層を stub 実装。 v1.55+ で 実 CLI spawn 実装に置換。
- * 現状 = env-gate + spawn shape 契約 + fail-closed のみ、 実 CLI 実行はしない。
+ * v0.5 stub 契約 → v0.6 実 child_process.spawn 実行 に置換 (executeSpawn 経由)。
+ * shape 契約 preserving = SpawnResult 構造は v0.5 と同一、 stdout/stderr/exitCode
+ * /durationMs は 実 spawn からの実測値。 test-only injection 経路として
+ * `invokeMobileCliWith` を追加 (SpawnFn を DI 可能)、 実 CLI 未 install 環境でも
+ * 決定的 test を成立させる。
  */
+import { spawn as nodeSpawn } from 'node:child_process';
 import type { MobileAxis } from '../semantics/types.js';
+import { executeSpawn, type SpawnFn } from './spawn-executor.js';
 
 export type MobileCliCommand =
   | 'expo build'
@@ -47,11 +51,23 @@ const AXIS_TO_CLI: Record<MobileAxis, MobileCliCommand | null> = {
 };
 
 /**
- * v0.5 stub = 実 CLI 実行はせず、 env-gate 通過確認 + spawn shape 契約のみ返す。
+ * v0.6 実 spawn 実行 = env-gate 通過確認 + args 上限 32 + 実 child_process.spawn 実行。
  * `KIWA_MOBILE_MODE=real` + 対応 axis env 未設定なら throw で fail-closed。
- * v1.55+ で child_process.spawn(cmd, args, { env, cwd }) 実装に置換。
+ * `KIWA_MOBILE_SPAWN=dry-run` の時は v0.5 stub 相当の shape 契約を返す
+ * (実 CLI 未 install 環境向け backward compat 経路)。
  */
 export async function invokeMobileCli(inv: SpawnInvocation): Promise<SpawnResult> {
+  return invokeMobileCliWith(inv, nodeSpawn);
+}
+
+/**
+ * DI 経路 = spawnFn を注入可能、 test で dummy spawn を差し込んで
+ * 決定的挙動を検証できる。 default は nodeSpawn。
+ */
+export async function invokeMobileCliWith(
+  inv: SpawnInvocation,
+  spawnFn: SpawnFn,
+): Promise<SpawnResult> {
   const start = Date.now();
   if (inv.env.KIWA_MOBILE_MODE !== 'real') {
     throw new Error(
@@ -61,15 +77,37 @@ export async function invokeMobileCli(inv: SpawnInvocation): Promise<SpawnResult
   if (inv.args.length > 32) {
     throw new Error(`invokeMobileCli(${inv.command}): args exceeds max 32 (${inv.args.length})`);
   }
-  // stub: 実 spawn は v1.55+、 現状は shape 契約のみ返す。
+
+  if (inv.env.KIWA_MOBILE_SPAWN === 'dry-run') {
+    return {
+      command: inv.command,
+      args: [...inv.args],
+      invoked: true,
+      exitCode: 0,
+      stdout: `[v0.6 dry-run] ${inv.command} ${inv.args.join(' ')}`,
+      stderr: '',
+      durationMs: Date.now() - start,
+    };
+  }
+
+  const executed = await executeSpawn(
+    {
+      command: inv.command,
+      args: inv.args,
+      env: inv.env,
+      ...(inv.cwd !== undefined ? { cwd: inv.cwd } : {}),
+    },
+    spawnFn,
+  );
+
   return {
     command: inv.command,
     args: [...inv.args],
     invoked: true,
-    exitCode: 0,
-    stdout: `[v0.5 spawn stub] ${inv.command} ${inv.args.join(' ')}`,
-    stderr: '',
-    durationMs: Date.now() - start,
+    exitCode: executed.exitCode,
+    stdout: executed.stdout,
+    stderr: executed.stderr,
+    durationMs: executed.durationMs,
   };
 }
 

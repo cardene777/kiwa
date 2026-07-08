@@ -21,11 +21,11 @@ describe('tutorial 114 — spawn stub env-gate snippet', () => {
     ).rejects.toThrow(/KIWA_MOBILE_MODE must be 'real'/);
   });
 
-  it('returns spawn shape when env=real', async () => {
+  it('returns spawn shape when env=real (dry-run for tutorial)', async () => {
     const r = await invokeMobileCli({
       command: 'expo build',
       args: ['--platform', 'ios'],
-      env: { KIWA_MOBILE_MODE: 'real' },
+      env: { KIWA_MOBILE_MODE: 'real', KIWA_MOBILE_SPAWN: 'dry-run' },
     });
     expect(r.invoked).toBe(true);
     expect(r.exitCode).toBe(0);
@@ -58,7 +58,7 @@ describe('tutorial 114 — all 6 CLI stubs snippet', () => {
       const r = await invokeMobileCli({
         command: cmd,
         args: [],
-        env: { KIWA_MOBILE_MODE: 'real' },
+        env: { KIWA_MOBILE_MODE: 'real', KIWA_MOBILE_SPAWN: 'dry-run' },
       });
       expect(r.command).toBe(cmd);
       expect(r.invoked).toBe(true);
