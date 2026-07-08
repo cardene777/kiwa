@@ -364,6 +364,12 @@ export default defineConfig({
             { text: '110 — Mobile testing baseline (React Native + Expo + Metro walkthrough)', link: '/tutorials/110-mobile-testing' },
           ],
         },
+        {
+          text: 'Mobile 深化 II (v1.51、 pair 第 13 の 2 段目 Phase 2)',
+          items: [
+            { text: '111 — Mobile advanced II (navigation + reanimated + async-storage + secure-storage walkthrough + real driver env-gate)', link: '/tutorials/111-mobile-advanced' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -408,6 +414,7 @@ export default defineConfig({
             { text: 'DevSecOps library integration (v0.1 6 axis SAST + SCA + Secret + IaC + DAST + Container + 4 skill 置換 pattern SSOT + 段階的移行 Phase 1-3)', link: '/concepts/security-devsecops-library-integration' },
             { text: 'Frontend advanced III testing (v1.49 6 axis SSOT + pair 深度 3 段 4 例目)', link: '/concepts/frontend-advanced-III-testing' },
             { text: 'Mobile testing baseline (v1.50 3 axis SSOT + new-base pair 第 13 + 41 package 到達)', link: '/concepts/mobile-testing-baseline' },
+            { text: 'Mobile testing advanced II (v1.51 7 axis SSOT + real driver env-gate + pair 第 13 2 段目)', link: '/concepts/mobile-testing-advanced' },
           ],
         },
       ],
@@ -457,6 +464,7 @@ export default defineConfig({
             { text: 'v1.47 → v1.48', link: '/migrations/v1.47-to-v1.48' },
             { text: 'v1.48 → v1.49', link: '/migrations/v1.48-to-v1.49' },
             { text: 'v1.49 → v1.50', link: '/migrations/v1.49-to-v1.50' },
+            { text: 'v1.50 → v1.51', link: '/migrations/v1.50-to-v1.51' },
           ],
         },
       ],
