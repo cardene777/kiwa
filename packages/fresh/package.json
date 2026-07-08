@@ -1,6 +1,6 @@
 {
   "name": "@kiwa/fresh",
-  "version": "0.2.0",
+  "version": "2.0.0",
   "description": "Deno Fresh Islands + Route Handler + Head normalization test adapter for kiwa — invoke Fresh Handler / defineRoute without a Deno runtime, capture partial-hydration Island mounts, and merge Head fragments (meta / title / link) for assertion-based testing (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {

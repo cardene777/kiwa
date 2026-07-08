@@ -1,6 +1,6 @@
 {
   "name": "@kiwa/desktop",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Desktop test harness for kiwa v1.0 — 12 axis + adapter + fidelity + spawn stub + 実 spawn + real behavior runner + probe + skip + v0.9 実 native binding 呼出 + v1.0 invoke-cache layer (InvokeCache class = LRU + TTL 両立 in-memory cache + withCache helper = probeAndInvoke 統合 + buildCacheKey 決定的 key 生成 SSOT、 4 status 経路 = cache-hit / cache-miss / cache-invalidated / cache-disabled、 default 5 分 TTL + 128 maxEntries + enabled=true) を pair layer 化。 shape 契約 preserving 絶対維持 = NativeInvokeResult 構造無変更、 cache hit 時 も status field = 'invoked' そのまま、 cacheStatus / cacheKey / cachedAt / cacheAgeMs を additive extension で 追加。 v1.62 real behavior + v1.63 probe + v1.64 実 invoke + v1.67 invoke-cache の 4 layer separation を 完成させる depth-6 pattern 2 例目確定 candidate (Mobile v1.55 depth-5 → Desktop v1.61 depth-5 → Desktop v1.67 depth-6 2 例目化)、 v1.55-v1.66 4 PR rhythm 継承 (13 milestone 連続 = 52 PR 連続同 rhythm)、 systematic pattern 42 度目適用 (additive-only + backward compat + shape 契約 preserving の 3 原則 + LRU/TTL/enabled の 3 SSOT + observability additive の 5 原則統合)、 backward compat 絶対維持 (v0.1-v0.9 API 変更 0)、 45 milestone snippet streak 到達。",
   "license": "MIT",
   "author": {

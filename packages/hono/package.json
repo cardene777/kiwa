@@ -1,6 +1,6 @@
 {
   "name": "@kiwa/hono",
-  "version": "0.2.0",
+  "version": "2.0.0",
   "description": "HonoJS Cloudflare Workers + hc RPC type-safe client + middleware chain test adapter for kiwa — invoke Hono app.request / route / middleware without a real Workers runtime, capture middleware execution order + context state + hc RPC request / response typing, and mock Workers env (KV / D1 / R2 / ExecutionContext) for assertion-based testing (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {

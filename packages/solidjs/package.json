@@ -1,6 +1,6 @@
 {
   "name": "@kiwa/solidjs",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "SolidJS Signal-based reactivity test adapter for kiwa — invoke Signal / Effect / createResource without a running SolidJS runtime, capture Suspense boundary transitions + error boundary, and render Solid components into a lightweight virtual tree for assertion-based testing (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {

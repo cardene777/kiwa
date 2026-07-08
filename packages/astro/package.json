@@ -1,6 +1,6 @@
 {
   "name": "@kiwa/astro",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Astro Server Endpoints (`pages/api/*.ts`) + `.astro` page SSR + View Transitions API test adapter for kiwa — invoke endpoint functions with simulated APIContext, render `.astro` pages with redirect / notFound / rewrite capture, and dispatch View Transitions lifecycle events (astro:before-preparation / after-preparation / before-swap / after-swap) without a running Astro dev server (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {
