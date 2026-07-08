@@ -621,6 +621,13 @@ const V1_56_PAGES = [
   { path: '/migrations/v1.55-to-v1.56', title: 'v1.55 → v1.56' },
 ];
 
+// v1.57 = Desktop 深化 I (v0.2 advanced 5 axis)、 35 milestone streak、 systematic pattern 32 度目。
+const V1_57_PAGES = [
+  { path: '/tutorials/117-desktop-advanced-axis', title: 'Desktop advanced axis' },
+  { path: '/concepts/desktop-advanced-axis', title: 'Desktop advanced axis' },
+  { path: '/migrations/v1.56-to-v1.57', title: 'v1.56 → v1.57' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1059,6 +1066,20 @@ test.describe('docs site — v1.44 pages render', () => {
       await page.goto(pageUrl(p.path));
       const body = await page.locator(CONTENT_LOCATOR).innerText();
       expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.57 pages render', () => {
+  for (const p of V1_57_PAGES) {
+    test(`v1.57 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
     });
   }
 });
