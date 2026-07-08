@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/mobile",
-  "version": "0.5.0",
-  "description": "Mobile test harness for kiwa v0.5 — 11 axis × mock/real adapter pair + fidelity harness + child_process.spawn stub 契約層。 v0.1-v0.3 semantics 11 axis + v0.4 adapter layer に加えて v0.5 (v1.54) で spawn-driver stub (env-gate + spawn shape 契約 + fail-closed) を追加、 6 CLI stub (expo build / metro bundle / codegen run / react-native start / pod install / gradle build) 呼出契約、 backward compat 絶対維持で v0.1-v0.4 API 変更 0。 **pair 第 13 の 5 段目 (Phase 5、 pair 深度 5 段拡張 1 例目 candidate、 depth-5 pattern 新設)**。",
+  "version": "0.6.0",
+  "description": "Mobile test harness for kiwa v0.6 — 11 axis × mock/real adapter pair + fidelity harness + 実 child_process.spawn 実行層 (v0.5 stub 契約 → v0.6 実 spawn 実行)。 v0.1-v0.3 semantics 11 axis + v0.4 adapter layer + v0.5 spawn stub に加えて v0.6 (v1.55) で 実 child_process.spawn 実行 + spawn-executor (env sanitize + timeout + buffer 上限 + allowlist) を追加、 v0.5 shape 契約 preserving (SpawnResult 構造無変更、 stdout/stderr/exitCode/durationMs は 実 spawn からの実測値)、 KIWA_MOBILE_SPAWN=dry-run で v0.5 相当 stub 復元、 invokeMobileCliWith DI 経路で test-only spawn 注入可能。 backward compat 絶対維持で v0.1-v0.5 API 変更 0。 **pair 第 13 の 6 段目 (Phase 6、 depth-5 pattern 実装完成)**。",
   "license": "MIT",
   "author": {
     "name": "cardene",
