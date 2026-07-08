@@ -677,6 +677,13 @@ const V1_64_PAGES = [
   { path: '/migrations/v1.63-to-v1.64', title: 'v1.63 → v1.64' },
 ];
 
+// v1.65 = quality-metrics 深化 II (v0.5 historical trend + drift detection)、 43 milestone streak、 systematic pattern 40 度突入、 depth-5 pattern 3 例目確定。
+const V1_65_PAGES = [
+  { path: '/tutorials/125-quality-metrics-history', title: 'quality-metrics v0.5 historical trend tracking' },
+  { path: '/concepts/quality-metrics-history', title: 'quality-metrics v0.5 historical trend tracking' },
+  { path: '/migrations/v1.64-to-v1.65', title: 'v1.64 → v1.65' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1115,6 +1122,20 @@ test.describe('docs site — v1.44 pages render', () => {
       await page.goto(pageUrl(p.path));
       const body = await page.locator(CONTENT_LOCATOR).innerText();
       expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.65 pages render', () => {
+  for (const p of V1_65_PAGES) {
+    test(`v1.65 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
     });
   }
 });
