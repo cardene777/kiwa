@@ -418,6 +418,12 @@ export default defineConfig({
             { text: '119 — Desktop adapter layer (AdapterInvocation + AdapterResult + MOCK/REAL_ADAPTERS + fidelity harness walkthrough)', link: '/tutorials/119-desktop-adapter-layer' },
           ],
         },
+        {
+          text: 'Desktop 深化 IV (v1.60、 v0.5 spawn stub 契約層、 systematic pattern 35 度目、 38 milestone streak、 depth-5 pattern 2 例目 candidate、 Mobile v1.54 rhythm 再現)',
+          items: [
+            { text: '120 — Desktop spawn stub (invokeDesktopCli + cliForAxis + buildSpawnInvocation + env-gate + fail-closed walkthrough)', link: '/tutorials/120-desktop-spawn-stub' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -471,6 +477,7 @@ export default defineConfig({
             { text: 'Desktop advanced axis (v1.57 v0.2 5 axis SSOT + auto-updater + fs-permissions + notification + menu-bar + tray-icon + 24 spec fidelity grid + systematic pattern 32 度目)', link: '/concepts/desktop-advanced-axis' },
             { text: 'Desktop advanced III (v1.58 v0.3 4 axis SSOT + screen-recording + global-shortcut + clipboard + dark-mode + 36 spec fidelity grid + systematic pattern 33 度目 + Mobile v1.50-v1.52 rhythm 再現)', link: '/concepts/desktop-advanced-iii' },
             { text: 'Desktop adapter layer (v1.59 v0.4 adapter interface + fidelity harness SSOT + 24 adapter pair + 72 combination + 36 fidelity pair + systematic pattern 34 度目 + Mobile v1.53 rhythm 再現 + depth-4 record 5 例目)', link: '/concepts/desktop-adapter-layer' },
+            { text: 'Desktop spawn stub 契約層 (v1.60 v0.5 8 CLI stub SSOT + 12 axis → 8 CLI + 4 non-CLI mapping + KIWA_DESKTOP_MODE env-gate + args 上限 32 + fail-closed + systematic pattern 35 度目 + Mobile v1.54 rhythm 再現 + depth-5 pattern 2 例目 candidate)', link: '/concepts/desktop-spawn-stub' },
           ],
         },
       ],
@@ -529,6 +536,7 @@ export default defineConfig({
             { text: 'v1.56 → v1.57', link: '/migrations/v1.56-to-v1.57' },
             { text: 'v1.57 → v1.58', link: '/migrations/v1.57-to-v1.58' },
             { text: 'v1.58 → v1.59', link: '/migrations/v1.58-to-v1.59' },
+            { text: 'v1.59 → v1.60', link: '/migrations/v1.59-to-v1.60' },
           ],
         },
       ],

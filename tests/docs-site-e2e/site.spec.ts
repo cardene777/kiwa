@@ -642,6 +642,13 @@ const V1_59_PAGES = [
   { path: '/migrations/v1.58-to-v1.59', title: 'v1.58 → v1.59' },
 ];
 
+// v1.60 = Desktop 深化 IV (v0.5 spawn stub 契約層)、 38 milestone streak、 systematic pattern 35 度目、 depth-5 pattern 2 例目 candidate、 Mobile v1.54 rhythm 再現。
+const V1_60_PAGES = [
+  { path: '/tutorials/120-desktop-spawn-stub', title: 'Desktop spawn stub 契約層' },
+  { path: '/concepts/desktop-spawn-stub', title: 'Desktop spawn stub 契約層' },
+  { path: '/migrations/v1.59-to-v1.60', title: 'v1.59 → v1.60' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1080,6 +1087,20 @@ test.describe('docs site — v1.44 pages render', () => {
       await page.goto(pageUrl(p.path));
       const body = await page.locator(CONTENT_LOCATOR).innerText();
       expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.60 pages render', () => {
+  for (const p of V1_60_PAGES) {
+    test(`v1.60 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
     });
   }
 });
