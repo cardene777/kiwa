@@ -1,0 +1,20 @@
+{
+  "name": "dogfood-mobile-advanced-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.51-2 — Mobile advanced II 4 new axis × 3 target workflow backed by @kiwa-test/mobile v0.2。 navigation + reanimated + async-storage + secure-storage を横断的に扱う。",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/mobile build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/mobile": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
