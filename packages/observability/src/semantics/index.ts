@@ -217,3 +217,16 @@ export {
   type AiopsSession,
   type AiopsState,
 } from './aiops.js';
+
+// v2.1 incident-orchestrator = alert + escalation + AIOps + FinOps + chaos の 継続合成 layer
+export type {
+  IncidentState,
+  IncidentEvent,
+  IncidentSession,
+  IncidentSummary,
+} from './incident-orchestrator.js';
+export {
+  startIncident,
+  dispatchEvent as dispatchIncidentEvent,
+  summarizeIncident,
+} from './incident-orchestrator.js';
