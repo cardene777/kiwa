@@ -600,6 +600,13 @@ const V1_53_PAGES = [
   { path: '/migrations/v1.52-to-v1.53', title: 'v1.52 → v1.53' },
 ];
 
+// v1.54 = 2 軸 milestone (rules 昇格 + Mobile 深化 V)、 pair 深度 5 段拡張 1 例目 candidate、 depth-5 pattern 新設、 32 milestone streak。
+const V1_54_PAGES = [
+  { path: '/tutorials/114-mobile-real-cli', title: 'Mobile v0.5 child_process.spawn stub' },
+  { path: '/concepts/mobile-testing-real-cli', title: 'Mobile v0.5 child_process.spawn stub 契約層' },
+  { path: '/migrations/v1.53-to-v1.54', title: 'v1.53 → v1.54' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1038,6 +1045,20 @@ test.describe('docs site — v1.44 pages render', () => {
       await page.goto(pageUrl(p.path));
       const body = await page.locator(CONTENT_LOCATOR).innerText();
       expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.54 pages render', () => {
+  for (const p of V1_54_PAGES) {
+    test(`v1.54 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
     });
   }
 });
