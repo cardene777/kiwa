@@ -16,9 +16,15 @@ export {
 export {
   runFidelityCheck,
   summarizeFidelity,
+  summarizeFidelityBehaviorDiff,
+  type FidelityBehaviorSummary,
   type FidelityDiff,
   type FidelitySummary,
+  type MetadataDiff,
 } from './fidelity-harness.js';
+
+// v0.7 real behavior runner (behavior diff early warning 実運用開始)
+export { REAL_AXIS_RUNNERS } from './real-runner.js';
 
 // v0.5 spawn stub 契約層 + v0.6 実 spawn (depth-5 pattern 2 例目確定、 depth-6 pattern 新設 candidate、 Mobile v1.54-v1.55 rhythm 再現)
 export {

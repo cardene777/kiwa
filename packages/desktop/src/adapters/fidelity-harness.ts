@@ -1,9 +1,12 @@
 /**
- * Fidelity harness (v0.4)。 mock/real の trace diff を検証、 12 axis × 3 target = 36 pair の
- * neutral event 列一致を保証する。 shape 契約 preserving 段階では diff 0 (v1.60+ で real
- * 実装後の behavior diff 発生時に本 harness が early warning を出す設計)。
+ * Fidelity harness (v0.7)。 mock/real の trace diff を検証、 12 axis × 3 target = 36 pair の
+ * neutral event 列一致を保証しつつ、 v0.7 で behavior diff (metadata / duration) を early
+ * warning 検知する pattern 拡張。
+ *
+ * shape 契約 preserving = neutralEvents 順序 + eventCount 一致 (matched=true)
+ * behavior diff = metadata + duration + state / completed 差異、 metadataDiff 経路で report
  */
-import type { DesktopAxis, DesktopTarget, NeutralEventName } from '../semantics/types.js';
+import type { AxisStep, DesktopAxis, DesktopTarget, NeutralEventName } from '../semantics/types.js';
 import { MOCK_ADAPTERS, REAL_ADAPTERS } from './mock-factory.js';
 import type { AdapterInvocation, AdapterResult } from './types.js';
 
@@ -15,6 +18,18 @@ export interface FidelityDiff {
   matched: boolean;
   mockCompleted: boolean;
   realCompleted: boolean;
+  /** v0.7: mock/real の metadata 差異検知 (step 別) */
+  metadataDiffs: MetadataDiff[];
+  /** v0.7: mock/real の duration 差異 (絶対値 ms) */
+  durationDiffMs: number;
+}
+
+export interface MetadataDiff {
+  stepIndex: number;
+  neutralEvent: NeutralEventName;
+  key: string;
+  mockValue: string | number | boolean | undefined;
+  realValue: string | number | boolean | undefined;
 }
 
 const ALL_AXES: DesktopAxis[] = [
@@ -42,6 +57,34 @@ function sameEvents(a: NeutralEventName[], b: NeutralEventName[]): boolean {
   return true;
 }
 
+function collectMetadataDiffs(
+  mockHistory: AxisStep<string>[],
+  realHistory: AxisStep<string>[],
+): MetadataDiff[] {
+  const diffs: MetadataDiff[] = [];
+  const len = Math.min(mockHistory.length, realHistory.length);
+  for (let i = 0; i < len; i += 1) {
+    const m = mockHistory[i];
+    const r = realHistory[i];
+    if (!m || !r) continue;
+    const keys = new Set([...Object.keys(m.metadata), ...Object.keys(r.metadata)]);
+    for (const key of keys) {
+      const mv = m.metadata[key];
+      const rv = r.metadata[key];
+      if (mv !== rv) {
+        diffs.push({
+          stepIndex: i,
+          neutralEvent: m.neutralEvent,
+          key,
+          mockValue: mv,
+          realValue: rv,
+        });
+      }
+    }
+  }
+  return diffs;
+}
+
 export async function runFidelityCheck(input: {
   scanIdPrefix?: string;
   axes?: DesktopAxis[];
@@ -67,6 +110,8 @@ export async function runFidelityCheck(input: {
         matched: sameEvents(mockResult.neutralEvents, realResult.neutralEvents),
         mockCompleted: mockResult.completed,
         realCompleted: realResult.completed,
+        metadataDiffs: collectMetadataDiffs(mockResult.history, realResult.history),
+        durationDiffMs: Math.abs(mockResult.durationMs - realResult.durationMs),
       });
     }
   }
@@ -99,5 +144,60 @@ export function summarizeFidelity(diffs: FidelityDiff[]): FidelitySummary {
     unmatched: total - matched,
     matchedRatio: total === 0 ? 1 : matched / total,
     perAxis: perAxis as Record<DesktopAxis, { matched: number; total: number }>,
+  };
+}
+
+/**
+ * v0.7 behavior diff summary — shape 契約 preserving (matched=true) を保ったまま、
+ * mock/real で異なる behavior (metadata + duration) を per-axis で集計。
+ * v1.62+ real 実装後の behavior drift を early warning 検知する経路。
+ */
+export interface FidelityBehaviorSummary {
+  total: number;
+  axesWithBehaviorDiff: DesktopAxis[];
+  totalMetadataDiffs: number;
+  perAxis: Record<
+    DesktopAxis,
+    {
+      metadataDiffCount: number;
+      maxDurationDiffMs: number;
+      hasBehaviorDiff: boolean;
+    }
+  >;
+}
+
+export function summarizeFidelityBehaviorDiff(diffs: FidelityDiff[]): FidelityBehaviorSummary {
+  const perAxis: Record<
+    string,
+    { metadataDiffCount: number; maxDurationDiffMs: number; hasBehaviorDiff: boolean }
+  > = {};
+  const axesWithBehaviorDiff = new Set<DesktopAxis>();
+  let totalMetadataDiffs = 0;
+
+  for (const d of diffs) {
+    const bucket = (perAxis[d.axis] ??= {
+      metadataDiffCount: 0,
+      maxDurationDiffMs: 0,
+      hasBehaviorDiff: false,
+    });
+    bucket.metadataDiffCount += d.metadataDiffs.length;
+    if (d.durationDiffMs > bucket.maxDurationDiffMs) {
+      bucket.maxDurationDiffMs = d.durationDiffMs;
+    }
+    if (d.metadataDiffs.length > 0) {
+      bucket.hasBehaviorDiff = true;
+      axesWithBehaviorDiff.add(d.axis);
+    }
+    totalMetadataDiffs += d.metadataDiffs.length;
+  }
+
+  return {
+    total: diffs.length,
+    axesWithBehaviorDiff: Array.from(axesWithBehaviorDiff),
+    totalMetadataDiffs,
+    perAxis: perAxis as Record<
+      DesktopAxis,
+      { metadataDiffCount: number; maxDurationDiffMs: number; hasBehaviorDiff: boolean }
+    >,
   };
 }
