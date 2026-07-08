@@ -472,6 +472,12 @@ export default defineConfig({
             { text: '128 — quality-metrics v2.1 adaptive threshold (learnAdaptiveThreshold + pickThresholdForAxis + statistical inference SSOT walkthrough)', link: '/tutorials/128-quality-metrics-adaptive-threshold' },
           ],
         },
+        {
+          text: 'Auth pair pioneer record 更新 (v2.2、 auth v0.7 continuous-auth state machine、 systematic pattern 45 度目 continuous state machine variant、 48 milestone streak、 Auth pair 4 段深化)',
+          items: [
+            { text: '129 — auth v0.7 continuous state machine (5 state SSOT + 4 段 risk level + interval 動的切替 + events log walkthrough)', link: '/tutorials/129-auth-continuous-state-machine' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -534,6 +540,7 @@ export default defineConfig({
             { text: 'quality-metrics v0.6 evaluateReleaseGate に drift check opt-in 統合 (v1.66 ReleaseGateContext 3 新 field = driftBaseline + driftThresholdPct + driftEnabled + drift.{axis} blocker 1:1 格上げ + axesEvaluated +1 lane 加算 + default off backward compat 絶対維持 + shape 契約 preserving + depth-5 pattern 3 例目確定 実運用 継続 + systematic pattern 41 度目)', link: '/concepts/quality-metrics-drift-gate' },
             { text: 'Desktop v1.0 invoke-cache layer (v1.67 InvokeCache class LRU + TTL 両立 + withCache helper probeAndInvoke 統合 + buildCacheKey SSOT + 4 status 経路 = cache-hit/miss/invalidated/disabled + default 5 分 TTL + 128 maxEntries + shape 契約 preserving + backward compat 絶対維持 + depth-6 pattern 2 例目確定 candidate + systematic pattern 42 度目)', link: '/concepts/desktop-invoke-cache' },
             { text: 'quality-metrics v2.1 adaptive drift threshold learning (v2.1 threshold-learning.ts 新設 learnAdaptiveThreshold + pickThresholdForAxis + AdaptiveThreshold / AdaptiveThresholdReport type SSOT + 統計的異常検知 mean+k*stdev SSOT + axis 別独立学習 + baseline=0 Infinity 除外 + shape 契約 preserving + backward compat 絶対維持 + depth-5 実運用継続 3 例目 compound 深化 + systematic pattern 44 度目 statistical inference variant + 4 PR rhythm 復帰)', link: '/concepts/quality-metrics-adaptive-threshold' },
+            { text: 'auth v0.7 continuous-auth 状態機械 (v2.2 continuous-auth.ts 新設 startContinuousAuth + scoreToLevel + evaluateRisk + completeStepUp + freezeSession + terminateContinuousAuth + 5 state SSOT monitoring/elevated/step-up-required/session-frozen/terminated + 4 段 risk level low/medium/high/critical + interval 動的切替 60_000ms/15_000ms + events log 累積 + guard clause + Auth pair v0.4 → v0.7 4 段深化 pioneer record 更新 + systematic pattern 45 度目 continuous state machine variant 8 原則統合)', link: '/concepts/auth-continuous-state-machine' },
           ],
         },
       ],
@@ -602,6 +609,7 @@ export default defineConfig({
             { text: 'v1.66 → v1.67', link: '/migrations/v1.66-to-v1.67' },
             { text: 'v1.67 → v2.0 (rename @kiwa-test/* → @kiwa/*)', link: '/migrations/v2.0-rename-plan' },
             { text: 'v2.0 → v2.1', link: '/migrations/v2.0-to-v2.1' },
+            { text: 'v2.1 → v2.2', link: '/migrations/v2.1-to-v2.2' },
           ],
         },
       ],
