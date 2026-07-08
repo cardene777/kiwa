@@ -460,6 +460,12 @@ export default defineConfig({
             { text: '126 — quality-metrics v0.6 drift-gate (driftEnabled + driftBaseline + driftThresholdPct + drift.{axis} blocker walkthrough)', link: '/tutorials/126-quality-metrics-drift-gate' },
           ],
         },
+        {
+          text: 'Desktop 深化 IX (v1.67、 v1.0 invoke-cache layer、 systematic pattern 42 度目、 45 milestone streak、 depth-6 pattern 2 例目確定 candidate)',
+          items: [
+            { text: '127 — Desktop v1.0 invoke-cache (InvokeCache + withCache + buildCacheKey + 4 status walkthrough)', link: '/tutorials/127-desktop-invoke-cache' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -520,6 +526,7 @@ export default defineConfig({
             { text: 'Desktop v0.9 実 native binding 呼出 (v1.64 native-invoke.ts 新設 3 type SSOT + probeAndInvoke + probeAndInvokeAll + InvokeStatus 4 経路 + 4 step probe → invoke 統合 + shape 契約 preserving 絶対維持 + 3 layer separation 完全 pay off + systematic pattern 39 度目 + depth-9 pattern 新設 candidate)', link: '/concepts/desktop-native-invoke' },
             { text: 'quality-metrics v0.5 historical trend + drift (v1.65 history.ts 新設 6 type SSOT + captureSnapshot + compareToBaseline + detectDrift + generateTrendReport + axis 別 上昇=改善/悪化 判定 + shape 契約 preserving 絶対維持 + depth-5 pattern 3 例目確定 = 絶対的 rule 昇格 signal + systematic pattern 40 度突入)', link: '/concepts/quality-metrics-history' },
             { text: 'quality-metrics v0.6 evaluateReleaseGate に drift check opt-in 統合 (v1.66 ReleaseGateContext 3 新 field = driftBaseline + driftThresholdPct + driftEnabled + drift.{axis} blocker 1:1 格上げ + axesEvaluated +1 lane 加算 + default off backward compat 絶対維持 + shape 契約 preserving + depth-5 pattern 3 例目確定 実運用 継続 + systematic pattern 41 度目)', link: '/concepts/quality-metrics-drift-gate' },
+            { text: 'Desktop v1.0 invoke-cache layer (v1.67 InvokeCache class LRU + TTL 両立 + withCache helper probeAndInvoke 統合 + buildCacheKey SSOT + 4 status 経路 = cache-hit/miss/invalidated/disabled + default 5 分 TTL + 128 maxEntries + shape 契約 preserving + backward compat 絶対維持 + depth-6 pattern 2 例目確定 candidate + systematic pattern 42 度目)', link: '/concepts/desktop-invoke-cache' },
           ],
         },
       ],
@@ -585,6 +592,7 @@ export default defineConfig({
             { text: 'v1.63 → v1.64', link: '/migrations/v1.63-to-v1.64' },
             { text: 'v1.64 → v1.65', link: '/migrations/v1.64-to-v1.65' },
             { text: 'v1.65 → v1.66', link: '/migrations/v1.65-to-v1.66' },
+            { text: 'v1.66 → v1.67', link: '/migrations/v1.66-to-v1.67' },
           ],
         },
       ],
