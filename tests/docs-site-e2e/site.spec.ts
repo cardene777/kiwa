@@ -649,6 +649,13 @@ const V1_60_PAGES = [
   { path: '/migrations/v1.59-to-v1.60', title: 'v1.59 → v1.60' },
 ];
 
+// v1.61 = Desktop 深化 V (v0.6 実 spawn 実装完成)、 39 milestone streak、 systematic pattern 36 度目、 depth-5 pattern 2 例目確定 + depth-6 pattern 新設 kiwa milestone 史上初、 Mobile v1.55 rhythm 再現。
+const V1_61_PAGES = [
+  { path: '/tutorials/121-desktop-v06-spawn', title: 'Desktop v0.6 実 child_process.spawn 実行' },
+  { path: '/concepts/desktop-v06-spawn', title: 'Desktop v0.6 実 child_process.spawn 実行' },
+  { path: '/migrations/v1.60-to-v1.61', title: 'v1.60 → v1.61' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1087,6 +1094,20 @@ test.describe('docs site — v1.44 pages render', () => {
       await page.goto(pageUrl(p.path));
       const body = await page.locator(CONTENT_LOCATOR).innerText();
       expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.61 pages render', () => {
+  for (const p of V1_61_PAGES) {
+    test(`v1.61 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
     });
   }
 });

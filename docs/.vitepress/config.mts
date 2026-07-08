@@ -424,6 +424,12 @@ export default defineConfig({
             { text: '120 — Desktop spawn stub (invokeDesktopCli + cliForAxis + buildSpawnInvocation + env-gate + fail-closed walkthrough)', link: '/tutorials/120-desktop-spawn-stub' },
           ],
         },
+        {
+          text: 'Desktop 深化 V (v1.61、 v0.6 実 spawn 実装完成、 systematic pattern 36 度目、 39 milestone streak、 depth-5 pattern 2 例目確定 + depth-6 pattern 新設 kiwa milestone 史上初、 Mobile v1.55 rhythm 再現)',
+          items: [
+            { text: '121 — Desktop v0.6 実 spawn (spawn-executor + per-command env allowlist + timeout + buffer 上限 + DI + dry-run walkthrough)', link: '/tutorials/121-desktop-v06-spawn' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -478,6 +484,7 @@ export default defineConfig({
             { text: 'Desktop advanced III (v1.58 v0.3 4 axis SSOT + screen-recording + global-shortcut + clipboard + dark-mode + 36 spec fidelity grid + systematic pattern 33 度目 + Mobile v1.50-v1.52 rhythm 再現)', link: '/concepts/desktop-advanced-iii' },
             { text: 'Desktop adapter layer (v1.59 v0.4 adapter interface + fidelity harness SSOT + 24 adapter pair + 72 combination + 36 fidelity pair + systematic pattern 34 度目 + Mobile v1.53 rhythm 再現 + depth-4 record 5 例目)', link: '/concepts/desktop-adapter-layer' },
             { text: 'Desktop spawn stub 契約層 (v1.60 v0.5 8 CLI stub SSOT + 12 axis → 8 CLI + 4 non-CLI mapping + KIWA_DESKTOP_MODE env-gate + args 上限 32 + fail-closed + systematic pattern 35 度目 + Mobile v1.54 rhythm 再現 + depth-5 pattern 2 例目 candidate)', link: '/concepts/desktop-spawn-stub' },
+            { text: 'Desktop v0.6 実 spawn (v1.61 spawn-executor 3 type SSOT + per-command env allowlist 8 CLI × env + safety layer 4 段 + invokeDesktopCli 3 経路分岐 + DI 経路 + KIWA_DESKTOP_SPAWN=dry-run + shape 契約 preserving + systematic pattern 36 度目 + Mobile v1.55 rhythm 再現 + depth-5 2 例目確定 + depth-6 新設 kiwa milestone 史上初)', link: '/concepts/desktop-v06-spawn' },
           ],
         },
       ],
@@ -537,6 +544,7 @@ export default defineConfig({
             { text: 'v1.57 → v1.58', link: '/migrations/v1.57-to-v1.58' },
             { text: 'v1.58 → v1.59', link: '/migrations/v1.58-to-v1.59' },
             { text: 'v1.59 → v1.60', link: '/migrations/v1.59-to-v1.60' },
+            { text: 'v1.60 → v1.61', link: '/migrations/v1.60-to-v1.61' },
           ],
         },
       ],
