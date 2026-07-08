@@ -57,6 +57,31 @@ export const MOBILE_AXIS_TO_EVENTS: Record<MobileAxis, NeutralEventName[]> = {
     'secure-storage.biometric_challenged',
     'secure-storage.credential_removed',
   ],
+  // v1.52 advanced III (New Architecture)
+  fabric: [
+    'fabric.render_scheduled',
+    'fabric.shadow_tree_committed',
+    'fabric.priority_updated',
+    'fabric.mount_completed',
+  ],
+  'turbo-modules': [
+    'turbo-modules.spec_registered',
+    'turbo-modules.jsi_bound',
+    'turbo-modules.method_invoked',
+    'turbo-modules.unregistered',
+  ],
+  codegen: [
+    'codegen.schema_loaded',
+    'codegen.spec_generated',
+    'codegen.type_emitted',
+    'codegen.build_completed',
+  ],
+  'new-architecture': [
+    'new-architecture.init_started',
+    'new-architecture.concurrent_enabled',
+    'new-architecture.interop_bridged',
+    'new-architecture.ready',
+  ],
 };
 
 export function collectFidelityCoverage(
