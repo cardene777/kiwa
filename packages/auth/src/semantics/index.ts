@@ -98,3 +98,17 @@ export {
   freezeSession,
   terminateContinuousAuth,
 } from './continuous-auth.js';
+
+// v0.8 session-lifecycle-orchestrator = continuous-auth + step-up-mfa + auth-continuity +
+// session-hijack-detect + auth-telemetry の 継続合成 layer (depth-5 pattern 10 例目 candidate)
+export type {
+  SessionState,
+  SessionEvent,
+  SessionOrchestratorSession,
+  SessionOrchestratorSummary,
+} from './session-lifecycle-orchestrator.js';
+export {
+  startSession,
+  dispatchEvent as dispatchSessionEvent,
+  summarizeSession,
+} from './session-lifecycle-orchestrator.js';
