@@ -118,3 +118,16 @@ export {
   type FidelityCoverage,
   type FidelityRow,
 } from './fidelity.js';
+
+// v2.1 query-orchestrator = query DSL + faceted + semantic + geo + relevance の 継続合成 layer
+export type {
+  QueryState,
+  QueryEvent,
+  QuerySession,
+  QuerySummary,
+} from './query-orchestrator.js';
+export {
+  startQuery,
+  dispatchEvent as dispatchQueryEvent,
+  summarizeQuery,
+} from './query-orchestrator.js';
