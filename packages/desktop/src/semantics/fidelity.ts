@@ -14,6 +14,7 @@ export interface FidelityCoverage {
 }
 
 export const DESKTOP_AXIS_TO_EVENTS: Record<DesktopAxis, NeutralEventName[]> = {
+  // v0.1
   electron: [
     'electron.app_ready',
     'electron.window_created',
@@ -31,6 +32,37 @@ export const DESKTOP_AXIS_TO_EVENTS: Record<DesktopAxis, NeutralEventName[]> = {
     'webview.bridge_bound',
     'webview.message_posted',
     'webview.isolation_asserted',
+  ],
+  // v0.2
+  'auto-updater': [
+    'auto-updater.check_started',
+    'auto-updater.update_downloaded',
+    'auto-updater.update_applied',
+    'auto-updater.relaunch_scheduled',
+  ],
+  'fs-permissions': [
+    'fs-permissions.request_submitted',
+    'fs-permissions.permission_granted',
+    'fs-permissions.permission_revoked',
+    'fs-permissions.audit_logged',
+  ],
+  notification: [
+    'notification.scheduled',
+    'notification.displayed',
+    'notification.action_invoked',
+    'notification.dismissed',
+  ],
+  'menu-bar': [
+    'menu-bar.built',
+    'menu-bar.item_appended',
+    'menu-bar.item_clicked',
+    'menu-bar.destroyed',
+  ],
+  'tray-icon': [
+    'tray-icon.created',
+    'tray-icon.tooltip_updated',
+    'tray-icon.clicked',
+    'tray-icon.removed',
   ],
 };
 
