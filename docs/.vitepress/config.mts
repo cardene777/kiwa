@@ -478,6 +478,12 @@ export default defineConfig({
             { text: '129 — auth v0.7 continuous state machine (5 state SSOT + 4 段 risk level + interval 動的切替 + events log walkthrough)', link: '/tutorials/129-auth-continuous-state-machine' },
           ],
         },
+        {
+          text: 'Payment pair depth-5 到達 (v2.3、 payment v2.1 lifecycle-orchestrator、 depth-5 pattern 4 例目確定 = dominant pattern 昇格 confirmed、 systematic pattern 46 度目 continuous state machine variant Payment 転用、 49 milestone streak)',
+          items: [
+            { text: '130 — payment v2.1 lifecycle-orchestrator (5 state SSOT + 8 event SSOT + 40 セル 遷移表 + soft-reject vs throw guard walkthrough)', link: '/tutorials/130-payment-lifecycle-orchestrator' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -541,6 +547,7 @@ export default defineConfig({
             { text: 'Desktop v1.0 invoke-cache layer (v1.67 InvokeCache class LRU + TTL 両立 + withCache helper probeAndInvoke 統合 + buildCacheKey SSOT + 4 status 経路 = cache-hit/miss/invalidated/disabled + default 5 分 TTL + 128 maxEntries + shape 契約 preserving + backward compat 絶対維持 + depth-6 pattern 2 例目確定 candidate + systematic pattern 42 度目)', link: '/concepts/desktop-invoke-cache' },
             { text: 'quality-metrics v2.1 adaptive drift threshold learning (v2.1 threshold-learning.ts 新設 learnAdaptiveThreshold + pickThresholdForAxis + AdaptiveThreshold / AdaptiveThresholdReport type SSOT + 統計的異常検知 mean+k*stdev SSOT + axis 別独立学習 + baseline=0 Infinity 除外 + shape 契約 preserving + backward compat 絶対維持 + depth-5 実運用継続 3 例目 compound 深化 + systematic pattern 44 度目 statistical inference variant + 4 PR rhythm 復帰)', link: '/concepts/quality-metrics-adaptive-threshold' },
             { text: 'auth v0.7 continuous-auth 状態機械 (v2.2 continuous-auth.ts 新設 startContinuousAuth + scoreToLevel + evaluateRisk + completeStepUp + freezeSession + terminateContinuousAuth + 5 state SSOT monitoring/elevated/step-up-required/session-frozen/terminated + 4 段 risk level low/medium/high/critical + interval 動的切替 60_000ms/15_000ms + events log 累積 + guard clause + Auth pair v0.4 → v0.7 4 段深化 pioneer record 更新 + systematic pattern 45 度目 continuous state machine variant 8 原則統合)', link: '/concepts/auth-continuous-state-machine' },
+            { text: 'payment v2.1 lifecycle-orchestrator (v2.3 lifecycle-orchestrator.ts 新設 startLifecycle + handleEvent + summarizeLifecycle + 5 state SSOT active-billing/grace-period/dunning-active/chargeback-dispute/canceled + 8 event SSOT + 40 セル 遷移表 + soft-reject + invalid log pattern payment webhook 重複配信対応 + Payment pair 5 段深化 = depth-5 pattern 4 例目確定 dominant pattern 昇格 confirmed + systematic pattern 46 度目 continuous state machine variant Payment 転用)', link: '/concepts/payment-lifecycle-orchestrator' },
           ],
         },
       ],
@@ -610,6 +617,7 @@ export default defineConfig({
             { text: 'v1.67 → v2.0 (rename @kiwa-test/* → @kiwa/*)', link: '/migrations/v2.0-rename-plan' },
             { text: 'v2.0 → v2.1', link: '/migrations/v2.0-to-v2.1' },
             { text: 'v2.1 → v2.2', link: '/migrations/v2.1-to-v2.2' },
+            { text: 'v2.2 → v2.3', link: '/migrations/v2.2-to-v2.3' },
           ],
         },
       ],
