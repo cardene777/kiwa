@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/security-devsecops",
-  "version": "0.1.0",
-  "description": "DevSecOps test harness for kiwa v0.1 — 6 axis (SAST + SCA + Secret scan + IaC scan + DAST + Container security) unified across 4 provider (Semgrep + Trivy + Gitleaks + tfsec + OWASP ZAP + Grype) with a 4x6 = 24 combination fidelity harness, KIWA_MODE=real env-gate, and quality-metrics 15-axis release gate integration. Complements v0.2 @kiwa-test/security (advanced runtime security: CSP + mTLS + SIEM + SLSA) with build-time / CI-time security scanning axis.",
+  "version": "0.2.0",
+  "description": "DevSecOps test harness for kiwa v0.2 — 6 axis (SAST + SCA + Secret scan + IaC scan + DAST + Container security) unified across 6 provider (Semgrep + Trivy + Gitleaks + tfsec + OWASP ZAP + Grype) with 6 axis × mock/real adapter pair (Phase 2 = 実 CLI 呼出隠蔽 adapter 統合)、 backward compat 維持で v0.1 semantics 直接使用継続、 KIWA_SECURITY_MODE=real で real driver env-gate opt-in。 Complements v0.2 @kiwa-test/security (advanced runtime security: CSP + mTLS + SIEM + SLSA) with build-time / CI-time security scanning axis.",
   "license": "MIT",
   "author": {
     "name": "cardene",
