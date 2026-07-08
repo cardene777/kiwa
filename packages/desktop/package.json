@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/desktop",
-  "version": "0.2.0",
-  "description": "Desktop test harness for kiwa v0.2 — 8 axis (v0.1 Electron + Tauri + Webview に v0.2 で Auto-updater + File-system permissions + Notification + Menu-bar + Tray-icon の advanced 5 axis 追加) を target-neutral state machine で扱う。 3 target (macos + windows + linux) × 8 axis × 4 event = 96 dialect mapping、 fidelity grid 24 row 構築。 v1.57 で kiwa 縦深化 pair 第 14 の第 2 段、 v1.55/v1.56 4 PR rhythm 継承、 systematic pattern 32 度目適用 (uniform state machine + axis-neutral state)、 backward compat 絶対維持 (v0.1 API 変更 0)、 35 milestone snippet streak 到達。",
+  "version": "0.3.0",
+  "description": "Desktop test harness for kiwa v0.3 — 12 axis (v0.1 Electron + Tauri + Webview + v0.2 Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon + v0.3 Screen recording + Global shortcut + Clipboard + Dark-mode の advanced III 4 axis 追加) を target-neutral state machine で扱う。 3 target (macos + windows + linux) × 12 axis × 4 event = 144 dialect mapping、 fidelity grid 36 row 構築。 v1.58 で kiwa 縦深化 pair 第 14 の第 3 段、 v1.55/v1.56/v1.57 4 PR rhythm 継承 (5 milestone 連続)、 systematic pattern 33 度目適用 (uniform state machine + axis-neutral state)、 backward compat 絶対維持 (v0.1 + v0.2 API 変更 0)、 36 milestone snippet streak 到達。",
   "license": "MIT",
   "author": {
     "name": "cardene",
