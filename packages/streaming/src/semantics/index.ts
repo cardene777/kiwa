@@ -105,3 +105,16 @@ export {
   type FidelityHarness,
   type SemanticsAxis,
 } from './fidelity-harness.js';
+
+// v2.1 pipeline-orchestrator = producer + consumer group + exactly-once + DLQ + schema registry の 継続合成 layer
+export type {
+  PipelineState,
+  PipelineEvent,
+  PipelineSession,
+  PipelineSummary,
+} from './pipeline-orchestrator.js';
+export {
+  startPipeline,
+  dispatchEvent as dispatchPipelineEvent,
+  summarizePipeline,
+} from './pipeline-orchestrator.js';
