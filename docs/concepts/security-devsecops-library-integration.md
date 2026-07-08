@@ -88,9 +88,108 @@ skill 実行結果は library の neutral event history を経由するため、
 
 ## 段階的移行 pattern
 
-- **Phase 1 (v1.46)** = library v0.1 semantics のみ提供、 skill は semantics 経由に move
-- **Phase 2 (v1.47+)** = library v0.2 で adapter 経由の実 scan 統合 (semgrep / trivy CLI 呼出を library 内に隠蔽)
+- **Phase 1 (v1.46) ✅** = library v0.1 semantics のみ提供、 skill は semantics 経由に move
+- **Phase 2 (v1.47) ✅** = library v0.2 で adapter 経由の実 scan 統合 (semgrep / trivy CLI 呼出を library 内に隠蔽)
 - **Phase 3 (v1.48+)** = 4 skill を library single entry (`runSecurityAudit`) 経由に統合、 skill 個別化を減らす
+
+## Phase 2 完成 SSOT (v1.47)
+
+v1.47 で `@kiwa-test/security-devsecops` v0.2 を release、 6 axis × mock/real adapter pair 追加。 backward compat 維持で v0.1 semantics 直接使用は継続、 adapter は新規 optional path。
+
+### v0.2 adapter interface
+
+```ts
+import type {
+  AdapterInvocation,
+  AdapterResult,
+  SastAdapter,
+  ScaAdapter,
+  SecretAdapter,
+  IacAdapter,
+  DastAdapter,
+  ContainerAdapter,
+} from '@kiwa-test/security-devsecops';
+
+// 6 axis 共通契約 = scan(input) → AdapterResult<TState>
+export interface CommonAdapter {
+  axis: DevSecOpsAxis;
+  scan(input: AdapterInvocation): Promise<AdapterResult<TState>>;
+}
+```
+
+### adapter 経由 skill 実装 pattern
+
+```ts
+// v1.47 security-audit skill 内部で使う adapter 経路
+import {
+  sastMockAdapter,
+  sastRealAdapter,
+  scaMockAdapter,
+  scaRealAdapter,
+  secretScanMockAdapter,
+  secretScanRealAdapter,
+  iacScanMockAdapter,
+  iacScanRealAdapter,
+  dastMockAdapter,
+  dastRealAdapter,
+  containerSecurityMockAdapter,
+  containerSecurityRealAdapter,
+  type AdapterMode,
+} from '@kiwa-test/security-devsecops';
+
+// mode 切替 = default mock、 KIWA_SECURITY_MODE=real で real 呼出
+async function runAudit(mode: AdapterMode, target: string) {
+  const adapters = mode === 'mock'
+    ? [sastMockAdapter, scaMockAdapter, secretScanMockAdapter, iacScanMockAdapter, dastMockAdapter, containerSecurityMockAdapter]
+    : [sastRealAdapter, scaRealAdapter, secretScanRealAdapter, iacScanRealAdapter, dastRealAdapter, containerSecurityRealAdapter];
+  const results = [];
+  for (const adapter of adapters) {
+    results.push(await adapter.scan({ scanId: crypto.randomUUID(), target, mode }));
+  }
+  return results;
+}
+```
+
+### env-gate SSOT (real adapter)
+
+real adapter は以下 env 全部揃った時のみ CLI 呼出。 それ以外は explicit throw。
+
+| env | 用途 | 必須 tier |
+|---|---|---|
+| `KIWA_SECURITY_MODE=real` | real 経路発動 SSOT | required |
+| `KIWA_SEMGREP_URL` | SAST | required if SAST 実行 |
+| `KIWA_TRIVY_URL` | SCA | required if SCA 実行 |
+| `KIWA_GITLEAKS_URL` | Secret | required if Secret 実行 |
+| `KIWA_TFSEC_URL` | IaC | required if IaC 実行 |
+| `KIWA_ZAP_URL` | DAST | required if DAST 実行 |
+| `KIWA_GRYPE_URL` | Container | required if Container 実行 |
+
+### fidelity harness (mock vs real)
+
+`examples/dogfood-security-devsecops-adapter-app/` で mock vs real の一致検証 harness を提供。
+
+- `runAdapterWorkflow(mode, target)` = 6 adapter 横断実行
+- `diffFidelity(mock, real)` = mock/real の完了状態 + event count 一致検証
+- v0.3 で real adapter が実 CLI spawn 実装に置換されても harness は継続使用可能
+
+### skill 4 種の adapter 経由経路 (Phase 2 完成)
+
+| skill | mock 経路 | real 経路 |
+|---|---|---|
+| security-audit | 6 mock adapter 全実行、 test 可能 | env-gate 通過時 6 real adapter 全実行 |
+| security-audit-supply-chain | scaMockAdapter + containerSecurityMockAdapter | env-gate 通過時 scaRealAdapter + containerSecurityRealAdapter |
+| security-audit-specialty | domain 選択で adapter 部分実行 | env-gate 通過時 real adapter 部分実行 |
+| security-audit-threat-model | 全 axis mock 結果 → STRIDE/DREAD 分類 | 全 axis real 結果 → STRIDE/DREAD 分類 |
+
+- default 経路 = mock、 test で常時走る、 regression detect 可能
+- real 経路 = local 実行時 env 設定で opt-in、 skill 出力を実 CLI 結果で置換
+- 従来の bash / Codex 委譲経路は `--legacy` flag fallback として残す (Phase 3 で削除予定)
+
+## Phase 3 (v1.48+) 計画
+
+- 4 skill を library single entry (`runSecurityAudit`) 経由に統合、 skill 個別化を減らす
+- adapter を extend して SBOM / SLSA provenance 生成 axis 追加
+- perf-harness strict mode で adapter 呼出 latency baseline 化
 
 ## 関連
 
