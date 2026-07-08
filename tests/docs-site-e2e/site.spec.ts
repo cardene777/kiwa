@@ -670,6 +670,13 @@ const V1_63_PAGES = [
   { path: '/migrations/v1.62-to-v1.63', title: 'v1.62 → v1.63' },
 ];
 
+// v1.64 = Desktop 深化 VIII (v0.9 実 native binding 呼出)、 42 milestone streak、 systematic pattern 39 度目、 depth-9 pattern 新設 candidate。
+const V1_64_PAGES = [
+  { path: '/tutorials/124-desktop-native-invoke', title: 'Desktop v0.9 実 native binding 呼出' },
+  { path: '/concepts/desktop-native-invoke', title: 'Desktop v0.9 実 native binding 呼出' },
+  { path: '/migrations/v1.63-to-v1.64', title: 'v1.63 → v1.64' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1108,6 +1115,20 @@ test.describe('docs site — v1.44 pages render', () => {
       await page.goto(pageUrl(p.path));
       const body = await page.locator(CONTENT_LOCATOR).innerText();
       expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.64 pages render', () => {
+  for (const p of V1_64_PAGES) {
+    test(`v1.64 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
     });
   }
 });
