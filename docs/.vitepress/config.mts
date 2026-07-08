@@ -448,6 +448,12 @@ export default defineConfig({
             { text: '124 — Desktop v0.9 実 native binding 呼出 (probeAndInvoke + probeAndInvokeAll + InvokeStatus 4 経路 walkthrough)', link: '/tutorials/124-desktop-native-invoke' },
           ],
         },
+        {
+          text: 'quality-metrics 深化 II (v1.65、 v0.5 historical trend tracking + drift detection、 systematic pattern 40 度突入、 43 milestone streak、 depth-5 pattern 3 例目確定 = 絶対的 rule 昇格 signal)',
+          items: [
+            { text: '125 — quality-metrics v0.5 history (captureSnapshot + compareToBaseline + detectDrift + generateTrendReport walkthrough)', link: '/tutorials/125-quality-metrics-history' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -506,6 +512,7 @@ export default defineConfig({
             { text: 'Desktop v0.7 real behavior runner (v1.62 REAL_AXIS_RUNNERS 12 axis 別 behavior 差別化 SSOT + fidelity harness 拡張 metadataDiffs + durationDiffMs + summarizeFidelityBehaviorDiff + shape 契約 preserving 絶対維持 + v0.4 fidelity harness 設計思想の実運用開始 + systematic pattern 37 度目 + depth-7 pattern 新設 candidate)', link: '/concepts/desktop-real-behavior' },
             { text: 'Desktop v0.8 probe layer (v1.63 probe.ts 新設 5 type SSOT + probeCliAvailable which/where + shouldSkipAxis 12 axis 別 skip strategy + platformGate + computeSkipMatrix + fidelity harness runFidelityCheckWithProbe + SkippedPair 統合 + shape 契約 preserving 絶対維持 + systematic pattern 38 度目 + depth-8 pattern 新設 candidate)', link: '/concepts/desktop-probe' },
             { text: 'Desktop v0.9 実 native binding 呼出 (v1.64 native-invoke.ts 新設 3 type SSOT + probeAndInvoke + probeAndInvokeAll + InvokeStatus 4 経路 + 4 step probe → invoke 統合 + shape 契約 preserving 絶対維持 + 3 layer separation 完全 pay off + systematic pattern 39 度目 + depth-9 pattern 新設 candidate)', link: '/concepts/desktop-native-invoke' },
+            { text: 'quality-metrics v0.5 historical trend + drift (v1.65 history.ts 新設 6 type SSOT + captureSnapshot + compareToBaseline + detectDrift + generateTrendReport + axis 別 上昇=改善/悪化 判定 + shape 契約 preserving 絶対維持 + depth-5 pattern 3 例目確定 = 絶対的 rule 昇格 signal + systematic pattern 40 度突入)', link: '/concepts/quality-metrics-history' },
           ],
         },
       ],
@@ -569,6 +576,7 @@ export default defineConfig({
             { text: 'v1.61 → v1.62', link: '/migrations/v1.61-to-v1.62' },
             { text: 'v1.62 → v1.63', link: '/migrations/v1.62-to-v1.63' },
             { text: 'v1.63 → v1.64', link: '/migrations/v1.63-to-v1.64' },
+            { text: 'v1.64 → v1.65', link: '/migrations/v1.64-to-v1.65' },
           ],
         },
       ],
