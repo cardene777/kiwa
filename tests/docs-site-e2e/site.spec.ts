@@ -705,6 +705,13 @@ const V2_1_PAGES = [
   { path: '/migrations/v2.0-to-v2.1', title: 'v2.0 → v2.1' },
 ];
 
+// v2.2 = Auth pair pioneer record 更新 (auth v0.7 continuous state machine)、 48 milestone streak、 systematic pattern 45 度目 continuous state machine variant。
+const V2_2_PAGES = [
+  { path: '/tutorials/129-auth-continuous-state-machine', title: '@kiwa/auth v0.7 continuous-auth state machine' },
+  { path: '/concepts/auth-continuous-state-machine', title: '@kiwa/auth v0.7 continuous-auth 状態機械 SSOT' },
+  { path: '/migrations/v2.1-to-v2.2', title: 'v2.1 → v2.2' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1192,6 +1199,20 @@ test.describe('docs site — v1.67 pages render', () => {
 test.describe('docs site — v2.1 pages render', () => {
   for (const p of V2_1_PAGES) {
     test(`v2.1 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v2.2 pages render', () => {
+  for (const p of V2_2_PAGES) {
+    test(`v2.2 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
