@@ -12,9 +12,16 @@
  */
 
 /** protocol tag — fidelity harness で grid 分類に使う。 */
-export type SemanticsProtocol = 'webrtc' | 'webtransport' | 'http3-quic';
+export type SemanticsProtocol =
+  | 'webrtc'
+  | 'webtransport'
+  | 'http3-quic'
+  // v0.3 advanced III (v1.45)
+  | 'moqt'
+  | 'webcodecs'
+  | 'ai-media';
 
-/** axis tag — 8 axis の identifier。 fidelity harness で row 分類に使う。 */
+/** axis tag — 8 base axis + 8 advanced III axis の identifier。 */
 export type SemanticsAxis =
   | 'webrtc-signaling'
   | 'webrtc-data-channel'
@@ -23,7 +30,16 @@ export type SemanticsAxis =
   | 'webtransport-uni'
   | 'webtransport-bi'
   | 'http3-push'
-  | 'quic-multiplex';
+  | 'quic-multiplex'
+  // v0.3 advanced III (v1.45)
+  | 'moq-fetch'
+  | 'moq-datagram-media'
+  | 'webcodecs-encoder'
+  | 'webcodecs-decoder'
+  | 'simulcast-svc'
+  | 'voice-streaming'
+  | 'whisper-streaming'
+  | 'realtime-ai-inference';
 
 /** 共通 transport event kind (8 axis 横断)。 */
 export type SemanticsEventKind =
@@ -65,7 +81,48 @@ export type SemanticsEventKind =
   | 'stream-open'
   | 'stream-close'
   | 'hpack-insert'
-  | 'zero-rtt-used';
+  | 'zero-rtt-used'
+  // v0.3 advanced III (v1.45)
+  // MoQ fetch (Media over QUIC / MOQT delivery + subscribe + publish)
+  | 'moq-track-announce'
+  | 'moq-track-subscribe'
+  | 'moq-object-sent'
+  | 'moq-object-received'
+  // MoQ datagram media (partial reliability + priority)
+  | 'moq-datagram-sent'
+  | 'moq-datagram-dropped'
+  | 'moq-priority-set'
+  | 'moq-fec-recovered'
+  // WebCodecs encoder (VideoEncoder / AudioEncoder direct API)
+  | 'encoder-config-set'
+  | 'encoder-frame-encoded'
+  | 'encoder-keyframe-forced'
+  | 'encoder-hardware-used'
+  // WebCodecs decoder (VideoDecoder / AudioDecoder + reorder buffer)
+  | 'decoder-config-set'
+  | 'decoder-frame-decoded'
+  | 'decoder-frame-reordered'
+  | 'decoder-frame-dropped'
+  // Simulcast + SVC layer selection
+  | 'simulcast-layer-added'
+  | 'svc-layer-selected'
+  | 'bitrate-adapted'
+  | 'layer-dropped'
+  // LLM voice streaming (OpenAI Realtime API + Anthropic voice)
+  | 'voice-session-open'
+  | 'voice-audio-chunk-sent'
+  | 'voice-response-chunk-received'
+  | 'voice-turn-completed'
+  // Whisper streaming ASR (partial transcript + VAD)
+  | 'whisper-audio-chunk-sent'
+  | 'whisper-partial-transcript'
+  | 'whisper-final-transcript'
+  | 'whisper-vad-triggered'
+  // Realtime AI inference (per-frame prediction + latency budget)
+  | 'ai-inference-request'
+  | 'ai-inference-response'
+  | 'ai-inference-latency-budget'
+  | 'ai-inference-dropped';
 
 /** 共通 event shape — payload は event kind 別に stringly typed。 */
 export interface SemanticsEvent<TPayload = unknown> {

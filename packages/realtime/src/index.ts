@@ -149,3 +149,40 @@ export {
   type WebTransportBiMock,
   type WebTransportUniMock,
 } from './semantics/index.js';
+
+/**
+ * v0.3 advanced III semantics (v1.45) — 3 new protocol (MoQ / WebCodecs /
+ * AI-media) × 8 axis (moq-fetch / moq-datagram-media / webcodecs-encoder /
+ * webcodecs-decoder / simulcast-svc / voice-streaming / whisper-streaming /
+ * realtime-ai-inference)。
+ */
+export {
+  createMoqDatagramMediaMock,
+  createMoqFetchMock,
+  createRealtimeAiInferenceMock,
+  createSimulcastSvcMock,
+  createVoiceStreamingMock,
+  createWebCodecsDecoderMock,
+  createWebCodecsEncoderMock,
+  createWhisperStreamingMock,
+  type AiInferenceRequest,
+  type AiInferenceResponse,
+  type DecoderConfig,
+  type EncodedFrame,
+  type EncoderConfig,
+  type MoqAnnouncement,
+  type MoqDatagram,
+  type MoqDatagramMediaMock,
+  type MoqFetchMock,
+  type MoqObject,
+  type RealtimeAiInferenceMock,
+  type SimulcastSvcLayer,
+  type SimulcastSvcMock,
+  type VoiceAudioChunk,
+  type VoiceSession,
+  type VoiceStreamingMock,
+  type WebCodecsDecoderMock,
+  type WebCodecsEncoderMock,
+  type WhisperStreamingMock,
+  type WhisperTranscript,
+} from './semantics/index.js';
