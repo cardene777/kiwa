@@ -11,7 +11,10 @@ export type NextAxis =
   | 'server-action-advanced'
   | 'partial-prerendering'
   | 'interception-routes'
-  | 'parallel-routes-advanced';
+  | 'parallel-routes-advanced'
+  // v1.49 advanced III (pair 第 6 pair 3 段拡張)
+  | 'turbopack-hmr'
+  | 'concurrent-transitions';
 
 export type NeutralEventName =
   | 'action.form_submitted'
@@ -29,7 +32,17 @@ export type NeutralEventName =
   | 'parallel.default_rendered'
   | 'parallel.loading_rendered'
   | 'parallel.error_boundary_captured'
-  | 'parallel.slot_navigated';
+  | 'parallel.slot_navigated'
+  // v1.49 turbopack-hmr
+  | 'turbopack.module_updated'
+  | 'turbopack.hmr_boundary_found'
+  | 'turbopack.hmr_applied'
+  | 'turbopack.fast_refresh_completed'
+  // v1.49 concurrent-transitions
+  | 'transition.started'
+  | 'transition.pending'
+  | 'transition.interrupted'
+  | 'transition.committed';
 
 export interface AxisStep<TState extends string> {
   neutralEvent: NeutralEventName;
@@ -57,6 +70,14 @@ const dialect: Record<NextTarget, Partial<Record<NeutralEventName, string>>> = {
     'parallel.loading_rendered': 'app.parallel.loading',
     'parallel.error_boundary_captured': 'app.parallel.error',
     'parallel.slot_navigated': 'app.parallel.navigate',
+    'turbopack.module_updated': 'app.turbopack.module.update',
+    'turbopack.hmr_boundary_found': 'app.turbopack.hmr.boundary',
+    'turbopack.hmr_applied': 'app.turbopack.hmr.apply',
+    'turbopack.fast_refresh_completed': 'app.turbopack.fast-refresh',
+    'transition.started': 'app.transition.start',
+    'transition.pending': 'app.transition.pending',
+    'transition.interrupted': 'app.transition.interrupt',
+    'transition.committed': 'app.transition.commit',
   },
   'pages-router': {
     'action.form_submitted': 'pages.api.form.submit',
@@ -75,6 +96,14 @@ const dialect: Record<NextTarget, Partial<Record<NeutralEventName, string>>> = {
     'parallel.loading_rendered': 'pages.slot.loading',
     'parallel.error_boundary_captured': 'pages.slot.error',
     'parallel.slot_navigated': 'pages.slot.navigate',
+    'turbopack.module_updated': 'pages.webpack.module.update',
+    'turbopack.hmr_boundary_found': 'pages.webpack.hmr.boundary',
+    'turbopack.hmr_applied': 'pages.webpack.hmr.apply',
+    'turbopack.fast_refresh_completed': 'pages.webpack.fast-refresh',
+    'transition.started': 'pages.transition.start',
+    'transition.pending': 'pages.transition.pending',
+    'transition.interrupted': 'pages.transition.interrupt',
+    'transition.committed': 'pages.transition.commit',
   },
   'edge-runtime': {
     'action.form_submitted': 'edge.action.form.submit',
@@ -93,6 +122,14 @@ const dialect: Record<NextTarget, Partial<Record<NeutralEventName, string>>> = {
     'parallel.loading_rendered': 'edge.parallel.loading',
     'parallel.error_boundary_captured': 'edge.parallel.error',
     'parallel.slot_navigated': 'edge.parallel.navigate',
+    'turbopack.module_updated': 'edge.esbuild.module.update',
+    'turbopack.hmr_boundary_found': 'edge.esbuild.hmr.boundary',
+    'turbopack.hmr_applied': 'edge.esbuild.hmr.apply',
+    'turbopack.fast_refresh_completed': 'edge.esbuild.fast-refresh',
+    'transition.started': 'edge.transition.start',
+    'transition.pending': 'edge.transition.pending',
+    'transition.interrupted': 'edge.transition.interrupt',
+    'transition.committed': 'edge.transition.commit',
   },
 };
 

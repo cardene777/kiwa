@@ -53,3 +53,23 @@ export {
   type FidelityCoverage,
   type FidelityRow,
 } from './fidelity.js';
+
+// v1.49 advanced III (pair 第 6 pair 3 段拡張)
+export {
+  applyHmrPatch,
+  completeFastRefresh,
+  findHmrBoundary,
+  markModuleUpdated,
+  startTurbopackHmr,
+  type TurbopackHmrSession,
+  type TurbopackHmrState,
+} from './turbopack-hmr.js';
+
+export {
+  commitTransition,
+  interruptTransition,
+  markTransitionPending,
+  startConcurrentTransition,
+  type ConcurrentTransitionSession,
+  type ConcurrentTransitionState,
+} from './concurrent-transitions.js';

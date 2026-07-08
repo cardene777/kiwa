@@ -7,11 +7,11 @@ import {
 } from '../../src/index.js';
 
 describe('nextjs fidelity coverage', () => {
-  it('collects 3 targets x 4 axes', () => {
+  it('collects 3 targets x 6 axes (v1.49 advanced III pair 3 段拡張)', () => {
     const coverage = collectFidelityCoverage();
     expect(coverage.providers).toEqual(['app-router', 'pages-router', 'edge-runtime']);
-    expect(coverage.axes).toHaveLength(4);
-    expect(coverage.rows).toHaveLength(12);
+    expect(coverage.axes).toHaveLength(6);
+    expect(coverage.rows).toHaveLength(18);
   });
 
   it('maps every axis to four neutral events', () => {
@@ -20,13 +20,15 @@ describe('nextjs fidelity coverage', () => {
     }
   });
 
-  it('keeps the combined 4-axis story in one grid', () => {
+  it('keeps the combined 6-axis story in one grid (v1.49)', () => {
     const axes = Object.keys(NEXT_AXIS_TO_EVENTS) as NextAxis[];
     expect(axes).toEqual([
       'server-action-advanced',
       'partial-prerendering',
       'interception-routes',
       'parallel-routes-advanced',
+      'turbopack-hmr',
+      'concurrent-transitions',
     ]);
   });
 
@@ -35,9 +37,9 @@ describe('nextjs fidelity coverage', () => {
     expect(providerEventName('edge-runtime', 'action.redirected')).toBe('edge.response.redirect');
   });
 
-  it('supports subset target collection', () => {
+  it('supports subset target collection (6 axis v1.49)', () => {
     const coverage = collectFidelityCoverage(['edge-runtime']);
-    expect(coverage.rows).toHaveLength(4);
+    expect(coverage.rows).toHaveLength(6);
     expect(coverage.rows.every((row) => row.provider === 'edge-runtime')).toBe(true);
   });
 

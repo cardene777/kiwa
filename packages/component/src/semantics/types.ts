@@ -11,7 +11,10 @@ export type ComponentAxis =
   | 'rsc-harness'
   | 'streaming-ssr'
   | 'view-transitions'
-  | 'form-action-advanced';
+  | 'form-action-advanced'
+  // v1.49 advanced III (pair 第 6 pair 3 段拡張)
+  | 'react-19-actions'
+  | 'islands-architecture';
 
 export type NeutralEventName =
   | 'rsc.render_started'
@@ -29,7 +32,17 @@ export type NeutralEventName =
   | 'form.status_pending'
   | 'form.optimistic_applied'
   | 'form.progressive_enhanced'
-  | 'form.action_resolved';
+  | 'form.action_resolved'
+  // v1.49 react-19-actions (useActionState + useOptimistic + useFormStatus 統合)
+  | 'action.state_initialized'
+  | 'action.transition_pending'
+  | 'action.optimistic_committed'
+  | 'action.resolved'
+  // v1.49 islands-architecture (partial hydration + selective interactivity)
+  | 'islands.registered'
+  | 'islands.hydration_started'
+  | 'islands.interactive_ready'
+  | 'islands.static_boundary_asserted';
 
 export interface AxisStep<TState extends string> {
   neutralEvent: NeutralEventName;

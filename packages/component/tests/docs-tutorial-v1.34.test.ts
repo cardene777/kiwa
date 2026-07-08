@@ -191,8 +191,10 @@ describe('tutorial 67 — fidelity coverage (component)', () => {
   it('every target covers every axis with 4 neutral events per axis (tutorial: fidelity snippet)', () => {
     const coverage = collectFidelityCoverage(['storybook8', 'playwright-ct', 'chromatic']);
 
-    expect(coverage.rows).toHaveLength(12);
-    expect(coverage.axes).toEqual([
+    // v1.34 = 4 axis (12 rows) / v1.49 pair 3 段拡張 = 6 axis (18 rows)、
+    // 拡張は additive のため v1.34 snippet の意味論は 4 axis 部分集合の存在確認に変更。
+    expect(coverage.rows).toHaveLength(18);
+    expect(coverage.axes.slice(0, 4)).toEqual([
       'rsc-harness',
       'streaming-ssr',
       'view-transitions',

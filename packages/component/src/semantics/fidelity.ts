@@ -38,6 +38,19 @@ export const COMPONENT_AXIS_TO_EVENTS: Record<ComponentAxis, NeutralEventName[]>
     'form.progressive_enhanced',
     'form.action_resolved',
   ],
+  // v1.49 advanced III
+  'react-19-actions': [
+    'action.state_initialized',
+    'action.transition_pending',
+    'action.optimistic_committed',
+    'action.resolved',
+  ],
+  'islands-architecture': [
+    'islands.registered',
+    'islands.hydration_started',
+    'islands.interactive_ready',
+    'islands.static_boundary_asserted',
+  ],
 };
 
 export function collectFidelityCoverage(
