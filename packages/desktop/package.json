@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/desktop",
-  "version": "0.1.0",
-  "description": "Desktop test harness for kiwa v0.1 — 3 axis (Electron + Tauri + Webview) unified as target-neutral state machine。 Electron (main process + renderer + IPC) / Tauri (invoke command + event listen + window mgmt) / Webview (bridge + preload script + context isolation)。 v1.56 で kiwa 縦深化 pair 第 14 新規 base pair 導入、 42 package 到達、 v2.0 milestone Desktop adapter goal 先取り実装。",
+  "version": "0.2.0",
+  "description": "Desktop test harness for kiwa v0.2 — 8 axis (v0.1 Electron + Tauri + Webview に v0.2 で Auto-updater + File-system permissions + Notification + Menu-bar + Tray-icon の advanced 5 axis 追加) を target-neutral state machine で扱う。 3 target (macos + windows + linux) × 8 axis × 4 event = 96 dialect mapping、 fidelity grid 24 row 構築。 v1.57 で kiwa 縦深化 pair 第 14 の第 2 段、 v1.55/v1.56 4 PR rhythm 継承、 systematic pattern 32 度目適用 (uniform state machine + axis-neutral state)、 backward compat 絶対維持 (v0.1 API 変更 0)、 35 milestone snippet streak 到達。",
   "license": "MIT",
   "author": {
     "name": "cardene",
