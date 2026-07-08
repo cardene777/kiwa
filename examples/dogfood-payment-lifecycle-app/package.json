@@ -1,0 +1,20 @@
+{
+  "name": "dogfood-payment-lifecycle-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v2.3-2 — @kiwa/payment v2.1 lifecycle-orchestrator の 4 pattern workflow reference。 depth-5 pattern 4 例目確定 dogfood。",
+  "scripts": {
+    "test": "pnpm -F @kiwa/core -F @kiwa/payment build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa/core": "workspace:*",
+    "@kiwa/payment": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
