@@ -593,6 +593,7 @@ export default defineConfig({
             { text: 'v1.64 → v1.65', link: '/migrations/v1.64-to-v1.65' },
             { text: 'v1.65 → v1.66', link: '/migrations/v1.65-to-v1.66' },
             { text: 'v1.66 → v1.67', link: '/migrations/v1.66-to-v1.67' },
+            { text: 'v1.67 → v2.0 (rename @kiwa-test/* → @kiwa/*)', link: '/migrations/v2.0-rename-plan' },
           ],
         },
       ],

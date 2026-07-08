@@ -18,13 +18,12 @@ function readJson<T = unknown>(rel: string): T {
 }
 
 describe('v2.0-4 publish artefacts', () => {
-  // v2.0-3 では skip、 v2.0-4 で plugin.json bump + announcement 追加後 enable
-  it.skip('plugin.json version bumped to 2.0.0 (enabled after v2.0-4)', () => {
+  it('plugin.json version bumped to 2.0.0', () => {
     const plugin = readJson<{ version: string }>('.claude-plugin/plugin.json');
     expect(plugin.version).toBe('2.0.0');
   });
 
-  it.skip('all 4 announcement files exist under docs/announcements/v2.0/ (enabled after v2.0-4)', () => {
+  it('all 4 announcement files exist under docs/announcements/v2.0/', () => {
     for (const name of ['gh-discussions-announcement.md', 'x-thread-en.md', 'x-thread-ja.md', 'zenn-article.md']) {
       const rel = `docs/announcements/v2.0/${name}`;
       expect(existsSync(resolve(REPO_ROOT, rel)), `missing: ${rel}`).toBe(true);
@@ -32,7 +31,7 @@ describe('v2.0-4 publish artefacts', () => {
     }
   });
 
-  it.skip('VitePress config.mts wires v2.0 migration guide (enabled after v2.0-4)', () => {
+  it('VitePress config.mts wires v2.0 migration guide', () => {
     const config = readText('docs/.vitepress/config.mts');
     expect(config).toContain('v2.0');
     expect(config).toContain('/migrations/v2.0-rename-plan');

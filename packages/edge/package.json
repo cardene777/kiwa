@@ -1,6 +1,6 @@
 {
   "name": "@kiwa/edge",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Edge runtime fetch handler test adapter for kiwa with advanced edge semantics v1.2 — invoke Cloudflare Workers / Vercel Edge / generic edge handlers with simulated env (KV / R2 / D1 / DurableObject minimal mocks) + ExecutionContext (waitUntil / passThroughOnException) + 16 axis semantics (durable-object, websocket-edge, edge-kv, geo-replicated, cron-trigger, subrequest-limit, cpu-time-limit, streaming-response + v1.2 advanced 8 axis = cold-start, middleware-chain, kv-eventual-consistency, r2-multipart, d1-read-replica, do-state-migration, websocket-hibernation, global-routing) without a running Miniflare or workerd (part of the kiwa test framework family)",
   "license": "MIT",
   "author": {

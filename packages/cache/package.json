@@ -1,6 +1,6 @@
 {
   "name": "@kiwa/cache",
-  "version": "0.2.0",
+  "version": "2.0.0",
   "description": "Cache test adapter for kiwa — Redis (testcontainers) live env + in-memory sandbox env + Memcached (stub + testcontainers) env + KeyDB (stub + testcontainers) env, with TTL / Pub/Sub / expiry / consistent-hash / multi-master replication assertion helpers (assertTTL / subscribe / assertPublished / serverFor / listEntries)",
   "license": "MIT",
   "author": {

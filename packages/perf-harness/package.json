@@ -1,6 +1,6 @@
 {
   "name": "@kiwa/perf-harness",
-  "version": "0.3.0",
+  "version": "2.0.0",
   "description": "Generic performance harness v0.3 strict — p50/p95/p99 measurement + regression detection + baseline persistence + 3-layer harness (serial + concurrent + memory) + strict mode (iter 400 + Welch |t|>3 + p95 delta 10%) + 38 package coverage + 14-axis release gate integration + detectRegressionStrict + runPerf3LayerStrict",
   "license": "MIT",
   "author": {

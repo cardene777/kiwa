@@ -1,6 +1,6 @@
 {
   "name": "@kiwa/a11y",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Accessibility (a11y) test adapter for kiwa — axe-core integration for jsdom + Playwright pages",
   "license": "MIT",
   "author": {
