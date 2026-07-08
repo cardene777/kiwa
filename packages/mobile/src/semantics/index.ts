@@ -80,3 +80,44 @@ export {
   type SecureStorageSession,
   type SecureStorageState,
 } from './secure-storage.js';
+
+// v1.52 advanced III axis exports (New Architecture)
+export {
+  commitShadowTree,
+  completeFabricMount,
+  initFabric,
+  scheduleFabricRender,
+  updateFabricPriority,
+  type FabricSession,
+  type FabricState,
+} from './fabric.js';
+
+export {
+  bindJsiRuntime,
+  initTurboModules,
+  invokeTurboMethod,
+  registerTurboSpec,
+  unregisterTurboModule,
+  type TurboModulesSession,
+  type TurboModulesState,
+} from './turbo-modules.js';
+
+export {
+  completeCodegenBuild,
+  emitCodegenType,
+  generateSpec,
+  initCodegen,
+  loadCodegenSchema,
+  type CodegenSession,
+  type CodegenState,
+} from './codegen.js';
+
+export {
+  bridgeLegacyModule,
+  enableConcurrentReact,
+  initNewArchitecture,
+  markNewArchReady,
+  startNewArchInit,
+  type NewArchitectureSession,
+  type NewArchitectureState,
+} from './new-architecture.js';

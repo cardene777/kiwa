@@ -7,11 +7,11 @@ import {
 } from '../../src/index.js';
 
 describe('mobile fidelity coverage', () => {
-  it('collects 3 targets × 7 axes = 21 rows (v1.51 advanced II)', () => {
+  it('collects 3 targets × 11 axes = 33 rows (v1.52 advanced III、 pair 3 段拡張 5 例目)', () => {
     const coverage = collectFidelityCoverage();
     expect(coverage.providers).toEqual(['ios', 'android', 'web']);
-    expect(coverage.axes).toHaveLength(7);
-    expect(coverage.rows).toHaveLength(21);
+    expect(coverage.axes).toHaveLength(11);
+    expect(coverage.rows).toHaveLength(33);
   });
 
   it('maps every axis to 4 neutral events', () => {
@@ -20,7 +20,7 @@ describe('mobile fidelity coverage', () => {
     }
   });
 
-  it('combined 7-axis story (v1.50 3 base + v1.51 4 advanced II)', () => {
+  it('combined 11-axis story (v1.50 3 base + v1.51 4 advanced II + v1.52 4 advanced III)', () => {
     const axes = Object.keys(MOBILE_AXIS_TO_EVENTS) as MobileAxis[];
     expect(axes).toEqual([
       'react-native',
@@ -30,6 +30,10 @@ describe('mobile fidelity coverage', () => {
       'reanimated',
       'async-storage',
       'secure-storage',
+      'fabric',
+      'turbo-modules',
+      'codegen',
+      'new-architecture',
     ]);
   });
 
@@ -39,9 +43,9 @@ describe('mobile fidelity coverage', () => {
     expect(providerEventName('web', 'metro.bundle_started')).toBe('web.metro-web.transform.start');
   });
 
-  it('subset provider works (7 axis)', () => {
+  it('subset provider works (11 axis)', () => {
     const coverage = collectFidelityCoverage(['ios']);
-    expect(coverage.rows).toHaveLength(7);
+    expect(coverage.rows).toHaveLength(11);
     expect(coverage.rows.every((r) => r.provider === 'ios')).toBe(true);
   });
 
@@ -49,5 +53,11 @@ describe('mobile fidelity coverage', () => {
     expect(providerEventName('ios', 'secure-storage.biometric_challenged')).toBe('ios.biometry.face-id');
     expect(providerEventName('android', 'secure-storage.biometric_challenged')).toBe('android.biometry.fingerprint');
     expect(providerEventName('web', 'secure-storage.biometric_challenged')).toBe('web.webauthn.challenge');
+  });
+
+  it('v1.52 advanced III dialects mapped for all 3 targets (Fabric / TurboModules / Codegen / New Architecture)', () => {
+    expect(providerEventName('ios', 'fabric.mount_completed')).toBe('ios.fabric.mount.done');
+    expect(providerEventName('android', 'new-architecture.ready')).toBe('android.new-arch.ready');
+    expect(providerEventName('web', 'new-architecture.concurrent_enabled')).toBe('web.concurrent-react.enable');
   });
 });
