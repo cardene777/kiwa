@@ -556,6 +556,13 @@ const V1_47_PAGES = [
   { path: '/migrations/v1.46-to-v1.47', title: 'v1.46 → v1.47' },
 ];
 
+// v1.48 = security-devsecops v0.3 Phase 3 orchestrator 単軸 milestone。
+// 1 dogfood + 1 tutorial (106 orchestrator) + migration。
+const V1_48_PAGES = [
+  { path: '/tutorials/106-security-orchestrator', title: 'DevSecOps single entry' },
+  { path: '/migrations/v1.47-to-v1.48', title: 'v1.47 → v1.48' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -994,6 +1001,20 @@ test.describe('docs site — v1.44 pages render', () => {
       await page.goto(pageUrl(p.path));
       const body = await page.locator(CONTENT_LOCATOR).innerText();
       expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.48 pages render', () => {
+  for (const p of V1_48_PAGES) {
+    test(`v1.48 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
     });
   }
 });
