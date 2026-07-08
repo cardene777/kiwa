@@ -83,3 +83,18 @@ export {
   bucketLatency,
   detectAbuse,
 } from './auth-telemetry.js';
+
+// v0.7 continuous-auth = risk-based-auth + auth-continuity + session-hijack-detect の 継続合成 layer
+export type {
+  ContinuousAuthState,
+  ContinuousAuthSession,
+  RiskLevel,
+} from './continuous-auth.js';
+export {
+  startContinuousAuth,
+  scoreToLevel,
+  evaluateRisk,
+  completeStepUp,
+  freezeSession,
+  terminateContinuousAuth,
+} from './continuous-auth.js';
