@@ -8,6 +8,7 @@
  */
 import type { AxisStep, DesktopAxis, DesktopTarget, NeutralEventName } from '../semantics/types.js';
 import { MOCK_ADAPTERS, REAL_ADAPTERS } from './mock-factory.js';
+import { shouldSkipAxis } from './probe.js';
 import type { AdapterInvocation, AdapterResult } from './types.js';
 
 export interface FidelityDiff {
@@ -164,6 +165,62 @@ export interface FidelityBehaviorSummary {
       hasBehaviorDiff: boolean;
     }
   >;
+}
+
+/**
+ * v0.8 = probe integration 経路の fidelity check。
+ * shouldSkipAxis で skip 判定された pair は skippedPairs に記録、 diffs から除外。
+ * shape 契約 preserving 絶対維持 = skip 経路は skippedPairs 経由で追跡可能。
+ */
+export interface SkippedPair {
+  axis: DesktopAxis;
+  target: DesktopTarget;
+  reason: string;
+}
+
+export interface FidelityCheckWithProbeResult {
+  diffs: FidelityDiff[];
+  skippedPairs: SkippedPair[];
+}
+
+export async function runFidelityCheckWithProbe(input: {
+  scanIdPrefix?: string;
+  axes?: DesktopAxis[];
+  targets?: DesktopTarget[];
+}): Promise<FidelityCheckWithProbeResult> {
+  const axes = input.axes ?? ALL_AXES;
+  const targets = input.targets ?? ALL_TARGETS;
+  const prefix = input.scanIdPrefix ?? 'fidelity-probe';
+  const diffs: FidelityDiff[] = [];
+  const skippedPairs: SkippedPair[] = [];
+
+  for (const axis of axes) {
+    for (const target of targets) {
+      const decision = shouldSkipAxis(axis, target);
+      if (decision.skip) {
+        skippedPairs.push({ axis, target, reason: decision.reason ?? 'unknown' });
+        continue;
+      }
+      const baseInv: Omit<AdapterInvocation, 'mode'> = {
+        scanId: `${prefix}-${axis}-${target}`,
+        target,
+      };
+      const mockResult: AdapterResult = await MOCK_ADAPTERS[axis].scan({ ...baseInv, mode: 'mock' });
+      const realResult: AdapterResult = await REAL_ADAPTERS[axis].scan({ ...baseInv, mode: 'real' });
+      diffs.push({
+        axis,
+        target,
+        mockEvents: mockResult.neutralEvents,
+        realEvents: realResult.neutralEvents,
+        matched: sameEvents(mockResult.neutralEvents, realResult.neutralEvents),
+        mockCompleted: mockResult.completed,
+        realCompleted: realResult.completed,
+        metadataDiffs: collectMetadataDiffs(mockResult.history, realResult.history),
+        durationDiffMs: Math.abs(mockResult.durationMs - realResult.durationMs),
+      });
+    }
+  }
+  return { diffs, skippedPairs };
 }
 
 export function summarizeFidelityBehaviorDiff(diffs: FidelityDiff[]): FidelityBehaviorSummary {
