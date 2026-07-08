@@ -1,0 +1,20 @@
+{
+  "name": "dogfood-quality-metrics-adaptive-threshold-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v2.1-2 — quality-metrics v2.1 adaptive drift threshold learning workflow backed by @kiwa/quality-metrics v2.1。 collectRolling + learnFromHistory + evaluateWithLearnedThreshold + explainLearnedGate の 4 pattern workflow reference。 v0.6 drift-gate dogfood を adaptive learning 経路に拡張、 depth-5 実運用継続 pattern 3 例目 の compound 深化 dogfood。",
+  "scripts": {
+    "test": "pnpm -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa/core": "workspace:*",
+    "@kiwa/quality-metrics": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
