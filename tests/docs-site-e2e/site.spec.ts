@@ -614,6 +614,13 @@ const V1_55_PAGES = [
   { path: '/migrations/v1.54-to-v1.55', title: 'v1.54 → v1.55' },
 ];
 
+// v1.56 = Desktop new-base pair 第 14、 42 package 到達、 34 milestone streak。
+const V1_56_PAGES = [
+  { path: '/tutorials/116-desktop-testing', title: 'Desktop testing baseline' },
+  { path: '/concepts/desktop-testing-baseline', title: 'Desktop testing baseline' },
+  { path: '/migrations/v1.55-to-v1.56', title: 'v1.55 → v1.56' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1052,6 +1059,20 @@ test.describe('docs site — v1.44 pages render', () => {
       await page.goto(pageUrl(p.path));
       const body = await page.locator(CONTENT_LOCATOR).innerText();
       expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.56 pages render', () => {
+  for (const p of V1_56_PAGES) {
+    test(`v1.56 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
     });
   }
 });
