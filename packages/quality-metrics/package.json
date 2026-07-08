@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/quality-metrics",
-  "version": "0.4.0",
-  "description": "Quality metrics harness for kiwa — unified 12-axis score (coverage / test count / fidelity / perf p95 / mutation kill / mutation tier + AI-LLM cost / latency / token / accuracy) with release gate SSOT, tier-aware mutation gate (Core 80 / Framework 70 / SaaS 65 / Test type 60), and per-provider report emit. v0.3 adds `DEFAULT_MUTATION_TIER_THRESHOLDS` + `resolveMutationTier` + `assertMutationTier` + `MutationTier` type + `ReleaseGateContext` type on top of v0.2. Feeds provider fidelity from v1.11 dogfood app suite and v1.12 AI-LLM harness.",
+  "version": "0.5.0",
+  "description": "Quality metrics harness for kiwa v0.5 — 13-axis release gate + historical trend tracking + drift detection。 v0.1 baseline → v0.2 mutation gate → v0.3 tier-aware → v0.4 release-gate context → v0.5 で historical trend tracking + drift detection 追加。 MetricSnapshot + BaselineComparison + DriftDetection + TrendReport SSOT + captureSnapshot + compareToBaseline + detectDrift + generateTrendReport export。 shape 契約 preserving = 既存 QualityReport 構造無変更、 additive のみ、 backward compat 絶対維持 (v0.1-v0.4 API 変更 0)。 depth-5 pattern 3 例目確定 (Mobile v1.54-v1.55 + Desktop v1.60-v1.61 + quality-metrics v1.65 で 3 例安定化到達、 「絶対的 rule」 昇格 signal)。",
   "license": "MIT",
   "author": {
     "name": "cardene",
