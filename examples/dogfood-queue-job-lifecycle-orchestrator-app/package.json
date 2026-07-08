@@ -1,0 +1,20 @@
+{
+  "name": "dogfood-queue-job-lifecycle-orchestrator-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v2.11-2 — @kiwa/queue v0.6 job-lifecycle-orchestrator 5 pattern workflow reference。 depth-5 pattern 12 例目 candidate dogfood、 backend systems layer 第 4 例。",
+  "scripts": {
+    "test": "pnpm -F @kiwa/core -F @kiwa/queue build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa/core": "workspace:*",
+    "@kiwa/queue": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
