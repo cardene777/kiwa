@@ -698,6 +698,13 @@ const V1_67_PAGES = [
   { path: '/migrations/v1.66-to-v1.67', title: 'v1.66 → v1.67' },
 ];
 
+// v2.1 = quality-metrics 深化 IV (adaptive drift threshold learning)、 47 milestone streak、 systematic pattern 44 度目 statistical inference variant、 4 PR rhythm 復帰。
+const V2_1_PAGES = [
+  { path: '/tutorials/128-quality-metrics-adaptive-threshold', title: 'quality-metrics v2.1 adaptive drift threshold learning' },
+  { path: '/concepts/quality-metrics-adaptive-threshold', title: 'quality-metrics v2.1 adaptive drift threshold learning' },
+  { path: '/migrations/v2.0-to-v2.1', title: 'v2.0 → v2.1' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1171,6 +1178,20 @@ test.describe('docs site — v1.66 pages render', () => {
 test.describe('docs site — v1.67 pages render', () => {
   for (const p of V1_67_PAGES) {
     test(`v1.67 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v2.1 pages render', () => {
+  for (const p of V2_1_PAGES) {
+    test(`v2.1 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;

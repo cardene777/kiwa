@@ -466,6 +466,12 @@ export default defineConfig({
             { text: '127 — Desktop v1.0 invoke-cache (InvokeCache + withCache + buildCacheKey + 4 status walkthrough)', link: '/tutorials/127-desktop-invoke-cache' },
           ],
         },
+        {
+          text: 'quality-metrics 深化 IV (v2.1、 adaptive drift threshold learning、 systematic pattern 44 度目、 47 milestone streak、 4 PR rhythm 復帰)',
+          items: [
+            { text: '128 — quality-metrics v2.1 adaptive threshold (learnAdaptiveThreshold + pickThresholdForAxis + statistical inference SSOT walkthrough)', link: '/tutorials/128-quality-metrics-adaptive-threshold' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -527,6 +533,7 @@ export default defineConfig({
             { text: 'quality-metrics v0.5 historical trend + drift (v1.65 history.ts 新設 6 type SSOT + captureSnapshot + compareToBaseline + detectDrift + generateTrendReport + axis 別 上昇=改善/悪化 判定 + shape 契約 preserving 絶対維持 + depth-5 pattern 3 例目確定 = 絶対的 rule 昇格 signal + systematic pattern 40 度突入)', link: '/concepts/quality-metrics-history' },
             { text: 'quality-metrics v0.6 evaluateReleaseGate に drift check opt-in 統合 (v1.66 ReleaseGateContext 3 新 field = driftBaseline + driftThresholdPct + driftEnabled + drift.{axis} blocker 1:1 格上げ + axesEvaluated +1 lane 加算 + default off backward compat 絶対維持 + shape 契約 preserving + depth-5 pattern 3 例目確定 実運用 継続 + systematic pattern 41 度目)', link: '/concepts/quality-metrics-drift-gate' },
             { text: 'Desktop v1.0 invoke-cache layer (v1.67 InvokeCache class LRU + TTL 両立 + withCache helper probeAndInvoke 統合 + buildCacheKey SSOT + 4 status 経路 = cache-hit/miss/invalidated/disabled + default 5 分 TTL + 128 maxEntries + shape 契約 preserving + backward compat 絶対維持 + depth-6 pattern 2 例目確定 candidate + systematic pattern 42 度目)', link: '/concepts/desktop-invoke-cache' },
+            { text: 'quality-metrics v2.1 adaptive drift threshold learning (v2.1 threshold-learning.ts 新設 learnAdaptiveThreshold + pickThresholdForAxis + AdaptiveThreshold / AdaptiveThresholdReport type SSOT + 統計的異常検知 mean+k*stdev SSOT + axis 別独立学習 + baseline=0 Infinity 除外 + shape 契約 preserving + backward compat 絶対維持 + depth-5 実運用継続 3 例目 compound 深化 + systematic pattern 44 度目 statistical inference variant + 4 PR rhythm 復帰)', link: '/concepts/quality-metrics-adaptive-threshold' },
           ],
         },
       ],
@@ -594,6 +601,7 @@ export default defineConfig({
             { text: 'v1.65 → v1.66', link: '/migrations/v1.65-to-v1.66' },
             { text: 'v1.66 → v1.67', link: '/migrations/v1.66-to-v1.67' },
             { text: 'v1.67 → v2.0 (rename @kiwa-test/* → @kiwa/*)', link: '/migrations/v2.0-rename-plan' },
+            { text: 'v2.0 → v2.1', link: '/migrations/v2.0-to-v2.1' },
           ],
         },
       ],
