@@ -64,6 +64,31 @@ export const DESKTOP_AXIS_TO_EVENTS: Record<DesktopAxis, NeutralEventName[]> = {
     'tray-icon.clicked',
     'tray-icon.removed',
   ],
+  // v0.3
+  'screen-recording': [
+    'screen-recording.permission_requested',
+    'screen-recording.started',
+    'screen-recording.chunk_captured',
+    'screen-recording.stopped',
+  ],
+  'global-shortcut': [
+    'global-shortcut.registered',
+    'global-shortcut.triggered',
+    'global-shortcut.unregistered',
+    'global-shortcut.all_cleared',
+  ],
+  clipboard: [
+    'clipboard.written',
+    'clipboard.read',
+    'clipboard.changed',
+    'clipboard.cleared',
+  ],
+  'dark-mode': [
+    'dark-mode.subscribed',
+    'dark-mode.theme_changed',
+    'dark-mode.user_preferred',
+    'dark-mode.unsubscribed',
+  ],
 };
 
 export function collectFidelityCoverage(

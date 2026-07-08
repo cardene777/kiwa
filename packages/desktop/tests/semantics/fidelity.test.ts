@@ -6,12 +6,12 @@ import {
   type DesktopAxis,
 } from '../../src/index.js';
 
-describe('desktop fidelity coverage (v0.2 — 3 target × 8 axis)', () => {
-  it('collects 3 targets × 8 axes = 24 rows', () => {
+describe('desktop fidelity coverage (v0.3 — 3 target × 12 axis)', () => {
+  it('collects 3 targets × 12 axes = 36 rows', () => {
     const coverage = collectFidelityCoverage();
     expect(coverage.providers).toEqual(['macos', 'windows', 'linux']);
-    expect(coverage.axes).toHaveLength(8);
-    expect(coverage.rows).toHaveLength(24);
+    expect(coverage.axes).toHaveLength(12);
+    expect(coverage.rows).toHaveLength(36);
   });
 
   it('maps every axis to 4 neutral events', () => {
@@ -20,7 +20,7 @@ describe('desktop fidelity coverage (v0.2 — 3 target × 8 axis)', () => {
     }
   });
 
-  it('combined 8-axis story (v0.1 3 axis + v0.2 5 advanced axis)', () => {
+  it('combined 12-axis story (v0.1 3 axis + v0.2 5 axis + v0.3 4 axis)', () => {
     const axes = Object.keys(DESKTOP_AXIS_TO_EVENTS) as DesktopAxis[];
     expect(axes).toEqual([
       'electron',
@@ -31,6 +31,10 @@ describe('desktop fidelity coverage (v0.2 — 3 target × 8 axis)', () => {
       'notification',
       'menu-bar',
       'tray-icon',
+      'screen-recording',
+      'global-shortcut',
+      'clipboard',
+      'dark-mode',
     ]);
   });
 
@@ -90,13 +94,55 @@ describe('desktop fidelity coverage (v0.2 — 3 target × 8 axis)', () => {
     );
   });
 
-  it('subset provider works (macos only = 8 rows)', () => {
+  it('translates v0.3 screen-recording dialect (ScreenCaptureKit / Windows.Graphics.Capture / xdg-portal ScreenCast)', () => {
+    expect(providerEventName('macos', 'screen-recording.started')).toBe('macos.SCStream.start');
+    expect(providerEventName('windows', 'screen-recording.started')).toBe(
+      'windows.GraphicsCaptureSession.startCapture',
+    );
+    expect(providerEventName('linux', 'screen-recording.started')).toBe(
+      'linux.xdgPortal.ScreenCast.Start',
+    );
+  });
+
+  it('translates v0.3 global-shortcut dialect (Carbon / User32 / xdg-portal GlobalShortcuts)', () => {
+    expect(providerEventName('macos', 'global-shortcut.registered')).toBe(
+      'macos.RegisterEventHotKey',
+    );
+    expect(providerEventName('windows', 'global-shortcut.registered')).toBe(
+      'windows.User32.RegisterHotKey',
+    );
+    expect(providerEventName('linux', 'global-shortcut.registered')).toBe(
+      'linux.xdgPortal.GlobalShortcuts.BindShortcut',
+    );
+  });
+
+  it('translates v0.3 clipboard dialect (NSPasteboard / SetClipboardData / gtk_clipboard)', () => {
+    expect(providerEventName('macos', 'clipboard.written')).toBe('macos.NSPasteboard.setString');
+    expect(providerEventName('windows', 'clipboard.written')).toBe(
+      'windows.User32.SetClipboardData',
+    );
+    expect(providerEventName('linux', 'clipboard.written')).toBe('linux.gtk.clipboard.set_text');
+  });
+
+  it('translates v0.3 dark-mode dialect (AppleInterfaceTheme / ImmersiveColorSet / xdg-portal Settings)', () => {
+    expect(providerEventName('macos', 'dark-mode.theme_changed')).toBe(
+      'macos.AppleInterfaceThemeChangedNotification',
+    );
+    expect(providerEventName('windows', 'dark-mode.theme_changed')).toBe(
+      'windows.ImmersiveColorSet',
+    );
+    expect(providerEventName('linux', 'dark-mode.theme_changed')).toBe(
+      'linux.xdgPortal.Settings.color-scheme.changed',
+    );
+  });
+
+  it('subset provider works (macos only = 12 rows)', () => {
     const coverage = collectFidelityCoverage(['macos']);
-    expect(coverage.rows).toHaveLength(8);
+    expect(coverage.rows).toHaveLength(12);
     expect(coverage.rows.every((r) => r.provider === 'macos')).toBe(true);
   });
 
-  it('v0.2 axis order preserves 3 → 8 append convention (no reorder)', () => {
+  it('v0.3 axis order preserves 8 → 12 append convention (no reorder)', () => {
     const coverage = collectFidelityCoverage(['macos']);
     expect(coverage.rows.map((r) => r.axis)).toEqual([
       'electron',
@@ -107,6 +153,10 @@ describe('desktop fidelity coverage (v0.2 — 3 target × 8 axis)', () => {
       'notification',
       'menu-bar',
       'tray-icon',
+      'screen-recording',
+      'global-shortcut',
+      'clipboard',
+      'dark-mode',
     ]);
   });
 });

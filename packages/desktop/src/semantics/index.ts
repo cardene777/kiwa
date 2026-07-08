@@ -83,6 +83,47 @@ export {
   type TrayIconState,
 } from './tray-icon.js';
 
+// v0.3 axis
+export {
+  captureScreenChunk,
+  requestScreenRecordingPermission,
+  startScreenRecording,
+  stopScreenRecording,
+  type ScreenRecordingSession,
+  type ScreenRecordingState,
+} from './screen-recording.js';
+
+export {
+  clearAllGlobalShortcuts,
+  createGlobalShortcutSession,
+  registerGlobalShortcut,
+  triggerGlobalShortcut,
+  unregisterGlobalShortcut,
+  type GlobalShortcutSession,
+  type GlobalShortcutState,
+} from './global-shortcut.js';
+
+export {
+  clearClipboard,
+  notifyClipboardChange,
+  openClipboard,
+  readClipboard,
+  writeClipboard,
+  type ClipboardFormat,
+  type ClipboardSession,
+  type ClipboardState,
+} from './clipboard.js';
+
+export {
+  notifyThemeChange,
+  recordUserPreference,
+  subscribeDarkMode,
+  unsubscribeDarkMode,
+  type DarkModeSession,
+  type DarkModeState,
+  type ThemeMode,
+} from './dark-mode.js';
+
 export {
   DESKTOP_AXIS_TO_EVENTS,
   collectFidelityCoverage,

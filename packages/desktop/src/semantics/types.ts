@@ -1,8 +1,9 @@
 /**
- * @kiwa-test/desktop — Desktop test harness (v0.2、 new-base pair 第 14 の第 2 段)。
+ * @kiwa-test/desktop — Desktop test harness (v0.3、 new-base pair 第 14 の第 3 段)。
  *
  * v0.1 3 axis (Electron + Tauri + Webview) + v0.2 5 advanced axis
- * (Auto-updater + File-system permissions + Notification + Menu-bar + Tray-icon) を
+ * (Auto-updater + File-system permissions + Notification + Menu-bar + Tray-icon) +
+ * v0.3 4 advanced III axis (Screen recording + Global shortcut + Clipboard + Dark-mode) を
  * target-neutral state machine で扱う。 target = macos + windows + linux の
  * 3 platform、 provider dialect も 3 target で mapping。
  */
@@ -16,7 +17,11 @@ export type DesktopAxis =
   | 'fs-permissions'
   | 'notification'
   | 'menu-bar'
-  | 'tray-icon';
+  | 'tray-icon'
+  | 'screen-recording'
+  | 'global-shortcut'
+  | 'clipboard'
+  | 'dark-mode';
 
 export type NeutralEventName =
   // v0.1 Electron axis (main + renderer + IPC + window)
@@ -58,7 +63,27 @@ export type NeutralEventName =
   | 'tray-icon.created'
   | 'tray-icon.tooltip_updated'
   | 'tray-icon.clicked'
-  | 'tray-icon.removed';
+  | 'tray-icon.removed'
+  // v0.3 Screen-recording axis (permission + started + chunk + stopped)
+  | 'screen-recording.permission_requested'
+  | 'screen-recording.started'
+  | 'screen-recording.chunk_captured'
+  | 'screen-recording.stopped'
+  // v0.3 Global-shortcut axis (register + triggered + unregister + all-cleared)
+  | 'global-shortcut.registered'
+  | 'global-shortcut.triggered'
+  | 'global-shortcut.unregistered'
+  | 'global-shortcut.all_cleared'
+  // v0.3 Clipboard axis (write + read + change + cleared)
+  | 'clipboard.written'
+  | 'clipboard.read'
+  | 'clipboard.changed'
+  | 'clipboard.cleared'
+  // v0.3 Dark-mode axis (subscribed + theme-changed + user-preferred + unsubscribed)
+  | 'dark-mode.subscribed'
+  | 'dark-mode.theme_changed'
+  | 'dark-mode.user_preferred'
+  | 'dark-mode.unsubscribed';
 
 export interface AxisStep<TState extends string> {
   neutralEvent: NeutralEventName;
@@ -107,6 +132,26 @@ const dialect: Record<DesktopTarget, Partial<Record<NeutralEventName, string>>> 
     'tray-icon.tooltip_updated': 'macos.NSStatusItem.setToolTip',
     'tray-icon.clicked': 'macos.NSStatusItem.action',
     'tray-icon.removed': 'macos.NSStatusItem.remove',
+    // v0.3 Screen-recording — macOS = ScreenCaptureKit (macOS 12.3+)
+    'screen-recording.permission_requested': 'macos.CGRequestScreenCaptureAccess',
+    'screen-recording.started': 'macos.SCStream.start',
+    'screen-recording.chunk_captured': 'macos.SCStream.didOutputSampleBuffer',
+    'screen-recording.stopped': 'macos.SCStream.stop',
+    // v0.3 Global-shortcut — macOS = RegisterEventHotKey (Carbon)
+    'global-shortcut.registered': 'macos.RegisterEventHotKey',
+    'global-shortcut.triggered': 'macos.kEventHotKeyPressed',
+    'global-shortcut.unregistered': 'macos.UnregisterEventHotKey',
+    'global-shortcut.all_cleared': 'macos.UnregisterAllHotKeys',
+    // v0.3 Clipboard — macOS = NSPasteboard
+    'clipboard.written': 'macos.NSPasteboard.setString',
+    'clipboard.read': 'macos.NSPasteboard.stringForType',
+    'clipboard.changed': 'macos.NSPasteboard.changeCount',
+    'clipboard.cleared': 'macos.NSPasteboard.clearContents',
+    // v0.3 Dark-mode — macOS = NSApplication.effectiveAppearance
+    'dark-mode.subscribed': 'macos.NSDistributedNotificationCenter.addObserver',
+    'dark-mode.theme_changed': 'macos.AppleInterfaceThemeChangedNotification',
+    'dark-mode.user_preferred': 'macos.AppleInterfaceStyle',
+    'dark-mode.unsubscribed': 'macos.NSDistributedNotificationCenter.removeObserver',
   },
   windows: {
     // v0.1
@@ -147,6 +192,26 @@ const dialect: Record<DesktopTarget, Partial<Record<NeutralEventName, string>>> 
     'tray-icon.tooltip_updated': 'windows.notifyIcon.NIM_MODIFY',
     'tray-icon.clicked': 'windows.notifyIcon.WM_LBUTTONUP',
     'tray-icon.removed': 'windows.notifyIcon.NIM_DELETE',
+    // v0.3 Screen-recording — Windows = Windows.Graphics.Capture (WinRT)
+    'screen-recording.permission_requested': 'windows.GraphicsCaptureAccess.requestAccess',
+    'screen-recording.started': 'windows.GraphicsCaptureSession.startCapture',
+    'screen-recording.chunk_captured': 'windows.Direct3D11CaptureFrame.arrived',
+    'screen-recording.stopped': 'windows.GraphicsCaptureSession.close',
+    // v0.3 Global-shortcut — Windows = RegisterHotKey (User32)
+    'global-shortcut.registered': 'windows.User32.RegisterHotKey',
+    'global-shortcut.triggered': 'windows.WM_HOTKEY',
+    'global-shortcut.unregistered': 'windows.User32.UnregisterHotKey',
+    'global-shortcut.all_cleared': 'windows.User32.UnregisterAllHotKeys',
+    // v0.3 Clipboard — Windows = OpenClipboard + SetClipboardData
+    'clipboard.written': 'windows.User32.SetClipboardData',
+    'clipboard.read': 'windows.User32.GetClipboardData',
+    'clipboard.changed': 'windows.WM_CLIPBOARDUPDATE',
+    'clipboard.cleared': 'windows.User32.EmptyClipboard',
+    // v0.3 Dark-mode — Windows = SystemUsesLightTheme registry + WM_SETTINGCHANGE
+    'dark-mode.subscribed': 'windows.WM_SETTINGCHANGE.subscribe',
+    'dark-mode.theme_changed': 'windows.ImmersiveColorSet',
+    'dark-mode.user_preferred': 'windows.registry.AppsUseLightTheme',
+    'dark-mode.unsubscribed': 'windows.WM_SETTINGCHANGE.unsubscribe',
   },
   linux: {
     // v0.1
@@ -187,6 +252,26 @@ const dialect: Record<DesktopTarget, Partial<Record<NeutralEventName, string>>> 
     'tray-icon.tooltip_updated': 'linux.statusNotifierItem.SetToolTip',
     'tray-icon.clicked': 'linux.statusNotifierItem.Activate',
     'tray-icon.removed': 'linux.statusNotifierItem.Unregister',
+    // v0.3 Screen-recording — Linux = xdg-desktop-portal ScreenCast
+    'screen-recording.permission_requested': 'linux.xdgPortal.ScreenCast.SelectSources',
+    'screen-recording.started': 'linux.xdgPortal.ScreenCast.Start',
+    'screen-recording.chunk_captured': 'linux.pipewire.stream.OnProcess',
+    'screen-recording.stopped': 'linux.xdgPortal.ScreenCast.Close',
+    // v0.3 Global-shortcut — Linux = X11 XGrabKey / Wayland xdg-portal GlobalShortcuts
+    'global-shortcut.registered': 'linux.xdgPortal.GlobalShortcuts.BindShortcut',
+    'global-shortcut.triggered': 'linux.xdgPortal.GlobalShortcuts.Activated',
+    'global-shortcut.unregistered': 'linux.xdgPortal.GlobalShortcuts.UnbindShortcut',
+    'global-shortcut.all_cleared': 'linux.xdgPortal.GlobalShortcuts.UnbindAll',
+    // v0.3 Clipboard — Linux = gtk_clipboard / Wayland wl_data_device
+    'clipboard.written': 'linux.gtk.clipboard.set_text',
+    'clipboard.read': 'linux.gtk.clipboard.wait_for_text',
+    'clipboard.changed': 'linux.gtk.clipboard.owner_change',
+    'clipboard.cleared': 'linux.gtk.clipboard.clear',
+    // v0.3 Dark-mode — Linux = xdg-desktop-portal Settings color-scheme
+    'dark-mode.subscribed': 'linux.xdgPortal.Settings.SettingChanged.subscribe',
+    'dark-mode.theme_changed': 'linux.xdgPortal.Settings.color-scheme.changed',
+    'dark-mode.user_preferred': 'linux.xdgPortal.Settings.Read.color-scheme',
+    'dark-mode.unsubscribed': 'linux.xdgPortal.Settings.SettingChanged.unsubscribe',
   },
 };
 
