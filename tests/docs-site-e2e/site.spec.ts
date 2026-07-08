@@ -607,6 +607,13 @@ const V1_54_PAGES = [
   { path: '/migrations/v1.53-to-v1.54', title: 'v1.53 → v1.54' },
 ];
 
+// v1.55 = Mobile 深化 VI、 depth-5 pattern 実装完成、 kiwa milestone 史上初 6 段拡張、 33 milestone streak。
+const V1_55_PAGES = [
+  { path: '/tutorials/115-mobile-v06-spawn', title: 'Mobile v0.6 実 child_process.spawn 実行' },
+  { path: '/concepts/mobile-testing-v06-spawn', title: 'Mobile v0.6 実 child_process.spawn 実行' },
+  { path: '/migrations/v1.54-to-v1.55', title: 'v1.54 → v1.55' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1045,6 +1052,20 @@ test.describe('docs site — v1.44 pages render', () => {
       await page.goto(pageUrl(p.path));
       const body = await page.locator(CONTENT_LOCATOR).innerText();
       expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.55 pages render', () => {
+  for (const p of V1_55_PAGES) {
+    test(`v1.55 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
     });
   }
 });
