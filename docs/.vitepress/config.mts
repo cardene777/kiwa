@@ -436,6 +436,12 @@ export default defineConfig({
             { text: '122 — Desktop v0.7 real behavior runner (REAL_AXIS_RUNNERS + fidelity harness 拡張 + summarizeFidelityBehaviorDiff walkthrough)', link: '/tutorials/122-desktop-real-behavior' },
           ],
         },
+        {
+          text: 'Desktop 深化 VII (v1.63、 v0.8 native binding availability probe + skip 経路、 systematic pattern 38 度目、 41 milestone streak、 depth-8 pattern 新設 candidate)',
+          items: [
+            { text: '123 — Desktop v0.8 probe (probeCliAvailable + shouldSkipAxis + platformGate + runFidelityCheckWithProbe walkthrough)', link: '/tutorials/123-desktop-probe' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -492,6 +498,7 @@ export default defineConfig({
             { text: 'Desktop spawn stub 契約層 (v1.60 v0.5 8 CLI stub SSOT + 12 axis → 8 CLI + 4 non-CLI mapping + KIWA_DESKTOP_MODE env-gate + args 上限 32 + fail-closed + systematic pattern 35 度目 + Mobile v1.54 rhythm 再現 + depth-5 pattern 2 例目 candidate)', link: '/concepts/desktop-spawn-stub' },
             { text: 'Desktop v0.6 実 spawn (v1.61 spawn-executor 3 type SSOT + per-command env allowlist 8 CLI × env + safety layer 4 段 + invokeDesktopCli 3 経路分岐 + DI 経路 + KIWA_DESKTOP_SPAWN=dry-run + shape 契約 preserving + systematic pattern 36 度目 + Mobile v1.55 rhythm 再現 + depth-5 2 例目確定 + depth-6 新設 kiwa milestone 史上初)', link: '/concepts/desktop-v06-spawn' },
             { text: 'Desktop v0.7 real behavior runner (v1.62 REAL_AXIS_RUNNERS 12 axis 別 behavior 差別化 SSOT + fidelity harness 拡張 metadataDiffs + durationDiffMs + summarizeFidelityBehaviorDiff + shape 契約 preserving 絶対維持 + v0.4 fidelity harness 設計思想の実運用開始 + systematic pattern 37 度目 + depth-7 pattern 新設 candidate)', link: '/concepts/desktop-real-behavior' },
+            { text: 'Desktop v0.8 probe layer (v1.63 probe.ts 新設 5 type SSOT + probeCliAvailable which/where + shouldSkipAxis 12 axis 別 skip strategy + platformGate + computeSkipMatrix + fidelity harness runFidelityCheckWithProbe + SkippedPair 統合 + shape 契約 preserving 絶対維持 + systematic pattern 38 度目 + depth-8 pattern 新設 candidate)', link: '/concepts/desktop-probe' },
           ],
         },
       ],
@@ -553,6 +560,7 @@ export default defineConfig({
             { text: 'v1.59 → v1.60', link: '/migrations/v1.59-to-v1.60' },
             { text: 'v1.60 → v1.61', link: '/migrations/v1.60-to-v1.61' },
             { text: 'v1.61 → v1.62', link: '/migrations/v1.61-to-v1.62' },
+            { text: 'v1.62 → v1.63', link: '/migrations/v1.62-to-v1.63' },
           ],
         },
       ],
