@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/mobile",
-  "version": "0.3.0",
-  "description": "Mobile test harness for kiwa v0.3 — 11 axis (React Native + Expo + Metro + Navigation + Reanimated + AsyncStorage + SecureStorage + Fabric + TurboModules + Codegen + New Architecture) unified as target-neutral state machine + real driver env-gate opt-in。 v0.1 (v1.50) 3 axis base + v0.2 (v1.51) advanced II 4 new axis に加えて v0.3 (v1.52) advanced III 4 new axis (React Native 0.76+ New Architecture: fabric concurrent renderer + turbo-modules typed native + codegen typed bridge + new-architecture async init) を追加、 backward compat 絶対維持で v0.1 + v0.2 API 変更 0。 **pair 第 13 の 3 段目 (Phase 3、 3 段拡張達成 5 例目 pair 深度 3 段記録)**。",
+  "version": "0.4.0",
+  "description": "Mobile test harness for kiwa v0.4 — 11 axis (React Native + Expo + Metro + Navigation + Reanimated + AsyncStorage + SecureStorage + Fabric + TurboModules + Codegen + New Architecture) × mock/real adapter pair + fidelity harness (trace diff 一致検証)。 v0.1 (v1.50) 3 axis base + v0.2 (v1.51) advanced II 4 new axis + v0.3 (v1.52) advanced III 4 new axis に加えて v0.4 (v1.53) real driver adapter (11 mock + 11 real + fidelity harness) を追加、 backward compat 絶対維持で v0.1-v0.3 API 変更 0。 **pair 第 13 の 4 段目 (Phase 4、 4 段拡張達成 4 例目 depth-4 record)**。",
   "license": "MIT",
   "author": {
     "name": "cardene",
