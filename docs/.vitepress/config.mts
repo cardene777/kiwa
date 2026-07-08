@@ -394,6 +394,12 @@ export default defineConfig({
             { text: '115 — Mobile v0.6 real child_process.spawn (dry-run + DI + sanitize + safety guards walkthrough)', link: '/tutorials/115-mobile-v06-spawn' },
           ],
         },
+        {
+          text: 'Desktop new-base pair 第 14 (v1.56、 42 package 到達、 v2.0 milestone desktop adapter goal 達成、 34 milestone streak)',
+          items: [
+            { text: '116 — Desktop testing baseline (Electron + Tauri + Webview walkthrough)', link: '/tutorials/116-desktop-testing' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -443,6 +449,7 @@ export default defineConfig({
             { text: 'Mobile real driver adapter (v1.53 adapter interface SSOT + 66 combination + pair 深度 4 段記録 4 例目 depth-4)', link: '/concepts/mobile-testing-real-driver' },
             { text: 'Mobile spawn stub 契約層 (v1.54 spawn-driver SSOT + 6 CLI stub + pair 深度 5 段拡張 1 例目 candidate depth-5 pattern 新設)', link: '/concepts/mobile-testing-real-cli' },
             { text: 'Mobile v0.6 実 child_process.spawn (v1.55 spawn-executor SSOT + per-command allowlist + dry-run + DI + safety guards + depth-5 pattern 実装完成 kiwa milestone 史上初 6 段拡張)', link: '/concepts/mobile-testing-v06-spawn' },
+            { text: 'Desktop testing baseline (v1.56 3 axis SSOT + new-base pair 第 14 + 42 package 到達 + v2.0 milestone desktop adapter goal 達成)', link: '/concepts/desktop-testing-baseline' },
           ],
         },
       ],
@@ -497,6 +504,7 @@ export default defineConfig({
             { text: 'v1.52 → v1.53', link: '/migrations/v1.52-to-v1.53' },
             { text: 'v1.53 → v1.54', link: '/migrations/v1.53-to-v1.54' },
             { text: 'v1.54 → v1.55', link: '/migrations/v1.54-to-v1.55' },
+            { text: 'v1.55 → v1.56', link: '/migrations/v1.55-to-v1.56' },
           ],
         },
       ],
