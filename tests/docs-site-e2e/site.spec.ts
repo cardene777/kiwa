@@ -540,6 +540,15 @@ const V1_45_PAGES = [
   { path: '/migrations/v1.44-to-v1.45', title: 'v1.44 → v1.45' },
 ];
 
+// v1.46 = quality gate integrity + DevSecOps library 2 軸。
+// 1 dogfood + 2 tutorial (103 DevSecOps + 104 perf strict) + concept doc + migration。
+const V1_46_PAGES = [
+  { path: '/tutorials/103-security-devsecops', title: 'DevSecOps 6 axis' },
+  { path: '/tutorials/104-perf-strict', title: 'Perf strict mode' },
+  { path: '/concepts/security-devsecops-library-integration', title: 'DevSecOps library integration' },
+  { path: '/migrations/v1.45-to-v1.46', title: 'v1.45 → v1.46' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -978,6 +987,20 @@ test.describe('docs site — v1.44 pages render', () => {
       await page.goto(pageUrl(p.path));
       const body = await page.locator(CONTENT_LOCATOR).innerText();
       expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.46 pages render', () => {
+  for (const p of V1_46_PAGES) {
+    test(`v1.46 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
     });
   }
 });
