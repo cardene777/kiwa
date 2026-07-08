@@ -323,6 +323,14 @@ export default defineConfig({
             { text: '99 — Risk-based auth (score aggregation + policy + telemetry + hijack detection walkthrough)', link: '/tutorials/99-risk-based-auth' },
           ],
         },
+        {
+          text: 'Realtime III 深化 (v1.45)',
+          items: [
+            { text: '100 — MoQ + WebCodecs (Media over QUIC track delivery + hardware encode + Simulcast/SVC walkthrough)', link: '/tutorials/100-moq-webcodecs' },
+            { text: '101 — Voice streaming (LLM voice + Whisper ASR + realtime AI inference walkthrough)', link: '/tutorials/101-voice-streaming' },
+            { text: '102 — SVC adaptive (SVC layer selection + WebCodecs decoder + MoQ datagram FEC walkthrough)', link: '/tutorials/102-svc-adaptive' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -363,6 +371,7 @@ export default defineConfig({
             { text: 'Observability advanced III testing (v2.2 8 axis SSOT + 4 provider × 8 axis = 32 advanced III cell grid + 16-axis combined harness + pair 深度 4 段 3 例目 record + KIWA_MODE=real env-gate)', link: '/concepts/observability-advanced-III-testing' },
             { text: 'Edge / Serverless advanced testing (v1.2 8 axis SSOT + 3 platform × 8 axis = 24 advanced cell grid + 16-axis combined harness + pair 第 12 新規 base pair 導入 + KIWA_MODE=real env-gate)', link: '/concepts/edge-serverless-advanced-testing' },
             { text: 'Auth advanced III testing (v0.6 8 axis SSOT + 3 platform × 8 axis = 24 advanced cell grid + pair 第 1 pair 3 段拡張達成 record + KIWA_MODE=real env-gate)', link: '/concepts/auth-advanced-III-testing' },
+            { text: 'Realtime advanced III testing (v0.3 8 axis SSOT + 3 protocol MoQ / WebCodecs / AI-media × 8 axis + pair 第 2 pair 3 段拡張達成 record + KIWA_MODE=real env-gate)', link: '/concepts/realtime-advanced-III-testing' },
           ],
         },
       ],
@@ -406,6 +415,7 @@ export default defineConfig({
             { text: 'v1.41 → v1.42', link: '/migrations/v1.41-to-v1.42' },
             { text: 'v1.42 → v1.43', link: '/migrations/v1.42-to-v1.43' },
             { text: 'v1.43 → v1.44', link: '/migrations/v1.43-to-v1.44' },
+            { text: 'v1.44 → v1.45', link: '/migrations/v1.44-to-v1.45' },
           ],
         },
       ],
