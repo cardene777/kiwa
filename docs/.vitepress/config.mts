@@ -454,6 +454,12 @@ export default defineConfig({
             { text: '125 — quality-metrics v0.5 history (captureSnapshot + compareToBaseline + detectDrift + generateTrendReport walkthrough)', link: '/tutorials/125-quality-metrics-history' },
           ],
         },
+        {
+          text: 'quality-metrics 深化 III (v1.66、 v0.6 evaluateReleaseGate に drift check opt-in 統合、 systematic pattern 41 度目、 44 milestone streak、 depth-5 pattern 3 例目確定 実運用 継続)',
+          items: [
+            { text: '126 — quality-metrics v0.6 drift-gate (driftEnabled + driftBaseline + driftThresholdPct + drift.{axis} blocker walkthrough)', link: '/tutorials/126-quality-metrics-drift-gate' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -513,6 +519,7 @@ export default defineConfig({
             { text: 'Desktop v0.8 probe layer (v1.63 probe.ts 新設 5 type SSOT + probeCliAvailable which/where + shouldSkipAxis 12 axis 別 skip strategy + platformGate + computeSkipMatrix + fidelity harness runFidelityCheckWithProbe + SkippedPair 統合 + shape 契約 preserving 絶対維持 + systematic pattern 38 度目 + depth-8 pattern 新設 candidate)', link: '/concepts/desktop-probe' },
             { text: 'Desktop v0.9 実 native binding 呼出 (v1.64 native-invoke.ts 新設 3 type SSOT + probeAndInvoke + probeAndInvokeAll + InvokeStatus 4 経路 + 4 step probe → invoke 統合 + shape 契約 preserving 絶対維持 + 3 layer separation 完全 pay off + systematic pattern 39 度目 + depth-9 pattern 新設 candidate)', link: '/concepts/desktop-native-invoke' },
             { text: 'quality-metrics v0.5 historical trend + drift (v1.65 history.ts 新設 6 type SSOT + captureSnapshot + compareToBaseline + detectDrift + generateTrendReport + axis 別 上昇=改善/悪化 判定 + shape 契約 preserving 絶対維持 + depth-5 pattern 3 例目確定 = 絶対的 rule 昇格 signal + systematic pattern 40 度突入)', link: '/concepts/quality-metrics-history' },
+            { text: 'quality-metrics v0.6 evaluateReleaseGate に drift check opt-in 統合 (v1.66 ReleaseGateContext 3 新 field = driftBaseline + driftThresholdPct + driftEnabled + drift.{axis} blocker 1:1 格上げ + axesEvaluated +1 lane 加算 + default off backward compat 絶対維持 + shape 契約 preserving + depth-5 pattern 3 例目確定 実運用 継続 + systematic pattern 41 度目)', link: '/concepts/quality-metrics-drift-gate' },
           ],
         },
       ],
@@ -577,6 +584,7 @@ export default defineConfig({
             { text: 'v1.62 → v1.63', link: '/migrations/v1.62-to-v1.63' },
             { text: 'v1.63 → v1.64', link: '/migrations/v1.63-to-v1.64' },
             { text: 'v1.64 → v1.65', link: '/migrations/v1.64-to-v1.65' },
+            { text: 'v1.65 → v1.66', link: '/migrations/v1.65-to-v1.66' },
           ],
         },
       ],
