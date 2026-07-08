@@ -1,0 +1,81 @@
+{
+  "name": "@kiwa-test/security-devsecops",
+  "version": "0.1.0",
+  "description": "DevSecOps test harness for kiwa v0.1 — 6 axis (SAST + SCA + Secret scan + IaC scan + DAST + Container security) unified across 4 provider (Semgrep + Trivy + Gitleaks + tfsec + OWASP ZAP + Grype) with a 4x6 = 24 combination fidelity harness, KIWA_MODE=real env-gate, and quality-metrics 15-axis release gate integration. Complements v0.2 @kiwa-test/security (advanced runtime security: CSP + mTLS + SIEM + SLSA) with build-time / CI-time security scanning axis.",
+  "license": "MIT",
+  "author": {
+    "name": "cardene",
+    "url": "https://github.com/cardene777"
+  },
+  "keywords": [
+    "kiwa",
+    "security",
+    "devsecops",
+    "sast",
+    "sca",
+    "secret-scan",
+    "iac-scan",
+    "dast",
+    "container-security",
+    "semgrep",
+    "trivy",
+    "gitleaks",
+    "tfsec",
+    "owasp-zap",
+    "grype",
+    "testing",
+    "vitest"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cardene777/kiwa.git",
+    "directory": "packages/security-devsecops"
+  },
+  "homepage": "https://github.com/cardene777/kiwa#readme",
+  "bugs": {
+    "url": "https://github.com/cardene777/kiwa/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vitest": "^2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
