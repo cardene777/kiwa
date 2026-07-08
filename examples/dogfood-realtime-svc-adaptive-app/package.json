@@ -1,0 +1,20 @@
+{
+  "name": "dogfood-realtime-svc-adaptive-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.45-4 — Simulcast + SVC + WebCodecs decoder + MoQ datagram adaptive delivery observability harness backed by @kiwa-test/realtime v0.3 simulcast-svc + webcodecs-decoder + moq-datagram-media semantics.",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/realtime build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/realtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
