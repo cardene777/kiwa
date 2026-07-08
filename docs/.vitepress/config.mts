@@ -412,6 +412,12 @@ export default defineConfig({
             { text: '118 — Desktop advanced III (Screen recording + Global shortcut + Clipboard + Dark-mode walkthrough)', link: '/tutorials/118-desktop-advanced-iii' },
           ],
         },
+        {
+          text: 'Desktop 深化 III (v1.59、 v0.4 adapter layer + fidelity harness、 systematic pattern 34 度目、 37 milestone streak、 depth-4 record 5 例目、 Mobile v1.53 rhythm 再現)',
+          items: [
+            { text: '119 — Desktop adapter layer (AdapterInvocation + AdapterResult + MOCK/REAL_ADAPTERS + fidelity harness walkthrough)', link: '/tutorials/119-desktop-adapter-layer' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -464,6 +470,7 @@ export default defineConfig({
             { text: 'Desktop testing baseline (v1.56 3 axis SSOT + new-base pair 第 14 + 42 package 到達 + v2.0 milestone desktop adapter goal 達成)', link: '/concepts/desktop-testing-baseline' },
             { text: 'Desktop advanced axis (v1.57 v0.2 5 axis SSOT + auto-updater + fs-permissions + notification + menu-bar + tray-icon + 24 spec fidelity grid + systematic pattern 32 度目)', link: '/concepts/desktop-advanced-axis' },
             { text: 'Desktop advanced III (v1.58 v0.3 4 axis SSOT + screen-recording + global-shortcut + clipboard + dark-mode + 36 spec fidelity grid + systematic pattern 33 度目 + Mobile v1.50-v1.52 rhythm 再現)', link: '/concepts/desktop-advanced-iii' },
+            { text: 'Desktop adapter layer (v1.59 v0.4 adapter interface + fidelity harness SSOT + 24 adapter pair + 72 combination + 36 fidelity pair + systematic pattern 34 度目 + Mobile v1.53 rhythm 再現 + depth-4 record 5 例目)', link: '/concepts/desktop-adapter-layer' },
           ],
         },
       ],
@@ -521,6 +528,7 @@ export default defineConfig({
             { text: 'v1.55 → v1.56', link: '/migrations/v1.55-to-v1.56' },
             { text: 'v1.56 → v1.57', link: '/migrations/v1.56-to-v1.57' },
             { text: 'v1.57 → v1.58', link: '/migrations/v1.57-to-v1.58' },
+            { text: 'v1.58 → v1.59', link: '/migrations/v1.58-to-v1.59' },
           ],
         },
       ],
