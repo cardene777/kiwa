@@ -1,12 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
   runAutoUpdaterAxis,
+  runClipboardAxis,
+  runDarkModeAxis,
   runElectronAxis,
   runFsPermissionsAxis,
   runFullDesktopWorkflow,
   runFullDesktopWorkflowV02,
+  runFullDesktopWorkflowV03,
+  runGlobalShortcutAxis,
   runMenuBarAxis,
   runNotificationAxis,
+  runScreenRecordingAxis,
   runTauriAxis,
   runTrayIconAxis,
   runWebviewAxis,
@@ -188,5 +193,103 @@ describe('Desktop v0.2 advanced 5 axis × 3 target workflow (v1.57-2)', () => {
     const total = runFullDesktopWorkflowV02().length;
     const v01Total = runFullDesktopWorkflow().length;
     expect(total - v01Total).toBe(15);
+  });
+});
+
+describe('Desktop v0.3 advanced III 4 axis × 3 target workflow (v1.58-2)', () => {
+  it('screen-recording axis stops on all 3 targets', () => {
+    const results = runScreenRecordingAxis();
+    expect(results).toHaveLength(3);
+    for (const r of results) {
+      expect(r.completed).toBe(true);
+      expect(r.axis).toBe('screen-recording');
+      expect(r.eventCount).toBeGreaterThanOrEqual(5);
+    }
+  });
+
+  it('global-shortcut axis all-clears on all 3 targets', () => {
+    const results = runGlobalShortcutAxis();
+    expect(results).toHaveLength(3);
+    for (const r of results) {
+      expect(r.completed).toBe(true);
+      expect(r.axis).toBe('global-shortcut');
+      expect(r.eventCount).toBeGreaterThanOrEqual(5);
+    }
+  });
+
+  it('clipboard axis clears on all 3 targets', () => {
+    const results = runClipboardAxis();
+    expect(results).toHaveLength(3);
+    for (const r of results) {
+      expect(r.completed).toBe(true);
+      expect(r.axis).toBe('clipboard');
+      expect(r.eventCount).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it('dark-mode axis unsubscribes on all 3 targets', () => {
+    const results = runDarkModeAxis();
+    expect(results).toHaveLength(3);
+    for (const r of results) {
+      expect(r.completed).toBe(true);
+      expect(r.axis).toBe('dark-mode');
+      expect(r.eventCount).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it('all 3 targets appear in each v0.3 axis', () => {
+    for (const runner of [
+      runScreenRecordingAxis,
+      runGlobalShortcutAxis,
+      runClipboardAxis,
+      runDarkModeAxis,
+    ]) {
+      const targets = runner().map((r) => r.target).sort();
+      expect(targets).toEqual(['linux', 'macos', 'windows']);
+    }
+  });
+
+  it('runFullDesktopWorkflowV03 emits 36 results (12 axis × 3 target)', () => {
+    const results = runFullDesktopWorkflowV03();
+    expect(results).toHaveLength(36);
+    for (const r of results) {
+      expect(r.completed).toBe(true);
+    }
+  });
+
+  it('v03 workflow contains all 12 unique axes', () => {
+    const results = runFullDesktopWorkflowV03();
+    const axes = new Set(results.map((r) => r.axis));
+    expect(axes.size).toBe(12);
+    expect(axes).toEqual(
+      new Set([
+        'electron',
+        'tauri',
+        'webview',
+        'auto-updater',
+        'fs-permissions',
+        'notification',
+        'menu-bar',
+        'tray-icon',
+        'screen-recording',
+        'global-shortcut',
+        'clipboard',
+        'dark-mode',
+      ]),
+    );
+  });
+
+  it('v02 workflow (8 axis) is subset of v03 workflow (12 axis)', () => {
+    const v02Axes = new Set(runFullDesktopWorkflowV02().map((r) => r.axis));
+    const v03Axes = new Set(runFullDesktopWorkflowV03().map((r) => r.axis));
+    for (const axis of v02Axes) {
+      expect(v03Axes.has(axis)).toBe(true);
+    }
+  });
+
+  it('v03 workflow adds 12 new results (4 v0.3 axis × 3 target)', () => {
+    const total = runFullDesktopWorkflowV03().length;
+    const v02Total = runFullDesktopWorkflowV02().length;
+    expect(total - v02Total).toBe(12);
   });
 });
