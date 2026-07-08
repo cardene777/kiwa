@@ -344,6 +344,12 @@ export default defineConfig({
             { text: '105 — DevSecOps adapter (6 axis × mock/real pair + env-gate + fidelity harness walkthrough)', link: '/tutorials/105-security-adapter' },
           ],
         },
+        {
+          text: 'DevSecOps orchestrator Phase 3 (v1.48)',
+          items: [
+            { text: '106 — DevSecOps single entry (runSecurityAudit + 4 preset + summary walkthrough)', link: '/tutorials/106-security-orchestrator' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -432,6 +438,7 @@ export default defineConfig({
             { text: 'v1.44 → v1.45', link: '/migrations/v1.44-to-v1.45' },
             { text: 'v1.45 → v1.46', link: '/migrations/v1.45-to-v1.46' },
             { text: 'v1.46 → v1.47', link: '/migrations/v1.46-to-v1.47' },
+            { text: 'v1.47 → v1.48', link: '/migrations/v1.47-to-v1.48' },
           ],
         },
       ],

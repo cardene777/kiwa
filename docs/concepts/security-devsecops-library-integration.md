@@ -90,7 +90,69 @@ skill 実行結果は library の neutral event history を経由するため、
 
 - **Phase 1 (v1.46) ✅** = library v0.1 semantics のみ提供、 skill は semantics 経由に move
 - **Phase 2 (v1.47) ✅** = library v0.2 で adapter 経由の実 scan 統合 (semgrep / trivy CLI 呼出を library 内に隠蔽)
-- **Phase 3 (v1.48+)** = 4 skill を library single entry (`runSecurityAudit`) 経由に統合、 skill 個別化を減らす
+- **Phase 3 (v1.48) ✅** = 4 skill を library single entry (`runSecurityAudit`) 経由に統合、 skill 個別化を排除
+
+## Phase 3 完成 SSOT (v1.48)
+
+v1.48 で `@kiwa-test/security-devsecops` v0.3 を release、 `runSecurityAudit` single entry + 4 preset SSOT + summary API 追加。 Phase 1 + Phase 2 の上に乗る optional path、 従来経路も動作継続。
+
+### 3 段の階層構造
+
+- **Phase 1 semantics** = 細かい finding driving (低レベル)、 use case = custom logic 挟む、 test fixture
+- **Phase 2 adapter** = axis 単位 workflow (中レベル)、 use case = 特定 axis のみ mock/real 切替
+- **Phase 3 orchestrator** = skill / workflow (高レベル)、 use case = 4 preset で skill 置換
+
+### 4 preset × skill 対応 map
+
+| preset | axis 実行数 | 対応 skill | 特徴 |
+|---|---|---|---|
+| audit-all | 6 (全 axis) | security-audit | 全 axis 実行 |
+| supply-chain | 2 (SCA + Container) | security-audit-supply-chain | 供給チェーン特化 |
+| specialty | 3 (SAST + Secret + DAST) | security-audit-specialty | domain 特化 |
+| threat-model | 6 (全 axis) + STRIDE tag | security-audit-threat-model | STRIDE 分類添付 |
+
+### single entry 実装 pattern
+
+```ts
+import {
+  runSecurityAudit,
+  summarizeAuditReport,
+  type AuditPreset,
+} from '@kiwa-test/security-devsecops';
+
+// skill 4 種を library で置換
+async function runSkill(preset: AuditPreset, target: string) {
+  const report = await runSecurityAudit({ preset, target, mode: 'mock' });
+  const summary = summarizeAuditReport(report);
+  return { report, summary };
+}
+
+// audit-all skill 実行
+const audit = await runSkill('audit-all', '/repo');
+console.log(audit.summary.completedAxis); // 6
+
+// threat-model skill 実行 (STRIDE tag 添付)
+const threat = await runSkill('threat-model', '/repo');
+console.log(threat.summary.stridDreadTags); // 6 tags
+```
+
+### AuditReport → AuditSummary 集約 SSOT
+
+- totalAxis / completedAxis = 完了状態
+- totalEvents = 全 axis event 総数
+- totalDurationMs = 全体実行時間
+- perAxis = axis 単位 completed + eventCount
+- stridDreadTags = threat-model preset のみ添付 (他 preset は undefined)
+
+### DevSecOps library 化計画完遂
+
+Phase 1 (semantics) → Phase 2 (adapter) → Phase 3 (orchestrator) の 3 段完成で、 skill 4 種は library single entry 経由に置換可能に。 skill 個別化の workload を library に集約、 kiwa の DevSecOps library 化計画は v1.48 で完遂。
+
+## Phase 4 (v1.49+) 計画
+
+- **v0.4 spawn 実装** = real adapter が実 semgrep / trivy / gitleaks / tfsec / OWASP ZAP / grype CLI を child_process.spawn で呼出、 fidelity harness で mock/real 差分を実 CLI 経路で監視
+- **7 axis 目 / 8 axis 目 追加** = SBOM (CycloneDX / SPDX) + SLSA provenance (build-time attestation)
+- **perf-harness strict mode 統合** = adapter 呼出 latency baseline 化
 
 ## Phase 2 完成 SSOT (v1.47)
 
