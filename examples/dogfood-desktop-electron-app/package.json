@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.56-2 — Desktop 3 axis × 3 target workflow backed by @kiwa-test/desktop v0.1。 Electron + Tauri + Webview を macos / windows / linux で横断的に扱う。",
+  "description": "Dogfood app v1.57-2 — Desktop 8 axis × 3 target workflow backed by @kiwa-test/desktop v0.2 (v0.1 3 axis Electron + Tauri + Webview に v0.2 で Auto-updater + File-system permissions + Notification + Menu-bar + Tray-icon の advanced 5 axis 追加、 macos / windows / linux で横断的に扱う、 backward compat 維持 = runFullDesktopWorkflow 3 axis 保持 + runFullDesktopWorkflowV02 で 8 axis 全走査)。",
   "scripts": {
     "test": "pnpm -F @kiwa-test/core -F @kiwa-test/desktop build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
