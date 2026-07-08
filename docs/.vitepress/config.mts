@@ -502,6 +502,12 @@ export default defineConfig({
             { text: '133 — search v2.1 query-orchestrator (5 state SSOT + 8 event SSOT + parsing/searching/reranking/facet walkthrough)', link: '/tutorials/133-search-query-orchestrator' },
           ],
         },
+        {
+          text: 'Observability pair depth-5 到達 (v2.7、 observability v2.1 incident-orchestrator、 depth-5 pattern 8 例目発生 = systematic law 継続強化 第 2 例、 **systematic pattern 50 度到達** milestone、 53 milestone streak)',
+          items: [
+            { text: '134 — observability v2.1 incident-orchestrator (5 state SSOT + 8 event SSOT + detecting/triaging/escalating/mitigating/resolved walkthrough)', link: '/tutorials/134-observability-incident-orchestrator' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -569,6 +575,7 @@ export default defineConfig({
             { text: 'realtime v2.1 session-orchestrator (v2.4 session-orchestrator.ts 新設 startSession + dispatchEvent + summarizeSession + 5 state SSOT connecting/subscribed/reconnecting/degraded/closed + 8 event SSOT + 40 セル 遷移表 + heartbeat 動的 QoS 3 回連続失敗 で degraded 降格 + soft-reject pattern + Realtime pair 5 段深化 = depth-5 pattern 5 例目発生 = systematic law 昇格 candidate 到達 + systematic pattern 47 度目 continuous state machine variant Realtime 転用)', link: '/concepts/realtime-session-orchestrator' },
             { text: 'streaming v2.1 pipeline-orchestrator (v2.5 pipeline-orchestrator.ts 新設 startPipeline + dispatchPipelineEvent + summarizePipeline + 5 state SSOT producing/consuming/rebalancing/dlq-active/stopped + 8 event SSOT + 40 セル 遷移表 + producer + consumer group + exactly-once + DLQ + schema registry 継続合成 + Streaming pair 5 段深化 = depth-5 pattern 6 例目発生 = **systematic law CONFIRMED** = kiwa 全体 最上位規範化 confirmed + systematic pattern 48 度目)', link: '/concepts/streaming-pipeline-orchestrator' },
             { text: 'search v2.1 query-orchestrator (v2.6 query-orchestrator.ts 新設 startQuery + dispatchQueryEvent + summarizeQuery + 5 state SSOT parsing/searching/reranking/facet-aggregating/completed + 8 event SSOT + query DSL + faceted + semantic + geo + relevance 継続合成 + Search pair 5 段深化 = depth-5 pattern 7 例目発生 systematic law 継続強化 + systematic pattern 49 度目 systematic law 継承 第 1 例)', link: '/concepts/search-query-orchestrator' },
+            { text: 'observability v2.1 incident-orchestrator (v2.7 incident-orchestrator.ts 新設 startIncident + dispatchIncidentEvent + summarizeIncident + 5 state SSOT detecting/triaging/escalating/mitigating/resolved + 8 event SSOT + alert + escalation + AIOps + FinOps + chaos 継続合成 + Observability pair 5 段深化 = depth-5 pattern 8 例目発生 systematic law 継続強化 第 2 例 + **systematic pattern 50 度到達 milestone**)', link: '/concepts/observability-incident-orchestrator' },
           ],
         },
       ],
@@ -642,6 +649,7 @@ export default defineConfig({
             { text: 'v2.3 → v2.4', link: '/migrations/v2.3-to-v2.4' },
             { text: 'v2.4 → v2.5', link: '/migrations/v2.4-to-v2.5' },
             { text: 'v2.5 → v2.6', link: '/migrations/v2.5-to-v2.6' },
+            { text: 'v2.6 → v2.7', link: '/migrations/v2.6-to-v2.7' },
           ],
         },
       ],
