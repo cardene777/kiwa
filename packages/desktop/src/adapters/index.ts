@@ -54,6 +54,17 @@ export {
   type NativeInvokeResult,
 } from './native-invoke.js';
 
+// v1.0 invoke-cache layer (depth-6 pattern 2 例目確定 candidate、 Desktop v0.9 → v1.0)
+export {
+  InvokeCache,
+  buildCacheKey,
+  withCache,
+  type CacheStatus,
+  type CachedInvokeEntry,
+  type CachedNativeInvokeResult,
+  type InvokeCacheConfig,
+} from './invoke-cache.js';
+
 // v0.5 spawn stub 契約層 + v0.6 実 spawn (depth-5 pattern 2 例目確定、 depth-6 pattern 新設 candidate、 Mobile v1.54-v1.55 rhythm 再現)
 export {
   buildSpawnInvocation,
