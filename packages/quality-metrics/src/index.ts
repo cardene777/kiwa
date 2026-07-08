@@ -48,3 +48,17 @@ export {
 } from './gate.js';
 
 export { diffReports, emitJson, emitMarkdown } from './emit.js';
+
+// v0.5 Historical trend tracking + drift detection
+export {
+  captureSnapshot,
+  compareToBaseline,
+  detectDrift,
+  generateTrendReport,
+  type AxisDelta,
+  type BaselineComparison,
+  type DriftCategory,
+  type DriftDetection,
+  type MetricSnapshot,
+  type TrendReport,
+} from './history.js';
