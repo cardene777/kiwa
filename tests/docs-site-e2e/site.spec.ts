@@ -719,6 +719,13 @@ const V2_3_PAGES = [
   { path: '/migrations/v2.2-to-v2.3', title: 'v2.2 → v2.3' },
 ];
 
+// v2.4 = Realtime pair depth-5 到達 (realtime v2.1 session-orchestrator)、 depth-5 pattern 5 例目発生 = systematic law 昇格 candidate 到達、 50 milestone streak、 systematic pattern 47 度目 continuous state machine variant Realtime 転用。
+const V2_4_PAGES = [
+  { path: '/tutorials/131-realtime-session-orchestrator', title: '@kiwa/realtime v2.1 session-orchestrator' },
+  { path: '/concepts/realtime-session-orchestrator', title: '@kiwa/realtime v2.1 session-orchestrator SSOT' },
+  { path: '/migrations/v2.3-to-v2.4', title: 'v2.3 → v2.4' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1234,6 +1241,20 @@ test.describe('docs site — v2.2 pages render', () => {
 test.describe('docs site — v2.3 pages render', () => {
   for (const p of V2_3_PAGES) {
     test(`v2.3 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v2.4 pages render', () => {
+  for (const p of V2_4_PAGES) {
+    test(`v2.4 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
