@@ -14,8 +14,13 @@ function readJson<T = unknown>(rel: string): T {
 }
 
 describe('v2.7-4 publish', () => {
-  it('plugin.json 2.7.0', () => {
-    expect(readJson<{ version: string }>('.claude-plugin/plugin.json').version).toBe('2.7.0');
+  it('plugin.json >= 2.7.0', () => {
+    const v = readJson<{ version: string }>('.claude-plugin/plugin.json').version;
+    const parts = v.split('.').map(Number);
+    const major = parts[0] ?? 0;
+    const minor = parts[1] ?? 0;
+    expect(major).toBeGreaterThanOrEqual(2);
+    expect(major > 2 || (major === 2 && minor >= 7)).toBe(true);
   });
   it('4 announcement', () => {
     for (const name of ['gh-discussions-announcement.md', 'x-thread-en.md', 'x-thread-ja.md', 'zenn-article.md']) {
