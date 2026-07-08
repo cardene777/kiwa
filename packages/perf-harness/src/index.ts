@@ -11,12 +11,13 @@ export type {
 export { buildMeasureResult, measure } from './measure.js';
 export { measureConcurrent, type ConcurrentInput } from './concurrent.js';
 export { measureMemory, type MemoryInput, type MemorySample } from './memory.js';
-export { detectRegression } from './regression.js';
+export { detectRegression, detectRegressionStrict } from './regression.js';
 export { defaultBaselinePath, loadBaseline, saveBaseline } from './baseline.js';
 export { evaluatePerfGate } from './gate.js';
 export { emitPerfReport } from './report.js';
 export {
   runPerf3Layer,
+  runPerf3LayerStrict,
   resolveKiwaRepoRoot,
   type PerfOpSpec,
   type RunPerf3LayerInput,
