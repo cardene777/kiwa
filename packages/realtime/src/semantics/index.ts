@@ -131,3 +131,16 @@ export {
   type AiInferenceResponse,
   type RealtimeAiInferenceMock,
 } from './realtime-ai-inference.js';
+
+// v2.1 session-orchestrator = presence + broadcast + subscription + heartbeat + reconnect の 継続合成 layer
+export type {
+  RealtimeSessionState,
+  RealtimeEvent,
+  RealtimeSession,
+  RealtimeSessionSummary,
+} from './session-orchestrator.js';
+export {
+  startSession,
+  dispatchEvent,
+  summarizeSession,
+} from './session-orchestrator.js';
