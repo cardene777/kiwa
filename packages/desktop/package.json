@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/desktop",
-  "version": "0.8.0",
-  "description": "Desktop test harness for kiwa v0.8 — 12 axis + adapter + fidelity + spawn stub + 実 spawn + v0.7 real behavior runner + v0.8 native binding availability probe + skip 経路 (which/where CLI check + platform gate + 12 axis 別 skip strategy、 実 CLI 未 install 環境でも決定的 test 成立) を pair layer 化。 probe = probeCliAvailable + shouldSkipAxis + computeSkipMatrix + platformGate、 fidelity harness に runFidelityCheckWithProbe + SkippedPair 統合 (skip した pair は matched 判定から除外、 skippedPairs metadata で追跡)、 shape 契約 preserving 絶対維持 = neutralEvents + eventCount 一致、 v0.4 fidelity harness 設計思想の実運用継続。 v1.63 で kiwa 縦深化 pair 第 14 の第 8 段 (depth-8 pattern 新設 candidate、 Desktop pair v0.1-v0.8)、 v1.55-v1.62 4 PR rhythm 継承 (10 milestone 連続 = 40 PR 連続同 rhythm)、 systematic pattern 38 度目適用 (uniform probe layer)、 backward compat 絶対維持 (v0.1-v0.7 API 変更 0)、 41 milestone snippet streak 到達。",
+  "version": "0.9.0",
+  "description": "Desktop test harness for kiwa v0.9 — 12 axis + adapter + fidelity + spawn stub + 実 spawn + real behavior runner + probe + skip + v0.9 実 native binding 呼出 (probeAndInvoke = probe + invoke 統合、 実 CLI 存在時のみ 実 spawn 呼出、 未 install 時は skip 経路で shape 契約 preserving) を pair layer 化。 native-invoke = probeAndInvoke + probeAndInvokeAll + InvokeStatus SSOT (invoked / cli-unavailable / axis-skipped / no-cli-mapping の 4 経路 return)、 shape 契約 preserving 絶対維持 = SpawnResult 構造無変更、 skip 時は spawnResult=null で明示。 v1.62 real behavior + v1.63 probe + v1.64 実 invoke の 3 milestone で構築した 3 layer separation の完全 pay off phase。 v1.64 で kiwa 縦深化 pair 第 14 の第 9 段 (depth-9 pattern 新設 candidate、 Desktop pair v0.1-v0.9)、 v1.55-v1.63 4 PR rhythm 継承 (11 milestone 連続 = 44 PR 連続同 rhythm)、 systematic pattern 39 度目適用 (uniform native invoke integration)、 backward compat 絶対維持 (v0.1-v0.8 API 変更 0)、 42 milestone snippet streak 到達。",
   "license": "MIT",
   "author": {
     "name": "cardene",
