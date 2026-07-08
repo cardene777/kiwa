@@ -165,3 +165,17 @@ export {
   drainPoolGracefully,
   exportPoolMetrics,
 } from './pool-advanced.js';
+
+// v0.6 transaction-orchestrator = txn-isolation + mvcc + connection-pool +
+// logical-replication + partitioning の 継続合成 layer (depth-5 pattern 9 例目)
+export type {
+  TransactionState,
+  TransactionEvent,
+  TransactionSession,
+  TransactionSummary,
+} from './transaction-orchestrator.js';
+export {
+  startTransaction,
+  dispatchEvent as dispatchTransactionEvent,
+  summarizeTransaction,
+} from './transaction-orchestrator.js';
