@@ -102,6 +102,19 @@ export interface PerfMetric {
   p99Ms: number;
   /** Total sample count that fed the percentiles. */
   samples: number;
+  /**
+   * v0.4 strict mode indicator。 true = strict variant で計測済
+   * (perf-harness v0.3 runPerf3LayerStrict + iter 400 + Welch |t|>3 + delta 10%)、
+   * false / undefined = v0.2 lax mode。
+   * strict = true の場合、 release gate は perf.strict axis も評価する。
+   */
+  strict?: boolean;
+  /**
+   * v0.4 strict baseline 存在フラグ。 true = .perf-baseline/{name}.json 存在確認済、
+   * false / undefined = baseline 未生成 (regression 検知不能)。 release gate で
+   * strict = true + baselineExists = false は fail-fast。
+   */
+  baselineExists?: boolean;
 }
 
 /** Mutation testing kill rate. */
@@ -312,6 +325,18 @@ export interface ReleaseGateThresholds {
   totalTokens: number;
   /** AI-LLM 下限 — golden vs 実出力 similarity score (default 0.80)。 */
   accuracyScore: number;
+  /**
+   * v0.4 perf strict axis — strict mode で計測された PerfMetric に対して
+   * `perf.strict.p95Ms` の上限 (default 50 = lax の半分)。 lax mode の PerfMetric
+   * (strict != true) は本 axis を skip する (backward compat)。
+   */
+  perfStrictP95Ms: number;
+  /**
+   * v0.4 perf strict baseline 存在必須フラグ。 true = strict mode の
+   * PerfMetric に対して baselineExists = true を必須化 (baseline 未生成なら
+   * fail-fast)。 default true。
+   */
+  perfStrictRequireBaseline: boolean;
 }
 
 /** Reason a report failed the release gate. Each blocker names the axis. */
