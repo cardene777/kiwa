@@ -12,17 +12,17 @@ import {
   type SpawnInvocation,
 } from '../src/index.js';
 
-describe('tutorial 120 — invokeDesktopCli snippet', () => {
-  it('ffmpeg 呼出 with KIWA_DESKTOP_MODE=real', async () => {
+describe('tutorial 120 — invokeDesktopCli snippet (v1.61+ dry-run env で v0.5 shape 契約復元)', () => {
+  it('ffmpeg 呼出 with KIWA_DESKTOP_MODE=real + KIWA_DESKTOP_SPAWN=dry-run', async () => {
     const inv: SpawnInvocation = {
       command: 'ffmpeg',
       args: ['-i', 'input.mp4', 'output.webm'],
-      env: { KIWA_DESKTOP_MODE: 'real' },
+      env: { KIWA_DESKTOP_MODE: 'real', KIWA_DESKTOP_SPAWN: 'dry-run' },
     };
     const result = await invokeDesktopCli(inv);
     expect(result.invoked).toBe(true);
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('[v0.5 stub]');
+    expect(result.stdout).toContain('[v0.6 dry-run]');
   });
 
   it('fail-closed when KIWA_DESKTOP_MODE 未設定', async () => {
@@ -75,11 +75,11 @@ describe('tutorial 120 — args 上限 + fail-closed snippet', () => {
     await expect(invokeDesktopCli(inv)).rejects.toThrow(/args exceeds max 32/);
   });
 
-  it('args 32 ちょうどは pass', async () => {
+  it('args 32 ちょうどは pass (dry-run で v0.5 shape 契約復元)', async () => {
     const inv = {
       command: 'electron-builder' as const,
       args: new Array<string>(32).fill('a'),
-      env: { KIWA_DESKTOP_MODE: 'real' },
+      env: { KIWA_DESKTOP_MODE: 'real', KIWA_DESKTOP_SPAWN: 'dry-run' },
     };
     const result = await invokeDesktopCli(inv);
     expect(result.invoked).toBe(true);

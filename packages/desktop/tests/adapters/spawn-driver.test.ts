@@ -8,10 +8,10 @@ import {
 } from '../../src/index.js';
 import type { DesktopAxis } from '../../src/semantics/index.js';
 
-describe('desktop spawn-driver v0.5 stub 契約層 (Mobile v1.54 rhythm 再現)', () => {
-  const baseEnv = { KIWA_DESKTOP_MODE: 'real' };
+describe('desktop spawn-driver v0.6 実 spawn + dry-run backward compat (Mobile v1.55 rhythm 再現)', () => {
+  const baseEnv = { KIWA_DESKTOP_MODE: 'real', KIWA_DESKTOP_SPAWN: 'dry-run' };
 
-  it('invokeDesktopCli succeeds under KIWA_DESKTOP_MODE=real', async () => {
+  it('invokeDesktopCli succeeds under KIWA_DESKTOP_MODE=real + dry-run', async () => {
     const inv: SpawnInvocation = {
       command: 'ffmpeg',
       args: ['-i', 'input.mp4', 'output.webm'],
@@ -22,7 +22,7 @@ describe('desktop spawn-driver v0.5 stub 契約層 (Mobile v1.54 rhythm 再現)'
     expect(result.exitCode).toBe(0);
     expect(result.command).toBe('ffmpeg');
     expect(result.args).toEqual(['-i', 'input.mp4', 'output.webm']);
-    expect(result.stdout).toContain('[v0.5 stub]');
+    expect(result.stdout).toContain('[v0.6 dry-run]');
     expect(result.stderr).toBe('');
     expect(result.durationMs).toBeGreaterThanOrEqual(0);
   });

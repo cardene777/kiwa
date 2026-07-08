@@ -20,12 +20,22 @@ export {
   type FidelitySummary,
 } from './fidelity-harness.js';
 
-// v0.5 spawn stub 契約層 (depth-5 pattern 2 例目 candidate、 Mobile v1.54 rhythm 再現)
+// v0.5 spawn stub 契約層 + v0.6 実 spawn (depth-5 pattern 2 例目確定、 depth-6 pattern 新設 candidate、 Mobile v1.54-v1.55 rhythm 再現)
 export {
   buildSpawnInvocation,
   cliForAxis,
   invokeDesktopCli,
+  invokeDesktopCliWith,
   type DesktopCliCommand,
   type SpawnInvocation,
   type SpawnResult,
 } from './spawn-driver.js';
+
+// v0.6 spawn executor (Mobile v0.6 pattern 転用)
+export {
+  executeSpawn,
+  sanitizeEnv,
+  type SpawnExecutorInput,
+  type SpawnExecutorResult,
+  type SpawnFn,
+} from './spawn-executor.js';
