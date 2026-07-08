@@ -102,3 +102,6 @@ export type {
   SetupRabbitMQAdvancedEnvOptions,
 } from './rabbitmq-advanced/types.js';
 export { setupRabbitMQAdvancedEnv } from './rabbitmq-advanced/setup-rabbitmq-advanced-env.js';
+
+// v0.6 job-lifecycle-orchestrator = 5 provider (BullMQ + Inngest + CF Queues + SQS + RabbitMQ) 継続合成 layer
+export * from './semantics/index.js';
