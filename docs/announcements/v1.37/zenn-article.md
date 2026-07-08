@@ -1,9 +1,9 @@
-# kiwa v1.37 released — Security 深化 (@kiwa-test/security v0.1.0 新規 + 8 axis security + 縦深化 pair 第 9 pair 連続化 + 新規 base pair)
+# kiwa v1.37 released — Security 深化 (@kiwa/security v0.1.0 新規 + 8 axis security + 縦深化 pair 第 9 pair 連続化 + 新規 base pair)
 
 ## TL;DR
 
 - **kiwa v1.37 released** — Security 深化 milestone
-- **`@kiwa-test/security` v0.1.0 新規 package** — 8 axis security semantics + real driver env-gate + 4 provider × 8 axis neutral state machine
+- **`@kiwa/security` v0.1.0 新規 package** — 8 axis security semantics + real driver env-gate + 4 provider × 8 axis neutral state machine
 - **8 axis semantics** = CSP + Rate limit + Authorization + WAF + Threat model + Secrets scanning + SBOM + Security headers advanced
 - **3 dogfood app 新規** — security-csp-headers-app + security-rbac-abac-app + security-sbom-scanning-app
 - **縦深化 pair pattern 第 9 pair 連続化** — Security 新規 base pair (v1.37 base、 v1.38+ で II 予定)
@@ -15,7 +15,7 @@
 
 kiwa は v1.36 まで dApp / web app / full-stack framework / 実 backend / real-time / payment / observability / search の 34 layer + release-invariants + a11y + component / performance / mutation の quality gate maximum grid を cover していたが、 security 領域は auth (v1.21-v1.22 で cover) 以外の CSP / Rate limit / Authorization / WAF / Threat model / Secrets scanning / SBOM / Security headers advanced が **未 cover** の状態だった.
 
-v1.37 で `@kiwa-test/security` v0.1.0 を **新規 package** として追加、 8 axis を helmet + express-rate-limit + casbin + coraza の 4 provider 統一 mock として実装、 CSP nonce + strict-dynamic + trusted-types、 Rate limit token bucket + leaky bucket + sliding window、 Authorization RBAC + ABAC、 WAF OWASP CRS、 Threat model STRIDE、 Secrets scanning TruffleHog + Gitleaks、 SBOM CycloneDX + SPDX + OSV、 Security headers HSTS + permissions-policy を 1 test surface で扱える security backbone testing 基盤を追加した.
+v1.37 で `@kiwa/security` v0.1.0 を **新規 package** として追加、 8 axis を helmet + express-rate-limit + casbin + coraza の 4 provider 統一 mock として実装、 CSP nonce + strict-dynamic + trusted-types、 Rate limit token bucket + leaky bucket + sliding window、 Authorization RBAC + ABAC、 WAF OWASP CRS、 Threat model STRIDE、 Secrets scanning TruffleHog + Gitleaks、 SBOM CycloneDX + SPDX + OSV、 Security headers HSTS + permissions-policy を 1 test surface で扱える security backbone testing 基盤を追加した.
 
 ## v1.37 で追加した 8 axis security semantics
 
@@ -68,7 +68,7 @@ Trivy + CycloneDX + SPDX + Gitleaks + OSV/NVD + license policy walkthrough、 62
 ## Try it
 
 ```bash
-pnpm add -D @kiwa-test/security
+pnpm add -D @kiwa/security
 ```
 
 Migration guide (additive-only、 breaking change なし):

@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.57 リリース — Desktop 深化 I (@kiwa-test/desktop v0.2 advanced 5 axis、 35 milestone streak、 systematic pattern 32 度目)"
+title: "kiwa v1.57 リリース — Desktop 深化 I (@kiwa/desktop v0.2 advanced 5 axis、 35 milestone streak、 systematic pattern 32 度目)"
 emoji: "🖥️"
 type: "tech"
 topics: ["testing", "vitest", "electron", "tauri", "desktop"]
@@ -14,7 +14,7 @@ published: false
 
 ## What's new
 
-### `@kiwa-test/desktop` v0.2 minor bump
+### `@kiwa/desktop` v0.2 minor bump
 
 v0.1 3 axis (Electron + Tauri + Webview) に **advanced 5 axis 追加**。
 
@@ -41,7 +41,7 @@ v0.1 3 axis (Electron + Tauri + Webview) に **advanced 5 axis 追加**。
 
 ### backward compat 絶対維持
 
-v0.2 5 axis の追加は additive、 v0.1 3 axis の 12 method / 12 event / 36 mapping は完全保持。 依存関係も `@kiwa-test/core` のみで v0.1 と同じ、 他 42 package への影響 0。
+v0.2 5 axis の追加は additive、 v0.1 3 axis の 12 method / 12 event / 36 mapping は完全保持。 依存関係も `@kiwa/core` のみで v0.1 と同じ、 他 42 package への影響 0。
 
 ### dogfood 拡張
 
@@ -58,7 +58,7 @@ v1.56 の 31 度目 (desktop v0.1 3 axis uniform = state machine + emit helper +
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/desktop@^0.2
+pnpm add -D @kiwa/desktop@^0.2
 ```
 
 ## Code sample (5 patterns)
@@ -66,7 +66,7 @@ pnpm add -D @kiwa-test/desktop@^0.2
 ### Pattern 1 — Auto-updater
 
 ```ts
-import { applyDownloadedUpdate, recordUpdateDownloaded, scheduleRelaunch, startAutoUpdaterCheck } from '@kiwa-test/desktop';
+import { applyDownloadedUpdate, recordUpdateDownloaded, scheduleRelaunch, startAutoUpdaterCheck } from '@kiwa/desktop';
 
 const s = startAutoUpdaterCheck({ target: 'macos', channel: 'stable' });
 recordUpdateDownloaded(s, { version: '1.2.3', bytes: 42_000_000 });
@@ -77,7 +77,7 @@ scheduleRelaunch(s, 5_000);
 ### Pattern 2 — File-system permissions
 
 ```ts
-import { grantFsPermission, logFsPermissionAudit, requestFsPermission, revokeFsPermission } from '@kiwa-test/desktop';
+import { grantFsPermission, logFsPermissionAudit, requestFsPermission, revokeFsPermission } from '@kiwa/desktop';
 
 const s = requestFsPermission({ target: 'macos', path: '/Users/alice/Documents', scope: 'read-write' });
 grantFsPermission(s, 'read');
@@ -89,7 +89,7 @@ logFsPermissionAudit(s, 'user-revoke');
 ### Pattern 3 — Notification
 
 ```ts
-import { dismissNotification, displayNotification, invokeNotificationAction, scheduleNotification } from '@kiwa-test/desktop';
+import { dismissNotification, displayNotification, invokeNotificationAction, scheduleNotification } from '@kiwa/desktop';
 
 const s = scheduleNotification({ target: 'windows', notificationId: 'update-1', title: 'Update available', scheduledAtMs: 1_000 });
 displayNotification(s, 1_500);
@@ -100,7 +100,7 @@ dismissNotification(s);
 ### Pattern 4 — Menu-bar
 
 ```ts
-import { appendMenuBarItem, buildMenuBar, clickMenuBarItem, destroyMenuBar } from '@kiwa-test/desktop';
+import { appendMenuBarItem, buildMenuBar, clickMenuBarItem, destroyMenuBar } from '@kiwa/desktop';
 
 const s = buildMenuBar({ target: 'linux', menuId: 'main-menu' });
 appendMenuBarItem(s, { id: 'file', label: 'File', accelerator: 'Cmd+F' });
@@ -111,7 +111,7 @@ destroyMenuBar(s);
 ### Pattern 5 — Tray-icon
 
 ```ts
-import { clickTrayIcon, createTrayIcon, removeTrayIcon, updateTrayTooltip } from '@kiwa-test/desktop';
+import { clickTrayIcon, createTrayIcon, removeTrayIcon, updateTrayTooltip } from '@kiwa/desktop';
 
 const s = createTrayIcon({ target: 'macos', trayId: 'tray-1', iconPath: '/app/icon.png' });
 updateTrayTooltip(s, 'Sync in progress');

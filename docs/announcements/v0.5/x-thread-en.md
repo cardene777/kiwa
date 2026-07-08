@@ -61,9 +61,9 @@ Rust / Go on the roadmap. The whole point: spec **once**, generate test layers a
 
 v0.5 headline: every one of the 11 npm packages now ships behind a **release-time mutation gate** with MSI ≥ 80 enforced by GitHub Actions.
 
-• @kiwa-test/api → 96.06%
-• @kiwa-test/a11y → 93.62%
-• @kiwa-test/ui → 91.76%
+• @kiwa/api → 96.06%
+• @kiwa/a11y → 93.62%
+• @kiwa/ui → 91.76%
 • all 11 packages ≥ 80%
 
 Coverage gate (Lines 90+ / Branches 80+) holds too.
@@ -72,7 +72,7 @@ Coverage gate (Lines 90+ / Branches 80+) holds too.
 
 ## [6/8]
 
-The component-test adapter (`@kiwa-test/ui`) covers **8 surfaces from one package**:
+The component-test adapter (`@kiwa/ui`) covers **8 surfaces from one package**:
 
 React / Vue 3 / Svelte / SolidJS / Lit / Qwik / Angular + real Chromium via Playwright.
 
@@ -92,7 +92,7 @@ If your stack feels like it has too many runners and too few specs, try kiwa:
 
 📖 README · https://github.com/cardene777/kiwa
 💬 Discussions · https://github.com/cardene777/kiwa/discussions/451
-📦 `npm install @kiwa-test/core`
+📦 `npm install @kiwa/core`
 🐍 `pip install kiwa-test-py`
 
 Issues / discussions / replies welcome 🌱

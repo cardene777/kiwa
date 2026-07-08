@@ -1,6 +1,6 @@
 # dogfood-security-sbom-scanning-app (v1.37-4)
 
-A Trivy + Gitleaks style SBOM + secret scanning service that drives CycloneDX 1.5 emission + SPDX 2.3 emission + OSV / NVD advisory lookup + SPDX license policy + TruffleHog / Gitleaks signatures + rotation SLA tracking across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa-test/security` v0.1 sbom + secrets-scan semantics) and real (Trivy + Gitleaks scanner stack driver when `SBOM_SCANNER_READY=1` + `KIWA_TRIVY_ENDPOINT` + `KIWA_GITLEAKS_ENDPOINT` + `KIWA_ADVISORY_FEED_URL` are set) implementations satisfy the same 14-op contract so the fidelity harness can diff them side by side.
+A Trivy + Gitleaks style SBOM + secret scanning service that drives CycloneDX 1.5 emission + SPDX 2.3 emission + OSV / NVD advisory lookup + SPDX license policy + TruffleHog / Gitleaks signatures + rotation SLA tracking across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa/security` v0.1 sbom + secrets-scan semantics) and real (Trivy + Gitleaks scanner stack driver when `SBOM_SCANNER_READY=1` + `KIWA_TRIVY_ENDPOINT` + `KIWA_GITLEAKS_ENDPOINT` + `KIWA_ADVISORY_FEED_URL` are set) implementations satisfy the same 14-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -48,4 +48,4 @@ The real adapter defers the Trivy + Gitleaks scanner driver wiring to a follow-u
 
 ## Fidelity report
 
-The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa-test/quality-metrics` picks up for the 13-axis release gate. The doc counterpart is added alongside the existing security dogfood entries.
+The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa/quality-metrics` picks up for the 13-axis release gate. The doc counterpart is added alongside the existing security dogfood entries.

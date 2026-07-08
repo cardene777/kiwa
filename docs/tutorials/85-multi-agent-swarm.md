@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/ai-llm` v0.5 that models the 5 pieces of a real multi-agent + swarm coordination pipeline that every non-trivial LLM-backed agent product eventually needs — a `crew assembly` step that pins a role snapshot onto the session so a supervisor sees the exact roster it can delegate to, a `supervisor delegation` step that runs deterministic round-robin across the worker pool so a `round=1` task lands on `worker A` and a `round=2` task lands on `worker B` without a flake, a `graph transition` step (LangGraph-shaped) that walks the `entry → terminal` node chain via edge follow so the agent workflow can be replayed for debugging, a role assignment + task allocation step (swarm-shaped) that assigns roles by index modulo + allocates tasks by priority descending so a high-priority task always lands on the first agent regardless of the input array order, and a Byzantine consensus + fault tolerance step that measures the `honest ratio` against a configurable `faultThreshold` (PBFT-lite invariant, default `> 2/3`) so a swarm with 4 faulty out of 10 agents lands on `tolerated: false` and a swarm with 2 faulty out of 10 lands on `tolerated: true`. `startMaoSession()` + `assembleCrew()` + `delegateBySupervisor()` + `transitionGraph()` + `completeRound()` + `startSwarmSession()` + `assignRoles()` + `allocateTasks()` + `reachConsensus()` + `tolerateByzantine()` give you every one of those pieces without booting a real CrewAI or LangGraph runtime. This is the pattern kiwa's `examples/dogfood-llm-multi-agent-swarm-app` exercises against the real LangGraph + CrewAI SDKs under `KIWA_MODE=real` + `ANTHROPIC_API_KEY` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the supervisor delegated the same task to `worker A` twice because the round counter was reset on session save" gap a reviewer sees in the multi-agent-delegation post-mortem.
+A vitest suite wired to `@kiwa/ai-llm` v0.5 that models the 5 pieces of a real multi-agent + swarm coordination pipeline that every non-trivial LLM-backed agent product eventually needs — a `crew assembly` step that pins a role snapshot onto the session so a supervisor sees the exact roster it can delegate to, a `supervisor delegation` step that runs deterministic round-robin across the worker pool so a `round=1` task lands on `worker A` and a `round=2` task lands on `worker B` without a flake, a `graph transition` step (LangGraph-shaped) that walks the `entry → terminal` node chain via edge follow so the agent workflow can be replayed for debugging, a role assignment + task allocation step (swarm-shaped) that assigns roles by index modulo + allocates tasks by priority descending so a high-priority task always lands on the first agent regardless of the input array order, and a Byzantine consensus + fault tolerance step that measures the `honest ratio` against a configurable `faultThreshold` (PBFT-lite invariant, default `> 2/3`) so a swarm with 4 faulty out of 10 agents lands on `tolerated: false` and a swarm with 2 faulty out of 10 lands on `tolerated: true`. `startMaoSession()` + `assembleCrew()` + `delegateBySupervisor()` + `transitionGraph()` + `completeRound()` + `startSwarmSession()` + `assignRoles()` + `allocateTasks()` + `reachConsensus()` + `tolerateByzantine()` give you every one of those pieces without booting a real CrewAI or LangGraph runtime. This is the pattern kiwa's `examples/dogfood-llm-multi-agent-swarm-app` exercises against the real LangGraph + CrewAI SDKs under `KIWA_MODE=real` + `ANTHROPIC_API_KEY` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the supervisor delegated the same task to `worker A` twice because the round counter was reset on session save" gap a reviewer sees in the multi-agent-delegation post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/ai-llm` v0.5 that models the 5 pieces of a r
 ```bash
 mkdir kiwa-multi-agent-swarm && cd kiwa-multi-agent-swarm
 pnpm init
-pnpm add -D @kiwa-test/ai-llm@^0.5 vitest typescript @types/node
+pnpm add -D @kiwa/ai-llm@^0.5 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.5 surface exports the multi-agent-orchestration axis (`startMaoSession` /
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { assembleCrew, startMaoSession } from '@kiwa-test/ai-llm';
+import { assembleCrew, startMaoSession } from '@kiwa/ai-llm';
 
 describe('mao — crew assembly', () => {
   it('records the crew and moves state to crew-assembled', () => {
@@ -80,7 +80,7 @@ import {
   assembleCrew,
   delegateBySupervisor,
   startMaoSession,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 
 describe('mao — supervisor delegation', () => {
   it('rotates workers round-robin', () => {
@@ -132,7 +132,7 @@ import {
   assembleCrew,
   startMaoSession,
   transitionGraph,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 
 describe('mao — graph transition', () => {
   it('walks entry → terminal via edge follow', () => {
@@ -186,7 +186,7 @@ import {
   allocateTasks,
   assignRoles,
   startSwarmSession,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 
 describe('swarm — role + task assignment', () => {
   it('cycles roles by index modulo', () => {
@@ -240,7 +240,7 @@ import {
   reachConsensus,
   startSwarmSession,
   tolerateByzantine,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 
 describe('swarm — Byzantine consensus', () => {
   it('picks the majority proposal', () => {
@@ -318,7 +318,7 @@ import {
   completeRound,
   delegateBySupervisor,
   startMaoSession,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 
 describe('mao — round completion', () => {
   it('flags sufficient when delegations meet the floor', () => {

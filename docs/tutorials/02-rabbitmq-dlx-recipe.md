@@ -15,7 +15,7 @@ A vitest test that publishes an invalid order into a `work.main` queue, watches 
 ```bash
 mkdir kiwa-rabbitmq-dlx && cd kiwa-rabbitmq-dlx
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa-test/queue @kiwa-test/core
+pnpm add -D vitest typescript @types/node @kiwa/queue @kiwa/core
 ```
 
 Set `type: module` + a test script in `package.json`:
@@ -50,7 +50,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   setupRabbitMQAdvancedEnv,
   type RabbitMQAdvancedTestEnv,
-} from '@kiwa-test/queue';
+} from '@kiwa/queue';
 
 let env: RabbitMQAdvancedTestEnv<'mock'>;
 

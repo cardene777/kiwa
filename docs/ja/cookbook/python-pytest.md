@@ -97,7 +97,7 @@ pip install 'kiwa-test-py[cov]'
 pytest --cov=app --cov-report=term-missing
 ```
 
-`@kiwa-test/observability` の `fromIstanbulCoverageSummary` と組み合わせれば、 TS + Python の coverage を 1 つの dashboard に集約できる。
+`@kiwa/observability` の `fromIstanbulCoverageSummary` と組み合わせれば、 TS + Python の coverage を 1 つの dashboard に集約できる。
 
 ## spec format
 
@@ -106,4 +106,4 @@ kiwa-design skill が出力する 9 column markdown table と一致 — [`/kiwa-
 ## 関連
 
 - Package: [`kiwa-test-py`](../../../kiwa-py/README.md)
-- TS 版: [`@kiwa-test/core`](../../../packages/core/README.md)
+- TS 版: [`@kiwa/core`](../../../packages/core/README.md)

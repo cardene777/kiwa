@@ -2,12 +2,12 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/desktop` v1.0 (invoke-cache layer、 v1.67 で **depth-6 pattern 2 例目確定 candidate** = Mobile v1.55 depth-5 + Desktop v1.61 depth-5 + Desktop v1.67 depth-6 の 2 例目化、 **systematic pattern 42 度目適用**、 **45 milestone streak**、 4 PR rhythm 14 milestone 連続 = 56 PR 連続)、 v0.9 で確立した probeAndInvoke 統合経路 の 上位 layer として、 同一 axis + target + args-hash の invoke を 2 回目以降 skip、 LRU + TTL 両立 in-memory cache で release cycle 全体 の 実 spawn cost を削減。
+A vitest suite wired to `@kiwa/desktop` v1.0 (invoke-cache layer、 v1.67 で **depth-6 pattern 2 例目確定 candidate** = Mobile v1.55 depth-5 + Desktop v1.61 depth-5 + Desktop v1.67 depth-6 の 2 例目化、 **systematic pattern 42 度目適用**、 **45 milestone streak**、 4 PR rhythm 14 milestone 連続 = 56 PR 連続)、 v0.9 で確立した probeAndInvoke 統合経路 の 上位 layer として、 同一 axis + target + args-hash の invoke を 2 回目以降 skip、 LRU + TTL 両立 in-memory cache で release cycle 全体 の 実 spawn cost を削減。
 
 ## Prerequisites
 
 - Node.js ≥ 20 + pnpm
-- `@kiwa-test/desktop` v1.0 (`pnpm add -D @kiwa-test/desktop@^1.0`)
+- `@kiwa/desktop` v1.0 (`pnpm add -D @kiwa/desktop@^1.0`)
 
 ## Step-by-step build
 
@@ -16,7 +16,7 @@ A vitest suite wired to `@kiwa-test/desktop` v1.0 (invoke-cache layer、 v1.67 �
 default config (5 分 TTL + 128 maxEntries + enabled=true) で cache instance を生成。
 
 ```ts
-import { InvokeCache } from '@kiwa-test/desktop';
+import { InvokeCache } from '@kiwa/desktop';
 
 const cache = new InvokeCache();
 // または config 明示指定
@@ -26,7 +26,7 @@ const strictCache = new InvokeCache({ ttlMs: 60_000, maxEntries: 32, enabled: tr
 ### 2. withCache helper で probeAndInvoke を cache 経由 呼出
 
 ```ts
-import { withCache } from '@kiwa-test/desktop';
+import { withCache } from '@kiwa/desktop';
 
 const result = await withCache({
   cache,
@@ -44,7 +44,7 @@ const result = await withCache({
 cache key は axis + target + args を 順序保持 で JSON.stringify 化。 env は cache key に 含めない (v1.62 real behavior SSOT に準拠、 env は spawn 副作用のみ)。
 
 ```ts
-import { buildCacheKey } from '@kiwa-test/desktop';
+import { buildCacheKey } from '@kiwa/desktop';
 
 const key1 = buildCacheKey({ axis: 'clipboard', target: 'macos', args: ['copy'] });
 // 'clipboard:macos:["copy"]'
@@ -88,4 +88,4 @@ Desktop pair pioneer record 更新、 depth-6 pattern 2 例目確定 は v1.68+ 
 
 ## What's next
 
-- v1.67 で v1.0 の 実運用 経路 が 確立 = 次 v1.68 は depth-6 実運用 継続 or v2.0 rename milestone (@kiwa-test/* → @kiwa/*)
+- v1.67 で v1.0 の 実運用 経路 が 確立 = 次 v1.68 は depth-6 実運用 継続 or v2.0 rename milestone (@kiwa/* → @kiwa/*)

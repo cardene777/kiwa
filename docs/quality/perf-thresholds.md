@@ -14,20 +14,20 @@ This doc pins **every** perf threshold in kiwa to one of three grounded rational
 
 | Target | Op | p95 threshold | Rationale |
 |---|---|---|---|
-| `@kiwa-test/quality-metrics` | `evaluateReleaseGate` | 5 ms | mock-invariant (pure calculation, one heap object per call) |
-| `@kiwa-test/quality-metrics` | `diffReports` | 5 ms | mock-invariant |
-| `@kiwa-test/ai-llm` | `anthropic.messages.create` (mock) | 40 ms | provider SLA — Anthropic Messages p95 non-streaming is ~600ms; mock must be < 10 % of live so tests do not become the bottleneck |
-| `@kiwa-test/ai-llm` | `openai.chat.completions.create` (mock) | 40 ms | provider SLA — OpenAI Chat Completions p95 is ~500-1200ms depending on model; same 10 % rule |
-| `@kiwa-test/ai-llm` | `vercel.generateText` (mock) | 40 ms | provider SLA — proxies to Anthropic / OpenAI, same target |
-| `@kiwa-test/ai-llm` | `langchain.invoke` (mock) | 40 ms | provider SLA — same |
-| `@kiwa-test/realtime` | `supabase.channel.track` (mock) | 20 ms | mock-invariant (channel registry lookup + presence Map insert) |
-| `@kiwa-test/realtime` | `ably.channel.publish` (mock) | 20 ms | mock-invariant |
-| `@kiwa-test/realtime` | `pusher.subscribeChannel` (mock) | 20 ms | mock-invariant |
-| `@kiwa-test/realtime` | `socketio.emit` (mock) | 20 ms | mock-invariant |
-| `@kiwa-test/payment` | `signWebhook` (mock) | 10 ms | mock-invariant (HMAC-SHA256 over ~500 bytes is < 1 ms on modern hardware) |
-| `@kiwa-test/payment` | `verifyWebhook` (mock) | 10 ms | mock-invariant |
-| `@kiwa-test/search` | `search` on 20-doc index (mock) | 5 ms | mock-invariant (linear scan over 20 docs) |
-| `dogfood-anthropic-chatbot` | `reply` (mock mode) | 30 ms | mock-invariant + one @kiwa-test/ai-llm call ⇒ threshold matches ai-llm + adapter overhead budget |
+| `@kiwa/quality-metrics` | `evaluateReleaseGate` | 5 ms | mock-invariant (pure calculation, one heap object per call) |
+| `@kiwa/quality-metrics` | `diffReports` | 5 ms | mock-invariant |
+| `@kiwa/ai-llm` | `anthropic.messages.create` (mock) | 40 ms | provider SLA — Anthropic Messages p95 non-streaming is ~600ms; mock must be < 10 % of live so tests do not become the bottleneck |
+| `@kiwa/ai-llm` | `openai.chat.completions.create` (mock) | 40 ms | provider SLA — OpenAI Chat Completions p95 is ~500-1200ms depending on model; same 10 % rule |
+| `@kiwa/ai-llm` | `vercel.generateText` (mock) | 40 ms | provider SLA — proxies to Anthropic / OpenAI, same target |
+| `@kiwa/ai-llm` | `langchain.invoke` (mock) | 40 ms | provider SLA — same |
+| `@kiwa/realtime` | `supabase.channel.track` (mock) | 20 ms | mock-invariant (channel registry lookup + presence Map insert) |
+| `@kiwa/realtime` | `ably.channel.publish` (mock) | 20 ms | mock-invariant |
+| `@kiwa/realtime` | `pusher.subscribeChannel` (mock) | 20 ms | mock-invariant |
+| `@kiwa/realtime` | `socketio.emit` (mock) | 20 ms | mock-invariant |
+| `@kiwa/payment` | `signWebhook` (mock) | 10 ms | mock-invariant (HMAC-SHA256 over ~500 bytes is < 1 ms on modern hardware) |
+| `@kiwa/payment` | `verifyWebhook` (mock) | 10 ms | mock-invariant |
+| `@kiwa/search` | `search` on 20-doc index (mock) | 5 ms | mock-invariant (linear scan over 20 docs) |
+| `dogfood-anthropic-chatbot` | `reply` (mock mode) | 30 ms | mock-invariant + one @kiwa/ai-llm call ⇒ threshold matches ai-llm + adapter overhead budget |
 | `dogfood-anthropic-chatbot` | `replyStream` (mock mode) | 50 ms | mock-invariant + streaming chunk fan-out (~5 chunks) ⇒ 5 × single-call budget |
 | `dogfood-anthropic-chatbot` | `toolLoop` (mock mode) | 100 ms | mock-invariant + tool loop up to 5 iterations |
 | `dogfood-openai-tool-agent` | `validateToolSchemas` | 50 ms | mock-invariant (JSON Schema validate over 3 tools) |
@@ -48,24 +48,24 @@ This doc pins **every** perf threshold in kiwa to one of three grounded rational
 | `dogfood-socketio-notification` | `deliverNotification` | 30 ms | Nielsen "instant" |
 | `dogfood-socketio-notification` | `getPending` | 30 ms | Nielsen "instant" |
 | `dogfood-socketio-notification` | `simulateReconnect` | 100 ms | reconnect ceremony (disconnect + queue drain + reconnect) |
-| `@kiwa-test/core` | `parseSpec` | 5 ms | mock-invariant (linear scan over meta lines + one table walk) |
-| `@kiwa-test/core` | `createPool` (size 4) | 5 ms | mock-invariant (Promise.all fan-out over 4 acquires + one borrow/release) |
-| `@kiwa-test/dapp` | `eventEmitterEmit` | 5 ms | mock-invariant (node:events dispatch + listener count) |
-| `@kiwa-test/dapp` | `anvilKeyLookup` | 5 ms | mock-invariant (readonly array indexing) |
-| `@kiwa-test/api` | `requestClientGet` | 5 ms | mock-invariant (url join + Response snapshot with stub fetcher) |
-| `@kiwa-test/api` | `requestClientPost` | 5 ms | mock-invariant (adds JSON.stringify encode over the GET path) |
-| `@kiwa-test/ui` | `setupComponentEnvSnapshot` | 30 ms | jsdom mount + React render + innerHTML capture — the lightest UI test path |
-| `@kiwa-test/ui` | `setupComponentEnvRender` | 30 ms | same jsdom + React mount cost baseline as snapshot |
-| `@kiwa-test/data` | `queueSend` | 5 ms | mock-invariant (dedup Set lookup + array push + consumer notify) |
-| `@kiwa-test/data` | `fakeClockAdvance` | 5 ms | mock-invariant (walk 2-entry cron table + fire due callbacks) |
-| `@kiwa-test/cli-test` | `writeFile` | 20 ms | fs write syscall + relative path resolution over an isolated tempdir |
-| `@kiwa-test/cli-test` | `readFile` | 10 ms | fs read syscall over an isolated tempdir |
-| `@kiwa-test/observability` | `collectRunHistory` | 5 ms | O(N) walk + per-test cap map over 200 records |
-| `@kiwa-test/observability` | `detectFlaky` | 5 ms | O(N) aggregation over 200 records |
-| `@kiwa-test/observability` | `checkThresholds` | 5 ms | mock-invariant (fixed 4-metric compare) |
-| `@kiwa-test/observability` | `renderDashboard` | 5 ms | markdown string concat over a 200-record summary |
-| `@kiwa-test/e2e` | `fetchOverLoopback` | 20 ms | node http server dispatch + fetch-handler adapter over loopback (no network) |
-| `@kiwa-test/cli` | `runSpecToTest` | 20 ms | md read + parseSpec + template render + file write |
+| `@kiwa/core` | `parseSpec` | 5 ms | mock-invariant (linear scan over meta lines + one table walk) |
+| `@kiwa/core` | `createPool` (size 4) | 5 ms | mock-invariant (Promise.all fan-out over 4 acquires + one borrow/release) |
+| `@kiwa/dapp` | `eventEmitterEmit` | 5 ms | mock-invariant (node:events dispatch + listener count) |
+| `@kiwa/dapp` | `anvilKeyLookup` | 5 ms | mock-invariant (readonly array indexing) |
+| `@kiwa/api` | `requestClientGet` | 5 ms | mock-invariant (url join + Response snapshot with stub fetcher) |
+| `@kiwa/api` | `requestClientPost` | 5 ms | mock-invariant (adds JSON.stringify encode over the GET path) |
+| `@kiwa/ui` | `setupComponentEnvSnapshot` | 30 ms | jsdom mount + React render + innerHTML capture — the lightest UI test path |
+| `@kiwa/ui` | `setupComponentEnvRender` | 30 ms | same jsdom + React mount cost baseline as snapshot |
+| `@kiwa/data` | `queueSend` | 5 ms | mock-invariant (dedup Set lookup + array push + consumer notify) |
+| `@kiwa/data` | `fakeClockAdvance` | 5 ms | mock-invariant (walk 2-entry cron table + fire due callbacks) |
+| `@kiwa/cli-test` | `writeFile` | 20 ms | fs write syscall + relative path resolution over an isolated tempdir |
+| `@kiwa/cli-test` | `readFile` | 10 ms | fs read syscall over an isolated tempdir |
+| `@kiwa/observability` | `collectRunHistory` | 5 ms | O(N) walk + per-test cap map over 200 records |
+| `@kiwa/observability` | `detectFlaky` | 5 ms | O(N) aggregation over 200 records |
+| `@kiwa/observability` | `checkThresholds` | 5 ms | mock-invariant (fixed 4-metric compare) |
+| `@kiwa/observability` | `renderDashboard` | 5 ms | markdown string concat over a 200-record summary |
+| `@kiwa/e2e` | `fetchOverLoopback` | 20 ms | node http server dispatch + fetch-handler adapter over loopback (no network) |
+| `@kiwa/cli` | `runSpecToTest` | 20 ms | md read + parseSpec + template render + file write |
 
 ## Regression detection defaults
 
@@ -77,7 +77,7 @@ Threshold: **20 % p95 delta** vs stored baseline (`.perf-baseline/{module}.json`
 
 ## Real-API measurement mode
 
-Live-mode perf tests coexist with mock perf tests under `tests/perf/`. The `*.live.perf.ts` files use `runPerf3LayerLive` from `@kiwa-test/perf-harness` and declare their required env vars via the `requiredEnv` option. Missing env vars trigger the skip path — the run still emits a report, but with `LIVE_ENV_MISSING` markers instead of gate results. This keeps CI-less environments honest: an empty report row is attributed to missing credentials, not silent success.
+Live-mode perf tests coexist with mock perf tests under `tests/perf/`. The `*.live.perf.ts` files use `runPerf3LayerLive` from `@kiwa/perf-harness` and declare their required env vars via the `requiredEnv` option. Missing env vars trigger the skip path — the run still emits a report, but with `LIVE_ENV_MISSING` markers instead of gate results. This keeps CI-less environments honest: an empty report row is attributed to missing credentials, not silent success.
 
 Enable live mode by setting the required env vars and rerunning the perf suite:
 

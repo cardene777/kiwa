@@ -2,13 +2,13 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/desktop` v0.2 (advanced 5 axis 追加、 v1.57 で kiwa 縦深化 pair 第 14 の第 2 段、 **systematic pattern 32 度目適用**、 35 milestone streak)、 v0.1 3 axis (Electron + Tauri + Webview) に v0.2 で advanced 5 axis (Auto-updater + File-system permissions + Notification + Menu-bar + Tray-icon) を追加した 8 axis × 3 target = 24 spec の workflow を deterministic に扱う pattern。
+A vitest suite wired to `@kiwa/desktop` v0.2 (advanced 5 axis 追加、 v1.57 で kiwa 縦深化 pair 第 14 の第 2 段、 **systematic pattern 32 度目適用**、 35 milestone streak)、 v0.1 3 axis (Electron + Tauri + Webview) に v0.2 で advanced 5 axis (Auto-updater + File-system permissions + Notification + Menu-bar + Tray-icon) を追加した 8 axis × 3 target = 24 spec の workflow を deterministic に扱う pattern。
 
 ## Prerequisites
 
 - Node.js ≥ 20
 - `pnpm`
-- `@kiwa-test/desktop` v0.2 (`pnpm add -D @kiwa-test/desktop@^0.2`)
+- `@kiwa/desktop` v0.2 (`pnpm add -D @kiwa/desktop@^0.2`)
 
 ## Step-by-step build
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/desktop` v0.2 (advanced 5 axis 追加、 v1.
 ```bash
 mkdir kiwa-desktop-v02 && cd kiwa-desktop-v02
 pnpm init
-pnpm add -D @kiwa-test/desktop@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa/desktop@^0.2 vitest typescript @types/node
 ```
 
 ### 2. Auto-updater axis (check + download + apply + relaunch)
@@ -29,7 +29,7 @@ import {
   recordUpdateDownloaded,
   scheduleRelaunch,
   startAutoUpdaterCheck,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('Auto-updater full path', () => {
   it('check → download → apply → relaunch', () => {
@@ -53,7 +53,7 @@ import {
   logFsPermissionAudit,
   requestFsPermission,
   revokeFsPermission,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('FS permissions flow', () => {
   it('request → grant → revoke → audit', () => {
@@ -81,7 +81,7 @@ import {
   displayNotification,
   invokeNotificationAction,
   scheduleNotification,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('Notification lifecycle', () => {
   it('schedule → display → action → dismiss', () => {
@@ -109,7 +109,7 @@ import {
   buildMenuBar,
   clickMenuBarItem,
   destroyMenuBar,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('Menu-bar lifecycle', () => {
   it('build → append → click → destroy', () => {
@@ -134,7 +134,7 @@ import {
   createTrayIcon,
   removeTrayIcon,
   updateTrayTooltip,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('Tray-icon lifecycle', () => {
   it('create → tooltip → click → remove', () => {
@@ -175,7 +175,7 @@ pnpm exec vitest run
 ## 8 axis × 3 target = 24 spec fidelity grid
 
 ```ts
-import { collectFidelityCoverage } from '@kiwa-test/desktop';
+import { collectFidelityCoverage } from '@kiwa/desktop';
 
 const coverage = collectFidelityCoverage();
 console.log(coverage.rows.length); // 24 (3 target × 8 axis)

@@ -1,7 +1,7 @@
 # Kafka Event Pipeline — Quality Report (v1.31-2)
 
 Dogfood: [`examples/dogfood-kafka-event-pipeline`](../../../examples/dogfood-kafka-event-pipeline/).
-Package under exercise: [`@kiwa-test/streaming`](../../../packages/streaming/) (v0.3.0).
+Package under exercise: [`@kiwa/streaming`](../../../packages/streaming/) (v0.3.0).
 
 v1.31-2 extends the v1.20-2 shape ([kafka-event-pipeline.md](./kafka-event-pipeline.md)) with 4 new axes drawn from the streaming v0.3 advanced semantics grid + a confluent-kafka + Schema Registry testcontainers real driver + a Playwright e2e layer.
 The v1.20-2 axes (idempotent producer / consumer group / exactly-once txn / DLQ) stay in place — v2 adds the raw-protocol + Schema Registry + testcontainers surface on top so the 13-axis release gate can score the full journey.
@@ -19,7 +19,7 @@ The v1.31-2 dogfood exercises 4 v1 patterns plus 4 v2 axes.
 
 ### v2 (new in v1.31-2)
 
-5. KIP-98 raw protocol — `initProducerId` + `fenceProducer` (epoch bump) + txn coordinator state machine walk (`Empty` → `Ongoing` → `PrepareCommit` → `CompleteCommit` → `Empty`) + incremental fetch session (KIP-227). Exercised through the `driveRawProtocol` adapter op wired to `createKafkaRawProtocol` from `@kiwa-test/streaming` v0.3.
+5. KIP-98 raw protocol — `initProducerId` + `fenceProducer` (epoch bump) + txn coordinator state machine walk (`Empty` → `Ongoing` → `PrepareCommit` → `CompleteCommit` → `Empty`) + incremental fetch session (KIP-227). Exercised through the `driveRawProtocol` adapter op wired to `createKafkaRawProtocol` from `@kiwa/streaming` v0.3.
 6. ISR + high-watermark — 3-broker ISR attach + HW advance past `min.insync.replicas` gate. Exercised through the `driveIsrHighWatermark` adapter op.
 7. Redpanda Schema Registry evolution — subject registration + `BACKWARD` / `FORWARD` / `FULL` compatibility check. Exercised through the `driveSchemaRegistry` adapter op wired to `createRedpandaSchemaEvolution`.
 8. confluent-kafka + Schema Registry testcontainers probe — env-gated (`KIWA_MODE=real` + `KAFKA_KEY`) real driver that boots a Kafka 3.7 + Schema Registry container pair through a duck-typed `testcontainers` module (soft peer dep, degrades to `KAFKA_ENV_MISSING` when Docker or the peer dep is missing).

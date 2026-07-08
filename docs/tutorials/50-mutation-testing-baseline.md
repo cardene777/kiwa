@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A `stryker.config.mjs` wired to `@stryker-mutator/vitest-runner`, a per-package baseline JSON on disk at `.mutation-baseline/{package}.json`, and a `@kiwa-test/quality-metrics` v0.3 tier gate that fails your `pnpm test:mutation` run when kill-rate drops below the tier floor. The exact pattern all 33 kiwa packages (v1.27 sweep) use — same 4-tier threshold table (Core 80 / Framework 70 / SaaS 65 / Test type 60), same `mutationFromCounts` + `assertMutationTier` + `resolveMutationTier` primitives, same JSON schema on disk. You leave this tutorial with a runnable Stryker suite, a persisted baseline, and a working tier gate for any package you point it at.
+A `stryker.config.mjs` wired to `@stryker-mutator/vitest-runner`, a per-package baseline JSON on disk at `.mutation-baseline/{package}.json`, and a `@kiwa/quality-metrics` v0.3 tier gate that fails your `pnpm test:mutation` run when kill-rate drops below the tier floor. The exact pattern all 33 kiwa packages (v1.27 sweep) use — same 4-tier threshold table (Core 80 / Framework 70 / SaaS 65 / Test type 60), same `mutationFromCounts` + `assertMutationTier` + `resolveMutationTier` primitives, same JSON schema on disk. You leave this tutorial with a runnable Stryker suite, a persisted baseline, and a working tier gate for any package you point it at.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ A `stryker.config.mjs` wired to `@stryker-mutator/vitest-runner`, a per-package 
 mkdir kiwa-mutation-baseline && cd kiwa-mutation-baseline
 pnpm init
 pnpm add -D @stryker-mutator/core@^8 @stryker-mutator/vitest-runner@^8 \
-  @kiwa-test/quality-metrics@^0.3 vitest typescript @types/node
+  @kiwa/quality-metrics@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest + Stryker scripts in `package.json`.
@@ -81,7 +81,7 @@ Note the boundary values (`80` and `60`). Stryker's `EqualityOperator` mutator f
 
 ```js
 /**
- * Mutation testing config for @kiwa-test/example.
+ * Mutation testing config for @kiwa/example.
  * Threshold: Core tier (high 80 / low 60 / break 50) — pure logic package.
  * SSOT: docs/quality/mutation-thresholds.md § Core tier.
  */
@@ -116,7 +116,7 @@ Three things to notice.
 
 ```json
 {
-  "package": "@kiwa-test/example",
+  "package": "@kiwa/example",
   "tier": "Core",
   "thresholds": { "high": 80, "low": 60, "break": 50 },
   "killRate": 100,
@@ -139,7 +139,7 @@ The verbal tier label (`Core` / `Framework` / `SaaS` / `Test type`) matches what
 
 ### 6. Wire the tier gate
 
-`tests/gate.test.ts` — feed the Stryker report into `@kiwa-test/quality-metrics` v0.3 and fail the vitest suite when the kill-rate drops below the tier floor.
+`tests/gate.test.ts` — feed the Stryker report into `@kiwa/quality-metrics` v0.3 and fail the vitest suite when the kill-rate drops below the tier floor.
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -147,7 +147,7 @@ import {
   assertMutationTier,
   mutationFromCounts,
   resolveMutationTier,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 
 describe('classifyKillRate — tier gate', () => {
   it('passes when kill-rate meets Core tier floor', () => {
@@ -187,11 +187,11 @@ import {
   evaluateReleaseGate,
   mutationFromCounts,
   type QualityReport,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 
 function baseReport(): QualityReport {
   return {
-    provider: '@kiwa-test/example',
+    provider: '@kiwa/example',
     version: '0.1.0',
     reportedAt: '2026-07-05T00:00:00Z',
     coverage: { line: 90, branch: 82, function: 95 },
@@ -244,7 +244,7 @@ pnpm test:mutation
 
 First run seeds the mutation report in `mutation-report/mutation.json`. Copy the key numbers into `.mutation-baseline/example.json` and commit — the baseline is now the last-known-green mutation score. Subsequent runs regenerate the report; a regression on any future PR shows up as a diff on the baseline JSON alongside the code change.
 
-The full end-to-end pattern lives in `packages/quality-metrics/tests/docs-tutorial-v1.27.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa-test/quality-metrics` v0.3 API.
+The full end-to-end pattern lives in `packages/quality-metrics/tests/docs-tutorial-v1.27.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa/quality-metrics` v0.3 API.
 
 ## Where to next
 

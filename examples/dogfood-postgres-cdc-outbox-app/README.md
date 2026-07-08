@@ -39,7 +39,7 @@ semantics that exercises 4 v1 patterns and 4 v2 axes.
 The dogfood is driven end-to-end through a provider-neutral adapter
 (`src/adapters/interface.ts`) with two implementations:
 
-- `makeMockAdapter()` — backed by `@kiwa-test/orm` v0.10 CDC +
+- `makeMockAdapter()` — backed by `@kiwa/orm` v0.10 CDC +
   logical-replication + replication + connection-pool + advanced-8-axis
   semantics. Default for CI + local.
 - `makeRealAdapter()` — probes a Postgres 16 broker via `POSTGRES_BOOTSTRAP`

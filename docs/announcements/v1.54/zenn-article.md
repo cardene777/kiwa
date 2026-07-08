@@ -16,7 +16,7 @@ kiwa v1.54 をリリースしました。 **2 軸 milestone** = rules/git-workfl
 
 ### 軸 2 — Mobile v0.5 child_process.spawn stub (Phase 5、 depth-5 pattern 新設)
 
-`@kiwa-test/mobile` v0.4 → v0.5 minor bump、 spawn-driver stub 契約層追加。
+`@kiwa/mobile` v0.4 → v0.5 minor bump、 spawn-driver stub 契約層追加。
 
 - `invokeMobileCli(inv)` = env-gate + spawn shape 契約 + fail-closed
 - `cliForAxis(axis)` = 11 axis → 6 CLI mapping (CLI-backed 7 axis / non-CLI 4 axis)
@@ -50,7 +50,7 @@ v1.23 → v1.54 = 32 milestone 連続、 kiwa 史上最長記録更新継続。 
 ## インストール
 
 ```bash
-pnpm add -D @kiwa-test/mobile@^0.5
+pnpm add -D @kiwa/mobile@^0.5
 ```
 
 ## Migration guide

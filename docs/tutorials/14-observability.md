@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that asserts on **span / metric / log / exception** telemetry emitted by the SUT, without depending on a real OTel collector, StatsD daemon, or Sentry ingest. `@kiwa-test/observability` v1.1 exposes a shared `TelemetryCollector` shape so the assertion code is identical regardless of which provider the SUT is instrumented against.
+A vitest test file that asserts on **span / metric / log / exception** telemetry emitted by the SUT, without depending on a real OTel collector, StatsD daemon, or Sentry ingest. `@kiwa/observability` v1.1 exposes a shared `TelemetryCollector` shape so the assertion code is identical regardless of which provider the SUT is instrumented against.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that asserts on **span / metric / log / exception** telemetry
 ```bash
 mkdir kiwa-telemetry && cd kiwa-telemetry
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa-test/observability
+pnpm add -D vitest typescript @types/node @kiwa/observability
 ```
 
 `package.json` + `tsconfig.json` — same shape as tutorial 12.
@@ -24,7 +24,7 @@ pnpm add -D vitest typescript @types/node @kiwa-test/observability
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createOtelMock } from '@kiwa-test/observability';
+import { createOtelMock } from '@kiwa/observability';
 
 describe('otel', () => {
   it('startSpan + addEvent + end', () => {
@@ -56,7 +56,7 @@ describe('otel', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createDatadogMock } from '@kiwa-test/observability';
+import { createDatadogMock } from '@kiwa/observability';
 
 describe('datadog', () => {
   it('statsd.increment default value = 1', () => {
@@ -81,7 +81,7 @@ describe('datadog', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createSentryMock } from '@kiwa-test/observability';
+import { createSentryMock } from '@kiwa/observability';
 
 describe('sentry', () => {
   it('captureException records fingerprint + tags', () => {
@@ -129,5 +129,5 @@ So a SUT instrumented against OTel today and Datadog tomorrow can reuse the same
 
 ## Related
 
-- [`@kiwa-test/observability` on npm](https://www.npmjs.com/package/@kiwa-test/observability)
+- [`@kiwa/observability` on npm](https://www.npmjs.com/package/@kiwa/observability)
 - [Concept — telemetry testing SSOT](../concepts/telemetry-testing)

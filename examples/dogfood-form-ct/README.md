@@ -2,7 +2,7 @@
 
 Playwright Component Testing dogfood for kiwa v1.16-3 (Issue #765).
 
-5 SaaS form patterns — login / signup / checkout / profile / search — driven through the `@kiwa-test/component` `createPlaywrightCTMock` API. Each form is asserted on 4 axes — mount / validation error / submit success / a11y violation count = 0. A skipped real adapter (`makeRealAdapter`, env-gated on `PW_CT_ENDPOINT`) mirrors the same 4-op surface so the fidelity harness can produce a 7-axis `@kiwa-test/quality-metrics` release gate report.
+5 SaaS form patterns — login / signup / checkout / profile / search — driven through the `@kiwa/component` `createPlaywrightCTMock` API. Each form is asserted on 4 axes — mount / validation error / submit success / a11y violation count = 0. A skipped real adapter (`makeRealAdapter`, env-gated on `PW_CT_ENDPOINT`) mirrors the same 4-op surface so the fidelity harness can produce a 7-axis `@kiwa/quality-metrics` release gate report.
 
 ## What runs
 
@@ -28,7 +28,7 @@ src/
     index.ts       # FORM_KINDS + FORM_SPECS (mountArgs / validationArgs / submitArgs)
   adapters/
     interface.ts   # FormCTAdapter (4 ops) + trace / metric shapes
-    mock.ts        # makeMockAdapter via @kiwa-test/component createPlaywrightCTMock
+    mock.ts        # makeMockAdapter via @kiwa/component createPlaywrightCTMock
     real.ts        # makeRealAdapter with PW_CT_ENDPOINT env-skip
   flows/
     form-flows.ts  # mountAllForms / validateAllForms / submitAllForms / a11yAllForms

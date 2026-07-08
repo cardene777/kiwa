@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A single vitest test that signs a user up with email + password, verifies the JWT, and asserts the emitted access token comes back with the expected `email` claim. Zero Supabase account needed — the whole flow runs against `@kiwa-test/auth`'s in-memory Supabase core adapter (v1.10-1).
+A single vitest test that signs a user up with email + password, verifies the JWT, and asserts the emitted access token comes back with the expected `email` claim. Zero Supabase account needed — the whole flow runs against `@kiwa/auth`'s in-memory Supabase core adapter (v1.10-1).
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A single vitest test that signs a user up with email + password, verifies the JW
 ```bash
 mkdir kiwa-supabase-first-test && cd kiwa-supabase-first-test
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa-test/auth @kiwa-test/core
+pnpm add -D vitest typescript @types/node @kiwa/auth @kiwa/core
 ```
 
 Create `tsconfig.json`:
@@ -38,7 +38,7 @@ Create `src/first-supabase-test.spec.ts`:
 
 ```ts
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupSupabaseAuthEnv, type SupabaseAuthTestEnv } from '@kiwa-test/auth';
+import { setupSupabaseAuthEnv, type SupabaseAuthTestEnv } from '@kiwa/auth';
 
 let env: SupabaseAuthTestEnv;
 
@@ -89,7 +89,7 @@ You should see one passing test in under 500ms.
 
 ## Troubleshoot
 
-- **`Cannot find module '@kiwa-test/auth'`** — Delete `node_modules` + reinstall. When `@kiwa-test/core` is not resolvable, pnpm sometimes silently skips the peer dep.
+- **`Cannot find module '@kiwa/auth'`** — Delete `node_modules` + reinstall. When `@kiwa/core` is not resolvable, pnpm sometimes silently skips the peer dep.
 - **`signature mismatch`** — You are verifying a token from a *different* `setupSupabaseAuthEnv()` call. Each env has its own secret; do not share tokens across envs.
 - **`invalid login credentials`** — The seed user had `password: 'strong'` but you signed in with a different password. The seed values are literal strings, not placeholders.
 

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/payment` v0.4 that models the 5 pieces of a real Paddle Billing v2 subscription that every non-trivial retention system eventually needs — subscription state machine with a grace period (past-due but still active from the customer's POV), mid-cycle proration for plan changes with the daysElapsed / daysInCycle split, coupon stacking with stackable vs non-stackable rules and a 100 % combined cap, revenue recovery via smart retry + dunning cascade (email → in-app → SMS → push) with card updater + network tokenization, and cross-provider token vault migration so a merchant can move from Paddle Billing v2 to Stripe without asking customers to re-enter cards. `startSubscriptionMachine()` + `enterGracePeriod()` + `applyProration()` + `stackCoupon()` + `startRecovery()` + `advanceCascade()` + `applyCardUpdate()` + `startVault()` + `migrateToken()` give you every one of those pieces as deterministic state machines. No live Paddle Billing v2 sandbox, no manual `paddle.transactions.preview()` amortisation, no ad-hoc coupon stacking calculator. This is the pattern kiwa's Paddle subscription v2 dogfood app (v1.33-3) exercises against real Paddle sandbox under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "we ran a black-friday coupon and it broke proration" case reviewers ask about.
+A vitest suite wired to `@kiwa/payment` v0.4 that models the 5 pieces of a real Paddle Billing v2 subscription that every non-trivial retention system eventually needs — subscription state machine with a grace period (past-due but still active from the customer's POV), mid-cycle proration for plan changes with the daysElapsed / daysInCycle split, coupon stacking with stackable vs non-stackable rules and a 100 % combined cap, revenue recovery via smart retry + dunning cascade (email → in-app → SMS → push) with card updater + network tokenization, and cross-provider token vault migration so a merchant can move from Paddle Billing v2 to Stripe without asking customers to re-enter cards. `startSubscriptionMachine()` + `enterGracePeriod()` + `applyProration()` + `stackCoupon()` + `startRecovery()` + `advanceCascade()` + `applyCardUpdate()` + `startVault()` + `migrateToken()` give you every one of those pieces as deterministic state machines. No live Paddle Billing v2 sandbox, no manual `paddle.transactions.preview()` amortisation, no ad-hoc coupon stacking calculator. This is the pattern kiwa's Paddle subscription v2 dogfood app (v1.33-3) exercises against real Paddle sandbox under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "we ran a black-friday coupon and it broke proration" case reviewers ask about.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/payment` v0.4 that models the 5 pieces of a 
 ```bash
 mkdir kiwa-paddle-billing && cd kiwa-paddle-billing
 pnpm init
-pnpm add -D @kiwa-test/payment@^0.4 vitest typescript @types/node
+pnpm add -D @kiwa/payment@^0.4 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -44,7 +44,7 @@ import {
   startSubscriptionMachine,
   enterGracePeriod,
   exitGracePeriod,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('paddle — grace period lifecycle', () => {
   it('enters grace, recovers back to active', async () => {
@@ -95,7 +95,7 @@ import {
   createPaddleMock,
   startSubscriptionMachine,
   applyProration,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('paddle — mid-cycle proration', () => {
   it('upgrades on day 10 of a 30-day cycle: credits 20 days of old + charges 20 days of new', async () => {
@@ -146,7 +146,7 @@ import {
   createPaddleMock,
   startSubscriptionMachine,
   stackCoupon,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('paddle — coupon stacking', () => {
   it('stacks 2 stackable coupons summing under 100', async () => {
@@ -225,7 +225,7 @@ import {
   applyCardUpdate,
   applyNetworkToken,
   finalizeRecovery,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('paddle — recovery ladder', () => {
   it('smart retry → dunning cascade → card update → network token → recovered', async () => {
@@ -288,7 +288,7 @@ import {
   tokenizeCard,
   migrateToken,
   verifyPciScope,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('paddle — vault + cross-provider migration', () => {
   it('tokenizes a card in Paddle then migrates it to Stripe with the same fingerprint', async () => {

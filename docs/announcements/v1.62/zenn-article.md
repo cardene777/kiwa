@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.62 リリース — Desktop 深化 VI (@kiwa-test/desktop v0.7 real behavior runner + fidelity harness behavior diff early warning、 depth-7 pattern 新設 candidate、 systematic pattern 37 度目、 40 milestone streak)"
+title: "kiwa v1.62 リリース — Desktop 深化 VI (@kiwa/desktop v0.7 real behavior runner + fidelity harness behavior diff early warning、 depth-7 pattern 新設 candidate、 systematic pattern 37 度目、 40 milestone streak)"
 emoji: "🔍"
 type: "tech"
 topics: ["testing", "vitest", "electron", "tauri", "desktop"]
@@ -55,7 +55,7 @@ v0.7 real behavior runner の追加は additive、 v0.1-v0.6 API 変更 0、 既
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/desktop@^0.7
+pnpm add -D @kiwa/desktop@^0.7
 ```
 
 ## Migration guide

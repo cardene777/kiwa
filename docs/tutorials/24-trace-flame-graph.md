@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that reconstructs a distributed-trace flame graph from an in-memory `TelemetryCollector` — the same collector `@kiwa-test/observability` v1.1 provider mocks (OpenTelemetry / Datadog / Sentry) write into. You start from a canonical HTTP-handler trace fixture (3 nested spans), build the span tree, render the flame graph with sibling collapse, drill into the `db.query` subtree, and join the 4-line log fixture to the span tree via `trace_id` / `span_id` attributes. No real Jaeger, no distributed tracer runtime, no wire format — the whole flow lives on the collector array.
+A vitest test file that reconstructs a distributed-trace flame graph from an in-memory `TelemetryCollector` — the same collector `@kiwa/observability` v1.1 provider mocks (OpenTelemetry / Datadog / Sentry) write into. You start from a canonical HTTP-handler trace fixture (3 nested spans), build the span tree, render the flame graph with sibling collapse, drill into the `db.query` subtree, and join the 4-line log fixture to the span tree via `trace_id` / `span_id` attributes. No real Jaeger, no distributed tracer runtime, no wire format — the whole flow lives on the collector array.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that reconstructs a distributed-trace flame graph from an in-
 ```bash
 mkdir kiwa-trace-flame && cd kiwa-trace-flame
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa-test/observability
+pnpm add -D vitest typescript @types/node @kiwa/observability
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -54,7 +54,7 @@ import {
   renderFlameGraph,
   trace_fanoutParallel,
   trace_httpHandler,
-} from '@kiwa-test/observability';
+} from '@kiwa/observability';
 
 export function buildHttpHandlerScene() {
   const collector = new TelemetryCollector();
@@ -80,7 +80,7 @@ Create `tests/trace.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { drillDown, flattenFlame } from '@kiwa-test/observability';
+import { drillDown, flattenFlame } from '@kiwa/observability';
 import { buildHttpHandlerScene } from '../src/trace';
 
 describe('trace flame graph — tree + flame + drill-down + log correlation', () => {
@@ -166,7 +166,7 @@ You should see 7 passing tests. Every assertion targets one of the 3 v2 axes —
 
 ## The 3 trace fixtures
 
-`@kiwa-test/observability` v2 ships 3 canonical trace shapes covering the flame graphs a debugger walks through most often.
+`@kiwa/observability` v2 ships 3 canonical trace shapes covering the flame graphs a debugger walks through most often.
 
 | Fixture | Root span | Children | Shape modelled |
 |---|---|---|---|

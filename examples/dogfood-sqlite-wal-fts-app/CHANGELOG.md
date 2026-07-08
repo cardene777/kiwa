@@ -4,7 +4,7 @@
 
 Initial dogfood for the v1.32 Database 深化 II milestone. Drives the
 SQLite WAL + FTS5 + Bun-style edge deployment semantics that the
-`@kiwa-test/orm` v0.10 8-axis surface promises for SQLite, from a
+`@kiwa/orm` v0.10 8-axis surface promises for SQLite, from a
 provider-neutral adapter (`src/adapters/interface.ts`) with mock +
 `SQLITE_KEY`-gated real implementations.
 
@@ -17,4 +17,4 @@ provider-neutral adapter (`src/adapters/interface.ts`) with mock +
   runtimes.
 - **AC3** — Playwright e2e specs (wal-fts5-edge-flow /
   testcontainers-probe-flow / emit-fidelity-flow) + fidelity harness
-  feeding the `@kiwa-test/quality-metrics` release gate.
+  feeding the `@kiwa/quality-metrics` release gate.

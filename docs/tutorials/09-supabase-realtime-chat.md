@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A single vitest test file that drives a small chat app through **three Supabase Realtime surfaces** — a broadcast on a room channel, a two-user presence roll-up, and a 500 ms typing-indicator debounce — using `@kiwa-test/realtime`'s `createSupabaseRealtimeMock`. The same test file also works against real Supabase Realtime when `SUPABASE_URL` + `SUPABASE_ANON_KEY` are set, so the fidelity harness can diff mock vs real behaviour.
+A single vitest test file that drives a small chat app through **three Supabase Realtime surfaces** — a broadcast on a room channel, a two-user presence roll-up, and a 500 ms typing-indicator debounce — using `@kiwa/realtime`'s `createSupabaseRealtimeMock`. The same test file also works against real Supabase Realtime when `SUPABASE_URL` + `SUPABASE_ANON_KEY` are set, so the fidelity harness can diff mock vs real behaviour.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A single vitest test file that drives a small chat app through **three Supabase 
 ```bash
 mkdir kiwa-supabase-realtime-chat && cd kiwa-supabase-realtime-chat
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa-test/realtime
+pnpm add -D vitest typescript @types/node @kiwa/realtime
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -50,7 +50,7 @@ import {
   createSupabaseRealtimeMock,
   type SupabaseChannel,
   type SupabaseMock,
-} from '@kiwa-test/realtime';
+} from '@kiwa/realtime';
 
 /** A chat message delivered on a room channel. */
 export interface ChatMessage {

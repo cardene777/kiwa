@@ -6,7 +6,7 @@ title: Mobile v0.5 child_process.spawn stub 契約層 — v1.54 depth-5 pattern 
 
 ## What this covers
 
-`@kiwa-test/mobile` v0.5 の spawn-driver stub 契約層 SSOT (env-gate + spawn shape 契約 + fail-closed + 6 CLI stub 呼出)、 縦深化 pair 第 13 の 5 段目 (Phase 5、 **pair 深度 5 段拡張 1 例目 candidate、 depth-5 pattern 新設**)。 v1.53 adapter layer の上に v1.54 で spawn-driver を lay、 real CLI 呼出経路の契約層完成。
+`@kiwa/mobile` v0.5 の spawn-driver stub 契約層 SSOT (env-gate + spawn shape 契約 + fail-closed + 6 CLI stub 呼出)、 縦深化 pair 第 13 の 5 段目 (Phase 5、 **pair 深度 5 段拡張 1 例目 candidate、 depth-5 pattern 新設**)。 v1.53 adapter layer の上に v1.54 で spawn-driver を lay、 real CLI 呼出経路の契約層完成。
 
 ## spawn-driver interface SSOT
 

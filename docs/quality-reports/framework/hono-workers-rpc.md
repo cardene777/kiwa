@@ -1,13 +1,13 @@
 # Fidelity — dogfood-hono-workers-rpc (v1.19-4)
 
-Real-vs-mock behavioural fidelity for the Cloudflare Workers + Hono + `hc` RPC + middleware chain + KV / D1 / R2 bindings harness driven by `@kiwa-test/hono` under mock-mode + real-mode env-skip, produced by `examples/dogfood-hono-workers-rpc/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-test/quality-metrics` release-gate 7-axis payload as the third modern-framework dogfood alongside `dogfood-solidjs-signal-app` (v1.19-2, SolidJS Signal reactivity) and `dogfood-fresh-islands` (v1.19-3, Fresh Islands architecture).
+Real-vs-mock behavioural fidelity for the Cloudflare Workers + Hono + `hc` RPC + middleware chain + KV / D1 / R2 bindings harness driven by `@kiwa/hono` under mock-mode + real-mode env-skip, produced by `examples/dogfood-hono-workers-rpc/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` release-gate 7-axis payload as the third modern-framework dogfood alongside `dogfood-solidjs-signal-app` (v1.19-2, SolidJS Signal reactivity) and `dogfood-fresh-islands` (v1.19-3, Fresh Islands architecture).
 
 ## Baseline (real mode skipped — `CF_ACCOUNT_ID` unset)
 
 When the harness runs without `CF_ACCOUNT_ID=1` in the environment, the real adapter emits `HONO_REAL_ENV_MISSING` for each of the six ops (`driveRoute` / `driveRpc` / `driveKv` / `driveD1` / `driveR2` / `driveExecutionCtx`). Divergences are recorded so the mock is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/hono/workers-rpc
+provider   : @kiwa/hono/workers-rpc
 version    : 0.1.0
 verdict    : PASS
 divergences: 6 (all six ops recorded as BEHAVIORAL_DIVERGENCE, real mode absent)
@@ -89,6 +89,6 @@ The middleware chain runs in registered order on every non-404 request. `cors` s
 
 ## Related
 
-- v1.19-1c `@kiwa-test/hono` v0.1 (`packages/hono/`)
-- v1.11-1 `@kiwa-test/quality-metrics` (`packages/quality-metrics/`)
+- v1.19-1c `@kiwa/hono` v0.1 (`packages/hono/`)
+- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
 - v1.19 milestone parent [#806](https://github.com/cardene777/kiwa/issues/806), this sub [#810](https://github.com/cardene777/kiwa/issues/810)

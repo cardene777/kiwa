@@ -1,13 +1,13 @@
 # Fidelity — dogfood-nuxt-webtransport-stream-app (v1.28-3)
 
-Real-vs-mock behavioural fidelity for the Nuxt 3 + aioquic + WebTransport streaming dogfood, produced by `examples/dogfood-nuxt-webtransport-stream-app/tests/emit-fidelity-report.spec.ts`. Feeds `@kiwa-test/quality-metrics` 12-axis release gate on the common 7-axis branch (WebTransport is a transport primitive, not a token-priced generative call).
+Real-vs-mock behavioural fidelity for the Nuxt 3 + aioquic + WebTransport streaming dogfood, produced by `examples/dogfood-nuxt-webtransport-stream-app/tests/emit-fidelity-report.spec.ts`. Feeds `@kiwa/quality-metrics` 12-axis release gate on the common 7-axis branch (WebTransport is a transport primitive, not a token-priced generative call).
 
 ## Baseline (real mode skipped — no `WEBTRANSPORT_KEY=1`)
 
 When the harness runs without the aioquic testcontainers env, the real adapter emits `KIWA_WEBTRANSPORT_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/realtime/nuxt-webtransport-stream-app
+provider   : @kiwa/realtime/nuxt-webtransport-stream-app
 version    : 0.2.0
 verdict    : PASS
 divergences: 9 (openSession / closeSession / openUniStream / openBiStream / writeStream / readStream / resetStream / sendDatagram / migrateConnection — recorded as BEHAVIORAL_DIVERGENCE, real mode absent)

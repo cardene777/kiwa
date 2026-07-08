@@ -1,6 +1,6 @@
 # examples/nextjs-server-actions-poc
 
-Proof of concept for [`@kiwa-test/nextjs`](../../packages/nextjs) — drives a Next.js Server Action through Vitest without a running Next.js server.
+Proof of concept for [`@kiwa/nextjs`](../../packages/nextjs) — drives a Next.js Server Action through Vitest without a running Next.js server.
 
 The example uses the **injectable env seam** pattern documented in [`server-action-seam.md`](../../.claude/skills/kiwa-nextjs/references/server-action-seam.md). The action under test accepts `(formData, env)`, defaulting to a production-shaped env that throws a kiwa redirect signal. The test substitutes a recording env so it can assert on the captured redirect URL + cookie writes.
 

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-`@kiwa-test/mobile` v0.6 で v0.5 spawn stub 契約層が **実 child_process.spawn 実行** に置換された経路を、 dry-run + DI + env sanitize の 3 pattern で決定的に扱う vitest suite。 **depth-5 pattern 実装完成**、 v0.5 shape 契約 preserving で backward compat 絶対維持。
+`@kiwa/mobile` v0.6 で v0.5 spawn stub 契約層が **実 child_process.spawn 実行** に置換された経路を、 dry-run + DI + env sanitize の 3 pattern で決定的に扱う vitest suite。 **depth-5 pattern 実装完成**、 v0.5 shape 契約 preserving で backward compat 絶対維持。
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@
 ```bash
 mkdir kiwa-mobile-v06 && cd kiwa-mobile-v06
 pnpm init
-pnpm add -D @kiwa-test/mobile@^0.6 vitest typescript @types/node
+pnpm add -D @kiwa/mobile@^0.6 vitest typescript @types/node
 ```
 
 ### 2. Dry-run mode (実 CLI 未 install 環境向け)
@@ -26,7 +26,7 @@ pnpm add -D @kiwa-test/mobile@^0.6 vitest typescript @types/node
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeMobileCli } from '@kiwa-test/mobile';
+import { invokeMobileCli } from '@kiwa/mobile';
 
 describe('v0.6 dry-run', () => {
   it('returns shape without invoking spawn', async () => {
@@ -49,7 +49,7 @@ describe('v0.6 dry-run', () => {
 ```ts
 import { EventEmitter } from 'node:events';
 import { describe, expect, it } from 'vitest';
-import { invokeMobileCliWith, type SpawnFn } from '@kiwa-test/mobile';
+import { invokeMobileCliWith, type SpawnFn } from '@kiwa/mobile';
 
 class DummyChild extends EventEmitter {
   stdout = new EventEmitter();
@@ -90,7 +90,7 @@ describe('v0.6 DI', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { sanitizeEnv } from '@kiwa-test/mobile';
+import { sanitizeEnv } from '@kiwa/mobile';
 
 describe('v0.6 env sanitize', () => {
   it('drops secrets, keeps command-specific tokens', () => {

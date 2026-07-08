@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v1.64 リリース — Desktop 深化 VIII。 **@kiwa-test/desktop v0.9** で 実 native binding 呼出 (probeAndInvoke) 追加、 probe availability 判定で 実 CLI 存在時のみ 実 spawn 呼出。 v1.55-v1.63 4 PR rhythm 継承 (**11 milestone 連続 = 44 PR 連続同 rhythm**)、 **systematic pattern 39 度目適用**、 **depth-9 pattern 新設 candidate 到達**。
+kiwa v1.64 リリース — Desktop 深化 VIII。 **@kiwa/desktop v0.9** で 実 native binding 呼出 (probeAndInvoke) 追加、 probe availability 判定で 実 CLI 存在時のみ 実 spawn 呼出。 v1.55-v1.63 4 PR rhythm 継承 (**11 milestone 連続 = 44 PR 連続同 rhythm**)、 **systematic pattern 39 度目適用**、 **depth-9 pattern 新設 candidate 到達**。
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-desktop-native-invoke-app 新規、 4 pattern workflow (invokeSingleAxis
 
 ## Tweet 4
 
-`pnpm add -D @kiwa-test/desktop@^0.9`。 migration: https://cardene777.github.io/kiwa/migrations/v1.63-to-v1.64
+`pnpm add -D @kiwa/desktop@^0.9`。 migration: https://cardene777.github.io/kiwa/migrations/v1.63-to-v1.64
 
 v1.65+ で 他 pair depth-5/6 拡張 (3 例安定化) 予定。 backward compat 絶対維持で v0.1-v0.8 完全保持。
 

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/ai-llm` v0.5 that models the 5 pieces of a real code-interpreter + fine-tuning workflow that every non-trivial LLM-backed product eventually needs — a sandboxed code execution session that pins a per-run `sandboxId` + `timeoutMs` so a rogue snippet cannot hijack a shared runtime, a memory-snapshotting `executeCode` step that walks the assignment tape `{k: v}` so a follow-up `rollback` can pop N executions and restore the exact `memory` shape, an external `useTool` step that records a `{name, args, ok}` triple so a stalled agent's tool-call log is a `console.log(session.toolCalls)` away from a debug session, a fine-tuning dataset preparer that walks `(prompt, chosen, rejected)` triples and dedupes them by hash so a poisoned dataset with 3 duplicate rows shrinks to 2 unique rows before any RLHF step runs, an RLHF policy-update step that computes `policyDelta = learningRate * meanReward` so a batch of rewards `[0.5, 0.7]` and a learning rate `0.1` lands on a deterministic `policyDelta` of `0.06`, an eval loop that appends scores to an `evalHistory` tape and pins the `baselineScore` on first call so a follow-up drift step can compare `latest - baseline`, and a drift detector that flags `Math.abs(delta) >= threshold` so a `baseline: 0.7` + `latest: 0.5` + `threshold: 0.15` combination lands on `drifted: true` and a downstream orchestrator can trigger a rollback of the fine-tuning run. `startCiSession()` + `startSandbox()` + `executeCode()` + `useTool()` + `rollback()` + `startFtpSession()` + `prepareDataset()` + `stepRlhf()` + `runEvalLoop()` + `detectDrift()` give you every one of those pieces without booting a real Python sandbox or a real RLHF training loop. This is the pattern kiwa's `examples/dogfood-llm-code-interpreter-app` exercises against a real Docker-isolated Python REPL under `KIWA_MODE=real` + `KIWA_CI_SANDBOX_URL` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the rollback popped 3 executions but the memory snapshot was one step stale because the snapshot was taken after the assignment instead of before" gap a reviewer sees in the code-interpreter-rollback post-mortem.
+A vitest suite wired to `@kiwa/ai-llm` v0.5 that models the 5 pieces of a real code-interpreter + fine-tuning workflow that every non-trivial LLM-backed product eventually needs — a sandboxed code execution session that pins a per-run `sandboxId` + `timeoutMs` so a rogue snippet cannot hijack a shared runtime, a memory-snapshotting `executeCode` step that walks the assignment tape `{k: v}` so a follow-up `rollback` can pop N executions and restore the exact `memory` shape, an external `useTool` step that records a `{name, args, ok}` triple so a stalled agent's tool-call log is a `console.log(session.toolCalls)` away from a debug session, a fine-tuning dataset preparer that walks `(prompt, chosen, rejected)` triples and dedupes them by hash so a poisoned dataset with 3 duplicate rows shrinks to 2 unique rows before any RLHF step runs, an RLHF policy-update step that computes `policyDelta = learningRate * meanReward` so a batch of rewards `[0.5, 0.7]` and a learning rate `0.1` lands on a deterministic `policyDelta` of `0.06`, an eval loop that appends scores to an `evalHistory` tape and pins the `baselineScore` on first call so a follow-up drift step can compare `latest - baseline`, and a drift detector that flags `Math.abs(delta) >= threshold` so a `baseline: 0.7` + `latest: 0.5` + `threshold: 0.15` combination lands on `drifted: true` and a downstream orchestrator can trigger a rollback of the fine-tuning run. `startCiSession()` + `startSandbox()` + `executeCode()` + `useTool()` + `rollback()` + `startFtpSession()` + `prepareDataset()` + `stepRlhf()` + `runEvalLoop()` + `detectDrift()` give you every one of those pieces without booting a real Python sandbox or a real RLHF training loop. This is the pattern kiwa's `examples/dogfood-llm-code-interpreter-app` exercises against a real Docker-isolated Python REPL under `KIWA_MODE=real` + `KIWA_CI_SANDBOX_URL` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the rollback popped 3 executions but the memory snapshot was one step stale because the snapshot was taken after the assignment instead of before" gap a reviewer sees in the code-interpreter-rollback post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/ai-llm` v0.5 that models the 5 pieces of a r
 ```bash
 mkdir kiwa-code-interpreter-ft && cd kiwa-code-interpreter-ft
 pnpm init
-pnpm add -D @kiwa-test/ai-llm@^0.5 vitest typescript @types/node
+pnpm add -D @kiwa/ai-llm@^0.5 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.5 surface exports the code-interpreter axis (`startCiSession` / `startSan
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { startCiSession, startSandbox } from '@kiwa-test/ai-llm';
+import { startCiSession, startSandbox } from '@kiwa/ai-llm';
 
 describe('ci — sandbox binding', () => {
   it('starts a sandbox and moves state to sandbox-started', () => {
@@ -70,7 +70,7 @@ The `session.sandboxId` binding is the SSOT for the follow-up `executeCode` / `u
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { executeCode, startCiSession, startSandbox } from '@kiwa-test/ai-llm';
+import { executeCode, startCiSession, startSandbox } from '@kiwa/ai-llm';
 
 describe('ci — code execution', () => {
   it('records execution and applies assigns to memory', () => {
@@ -114,7 +114,7 @@ import {
   startCiSession,
   startSandbox,
   useTool,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 
 describe('ci — tool + rollback', () => {
   it('records a tool call', () => {
@@ -158,7 +158,7 @@ The rollback semantics are the key invariant — a code-interpreter agent that s
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { prepareDataset, startFtpSession } from '@kiwa-test/ai-llm';
+import { prepareDataset, startFtpSession } from '@kiwa/ai-llm';
 
 describe('ftp — dataset preparation', () => {
   it('dedupes duplicate samples when dedupe is on', () => {
@@ -199,7 +199,7 @@ describe('ftp — dataset preparation', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { prepareDataset, startFtpSession, stepRlhf } from '@kiwa-test/ai-llm';
+import { prepareDataset, startFtpSession, stepRlhf } from '@kiwa/ai-llm';
 
 describe('ftp — RLHF stepping', () => {
   it('records a step with deterministic policy delta', () => {
@@ -244,7 +244,7 @@ import {
   prepareDataset,
   runEvalLoop,
   startFtpSession,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 
 describe('ftp — eval + drift', () => {
   it('flags drift when latest deviates from baseline beyond threshold', () => {

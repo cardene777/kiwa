@@ -1,6 +1,6 @@
 # nuxt-server-routes-full — kiwa Nuxt 3 PoC (v1.0.4+ 全 3 helper)
 
-`@kiwa-test/nuxt` v1.0.4 の **3 helper 全部** (`invokeEventHandler` / `invokeRouteMiddleware` / `invokeNitroPlugin`) を **実 Nuxt 3 project** に統合した参考実装。
+`@kiwa/nuxt` v1.0.4 の **3 helper 全部** (`invokeEventHandler` / `invokeRouteMiddleware` / `invokeNitroPlugin`) を **実 Nuxt 3 project** に統合した参考実装。
 
 OSS contributor / kiwa を初めて触る user 向けに、 `defineEventHandler` / `defineNuxtRouteMiddleware` / `defineNitroPlugin` の 3 layer をどう書けば kiwa 経由で test できるかを **コピペで動く形** で示す。
 
@@ -49,7 +49,7 @@ nuxt-server-routes-full/
 
 ```bash
 pnpm install               # repo root から実行
-pnpm -F examples-nuxt-server-routes-full build  # 依存 @kiwa-test/nuxt + @kiwa-test/core を先に build
+pnpm -F examples-nuxt-server-routes-full build  # 依存 @kiwa/nuxt + @kiwa/core を先に build
 ```
 
 ### Step 2 — kiwa unit test (Nuxt 起動不要、 高速)
@@ -92,7 +92,7 @@ pnpm -F examples-nuxt-server-routes-full test:e2e
 2. **`invokeRouteMiddleware`** (route middleware) — navigateTo / abortNavigation の branded signal capture、 全 Nuxt page で発火する global guard
 3. **`invokeNitroPlugin`** (Nitro plugin lifecycle) — hook 登録 + payload mutation + handler error isolation、 server-wide 横断機能の test
 
-各 helper の API 詳細は [`@kiwa-test/nuxt` の README](../../packages/nuxt/README.md) を参照。
+各 helper の API 詳細は [`@kiwa/nuxt` の README](../../packages/nuxt/README.md) を参照。
 
 ## 関連
 

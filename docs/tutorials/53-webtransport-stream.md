@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A provider-neutral `WebTransportStreamAdapter` with two implementations — a **mock adapter** backed by `@kiwa-test/realtime` v0.2's `createWebTransportUniMock` + `createWebTransportBiMock`, and a **real adapter** stub that would drive aioquic + Chrome experimental HTTP/3 under `KIWA_MODE=real` + `WEBTRANSPORT_KEY=1`. Both satisfy the same 9-op contract (`openSession` / `closeSession` / `openUniStream` / `openBiStream` / `writeStream` / `readStream` / `resetStream` / `sendDatagram` / `migrateConnection`), so a fidelity harness can diff them across the WebTransport axes (uni / bi / datagram / migration). This is the exact pattern the `dogfood-nuxt-webtransport-stream-app` (v1.28-3, PR #979) uses to run 30 tests against bi-stream backpressure, uni-stream reset, and 0-RTT resumption tickets.
+A provider-neutral `WebTransportStreamAdapter` with two implementations — a **mock adapter** backed by `@kiwa/realtime` v0.2's `createWebTransportUniMock` + `createWebTransportBiMock`, and a **real adapter** stub that would drive aioquic + Chrome experimental HTTP/3 under `KIWA_MODE=real` + `WEBTRANSPORT_KEY=1`. Both satisfy the same 9-op contract (`openSession` / `closeSession` / `openUniStream` / `openBiStream` / `writeStream` / `readStream` / `resetStream` / `sendDatagram` / `migrateConnection`), so a fidelity harness can diff them across the WebTransport axes (uni / bi / datagram / migration). This is the exact pattern the `dogfood-nuxt-webtransport-stream-app` (v1.28-3, PR #979) uses to run 30 tests against bi-stream backpressure, uni-stream reset, and 0-RTT resumption tickets.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A provider-neutral `WebTransportStreamAdapter` with two implementations — a **
 ```bash
 mkdir kiwa-webtransport-stream && cd kiwa-webtransport-stream
 pnpm init
-pnpm add -D @kiwa-test/realtime@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa/realtime@^0.2 vitest typescript @types/node
 ```
 
 `package.json`:
@@ -92,7 +92,7 @@ Two things to notice.
 - The 9 ops match the WebTransport browser API 1:1. `openUniStream` maps to `WebTransport.createUnidirectionalStream()`, `sendDatagram` maps to `transport.datagrams.writable.getWriter().write(data)`, `resetStream` maps to `writer.abort()`. The mock exposes the same shapes so a caller that reads this interface can port to real WebTransport without translation.
 - `writeStream` returns `backpressure: boolean` explicitly. Real `writer.write()` blocks on `writer.ready` when the flow-control window drains — the mock surfaces that as an observable field on the return so behavior tests can assert `backpressure === true` at the exact byte that hit the window boundary.
 
-### 3. Wire the mock adapter with `@kiwa-test/realtime` v0.2
+### 3. Wire the mock adapter with `@kiwa/realtime` v0.2
 
 `src/adapters/mock.ts` — one uni mock + one bi mock per session so per-session state (stream registry, window remaining) stays isolated. The mock defers open / write to microtask timing so it matches Chrome's async `writer.ready` semantics.
 
@@ -104,7 +104,7 @@ import {
   type UniStreamHandle,
   type WebTransportBiMock,
   type WebTransportUniMock,
-} from '@kiwa-test/realtime';
+} from '@kiwa/realtime';
 import type { WebTransportStreamAdapter } from './interface.js';
 
 interface SessionState {
@@ -244,7 +244,7 @@ export function makeMockAdapter(opts: { seed?: number } = {}): WebTransportStrea
 
 Three things to notice.
 
-- **Bi-stream window semantics**. `writeStream` snapshots `windowRemaining` **before** the write, decides `backpressure` from that snapshot, then awaits the write. The `@kiwa-test/realtime` bi mock refills the window after backpressure via an artificial delay — so `remainingWindow` after a backpressure event is the fresh window, not the drained value. Behavior tests that assert `remainingWindow > 0` post-backpressure land the same way in the mock and in real Chrome + aioquic.
+- **Bi-stream window semantics**. `writeStream` snapshots `windowRemaining` **before** the write, decides `backpressure` from that snapshot, then awaits the write. The `@kiwa/realtime` bi mock refills the window after backpressure via an artificial delay — so `remainingWindow` after a backpressure event is the fresh window, not the drained value. Behavior tests that assert `remainingWindow > 0` post-backpressure land the same way in the mock and in real Chrome + aioquic.
 - **Uni streams never backpressure**. WebTransport specifies uni streams as fire-and-forget from the sender's perspective — flow control is per-stream, and a uni stream has a large enough default window to swallow bulk writes without stalling. The mock returns `backpressure: false, remainingWindow: 0` on every uni write to make that invariant explicit; a caller that flips the boolean by mistake fails the test immediately.
 - **Connection migration path-validation**. `migrateConnection({ reason: 'network-change' })` returns `pathValidated: false` when no active streams exist. That is exactly how Chrome + aioquic behave — a NAT rebinding without in-flight traffic never triggers the QUIC path-validation frame. The mock preserves that distinction so a caller cannot accidentally rely on `network-change` migrating unconditionally.
 

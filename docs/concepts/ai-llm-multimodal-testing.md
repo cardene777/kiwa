@@ -9,9 +9,9 @@ Each of these opens new failure modes that a purely text-only 11-axis release ga
 | shape | v1.12 coverage | v1.15 coverage |
 |---|---|---|
 | text-only chat + streaming + tool_use | 4 SDK mocks + 11-axis gate | unchanged |
-| multimodal input (image + audio) | not supported | `@kiwa-test/ai-llm` v0.2 across all 4 SDKs |
-| tool provisioning via process boundary | app-internal function tools only | `@kiwa-test/mcp` v0.1 (JSON-RPC 2.0) |
-| stateful multi-turn agent orchestration | text-only Anthropic/OpenAI/Vercel/LangChain loops | `@kiwa-test/agent` v0.1 (LangGraph + Assistants v2) |
+| multimodal input (image + audio) | not supported | `@kiwa/ai-llm` v0.2 across all 4 SDKs |
+| tool provisioning via process boundary | app-internal function tools only | `@kiwa/mcp` v0.1 (JSON-RPC 2.0) |
+| stateful multi-turn agent orchestration | text-only Anthropic/OpenAI/Vercel/LangChain loops | `@kiwa/agent` v0.1 (LangGraph + Assistants v2) |
 
 All three land as **additive** — v1.12 test suites keep passing on their v0.1 configuration.
 
@@ -65,11 +65,11 @@ Real MCP clients enforce this order because a `tools/list` before `initialize` g
 
 The `-32002` code, along with the other three MCP-specific extensions (`-32000` ToolExecutionError, `-32001` ToolSchemaError, `-32003` ToolNotFound), is part of the mock's contract. Tests that assert on these codes will keep passing when the `InMemoryTransport` is swapped for a stdio child process transport, because the wire format is identical.
 
-The response-bank pattern from v1.12 does not apply directly to MCP because MCP tool calls are function invocations, not chat replies. Instead, `@kiwa-test/mcp` uses a **tool registry**: each tool has a name, description, JSONSchema input schema, and handler. The handler is a plain function that runs synchronously in the mock and returns a `ToolResult` (`content: [{ type: 'text', text: '...' }]` in the common case).
+The response-bank pattern from v1.12 does not apply directly to MCP because MCP tool calls are function invocations, not chat replies. Instead, `@kiwa/mcp` uses a **tool registry**: each tool has a name, description, JSONSchema input schema, and handler. The handler is a plain function that runs synchronously in the mock and returns a `ToolResult` (`content: [{ type: 'text', text: '...' }]` in the common case).
 
 ## Concept 4 — agent state machines are graphs, not chat logs
 
-`@kiwa-test/agent` covers two orchestration styles under one API:
+`@kiwa/agent` covers two orchestration styles under one API:
 
 - **LangGraph-style `StateGraph`** — declarative dataflow. Nodes are pure state → patch functions; edges are unconditional (v0.1). The graph is validated on `.compile()` with 6 fail-fast checks (see [Tutorial 18](../tutorials/18-agent-orchestration) for the list).
 - **OpenAI Assistants v2** — stateful multi-turn. Runs move through 5 statuses (`queued` / `in_progress` / `requires_action` / `completed` / `failed`); tool outputs are submitted asynchronously via `submitToolOutputs`.
@@ -78,11 +78,11 @@ Both styles share a common failure mode: **runaway loops**. A conditional edge t
 
 The mock's Assistants v2 client resolves handlers synchronously so the `in_progress` step is folded into the initial `poll` call. Real Assistants v2 exposes `in_progress` when polling during handler execution; tests do not need to sleep-poll the mock to observe it. This is the same trade-off as the multimodal mock: the mock is deterministic on purpose, and the release gate measures how far real diverges.
 
-## Concept 5 — MCP + agent + multimodal roll into the 11-axis gate, but only when combined with `@kiwa-test/ai-*`
+## Concept 5 — MCP + agent + multimodal roll into the 11-axis gate, but only when combined with `@kiwa/ai-*`
 
-The `evaluateReleaseGate` 11-axis branch triggers on the provider prefix `@kiwa-test/ai-*`. `@kiwa-test/mcp` and `@kiwa-test/agent` on their own are not AI-LLM providers — they are protocol + orchestration wrappers. A dogfood app that uses `@kiwa-test/mcp` to expose tools **plus** `@kiwa-test/ai-llm` to drive a Claude client rolls into the 11-axis gate because the provider string is `@kiwa-test/ai-llm/<subpath>`; the MCP overhead shows up in latency + token counts, not as separate axes.
+The `evaluateReleaseGate` 11-axis branch triggers on the provider prefix `@kiwa/ai-*`. `@kiwa/mcp` and `@kiwa/agent` on their own are not AI-LLM providers — they are protocol + orchestration wrappers. A dogfood app that uses `@kiwa/mcp` to expose tools **plus** `@kiwa/ai-llm` to drive a Claude client rolls into the 11-axis gate because the provider string is `@kiwa/ai-llm/<subpath>`; the MCP overhead shows up in latency + token counts, not as separate axes.
 
-Concretely, the dogfood app `examples/dogfood-mcp-tool-agent` reports its provider as `@kiwa-test/ai-llm/mcp-tool-agent`. This means:
+Concretely, the dogfood app `examples/dogfood-mcp-tool-agent` reports its provider as `@kiwa/ai-llm/mcp-tool-agent`. This means:
 
 - `cost.perRequestUsd` counts the full Anthropic + MCP roundtrip on the real side, and the mock cost of both on the mock side.
 - `latency.p95Ms` counts the full JSON-RPC + Claude latency.
@@ -114,7 +114,7 @@ Two failure modes are specific to agent orchestration and only show up in tests 
 
 - **Text-only chat** — v1.12 patterns still apply. Do not adopt multimodal / MCP / agent unless the app actually needs them.
 - **Vision or OCR** — v1.15 multimodal on the appropriate SDK. Anthropic vision for classification / description, OpenAI vision with `detail: 'high'` for OCR / small-text answers.
-- **Audio input** — v1.15 Whisper on `@kiwa-test/ai-llm` OpenAI mock. Keep audio-duration assertions in the test to prove the cost path.
+- **Audio input** — v1.15 Whisper on `@kiwa/ai-llm` OpenAI mock. Keep audio-duration assertions in the test to prove the cost path.
 - **Tools behind a process boundary** — v1.15 MCP. Direct app-internal tools should still use native Claude / OpenAI tool-use to avoid a JSON-RPC hop that provides no benefit.
 - **Multi-turn stateful conversation** — v1.15 agent. Pick LangGraph for declarative dataflow, Assistants v2 for OpenAI-shaped stateful multi-turn.
 
@@ -122,8 +122,8 @@ Two failure modes are specific to agent orchestration and only show up in tests 
 
 - **Image generation** (Anthropic image output / DALL·E / Imagen) — the multimodal mock covers input only. Output-side image generation is a separate mock surface and lands in a future release.
 - **Text-to-speech** — mirror of image generation. Whisper covers speech-to-text; TTS is out of scope for v1.15.
-- **MCP resources / prompts / sampling / logging ops** — v0.1 covers the tool-use half. The remaining ops are additive and land in `@kiwa-test/mcp` v0.2.
-- **LangGraph conditional edges / channels reducers / interrupts / checkpointers** — v0.1 covers unconditional dataflow. Advanced graph shapes are additive and land in `@kiwa-test/agent` v0.2.
+- **MCP resources / prompts / sampling / logging ops** — v0.1 covers the tool-use half. The remaining ops are additive and land in `@kiwa/mcp` v0.2.
+- **LangGraph conditional edges / channels reducers / interrupts / checkpointers** — v0.1 covers unconditional dataflow. Advanced graph shapes are additive and land in `@kiwa/agent` v0.2.
 - **Live streaming for Assistants v2 runs (SSE)** — v0.1 exposes synchronous `poll`. SSE streaming is on the v0.2 roadmap.
 
 ## Reading list
@@ -133,9 +133,9 @@ Two failure modes are specific to agent orchestration and only show up in tests 
 - [Tutorial 16 — Multimodal chat](../tutorials/16-multimodal-chat)
 - [Tutorial 17 — MCP tool-use agent](../tutorials/17-mcp-tool-agent)
 - [Tutorial 18 — Agent orchestration](../tutorials/18-agent-orchestration)
-- [`@kiwa-test/ai-llm` README](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/README.md)
-- [`@kiwa-test/mcp` README](https://github.com/cardene777/kiwa/blob/main/packages/mcp/README.md)
-- [`@kiwa-test/agent` README](https://github.com/cardene777/kiwa/blob/main/packages/agent/README.md)
+- [`@kiwa/ai-llm` README](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/README.md)
+- [`@kiwa/mcp` README](https://github.com/cardene777/kiwa/blob/main/packages/mcp/README.md)
+- [`@kiwa/agent` README](https://github.com/cardene777/kiwa/blob/main/packages/agent/README.md)
 
 ## Takeaways
 
@@ -143,4 +143,4 @@ Two failure modes are specific to agent orchestration and only show up in tests 
 - Whisper URLs are never resolved by the mock. Duration is metadata; assertions are on transcribed text + segment count.
 - MCP handshake order is a first-class invariant. The mock enforces it — a `tools/list` before `initialize` returns `-32002`.
 - Agent orchestration adds two new failure modes: **response-bank turn-0 collision** on Anthropic tool-use loops (mitigated by fresh mock per iteration) and **poll-after-cancel** returning the terminal step instead of throwing.
-- v1.15 mocks roll into the existing 11-axis gate through the `@kiwa-test/ai-*` provider prefix. No new axes; MCP + agent overhead is fidelity + latency + token spend that the existing axes already measure.
+- v1.15 mocks roll into the existing 11-axis gate through the `@kiwa/ai-*` provider prefix. No new axes; MCP + agent overhead is fidelity + latency + token spend that the existing axes already measure.

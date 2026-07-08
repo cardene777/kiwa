@@ -1,6 +1,6 @@
 # orm-drizzle-mysql-poc — kiwa ORM query test PoC (Drizzle + MySQL via testcontainers)
 
-`@kiwa-test/orm` v0.2.1 を **Drizzle ORM + MySQL (testcontainers)** で使う PoC。 同じ `UsersRepository` を Postgres / MySQL 経路で動かす dialect 横断 reference。
+`@kiwa/orm` v0.2.1 を **Drizzle ORM + MySQL (testcontainers)** で使う PoC。 同じ `UsersRepository` を Postgres / MySQL 経路で動かす dialect 横断 reference。
 
 ## 前提
 
@@ -58,5 +58,5 @@ production-shape repository は dialect 共有可能、 error pattern matcher �
 - 上位 Issue ... CAR-298 (v1.2 ORM #527-2 follow-up MySQL via testcontainers)
 - 親 Issue ... CAR-291 (#527)
 - 親 PR ... 本 PR (`feature/527-2-orm-testcontainers-mysql`)
-- runtime fixture ... [`@kiwa-test/orm`](../../packages/orm/README.md) v0.2.1
+- runtime fixture ... [`@kiwa/orm`](../../packages/orm/README.md) v0.2.1
 - 関連 PoC ... [`orm-drizzle-sqlite-poc`](../orm-drizzle-sqlite-poc/README.md) (mock) / [`orm-drizzle-postgres-poc`](../orm-drizzle-postgres-poc/README.md) (live Postgres)

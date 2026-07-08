@@ -1,9 +1,9 @@
 ---
 name: kiwa-cli-test
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.cli.md`) を CLI / shell / file IO test (Vitest + @kiwa-test/cli-test) に変換する Layer 2 CLI test skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.cli.md`) を CLI / shell / file IO test (Vitest + @kiwa/cli-test) に変換する Layer 2 CLI test skill。
   isolated tempdir + env override + stdout/stderr snapshot + 副作用 (file IO) assertion を統合表現する。
-  `/kiwa-design --layer cli` が出力する 9 column 表 (Mode = mock | live、 Topic = sub-command 識別子) を `@kiwa-test/cli-test` API に機械的に変換する。
+  `/kiwa-design --layer cli` が出力する 9 column 表 (Mode = mock | live、 Topic = sub-command 識別子) を `@kiwa/cli-test` API に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -13,7 +13,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 # /kiwa-cli-test — Layer 2 CLI test skill
 
 CLI / shell / file IO の test を Layer 1 spec から自動生成する。
-`@kiwa-test/cli-test` の `setupCliEnv` + `runCli` + `expect*` helper を Mode / Topic / Observation 列の値で組み合わせる。
+`@kiwa/cli-test` の `setupCliEnv` + `runCli` + `expect*` helper を Mode / Topic / Observation 列の値で組み合わせる。
 
 ## 入力の trust boundary
 
@@ -22,7 +22,7 @@ CLI / shell / file IO の test を Layer 1 spec から自動生成する。
 ## 前提
 
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.cli.md`) が存在
-- vitest + `@kiwa-test/cli-test` が devDependencies で利用可能
+- vitest + `@kiwa/cli-test` が devDependencies で利用可能
 - 出力先 `tests/{module}.test.ts` への Write 権限
 
 ## ユーザーのリクエスト
@@ -47,7 +47,7 @@ import {
   expectStderrContains,
   setupCliEnv,
   type CliTestEnv,
-} from '@kiwa-test/cli-test';
+} from '@kiwa/cli-test';
 ```
 
 ### Step 1: Topic 別 describe にグループ化
@@ -83,7 +83,7 @@ import {
   expectStdoutContains,
   setupCliEnv,
   type CliTestEnv,
-} from '@kiwa-test/cli-test';
+} from '@kiwa/cli-test';
 
 const envs: CliTestEnv[] = [];
 afterEach(async () => {
@@ -113,5 +113,5 @@ describe('kiwa CLI (help / errors)', () => {
 
 ## references
 
-- `@kiwa-test/cli-test` API ... `packages/cli-test/README.md`
+- `@kiwa/cli-test` API ... `packages/cli-test/README.md`
 - 実 PoC ... `examples/cli-poc/`

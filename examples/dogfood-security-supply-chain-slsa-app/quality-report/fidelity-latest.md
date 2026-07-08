@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/security/dogfood-supply-chain-slsa-app @ 0.2.0
+# Quality Report — @kiwa/security/dogfood-supply-chain-slsa-app @ 0.2.0
 
 _Reported at 2026-07-07T07:37:44.772Z._
 

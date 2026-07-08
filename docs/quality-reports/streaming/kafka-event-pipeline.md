@@ -1,7 +1,7 @@
 # Kafka Event Pipeline — Quality Report (v1.20-2)
 
 Dogfood: [`examples/dogfood-kafka-event-pipeline`](../../../examples/dogfood-kafka-event-pipeline/).
-Package under exercise: [`@kiwa-test/streaming`](../../../packages/streaming/) (v0.1.0).
+Package under exercise: [`@kiwa/streaming`](../../../packages/streaming/) (v0.1.0).
 
 ## Scope
 

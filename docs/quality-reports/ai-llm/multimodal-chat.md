@@ -1,13 +1,13 @@
 # Fidelity — dogfood-multimodal-chat (v1.15-4)
 
-Real-vs-mock behavioural fidelity for the Anthropic vision (multimodal) dogfood, produced by `examples/dogfood-multimodal-chat/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-test/quality-metrics` 11-axis release gate.
+Real-vs-mock behavioural fidelity for the Anthropic vision (multimodal) dogfood, produced by `examples/dogfood-multimodal-chat/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 11-axis release gate.
 
 ## Baseline (real mode skipped — no `ANTHROPIC_API_KEY`)
 
 When the harness runs without an Anthropic API key, the real adapter emits `ANTHROPIC_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/ai-llm/multimodal-chat
+provider   : @kiwa/ai-llm/multimodal-chat
 version    : 0.1.0
 verdict    : FAIL (accuracy.score 0.30 vs threshold 0.80)
 divergences: 3 (describeImage / streamDescribeImage / compareImages — real mode absent)
@@ -69,6 +69,6 @@ For a 2-image compare call at default detail, `imageTokenEstimate` = 2400 — th
 
 The mock's response bank in `examples/dogfood-multimodal-chat/src/adapters/mock.ts` keys by the trailing text block of the user message (the vision message concatenates image blocks + text, and the shared `MockEngine` matches on the text portion). Each response returns a Claude-shaped vision reply so streaming chunks + finish reason + usage all take realistic shapes.
 
-Provider prefix `@kiwa-test/ai-llm/` triggers the 11-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — the 4 AI-LLM axes cost / latency / token / accuracy are added on top of the shared 7).
+Provider prefix `@kiwa/ai-llm/` triggers the 11-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — the 4 AI-LLM axes cost / latency / token / accuracy are added on top of the shared 7).
 
 The real adapter (`src/adapters/real.ts`) speaks Anthropic's HTTP API directly — headers `x-api-key` + `anthropic-version: 2023-06-01`, body includes `image` content blocks whose `source` is either `{ type: 'base64', media_type, data }` or `{ type: 'url', url }`. No `@anthropic-ai/sdk` dependency is dragged into the workspace root; the shape stays honest.

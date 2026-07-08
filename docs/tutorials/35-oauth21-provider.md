@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite for an OAuth 2.1 authorization server (AS) that exercises the four spec-critical flows — PKCE-guarded authorization code exchange, DPoP-bound access tokens (RFC 9449), rotating refresh tokens (RFC 6749bis §6), and token revocation + introspection (RFC 7009 + RFC 7662). The tests never boot a real AS or issue a real DPoP proof; they drive the OAuth 2.1 endpoints through `@kiwa-test/auth` v1.21-1c's mock-shaped stubs so the same suite runs in Node.js without a Keycloak / Ory Hydra deployment or a real ES256 keypair.
+A vitest suite for an OAuth 2.1 authorization server (AS) that exercises the four spec-critical flows — PKCE-guarded authorization code exchange, DPoP-bound access tokens (RFC 9449), rotating refresh tokens (RFC 6749bis §6), and token revocation + introspection (RFC 7009 + RFC 7662). The tests never boot a real AS or issue a real DPoP proof; they drive the OAuth 2.1 endpoints through `@kiwa/auth` v1.21-1c's mock-shaped stubs so the same suite runs in Node.js without a Keycloak / Ory Hydra deployment or a real ES256 keypair.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest suite for an OAuth 2.1 authorization server (AS) that exercises the fou
 ```bash
 mkdir kiwa-oauth21-first && cd kiwa-oauth21-first
 pnpm init
-pnpm add -D @kiwa-test/auth@0.1 vitest typescript @types/node
+pnpm add -D @kiwa/auth@0.1 vitest typescript @types/node
 ```
 
 Add the vitest script and TypeScript configuration in `package.json`.
@@ -29,7 +29,7 @@ Add the vitest script and TypeScript configuration in `package.json`.
 }
 ```
 
-Ship a `tsconfig.json` that matches the ESM shape `@kiwa-test/auth` exports.
+Ship a `tsconfig.json` that matches the ESM shape `@kiwa/auth` exports.
 
 ```json
 {
@@ -54,7 +54,7 @@ import {
   __resetOAuth21Counters,
   setupOAuth21Env,
   type OAuth21TestEnv,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 
 const envs: OAuth21TestEnv[] = [];
 
@@ -352,7 +352,7 @@ OAuth 2.1 (draft RFC 6749bis + RFC 9700 BCP) diverges from OAuth 2.0 on four axe
 - **DPoP-bound access tokens (RFC 9449)** — OAuth 2.0 issued bearer tokens that any holder could present. OAuth 2.1 + RFC 9449 lets a client bind a token to a DPoP JWK thumbprint — the resource server checks the DPoP proof matches the bound thumbprint on every request. The mock records the thumbprint on the access token and refuses refresh with a different JWK.
 - **Rotating refresh + reuse detection (RFC 9700 §2.2.4)** — OAuth 2.0 let refresh tokens live for weeks. OAuth 2.1 rotates the refresh token on every use and treats a reused (already-rotated) token as an attack signal that invalidates the whole token family. The mock's `refreshToken()` returns a new refresh token and refuses reuse.
 
-`@kiwa-test/auth` v1.21-1c records each axis.
+`@kiwa/auth` v1.21-1c records each axis.
 
 - **PKCE** — `env.createPkceChallenge()` returns `{ codeVerifier, codeChallenge, codeChallengeMethod: 'S256' }`. `env.server.authorize({ codeChallengeMethod: 'plain' })` throws at authorize time. `env.server.token({ codeVerifier })` verifies against the stored challenge; a mismatch throws `/PKCE code_verifier does not match/`.
 - **Dropped grants** — `env.server.authorize({ responseType: 'token' })` throws `/response_type "token" refused/`. `env.server.token({ grantType: 'password' })` and `grantType: 'client_credentials'` throw `/refused/`.

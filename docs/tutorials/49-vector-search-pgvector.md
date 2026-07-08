@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/orm` v0.9 that walks the vector-store axis end-to-end for a pgvector-backed hybrid search on Postgres. You will build an IVFFlat / HNSW index, run a k-NN search with a cosine / L2 / inner-product distance, run a hybrid search that combines vector similarity with a keyword score, and compute raw pairwise distances for telemetry. The exact pattern that `examples/dogfood-vector-search-app` (SvelteKit + kysely + Postgres 16 + pgvector) uses — same `createVectorStoreSession` + `buildIndex` + `knnSearch` + `hybridSearch` + `computeDistance` primitives, same dimension guards, same distance-kind switching. You leave this tutorial with a runnable hybrid search test and a working distance calculator for any pgvector flow you point it at.
+A vitest suite wired to `@kiwa/orm` v0.9 that walks the vector-store axis end-to-end for a pgvector-backed hybrid search on Postgres. You will build an IVFFlat / HNSW index, run a k-NN search with a cosine / L2 / inner-product distance, run a hybrid search that combines vector similarity with a keyword score, and compute raw pairwise distances for telemetry. The exact pattern that `examples/dogfood-vector-search-app` (SvelteKit + kysely + Postgres 16 + pgvector) uses — same `createVectorStoreSession` + `buildIndex` + `knnSearch` + `hybridSearch` + `computeDistance` primitives, same dimension guards, same distance-kind switching. You leave this tutorial with a runnable hybrid search test and a working distance calculator for any pgvector flow you point it at.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/orm` v0.9 that walks the vector-store axis e
 ```bash
 mkdir kiwa-vector-search && cd kiwa-vector-search
 pnpm init
-pnpm add -D @kiwa-test/orm@^0.9 vitest typescript @types/node
+pnpm add -D @kiwa/orm@^0.9 vitest typescript @types/node
 ```
 
 Add the vitest script in `package.json`.
@@ -37,7 +37,7 @@ Add the vitest script in `package.json`.
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createVectorStoreSession } from '@kiwa-test/orm';
+import { createVectorStoreSession } from '@kiwa/orm';
 
 describe('vector — session ctor', () => {
   it('starts unindexed with the requested distance kind', () => {
@@ -65,7 +65,7 @@ The distance kind is fixed at session creation so downstream `computeDistance` c
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { buildIndex, createVectorStoreSession } from '@kiwa-test/orm';
+import { buildIndex, createVectorStoreSession } from '@kiwa/orm';
 
 describe('vector — build IVFFlat index', () => {
   it('moves unindexed -> indexed with dimensions + lists', () => {
@@ -117,7 +117,7 @@ describe('vector — build IVFFlat index', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { buildIndex, createVectorStoreSession } from '@kiwa-test/orm';
+import { buildIndex, createVectorStoreSession } from '@kiwa/orm';
 
 describe('vector — build HNSW index', () => {
   it('moves unindexed -> indexed with m + efConstruction', () => {
@@ -174,7 +174,7 @@ import {
   buildIndex,
   createVectorStoreSession,
   knnSearch,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('vector — knn search', () => {
   it('bumps searchCount and moves to searched', () => {
@@ -245,7 +245,7 @@ import {
   buildIndex,
   createVectorStoreSession,
   hybridSearch,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('vector — hybrid search', () => {
   it('records k + keyword + weight and moves to searched', () => {
@@ -315,7 +315,7 @@ import { describe, expect, it } from 'vitest';
 import {
   computeDistance,
   createVectorStoreSession,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('vector — compute distance', () => {
   it('returns 0 for identical cosine vectors', () => {
@@ -376,7 +376,7 @@ describe('vector — compute distance', () => {
 pnpm test
 ```
 
-Every step above returns an `AxisStep<VectorState>` envelope so downstream tests can assert on either the state machine outcome (`step.state === 'searched'`) or the emitted event (`step.neutralEvent === 'vector.hybrid-searched'`). The full end-to-end pattern lives in `packages/orm/tests/docs-tutorial-v1.26.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa-test/orm` v0.9 API.
+Every step above returns an `AxisStep<VectorState>` envelope so downstream tests can assert on either the state machine outcome (`step.state === 'searched'`) or the emitted event (`step.neutralEvent === 'vector.hybrid-searched'`). The full end-to-end pattern lives in `packages/orm/tests/docs-tutorial-v1.26.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa/orm` v0.9 API.
 
 ## Where to next
 

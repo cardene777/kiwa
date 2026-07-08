@@ -6,7 +6,7 @@ title: Desktop v0.8 native binding availability probe + skip 経路 SSOT
 
 ## What this covers
 
-`@kiwa-test/desktop` v0.8 の probe layer + skip 経路 SSOT。 v1.63 で v0.7 real behavior runner → v0.8 probe layer 拡張、 kiwa 縦深化 pair 第 14 の第 8 段 (depth-8 pattern 新設 candidate)、 v0.7 baseline (`docs/concepts/desktop-real-behavior.md`) を extend。
+`@kiwa/desktop` v0.8 の probe layer + skip 経路 SSOT。 v1.63 で v0.7 real behavior runner → v0.8 probe layer 拡張、 kiwa 縦深化 pair 第 14 の第 8 段 (depth-8 pattern 新設 candidate)、 v0.7 baseline (`docs/concepts/desktop-real-behavior.md`) を extend。
 
 ## probe layer 5 type SSOT
 

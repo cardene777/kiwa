@@ -6,7 +6,7 @@ title: kiwa API reference
 
 Auto-generated API documentation for every language kiwa ships.
 
-- **TypeScript** — [`/api/typescript/`](./typescript/) covers every `@kiwa-test/*` package (typedoc output)
+- **TypeScript** — [`/api/typescript/`](./typescript/) covers every `@kiwa/*` package (typedoc output)
 - **Rust** — [`/api/rust/kiwa/`](./rust/kiwa/) covers `kiwa-test-rs` (cargo doc output)
 - **Solidity** — [`/api/solidity/dogfood-foundry-dapp/`](./solidity/dogfood-foundry-dapp/) covers the dogfood Foundry project (forge doc output)
 
@@ -23,7 +23,7 @@ The skill runs typedoc + cargo doc + forge doc in sequence and writes each langu
 To rebuild after a package changes:
 
 ```bash
-pnpm -F @kiwa-test/<name> build     # keep dist/ current
+pnpm -F @kiwa/<name> build     # keep dist/ current
 claude /docs-generate --only typescript
 ```
 

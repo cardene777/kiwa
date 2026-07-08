@@ -1,13 +1,13 @@
 # Fidelity — dogfood-sveltekit-http3-multiplex-app (v1.28-4)
 
-Real-vs-mock behavioural fidelity for the SvelteKit + nginx-quic + HTTP/3 multiplex dogfood, produced by `examples/dogfood-sveltekit-http3-multiplex-app/tests/emit-fidelity-report.spec.ts`. Feeds `@kiwa-test/quality-metrics` 12-axis release gate on the common 7-axis branch (HTTP/3 is a transport primitive, not a token-priced generative call).
+Real-vs-mock behavioural fidelity for the SvelteKit + nginx-quic + HTTP/3 multiplex dogfood, produced by `examples/dogfood-sveltekit-http3-multiplex-app/tests/emit-fidelity-report.spec.ts`. Feeds `@kiwa/quality-metrics` 12-axis release gate on the common 7-axis branch (HTTP/3 is a transport primitive, not a token-priced generative call).
 
 ## Baseline (real mode skipped — no `HTTP3_KEY=1`)
 
 When the harness runs without the nginx-quic testcontainers env, the real adapter emits `KIWA_HTTP3_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/realtime/sveltekit-http3-multiplex-app
+provider   : @kiwa/realtime/sveltekit-http3-multiplex-app
 version    : 0.2.0
 verdict    : PASS
 divergences: 9 (openConnection / closeConnection / openStream / concurrentSend / writeStream / readStream / closeStream / insertHpackHeader / resumeZeroRtt — recorded as BEHAVIORAL_DIVERGENCE, real mode absent)

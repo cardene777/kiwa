@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/ai-llm` v0.4 that models the 5 pieces of a real agent orchestration pipeline that every non-trivial LLM-backed agent product eventually needs — a ReAct step recorder that pins each `(thought, action, observation)` triple onto a persistent `reactTrace` so a stalled agent's exact loop can be replayed, a Tree of Thought expander that walks a `root` thought into a branching tree of alternative thoughts + per-branch scores so an agent can pick the highest-scoring path without committing to the first one it thinks of, a reflection + self-correction step that runs the agent's output against a `critiqueRules` list and returns a revised output with the violations rewritten to `[revised]`, a tool selector that ranks a `candidates` list by intent-token overlap against `name` + `description` so the agent picks the tool with the highest semantic match instead of the first one in the array, and a cost / latency SLA harness (`checkBudget` → `measureLatency` → `routeModel` → `engageFallback`) that pins the per-request `$` cost + p50 / p95 / p99 latency + model routing + fallback ladder so an agent that hits the budget cap gracefully retries a cheaper model. `startAgentSession()` + `reactStep()` + `expandToT()` + `reflectAndCorrect()` + `selectTool()` + `startSlaSession()` + `checkBudget()` + `measureLatency()` + `routeModel()` + `engageFallback()` give you every one of those pieces without booting a real Vercel AI SDK endpoint. This is the pattern kiwa's `examples/dogfood-llm-agent-orchestration-app` exercises against the real Vercel AI SDK (`generateText`) under `KIWA_MODE=real` + `OPENAI_API_KEY` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the ReAct loop stepped 20 times before the budget check fired because `checkBudget` was called after `reactStep` instead of before" gap a reviewer sees in the orchestration-cost post-mortem.
+A vitest suite wired to `@kiwa/ai-llm` v0.4 that models the 5 pieces of a real agent orchestration pipeline that every non-trivial LLM-backed agent product eventually needs — a ReAct step recorder that pins each `(thought, action, observation)` triple onto a persistent `reactTrace` so a stalled agent's exact loop can be replayed, a Tree of Thought expander that walks a `root` thought into a branching tree of alternative thoughts + per-branch scores so an agent can pick the highest-scoring path without committing to the first one it thinks of, a reflection + self-correction step that runs the agent's output against a `critiqueRules` list and returns a revised output with the violations rewritten to `[revised]`, a tool selector that ranks a `candidates` list by intent-token overlap against `name` + `description` so the agent picks the tool with the highest semantic match instead of the first one in the array, and a cost / latency SLA harness (`checkBudget` → `measureLatency` → `routeModel` → `engageFallback`) that pins the per-request `$` cost + p50 / p95 / p99 latency + model routing + fallback ladder so an agent that hits the budget cap gracefully retries a cheaper model. `startAgentSession()` + `reactStep()` + `expandToT()` + `reflectAndCorrect()` + `selectTool()` + `startSlaSession()` + `checkBudget()` + `measureLatency()` + `routeModel()` + `engageFallback()` give you every one of those pieces without booting a real Vercel AI SDK endpoint. This is the pattern kiwa's `examples/dogfood-llm-agent-orchestration-app` exercises against the real Vercel AI SDK (`generateText`) under `KIWA_MODE=real` + `OPENAI_API_KEY` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the ReAct loop stepped 20 times before the budget check fired because `checkBudget` was called after `reactStep` instead of before" gap a reviewer sees in the orchestration-cost post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/ai-llm` v0.4 that models the 5 pieces of a r
 ```bash
 mkdir kiwa-agent-orch && cd kiwa-agent-orch
 pnpm init
-pnpm add -D @kiwa-test/ai-llm@^0.4 vitest typescript @types/node
+pnpm add -D @kiwa/ai-llm@^0.4 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.4 surface exports the agent-orchestration axis (`startAgentSession` / `re
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { reactStep, startAgentSession } from '@kiwa-test/ai-llm';
+import { reactStep, startAgentSession } from '@kiwa/ai-llm';
 
 describe('agent — ReAct trace', () => {
   it('appends a triple to reactTrace on each call', () => {
@@ -83,7 +83,7 @@ The `reactTrace` is the audit surface — a stalled agent's trace can be dumped 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { expandToT, startAgentSession } from '@kiwa-test/ai-llm';
+import { expandToT, startAgentSession } from '@kiwa/ai-llm';
 
 describe('agent — Tree of Thought', () => {
   it('builds a tree with the requested depth and branch factor', () => {
@@ -137,7 +137,7 @@ import {
   reactStep,
   reflectAndCorrect,
   startAgentSession,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 
 describe('agent — reflection', () => {
   it('rewrites a violated word to [revised] and reports the critique', () => {
@@ -197,7 +197,7 @@ The `cycle` counter is the bounded self-correction signal — an agent that refl
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { reactStep, selectTool, startAgentSession } from '@kiwa-test/ai-llm';
+import { reactStep, selectTool, startAgentSession } from '@kiwa/ai-llm';
 
 describe('agent — tool selection', () => {
   it('picks the tool with the highest intent overlap', () => {
@@ -262,7 +262,7 @@ import {
   measureLatency,
   routeModel,
   startSlaSession,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 
 describe('agent — SLA harness', () => {
   it('checkBudget returns allowed: false once the budget cap is hit', () => {

@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/streaming/nats-jetstream-dogfood @ 0.2.0
+# Quality Report — @kiwa/streaming/nats-jetstream-dogfood @ 0.2.0
 
 _Reported at 2026-07-06T05:33:38.699Z._
 

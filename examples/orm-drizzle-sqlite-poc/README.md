@@ -1,6 +1,6 @@
 # orm-drizzle-sqlite-poc — kiwa ORM query test PoC (Drizzle + SQLite)
 
-`@kiwa-test/orm` v0.1 を **Drizzle ORM + in-memory SQLite** で使う最小 PoC。 `UsersRepository` クラスを `setupOrmEnv` 経由で 8 test cover し、 Pattern A (Dependency Injection) の流儀で production-shape repository をそのまま test できることを示す。
+`@kiwa/orm` v0.1 を **Drizzle ORM + in-memory SQLite** で使う最小 PoC。 `UsersRepository` クラスを `setupOrmEnv` 経由で 8 test cover し、 Pattern A (Dependency Injection) の流儀で production-shape repository をそのまま test できることを示す。
 
 ## 構造
 
@@ -39,5 +39,5 @@ pnpm -F examples-orm-drizzle-sqlite-poc test
 
 - 上位 Issue ... [#527](https://github.com/cardene777/kiwa/issues/527) (v1.2 ORM query test adapter、 MVP 完遂、 follow-up #527-2..N で testcontainers / Prisma / Kysely 追加)
 - 親 PR ... 本 PR (`feature/527-1-orm-drizzle-sqlite-mvp`)
-- runtime fixture ... [`@kiwa-test/orm`](../../packages/orm/README.md) v0.1
+- runtime fixture ... [`@kiwa/orm`](../../packages/orm/README.md) v0.1
 - 関連 skill ... `/kiwa-design --layer orm-query` / `/kiwa-orm`

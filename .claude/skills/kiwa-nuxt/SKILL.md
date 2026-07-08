@@ -1,9 +1,9 @@
 ---
 name: kiwa-nuxt
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.{nuxt|nuxt-mw|nitro}.md`) を Nuxt 3 の 3 mode (Server Routes `server/api/*.ts` の `defineEventHandler` / route middleware `middleware/*.ts` の `defineNuxtRouteMiddleware` / Nitro plugin lifecycle `server/plugins/*.ts` の `defineNitroPlugin`) test (Vitest + @kiwa-test/nuxt) に変換する Layer 2 skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.{nuxt|nuxt-mw|nitro}.md`) を Nuxt 3 の 3 mode (Server Routes `server/api/*.ts` の `defineEventHandler` / route middleware `middleware/*.ts` の `defineNuxtRouteMiddleware` / Nitro plugin lifecycle `server/plugins/*.ts` の `defineNitroPlugin`) test (Vitest + @kiwa/nuxt) に変換する Layer 2 skill。
   3 mode 全部 Nitro 起動なしで isolated 実行可能、 `invokeEventHandler` (Server Routes) / `invokeRouteMiddleware` (route middleware、 navigateTo / abortNavigation の throw を branded signal 化) / `invokeNitroPlugin` (Nitro plugin、 7 lifecycle hook を任意 payload で fire + hookOnce auto-detach + handler error isolation) の 3 helper を spec の 9 column 表から機械変換する。
-  `/kiwa-design --layer {nuxt-server-route|nuxt-route-middleware|nuxt-nitro-plugin}` が出力する 9 column 表を `@kiwa-test/nuxt` v1.0.3+ の対応 helper の引数に機械的に変換する。
+  `/kiwa-design --layer {nuxt-server-route|nuxt-route-middleware|nuxt-nitro-plugin}` が出力する 9 column 表を `@kiwa/nuxt` v1.0.3+ の対応 helper の引数に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -12,7 +12,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /kiwa-nuxt — Nuxt 3 test 生成 (Layer 2、 3 mode)
 
-`/kiwa-design --layer {nuxt-server-route|nuxt-route-middleware|nuxt-nitro-plugin}` が出力した spec の 9 column 表を、 `@kiwa-test/nuxt` v1.0.3+ の `invokeEventHandler` / `invokeRouteMiddleware` / `invokeNitroPlugin` を使った Vitest test に機械変換する。
+`/kiwa-design --layer {nuxt-server-route|nuxt-route-middleware|nuxt-nitro-plugin}` が出力した spec の 9 column 表を、 `@kiwa/nuxt` v1.0.3+ の `invokeEventHandler` / `invokeRouteMiddleware` / `invokeNitroPlugin` を使った Vitest test に機械変換する。
 
 対象は **Nuxt 3 の 3 layer** ... Server Routes (`server/api/*.ts` の `defineEventHandler`) / route middleware (`middleware/*.ts` の `defineNuxtRouteMiddleware`) / Nitro plugin lifecycle (`server/plugins/*.ts` の `defineNitroPlugin`)。 client component (Vue) は `/kiwa-ui` (Vue mode) で別 layer 対応済。
 
@@ -20,7 +20,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 - 対象 example / project に Nuxt 3 (`server/api/` / `middleware/` / `server/plugins/`) が存在
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.{nuxt|nuxt-mw|nitro}.md`) が存在
-- `@kiwa-test/nuxt` v1.0.3+ が install 済 (`pnpm add -D @kiwa-test/nuxt`)
+- `@kiwa/nuxt` v1.0.3+ が install 済 (`pnpm add -D @kiwa/nuxt`)
 - vitest + tsx + typescript の standard 開発環境
 
 ## mode 1 — Server Routes (`--layer nuxt-server-route`)
@@ -42,7 +42,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 ### test 生成 template
 
 ```ts
-import { invokeEventHandler, NUXT_REDIRECT_SYMBOL } from '@kiwa-test/nuxt';
+import { invokeEventHandler, NUXT_REDIRECT_SYMBOL } from '@kiwa/nuxt';
 import { handler } from '../server/api/items.get.js';
 
 it('{ID} {Observation}', async () => {
@@ -77,7 +77,7 @@ it('{ID} {Observation}', async () => {
 ### test 生成 template
 
 ```ts
-import { invokeRouteMiddleware, NUXT_MIDDLEWARE_REDIRECT_SYMBOL, NUXT_MIDDLEWARE_ABORT_SYMBOL } from '@kiwa-test/nuxt';
+import { invokeRouteMiddleware, NUXT_MIDDLEWARE_REDIRECT_SYMBOL, NUXT_MIDDLEWARE_ABORT_SYMBOL } from '@kiwa/nuxt';
 import auth from '../middleware/auth.js';
 
 it('{ID} {Observation}', async () => {
@@ -113,7 +113,7 @@ middleware 内部の `useUserSession()` 等を直接呼ばず、 `to.meta.userSe
 ### test 生成 template
 
 ```ts
-import { invokeNitroPlugin } from '@kiwa-test/nuxt';
+import { invokeNitroPlugin } from '@kiwa/nuxt';
 import analyticsPlugin from '../server/plugins/analytics.js';
 
 it('{ID} {Observation}', async () => {
@@ -145,7 +145,7 @@ it('{ID} {Observation}', async () => {
 ## 関連
 
 - 上流 ... `/kiwa-design --layer {nuxt-server-route|nuxt-route-middleware|nuxt-nitro-plugin}`
-- runtime fixture ... `@kiwa-test/nuxt` v1.0.3+ (`packages/nuxt/`)
+- runtime fixture ... `@kiwa/nuxt` v1.0.3+ (`packages/nuxt/`)
 - 下流 (review) ... `/kiwa-review --layer {nuxt-server-route|nuxt-route-middleware|nuxt-nitro-plugin}`
 - client component (Vue) ... `/kiwa-ui` (Vue mode)
 - PoC ... `examples/nuxt-server-routes-poc/` + (route middleware / Nitro plugin の PoC は v1.2 で追加予定)

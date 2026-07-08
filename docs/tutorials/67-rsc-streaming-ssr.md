@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/component` v0.3 that models the 4 pieces of a real React 19 + Next.js 15 App Router streaming layer that every non-trivial app eventually needs — an RSC harness that tracks HTML chunks streamed from the server, a Suspense boundary that flips to `pending` while data loads, an error boundary that captures thrown promises without cratering the whole route, and a view transition that animates the DOM diff during navigation. `startRscHarness()` + `startStreamingSsr()` + `startViewTransitionSession()` give you every one of those pieces as a deterministic state machine — `idle` → `rendering` → `suspended` → `streaming` → `completed`, `suspense-pending` → `progressive-hydrating` → `selective-hydrated`, `element-transitioning` → `finished`. No live Next.js dev server, no Chromium browser required, no Playwright screencasts. This is the pattern kiwa's `examples/dogfood-nextjs-rsc-streaming-app` exercises against real Chromium under Playwright; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "Suspense fallback never got replaced" case a reviewer sees in prod.
+A vitest suite wired to `@kiwa/component` v0.3 that models the 4 pieces of a real React 19 + Next.js 15 App Router streaming layer that every non-trivial app eventually needs — an RSC harness that tracks HTML chunks streamed from the server, a Suspense boundary that flips to `pending` while data loads, an error boundary that captures thrown promises without cratering the whole route, and a view transition that animates the DOM diff during navigation. `startRscHarness()` + `startStreamingSsr()` + `startViewTransitionSession()` give you every one of those pieces as a deterministic state machine — `idle` → `rendering` → `suspended` → `streaming` → `completed`, `suspense-pending` → `progressive-hydrating` → `selective-hydrated`, `element-transitioning` → `finished`. No live Next.js dev server, no Chromium browser required, no Playwright screencasts. This is the pattern kiwa's `examples/dogfood-nextjs-rsc-streaming-app` exercises against real Chromium under Playwright; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "Suspense fallback never got replaced" case a reviewer sees in prod.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/component` v0.3 that models the 4 pieces of 
 ```bash
 mkdir kiwa-rsc-streaming && cd kiwa-rsc-streaming
 pnpm init
-pnpm add -D @kiwa-test/component@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa/component@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.3 surface exports `startRscHarness` + `startStreamingSsr` + `startViewTra
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { startRscHarness } from '@kiwa-test/component';
+import { startRscHarness } from '@kiwa/component';
 
 describe('rsc — startRscHarness', () => {
   it('constructs a session with defaults filled in', () => {
@@ -73,7 +73,7 @@ The rule of thumb is that the component id is the SSOT — the same id shows up 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { beginRscRender, startRscHarness, streamHtmlChunk } from '@kiwa-test/component';
+import { beginRscRender, startRscHarness, streamHtmlChunk } from '@kiwa/component';
 
 describe('rsc — streaming ladder', () => {
   it('advances idle → rendering → streaming with per-chunk metadata', () => {
@@ -120,7 +120,7 @@ import {
   enterSuspenseBoundary,
   startRscHarness,
   streamHtmlChunk,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 
 describe('rsc — Suspense boundary + completion', () => {
   it('advances rendering → suspended → streaming → completed with resolved chunks', () => {
@@ -159,7 +159,7 @@ import {
   markSuspensePending,
   startProgressiveHydration,
   startStreamingSsr,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 
 describe('ssr — selective hydration ladder', () => {
   it('tracks pending → hydrating → hydrated per boundary', () => {
@@ -205,7 +205,7 @@ import {
   finishElementTransition,
   startElementTransition,
   startViewTransitionSession,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 
 describe('view — element transition + animation assertion', () => {
   it('advances idle → element-transitioning → finished when the last active element finishes', () => {
@@ -254,7 +254,7 @@ The rule of thumb is that view transitions is what turns "the whole page flashes
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { collectFidelityCoverage } from '@kiwa-test/component';
+import { collectFidelityCoverage } from '@kiwa/component';
 
 describe('component — fidelity coverage', () => {
   it('every target covers every axis with 4 neutral events per axis', () => {

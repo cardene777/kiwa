@@ -1,7 +1,7 @@
 # NATS JetStream — Quality Report (v1.20-4)
 
 Dogfood: [`examples/dogfood-nats-jetstream`](../../../examples/dogfood-nats-jetstream/).
-Package under exercise: [`@kiwa-test/streaming`](../../../packages/streaming/) (v0.1.0).
+Package under exercise: [`@kiwa/streaming`](../../../packages/streaming/) (v0.1.0).
 
 ## Scope
 

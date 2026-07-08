@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.61 リリース — Desktop 深化 V。 **@kiwa-test/desktop v0.6** で 実 child_process.spawn 実行追加、 spawn-executor + 8 CLI per-command env allowlist + timeout 60s + buffer 上限 10MB + shell:false + detached:false + SIGKILL + DI 経路 + KIWA_DESKTOP_SPAWN=dry-run で v0.5 shape 復元。 v1.55-v1.60 4 PR rhythm 継承 (**8 milestone 連続 = 32 PR 連続同 rhythm**)、 **systematic pattern 36 度目適用**、 **depth-6 pattern 新設 = kiwa milestone 史上初 depth-6 record 到達** + **depth-5 pattern 2 例目確定**。
+kiwa v1.61 リリース — Desktop 深化 V。 **@kiwa/desktop v0.6** で 実 child_process.spawn 実行追加、 spawn-executor + 8 CLI per-command env allowlist + timeout 60s + buffer 上限 10MB + shell:false + detached:false + SIGKILL + DI 経路 + KIWA_DESKTOP_SPAWN=dry-run で v0.5 shape 復元。 v1.55-v1.60 4 PR rhythm 継承 (**8 milestone 連続 = 32 PR 連続同 rhythm**)、 **systematic pattern 36 度目適用**、 **depth-6 pattern 新設 = kiwa milestone 史上初 depth-6 record 到達** + **depth-5 pattern 2 例目確定**。
 
 ## Tweet 2 — spawn-executor + safety layer 4 段
 
@@ -14,7 +14,7 @@ dogfood-desktop-v06-spawn-app 新規、 dry-run + DI + env sanitize の 3 patter
 
 ## Tweet 4 — install + Mobile v1.55 rhythm 完全再現 + v1.62 計画
 
-`pnpm add -D @kiwa-test/desktop@^0.6`。 migration: https://cardene777.github.io/kiwa/migrations/v1.60-to-v1.61
+`pnpm add -D @kiwa/desktop@^0.6`。 migration: https://cardene777.github.io/kiwa/migrations/v1.60-to-v1.61
 
 **Mobile v1.50-v1.55 (base → advanced II → advanced III → adapter → spawn stub → 実 spawn) 6 milestone rhythm を Desktop pair (v1.56-v1.61) で完全再現**、 depth-6 到達 (**kiwa milestone 史上初**) + depth-5 pattern 2 例目確定 (2 例安定化到達)。 v1.62+ で v0.4 real adapter を実 OS API 呼出 (electron-updater / SCStream / NSPasteboard) に置換予定。 backward compat 絶対維持で v0.1-v0.5 完全保持。
 

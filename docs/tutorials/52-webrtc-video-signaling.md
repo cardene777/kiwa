@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A provider-neutral `VideoCallAdapter` with two implementations — a **mock adapter** backed by `@kiwa-test/realtime` v0.2's `createWebRtcSignalingMock` + `createWebRtcIceMock` + `createWebRtcTrackMock`, and a **real adapter** stub that would drive mediasoup SFU + coturn TURN under `KIWA_MODE=real` + `WEBRTC_MEDIASOUP_READY=1`. Both satisfy the same 8-op contract (`joinRoom` / `leaveRoom` / `publishTrack` / `unpublishTrack` / `muteTrack` / `unmuteTrack` / `selectLayer` / `iceRestart`), so a fidelity harness can diff them side-by-side across the 4 WebRTC axes (signaling / ICE / track / simulcast) that mediasoup + coturn make observable in production. This is the exact pattern the `dogfood-nextjs-webrtc-video-app` (v1.28-2, PR #978) uses to run 36 tests against 2-user rooms, layer switches, mute / unmute, and forced-relay ICE restarts.
+A provider-neutral `VideoCallAdapter` with two implementations — a **mock adapter** backed by `@kiwa/realtime` v0.2's `createWebRtcSignalingMock` + `createWebRtcIceMock` + `createWebRtcTrackMock`, and a **real adapter** stub that would drive mediasoup SFU + coturn TURN under `KIWA_MODE=real` + `WEBRTC_MEDIASOUP_READY=1`. Both satisfy the same 8-op contract (`joinRoom` / `leaveRoom` / `publishTrack` / `unpublishTrack` / `muteTrack` / `unmuteTrack` / `selectLayer` / `iceRestart`), so a fidelity harness can diff them side-by-side across the 4 WebRTC axes (signaling / ICE / track / simulcast) that mediasoup + coturn make observable in production. This is the exact pattern the `dogfood-nextjs-webrtc-video-app` (v1.28-2, PR #978) uses to run 36 tests against 2-user rooms, layer switches, mute / unmute, and forced-relay ICE restarts.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A provider-neutral `VideoCallAdapter` with two implementations — a **mock adap
 ```bash
 mkdir kiwa-webrtc-video && cd kiwa-webrtc-video
 pnpm init
-pnpm add -D @kiwa-test/realtime@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa/realtime@^0.2 vitest typescript @types/node
 ```
 
 `package.json` — one vitest script is enough for this tutorial.
@@ -86,9 +86,9 @@ export interface VideoCallAdapter {
 Two things to notice.
 
 - The interface is **provider-neutral** — nothing about mediasoup, coturn, Janus, or LiveKit leaks through. Any SFU + TURN stack that speaks WebRTC can satisfy the 8-op contract.
-- `simulcastLayers` is the video-only field. `getUserMedia` in `@kiwa-test/realtime` v0.2 produces a video track with 3 default layers (`low: 100 kbps` / `med: 300 kbps` / `high: 900 kbps`) — the exact defaults mediasoup + Janus SFUs negotiate.
+- `simulcastLayers` is the video-only field. `getUserMedia` in `@kiwa/realtime` v0.2 produces a video track with 3 default layers (`low: 100 kbps` / `med: 300 kbps` / `high: 900 kbps`) — the exact defaults mediasoup + Janus SFUs negotiate.
 
-### 3. Wire the mock adapter with `@kiwa-test/realtime` v0.2
+### 3. Wire the mock adapter with `@kiwa/realtime` v0.2
 
 `src/adapters/mock.ts` — one signaling / ICE / track mock per peer so per-peer state (SDP fingerprint, ICE stats, published tracks) stays isolated. This is exactly how mediasoup allocates producer / consumer / transport instances per peer.
 
@@ -100,7 +100,7 @@ import {
   type WebRtcIceMock,
   type WebRtcSignalingMock,
   type WebRtcTrackMock,
-} from '@kiwa-test/realtime';
+} from '@kiwa/realtime';
 import type { PeerRole, VideoCallAdapter } from './interface.js';
 
 interface PeerState {
@@ -358,9 +358,9 @@ Two things to notice.
 pnpm test
 ```
 
-Both behavior tests pass in under a second. The mock adapter has now been exercised end-to-end and can be handed to the fidelity harness (`runRealtimeFidelityCheck` from `@kiwa-test/realtime`) alongside the real stub to measure divergence when `KIWA_MODE=real` + `WEBRTC_MEDIASOUP_READY=1` are set in a follow-up integration run.
+Both behavior tests pass in under a second. The mock adapter has now been exercised end-to-end and can be handed to the fidelity harness (`runRealtimeFidelityCheck` from `@kiwa/realtime`) alongside the real stub to measure divergence when `KIWA_MODE=real` + `WEBRTC_MEDIASOUP_READY=1` are set in a follow-up integration run.
 
-The full 36-test end-to-end pattern (including 2-tab Playwright specs for multi-user rooms, reconnect after network drop, and simulcast layer negotiation across viewers) lives in [`examples/dogfood-nextjs-webrtc-video-app`](https://github.com/cardene777/kiwa/tree/main/examples/dogfood-nextjs-webrtc-video-app). The snippet validation test that guarantees every code sample above keeps matching the real `@kiwa-test/realtime` v0.2 API lives in `packages/realtime/tests/docs-tutorial-v1.28.test.ts`.
+The full 36-test end-to-end pattern (including 2-tab Playwright specs for multi-user rooms, reconnect after network drop, and simulcast layer negotiation across viewers) lives in [`examples/dogfood-nextjs-webrtc-video-app`](https://github.com/cardene777/kiwa/tree/main/examples/dogfood-nextjs-webrtc-video-app). The snippet validation test that guarantees every code sample above keeps matching the real `@kiwa/realtime` v0.2 API lives in `packages/realtime/tests/docs-tutorial-v1.28.test.ts`.
 
 ## Where to next
 

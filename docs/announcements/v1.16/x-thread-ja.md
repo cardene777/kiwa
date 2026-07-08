@@ -1,6 +1,6 @@
 1/ kiwa v1.16 released。 Component test 縦軸 milestone です。 v1.15 (AI-LLM 深化、 multimodal / MCP / agent) の後、 v1.16 は 2026 SaaS frontend team のほぼ全てが導入済の 3 統合 (Storybook 8 + Playwright Component Testing + Chromatic) を 1 統一 mock harness に land しました。
 
-2/ `@kiwa-test/component` v0.1 — 3 統合 1 API 統一。 `createStoryRegistry` (Storybook 8 CSF3 = args deep merge + play function runner + `parameters.a11y` / `parameters.chromatic` 透過 + heuristic a11y checker)、 `createPlaywrightCTMock` (mount + getByText + getByRole + click + fill + textContent + count Locator API subset)、 `createChromaticVisualMock` (SHA-256 markup hash baseline / diff / accept-reject workflow、 multi viewport)。
+2/ `@kiwa/component` v0.1 — 3 統合 1 API 統一。 `createStoryRegistry` (Storybook 8 CSF3 = args deep merge + play function runner + `parameters.a11y` / `parameters.chromatic` 透過 + heuristic a11y checker)、 `createPlaywrightCTMock` (mount + getByText + getByRole + click + fill + textContent + count Locator API subset)、 `createChromaticVisualMock` (SHA-256 markup hash baseline / diff / accept-reject workflow、 multi viewport)。
 
 3/ framework agnostic MockNode tree — React / Vue / Svelte / Solid どれで書いても `ComponentRender = (args) => MockNode` に集約。 5 component fixture (`buildButton` / `buildInput` / `buildForm` / `buildModal` / `buildCard`) を 3 経路で共有、 同じ test で 3 統合を browser 起動なしで駆動。
 

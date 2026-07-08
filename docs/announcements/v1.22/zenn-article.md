@@ -12,7 +12,7 @@ v1.22 は kiwa の 12 milestone 目です。 v1.21 (Auth 深化、 WebAuthn L3 +
 
 ## 主な追加
 
-### `@kiwa-test/auth` v0.5.0 (real driver adapter + caBLE + Nuxt 3 RP full flow + Federation JWKS rotation real e2e)
+### `@kiwa/auth` v0.5.0 (real driver adapter + caBLE + Nuxt 3 RP full flow + Federation JWKS rotation real e2e)
 
 v1.21 で land した 4 protocol adapter (`setupWebAuthnEnv` / `setupPasskeyEnv` / `setupOAuth21Env` / `setupOidcEnv`) の signature を完全維持したまま、 v1.22 は 3 経路で real driver 対応を追加。
 
@@ -22,7 +22,7 @@ v1.21 で land した 4 protocol adapter (`setupWebAuthnEnv` / `setupPasskeyEnv`
 
 ```ts
 import { GenericContainer } from 'testcontainers';
-import { setupOidcEnv } from '@kiwa-test/auth';
+import { setupOidcEnv } from '@kiwa/auth';
 
 const container = await new GenericContainer('quay.io/keycloak/keycloak:26.0')
   .withCommand(['start-dev', '--http-port=8080'])
@@ -75,7 +75,7 @@ v1.21-4d で mock として land した Federation JWKS rotation e2e を、 real
 
 ### 3 execution mode SSOT (`docs/concepts/real-driver-testing.md`)
 
-- **`mock only`** (default、 `KIWA_MODE` 未 set) = pure `@kiwa-test/auth` mock、 network 0、 ~1 ms per test。 全 PR が本 mode で走行。
+- **`mock only`** (default、 `KIWA_MODE` 未 set) = pure `@kiwa/auth` mock、 network 0、 ~1 ms per test。 全 PR が本 mode で走行。
 - **`real-optional`** (`KIWA_MODE=real-optional`) = real driver 試行、 container URL 欠時は mock fallback + warning 出力。 laptop 開発 friendly。
 - **`real-required`** (`KIWA_MODE=real` + `KEYCLOAK_URL` / `OAUTH21_BOOTSTRAP=1` / Chrome caBLE flag) = driver 欠時 fail hard、 nightly CI + release smoke 用。
 
@@ -98,7 +98,7 @@ v1.21-4d で mock として land した Federation JWKS rotation e2e を、 real
 #### `dogfood-webauthn-passkey-app` — caBLE hybrid transport 5 軸 fidelity harness
 
 - CTAP2 hybrid transport (Cloud-Assisted BLE) real device flow を Playwright + Chrome `--enable-features=WebAuthenticationRemoteDesktopSupport` で走査
-- 40 new test で `@kiwa-test/auth` 新 caBLE mock vs real Chrome + Android phone pair の 5 軸 fidelity 検証
+- 40 new test で `@kiwa/auth` 新 caBLE mock vs real Chrome + Android phone pair の 5 軸 fidelity 検証
 - phone → laptop 越しの credential 移送が mock と real で同じ挙動、 fidelity gate PASS
 
 ### tutorial 2 本 + concept doc + migration guide
@@ -119,7 +119,7 @@ v1.21-4d で mock として land した Federation JWKS rotation e2e を、 real
 
 - **6 sub-Issue 解決** (#891-#896)
 - **6 PR merge** (v1.22-1 + v1.22-2 + v1.22-3 + v1.22-4 + v1.22-5 + 本 publish PR)
-- **1 npm minor bump** (`@kiwa-test/auth` v0.4.0 → v0.5.0) — kiwa runtime fixture 34 packages 維持
+- **1 npm minor bump** (`@kiwa/auth` v0.4.0 → v0.5.0) — kiwa runtime fixture 34 packages 維持
 - **3 dogfood app 升級** with fidelity report → 7 軸 release gate 供給
 - **~120 new test** 3 real driver adapter + caBLE + a11y + Federation JWKS rotation e2e
 

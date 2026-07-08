@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v1.65 is out — quality-metrics deepening II. **@kiwa-test/quality-metrics v0.5** adds historical trend tracking + drift detection, 4 exports (captureSnapshot + compareToBaseline + detectDrift + generateTrendReport). Inherits v1.55-v1.64 4-PR rhythm (**12 milestones = 48 PRs same rhythm**), **systematic pattern 40th application (40th milestone breakthrough)**, **depth-5 pattern 3rd case confirmed**.
+kiwa v1.65 is out — quality-metrics deepening II. **@kiwa/quality-metrics v0.5** adds historical trend tracking + drift detection, 4 exports (captureSnapshot + compareToBaseline + detectDrift + generateTrendReport). Inherits v1.55-v1.64 4-PR rhythm (**12 milestones = 48 PRs same rhythm**), **systematic pattern 40th application (40th milestone breakthrough)**, **depth-5 pattern 3rd case confirmed**.
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-quality-metrics-history-app new, 4-pattern workflow, 10 tests all pass. 
 
 ## Tweet 4
 
-`pnpm add -D @kiwa-test/quality-metrics@^0.5`. Migration: https://cardene777.github.io/kiwa/migrations/v1.64-to-v1.65
+`pnpm add -D @kiwa/quality-metrics@^0.5`. Migration: https://cardene777.github.io/kiwa/migrations/v1.64-to-v1.65
 
 **depth-5 pattern 3rd case confirmed** = Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 = 3-case stabilization reached, "pattern → confirmed pattern → absolute rule" promotion signal. v1.66+ can cite as SOP for other pairs' depth-5 expansion.
 

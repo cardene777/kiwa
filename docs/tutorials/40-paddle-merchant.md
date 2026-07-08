@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A Nuxt 3 merchant-of-record app wired to `@kiwa-test/payment` v0.3's Paddle Billing v2 mock. The suite covers Paddle's distinguishing fidelity axes — inline checkout instead of hosted redirect, tier upgrade + proration, and VAT/GST/sales-tax auto-calculation with reverse charge for B2B cross-border EU customers. Because Paddle acts as a **Merchant-of-Record** (MoR), the app never touches PSP details — Paddle handles fraud + chargeback + tax registration, and the app just books the neutralised events.
+A Nuxt 3 merchant-of-record app wired to `@kiwa/payment` v0.3's Paddle Billing v2 mock. The suite covers Paddle's distinguishing fidelity axes — inline checkout instead of hosted redirect, tier upgrade + proration, and VAT/GST/sales-tax auto-calculation with reverse charge for B2B cross-border EU customers. Because Paddle acts as a **Merchant-of-Record** (MoR), the app never touches PSP details — Paddle handles fraud + chargeback + tax registration, and the app just books the neutralised events.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A Nuxt 3 merchant-of-record app wired to `@kiwa-test/payment` v0.3's Paddle Bill
 ```bash
 mkdir kiwa-paddle-merchant && cd kiwa-paddle-merchant
 pnpm init
-pnpm add -D @kiwa-test/payment@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa/payment@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest script in `package.json`.
@@ -37,7 +37,7 @@ Add the vitest script in `package.json`.
 `src/adapters/mock.ts` — `createPaddleMock` returns the shared `PaymentAdapter` interface.
 
 ```ts
-import { createPaddleMock } from '@kiwa-test/payment';
+import { createPaddleMock } from '@kiwa/payment';
 
 export function paddleMock() {
   return createPaddleMock({ secret: 'pdl_ntf_test' });
@@ -54,7 +54,7 @@ Paddle uses an **inline JavaScript checkout** (`Paddle.Checkout.open(...)`) inst
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { checkoutCompleted, createPaddleMock } from '@kiwa-test/payment';
+import { checkoutCompleted, createPaddleMock } from '@kiwa/payment';
 
 describe('paddle inline checkout', () => {
   it('emits checkout.completed after the inline flow closes', async () => {
@@ -85,7 +85,7 @@ Subscription tier changes go through the same `changePlan` helper as Stripe, but
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createPaddleMock, createSubscription, changePlan } from '@kiwa-test/payment';
+import { createPaddleMock, createSubscription, changePlan } from '@kiwa/payment';
 
 describe('subscription tier + proration', () => {
   it('upgrades to a higher plan and records the delta metadata', async () => {
@@ -138,7 +138,7 @@ Paddle's MoR model handles tax registration in ~180 jurisdictions. Merchants **d
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { calculateTax } from '@kiwa-test/payment';
+import { calculateTax } from '@kiwa/payment';
 
 describe('VAT/GST/sales-tax auto-calc', () => {
   it('calculates 20 % UK VAT for a B2C digital purchase', () => {
@@ -200,7 +200,7 @@ Four axes covered — VAT (UK B2C digital), reverse charge (EU B2B cross-border 
 Same env-gated shape as the Stripe tutorial.
 
 ```ts
-import { createPaddleMock } from '@kiwa-test/payment';
+import { createPaddleMock } from '@kiwa/payment';
 
 const mode = process.env.KIWA_MODE ?? 'mock';
 export const adapter = mode === 'real'

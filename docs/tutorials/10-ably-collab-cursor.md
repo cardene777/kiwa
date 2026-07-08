@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A single vitest test file that drives a small collaboration board through **three Ably surfaces** — a cursor position broadcast on a board channel, a 60 fps client-side throttle on mass mousemove events, and a `channel.history({ limit })` rewind for a late-joining user — using `@kiwa-test/realtime`'s `createAblyMock`. The same test file also works against real Ably when `ABLY_API_KEY` is set, so the fidelity harness can diff mock vs real behaviour.
+A single vitest test file that drives a small collaboration board through **three Ably surfaces** — a cursor position broadcast on a board channel, a 60 fps client-side throttle on mass mousemove events, and a `channel.history({ limit })` rewind for a late-joining user — using `@kiwa/realtime`'s `createAblyMock`. The same test file also works against real Ably when `ABLY_API_KEY` is set, so the fidelity harness can diff mock vs real behaviour.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A single vitest test file that drives a small collaboration board through **thre
 ```bash
 mkdir kiwa-ably-collab-cursor && cd kiwa-ably-collab-cursor
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa-test/realtime
+pnpm add -D vitest typescript @types/node @kiwa/realtime
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -50,7 +50,7 @@ import {
   createAblyMock,
   type AblyChannel,
   type AblyMock,
-} from '@kiwa-test/realtime';
+} from '@kiwa/realtime';
 
 /** A cursor position broadcast on the board channel. */
 export interface CursorPosition {

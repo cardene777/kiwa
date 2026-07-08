@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that exercises **four multimodal Anthropic + OpenAI + Vercel AI + LangChain flows** — an Anthropic vision reply against a base64 image, an OpenAI vision reply against a data-URL image with `detail: 'high'`, an OpenAI Whisper transcription against a URL-hosted audio file, and a Vercel AI SDK multimodal `generateText` against a hosted image — using `@kiwa-test/ai-llm` v0.2 multimodal mocks. Every reply is deterministic against a canned response bank, so tests stay flake-free while still measuring cost + token accounting shaped like the real APIs.
+A vitest test file that exercises **four multimodal Anthropic + OpenAI + Vercel AI + LangChain flows** — an Anthropic vision reply against a base64 image, an OpenAI vision reply against a data-URL image with `detail: 'high'`, an OpenAI Whisper transcription against a URL-hosted audio file, and a Vercel AI SDK multimodal `generateText` against a hosted image — using `@kiwa/ai-llm` v0.2 multimodal mocks. Every reply is deterministic against a canned response bank, so tests stay flake-free while still measuring cost + token accounting shaped like the real APIs.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that exercises **four multimodal Anthropic + OpenAI + Vercel 
 ```bash
 mkdir kiwa-multimodal-chat && cd kiwa-multimodal-chat
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa-test/ai-llm
+pnpm add -D vitest typescript @types/node @kiwa/ai-llm
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -51,7 +51,7 @@ import {
   createOpenAIMock,
   createVercelAiMock,
   toTranscriptionKey,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 
 const TINY_JPEG_BASE64 =
   '/9j/4AAQSkZJRgABAQEAYABgAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2NjIpLCBxdWFsaXR5ID0gOTAK/9sAQwADAgID';
@@ -203,7 +203,7 @@ describe('multimodal — Whisper transcription (URL audio)', () => {
       file: fixtures.AUDIO_URL,
       model: 'whisper-1-mock',
       response_format: 'verbose_json',
-    })) as import('@kiwa-test/ai-llm').OpenAiTranscriptionVerboseJson;
+    })) as import('@kiwa/ai-llm').OpenAiTranscriptionVerboseJson;
 
     expect(trans.text).toBe('hello kiwa');
     expect(trans.language).toBe('en');
@@ -278,4 +278,4 @@ Multimodal token accounting mirrors real provider rate cards so mock cost tracki
 - [Tutorial 07 — OpenAI tool-use agent](./07-openai-tool-agent) — non-multimodal tool loop
 - [Concept — AI-LLM multimodal testing SSOT](../concepts/ai-llm-multimodal-testing)
 - [Migration guide v1.14 → v1.15](../migrations/v1.14-to-v1.15)
-- [`@kiwa-test/ai-llm` on npm](https://www.npmjs.com/package/@kiwa-test/ai-llm)
+- [`@kiwa/ai-llm` on npm](https://www.npmjs.com/package/@kiwa/ai-llm)

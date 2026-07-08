@@ -6,7 +6,7 @@ id_token-layer report for `examples/dogfood-oidc-federation` Sub-Issue #874 (v1.
 
 The id-token-verify harness lifts the harness from 8 → 12 axes. Axes 1–4 stay covered by the Sub-Issue #872 skeleton report (`discovery-jwks-skeleton.spec.ts`); axes 5–8 are the DCR-layer additions from Sub-Issue #873; axes 9–12 are the id_token-layer additions this Sub-Issue lands.
 
-| axis | mock (`@kiwa-test/auth` via `src/lib/id-token.ts` wrapper) | real (Keycloak, `OIDC_BOOTSTRAP=1`, Sub-Issue #875) | assertion |
+| axis | mock (`@kiwa/auth` via `src/lib/id-token.ts` wrapper) | real (Keycloak, `OIDC_BOOTSTRAP=1`, Sub-Issue #875) | assertion |
 |---|---|---|---|
 | 9. JWS signature | header + payload + kid recompute must match the signature segment; wrong kid, tampered signature, missing / unknown kid, alg mismatch all refuse with `axis=signature`. Rotated-but-in-retention-window kid still verifies. | Keycloak `/token` mints RS256 / ES256 signed id_tokens; the RP verifies against Keycloak's `/certs` JWKS. | OIDC Core 1.0 §3.1.3.7 — the RP MUST validate the JWS per RFC 7515 §5.2, using the kid selected from the JWKS. |
 | 10. claims 一致 | iss / aud MUST match the RP expectations; exp within skew tolerance (default 60 s) accepts, beyond skew refuses; iat in the future beyond skew refuses (clock-drift attack). | Keycloak mints claims from realm settings; the RP verifies against the expected iss + client_id. | OIDC Core 1.0 §3.1.3.7 — the RP MUST verify iss / aud + reject expired / future-dated tokens. |

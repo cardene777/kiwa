@@ -1,13 +1,13 @@
 # Fidelity — dogfood-storybook-design-system (v1.16-2)
 
-Real-vs-mock behavioural fidelity for the React design-system Storybook 8 dogfood, produced by `examples/dogfood-storybook-design-system/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-test/quality-metrics` 7-axis release gate.
+Real-vs-mock behavioural fidelity for the React design-system Storybook 8 dogfood, produced by `examples/dogfood-storybook-design-system/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 7-axis release gate.
 
 ## Baseline (real mode skipped — no `STORYBOOK_URL` and no live `@storybook/react` install)
 
 When the harness runs without a `STORYBOOK_URL` env var, the real adapter emits `STORYBOOK_REAL_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/component/storybook-design-system
+provider   : @kiwa/component/storybook-design-system
 version    : 0.1.0
 verdict    : PASS (7-axis component branch — all axes clear the default gate)
 divergences: 6 (registerAll / listStories / resolveArgs / mount / play / runA11y — real mode absent)
@@ -55,7 +55,7 @@ Six provider-neutral ops on `StorybookAdapter`.
 - `resolveArgs` — merges `meta.args + story.args` per CSF3 semantics and returns a resolved snapshot; the merge is preserved across `parameters.chromatic` and `parameters.a11y`
 - `mount` — renders 1 story to a `MockNode` tree and hashes the resulting pseudo-HTML (SHA-256 → 16-char hex) for Chromatic baseline capture
 - `play` — runs the story's play function, records 1 trace step per `step()` call, and increments a `handlersInvoked` counter as a proxy for the real preview's interaction log
-- `runA11y` — invokes the heuristic checker inside `@kiwa-test/component` (button-name / image-alt / label rules) + any injected violations from `parameters.a11y`
+- `runA11y` — invokes the heuristic checker inside `@kiwa/component` (button-name / image-alt / label rules) + any injected violations from `parameters.a11y`
 
 ## 12 primitives (design-system SSOT)
 
@@ -80,4 +80,4 @@ Form (composed of Input + Button) contributes 1 additional play story (Submit) a
 
 ## Notes
 
-Provider prefix `@kiwa-test/component/` does not match the AI-LLM branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — 4 AI-LLM axes are appended only when the prefix is `@kiwa-test/ai-*`). Component test dogfoods stay on the 7-axis common track — Storybook is a rendering surface, not a token-priced generative surface, so cost / latency / token / accuracy do not apply. Mount + play + a11y round-trip latency still feeds `perf.p95Ms` so component render performance stays visible in the report.
+Provider prefix `@kiwa/component/` does not match the AI-LLM branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — 4 AI-LLM axes are appended only when the prefix is `@kiwa/ai-*`). Component test dogfoods stay on the 7-axis common track — Storybook is a rendering surface, not a token-priced generative surface, so cost / latency / token / accuracy do not apply. Mount + play + a11y round-trip latency still feeds `perf.p95Ms` so component render performance stays visible in the report.

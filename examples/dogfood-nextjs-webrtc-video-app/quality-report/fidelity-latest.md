@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/realtime/nextjs-webrtc-video-app @ 0.2.0
+# Quality Report — @kiwa/realtime/nextjs-webrtc-video-app @ 0.2.0
 
 _Reported at 2026-07-06T02:44:15.072Z._
 

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/security-devsecops` v0.1 that models a full DevSecOps audit workflow — 6 axis で SAST (Semgrep-style) + SCA (Trivy-style) + Secret scan (Gitleaks-style) + IaC scan (tfsec-style) + DAST (OWASP ZAP-style) + Container security (Grype-style) を chain 実行する pattern。
+A vitest suite wired to `@kiwa/security-devsecops` v0.1 that models a full DevSecOps audit workflow — 6 axis で SAST (Semgrep-style) + SCA (Trivy-style) + Secret scan (Gitleaks-style) + IaC scan (tfsec-style) + DAST (OWASP ZAP-style) + Container security (Grype-style) を chain 実行する pattern。
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/security-devsecops` v0.1 that models a full 
 ```bash
 mkdir kiwa-devsecops && cd kiwa-devsecops
 pnpm init
-pnpm add -D @kiwa-test/security-devsecops@^0.1 vitest typescript @types/node
+pnpm add -D @kiwa/security-devsecops@^0.1 vitest typescript @types/node
 ```
 
 ### 2. SAST scan
@@ -31,7 +31,7 @@ import {
   detectSastFinding,
   startSastScan,
   suppressSastFinding,
-} from '@kiwa-test/security-devsecops';
+} from '@kiwa/security-devsecops';
 
 describe('SAST scan', () => {
   it('detects finding + suppresses false positive', () => {
@@ -67,7 +67,7 @@ import {
   startIacScan,
   startScaScan,
   startSecretScan,
-} from '@kiwa-test/security-devsecops';
+} from '@kiwa/security-devsecops';
 
 describe('build-time security', () => {
   it('SCA detects CVE with fix version', () => {
@@ -126,7 +126,7 @@ import {
   detectContainerCve,
   startContainerScan,
   startDastScan,
-} from '@kiwa-test/security-devsecops';
+} from '@kiwa/security-devsecops';
 
 describe('runtime security', () => {
   it('DAST detects SQLi + confirms vuln', () => {

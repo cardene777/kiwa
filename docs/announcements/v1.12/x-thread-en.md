@@ -4,13 +4,13 @@ Focus shift from "measure release quality" (v1.11) to "measure release quality o
 
 The v1.11 release gate assumed deterministic mocks. Claude / GPT / Gemini break that assumption. v1.12 absorbs the break — cost / latency / token / accuracy as first-class release-gate axes.
 
-2/ @kiwa-test/quality-metrics v0.2 — 11 axes now.
+2/ @kiwa/quality-metrics v0.2 — 11 axes now.
 
 v1.11 axes stay untouched (coverage / test count / fidelity / perf p95 / mutation kill).
 
-AI-LLM providers (name starts with @kiwa-test/ai-) additionally emit — cost.perRequestUsd ≤ $0.10 / latency.p95Ms ≤ 3000 / token.totalTokens ≤ 4000 / accuracy.score ≥ 0.80.
+AI-LLM providers (name starts with @kiwa/ai-) additionally emit — cost.perRequestUsd ≤ $0.10 / latency.p95Ms ≤ 3000 / token.totalTokens ≤ 4000 / accuracy.score ≥ 0.80.
 
-3/ @kiwa-test/ai-llm v0.1 — 4 SDK unified mock.
+3/ @kiwa/ai-llm v0.1 — 4 SDK unified mock.
 
 createAnthropicMock — Messages API + streaming + tool_use + system prompt.
 createOpenAIMock — Chat Completions + stream + function calling + parallel tool calls.

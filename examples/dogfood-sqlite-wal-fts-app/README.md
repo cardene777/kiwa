@@ -2,7 +2,7 @@
 
 Dogfood app for v1.32-4 — a SQLite WAL + FTS5 full-text-search notebook
 backed by Bun-style edge-deployment semantics driven by
-`@kiwa-test/orm` v0.10 in `KIWA_MODE=mock` and a libsql / turso edge
+`@kiwa/orm` v0.10 in `KIWA_MODE=mock` and a libsql / turso edge
 driver in `KIWA_MODE=real` (`SQLITE_KEY`-gated).
 The dogfood exercises 4 v1.32-4 axes:
 

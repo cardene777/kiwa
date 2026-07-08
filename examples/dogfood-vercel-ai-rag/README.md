@@ -1,10 +1,10 @@
 # dogfood-vercel-ai-rag
 
-Dogfood app 3 (v1.12-4) — a **Vercel AI SDK + LangChain retriever + embedding + RAG pipeline** that exercises document ingest, chunking, embedding, vector-store search, retrieval, and streaming LLM generation across a provider-neutral interface so `@kiwa-test/ai-llm`'s Vercel AI SDK + LangChain mocks can be measured against a real Vercel AI SDK-shape endpoint + real OpenAI embeddings + Pinecone-shape vector store. The resulting fidelity report feeds `@kiwa-test/quality-metrics` 11-axis release gate.
+Dogfood app 3 (v1.12-4) — a **Vercel AI SDK + LangChain retriever + embedding + RAG pipeline** that exercises document ingest, chunking, embedding, vector-store search, retrieval, and streaming LLM generation across a provider-neutral interface so `@kiwa/ai-llm`'s Vercel AI SDK + LangChain mocks can be measured against a real Vercel AI SDK-shape endpoint + real OpenAI embeddings + Pinecone-shape vector store. The resulting fidelity report feeds `@kiwa/quality-metrics` 11-axis release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-test/ai-llm` `createVercelAiMock` + `createLangchainMock` + deterministic hashing embedder + in-memory vector store).
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/ai-llm` `createVercelAiMock` + `createLangchainMock` + deterministic hashing embedder + in-memory vector store).
 - `KIWA_MODE=real` — driven by `makeRealAdapter()` that calls `POST /v1/chat/completions` + `POST /v1/embeddings` on OpenAI + Pinecone `/vectors/upsert` + `/query` via `fetch` when all three of `OPENAI_API_KEY` / `RAG_VECTOR_STORE_URL` / `RAG_VECTOR_STORE_API_KEY` are set. Without any of them each method reports `RAG_ENV_MISSING` so the fidelity harness records the gap without failing the suite.
 
 Real-mode envs.
@@ -57,7 +57,7 @@ The `quality-report/` directory is git-ignored — promote snapshots to `docs/qu
 
 ## Per-question mock response bank
 
-The shared `MockEngine` inside `@kiwa-test/ai-llm` resolves prompts through a response bank keyed by the last `role: 'user'` message. RAG builds a new user prompt per question (context block + question), so the mock adapter constructs a **fresh `createVercelAiMock` instance per answer** whose response bank is seeded from the retrieved hits — the mock's answers stay grounded in the retrieved context without requiring changes to the shared engine.
+The shared `MockEngine` inside `@kiwa/ai-llm` resolves prompts through a response bank keyed by the last `role: 'user'` message. RAG builds a new user prompt per question (context block + question), so the mock adapter constructs a **fresh `createVercelAiMock` instance per answer** whose response bank is seeded from the retrieved hits — the mock's answers stay grounded in the retrieved context without requiring changes to the shared engine.
 
 The `createLangchainMock` instance is exercised once during `ingest()` for surface coverage — it participates in the fidelity harness even though the primary answer path uses the Vercel mock.
 
@@ -67,7 +67,7 @@ The `createLangchainMock` instance is exercised once during `ingest()` for surfa
 
 ## Release gate (11 axes)
 
-Because the provider string is `@kiwa-test/ai-llm/vercel-ai-rag`, `evaluateReleaseGate` runs the AI-LLM branch (11 axes = common 7 + AI-LLM 4).
+Because the provider string is `@kiwa/ai-llm/vercel-ai-rag`, `evaluateReleaseGate` runs the AI-LLM branch (11 axes = common 7 + AI-LLM 4).
 
 - cost per request ≤ $0.10
 - p95 latency ≤ 3000 ms
@@ -84,8 +84,8 @@ The default thresholds are provider-agnostic; overrides live in `packages/qualit
 
 ## Related
 
-- v1.12-1 `@kiwa-test/ai-llm` v0.1 (`packages/ai-llm/`)
+- v1.12-1 `@kiwa/ai-llm` v0.1 (`packages/ai-llm/`)
 - v1.12-2 dogfood app 1 (`examples/dogfood-anthropic-chatbot/`)
 - v1.12-3 dogfood app 2 (`examples/dogfood-openai-tool-agent/`)
-- v1.11-1 `@kiwa-test/quality-metrics` (`packages/quality-metrics/`)
+- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
 - v1.12 milestone parent [#694](https://github.com/cardene777/kiwa/issues/694), this sub [#698](https://github.com/cardene777/kiwa/issues/698)

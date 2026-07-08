@@ -9,7 +9,7 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 1 | [Your first Supabase Auth test in 5 min](./01-supabase-auth-first-test.md) | Node.js / vitest | 5 min |
 | 2 | [RabbitMQ DLX test recipe](./02-rabbitmq-dlx-recipe.md) | Node.js / vitest | 8 min |
 | 3 | [Rust contract test from zero](./03-rust-contract-from-zero.md) | Rust / cargo | 10 min |
-| 4 | [Testing Next.js Server Actions with @kiwa-test/nextjs](./04-nextjs-server-actions.md) | Node.js / vitest | 6 min |
+| 4 | [Testing Next.js Server Actions with @kiwa/nextjs](./04-nextjs-server-actions.md) | Node.js / vitest | 6 min |
 | 5 | [Multi-provider auth (NextAuth + Clerk + Auth0)](./05-multi-provider-auth.md) | Node.js / vitest | 12 min |
 | 16 | [Multimodal chat — image + audio + Whisper](./16-multimodal-chat.md) | Node.js / vitest | 10 min |
 | 17 | [MCP tool-use agent — JSON-RPC 2.0 chain](./17-mcp-tool-agent.md) | Node.js / vitest | 12 min |

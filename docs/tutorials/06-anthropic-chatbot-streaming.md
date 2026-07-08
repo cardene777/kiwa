@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A single vitest test that drives a small chatbot through **three Anthropic Messages API surfaces** — a non-streaming reply with a system prompt, a streaming reply with delta chunks, and a two-tool `tool_use` loop (weather + calculator) — using `@kiwa-test/ai-llm`'s `createAnthropicMock`. The same test file also works against the real Anthropic API when `ANTHROPIC_API_KEY` is set, so the fidelity harness can diff mock vs real behaviour.
+A single vitest test that drives a small chatbot through **three Anthropic Messages API surfaces** — a non-streaming reply with a system prompt, a streaming reply with delta chunks, and a two-tool `tool_use` loop (weather + calculator) — using `@kiwa/ai-llm`'s `createAnthropicMock`. The same test file also works against the real Anthropic API when `ANTHROPIC_API_KEY` is set, so the fidelity harness can diff mock vs real behaviour.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A single vitest test that drives a small chatbot through **three Anthropic Messa
 ```bash
 mkdir kiwa-anthropic-chatbot && cd kiwa-anthropic-chatbot
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa-test/ai-llm
+pnpm add -D vitest typescript @types/node @kiwa/ai-llm
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -46,7 +46,7 @@ Add `tsconfig.json`:
 Create `src/mock-adapter.ts` — the mock the tests drive:
 
 ```ts
-import { createAnthropicMock, type AnthropicMessagesRequest } from '@kiwa-test/ai-llm';
+import { createAnthropicMock, type AnthropicMessagesRequest } from '@kiwa/ai-llm';
 
 /**
  * Build a chatbot mock that mirrors real Anthropic response shapes for the
@@ -268,7 +268,7 @@ Real-mode envs.
 
 ## Troubleshoot
 
-- **`Cannot find module '@kiwa-test/ai-llm'`** — Reinstall with `pnpm install`. The package is peer-dep free but the mock engine ships as ESM only, so `"type": "module"` in `package.json` is required.
+- **`Cannot find module '@kiwa/ai-llm'`** — Reinstall with `pnpm install`. The package is peer-dep free but the mock engine ships as ESM only, so `"type": "module"` in `package.json` is required.
 - **`chunks` is empty in the streaming test** — The mock only emits `content_block_delta` events when the response bank entry has a `chunks: [...]` array. Add `chunks: [...]` alongside `content` to any prompt you want to stream.
 - **Tool loop never finalises** — The mock resolves the follow-up turn by matching on `''` (empty content lookup key). Make sure your response bank has an entry for `''` after your `tool_use` response.
 - **`costUsd` is 0 for streamed responses** — Streaming mode reports cost via `message_stop._kiwa.costUsd`. If your test loop breaks before consuming `message_stop` the cost falls back to 0 — always drain the async iterator.

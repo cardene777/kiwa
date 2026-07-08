@@ -6,7 +6,7 @@
 - **eventually consistent** — real backends buffer + batch + flush. A test that asserts on a metric emitted a moment ago must poll or sleep.
 - **provider lock-in** — a SUT instrumented against Datadog today might swap to OTel tomorrow. Assertion code shouldn't need to change.
 
-`@kiwa-test/observability` v1.1 solves all three by writing telemetry to an in-process `TelemetryCollector` with a shape shared by all 3 provider mocks.
+`@kiwa/observability` v1.1 solves all three by writing telemetry to an in-process `TelemetryCollector` with a shape shared by all 3 provider mocks.
 
 ## The shared `TelemetryCollector`
 
@@ -69,4 +69,4 @@ Two Sentry semantics worth pinning down:
 ## Related
 
 - [Tutorial 14 — Telemetry mock](../tutorials/14-observability)
-- [`@kiwa-test/observability` on npm](https://www.npmjs.com/package/@kiwa-test/observability)
+- [`@kiwa/observability` on npm](https://www.npmjs.com/package/@kiwa/observability)

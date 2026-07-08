@@ -2,10 +2,10 @@
 
 The v1.9 milestone (**6/6 GitHub Issues resolved**) just landed. After v1.8 landed 3 new layers with 1 provider each (auth = NextAuth v5 + Lucia v3 + Better Auth、 queue = BullMQ + Inngest、 cache = Redis)、 v1.9 fills the **provider gap** for prod SaaS teams — Clerk / Auth0 / Cloudflare Queues / SQS / Memcached / KeyDB. Every kiwa Layer 1 spec + Layer 2 skill now honours a `--provider` flag.
 
-## 1. `@kiwa-test/auth` v0.2 — Clerk + Auth0 追加 (5 providers total)
+## 1. `@kiwa/auth` v0.2 — Clerk + Auth0 追加 (5 providers total)
 
 ```ts
-import { setupClerkEnv, setupAuth0Env } from "@kiwa-test/auth";
+import { setupClerkEnv, setupAuth0Env } from "@kiwa/auth";
 
 // Clerk (SaaS 2026 dominant) — user + session + orgs mock
 const clerk = await setupClerkEnv({
@@ -30,10 +30,10 @@ const roles = await auth0.mgmt.users.assignRoles("bob@corp.example", ["admin"]);
 - **Auth0** — tenant + rules + Management API mock, post-login rule pipeline reproduces the production execution order, `mgmt.users` / `mgmt.roles` / `mgmt.connections` API surface
 - **`--provider` flag** — `/kiwa-auth --provider {nextauth|lucia|better-auth|clerk|auth0|all}` selects which providers the generated test file exercises
 
-## 2. `@kiwa-test/queue` v0.2 — Cloudflare Queues + SQS 追加 (4 providers total)
+## 2. `@kiwa/queue` v0.2 — Cloudflare Queues + SQS 追加 (4 providers total)
 
 ```ts
-import { setupCloudflareQueuesEnv, setupSQSEnv } from "@kiwa-test/queue";
+import { setupCloudflareQueuesEnv, setupSQSEnv } from "@kiwa/queue";
 
 // Cloudflare Queues (edge queue) — miniflare (in-process) + wrangler (real)
 const cfq = await setupCloudflareQueuesEnv();
@@ -69,10 +69,10 @@ await sqs.assertDeleted("orders", { receiveCount: 1 });
 - **AWS SQS** — stub backend + localstack backend, standard + FIFO queue (`messageGroupId` + `messageDeduplicationId` dedup), batch send / delete (10 entries cap), visibility timeout + long polling + DLQ redrive policy
 - **`--provider` flag** — `/kiwa-queue --provider {bullmq|inngest|cloudflare|sqs|all}` selects backend
 
-## 3. `@kiwa-test/cache` v0.2 — Memcached + KeyDB 追加 (3 providers total)
+## 3. `@kiwa/cache` v0.2 — Memcached + KeyDB 追加 (3 providers total)
 
 ```ts
-import { setupMemcachedEnv, setupKeyDBEnv } from "@kiwa-test/cache";
+import { setupMemcachedEnv, setupKeyDBEnv } from "@kiwa/cache";
 
 // Memcached (legacy 定番) — 8 core commands + multi-server consistent hashing
 const mc = await setupMemcachedEnv({ servers: ["stub-a", "stub-b", "stub-c"] });
@@ -157,13 +157,13 @@ Drop priorities on the [Discussions board](https://github.com/cardene777/kiwa/di
 /plugin install kiwa@kiwa-marketplace
 
 # Auth (5 providers)
-pnpm add -D @kiwa-test/auth
+pnpm add -D @kiwa/auth
 
 # Job queue (4 providers)
-pnpm add -D @kiwa-test/queue
+pnpm add -D @kiwa/queue
 
 # Cache (3 providers)
-pnpm add -D @kiwa-test/cache
+pnpm add -D @kiwa/cache
 ```
 
 Repo ... https://github.com/cardene777/kiwa

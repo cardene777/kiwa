@@ -1,13 +1,13 @@
 # Fidelity — dogfood-foundry-invariant-fuzz (v1.18-3)
 
-Real-vs-mock behavioural fidelity for the Foundry invariant/fuzz dogfood, produced by `examples/dogfood-foundry-invariant-fuzz/tests/emit_quality_report.rs`. Drives 3 Solidity contract (ERC-20 / Vault / Router) の合計 9 個 invariant を forge 10_000 run + fuzz seed 決定的化 + shrink parser 検証で走らせ、 `@kiwa-test/quality-metrics` release-gate 11-axis payload に blockchain-native な invariant/fuzz 軸を追加する。
+Real-vs-mock behavioural fidelity for the Foundry invariant/fuzz dogfood, produced by `examples/dogfood-foundry-invariant-fuzz/tests/emit_quality_report.rs`. Drives 3 Solidity contract (ERC-20 / Vault / Router) の合計 9 個 invariant を forge 10_000 run + fuzz seed 決定的化 + shrink parser 検証で走らせ、 `@kiwa/quality-metrics` release-gate 11-axis payload に blockchain-native な invariant/fuzz 軸を追加する。
 
 ## Baseline (real mode skipped — no `forge` on PATH)
 
 forge が PATH に無い host では real 側は 4 op (`invariant_erc20` / `invariant_vault` / `invariant_router` / `run_coverage`) で `FOUNDRY_ENV_MISSING` を刻み、 mock 側との behavioural divergence を 4 件記録する。 wiring ops (`describe_options` / `describe_env`) は `FoundryEnv::detect` の観測値を trace detail に載せて PASS する。 mock は 3 contract × 10_000 run = 30_000 runs を deterministic に PASS 扱いで積む。
 
 ```
-provider   : @kiwa-test/contract/foundry-invariant-fuzz-dogfood
+provider   : @kiwa/contract/foundry-invariant-fuzz-dogfood
 version    : 0.1.0
 verdict    : PASS
 divergences: 4 (invariant_erc20 / invariant_vault / invariant_router / run_coverage — BEHAVIORAL_DIVERGENCE, real mode absent)

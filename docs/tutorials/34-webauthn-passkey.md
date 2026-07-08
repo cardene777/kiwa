@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite for a WebAuthn L3 relying party (RP) that exercises the four spec-critical ceremonies — virtual authenticator mount, credential creation + attestation, credential assertion + userVerification, and Passkey backup + restore across the iCloud Keychain / Google Password Manager sync fabric. The tests never boot a real browser or plug in a security key; they drive the L3 ceremony surfaces through `@kiwa-test/auth` v1.21-1's virtual-authenticator-shaped stubs so the same suite runs in Node.js without Chrome DevTools Protocol, Playwright, or a physical roaming authenticator.
+A vitest suite for a WebAuthn L3 relying party (RP) that exercises the four spec-critical ceremonies — virtual authenticator mount, credential creation + attestation, credential assertion + userVerification, and Passkey backup + restore across the iCloud Keychain / Google Password Manager sync fabric. The tests never boot a real browser or plug in a security key; they drive the L3 ceremony surfaces through `@kiwa/auth` v1.21-1's virtual-authenticator-shaped stubs so the same suite runs in Node.js without Chrome DevTools Protocol, Playwright, or a physical roaming authenticator.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest suite for a WebAuthn L3 relying party (RP) that exercises the four spec
 ```bash
 mkdir kiwa-webauthn-first && cd kiwa-webauthn-first
 pnpm init
-pnpm add -D @kiwa-test/auth@0.1 vitest typescript @types/node
+pnpm add -D @kiwa/auth@0.1 vitest typescript @types/node
 ```
 
 Add the vitest script and TypeScript configuration in `package.json`.
@@ -29,7 +29,7 @@ Add the vitest script and TypeScript configuration in `package.json`.
 }
 ```
 
-Ship a `tsconfig.json` that matches the ESM shape `@kiwa-test/auth` exports.
+Ship a `tsconfig.json` that matches the ESM shape `@kiwa/auth` exports.
 
 ```json
 {
@@ -57,7 +57,7 @@ import {
   setupWebAuthnEnv,
   type PasskeyTestEnv,
   type WebAuthnTestEnv,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 
 const webauthnEnvs: WebAuthnTestEnv[] = [];
 const passkeyEnvs: PasskeyTestEnv[] = [];
@@ -280,7 +280,7 @@ WebAuthn L3 diverges from OAuth-shaped bearer flows on four axes that show up in
 - **SignCount monotonic bump** — every successful `credentialAssertion` bumps the authenticator's `signCount` by 1. A stale signCount (a rewound clone) is the WebAuthn spec's cloning-detection signal. The mock lets you assert on the exact bump.
 - **Passkey backup eligibility** — a bare security-key credential is not backup-eligible; a platform authenticator (Touch ID / Face ID / Windows Hello / Android Biometric) is. Backup + restore through the sync fabric (`icloud-keychain` / `google-password-manager`) only accepts backup-eligible credentials.
 
-`@kiwa-test/auth` v1.21-1 records each axis.
+`@kiwa/auth` v1.21-1 records each axis.
 
 - **Attachment × transport contract** — `setupWebAuthnEnv({ authenticators: [{ attachment, transport, hasResidentKey, hasUserVerification }] })` throws at setup time when the pair is invalid. `attachment: 'platform'` demands `transport: 'internal'`; `attachment: 'cross-platform'` refuses `transport: 'internal'`.
 - **AttestationObject** — `credentialCreation({ attestation })` returns `{ attestationObject, credentialId, attachment, transports, clientDataJSON }`. `base64UrlDecodeWebAuthn(response.attestationObject)` yields a deterministic byte string that RP-side parsers can walk.

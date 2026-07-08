@@ -1,7 +1,7 @@
 ---
 name: kiwa-queue
 description: |
-  /kiwa-design (Layer 1) が出力した `tests/spec/integration/test-spec-{module}.queue.md` を入力に、 `@kiwa-test/queue` を使う `test/*.queue.test.ts` を Write して `vitest` で動作確認する Layer 2 queue test skill。
+  /kiwa-design (Layer 1) が出力した `tests/spec/integration/test-spec-{module}.queue.md` を入力に、 `@kiwa/queue` を使う `test/*.queue.test.ts` を Write して `vitest` で動作確認する Layer 2 queue test skill。
   11 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ / 回帰) を 4 provider (`setupBullMQEnv` BullMQ / `setupInngestEnv` Inngest / `setupCloudflareQueuesEnv` Cloudflare Queues / `setupSQSEnv` AWS SQS) × 各 provider 2 backend に変換し、 job add / process / retry / fail / drain / delay + event send / step function / concurrency + queue send / consumer batch / DLQ + SQS FIFO / batch / long polling / visibility timeout の sub-feature を 1 spec で cover する。
 user_invocable: true
 context: conversation
@@ -13,11 +13,11 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 `/kiwa-design` (Layer 1) の `--layer job-queue` 出力を `test/*.queue.test.ts` に変換し、 `vitest` で動作確認する。 BullMQ (Redis-backed) + Inngest (SaaS 型 event-driven) を統一 surface で cover する Layer 2 skill。
 
-`@kiwa-test/queue` v0.1 (v1.8-4〜v1.8-5、 Issue #640 / #641) の 2 factory (`setupBullMQEnv` / `setupInngestEnv`) を Layer 1 spec の観点別 TC 表から自動的に選択し、 sandbox / testcontainers / stub / dev-server の 4 backend mode を TC ごとに割当てる。
+`@kiwa/queue` v0.1 (v1.8-4〜v1.8-5、 Issue #640 / #641) の 2 factory (`setupBullMQEnv` / `setupInngestEnv`) を Layer 1 spec の観点別 TC 表から自動的に選択し、 sandbox / testcontainers / stub / dev-server の 4 backend mode を TC ごとに割当てる。
 
 ## 前提
 
-- `@kiwa-test/queue` v0.1.0+ が devDependency に入っている (`pnpm add -D @kiwa-test/queue`)
+- `@kiwa/queue` v0.1.0+ が devDependency に入っている (`pnpm add -D @kiwa/queue`)
 - 対象 backend (BullMQ の場合 `bullmq` / `ioredis` / testcontainers 使用時 `testcontainers`、 Inngest の場合 `inngest` / dev-server 使用時 `inngest-cli`) が peer dependency として入っている
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.queue.md`) が存在
 
@@ -53,7 +53,7 @@ TC 表を describe / it に落とす。 BullMQ TC は `setupBullMQEnv` + `env.ad
 生成テンプレ (backend = BullMQ sandbox):
 
 ```ts
-import { setupBullMQEnv } from "@kiwa-test/queue";
+import { setupBullMQEnv } from "@kiwa/queue";
 import { afterEach, describe, expect, it } from "vitest";
 
 const envs: Array<{ stop(): Promise<void> }> = [];
@@ -94,6 +94,6 @@ describe("{module} — queue happy path", () => {
 
 ## 関連
 
-- `@kiwa-test/queue` v0.1 (v1.8-4〜v1.8-5、 Issue #640 / #641) SSOT
+- `@kiwa/queue` v0.1 (v1.8-4〜v1.8-5、 Issue #640 / #641) SSOT
 - `packages/queue/README.md` — 2 factory の API リファレンス
 - `examples/queue-bullmq-poc/` / `examples/queue-inngest-poc/` — 実 test 例

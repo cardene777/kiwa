@@ -6,7 +6,7 @@ title: Mobile testing baseline — v1.50 3 axis SSOT
 
 ## What this covers
 
-`@kiwa-test/mobile` v0.1 の 3 axis (React Native + Expo + Metro) target-neutral state machine SSOT。 v1.50 で kiwa 縦深化 pair 第 13 新規 base pair として導入、 **41 package 到達**。
+`@kiwa/mobile` v0.1 の 3 axis (React Native + Expo + Metro) target-neutral state machine SSOT。 v1.50 で kiwa 縦深化 pair 第 13 新規 base pair として導入、 **41 package 到達**。
 
 ## 3 axis 一覧
 
@@ -50,7 +50,7 @@ ios.metro.transform.start ← metro.bundle_started (ios)
 
 ## backward compat 絶対維持
 
-新 package `@kiwa-test/mobile` の追加は additive、 既存 40 package 全部 API 変更 0。 依存関係も `@kiwa-test/core` のみ、 他 package への影響なし。
+新 package `@kiwa/mobile` の追加は additive、 既存 40 package 全部 API 変更 0。 依存関係も `@kiwa/core` のみ、 他 package への影響なし。
 
 ## 縦深化 pair 第 13 新規 base pair 導入
 

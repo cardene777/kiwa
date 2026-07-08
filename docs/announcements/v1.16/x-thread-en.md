@@ -1,6 +1,6 @@
 1/ kiwa v1.16 is out — Component test vertical. After v1.15's AI-LLM deepening (multimodal / MCP / agent), v1.16 lands the frontend layer nearly every 2026 SaaS team ships: Storybook 8 + Playwright Component Testing + Chromatic, all under one unified mock harness.
 
-2/ `@kiwa-test/component` v0.1 — one API for three integrations. `createStoryRegistry` (Storybook 8 CSF3: args deep merge + play function runner + `parameters.a11y` / `parameters.chromatic` passthrough + heuristic a11y checker), `createPlaywrightCTMock` (mount + getByText + getByRole + click + fill + textContent + count Locator API subset), `createChromaticVisualMock` (SHA-256 markup hash baseline / diff / accept-reject workflow, multi viewport).
+2/ `@kiwa/component` v0.1 — one API for three integrations. `createStoryRegistry` (Storybook 8 CSF3: args deep merge + play function runner + `parameters.a11y` / `parameters.chromatic` passthrough + heuristic a11y checker), `createPlaywrightCTMock` (mount + getByText + getByRole + click + fill + textContent + count Locator API subset), `createChromaticVisualMock` (SHA-256 markup hash baseline / diff / accept-reject workflow, multi viewport).
 
 3/ Framework agnostic MockNode tree — React / Vue / Svelte / Solid all reduce to `ComponentRender = (args) => MockNode`. Five component fixtures (`buildButton` / `buildInput` / `buildForm` / `buildModal` / `buildCard`) share the same tree, so the same test drives all three integrations without browser boot.
 

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite for a NATS-shaped message system that exercises the four v1.20 primitives — `createNatsMock` for the connection, core pub/sub with `*` (single-token) and `>` (multi-token) wildcards, JetStream persistent streams with consumers + ack tracking, and the KV + Object stores that ride on JetStream. The tests never boot a real NATS server; they drive the pub/sub + stream + KV + object surfaces through `@kiwa-test/streaming` v0.1's nats.js-shaped stubs so the same suite runs in Node.js without Docker, `nats-server`, or a JetStream data directory.
+A vitest suite for a NATS-shaped message system that exercises the four v1.20 primitives — `createNatsMock` for the connection, core pub/sub with `*` (single-token) and `>` (multi-token) wildcards, JetStream persistent streams with consumers + ack tracking, and the KV + Object stores that ride on JetStream. The tests never boot a real NATS server; they drive the pub/sub + stream + KV + object surfaces through `@kiwa/streaming` v0.1's nats.js-shaped stubs so the same suite runs in Node.js without Docker, `nats-server`, or a JetStream data directory.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest suite for a NATS-shaped message system that exercises the four v1.20 pr
 ```bash
 mkdir kiwa-nats-first && cd kiwa-nats-first
 pnpm init
-pnpm add -D @kiwa-test/streaming@0.1 vitest typescript @types/node
+pnpm add -D @kiwa/streaming@0.1 vitest typescript @types/node
 ```
 
 Add the vitest script and TypeScript configuration in `package.json`.
@@ -29,7 +29,7 @@ Add the vitest script and TypeScript configuration in `package.json`.
 }
 ```
 
-Ship a `tsconfig.json` that matches the ESM shape `@kiwa-test/streaming` exports.
+Ship a `tsconfig.json` that matches the ESM shape `@kiwa/streaming` exports.
 
 ```json
 {
@@ -54,7 +54,7 @@ import {
   createNatsMock,
   isNatsMock,
   type StreamingMessage,
-} from '@kiwa-test/streaming';
+} from '@kiwa/streaming';
 
 describe('core pub/sub with subject wildcards', () => {
   it('literal subject reaches exactly the matching subscriber', async () => {
@@ -171,7 +171,7 @@ NATS diverges from Kafka on three axes that show up in every non-trivial test �
 - **JetStream vs core** — core NATS is ephemeral, at-most-once. Publish arrives if there is a subscriber right now; drops otherwise. JetStream is at-least-once with persistent streams — `addStream({ name, subjects })` binds a name to a subject filter, `publish()` persists to disk, and `consumer.fetch(N)` pulls N pending messages. Consumers are named durables that survive reconnects.
 - **Colocated KV + Object stores** — JetStream persistence is the same substrate as the KV store (`nats.kv('bucket')`) and the Object store (`nats.objectStore('bucket')`). One binary handles pub/sub, streaming, key-value, and object storage. That means a service can use `nats.kv('sessions')` instead of Redis, `nats.objectStore('files')` instead of S3, and still route events through the same connection.
 
-`@kiwa-test/streaming` records each axis.
+`@kiwa/streaming` records each axis.
 
 - **Subject match** — `nats.subscribe(pattern, cb)` uses the same tokenizer as real NATS. `compileSubject('orders.*.created')` returns a matcher; `matchSubject(matcher, 'orders.user-1.created')` returns true, `matchSubject(matcher, 'orders.user-1.deep.created')` returns false. That means a test asserting on subject routing catches typos at wire time, not at production time.
 - **Stream persist** — `js.publish('orders.created', payload)` throws when no stream matches the subject (unlike core pub/sub which silently drops). `js.getStreamMessages(name)` returns the persisted array. Sequence numbers start at 1 (not 0 like Kafka).
@@ -192,7 +192,7 @@ That matters because production bugs show up as "the wildcard subscription did n
 For a full 5-op fidelity harness that compares mock traces against a real `nats-server -js` process, see `examples/dogfood-nats-jetstream` and its `quality-report/fidelity-latest.md`.
 
 ```ts
-import { createNatsMock, type StreamingMessage } from '@kiwa-test/streaming';
+import { createNatsMock, type StreamingMessage } from '@kiwa/streaming';
 
 const nats = createNatsMock();
 nats.subscribe('rpc.echo', async (m: StreamingMessage) => {
@@ -208,5 +208,5 @@ expect(reply.value).toBe(42);
 ## Related
 
 - Concept doc — [Streaming testing (producer / consumer / exactly-once / DLQ / schema-registry SSOT)](../concepts/streaming-testing)
-- v1.20-1 [#827](https://github.com/cardene777/kiwa/issues/827) — `@kiwa-test/streaming` v0.1 landing
+- v1.20-1 [#827](https://github.com/cardene777/kiwa/issues/827) — `@kiwa/streaming` v0.1 landing
 - v1.20-4 [#830](https://github.com/cardene777/kiwa/issues/830) — `dogfood-nats-jetstream` (the full 3-layer dogfood this tutorial cuts down)

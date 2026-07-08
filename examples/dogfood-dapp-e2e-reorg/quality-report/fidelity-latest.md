@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/dapp/reorg-dogfood v0.1.0
+# Quality Report — @kiwa/dapp/reorg-dogfood v0.1.0
 
 Overall verdict — **PASS**
 

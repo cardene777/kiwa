@@ -263,7 +263,7 @@ target=web (汎用 web 3 surface セット) または target=all の場合に実
 
 [Step 4w-e2e-b] /kiwa-e2e --mode new --lang $DOC_LANG [--no-review]
   ↓ tests/{example}.e2e.spec.ts 生成
-  ↓ @kiwa-test/e2e で playwright 起動
+  ↓ @kiwa/e2e で playwright 起動
   ↓ tests/reports/review/test-review-{example}.e2e.{lang}.md Write
 
 [Step 4w-a11y-a] /kiwa-design --layer a11y --module {example} --input app/ --lang $DOC_LANG [--no-review]
@@ -271,7 +271,7 @@ target=web (汎用 web 3 surface セット) または target=all の場合に実
 
 [Step 4w-a11y-b] /kiwa-a11y --mode new --lang $DOC_LANG [--no-review]
   ↓ tests/{example}.a11y.test.ts 生成
-  ↓ @kiwa-test/a11y で axe-core 評価
+  ↓ @kiwa/a11y で axe-core 評価
   ↓ tests/reports/review/test-review-{example}.a11y.{lang}.md Write
 
 [Step 4w-visual-a] /kiwa-design --layer visual --module {example} --input app/ --lang $DOC_LANG [--no-review]
@@ -279,7 +279,7 @@ target=web (汎用 web 3 surface セット) または target=all の場合に実
 
 [Step 4w-visual-b] /kiwa-visual --mode new --lang $DOC_LANG [--no-review]
   ↓ tests/{example}.visual.test.ts 生成 + tests/visual/baseline/{example}/ baseline 画像生成
-  ↓ @kiwa-test/visual で pixelmatch 評価
+  ↓ @kiwa/visual で pixelmatch 評価
   ↓ tests/reports/review/test-review-{example}.visual.{lang}.md Write
 ```
 
@@ -526,7 +526,7 @@ result-review or 子 review (spec-review / test-review) が FAIL の場合、 re
 | contract 未実装 function に対する test 提案 | test 追加でなく contract 実装が必要、 別 issue |
 | `forge build` / `hardhat compile` 失敗 (環境 / 依存問題) | skill 修正でなく環境調査必要 |
 | UI 不在で UI 起点 test 不可能 (e2e で app/ 欠落) | skill では実装不可、 user が UI 実装 or target 変更必要 |
-| **kiwa fixture 拡張前提の test (改善 6 / Issue #227)** | **`browser.newContext()` で別 PK wallet inject / `anvil_setStorageAt` storage 改変 / wallet 接続 race polling 等を必要とする test は @kiwa-test/dapp helper 拡張が前提、 auto-fix loop 内で実装すると core API の設計判断を Opus 裁量で固定するリスク。 別 Issue 化推奨** |
+| **kiwa fixture 拡張前提の test (改善 6 / Issue #227)** | **`browser.newContext()` で別 PK wallet inject / `anvil_setStorageAt` storage 改変 / wallet 接続 race polling 等を必要とする test は @kiwa/dapp helper 拡張が前提、 auto-fix loop 内で実装すると core API の設計判断を Opus 裁量で固定するリスク。 別 Issue 化推奨** |
 
 ##### 「kiwa fixture 拡張前提」 critical の判定 logic
 

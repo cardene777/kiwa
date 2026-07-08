@@ -9,10 +9,10 @@ A single Todo app + REST API is exercised by every kiwa adapter:
 | Layer | Adapter | Environment | What runs |
 |---|---|---|---|
 | unit | (none, pure vitest) | node | normalize / validate / summarize logic |
-| integration (api) | `@kiwa-test/api` | node + real HTTP server (free port) | 5 cases against `/api/todos` |
-| ui | `@kiwa-test/ui` (jsdom) | jsdom | 3 cases on `<TodoForm />` |
-| e2e | `@kiwa-test/e2e` (Playwright) | **real Chromium** (headless) | 2 cases driving form submit |
-| observability | `@kiwa-test/observability` | node | dashboard combining history + flaky + spec gaps |
+| integration (api) | `@kiwa/api` | node + real HTTP server (free port) | 5 cases against `/api/todos` |
+| ui | `@kiwa/ui` (jsdom) | jsdom | 3 cases on `<TodoForm />` |
+| e2e | `@kiwa/e2e` (Playwright) | **real Chromium** (headless) | 2 cases driving form submit |
+| observability | `@kiwa/observability` | node | dashboard combining history + flaky + spec gaps |
 
 ## Run
 

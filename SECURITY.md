@@ -29,8 +29,8 @@ Instead, contact the maintainer directly:
 
 ## Scope
 This policy applies to:
-- `@kiwa-test/dapp` (npm package)
-- `@kiwa-test/cli` (npm package)
+- `@kiwa/dapp` (npm package)
+- `@kiwa/cli` (npm package)
 - The kiwa GitHub repository
 Out of scope:
 - Vulnerabilities in upstream dependencies (`anvil` / `viem` / Playwright) - report to those projects directly

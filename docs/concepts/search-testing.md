@@ -6,7 +6,7 @@
 - **network-shaped** — all three are HTTP-first. Every test call is a real fetch. Flaky when the CI network drops.
 - **ranking non-determinism** — real servers may re-rank on typo distance, term frequency, position, custom rules. Assertions on `hits[0].id === expected` become brittle.
 
-`@kiwa-test/search` moves the query path in-process with deterministic ranking so the same test can gate CI.
+`@kiwa/search` moves the query path in-process with deterministic ranking so the same test can gate CI.
 
 ## The `SearchAdapter` contract
 
@@ -58,4 +58,4 @@ Override per test: `createMeilisearchMock({ typoTolerance: false })`.
 ## Related
 
 - [Tutorial 13 — Search mock](../tutorials/13-search)
-- [`@kiwa-test/search` on npm](https://www.npmjs.com/package/@kiwa-test/search)
+- [`@kiwa/search` on npm](https://www.npmjs.com/package/@kiwa/search)

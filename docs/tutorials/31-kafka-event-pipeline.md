@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite for a Kafka-shaped event pipeline that exercises the four v1.20 primitives — `createKafkaMock` for the broker, a transactional producer for atomic multi-record writes, a consumer group that walks the round-robin partition assigner, and a dead-letter queue that quarantines poison messages after retries exhaust. The tests never boot a real Kafka broker; they drive the producer / consumer / admin surfaces through `@kiwa-test/streaming` v0.1's kafkajs-shaped stubs so the same suite runs in Node.js without Docker, Zookeeper, or a Redpanda binary.
+A vitest suite for a Kafka-shaped event pipeline that exercises the four v1.20 primitives — `createKafkaMock` for the broker, a transactional producer for atomic multi-record writes, a consumer group that walks the round-robin partition assigner, and a dead-letter queue that quarantines poison messages after retries exhaust. The tests never boot a real Kafka broker; they drive the producer / consumer / admin surfaces through `@kiwa/streaming` v0.1's kafkajs-shaped stubs so the same suite runs in Node.js without Docker, Zookeeper, or a Redpanda binary.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest suite for a Kafka-shaped event pipeline that exercises the four v1.20 p
 ```bash
 mkdir kiwa-kafka-first && cd kiwa-kafka-first
 pnpm init
-pnpm add -D @kiwa-test/streaming@0.1 vitest typescript @types/node
+pnpm add -D @kiwa/streaming@0.1 vitest typescript @types/node
 ```
 
 Add the vitest script and TypeScript configuration in `package.json`.
@@ -29,7 +29,7 @@ Add the vitest script and TypeScript configuration in `package.json`.
 }
 ```
 
-Ship a `tsconfig.json` that matches the ESM shape `@kiwa-test/streaming` exports.
+Ship a `tsconfig.json` that matches the ESM shape `@kiwa/streaming` exports.
 
 ```json
 {
@@ -56,7 +56,7 @@ import {
   createDeadLetterQueue,
   isKafkaMock,
   isTransactionalProducer,
-} from '@kiwa-test/streaming';
+} from '@kiwa/streaming';
 
 describe('producer + consumer roundtrip', () => {
   it('produces + consumes a message on the same topic', async () => {
@@ -172,7 +172,7 @@ Vitest picks up the file, runs the 5 tests in a single Node.js process, and exit
 
 Kafka diverges from HTTP request/response on four axes that show up in every non-trivial pipeline test — partition affinity, consumer group rebalance, exactly-once atomic commit, and DLQ quarantine. HTTP tests capture the request shape and the response body; Kafka tests capture the **flow of records across partitions over time**.
 
-`@kiwa-test/streaming` records each of the four axes.
+`@kiwa/streaming` records each of the four axes.
 
 - **Partition affinity** — `producer.send({ messages: [{ key, value }] })` hashes the key to a partition. Two writes with the same key always land on the same partition. `result[0].partition` surfaces the choice for the assertion `expect(first.partition).toBe(second.partition)`.
 - **Consumer group rebalance** — `kafka.consumer({ groupId, partitionAssigner })` supports `range` (single owner gets all partitions) and `round-robin` (partitions split across group members). `consumer.assignments()` returns the current owned partition set — the assertion becomes `expect(a1.length + a2.length).toBe(numPartitions)`.
@@ -194,7 +194,7 @@ That matters because production bugs show up as "the consumer group did not reba
 For a full 5-op fidelity harness that compares mock traces against a real `docker compose up -d` cluster, see `examples/dogfood-kafka-event-pipeline` and its `quality-report/fidelity-latest.md`.
 
 ```ts
-import { createKafkaMock, createIdempotentProducer } from '@kiwa-test/streaming';
+import { createKafkaMock, createIdempotentProducer } from '@kiwa/streaming';
 
 const kafka = createKafkaMock();
 const producer = createIdempotentProducer({ kafka });
@@ -213,5 +213,5 @@ expect(producer.isDuplicate(42)).toBe(true);
 ## Related
 
 - Concept doc — [Streaming testing (producer / consumer / exactly-once / DLQ / schema-registry SSOT)](../concepts/streaming-testing)
-- v1.20-1 [#827](https://github.com/cardene777/kiwa/issues/827) — `@kiwa-test/streaming` v0.1 landing
+- v1.20-1 [#827](https://github.com/cardene777/kiwa/issues/827) — `@kiwa/streaming` v0.1 landing
 - v1.20-2 [#828](https://github.com/cardene777/kiwa/issues/828) — `dogfood-kafka-event-pipeline` (the full 3-layer dogfood this tutorial cuts down)

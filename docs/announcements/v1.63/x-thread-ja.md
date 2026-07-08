@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v1.63 リリース — Desktop 深化 VII。 **@kiwa-test/desktop v0.8** で native binding availability probe + skip 経路 追加、 which/where CLI check + platform gate + 12 axis 別 skip strategy + fidelity harness probe 統合。 v1.55-v1.62 4 PR rhythm 継承 (**10 milestone 連続 = 40 PR 連続同 rhythm**)、 **systematic pattern 38 度目適用**、 **depth-8 pattern 新設 candidate 到達**。
+kiwa v1.63 リリース — Desktop 深化 VII。 **@kiwa/desktop v0.8** で native binding availability probe + skip 経路 追加、 which/where CLI check + platform gate + 12 axis 別 skip strategy + fidelity harness probe 統合。 v1.55-v1.62 4 PR rhythm 継承 (**10 milestone 連続 = 40 PR 連続同 rhythm**)、 **systematic pattern 38 度目適用**、 **depth-8 pattern 新設 candidate 到達**。
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-desktop-probe-app 新規、 4 pattern workflow (probeAllCliCommands + sk
 
 ## Tweet 4
 
-`pnpm add -D @kiwa-test/desktop@^0.8`。 migration: https://cardene777.github.io/kiwa/migrations/v1.62-to-v1.63
+`pnpm add -D @kiwa/desktop@^0.8`。 migration: https://cardene777.github.io/kiwa/migrations/v1.62-to-v1.63
 
 v1.64+ で 実 native binding 呼出 (probe availability 判定で 実 CLI 存在時のみ 呼出) 予定。 backward compat 絶対維持で v0.1-v0.7 完全保持。
 

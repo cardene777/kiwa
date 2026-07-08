@@ -14,7 +14,7 @@ v1.11 以降の連続完遂 9 milestone (release gate → 非決定性 → 時�
 
 ## 主な追加
 
-### `@kiwa-test/streaming` v0.1.0 (new package)
+### `@kiwa/streaming` v0.1.0 (new package)
 
 3 provider (Kafka + Redpanda + NATS) を統一 mock 化した streaming test adapter。 broker binary + Docker + Zookeeper 不要 + 5 semantics 完全対応 + kafkajs / nats.js API 互換の 3 特徴。
 
@@ -28,7 +28,7 @@ import {
   createReadCommittedFilter,
   createDeadLetterQueue,
   createSchemaRegistry,
-} from '@kiwa-test/streaming';
+} from '@kiwa/streaming';
 
 // 1. Kafka producer + consumer group (kafkajs-shaped)
 const kafka = createKafkaMock({ defaultPartitionCount: 4 });
@@ -92,10 +92,10 @@ expect(quarantined[0].reason).toContain('poison');
 
 `createDeadLetterQueue({ sourceTopic, dlqTopic, maxRetries, backoffExponent })` は retry policy + poison message quarantine + inspect + reprocess flow を任意 consumer に重ねる。 `processWithRetry(handler)` は handler が throw した際に `maxRetries` 回 exponential backoff で retry、 全 retry 失敗で DLQ topic に quarantine + `reason` + `attemptCount` metadata 付与、 `getQuarantined()` で inspect、 `reprocess(entryId)` で main topic 戻し。
 
-### `@kiwa-test/streaming` v0.1.0 の Redpanda + schema registry
+### `@kiwa/streaming` v0.1.0 の Redpanda + schema registry
 
 ```ts
-import { createRedpandaMock, createSchemaRegistry } from '@kiwa-test/streaming';
+import { createRedpandaMock, createSchemaRegistry } from '@kiwa/streaming';
 
 // 1. Redpanda broker (Kafka API 互換)
 const redpanda = createRedpandaMock({ schemaRegistry: true });
@@ -134,10 +134,10 @@ await expect(
 
 Redpanda mock は Kafka API 互換 broker + colocated `SchemaRegistry` の 2 layer を 1 constructor に統合 — Kafka 用 test をそのまま Redpanda に移せる + schema registry の下流 test を追加できる。 `registerAvro` / `registerProtobuf` / `registerJson` の 3 schema kind、 `checkCompatibility(subject, newSchema, { mode })` の 3 mode (`BACKWARD` (新 schema で古い data を read できるか、 追加 field with default は OK、 field 削除は fail) + `FORWARD` (古い schema で新 data を read できるか、 field 削除は OK、 追加 field は fail) + `FULL` (両方向 check、 最も厳しい))。 schema evolution version は 1 → 2 → 3 と自動 increment、 fail-fast publish は schema id が register 済でない状態で send を試みると即 throw (production の Confluent Schema Registry と同一 semantics)。
 
-### `@kiwa-test/streaming` v0.1.0 の NATS + JetStream + KV + Object store
+### `@kiwa/streaming` v0.1.0 の NATS + JetStream + KV + Object store
 
 ```ts
-import { createNatsMock, compileSubject, matchSubject } from '@kiwa-test/streaming';
+import { createNatsMock, compileSubject, matchSubject } from '@kiwa/streaming';
 
 // 1. Core pub/sub + subject routing (* + >)
 const nats = createNatsMock();
@@ -190,9 +190,9 @@ expect(info.size).toBe(3);
 
 ## dogfood 3 app
 
-- **`examples/dogfood-kafka-event-pipeline`** — Kafka producer + consumer group + exactly-once transactional producer + DLQ。 `makeMockAdapter` は `@kiwa-test/streaming` の `createKafkaMock` + `createTransactionalProducer` + `createDeadLetterQueue`、 `makeRealAdapter` は Kafka-like harness。 `KafkaFidelityReport` は 5 scenario (partitioner determinism (同 key は同 partition) / consumer group rebalance (member 1 → 2 join で partition 再配布) / offset commit + seek / transactional producer atomic commit (abort 時に全 write 破棄) / DLQ retry exhaustion + quarantine (poison message が 3 retry 後 dlq topic 移動)) の mock vs real 差分を出力。 7 軸 release gate PASS。
+- **`examples/dogfood-kafka-event-pipeline`** — Kafka producer + consumer group + exactly-once transactional producer + DLQ。 `makeMockAdapter` は `@kiwa/streaming` の `createKafkaMock` + `createTransactionalProducer` + `createDeadLetterQueue`、 `makeRealAdapter` は Kafka-like harness。 `KafkaFidelityReport` は 5 scenario (partitioner determinism (同 key は同 partition) / consumer group rebalance (member 1 → 2 join で partition 再配布) / offset commit + seek / transactional producer atomic commit (abort 時に全 write 破棄) / DLQ retry exhaustion + quarantine (poison message が 3 retry 後 dlq topic 移動)) の mock vs real 差分を出力。 7 軸 release gate PASS。
 - **`examples/dogfood-redpanda-schema-registry`** — Redpanda + 3 Avro schema (v1 → v2 additive field / v2 → v3 breaking field type change / v3 → v4 default value drop) + BACKWARD / FORWARD / FULL compatibility check + fail-fast publish。 `RedpandaFidelityReport` は 5 op (schema register + fetch / evolution + version bump / compatibility gate pass (BACKWARD 通過) + fail (FORWARD 拒否) / fail-fast publish rejection / Kafka API round-trip on the same broker) を比較。 7 軸 release gate PASS。
-- **`examples/dogfood-nats-jetstream`** — NATS core pub/sub + `*` / `>` wildcard routing + JetStream persistent stream + KV store + Object store。 `makeMockAdapter` は `@kiwa-test/streaming` の `createNatsMock` + `js.kv` + `js.objectStore`、 `makeRealAdapter` は minimal NATS-shaped runtime。 `NatsFidelityReport` は 5 scenario (core pub/sub / wildcard routing (`*` single-token + `>` trailing multi-token) / JetStream persistent stream + consumer ack / KV round-trip + revision tracking / Object store round-trip + chunk-based store) を比較。 7 軸 release gate PASS。
+- **`examples/dogfood-nats-jetstream`** — NATS core pub/sub + `*` / `>` wildcard routing + JetStream persistent stream + KV store + Object store。 `makeMockAdapter` は `@kiwa/streaming` の `createNatsMock` + `js.kv` + `js.objectStore`、 `makeRealAdapter` は minimal NATS-shaped runtime。 `NatsFidelityReport` は 5 scenario (core pub/sub / wildcard routing (`*` single-token + `>` trailing multi-token) / JetStream persistent stream + consumer ack / KV round-trip + revision tracking / Object store round-trip + chunk-based store) を比較。 7 軸 release gate PASS。
 
 ## docs
 
@@ -206,7 +206,7 @@ VitePress sidebar には `Streaming 深化 (v1.20)` セクションを追加、 
 
 - **6 sub-Issues resolved** (#827-#832)
 - **6 PRs merged** (v1.20-1 + v1.20-2/3/4/5 + 本 publish PR)
-- **1 new npm package** (`@kiwa-test/streaming` v0.1.0)
+- **1 new npm package** (`@kiwa/streaming` v0.1.0)
 - **3 new dogfood app** (kafka-event-pipeline + redpanda-schema-registry + nats-jetstream、 全 7 軸 release gate PASS)
 - **5 semantics** (producer / consumer / exactly-once / DLQ / schema-registry) 統一 mock
 - **kiwa runtime fixture 33 → 34** (streaming が新規 land)

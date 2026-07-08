@@ -1,10 +1,10 @@
 # dogfood-supabase-saas-app
 
-Dogfood app 1 (v1.11-2) — a SaaS-shaped Next.js-style app that exercises Supabase Auth core + advanced across five features (email/password + magic link + OAuth PKCE + MFA TOTP + SSO SAML + Web3 SIWE + RLS-protected doc list) so we can measure how faithfully `@kiwa-test/auth` mocks track the real Supabase behaviour.
+Dogfood app 1 (v1.11-2) — a SaaS-shaped Next.js-style app that exercises Supabase Auth core + advanced across five features (email/password + magic link + OAuth PKCE + MFA TOTP + SSO SAML + Web3 SIWE + RLS-protected doc list) so we can measure how faithfully `@kiwa/auth` mocks track the real Supabase behaviour.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-test/auth` core + advanced envs)
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/auth` core + advanced envs)
 - `KIWA_MODE=real` — driven by `makeRealAdapter()` that talks to a running Supabase instance via `SUPABASE_URL` + `SUPABASE_ANON_KEY` + `SUPABASE_SERVICE_ROLE_KEY`. When the env vars are missing, the adapter reports each method as `SUPABASE_ENV_MISSING` so the fidelity harness records the gap without failing the test suite.
 
 ## Layout
@@ -17,7 +17,7 @@ src/
     real.ts        -- Supabase HTTP adapter with graceful skip when env missing
   flows/
     user-flows.ts  -- orchestrates onboarding + docs + MFA + SSO + SIWE flows
-    fidelity.ts   -- trace-diffing harness that feeds @kiwa-test/quality-metrics
+    fidelity.ts   -- trace-diffing harness that feeds @kiwa/quality-metrics
 tests/
   e2e-mock-mode.test.ts        -- 8 mock-mode e2e tests
   fidelity-report.test.ts      -- 3 harness tests

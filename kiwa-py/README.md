@@ -1,6 +1,6 @@
-# @kiwa-test/py — Python pytest adapter
+# @kiwa/py — Python pytest adapter
 
-Port of [kiwa](https://github.com/cardene777/kiwa) `@kiwa-test/core` + integration adapters to the Python ecosystem.
+Port of [kiwa](https://github.com/cardene777/kiwa) `@kiwa/core` + integration adapters to the Python ecosystem.
 
 ## Install
 

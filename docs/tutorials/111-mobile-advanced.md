@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-`@kiwa-test/mobile` v0.2 で追加された advanced II 4 axis (navigation + reanimated + async-storage + secure-storage) を、 3 target (ios + android + web) 横断的に扱う vitest suite。 v1.50 base 3 axis と合わせて 7 axis を production layer で使う pattern。
+`@kiwa/mobile` v0.2 で追加された advanced II 4 axis (navigation + reanimated + async-storage + secure-storage) を、 3 target (ios + android + web) 横断的に扱う vitest suite。 v1.50 base 3 axis と合わせて 7 axis を production layer で使う pattern。
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@
 ```bash
 mkdir kiwa-mobile-advanced && cd kiwa-mobile-advanced
 pnpm init
-pnpm add -D @kiwa-test/mobile@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa/mobile@^0.2 vitest typescript @types/node
 ```
 
 ### 2. Navigation axis (React Navigation / Expo Router)
@@ -30,7 +30,7 @@ import {
   openNavigationModal,
   pushNavigationStack,
   switchNavigationTab,
-} from '@kiwa-test/mobile';
+} from '@kiwa/mobile';
 
 describe('Navigation stack + tab + modal + deep-link', () => {
   it('composes navigation flow', () => {
@@ -54,7 +54,7 @@ import {
   initReanimated,
   startReanimatedAnimation,
   updateSharedValue,
-} from '@kiwa-test/mobile';
+} from '@kiwa/mobile';
 
 describe('Reanimated 3 animation lifecycle', () => {
   it('shared value + worklet + animate', () => {
@@ -79,7 +79,7 @@ import {
   removeCredential,
   setAsyncStorageItem,
   storeCredential,
-} from '@kiwa-test/mobile';
+} from '@kiwa/mobile';
 
 describe('Storage 2 axis', () => {
   it('AsyncStorage set + Secure store + biometric', () => {
@@ -98,7 +98,7 @@ describe('Storage 2 axis', () => {
 ### 5. Real driver env-gate (opt-in)
 
 ```ts
-import { readMobileRealDriverEnv, assertMobileRealDriverAvailable } from '@kiwa-test/mobile';
+import { readMobileRealDriverEnv, assertMobileRealDriverAvailable } from '@kiwa/mobile';
 
 process.env.KIWA_MOBILE_MODE = 'real';
 process.env.KIWA_NAVIGATION_URL = 'http://navigator';

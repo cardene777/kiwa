@@ -1,6 +1,6 @@
 # A11y testing SSOT — WCAG 2.1 AA + 4-tier threshold + baseline persistence + 3-layer harness SSOT for kiwa v1.30
 
-Introduced in v1.16 as `@kiwa-test/a11y` v1.0 (`runAxe` + `reportViolations` + `expectNoViolations` — a thin axe-core wrapper over jsdom + Playwright pages), extended in v1.30-2 as v1.1 (`runLayerHarness` + `bucketViolations` + `unionByRule` + `computeTotals` + `isHarnessOk` + `summariseHarness` — the 3-layer harness on top of the v1.0 primitives), and rolled out to all 34 kiwa packages in the v1.30 milestone. This document is the SSOT for **what a kiwa a11y suite measures, how impact violations are counted, and how a regression is decided**. Every downstream axe config (`packages/*/.axe-config.mjs`) and every downstream baseline JSON (`.a11y-baseline/*.json`) reads these rules from here — do not re-derive them locally.
+Introduced in v1.16 as `@kiwa/a11y` v1.0 (`runAxe` + `reportViolations` + `expectNoViolations` — a thin axe-core wrapper over jsdom + Playwright pages), extended in v1.30-2 as v1.1 (`runLayerHarness` + `bucketViolations` + `unionByRule` + `computeTotals` + `isHarnessOk` + `summariseHarness` — the 3-layer harness on top of the v1.0 primitives), and rolled out to all 34 kiwa packages in the v1.30 milestone. This document is the SSOT for **what a kiwa a11y suite measures, how impact violations are counted, and how a regression is decided**. Every downstream axe config (`packages/*/.axe-config.mjs`) and every downstream baseline JSON (`.a11y-baseline/*.json`) reads these rules from here — do not re-derive them locally.
 
 ## Why an a11y SSOT
 
@@ -17,7 +17,7 @@ The 5 rules below are the smallest set that make kiwa a11y suites comparable acr
 Every `runAxe` call in the kiwa monorepo passes the same tag filter. Best-practice rules are excluded because they surface style suggestions, not conformance failures.
 
 ```ts
-import { runAxe } from '@kiwa-test/a11y';
+import { runAxe } from '@kiwa/a11y';
 
 const results = await runAxe({
   context: document.body,
@@ -34,7 +34,7 @@ The SSOT matches WCAG 2.1 AA conformance. A future SSOT extension to WCAG 2.2 AA
 
 ### Exceptions
 
-- **Provider-specific test-only fixtures** — when a jsdom fixture only exists to exercise the adapter's DOM output (e.g. `@kiwa-test/component` Storybook 8 fixture), the audit runs against the rendered component tree, not against test-scaffolding markup. The `context` field of `runAxe` scopes the audit to a specific subtree.
+- **Provider-specific test-only fixtures** — when a jsdom fixture only exists to exercise the adapter's DOM output (e.g. `@kiwa/component` Storybook 8 fixture), the audit runs against the rendered component tree, not against test-scaffolding markup. The `context` field of `runAxe` scopes the audit to a specific subtree.
 - **Framework-owned markup** — when a framework internal (Next router link, Nuxt teleport, Astro island wrapper) surfaces a violation that requires an upstream PR to fix, the tier ceiling loosens `serious` to 0-3 and `moderate` to 0-10 so the package baseline can still commit while the upstream fix is in flight.
 
 ## Rule 2 — 4-tier threshold rationale
@@ -52,15 +52,15 @@ The v1.30 milestone pins every kiwa package to one of four rationale tiers, name
 
 ### Stricter and looser overrides
 
-- **Stricter override** — a package may lower its ceiling below the tier default (e.g. `@kiwa-test/api` at Core-strict 0/0/0 because its historical bar already met it). Stricter overrides do not need approval — they lower the ceiling. The `.axe-config.mjs` header comment records the lowered value.
-- **Looser override** — a package may raise its serious / moderate ceiling above the tier default when the baseline sweep lands above the tier default and a follow-up PR is scoped to bring it back. Looser overrides require a one-line justification pinned to the follow-up work. `critical` cannot be raised — the type literal forbids it. `@kiwa-test/auth` at Framework 0/5/15 is the sole current example (router link internals — follow-up upstream PR brings serious back to 3).
+- **Stricter override** — a package may lower its ceiling below the tier default (e.g. `@kiwa/api` at Core-strict 0/0/0 because its historical bar already met it). Stricter overrides do not need approval — they lower the ceiling. The `.axe-config.mjs` header comment records the lowered value.
+- **Looser override** — a package may raise its serious / moderate ceiling above the tier default when the baseline sweep lands above the tier default and a follow-up PR is scoped to bring it back. Looser overrides require a one-line justification pinned to the follow-up work. `critical` cannot be raised — the type literal forbids it. `@kiwa/auth` at Framework 0/5/15 is the sole current example (router link internals — follow-up upstream PR brings serious back to 3).
 
 ### The `A11yTier` enum
 
 The runtime enum is `type A11yTier = 'core' | 'framework' | 'saas' | 'test-type'`. The verbal labels written in `.a11y-baseline/*.json` header comments (`Core` / `Framework` / `SaaS` / `Test type`) resolve through `resolveA11yTier`.
 
 ```ts
-import { resolveA11yTier } from '@kiwa-test/quality-metrics';
+import { resolveA11yTier } from '@kiwa/quality-metrics';
 
 resolveA11yTier('Core');       // → 'core'
 resolveA11yTier('Framework');  // → 'framework'
@@ -77,7 +77,7 @@ Every `pnpm test:a11y` invocation runs `scripts/run-axe-baseline.mjs`, which rea
 
 ```json
 {
-  "package": "@kiwa-test/auth",
+  "package": "@kiwa/auth",
   "generatedAt": "2026-07-06T01:47:54.816Z",
   "layers": {
     "jsdom": {
@@ -145,7 +145,7 @@ const report = await runLayerHarness('my-component', {
 });
 ```
 
-The harness aggregates the pre-computed axe results verbatim to keep `@kiwa-test/a11y` Playwright-free at build time (Playwright is a peerDep, not a dep). Missing `fixture.results.violations` is treated as an empty axe run rather than a thrown TypeError — a common shape when the caller wired the harness before the browser run completed.
+The harness aggregates the pre-computed axe results verbatim to keep `@kiwa/a11y` Playwright-free at build time (Playwright is a peerDep, not a dep). Missing `fixture.results.violations` is treated as an empty axe run rather than a thrown TypeError — a common shape when the caller wired the harness before the browser run completed.
 
 ### SSR-hydration layer
 
@@ -174,7 +174,7 @@ v1.30-4 promotes the a11y tier to a first-class 13th axis in the release gate. `
 import {
   evaluateReleaseGate,
   resolveA11yTier,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 
 const verdict = evaluateReleaseGate(report, {}, {
   a11yTier: resolveA11yTier('SaaS'),
@@ -199,7 +199,7 @@ import {
   a11yFromBaseline,
   assertA11yTier,
   resolveA11yTier,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 
 const metric = a11yFromBaseline({
   totals: { critical: 0, serious: 0, moderate: 0, minor: 2 },
@@ -231,7 +231,7 @@ The rule of thumb is that packages with a Framework or Test type tier tend to ne
 
 ## The parallel to perf-testing and mutation-testing
 
-`@kiwa-test/perf-harness` runs `serial + concurrent + memory` in one `runPerf3Layer` call — 3 layers, all mandatory when the package has any measured surface. `@kiwa-test/a11y` runs `jsdom + Playwright + SSR-hydration` — 3 layers, opt-in per fixture. `@kiwa-test/quality-metrics` mutation gate is single-layer by design (Stryker mutates one operator per run and re-executes the full vitest suite). The 3 harnesses converge on the same 4-tier SSOT for release-gate integration but keep their layer semantics distinct.
+`@kiwa/perf-harness` runs `serial + concurrent + memory` in one `runPerf3Layer` call — 3 layers, all mandatory when the package has any measured surface. `@kiwa/a11y` runs `jsdom + Playwright + SSR-hydration` — 3 layers, opt-in per fixture. `@kiwa/quality-metrics` mutation gate is single-layer by design (Stryker mutates one operator per run and re-executes the full vitest suite). The 3 harnesses converge on the same 4-tier SSOT for release-gate integration but keep their layer semantics distinct.
 
 | Axis | Layers | Cost | Runs when |
 |---|---|---|---|
@@ -249,10 +249,10 @@ The v1.30 milestone applied the tier gate to every kiwa package. Package tiers a
 
 | Layer | Packages |
 |---|---|
-| Core (9) | `@kiwa-test/core` / `api` / `data` / `cli-test` / `cli` / `observability` / `perf-harness` / `quality-metrics` / `release-invariants` |
-| Framework (12) | `@kiwa-test/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `solidjs` / `fresh` / `hono` / `auth` |
-| SaaS (11) | `@kiwa-test/ai-llm` / `payment` / `queue` / `cache` / `streaming` / `realtime` / `mcp` / `agent` / `search` / `orm` / `dapp` |
-| Test type (5) | `@kiwa-test/ui` / `a11y` / `visual` / `component` / `e2e` |
+| Core (9) | `@kiwa/core` / `api` / `data` / `cli-test` / `cli` / `observability` / `perf-harness` / `quality-metrics` / `release-invariants` |
+| Framework (12) | `@kiwa/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `solidjs` / `fresh` / `hono` / `auth` |
+| SaaS (11) | `@kiwa/ai-llm` / `payment` / `queue` / `cache` / `streaming` / `realtime` / `mcp` / `agent` / `search` / `orm` / `dapp` |
+| Test type (5) | `@kiwa/ui` / `a11y` / `visual` / `component` / `e2e` |
 
 Every package writes a per-package baseline JSON to `.a11y-baseline/{package}.json`, runs the 3-layer harness on every `pnpm test:a11y` invocation, and gates on the tier ceiling via `assertA11yTier` (in package tests) or `evaluateReleaseGate({ a11yTier })` (at release time). The `A11Y_PACKAGE_TIER` map in `scripts/check-a11y-gates.mjs` is the runtime SSOT for the tier assignment; the doc table above is the human-readable SSOT.
 

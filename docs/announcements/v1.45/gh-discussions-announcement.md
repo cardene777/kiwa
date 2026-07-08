@@ -6,7 +6,7 @@ kiwa v1.45 is out. **Pair 2 (Realtime) achieves 3-stage extension** (v1.13 v0.1 
 
 ## What's new
 
-### `@kiwa-test/realtime` v0.3.0
+### `@kiwa/realtime` v0.3.0
 
 - **moq-fetch** — MoQT track announce + subscribe + object delivery
 - **moq-datagram-media** — partial reliability + priority + FEC recovery
@@ -55,7 +55,7 @@ v1.23 → v1.45 = 23 milestones with tutorial code snippet validation tests.
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/realtime@^0.3
+pnpm add -D @kiwa/realtime@^0.3
 ```
 
 ## Migration guide

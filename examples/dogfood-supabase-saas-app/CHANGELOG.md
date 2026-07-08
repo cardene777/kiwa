@@ -6,5 +6,5 @@
 
 - Updated dependencies [dffb701]
 - Updated dependencies [797e5ea]
-  - @kiwa-test/auth@0.3.0
-  - @kiwa-test/quality-metrics@0.2.0
+  - @kiwa/auth@0.3.0
+  - @kiwa/quality-metrics@0.2.0

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that runs a minimal **retrieval-augmented generation** pipeline against `@kiwa-test/ai-llm`'s `createVercelAiMock` — chunk a small doc, embed each chunk with a deterministic hashing embedder, upsert into an in-memory vector store, retrieve top-k hits for a question, and stream an answer grounded in the retrieved context. The pattern mirrors the dogfood app at `examples/dogfood-vercel-ai-rag/` and covers every axis the fidelity harness measures (embedding cosine similarity, retrieval F1, answer Jaccard).
+A vitest test file that runs a minimal **retrieval-augmented generation** pipeline against `@kiwa/ai-llm`'s `createVercelAiMock` — chunk a small doc, embed each chunk with a deterministic hashing embedder, upsert into an in-memory vector store, retrieve top-k hits for a question, and stream an answer grounded in the retrieved context. The pattern mirrors the dogfood app at `examples/dogfood-vercel-ai-rag/` and covers every axis the fidelity harness measures (embedding cosine similarity, retrieval F1, answer Jaccard).
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that runs a minimal **retrieval-augmented generation** pipeli
 ```bash
 mkdir kiwa-vercel-ai-rag && cd kiwa-vercel-ai-rag
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa-test/ai-llm
+pnpm add -D vitest typescript @types/node @kiwa/ai-llm
 ```
 
 Set `type: module` in `package.json`:
@@ -152,7 +152,7 @@ export function createInMemoryVectorStore() {
 Create `src/rag.ts` — the ingest + retrieve + answer glue:
 
 ```ts
-import { createVercelAiMock } from '@kiwa-test/ai-llm';
+import { createVercelAiMock } from '@kiwa/ai-llm';
 import { createHashingEmbedder } from './embedder.js';
 import { createInMemoryVectorStore, type QueryHit } from './vector-store.js';
 
@@ -164,7 +164,7 @@ export const SEED_DOCS = [
   },
   {
     id: 'doc-2',
-    text: 'The release gate evaluates 11 axes when the provider starts with @kiwa-test/ai-llm — 7 base plus 4 AI-LLM specific: cost, latency, token, accuracy.',
+    text: 'The release gate evaluates 11 axes when the provider starts with @kiwa/ai-llm — 7 base plus 4 AI-LLM specific: cost, latency, token, accuracy.',
   },
   {
     id: 'doc-3',
@@ -273,7 +273,7 @@ describe('vercel ai rag pipeline — mock', () => {
       question: 'How many axes does the release gate evaluate?',
       topK: 3,
       cannedAnswer:
-        '11 axes when the provider starts with @kiwa-test/ai-llm — 7 base plus 4 AI-LLM specific.',
+        '11 axes when the provider starts with @kiwa/ai-llm — 7 base plus 4 AI-LLM specific.',
     });
     expect(hits[0]?.metadata.docId).toBe('doc-2');
     expect(text).toMatch(/11 axes/);
@@ -347,4 +347,4 @@ Without any of those the real adapter reports `RAG_ENV_MISSING` for every method
 
 - The [AI-LLM testing concept guide](../concepts/ai-llm-testing.md) explains why AI-LLM tests need extra fidelity / cost / accuracy axes and how to think about non-determinism.
 - The dogfood app's [`src/rag/chunker.ts`](https://github.com/cardene777/kiwa/blob/main/examples/dogfood-vercel-ai-rag/src/rag/chunker.ts) shows a real chunker with 500-char chunks + 50-char overlap that approximates LangChain's `RecursiveCharacterTextSplitter`.
-- [`@kiwa-test/quality-metrics`](../quality/release-gate) documents the 11-axis release gate; AI-LLM 4 axes activate when the provider string starts with `@kiwa-test/ai-`.
+- [`@kiwa/quality-metrics`](../quality/release-gate) documents the 11-axis release gate; AI-LLM 4 axes activate when the provider string starts with `@kiwa/ai-`.

@@ -8,11 +8,11 @@ published: true
 
 # kiwa v1.26 released
 
-v1.26 は kiwa の 16 milestone 目です。 v1.14 (横軸拡張、 `@kiwa-test/orm` v0.8 で Drizzle / Prisma / Kysely × SQLite / Postgres / MySQL の 3 × 3 provider-backend matrix + testcontainers real driver + `createOrmEnv` + `applyMigrations` + `seedFixtures` primitive を land) を基盤に、 v1.26 は同 primitive の上に **8 axis advanced production db semantics** (replication + cdc + logical-replication + mvcc + rls + connection-pool + partitioning + vector-store) を land。 v0.8 primitive は first-line contract のまま維持 (v0.8 signature 完全維持)、 8 axis pure state-machine helper 40 種は second-line envelope として並走。 `@kiwa-test/orm` v0.8.0 → v0.9.0 minor bump は 8 axis semantics extension + 3 provider × 3 backend neutral state machine 標準化を反映。 v1.11 以降の連続完遂 15 milestone (release gate → 非決定性 → 時間軸 → 横軸拡張 → AI-LLM 深化 → component 縦軸 → Observability v2 → Blockchain 深化 → Framework 深化 → Streaming 深化 → Auth 深化 → Auth 深化 II → Payment 深化 → Edge / Serverless 深化 → Perf-harness sweep) を受けて、 v1.26 は Database 深化 milestone、 kiwa runtime fixture 34 packages はそのまま維持 (orm 既存 package の minor 拡張)。
+v1.26 は kiwa の 16 milestone 目です。 v1.14 (横軸拡張、 `@kiwa/orm` v0.8 で Drizzle / Prisma / Kysely × SQLite / Postgres / MySQL の 3 × 3 provider-backend matrix + testcontainers real driver + `createOrmEnv` + `applyMigrations` + `seedFixtures` primitive を land) を基盤に、 v1.26 は同 primitive の上に **8 axis advanced production db semantics** (replication + cdc + logical-replication + mvcc + rls + connection-pool + partitioning + vector-store) を land。 v0.8 primitive は first-line contract のまま維持 (v0.8 signature 完全維持)、 8 axis pure state-machine helper 40 種は second-line envelope として並走。 `@kiwa/orm` v0.8.0 → v0.9.0 minor bump は 8 axis semantics extension + 3 provider × 3 backend neutral state machine 標準化を反映。 v1.11 以降の連続完遂 15 milestone (release gate → 非決定性 → 時間軸 → 横軸拡張 → AI-LLM 深化 → component 縦軸 → Observability v2 → Blockchain 深化 → Framework 深化 → Streaming 深化 → Auth 深化 → Auth 深化 II → Payment 深化 → Edge / Serverless 深化 → Perf-harness sweep) を受けて、 v1.26 は Database 深化 milestone、 kiwa runtime fixture 34 packages はそのまま維持 (orm 既存 package の minor 拡張)。
 
 ## 主な追加
 
-### `@kiwa-test/orm` v0.9.0 (8 axis advanced production db semantics extension)
+### `@kiwa/orm` v0.9.0 (8 axis advanced production db semantics extension)
 
 v1.14 で land した `createOrmEnv` + `applyMigrations` + `seedFixtures` + testcontainers real driver + Drizzle / Prisma / Kysely × Postgres / MySQL / SQLite 3 × 3 matrix signature を完全維持したまま、 v1.26 は `packages/orm/src/semantics/*` に 40 helper (8 axis × 5 helper) を追加。 各 helper は pure state machine (no adapter / no network) で決定論的、 test / fixture / bench で reproducible。
 
@@ -27,7 +27,7 @@ v1.14 で land した `createOrmEnv` + `applyMigrations` + `seedFixtures` + test
 
 ### v1.26-1 8 axis advanced db semantics (Issue #940)
 
-`@kiwa-test/orm` v0.9 の 8 axis 完全一覧。
+`@kiwa/orm` v0.9 の 8 axis 完全一覧。
 
 | axis | helpers | neutral events | 相当機能 |
 |---|---|---|---|
@@ -49,7 +49,7 @@ import {
   appendOutbox,
   markEventOrdered,
   confirmDelivery,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 const session = createCdcSession({ backend: 'postgres', provider: 'drizzle' });
 const decoded = decodeEvent(session, { lsn: '0/16B62A0', op: 'INSERT', schema: 'public', table: 'orders' });
@@ -101,12 +101,12 @@ Postgres 16 pgvector IVFFlat + HNSW index + cosine / L2 distance + hybrid semant
 
 docs は 3 pillar + 1 concept + 1 migration + 1 snippet validation を追加。
 
-- **tutorial 47** (`docs/tutorials/47-postgres-cdc-outbox.md`) ... cdc axis walkthrough、 空 project → `@kiwa-test/orm@^0.9` install → `createCdcSession` + `decodeEvent` + `appendOutbox` + `markEventOrdered` + `confirmDelivery` の 7 step 完走 recipe。
+- **tutorial 47** (`docs/tutorials/47-postgres-cdc-outbox.md`) ... cdc axis walkthrough、 空 project → `@kiwa/orm@^0.9` install → `createCdcSession` + `decodeEvent` + `appendOutbox` + `markEventOrdered` + `confirmDelivery` の 7 step 完走 recipe。
 - **tutorial 48** (`docs/tutorials/48-mysql-rls-tenant.md`) ... rls axis walkthrough、 `createRlsSession` + `installPolicy` + `filterTenant` + `bypassRls` + `logAudit` の 7 step 完走 recipe + tenant isolation + chain-hash audit log。
 - **tutorial 49** (`docs/tutorials/49-vector-search-pgvector.md`) ... vector-store axis walkthrough、 `createVectorStoreSession` + `buildIndex` + `knnSearch` + `hybridSearch` + `computeDistance` の 8 step 完走 recipe + IVFFlat / HNSW + hybrid search。
 - **concept doc** (`docs/concepts/db-advanced-testing.md`) ... 8 axis SSOT + Rule 1-4 + provider × backend fidelity table + 3 dogfood app matrix。
 - **migration guide** (`docs/migrations/v1.25-to-v1.26.md`) ... additive-only、 breaking change 0、 v0.8 API 全 signature 完全維持、 v0.9 の 40 helper + 8 axis session ctor は opt-in。
-- **snippet validation** (`packages/orm/tests/docs-tutorial-v1.26.test.ts`) ... tutorial 47-49 の全 code snippet を実 `@kiwa-test/orm` v0.9 API import + execute + assertion で走査、 32 test で drift を検知 (`docs-tutorial-v1.21` から `docs-tutorial-v1.25` と同じ pattern)。
+- **snippet validation** (`packages/orm/tests/docs-tutorial-v1.26.test.ts`) ... tutorial 47-49 の全 code snippet を実 `@kiwa/orm` v0.9 API import + execute + assertion で走査、 32 test で drift を検知 (`docs-tutorial-v1.21` から `docs-tutorial-v1.25` と同じ pattern)。
 
 ### v1.26-6 publish (本 PR)
 
@@ -115,13 +115,13 @@ docs は 3 pillar + 1 concept + 1 migration + 1 snippet validation を追加。
 - 4 announcement file (gh-discussions + x-thread-en + x-thread-ja + zenn-article) 新規追加。
 - `tests/release-smoke/tests/v1-26-publish.test.ts` (7 axis publish artefact invariant) 新規 + `v1-25-publish.test.ts` 削除。
 - `tests/docs-site-e2e/site.spec.ts` に `V1_26_PAGES` (5 page: tutorial 47 + tutorial 48 + tutorial 49 + concept `db-advanced-testing` + migration `v1.25-to-v1.26`、 nav + search widget mount check) 追加。
-- release script filter に `@kiwa-test/orm` が **既に含まれている** (v1.14 land 時から build + publish 両 filter に存在) ため追加変更なし、 但し v1-26 smoke test は filter presence を invariant として assert する。
+- release script filter に `@kiwa/orm` が **既に含まれている** (v1.14 land 時から build + publish 両 filter に存在) ため追加変更なし、 但し v1-26 smoke test は filter presence を invariant として assert する。
 
 ## Numbers
 
 - **6 sub-Issue 解決** (#940-#945)
 - **6 PR merge** (v1.26-1 + v1.26-2 + v1.26-3 + v1.26-4 + v1.26-5 + 本 publish PR)
-- **1 npm minor bump** (`@kiwa-test/orm` v0.8.0 → v0.9.0) — kiwa runtime fixture 34 packages 維持
+- **1 npm minor bump** (`@kiwa/orm` v0.8.0 → v0.9.0) — kiwa runtime fixture 34 packages 維持
 - **222 semantics behavior test 新規** (semantics/ statement 99.54 % / branch 95.61 % / function 100 % coverage)
 - **103 dogfood vitest 新規** (postgres-cdc-outbox 28 + mysql-rls-tenant 34 + vector-search 41)
 - **288 dialect entry** (3 provider × 3 backend × 32 neutral event) — 8 axis wiring 全 exhaustive

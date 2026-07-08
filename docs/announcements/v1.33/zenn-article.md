@@ -1,9 +1,9 @@
-# kiwa v1.33 released — Payment 深化 II (@kiwa-test/payment v0.4.0 + 8 axis advanced billing II + real driver + 縦深化 pair 第 5 pair 連続化)
+# kiwa v1.33 released — Payment 深化 II (@kiwa/payment v0.4.0 + 8 axis advanced billing II + real driver + 縦深化 pair 第 5 pair 連続化)
 
 ## TL;DR
 
 - **kiwa v1.33 released** — Payment 深化 II milestone (advanced billing II 8 axis + real driver + 縦深化 pair 第 5 pair 連続化)
-- **`@kiwa-test/payment` v0.3.0 → v0.4.0 minor bump** — 8 axis advanced billing II semantics + real driver env-gate + 3 provider × 8 axis neutral state machine 追加
+- **`@kiwa/payment` v0.3.0 → v0.4.0 minor bump** — 8 axis advanced billing II semantics + real driver env-gate + 3 provider × 8 axis neutral state machine 追加
 - **8 axis semantics** = orchestration + revenue-recovery + refund-advanced + dispute + webhook-idempotency-advanced + tax-localization + subscription-state-machine + payment-method-vault
 - **3 dogfood app v2 / 新規** — stripe-marketplace-app v2 + paddle-subscription-app v2 + lemonsqueezy-license-app 新規、 全 7 軸 release gate PASS + real driver env-gate
 - **縦深化 pair pattern 第 5 pair 連続化** — Auth pair (v1.21→v1.22) + Realtime pair (v1.13→v1.28) + Streaming pair (v1.20→v1.31) + Database pair (v1.14→v1.32) + **Payment pair (v1.23→v1.33)**、 縦深化戦略 SSOT を payment production layer に拡張
@@ -13,7 +13,7 @@
 
 ## v1.33 が解決したい問題 — Payment production semantics の testing gap
 
-v1.14 で `@kiwa-test/payment` v0.2 (Stripe + Paddle + Lemon Squeezy webhook mock + HMAC signature verify + 4 fixture builder) を land、 v1.23 で v0.3 に minor bump して **9 base billing semantics** (dunning + retry + 3DS v2 + SCA + PSD2 mandate + subscription lifecycle + invoice lifecycle + VAT/GST/sales tax + chargeback dispute) を追加した時点で、 kiwa は 3 provider (Stripe / Paddle / Lemon Squeezy) 上に単一の billing state envelope を統一 mock として提供していた。 broker 経由の live provider endpoint 不要で mock only mode で走る、 実 test 環境の生産性を確保する目的の layer。
+v1.14 で `@kiwa/payment` v0.2 (Stripe + Paddle + Lemon Squeezy webhook mock + HMAC signature verify + 4 fixture builder) を land、 v1.23 で v0.3 に minor bump して **9 base billing semantics** (dunning + retry + 3DS v2 + SCA + PSD2 mandate + subscription lifecycle + invoice lifecycle + VAT/GST/sales tax + chargeback dispute) を追加した時点で、 kiwa は 3 provider (Stripe / Paddle / Lemon Squeezy) 上に単一の billing state envelope を統一 mock として提供していた。 broker 経由の live provider endpoint 不要で mock only mode で走る、 実 test 環境の生産性を確保する目的の layer。
 
 しかし v1.23 land 後の実行観測で判明したのは、 real production payment setup で頻繁に遭遇する **8 axis の advanced billing II semantics** — Stripe 障害時の multi-provider routing + failover cascade / dunning cascade (email → in-app → SMS → push) + card updater + network tokenization / Stripe Connect の destination charge + application fee + refund split / chargeback lifecycle (evidence submission + representment + arbitration escalation) / at-least-once webhook + idempotency key + dedup window / DAC7 EU digital platform reporting + jurisdiction split / grace period + trial + proration + coupon stacking / cross-provider vault + token migration + network token — が 9 base semantics だけでは cover できないこと。
 
@@ -78,19 +78,19 @@ cross-provider vault (Stripe → Paddle → Lemon Squeezy 間の payment method 
 v1.33 で kiwa の縦深化 pair pattern (basic mock milestone → 深化 II milestone で real driver + advanced semantics) が **5 pair 連続完成**:
 
 1. **Auth pair** (v1.21 → v1.22)
-   - v1.21 = `@kiwa-test/auth` v0.4 4 protocol adapter (WebAuthn L3 / Passkey / OAuth 2.1 / OIDC) mock only
+   - v1.21 = `@kiwa/auth` v0.4 4 protocol adapter (WebAuthn L3 / Passkey / OAuth 2.1 / OIDC) mock only
    - v1.22 = Keycloak testcontainers + oauth2-mock-server + Chrome caBLE hybrid transport (real driver) + a11y axe-core gate
 2. **Realtime pair** (v1.13 → v1.28)
-   - v1.13 = `@kiwa-test/realtime` v0.1 4 provider (Supabase / Ably / Pusher / Socket.io) × 5 base semantics mock only
+   - v1.13 = `@kiwa/realtime` v0.1 4 provider (Supabase / Ably / Pusher / Socket.io) × 5 base semantics mock only
    - v1.28 = WebRTC + WebTransport + HTTP/3 + QUIC multiplexing + 8 axis advanced (real driver env-gate)
 3. **Streaming pair** (v1.20 → v1.31)
-   - v1.20 = `@kiwa-test/streaming` v0.1 3 provider (Kafka / Redpanda / NATS) × 5 semantics mock only
+   - v1.20 = `@kiwa/streaming` v0.1 3 provider (Kafka / Redpanda / NATS) × 5 semantics mock only
    - v1.31 = Kafka raw + Redpanda schema + NATS JetStream + 8 axis advanced (real driver env-gate + testcontainers)
 4. **Database pair** (v1.14 → v1.32)
-   - v1.14-v1.26 = `@kiwa-test/orm` v0.1-v0.9 3 ORM × 3 backend + 8 base semantics mock only
+   - v1.14-v1.26 = `@kiwa/orm` v0.1-v0.9 3 ORM × 3 backend + 8 base semantics mock only
    - v1.32 = Postgres logical replication + MySQL cluster + SQLite WAL/FTS5 + 8 axis advanced (real driver env-gate + testcontainers)
 5. **Payment pair** (v1.23 → v1.33、 this)
-   - v1.14-v1.23 = `@kiwa-test/payment` v0.2-v0.3 3 provider webhook + 9 base billing semantics mock only
+   - v1.14-v1.23 = `@kiwa/payment` v0.2-v0.3 3 provider webhook + 9 base billing semantics mock only
    - v1.33 = Stripe Connect + Paddle Billing v2 + Lemon Squeezy license + 8 axis advanced billing II (real driver env-gate)
 
 basic mock → advanced real driver の 2 phase pair を追加 provider に横展開する pattern が SSOT 化された。 v1.25 perf + v1.27 mutation + v1.30 a11y の横串 triple pair と合わせて **kiwa quality gate 縦横 grid maximum extension**。
@@ -110,13 +110,13 @@ v1.23 (payment) → v1.24 (edge) → v1.25 (perf-harness) → v1.26 (orm-v1.26) 
 ## 使い方
 
 ```bash
-pnpm add -D @kiwa-test/payment @kiwa-test/core
+pnpm add -D @kiwa/payment @kiwa/core
 ```
 
 Payment orchestration の pure state machine helper:
 
 ```typescript
-import { startOrchestration, routeCharge, probeCircuit } from '@kiwa-test/payment/semantics/orchestration';
+import { startOrchestration, routeCharge, probeCircuit } from '@kiwa/payment/semantics/orchestration';
 
 const orch = startOrchestration({
   providers: ['stripe', 'paddle', 'lemonsqueezy'],
@@ -180,6 +180,6 @@ Feedback welcome — どの候補が優先されるべきか、 Discussions で�
 - Docs: https://cardene777.github.io/kiwa
 - Migration guide: https://cardene777.github.io/kiwa/migrations/v1.32-to-v1.33
 - Concept doc: https://cardene777.github.io/kiwa/concepts/payment-real-driver-testing
-- npm: `@kiwa-test/payment` v0.4.0
+- npm: `@kiwa/payment` v0.4.0
 
 Thanks for testing kiwa v1.33 pre-releases and shaping the 縦深化 pair pattern SSOT into a 5-pair grid.

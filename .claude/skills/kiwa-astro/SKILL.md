@@ -1,9 +1,9 @@
 ---
 name: kiwa-astro
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.{astro|astro-ssr|astro-vt}.md`) を Astro の 3 mode (Server Endpoints `pages/api/*.ts` の `GET` / `POST` 等 function exports + `.astro` page SSR + View Transitions API lifecycle event) test (Vitest + @kiwa-test/astro) に変換する Layer 2 skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.{astro|astro-ssr|astro-vt}.md`) を Astro の 3 mode (Server Endpoints `pages/api/*.ts` の `GET` / `POST` 等 function exports + `.astro` page SSR + View Transitions API lifecycle event) test (Vitest + @kiwa/astro) に変換する Layer 2 skill。
   endpoint mode は `APIRoute((context: APIContext) => Response)` を `invokeEndpoint(...)` 経由で direct invoke し Response (200 / 3xx redirect) を normalize、 ssr mode は `.astro` page を `renderAstroPage(...)` で render し HTML string / Response 両 return + Astro.redirect / kiwaAstroNotFound / Astro.rewrite signal 捕捉 + cookies mutate + locals 伝搬を Astro Container API 不要で実現、 view-transitions mode は `setupAstroViewTransitionEnv(...)` で 4 lifecycle event (`astro:before-preparation` / `astro:after-preparation` / `astro:before-swap` / `astro:after-swap`) を 1 env で順次 dispatch + preventDefault による nav cancel + loader override + cross-document fallback + diffDom() で from / to の top-level tag 差分抽出を real browser なしで実現する。
-  `/kiwa-design --layer astro-endpoint` / `--layer astro-ssr` / `--layer astro-view-transitions` が出力する 9 column 表を `@kiwa-test/astro` v1.1+ の `invokeEndpoint` / `renderAstroPage` / `setupAstroViewTransitionEnv` の引数に機械的に変換する。
+  `/kiwa-design --layer astro-endpoint` / `--layer astro-ssr` / `--layer astro-view-transitions` が出力する 9 column 表を `@kiwa/astro` v1.1+ の `invokeEndpoint` / `renderAstroPage` / `setupAstroViewTransitionEnv` の引数に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -12,7 +12,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /kiwa-astro — Astro Server Endpoints test 生成 (Layer 2)
 
-`/kiwa-design --layer astro-endpoint` が出力した 9 column 表を、 `@kiwa-test/astro` v1.0+ の `invokeEndpoint` を使った Vitest test に機械変換する。
+`/kiwa-design --layer astro-endpoint` が出力した 9 column 表を、 `@kiwa/astro` v1.0+ の `invokeEndpoint` を使った Vitest test に機械変換する。
 
 対象は **Astro Server Endpoints (`pages/api/*.ts` の `export GET` / `POST` / 等の function export)**。 Astro Islands / `.astro` page rendering は本 skill のスコープ外 (前者は client framework adapter で対応、 後者は Astro Container API で別途対応)。
 
@@ -33,7 +33,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 ## test 生成 template
 
 ```ts
-import { invokeEndpoint, type APIRoute } from '@kiwa-test/astro';
+import { invokeEndpoint, type APIRoute } from '@kiwa/astro';
 import { GET, POST } from '../pages/api/items.ts';
 
 it('{ID} {Observation}', async () => {
@@ -76,7 +76,7 @@ it('{ID} {Observation}', async () => {
 ### test 生成 template
 
 ```ts
-import { renderAstroPage, kiwaAstroNotFound, ASTRO_REDIRECT_SYMBOL, ASTRO_NOT_FOUND_SYMBOL } from '@kiwa-test/astro';
+import { renderAstroPage, kiwaAstroNotFound, ASTRO_REDIRECT_SYMBOL, ASTRO_NOT_FOUND_SYMBOL } from '@kiwa/astro';
 import PostPage from '../pages/posts/[slug].astro.js';
 
 it('{ID} {Observation}', async () => {
@@ -133,7 +133,7 @@ Astro v5 の `<ViewTransitions />` component が dispatch する 4 lifecycle eve
 ### test 生成 template
 
 ```ts
-import { setupAstroViewTransitionEnv } from '@kiwa-test/astro';
+import { setupAstroViewTransitionEnv } from '@kiwa/astro';
 
 it('{ID} {Observation}', async () => {
   const env = setupAstroViewTransitionEnv({
@@ -175,7 +175,7 @@ it('{ID} {Observation}', async () => {
 ## 関連
 
 - 上流 ... `/kiwa-design --layer {astro-endpoint|astro-ssr|astro-view-transitions}`
-- runtime fixture ... `@kiwa-test/astro` v1.1+ (`packages/astro/`)
+- runtime fixture ... `@kiwa/astro` v1.1+ (`packages/astro/`)
 - 下流 ... `/kiwa-review --layer {astro-endpoint|astro-ssr|astro-view-transitions}`
 - Astro Islands (client side hydration) ... `/kiwa-ui` の対象 framework mode (React / Vue / Svelte / 等)
 - HTML-perfect snapshot ... Astro Container API (`experimental_AstroContainer`) 併用も可、 本 helper は redirect / notFound / locals 等の **動作** 検証に focus

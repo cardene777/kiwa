@@ -1,9 +1,9 @@
 # dogfood-oauth21-provider
 
-Dogfood app for `@kiwa-test/auth` v1.22-2 (OAuth 2.1 adapter). A Hono + Cloudflare Workers Authorization Server (AS) that exercises the RFC 9700 endpoint surface — `/authorize`, `/token`, `/revoke`, `/introspect`, `/.well-known/openid-configuration` — with four spec-critical flows: PKCE always mandatory, DPoP-bound tokens, refresh token rotation, revocation cascade.
+Dogfood app for `@kiwa/auth` v1.22-2 (OAuth 2.1 adapter). A Hono + Cloudflare Workers Authorization Server (AS) that exercises the RFC 9700 endpoint surface — `/authorize`, `/token`, `/revoke`, `/introspect`, `/.well-known/openid-configuration` — with four spec-critical flows: PKCE always mandatory, DPoP-bound tokens, refresh token rotation, revocation cascade.
 
 - `KIWA_MODE=real` — `oauth2-mock-server` (Navikt `ghcr.io/navikt/mock-oauth2-server`) spawned through testcontainers. Skipped when the environment cannot reach docker (`OAUTH21_BOOTSTRAP` unset). v1.22-2 (`#888`) wires the testcontainers boot path so the discovery axis gets live coverage.
-- `KIWA_MODE=mock` — `@kiwa-test/auth` `setupOAuth21Env` + `createAuthorizationServer` deterministic mock. Always runs.
+- `KIWA_MODE=mock` — `@kiwa/auth` `setupOAuth21Env` + `createAuthorizationServer` deterministic mock. Always runs.
 
 Behavioural fidelity between the two drivers feeds the release gate (`docs/quality-reports/auth/oauth21-provider.md`).
 
@@ -25,7 +25,7 @@ Sub-Issue **a** landed the shared surface — Hono app, adapter interface, `KIWA
 src/
   adapters/
     interface.ts       # OAuth21ASAdapter contract (discovery / authorize / token / revoke / introspect + register client + user)
-    mock.ts            # makeMockAdapter — @kiwa-test/auth setupOAuth21Env + createAuthorizationServer
+    mock.ts            # makeMockAdapter — @kiwa/auth setupOAuth21Env + createAuthorizationServer
     real.ts            # makeRealAdapter — oauth2-mock-server via testcontainers (skipped when OAUTH21_BOOTSTRAP unset)
   lib/
     hono-app.ts        # createHonoApp — Hono routes for the 5 RFC 9700 endpoints, thin wrapper over the adapter
@@ -36,10 +36,10 @@ src/
     introspect/route.ts # createIntrospectHandler delegate (RFC 7662 §2.2 `{active: false}` sentinel)
     well-known/route.ts # createWellKnownHandler delegate — discovery metadata
   lib/
-    pkce.ts            # PKCE helpers (createPkceChallenge / deriveChallengeS256 / verifyChallenge / assertVerifierFormat / assertMethodAllowed) — thin wrapper around @kiwa-test/auth's PKCE primitives
+    pkce.ts            # PKCE helpers (createPkceChallenge / deriveChallengeS256 / verifyChallenge / assertVerifierFormat / assertMethodAllowed) — thin wrapper around @kiwa/auth's PKCE primitives
   lib/
-    dpop.ts            # DPoP helpers (parseDpopHeader / assertDpopHeaderShape / verifyDpopProofBinding / computeJkt) — thin wrapper around @kiwa-test/auth's DPoP primitives
-    refresh-rotation.ts # Refresh-rotation helpers (rotateAndMint / classifyRefreshTokenError / RefreshRotationError) — thin wrapper around @kiwa-test/auth's rotateRefreshToken
+    dpop.ts            # DPoP helpers (parseDpopHeader / assertDpopHeaderShape / verifyDpopProofBinding / computeJkt) — thin wrapper around @kiwa/auth's DPoP primitives
+    refresh-rotation.ts # Refresh-rotation helpers (rotateAndMint / classifyRefreshTokenError / RefreshRotationError) — thin wrapper around @kiwa/auth's rotateRefreshToken
     revocation-cascade.ts # Cascade helper — cascadeRevoke tears down every access + refresh in the (clientId, subject) family per RFC 9700 §2.2.2
 tests/
   endpoints-skeleton.spec.ts # 4 fidelity axes: discovery metadata / OAuth 2.1 hardening / grant allowlist / revoke+introspect contract
@@ -64,7 +64,7 @@ pnpm typecheck                           # tsc --noEmit
 
 ### Revocation-cascade + release gate (Sub-Issue #867)
 
-| axis | mock (`@kiwa-test/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
+| axis | mock (`@kiwa/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
 |---|---|---|---|
 | Revocation 1. access_token revoke | `/revoke` on an access_token deletes it from the AS active registry; `/introspect` returns `{active: false}`; body is empty (200) per RFC 7009 §2.2 | oauth2-mock-server same delete + introspect flip | RFC 7009 §2 — the state transition is observable through `/introspect` immediately after `/revoke` succeeds. |
 | Revocation 2. cascade to refresh | Revoking any single token invalidates every sibling (access + active refresh) in the `(clientId, subject)` family; subsequent refresh on the sibling fails with `invalid_grant`; cascade fans out across multiple grants sharing the same identity | oauth2-mock-server tears down family with the same fan-out | RFC 9700 §2.2.2 — any signal of compromise tears down the full family; cascade scope is deliberately `(clientId, subject)` not `(clientId, subject, scope)` so partial scope reuse can't survive. |
@@ -87,7 +87,7 @@ See `docs/quality-reports/auth/oauth21-provider.md` for the integrated release g
 
 ### DPoP-flow + refresh-rotation (Sub-Issue #866)
 
-| axis | mock (`@kiwa-test/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
+| axis | mock (`@kiwa/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
 |---|---|---|---|
 | DPoP 1. header alg | `parseDpopHeader` refuses missing / comma-folded / non-`ES256` / non-`dpop+jwt` / non-EC-P256 headers with `header_missing` / `header_malformed` / `header_alg_refused` / `header_typ_refused` / `header_jwk_refused`; `/token` returns `invalid_dpop_proof` | oauth2-mock-server refuses same with `invalid_dpop_proof` at HTTP layer | RFC 9449 §4.2 — every downgrade path refused before AS is invoked; valid proof mints `token_type=DPoP`, absent proof mints `token_type=Bearer`. |
 | DPoP 2. htm + htu binding | `verifyDpopProofBinding` rejects wrong `htm` (uppercase HTTP method) or wrong `htu` (absolute URL) with `payload_htm_mismatch` / `payload_htu_mismatch`; `/token` surfaces as `invalid_dpop_proof` | oauth2-mock-server enforces same binding | RFC 9449 §4.3 — proof pinned to request; a proof intended for `/introspect` cannot be replayed at `/token`. |
@@ -102,7 +102,7 @@ See `docs/quality-reports/auth/oauth21-provider-dpop-refresh.md` for the full re
 
 ### PKCE-flow (Sub-Issue #865)
 
-| axis | mock (`@kiwa-test/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
+| axis | mock (`@kiwa/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
 |---|---|---|---|
 | 1. verifier entropy | `createPkceChallenge` emits 43-char base64url; `assertVerifierFormat` refuses < 43 / > 128 / reserved chars | oauth2-mock-server accepts any 43-128 char verifier and rejects malformed at `/token` | RFC 7636 §4.1 length + charset invariants enforced pre-flight (`invalid_request` kind). |
 | 2. challenge derivation | `deriveChallengeS256(verifier)` = `base64url(SHA-256(verifier))`, no padding, hand-verified via `node:crypto` | oauth2-mock-server rederives server-side using the same encoder | Cross-driver derivation matches byte-for-byte; padding / `+` / `/` signals downgrade. |
@@ -113,7 +113,7 @@ See `docs/quality-reports/auth/oauth21-provider-pkce.md` for the full report.
 
 ### Endpoints-skeleton (Sub-Issue #864)
 
-| axis | mock (`@kiwa-test/auth`) | real (oauth2-mock-server) | assertion |
+| axis | mock (`@kiwa/auth`) | real (oauth2-mock-server) | assertion |
 |---|---|---|---|
 | 1. discovery metadata | Static shape derived from `issuer`; response_types=[code], grant_types=[authorization_code, refresh_token], code_challenge_methods=[S256], dpop_signing_alg_values=[ES256] | Static shape emitted by oauth2-mock-server at boot | RFC 8414 §2 shape restricted to the OAuth 2.1 subset — implicit / password / plain PKCE explicitly omitted from advertised subsets. |
 | 2. `/authorize` OAuth 2.1 hardening | `response_type=token` → 400 `unsupported_response_type`; `code_challenge_method=plain` → 400 `invalid_request`; valid `code` → 302 `redirect_uri?code=...&state=...` | oauth2-mock-server enforces the same RFC 9700 §2.1 rules | Both drivers refuse implicit / plain PKCE with the same error codes so a client cannot pass discovery + fail at runtime. |

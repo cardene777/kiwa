@@ -4,11 +4,11 @@ Focus shift from "measure release quality of AI-LLM providers" (v1.12, non-deter
 
 v1.11 + v1.12 axes measure scalars. Realtime failures are sequences. v1.13 absorbs that.
 
-2/ @kiwa-test/perf-harness v0.1 — 5 target generic perf.
+2/ @kiwa/perf-harness v0.1 — 5 target generic perf.
 
 bench.request / bench.function / bench.stream / bench.batch / bench.worker — p50 / p95 / p99 + regression detection + baseline persistence. Feeds the 11-axis release gate's perf.p95Ms.
 
-3/ @kiwa-test/realtime v0.1 — 4 provider unified mock.
+3/ @kiwa/realtime v0.1 — 4 provider unified mock.
 
 createSupabaseRealtimeMock — channel.on('presence' | 'broadcast' | 'postgres_changes', filter, handler) + track / send.
 createAblyMock — channels.get / subscribe / presence.subscribe / history rewind.

@@ -22,7 +22,7 @@ Supabase Auth (GoTrue) の provider を追加。 core と advanced の 2 adapter
 email/password + OAuth PKCE + magic link + SMS OTP + JWT session (HS256) を testcontainers Supabase Local 経路で mock。
 
 ```ts
-import { setupSupabaseAuthEnv } from "@kiwa-test/auth";
+import { setupSupabaseAuthEnv } from "@kiwa/auth";
 
 const env = await setupSupabaseAuthEnv({
   projectUrl: "https://poc.supabase.co",
@@ -48,7 +48,7 @@ const claims = await env.verifyToken(session.accessToken);
 RLS policy シミュレーション + MFA + SSO SAML + Web3 SIWE。
 
 ```ts
-import { setupSupabaseAdvancedEnv, type RlsPolicy } from "@kiwa-test/auth";
+import { setupSupabaseAdvancedEnv, type RlsPolicy } from "@kiwa/auth";
 
 const ownerPolicy: RlsPolicy = {
   name: "documents_owner_select",
@@ -109,7 +109,7 @@ RabbitMQ が queue provider family に加入。 basic は AMQP 0.9.1 model、 ad
 stub (in-process) + testcontainers 両 mode。
 
 ```ts
-import { setupRabbitMQEnv } from "@kiwa-test/queue";
+import { setupRabbitMQEnv } from "@kiwa/queue";
 
 const env = await setupRabbitMQEnv({
   exchanges: [
@@ -138,7 +138,7 @@ await env.consume({
 ### Advanced adapter (v1.10-4)
 
 ```ts
-import { setupRabbitMQAdvancedEnv } from "@kiwa-test/queue";
+import { setupRabbitMQAdvancedEnv } from "@kiwa/queue";
 
 const env = await setupRabbitMQAdvancedEnv({
   exchanges: [{ name: "dlx.work", type: "direct" }],

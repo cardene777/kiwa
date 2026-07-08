@@ -1,13 +1,13 @@
 # Fidelity — dogfood-cloudflare-workers-durable-object-app (v1.24-2)
 
-Real-vs-mock behavioural fidelity for the Cloudflare Workers Durable Object realtime chat room app driven by `@kiwa-test/edge` v0.2 (v1.24-1 land, PR #920) under `KIWA_MODE=real` (Miniflare + `wrangler dev` + `WRANGLER_KEY=1` env-gate) and `KIWA_MODE=mock` (`@kiwa-test/edge` v0.2 8 axis semantics), produced by `examples/dogfood-cloudflare-workers-durable-object-app/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-test/quality-metrics` release-gate 7-axis payload as the first edge-platform dogfood in the v1.24 milestone.
+Real-vs-mock behavioural fidelity for the Cloudflare Workers Durable Object realtime chat room app driven by `@kiwa/edge` v0.2 (v1.24-1 land, PR #920) under `KIWA_MODE=real` (Miniflare + `wrangler dev` + `WRANGLER_KEY=1` env-gate) and `KIWA_MODE=mock` (`@kiwa/edge` v0.2 8 axis semantics), produced by `examples/dogfood-cloudflare-workers-durable-object-app/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` release-gate 7-axis payload as the first edge-platform dogfood in the v1.24 milestone.
 
 ## Baseline (real mode skipped — `KIWA_MODE=real` + `WRANGLER_KEY=1` unset)
 
 When the harness runs without both `KIWA_MODE=real` and `WRANGLER_KEY=1` in the environment, the real adapter emits `KIWA_CF_DURABLE_OBJECT_ENV_MISSING` for each of the 8 ops (`driveRoomJoin` / `driveRoomBroadcast` / `driveStorageTx` / `driveAlarmPurge` / `driveWsUpgrade` / `driveWsSend` / `driveWsClose` / `driveWsHibernation`). Divergences are recorded so the mock is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/edge/cloudflare-durable-object
+provider   : @kiwa/edge/cloudflare-durable-object
 version    : 0.1.0
 verdict    : PASS
 divergences: 8 (all eight ops recorded as BEHAVIORAL_DIVERGENCE, real mode absent)
@@ -47,7 +47,7 @@ pnpm --filter dogfood-cloudflare-workers-durable-object-app test
 
 ## 8-op surface = durable-object 4 + websocket-edge 4
 
-The 8 ops correspond directly to the 8 axis routing pattern inherited from v1.24-1 (`@kiwa-test/edge` v0.2 semantics). Each op emits neutral events on 1 or 2 axes:
+The 8 ops correspond directly to the 8 axis routing pattern inherited from v1.24-1 (`@kiwa/edge` v0.2 semantics). Each op emits neutral events on 1 or 2 axes:
 
 | op | primary axis | neutral events emitted |
 |---|---|---|
@@ -85,4 +85,4 @@ The 8 ops correspond directly to the 8 axis routing pattern inherited from v1.24
 
 - Parent — v1.24 (#913, Edge / Serverless 深化)
 - Sub-Issue — v1.24-2 (#915)
-- Depends on — v1.24-1 (@kiwa-test/edge v1.1.0 = v0.2 with 8 axis semantics, PR #920)
+- Depends on — v1.24-1 (@kiwa/edge v1.1.0 = v0.2 with 8 axis semantics, PR #920)

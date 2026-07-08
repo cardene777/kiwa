@@ -40,7 +40,7 @@ The v1.12 gate adds 4 axes that measure **what real vs mock actually cost and ho
 | **token — totalTokens** | mean prompt + completion tokens per request | detects context bloat + retrieval-augmented prompt runaway |
 | **accuracy — score** | similarity score between mock output and real output on a golden set | detects mock drift from real behaviour |
 
-Only providers whose name starts with `@kiwa-test/ai-` enter the 11-axis branch. Everyone else still runs on 7 axes with the v1.11 semantics unchanged (see `isAiLlmProvider` in `packages/quality-metrics/src/types.ts`).
+Only providers whose name starts with `@kiwa/ai-` enter the 11-axis branch. Everyone else still runs on 7 axes with the v1.11 semantics unchanged (see `isAiLlmProvider` in `packages/quality-metrics/src/types.ts`).
 
 ## Concept 1 — non-determinism as a first-class constraint
 
@@ -95,7 +95,7 @@ The four numbers give a top-line signal, but the 4 AI-LLM axes on the `QualityRe
 
 ## Concept 3 — accuracy threshold (0.80 default, method-aware)
 
-Accuracy is the hardest of the four axes because it depends on what "close" means for your domain. `@kiwa-test/quality-metrics` supports three methods with the same 0.80 default threshold but different semantics:
+Accuracy is the hardest of the four axes because it depends on what "close" means for your domain. `@kiwa/quality-metrics` supports three methods with the same 0.80 default threshold but different semantics:
 
 | method | what it measures | when to use |
 |---|---|---|
@@ -135,7 +135,7 @@ The mock's role is to give the gate a deterministic baseline — "the real cost 
 Rules of thumb.
 
 - **Use AI-LLM 11 axes if** your test suite drives an LLM (Anthropic, OpenAI, Vercel AI SDK, LangChain, or any provider that ends up calling one of those) and you can measure cost / latency / token / accuracy against a real provider on some prompt set.
-- **Skip AI-LLM 11 axes if** your test suite drives a pure logic mock (Supabase Auth, RabbitMQ, Foundry, etc). Even if your app internally calls an LLM, the provider prefix (`@kiwa-test/auth`, `@kiwa-test/queue`, etc.) keeps you on the 7-axis branch. Adding AI-LLM axes to non-AI providers is possible via override but generally not useful — the metrics measure LLM behaviour, not auth / queue / contract behaviour.
+- **Skip AI-LLM 11 axes if** your test suite drives a pure logic mock (Supabase Auth, RabbitMQ, Foundry, etc). Even if your app internally calls an LLM, the provider prefix (`@kiwa/auth`, `@kiwa/queue`, etc.) keeps you on the 7-axis branch. Adding AI-LLM axes to non-AI providers is possible via override but generally not useful — the metrics measure LLM behaviour, not auth / queue / contract behaviour.
 - **You have no real API key** — the dogfood apps show how to still produce a report by falling back to a `test-real` variant (deterministic hashing embedder for embeddings, canned fixture for chat) that shares the mock's implementation but exposes a distinct trace signature. The accuracy score in that setup measures "does the mock differ from the test-real fixture in a way we care about", which is not the same as "does the mock differ from production". Document the fallback in the report notes.
 
 ## What is deliberately not in scope for v1.12
@@ -152,12 +152,12 @@ Rules of thumb.
 - [Anthropic streaming tutorial](../tutorials/06-anthropic-chatbot-streaming) — hands-on with `createAnthropicMock`
 - [OpenAI tool agent tutorial](../tutorials/07-openai-tool-agent) — hands-on with `createOpenAIMock` (function calling + parallel calls)
 - [Vercel AI RAG tutorial](../tutorials/08-vercel-ai-rag) — hands-on with `createVercelAiMock` + embeddings + vector store
-- [`@kiwa-test/ai-llm` README](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/README.md) — full API reference for the 4 mocks + fidelity harness
+- [`@kiwa/ai-llm` README](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/README.md) — full API reference for the 4 mocks + fidelity harness
 
 ## Takeaways
 
 - Non-determinism is a property of the model, not a bug in kiwa. The v1.12 gate embraces it.
 - The mock is deterministic on purpose; the release gate measures how far real drifts from the mock, per axis.
-- 4 new axes (cost / latency / token / accuracy) turn the 7-axis gate into an 11-axis gate — but only for providers whose name starts with `@kiwa-test/ai-`. Non-AI providers are unaffected.
+- 4 new axes (cost / latency / token / accuracy) turn the 7-axis gate into an 11-axis gate — but only for providers whose name starts with `@kiwa/ai-`. Non-AI providers are unaffected.
 - Accuracy is method-aware (cosine / jaccard / rouge-l). Pick the method that matches your task; document overrides in the PR body.
 - v1.12 is the infrastructure; v1.13+ will build on it (evaluation harnesses, multi-turn correctness, fine-tune regression suites).

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/orm` v0.10 that models the 4 pieces of MySQL 8 group replication that every InnoDB cluster deployment hits — a member joining the group (`group_replication_start` + weight), single-primary election (`group_replication_switch_to_single_primary_mode` picking the elected member), write conflict detection (`performance_schema.replication_group_member_stats.COUNT_CONFLICTS_DETECTED`), and a member leaving (`STOP GROUP_REPLICATION` shrinks the visible member set). `createMysqlClusterSession()` gives you every one of those pieces as a deterministic state machine — `empty` → `joined` → `primary-elected` → `conflict-detected` → `member-left`. No MySQL Router binary, no `docker run mysql:8.0`, no `group_replication_local_address` config edit. This is the pattern kiwa's MySQL RLS + tenant dogfood app (v1.32-3) exercises against real MySQL 8 testcontainers under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the write got certified on 2 nodes but rejected on the 3rd" case that only shows up in production.
+A vitest suite wired to `@kiwa/orm` v0.10 that models the 4 pieces of MySQL 8 group replication that every InnoDB cluster deployment hits — a member joining the group (`group_replication_start` + weight), single-primary election (`group_replication_switch_to_single_primary_mode` picking the elected member), write conflict detection (`performance_schema.replication_group_member_stats.COUNT_CONFLICTS_DETECTED`), and a member leaving (`STOP GROUP_REPLICATION` shrinks the visible member set). `createMysqlClusterSession()` gives you every one of those pieces as a deterministic state machine — `empty` → `joined` → `primary-elected` → `conflict-detected` → `member-left`. No MySQL Router binary, no `docker run mysql:8.0`, no `group_replication_local_address` config edit. This is the pattern kiwa's MySQL RLS + tenant dogfood app (v1.32-3) exercises against real MySQL 8 testcontainers under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the write got certified on 2 nodes but rejected on the 3rd" case that only shows up in production.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/orm` v0.10 that models the 4 pieces of MySQL
 ```bash
 mkdir kiwa-mysql-cluster && cd kiwa-mysql-cluster
 pnpm init
-pnpm add -D @kiwa-test/orm@^0.10 vitest typescript @types/node
+pnpm add -D @kiwa/orm@^0.10 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.10 surface exports `createMysqlClusterSession` from the semantics barrel.
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createMysqlClusterSession, joinClusterMember } from '@kiwa-test/orm';
+import { createMysqlClusterSession, joinClusterMember } from '@kiwa/orm';
 
 describe('group replication — joinClusterMember', () => {
   it('adds a member with a positive weight and grows the visible set', () => {
@@ -96,7 +96,7 @@ import {
   createMysqlClusterSession,
   joinClusterMember,
   electClusterPrimary,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('group replication — electClusterPrimary', () => {
   it('elects a joined member as the single-primary and records it', () => {
@@ -156,7 +156,7 @@ import {
   joinClusterMember,
   electClusterPrimary,
   detectClusterConflict,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('group replication — detectClusterConflict', () => {
   it('records the winner member and increments the conflict counter', () => {
@@ -214,7 +214,7 @@ import {
   electClusterPrimary,
   detectClusterConflict,
   leaveClusterMember,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('group replication — leaveClusterMember', () => {
   it('removes the member and clears the primary slot when the leaver was the primary', () => {
@@ -243,7 +243,7 @@ The `primaryPresent: false` field in the step metadata is the signal that a re-e
 
 ## What you learned
 
-The 4 group-replication pieces the tutorial covered — member join with weight bias, single-primary election, certification conflict detection, and member leave with primary clearing — are the ones every InnoDB cluster deployment hits. `@kiwa-test/orm` v0.10 models them with a deterministic state machine so tests run in milliseconds. Under `KIWA_MODE=real MYSQL_KEY=...`, the fidelity harness runs the same assertions against real MySQL 8 testcontainers — the v1.32-3 `dogfood-mysql-rls-tenant-app` v2 does exactly that.
+The 4 group-replication pieces the tutorial covered — member join with weight bias, single-primary election, certification conflict detection, and member leave with primary clearing — are the ones every InnoDB cluster deployment hits. `@kiwa/orm` v0.10 models them with a deterministic state machine so tests run in milliseconds. Under `KIWA_MODE=real MYSQL_KEY=...`, the fidelity harness runs the same assertions against real MySQL 8 testcontainers — the v1.32-3 `dogfood-mysql-rls-tenant-app` v2 does exactly that.
 
 ## Next
 

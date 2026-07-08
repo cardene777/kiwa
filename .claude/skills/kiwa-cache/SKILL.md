@@ -1,7 +1,7 @@
 ---
 name: kiwa-cache
 description: |
-  /kiwa-design (Layer 1) が出力した `tests/spec/integration/test-spec-{module}.cache.md` を入力に、 `@kiwa-test/cache` を使う `test/*.cache.test.ts` を Write して `vitest` で動作確認する Layer 2 cache test skill。
+  /kiwa-design (Layer 1) が出力した `tests/spec/integration/test-spec-{module}.cache.md` を入力に、 `@kiwa/cache` を使う `test/*.cache.test.ts` を Write して `vitest` で動作確認する Layer 2 cache test skill。
   11 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ / 回帰) を 3 provider (`setupCacheEnv` Redis / `setupMemcachedEnv` Memcached / `setupKeyDBEnv` KeyDB) × 2 backend (stub/in-memory + testcontainers) + client 選択 (ioredis / node-redis / memjs / memcached) に変換し、 get / set / delete / TTL / expiry / Pub/Sub / consistent-hash / multi-master の sub-feature を 1 spec で cover する。
 user_invocable: true
 context: conversation
@@ -13,11 +13,11 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 `/kiwa-design` (Layer 1) の `--layer cache` 出力を `test/*.cache.test.ts` に変換し、 `vitest` で動作確認する。 Redis (in-memory fake + testcontainers real) を統一 surface で cover する Layer 2 skill。
 
-`@kiwa-test/cache` v0.1 (v1.8-6、 Issue #642) の `setupCacheEnv` factory を Layer 1 spec の観点別 TC 表から自動的に選択し、 in-memory / testcontainers 2 backend + ioredis / node-redis 2 client を TC ごとに割当てる。
+`@kiwa/cache` v0.1 (v1.8-6、 Issue #642) の `setupCacheEnv` factory を Layer 1 spec の観点別 TC 表から自動的に選択し、 in-memory / testcontainers 2 backend + ioredis / node-redis 2 client を TC ごとに割当てる。
 
 ## 前提
 
-- `@kiwa-test/cache` v0.1.0+ が devDependency に入っている (`pnpm add -D @kiwa-test/cache`)
+- `@kiwa/cache` v0.1.0+ が devDependency に入っている (`pnpm add -D @kiwa/cache`)
 - testcontainers mode 使用時は `testcontainers` + `ioredis` (default) または `redis` (node-redis) が peer dependency として入っている
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.cache.md`) が存在
 
@@ -58,7 +58,7 @@ TC 表を describe / it に落とす。 provider ごとに使う factory が違�
 生成テンプレ (mode = in-memory、 TTL 検証 TC):
 
 ```ts
-import { setupCacheEnv } from "@kiwa-test/cache";
+import { setupCacheEnv } from "@kiwa/cache";
 import { afterEach, describe, expect, it } from "vitest";
 
 const envs: Array<{ stop(): Promise<void> }> = [];
@@ -114,6 +114,6 @@ describe("{module} — cache pub/sub", () => {
 
 ## 関連
 
-- `@kiwa-test/cache` v0.1 (v1.8-6、 Issue #642) SSOT
+- `@kiwa/cache` v0.1 (v1.8-6、 Issue #642) SSOT
 - `packages/cache/README.md` — API リファレンス
 - `examples/cache-redis-poc/` — 実 test 例 (signup session 8 test)

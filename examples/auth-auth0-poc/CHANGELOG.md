@@ -5,4 +5,4 @@
 ### Patch Changes
 
 - Updated dependencies [dffb701]
-  - @kiwa-test/auth@0.3.0
+  - @kiwa/auth@0.3.0

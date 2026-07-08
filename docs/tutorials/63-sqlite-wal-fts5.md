@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/orm` v0.10 that models the pieces of SQLite that every edge-deployed dApp eventually needs — `PRAGMA journal_mode = WAL` (switching from rollback-journal to write-ahead log so multiple readers stop blocking a single writer), `wal_autocheckpoint` size threshold (the WAL file grows until `wal_checkpoint` runs — either automatically or explicitly), `PRAGMA wal_checkpoint(TRUNCATE)` (advancing the WAL, checkpointing dirty pages, and truncating the WAL file when possible), shared-memory `-shm` region mapping (the wal-index that turns "read the WAL" into "read a memory-mapped array"), plus FTS5 virtual tables (`CREATE VIRTUAL TABLE ... USING fts5`), tokenizer configuration (`unicode61` / `porter` / `trigram`), `MATCH` queries with BM25 ranking, and `fts5vocab` term inspection. `createSqliteWalSession()` and `createFts5Session()` give you every one of those pieces as a deterministic state machine — `rollback-journal` → `wal-enabled` → `threshold-crossed` → `checkpointed` → `shared-memory-mapped`, and `empty` → `virtual-table-created` → `tokenized` → `matched` → `vocab-inspected`. No `sqlite3` binary boot, no `libsql-server`, no `-shm` on-disk poking. This is the pattern kiwa's v1.32-4 dogfood app exercises against real libsql / SQLite testcontainers under the fidelity harness.
+A vitest suite wired to `@kiwa/orm` v0.10 that models the pieces of SQLite that every edge-deployed dApp eventually needs — `PRAGMA journal_mode = WAL` (switching from rollback-journal to write-ahead log so multiple readers stop blocking a single writer), `wal_autocheckpoint` size threshold (the WAL file grows until `wal_checkpoint` runs — either automatically or explicitly), `PRAGMA wal_checkpoint(TRUNCATE)` (advancing the WAL, checkpointing dirty pages, and truncating the WAL file when possible), shared-memory `-shm` region mapping (the wal-index that turns "read the WAL" into "read a memory-mapped array"), plus FTS5 virtual tables (`CREATE VIRTUAL TABLE ... USING fts5`), tokenizer configuration (`unicode61` / `porter` / `trigram`), `MATCH` queries with BM25 ranking, and `fts5vocab` term inspection. `createSqliteWalSession()` and `createFts5Session()` give you every one of those pieces as a deterministic state machine — `rollback-journal` → `wal-enabled` → `threshold-crossed` → `checkpointed` → `shared-memory-mapped`, and `empty` → `virtual-table-created` → `tokenized` → `matched` → `vocab-inspected`. No `sqlite3` binary boot, no `libsql-server`, no `-shm` on-disk poking. This is the pattern kiwa's v1.32-4 dogfood app exercises against real libsql / SQLite testcontainers under the fidelity harness.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/orm` v0.10 that models the pieces of SQLite 
 ```bash
 mkdir kiwa-sqlite-wal-fts && cd kiwa-sqlite-wal-fts
 pnpm init
-pnpm add -D @kiwa-test/orm@^0.10 vitest typescript @types/node
+pnpm add -D @kiwa/orm@^0.10 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.10 surface exports `createSqliteWalSession` and `createFts5Session` from 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createSqliteWalSession, switchJournalMode } from '@kiwa-test/orm';
+import { createSqliteWalSession, switchJournalMode } from '@kiwa/orm';
 
 describe('WAL — switchJournalMode', () => {
   it('flips journal_mode from DELETE to WAL and records the event', () => {
@@ -84,7 +84,7 @@ import {
   createSqliteWalSession,
   switchJournalMode,
   crossWalSizeThreshold,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('WAL — crossWalSizeThreshold', () => {
   it('records the WAL size and transitions to threshold-crossed', () => {
@@ -133,7 +133,7 @@ import {
   switchJournalMode,
   crossWalSizeThreshold,
   triggerWalCheckpoint,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('WAL — triggerWalCheckpoint', () => {
   it('runs a TRUNCATE checkpoint and resets the WAL size to 0', () => {
@@ -185,7 +185,7 @@ import {
   crossWalSizeThreshold,
   triggerWalCheckpoint,
   mapSharedMemory,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('WAL — mapSharedMemory', () => {
   it('maps a positive region and flips the shared-memory-mapped flag', () => {
@@ -236,7 +236,7 @@ import {
   tokenizeFts5Document,
   matchFts5Query,
   inspectFts5Vocab,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('FTS5 — full lifecycle', () => {
   it('creates the virtual table with unicode61 tokenizer', () => {
@@ -328,7 +328,7 @@ The 3 tokenizer options (`unicode61` / `porter` / `trigram`) each fit a differen
 
 ## What you learned
 
-The 5 WAL pieces (journal_mode switch, threshold cross, checkpoint, shared memory) + the 4 FTS5 pieces (virtual table, tokenize, match+rank, vocab) are the ones every edge SQLite deployment hits. `@kiwa-test/orm` v0.10 models them with deterministic state machines so tests run in milliseconds. Under `KIWA_MODE=real SQLITE_KEY=...`, the fidelity harness runs the same assertions against real libsql / SQLite testcontainers — the v1.32-4 `dogfood-sqlite-wal-fts-app` does exactly that.
+The 5 WAL pieces (journal_mode switch, threshold cross, checkpoint, shared memory) + the 4 FTS5 pieces (virtual table, tokenize, match+rank, vocab) are the ones every edge SQLite deployment hits. `@kiwa/orm` v0.10 models them with deterministic state machines so tests run in milliseconds. Under `KIWA_MODE=real SQLITE_KEY=...`, the fidelity harness runs the same assertions against real libsql / SQLite testcontainers — the v1.32-4 `dogfood-sqlite-wal-fts-app` does exactly that.
 
 ## Next
 

@@ -6,7 +6,7 @@ Full mock vs real fidelity numbers are filled in as DCR / id_token verify / fede
 
 ## Fidelity axes (discovery-jwks-skeleton)
 
-| axis | mock (`@kiwa-test/auth`) | real (Keycloak + testcontainers) | assertion |
+| axis | mock (`@kiwa/auth`) | real (Keycloak + testcontainers) | assertion |
 |---|---|---|---|
 | 1. discovery metadata | Static shape derived from `issuer`; response_types=[code], id_token_signing_alg_values=[RS256, ES256], code_challenge_methods=[S256], scopes_supported=[openid, profile, email, offline_access], token_endpoint_auth_methods=[client_secret_basic, client_secret_post, none] | Keycloak realm boot-time metadata; issuer is derived from `KEYCLOAK_URL` env var Sub-Issue #873 will set | OIDC Discovery §3 mandatory keys present + OAuth 2.1 restrictions honoured (implicit + plain PKCE + password grants explicitly omitted). |
 | 2. discovery issuer 一致 guard | `assertIssuerMatchesFetchUrl` throws `DiscoveryIssuerMismatchError` when metadata.issuer diverges from fetch URL; trailing-slash tolerant | Same guard runs against Keycloak realm URL | OIDC Discovery §4.3 — `issuer` MUST equal URL used to fetch. |

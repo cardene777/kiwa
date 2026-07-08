@@ -2,13 +2,13 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/desktop` v0.3 (advanced III 4 axis 追加、 v1.58 で kiwa 縦深化 pair 第 14 の第 3 段、 **systematic pattern 33 度目適用**、 36 milestone streak)、 v0.1 3 axis (Electron + Tauri + Webview) + v0.2 5 axis (Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon) に v0.3 で advanced III 4 axis (Screen recording + Global shortcut + Clipboard + Dark-mode) を追加した **12 axis × 3 target = 36 spec** の workflow を deterministic に扱う pattern。
+A vitest suite wired to `@kiwa/desktop` v0.3 (advanced III 4 axis 追加、 v1.58 で kiwa 縦深化 pair 第 14 の第 3 段、 **systematic pattern 33 度目適用**、 36 milestone streak)、 v0.1 3 axis (Electron + Tauri + Webview) + v0.2 5 axis (Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon) に v0.3 で advanced III 4 axis (Screen recording + Global shortcut + Clipboard + Dark-mode) を追加した **12 axis × 3 target = 36 spec** の workflow を deterministic に扱う pattern。
 
 ## Prerequisites
 
 - Node.js ≥ 20
 - `pnpm`
-- `@kiwa-test/desktop` v0.3 (`pnpm add -D @kiwa-test/desktop@^0.3`)
+- `@kiwa/desktop` v0.3 (`pnpm add -D @kiwa/desktop@^0.3`)
 
 ## Step-by-step build
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/desktop` v0.3 (advanced III 4 axis 追加、
 ```bash
 mkdir kiwa-desktop-v03 && cd kiwa-desktop-v03
 pnpm init
-pnpm add -D @kiwa-test/desktop@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa/desktop@^0.3 vitest typescript @types/node
 ```
 
 ### 2. Screen-recording axis (permission + start + chunk + stop)
@@ -29,7 +29,7 @@ import {
   requestScreenRecordingPermission,
   startScreenRecording,
   stopScreenRecording,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('Screen-recording full path', () => {
   it('permission → start → chunk → stop', () => {
@@ -59,7 +59,7 @@ import {
   registerGlobalShortcut,
   triggerGlobalShortcut,
   unregisterGlobalShortcut,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('Global-shortcut flow', () => {
   it('register → trigger → unregister → clear', () => {
@@ -85,7 +85,7 @@ import {
   openClipboard,
   readClipboard,
   writeClipboard,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('Clipboard lifecycle', () => {
   it('write → read → change → clear', () => {
@@ -109,7 +109,7 @@ import {
   recordUserPreference,
   subscribeDarkMode,
   unsubscribeDarkMode,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('Dark-mode lifecycle', () => {
   it('subscribe → theme-change → user-preferred → unsubscribe', () => {
@@ -148,7 +148,7 @@ pnpm exec vitest run
 ## 12 axis × 3 target = 36 spec fidelity grid
 
 ```ts
-import { collectFidelityCoverage } from '@kiwa-test/desktop';
+import { collectFidelityCoverage } from '@kiwa/desktop';
 
 const coverage = collectFidelityCoverage();
 console.log(coverage.rows.length); // 36 (3 target × 12 axis)

@@ -6,7 +6,7 @@ title: Desktop advanced III — v1.58 v0.3 4 axis SSOT
 
 ## What this covers
 
-`@kiwa-test/desktop` v0.3 の advanced III 4 axis (Screen recording + Global shortcut + Clipboard + Dark-mode) target-neutral state machine SSOT。 v1.58 で v0.2 8 axis → v0.3 12 axis に minor bump、 kiwa 縦深化 pair 第 14 の第 3 段、 v0.2 baseline (`docs/concepts/desktop-advanced-axis.md`) を extend。
+`@kiwa/desktop` v0.3 の advanced III 4 axis (Screen recording + Global shortcut + Clipboard + Dark-mode) target-neutral state machine SSOT。 v1.58 で v0.2 8 axis → v0.3 12 axis に minor bump、 kiwa 縦深化 pair 第 14 の第 3 段、 v0.2 baseline (`docs/concepts/desktop-advanced-axis.md`) を extend。
 
 ## v0.3 4 axis 一覧
 
@@ -66,7 +66,7 @@ linux.xdgPortal.Settings.color-scheme.changed ← dark-mode.theme_changed (linux
 
 ## backward compat 絶対維持
 
-v0.3 4 axis の追加は additive、 v0.1 + v0.2 の 8 axis / 32 method / 32 event / 96 mapping は完全保持。 依存関係も `@kiwa-test/core` のみで v0.1 + v0.2 と同じ、 他 42 package への影響 0。
+v0.3 4 axis の追加は additive、 v0.1 + v0.2 の 8 axis / 32 method / 32 event / 96 mapping は完全保持。 依存関係も `@kiwa/core` のみで v0.1 + v0.2 と同じ、 他 42 package への影響 0。
 
 ## systematic pattern 33 度目適用
 

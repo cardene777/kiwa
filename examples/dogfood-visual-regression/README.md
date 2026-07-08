@@ -2,7 +2,7 @@
 
 Chromatic-style visual regression dogfood for kiwa v1.16-4 (Issue #766).
 
-10 UI scenes — 5 primitives (`card` / `modal` / `table` / `toast` / `form`) × 2 themes (`light` / `dark`) — driven through the `@kiwa-test/component` `createChromaticVisualMock` API. Each scene is asserted on 4 AC axes — baseline seed / capture / diff-on-intent-change / accept-restores-baseline — with a bonus reject axis proving the review branch. A skipped real adapter (`makeRealAdapter`, env-gated on `CHROMATIC_PROJECT_TOKEN`) mirrors the same 3-op fidelity surface (`seedBaselines` / `captureAll` / `review`, plus a `captureOne` single-scene convenience) so the fidelity harness can produce a 7-axis `@kiwa-test/quality-metrics` release gate report.
+10 UI scenes — 5 primitives (`card` / `modal` / `table` / `toast` / `form`) × 2 themes (`light` / `dark`) — driven through the `@kiwa/component` `createChromaticVisualMock` API. Each scene is asserted on 4 AC axes — baseline seed / capture / diff-on-intent-change / accept-restores-baseline — with a bonus reject axis proving the review branch. A skipped real adapter (`makeRealAdapter`, env-gated on `CHROMATIC_PROJECT_TOKEN`) mirrors the same 3-op fidelity surface (`seedBaselines` / `captureAll` / `review`, plus a `captureOne` single-scene convenience) so the fidelity harness can produce a 7-axis `@kiwa/quality-metrics` release gate report.
 
 ## What runs
 
@@ -11,7 +11,7 @@ pnpm --filter dogfood-visual-regression test        # 57 behavior tests + fideli
 pnpm --filter dogfood-visual-regression test:perf   # 3-layer perf gate (serial + concurrent + memory)
 ```
 
-Both commands are pure Node (no browser process needed) — the mock adapter uses the in-memory `MockNode` → SHA-256 hex hash pipeline from `@kiwa-test/component`, and the real adapter records `CHROMATIC_REAL_ENV_MISSING` for every op when the env var is unset.
+Both commands are pure Node (no browser process needed) — the mock adapter uses the in-memory `MockNode` → SHA-256 hex hash pipeline from `@kiwa/component`, and the real adapter records `CHROMATIC_REAL_ENV_MISSING` for every op when the env var is unset.
 
 ## Layout
 
@@ -23,7 +23,7 @@ src/
     index.ts         # SCENE_REGISTRATIONS + SCENE_SPECS + SCENE_IDS + SCENE_COUNT SSOT
   adapters/
     interface.ts     # VisualRegressionAdapter (4 ops) + trace / metric shapes
-    mock.ts          # makeMockAdapter via @kiwa-test/component createChromaticVisualMock + StoryRegistry
+    mock.ts          # makeMockAdapter via @kiwa/component createChromaticVisualMock + StoryRegistry
     real.ts          # makeRealAdapter with CHROMATIC_PROJECT_TOKEN env-skip
   flows/
     visual-flows.ts  # seedAllBaselines / captureAllScenesNeutral / captureAllScenesChanged / acceptAllPendingChanges / rejectAllPendingChanges + runAllScenes
@@ -73,8 +73,8 @@ Real-mode envs.
 
 ## Related
 
-- v1.16-1 `@kiwa-test/component` v0.1 (`packages/component/`) — `createChromaticVisualMock` + `hashMarkup`
+- v1.16-1 `@kiwa/component` v0.1 (`packages/component/`) — `createChromaticVisualMock` + `hashMarkup`
 - v1.16-2 `dogfood-storybook-design-system` (`examples/dogfood-storybook-design-system/`) — Storybook 8 story registration + 12 primitives
 - v1.16-3 `dogfood-form-ct` (`examples/dogfood-form-ct/`) — Playwright CT form patterns
-- v1.11-1 `@kiwa-test/quality-metrics` (`packages/quality-metrics/`)
+- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
 - v1.16 milestone parent [#762](https://github.com/cardene777/kiwa/issues/762), this sub [#766](https://github.com/cardene777/kiwa/issues/766)

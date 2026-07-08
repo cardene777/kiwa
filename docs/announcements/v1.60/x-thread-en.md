@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.60 is out — Desktop deepening IV. **@kiwa-test/desktop v0.5** adds child_process.spawn stub contract layer, extracts **8 CLI-backed axes** from 12 axes (electron-builder / electron-updater / ffmpeg / xclip / osascript / notify-send / defaults / reg) + 4 non-CLI axes, KIWA_DESKTOP_MODE env-gate + args cap 32 + fail-closed. Inherits v1.55-v1.59 4-PR rhythm (**7 milestones consecutive = 28 PRs same rhythm**), **systematic pattern 35th application**, **depth-5 pattern 2nd candidate reached**.
+kiwa v1.60 is out — Desktop deepening IV. **@kiwa/desktop v0.5** adds child_process.spawn stub contract layer, extracts **8 CLI-backed axes** from 12 axes (electron-builder / electron-updater / ffmpeg / xclip / osascript / notify-send / defaults / reg) + 4 non-CLI axes, KIWA_DESKTOP_MODE env-gate + args cap 32 + fail-closed. Inherits v1.55-v1.59 4-PR rhythm (**7 milestones consecutive = 28 PRs same rhythm**), **systematic pattern 35th application**, **depth-5 pattern 2nd candidate reached**.
 
 ## Tweet 2 — spawn stub contract layer
 
@@ -14,7 +14,7 @@ dogfood-desktop-spawn-app new, 8 CLI stub workflow + env-gate 3 patterns (real /
 
 ## Tweet 4 — install + Mobile v1.54 rhythm fully reproduced + v1.61 roadmap
 
-`pnpm add -D @kiwa-test/desktop@^0.5`. Migration: https://cardene777.github.io/kiwa/migrations/v1.59-to-v1.60
+`pnpm add -D @kiwa/desktop@^0.5`. Migration: https://cardene777.github.io/kiwa/migrations/v1.59-to-v1.60
 
 **Mobile v1.50-v1.54 (base → advanced II → advanced III → adapter → spawn stub) 5-milestone rhythm fully reproduced in Desktop pair (v1.56-v1.60)**, **depth-5 pattern 2nd candidate reached** (Mobile depth-5 1st + Desktop 2nd candidate). v1.61+ will bring Desktop v0.6 real spawn (Mobile v0.6 pattern port, depth-6 pattern new candidate). Backward compat absolutely preserved — v0.1-v0.4 fully retained.
 

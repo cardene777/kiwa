@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/payment` v0.5 that models the 2 pieces of a real crypto-payment + cross-border-FX product surface that every non-trivial global-first product eventually needs — a crypto-payment `createCryptoInvoice` step that pins an `invoiceId` + `chain` (`ethereum` / `polygon` / `base` / `arbitrum` / `solana`) + `token` (`USDC` / `USDT` / `DAI` / `ETH` / `SOL`) + `config.requiredConfirmations` (default 3, mirroring Coinbase Commerce / BitPay production defaults), a `confirmTx` step that records `txHash` + observed `confirmations` and only flips state to `'confirmed'` once the count reaches the required threshold so a caller cannot mark a 1-confirmation tx as final and eat a chain-reorg loss, an `abstractGas` step that only runs when `config.gasAbstractionEnabled: true` (EIP-4337 paymaster / meta-tx pattern) so a customer paying in USDC does not need to hold ETH for gas, a `linkWallet` step that binds a `walletAddress` to `session.customerId` for repeat billing (requires a non-empty `signature` proof), a `startFxTransfer` step that starts a fresh FX session with `config.settlementRail` (`SWIFT` / `SEPA` / `ACH` / `FASTER` / `RTGS`, default `SWIFT`) + `config.rateLockDurationMs` (default 60s, mirroring Wise / Airwallex quote-lock windows), a `lockRate` step that pins an `FxRateQuote` (`fromCurrency` / `toCurrency` / `rate` / `quoteId` / `lockedAt` / `lockExpiresAt` / `amountToCents`) so a downstream `initiateSettlement` throws if the rate lock has expired, an `initiateSettlement` step that fires on the configured rail with beneficiary IBAN / BIC, a `completeSettlement` step that flips state to `'settlement-completed'` + records `settledAmountCents`, and an `expireRate` step that explicitly marks a rate lock as expired so a stalled retry loop cannot silently ship a stale rate. `createCryptoInvoice()` + `confirmTx()` + `abstractGas()` + `linkWallet()` + `startFxTransfer()` + `lockRate()` + `initiateSettlement()` + `completeSettlement()` + `expireRate()` give you every one of those pieces without booting a real Coinbase Commerce / BitPay / Wise / Airwallex backend. This is the pattern kiwa's `examples/dogfood-payment-crypto-fx-app` exercises against real Coinbase Commerce / BitPay (stablecoin invoicing + on-chain confirmation) + Wise / Airwallex (multi-currency FX + SWIFT/SEPA settlement) backends under `KIWA_MODE=real` + `KIWA_CRYPTO_URL` + `KIWA_FX_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the settlement ran against an expired rate lock because `initiateSettlement` did not check `lockExpiresAt`" gap a reviewer sees in the fx-rate-drift post-mortem.
+A vitest suite wired to `@kiwa/payment` v0.5 that models the 2 pieces of a real crypto-payment + cross-border-FX product surface that every non-trivial global-first product eventually needs — a crypto-payment `createCryptoInvoice` step that pins an `invoiceId` + `chain` (`ethereum` / `polygon` / `base` / `arbitrum` / `solana`) + `token` (`USDC` / `USDT` / `DAI` / `ETH` / `SOL`) + `config.requiredConfirmations` (default 3, mirroring Coinbase Commerce / BitPay production defaults), a `confirmTx` step that records `txHash` + observed `confirmations` and only flips state to `'confirmed'` once the count reaches the required threshold so a caller cannot mark a 1-confirmation tx as final and eat a chain-reorg loss, an `abstractGas` step that only runs when `config.gasAbstractionEnabled: true` (EIP-4337 paymaster / meta-tx pattern) so a customer paying in USDC does not need to hold ETH for gas, a `linkWallet` step that binds a `walletAddress` to `session.customerId` for repeat billing (requires a non-empty `signature` proof), a `startFxTransfer` step that starts a fresh FX session with `config.settlementRail` (`SWIFT` / `SEPA` / `ACH` / `FASTER` / `RTGS`, default `SWIFT`) + `config.rateLockDurationMs` (default 60s, mirroring Wise / Airwallex quote-lock windows), a `lockRate` step that pins an `FxRateQuote` (`fromCurrency` / `toCurrency` / `rate` / `quoteId` / `lockedAt` / `lockExpiresAt` / `amountToCents`) so a downstream `initiateSettlement` throws if the rate lock has expired, an `initiateSettlement` step that fires on the configured rail with beneficiary IBAN / BIC, a `completeSettlement` step that flips state to `'settlement-completed'` + records `settledAmountCents`, and an `expireRate` step that explicitly marks a rate lock as expired so a stalled retry loop cannot silently ship a stale rate. `createCryptoInvoice()` + `confirmTx()` + `abstractGas()` + `linkWallet()` + `startFxTransfer()` + `lockRate()` + `initiateSettlement()` + `completeSettlement()` + `expireRate()` give you every one of those pieces without booting a real Coinbase Commerce / BitPay / Wise / Airwallex backend. This is the pattern kiwa's `examples/dogfood-payment-crypto-fx-app` exercises against real Coinbase Commerce / BitPay (stablecoin invoicing + on-chain confirmation) + Wise / Airwallex (multi-currency FX + SWIFT/SEPA settlement) backends under `KIWA_MODE=real` + `KIWA_CRYPTO_URL` + `KIWA_FX_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the settlement ran against an expired rate lock because `initiateSettlement` did not check `lockExpiresAt`" gap a reviewer sees in the fx-rate-drift post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/payment` v0.5 that models the 2 pieces of a 
 ```bash
 mkdir kiwa-crypto-fx && cd kiwa-crypto-fx
 pnpm init
-pnpm add -D @kiwa-test/payment@^0.5 vitest typescript @types/node
+pnpm add -D @kiwa/payment@^0.5 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.5 surface exports the crypto-payment axis (`createCryptoInvoice` / `confi
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createCryptoInvoice, createStripeMock } from '@kiwa-test/payment';
+import { createCryptoInvoice, createStripeMock } from '@kiwa/payment';
 
 describe('crypto — invoice creation', () => {
   it('creates an invoice on ethereum + USDC', async () => {
@@ -85,7 +85,7 @@ import {
   confirmTx,
   createCryptoInvoice,
   createStripeMock,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('crypto — tx confirmation gate', () => {
   it('stays awaiting until confirmations reach requiredConfirmations', async () => {
@@ -133,7 +133,7 @@ import {
   abstractGas,
   createCryptoInvoice,
   createStripeMock,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('crypto — gas abstraction', () => {
   it('records paymaster + gas subsidy', async () => {
@@ -186,7 +186,7 @@ import {
   createCryptoInvoice,
   createStripeMock,
   linkWallet,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('crypto — wallet linking', () => {
   it('binds wallet on non-empty signature', async () => {
@@ -238,7 +238,7 @@ import {
   createStripeMock,
   lockRate,
   startFxTransfer,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('fx — rate lock', () => {
   it('locks a quote and computes amountToCents', async () => {
@@ -293,7 +293,7 @@ import {
   initiateSettlement,
   lockRate,
   startFxTransfer,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('fx — settlement flow', () => {
   it('initiates + completes settlement on the SEPA rail', async () => {
@@ -352,7 +352,7 @@ import {
   expireRate,
   lockRate,
   startFxTransfer,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('fx — explicit rate expiration', () => {
   it('marks the rate lock expired', async () => {

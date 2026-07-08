@@ -6,7 +6,7 @@ kiwa v1.67 is out。 **Desktop 深化 IX** 単軸 milestone、 v0.9 実 native b
 
 ## What's new
 
-### `@kiwa-test/desktop` v0.9 → v1.0 major bump
+### `@kiwa/desktop` v0.9 → v1.0 major bump
 
 - **InvokeCache class** = LRU + TTL 両立 in-memory cache、 default 5 分 TTL + 128 maxEntries + enabled=true
 - **withCache helper** = probeAndInvoke 統合、 4 status 経路 (cache-hit / cache-miss / cache-invalidated / cache-disabled)
@@ -35,7 +35,7 @@ v1.23 → v1.67 = **45 milestone**、 kiwa 史上最長記録更新継続。
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/desktop@^1.0
+pnpm add -D @kiwa/desktop@^1.0
 ```
 
 ## Migration guide
@@ -44,4 +44,4 @@ pnpm add -D @kiwa-test/desktop@^1.0
 
 ## What's next
 
-- v1.68+ = depth-6 実運用継続 or v2.0 rename milestone (@kiwa-test/* → @kiwa/*)
+- v1.68+ = depth-6 実運用継続 or v2.0 rename milestone (@kiwa/* → @kiwa/*)

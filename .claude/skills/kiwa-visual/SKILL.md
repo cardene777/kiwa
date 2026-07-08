@@ -1,9 +1,9 @@
 ---
 name: kiwa-visual
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.visual.md`) を visual regression test (pixelmatch + @kiwa-test/visual) に変換する Layer 2 visual test skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.visual.md`) を visual regression test (pixelmatch + @kiwa/visual) に変換する Layer 2 visual test skill。
   Playwright screenshot or jsdom DOM snapshot を baseline と pixel-level で比較し、 視覚的退化を検出する。
-  `/kiwa-design --layer visual` が出力する 9 column 表を `@kiwa-test/visual` の `comparePngBuffers` / `expectNoVisualDiff` の引数に機械的に変換する。
+  `/kiwa-design --layer visual` が出力する 9 column 表を `@kiwa/visual` の `comparePngBuffers` / `expectNoVisualDiff` の引数に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -23,7 +23,7 @@ pixelmatch + pngjs で pixel-level 比較を行い、 threshold (default 0.1% di
 ## 前提
 
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.visual.md`) が存在 (`/kiwa-design --layer visual` で生成)
-- 対象 example に `package.json` があり、 `@kiwa-test/visual` + `@playwright/test` + `pixelmatch` + `pngjs` が devDependencies で利用可能
+- 対象 example に `package.json` があり、 `@kiwa/visual` + `@playwright/test` + `pixelmatch` + `pngjs` が devDependencies で利用可能
 - 対象 component / page (screenshot 対象) が存在
 - 出力先 `tests/visual/{module}.spec.ts` への Write 権限
 - baseline directory (`tests/visual/__snapshots__/baseline/`) が存在 (なければ初回実行で生成)
@@ -62,7 +62,7 @@ $ARGUMENTS
 import { test, expect } from '@playwright/test';
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { comparePngBuffers, expectNoVisualDiff } from '@kiwa-test/visual';
+import { comparePngBuffers, expectNoVisualDiff } from '@kiwa/visual';
 
 const BASELINE_DIR = resolve(__dirname, '__snapshots__/baseline');
 const ACTUAL_DIR = resolve(__dirname, '__snapshots__/actual');
@@ -153,7 +153,7 @@ mismatch 発生時は diff PNG を `tests/visual/__snapshots__/diff/` に出力�
 
 ## references
 
-- `@kiwa-test/visual` 公式 API ... `packages/visual/README.md`
+- `@kiwa/visual` 公式 API ... `packages/visual/README.md`
 - pixelmatch threshold 詳細 ... https://github.com/mapbox/pixelmatch#api
 - Playwright screenshot API ... https://playwright.dev/docs/api/class-page#page-screenshot
 

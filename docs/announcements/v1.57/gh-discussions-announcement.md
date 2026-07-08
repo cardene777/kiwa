@@ -6,7 +6,7 @@ kiwa v1.57 is out。 **Desktop 深化 I** 単軸 milestone、 v1.56 で導入し
 
 ## What's new
 
-### `@kiwa-test/desktop` v0.2 minor bump
+### `@kiwa/desktop` v0.2 minor bump
 
 - v0.1 3 axis (Electron + Tauri + Webview) に **advanced 5 axis 追加**
   - **Auto-updater** = check → download → apply → relaunch (Squirrel.Mac / Squirrel.Windows / AppImage)
@@ -40,7 +40,7 @@ desktop v0.2 5 axis に uniform state machine pattern 適用、 v1.56 の 31 度
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/desktop@^0.2
+pnpm add -D @kiwa/desktop@^0.2
 ```
 
 ## Migration guide

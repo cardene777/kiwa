@@ -4,7 +4,7 @@
 
 kiwa v1.39 is out — Security 深化 II land.
 
-@kiwa-test/security v0.1.0 → v0.2.0 minor bump. 8 axis advanced II security production semantics across 4 provider × 8 axis = 32 cell advanced II fidelity grid (combined with v1.37 v0.1 base 32 cell = 64 combination coverage).
+@kiwa/security v0.1.0 → v0.2.0 minor bump. 8 axis advanced II security production semantics across 4 provider × 8 axis = 32 cell advanced II fidelity grid (combined with v1.37 v0.1 base 32 cell = 64 combination coverage).
 
 Real driver env-gate (KIWA_MODE=real + testcontainers for istio + opa + siem-splunk + vault). 3 dogfood app new (security-mtls-zero-trust-app + security-siem-incident-app + security-supply-chain-slsa-app) 全 7 軸 release gate PASS.
 
@@ -29,4 +29,4 @@ Auth / Realtime / Streaming / Database / Payment / Frontend / Observability / Se
 
 17 milestone 連続 snippet validation streak (v1.23-v1.39) 達成.
 
-`pnpm add -D @kiwa-test/security` で v0.2.0 が入る. zero breaking changes. migration guide は https://cardene777.github.io/kiwa/migrations/v1.38-to-v1.39
+`pnpm add -D @kiwa/security` で v0.2.0 が入る. zero breaking changes. migration guide は https://cardene777.github.io/kiwa/migrations/v1.38-to-v1.39

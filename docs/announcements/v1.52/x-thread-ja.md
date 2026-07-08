@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.52 リリース — Mobile 深化 III (@kiwa-test/mobile v0.3)、 **pair 深度 3 段拡張達成 5 例目 pair 深度 3 段記録** milestone。 React Native 0.76+ New Architecture 4 axis (fabric + turbo-modules + codegen + new-architecture) 追加。
+kiwa v1.52 リリース — Mobile 深化 III (@kiwa/mobile v0.3)、 **pair 深度 3 段拡張達成 5 例目 pair 深度 3 段記録** milestone。 React Native 0.76+ New Architecture 4 axis (fabric + turbo-modules + codegen + new-architecture) 追加。
 
 ## Tweet 2 — 11 axis fidelity + New Architecture
 
@@ -14,7 +14,7 @@ kiwa v1.52 リリース — Mobile 深化 III (@kiwa-test/mobile v0.3)、 **pair
 
 ## Tweet 4 — install + Phase 4 計画
 
-`pnpm add -D @kiwa-test/mobile@^0.3`。 migration: https://cardene777.github.io/kiwa/migrations/v1.51-to-v1.52
+`pnpm add -D @kiwa/mobile@^0.3`。 migration: https://cardene777.github.io/kiwa/migrations/v1.51-to-v1.52
 
 v1.53+ で Mobile v0.4 real driver 実装 (Metro real bundle + Expo EAS CLI + Fabric real renderer)、 systematic root cause pattern SSOT 27 度目適用。
 

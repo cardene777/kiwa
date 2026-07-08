@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/payment/dogfood-embedded-finance-app @ 0.5.0
+# Quality Report — @kiwa/payment/dogfood-embedded-finance-app @ 0.5.0
 
 _Reported at 2026-07-07T12:54:45.047Z._
 

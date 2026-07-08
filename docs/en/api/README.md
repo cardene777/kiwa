@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](../../ja/api/README.md)
 
-Main API exported from `@kiwa-test/dapp`.
+Main API exported from `@kiwa/dapp`.
 
 ## Fixture / anvil
 

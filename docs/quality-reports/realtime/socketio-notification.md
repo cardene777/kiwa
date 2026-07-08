@@ -1,13 +1,13 @@
 # Fidelity — dogfood-socketio-notification (v1.13-5)
 
-Real-vs-mock behavioural fidelity for the Socket.io / SSE notification dogfood, produced by `examples/dogfood-socketio-notification/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-test/quality-metrics` 7-axis release gate.
+Real-vs-mock behavioural fidelity for the Socket.io / SSE notification dogfood, produced by `examples/dogfood-socketio-notification/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 7-axis release gate.
 
 ## Baseline (real mode skipped — no `SOCKETIO_URL`)
 
 When the harness runs without Socket.io / SSE credentials, the real adapter emits `SOCKETIO_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/realtime/socketio-notification
+provider   : @kiwa/realtime/socketio-notification
 version    : 0.1.0
 verdict    : PASS
 divergences: 4 (subscribeRoom / deliverNotification / simulateReconnect / getPending — recorded as BEHAVIORAL_DIVERGENCE, real mode absent)
@@ -66,4 +66,4 @@ Four provider-neutral ops on `NotificationAdapter`.
 
 **Redis adapter (single-server fidelity).** Socket.io production configurations often stack a Redis adapter (`@socket.io/redis-adapter`) so multiple server processes can broadcast to a shared client pool. The mock is single-process by construction — Redis pub/sub cross-broadcast is out of scope for the fidelity harness. The dogfood measures single-server behaviour (which is what the mock guarantees); multi-server semantics is a follow-up when the SDK + a Redis instance are wired.
 
-**Provider prefix + 7 axes.** Provider `@kiwa-test/realtime/socketio-notification` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Socket.io / SSE is a socket / pub-sub primitive, not a token-priced generative call. Socket round-trip latency feeds `perf.p95Ms` so realtime performance stays visible in the report.
+**Provider prefix + 7 axes.** Provider `@kiwa/realtime/socketio-notification` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Socket.io / SSE is a socket / pub-sub primitive, not a token-priced generative call. Socket round-trip latency feeds `perf.p95Ms` so realtime performance stays visible in the report.

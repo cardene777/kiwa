@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.57 リリース — Desktop 深化 I。 **@kiwa-test/desktop v0.2** で advanced 5 axis 追加 (Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon)、 v0.1 3 axis と合わせて **8 axis × 3 target = 24 spec fidelity grid** 構築。 v1.55/v1.56 4 PR rhythm 継承、 **systematic pattern 32 度目適用**。
+kiwa v1.57 リリース — Desktop 深化 I。 **@kiwa/desktop v0.2** で advanced 5 axis 追加 (Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon)、 v0.1 3 axis と合わせて **8 axis × 3 target = 24 spec fidelity grid** 構築。 v1.55/v1.56 4 PR rhythm 継承、 **systematic pattern 32 度目適用**。
 
 ## Tweet 2 — v0.2 5 axis semantics
 
@@ -14,7 +14,7 @@ dogfood-desktop-electron-app に v0.2 5 axis workflow 追加、 21 test 全 PASS
 
 ## Tweet 4 — install + v1.58 計画
 
-`pnpm add -D @kiwa-test/desktop@^0.2`。 migration: https://cardene777.github.io/kiwa/migrations/v1.56-to-v1.57
+`pnpm add -D @kiwa/desktop@^0.2`。 migration: https://cardene777.github.io/kiwa/migrations/v1.56-to-v1.57
 
 v1.58+ で Desktop 深化 II (v0.3 real driver: @electron/test-utils + tauri-driver + WebDriver) 予定。 backward compat 絶対維持で v0.1 3 axis の 12 method / 12 event / 36 mapping は完全保持。
 

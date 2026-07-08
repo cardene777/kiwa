@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.65 リリース — quality-metrics 深化 II (@kiwa-test/quality-metrics v0.5 historical trend tracking + drift detection、 depth-5 pattern 3 例目確定 = 絶対的 rule 昇格 signal、 systematic pattern 40 度目、 43 milestone streak)"
+title: "kiwa v1.65 リリース — quality-metrics 深化 II (@kiwa/quality-metrics v0.5 historical trend tracking + drift detection、 depth-5 pattern 3 例目確定 = 絶対的 rule 昇格 signal、 systematic pattern 40 度目、 43 milestone streak)"
 emoji: "📈"
 type: "tech"
 topics: ["testing", "vitest", "quality-metrics", "release-gate"]
@@ -64,7 +64,7 @@ v1.55 30 度突入以来の 10 度目 signal 到達。
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/quality-metrics@^0.5
+pnpm add -D @kiwa/quality-metrics@^0.5
 ```
 
 ## Migration guide

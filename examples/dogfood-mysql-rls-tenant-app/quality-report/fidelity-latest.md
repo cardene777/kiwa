@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/orm/mysql-rls-dogfood @ 0.1.0
+# Quality Report — @kiwa/orm/mysql-rls-dogfood @ 0.1.0
 
 _Reported at 2026-07-06T07:59:19.188Z._
 

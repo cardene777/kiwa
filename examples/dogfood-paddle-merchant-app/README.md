@@ -1,7 +1,7 @@
 # dogfood-paddle-merchant-app
 
 Sub-Issue #902 (v1.23-3) — Nuxt 3 dogfood app for Paddle Billing v2 as a
-Merchant-of-Record. Wires `@kiwa-test/payment` v0.3 mock adapter + 9-axis
+Merchant-of-Record. Wires `@kiwa/payment` v0.3 mock adapter + 9-axis
 semantics into a merchant-flow surface (inline checkout / webhook /
 subscription tier upgrade-downgrade / VAT/GST/sales-tax auto-calc) so
 end-to-end fidelity can be verified without booting the real Paddle
@@ -13,7 +13,7 @@ sandbox.
 src/
 ├── adapters/
 │   ├── interface.ts         provider-neutral RP surface
-│   ├── mock.ts              @kiwa-test/payment paddle mock
+│   ├── mock.ts              @kiwa/payment paddle mock
 │   └── real.ts              env-gated real driver skeleton
 ├── server/api/              Nuxt 3 server routes (H3-compatible handlers)
 │   ├── checkout.post.ts
@@ -41,13 +41,13 @@ pnpm --filter dogfood-paddle-merchant-app test        # vitest — 40 tests
 pnpm --filter dogfood-paddle-merchant-app typecheck   # strict tsc
 ```
 
-The `pnpm test` script builds `@kiwa-test/payment` + `@kiwa-test/core`
+The `pnpm test` script builds `@kiwa/payment` + `@kiwa/core`
 first so the workspace symlink resolves the freshest `dist/`.
 
 ## Modes
 
 ```
-KIWA_MODE=mock  (default) — @kiwa-test/payment createPaddleMock + 9-axis semantics
+KIWA_MODE=mock  (default) — @kiwa/payment createPaddleMock + 9-axis semantics
 KIWA_MODE=real            — real driver, requires PADDLE_KEY + PADDLE_NOTIFICATION_SECRET + KIWA_PADDLE_REAL_READY=1
 ```
 
@@ -75,7 +75,7 @@ dogfood app makes explicit:
 ## Related
 
 - Parent Issue #899 (v1.23 Payment 深化 milestone)
-- Sub-Issue #900 (v1.23-1) — `@kiwa-test/payment` v0.3 9-axis semantics
+- Sub-Issue #900 (v1.23-1) — `@kiwa/payment` v0.3 9-axis semantics
 - Sub-Issue #901 (v1.23-2) — Stripe billing dogfood app (Next.js 15)
 - Sub-Issue #903 (v1.23-4) — Lemon Squeezy license dogfood app (SvelteKit)
 - docs/quality-reports/payment/paddle-merchant-app.md — release gate SSOT

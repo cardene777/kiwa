@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/observability/dogfood-iac-drift-app @ 2.2.0
+# Quality Report — @kiwa/observability/dogfood-iac-drift-app @ 2.2.0
 
 _Reported at 2026-07-07T14:50:02.372Z._
 

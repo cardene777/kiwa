@@ -1,8 +1,8 @@
-# `@kiwa-test/dapp` を library として import して test を手書きする手順
+# `@kiwa/dapp` を library として import して test を手書きする手順
 
 > [🇬🇧 English](./write-tests-manually.md) • [🇯🇵 日本語](./write-tests-manually.ja.md)
 
-skill (`/kiwa-test` / `/kiwa-play` 等) を使わず、 `@kiwa-test/dapp` を npm library として直接 import して自分で test を書く経路。 既存 dApp プロジェクトに kiwa を library として組み込む / skill 生成 test を読みづらいので自前で書きたい / 一部 fixture だけ流用したい 等の use case 向け。
+skill (`/kiwa-test` / `/kiwa-play` 等) を使わず、 `@kiwa/dapp` を npm library として直接 import して自分で test を書く経路。 既存 dApp プロジェクトに kiwa を library として組み込む / skill 生成 test を読みづらいので自前で書きたい / 一部 fixture だけ流用したい 等の use case 向け。
 
 skill 経由で 0 から自動生成したい場合は `tests/docs/run-tests.ja.md` を読む。
 
@@ -21,8 +21,8 @@ skill 経由で 0 から自動生成したい場合は `tests/docs/run-tests.ja.
 自分の dApp project root で実行。
 
 ```bash
-# @kiwa-test/dapp を install (主要 dep)
-pnpm add -D @kiwa-test/dapp @playwright/test viem
+# @kiwa/dapp を install (主要 dep)
+pnpm add -D @kiwa/dapp @playwright/test viem
 
 # Foundry (anvil 起動用) PATH 上
 anvil --version
@@ -35,7 +35,7 @@ pnpm exec playwright install chromium
 
 ## Step 1 — playwright.config.ts を書く
 
-`@kiwa-test/dapp` の fixture は Playwright 標準 `test` を拡張した形。 通常 Playwright config をそのまま使える。
+`@kiwa/dapp` の fixture は Playwright 標準 `test` を拡張した形。 通常 Playwright config をそのまま使える。
 
 ```typescript
 // playwright.config.ts
@@ -55,11 +55,11 @@ export default defineConfig({
 
 ## Step 2 — `tests/prepare-env.ts` で anvil 起動 + contract deploy
 
-`@kiwa-test/dapp` の `runE2EPrepareEnv` で anvil 子プロセス起動 + contract deploy + `.env.local` 出力を 1 関数化。
+`@kiwa/dapp` の `runE2EPrepareEnv` で anvil 子プロセス起動 + contract deploy + `.env.local` 出力を 1 関数化。
 
 ```typescript
 // tests/prepare-env.ts
-import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa-test/dapp';
+import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa/dapp';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -104,7 +104,7 @@ await runE2EPrepareEnv({
 ```typescript
 // tests/mint.spec.ts
 import { test, expect } from '@playwright/test';
-import { dappE2eTest } from '@kiwa-test/dapp';
+import { dappE2eTest } from '@kiwa/dapp';
 import { createPublicClient, createWalletClient, http, defineChain, type Address } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { readFileSync } from 'node:fs';
@@ -160,7 +160,7 @@ dappE2eTest('TC-001 mint で balance +1', async ({ anvilPort, page }) => {
 
 ```typescript
 // tests/marketplace.spec.ts
-import { dappE2eTest } from '@kiwa-test/dapp';
+import { dappE2eTest } from '@kiwa/dapp';
 import { expect } from '@playwright/test';
 import {
   createPublicClient, createWalletClient, http, defineChain,
@@ -230,11 +230,11 @@ dappE2eTest('TC-001 mint → list → buy で owner が seller から buyer に�
 
 ### snapshot / revert で test 間隔離 sample
 
-`@kiwa-test/dapp` の `snapshotChain` / `revertChain` で各 test を独立化:
+`@kiwa/dapp` の `snapshotChain` / `revertChain` で各 test を独立化:
 
 ```typescript
-import { dappE2eTest } from '@kiwa-test/dapp';
-import { snapshotChain, revertChain, increaseTime } from '@kiwa-test/dapp';
+import { dappE2eTest } from '@kiwa/dapp';
+import { snapshotChain, revertChain, increaseTime } from '@kiwa/dapp';
 import { expect } from '@playwright/test';
 import type { Hex } from 'viem';
 
@@ -266,8 +266,8 @@ dappE2eTest('TC-VESTING-002 cliff 前は release が 0', async ({ anvilPort }) =
 ### custom error の revert を assertion する sample
 
 ```typescript
-import { dappE2eTest } from '@kiwa-test/dapp';
-import { expectCustomError } from '@kiwa-test/dapp';
+import { dappE2eTest } from '@kiwa/dapp';
+import { expectCustomError } from '@kiwa/dapp';
 
 dappE2eTest('TC-001 OnlyOwner で revert', async ({ anvilPort }) => {
   const publicClient = makePublicClient(anvilPort);
@@ -317,7 +317,7 @@ pnpm test
 for r in 1 2 3 4; do echo "=== Round $r ==="; pnpm test 2>&1 | tail -3; done
 ```
 
-## `@kiwa-test/dapp` 主要 API 早見表
+## `@kiwa/dapp` 主要 API 早見表
 
 詳細は `docs/ja/api/README.md`。
 
@@ -353,7 +353,7 @@ for r in 1 2 3 4; do echo "=== Round $r ==="; pnpm test 2>&1 | tail -3; done
 
 | 症状 | 対処 |
 |---|---|
-| `Cannot find module '@kiwa-test/dapp'` | `pnpm add -D @kiwa-test/dapp` で install、 `pnpm -F @kiwa-test/dapp build` で build (monorepo の場合) |
+| `Cannot find module '@kiwa/dapp'` | `pnpm add -D @kiwa/dapp` で install、 `pnpm -F @kiwa/dapp build` で build (monorepo の場合) |
 | `ReferenceError: require is not defined` | package.json に `"type": "module"` 追加 |
 | `Executable doesn't exist .../chrome-headless-shell` | `pnpm exec playwright install chromium` |
 | anvil port 衝突 (`EADDRINUSE: 8545`) | `pkill -f anvil` で既存 daemon 停止 or `getFreePort()` で動的 port |
@@ -362,7 +362,7 @@ for r in 1 2 3 4; do echo "=== Round $r ==="; pnpm test 2>&1 | tail -3; done
 
 ## 関連 docs
 
-- `@kiwa-test/dapp` API reference: `docs/ja/api/README.md`
+- `@kiwa/dapp` API reference: `docs/ja/api/README.md`
 - 各 API 詳細:
   - `docs/ja/api/dapp-e2e-test.md` (dappE2eTest fixture)
   - `docs/ja/api/start-anvil.md` (anvil 起動)

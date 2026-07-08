@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/realtime/nuxt-webtransport-stream-app @ 0.2.0
+# Quality Report — @kiwa/realtime/nuxt-webtransport-stream-app @ 0.2.0
 
 _Reported at 2026-07-06T02:44:24.241Z._
 

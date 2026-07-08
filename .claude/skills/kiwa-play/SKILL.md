@@ -1,9 +1,9 @@
 ---
 name: kiwa-play
 description: |
-  kiwa (@kiwa-test/dapp + @kiwa-test/cli) を使った dApp e2e テストの設計・実装・実行を支援する汎用 skill。
+  kiwa (@kiwa/dapp + @kiwa/cli) を使った dApp e2e テストの設計・実装・実行を支援する汎用 skill。
   Playwright + viem + anvil のスタックで wallet inject / contract deploy / multi-chain / EIP-1271 / time-warp / RPC override 等の dApp 固有要件をカバーする。
-  新規 dApp 導入 (pnpm dlx @kiwa-test/cli init) と既存プロジェクトへの test 追加の両方に対応。
+  新規 dApp 導入 (pnpm dlx @kiwa/cli init) と既存プロジェクトへの test 追加の両方に対応。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -12,7 +12,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /kiwa-play — kiwa経由の dApp e2e テスト skill
 
-`@kiwa-test/dapp` の fixture と `@kiwa-test/cli` の scaffold を使い、 anvil + viem + Playwright で動く dApp e2e テストを設計・作成・実行する。
+`@kiwa/dapp` の fixture と `@kiwa/cli` の scaffold を使い、 anvil + viem + Playwright で動く dApp e2e テストを設計・作成・実行する。
 
 dApp で「ユーザー操作 → wallet → contract → state 検証」の往復が必要な test を書く場面で本 skill を起動する。
 
@@ -29,7 +29,7 @@ $ARGUMENTS
 
 ## オプション
 
-- `--init` — 新規 dApp プロジェクトに kiwa を導入 (`pnpm dlx @kiwa-test/cli init` を実行し scaffold 生成)
+- `--init` — 新規 dApp プロジェクトに kiwa を導入 (`pnpm dlx @kiwa/cli init` を実行し scaffold 生成)
 - `--mode {new|extend|debug}` — `new` (新規 test 設計) / `extend` (既存 test 拡張) / `debug` (flaky / fail 解析)
 - `--rounds {N}` — N round 連続 PASS 検証 (flaky 0 件確認、 デフォルト 1)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0a で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
@@ -50,14 +50,14 @@ AskUserQuestion で spec / report 等の文書生成言語を user に確認す�
 
 | 状態 | 判定 | 進行先 |
 |---|---|---|
-| 未導入 | `package.json` に `@kiwa-test/dapp` 無し | Step 1 (init) |
+| 未導入 | `package.json` に `@kiwa/dapp` 無し | Step 1 (init) |
 | 導入済・新規 test | kiwa 導入済、 該当 test ファイル無し | Step 2 |
 | 導入済・拡張 / debug | 既存 test を拡張 / fix | Step 2' |
 
 ### Step 1: 新規導入 (`--init`)
 
 ```bash
-pnpm dlx @kiwa-test/cli init
+pnpm dlx @kiwa/cli init
 pnpm install
 ```
 
@@ -133,7 +133,7 @@ dApp test は以下 3 layer で構造化:
 
 ### Step 3: 既存 example pattern 参照
 
-`@kiwa-test/dapp` のリポジトリ (https://github.com/cardene777/kiwa) には 22 example が含まれており、 用途別の典型実装を学べる。
+`@kiwa/dapp` のリポジトリ (https://github.com/cardene777/kiwa) には 22 example が含まれており、 用途別の典型実装を学べる。
 
 | 用途 | example | 学べるパターン |
 |---|---|---|
@@ -160,7 +160,7 @@ dApp test は以下 3 layer で構造化:
 
 ```ts
 // tests/prepare-env.ts
-import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa-test/dapp';
+import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa/dapp';
 
 await runE2EPrepareEnv({
   envFile: '.env.local',
@@ -222,7 +222,7 @@ test('T-XX-001 my flow', async ({ page, anvilPort }) => {
 
 ### Step 6: revert 検証パターン
 
-`@kiwa-test/dapp` に `expectCustomError` helper が含まれる (v0.2 以降)。
+`@kiwa/dapp` に `expectCustomError` helper が含まれる (v0.2 以降)。
 それ未満のバージョンは自前で書く:
 
 ```ts
@@ -243,7 +243,7 @@ pnpm test        # playwright test 1 round
 ```
 
 flaky 検証は 4 round 連続 PASS で固定。
-並列実行は `@kiwa-test/dapp` の build race を起こすため sequential 厳守。
+並列実行は `@kiwa/dapp` の build race を起こすため sequential 厳守。
 
 ### Step 8: 任意 — adversarial review
 
@@ -281,7 +281,7 @@ review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 repo
 ## references
 
 - `references/example-patterns.md` — 22 example の用途別 index と典型コード
-- `references/fixture-api.md` — `@kiwa-test/dapp` 主要 export API リファレンス
+- `references/fixture-api.md` — `@kiwa/dapp` 主要 export API リファレンス
 - `references/troubleshooting.md` — webServer 起動失敗・anvil port 衝突・core build race 対策
 - `references/adversarial-pitfalls.md` — 偽陽性パターン 9 種 + self-check 5 問
 - `references/doc-language-selection.md` — Step 0a 文書生成言語選択 共通 SSOT (kiwa-forge と共用、 ja / en / その他 ISO 639-1)
@@ -297,4 +297,4 @@ review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 repo
 
 - リポジトリ: https://github.com/cardene777/kiwa
 - 公式 docs (JP+EN 対訳): `docs/{ja,en}/{quickstart,concepts,api,cookbook,faq}.md`
-- npm: `@kiwa-test/dapp` / `@kiwa-test/cli` (`@kiwa-test/cookbook` は将来の subpackage 構想)
+- npm: `@kiwa/dapp` / `@kiwa/cli` (`@kiwa/cookbook` は将来の subpackage 構想)

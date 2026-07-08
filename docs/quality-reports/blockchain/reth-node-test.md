@@ -1,13 +1,13 @@
 # Fidelity — dogfood-reth-node-test (v1.18-2)
 
-Real-vs-mock behavioural fidelity for the Reth NodeBuilder dogfood, produced by `examples/dogfood-reth-node-test/tests/emit_fidelity_report.rs`. Feeds `@kiwa-test/quality-metrics` release-gate 11-axis payload with a Rust-native blockchain adapter alongside the existing TypeScript ones.
+Real-vs-mock behavioural fidelity for the Reth NodeBuilder dogfood, produced by `examples/dogfood-reth-node-test/tests/emit_fidelity_report.rs`. Feeds `@kiwa/quality-metrics` release-gate 11-axis payload with a Rust-native blockchain adapter alongside the existing TypeScript ones.
 
 ## Baseline (real mode skipped — no `reth` on PATH)
 
 When the harness runs on a host without the reth binary, the real adapter emits `RETH_ENV_MISSING` for the three scenario ops (`erc20_transfer` / `reorg_3block` / `event_history`) and passes the wiring ops (`describe_signer` / `describe_provider` / `detect_reth`) with the `RethBinary::detect`-observed availability recorded in the trace detail. Divergences are recorded so the mock is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/contract/reth-node-dogfood
+provider   : @kiwa/contract/reth-node-dogfood
 version    : 0.1.0
 verdict    : PASS
 divergences: 3 (erc20_transfer / reorg_3block / event_history — recorded as BEHAVIORAL_DIVERGENCE, real mode absent)

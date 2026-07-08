@@ -6,7 +6,7 @@ kiwa v1.43 をリリースしました。 **12 番目の縦深化 pair を新規
 
 ## 何が変わったか
 
-### `@kiwa-test/edge` v1.2.0 (v1.1.0 → v1.2.0 minor bump)
+### `@kiwa/edge` v1.2.0 (v1.1.0 → v1.2.0 minor bump)
 
 既存の 8-axis base の上に、 8 個の advanced axis を追加しました。
 
@@ -61,7 +61,7 @@ v1.23 から v1.43 まで、 21 milestone 連続で tutorial code snippet の va
 ## インストール
 
 ```bash
-pnpm add -D @kiwa-test/edge@^1.2
+pnpm add -D @kiwa/edge@^1.2
 ```
 
 Additive-only。 breaking change はありません。

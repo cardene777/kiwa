@@ -1,13 +1,13 @@
 # Fidelity — dogfood-supabase-realtime-chat (v1.13-3)
 
-Real-vs-mock behavioural fidelity for the Supabase Realtime chat dogfood, produced by `examples/dogfood-supabase-realtime-chat/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-test/quality-metrics` 7-axis release gate.
+Real-vs-mock behavioural fidelity for the Supabase Realtime chat dogfood, produced by `examples/dogfood-supabase-realtime-chat/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 7-axis release gate.
 
 ## Baseline (real mode skipped — no `SUPABASE_URL` / `SUPABASE_ANON_KEY`)
 
 When the harness runs without Supabase credentials, the real adapter emits `SUPABASE_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/realtime/supabase-realtime-chat
+provider   : @kiwa/realtime/supabase-realtime-chat
 version    : 0.1.0
 verdict    : PASS
 divergences: 4 (joinRoom / sendMessage / getPresence / sendTyping — recorded as BEHAVIORAL_DIVERGENCE, real mode absent)
@@ -58,4 +58,4 @@ The mock engine (`packages/realtime/src/engine.ts`) tracks presence as `channel 
 
 The typing debounce is a client-side concern in the real Supabase SDK — this dogfood implements the same 500 ms window in `mock.ts` `sendTyping` so the fidelity harness can score the emitted / suppressed ratio as an observable behaviour, not a hidden implementation detail.
 
-Provider prefix `@kiwa-test/realtime/` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Supabase Realtime is a socket / pub-sub primitive, not a token-priced generative call. Socket round-trip latency feeds `perf.p95Ms` so realtime performance stays visible in the report.
+Provider prefix `@kiwa/realtime/` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Supabase Realtime is a socket / pub-sub primitive, not a token-priced generative call. Socket round-trip latency feeds `perf.p95Ms` so realtime performance stays visible in the report.
