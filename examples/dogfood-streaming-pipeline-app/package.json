@@ -1,0 +1,20 @@
+{
+  "name": "dogfood-streaming-pipeline-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v2.5-2 — @kiwa/streaming v2.1 pipeline-orchestrator 4 pattern workflow reference。 depth-5 pattern 6 例目発生 = systematic law CONFIRMED dogfood。",
+  "scripts": {
+    "test": "pnpm -F @kiwa/core -F @kiwa/streaming build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa/core": "workspace:*",
+    "@kiwa/streaming": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
