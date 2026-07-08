@@ -6,7 +6,7 @@ DCR-layer report for `examples/dogfood-oidc-federation` Sub-Issue #873 (v1.21-4b
 
 The dcr-flow harness lifts the skeleton's 4 axes to 8. Axes 1–4 stay covered by the Sub-Issue #872 skeleton report (`discovery-jwks-skeleton.spec.ts`, 25 tests); axes 5–8 are the DCR-layer additions this Sub-Issue lands.
 
-| axis | mock (`@kiwa-test/auth` via `src/lib/dcr.ts` wrapper) | real (Keycloak + testcontainers, `OIDC_BOOTSTRAP=1`) | assertion |
+| axis | mock (`@kiwa/auth` via `src/lib/dcr.ts` wrapper) | real (Keycloak + testcontainers, `OIDC_BOOTSTRAP=1`) | assertion |
 |---|---|---|---|
 | 5. auth method 3 shapes | `client_secret_basic` + `client_secret_post` mint a `client_secret`; `pk_jwt` requires `jwks_uri` or inline `jwks`, omits `client_secret`, and echoes the requested method verbatim on the response. Unknown methods refuse with `errorKind=unsupported_auth_method`. | Keycloak `/registrations` accepts the same three methods; `pk_jwt` maps to Keycloak's `client_jwt` policy with the RP's JWKS registered as the client authenticator. | RFC 7591 §2 — `token_endpoint_auth_method` must be one advertised by the OP's Discovery metadata; JWT-based methods require a JWKS source. |
 | 6. dropped grant refusal | `password` / `implicit` / `client_credentials` refuse at the wrapper before delegating to the underlying kiwa library. Mixed allowlist (`authorization_code + password`) refuses partially. `authorization_code + refresh_token` accepts. | Keycloak refuses the same three grants at realm boot when OAuth 2.1 compliance is enabled. | OAuth 2.1 §1 — grant types the spec dropped MUST NOT be registered on new clients. |

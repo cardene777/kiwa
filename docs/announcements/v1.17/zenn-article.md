@@ -10,11 +10,11 @@ published: true
 
 v1.17 は kiwa の 7 milestone 目です。 v1.16 (component test 縦軸、 Storybook 8 + Playwright CT + Chromatic) の後、 v1.17 は 2026 SaaS production team のほぼ全てが導入済の **observability stack (Grafana dashboard + Prometheus AlertManager + trace flame graph + log correlation) を 1 統一 mock harness に land** しました。
 
-v1.14-4 で land した `@kiwa-test/observability` v1.1 telemetry mock 3 provider (OpenTelemetry / Datadog / Sentry) を基盤に、 実運用の dashboard 描画 + alert routing + trace flame graph + log ↔ span correlation の 4 追加軸を major bump として重ねる縦軸思想です。
+v1.14-4 で land した `@kiwa/observability` v1.1 telemetry mock 3 provider (OpenTelemetry / Datadog / Sentry) を基盤に、 実運用の dashboard 描画 + alert routing + trace flame graph + log ↔ span correlation の 4 追加軸を major bump として重ねる縦軸思想です。
 
 ## 主な追加
 
-### `@kiwa-test/observability` v2.0 (major bump)
+### `@kiwa/observability` v2.0 (major bump)
 
 v1.14-4 で land した telemetry mock 3 provider (OpenTelemetry / Datadog / Sentry) を基盤に、 4 追加軸を統一 API で扱う mock harness に発展。 v1.0 (`renderDashboard` / `detectFlaky` / `analyzeSpecCoverage` / `checkThresholds`) + v1.1 (`TelemetryCollector` + 3 provider mock) surface は 100% backward compatible です。 major bump は「新 public surface が module 境界を跨ぐ (11 export + 13 fixture builder) 」 と「v2 module name で Observability v2 milestone を signal する」 の 2 意味。
 
@@ -42,7 +42,7 @@ import {
   trace_httpHandler,
   trace_nestedRetry,
   logs_forHttpTrace,
-} from '@kiwa-test/observability';
+} from '@kiwa/observability';
 
 // 1) Dashboard — panel + query + refresh + threshold badge
 const otel = createOtelMock({ now: () => 1_000 });
@@ -129,7 +129,7 @@ React SPA style trace flame graph explorer を provider-neutral `FlameExplorerAd
 ### docs 3 pillars + concept doc
 
 - Tutorial 22 (Observability dashboard、 5 panel + threshold + refresh) / 23 (Alert orchestrator、 10 rule + 3-level route + silence + escalation) / 24 (Trace flame graph、 span tree + flame + drill-down + log correlation)
-- Migration guide `v1.16 → v1.17` (additive-only、 既存 test は無変更で pass、 `@kiwa-test/observability` v1.x → v2.0 major bump は import 追加のみで移行完了)
+- Migration guide `v1.16 → v1.17` (additive-only、 既存 test は無変更で pass、 `@kiwa/observability` v1.x → v2.0 major bump は import 追加のみで移行完了)
 - Concept doc `docs/concepts/observability-v2-testing.md` — 4 追加軸 (dashboard / alert / trace-flame / log-correlation) × 6 semantic axis (panel query resolution / threshold badge / routing tree / silence + escalation / span aggregate / log ↔ span correlation) を SSOT 化
 - VitePress sidebar 追記 (Observability v2 (v1.17) section + concept doc link + migration link)
 - `/docs-publish-kiwa` 経由 gh-pages 反映済

@@ -8,7 +8,7 @@ Payment providers push webhooks asynchronously from their backend. A test that s
 - **coupled** — a test account has to exist. Sandbox mode differs per provider.
 - **verify chain** — the signature is HMAC-SHA256 over `{ts}.{body}` for Stripe, `{ts}:{body}` for Paddle, raw body only for Lemon Squeezy. Tampering vs stale-timestamp vs malformed-body must be exercised separately.
 
-`@kiwa-test/payment` addresses all three by moving the sign + verify path in-process.
+`@kiwa/payment` addresses all three by moving the sign + verify path in-process.
 
 ## The `PaymentAdapter` contract
 
@@ -18,7 +18,7 @@ Three ops. All three providers implement the same shape.
 - `verifyWebhook({ rawBody, signature, toleranceMs? })` — timing-safe verify. Returns one of 4 reasons: `ok` / `bad-signature` / `stale-timestamp` / `malformed-body`.
 - `onWebhook(handler)` + `emit(event)` — synchronous handler dispatch for end-to-end webhook flows.
 
-The provider prefix (`@kiwa-test/payment/stripe` etc.) triggers the common 7-axis release gate — no AI-LLM axes apply.
+The provider prefix (`@kiwa/payment/stripe` etc.) triggers the common 7-axis release gate — no AI-LLM axes apply.
 
 ## The 3 provider differences that matter
 
@@ -48,7 +48,7 @@ The tests you should write for every payment integration.
 - **`stale-timestamp`** — replay attack. Body signed 10 minutes ago, verify with `toleranceMs: 60_000` must reject.
 - **`malformed-body`** — arbitrary garbage. JSON parse fails or `timestamp` field missing. Verify must reject.
 
-All 4 must pass before the endpoint reaches production. `@kiwa-test/payment` exercises each in unit-test time (no real webhook, no polling).
+All 4 must pass before the endpoint reaches production. `@kiwa/payment` exercises each in unit-test time (no real webhook, no polling).
 
 ## When NOT to use the mock
 
@@ -58,4 +58,4 @@ All 4 must pass before the endpoint reaches production. `@kiwa-test/payment` exe
 ## Related
 
 - [Tutorial 12 — Payment webhook mock](../tutorials/12-payment)
-- [`@kiwa-test/payment` on npm](https://www.npmjs.com/package/@kiwa-test/payment)
+- [`@kiwa/payment` on npm](https://www.npmjs.com/package/@kiwa/payment)

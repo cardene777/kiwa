@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/security/dogfood-siem-incident-app @ 0.2.0
+# Quality Report — @kiwa/security/dogfood-siem-incident-app @ 0.2.0
 
 _Reported at 2026-07-07T07:20:09.591Z._
 

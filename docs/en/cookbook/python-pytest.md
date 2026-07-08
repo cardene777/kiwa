@@ -97,7 +97,7 @@ pip install 'kiwa-test-py[cov]'
 pytest --cov=app --cov-report=term-missing
 ```
 
-Pairs with `@kiwa-test/observability`'s `fromIstanbulCoverageSummary` when you want a single dashboard across TS + Python coverage.
+Pairs with `@kiwa/observability`'s `fromIstanbulCoverageSummary` when you want a single dashboard across TS + Python coverage.
 
 ## Spec format
 
@@ -106,4 +106,4 @@ Same 9-column markdown table the kiwa-design skill produces — see [`/kiwa-desi
 ## Related
 
 - Package: [`kiwa-test-py`](../../../kiwa-py/README.md)
-- TypeScript counterpart: [`@kiwa-test/core`](../../../packages/core/README.md)
+- TypeScript counterpart: [`@kiwa/core`](../../../packages/core/README.md)

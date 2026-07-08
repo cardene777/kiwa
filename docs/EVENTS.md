@@ -45,7 +45,7 @@ The following example is the minimum setup for receiving `accountsChanged` in a 
 
 ```typescript
 import { expect } from '@playwright/test';
-import { dappE2eTest as test } from '@kiwa-test/dapp';
+import { dappE2eTest as test } from '@kiwa/dapp';
 
 test('accountsChanged event が page 側 handler を発火する', async ({ page, dappE2e }) => {
   await page.setContent(`

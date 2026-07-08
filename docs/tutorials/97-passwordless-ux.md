@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/auth` v0.6 that models the 3 pieces of a real passwordless UX posture that every non-trivial production login flow eventually needs — a device-bound passkey axis that pins credential binding + sync fabric verification + credential migration (mirroring Chrome Sync + iCloud Keychain + Firefox Sync ergonomics) so a "which device is this credential bound to?" question resolves to one telemetry event without walking the raw session log, a conditional UI axis that pins autofill hint + mediation "conditional" + fallback ladder + timeout (mirroring WebAuthn L3 `mediation: "conditional"` semantics on chromium / webkit / firefox) so a silent inline passkey pick resolves without a modal, a cross-device flow axis that pins CTAP2 hybrid transport (caBLE) QR handshake + BLE proximity + tunnel state machine so a desktop-signing-with-phone flow drives to one clear handshake, and a fidelity harness that diffs mock vs real trace side-by-side across 3 browser dialects so behavioural drift stays observable.
+A vitest suite wired to `@kiwa/auth` v0.6 that models the 3 pieces of a real passwordless UX posture that every non-trivial production login flow eventually needs — a device-bound passkey axis that pins credential binding + sync fabric verification + credential migration (mirroring Chrome Sync + iCloud Keychain + Firefox Sync ergonomics) so a "which device is this credential bound to?" question resolves to one telemetry event without walking the raw session log, a conditional UI axis that pins autofill hint + mediation "conditional" + fallback ladder + timeout (mirroring WebAuthn L3 `mediation: "conditional"` semantics on chromium / webkit / firefox) so a silent inline passkey pick resolves without a modal, a cross-device flow axis that pins CTAP2 hybrid transport (caBLE) QR handshake + BLE proximity + tunnel state machine so a desktop-signing-with-phone flow drives to one clear handshake, and a fidelity harness that diffs mock vs real trace side-by-side across 3 browser dialects so behavioural drift stays observable.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/auth` v0.6 that models the 3 pieces of a rea
 ```bash
 mkdir kiwa-passwordless-ux && cd kiwa-passwordless-ux
 pnpm init
-pnpm add -D @kiwa-test/auth@^0.6 vitest typescript @types/node
+pnpm add -D @kiwa/auth@^0.6 vitest typescript @types/node
 ```
 
 ### 2. Device-bound passkey
@@ -26,7 +26,7 @@ pnpm add -D @kiwa-test/auth@^0.6 vitest typescript @types/node
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa-test/auth';
+import { semantics } from '@kiwa/auth';
 
 describe('device-bound passkey', () => {
   it('binds credential to device + verifies sync fabric', () => {
@@ -52,7 +52,7 @@ describe('device-bound passkey', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa-test/auth';
+import { semantics } from '@kiwa/auth';
 
 describe('conditional UI', () => {
   it('shows hint and selects autofill', () => {
@@ -71,7 +71,7 @@ describe('conditional UI', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa-test/auth';
+import { semantics } from '@kiwa/auth';
 
 describe('cross-device flow', () => {
   it('completes QR handshake for desktop-with-phone sign-in', () => {
@@ -91,4 +91,4 @@ describe('cross-device flow', () => {
 pnpm test
 ```
 
-All 3 test files pass. You now have a passwordless UX observability suite driven by `@kiwa-test/auth` v0.6 advanced semantics, ready to plug into a real Chromium / WebKit / Firefox WebAuthn stack via `KIWA_MODE=real`.
+All 3 test files pass. You now have a passwordless UX observability suite driven by `@kiwa/auth` v0.6 advanced semantics, ready to plug into a real Chromium / WebKit / Firefox WebAuthn stack via `KIWA_MODE=real`.

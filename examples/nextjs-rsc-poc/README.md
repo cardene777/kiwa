@@ -1,6 +1,6 @@
 # examples/nextjs-rsc-poc
 
-Proof of concept for `@kiwa-test/nextjs` RSC mode (Issue #494). Tests two real-world async server components — `UserPage([slug])` (notFound throw) and `UserList(?q=)` (searchParams filter) — through `renderServerComponent` without a running Next.js server or JSX runtime.
+Proof of concept for `@kiwa/nextjs` RSC mode (Issue #494). Tests two real-world async server components — `UserPage([slug])` (notFound throw) and `UserList(?q=)` (searchParams filter) — through `renderServerComponent` without a running Next.js server or JSX runtime.
 
 ## What it covers
 

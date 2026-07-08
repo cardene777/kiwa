@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/observability/dogfood-chaos-aiops-app @ 2.2.0
+# Quality Report — @kiwa/observability/dogfood-chaos-aiops-app @ 2.2.0
 
 _Reported at 2026-07-07T15:21:09.329Z._
 

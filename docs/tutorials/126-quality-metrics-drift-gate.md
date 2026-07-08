@@ -2,12 +2,12 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/quality-metrics` v0.6 (evaluateReleaseGate に drift check opt-in 統合、 v1.66 で **depth-5 pattern 3 例目確定 実運用 継続** = Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 の 3 例安定化到達 = 「絶対的 rule」 昇格 signal 到達済、 **systematic pattern 41 度目適用**、 **44 milestone streak**、 4 PR rhythm 13 milestone 連続 = 52 PR 連続)、 v0.5 で pure library として提供した historical trend tracking + drift detection を release gate の judgment path に格上げ、 regression 検知 axis を `drift.{axis名}` の ReleaseGateBlocker に 1:1 格上げ、 pass/fail 判定 と 前回比較 判定 を 1 経路 で 統合。
+A vitest suite wired to `@kiwa/quality-metrics` v0.6 (evaluateReleaseGate に drift check opt-in 統合、 v1.66 で **depth-5 pattern 3 例目確定 実運用 継続** = Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 の 3 例安定化到達 = 「絶対的 rule」 昇格 signal 到達済、 **systematic pattern 41 度目適用**、 **44 milestone streak**、 4 PR rhythm 13 milestone 連続 = 52 PR 連続)、 v0.5 で pure library として提供した historical trend tracking + drift detection を release gate の judgment path に格上げ、 regression 検知 axis を `drift.{axis名}` の ReleaseGateBlocker に 1:1 格上げ、 pass/fail 判定 と 前回比較 判定 を 1 経路 で 統合。
 
 ## Prerequisites
 
 - Node.js ≥ 20 + pnpm
-- `@kiwa-test/quality-metrics` v0.6 (`pnpm add -D @kiwa-test/quality-metrics@^0.6`)
+- `@kiwa/quality-metrics` v0.6 (`pnpm add -D @kiwa/quality-metrics@^0.6`)
 
 ## Step-by-step build
 
@@ -16,7 +16,7 @@ A vitest suite wired to `@kiwa-test/quality-metrics` v0.6 (evaluateReleaseGate �
 前回 release の QualityReport を MetricSnapshot に record する。
 
 ```ts
-import { captureSnapshot } from '@kiwa-test/quality-metrics';
+import { captureSnapshot } from '@kiwa/quality-metrics';
 
 const baseline = captureSnapshot({
   report: previousReleaseReport,
@@ -30,7 +30,7 @@ const baseline = captureSnapshot({
 `ReleaseGateContext` の 3 新 field を セット して 呼出す。
 
 ```ts
-import { evaluateReleaseGate } from '@kiwa-test/quality-metrics';
+import { evaluateReleaseGate } from '@kiwa/quality-metrics';
 
 const verdict = evaluateReleaseGate(currentReport, {}, {
   driftEnabled: true,

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/security` v0.2 that models the 8 signals of a real mTLS + zero-trust access chain that every non-trivial service-mesh app eventually needs — a mutual TLS handshake that pins TLS 1.2 / 1.3 + a named cipher suite so the peer identity is decided before any application byte flows, an SPKI SHA-256 pin verifier that survives certificate rotation without pinning the leaf, an OCSP stapled-response checker that fails closed on `stapled: false` instead of silently continuing on a revoked cert, a Certificate Transparency SCT-count check that rejects a cert with fewer than the required number of embedded SCTs, a device posture evaluator that walks OS-update + disk-encryption + EDR + MDM 4-signal so a rogue laptop never reaches the JIT step, a risk scorer that adds unusual-location + unusual-time + new-device + threat-intel-hit into a 0-100 score, a Just-in-Time role grant that only fires when the risk score is under the 50 threshold, and a micro-segmentation enforcer that allowlists the exact peer workload the granted role is allowed to talk to. `startMtlsSession()` + `completeHandshake()` + `verifyPin()` + `verifyOcsp()` + `checkCtLog()` + `startZeroTrustSession()` + `evaluatePosture()` + `scoreRisk()` + `requestJit()` + `enforceMicroSegment()` give you every one of those signals without booting a real Istio sidecar or an OPA rego policy engine. This is the pattern kiwa's `examples/dogfood-security-mtls-zero-trust-app` exercises against real Istio + OPA under `KIWA_MODE=real` + `KIWA_ISTIO_URL` + `KIWA_OPA_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the OCSP staple was missing but the handshake still completed because the middleware treated `stapled: false` as `unknown` instead of `deny`" gap a reviewer sees in the mTLS rollout post-mortem.
+A vitest suite wired to `@kiwa/security` v0.2 that models the 8 signals of a real mTLS + zero-trust access chain that every non-trivial service-mesh app eventually needs — a mutual TLS handshake that pins TLS 1.2 / 1.3 + a named cipher suite so the peer identity is decided before any application byte flows, an SPKI SHA-256 pin verifier that survives certificate rotation without pinning the leaf, an OCSP stapled-response checker that fails closed on `stapled: false` instead of silently continuing on a revoked cert, a Certificate Transparency SCT-count check that rejects a cert with fewer than the required number of embedded SCTs, a device posture evaluator that walks OS-update + disk-encryption + EDR + MDM 4-signal so a rogue laptop never reaches the JIT step, a risk scorer that adds unusual-location + unusual-time + new-device + threat-intel-hit into a 0-100 score, a Just-in-Time role grant that only fires when the risk score is under the 50 threshold, and a micro-segmentation enforcer that allowlists the exact peer workload the granted role is allowed to talk to. `startMtlsSession()` + `completeHandshake()` + `verifyPin()` + `verifyOcsp()` + `checkCtLog()` + `startZeroTrustSession()` + `evaluatePosture()` + `scoreRisk()` + `requestJit()` + `enforceMicroSegment()` give you every one of those signals without booting a real Istio sidecar or an OPA rego policy engine. This is the pattern kiwa's `examples/dogfood-security-mtls-zero-trust-app` exercises against real Istio + OPA under `KIWA_MODE=real` + `KIWA_ISTIO_URL` + `KIWA_OPA_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the OCSP staple was missing but the handshake still completed because the middleware treated `stapled: false` as `unknown` instead of `deny`" gap a reviewer sees in the mTLS rollout post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/security` v0.2 that models the 8 signals of 
 ```bash
 mkdir kiwa-mtls-zero-trust && cd kiwa-mtls-zero-trust
 pnpm init
-pnpm add -D @kiwa-test/security@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa/security@^0.2 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.2 surface exports the mTLS axis (`startMtlsSession` / `completeHandshake`
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { completeHandshake, startMtlsSession } from '@kiwa-test/security';
+import { completeHandshake, startMtlsSession } from '@kiwa/security';
 
 describe('mtls — handshake', () => {
   it('completes a TLS 1.3 handshake and moves state to handshake-completed', () => {
@@ -90,7 +90,7 @@ The `state` transition to `handshake-completed` is what makes the follow-up SPKI
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { completeHandshake, startMtlsSession, verifyPin } from '@kiwa-test/security';
+import { completeHandshake, startMtlsSession, verifyPin } from '@kiwa/security';
 
 describe('mtls — SPKI pin', () => {
   it('accepts a matching SPKI hash and moves state to pinned', () => {
@@ -151,7 +151,7 @@ import {
   startMtlsSession,
   verifyOcsp,
   verifyPin,
-} from '@kiwa-test/security';
+} from '@kiwa/security';
 
 describe('mtls — OCSP staple', () => {
   it('moves state to ocsp-verified on a good stapled response', () => {
@@ -211,7 +211,7 @@ import {
   startMtlsSession,
   verifyOcsp,
   verifyPin,
-} from '@kiwa-test/security';
+} from '@kiwa/security';
 
 describe('mtls — CT log', () => {
   it('accepts SCT count above the required minimum', () => {
@@ -266,7 +266,7 @@ The `sctCount >= minSctRequired` check is the browser-side default (Chrome enfor
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { evaluatePosture, startZeroTrustSession } from '@kiwa-test/security';
+import { evaluatePosture, startZeroTrustSession } from '@kiwa/security';
 
 describe('zero-trust — device posture', () => {
   it('emits passed=true when all 4 signals are present', () => {
@@ -326,7 +326,7 @@ import {
   requestJit,
   scoreRisk,
   startZeroTrustSession,
-} from '@kiwa-test/security';
+} from '@kiwa/security';
 
 describe('zero-trust — risk score + JIT', () => {
   it('grants JIT when accumulated risk is under 50', () => {
@@ -431,7 +431,7 @@ import {
   requestJit,
   scoreRisk,
   startZeroTrustSession,
-} from '@kiwa-test/security';
+} from '@kiwa/security';
 
 describe('zero-trust — micro-segmentation', () => {
   it('allows a peer inside the allowedPeers allowlist', () => {

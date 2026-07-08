@@ -1,6 +1,6 @@
 # examples/queue-poc
 
-Proof-of-concept that exercises `@kiwa-test/data` against an in-memory order processor + cron schedule.
+Proof-of-concept that exercises `@kiwa/data` against an in-memory order processor + cron schedule.
 
 ## What this shows
 

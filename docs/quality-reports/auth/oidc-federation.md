@@ -44,9 +44,9 @@ Timeline:
 
 ## Fidelity axes (v1.21-4d additions)
 
-The v1.21-4d harness lifts the fidelity axes from 12 → 16 by adding four Federation §7 trust-chain axes. Every axis has a mock coverage row driven by `@kiwa-test/auth`'s `resolveTrustChain` (wrapped through `src/lib/federation.ts`) and a real coverage row that stays refused with `KIWA_OIDC_ENV_MISSING` until Keycloak's Federation deployment is provisioned behind `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL`.
+The v1.21-4d harness lifts the fidelity axes from 12 → 16 by adding four Federation §7 trust-chain axes. Every axis has a mock coverage row driven by `@kiwa/auth`'s `resolveTrustChain` (wrapped through `src/lib/federation.ts`) and a real coverage row that stays refused with `KIWA_OIDC_ENV_MISSING` until Keycloak's Federation deployment is provisioned behind `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL`.
 
-| axis | mock (`@kiwa-test/auth` via `src/lib/federation.ts` wrapper) | real (Keycloak, `OIDC_BOOTSTRAP=1`, deferred) | assertion |
+| axis | mock (`@kiwa/auth` via `src/lib/federation.ts` wrapper) | real (Keycloak, `OIDC_BOOTSTRAP=1`, deferred) | assertion |
 |---|---|---|---|
 | 13. 3-step chain | `resolveTrustChain({leaf, intermediates, anchor})` returns `chain = [leaf, intermediate]` ordered leaf → anchor; resolved `anchor.entity_id` matches the expected anchor; `describeChain(chain)` renders `leafSub -> intermediateSub -> anchor`. | Keycloak Federation resolves the same chain against its trust-anchor JWKS (deferred pending Keycloak Federation deployment; the mock is the release-gate reference until then). | OpenID Federation 1.0 §7.2 — chain walk from leaf to anchor via `iss` → `sub` linkage. |
 | 14. broken link | Intermediate whose `sub` does not match the previous step's `iss` refuses; empty intermediates with a non-anchor leaf `iss` also refuses as `broken_link`. | Keycloak Federation returns 4xx on chain resolution failure. | OpenID Federation 1.0 §7.2 — a chain step that does not describe the previous step's issuer breaks the walk. |
@@ -138,7 +138,7 @@ The default startup timeout is 90s — Keycloak cold-boots in 15-20s on a warm i
 
 ## Real vs mock fidelity — measurement plan
 
-The mock (`@kiwa-test/auth` `setupOidcEnv`) is the release-gate reference for v1.22-1. Axes 1 + 3 add live Keycloak diff coverage (see § Real coverage matrix — v1.22-1); the remaining axes stay on the mock-as-reference matrix with documented Sub-Issue v1.22-N follow-ups. Everything runs by default under `KIWA_MODE=mock`; the `OIDC_BOOTSTRAP=1` gate opts a caller into the additional live diff.
+The mock (`@kiwa/auth` `setupOidcEnv`) is the release-gate reference for v1.22-1. Axes 1 + 3 add live Keycloak diff coverage (see § Real coverage matrix — v1.22-1); the remaining axes stay on the mock-as-reference matrix with documented Sub-Issue v1.22-N follow-ups. Everything runs by default under `KIWA_MODE=mock`; the `OIDC_BOOTSTRAP=1` gate opts a caller into the additional live diff.
 
 ## Release gate 7 軸 verdict
 
@@ -239,19 +239,19 @@ The e2e spec follows the v1.22-1 pattern: one container per file (`beforeAll` bo
 
 The federation-specific behaviour lives in `src/lib/federation.ts` —
 
-- `resolveTrustChain(input)` — discriminated outcome (`{ ok: true; chain; anchor } | { ok: false; issue: { axis, reason } }`). Delegates to `@kiwa-test/auth`'s `resolveTrustChain`; the wrapper reads the underlying `reason_code` discriminator to pin the axis.
+- `resolveTrustChain(input)` — discriminated outcome (`{ ok: true; chain; anchor } | { ok: false; issue: { axis, reason } }`). Delegates to `@kiwa/auth`'s `resolveTrustChain`; the wrapper reads the underlying `reason_code` discriminator to pin the axis.
 - `classifyFederationReason(reason_code)` — 1:1 forwarder from the upstream `TrustChainReasonCode` tag onto the wrapper's `FederationChainAxis`. Returns `structural` only when `reason_code` is undefined (safety net for hand-rolled `TrustChainResult` inputs — the real resolver always populates the field).
 - `mustResolveTrustChain(input)` — throwing variant used by the RP bootstrap path where any resolution failure aborts startup. Throws `FederationChainError` carrying the same structured `FederationIssue`.
-- `assertAnchorMatches(outcome, expected)` — asserts the resolved anchor `entity_id` equals the expected anchor. Federation §7.2 already enforces this on the resolver; the extra check pins the release-gate matrix against an independent reference so an accidental resolver swap trips the harness. This helper is the sole live path that surfaces `axis === 'anchor_mismatch'` in the wrapper (the walker exit paths inside `@kiwa-test/auth` collapse onto `broken_link` when they exhaust intermediates).
+- `assertAnchorMatches(outcome, expected)` — asserts the resolved anchor `entity_id` equals the expected anchor. Federation §7.2 already enforces this on the resolver; the extra check pins the release-gate matrix against an independent reference so an accidental resolver swap trips the harness. This helper is the sole live path that surfaces `axis === 'anchor_mismatch'` in the wrapper (the walker exit paths inside `@kiwa/auth` collapse onto `broken_link` when they exhaust intermediates).
 - `describeChain(chain)` — renders a resolved chain as `leafSub -> intermediateSub -> anchor` for docs + release-gate reports.
 
 ### Follow-up (v1.21 GH #880 / CAR-432) — `reason_code` upstream SSOT
 
-The v1.21-4d PR review flagged the substring-based classifier as fragile — reason string rewording upstream would silently drop failures onto `structural`. The follow-up moves the failure-axis SSOT into `@kiwa-test/auth` by adding a `reason_code: TrustChainReasonCode` field on `TrustChainResult` (`broken_link` / `cycle` / `expired_intermediate` / `expired_leaf` / `anchor_mismatch`). The wrapper reads the tag directly; the `anchor_mismatch` tag is reserved for the wrapper's `assertAnchorMatches` path since the walker never emits it. Tests moved from tolerant `expect(['cycle', 'broken_link']).toContain(...)` to exact-axis pins, and axis 16 fixtures were rebuilt so the walker actually enters cycle-detection instead of the broken-link short-circuit.
+The v1.21-4d PR review flagged the substring-based classifier as fragile — reason string rewording upstream would silently drop failures onto `structural`. The follow-up moves the failure-axis SSOT into `@kiwa/auth` by adding a `reason_code: TrustChainReasonCode` field on `TrustChainResult` (`broken_link` / `cycle` / `expired_intermediate` / `expired_leaf` / `anchor_mismatch`). The wrapper reads the tag directly; the `anchor_mismatch` tag is reserved for the wrapper's `assertAnchorMatches` path since the walker never emits it. Tests moved from tolerant `expect(['cycle', 'broken_link']).toContain(...)` to exact-axis pins, and axis 16 fixtures were rebuilt so the walker actually enters cycle-detection instead of the broken-link short-circuit.
 
 ## Environment gating
 
-- `KIWA_MODE=mock` — forces the mock env; every axis 1–16 test always runs. The federation resolver used is `resolveOidcTrustChain` from `@kiwa-test/auth`.
+- `KIWA_MODE=mock` — forces the mock env; every axis 1–16 test always runs. The federation resolver used is `resolveOidcTrustChain` from `@kiwa/auth`.
 - `OIDC_BOOTSTRAP=1` (v1.22-1) — opts a caller into the Keycloak testcontainers live driver. When `KEYCLOAK_URL` is set the adapter fetches from the supplied URL; otherwise `startKeycloakContainer()` boots `quay.io/keycloak/keycloak:26.0` through `testcontainers` (docker required). Live coverage activates on axes 1 + 3.
 - `OIDC_BOOTSTRAP=1` + `KEYCLOAK_URL=...` — opt-in for real ceremonies against a pre-provisioned Keycloak (docker-compose / external testcontainers instance / shared deployment).
 

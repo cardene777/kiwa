@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-The v1.30 milestone (Issue #991) applied `@kiwa-test/a11y` v1.1 + `@kiwa-test/quality-metrics` v0.4 tier-aware a11y gates to every kiwa package — the earlier state was one package (`@kiwa-test/a11y` itself) with a `test:a11y` script, and 34 published packages (33 `@kiwa-test/*` + `release-invariants`) landed a `.axe-config.mjs` + `.a11y-baseline/{pkg}.json` + `test:a11y` script in the v1.30-1 through v1.30-3 sweep. This tutorial captures the exact recipe you follow when a new package (or a fork of the monorepo) needs to join the sweep — the same primitives from tutorial 56, wired up through the 4-tier threshold SSOT so a core / framework / SaaS / test-type package each get a per-tier floor in one pass. Follow the 6 steps below and any package gets an a11y baseline + tier gate in under 15 minutes. This is the pattern kiwa's 34 packages already use, spelled out step-by-step.
+The v1.30 milestone (Issue #991) applied `@kiwa/a11y` v1.1 + `@kiwa/quality-metrics` v0.4 tier-aware a11y gates to every kiwa package — the earlier state was one package (`@kiwa/a11y` itself) with a `test:a11y` script, and 34 published packages (33 `@kiwa/*` + `release-invariants`) landed a `.axe-config.mjs` + `.a11y-baseline/{pkg}.json` + `test:a11y` script in the v1.30-1 through v1.30-3 sweep. This tutorial captures the exact recipe you follow when a new package (or a fork of the monorepo) needs to join the sweep — the same primitives from tutorial 56, wired up through the 4-tier threshold SSOT so a core / framework / SaaS / test-type package each get a per-tier floor in one pass. Follow the 6 steps below and any package gets an a11y baseline + tier gate in under 15 minutes. This is the pattern kiwa's 34 packages already use, spelled out step-by-step.
 
 ## Prerequisites
 
@@ -18,10 +18,10 @@ For a package you are onboarding, pick the tier that best describes the code axe
 
 | Tier | Ceiling (critical / serious / moderate) | Applies to |
 |---|---|---|
-| Core | 0 / 0 / 0-3 | Pure logic packages with no DOM output. `@kiwa-test/core` / `api` / `data` / `cli-test` / `cli` / `observability` / `perf-harness` / `quality-metrics` / `release-invariants`. |
-| Framework | 0 / 0-3 / 0-10 | SSR / hydration / RSC / adapter-wrapper layers. `@kiwa-test/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `solidjs` / `fresh` / `hono` / `auth`. |
-| SaaS | 0 / 0 / 0 | Provider-specific adapters that expose no DOM. `@kiwa-test/ai-llm` / `payment` / `queue` / `cache` / `streaming` / `realtime` / `mcp` / `agent` / `search` / `orm` / `dapp`. |
-| Test type | 0 / 0-3 / 0-10 | Harness packages with DOM / jsdom / browser fixture noise. `@kiwa-test/ui` / `a11y` / `visual` / `component` / `e2e`. |
+| Core | 0 / 0 / 0-3 | Pure logic packages with no DOM output. `@kiwa/core` / `api` / `data` / `cli-test` / `cli` / `observability` / `perf-harness` / `quality-metrics` / `release-invariants`. |
+| Framework | 0 / 0-3 / 0-10 | SSR / hydration / RSC / adapter-wrapper layers. `@kiwa/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `solidjs` / `fresh` / `hono` / `auth`. |
+| SaaS | 0 / 0 / 0 | Provider-specific adapters that expose no DOM. `@kiwa/ai-llm` / `payment` / `queue` / `cache` / `streaming` / `realtime` / `mcp` / `agent` / `search` / `orm` / `dapp`. |
+| Test type | 0 / 0-3 / 0-10 | Harness packages with DOM / jsdom / browser fixture noise. `@kiwa/ui` / `a11y` / `visual` / `component` / `e2e`. |
 
 The rule is that each new package picks the tier whose code shape it most resembles. If none fits, add a new tier row to the SSOT **first** and cite it from your PR body — the tier table is what makes future reviews cheap. `critical: 0` is an invariant across every tier because a critical WCAG 2.1 AA violation is a hard failure regardless of what the package does.
 
@@ -31,7 +31,7 @@ The rule is that each new package picks the tier whose code shape it most resemb
 
 ```js
 /**
- * A11y (axe-core) config for @kiwa-test/my-package.
+ * A11y (axe-core) config for @kiwa/my-package.
  * Tier: SaaS tier (critical 0 / serious 0 / moderate 0) — provider-specific
  * adapter, no DOM output.
  * SSOT: docs/quality/a11y-thresholds.md § SaaS tier.
@@ -75,26 +75,26 @@ Root `package.json` — extend the workspace `test:a11y` sweep so `pnpm test:a11
 ```json
 {
   "scripts": {
-    "test:a11y": "pnpm -r --filter '@kiwa-test/*' test:a11y"
+    "test:a11y": "pnpm -r --filter '@kiwa/*' test:a11y"
   }
 }
 ```
 
-The `-r --filter '@kiwa-test/*'` glob picks up every workspace package named `@kiwa-test/…` automatically, so as long as your package name follows the convention no additional wiring is required. Add the new package to the `A11Y_PACKAGE_TIER` map in `scripts/check-a11y-gates.mjs` so the release gate reads the right ceiling.
+The `-r --filter '@kiwa/*'` glob picks up every workspace package named `@kiwa/…` automatically, so as long as your package name follows the convention no additional wiring is required. Add the new package to the `A11Y_PACKAGE_TIER` map in `scripts/check-a11y-gates.mjs` so the release gate reads the right ceiling.
 
 ### 4. Seed the baseline on the first run
 
 ```bash
-pnpm --filter @kiwa-test/my-package test:a11y
+pnpm --filter @kiwa/my-package test:a11y
 ```
 
 On the first invocation, `scripts/run-axe-baseline.mjs` reads `.axe-config.mjs`, validates the shape against the SSOT tier table, runs `runLayerHarness` against whatever fixtures the config supplies (jsdom / Playwright / SSR-hydration), and writes the aggregated report to `.a11y-baseline/my-package.json`.
 
-A package with no runtime DOM produces a `layers-absent` baseline — every layer records `applicable: false` with an explicit reason. This is the expected state for every current `@kiwa-test/*` package because they are test-adapter infrastructure that emit no runtime DOM.
+A package with no runtime DOM produces a `layers-absent` baseline — every layer records `applicable: false` with an explicit reason. This is the expected state for every current `@kiwa/*` package because they are test-adapter infrastructure that emit no runtime DOM.
 
 ```json
 {
-  "package": "@kiwa-test/my-package",
+  "package": "@kiwa/my-package",
   "generatedAt": "2026-07-06T00:00:00.000Z",
   "layers": {
     "jsdom": {
@@ -134,9 +134,9 @@ Commit the baseline JSON — the file is **tracked in git** so an a11y regressio
 export const A11Y_PACKAGE_TIER = Object.freeze({
   // ...
   // SaaS tier (provider-specific adapters).
-  '@kiwa-test/my-package': { tier: 'saas' },
+  '@kiwa/my-package': { tier: 'saas' },
   // Or with a documented looser override:
-  '@kiwa-test/my-package-b': {
+  '@kiwa/my-package-b': {
     tier: 'framework',
     override: { critical: 0, serious: 5, moderate: 15 },
     reason: 'router link internals — follow-up upstream PR brings serious back to 3.',
@@ -144,7 +144,7 @@ export const A11Y_PACKAGE_TIER = Object.freeze({
 });
 ```
 
-Stricter overrides (lowering the ceiling below the tier default, e.g. `@kiwa-test/api` = 0/0/0 on Core) do **not** need a reason — a lower ceiling is always safe. Looser overrides require a one-line justification pinned to the follow-up work that will bring the ceiling back to the tier default (SSOT `docs/quality/a11y-thresholds.md` § Overrides). `critical` cannot be raised above 0 — the `A11yThreshold` TypeScript literal enforces this at compile time.
+Stricter overrides (lowering the ceiling below the tier default, e.g. `@kiwa/api` = 0/0/0 on Core) do **not** need a reason — a lower ceiling is always safe. Looser overrides require a one-line justification pinned to the follow-up work that will bring the ceiling back to the tier default (SSOT `docs/quality/a11y-thresholds.md` § Overrides). `critical` cannot be raised above 0 — the `A11yThreshold` TypeScript literal enforces this at compile time.
 
 ### 6. Wire the tier gate into `evaluateReleaseGate`
 
@@ -162,12 +162,12 @@ import {
   perfFromSamples,
   resolveA11yTier,
   testCountFromCategories,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 
-describe('@kiwa-test/my-package — 13-axis release gate', () => {
+describe('@kiwa/my-package — 13-axis release gate', () => {
   it('passes the tier ceiling when the a11y baseline holds', () => {
     const report = assembleReport({
-      provider: '@kiwa-test/my-package',
+      provider: '@kiwa/my-package',
       version: '0.1.0',
       coverage: coverageFromV8Summary({
         lines: { pct: 90 },

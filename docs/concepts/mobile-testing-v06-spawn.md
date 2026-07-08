@@ -6,7 +6,7 @@ title: Mobile v0.6 実 child_process.spawn 実行 — v1.55 depth-5 pattern 実�
 
 ## What this covers
 
-`@kiwa-test/mobile` v0.6 の 実 child_process.spawn 実行 SSOT (env sanitize + timeout enforcement + buffer 上限 + allowlist per command + dry-run + DI 経路)、 縦深化 pair 第 13 の 6 段目 (Phase 6、 **depth-5 pattern 実装完成**、 kiwa milestone 史上初 6 段拡張)。 v1.54 stub 契約層の上に v1.55 で 実 spawn 実行を lay、 v0.5 shape 契約 preserving で backward compat 絶対維持。
+`@kiwa/mobile` v0.6 の 実 child_process.spawn 実行 SSOT (env sanitize + timeout enforcement + buffer 上限 + allowlist per command + dry-run + DI 経路)、 縦深化 pair 第 13 の 6 段目 (Phase 6、 **depth-5 pattern 実装完成**、 kiwa milestone 史上初 6 段拡張)。 v1.54 stub 契約層の上に v1.55 で 実 spawn 実行を lay、 v0.5 shape 契約 preserving で backward compat 絶対維持。
 
 ## spawn-executor SSOT
 

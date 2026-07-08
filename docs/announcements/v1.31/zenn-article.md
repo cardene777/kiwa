@@ -1,9 +1,9 @@
-# kiwa v1.31 released — Streaming 深化 II (@kiwa-test/streaming v0.3.0 + 8 axis advanced + real driver + 縦深化 pair 第 3 pair 完成)
+# kiwa v1.31 released — Streaming 深化 II (@kiwa/streaming v0.3.0 + 8 axis advanced + real driver + 縦深化 pair 第 3 pair 完成)
 
 ## TL;DR
 
 - **kiwa v1.31 released** — Streaming 深化 II milestone (Kafka raw + Redpanda schema + NATS JetStream durable + real driver + 縦深化 pair 第 3 pair 完成)
-- **`@kiwa-test/streaming` v0.2.0 → v0.3.0 minor bump** — 8 axis advanced streaming production semantics + real driver env-gate + 3 provider (Kafka / Redpanda / NATS) neutral state machine 追加
+- **`@kiwa/streaming` v0.2.0 → v0.3.0 minor bump** — 8 axis advanced streaming production semantics + real driver env-gate + 3 provider (Kafka / Redpanda / NATS) neutral state machine 追加
 - **8 axis semantics** = Kafka raw protocol + Kafka consumer group + Redpanda schema evolution + Redpanda transactions + NATS JetStream durable + NATS KV/Object Store + Streaming exactly-once + Consumer lag telemetry
 - **3 dogfood app v2** — kafka-event-pipeline v2 + redpanda-schema-registry v2 + nats-jetstream v2、 全 7 軸 release gate PASS + testcontainers
 - **縦深化 pair pattern 第 3 pair 完成** — Auth pair (v1.21→v1.22) + Realtime pair (v1.13→v1.28) + **Streaming pair (v1.20→v1.31)**、 縦深化戦略 SSOT 確立
@@ -13,7 +13,7 @@
 
 ## v1.31 が解決したい問題 — Streaming production semantics の testing gap
 
-v1.20 で `@kiwa-test/streaming` v0.1 を land した時点で、 kiwa は 3 provider (Kafka / Redpanda / NATS) 上に **5 base semantics** (producer / consumer / exactly-once / DLQ / schema-registry) を統一 mock として提供していた。 broker binary + Docker + Zookeeper 不要で mock only mode で走る、 実 test 環境の生産性を確保する目的の layer。
+v1.20 で `@kiwa/streaming` v0.1 を land した時点で、 kiwa は 3 provider (Kafka / Redpanda / NATS) 上に **5 base semantics** (producer / consumer / exactly-once / DLQ / schema-registry) を統一 mock として提供していた。 broker binary + Docker + Zookeeper 不要で mock only mode で走る、 実 test 環境の生産性を確保する目的の layer。
 
 しかし v1.20 の実行観測で判明したのは、 real production streaming setup で頻繁に遭遇する **8 axis の advanced semantics** — Kafka raw protocol (KIP-98 idempotent + transaction coordinator) / consumer group rebalance / Redpanda schema evolution / Redpanda transactions / NATS JetStream durable / KV/Object Store / exactly-once transactional producer + read-committed isolation / consumer lag telemetry — が 5 base semantics だけでは cover できないこと。
 
@@ -78,13 +78,13 @@ Offset lag + time lag + partition-level lag + high watermark + log-end-offset �
 v1.31 で kiwa の縦深化 pair pattern (basic mock milestone → 深化 II milestone で real driver + advanced semantics) が 3 pair 連続完成:
 
 1. **Auth pair** (v1.21 → v1.22)
-   - v1.21 = `@kiwa-test/auth` v0.4 4 protocol adapter (WebAuthn L3 / Passkey / OAuth 2.1 / OIDC) mock only
+   - v1.21 = `@kiwa/auth` v0.4 4 protocol adapter (WebAuthn L3 / Passkey / OAuth 2.1 / OIDC) mock only
    - v1.22 = Keycloak testcontainers + oauth2-mock-server + Chrome caBLE hybrid transport (real driver) + a11y axe-core gate
 2. **Realtime pair** (v1.13 → v1.28)
-   - v1.13 = `@kiwa-test/realtime` v0.1 4 provider (Supabase / Ably / Pusher / Socket.io) × 5 base semantics mock only
+   - v1.13 = `@kiwa/realtime` v0.1 4 provider (Supabase / Ably / Pusher / Socket.io) × 5 base semantics mock only
    - v1.28 = WebRTC + WebTransport + HTTP/3 + QUIC multiplexing + 8 axis advanced (real driver env-gate)
 3. **Streaming pair** (v1.20 → v1.31、 this)
-   - v1.20 = `@kiwa-test/streaming` v0.1 3 provider (Kafka / Redpanda / NATS) × 5 semantics mock only
+   - v1.20 = `@kiwa/streaming` v0.1 3 provider (Kafka / Redpanda / NATS) × 5 semantics mock only
    - v1.31 = Kafka raw + Redpanda schema + NATS JetStream + 8 axis advanced (real driver env-gate + testcontainers)
 
 basic mock → advanced real driver の 2 phase pair を追加 provider に横展開する pattern が SSOT 化された。 v1.25 perf + v1.27 mutation + v1.30 a11y の横串 triple pair と合わせて **kiwa quality gate 縦横 grid 完成**。
@@ -104,13 +104,13 @@ v1.23 (payment) → v1.24 (edge) → v1.25 (perf-harness) → v1.26 (orm) → v1
 ## 使い方
 
 ```bash
-pnpm add -D @kiwa-test/streaming @kiwa-test/core
+pnpm add -D @kiwa/streaming @kiwa/core
 ```
 
 Kafka raw protocol の pure state machine helper:
 
 ```typescript
-import { createKafkaRawEnv } from '@kiwa-test/streaming/semantics/kafka-raw-protocol';
+import { createKafkaRawEnv } from '@kiwa/streaming/semantics/kafka-raw-protocol';
 
 const env = createKafkaRawEnv({
   brokers: ['localhost:9092'],
@@ -171,6 +171,6 @@ Feedback welcome — どの候補が優先されるべきか、 Discussions で�
 - Docs: https://cardene777.github.io/kiwa
 - Migration guide: https://cardene777.github.io/kiwa/migrations/v1.30-to-v1.31
 - Concept doc: https://cardene777.github.io/kiwa/concepts/streaming-real-driver-testing
-- npm: `@kiwa-test/streaming` v0.3.0
+- npm: `@kiwa/streaming` v0.3.0
 
 Thanks for testing kiwa v1.31 pre-releases and shaping the 縦深化 pair pattern SSOT.

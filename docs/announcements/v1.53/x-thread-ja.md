@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.53 リリース — Mobile 深化 IV (@kiwa-test/mobile v0.4)、 **pair 深度 4 段拡張達成 4 例目 depth-4 record** milestone。 v1.40 AI/LLM + v1.41 Payment + v1.42 Observability の 3 例安定化に続く 4 例目、 depth-4 pattern 4 例安定化を実証。
+kiwa v1.53 リリース — Mobile 深化 IV (@kiwa/mobile v0.4)、 **pair 深度 4 段拡張達成 4 例目 depth-4 record** milestone。 v1.40 AI/LLM + v1.41 Payment + v1.42 Observability の 3 例安定化に続く 4 例目、 depth-4 pattern 4 例安定化を実証。
 
 ## Tweet 2 — 22 adapter + fidelity harness
 
@@ -14,7 +14,7 @@ kiwa v1.53 リリース — Mobile 深化 IV (@kiwa-test/mobile v0.4)、 **pair 
 
 ## Tweet 4 — install + Phase 5 計画
 
-`pnpm add -D @kiwa-test/mobile@^0.4`。 migration: https://cardene777.github.io/kiwa/migrations/v1.52-to-v1.53
+`pnpm add -D @kiwa/mobile@^0.4`。 migration: https://cardene777.github.io/kiwa/migrations/v1.52-to-v1.53
 
 v1.54+ で Mobile v0.5 child_process.spawn 実装 (Metro real bundle + Expo EAS CLI 実 spawn + Fabric native mount)、 systematic root cause pattern SSOT 28 度目適用。
 

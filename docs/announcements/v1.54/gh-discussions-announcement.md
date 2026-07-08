@@ -14,7 +14,7 @@ kiwa v1.54 is out。 **2 軸 milestone** = rules/git-workflow.md § GitHub API r
 
 ### 軸 2 — Mobile v0.5 child_process.spawn stub
 
-- `@kiwa-test/mobile` v0.4 → v0.5 minor bump、 `spawn-driver.ts` 新規
+- `@kiwa/mobile` v0.4 → v0.5 minor bump、 `spawn-driver.ts` 新規
 - `invokeMobileCli(inv)` = env-gate + spawn shape 契約 + fail-closed
 - `cliForAxis(axis)` = 11 axis → 6 CLI mapping (CLI-backed 7 axis / non-CLI 4 axis)
 - 6 CLI stub = `expo build` / `metro bundle` / `codegen run` / `react-native start` / `pod install` / `gradle build`
@@ -53,7 +53,7 @@ v1.23 → v1.54 = 32 milestone streak、 kiwa 史上最長記録更新継続。
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/mobile@^0.5
+pnpm add -D @kiwa/mobile@^0.5
 ```
 
 ## Migration guide

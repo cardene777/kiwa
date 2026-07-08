@@ -1,13 +1,13 @@
 # WebRTC / WebTransport / HTTP/3 testing SSOT — 8-axis grid + P2P vs SFU + ICE trickle vs half-trickle + WebTransport vs WebSocket for kiwa v1.28
 
-Introduced in v1.28 as `@kiwa-test/realtime` v0.2 — 3 protocol × 8 axis low-layer transport mocks (`createWebRtcSignalingMock` + `createWebRtcIceMock` + `createWebRtcTrackMock` + `createWebRtcDataChannelMock` + `createWebTransportUniMock` + `createWebTransportBiMock` + `createHttp3PushMock` + `createQuicMultiplexMock`) + 24-row `SEMANTICS_GRID` + `resolveRealtimeDriver` env-gate. This document is the SSOT for **what an advanced-realtime kiwa suite measures, which protocol handles which axis, and how to pick between the two most common architectural choices (P2P vs SFU, WebTransport vs WebSocket)**. Every downstream axis mock (`packages/realtime/src/semantics/*.ts`) and every dogfood app adapter (`examples/dogfood-*/src/adapters/interface.ts`) reads these rules from here — do not re-derive them locally.
+Introduced in v1.28 as `@kiwa/realtime` v0.2 — 3 protocol × 8 axis low-layer transport mocks (`createWebRtcSignalingMock` + `createWebRtcIceMock` + `createWebRtcTrackMock` + `createWebRtcDataChannelMock` + `createWebTransportUniMock` + `createWebTransportBiMock` + `createHttp3PushMock` + `createQuicMultiplexMock`) + 24-row `SEMANTICS_GRID` + `resolveRealtimeDriver` env-gate. This document is the SSOT for **what an advanced-realtime kiwa suite measures, which protocol handles which axis, and how to pick between the two most common architectural choices (P2P vs SFU, WebTransport vs WebSocket)**. Every downstream axis mock (`packages/realtime/src/semantics/*.ts`) and every dogfood app adapter (`examples/dogfood-*/src/adapters/interface.ts`) reads these rules from here — do not re-derive them locally.
 
 ## Why an advanced-realtime SSOT
 
 Realtime tests without a shared standard fail three ways.
 
 - **Protocol / axis conflation**. WebRTC signaling and WebRTC ICE both surface in an `RTCPeerConnection` lifecycle, but they measure different failure modes. Signaling fidelity is about SDP negotiation shape (offer / answer ordering, media section count, BUNDLE flag); ICE fidelity is about candidate gathering + connectivity check state machine (`new → gathering → complete`, `new → checking → connected`). A single "WebRTC test" that conflates them cannot pin down which one regressed. The 8-axis SSOT names each measurable surface separately.
-- **Mock vs real drift**. WebRTC + WebTransport + HTTP/3 all specify complex asynchronous state machines. A hand-written mock that gets a state transition wrong (e.g. ICE `checking → connected` without an active candidate pair) can pass thousands of tests while silently diverging from real Chrome + aioquic behavior. The `@kiwa-test/realtime` v0.2 mocks pin the state machine transitions to a shared spec so a fidelity harness diff catches the drift.
+- **Mock vs real drift**. WebRTC + WebTransport + HTTP/3 all specify complex asynchronous state machines. A hand-written mock that gets a state transition wrong (e.g. ICE `checking → connected` without an active candidate pair) can pass thousands of tests while silently diverging from real Chrome + aioquic behavior. The `@kiwa/realtime` v0.2 mocks pin the state machine transitions to a shared spec so a fidelity harness diff catches the drift.
 - **Architecture choice masking bugs**. A test that mocks the SFU signaling shape (mediasoup) does not exercise P2P `RTCDataChannel` negotiation, and vice versa. Choosing the wrong architecture at the test level masks the bugs the app hits in production. The concept doc records the P2P vs SFU + WebTransport vs WebSocket decision criteria so tests pick the shape their app actually ships.
 
 The 4 rules below are the smallest set that make advanced-realtime kiwa suites comparable across the 3 protocols, 8 axes, and 3 dogfood apps.
@@ -39,7 +39,7 @@ The 3 × 8 = 24 pair matrix is captured in `SEMANTICS_GRID`. Every pair is one o
 The grid is not just documentation — `measureSemanticsGrid({ scenarios })` iterates it and returns exactly 24 result rows, with non-applicable rows emitting a placeholder `{ eventsEmitted: 0, streamsOpened: 0, ... }`. Downstream matrix rendering does not need to fill gaps; the runtime and the doc agree by construction.
 
 ```ts
-import { measureSemanticsGrid, SEMANTICS_GRID } from '@kiwa-test/realtime';
+import { measureSemanticsGrid, SEMANTICS_GRID } from '@kiwa/realtime';
 
 // SEMANTICS_GRID.length === 24
 // SEMANTICS_GRID.filter(r => r.applicable).length === 8
@@ -91,7 +91,7 @@ Two low-level design decisions surface repeatedly in advanced-realtime test suit
 - **Half-trickle** — the offerer trickles candidates but the answerer waits for gathering to complete before sending the answer. Common in older signaling gateways that assume the SDP answer contains all `a=candidate:` lines. Adds ~800-1200 ms to the answerer-side handshake.
 - **Non-trickle** — both sides wait for gathering to complete. Signaling channels that cannot handle multi-message candidate flows (some SIP-over-WebSocket bridges) fall back here.
 
-The `@kiwa-test/realtime` v0.2 `createWebRtcSignalingMock` + `createWebRtcIceMock` emit candidates one-by-one via `emitIceCandidates(n)` / `startGathering(n)`. A trickle-ICE-aware app will assert on the number of `ice-candidate` events emitted; a half-trickle app will assert that the answer only sends after `ice-gathering` reaches state `complete`.
+The `@kiwa/realtime` v0.2 `createWebRtcSignalingMock` + `createWebRtcIceMock` emit candidates one-by-one via `emitIceCandidates(n)` / `startGathering(n)`. A trickle-ICE-aware app will assert on the number of `ice-candidate` events emitted; a half-trickle app will assert that the answer only sends after `ice-gathering` reaches state `complete`.
 
 ### WebTransport vs WebSocket
 
@@ -115,7 +115,7 @@ The `dogfood-nuxt-webtransport-stream-app` exercises the WebTransport shape end-
 
 ## The 3-layer harness alignment
 
-`@kiwa-test/perf-harness` runs `serial + concurrent + memory` in one `runPerf3Layer` call. The advanced-realtime semantics harness is single-layer by design — each `measureSemanticsAxis` call runs one scenario against one mock and collects the event stream. The perf harness is 3-layer because contention + memory leaks slip past a serial p95; the realtime harness is 1-layer because concurrent stream measurement is already the *scenario itself* (`concurrentSend` opens N streams and measures priority ordering).
+`@kiwa/perf-harness` runs `serial + concurrent + memory` in one `runPerf3Layer` call. The advanced-realtime semantics harness is single-layer by design — each `measureSemanticsAxis` call runs one scenario against one mock and collects the event stream. The perf harness is 3-layer because contention + memory leaks slip past a serial p95; the realtime harness is 1-layer because concurrent stream measurement is already the *scenario itself* (`concurrentSend` opens N streams and measures priority ordering).
 
 The kiwa release gate treats them as parallel axes.
 
@@ -134,7 +134,7 @@ The semantics fidelity axis is cheap (~2 s per axis, 16 s for all 8 in one `meas
 The `resolveRealtimeDriver({ provider, requiredKeys, createReal, createMock })` helper is the SSOT for opting into real drivers on the 4 v1.13 providers (Supabase / Ably / Pusher / Socket.io). It returns `createMock()` unless `KIWA_MODE=real` + every `requiredKeys` env variable is present — safe fallback by construction.
 
 ```ts
-import { resolveRealtimeDriverByProvider } from '@kiwa-test/realtime';
+import { resolveRealtimeDriverByProvider } from '@kiwa/realtime';
 
 const { driver, isReal, reason, missingKeys } = resolveRealtimeDriverByProvider(
   'supabase',
@@ -148,11 +148,11 @@ The 3 v1.28 dogfood apps use a per-adapter env gate (not `resolveRealtimeDriver`
 
 ## Package coverage (v1.28)
 
-The v1.28 milestone applied the 8-axis grid to one package (`@kiwa-test/realtime`) and three dogfood apps.
+The v1.28 milestone applied the 8-axis grid to one package (`@kiwa/realtime`) and three dogfood apps.
 
 | Layer | Packages / apps |
 |---|---|
-| SaaS (adapter, 1) | `@kiwa-test/realtime` v0.2 |
+| SaaS (adapter, 1) | `@kiwa/realtime` v0.2 |
 | Dogfood apps (3) | `dogfood-nextjs-webrtc-video-app` / `dogfood-nuxt-webtransport-stream-app` / `dogfood-sveltekit-http3-multiplex-app` |
 
 Every dogfood app writes a per-app baseline JSON to `.mutation-baseline/{app}.json` (SaaS tier default 65 %), runs Stryker on every `pnpm test:mutation` invocation, and gates on the tier floor via `evaluateReleaseGate({ mutationTier: 'saas' })`.
@@ -164,7 +164,7 @@ The 12-axis release gate does not add a new axis in v1.28. The 8 realtime axes f
 | Axis | Kind | Introduced | Threshold source |
 |---|---|---|---|
 | fidelity — ratio | floor | v1.11 (7-axis) | `ReleaseGateThresholds.fidelityRatio` (default 60 %, overrideable). v1.28 rows contribute per-axis coverage. |
-| mutation — tier | floor | v1.27-4 (12-axis) | `DEFAULT_MUTATION_TIER_THRESHOLDS[tier]` — SaaS default 65 % for the 3 dogfood apps + `@kiwa-test/realtime` v0.2 |
+| mutation — tier | floor | v1.27-4 (12-axis) | `DEFAULT_MUTATION_TIER_THRESHOLDS[tier]` — SaaS default 65 % for the 3 dogfood apps + `@kiwa/realtime` v0.2 |
 
 The 8-axis grid is a *fidelity signal* — it improves the resolution of the `fidelity.ratio` axis without changing the axis count. Backward-compatible with every v1.11 – v1.27 consumer.
 

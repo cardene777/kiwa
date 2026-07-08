@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v1.63 is out — Desktop deepening VII. **@kiwa-test/desktop v0.8** adds native binding availability probe + skip path, which/where CLI check + platform gate + 12 axis skip strategy + fidelity harness probe integration. Inherits v1.55-v1.62 4-PR rhythm (**10 milestones = 40 PRs same rhythm**), **systematic pattern 38th application**, **depth-8 pattern new candidate reached**.
+kiwa v1.63 is out — Desktop deepening VII. **@kiwa/desktop v0.8** adds native binding availability probe + skip path, which/where CLI check + platform gate + 12 axis skip strategy + fidelity harness probe integration. Inherits v1.55-v1.62 4-PR rhythm (**10 milestones = 40 PRs same rhythm**), **systematic pattern 38th application**, **depth-8 pattern new candidate reached**.
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-desktop-probe-app new, 4-pattern workflow, 10 tests all pass. kiwa packa
 
 ## Tweet 4
 
-`pnpm add -D @kiwa-test/desktop@^0.8`. Migration: https://cardene777.github.io/kiwa/migrations/v1.62-to-v1.63
+`pnpm add -D @kiwa/desktop@^0.8`. Migration: https://cardene777.github.io/kiwa/migrations/v1.62-to-v1.63
 
 v1.64+ will implement real native binding invocation. Backward compat absolutely preserved — v0.1-v0.7 fully retained.
 

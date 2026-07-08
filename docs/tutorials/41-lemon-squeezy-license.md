@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A SvelteKit merchant-of-record app wired to `@kiwa-test/payment` v0.3's Lemon Squeezy mock. The suite covers Lemon Squeezy's distinguishing axes — hosted checkout page (no inline SDK), refund full + partial via the neutral `refunded` fixture, and the chargeback dispute lifecycle (opened → evidence submitted → won or lost + fee assessment). Like Paddle, Lemon Squeezy is a Merchant-of-Record — tax + fraud + chargeback are handled upstream, and the app books the neutralised events.
+A SvelteKit merchant-of-record app wired to `@kiwa/payment` v0.3's Lemon Squeezy mock. The suite covers Lemon Squeezy's distinguishing axes — hosted checkout page (no inline SDK), refund full + partial via the neutral `refunded` fixture, and the chargeback dispute lifecycle (opened → evidence submitted → won or lost + fee assessment). Like Paddle, Lemon Squeezy is a Merchant-of-Record — tax + fraud + chargeback are handled upstream, and the app books the neutralised events.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A SvelteKit merchant-of-record app wired to `@kiwa-test/payment` v0.3's Lemon Sq
 ```bash
 mkdir kiwa-lemon-squeezy-license && cd kiwa-lemon-squeezy-license
 pnpm init
-pnpm add -D @kiwa-test/payment@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa/payment@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest script in `package.json`.
@@ -37,7 +37,7 @@ Add the vitest script in `package.json`.
 `src/adapters/mock.ts`.
 
 ```ts
-import { createLemonSqueezyMock } from '@kiwa-test/payment';
+import { createLemonSqueezyMock } from '@kiwa/payment';
 
 export function lemonSqueezyMock() {
   return createLemonSqueezyMock({ secret: 'ls_sign_test' });
@@ -54,7 +54,7 @@ Unlike Paddle's inline SDK, Lemon Squeezy uses a **hosted checkout URL** — mer
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { checkoutCompleted, createLemonSqueezyMock } from '@kiwa-test/payment';
+import { checkoutCompleted, createLemonSqueezyMock } from '@kiwa/payment';
 
 describe('lemon squeezy hosted checkout', () => {
   it('emits checkout.completed after the hosted flow completes', async () => {
@@ -85,7 +85,7 @@ Refunds use the neutral `refunded` fixture. The fixture inverts the amount sign 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createLemonSqueezyMock, refunded } from '@kiwa-test/payment';
+import { createLemonSqueezyMock, refunded } from '@kiwa/payment';
 
 describe('refund', () => {
   it('processes a full refund with negative amount', async () => {
@@ -135,7 +135,7 @@ import {
   openChargeback,
   submitEvidence,
   resolveChargeback,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('chargeback dispute', () => {
   it('walks opened → evidence → won with no fee', async () => {
@@ -185,7 +185,7 @@ The chargeback state machine mirrors real card-network disputes — `opened` (cu
 ### 6. Real driver mode
 
 ```ts
-import { createLemonSqueezyMock } from '@kiwa-test/payment';
+import { createLemonSqueezyMock } from '@kiwa/payment';
 
 const mode = process.env.KIWA_MODE ?? 'mock';
 export const adapter = mode === 'real'

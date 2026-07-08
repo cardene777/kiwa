@@ -1,10 +1,10 @@
 # dogfood-fresh-islands
 
-Dogfood app (v1.19-3) — a Deno Fresh Islands + Route Handler + partial hydration + edge runtime harness that exercises **4 flows** (route Handler dispatch / defineRoute page tree / island mount + interaction / Head merge + edge env) inside `GreetRoute` / `Counter Island` / `TodoList Island` / `SiteHead` components. Drivable in both `KIWA_MODE=real` (spawns real Deno Fresh + `fresh-testing-library` through env-skip when `DENO_INSTALLED=1`) and `KIWA_MODE=mock` (`@kiwa-test/fresh` `invokeFreshHandler` + `invokeDefineRoute` + `hydrateIslands` + `simulateInteraction` + `mergeHead`). Behavioural fidelity feeds `@kiwa-test/quality-metrics` 7-axis release gate.
+Dogfood app (v1.19-3) — a Deno Fresh Islands + Route Handler + partial hydration + edge runtime harness that exercises **4 flows** (route Handler dispatch / defineRoute page tree / island mount + interaction / Head merge + edge env) inside `GreetRoute` / `Counter Island` / `TodoList Island` / `SiteHead` components. Drivable in both `KIWA_MODE=real` (spawns real Deno Fresh + `fresh-testing-library` through env-skip when `DENO_INSTALLED=1`) and `KIWA_MODE=mock` (`@kiwa/fresh` `invokeFreshHandler` + `invokeDefineRoute` + `hydrateIslands` + `simulateInteraction` + `mergeHead`). Behavioural fidelity feeds `@kiwa/quality-metrics` 7-axis release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-test/fresh` `invokeFreshHandler` + `invokeDefineRoute` + `hydrateIslands` + `simulateInteraction` + `mergeHead` + `renderHead` + `withEdgeEnv`).
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/fresh` `invokeFreshHandler` + `invokeDefineRoute` + `hydrateIslands` + `simulateInteraction` + `mergeHead` + `renderHead` + `withEdgeEnv`).
 - `KIWA_MODE=real` — driven by `makeRealAdapter()`, which detects `DENO_INSTALLED=1`. Without the env var each method reports `FRESH_REAL_ENV_MISSING` and throws `SkippedError`; with the env var each method reports `FRESH_LIVE_NOT_IMPLEMENTED` (a placeholder trace that keeps the divergence shape stable for follow-up work that swaps in a real `fresh-testing-library` driver).
 
 Real-mode envs.
@@ -26,11 +26,11 @@ src/
     env-mock.ts            -- withEdgeEnv (Deno.env + Deno.serve mock) + sampleEdgeHandler
   adapters/
     interface.ts           -- provider-neutral 6-op contract
-    mock.ts                -- kiwa mock adapter (@kiwa-test/fresh)
+    mock.ts                -- kiwa mock adapter (@kiwa/fresh)
     real.ts                -- real Deno Fresh adapter with env-skip when DENO_INSTALLED is unset
   flows/
     fresh-flows.ts         -- 4 user-facing flows (route / island / head / edge)
-    fidelity.ts            -- trace-diffing harness feeding @kiwa-test/quality-metrics
+    fidelity.ts            -- trace-diffing harness feeding @kiwa/quality-metrics
 tests/
   greet-route.test.ts          -- 8 defineRoute + Handler invariants
   counter-island.test.ts       -- 6 Counter island mount + hydrate + interaction tests
@@ -70,7 +70,7 @@ Every method emits at least 1 trace event, so the fidelity harness can diff the 
 
 ## Release gate (7 axes)
 
-Because the provider string is `@kiwa-test/fresh/islands-app`, `evaluateReleaseGate` includes the common 7 axes (coverage 3 / fidelity / perf p95 / mutation / behavior tests). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply — Route Handler + Islands are not token-priced generative surfaces.
+Because the provider string is `@kiwa/fresh/islands-app`, `evaluateReleaseGate` includes the common 7 axes (coverage 3 / fidelity / perf p95 / mutation / behavior tests). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply — Route Handler + Islands are not token-priced generative surfaces.
 
 - coverage — line >= 85%, branch >= 80%, function >= 90%
 - fidelity — ratio >= 70% (mock covered ops / real total ops, penalised by behavioural divergences)
@@ -106,6 +106,6 @@ Each of the 6 Fresh-driven invocations exercises 1 specific Fresh contract so th
 
 ## Related
 
-- v1.19-1b `@kiwa-test/fresh` v0.1 (`packages/fresh/`)
-- v1.11-1 `@kiwa-test/quality-metrics` (`packages/quality-metrics/`)
+- v1.19-1b `@kiwa/fresh` v0.1 (`packages/fresh/`)
+- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
 - v1.19 milestone parent [#806](https://github.com/cardene777/kiwa/issues/806), this sub [#809](https://github.com/cardene777/kiwa/issues/809)

@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.61 リリース — Desktop 深化 V (@kiwa-test/desktop v0.6 実 child_process.spawn 実行、 depth-5 pattern 2 例目確定 + depth-6 pattern 新設 kiwa milestone 史上初、 systematic pattern 36 度目、 39 milestone streak、 Mobile v1.55 rhythm 完全再現)"
+title: "kiwa v1.61 リリース — Desktop 深化 V (@kiwa/desktop v0.6 実 child_process.spawn 実行、 depth-5 pattern 2 例目確定 + depth-6 pattern 新設 kiwa milestone 史上初、 systematic pattern 36 度目、 39 milestone streak、 Mobile v1.55 rhythm 完全再現)"
 emoji: "⚙"
 type: "tech"
 topics: ["testing", "vitest", "electron", "tauri", "desktop"]
@@ -14,7 +14,7 @@ published: false
 
 ## What's new
 
-### `@kiwa-test/desktop` v0.6 minor bump
+### `@kiwa/desktop` v0.6 minor bump
 
 - **[Tutorial 121 — Desktop v0.6 実 spawn 実装完成](https://cardene777.github.io/kiwa/tutorials/121-desktop-v06-spawn)**
 - Migration v1.60 → v1.61 additive + 4 pattern SSOT + depth-6 pattern 新設 SSOT + depth-5 pattern 2 例目確定 SSOT
@@ -84,7 +84,7 @@ pair 深度 6 段拡張 (v0.1 → v0.2 → v0.3 → v0.4 → v0.5 → v0.6) の 
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/desktop@^0.6
+pnpm add -D @kiwa/desktop@^0.6
 ```
 
 ## Code sample (4 patterns)
@@ -92,7 +92,7 @@ pnpm add -D @kiwa-test/desktop@^0.6
 ### Pattern 1 — dry-run 経路 (backward compat)
 
 ```ts
-import { invokeDesktopCli } from '@kiwa-test/desktop';
+import { invokeDesktopCli } from '@kiwa/desktop';
 
 const result = await invokeDesktopCli({
   command: 'ffmpeg',
@@ -104,7 +104,7 @@ const result = await invokeDesktopCli({
 ### Pattern 2 — DI 経路
 
 ```ts
-import { invokeDesktopCliWith, type SpawnFn } from '@kiwa-test/desktop';
+import { invokeDesktopCliWith, type SpawnFn } from '@kiwa/desktop';
 
 const result = await invokeDesktopCliWith(
   { command: 'ffmpeg', args: ['-version'], env: { KIWA_DESKTOP_MODE: 'real', PATH: '/usr/bin' } },
@@ -115,7 +115,7 @@ const result = await invokeDesktopCliWith(
 ### Pattern 3 — sanitizeEnv
 
 ```ts
-import { sanitizeEnv } from '@kiwa-test/desktop';
+import { sanitizeEnv } from '@kiwa/desktop';
 
 const clean = sanitizeEnv('electron-builder', { PATH: '/usr/bin', CSC_LINK: 'ok', SECRET_TOKEN: 'nope' });
 ```
@@ -123,7 +123,7 @@ const clean = sanitizeEnv('electron-builder', { PATH: '/usr/bin', CSC_LINK: 'ok'
 ### Pattern 4 — executeSpawn 低レベル API
 
 ```ts
-import { executeSpawn } from '@kiwa-test/desktop';
+import { executeSpawn } from '@kiwa/desktop';
 
 const result = await executeSpawn({
   command: 'ffmpeg',

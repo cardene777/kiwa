@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/mobile` v0.1 (new-base pair 第 13、 41 package 到達)、 3 axis (React Native + Expo + Metro) × 3 target (ios + android + web) の workflow を deterministic に扱う pattern。
+A vitest suite wired to `@kiwa/mobile` v0.1 (new-base pair 第 13、 41 package 到達)、 3 axis (React Native + Expo + Metro) × 3 target (ios + android + web) の workflow を deterministic に扱う pattern。
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/mobile` v0.1 (new-base pair 第 13、 41 pac
 ```bash
 mkdir kiwa-mobile && cd kiwa-mobile
 pnpm init
-pnpm add -D @kiwa-test/mobile@^0.1 vitest typescript @types/node
+pnpm add -D @kiwa/mobile@^0.1 vitest typescript @types/node
 ```
 
 ### 2. React Native axis (component + native module + gesture)
@@ -29,7 +29,7 @@ import {
   mountReactNativeComponent,
   recognizeGesture,
   unmountReactNativeComponent,
-} from '@kiwa-test/mobile';
+} from '@kiwa/mobile';
 
 describe('React Native lifecycle', () => {
   it('mount → invoke → gesture → unmount', () => {
@@ -52,7 +52,7 @@ import {
   loadExpoBuildConfig,
   receivePushNotification,
   resolveDeepLink,
-} from '@kiwa-test/mobile';
+} from '@kiwa/mobile';
 
 describe('Expo build flow', () => {
   it('load config → deep link → push → complete build', () => {
@@ -74,7 +74,7 @@ import {
   completeMetroBundle,
   resolveMetroModule,
   startMetroBundle,
-} from '@kiwa-test/mobile';
+} from '@kiwa/mobile';
 
 describe('Metro bundle flow', () => {
   it('start → resolve → hmr → complete', () => {

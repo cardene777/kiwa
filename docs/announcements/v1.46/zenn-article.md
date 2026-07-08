@@ -6,21 +6,21 @@ kiwa v1.46 をリリースしました。 **quality gate integrity 回復 + DevS
 
 ## 何が変わったか
 
-### `@kiwa-test/perf-harness` v0.3.0 strict mode
+### `@kiwa/perf-harness` v0.3.0 strict mode
 
 - `detectRegressionStrict` (|t|>3 + delta 10%) 追加
 - `runPerf3LayerStrict` (iter 400 + concurrency 20 + memory 400) 追加
 - v0.2 lax mode (|t|>2 + 20% + iter 200) は backward compat として維持
 - test 漏れゼロを狙う fail-fast mode
 
-### `@kiwa-test/quality-metrics` v0.4.0 15 axis
+### `@kiwa/quality-metrics` v0.4.0 15 axis
 
 - `PerfMetric` に `strict` + `baselineExists` field 追加
 - `ReleaseGateThresholds` に `perfStrictP95Ms` (default 50) + `perfStrictRequireBaseline` (default true) 追加
 - `evaluateReleaseGate` に `perf.strict.p95Ms` + `perf.strict.baseline` axis 追加 (`strict = true` 時のみ発火)
 - 13 → 15 axis 拡張、 backward compat
 
-### `@kiwa-test/security-devsecops` v0.1.0 新規 (40 package 到達)
+### `@kiwa/security-devsecops` v0.1.0 新規 (40 package 到達)
 
 6 axis の state machine + neutral event pattern。
 
@@ -50,9 +50,9 @@ v1.23 → v1.46 で 24 milestone 連続。 kiwa 史上最長記録更新継続�
 ## インストール
 
 ```bash
-pnpm add -D @kiwa-test/perf-harness@^0.3
-pnpm add -D @kiwa-test/quality-metrics@^0.4
-pnpm add -D @kiwa-test/security-devsecops@^0.1
+pnpm add -D @kiwa/perf-harness@^0.3
+pnpm add -D @kiwa/quality-metrics@^0.4
+pnpm add -D @kiwa/security-devsecops@^0.1
 ```
 
 ## Migration guide

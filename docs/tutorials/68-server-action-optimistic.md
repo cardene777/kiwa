@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/component` v0.3 (form-action-advanced) + `@kiwa-test/nextjs` v1.2 (server-action-advanced) that models the 6 pieces of a real React 19 + Next.js 15 Server Action layer that every non-trivial form flow eventually needs — a form action session that tracks pending / optimistic / resolved states, a `useFormStatus` pending mark that renders the loading spinner without a client-side hook, a `useOptimistic` patch ledger that lets the UI show the resolved value before the Server Action returns, a `revalidatePath` call that invalidates the `/subscribers` cache after a successful subscribe, a `revalidateTag` call that invalidates the `like-count` tag after a successful like, and a `redirect` call that navigates to `/dashboard` after a successful login. `startFormActionSession()` + `startServerActionAdvanced()` give you every one of those pieces as a deterministic state machine — `idle` → `pending` → `optimistic` → `enhanced` → `resolved`, `idle` → `submitted` → `path-revalidated` → `tag-revalidated` → `redirected`. No live Next.js server, no browser required, no Playwright screencasts. This is the pattern kiwa's `examples/dogfood-nextjs-server-action-app` exercises against real Chromium under Playwright; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "optimistic patch stuck" case a reviewer sees in prod.
+A vitest suite wired to `@kiwa/component` v0.3 (form-action-advanced) + `@kiwa/nextjs` v1.2 (server-action-advanced) that models the 6 pieces of a real React 19 + Next.js 15 Server Action layer that every non-trivial form flow eventually needs — a form action session that tracks pending / optimistic / resolved states, a `useFormStatus` pending mark that renders the loading spinner without a client-side hook, a `useOptimistic` patch ledger that lets the UI show the resolved value before the Server Action returns, a `revalidatePath` call that invalidates the `/subscribers` cache after a successful subscribe, a `revalidateTag` call that invalidates the `like-count` tag after a successful like, and a `redirect` call that navigates to `/dashboard` after a successful login. `startFormActionSession()` + `startServerActionAdvanced()` give you every one of those pieces as a deterministic state machine — `idle` → `pending` → `optimistic` → `enhanced` → `resolved`, `idle` → `submitted` → `path-revalidated` → `tag-revalidated` → `redirected`. No live Next.js server, no browser required, no Playwright screencasts. This is the pattern kiwa's `examples/dogfood-nextjs-server-action-app` exercises against real Chromium under Playwright; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "optimistic patch stuck" case a reviewer sees in prod.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/component` v0.3 (form-action-advanced) + `@k
 ```bash
 mkdir kiwa-server-action && cd kiwa-server-action
 pnpm init
-pnpm add -D @kiwa-test/component@^0.3 @kiwa-test/nextjs@^1.2 vitest typescript @types/node
+pnpm add -D @kiwa/component@^0.3 @kiwa/nextjs@^1.2 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.3 surface exports `startFormActionSession` from the component semantics b
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { startFormActionSession } from '@kiwa-test/component';
+import { startFormActionSession } from '@kiwa/component';
 
 interface SubscribeForm extends Record<string, unknown> {
   email: string;
@@ -85,7 +85,7 @@ import {
   applyOptimisticUpdate,
   markFormStatusPending,
   startFormActionSession,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 
 interface LikeForm extends Record<string, unknown> {
   postId: string;
@@ -139,7 +139,7 @@ import {
   markFormStatusPending,
   resolveFormAction,
   startFormActionSession,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 
 interface SubscribeForm extends Record<string, unknown> {
   email: string;
@@ -186,11 +186,11 @@ The rule of thumb is that progressive enhancement is what lets a form work when 
 
 ### 5. `startServerActionAdvanced` + `submitFormAction` — the Server Action pipeline
 
-`tests/action/submit.test.ts` — the Next.js side of the pair (`@kiwa-test/nextjs` v1.2 server-action-advanced axis) tracks form submission on the server. The mock enforces that the action must move `idle` → `submitted` before any revalidation / redirect step; the form fields are recorded so tests can assert on the exact field names + values.
+`tests/action/submit.test.ts` — the Next.js side of the pair (`@kiwa/nextjs` v1.2 server-action-advanced axis) tracks form submission on the server. The mock enforces that the action must move `idle` → `submitted` before any revalidation / redirect step; the form fields are recorded so tests can assert on the exact field names + values.
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { startServerActionAdvanced, submitFormAction } from '@kiwa-test/nextjs';
+import { startServerActionAdvanced, submitFormAction } from '@kiwa/nextjs';
 
 describe('action — submitFormAction', () => {
   it('advances idle → submitted with the form fields captured', () => {
@@ -235,7 +235,7 @@ import {
   revalidateActionTag,
   startServerActionAdvanced,
   submitFormAction,
-} from '@kiwa-test/nextjs';
+} from '@kiwa/nextjs';
 
 describe('action — revalidate + redirect ladder', () => {
   it('advances submitted → path-revalidated → tag-revalidated → redirected', () => {
@@ -290,8 +290,8 @@ The rule of thumb is that revalidate + redirect are the SSOT for the post-submit
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { collectFidelityCoverage as componentCoverage } from '@kiwa-test/component';
-import { collectFidelityCoverage as nextCoverage } from '@kiwa-test/nextjs';
+import { collectFidelityCoverage as componentCoverage } from '@kiwa/component';
+import { collectFidelityCoverage as nextCoverage } from '@kiwa/nextjs';
 
 describe('frontend — fidelity coverage', () => {
   it('component covers 3 target × 4 axis = 12 cells', () => {

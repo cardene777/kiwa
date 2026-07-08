@@ -118,7 +118,7 @@ integration test は経路により helper を使い分ける。
 | 実 anvil + state load | `setupTestEnv({ anvil: { loadState } })` | pre-built state で瞬時起動、 deploy + setup を毎回流さない |
 
 ```ts
-import { setupTestEnv } from '@kiwa-test/dapp';
+import { setupTestEnv } from '@kiwa/dapp';
 
 // HTTP API mock + 実 anvil + pre-built state を同 fixture で扱う
 const env = await setupTestEnv({
@@ -141,7 +141,7 @@ mock / 実 anvil / load-state の選択は Layer 1 spec の「テスト経路」
 borrow / release (anvil_reset) で 0ms 再利用、 vitest の test file 並列実行と組合せて壁時計を大幅短縮する。
 
 ```ts
-import { createAnvilPool, setupTestEnv, type AnvilPool } from '@kiwa-test/dapp';
+import { createAnvilPool, setupTestEnv, type AnvilPool } from '@kiwa/dapp';
 
 let pool: AnvilPool;
 beforeAll(async () => { pool = await createAnvilPool({ size: 4 }); });
@@ -170,7 +170,7 @@ const ctx = {
 await expect(sendTransaction(ctx, params)).rejects.toMatchObject({ code: -32603 });
 ```
 
-## HTTP API layer 経路 (@kiwa-test/api、 v1 拡張)
+## HTTP API layer 経路 (@kiwa/api、 v1 拡張)
 
 HTTP / REST / GraphQL を Layer 1 spec から実 test に変換する経路。
 `--layer api` で `/kiwa-design` が `tests/spec/integration/test-spec-{module}.api.md` に 9 column 表 (ID / Observation / Given / When / Then / Priority / Automation / Mode / Route) を出力する。
@@ -184,9 +184,9 @@ HTTP / REST / GraphQL を Layer 1 spec から実 test に変換する経路。
 | `live` | 実 HTTP server | `setupApiServer({ mode: 'live', app })` で Node http.Server を 127.0.0.1 で起動、 Next.js Route Handler / Express / NestJS / Fastify の fetch handler を受け取る |
 | `hybrid` | live + msw 共存 | `setupApiServer({ mode: 'hybrid', app, mockHandlers })` で live 実装を基本にしつつ msw で path 単位 override 可能 |
 
-### 9 column → @kiwa-test/api helper への mapping
+### 9 column → @kiwa/api helper への mapping
 
-| spec column | Vitest + @kiwa-test/api helper への変換 |
+| spec column | Vitest + @kiwa/api helper への変換 |
 |---|---|
 | ID | `it('{ID} {Observation}', async () => { ... })` の test 名 |
 | Observation | test 名 + `describe` 階層 (観点別 group) |
@@ -203,7 +203,7 @@ HTTP / REST / GraphQL を Layer 1 spec から実 test に変換する経路。
 ```ts
 import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupApiServer, type ApiTestEnv } from '@kiwa-test/api';
+import { setupApiServer, type ApiTestEnv } from '@kiwa/api';
 import { createItemsHandler, type Item } from '../src/route.js';
 
 const envs: ApiTestEnv[] = [];
@@ -245,7 +245,7 @@ describe('items API (mock mode)', () => {
 
 - 入力 spec ... `tests/spec/integration/test-spec-{module}.api.md` (`/kiwa-design --layer api` 出力)
 - 出力 test ... `tests/{module}.test.ts` (Vitest + msw + supertest)
-- 既存 dApp + 実 anvil 経路の spec (`tests/spec/integration/test-spec-{module}.md`) は `@kiwa-test/dapp` setupTestEnv 経路で従来通り動作
+- 既存 dApp + 実 anvil 経路の spec (`tests/spec/integration/test-spec-{module}.md`) は `@kiwa/dapp` setupTestEnv 経路で従来通り動作
 
 `env.stop()` は `afterEach` / `afterAll` で必ず呼ぶ (live server / msw server を確実に停止する)。
 

@@ -1,13 +1,13 @@
 # Fidelity — dogfood-nextjs-rsc-streaming-app (v1.34-2)
 
-Real-vs-mock behavioural fidelity for the Next.js 15.4 + React 19.1 App Router + RSC streaming dogfood, produced by `examples/dogfood-nextjs-rsc-streaming-app/tests/emit-fidelity-report.spec.ts`. Feeds `@kiwa-test/quality-metrics` 13-axis release gate on the common 8-axis branch (7 core axes + a11y at SaaS-tier, since the RSC harness emits no DOM in mock mode).
+Real-vs-mock behavioural fidelity for the Next.js 15.4 + React 19.1 App Router + RSC streaming dogfood, produced by `examples/dogfood-nextjs-rsc-streaming-app/tests/emit-fidelity-report.spec.ts`. Feeds `@kiwa/quality-metrics` 13-axis release gate on the common 8-axis branch (7 core axes + a11y at SaaS-tier, since the RSC harness emits no DOM in mock mode).
 
 ## Baseline (real mode skipped — no `RSC_STREAMING_BROWSER_READY=1`)
 
 When the harness runs without the Playwright + Chromium browser session env, the real adapter emits `KIWA_RSC_STREAMING_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/component/nextjs-rsc-streaming-app
+provider   : @kiwa/component/nextjs-rsc-streaming-app
 version    : 0.3.0
 verdict    : PASS
 divergences: 15 (renderArticle / enterSuspense / streamChunk / completeArticle / startCatalog / pendCatalogBoundary / captureCatalogError / hydrateCatalogBoundary / startTransition / finishTransition / assertAnimation / markFormPending / applyOptimistic / enhanceForm / resolveForm — recorded as BEHAVIORAL_DIVERGENCE, real mode absent)

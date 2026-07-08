@@ -8,9 +8,9 @@ kiwa v1.46 is out. **quality gate integrity 回復 + DevSecOps library 化 の 2
 
 ### 3 package updated / new
 
-- `@kiwa-test/perf-harness` v0.2 → v0.3 — strict mode 追加 (`detectRegressionStrict` + `runPerf3LayerStrict`)、 iter 400 + Welch |t|>3 + delta 10%、 backward compat 維持
-- `@kiwa-test/quality-metrics` v0.3 → v0.4 — perf.strict axis 追加 (13 → 15 axis)、 `PerfMetric.strict` + `.baselineExists` field 追加
-- `@kiwa-test/security-devsecops` v0.1 新規 (40 package 到達) — 6 axis (SAST + SCA + Secret + IaC + DAST + Container) state machine
+- `@kiwa/perf-harness` v0.2 → v0.3 — strict mode 追加 (`detectRegressionStrict` + `runPerf3LayerStrict`)、 iter 400 + Welch |t|>3 + delta 10%、 backward compat 維持
+- `@kiwa/quality-metrics` v0.3 → v0.4 — perf.strict axis 追加 (13 → 15 axis)、 `PerfMetric.strict` + `.baselineExists` field 追加
+- `@kiwa/security-devsecops` v0.1 新規 (40 package 到達) — 6 axis (SAST + SCA + Secret + IaC + DAST + Container) state machine
 
 ### 38 package perf baseline 完全 sweep
 
@@ -34,9 +34,9 @@ v1.23 → v1.46 = 24 milestones with tutorial code snippet validation tests.
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/perf-harness@^0.3
-pnpm add -D @kiwa-test/quality-metrics@^0.4
-pnpm add -D @kiwa-test/security-devsecops@^0.1
+pnpm add -D @kiwa/perf-harness@^0.3
+pnpm add -D @kiwa/quality-metrics@^0.4
+pnpm add -D @kiwa/security-devsecops@^0.1
 ```
 
 ## Migration guide

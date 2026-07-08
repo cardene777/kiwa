@@ -6,10 +6,10 @@ Full mock vs real fidelity numbers are filled in as `/manage` + `/signin` land i
 
 ## Fidelity axes (register-attestation)
 
-| axis | mock (`@kiwa-test/auth`) | real (SimpleWebAuthn + Chrome Virtual Authenticator) | assertion |
+| axis | mock (`@kiwa/auth`) | real (SimpleWebAuthn + Chrome Virtual Authenticator) | assertion |
 |---|---|---|---|
 | 1. `attestationObject` shape | base64url(`attestation::<mode>::<credentialId>::<rpId>`) — deterministic | base64url(CBOR) — attestation statement + authenticator data + fmt | Both encode as base64url; mock string decodes to a canonical mode-tagged marker so structural drift is caught. Real is validated via SimpleWebAuthn `verifyRegistrationResponse` (Sub-Issue #857). |
-| 2. `clientDataJSON` shape | base64url(JSON) with `type=webauthn.create`, normalized base64url challenge, origin = `https://<rp.id>`, `crossOrigin=false` | same JSON layout, real Uint8Array challenge round-tripped through browser | JSON shape is identical between mock + real; `normalizeChallenge` in `@kiwa-test/auth` mirrors what a browser encodes. |
+| 2. `clientDataJSON` shape | base64url(JSON) with `type=webauthn.create`, normalized base64url challenge, origin = `https://<rp.id>`, `crossOrigin=false` | same JSON layout, real Uint8Array challenge round-tripped through browser | JSON shape is identical between mock + real; `normalizeChallenge` in `@kiwa/auth` mirrors what a browser encodes. |
 | 3. Signature format | deterministic fnv-1a base64url (`mockSignature`) | ES256 / RS256 / EdDSA base64url (real authenticator) | Both satisfy the base64url alphabet. Sub-Issue #857 diffs on decoding + verification success rather than byte-equality (mock cannot forge real signatures). |
 | 4. `signCount` initial value | `0` (per `credentialCreation` in `packages/auth/src/webauthn/creation.ts`) | `0` (per WebAuthn L3 §6.1.1) | Both drivers must return exactly `0` for a freshly minted credential. |
 

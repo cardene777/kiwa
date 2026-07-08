@@ -1,6 +1,6 @@
 # kiwa-test-rs — Rust cargo test adapter
 
-Port of [kiwa](https://github.com/cardene777/kiwa) `@kiwa-test/core` to the Rust ecosystem.
+Port of [kiwa](https://github.com/cardene777/kiwa) `@kiwa/core` to the Rust ecosystem.
 Provides a deterministic fixture (`setup_env`) with mode selection (`Mock` / `Live`),
 automatic cleanup via `Drop`, diff-aware assertion macros
 (`assert_kiwa_eq!` / `assert_kiwa_close!`), and a hyper-based integration mock
@@ -626,7 +626,7 @@ including the negative-path panic assertions).
 
 - Parent v1.6 milestone — [#606](https://github.com/cardene777/kiwa/issues/606) (v1.5 findings 5 件消化 + docs 整合化)
 - Parent v1.5 milestone — [#591](https://github.com/cardene777/kiwa/issues/591) (Rust + Go web framework adapters)
-- TypeScript core — [`@kiwa-test/core`](https://github.com/cardene777/kiwa/tree/main/packages/core)
+- TypeScript core — [`@kiwa/core`](https://github.com/cardene777/kiwa/tree/main/packages/core)
 - Python sibling — [`kiwa-test-py`](https://github.com/cardene777/kiwa/tree/main/kiwa-py)
 - PoC (unit + mock_server) — [`examples/rust-cargo-poc/`](https://github.com/cardene777/kiwa/tree/main/examples/rust-cargo-poc)
 - PoC (axum) — [`examples/rust-axum-poc/`](https://github.com/cardene777/kiwa/tree/main/examples/rust-axum-poc)

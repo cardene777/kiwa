@@ -2,12 +2,12 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/desktop` v0.7 (real behavior runner + fidelity harness 拡張、 v1.62 で kiwa 縦深化 pair 第 14 の第 7 段 = **depth-7 pattern 新設 candidate**、 **systematic pattern 37 度目適用**、 40 milestone streak)、 12 axis 別 mock/real の behavior 差別化 (metadata + duration) を fidelity harness で検出、 shape 契約 preserving (neutralEvents + eventCount 一致) を保ったまま early warning 検知。
+A vitest suite wired to `@kiwa/desktop` v0.7 (real behavior runner + fidelity harness 拡張、 v1.62 で kiwa 縦深化 pair 第 14 の第 7 段 = **depth-7 pattern 新設 candidate**、 **systematic pattern 37 度目適用**、 40 milestone streak)、 12 axis 別 mock/real の behavior 差別化 (metadata + duration) を fidelity harness で検出、 shape 契約 preserving (neutralEvents + eventCount 一致) を保ったまま early warning 検知。
 
 ## Prerequisites
 
 - Node.js ≥ 20 + pnpm
-- `@kiwa-test/desktop` v0.7 (`pnpm add -D @kiwa-test/desktop@^0.7`)
+- `@kiwa/desktop` v0.7 (`pnpm add -D @kiwa/desktop@^0.7`)
 
 ## Step-by-step build
 
@@ -15,7 +15,7 @@ A vitest suite wired to `@kiwa-test/desktop` v0.7 (real behavior runner + fideli
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runFidelityCheck, summarizeFidelity } from '@kiwa-test/desktop';
+import { runFidelityCheck, summarizeFidelity } from '@kiwa/desktop';
 
 describe('shape 契約 preserving', () => {
   it('36 pair 全 matched (neutralEvents + eventCount 一致)', async () => {
@@ -31,7 +31,7 @@ describe('shape 契約 preserving', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runFidelityCheck, summarizeFidelityBehaviorDiff } from '@kiwa-test/desktop';
+import { runFidelityCheck, summarizeFidelityBehaviorDiff } from '@kiwa/desktop';
 
 describe('v0.7 behavior diff early warning', () => {
   it('mock/real の metadata 差異が per-axis 検出される', async () => {
@@ -47,7 +47,7 @@ describe('v0.7 behavior diff early warning', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runFidelityCheck } from '@kiwa-test/desktop';
+import { runFidelityCheck } from '@kiwa/desktop';
 
 describe('per-axis drill-down', () => {
   it('auto-updater = mock 42MB vs real 128MB を検出', async () => {

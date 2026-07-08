@@ -2,11 +2,11 @@
 
 ## 概要
 
-kiwa v1.47 をリリースしました。 **security-devsecops v0.2 adapter 統合 Phase 2 完成** の単軸 milestone。 v1.46 で新規追加した `@kiwa-test/security-devsecops` v0.1 の semantics に加えて、 6 axis × mock/real adapter pair (12 adapter) を追加、 実 CLI (semgrep / trivy / gitleaks / tfsec / OWASP ZAP / grype) 呼出隠蔽の interface + env-gate + fidelity harness を確立しました。
+kiwa v1.47 をリリースしました。 **security-devsecops v0.2 adapter 統合 Phase 2 完成** の単軸 milestone。 v1.46 で新規追加した `@kiwa/security-devsecops` v0.1 の semantics に加えて、 6 axis × mock/real adapter pair (12 adapter) を追加、 実 CLI (semgrep / trivy / gitleaks / tfsec / OWASP ZAP / grype) 呼出隠蔽の interface + env-gate + fidelity harness を確立しました。
 
 ## 何が変わったか
 
-### `@kiwa-test/security-devsecops` v0.1 → v0.2
+### `@kiwa/security-devsecops` v0.1 → v0.2
 
 - 6 adapter interface = SastAdapter / ScaAdapter / SecretAdapter / IacAdapter / DastAdapter / ContainerAdapter
 - 12 adapter 実装 = 6 axis × mock (deterministic replay) + real (env-gate opt-in CLI 呼出隠蔽 stub)
@@ -37,7 +37,7 @@ v1.23 → v1.47 = 25 milestone 連続、 kiwa 史上最長記録更新継続。
 ## インストール
 
 ```bash
-pnpm add -D @kiwa-test/security-devsecops@^0.2
+pnpm add -D @kiwa/security-devsecops@^0.2
 ```
 
 ## Migration guide

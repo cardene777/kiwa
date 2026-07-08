@@ -1,4 +1,4 @@
-# `@kiwa-test/visual` で visual regression
+# `@kiwa/visual` で visual regression
 
 > [🇬🇧 English](../../en/cookbook/visual-regression.md) • [🇯🇵 日本語](./visual-regression.md)
 
@@ -13,7 +13,7 @@ pixelmatch + pngjs によるピクセル単位 PNG diff。 commit された base
 ## インストール
 
 ```bash
-pnpm add -D @kiwa-test/visual pixelmatch pngjs
+pnpm add -D @kiwa/visual pixelmatch pngjs
 ```
 
 `pixelmatch` と `pngjs` は peer/optional、 必ず一緒に install する。
@@ -24,7 +24,7 @@ pnpm add -D @kiwa-test/visual pixelmatch pngjs
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { expectNoVisualDiff } from '@kiwa-test/visual';
+import { expectNoVisualDiff } from '@kiwa/visual';
 
 const fixtureDir = join(__dirname, 'fixtures');
 
@@ -48,7 +48,7 @@ test('header と baseline 一致', async ({ page }) => {
 ```ts
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
-import { comparePngBuffers } from '@kiwa-test/visual';
+import { comparePngBuffers } from '@kiwa/visual';
 
 test('chart 描画と baseline 一致', () => {
   const baseline = readFileSync('tests/fixtures/chart.baseline.png');
@@ -79,6 +79,6 @@ macOS vs Linux CI の AA 差分が false positive の最大要因。 防御 2 �
 
 ## 関連
 
-- Package: [`@kiwa-test/visual`](../../../packages/visual/README.md)
+- Package: [`@kiwa/visual`](../../../packages/visual/README.md)
 - a11y cookbook: [a11y-axe.md](./a11y-axe.md)
 - pixelmatch docs: https://github.com/mapbox/pixelmatch

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite for a Cloudflare Workers-shaped Hono app that exercises the three v1.19 primitives — `createHonoApp` + middleware chain for the route surface, `createRpcClient` for the hc type-safe RPC client, and `mockKVNamespace` + `mockD1Database` + `mockR2Bucket` for the Workers env bindings. The suite never boots wrangler or miniflare; it drives the request contract through `@kiwa-test/hono` v0.1's brand-symbol-guarded stubs so the same tests run in Node.js in under a second.
+A vitest suite for a Cloudflare Workers-shaped Hono app that exercises the three v1.19 primitives — `createHonoApp` + middleware chain for the route surface, `createRpcClient` for the hc type-safe RPC client, and `mockKVNamespace` + `mockD1Database` + `mockR2Bucket` for the Workers env bindings. The suite never boots wrangler or miniflare; it drives the request contract through `@kiwa/hono` v0.1's brand-symbol-guarded stubs so the same tests run in Node.js in under a second.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest suite for a Cloudflare Workers-shaped Hono app that exercises the three
 ```bash
 mkdir kiwa-hono-first && cd kiwa-hono-first
 pnpm init
-pnpm add -D @kiwa-test/hono@0.1 vitest typescript @types/node
+pnpm add -D @kiwa/hono@0.1 vitest typescript @types/node
 ```
 
 Add the vitest script + ESM configuration in `package.json`.
@@ -29,7 +29,7 @@ Add the vitest script + ESM configuration in `package.json`.
 }
 ```
 
-Ship a `tsconfig.json` compatible with the ESM shape `@kiwa-test/hono` exports.
+Ship a `tsconfig.json` compatible with the ESM shape `@kiwa/hono` exports.
 
 ```json
 {
@@ -58,7 +58,7 @@ import {
   mockD1Database,
   isKVNamespaceMock,
   isD1DatabaseMock,
-} from '@kiwa-test/hono';
+} from '@kiwa/hono';
 
 describe('createHonoApp — route + middleware chain', () => {
   it('middleware runs before the handler and trace records both entries', async () => {
@@ -151,10 +151,10 @@ Hono's `hc` client is a proxy that reflects the app's route tree back at the cal
 
 That means Hono bugs look like "the RPC client sent an unexpected header" or "the middleware trace missed the auth entry". The shape of the assertion becomes "the trace array records `['middleware', 'handler']` in order, and the response body deserializes to the expected shape".
 
-`@kiwa-test/hono` records that trace on every `invokeRoute` and `createRpcClient` call. The `result.trace` array carries a `{ kind, pattern }` entry per hop — one for each `use()` middleware that matches, plus one for the terminal handler. When a downstream harness catches a regression the assertion surfaces the exact hop sequence, so the test names the hop that changed.
+`@kiwa/hono` records that trace on every `invokeRoute` and `createRpcClient` call. The `result.trace` array carries a `{ kind, pattern }` entry per hop — one for each `use()` middleware that matches, plus one for the terminal handler. When a downstream harness catches a regression the assertion surfaces the exact hop sequence, so the test names the hop that changed.
 
 ```ts
-import { createHonoApp, invokeRoute } from '@kiwa-test/hono';
+import { createHonoApp, invokeRoute } from '@kiwa/hono';
 
 const app = createHonoApp();
 app.use('/api/*', async (_c, next) => {
@@ -181,7 +181,7 @@ Cloudflare Workers apps read state through env bindings — `env.KV.get(key)`, `
 `mockKVNamespace()` / `mockD1Database()` / `mockR2Bucket()` deliver the same 6-op surface — put / get / delete / list / expire / snapshot. The mocks even honour `expirationTtl` by wrapping `Date.now`, so a test asserting "the session expires after 60 seconds" walks the wall-clock semantics.
 
 ```ts
-import { mockKVNamespace } from '@kiwa-test/hono';
+import { mockKVNamespace } from '@kiwa/hono';
 
 const kv = mockKVNamespace();
 const originalNow = Date.now;
@@ -202,5 +202,5 @@ The `__snapshot()` escape hatch on every mock returns the whole store as a plain
 ## Related
 
 - Concept doc — [Modern web framework testing (Signal reactivity / Islands architecture / edge runtime + RPC type-safety SSOT)](../concepts/modern-web-framework-testing)
-- v1.19-1c [#815](https://github.com/cardene777/kiwa/issues/815) — `@kiwa-test/hono` v0.1 landing
+- v1.19-1c [#815](https://github.com/cardene777/kiwa/issues/815) — `@kiwa/hono` v0.1 landing
 - v1.19-4 [#810](https://github.com/cardene777/kiwa/issues/810) — `dogfood-hono-workers-rpc` (the full 3-layer dogfood this tutorial cuts down)

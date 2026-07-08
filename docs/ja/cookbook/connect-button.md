@@ -16,7 +16,7 @@ dApp の `Connect Wallet` ボタンを押下 → wallet picker / 直接接続 �
 ### 1. fixture の準備
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@kiwa-test/dapp';
+import { dappE2eTest as test, expect } from '@kiwa/dapp';
 import type { Page } from '@playwright/test';
 
 async function ensureConnected(page: Page) {

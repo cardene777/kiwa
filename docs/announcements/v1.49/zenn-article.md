@@ -6,7 +6,7 @@ kiwa v1.49 をリリースしました。 **Frontend 深化 III** (component v0.
 
 ## 何が変わったか
 
-### `@kiwa-test/component` v0.3 → v0.4 + `@kiwa-test/nextjs` v1.2 → v1.3 (pair minor bump)
+### `@kiwa/component` v0.3 → v0.4 + `@kiwa/nextjs` v1.2 → v1.3 (pair minor bump)
 
 - component 側 = react-19-actions (useActionState + useOptimistic + useFormStatus 統合、 4 state) + islands-architecture (Astro / Deno Fresh / Solid Start、 5 state)
 - nextjs 側 = turbopack-hmr (Next.js 15 Turbopack HMR + fast refresh、 5 state) + concurrent-transitions (React 18/19 concurrent + interrupt-and-restart、 5 state)
@@ -40,8 +40,8 @@ v1.23 → v1.49 = 27 milestone 連続、 kiwa 史上最長記録更新継続。
 ## インストール
 
 ```bash
-pnpm add -D @kiwa-test/component@^0.4
-pnpm add -D @kiwa-test/nextjs@^1.3
+pnpm add -D @kiwa/component@^0.4
+pnpm add -D @kiwa/nextjs@^1.3
 ```
 
 ## Migration guide

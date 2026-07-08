@@ -4,9 +4,9 @@ v1.14 is out. After 3 縦軸 milestones (v1.11 release gate → v1.12 non-determ
 
 ## What shipped
 
-- **`@kiwa-test/payment` v0.1** — Stripe + Paddle + Lemon Squeezy webhook mock. HMAC-SHA256 signature verify with timing-safe compare, 4 fixture builders (`checkoutCompleted` / `subscriptionCreated` / `paymentFailed` / `refunded`), handler dispatch for e2e webhook flows.
-- **`@kiwa-test/search` v0.1** — Meilisearch + Algolia + Typesense in-memory search mock. Word-overlap ranking, filter / facet / sort / pagination, 1-edit-distance typo tolerance (default matches each provider's production default).
-- **`@kiwa-test/observability` v1.1** — 3 new telemetry mocks (OpenTelemetry + Datadog + Sentry). Unified `TelemetryCollector` shape (spans / metrics / logs / exceptions / transactions) so assertions read the same regardless of provider chosen.
+- **`@kiwa/payment` v0.1** — Stripe + Paddle + Lemon Squeezy webhook mock. HMAC-SHA256 signature verify with timing-safe compare, 4 fixture builders (`checkoutCompleted` / `subscriptionCreated` / `paymentFailed` / `refunded`), handler dispatch for e2e webhook flows.
+- **`@kiwa/search` v0.1** — Meilisearch + Algolia + Typesense in-memory search mock. Word-overlap ranking, filter / facet / sort / pagination, 1-edit-distance typo tolerance (default matches each provider's production default).
+- **`@kiwa/observability` v1.1** — 3 new telemetry mocks (OpenTelemetry + Datadog + Sentry). Unified `TelemetryCollector` shape (spans / metrics / logs / exceptions / transactions) so assertions read the same regardless of provider chosen.
 - **`kiwa-test-go` v0.5** — Iris + Chi subpackage. Same `TestServer` contract as v1.5+ gin / echo / fiber. Kiwa now covers **5 Go web frameworks** in one polyglot skill.
 - **perf 実測完遂** — v1.13-1 landed the perf-harness with 5 targets. v1.14-1 extends to **9 targets** (added realtime + 3 realtime dogfood apps). All targets emit p95 reports under `docs/quality-reports/perf/` and pass the release gate.
 

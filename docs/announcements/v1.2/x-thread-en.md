@@ -43,7 +43,7 @@ All expose `setupXxxEnv()` + `mode` + `stop()`. Dynamic import + optional peer d
 
 ## [4/8]
 
-`@kiwa-test/orm` v0.6.0 reaches a 9-combo acceptance matrix.
+`@kiwa/orm` v0.6.0 reaches a 9-combo acceptance matrix.
 
 Run mock mode (no Docker) for speed, or live mode (testcontainers) for deterministic query tests against a real DB.
 

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite that runs the same auth protocol tests against **two modes** — the pure `@kiwa-test/auth` mock (fast, 0 network) and a **real driver** backed by Keycloak (OIDC) + oauth2-mock-server (OAuth 2.1) launched through testcontainers. The suite is env-gated so CI keeps running the fast mock-only mode by default, and opts into the real driver only when `KIWA_MODE=real` + the container URLs are set. This is the v1.22 milestone's central technique — mocks stay the first-line contract, real drivers become the second-line fidelity check.
+A vitest suite that runs the same auth protocol tests against **two modes** — the pure `@kiwa/auth` mock (fast, 0 network) and a **real driver** backed by Keycloak (OIDC) + oauth2-mock-server (OAuth 2.1) launched through testcontainers. The suite is env-gated so CI keeps running the fast mock-only mode by default, and opts into the real driver only when `KIWA_MODE=real` + the container URLs are set. This is the v1.22 milestone's central technique — mocks stay the first-line contract, real drivers become the second-line fidelity check.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ A vitest suite that runs the same auth protocol tests against **two modes** — 
 ```bash
 mkdir kiwa-real-driver-first && cd kiwa-real-driver-first
 pnpm init
-pnpm add -D @kiwa-test/auth@^0.5 vitest typescript @types/node testcontainers
+pnpm add -D @kiwa/auth@^0.5 vitest typescript @types/node testcontainers
 ```
 
 Add the vitest script + TypeScript configuration in `package.json`.
@@ -56,7 +56,7 @@ The v1.22 milestone SSOT (concept doc `docs/concepts/real-driver-testing.md`) de
 
 | Mode | Trigger | Behaviour |
 |---|---|---|
-| `mock only` | `KIWA_MODE` unset | Pure `@kiwa-test/auth` mock, 0 container, sub-100 ms per test |
+| `mock only` | `KIWA_MODE` unset | Pure `@kiwa/auth` mock, 0 container, sub-100 ms per test |
 | `real-optional` | `KIWA_MODE=real-optional` | Try real driver; if the container URL is missing, fall back to mock with a warning |
 | `real-required` | `KIWA_MODE=real` + `KEYCLOAK_URL` (or `OAUTH21_BOOTSTRAP=1`) set | Fail hard if the driver is missing; run tests only against the live container |
 
@@ -143,7 +143,7 @@ import {
   __resetOidcCounters,
   setupOidcEnv,
   type OidcTestEnv,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 import { keycloakEnv } from './setup-keycloak.js';
 import { resolveMode } from './mode.js';
 
@@ -211,5 +211,5 @@ The mock-only pass finishes in ~200 ms. The real-driver pass finishes in ~40 s (
 ## Common pitfalls
 
 - **Container never starts.** Check `docker ps` — the testcontainers reaper may have left old containers. `docker rm -f $(docker ps -aq)` clears them.
-- **Fidelity report shows drift.** The mock is out of date — bump `@kiwa-test/auth` to the latest patch. If drift persists, file an Issue with the failing axis name; the concept doc lists which axes are load-bearing for each protocol.
+- **Fidelity report shows drift.** The mock is out of date — bump `@kiwa/auth` to the latest patch. If drift persists, file an Issue with the failing axis name; the concept doc lists which axes are load-bearing for each protocol.
 - **`KIWA_MODE=real` but no `KEYCLOAK_URL`.** The `require*` helpers throw at startup — that's the intended `real-required` failure mode. Switch to `KIWA_MODE=real-optional` for the "fall back to mock with a warning" behaviour.

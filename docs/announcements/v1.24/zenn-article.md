@@ -8,11 +8,11 @@ published: true
 
 # kiwa v1.24 released
 
-v1.24 は kiwa の 14 milestone 目です。 v1.14 (横軸拡張、 `@kiwa-test/edge` v0.1 で fetch handler + KV / R2 / D1 / DurableObject minimal mock + ExecutionContext を land) の後、 v1.24 は edge / serverless mock の上に **8 axis advanced edge semantics 層** を追加、 Durable Object hibernation + WebSocket edge + edge KV eventual consistency + geo-replicated + Cron trigger + subrequest limit + CPU time limit + streaming Response の 8 axis を platform-neutral state machine + strict transition guard として `packages/edge/src/semantics/*` に実装しました。 v1.14 fetch handler mock は first-line contract のまま維持 (v0.1 signature 完全維持)、 8 axis semantics は second-line envelope として並走、 test は adapter 経由 `KIWA_MODE=real` で real platform sandbox に切替可能 (v1.22 で確立した 3 execution mode SSOT を継承)。 v1.11 以降の連続完遂 13 milestone (release gate → 非決定性 → 時間軸 → 横軸拡張 → AI-LLM 深化 → component 縦軸 → Observability v2 → Blockchain 深化 → Framework 深化 → Streaming 深化 → Auth 深化 → Auth 深化 II → Payment 深化) を受けて、 v1.24 は Edge / Serverless 深化 milestone、 kiwa runtime fixture 34 packages はそのまま維持 (edge 既存 package の minor 拡張)。
+v1.24 は kiwa の 14 milestone 目です。 v1.14 (横軸拡張、 `@kiwa/edge` v0.1 で fetch handler + KV / R2 / D1 / DurableObject minimal mock + ExecutionContext を land) の後、 v1.24 は edge / serverless mock の上に **8 axis advanced edge semantics 層** を追加、 Durable Object hibernation + WebSocket edge + edge KV eventual consistency + geo-replicated + Cron trigger + subrequest limit + CPU time limit + streaming Response の 8 axis を platform-neutral state machine + strict transition guard として `packages/edge/src/semantics/*` に実装しました。 v1.14 fetch handler mock は first-line contract のまま維持 (v0.1 signature 完全維持)、 8 axis semantics は second-line envelope として並走、 test は adapter 経由 `KIWA_MODE=real` で real platform sandbox に切替可能 (v1.22 で確立した 3 execution mode SSOT を継承)。 v1.11 以降の連続完遂 13 milestone (release gate → 非決定性 → 時間軸 → 横軸拡張 → AI-LLM 深化 → component 縦軸 → Observability v2 → Blockchain 深化 → Framework 深化 → Streaming 深化 → Auth 深化 → Auth 深化 II → Payment 深化) を受けて、 v1.24 は Edge / Serverless 深化 milestone、 kiwa runtime fixture 34 packages はそのまま維持 (edge 既存 package の minor 拡張)。
 
 ## 主な追加
 
-### `@kiwa-test/edge` v1.1.0 (8 axis advanced edge semantics)
+### `@kiwa/edge` v1.1.0 (8 axis advanced edge semantics)
 
 v1.14 で land した fetch handler + KV / R2 / D1 / DurableObject minimal mock (`invokeEdgeHandler` / `createKvNamespace` + `EdgeFetchHandler` / `EdgeEnvBindings` / `InvokeEdgeHandlerOptions` / `InvokeEdgeHandlerResult` / `SimulatedExecutionContext`) の signature を完全維持したまま、 v1.24 は `packages/edge/src/semantics/*` に 1 axis = 1 file の pure state machine helper を追加。 各 axis は shared `EdgePlatform` union (`'cloudflare' | 'vercel' | 'deno'`) を受け取り強型 `AxisStep` sequence を emit するため、 test は platform-specific event 名ではなく **transition** に対して assert 可能。
 
@@ -21,7 +21,7 @@ v1.14 で land した fetch handler + KV / R2 / D1 / DurableObject minimal mock 
 state machine ... `initialized` → `active` (loops on `requestDurableObject` / `fireAlarm` / `writeStorage`) → `hibernated` / `terminated` (out of scope for v1.1)。 default で Cloudflare Durable Object の transactional storage guarantee + Hibernation-driven wake-up semantics を再現。
 
 ```ts
-import { createDurableObject, requestDurableObject, fireAlarm, writeStorage } from '@kiwa-test/edge';
+import { createDurableObject, requestDurableObject, fireAlarm, writeStorage } from '@kiwa/edge';
 
 const session = createDurableObject({ id: 'chat-room-1', platform: 'cloudflare' });
 // session.state === 'initialized'
@@ -43,7 +43,7 @@ await fireAlarm(session);
 state machine ... `pending` → `open` → `closed`。 全 3 platform (Cloudflare `WebSocketPair` / Vercel edge websockets / Deno `Deno.upgradeWebSocket`) が 101 Switching Protocols を upgrade で受けるが、 telemetry string は各 platform 別 — 統一 mock でそれを吸収。
 
 ```ts
-import { requestWebSocketUpgrade, acceptWebSocket, sendMessage, closeWebSocket } from '@kiwa-test/edge';
+import { requestWebSocketUpgrade, acceptWebSocket, sendMessage, closeWebSocket } from '@kiwa/edge';
 
 const socket = requestWebSocketUpgrade({ id: 'ws-1', platform: 'vercel' });
 // socket.state === 'pending'
@@ -65,7 +65,7 @@ await closeWebSocket(socket, { code: 1000 });
 consistency states ... `consistent` (Deno KV primary) / `eventually-consistent` (Cloudflare KV, Vercel Edge Config, Deno KV replicas)。 全 3 platform edge KV は strong consistency を trade して低遅延 edge read を取る。
 
 ```ts
-import { createEdgeKvSession, kvRead, kvWrite, kvRangeQuery } from '@kiwa-test/edge';
+import { createEdgeKvSession, kvRead, kvWrite, kvRangeQuery } from '@kiwa/edge';
 
 const session = createEdgeKvSession({ platform: 'cloudflare', state: 'eventually-consistent' });
 
@@ -84,7 +84,7 @@ const { matches } = await kvRangeQuery(session, { prefix: 'user:', limit: 10 });
 state machine ... `in-sync` → `lagging` (on `geoPrimaryWrite` or `markReplicaLagged`) → `in-sync` (only when every replica lag returns to 0) / `conflict-detected` → `in-sync` (on `resolveConflict`)。 Cloudflare Smart Placement + KV replication、 Vercel Edge Config replication、 Deno KV primary/replica topology の共通 envelope を吸収。
 
 ```ts
-import { createGeoReplicatedSession, geoPrimaryWrite, markReplicaLagged, syncReplica, resolveConflict } from '@kiwa-test/edge';
+import { createGeoReplicatedSession, geoPrimaryWrite, markReplicaLagged, syncReplica, resolveConflict } from '@kiwa/edge';
 
 const session = createGeoReplicatedSession({
   platform: 'deno',
@@ -147,13 +147,13 @@ await syncReplica(session, { region: 'ap-south' });
 
 #### snippet validation `docs-tutorial-v1.24.test.ts`
 
-tutorial 42-44 の全 code snippet を実 `@kiwa-test/edge` API import + execute + assertion で走査、 16 test で drift を検知 (`docs-tutorial-v1.21.test.ts` / `docs-tutorial-v1.22.test.ts` / `docs-tutorial-v1.23.test.ts` と同じ pattern)。
+tutorial 42-44 の全 code snippet を実 `@kiwa/edge` API import + execute + assertion で走査、 16 test で drift を検知 (`docs-tutorial-v1.21.test.ts` / `docs-tutorial-v1.22.test.ts` / `docs-tutorial-v1.23.test.ts` と同じ pattern)。
 
 ## Numbers
 
 - **6 sub-Issue 解決** (#914-#919)
 - **6 PR merge** (v1.24-1 + v1.24-2 + v1.24-3 + v1.24-4 + v1.24-5 + 本 publish PR)
-- **1 npm minor bump** (`@kiwa-test/edge` v1.0.2 → v1.1.0) — kiwa runtime fixture 34 packages 維持
+- **1 npm minor bump** (`@kiwa/edge` v1.0.2 → v1.1.0) — kiwa runtime fixture 34 packages 維持
 - **3 dogfood edge app 新規** with fidelity report → 7 軸 release gate 供給
 - **~271 new test** 8 axis semantics (120) + Cloudflare (40) + Vercel (45) + Deno (50) + snippet validation (16)
 
@@ -165,7 +165,7 @@ edge testing には fetch handler 単純 mock で捕捉不能な 3 失敗 mode �
 - **consistency envelope** — real edge KV は strong consistency を trade して edge read の低遅延を取る (Cloudflare KV / Vercel Edge Config / Deno KV replica)。 primary vs replica の distinction を skip する test は read-your-writes bug を素通し、 merchant app が stale-read race で ship される。
 - **cross-platform fidelity** — Cloudflare は cron を 3 source (scheduled + queue + email) から発火、 Vercel + Deno は 2 source (scheduled + queue)。 streaming Response backpressure は Vercel が byte、 Cloudflare が chunk。 neutral test surface が上記の違いを **明示 assertion** に変え、 silent regression を防ぐ。
 
-8 axis は 3 target platform の edge envelope を再現する最小 set。 各 axis は `@kiwa-test/edge/semantics/*` 下の独立 module、 shared `EdgePlatform` union + 強型 `AxisStep` sequence emit で「platform-specific event 名」 ではなく「transition」 に対する assertion を可能にする。
+8 axis は 3 target platform の edge envelope を再現する最小 set。 各 axis は `@kiwa/edge/semantics/*` 下の独立 module、 shared `EdgePlatform` union + 強型 `AxisStep` sequence emit で「platform-specific event 名」 ではなく「transition」 に対する assertion を可能にする。
 
 ## 14 milestone 連続完遂
 

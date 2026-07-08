@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/streaming` v0.3 that models the pieces of the Kafka wire protocol every exactly-once test bumps into — producer id + epoch fencing (KIP-98), the transaction coordinator state machine (`Empty` → `Ongoing` → `PrepareCommit` → `CompleteCommit` → `Empty`), incremental fetch sessions (KIP-227), and the in-sync replica (ISR) set with high-watermark advance rules. No broker binary, no docker-compose, no `kafkajs.admin()`. `createKafkaRawProtocol()` gives you every one of those pieces as a test-side model, so the assertion "the second `send()` after a fenced producer got `INVALID_PRODUCER_EPOCH`" fires without a real Kafka. This is the pattern the streaming v0.3 8-axis grid uses under the hood — same producer identity semantics, same txn state machine, same ISR + HW gate. You leave this tutorial with a runnable exactly-once model + a fencing assertion + a HW gate that behaves like a real Kafka cluster in seconds instead of minutes.
+A vitest suite wired to `@kiwa/streaming` v0.3 that models the pieces of the Kafka wire protocol every exactly-once test bumps into — producer id + epoch fencing (KIP-98), the transaction coordinator state machine (`Empty` → `Ongoing` → `PrepareCommit` → `CompleteCommit` → `Empty`), incremental fetch sessions (KIP-227), and the in-sync replica (ISR) set with high-watermark advance rules. No broker binary, no docker-compose, no `kafkajs.admin()`. `createKafkaRawProtocol()` gives you every one of those pieces as a test-side model, so the assertion "the second `send()` after a fenced producer got `INVALID_PRODUCER_EPOCH`" fires without a real Kafka. This is the pattern the streaming v0.3 8-axis grid uses under the hood — same producer identity semantics, same txn state machine, same ISR + HW gate. You leave this tutorial with a runnable exactly-once model + a fencing assertion + a HW gate that behaves like a real Kafka cluster in seconds instead of minutes.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/streaming` v0.3 that models the pieces of th
 ```bash
 mkdir kiwa-kafka-raw && cd kiwa-kafka-raw
 pnpm init
-pnpm add -D @kiwa-test/streaming@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa/streaming@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -31,7 +31,7 @@ Add the vitest scripts in `package.json`.
 }
 ```
 
-`@kiwa-test/streaming` v0.3 ships the 8-axis advanced-semantics surface (`createKafkaRawProtocol` + `createKafkaConsumerGroup` + `createRedpandaSchemaEvolution` + `createRedpandaTransactions` + `createNatsJetStreamDurable` + `createNatsKvObject` + `createExactlyOnceSemantics` + `createConsumerLagTelemetry`) alongside the v0.1 unified mocks. This tutorial focuses on axis 1 (Kafka raw protocol) — tutorial 59 covers Redpanda schema evolution, tutorial 60 covers NATS JetStream durable.
+`@kiwa/streaming` v0.3 ships the 8-axis advanced-semantics surface (`createKafkaRawProtocol` + `createKafkaConsumerGroup` + `createRedpandaSchemaEvolution` + `createRedpandaTransactions` + `createNatsJetStreamDurable` + `createNatsKvObject` + `createExactlyOnceSemantics` + `createConsumerLagTelemetry`) alongside the v0.1 unified mocks. This tutorial focuses on axis 1 (Kafka raw protocol) — tutorial 59 covers Redpanda schema evolution, tutorial 60 covers NATS JetStream durable.
 
 ### 2. InitProducerId + epoch fencing
 
@@ -39,7 +39,7 @@ Add the vitest scripts in `package.json`.
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createKafkaRawProtocol } from '@kiwa-test/streaming';
+import { createKafkaRawProtocol } from '@kiwa/streaming';
 
 describe('KIP-98 producer identity fencing', () => {
   it('fenceProducer bumps epoch and invalidates the old identity', () => {
@@ -64,7 +64,7 @@ The rule is that a fenced producer identity **is not just invalid** — it is in
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createKafkaRawProtocol } from '@kiwa-test/streaming';
+import { createKafkaRawProtocol } from '@kiwa/streaming';
 
 describe('KIP-98 transaction coordinator state machine', () => {
   it('follows the 4-step commit path Empty → Ongoing → PrepareCommit → CompleteCommit → Empty', () => {
@@ -93,7 +93,7 @@ The `Empty → PrepareCommit` shortcut is the exact bug a "double commit" client
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createKafkaRawProtocol } from '@kiwa-test/streaming';
+import { createKafkaRawProtocol } from '@kiwa/streaming';
 
 describe('KIP-227 incremental fetch session', () => {
   it('bumpFetchSession increments the epoch on each call', () => {
@@ -119,7 +119,7 @@ describe('KIP-227 incremental fetch session', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createKafkaRawProtocol } from '@kiwa-test/streaming';
+import { createKafkaRawProtocol } from '@kiwa/streaming';
 
 describe('ISR + high-watermark advance rules', () => {
   it('HW advances when the ISR has >= min.insync.replicas members', () => {
@@ -150,7 +150,7 @@ The `min.insync.replicas` gate is what stops the "silent data loss" pattern — 
 
 ## What you learned
 
-The 4 raw-protocol pieces the tutorial covered — producer id + epoch fencing, txn coordinator state machine, incremental fetch session, and ISR + HW gate — are the failure surfaces every exactly-once test hits. `@kiwa-test/streaming` v0.3 packages them as a test-side model so the assertion runs in milliseconds instead of the seconds a real broker + testcontainers takes. When you graduate to a real driver run (`KIWA_MODE=real KAFKA_KEY=...`), the fidelity harness compares the same assertion output against the actual broker — see the v1.30 → v1.31 migration guide for the env-gate contract.
+The 4 raw-protocol pieces the tutorial covered — producer id + epoch fencing, txn coordinator state machine, incremental fetch session, and ISR + HW gate — are the failure surfaces every exactly-once test hits. `@kiwa/streaming` v0.3 packages them as a test-side model so the assertion runs in milliseconds instead of the seconds a real broker + testcontainers takes. When you graduate to a real driver run (`KIWA_MODE=real KAFKA_KEY=...`), the fidelity harness compares the same assertion output against the actual broker — see the v1.30 → v1.31 migration guide for the env-gate contract.
 
 ## Next
 

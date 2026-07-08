@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/component/storybook-8-mdx @ 0.1.0
+# Quality Report — @kiwa/component/storybook-8-mdx @ 0.1.0
 
 _Reported at 2026-07-06T13:35:00.064Z._
 

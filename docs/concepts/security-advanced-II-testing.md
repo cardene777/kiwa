@@ -1,6 +1,6 @@
 # Security advanced II testing — v0.2 8 axis × 4 provider = 32 cell advanced grid + real-driver env-gate (SSOT)
 
-kiwa's v1.39-1 security v0.2 package (`@kiwa-test/security` v0.2.0) covers **8 advanced axes** that model the deepening security posture of a real production stack beyond the v0.1 base HTTP-header + policy-engine surface — mTLS handshake + zero-trust access + SIEM audit + incident response + cryptography advanced + container / Kubernetes hardening + supply chain SLSA + web vitals security. This concept doc is the SSOT for those 8 advanced axes; the tutorials (82-84) and dogfood apps (v1.39-2/3/4) are the concrete implementations.
+kiwa's v1.39-1 security v0.2 package (`@kiwa/security` v0.2.0) covers **8 advanced axes** that model the deepening security posture of a real production stack beyond the v0.1 base HTTP-header + policy-engine surface — mTLS handshake + zero-trust access + SIEM audit + incident response + cryptography advanced + container / Kubernetes hardening + supply chain SLSA + web vitals security. This concept doc is the SSOT for those 8 advanced axes; the tutorials (82-84) and dogfood apps (v1.39-2/3/4) are the concrete implementations.
 
 The v0.2 grid is orthogonal to the v0.1 base grid — the base grid (`SECURITY_FIDELITY_GRID`) covers the "read a request, decide allow / deny, emit audit event" primitive across 4 provider (`helmet` / `express-rate-limit` / `casbin` / `coraza`), and the advanced grid (`SECURITY_ADV_FIDELITY_GRID`) covers the "service mesh + policy engine + SIEM + secrets vault" primitives across a different 4 provider (`istio` / `opa` / `siem-splunk` / `vault`). Read the `security-real-driver-testing.md` concept doc first for the v0.1 base grid, then read this doc for the v0.2 advanced grid.
 
@@ -75,7 +75,7 @@ If the advanced fidelity harness has a `planned` cell, the corresponding tutoria
 
 ## How this ties into the 13-axis release gate
 
-v1.39 does not add a 14th release-gate axis. The 8 advanced security axes gate the security package's own tests (via `pnpm --filter @kiwa-test/security test`) but do not surface as a per-package `@kiwa-test/quality-metrics` axis. The reasoning — the advanced fidelity harness is provider-shape-specific, and a package that does not export to istio / opa / splunk / vault has nothing to assert on. When a future milestone adds a `security.advanced.fidelity` axis that describes "which advanced security providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.39 keeps the axis count at 13.
+v1.39 does not add a 14th release-gate axis. The 8 advanced security axes gate the security package's own tests (via `pnpm --filter @kiwa/security test`) but do not surface as a per-package `@kiwa/quality-metrics` axis. The reasoning — the advanced fidelity harness is provider-shape-specific, and a package that does not export to istio / opa / splunk / vault has nothing to assert on. When a future milestone adds a `security.advanced.fidelity` axis that describes "which advanced security providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.39 keeps the axis count at 13.
 
 ## The v0.1 → v0.2 pair 深化 relationship
 

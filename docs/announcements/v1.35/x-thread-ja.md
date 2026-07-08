@@ -4,7 +4,7 @@
 
 kiwa v1.35 リリース — Observability 深化 II が land。
 
-@kiwa-test/observability v2.0 → v2.1 minor bump。 4 provider (Grafana OSS + Prometheus + Loki + OpenTelemetry Collector) 上に advanced observability semantics 8 axis を追加 (SLO burn rate + RED/USE/four golden signals + exemplar tracing + OpenTelemetry advanced + log correlation advanced + alert routing advanced + continuous profiling + cardinality control)。
+@kiwa/observability v2.0 → v2.1 minor bump。 4 provider (Grafana OSS + Prometheus + Loki + OpenTelemetry Collector) 上に advanced observability semantics 8 axis を追加 (SLO burn rate + RED/USE/four golden signals + exemplar tracing + OpenTelemetry advanced + log correlation advanced + alert routing advanced + continuous profiling + cardinality control)。
 
 real driver env-gate (KIWA_MODE=real + GRAFANA_URL / PROMETHEUS_URL / LOKI_URL / OTEL_COLLECTOR_URL) で opt-in production fidelity 走査。 dogfood 3 app v2 / 新規 (observability-slo-app v2 + otel-exemplar-app v2 + profiling-app 新規) 全 7 軸 release gate PASS。
 
@@ -47,6 +47,6 @@ payment-v1.23 / edge / perf-harness / orm-v1.26 / quality-metrics / realtime / r
 
 すべての tutorial code snippet が docs-tutorial-v1.XX.test.ts で自動検証されている。
 
-`pnpm add -D @kiwa-test/observability` で v2.1.0 が入る。 breaking change なし。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.34-to-v1.35
+`pnpm add -D @kiwa/observability` で v2.1.0 が入る。 breaking change なし。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.34-to-v1.35
 
 次は v2.0。 Multi-version Vitest matrix + desktop/mobile adapter + coverage 100 % milestone + cache depth II (Dragonfly + KeyDB failover + Redis cluster resharding) + queue depth II + AI-LLM depth II + search depth II が有力候補。 feedback 歓迎。

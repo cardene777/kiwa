@@ -6,7 +6,7 @@ kiwa v1.59 is out。 **Desktop 深化 III** 単軸 milestone、 v1.56-v1.58 で�
 
 ## What's new
 
-### `@kiwa-test/desktop` v0.4 minor bump
+### `@kiwa/desktop` v0.4 minor bump
 
 - v0.1 3 axis + v0.2 5 axis + v0.3 4 axis = 12 axis semantics に **adapter layer + fidelity harness 追加**
   - **AdapterInvocation + AdapterMode + AdapterResult + DesktopAdapter** 4 type SSOT
@@ -45,7 +45,7 @@ pair 深度 4 段拡張達成 (v0.1 → v0.2 → v0.3 → v0.4) の 5 例目、 
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/desktop@^0.4
+pnpm add -D @kiwa/desktop@^0.4
 ```
 
 ## Migration guide

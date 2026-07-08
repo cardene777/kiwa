@@ -6,7 +6,7 @@ kiwa v1.48 is out. **security-devsecops v0.3 Phase 3 runSecurityAudit single ent
 
 ## What's new
 
-### `@kiwa-test/security-devsecops` v0.2 → v0.3
+### `@kiwa/security-devsecops` v0.2 → v0.3
 
 - `runSecurityAudit(input)` single entry 追加、 skill 4 種を library で置換可能
 - 4 preset SSOT map = audit-all (6 axis) / supply-chain (SCA + Container) / specialty (SAST + Secret + DAST) / threat-model (6 axis + STRIDE tag)
@@ -30,7 +30,7 @@ v1.23 → v1.48 = 26 milestones、 kiwa 史上最長記録更新継続。
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/security-devsecops@^0.3
+pnpm add -D @kiwa/security-devsecops@^0.3
 ```
 
 ## Migration guide

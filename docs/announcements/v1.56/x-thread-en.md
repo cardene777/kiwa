@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.56 released — Desktop new-base pair 14 introduced, **@kiwa-test/desktop v0.1** new (Electron + Tauri + Webview 3 axis), **42 packages reached**. Paired with v1.50 Mobile to achieve **v2.0 milestone desktop + mobile adapters goal**.
+kiwa v1.56 released — Desktop new-base pair 14 introduced, **@kiwa/desktop v0.1** new (Electron + Tauri + Webview 3 axis), **42 packages reached**. Paired with v1.50 Mobile to achieve **v2.0 milestone desktop + mobile adapters goal**.
 
 ## Tweet 2 — 3 axis semantics
 
@@ -14,7 +14,7 @@ dogfood-desktop-electron-app new (3 axis × 3 target workflow, 11 tests). **34-m
 
 ## Tweet 4 — install + Phase 2
 
-`pnpm add -D @kiwa-test/desktop@^0.1`. Migration: https://cardene777.github.io/kiwa/migrations/v1.55-to-v1.56
+`pnpm add -D @kiwa/desktop@^0.1`. Migration: https://cardene777.github.io/kiwa/migrations/v1.55-to-v1.56
 
 v1.57+ = Desktop deepening (v0.2 advanced axis: Auto-updater / File system permissions / Notification / Menu bar).
 

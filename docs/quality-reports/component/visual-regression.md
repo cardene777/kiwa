@@ -1,13 +1,13 @@
 # Fidelity — dogfood-visual-regression (v1.16-4)
 
-Real-vs-mock behavioural fidelity for the 10-scene Chromatic-style visual regression dogfood, produced by `examples/dogfood-visual-regression/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-test/quality-metrics` 7-axis release gate.
+Real-vs-mock behavioural fidelity for the 10-scene Chromatic-style visual regression dogfood, produced by `examples/dogfood-visual-regression/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 7-axis release gate.
 
 ## Baseline (real mode skipped — no `CHROMATIC_PROJECT_TOKEN` and no live `chromatic-cli` install)
 
 When the harness runs without a `CHROMATIC_PROJECT_TOKEN` env var, the real adapter emits `CHROMATIC_REAL_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/component/visual-regression
+provider   : @kiwa/component/visual-regression
 version    : 0.1.0
 verdict    : PASS (7-axis component branch — all axes clear the default gate)
 divergences: 3 (seedBaselines / captureAll / review — real mode absent)
@@ -52,7 +52,7 @@ The v0.1 real adapter emits `CHROMATIC_LIVE_NOT_IMPLEMENTED` when `CHROMATIC_PRO
 
 Three provider-neutral ops on `VisualRegressionAdapter`.
 
-- `seedBaselines` — walks the 10-scene registry, renders each with `seedArgs()`, hashes the pseudo-HTML through `@kiwa-test/component` `hashMarkup`, and seeds a `VisualBaseline` for every declared viewport (10 scenes × 2 viewports = 20 seed pairs per invocation)
+- `seedBaselines` — walks the 10-scene registry, renders each with `seedArgs()`, hashes the pseudo-HTML through `@kiwa/component` `hashMarkup`, and seeds a `VisualBaseline` for every declared viewport (10 scenes × 2 viewports = 20 seed pairs per invocation)
 - `captureAll` — walks the 10-scene registry, renders each with either `seedArgs()` or `changedArgs()`, captures the current markup, and returns 1 `VisualDiff` per viewport (`status='new'` for the first capture, `status='passed'` for a match, `status='failed'` on hash mismatch). Every diff also carries the `baselineHash` and `currentHash` fields for downstream inspection
 - `review` — records an accept or reject entry against a `(sceneId, viewport)` pair; accept swaps the baseline for the currently captured markup so the next matching capture reads passed, reject leaves the baseline intact so the next matching capture still fails
 
@@ -74,4 +74,4 @@ Each primitive renders identically across light + dark themes except for the `da
 
 ## Notes
 
-Provider prefix `@kiwa-test/component/` does not match the AI-LLM branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — 4 AI-LLM axes are appended only when the prefix is `@kiwa-test/ai-*`). Component test dogfoods stay on the 7-axis common track — Chromatic is a snapshot + diff surface, not a token-priced generative surface, so cost / latency / token / accuracy do not apply. Seed + capture + review round-trip latency still feeds `perf.p95Ms` so visual-regression performance stays visible in the report.
+Provider prefix `@kiwa/component/` does not match the AI-LLM branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — 4 AI-LLM axes are appended only when the prefix is `@kiwa/ai-*`). Component test dogfoods stay on the 7-axis common track — Chromatic is a snapshot + diff surface, not a token-priced generative surface, so cost / latency / token / accuracy do not apply. Seed + capture + review round-trip latency still feeds `perf.p95Ms` so visual-regression performance stays visible in the report.

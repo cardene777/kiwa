@@ -2,7 +2,7 @@
 
 ## Why this file exists
 
-The Stryker rollout across kiwa's `@kiwa-test/*` monorepo used ad-hoc per-package thresholds up to v1.26 — `high 80 / low 60 / break 50` for `core`, `high 90 / low 80 / break 80` for `api` and `nextjs`, and no documented reason for the split. When v1.27 expands mutation testing from 22 packages to 33+, each new package needs a threshold justification that survives review.
+The Stryker rollout across kiwa's `@kiwa/*` monorepo used ad-hoc per-package thresholds up to v1.26 — `high 80 / low 60 / break 50` for `core`, `high 90 / low 80 / break 80` for `api` and `nextjs`, and no documented reason for the split. When v1.27 expands mutation testing from 22 packages to 33+, each new package needs a threshold justification that survives review.
 
 This doc pins every package to one of four rationale tiers and encodes the mapping in each package's `stryker.config.mjs` header comment. The tiers are named after the shape of the code Stryker runs over, not the package name.
 
@@ -21,40 +21,40 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 
 | Package | Tier | Threshold | Reason |
 |---|---|---|---|
-| `@kiwa-test/core` | Core | 80 / 60 / 50 | Pure parser + pool logic every adapter depends on. |
-| `@kiwa-test/api` | Core | 90 / 80 / 80 | HTTP request client + MSW bridge — protocol invariants. |
-| `@kiwa-test/data` | Core | 80 / 60 / 50 | Fixture builders + assertion helpers, pure logic. |
-| `@kiwa-test/cli-test` | Core | 80 / 60 / 50 | CLI expectation runner, pure logic. |
-| `@kiwa-test/cli` | Core | 80 / 60 / 50 | CLI runtime for kiwa init / scaffold, pure logic. |
-| `@kiwa-test/observability` | Core | 80 / 60 / 50 | Flaky detection + coverage gap analysis, pure logic. |
-| `@kiwa-test/nextjs` | Framework | 70 / 60 / 50 | RSC + Server Actions + Middleware invariants. v1.27-1 rolled out with an aspirational 90 / 80 / 80 override, but the v1.27-2 baseline sweep landed at 80 % covered MSI (79.35 % total). Reverted to Framework default until follow-up tests raise the bar back to 90. |
-| `@kiwa-test/nuxt` | Framework | 70 / 60 / 50 | SSR + hydration + Nitro adapter drift. |
-| `@kiwa-test/sveltekit` | Framework | 70 / 60 / 50 | SSR + hydration + load / actions drift. |
-| `@kiwa-test/remix` | Framework | 70 / 60 / 50 | SSR + loader / action + client hydration drift. |
-| `@kiwa-test/astro` | Framework | 70 / 60 / 50 | Islands + SSR + partial hydration drift. |
-| `@kiwa-test/solidstart` | Framework | 70 / 60 / 50 | Solid SSR + resource + server-function drift. |
-| `@kiwa-test/qwikcity` | Framework | 70 / 60 / 50 | Resumability + SSR + route loader drift. |
-| `@kiwa-test/edge` | Framework | 70 / 60 / 50 | Workers / Deno / Bun edge runtimes with divergent APIs. |
-| `@kiwa-test/solidjs` | Framework | 70 / 60 / 50 | Solid signal + resource + SSR drift. |
-| `@kiwa-test/fresh` | Framework | 70 / 60 / 50 | Deno Fresh islands + SSR drift. |
-| `@kiwa-test/hono` | Framework | 70 / 60 / 50 | Hono edge + node adapter drift. |
-| `@kiwa-test/auth` | Framework | 70 / 60 / 50 | Adapter wraps NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth — SSR + RSC + provider drift. |
-| `@kiwa-test/ai-llm` | SaaS | 65 / 55 / 50 | Anthropic / OpenAI / Vercel AI SDK / LangChain — provider API surfaces evolve rapidly. |
-| `@kiwa-test/payment` | SaaS | 65 / 55 / 50 | Stripe / Paddle / Lemon Squeezy — webhook shape + billing semantics drift. |
-| `@kiwa-test/queue` | SaaS | 65 / 55 / 50 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ — provider transport + semantics drift. v1.27-3 baseline mutates `sandbox-queue.js` only; `testcontainers-queue.js` is excluded because its assertions only fire against live containers (0 covered mutants under the unit suite). |
-| `@kiwa-test/cache` | SaaS | 65 / 55 / 50 | Redis / KeyDB / Memcached — client library + protocol drift. v1.27-3 baseline mutates `in-memory-cache.js` only; `testcontainers-cache.js` is excluded for the same reason as queue. |
-| `@kiwa-test/streaming` | SaaS | 65 / 55 / 50 | Kafka / NATS / Redpanda with DLQ + exactly-once semantics. |
-| `@kiwa-test/realtime` | SaaS | 65 / 55 / 50 | Supabase Realtime / Ably / Pusher / Socket.io — WebSocket API drift. v1.27-3 baseline mutates `engine.js` / `fidelity.js` / `ably.js` only; `pusher.js` + `socketio.js` require a live provider socket to exercise, and `report.js` is a thin adapter over `@kiwa-test/quality-metrics` (mutation-tested there). |
-| `@kiwa-test/mcp` | SaaS | 65 / 55 / 50 | MCP JSON-RPC protocol + transport drift. |
-| `@kiwa-test/agent` | SaaS | 65 / 55 / 50 | LangGraph + OpenAI Assistants v2 — graph + polling semantics drift. |
-| `@kiwa-test/search` | SaaS | 65 / 55 / 50 | Algolia / Meilisearch / Typesense — index + query fidelity drift. |
-| `@kiwa-test/orm` | SaaS | 65 / 55 / 50 | Prisma / Drizzle / Kysely — SQL dialect + query planner drift. |
-| `@kiwa-test/dapp` | SaaS | 65 / 55 / 50 | viem + anvil + wallet fixture — chain protocol + wallet inject drift. |
-| `@kiwa-test/ui` | Test type | 60 / 50 / 40 | Vue / Solid / Lit / Qwik / Angular DOM harness — jsdom + framework noise. |
-| `@kiwa-test/a11y` | Test type | 60 / 50 / 40 | axe-core WCAG 2.1 AA — measurement noise + jsdom limits. |
-| `@kiwa-test/visual` | Test type | 60 / 50 / 40 | Screenshot + baseline / diff / accept — image diff tolerance. |
-| `@kiwa-test/component` | Test type | 60 / 50 / 40 | Storybook + Playwright CT + Chromatic — DOM + visual noise. |
-| `@kiwa-test/e2e` | Test type | 60 / 50 / 40 | Playwright fixture + test env — browser fixture noise. |
+| `@kiwa/core` | Core | 80 / 60 / 50 | Pure parser + pool logic every adapter depends on. |
+| `@kiwa/api` | Core | 90 / 80 / 80 | HTTP request client + MSW bridge — protocol invariants. |
+| `@kiwa/data` | Core | 80 / 60 / 50 | Fixture builders + assertion helpers, pure logic. |
+| `@kiwa/cli-test` | Core | 80 / 60 / 50 | CLI expectation runner, pure logic. |
+| `@kiwa/cli` | Core | 80 / 60 / 50 | CLI runtime for kiwa init / scaffold, pure logic. |
+| `@kiwa/observability` | Core | 80 / 60 / 50 | Flaky detection + coverage gap analysis, pure logic. |
+| `@kiwa/nextjs` | Framework | 70 / 60 / 50 | RSC + Server Actions + Middleware invariants. v1.27-1 rolled out with an aspirational 90 / 80 / 80 override, but the v1.27-2 baseline sweep landed at 80 % covered MSI (79.35 % total). Reverted to Framework default until follow-up tests raise the bar back to 90. |
+| `@kiwa/nuxt` | Framework | 70 / 60 / 50 | SSR + hydration + Nitro adapter drift. |
+| `@kiwa/sveltekit` | Framework | 70 / 60 / 50 | SSR + hydration + load / actions drift. |
+| `@kiwa/remix` | Framework | 70 / 60 / 50 | SSR + loader / action + client hydration drift. |
+| `@kiwa/astro` | Framework | 70 / 60 / 50 | Islands + SSR + partial hydration drift. |
+| `@kiwa/solidstart` | Framework | 70 / 60 / 50 | Solid SSR + resource + server-function drift. |
+| `@kiwa/qwikcity` | Framework | 70 / 60 / 50 | Resumability + SSR + route loader drift. |
+| `@kiwa/edge` | Framework | 70 / 60 / 50 | Workers / Deno / Bun edge runtimes with divergent APIs. |
+| `@kiwa/solidjs` | Framework | 70 / 60 / 50 | Solid signal + resource + SSR drift. |
+| `@kiwa/fresh` | Framework | 70 / 60 / 50 | Deno Fresh islands + SSR drift. |
+| `@kiwa/hono` | Framework | 70 / 60 / 50 | Hono edge + node adapter drift. |
+| `@kiwa/auth` | Framework | 70 / 60 / 50 | Adapter wraps NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth — SSR + RSC + provider drift. |
+| `@kiwa/ai-llm` | SaaS | 65 / 55 / 50 | Anthropic / OpenAI / Vercel AI SDK / LangChain — provider API surfaces evolve rapidly. |
+| `@kiwa/payment` | SaaS | 65 / 55 / 50 | Stripe / Paddle / Lemon Squeezy — webhook shape + billing semantics drift. |
+| `@kiwa/queue` | SaaS | 65 / 55 / 50 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ — provider transport + semantics drift. v1.27-3 baseline mutates `sandbox-queue.js` only; `testcontainers-queue.js` is excluded because its assertions only fire against live containers (0 covered mutants under the unit suite). |
+| `@kiwa/cache` | SaaS | 65 / 55 / 50 | Redis / KeyDB / Memcached — client library + protocol drift. v1.27-3 baseline mutates `in-memory-cache.js` only; `testcontainers-cache.js` is excluded for the same reason as queue. |
+| `@kiwa/streaming` | SaaS | 65 / 55 / 50 | Kafka / NATS / Redpanda with DLQ + exactly-once semantics. |
+| `@kiwa/realtime` | SaaS | 65 / 55 / 50 | Supabase Realtime / Ably / Pusher / Socket.io — WebSocket API drift. v1.27-3 baseline mutates `engine.js` / `fidelity.js` / `ably.js` only; `pusher.js` + `socketio.js` require a live provider socket to exercise, and `report.js` is a thin adapter over `@kiwa/quality-metrics` (mutation-tested there). |
+| `@kiwa/mcp` | SaaS | 65 / 55 / 50 | MCP JSON-RPC protocol + transport drift. |
+| `@kiwa/agent` | SaaS | 65 / 55 / 50 | LangGraph + OpenAI Assistants v2 — graph + polling semantics drift. |
+| `@kiwa/search` | SaaS | 65 / 55 / 50 | Algolia / Meilisearch / Typesense — index + query fidelity drift. |
+| `@kiwa/orm` | SaaS | 65 / 55 / 50 | Prisma / Drizzle / Kysely — SQL dialect + query planner drift. |
+| `@kiwa/dapp` | SaaS | 65 / 55 / 50 | viem + anvil + wallet fixture — chain protocol + wallet inject drift. |
+| `@kiwa/ui` | Test type | 60 / 50 / 40 | Vue / Solid / Lit / Qwik / Angular DOM harness — jsdom + framework noise. |
+| `@kiwa/a11y` | Test type | 60 / 50 / 40 | axe-core WCAG 2.1 AA — measurement noise + jsdom limits. |
+| `@kiwa/visual` | Test type | 60 / 50 / 40 | Screenshot + baseline / diff / accept — image diff tolerance. |
+| `@kiwa/component` | Test type | 60 / 50 / 40 | Storybook + Playwright CT + Chromatic — DOM + visual noise. |
+| `@kiwa/e2e` | Test type | 60 / 50 / 40 | Playwright fixture + test env — browser fixture noise. |
 
 Any future adapter starts by picking the tier its code most resembles. If none fits, add a new tier here first, then the config.
 
@@ -64,7 +64,7 @@ Every `packages/*/stryker.config.mjs` starts with a header comment that names th
 
 ```js
 /**
- * Mutation testing config for @kiwa-test/<name>.
+ * Mutation testing config for @kiwa/<name>.
  * Threshold: <tier> tier (high N / low N / break N) — <one-line reason>.
  * SSOT: docs/quality/mutation-thresholds.md § <tier> tier.
  */
@@ -74,7 +74,7 @@ The comment is the on-the-spot receipt. This doc is the shared law.
 
 ## Overrides
 
-A package may sit one tier stricter than its default (e.g. `@kiwa-test/api` picks Core-strict 90 / 80 / 80 because its historical bar already met it). Stricter overrides do not need approval — they raise the floor. A looser override requires a one-line justification in the PR body of the change that introduces it, and must not drop below the tier's `break` threshold.
+A package may sit one tier stricter than its default (e.g. `@kiwa/api` picks Core-strict 90 / 80 / 80 because its historical bar already met it). Stricter overrides do not need approval — they raise the floor. A looser override requires a one-line justification in the PR body of the change that introduces it, and must not drop below the tier's `break` threshold.
 
 ## Baseline snapshots
 
@@ -83,7 +83,7 @@ Each package writes a per-package baseline JSON to `.mutation-baseline/<pkg>.jso
 ## 12-axis release gate integration (v1.27-4)
 
 v1.27-4 promotes the mutation kill rate to a first-class 12th axis in the release gate.
-`@kiwa-test/quality-metrics` exposes three new symbols so downstream apps can opt in:
+`@kiwa/quality-metrics` exposes three new symbols so downstream apps can opt in:
 
 - `DEFAULT_MUTATION_TIER_THRESHOLDS` — the SSOT table (`core: 80 / framework: 70 / saas: 65 / test-type: 60`), a `Readonly<Record<MutationTier, number>>` that mirrors the tier `high` column above.
 - `resolveMutationTier(label)` — normalises the verbal tier label (`Core` / `Framework` / `SaaS` / `Test type`) written in `.mutation-baseline/*.json` into the machine `MutationTier` enum (`core` / `framework` / `saas` / `test-type`). Case-insensitive, trim-tolerant.

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that drives **two agent orchestration styles** under one API — a LangGraph-style `StateGraph` that classifies a message → answers, and an OpenAI Assistants v2 flow that spawns an assistant, opens a thread, creates a run, handles a `requires_action` step by submitting tool outputs, and observes the run transitioning to `completed`. `@kiwa-test/agent` runs both flows in-process, deterministic run ids, and 6-item compile validation so runaway agent loops fail fast in tests instead of production.
+A vitest test file that drives **two agent orchestration styles** under one API — a LangGraph-style `StateGraph` that classifies a message → answers, and an OpenAI Assistants v2 flow that spawns an assistant, opens a thread, creates a run, handles a `requires_action` step by submitting tool outputs, and observes the run transitioning to `completed`. `@kiwa/agent` runs both flows in-process, deterministic run ids, and 6-item compile validation so runaway agent loops fail fast in tests instead of production.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that drives **two agent orchestration styles** under one API 
 ```bash
 mkdir kiwa-agent && cd kiwa-agent
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa-test/agent
+pnpm add -D vitest typescript @types/node @kiwa/agent
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -46,7 +46,7 @@ Add `tsconfig.json`:
 Create `src/chat-graph.ts` — a 2-node `StateGraph` that classifies then answers:
 
 ```ts
-import { END, START, StateGraph } from '@kiwa-test/agent';
+import { END, START, StateGraph } from '@kiwa/agent';
 
 export interface ChatState {
   messages: string[];
@@ -75,7 +75,7 @@ export function buildChatGraph() {
 Create `src/weather-agent.ts` — an Assistants v2 flow that requires a tool output before completing:
 
 ```ts
-import { AssistantsClient, toolCall } from '@kiwa-test/agent';
+import { AssistantsClient, toolCall } from '@kiwa/agent';
 
 export function buildWeatherAssistant() {
   const client = new AssistantsClient({ idSeed: 'weather-demo' });
@@ -235,4 +235,4 @@ Conditional edges (`addConditionalEdges` in real LangGraph), channels reducers, 
 - [Tutorial 17 — MCP tool-use agent](./17-mcp-tool-agent) — MCP tool loop that pairs well with Assistants v2
 - [Tutorial 07 — OpenAI tool-use agent](./07-openai-tool-agent) — native (non-Assistants) tool loop
 - [Concept — AI-LLM multimodal testing SSOT](../concepts/ai-llm-multimodal-testing) — includes agent-state gotchas
-- [`@kiwa-test/agent` on npm](https://www.npmjs.com/package/@kiwa-test/agent)
+- [`@kiwa/agent` on npm](https://www.npmjs.com/package/@kiwa/agent)

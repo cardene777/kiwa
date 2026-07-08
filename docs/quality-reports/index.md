@@ -4,7 +4,7 @@ title: kiwa quality reports
 
 # kiwa quality reports
 
-This section hosts per-provider [`@kiwa-test/quality-metrics`](../quality/release-gate) snapshots. See [`docs/quality-reports/README.md`](./README) for the emit + promotion workflow.
+This section hosts per-provider [`@kiwa/quality-metrics`](../quality/release-gate) snapshots. See [`docs/quality-reports/README.md`](./README) for the emit + promotion workflow.
 
 ## Latest reports
 

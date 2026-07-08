@@ -1,6 +1,6 @@
 1/ kiwa v1.17 is out — Observability v2 milestone. After v1.16's component test vertical (Storybook 8 + Playwright CT + Chromatic), v1.17 lands the SaaS observability stack every production team already ships: Grafana dashboards + Prometheus AlertManager routing + trace flame graphs + log ↔ span correlation.
 
-2/ `@kiwa-test/observability` v2.0 (major bump) — 4 additional axes on top of the v1.1 telemetry mock foundation (v1.14-4 OpenTelemetry / Datadog / Sentry). Zero breaking changes to v1.0 or v1.1 surfaces; 11 new public exports + 13 fixture builders under the "Observability v2" module signal.
+2/ `@kiwa/observability` v2.0 (major bump) — 4 additional axes on top of the v1.1 telemetry mock foundation (v1.14-4 OpenTelemetry / Datadog / Sentry). Zero breaking changes to v1.0 or v1.1 surfaces; 11 new public exports + 13 fixture builders under the "Observability v2" module signal.
 
 3/ `DashboardMock` — bind a dashboard to a `TelemetryCollector`, evaluate N panel queries (`sum` / `avg` / `max` / `min` / `count` / `last`) with optional tag filter + time window, attach `PanelThreshold[]` for `ok` / `warn` / `critical` badge. `refresh()` returns `PanelResult[]` + increments `refreshCount`.
 

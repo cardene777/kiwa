@@ -1,10 +1,10 @@
 # dogfood-socketio-notification
 
-Dogfood app 3 (v1.13-5) — a Socket.io / SSE notification app that exercises **server-to-client push + room-scoped delivery + reconnect + pending event replay + queue-overflow backpressure** across a provider-neutral interface so `@kiwa-test/realtime`'s Socket.io mock can be measured against a real Socket.io / SSE call. The resulting fidelity report feeds `@kiwa-test/quality-metrics` release gate.
+Dogfood app 3 (v1.13-5) — a Socket.io / SSE notification app that exercises **server-to-client push + room-scoped delivery + reconnect + pending event replay + queue-overflow backpressure** across a provider-neutral interface so `@kiwa/realtime`'s Socket.io mock can be measured against a real Socket.io / SSE call. The resulting fidelity report feeds `@kiwa/quality-metrics` release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-test/realtime` `createSocketioMock`, deterministic broadcast + room + reconnect + backpressure engine)
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/realtime` `createSocketioMock`, deterministic broadcast + room + reconnect + backpressure engine)
 - `KIWA_MODE=real` — driven by `makeRealAdapter()` that would talk to `socket.io-client` (or the SSE endpoint) when `SOCKETIO_URL` is set. When the variable is missing the adapter reports each method as `SOCKETIO_ENV_MISSING` so the fidelity harness records the gap without failing the test suite. When the env is set but the SDK is not installed (the default in this workspace, which does not vendor `socket.io-client`), the adapter downgrades to `SOCKETIO_SDK_MISSING` — the same harness path, one level closer to real IO.
 
 Real-mode envs.
@@ -28,7 +28,7 @@ src/
     notification-flows.ts -- subscribe + deliver / multi-room / reconnect
                              + pending replay / backpressure overflow
     fidelity.ts           -- trace-diffing harness that feeds
-                             @kiwa-test/quality-metrics
+                             @kiwa/quality-metrics
 tests/
   e2e-mock-mode.test.ts        -- 10 mock-mode e2e tests
   fidelity-report.test.ts      -- 3 harness tests
@@ -47,7 +47,7 @@ The `quality-report/` directory is git-ignored — promote snapshots to `docs/qu
 
 ## Release gate (7 axes)
 
-Because the provider string is `@kiwa-test/realtime/socketio-notification`, `evaluateReleaseGate` runs the common 7-axis branch. The AI-LLM 4 axes (cost per request / p95 latency / total tokens / accuracy) do not apply — Socket.io / SSE is a socket / pub-sub primitive, not a token-priced generative surface. Socket round-trip latency still feeds `perf.p95Ms` so the realtime performance axis stays visible in the report.
+Because the provider string is `@kiwa/realtime/socketio-notification`, `evaluateReleaseGate` runs the common 7-axis branch. The AI-LLM 4 axes (cost per request / p95 latency / total tokens / accuracy) do not apply — Socket.io / SSE is a socket / pub-sub primitive, not a token-priced generative surface. Socket round-trip latency still feeds `perf.p95Ms` so the realtime performance axis stays visible in the report.
 
 - `coverage.line` ≥ 85%
 - `coverage.branch` ≥ 80%
@@ -70,8 +70,8 @@ The mock adapter also exposes a test-only `disconnectClient()` method so the fid
 
 ## Related
 
-- v1.13-2 `@kiwa-test/realtime` v0.1 (`packages/realtime/`)
+- v1.13-2 `@kiwa/realtime` v0.1 (`packages/realtime/`)
 - v1.13-3 `dogfood-supabase-realtime-chat` (`examples/dogfood-supabase-realtime-chat/`) — sibling dogfood for broadcast + presence + typing debounce
 - v1.13-4 `dogfood-ably-collab-cursor` (`examples/dogfood-ably-collab-cursor/`) — sibling dogfood for cursor broadcast + throttle + history rewind
-- v1.11-1 `@kiwa-test/quality-metrics` (`packages/quality-metrics/`)
+- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
 - v1.13 milestone parent [#709](https://github.com/cardene777/kiwa/issues/709), this sub [#713](https://github.com/cardene777/kiwa/issues/713)

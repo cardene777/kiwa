@@ -5,8 +5,8 @@ with row-level security policies + automatic `tenant_id` injection +
 cross-tenant refuse + tamper-evident audit log + v2 advanced db semantics
 (MySQL 8 group replication + binlog / GTID / ROW / gap + MySQL Router
 R/W split via pool advanced + MySQL 8 + Router testcontainers probe),
-exercising the 4 v1 patterns `@kiwa-test/orm` (v0.9) promises for MySQL 8
-RLS + 4 v2 axes `@kiwa-test/orm` v0.10 promises for MySQL advanced db
+exercising the 4 v1 patterns `@kiwa/orm` (v0.9) promises for MySQL 8
+RLS + 4 v2 axes `@kiwa/orm` v0.10 promises for MySQL advanced db
 semantics:
 
 1. **Tenant_id auto-injection** — every write goes through an RLS gate
@@ -28,7 +28,7 @@ v2 axes (v1.32-3):
 
 5. **Group replication** — MySQL 8 group_replication + performance_schema
    walk (empty → joined → primary-elected → conflict-detected →
-   member-left) driven through `@kiwa-test/orm` v0.10's
+   member-left) driven through `@kiwa/orm` v0.10's
    `createMysqlClusterSession` + `joinClusterMember` +
    `electClusterPrimary` + `detectClusterConflict` + `leaveClusterMember`.
 6. **Binlog advance** — MySQL 8 binlog position advance + GTID set update

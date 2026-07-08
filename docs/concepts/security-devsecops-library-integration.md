@@ -6,7 +6,7 @@ title: DevSecOps library integration — skill 置換 pattern SSOT
 
 ## What this covers
 
-`@kiwa-test/security-devsecops` v0.1 (v1.46-4) を dev-flow の security 4 skill 経路 (security-audit + security-audit-supply-chain + security-audit-specialty + security-audit-threat-model) から使う統一 pattern。 これまで各 skill が bash / Codex 委譲で個別に scan tool を叩いていた経路を、 library 経由で test 可能な形に置換する SSOT。
+`@kiwa/security-devsecops` v0.1 (v1.46-4) を dev-flow の security 4 skill 経路 (security-audit + security-audit-supply-chain + security-audit-specialty + security-audit-threat-model) から使う統一 pattern。 これまで各 skill が bash / Codex 委譲で個別に scan tool を叩いていた経路を、 library 経由で test 可能な形に置換する SSOT。
 
 ## v1.46 の置換方針
 
@@ -21,7 +21,7 @@ title: DevSecOps library integration — skill 置換 pattern SSOT
 
 ### 置換後 skill 経路 (v1.46 SSOT)
 
-各 skill は `@kiwa-test/security-devsecops` v0.1 の 6 axis semantics を経由して scan を state machine 化する。 skill 実行 = library の state machine を driving + neutral event 収集 + 結果集約。
+各 skill は `@kiwa/security-devsecops` v0.1 の 6 axis semantics を経由して scan を state machine 化する。 skill 実行 = library の state machine を driving + neutral event 収集 + 結果集約。
 
 ```ts
 // security-audit skill 内部で呼ぶ pattern
@@ -46,7 +46,7 @@ import {
   detectContainerCve,
   flagContainerMalware,
   completeContainerScan,
-} from '@kiwa-test/security-devsecops';
+} from '@kiwa/security-devsecops';
 
 // SAST axis
 const sast = startSastScan({ scanId: 'audit-1', target: 'src/' });
@@ -74,7 +74,7 @@ const sastReport = completeSastScan(sast);
 ```markdown
 ## v1.46+ library 経路 (SSOT)
 
-本 skill は v1.46 以降 `@kiwa-test/security-devsecops` v0.1 の 6 axis semantics 経由で scan を state machine 化する。
+本 skill は v1.46 以降 `@kiwa/security-devsecops` v0.1 の 6 axis semantics 経由で scan を state machine 化する。
 
 - SAST → `startSastScan` + `detectSastFinding` + `completeSastScan`
 - SCA → `startScaScan` + `detectScaVuln` + `completeScaScan`
@@ -94,7 +94,7 @@ skill 実行結果は library の neutral event history を経由するため、
 
 ## Phase 3 完成 SSOT (v1.48)
 
-v1.48 で `@kiwa-test/security-devsecops` v0.3 を release、 `runSecurityAudit` single entry + 4 preset SSOT + summary API 追加。 Phase 1 + Phase 2 の上に乗る optional path、 従来経路も動作継続。
+v1.48 で `@kiwa/security-devsecops` v0.3 を release、 `runSecurityAudit` single entry + 4 preset SSOT + summary API 追加。 Phase 1 + Phase 2 の上に乗る optional path、 従来経路も動作継続。
 
 ### 3 段の階層構造
 
@@ -118,7 +118,7 @@ import {
   runSecurityAudit,
   summarizeAuditReport,
   type AuditPreset,
-} from '@kiwa-test/security-devsecops';
+} from '@kiwa/security-devsecops';
 
 // skill 4 種を library で置換
 async function runSkill(preset: AuditPreset, target: string) {
@@ -156,7 +156,7 @@ Phase 1 (semantics) → Phase 2 (adapter) → Phase 3 (orchestrator) の 3 段�
 
 ## Phase 2 完成 SSOT (v1.47)
 
-v1.47 で `@kiwa-test/security-devsecops` v0.2 を release、 6 axis × mock/real adapter pair 追加。 backward compat 維持で v0.1 semantics 直接使用は継続、 adapter は新規 optional path。
+v1.47 で `@kiwa/security-devsecops` v0.2 を release、 6 axis × mock/real adapter pair 追加。 backward compat 維持で v0.1 semantics 直接使用は継続、 adapter は新規 optional path。
 
 ### v0.2 adapter interface
 
@@ -170,7 +170,7 @@ import type {
   IacAdapter,
   DastAdapter,
   ContainerAdapter,
-} from '@kiwa-test/security-devsecops';
+} from '@kiwa/security-devsecops';
 
 // 6 axis 共通契約 = scan(input) → AdapterResult<TState>
 export interface CommonAdapter {
@@ -197,7 +197,7 @@ import {
   containerSecurityMockAdapter,
   containerSecurityRealAdapter,
   type AdapterMode,
-} from '@kiwa-test/security-devsecops';
+} from '@kiwa/security-devsecops';
 
 // mode 切替 = default mock、 KIWA_SECURITY_MODE=real で real 呼出
 async function runAudit(mode: AdapterMode, target: string) {
@@ -255,7 +255,7 @@ real adapter は以下 env 全部揃った時のみ CLI 呼出。 それ以外�
 
 ## 関連
 
-- `@kiwa-test/security` v0.2 (v1.39) — runtime security (CSP + mTLS + SIEM + SLSA) を扱う別 package
-- `@kiwa-test/security-devsecops` v0.1 (v1.46) — build-time / CI-time security scanning を扱う本 package
+- `@kiwa/security` v0.2 (v1.39) — runtime security (CSP + mTLS + SIEM + SLSA) を扱う別 package
+- `@kiwa/security-devsecops` v0.1 (v1.46) — build-time / CI-time security scanning を扱う本 package
 - `docs/quality/perf-thresholds.md` — perf threshold SSOT (v0.4 strict と関連)
 - `rules/quality.md` — dev-flow quality gate SSOT

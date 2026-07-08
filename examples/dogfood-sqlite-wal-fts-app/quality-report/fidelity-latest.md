@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/orm/sqlite-wal-fts-dogfood @ 0.1.0
+# Quality Report — @kiwa/orm/sqlite-wal-fts-dogfood @ 0.1.0
 
 _Reported at 2026-07-06T08:14:26.235Z._
 

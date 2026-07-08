@@ -2,7 +2,7 @@
 
 ## What this covers
 
-`@kiwa-test/realtime` v0.3 layers 8 advanced III axes on top of the v0.2 base (WebRTC + WebTransport + HTTP/3 + QUIC 8 axis)。 v0.3 introduces 3 new protocols (MoQ / WebCodecs / AI-media) and 8 axes for Media over QUIC delivery + WebCodecs direct API + LLM voice / Whisper ASR / realtime AI inference。
+`@kiwa/realtime` v0.3 layers 8 advanced III axes on top of the v0.2 base (WebRTC + WebTransport + HTTP/3 + QUIC 8 axis)。 v0.3 introduces 3 new protocols (MoQ / WebCodecs / AI-media) and 8 axes for Media over QUIC delivery + WebCodecs direct API + LLM voice / Whisper ASR / realtime AI inference。
 
 ## Pair 第 2 pair 3 段拡張達成 (3 例目 record)
 

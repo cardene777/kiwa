@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/observability/dogfood-llm-ops-app @ 2.2.0
+# Quality Report — @kiwa/observability/dogfood-llm-ops-app @ 2.2.0
 
 _Reported at 2026-07-07T15:04:37.764Z._
 

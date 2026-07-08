@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/security` v0.1 that models the 5 pieces of a real Content Security Policy pipeline that every non-trivial browser-facing app eventually needs — a nonce-based `script-src` that unblocks the first-party bundle without shipping `'unsafe-inline'`, a `sha256` / `sha384` / `sha512` hash source for the small inline snippets that predate the nonce refactor, a `'strict-dynamic'` policy that lets the nonced loader inject downstream scripts without maintaining a per-CDN allowlist, a `trusted-types` directive that declares the DOM sink policies your app is allowed to write through, and a report-only header variant that ships the same policy behind `Content-Security-Policy-Report-Only` so a real-world rollout can start in observe mode. `buildCspHeader()` + `validateNonce()` + `toCspEvent()` give you every one of those pieces without booting a real helmet middleware. This is the pattern kiwa's `examples/dogfood-security-csp-headers-app` exercises against real Next.js middleware under `KIWA_MODE=real`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the `'strict-dynamic'` directive silently disabled the whole policy because no nonce was in `script-src`" gap a reviewer sees in the CSP rollout post-mortem.
+A vitest suite wired to `@kiwa/security` v0.1 that models the 5 pieces of a real Content Security Policy pipeline that every non-trivial browser-facing app eventually needs — a nonce-based `script-src` that unblocks the first-party bundle without shipping `'unsafe-inline'`, a `sha256` / `sha384` / `sha512` hash source for the small inline snippets that predate the nonce refactor, a `'strict-dynamic'` policy that lets the nonced loader inject downstream scripts without maintaining a per-CDN allowlist, a `trusted-types` directive that declares the DOM sink policies your app is allowed to write through, and a report-only header variant that ships the same policy behind `Content-Security-Policy-Report-Only` so a real-world rollout can start in observe mode. `buildCspHeader()` + `validateNonce()` + `toCspEvent()` give you every one of those pieces without booting a real helmet middleware. This is the pattern kiwa's `examples/dogfood-security-csp-headers-app` exercises against real Next.js middleware under `KIWA_MODE=real`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the `'strict-dynamic'` directive silently disabled the whole policy because no nonce was in `script-src`" gap a reviewer sees in the CSP rollout post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/security` v0.1 that models the 5 pieces of a
 ```bash
 mkdir kiwa-csp && cd kiwa-csp
 pnpm init
-pnpm add -D @kiwa-test/security@^0.1 vitest typescript @types/node
+pnpm add -D @kiwa/security@^0.1 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.1 surface exports the CSP axis (`buildCspHeader` / `validateNonce` / `toC
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { buildCspHeader } from '@kiwa-test/security';
+import { buildCspHeader } from '@kiwa/security';
 
 describe('csp — minimal policy', () => {
   it('emits Content-Security-Policy header by default', () => {
@@ -77,7 +77,7 @@ The `expandedDirectives` map is the debug surface — the header string is what 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { buildCspHeader, validateNonce } from '@kiwa-test/security';
+import { buildCspHeader, validateNonce } from '@kiwa/security';
 
 describe('csp — nonce', () => {
   it('accepts a 22-char base64url nonce (16 bytes of entropy)', () => {
@@ -130,7 +130,7 @@ The middleware side generates a fresh nonce per request (`crypto.randomBytes(16)
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { buildCspHeader } from '@kiwa-test/security';
+import { buildCspHeader } from '@kiwa/security';
 
 describe('csp — hash sources', () => {
   it('emits sha256 hash source in script-src by default', () => {
@@ -175,7 +175,7 @@ describe('csp — hash sources', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { buildCspHeader } from '@kiwa-test/security';
+import { buildCspHeader } from '@kiwa/security';
 
 describe('csp — strict-dynamic', () => {
   it('emits strict-dynamic + nonce in script-src', () => {
@@ -219,7 +219,7 @@ The `strictDynamic requires at least one nonce or hash` throw is the exact same 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { buildCspHeader } from '@kiwa-test/security';
+import { buildCspHeader } from '@kiwa/security';
 
 describe('csp — trusted-types', () => {
   it('emits trusted-types directive with named policies', () => {
@@ -250,7 +250,7 @@ Rolling this out safely means declaring the DOM-sink allowlist explicitly, then 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { buildCspHeader } from '@kiwa-test/security';
+import { buildCspHeader } from '@kiwa/security';
 
 describe('csp — report-only', () => {
   it('flips the header name when reportOnly is true', () => {
@@ -280,7 +280,7 @@ The `report-to` directive is the modern shape (paired with a `Report-To` respons
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { toCspEvent } from '@kiwa-test/security';
+import { toCspEvent } from '@kiwa/security';
 
 describe('csp — fidelity adapter', () => {
   it('normalizes a helmet-side deny into the neutral SecurityEvent shape', () => {

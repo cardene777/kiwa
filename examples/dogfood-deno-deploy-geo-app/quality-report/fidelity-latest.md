@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/edge/deno-deploy-geo @ 0.1.0
+# Quality Report — @kiwa/edge/deno-deploy-geo @ 0.1.0
 
 _Reported at 2026-07-05T02:04:47.720Z._
 

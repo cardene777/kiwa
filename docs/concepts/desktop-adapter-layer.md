@@ -6,7 +6,7 @@ title: Desktop adapter layer — v1.59 v0.4 24 adapter + 36 fidelity SSOT
 
 ## What this covers
 
-`@kiwa-test/desktop` v0.4 の adapter interface + fidelity harness SSOT。 v1.59 で v0.3 12 axis → v0.4 adapter layer 追加、 kiwa 縦深化 pair 第 14 の第 4 段、 **depth-4 record 5 例目**、 Mobile v1.53 pattern (v0.4 real driver adapter layer) 転用、 v0.3 baseline (`docs/concepts/desktop-advanced-iii.md`) を extend。
+`@kiwa/desktop` v0.4 の adapter interface + fidelity harness SSOT。 v1.59 で v0.3 12 axis → v0.4 adapter layer 追加、 kiwa 縦深化 pair 第 14 の第 4 段、 **depth-4 record 5 例目**、 Mobile v1.53 pattern (v0.4 real driver adapter layer) 転用、 v0.3 baseline (`docs/concepts/desktop-advanced-iii.md`) を extend。
 
 ## adapter interface 4 type SSOT
 
@@ -75,7 +75,7 @@ adapter interface + fidelity harness は semantics layer の上に構築、 prov
 
 ## backward compat 絶対維持
 
-v0.4 adapter layer の追加は additive、 v0.1 + v0.2 + v0.3 の 12 axis / 48 method / 48 event / 144 mapping は完全保持。 依存関係も `@kiwa-test/core` のみで v0.1-v0.3 と同じ、 他 42 package への影響 0、 semantics layer からの API export 完全保持。
+v0.4 adapter layer の追加は additive、 v0.1 + v0.2 + v0.3 の 12 axis / 48 method / 48 event / 144 mapping は完全保持。 依存関係も `@kiwa/core` のみで v0.1-v0.3 と同じ、 他 42 package への影響 0、 semantics layer からの API export 完全保持。
 
 ## systematic pattern 34 度目適用
 

@@ -16,7 +16,7 @@ component 側 = react-19-actions (useActionState + useOptimistic 統合) + islan
 
 ## Tweet 4 — install + npm
 
-`pnpm add -D @kiwa-test/component@^0.4 @kiwa-test/nextjs@^1.3`。 migration: https://cardene777.github.io/kiwa/migrations/v1.48-to-v1.49
+`pnpm add -D @kiwa/component@^0.4 @kiwa/nextjs@^1.3`。 migration: https://cardene777.github.io/kiwa/migrations/v1.48-to-v1.49
 
 7 sub 完遂 (v1.49-1 pair minor bump / v1.49-2 rsc dogfood / v1.49-3 view-transitions dogfood / v1.49-4 islands-turbopack dogfood / v1.49-5 docs 27 streak / v1.49-6 publish / v1.49-7 retrospective)。
 

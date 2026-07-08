@@ -1,9 +1,9 @@
 ---
 name: kiwa-sveltekit
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.svk.md` / `.svk-action.md` / `.svk-hooks.md`) を SvelteKit の load function + form actions + hooks.server.ts (handle / handleFetch / handleError) test (Vitest + @kiwa-test/sveltekit) に変換する Layer 2 skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.svk.md` / `.svk-action.md` / `.svk-hooks.md`) を SvelteKit の load function + form actions + hooks.server.ts (handle / handleFetch / handleError) test (Vitest + @kiwa/sveltekit) に変換する Layer 2 skill。
   `+page.server.ts` の `load` を `invokeLoad`、 `actions.{name}` を `invokeAction`、 `hooks.server.ts` の `handle` / `handleFetch` / `handleError` を `invokeHandle` / `invokeHandleFetch` / `invokeHandleError` で direct invoke、 redirect / error / fail signal + outgoing response + locals 操作を捕捉する。
-  `/kiwa-design --layer sveltekit-load` / `--layer sveltekit-action` / `--layer sveltekit-handle` / `--layer sveltekit-handle-fetch` / `--layer sveltekit-handle-error` が出力する 9 column 表を `@kiwa-test/sveltekit` の API に機械的に変換する。
+  `/kiwa-design --layer sveltekit-load` / `--layer sveltekit-action` / `--layer sveltekit-handle` / `--layer sveltekit-handle-fetch` / `--layer sveltekit-handle-error` が出力する 9 column 表を `@kiwa/sveltekit` の API に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -12,7 +12,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /kiwa-sveltekit — SvelteKit load + form actions test 生成 (Layer 2)
 
-`/kiwa-design --layer sveltekit-load` / `--layer sveltekit-action` が出力した 9 column 表を、 `@kiwa-test/sveltekit` v1.0+ の `invokeLoad` / `invokeAction` を使った Vitest test に機械変換する。
+`/kiwa-design --layer sveltekit-load` / `--layer sveltekit-action` が出力した 9 column 表を、 `@kiwa/sveltekit` v1.0+ の `invokeLoad` / `invokeAction` を使った Vitest test に機械変換する。
 
 対象は **SvelteKit `+page.server.ts` / `+layout.server.ts` の load function** と **`+page.server.ts` の actions**。 client component (Svelte) は `/kiwa-ui` (Svelte mode) で別 layer 対応済、 `hooks.server.ts` の handle は本 skill のスコープ外 (将来 Issue)。
 
@@ -20,7 +20,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 - SvelteKit project (`+page.server.ts` / `+server.ts`) が存在
 - Layer 1 spec が存在
-- `@kiwa-test/sveltekit` v1.0+ install 済
+- `@kiwa/sveltekit` v1.0+ install 済
 
 ## 9 column 拡張表
 
@@ -56,7 +56,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 ```ts
 // load
-import { invokeLoad, SK_REDIRECT_SYMBOL } from '@kiwa-test/sveltekit';
+import { invokeLoad, SK_REDIRECT_SYMBOL } from '@kiwa/sveltekit';
 import { load } from '../src/routes/[id]/+page.server.ts';
 
 it('{ID} {Observation}', async () => {
@@ -70,7 +70,7 @@ it('{ID} {Observation}', async () => {
 });
 
 // action
-import { invokeAction, SK_FAIL_SYMBOL } from '@kiwa-test/sveltekit';
+import { invokeAction, SK_FAIL_SYMBOL } from '@kiwa/sveltekit';
 import { actions } from '../src/routes/login/+page.server.ts';
 
 it('{ID} {Observation}', async () => {
@@ -126,7 +126,7 @@ it('{ID} {Observation}', async () => {
 ### test 生成 template
 
 ```ts
-import { invokeHandle, invokeHandleFetch, invokeHandleError } from '@kiwa-test/sveltekit';
+import { invokeHandle, invokeHandleFetch, invokeHandleError } from '@kiwa/sveltekit';
 import { handle, handleFetch, handleError } from '../src/hooks.server.ts';
 
 it('{ID} {Observation}', async () => {
@@ -162,7 +162,7 @@ it('{ID} {Observation}', async () => {
 
 ```typescript
 import { describe, expect, it, beforeEach } from 'vitest';
-import { setupSvelteKitHooksEnv, sequence } from '@kiwa-test/sveltekit';
+import { setupSvelteKitHooksEnv, sequence } from '@kiwa/sveltekit';
 import { {h1}, {h2} } from '../src/lib/_kiwa/{file}.ts';
 
 describe('{module} hooks chain', () => {
@@ -187,6 +187,6 @@ describe('{module} hooks chain', () => {
 ## 関連
 
 - 上流 ... `/kiwa-design --layer sveltekit-load` / `--layer sveltekit-action` / `--layer sveltekit-handle` / `--layer sveltekit-handle-fetch` / `--layer sveltekit-handle-error` / `--layer sveltekit-hooks-chain`
-- runtime fixture ... `@kiwa-test/sveltekit` v1.1+ (`packages/sveltekit/`、 v1.0.1 は単発 invoke、 v1.1+ は `setupSvelteKitHooksEnv` + `sequence` chain 対応)
+- runtime fixture ... `@kiwa/sveltekit` v1.1+ (`packages/sveltekit/`、 v1.0.1 は単発 invoke、 v1.1+ は `setupSvelteKitHooksEnv` + `sequence` chain 対応)
 - 下流 (review) ... `/kiwa-review --layer sveltekit-{load,action,handle,handle-fetch,handle-error,hooks-chain}`
 - client component (Svelte) ... `/kiwa-ui` (Svelte mode)

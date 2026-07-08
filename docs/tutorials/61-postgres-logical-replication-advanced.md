@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/orm` v0.10 that models the 4 advanced pieces of Postgres logical replication that every non-trivial CDC pipeline eventually trips over — `START_REPLICATION` protocol handshake with `pgoutput` (KIP-style protocol version + start LSN), replication origin tracking (`pg_replication_origin_advance` so a subscriber can survive a restart without re-reading the whole slot), two-safe commit confirmation (`synchronous_commit = remote_apply` with at least one synchronous standby), and cascaded subscription sync (an upstream subscriber that itself becomes a publisher for a downstream). `createLogicalReplicationAdvancedSession()` gives you every one of those pieces as a deterministic state machine — `idle` → `streaming` → `origin-tracked` → `two-safe-confirmed` → `cascade-synced`. No `pg_ctl start`, no `docker run postgres`, no `wal_level = logical` PGDATA edit. This is the pattern kiwa's Postgres dogfood app (v1.32-2) exercises against real Postgres 16 testcontainers under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the subscriber restarted and re-read 40 MB of WAL" case reviewers ask about.
+A vitest suite wired to `@kiwa/orm` v0.10 that models the 4 advanced pieces of Postgres logical replication that every non-trivial CDC pipeline eventually trips over — `START_REPLICATION` protocol handshake with `pgoutput` (KIP-style protocol version + start LSN), replication origin tracking (`pg_replication_origin_advance` so a subscriber can survive a restart without re-reading the whole slot), two-safe commit confirmation (`synchronous_commit = remote_apply` with at least one synchronous standby), and cascaded subscription sync (an upstream subscriber that itself becomes a publisher for a downstream). `createLogicalReplicationAdvancedSession()` gives you every one of those pieces as a deterministic state machine — `idle` → `streaming` → `origin-tracked` → `two-safe-confirmed` → `cascade-synced`. No `pg_ctl start`, no `docker run postgres`, no `wal_level = logical` PGDATA edit. This is the pattern kiwa's Postgres dogfood app (v1.32-2) exercises against real Postgres 16 testcontainers under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the subscriber restarted and re-read 40 MB of WAL" case reviewers ask about.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/orm` v0.10 that models the 4 advanced pieces
 ```bash
 mkdir kiwa-pg-logical-adv && cd kiwa-pg-logical-adv
 pnpm init
-pnpm add -D @kiwa-test/orm@^0.10 vitest typescript @types/node
+pnpm add -D @kiwa/orm@^0.10 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.10 surface exports `createLogicalReplicationAdvancedSession` from the sem
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createLogicalReplicationAdvancedSession, startLogicalStreaming } from '@kiwa-test/orm';
+import { createLogicalReplicationAdvancedSession, startLogicalStreaming } from '@kiwa/orm';
 
 describe('logical replication — startLogicalStreaming', () => {
   it('opens a pgoutput stream from a positive start LSN and protocol version 1+', () => {
@@ -83,7 +83,7 @@ import {
   createLogicalReplicationAdvancedSession,
   startLogicalStreaming,
   trackReplicationOrigin,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('replication origin — advance', () => {
   it('records the remote LSN and switches to origin-tracked', () => {
@@ -129,7 +129,7 @@ import {
   startLogicalStreaming,
   trackReplicationOrigin,
   confirmTwoSafeCommit,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('two-safe commit — synchronous_commit = remote_apply', () => {
   it('advances confirmedLsn when >= 1 synchronous standby applies', () => {
@@ -194,7 +194,7 @@ import {
   trackReplicationOrigin,
   confirmTwoSafeCommit,
   syncCascadedSubscription,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 describe('cascaded subscription', () => {
   it('adds a downstream subscriber and tracks the cascaded count', () => {
@@ -241,7 +241,7 @@ The self-loop guard is the shape of the bug that eats a weekend — a cascaded t
 
 ## What you learned
 
-The 4 advanced-replication pieces the tutorial covered — pgoutput handshake, replication origin tracking, two-safe commit confirmation, and cascaded subscription sync — are the ones every non-trivial Postgres CDC pipeline hits. `@kiwa-test/orm` v0.10 models them with an explicit state machine so tests run in milliseconds. Under `KIWA_MODE=real POSTGRES_KEY=...`, the fidelity harness runs the same assertions against real Postgres 16 testcontainers — the v1.32-2 `dogfood-postgres-cdc-outbox-app` v2 does exactly that.
+The 4 advanced-replication pieces the tutorial covered — pgoutput handshake, replication origin tracking, two-safe commit confirmation, and cascaded subscription sync — are the ones every non-trivial Postgres CDC pipeline hits. `@kiwa/orm` v0.10 models them with an explicit state machine so tests run in milliseconds. Under `KIWA_MODE=real POSTGRES_KEY=...`, the fidelity harness runs the same assertions against real Postgres 16 testcontainers — the v1.32-2 `dogfood-postgres-cdc-outbox-app` v2 does exactly that.
 
 ## Next
 

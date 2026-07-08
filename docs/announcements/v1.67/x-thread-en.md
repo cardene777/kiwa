@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v1.67 is out — Desktop deepening IX. **@kiwa-test/desktop v1.0** (major bump) adds invoke-cache layer, InvokeCache class = LRU + TTL in-memory cache, withCache helper integrates probeAndInvoke, 4 status routes (cache-hit / cache-miss / cache-invalidated / cache-disabled). Inherits v1.55-v1.66 4-PR rhythm (**14 milestones = 56 PRs same rhythm**), **systematic pattern 42nd application**, **depth-6 pattern 2nd case candidate**.
+kiwa v1.67 is out — Desktop deepening IX. **@kiwa/desktop v1.0** (major bump) adds invoke-cache layer, InvokeCache class = LRU + TTL in-memory cache, withCache helper integrates probeAndInvoke, 4 status routes (cache-hit / cache-miss / cache-invalidated / cache-disabled). Inherits v1.55-v1.66 4-PR rhythm (**14 milestones = 56 PRs same rhythm**), **systematic pattern 42nd application**, **depth-6 pattern 2nd case candidate**.
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-desktop-invoke-cache-app new, 4-pattern workflow (warmupCacheWithMatrix 
 
 ## Tweet 4
 
-`pnpm add -D @kiwa-test/desktop@^1.0`. Migration: https://cardene777.github.io/kiwa/migrations/v1.66-to-v1.67
+`pnpm add -D @kiwa/desktop@^1.0`. Migration: https://cardene777.github.io/kiwa/migrations/v1.66-to-v1.67
 
 **depth-6 pattern 2nd case candidate** = Mobile v1.55 depth-5 + Desktop v1.61 depth-5 + Desktop v1.67 depth-6 = 4 layer separation completed (real behavior + probe + real invoke + invoke-cache). Desktop pair pioneer record updated.
 

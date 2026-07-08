@@ -25,8 +25,8 @@ Optional but useful:
 
 ## Repository layout
 
-- `packages/dapp` — `@kiwa-test/dapp` Playwright fixture runtime
-- `packages/cli` — `@kiwa-test/cli` project scaffolding and CLI commands
+- `packages/dapp` — `@kiwa/dapp` Playwright fixture runtime
+- `packages/cli` — `@kiwa/cli` project scaffolding and CLI commands
 - `docs/` — English and Japanese documentation
 - `examples/` — sample dApps and integration targets
 - `tests/` — skill-chain docs, fixtures, and verification assets

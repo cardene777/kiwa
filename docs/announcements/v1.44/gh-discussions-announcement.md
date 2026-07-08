@@ -6,7 +6,7 @@ kiwa v1.44 is out. **Pair 1 (Auth) achieves 3-stage extension** (v1.21 v0.4 4-pr
 
 ## What's new
 
-### `@kiwa-test/auth` v0.6.0
+### `@kiwa/auth` v0.6.0
 
 - **device-bound-passkey** — device binding + sync fabric verification + credential migration + credProps.rk
 - **conditional-ui** — WebAuthn L3 conditional mediation + autofill hint + fallback ladder + timeout
@@ -57,7 +57,7 @@ v1.23 → v1.44 = 22 milestones with tutorial code snippet validation tests.
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/auth@^0.6
+pnpm add -D @kiwa/auth@^0.6
 ```
 
 Additive-only. No breaking changes.

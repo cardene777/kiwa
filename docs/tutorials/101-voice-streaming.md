@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/realtime` v0.3 that models the 3 pieces of a real realtime AI media stack — LLM voice streaming (OpenAI Realtime API + Anthropic voice pattern), Whisper streaming ASR with VAD, and realtime AI inference with latency budget enforcement.
+A vitest suite wired to `@kiwa/realtime` v0.3 that models the 3 pieces of a real realtime AI media stack — LLM voice streaming (OpenAI Realtime API + Anthropic voice pattern), Whisper streaming ASR with VAD, and realtime AI inference with latency budget enforcement.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/realtime` v0.3 that models the 3 pieces of a
 ```bash
 mkdir kiwa-voice-streaming && cd kiwa-voice-streaming
 pnpm init
-pnpm add -D @kiwa-test/realtime@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa/realtime@^0.3 vitest typescript @types/node
 ```
 
 ### 2. LLM voice streaming
@@ -26,7 +26,7 @@ pnpm add -D @kiwa-test/realtime@^0.3 vitest typescript @types/node
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createVoiceStreamingMock } from '@kiwa-test/realtime';
+import { createVoiceStreamingMock } from '@kiwa/realtime';
 
 describe('LLM voice streaming', () => {
   it('completes full session turn', async () => {
@@ -46,7 +46,7 @@ describe('LLM voice streaming', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createWhisperStreamingMock } from '@kiwa-test/realtime';
+import { createWhisperStreamingMock } from '@kiwa/realtime';
 
 describe('Whisper streaming', () => {
   it('handles VAD → transcript flow', async () => {
@@ -79,7 +79,7 @@ describe('Whisper streaming', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createRealtimeAiInferenceMock } from '@kiwa-test/realtime';
+import { createRealtimeAiInferenceMock } from '@kiwa/realtime';
 
 describe('Realtime AI inference', () => {
   it('flags budget exceeded', async () => {

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/observability` v2.1 that models the 4 pieces of a real continuous-profiling loop that every non-trivial service eventually needs — a profiling session that pins a `serviceName` + target profile store (Grafana Pyroscope / Prometheus Parca / Loki-hosted profile bucket / OpenTelemetry Collector), a per-kind sample recorder (CPU / memory / off-CPU) that carries the call stack + valueBytes + timestamp without touching real eBPF or `/proc`, a flame-graph builder that aggregates the samples into a tree with `totalValue` per frame, and a flame-tree walker that flattens the graph into a depth-first list a UI panel can render. `startProfiling()` + `sampleCpu()` + `sampleMemory()` + `sampleOffCpu()` + `buildFlameGraph()` + `flattenFlameGraph()` give you every one of those pieces without booting a real Pyroscope + eBPF pair. This is the pattern kiwa's `examples/dogfood-profiling-app` exercises against real Grafana Pyroscope 1.9+ under `KIWA_MODE=real` + `PYROSCOPE_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the flame graph rendered but the hottest frame was 3× off because we forgot to normalize valueBytes across sample kinds" gap a reviewer sees in the perf regression audit.
+A vitest suite wired to `@kiwa/observability` v2.1 that models the 4 pieces of a real continuous-profiling loop that every non-trivial service eventually needs — a profiling session that pins a `serviceName` + target profile store (Grafana Pyroscope / Prometheus Parca / Loki-hosted profile bucket / OpenTelemetry Collector), a per-kind sample recorder (CPU / memory / off-CPU) that carries the call stack + valueBytes + timestamp without touching real eBPF or `/proc`, a flame-graph builder that aggregates the samples into a tree with `totalValue` per frame, and a flame-tree walker that flattens the graph into a depth-first list a UI panel can render. `startProfiling()` + `sampleCpu()` + `sampleMemory()` + `sampleOffCpu()` + `buildFlameGraph()` + `flattenFlameGraph()` give you every one of those pieces without booting a real Pyroscope + eBPF pair. This is the pattern kiwa's `examples/dogfood-profiling-app` exercises against real Grafana Pyroscope 1.9+ under `KIWA_MODE=real` + `PYROSCOPE_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the flame graph rendered but the hottest frame was 3× off because we forgot to normalize valueBytes across sample kinds" gap a reviewer sees in the perf regression audit.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/observability` v2.1 that models the 4 pieces
 ```bash
 mkdir kiwa-profiling && cd kiwa-profiling
 pnpm init
-pnpm add -D @kiwa-test/observability@^2.1 vitest typescript @types/node
+pnpm add -D @kiwa/observability@^2.1 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v2.1 surface exports the profiling axis through the `semantics/` barrel. Thi
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa-test/observability';
+import { semantics } from '@kiwa/observability';
 
 const { sampleCpu, startProfiling } = semantics;
 
@@ -106,7 +106,7 @@ The 4 tests pass. The `stack.length > 0` invariant is the compile-time equivalen
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa-test/observability';
+import { semantics } from '@kiwa/observability';
 
 const { sampleCpu, sampleMemory, sampleOffCpu, startProfiling } = semantics;
 
@@ -172,7 +172,7 @@ The 3 kinds share the same arithmetic type (`valueBytes: number`) on purpose —
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa-test/observability';
+import { semantics } from '@kiwa/observability';
 
 const { buildFlameGraph, sampleCpu, startProfiling } = semantics;
 
@@ -230,7 +230,7 @@ The `rootValue === Σ valueBytes` invariant is the compile-time equivalent of th
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa-test/observability';
+import { semantics } from '@kiwa/observability';
 
 const { buildFlameGraph, flattenFlameGraph, sampleCpu, startProfiling } = semantics;
 
@@ -280,7 +280,7 @@ The depth-first ordering matches what Grafana Pyroscope's flame panel expects on
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa-test/observability';
+import { semantics } from '@kiwa/observability';
 
 const { collectFidelityCoverage } = semantics;
 
@@ -321,7 +321,7 @@ Under `KIWA_MODE=real` the same assertions run against real Grafana Pyroscope. T
 
 ```ts
 import { describe, it } from 'vitest';
-import { skipUnlessReal } from '@kiwa-test/observability';
+import { skipUnlessReal } from '@kiwa/observability';
 
 const gate = skipUnlessReal(process.env);
 const requiredEnv = ['PYROSCOPE_URL'] as const;

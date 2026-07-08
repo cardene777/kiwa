@@ -19,7 +19,7 @@ GitHub README に embed しています ... https://github.com/cardene777/kiwa
 :::
 
 ```bash
-npm install @kiwa-test/core
+npm install @kiwa/core
 # or
 pip install kiwa-test-py
 ```
@@ -48,17 +48,17 @@ kiwa は Layer 1 spec を hub にしてここを解決します。 1 つの 9 �
 
 | Surface | 例 | adapter |
 |---|---|---|
-| Contract | Foundry / Hardhat / forge / Solidity | `@kiwa-test/spec` + skill chain |
-| API integration | msw / supertest / Vitest | `@kiwa-test/api` |
-| Component | React / Vue / Svelte / Solid / Lit / Qwik / Angular / Chromium | `@kiwa-test/ui` |
-| E2E | Playwright + anvil + viem + EIP-6963 + ERC-4337 | `@kiwa-test/core` + `@kiwa-test/e2e` |
-| A11y + Visual | axe-core / pixelmatch | `@kiwa-test/a11y` + `@kiwa-test/visual` |
-| Data + CLI + Observability | queue / cron / shell IO / flaky 検出 | `@kiwa-test/data` + `@kiwa-test/cli-test` + `@kiwa-test/observability` |
+| Contract | Foundry / Hardhat / forge / Solidity | `@kiwa/spec` + skill chain |
+| API integration | msw / supertest / Vitest | `@kiwa/api` |
+| Component | React / Vue / Svelte / Solid / Lit / Qwik / Angular / Chromium | `@kiwa/ui` |
+| E2E | Playwright + anvil + viem + EIP-6963 + ERC-4337 | `@kiwa/core` + `@kiwa/e2e` |
+| A11y + Visual | axe-core / pixelmatch | `@kiwa/a11y` + `@kiwa/visual` |
+| Data + CLI + Observability | queue / cron / shell IO / flaky 検出 | `@kiwa/data` + `@kiwa/cli-test` + `@kiwa/observability` |
 
-`@kiwa-test/ui` だけで 8 framework + 実 Chromium に対応します。 全 adapter が `mode (render / interaction / snapshot) + stop()` 契約を共有し、 `env.kind` で discriminate できます。
+`@kiwa/ui` だけで 8 framework + 実 Chromium に対応します。 全 adapter が `mode (render / interaction / snapshot) + stop()` 契約を共有し、 `env.kind` で discriminate できます。
 
 ```ts
-import { setupVueComponentEnv } from "@kiwa-test/ui";
+import { setupVueComponentEnv } from "@kiwa/ui";
 
 const env = await setupVueComponentEnv({
   mode: "interaction",
@@ -76,8 +76,8 @@ dynamic import + optional peer dep なので、 利用者は使う framework だ
 
 kiwa の独自性は言語横断対応です。
 
-- **TypeScript** ... 11 npm package (`@kiwa-test/{core, spec, api, ui, data, cli-test, e2e, a11y, visual, observability, cli}`)
-- **Python** ... 1 PyPI package (`kiwa-test-py`、 `@kiwa-test/spec` の Python 移植 + requests / httpx adapter)
+- **TypeScript** ... 11 npm package (`@kiwa/{core, spec, api, ui, data, cli-test, e2e, a11y, visual, observability, cli}`)
+- **Python** ... 1 PyPI package (`kiwa-test-py`、 `@kiwa/spec` の Python 移植 + requests / httpx adapter)
 - **Solidity** ... Foundry / Hardhat 連携 (forge / chai-matchers / fast-check)
 
 「default は TS だけど、 Python の microservice と Solidity の contract も同じ spec で test したい」 という現代の polyglot stack で力を発揮します。 Rust / Go は構想中。
@@ -93,17 +93,17 @@ node scripts/check-mutation-gates.mjs
 
 | Package | MSI | Threshold |
 |---|---|---|
-| `@kiwa-test/api` | **96.06 %** | 90 |
-| `@kiwa-test/a11y` | **93.62 %** | 90 |
-| `@kiwa-test/ui` | **91.76 %** | 80 |
-| `@kiwa-test/cli-test` | 89.69 % | 80 |
-| `@kiwa-test/data` | 86.93 % | 80 |
-| `@kiwa-test/spec` | 85.51 % | 80 |
-| `@kiwa-test/core` | 85.09 % | 80 |
-| `@kiwa-test/cli` | 84.44 % | 80 |
-| `@kiwa-test/e2e` | 84.21 % | 80 |
-| `@kiwa-test/observability` | 84.12 % | 80 |
-| `@kiwa-test/visual` | 83.02 % | 80 |
+| `@kiwa/api` | **96.06 %** | 90 |
+| `@kiwa/a11y` | **93.62 %** | 90 |
+| `@kiwa/ui` | **91.76 %** | 80 |
+| `@kiwa/cli-test` | 89.69 % | 80 |
+| `@kiwa/data` | 86.93 % | 80 |
+| `@kiwa/spec` | 85.51 % | 80 |
+| `@kiwa/core` | 85.09 % | 80 |
+| `@kiwa/cli` | 84.44 % | 80 |
+| `@kiwa/e2e` | 84.21 % | 80 |
+| `@kiwa/observability` | 84.12 % | 80 |
+| `@kiwa/visual` | 83.02 % | 80 |
 
 #### 設計判断 ... なぜ package 別 threshold か
 
@@ -141,8 +141,8 @@ pnpm gate:mutation
 - **dApp / smart contract** ... wallet UI / NFT marketplace / DAO governance UI の contract test + e2e、 Foundry + Hardhat + Playwright + anvil + viem の chain
 - **REST API microservice (TS)** ... msw + supertest で contract test、 Vitest で unit
 - **REST API microservice (Python)** ... pytest + requests/httpx で contract test
-- **enterprise web (Angular / Vue)** ... `@kiwa-test/ui` の framework adapter で component test
-- **CLI tool / queue worker** ... `@kiwa-test/cli-test` + `@kiwa-test/data` で shell IO + queue test
+- **enterprise web (Angular / Vue)** ... `@kiwa/ui` の framework adapter で component test
+- **CLI tool / queue worker** ... `@kiwa/cli-test` + `@kiwa/data` で shell IO + queue test
 - **a11y / visual regression** ... axe-core + pixelmatch、 同 spec を共有して runner を増やさない
 
 「stack ごとに runner も spec も書き直す」 が一気に消えるのが kiwa の効用です。
@@ -150,18 +150,18 @@ pnpm gate:mutation
 ## 試す
 
 ```bash
-npm install @kiwa-test/core
+npm install @kiwa/core
 # Python service なら
 pip install kiwa-test-py
 # 一気に scaffold したい場合
-pnpm dlx @kiwa-test/cli init
+pnpm dlx @kiwa/cli init
 ```
 
 詳細は README + Cookbook を参照してください。
 
 - 📖 README ... https://github.com/cardene777/kiwa
 - 💬 Discussions ... https://github.com/cardene777/kiwa/discussions/451
-- 📦 npm ... https://www.npmjs.com/package/@kiwa-test/core
+- 📦 npm ... https://www.npmjs.com/package/@kiwa/core
 - 🐍 PyPI ... https://pypi.org/project/kiwa-test-py/
 
 ## 開発裏側 / 学び
@@ -178,7 +178,7 @@ pnpm dlx @kiwa-test/cli init
 - 6 surface (contract / API / component / e2e / a11y / visual + data / CLI / obs.) を 1 chain でカバー
 - TypeScript (11 npm) + Python (1 PyPI) + Solidity (forge / hardhat) を同 spec から
 - release workflow で Coverage + Mutation 2 gate を物理 enforce、 全 11 npm package で MSI ≥ 80
-- `@kiwa-test/ui` 1 package で React / Vue / Svelte / Solid / Lit / Qwik / Angular + Chromium の 8 adapter
+- `@kiwa/ui` 1 package で React / Vue / Svelte / Solid / Lit / Qwik / Angular + Chromium の 8 adapter
 
 stack に test 散乱を感じる人にぜひ。 Issue / Discussion / リプライ歓迎です 🌱
 

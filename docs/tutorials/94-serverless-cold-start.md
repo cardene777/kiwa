@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/edge` v1.2 that models the 3 pieces of a real serverless cold-start observability posture that every non-trivial production edge platform eventually needs — a cold-start `invokeColdStart` step that pins the class (`cold` / `warm` / `provisioned`) an invocation lands in based on pool state (mirroring Cloudflare Workers cold-start telemetry / Vercel Edge warm hits / AWS Lambda provisioned concurrency) so a "why did this request take 250ms instead of 30ms?" question resolves to one telemetry class without walking the raw invocation log, a `preWarmInstance` step that marks an instance warm without producing latency (mirroring `pinger` warm-up cron patterns) so a scheduled ping can amortise cold penalties across the request stream, an `evictExpired` step that reclaims warm instances whose last invocation is older than TTL (mirroring platform GC pressure) so the pool size stays bounded without a per-platform observability probe, and a `startColdStartPool` bootstrap that pins provisioned reservations upfront so an always-on instance never falls back to a cold path. `startColdStartPool()` + `invokeColdStart()` + `preWarmInstance()` + `evictExpired()` give you every one of those pieces without booting a real Cloudflare Workers + Vercel Edge + AWS Lambda stack. This is the pattern kiwa's `examples/dogfood-edge-serverless-cold-start-app` exercises against real Cloudflare Workers + Vercel Edge Functions + AWS Lambda provisioned concurrency + Deno Deploy backends under `KIWA_MODE=real` + the relevant `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "warm pool never fired because `warmedTtlMs` was 60_000 but the ping cron ran every 90 seconds, provisioned invocations reported cold class because `provisionedIds` was set on a different session than the pool, and evictExpired never freed the warm entry because `nowMs - lastInvokeAtMs` used `<` instead of `>`" gap a reviewer sees in a serverless cold-start post-mortem.
+A vitest suite wired to `@kiwa/edge` v1.2 that models the 3 pieces of a real serverless cold-start observability posture that every non-trivial production edge platform eventually needs — a cold-start `invokeColdStart` step that pins the class (`cold` / `warm` / `provisioned`) an invocation lands in based on pool state (mirroring Cloudflare Workers cold-start telemetry / Vercel Edge warm hits / AWS Lambda provisioned concurrency) so a "why did this request take 250ms instead of 30ms?" question resolves to one telemetry class without walking the raw invocation log, a `preWarmInstance` step that marks an instance warm without producing latency (mirroring `pinger` warm-up cron patterns) so a scheduled ping can amortise cold penalties across the request stream, an `evictExpired` step that reclaims warm instances whose last invocation is older than TTL (mirroring platform GC pressure) so the pool size stays bounded without a per-platform observability probe, and a `startColdStartPool` bootstrap that pins provisioned reservations upfront so an always-on instance never falls back to a cold path. `startColdStartPool()` + `invokeColdStart()` + `preWarmInstance()` + `evictExpired()` give you every one of those pieces without booting a real Cloudflare Workers + Vercel Edge + AWS Lambda stack. This is the pattern kiwa's `examples/dogfood-edge-serverless-cold-start-app` exercises against real Cloudflare Workers + Vercel Edge Functions + AWS Lambda provisioned concurrency + Deno Deploy backends under `KIWA_MODE=real` + the relevant `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "warm pool never fired because `warmedTtlMs` was 60_000 but the ping cron ran every 90 seconds, provisioned invocations reported cold class because `provisionedIds` was set on a different session than the pool, and evictExpired never freed the warm entry because `nowMs - lastInvokeAtMs` used `<` instead of `>`" gap a reviewer sees in a serverless cold-start post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/edge` v1.2 that models the 3 pieces of a rea
 ```bash
 mkdir kiwa-serverless-cold-start && cd kiwa-serverless-cold-start
 pnpm init
-pnpm add -D @kiwa-test/edge@^1.2 vitest typescript @types/node
+pnpm add -D @kiwa/edge@^1.2 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v1.2 surface exports the cold-start axis (`startColdStartPool` / `invokeCold
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeColdStart, startColdStartPool } from '@kiwa-test/edge';
+import { invokeColdStart, startColdStartPool } from '@kiwa/edge';
 
 describe('cold-start — invocation classification', () => {
   it('first invoke is cold', () => {
@@ -65,7 +65,7 @@ describe('cold-start — invocation classification', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeColdStart, preWarmInstance, startColdStartPool } from '@kiwa-test/edge';
+import { invokeColdStart, preWarmInstance, startColdStartPool } from '@kiwa/edge';
 
 describe('cold-start — pre-warm', () => {
   it('pre-warmed instance skips cold path on next invoke', () => {
@@ -83,7 +83,7 @@ describe('cold-start — pre-warm', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { evictExpired, invokeColdStart, startColdStartPool } from '@kiwa-test/edge';
+import { evictExpired, invokeColdStart, startColdStartPool } from '@kiwa/edge';
 
 describe('cold-start — evict', () => {
   it('removes stale warm entries but keeps provisioned', () => {

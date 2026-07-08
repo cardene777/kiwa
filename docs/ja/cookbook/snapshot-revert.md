@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](../../en/cookbook/snapshot-revert.md) • [🇯🇵 日本語](./snapshot-revert.md)
 
-`@kiwa-test/dapp` v0.2 で追加された `snapshotChain` / `revertChain` を使い、 anvil chain state を test ごとに完全に隔離する pattern。
+`@kiwa/dapp` v0.2 で追加された `snapshotChain` / `revertChain` を使い、 anvil chain state を test ごとに完全に隔離する pattern。
 
 ## 課題
 
@@ -16,7 +16,7 @@
 
 ```ts
 import { test, expect } from './fixture';
-import { snapshotChain, revertChain, increaseTime } from '@kiwa-test/dapp';
+import { snapshotChain, revertChain, increaseTime } from '@kiwa/dapp';
 import type { Hex } from 'viem';
 
 let snapshotId: Hex;

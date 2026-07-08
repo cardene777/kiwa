@@ -4,7 +4,7 @@
 
 kiwa v1.32 リリース — Database 深化 II が land。
 
-@kiwa-test/orm v0.9 → v0.10 minor bump。 3 ORM (Drizzle / Prisma / Kysely) × 3 backend (Postgres / MySQL / SQLite) 上に advanced production db semantics 8 axis を追加 (Postgres logical replication + Postgres MVCC + MySQL cluster + MySQL binlog + SQLite WAL + SQLite FTS5 + txn isolation + advanced connection pool)。
+@kiwa/orm v0.9 → v0.10 minor bump。 3 ORM (Drizzle / Prisma / Kysely) × 3 backend (Postgres / MySQL / SQLite) 上に advanced production db semantics 8 axis を追加 (Postgres logical replication + Postgres MVCC + MySQL cluster + MySQL binlog + SQLite WAL + SQLite FTS5 + txn isolation + advanced connection pool)。
 
 real driver env-gate + testcontainers で opt-in production fidelity 走査。 dogfood 3 app v2 / 新規 (postgres-cdc-outbox-app v2 + mysql-rls-tenant-app v2 + sqlite-wal-fts-app 新規) 全 7 軸 release gate PASS。
 
@@ -44,6 +44,6 @@ payment / edge / perf-harness / orm-v1.26 / quality-metrics / realtime / release
 
 すべての tutorial code snippet が docs-tutorial-v1.XX.test.ts で自動検証されている。
 
-`pnpm add -D @kiwa-test/orm` で v0.10.0 が入る。 breaking change なし。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.31-to-v1.32
+`pnpm add -D @kiwa/orm` で v0.10.0 が入る。 breaking change なし。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.31-to-v1.32
 
 次は v2.0。 Multi-version Vitest matrix + desktop/mobile adapter + coverage 100 % milestone + database depth III (SurrealDB + EdgeDB + Turso + CockroachDB + TimescaleDB + QuestDB) が有力候補。 feedback 歓迎。

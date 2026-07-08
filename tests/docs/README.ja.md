@@ -7,7 +7,7 @@ kiwa contributor / kiwa repo 内で skill chain を回したい人向けの内�
 ここに置く docs。
 
 - 🚀 [run-tests.ja.md](./run-tests.ja.md) — **`/kiwa-test` 1 コマンドで全 chain 一括実行** (kiwa-design → kiwa-forge / kiwa-hardhat / kiwa-play → kiwa-review)、 contract / dapp / 両方を起動時に選択。 個別 skill を順次叩く負担なし。 **最初に試すならこれ** (Recommended)
-- ✍️ [write-tests-manually.ja.md](./write-tests-manually.ja.md) — **skill を使わず `@kiwa-test/dapp` を library として手書きで import** する手順 (既存 dApp に test を後付け追加 / fixture のみ流用 / 一部 helper だけ kiwa に置換 等の use case)。 1 file 完結 sample 4 種 (mint / marketplace / snapshot / custom error) 込み
+- ✍️ [write-tests-manually.ja.md](./write-tests-manually.ja.md) — **skill を使わず `@kiwa/dapp` を library として手書きで import** する手順 (既存 dApp に test を後付け追加 / fixture のみ流用 / 一部 helper だけ kiwa に置換 等の use case)。 1 file 完結 sample 4 種 (mint / marketplace / snapshot / custom error) 込み
 - 🛠️ [skill-chain-tutorial.ja.md](./skill-chain-tutorial.ja.md) — skill chain (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat` → `/kiwa-play`) で contract test + e2e test を仕様書から生成 → 実走まで full flow
 - 🧩 [retrofit-existing-dapp.ja.md](./retrofit-existing-dapp.ja.md) — 既に動いている dApp + Foundry project に skill chain を後付け導入する手順 (nextjs-token-gating の実例で歩く)
 - ⚒️ [run-contract-tests.ja.md](./run-contract-tests.ja.md) — `contracts/` 配下の **複数 contract を一括** で個別 skill (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat`) で test を生成 → 実走する手順 (nft-marketplace 2 contract を題材、 連携 scenario は主体 contract test file 内に含める、 単一 contract も同 flow)
@@ -25,7 +25,7 @@ kiwa contributor / kiwa repo 内で skill chain を回したい人向けの内�
 | `/kiwa-hardhat` | Layer 2 contract | Layer 1 仕様書を Hardhat `test/*.test.cjs` に変換 + `npx hardhat test` + coverage auto loop | `.claude/skills/kiwa-hardhat/SKILL.md` |
 | `/kiwa-vitest` | Layer 2 unit | Layer 1 仕様書を Vitest `test/unit/*.test.{ts,tsx}` に変換 (TS 関数 / TSX hook の単体テスト、 F-3) | `.claude/skills/kiwa-vitest/SKILL.md` |
 | `/kiwa-api` | Layer 2 integration | Layer 1 仕様書を msw / supertest / Playwright `request` の API integration test に変換 (F-3) | `.claude/skills/kiwa-api/SKILL.md` |
-| `/kiwa-play` | Layer 3 e2e | `@kiwa-test/dapp` fixture を使った Playwright `tests/*.spec.ts` の設計 / 実装 / 実行 | `.claude/skills/kiwa-play/SKILL.md` |
+| `/kiwa-play` | Layer 3 e2e | `@kiwa/dapp` fixture を使った Playwright `tests/*.spec.ts` の設計 / 実装 / 実行 | `.claude/skills/kiwa-play/SKILL.md` |
 | `/kiwa-review` | reviewer | spec / test code / 実行結果を 3 mode (spec-review / test-review / result-review) で品質判定 | `.claude/skills/kiwa-review/SKILL.md` |
 
 ## 全体図
@@ -55,7 +55,7 @@ graph LR
 
 ## 関連 docs
 
-- [docs/ja/quickstart.md](../../docs/ja/quickstart.md) — OSS user 向け入門 (`@kiwa-test/cli init` での新規 dApp 立ち上げ)
+- [docs/ja/quickstart.md](../../docs/ja/quickstart.md) — OSS user 向け入門 (`@kiwa/cli init` での新規 dApp 立ち上げ)
 - [docs/ja/cookbook/with-deploy.md](../../docs/ja/cookbook/with-deploy.md) — `kiwa init --with-deploy` の 4 file boilerplate を使った framework 統合
 - [docs/ja/examples/README.md](../../docs/ja/examples/README.md) — 20 example の機能逆引きマップ (skill chain の出力 reference)
 - [docs/EXAMPLE-FIXTURES.ja.md](../../docs/EXAMPLE-FIXTURES.ja.md) — どの example が `tests/fixtures/` に完成形 fixture を持つか、 e2e only 18 example を対象外にしている理由

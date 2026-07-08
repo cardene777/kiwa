@@ -1,6 +1,6 @@
 # dogfood-observability-slo-app v1.35-2
 
-Dogfood application that exercises the `@kiwa-test/observability` v2.1 SLO axis
+Dogfood application that exercises the `@kiwa/observability` v2.1 SLO axis
 end-to-end through a provider-neutral 14-op contract satisfied by both a
 deterministic mock adapter and a `KIWA_MODE=real` testcontainers-driven
 Grafana OSS + Prometheus + Alertmanager real adapter.
@@ -12,7 +12,7 @@ behaviour closely enough that consumers can trust the mock in unit tests. The
 fidelity harness diffs mock vs real traces across 3 SLO objectives (99.9 /
 99.95 / 99.99) × 3 Google SRE canonical MWMBR window pairs (fast burn / slow
 burn / ticket burn) and feeds the divergence count into the
-`@kiwa-test/quality-metrics` 13-axis release gate.
+`@kiwa/quality-metrics` 13-axis release gate.
 
 ## Surface — 14 ops
 

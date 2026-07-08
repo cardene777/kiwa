@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-`@kiwa-test/mobile` v0.4 で追加された adapter interface (11 axis × mock/real = 22 adapter) + fidelity harness を使い、 3 target × 11 axis = 33 combination の mock/real trace diff 一致を検証する vitest suite。 **pair 深度 4 段拡張達成 4 例目 depth-4 record**。
+`@kiwa/mobile` v0.4 で追加された adapter interface (11 axis × mock/real = 22 adapter) + fidelity harness を使い、 3 target × 11 axis = 33 combination の mock/real trace diff 一致を検証する vitest suite。 **pair 深度 4 段拡張達成 4 例目 depth-4 record**。
 
 ## Prerequisites
 
@@ -17,14 +17,14 @@
 ```bash
 mkdir kiwa-mobile-real-driver && cd kiwa-mobile-real-driver
 pnpm init
-pnpm add -D @kiwa-test/mobile@^0.4 vitest typescript @types/node
+pnpm add -D @kiwa/mobile@^0.4 vitest typescript @types/node
 ```
 
 ### 2. Single axis mock adapter
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { MOCK_ADAPTERS, type AdapterInvocation } from '@kiwa-test/mobile';
+import { MOCK_ADAPTERS, type AdapterInvocation } from '@kiwa/mobile';
 
 describe('Fabric mock adapter', () => {
   it('scan completes with neutralEvents', async () => {
@@ -41,7 +41,7 @@ describe('Fabric mock adapter', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { REAL_ADAPTERS, type AdapterInvocation } from '@kiwa-test/mobile';
+import { REAL_ADAPTERS, type AdapterInvocation } from '@kiwa/mobile';
 
 describe('TurboModules real adapter', () => {
   it('scan completes for android', async () => {
@@ -57,7 +57,7 @@ describe('TurboModules real adapter', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runFidelityCheck, summarizeFidelity, type MobileAxis } from '@kiwa-test/mobile';
+import { runFidelityCheck, summarizeFidelity, type MobileAxis } from '@kiwa/mobile';
 
 const ALL_AXES: MobileAxis[] = [
   'react-native', 'expo', 'metro',

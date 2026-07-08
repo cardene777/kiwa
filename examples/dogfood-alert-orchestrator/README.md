@@ -1,10 +1,10 @@
 # dogfood-alert-orchestrator
 
-Dogfood app (v1.17-3) — a Node.js style **Prometheus AlertManager** orchestrator driven behind a provider-neutral surface. 10 alert rules (threshold / rate / anomaly) evaluate against a metric window; fires walk a 3-level routing tree (severity → team → channel); silences (literal + regex) suppress by label match; an escalation ladder (L1 30s → L2 5min → L3 30min) walks the state machine so tests can assert receiver X saw alert Y at tier N. The fidelity harness diffs mock vs a live AlertManager HTTP API and feeds `@kiwa-test/quality-metrics` release gate.
+Dogfood app (v1.17-3) — a Node.js style **Prometheus AlertManager** orchestrator driven behind a provider-neutral surface. 10 alert rules (threshold / rate / anomaly) evaluate against a metric window; fires walk a 3-level routing tree (severity → team → channel); silences (literal + regex) suppress by label match; an escalation ladder (L1 30s → L2 5min → L3 30min) walks the state machine so tests can assert receiver X saw alert Y at tier N. The fidelity harness diffs mock vs a live AlertManager HTTP API and feeds `@kiwa/quality-metrics` release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-test/observability` `AlertRouter` + `TelemetryCollector`, deterministic lifecycle transitions).
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/observability` `AlertRouter` + `TelemetryCollector`, deterministic lifecycle transitions).
 - `KIWA_MODE=real` — driven by `makeRealAdapter()` that talks to a Prometheus AlertManager HTTP API when `ALERTMANAGER_URL` is set. When the variable is missing the adapter reports each method as `ALERTMANAGER_ENV_MISSING` so the fidelity harness records the gap without failing the test suite. When the URL is set but `globalThis.fetch` is unavailable the adapter downgrades to `ALERTMANAGER_FETCH_MISSING`.
 
 Real-mode envs.
@@ -36,7 +36,7 @@ src/
     index.ts            -- 3-step escalation ladder (L1 / L2 / L3)
   flows/
     orchestrator-flows.ts -- ingest / evaluate / route / escalate + OPS_UNDER_TEST
-    fidelity.ts           -- trace-diffing harness → @kiwa-test/quality-metrics
+    fidelity.ts           -- trace-diffing harness → @kiwa/quality-metrics
   app/
     orchestrator-service.ts -- Node.js style orchestrator service
                                (createOrchestratorService().ingest() / .cycle())

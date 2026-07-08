@@ -77,7 +77,7 @@ If the fidelity harness has a `planned` cell, the corresponding tutorial + dogfo
 
 ## How this ties into the 13-axis release gate
 
-v1.35 does not add a 14th release-gate axis. The 8 advanced observability axes gate the observability package's own tests (via `pnpm --filter @kiwa-test/observability test`) but do not surface as a per-package `@kiwa-test/quality-metrics` axis. The reasoning — the fidelity harness is provider-shape-specific, and a package that does not export to Grafana OSS / Prometheus / Loki / OpenTelemetry Collector has nothing to assert on. When a future milestone adds an `observability.fidelity` axis that describes "which observability providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.35 keeps the axis count at 13.
+v1.35 does not add a 14th release-gate axis. The 8 advanced observability axes gate the observability package's own tests (via `pnpm --filter @kiwa/observability test`) but do not surface as a per-package `@kiwa/quality-metrics` axis. The reasoning — the fidelity harness is provider-shape-specific, and a package that does not export to Grafana OSS / Prometheus / Loki / OpenTelemetry Collector has nothing to assert on. When a future milestone adds an `observability.fidelity` axis that describes "which observability providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.35 keeps the axis count at 13.
 
 ## SSOT boundaries
 

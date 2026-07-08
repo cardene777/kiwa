@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.58 リリース — Desktop 深化 II (@kiwa-test/desktop v0.3 advanced III 4 axis、 36 milestone streak、 systematic pattern 33 度目、 Mobile v1.50→v1.52 rhythm 再現)"
+title: "kiwa v1.58 リリース — Desktop 深化 II (@kiwa/desktop v0.3 advanced III 4 axis、 36 milestone streak、 systematic pattern 33 度目、 Mobile v1.50→v1.52 rhythm 再現)"
 emoji: "🎥"
 type: "tech"
 topics: ["testing", "vitest", "electron", "tauri", "desktop"]
@@ -14,7 +14,7 @@ published: false
 
 ## What's new
 
-### `@kiwa-test/desktop` v0.3 minor bump
+### `@kiwa/desktop` v0.3 minor bump
 
 v0.1 3 axis (Electron + Tauri + Webview) + v0.2 5 axis (Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon) に **advanced III 4 axis 追加**。
 
@@ -61,7 +61,7 @@ Mobile v1.50 (base 3 axis) → v1.51 (advanced II 4 axis) → v1.52 (advanced II
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/desktop@^0.3
+pnpm add -D @kiwa/desktop@^0.3
 ```
 
 ## Code sample (4 patterns)
@@ -69,7 +69,7 @@ pnpm add -D @kiwa-test/desktop@^0.3
 ### Pattern 1 — Screen-recording
 
 ```ts
-import { captureScreenChunk, requestScreenRecordingPermission, startScreenRecording, stopScreenRecording } from '@kiwa-test/desktop';
+import { captureScreenChunk, requestScreenRecordingPermission, startScreenRecording, stopScreenRecording } from '@kiwa/desktop';
 
 const s = requestScreenRecordingPermission({ target: 'macos', sessionId: 'rec-1', displayId: 'display-primary' });
 startScreenRecording(s, true);
@@ -80,7 +80,7 @@ stopScreenRecording(s);
 ### Pattern 2 — Global-shortcut
 
 ```ts
-import { clearAllGlobalShortcuts, createGlobalShortcutSession, registerGlobalShortcut, triggerGlobalShortcut } from '@kiwa-test/desktop';
+import { clearAllGlobalShortcuts, createGlobalShortcutSession, registerGlobalShortcut, triggerGlobalShortcut } from '@kiwa/desktop';
 
 const s = createGlobalShortcutSession({ target: 'windows', namespace: 'app' });
 registerGlobalShortcut(s, 'CmdOrCtrl+Shift+P');
@@ -91,7 +91,7 @@ clearAllGlobalShortcuts(s);
 ### Pattern 3 — Clipboard
 
 ```ts
-import { clearClipboard, notifyClipboardChange, openClipboard, readClipboard, writeClipboard } from '@kiwa-test/desktop';
+import { clearClipboard, notifyClipboardChange, openClipboard, readClipboard, writeClipboard } from '@kiwa/desktop';
 
 const s = openClipboard({ target: 'linux', clipboardId: 'cb-1' });
 writeClipboard(s, { contents: 'hello', format: 'text' });
@@ -103,7 +103,7 @@ clearClipboard(s);
 ### Pattern 4 — Dark-mode
 
 ```ts
-import { notifyThemeChange, recordUserPreference, subscribeDarkMode, unsubscribeDarkMode } from '@kiwa-test/desktop';
+import { notifyThemeChange, recordUserPreference, subscribeDarkMode, unsubscribeDarkMode } from '@kiwa/desktop';
 
 const s = subscribeDarkMode({ target: 'macos', observerId: 'obs-1', initialTheme: 'light' });
 notifyThemeChange(s, 'dark');

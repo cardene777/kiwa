@@ -1,13 +1,13 @@
 # Fidelity — dogfood-vercel-edge-function-app (v1.24-3)
 
-Real-vs-mock behavioural fidelity for the Next.js 15 middleware + edge runtime app driven by `@kiwa-test/edge` v0.2 (v1.24-1 land, PR #920) under `KIWA_MODE=real` (Vercel Edge sandbox + `vercel dev` + `VERCEL_KEY=1` env-gate) and `KIWA_MODE=mock` (`@kiwa-test/edge` v0.2 8 axis semantics), produced by `examples/dogfood-vercel-edge-function-app/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-test/quality-metrics` release-gate 7-axis payload as the second edge-platform dogfood in the v1.24 milestone.
+Real-vs-mock behavioural fidelity for the Next.js 15 middleware + edge runtime app driven by `@kiwa/edge` v0.2 (v1.24-1 land, PR #920) under `KIWA_MODE=real` (Vercel Edge sandbox + `vercel dev` + `VERCEL_KEY=1` env-gate) and `KIWA_MODE=mock` (`@kiwa/edge` v0.2 8 axis semantics), produced by `examples/dogfood-vercel-edge-function-app/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` release-gate 7-axis payload as the second edge-platform dogfood in the v1.24 milestone.
 
 ## Baseline (real mode skipped — `KIWA_MODE=real` + `VERCEL_KEY=1` unset)
 
 When the harness runs without both `KIWA_MODE=real` and `VERCEL_KEY=1` in the environment, the real adapter emits `KIWA_VERCEL_EDGE_ENV_MISSING` for each of the 8 ops (`driveGeoRoute` / `driveGeoPrimaryWrite` / `driveGeoReplicaSync` / `driveKvRead` / `driveKvWrite` / `driveKvRangeQuery` / `driveSseOpen` / `driveSseBackpressure`). Divergences are recorded so the mock is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa-test/edge/vercel-edge-function
+provider   : @kiwa/edge/vercel-edge-function
 version    : 0.1.0
 verdict    : PASS
 divergences: 8 (all eight ops recorded as BEHAVIORAL_DIVERGENCE, real mode absent)
@@ -47,7 +47,7 @@ pnpm --filter dogfood-vercel-edge-function-app test
 
 ## 8-op surface = geo-replicated 3 + edge-kv 3 + streaming-response 2
 
-The 8 ops correspond directly to the 8 axis routing pattern inherited from v1.24-1 (`@kiwa-test/edge` v0.2 semantics). Each op emits neutral events on 1 axis:
+The 8 ops correspond directly to the 8 axis routing pattern inherited from v1.24-1 (`@kiwa/edge` v0.2 semantics). Each op emits neutral events on 1 axis:
 
 | op | primary axis | neutral events emitted |
 |---|---|---|
@@ -91,5 +91,5 @@ When either gate is unset the adapter records `KIWA_VERCEL_EDGE_ENV_MISSING` on 
 
 - Parent — v1.24 (#913)
 - Sub-Issue — v1.24-3 (#916)
-- Depends on — v1.24-1 (@kiwa-test/edge v0.2 with 8 axis semantics, PR #920)
+- Depends on — v1.24-1 (@kiwa/edge v0.2 with 8 axis semantics, PR #920)
 - Sibling — v1.24-2 (dogfood-cloudflare-workers-durable-object-app, PR #921)

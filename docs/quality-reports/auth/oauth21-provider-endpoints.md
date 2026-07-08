@@ -6,7 +6,7 @@ Full mock vs real fidelity numbers are filled in as PKCE / DPoP / refresh rotati
 
 ## Fidelity axes (endpoints-skeleton)
 
-| axis | mock (`@kiwa-test/auth`) | real (oauth2-mock-server + testcontainers) | assertion |
+| axis | mock (`@kiwa/auth`) | real (oauth2-mock-server + testcontainers) | assertion |
 |---|---|---|---|
 | 1. discovery metadata | Static shape derived from `issuer`; response_types=[code], grant_types=[authorization_code, refresh_token], code_challenge_methods=[S256], dpop_signing_alg_values=[ES256], token_endpoint_auth_methods=[client_secret_basic, client_secret_post, none] | oauth2-mock-server emits an identical shape at container boot; issuer is derived from `OAUTH2_ISSUER` env var Sub-Issue #865 will set | RFC 8414 §2 mandatory keys present; RFC 9700 restrictions honoured (implicit + password + plain PKCE explicitly omitted). |
 | 2. `/authorize` OAuth 2.1 hardening | `response_type=token` → 400 `unsupported_response_type`; `code_challenge_method=plain` → 400 `invalid_request`; missing `state` → surfaces via AS reject (Sub-Issue #865 adds explicit `invalid_request` mapping); valid `code` + `S256` → 302 with `code` + `state` in query | oauth2-mock-server rejects `response_type=token` with the same code; testcontainers image built from `oauth2-mock-server@8` covers RFC 9700 §2.1 | Both drivers refuse implicit + plain PKCE with the same status + error code so a client cannot mismatch discovery + runtime. |

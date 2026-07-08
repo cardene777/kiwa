@@ -31,7 +31,7 @@ What grew in v1.8:
 
 ## [3/8]
 
-`@kiwa-test/auth` v0.1:
+`@kiwa/auth` v0.1:
 
 - **NextAuth v5 (Auth.js)** — session mock (jwt/db) + 3 providers (Google/GitHub/Email) + Prisma/Drizzle
 - **Lucia v3** — bare-metal session (fresh + rolling refresh) + password (Argon2) + SQLite/PG
@@ -43,7 +43,7 @@ All 3 dominant 2026 providers covered.
 
 ## [4/8]
 
-`@kiwa-test/queue` v0.1:
+`@kiwa/queue` v0.1:
 
 - **BullMQ** — sandbox (in-process) + testcontainers (real Redis) modes
 - **Inngest** — stub (deterministic) + dev-server (real HTTP) modes
@@ -53,7 +53,7 @@ All 3 dominant 2026 providers covered.
 
 ## [5/8]
 
-`@kiwa-test/cache` v0.1:
+`@kiwa/cache` v0.1:
 
 - **Redis** — in-memory (default) + testcontainers (real + ioredis/node-redis) modes
 - 8 helpers — get/set/delete/TTL/expire/Pub/Sub/publish/subscribe

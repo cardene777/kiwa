@@ -1,4 +1,4 @@
-# Accessibility audit with `@kiwa-test/a11y`
+# Accessibility audit with `@kiwa/a11y`
 
 > [🇬🇧 English](./a11y-axe.md) • [🇯🇵 日本語](../../ja/cookbook/a11y-axe.md)
 
@@ -13,10 +13,10 @@ axe-core wrapped for kiwa — run accessibility (a11y) audits inside Vitest + js
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/a11y axe-core
+pnpm add -D @kiwa/a11y axe-core
 ```
 
-`axe-core` is a peer/optional dep — install it alongside `@kiwa-test/a11y`.
+`axe-core` is a peer/optional dep — install it alongside `@kiwa/a11y`.
 
 ## Scenario A — Vitest + jsdom
 
@@ -24,7 +24,7 @@ pnpm add -D @kiwa-test/a11y axe-core
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runAxe, expectNoViolations } from '@kiwa-test/a11y';
+import { runAxe, expectNoViolations } from '@kiwa/a11y';
 
 describe('LoginForm a11y', () => {
   it('no serious / critical violations after render', async () => {
@@ -50,7 +50,7 @@ If a violation crosses the threshold the assertion throws with the full axe summ
 
 ```ts
 import { test, expect } from '@playwright/test';
-import { reportViolations } from '@kiwa-test/a11y';
+import { reportViolations } from '@kiwa/a11y';
 
 test('home page is accessible', async ({ page }) => {
   await page.goto('/');
@@ -93,6 +93,6 @@ const results = await runAxe({
 
 ## Related
 
-- Package: [`@kiwa-test/a11y`](../../../packages/a11y/README.md)
+- Package: [`@kiwa/a11y`](../../../packages/a11y/README.md)
 - Visual regression cookbook: [visual-regression.md](./visual-regression.md)
 - axe-core rule catalogue: https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md

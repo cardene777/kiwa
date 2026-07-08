@@ -61,9 +61,9 @@ Rust / Go は構想中。 「default は TS だけど Python の service と Sol
 
 v0.5 の目玉 ... 全 11 npm package で MSI ≥ 80 を release workflow で物理 enforce しました。
 
-- @kiwa-test/api ... 96.06 %
-- @kiwa-test/a11y ... 93.62 %
-- @kiwa-test/ui ... 91.76 %
+- @kiwa/api ... 96.06 %
+- @kiwa/a11y ... 93.62 %
+- @kiwa/ui ... 91.76 %
 - 全 package ≥ 80 通過
 
 Coverage gate (Lines 90+ / Branches 80+) も維持。
@@ -72,7 +72,7 @@ Coverage gate (Lines 90+ / Branches 80+) も維持。
 
 ## [6/8]
 
-Component test (`@kiwa-test/ui`) は 1 package で 8 surface 対応 ...
+Component test (`@kiwa/ui`) は 1 package で 8 surface 対応 ...
 
 React / Vue 3 / Svelte / SolidJS / Lit / Qwik / Angular + 実 Chromium
 
@@ -94,7 +94,7 @@ stack に test 散乱を感じる方、 ぜひ触ってみてください。
 
 📖 README https://github.com/cardene777/kiwa
 💬 Discussions https://github.com/cardene777/kiwa/discussions/451
-📦 `npm install @kiwa-test/core`
+📦 `npm install @kiwa/core`
 🐍 `pip install kiwa-test-py`
 
 質問・要望は Issue / Discussion / リプライ歓迎です 🌱

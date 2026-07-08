@@ -20,7 +20,7 @@ the dogfood app to probe the "RP asked for a spec-invalid value" path.
 
 ## Fidelity axes (userVerification)
 
-| axis | mock (`@kiwa-test/auth`) | real (SimpleWebAuthn + Chrome Virtual Authenticator) | assertion |
+| axis | mock (`@kiwa/auth`) | real (SimpleWebAuthn + Chrome Virtual Authenticator) | assertion |
 |---|---|---|---|
 | 1. `required` on UV-capable authenticator | Succeeds; assertion UV bit = 1 | Succeeds; assertion UV bit = 1 | Both drivers set UV=1 in `authenticatorData` byte 32 (`FLAG_USER_VERIFIED = 0x04`). |
 | 2. `required` on non-UV authenticator | Throws `userVerification=required but authenticator does not support user verification`; trace `errorKind = user_verification_unsupported` | SimpleWebAuthn `verifyAuthenticationResponse` throws `UserVerificationRequirement not satisfied`; 400 | Both surface the failure as a client-visible 400 with a stable error kind. |

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that registers **3 design-system components** (`Button` / `Input` / `Card`) as Storybook 8 `StoryObj` (CSF3), resolves `meta.args + story.args` per CSF3 semantics, runs each story's `play` function against an in-memory canvas, and asserts a11y violations = 0 through the built-in `runA11y` checker. `@kiwa-test/component` runs the whole flow in-process, deterministic story ids, and 3 heuristic a11y rules so component regressions fail fast in tests instead of production.
+A vitest test file that registers **3 design-system components** (`Button` / `Input` / `Card`) as Storybook 8 `StoryObj` (CSF3), resolves `meta.args + story.args` per CSF3 semantics, runs each story's `play` function against an in-memory canvas, and asserts a11y violations = 0 through the built-in `runA11y` checker. `@kiwa/component` runs the whole flow in-process, deterministic story ids, and 3 heuristic a11y rules so component regressions fail fast in tests instead of production.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that registers **3 design-system components** (`Button` / `In
 ```bash
 mkdir kiwa-storybook && cd kiwa-storybook
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa-test/component
+pnpm add -D vitest typescript @types/node @kiwa/component
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -51,8 +51,8 @@ import {
   buildCard,
   buildInput,
   fireEvent,
-} from '@kiwa-test/component';
-import type { StoryObj } from '@kiwa-test/component';
+} from '@kiwa/component';
+import type { StoryObj } from '@kiwa/component';
 
 // Button — 1 default + 1 interactive play
 export const buttonMeta = {
@@ -108,7 +108,7 @@ export const cardMeta = {
 Create `src/registry.ts` — a factory that registers all 3 metas into one registry:
 
 ```ts
-import { createStoryRegistry } from '@kiwa-test/component';
+import { createStoryRegistry } from '@kiwa/component';
 import { buttonMeta, cardMeta, inputMeta } from './stories.js';
 
 export function buildDesignSystemRegistry() {

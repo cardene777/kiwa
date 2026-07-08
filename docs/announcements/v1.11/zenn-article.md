@@ -8,12 +8,12 @@ published: false
 
 ## TL;DR
 
-kiwa v1.11 milestone (**6/6 GitHub Issues resolved**) を land した。 v1.10 まで「provider 数を増やす」 直交軸で拡張してきたが、 v1.11 は **「release 品質を数値で判断可能にする」 縦軸** に思想シフト。 5 軸統一 harness `@kiwa-test/quality-metrics` v0.1、 dogfood 3 app (real vs mock の fidelity 実測)、 docs 3 pillars (tutorial + migration + API reference)、 VitePress + GitHub Pages publication まで同時 land。
+kiwa v1.11 milestone (**6/6 GitHub Issues resolved**) を land した。 v1.10 まで「provider 数を増やす」 直交軸で拡張してきたが、 v1.11 は **「release 品質を数値で判断可能にする」 縦軸** に思想シフト。 5 軸統一 harness `@kiwa/quality-metrics` v0.1、 dogfood 3 app (real vs mock の fidelity 実測)、 docs 3 pillars (tutorial + migration + API reference)、 VitePress + GitHub Pages publication まで同時 land。
 
 - 親 Issue: [#680](https://github.com/cardene777/kiwa/issues/680)
 - 6 sub-Issue: [#681](https://github.com/cardene777/kiwa/issues/681) - [#686](https://github.com/cardene777/kiwa/issues/686)
 
-## 1. `@kiwa-test/quality-metrics` v0.1 — 5 軸統一 harness (v1.11-1)
+## 1. `@kiwa/quality-metrics` v0.1 — 5 軸統一 harness (v1.11-1)
 
 kiwa の全 provider adapter が同一 shape の score を出す統一 API。 v1.10 まで「mock 忠実度が provider によって濃淡がある」 「性能 / coverage / regression detection が SSOT 数値化されていない」 課題を、 5 軸で release gate 判定可能な形に落とし込む。
 
@@ -78,7 +78,7 @@ v1.11-3 rabbitmq dogfood で release gate が **FAIL 判定** — perf p95 548ms
 - 01: Your first Supabase Auth test in 5 min
 - 02: RabbitMQ DLX test recipe
 - 03: Rust contract test from zero
-- 04: Testing Next.js Server Actions with @kiwa-test/nextjs
+- 04: Testing Next.js Server Actions with @kiwa/nextjs
 - 05: Multi-provider auth (NextAuth + Clerk + Auth0)
 
 全て `What you'll build / Prerequisites / Step-by-step / Explanation / Troubleshoot` の 5 セクション、 full copy-pasteable。
@@ -116,7 +116,7 @@ Playwright E2E (`tests/docs-site-e2e/`) が 5 canonical page (landing / tutorial
 v1.10 user は zero-migration。 既存 test file はそのまま動く。 v1.11 追加は全て opt-in。
 
 ```bash
-pnpm add -D @kiwa-test/quality-metrics
+pnpm add -D @kiwa/quality-metrics
 ```
 
 詳細: [v1.10 → v1.11 migration guide](https://github.com/cardene777/kiwa/blob/main/docs/migrations/v1.10-to-v1.11.md)。
@@ -136,7 +136,7 @@ pnpm add -D @kiwa-test/quality-metrics
 
 - v1.11 親 Issue: https://github.com/cardene777/kiwa/issues/680
 - v1.10 完遂時の弱点分析 (release gate SSOT 化の source of truth)
-- @kiwa-test/quality-metrics: `packages/quality-metrics/`
+- @kiwa/quality-metrics: `packages/quality-metrics/`
 - dogfood 3 app: `examples/dogfood-{supabase-saas,rabbitmq-worker,foundry}-app/`
 - VitePress: https://vitepress.dev/
 - GitHub Pages Free plan: https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages

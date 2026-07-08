@@ -1,6 +1,6 @@
 # Perf testing SSOT — p50 / p95 / p99 + baseline persistence + regression detection SSOT for kiwa v1.25
 
-Introduced in v1.13-1 as `@kiwa-test/perf-harness` v0.1 (`measure` + `saveBaseline` + `detectRegression`), extended in v1.14-post as `runPerf3Layer` (serial + concurrent + memory 3-layer), and rolled out to all 33 kiwa packages in the v1.25 milestone. This document is the SSOT for **what a kiwa perf suite measures, how the numbers are computed, and how a regression is decided**. Every downstream perf suite in `packages/*/tests/perf/*.perf.ts` reads these rules from here — do not re-derive them locally.
+Introduced in v1.13-1 as `@kiwa/perf-harness` v0.1 (`measure` + `saveBaseline` + `detectRegression`), extended in v1.14-post as `runPerf3Layer` (serial + concurrent + memory 3-layer), and rolled out to all 33 kiwa packages in the v1.25 milestone. This document is the SSOT for **what a kiwa perf suite measures, how the numbers are computed, and how a regression is decided**. Every downstream perf suite in `packages/*/tests/perf/*.perf.ts` reads these rules from here — do not re-derive them locally.
 
 ## Why a perf SSOT
 
@@ -17,7 +17,7 @@ The 4 rules below are the smallest set that make kiwa perf suites comparable acr
 Every `measure` call in the kiwa monorepo passes `warmup: 3` and `iterations: 100` unless there is a written override in the package's `README.md`. Fewer iterations get too noisy for Welch's t-test to reject the null hypothesis; more iterations waste CI time.
 
 ```ts
-import { measure } from '@kiwa-test/perf-harness';
+import { measure } from '@kiwa/perf-harness';
 
 const result = await measure({
   name: 'primaryApi',
@@ -58,7 +58,7 @@ import {
   loadBaseline,
   measure,
   saveBaseline,
-} from '@kiwa-test/perf-harness';
+} from '@kiwa/perf-harness';
 
 const path = defaultBaselinePath('my-module');
 const current = await measure({ name: 'my-module', iterations: 100, warmup: 3, fn });
@@ -82,7 +82,7 @@ Commit the baseline JSON to lock the envelope into the repo. A regression on a f
 Dual-gating (delta + significance) is what suppresses false positives. A 25 % delta with `welchT = 1.2` (many overlapping samples) is `stable`, not `regressed`. A 5 % delta with `welchT = 3.0` (tight distributions) is `stable`, not `regressed`. Only "large **and** tight" fires the alarm.
 
 ```ts
-import { detectRegression, measure } from '@kiwa-test/perf-harness';
+import { detectRegression, measure } from '@kiwa/perf-harness';
 
 const baseline = await loadBaseline(defaultBaselinePath('my-module'));
 const current = await measure({ name: 'my-module', iterations: 100, warmup: 3, fn });
@@ -103,7 +103,7 @@ if (baseline) {
 - **memory** — `measureMemory` at 200 iterations, gate on `arrayBuffersDelta` (not `heapUsedDelta`, which is dominated by GC timing). Leak detector.
 
 ```ts
-import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-test/perf-harness';
+import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa/perf-harness';
 import path from 'node:path';
 
 const result = await runPerf3Layer({
@@ -126,10 +126,10 @@ The v1.25 milestone applied the 3-layer harness to every kiwa package.
 
 | Layer | Packages |
 |---|---|
-| core (9) | `@kiwa-test/core` + `@kiwa-test/dapp` + `@kiwa-test/api` + `@kiwa-test/ui` + `@kiwa-test/data` + `@kiwa-test/cli-test` + `@kiwa-test/observability` + `@kiwa-test/e2e` + `@kiwa-test/cli` |
-| framework adapter (11) | `@kiwa-test/nextjs` + `@kiwa-test/nuxt` + `@kiwa-test/sveltekit` + `@kiwa-test/remix` + `@kiwa-test/astro` + `@kiwa-test/solidstart` + `@kiwa-test/qwikcity` + `@kiwa-test/edge` + `@kiwa-test/fresh` + `@kiwa-test/hono` + `@kiwa-test/solidjs` |
-| test type (3) | `@kiwa-test/a11y` + `@kiwa-test/visual` + `@kiwa-test/component` |
-| SaaS layer (10) | `@kiwa-test/auth` + `@kiwa-test/queue` + `@kiwa-test/cache` + `@kiwa-test/orm` + `@kiwa-test/payment` + `@kiwa-test/streaming` + `@kiwa-test/search` + `@kiwa-test/mcp` + `@kiwa-test/agent` |
+| core (9) | `@kiwa/core` + `@kiwa/dapp` + `@kiwa/api` + `@kiwa/ui` + `@kiwa/data` + `@kiwa/cli-test` + `@kiwa/observability` + `@kiwa/e2e` + `@kiwa/cli` |
+| framework adapter (11) | `@kiwa/nextjs` + `@kiwa/nuxt` + `@kiwa/sveltekit` + `@kiwa/remix` + `@kiwa/astro` + `@kiwa/solidstart` + `@kiwa/qwikcity` + `@kiwa/edge` + `@kiwa/fresh` + `@kiwa/hono` + `@kiwa/solidjs` |
+| test type (3) | `@kiwa/a11y` + `@kiwa/visual` + `@kiwa/component` |
+| SaaS layer (10) | `@kiwa/auth` + `@kiwa/queue` + `@kiwa/cache` + `@kiwa/orm` + `@kiwa/payment` + `@kiwa/streaming` + `@kiwa/search` + `@kiwa/mcp` + `@kiwa/agent` |
 
 Every package writes a per-op p95 baseline, runs the 3-layer gate on every `pnpm test:perf` invocation, and feeds the report into `docs/quality-reports/perf/{package}.md`. The release gate (`evaluateReleaseGate`) treats a `regressed` verdict on any package as a release blocker on the `perf.p95Ms` axis.
 

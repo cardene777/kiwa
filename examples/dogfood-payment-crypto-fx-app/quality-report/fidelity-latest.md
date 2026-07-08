@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/payment/dogfood-crypto-fx-app @ 0.5.0
+# Quality Report — @kiwa/payment/dogfood-crypto-fx-app @ 0.5.0
 
 _Reported at 2026-07-07T13:28:47.599Z._
 

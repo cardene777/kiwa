@@ -6,11 +6,11 @@ title: Frontend advanced III testing — v1.49 6 axis SSOT
 
 ## What this covers
 
-`@kiwa-test/component` v0.4 + `@kiwa-test/nextjs` v1.3 の pair minor bump による Frontend 深化 III 6 axis SSOT。 v1.34 で導入した advanced 4 axis に、 v1.49 で 4 new axis (component 側 2 + nextjs 側 2) 追加、 3 target × 6 axis = 18 row grid に拡張。
+`@kiwa/component` v0.4 + `@kiwa/nextjs` v1.3 の pair minor bump による Frontend 深化 III 6 axis SSOT。 v1.34 で導入した advanced 4 axis に、 v1.49 で 4 new axis (component 側 2 + nextjs 側 2) 追加、 3 target × 6 axis = 18 row grid に拡張。
 
 ## 6 axis 一覧
 
-### component 側 (@kiwa-test/component v0.4)
+### component 側 (@kiwa/component v0.4)
 
 - **rsc-harness** (v1.34) — React Server Components render + suspense boundary + streaming chunk
 - **streaming-ssr** (v1.34) — Streaming SSR + selective hydration + progressive hydration + error boundary
@@ -19,7 +19,7 @@ title: Frontend advanced III testing — v1.49 6 axis SSOT
 - **react-19-actions** (v1.49 new) — React 19 useActionState + useOptimistic + useFormStatus 統合、 4 state (idle / transition-pending / optimistic-committed / resolved)
 - **islands-architecture** (v1.49 new) — Astro / Deno Fresh / Solid Start の Islands architecture、 5 state (idle / registered / hydrating / interactive / static-verified)
 
-### nextjs 側 (@kiwa-test/nextjs v1.3)
+### nextjs 側 (@kiwa/nextjs v1.3)
 
 - **server-action-advanced** (v1.34) — Server Actions v2 + revalidatePath + revalidateTag + redirect
 - **partial-prerendering** (v1.34) — PPR static shell + dynamic hole + streaming boundary

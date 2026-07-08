@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/component/nextjs-rsc-streaming-app @ 0.3.0
+# Quality Report — @kiwa/component/nextjs-rsc-streaming-app @ 0.3.0
 
 _Reported at 2026-07-06T12:58:20.396Z._
 

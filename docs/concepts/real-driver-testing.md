@@ -4,11 +4,11 @@ kiwa's v1.21 auth milestone landed 4 protocol adapters (WebAuthn L3 + Passkey + 
 
 ## The 3 modes
 
-Every v1.22 test surface (`@kiwa-test/auth` v0.5, dogfood apps, tutorials 37-38) exposes three execution modes gated on the `KIWA_MODE` environment variable.
+Every v1.22 test surface (`@kiwa/auth` v0.5, dogfood apps, tutorials 37-38) exposes three execution modes gated on the `KIWA_MODE` environment variable.
 
 | Mode | Trigger | Behaviour | Latency budget | When to use |
 |---|---|---|---|---|
-| `mock only` | `KIWA_MODE` unset (default) | Pure `@kiwa-test/auth` mock; every spec-critical branch runs deterministically | < 5 ms per test | Every PR, every push, every local run |
+| `mock only` | `KIWA_MODE` unset (default) | Pure `@kiwa/auth` mock; every spec-critical branch runs deterministically | < 5 ms per test | Every PR, every push, every local run |
 | `real-optional` | `KIWA_MODE=real-optional` | Try the real driver; if the container URL / driver flag is missing, fall back to mock and print `warn: driver unavailable, running mock` | < 5 ms mock / < 60 s real (best-effort) | Local exploratory runs where Docker may or may not be up; laptop CI where testcontainers is optional |
 | `real-required` | `KIWA_MODE=real` + protocol-specific env (`KEYCLOAK_URL` / `OAUTH21_BOOTSTRAP=1` / Chrome caBLE flag) | Fail hard if the driver is missing; run tests only against the live container / browser | < 90 s per test | Nightly CI where drift detection between mock and real matters more than latency; pre-release smoke |
 
@@ -59,7 +59,7 @@ Concrete v1.22 axes.
 
 ## Where the release gate hooks in
 
-`@kiwa-test/quality-metrics` v0.2 exposes the fidelity axis as one of the 7 general-purpose axes (`coverage / test count / fidelity / perf p95 / mutation / a11y / dogfood-run`). The dogfood app calls `evaluateReleaseGate(report)` with the fidelity ratio. A verdict of `PASS` requires **every axis of the fidelity report to record `N/N` in `KIWA_MODE=real`** — drift = release-gate failure.
+`@kiwa/quality-metrics` v0.2 exposes the fidelity axis as one of the 7 general-purpose axes (`coverage / test count / fidelity / perf p95 / mutation / a11y / dogfood-run`). The dogfood app calls `evaluateReleaseGate(report)` with the fidelity ratio. A verdict of `PASS` requires **every axis of the fidelity report to record `N/N` in `KIWA_MODE=real`** — drift = release-gate failure.
 
 Every v1.22 dogfood app publishes a fidelity report artefact on merge:
 

@@ -4,7 +4,7 @@
 
 kiwa v1.37 is out — Security 深化 land.
 
-@kiwa-test/security v0.1.0 new package. 8 axis security semantics across 4 provider × 8 axis = 32 cell fidelity grid.
+@kiwa/security v0.1.0 new package. 8 axis security semantics across 4 provider × 8 axis = 32 cell fidelity grid.
 
 Real driver env-gate (KIWA_MODE=real + HELMET_VERSION / RATE_LIMIT_VERSION / CASBIN_VERSION / CORAZA_VERSION). 3 dogfood app new (security-csp-headers-app + security-rbac-abac-app + security-sbom-scanning-app) 全 7 軸 release gate PASS.
 
@@ -29,4 +29,4 @@ Auth / Realtime / Streaming / Database / Payment / Frontend / Observability / Se
 
 15 milestone 連続 snippet validation streak (v1.23-v1.37) 達成.
 
-`pnpm add -D @kiwa-test/security` で v0.1.0 が入る. zero breaking changes. migration guide は https://cardene777.github.io/kiwa/migrations/v1.36-to-v1.37
+`pnpm add -D @kiwa/security` で v0.1.0 が入る. zero breaking changes. migration guide は https://cardene777.github.io/kiwa/migrations/v1.36-to-v1.37

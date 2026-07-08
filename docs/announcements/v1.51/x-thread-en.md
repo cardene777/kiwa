@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.51 released — Mobile deepening II (@kiwa-test/mobile v0.2), pair-13 **2nd stage (Phase 2)** complete. Advanced II 4 new axis (navigation + reanimated + async-storage + secure-storage) + real driver env-gate.
+kiwa v1.51 released — Mobile deepening II (@kiwa/mobile v0.2), pair-13 **2nd stage (Phase 2)** complete. Advanced II 4 new axis (navigation + reanimated + async-storage + secure-storage) + real driver env-gate.
 
 ## Tweet 2 — 7 axis fidelity + real driver
 
@@ -14,7 +14,7 @@ dogfood-mobile-advanced-app new (4 axis × 3 target workflow + env-gate 3 patter
 
 ## Tweet 4 — install + Phase 3
 
-`pnpm add -D @kiwa-test/mobile@^0.2`. Migration: https://cardene777.github.io/kiwa/migrations/v1.50-to-v1.51
+`pnpm add -D @kiwa/mobile@^0.2`. Migration: https://cardene777.github.io/kiwa/migrations/v1.50-to-v1.51
 
 v1.52+ = Mobile deepening III (v0.3 Fabric + TurboModules + Codegen + New Architecture) targets pair-depth-3 5th record. systematic root cause pattern SSOT 26th application.
 

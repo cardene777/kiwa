@@ -43,7 +43,7 @@ export async function waitForChainState<TValue = unknown>(opts: {
 ## Example
 
 ~~~ts
-import { waitForChainState } from '@kiwa-test/dapp';
+import { waitForChainState } from '@kiwa/dapp';
 import { createPublicClient, defineChain, http } from 'viem';
 
 const pub = createPublicClient({ chain: anvilChain, transport: http() });

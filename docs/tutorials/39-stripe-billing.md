@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A Next.js 15 App Router merchant app wired to `@kiwa-test/payment` v0.3's Stripe mock adapter and 9-axis semantics. The suite covers the full billing journey — checkout session, subscription create + upgrade + downgrade + cancel, 3D Secure v2 challenge + frictionless, and Smart Retry dunning (4 attempts + grace period + uncollectible). Every event goes through the same `PaymentAdapter` interface, so the `KIWA_MODE=real` switch flips the run to the actual Stripe API without touching the test bodies.
+A Next.js 15 App Router merchant app wired to `@kiwa/payment` v0.3's Stripe mock adapter and 9-axis semantics. The suite covers the full billing journey — checkout session, subscription create + upgrade + downgrade + cancel, 3D Secure v2 challenge + frictionless, and Smart Retry dunning (4 attempts + grace period + uncollectible). Every event goes through the same `PaymentAdapter` interface, so the `KIWA_MODE=real` switch flips the run to the actual Stripe API without touching the test bodies.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A Next.js 15 App Router merchant app wired to `@kiwa-test/payment` v0.3's Stripe
 ```bash
 mkdir kiwa-stripe-billing && cd kiwa-stripe-billing
 pnpm init
-pnpm add -D @kiwa-test/payment@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa/payment@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest script in `package.json`.
@@ -37,7 +37,7 @@ Add the vitest script in `package.json`.
 `src/adapters/mock.ts` — a thin factory that returns the shared `PaymentAdapter` interface used by every route handler.
 
 ```ts
-import { createStripeMock } from '@kiwa-test/payment';
+import { createStripeMock } from '@kiwa/payment';
 
 export function stripeMock() {
   return createStripeMock({ secret: 'whsec_test' });
@@ -59,7 +59,7 @@ import {
   pauseSubscription,
   resumeSubscription,
   cancelSubscription,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('subscription lifecycle', () => {
   it('walks created → upgraded → paused → resumed → canceled', async () => {
@@ -105,7 +105,7 @@ import {
   threeDsRequestChallenge,
   threeDsSubmitChallenge,
   threeDsFrictionless,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('3DS v2', () => {
   it('accepted — user completes the challenge', async () => {
@@ -165,7 +165,7 @@ import {
   startDunning,
   dunningAttempt,
   finalizeDunning,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('dunning', () => {
   it('recovers on the 3rd retry', async () => {
@@ -217,7 +217,7 @@ The default `maxAttempts` = 4 with a 3-day `retryIntervalMs` matches Stripe Smar
 Every route handler in the merchant app reads `KIWA_MODE`:
 
 ```ts
-import { createStripeMock } from '@kiwa-test/payment';
+import { createStripeMock } from '@kiwa/payment';
 
 const mode = process.env.KIWA_MODE ?? 'mock';
 export const adapter = mode === 'real'

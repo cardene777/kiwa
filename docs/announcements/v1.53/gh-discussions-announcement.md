@@ -2,11 +2,11 @@
 
 ## Summary
 
-kiwa v1.53 is out。 **Mobile 深化 IV** (@kiwa-test/mobile v0.4) 単軸 milestone、 **縦深化 pair 第 13 の 4 段目 (Phase 4、 pair 深度 4 段拡張達成 4 例目 depth-4 record) 完成**。 v1.40 AI/LLM + v1.41 Payment + v1.42 Observability の 3 例安定化に続く 4 例目、 depth-4 pattern 4 例安定化を実証。
+kiwa v1.53 is out。 **Mobile 深化 IV** (@kiwa/mobile v0.4) 単軸 milestone、 **縦深化 pair 第 13 の 4 段目 (Phase 4、 pair 深度 4 段拡張達成 4 例目 depth-4 record) 完成**。 v1.40 AI/LLM + v1.41 Payment + v1.42 Observability の 3 例安定化に続く 4 例目、 depth-4 pattern 4 例安定化を実証。
 
 ## What's new
 
-### `@kiwa-test/mobile` v0.3 → v0.4
+### `@kiwa/mobile` v0.3 → v0.4
 
 - **adapter interface layer 新規** = `AdapterInvocation` + `AdapterResult` + `MobileAdapter` interface
 - **22 adapter constant records** = `MOCK_ADAPTERS` + `REAL_ADAPTERS` (11 axis × 2 mode)
@@ -42,7 +42,7 @@ v1.40 AI/LLM (v1.12→v1.15→v1.25→v1.40) + v1.41 Payment (v1.14→v1.23→v1
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/mobile@^0.4
+pnpm add -D @kiwa/mobile@^0.4
 ```
 
 ## Migration guide

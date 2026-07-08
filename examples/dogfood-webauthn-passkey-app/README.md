@@ -1,9 +1,9 @@
 # dogfood-webauthn-passkey-app
 
-Dogfood app for `@kiwa-test/auth` v1.21-1a (WebAuthn L3 adapter). A Next.js 15 App Router RP (Relying Party) that exercises the four spec-critical WebAuthn ceremonies — credential creation + attestation, credential assertion + userVerification, and residentKey-based discoverable credentials — under two drivers:
+Dogfood app for `@kiwa/auth` v1.21-1a (WebAuthn L3 adapter). A Next.js 15 App Router RP (Relying Party) that exercises the four spec-critical WebAuthn ceremonies — credential creation + attestation, credential assertion + userVerification, and residentKey-based discoverable credentials — under two drivers:
 
 - `KIWA_MODE=real` — Chrome Virtual Authenticator API + SimpleWebAuthn-shaped RP server (`webauthn-server.ts`). Skipped when the environment cannot reach a headed Chrome (`DISPLAY` unset / CI-less local without Playwright browsers installed).
-- `KIWA_MODE=mock` — `@kiwa-test/auth` `setupWebAuthnEnv` + `credentialCreation` / `credentialAssertion` deterministic mock. Always runs.
+- `KIWA_MODE=mock` — `@kiwa/auth` `setupWebAuthnEnv` + `credentialCreation` / `credentialAssertion` deterministic mock. Always runs.
 
 Behavioural fidelity between the two drivers feeds the release gate (`quality-reports/auth/webauthn-passkey-app-register.md` + siblings).
 
@@ -24,7 +24,7 @@ Sub-Issue **a** landed the shared surface (RP server, adapter interface, `KIWA_M
 src/
   adapters/
     interface.ts        # WebAuthnRPAdapter contract (register / signin / listCredentials / deleteCredential)
-    mock.ts             # makeMockAdapter — @kiwa-test/auth setupWebAuthnEnv + credentialCreation + credentialAssertion
+    mock.ts             # makeMockAdapter — @kiwa/auth setupWebAuthnEnv + credentialCreation + credentialAssertion
     real.ts             # makeRealAdapter — SimpleWebAuthn-shaped RP + Chrome Virtual Authenticator (skipped when DISPLAY absent or KIWA_WEBAUTHN_REAL_READY unset)
   lib/
     webauthn-server.ts  # Framework-agnostic RP server logic (challenge store + attestation verification)

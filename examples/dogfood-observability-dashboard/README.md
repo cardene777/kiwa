@@ -1,10 +1,10 @@
 # dogfood-observability-dashboard
 
-Dogfood app (v1.17-2) — a Next.js App Router style **Grafana dashboard** driven behind a provider-neutral surface. 5 panels (line / bar / gauge / stat / table) execute PromQL-style queries against the `@kiwa-test/observability` `DashboardMock` (v1.17-1) so behavioural fidelity between the mock and a real Prometheus HTTP API can be measured side-by-side. The resulting fidelity report feeds `@kiwa-test/quality-metrics` release gate.
+Dogfood app (v1.17-2) — a Next.js App Router style **Grafana dashboard** driven behind a provider-neutral surface. 5 panels (line / bar / gauge / stat / table) execute PromQL-style queries against the `@kiwa/observability` `DashboardMock` (v1.17-1) so behavioural fidelity between the mock and a real Prometheus HTTP API can be measured side-by-side. The resulting fidelity report feeds `@kiwa/quality-metrics` release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-test/observability` `DashboardMock` + `TelemetryCollector`, deterministic metric aggregation + refresh cadence + badge)
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/observability` `DashboardMock` + `TelemetryCollector`, deterministic metric aggregation + refresh cadence + badge)
 - `KIWA_MODE=real` — driven by `makeRealAdapter()` that talks to a Prometheus HTTP API when `PROMETHEUS_URL` is set. When the variable is missing the adapter reports each method as `PROMETHEUS_ENV_MISSING` so the fidelity harness records the gap without failing the test suite. When the URL is set but `globalThis.fetch` is unavailable (rare on modern Node), the adapter downgrades to `PROMETHEUS_FETCH_MISSING` — the same harness path, one level closer to real IO.
 
 Real-mode envs.
@@ -27,7 +27,7 @@ src/
     index.ts            -- shared PromQL-style query builders
   flows/
     dashboard-flows.ts  -- initial load / refresh cycle / query matrix / alert badge
-    fidelity.ts         -- trace-diffing harness that feeds @kiwa-test/quality-metrics
+    fidelity.ts         -- trace-diffing harness that feeds @kiwa/quality-metrics
   app/
     dashboard-page.ts   -- Next.js App Router style controller
                            (createDashboardPageController.load() / .refresh())
@@ -52,7 +52,7 @@ The `quality-report/` directory is git-ignored — promote snapshots to `docs/qu
 
 ## Release gate (7 axes)
 
-Because the provider string is `@kiwa-test/observability/dashboard`, `evaluateReleaseGate` runs the common 7-axis branch. The AI-LLM 4 axes (cost per request / p95 latency / total tokens / accuracy) do not apply — Prometheus is a metrics primitive, not a token-priced generative call. HTTP query latency still feeds `perf.p95Ms` so the dashboard performance axis stays visible in the report.
+Because the provider string is `@kiwa/observability/dashboard`, `evaluateReleaseGate` runs the common 7-axis branch. The AI-LLM 4 axes (cost per request / p95 latency / total tokens / accuracy) do not apply — Prometheus is a metrics primitive, not a token-priced generative call. HTTP query latency still feeds `perf.p95Ms` so the dashboard performance axis stays visible in the report.
 
 - `coverage.line` ≥ 85%
 - `coverage.branch` ≥ 80%
@@ -87,7 +87,7 @@ The 5 seeded panels (`src/panels/index.ts`) each pin one chart_type against a sh
 
 ## Related
 
-- v1.14-4 `@kiwa-test/observability` v1.1 (`packages/observability/`) — telemetry provider mocks (OpenTelemetry / Datadog / Sentry)
-- v1.17-1 `@kiwa-test/observability` v2.0 (`packages/observability/`) — DashboardMock + AlertRouter + trace flame graph + log correlation
-- v1.11-1 `@kiwa-test/quality-metrics` (`packages/quality-metrics/`) — 7-axis release gate
+- v1.14-4 `@kiwa/observability` v1.1 (`packages/observability/`) — telemetry provider mocks (OpenTelemetry / Datadog / Sentry)
+- v1.17-1 `@kiwa/observability` v2.0 (`packages/observability/`) — DashboardMock + AlertRouter + trace flame graph + log correlation
+- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`) — 7-axis release gate
 - v1.17 milestone parent [#777](https://github.com/cardene777/kiwa/issues/777), this sub [#779](https://github.com/cardene777/kiwa/issues/779)

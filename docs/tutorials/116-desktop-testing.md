@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/desktop` v0.1 (new-base pair 第 14、 **42 package 到達**、 v2.0 milestone desktop adapter goal 達成)、 3 axis (Electron + Tauri + Webview) × 3 target (macos + windows + linux) の workflow を deterministic に扱う pattern。
+A vitest suite wired to `@kiwa/desktop` v0.1 (new-base pair 第 14、 **42 package 到達**、 v2.0 milestone desktop adapter goal 達成)、 3 axis (Electron + Tauri + Webview) × 3 target (macos + windows + linux) の workflow を deterministic に扱う pattern。
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/desktop` v0.1 (new-base pair 第 14、 **42 
 ```bash
 mkdir kiwa-desktop && cd kiwa-desktop
 pnpm init
-pnpm add -D @kiwa-test/desktop@^0.1 vitest typescript @types/node
+pnpm add -D @kiwa/desktop@^0.1 vitest typescript @types/node
 ```
 
 ### 2. Electron axis (main + BrowserWindow + IPC + quit)
@@ -29,7 +29,7 @@ import {
   dispatchIpcMessage,
   quitElectronApp,
   startElectronApp,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('Electron lifecycle', () => {
   it('start → window → ipc → quit', () => {
@@ -53,7 +53,7 @@ import {
   invokeTauriCommand,
   registerTauriCommand,
   startTauriApp,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('Tauri invoke flow', () => {
   it('register → invoke → emit → close', () => {
@@ -76,7 +76,7 @@ import {
   bindContextBridge,
   loadPreloadScript,
   postWebviewMessage,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 describe('Webview bridge flow', () => {
   it('preload → bind → post → isolation asserted', () => {

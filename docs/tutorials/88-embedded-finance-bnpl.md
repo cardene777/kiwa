@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/payment` v0.5 that models the 2 pieces of a real embedded-finance + BNPL (Buy Now Pay Later) product surface that every non-trivial fintech-adjacent product eventually needs — an embedded-finance `openAccount` step that pins a per-customer `accountId` + `customerId` + `currency` so a follow-up KYC / KYB / card-issuance step operates on a single SSOT, a `verifyKyc` step that gates card issuance on a caller-supplied score against a session-level `minScore` floor (default `60`, mirroring Stripe Treasury / Unit / Column onboarding) so a `score: 30` customer lands on `state: 'suspended'` and a `score: 80` customer lands on `state: 'kyc-verified'`, a `verifyKyb` step that is only accepted when `config.requireKyb: true` so a mis-configured caller cannot silently no-op a business-verification step, an `issueCard` step that refuses to run until KYC (and KYB when required) are `verified` so a rogue card cannot be issued against an un-verified account, and a `closeAccount` step that pins the terminal state so no further ops accept, a BNPL `createBnplPlan` step that splits `totalCents` into equal installments (rounded to integer cents, last installment absorbs remainder), a `scheduleInstallment` step that advances the schedule pointer + emits `bnpl.installment_scheduled`, a `scoreRisk` step that gates plan progression on a caller-supplied 0-100 score against `config.minRiskScore` (default `50`, mirroring Klarna soft-credit-check onboarding) so a `score: 30` customer moves to `state: 'defaulted'` and a `score: 70` customer moves to `state: 'risk-scored'`, a `chargeLateFee` step that accumulates `session.lateFeesTotalCents` per missed installment (default `700` = $7.00, mirroring Affirm late-fee schedule), and a `markInstallmentPaid` step that flips `state` to `'settled'` once all installments are paid. `openAccount()` + `verifyKyc()` + `verifyKyb()` + `issueCard()` + `closeAccount()` + `createBnplPlan()` + `scheduleInstallment()` + `scoreRisk()` + `chargeLateFee()` + `markInstallmentPaid()` give you every one of those pieces without booting a real Stripe Treasury / Klarna / Affirm backend. This is the pattern kiwa's `examples/dogfood-payment-embedded-finance-app` + `examples/dogfood-payment-bnpl-installment-app` exercise against real Stripe Treasury (BaaS + card issuance) + Unit / Column (KYB register lookup) + Klarna / Affirm / Afterpay (BNPL + credit check + late fee) backends under `KIWA_MODE=real` + the relevant `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the card was issued to an un-verified account because `issueCard` did not gate on `session.kycStatus === 'verified'`" gap a reviewer sees in the embedded-finance-issuance post-mortem.
+A vitest suite wired to `@kiwa/payment` v0.5 that models the 2 pieces of a real embedded-finance + BNPL (Buy Now Pay Later) product surface that every non-trivial fintech-adjacent product eventually needs — an embedded-finance `openAccount` step that pins a per-customer `accountId` + `customerId` + `currency` so a follow-up KYC / KYB / card-issuance step operates on a single SSOT, a `verifyKyc` step that gates card issuance on a caller-supplied score against a session-level `minScore` floor (default `60`, mirroring Stripe Treasury / Unit / Column onboarding) so a `score: 30` customer lands on `state: 'suspended'` and a `score: 80` customer lands on `state: 'kyc-verified'`, a `verifyKyb` step that is only accepted when `config.requireKyb: true` so a mis-configured caller cannot silently no-op a business-verification step, an `issueCard` step that refuses to run until KYC (and KYB when required) are `verified` so a rogue card cannot be issued against an un-verified account, and a `closeAccount` step that pins the terminal state so no further ops accept, a BNPL `createBnplPlan` step that splits `totalCents` into equal installments (rounded to integer cents, last installment absorbs remainder), a `scheduleInstallment` step that advances the schedule pointer + emits `bnpl.installment_scheduled`, a `scoreRisk` step that gates plan progression on a caller-supplied 0-100 score against `config.minRiskScore` (default `50`, mirroring Klarna soft-credit-check onboarding) so a `score: 30` customer moves to `state: 'defaulted'` and a `score: 70` customer moves to `state: 'risk-scored'`, a `chargeLateFee` step that accumulates `session.lateFeesTotalCents` per missed installment (default `700` = $7.00, mirroring Affirm late-fee schedule), and a `markInstallmentPaid` step that flips `state` to `'settled'` once all installments are paid. `openAccount()` + `verifyKyc()` + `verifyKyb()` + `issueCard()` + `closeAccount()` + `createBnplPlan()` + `scheduleInstallment()` + `scoreRisk()` + `chargeLateFee()` + `markInstallmentPaid()` give you every one of those pieces without booting a real Stripe Treasury / Klarna / Affirm backend. This is the pattern kiwa's `examples/dogfood-payment-embedded-finance-app` + `examples/dogfood-payment-bnpl-installment-app` exercise against real Stripe Treasury (BaaS + card issuance) + Unit / Column (KYB register lookup) + Klarna / Affirm / Afterpay (BNPL + credit check + late fee) backends under `KIWA_MODE=real` + the relevant `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the card was issued to an un-verified account because `issueCard` did not gate on `session.kycStatus === 'verified'`" gap a reviewer sees in the embedded-finance-issuance post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/payment` v0.5 that models the 2 pieces of a 
 ```bash
 mkdir kiwa-embedded-finance-bnpl && cd kiwa-embedded-finance-bnpl
 pnpm init
-pnpm add -D @kiwa-test/payment@^0.5 vitest typescript @types/node
+pnpm add -D @kiwa/payment@^0.5 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.5 surface exports the embedded-finance axis (`openAccount` / `verifyKyc` 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createStripeMock, openAccount } from '@kiwa-test/payment';
+import { createStripeMock, openAccount } from '@kiwa/payment';
 
 describe('embedded — account binding', () => {
   it('opens an account and moves state to account-opened', async () => {
@@ -76,7 +76,7 @@ describe('embedded — account binding', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createStripeMock, openAccount, verifyKyc } from '@kiwa-test/payment';
+import { createStripeMock, openAccount, verifyKyc } from '@kiwa/payment';
 
 describe('embedded — KYC score gate', () => {
   it('moves to kyc-verified on score >= minScore', async () => {
@@ -124,7 +124,7 @@ describe('embedded — KYC score gate', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createStripeMock, openAccount, verifyKyb } from '@kiwa-test/payment';
+import { createStripeMock, openAccount, verifyKyb } from '@kiwa/payment';
 
 describe('embedded — KYB business verification', () => {
   it('moves to kyb-verified on verified=true', async () => {
@@ -171,7 +171,7 @@ import {
   issueCard,
   openAccount,
   verifyKyc,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('embedded — card issuance', () => {
   it('issues a card after KYC verified', async () => {
@@ -216,7 +216,7 @@ The KYC / KYB gate on `issueCard` is the invariant that lets a compliance-audit 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createBnplPlan, createStripeMock } from '@kiwa-test/payment';
+import { createBnplPlan, createStripeMock } from '@kiwa/payment';
 
 describe('bnpl — plan creation', () => {
   it('splits totalCents into equal installments', async () => {
@@ -271,7 +271,7 @@ import {
   createBnplPlan,
   createStripeMock,
   scheduleInstallment,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('bnpl — schedule installments', () => {
   it('advances the schedule pointer by 1 per call', async () => {
@@ -317,7 +317,7 @@ import {
   createBnplPlan,
   createStripeMock,
   scoreRisk,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('bnpl — risk scoring', () => {
   it('moves to risk-scored on score >= minRiskScore', async () => {
@@ -368,7 +368,7 @@ import {
   createStripeMock,
   markInstallmentPaid,
   scoreRisk,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 describe('bnpl — late fee + settlement', () => {
   it('accumulates late fees across missed installments', async () => {

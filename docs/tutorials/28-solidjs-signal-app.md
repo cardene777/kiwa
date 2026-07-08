@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite for a SolidJS-shaped counter + async data fetcher that exercises the four v1.19 primitives — `mockSignal` for state, `mockEffect` for the fine-grained subscription contract, `batch` for a single-flush write group, and `createResourceStub` for a Suspense-shaped async fetch. The tests never boot a real Solid runtime; they drive the reactive graph through `@kiwa-test/solidjs` v0.1's brand-symbol-guarded stubs so the same suite runs in Node.js without a DOM, a Deno runtime, or a browser.
+A vitest suite for a SolidJS-shaped counter + async data fetcher that exercises the four v1.19 primitives — `mockSignal` for state, `mockEffect` for the fine-grained subscription contract, `batch` for a single-flush write group, and `createResourceStub` for a Suspense-shaped async fetch. The tests never boot a real Solid runtime; they drive the reactive graph through `@kiwa/solidjs` v0.1's brand-symbol-guarded stubs so the same suite runs in Node.js without a DOM, a Deno runtime, or a browser.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest suite for a SolidJS-shaped counter + async data fetcher that exercises 
 ```bash
 mkdir kiwa-solidjs-first && cd kiwa-solidjs-first
 pnpm init
-pnpm add -D @kiwa-test/solidjs@0.1 vitest typescript @types/node
+pnpm add -D @kiwa/solidjs@0.1 vitest typescript @types/node
 ```
 
 Add the vitest script and TypeScript configuration in `package.json`.
@@ -29,7 +29,7 @@ Add the vitest script and TypeScript configuration in `package.json`.
 }
 ```
 
-Ship a `tsconfig.json` that matches the ESM shape `@kiwa-test/solidjs` exports.
+Ship a `tsconfig.json` that matches the ESM shape `@kiwa/solidjs` exports.
 
 ```json
 {
@@ -57,7 +57,7 @@ import {
   createResourceStub,
   isSignal,
   isResourceAccessor,
-} from '@kiwa-test/solidjs';
+} from '@kiwa/solidjs';
 
 describe('signal + effect contract', () => {
   it('effect body re-runs when a subscribed signal writes', () => {
@@ -132,10 +132,10 @@ Vitest picks up the file, runs the 4 tests in a single Node.js process, and exit
 
 SolidJS diverges from React on one axis that shows up in every non-trivial test — component bodies run **once** and only the closures that read a signal re-run when the signal writes. React re-renders the whole component on every state change; Solid re-runs only the effect that read the changed signal. That difference means Solid bugs look like "the effect body captured a stale signal read" — and the shape of the assertion becomes "on write N, effect body re-ran K times".
 
-`@kiwa-test/solidjs` records that in `EffectHandle.trace()`. Every re-run appends a `{ readValues }` row, so the test can assert on the exact re-run count without a `setTimeout(0)` flush.
+`@kiwa/solidjs` records that in `EffectHandle.trace()`. Every re-run appends a `{ readValues }` row, so the test can assert on the exact re-run count without a `setTimeout(0)` flush.
 
 ```ts
-import { mockEffect, mockSignal } from '@kiwa-test/solidjs';
+import { mockEffect, mockSignal } from '@kiwa/solidjs';
 
 const [get, set] = mockSignal(1);
 const handle = mockEffect(() => {
@@ -162,7 +162,7 @@ That matters because production bugs show up as "the resource state stayed on `r
 For a Suspense-shaped test that walks fallback → content, use `renderWithSuspense` from the same package.
 
 ```ts
-import { renderWithSuspense, h, stringify } from '@kiwa-test/solidjs';
+import { renderWithSuspense, h, stringify } from '@kiwa/solidjs';
 
 const boundary = await renderWithSuspense({
   component: () => h('p', null, 'ready'),
@@ -179,5 +179,5 @@ expect(boundary.timedOut).toBe(false);
 ## Related
 
 - Concept doc — [Modern web framework testing (Signal reactivity / Islands architecture / edge runtime + RPC type-safety SSOT)](../concepts/modern-web-framework-testing)
-- v1.19-1a [#813](https://github.com/cardene777/kiwa/issues/813) — `@kiwa-test/solidjs` v0.1 landing
+- v1.19-1a [#813](https://github.com/cardene777/kiwa/issues/813) — `@kiwa/solidjs` v0.1 landing
 - v1.19-2 [#808](https://github.com/cardene777/kiwa/issues/808) — `dogfood-solidjs-signal-app` (the full 3-layer dogfood this tutorial cuts down)

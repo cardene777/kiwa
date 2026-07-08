@@ -1,6 +1,6 @@
 # dogfood-nextjs-rsc-streaming-app (v1.34-2)
 
-A Next.js 15.4 + React 19.1 App Router app that drives RSC render + Suspense + streaming HTML chunks + selective hydration + view transitions + form action advanced across a provider-neutral `RscStreamingAdapter`. Both mock (`@kiwa-test/component` v0.3 rsc-harness + streaming-ssr + view-transitions + form-action-advanced semantics + `@kiwa-test/nextjs` v1.2 renderServerComponent + setupNextRscEnv helpers) and real (Playwright + Chromium headless when `RSC_STREAMING_BROWSER_READY=1`) implementations satisfy the same 15-op contract so the fidelity harness can diff them side by side.
+A Next.js 15.4 + React 19.1 App Router app that drives RSC render + Suspense + streaming HTML chunks + selective hydration + view transitions + form action advanced across a provider-neutral `RscStreamingAdapter`. Both mock (`@kiwa/component` v0.3 rsc-harness + streaming-ssr + view-transitions + form-action-advanced semantics + `@kiwa/nextjs` v1.2 renderServerComponent + setupNextRscEnv helpers) and real (Playwright + Chromium headless when `RSC_STREAMING_BROWSER_READY=1`) implementations satisfy the same 15-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -46,4 +46,4 @@ The real adapter defers the Playwright + Chromium browser session wiring to a fo
 
 ## Fidelity report
 
-The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa-test/quality-metrics` picks up for the 13-axis release gate. The doc counterpart lives at `docs/quality-reports/component/nextjs-rsc-streaming-app.md`.
+The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa/quality-metrics` picks up for the 13-axis release gate. The doc counterpart lives at `docs/quality-reports/component/nextjs-rsc-streaming-app.md`.

@@ -1,6 +1,6 @@
 # kiwa release gate — 12 軸 SSOT (v1.27-4+)
 
-kiwa provider が「release 可」 と判定される 12 軸の閾値 SSOT。 `@kiwa-test/quality-metrics` package の `DEFAULT_RELEASE_GATE_THRESHOLDS` (共通 7 軸 + AI-LLM 4 軸) と `DEFAULT_MUTATION_TIER_THRESHOLDS` (v1.27-4 で追加された 12 番目 axis の tier default 表) に 1:1 で対応する。 provider 個別に上書き可能だが、 その場合は overrides 理由を該当 provider の PR body に明記する。
+kiwa provider が「release 可」 と判定される 12 軸の閾値 SSOT。 `@kiwa/quality-metrics` package の `DEFAULT_RELEASE_GATE_THRESHOLDS` (共通 7 軸 + AI-LLM 4 軸) と `DEFAULT_MUTATION_TIER_THRESHOLDS` (v1.27-4 で追加された 12 番目 axis の tier default 表) に 1:1 で対応する。 provider 個別に上書き可能だが、 その場合は overrides 理由を該当 provider の PR body に明記する。
 
 v1.11 で確立した共通 7 軸 (Issue #681) に、 v1.12 milestone (Issue #695) で AI-LLM 4 軸 (cost / latency / token / accuracy) を追加、 v1.27-4 (Issue #959) で mutation kill rate の 4-tier 判定を第 12 軸として追加した。 12 番目の `mutation.tier` axis は opt-in で有効化する (`evaluateReleaseGate` の第 3 引数 `context.mutationTier` を渡した provider のみ)、 legacy 7 / 11 軸経路は完全に後方互換に保つ。
 
@@ -16,7 +16,7 @@ v1.11 で確立した共通 7 軸 (Issue #681) に、 v1.12 milestone (Issue #69
 | mutation — killRate | 60% | ≥ | mutation testing の「6 割は殺せる」 test suite の bar |
 | test count — behavior | 10 | ≥ | 最低 10 個の behavior test で API 網羅 |
 
-## SSOT 表 — AI-LLM 4 軸 (`@kiwa-test/ai-*` provider のみ強制)
+## SSOT 表 — AI-LLM 4 軸 (`@kiwa/ai-*` provider のみ強制)
 
 | 軸 | 閾値 | 比較 | 根拠 |
 |---|---|---|---|
@@ -36,7 +36,7 @@ v1.11 で確立した共通 7 軸 (Issue #681) に、 v1.12 milestone (Issue #69
 | saas | 65% | ≥ | provider-specific adapter (external API drift 前提) |
 | test-type | 60% | ≥ | DOM / browser noise を含む harness package |
 
-tier 判定 SSOT は `docs/quality/mutation-thresholds.md`。 `evaluateReleaseGate(report, overrides, { mutationTier: 'saas' })` で opt-in、 tier 指定なしで従来の 7 / 11 軸経路を維持する。 per-package looser override (`.mutation-baseline/*.json` の override 値、 例 `@kiwa-test/auth` = 65 / `@kiwa-test/cache` = 60) は `context.mutationTierThreshold` で渡す。 legacy `mutation.killRate` axis と本 `mutation.tier` axis は並存 (置換ではない)、 v1.11 consumer の overrides もそのまま機能する。
+tier 判定 SSOT は `docs/quality/mutation-thresholds.md`。 `evaluateReleaseGate(report, overrides, { mutationTier: 'saas' })` で opt-in、 tier 指定なしで従来の 7 / 11 軸経路を維持する。 per-package looser override (`.mutation-baseline/*.json` の override 値、 例 `@kiwa/auth` = 65 / `@kiwa/cache` = 60) は `context.mutationTierThreshold` で渡す。 legacy `mutation.killRate` axis と本 `mutation.tier` axis は並存 (置換ではない)、 v1.11 consumer の overrides もそのまま機能する。
 
 ## 使い方
 
@@ -52,10 +52,10 @@ import {
   mutationFromCounts,
   perfFromSamples,
   testCountFromCategories,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 
 const report = assembleReport({
-  provider: '@kiwa-test/auth',
+  provider: '@kiwa/auth',
   version: '0.3.0',
   coverage: coverageFromV8Summary(covSummary.total),
   testCount: testCountFromCategories({ behavior: 236, integration: 8, e2e: 0 }),
@@ -72,7 +72,7 @@ if (!verdict.passed) {
 console.log(emitMarkdown({ report, verdict }));
 ```
 
-### AI-LLM 11 軸 (`@kiwa-test/ai-*` provider)
+### AI-LLM 11 軸 (`@kiwa/ai-*` provider)
 
 ```ts
 import {
@@ -82,10 +82,10 @@ import {
   evaluateReleaseGate,
   latencyFromSamples,
   tokenFromSamples,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 
 const report = assembleReport({
-  provider: '@kiwa-test/ai-llm',
+  provider: '@kiwa/ai-llm',
   version: '0.1.0',
   coverage: covMetric,
   testCount: testMetric,
@@ -110,7 +110,7 @@ import {
   assertMutationTier,
   evaluateReleaseGate,
   resolveMutationTier,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 
 // baseline JSON の verbal tier label は resolveMutationTier で enum 化。
 const tier = resolveMutationTier('SaaS'); // -> 'saas'
@@ -129,11 +129,11 @@ const verdict = evaluateReleaseGate(
 // mutation.tier axis 未達は `mutation.tier` blocker として surface。
 ```
 
-`@kiwa-test/ai-llm` 使用時は `buildAiLlmReport` / `buildAiLlmReportFromMock` で `runFidelityCheck` の結果から直接 `QualityReport` を組み立てられる (詳細 = `packages/ai-llm/README.md`)。
+`@kiwa/ai-llm` 使用時は `buildAiLlmReport` / `buildAiLlmReportFromMock` で `runFidelityCheck` の結果から直接 `QualityReport` を組み立てられる (詳細 = `packages/ai-llm/README.md`)。
 
 ## AI-LLM 分岐の判定
 
-`isAiLlmProvider(provider: string): boolean` が SSOT。 `@kiwa-test/quality-metrics` から export、 判定は `provider.startsWith('@kiwa-test/ai-')` の 1 行。 downstream consumer (dogfood app 等) は本 helper を import して同一判定を使う。
+`isAiLlmProvider(provider: string): boolean` が SSOT。 `@kiwa/quality-metrics` から export、 判定は `provider.startsWith('@kiwa/ai-')` の 1 行。 downstream consumer (dogfood app 等) は本 helper を import して同一判定を使う。
 
 ## overrides の運用
 
@@ -154,5 +154,5 @@ provider 特性で default 閾値を満たせない場合、 overrides を `eval
 - v1.12 milestone 親 Issue #694、 sub #695 (AI-LLM 4 軸拡張、 本 SSOT 更新の源)
 - v1.27 milestone 親 Issue #955、 sub #959 (mutation.tier 12 番目 axis、 4-tier threshold enforcement、 本 SSOT 更新の源)
 - `docs/quality/mutation-thresholds.md` (mutation kill rate 4-tier SSOT + baseline JSON schema + `.mutation-baseline/*.json` の verbal tier label)
-- `@kiwa-test/quality-metrics` v0.2 (`packages/quality-metrics`)
-- `@kiwa-test/ai-llm` v0.1 (`packages/ai-llm`)
+- `@kiwa/quality-metrics` v0.2 (`packages/quality-metrics`)
+- `@kiwa/ai-llm` v0.1 (`packages/ai-llm`)

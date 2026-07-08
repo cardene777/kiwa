@@ -8,11 +8,11 @@ published: true
 
 # kiwa v1.27 released
 
-v1.27 は kiwa の 17 milestone 目です。 v1.11 (release gate、 `@kiwa-test/quality-metrics` v0.1 で `mutationFromCounts` + 60 % kill-rate axis on 11-axis release gate を land) を基盤に、 v1.27 は同 primitive の上に **4-tier mutation threshold SSOT + Stryker 33 全 kiwa package rollout + 12-axis release gate 拡張 (mutation.tier axis 追加)** を land。 v0.2 primitive (`assembleReport` / `evaluateReleaseGate` / `mutationFromCounts` / `emitMarkdown`) は first-line contract のまま維持 (v0.2 signature 完全維持)、 5 新 primitive (`DEFAULT_MUTATION_TIER_THRESHOLDS` / `resolveMutationTier` / `assertMutationTier` / `MutationTier` type / `ReleaseGateContext` type) は second-line envelope として並走。 `@kiwa-test/quality-metrics` v0.2.0 → v0.3.0 minor bump は 4-tier threshold SSOT extension + 12-axis release gate 標準化を反映。 v1.11 以降の連続完遂 16 milestone (release gate → 非決定性 → 時間軸 → 横軸拡張 → AI-LLM 深化 → component 縦軸 → Observability v2 → Blockchain 深化 → Framework 深化 → Streaming 深化 → Auth 深化 → Auth 深化 II → Payment 深化 → Edge / Serverless 深化 → Perf-harness sweep → Database 深化) を受けて、 v1.27 は Mutation testing sweep milestone、 kiwa runtime fixture 34 packages はそのまま維持 (quality-metrics 既存 package の minor 拡張)。
+v1.27 は kiwa の 17 milestone 目です。 v1.11 (release gate、 `@kiwa/quality-metrics` v0.1 で `mutationFromCounts` + 60 % kill-rate axis on 11-axis release gate を land) を基盤に、 v1.27 は同 primitive の上に **4-tier mutation threshold SSOT + Stryker 33 全 kiwa package rollout + 12-axis release gate 拡張 (mutation.tier axis 追加)** を land。 v0.2 primitive (`assembleReport` / `evaluateReleaseGate` / `mutationFromCounts` / `emitMarkdown`) は first-line contract のまま維持 (v0.2 signature 完全維持)、 5 新 primitive (`DEFAULT_MUTATION_TIER_THRESHOLDS` / `resolveMutationTier` / `assertMutationTier` / `MutationTier` type / `ReleaseGateContext` type) は second-line envelope として並走。 `@kiwa/quality-metrics` v0.2.0 → v0.3.0 minor bump は 4-tier threshold SSOT extension + 12-axis release gate 標準化を反映。 v1.11 以降の連続完遂 16 milestone (release gate → 非決定性 → 時間軸 → 横軸拡張 → AI-LLM 深化 → component 縦軸 → Observability v2 → Blockchain 深化 → Framework 深化 → Streaming 深化 → Auth 深化 → Auth 深化 II → Payment 深化 → Edge / Serverless 深化 → Perf-harness sweep → Database 深化) を受けて、 v1.27 は Mutation testing sweep milestone、 kiwa runtime fixture 34 packages はそのまま維持 (quality-metrics 既存 package の minor 拡張)。
 
 ## 主な追加
 
-### `@kiwa-test/quality-metrics` v0.3.0 (4-tier mutation threshold SSOT + tier-aware 12-axis release gate extension)
+### `@kiwa/quality-metrics` v0.3.0 (4-tier mutation threshold SSOT + tier-aware 12-axis release gate extension)
 
 v1.11 で land した `assembleReport` + `evaluateReleaseGate` + `mutationFromCounts` + `emitMarkdown` + 全 `*Metric` type alias の signature を完全維持したまま、 v1.27 は `packages/quality-metrics/src/gate.ts` に 5 primitive を追加。 全 primitive は pure function (no adapter / no network) で決定論的、 test / fixture / release gate で reproducible。
 
@@ -33,7 +33,7 @@ v1.11 で land した `assembleReport` + `evaluateReleaseGate` + `mutationFromCo
 
 ### v1.27-1 Stryker infra 基盤 (Issue #957)
 
-`@kiwa-test/*` 34 package (含 quality-metrics itself) に以下 4 経路を land。
+`@kiwa/*` 34 package (含 quality-metrics itself) に以下 4 経路を land。
 
 - 各 package に `stryker.config.mjs` — `@stryker-mutator/vitest-runner` + `mutate: ['src/**/*.ts']` + `thresholds: { high: <tier-floor>, low: <tier-floor - 10>, break: <tier-floor - 20> }` (`high` / `low` / `break` は tier 依存、 `resolveMutationTier` 経由で解決)
 - `test:mutation` script — `stryker run` を wrap、 `--incremental` は default off (regression detection 用に full run)
@@ -64,7 +64,7 @@ v1.11 で land した `assembleReport` + `evaluateReleaseGate` + `mutationFromCo
 
 ### v1.27-4 release gate 12-axis 拡張 (Issue #959)
 
-`@kiwa-test/quality-metrics` v0.3 で `evaluateReleaseGate(report, thresholdOverrides, ctx)` の第 3 引数に `ReleaseGateContext` type を追加、 `ctx.mutationTier` が set された時のみ 12th axis (`mutation.tier`) を発動、 tier floor 未達で `mutation.tier` axis を fail。
+`@kiwa/quality-metrics` v0.3 で `evaluateReleaseGate(report, thresholdOverrides, ctx)` の第 3 引数に `ReleaseGateContext` type を追加、 `ctx.mutationTier` が set された時のみ 12th axis (`mutation.tier`) を発動、 tier floor 未達で `mutation.tier` axis を fail。
 
 ```ts
 import {
@@ -73,16 +73,16 @@ import {
   resolveMutationTier,
   mutationFromCounts,
   DEFAULT_MUTATION_TIER_THRESHOLDS,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 
 const PACKAGE_TIER = {
-  '@kiwa-test/core': 'Core',
-  '@kiwa-test/nextjs': 'Framework',
-  '@kiwa-test/payment': 'SaaS',
-  '@kiwa-test/a11y': 'TestType',
+  '@kiwa/core': 'Core',
+  '@kiwa/nextjs': 'Framework',
+  '@kiwa/payment': 'SaaS',
+  '@kiwa/a11y': 'TestType',
 } as const;
 
-const tier = resolveMutationTier('@kiwa-test/payment', PACKAGE_TIER); // 'SaaS'
+const tier = resolveMutationTier('@kiwa/payment', PACKAGE_TIER); // 'SaaS'
 const report = assembleReport({
   mutation: mutationFromCounts({ killed: 130, survived: 60, timeout: 8, error: 2 }),
   // ...
@@ -102,7 +102,7 @@ const verdict = evaluateReleaseGate(report, {}, { mutationTier: tier });
 
 - **6 sub-Issues resolved** (#957 / #963 / #966 / #959 / #968 / #961)
 - **6 PRs merged** (v1.27-1 through v1.27-6)
-- **1 npm minor bump** (`@kiwa-test/quality-metrics` v0.2.0 → v0.3.0) — kiwa runtime fixture count stays 34
+- **1 npm minor bump** (`@kiwa/quality-metrics` v0.2.0 → v0.3.0) — kiwa runtime fixture count stays 34
 - **33 packages** with Stryker rollout (22 already had a config from earlier milestones, 11 new in v1.27-1 through v1.27-3)
 - **4 tiers** (Core 80 % / Framework 70 % / SaaS 65 % / Test type 60 %) in the mutation threshold SSOT
 - **12 axes** on the release gate (mutation.tier axis is the new one)

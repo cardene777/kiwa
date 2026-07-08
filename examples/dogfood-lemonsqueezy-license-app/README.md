@@ -2,7 +2,7 @@
 
 CAR-738 (v1.33-4) — Lemon Squeezy Merchant-of-Record RP focused on
 license key + activation + affiliate program + refund window. Drives
-`@kiwa-test/payment` v0.4 through a mock adapter, with a real driver
+`@kiwa/payment` v0.4 through a mock adapter, with a real driver
 env-gate (`KIWA_MODE=real` + `LEMONSQUEEZY_KEY` +
 `KIWA_LEMONSQUEEZY_REAL_READY=1`) that surfaces
 `KIWA_LEMONSQUEEZY_ENV_MISSING` until CI wires the sandbox fixture.
@@ -28,7 +28,7 @@ refund-window axis so the v1.33-1 `refund-advanced` +
 src/
 ├── adapters/
 │   ├── interface.ts                provider-neutral adapter contract
-│   ├── mock.ts                     @kiwa-test/payment lemonsqueezy mock + in-memory store
+│   ├── mock.ts                     @kiwa/payment lemonsqueezy mock + in-memory store
 │   └── real.ts                     env-gated real driver skeleton
 ├── routes/
 │   ├── checkout/handler.ts         POST /checkout (referral link support)
@@ -56,13 +56,13 @@ pnpm --filter dogfood-lemonsqueezy-license-app test        # vitest — 4 spec f
 pnpm --filter dogfood-lemonsqueezy-license-app typecheck   # strict tsc
 ```
 
-The `pnpm test` script builds `@kiwa-test/payment` + `@kiwa-test/core`
+The `pnpm test` script builds `@kiwa/payment` + `@kiwa/core`
 first so the workspace symlink resolves the freshest `dist/`.
 
 ## Modes
 
 ```
-KIWA_MODE=mock  (default) — @kiwa-test/payment createLemonSqueezyMock + local license / affiliate logic
+KIWA_MODE=mock  (default) — @kiwa/payment createLemonSqueezyMock + local license / affiliate logic
 KIWA_MODE=real            — real driver, requires LEMONSQUEEZY_KEY + KIWA_LEMONSQUEEZY_REAL_READY=1
 ```
 
@@ -83,6 +83,6 @@ the entire flow deterministically.
 ## Related
 
 - `dogfood-lemon-squeezy-app` (v1.23-4) — broader Merchant-of-Record surface
-- `@kiwa-test/payment` v0.4 semantics — `refund-advanced`, `payment-method-vault`
+- `@kiwa/payment` v0.4 semantics — `refund-advanced`, `payment-method-vault`
 - CAR-731 (v1.33 parent) — payment 深化 II
-- CAR-732 (v1.33-1) — @kiwa-test/payment v0.4 base
+- CAR-732 (v1.33-1) — @kiwa/payment v0.4 base

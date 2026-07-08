@@ -7,7 +7,7 @@ Playwright `test` extended for dApp E2E. Receives `page` plus the `dappE2e` help
 ## Signature
 
 ~~~ts
-import { dappE2eTest } from '@kiwa-test/dapp';
+import { dappE2eTest } from '@kiwa/dapp';
 
 const test = dappE2eTest;
 ~~~
@@ -38,7 +38,7 @@ const test = dappE2eTest;
 ## Example
 
 ~~~ts
-import { dappE2eTest as test, expect } from '@kiwa-test/dapp';
+import { dappE2eTest as test, expect } from '@kiwa/dapp';
 
 test('sign with personal_sign after connect', async ({ page, dappE2e }) => {
   await page.goto('/');

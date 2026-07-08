@@ -1,6 +1,6 @@
 # orm-drizzle-postgres-poc — kiwa ORM query test PoC (Drizzle + Postgres via testcontainers)
 
-`@kiwa-test/orm` v0.2 を **Drizzle ORM + Postgres (testcontainers)** で使う PoC。 v0.1 の SQLite mock 経路と同じ Pattern A (DI) で `UsersRepository` を 8 test cover。
+`@kiwa/orm` v0.2 を **Drizzle ORM + Postgres (testcontainers)** で使う PoC。 v0.1 の SQLite mock 経路と同じ Pattern A (DI) で `UsersRepository` を 8 test cover。
 
 ## 前提
 
@@ -55,5 +55,5 @@ production-shape repository は dialect 共有可能。 test の error pattern m
 
 - 上位 Issue ... CAR-292 / [#527-2](https://github.com/cardene777/kiwa/issues/527) (v1.2 ORM testcontainers)
 - 親 PR ... 本 PR (`feature/527-2-orm-testcontainers-postgres`)
-- runtime fixture ... [`@kiwa-test/orm`](../../packages/orm/README.md) v0.2
+- runtime fixture ... [`@kiwa/orm`](../../packages/orm/README.md) v0.2
 - 関連 PoC (mock 経路) ... [`orm-drizzle-sqlite-poc`](../orm-drizzle-sqlite-poc/README.md)

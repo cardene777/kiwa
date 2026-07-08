@@ -5,4 +5,4 @@
 ### Patch Changes
 
 - Updated dependencies [d297fee]
-  - @kiwa-test/hono@0.2.0
+  - @kiwa/hono@0.2.0

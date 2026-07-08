@@ -1,9 +1,9 @@
 ---
 name: kiwa-data
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.data.md`) を queue / cron / batch test (Vitest + @kiwa-test/data) に変換する Layer 2 data layer test skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.data.md`) を queue / cron / batch test (Vitest + @kiwa/data) に変換する Layer 2 data layer test skill。
   in-memory queue + fake clock + idempotency / DLQ semantics の test を統合表現する。
-  `/kiwa-design --layer data` が出力する 9 column 表 (Mode = mock | live、 Topic = queue / cron 識別子) を `@kiwa-test/data` API に機械的に変換する。
+  `/kiwa-design --layer data` が出力する 9 column 表 (Mode = mock | live、 Topic = queue / cron 識別子) を `@kiwa/data` API に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -13,7 +13,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 # /kiwa-data — Layer 2 data layer test skill
 
 queue / cron / batch job の test を Layer 1 spec から自動生成する。
-`@kiwa-test/data` の `setupQueueEnv` + `createFakeClock` + `expectIdempotent` + `expectAtLeastOnce` を Mode / Topic / Observation 列の値で組み合わせる。
+`@kiwa/data` の `setupQueueEnv` + `createFakeClock` + `expectIdempotent` + `expectAtLeastOnce` を Mode / Topic / Observation 列の値で組み合わせる。
 
 ## 入力の trust boundary
 
@@ -22,7 +22,7 @@ queue / cron / batch job の test を Layer 1 spec から自動生成する。
 ## 前提
 
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.data.md`) が存在
-- vitest + `@kiwa-test/data` が devDependencies で利用可能
+- vitest + `@kiwa/data` が devDependencies で利用可能
 - 出力先 `tests/{module}.test.ts` への Write 権限
 
 ## ユーザーのリクエスト
@@ -53,7 +53,7 @@ import {
   expectAtLeastOnce,
   setupQueueEnv,
   type QueueTestEnv,
-} from '@kiwa-test/data';
+} from '@kiwa/data';
 ```
 
 ### Step 1: Topic 別 describe にグループ化
@@ -89,7 +89,7 @@ await expectAtLeastOnce(env.client, body, 3, expect);
 
 ```ts
 import { afterEach, describe, expect, it } from 'vitest';
-import { createFakeClock, setupQueueEnv, type QueueTestEnv } from '@kiwa-test/data';
+import { createFakeClock, setupQueueEnv, type QueueTestEnv } from '@kiwa/data';
 
 const envs: QueueTestEnv[] = [];
 afterEach(async () => {
@@ -127,5 +127,5 @@ describe('cron schedule (fake clock)', () => {
 
 ## references
 
-- `@kiwa-test/data` API ... `packages/data/README.md`
+- `@kiwa/data` API ... `packages/data/README.md`
 - 実 PoC ... `examples/queue-poc/`

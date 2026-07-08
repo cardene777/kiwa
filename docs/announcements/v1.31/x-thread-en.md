@@ -4,7 +4,7 @@
 
 kiwa v1.31 is out — Streaming 深化 II land.
 
-@kiwa-test/streaming v0.2 → v0.3 minor bump. 8 axis advanced streaming semantics (Kafka raw + consumer group + Redpanda schema + transactions + NATS JetStream durable + KV/Object + exactly-once + consumer lag telemetry) across 3 providers (Kafka / Redpanda / NATS).
+@kiwa/streaming v0.2 → v0.3 minor bump. 8 axis advanced streaming semantics (Kafka raw + consumer group + Redpanda schema + transactions + NATS JetStream durable + KV/Object + exactly-once + consumer lag telemetry) across 3 providers (Kafka / Redpanda / NATS).
 
 Real driver env-gate + testcontainers for opt-in production fidelity walkthrough. 3 dogfood app v2 (kafka-event-pipeline v2 + redpanda-schema-registry v2 + nats-jetstream v2) 全 7 軸 release gate PASS.
 
@@ -43,6 +43,6 @@ payment / edge / perf-harness / orm / quality-metrics / realtime / release-invar
 
 すべての tutorial code snippet が docs-tutorial-v1.XX.test.ts で automated validation されている。
 
-`pnpm add -D @kiwa-test/streaming` で v0.3.0 が入る。 zero breaking changes。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.30-to-v1.31
+`pnpm add -D @kiwa/streaming` で v0.3.0 が入る。 zero breaking changes。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.30-to-v1.31
 
 Next up: v2.0. Multi-version Vitest matrix + desktop/mobile adapters + coverage 100 % milestone + streaming depth III (Pulsar + KsqlDB + Faust + Flink + Beam) が有力候補。 feedback welcome。

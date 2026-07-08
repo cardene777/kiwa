@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.59 is out — Desktop deepening III. **@kiwa-test/desktop v0.4** adds adapter interface + fidelity harness, 12 axis × mock/real = **24 adapter pair**, 3 target × 12 axis × 2 mode = **72 combination**, 3 target × 12 axis = **36 fidelity pair** (shape contract preserving, all matched). Inherits v1.55-v1.58 4-PR rhythm (**6 milestones consecutive**), **systematic pattern 34th application**, **depth-4 record 5th case reached**.
+kiwa v1.59 is out — Desktop deepening III. **@kiwa/desktop v0.4** adds adapter interface + fidelity harness, 12 axis × mock/real = **24 adapter pair**, 3 target × 12 axis × 2 mode = **72 combination**, 3 target × 12 axis = **36 fidelity pair** (shape contract preserving, all matched). Inherits v1.55-v1.58 4-PR rhythm (**6 milestones consecutive**), **systematic pattern 34th application**, **depth-4 record 5th case reached**.
 
 ## Tweet 2 — adapter interface
 
@@ -14,7 +14,7 @@ dogfood-desktop-adapter-app new, 72 combination workflow + 36 fidelity pair, 10 
 
 ## Tweet 4 — install + Mobile v1.50-v1.53 rhythm fully reproduced + v1.60 roadmap
 
-`pnpm add -D @kiwa-test/desktop@^0.4`. Migration: https://cardene777.github.io/kiwa/migrations/v1.58-to-v1.59
+`pnpm add -D @kiwa/desktop@^0.4`. Migration: https://cardene777.github.io/kiwa/migrations/v1.58-to-v1.59
 
 **Mobile v1.50-v1.53 (base → advanced II → advanced III → adapter) 4-milestone rhythm fully reproduced in Desktop pair (v1.56-v1.59)**, depth-4 record 5th case reached (Mobile depth-4 4 cases + Desktop 5th). v1.60+ will bring Desktop v0.5 spawn stub (Mobile v0.5 pattern port, depth-5 pattern 2nd candidate). Backward compat absolutely preserved — v0.1-v0.3 12 axes / 48 methods fully retained.
 

@@ -16,7 +16,7 @@ Inject two or more wallets via EIP-6963 and test the path of selecting a specifi
 ### 1. Configure wallets in the fixture
 
 ~~~ts
-import { dappE2eTest } from '@kiwa-test/dapp';
+import { dappE2eTest } from '@kiwa/dapp';
 
 const test = dappE2eTest.extend({});
 

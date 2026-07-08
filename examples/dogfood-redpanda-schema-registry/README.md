@@ -2,7 +2,7 @@
 
 Dogfood app for v1.31-3 — a Redpanda + Confluent-shaped Schema Registry
 pipeline that exercises **4 v1 patterns + 4 v2 axes** from
-`@kiwa-test/streaming`'s schema-registry surface. v1 covers register /
+`@kiwa/streaming`'s schema-registry surface. v1 covers register /
 evolution / compat / publish; v2 adds transitive evolution + subject
 strategy probe + Redpanda Console admin + testcontainers probe.
 
@@ -50,7 +50,7 @@ strategy probe + Redpanda Console admin + testcontainers probe.
 The dogfood is driven end-to-end through a provider-neutral adapter
 (`src/adapters/interface.ts`) with two implementations:
 
-- `makeMockAdapter()` — backed by `@kiwa-test/streaming`'s RedpandaMock +
+- `makeMockAdapter()` — backed by `@kiwa/streaming`'s RedpandaMock +
   colocated SchemaRegistry mock + a fixture Console fetch. Default for CI
   + local.
 - `makeRealAdapter()` — requires `KIWA_MODE=real` + `REDPANDA_KEY` (or a

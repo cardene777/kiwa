@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-`@kiwa-test/mobile` v0.5 で追加された spawn-driver stub (`invokeMobileCli` + 6 CLI 呼出契約 + env-gate + fail-closed) を使い、 Mobile 領域の real CLI 呼出経路の契約層を deterministic に扱う vitest suite。 **pair 深度 5 段拡張 1 例目 candidate、 depth-5 pattern 新設**。
+`@kiwa/mobile` v0.5 で追加された spawn-driver stub (`invokeMobileCli` + 6 CLI 呼出契約 + env-gate + fail-closed) を使い、 Mobile 領域の real CLI 呼出経路の契約層を deterministic に扱う vitest suite。 **pair 深度 5 段拡張 1 例目 candidate、 depth-5 pattern 新設**。
 
 ## Prerequisites
 
@@ -17,14 +17,14 @@
 ```bash
 mkdir kiwa-mobile-real-cli && cd kiwa-mobile-real-cli
 pnpm init
-pnpm add -D @kiwa-test/mobile@^0.5 vitest typescript @types/node
+pnpm add -D @kiwa/mobile@^0.5 vitest typescript @types/node
 ```
 
 ### 2. Env-gate + fail-closed pattern
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeMobileCli } from '@kiwa-test/mobile';
+import { invokeMobileCli } from '@kiwa/mobile';
 
 describe('spawn stub env-gate', () => {
   it('rejects when KIWA_MOBILE_MODE not real', async () => {
@@ -53,7 +53,7 @@ describe('spawn stub env-gate', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { cliForAxis, type MobileAxis } from '@kiwa-test/mobile';
+import { cliForAxis, type MobileAxis } from '@kiwa/mobile';
 
 describe('axis-CLI mapping', () => {
   it('CLI-backed axes return command', () => {
@@ -76,7 +76,7 @@ describe('axis-CLI mapping', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeMobileCli, type MobileCliCommand } from '@kiwa-test/mobile';
+import { invokeMobileCli, type MobileCliCommand } from '@kiwa/mobile';
 
 const ALL_CLIS: MobileCliCommand[] = [
   'expo build', 'metro bundle', 'codegen run',

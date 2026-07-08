@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/auth` v0.6 that models the 3 pieces of a real risk-based auth posture — a risk-based auth axis with signal aggregation + adaptive challenge + policy chain, an auth telemetry axis with attempt log + success rate + latency histogram + abuse detection, and a session hijack detect axis with fingerprint drift + geo anomaly + concurrent session + logout cascade.
+A vitest suite wired to `@kiwa/auth` v0.6 that models the 3 pieces of a real risk-based auth posture — a risk-based auth axis with signal aggregation + adaptive challenge + policy chain, an auth telemetry axis with attempt log + success rate + latency histogram + abuse detection, and a session hijack detect axis with fingerprint drift + geo anomaly + concurrent session + logout cascade.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/auth` v0.6 that models the 3 pieces of a rea
 ```bash
 mkdir kiwa-risk-based-auth && cd kiwa-risk-based-auth
 pnpm init
-pnpm add -D @kiwa-test/auth@^0.6 vitest typescript @types/node
+pnpm add -D @kiwa/auth@^0.6 vitest typescript @types/node
 ```
 
 ### 2. Risk-based auth
@@ -26,7 +26,7 @@ pnpm add -D @kiwa-test/auth@^0.6 vitest typescript @types/node
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa-test/auth';
+import { semantics } from '@kiwa/auth';
 
 describe('risk-based auth', () => {
   it('low signals → allowed', () => {
@@ -75,7 +75,7 @@ describe('risk-based auth', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa-test/auth';
+import { semantics } from '@kiwa/auth';
 
 describe('auth telemetry', () => {
   it('detects abuse when failure rate exceeds threshold', () => {
@@ -98,7 +98,7 @@ describe('auth telemetry', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa-test/auth';
+import { semantics } from '@kiwa/auth';
 
 describe('session hijack detect', () => {
   it('reports geo anomaly + concurrent + triggers cascade', () => {

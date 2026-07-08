@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa-test/search` v0.3 that models the 6 pieces of a real OpenSearch relevance-tuning pipeline that every non-trivial content platform (blog / knowledge base / e-commerce catalog) eventually needs — a relevance session that pins BM25 `k1` / `b` tuning params + optional custom-ranking boost, a BM25 scorer and a TF-IDF scorer that produce ranked hits, an A/B variant selector that stably assigns users to buckets, a synonym session that handles multi-language expansion + phonetic match + stemmer + typo bridge, and an index-management session that handles rolling reindex + shard allocation + replica promotion + zero-downtime alias swap. `startRelevanceSession()` + `scoreBm25()` + `scoreTfIdf()` + `applyCustomRanking()` + `selectAbVariant()` + `startSynonymSession()` + `startIndexMgmtSession()` + `swapZeroDowntime()` give you every one of those pieces without booting a real OpenSearch OSS cluster. This is the pattern kiwa's `examples/dogfood-search-opensearch-app` exercises against real OpenSearch OSS 2.x under `KIWA_MODE=real` + `KIWA_OPENSEARCH_URL` + `OPENSEARCH_KEY`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the p95 nDCG@10 dropped from 0.83 to 0.71 after the synonym file rewrite but nobody caught it until the customer replied 'no results for shirt'" gap a reviewer sees in the relevance-drift post-mortem.
+A vitest suite wired to `@kiwa/search` v0.3 that models the 6 pieces of a real OpenSearch relevance-tuning pipeline that every non-trivial content platform (blog / knowledge base / e-commerce catalog) eventually needs — a relevance session that pins BM25 `k1` / `b` tuning params + optional custom-ranking boost, a BM25 scorer and a TF-IDF scorer that produce ranked hits, an A/B variant selector that stably assigns users to buckets, a synonym session that handles multi-language expansion + phonetic match + stemmer + typo bridge, and an index-management session that handles rolling reindex + shard allocation + replica promotion + zero-downtime alias swap. `startRelevanceSession()` + `scoreBm25()` + `scoreTfIdf()` + `applyCustomRanking()` + `selectAbVariant()` + `startSynonymSession()` + `startIndexMgmtSession()` + `swapZeroDowntime()` give you every one of those pieces without booting a real OpenSearch OSS cluster. This is the pattern kiwa's `examples/dogfood-search-opensearch-app` exercises against real OpenSearch OSS 2.x under `KIWA_MODE=real` + `KIWA_OPENSEARCH_URL` + `OPENSEARCH_KEY`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the p95 nDCG@10 dropped from 0.83 to 0.71 after the synonym file rewrite but nobody caught it until the customer replied 'no results for shirt'" gap a reviewer sees in the relevance-drift post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa-test/search` v0.3 that models the 6 pieces of a r
 ```bash
 mkdir kiwa-opensearch-relevance && cd kiwa-opensearch-relevance
 pnpm init
-pnpm add -D @kiwa-test/search@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa/search@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -43,7 +43,7 @@ import {
   startRelevanceSession,
   seedRelevanceDocuments,
   scoreBm25,
-} from '@kiwa-test/search';
+} from '@kiwa/search';
 
 const sampleDocs = [
   { id: 'a', content: 'search engine mock kiwa realtime' },
@@ -101,7 +101,7 @@ import {
   startRelevanceSession,
   seedRelevanceDocuments,
   scoreTfIdf,
-} from '@kiwa-test/search';
+} from '@kiwa/search';
 
 const sampleDocs = [
   { id: 'a', content: 'search engine mock kiwa realtime' },
@@ -134,7 +134,7 @@ import {
   seedRelevanceDocuments,
   scoreBm25,
   applyCustomRanking,
-} from '@kiwa-test/search';
+} from '@kiwa/search';
 
 describe('relevance — custom ranking boost', () => {
   it('multiplies by a caller-provided signal', () => {
@@ -161,7 +161,7 @@ The invariant is that `applyCustomRanking` preserves the `hits` array ordering b
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { startRelevanceSession, selectAbVariant } from '@kiwa-test/search';
+import { startRelevanceSession, selectAbVariant } from '@kiwa/search';
 
 describe('relevance — A/B variant', () => {
   it('is stable per userId', () => {
@@ -198,7 +198,7 @@ import {
   startSynonymSession,
   registerSynonyms,
   expandMultiLanguage,
-} from '@kiwa-test/search';
+} from '@kiwa/search';
 
 describe('synonym-advanced — multi-language expansion', () => {
   it('expands base to synonyms across languages', () => {
@@ -244,7 +244,7 @@ import {
   matchPhonetic,
   normalizeStemmer,
   bridgeTypo,
-} from '@kiwa-test/search';
+} from '@kiwa/search';
 
 describe('synonym-advanced — fuzzy trio', () => {
   it('phonetic match uses soundex codes', () => {
@@ -297,7 +297,7 @@ import {
   promoteReplica,
   advanceRollingReindex,
   swapZeroDowntime,
-} from '@kiwa-test/search';
+} from '@kiwa/search';
 
 describe('index-management — rolling reindex + zero-downtime swap', () => {
   it('walks the full lifecycle allocate → promote → reindex → swap', () => {
@@ -349,7 +349,7 @@ The `swapZeroDowntime` invariant is that the alias target flips atomically — `
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { collectFidelityCoverage } from '@kiwa-test/search';
+import { collectFidelityCoverage } from '@kiwa/search';
 
 describe('opensearch — 3 axis fidelity coverage', () => {
   it('the 4 provider × relevance grid emits 4 rows', () => {

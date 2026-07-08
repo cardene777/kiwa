@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.64 リリース — Desktop 深化 VIII (@kiwa-test/desktop v0.9 実 native binding 呼出、 depth-9 pattern 新設 candidate、 systematic pattern 39 度目、 42 milestone streak、 3 layer separation 完全 pay off)"
+title: "kiwa v1.64 リリース — Desktop 深化 VIII (@kiwa/desktop v0.9 実 native binding 呼出、 depth-9 pattern 新設 candidate、 systematic pattern 39 度目、 42 milestone streak、 3 layer separation 完全 pay off)"
 emoji: "🔗"
 type: "tech"
 topics: ["testing", "vitest", "electron", "tauri", "desktop"]
@@ -63,7 +63,7 @@ Desktop pair v0.1 → v0.9 の 9 段拡張。
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/desktop@^0.9
+pnpm add -D @kiwa/desktop@^0.9
 ```
 
 ## Migration guide

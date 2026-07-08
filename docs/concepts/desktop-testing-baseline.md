@@ -6,7 +6,7 @@ title: Desktop testing baseline — v1.56 3 axis SSOT
 
 ## What this covers
 
-`@kiwa-test/desktop` v0.1 の 3 axis (Electron + Tauri + Webview) target-neutral state machine SSOT。 v1.56 で kiwa 縦深化 pair 第 14 新規 base pair として導入、 **42 package 到達**、 v1.50 Mobile と対で **v2.0 milestone 「desktop + mobile adapters」 goal 達成**。
+`@kiwa/desktop` v0.1 の 3 axis (Electron + Tauri + Webview) target-neutral state machine SSOT。 v1.56 で kiwa 縦深化 pair 第 14 新規 base pair として導入、 **42 package 到達**、 v1.50 Mobile と対で **v2.0 milestone 「desktop + mobile adapters」 goal 達成**。
 
 ## 3 axis 一覧
 
@@ -49,7 +49,7 @@ macos.tauri.invoke             ← tauri.command_invoked (macos)
 
 ## backward compat 絶対維持
 
-新 package `@kiwa-test/desktop` の追加は additive、 既存 41 package 全部 API 変更 0。 依存関係も `@kiwa-test/core` のみ、 他 package への影響なし。
+新 package `@kiwa/desktop` の追加は additive、 既存 41 package 全部 API 変更 0。 依存関係も `@kiwa/core` のみ、 他 package への影響なし。
 
 ## 縦深化 pair 第 14 新規 base pair 導入 = v2.0 milestone goal 達成
 

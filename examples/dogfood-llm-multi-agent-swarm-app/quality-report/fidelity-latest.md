@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/ai-llm/dogfood-multi-agent-swarm-app @ 0.1.0
+# Quality Report — @kiwa/ai-llm/dogfood-multi-agent-swarm-app @ 0.1.0
 
 _Reported at 2026-07-07T11:14:48.901Z._
 

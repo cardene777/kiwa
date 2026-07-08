@@ -24,7 +24,7 @@ the release gate #843 mandates for v1.21-2.
 |---|---|---|---|
 | 1 | `lint` | Root workspace lint. Dogfood app has no source files that trigger lint-specific warnings beyond the shared kiwa lint config. | pass |
 | 2 | `typecheck` | `pnpm --filter dogfood-webauthn-passkey-app typecheck` — strict `tsc --noEmit` under `exactOptionalPropertyTypes`. | pass |
-| 3 | `build` | `pnpm --filter @kiwa-test/auth -F @kiwa-test/core build` runs as a precondition of `pnpm test`. dogfood app itself is a Next.js consumer that does not ship a build artifact. | pass |
+| 3 | `build` | `pnpm --filter @kiwa/auth -F @kiwa/core build` runs as a precondition of `pnpm test`. dogfood app itself is a Next.js consumer that does not ship a build artifact. | pass |
 | 4 | `test` | `pnpm --filter dogfood-webauthn-passkey-app test` — 4 spec files, 69 tests (68 pass + 1 skipped for the env-missing real signin path). | pass (68 / 69, 1 skip is env-gated) |
 | 5 | `test:cov` | Coverage delta of the four spec files against the RP surface. Every persisted-credential code path in `webauthn-server.ts`, `adapters/mock.ts`, `adapters/real.ts`, `app/register/route.ts`, `app/signin/route.ts`, `app/manage/route.ts` is executed by at least one test in each of `register-attestation.spec.ts`, `signin-assertion.spec.ts`, `user-verification.spec.ts`, `resident-key.spec.ts`. | pass |
 | 6 | `test:e2e` | `pnpm --filter dogfood-webauthn-passkey-app test:e2e` — Playwright + Chrome Virtual Authenticator, 2 specs (`passkey-signin.spec.ts` + `passkey-full-flow.spec.ts`). Skips with a clear reason on hosts without the Playwright browsers cache so the gate stays green on CI-less local. | pass (skip when Chromium unavailable) |
@@ -79,7 +79,7 @@ so the real-adapter code path is exercised in addition to the browser side.
   behind `KIWA_WEBAUTHN_ENV_MISSING`. Wiring the real adapter through the
   Playwright harness (so both browser-side + RP-side are exercised) is a
   follow-up PR once the SimpleWebAuthn-shaped RP server lands upstream in
-  `@kiwa-test/auth`.
+  `@kiwa/auth`.
 - Cross-user credential scoping — the RP store keys by `credentialId` only.
   A production Passkey RP scopes by `userHandle` + filters `/manage` list to
   the signed-in user. Sub-Issue #859's detail report notes this SCOPE

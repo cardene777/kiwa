@@ -6,7 +6,7 @@ kiwa v1.64 is out。 **Desktop 深化 VIII** 単軸 milestone、 v1.63 probe lay
 
 ## What's new
 
-### `@kiwa-test/desktop` v0.9 minor bump
+### `@kiwa/desktop` v0.9 minor bump
 
 - **native-invoke.ts 新設** = probeAndInvoke + probeAndInvokeAll + InvokeStatus SSOT (4 経路: invoked / cli-unavailable / axis-skipped / no-cli-mapping)
 - **NativeInvokeInput + NativeInvokeResult + NativeInvokeMatrixSummary type SSOT**
@@ -36,7 +36,7 @@ Desktop pair v0.1 → v0.9 の 9 段拡張。
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/desktop@^0.9
+pnpm add -D @kiwa/desktop@^0.9
 ```
 
 ## Migration guide

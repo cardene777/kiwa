@@ -33,7 +33,7 @@ What v1.9 adds.
 
 ## [3/8]
 
-@kiwa-test/auth v0.2 ...
+@kiwa/auth v0.2 ...
 
 - **Clerk** — user + session + orgs mock, `signIn` / `assertSignedIn` / `assertOrgRole` helpers, publicMetadata / privateMetadata distinction preserved
 - **Auth0** — tenant + rules pipeline + Management API mock, post-login rules execute in the same order as prod
@@ -44,7 +44,7 @@ Two dominant 2026 providers now testable: SaaS-first Clerk + enterprise-first Au
 
 ## [4/8]
 
-@kiwa-test/queue v0.2 ...
+@kiwa/queue v0.2 ...
 
 - **Cloudflare Queues** — miniflare (in-process) + wrangler (real subprocess), consumer batch + ack/retry/DLQ + `maxBatchSize` chunking
 - **AWS SQS** — stub + localstack, standard + FIFO (`messageGroupId` + dedup), batch (10 cap) + visibility timeout + long polling + DLQ redrive
@@ -55,7 +55,7 @@ Edge queue + AWS-classic queue both covered.
 
 ## [5/8]
 
-@kiwa-test/cache v0.2 ...
+@kiwa/cache v0.2 ...
 
 - **Memcached** — stub + testcontainers, 8 core commands (get/set/delete/add/replace/incr/decr/flush), multi-server consistent hashing (FNV-1a + 128 vnodes)
 - **KeyDB** — stub + testcontainers, Redis-compatible surface + KeyDB's active multi-master replication + cross-region Pub/Sub + optional simulated replication lag

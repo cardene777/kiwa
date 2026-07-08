@@ -1,6 +1,6 @@
 # dogfood-nuxt-webtransport-stream-app (v1.28-3)
 
-A Nuxt 3 + aioquic HTTP/3 + WebTransport uni/bi + Datagram + connection migration + 0-RTT resumption stream room that exercises the WebTransport axes across a provider-neutral `WebTransportStreamAdapter`. Both mock (`@kiwa-test/realtime` v0.2) and real (aioquic + Chrome experimental flag, opt-in) implementations satisfy the same 9-op contract so the fidelity harness can diff them side by side.
+A Nuxt 3 + aioquic HTTP/3 + WebTransport uni/bi + Datagram + connection migration + 0-RTT resumption stream room that exercises the WebTransport axes across a provider-neutral `WebTransportStreamAdapter`. Both mock (`@kiwa/realtime` v0.2) and real (aioquic + Chrome experimental flag, opt-in) implementations satisfy the same 9-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -37,4 +37,4 @@ The real adapter defers the aioquic + Chrome origin-trial wiring to a follow-up 
 
 ## Fidelity report
 
-The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa-test/quality-metrics` picks up for the 12-axis release gate. The doc counterpart lives at `docs/quality-reports/realtime/nuxt-webtransport-stream-app.md`.
+The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa/quality-metrics` picks up for the 12-axis release gate. The doc counterpart lives at `docs/quality-reports/realtime/nuxt-webtransport-stream-app.md`.

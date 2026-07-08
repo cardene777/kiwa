@@ -17,8 +17,8 @@
 - [kiwa init --with-deploy で framework 統合 boilerplate を生成する](./with-deploy.md) — anvil + forge build + forge create + .env.local 書き込みを 4 file boilerplate で自動化
 - [同じ contract に 3 layer を重ねる](./three-layer-stack.md) — Foundry + Hardhat + Playwright を mint-nft / defi-swap / nextjs-token-gating で並立 (3 contract × 3 lane = 9 entry 検証済)
 - [1 機能に 5 layer test を重ねる](./five-layer-stack.md) — 3 layer 並立に Vitest (unit) + msw (integration) を加え、 TS helper + HTTP / RPC adapter を持つ機能を 5 layer で検証 (F-3)
-- [`@kiwa-test/a11y` で a11y 監査する](./a11y-axe.md) ⭐ v0.9 新設 — axe-core を Vitest + jsdom と Playwright page に統合
-- [`@kiwa-test/visual` で visual regression](./visual-regression.md) ⭐ v0.9 新設 — pixelmatch + pngjs によるピクセル単位 PNG diff
+- [`@kiwa/a11y` で a11y 監査する](./a11y-axe.md) ⭐ v0.9 新設 — axe-core を Vitest + jsdom と Playwright page に統合
+- [`@kiwa/visual` で visual regression](./visual-regression.md) ⭐ v0.9 新設 — pixelmatch + pngjs によるピクセル単位 PNG diff
 - [Python adapter `kiwa-test-py` を使う](./python-pytest.md) ⭐ v0.9 新設 — pytest plugin + requests / httpx、 TS chain と同じ spec markdown
 
 ## kiwa contributor 向け内部 test docs
@@ -27,7 +27,7 @@ kiwa repo 内で skill chain (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat`
 
 - [tests/docs/README.ja.md](../../../tests/docs/README.ja.md) — 4 skill 案内 + chapter 動線
 - [tests/docs/run-tests.ja.md](../../../tests/docs/run-tests.ja.md) — `/kiwa-test` 1 コマンドで全 chain 一括実行 (contract / dApp / 両方、 最初に試すならこれ)
-- [tests/docs/write-tests-manually.ja.md](../../../tests/docs/write-tests-manually.ja.md) — skill を使わず `@kiwa-test/dapp` を library として import して手書きで test を書く手順 (1 file 完結 sample 4 種)
+- [tests/docs/write-tests-manually.ja.md](../../../tests/docs/write-tests-manually.ja.md) — skill を使わず `@kiwa/dapp` を library として import して手書きで test を書く手順 (1 file 完結 sample 4 種)
 - [tests/docs/skill-chain-tutorial.ja.md](../../../tests/docs/skill-chain-tutorial.ja.md) — 仕様書から contract test + e2e test 生成 → 実走の full flow
 - [tests/docs/retrofit-existing-dapp.ja.md](../../../tests/docs/retrofit-existing-dapp.ja.md) — 既存 dApp + Foundry project に skill chain を後付け導入する手順
 - [tests/docs/run-contract-tests.ja.md](../../../tests/docs/run-contract-tests.ja.md) — 個別 skill (`/kiwa-design` → `/kiwa-forge` / `/kiwa-hardhat`) で contract test を生成 → 実走 (Foundry + Hardhat)

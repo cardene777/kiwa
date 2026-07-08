@@ -1,6 +1,6 @@
 # Observability v2 testing — dashboard, alert, trace flame graph, log correlation
 
-`@kiwa-test/observability` v1.1 (v1.14-4) shipped provider-flavoured mocks for OpenTelemetry / Datadog / Sentry. Every mock wrote into the same `TelemetryCollector` so the assertion code was provider-neutral at the **emit boundary**. That covers instrumentation coverage. It does not cover the **operational surface** that lives on top of that emitted data — the Grafana dashboard that renders the metrics, the AlertManager that pages the on-call, the Jaeger flame graph that a debugger drills into after an incident, or the log line a support engineer joins to a trace ID.
+`@kiwa/observability` v1.1 (v1.14-4) shipped provider-flavoured mocks for OpenTelemetry / Datadog / Sentry. Every mock wrote into the same `TelemetryCollector` so the assertion code was provider-neutral at the **emit boundary**. That covers instrumentation coverage. It does not cover the **operational surface** that lives on top of that emitted data — the Grafana dashboard that renders the metrics, the AlertManager that pages the on-call, the Jaeger flame graph that a debugger drills into after an incident, or the log line a support engineer joins to a trace ID.
 
 v1.17 adds 4 new axes on top of that v1.1 base so the whole SaaS observability wall is testable in-process, deterministically, without a real Prometheus / AlertManager / Jaeger.
 
@@ -30,7 +30,7 @@ import {
   buildSpanTree,
   createOtelMock,
   renderFlameGraph,
-} from '@kiwa-test/observability';
+} from '@kiwa/observability';
 
 const collector = new TelemetryCollector();
 const otel = createOtelMock({ collector });
@@ -127,7 +127,7 @@ import {
   rule_queueBackpressure,
   trace_httpHandler,
   logs_forHttpTrace,
-} from '@kiwa-test/observability';
+} from '@kiwa/observability';
 
 const dashboard = new DashboardMock(
   { id: 'sre', title: 'SRE', panels: [panel_httpErrorRate(), panel_p99Latency(), panel_queueDepth()] },
@@ -148,14 +148,14 @@ Each v1.17 dogfood app (`examples/dogfood-observability-dashboard/`, `examples/d
 
 1. Runs the same 4-op / 5-op / 5-op surface through `makeMockAdapter()` — always available, driven by the v2 mock.
 2. Runs the same surface through `makeRealAdapter()` — env-gated on `PROMETHEUS_URL` / `ALERTMANAGER_URL` / `JAEGER_URL`; falls back to `*_ENV_MISSING` traces when the connection env is absent.
-3. Emits a `FidelityReport` with per-op traces, latency samples, and per-axis coverage summary that feeds `@kiwa-test/quality-metrics` release gate.
+3. Emits a `FidelityReport` with per-op traces, latency samples, and per-axis coverage summary that feeds `@kiwa/quality-metrics` release gate.
 4. Writes the report as `quality-report/fidelity-latest.md` (git-ignored — CI reads this) and `quality-report/fidelity-latest.json` (machine-readable).
 
-The report is hand-promoted to `docs/quality-reports/observability/<name>.md` when a release cuts. `evaluateReleaseGate` consumes the JSON directly and gates the release on the 7-axis pass (`@kiwa-test/observability/*` prefix stays on the common 7-axis branch — no token pricing to measure).
+The report is hand-promoted to `docs/quality-reports/observability/<name>.md` when a release cuts. `evaluateReleaseGate` consumes the JSON directly and gates the release on the 7-axis pass (`@kiwa/observability/*` prefix stays on the common 7-axis branch — no token pricing to measure).
 
 ## What v2 does not model — SSOT
 
-- **UI pixels** — dashboard panels have `value` + `badge` metadata; there is no `<canvas>` rendering. Real Grafana pixel differences (font, chart plugin, plot style) belong to a component-test harness (`@kiwa-test/component`), not observability.
+- **UI pixels** — dashboard panels have `value` + `badge` metadata; there is no `<canvas>` rendering. Real Grafana pixel differences (font, chart plugin, plot style) belong to a component-test harness (`@kiwa/component`), not observability.
 - **Delivery mechanics** — `AlertReceiverEvent` records "receiver X saw fire Y at time Z". It does not simulate a Slack API round-trip, PagerDuty ack window, or OpsGenie retry ladder.
 - **Wire encoding** — v2 reads from `TelemetryCollector`. The v1.1 provider mocks own the SUT emit boundary; OTLP / Zipkin / Jaeger Thrift serialisation happens outside the mock surface.
 - **Distributed span context** — parent references use `parentSpanName` for in-process traces. A production trace across services carries a `traceParent` header per W3C Trace Context; that is an integration concern the mock does not simulate.

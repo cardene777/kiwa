@@ -6,7 +6,7 @@ title: Desktop spawn stub 契約層 — v1.60 v0.5 8 CLI stub + env-gate SSOT
 
 ## What this covers
 
-`@kiwa-test/desktop` v0.5 の spawn stub 契約層 SSOT。 v1.60 で v0.4 adapter layer → v0.5 spawn stub 追加、 kiwa 縦深化 pair 第 14 の第 5 段、 **depth-5 record 2 例目 candidate**、 Mobile v1.54 pattern (v0.5 spawn-driver 契約層) 転用、 v0.4 baseline (`docs/concepts/desktop-adapter-layer.md`) を extend。
+`@kiwa/desktop` v0.5 の spawn stub 契約層 SSOT。 v1.60 で v0.4 adapter layer → v0.5 spawn stub 追加、 kiwa 縦深化 pair 第 14 の第 5 段、 **depth-5 record 2 例目 candidate**、 Mobile v1.54 pattern (v0.5 spawn-driver 契約層) 転用、 v0.4 baseline (`docs/concepts/desktop-adapter-layer.md`) を extend。
 
 ## spawn stub 契約層 3 type SSOT
 
@@ -80,7 +80,7 @@ Desktop v0.5 SpawnResult = Mobile v0.5 SpawnResult と 6 field 完全一致 (com
 
 ## backward compat 絶対維持
 
-v0.5 spawn stub 契約層の追加は additive、 v0.1 + v0.2 + v0.3 + v0.4 の 12 axis / 48 method / 48 event / 144 mapping + adapter interface + fidelity harness は完全保持。 依存関係も `@kiwa-test/core` のみで v0.1-v0.4 と同じ、 他 43 package への影響 0、 semantics + adapters 既存 layer からの API export 完全保持。
+v0.5 spawn stub 契約層の追加は additive、 v0.1 + v0.2 + v0.3 + v0.4 の 12 axis / 48 method / 48 event / 144 mapping + adapter interface + fidelity harness は完全保持。 依存関係も `@kiwa/core` のみで v0.1-v0.4 と同じ、 他 43 package への影響 0、 semantics + adapters 既存 layer からの API export 完全保持。
 
 ## systematic pattern 35 度目適用
 

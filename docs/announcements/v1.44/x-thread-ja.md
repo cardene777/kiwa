@@ -4,7 +4,7 @@
 
 kiwa v1.44 リリース — Auth Passwordless UX III 深化 が land.
 
-@kiwa-test/auth v0.5.0 → v0.6.0 minor bump. 3 platform (chromium + webkit + firefox) 上に advanced Passwordless UX production semantics 8 axis を追加 (24 fidelity grid / 8 axis × 3 platform).
+@kiwa/auth v0.5.0 → v0.6.0 minor bump. 3 platform (chromium + webkit + firefox) 上に advanced Passwordless UX production semantics 8 axis を追加 (24 fidelity grid / 8 axis × 3 platform).
 
 縦深化 pair pattern 第 1 pair (Auth) **3 段拡張達成** (v1.21 v0.4 → v1.22 v0.5 → v1.44 v0.6)、 pair 第 8 Search v1.14→v1.15→v1.36 に続く 2 例目 pair 深度 3 段記録。
 
@@ -20,7 +20,7 @@ Auth v1.21 v0.4 (4 protocol adapter) → v1.22 v0.5 (real driver + a11y gate) �
 
 **22 milestone 連続 snippet validation streak** (v1.23-v1.44) 達成。
 
-`pnpm add -D @kiwa-test/auth` で v0.6.0 が入る。 breaking change なし。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.43-to-v1.44
+`pnpm add -D @kiwa/auth` で v0.6.0 が入る。 breaking change なし。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.43-to-v1.44
 
 sub-milestone 6 完遂 (v1.44-1 auth v0.6 + 8 axis + 526 test / v1.44-2 dogfood-passwordless-ux + 60 test / v1.44-3 dogfood-step-up-mfa + 60 test / v1.44-4 dogfood-risk-based + 60 test / v1.44-5 docs + 538 test = 22 milestone snippet streak / v1.44-6 publish).
 

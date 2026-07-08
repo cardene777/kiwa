@@ -6,13 +6,13 @@ Supabase Auth (core + advanced)、 RabbitMQ (basic + advanced)、 Rust contract 
 
 6/6 sub-issues 全 resolved。
 
-2/ `@kiwa-test/auth` v0.3 — Supabase Auth (2 adapter)。
+2/ `@kiwa/auth` v0.3 — Supabase Auth (2 adapter)。
 
 Core: PKCE OAuth、 magic link、 SMS OTP、 JWT HS256 + refresh rotation。
 
 Advanced: RLS policy シミュレーション (SELECT/INSERT/UPDATE/DELETE + service_role bypass)、 MFA (TOTP RFC 6238 + backup codes + SMS AAL upgrade)、 SSO SAML 2.0 (SP-initiated + tampering 検知)、 Web3 SIWE (EIP-4361 + replay 保護)。
 
-3/ `@kiwa-test/queue` v0.3 — RabbitMQ (2 adapter)。
+3/ `@kiwa/queue` v0.3 — RabbitMQ (2 adapter)。
 
 Basic: 4 exchange type (direct / topic / fanout / headers、 wildcards + x-match)、 consumer + ack/nack、 prefetch QoS、 mandatory return。
 

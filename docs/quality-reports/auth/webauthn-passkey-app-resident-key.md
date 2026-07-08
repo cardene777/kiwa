@@ -23,7 +23,7 @@ stored on the authenticator itself, usable without the RP supplying
 
 ## Fidelity axes (residentKey + `/manage`)
 
-| axis | mock (`@kiwa-test/auth`) | real (SimpleWebAuthn + Chrome Virtual Authenticator) | assertion |
+| axis | mock (`@kiwa/auth`) | real (SimpleWebAuthn + Chrome Virtual Authenticator) | assertion |
 |---|---|---|---|
 | 1. Creation — `required` on resident-key-capable authenticator | Succeeds; `credential.discoverable === true` | Succeeds; `credential.discoverable === true` | Both drivers persist the credential and mark it discoverable. |
 | 2. Creation — `required` on non-resident-key authenticator | Throws `residentKey=required but authenticator does not have resident key storage`; trace `errorKind = resident_key_unsupported` | SimpleWebAuthn `verifyRegistrationResponse` throws `residentKey requirement not satisfied`; 400 | Both surface the failure as a client-visible 400 with a stable error kind. |

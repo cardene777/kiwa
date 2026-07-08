@@ -11,4 +11,4 @@
 - Updated dependencies [82f4006]
 - Updated dependencies [d977ea4]
 - Updated dependencies [9468a99]
-  - @kiwa-test/orm@0.8.0
+  - @kiwa/orm@0.8.0

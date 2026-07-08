@@ -1,6 +1,6 @@
 # dogfood-llm-code-interpreter-app (v1.40-3)
 
-A sandboxed code interpreter + Python REPL + tool use + rollback service that drives the `@kiwa-test/ai-llm` v0.5 code-interpreter axis (sandbox lifecycle + execution history + tool call ledger + memory snapshot stack) across a provider-neutral `LlmCodeInterpreterAdapter`. Both mock (`@kiwa-test/ai-llm` v0.5 code-interpreter semantics) and real (Vercel AI SDK + Anthropic Messages driver + sandboxed Python REPL executor (E2B / Modal / Deno subprocess) when `KIWA_MODE=real` + `ANTHROPIC_API_KEY` + `KIWA_LLM_BUDGET_USD` are set) implementations satisfy the same 7-op contract so the fidelity harness can diff them side by side.
+A sandboxed code interpreter + Python REPL + tool use + rollback service that drives the `@kiwa/ai-llm` v0.5 code-interpreter axis (sandbox lifecycle + execution history + tool call ledger + memory snapshot stack) across a provider-neutral `LlmCodeInterpreterAdapter`. Both mock (`@kiwa/ai-llm` v0.5 code-interpreter semantics) and real (Vercel AI SDK + Anthropic Messages driver + sandboxed Python REPL executor (E2B / Modal / Deno subprocess) when `KIWA_MODE=real` + `ANTHROPIC_API_KEY` + `KIWA_LLM_BUDGET_USD` are set) implementations satisfy the same 7-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -39,6 +39,6 @@ The real adapter defers the Vercel AI SDK + Anthropic Messages ceremony (sandbox
 
 ## Fidelity harness
 
-`runFidelityHarness()` diffs the mock and real trace event streams and feeds the divergence count into `@kiwa-test/quality-metrics` release gate. Behavioral divergences are expected on non-integration environments — the real adapter refuses every op with `KIWA_LLM_ENV_MISSING`, and the mock adapter succeeds, so every op appears in the divergence list. The harness treats those as `BEHAVIORAL_DIVERGENCE` records so the release-gate row can distinguish "not configured" from "ran and diverged".
+`runFidelityHarness()` diffs the mock and real trace event streams and feeds the divergence count into `@kiwa/quality-metrics` release gate. Behavioral divergences are expected on non-integration environments — the real adapter refuses every op with `KIWA_LLM_ENV_MISSING`, and the mock adapter succeeds, so every op appears in the divergence list. The harness treats those as `BEHAVIORAL_DIVERGENCE` records so the release-gate row can distinguish "not configured" from "ran and diverged".
 
 The report writes both markdown and JSON into `./quality-report/`, which the release script picks up alongside every other axis dogfood.

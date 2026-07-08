@@ -8,11 +8,11 @@ published: true
 
 # kiwa v1.28 released
 
-v1.28 は kiwa の 18 milestone 目です。 v1.13 (時間軸、 `@kiwa-test/realtime` v0.1 で 4 provider Supabase / Ably / Pusher / Socket.io × 5 base semantics 統一 mock を land) を基盤に、 v1.28 は同 provider mock の上に **advanced realtime production semantics 8 axis (WebRTC + WebTransport + HTTP/3 + QUIC multiplexing) + 3 dogfood app + real driver env-gate + protocol-neutral state machine + strict transition guard** を land。 v0.1 4 provider mock + 5 base semantics API (`presence` / `broadcast` / `postgres_changes` / `room` / `reconnect`) は first-line contract のまま維持 (v0.1 signature 完全維持)、 8 新 axis (`webrtc-signaling` / `webrtc-data-channel` / `webrtc-media-track` / `webrtc-ice-stun-turn` / `webtransport-unidirectional` / `webtransport-bidirectional` / `http3-push` / `quic-multiplexing`) は second-line envelope として並走。 `@kiwa-test/realtime` v0.1.1 → v0.2.0 minor bump は 8 axis advanced-transport semantics + 24-row 3×8 fidelity grid + real driver env-gate を反映。 v1.11 以降の連続完遂 17 milestone (release gate → 非決定性 → 時間軸 → 横軸拡張 → AI-LLM 深化 → component 縦軸 → Observability v2 → Blockchain 深化 → Framework 深化 → Streaming 深化 → Auth 深化 → Auth 深化 II → Payment 深化 → Edge / Serverless 深化 → Perf-harness sweep → Database 深化 → Mutation testing sweep) を受けて、 v1.28 は Realtime 深化 II milestone、 kiwa runtime fixture 34 packages はそのまま維持 (realtime 既存 package の minor 拡張)。
+v1.28 は kiwa の 18 milestone 目です。 v1.13 (時間軸、 `@kiwa/realtime` v0.1 で 4 provider Supabase / Ably / Pusher / Socket.io × 5 base semantics 統一 mock を land) を基盤に、 v1.28 は同 provider mock の上に **advanced realtime production semantics 8 axis (WebRTC + WebTransport + HTTP/3 + QUIC multiplexing) + 3 dogfood app + real driver env-gate + protocol-neutral state machine + strict transition guard** を land。 v0.1 4 provider mock + 5 base semantics API (`presence` / `broadcast` / `postgres_changes` / `room` / `reconnect`) は first-line contract のまま維持 (v0.1 signature 完全維持)、 8 新 axis (`webrtc-signaling` / `webrtc-data-channel` / `webrtc-media-track` / `webrtc-ice-stun-turn` / `webtransport-unidirectional` / `webtransport-bidirectional` / `http3-push` / `quic-multiplexing`) は second-line envelope として並走。 `@kiwa/realtime` v0.1.1 → v0.2.0 minor bump は 8 axis advanced-transport semantics + 24-row 3×8 fidelity grid + real driver env-gate を反映。 v1.11 以降の連続完遂 17 milestone (release gate → 非決定性 → 時間軸 → 横軸拡張 → AI-LLM 深化 → component 縦軸 → Observability v2 → Blockchain 深化 → Framework 深化 → Streaming 深化 → Auth 深化 → Auth 深化 II → Payment 深化 → Edge / Serverless 深化 → Perf-harness sweep → Database 深化 → Mutation testing sweep) を受けて、 v1.28 は Realtime 深化 II milestone、 kiwa runtime fixture 34 packages はそのまま維持 (realtime 既存 package の minor 拡張)。
 
 ## 主な追加
 
-### `@kiwa-test/realtime` v0.2.0 (advanced realtime semantics 8 axis + 24-row 3×8 grid + real driver env-gate)
+### `@kiwa/realtime` v0.2.0 (advanced realtime semantics 8 axis + 24-row 3×8 grid + real driver env-gate)
 
 v1.13 で land した 4 provider mock (`createSupabaseRealtimeMock` / `createAblyMock` / `createPusherMock` / `createSocketIoMock`) + 5 base semantics (`presence` / `broadcast` / `postgres_changes` / `room` / `reconnect`) の signature を完全維持したまま、 v1.28 は `packages/realtime/src/semantics/*` に 8 axis の pure state-machine helper を追加。 全 helper は pure function (no adapter / no browser / no signaling server) で決定論的、 test / fixture / release gate で reproducible。
 
@@ -36,7 +36,7 @@ v1.13 で land した 4 provider mock (`createSupabaseRealtimeMock` / `createAbl
 
 ### v1.28-1 realtime v0.2 advanced semantics (Issue #977)
 
-`@kiwa-test/realtime` v0.2 で 8 axis × 3 protocol = 24 row fidelity grid + real-vs-mock fidelity harness + 60 semantics behavior test + v1.13 4 provider (Supabase / Ably / Pusher / Socket.io) に real driver env-gate 追加。 各 axis file は pure state-machine helper で strict transition guard、 決定論的・ adapter-free・ network-free。 `packages/realtime/src/semantics/*` 8 file + 60 vitest all-PASS。
+`@kiwa/realtime` v0.2 で 8 axis × 3 protocol = 24 row fidelity grid + real-vs-mock fidelity harness + 60 semantics behavior test + v1.13 4 provider (Supabase / Ably / Pusher / Socket.io) に real driver env-gate 追加。 各 axis file は pure state-machine helper で strict transition guard、 決定論的・ adapter-free・ network-free。 `packages/realtime/src/semantics/*` 8 file + 60 vitest all-PASS。
 
 ### v1.28-2 dogfood-nextjs-webrtc-video-app (Issue #978)
 
@@ -58,7 +58,7 @@ SvelteKit + nginx-quic HTTP/3 + QUIC multiplex + stream priority + HPACK dynamic
 
 - **6 sub-Issues resolved** (#977 / #978 / #979 / #980 / #983 / #976)
 - **6 PRs merged** (v1.28-1 through v1.28-6 + follow-up #982 adversarial-review)
-- **1 npm minor bump** (`@kiwa-test/realtime` v0.1.1 → v0.2.0) — kiwa runtime fixture count stays 34
+- **1 npm minor bump** (`@kiwa/realtime` v0.1.1 → v0.2.0) — kiwa runtime fixture count stays 34
 - **8 axes** on advanced realtime semantics (WebRTC 4 + WebTransport 2 + HTTP/3 1 + QUIC 1)
 - **3 protocol × 8 axis = 24 row fidelity grid**
 - **3 dogfood apps** (Next.js + mediasoup SFU + coturn / Nuxt + WebTransport + aioquic / SvelteKit + nginx-quic HTTP/3) — 36 + 30 + 32 = **98 dogfood vitest** total

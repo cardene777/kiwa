@@ -16,7 +16,7 @@ v0.5 announcement で「Rust / Go は構想中」 と明言した公約をよう
 
 ```bash
 # 5 言語全部、 同じ Layer 1 spec から生成
-npm install @kiwa-test/core
+npm install @kiwa/core
 pip install kiwa-test-py
 cargo add kiwa-test-rs
 go get github.com/cardene777/kiwa-test-go
@@ -127,7 +127,7 @@ cargo add --dev kiwa-test-rs --features integration
 go get github.com/cardene777/kiwa-test-go
 
 # 既存 (継続)
-pnpm add -D @kiwa-test/core
+pnpm add -D @kiwa/core
 pip install kiwa-test-py
 ```
 

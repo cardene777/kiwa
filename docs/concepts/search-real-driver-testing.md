@@ -73,7 +73,7 @@ If the fidelity harness has a `planned` cell, the corresponding tutorial + dogfo
 
 ## How this ties into the 13-axis release gate
 
-v1.36 does not add a 14th release-gate axis. The 8 advanced search axes gate the search package's own tests (via `pnpm --filter @kiwa-test/search test`) but do not surface as a per-package `@kiwa-test/quality-metrics` axis. The reasoning — the fidelity harness is provider-shape-specific, and a package that does not export to Meilisearch / Typesense / Algolia / OpenSearch OSS has nothing to assert on. When a future milestone adds a `search.fidelity` axis that describes "which search providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.36 keeps the axis count at 13.
+v1.36 does not add a 14th release-gate axis. The 8 advanced search axes gate the search package's own tests (via `pnpm --filter @kiwa/search test`) but do not surface as a per-package `@kiwa/quality-metrics` axis. The reasoning — the fidelity harness is provider-shape-specific, and a package that does not export to Meilisearch / Typesense / Algolia / OpenSearch OSS has nothing to assert on. When a future milestone adds a `search.fidelity` axis that describes "which search providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.36 keeps the axis count at 13.
 
 ## SSOT boundaries
 

@@ -1,6 +1,6 @@
 # dogfood-dapp-e2e-reorg
 
-Dogfood app (v1.18-4) — Next.js 15 + viem + wagmi ERC-20 UI driven through `@kiwa-test/dapp` (kiwa-play) fixtures under anvil fork mainnet + reorg simulation. Four reorg scenarios (pending / balance rollback / event history / nonce gap) exercised through a provider-neutral adapter shape so the fidelity harness diffs mock vs real on the same call surface.
+Dogfood app (v1.18-4) — Next.js 15 + viem + wagmi ERC-20 UI driven through `@kiwa/dapp` (kiwa-play) fixtures under anvil fork mainnet + reorg simulation. Four reorg scenarios (pending / balance rollback / event history / nonce gap) exercised through a provider-neutral adapter shape so the fidelity harness diffs mock vs real on the same call surface.
 
 ## Layout
 
@@ -25,7 +25,7 @@ tests/
   unit/fidelity-report.test.ts      -- 9 fidelity harness tests
   unit/release-gate.test.ts         -- 6 release-gate 11-axis contract tests
   e2e/reorg-4scenario.spec.ts       -- 5 Playwright specs (warmup + 4 reorg scenarios)
-  fixture.ts / prepare-env.ts       -- @kiwa-test/dapp fixture + prepare-env glue
+  fixture.ts / prepare-env.ts       -- @kiwa/dapp fixture + prepare-env glue
   global-setup.ts / global-teardown.ts
 ```
 

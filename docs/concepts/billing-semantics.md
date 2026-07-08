@@ -1,6 +1,6 @@
-# Advanced billing semantics — 9-axis SSOT for kiwa `@kiwa-test/payment` v0.3
+# Advanced billing semantics — 9-axis SSOT for kiwa `@kiwa/payment` v0.3
 
-Introduced in v1.23-1, `@kiwa-test/payment` v0.3 raises the payment mock harness from a **webhook signature + fixture builder** surface to a full **advanced billing semantics** surface. Where v0.2 gave you `signWebhook` / `emit` / `verify` and 4 fixture events (checkout / subscription / paymentFailed / refund), v0.3 layers **9 axes** of provider-neutralised billing state on top.
+Introduced in v1.23-1, `@kiwa/payment` v0.3 raises the payment mock harness from a **webhook signature + fixture builder** surface to a full **advanced billing semantics** surface. Where v0.2 gave you `signWebhook` / `emit` / `verify` and 4 fixture events (checkout / subscription / paymentFailed / refund), v0.3 layers **9 axes** of provider-neutralised billing state on top.
 
 The 9 axes are the observable envelope every real provider (Stripe, Paddle, Lemon Squeezy) converges on — mapped to the same neutral event names + state machines — so tests write once and re-run against any provider. This document is the SSOT for what each axis exists to test, what state machine it defines, and which real-provider behaviours it neutralises.
 
@@ -12,7 +12,7 @@ Payment testing has three failure modes that a webhook-only mock can't catch.
 - **Retry cadence**. Real dunning is 4 attempts over ~1 week + a grace period. Tests that skip the retry loop miss uncollectible-flip regressions and let merchant apps ship without the grace-period UX.
 - **Cross-provider fidelity**. Stripe defers proration to the next invoice; Paddle charges the difference immediately; Lemon Squeezy hosts checkout while Paddle inlines it. A neutral test surface makes these differences **explicit assertions**, not silent regressions.
 
-The 9 axes below are the smallest set that reproduces the full billing envelope across the 3 target providers. Each axis is an independent module under `@kiwa-test/payment/semantics/*`; each provides pure functions that operate on a `PaymentAdapter` (the same interface `createStripeMock` / `createPaddleMock` / `createLemonSqueezyMock` return) and emit a strongly typed `AxisStep` sequence.
+The 9 axes below are the smallest set that reproduces the full billing envelope across the 3 target providers. Each axis is an independent module under `@kiwa/payment/semantics/*`; each provides pure functions that operate on a `PaymentAdapter` (the same interface `createStripeMock` / `createPaddleMock` / `createLemonSqueezyMock` return) and emit a strongly typed `AxisStep` sequence.
 
 ## Axis 1 — Dunning
 
@@ -153,7 +153,7 @@ Every axis works in the same 3 execution modes as the v1.22 real driver layer.
 
 | Mode | Trigger | Behaviour |
 |---|---|---|
-| `mock only` | `KIWA_MODE` unset | Pure `@kiwa-test/payment` mock adapter, 0 network, sub-100 ms per test |
+| `mock only` | `KIWA_MODE` unset | Pure `@kiwa/payment` mock adapter, 0 network, sub-100 ms per test |
 | `real-optional` | `KIWA_MODE=real-optional` | Try real driver; fall back to mock with a warning if credentials are missing |
 | `real-required` | `KIWA_MODE=real` + provider-specific keys | Fail hard if credentials are missing; run only against the live sandbox |
 

@@ -1,6 +1,6 @@
 # sveltekit-full — kiwa SvelteKit PoC (v1.0.x 全 3 helper)
 
-`@kiwa-test/sveltekit` v1.0.x の **3 helper 全部** (`invokeLoad` / `invokeAction` / `invokeHandle`) を **実 SvelteKit project** に統合した参考実装。
+`@kiwa/sveltekit` v1.0.x の **3 helper 全部** (`invokeLoad` / `invokeAction` / `invokeHandle`) を **実 SvelteKit project** に統合した参考実装。
 
 OSS contributor / kiwa を初めて触る user 向けに、 `+page.server.ts` の `load` / `actions` / `hooks.server.ts` の `handle` の 3 layer をどう書けば kiwa 経由で test できるかを **コピペで動く形** で示す。
 
@@ -55,7 +55,7 @@ sveltekit-full/
 
 ```bash
 pnpm install               # repo root から実行
-pnpm -F examples-sveltekit-full build  # 依存 @kiwa-test/sveltekit + @kiwa-test/core を先に build
+pnpm -F examples-sveltekit-full build  # 依存 @kiwa/sveltekit + @kiwa/core を先に build
 ```
 
 ### Step 2 — kiwa unit test (SvelteKit 起動不要、 高速)
@@ -98,7 +98,7 @@ pnpm -F examples-sveltekit-full test:e2e
 2. **`invokeAction`** (`+page.server.ts` の actions) — formData seed + fail / redirect / error / cookies capture
 3. **`invokeHandle`** (`hooks.server.ts` の handle) — request middleware、 `resolve()` callback 注入で downstream 経路を fake 化、 locals injection 観測
 
-各 helper の API 詳細は [`@kiwa-test/sveltekit` の README](../../packages/sveltekit/README.md) を参照。
+各 helper の API 詳細は [`@kiwa/sveltekit` の README](../../packages/sveltekit/README.md) を参照。
 
 ## 関連
 

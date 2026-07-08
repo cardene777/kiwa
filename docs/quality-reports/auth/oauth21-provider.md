@@ -12,7 +12,7 @@ Sibling reports (kept for depth-of-detail per Sub-Issue):
 
 The gate is passed when every axis has an assertion contract with mock coverage that runs unconditionally, plus a real column that either runs live (when `OAUTH21_BOOTSTRAP=1` + `OAUTH21_MOCK_SERVER_URL=<url>` are set) or documents the env-skip contract.
 
-| # | axis | RFC anchor | mock (`@kiwa-test/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | status |
+| # | axis | RFC anchor | mock (`@kiwa/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | status |
 |---|---|---|---|---|---|
 | 1 | behavioural fidelity (real vs mock) | RFC 6749 §5.1 / RFC 7009 §2 / RFC 7662 §2.2 / RFC 8414 §2 | `tests/fidelity-harness.spec.ts` runs 5 endpoints × 4 axes = 20 comparison points against the mock unconditionally; each point pins shape + trace + contract + env-skip | Real column reports `KIWA_OAUTH21_ENV_MISSING` on every non-discovery method until the CI runner sets `OAUTH21_BOOTSTRAP=1` + `OAUTH21_MOCK_SERVER_URL=<url>` — the discovery endpoint stays green regardless because the shape is static per issuer | PASS |
 | 2 | performance harness (mock + live throughput) | RFC 6749 §6 non-functional envelope | Mock harness completes 136 spec assertions in `< 400 ms` (vitest run) — the AS never crosses process boundary, every call is in-process, no `await` on I/O; this is the ceiling that a live driver has to fit under to be considered "fast enough" for release | Live harness inherits the same shape once `oauth2-mock-server` is wired; the container adds a docker startup cost (< 5 s per suite) plus HTTP round-trip (< 5 ms per call) that stays outside the release gate budget of 30 s per spec file | PASS |
@@ -24,7 +24,7 @@ The gate is passed when every axis has an assertion contract with mock coverage 
 
 ## Fidelity axes (revocation-cascade)
 
-| axis | RFC anchor | mock (`@kiwa-test/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
+| axis | RFC anchor | mock (`@kiwa/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
 |---|---|---|---|---|
 | 1. access_token revoke | RFC 7009 §2 | `/revoke` on an access_token deletes it from the AS active registry; `/introspect` returns `{active: false}` on the next lookup; body is empty (200) per RFC 7009 §2.2 | oauth2-mock-server same delete + introspect flip | Revocation is the primary defence when a resource server discovers a leaked token; the AS must publish the state transition through `/introspect` immediately. |
 | 2. cascade to refresh | RFC 9700 §2.2.2 | Revoking an access_token invalidates the sibling refresh_token minted from the same grant; subsequent `grant_type=refresh_token` on the sibling fails with `invalid_grant`; cascade fans out across multiple grants sharing the same `(clientId, subject)` pair | oauth2-mock-server tears down family with the same fan-out semantics | RFC 9700 §2.2.2 requires that any signal of compromise tear down the whole family — cascade prevents an attacker with a leaked access_token from silently rotating into a fresh refresh_token. |

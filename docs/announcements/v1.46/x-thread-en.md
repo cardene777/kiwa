@@ -12,13 +12,13 @@ v1.25 docs claimed "33 package sweep" but reality was 15 packages, v1.42-v1.45 a
 
 ## Tweet 3 — DevSecOps library
 
-@kiwa-test/security-devsecops v0.1 new (40 package). 6 axis (SAST + SCA + Secret + IaC + DAST + Container) as state machine + neutral event pattern. Replaces dev-flow /security-audit skill 4 variants via library (v0.2 adapter integration + v0.3 unified entry planned).
+@kiwa/security-devsecops v0.1 new (40 package). 6 axis (SAST + SCA + Secret + IaC + DAST + Container) as state machine + neutral event pattern. Replaces dev-flow /security-audit skill 4 variants via library (v0.2 adapter integration + v0.3 unified entry planned).
 
 ## Tweet 4 — snippet streak + npm publish
 
 **24-milestone snippet validation streak** (v1.23-v1.46).
 
-`pnpm add -D @kiwa-test/perf-harness @kiwa-test/quality-metrics @kiwa-test/security-devsecops`. Migration: https://cardene777.github.io/kiwa/migrations/v1.45-to-v1.46
+`pnpm add -D @kiwa/perf-harness @kiwa/quality-metrics @kiwa/security-devsecops`. Migration: https://cardene777.github.io/kiwa/migrations/v1.45-to-v1.46
 
 7 sub complete (v1.46-1 perf-harness strict / v1.46-2 38 baseline / v1.46-3 quality-metrics 15 axis / v1.46-4 security-devsecops / v1.46-5 skill SSOT / v1.46-6 dogfood + docs / v1.46-7 publish).
 

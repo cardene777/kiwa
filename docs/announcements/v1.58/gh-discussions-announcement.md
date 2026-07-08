@@ -6,7 +6,7 @@ kiwa v1.58 is out。 **Desktop 深化 II** 単軸 milestone、 v1.56 で導入�
 
 ## What's new
 
-### `@kiwa-test/desktop` v0.3 minor bump
+### `@kiwa/desktop` v0.3 minor bump
 
 - v0.1 3 axis + v0.2 5 axis に **advanced III 4 axis 追加**
   - **Screen-recording** = permission → start → chunk → stop (ScreenCaptureKit / Windows.Graphics.Capture / xdg-portal ScreenCast)
@@ -43,7 +43,7 @@ Mobile v1.50 (base 3 axis) → v1.51 (advanced II 4 axis) → v1.52 (advanced II
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/desktop@^0.3
+pnpm add -D @kiwa/desktop@^0.3
 ```
 
 ## Migration guide

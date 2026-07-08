@@ -8,18 +8,18 @@ If v0.5 was "stop rewriting the same test viewpoint per runner", v1.2 is "do tha
 
 | Surface | Package | Notes |
 |---|---|---|
-| Core fixture | `@kiwa-test/dapp` + `@kiwa-test/core` | Playwright + viem + anvil + EIP-6963 + ERC-4337 |
-| API integration | `@kiwa-test/api` | msw / supertest |
-| Component | `@kiwa-test/ui` | React / Vue / Svelte / Solid / Lit / Qwik / Angular / Chromium (8 adapters) |
-| E2E + A11y + Visual | `@kiwa-test/e2e` + `@kiwa-test/a11y` + `@kiwa-test/visual` | Playwright + axe-core + pixelmatch |
-| Data + CLI + Observability | `@kiwa-test/data` + `@kiwa-test/cli-test` + `@kiwa-test/observability` | queue / cron / shell IO / flaky detection |
-| **Server framework (v1.2 main)** | `@kiwa-test/{nextjs,nuxt,sveltekit,remix,astro,solidstart,qwikcity}` | 7 framework helpers, all `setupXxxEnv` + `mode` + `stop()` |
-| **Edge runtime (v1.2 new)** | `@kiwa-test/edge` | Cloudflare Workers / Vercel Edge, KV mock, no Miniflare |
-| **ORM query (v1.2 new)** | `@kiwa-test/orm` | Drizzle / Prisma / Kysely × SQLite / Postgres / MySQL — 9 combos |
+| Core fixture | `@kiwa/dapp` + `@kiwa/core` | Playwright + viem + anvil + EIP-6963 + ERC-4337 |
+| API integration | `@kiwa/api` | msw / supertest |
+| Component | `@kiwa/ui` | React / Vue / Svelte / Solid / Lit / Qwik / Angular / Chromium (8 adapters) |
+| E2E + A11y + Visual | `@kiwa/e2e` + `@kiwa/a11y` + `@kiwa/visual` | Playwright + axe-core + pixelmatch |
+| Data + CLI + Observability | `@kiwa/data` + `@kiwa/cli-test` + `@kiwa/observability` | queue / cron / shell IO / flaky detection |
+| **Server framework (v1.2 main)** | `@kiwa/{nextjs,nuxt,sveltekit,remix,astro,solidstart,qwikcity}` | 7 framework helpers, all `setupXxxEnv` + `mode` + `stop()` |
+| **Edge runtime (v1.2 new)** | `@kiwa/edge` | Cloudflare Workers / Vercel Edge, KV mock, no Miniflare |
+| **ORM query (v1.2 new)** | `@kiwa/orm` | Drizzle / Prisma / Kysely × SQLite / Postgres / MySQL — 9 combos |
 
 Every helper exposes the same `setupXxxEnv({ mode, ... })` → `{ env, stop }` shape. Dynamic import + optional peer deps mean you only install what you actually use.
 
-## 2. ORM matrix — 9 combos via `@kiwa-test/orm` v0.6.0
+## 2. ORM matrix — 9 combos via `@kiwa/orm` v0.6.0
 
 `setupOrmEnv({ orm, dialect, mode, schema })` resolves to a unified `env.db` + `env.connectionUri` + `env.stop()`.
 
@@ -35,11 +35,11 @@ Mock mode for speed, live mode for deterministic queries against a real DB. The 
 
 `examples/{framework}-full/` ships **real dev server + kiwa helper unit tests + Playwright e2e** for 5 frameworks:
 
-- `examples/nuxt-server-routes-full/` — Nuxt 3 + `@kiwa-test/nuxt` v1.0.4
-- `examples/sveltekit-full/` — SvelteKit 2 + `@kiwa-test/sveltekit` (load + actions + hooks)
-- `examples/remix-full/` — Remix v2 + `@kiwa-test/remix` (loader + action + Resource Routes)
-- `examples/astro-server-endpoints-full/` — Astro v5 SSR + `@kiwa-test/astro` (`invokeEndpoint`)
-- `examples/nextjs-app-router-full/` — Next.js v15 + `@kiwa-test/nextjs` (all 4 layers)
+- `examples/nuxt-server-routes-full/` — Nuxt 3 + `@kiwa/nuxt` v1.0.4
+- `examples/sveltekit-full/` — SvelteKit 2 + `@kiwa/sveltekit` (load + actions + hooks)
+- `examples/remix-full/` — Remix v2 + `@kiwa/remix` (loader + action + Resource Routes)
+- `examples/astro-server-endpoints-full/` — Astro v5 SSR + `@kiwa/astro` (`invokeEndpoint`)
+- `examples/nextjs-app-router-full/` — Next.js v15 + `@kiwa/nextjs` (all 4 layers)
 
 Pick the one closest to your stack and retrofit.
 
@@ -50,7 +50,7 @@ Pick the one closest to your stack and retrofit.
 | Node.js 20+ | `.github/workflows/test.yml` | ✅ primary |
 | Bun 1.3+ | `.github/workflows/test-bun.yml` | ✅ all 19 packages pass |
 | Deno 2.x | `.github/workflows/test-deno.yml` | ✅ all 19 packages pass |
-| Cloudflare Workers / Vercel Edge | `@kiwa-test/edge` (KV mock + `invokeEdgeHandler`) | ✅ no Miniflare required |
+| Cloudflare Workers / Vercel Edge | `@kiwa/edge` (KV mock + `invokeEdgeHandler`) | ✅ no Miniflare required |
 
 ## 5. Claude Code plugin — 25 skills now
 
@@ -90,7 +90,7 @@ Drop your priorities in the [Discussions board](https://github.com/cardene777/ki
 /plugin install kiwa@kiwa-marketplace
 
 # Or fixture only — install just what you need
-pnpm add -D @kiwa-test/dapp @kiwa-test/orm @kiwa-test/sveltekit
+pnpm add -D @kiwa/dapp @kiwa/orm @kiwa/sveltekit
 
 # Or Python pytest adapter
 pip install kiwa-test-py

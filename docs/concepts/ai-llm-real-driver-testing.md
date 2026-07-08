@@ -1,6 +1,6 @@
 # AI-LLM real-driver testing — 8 axis × 4 provider = 32 cell grid + real-driver env-gate (SSOT)
 
-kiwa's v1.38-1 ai-llm package upgrade (`@kiwa-test/ai-llm` v0.4) covers **8 axes** that model the surface every non-trivial production LLM stack has to reason about — prompt injection defense + hallucination detection + LLM eval + guardrails + advanced RAG + agent orchestration + fine-tuning eval + cost / latency SLA. This concept doc is the SSOT for those 8 axes; the tutorials (79-81) and dogfood apps (v1.38-2/3/4) are the concrete implementations.
+kiwa's v1.38-1 ai-llm package upgrade (`@kiwa/ai-llm` v0.4) covers **8 axes** that model the surface every non-trivial production LLM stack has to reason about — prompt injection defense + hallucination detection + LLM eval + guardrails + advanced RAG + agent orchestration + fine-tuning eval + cost / latency SLA. This concept doc is the SSOT for those 8 axes; the tutorials (79-81) and dogfood apps (v1.38-2/3/4) are the concrete implementations.
 
 ## The 8-axis grid
 
@@ -73,7 +73,7 @@ If the fidelity harness has a `planned` cell, the corresponding tutorial + dogfo
 
 ## How this ties into the 13-axis release gate
 
-v1.38 does not add a 14th release-gate axis. The 8 ai-llm axes gate the ai-llm package's own tests (via `pnpm --filter @kiwa-test/ai-llm test`) but do not surface as a per-package `@kiwa-test/quality-metrics` axis. The reasoning — the fidelity harness is provider-shape-specific, and a package that does not export to Anthropic Messages / OpenAI Chat Completions / Vercel AI / LangChain has nothing to assert on. When a future milestone adds an `ai-llm.fidelity` axis that describes "which LLM providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.38 keeps the axis count at 13.
+v1.38 does not add a 14th release-gate axis. The 8 ai-llm axes gate the ai-llm package's own tests (via `pnpm --filter @kiwa/ai-llm test`) but do not surface as a per-package `@kiwa/quality-metrics` axis. The reasoning — the fidelity harness is provider-shape-specific, and a package that does not export to Anthropic Messages / OpenAI Chat Completions / Vercel AI / LangChain has nothing to assert on. When a future milestone adds an `ai-llm.fidelity` axis that describes "which LLM providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.38 keeps the axis count at 13.
 
 ## SSOT boundaries
 

@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.63 リリース — Desktop 深化 VII (@kiwa-test/desktop v0.8 native binding availability probe + skip 経路、 depth-8 pattern 新設 candidate、 systematic pattern 38 度目、 41 milestone streak)"
+title: "kiwa v1.63 リリース — Desktop 深化 VII (@kiwa/desktop v0.8 native binding availability probe + skip 経路、 depth-8 pattern 新設 candidate、 systematic pattern 38 度目、 41 milestone streak)"
 emoji: "🧭"
 type: "tech"
 topics: ["testing", "vitest", "electron", "tauri", "desktop"]
@@ -35,15 +35,15 @@ published: false
 
 ```ts
 // Pattern 1 — CLI probe
-import { probeCliAvailable } from '@kiwa-test/desktop';
+import { probeCliAvailable } from '@kiwa/desktop';
 const result = await probeCliAvailable({ command: 'ffmpeg' });
 
 // Pattern 2 — Skip decision
-import { shouldSkipAxis } from '@kiwa-test/desktop';
+import { shouldSkipAxis } from '@kiwa/desktop';
 const decision = shouldSkipAxis('clipboard', 'linux');
 
 // Pattern 3 — Probe-aware fidelity check
-import { runFidelityCheckWithProbe } from '@kiwa-test/desktop';
+import { runFidelityCheckWithProbe } from '@kiwa/desktop';
 const { diffs, skippedPairs } = await runFidelityCheckWithProbe({});
 ```
 
@@ -62,7 +62,7 @@ pair 深度 8 段拡張 (v0.1 → v0.2 → ... → v0.8) の kiwa milestone 史�
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/desktop@^0.8
+pnpm add -D @kiwa/desktop@^0.8
 ```
 
 ## Migration guide

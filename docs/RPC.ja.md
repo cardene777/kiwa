@@ -148,7 +148,7 @@ test 側から User Reject (`EIP-1193` code `4001`) を deterministic に発火�
 ### 利用例
 
 ```typescript
-import { dappE2eTest as test } from '@kiwa-test/dapp';
+import { dappE2eTest as test } from '@kiwa/dapp';
 
 test('reject 経路の error UX 確認', async ({ page, dappE2e }) => {
   await dappE2e.setApprovalMode('reject');

@@ -1,6 +1,6 @@
 1/ kiwa v1.17 released。 Observability v2 milestone です。 v1.16 (component test 縦軸、 Storybook 8 + Playwright CT + Chromatic) の後、 v1.17 は 2026 SaaS production team のほぼ全てが導入済の observability stack (Grafana dashboard + Prometheus AlertManager + trace flame graph + log correlation) を 1 統一 mock harness に land しました。
 
-2/ `@kiwa-test/observability` v2.0 (major bump) — v1.14-4 で land した v1.1 telemetry mock 3 provider (OpenTelemetry / Datadog / Sentry) を基盤に、 4 追加軸を land。 v1.0 (`renderDashboard` / `detectFlaky` / `analyzeSpecCoverage` / `checkThresholds`) + v1.1 (`TelemetryCollector` + 3 provider mock) surface は 100% backward compatible。 11 新 export + 13 fixture builder。
+2/ `@kiwa/observability` v2.0 (major bump) — v1.14-4 で land した v1.1 telemetry mock 3 provider (OpenTelemetry / Datadog / Sentry) を基盤に、 4 追加軸を land。 v1.0 (`renderDashboard` / `detectFlaky` / `analyzeSpecCoverage` / `checkThresholds`) + v1.1 (`TelemetryCollector` + 3 provider mock) surface は 100% backward compatible。 11 新 export + 13 fixture builder。
 
 3/ `DashboardMock` — `TelemetryCollector` に bind して N panel query を 6 種 aggregate (`sum` / `avg` / `max` / `min` / `count` / `last`) で評価、 optional tag filter + time window + `PanelThreshold[]` で ok / warn / critical badge 選定。 `refresh()` は `PanelResult[]` 返却 + `refreshCount` tick。
 

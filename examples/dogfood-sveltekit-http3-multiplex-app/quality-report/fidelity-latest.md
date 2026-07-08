@@ -1,4 +1,4 @@
-# Quality Report — @kiwa-test/realtime/sveltekit-http3-multiplex-app @ 0.2.0
+# Quality Report — @kiwa/realtime/sveltekit-http3-multiplex-app @ 0.2.0
 
 _Reported at 2026-07-06T02:44:27.838Z._
 
