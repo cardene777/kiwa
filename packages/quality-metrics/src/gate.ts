@@ -193,6 +193,8 @@ export const DEFAULT_RELEASE_GATE_THRESHOLDS: ReleaseGateThresholds = {
   latencyP95Ms: 3000,
   totalTokens: 4000,
   accuracyScore: 0.8,
+  perfStrictP95Ms: 50,
+  perfStrictRequireBaseline: true,
 };
 
 /**
@@ -250,7 +252,27 @@ export function evaluateReleaseGate(
   check('mutation.killRate', report.mutation.killRate, thresholds.mutationKillRate, '>=');
   check('testCount.behavior', report.testCount.behavior, thresholds.behaviorTests, '>=');
 
+  // v0.4 perf strict axis — strict mode で計測された PerfMetric に対してのみ評価。
+  // strict != true の場合は skip (backward compat)、 strict = true なら追加 axis
+  // として fail-fast 判定。 baseline 必須 flag が true + baselineExists != true
+  // なら strict.baseline axis を fail-fast で発火。
   let axesEvaluated = 7;
+  if (report.perf.strict === true) {
+    check('perf.strict.p95Ms', report.perf.p95Ms, thresholds.perfStrictP95Ms, '<=');
+    axesEvaluated++;
+    if (thresholds.perfStrictRequireBaseline) {
+      const baselineExists = report.perf.baselineExists === true;
+      if (!baselineExists) {
+        blockers.push({
+          axis: 'perf.strict.baseline',
+          threshold: 1,
+          actual: 0,
+          op: '>=',
+        });
+      }
+      axesEvaluated++;
+    }
+  }
   if (isAiLlmProvider(report.provider)) {
     axesEvaluated = 11;
     // 欠損時は Infinity / -Infinity で floor / ceiling を必ず fail させる。

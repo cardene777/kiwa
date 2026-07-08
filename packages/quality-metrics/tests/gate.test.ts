@@ -26,7 +26,7 @@ describe('evaluateReleaseGate — pass (non AI-LLM)', () => {
     expect(verdict.axesEvaluated).toBe(7);
   });
 
-  it('T-QM-GT-002 exposes stable default thresholds SSOT (11 軸)', () => {
+  it('T-QM-GT-002 exposes stable default thresholds SSOT (v0.4 13 axis + optional strict 2)', () => {
     expect(DEFAULT_RELEASE_GATE_THRESHOLDS).toEqual({
       coverageLine: 85,
       coverageBranch: 80,
@@ -39,6 +39,8 @@ describe('evaluateReleaseGate — pass (non AI-LLM)', () => {
       latencyP95Ms: 3000,
       totalTokens: 4000,
       accuracyScore: 0.8,
+      perfStrictP95Ms: 50,
+      perfStrictRequireBaseline: true,
     });
   });
 });
