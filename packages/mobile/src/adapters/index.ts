@@ -25,3 +25,13 @@ export {
   summarizeFidelity,
   type FidelityDiff,
 } from './fidelity-harness.js';
+
+// v0.5 spawn driver (pair 深度 5 段拡張 1 例目 candidate、 depth-5 pattern 新設)
+export {
+  buildSpawnInvocation,
+  cliForAxis,
+  invokeMobileCli,
+  type MobileCliCommand,
+  type SpawnInvocation,
+  type SpawnResult,
+} from './spawn-driver.js';
