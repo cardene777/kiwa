@@ -726,6 +726,13 @@ const V2_4_PAGES = [
   { path: '/migrations/v2.3-to-v2.4', title: 'v2.3 → v2.4' },
 ];
 
+// v2.5 = Streaming pair depth-5 到達 (streaming v2.1 pipeline-orchestrator)、 depth-5 pattern 6 例目発生 = systematic law CONFIRMED、 51 milestone streak、 systematic pattern 48 度目。
+const V2_5_PAGES = [
+  { path: '/tutorials/132-streaming-pipeline-orchestrator', title: '@kiwa/streaming v2.1 pipeline-orchestrator' },
+  { path: '/concepts/streaming-pipeline-orchestrator', title: '@kiwa/streaming v2.1 pipeline-orchestrator SSOT' },
+  { path: '/migrations/v2.4-to-v2.5', title: 'v2.4 → v2.5' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1255,6 +1262,20 @@ test.describe('docs site — v2.3 pages render', () => {
 test.describe('docs site — v2.4 pages render', () => {
   for (const p of V2_4_PAGES) {
     test(`v2.4 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v2.5 pages render', () => {
+  for (const p of V2_5_PAGES) {
+    test(`v2.5 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
