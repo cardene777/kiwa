@@ -1,11 +1,15 @@
 /**
- * Desktop spawn driver (v0.5、 depth-5 pattern 2 例目 candidate、 Mobile v1.54 rhythm 再現)。
+ * Desktop spawn driver (v0.6、 depth-5 pattern 2 例目確定 + depth-6 pattern 新設 candidate、 Mobile v1.55 rhythm 再現)。
  *
- * v0.5 stub 契約層 = shape 契約のみ、 実 spawn 実行は v1.61+ の v0.6 で追加予定。
- * env-gate `KIWA_DESKTOP_MODE=real` + args 上限 32 + fail-closed で安全性保証。
- * 12 axis から CLI-backed axis を抽出 (8 CLI)、 non-CLI axis (electron / tauri / webview / dark-mode) は null。
+ * v0.5 stub 契約 → v0.6 実 child_process.spawn 実行 に置換 (executeSpawn 経由)。
+ * shape 契約 preserving = SpawnResult 構造は v0.5 と同一、 stdout/stderr/exitCode/durationMs は
+ * 実 spawn からの実測値。 test-only injection 経路として `invokeDesktopCliWith` を追加
+ * (SpawnFn を DI 可能)、 実 CLI 未 install 環境でも決定的 test を成立させる。
+ * KIWA_DESKTOP_SPAWN=dry-run で v0.5 stub 相当 shape 復元 (backward compat 経路)。
  */
+import { spawn as nodeSpawn } from 'node:child_process';
 import type { DesktopAxis } from '../semantics/types.js';
+import { executeSpawn, type SpawnFn } from './spawn-executor.js';
 
 export type DesktopCliCommand =
   | 'electron-builder'
@@ -35,29 +39,38 @@ export interface SpawnResult {
 }
 
 const AXIS_TO_CLI: Record<DesktopAxis, DesktopCliCommand | null> = {
-  // v0.1 axis
-  electron: null, // native process、 CLI 不要
+  electron: null,
   tauri: null,
   webview: null,
-  // v0.2 axis
   'auto-updater': 'electron-updater',
-  'fs-permissions': 'osascript', // macOS TCC 系。 Windows/Linux は別 CLI 検出予定
-  notification: 'notify-send', // Linux libnotify、 macOS/Windows は別
-  'menu-bar': 'electron-builder', // packaging 時 template
-  'tray-icon': 'electron-builder', // packaging 時 template
-  // v0.3 axis
+  'fs-permissions': 'osascript',
+  notification: 'notify-send',
+  'menu-bar': 'electron-builder',
+  'tray-icon': 'electron-builder',
   'screen-recording': 'ffmpeg',
-  'global-shortcut': 'defaults', // macOS accessibility 系
-  clipboard: 'xclip', // Linux。 macOS = pbcopy、 Windows = clip
-  'dark-mode': null, // OS notification 経路、 CLI なし (macOS defaults / Windows reg で読める余地あり)
+  'global-shortcut': 'defaults',
+  clipboard: 'xclip',
+  'dark-mode': null,
 };
 
 /**
- * v0.5 stub 契約層 = env-gate 通過確認 + args 上限 32 + shape 契約返却。
+ * v0.6 実 spawn 実行 = env-gate 通過確認 + args 上限 32 + 実 child_process.spawn 実行。
  * `KIWA_DESKTOP_MODE=real` + 対応 axis env 未設定なら throw で fail-closed。
- * 実 spawn 実行は v1.61+ の v0.6 で置換予定。
+ * `KIWA_DESKTOP_SPAWN=dry-run` の時は v0.5 stub 相当の shape 契約を返す
+ * (実 CLI 未 install 環境向け backward compat 経路)。
  */
 export async function invokeDesktopCli(inv: SpawnInvocation): Promise<SpawnResult> {
+  return invokeDesktopCliWith(inv, nodeSpawn);
+}
+
+/**
+ * DI 経路 = spawnFn を注入可能、 test で dummy spawn を差し込んで
+ * 決定的挙動を検証できる。 default は nodeSpawn。
+ */
+export async function invokeDesktopCliWith(
+  inv: SpawnInvocation,
+  spawnFn: SpawnFn,
+): Promise<SpawnResult> {
   const start = Date.now();
   if (inv.env.KIWA_DESKTOP_MODE !== 'real') {
     throw new Error(
@@ -68,15 +81,36 @@ export async function invokeDesktopCli(inv: SpawnInvocation): Promise<SpawnResul
     throw new Error(`invokeDesktopCli(${inv.command}): args exceeds max 32 (${inv.args.length})`);
   }
 
-  // v0.5 = stub 契約、 実 spawn は v0.6 で置換
+  if (inv.env.KIWA_DESKTOP_SPAWN === 'dry-run') {
+    return {
+      command: inv.command,
+      args: [...inv.args],
+      invoked: true,
+      exitCode: 0,
+      stdout: `[v0.6 dry-run] ${inv.command} ${inv.args.join(' ')}`,
+      stderr: '',
+      durationMs: Date.now() - start,
+    };
+  }
+
+  const executed = await executeSpawn(
+    {
+      command: inv.command,
+      args: inv.args,
+      env: inv.env,
+      ...(inv.cwd !== undefined ? { cwd: inv.cwd } : {}),
+    },
+    spawnFn,
+  );
+
   return {
     command: inv.command,
     args: [...inv.args],
     invoked: true,
-    exitCode: 0,
-    stdout: `[v0.5 stub] ${inv.command} ${inv.args.join(' ')}`,
-    stderr: '',
-    durationMs: Date.now() - start,
+    exitCode: executed.exitCode,
+    stdout: executed.stdout,
+    stderr: executed.stderr,
+    durationMs: executed.durationMs,
   };
 }
 
