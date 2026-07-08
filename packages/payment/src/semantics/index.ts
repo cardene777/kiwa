@@ -243,3 +243,16 @@ export {
   fileSar,
   lockForAudit,
 } from './regulatory-reporting.js';
+
+// v2.1 lifecycle-orchestrator = subscription lifecycle + dunning + retry + revenue-recovery + chargeback の 継続合成 layer
+export type {
+  LifecycleState,
+  LifecycleEvent,
+  LifecycleSession,
+  LifecycleSummary,
+} from './lifecycle-orchestrator.js';
+export {
+  startLifecycle,
+  handleEvent,
+  summarizeLifecycle,
+} from './lifecycle-orchestrator.js';
