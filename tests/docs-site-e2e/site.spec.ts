@@ -684,6 +684,13 @@ const V1_65_PAGES = [
   { path: '/migrations/v1.64-to-v1.65', title: 'v1.64 → v1.65' },
 ];
 
+// v1.66 = quality-metrics 深化 III (v0.6 evaluateReleaseGate に drift check opt-in 統合)、 44 milestone streak、 systematic pattern 41 度目、 depth-5 pattern 3 例目確定 実運用継続。
+const V1_66_PAGES = [
+  { path: '/tutorials/126-quality-metrics-drift-gate', title: 'quality-metrics v0.6 evaluateReleaseGate に drift check opt-in 統合' },
+  { path: '/concepts/quality-metrics-drift-gate', title: 'quality-metrics v0.6 evaluateReleaseGate に drift check opt-in 統合' },
+  { path: '/migrations/v1.65-to-v1.66', title: 'v1.65 → v1.66' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1129,6 +1136,20 @@ test.describe('docs site — v1.44 pages render', () => {
 test.describe('docs site — v1.65 pages render', () => {
   for (const p of V1_65_PAGES) {
     test(`v1.65 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.66 pages render', () => {
+  for (const p of V1_66_PAGES) {
+    test(`v1.66 page ${p.path} renders with expected title`, async ({ page }) => {
       if (!existsSync(join(distDir, 'index.html'))) {
         test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
         return;
