@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa-test/core';
+import type { TestEnvBase } from '@kiwa/core';
 
 /**
  * Angular component test adapter. Wraps @testing-library/angular's `render`

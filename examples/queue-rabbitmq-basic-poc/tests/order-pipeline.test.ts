@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupRabbitMQEnv, type RabbitMQTestEnv } from '@kiwa-test/queue';
+import { setupRabbitMQEnv, type RabbitMQTestEnv } from '@kiwa/queue';
 import { fanoutOrderThroughPipeline, runRetryConsumer } from '../src/order-pipeline.js';
 
 const envs: RabbitMQTestEnv[] = [];

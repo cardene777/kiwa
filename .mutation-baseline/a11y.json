@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/a11y",
+  "package": "@kiwa/a11y",
   "tier": "Test type",
   "thresholds": {
     "high": 60,

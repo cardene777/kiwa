@@ -1,5 +1,5 @@
-import { appendChild, createNode } from '@kiwa-test/component';
-import type { MockNode } from '@kiwa-test/component';
+import { appendChild, createNode } from '@kiwa/component';
+import type { MockNode } from '@kiwa/component';
 
 /**
  * Small builders every form fixture uses to keep markup consistent — an input
@@ -22,7 +22,7 @@ export interface FieldSpec {
 
 /**
  * Build a label + input pair. Adds `aria-required=true` when required so the
- * heuristic a11y checker inside `@kiwa-test/component` treats the field as
+ * heuristic a11y checker inside `@kiwa/component` treats the field as
  * accessible even when the placeholder is empty.
  */
 export function buildField(spec: FieldSpec): MockNode {

@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/qwikcity.
+ * Mutation testing config for @kiwa/qwikcity.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — Resumability + SSR + route loader drift.
  * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
  */

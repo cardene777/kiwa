@@ -7,7 +7,7 @@ import {
   type AdapterResult,
   type MobileAxis,
   type MobileTarget,
-} from '@kiwa-test/mobile';
+} from '@kiwa/mobile';
 
 const ALL_AXES: MobileAxis[] = [
   'react-native',

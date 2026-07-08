@@ -1,4 +1,4 @@
-import { h, type SolidChild, type SolidComponent } from '@kiwa-test/solidjs';
+import { h, type SolidChild, type SolidComponent } from '@kiwa/solidjs';
 import type { UserProfileStore } from '../store/user-profile.js';
 
 /**

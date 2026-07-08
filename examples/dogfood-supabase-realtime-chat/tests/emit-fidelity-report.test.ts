@@ -36,7 +36,7 @@ describe('dogfood-supabase-realtime-chat — emit fidelity report to quality-rep
     // contributes to the trace + presence surface coverage.
     await twoUsersJoinAndChat(twoUserMock);
     const output = runFidelityHarness({
-      provider: '@kiwa-test/realtime/supabase-realtime-chat',
+      provider: '@kiwa/realtime/supabase-realtime-chat',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

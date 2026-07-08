@@ -1,6 +1,6 @@
 /**
  * Mock adapter — spins up 1 vector index gate per session, 1 document
- * store, and 1 embedding cache against `@kiwa-test/orm`'s vector-store
+ * store, and 1 embedding cache against `@kiwa/orm`'s vector-store
  * semantics. Every op appends 1 latency sample and 1 trace event so the
  * fidelity harness never reads as 0-sample.
  *

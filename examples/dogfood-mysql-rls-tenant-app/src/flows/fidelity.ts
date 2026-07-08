@@ -1,7 +1,7 @@
 /**
  * Fidelity harness — runs the same 5-op adapter surface against both
  * mock and real, diffs the trace events, and assembles a
- * `@kiwa-test/quality-metrics` release-gate report.
+ * `@kiwa/quality-metrics` release-gate report.
  *
  * The comparison is per-op: an op that succeeds in mock but is
  * `MYSQL_ENV_MISSING` / `REAL_ADAPTER_NOT_IMPLEMENTED` in real is a
@@ -22,7 +22,7 @@ import {
   type MutationTier,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 import type {
   MysqlRlsTenantAdapter,
   TraceEvent,
@@ -44,7 +44,7 @@ export interface FidelityRunInput {
   mutation: { mutations: number; killed: number };
   /**
    * v1.27-4 12-axis release gate — mutation tier of the upstream package
-   * (`@kiwa-test/orm` = `saas` here). When present, `evaluateReleaseGate`
+   * (`@kiwa/orm` = `saas` here). When present, `evaluateReleaseGate`
    * adds a `mutation.tier` axis using the SSOT threshold table. Absent =
    * legacy 7-axis behaviour (backward compat).
    */

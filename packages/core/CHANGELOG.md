@@ -1,4 +1,4 @@
-# @kiwa-test/core
+# @kiwa/core
 
 ## 1.0.1
 
@@ -6,26 +6,26 @@
 
 - 32a6c10: 📦 11 packages initial v1.0.x npm publish (改名後初回)。
 
-  PR #476 で `@kiwa-test/core` ↔ `@kiwa-test/spec` swap rename + dApp 改名 + v1.0 major bump を local で実施したが、 npm への publish が未実行のため npm 上では旧 0.x 系のまま停滞していた。
+  PR #476 で `@kiwa/core` ↔ `@kiwa/spec` swap rename + dApp 改名 + v1.0 major bump を local で実施したが、 npm への publish が未実行のため npm 上では旧 0.x 系のまま停滞していた。
 
   本 changeset で全 11 packages を v1.0.1 へ patch bump して publish を発火させ、 改名後の v1.0 系を npm に反映する。
 
   ## 影響範囲
 
-  - 旧 `@kiwa-test/core` (0.3.1) は dApp E2E fixture の名残、 v1.0.1 では新 spec として publish
-  - 旧 `@kiwa-test/spec` は廃止 (`@kiwa-test/core` に統合)
-  - 新 `@kiwa-test/dapp` (404 → v1.0.1 として初公開)
+  - 旧 `@kiwa/core` (0.3.1) は dApp E2E fixture の名残、 v1.0.1 では新 spec として publish
+  - 旧 `@kiwa/spec` は廃止 (`@kiwa/core` に統合)
+  - 新 `@kiwa/dapp` (404 → v1.0.1 として初公開)
   - 既存 9 adapter (api / ui / data / e2e / a11y / cli-test / observability / visual / cli) は v1.0.1 patch bump で公開
   - v1.0.0 → v1.0.1 patch bump (PR #476 の v1.0.0 内部 bump を上書きせず継続)
 
   ## 確認方法
 
   ```bash
-  npm view @kiwa-test/core version    # → 1.0.1
-  npm view @kiwa-test/dapp version    # → 1.0.1 (新規公開)
-  npm view @kiwa-test/e2e version     # → 1.0.1
-  npm view @kiwa-test/a11y version    # → 1.0.1
-  npm view @kiwa-test/visual version  # → 1.0.1
+  npm view @kiwa/core version    # → 1.0.1
+  npm view @kiwa/dapp version    # → 1.0.1 (新規公開)
+  npm view @kiwa/e2e version     # → 1.0.1
+  npm view @kiwa/a11y version    # → 1.0.1
+  npm view @kiwa/visual version  # → 1.0.1
   ```
 
 ## 0.1.1
@@ -41,17 +41,17 @@
 - e16898f: v1 — 汎用テストツール化 MVP: spec / api 新設 + core を spec ベースに整理
 
   kiwa を dApp E2E 専用から汎用テストツールへ拡大する v1。
-  spec 共通基盤を `@kiwa-test/core` として新設、 HTTP API adapter を `@kiwa-test/api` として新設し、 `@kiwa-test/dapp` は `@kiwa-test/core` を peer dep として依存しつつ既存 dApp E2E API を完全互換で維持する。
+  spec 共通基盤を `@kiwa/core` として新設、 HTTP API adapter を `@kiwa/api` として新設し、 `@kiwa/dapp` は `@kiwa/core` を peer dep として依存しつつ既存 dApp E2E API を完全互換で維持する。
 
   ## 新規 package
 
-  ### @kiwa-test/core 0.1.0 (新設)
+  ### @kiwa/core 0.1.0 (新設)
 
   - `parseSpec(markdown)` ... kiwa-design 9 column markdown を `SpecDoc` (cases, layer, mode, route) にパース
   - `createPool({ size, acquire, reset, release })` ... 汎用 borrow / release pool、 anvil pool の基底
   - `TestEnvBase<TMode>` / `Lease` / `Pool` / `TestLayer` / `TestMode` ... 全 adapter 共通の型
 
-  ### @kiwa-test/api 0.1.0 (新設)
+  ### @kiwa/api 0.1.0 (新設)
 
   - `setupApiServer({ mode })` ... HTTP API テストの 3 経路統合 helper
     - `mode: 'mock'` ... msw v2 handler で固定応答
@@ -62,10 +62,10 @@
 
   ## 変更 package
 
-  ### @kiwa-test/dapp 0.2.0 → 0.3.0 (minor)
+  ### @kiwa/dapp 0.2.0 → 0.3.0 (minor)
 
-  - `@kiwa-test/core` を dependency として参照、 spec の共通型 (`TestLayer` / `TestMode` / `Lease` / `Pool` / `SpecDoc`) を main entry から re-export
-  - `parseSpec` も core から re-export (既存 user が `@kiwa-test/dapp` の単一 install で spec parser を使える経路を確保)
+  - `@kiwa/core` を dependency として参照、 spec の共通型 (`TestLayer` / `TestMode` / `Lease` / `Pool` / `SpecDoc`) を main entry から re-export
+  - `parseSpec` も core から re-export (既存 user が `@kiwa/dapp` の単一 install で spec parser を使える経路を確保)
   - 既存 API 完全互換、 既存 118 件 test PASS
 
   ## PoC
@@ -75,4 +75,4 @@
   ## skill SSOT
 
   - `.claude/skills/kiwa-design/SKILL.md` ... `--layer api` の出力 path (`tests/spec/integration/test-spec-{module}.api.md`) + api 専用 9 column 表 (Mode / Route 追加) を追記
-  - `.claude/skills/kiwa-api/SKILL.md` ... `@kiwa-test/api` 経路 + msw / supertest mapping + 実装例を追記
+  - `.claude/skills/kiwa-api/SKILL.md` ... `@kiwa/api` 経路 + msw / supertest mapping + 実装例を追記

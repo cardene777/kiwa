@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/e2e",
+  "package": "@kiwa/e2e",
   "tier": "Test type",
   "thresholds": {
     "high": 60,

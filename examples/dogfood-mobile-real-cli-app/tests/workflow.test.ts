@@ -3,7 +3,7 @@ import {
   cliForAxis,
   invokeMobileCli,
   type MobileCliCommand,
-} from '@kiwa-test/mobile';
+} from '@kiwa/mobile';
 import {
   listNonCliAxes,
   runAllCliStubs,

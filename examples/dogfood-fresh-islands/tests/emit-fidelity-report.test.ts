@@ -50,7 +50,7 @@ describe('dogfood-fresh-islands — emit fidelity report to quality-report/', ()
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/fresh/islands-app',
+      provider: '@kiwa/fresh/islands-app',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

@@ -11,7 +11,7 @@ import {
   providerEventName,
   type PaymentAdapter,
   type PaymentWebhookEvent,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 import type {
   ChargeResult,
   CheckoutInput,

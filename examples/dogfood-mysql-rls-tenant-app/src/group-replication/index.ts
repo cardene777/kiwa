@@ -19,7 +19,7 @@ import {
   joinClusterMember,
   leaveClusterMember,
   type MysqlClusterSession,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 import type { GroupReplicationObservation } from '../adapters/interface.js';
 
 export interface DriveGroupReplicationInput {

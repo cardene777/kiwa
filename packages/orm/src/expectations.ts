@@ -1,4 +1,4 @@
-// expectations.ts — query-result assertion helpers for @kiwa-test/orm.
+// expectations.ts — query-result assertion helpers for @kiwa/orm.
 //
 // Helpers are framework-agnostic: they accept a Vitest-shaped `expect`
 // argument so test files keep their assertion library intact. The helpers

@@ -9,7 +9,7 @@
  *    KIWA_FX_URL + KIWA_PAYMASTER_URL + KIWA_SETTLEMENT_URL) when
  *    `KIWA_MODE=real` + `CRYPTO_FX_STACK_READY=1` are set; otherwise every
  *    op reports `KIWA_CRYPTO_FX_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/payment` v0.5
+ *  - {@link makeMockAdapter} — backed by `@kiwa/payment` v0.5
  *    crypto-payment + fx-cross-border semantics (createCryptoInvoice /
  *    confirmTx / abstractGas / linkWallet / startFxTransfer / lockRate /
  *    initiateSettlement / completeSettlement / expireRate).

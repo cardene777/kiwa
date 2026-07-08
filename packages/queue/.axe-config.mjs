@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/queue.
+ * A11y (axe-core) config for @kiwa/queue.
  * Tier: SaaS tier (critical 0 / serious 0 / moderate 0) — BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § SaaS tier.
  *

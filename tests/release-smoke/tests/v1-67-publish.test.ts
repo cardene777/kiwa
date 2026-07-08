@@ -1,5 +1,5 @@
 // Behavior test for v1.67-4 publish PR。
-// v1.67 = @kiwa-test/desktop v1.0 invoke-cache layer (depth-6 pattern 2 例目確定 candidate)
+// v1.67 = @kiwa/desktop v1.0 invoke-cache layer (depth-6 pattern 2 例目確定 candidate)
 // systematic root cause pattern SSOT 42nd application.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -43,9 +43,9 @@ describe('v1.67-4 publish artefacts', () => {
     }
   });
 
-  it('@kiwa-test/desktop package.json is v1.0.0 (major bump)', () => {
+  it('@kiwa/desktop package.json is v1.0.0 (major bump)', () => {
     const pkg = readJson<{ name: string; version: string }>('packages/desktop/package.json');
-    expect(pkg.name).toBe('@kiwa-test/desktop');
+    expect(pkg.name).toBe('@kiwa/desktop');
     expect(pkg.version).toBe('1.0.0');
   });
 
@@ -56,9 +56,9 @@ describe('v1.67-4 publish artefacts', () => {
     expect(src).toContain('export async function withCache');
   });
 
-  it('release script filter contains @kiwa-test/desktop (42nd application)', () => {
+  it('release script filter contains @kiwa/desktop (42nd application)', () => {
     const pkg = readJson<{ scripts: { release: string } }>('package.json');
-    expect(pkg.scripts.release).toContain('-F @kiwa-test/desktop');
+    expect(pkg.scripts.release).toContain('-F @kiwa/desktop');
   });
 
   it('dogfood-desktop-invoke-cache-app has 4 pattern workflow runners', () => {

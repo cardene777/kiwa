@@ -6,7 +6,7 @@
  * spinning up a policy store.
  *
  * The rbac surface pairs the parent v1.37-1 `authorization` axis (RBAC +
- * role hierarchy + expansion + rbacAllows) with `@kiwa-test/security`
+ * role hierarchy + expansion + rbacAllows) with `@kiwa/security`
  * v0.1 — every op has a neutral event counterpart the fidelity harness
  * can compare across mock vs real.
  */

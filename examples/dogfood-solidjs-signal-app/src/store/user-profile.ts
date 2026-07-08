@@ -1,4 +1,4 @@
-import { createResourceStub, type ResourceHandle } from '@kiwa-test/solidjs';
+import { createResourceStub, type ResourceHandle } from '@kiwa/solidjs';
 
 /**
  * UserProfile store — a `createResourceStub` wrapping an async fetcher.

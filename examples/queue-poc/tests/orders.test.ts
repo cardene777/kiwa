@@ -4,7 +4,7 @@ import {
   expectIdempotent,
   setupQueueEnv,
   type QueueTestEnv,
-} from '@kiwa-test/data';
+} from '@kiwa/data';
 import { startOrderProcessor, type Order, type OrderState } from '../src/processor.js';
 
 const envs: Array<QueueTestEnv<Order>> = [];

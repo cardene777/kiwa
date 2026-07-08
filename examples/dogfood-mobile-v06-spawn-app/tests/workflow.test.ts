@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { describe, expect, it } from 'vitest';
-import type { SpawnFn } from '@kiwa-test/mobile';
+import type { SpawnFn } from '@kiwa/mobile';
 import {
   runDryRunWorkflow,
   runWithInjectedSpawn,

@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives @kiwa-test/payment's `createLemonSqueezyMock` +
+ * Mock adapter — drives @kiwa/payment's `createLemonSqueezyMock` +
  * the local license / affiliate / refund logic so tests exercise the
  * full path without touching the real Lemon Squeezy sandbox.
  *
@@ -9,8 +9,8 @@
  * framework-neutral route factories.
  */
 
-import { createLemonSqueezyMock } from '@kiwa-test/payment';
-import type { PaymentAdapter, PaymentWebhookEvent } from '@kiwa-test/payment';
+import { createLemonSqueezyMock } from '@kiwa/payment';
+import type { PaymentAdapter, PaymentWebhookEvent } from '@kiwa/payment';
 import type {
   AffiliateConvertInput,
   AffiliateRegisterInput,

@@ -7,11 +7,11 @@
     "test:foundry": "FOUNDRY_OFFLINE=true forge test",
     "test:hardhat": "hardhat test --config hardhat.config.cjs",
     "test:hardhat:coverage": "hardhat coverage --config hardhat.config.cjs",
-    "test:e2e": "pnpm -F @kiwa-test/dapp build && playwright test",
+    "test:e2e": "pnpm -F @kiwa/dapp build && playwright test",
     "forge:build": "forge build"
   },
   "dependencies": {
-    "@kiwa-test/dapp": "workspace:*"
+    "@kiwa/dapp": "workspace:*"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",

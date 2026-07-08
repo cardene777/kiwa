@@ -19,7 +19,7 @@ import {
   syncCascadedSubscription,
   trackReplicationOrigin,
   type LogicalReplicationAdvancedSession,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 import type { LogicalReplicationAdvancedObservation } from '../adapters/interface.js';
 
 export interface DriveLogicalReplicationInput {

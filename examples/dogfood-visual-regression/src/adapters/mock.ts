@@ -8,7 +8,7 @@ import {
   type VisualBaseline,
   type VisualDiff,
   type VisualReviewEntry,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 import type { SceneSpec } from '../scenes/index.js';
 import type {
   BaselineSeedOutcome,
@@ -20,7 +20,7 @@ import type {
 
 /**
  * Mock adapter — drives Chromatic-style visual regression through
- * `@kiwa-test/component` `createChromaticVisualMock`. Every op records a trace
+ * `@kiwa/component` `createChromaticVisualMock`. Every op records a trace
  * event so the fidelity harness can diff mock vs real behaviour without a
  * live Chromatic CI upload.
  *

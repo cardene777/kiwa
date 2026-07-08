@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/solidstart.
+ * A11y (axe-core) config for @kiwa/solidstart.
  * Tier: Framework tier (critical 0 / serious 0-3 / moderate 0-10) — Solid SSR + resource + server-function drift.
  * SSOT: docs/quality/a11y-thresholds.md § Framework tier.
  */

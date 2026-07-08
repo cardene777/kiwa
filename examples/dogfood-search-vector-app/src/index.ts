@@ -1,7 +1,7 @@
 /**
  * Public surface for dogfood-search-vector-app v0.0.1 (v1.36-2).
  *
- * A dogfood app that drives the `@kiwa-test/search` v0.3 vector +
+ * A dogfood app that drives the `@kiwa/search` v0.3 vector +
  * semantic axes (index build → k-NN query → semantic query understand
  * → intent classify → cross-encoder rerank → embedding cache → hybrid
  * vector+keyword fuse → recall@k → fidelity signal → Meilisearch /
@@ -9,7 +9,7 @@
  * contract, satisfied by both a deterministic mock adapter and a
  * `KIWA_MODE=real` Meilisearch + Typesense wire-surface real adapter.
  * The fidelity harness diffs both traces and feeds the divergence count
- * into the `@kiwa-test/quality-metrics` 13-axis release gate.
+ * into the `@kiwa/quality-metrics` 13-axis release gate.
  */
 
 export { makeMockAdapter } from './adapters/mock.js';

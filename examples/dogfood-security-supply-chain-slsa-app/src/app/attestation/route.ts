@@ -6,7 +6,7 @@
  * exercise mock and real without spinning up a cosign + rekor stack.
  *
  * The attestation surface pairs the parent v1.39-1 `supply-chain` axis
- * (signProvenance + verifyAttestation) with `@kiwa-test/security` v0.2
+ * (signProvenance + verifyAttestation) with `@kiwa/security` v0.2
  * — every op emits a neutral event the fidelity harness can compare
  * across mock vs real.
  */

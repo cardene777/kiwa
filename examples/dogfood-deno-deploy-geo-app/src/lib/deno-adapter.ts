@@ -5,7 +5,7 @@
  * The dogfood app talks to Deno Deploy only through this interface.
  * Two implementations exist —
  *
- * - {@link makeMockAdapter} — backed by `@kiwa-test/edge` v0.2 8 axis
+ * - {@link makeMockAdapter} — backed by `@kiwa/edge` v0.2 8 axis
  *   semantics helpers on the `geo-replicated` + `edge-kv` +
  *   `cron-trigger` axes (createGeoReplicatedSession / geoPrimaryWrite /
  *   markReplicaLagged / syncReplica / resolveConflict /
@@ -20,7 +20,7 @@
  * vs mock can be measured side-by-side and fed to the fidelity harness.
  *
  * The 8 ops correspond to the 8 axis routing pattern inherited from
- * v1.24-1 (`@kiwa-test/edge` v0.2 semantics): geo-replicated (3 events) +
+ * v1.24-1 (`@kiwa/edge` v0.2 semantics): geo-replicated (3 events) +
  * edge-kv (2 events) + cron-trigger (3 events) = 8 op surface.
  *
  * User journey — a client hits a Fresh route. The handler resolves a POP

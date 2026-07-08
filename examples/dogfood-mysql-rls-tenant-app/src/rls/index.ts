@@ -1,5 +1,5 @@
 /**
- * RLS gate — wraps `@kiwa-test/orm`'s RLS session semantics into a small
+ * RLS gate — wraps `@kiwa/orm`'s RLS session semantics into a small
  * helper that models the production Prisma-middleware layer:
  *
  *   1. `mountPolicy` installs a per-table policy on session bring-up
@@ -22,7 +22,7 @@ import {
   installPolicy,
   logAudit,
   type RlsSession,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 export interface RlsGate {
   readonly session: RlsSession;

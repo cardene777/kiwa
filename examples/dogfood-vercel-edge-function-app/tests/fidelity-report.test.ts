@@ -61,7 +61,7 @@ describe('fidelity harness contract', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/edge/vercel-edge-function',
+      provider: '@kiwa/edge/vercel-edge-function',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -117,7 +117,7 @@ describe('fidelity harness contract', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/edge/vercel-edge-function',
+      provider: '@kiwa/edge/vercel-edge-function',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -155,7 +155,7 @@ describe('fidelity harness contract', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/edge/vercel-edge-function',
+      provider: '@kiwa/edge/vercel-edge-function',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

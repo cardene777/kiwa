@@ -7,7 +7,7 @@ import {
   expectStderrContains,
   setupCliEnv,
   type CliTestEnv,
-} from '@kiwa-test/cli-test';
+} from '@kiwa/cli-test';
 
 const envs: CliTestEnv[] = [];
 const here = dirname(fileURLToPath(import.meta.url));

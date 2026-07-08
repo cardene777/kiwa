@@ -5,11 +5,11 @@
  * this interface. Two implementations exist — {@link makeRealAdapter}
  * (real Vercel AI SDK-shape HTTP calls + real OpenAI embeddings + Pinecone
  * vector store when env is set, otherwise reports `RAG_ENV_MISSING`) and
- * {@link makeMockAdapter} (backed by `@kiwa-test/ai-llm`'s
+ * {@link makeMockAdapter} (backed by `@kiwa/ai-llm`'s
  * {@link createVercelAiMock} + {@link createLangchainMock} + in-memory
  * vector store). Both must satisfy the same contract so retrieval /
  * embedding / final-answer fidelity between real vs mock can be measured
- * side-by-side and fed to `@kiwa-test/quality-metrics` 11-axis release gate.
+ * side-by-side and fed to `@kiwa/quality-metrics` 11-axis release gate.
  */
 
 import type { IngestReport } from '../rag/ingest.js';

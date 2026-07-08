@@ -1,16 +1,16 @@
-# @kiwa-test/hono
+# @kiwa/hono
 
 ## 0.2.0
 
 ### Minor Changes
 
-- d297fee: New package `@kiwa-test/hono` v0.1 — HonoJS Cloudflare Workers + hc RPC type-safe client + middleware chain test adapter (Issue #815, v1.19-1c). Provides `createHonoApp` + `invokeRoute` + `createContext` + `buildRequest` + `compileRoute` + `matchRoute` + `createRpcClient` + `defineRpcApp` + `createWorkersEnv` + `createExecutionContext` + `mockKVNamespace` + `mockD1Database` + `mockR2Bucket` + type guards (`isHonoApp` / `isHonoContext` / `isHcResponse` / `isWorkersEnv` / `isExecutionContextMock` / `isKVNamespaceMock` / `isD1DatabaseMock` / `isR2BucketMock`) + brand symbols (`HONO_APP_SYMBOL` / `HONO_CONTEXT_SYMBOL` / `HONO_ROUTE_SYMBOL` / `HC_CLIENT_SYMBOL` / `HC_REQUEST_SYMBOL` / `WORKERS_ENV_SYMBOL` / `EXECUTION_CTX_SYMBOL` / `KV_NAMESPACE_SYMBOL` / `D1_DATABASE_SYMBOL` / `R2_BUCKET_SYMBOL`). 89 unit tests passing (app 39 + rpc 17 + workers 33), coverage 97.91% lines / 88.47% branches / 97.75% functions, release gate 7 軸 pass.
+- d297fee: New package `@kiwa/hono` v0.1 — HonoJS Cloudflare Workers + hc RPC type-safe client + middleware chain test adapter (Issue #815, v1.19-1c). Provides `createHonoApp` + `invokeRoute` + `createContext` + `buildRequest` + `compileRoute` + `matchRoute` + `createRpcClient` + `defineRpcApp` + `createWorkersEnv` + `createExecutionContext` + `mockKVNamespace` + `mockD1Database` + `mockR2Bucket` + type guards (`isHonoApp` / `isHonoContext` / `isHcResponse` / `isWorkersEnv` / `isExecutionContextMock` / `isKVNamespaceMock` / `isD1DatabaseMock` / `isR2BucketMock`) + brand symbols (`HONO_APP_SYMBOL` / `HONO_CONTEXT_SYMBOL` / `HONO_ROUTE_SYMBOL` / `HC_CLIENT_SYMBOL` / `HC_REQUEST_SYMBOL` / `WORKERS_ENV_SYMBOL` / `EXECUTION_CTX_SYMBOL` / `KV_NAMESPACE_SYMBOL` / `D1_DATABASE_SYMBOL` / `R2_BUCKET_SYMBOL`). 89 unit tests passing (app 39 + rpc 17 + workers 33), coverage 97.91% lines / 88.47% branches / 97.75% functions, release gate 7 軸 pass.
 
 ## 0.1.0
 
 ### Minor Changes
 
-- 🎉 New package `@kiwa-test/hono` v0.1 — HonoJS Cloudflare Workers + hc RPC type-safe client + middleware chain test adapter (Issue #815, v1.19-1c).
+- 🎉 New package `@kiwa/hono` v0.1 — HonoJS Cloudflare Workers + hc RPC type-safe client + middleware chain test adapter (Issue #815, v1.19-1c).
 
   ## What's in the box
 
@@ -44,7 +44,7 @@
 
   - v1.19-1 (#807) は SolidJS (#813) + Fresh (#814) + 本 pkg (#815) の 3 分割で 1 pkg = 1 PR 化.
   - `packages/hono/{stryker.config.mjs,vitest.stryker.config.mjs}` 配置で mutation gate 統合準備.
-  - `scripts/check-coverage-gates.mjs` + `scripts/check-mutation-gates.mjs` に `@kiwa-test/hono` 行追加.
+  - `scripts/check-coverage-gates.mjs` + `scripts/check-mutation-gates.mjs` に `@kiwa/hono` 行追加.
   - `tests/release-smoke/tests/import-surface.test.ts` に new export block 追加.
   - root README Limitations 表に HonoJS ✅ 行追加、 Roadmap v1.19 行に 3/3 resolved 記載.
 

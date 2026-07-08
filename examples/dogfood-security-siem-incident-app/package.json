@@ -3,16 +3,16 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.39-3 — a Splunk + PagerDuty style SIEM + incident response orchestrator (CIM-formatted structured audit log + tamper-evident hash-chain seal + hot/warm/cold retention + correlation rule + playbook trigger + sev1-5 severity classification + escalation + forensics capture + post-mortem + fused SIEM-to-incident orchestrator) that drives a SIEM + incident response surface backed by @kiwa-test/security v0.2 siem-audit + incident-response semantics, runnable in both KIWA_MODE=real (KIWA_SIEM_ENDPOINT + KIWA_PAGERDUTY_URL + KIWA_LOKI_URL provider endpoints) and KIWA_MODE=mock (in-memory state machine) so behavioural fidelity feeds @kiwa-test/quality-metrics.",
+  "description": "Dogfood app v1.39-3 — a Splunk + PagerDuty style SIEM + incident response orchestrator (CIM-formatted structured audit log + tamper-evident hash-chain seal + hot/warm/cold retention + correlation rule + playbook trigger + sev1-5 severity classification + escalation + forensics capture + post-mortem + fused SIEM-to-incident orchestrator) that drives a SIEM + incident response surface backed by @kiwa/security v0.2 siem-audit + incident-response semantics, runnable in both KIWA_MODE=real (KIWA_SIEM_ENDPOINT + KIWA_PAGERDUTY_URL + KIWA_LOKI_URL provider endpoints) and KIWA_MODE=mock (in-memory state machine) so behavioural fidelity feeds @kiwa/quality-metrics.",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/security -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/core -F @kiwa/security -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/quality-metrics": "workspace:*",
-    "@kiwa-test/security": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/quality-metrics": "workspace:*",
+    "@kiwa/security": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

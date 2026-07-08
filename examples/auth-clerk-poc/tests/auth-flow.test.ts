@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupClerkEnv, type ClerkTestEnv } from '@kiwa-test/auth';
+import { setupClerkEnv, type ClerkTestEnv } from '@kiwa/auth';
 import {
   createAdminRoute,
   createProtectedRoute,

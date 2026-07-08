@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa-test/core';
+import type { TestEnvBase } from '@kiwa/core';
 
 /**
  * Clerk exposes a hosted auth backend + `@clerk/backend` SDK. All server-side

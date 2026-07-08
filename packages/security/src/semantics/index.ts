@@ -1,5 +1,5 @@
 /**
- * @kiwa-test/security v0.2 advanced II SSOT — 4 provider x 8 axis semantics.
+ * @kiwa/security v0.2 advanced II SSOT — 4 provider x 8 axis semantics.
  *
  * v0.1 (`../index.ts`) の base 8 axis (CSP / rate-limit / authorization / WAF /
  * threat-model / secrets-scan / SBOM / security-headers) と直交する

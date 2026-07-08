@@ -6,7 +6,7 @@ import {
   type CoverageSummary,
   type TestRunRecord,
 } from '../../src/index.js';
-import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-test/perf-harness';
+import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa/perf-harness';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 

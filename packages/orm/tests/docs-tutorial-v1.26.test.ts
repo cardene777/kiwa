@@ -10,7 +10,7 @@
  * ため、 snippet と実 API の乖離を CI で検知する。 v1.17 / v1.19 / v1.20 /
  * v1.21 / v1.22 / v1.23 / v1.24 / v1.25 の docs-tutorial-v*.test.ts と同 pattern。
  *
- * v1.26 は @kiwa-test/orm v0.9 の 8 axis advanced db semantics を扱う。
+ * v1.26 は @kiwa/orm v0.9 の 8 axis advanced db semantics を扱う。
  * tutorial 3 本は cdc / rls / vector-store の 3 axis を各 1 walkthrough で
  * cover するため、 本 test も 3 axis × 各 5-7 snippet ≈ 27 test に focus する。
  */

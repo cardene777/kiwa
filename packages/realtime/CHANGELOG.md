@@ -1,10 +1,10 @@
-# @kiwa-test/realtime
+# @kiwa/realtime
 
 ## 0.2.0
 
 ### Minor Changes
 
-- 🆕 feat(v1.28-1): `@kiwa-test/realtime` v0.2.0 — advanced-transport semantics for 3 protocols × 8 axes plus a real-driver env-gate for the 4 base providers.
+- 🆕 feat(v1.28-1): `@kiwa/realtime` v0.2.0 — advanced-transport semantics for 3 protocols × 8 axes plus a real-driver env-gate for the 4 base providers.
 
   GH #971 — extends the v1.13 base (5 semantics, 4 providers) with a new low-layer transport surface for WebRTC / WebTransport / HTTP/3 / QUIC dogfood apps, keeps the mock-default posture, and lifts the 4 providers to real-vs-mock parity via `KIWA_MODE=real`.
 
@@ -42,7 +42,7 @@
 
 ### Patch Changes
 
-- bd40f20: 🆕 feat(v1.13-2): `@kiwa-test/realtime` v0.1.0 — 4 provider unified mock harness (Supabase Realtime + Ably + Pusher + Socket.io/SSE)
+- bd40f20: 🆕 feat(v1.13-2): `@kiwa/realtime` v0.1.0 — 4 provider unified mock harness (Supabase Realtime + Ably + Pusher + Socket.io/SSE)
 
   v1.13 milestone (Issue #710、 親 #709) — Realtime 系 4 provider 統一 mock を新設し、 presence / broadcast / postgres_changes / room / reconnect の 5 semantics を SSOT として提供する。
 
@@ -89,9 +89,9 @@
 
   ## Backward compatibility
 
-  新規 package のため既存 breaking なし。 `@kiwa-test/quality-metrics` v0.2 の AI-LLM provider 判定 (`isAiLlmProvider`) は変更不要 — realtime 側で AI-LLM 4 軸 shape に変換して同じ 11 軸 gate を再利用する。
+  新規 package のため既存 breaking なし。 `@kiwa/quality-metrics` v0.2 の AI-LLM provider 判定 (`isAiLlmProvider`) は変更不要 — realtime 側で AI-LLM 4 軸 shape に変換して同じ 11 軸 gate を再利用する。
 
   Refs #710、 #709。
 
 - Updated dependencies [797e5ea]
-  - @kiwa-test/quality-metrics@0.2.0
+  - @kiwa/quality-metrics@0.2.0

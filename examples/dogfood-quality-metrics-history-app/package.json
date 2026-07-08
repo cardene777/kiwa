@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.65-2 — quality-metrics v0.5 historical trend tracking + drift detection workflow backed by @kiwa-test/quality-metrics v0.5。 captureSnapshot + compareToBaseline + detectDrift + generateTrendReport の 4 pattern workflow reference。 depth-5 pattern 3 例目確定 dogfood。",
+  "description": "Dogfood app v1.65-2 — quality-metrics v0.5 historical trend tracking + drift detection workflow backed by @kiwa/quality-metrics v0.5。 captureSnapshot + compareToBaseline + detectDrift + generateTrendReport の 4 pattern workflow reference。 depth-5 pattern 3 例目確定 dogfood。",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/quality-metrics": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

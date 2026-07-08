@@ -7,12 +7,12 @@
  * client.
  *
  * The swarm surface pairs the v1.40-1 `agent-swarm` axis (role-based
- * task allocation + PBFT-lite consensus) with `@kiwa-test/ai-llm` v0.5
+ * task allocation + PBFT-lite consensus) with `@kiwa/ai-llm` v0.5
  * — every op has a neutral event counterpart the fidelity harness can
  * compare across mock vs real.
  */
 
-import type { SwarmVote } from '@kiwa-test/ai-llm';
+import type { SwarmVote } from '@kiwa/ai-llm';
 import type {
   AllocateTasksResult,
   AssignRolesResult,

@@ -1,8 +1,8 @@
-import type { NextAuthTestEnv } from '@kiwa-test/auth';
+import type { NextAuthTestEnv } from '@kiwa/auth';
 
 /**
  * Minimal Next.js App Router style handler that consumes a NextAuth session.
- * The PoC feeds the handler through `@kiwa-test/auth` so we can verify the
+ * The PoC feeds the handler through `@kiwa/auth` so we can verify the
  * whole sign-in / session / sign-out loop without booting Next.js.
  */
 export interface ProtectedProfile {

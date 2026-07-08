@@ -11,8 +11,8 @@
  * docs-tutorial-v*.test.ts と同 pattern。 8 milestone 連続 pattern
  * (v1.23-v1.30) を確立する。
  *
- * v1.30 は @kiwa-test/a11y v1.1 の 3-layer harness (runLayerHarness +
- * bucketViolations + computeTotals + isHarnessOk) + @kiwa-test/quality-metrics
+ * v1.30 は @kiwa/a11y v1.1 の 3-layer harness (runLayerHarness +
+ * bucketViolations + computeTotals + isHarnessOk) + @kiwa/quality-metrics
  * v0.4 の 4-tier a11y SSOT + 13-axis release gate を扱う。 tutorial 56 は
  * axe-core setup + WCAG 2.1 AA gate + 3-layer harness + tier gate walkthrough、
  * tutorial 57 は 0 → 34 package migration methodology + tier + optional
@@ -176,7 +176,7 @@ describe('tutorial 57 — Section 4: layers-absent baseline shape', () => {
     // The migration tutorial documents the shape of a Core / SaaS-tier
     // package baseline where no runtime DOM exists. The runLayerHarness call
     // with no fixtures reproduces exactly that shape.
-    const report = await runLayerHarness('@kiwa-test/my-package', {});
+    const report = await runLayerHarness('@kiwa/my-package', {});
 
     expect(report.totals).toEqual({ critical: 0, serious: 0, moderate: 0, minor: 0 });
     expect(report.ok).toBe(true);
@@ -186,7 +186,7 @@ describe('tutorial 57 — Section 4: layers-absent baseline shape', () => {
   });
 
   it('layers-absent baseline is JSON serialisable + round-trip stable', async () => {
-    const report = await runLayerHarness('@kiwa-test/my-package', {});
+    const report = await runLayerHarness('@kiwa/my-package', {});
     const roundtrip = JSON.parse(JSON.stringify(report)) as HarnessReport;
     expect(roundtrip.package).toBe(report.package);
     expect(roundtrip.totals).toEqual(report.totals);

@@ -1,5 +1,5 @@
 /**
- * @kiwa-test/desktop — Desktop test harness (v0.3、 new-base pair 第 14 の第 3 段)。
+ * @kiwa/desktop — Desktop test harness (v0.3、 new-base pair 第 14 の第 3 段)。
  *
  * v0.1 3 axis (Electron + Tauri + Webview) + v0.2 5 advanced axis
  * (Auto-updater + File-system permissions + Notification + Menu-bar + Tray-icon) +

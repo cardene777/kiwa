@@ -7,7 +7,7 @@ import {
   type AdapterResult,
   type DesktopAxis,
   type DesktopTarget,
-} from '@kiwa-test/desktop';
+} from '@kiwa/desktop';
 
 const ALL_AXES: DesktopAxis[] = [
   'electron',

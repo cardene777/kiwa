@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/cli",
+  "package": "@kiwa/cli",
   "generatedAt": "2026-07-06T01:15:07.651Z",
   "layers": {
     "jsdom": {

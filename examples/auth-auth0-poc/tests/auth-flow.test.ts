@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupAuth0Env, type Auth0TestEnv } from '@kiwa-test/auth';
+import { setupAuth0Env, type Auth0TestEnv } from '@kiwa/auth';
 import {
   createAdminRoute,
   createProtectedRoute,

@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/payment.
+ * A11y (axe-core) config for @kiwa/payment.
  * Tier: SaaS tier (critical 0 / serious 0 / moderate 0) — Stripe / Paddle / Lemon Squeezy. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § SaaS tier.
  *

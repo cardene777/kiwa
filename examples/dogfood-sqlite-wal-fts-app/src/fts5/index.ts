@@ -13,7 +13,7 @@ import {
   inspectFts5Vocab,
   type Fts5Session,
   type Fts5Tokenizer,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 export interface Fts5JourneyInput {
   readonly tableName: string;

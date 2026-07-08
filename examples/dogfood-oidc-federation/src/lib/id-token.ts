@@ -1,6 +1,6 @@
 /**
  * id_token verification wrapper — layers dogfood-app-specific fidelity
- * assertions on top of `@kiwa-test/auth`'s `verifyIdToken`. Sub-Issue
+ * assertions on top of `@kiwa/auth`'s `verifyIdToken`. Sub-Issue
  * v1.21-4c (this state) exercises the OIDC Core 1.0 §3.1.3.7 verification
  * requirements + the §3.1.3.6 hash-chain semantics.
  *
@@ -32,7 +32,7 @@ import type {
   IdTokenClaims,
   VerifyIdTokenOptions,
   VerifyIdTokenResult,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 
 /**
  * Verifier callback shape — matches `OidcTestEnv.verifyIdToken`. The wrapper
@@ -172,7 +172,7 @@ export interface IdTokenHeader {
 
 /**
  * Base64url-decode a string. Duplicated locally instead of importing from
- * `@kiwa-test/auth` because the auth package does not export the helper;
+ * `@kiwa/auth` because the auth package does not export the helper;
  * the RP-side helper stays fully self-contained.
  */
 function base64UrlDecode(input: string): string {

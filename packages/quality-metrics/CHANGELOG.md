@@ -1,4 +1,4 @@
-# @kiwa-test/quality-metrics
+# @kiwa/quality-metrics
 
 ## 0.6.0
 
@@ -6,7 +6,7 @@
 
 - v1.66-1 (Issue TBD、 v1.66 milestone quality-metrics 深化 III) — evaluateReleaseGate に drift check opt-in 統合。 v0.5 で pure library として提供した historical trend tracking + drift detection を release gate の judgment path に格上げ。
 
-  ## `@kiwa-test/quality-metrics` v0.6.0
+  ## `@kiwa/quality-metrics` v0.6.0
 
   ### What's added
 
@@ -38,12 +38,12 @@
 
 - 797e5ea: v1.12-1 (Issue #695、 v1.12 milestone 親 #694) — release gate SSOT を 5 軸 → 11 軸に拡張 + AI-LLM 統一 mock harness v0.1 新設。
 
-  ## `@kiwa-test/quality-metrics` v0.2.0
+  ## `@kiwa/quality-metrics` v0.2.0
 
   ### What's added
 
   - **4 新軸** (`CostMetric` / `LatencyMetric` / `TokenMetric` / `AccuracyMetric`) を `types.ts` に追加、 既存 7 軸と合わせ 11 軸。
-  - **AI-LLM 分岐** ... `evaluateReleaseGate` 内で `isAiLlmProvider(report.provider)` 判定、 `@kiwa-test/ai-*` provider のみ 4 軸を追加検査、 それ以外は既存 7 軸のまま (breaking change なし)。
+  - **AI-LLM 分岐** ... `evaluateReleaseGate` 内で `isAiLlmProvider(report.provider)` 判定、 `@kiwa/ai-*` provider のみ 4 軸を追加検査、 それ以外は既存 7 軸のまま (breaking change なし)。
   - **default 閾値** (`DEFAULT_RELEASE_GATE_THRESHOLDS`) に 4 field 追加 ... `costPerRequestUsd: 0.1` / `latencyP95Ms: 3000` / `totalTokens: 4000` / `accuracyScore: 0.8`。
   - **collect helpers** 4 追加 ... `costFromSamples` / `latencyFromSamples` / `tokenFromSamples` / `accuracyFromSamples`。
   - **emit / diff** 4 軸拡張 ... `emitMarkdown` は AI-LLM provider で `11-axis summary` 表 + 4 行を追加出力、 `diffReports` は両 report が該当 field を持つときのみ diff。
@@ -61,14 +61,14 @@
   - 非 AI-LLM provider (既存 7 軸のみ) は挙動不変、 breaking change なし。
   - `axesEvaluated` は non AI-LLM で `7`、 AI-LLM で `11` を返す。
 
-  ## `@kiwa-test/ai-llm` v0.1.0 (新設)
+  ## `@kiwa/ai-llm` v0.1.0 (新設)
 
   ### What's added
 
   - **4 SDK 統一 mock** ... Anthropic Messages API / OpenAI Chat Completions / Vercel AI SDK (`streamText` / `generateText`) / LangChain (`ChatModel` / `Runnable`) の同一 interface。
   - **streaming + tool-use + system prompt** の 3 use case を 4 SDK 全てで cover。
   - **fidelity harness** (`fidelity.ts`) ... real API vs mock の 4 metric (cost / latency / token / accuracy) diff を返す。 v1.12-2/-3/-4 dogfood app が直接使用する。
-  - **report adapter** (`report.ts`) ... 4 SDK 実測値から `@kiwa-test/quality-metrics` 用 `QualityReport` を組み立てる。
+  - **report adapter** (`report.ts`) ... 4 SDK 実測値から `@kiwa/quality-metrics` 用 `QualityReport` を組み立てる。
 
   ### API surface
 

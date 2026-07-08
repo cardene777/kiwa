@@ -4,7 +4,7 @@
 // この関数を呼ぶ。 kiwa renderServerComponent では sessionGetter を injection
 // することで cookies dep を回避する。
 
-import type { RscNode } from '@kiwa-test/nextjs';
+import type { RscNode } from '@kiwa/nextjs';
 import { resolveUserFromCookieHeader, type SessionUser } from '../../../lib/_kiwa/auth';
 
 export interface Item {

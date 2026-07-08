@@ -1,5 +1,5 @@
 {
-  "name": "@kiwa-test/search",
+  "name": "@kiwa/search",
   "version": "0.3.0",
   "description": "Search provider mock harness for kiwa — unified Meilisearch + Algolia + Typesense query/index/search/facet mocks with in-memory index + deterministic ranking + release-gate integration.",
   "license": "MIT",
@@ -53,18 +53,18 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "pretest:perf": "pnpm -F @kiwa-test/perf-harness build",
+    "pretest:perf": "pnpm -F @kiwa/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:mutation": "stryker run",
     "test:a11y": "node ../../scripts/run-axe-baseline.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/quality-metrics": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/quality-metrics": "workspace:*"
   },
   "devDependencies": {
-    "@kiwa-test/perf-harness": "workspace:*",
+    "@kiwa/perf-harness": "workspace:*",
     "@stryker-mutator/core": "^8.7.1",
     "@stryker-mutator/vitest-runner": "^8.7.1",
     "@types/node": "^22.10.0",

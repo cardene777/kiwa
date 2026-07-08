@@ -1,5 +1,5 @@
 /**
- * Registry flow — wraps @kiwa-test/streaming's SchemaRegistry with the
+ * Registry flow — wraps @kiwa/streaming's SchemaRegistry with the
  * dogfood-specific subject naming strategy + a compat-mode switch helper.
  *
  * The dogfood's contract with the registry:
@@ -14,7 +14,7 @@ import type {
   RegisteredSchema,
   SchemaKind,
   SchemaRegistry,
-} from '@kiwa-test/streaming';
+} from '@kiwa/streaming';
 
 export interface RegistryRun {
   readonly registry: SchemaRegistry;

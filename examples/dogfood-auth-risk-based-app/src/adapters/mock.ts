@@ -1,4 +1,4 @@
-import { semantics } from '@kiwa-test/auth';
+import { semantics } from '@kiwa/auth';
 const {
   applyPolicy,
   detectAbuse,

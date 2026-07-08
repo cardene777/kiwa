@@ -4,7 +4,7 @@ import {
   type MockResponse,
   type OpenAiChatCompletionsRequest,
   type OpenAiChatCompletionsResponse,
-} from '@kiwa-test/ai-llm';
+} from '@kiwa/ai-llm';
 import type {
   AgentAdapter,
   AgentLoopResult,
@@ -15,7 +15,7 @@ import { parseToolCall, summariseSteps } from './shared.js';
 import type { ToolSchema } from '../tools/schema.js';
 
 /**
- * Mock adapter — drives the `@kiwa-test/ai-llm` OpenAI mock so the same
+ * Mock adapter — drives the `@kiwa/ai-llm` OpenAI mock so the same
  * agent code exercises {@link createOpenAIMock} without hitting the network.
  *
  * ## Why per-turn client instances

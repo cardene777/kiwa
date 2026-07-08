@@ -1,4 +1,4 @@
-import type { BetterAuthTestEnv } from '@kiwa-test/auth';
+import type { BetterAuthTestEnv } from '@kiwa/auth';
 
 /**
  * Minimal bare-metal server handler that consumes a Better Auth session token.

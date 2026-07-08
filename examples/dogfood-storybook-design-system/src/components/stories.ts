@@ -1,5 +1,5 @@
-import { fireEvent } from '@kiwa-test/component';
-import type { StoryMeta } from '@kiwa-test/component';
+import { fireEvent } from '@kiwa/component';
+import type { StoryMeta } from '@kiwa/component';
 import type {
   AvatarArgs,
   BadgeArgs,

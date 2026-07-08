@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa-test/component/nextjs-rsc-streaming-app",
+  "provider": "@kiwa/component/nextjs-rsc-streaming-app",
   "version": "0.3.0",
   "reportedAt": "2026-07-06T12:58:20.396Z",
   "coverage": {

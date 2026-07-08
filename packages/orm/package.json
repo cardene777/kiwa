@@ -1,5 +1,5 @@
 {
-  "name": "@kiwa-test/orm",
+  "name": "@kiwa/orm",
   "version": "0.10.0",
   "description": "ORM query test adapter for kiwa — setup Drizzle, Prisma, or Kysely environments against in-memory SQLite (mock) or testcontainers Postgres/MySQL (live), apply SQL string / SQL string[] / drizzle-kit-generated `{ folder }` migrations, seed fixtures, and assert query results with a consistent setupOrmEnv API",
   "license": "MIT",
@@ -59,7 +59,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "pretest:perf": "pnpm -F @kiwa-test/perf-harness build",
+    "pretest:perf": "pnpm -F @kiwa/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/index.js' --coverage.include='.vitest-dist/src/setup-orm-env.js' --coverage.include='.vitest-dist/src/expectations.js' --coverage.include='.vitest-dist/src/semantics/**/*.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='**/*.d.ts'",
     "test:mutation": "stryker run",
@@ -67,7 +67,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*"
+    "@kiwa/core": "workspace:*"
   },
   "peerDependencies": {
     "@prisma/client": ">=5",
@@ -119,7 +119,7 @@
     }
   },
   "devDependencies": {
-    "@kiwa-test/perf-harness": "workspace:*",
+    "@kiwa/perf-harness": "workspace:*",
     "@prisma/client": "^5.22.0",
     "@stryker-mutator/core": "^8.7.1",
     "@stryker-mutator/vitest-runner": "^8.7.1",

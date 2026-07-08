@@ -1,5 +1,5 @@
 {
-  "name": "@kiwa-test/release-invariants",
+  "name": "@kiwa/release-invariants",
   "version": "0.1.0",
   "description": "Release invariants SSOT for kiwa — release script filter coverage + provenance flag absence + gate script package coverage checkers, packaged so downstream monorepos can reuse the same 3 invariants that kiwa v1.14-v1.28 rediscovered 4 times.",
   "license": "MIT",

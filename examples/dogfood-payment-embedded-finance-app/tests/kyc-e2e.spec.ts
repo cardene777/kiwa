@@ -13,7 +13,7 @@
  *  3. checkScoreThreshold compares aggregate KYC + KYB score against a
  *     minRequired threshold with a strict >= semantics.
  *  4. closeKyc terminates the session and forwards state to
- *     `@kiwa-test/payment` v0.5 closeAccount.
+ *     `@kiwa/payment` v0.5 closeAccount.
  *  5. Route handler dispatches the shape variations exposed over HTTP
  *     without spinning up a Node server.
  */

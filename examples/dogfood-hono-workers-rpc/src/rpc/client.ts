@@ -1,5 +1,5 @@
-import { createRpcClient } from '@kiwa-test/hono';
-import type { HonoAppLike } from '@kiwa-test/hono';
+import { createRpcClient } from '@kiwa/hono';
+import type { HonoAppLike } from '@kiwa/hono';
 import type { DogfoodEnv } from '../routes/app.js';
 
 /**

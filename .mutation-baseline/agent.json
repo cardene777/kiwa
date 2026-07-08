@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/agent",
+  "package": "@kiwa/agent",
   "tier": "SaaS",
   "thresholds": {
     "high": 65,

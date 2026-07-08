@@ -1,4 +1,4 @@
-import { batch, mockSignal, mockEffect, type EffectHandle, type SignalGetter, type SignalSetter } from '@kiwa-test/solidjs';
+import { batch, mockSignal, mockEffect, type EffectHandle, type SignalGetter, type SignalSetter } from '@kiwa/solidjs';
 
 /**
  * Todos store — a Signal<Todo[]> plus a derived effect that counts

@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { killAnvilFromPidFile } from '@kiwa-test/dapp';
+import { killAnvilFromPidFile } from '@kiwa/dapp';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const exampleRoot = resolve(__dirname, '..');

@@ -71,7 +71,7 @@ async function loadPeers(): Promise<{ bullmq: BullMQModule; ioredis: IoRedisModu
     ioredis = (await import('ioredis')) as unknown as IoRedisModule;
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/queue: testcontainers mode requires 'bullmq' + 'ioredis' peer dependencies. Install with `pnpm add -D bullmq ioredis`. Original error: " +
+      "@kiwa/queue: testcontainers mode requires 'bullmq' + 'ioredis' peer dependencies. Install with `pnpm add -D bullmq ioredis`. Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }
@@ -90,7 +90,7 @@ async function startRedisContainer(image: string): Promise<{
     container = new testcontainers.GenericContainer(image).withExposedPorts(6379);
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/queue: testcontainers mode requires the 'testcontainers' peer dependency. Install with `pnpm add -D testcontainers`. Original error: " +
+      "@kiwa/queue: testcontainers mode requires the 'testcontainers' peer dependency. Install with `pnpm add -D testcontainers`. Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }

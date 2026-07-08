@@ -9,7 +9,7 @@
  *    Modal / Deno subprocess sandbox) when `KIWA_MODE=real` +
  *    `ANTHROPIC_API_KEY` + `KIWA_LLM_BUDGET_USD` are set; otherwise
  *    every op reports `KIWA_LLM_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/ai-llm` v0.5
+ *  - {@link makeMockAdapter} — backed by `@kiwa/ai-llm` v0.5
  *    code-interpreter semantics (startCiSession / startSandbox /
  *    executeCode / useTool / rollback).
  *

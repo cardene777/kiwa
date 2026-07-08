@@ -1,7 +1,7 @@
 import {
   createPlaywrightCTMock,
   type PlaywrightCTMock,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 import { FORM_SPECS } from '../forms/index.js';
 import type {
   FormArgsMap,
@@ -17,11 +17,11 @@ import type {
   FormValidationOutcome,
   TraceEvent,
 } from './interface.js';
-import { createStoryRegistry, type StoryRegistry } from '@kiwa-test/component';
+import { createStoryRegistry, type StoryRegistry } from '@kiwa/component';
 
 /**
  * Mock adapter — drives Playwright Component Testing through
- * `@kiwa-test/component` `createPlaywrightCTMock` (mount + interact + assert
+ * `@kiwa/component` `createPlaywrightCTMock` (mount + interact + assert
  * against an in-memory MockNode canvas). Every op records a trace event so the
  * fidelity harness can diff mock vs real behaviour without a live browser
  * process.
@@ -29,7 +29,7 @@ import { createStoryRegistry, type StoryRegistry } from '@kiwa-test/component';
  * The mock is intentionally fast (<1 ms per op) but still records a per-op
  * latency sample so `perf.p95Ms` in the 7-axis release gate never reads as
  * 0-sample. A parallel `StoryRegistry` is used only for the a11y check because
- * the heuristic checker inside `@kiwa-test/component` is exposed through the
+ * the heuristic checker inside `@kiwa/component` is exposed through the
  * `StoryRegistry.runA11y` op rather than as a stand-alone function — the story
  * registration is a1 tiny shim (title + render + `A11y` story) around each
  * form so the check can run on the same rendered tree the CT flow mounted.
@@ -239,7 +239,7 @@ export function makeMockAdapter(): FormCTAdapter {
         const spec = FORM_SPECS[kind];
         const reg = ensureRegistry();
         // Register (or re-register) the form as a single-story meta so the
-        // heuristic a11y checker inside `@kiwa-test/component` can walk the
+        // heuristic a11y checker inside `@kiwa/component` can walk the
         // rendered tree the same way it does for Storybook stories.
         reg.register({
           title: `FormCT/${kind}-${args.formId}`,

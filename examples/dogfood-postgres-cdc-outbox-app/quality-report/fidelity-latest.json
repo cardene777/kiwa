@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa-test/orm/postgres-cdc-dogfood",
+  "provider": "@kiwa/orm/postgres-cdc-dogfood",
   "version": "0.1.0",
   "reportedAt": "2026-07-06T07:42:03.154Z",
   "coverage": {

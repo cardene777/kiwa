@@ -4,7 +4,7 @@
 // export const load = (event) => itemsLoad(event) として thin wrap する。
 // この分離により kiwa unit test は SvelteKit runtime 不要、 e2e は実 vite dev + adapter で動作する。
 
-import { error, redirect, type SimulatedLoadEvent } from '@kiwa-test/sveltekit';
+import { error, redirect, type SimulatedLoadEvent } from '@kiwa/sveltekit';
 
 export interface Item {
   readonly id: number;

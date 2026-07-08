@@ -63,7 +63,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
       }
       const { stdout, stderr } = await execFileAsync('node', [GATE_SCRIPT], { cwd: fakeRoot });
       expect(stderr).toContain('All packages passed coverage thresholds');
-      expect(stdout).toMatch(/@kiwa-test\/core.*✅/);
+      expect(stdout).toMatch(/@kiwa\/core.*✅/);
     } finally {
       rmSync(fakeRoot, { recursive: true, force: true });
     }
@@ -120,7 +120,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
         stderr = err.stderr ?? '';
       }
       expect(exitCode).not.toBe(0);
-      expect(stdout).toMatch(/@kiwa-test\/core.*❌/);
+      expect(stdout).toMatch(/@kiwa\/core.*❌/);
       expect(stderr).toContain('Coverage gate failed');
     } finally {
       rmSync(fakeRoot, { recursive: true, force: true });

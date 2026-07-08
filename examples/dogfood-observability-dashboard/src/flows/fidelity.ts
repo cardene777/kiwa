@@ -10,18 +10,18 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 import type { DashboardAdapter, TraceEvent } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into the `@kiwa-test/quality-metrics`
+ * (missing ops, unmatched behaviour) into the `@kiwa/quality-metrics`
  * 7-axis release gate, and emits a JSON + markdown report so the release
  * process can consume it.
  *
  * The dogfood app is the source of truth for whether the kiwa
- * `@kiwa-test/observability` DashboardMock tracks real Prometheus /
+ * `@kiwa/observability` DashboardMock tracks real Prometheus /
  * Grafana behaviour closely enough to be trusted as a mock in unit
  * tests — this harness is where that trust is measured.
  *

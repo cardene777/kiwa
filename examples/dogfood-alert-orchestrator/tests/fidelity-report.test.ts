@@ -33,7 +33,7 @@ describe('dogfood-alert-orchestrator — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/observability/alert',
+      provider: '@kiwa/observability/alert',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -48,7 +48,7 @@ describe('dogfood-alert-orchestrator — fidelity harness', () => {
       mutation: { mutations: 40, killed: 28 },
       surfaceCoverage: { mockCoveredMethods: 3, realTotalMethods: 3 },
     });
-    expect(output.report.provider).toBe('@kiwa-test/observability/alert');
+    expect(output.report.provider).toBe('@kiwa/observability/alert');
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThanOrEqual(3);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     await mock.reset();
@@ -66,7 +66,7 @@ describe('dogfood-alert-orchestrator — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/observability/alert',
+      provider: '@kiwa/observability/alert',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -99,7 +99,7 @@ describe('dogfood-alert-orchestrator — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/observability/alert',
+      provider: '@kiwa/observability/alert',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupLuciaEnv, type LuciaTestEnv } from '@kiwa-test/auth';
+import { setupLuciaEnv, type LuciaTestEnv } from '@kiwa/auth';
 import { createProtectedRoute, type ProtectedProfile } from '../src/route.js';
 
 const envs: LuciaTestEnv[] = [];

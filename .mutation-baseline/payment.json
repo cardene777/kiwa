@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/payment",
+  "package": "@kiwa/payment",
   "tier": "SaaS",
   "thresholds": {
     "high": 65,

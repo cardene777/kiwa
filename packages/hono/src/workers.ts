@@ -18,7 +18,7 @@
 // Out of scope on purpose:
 //   - real Durable Object binding lifecycle (implementations require the DO
 //     runtime; use a fake `env.MY_DO` object in the test itself)
-//   - real Queue producer + consumer messaging (see @kiwa-test/queue instead)
+//   - real Queue producer + consumer messaging (see @kiwa/queue instead)
 //   - websockets / WebSocketPair / attached crypto keys (v0.1)
 
 import type { ExecutionCtxLike } from './app.js';

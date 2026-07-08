@@ -1,12 +1,12 @@
 /**
  * Fidelity harness — compares a chat-room run under `makeMockAdapter`
  * against one under `makeRealAdapter`, feeds the divergence count
- * (missing ops, behavioural mismatch) into the `@kiwa-test/quality-metrics`
+ * (missing ops, behavioural mismatch) into the `@kiwa/quality-metrics`
  * 7-axis release gate, and emits a JSON + markdown report the release
  * process can consume.
  *
  * The dogfood app is the source of truth for whether the kiwa
- * `@kiwa-test/edge` v0.2 durable-object + websocket-edge axes track a real
+ * `@kiwa/edge` v0.2 durable-object + websocket-edge axes track a real
  * Cloudflare Workers runtime closely enough to be trusted in unit tests.
  *
  * The 8 ops under test correspond to the 8 axis routing pattern:
@@ -34,7 +34,7 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 import type { CloudflareDurableObjectAdapter, TraceEvent } from './cf-adapter.js';
 
 export interface FidelityRunInput {

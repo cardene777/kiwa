@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa-test/core';
+import type { TestEnvBase } from '@kiwa/core';
 import type { ReactElement } from 'react';
 import type { RenderOptions, RenderResult, screen as ScreenApi } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';

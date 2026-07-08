@@ -98,7 +98,7 @@ describe('emit fidelity-latest report', () => {
     const matrix = await runAdapterMatrix({ mock, real, run: driveFlows });
 
     const output = runFidelityHarness({
-      provider: '@kiwa-test/component/nextjs-rsc-streaming-app',
+      provider: '@kiwa/component/nextjs-rsc-streaming-app',
       version: '0.3.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

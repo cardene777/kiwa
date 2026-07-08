@@ -16,7 +16,7 @@ import {
   type SvelteKitErrorSignal,
   type SvelteKitFailSignal,
   type SvelteKitRedirectSignal,
-} from '@kiwa-test/sveltekit';
+} from '@kiwa/sveltekit';
 import { itemsLoad } from './_kiwa/items-load.js';
 import { createItemAction } from './_kiwa/items-actions.js';
 

@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/nextjs.
+ * Mutation testing config for @kiwa/nextjs.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — SSR + RSC + Server
  * Actions + Middleware invariants; the initial v1.27-1 rollout used the
  * aspirational 90 / 80 / 80 override, but the v1.27-2 baseline sweep landed at

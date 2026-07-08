@@ -5,7 +5,7 @@
  *
  * The guardrails surface pairs the parent v1.38-1 `guardrails` axis
  * (schema + regex + toxicity + PII + Constitutional AI) with
- * `@kiwa-test/ai-llm` v0.4 — every op has a neutral event counterpart
+ * `@kiwa/ai-llm` v0.4 — every op has a neutral event counterpart
  * the fidelity harness can compare across mock vs real.
  */
 

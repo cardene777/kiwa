@@ -14,15 +14,15 @@ import {
   tokenFromSamples,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
-import { jaccardSimilarity } from '@kiwa-test/ai-llm';
+} from '@kiwa/quality-metrics';
+import { jaccardSimilarity } from '@kiwa/ai-llm';
 import type { ChatbotAdapter, TraceEvent } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
  * (SSE token diff, missing ops, unmatched behaviour) into the
- * `@kiwa-test/quality-metrics` 11-axis release gate, and emits a JSON +
+ * `@kiwa/quality-metrics` 11-axis release gate, and emits a JSON +
  * markdown report so the release process can consume it.
  *
  * The dogfood app is the source of truth for whether the kiwa mock tracks

@@ -3,21 +3,21 @@
   "version": "0.0.3",
   "private": true,
   "type": "module",
-  "description": "Dogfood app (v1.31-4) — a NATS JetStream + KV + Object Store + subject routing pipeline that exercises 4 v1 patterns (JetStream persistent stream + durable consumer + ack / redelivery / KV Store put + get + watch + delete + versioning / Object Store put + get + delete + chunk metadata / subject-based routing with wildcard subject + queue group) + 4 v2 axes (JetStream durable consumer ack_wait + max_deliver + backoff / KV bucket revision history + delete tombstone + watch / Object Store chunk boundary + LZ4 compression + reassembly / NATS 2.10+ testcontainers duck-typing) driven by @kiwa-test/streaming v0.3 in KIWA_MODE=mock and a NATS 2.10+ testcontainers boot in KIWA_MODE=real (env-gated on NATS_KEY). Behavioural fidelity feeds @kiwa-test/quality-metrics 13-axis release gate + Playwright e2e for jetstream / kv / object / routing / durable / kv-revision / object-chunking / testcontainers-probe flows.",
+  "description": "Dogfood app (v1.31-4) — a NATS JetStream + KV + Object Store + subject routing pipeline that exercises 4 v1 patterns (JetStream persistent stream + durable consumer + ack / redelivery / KV Store put + get + watch + delete + versioning / Object Store put + get + delete + chunk metadata / subject-based routing with wildcard subject + queue group) + 4 v2 axes (JetStream durable consumer ack_wait + max_deliver + backoff / KV bucket revision history + delete tombstone + watch / Object Store chunk boundary + LZ4 compression + reassembly / NATS 2.10+ testcontainers duck-typing) driven by @kiwa/streaming v0.3 in KIWA_MODE=mock and a NATS 2.10+ testcontainers boot in KIWA_MODE=real (env-gated on NATS_KEY). Behavioural fidelity feeds @kiwa/quality-metrics 13-axis release gate + Playwright e2e for jetstream / kv / object / routing / durable / kv-revision / object-chunking / testcontainers-probe flows.",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/streaming -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "pretest:perf": "pnpm -F @kiwa-test/streaming -F @kiwa-test/core -F @kiwa-test/quality-metrics -F @kiwa-test/perf-harness build",
+    "test": "pnpm -F @kiwa/streaming -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "pretest:perf": "pnpm -F @kiwa/streaming -F @kiwa/core -F @kiwa/quality-metrics -F @kiwa/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/streaming": "workspace:*",
-    "@kiwa-test/quality-metrics": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/streaming": "workspace:*",
+    "@kiwa/quality-metrics": "workspace:*"
   },
   "devDependencies": {
-    "@kiwa-test/perf-harness": "workspace:*",
+    "@kiwa/perf-harness": "workspace:*",
     "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.0",
     "typescript": "^5.6.0",

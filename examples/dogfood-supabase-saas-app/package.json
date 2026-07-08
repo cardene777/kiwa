@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app 1 (v1.11-2) — SaaS onboarding + protected doc list + MFA + SSO SAML + Web3 SIWE, drivable in both KIWA_MODE=real (Supabase Local) and KIWA_MODE=mock (@kiwa-test/auth) so behavioural fidelity feeds @kiwa-test/quality-metrics.",
+  "description": "Dogfood app 1 (v1.11-2) — SaaS onboarding + protected doc list + MFA + SSO SAML + Web3 SIWE, drivable in both KIWA_MODE=real (Supabase Local) and KIWA_MODE=mock (@kiwa/auth) so behavioural fidelity feeds @kiwa/quality-metrics.",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/auth -F @kiwa-test/core -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/auth -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/auth": "workspace:*",
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/quality-metrics": "workspace:*"
+    "@kiwa/auth": "workspace:*",
+    "@kiwa/core": "workspace:*",
+    "@kiwa/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

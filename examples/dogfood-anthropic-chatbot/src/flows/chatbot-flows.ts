@@ -3,7 +3,7 @@ import type { ChatbotAdapter } from '../adapters/interface.js';
 /**
  * User-facing flows the chatbot app exposes. Each flow talks only through
  * {@link ChatbotAdapter} so the same code powers both `KIWA_MODE=real`
- * (Anthropic Messages API) and `KIWA_MODE=mock` (`@kiwa-test/ai-llm`
+ * (Anthropic Messages API) and `KIWA_MODE=mock` (`@kiwa/ai-llm`
  * createAnthropicMock).
  *
  * The 3 flows below mirror the AC in Issue #696 —

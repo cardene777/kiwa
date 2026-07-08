@@ -40,7 +40,7 @@ async function pingWrangler(url: string, timeoutMs: number): Promise<void> {
     });
   }
   throw new Error(
-    `@kiwa-test/queue: wrangler dev did not respond at ${probeUrl} within ${timeoutMs}ms`,
+    `@kiwa/queue: wrangler dev did not respond at ${probeUrl} within ${timeoutMs}ms`,
   );
 }
 
@@ -53,7 +53,7 @@ async function spawnWrangler(
     child_process = await import('node:child_process');
   } catch (caught) {
     throw new Error(
-      "@kiwa-test/queue: wrangler mode requires node:child_process (Node >= 20). Original error: " +
+      "@kiwa/queue: wrangler mode requires node:child_process (Node >= 20). Original error: " +
         (caught instanceof Error ? caught.message : String(caught)),
     );
   }

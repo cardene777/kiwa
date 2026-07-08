@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.63-2 — Desktop v0.8 native binding availability probe + skip 経路 workflow backed by @kiwa-test/desktop v0.8。 which/where CLI check + platform gate + 12 axis 別 skip strategy + fidelity harness probe 統合 (runFidelityCheckWithProbe + SkippedPair) の 3 pattern workflow reference。 実 CLI 未 install 環境 (CI + linux で reg / macos で notify-send / windows で osascript) でも決定的 test 成立する pattern の dogfood。",
+  "description": "Dogfood app v1.63-2 — Desktop v0.8 native binding availability probe + skip 経路 workflow backed by @kiwa/desktop v0.8。 which/where CLI check + platform gate + 12 axis 別 skip strategy + fidelity harness probe 統合 (runFidelityCheckWithProbe + SkippedPair) の 3 pattern workflow reference。 実 CLI 未 install 環境 (CI + linux で reg / macos で notify-send / windows で osascript) でも決定的 test 成立する pattern の dogfood。",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/desktop build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/core -F @kiwa/desktop build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/desktop": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/desktop": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

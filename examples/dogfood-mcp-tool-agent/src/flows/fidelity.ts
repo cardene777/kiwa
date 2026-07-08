@@ -14,15 +14,15 @@ import {
   tokenFromSamples,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
-import { jaccardSimilarity } from '@kiwa-test/ai-llm';
+} from '@kiwa/quality-metrics';
+import { jaccardSimilarity } from '@kiwa/ai-llm';
 import type { McpAgentAdapter, TraceEvent } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares an MCP-tool-agent run under
  * {@link makeMockAdapter} against one under {@link makeRealAdapter}, feeds
  * the divergence count (missing ops, tool call order, schema error shape)
- * into the `@kiwa-test/quality-metrics` 11-axis release gate, and emits a
+ * into the `@kiwa/quality-metrics` 11-axis release gate, and emits a
  * JSON + markdown report so the release process can consume it.
  *
  * The MCP dogfood is the source of truth for whether the kiwa mock tracks

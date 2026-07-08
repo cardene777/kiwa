@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupKeyDBEnv, type KeyDBTestEnv } from '@kiwa-test/cache';
+import { setupKeyDBEnv, type KeyDBTestEnv } from '@kiwa/cache';
 import { createRegionCache } from '../src/multi-region-cache.js';
 
 const envs: KeyDBTestEnv[] = [];

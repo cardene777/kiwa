@@ -1,4 +1,4 @@
-import type { MockNode, StoryParameters } from '@kiwa-test/component';
+import type { MockNode, StoryParameters } from '@kiwa/component';
 
 /**
  * Theme axis — a scene is registered twice, once per theme, so the mock harness

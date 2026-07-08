@@ -19,7 +19,7 @@ import {
   startNewArchInit,
   unregisterTurboModule,
   type MobileTarget,
-} from '@kiwa-test/mobile';
+} from '@kiwa/mobile';
 
 export interface WorkflowResult {
   target: MobileTarget;

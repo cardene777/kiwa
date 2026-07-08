@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/sveltekit.
+ * A11y (axe-core) config for @kiwa/sveltekit.
  * Tier: Framework tier (critical 0 / serious 0-3 / moderate 0-10) — SSR + hydration + load / actions. Serious tolerance for SvelteKit-owned markup.
  * SSOT: docs/quality/a11y-thresholds.md § Framework tier.
  */

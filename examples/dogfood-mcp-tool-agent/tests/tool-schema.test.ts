@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { JsonRpcErrorCode, McpRpcError } from '@kiwa-test/mcp';
+import { JsonRpcErrorCode, McpRpcError } from '@kiwa/mcp';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { ALL_TOOLS, TOOL_HANDLERS } from '../src/tools/schema.js';
 

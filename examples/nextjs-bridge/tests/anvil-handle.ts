@@ -1,3 +1,3 @@
-import type { AnvilHandle } from '@kiwa-test/dapp';
+import type { AnvilHandle } from '@kiwa/dapp';
 
 export const anvilState: { handles: AnvilHandle[] } = { handles: [] };

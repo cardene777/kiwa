@@ -4,7 +4,7 @@ import {
   startElementTransition,
   startViewTransitionSession,
   type ComponentTarget,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 import {
   commitTransition,
   interruptTransition,
@@ -16,7 +16,7 @@ import {
   flushStreamingBoundary,
   completePartialPrerendering,
   type NextTarget,
-} from '@kiwa-test/nextjs';
+} from '@kiwa/nextjs';
 
 export interface WorkflowResult {
   target: string;

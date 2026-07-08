@@ -1,6 +1,6 @@
 /**
  * Emit a fidelity report to disk — the 3-spec dogfood harness plus the
- * `@kiwa-test/quality-metrics` release gate run over the mock + real
+ * `@kiwa/quality-metrics` release gate run over the mock + real
  * adapters, producing the JSON snapshot + markdown that `docs/quality-
  * reports/edge/vercel-edge-function-app.md` consumes at release time.
  *
@@ -82,7 +82,7 @@ describe('dogfood-vercel-edge-function-app — emit fidelity report to quality-r
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/edge/vercel-edge-function',
+      provider: '@kiwa/edge/vercel-edge-function',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

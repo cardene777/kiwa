@@ -19,7 +19,7 @@ import type {
   Invoice as SemanticInvoice,
   PaymentWebhookEvent,
   Subscription as SemanticSubscription,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 import type {
   CheckoutInput,
   CheckoutResult,

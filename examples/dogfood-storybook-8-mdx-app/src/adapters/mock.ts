@@ -4,7 +4,7 @@ import {
   type MockNode,
   type StoryMeta,
   type StoryRegistry,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 import type {
   A11yReport,
   CoverageEntry,
@@ -22,7 +22,7 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — spins up an in-process `@kiwa-test/component` `StoryRegistry`
+ * Mock adapter — spins up an in-process `@kiwa/component` `StoryRegistry`
  * + in-memory MdxRegistry + InteractionRunner + CoverageReporter. Every op
  * records a trace event so the fidelity harness can diff mock vs real
  * behaviour without needing a live Storybook preview.

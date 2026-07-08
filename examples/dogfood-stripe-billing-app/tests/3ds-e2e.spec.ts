@@ -24,7 +24,7 @@
  */
 
 import { afterEach, describe, expect, it } from 'vitest';
-import { providerEventName } from '@kiwa-test/payment';
+import { providerEventName } from '@kiwa/payment';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { createCheckoutHandler } from '../src/app/checkout/route.js';
 

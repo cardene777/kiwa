@@ -7,7 +7,7 @@
  * toolchain.
  *
  * The reproducible surface pairs the parent v1.39-1 `supply-chain` axis
- * (matchReproducibleBuild) with `@kiwa-test/security` v0.2 — the op
+ * (matchReproducibleBuild) with `@kiwa/security` v0.2 — the op
  * emits a neutral event the fidelity harness can compare across mock
  * vs real.
  */

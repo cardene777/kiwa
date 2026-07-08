@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/observability",
+  "package": "@kiwa/observability",
   "tier": "Core",
   "thresholds": {
     "high": 80,

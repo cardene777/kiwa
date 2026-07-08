@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/astro.
+ * A11y (axe-core) config for @kiwa/astro.
  * Tier: Framework tier (critical 0 / serious 0-3 / moderate 0-10) — Islands + SSR + partial hydration. Serious tolerance for Astro island wrappers.
  * SSOT: docs/quality/a11y-thresholds.md § Framework tier.
  */

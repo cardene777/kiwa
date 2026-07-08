@@ -5,7 +5,7 @@
  * verdict are consistent with the observed divergence count.
  *
  * The fidelity harness is the seam through which the v1.36-1
- * `@kiwa-test/search` v0.3 faceted-advanced + geo axes are validated
+ * `@kiwa/search` v0.3 faceted-advanced + geo axes are validated
  * against the real Algolia sandbox surface. Any drift the harness
  * detects surfaces here.
  */

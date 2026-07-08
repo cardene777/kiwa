@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa-test/payment/dogfood-crypto-fx-app",
+  "provider": "@kiwa/payment/dogfood-crypto-fx-app",
   "version": "0.5.0",
   "reportedAt": "2026-07-07T13:28:47.599Z",
   "coverage": {

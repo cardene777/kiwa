@@ -12,7 +12,7 @@
  * whole `fixtures` field, or declares every layer absent) produces a
  * `layers-absent` baseline — every layer records `applicable: false` with an
  * explicit reason. This is the expected state for every current kiwa
- * `@kiwa-test/*` package because they are test-adapter infrastructure that
+ * `@kiwa/*` package because they are test-adapter infrastructure that
  * emit no runtime DOM.
  *
  * Fixture-wired path — packages that supply a jsdom or SSR-hydration fixture
@@ -413,10 +413,10 @@ async function main() {
   }
   let runLayerHarness;
   try {
-    ({ runLayerHarness } = await import('@kiwa-test/a11y'));
+    ({ runLayerHarness } = await import('@kiwa/a11y'));
   } catch (err) {
     console.error(
-      `[a11y] ${pkgName}: could not import @kiwa-test/a11y (needed for fixture-wired baseline). ${err instanceof Error ? err.message : err}`,
+      `[a11y] ${pkgName}: could not import @kiwa/a11y (needed for fixture-wired baseline). ${err instanceof Error ? err.message : err}`,
     );
     process.exit(1);
   }

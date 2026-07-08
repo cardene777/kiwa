@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa-test/observability/otel-exemplar",
+  "provider": "@kiwa/observability/otel-exemplar",
   "version": "2.1.0",
   "reportedAt": "2026-07-06T15:06:39.984Z",
   "coverage": {

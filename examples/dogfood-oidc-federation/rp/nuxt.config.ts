@@ -7,7 +7,7 @@
 // code for an id_token + userinfo. Sub-Issue v1.21-4d wires the JWKS
 // rotation e2e against this skeleton.
 //
-// The RP intentionally does not import `@kiwa-test/auth` from within Nuxt
+// The RP intentionally does not import `@kiwa/auth` from within Nuxt
 // modules to keep the Nuxt Nitro build hermetic — the OP-side helpers live
 // under `../src/lib/*.ts` and the RP consumes them through the shared
 // `dogfood-oidc-federation` package boundary at test time.

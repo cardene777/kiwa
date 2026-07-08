@@ -1,4 +1,4 @@
-# @kiwa-test/agent
+# @kiwa/agent
 
 Agent orchestration mock harness for kiwa — LangGraph 型 state machine + OpenAI Assistants v2 の 1 統一 API。
 
@@ -12,7 +12,7 @@ LangGraph は agent graph の DSL、 OpenAI Assistants v2 は stateful conversat
 ## Usage — LangGraph 型 state machine
 
 ```ts
-import { END, START, StateGraph } from '@kiwa-test/agent';
+import { END, START, StateGraph } from '@kiwa/agent';
 
 interface ChatState {
   messages: string[];
@@ -45,7 +45,7 @@ for await (const step of compiled.stream({ messages: ['hi'], intent: null, reply
 ## Usage — OpenAI Assistants v2
 
 ```ts
-import { AssistantsClient, toolCall } from '@kiwa-test/agent';
+import { AssistantsClient, toolCall } from '@kiwa/agent';
 
 const client = new AssistantsClient({ idSeed: 'demo' });
 

@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/search` v0.3 `semantics/faceted-advanced`
+ * Mock adapter — drives `@kiwa/search` v0.3 `semantics/faceted-advanced`
  * + `semantics/geo` state machines deterministically without any backend.
  * The same app code exercises a full faceted session start + seed +
  * nested facet compute + hierarchy traversal + distinct count + refined
@@ -12,12 +12,12 @@
  * keeps per-index state in production.
  *
  * The mock adapter piggy-backs on the same neutral event vocabulary that
- * `@kiwa-test/search` v0.3 faceted-advanced + geo semantics emit — every
+ * `@kiwa/search` v0.3 faceted-advanced + geo semantics emit — every
  * op appends the matching neutral event onto the trace so the fidelity
  * harness can assert both adapters produce identical event orderings.
  */
 
-import { semantics } from '@kiwa-test/search';
+import { semantics } from '@kiwa/search';
 import {
   type ApplyRefinedFilterResult,
   type BoundingBox,

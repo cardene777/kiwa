@@ -17,11 +17,11 @@ import type {
   ReadCommittedFilter,
   StreamingMessage,
   TransactionalProducer,
-} from '@kiwa-test/streaming';
+} from '@kiwa/streaming';
 import {
   createReadCommittedFilter,
   createTransactionalProducer,
-} from '@kiwa-test/streaming';
+} from '@kiwa/streaming';
 
 export interface TransactionRun {
   readonly producer: TransactionalProducer;

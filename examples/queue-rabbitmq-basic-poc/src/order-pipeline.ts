@@ -1,4 +1,4 @@
-import type { RabbitMQTestEnv } from '@kiwa-test/queue';
+import type { RabbitMQTestEnv } from '@kiwa/queue';
 
 /**
  * PoC — a small order-processing pipeline that fans out incoming orders to

@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa-test/core';
+import type { TestEnvBase } from '@kiwa/core';
 
 /**
  * Chrome Virtual Authenticator API mirrors WebAuthn L3 spec §6.2. Transport

@@ -1,4 +1,4 @@
-# @kiwa-test/queue
+# @kiwa/queue
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package covers the Queue surface)" width="640" />
@@ -10,7 +10,7 @@ Queue test adapter for kiwa — BullMQ sandbox (in-memory) + testcontainers Redi
 
 ## Overview
 
-`@kiwa-test/queue` is the Layer 2 adapter that turns a queue-shaped Layer 1 spec into a runnable Vitest suite. It ships four factories:
+`@kiwa/queue` is the Layer 2 adapter that turns a queue-shaped Layer 1 spec into a runnable Vitest suite. It ships four factories:
 
 - **`setupBullMQEnv`** — BullMQ (Redis-backed job queue) with `sandbox` (in-process) + `testcontainers` (real Redis + BullMQ + ioredis) backends.
 - **`setupInngestEnv`** — Inngest (SaaS event-driven) with `stub` (in-process, deterministic) + `dev-server` (real Inngest dev-server HTTP round-trip) backends.
@@ -22,7 +22,7 @@ Backend selection is a one-argument change (`mode: '...'`) and all four factorie
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/queue @kiwa-test/core vitest
+pnpm add -D @kiwa/queue @kiwa/core vitest
 # BullMQ testcontainers mode also needs:
 pnpm add -D bullmq ioredis testcontainers
 # Inngest dev-server mode also needs:
@@ -38,7 +38,7 @@ pnpm add -D miniflare
 ## Quick start — sandbox
 
 ```ts
-import { setupBullMQEnv } from "@kiwa-test/queue";
+import { setupBullMQEnv } from "@kiwa/queue";
 
 const env = await setupBullMQEnv();       // defaults to mode: "sandbox"
 env.process<{ x: number }, number>(async (job) => job.data.x * 2);
@@ -54,7 +54,7 @@ await env.stop();    // clears the queue + registered processor
 ## Quick start — testcontainers Redis
 
 ```ts
-import { setupBullMQEnv } from "@kiwa-test/queue";
+import { setupBullMQEnv } from "@kiwa/queue";
 
 const env = await setupBullMQEnv({
   mode: "testcontainers",
@@ -135,7 +135,7 @@ pnpm -F examples-queue-bullmq-poc test
 ### Quick start — stub
 
 ```ts
-import { setupInngestEnv } from "@kiwa-test/queue";
+import { setupInngestEnv } from "@kiwa/queue";
 
 const env = await setupInngestEnv();                 // defaults to mode: "stub"
 env.registerFunction({
@@ -160,7 +160,7 @@ await env.stop();
 ### Quick start — dev-server
 
 ```ts
-import { setupInngestEnv } from "@kiwa-test/queue";
+import { setupInngestEnv } from "@kiwa/queue";
 
 const env = await setupInngestEnv({
   mode: "dev-server",
@@ -227,12 +227,12 @@ pnpm -F examples-queue-inngest-poc test
 
 ## Cloudflare Queues env — `setupCloudflareQueuesEnv`
 
-`setupCloudflareQueuesEnv` covers the edge-queue slot in the `@kiwa-test/queue` family. Producers push messages by queue name + body; a registered consumer receives a `queue(batch, env, ctx)`-shaped batch object with `msg.ack()` / `msg.retry()` / `batch.ackAll()` / `batch.retryAll()` — the same surface production Workers see.
+`setupCloudflareQueuesEnv` covers the edge-queue slot in the `@kiwa/queue` family. Producers push messages by queue name + body; a registered consumer receives a `queue(batch, env, ctx)`-shaped batch object with `msg.ack()` / `msg.retry()` / `batch.ackAll()` / `batch.retryAll()` — the same surface production Workers see.
 
 ### Quick start — miniflare
 
 ```ts
-import { setupCloudflareQueuesEnv } from "@kiwa-test/queue";
+import { setupCloudflareQueuesEnv } from "@kiwa/queue";
 
 const env = await setupCloudflareQueuesEnv();          // defaults to mode: "miniflare"
 env.registerConsumer<{ userId: string }>({
@@ -263,7 +263,7 @@ await env.stop();
 ### Quick start — wrangler
 
 ```ts
-import { setupCloudflareQueuesEnv } from "@kiwa-test/queue";
+import { setupCloudflareQueuesEnv } from "@kiwa/queue";
 
 const env = await setupCloudflareQueuesEnv({
   mode: "wrangler",
@@ -332,12 +332,12 @@ pnpm -F examples-queue-cloudflare-poc test
 
 ## SQS env — `setupSQSEnv`
 
-`setupSQSEnv` covers the AWS-standard queue slot in the `@kiwa-test/queue` family. Producers `send` messages by queue name; consumers `receive` them, either `delete` on success or let the visibility timeout expire so the message returns to the queue. FIFO queues honour `messageGroupId` + `messageDeduplicationId`; standard queues honour delayed sends + long polling + DLQ redrive policy.
+`setupSQSEnv` covers the AWS-standard queue slot in the `@kiwa/queue` family. Producers `send` messages by queue name; consumers `receive` them, either `delete` on success or let the visibility timeout expire so the message returns to the queue. FIFO queues honour `messageGroupId` + `messageDeduplicationId`; standard queues honour delayed sends + long polling + DLQ redrive policy.
 
 ### Quick start — stub
 
 ```ts
-import { setupSQSEnv } from "@kiwa-test/queue";
+import { setupSQSEnv } from "@kiwa/queue";
 
 const env = await setupSQSEnv({                        // defaults to mode: "stub"
   queues: [
@@ -363,7 +363,7 @@ await env.stop();
 ### Quick start — localstack
 
 ```ts
-import { setupSQSEnv } from "@kiwa-test/queue";
+import { setupSQSEnv } from "@kiwa/queue";
 
 const env = await setupSQSEnv({
   mode: "localstack",

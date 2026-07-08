@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/orm",
+  "package": "@kiwa/orm",
   "tier": "SaaS",
   "thresholds": {
     "high": 65,

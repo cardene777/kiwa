@@ -8,7 +8,7 @@ import {
   type IslandDefinition,
   type IslandMount,
   type IslandProps,
-} from '@kiwa-test/fresh';
+} from '@kiwa/fresh';
 import {
   CounterIsland,
   getCounterState,

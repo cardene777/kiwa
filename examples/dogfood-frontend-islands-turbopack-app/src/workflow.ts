@@ -9,7 +9,7 @@ import {
   resolveFormAction,
   startFormActionSession,
   type ComponentTarget,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 import {
   applyHmrPatch,
   completeFastRefresh,
@@ -17,7 +17,7 @@ import {
   markModuleUpdated,
   startTurbopackHmr,
   type NextTarget,
-} from '@kiwa-test/nextjs';
+} from '@kiwa/nextjs';
 
 export interface WorkflowResult {
   target: string;

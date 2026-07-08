@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/api",
+  "package": "@kiwa/api",
   "tier": "Core",
   "thresholds": {
     "high": 90,

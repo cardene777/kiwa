@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.53-2 — Mobile 11 axis × mock/real adapter pair × fidelity harness backed by @kiwa-test/mobile v0.4。 pair 深度 4 段拡張達成 4 例目 depth-4 record dogfood。",
+  "description": "Dogfood app v1.53-2 — Mobile 11 axis × mock/real adapter pair × fidelity harness backed by @kiwa/mobile v0.4。 pair 深度 4 段拡張達成 4 例目 depth-4 record dogfood。",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/mobile build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/core -F @kiwa/mobile build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/mobile": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/mobile": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

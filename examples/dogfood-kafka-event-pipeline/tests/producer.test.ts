@@ -1,4 +1,4 @@
-import { createKafkaMock } from '@kiwa-test/streaming';
+import { createKafkaMock } from '@kiwa/streaming';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createProducerRun, type OrderEvent } from '../src/producer/index.js';
 

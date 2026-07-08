@@ -7,7 +7,7 @@
  *  - {@link makeRealAdapter} — drives the Anthropic Messages API when
  *    `KIWA_MODE=real` + `ANTHROPIC_API_KEY` + `KIWA_LLM_BUDGET_USD` are set;
  *    otherwise every op reports `KIWA_LLM_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/ai-llm` v0.4
+ *  - {@link makeMockAdapter} — backed by `@kiwa/ai-llm` v0.4
  *    prompt-injection + guardrails semantics (detectInjection /
  *    blockJailbreak / blockRoleHijacking / validateSchema / matchRegex /
  *    blockToxicity / redactPii / checkConstitutional).
@@ -129,7 +129,7 @@ export interface TraceEvent {
   detail?: unknown;
 }
 
-/** Simple JSON schema used by validateSchema (aligned with @kiwa-test/ai-llm SimpleSchema). */
+/** Simple JSON schema used by validateSchema (aligned with @kiwa/ai-llm SimpleSchema). */
 export interface JsonSchemaInput {
   type: 'object';
   properties: Record<
@@ -146,7 +146,7 @@ export interface JsonSchemaInput {
   required?: string[];
 }
 
-/** Constitutional principle input (aligned with @kiwa-test/ai-llm ConstitutionalPrinciple). */
+/** Constitutional principle input (aligned with @kiwa/ai-llm ConstitutionalPrinciple). */
 export interface ConstitutionalPrincipleInput {
   id: string;
   ruleText: string;

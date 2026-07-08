@@ -1,12 +1,12 @@
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into `@kiwa-test/quality-metrics`
+ * (missing ops, unmatched behaviour) into `@kiwa/quality-metrics`
  * release gate, and emits a JSON + markdown report so the release
  * process can consume it.
  *
  * The dogfood app is the source of truth for whether the v1.38-1
- * `@kiwa-test/ai-llm` v0.4 prompt-injection + guardrails helpers track
+ * `@kiwa/ai-llm` v0.4 prompt-injection + guardrails helpers track
  * the real Anthropic Messages behaviour closely enough to be trusted as
  * a mock in unit tests. The report tracks the same 14 ops the adapter
  * contract exposes so any divergence surfaces the op that broke.
@@ -14,7 +14,7 @@
  * AI-LLM dogfoods use the common 7 axes (coverage 3 / fidelity / perf
  * p95 / mutation / behavior test count) + the 4 AI-LLM sub-axes (cost /
  * latency / token / accuracy) — {@link evaluateReleaseGate} routes on
- * the `@kiwa-test/ai-` provider prefix. This dogfood exercises
+ * the `@kiwa/ai-` provider prefix. This dogfood exercises
  * deterministic pattern matching (not a real LLM call), so the 4 sub
  * axes are populated with defensive-defense-specific proxies —
  *  - cost = $0 per request (no upstream Anthropic call)
@@ -41,7 +41,7 @@ import {
   tokenFromSamples,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 import type { LlmSafetyAdapter, TraceEvent } from '../adapters/interface.js';
 
 export interface FidelityRunInput {

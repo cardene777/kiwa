@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/mcp",
+  "package": "@kiwa/mcp",
   "generatedAt": "2026-07-06T01:47:54.873Z",
   "layers": {
     "jsdom": {

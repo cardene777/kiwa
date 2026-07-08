@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/nuxt.
+ * A11y (axe-core) config for @kiwa/nuxt.
  * Tier: Framework tier (critical 0 / serious 0-3 / moderate 0-10) — SSR + hydration + Nitro adapter. Serious tolerance for Nuxt teleport.
  * SSOT: docs/quality/a11y-thresholds.md § Framework tier.
  */

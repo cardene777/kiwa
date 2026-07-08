@@ -23,7 +23,7 @@ describe('dogfood-observability-dashboard — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/observability/dashboard',
+      provider: '@kiwa/observability/dashboard',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -38,7 +38,7 @@ describe('dogfood-observability-dashboard — fidelity harness', () => {
       mutation: { mutations: 40, killed: 28 },
       surfaceCoverage: { mockCoveredMethods: 2, realTotalMethods: 2 },
     });
-    expect(output.report.provider).toBe('@kiwa-test/observability/dashboard');
+    expect(output.report.provider).toBe('@kiwa/observability/dashboard');
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThanOrEqual(2);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     await mock.reset();
@@ -56,7 +56,7 @@ describe('dogfood-observability-dashboard — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/observability/dashboard',
+      provider: '@kiwa/observability/dashboard',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -90,7 +90,7 @@ describe('dogfood-observability-dashboard — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/observability/dashboard',
+      provider: '@kiwa/observability/dashboard',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

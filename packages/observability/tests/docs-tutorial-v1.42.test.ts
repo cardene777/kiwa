@@ -1,6 +1,6 @@
 /**
  * v1.42-5 docs 補強 (Issue #1161 / CAR-1050) — tutorial 91-93 code snippet
- * validation for `@kiwa-test/observability` v2.2 advanced III 8 axis (IaC +
+ * validation for `@kiwa/observability` v2.2 advanced III 8 axis (IaC +
  * Service mesh + eBPF profiling III + LLM observability + FinOps + Chaos
  * engineering + Data pipeline + AIOps).
  *

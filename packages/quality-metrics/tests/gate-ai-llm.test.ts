@@ -7,7 +7,7 @@ import {
 
 function passingAiLlmReport(): QualityReport {
   return {
-    provider: '@kiwa-test/ai-llm',
+    provider: '@kiwa/ai-llm',
     version: '0.1.0',
     reportedAt: '2026-07-02T00:00:00Z',
     coverage: { line: 90, branch: 82, function: 95 },
@@ -23,16 +23,16 @@ function passingAiLlmReport(): QualityReport {
 }
 
 describe('isAiLlmProvider', () => {
-  it('T-QM-AI-001 accepts @kiwa-test/ai- prefix', () => {
-    expect(isAiLlmProvider('@kiwa-test/ai-llm')).toBe(true);
-    expect(isAiLlmProvider('@kiwa-test/ai-openai')).toBe(true);
-    expect(isAiLlmProvider('@kiwa-test/ai-anthropic')).toBe(true);
+  it('T-QM-AI-001 accepts @kiwa/ai- prefix', () => {
+    expect(isAiLlmProvider('@kiwa/ai-llm')).toBe(true);
+    expect(isAiLlmProvider('@kiwa/ai-openai')).toBe(true);
+    expect(isAiLlmProvider('@kiwa/ai-anthropic')).toBe(true);
   });
 
   it('T-QM-AI-002 rejects other providers', () => {
-    expect(isAiLlmProvider('@kiwa-test/auth')).toBe(false);
-    expect(isAiLlmProvider('@kiwa-test/api')).toBe(false); // ai と api を混同しない
-    expect(isAiLlmProvider('@kiwa-test/queue')).toBe(false);
+    expect(isAiLlmProvider('@kiwa/auth')).toBe(false);
+    expect(isAiLlmProvider('@kiwa/api')).toBe(false); // ai と api を混同しない
+    expect(isAiLlmProvider('@kiwa/queue')).toBe(false);
     expect(isAiLlmProvider('ai-llm')).toBe(false);
   });
 });

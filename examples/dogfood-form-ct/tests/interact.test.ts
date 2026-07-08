@@ -3,7 +3,7 @@ import {
   createPlaywrightCTMock,
   fireEvent,
   type PlaywrightCTMock,
-} from '@kiwa-test/component';
+} from '@kiwa/component';
 import {
   buildLoginForm,
   buildSearchForm,

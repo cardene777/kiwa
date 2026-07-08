@@ -51,7 +51,7 @@ describe('dogfood-nats-jetstream — emit fidelity report to quality-report/', (
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/streaming/nats-jetstream-dogfood',
+      provider: '@kiwa/streaming/nats-jetstream-dogfood',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

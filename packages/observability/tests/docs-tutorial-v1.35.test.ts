@@ -1,6 +1,6 @@
 /**
  * v1.35-5 docs 補強 (Issue #1066 / CAR-802) — tutorial 70-72 code snippet validation
- * for `@kiwa-test/observability` v2.1 advanced 8 axis.
+ * for `@kiwa/observability` v2.1 advanced 8 axis.
  *
  * `docs/tutorials/70-slo-burn-rate.md` / `docs/tutorials/71-otel-exemplar.md` /
  * `docs/tutorials/72-continuous-profiling.md` に載っている advanced-semantics

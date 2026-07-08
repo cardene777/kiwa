@@ -4,7 +4,7 @@ import type { ImageRef, VisionChatAdapter } from '../adapters/interface.js';
  * User-facing vision flows the multimodal chat app exposes. Each flow
  * talks only through {@link VisionChatAdapter} so the same code powers
  * both `KIWA_MODE=real` (Anthropic Messages API with vision content
- * blocks) and `KIWA_MODE=mock` (`@kiwa-test/ai-llm`
+ * blocks) and `KIWA_MODE=mock` (`@kiwa/ai-llm`
  * `createAnthropicMock` with `MessagePart` image).
  *
  * The 4 flows below mirror the AC in Issue #749 —

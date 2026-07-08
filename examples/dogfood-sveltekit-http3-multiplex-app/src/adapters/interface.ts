@@ -7,7 +7,7 @@
  *  - {@link makeRealAdapter} (drives nginx-quic HTTP/3 testcontainers when
  *    `KIWA_MODE=real` + `HTTP3_KEY=1` are set; otherwise every op reports
  *    `KIWA_HTTP3_ENV_MISSING`)
- *  - {@link makeMockAdapter} (backed by `@kiwa-test/realtime` v0.2's
+ *  - {@link makeMockAdapter} (backed by `@kiwa/realtime` v0.2's
  *    `createQuicMultiplexMock` + `createHttp3PushMock`)
  *
  * Both must satisfy the same 9-op contract so behavioural fidelity between

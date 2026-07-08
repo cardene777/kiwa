@@ -6,7 +6,7 @@
  * returns the sentinel so the resource server sees a stable shape.
  */
 
-import type { IntrospectionResponse } from '@kiwa-test/auth';
+import type { IntrospectionResponse } from '@kiwa/auth';
 import type { OAuth21ASAdapter } from '../../adapters/interface.js';
 
 export function createIntrospectHandler(

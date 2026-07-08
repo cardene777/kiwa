@@ -5,10 +5,10 @@
  * implementations exist — {@link makeRealAdapter} (calls
  * `@supabase/supabase-js` when `SUPABASE_URL` + `SUPABASE_ANON_KEY` are set,
  * otherwise reports each method as `SUPABASE_ENV_MISSING`) and
- * {@link makeMockAdapter} (backed by `@kiwa-test/realtime`'s
+ * {@link makeMockAdapter} (backed by `@kiwa/realtime`'s
  * {@link createSupabaseRealtimeMock}). Both must satisfy the same contract so
  * behavioural fidelity between real vs mock can be measured side-by-side and
- * fed to `@kiwa-test/quality-metrics` release gate.
+ * fed to `@kiwa/quality-metrics` release gate.
  */
 
 /** A chat message delivered on a room channel. */

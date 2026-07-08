@@ -101,7 +101,7 @@ describe('emit fidelity-latest report', () => {
     const matrix = await runAdapterMatrix({ mock, real, run: driveFlows });
 
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/dogfood-code-interpreter-app',
+      provider: '@kiwa/ai-llm/dogfood-code-interpreter-app',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -168,7 +168,7 @@ describe('emit fidelity-latest report', () => {
     const real = makeRealAdapter();
     const matrix = await runAdapterMatrix({ mock, real, run: driveFlows });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/dogfood-code-interpreter-app',
+      provider: '@kiwa/ai-llm/dogfood-code-interpreter-app',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

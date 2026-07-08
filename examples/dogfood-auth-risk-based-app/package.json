@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.44-4 — risk-based auth + auth telemetry + hijack observability harness backed by @kiwa-test/auth v0.6 risk-based-auth + auth-telemetry + session-hijack-detect semantics.",
+  "description": "Dogfood app v1.44-4 — risk-based auth + auth telemetry + hijack observability harness backed by @kiwa/auth v0.6 risk-based-auth + auth-telemetry + session-hijack-detect semantics.",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/auth build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/core -F @kiwa/auth build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/auth": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/auth": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

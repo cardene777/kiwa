@@ -229,11 +229,11 @@ describe('isHarnessOk', () => {
 describe('runLayerHarness', () => {
   it('with no fixtures, every layer is absent and totals are zero', async () => {
     const report = await runLayerHarness(
-      '@kiwa-test/core',
+      '@kiwa/core',
       {},
       new Date('2026-07-06T00:00:00Z'),
     );
-    expect(report.package).toBe('@kiwa-test/core');
+    expect(report.package).toBe('@kiwa/core');
     expect(report.generatedAt).toBe('2026-07-06T00:00:00.000Z');
     expect(report.layers.jsdom.applicable).toBe(false);
     expect(report.layers.playwright.applicable).toBe(false);
@@ -244,7 +244,7 @@ describe('runLayerHarness', () => {
 
   it('with a jsdom fixture pointing at labelled markup, records applicable + zero violations', async () => {
     document.body.innerHTML = `<div id="root"><button type="button" aria-label="ok">ok</button></div>`;
-    const report = await runLayerHarness('@kiwa-test/ui', {
+    const report = await runLayerHarness('@kiwa/ui', {
       jsdom: { context: document.getElementById('root') as Element },
     });
     expect(report.layers.jsdom.applicable).toBe(true);
@@ -254,7 +254,7 @@ describe('runLayerHarness', () => {
 
   it('with a jsdom fixture pointing at unlabeled markup, records the button-name violation', async () => {
     document.body.innerHTML = `<div id="root"><button type="button"></button></div>`;
-    const report = await runLayerHarness('@kiwa-test/ui', {
+    const report = await runLayerHarness('@kiwa/ui', {
       jsdom: { context: document.getElementById('root') as Element },
     });
     expect(report.layers.jsdom.applicable).toBe(true);
@@ -262,7 +262,7 @@ describe('runLayerHarness', () => {
   });
 
   it('with a playwright fixture, records the pre-run axe results verbatim', async () => {
-    const report = await runLayerHarness('@kiwa-test/e2e', {
+    const report = await runLayerHarness('@kiwa/e2e', {
       playwright: {
         results: {
           violations: [violation('color-contrast', 'serious')],
@@ -278,7 +278,7 @@ describe('runLayerHarness', () => {
   });
 
   it('B7 — playwright fixture with malformed results.violations is treated as empty, not a throw', async () => {
-    const report = await runLayerHarness('@kiwa-test/e2e', {
+    const report = await runLayerHarness('@kiwa/e2e', {
       playwright: {
         // Deliberately malformed — .results.violations is missing.
         results: {} as any,
@@ -290,7 +290,7 @@ describe('runLayerHarness', () => {
   });
 
   it('B7 — playwright fixture with entirely absent results is treated as empty, not a throw', async () => {
-    const report = await runLayerHarness('@kiwa-test/e2e', {
+    const report = await runLayerHarness('@kiwa/e2e', {
       playwright: {
         results: undefined as unknown as {
           violations: AxeViolation[];
@@ -305,7 +305,7 @@ describe('runLayerHarness', () => {
   });
 
   it('with an SSR string, parses it, runs axe, and records violations', async () => {
-    const report = await runLayerHarness('@kiwa-test/nextjs', {
+    const report = await runLayerHarness('@kiwa/nextjs', {
       ssrHydration: {
         ssrHtml: `<button type="button"></button>`,
       },
@@ -317,7 +317,7 @@ describe('runLayerHarness', () => {
   it('with SSR + hydrated fixtures, unions violations without double-counting by rule id', async () => {
     document.body.innerHTML = `<div id="hydrated"><button type="button"></button></div>`;
     const hydrated = document.getElementById('hydrated') as Element;
-    const report = await runLayerHarness('@kiwa-test/nextjs', {
+    const report = await runLayerHarness('@kiwa/nextjs', {
       ssrHydration: {
         ssrHtml: `<button type="button"></button>`,
         hydrated,
@@ -334,7 +334,7 @@ describe('runLayerHarness', () => {
     const detached = document.createElement('div');
     detached.innerHTML = `<button type="button"></button>`;
     // Deliberately do NOT append `detached` to the document.
-    const report = await runLayerHarness('@kiwa-test/nextjs', {
+    const report = await runLayerHarness('@kiwa/nextjs', {
       ssrHydration: {
         ssrHtml: `<span aria-label="ok">ok</span>`,
         hydrated: detached,
@@ -363,7 +363,7 @@ describe('runLayerHarness', () => {
     expect(host.isConnected).toBe(false);
     expect(child.parentNode).toBe(host);
 
-    await runLayerHarness('@kiwa-test/nextjs', {
+    await runLayerHarness('@kiwa/nextjs', {
       ssrHydration: {
         ssrHtml: `<span aria-label="ok">ok</span>`,
         hydrated: child,
@@ -409,7 +409,7 @@ describe('runLayerHarness', () => {
     // `.documentElement` on a non-Document.
     let harnessError: unknown = null;
     try {
-      await runLayerHarness('@kiwa-test/nextjs', {
+      await runLayerHarness('@kiwa/nextjs', {
         ssrHydration: {
           ssrHtml: `<span aria-label="ok">ok</span>`,
           hydrated: foreignElement as unknown as Element,
@@ -438,7 +438,7 @@ describe('runLayerHarness', () => {
     // hydrated fixture where axe emits the same rule id on both sides.
     document.body.innerHTML = `<div id="hydrated"><button type="button"></button></div>`;
     const hydrated = document.getElementById('hydrated') as Element;
-    const report = await runLayerHarness('@kiwa-test/nextjs', {
+    const report = await runLayerHarness('@kiwa/nextjs', {
       ssrHydration: {
         ssrHtml: `<button type="button"></button>`,
         hydrated,
@@ -456,7 +456,7 @@ describe('runLayerHarness', () => {
 
   it('B6 — SSR fixture rejects a non-string ssrHtml before touching innerHTML', async () => {
     await expect(
-      runLayerHarness('@kiwa-test/nextjs', {
+      runLayerHarness('@kiwa/nextjs', {
         ssrHydration: {
           ssrHtml: undefined as unknown as string,
         },
@@ -466,7 +466,7 @@ describe('runLayerHarness', () => {
 
   it('records aggregate totals across applicable layers', async () => {
     document.body.innerHTML = `<div id="root"><button type="button"></button></div>`;
-    const report = await runLayerHarness('@kiwa-test/mixed', {
+    const report = await runLayerHarness('@kiwa/mixed', {
       jsdom: { context: document.getElementById('root') as Element },
       playwright: {
         results: {
@@ -483,13 +483,13 @@ describe('runLayerHarness', () => {
 
 describe('summariseHarness', () => {
   it('reports the no-DOM shortcut when every layer is absent', async () => {
-    const report = await runLayerHarness('@kiwa-test/core', {});
+    const report = await runLayerHarness('@kiwa/core', {});
     expect(summariseHarness(report)).toContain('no applicable layers');
   });
 
   it('surfaces the applicable-layer violation summary', async () => {
     document.body.innerHTML = `<button type="button"></button>`;
-    const report = await runLayerHarness('@kiwa-test/ui', {
+    const report = await runLayerHarness('@kiwa/ui', {
       jsdom: { context: document.body },
     });
     const summary = summariseHarness(report);
@@ -515,7 +515,7 @@ describe('summariseHarness', () => {
       },
     };
     const report: HarnessReport = {
-      package: '@kiwa-test/nextjs',
+      package: '@kiwa/nextjs',
       generatedAt: new Date().toISOString(),
       layers,
       totals: computeTotals(layers),
@@ -537,7 +537,7 @@ describe('runLayerHarness — SSR without jsdom-like document', () => {
     delete globalThis.document;
     try {
       await expect(
-        runLayerHarness('@kiwa-test/nextjs', {
+        runLayerHarness('@kiwa/nextjs', {
           ssrHydration: { ssrHtml: `<button></button>` },
         }),
       ).rejects.toThrow(/jsdom-like global document/);

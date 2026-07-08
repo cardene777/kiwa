@@ -1,12 +1,12 @@
 /**
  * Fidelity harness — compares a Deno Deploy run under `makeMockAdapter`
  * against one under `makeRealAdapter`, feeds the divergence count
- * (missing ops, behavioural mismatch) into the `@kiwa-test/quality-metrics`
+ * (missing ops, behavioural mismatch) into the `@kiwa/quality-metrics`
  * 7-axis release gate, and emits a JSON + markdown report the release
  * process can consume.
  *
  * The dogfood app is the source of truth for whether the kiwa
- * `@kiwa-test/edge` v0.2 geo-replicated + edge-kv + cron-trigger axes
+ * `@kiwa/edge` v0.2 geo-replicated + edge-kv + cron-trigger axes
  * track a real Deno Deploy runtime closely enough to be trusted in unit
  * tests.
  *
@@ -34,7 +34,7 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 import type { DenoDeployAdapter, TraceEvent } from './deno-adapter.js';
 
 export interface FidelityRunInput {

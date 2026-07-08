@@ -1,4 +1,4 @@
-# @kiwa-test/orm
+# @kiwa/orm
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview" width="640" />
@@ -10,7 +10,7 @@ ORM query test adapter for kiwa.
 
 ## Overview
 
-`@kiwa-test/orm` provides deterministic primitives for testing ORM-backed query layers.
+`@kiwa/orm` provides deterministic primitives for testing ORM-backed query layers.
 
 - **v0.1** — Drizzle ORM + in-memory SQLite (`mode: 'mock'`). Fast, Docker-free, type-safe.
 - **v0.2** — Drizzle ORM + Postgres via testcontainers.
@@ -26,7 +26,7 @@ ORM query test adapter for kiwa.
 
 ```bash
 # mock mode (SQLite) — minimum install
-pnpm add -D @kiwa-test/orm @kiwa-test/core drizzle-orm better-sqlite3 vitest
+pnpm add -D @kiwa/orm @kiwa/core drizzle-orm better-sqlite3 vitest
 
 # live mode (Postgres) — add testcontainers + postgres.js
 pnpm add -D @testcontainers/postgresql postgres
@@ -37,7 +37,7 @@ All driver / runtime packages are declared as `peerDependencies` so callers cont
 ## Quick start — mock SQLite (v0.1)
 
 ```ts
-import { setupOrmEnv } from '@kiwa-test/orm';
+import { setupOrmEnv } from '@kiwa/orm';
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
 const users = sqliteTable('users', { id: integer('id').primaryKey(), email: text('email').notNull().unique() });
@@ -58,7 +58,7 @@ await env.stop();
 ## Quick start — live Postgres via testcontainers (v0.2)
 
 ```ts
-import { setupOrmEnv } from '@kiwa-test/orm';
+import { setupOrmEnv } from '@kiwa/orm';
 import { pgTable, serial, text } from 'drizzle-orm/pg-core';
 
 const users = pgTable('users', { id: serial('id').primaryKey(), email: text('email').notNull().unique() });
@@ -140,7 +140,7 @@ import {
   markReplicaLagged,
   startFailover,
   promoteReplica,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 const session = createReplicationSession({
   primaryId: 'db_primary',

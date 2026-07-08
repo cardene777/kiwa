@@ -5,7 +5,7 @@ import {
   setupSupabaseAuthEnv,
   type SupabaseAdvancedTestEnv,
   type SupabaseAuthTestEnv,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 import type {
   AuthAdapter,
   AuthSession,

@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/e2e",
+  "package": "@kiwa/e2e",
   "generatedAt": "2026-07-06T01:15:07.728Z",
   "layers": {
     "jsdom": {

@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa-test/data.
+ * A11y (axe-core) config for @kiwa/data.
  * Tier: Core tier (critical 0 / serious 0 / moderate 0-3) — Fixture builders + assertion helpers. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § Core tier.
  */

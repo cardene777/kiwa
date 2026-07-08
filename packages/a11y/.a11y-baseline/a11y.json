@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/a11y",
+  "package": "@kiwa/a11y",
   "generatedAt": "2026-07-06T01:47:54.816Z",
   "layers": {
     "jsdom": {

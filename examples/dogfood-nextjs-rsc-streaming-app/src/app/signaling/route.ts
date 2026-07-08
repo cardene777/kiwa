@@ -9,7 +9,7 @@
  *
  * The signaling surface pairs the parent v1.34-1 `view-transitions` +
  * `form-action-advanced` axes with the neutral event vocabulary that
- * `@kiwa-test/component` v0.3 emits — every op has a neutral event
+ * `@kiwa/component` v0.3 emits — every op has a neutral event
  * counterpart the fidelity harness can compare across mock vs real.
  */
 

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupSupabaseAuthEnv, type SupabaseAuthTestEnv } from '@kiwa-test/auth';
+import { setupSupabaseAuthEnv, type SupabaseAuthTestEnv } from '@kiwa/auth';
 import {
   completeOAuthCallback,
   completeSignupFlow,

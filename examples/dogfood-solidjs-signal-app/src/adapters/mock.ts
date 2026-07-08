@@ -5,7 +5,7 @@ import {
   renderWithSuspense,
   stringify,
   type SolidChild,
-} from '@kiwa-test/solidjs';
+} from '@kiwa/solidjs';
 import { Counter } from '../components/Counter.js';
 import { TodoList } from '../components/TodoList.js';
 import { UserProfile, UserProfileLoadingFallback } from '../components/UserProfile.js';
@@ -21,7 +21,7 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — spins up `@kiwa-test/solidjs` mock primitives, mounts the
+ * Mock adapter — spins up `@kiwa/solidjs` mock primitives, mounts the
  * dogfood components with the store fixtures, and drives the 6-op surface
  * through the harness API. Every op records a trace event so the fidelity
  * harness can diff mock vs real behaviour without needing a live Solid

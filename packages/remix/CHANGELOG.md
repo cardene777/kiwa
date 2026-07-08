@@ -1,4 +1,4 @@
-# @kiwa-test/remix
+# @kiwa/remix
 
 ## 1.2.0
 
@@ -35,7 +35,7 @@
 
   - nested route の action chain (parent action → child loader への post-action data 連鎖) — Remix の `useActionData()` propagation は別 Issue。
   - 3 階層以上の deeply nested route (root > parent > child > grand) — v1.1 は 2 階層 (parent + child) 固定、 N 階層は別 Issue。
-  - real `<Await/>` component + suspense fallback の DOM 描画 — defer の data resolve だけを cover、 render は別 Issue で `@kiwa-test/ui` 連携。
+  - real `<Await/>` component + suspense fallback の DOM 描画 — defer の data resolve だけを cover、 render は別 Issue で `@kiwa/ui` 連携。
 
 ### Patch Changes
 
@@ -96,7 +96,7 @@
 
 ### Patch Changes
 
-- a328da2: 🎉 New package `@kiwa-test/remix` v1.0 — Remix v2 / React Router v7 loader + action test adapter (Issue #498、 v1.1 milestone 7/8).
+- a328da2: 🎉 New package `@kiwa/remix` v1.0 — Remix v2 / React Router v7 loader + action test adapter (Issue #498、 v1.1 milestone 7/8).
 
   ## What's in the box
 
@@ -115,5 +115,5 @@
 
   ## Out of scope (separate Issues)
 
-  - Remix `useFetcher` / SPA hooks — covered by `@kiwa-test/ui` React mode for the client side.
+  - Remix `useFetcher` / SPA hooks — covered by `@kiwa/ui` React mode for the client side.
   - Remix `links` / `meta` exports — pure object exports, no helper needed.

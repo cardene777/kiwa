@@ -8,13 +8,13 @@
  *  - {@link makeRealAdapter} — drives Cloudflare Workers Durable Objects +
  *    Vercel Edge session-affinity + Deno Deploy stateful-object APIs when
  *    KIWA_MODE=real + EDGE_DO_MIGRATION_STACK_READY=1 are set.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/edge` v1.2 advanced
+ *  - {@link makeMockAdapter} — backed by `@kiwa/edge` v1.2 advanced
  *    do-state-migration semantics.
  *
  * 12-op contract — 3 axes × 4 ops (schema-bump / data-migrate / rollout).
  */
 
-import type { EdgePlatform as EdgeEdgePlatform } from '@kiwa-test/edge';
+import type { EdgePlatform as EdgeEdgePlatform } from '@kiwa/edge';
 
 export type EdgePlatform = EdgeEdgePlatform;
 

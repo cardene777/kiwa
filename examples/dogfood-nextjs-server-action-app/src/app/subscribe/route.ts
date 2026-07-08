@@ -6,7 +6,7 @@
  * and real without spinning up Next.js.
  *
  * The subscribe surface pairs the parent v1.34-1 `server-action-advanced`
- * axis (submit + revalidatePath) with `@kiwa-test/nextjs` v1.2 — every op
+ * axis (submit + revalidatePath) with `@kiwa/nextjs` v1.2 — every op
  * has a neutral event counterpart the fidelity harness can compare across
  * mock vs real.
  */

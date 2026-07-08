@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/mcp.
+ * Mutation testing config for @kiwa/mcp.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — MCP adapter wraps
  * server + client + tools with fixture; MCP protocol version drift +
  * transport surfaces expected.

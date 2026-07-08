@@ -6,7 +6,7 @@
  * (monotonically increasing sequence number) so downstream CDC decoding
  * can preserve strict ordering.
  *
- * The module wraps `@kiwa-test/orm`'s CDC session semantics so both
+ * The module wraps `@kiwa/orm`'s CDC session semantics so both
  * `insert` / `update` / `delete` operations flow through the same
  * `decodeEvent` → `appendOutbox` → `markEventOrdered` chain, matching the
  * production shape of a Postgres wal2json + Debezium connector.
@@ -21,7 +21,7 @@ import {
   type CdcEvent,
   type CdcEventKind,
   type CdcSession,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 export interface OrderRow {
   readonly orderId: string;

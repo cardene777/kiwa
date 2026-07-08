@@ -1,4 +1,4 @@
-# @kiwa-test/cache
+# @kiwa/cache
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package covers the Cache surface)" width="640" />
@@ -10,7 +10,7 @@ Cache test adapter for kiwa — Redis (testcontainers) live env + in-memory sand
 
 ## Overview
 
-`@kiwa-test/cache` is the Layer 2 adapter that turns a cache-shaped Layer 1 spec into a runnable Vitest suite. Three factories cover the dominant cache providers:
+`@kiwa/cache` is the Layer 2 adapter that turns a cache-shaped Layer 1 spec into a runnable Vitest suite. Three factories cover the dominant cache providers:
 
 - **`setupCacheEnv`** — Redis (in-process + testcontainers), assertion surface for TTL / Pub/Sub / expiry.
 - **`setupMemcachedEnv`** — Memcached (in-process stub + testcontainers), 8 core commands + TTL + multi-server consistent hashing.
@@ -21,7 +21,7 @@ All three factories share the same `TestEnvBase<TMode>` shape so switching lanes
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/cache @kiwa-test/core vitest
+pnpm add -D @kiwa/cache @kiwa/core vitest
 # testcontainers mode also needs:
 pnpm add -D testcontainers ioredis           # or: pnpm add -D testcontainers redis
 ```
@@ -31,7 +31,7 @@ pnpm add -D testcontainers ioredis           # or: pnpm add -D testcontainers re
 ## Quick start — in-memory
 
 ```ts
-import { setupCacheEnv } from "@kiwa-test/cache";
+import { setupCacheEnv } from "@kiwa/cache";
 
 const env = await setupCacheEnv();          // defaults to mode: "in-memory"
 
@@ -50,7 +50,7 @@ await env.stop();
 ## Quick start — testcontainers Redis
 
 ```ts
-import { setupCacheEnv } from "@kiwa-test/cache";
+import { setupCacheEnv } from "@kiwa/cache";
 
 const env = await setupCacheEnv({
   mode: "testcontainers",
@@ -94,7 +94,7 @@ await env.stop();                           // stops container + closes client
 ### Quick start — stub
 
 ```ts
-import { setupMemcachedEnv } from "@kiwa-test/cache";
+import { setupMemcachedEnv } from "@kiwa/cache";
 
 const env = await setupMemcachedEnv({           // defaults to mode: "stub"
   servers: ["stub-a", "stub-b", "stub-c"],
@@ -117,7 +117,7 @@ await env.stop();
 ### Quick start — testcontainers
 
 ```ts
-import { setupMemcachedEnv } from "@kiwa-test/cache";
+import { setupMemcachedEnv } from "@kiwa/cache";
 
 const env = await setupMemcachedEnv({
   mode: "testcontainers",
@@ -163,7 +163,7 @@ pnpm -F examples-cache-memcached-poc test
 ### Quick start — stub
 
 ```ts
-import { setupKeyDBEnv } from "@kiwa-test/cache";
+import { setupKeyDBEnv } from "@kiwa/cache";
 
 const env = await setupKeyDBEnv({                // defaults to mode: "stub"
   cluster: ["us-east", "us-west", "eu-central"],

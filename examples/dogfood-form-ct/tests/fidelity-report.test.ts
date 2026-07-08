@@ -35,7 +35,7 @@ describe('dogfood-form-ct — fidelity harness contract (7-axis release gate)', 
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/component/form-ct',
+      provider: '@kiwa/component/form-ct',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -77,7 +77,7 @@ describe('dogfood-form-ct — fidelity harness contract (7-axis release gate)', 
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/component/form-ct',
+      provider: '@kiwa/component/form-ct',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

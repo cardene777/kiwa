@@ -25,7 +25,7 @@ describe('dogfood-multimodal — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/multimodal-chat',
+      provider: '@kiwa/ai-llm/multimodal-chat',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -49,7 +49,7 @@ describe('dogfood-multimodal — fidelity harness', () => {
       mutation: { mutations: 40, killed: 28 },
       surfaceCoverage: { mockCoveredMethods: 3, realTotalMethods: 3 },
     });
-    expect(output.report.provider).toBe('@kiwa-test/ai-llm/multimodal-chat');
+    expect(output.report.provider).toBe('@kiwa/ai-llm/multimodal-chat');
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThanOrEqual(3);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     await mock.reset();
@@ -67,7 +67,7 @@ describe('dogfood-multimodal — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/multimodal-chat',
+      provider: '@kiwa/ai-llm/multimodal-chat',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -109,7 +109,7 @@ describe('dogfood-multimodal — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/ai-llm/multimodal-chat',
+      provider: '@kiwa/ai-llm/multimodal-chat',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -142,7 +142,7 @@ describe('dogfood-multimodal — fidelity harness', () => {
       accuracy?: { score?: number };
     };
     expect(parsed.fidelity).toBeDefined();
-    // AI-LLM 4 axes must be emitted for `@kiwa-test/ai-*` providers.
+    // AI-LLM 4 axes must be emitted for `@kiwa/ai-*` providers.
     expect(parsed.cost?.perRequestUsd).toBeGreaterThanOrEqual(0);
     expect(parsed.latency?.p95Ms).toBeGreaterThanOrEqual(0);
     expect(parsed.token?.totalTokens).toBeGreaterThanOrEqual(0);

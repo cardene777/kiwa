@@ -52,7 +52,7 @@ describe('dogfood-rabbitmq — emit fidelity report to quality-report/', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/queue/rabbitmq-dogfood',
+      provider: '@kiwa/queue/rabbitmq-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

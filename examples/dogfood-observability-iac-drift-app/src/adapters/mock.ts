@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/observability` v2.2 advanced III IaC
+ * Mock adapter — drives `@kiwa/observability` v2.2 advanced III IaC
  * semantics (startIacSession / capturePlan / detectDrift / evaluatePolicy
  * / attributeCost) so the same app code exercises a deterministic
  * Terraform + OPA + cost ceremony without a real Terraform state / OPA
@@ -23,7 +23,7 @@
  * op that diverged.
  */
 
-import { semantics } from '@kiwa-test/observability';
+import { semantics } from '@kiwa/observability';
 import {
   type CostAttributeResult,
   type CostAttribution,

@@ -43,7 +43,7 @@ describe('dogfood-nats-jetstream — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/streaming/nats-jetstream-dogfood',
+      provider: '@kiwa/streaming/nats-jetstream-dogfood',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -78,7 +78,7 @@ describe('dogfood-nats-jetstream — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/streaming/nats-jetstream-dogfood',
+      provider: '@kiwa/streaming/nats-jetstream-dogfood',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -104,7 +104,7 @@ describe('dogfood-nats-jetstream — fidelity harness', () => {
     const real = await makeRealAdapter();
     const matrix = await runAdapterMatrix({ mock, real, run: async () => undefined });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/streaming/nats-jetstream-dogfood',
+      provider: '@kiwa/streaming/nats-jetstream-dogfood',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -137,7 +137,7 @@ describe('dogfood-nats-jetstream — fidelity harness', () => {
     await driveObjectChunkingFlow(mock);
     await driveTestcontainersProbeFlow(mock);
     const output = runFidelityHarness({
-      provider: '@kiwa-test/streaming/nats-jetstream-dogfood',
+      provider: '@kiwa/streaming/nats-jetstream-dogfood',
       version: '0.2.0',
       mockTraces: mock.traces(),
       realTraces: real.traces(),

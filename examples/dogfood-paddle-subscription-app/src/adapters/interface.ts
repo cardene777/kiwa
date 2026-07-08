@@ -13,7 +13,7 @@
 import type {
   PaymentWebhookEvent,
   WebhookVerifyResult,
-} from '@kiwa-test/payment';
+} from '@kiwa/payment';
 
 export type SubscriptionAppMode = 'mock' | 'real';
 export type CustomerStatus = 'active' | 'archived';

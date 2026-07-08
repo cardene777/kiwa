@@ -34,7 +34,7 @@ import type {
   JwksDocument,
   JwksKey,
   OpenIdProviderMetadata,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 import type {
   ExtendedClientRegistrationRequest,
   ExtendedClientRegistrationResponse,

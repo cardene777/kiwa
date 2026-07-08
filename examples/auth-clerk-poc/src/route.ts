@@ -1,4 +1,4 @@
-import type { ClerkTestEnv } from '@kiwa-test/auth';
+import type { ClerkTestEnv } from '@kiwa/auth';
 
 /**
  * Minimal server handler that mirrors Clerk's real Next.js middleware +

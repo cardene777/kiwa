@@ -10,7 +10,7 @@
  * v1.21 / v1.22 / v1.23 / v1.24 / v1.25 / v1.26 の docs-tutorial-v*.test.ts と
  * 同 pattern。 5 milestone 連続 pattern (v1.23-v1.27) を確立する。
  *
- * v1.27 は @kiwa-test/quality-metrics v0.3 の 4-tier mutation SSOT + 12-axis
+ * v1.27 は @kiwa/quality-metrics v0.3 の 4-tier mutation SSOT + 12-axis
  * release gate を扱う。 tutorial 50 は Stryker setup + baseline persistence +
  * tier gate walkthrough、 tutorial 51 は 22 → 33 package migration
  * methodology + tier + optional override。 tutorial 内の TypeScript snippet
@@ -89,7 +89,7 @@ describe('tutorial 50 — Section 6: tier gate', () => {
 // Section 7 — Gate the release with the 12th axis
 function baseReportForRelease(): QualityReport {
   return {
-    provider: '@kiwa-test/example',
+    provider: '@kiwa/example',
     version: '0.1.0',
     reportedAt: '2026-07-05T00:00:00Z',
     coverage: { line: 90, branch: 82, function: 95 },
@@ -147,15 +147,15 @@ describe('tutorial 51 — Section 1: 4-tier SSOT table', () => {
     });
   });
 
-  it('Framework tier floor is 70 — matches @kiwa-test/nextjs stryker config', () => {
+  it('Framework tier floor is 70 — matches @kiwa/nextjs stryker config', () => {
     expect(DEFAULT_MUTATION_TIER_THRESHOLDS.framework).toBe(70);
   });
 
-  it('SaaS tier floor is 65 — matches @kiwa-test/ai-llm / payment / queue defaults', () => {
+  it('SaaS tier floor is 65 — matches @kiwa/ai-llm / payment / queue defaults', () => {
     expect(DEFAULT_MUTATION_TIER_THRESHOLDS.saas).toBe(65);
   });
 
-  it('Test type tier floor is 60 — matches @kiwa-test/ui / a11y / visual defaults', () => {
+  it('Test type tier floor is 60 — matches @kiwa/ui / a11y / visual defaults', () => {
     expect(DEFAULT_MUTATION_TIER_THRESHOLDS['test-type']).toBe(60);
   });
 });
@@ -163,7 +163,7 @@ describe('tutorial 51 — Section 1: 4-tier SSOT table', () => {
 describe('tutorial 51 — Section 6: 12-axis release gate via assembleReport', () => {
   it('passes the SaaS tier floor when the mutation baseline holds', () => {
     const report = assembleReport({
-      provider: '@kiwa-test/my-package',
+      provider: '@kiwa/my-package',
       version: '0.1.0',
       coverage: coverageFromV8Summary({
         lines: { pct: 90 },
@@ -188,7 +188,7 @@ describe('tutorial 51 — Section 6: 12-axis release gate via assembleReport', (
     // Migration guide + concept doc example: legacy override on the 7-axis
     // path AND opt-in tier axis both surface when kill rate falls below both.
     const report = assembleReport({
-      provider: '@kiwa-test/example',
+      provider: '@kiwa/example',
       version: '0.1.0',
       coverage: coverageFromV8Summary({
         lines: { pct: 90 },

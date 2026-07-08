@@ -1,20 +1,20 @@
-# @kiwa-test/nextjs
+# @kiwa/nextjs
 
 Next.js App Router test adapter for [kiwa](https://github.com/cardene777/kiwa) — invoke Server Actions in isolation and capture redirect / cookie / header side-effects without a running Next.js server.
 
 ```bash
-pnpm add -D @kiwa-test/nextjs
+pnpm add -D @kiwa/nextjs
 ```
 
 ## Why
 
-Next.js Server Actions (`'use server'`) are async functions that can throw `redirect()`, mutate cookies, and call `revalidatePath()` — none of which return values. Integration-level testing through Playwright works but is slow and flaky. `@kiwa-test/nextjs` lets you call the action **directly in Vitest** and assert on the captured side-effects.
+Next.js Server Actions (`'use server'`) are async functions that can throw `redirect()`, mutate cookies, and call `revalidatePath()` — none of which return values. Integration-level testing through Playwright works but is slow and flaky. `@kiwa/nextjs` lets you call the action **directly in Vitest** and assert on the captured side-effects.
 
 ## Quick start
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa-test/nextjs';
+import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa/nextjs';
 
 // app/actions.ts — your Server Action
 async function login(formData: FormData) {
@@ -71,7 +71,7 @@ Throw a `{ [REDIRECT_SYMBOL]: true, url, type }` from your action to signal a re
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { setupNextRscEnv } from '@kiwa-test/nextjs';
+import { setupNextRscEnv } from '@kiwa/nextjs';
 
 async function* streamItems() {
   yield { type: 'div', key: null, props: { children: 'partial: 1 item' } };

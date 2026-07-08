@@ -4,7 +4,7 @@
 // response header に echo する pattern を示し、 invokeEndpoint で locals を seed
 // する流れを demo する。
 
-import type { APIRoute } from '@kiwa-test/astro';
+import type { APIRoute } from '@kiwa/astro';
 
 interface CounterState {
   count: number;

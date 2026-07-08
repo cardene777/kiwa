@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.44-2 — a passwordless UX observability harness driven behind a provider-neutral surface backed by @kiwa-test/auth v0.6 advanced device-bound-passkey + conditional-ui + cross-device-flow semantics + real-driver env-gate. Two adapter implementations satisfy the same 12-op contract: makeMockAdapter walks the auth v0.6 semantics deterministically; makeRealAdapter emits a Chrome + Safari + Firefox WebAuthn L3 + iCloud Keychain + Chrome Sync API sequence when KIWA_MODE=real + KIWA_AUTH_PASSWORDLESS_URL are wired, otherwise reports KIWA_AUTH_PASSWORDLESS_ENV_MISSING.",
+  "description": "Dogfood app v1.44-2 — a passwordless UX observability harness driven behind a provider-neutral surface backed by @kiwa/auth v0.6 advanced device-bound-passkey + conditional-ui + cross-device-flow semantics + real-driver env-gate. Two adapter implementations satisfy the same 12-op contract: makeMockAdapter walks the auth v0.6 semantics deterministically; makeRealAdapter emits a Chrome + Safari + Firefox WebAuthn L3 + iCloud Keychain + Chrome Sync API sequence when KIWA_MODE=real + KIWA_AUTH_PASSWORDLESS_URL are wired, otherwise reports KIWA_AUTH_PASSWORDLESS_ENV_MISSING.",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/auth build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/core -F @kiwa/auth build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/auth": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/auth": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

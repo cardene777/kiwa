@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/remix",
+  "package": "@kiwa/remix",
   "tier": "Framework",
   "thresholds": {
     "high": 70,

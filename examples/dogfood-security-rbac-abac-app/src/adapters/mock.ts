@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa-test/security` v0.1 authorization semantics
+ * Mock adapter — drives `@kiwa/security` v0.1 authorization semantics
  * (createRbacPolicy / rbacAllows / expandRoles / evaluateAbac /
  * evaluateCombined) so the same app code exercises a deterministic RBAC +
  * ABAC + policy-store ceremony without a real Casbin policy store. Both
@@ -29,7 +29,7 @@ import {
   type AbacRule,
   type AbacRuleEffect,
   type RbacRole,
-} from '@kiwa-test/security';
+} from '@kiwa/security';
 import type {
   AbacEvaluateResult,
   AbacRuleInput,

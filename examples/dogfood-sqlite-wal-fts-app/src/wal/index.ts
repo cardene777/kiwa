@@ -13,7 +13,7 @@ import {
   triggerWalCheckpoint,
   mapSharedMemory,
   type SqliteWalSession,
-} from '@kiwa-test/orm';
+} from '@kiwa/orm';
 
 export interface WalJourneyInput {
   readonly databasePath: string;

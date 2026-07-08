@@ -3,7 +3,7 @@
  * Durable Object instance based on the URL path. A real Cloudflare Workers
  * deployment would forward `/room/:roomId/*` to the DO via
  * `env.CHAT_ROOM.get(id).fetch(request)`; the mock reproduces the routing
- * logic + WebSocket upgrade handshake using the `@kiwa-test/edge` v0.2
+ * logic + WebSocket upgrade handshake using the `@kiwa/edge` v0.2
  * websocket-edge axis semantics.
  *
  * Routing table.
@@ -26,7 +26,7 @@ import {
   sendMessage,
   closeWebSocket,
   type WebSocketSession,
-} from '@kiwa-test/edge';
+} from '@kiwa/edge';
 import type { ChatMessage, ChatRoomRegistry } from './chat-room.js';
 
 export const ROUTE_PATHS = {

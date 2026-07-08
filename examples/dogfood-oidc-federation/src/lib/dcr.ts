@@ -1,7 +1,7 @@
 /**
  * DCR registration handler — RFC 7591 Dynamic Client Registration for the
  * dogfood OP. The handler sits between the Hono `/register` route + the
- * underlying `@kiwa-test/auth` `dynamicClientRegistration` helper so the
+ * underlying `@kiwa/auth` `dynamicClientRegistration` helper so the
  * dogfood app can layer RFC-7591-specific behaviour that the shared kiwa
  * library does not carry:
  *   - three RFC 7591 client authentication methods —
@@ -28,7 +28,7 @@
 import type {
   ClientRegistrationRequest,
   ClientRegistrationResponse,
-} from '@kiwa-test/auth';
+} from '@kiwa/auth';
 
 /**
  * Auth methods the dogfood DCR handler advertises. The underlying kiwa

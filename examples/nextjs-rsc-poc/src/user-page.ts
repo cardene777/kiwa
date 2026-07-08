@@ -5,7 +5,7 @@
 // here and use a small element factory so the PoC stays a pure Vitest
 // workspace; the runtime element shape is identical to React's.
 
-import { NOT_FOUND_SYMBOL, type RscNode, type RscElement } from '@kiwa-test/nextjs';
+import { NOT_FOUND_SYMBOL, type RscNode, type RscElement } from '@kiwa/nextjs';
 
 interface RscProps {
   readonly [key: string]: unknown;

@@ -1,7 +1,7 @@
 /**
  * JetStream flow — persistent stream + durable consumer + ack + redelivery.
  *
- * Wraps `@kiwa-test/streaming`'s NATS mock JetStream store. The dogfood
+ * Wraps `@kiwa/streaming`'s NATS mock JetStream store. The dogfood
  * models the 4 building blocks a real nats.js JetStream client exposes:
  *
  * 1. Stream declaration — one stream owns 1+ subjects with a retention
@@ -23,7 +23,7 @@ import type {
   JetStreamStore,
   NatsMock,
   StreamingMessage,
-} from '@kiwa-test/streaming';
+} from '@kiwa/streaming';
 
 export interface JetStreamRun {
   readonly addStream: (config: JetStreamConfig) => Promise<void>;

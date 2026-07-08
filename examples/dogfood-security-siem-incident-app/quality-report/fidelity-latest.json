@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa-test/security/dogfood-siem-incident-app",
+  "provider": "@kiwa/security/dogfood-siem-incident-app",
   "version": "0.2.0",
   "reportedAt": "2026-07-07T07:20:09.591Z",
   "coverage": {

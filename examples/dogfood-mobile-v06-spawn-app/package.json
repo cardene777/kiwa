@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.55-2 — Mobile v0.6 実 child_process.spawn workflow backed by @kiwa-test/mobile v0.6。 dry-run 経路で shape 契約 検証 + SpawnFn DI で決定的挙動 + env sanitize + timeout / buffer 上限 pattern reference。 depth-5 pattern 実装完成 dogfood。",
+  "description": "Dogfood app v1.55-2 — Mobile v0.6 実 child_process.spawn workflow backed by @kiwa/mobile v0.6。 dry-run 経路で shape 契約 検証 + SpawnFn DI で決定的挙動 + env sanitize + timeout / buffer 上限 pattern reference。 depth-5 pattern 実装完成 dogfood。",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/mobile build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/core -F @kiwa/mobile build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/mobile": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/mobile": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

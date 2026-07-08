@@ -1,7 +1,7 @@
 /**
  * WebTransport adapter routing — the entry point the Nuxt 3 app uses to pick
  * between real (aioquic + Chrome experimental flag) and mock
- * (@kiwa-test/realtime v0.2) at runtime. Inherits the 8-axis routing shape
+ * (@kiwa/realtime v0.2) at runtime. Inherits the 8-axis routing shape
  * from v1.28-1 so downstream dogfoods can reuse this pattern with a one-liner
  * switch on the axis.
  *

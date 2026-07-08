@@ -1,12 +1,12 @@
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into `@kiwa-test/quality-metrics`
+ * (missing ops, unmatched behaviour) into `@kiwa/quality-metrics`
  * 13-axis release gate, and emits a JSON + markdown report so the release
  * process can consume it.
  *
  * The dogfood app is the source of truth for whether the v1.37-1
- * `@kiwa-test/security` v0.1 sbom + secrets-scan helpers track the real
+ * `@kiwa/security` v0.1 sbom + secrets-scan helpers track the real
  * Trivy + Gitleaks scanner behaviour closely enough to be trusted as a
  * mock in unit tests. The report tracks the 14 ops the adapter contract
  * exposes so any divergence surfaces the op that broke.
@@ -32,7 +32,7 @@ import {
   type A11yTier,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa-test/quality-metrics';
+} from '@kiwa/quality-metrics';
 import type { SecurityAdapter, TraceEvent } from '../adapters/interface.js';
 
 export interface FidelityRunInput {

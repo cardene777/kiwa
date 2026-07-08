@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupCacheEnv, type CacheTestEnv } from '@kiwa-test/cache';
+import { setupCacheEnv, type CacheTestEnv } from '@kiwa/cache';
 import {
   SESSION_INVALIDATE_CHANNEL,
   extendSession,

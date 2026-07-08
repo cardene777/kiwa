@@ -3,16 +3,16 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.41-2 — a Stripe Treasury + Unit + Column style embedded finance orchestrator (BaaS account open + funding transfers + card issuance both virtual + physical + KYC individual verification + KYB business verification with score thresholds) that drives a payments-as-a-platform surface backed by @kiwa-test/payment v0.5 embedded-finance semantics, runnable in both KIWA_MODE=real (KIWA_STRIPE_TREASURY_KEY + KIWA_UNIT_API_URL + KIWA_COLUMN_API_URL provider endpoints) and KIWA_MODE=mock (in-memory state machine) so behavioural fidelity feeds @kiwa-test/quality-metrics.",
+  "description": "Dogfood app v1.41-2 — a Stripe Treasury + Unit + Column style embedded finance orchestrator (BaaS account open + funding transfers + card issuance both virtual + physical + KYC individual verification + KYB business verification with score thresholds) that drives a payments-as-a-platform surface backed by @kiwa/payment v0.5 embedded-finance semantics, runnable in both KIWA_MODE=real (KIWA_STRIPE_TREASURY_KEY + KIWA_UNIT_API_URL + KIWA_COLUMN_API_URL provider endpoints) and KIWA_MODE=mock (in-memory state machine) so behavioural fidelity feeds @kiwa/quality-metrics.",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/payment -F @kiwa-test/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/core -F @kiwa/payment -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/payment": "workspace:*",
-    "@kiwa-test/quality-metrics": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/payment": "workspace:*",
+    "@kiwa/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

@@ -3,7 +3,7 @@
  *
  * `driveFacetedLifecycle` drives every faceted-axis op (startFacetedSession
  * → seedFacetedDocuments → computeNestedFacets → traverseHierarchy →
- * countDistinct → applyRefinedFilter) in the order `@kiwa-test/search`
+ * countDistinct → applyRefinedFilter) in the order `@kiwa/search`
  * v0.3 faceted-advanced semantics expect. Any op that diverges surfaces
  * in the fidelity trace.
  *

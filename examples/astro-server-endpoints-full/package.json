@@ -4,17 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm -F @kiwa-test/astro -F @kiwa-test/core build && astro build",
+    "build": "pnpm -F @kiwa/astro -F @kiwa/core build && astro build",
     "dev": "astro dev",
     "start": "astro preview",
     "preview": "astro preview",
-    "test": "pnpm -F @kiwa-test/astro -F @kiwa-test/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/astro -F @kiwa/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@kiwa-test/astro": "workspace:*",
-    "@kiwa-test/core": "workspace:*",
+    "@kiwa/astro": "workspace:*",
+    "@kiwa/core": "workspace:*",
     "astro": "^5.0.0"
   },
   "devDependencies": {

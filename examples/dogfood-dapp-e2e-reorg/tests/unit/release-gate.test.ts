@@ -46,7 +46,7 @@ async function computeAxes() {
     );
   }
   return runFidelityHarness({
-    provider: '@kiwa-test/dapp/reorg-dogfood',
+    provider: '@kiwa/dapp/reorg-dogfood',
     version: '0.1.0',
     mockTraces: mock.traces(),
     realTraces: real.traces(),

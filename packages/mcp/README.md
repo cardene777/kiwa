@@ -1,4 +1,4 @@
-# @kiwa-test/mcp
+# @kiwa/mcp
 
 Model Context Protocol (MCP) server + client mock harness for kiwa.
 
@@ -16,7 +16,7 @@ import {
   connectClientToServer,
   McpServer,
   registerAllFixtureTools,
-} from '@kiwa-test/mcp';
+} from '@kiwa/mcp';
 
 const server = new McpServer({ name: 'my-mock', version: '1.0.0' });
 registerAllFixtureTools(server);

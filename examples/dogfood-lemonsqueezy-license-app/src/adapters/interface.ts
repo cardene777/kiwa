@@ -2,7 +2,7 @@
  * Provider-neutral surface for the v1.33-4 dogfood app. Two
  * implementations exist —
  *
- *  - {@link makeMockAdapter} — backed by @kiwa-test/payment's
+ *  - {@link makeMockAdapter} — backed by @kiwa/payment's
  *    `createLemonSqueezyMock` + a small in-memory store for licenses,
  *    orders, refunds, and affiliate records.
  *  - {@link makeRealAdapter} — env-gated Lemon Squeezy sandbox skeleton
@@ -23,7 +23,7 @@
  *    order-paid time using tier policy.
  */
 
-import type { PaymentWebhookEvent, WebhookVerifyResult } from '@kiwa-test/payment';
+import type { PaymentWebhookEvent, WebhookVerifyResult } from '@kiwa/payment';
 import type {
   AffiliateReferralRecord,
   LicenseActivation,

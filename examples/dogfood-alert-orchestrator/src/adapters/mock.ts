@@ -5,7 +5,7 @@ import {
   type EscalationStep,
   type MetricRecord,
   type RouteEntry,
-} from '@kiwa-test/observability';
+} from '@kiwa/observability';
 import type {
   AlertFireEvent,
   AlertOrchestratorAdapter,
@@ -23,7 +23,7 @@ import { SilenceStore } from '../silence/index.js';
 import { stepFor } from '../escalation/index.js';
 
 /**
- * Mock adapter — drives the `@kiwa-test/observability` `AlertRouter` so
+ * Mock adapter — drives the `@kiwa/observability` `AlertRouter` so
  * the same app code exercises the Prometheus AlertManager surface without
  * needing a live AlertManager process. The mock produces deterministic
  * lifecycle transitions (fire → route → silence → escalate → resolve) so
@@ -289,7 +289,7 @@ export function makeMockAdapter(config: AlertOrchestratorConfig): AlertOrchestra
 
 /**
  * Compile a provider-neutral {@link AlertRuleDef} into a
- * `@kiwa-test/observability` {@link AlertRule}. Rate + anomaly kinds
+ * `@kiwa/observability` {@link AlertRule}. Rate + anomaly kinds
  * remap to a synthetic scalar metric so the router still fires by
  * threshold comparison.
  */

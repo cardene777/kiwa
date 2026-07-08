@@ -33,7 +33,7 @@ describe('dogfood-rabbitmq — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/queue/rabbitmq-dogfood',
+      provider: '@kiwa/queue/rabbitmq-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -65,7 +65,7 @@ describe('dogfood-rabbitmq — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/queue/rabbitmq-dogfood',
+      provider: '@kiwa/queue/rabbitmq-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -90,7 +90,7 @@ describe('dogfood-rabbitmq — fidelity harness', () => {
     const real = await makeRealAdapter();
     const matrix = await runAdapterMatrix({ mock, real, run: async () => undefined });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/queue/rabbitmq-dogfood',
+      provider: '@kiwa/queue/rabbitmq-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

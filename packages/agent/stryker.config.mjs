@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa-test/agent.
+ * Mutation testing config for @kiwa/agent.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — agent adapter covers
  * LangGraph + OpenAI Assistants + state machine; provider API + graph
  * semantics drift expected.

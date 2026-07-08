@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa-test/ai-llm",
+  "package": "@kiwa/ai-llm",
   "generatedAt": "2026-07-06T01:52:55.814Z",
   "layers": {
     "jsdom": {

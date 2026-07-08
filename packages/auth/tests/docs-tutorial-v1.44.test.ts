@@ -8,7 +8,7 @@
  *
  * 22 milestone 連続 snippet validation streak = v1.23 → v1.44。
  *
- * v1.44 は @kiwa-test/auth v0.6 advanced Passwordless UX 8 axis を扱う。
+ * v1.44 は @kiwa/auth v0.6 advanced Passwordless UX 8 axis を扱う。
  */
 import { describe, expect, it } from 'vitest';
 import { semantics } from '../src/index.js';

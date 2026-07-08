@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.52-2 — Mobile advanced III (New Architecture) 4 axis × 3 target workflow backed by @kiwa-test/mobile v0.3。 Fabric + TurboModules + Codegen + New Architecture 統一 workflow。",
+  "description": "Dogfood app v1.52-2 — Mobile advanced III (New Architecture) 4 axis × 3 target workflow backed by @kiwa/mobile v0.3。 Fabric + TurboModules + Codegen + New Architecture 統一 workflow。",
   "scripts": {
-    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/mobile build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa/core -F @kiwa/mobile build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa-test/core": "workspace:*",
-    "@kiwa-test/mobile": "workspace:*"
+    "@kiwa/core": "workspace:*",
+    "@kiwa/mobile": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

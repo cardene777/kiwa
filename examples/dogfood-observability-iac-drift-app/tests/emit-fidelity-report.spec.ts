@@ -111,7 +111,7 @@ describe('emit fidelity-latest report', () => {
     const matrix = await runAdapterMatrix({ mock, real, run: driveFlows });
 
     const output = runFidelityHarness({
-      provider: '@kiwa-test/observability/dogfood-iac-drift-app',
+      provider: '@kiwa/observability/dogfood-iac-drift-app',
       version: '2.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

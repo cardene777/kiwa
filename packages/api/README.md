@@ -1,4 +1,4 @@
-# @kiwa-test/api
+# @kiwa/api
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package covers the HTTP API surface)" width="640" />
@@ -10,7 +10,7 @@ HTTP API test adapter for kiwa — Vitest + msw + supertest under a single `setu
 
 ## Overview
 
-`@kiwa-test/api` is the Layer 2 adapter that turns a Layer 1 kiwa-design spec (with `mode = mock | live | hybrid`) into a runnable Vitest suite. It works with any Node-runnable HTTP framework:
+`@kiwa/api` is the Layer 2 adapter that turns a Layer 1 kiwa-design spec (with `mode = mock | live | hybrid`) into a runnable Vitest suite. It works with any Node-runnable HTTP framework:
 
 - Next.js App Router (Route Handler — `fetch handler` shape)
 - Express / Fastify / NestJS (Node `(req, res) =>` shape)
@@ -20,7 +20,7 @@ HTTP API test adapter for kiwa — Vitest + msw + supertest under a single `setu
 ## Install
 
 ```bash
-pnpm add -D @kiwa-test/api @kiwa-test/core msw supertest vitest
+pnpm add -D @kiwa/api @kiwa/core msw supertest vitest
 ```
 
 `msw` and `supertest` are declared as **optional peer dependencies** — install only what your specs need.
@@ -28,7 +28,7 @@ pnpm add -D @kiwa-test/api @kiwa-test/core msw supertest vitest
 ## Three modes
 
 ```ts
-import { setupApiServer } from "@kiwa-test/api";
+import { setupApiServer } from "@kiwa/api";
 
 // 1) mock mode — msw handlers return canned responses, no real server.
 const mockEnv = await setupApiServer({

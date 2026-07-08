@@ -8,7 +8,7 @@
  *    KIWA_COST_API_URL) when `KIWA_MODE=real` +
  *    `IAC_STACK_READY=1` are set; otherwise every op reports
  *    `KIWA_IAC_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa-test/observability` v2.2
+ *  - {@link makeMockAdapter} — backed by `@kiwa/observability` v2.2
  *    IaC semantics (capturePlan / detectDrift / evaluatePolicy /
  *    attributeCost).
  *
@@ -28,7 +28,7 @@
  * report can point at the ops that diverged.
  */
 
-import type { semantics } from '@kiwa-test/observability';
+import type { semantics } from '@kiwa/observability';
 
 /** Re-export from observability semantics namespace. */
 export type ObservabilityTarget = semantics.ObservabilityTarget;

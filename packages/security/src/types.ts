@@ -1,5 +1,5 @@
 /**
- * Shared types for `@kiwa-test/security` — 4 provider unified mock over 8 axis
+ * Shared types for `@kiwa/security` — 4 provider unified mock over 8 axis
  * of security posture (Content Security Policy / rate limiting / authorization
  * / WAF / threat modeling / secrets scanning / SBOM / advanced security headers).
  *

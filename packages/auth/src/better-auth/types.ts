@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa-test/core';
+import type { TestEnvBase } from '@kiwa/core';
 
 /**
  * Better Auth ships three official database adapter shapes — `betterAuth/adapters/prisma`,

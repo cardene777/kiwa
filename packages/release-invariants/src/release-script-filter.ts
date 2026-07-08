@@ -34,7 +34,7 @@ export function checkReleaseScriptFilter(
 ): ReleaseScriptFilterResult {
   const entries: ReleaseScriptFilterEntry[] = publishable.map((pkg) => {
     // Word-boundary + literal package name avoids substring hits
-    // (e.g. `@kiwa-test/ai` vs `@kiwa-test/ai-llm`).
+    // (e.g. `@kiwa/ai` vs `@kiwa/ai-llm`).
     const buildFilterPresent = releaseScript.includes(`-F ${pkg.name}`);
     const publishFilterPresent = releaseScript.includes(`--filter ${pkg.name}`);
     const ok = buildFilterPresent && publishFilterPresent;

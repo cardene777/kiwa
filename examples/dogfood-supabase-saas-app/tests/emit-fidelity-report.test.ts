@@ -75,7 +75,7 @@ describe('dogfood-supabase — emit fidelity report to quality-reports/', () => 
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/auth/supabase-dogfood',
+      provider: '@kiwa/auth/supabase-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

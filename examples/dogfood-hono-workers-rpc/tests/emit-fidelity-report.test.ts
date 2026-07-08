@@ -48,7 +48,7 @@ describe('dogfood-hono-workers-rpc — emit fidelity report to quality-report/',
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa-test/hono/workers-rpc',
+      provider: '@kiwa/hono/workers-rpc',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

@@ -1,4 +1,4 @@
-# @kiwa-test/payment
+# @kiwa/payment
 
 ## 0.4.0 — 2026-07-06
 
@@ -17,7 +17,7 @@
 ### Patch Changes
 
 - Updated dependencies [797e5ea]
-  - @kiwa-test/quality-metrics@0.2.0
+  - @kiwa/quality-metrics@0.2.0
 
 ## 0.1.0 — 2026-07-03
 

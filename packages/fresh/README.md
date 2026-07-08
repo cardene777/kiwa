@@ -1,14 +1,14 @@
-# @kiwa-test/fresh
+# @kiwa/fresh
 
 Deno Fresh Islands + Route Handler + Head normalization test adapter for [kiwa](https://github.com/cardene777/kiwa) — model Fresh's server route + partial-hydration + `<Head>` merge contract in Vitest without a Deno runtime.
 
 ```bash
-pnpm add -D @kiwa-test/fresh
+pnpm add -D @kiwa/fresh
 ```
 
 ## Why
 
-Deno Fresh routes ship mostly static HTML and hydrate any component under `islands/` on the client with its `props`. Testing the observable behavior — handler dispatch, `ctx.render(data)` capture, island mount + interaction, `<Head>` merge — normally means spinning up Deno + esbuild + preact. `@kiwa-test/fresh` gives you standalone helpers that model the same shape so tests assert directly on the response, the hydrated tree, and the merged head.
+Deno Fresh routes ship mostly static HTML and hydrate any component under `islands/` on the client with its `props`. Testing the observable behavior — handler dispatch, `ctx.render(data)` capture, island mount + interaction, `<Head>` merge — normally means spinning up Deno + esbuild + preact. `@kiwa/fresh` gives you standalone helpers that model the same shape so tests assert directly on the response, the hydrated tree, and the merged head.
 
 ## Quick start
 
@@ -16,7 +16,7 @@ Deno Fresh routes ship mostly static HTML and hydrate any component under `islan
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeFreshHandler, h, type FreshHandlers } from '@kiwa-test/fresh';
+import { invokeFreshHandler, h, type FreshHandlers } from '@kiwa/fresh';
 
 describe('GET /api/ping', () => {
   it('returns pong', async () => {
@@ -50,7 +50,7 @@ describe('GET /api/ping', () => {
 
 ```ts
 import { expect, it } from 'vitest';
-import { defineRoute, invokeDefineRoute, h, stringify, redirect } from '@kiwa-test/fresh';
+import { defineRoute, invokeDefineRoute, h, stringify, redirect } from '@kiwa/fresh';
 
 it('renders page with params', async () => {
   const route = defineRoute((_req, ctx) => h('article', null, `id=${ctx.params.id}`));
@@ -78,7 +78,7 @@ it('captures redirect() throw', async () => {
 
 ```ts
 import { expect, it } from 'vitest';
-import { defineIsland, islandPlaceholder, hydrateIslands, simulateInteraction, h } from '@kiwa-test/fresh';
+import { defineIsland, islandPlaceholder, hydrateIslands, simulateInteraction, h } from '@kiwa/fresh';
 
 it('hydrates a Counter island and dispatches a click', () => {
   let count = 0;
@@ -100,7 +100,7 @@ it('hydrates a Counter island and dispatches a click', () => {
 
 ```ts
 import { expect, it } from 'vitest';
-import { defineHead, mergeHead, renderHead, extractHead, h } from '@kiwa-test/fresh';
+import { defineHead, mergeHead, renderHead, extractHead, h } from '@kiwa/fresh';
 
 it('later fragment overrides title + dedups meta by name', () => {
   const merged = mergeHead([
@@ -150,4 +150,4 @@ Brand symbols: `FRESH_REDIRECT_SYMBOL` / `FRESH_NOT_FOUND_SYMBOL` / `FRESH_ROUTE
 - `_app.tsx` / `_layout.tsx` nesting is out of scope for v0.1 — call each layer explicitly.
 - `simulateInteraction` doesn't bubble events; it invokes each collected handler once with a synthetic event object.
 
-Companion: v1.19-1b of the [kiwa test framework](https://github.com/cardene777/kiwa) — released alongside `@kiwa-test/solidjs` (#813) + `@kiwa-test/hono` (v1.19-1c) as part of the v1.19 modern framework depth-drive.
+Companion: v1.19-1b of the [kiwa test framework](https://github.com/cardene777/kiwa) — released alongside `@kiwa/solidjs` (#813) + `@kiwa/hono` (v1.19-1c) as part of the v1.19 modern framework depth-drive.

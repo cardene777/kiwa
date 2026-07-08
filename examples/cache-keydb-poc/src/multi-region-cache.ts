@@ -1,4 +1,4 @@
-import type { KeyDBTestEnv } from '@kiwa-test/cache';
+import type { KeyDBTestEnv } from '@kiwa/cache';
 
 /**
  * A small multi-region rate-limit cache stitched together so the PoC proves
