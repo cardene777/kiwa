@@ -1,0 +1,20 @@
+{
+  "name": "dogfood-desktop-spawn-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Dogfood app v1.60-2 — Desktop 12 axis から 8 CLI-backed axis 抽出 + spawn stub 契約層 workflow backed by @kiwa-test/desktop v0.5 (v0.1-v0.4 semantics + adapter + fidelity に v0.5 で spawn stub 契約層追加、 KIWA_DESKTOP_MODE env-gate + args 上限 32 + fail-closed の 3 pattern workflow、 8 CLI stub 全走査 + axis-backed CLI chain + non-CLI axis 列挙)。 Mobile v1.54 dogfood-mobile-real-cli-app pattern を Desktop に転用、 pair 深度 5 段拡張達成 2 例目 candidate depth-5 record dogfood。",
+  "scripts": {
+    "test": "pnpm -F @kiwa-test/core -F @kiwa-test/desktop build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwa-test/core": "workspace:*",
+    "@kiwa-test/desktop": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
