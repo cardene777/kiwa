@@ -96,9 +96,9 @@ describe('tutorial 68 — revalidate + redirect ladder', () => {
 });
 
 describe('tutorial 68 — fidelity coverage (nextjs)', () => {
-  it('nextjs covers 3 target × 4 axis = 12 cells with the server-action-advanced axis (tutorial: fidelity snippet)', () => {
+  it('nextjs covers 3 target × 6 axis = 18 cells (v1.49 advanced III 拡張後、 server-action-advanced axis 継続) (tutorial: fidelity snippet)', () => {
     const coverage = collectFidelityCoverage(['app-router', 'pages-router', 'edge-runtime']);
-    expect(coverage.rows).toHaveLength(12);
+    expect(coverage.rows).toHaveLength(18);
     expect(coverage.axes).toContain('server-action-advanced');
 
     const actionRows = coverage.rows.filter((r) => r.axis === 'server-action-advanced');

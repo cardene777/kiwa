@@ -38,6 +38,19 @@ export const NEXT_AXIS_TO_EVENTS: Record<NextAxis, NeutralEventName[]> = {
     'parallel.error_boundary_captured',
     'parallel.slot_navigated',
   ],
+  // v1.49 advanced III
+  'turbopack-hmr': [
+    'turbopack.module_updated',
+    'turbopack.hmr_boundary_found',
+    'turbopack.hmr_applied',
+    'turbopack.fast_refresh_completed',
+  ],
+  'concurrent-transitions': [
+    'transition.started',
+    'transition.pending',
+    'transition.interrupted',
+    'transition.committed',
+  ],
 };
 
 export function collectFidelityCoverage(

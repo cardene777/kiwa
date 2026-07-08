@@ -54,3 +54,24 @@ export {
   type FidelityCoverage,
   type FidelityRow,
 } from './fidelity.js';
+
+// v1.49 advanced III (pair 第 6 pair 3 段拡張)
+export {
+  applyOptimisticUpdate as applyReactActionOptimistic,
+  beginActionTransition,
+  initializeReactActions,
+  resolveAction,
+  type ReactActionsSession,
+  type ReactActionsState,
+} from './react-19-actions.js';
+
+export {
+  assertStaticBoundary,
+  beginIslandHydration,
+  bootstrapIslandsRoute,
+  markIslandInteractive,
+  registerIsland,
+  type IslandsSession,
+  type IslandsState,
+  type IslandSpec,
+} from './islands-architecture.js';

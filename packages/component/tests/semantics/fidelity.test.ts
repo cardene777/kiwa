@@ -7,11 +7,11 @@ import {
 } from '../../src/index.js';
 
 describe('component fidelity coverage', () => {
-  it('collects 3 targets x 4 axes', () => {
+  it('collects 3 targets x 6 axes (v1.49 advanced III pair 3 段拡張)', () => {
     const coverage = collectFidelityCoverage();
     expect(coverage.providers).toEqual(['storybook8', 'playwright-ct', 'chromatic']);
-    expect(coverage.axes).toHaveLength(4);
-    expect(coverage.rows).toHaveLength(12);
+    expect(coverage.axes).toHaveLength(6);
+    expect(coverage.rows).toHaveLength(18);
   });
 
   it('maps every axis to four neutral events', () => {
@@ -20,13 +20,15 @@ describe('component fidelity coverage', () => {
     }
   });
 
-  it('keeps the combined 4-axis story in one grid', () => {
+  it('keeps the combined 6-axis story in one grid (v1.49)', () => {
     const axes = Object.keys(COMPONENT_AXIS_TO_EVENTS) as ComponentAxis[];
     expect(axes).toEqual([
       'rsc-harness',
       'streaming-ssr',
       'view-transitions',
       'form-action-advanced',
+      'react-19-actions',
+      'islands-architecture',
     ]);
   });
 
@@ -39,9 +41,9 @@ describe('component fidelity coverage', () => {
     );
   });
 
-  it('supports subset target collection', () => {
+  it('supports subset target collection (6 axis v1.49)', () => {
     const coverage = collectFidelityCoverage(['chromatic']);
-    expect(coverage.rows).toHaveLength(4);
+    expect(coverage.rows).toHaveLength(6);
     expect(coverage.rows.every((row) => row.provider === 'chromatic')).toBe(true);
   });
 
