@@ -29,7 +29,7 @@ v0.1 3 axis + v0.2 5 axis + v0.3 4 axis = 12 axis semantics に **adapter layer 
 | AdapterMode | 'mock' \| 'real' |
 | AdapterInvocation | scanId + target + mode + optional metadata |
 | AdapterResult | axis + target + mode + completed + eventCount + durationMs + history + neutralEvents |
-| DesktopAdapter | axis + scan(inv) → Promise<AdapterResult> |
+| DesktopAdapter | axis + scan(inv) → `Promise<AdapterResult>` |
 
 ### 3 target × 12 axis × 2 mode = 72 combination + 36 fidelity pair
 
