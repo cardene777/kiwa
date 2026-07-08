@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/realtime",
-  "version": "0.2.0",
-  "description": "Realtime test harness for kiwa — unified mock across 4 realtime providers (Supabase / Ably / Pusher / Socket.io) covering the 5 base semantics plus v0.2 advanced-transport semantics for WebRTC / WebTransport / HTTP/3 / QUIC, with a real-vs-mock fidelity harness, a 24-row 3x8 grid harness, real-driver env-gate, and quality-metrics 11-axis integration.",
+  "version": "0.3.0",
+  "description": "Realtime test harness for kiwa v0.3 advanced III — unified mock across 4 realtime providers (Supabase / Ably / Pusher / Socket.io) covering the 5 base semantics + v0.2 advanced-transport 8 axis (WebRTC / WebTransport / HTTP/3 / QUIC) + v0.3 advanced III 8 axis (moq-fetch / moq-datagram-media / webcodecs-encoder / webcodecs-decoder / simulcast-svc / voice-streaming / whisper-streaming / realtime-ai-inference) covering Media over QUIC + WebCodecs direct API + LLM voice streaming + Whisper ASR + realtime AI inference, with a real-vs-mock fidelity harness, a 48-row 6x8 grid harness, real-driver env-gate, and quality-metrics 11-axis integration.",
   "license": "MIT",
   "author": {
     "name": "cardene",

@@ -77,3 +77,57 @@ export {
   type QuicStreamHandle,
   type QuicStreamOptions,
 } from './quic-multiplex.js';
+
+// v0.3 advanced III (v1.45) — MoQ + WebCodecs + AI-media 8 axis.
+
+export {
+  createMoqFetchMock,
+  type MoqAnnouncement,
+  type MoqFetchMock,
+  type MoqObject,
+} from './moq-fetch.js';
+
+export {
+  createMoqDatagramMediaMock,
+  type MoqDatagram,
+  type MoqDatagramMediaMock,
+} from './moq-datagram-media.js';
+
+export {
+  createWebCodecsEncoderMock,
+  type EncodedFrame,
+  type EncoderConfig,
+  type WebCodecsEncoderMock,
+} from './webcodecs-encoder.js';
+
+export {
+  createWebCodecsDecoderMock,
+  type DecoderConfig,
+  type WebCodecsDecoderMock,
+} from './webcodecs-decoder.js';
+
+export {
+  createSimulcastSvcMock,
+  type SimulcastSvcLayer,
+  type SimulcastSvcMock,
+} from './simulcast-svc.js';
+
+export {
+  createVoiceStreamingMock,
+  type VoiceAudioChunk,
+  type VoiceSession,
+  type VoiceStreamingMock,
+} from './voice-streaming.js';
+
+export {
+  createWhisperStreamingMock,
+  type WhisperStreamingMock,
+  type WhisperTranscript,
+} from './whisper-streaming.js';
+
+export {
+  createRealtimeAiInferenceMock,
+  type AiInferenceRequest,
+  type AiInferenceResponse,
+  type RealtimeAiInferenceMock,
+} from './realtime-ai-inference.js';
