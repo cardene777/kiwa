@@ -1,6 +1,6 @@
 {
   "name": "@kiwa/auth",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Auth test adapter for kiwa v0.6 advanced Passwordless UX III (NextAuth v5 / Auth.js + Lucia v3 + Better Auth + Clerk + Auth0 + Supabase Auth core + advanced + WebAuthn L3 + Passkey + OAuth 2.1 + OIDC + real driver adapter + v0.6 Passwordless UX 8 axis (device-bound-passkey / conditional-ui / step-up-mfa / risk-based-auth / auth-continuity / cross-device-flow / session-hijack-detect / auth-telemetry) — 3 platform (chromium + webkit + firefox) × 8 axis = 24 fidelity grid + session + provider + DB adapter mocks with RLS + MFA + SSO SAML + Web3 SIWE + Virtual Authenticator + credential creation + assertion + PKCE S256 + DPoP + refresh rotation + revocation + Discovery + JWKS rotation + Dynamic Client Registration + id_token verify + Federation trust chain + real driver testcontainers + caBLE hybrid transport + a11y axe-core gate + Federation JWKS rotation real e2e)",
   "license": "MIT",
   "author": {
