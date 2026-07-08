@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_RELEASE_GATE_THRESHOLDS,
+  captureSnapshot,
   evaluateReleaseGate,
   type QualityReport,
 } from '../src/index.js';
@@ -128,5 +129,173 @@ describe('evaluateReleaseGate — fail', () => {
     expect(verdict.passed).toBe(true);
     expect(verdict.axesEvaluated).toBe(7);
     expect(verdict.blockers.find((b) => b.axis === 'cost.perRequestUsd')).toBeUndefined();
+  });
+});
+
+describe('evaluateReleaseGate — v0.6 drift 統合 axis 群', () => {
+  it('T-QM-GT-013 driftEnabled + driftBaseline 両立時のみ drift axis 発火 (axesEvaluated +1)', () => {
+    const baselineReport = passingReport();
+    const baselineSnapshot = captureSnapshot({
+      report: baselineReport,
+      capturedAt: '2026-06-01T00:00:00Z',
+      label: 'baseline-v1.65',
+    });
+    const currentReport = passingReport();
+    const verdict = evaluateReleaseGate(currentReport, {}, {
+      driftEnabled: true,
+      driftBaseline: baselineSnapshot,
+    });
+    expect(verdict.axesEvaluated).toBe(8);
+    expect(verdict.passed).toBe(true);
+  });
+
+  it('T-QM-GT-014 driftEnabled=false / driftBaseline 不在で 完全 skip (v0.5 まで の 7 axis 挙動 維持)', () => {
+    const baselineReport = passingReport();
+    const baselineSnapshot = captureSnapshot({
+      report: baselineReport,
+      capturedAt: '2026-06-01T00:00:00Z',
+    });
+    const currentReport = passingReport();
+    // Case A: driftEnabled 省略、 driftBaseline 存在 → skip
+    const verdictA = evaluateReleaseGate(currentReport, {}, {
+      driftBaseline: baselineSnapshot,
+    });
+    expect(verdictA.axesEvaluated).toBe(7);
+    // Case B: driftEnabled=true、 driftBaseline 省略 → skip
+    const verdictB = evaluateReleaseGate(currentReport, {}, {
+      driftEnabled: true,
+    });
+    expect(verdictB.axesEvaluated).toBe(7);
+    // Case C: 両方省略 → skip (backward compat 絶対 維持)
+    const verdictC = evaluateReleaseGate(currentReport, {}, {});
+    expect(verdictC.axesEvaluated).toBe(7);
+  });
+
+  it('T-QM-GT-015 coverage regression 検知 で drift.coverage.line blocker 発火 (100 → 80)', () => {
+    const baselineReport = passingReport();
+    baselineReport.coverage.line = 100;
+    const baselineSnapshot = captureSnapshot({
+      report: baselineReport,
+      capturedAt: '2026-06-01T00:00:00Z',
+    });
+    const currentReport = passingReport();
+    currentReport.coverage.line = 80;
+    const verdict = evaluateReleaseGate(currentReport, {}, {
+      driftEnabled: true,
+      driftBaseline: baselineSnapshot,
+      driftThresholdPct: 5.0,
+    });
+    expect(verdict.passed).toBe(false);
+    const driftBlocker = verdict.blockers.find((b) => b.axis === 'drift.coverage.line');
+    expect(driftBlocker).toBeDefined();
+    expect(driftBlocker?.threshold).toBe(-5.0);
+    expect(driftBlocker?.op).toBe('>=');
+  });
+
+  it('T-QM-GT-016 perf regression 検知 (上昇 = 悪化) で drift.perf.p95Ms blocker 発火', () => {
+    const baselineReport = passingReport();
+    baselineReport.perf.p95Ms = 30;
+    const baselineSnapshot = captureSnapshot({
+      report: baselineReport,
+      capturedAt: '2026-06-01T00:00:00Z',
+    });
+    const currentReport = passingReport();
+    currentReport.perf.p95Ms = 60;
+    const verdict = evaluateReleaseGate(currentReport, {}, {
+      driftEnabled: true,
+      driftBaseline: baselineSnapshot,
+    });
+    expect(verdict.passed).toBe(false);
+    const driftBlocker = verdict.blockers.find((b) => b.axis === 'drift.perf.p95Ms');
+    expect(driftBlocker).toBeDefined();
+  });
+
+  it('T-QM-GT-017 improvement (perf 30 → 20) は drift blocker 発火せず pass', () => {
+    const baselineReport = passingReport();
+    baselineReport.perf.p95Ms = 30;
+    const baselineSnapshot = captureSnapshot({
+      report: baselineReport,
+      capturedAt: '2026-06-01T00:00:00Z',
+    });
+    const currentReport = passingReport();
+    currentReport.perf.p95Ms = 20;
+    const verdict = evaluateReleaseGate(currentReport, {}, {
+      driftEnabled: true,
+      driftBaseline: baselineSnapshot,
+    });
+    expect(verdict.passed).toBe(true);
+    expect(verdict.blockers.filter((b) => b.axis.startsWith('drift.'))).toEqual([]);
+  });
+
+  it('T-QM-GT-018 threshold 未満 の 変動 は stable 扱い で drift blocker 発火せず (coverage 90 → 91)', () => {
+    const baselineReport = passingReport();
+    baselineReport.coverage.line = 90;
+    const baselineSnapshot = captureSnapshot({
+      report: baselineReport,
+      capturedAt: '2026-06-01T00:00:00Z',
+    });
+    const currentReport = passingReport();
+    currentReport.coverage.line = 91;
+    const verdict = evaluateReleaseGate(currentReport, {}, {
+      driftEnabled: true,
+      driftBaseline: baselineSnapshot,
+      driftThresholdPct: 5.0,
+    });
+    expect(verdict.passed).toBe(true);
+  });
+
+  it('T-QM-GT-019 driftThresholdPct 省略 で default 5.0 適用', () => {
+    const baselineReport = passingReport();
+    baselineReport.coverage.line = 90;
+    const baselineSnapshot = captureSnapshot({
+      report: baselineReport,
+      capturedAt: '2026-06-01T00:00:00Z',
+    });
+    const currentReport = passingReport();
+    currentReport.coverage.line = 86; // 90 → 86 = -4.4% で threshold 5.0 未満、 stable
+    const verdict = evaluateReleaseGate(currentReport, {}, {
+      driftEnabled: true,
+      driftBaseline: baselineSnapshot,
+    });
+    expect(verdict.passed).toBe(true);
+  });
+
+  it('T-QM-GT-020 複数 regression 検知 で 個別 drift blocker 群 が 1:1 で 積まれる', () => {
+    const baselineReport = passingReport();
+    baselineReport.coverage.line = 100;
+    baselineReport.coverage.branch = 100;
+    const baselineSnapshot = captureSnapshot({
+      report: baselineReport,
+      capturedAt: '2026-06-01T00:00:00Z',
+    });
+    const currentReport = passingReport();
+    currentReport.coverage.line = 80;
+    currentReport.coverage.branch = 80; // 82 default → 80 で -2.4% だが 100 → 80 なら -20%
+    const verdict = evaluateReleaseGate(currentReport, {}, {
+      driftEnabled: true,
+      driftBaseline: baselineSnapshot,
+    });
+    const driftAxes = verdict.blockers.filter((b) => b.axis.startsWith('drift.')).map((b) => b.axis);
+    expect(driftAxes).toContain('drift.coverage.line');
+    expect(driftAxes).toContain('drift.coverage.branch');
+  });
+
+  it('T-QM-GT-021 drift 統合 は 既存 axis 群 と 並存 (drift + coverage 二重 fail)', () => {
+    const baselineReport = passingReport();
+    baselineReport.coverage.line = 100;
+    const baselineSnapshot = captureSnapshot({
+      report: baselineReport,
+      capturedAt: '2026-06-01T00:00:00Z',
+    });
+    const currentReport = passingReport();
+    currentReport.coverage.line = 60; // 既存 coverage.line 85 未満 で fail + drift 100 → 60 で -40% regression
+    const verdict = evaluateReleaseGate(currentReport, {}, {
+      driftEnabled: true,
+      driftBaseline: baselineSnapshot,
+    });
+    expect(verdict.passed).toBe(false);
+    const axes = verdict.blockers.map((b) => b.axis);
+    expect(axes).toContain('coverage.line'); // 既存 axis fail
+    expect(axes).toContain('drift.coverage.line'); // drift 統合 axis fail
   });
 });

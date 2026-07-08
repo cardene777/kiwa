@@ -1,5 +1,37 @@
 # @kiwa-test/quality-metrics
 
+## 0.6.0
+
+### Minor Changes
+
+- v1.66-1 (Issue TBD、 v1.66 milestone quality-metrics 深化 III) — evaluateReleaseGate に drift check opt-in 統合。 v0.5 で pure library として提供した historical trend tracking + drift detection を release gate の judgment path に格上げ。
+
+  ## `@kiwa-test/quality-metrics` v0.6.0
+
+  ### What's added
+
+  - **3 新 context field** ... `ReleaseGateContext.driftBaseline` (`MetricSnapshot`) / `driftThresholdPct` (default 5.0) / `driftEnabled` (default undefined = off)。
+  - **drift 統合 axis 群** ... `driftEnabled === true` かつ `driftBaseline` 存在時のみ発火、 `evaluateReleaseGate` 内部で `captureSnapshot` + `compareToBaseline` + `detectDrift` chain 実行、 regression 検知 axis を `drift.{axis名}` の `ReleaseGateBlocker` に 1:1 格上げ。
+  - **axesEvaluated 加算 rule** ... drift lane は tier axis と同じ +1 の 単一 lane 加算 (blocker 数と 独立)。 base 7 + drift 1 = 8、 base 11 + drift 1 = 12 等。
+  - **9 behavior test 追加** (T-QM-GT-013 〜 T-QM-GT-021) ... 発火条件 / skip 経路 / regression 1:1 blocker 化 / improvement pass / stable pass / default threshold / 複数 regression / 既存 axis 並存 の 全経路 cover。
+
+  ### Backward compat 絶対維持 (v0.1-v0.5 API 変更 0)
+
+  - `driftEnabled` 省略 or `driftBaseline` 省略で v0.5 まで の 7 / 11 / 13 axis 動作を 厳密に 維持。
+  - v0.5 の `captureSnapshot` / `compareToBaseline` / `detectDrift` / `generateTrendReport` の 4 export は 一切 変更なし、 pure library 経路 も そのまま。
+  - shape 契約 preserving = `QualityReport` 構造 変更 0、 additive のみ、 既存 dogfood / consumer 全て そのまま 動作。
+
+  ### Depth-5 pattern 3 例目確定 の 実運用 継続
+
+  - v0.5 の depth-5 pattern (Mobile v1.54-v1.55 + Desktop v1.60-v1.61 + quality-metrics v1.65) 3 例目確定 = 「絶対的 rule」 昇格 signal 到達済、 v0.6 は その 実運用 継続 として drift 統合 を 展開。
+  - systematic pattern 41 度目 = shape 契約 preserving + additive-only + backward compat 絶対維持 の 3 原則 を v0.6 も 継承。
+
+## 0.5.0
+
+### Minor Changes
+
+- v1.65-1 (Issue #1291、 v1.65 milestone quality-metrics 深化 II) — MetricSnapshot + BaselineComparison + DriftDetection + TrendReport SSOT 追加 + captureSnapshot / compareToBaseline / detectDrift / generateTrendReport の 4 export。 shape 契約 preserving = 既存 QualityReport 構造無変更、 additive のみ、 pure library として提供 + release-gate 統合は v0.6 で 予定。
+
 ## 0.2.0
 
 ### Minor Changes

@@ -1,3 +1,4 @@
+import { captureSnapshot, compareToBaseline, detectDrift } from './history.js';
 import type {
   A11yMetric,
   A11yThreshold,
@@ -221,6 +222,15 @@ export const DEFAULT_RELEASE_GATE_THRESHOLDS: ReleaseGateThresholds = {
  * serious / moderate) を突合、 fail 時は impact 毎に個別 blocker を積む。
  * report.a11y が undefined の場合は critical Infinity fallback で必ず fail
  * (silent "no data" pass を防止)。
+ *
+ * v1.66 で drift 統合 axis 群 `drift.*` を optional 追加。
+ * `context.driftEnabled === true` かつ `context.driftBaseline` 存在時のみ
+ * v0.5 の `captureSnapshot` + `compareToBaseline` + `detectDrift` を chain
+ * 実行、 regression 検知 axis を `drift.{axis名}` の {@link ReleaseGateBlocker}
+ * として 1:1 格上げする。 driftEnabled が false / 省略で default off、
+ * v0.5 までの 11 / 13 axis 動作を 厳密に 維持 (backward compat 絶対維持)。
+ * regressions 数 = drift blocker 数、 axesEvaluated は drift lane を +1 の 単一 lane
+ * として 加算 (mutation.tier / a11y.tier と 同一 設計)。
  */
 export function evaluateReleaseGate(
   report: QualityReport,
@@ -332,6 +342,41 @@ export function evaluateReleaseGate(
         threshold: a11yThreshold.moderate,
         actual: moderate,
         op: '<=',
+      });
+    }
+  }
+
+  // v0.6 drift 統合 axis 群 — driftEnabled + driftBaseline 両立時のみ発火。
+  // v0.5 の pure library (captureSnapshot + compareToBaseline + detectDrift)
+  // を そのまま chain、 regression を 1:1 で ReleaseGateBlocker に格上げ。
+  // axesEvaluated は drift lane を +1 の 単一 lane として 加算
+  // (mutation.tier / a11y.tier と 同一 設計、 blocker 数と 独立)。
+  if (context.driftEnabled === true && context.driftBaseline !== undefined) {
+    axesEvaluated += 1;
+    const current = captureSnapshot({
+      report,
+      capturedAt: report.reportedAt,
+      label: `current-${report.version}`,
+    });
+    const comparison = compareToBaseline({
+      current,
+      baseline: context.driftBaseline,
+    });
+    const drift = detectDrift(
+      context.driftThresholdPct !== undefined
+        ? { comparison, thresholdPct: context.driftThresholdPct }
+        : { comparison },
+    );
+    // regression 検知 axis を drift.{axis} で 1:1 blocker 化。
+    // threshold = -thresholdPct (下限違反 semantics)、 actual = delta.deltaPct、
+    // op = '>=' で 「delta% が -threshold より 上」 を 満たすべき floor 検査 と
+    // 解釈する (regression = actual < -threshold で fail)。
+    for (const regression of drift.regressions) {
+      blockers.push({
+        axis: `drift.${regression.axis}`,
+        threshold: -drift.threshold,
+        actual: regression.deltaPct,
+        op: '>=',
       });
     }
   }

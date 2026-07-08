@@ -372,7 +372,7 @@ export interface ReleaseGateVerdict {
 
 /**
  * Optional context that opts a report into the tier-aware axes (mutation.tier
- * v1.27-4 + a11y.tier v1.30-4). Passed as the third argument of
+ * v1.27-4 + a11y.tier v1.30-4 + drift.* v1.66). Passed as the third argument of
  * {@link evaluateReleaseGate}. Absent fields = legacy 7 / 11 axis behaviour
  * (backward compatible).
  */
@@ -403,6 +403,31 @@ export interface ReleaseGateContext {
    * `critical` is always 0 — SSOT invariant, never overridable.
    */
   a11yTierThreshold?: A11yThreshold;
+  /**
+   * v0.6 drift check opt-in — baseline snapshot を渡すと drift 検知が
+   * release gate に統合される。 v0.5 で 提供した pure library の
+   * `captureSnapshot` + `compareToBaseline` + `detectDrift` の chain を
+   * `evaluateReleaseGate` 内部で実行、 regression 検知 axis を
+   * `drift.{axis名}` として {@link ReleaseGateBlocker} に格上げする。
+   *
+   * 発火条件 = `driftEnabled === true` かつ `driftBaseline` 存在。 default
+   * off (両 field 不在) で v0.5 までの 11 / 13 axis 動作を厳密に維持
+   * (backward compat 絶対維持)。
+   *
+   * `MetricSnapshot` の import は shape だけの循環参照回避のため
+   * `history.js` 経由。
+   */
+  driftBaseline?: import('./history.js').MetricSnapshot;
+  /**
+   * v0.6 drift 判定 の 絶対値 delta% 閾値 (default 5.0)。 {@link detectDrift}
+   * の `thresholdPct` に そのまま 渡る。 driftBaseline 不在時は 無視。
+   */
+  driftThresholdPct?: number;
+  /**
+   * v0.6 drift check opt-in flag。 true + driftBaseline 存在で drift 発火、
+   * 他の 組合せは 全て skip (default off で backward compat)。
+   */
+  driftEnabled?: boolean;
 }
 
 /**
