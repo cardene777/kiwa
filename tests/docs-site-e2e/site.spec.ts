@@ -563,6 +563,15 @@ const V1_48_PAGES = [
   { path: '/migrations/v1.47-to-v1.48', title: 'v1.47 → v1.48' },
 ];
 
+// v1.49 = Frontend 深化 III pair 3 段拡張 4 例目、 3 dogfood + 3 tutorial (107-109) + migration + concept。
+const V1_49_PAGES = [
+  { path: '/tutorials/107-rsc-server-actions-v2', title: 'RSC + Server Actions v2' },
+  { path: '/tutorials/108-view-transitions-concurrent', title: 'View Transitions + Concurrent React' },
+  { path: '/tutorials/109-islands-turbopack-hmr', title: 'Islands + Turbopack HMR' },
+  { path: '/concepts/frontend-advanced-III-testing', title: 'Frontend advanced III testing' },
+  { path: '/migrations/v1.48-to-v1.49', title: 'v1.48 → v1.49' },
+];
+
 /**
  * VitePress landing pages built from `hero:` frontmatter use the `.VPHome`
  * layout with no `<main>` element; every other layout mounts content into
@@ -1001,6 +1010,20 @@ test.describe('docs site — v1.44 pages render', () => {
       await page.goto(pageUrl(p.path));
       const body = await page.locator(CONTENT_LOCATOR).innerText();
       expect(body).toContain(p.title);
+    });
+  }
+});
+
+test.describe('docs site — v1.49 pages render', () => {
+  for (const p of V1_49_PAGES) {
+    test(`v1.49 page ${p.path} renders with expected title`, async ({ page }) => {
+      if (!existsSync(join(distDir, 'index.html'))) {
+        test.skip(true, 'docs/.vitepress/dist/ not built — run `pnpm docs:build` first');
+        return;
+      }
+      const htmlPath = join(distDir, `${p.path.replace(/^\//, '')}.html`);
+      await page.goto(`file://${htmlPath}`);
+      await expect(page.locator('h1').first()).toContainText(p.title);
     });
   }
 });
