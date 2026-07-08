@@ -496,6 +496,12 @@ export default defineConfig({
             { text: '132 — streaming v2.1 pipeline-orchestrator (5 state SSOT + 8 event SSOT + 40 セル 遷移表 + producer/consumer/rebalance/DLQ walkthrough)', link: '/tutorials/132-streaming-pipeline-orchestrator' },
           ],
         },
+        {
+          text: 'Search pair depth-5 到達 (v2.6、 search v2.1 query-orchestrator、 depth-5 pattern 7 例目発生 = systematic law 継続強化、 systematic pattern 49 度目、 52 milestone streak)',
+          items: [
+            { text: '133 — search v2.1 query-orchestrator (5 state SSOT + 8 event SSOT + parsing/searching/reranking/facet walkthrough)', link: '/tutorials/133-search-query-orchestrator' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -562,6 +568,7 @@ export default defineConfig({
             { text: 'payment v2.1 lifecycle-orchestrator (v2.3 lifecycle-orchestrator.ts 新設 startLifecycle + handleEvent + summarizeLifecycle + 5 state SSOT active-billing/grace-period/dunning-active/chargeback-dispute/canceled + 8 event SSOT + 40 セル 遷移表 + soft-reject + invalid log pattern payment webhook 重複配信対応 + Payment pair 5 段深化 = depth-5 pattern 4 例目確定 dominant pattern 昇格 confirmed + systematic pattern 46 度目 continuous state machine variant Payment 転用)', link: '/concepts/payment-lifecycle-orchestrator' },
             { text: 'realtime v2.1 session-orchestrator (v2.4 session-orchestrator.ts 新設 startSession + dispatchEvent + summarizeSession + 5 state SSOT connecting/subscribed/reconnecting/degraded/closed + 8 event SSOT + 40 セル 遷移表 + heartbeat 動的 QoS 3 回連続失敗 で degraded 降格 + soft-reject pattern + Realtime pair 5 段深化 = depth-5 pattern 5 例目発生 = systematic law 昇格 candidate 到達 + systematic pattern 47 度目 continuous state machine variant Realtime 転用)', link: '/concepts/realtime-session-orchestrator' },
             { text: 'streaming v2.1 pipeline-orchestrator (v2.5 pipeline-orchestrator.ts 新設 startPipeline + dispatchPipelineEvent + summarizePipeline + 5 state SSOT producing/consuming/rebalancing/dlq-active/stopped + 8 event SSOT + 40 セル 遷移表 + producer + consumer group + exactly-once + DLQ + schema registry 継続合成 + Streaming pair 5 段深化 = depth-5 pattern 6 例目発生 = **systematic law CONFIRMED** = kiwa 全体 最上位規範化 confirmed + systematic pattern 48 度目)', link: '/concepts/streaming-pipeline-orchestrator' },
+            { text: 'search v2.1 query-orchestrator (v2.6 query-orchestrator.ts 新設 startQuery + dispatchQueryEvent + summarizeQuery + 5 state SSOT parsing/searching/reranking/facet-aggregating/completed + 8 event SSOT + query DSL + faceted + semantic + geo + relevance 継続合成 + Search pair 5 段深化 = depth-5 pattern 7 例目発生 systematic law 継続強化 + systematic pattern 49 度目 systematic law 継承 第 1 例)', link: '/concepts/search-query-orchestrator' },
           ],
         },
       ],
@@ -634,6 +641,7 @@ export default defineConfig({
             { text: 'v2.2 → v2.3', link: '/migrations/v2.2-to-v2.3' },
             { text: 'v2.3 → v2.4', link: '/migrations/v2.3-to-v2.4' },
             { text: 'v2.4 → v2.5', link: '/migrations/v2.4-to-v2.5' },
+            { text: 'v2.5 → v2.6', link: '/migrations/v2.5-to-v2.6' },
           ],
         },
       ],
