@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/desktop",
-  "version": "0.3.0",
-  "description": "Desktop test harness for kiwa v0.3 — 12 axis (v0.1 Electron + Tauri + Webview + v0.2 Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon + v0.3 Screen recording + Global shortcut + Clipboard + Dark-mode の advanced III 4 axis 追加) を target-neutral state machine で扱う。 3 target (macos + windows + linux) × 12 axis × 4 event = 144 dialect mapping、 fidelity grid 36 row 構築。 v1.58 で kiwa 縦深化 pair 第 14 の第 3 段、 v1.55/v1.56/v1.57 4 PR rhythm 継承 (5 milestone 連続)、 systematic pattern 33 度目適用 (uniform state machine + axis-neutral state)、 backward compat 絶対維持 (v0.1 + v0.2 API 変更 0)、 36 milestone snippet streak 到達。",
+  "version": "0.4.0",
+  "description": "Desktop test harness for kiwa v0.4 — 12 axis semantics (v0.1 Electron + Tauri + Webview + v0.2 Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon + v0.3 Screen recording + Global shortcut + Clipboard + Dark-mode) + v0.4 adapter interface + fidelity harness (Mobile v1.53 rhythm 再現、 12 axis × mock/real = 24 adapter、 3 target × 12 axis × 2 mode = 72 combination) を pair layer 化。 3 target (macos + windows + linux) × 12 axis × 4 event = 144 dialect mapping、 fidelity grid 36 row 構築。 v1.59 で kiwa 縦深化 pair 第 14 の第 4 段、 v1.55-v1.58 4 PR rhythm 継承 (6 milestone 連続)、 systematic pattern 34 度目適用 (uniform adapter interface)、 backward compat 絶対維持 (v0.1 + v0.2 + v0.3 API 変更 0)、 37 milestone snippet streak 到達、 depth-4 record 到達 (Mobile depth-4 4 例目 + Desktop depth-4 = 5 例目)。",
   "license": "MIT",
   "author": {
     "name": "cardene",
