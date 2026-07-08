@@ -490,6 +490,12 @@ export default defineConfig({
             { text: '131 — realtime v2.1 session-orchestrator (5 state SSOT + 8 event SSOT + 40 セル 遷移表 + heartbeat 動的 QoS walkthrough)', link: '/tutorials/131-realtime-session-orchestrator' },
           ],
         },
+        {
+          text: 'Streaming pair depth-5 到達 (v2.5、 streaming v2.1 pipeline-orchestrator、 depth-5 pattern 6 例目発生 = **systematic law CONFIRMED**、 systematic pattern 48 度目、 51 milestone streak)',
+          items: [
+            { text: '132 — streaming v2.1 pipeline-orchestrator (5 state SSOT + 8 event SSOT + 40 セル 遷移表 + producer/consumer/rebalance/DLQ walkthrough)', link: '/tutorials/132-streaming-pipeline-orchestrator' },
+          ],
+        },
       ],
       '/concepts/': [
         {
@@ -555,6 +561,7 @@ export default defineConfig({
             { text: 'auth v0.7 continuous-auth 状態機械 (v2.2 continuous-auth.ts 新設 startContinuousAuth + scoreToLevel + evaluateRisk + completeStepUp + freezeSession + terminateContinuousAuth + 5 state SSOT monitoring/elevated/step-up-required/session-frozen/terminated + 4 段 risk level low/medium/high/critical + interval 動的切替 60_000ms/15_000ms + events log 累積 + guard clause + Auth pair v0.4 → v0.7 4 段深化 pioneer record 更新 + systematic pattern 45 度目 continuous state machine variant 8 原則統合)', link: '/concepts/auth-continuous-state-machine' },
             { text: 'payment v2.1 lifecycle-orchestrator (v2.3 lifecycle-orchestrator.ts 新設 startLifecycle + handleEvent + summarizeLifecycle + 5 state SSOT active-billing/grace-period/dunning-active/chargeback-dispute/canceled + 8 event SSOT + 40 セル 遷移表 + soft-reject + invalid log pattern payment webhook 重複配信対応 + Payment pair 5 段深化 = depth-5 pattern 4 例目確定 dominant pattern 昇格 confirmed + systematic pattern 46 度目 continuous state machine variant Payment 転用)', link: '/concepts/payment-lifecycle-orchestrator' },
             { text: 'realtime v2.1 session-orchestrator (v2.4 session-orchestrator.ts 新設 startSession + dispatchEvent + summarizeSession + 5 state SSOT connecting/subscribed/reconnecting/degraded/closed + 8 event SSOT + 40 セル 遷移表 + heartbeat 動的 QoS 3 回連続失敗 で degraded 降格 + soft-reject pattern + Realtime pair 5 段深化 = depth-5 pattern 5 例目発生 = systematic law 昇格 candidate 到達 + systematic pattern 47 度目 continuous state machine variant Realtime 転用)', link: '/concepts/realtime-session-orchestrator' },
+            { text: 'streaming v2.1 pipeline-orchestrator (v2.5 pipeline-orchestrator.ts 新設 startPipeline + dispatchPipelineEvent + summarizePipeline + 5 state SSOT producing/consuming/rebalancing/dlq-active/stopped + 8 event SSOT + 40 セル 遷移表 + producer + consumer group + exactly-once + DLQ + schema registry 継続合成 + Streaming pair 5 段深化 = depth-5 pattern 6 例目発生 = **systematic law CONFIRMED** = kiwa 全体 最上位規範化 confirmed + systematic pattern 48 度目)', link: '/concepts/streaming-pipeline-orchestrator' },
           ],
         },
       ],
@@ -626,6 +633,7 @@ export default defineConfig({
             { text: 'v2.1 → v2.2', link: '/migrations/v2.1-to-v2.2' },
             { text: 'v2.2 → v2.3', link: '/migrations/v2.2-to-v2.3' },
             { text: 'v2.3 → v2.4', link: '/migrations/v2.3-to-v2.4' },
+            { text: 'v2.4 → v2.5', link: '/migrations/v2.4-to-v2.5' },
           ],
         },
       ],
