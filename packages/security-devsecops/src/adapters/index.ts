@@ -6,6 +6,7 @@
  * (real、 v1.47-2 で追加)。
  */
 export * from './types.js';
+export * from './real-driver.js';
 
 export { sastMockAdapter } from './sast-mock.js';
 export { scaMockAdapter } from './sca-mock.js';
@@ -13,3 +14,10 @@ export { secretScanMockAdapter } from './secret-scan-mock.js';
 export { iacScanMockAdapter } from './iac-scan-mock.js';
 export { dastMockAdapter } from './dast-mock.js';
 export { containerSecurityMockAdapter } from './container-security-mock.js';
+
+export { sastRealAdapter } from './sast-real.js';
+export { scaRealAdapter } from './sca-real.js';
+export { secretScanRealAdapter } from './secret-scan-real.js';
+export { iacScanRealAdapter } from './iac-scan-real.js';
+export { dastRealAdapter } from './dast-real.js';
+export { containerSecurityRealAdapter } from './container-security-real.js';
