@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-test/desktop",
-  "version": "0.4.0",
-  "description": "Desktop test harness for kiwa v0.4 — 12 axis semantics (v0.1 Electron + Tauri + Webview + v0.2 Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon + v0.3 Screen recording + Global shortcut + Clipboard + Dark-mode) + v0.4 adapter interface + fidelity harness (Mobile v1.53 rhythm 再現、 12 axis × mock/real = 24 adapter、 3 target × 12 axis × 2 mode = 72 combination) を pair layer 化。 3 target (macos + windows + linux) × 12 axis × 4 event = 144 dialect mapping、 fidelity grid 36 row 構築。 v1.59 で kiwa 縦深化 pair 第 14 の第 4 段、 v1.55-v1.58 4 PR rhythm 継承 (6 milestone 連続)、 systematic pattern 34 度目適用 (uniform adapter interface)、 backward compat 絶対維持 (v0.1 + v0.2 + v0.3 API 変更 0)、 37 milestone snippet streak 到達、 depth-4 record 到達 (Mobile depth-4 4 例目 + Desktop depth-4 = 5 例目)。",
+  "version": "0.5.0",
+  "description": "Desktop test harness for kiwa v0.5 — 12 axis semantics (v0.1 Electron + Tauri + Webview + v0.2 Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon + v0.3 Screen recording + Global shortcut + Clipboard + Dark-mode) + v0.4 adapter interface + fidelity harness (24 adapter + 72 combination + 36 fidelity pair) + v0.5 spawn stub 契約層 (invokeDesktopCli + cliForAxis + buildSpawnInvocation + KIWA_DESKTOP_MODE env-gate + args 上限 32 + fail-closed、 12 axis から 8 CLI-backed axis 抽出 = electron-builder / electron-updater / ffmpeg / xclip / osascript / notify-send / defaults / reg) を pair layer 化。 Mobile v1.54 rhythm 再現、 v1.60 で kiwa 縦深化 pair 第 14 の第 5 段、 v1.55-v1.59 4 PR rhythm 継承 (7 milestone 連続)、 systematic pattern 35 度目適用 (uniform spawn stub)、 backward compat 絶対維持 (v0.1 + v0.2 + v0.3 + v0.4 API 変更 0)、 38 milestone snippet streak 到達、 depth-5 pattern 2 例目 candidate 到達 (Mobile depth-5 1 例目 + Desktop v1.60 2 例目 candidate、 v1.61+ v0.6 実 spawn で 2 例目確定予定)。",
   "license": "MIT",
   "author": {
     "name": "cardene",
