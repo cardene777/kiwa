@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/cli-test",
   "version": "2.1.0",
   "description": "CLI / shell / file IO test adapter for kiwa (execFile + temp dir + stdout/stderr snapshot)",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/sveltekit",
   "version": "2.0.0",
   "description": "SvelteKit load + form actions + server endpoints + hooks (handle / handleFetch / handleError + sequence chain) test adapter for kiwa — invoke +page.server.ts / +server.ts / hooks.server.ts callbacks in isolation, share locals / cookies across hook chain, and capture redirect / cookies / response headers without a running SvelteKit dev server (part of the kiwa test framework family)",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

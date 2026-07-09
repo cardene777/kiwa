@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/ui",
   "version": "2.0.0",
   "description": "React component test adapter for kiwa (Vitest + Testing Library + JSDOM)",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

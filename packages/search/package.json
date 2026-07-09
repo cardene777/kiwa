@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/search",
   "version": "2.1.0",
   "description": "Search provider mock harness for kiwa — unified Meilisearch + Algolia + Typesense query/index/search/facet mocks with in-memory index + deterministic ranking + release-gate integration.",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

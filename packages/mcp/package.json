@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/mcp",
   "version": "2.0.0",
   "description": "Model Context Protocol (MCP) server mock harness for kiwa — JSON-RPC 2.0 handshake + tool registration + schema validation + client-server roundtrip against a stable in-process transport. Ships with 5 fixture tools (echo / calc / weather / search / db-query) so kiwa tests can exercise the exact MCP tool call chain a real MCP server implements.",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

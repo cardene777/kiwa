@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/cache",
   "version": "2.1.0",
   "description": "Cache test adapter for kiwa — Redis (testcontainers) live env + in-memory sandbox env + Memcached (stub + testcontainers) env + KeyDB (stub + testcontainers) env, with TTL / Pub/Sub / expiry / consistent-hash / multi-master replication assertion helpers (assertTTL / subscribe / assertPublished / serverFor / listEntries)",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

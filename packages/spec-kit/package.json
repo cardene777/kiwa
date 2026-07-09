@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/spec-kit",
   "version": "0.1.0",
   "description": "kiwa spec-driven development toolkit — classify specification items into 3 layers (formal-verifiable / runtime-testable / human-review-only) and emit paired spec files: specFormal.md (Lean-verifiable state machines and pure contracts) + specRuntime.md (side effects, integration, UX). Structurally prevents 'written but never verified' silent gaps。 The 際 (kiwa) between specification and verification is where quality is decided",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/a11y",
   "version": "2.0.0",
   "description": "Accessibility (a11y) test adapter for kiwa — axe-core integration for jsdom + Playwright pages",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

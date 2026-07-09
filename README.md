@@ -16,7 +16,7 @@ One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js 
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa-lab/dapp?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-lab/dapp)
 [![packages](https://img.shields.io/badge/npm%20packages-11-cb3837?logo=npm)](#what-s-in-the-box)
 [![python](https://img.shields.io/badge/PyPI-kiwa--test--py-3776ab?logo=python&logoColor=white)](./kiwa-py)
-[![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![license](https://img.shields.io/badge/license-All%20Rights%20Reserved-red)](./LICENSE)
 [![tests](https://img.shields.io/badge/tests-292%20execution%20PASS-success)](#testing--quality)
 [![flaky](https://img.shields.io/badge/flaky-0%2F292-success)](#testing--quality)
 [![coverage](https://img.shields.io/badge/coverage-Lines%2090%2B%20%2F%20Branches%2080%2B-success)](#quality-gates)
@@ -25,7 +25,9 @@ One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js 
 [![typescript](https://img.shields.io/badge/typescript-strict-3178c6?logo=typescript&logoColor=white)](./tsconfig.base.json)
 [![claude code](https://img.shields.io/badge/Claude%20Code-8%20skills-d97706?logo=anthropic&logoColor=white)](./docs/SKILL-DESIGN.md)
 
-[**Quickstart**](#quickstart) • [**4 layer chain**](#4-layer-chain) • [**Features**](#features) • [**Examples**](#examples) • [**Docs**](./docs/en/README.md) • [**Cookbook**](./docs/en/cookbook/README.md) • [**FAQ**](./docs/en/faq.md)
+[**Quickstart**](#quickstart) • [**4 layer chain**](#4-layer-chain) • [**Features**](#features) • [**Examples**](#examples) • [**Docs**](./docs/en/README.md) • [**Cookbook**](./docs/en/cookbook/README.md) • [**FAQ**](./docs/en/faq.md) • [**Changelog**](./CHANGELOG.md) • [**License**](./LICENSE)
+
+> **Status: pre-release.** kiwa is public for visibility only. Source is under an "All rights reserved" license until general availability; see [LICENSE](./LICENSE) for what you may and may not do. Issues and pull requests are conducted in **English** per [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 

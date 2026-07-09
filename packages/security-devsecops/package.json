@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/security-devsecops",
   "version": "2.0.0",
   "description": "DevSecOps test harness for kiwa v0.3 — 6 axis (SAST + SCA + Secret scan + IaC scan + DAST + Container security) unified across 6 provider (Semgrep + Trivy + Gitleaks + tfsec + OWASP ZAP + Grype)、 v0.1 semantics + v0.2 adapter に加えて **v0.3 で runSecurityAudit single entry + 4 preset (audit-all / supply-chain / specialty / threat-model) + summarizeAuditReport 集約 API を追加、 Phase 3 完成で skill 個別化を排除**、 backward compat 絶対維持で v0.1 + v0.2 API 変更 0、 KIWA_SECURITY_MODE=real で real driver env-gate opt-in。 Complements v0.2 @kiwa-lab/security (advanced runtime security: CSP + mTLS + SIEM + SLSA) with build-time / CI-time security scanning axis.",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

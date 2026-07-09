@@ -3,6 +3,28 @@
 Thank you for considering contributing to kiwa.
 We welcome bug reports, documentation fixes, tests, examples, and feature improvements.
 
+## Language policy (SSOT)
+
+All public collaboration on this repository is conducted in **English**. This
+covers every artifact a maintainer or reviewer encounters through the public
+GitHub surface:
+
+- Issue titles and bodies
+- Pull request titles, bodies, and review comments
+- Commit messages
+- Code comments and identifiers
+- Documentation authored under `docs/` for public consumption
+
+The goal is a low-friction path for OSS contributors regardless of first
+language. Japanese is used only in files explicitly marked as Japanese
+translations (for example, `README.ja.md`, `docs/ja/`) and in internal
+retrospectives outside this repository. If you must reference Japanese source
+material, quote and translate the relevant fragment in English inline.
+
+This policy is retroactive for **new work** starting at v2.18. Existing
+Japanese content that predates the policy will be migrated opportunistically;
+please do not open bulk-translation PRs without discussing scope first.
+
 ## Getting started
 
 1. Fork and clone the repository

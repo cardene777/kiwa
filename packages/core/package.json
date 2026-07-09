@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/core",
   "version": "2.0.0",
   "description": "Core spec language + test environment abstractions for kiwa adapters (dapp / api / ui / data / cli). Renamed from @kiwa-lab/spec in v1.0.",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"
