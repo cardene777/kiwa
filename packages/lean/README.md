@@ -301,6 +301,17 @@ first would be reported as verified having never been read.
 See [`CHANGELOG.md`](./CHANGELOG.md) for the 0.3.0 breaking changes and why they
 were breaking.
 
+## Contributing
+
+```bash
+pnpm test                                        # everything but the toolchain matrix
+KIWA_LEAN_TOOLCHAINS=v4.15.0,v4.31.0 pnpm test   # against several Lean releases
+pnpm test:package                                # build, pack, install, and use the tarball
+```
+
+`test:package` is what `prepublishOnly` runs, so a package that a consumer cannot
+install, import from CommonJS, or typecheck against does not get published.
+
 ## License
 
 UNLICENSED. Part of [kiwa](https://github.com/cardene777/kiwa).

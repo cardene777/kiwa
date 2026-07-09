@@ -60,7 +60,8 @@
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs"
+    "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs && pnpm test:package",
+    "test:package": "KIWA_LEAN_PACKAGE_TEST=1 pnpm test"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
