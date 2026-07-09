@@ -10,6 +10,8 @@ const MINI_SPEC: OrchestratorSpec = {
   events: ['e1', 'e2'],
   transitions: [
     { from: 'a', event: 'e1', to: 'b' },
+    { from: 'a', event: 'e2', invalid: true },
+    { from: 'b', event: 'e1', invalid: true },
     { from: 'b', event: 'e2', to: 'a' },
   ],
 };
@@ -69,5 +71,25 @@ describe('verifyLeanSpec — Lean toolchain integration', () => {
     const specB = generateLeanSpec({ ...MINI_SPEC, moduleName: 'B', namespace: 'B' });
     const result = verifyLeanSpec([specA, specB], { skip: true });
     expect(result.verifiedFiles).toEqual(['KiwaSpecs/A.lean', 'KiwaSpecs/B.lean']);
+  });
+
+  it('T-LEAN-V-007 refuses two specs that share a path, rather than checking one twice', () => {
+    // They used to be written to the same file. The first was overwritten before
+    // Lean saw it, and both were reported as verified.
+    const first = generateLeanSpec({ ...MINI_SPEC, moduleName: 'Same', namespace: 'Alpha' });
+    const second = generateLeanSpec({ ...MINI_SPEC, moduleName: 'Same', namespace: 'Beta' });
+
+    expect(() => verifyLeanSpec([first, second], { skip: true })).toThrow(
+      /two specs share the path KiwaSpecs\/Same\.lean/,
+    );
+  });
+
+  it('T-LEAN-V-008 the check for a shared path runs before Lean is looked for', () => {
+    const first = generateLeanSpec({ ...MINI_SPEC, moduleName: 'Same', namespace: 'Alpha' });
+    const second = generateLeanSpec({ ...MINI_SPEC, moduleName: 'Same', namespace: 'Beta' });
+
+    expect(() =>
+      verifyLeanSpec([first, second], { leanBin: '/definitely/not/lean/xyz' }),
+    ).toThrow(/two specs share the path/);
   });
 });

@@ -1,7 +1,7 @@
 {
   "name": "@kiwa-lab/lean",
-  "version": "0.2.1",
-  "description": "Lean 4 spec generator for kiwa lifecycle-orchestrator state machines — converts 5 state + 8 event + 40-cell transition SSOT to Lean 4 inductive type + total function + coverage theorem, enables formal verification-driven testing alongside runtime testing。 Reifies kiwa's systematic pattern from convention (rule 昇格) to type-level theorem",
+  "version": "0.3.0",
+  "description": "Lean 4 spec generator for lifecycle-orchestrator state machines. Compiles a transition table to a Lean 4 inductive type and a total dispatch function with no catch-all, so Lean’s exhaustiveness checker is what proves the table is complete, and a rejected transition is distinguishable from a deliberate self-loop. Emits absorbing and has-exit theorems that fail to compile when the table contradicts them, and runs the real toolchain via verifyLeanSpec.",
   "license": "UNLICENSED",
   "author": {
     "name": "cardene",
@@ -29,6 +29,7 @@
     "url": "https://github.com/cardene777/kiwa/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -46,7 +47,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "publishConfig": {
     "access": "public"
@@ -58,13 +60,8 @@
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs"
-  },
-  "dependencies": {
-    "@kiwa-lab/core": "workspace:*"
-  },
-  "peerDependencies": {
-    "vitest": "^2"
+    "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs && pnpm test:package",
+    "test:package": "KIWA_LEAN_PACKAGE_TEST=1 pnpm test"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

@@ -13,8 +13,8 @@ v2.14 で追加した `@kiwa-lab/lean` v0.1 spec generator を v0.2 で `verifyL
 | Layer | v0.1 | v0.2 |
 |---|---|---|
 | generateLeanSpec | ✅ Lean source 生成 | ✅ 変更 0 (shape preserving) |
-| generateLakeProject | ✅ Lake scaffold 生成 | ✅ 変更 0 |
-| verifyLeanSpec | ❌ | ✅ 新規 = lean --check 実行 |
+| generateLakeProject | ✅ Lake scaffold 生成 | ✅ v0.3 で修正 (下記) |
+| verifyLeanSpec | ❌ | ✅ 新規 = 実 toolchain 呼出 (`lean <file>`) |
 
 ## verifyLeanSpec API SSOT
 
@@ -26,10 +26,38 @@ verifyLeanSpec(specs: readonly LeanSpecOutput[], opts?: VerifyOptions): VerifyRe
 
 | status | 発火条件 |
 |---|---|
-| `ok` | Lean install 済 + 全 spec の `lean --check` 成功 |
-| `verification-failed` | Lean install 済 + いずれかの spec の `lean --check` 失敗 (stderr 添付) |
+| `ok` | Lean install 済 + 全 spec の elaboration 成功 |
+| `verification-failed` | Lean install 済 + いずれかの spec の elaboration 失敗 (`diagnostics` に Lean の出力を添付) |
 | `lean-not-installed` | Lean toolchain 未 install (throw なし return) |
 | `skipped-by-env` | `KIWA_LEAN_SKIP_VERIFY=1` env or `opts.skip=true` |
+
+### Lake project は何も建てていなかった (v0.3 で修正)
+
+生成される `lakefile.lean` の `lean_lib` に `@[default_target]` が無く、 `lake build` は対象を 1 つも持たなかった。 spec に型エラーがあっても `Build completed successfully` と表示して 0 で終了する。 さらに根 module が spec を `import` せず、 `globs` も無いため、 仮に対象があっても spec file は 1 度もコンパイルされなかった。
+
+v0.3 は `@[default_target]` と `globs := #[.andSubmodules \`<rootNamespace>]` を出し、 `modules` を渡すと根 module が各 spec を `import` する。 壊れた spec を置いて `lake build` が落ちることを test で固定した。
+
+`verifyLeanSpec` は Lake project を書かない。 書いて `lake` を呼ばないのが v0.2 までの姿で、 `lakefile.lean` は何にも影響していなかった。 影響しているのは `lean-toolchain` だけで、 `elan` がこの file を作業 directory から読んで実行する Lean の版を決める。 生成 spec は何も `import` しないので、 検査に build system は要らない。
+
+### Lean の起動は 1 回 (v0.3)
+
+`lean` は file を 1 つしか受け取らない。 v0.2 は spec ごとに起動しており、 5 spec で約 660 ms かかった。 生成 spec は各自の namespace を開閉し何も import しないので、 1 file に結合しても検査内容は変わらない。 結合後は約 310 ms。
+
+診断の位置は結合 file ではなく spec の名前で述べる。 namespace が重複する 2 spec は Lean が 2 つ目を名指しで拒否する。
+
+`moduleName` が同じ 2 spec は拒否する。 v0.2 は同じ path に 2 度書き、 先の spec を検査しないまま `verifiedFiles` に載せていた。
+
+### 対応する Lean の版 (v0.3 で実測)
+
+生成 source を v4.12.0 / v4.15.0 / v4.23.0 / v4.31.0 の 4 版で検証した。 4 版とも完全な表を受理し、 同じ壊れ方を拒否する。 診断の文言は版で変わる (`missing cases` → `Missing cases` が v4.23) ので、 test は Lean が echo し返す識別子で判定する。
+
+`verifyLeanSpec` は既定で版を固定しない。 machine の Lean が検査する。 `leanToolchain` を渡した時だけ `lean-toolchain` を書き、 `elan` がその版を走らせる。
+
+### 起動形と診断の出所 (v0.3 で修正)
+
+Lean に `--check` flag は存在しない。 file を elaborate すること自体が検査で、 証明の失敗も網羅性の欠落も非零終了になる。 v0.2 は `lean --check <file>` を実行しており、 Lean は `unrecognized option` で常に非零終了していた。 つまり Lean が入っている環境では、 正しい spec も壊れた spec も等しく `verification-failed` を返していた。 toolchain を入れて実行する test が 1 件も無かったため、 誰も気付けなかった。
+
+Lean は診断を **stdout** に書く。 `stderr` は空になる。 v0.2 の `VerifyResult.stderr` は常に空文字列で、 「検証に失敗した」 とだけ告げて理由を落としていた。 v0.3 は `diagnostics` に実際に喋った側の stream を載せる。
 
 ### 決定的 CI 動作
 
@@ -40,11 +68,11 @@ Lean toolchain 未 install 環境 (CI default / offline / sandbox) は `lean-not
 ```
 OrchestratorSpec (SSOT)
     ├─► generateLeanSpec → Lean 4 source
-    │       └─► verifyLeanSpec → lean --check → { status: 'ok' }
+    │       └─► verifyLeanSpec → lean <file> → { status: 'ok' }
     └─► TypeScript impl → vitest runtime testing
 ```
 
-同 SSOT (5 state / 8 event / 40 セル) を 両層で駆動、 Lean 側で型 + 定理 (`dispatch_total`) を検証、 TS 側で 実行時挙動 verify。
+同 SSOT (5 state / 8 event / 40 セル) を 両層で駆動、 Lean 側で網羅性 (catch-all 不在の match) と定理 (`<state>_absorbing` / `<state>_can_leave` / `<state>_no_escape` / `<state>_reachable`) を検査、 TS 側で 実行時挙動 verify。
 
 ## v2.15 milestone signal
 

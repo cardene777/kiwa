@@ -29,7 +29,7 @@ kiwa は 「testing framework」 に留まらない。 **開発 workflow の 各
 
 - 全入力に対して、 数学的に 定理として証明
 - 対象 = 状態機械 / 型契約 / pure function、 論理的に定式化可能な domain
-- 実装 = `@kiwa-lab/lean` = Lean 4 spec generator + `lean --check` 統合
+- 実装 = `@kiwa-lab/lean` = Lean 4 spec generator + 実 toolchain 呼出 (`verifyLeanSpec`)
 
 ### 軸 3 = 仕様駆動開発 (spec-driven development)
 
@@ -43,24 +43,37 @@ kiwa の depth-5 pattern は、 全 orchestrator (transaction / session / cache 
 
 1. **5 state SSOT** = state 空間を 有限化、 型として存在させる
 2. **8 event SSOT** = event 空間を 有限化、 型として存在させる
-3. **40 セル 遷移表 SSOT** = 5 × 8 = 40 の 全 (state, event) pair を 網羅的に定義
+3. **40 セル 遷移表 SSOT** = 5 × 8 = 40 の 全 (state, event) pair を 網羅的に定義、 宣言されていない cell は生成時に拒否される (Lean 側では catch-all 不在の match が同じことを再検査する)
 4. **domain 別 guard 使い分け** = backend systems layer = throw guard (遷移確定的) / payment / realtime / streaming / webhook 重複配信 domain = soft-reject (idempotency 保証)
 5. **shape 契約 preserving** = 既存 API 変更 0、 新規追加のみ、 backward compat 絶対維持
 
-**systematic law の 型レベル格上げ** = `@kiwa-lab/lean` v0.1 で 5 原則を Lean 4 の inductive type + total dispatch + `dispatch_total` theorem に変換、 rule 昇格 (convention) から type-level 定理に格上げ。
+**systematic law の 型レベル格上げ** = `@kiwa-lab/lean` が 5 原則を Lean 4 の inductive type + `dispatch : State → Event → Step` に変換する。 `Step` は次状態 (`to`) と拒否 (`invalid`) を分けるので、 意図した自己遷移と書き忘れが別物になる。 catch-all を置かないため、 表が欠けていれば Lean の網羅性検査が cell 名を挙げて落ちる。 網羅の保証は定理ではなく型検査そのものが担う。
+
+生成される定理は表から機械的に導ける 4 種で、 いずれも表と矛盾すれば証明が通らない。 終端状態の `<state>_absorbing` (どの event でも `invalid`)、 出ていける状態の `<state>_can_leave` (別の状態へ動かす event がある)、 sink の `<state>_no_escape` (event を受理するが、 どれも外へ出さない)、 そして `initial` を与えた場合の `<state>_reachable` (初期状態からの最短経路)。
+
+sink と終端は別物として扱う。 自己遷移しか持たない状態は event を受理するので終端ではないが、 二度と出られない。 「有効な event が 1 つでもあるか」 を出口の条件にすると、 この状態を「出口がある」 と報告してしまう。
+
+v0.2 までの `dispatch_total` (`∃ s', dispatch s e = s'`) は任意の関数について `rfl` で証明でき、 遷移を 1 つも定義していない表でも通ったため v0.3 で削除した。
 
 ## 検証の 3 段 pipeline
 
 ```
 OrchestratorSpec (SSOT)
     ├─► generateLeanSpec → Lean 4 source
-    │       └─► verifyLeanSpec → lean --check → { status: 'ok' }
+    │       └─► verifyLeanSpec → lean <file> → { status: 'ok' }
     │
     └─► TypeScript impl → vitest runtime testing
             └─► fidelity harness → mock ↔ real 差分 verify (optional)
 ```
 
 同 SSOT を 両層で駆動、 Lean 側で 型 + 定理検証 (Level 2)、 TS 側で 実挙動 verify + fidelity harness で real driver 差分 verify。
+
+3 者 (spec / TypeScript 実装 / Lean file) が同じ表を駆動していることを 2 つの機構が検査する。
+
+- `checkConformance` = spec の全 cell を実装に問い、 遷移先の食い違い / 実装が拒否 / 実装が受理 / 状態空間の外 の 4 種を報告する
+- `checkLeanTable` = 生成された Lean に自分の表を出力させ、 spec と突き合わせる
+
+後者が要る理由は、 定理が生成器と同じ表から導かれるからだ。 生成器が 1 cell を誤った遷移先に render すると、 file は compile し、 全定理が証明され、 表だけが違う。 Lean の網羅性検査は cell の欠落を捕まえるが、 移動は捕まえない。 v0.3 まで、 3 辺のうち 2 辺しか結ばれていなかった。
 
 ## Non-goals (kiwa は何を目指さないか)
 
@@ -71,7 +84,7 @@ OrchestratorSpec (SSOT)
 ## v2.15 現状の到達点 (2026-07-09)
 
 - 42 npm package (@kiwa-lab org、 v1.x @kiwa-test/* 41 package deprecated 誘導済)
-- `@kiwa-lab/lean` v0.2 = Lean spec 生成 + `lean --check` 統合 (Level 1 + Level 2)
+- `@kiwa-lab/lean` v0.3 = Lean spec 生成 + 実 toolchain 検証 (Level 1 + Level 2)
 - systematic pattern 57 度到達 = 5 原則が 半世紀 pattern 適用 の 定常運用 phase
 - backend systems layer 完全普及 (transaction / session / cache / job / cli の 5 lifecycle-orchestrator = depth-5 到達)
 - 60 milestone streak (v1.23-v2.15)

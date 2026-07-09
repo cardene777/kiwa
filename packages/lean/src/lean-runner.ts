@@ -1,0 +1,223 @@
+/**
+ * Running Lean over a file in a scratch directory.
+ *
+ * Both `verifyLeanSpec` and `extractLeanTable` need the same three things: find
+ * Lean, write a file where it can be reached, run it. Written twice, the two
+ * would learn different things about the toolchain — that Lean reports on stdout,
+ * that only `lean-toolchain` pins a version — and one would forget.
+ */
+
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { UsageError } from './errors.js';
+
+export const DEFAULT_TIMEOUT_MS = 60_000;
+
+/**
+ * How much Lean may print before the buffer that holds it is full.
+ *
+ * Node's default is one megabyte, and `extractLeanTable` prints one line per cell:
+ * about sixty-eight bytes, so fifteen thousand cells fill it. Past that,
+ * `execFileSync` throws `ENOBUFS` and Lean's own answer is lost — a tool limit
+ * arriving as a verdict on the spec, which is the confusion `timed-out` exists to
+ * prevent.
+ *
+ * Sixty-four megabytes is a million cells, and it is a ceiling rather than an
+ * allocation.
+ */
+const MAX_OUTPUT_BYTES = 64 * 1024 * 1024;
+
+export interface LeanRunOptions {
+  /**
+   * Lean toolchain to pin, written to `lean-toolchain` beside the source.
+   *
+   * `elan` reads that file from the working directory and runs the version it
+   * names, downloading it first if the machine does not have it. Left unset, the
+   * machine's own Lean does the work.
+   */
+  leanToolchain?: string;
+  /** Override for the Lean executable. Default: `lean` on PATH. */
+  leanBin?: string;
+  /** Where the scratch directory is created. Default: the OS temp directory. */
+  workDir?: string;
+  /** Timeout for the Lean subprocess in ms. Default: 60_000. */
+  timeoutMs?: number;
+  /**
+   * How many bytes Lean may print before the rest is thrown away.
+   *
+   * Default: 64 MiB, about a million cells. A run that exceeds it reports
+   * `output-too-large` rather than a verdict, since the answer existed and was
+   * lost.
+   */
+  maxOutputBytes?: number;
+}
+
+/**
+ * The Lean binary, or `null` when it is not there.
+ *
+ * A program that exits zero for `--version` is not thereby Lean. `/bin/echo`
+ * does, and pointing `leanBin` at it made every spec verify — the worst shape a
+ * pass can take, since nothing looked at anything. Lean says who it is:
+ *
+ *   Lean (version 4.15.0, arm64-apple-darwin23.6.0, commit ..., Release)
+ */
+export function detectLeanBinary(explicit?: string): string | null {
+  const bin = explicit ?? 'lean';
+  try {
+    const version = execFileSync(bin, ['--version'], {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 10_000,
+    });
+    return /^Lean \(version /.test(version.trim()) ? bin : null;
+  } catch {
+    return null;
+  }
+}
+
+/** What `execFileSync` throws, in the shape this reads it. */
+export interface SpawnFailure {
+  code?: string | undefined;
+  signal?: string | null | undefined;
+}
+
+/**
+ * Why Lean stopped, when it did not finish normally.
+ *
+ * `ENOBUFS` and `SIGTERM` arrive together: Node kills the child when the buffer
+ * fills, and killing it is also what a timeout does. `ENOBUFS` is what Node knows;
+ * `SIGTERM` is what it did about it. Reading the signal first calls a full buffer
+ * a timeout, and sends the reader to raise the wrong knob.
+ */
+export function classifyFailure(error: SpawnFailure): {
+  timedOut: boolean;
+  overflowed: boolean;
+} {
+  if (error.code === 'ENOBUFS') return { timedOut: false, overflowed: true };
+  return {
+    timedOut: error.code === 'ETIMEDOUT' || error.signal === 'SIGTERM',
+    overflowed: false,
+  };
+}
+
+export interface LeanRun {
+  ok: boolean;
+  /**
+   * Lean was still working when `timeoutMs` ran out.
+   *
+   * A timeout is not a verdict. Reporting it as a failure says the spec is wrong
+   * when nothing has been established about the spec at all, and on a large
+   * machine — Lean's cost grows with the number of states, since each one carries
+   * a theorem — that is the failure a caller meets first.
+   */
+  timedOut: boolean;
+  /**
+   * Lean printed more than the buffer holds, and the rest was thrown away.
+   *
+   * Like a timeout, this says nothing about the spec. Unlike a timeout, it says
+   * the answer existed and was lost.
+   */
+  overflowed: boolean;
+  stdout: string;
+  stderr: string;
+  /**
+   * Whichever stream spoke, when Lean refused. Lean writes its diagnostics to
+   * stdout, so a caller reading `stderr` alone learns that something failed and
+   * nothing about what.
+   */
+  diagnostics: string;
+  /** Where the source was written. Lean's positions name this path. */
+  filePath: string;
+}
+
+/**
+ * Write `source` to a scratch file and hand it to Lean.
+ *
+ * `args` decides what Lean does with it: nothing elaborates the file, which is
+ * how a file is checked, and `--run` also executes its `main`. Lean has no
+ * `--check` flag and refuses more than one file.
+ *
+ * The scratch directory is removed before returning, so `filePath` names a file
+ * that no longer exists — it is there to rewrite the positions Lean printed.
+ */
+export function runLeanSource(
+  source: string,
+  args: readonly string[],
+  opts: LeanRunOptions = {},
+): LeanRun | 'lean-not-installed' {
+  const {
+    leanToolchain,
+    leanBin,
+    workDir,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    maxOutputBytes = MAX_OUTPUT_BYTES,
+  } = opts;
+
+  const bin = detectLeanBinary(leanBin);
+  if (bin === null) return 'lean-not-installed';
+
+  let rootDir: string;
+  try {
+    rootDir = mkdtempSync(join(workDir ?? tmpdir(), 'kiwa-lean-'));
+  } catch (error) {
+    // `ENOENT: mkdtemp '/nope/kiwa-lean-'` names a path the caller never wrote
+    // and does not say which option produced it.
+    throw new UsageError(
+      `workDir ${JSON.stringify(workDir)} is not a directory Lean's scratch files can be ` +
+        `written to: ${(error as Error).message}`,
+    );
+  }
+  const filePath = resolve(rootDir, 'Specs.lean');
+  try {
+    if (leanToolchain !== undefined) {
+      writeFileSync(resolve(rootDir, 'lean-toolchain'), `${leanToolchain}\n`, 'utf-8');
+    }
+    writeFileSync(filePath, source, 'utf-8');
+
+    try {
+      const stdout = execFileSync(bin, [...args, filePath], {
+        cwd: rootDir,
+        encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+        timeout: timeoutMs,
+        maxBuffer: maxOutputBytes,
+      });
+      return { ok: true, timedOut: false, overflowed: false, stdout, stderr: '', diagnostics: '', filePath };
+    } catch (err) {
+      const e = err as NodeJS.ErrnoException & {
+        stderr?: Buffer;
+        stdout?: Buffer;
+        signal?: string;
+      };
+      const stdout = e.stdout?.toString('utf-8') ?? '';
+      const stderr = e.stderr?.toString('utf-8') ?? '';
+      const { timedOut, overflowed } = classifyFailure(e);
+      const spoke = [stdout, stderr].map((s) => s.trim()).filter((s) => s !== '');
+      return {
+        ok: false,
+        timedOut,
+        overflowed,
+        stdout,
+        stderr,
+        diagnostics: timedOut
+          ? `Lean did not finish within ${timeoutMs}ms. Raise timeoutMs, or split the machine: ` +
+            'Lean elaborates a theorem per state, so its cost grows with the state count.'
+          : overflowed
+            ? `Lean printed more than ${maxOutputBytes} bytes, and the rest was lost. ` +
+              'Nothing was established about the spec: split the machine.'
+            : spoke.length > 0
+              ? spoke.join('\n')
+              : String(err),
+        filePath,
+      };
+    }
+  } finally {
+    try {
+      rmSync(rootDir, { recursive: true, force: true });
+    } catch {
+      // best-effort cleanup; ignore
+    }
+  }
+}

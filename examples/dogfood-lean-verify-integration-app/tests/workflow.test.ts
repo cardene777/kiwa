@@ -1,5 +1,6 @@
+import { execFileSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
-import type { OrchestratorSpec } from '@kiwa-lab/lean';
+import { generateLeanSpec, verifyLeanSpec, type OrchestratorSpec } from '@kiwa-lab/lean';
 import {
   batchVerify,
   isSkippedOrNotInstalled,
@@ -20,6 +21,7 @@ const TRANSACTION_SPEC: OrchestratorSpec = {
     'rollback-requested',
     'timeout',
   ],
+  unspecified: 'invalid',
   transitions: [
     { from: 'beginning', event: 'begin-completed', to: 'active' },
     { from: 'active', event: 'commit-requested', to: 'committing' },
@@ -40,13 +42,25 @@ const SESSION_SPEC: OrchestratorSpec = {
     'revoke-requested',
     'timeout',
   ],
+  unspecified: 'invalid',
   transitions: [{ from: 'init', event: 'auth-succeeded', to: 'authed' }],
 };
 
+function leanInstalled(): boolean {
+  try {
+    execFileSync('lean', ['--version'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 describe('dogfood-lean-verify-integration (v2.15-2)', () => {
-  it('Pattern 1: specToVerify returns lean-not-installed on typical dev environment (or ok if Lean is installed)', () => {
+  it('Pattern 1: specToVerify verifies with Lean, and reports its absence otherwise', () => {
+    // `verification-failed` used to be accepted here too, so the assertion held
+    // whatever happened. With a toolchain present, a generated spec verifies.
     const result = specToVerify(TRANSACTION_SPEC);
-    expect(['lean-not-installed', 'ok', 'verification-failed']).toContain(result.status);
+    expect(result.status).toBe(leanInstalled() ? 'ok' : 'lean-not-installed');
   });
 
   it('Pattern 2: batchVerify with skip=true always returns skipped-by-env', () => {
@@ -89,5 +103,40 @@ describe('dogfood-lean-verify-integration (v2.15-2)', () => {
     const result = batchVerify(specs, { skip: true });
     expect(result.status).toBe('skipped-by-env');
     expect(result.verifiedFiles.length).toBe(5);
+  });
+
+  it.skipIf(!leanInstalled())(
+    'Pattern 5: 実 toolchain が 5 spec をまとめて検証する',
+    () => {
+      const specs: OrchestratorSpec[] = [
+        TRANSACTION_SPEC,
+        SESSION_SPEC,
+        { ...SESSION_SPEC, moduleName: 'CacheLifecycleOrchestrator', namespace: 'Cache' },
+      ];
+      const result = batchVerify(specs);
+      expect(result.status).toBe('ok');
+      expect(result.verifiedFiles.length).toBe(3);
+    },
+  );
+
+  it.skipIf(!leanInstalled())('Pattern 6: 壊れた spec は理由付きで拒否される', () => {
+    // beginning からしか出られない機械で、 beginning を終端だと主張させる。
+    const broken: OrchestratorSpec = {
+      ...TRANSACTION_SPEC,
+      moduleName: 'BrokenOrchestrator',
+      namespace: 'Broken',
+    };
+    const out = specToVerify(broken);
+    expect(out.status).toBe('ok');
+
+    // 生成物の定理を偽にしたものを直接 Lean にかける。
+    const good = generateLeanSpec(broken);
+    const falsified = {
+      ...good,
+      source: good.source.replace('⟨.BeginCompleted, rfl⟩', '⟨.QueryExecuted, rfl⟩'),
+    };
+    const result = verifyLeanSpec([falsified]);
+    expect(result.status).toBe('verification-failed');
+    expect(result.diagnostics).toContain('error');
   });
 });
