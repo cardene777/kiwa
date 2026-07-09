@@ -324,7 +324,15 @@ state / event 名は影響を受けない。 PascalCase の constructor にな�
 
 `generator.test.ts` の `l.includes('active_can_leave') === false` は、 ほぼ全ての行で真になる。 主張は「`beginning` の証人行が存在する」 に潰れており、 `active` の証人選択が壊れても通る。 証人そのものを固定する形に書き直した。
 
-これら 4 件 (27-30) は独立した adversarial review が指摘した。 私は 26 件を自分で見つけたが、 この 4 件は見落としていた。
+#### 31. 溢れの修正が、 溢れを timeout として報告していた
+
+`ENOBUFS` と `SIGTERM` は同時に届く。 buffer が満ちると Node は子を殺し、 殺すことは timeout がすることでもあるからだ。 判定は signal を先に読んでいたので、 満ちた buffer が timeout として報告される。 読み手は間違った knob を回しに行く。
+
+`ENOBUFS` は Node が知っていることで、 `SIGTERM` はそれに対してしたことだ。 前者を先に読む。
+
+Lean は Node が殺す前に印字を終えるので、 この組合せは Lean 経由では再現できない。 分類を `classifyFailure` として切り出し、 直接 test した。 再現できない経路を、 再現できないまま放置しない。
+
+これら 5 件 (27-31) のうち 4 件は独立した adversarial review が指摘した。 私は 26 件を自分で見つけたが、 この 4 件は見落としていた。 5 件目 (31) は、 その 4 件目を直す過程で私が作った。
 
 ### 移行 (v0.3 の入力規約)
 

@@ -10,7 +10,7 @@ import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { detectLeanBinary } from '../src/lean-runner.js';
+import { classifyFailure, detectLeanBinary } from '../src/lean-runner.js';
 import { generateLeanSpec } from '../src/generator.js';
 import { checkLeanTable } from '../src/extract.js';
 import { UsageError } from '../src/errors.js';
@@ -105,6 +105,43 @@ describe.skipIf(!HAS_LEAN)('a timeout is not a verdict on the spec', () => {
 
   it('T-RUNNER-013 a generous timeout leaves the verdict alone', () => {
     expect(verifyLeanSpec(output(), { timeoutMs: 120_000 }).status).toBe('ok');
+  });
+});
+
+describe('why Lean stopped, when it did not finish', () => {
+  // Node kills the child when the buffer fills, and killing it is also what a
+  // timeout does — so `ENOBUFS` and `SIGTERM` arrive together. Reading the signal
+  // first calls a full buffer a timeout, and sends the reader to raise the wrong
+  // knob. Lean happens to finish writing before Node kills it, so this pair is
+  // unreachable through Lean and reachable through any slower child.
+  it('T-RUNNER-030 a full buffer is an overflow, even when the child was killed for it', () => {
+    expect(classifyFailure({ code: 'ENOBUFS', signal: 'SIGTERM' })).toEqual({
+      timedOut: false,
+      overflowed: true,
+    });
+  });
+
+  it('T-RUNNER-031 a full buffer after the child exits is still an overflow', () => {
+    expect(classifyFailure({ code: 'ENOBUFS', signal: null })).toEqual({
+      timedOut: false,
+      overflowed: true,
+    });
+  });
+
+  it('T-RUNNER-032 a timeout is a timeout', () => {
+    expect(classifyFailure({ code: 'ETIMEDOUT', signal: 'SIGTERM' })).toEqual({
+      timedOut: true,
+      overflowed: false,
+    });
+  });
+
+  it('T-RUNNER-033 a child killed by something else is treated as a timeout', () => {
+    // It did not finish, and nothing was established. Which is what matters.
+    expect(classifyFailure({ signal: 'SIGTERM' })).toEqual({ timedOut: true, overflowed: false });
+  });
+
+  it('T-RUNNER-034 an ordinary non-zero exit is neither', () => {
+    expect(classifyFailure({ signal: null })).toEqual({ timedOut: false, overflowed: false });
   });
 });
 

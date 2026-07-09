@@ -77,6 +77,31 @@ export function detectLeanBinary(explicit?: string): string | null {
   }
 }
 
+/** What `execFileSync` throws, in the shape this reads it. */
+export interface SpawnFailure {
+  code?: string | undefined;
+  signal?: string | null | undefined;
+}
+
+/**
+ * Why Lean stopped, when it did not finish normally.
+ *
+ * `ENOBUFS` and `SIGTERM` arrive together: Node kills the child when the buffer
+ * fills, and killing it is also what a timeout does. `ENOBUFS` is what Node knows;
+ * `SIGTERM` is what it did about it. Reading the signal first calls a full buffer
+ * a timeout, and sends the reader to raise the wrong knob.
+ */
+export function classifyFailure(error: SpawnFailure): {
+  timedOut: boolean;
+  overflowed: boolean;
+} {
+  if (error.code === 'ENOBUFS') return { timedOut: false, overflowed: true };
+  return {
+    timedOut: error.code === 'ETIMEDOUT' || error.signal === 'SIGTERM',
+    overflowed: false,
+  };
+}
+
 export interface LeanRun {
   ok: boolean;
   /**
@@ -168,10 +193,7 @@ export function runLeanSource(
       };
       const stdout = e.stdout?.toString('utf-8') ?? '';
       const stderr = e.stderr?.toString('utf-8') ?? '';
-      // Node kills the child on timeout, so `code` is ETIMEDOUT or the signal is
-      // the one it sent. Either way Lean never said anything about the spec.
-      const timedOut = e.code === 'ETIMEDOUT' || e.signal === 'SIGTERM';
-      const overflowed = e.code === 'ENOBUFS';
+      const { timedOut, overflowed } = classifyFailure(e);
       const spoke = [stdout, stderr].map((s) => s.trim()).filter((s) => s !== '');
       return {
         ok: false,
