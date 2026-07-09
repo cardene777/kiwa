@@ -9,8 +9,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@kiwa-lab/auth": "workspace:*",
+    "@kiwa-lab/cache": "workspace:*",
+    "@kiwa-lab/cli-test": "workspace:*",
     "@kiwa-lab/core": "workspace:*",
-    "@kiwa-lab/lean": "workspace:*"
+    "@kiwa-lab/lean": "workspace:*",
+    "@kiwa-lab/orm": "workspace:*",
+    "@kiwa-lab/queue": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

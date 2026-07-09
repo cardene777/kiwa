@@ -68,6 +68,8 @@ OrchestratorSpec (SSOT)
 
 同 SSOT を 両層で駆動、 Lean 側で 型 + 定理検証 (Level 2)、 TS 側で 実挙動 verify + fidelity harness で real driver 差分 verify。
 
+両層が同じ表を駆動していることは `checkConformance` が検査する。 spec の全 cell を実装に問い、 遷移先の食い違い / 実装が拒否 / 実装が受理 / 状態空間の外 の 4 種を報告する。 v0.3 まで、 この主張は文書にしか無く、 どちらの層を 1 cell 変えても test は全て通った。
+
 ## Non-goals (kiwa は何を目指さないか)
 
 - kiwa は **1 layer だけの test framework** ではない (test だけ、 spec だけ、 verify だけ、 は kiwa の思想と 矛盾する)

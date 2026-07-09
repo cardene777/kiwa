@@ -163,6 +163,39 @@ elan toolchain install leanprover/lean4:v4.31.0
 KIWA_LEAN_TOOLCHAINS=v4.15.0,v4.31.0 pnpm test
 ```
 
+## Does the code agree with the spec?
+
+Proving things about a table says nothing about the program that was supposed to
+implement it. `checkConformance` asks the implementation what it does with every
+cell and reports where the two disagree.
+
+```ts
+import { checkConformance, formatConformance } from '@kiwa-lab/lean';
+
+const report = checkConformance(spec, (state, event) => {
+  const next = dispatch({ session: { ...start(), state }, event });
+  return refused(next) ? { kind: 'rejected' } : { kind: 'to', state: next.state };
+});
+
+if (!report.ok) throw new Error(formatConformance(spec, report));
+```
+
+It knows nothing about how your code is written: you say what it means for your
+implementation to refuse an event, since only you know whether that is a throw, a
+returned error, or an untouched state and a log line.
+
+Four ways to disagree, and each is reported per cell:
+
+| kind | meaning |
+|---|---|
+| `different-target` | both accept, and they land in different states |
+| `impl-rejects` | the spec names a target; the code refused the event |
+| `impl-accepts` | the spec refuses the event; the code took it somewhere |
+| `unknown-state` | the code landed outside the machine's state space |
+
+`impl-accepts` is the half a test written from the happy path never reaches: the
+machine takes an event the spec calls impossible.
+
 ## API
 
 | Export | Purpose |
@@ -170,6 +203,8 @@ KIWA_LEAN_TOOLCHAINS=v4.15.0,v4.31.0 pnpm test
 | `generateLeanSpec(spec)` | table → Lean 4 source, plus `meta` (cell counts, terminal states, sinks, reachability paths) |
 | `generateLakeProject(config)` | a Lake package whose `lake build` actually builds the specs put in it |
 | `verifyLeanSpec(specs, opts?)` | run Lean over generated specs |
+| `checkConformance(spec, observe)` | walk every cell, comparing the spec with an implementation |
+| `formatConformance(spec, report)` | render a report as one failure message |
 | `isInvalid(transition)` | narrow a `Transition` to its rejecting form |
 
 Check the Lake project into a repository when you want `lake build` to check the
