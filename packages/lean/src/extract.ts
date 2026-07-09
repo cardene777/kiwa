@@ -18,7 +18,7 @@
 
 import { generateLeanSpec } from './generator.js';
 import { runLeanSource, type LeanRunOptions } from './lean-runner.js';
-import { cellKey, resolveTable, type Table } from './table.js';
+import { cellKey, quoteIdentifier, resolveTable, type Table } from './table.js';
 import type { OrchestratorSpec } from './types.js';
 
 const toPascalCase = (input: string): string =>
@@ -52,27 +52,30 @@ const CELL_PREFIX = 'kiwa-lean-cell:';
  */
 export function renderTableProgram(spec: OrchestratorSpec): string {
   const { namespace, states, events } = spec;
+  // The generator writes the namespace the same way. `open end` would close the
+  // file rather than open a namespace.
+  const ns = quoteIdentifier(namespace);
 
   const stateArm = (s: string) => `  | .${toPascalCase(s)} => ${JSON.stringify(s)}`;
   const eventArm = (e: string) => `  | .${toPascalCase(e)} => ${JSON.stringify(e)}`;
   const listOf = (xs: readonly string[]) => xs.map((x) => `.${toPascalCase(x)}`).join(', ');
 
   return `
-open ${namespace}
+open ${ns}
 
-def stateName : ${namespace}.State → String
+def stateName : ${ns}.State → String
 ${states.map(stateArm).join('\n')}
 
-def eventName : ${namespace}.Event → String
+def eventName : ${ns}.Event → String
 ${events.map(eventArm).join('\n')}
 
-def allStates : List ${namespace}.State := [${listOf(states)}]
-def allEvents : List ${namespace}.Event := [${listOf(events)}]
+def allStates : List ${ns}.State := [${listOf(states)}]
+def allEvents : List ${ns}.Event := [${listOf(events)}]
 
 def main : IO Unit := do
   for s in allStates do
     for e in allEvents do
-      let target := match ${namespace}.dispatch s e with
+      let target := match ${ns}.dispatch s e with
         | .to next => stateName next
         | .invalid => ${JSON.stringify(REJECTED)}
       IO.println s!"${CELL_PREFIX}{stateName s},{eventName e},{target}"
@@ -86,7 +89,9 @@ export type ExtractStatus =
   /** Lean was still working when `timeoutMs` ran out. Nothing was established. */
   | 'timed-out'
   /** `opts.skip` or `KIWA_LEAN_SKIP_VERIFY=1`. Nothing was established. */
-  | 'skipped-by-env';
+  | 'skipped-by-env'
+  /** Lean printed more cells than the buffer holds. Nothing was established. */
+  | 'output-too-large';
 
 export interface ExtractResult {
   status: ExtractStatus;
@@ -129,7 +134,7 @@ export function extractLeanTable(
   if (run === 'lean-not-installed') return { status: 'lean-not-installed' };
   if (!run.ok) {
     return {
-      status: run.timedOut ? 'timed-out' : 'extraction-failed',
+      status: run.timedOut ? 'timed-out' : run.overflowed ? 'output-too-large' : 'extraction-failed',
       diagnostics: run.diagnostics,
     };
   }
@@ -145,11 +150,21 @@ export function extractLeanTable(
     if (state === undefined || event === undefined || target === undefined) {
       return { status: 'extraction-failed', diagnostics: `unreadable cell from Lean: ${cell}` };
     }
-    table.set(cellKey(state, event), target === REJECTED ? null : target);
+    const key = cellKey(state, event);
+    // A cell printed twice would overwrite the first, and the count would not
+    // notice: the second value could come from anywhere, dispatch included.
+    if (table.has(key)) {
+      return {
+        status: 'extraction-failed',
+        diagnostics: `Lean printed ${state} + ${event} twice. Only one answer per cell is a table.`,
+      };
+    }
+    table.set(key, target === REJECTED ? null : target);
   }
 
-  // Names are identifiers, so no two cells share a key and the count is the whole
-  // check: a table missing a cell would silently agree with the spec about it.
+  // Names are identifiers, so no two cells share a key, and with duplicates ruled
+  // out above the count is the whole check: a table missing a cell would silently
+  // agree with the spec about it.
   const expected = spec.states.length * spec.events.length;
   if (table.size !== expected) {
     return {

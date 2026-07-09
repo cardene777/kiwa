@@ -15,6 +15,20 @@ import { UsageError } from './errors.js';
 
 export const DEFAULT_TIMEOUT_MS = 60_000;
 
+/**
+ * How much Lean may print before the buffer that holds it is full.
+ *
+ * Node's default is one megabyte, and `extractLeanTable` prints one line per cell:
+ * about sixty-eight bytes, so fifteen thousand cells fill it. Past that,
+ * `execFileSync` throws `ENOBUFS` and Lean's own answer is lost — a tool limit
+ * arriving as a verdict on the spec, which is the confusion `timed-out` exists to
+ * prevent.
+ *
+ * Sixty-four megabytes is a million cells, and it is a ceiling rather than an
+ * allocation.
+ */
+const MAX_OUTPUT_BYTES = 64 * 1024 * 1024;
+
 export interface LeanRunOptions {
   /**
    * Lean toolchain to pin, written to `lean-toolchain` beside the source.
@@ -30,6 +44,14 @@ export interface LeanRunOptions {
   workDir?: string;
   /** Timeout for the Lean subprocess in ms. Default: 60_000. */
   timeoutMs?: number;
+  /**
+   * How many bytes Lean may print before the rest is thrown away.
+   *
+   * Default: 64 MiB, about a million cells. A run that exceeds it reports
+   * `output-too-large` rather than a verdict, since the answer existed and was
+   * lost.
+   */
+  maxOutputBytes?: number;
 }
 
 /**
@@ -66,6 +88,13 @@ export interface LeanRun {
    * a theorem — that is the failure a caller meets first.
    */
   timedOut: boolean;
+  /**
+   * Lean printed more than the buffer holds, and the rest was thrown away.
+   *
+   * Like a timeout, this says nothing about the spec. Unlike a timeout, it says
+   * the answer existed and was lost.
+   */
+  overflowed: boolean;
   stdout: string;
   stderr: string;
   /**
@@ -93,7 +122,13 @@ export function runLeanSource(
   args: readonly string[],
   opts: LeanRunOptions = {},
 ): LeanRun | 'lean-not-installed' {
-  const { leanToolchain, leanBin, workDir, timeoutMs = DEFAULT_TIMEOUT_MS } = opts;
+  const {
+    leanToolchain,
+    leanBin,
+    workDir,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    maxOutputBytes = MAX_OUTPUT_BYTES,
+  } = opts;
 
   const bin = detectLeanBinary(leanBin);
   if (bin === null) return 'lean-not-installed';
@@ -122,8 +157,9 @@ export function runLeanSource(
         encoding: 'utf-8',
         stdio: ['ignore', 'pipe', 'pipe'],
         timeout: timeoutMs,
+        maxBuffer: maxOutputBytes,
       });
-      return { ok: true, timedOut: false, stdout, stderr: '', diagnostics: '', filePath };
+      return { ok: true, timedOut: false, overflowed: false, stdout, stderr: '', diagnostics: '', filePath };
     } catch (err) {
       const e = err as NodeJS.ErrnoException & {
         stderr?: Buffer;
@@ -135,18 +171,23 @@ export function runLeanSource(
       // Node kills the child on timeout, so `code` is ETIMEDOUT or the signal is
       // the one it sent. Either way Lean never said anything about the spec.
       const timedOut = e.code === 'ETIMEDOUT' || e.signal === 'SIGTERM';
+      const overflowed = e.code === 'ENOBUFS';
       const spoke = [stdout, stderr].map((s) => s.trim()).filter((s) => s !== '');
       return {
         ok: false,
         timedOut,
+        overflowed,
         stdout,
         stderr,
         diagnostics: timedOut
           ? `Lean did not finish within ${timeoutMs}ms. Raise timeoutMs, or split the machine: ` +
             'Lean elaborates a theorem per state, so its cost grows with the state count.'
-          : spoke.length > 0
-            ? spoke.join('\n')
-            : String(err),
+          : overflowed
+            ? `Lean printed more than ${maxOutputBytes} bytes, and the rest was lost. ` +
+              'Nothing was established about the spec: split the machine.'
+            : spoke.length > 0
+              ? spoke.join('\n')
+              : String(err),
         filePath,
       };
     }

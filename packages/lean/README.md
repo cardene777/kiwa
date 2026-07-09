@@ -34,8 +34,24 @@ const spec = {
 const out = generateLeanSpec(spec);
 const result = verifyLeanSpec([out]);
 
-result.status; // 'ok' | 'verification-failed' | 'timed-out' | 'lean-not-installed' | 'skipped-by-env'
+result.status; // 'ok' | 'verification-failed' | 'timed-out' | 'output-too-large' | 'lean-not-installed' | 'skipped-by-env'
 ```
+
+## Any namespace, including `end`
+
+The generated file writes the namespace in guillemets:
+
+```lean
+namespace «Session»
+...
+end «Session»
+```
+
+Written bare, a namespace called `end` closes the block that opens it, and Lean
+answers `unexpected token 'end'; expected identifier` — a problem handed to a
+compiler three steps downstream. Sixty-five of eighty candidate keywords broke the
+file that way. Guillemets make any identifier a name, which is what Lake has
+always done with its own package and library names.
 
 ## A rejection is not a self-loop
 
@@ -130,12 +146,17 @@ Lean is not blocked. It never returns `ok` for a check it did not run.
 | `ok` | every spec elaborated |
 | `verification-failed` | Lean rejected one; `diagnostics` carries what it said |
 | `timed-out` | Lean was still working when `timeoutMs` ran out |
+| `output-too-large` | Lean printed more than `maxOutputBytes`, and the rest was lost |
 | `lean-not-installed` | no toolchain on `PATH`, or the binary is not Lean |
 | `skipped-by-env` | `opts.skip` or `KIWA_LEAN_SKIP_VERIFY=1` |
 
-`timed-out` is its own status because a timeout is not a verdict: nothing has been
-established about the spec. `checkLeanTable` reads the same switch and reports the
-same statuses, so a build that turns Lean off turns it off for both.
+`timed-out` and `output-too-large` are their own statuses because neither is a
+verdict: nothing has been established about the spec.
+The first says Lean never finished; the second says it finished and the answer did
+not fit.
+
+`checkLeanTable` reads the same switch and reports the same statuses, so a build
+that turns Lean off turns it off for both.
 
 To install a toolchain:
 
@@ -267,6 +288,10 @@ checking cost grows with the state count, measured on Lean 4.15:
 | 20 × 20 | 400 | &lt;1 ms | 0.7 s |
 | 30 × 30 | 900 | 2 ms | 2.6 s |
 | 50 × 50 | 2500 | 5 ms | 16 s |
+
+The table printer emits about sixty-eight bytes per cell, and `maxOutputBytes`
+defaults to 64 MiB — a million cells. Past either ceiling you get a status, not a
+verdict.
 
 Naming an `initial` state roughly doubles the Lean time, since each state gains a
 reachability theorem. The default `timeoutMs` is 60 seconds; past a few thousand

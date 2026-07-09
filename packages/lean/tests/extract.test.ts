@@ -74,14 +74,14 @@ describe('renderTableProgram builds a program that prints the table', () => {
 
     expect(program).toContain('| .Init => "init"');
     expect(program).toContain('| .SessionExpired => "session-expired"');
-    expect(program).toContain('def allStates : List Probe.State := [.Init, .Authed, .Expired]');
+    expect(program).toContain('def allStates : List «Probe».State := [.Init, .Authed, .Expired]');
     expect(program).toContain('def main : IO Unit');
   });
 
   it('T-EXTRACT-002 reads the table through dispatch, which is what is under test', () => {
     // The name maps come from the spec, so they cannot disagree with it. The
     // table does, and it is read by evaluating `dispatch`.
-    expect(renderTableProgram(SPEC)).toContain('match Probe.dispatch s e with');
+    expect(renderTableProgram(SPEC)).toContain('match «Probe».dispatch s e with');
   });
 });
 
@@ -217,8 +217,8 @@ describe('a check that did not run is not a check that passed', () => {
     // Lean and the source share stdout. Reading every line as a cell turned an
     // `#eval` into `unreadable line from Lean`, failing a spec that was fine.
     const noisy = generateLeanSpec(SPEC).source.replace(
-      /^end Probe$/m,
-      '#eval IO.println "a line from the source"\n#eval IO.println "another,with,commas"\n\nend Probe',
+      /^end «Probe»$/m,
+      '#eval IO.println "a line from the source"\n#eval IO.println "another,with,commas"\n\nend «Probe»',
     );
     expect(noisy).toContain('#eval');
 
@@ -228,19 +228,36 @@ describe('a check that did not run is not a check that passed', () => {
     expect(table?.size).toBe(9);
   });
 
-  it.skipIf(!HAS_LEAN)('T-EXTRACT-035 a table with a cell too many is not a table', () => {
+  it.skipIf(!HAS_LEAN)('T-EXTRACT-037 a cell printed twice is not a table either', () => {
+    // The count does not notice a repeated key: the second line overwrites the
+    // first, and its value could have come from anywhere. `dispatch` says
+    // `init + auth-succeeded` goes to `authed`; this line says it is rejected,
+    // and the table would carry the lie with the right number of cells.
+    const source = generateLeanSpec(SPEC).source.replace(
+      /^end «Probe»$/m,
+      '#eval IO.println "kiwa-lean-cell:init,auth-succeeded,invalid"\n\nend «Probe»',
+    );
+
+    const { status, diagnostics } = extractLeanTable(source, SPEC);
+
+    expect(status).toBe('extraction-failed');
+    expect(diagnostics).toContain('Lean printed init + auth-succeeded twice');
+  });
+
+  it.skipIf(!HAS_LEAN)('T-EXTRACT-035 a cell the machine does not have is not a table', () => {
     // The count is the whole check, since names are identifiers and no two cells
     // share a key. A source that prints a cell of its own has stopped describing
     // the machine the spec describes.
     const source = generateLeanSpec(SPEC).source.replace(
-      /^end Probe$/m,
-      '#eval IO.println "kiwa-lean-cell:ghost,ghost,invalid"\n\nend Probe',
+      /^end «Probe»$/m,
+      '#eval IO.println "kiwa-lean-cell:ghost,ghost,invalid"\n\nend «Probe»',
     );
 
     const { status, diagnostics } = extractLeanTable(source, SPEC);
 
     expect(status).toBe('extraction-failed');
     expect(diagnostics).toContain('Lean printed 10 cells, expected 9');
+    expect(diagnostics).toContain('does not hold the machine this spec describes');
   });
 
   it.skipIf(!HAS_LEAN)('T-EXTRACT-036 a spec whose machine the source does not hold fails', () => {

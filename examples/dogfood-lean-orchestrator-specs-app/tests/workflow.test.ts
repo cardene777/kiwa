@@ -55,8 +55,11 @@ describe('dogfood-lean-orchestrator-specs (v2.14-2)', () => {
       ...Object.fromEntries(specs.map((s) => [`KiwaSpecs/${s.path}`, s.source])),
     };
     expect(Object.keys(files).length).toBe(3 + 5);
-    expect(files['KiwaSpecs/TransactionOrchestrator.lean']).toContain('namespace Transaction');
-    expect(files['KiwaSpecs/CliLifecycleOrchestrator.lean']).toContain('namespace Cli');
+    // namespace は «» で囲まれる。 `end` や `def` を namespace 名にできるようにするため
+    // (65 / 80 の候補語が bare 記法で Lean を壊した)。 Lake が自身の package 名に対して
+    // 昔から採っている記法。
+    expect(files['KiwaSpecs/TransactionOrchestrator.lean']).toContain('namespace «Transaction»');
+    expect(files['KiwaSpecs/CliLifecycleOrchestrator.lean']).toContain('namespace «Cli»');
   });
 
   it('Pattern 5-a: lake build が spec を実際に建てる設定になっている', () => {

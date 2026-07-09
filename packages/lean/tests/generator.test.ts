@@ -108,10 +108,13 @@ describe('generateLeanSpec — types and table', () => {
     expect(arm).toContain('=> .to .Active');
   });
 
-  it('T-LEAN-007 wraps output in the namespace', () => {
+  it('T-LEAN-007 wraps output in the namespace, written so Lean reads it as a name', () => {
+    // A namespace called `end` would close the block that opens it, and sixty-five
+    // of eighty candidate keywords broke the file. Guillemets make any identifier
+    // a name, which is what Lake has always done with its own.
     const out = generateLeanSpec(TXN_SPEC);
-    expect(out.source).toContain('namespace Transaction');
-    expect(out.source).toContain('end Transaction');
+    expect(out.source).toContain('namespace «Transaction»');
+    expect(out.source).toContain('end «Transaction»');
   });
 
   it('T-LEAN-008 reports 40 cells, the valid/rejected split, and the terminal states', () => {
@@ -163,14 +166,9 @@ describe('generateLeanSpec — theorems that can fail', () => {
   it('T-LEAN-026 the can-leave witness is an event that actually leaves, not a self-loop', () => {
     // `active + query-executed` stays in `active`. It must not be the witness.
     const out = generateLeanSpec(TXN_SPEC);
-    const line = out.source
-      .split('\n')
-      .find((l) => l.includes('active_can_leave') === false && l.includes('⟨.BeginCompleted, rfl⟩'));
-    expect(line).toBeDefined();
 
     const activeWitness = out.source.split('theorem active_can_leave')[1]?.split('\n')[1];
-    expect(activeWitness).not.toContain('QueryExecuted');
-    expect(activeWitness).toContain('SavepointCreated');
+    expect(activeWitness).toBe('  ⟨.SavepointCreated, rfl⟩');
   });
 
   it('T-LEAN-024 the old vacuous totality theorem is gone', () => {

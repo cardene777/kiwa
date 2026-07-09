@@ -290,9 +290,46 @@ Lean と source は stdout を共有する。 全行を cell として読んで�
 
 書いている最中に 2 つ見つけた。 lifecycle は `npm_config_*` を環境に撒く。 `pack_destination` もその 1 つで、 `npm pack` が指定と違う場所に tarball を書いた。 内側の command は利用者の build が持つ環境で走らせる。 そして `beforeAll` が throw すると test は skip として数えられる。 飛ばされた検査は通った検査と見分けがつかない。 導入の失敗は `T-PKG-000` の失敗として現れる。
 
+#### 27. `namespace` が Lean の予約語だと、 生成 file が壊れた
+
+`validateSpec` は `namespace` が identifier であることを検査していた。 `end` は identifier だ。 そして生成器は `namespace end` と bare で書いていたので、 Lean は `unexpected token 'end'; expected identifier` と答えた。 検査が防ぐと謳っていた「3 step 下流の compiler が代わりに文句を言う」 状態そのもの。
+
+候補 80 語のうち **65 語** が生成 file を壊した (`end` / `def` / `theorem` / `where` / `by` / `match` / `Type` / `Prop` / `Sort` / ...)。
+
+Lean の予約語一覧を手で保つ道は採らない。 この package は Lean の文法を他の面では追っていないので、 次の release で語が増えれば漏れる。 かわりに `«»` で囲む。 任意の identifier が名前になる。 `lake.ts` が package 名と library 名に対して昔から採っていた記法と同じ。
+
+```lean
+namespace «Session»
+...
+end «Session»
+```
+
+`extractLeanTable` の `open` と型注釈も同じ扱いにした。 v4.12.0 / v4.15.0 / v4.23.0 / v4.31.0 の 4 版で確認。
+
+state / event 名は影響を受けない。 PascalCase の constructor になるので、 `end` は `End` になり、 自身の型の中に住む。 `moduleName` も Lean source に現れない。
+
+#### 28. 出力が buffer を超えると、 「仕様が誤り」 として返っていた
+
+`execFileSync` の既定 `maxBuffer` は 1 MB。 表を印字する program は 1 cell あたり約 68 bytes を出すので、 15,000 cell で満ちる。 超えると Node は `ENOBUFS` を投げ、 Lean の答えは失われる。 tool の限界が spec への verdict として届く。 `timed-out` が防いでいるのと同じ混同。
+
+`maxOutputBytes` (既定 64 MiB = 約 100 万 cell) を option にし、 超過を `output-too-large` として返す。 `timed-out` と同じく `ok: false`、 何も確立していない。
+
+#### 29. 同じ cell を 2 度印字されても、 件数は変わらなかった
+
+`extractLeanTable` は印字を Map に入れる。 同じ鍵が 2 度来れば上書きされ、 `table.size` は変わらない。 2 つ目の値は `dispatch` 以外のどこから来たものでもよい。 鍵の重複を拒否する。
+
+「件数が検査の全て」 という comment は、 重複を排除して初めて正しい。
+
+#### 30. 常に真になる主張が 1 件あった
+
+`generator.test.ts` の `l.includes('active_can_leave') === false` は、 ほぼ全ての行で真になる。 主張は「`beginning` の証人行が存在する」 に潰れており、 `active` の証人選択が壊れても通る。 証人そのものを固定する形に書き直した。
+
+これら 4 件 (27-30) は独立した adversarial review が指摘した。 私は 26 件を自分で見つけたが、 この 4 件は見落としていた。
+
 ### 移行 (v0.3 の入力規約)
 
 - state / event 名は `[A-Za-z][A-Za-z0-9_-]*` (kebab-case / underscore 可)
+- `namespace` は Lean の予約語でもよい (`«»` で囲まれる)、 生成物の見た目が `namespace «Session»` に変わる
 - `moduleName` は `[A-Za-z][A-Za-z0-9_]*` (ハイフン不可、 Lean module 名になるため)
 - `namespace` / `rootNamespace` は Lean identifier
 - 2 state が同じ constructor 名 / 定理名になる組合せは拒否

@@ -12,7 +12,9 @@ export type VerifyStatus =
   | 'skipped-by-env'
   | 'verification-failed'
   /** Lean was still working when `timeoutMs` ran out. Nothing was established. */
-  | 'timed-out';
+  | 'timed-out'
+  /** Lean printed more than the buffer holds. Nothing was established. */
+  | 'output-too-large';
 
 export interface VerifyOptions {
   /** Root namespace under which specs will be organized. Default: `KiwaSpecs`. */
@@ -154,9 +156,10 @@ export function verifyLeanSpec(
 
   if (!run.ok) {
     return {
-      // A timeout is not a verdict on the spec. Calling it a failed verification
-      // sends a caller looking for a bug in a table Lean never finished reading.
-      status: run.timedOut ? 'timed-out' : 'verification-failed',
+      // Neither a timeout nor a full buffer is a verdict on the spec. Calling
+      // either a failed verification sends a caller looking for a bug in a table
+      // Lean never finished reading, or finished reading and could not report.
+      status: run.timedOut ? 'timed-out' : run.overflowed ? 'output-too-large' : 'verification-failed',
       diagnostics: attribute(run.diagnostics, run.filePath, segments),
       stdout: run.stdout,
       stderr: run.stderr,

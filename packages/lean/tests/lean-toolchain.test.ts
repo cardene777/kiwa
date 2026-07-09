@@ -20,6 +20,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { generateLeanSpec } from '../src/generator.js';
+import { checkLeanTable } from '../src/extract.js';
 import { generateLakeProject } from '../src/lake.js';
 import { verifyLeanSpec } from '../src/verify.js';
 import type { OrchestratorSpec } from '../src/types.js';
@@ -194,7 +195,7 @@ describe.skipIf(!HAS_LEAN)('a failure names the spec it came from', () => {
     const second = good('Second', 'Second');
     const brokenAtEnd = {
       ...first,
-      source: first.source.replace(/end First\n$/, 'end First\ndef bad_at_end : Nat := "x"\n'),
+      source: first.source.replace(/end «First»\n$/, 'end «First»\ndef bad_at_end : Nat := "x"\n'),
     };
     expect(brokenAtEnd.source).toContain('bad_at_end');
 
@@ -287,6 +288,82 @@ end Vacuous
   });
 });
 
+describe.skipIf(!HAS_LEAN)('a namespace that is a Lean keyword', () => {
+  // Written bare, `namespace end` closed the block that opened it, and Lean said
+  // `unexpected token 'end'; expected identifier` — the failure three steps
+  // downstream that validation exists to prevent. Sixty-five of eighty candidate
+  // keywords broke the generated file.
+  const KEYWORDS = ['end', 'def', 'theorem', 'where', 'by', 'open', 'match', 'Type', 'Prop'];
+
+  const machine = (namespace: string): OrchestratorSpec => ({
+    moduleName: 'Kw',
+    namespace,
+    states: ['init', 'done'],
+    events: ['go', 'timeout'],
+    unspecified: 'invalid',
+    initial: 'init',
+    terminal: ['done'],
+    transitions: [{ from: 'init', event: 'go', to: 'done' }],
+  });
+
+  it.each(KEYWORDS)('T-LEAN-170 %s: the generated spec verifies', (namespace) => {
+    expect(verifyLeanSpec([generateLeanSpec(machine(namespace))]).status).toBe('ok');
+  });
+
+  it.each(KEYWORDS)('T-LEAN-171 %s: Lean prints the table it computes', (namespace) => {
+    const report = checkLeanTable(machine(namespace));
+
+    expect(report.status).toBe('ok');
+    expect(report.ok).toBe(true);
+    expect(report.checked).toBe(4);
+  });
+
+  it('T-LEAN-172 a keyword namespace still catches a missing cell', () => {
+    // The escaping must not cost the checking.
+    const source = generateLeanSpec(machine('end'))
+      .source.split('\n')
+      .filter((line) => !(line.includes('.Init,') && line.includes('.Timeout')))
+      .join('\n');
+
+    const result = verifyLeanSpec([{ source, path: 'Kw.lean', meta: PROBE_META }]);
+
+    expect(result.status).toBe('verification-failed');
+    expect(result.diagnostics).toMatch(MISSING_CASES);
+  });
+});
+
+describe.skipIf(!HAS_LEAN)('Lean may print more than the buffer holds', () => {
+  // Node's default is one megabyte, and the table printer emits about sixty-eight
+  // bytes per cell: fifteen thousand cells fill it. `execFileSync` then throws
+  // ENOBUFS and Lean's answer is lost — a tool limit arriving as a verdict, which
+  // is the confusion `timed-out` exists to prevent.
+  const SMALL: OrchestratorSpec = {
+    moduleName: 'Small',
+    namespace: 'Small',
+    states: ['a', 'b'],
+    events: ['e'],
+    unspecified: 'invalid',
+    transitions: [{ from: 'a', event: 'e', to: 'b' }],
+  };
+
+  it('T-LEAN-180 an overflowing table is not a table, and not a verdict', () => {
+    const report = checkLeanTable(SMALL, { maxOutputBytes: 1 });
+
+    expect(report.status).toBe('output-too-large');
+    expect(report.status).not.toBe('extraction-failed');
+    expect(report.ok).toBe(false);
+    expect(report.diagnostics).toContain('the rest was lost');
+    expect(report.diagnostics).toContain('split the machine');
+  });
+
+  it('T-LEAN-181 the ceiling is generous by default, and the table comes back whole', () => {
+    const report = checkLeanTable(SMALL);
+
+    expect(report.status).toBe('ok');
+    expect(report.checked).toBe(2);
+  });
+});
+
 describe.skipIf(!HAS_LEAN)('Lean checks the sink theorems', () => {
   const JOB: OrchestratorSpec = {
     moduleName: 'JobOrchestrator',
@@ -350,11 +427,11 @@ describe.skipIf(!HAS_LEAN)('Lean checks the sink theorems', () => {
   });
 
   it('T-LEAN-143 a self-loop does not escape, and Lean computes that', () => {
-    const source = `${generateLeanSpec(JOB).source.replace(/\nend Job\n$/, '')}
+    const source = `${generateLeanSpec(JOB).source.replace(/\nend «Job»\n$/, '')}
 theorem self_loop_does_not_escape : escapes .Queued .Start = false := rfl
 theorem real_move_escapes : escapes .Queued .Succeed = true := rfl
 
-end Job
+end «Job»
 `;
     expect(checkSource(source).ok).toBe(true);
   });

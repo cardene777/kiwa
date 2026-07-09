@@ -16,6 +16,21 @@ export type Table = ReadonlyMap<string, string | null>;
 
 export const cellKey = (state: string, event: string): string => `${state}::${event}`;
 
+/**
+ * Write a name so Lean reads it as a name.
+ *
+ * A namespace called `end` closes the block that opens it; `def`, `theorem`,
+ * `where` and sixty others do their own damage. Lean has a spelling for "this is
+ * an identifier, whatever else it looks like", and Lake has always used it for
+ * its package and library names.
+ *
+ * Always, rather than only for the names that need it: the alternative is a list
+ * of Lean's keywords, kept by hand, in a package that does not otherwise track
+ * Lean's grammar. Sixty-five of eighty candidate words broke the generated file,
+ * and the next release of Lean may add another.
+ */
+export const quoteIdentifier = (name: string): string => `«${name}»`;
+
 /** How many undeclared cells to name before saying "and N more". */
 const MAX_REPORTED_CELLS = 8;
 

@@ -1,5 +1,6 @@
 import {
   cellKey,
+  quoteIdentifier,
   resolveTable,
   sinkStates as findSinks,
   terminalStates as findTerminals,
@@ -55,6 +56,10 @@ const toSnakeCase = (input: string): string =>
  */
 export function generateLeanSpec(spec: OrchestratorSpec): LeanSpecOutput {
   const { moduleName, namespace, states, events } = spec;
+  // Lean reads a bare identifier as syntax, so a namespace named `end` closes the
+  // block that opens it. Guillemets make any identifier a name, which is how Lake
+  // has always written its package and library names.
+  const ns = quoteIdentifier(namespace);
 
   const table = resolveTable(spec, 'generateLeanSpec');
 
@@ -87,7 +92,7 @@ export function generateLeanSpec(spec: OrchestratorSpec): LeanSpecOutput {
 -- checker is what proves the table is complete. Removing a line is a compile
 -- error naming the cell, not a silent fallthrough.
 
-namespace ${namespace}
+namespace ${ns}
 
 inductive State where
 ${states.map((s) => `  | ${toPascalCase(s)} : State`).join('\n')}
@@ -114,7 +119,7 @@ def escapes (s : State) (e : Event) : Bool :=
   match dispatch s e with
   | .to s' => !(decide (s' = s))
   | .invalid => false
-${stepsDef}${theorems}end ${namespace}
+${stepsDef}${theorems}end ${ns}
 `;
 
   const meta: LeanSpecOutput['meta'] = {

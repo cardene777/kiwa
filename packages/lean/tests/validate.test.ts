@@ -112,6 +112,49 @@ describe('a name that would become a path or syntax is refused', () => {
   });
 });
 
+describe('a namespace is written so Lean reads it as a name', () => {
+  // `namespace end` closes the block that opens it. `namespace def`, `theorem`,
+  // `where`, `Type`, `Prop` and sixty more break the file in their own ways:
+  // sixty-five of eighty candidate words, when the namespace was written bare.
+  //
+  // A list of Lean's keywords, kept by hand in a package that does not otherwise
+  // track Lean's grammar, would be wrong the next time Lean adds one. Guillemets
+  // make any identifier a name, which is what Lake has always done with its own.
+  const KEYWORDS = [
+    'end',
+    'def',
+    'theorem',
+    'namespace',
+    'open',
+    'where',
+    'by',
+    'match',
+    'fun',
+    'let',
+    'have',
+    'show',
+    'deriving',
+    'inductive',
+    'Type',
+    'Prop',
+    'Sort',
+  ];
+
+  it.each(KEYWORDS)('T-VALID-025 namespace %s is quoted', (namespace) => {
+    const out = generateLeanSpec(spec({ namespace }));
+
+    expect(out.source).toContain(`namespace «${namespace}»`);
+    expect(out.source).toContain(`end «${namespace}»`);
+  });
+
+  it('T-VALID-026 an ordinary namespace is quoted too, so there is one spelling', () => {
+    const out = generateLeanSpec(spec({ namespace: 'Session' }));
+
+    expect(out.source).toContain('namespace «Session»');
+    expect(out.source).not.toContain('namespace Session\n');
+  });
+});
+
 describe('the separator that keys the table cannot be smuggled into a name', () => {
   it('T-VALID-030 two cells used to become one', () => {
     // cellKey(state, event) is `state::event`. ("a", "b::c") and ("a::b", "c")
