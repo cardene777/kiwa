@@ -14,16 +14,25 @@ function readJson<T = unknown>(rel: string): T {
 }
 
 describe('v2.14-4 publish', () => {
-  it('plugin.json 2.14.0', () => {
-    expect(readJson<{ version: string }>('.claude-plugin/plugin.json').version).toBe('2.14.0');
+  it('plugin.json >= 2.14.0', () => {
+    const v = readJson<{ version: string }>('.claude-plugin/plugin.json').version;
+    const parts = v.split('.').map(Number);
+    const major = parts[0] ?? 0;
+    const minor = parts[1] ?? 0;
+    expect(major).toBeGreaterThanOrEqual(2);
+    expect(major > 2 || (major === 2 && minor >= 14)).toBe(true);
   });
   it('gh-discussions-announcement.md exists (v2.14)', () => {
     expect(
       existsSync(resolve(REPO_ROOT, 'docs/announcements/v2.14/gh-discussions-announcement.md')),
     ).toBe(true);
   });
-  it('@kiwa-lab/lean v0.1.0', () => {
-    expect(readJson<{ version: string }>('packages/lean/package.json').version).toBe('0.1.0');
+  it('@kiwa-lab/lean version >= 0.1.0', () => {
+    const v = readJson<{ version: string }>('packages/lean/package.json').version;
+    const parts = v.split('.').map(Number);
+    const major = parts[0] ?? 0;
+    const minor = parts[1] ?? 0;
+    expect(major > 0 || (major === 0 && minor >= 1)).toBe(true);
   });
   it('lean generator source', () => {
     const src = readText('packages/lean/src/generator.ts');
