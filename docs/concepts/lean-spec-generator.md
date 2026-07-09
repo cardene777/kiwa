@@ -22,6 +22,8 @@ kiwa v2.14+ は 同じ SSOT (5 state / 8 event / 40 セル) を 2 層で駆動�
 ```ts
 generateLeanSpec(spec: OrchestratorSpec): LeanSpecOutput;
 generateLakeProject(config: LakeProjectConfig): LakeProjectFiles;
+// config.modules を渡すと根 module が各 spec を import する。
+// lakefile は @[default_target] + globs を出すので、 lake build が spec を実際に建てる。
 ```
 
 ### OrchestratorSpec 型

@@ -37,4 +37,35 @@ describe('generateLakeProject — minimal Lake scaffolding', () => {
     });
     expect(out.files['lean-toolchain']).toBe('leanprover/lean4:v4.16.0\n');
   });
+
+  it('T-LEAN-LAKE-005 the library is a default target, or lake build builds nothing', () => {
+    // Without the attribute, `lake build` has no targets and reports success on a
+    // project whose specs do not compile.
+    const out = generateLakeProject({ packageName: 'p', rootNamespace: 'KiwaSpecs' });
+    expect(out.files['lakefile.lean']).toContain('@[default_target]');
+  });
+
+  it('T-LEAN-LAKE-006 a glob collects the specs, so an unimported one is still built', () => {
+    const out = generateLakeProject({ packageName: 'p', rootNamespace: 'KiwaSpecs' });
+    expect(out.files['lakefile.lean']).toContain('globs := #[.andSubmodules `KiwaSpecs]');
+  });
+
+  it('T-LEAN-LAKE-007 the root module imports the named modules', () => {
+    const out = generateLakeProject({
+      packageName: 'p',
+      rootNamespace: 'KiwaSpecs',
+      modules: ['TransactionOrchestrator', 'SessionOrchestrator'],
+    });
+    expect(out.files['KiwaSpecs.lean']).toContain('import KiwaSpecs.TransactionOrchestrator');
+    expect(out.files['KiwaSpecs.lean']).toContain('import KiwaSpecs.SessionOrchestrator');
+  });
+
+  it('T-LEAN-LAKE-008 with no modules the root module says the glob does the work', () => {
+    const out = generateLakeProject({ packageName: 'p', rootNamespace: 'KiwaSpecs' });
+    const statements = (out.files['KiwaSpecs.lean'] ?? '')
+      .split('\n')
+      .filter((line) => line.startsWith('import '));
+    expect(statements).toEqual([]);
+    expect(out.files['KiwaSpecs.lean']).toContain('built by the glob');
+  });
 });

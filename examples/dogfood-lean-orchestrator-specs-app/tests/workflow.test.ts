@@ -44,11 +44,12 @@ describe('dogfood-lean-orchestrator-specs (v2.14-2)', () => {
   });
 
   it('Pattern 5: Lake project + 5 spec で 1 バンドル出力', () => {
+    const specs = ALL_SPECS.map((s) => generateLeanSpec(s));
     const lake = generateLakeProject({
       packageName: 'kiwa-orchestrator-specs',
       rootNamespace: 'KiwaSpecs',
+      modules: specs.map((s) => s.path.replace(/\.lean$/, '')),
     });
-    const specs = ALL_SPECS.map((s) => generateLeanSpec(s));
     const files = {
       ...lake.files,
       ...Object.fromEntries(specs.map((s) => [`KiwaSpecs/${s.path}`, s.source])),
@@ -56,6 +57,23 @@ describe('dogfood-lean-orchestrator-specs (v2.14-2)', () => {
     expect(Object.keys(files).length).toBe(3 + 5);
     expect(files['KiwaSpecs/TransactionOrchestrator.lean']).toContain('namespace Transaction');
     expect(files['KiwaSpecs/CliLifecycleOrchestrator.lean']).toContain('namespace Cli');
+  });
+
+  it('Pattern 5-a: lake build が spec を実際に建てる設定になっている', () => {
+    // `@[default_target]` が無いと lake build は対象を持たず、 spec が壊れていても
+    // 「成功」 と報告する。 glob が無いと、 import されない spec は建てられない。
+    const lake = generateLakeProject({
+      packageName: 'kiwa-orchestrator-specs',
+      rootNamespace: 'KiwaSpecs',
+      modules: ALL_SPECS.map((s) => generateLeanSpec(s).path.replace(/\.lean$/, '')),
+    });
+    expect(lake.files['lakefile.lean']).toContain('@[default_target]');
+    expect(lake.files['lakefile.lean']).toContain('globs := #[.andSubmodules `KiwaSpecs]');
+
+    const root = lake.files['KiwaSpecs.lean'] ?? '';
+    for (const spec of ALL_SPECS) {
+      expect(root).toContain(`import KiwaSpecs.${spec.moduleName}`);
+    }
   });
 
   it('5 orchestrator 統合 (kiwa 全体 systematic pattern の Lean 反映)', () => {

@@ -15,21 +15,26 @@
  */
 
 import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { generateLeanSpec } from '../src/generator.js';
+import { generateLakeProject } from '../src/lake.js';
 import { verifyLeanSpec } from '../src/verify.js';
 import type { OrchestratorSpec } from '../src/types.js';
 
-function leanInstalled(): boolean {
+function installed(bin: string): boolean {
   try {
-    execFileSync('lean', ['--version'], { stdio: 'ignore' });
+    execFileSync(bin, ['--version'], { stdio: 'ignore' });
     return true;
   } catch {
     return false;
   }
 }
 
-const HAS_LEAN = leanInstalled();
+const HAS_LEAN = installed('lean');
+const HAS_LAKE = installed('lake');
 
 const SESSION: OrchestratorSpec = {
   moduleName: 'SessionOrchestrator',
@@ -80,6 +85,18 @@ describe.skipIf(!HAS_LEAN)('the generated spec is accepted by Lean', () => {
     // every file and reported a correct spec as a failing one.
     const out = execFileSync('lean', ['--help'], { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] });
     expect(out).not.toContain('--check');
+  });
+
+  it('T-LEAN-103 the lean-toolchain file decides which Lean runs, so verify writes one', () => {
+    // It is the only file the scratch directory needs. Naming a version that does
+    // not exist must fail rather than fall back to whatever is installed; if it
+    // passed, nothing would be pinning anything.
+    const result = verifyLeanSpec([generateLeanSpec(SESSION)], {
+      leanToolchain: 'leanprover/lean4:v0.0.0-does-not-exist',
+    });
+
+    expect(result.status).toBe('verification-failed');
+    expect(result.diagnostics).toContain('no such release');
   });
 });
 
@@ -280,5 +297,85 @@ describe.skipIf(HAS_LEAN)('without a toolchain', () => {
   it('T-LEAN-120 verification reports lean-not-installed rather than passing', () => {
     const result = verifyLeanSpec([generateLeanSpec(SESSION)]);
     expect(result.status).toBe('lean-not-installed');
+  });
+});
+
+/**
+ * The Lake project is what a caller checks into a repository, so `lake build` is
+ * the command that will run against it. It used to report success on a project
+ * whose specs did not compile, because the library was not a default target and
+ * nothing imported the specs.
+ */
+describe.skipIf(!HAS_LAKE)('the generated Lake project builds the specs inside it', () => {
+  const BROKEN = 'namespace Broken\ndef bad : Nat := "not a number"\nend Broken\n';
+
+  interface BuildResult {
+    status: number;
+    output: string;
+  }
+
+  /** Write a Lake project holding one spec module, then build it. */
+  function buildProject(specSource: string, modules: readonly string[] = []): BuildResult {
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-lake-'));
+    try {
+      const lake = generateLakeProject({
+        packageName: 'probe',
+        rootNamespace: 'KiwaSpecs',
+        modules,
+      });
+      for (const [rel, content] of Object.entries(lake.files)) {
+        const abs = resolve(root, rel);
+        mkdirSync(dirname(abs), { recursive: true });
+        writeFileSync(abs, content, 'utf-8');
+      }
+      const specPath = resolve(root, 'KiwaSpecs/Spec.lean');
+      mkdirSync(dirname(specPath), { recursive: true });
+      writeFileSync(specPath, specSource, 'utf-8');
+
+      const result = execFileSync('lake', ['build'], {
+        cwd: root,
+        encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+        timeout: 240_000,
+      });
+      return { status: 0, output: result };
+    } catch (err) {
+      const e = err as { status?: number; stdout?: Buffer; stderr?: Buffer };
+      return {
+        status: e.status ?? -1,
+        output: `${e.stdout?.toString('utf-8') ?? ''}${e.stderr?.toString('utf-8') ?? ''}`,
+      };
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }
+
+  it('T-LEAN-150 a project holding a generated spec builds', () => {
+    const spec = generateLeanSpec(SESSION);
+    expect(buildProject(spec.source).status).toBe(0);
+  });
+
+  it('T-LEAN-151 a project holding a broken spec fails, even with nothing importing it', () => {
+    const result = buildProject(BROKEN);
+    expect(result.status).not.toBe(0);
+    expect(result.output).toContain('Spec.lean');
+    expect(result.output).toContain('error');
+  });
+
+  it('T-LEAN-152 a broken spec named in the root module also fails', () => {
+    const result = buildProject(BROKEN, ['Spec']);
+    expect(result.status).not.toBe(0);
+  });
+
+  it('T-LEAN-153 a spec with a missing cell fails the build, not just a direct lean call', () => {
+    const source = generateLeanSpec(SESSION)
+      .source.split('\n')
+      .filter((line) => !(line.includes('.Authed,') && line.includes('.Timeout')))
+      .join('\n');
+
+    const result = buildProject(source);
+
+    expect(result.status).not.toBe(0);
+    expect(result.output).toContain('missing cases');
   });
 });
