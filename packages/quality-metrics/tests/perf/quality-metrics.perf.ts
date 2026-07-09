@@ -1,5 +1,5 @@
 import { diffReports, evaluateReleaseGate, type QualityReport } from '../../src/index.js';
-import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa/perf-harness';
+import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-lab/perf-harness';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -38,7 +38,7 @@ describe(MODULE, () => {
     '3-layer perf: evaluateReleaseGate + diffReports on 7-axis + 11-axis reports',
     async () => {
       const nonAi = buildReport('kiwa-plugin');
-      const ai = buildAiReport('@kiwa/ai-anthropic/messages');
+      const ai = buildAiReport('@kiwa-lab/ai-anthropic/messages');
       // diffReports requires same provider — use the same provider name
       // with different version fields so the diff has real work to do.
       const previousNonAi = { ...buildReport('kiwa-plugin'), version: 'v0.9.0' };

@@ -4,7 +4,7 @@
 
 kiwa v1.43 released — Edge / Serverless deepening lands.
 
-@kiwa/edge v1.1.0 → v1.2.0 minor bump. 3 platform (Cloudflare Workers + Vercel Edge + Deno Deploy) × advanced edge production semantics 8 axis (v1.24 v0.2 8 axis + v1.43 v1.2 8 advanced axis = 48 combination coverage / 16 axis × 3 platform grid).
+@kiwa-lab/edge v1.1.0 → v1.2.0 minor bump. 3 platform (Cloudflare Workers + Vercel Edge + Deno Deploy) × advanced edge production semantics 8 axis (v1.24 v0.2 8 axis + v1.43 v1.2 8 advanced axis = 48 combination coverage / 16 axis × 3 platform grid).
 
 **12th 縦深化 pair introduced** — first new pair base since v1.37 Security, 5 milestones ago. 5-milestone new-base cadence complete after 3 depth-4 records.
 
@@ -26,7 +26,7 @@ Next III depth target: ~v1.62 (depth-4 pattern III depth = base + 19 milestones)
 
 21-milestone consecutive snippet validation streak (v1.23-v1.43) achieved.
 
-`pnpm add -D @kiwa/edge` gets v1.2.0. No breaking changes. Migration guide: https://cardene777.github.io/kiwa/migrations/v1.42-to-v1.43
+`pnpm add -D @kiwa-lab/edge` gets v1.2.0. No breaking changes. Migration guide: https://cardene777.github.io/kiwa/migrations/v1.42-to-v1.43
 
 6 sub-milestone completion (v1.43-1 edge v1.2.0 + 8 axis semantics + 227 test / v1.43-2 cold-start dogfood + 64 test / v1.43-3 DO migration dogfood + 60 test / v1.43-4 global routing dogfood + 60 test / v1.43-5 docs + 241 test = 21 milestone snippet streak / v1.43-6 publish).
 

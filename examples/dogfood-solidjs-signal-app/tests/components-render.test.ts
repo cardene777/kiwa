@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { renderSolid, stringify } from '@kiwa/solidjs';
+import { renderSolid, stringify } from '@kiwa-lab/solidjs';
 import { Counter } from '../src/components/Counter.js';
 import { TodoList } from '../src/components/TodoList.js';
 import { UserProfile } from '../src/components/UserProfile.js';

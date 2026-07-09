@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite for an OpenID Provider (OP) that exercises the four spec-critical surfaces — Discovery 1.0 metadata, RFC 7591 Dynamic Client Registration (DCR), `id_token` sign + verify with `at_hash` / `c_hash` / `nonce` guards (OIDC Core §2 + §3.1.3.6-7), and OpenID Federation 1.0 §7 trust-chain resolution. The tests never boot a real OP or fetch a real trust anchor; they drive the endpoints through `@kiwa/auth` v1.21-1d's mock-shaped stubs so the same suite runs in Node.js without a Keycloak deployment or a Federation trust anchor URL.
+A vitest suite for an OpenID Provider (OP) that exercises the four spec-critical surfaces — Discovery 1.0 metadata, RFC 7591 Dynamic Client Registration (DCR), `id_token` sign + verify with `at_hash` / `c_hash` / `nonce` guards (OIDC Core §2 + §3.1.3.6-7), and OpenID Federation 1.0 §7 trust-chain resolution. The tests never boot a real OP or fetch a real trust anchor; they drive the endpoints through `@kiwa-lab/auth` v1.21-1d's mock-shaped stubs so the same suite runs in Node.js without a Keycloak deployment or a Federation trust anchor URL.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest suite for an OpenID Provider (OP) that exercises the four spec-critical
 ```bash
 mkdir kiwa-oidc-first && cd kiwa-oidc-first
 pnpm init
-pnpm add -D @kiwa/auth@0.1 vitest typescript @types/node
+pnpm add -D @kiwa-lab/auth@0.1 vitest typescript @types/node
 ```
 
 Add the vitest script and TypeScript configuration in `package.json`.
@@ -29,7 +29,7 @@ Add the vitest script and TypeScript configuration in `package.json`.
 }
 ```
 
-Ship a `tsconfig.json` that matches the ESM shape `@kiwa/auth` exports.
+Ship a `tsconfig.json` that matches the ESM shape `@kiwa-lab/auth` exports.
 
 ```json
 {
@@ -59,7 +59,7 @@ import {
   resolveOidcTrustChain,
   setupOidcEnv,
   type OidcTestEnv,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 
 const envs: OidcTestEnv[] = [];
 
@@ -378,7 +378,7 @@ OIDC Core + Discovery + DCR + Federation diverges from bare OAuth 2.1 on four ax
 - **id_token claim + hash + nonce guards** — OIDC Core §2 defines the `id_token` claims (`iss` / `sub` / `aud` / `exp` / `iat` / `nonce` / `at_hash` / `c_hash`). §3.1.3.7 mandates `iss` / `aud` / `exp` guards; §3.1.3.6 mandates `at_hash` binds the id_token to the access token; §3.3.2.11 mandates `c_hash` binds the id_token to the authorization code. The mock's `verifyIdToken()` returns `{ valid, reason, claims }` on every case.
 - **Federation trust chain (OIDF 1.0 §7)** — Federation lets a leaf entity chain up through N intermediates to a trust anchor, with each intermediate signing a JWS-shaped entity statement about the next. The chain walker refuses broken links, expired intermediates, chains that never reach the anchor, and cycles between intermediates.
 
-`@kiwa/auth` v1.21-1d records each axis.
+`@kiwa-lab/auth` v1.21-1d records each axis.
 
 - **Discovery** — `env.discovery.fetch()` returns the OpenID Provider metadata. `env.discovery.url` returns the well-known URL. Metadata overrides that mismatch `issuer` throw at construction time.
 - **DCR** — `env.registerClient({ redirect_uris, ... })` returns `{ client_id, client_secret?, token_endpoint_auth_method, ... }`. Dropped grants throw at register time. `mintSoftwareStatement({ software_id }, 'trust-anchor-alpha')` produces a JWS; `env.registerClient({ software_statement: forged })` throws `/signature verification failed/` when the trust anchor does not match.

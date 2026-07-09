@@ -36,7 +36,7 @@ published: false
 ### 4 code pattern
 
 ```ts
-import { semantics } from '@kiwa/auth';
+import { semantics } from '@kiwa-lab/auth';
 
 // Pattern 1 — baseline 監視 開始
 const s = semantics.startContinuousAuth({
@@ -82,7 +82,7 @@ Desktop v1.67 depth-6 candidate + quality-metrics v2.1 継続深化 と 独立�
 ## Install
 
 ```bash
-pnpm add -D @kiwa/auth@^2.1
+pnpm add -D @kiwa-lab/auth@^2.1
 ```
 
 ## Migration guide

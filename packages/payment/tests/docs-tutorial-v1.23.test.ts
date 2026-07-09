@@ -10,7 +10,7 @@
  * ため、 snippet と実 API の乖離を CI で検知する。 v1.17 / v1.19 / v1.20 /
  * v1.21 / v1.22 の docs-tutorial-v*.test.ts と同 pattern。
  *
- * v1.23 は @kiwa/payment v0.3 の 9-axis 高度な billing semantics を扱う
+ * v1.23 は @kiwa-lab/payment v0.3 の 9-axis 高度な billing semantics を扱う
  * (dunning / retry / 3DS v2 / SCA / PSD2 / subscription / invoice / tax /
  * chargeback)。 mock 部分のみを behavior test 対象とする (real driver
  * (Stripe / Paddle / Lemon Squeezy sandbox) は unit test の範囲外)。

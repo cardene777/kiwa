@@ -1,12 +1,12 @@
 ---
-title: "@kiwa/streaming v2.1 pipeline-orchestrator SSOT"
+title: "@kiwa-lab/streaming v2.1 pipeline-orchestrator SSOT"
 ---
 
-# @kiwa/streaming v2.1 pipeline-orchestrator SSOT
+# @kiwa-lab/streaming v2.1 pipeline-orchestrator SSOT
 
 ## What this covers
 
-`@kiwa/streaming` v2.1 pipeline-orchestrator = producer + consumer group + exactly-once + DLQ + schema registry の 5 axis を 継続合成する 上位 layer。 Streaming pair v0.1 → v0.2 → v0.3 → v2.1 = 5 段深化到達 = **depth-5 pattern 6 例目発生 = systematic law CONFIRMED**。 pattern 昇格階段 の 最上位 = kiwa 全体 で 必ず守る 最上位規範化 confirmed、 systematic pattern 48 度目適用 (continuous state machine variant Streaming 転用)。
+`@kiwa-lab/streaming` v2.1 pipeline-orchestrator = producer + consumer group + exactly-once + DLQ + schema registry の 5 axis を 継続合成する 上位 layer。 Streaming pair v0.1 → v0.2 → v0.3 → v2.1 = 5 段深化到達 = **depth-5 pattern 6 例目発生 = systematic law CONFIRMED**。 pattern 昇格階段 の 最上位 = kiwa 全体 で 必ず守る 最上位規範化 confirmed、 systematic pattern 48 度目適用 (continuous state machine variant Streaming 転用)。
 
 ## 5 state SSOT
 

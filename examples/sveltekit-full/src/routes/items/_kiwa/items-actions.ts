@@ -3,7 +3,7 @@
 // Pattern A (Dependency Injection) — 実 SvelteKit 側は src/routes/items/+page.server.ts で
 // export const actions = { create: (event) => createItemAction(event), ... } として thin wrap する。
 
-import { fail, redirect, type SimulatedActionEvent, type SvelteKitFailSignal } from '@kiwa/sveltekit';
+import { fail, redirect, type SimulatedActionEvent, type SvelteKitFailSignal } from '@kiwa-lab/sveltekit';
 
 export interface CreateItemSuccess {
   readonly id: number;

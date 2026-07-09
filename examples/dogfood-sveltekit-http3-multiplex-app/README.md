@@ -1,6 +1,6 @@
 # dogfood-sveltekit-http3-multiplex-app (v1.28-4)
 
-A SvelteKit + nginx-quic HTTP/3 + QUIC stream multiplex + priority scheduling + HPACK dynamic table + 0-RTT resumption experience that exercises the QUIC multiplex axes across a provider-neutral `Http3MultiplexAdapter`. Both mock (`@kiwa/realtime` v0.2) and real (nginx-quic testcontainers, opt-in) implementations satisfy the same 9-op contract so the fidelity harness can diff them side by side.
+A SvelteKit + nginx-quic HTTP/3 + QUIC stream multiplex + priority scheduling + HPACK dynamic table + 0-RTT resumption experience that exercises the QUIC multiplex axes across a provider-neutral `Http3MultiplexAdapter`. Both mock (`@kiwa-lab/realtime` v0.2) and real (nginx-quic testcontainers, opt-in) implementations satisfy the same 9-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -37,4 +37,4 @@ The real adapter defers the nginx-quic testcontainers wiring to a follow-up mile
 
 ## Fidelity report
 
-The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa/quality-metrics` picks up for the 12-axis release gate. The doc counterpart lives at `docs/quality-reports/realtime/sveltekit-http3-multiplex-app.md`.
+The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa-lab/quality-metrics` picks up for the 12-axis release gate. The doc counterpart lives at `docs/quality-reports/realtime/sveltekit-http3-multiplex-app.md`.

@@ -3,7 +3,7 @@
 // AC #4 (PoC): admin + redirect middleware を新規追加 + test 網羅。
 
 import { describe, expect, it } from 'vitest';
-import { setupNuxtMiddlewareEnv } from '@kiwa/nuxt';
+import { setupNuxtMiddlewareEnv } from '@kiwa-lab/nuxt';
 import { globalAuthGuard, adminRouteGuard } from '../middleware/_kiwa/route-guard.js';
 
 describe('route-guard chain via setupNuxtMiddlewareEnv', () => {

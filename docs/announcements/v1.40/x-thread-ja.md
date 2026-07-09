@@ -4,7 +4,7 @@
 
 kiwa v1.40 リリース — AI/LLM 深化 III が land.
 
-@kiwa/ai-llm v0.4.0 → v0.5.0 minor bump. 4 provider (Anthropic + OpenAI + Vercel AI SDK + LangChain) 上に advanced III AI/LLM production semantics 8 axis を追加 (v1.38 v0.4 advanced 32 cell と合わせて 64 combination coverage).
+@kiwa-lab/ai-llm v0.4.0 → v0.5.0 minor bump. 4 provider (Anthropic + OpenAI + Vercel AI SDK + LangChain) 上に advanced III AI/LLM production semantics 8 axis を追加 (v1.38 v0.4 advanced 32 cell と合わせて 64 combination coverage).
 
 real driver env-gate (KIWA_MODE=real + provider API keys + KIWA_LLM_BUDGET_USD) で opt-in production fidelity 走査. dogfood 3 app 新規 (llm-multi-agent-swarm-app + llm-code-interpreter-app + llm-ops-registry-app) 全 7 軸 release gate PASS.
 
@@ -20,4 +20,4 @@ AI/LLM v1.12 → v1.15 → v1.38 → v1.40 の **4 段拡張 pattern** (kiwa 史
 
 18 milestone 連続 snippet validation streak (v1.23-v1.40) 達成.
 
-`pnpm add -D @kiwa/ai-llm` で v0.5.0 が入る. breaking change なし. migration guide は https://cardene777.github.io/kiwa/migrations/v1.39-to-v1.40
+`pnpm add -D @kiwa-lab/ai-llm` で v0.5.0 が入る. breaking change なし. migration guide は https://cardene777.github.io/kiwa/migrations/v1.39-to-v1.40

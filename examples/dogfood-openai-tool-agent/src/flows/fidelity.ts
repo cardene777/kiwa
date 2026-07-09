@@ -14,15 +14,15 @@ import {
   tokenFromSamples,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
-import { jaccardSimilarity } from '@kiwa/ai-llm';
+} from '@kiwa-lab/quality-metrics';
+import { jaccardSimilarity } from '@kiwa-lab/ai-llm';
 import type { AgentAdapter, TraceEvent } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, aggregates cost / token /
  * latency samples, computes a Jaccard-based accuracy score between real
- * and mock final texts, and produces a `@kiwa/quality-metrics` 11-axis
+ * and mock final texts, and produces a `@kiwa-lab/quality-metrics` 11-axis
  * report + release gate verdict + markdown / JSON snapshots.
  *
  * The dogfood app is the source of truth for whether the kiwa OpenAI mock

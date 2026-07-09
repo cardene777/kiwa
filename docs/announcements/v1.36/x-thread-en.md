@@ -4,7 +4,7 @@
 
 kiwa v1.36 is out — Search 深化 II land.
 
-@kiwa/search v0.2 → v0.3 minor bump. 8 axis advanced search semantics across 4 provider × 8 axis = 32 cell fidelity grid.
+@kiwa-lab/search v0.2 → v0.3 minor bump. 8 axis advanced search semantics across 4 provider × 8 axis = 32 cell fidelity grid.
 
 Real driver env-gate (KIWA_MODE=real + MEILI_URL / TYPESENSE_URL / ALGOLIA_APP_ID + ALGOLIA_API_KEY / OPENSEARCH_URL). 3 dogfood app v2 / new (search-vector-app v2 + search-faceted-geo-app v2 + search-opensearch-app new) 全 7 軸 release gate PASS.
 
@@ -29,4 +29,4 @@ Auth / Realtime / Streaming / Database / Payment / Frontend / Observability / Se
 
 14 milestone 連続 snippet validation streak (v1.23-v1.36) 達成.
 
-`pnpm add -D @kiwa/search` で v0.3.0 が入る. zero breaking changes. migration guide は https://cardene777.github.io/kiwa/migrations/v1.35-to-v1.36
+`pnpm add -D @kiwa-lab/search` で v0.3.0 が入る. zero breaking changes. migration guide は https://cardene777.github.io/kiwa/migrations/v1.35-to-v1.36

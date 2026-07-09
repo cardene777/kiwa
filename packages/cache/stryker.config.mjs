@@ -1,11 +1,11 @@
 /**
- * Mutation testing config for @kiwa/cache.
+ * Mutation testing config for @kiwa-lab/cache.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — cache adapter targets
  * the in-memory backend. testcontainers-cache.js is excluded because its
  * assertions only fire when a live KeyDB / Memcached container is running,
  * which the mutation run does not spin up (the file scored 0 % / 0 covered
  * mutants in the v1.27-3 baseline sweep). Testcontainers coverage is handled
- * by the container fixture suite in @kiwa/dapp-integration, not here.
+ * by the container fixture suite in @kiwa-lab/dapp-integration, not here.
  * SSOT: docs/quality/mutation-thresholds.md § SaaS tier.
  */
 export default {

@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.24-4 — a Deno Fresh app on Deno Deploy that exercises the geo-replicated axis (Deno KV strong consistency + multi-region write + eventual consistency observation) + edge-kv axis (read-your-writes + range query) + cron-trigger axis (Deno Deploy Cron scheduled + queue trigger + 24h retention purge) end-to-end. Drivable in both KIWA_MODE=real (Deno Deploy sandbox + DENO_DEPLOY_KEY env-gate) and KIWA_MODE=mock (@kiwa/edge v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.",
+  "description": "Dogfood app v1.24-4 — a Deno Fresh app on Deno Deploy that exercises the geo-replicated axis (Deno KV strong consistency + multi-region write + eventual consistency observation) + edge-kv axis (read-your-writes + range query) + cron-trigger axis (Deno Deploy Cron scheduled + queue trigger + 24h retention purge) end-to-end. Drivable in both KIWA_MODE=real (Deno Deploy sandbox + DENO_DEPLOY_KEY env-gate) and KIWA_MODE=mock (@kiwa-lab/edge v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.",
   "scripts": {
-    "test": "pnpm -F @kiwa/edge -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/edge -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/edge": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/edge": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

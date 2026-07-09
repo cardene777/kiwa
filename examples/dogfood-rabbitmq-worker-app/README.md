@@ -1,6 +1,6 @@
 # dogfood-rabbitmq-worker-app
 
-Dogfood app 2 (v1.11-3) — order-processing worker driven by `@kiwa/queue` RabbitMQ basic + advanced adapters (`KIWA_MODE=mock`) vs a live rabbitmq:3-management broker (`KIWA_MODE=real`), so behavioural fidelity can feed `@kiwa/quality-metrics`.
+Dogfood app 2 (v1.11-3) — order-processing worker driven by `@kiwa-lab/queue` RabbitMQ basic + advanced adapters (`KIWA_MODE=mock`) vs a live rabbitmq:3-management broker (`KIWA_MODE=real`), so behavioural fidelity can feed `@kiwa-lab/quality-metrics`.
 
 ## Modes
 

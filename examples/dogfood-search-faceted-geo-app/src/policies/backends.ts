@@ -5,7 +5,7 @@
  * Algolia's production API ships native facet distribution (nested +
  * hierarchical) and geo filters (aroundLatLng radius + insideBoundingBox
  * + insidePolygon) that are the reference implementation the
- * `@kiwa/search` v0.3 faceted-advanced + geo axes were designed to
+ * `@kiwa-lab/search` v0.3 faceted-advanced + geo axes were designed to
  * match. Meilisearch / Typesense / OpenSearch OSS are covered by sibling
  * apps in the v1.36-2 / v1.36-4 releases.
  */

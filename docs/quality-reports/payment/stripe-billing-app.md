@@ -8,7 +8,7 @@ v1.23-4 Lemon Squeezy license app.
 ## Scope
 
 Sub-Issue #901 exercises the Stripe half of the advanced billing landscape
-that `@kiwa/payment` v0.3 mocks: checkout session creation, webhook
+that `@kiwa-lab/payment` v0.3 mocks: checkout session creation, webhook
 signature verification, subscription lifecycle transitions (create /
 change plan / pause / resume / cancel / reactivate), invoice lifecycle
 (draft / open / pay / void / uncollectible / credit note), 3D Secure v2
@@ -17,7 +17,7 @@ challenge flow, and dunning (payment retry sequence + grace period).
 Layout:
 
 - `src/adapters/interface.ts` — provider-neutral Stripe RP surface
-- `src/adapters/mock.ts` — `@kiwa/payment` `createStripeMock` +
+- `src/adapters/mock.ts` — `@kiwa-lab/payment` `createStripeMock` +
   9-axis semantics wired to Next.js 15 route handlers
 - `src/adapters/real.ts` — env-gated real driver skeleton
   (`KIWA_MODE=real` + `STRIPE_KEY` + `STRIPE_WEBHOOK_SECRET` +
@@ -63,7 +63,7 @@ release gate mandate in Issue #899 (v1.23 parent).
 |---|---|---|---|
 | 1 | `lint` | Root workspace lint. Dogfood app source obeys the shared kiwa lint config with no per-file overrides. | pass |
 | 2 | `typecheck` | `pnpm --filter dogfood-stripe-billing-app typecheck` — strict `tsc --noEmit` under `exactOptionalPropertyTypes`. | pass |
-| 3 | `build` | `pnpm --filter @kiwa/payment -F @kiwa/core build` runs as a precondition of `pnpm test`. dogfood app itself is a Next.js consumer that does not ship a build artifact. | pass |
+| 3 | `build` | `pnpm --filter @kiwa-lab/payment -F @kiwa-lab/core build` runs as a precondition of `pnpm test`. dogfood app itself is a Next.js consumer that does not ship a build artifact. | pass |
 | 4 | `test` | `pnpm --filter dogfood-stripe-billing-app test` — 3 spec files, 35 tests. | pass (35 / 35) |
 | 5 | `test:cov` | Coverage delta of the 3 spec files against the RP surface. Every persisted-record code path in `store.ts`, `stripe-adapter.ts`, `adapters/mock.ts`, `adapters/real.ts`, `app/checkout/route.ts`, `app/webhook/route.ts`, `app/subscription/route.ts`, `app/invoice/route.ts` is executed by at least one test. `adapters/real.ts` is exercised through the 6 `detectRealEnvMissing` fixture tests + the checkout/reset paths. | pass |
 | 6 | `test:e2e` | Playwright config lands the skeleton; the ad-hoc Node HTTP server wiring per the webauthn dogfood pattern will follow in a downstream Sub-Issue once the Stripe testcontainers fidelity harness lands. Vitest already exercises the route handlers via direct `fetch()` in `tests/checkout-e2e.spec.ts` so the AC "Playwright e2e 3 spec" is met by the 3 axis-focused vitest specs, kept structured so the Playwright migration is a rename. | pass (per-axis vitest coverage) |

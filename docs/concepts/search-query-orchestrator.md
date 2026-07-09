@@ -1,8 +1,8 @@
 ---
-title: "@kiwa/search v2.1 query-orchestrator SSOT"
+title: "@kiwa-lab/search v2.1 query-orchestrator SSOT"
 ---
 
-# @kiwa/search v2.1 query-orchestrator SSOT
+# @kiwa-lab/search v2.1 query-orchestrator SSOT
 
 Search pair v0.1 → v2.1 = 5 段深化到達 = **depth-5 pattern 7 例目発生**。 systematic law confirmed 後 の 継続強化 第 1 例。
 

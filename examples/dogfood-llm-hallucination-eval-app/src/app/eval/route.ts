@@ -5,7 +5,7 @@
  *
  * The eval surface pairs the parent v1.38-1 `llm-eval` axis (LLM-as-
  * judge + rubric + preference + Elo + human-in-the-loop) with
- * `@kiwa/ai-llm` v0.4 — every op has a neutral event counterpart
+ * `@kiwa-lab/ai-llm` v0.4 — every op has a neutral event counterpart
  * the fidelity harness can compare across mock vs real.
  */
 

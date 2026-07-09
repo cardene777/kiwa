@@ -5,7 +5,7 @@ import {
   type Handler,
   type HonoResponseSpec,
   type Middleware,
-} from '@kiwa/hono';
+} from '@kiwa-lab/hono';
 
 /**
  * The dogfood app — 5 routes wired into a `createHonoApp()` instance with a
@@ -57,7 +57,7 @@ export interface DogfoodEnv {
 /**
  * KV binding contract — subset of the CF Workers `KVNamespace` interface the
  * routes touch (get / put). Kept intentionally narrow so tests can supply
- * either a real `mockKVNamespace()` from `@kiwa/hono` or a hand-rolled
+ * either a real `mockKVNamespace()` from `@kiwa-lab/hono` or a hand-rolled
  * stub.
  */
 export interface KvBinding {

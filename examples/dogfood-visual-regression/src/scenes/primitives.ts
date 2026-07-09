@@ -1,5 +1,5 @@
-import { appendChild, createNode } from '@kiwa/component';
-import type { MockNode } from '@kiwa/component';
+import { appendChild, createNode } from '@kiwa-lab/component';
+import type { MockNode } from '@kiwa-lab/component';
 import type { SceneArgs } from './types.js';
 
 /**

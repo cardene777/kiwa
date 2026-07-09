@@ -6,7 +6,7 @@ title: Desktop advanced axis — v1.57 v0.2 5 axis SSOT
 
 ## What this covers
 
-`@kiwa/desktop` v0.2 の advanced 5 axis (Auto-updater + File-system permissions + Notification + Menu-bar + Tray-icon) target-neutral state machine SSOT。 v1.57 で v0.1 3 axis → v0.2 8 axis に minor bump、 kiwa 縦深化 pair 第 14 の第 2 段、 v0.1 baseline (`docs/concepts/desktop-testing-baseline.md`) を extend。
+`@kiwa-lab/desktop` v0.2 の advanced 5 axis (Auto-updater + File-system permissions + Notification + Menu-bar + Tray-icon) target-neutral state machine SSOT。 v1.57 で v0.1 3 axis → v0.2 8 axis に minor bump、 kiwa 縦深化 pair 第 14 の第 2 段、 v0.1 baseline (`docs/concepts/desktop-testing-baseline.md`) を extend。
 
 ## v0.2 5 axis 一覧
 
@@ -71,7 +71,7 @@ linux.statusNotifierItem.Register   ← tray-icon.created (linux)
 
 ## backward compat 絶対維持
 
-v0.2 5 axis の追加は additive、 v0.1 3 axis の 12 method / 12 event / 36 mapping は完全保持。 依存関係も `@kiwa/core` のみで v0.1 と同じ、 他 42 package への影響 0。
+v0.2 5 axis の追加は additive、 v0.1 3 axis の 12 method / 12 event / 36 mapping は完全保持。 依存関係も `@kiwa-lab/core` のみで v0.1 と同じ、 他 42 package への影響 0。
 
 ## systematic pattern 32 度目適用
 

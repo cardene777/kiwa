@@ -5,7 +5,7 @@ Adds the caBLE hybrid transport (CTAP2) axes on top of the register / signin / u
 
 ## Fidelity axes (caBLE hybrid transport, 5 軸)
 
-| axis | mock (`@kiwa/auth` caBLE surface) | real (real phone + real BLE + real WebSocket tunnel) | assertion |
+| axis | mock (`@kiwa-lab/auth` caBLE surface) | real (real phone + real BLE + real WebSocket tunnel) | assertion |
 |---|---|---|---|
 | 1. QR code generation | `FIDO:/<sessionId>?pubkey=<tagged>&tunnel=<hint>&nonce=<nonce>` — deterministic session id counter, credential id tag embedded in pubkey | `FIDO:/` URI carrying base32-encoded EC P-256 public key + tunnel server hint + random nonce | Both encode as a `FIDO:/` URI. Mock keeps the pubkey / tunnel / nonce as literal strings so structural drift is caught; real produces base32 payload but the URI shape + field ordering is identical. |
 | 2. BLE advertisement handshake | deterministic shared secret `shared-secret::<sessionId>::<nonce>` — both sides derive matching values, verified=true | ECDH between ephemeral P-256 keys, nonce as KDF salt, 20-byte encrypted advertisement | Mock verifies that shared secret derivation is stable across the initiator + responder + binds to nonce. Real advertisement payload is opaque bytes; mock keeps `ble-adv::<sessionId>::<len>` so the correlation key survives to the tunnel step. |

@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/fresh",
+  "package": "@kiwa-lab/fresh",
   "tier": "Framework",
   "thresholds": {
     "high": 70,

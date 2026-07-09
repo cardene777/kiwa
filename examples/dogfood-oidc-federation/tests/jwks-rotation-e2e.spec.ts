@@ -21,13 +21,13 @@
  *       previous kids until each deadline fires independently.
  *   4d. fresh active key issues verifiable id_tokens after rotation.
  *
- * The harness drives the underlying `@kiwa/auth` env directly (no HTTP
+ * The harness drives the underlying `@kiwa-lab/auth` env directly (no HTTP
  * round-trip) so a rotation regression trips before the Hono OP has a chance
  * to obscure the failure with a 5xx.
  */
 
 import { describe, expect, it } from 'vitest';
-import { setupOidcEnv, type OidcTestEnv } from '@kiwa/auth';
+import { setupOidcEnv, type OidcTestEnv } from '@kiwa-lab/auth';
 import {
   IdTokenVerifyError,
   mustVerifyIdToken,

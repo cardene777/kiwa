@@ -1,9 +1,9 @@
-# @kiwa/hono
+# @kiwa-lab/hono
 
 HonoJS Cloudflare Workers + hc RPC type-safe client + middleware chain test adapter for [kiwa](https://github.com/cardene777/kiwa) — model Hono's fetch-shaped request / response contract, its middleware chain, and its Workers bindings in Vitest without a real Workers runtime.
 
 ```bash
-pnpm add -D @kiwa/hono
+pnpm add -D @kiwa-lab/hono
 ```
 
 ## Why
@@ -11,7 +11,7 @@ pnpm add -D @kiwa/hono
 HonoJS is a fast, edge-first web framework whose apps compose from
 `app.get(path, handler)` + `app.use(pattern, mw)` + `app.route(prefix, sub)`,
 run inside a Cloudflare Workers runtime, and speak type-safe RPC to their
-clients via `hc<AppType>(baseUrl)`. `@kiwa/hono` gives you standalone
+clients via `hc<AppType>(baseUrl)`. `@kiwa-lab/hono` gives you standalone
 mocks that model the same observable contract so tests can assert on route
 dispatch + middleware chain order + hc client typing + Workers env / KV / D1
 / R2 / ExecutionContext without spinning up a real Workers runtime.
@@ -22,7 +22,7 @@ dispatch + middleware chain order + hc client typing + Workers env / KV / D1
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createHonoApp } from '@kiwa/hono';
+import { createHonoApp } from '@kiwa-lab/hono';
 
 describe('api', () => {
   it('runs middleware before the handler', async () => {
@@ -48,7 +48,7 @@ describe('api', () => {
 
 ```ts
 import { expect, it } from 'vitest';
-import { createHonoApp, createRpcClient } from '@kiwa/hono';
+import { createHonoApp, createRpcClient } from '@kiwa-lab/hono';
 
 it('type-safe RPC request + response', async () => {
   const app = createHonoApp();
@@ -74,7 +74,7 @@ import {
   mockKVNamespace,
   mockD1Database,
   mockR2Bucket,
-} from '@kiwa/hono';
+} from '@kiwa-lab/hono';
 
 it('KV binding is reachable through env', async () => {
   const KV = mockKVNamespace();
@@ -101,7 +101,7 @@ import {
   createHonoApp,
   createExecutionContext,
   mockKVNamespace,
-} from '@kiwa/hono';
+} from '@kiwa-lab/hono';
 
 it('waitUntil side-effect is observable after drain', async () => {
   const KV = mockKVNamespace();
@@ -145,4 +145,4 @@ Brand symbols: `HONO_APP_SYMBOL` / `HONO_CONTEXT_SYMBOL` / `HONO_ROUTE_SYMBOL` /
 - Streaming responses (SSE / chunked) and websockets are out of scope for v0.1; responses are always fully buffered.
 - Real Cloudflare Workers Durable Objects / Queues / Analytics Engine bindings are out of scope; supply a fake object under the same env binding name if a test needs them.
 
-Companion: v1.19-1c of the [kiwa test framework](https://github.com/cardene777/kiwa) — released alongside `@kiwa/solidjs` (#813) + `@kiwa/fresh` (#814) as part of the v1.19 modern framework depth-drive.
+Companion: v1.19-1c of the [kiwa test framework](https://github.com/cardene777/kiwa) — released alongside `@kiwa-lab/solidjs` (#813) + `@kiwa-lab/fresh` (#814) as part of the v1.19 modern framework depth-drive.

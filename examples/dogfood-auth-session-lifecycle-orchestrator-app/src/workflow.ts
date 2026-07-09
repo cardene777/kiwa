@@ -1,4 +1,4 @@
-import { semantics } from '@kiwa/auth';
+import { semantics } from '@kiwa-lab/auth';
 
 type SessionOrchestratorSession = semantics.SessionOrchestratorSession;
 type SessionOrchestratorSummary = semantics.SessionOrchestratorSummary;

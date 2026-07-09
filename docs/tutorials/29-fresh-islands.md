@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite for a Deno Fresh-shaped route + Islands app that exercises the three v1.19 primitives — `invokeFreshHandler` for GET / POST route handlers, `defineIsland` + `hydrateIslands` for partial-hydration Islands, and `defineHead` + `mergeHead` for meta tag normalization. The suite never boots the Deno runtime; it drives the handler contract through `@kiwa/fresh` v0.1's brand-symbol-guarded stubs so the same tests run in Node.js against a Fresh-shaped surface.
+A vitest suite for a Deno Fresh-shaped route + Islands app that exercises the three v1.19 primitives — `invokeFreshHandler` for GET / POST route handlers, `defineIsland` + `hydrateIslands` for partial-hydration Islands, and `defineHead` + `mergeHead` for meta tag normalization. The suite never boots the Deno runtime; it drives the handler contract through `@kiwa-lab/fresh` v0.1's brand-symbol-guarded stubs so the same tests run in Node.js against a Fresh-shaped surface.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest suite for a Deno Fresh-shaped route + Islands app that exercises the th
 ```bash
 mkdir kiwa-fresh-first && cd kiwa-fresh-first
 pnpm init
-pnpm add -D @kiwa/fresh@0.1 vitest typescript @types/node
+pnpm add -D @kiwa-lab/fresh@0.1 vitest typescript @types/node
 ```
 
 Add the vitest script + ESM configuration in `package.json`.
@@ -29,7 +29,7 @@ Add the vitest script + ESM configuration in `package.json`.
 }
 ```
 
-Ship a `tsconfig.json` compatible with the ESM shape `@kiwa/fresh` exports.
+Ship a `tsconfig.json` compatible with the ESM shape `@kiwa-lab/fresh` exports.
 
 ```json
 {
@@ -63,7 +63,7 @@ import {
   mergeHead,
   renderHead,
   type FreshHandlers,
-} from '@kiwa/fresh';
+} from '@kiwa-lab/fresh';
 
 describe('invokeFreshHandler — route contract', () => {
   it('GET handler renders JSON body + 200 status', async () => {
@@ -167,7 +167,7 @@ Fresh diverges from Next.js on the axis that shows up in every Islands regressio
 
 That means Fresh bugs look like "the island did not hydrate because the marker was missing" or "the client-side island received stale props". The shape of the assertion becomes "the server HTML contains a `data-island` element per island call, with its serialized props".
 
-`@kiwa/fresh` records the marker shape through `stringify(islandPlaceholder(Island, props))`. The output is exactly what a Fresh server ships to the browser — `<div data-island="Counter" data-props="{&quot;start&quot;:3}"></div>` — so a downstream client harness picks the marker up and drives hydration through the registry pattern.
+`@kiwa-lab/fresh` records the marker shape through `stringify(islandPlaceholder(Island, props))`. The output is exactly what a Fresh server ships to the browser — `<div data-island="Counter" data-props="{&quot;start&quot;:3}"></div>` — so a downstream client harness picks the marker up and drives hydration through the registry pattern.
 
 ## Why `defineHead` merges instead of concatenates
 
@@ -176,7 +176,7 @@ Real Fresh flows meta tags top-down — the root layout defines viewport + chars
 `mergeHead(fragments[])` implements the canonical Fresh rule — later fragments override the earlier `title` / `base`, meta rows dedup by `name` / `property` (or singleton for `charset`), links dedup by `rel + href`, and external scripts dedup by `src`. That means a test asserting on the merged output surfaces the exact HTML the browser sees.
 
 ```ts
-import { defineHead, mergeHead, renderHead } from '@kiwa/fresh';
+import { defineHead, mergeHead, renderHead } from '@kiwa-lab/fresh';
 
 const layout = defineHead({ title: 'kiwa', meta: [{ name: 'viewport', content: 'width=device-width' }] });
 const page = defineHead({ title: 'kiwa — home', meta: [{ name: 'description', content: 'test framework' }] });
@@ -192,5 +192,5 @@ Three properties are load-bearing.
 ## Related
 
 - Concept doc — [Modern web framework testing (Signal reactivity / Islands architecture / edge runtime + RPC type-safety SSOT)](../concepts/modern-web-framework-testing)
-- v1.19-1b [#814](https://github.com/cardene777/kiwa/issues/814) — `@kiwa/fresh` v0.1 landing
+- v1.19-1b [#814](https://github.com/cardene777/kiwa/issues/814) — `@kiwa-lab/fresh` v0.1 landing
 - v1.19-3 [#809](https://github.com/cardene777/kiwa/issues/809) — `dogfood-fresh-islands` (the full 3-layer dogfood this tutorial cuts down)

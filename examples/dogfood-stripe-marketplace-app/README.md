@@ -1,7 +1,7 @@
 # dogfood-stripe-marketplace-app
 
 Sub-Issue #1037 (CAR-733) — Next.js 15 App Router dogfood app for Stripe
-Connect marketplace flows. Wires `@kiwa/payment` v0.4 mock signing into
+Connect marketplace flows. Wires `@kiwa-lab/payment` v0.4 mock signing into
 seller onboarding, destination charges, application fees, multi-party payouts,
 and annual tax reports so mock-vs-real fidelity can feed the payment release
 gate.
@@ -37,7 +37,7 @@ pnpm --filter dogfood-stripe-marketplace-app test
 pnpm --filter dogfood-stripe-marketplace-app typecheck
 ```
 
-The `pnpm test` script builds `@kiwa/payment` + `@kiwa/core`
+The `pnpm test` script builds `@kiwa-lab/payment` + `@kiwa-lab/core`
 first so the workspace symlink resolves the freshest `dist/`.
 
 ## Modes

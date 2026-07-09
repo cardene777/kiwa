@@ -3,7 +3,7 @@
 // 実 Next.js では app/items/actions.ts で 'use server' 付きの薄い wrapper を
 // 用意し、 内部で createItemAction(formData, env) を呼ぶ。 env は injection point。
 
-import { REDIRECT_SYMBOL, type CookieJar } from '@kiwa/nextjs';
+import { REDIRECT_SYMBOL, type CookieJar } from '@kiwa-lab/nextjs';
 import { resolveUser } from '../../../lib/_kiwa/auth';
 
 export interface ItemsActionEnv {

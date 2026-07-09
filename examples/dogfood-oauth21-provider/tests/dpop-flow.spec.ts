@@ -35,8 +35,8 @@ import {
   createMockDpopJwk,
   createPkceChallenge,
   parseDpopProof as kiwaParseDpopProof,
-} from '@kiwa/auth';
-import type { DpopJwk, DpopProof } from '@kiwa/auth';
+} from '@kiwa-lab/auth';
+import type { DpopJwk, DpopProof } from '@kiwa-lab/auth';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { makeRealAdapter } from '../src/adapters/real.js';
 import { createHonoApp } from '../src/lib/hono-app.js';

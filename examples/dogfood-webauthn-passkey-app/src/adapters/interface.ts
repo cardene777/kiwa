@@ -6,7 +6,7 @@
  *  - {@link makeRealAdapter} (drives Chrome Virtual Authenticator + a
  *    SimpleWebAuthn-shaped RP server, skipped when the environment cannot
  *    reach a headed Chrome)
- *  - {@link makeMockAdapter} (backed by `@kiwa/auth`'s
+ *  - {@link makeMockAdapter} (backed by `@kiwa-lab/auth`'s
  *    `setupWebAuthnEnv` + `credentialCreation` / `credentialAssertion`)
  *
  * Both must satisfy the same contract so behavioural fidelity between real
@@ -20,7 +20,7 @@ import type {
   WebAuthnAttestationConveyancePreference,
   WebAuthnCredential,
   WebAuthnUserVerificationRequirement,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 
 /**
  * userVerification value accepted at the dogfood RP boundary. Extends the

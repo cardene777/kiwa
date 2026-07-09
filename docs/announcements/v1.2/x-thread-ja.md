@@ -43,7 +43,7 @@ Next.js / Nuxt / SvelteKit / Remix / Astro / SolidStart / Qwik City / Cloudflare
 
 ## [4/8]
 
-`@kiwa/orm` v0.6.0 で ORM query test の受入 matrix が 9 組合せに到達しました。
+`@kiwa-lab/orm` v0.6.0 で ORM query test の受入 matrix が 9 組合せに到達しました。
 
 mock mode (Docker 不要) で速く回し、 live mode (testcontainers) で実 DB に対する query test を deterministic に書ける、 という基本構成です。
 

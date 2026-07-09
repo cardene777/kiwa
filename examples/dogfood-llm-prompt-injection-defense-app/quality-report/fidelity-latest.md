@@ -1,4 +1,4 @@
-# Quality Report — @kiwa/ai-llm/dogfood-prompt-injection-defense-app @ 0.1.0
+# Quality Report — @kiwa-lab/ai-llm/dogfood-prompt-injection-defense-app @ 0.1.0
 
 _Reported at 2026-07-07T05:13:06.954Z._
 

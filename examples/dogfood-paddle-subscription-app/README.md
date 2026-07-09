@@ -1,7 +1,7 @@
 # dogfood-paddle-subscription-app
 
 Sub-Issue #1038 (CAR-737) — Next.js 15 App Router dogfood app for Paddle
-Billing v2 subscription lifecycle flows. Wires `@kiwa/payment` v0.4 mock
+Billing v2 subscription lifecycle flows. Wires `@kiwa-lab/payment` v0.4 mock
 signing into customer signup, subscription creation + trial extension, mid-
 cycle proration, retention offers (pause + downgrade + coupon), coupon
 stacking, and refund window enforcement so mock-vs-real fidelity can feed the
@@ -38,7 +38,7 @@ pnpm --filter dogfood-paddle-subscription-app test
 pnpm --filter dogfood-paddle-subscription-app typecheck
 ```
 
-The `pnpm test` script builds `@kiwa/payment` + `@kiwa/core`
+The `pnpm test` script builds `@kiwa-lab/payment` + `@kiwa-lab/core`
 first so the workspace symlink resolves the freshest `dist/`.
 
 ## Modes

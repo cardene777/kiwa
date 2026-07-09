@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { invokeRoute } from '@kiwa/hono';
+import { invokeRoute } from '@kiwa-lab/hono';
 import {
   buildDogfoodApp,
   resetRateLimit,

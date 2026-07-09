@@ -1,7 +1,7 @@
 /**
  * Fidelity harness — runs the same 5-op adapter surface against both
  * mock and real, diffs the trace events, and assembles a
- * `@kiwa/quality-metrics` release-gate report.
+ * `@kiwa-lab/quality-metrics` release-gate report.
  *
  * The comparison is per-op: an op that succeeds in mock but is
  * `SQLITE_ENV_MISSING` / `REAL_ADAPTER_NOT_IMPLEMENTED` in real is a
@@ -22,7 +22,7 @@ import {
   type MutationTier,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { SqliteWalFtsAdapter, TraceEvent } from '../adapters/interface.js';
 
 export interface FidelityRunInput {

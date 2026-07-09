@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](../../en/cookbook/smart-wallet-aa.md) • [🇯🇵 日本語](./smart-wallet-aa.md)
 
-`@kiwa/dapp` v0.3 で追加された `WalletConfig.isContractAccount` を使い、 ERC-4337 / EIP-1271 の smart contract account を end-to-end で test する pattern。
+`@kiwa-lab/dapp` v0.3 で追加された `WalletConfig.isContractAccount` を使い、 ERC-4337 / EIP-1271 の smart contract account を end-to-end で test する pattern。
 
 ## 課題
 
@@ -20,7 +20,7 @@
 
 ```ts
 // tests/prepare-env.ts
-import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa/dapp';
+import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa-lab/dapp';
 
 await runE2EPrepareEnv({
   envFile: '.env.local',
@@ -50,7 +50,7 @@ await runE2EPrepareEnv({
 
 ```ts
 // tests/fixture.ts
-import { dappE2eTest } from '@kiwa/dapp';
+import { dappE2eTest } from '@kiwa-lab/dapp';
 import type { Address } from 'viem';
 
 const SMART_ACCOUNT_ADDRESS = process.env.NEXT_PUBLIC_SMART_ACCOUNT as Address;
@@ -134,7 +134,7 @@ test('T-AA-002 personal_sign の signature が isValidSignature で検証成功'
 - **Safe (Gnosis Safe)** — multi-sig threshold 署名
 - **Biconomy / ZeroDev / Alchemy AA SDK** — managed bundler / paymaster
 
-これらは外部 SDK 依存を `peerDependencies` で受ける形で example 化する想定 (`@kiwa/aa-thirdweb` / `@kiwa/aa-safe` 等の subpackage 化も検討)。
+これらは外部 SDK 依存を `peerDependencies` で受ける形で example 化する想定 (`@kiwa-lab/aa-thirdweb` / `@kiwa-lab/aa-safe` 等の subpackage 化も検討)。
 
 ## 偽陽性対策
 

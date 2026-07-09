@@ -23,7 +23,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   providerEventName,
   type PaymentWebhookEvent,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { detectRealEnvMissing, makeRealAdapter } from '../src/adapters/real.js';
 import { createCheckoutHandler } from '../src/app/checkout/route.js';

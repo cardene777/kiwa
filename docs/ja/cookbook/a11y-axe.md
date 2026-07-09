@@ -1,4 +1,4 @@
-# `@kiwa/a11y` で a11y 監査する
+# `@kiwa-lab/a11y` で a11y 監査する
 
 > [🇬🇧 English](../../en/cookbook/a11y-axe.md) • [🇯🇵 日本語](./a11y-axe.md)
 
@@ -13,7 +13,7 @@ axe-core を kiwa に統合した accessibility 監査 adapter。 Vitest + jsdom
 ## インストール
 
 ```bash
-pnpm add -D @kiwa/a11y axe-core
+pnpm add -D @kiwa-lab/a11y axe-core
 ```
 
 `axe-core` は peer/optional 扱い、 必ず一緒に install する。
@@ -24,7 +24,7 @@ pnpm add -D @kiwa/a11y axe-core
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runAxe, expectNoViolations } from '@kiwa/a11y';
+import { runAxe, expectNoViolations } from '@kiwa-lab/a11y';
 
 describe('LoginForm a11y', () => {
   it('render 後に serious / critical 違反 0 件', async () => {
@@ -50,7 +50,7 @@ describe('LoginForm a11y', () => {
 
 ```ts
 import { test, expect } from '@playwright/test';
-import { reportViolations } from '@kiwa/a11y';
+import { reportViolations } from '@kiwa-lab/a11y';
 
 test('home page は accessible', async ({ page }) => {
   await page.goto('/');
@@ -93,6 +93,6 @@ const results = await runAxe({
 
 ## 関連
 
-- Package: [`@kiwa/a11y`](../../../packages/a11y/README.md)
+- Package: [`@kiwa-lab/a11y`](../../../packages/a11y/README.md)
 - visual regression cookbook: [visual-regression.md](./visual-regression.md)
 - axe-core rule catalogue: https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md

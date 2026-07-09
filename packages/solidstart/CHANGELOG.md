@@ -1,4 +1,4 @@
-# @kiwa/solidstart
+# @kiwa-lab/solidstart
 
 ## 1.0.2
 
@@ -12,7 +12,7 @@
 
 ### Patch Changes
 
-- d13cb73: 🎉 New package `@kiwa/solidstart` v1.0 — SolidStart Server Functions + API Routes test adapter (Issue #518、 v1.2 milestone 2/10).
+- d13cb73: 🎉 New package `@kiwa-lab/solidstart` v1.0 — SolidStart Server Functions + API Routes test adapter (Issue #518、 v1.2 milestone 2/10).
 
   ## What's in the box
 
@@ -37,4 +37,4 @@
   ## Out of scope (separate Issues)
 
   - Qwik City routeAction\$ / routeLoader\$ / Endpoints — Issue #519。
-  - SolidStart route data (`route.data` / `createAsync`) — client side、 `@kiwa/ui` Solid mode 対応済。
+  - SolidStart route data (`route.data` / `createAsync`) — client side、 `@kiwa-lab/ui` Solid mode 対応済。

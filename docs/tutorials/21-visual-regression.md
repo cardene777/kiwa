@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that walks the **Chromatic-style visual regression 4-state machine** — seed the baseline, capture the current markup, detect a diff on an intentional change, and accept the diff to restore the passed state. `@kiwa/component`'s `createChromaticVisualMock` hashes rendered markup (`SHA-256(renderMarkup(canvas.root))`) instead of pixels, so the whole flow runs in Node.js without a browser. The mock exposes the exact same `seedBaseline` / `capture` / `captureAll` / `review` API surface a real Chromatic driver implements, so the same test file works against `chromatic-cli` later.
+A vitest test file that walks the **Chromatic-style visual regression 4-state machine** — seed the baseline, capture the current markup, detect a diff on an intentional change, and accept the diff to restore the passed state. `@kiwa-lab/component`'s `createChromaticVisualMock` hashes rendered markup (`SHA-256(renderMarkup(canvas.root))`) instead of pixels, so the whole flow runs in Node.js without a browser. The mock exposes the exact same `seedBaseline` / `capture` / `captureAll` / `review` API surface a real Chromatic driver implements, so the same test file works against `chromatic-cli` later.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that walks the **Chromatic-style visual regression 4-state ma
 ```bash
 mkdir kiwa-visual && cd kiwa-visual
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa/component
+pnpm add -D vitest typescript @types/node @kiwa-lab/component
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -46,8 +46,8 @@ Add `tsconfig.json`:
 Create `src/scenes.ts` — 2 scenes across 2 viewports (light desktop + dark mobile) using the built-in `buildCard`:
 
 ```ts
-import { buildCard, createStoryRegistry } from '@kiwa/component';
-import type { CardArgs, StoryObj } from '@kiwa/component';
+import { buildCard, createStoryRegistry } from '@kiwa-lab/component';
+import type { CardArgs, StoryObj } from '@kiwa-lab/component';
 
 // Meta with 2 stories, 2 viewports each = 4 baselines
 export const cardMeta = {
@@ -82,7 +82,7 @@ Create `tests/visual.test.ts`:
 
 ```ts
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createChromaticVisualMock } from '@kiwa/component';
+import { createChromaticVisualMock } from '@kiwa-lab/component';
 import { buildRegistry } from '../src/scenes';
 
 // Deterministic timestamp so review entries are stable in the test output

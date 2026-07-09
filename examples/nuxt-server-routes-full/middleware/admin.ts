@@ -1,6 +1,6 @@
 // Real Nuxt 3 route middleware — admin-only route guard.
 // Thin wrapper around `_kiwa/route-guard.ts adminRouteGuard` so unit tests
-// can exercise the pure middleware through @kiwa/nuxt setupNuxtMiddlewareEnv
+// can exercise the pure middleware through @kiwa-lab/nuxt setupNuxtMiddlewareEnv
 // while the real path still flows through `defineNuxtRouteMiddleware`.
 
 import { adminRouteGuard } from './_kiwa/route-guard.js';

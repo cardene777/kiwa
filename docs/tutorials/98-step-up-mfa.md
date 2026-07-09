@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/auth` v0.6 that models the 3 pieces of a real step-up MFA posture — an AAL escalation ladder (NIST SP 800-63B AAL1 → AAL2 → AAL3) with per-factor satisfaction + trust duration cache, an auth continuity axis with seamless re-auth + refresh token rotation + session extension + revocation window, and a fidelity harness diffing browser dialects.
+A vitest suite wired to `@kiwa-lab/auth` v0.6 that models the 3 pieces of a real step-up MFA posture — an AAL escalation ladder (NIST SP 800-63B AAL1 → AAL2 → AAL3) with per-factor satisfaction + trust duration cache, an auth continuity axis with seamless re-auth + refresh token rotation + session extension + revocation window, and a fidelity harness diffing browser dialects.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/auth` v0.6 that models the 3 pieces of a real ste
 ```bash
 mkdir kiwa-step-up-mfa && cd kiwa-step-up-mfa
 pnpm init
-pnpm add -D @kiwa/auth@^0.6 vitest typescript @types/node
+pnpm add -D @kiwa-lab/auth@^0.6 vitest typescript @types/node
 ```
 
 ### 2. AAL escalation
@@ -26,7 +26,7 @@ pnpm add -D @kiwa/auth@^0.6 vitest typescript @types/node
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/auth';
+import { semantics } from '@kiwa-lab/auth';
 
 describe('AAL escalation', () => {
   it('escalates AAL1 → AAL2 with sms factor', () => {
@@ -59,7 +59,7 @@ describe('AAL escalation', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/auth';
+import { semantics } from '@kiwa-lab/auth';
 
 describe('trust cache', () => {
   it('hits within trust duration', () => {
@@ -83,7 +83,7 @@ describe('trust cache', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/auth';
+import { semantics } from '@kiwa-lab/auth';
 
 describe('auth continuity', () => {
   it('rotates refresh token safely', () => {

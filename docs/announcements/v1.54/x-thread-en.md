@@ -10,11 +10,11 @@ kiwa v1.54 released — 2-axis milestone (rules promotion + Mobile deepening V),
 
 ## Tweet 3 — Mobile v0.5 spawn stub + 32-milestone streak
 
-`@kiwa/mobile` v0.5 = `invokeMobileCli` + 6 CLI stubs (`expo build` / `metro bundle` / `codegen run` / `react-native start` / `pod install` / `gradle build`) + env-gate + fail-closed. Backward compat strict = v0.1-v0.4 API 0 changes. **32-milestone consecutive snippet validation streak** (v1.23-v1.54) — kiwa all-time record continues.
+`@kiwa-lab/mobile` v0.5 = `invokeMobileCli` + 6 CLI stubs (`expo build` / `metro bundle` / `codegen run` / `react-native start` / `pod install` / `gradle build`) + env-gate + fail-closed. Backward compat strict = v0.1-v0.4 API 0 changes. **32-milestone consecutive snippet validation streak** (v1.23-v1.54) — kiwa all-time record continues.
 
 ## Tweet 4 — install + Phase 6
 
-`pnpm add -D @kiwa/mobile@^0.5`. Migration: https://cardene777.github.io/kiwa/migrations/v1.53-to-v1.54
+`pnpm add -D @kiwa-lab/mobile@^0.5`. Migration: https://cardene777.github.io/kiwa/migrations/v1.53-to-v1.54
 
 v1.55+ = Mobile v0.6 real child_process.spawn execution (stub → real CLI spawn). systematic root cause pattern SSOT 29th application.
 

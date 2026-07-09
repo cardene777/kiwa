@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa/ai-llm/dogfood-multi-agent-swarm-app",
+  "provider": "@kiwa-lab/ai-llm/dogfood-multi-agent-swarm-app",
   "version": "0.1.0",
   "reportedAt": "2026-07-07T11:14:48.901Z",
   "coverage": {

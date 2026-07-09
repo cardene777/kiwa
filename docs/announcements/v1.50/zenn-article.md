@@ -6,7 +6,7 @@ kiwa v1.50 をリリースしました。 **Mobile 新規 base pair 第 13 導�
 
 ## 何が変わったか
 
-### `@kiwa/mobile` v0.1 新規
+### `@kiwa-lab/mobile` v0.1 新規
 
 - 3 axis semantics = React Native (component + native module + gesture) + Expo (build config + deep link + push notification) + Metro (bundler + HMR + resolver)
 - 3 target (ios + android + web) × 3 axis = 9 row fidelity grid
@@ -37,7 +37,7 @@ v1.23 → v1.50 = 28 milestone 連続、 kiwa 史上最長記録更新継続。 
 ## インストール
 
 ```bash
-pnpm add -D @kiwa/mobile@^0.1
+pnpm add -D @kiwa-lab/mobile@^0.1
 ```
 
 ## Migration guide

@@ -2,7 +2,7 @@
 
 The v1.11 milestone (**6/6 GitHub Issues resolved**) just landed. After v1.10 shipped 3 axes of provider expansion (Supabase Auth + RabbitMQ + Rust contract layer)、 v1.11 shifts kiwa's focus from **"add more providers"** to **"measure release quality with numbers"**. Every provider now reports the same 5-axis score、 the release gate has SSOT thresholds、 3 dogfood apps run real-vs-mock behavioural fidelity checks、 and the whole docs site publishes to GitHub Pages via CI-free `/docs-publish` local skill.
 
-## 1. `@kiwa/quality-metrics` v0.1 — 5-axis unified score
+## 1. `@kiwa-lab/quality-metrics` v0.1 — 5-axis unified score
 
 Every kiwa provider adapter now emits the same shape. The harness collects coverage / test count / fidelity / perf p95 / mutation kill rate、 evaluates against release-gate thresholds、 and emits markdown + JSON reports.
 
@@ -16,10 +16,10 @@ import {
   mutationFromCounts,
   perfFromSamples,
   testCountFromCategories,
-} from "@kiwa/quality-metrics";
+} from "@kiwa-lab/quality-metrics";
 
 const report = assembleReport({
-  provider: "@kiwa/auth",
+  provider: "@kiwa-lab/auth",
   version: "0.3.0",
   coverage: coverageFromV8Summary(coverageSummary.total),
   testCount: testCountFromCategories({ behavior: 236, integration: 8, e2e: 0 }),
@@ -68,7 +68,7 @@ A Playwright E2E suite (`tests/docs-site-e2e/`) verifies the 5 canonical pages +
 v1.10 users can adopt v1.11 without touching existing tests. Add the harness to your test suite:
 
 ```bash
-pnpm add -D @kiwa/quality-metrics
+pnpm add -D @kiwa-lab/quality-metrics
 ```
 
 Full migration guide: [v1.10 → v1.11](https://github.com/cardene777/kiwa/blob/main/docs/migrations/v1.10-to-v1.11.md).

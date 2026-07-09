@@ -33,7 +33,7 @@ v1.8 で増えたもの。
 
 ## [3/8]
 
-@kiwa/auth v0.1 ...
+@kiwa-lab/auth v0.1 ...
 
 - **NextAuth v5 (Auth.js)** ... session mock (jwt/database) + 3 provider (Google/GitHub/Email) + Prisma/Drizzle
 - **Lucia v3** ... bare-metal session (fresh flag + rolling refresh) + password (Argon2) + SQLite/PG
@@ -45,7 +45,7 @@ v1.8 で増えたもの。
 
 ## [4/8]
 
-@kiwa/queue v0.1 ...
+@kiwa-lab/queue v0.1 ...
 
 - **BullMQ** ... sandbox (in-process) + testcontainers (real Redis) 2 mode
 - **Inngest** ... stub (deterministic) + dev-server (real HTTP) 2 mode
@@ -55,7 +55,7 @@ v1.8 で増えたもの。
 
 ## [5/8]
 
-@kiwa/cache v0.1 ...
+@kiwa-lab/cache v0.1 ...
 
 - **Redis** ... in-memory (default) + testcontainers (real + ioredis/node-redis) 2 mode
 - 8 helper ... get/set/delete/TTL/expire/Pub/Sub/publish/subscribe

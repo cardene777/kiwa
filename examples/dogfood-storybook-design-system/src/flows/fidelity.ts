@@ -11,18 +11,18 @@ import {
   type MutationTier,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { StorybookAdapter, TraceEvent } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares a Storybook design-system run under
  * {@link makeMockAdapter} against one under {@link makeRealAdapter}, feeds
  * the divergence count (missing ops, unmatched behaviour) into the
- * `@kiwa/quality-metrics` 7-axis release gate, and emits a JSON +
+ * `@kiwa-lab/quality-metrics` 7-axis release gate, and emits a JSON +
  * markdown report so the release process can consume it.
  *
  * The dogfood app is the source of truth for whether the kiwa
- * `@kiwa/component` `createStoryRegistry` mock tracks real Storybook 8
+ * `@kiwa-lab/component` `createStoryRegistry` mock tracks real Storybook 8
  * closely enough to be trusted in unit tests — this harness is where that
  * trust is measured.
  *
@@ -58,7 +58,7 @@ export interface FidelityRunInput {
   surfaceCoverage: { mockCoveredMethods: number; realTotalMethods: number };
   /**
    * v1.27-4 12-axis release gate — mutation tier of the upstream package
-   * (`@kiwa/component` = `test-type` here). When present,
+   * (`@kiwa-lab/component` = `test-type` here). When present,
    * `evaluateReleaseGate` adds a `mutation.tier` axis using the SSOT
    * threshold table. Absent = legacy 7-axis behaviour (backward compat).
    */

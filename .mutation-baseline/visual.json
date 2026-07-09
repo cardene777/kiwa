@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/visual",
+  "package": "@kiwa-lab/visual",
   "tier": "Test type",
   "thresholds": {
     "high": 60,

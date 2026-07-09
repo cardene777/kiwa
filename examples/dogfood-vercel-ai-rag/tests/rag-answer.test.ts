@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { makeTestRealAdapter } from '../src/adapters/real.js';
 import { RAG_QA_PAIRS } from '../src/flows/rag-flows.js';
-import { jaccardSimilarity } from '@kiwa/ai-llm';
+import { jaccardSimilarity } from '@kiwa-lab/ai-llm';
 
 /**
  * Task 3.3 — RAG answer accuracy. The AC target is mean Jaccard similarity

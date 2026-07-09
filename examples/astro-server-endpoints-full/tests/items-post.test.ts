@@ -1,14 +1,14 @@
 // kiwa unit test for src/pages/api/_kiwa/items-endpoint.ts (POST)
 
 import { describe, expect, it } from 'vitest';
-import { invokeEndpoint } from '@kiwa/astro';
+import { invokeEndpoint } from '@kiwa-lab/astro';
 import { itemsPostEndpoint } from '../src/pages/api/_kiwa/items-endpoint.js';
 
 async function readJson(response: Response): Promise<unknown> {
   return await response.clone().json();
 }
 
-describe('itemsPostEndpoint via @kiwa/astro invokeEndpoint', () => {
+describe('itemsPostEndpoint via @kiwa-lab/astro invokeEndpoint', () => {
   it('T-AF-101: session 不在で /login に 302 redirect', async () => {
     const { redirect } = await invokeEndpoint({
       endpoint: itemsPostEndpoint,

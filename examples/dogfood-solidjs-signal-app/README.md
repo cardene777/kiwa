@@ -1,10 +1,10 @@
 # dogfood-solidjs-signal-app
 
-Dogfood app (v1.19-2) — a SolidJS Signal-based reactivity harness that exercises **3 store patterns** (counter Signal / todos Signal / userProfile createResource) inside `Counter` / `TodoList` / `UserProfile` components with a **Suspense boundary + error boundary**. Drivable in both `KIWA_MODE=real` (spawns real `solid-js` + `solid-testing-library` through env-skip when `SOLID_LIVE=1`) and `KIWA_MODE=mock` (`@kiwa/solidjs` `mockSignal` + `mockEffect` + `createResourceStub` + `renderWithSuspense`). Behavioural fidelity feeds `@kiwa/quality-metrics` 7-axis release gate.
+Dogfood app (v1.19-2) — a SolidJS Signal-based reactivity harness that exercises **3 store patterns** (counter Signal / todos Signal / userProfile createResource) inside `Counter` / `TodoList` / `UserProfile` components with a **Suspense boundary + error boundary**. Drivable in both `KIWA_MODE=real` (spawns real `solid-js` + `solid-testing-library` through env-skip when `SOLID_LIVE=1`) and `KIWA_MODE=mock` (`@kiwa-lab/solidjs` `mockSignal` + `mockEffect` + `createResourceStub` + `renderWithSuspense`). Behavioural fidelity feeds `@kiwa-lab/quality-metrics` 7-axis release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/solidjs` `mockSignal` + `mockEffect` + `renderSolid` + `stringify` + `renderWithSuspense`).
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-lab/solidjs` `mockSignal` + `mockEffect` + `renderSolid` + `stringify` + `renderWithSuspense`).
 - `KIWA_MODE=real` — driven by `makeRealAdapter()`, which detects `SOLID_LIVE=1`. Without the env var each method reports `SOLID_REAL_ENV_MISSING` and throws `SkippedError`; with the env var each method reports `SOLID_LIVE_NOT_IMPLEMENTED` (a placeholder trace that keeps the divergence shape stable for follow-up work that swaps in a real `solid-testing-library` driver).
 
 Real-mode envs.
@@ -25,11 +25,11 @@ src/
     UserProfile.ts     -- Signal-driven state switch + loading / ready / error / boundary fallback
   adapters/
     interface.ts       -- provider-neutral 6-op contract
-    mock.ts            -- kiwa mock adapter (@kiwa/solidjs)
+    mock.ts            -- kiwa mock adapter (@kiwa-lab/solidjs)
     real.ts            -- real solid-js adapter with env-skip when SOLID_LIVE is unset
   flows/
     signal-flows.ts    -- 4 user-facing flows (counter / todos / resource / suspense)
-    fidelity.ts        -- trace-diffing harness feeding @kiwa/quality-metrics
+    fidelity.ts        -- trace-diffing harness feeding @kiwa-lab/quality-metrics
 tests/
   counter-store.test.ts       -- 6 counter Signal + Effect invariants
   todos-store.test.ts         -- 6 todos batch + fine-grained update tests
@@ -69,7 +69,7 @@ Every method emits at least 1 trace event, so the fidelity harness can diff the 
 
 ## Release gate (7 axes)
 
-Because the provider string is `@kiwa/solidjs/signal-app`, `evaluateReleaseGate` includes the common 7 axes (coverage 3 / fidelity / perf p95 / mutation / behavior tests). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply — Signal reactivity is not a token-priced generative surface.
+Because the provider string is `@kiwa-lab/solidjs/signal-app`, `evaluateReleaseGate` includes the common 7 axes (coverage 3 / fidelity / perf p95 / mutation / behavior tests). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply — Signal reactivity is not a token-priced generative surface.
 
 - coverage — line >= 85%, branch >= 80%, function >= 90%
 - fidelity — ratio >= 70% (mock covered ops / real total ops, penalised by behavioural divergences)
@@ -100,6 +100,6 @@ Each of the 6 signal-driven invocations exercises 1 specific reactivity contract
 
 ## Related
 
-- v1.19-1a `@kiwa/solidjs` v0.1 (`packages/solidjs/`)
-- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
+- v1.19-1a `@kiwa-lab/solidjs` v0.1 (`packages/solidjs/`)
+- v1.11-1 `@kiwa-lab/quality-metrics` (`packages/quality-metrics/`)
 - v1.19 milestone parent [#806](https://github.com/cardene777/kiwa/issues/806), this sub [#808](https://github.com/cardene777/kiwa/issues/808)

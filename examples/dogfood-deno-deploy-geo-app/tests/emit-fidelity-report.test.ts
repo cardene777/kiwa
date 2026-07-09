@@ -1,6 +1,6 @@
 /**
  * Emit a fidelity report to disk — the 3-spec dogfood harness plus the
- * `@kiwa/quality-metrics` release gate run over the mock + real
+ * `@kiwa-lab/quality-metrics` release gate run over the mock + real
  * adapters, producing the JSON snapshot + markdown that `docs/quality-
  * reports/edge/deno-deploy-geo-app.md` consumes at release time.
  *
@@ -84,7 +84,7 @@ describe('dogfood-deno-deploy-geo-app — emit fidelity report to quality-report
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/edge/deno-deploy-geo',
+      provider: '@kiwa-lab/edge/deno-deploy-geo',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

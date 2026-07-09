@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v2.1 is out — quality-metrics deepening IV. **@kiwa/quality-metrics v2.1** adds adaptive drift threshold learning: `learnAdaptiveThreshold` learns per-axis threshold from history using mean + k*stdev (default k=2 = 95% CI), `pickThresholdForAxis` returns per-axis or aggregate fallback. First **4 PR rhythm milestone after v2.0 rename**, **systematic pattern 44th application (statistical inference variant)**, **47 milestone streak** achieved.
+kiwa v2.1 is out — quality-metrics deepening IV. **@kiwa-lab/quality-metrics v2.1** adds adaptive drift threshold learning: `learnAdaptiveThreshold` learns per-axis threshold from history using mean + k*stdev (default k=2 = 95% CI), `pickThresholdForAxis` returns per-axis or aggregate fallback. First **4 PR rhythm milestone after v2.0 rename**, **systematic pattern 44th application (statistical inference variant)**, **47 milestone streak** achieved.
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-quality-metrics-adaptive-threshold-app new, 4-pattern workflow (collectR
 
 ## Tweet 4
 
-`pnpm add -D @kiwa/quality-metrics@^2.1`. Migration: https://cardene777.github.io/kiwa/migrations/v2.0-to-v2.1
+`pnpm add -D @kiwa-lab/quality-metrics@^2.1`. Migration: https://cardene777.github.io/kiwa/migrations/v2.0-to-v2.1
 
 Backward compat absolute: 既存 API 変更 0, opt-in for v2.1 consumers. Existing 193 tests continue passing.
 

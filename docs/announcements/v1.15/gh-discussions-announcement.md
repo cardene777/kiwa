@@ -4,17 +4,17 @@ v1.15 is out. After v1.14's 横軸拡張 (payment / search / telemetry / Go Iris
 
 ## What shipped
 
-- **`@kiwa/ai-llm` v0.2** — multimodal (image + audio) input mock across all 4 SDKs (Anthropic Messages API + OpenAI Chat Completions + Vercel AI SDK + LangChain), plus Whisper transcription mock. Image tokens flow into prompt-token accounting; the `detail` hint scales base cost (0.5× / 0.8× / 1.0× for low / auto / high). Text-only v0.1 tests keep passing.
-- **`@kiwa/mcp` v0.1** — Model Context Protocol server + client mock with `InMemoryTransport`. Covers the 4 ops MCP-aware tool-use clients need (`initialize` / `notifications/initialized` / `tools/list` / `tools/call`), 8 JSON-RPC error codes (including MCP extensions -32000 / -32001 / -32002 / -32003), and 5 fixture tools (echo / calc / weather / search / db-query).
-- **`@kiwa/agent` v0.1** — LangGraph-style `StateGraph` + OpenAI Assistants v2 client under one API. 6-item compile validation (fail-fast), deterministic run ids, run-status transitions (`queued` → `requires_action` → `submitToolOutputs` → `completed`) match real Assistants v2 shape.
-- **dogfood-multimodal-chat + dogfood-mcp-tool-agent** — 2 new dogfood apps that measure the mocks against real Anthropic + real MCP endpoints. Both roll into the 11-axis release gate via the `@kiwa/ai-*` provider prefix.
+- **`@kiwa-lab/ai-llm` v0.2** — multimodal (image + audio) input mock across all 4 SDKs (Anthropic Messages API + OpenAI Chat Completions + Vercel AI SDK + LangChain), plus Whisper transcription mock. Image tokens flow into prompt-token accounting; the `detail` hint scales base cost (0.5× / 0.8× / 1.0× for low / auto / high). Text-only v0.1 tests keep passing.
+- **`@kiwa-lab/mcp` v0.1** — Model Context Protocol server + client mock with `InMemoryTransport`. Covers the 4 ops MCP-aware tool-use clients need (`initialize` / `notifications/initialized` / `tools/list` / `tools/call`), 8 JSON-RPC error codes (including MCP extensions -32000 / -32001 / -32002 / -32003), and 5 fixture tools (echo / calc / weather / search / db-query).
+- **`@kiwa-lab/agent` v0.1** — LangGraph-style `StateGraph` + OpenAI Assistants v2 client under one API. 6-item compile validation (fail-fast), deterministic run ids, run-status transitions (`queued` → `requires_action` → `submitToolOutputs` → `completed`) match real Assistants v2 shape.
+- **dogfood-multimodal-chat + dogfood-mcp-tool-agent** — 2 new dogfood apps that measure the mocks against real Anthropic + real MCP endpoints. Both roll into the 11-axis release gate via the `@kiwa-lab/ai-*` provider prefix.
 - **docs** — 3 new tutorials (multimodal / MCP / agent) + additive migration guide v1.14 → v1.15 + concept doc `ai-llm-multimodal-testing.md` covering the 6 design decisions behind these mocks. VitePress sidebar refreshed; gh-pages published.
 
 ## Numbers
 
 - **6 sub-Issues resolved** (#746-#751)
 - **6 PRs merged** (#752-#756 + this docs PR)
-- **3 new / expanded packages** (`@kiwa/ai-llm` v0.2 + `@kiwa/mcp` v0.1 + `@kiwa/agent` v0.1)
+- **3 new / expanded packages** (`@kiwa-lab/ai-llm` v0.2 + `@kiwa-lab/mcp` v0.1 + `@kiwa-lab/agent` v0.1)
 - **2 new dogfood apps** with fidelity reports feeding the 11-axis gate
 
 ## v2.0 candidates

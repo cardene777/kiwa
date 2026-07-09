@@ -8,7 +8,7 @@ import {
   expectCustomError,
   startAnvil,
   startAnvilFork,
-} from '@kiwa/dapp';
+} from '@kiwa-lab/dapp';
 import {
   createPublicClient,
   createWalletClient,

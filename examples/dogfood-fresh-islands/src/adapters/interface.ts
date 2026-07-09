@@ -2,7 +2,7 @@
  * Provider-neutral Deno Fresh adapter contract for the fresh-islands dogfood.
  *
  * The dogfood talks to Fresh only through this interface. Two implementations
- * exist: {@link makeMockAdapter} (backed by `@kiwa/fresh`
+ * exist: {@link makeMockAdapter} (backed by `@kiwa-lab/fresh`
  * invokeFreshHandler + invokeDefineRoute + hydrateIslands + simulateInteraction
  * + mergeHead) and {@link makeRealAdapter} (drives a real Deno Fresh runtime
  * through `fresh-testing-library` when `DENO_INSTALLED=1`, else returns a
@@ -10,7 +10,7 @@
  * trace).
  *
  * Both satisfy the same 6-op surface so behavioural fidelity between real vs
- * mock can be measured side-by-side and fed to `@kiwa/quality-metrics`
+ * mock can be measured side-by-side and fed to `@kiwa-lab/quality-metrics`
  * 7-axis release gate.
  */
 

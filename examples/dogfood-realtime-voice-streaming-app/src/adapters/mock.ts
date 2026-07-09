@@ -5,7 +5,7 @@ import {
   type RealtimeAiInferenceMock,
   type VoiceStreamingMock,
   type WhisperStreamingMock,
-} from '@kiwa/realtime';
+} from '@kiwa-lab/realtime';
 import type { AiSession, AiStep, Platform, RealtimeAiAdapter } from './interface.js';
 
 interface MockContext {

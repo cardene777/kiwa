@@ -1,12 +1,12 @@
 ---
-title: "@kiwa/auth v0.7 continuous-auth 状態機械 SSOT"
+title: "@kiwa-lab/auth v0.7 continuous-auth 状態機械 SSOT"
 ---
 
-# @kiwa/auth v0.7 continuous-auth 状態機械 SSOT
+# @kiwa-lab/auth v0.7 continuous-auth 状態機械 SSOT
 
 ## What this covers
 
-`@kiwa/auth` v0.7 の continuous-auth 状態機械 SSOT。 v0.6 で 8 axis Passwordless UX III (risk-based-auth + auth-continuity + session-hijack-detect 等) を land、 v0.7 で 3 axis を 継続合成 する 上位 layer として continuous-auth を追加。 Auth pair v0.4 → v0.5 → v0.6 → v0.7 = 4 段深化、 Desktop v1.67 depth-6 candidate と 独立進行 の Auth pair pioneer record 更新、 systematic pattern 45 度目適用 (continuous state machine variant)。
+`@kiwa-lab/auth` v0.7 の continuous-auth 状態機械 SSOT。 v0.6 で 8 axis Passwordless UX III (risk-based-auth + auth-continuity + session-hijack-detect 等) を land、 v0.7 で 3 axis を 継続合成 する 上位 layer として continuous-auth を追加。 Auth pair v0.4 → v0.5 → v0.6 → v0.7 = 4 段深化、 Desktop v1.67 depth-6 candidate と 独立進行 の Auth pair pioneer record 更新、 systematic pattern 45 度目適用 (continuous state machine variant)。
 
 ## 5 state SSOT
 

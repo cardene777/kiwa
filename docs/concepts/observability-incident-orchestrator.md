@@ -1,8 +1,8 @@
 ---
-title: "@kiwa/observability v2.1 incident-orchestrator SSOT"
+title: "@kiwa-lab/observability v2.1 incident-orchestrator SSOT"
 ---
 
-# @kiwa/observability v2.1 incident-orchestrator SSOT
+# @kiwa-lab/observability v2.1 incident-orchestrator SSOT
 
 Observability pair v0.1-v2.1 = 5 段深化到達 = **depth-5 pattern 8 例目発生**。 systematic law 継続強化 第 2 例、 **systematic pattern 50 度到達 milestone**。
 

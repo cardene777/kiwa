@@ -10,12 +10,12 @@ import {
   testCountFromCategories,
   tokenFromSamples,
   type QualityReport,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { FidelityReport } from './fidelity.js';
 import type { AiLlmMock } from './types.js';
 
 /**
- * `@kiwa/ai-llm` 実測値を `@kiwa/quality-metrics` `QualityReport`
+ * `@kiwa-lab/ai-llm` 実測値を `@kiwa-lab/quality-metrics` `QualityReport`
  * に集約する adapter。
  *
  * dogfood app が fidelity harness を回した後、 本 adapter で
@@ -31,7 +31,7 @@ export interface BuildAiLlmReportInput {
   /** fidelity harness の結果 (real vs mock 4 metric 実測) */
   fidelity: FidelityReport;
   /**
-   * mock 側 SDK 表面の cover 数。 `@kiwa/quality-metrics` 5 軸目の
+   * mock 側 SDK 表面の cover 数。 `@kiwa-lab/quality-metrics` 5 軸目の
    * fidelity ratio 用。 default `{ mock: 4, real: 4 }` (4 SDK 全 cover)。
    */
   surfaceCoverage?: { mockCoveredMethods: number; realTotalMethods: number };

@@ -1,7 +1,7 @@
 # Postgres CDC + Outbox App — Quality Report (v1.26-2)
 
 Dogfood: [`examples/dogfood-postgres-cdc-outbox-app`](../../../examples/dogfood-postgres-cdc-outbox-app/).
-Package under exercise: [`@kiwa/orm`](../../../packages/orm/) (v0.9).
+Package under exercise: [`@kiwa-lab/orm`](../../../packages/orm/) (v0.9).
 
 ## Scope
 
@@ -11,14 +11,14 @@ promises in v0.9:
 1. **Transactional outbox** — Debezium-style outbox row appended in the
    same transaction as the domain write, LSN monotonic per slot, batch
    seal preserves order (`src/outbox/index.ts` wraps
-   `@kiwa/orm`'s `createCdcSession` / `decodeEvent` / `appendOutbox`
+   `@kiwa-lab/orm`'s `createCdcSession` / `decodeEvent` / `appendOutbox`
    / `markEventOrdered`).
 2. **CDC pickup** — outbox events past a committed LSN are read in order
    and delivered into a Redis Streams consumer group with at-least-once
    ack (`src/cdc/index.ts` + `src/consumer/index.ts`).
 3. **Streaming replication** — primary write advances LSN, per-replica
    applied LSN observation, two-step failover (`startFailover` →
-   `promoteReplica`) via `@kiwa/orm`'s replication semantics.
+   `promoteReplica`) via `@kiwa-lab/orm`'s replication semantics.
 4. **At-least-once + idempotent consumer** — duplicate LSN ingest is
    dropped by the consumer seen-set, ack advances the outbox's
    `confirmedLsn`.

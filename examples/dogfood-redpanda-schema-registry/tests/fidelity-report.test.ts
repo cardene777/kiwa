@@ -41,7 +41,7 @@ describe('dogfood-redpanda-schema-registry — fidelity harness (v1.31-3)', () =
       run: (adapter) => driveAll(adapter as ReturnType<typeof makeMockAdapter>),
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/streaming/redpanda-schema-registry-dogfood',
+      provider: '@kiwa-lab/streaming/redpanda-schema-registry-dogfood',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -76,7 +76,7 @@ describe('dogfood-redpanda-schema-registry — fidelity harness (v1.31-3)', () =
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/streaming/redpanda-schema-registry-dogfood',
+      provider: '@kiwa-lab/streaming/redpanda-schema-registry-dogfood',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -102,7 +102,7 @@ describe('dogfood-redpanda-schema-registry — fidelity harness (v1.31-3)', () =
     const real = await makeRealAdapter();
     const matrix = await runAdapterMatrix({ mock, real, run: async () => undefined });
     const output = runFidelityHarness({
-      provider: '@kiwa/streaming/redpanda-schema-registry-dogfood',
+      provider: '@kiwa-lab/streaming/redpanda-schema-registry-dogfood',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -127,7 +127,7 @@ describe('dogfood-redpanda-schema-registry — fidelity harness (v1.31-3)', () =
     const real = await makeRealAdapter();
     await driveAll(mock);
     const output = runFidelityHarness({
-      provider: '@kiwa/streaming/redpanda-schema-registry-dogfood',
+      provider: '@kiwa-lab/streaming/redpanda-schema-registry-dogfood',
       version: '0.2.0',
       mockTraces: mock.traces(),
       realTraces: real.traces(),
@@ -154,7 +154,7 @@ describe('dogfood-redpanda-schema-registry — fidelity harness (v1.31-3)', () =
     const real = await makeRealAdapter();
     await driveAll(mock);
     const output = runFidelityHarness({
-      provider: '@kiwa/streaming/redpanda-schema-registry-dogfood',
+      provider: '@kiwa-lab/streaming/redpanda-schema-registry-dogfood',
       version: '0.2.0',
       mockTraces: mock.traces(),
       realTraces: real.traces(),

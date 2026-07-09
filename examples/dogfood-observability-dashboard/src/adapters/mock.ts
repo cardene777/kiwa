@@ -4,7 +4,7 @@ import {
   type MetricRecord,
   type PanelConfig,
   type PanelKind,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 import type {
   ChartType,
   DashboardAdapter,
@@ -18,7 +18,7 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — drives the `@kiwa/observability` DashboardMock so
+ * Mock adapter — drives the `@kiwa-lab/observability` DashboardMock so
  * the same app code exercises the Grafana-style surface without touching
  * a real Prometheus. The mock produces deterministic behaviour so fidelity
  * tests can assert on panel render values, badge assignment, refresh

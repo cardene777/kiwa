@@ -3,7 +3,7 @@ import {
   setupSupabaseAdvancedEnv,
   type RlsPolicy,
   type SupabaseAdvancedTestEnv,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 import {
   completeSamlSsoLogin,
   completeSiweLogin,

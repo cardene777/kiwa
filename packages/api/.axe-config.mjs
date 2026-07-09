@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/api.
+ * A11y (axe-core) config for @kiwa-lab/api.
  * Tier: Core tier (critical 0 / serious 0 / moderate 0-3) — HTTP request client + MSW bridge. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § Core tier.
  */

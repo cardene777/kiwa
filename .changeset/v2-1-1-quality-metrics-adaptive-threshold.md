@@ -1,5 +1,5 @@
 ---
-"@kiwa/quality-metrics": minor
+"@kiwa-lab/quality-metrics": minor
 ---
 
 v2.1-1 quality-metrics v2.1 = adaptive drift threshold learning layer 新設。

@@ -41,7 +41,7 @@ async function buildReport() {
     mock,
     real,
     report: runFidelityHarness({
-      provider: '@kiwa/dapp/reorg-dogfood',
+      provider: '@kiwa-lab/dapp/reorg-dogfood',
       version: '0.1.0',
       mockTraces: mock.traces(),
       realTraces: real.traces(),
@@ -88,7 +88,7 @@ describe('dogfood-dapp-e2e-reorg — fidelity harness contract', () => {
 
   it('T-DR-FID-004 abi.transferSelector axis fails on wrong selector', () => {
     const wrongReport = runFidelityHarness({
-      provider: '@kiwa/dapp/reorg-dogfood',
+      provider: '@kiwa-lab/dapp/reorg-dogfood',
       version: '0.1.0',
       mockTraces: [],
       realTraces: [],
@@ -120,7 +120,7 @@ describe('dogfood-dapp-e2e-reorg — fidelity harness contract', () => {
     const { report } = await buildReport();
     const jsonText = emitJson(report);
     const parsed = JSON.parse(jsonText);
-    expect(parsed.provider).toBe('@kiwa/dapp/reorg-dogfood');
+    expect(parsed.provider).toBe('@kiwa-lab/dapp/reorg-dogfood');
     expect(parsed.axes).toHaveLength(11);
     expect(parsed.matrix).toHaveLength(4);
   });
@@ -135,7 +135,7 @@ describe('dogfood-dapp-e2e-reorg — fidelity harness contract', () => {
 
   it('T-DR-FID-008 perf.p95Ms axis fails when latency exceeds threshold', () => {
     const report = runFidelityHarness({
-      provider: '@kiwa/dapp/reorg-dogfood',
+      provider: '@kiwa-lab/dapp/reorg-dogfood',
       version: '0.1.0',
       mockTraces: [{ op: 'pendingTx', ok: true }],
       realTraces: [],
@@ -152,7 +152,7 @@ describe('dogfood-dapp-e2e-reorg — fidelity harness contract', () => {
 
   it('T-DR-FID-009 mutation.killRate axis fails below threshold', () => {
     const report = runFidelityHarness({
-      provider: '@kiwa/dapp/reorg-dogfood',
+      provider: '@kiwa-lab/dapp/reorg-dogfood',
       version: '0.1.0',
       mockTraces: [],
       realTraces: [],

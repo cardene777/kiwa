@@ -22,7 +22,7 @@
  * is required so tests can prove the gate is wired.
  */
 
-import type { MaoDelegation } from '@kiwa/ai-llm';
+import type { MaoDelegation } from '@kiwa-lab/ai-llm';
 import type {
   AllocateTasksResult,
   AssembleCrewResult,

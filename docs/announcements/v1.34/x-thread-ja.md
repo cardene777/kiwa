@@ -4,7 +4,7 @@
 
 kiwa v1.34 リリース — Frontend 深化 が land。
 
-@kiwa/component v0.2 → v0.3 + @kiwa/nextjs v1.1 → v1.2 pair minor bump。 3 target (Storybook 8 + Playwright CT + Chromatic + Next.js 15 App Router / Pages Router / Edge Runtime) 上に advanced frontend semantics 8 axis を追加 (RSC harness + streaming SSR + view transitions + form action advanced + server action advanced + partial prerendering + interception routes + parallel routes advanced)。
+@kiwa-lab/component v0.2 → v0.3 + @kiwa-lab/nextjs v1.1 → v1.2 pair minor bump。 3 target (Storybook 8 + Playwright CT + Chromatic + Next.js 15 App Router / Pages Router / Edge Runtime) 上に advanced frontend semantics 8 axis を追加 (RSC harness + streaming SSR + view transitions + form action advanced + server action advanced + partial prerendering + interception routes + parallel routes advanced)。
 
 real driver env-gate (KIWA_MODE=real) で opt-in production fidelity 走査。 dogfood 3 app 新規 (nextjs-rsc-streaming-app v2 + nextjs-server-action-app 新規 + storybook-8-mdx-app 新規) 全 7 軸 release gate PASS。
 
@@ -46,6 +46,6 @@ payment-v1.23 / edge / perf-harness / orm-v1.26 / quality-metrics / realtime / r
 
 すべての tutorial code snippet が docs-tutorial-v1.XX.test.ts で自動検証されている。
 
-`pnpm add -D @kiwa/component @kiwa/nextjs` で v0.3.0 + v1.2.0 が入る。 breaking change なし。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.33-to-v1.34
+`pnpm add -D @kiwa-lab/component @kiwa-lab/nextjs` で v0.3.0 + v1.2.0 が入る。 breaking change なし。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.33-to-v1.34
 
 次は v2.0。 Multi-version Vitest matrix + desktop/mobile adapter + coverage 100 % milestone + cache depth II (Dragonfly + KeyDB failover + Redis cluster resharding) + queue depth II + AI-LLM depth II が有力候補。 feedback 歓迎。

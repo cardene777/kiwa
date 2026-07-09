@@ -12,7 +12,7 @@ import {
   fromVitestJson,
   renderDashboard,
   type VitestStyleReport,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 const RUN_1: VitestStyleReport = {
   startTime: 1700000000,

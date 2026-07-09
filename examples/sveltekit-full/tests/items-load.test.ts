@@ -1,13 +1,13 @@
 // kiwa unit test for src/routes/items/_kiwa/items-load.ts
-// — invokes the pure load function through @kiwa/sveltekit's invokeLoad.
+// — invokes the pure load function through @kiwa-lab/sveltekit's invokeLoad.
 // SvelteKit / Vite runtime は一切起動せず、 simulated load event だけで
 // data / redirect / error / responseHeaders / cookies を全捕捉する。
 
 import { describe, expect, it } from 'vitest';
-import { invokeLoad } from '@kiwa/sveltekit';
+import { invokeLoad } from '@kiwa-lab/sveltekit';
 import { itemsLoad } from '../src/routes/items/_kiwa/items-load.js';
 
-describe('itemsLoad via @kiwa/sveltekit invokeLoad', () => {
+describe('itemsLoad via @kiwa-lab/sveltekit invokeLoad', () => {
   it('T-SF-001: session=admin で全 items + cache-control header 注入', async () => {
     const { data, env, redirect, error } = await invokeLoad({
       load: itemsLoad,

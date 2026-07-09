@@ -2,11 +2,11 @@
 
 DPoP + refresh-rotation report for `examples/dogfood-oauth21-provider` Sub-Issue #866 (v1.21-3c).
 
-Extends the endpoints-skeleton report (Sub-Issue #864 → `oauth21-provider-endpoints.md`) and the pkce-flow report (Sub-Issue #865 → `oauth21-provider-pkce.md`) with DPoP proof binding + refresh token rotation behavioural fidelity. The mock adapter (`@kiwa/auth`'s `setupOAuth21Env` + `createAuthorizationServer`) covers every axis unconditionally; the real adapter (`oauth2-mock-server` via testcontainers) stays env-skipped through `KIWA_OAUTH21_ENV_MISSING` until Sub-Issue #867 ships the container image + wiring, so the real column shows the assertion contract rather than a green run.
+Extends the endpoints-skeleton report (Sub-Issue #864 → `oauth21-provider-endpoints.md`) and the pkce-flow report (Sub-Issue #865 → `oauth21-provider-pkce.md`) with DPoP proof binding + refresh token rotation behavioural fidelity. The mock adapter (`@kiwa-lab/auth`'s `setupOAuth21Env` + `createAuthorizationServer`) covers every axis unconditionally; the real adapter (`oauth2-mock-server` via testcontainers) stays env-skipped through `KIWA_OAUTH21_ENV_MISSING` until Sub-Issue #867 ships the container image + wiring, so the real column shows the assertion contract rather than a green run.
 
 ## Fidelity axes (dpop-flow)
 
-| axis | RFC anchor | mock (`@kiwa/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
+| axis | RFC anchor | mock (`@kiwa-lab/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
 |---|---|---|---|---|
 | 1. DPoP header alg | RFC 9449 §4.2 | `parseDpopHeader` re-parses the compact JWT, refuses missing / comma-folded / non-`ES256` / non-`dpop+jwt` / non-EC-P256 headers with `header_missing` / `header_malformed` / `header_alg_refused` / `header_typ_refused` / `header_jwk_refused` — every rejection surfaces as `invalid_dpop_proof` at `/token` | oauth2-mock-server refuses same downgrades with `invalid_dpop_proof` at the HTTP layer; discovery advertises `dpop_signing_alg_values_supported=[ES256]` only | Both drivers refuse every header downgrade before the AS is invoked. Valid proof mints `token_type=DPoP`; absent proof mints `token_type=Bearer` — the client can pick sender-constrained or plain bearer per request. |
 | 2. `htm` + `htu` binding | RFC 9449 §4.3 | `verifyDpopProofBinding` rejects wrong `htm` (uppercase HTTP method) with `payload_htm_mismatch` and wrong `htu` (absolute URL, no query / fragment) with `payload_htu_mismatch`; both surface as `invalid_dpop_proof` at `/token` | oauth2-mock-server enforces same binding server-side, refuses with `invalid_dpop_proof` | Proof is pinned to the exact request it rides on — a proof intended for `/introspect` cannot be replayed at `/token`, a proof crafted for a `GET` cannot be swapped into a `POST`. |
@@ -15,7 +15,7 @@ Extends the endpoints-skeleton report (Sub-Issue #864 → `oauth21-provider-endp
 
 ## Fidelity axes (refresh-rotation)
 
-| axis | RFC anchor | mock (`@kiwa/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
+| axis | RFC anchor | mock (`@kiwa-lab/auth`) | real (oauth2-mock-server, gated by `OAUTH21_BOOTSTRAP=1`) | assertion |
 |---|---|---|---|---|
 | 1. rotation on use | RFC 9700 §2.2 | Every `/token` `grant_type=refresh_token` success mints a fresh refresh_token whose `rotationCount = previous + 1`; kiwa AS drops the previous from the active map. 5-step chain observed to produce 6 distinct refresh_tokens | oauth2-mock-server rotates on every use with same `rotationCount` semantics | Every use invalidates the previous — a legitimate client that immediately refreshes twice would fail the second call, so the RP client library must track the current token carefully. |
 | 2. re-use detection | RFC 9700 §2.2.2 | Reuse of a rotated refresh_token surfaces as `invalid_grant` with `kind=refresh_token_reused` (family torn down); `unknown_refresh_token` is a distinct kind so a caller can tell a stale token apart from a never-issued one. Reuse rejection applies regardless of which client presents the token — cross-client attempt refused too | oauth2-mock-server tears down the family with same kind separation | Reuse of a rotated token means one of the two holders (legitimate client or attacker) is unauthorized — the AS cannot tell which, so it tears down the whole chain. RFC 9700 §2.2.2 requires this. |
@@ -24,7 +24,7 @@ Extends the endpoints-skeleton report (Sub-Issue #864 → `oauth21-provider-endp
 
 ## DPoP guard implementation notes
 
-- `src/lib/dpop.ts` re-exports the kiwa primitives (`parseDpopProof`, `verifyDpopProof`, `computeJkt`, `createMockDpopJwk`) so the dogfood app never imports directly from `@kiwa/auth` in the app layer. Downstream Sub-Issues can swap the kiwa helper for a different implementation without touching the route handlers.
+- `src/lib/dpop.ts` re-exports the kiwa primitives (`parseDpopProof`, `verifyDpopProof`, `computeJkt`, `createMockDpopJwk`) so the dogfood app never imports directly from `@kiwa-lab/auth` in the app layer. Downstream Sub-Issues can swap the kiwa helper for a different implementation without touching the route handlers.
 - `DpopValidationError.kind` is the SSOT for the OAuth 2.1 error code mapping. `mapDpopKindToTokenCode` in `src/lib/hono-app.ts` maps every rejection kind to `invalid_dpop_proof` — the exhaustive switch forces the caller to decide which OAuth code to emit when a new kind is added.
 - `parseDpopHeader` runs at the HTTP boundary (Hono `/token` handler reads the `DPoP` header, normalises the value, parses it). Absent header → `token_type=Bearer` output; present header → parsed proof forwarded into the adapter as `TokenRequest.dpop`. Absent header is not an error unless the refresh_token is DPoP-bound (kiwa AS catches that case).
 - `classifyDpopAsError` in `src/lib/hono-app.ts` classifies kiwa AS-side rejection messages from `verifyDpopProof(...)` — the AS invokes the verifier inside `handleAuthorizationCode` + `handleRefreshToken`, so the rejection surfaces at the outer `adapter.token(...)` call with a `verifyDpopProof:` prefix. The classifier keeps the switch in one place so route handlers do not grep the underlying error string.

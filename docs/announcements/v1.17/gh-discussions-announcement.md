@@ -1,10 +1,10 @@
 # kiwa v1.17 released — Observability v2 (dashboard + alert + trace flame graph + log correlation)
 
-v1.17 is out. After v1.16's component test vertical (`@kiwa/component` v0.1 unifying Storybook 8 + Playwright CT + Chromatic), v1.17 turns to the **SaaS observability stack** every production team already ships: Grafana-style dashboards, Prometheus AlertManager-style routing, trace flame graphs, and log ↔ span correlation — four additional axes on top of the v1.14 telemetry mock foundation.
+v1.17 is out. After v1.16's component test vertical (`@kiwa-lab/component` v0.1 unifying Storybook 8 + Playwright CT + Chromatic), v1.17 turns to the **SaaS observability stack** every production team already ships: Grafana-style dashboards, Prometheus AlertManager-style routing, trace flame graphs, and log ↔ span correlation — four additional axes on top of the v1.14 telemetry mock foundation.
 
 ## What shipped
 
-- **`@kiwa/observability` v2.0** (major bump) — 4 additional axes over the v1.1 telemetry mock (v1.14-4 land). Zero breaking changes to v1.0 (`renderDashboard` / `detectFlaky` / `analyzeSpecCoverage` / `checkThresholds`) or v1.1 (`TelemetryCollector` + `createOtelMock` / `createDatadogMock` / `createSentryMock`) surfaces; the major bump signals the "Observability v2" milestone with 11 new public exports + 13 fixture builders.
+- **`@kiwa-lab/observability` v2.0** (major bump) — 4 additional axes over the v1.1 telemetry mock (v1.14-4 land). Zero breaking changes to v1.0 (`renderDashboard` / `detectFlaky` / `analyzeSpecCoverage` / `checkThresholds`) or v1.1 (`TelemetryCollector` + `createOtelMock` / `createDatadogMock` / `createSentryMock`) surfaces; the major bump signals the "Observability v2" milestone with 11 new public exports + 13 fixture builders.
   - `DashboardMock` + `buildDashboardMock` — bind a dashboard to a `TelemetryCollector`, evaluate N panel queries (`sum` / `avg` / `max` / `min` / `count` / `last`) with optional tag filter + time window, attach `PanelThreshold[]` for `ok` / `warn` / `critical` badge selection. `refresh()` returns `PanelResult[]` and increments `refreshCount`; `panel(id)` looks up by id from the most recent results.
   - `AlertRouter` — register `AlertRule[]` against a `TelemetryCollector`; `evaluate()` transitions `pending → firing` under a `forSamples` gate and resolves back when the metric drops. `setRoute` walks a nested `RouteEntry` tree (deepest match wins). `addSilence` suppresses fires while the label match holds and `expiresAt` is in the future. `setEscalation` + `tickEscalation()` walks a state machine so kiwa tests can assert "reached tier 2 at t=15min" without any wall clock.
   - `buildSpanTree` + `renderFlameGraph` + `drillDown` + `flattenFlame` — pure transforms over `SpanRecord[]` (v1.1 shape unchanged) that reconstruct the span parent chain, compute `totalMs` / `selfMs`, collapse siblings by name into `FlameNode` (samples counted), and extract a subtree with depth normalized to 0. Orphan spans (parent not found) become roots.
@@ -19,7 +19,7 @@ v1.17 is out. After v1.16's component test vertical (`@kiwa/component` v0.1 unif
 
 - **6 sub-Issues resolved** (#778-#783)
 - **6 PRs merged** (#784-#788 + this publish PR)
-- **1 major version bump** (`@kiwa/observability` v1.2 → v2.0.0)
+- **1 major version bump** (`@kiwa-lab/observability` v1.2 → v2.0.0)
 - **3 new dogfood apps** with fidelity reports feeding the 7-axis release gate
 - **40+ new behavior tests** in the harness + **78 dogfood tests** (22 + 27 + 29) all pass
 

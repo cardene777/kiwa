@@ -2,9 +2,9 @@
 
 ## Why this file exists
 
-kiwa v1.16 introduced `@kiwa/a11y` (axe-core WCAG 2.1 AA wrapper) as a single test-adapter package.
+kiwa v1.16 introduced `@kiwa-lab/a11y` (axe-core WCAG 2.1 AA wrapper) as a single test-adapter package.
 v1.30 promotes accessibility from one-package coverage to a 37-package infra baseline mirroring the mutation-thresholds SSOT (`docs/quality/mutation-thresholds.md`, v1.27) and the perf-thresholds SSOT (`docs/quality/perf-thresholds.md`, v1.25).
-(The Issue AC calls it "34 packages" — the count is the 33 `@kiwa/*` packages published in v1.29 + `release-invariants`. This SSOT covers all 37 published packages including `perf-harness` + `quality-metrics` because they are the same publish set and share the same 4-tier rationale.)
+(The Issue AC calls it "34 packages" — the count is the 33 `@kiwa-lab/*` packages published in v1.29 + `release-invariants`. This SSOT covers all 37 published packages including `perf-harness` + `quality-metrics` because they are the same publish set and share the same 4-tier rationale.)
 
 Every kiwa package publishes an `.axe-config.mjs` that pins its WCAG 2.1 AA rule set + tag filter + `.a11y-baseline/{pkg}.json` output path, and every `test:a11y` script writes a machine-readable baseline that downstream release gates (v1.30-4, 13th axis) can enforce.
 Without a shared threshold rationale, each package would land its own bar and drift for the same reasons the mutation-testing rollout drifted before v1.27 — no documented "why 0 critical here" survives the review that lands the code six weeks later.
@@ -32,43 +32,43 @@ Kill line = `.a11y-baseline/{pkg}.json` reports one violation count per impact.
 
 | Package | Tier | Threshold (critical / serious / moderate) | Reason |
 |---|---|---|---|
-| `@kiwa/core` | Core | 0 / 0 / 0-3 | Pure parser + pool logic every adapter depends on. No DOM. |
-| `@kiwa/api` | Core | 0 / 0 / 0-3 | HTTP request client + MSW bridge. No DOM. |
-| `@kiwa/data` | Core | 0 / 0 / 0-3 | Fixture builders + assertion helpers. No DOM. |
-| `@kiwa/cli-test` | Core | 0 / 0 / 0-3 | CLI expectation runner. No DOM. |
-| `@kiwa/cli` | Core | 0 / 0 / 0-3 | CLI runtime. No DOM. |
-| `@kiwa/observability` | Core | 0 / 0 / 0-3 | Flaky detection + coverage gap analysis. No DOM. |
-| `@kiwa/perf-harness` | Core | 0 / 0 / 0-3 | Perf runner + tinybench wrapper. No DOM. |
-| `@kiwa/quality-metrics` | Core | 0 / 0 / 0-3 | Release gate calculator. No DOM. |
-| `@kiwa/release-invariants` | Core | 0 / 0 / 0-3 | Release script filter + provenance flag + gate script checkers. No DOM. |
-| `@kiwa/nextjs` | Framework | 0 / 0-3 / 0-10 | RSC + Server Actions + Middleware. Serious tolerance for Next router link internals. |
-| `@kiwa/nuxt` | Framework | 0 / 0-3 / 0-10 | SSR + hydration + Nitro adapter. Serious tolerance for Nuxt teleport. |
-| `@kiwa/sveltekit` | Framework | 0 / 0-3 / 0-10 | SSR + hydration + load / actions. Serious tolerance for SvelteKit-owned markup. |
-| `@kiwa/remix` | Framework | 0 / 0-3 / 0-10 | SSR + loader / action + client hydration. Serious tolerance for Remix-owned markup. |
-| `@kiwa/astro` | Framework | 0 / 0-3 / 0-10 | Islands + SSR + partial hydration. Serious tolerance for Astro island wrappers. |
-| `@kiwa/solidstart` | Framework | 0 / 0-3 / 0-10 | Solid SSR + resource + server-function. |
-| `@kiwa/qwikcity` | Framework | 0 / 0-3 / 0-10 | Resumability + SSR + route loader. |
-| `@kiwa/edge` | Framework | 0 / 0-3 / 0-10 | Workers / Deno / Bun edge runtimes with divergent APIs. |
-| `@kiwa/solidjs` | Framework | 0 / 0-3 / 0-10 | Solid signal + resource + SSR. |
-| `@kiwa/fresh` | Framework | 0 / 0-3 / 0-10 | Deno Fresh islands + SSR. |
-| `@kiwa/hono` | Framework | 0 / 0-3 / 0-10 | Hono edge + node adapter. |
-| `@kiwa/auth` | Framework | 0 / 0-3 / 0-10 | NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth. |
-| `@kiwa/ai-llm` | SaaS | 0 / 0 / 0 | Anthropic / OpenAI / Vercel AI SDK / LangChain adapters. No DOM. |
-| `@kiwa/payment` | SaaS | 0 / 0 / 0 | Stripe / Paddle / Lemon Squeezy. No DOM. |
-| `@kiwa/queue` | SaaS | 0 / 0 / 0 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ. No DOM. |
-| `@kiwa/cache` | SaaS | 0 / 0 / 0 | Redis / KeyDB / Memcached. No DOM. |
-| `@kiwa/streaming` | SaaS | 0 / 0 / 0 | Kafka / NATS / Redpanda. No DOM. |
-| `@kiwa/realtime` | SaaS | 0 / 0 / 0 | Supabase Realtime / Ably / Pusher / Socket.io. No DOM. |
-| `@kiwa/mcp` | SaaS | 0 / 0 / 0 | MCP JSON-RPC protocol + transport. No DOM. |
-| `@kiwa/agent` | SaaS | 0 / 0 / 0 | LangGraph + OpenAI Assistants v2. No DOM. |
-| `@kiwa/search` | SaaS | 0 / 0 / 0 | Algolia / Meilisearch / Typesense. No DOM. |
-| `@kiwa/orm` | SaaS | 0 / 0 / 0 | Prisma / Drizzle / Kysely. No DOM. |
-| `@kiwa/dapp` | SaaS | 0 / 0 / 0 | viem + anvil + wallet fixture. No DOM. |
-| `@kiwa/ui` | Test type | 0 / 0-3 / 0-10 | Vue / Solid / Lit / Qwik / Angular DOM harness. jsdom + framework noise. |
-| `@kiwa/a11y` | Test type | 0 / 0-3 / 0-10 | axe-core WCAG 2.1 AA wrapper. Self-tests exercise DOM fixtures. |
-| `@kiwa/visual` | Test type | 0 / 0-3 / 0-10 | Screenshot + baseline / diff / accept. DOM fixture noise. |
-| `@kiwa/component` | Test type | 0 / 0-3 / 0-10 | Storybook + Playwright CT + Chromatic. DOM fixture noise. |
-| `@kiwa/e2e` | Test type | 0 / 0-3 / 0-10 | Playwright fixture. Browser fixture noise. |
+| `@kiwa-lab/core` | Core | 0 / 0 / 0-3 | Pure parser + pool logic every adapter depends on. No DOM. |
+| `@kiwa-lab/api` | Core | 0 / 0 / 0-3 | HTTP request client + MSW bridge. No DOM. |
+| `@kiwa-lab/data` | Core | 0 / 0 / 0-3 | Fixture builders + assertion helpers. No DOM. |
+| `@kiwa-lab/cli-test` | Core | 0 / 0 / 0-3 | CLI expectation runner. No DOM. |
+| `@kiwa-lab/cli` | Core | 0 / 0 / 0-3 | CLI runtime. No DOM. |
+| `@kiwa-lab/observability` | Core | 0 / 0 / 0-3 | Flaky detection + coverage gap analysis. No DOM. |
+| `@kiwa-lab/perf-harness` | Core | 0 / 0 / 0-3 | Perf runner + tinybench wrapper. No DOM. |
+| `@kiwa-lab/quality-metrics` | Core | 0 / 0 / 0-3 | Release gate calculator. No DOM. |
+| `@kiwa-lab/release-invariants` | Core | 0 / 0 / 0-3 | Release script filter + provenance flag + gate script checkers. No DOM. |
+| `@kiwa-lab/nextjs` | Framework | 0 / 0-3 / 0-10 | RSC + Server Actions + Middleware. Serious tolerance for Next router link internals. |
+| `@kiwa-lab/nuxt` | Framework | 0 / 0-3 / 0-10 | SSR + hydration + Nitro adapter. Serious tolerance for Nuxt teleport. |
+| `@kiwa-lab/sveltekit` | Framework | 0 / 0-3 / 0-10 | SSR + hydration + load / actions. Serious tolerance for SvelteKit-owned markup. |
+| `@kiwa-lab/remix` | Framework | 0 / 0-3 / 0-10 | SSR + loader / action + client hydration. Serious tolerance for Remix-owned markup. |
+| `@kiwa-lab/astro` | Framework | 0 / 0-3 / 0-10 | Islands + SSR + partial hydration. Serious tolerance for Astro island wrappers. |
+| `@kiwa-lab/solidstart` | Framework | 0 / 0-3 / 0-10 | Solid SSR + resource + server-function. |
+| `@kiwa-lab/qwikcity` | Framework | 0 / 0-3 / 0-10 | Resumability + SSR + route loader. |
+| `@kiwa-lab/edge` | Framework | 0 / 0-3 / 0-10 | Workers / Deno / Bun edge runtimes with divergent APIs. |
+| `@kiwa-lab/solidjs` | Framework | 0 / 0-3 / 0-10 | Solid signal + resource + SSR. |
+| `@kiwa-lab/fresh` | Framework | 0 / 0-3 / 0-10 | Deno Fresh islands + SSR. |
+| `@kiwa-lab/hono` | Framework | 0 / 0-3 / 0-10 | Hono edge + node adapter. |
+| `@kiwa-lab/auth` | Framework | 0 / 0-3 / 0-10 | NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth. |
+| `@kiwa-lab/ai-llm` | SaaS | 0 / 0 / 0 | Anthropic / OpenAI / Vercel AI SDK / LangChain adapters. No DOM. |
+| `@kiwa-lab/payment` | SaaS | 0 / 0 / 0 | Stripe / Paddle / Lemon Squeezy. No DOM. |
+| `@kiwa-lab/queue` | SaaS | 0 / 0 / 0 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ. No DOM. |
+| `@kiwa-lab/cache` | SaaS | 0 / 0 / 0 | Redis / KeyDB / Memcached. No DOM. |
+| `@kiwa-lab/streaming` | SaaS | 0 / 0 / 0 | Kafka / NATS / Redpanda. No DOM. |
+| `@kiwa-lab/realtime` | SaaS | 0 / 0 / 0 | Supabase Realtime / Ably / Pusher / Socket.io. No DOM. |
+| `@kiwa-lab/mcp` | SaaS | 0 / 0 / 0 | MCP JSON-RPC protocol + transport. No DOM. |
+| `@kiwa-lab/agent` | SaaS | 0 / 0 / 0 | LangGraph + OpenAI Assistants v2. No DOM. |
+| `@kiwa-lab/search` | SaaS | 0 / 0 / 0 | Algolia / Meilisearch / Typesense. No DOM. |
+| `@kiwa-lab/orm` | SaaS | 0 / 0 / 0 | Prisma / Drizzle / Kysely. No DOM. |
+| `@kiwa-lab/dapp` | SaaS | 0 / 0 / 0 | viem + anvil + wallet fixture. No DOM. |
+| `@kiwa-lab/ui` | Test type | 0 / 0-3 / 0-10 | Vue / Solid / Lit / Qwik / Angular DOM harness. jsdom + framework noise. |
+| `@kiwa-lab/a11y` | Test type | 0 / 0-3 / 0-10 | axe-core WCAG 2.1 AA wrapper. Self-tests exercise DOM fixtures. |
+| `@kiwa-lab/visual` | Test type | 0 / 0-3 / 0-10 | Screenshot + baseline / diff / accept. DOM fixture noise. |
+| `@kiwa-lab/component` | Test type | 0 / 0-3 / 0-10 | Storybook + Playwright CT + Chromatic. DOM fixture noise. |
+| `@kiwa-lab/e2e` | Test type | 0 / 0-3 / 0-10 | Playwright fixture. Browser fixture noise. |
 
 Any future adapter starts by picking the tier its code most resembles.
 If none fits, add a new tier here first, then the config.
@@ -79,7 +79,7 @@ Every `packages/*/.axe-config.mjs` starts with a header comment that names the t
 
 ```js
 /**
- * A11y (axe-core) config for @kiwa/<name>.
+ * A11y (axe-core) config for @kiwa-lab/<name>.
  * Tier: <tier> tier (critical 0 / serious <range> / moderate <range>) — <one-line reason>.
  * SSOT: docs/quality/a11y-thresholds.md § <tier> tier.
  */
@@ -117,7 +117,7 @@ export default {
 
 ## Overrides
 
-A package may sit one tier stricter than its default (e.g. `@kiwa/component` sets `moderate.max = 0` if its Storybook fixtures reach zero violations).
+A package may sit one tier stricter than its default (e.g. `@kiwa-lab/component` sets `moderate.max = 0` if its Storybook fixtures reach zero violations).
 Stricter overrides do not need approval — they raise the floor.
 A looser override requires a one-line justification in the PR body of the change that introduces it, and must not raise `critical` above `0`.
 No override may ever raise the `critical` bar.
@@ -139,9 +139,9 @@ Every applicable package participates in three layers, each running axe-core onc
 | `playwright` | Dynamic browser audit — axe-core inside a real Playwright page. Catches contrast + layout rules that jsdom's incomplete CSSOM cannot resolve. | `.axe-config.mjs > fixtures.playwright.results: AxeResults` (caller runs the Playwright evaluation, harness aggregates) |
 | `ssrHydration` | SSR + hydration diff — axe-core over the SSR HTML string plus an optional post-hydration Element. Violations are unioned by rule id so SSR-only + hydration-only + shared violations each surface once. | `.axe-config.mjs > fixtures.ssrHydration.ssrHtml: string` (+ optional `hydrated: Element`) |
 
-A package that intentionally does not participate in a layer omits the field, and the baseline records `applicable: false` with an explicit reason. Every current `@kiwa/*` core + framework adapter (v1.30-2 scope) is a test-adapter package that emits no runtime DOM, so its baseline records `layers-absent` — every layer is `applicable: false`, `totals` is zero, `ok` is `true`. The harness ran, proved the wiring is intact, and left the tier ceilings in force for the day a fixture is added.
+A package that intentionally does not participate in a layer omits the field, and the baseline records `applicable: false` with an explicit reason. Every current `@kiwa-lab/*` core + framework adapter (v1.30-2 scope) is a test-adapter package that emits no runtime DOM, so its baseline records `layers-absent` — every layer is `applicable: false`, `totals` is zero, `ok` is `true`. The harness ran, proved the wiring is intact, and left the tier ceilings in force for the day a fixture is added.
 
-The harness lives in `packages/a11y/src/layer-harness.ts` and is exported from `@kiwa/a11y` as `runLayerHarness`. Unit tests exhaust every branch — union dedupe, absent-layer reasons, tier breach detection, missing-document fallback — so the driver in `scripts/run-axe-baseline.mjs` stays thin.
+The harness lives in `packages/a11y/src/layer-harness.ts` and is exported from `@kiwa-lab/a11y` as `runLayerHarness`. Unit tests exhaust every branch — union dedupe, absent-layer reasons, tier breach detection, missing-document fallback — so the driver in `scripts/run-axe-baseline.mjs` stays thin.
 
 ## Provider provenance (v1.30-3)
 
@@ -151,19 +151,19 @@ Each entry is an object with `name` required plus any of `protocol` / `semantics
 
 | Package | Entry count | Shape |
 |---|---|---|
-| `@kiwa/auth` | 10 | 6 provider (auth0 / better-auth / clerk / lucia / supabase / supabase-advanced) + 4 protocol (oauth21 / oidc / passkey / webauthn). |
-| `@kiwa/queue` | 5 | bullmq / inngest / cloudflare-queues / sqs / rabbitmq. `rabbitmq-advanced` is an axis of `rabbitmq`. |
-| `@kiwa/cache` | 3 | in-memory / keydb / memcached. |
-| `@kiwa/payment` | 27 | 3 brand (stripe / paddle / lemonsqueezy) × 9 axis (invoice / retry / subscription-lifecycle / chargeback / dunning / tax / three-ds / sca / psd2). |
-| `@kiwa/streaming` | 15 | 3 brand (kafka / nats / redpanda) × 5 semantics (dlq / exactly-once / schema-registry / partition / retention). |
-| `@kiwa/orm` | 72 | 3 brand (drizzle / prisma / kysely) × 3 backend (postgres / mysql / sqlite) × 8 axis (cdc / replication / mvcc / partitioning / connection-pool / logical-replication / rls / vector-store). |
+| `@kiwa-lab/auth` | 10 | 6 provider (auth0 / better-auth / clerk / lucia / supabase / supabase-advanced) + 4 protocol (oauth21 / oidc / passkey / webauthn). |
+| `@kiwa-lab/queue` | 5 | bullmq / inngest / cloudflare-queues / sqs / rabbitmq. `rabbitmq-advanced` is an axis of `rabbitmq`. |
+| `@kiwa-lab/cache` | 3 | in-memory / keydb / memcached. |
+| `@kiwa-lab/payment` | 27 | 3 brand (stripe / paddle / lemonsqueezy) × 9 axis (invoice / retry / subscription-lifecycle / chargeback / dunning / tax / three-ds / sca / psd2). |
+| `@kiwa-lab/streaming` | 15 | 3 brand (kafka / nats / redpanda) × 5 semantics (dlq / exactly-once / schema-registry / partition / retention). |
+| `@kiwa-lab/orm` | 72 | 3 brand (drizzle / prisma / kysely) × 3 backend (postgres / mysql / sqlite) × 8 axis (cdc / replication / mvcc / partitioning / connection-pool / logical-replication / rls / vector-store). |
 
 Non-SaaS packages omit the field; the baseline shape is unchanged (no `providers` key). Adding a new provider adapter is a two-file edit — append to `.axe-config.mjs` `providers` and re-run `pnpm test:a11y` to refresh the baseline — no other config changes needed.
 
 ## 13-axis release gate integration (v1.30-4)
 
 v1.30-4 promotes the a11y violation count to a first-class 13th axis in the release gate (the 12th, mutation kill rate, was added in v1.27-4).
-`@kiwa/quality-metrics` will expose three symbols mirroring the mutation tier interface.
+`@kiwa-lab/quality-metrics` will expose three symbols mirroring the mutation tier interface.
 
 - `DEFAULT_A11Y_TIER_THRESHOLDS` — the SSOT table (`core: {critical: 0, serious: 0, moderate: 3}`, `framework: {critical: 0, serious: 3, moderate: 10}`, `saas: {critical: 0, serious: 0, moderate: 0}`, `test-type: {critical: 0, serious: 3, moderate: 10}`), a `Readonly<Record<A11yTier, A11yThreshold>>`.
 - `resolveA11yTier(label)` — normalises the verbal tier label (`Core` / `Framework` / `SaaS` / `Test type`) written in `.a11y-baseline/*.json` into the machine `A11yTier` enum. Case-insensitive, trim-tolerant.

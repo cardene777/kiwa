@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   setupRabbitMQAdvancedEnv,
   type RabbitMQAdvancedTestEnv,
-} from '@kiwa/queue';
+} from '@kiwa-lab/queue';
 import {
   processWithDeadLetter,
   scheduleSmsReminder,

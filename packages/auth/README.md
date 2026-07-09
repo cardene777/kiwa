@@ -1,4 +1,4 @@
-# @kiwa/auth
+# @kiwa-lab/auth
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package covers the Auth surface)" width="640" />
@@ -10,7 +10,7 @@ Auth test adapter for kiwa — NextAuth v5 (Auth.js), Lucia v3, Better Auth, Cle
 
 ## Overview
 
-`@kiwa/auth` is the Layer 2 adapter that turns an auth-shaped Layer 1 spec into a runnable Vitest suite. It ships six independent helpers:
+`@kiwa-lab/auth` is the Layer 2 adapter that turns an auth-shaped Layer 1 spec into a runnable Vitest suite. It ships six independent helpers:
 
 - **`setupNextAuthEnv`** — NextAuth v5 (Auth.js) session / provider / database mocks.
 - **`setupLuciaEnv`** — Lucia v3 password + OAuth flows across SQLite / PostgreSQL adapter shapes.
@@ -22,7 +22,7 @@ Auth test adapter for kiwa — NextAuth v5 (Auth.js), Lucia v3, Better Auth, Cle
 ## Install
 
 ```bash
-pnpm add -D @kiwa/auth @kiwa/core vitest
+pnpm add -D @kiwa-lab/auth @kiwa-lab/core vitest
 # and, per stack, any of:
 pnpm add -D next-auth        # for setupNextAuthEnv
 pnpm add -D lucia            # for setupLuciaEnv
@@ -37,7 +37,7 @@ pnpm add -D @supabase/supabase-js    # for setupSupabaseAuthEnv (optional — mo
 ## Quick start — NextAuth v5
 
 ```ts
-import { setupNextAuthEnv } from "@kiwa/auth";
+import { setupNextAuthEnv } from "@kiwa-lab/auth";
 
 const env = await setupNextAuthEnv({
   providers: ["google", "github", "email"],
@@ -78,7 +78,7 @@ await env.providers.email.signIn({ email: "c@example.test" });
 The default in-memory adapter matches the Auth.js `Adapter` contract, so you can swap it for a real Prisma or Drizzle adapter in integration tests:
 
 ```ts
-import { createInMemoryAdapter, setupNextAuthEnv } from "@kiwa/auth";
+import { createInMemoryAdapter, setupNextAuthEnv } from "@kiwa-lab/auth";
 
 const shared = createInMemoryAdapter(); // or your real adapter
 const env = await setupNextAuthEnv({ database: shared });
@@ -94,7 +94,7 @@ See [`examples/auth-nextjs-nextauth-poc/`](../../examples/auth-nextjs-nextauth-p
 ## Quick start — Lucia v3
 
 ```ts
-import { setupLuciaEnv } from "@kiwa/auth";
+import { setupLuciaEnv } from "@kiwa-lab/auth";
 
 const env = await setupLuciaEnv({
   providers: ["google", "github"],
@@ -133,7 +133,7 @@ await env.stop();
 `createInMemoryLuciaAdapter` matches the surface of `@lucia-auth/adapter-sqlite` and `@lucia-auth/adapter-postgresql`. Both official adapters expose the same method names, so the mock is a drop-in for either — the `kind` tag is the only observable difference:
 
 ```ts
-import { createInMemoryLuciaAdapter, setupLuciaEnv } from "@kiwa/auth";
+import { createInMemoryLuciaAdapter, setupLuciaEnv } from "@kiwa-lab/auth";
 
 const shared = createInMemoryLuciaAdapter("postgresql");
 const env = await setupLuciaEnv({ database: shared });
@@ -147,7 +147,7 @@ See [`examples/auth-lucia-poc/`](../../examples/auth-lucia-poc) for the end-to-e
 ## Quick start — Better Auth
 
 ```ts
-import { setupBetterAuthEnv, generateTotpCode } from "@kiwa/auth";
+import { setupBetterAuthEnv, generateTotpCode } from "@kiwa-lab/auth";
 
 const env = await setupBetterAuthEnv({
   providers: ["google", "github"],
@@ -204,7 +204,7 @@ await env.stop();
 `createInMemoryBetterAuthAdapter` matches the operation surface of `better-auth/adapters/prisma`, `better-auth/adapters/drizzle`, and `better-auth/adapters/kysely`. All three official adapters funnel through the same operation set at the Better Auth layer, so the mock is a drop-in for any of them — the `kind` tag is the only observable difference:
 
 ```ts
-import { createInMemoryBetterAuthAdapter, setupBetterAuthEnv } from "@kiwa/auth";
+import { createInMemoryBetterAuthAdapter, setupBetterAuthEnv } from "@kiwa-lab/auth";
 
 const shared = createInMemoryBetterAuthAdapter("drizzle");
 const env = await setupBetterAuthEnv({ database: shared });
@@ -232,7 +232,7 @@ See [`examples/auth-better-auth-poc/`](../../examples/auth-better-auth-poc) for 
 ## Quick start — Clerk
 
 ```ts
-import { setupClerkEnv } from "@kiwa/auth";
+import { setupClerkEnv } from "@kiwa-lab/auth";
 
 const env = await setupClerkEnv({
   users: [{ primaryEmailAddress: "alice@example.test" }],
@@ -305,7 +305,7 @@ See [`examples/auth-clerk-poc/`](../../examples/auth-clerk-poc) for the end-to-e
 ## Quick start — Auth0
 
 ```ts
-import { setupAuth0Env } from "@kiwa/auth";
+import { setupAuth0Env } from "@kiwa-lab/auth";
 
 const env = await setupAuth0Env({
   tenant: "kiwa-test",
@@ -401,7 +401,7 @@ See [`examples/auth-auth0-poc/`](../../examples/auth-auth0-poc) for the end-to-e
 ## Quick start — Supabase Auth core
 
 ```ts
-import { setupSupabaseAuthEnv } from "@kiwa/auth";
+import { setupSupabaseAuthEnv } from "@kiwa-lab/auth";
 
 const env = await setupSupabaseAuthEnv({
   projectUrl: "https://my.supabase.co",

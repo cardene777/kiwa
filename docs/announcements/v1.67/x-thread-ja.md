@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v1.67 リリース — Desktop 深化 IX。 **@kiwa/desktop v1.0** (major bump) で invoke-cache layer 統合、 InvokeCache class = LRU + TTL 両立 in-memory cache + withCache helper = probeAndInvoke 統合、 4 status 経路 (cache-hit / cache-miss / cache-invalidated / cache-disabled)。 v1.55-v1.66 4 PR rhythm 継承 (**14 milestone 連続 = 56 PR 連続同 rhythm**)、 **systematic pattern 42 度目適用**、 **depth-6 pattern 2 例目確定 candidate**。
+kiwa v1.67 リリース — Desktop 深化 IX。 **@kiwa-lab/desktop v1.0** (major bump) で invoke-cache layer 統合、 InvokeCache class = LRU + TTL 両立 in-memory cache + withCache helper = probeAndInvoke 統合、 4 status 経路 (cache-hit / cache-miss / cache-invalidated / cache-disabled)。 v1.55-v1.66 4 PR rhythm 継承 (**14 milestone 連続 = 56 PR 連続同 rhythm**)、 **systematic pattern 42 度目適用**、 **depth-6 pattern 2 例目確定 candidate**。
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-desktop-invoke-cache-app 新規、 4 pattern workflow (warmupCacheWithMa
 
 ## Tweet 4
 
-`pnpm add -D @kiwa/desktop@^1.0`。 migration: https://cardene777.github.io/kiwa/migrations/v1.66-to-v1.67
+`pnpm add -D @kiwa-lab/desktop@^1.0`。 migration: https://cardene777.github.io/kiwa/migrations/v1.66-to-v1.67
 
 **depth-6 pattern 2 例目確定 candidate** = Mobile v1.55 depth-5 + Desktop v1.61 depth-5 + Desktop v1.67 depth-6 = 4 layer separation 完成 (real behavior + probe + 実 invoke + invoke-cache)。 Desktop pair pioneer record 更新。
 

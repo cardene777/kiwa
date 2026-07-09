@@ -1,6 +1,6 @@
 /**
  * JetStream durable-consumer flow (v1.31-4) — wraps
- * `@kiwa/streaming`'s `createNatsJetStreamDurable` semantics so the
+ * `@kiwa-lab/streaming`'s `createNatsJetStreamDurable` semantics so the
  * dogfood can exercise ack_wait + max_deliver + backoff behaviour without
  * depending on the real `nats-server` binary.
  *
@@ -22,7 +22,7 @@ import {
   createNatsJetStreamDurable,
   type DurableConsumerConfig,
   type NatsJetStreamDurable,
-} from '@kiwa/streaming';
+} from '@kiwa-lab/streaming';
 
 export interface DurableFlowInput {
   readonly config?: DurableConsumerConfig;

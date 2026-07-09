@@ -1,4 +1,4 @@
-# @kiwa/cli
+# @kiwa-lab/cli
 
 ## 1.0.1
 
@@ -6,26 +6,26 @@
 
 - 32a6c10: 📦 11 packages initial v1.0.x npm publish (改名後初回)。
 
-  PR #476 で `@kiwa/core` ↔ `@kiwa/spec` swap rename + dApp 改名 + v1.0 major bump を local で実施したが、 npm への publish が未実行のため npm 上では旧 0.x 系のまま停滞していた。
+  PR #476 で `@kiwa-lab/core` ↔ `@kiwa-lab/spec` swap rename + dApp 改名 + v1.0 major bump を local で実施したが、 npm への publish が未実行のため npm 上では旧 0.x 系のまま停滞していた。
 
   本 changeset で全 11 packages を v1.0.1 へ patch bump して publish を発火させ、 改名後の v1.0 系を npm に反映する。
 
   ## 影響範囲
 
-  - 旧 `@kiwa/core` (0.3.1) は dApp E2E fixture の名残、 v1.0.1 では新 spec として publish
-  - 旧 `@kiwa/spec` は廃止 (`@kiwa/core` に統合)
-  - 新 `@kiwa/dapp` (404 → v1.0.1 として初公開)
+  - 旧 `@kiwa-lab/core` (0.3.1) は dApp E2E fixture の名残、 v1.0.1 では新 spec として publish
+  - 旧 `@kiwa-lab/spec` は廃止 (`@kiwa-lab/core` に統合)
+  - 新 `@kiwa-lab/dapp` (404 → v1.0.1 として初公開)
   - 既存 9 adapter (api / ui / data / e2e / a11y / cli-test / observability / visual / cli) は v1.0.1 patch bump で公開
   - v1.0.0 → v1.0.1 patch bump (PR #476 の v1.0.0 内部 bump を上書きせず継続)
 
   ## 確認方法
 
   ```bash
-  npm view @kiwa/core version    # → 1.0.1
-  npm view @kiwa/dapp version    # → 1.0.1 (新規公開)
-  npm view @kiwa/e2e version     # → 1.0.1
-  npm view @kiwa/a11y version    # → 1.0.1
-  npm view @kiwa/visual version  # → 1.0.1
+  npm view @kiwa-lab/core version    # → 1.0.1
+  npm view @kiwa-lab/dapp version    # → 1.0.1 (新規公開)
+  npm view @kiwa-lab/e2e version     # → 1.0.1
+  npm view @kiwa-lab/a11y version    # → 1.0.1
+  npm view @kiwa-lab/visual version  # → 1.0.1
   ```
 
 ## 0.3.1
@@ -42,19 +42,19 @@
 
   ## 新規
 
-  ### @kiwa/e2e v0.1.0 (新設)
+  ### @kiwa-lab/e2e v0.1.0 (新設)
 
   - `setupE2eEnv({ app | staticHtml, browser, initialPath })` ... 実 HTTP server を free port で起動 + Playwright (chromium/firefox/webkit) headless で navigate
   - `BrowserPageHandle` / `BrowserLocator` / `startServer` を export
   - @playwright/test を optional peer dep
 
-  ### @kiwa/ui browser mode (minor)
+  ### @kiwa-lab/ui browser mode (minor)
 
   - `setupBrowserComponentEnv({ ui, browser, headless })` ... React 要素を SSR renderToStaticMarkup + Playwright 実 Chromium に load
   - 既存 jsdom 経路は変更なし
   - @playwright/test を optional peer dep に追加
 
-  ### @kiwa/cli (minor)
+  ### @kiwa-lab/cli (minor)
 
   - `kiwa spec-to-test --in {spec.md} --out {test.ts} [--layer {layer}]` ... markdown 9 column を実 vitest test code に変換 (api / ui / data / cli 全 layer 対応)
   - `kiwa run --watch [--layer L]...` ... 複数 layer を並列 vitest watch daemon として spawn (default unit api ui、 --dry-run で plan 確認)
@@ -74,7 +74,7 @@
 
   ## 新規機能
 
-  ### @kiwa/dapp
+  ### @kiwa-lab/dapp
 
   - `setupTestEnv` / `withAnvil` ... vitest test 内で mock 経路 (anvil 不起動) と 実 anvil 経路 (clean / state-load) を同 API で切替 (#350)
   - `StartAnvilOptions.loadState` / `dumpState` ... anvil の `--load-state` / `--dump-state` flag を透過、 deploy + setup を 1 回だけ実行して state.json を一括コピペ可能 (#350)
@@ -82,7 +82,7 @@
   - `setupTestEnv({ pool })` ... pool 経由経路の opt-in、 `anvil` option と排他 (#354)
   - `TxBroadcastCtx.transportTimeoutMs` / `transportRetryCount` ... viem http transport の timeout / retry を制御、 fail-fast (#356)
 
-  ### @kiwa/cli
+  ### @kiwa-lab/cli
 
   - `kiwa anvil seed <script> --out <path>` ... seed script で deploy + setup を 1 回実行 → anvil 終了時に `--dump-state` で chain 状態を一括書出する CLI sub-command (#350)
 
@@ -107,7 +107,7 @@
 
 ### Patch Changes
 
-- c856f93: README の v7 promo gif (10fps / 800px / 4.5-4.7MB、 npm camo 5MB 制限内) と 3 経路 brand statement (`@kiwa/forge` + `@kiwa/dapp` + 手書き) 言及を npm registry に届けるための patch bump。 code 変更なし、 README の同期目的のみ。
+- c856f93: README の v7 promo gif (10fps / 800px / 4.5-4.7MB、 npm camo 5MB 制限内) と 3 経路 brand statement (`@kiwa-lab/forge` + `@kiwa-lab/dapp` + 手書き) 言及を npm registry に届けるための patch bump。 code 変更なし、 README の同期目的のみ。
 
   詳細は PR #326 (v7 fix commit e401595) を参照。
 
@@ -123,9 +123,9 @@
 
 ### Minor Changes
 
-- 40dc74b: `@kiwa/cli` の `init` 命令に 4 option (`--testDir <path>` / `--config-suffix <name>` / `--script-key <key>` / `--with-deploy <foundry-path>`) を追加 (#150 / #154)。
+- 40dc74b: `@kiwa-lab/cli` の `init` 命令に 4 option (`--testDir <path>` / `--config-suffix <name>` / `--script-key <key>` / `--with-deploy <foundry-path>`) を追加 (#150 / #154)。
   既存 Playwright 構成を持つ project への共存導入と、Foundry boilerplate (`tests/prepare-env.ts` / `global-setup.ts` / `global-teardown.ts` / `fixture.ts`) の自動生成が可能になった。
-  `@kiwa/dapp` の `RpcContext` に opt-in `rejectConnect` flag を追加し、 `setApprovalMode('reject')` 時に `eth_requestAccounts` を EIP-1193 code 4001 で reject 可能に (#156)。 `eth_accounts` は read-only として従来挙動を維持し下位互換を保つ。 `WalletApi` / `DappE2eApi` に `setRejectConnect(enabled)` setter を expose。
+  `@kiwa-lab/dapp` の `RpcContext` に opt-in `rejectConnect` flag を追加し、 `setApprovalMode('reject')` 時に `eth_requestAccounts` を EIP-1193 code 4001 で reject 可能に (#156)。 `eth_accounts` は read-only として従来挙動を維持し下位互換を保つ。 `WalletApi` / `DappE2eApi` に `setRejectConnect(enabled)` setter を expose。
 - 4104571: Issue #4 — Changesets + GitHub Actions CI (node 20/22 matrix) + npm publish provenance による v0.1.0 publish 基盤を確立。
   各 package に publishConfig (access public + provenance true) + repository + license MIT + keywords を追加し、`.npmignore` と `files: ["dist"]` で公開 tarball を dist のみに限定。
   本 changeset は次回 release.yml 起動時の version PR に集約され、v0.0.0 → v0.1.0 bump の起点となる (実 publish は NPM_TOKEN 配布後)。

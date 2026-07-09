@@ -1,4 +1,4 @@
-import { defineIsland, h, type IslandDefinition, type SyntheticEvent } from '@kiwa/fresh';
+import { defineIsland, h, type IslandDefinition, type SyntheticEvent } from '@kiwa-lab/fresh';
 
 /**
  * TodoList island — hosts an input + a rendered list of seed titles. The
@@ -9,7 +9,7 @@ import { defineIsland, h, type IslandDefinition, type SyntheticEvent } from '@ki
 
 export interface TodoListIslandProps {
   readonly seedTitles: readonly string[];
-  // Index signature is required by @kiwa/fresh `IslandProps` constraint so
+  // Index signature is required by @kiwa-lab/fresh `IslandProps` constraint so
   // the JSON-serialized props round-trip through hydrateIslands without losing
   // typing at the island boundary.
   readonly [key: string]: unknown;

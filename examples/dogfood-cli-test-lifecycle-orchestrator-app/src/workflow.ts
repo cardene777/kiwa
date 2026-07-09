@@ -5,7 +5,7 @@ import {
   type CliSession,
   type CliSummary,
   type CliEvent,
-} from '@kiwa/cli-test';
+} from '@kiwa-lab/cli-test';
 
 export function bootCli(input: { timestamp: string }): CliSession {
   return startCli({ timestamp: input.timestamp });

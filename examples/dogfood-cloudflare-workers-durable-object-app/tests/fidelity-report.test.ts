@@ -66,7 +66,7 @@ describe('fidelity harness contract', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/edge/cloudflare-durable-object',
+      provider: '@kiwa-lab/edge/cloudflare-durable-object',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -122,7 +122,7 @@ describe('fidelity harness contract', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/edge/cloudflare-durable-object',
+      provider: '@kiwa-lab/edge/cloudflare-durable-object',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

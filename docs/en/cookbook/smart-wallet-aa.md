@@ -2,7 +2,7 @@
 
 > [🇬🇧 English](./smart-wallet-aa.md) • [🇯🇵 日本語](../../ja/cookbook/smart-wallet-aa.md)
 
-Use `WalletConfig.isContractAccount` added in `@kiwa/dapp` v0.3 to test ERC-4337 / EIP-1271 smart contract accounts end-to-end.
+Use `WalletConfig.isContractAccount` added in `@kiwa-lab/dapp` v0.3 to test ERC-4337 / EIP-1271 smart contract accounts end-to-end.
 
 ## Problem
 
@@ -20,7 +20,7 @@ kiwa handles these differences transparently at the RPC layer so dApp code (wagm
 
 ```ts
 // tests/prepare-env.ts
-import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa/dapp';
+import { runE2EPrepareEnv, loadForgeArtifact } from '@kiwa-lab/dapp';
 
 await runE2EPrepareEnv({
   envFile: '.env.local',
@@ -50,7 +50,7 @@ await runE2EPrepareEnv({
 
 ```ts
 // tests/fixture.ts
-import { dappE2eTest } from '@kiwa/dapp';
+import { dappE2eTest } from '@kiwa-lab/dapp';
 import type { Address } from 'viem';
 
 const SMART_ACCOUNT_ADDRESS = process.env.NEXT_PUBLIC_SMART_ACCOUNT as Address;
@@ -130,7 +130,7 @@ SDK-bound integrations land in v0.4+ (Phase D-3):
 - **Safe (Gnosis Safe)** — multi-sig threshold signatures
 - **Biconomy / ZeroDev / Alchemy AA SDK** — managed bundler / paymaster
 
-Likely shape: accept external SDKs via `peerDependencies` and ship them as subpackages (`@kiwa/aa-thirdweb`, `@kiwa/aa-safe`, ...).
+Likely shape: accept external SDKs via `peerDependencies` and ship them as subpackages (`@kiwa-lab/aa-thirdweb`, `@kiwa-lab/aa-safe`, ...).
 
 ## Avoiding false positives
 

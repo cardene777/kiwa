@@ -10,7 +10,7 @@
  * ため、 snippet と実 API の乖離を CI で検知する。 v1.17 / v1.19 / v1.20 /
  * v1.21 / v1.22 / v1.23 の docs-tutorial-v*.test.ts と同 pattern。
  *
- * v1.24 は @kiwa/edge v0.2 の 8-axis 高度な edge semantics を扱う
+ * v1.24 は @kiwa-lab/edge v0.2 の 8-axis 高度な edge semantics を扱う
  * (durable-object / websocket-edge / edge-kv / geo-replicated / cron-trigger /
  * subrequest-limit / cpu-time-limit / streaming-response)。 mock 部分のみを
  * behavior test 対象とする (real driver (Miniflare / Vercel Edge sandbox /

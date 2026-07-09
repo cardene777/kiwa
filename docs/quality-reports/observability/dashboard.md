@@ -1,13 +1,13 @@
 # Fidelity — dogfood-observability-dashboard (v1.17-2)
 
-Real-vs-mock behavioural fidelity for the Grafana-style observability dashboard dogfood, produced by `examples/dogfood-observability-dashboard/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 7-axis release gate.
+Real-vs-mock behavioural fidelity for the Grafana-style observability dashboard dogfood, produced by `examples/dogfood-observability-dashboard/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-lab/quality-metrics` 7-axis release gate.
 
 ## Baseline (real mode skipped — no `PROMETHEUS_URL`)
 
 When the harness runs without a Prometheus URL, the real adapter emits `PROMETHEUS_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa/observability/dashboard
+provider   : @kiwa-lab/observability/dashboard
 version    : 2.0.0
 verdict    : PASS
 divergences: 2 (refreshDashboard / runQuery — recorded as BEHAVIORAL_DIVERGENCE, real mode absent)
@@ -67,7 +67,7 @@ The 5 seeded panels (`src/panels/index.ts`) each pin one chart_type against a sh
 
 ## Notes
 
-Provider prefix `@kiwa/observability/` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Prometheus is a metrics primitive, not a token-priced generative call. HTTP query round-trip latency feeds `perf.p95Ms` so dashboard performance stays visible in the report.
+Provider prefix `@kiwa-lab/observability/` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Prometheus is a metrics primitive, not a token-priced generative call. HTTP query round-trip latency feeds `perf.p95Ms` so dashboard performance stays visible in the report.
 
 `getRefreshCount` is deliberately NOT reset by `adapter.reset()` — the DashboardMock instance owns refresh identity across the adapter's lifetime, so tests can measure absolute refresh cadence without wall-clock coupling. `adapter.reset()` DOES clear traces, query counters, and latency samples so a test can start a fresh fidelity run without discarding refresh history.
 

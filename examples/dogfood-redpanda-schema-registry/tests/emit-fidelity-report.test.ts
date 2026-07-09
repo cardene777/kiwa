@@ -44,7 +44,7 @@ describe('dogfood-redpanda-schema-registry — emit fidelity report to quality-r
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/streaming/redpanda-schema-registry-dogfood',
+      provider: '@kiwa-lab/streaming/redpanda-schema-registry-dogfood',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

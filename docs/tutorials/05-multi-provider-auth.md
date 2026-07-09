@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A single vitest test file that runs the same login-then-fetch-profile flow against three different auth providers — NextAuth v5, Clerk, Auth0 — using `@kiwa/auth`'s per-provider adapters. The point is to prove that a provider-neutral shape you write once can be swapped freely.
+A single vitest test file that runs the same login-then-fetch-profile flow against three different auth providers — NextAuth v5, Clerk, Auth0 — using `@kiwa-lab/auth`'s per-provider adapters. The point is to prove that a provider-neutral shape you write once can be swapped freely.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A single vitest test file that runs the same login-then-fetch-profile flow again
 ```bash
 mkdir kiwa-multi-provider && cd kiwa-multi-provider
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa/auth @kiwa/core
+pnpm add -D vitest typescript @types/node @kiwa-lab/auth @kiwa-lab/core
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -61,7 +61,7 @@ export interface ProviderAdapter {
 Create `src/adapters.ts` — one per provider:
 
 ```ts
-import { setupAuth0Env, setupClerkEnv, setupNextAuthEnv } from '@kiwa/auth';
+import { setupAuth0Env, setupClerkEnv, setupNextAuthEnv } from '@kiwa-lab/auth';
 import type { ProviderAdapter } from './provider-adapter.js';
 
 export async function nextauthAdapter(): Promise<ProviderAdapter> {
@@ -165,7 +165,7 @@ You should see 3 passing tests — one per provider.
 
 ## Troubleshoot
 
-- **`env.callbacks.session is not a function`** — NextAuth v5 renamed callbacks; make sure `@kiwa/auth` is on v0.3+.
+- **`env.callbacks.session is not a function`** — NextAuth v5 renamed callbacks; make sure `@kiwa-lab/auth` is on v0.3+.
 - **`Clerk.signIn` throws `user_1 not found`** — Clerk envs are seeded via the `users: [{ id: ... }]` array. Check the id matches what you pass to `signIn`.
 - **Auth0 mgmt.users.create returns `null`** — The tenant name is required. Setup with `setupAuth0Env({ tenant: '<name>' })`.
 

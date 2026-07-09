@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A Playwright + `@kiwa/dapp` test that fires a Next.js + wagmi ERC-20 UI at an anvil fork, mines a transfer, drops an `evm_snapshot` marker, mines more state on top, then rewinds the chain with `evm_revert` and asserts the dApp reconverges. You end with 4 scenarios that cover the reorg failure modes wagmi + viem users hit in production — pending-tx dropped, confirmed-tx balance rollback, `Transfer` event history truncation, and nonce-gap re-send — powered by the same `snapshotChain` / `revertChain` primitives `kiwa-play` ships in v1.18.
+A Playwright + `@kiwa-lab/dapp` test that fires a Next.js + wagmi ERC-20 UI at an anvil fork, mines a transfer, drops an `evm_snapshot` marker, mines more state on top, then rewinds the chain with `evm_revert` and asserts the dApp reconverges. You end with 4 scenarios that cover the reorg failure modes wagmi + viem users hit in production — pending-tx dropped, confirmed-tx balance rollback, `Transfer` event history truncation, and nonce-gap re-send — powered by the same `snapshotChain` / `revertChain` primitives `kiwa-play` ships in v1.18.
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ A Playwright + `@kiwa/dapp` test that fires a Next.js + wagmi ERC-20 UI at an an
 mkdir kiwa-reorg-first && cd kiwa-reorg-first
 pnpm init
 pnpm add next react react-dom wagmi viem
-pnpm add -D @playwright/test @kiwa/dapp typescript @types/node
+pnpm add -D @playwright/test @kiwa-lab/dapp typescript @types/node
 ```
 
 Set `type: module`, the test script, and the Playwright config in `package.json`.
@@ -62,10 +62,10 @@ Bring the anvil chain up (fork mainnet is optional; the tutorial uses the defaul
 anvil --port 8557 &
 ```
 
-Create the Playwright fixture at `tests/fixture.ts` that layers on top of `@kiwa/dapp`.
+Create the Playwright fixture at `tests/fixture.ts` that layers on top of `@kiwa-lab/dapp`.
 
 ```ts
-import { dappE2eTest } from '@kiwa/dapp';
+import { dappE2eTest } from '@kiwa-lab/dapp';
 
 const ANVIL_PORT = 8557;
 
@@ -81,7 +81,7 @@ export { expect } from '@playwright/test';
 Add the reorg spec at `tests/e2e/reorg.spec.ts`. The four scenarios walk exactly the shape the `dogfood-dapp-e2e-reorg` app measures in the release-gate feed.
 
 ```ts
-import { snapshotChain, revertChain } from '@kiwa/dapp';
+import { snapshotChain, revertChain } from '@kiwa-lab/dapp';
 import { createPublicClient, createWalletClient, defineChain, http, parseUnits } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from '../fixture';
@@ -155,9 +155,9 @@ Reorg bugs in wagmi + viem apps almost always fall into one of four buckets. The
 
 Every scenario keeps `evm_snapshot` and `evm_revert` symmetric so the anvil state matches the mock adapter's `MockChainState.snapshot()` / `revert()` — that symmetry is what lets the release-gate fidelity harness diff mock vs real on the same 4-op trace.
 
-## What v1.18 brings to `@kiwa/dapp`
+## What v1.18 brings to `@kiwa-lab/dapp`
 
-The v1.10 `@kiwa/dapp` package shipped the wallet-injection + `dappE2eTest` fixture. v1.18 adds two primitives on top.
+The v1.10 `@kiwa-lab/dapp` package shipped the wallet-injection + `dappE2eTest` fixture. v1.18 adds two primitives on top.
 
 - `snapshotChain(client: PublicClient): Promise<Hex>` — thin wrapper that calls `evm_snapshot` through the viem `PublicClient` request path and returns the snapshot id typed as a `Hex`, ready to feed back into `revertChain`.
 - `revertChain(client: PublicClient, snapshotId: Hex): Promise<boolean>` — thin wrapper that calls `evm_revert` and returns anvil's boolean response. A stale id returns `false`, so the assertion `expect(reverted).toBe(true)` catches drift instead of letting the test silently continue.

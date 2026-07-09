@@ -17,7 +17,7 @@
  * include DPoP proof binding + refresh rotation guards at this layer.
  */
 
-import type { TokenRequest, TokenResponse } from '@kiwa/auth';
+import type { TokenRequest, TokenResponse } from '@kiwa-lab/auth';
 import type { OAuth21ASAdapter } from '../../adapters/interface.js';
 import { assertVerifierFormat, PkceValidationError } from '../../lib/pkce.js';
 

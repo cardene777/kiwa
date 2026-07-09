@@ -2,14 +2,14 @@
 
 > [🇬🇧 English](../../en/api/test-helpers.md) • [🇯🇵 日本語](./test-helpers.md)
 
-`@kiwa/dapp` v0.2 で追加された 7 test helper の API リファレンス。 業界標準 (hardhat / foundry / viem / hardhat-chai-matchers) と並ぶ範囲を core に集約することで、 各 example での重複定義を解消した。
+`@kiwa-lab/dapp` v0.2 で追加された 7 test helper の API リファレンス。 業界標準 (hardhat / foundry / viem / hardhat-chai-matchers) と並ぶ範囲を core に集約することで、 各 example での重複定義を解消した。
 
 ## snapshotChain / revertChain
 
 anvil の `evm_snapshot` / `evm_revert` の thin wrapper。 test 間で chain state を隔離する用途。
 
 ```ts
-import { snapshotChain, revertChain } from '@kiwa/dapp';
+import { snapshotChain, revertChain } from '@kiwa-lab/dapp';
 
 test.beforeEach(async ({ publicClient }) => {
   snapshotId = await snapshotChain(publicClient);
@@ -30,7 +30,7 @@ test.afterEach(async ({ publicClient }) => {
 viem `BaseError` chain から `ContractFunctionRevertedError` を抽出し、 `errorName` を assertion する custom error 検証 helper。
 
 ```ts
-import { expectCustomError } from '@kiwa/dapp';
+import { expectCustomError } from '@kiwa-lab/dapp';
 
 try {
   await publicClient.simulateContract({
@@ -55,7 +55,7 @@ try {
 時間操作の thin wrapper。 vesting / TTL / timelock 系 dApp の test に。
 
 ```ts
-import { increaseTime, mineBlock, setNextBlockTimestamp } from '@kiwa/dapp';
+import { increaseTime, mineBlock, setNextBlockTimestamp } from '@kiwa-lab/dapp';
 
 await increaseTime(publicClient, 7 * 24 * 60 * 60);  // 7 day 進める
 await mineBlock(publicClient, 5);  // 5 block mine
@@ -73,7 +73,7 @@ await setNextBlockTimestamp(publicClient, 1_900_000_000n);  // 次 block timesta
 任意 EOA / contract を impersonate し、 owner-only function を直接呼ぶ用途。
 
 ```ts
-import { impersonateAccount, stopImpersonateAccount, setBalance } from '@kiwa/dapp';
+import { impersonateAccount, stopImpersonateAccount, setBalance } from '@kiwa-lab/dapp';
 
 await setBalance(publicClient, OWNER_ADDR, 10n ** 18n);  // 1 ETH 注入
 await impersonateAccount(publicClient, OWNER_ADDR);
@@ -99,7 +99,7 @@ mainnet fork test で「実在する owner address から呼ぶ」シナリオ�
 複数 chain id の anvil を同時起動する helper。 multi-chain dApp (bridge / cross-chain swap) の test に。
 
 ```ts
-import { startAnvilCluster } from '@kiwa/dapp';
+import { startAnvilCluster } from '@kiwa-lab/dapp';
 
 const cluster = await startAnvilCluster({
   chains: [
@@ -120,7 +120,7 @@ await cluster.stop();  // 全 chain を一括停止
 `anvil --fork-url` の thin wrapper。 mainnet / sepolia / 任意 RPC 経由の fork test に。
 
 ```ts
-import { startAnvilFork } from '@kiwa/dapp';
+import { startAnvilFork } from '@kiwa-lab/dapp';
 
 const fork = await startAnvilFork({
   forkUrl: process.env.ALCHEMY_MAINNET!,
@@ -138,7 +138,7 @@ const fork = await startAnvilFork({
 `decodeEventLog` + assertion を 1 関数に統合した event 検証 helper。
 
 ```ts
-import { expectEvent } from '@kiwa/dapp';
+import { expectEvent } from '@kiwa-lab/dapp';
 
 const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
@@ -157,7 +157,7 @@ expectEvent(receipt, NFT_ABI, 'Transfer', {
 action 実行前後で残高差分を assertion する helper。 hardhat-chai-matchers の `changeTokenBalance` / `changeEtherBalance` 互換 API。
 
 ```ts
-import { expectBalanceChange, expectEthBalanceChange } from '@kiwa/dapp';
+import { expectBalanceChange, expectEthBalanceChange } from '@kiwa-lab/dapp';
 
 // ERC-20 残高
 await expectBalanceChange(publicClient, USDC_ADDR, USER_ADDR, 100n * 10n ** 6n, async () => {

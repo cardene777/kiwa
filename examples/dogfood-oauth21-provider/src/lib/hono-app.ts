@@ -30,7 +30,7 @@ import type {
   AuthorizationServer,
   DpopProof,
   TokenRequest,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 import type { OAuth21ASAdapter } from '../adapters/interface.js';
 import { assertAuthorizeQueryPkce } from '../app/authorize/route.js';
 import { assertTokenPkce } from '../app/token/route.js';

@@ -6,7 +6,7 @@ title: Desktop v1.0 invoke-cache layer SSOT
 
 ## What this covers
 
-`@kiwa/desktop` v1.0 の invoke-cache layer SSOT。 v1.67 で v0.9 実 native binding 呼出 → v1.0 invoke-cache 統合、 Desktop 縦深化 pair の第 10 段、 **depth-6 pattern 2 例目確定 candidate** (Mobile v1.55 depth-5 + Desktop v1.61 depth-5 + Desktop v1.67 depth-6 の 2 例目化)、 v0.9 baseline (`docs/concepts/desktop-native-invoke.md`) を extend。
+`@kiwa-lab/desktop` v1.0 の invoke-cache layer SSOT。 v1.67 で v0.9 実 native binding 呼出 → v1.0 invoke-cache 統合、 Desktop 縦深化 pair の第 10 段、 **depth-6 pattern 2 例目確定 candidate** (Mobile v1.55 depth-5 + Desktop v1.61 depth-5 + Desktop v1.67 depth-6 の 2 例目化)、 v0.9 baseline (`docs/concepts/desktop-native-invoke.md`) を extend。
 
 ## InvokeCache class SSOT
 

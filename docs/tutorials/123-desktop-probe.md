@@ -2,12 +2,12 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/desktop` v0.8 (probe layer、 v1.63 で kiwa 縦深化 pair 第 14 の第 8 段 = **depth-8 pattern 新設 candidate**、 **systematic pattern 38 度目適用**、 41 milestone streak)、 8 CLI availability probe + platform gate + 12 axis 別 skip strategy + fidelity harness probe 統合、 実 CLI 未 install 環境でも決定的 test 成立。
+A vitest suite wired to `@kiwa-lab/desktop` v0.8 (probe layer、 v1.63 で kiwa 縦深化 pair 第 14 の第 8 段 = **depth-8 pattern 新設 candidate**、 **systematic pattern 38 度目適用**、 41 milestone streak)、 8 CLI availability probe + platform gate + 12 axis 別 skip strategy + fidelity harness probe 統合、 実 CLI 未 install 環境でも決定的 test 成立。
 
 ## Prerequisites
 
 - Node.js ≥ 20 + pnpm
-- `@kiwa/desktop` v0.8 (`pnpm add -D @kiwa/desktop@^0.8`)
+- `@kiwa-lab/desktop` v0.8 (`pnpm add -D @kiwa-lab/desktop@^0.8`)
 
 ## Step-by-step build
 
@@ -15,7 +15,7 @@ A vitest suite wired to `@kiwa/desktop` v0.8 (probe layer、 v1.63 で kiwa 縦�
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { probeCliAvailable } from '@kiwa/desktop';
+import { probeCliAvailable } from '@kiwa-lab/desktop';
 
 describe('probe CLI', () => {
   it('ffmpeg 存在確認 (which/where)', async () => {
@@ -31,7 +31,7 @@ describe('probe CLI', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { shouldSkipAxis, platformGate } from '@kiwa/desktop';
+import { shouldSkipAxis, platformGate } from '@kiwa-lab/desktop';
 
 describe('platform gate + skip', () => {
   it('electron / tauri / webview / dark-mode = semantics-only、 skip なし', () => {
@@ -48,7 +48,7 @@ describe('platform gate + skip', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runFidelityCheckWithProbe } from '@kiwa/desktop';
+import { runFidelityCheckWithProbe } from '@kiwa-lab/desktop';
 
 describe('probe-aware fidelity check', () => {
   it('diffs + skippedPairs 両方返却、 総和 = 36 pair', async () => {

@@ -38,7 +38,7 @@ describe('adversarial regressions — codex-rescue findings on PR #916', () => {
     // The report must NOT trust the caller — it must reflect what actually ran.
     const emptyMockTraces: TraceEvent[] = [];
     const output = runFidelityHarness({
-      provider: '@kiwa/edge/vercel-edge-function',
+      provider: '@kiwa-lab/edge/vercel-edge-function',
       version: '0.1.0',
       mockTraces: emptyMockTraces,
       realTraces: [],

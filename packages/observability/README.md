@@ -1,4 +1,4 @@
-# @kiwa/observability
+# @kiwa-lab/observability
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package closes the loop with coverage / flaky detection / dashboard)" width="640" />
@@ -10,7 +10,7 @@ Observability adapter for kiwa — close the loop between Layer 1 spec, Layer 2 
 
 ## Overview
 
-`@kiwa/observability` provides the bottom of the design × implementation × observability loop:
+`@kiwa-lab/observability` provides the bottom of the design × implementation × observability loop:
 
 - `collectRunHistory({ history, records, maxPerTest })` — append vitest-style runs to a history, with FIFO eviction.
 - `fromVitestJson(report, { runId })` — convert a vitest JSON reporter blob into `TestRunRecord[]`, extracting `T-XXX-NNN` IDs from the test names.
@@ -36,7 +36,7 @@ Named fixture builders (`panel_httpErrorRate` / `rule_errorRateCritical` / `trac
 ## Install
 
 ```bash
-pnpm add -D @kiwa/observability @kiwa/core vitest
+pnpm add -D @kiwa-lab/observability @kiwa-lab/core vitest
 ```
 
 ## Quick start
@@ -48,7 +48,7 @@ import {
   detectFlaky,
   fromVitestJson,
   renderDashboard,
-} from "@kiwa/observability";
+} from "@kiwa-lab/observability";
 import { readFile } from "node:fs/promises";
 
 const vitestReport = JSON.parse(await readFile("vitest-results.json", "utf8"));

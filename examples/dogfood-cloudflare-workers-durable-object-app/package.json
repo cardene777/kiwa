@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.24-2 — a Cloudflare Workers Durable Object realtime chat room app that exercises the durable-object axis (createDurableObject / requestDurableObject / fireAlarm / writeStorage) + websocket-edge axis (upgrade-requested / accepted / message / closed) + Hibernation API + storage transactional + 24-h alarm-based purge. Drivable in both KIWA_MODE=real (Miniflare + wrangler dev + WRANGLER_KEY env-gate) and KIWA_MODE=mock (@kiwa/edge v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.",
+  "description": "Dogfood app v1.24-2 — a Cloudflare Workers Durable Object realtime chat room app that exercises the durable-object axis (createDurableObject / requestDurableObject / fireAlarm / writeStorage) + websocket-edge axis (upgrade-requested / accepted / message / closed) + Hibernation API + storage transactional + 24-h alarm-based purge. Drivable in both KIWA_MODE=real (Miniflare + wrangler dev + WRANGLER_KEY env-gate) and KIWA_MODE=mock (@kiwa-lab/edge v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.",
   "scripts": {
-    "test": "pnpm -F @kiwa/edge -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/edge -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/edge": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/edge": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

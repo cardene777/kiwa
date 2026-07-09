@@ -6,7 +6,7 @@ kiwa v1.48 をリリースしました。 **security-devsecops v0.3 Phase 3 runS
 
 ## 何が変わったか
 
-### `@kiwa/security-devsecops` v0.2 → v0.3 (Phase 3 完成)
+### `@kiwa-lab/security-devsecops` v0.2 → v0.3 (Phase 3 完成)
 
 - `runSecurityAudit({ preset, target, mode })` single entry 追加、 skill 個別化の workload を library に集約
 - 4 preset SSOT map = audit-all / supply-chain / specialty / threat-model
@@ -44,7 +44,7 @@ v1.23 → v1.48 = 26 milestone 連続、 kiwa 史上最長記録更新継続。
 ## インストール
 
 ```bash
-pnpm add -D @kiwa/security-devsecops@^0.3
+pnpm add -D @kiwa-lab/security-devsecops@^0.3
 ```
 
 ## Migration guide

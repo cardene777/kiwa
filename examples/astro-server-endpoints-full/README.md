@@ -1,6 +1,6 @@
 # astro-server-endpoints-full — kiwa Astro v5 SSR PoC (APIRoute + middleware locals)
 
-`@kiwa/astro` v1.0.x の `invokeEndpoint` helper を **実 Astro v5 SSR project** に統合した参考実装。
+`@kiwa-lab/astro` v1.0.x の `invokeEndpoint` helper を **実 Astro v5 SSR project** に統合した参考実装。
 
 OSS contributor / kiwa を初めて触る user 向けに、 Astro の `pages/api/*.ts` (API Route) と middleware で注入される `Astro.locals` をどう書けば kiwa 経由で test できるかを **コピペで動く形** で示す。
 
@@ -57,7 +57,7 @@ astro-server-endpoints-full/
 
 ```bash
 pnpm install               # repo root から実行
-pnpm -F examples-astro-server-endpoints-full build  # 依存 @kiwa/astro + @kiwa/core + Astro build
+pnpm -F examples-astro-server-endpoints-full build  # 依存 @kiwa-lab/astro + @kiwa-lab/core + Astro build
 ```
 
 ### Step 2 — kiwa unit test (Astro 起動不要、 高速)
@@ -101,7 +101,7 @@ pnpm -F examples-astro-server-endpoints-full test:e2e
 3. **locals injection pattern** — `locals: { ... }` で middleware 注入値を fake 化、 endpoint が読む値を unit test で精緻に制御
 4. **redirect pattern** — `context.redirect()` を返した時、 結果の `redirect` field が `{ url, status }` で捕捉される (response status code でも判定可)
 
-helper の API 詳細は [`@kiwa/astro` の README](../../packages/astro/README.md) を参照。
+helper の API 詳細は [`@kiwa-lab/astro` の README](../../packages/astro/README.md) を参照。
 
 ## 関連
 

@@ -2,13 +2,13 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/desktop` v0.6 (実 spawn 実装完成、 v1.61 で kiwa 縦深化 pair 第 14 の第 6 段、 **depth-5 pattern 2 例目確定** + **depth-6 pattern 新設 candidate** (kiwa milestone 史上初 depth-6 record)、 **systematic pattern 36 度目適用**、 **Mobile v1.55 rhythm 再現**、 39 milestone streak)、 8 CLI-backed axis (electron-builder / electron-updater / ffmpeg / xclip / osascript / notify-send / defaults / reg) を per-command env allowlist + timeout + buffer 上限 + shell:false + detached:false + SIGKILL の安全性 pattern + DI 経路 + KIWA_DESKTOP_SPAWN=dry-run で backward compat。
+A vitest suite wired to `@kiwa-lab/desktop` v0.6 (実 spawn 実装完成、 v1.61 で kiwa 縦深化 pair 第 14 の第 6 段、 **depth-5 pattern 2 例目確定** + **depth-6 pattern 新設 candidate** (kiwa milestone 史上初 depth-6 record)、 **systematic pattern 36 度目適用**、 **Mobile v1.55 rhythm 再現**、 39 milestone streak)、 8 CLI-backed axis (electron-builder / electron-updater / ffmpeg / xclip / osascript / notify-send / defaults / reg) を per-command env allowlist + timeout + buffer 上限 + shell:false + detached:false + SIGKILL の安全性 pattern + DI 経路 + KIWA_DESKTOP_SPAWN=dry-run で backward compat。
 
 ## Prerequisites
 
 - Node.js ≥ 20
 - `pnpm`
-- `@kiwa/desktop` v0.6 (`pnpm add -D @kiwa/desktop@^0.6`)
+- `@kiwa-lab/desktop` v0.6 (`pnpm add -D @kiwa-lab/desktop@^0.6`)
 
 ## Step-by-step build
 
@@ -17,14 +17,14 @@ A vitest suite wired to `@kiwa/desktop` v0.6 (実 spawn 実装完成、 v1.61 �
 ```bash
 mkdir kiwa-desktop-v06 && cd kiwa-desktop-v06
 pnpm init
-pnpm add -D @kiwa/desktop@^0.6 vitest typescript @types/node
+pnpm add -D @kiwa-lab/desktop@^0.6 vitest typescript @types/node
 ```
 
 ### 2. dry-run 経路 (実 CLI 未 install 環境向け backward compat)
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeDesktopCli, type DesktopCliCommand } from '@kiwa/desktop';
+import { invokeDesktopCli, type DesktopCliCommand } from '@kiwa-lab/desktop';
 
 describe('v0.6 dry-run', () => {
   it('KIWA_DESKTOP_SPAWN=dry-run で v0.5 shape 契約復元', async () => {
@@ -47,7 +47,7 @@ describe('v0.6 dry-run', () => {
 ```ts
 import { EventEmitter } from 'node:events';
 import { describe, expect, it } from 'vitest';
-import { invokeDesktopCliWith, type SpawnFn } from '@kiwa/desktop';
+import { invokeDesktopCliWith, type SpawnFn } from '@kiwa-lab/desktop';
 
 class DummyChild extends EventEmitter {
   stdout = new EventEmitter();
@@ -85,7 +85,7 @@ describe('v0.6 DI 経路', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { sanitizeEnv } from '@kiwa/desktop';
+import { sanitizeEnv } from '@kiwa-lab/desktop';
 
 describe('v0.6 sanitizeEnv', () => {
   it('electron-builder は CSC_LINK + BUILD_TARGET を通す', () => {

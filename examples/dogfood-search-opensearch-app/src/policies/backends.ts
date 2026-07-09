@@ -5,7 +5,7 @@
  * — OpenSearch's production HTTP API ships native BM25 + custom
  * ranking (script scoring / function score) + multi-analyzer (stemmer
  * + phonetic + fuzzy) + rolling reindex + alias swap that are the
- * reference implementation the `@kiwa/search` v0.3 relevance +
+ * reference implementation the `@kiwa-lab/search` v0.3 relevance +
  * synonym-advanced + index-management axes were designed to match.
  * Meilisearch / Typesense / Algolia are covered by sibling apps in the
  * v1.36-2 / v1.36-3 releases.

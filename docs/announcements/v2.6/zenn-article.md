@@ -13,7 +13,7 @@ Search pair v0.1 → v2.1 = 5 段深化到達 = **depth-5 pattern 7 例目発生
 ## Install
 
 ```bash
-pnpm add -D @kiwa/search@^2.1
+pnpm add -D @kiwa-lab/search@^2.1
 ```
 
 ## Migration guide

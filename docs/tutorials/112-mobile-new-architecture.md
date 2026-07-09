@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-`@kiwa/mobile` v0.3 で追加された advanced III 4 axis (fabric + turbo-modules + codegen + new-architecture) を、 React Native 0.76+ New Architecture の semantics を target-neutral に扱う vitest suite。 v1.50 base 3 + v1.51 advanced II 4 と合わせて **11 axis を production layer で使う pattern**、 pair 深度 3 段拡張達成 5 例目。
+`@kiwa-lab/mobile` v0.3 で追加された advanced III 4 axis (fabric + turbo-modules + codegen + new-architecture) を、 React Native 0.76+ New Architecture の semantics を target-neutral に扱う vitest suite。 v1.50 base 3 + v1.51 advanced II 4 と合わせて **11 axis を production layer で使う pattern**、 pair 深度 3 段拡張達成 5 例目。
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@
 ```bash
 mkdir kiwa-mobile-new-arch && cd kiwa-mobile-new-arch
 pnpm init
-pnpm add -D @kiwa/mobile@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa-lab/mobile@^0.3 vitest typescript @types/node
 ```
 
 ### 2. Fabric axis (concurrent renderer)
@@ -29,7 +29,7 @@ import {
   completeFabricMount,
   initFabric,
   scheduleFabricRender,
-} from '@kiwa/mobile';
+} from '@kiwa-lab/mobile';
 
 describe('Fabric concurrent renderer', () => {
   it('schedule → commit → mount', () => {
@@ -52,7 +52,7 @@ import {
   invokeTurboMethod,
   registerTurboSpec,
   unregisterTurboModule,
-} from '@kiwa/mobile';
+} from '@kiwa-lab/mobile';
 
 describe('TurboModules JSI lifecycle', () => {
   it('register → bind → invoke → unregister', () => {
@@ -76,7 +76,7 @@ import {
   generateSpec,
   initCodegen,
   loadCodegenSchema,
-} from '@kiwa/mobile';
+} from '@kiwa-lab/mobile';
 
 describe('Codegen build flow', () => {
   it('schema → spec → type → build', () => {
@@ -100,7 +100,7 @@ import {
   initNewArchitecture,
   markNewArchReady,
   startNewArchInit,
-} from '@kiwa/mobile';
+} from '@kiwa-lab/mobile';
 
 describe('New Architecture full init', () => {
   it('init → concurrent → interop → ready', () => {

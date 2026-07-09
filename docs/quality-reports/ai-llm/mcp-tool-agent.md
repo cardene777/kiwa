@@ -1,13 +1,13 @@
 # Fidelity — dogfood-mcp-tool-agent (v1.15-5)
 
-Real-vs-mock behavioural fidelity for the Anthropic Claude MCP tool-use agent dogfood, produced by `examples/dogfood-mcp-tool-agent/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 11-axis release gate.
+Real-vs-mock behavioural fidelity for the Anthropic Claude MCP tool-use agent dogfood, produced by `examples/dogfood-mcp-tool-agent/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-lab/quality-metrics` 11-axis release gate.
 
 ## Baseline (real mode skipped — no `ANTHROPIC_API_KEY` and no live `@modelcontextprotocol/sdk` install)
 
 When the harness runs without an Anthropic API key or a real MCP server binary, the real adapter emits `MCP_REAL_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa/ai-llm/mcp-tool-agent
+provider   : @kiwa-lab/ai-llm/mcp-tool-agent
 version    : 0.1.0
 verdict    : FAIL (accuracy.score below the 0.80 gate — expected without a live pair)
 divergences: 4 (handshake / listTools / callTool / runMcpToolLoop — real mode absent)
@@ -73,4 +73,4 @@ Anthropic Claude's tool-use loop delivers follow-up turns as user messages whose
 
 ## Notes
 
-Provider prefix `@kiwa/ai-llm/` triggers the 11-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — the 4 AI-LLM axes cost / latency / token / accuracy are added on top of the shared 7). MCP-specific fidelity (protocol version negotiation, `tools/list` shape, JSON-RPC error code parity) rolls up into the shared `fidelity.ratio` axis via the trace-diffing harness.
+Provider prefix `@kiwa-lab/ai-llm/` triggers the 11-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — the 4 AI-LLM axes cost / latency / token / accuracy are added on top of the shared 7). MCP-specific fidelity (protocol version negotiation, `tools/list` shape, JSON-RPC error code parity) rolls up into the shared `fidelity.ratio` axis via the trace-diffing harness.

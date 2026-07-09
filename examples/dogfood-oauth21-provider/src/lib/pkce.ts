@@ -34,8 +34,8 @@ import {
   createPkceChallenge as kiwaCreatePkceChallenge,
   deriveCodeChallenge as kiwaDeriveCodeChallenge,
   verifyCodeChallenge as kiwaVerifyCodeChallenge,
-} from '@kiwa/auth';
-import type { PkceChallenge, PkceChallengeMethod } from '@kiwa/auth';
+} from '@kiwa-lab/auth';
+import type { PkceChallenge, PkceChallengeMethod } from '@kiwa-lab/auth';
 
 /**
  * RFC 7636 §4.1 — code_verifier length bounds. 43 chars is the low bound
@@ -88,7 +88,7 @@ export class PkceValidationError extends Error {
  * Produce a fresh `{codeVerifier, codeChallenge, codeChallengeMethod}` triple.
  * Wraps {@link kiwaCreatePkceChallenge} without extra logic — kept as a
  * dogfood-level named export so callers do not import from
- * `@kiwa/auth` directly (keeps the dependency surface obvious).
+ * `@kiwa-lab/auth` directly (keeps the dependency surface obvious).
  */
 export function createPkceChallenge(): PkceChallenge {
   return kiwaCreatePkceChallenge();

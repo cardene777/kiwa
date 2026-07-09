@@ -2,7 +2,7 @@
 
 ## What this covers
 
-`@kiwa/auth` v0.6 layers 8 advanced Passwordless UX axes on top of the v0.4 / v0.5 base (4 protocol adapter = WebAuthn L3 + Passkey + OAuth 2.1 + OIDC). Each new axis models a semantic that browsers implement differently — device binding, conditional UI, step-up MFA, risk-based auth, auth continuity, cross-device flow, session hijack detection, and auth telemetry. This document is the SSOT for the 8 axes, the 3-platform fidelity grid (chromium / webkit / firefox), and the pair 第 1 pair 3 段拡張達成 record.
+`@kiwa-lab/auth` v0.6 layers 8 advanced Passwordless UX axes on top of the v0.4 / v0.5 base (4 protocol adapter = WebAuthn L3 + Passkey + OAuth 2.1 + OIDC). Each new axis models a semantic that browsers implement differently — device binding, conditional UI, step-up MFA, risk-based auth, auth continuity, cross-device flow, session hijack detection, and auth telemetry. This document is the SSOT for the 8 axes, the 3-platform fidelity grid (chromium / webkit / firefox), and the pair 第 1 pair 3 段拡張達成 record.
 
 ## Pair 第 1 pair 3 段拡張達成
 

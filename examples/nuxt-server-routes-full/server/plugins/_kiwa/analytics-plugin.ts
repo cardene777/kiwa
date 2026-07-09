@@ -4,7 +4,7 @@
 // 応答時間計測、 error 時は error log を console.error に出力。 logger は引数注入 (Pattern A) で
 // test 時に spy 可能。
 
-import type { SimulatedNitroApp } from '@kiwa/nuxt';
+import type { SimulatedNitroApp } from '@kiwa-lab/nuxt';
 
 export interface AnalyticsLogger {
   info(msg: string, payload?: Record<string, unknown>): void;

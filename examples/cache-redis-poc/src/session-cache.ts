@@ -1,4 +1,4 @@
-import type { CacheTestEnv } from '@kiwa/cache';
+import type { CacheTestEnv } from '@kiwa-lab/cache';
 
 /**
  * Signup-flow session cache — the sort of thing a SaaS registers when a user

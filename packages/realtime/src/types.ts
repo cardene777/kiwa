@@ -1,5 +1,5 @@
 /**
- * Shared types for `@kiwa/realtime` — 4 realtime provider 統一 mock の共通契約。
+ * Shared types for `@kiwa-lab/realtime` — 4 realtime provider 統一 mock の共通契約。
  *
  * v1.13 milestone (Issue #710、 親 #709) で新設。 kiwa の思想 =
  * 「1 度書けば 4 realtime SDK 同一挙動で回せる mock」 を実現するため、

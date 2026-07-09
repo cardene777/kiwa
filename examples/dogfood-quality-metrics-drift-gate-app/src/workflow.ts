@@ -7,7 +7,7 @@ import {
   type ReleaseGateContext,
   type ReleaseGateThresholds,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 
 /**
  * Pattern 1 — evaluateWithDriftGate = evaluateReleaseGate に driftEnabled +

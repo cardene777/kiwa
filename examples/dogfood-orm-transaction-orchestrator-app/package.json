@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v2.8-2 — @kiwa/orm v0.6 transaction-orchestrator 5 pattern workflow reference。 depth-5 pattern 9 例目 dogfood、 backend systems layer 初適用。",
+  "description": "Dogfood app v2.8-2 — @kiwa-lab/orm v0.6 transaction-orchestrator 5 pattern workflow reference。 depth-5 pattern 9 例目 dogfood、 backend systems layer 初適用。",
   "scripts": {
-    "test": "pnpm -F @kiwa/core -F @kiwa/orm build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/core -F @kiwa-lab/orm build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/orm": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/orm": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

@@ -2,11 +2,11 @@
 
 ## Summary
 
-kiwa v1.52 is out。 **Mobile 深化 III** (@kiwa/mobile v0.3) 単軸 milestone、 **縦深化 pair 第 13 の 3 段目 (Phase 3、 pair 深度 3 段拡張達成 5 例目 pair 深度 3 段記録) 完成**。 React Native 0.76+ New Architecture 4 axis (fabric + turbo-modules + codegen + new-architecture) 追加。
+kiwa v1.52 is out。 **Mobile 深化 III** (@kiwa-lab/mobile v0.3) 単軸 milestone、 **縦深化 pair 第 13 の 3 段目 (Phase 3、 pair 深度 3 段拡張達成 5 例目 pair 深度 3 段記録) 完成**。 React Native 0.76+ New Architecture 4 axis (fabric + turbo-modules + codegen + new-architecture) 追加。
 
 ## What's new
 
-### `@kiwa/mobile` v0.2 → v0.3
+### `@kiwa-lab/mobile` v0.2 → v0.3
 
 - **fabric axis 新規** = React Native 0.76+ Fabric concurrent renderer (schedule + shadow tree commit + priority + mount、 5 state)
 - **turbo-modules axis 新規** = typed native module + JSI runtime + spec registration (5 state)
@@ -42,7 +42,7 @@ Search v1.36 + Auth v1.44 + Realtime v1.45 + Frontend v1.49 の 4 例安定化�
 ## Install
 
 ```bash
-pnpm add -D @kiwa/mobile@^0.3
+pnpm add -D @kiwa-lab/mobile@^0.3
 ```
 
 ## Migration guide

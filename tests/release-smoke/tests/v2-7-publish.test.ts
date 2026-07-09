@@ -33,15 +33,15 @@ describe('v2.7-4 publish', () => {
       expect(config).toContain(link);
     }
   });
-  it('@kiwa/observability v2.1.0', () => {
+  it('@kiwa-lab/observability v2.1.0', () => {
     expect(readJson<{ version: string }>('packages/observability/package.json').version).toBe('2.1.0');
   });
   it('incident-orchestrator source', () => {
     const src = readText('packages/observability/src/semantics/incident-orchestrator.ts');
     expect(src).toContain('export function startIncident');
   });
-  it('release filter @kiwa/observability (50th)', () => {
-    expect(readJson<{ scripts: { release: string } }>('package.json').scripts.release).toContain('-F @kiwa/observability');
+  it('release filter @kiwa-lab/observability (50th)', () => {
+    expect(readJson<{ scripts: { release: string } }>('package.json').scripts.release).toContain('-F @kiwa-lab/observability');
   });
   it('dogfood 4 pattern', () => {
     const src = readText('examples/dogfood-observability-incident-app/src/workflow.ts');

@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/payment` v0.5 embedded-finance
+ * Mock adapter — drives `@kiwa-lab/payment` v0.5 embedded-finance
  * semantics (openAccount / verifyKyc / verifyKyb / issueCard /
  * closeAccount) so the same app code exercises a deterministic BaaS
  * ceremony without a real Stripe Treasury / Unit / Column endpoint. Both
@@ -27,7 +27,7 @@ import {
   closeAccount as closeAccountSem,
   type EmbeddedFinanceSession,
   type PaymentAdapter as PaymentWebhookAdapter,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import type {
   CardActivateResult,
   CardIssueResult,

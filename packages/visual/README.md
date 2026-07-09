@@ -1,4 +1,4 @@
-# @kiwa/visual
+# @kiwa-lab/visual
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package covers the visual regression surface)" width="640" />
@@ -11,7 +11,7 @@ Visual regression test adapter for the [kiwa](https://github.com/cardene777/kiwa
 ## Install
 
 ```bash
-pnpm add -D @kiwa/visual pixelmatch pngjs
+pnpm add -D @kiwa-lab/visual pixelmatch pngjs
 ```
 
 `pixelmatch` と `pngjs` は peer/optional 扱い、 必ず一緒に install してください。
@@ -21,7 +21,7 @@ pnpm add -D @kiwa/visual pixelmatch pngjs
 ```ts
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
-import { expectNoVisualDiff } from '@kiwa/visual';
+import { expectNoVisualDiff } from '@kiwa-lab/visual';
 
 test('header snapshot matches', () => {
   const baseline = readFileSync('tests/fixtures/header.baseline.png');

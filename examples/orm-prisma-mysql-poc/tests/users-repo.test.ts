@@ -1,9 +1,9 @@
-// PoC tests — @kiwa/orm v0.7 (Prisma + testcontainers MySQL).
+// PoC tests — @kiwa-lab/orm v0.7 (Prisma + testcontainers MySQL).
 
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { resolve } from 'node:path';
-import { setupOrmEnv, expectRowCount } from '@kiwa/orm';
-import type { OrmTestEnvLivePrismaMysql } from '@kiwa/orm';
+import { setupOrmEnv, expectRowCount } from '@kiwa-lab/orm';
+import type { OrmTestEnvLivePrismaMysql } from '@kiwa-lab/orm';
 import { PrismaClient } from '../prisma/generated/index.js';
 import { UsersRepository } from '../src/users-repo.js';
 
@@ -35,7 +35,7 @@ async function newEnv(): Promise<OrmTestEnvLivePrismaMysql<PrismaClient>> {
   });
 }
 
-describe('UsersRepository via @kiwa/orm (prisma + testcontainers mysql)', () => {
+describe('UsersRepository via @kiwa-lab/orm (prisma + testcontainers mysql)', () => {
   it('T-PM-001: create + findByEmail round-trip on real MySQL via Prisma', async () => {
     if (!dockerAvailable) return;
     env = await newEnv();

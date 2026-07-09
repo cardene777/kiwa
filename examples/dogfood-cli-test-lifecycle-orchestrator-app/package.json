@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v2.12-2 — @kiwa/cli-test v0.6 cli-lifecycle-orchestrator 5 pattern workflow reference。 depth-5 pattern 13 例目 candidate dogfood、 backend systems layer 第 5 例 = 完全普及。",
+  "description": "Dogfood app v2.12-2 — @kiwa-lab/cli-test v0.6 cli-lifecycle-orchestrator 5 pattern workflow reference。 depth-5 pattern 13 例目 candidate dogfood、 backend systems layer 第 5 例 = 完全普及。",
   "scripts": {
-    "test": "pnpm -F @kiwa/core -F @kiwa/cli-test build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/core -F @kiwa-lab/cli-test build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/cli-test": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/cli-test": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

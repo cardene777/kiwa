@@ -5,10 +5,10 @@
  * implementations exist — {@link makeRealAdapter} (fetches Anthropic
  * Messages API with `image` content blocks when `ANTHROPIC_API_KEY` is
  * set, otherwise reports each method as `ANTHROPIC_ENV_MISSING`) and
- * {@link makeMockAdapter} (backed by `@kiwa/ai-llm`
+ * {@link makeMockAdapter} (backed by `@kiwa-lab/ai-llm`
  * `createAnthropicMock` with `MessagePart` image support). Both must
  * satisfy the same contract so behavioural fidelity between real vs mock
- * can be measured side-by-side and fed to `@kiwa/quality-metrics`
+ * can be measured side-by-side and fed to `@kiwa-lab/quality-metrics`
  * 11-axis release gate.
  *
  * The 4 flows this contract supports mirror the AC in Issue #749 —

@@ -27,7 +27,7 @@ describe('v2.10-4 publish', () => {
       existsSync(resolve(REPO_ROOT, 'docs/announcements/v2.10/gh-discussions-announcement.md')),
     ).toBe(true);
   });
-  it('@kiwa/cache v2.1.0', () => {
+  it('@kiwa-lab/cache v2.1.0', () => {
     expect(readJson<{ version: string }>('packages/cache/package.json').version).toBe('2.1.0');
   });
   it('cache-lifecycle-orchestrator source', () => {
@@ -36,9 +36,9 @@ describe('v2.10-4 publish', () => {
     expect(src).toContain("'filling'");
     expect(src).toContain("'evicted'");
   });
-  it('release filter @kiwa/cache', () => {
+  it('release filter @kiwa-lab/cache', () => {
     expect(readJson<{ scripts: { release: string } }>('package.json').scripts.release).toContain(
-      '-F @kiwa/cache',
+      '-F @kiwa-lab/cache',
     );
   });
   it('dogfood 5 pattern', () => {

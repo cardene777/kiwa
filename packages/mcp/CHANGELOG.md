@@ -1,10 +1,10 @@
-# @kiwa/mcp
+# @kiwa-lab/mcp
 
 ## 0.2.0
 
 ### Minor Changes
 
-- 73e01b7: v1.15-2: @kiwa/mcp v0.1 — Model Context Protocol server + client mock harness
+- 73e01b7: v1.15-2: @kiwa-lab/mcp v0.1 — Model Context Protocol server + client mock harness
 
   - `packages/mcp/` を新設 (v0.1.0)。 JSON-RPC 2.0 envelope + MCP protocol 型 (`InitializeParams` / `InitializeResult` / `ToolsListResult` / `ToolsCallParams` / `ToolCallResult` / `McpTool` / `ToolInputSchema` / `JsonRpcErrorCode`) を SSOT 化。
   - `McpServer` — 4 op (initialize / notifications/initialized / tools/list / tools/call) を dispatch。 handshake 強制 default で pre-initialize 呼出は `NotInitialized` (-32002) を返す。 tool 呼出は schema validation → handler 実行 → `ToolCallResult { content, isError }` の流れで、 handler throw は `ToolExecutionError` (-32000)、 schema mismatch は `ToolSchemaError` (-32001)、 未登録 tool は `ToolNotFound` (-32003) を返す。

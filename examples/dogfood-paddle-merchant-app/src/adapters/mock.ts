@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/payment`'s `createPaddleMock` + the
+ * Mock adapter — drives `@kiwa-lab/payment`'s `createPaddleMock` + the
  * 9-axis semantics helpers so the same app code exercises a deterministic
  * Paddle Billing v2 envelope without touching the real Paddle API.
  *
@@ -11,14 +11,14 @@
  * real adapter inject a Paddle sandbox instance for real-vs-mock diffs.
  */
 
-import { createPaddleMock } from '@kiwa/payment';
+import { createPaddleMock } from '@kiwa-lab/payment';
 import type {
   Invoice as SemanticInvoice,
   PaymentWebhookEvent,
   Subscription as SemanticSubscription,
   DunningSession,
   TaxLine,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import type {
   CheckoutInput,
   CheckoutResult,

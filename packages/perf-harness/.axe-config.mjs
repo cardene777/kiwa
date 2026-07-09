@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/perf-harness.
+ * A11y (axe-core) config for @kiwa-lab/perf-harness.
  * Tier: Core tier (critical 0 / serious 0 / moderate 0-3) — Perf runner + tinybench wrapper. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § Core tier.
  */

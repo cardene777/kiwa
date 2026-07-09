@@ -1,6 +1,6 @@
 # examples/nextjs-api-poc
 
-Proof-of-concept that exercises `@kiwa/api` and `@kiwa/core` against a single Route Handler (`/api/items`).
+Proof-of-concept that exercises `@kiwa-lab/api` and `@kiwa-lab/core` against a single Route Handler (`/api/items`).
 
 ## What this shows
 

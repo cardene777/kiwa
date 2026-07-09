@@ -1,13 +1,13 @@
 # Fidelity — dogfood-dapp-e2e-reorg (v1.18-4)
 
-Real-vs-mock behavioural fidelity for the Next.js + viem + wagmi dApp driven by kiwa-play under anvil fork mainnet + reorg simulation, produced by `examples/dogfood-dapp-e2e-reorg/scripts/emit-fidelity-report.ts`. Feeds `@kiwa/quality-metrics` release-gate 11-axis payload with a TypeScript-native blockchain adapter alongside the Rust ones landed in v1.18-2 (`dogfood-reth-node-test`) and v1.18-3 (`dogfood-foundry-invariant-fuzz`).
+Real-vs-mock behavioural fidelity for the Next.js + viem + wagmi dApp driven by kiwa-play under anvil fork mainnet + reorg simulation, produced by `examples/dogfood-dapp-e2e-reorg/scripts/emit-fidelity-report.ts`. Feeds `@kiwa-lab/quality-metrics` release-gate 11-axis payload with a TypeScript-native blockchain adapter alongside the Rust ones landed in v1.18-2 (`dogfood-reth-node-test`) and v1.18-3 (`dogfood-foundry-invariant-fuzz`).
 
 ## Baseline (real mode skipped — TESTNET_RPC_URL unset)
 
 When the harness runs without `TESTNET_RPC_URL` in the environment, the real adapter emits `REORG_REAL_ENV_MISSING` for each of the four scenario ops (`pendingTx` / `confirmedTx` / `transferEvent` / `nonceGap`). Divergences are recorded so the mock is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa/dapp/reorg-dogfood
+provider   : @kiwa-lab/dapp/reorg-dogfood
 version    : 0.1.0
 verdict    : PASS
 divergences: 4 (all four ops recorded as BEHAVIORAL_DIVERGENCE, real mode absent)

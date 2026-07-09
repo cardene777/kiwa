@@ -1,4 +1,4 @@
-import type { TestEnvBase, TestMode } from '@kiwa/core';
+import type { TestEnvBase, TestMode } from '@kiwa-lab/core';
 
 /**
  * KeyDB backend selection.

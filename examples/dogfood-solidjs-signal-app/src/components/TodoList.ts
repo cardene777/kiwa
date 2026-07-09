@@ -1,4 +1,4 @@
-import { h, type SolidChild, type SolidComponent } from '@kiwa/solidjs';
+import { h, type SolidChild, type SolidComponent } from '@kiwa-lab/solidjs';
 import type { TodosStore } from '../store/todos.js';
 
 /**

@@ -140,7 +140,7 @@ export function registerWeather(server: McpServer): void {
 
 /**
  * mock corpus — query の word overlap で ranking する軽量 search。
- * @kiwa/search と同じ思想 (word-overlap ranking) を採用、 top-N を返す。
+ * @kiwa-lab/search と同じ思想 (word-overlap ranking) を採用、 top-N を返す。
  */
 const SEARCH_CORPUS: readonly { id: string; title: string; text: string }[] = [
   { id: 'doc-1', title: 'MCP overview', text: 'Model Context Protocol server client tool call' },

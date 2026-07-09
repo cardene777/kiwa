@@ -5,4 +5,4 @@
 ### Patch Changes
 
 - Updated dependencies [9b85ce4]
-  - @kiwa/component@0.2.0
+  - @kiwa-lab/component@0.2.0

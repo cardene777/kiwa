@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/streaming",
+  "package": "@kiwa-lab/streaming",
   "tier": "SaaS",
   "thresholds": {
     "high": 65,

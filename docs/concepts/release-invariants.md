@@ -1,6 +1,6 @@
 # Release invariants SSOT — 3 rules that turn a 4-time recurring bug into an invariant for kiwa v1.29
 
-Introduced in v1.29 as `@kiwa/release-invariants` v0.1 — 3 pure invariant checkers (`checkReleaseScriptFilter` + `checkProvenanceFlagAbsence` + `checkGateScriptPackageCoverage`) + a 1-shot `buildReleaseInvariantsSummary` aggregator. This document is the SSOT for **what the release gate measures, why each invariant matters, and how the systematic root cause pattern converged after 4 rediscoveries**. Every downstream release-smoke suite (`tests/release-smoke/tests/release-script-filter.test.ts` v1.29-1, `tests/release-smoke/tests/v1-29-publish.test.ts` v1.29-3) and every migration path (`docs/migrations/v1.28-to-v1.29.md`) reads these rules from here — do not re-derive them locally.
+Introduced in v1.29 as `@kiwa-lab/release-invariants` v0.1 — 3 pure invariant checkers (`checkReleaseScriptFilter` + `checkProvenanceFlagAbsence` + `checkGateScriptPackageCoverage`) + a 1-shot `buildReleaseInvariantsSummary` aggregator. This document is the SSOT for **what the release gate measures, why each invariant matters, and how the systematic root cause pattern converged after 4 rediscoveries**. Every downstream release-smoke suite (`tests/release-smoke/tests/release-script-filter.test.ts` v1.29-1, `tests/release-smoke/tests/v1-29-publish.test.ts` v1.29-3) and every migration path (`docs/migrations/v1.28-to-v1.29.md`) reads these rules from here — do not re-derive them locally.
 
 ## Why an SSOT
 
@@ -14,10 +14,10 @@ The 3 rules below are the smallest set that make kiwa release scripts comparable
 
 ## Rule 1 — release script filter symmetry
 
-Every publishable `@kiwa/*` package must appear in **both** halves of `scripts.release`.
+Every publishable `@kiwa-lab/*` package must appear in **both** halves of `scripts.release`.
 
-- Build half — `pnpm -F @kiwa/{name} build ... build && ...`
-- Publish half — `pnpm publish --filter @kiwa/{name} --filter ...`
+- Build half — `pnpm -F @kiwa-lab/{name} build ... build && ...`
+- Publish half — `pnpm publish --filter @kiwa-lab/{name} --filter ...`
 
 A half-only entry is the exact failure mode v1.14 / v1.25 / v1.27 / v1.28 all rediscovered.
 
@@ -34,16 +34,16 @@ The check is pure — no filesystem access, no side effects. Callers supply the 
 import {
   checkReleaseScriptFilter,
   type PublishablePackage,
-} from '@kiwa/release-invariants';
+} from '@kiwa-lab/release-invariants';
 
 const PUBLISHABLE: PublishablePackage[] = [
-  { name: '@kiwa/core' },
-  { name: '@kiwa/realtime' },
+  { name: '@kiwa-lab/core' },
+  { name: '@kiwa-lab/realtime' },
 ];
 
 const releaseScript =
-  'pnpm -F @kiwa/core -F @kiwa/realtime build && ' +
-  'pnpm publish --filter @kiwa/core --filter @kiwa/realtime';
+  'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime build && ' +
+  'pnpm publish --filter @kiwa-lab/core --filter @kiwa-lab/realtime';
 
 const result = checkReleaseScriptFilter(releaseScript, PUBLISHABLE);
 // result.ok === true, missingBuildFilter === [], missingPublishFilter === []
@@ -60,10 +60,10 @@ const result = checkReleaseScriptFilter(releaseScript, PUBLISHABLE);
 - **`excerpts: string[]`** — up to 3 40-char windows around each `--provenance` match. Used in failure messages so the offending location is obvious.
 
 ```ts
-import { checkProvenanceFlagAbsence } from '@kiwa/release-invariants';
+import { checkProvenanceFlagAbsence } from '@kiwa-lab/release-invariants';
 
 const releaseScript =
-  'pnpm publish --filter @kiwa/core --provenance --access public';
+  'pnpm publish --filter @kiwa-lab/core --provenance --access public';
 const result = checkProvenanceFlagAbsence(releaseScript);
 // result.ok === false, result.excerpts[0] contains the offending context
 ```
@@ -82,15 +82,15 @@ Every publishable package must appear in `scripts.test:mutation` (root `package.
 import {
   checkGateScriptPackageCoverage,
   type PublishablePackage,
-} from '@kiwa/release-invariants';
+} from '@kiwa-lab/release-invariants';
 
 const PUBLISHABLE: PublishablePackage[] = [
-  { name: '@kiwa/core' },
-  { name: '@kiwa/realtime' },
+  { name: '@kiwa-lab/core' },
+  { name: '@kiwa-lab/realtime' },
 ];
 
 const mutationGateScript =
-  'pnpm -F @kiwa/core -F @kiwa/realtime run test:mutation';
+  'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime run test:mutation';
 
 const result = checkGateScriptPackageCoverage(mutationGateScript, PUBLISHABLE);
 // result.ok === true
@@ -104,7 +104,7 @@ Downstream release-smoke suites usually want a single boolean plus the 3 sub-res
 import {
   buildReleaseInvariantsSummary,
   type PublishablePackage,
-} from '@kiwa/release-invariants';
+} from '@kiwa-lab/release-invariants';
 
 const summary = buildReleaseInvariantsSummary({
   releaseScript,
@@ -124,10 +124,10 @@ The v1.29 milestone did not invent these invariants. It named a pattern that had
 
 | milestone | package | miss | fix PR | pattern application |
 |---|---|---|---|---|
-| v1.14 | `@kiwa/payment` | build filter present, publish filter missing | #912 (v1.23 follow-up) | 1st |
-| v1.25 | `@kiwa/perf-harness` | proactive add to both halves during rollout | #932 | 2nd (proactive) |
-| v1.27 | `@kiwa/quality-metrics` | build filter present, publish filter missing | #961 | 3rd (reactive again) |
-| v1.28 | `@kiwa/realtime` | build filter present, publish filter missing | #976 | 4th |
+| v1.14 | `@kiwa-lab/payment` | build filter present, publish filter missing | #912 (v1.23 follow-up) | 1st |
+| v1.25 | `@kiwa-lab/perf-harness` | proactive add to both halves during rollout | #932 | 2nd (proactive) |
+| v1.27 | `@kiwa-lab/quality-metrics` | build filter present, publish filter missing | #961 | 3rd (reactive again) |
+| v1.28 | `@kiwa-lab/realtime` | build filter present, publish filter missing | #976 | 4th |
 | v1.29-1 | 6 legacy misses (`agent` / `ai-llm` / `component` / `mcp` / `search` / `streaming`) | build filter present, publish filter missing | #989 | fail-fast test axis |
 | v1.29-3 | — | none new — SSOT + 7-milestone snippet validation | this milestone | SSOT + docs |
 
@@ -135,7 +135,7 @@ The retrospective (vault `decisions/personal/2026-07-05-kiwa-v1.28-milestone-ret
 
 - **v1.29-1** — release-smoke axis `release-script-filter.test.ts` with dynamic package discovery + 40 per-package assertions. Fail-fast, before milestone finisher. Landed 6 previously-missing packages in the same PR (agent / ai-llm / component / mcp / search / streaming).
 - **v1.29-2** — PostToolUse hook `release-script-filter-guard.sh` + `/issue-plan` checklist SSOT for new package additions. Proactive prevention, before test.
-- **v1.29-3** — this milestone. `@kiwa/release-invariants` v0.1 SSOT + `docs/tutorials/55-release-script-filter-ssot.md` walkthrough + `docs/concepts/release-invariants.md` (this doc) + `docs/migrations/v1.28-to-v1.29.md` migration path + 7-milestone snippet validation streak (v1.23 → v1.29) via `packages/release-invariants/tests/docs-tutorial-v1.29.test.ts`.
+- **v1.29-3** — this milestone. `@kiwa-lab/release-invariants` v0.1 SSOT + `docs/tutorials/55-release-script-filter-ssot.md` walkthrough + `docs/concepts/release-invariants.md` (this doc) + `docs/migrations/v1.28-to-v1.29.md` migration path + 7-milestone snippet validation streak (v1.23 → v1.29) via `packages/release-invariants/tests/docs-tutorial-v1.29.test.ts`.
 
 ## Rule 5 — 7-milestone snippet validation streak
 

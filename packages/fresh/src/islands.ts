@@ -22,7 +22,7 @@
 // Out of scope on purpose:
 //   - real esbuild / islands bundle compilation
 //   - real DOM (synthetic events are captured verbatim, no bubbling)
-//   - Signal-based reactive graph (see @kiwa/solidjs for that shape)
+//   - Signal-based reactive graph (see @kiwa-lab/solidjs for that shape)
 
 import type { FreshChild, FreshVNode } from './route.js';
 import { findNodes, h, isFreshVNode, stringify } from './route.js';

@@ -6,7 +6,7 @@ kiwa v2.3 is out。 **Payment pair depth-5 到達** milestone、 v0.4 Payment �
 
 ## What's new
 
-### `@kiwa/payment` v2.0 → v2.1 minor bump
+### `@kiwa-lab/payment` v2.0 → v2.1 minor bump
 
 - **3 export** = `startLifecycle` + `handleEvent` + `summarizeLifecycle`
 - **5 state SSOT** = active-billing / grace-period / dunning-active / chargeback-dispute / canceled
@@ -37,7 +37,7 @@ v1.23 → v2.3 = **49 milestone**、 kiwa 史上最長記録更新継続。
 ## Install
 
 ```bash
-pnpm add -D @kiwa/payment@^2.1
+pnpm add -D @kiwa-lab/payment@^2.1
 ```
 
 ## Migration guide

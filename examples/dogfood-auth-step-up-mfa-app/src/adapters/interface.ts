@@ -1,4 +1,4 @@
-import type { AuthPlatform as AuthAuthPlatform } from '@kiwa/auth';
+import type { AuthPlatform as AuthAuthPlatform } from '@kiwa-lab/auth';
 export type AuthPlatform = AuthAuthPlatform;
 
 export type MfaStage = 'step-up' | 'continuity' | 'hijack';

@@ -6,7 +6,7 @@ kiwa v1.63 is out。 **Desktop 深化 VII** 単軸 milestone、 v1.62 real behav
 
 ## What's new
 
-### `@kiwa/desktop` v0.8 minor bump
+### `@kiwa-lab/desktop` v0.8 minor bump
 
 - **probe.ts 新設** = ProbeInput + ProbeResult + PlatformGate + NodePlatform SSOT + probeCliAvailable + shouldSkipAxis + platformGate + computeSkipMatrix
 - **fidelity-harness 拡張** = runFidelityCheckWithProbe + SkippedPair 統合 (skip した pair は diffs から除外、 skippedPairs metadata で追跡)
@@ -35,7 +35,7 @@ Desktop pair v0.1 → v0.8 の 8 段拡張、 kiwa milestone 史上 depth-8 reco
 ## Install
 
 ```bash
-pnpm add -D @kiwa/desktop@^0.8
+pnpm add -D @kiwa-lab/desktop@^0.8
 ```
 
 ## Migration guide

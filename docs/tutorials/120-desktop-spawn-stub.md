@@ -2,13 +2,13 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/desktop` v0.5 (spawn stub 契約層、 v1.60 で kiwa 縦深化 pair 第 14 の第 5 段、 **depth-5 pattern 2 例目 candidate**、 **systematic pattern 35 度目適用**、 **Mobile v1.54 rhythm 再現**、 38 milestone streak)、 12 axis から抽出した 8 CLI-backed axis (electron-builder / electron-updater / ffmpeg / xclip / osascript / notify-send / defaults / reg) を `invokeDesktopCli` + `cliForAxis` + `buildSpawnInvocation` で扱う pattern、 KIWA_DESKTOP_MODE env-gate + args 上限 32 + fail-closed の 3 pattern workflow。
+A vitest suite wired to `@kiwa-lab/desktop` v0.5 (spawn stub 契約層、 v1.60 で kiwa 縦深化 pair 第 14 の第 5 段、 **depth-5 pattern 2 例目 candidate**、 **systematic pattern 35 度目適用**、 **Mobile v1.54 rhythm 再現**、 38 milestone streak)、 12 axis から抽出した 8 CLI-backed axis (electron-builder / electron-updater / ffmpeg / xclip / osascript / notify-send / defaults / reg) を `invokeDesktopCli` + `cliForAxis` + `buildSpawnInvocation` で扱う pattern、 KIWA_DESKTOP_MODE env-gate + args 上限 32 + fail-closed の 3 pattern workflow。
 
 ## Prerequisites
 
 - Node.js ≥ 20
 - `pnpm`
-- `@kiwa/desktop` v0.5 (`pnpm add -D @kiwa/desktop@^0.5`)
+- `@kiwa-lab/desktop` v0.5 (`pnpm add -D @kiwa-lab/desktop@^0.5`)
 
 ## Step-by-step build
 
@@ -17,14 +17,14 @@ A vitest suite wired to `@kiwa/desktop` v0.5 (spawn stub 契約層、 v1.60 で 
 ```bash
 mkdir kiwa-desktop-v05 && cd kiwa-desktop-v05
 pnpm init
-pnpm add -D @kiwa/desktop@^0.5 vitest typescript @types/node
+pnpm add -D @kiwa-lab/desktop@^0.5 vitest typescript @types/node
 ```
 
 ### 2. Spawn-driver 契約層 (invokeDesktopCli)
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeDesktopCli, type SpawnInvocation } from '@kiwa/desktop';
+import { invokeDesktopCli, type SpawnInvocation } from '@kiwa-lab/desktop';
 
 describe('invokeDesktopCli v0.5 stub', () => {
   it('ffmpeg 呼出 with KIWA_DESKTOP_MODE=real', async () => {
@@ -49,7 +49,7 @@ describe('invokeDesktopCli v0.5 stub', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { cliForAxis } from '@kiwa/desktop';
+import { cliForAxis } from '@kiwa-lab/desktop';
 
 describe('cliForAxis mapping', () => {
   it('CLI-backed axis (8 axes)', () => {
@@ -72,7 +72,7 @@ describe('cliForAxis mapping', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { buildSpawnInvocation } from '@kiwa/desktop';
+import { buildSpawnInvocation } from '@kiwa-lab/desktop';
 
 describe('buildSpawnInvocation', () => {
   it('default args + env', () => {
@@ -98,7 +98,7 @@ describe('buildSpawnInvocation', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeDesktopCli } from '@kiwa/desktop';
+import { invokeDesktopCli } from '@kiwa-lab/desktop';
 
 describe('args 上限 + fail-closed', () => {
   it('args 33 で throw', async () => {

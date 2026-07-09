@@ -7,7 +7,7 @@
 // parent → child の Cookie header に乗る (kiwa の setupRemixNestedRouteEnv で
 // 自動 propagate)。
 
-import { json, defer, type SimulatedRouteArgs } from '@kiwa/remix';
+import { json, defer, type SimulatedRouteArgs } from '@kiwa-lab/remix';
 import type { DashboardLayoutData } from './dashboard-layout-loader.js';
 
 export interface DashboardProfileData {

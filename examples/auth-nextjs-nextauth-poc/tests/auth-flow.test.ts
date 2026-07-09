@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupNextAuthEnv, type NextAuthTestEnv } from '@kiwa/auth';
+import { setupNextAuthEnv, type NextAuthTestEnv } from '@kiwa-lab/auth';
 import { createProtectedRoute, type ProtectedProfile } from '../src/route.js';
 
 const envs: NextAuthTestEnv[] = [];

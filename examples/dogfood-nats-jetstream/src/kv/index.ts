@@ -8,7 +8,7 @@
  * modelling the CAS wire protocol.
  */
 
-import type { KVEntry, KVStore, NatsMock } from '@kiwa/streaming';
+import type { KVEntry, KVStore, NatsMock } from '@kiwa-lab/streaming';
 
 export interface KVRun {
   readonly bucket: string;

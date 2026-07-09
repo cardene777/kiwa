@@ -117,4 +117,4 @@ Every count sits above the 10-test release-gate floor so the 11-axis check passe
 - [Tutorial 29 — Fresh Islands + Route Handler + Head normalize](../tutorials/29-fresh-islands)
 - [Tutorial 30 — HonoJS + hc RPC type-safe client + Workers env (KV / D1 / R2)](../tutorials/30-hono-workers-rpc)
 - [Migration v1.18 → v1.19](../migrations/v1.18-to-v1.19)
-- v1.14 baseline — [Testing Next.js Server Actions with @kiwa/nextjs](../tutorials/04-nextjs-server-actions)
+- v1.14 baseline — [Testing Next.js Server Actions with @kiwa-lab/nextjs](../tutorials/04-nextjs-server-actions)

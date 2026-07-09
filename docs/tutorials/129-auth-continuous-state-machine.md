@@ -1,20 +1,20 @@
-# @kiwa/auth v0.7 continuous-auth state machine in 15 min
+# @kiwa-lab/auth v0.7 continuous-auth state machine in 15 min
 
 ## What you'll build
 
-`@kiwa/auth` v0.7 (Auth pair pioneer record 更新、 v0.6 → v0.7 = 4 段深化) の pure state machine を利用した continuous authentication flow。 「session 生存中 に risk score を 動的評価 して session lifetime + step-up trigger を 動的調整」 する。 48 milestone streak、 systematic pattern 45 度目適用 (continuous state machine variant)。
+`@kiwa-lab/auth` v0.7 (Auth pair pioneer record 更新、 v0.6 → v0.7 = 4 段深化) の pure state machine を利用した continuous authentication flow。 「session 生存中 に risk score を 動的評価 して session lifetime + step-up trigger を 動的調整」 する。 48 milestone streak、 systematic pattern 45 度目適用 (continuous state machine variant)。
 
 ## Prerequisites
 
 - Node.js ≥ 20 + pnpm
-- `@kiwa/auth` v2.1 (`pnpm add -D @kiwa/auth@^2.1`)
+- `@kiwa-lab/auth` v2.1 (`pnpm add -D @kiwa-lab/auth@^2.1`)
 
 ## Step-by-step build
 
 ### 1. baseline risk で 監視 開始
 
 ```ts
-import { semantics } from '@kiwa/auth';
+import { semantics } from '@kiwa-lab/auth';
 
 const session = semantics.startContinuousAuth({
   initialRiskScore: 0,

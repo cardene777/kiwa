@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/search",
+  "package": "@kiwa-lab/search",
   "tier": "SaaS",
   "thresholds": {
     "high": 65,

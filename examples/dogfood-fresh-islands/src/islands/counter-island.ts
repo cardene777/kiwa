@@ -1,4 +1,4 @@
-import { defineIsland, h, type IslandDefinition } from '@kiwa/fresh';
+import { defineIsland, h, type IslandDefinition } from '@kiwa-lab/fresh';
 
 /**
  * Counter island — the smallest interactive island the dogfood ships. The
@@ -14,7 +14,7 @@ import { defineIsland, h, type IslandDefinition } from '@kiwa/fresh';
 export interface CounterIslandProps {
   readonly label: string;
   readonly start: number;
-  // Index signature is required by @kiwa/fresh `IslandProps` constraint so
+  // Index signature is required by @kiwa-lab/fresh `IslandProps` constraint so
   // the JSON-serialized props round-trip through hydrateIslands without losing
   // typing at the island boundary.
   readonly [key: string]: unknown;

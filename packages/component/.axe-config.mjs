@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/component.
+ * A11y (axe-core) config for @kiwa-lab/component.
  * Tier: Test type tier (critical 0 / serious 0-3 / moderate 0-10) — Storybook + Playwright CT + Chromatic. DOM fixture noise.
  * SSOT: docs/quality/a11y-thresholds.md § Test type tier.
  */

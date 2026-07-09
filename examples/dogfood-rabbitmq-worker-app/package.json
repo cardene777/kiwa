@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app 2 (v1.11-3) — order-processing worker driven by @kiwa/queue (RabbitMQ basic + advanced) in `KIWA_MODE=mock` and by amqplib against a live rabbitmq:3-management broker in `KIWA_MODE=real`; behavioural fidelity feeds @kiwa/quality-metrics.",
+  "description": "Dogfood app 2 (v1.11-3) — order-processing worker driven by @kiwa-lab/queue (RabbitMQ basic + advanced) in `KIWA_MODE=mock` and by amqplib against a live rabbitmq:3-management broker in `KIWA_MODE=real`; behavioural fidelity feeds @kiwa-lab/quality-metrics.",
   "scripts": {
-    "test": "pnpm -F @kiwa/queue -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/queue -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/queue": "workspace:*",
-    "@kiwa/core": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/queue": "workspace:*",
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

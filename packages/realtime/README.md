@@ -1,6 +1,6 @@
-# `@kiwa/realtime`
+# `@kiwa-lab/realtime`
 
-Realtime test harness for kiwa — a unified mock across 4 realtime providers (Supabase Realtime + Ably + Pusher + Socket.io / SSE) covering the 5 shared semantics — presence, broadcast, postgres_changes, room, and reconnect policy — with a real-vs-mock fidelity harness and a `@kiwa/quality-metrics` 11-axis adapter.
+Realtime test harness for kiwa — a unified mock across 4 realtime providers (Supabase Realtime + Ably + Pusher + Socket.io / SSE) covering the 5 shared semantics — presence, broadcast, postgres_changes, room, and reconnect policy — with a real-vs-mock fidelity harness and a `@kiwa-lab/quality-metrics` 11-axis adapter.
 
 v0.1 lays the foundation for the v1.13 milestone dogfood apps (chat / collaboration / dashboards).
 
@@ -9,7 +9,7 @@ v0.2 adds 8 advanced-transport semantics across 3 protocols (WebRTC / WebTranspo
 ## Install
 
 ```sh
-pnpm add -D @kiwa/realtime @kiwa/quality-metrics
+pnpm add -D @kiwa-lab/realtime @kiwa-lab/quality-metrics
 ```
 
 ## Quick start — 4 provider mocks
@@ -17,7 +17,7 @@ pnpm add -D @kiwa/realtime @kiwa/quality-metrics
 ### Supabase Realtime
 
 ```ts
-import { createSupabaseRealtimeMock } from '@kiwa/realtime';
+import { createSupabaseRealtimeMock } from '@kiwa-lab/realtime';
 
 const supabase = createSupabaseRealtimeMock({
   scenarios: {
@@ -40,7 +40,7 @@ Supports the full `channel.on('presence' | 'broadcast' | 'postgres_changes', fil
 ### Ably
 
 ```ts
-import { createAblyMock } from '@kiwa/realtime';
+import { createAblyMock } from '@kiwa-lab/realtime';
 
 const ably = createAblyMock({ clientId: 'alice' });
 const channel = ably.channels.get('room-1');
@@ -56,7 +56,7 @@ const history = await channel.history({ limit: 10 }); // rewind support
 ### Pusher
 
 ```ts
-import { createPusherMock } from '@kiwa/realtime';
+import { createPusherMock } from '@kiwa-lab/realtime';
 
 const pusher = createPusherMock({ userId: 'me' });
 const channel = pusher.subscribeChannel('presence-room-1');
@@ -73,7 +73,7 @@ Presence channels are identified by the `presence-` name prefix, and expose the 
 ### Socket.io
 
 ```ts
-import { createSocketioMock } from '@kiwa/realtime';
+import { createSocketioMock } from '@kiwa-lab/realtime';
 
 const io = createSocketioMock();
 const socket = io.io('/chat');
@@ -91,7 +91,7 @@ Namespace + room are normalized into a single engine channel key so the mock can
 ## Fidelity harness
 
 ```ts
-import { runRealtimeFidelityCheck } from '@kiwa/realtime';
+import { runRealtimeFidelityCheck } from '@kiwa-lab/realtime';
 
 const report = await runRealtimeFidelityCheck({
   realDriver, // your real provider adapter — collect real events
@@ -118,11 +118,11 @@ Each scenario runs both drivers in parallel and produces a `RealtimeFidelityReco
 ## Quality-metrics adapter
 
 ```ts
-import { buildRealtimeReport } from '@kiwa/realtime';
-import { evaluateReleaseGate } from '@kiwa/quality-metrics';
+import { buildRealtimeReport } from '@kiwa-lab/realtime';
+import { evaluateReleaseGate } from '@kiwa-lab/quality-metrics';
 
 const qr = buildRealtimeReport({
-  provider: '@kiwa/realtime',
+  provider: '@kiwa-lab/realtime',
   version: '0.1.0',
   fidelity: fidelityReport,
   mockMetrics: supabase.getMetrics(),
@@ -169,7 +169,7 @@ import {
   createQuicMultiplexMock,
   measureSemanticsGrid,
   SEMANTICS_GRID,
-} from '@kiwa/realtime';
+} from '@kiwa-lab/realtime';
 
 const signaling = createWebRtcSignalingMock();
 signaling.onEvent((event) => console.log(event.kind, event.payload));
@@ -186,7 +186,7 @@ console.log(SEMANTICS_GRID.filter((row) => row.applicable).length); // 8
 ## Real driver env-gate
 
 ```ts
-import { resolveRealtimeDriverByProvider } from '@kiwa/realtime';
+import { resolveRealtimeDriverByProvider } from '@kiwa-lab/realtime';
 
 const { driver, isReal, reason } = resolveRealtimeDriverByProvider(
   'supabase',
@@ -208,8 +208,8 @@ if (isReal) console.log('real driver active —', reason);
 
 ## Related packages
 
-- [`@kiwa/ai-llm`](../ai-llm) — 4 SDK LLM mock harness (Anthropic / OpenAI / Vercel AI / LangChain)
-- [`@kiwa/quality-metrics`](../quality-metrics) — 11-axis release gate SSOT
+- [`@kiwa-lab/ai-llm`](../ai-llm) — 4 SDK LLM mock harness (Anthropic / OpenAI / Vercel AI / LangChain)
+- [`@kiwa-lab/quality-metrics`](../quality-metrics) — 11-axis release gate SSOT
 
 ## License
 

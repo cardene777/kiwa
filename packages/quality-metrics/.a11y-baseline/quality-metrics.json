@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/quality-metrics",
+  "package": "@kiwa-lab/quality-metrics",
   "generatedAt": "2026-07-06T01:52:55.606Z",
   "layers": {
     "jsdom": {

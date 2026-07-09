@@ -1,20 +1,20 @@
-# @kiwa/payment v2.1 lifecycle-orchestrator in 15 min
+# @kiwa-lab/payment v2.1 lifecycle-orchestrator in 15 min
 
 ## What you'll build
 
-`@kiwa/payment` v2.1 lifecycle-orchestrator = subscription lifecycle + dunning + retry + revenue-recovery + chargeback の 継続合成 layer。 5 state SSOT + 8 event SSOT + 40 セル 遷移表。 **depth-5 pattern 4 例目確定** (Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 + Payment v2.1)、 systematic pattern 46 度目適用、 49 milestone streak。
+`@kiwa-lab/payment` v2.1 lifecycle-orchestrator = subscription lifecycle + dunning + retry + revenue-recovery + chargeback の 継続合成 layer。 5 state SSOT + 8 event SSOT + 40 セル 遷移表。 **depth-5 pattern 4 例目確定** (Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 + Payment v2.1)、 systematic pattern 46 度目適用、 49 milestone streak。
 
 ## Prerequisites
 
 - Node.js ≥ 20 + pnpm
-- `@kiwa/payment` v2.1 (`pnpm add -D @kiwa/payment@^2.1`)
+- `@kiwa-lab/payment` v2.1 (`pnpm add -D @kiwa-lab/payment@^2.1`)
 
 ## Step-by-step build
 
 ### 1. subscription 契約成立で 初期化
 
 ```ts
-import { startLifecycle } from '@kiwa/payment';
+import { startLifecycle } from '@kiwa-lab/payment';
 
 const session = startLifecycle({ timestamp: new Date().toISOString() });
 // session.state = 'active-billing'
@@ -23,7 +23,7 @@ const session = startLifecycle({ timestamp: new Date().toISOString() });
 ### 2. event 送信 で 遷移
 
 ```ts
-import { handleEvent } from '@kiwa/payment';
+import { handleEvent } from '@kiwa-lab/payment';
 
 // 通常課金成功
 let next = handleEvent({ session, event: 'payment-succeeded', timestamp: t1 });

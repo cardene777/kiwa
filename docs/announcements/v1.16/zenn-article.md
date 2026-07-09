@@ -12,7 +12,7 @@ v1.16 は kiwa の 6 milestone 目です。 v1.15 (AI-LLM 深化、 multimodal /
 
 ## 主な追加
 
-### `@kiwa/component` v0.1
+### `@kiwa-lab/component` v0.1
 
 3 統合 (Storybook 8 + Playwright CT + Chromatic) を 1 API で扱う統一 mock harness。 framework agnostic な MockNode tree を 3 経路で共有します。
 
@@ -24,7 +24,7 @@ import {
   buildButton,
   buildForm,
   fireEvent,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 
 // 1) Storybook 8 CSF3
 const registry = createStoryRegistry();
@@ -98,7 +98,7 @@ Playwright CT で 5 form pattern (login / signup / checkout / profile / search) 
 ### docs 3 pillars + concept doc
 
 - Tutorial 19 (Storybook 8 design system) / 20 (Playwright CT × 5 form pattern) / 21 (Chromatic 4-state machine)
-- Migration guide `v1.15 → v1.16` (additive-only、 既存 test は無変更で pass、 `@kiwa/component` v0.1 + 3 dogfood app 導入手順)
+- Migration guide `v1.15 → v1.16` (additive-only、 既存 test は無変更で pass、 `@kiwa-lab/component` v0.1 + 3 dogfood app 導入手順)
 - Concept doc `docs/concepts/component-testing.md` — 3 surfaces (Storybook 8 + Playwright CT + Chromatic) × 6 semantic axes (story registration / args resolution / interaction trace / a11y / snapshot hash / review workflow) を SSOT 化
 - VitePress sidebar 追記 (Component test (v1.16) section + concept doc link + migration link)
 - `/docs-publish-kiwa` 経由 gh-pages 反映済

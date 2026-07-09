@@ -1,11 +1,11 @@
 // kiwa unit test for app/items/_kiwa/items-rsc.ts
-// — renders the async RSC through @kiwa/nextjs's renderServerComponent.
+// — renders the async RSC through @kiwa-lab/nextjs's renderServerComponent.
 
 import { describe, expect, it } from 'vitest';
-import { renderServerComponent, findAll, textContent } from '@kiwa/nextjs';
+import { renderServerComponent, findAll, textContent } from '@kiwa-lab/nextjs';
 import { ItemsPageRSC } from '../app/items/_kiwa/items-rsc.js';
 
-describe('ItemsPageRSC via @kiwa/nextjs renderServerComponent', () => {
+describe('ItemsPageRSC via @kiwa-lab/nextjs renderServerComponent', () => {
   it('T-NF-201: session=admin で h1 + ul/li が 3 件 render', async () => {
     const { tree, error } = await renderServerComponent({
       component: ItemsPageRSC,

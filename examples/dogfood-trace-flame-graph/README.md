@@ -1,10 +1,10 @@
 # dogfood-trace-flame-graph
 
-Dogfood app (v1.17-4) — a trace flame graph explorer (React-style component tree modelled in pure TS for headless test) driven behind a provider-neutral surface. 10 canonical traces (nested span shapes; 100+ spans across the set) build into span trees + collapsed flame graphs; drill-down extracts a subtree; log correlation joins logs to spans and back via traceId + spanId; a summary + LogPanel + Drilldown UI is exercised for regression coverage without ever mounting a DOM. The fidelity harness diffs mock vs a live Jaeger HTTP API and feeds `@kiwa/quality-metrics` release gate.
+Dogfood app (v1.17-4) — a trace flame graph explorer (React-style component tree modelled in pure TS for headless test) driven behind a provider-neutral surface. 10 canonical traces (nested span shapes; 100+ spans across the set) build into span trees + collapsed flame graphs; drill-down extracts a subtree; log correlation joins logs to spans and back via traceId + spanId; a summary + LogPanel + Drilldown UI is exercised for regression coverage without ever mounting a DOM. The fidelity harness diffs mock vs a live Jaeger HTTP API and feeds `@kiwa-lab/quality-metrics` release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/observability` `buildSpanTree` + `renderFlameGraph` + `LogCorrelationIndex`, deterministic exploration).
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-lab/observability` `buildSpanTree` + `renderFlameGraph` + `LogCorrelationIndex`, deterministic exploration).
 - `KIWA_MODE=real` — driven by `makeRealAdapter()` that talks to a Jaeger HTTP API when `JAEGER_URL` is set. When the variable is missing the adapter reports each method as `JAEGER_ENV_MISSING` so the fidelity harness records the gap without failing the test suite. When the URL is set but `globalThis.fetch` is unavailable the adapter downgrades to `JAEGER_FETCH_MISSING`.
 
 Real-mode envs.
@@ -42,7 +42,7 @@ src/
   flows/
     flame-flows.ts      -- load / render / drilldown / logJoin / filter +
                            OPS_UNDER_TEST
-    fidelity.ts         -- trace-diffing harness → @kiwa/quality-metrics
+    fidelity.ts         -- trace-diffing harness → @kiwa-lab/quality-metrics
   app/
     flame-service.ts    -- browser SPA style explorer service
                            (createFlameService().focus() / .drill() / .filter())

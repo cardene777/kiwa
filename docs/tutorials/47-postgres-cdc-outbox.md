@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/orm` v0.9 that walks the CDC (change data capture) axis end-to-end for a Debezium-style outbox pattern on Postgres. You will decode a change event out of a simulated logical replication slot, append it to an outbox buffer, assert strict LSN ordering, and confirm at-least-once delivery downstream. The exact pattern that `examples/dogfood-postgres-cdc-outbox-app` (Next.js 15 + drizzle + Postgres 16 + Redis Streams consumer) uses — same `createCdcSession` + `decodeEvent` + `appendOutbox` + `markEventOrdered` + `confirmDelivery` primitives, same state-machine guards, same LSN invariants. You leave this tutorial with a runnable outbox test and a working delivery pointer for any Postgres CDC flow you point it at.
+A vitest suite wired to `@kiwa-lab/orm` v0.9 that walks the CDC (change data capture) axis end-to-end for a Debezium-style outbox pattern on Postgres. You will decode a change event out of a simulated logical replication slot, append it to an outbox buffer, assert strict LSN ordering, and confirm at-least-once delivery downstream. The exact pattern that `examples/dogfood-postgres-cdc-outbox-app` (Next.js 15 + drizzle + Postgres 16 + Redis Streams consumer) uses — same `createCdcSession` + `decodeEvent` + `appendOutbox` + `markEventOrdered` + `confirmDelivery` primitives, same state-machine guards, same LSN invariants. You leave this tutorial with a runnable outbox test and a working delivery pointer for any Postgres CDC flow you point it at.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/orm` v0.9 that walks the CDC (change data capture
 ```bash
 mkdir kiwa-cdc-outbox && cd kiwa-cdc-outbox
 pnpm init
-pnpm add -D @kiwa/orm@^0.9 vitest typescript @types/node
+pnpm add -D @kiwa-lab/orm@^0.9 vitest typescript @types/node
 ```
 
 Add the vitest script in `package.json`.
@@ -37,7 +37,7 @@ Add the vitest script in `package.json`.
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createCdcSession } from '@kiwa/orm';
+import { createCdcSession } from '@kiwa-lab/orm';
 
 describe('cdc — session ctor', () => {
   it('starts idle with empty buffers', () => {
@@ -64,7 +64,7 @@ The session object is a plain state-machine container — no I/O, no timers, no 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createCdcSession, decodeEvent } from '@kiwa/orm';
+import { createCdcSession, decodeEvent } from '@kiwa-lab/orm';
 
 describe('cdc — decode', () => {
   it('records the decoded event and moves to decoding', () => {
@@ -113,7 +113,7 @@ import {
   appendOutbox,
   createCdcSession,
   decodeEvent,
-} from '@kiwa/orm';
+} from '@kiwa-lab/orm';
 
 describe('cdc — outbox append', () => {
   it('moves decoding -> buffered and preserves the event', () => {
@@ -160,7 +160,7 @@ import {
   createCdcSession,
   decodeEvent,
   markEventOrdered,
-} from '@kiwa/orm';
+} from '@kiwa-lab/orm';
 
 describe('cdc — LSN ordering', () => {
   it('accepts a strictly increasing outbox', () => {
@@ -211,7 +211,7 @@ import {
   createCdcSession,
   decodeEvent,
   markEventOrdered,
-} from '@kiwa/orm';
+} from '@kiwa-lab/orm';
 
 describe('cdc — confirm delivery', () => {
   it('advances confirmedLsn and moves to delivered', () => {
@@ -271,7 +271,7 @@ The three assertions map to the three bugs a real CDC pipeline hits — duplicat
 pnpm test
 ```
 
-Every step above returns an `AxisStep<CdcState>` envelope so downstream tests can assert on either the state machine outcome (`step.state === 'delivered'`) or the emitted event (`step.neutralEvent === 'cdc.at-least-once-delivered'`). The full end-to-end pattern lives in `packages/orm/tests/docs-tutorial-v1.26.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa/orm` v0.9 API.
+Every step above returns an `AxisStep<CdcState>` envelope so downstream tests can assert on either the state machine outcome (`step.state === 'delivered'`) or the emitted event (`step.neutralEvent === 'cdc.at-least-once-delivered'`). The full end-to-end pattern lives in `packages/orm/tests/docs-tutorial-v1.26.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa-lab/orm` v0.9 API.
 
 ## Where to next
 

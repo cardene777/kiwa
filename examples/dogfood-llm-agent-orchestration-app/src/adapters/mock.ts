@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/ai-llm` v0.4 agent-orchestration
+ * Mock adapter — drives `@kiwa-lab/ai-llm` v0.4 agent-orchestration
  * semantics so the same app code exercises a deterministic planning
  * ceremony without a real Anthropic / Vercel AI SDK call. Both mock and
  * real adapters satisfy {@link LlmAgentAdapter}, so the fidelity harness
@@ -25,7 +25,7 @@ import {
   selectTool,
   startAgentSession,
   type AgentSession,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 import type {
   AgentPipelineResult,
   LlmAgentAdapter,

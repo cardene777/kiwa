@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.21-2 — a WebAuthn + Passkey RP for Next.js 15 App Router that exercises credential creation + attestation + assertion + userVerification + residentKey. Drivable in both KIWA_MODE=real (Chrome Virtual Authenticator + SimpleWebAuthn-shaped RP server) and KIWA_MODE=mock (@kiwa/auth setupWebAuthnEnv) so behavioural fidelity feeds the release gate.",
+  "description": "Dogfood app v1.21-2 — a WebAuthn + Passkey RP for Next.js 15 App Router that exercises credential creation + attestation + assertion + userVerification + residentKey. Drivable in both KIWA_MODE=real (Chrome Virtual Authenticator + SimpleWebAuthn-shaped RP server) and KIWA_MODE=mock (@kiwa-lab/auth setupWebAuthnEnv) so behavioural fidelity feeds the release gate.",
   "scripts": {
-    "test": "pnpm -F @kiwa/auth -F @kiwa/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/auth -F @kiwa-lab/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/auth": "workspace:*",
-    "@kiwa/core": "workspace:*"
+    "@kiwa-lab/auth": "workspace:*",
+    "@kiwa-lab/core": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

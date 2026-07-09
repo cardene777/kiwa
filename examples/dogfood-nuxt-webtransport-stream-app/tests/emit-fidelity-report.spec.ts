@@ -84,7 +84,7 @@ describe('fidelity report — WebTransport dogfood', () => {
     const matrix = await runAdapterMatrix({ mock, real, run: driveFlows });
 
     const output = runFidelityHarness({
-      provider: '@kiwa/realtime/nuxt-webtransport-stream-app',
+      provider: '@kiwa-lab/realtime/nuxt-webtransport-stream-app',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -124,7 +124,7 @@ describe('fidelity report — WebTransport dogfood', () => {
     const matrix = await runAdapterMatrix({ mock, real, run: driveFlows });
 
     const output = runFidelityHarness({
-      provider: '@kiwa/realtime/nuxt-webtransport-stream-app',
+      provider: '@kiwa-lab/realtime/nuxt-webtransport-stream-app',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

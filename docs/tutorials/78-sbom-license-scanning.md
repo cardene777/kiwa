@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/security` v0.1 that models the 6 pieces of a real supply-chain security pipeline that every non-trivial deployable eventually needs — a CycloneDX 1.5 SBOM builder that emits the industry-standard component list, a SPDX 2.3 SBOM builder that emits the Linux Foundation format side by side, a SBOM validator that catches missing `name` / `version` / malformed `purl` before they hit downstream tooling, an advisory feed lookup that joins your components against an in-memory OSV / NVD feed and returns the affected rows, a license policy evaluator that maps SPDX license identifiers to allow / warn / deny verdicts, and a secrets scanner with TruffleHog-style pattern rules plus Gitleaks-style entropy validation for the base64 / hex secrets that regex alone would false-positive on. `toCycloneDx()` + `toSpdx()` + `validateSbom()` + `lookupAdvisories()` + `evaluateLicense()` + `scanSecrets()` + `isRotationOverdue()` give you every one of those pieces without booting Trivy or Gitleaks. This is the pattern kiwa's `examples/dogfood-security-sbom-scanning-app` exercises against real Trivy + Gitleaks + OSV-Scanner under `KIWA_MODE=real`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the SBOM said 0 vulnerable components but the OSV feed had a critical for `left-pad@1.3.0` because the version-range parser only handled exact matches" gap a reviewer sees in the supply-chain post-mortem.
+A vitest suite wired to `@kiwa-lab/security` v0.1 that models the 6 pieces of a real supply-chain security pipeline that every non-trivial deployable eventually needs — a CycloneDX 1.5 SBOM builder that emits the industry-standard component list, a SPDX 2.3 SBOM builder that emits the Linux Foundation format side by side, a SBOM validator that catches missing `name` / `version` / malformed `purl` before they hit downstream tooling, an advisory feed lookup that joins your components against an in-memory OSV / NVD feed and returns the affected rows, a license policy evaluator that maps SPDX license identifiers to allow / warn / deny verdicts, and a secrets scanner with TruffleHog-style pattern rules plus Gitleaks-style entropy validation for the base64 / hex secrets that regex alone would false-positive on. `toCycloneDx()` + `toSpdx()` + `validateSbom()` + `lookupAdvisories()` + `evaluateLicense()` + `scanSecrets()` + `isRotationOverdue()` give you every one of those pieces without booting Trivy or Gitleaks. This is the pattern kiwa's `examples/dogfood-security-sbom-scanning-app` exercises against real Trivy + Gitleaks + OSV-Scanner under `KIWA_MODE=real`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the SBOM said 0 vulnerable components but the OSV feed had a critical for `left-pad@1.3.0` because the version-range parser only handled exact matches" gap a reviewer sees in the supply-chain post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/security` v0.1 that models the 6 pieces of a real
 ```bash
 mkdir kiwa-sbom && cd kiwa-sbom
 pnpm init
-pnpm add -D @kiwa/security@^0.1 vitest typescript @types/node
+pnpm add -D @kiwa-lab/security@^0.1 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,8 +39,8 @@ The v0.1 surface exports the SBOM axis (`toCycloneDx` / `toSpdx` / `validateSbom
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import type { SbomComponent } from '@kiwa/security';
-import { toCycloneDx, toSpdx } from '@kiwa/security';
+import type { SbomComponent } from '@kiwa-lab/security';
+import { toCycloneDx, toSpdx } from '@kiwa-lab/security';
 
 const components: SbomComponent[] = [
   { name: 'react', version: '18.2.0', purl: 'pkg:npm/react@18.2.0', license: 'MIT' },
@@ -71,7 +71,7 @@ describe('sbom — dual format', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { toCycloneDx, validateSbom } from '@kiwa/security';
+import { toCycloneDx, validateSbom } from '@kiwa-lab/security';
 
 describe('sbom — validate', () => {
   it('accepts a well-formed SBOM', () => {
@@ -109,8 +109,8 @@ describe('sbom — validate', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import type { AdvisoryFeed } from '@kiwa/security';
-import { lookupAdvisories, toCycloneDx, versionInRange } from '@kiwa/security';
+import type { AdvisoryFeed } from '@kiwa-lab/security';
+import { lookupAdvisories, toCycloneDx, versionInRange } from '@kiwa-lab/security';
 
 describe('sbom — versionInRange', () => {
   it('matches an exact version', () => {
@@ -172,7 +172,7 @@ The `< 2.0.0` range on `left-pad@1.3.0` is exactly the class of gap the introduc
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_LICENSE_POLICY, evaluateLicense } from '@kiwa/security';
+import { DEFAULT_LICENSE_POLICY, evaluateLicense } from '@kiwa-lab/security';
 
 describe('sbom — evaluateLicense (default policy)', () => {
   it('allows MIT and Apache-2.0', () => {
@@ -221,7 +221,7 @@ import {
   DEFAULT_SIGNATURES,
   scanSecrets,
   shannonEntropy,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 
 describe('secrets-scan — signatures', () => {
   it('flags an AWS access key by prefix', () => {
@@ -275,8 +275,8 @@ The `shannonEntropy` helper is exported so downstream code can reuse the thresho
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import type { RotationTracker } from '@kiwa/security';
-import { isRotationOverdue, markRotated } from '@kiwa/security';
+import type { RotationTracker } from '@kiwa-lab/security';
+import { isRotationOverdue, markRotated } from '@kiwa-lab/security';
 
 const dayMs = 24 * 60 * 60 * 1000;
 const finding = {

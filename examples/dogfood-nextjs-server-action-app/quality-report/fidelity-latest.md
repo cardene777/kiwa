@@ -1,4 +1,4 @@
-# Quality Report — @kiwa/component/nextjs-server-action-app @ 0.3.0
+# Quality Report — @kiwa-lab/component/nextjs-server-action-app @ 0.3.0
 
 _Reported at 2026-07-06T13:13:21.490Z._
 

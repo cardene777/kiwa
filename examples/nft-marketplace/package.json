@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "pnpm -F @kiwa/dapp build && playwright test",
+    "test": "pnpm -F @kiwa-lab/dapp build && playwright test",
     "test:hardhat": "hardhat test --config hardhat.config.cjs",
     "test:hardhat:coverage": "hardhat coverage --config hardhat.config.cjs",
     "typecheck": "tsc --noEmit",
     "forge:build": "forge build"
   },
   "dependencies": {
-    "@kiwa/dapp": "workspace:*"
+    "@kiwa-lab/dapp": "workspace:*"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",

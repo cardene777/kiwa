@@ -57,7 +57,7 @@ describe('dogfood-vector-search-app — emit fidelity report to quality-report/'
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/orm/vector-search-dogfood',
+      provider: '@kiwa-lab/orm/vector-search-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

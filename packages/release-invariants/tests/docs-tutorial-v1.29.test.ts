@@ -10,7 +10,7 @@
  * docs-tutorial-v*.test.ts と同 pattern。 7 milestone 連続 pattern
  * (v1.23-v1.29) を確立する。
  *
- * v1.29 は @kiwa/release-invariants v0.1 の 3 pure invariant checker
+ * v1.29 は @kiwa-lab/release-invariants v0.1 の 3 pure invariant checker
  * (checkReleaseScriptFilter + checkProvenanceFlagAbsence +
  * checkGateScriptPackageCoverage) + 1-shot buildReleaseInvariantsSummary
  * aggregator を扱う。 tutorial 55 は systematic root cause pattern SSOT の
@@ -80,8 +80,8 @@ function createMockReleaseInvariants(
 // ---------------------------------------------------------------------------
 
 const PUBLISHABLE: PublishablePackage[] = [
-  { name: '@kiwa/core' },
-  { name: '@kiwa/realtime' },
+  { name: '@kiwa-lab/core' },
+  { name: '@kiwa-lab/realtime' },
 ];
 
 describe('tutorial 55 — release invariants', () => {
@@ -89,10 +89,10 @@ describe('tutorial 55 — release invariants', () => {
     const adapter = createMockReleaseInvariants({
       publishable: PUBLISHABLE,
       releaseScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime build && ' +
-        'pnpm publish --filter @kiwa/core --filter @kiwa/realtime',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime build && ' +
+        'pnpm publish --filter @kiwa-lab/core --filter @kiwa-lab/realtime',
       mutationGateScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime run test:mutation',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime run test:mutation',
     });
     const summary = await adapter.summarize();
     expect(summary.ok).toBe(true);
@@ -105,21 +105,21 @@ describe('tutorial 55 — release invariants', () => {
     const adapter = createMockReleaseInvariants({
       publishable: PUBLISHABLE,
       releaseScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime build && ' +
-        'pnpm publish --filter @kiwa/core',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime build && ' +
+        'pnpm publish --filter @kiwa-lab/core',
       mutationGateScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime run test:mutation',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime run test:mutation',
     });
     const summary = await adapter.summarize();
     expect(summary.ok).toBe(false);
     expect(summary.releaseScriptFilter.ok).toBe(false);
     expect(summary.releaseScriptFilter.missingPublishFilter).toEqual([
-      '@kiwa/realtime',
+      '@kiwa-lab/realtime',
     ]);
     expect(summary.releaseScriptFilter.missingBuildFilter).toEqual([]);
     // the offending package's entry has partial=true
     const realtime = summary.releaseScriptFilter.entries.find(
-      (e) => e.name === '@kiwa/realtime',
+      (e) => e.name === '@kiwa-lab/realtime',
     )!;
     expect(realtime.partial).toBe(true);
     expect(realtime.buildFilterPresent).toBe(true);
@@ -130,10 +130,10 @@ describe('tutorial 55 — release invariants', () => {
     const adapter = createMockReleaseInvariants({
       publishable: PUBLISHABLE,
       releaseScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime build && ' +
-        'pnpm publish --filter @kiwa/core --filter @kiwa/realtime --provenance',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime build && ' +
+        'pnpm publish --filter @kiwa-lab/core --filter @kiwa-lab/realtime --provenance',
       mutationGateScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime run test:mutation',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime run test:mutation',
     });
     const summary = await adapter.summarize();
     expect(summary.ok).toBe(false);
@@ -147,15 +147,15 @@ describe('tutorial 55 — release invariants', () => {
     const adapter = createMockReleaseInvariants({
       publishable: PUBLISHABLE,
       releaseScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime build && ' +
-        'pnpm publish --filter @kiwa/core --filter @kiwa/realtime',
-      mutationGateScript: 'pnpm -F @kiwa/core run test:mutation',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime build && ' +
+        'pnpm publish --filter @kiwa-lab/core --filter @kiwa-lab/realtime',
+      mutationGateScript: 'pnpm -F @kiwa-lab/core run test:mutation',
     });
     const summary = await adapter.summarize();
     expect(summary.ok).toBe(false);
     expect(summary.gateScriptPackageCoverage.ok).toBe(false);
     expect(summary.gateScriptPackageCoverage.missingMutationFilter).toEqual([
-      '@kiwa/realtime',
+      '@kiwa-lab/realtime',
     ]);
   });
 });
@@ -167,8 +167,8 @@ describe('tutorial 55 — release invariants', () => {
 describe('tutorial 55 — direct API cross-check', () => {
   it('checkReleaseScriptFilter reports both halves for the happy path', () => {
     const result = checkReleaseScriptFilter(
-      'pnpm -F @kiwa/core -F @kiwa/realtime build && ' +
-        'pnpm publish --filter @kiwa/core --filter @kiwa/realtime',
+      'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime build && ' +
+        'pnpm publish --filter @kiwa-lab/core --filter @kiwa-lab/realtime',
       PUBLISHABLE,
     );
     expect(result.ok).toBe(true);
@@ -179,7 +179,7 @@ describe('tutorial 55 — direct API cross-check', () => {
 
   it('checkProvenanceFlagAbsence reports no excerpts for a clean script', () => {
     const result = checkProvenanceFlagAbsence(
-      'pnpm publish --filter @kiwa/core --access public --no-git-checks',
+      'pnpm publish --filter @kiwa-lab/core --access public --no-git-checks',
     );
     expect(result.ok).toBe(true);
     expect(result.provenanceFlagPresent).toBe(false);
@@ -198,7 +198,7 @@ describe('tutorial 55 — direct API cross-check', () => {
 
   it('checkGateScriptPackageCoverage reports every publishable package', () => {
     const result = checkGateScriptPackageCoverage(
-      'pnpm -F @kiwa/core -F @kiwa/realtime run test:mutation',
+      'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime run test:mutation',
       PUBLISHABLE,
     );
     expect(result.ok).toBe(true);

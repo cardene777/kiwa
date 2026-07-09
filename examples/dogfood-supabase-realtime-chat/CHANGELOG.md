@@ -6,5 +6,5 @@
 
 - Updated dependencies [797e5ea]
 - Updated dependencies [bd40f20]
-  - @kiwa/quality-metrics@0.2.0
-  - @kiwa/realtime@0.1.1
+  - @kiwa-lab/quality-metrics@0.2.0
+  - @kiwa-lab/realtime@0.1.1

@@ -1,6 +1,6 @@
 /**
  * KV bucket revision flow (v1.31-4) — wraps
- * `@kiwa/streaming`'s `createNatsKvObject` KV surface so the dogfood
+ * `@kiwa-lab/streaming`'s `createNatsKvObject` KV surface so the dogfood
  * can exercise history depth + tombstone + watch semantics.
  *
  * The canned scenario:
@@ -12,7 +12,7 @@
  *   6. Assert `getKv` after tombstone returns null.
  */
 
-import { createNatsKvObject, type NatsKvObject } from '@kiwa/streaming';
+import { createNatsKvObject, type NatsKvObject } from '@kiwa-lab/streaming';
 
 export interface KvRevisionFlowInput {
   readonly bucket?: string;

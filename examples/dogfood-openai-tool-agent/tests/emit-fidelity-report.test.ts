@@ -30,7 +30,7 @@ describe('dogfood-openai-tool-agent — emit fidelity report to quality-report/'
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/ai-llm/openai-tool-agent',
+      provider: '@kiwa-lab/ai-llm/openai-tool-agent',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

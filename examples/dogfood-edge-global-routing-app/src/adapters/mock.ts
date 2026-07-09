@@ -1,6 +1,6 @@
 /**
  * Mock adapter — walks the edge global-routing + d1-read-replica state
- * machines from @kiwa/edge v1.2 semantics deterministically.
+ * machines from @kiwa-lab/edge v1.2 semantics deterministically.
  */
 import {
   markUnhealthy,
@@ -13,7 +13,7 @@ import {
   startRoutingPool,
   type D1Session,
   type RoutingSession as EdgeRoutingSession,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 import type {
   EdgeRoutingAdapter,
   ReplicaSession,

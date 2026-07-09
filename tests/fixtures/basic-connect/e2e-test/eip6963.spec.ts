@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { dappE2eTest } from '@kiwa/dapp';
+import { dappE2eTest } from '@kiwa-lab/dapp';
 import { privateKeyToAccount } from 'viem/accounts';
 
 const PK1 =

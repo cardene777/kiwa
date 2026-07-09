@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa/realtime/nextjs-webrtc-video-app",
+  "provider": "@kiwa-lab/realtime/nextjs-webrtc-video-app",
   "version": "0.2.0",
   "reportedAt": "2026-07-06T02:44:15.072Z",
   "coverage": {

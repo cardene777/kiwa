@@ -1,9 +1,9 @@
-// PoC tests — @kiwa/orm v0.2.1 (Drizzle + MySQL via testcontainers).
+// PoC tests — @kiwa-lab/orm v0.2.1 (Drizzle + MySQL via testcontainers).
 
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { setupOrmEnv, expectRowCount } from '@kiwa/orm';
-import type { OrmTestEnvLiveMysql } from '@kiwa/orm';
+import { setupOrmEnv, expectRowCount } from '@kiwa-lab/orm';
+import type { OrmTestEnvLiveMysql } from '@kiwa-lab/orm';
 import { posts, schema, type Schema } from '../src/schema.js';
 import { INITIAL_MIGRATION } from '../src/migration.sql.js';
 import { UsersRepository } from '../src/users-repo.js';
@@ -24,7 +24,7 @@ afterEach(async () => {
   if (env) { await env.stop(); env = null; }
 }, 60_000);
 
-describe('UsersRepository via @kiwa/orm (mysql testcontainers)', () => {
+describe('UsersRepository via @kiwa-lab/orm (mysql testcontainers)', () => {
   it('T-MY-001: create + findByEmail round-trip on real MySQL', async () => {
     if (!dockerAvailable) return;
     env = await setupOrmEnv({

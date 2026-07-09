@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.51 リリース — Mobile 深化 II (@kiwa/mobile v0.2)、 縦深化 pair 第 13 の **2 段目 (Phase 2)** 完成。 advanced II 4 new axis (navigation + reanimated + async-storage + secure-storage) + real driver env-gate 追加。
+kiwa v1.51 リリース — Mobile 深化 II (@kiwa-lab/mobile v0.2)、 縦深化 pair 第 13 の **2 段目 (Phase 2)** 完成。 advanced II 4 new axis (navigation + reanimated + async-storage + secure-storage) + real driver env-gate 追加。
 
 ## Tweet 2 — 7 axis fidelity + real driver
 
@@ -14,7 +14,7 @@ dogfood-mobile-advanced-app 新規 (4 axis × 3 target workflow + env-gate 3 pat
 
 ## Tweet 4 — install + Phase 3 計画
 
-`pnpm add -D @kiwa/mobile@^0.2`。 migration: https://cardene777.github.io/kiwa/migrations/v1.50-to-v1.51
+`pnpm add -D @kiwa-lab/mobile@^0.2`。 migration: https://cardene777.github.io/kiwa/migrations/v1.50-to-v1.51
 
 v1.52+ で Mobile 深化 III (v0.3 Fabric + TurboModules + Codegen + New Architecture) で pair 深度 3 段拡張達成 (5 例目 pair 深度 3 段記録) を狙う。 systematic root cause pattern SSOT 26 度目適用。
 

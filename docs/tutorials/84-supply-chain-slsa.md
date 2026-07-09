@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/security` v0.2 that models the 4 signals of a real supply chain SLSA chain that every non-trivial build pipeline eventually needs — a SLSA level classifier that walks 8 booleans (build-scripted-from-repo + build-service-is-trustworthy + build-parameterizable + build-isolated + provenance-exists + provenance-authenticated + provenance-service-generated + provenance-non-falsifiable) into a 0..4 level so a CI-driven build cannot silently claim SLSA 3 without the isolation + non-falsifiable provenance signals, a reproducible-build matcher that compares two build hashes and pins the toolchain version so a `nixpkgs` rev bump or a `node --version` drift shows up as `matched: false`, a provenance signer that records the builder id + materials count + signature algorithm (`sigstore-cosign` / `in-toto` / `gpg`), and an attestation verifier that requires a trust-root fingerprint + at least one valid signature and pins the attestation type (`slsa-provenance` / `spdx-sbom` / `cyclone-dx-vex`). `startSupplyChainSession()` + `verifySlsaLevel()` + `matchReproducibleBuild()` + `signProvenance()` + `verifyAttestation()` give you every one of those signals without booting a real sigstore or in-toto attestation engine. This is the pattern kiwa's `examples/dogfood-security-supply-chain-slsa-app` exercises against real sigstore + in-toto under `KIWA_MODE=real` + `KIWA_VAULT_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the build claimed SLSA 3 but the isolation signal was `false` and the CI operator only noticed after a downstream consumer rejected the attestation" gap a reviewer sees in the supply chain post-mortem.
+A vitest suite wired to `@kiwa-lab/security` v0.2 that models the 4 signals of a real supply chain SLSA chain that every non-trivial build pipeline eventually needs — a SLSA level classifier that walks 8 booleans (build-scripted-from-repo + build-service-is-trustworthy + build-parameterizable + build-isolated + provenance-exists + provenance-authenticated + provenance-service-generated + provenance-non-falsifiable) into a 0..4 level so a CI-driven build cannot silently claim SLSA 3 without the isolation + non-falsifiable provenance signals, a reproducible-build matcher that compares two build hashes and pins the toolchain version so a `nixpkgs` rev bump or a `node --version` drift shows up as `matched: false`, a provenance signer that records the builder id + materials count + signature algorithm (`sigstore-cosign` / `in-toto` / `gpg`), and an attestation verifier that requires a trust-root fingerprint + at least one valid signature and pins the attestation type (`slsa-provenance` / `spdx-sbom` / `cyclone-dx-vex`). `startSupplyChainSession()` + `verifySlsaLevel()` + `matchReproducibleBuild()` + `signProvenance()` + `verifyAttestation()` give you every one of those signals without booting a real sigstore or in-toto attestation engine. This is the pattern kiwa's `examples/dogfood-security-supply-chain-slsa-app` exercises against real sigstore + in-toto under `KIWA_MODE=real` + `KIWA_VAULT_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the build claimed SLSA 3 but the isolation signal was `false` and the CI operator only noticed after a downstream consumer rejected the attestation" gap a reviewer sees in the supply chain post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/security` v0.2 that models the 4 signals of a rea
 ```bash
 mkdir kiwa-supply-chain && cd kiwa-supply-chain
 pnpm init
-pnpm add -D @kiwa/security@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/security@^0.2 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -47,7 +47,7 @@ import { describe, expect, it } from 'vitest';
 import {
   startSupplyChainSession,
   verifySlsaLevel,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 
 describe('supply-chain — verifySlsaLevel', () => {
   it('classifies a fully-signed isolated non-parameterized build as SLSA 4', () => {
@@ -126,7 +126,7 @@ import {
   matchReproducibleBuild,
   startSupplyChainSession,
   verifySlsaLevel,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 
 describe('supply-chain — matchReproducibleBuild', () => {
   it('emits matched=true when two independent builds produce the same hash', () => {
@@ -206,7 +206,7 @@ import {
   signProvenance,
   startSupplyChainSession,
   verifySlsaLevel,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 
 describe('supply-chain — signProvenance', () => {
   it('records builder id + materials count + sigstore-cosign algorithm', () => {
@@ -326,7 +326,7 @@ import {
   startSupplyChainSession,
   verifyAttestation,
   verifySlsaLevel,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 
 describe('supply-chain — verifyAttestation', () => {
   it('records attestation type + trust root + valid signature count', () => {

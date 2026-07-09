@@ -11,4 +11,4 @@
 ### Patch Changes
 
 - Updated dependencies [1fab5c4]
-  - @kiwa/streaming@0.2.0
+  - @kiwa-lab/streaming@0.2.0

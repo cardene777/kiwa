@@ -6,7 +6,7 @@
  *  - {@link makeRealAdapter} (drives aioquic HTTP/3 testcontainers when
  *    `KIWA_MODE=real` + `WEBTRANSPORT_KEY=1` are set; otherwise every op
  *    reports `KIWA_WEBTRANSPORT_ENV_MISSING`)
- *  - {@link makeMockAdapter} (backed by `@kiwa/realtime` v0.2's
+ *  - {@link makeMockAdapter} (backed by `@kiwa-lab/realtime` v0.2's
  *    `createWebTransportUniMock` + `createWebTransportBiMock`)
  *
  * Both must satisfy the same 8-op contract so behavioural fidelity between

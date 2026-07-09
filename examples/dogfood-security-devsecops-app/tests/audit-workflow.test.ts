@@ -19,7 +19,7 @@ import {
   startSecretScan,
   attemptDastAttack,
   confirmDastVuln,
-} from '@kiwa/security-devsecops';
+} from '@kiwa-lab/security-devsecops';
 
 /**
  * dev-flow の /security-audit skill 経路を library 経由で実行する dogfood。

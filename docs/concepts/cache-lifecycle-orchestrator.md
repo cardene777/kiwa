@@ -1,12 +1,12 @@
 ---
-title: "@kiwa/cache v0.6 cache-lifecycle-orchestrator SSOT"
+title: "@kiwa-lab/cache v0.6 cache-lifecycle-orchestrator SSOT"
 ---
 
-# @kiwa/cache v0.6 cache-lifecycle-orchestrator SSOT
+# @kiwa-lab/cache v0.6 cache-lifecycle-orchestrator SSOT
 
 ## What this covers
 
-`@kiwa/cache` v0.6 cache-lifecycle-orchestrator = 3 provider (Redis + Memcached + KeyDB) を 継続合成する 上位 layer。 depth-5 pattern 11 例目 candidate = systematic law 継続強化 第 5 例、 backend systems layer 第 3 例 (ORM / Auth に続く)、 systematic pattern 53 度目適用。
+`@kiwa-lab/cache` v0.6 cache-lifecycle-orchestrator = 3 provider (Redis + Memcached + KeyDB) を 継続合成する 上位 layer。 depth-5 pattern 11 例目 candidate = systematic law 継続強化 第 5 例、 backend systems layer 第 3 例 (ORM / Auth に続く)、 systematic pattern 53 度目適用。
 
 ## 5 state SSOT
 

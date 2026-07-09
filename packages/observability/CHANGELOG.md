@@ -1,4 +1,4 @@
-# @kiwa/observability
+# @kiwa-lab/observability
 
 ## 2.1.0
 
@@ -8,7 +8,7 @@
   - 4 provider target (Grafana OSS / Prometheus / Loki / OpenTelemetry Collector) x 8 axis = 32 grid fidelity harness (`semantics.collectFidelityCoverage()`)。
   - Provider-neutral event 名 (`slo.burn_rate_evaluated` 等) と provider-specific dialect (`grafana.slo.burn.eval` 等) を `providerEventName()` で切替、 テストは neutral 名で assert、 実配線は dialect で観測。
   - Real driver env-gate (`isKiwaModeReal()` + `resolveObservabilityEndpoint()` + `skipUnlessReal()`) が KIWA_MODE=real 時に Grafana OSS/Prometheus/Loki/OTel Collector backend endpoint を解決。 KIWA_MODE≠real 時は skip=true を返して mock semantics に fallback。
-  - namespaced export ... `semantics/*` は `import { semantics } from '@kiwa/observability'` 経由、 v2.0 の `Silence` / `EscalationStep` / `FlameNode` と競合しない構造で追加。
+  - namespaced export ... `semantics/*` は `import { semantics } from '@kiwa-lab/observability'` 経由、 v2.0 の `Silence` / `EscalationStep` / `FlameNode` と競合しない構造で追加。
   - v2.0 の既存 API (dashboard-mock / alert / trace-flame / log-correlation) と v1.1 telemetry mock は無変更、 v1.0 flaky/coverage も無変更。
   - Refs #1061 (v1.35-1、 CAR-798)、 #1060 (v1.35 parent)、 縦深化 pair 第 7 pair 連続化 (v1.14 base → v1.17 v2 → v1.35 v2.1)。
 
@@ -40,30 +40,30 @@
 
 - 32a6c10: 📦 11 packages initial v1.0.x npm publish (改名後初回)。
 
-  PR #476 で `@kiwa/core` ↔ `@kiwa/spec` swap rename + dApp 改名 + v1.0 major bump を local で実施したが、 npm への publish が未実行のため npm 上では旧 0.x 系のまま停滞していた。
+  PR #476 で `@kiwa-lab/core` ↔ `@kiwa-lab/spec` swap rename + dApp 改名 + v1.0 major bump を local で実施したが、 npm への publish が未実行のため npm 上では旧 0.x 系のまま停滞していた。
 
   本 changeset で全 11 packages を v1.0.1 へ patch bump して publish を発火させ、 改名後の v1.0 系を npm に反映する。
 
   ## 影響範囲
 
-  - 旧 `@kiwa/core` (0.3.1) は dApp E2E fixture の名残、 v1.0.1 では新 spec として publish
-  - 旧 `@kiwa/spec` は廃止 (`@kiwa/core` に統合)
-  - 新 `@kiwa/dapp` (404 → v1.0.1 として初公開)
+  - 旧 `@kiwa-lab/core` (0.3.1) は dApp E2E fixture の名残、 v1.0.1 では新 spec として publish
+  - 旧 `@kiwa-lab/spec` は廃止 (`@kiwa-lab/core` に統合)
+  - 新 `@kiwa-lab/dapp` (404 → v1.0.1 として初公開)
   - 既存 9 adapter (api / ui / data / e2e / a11y / cli-test / observability / visual / cli) は v1.0.1 patch bump で公開
   - v1.0.0 → v1.0.1 patch bump (PR #476 の v1.0.0 内部 bump を上書きせず継続)
 
   ## 確認方法
 
   ```bash
-  npm view @kiwa/core version    # → 1.0.1
-  npm view @kiwa/dapp version    # → 1.0.1 (新規公開)
-  npm view @kiwa/e2e version     # → 1.0.1
-  npm view @kiwa/a11y version    # → 1.0.1
-  npm view @kiwa/visual version  # → 1.0.1
+  npm view @kiwa-lab/core version    # → 1.0.1
+  npm view @kiwa-lab/dapp version    # → 1.0.1 (新規公開)
+  npm view @kiwa-lab/e2e version     # → 1.0.1
+  npm view @kiwa-lab/a11y version    # → 1.0.1
+  npm view @kiwa-lab/visual version  # → 1.0.1
   ```
 
 - Updated dependencies [32a6c10]
-  - @kiwa/core@1.0.1
+  - @kiwa-lab/core@1.0.1
 
 ## 0.2.1
 
@@ -71,7 +71,7 @@
 
 - c0f0a97: Lock in mutation testing across all 11 packages with a release-time gate. `scripts/check-mutation-gates.mjs` reads each package's `mutation-report/mutation.json` and enforces per-package MSI thresholds (90% for pure-logic — api / a11y / ui after PR 1-5; 80% for thin wrappers around third-party libs). Release workflow now runs `pnpm test:mutation` for every package and fails the publish if any package's MSI regresses below its threshold. Current snapshot: api 96.06 / a11y 93.62 / ui 91.76 / cli-test 89.69 / data 86.93 / spec 85.51 / core 85.09 / cli 84.44 / e2e 84.21 / observability 84.12 / visual 83.02 — all above thresholds. No public API change.
 - Updated dependencies [c0f0a97]
-  - @kiwa/core@0.1.1
+  - @kiwa-lab/core@0.1.1
 
 ## 0.2.0
 
@@ -85,14 +85,14 @@
   - `@vitest/coverage-v8` を devDep に追加
   - v8 provider で line / branch / function / statement coverage を JSON + text reporter で出力
 
-  ## B: @kiwa/observability に coverage 取込 (minor)
+  ## B: @kiwa-lab/observability に coverage 取込 (minor)
 
   - `fromIstanbulCoverageSummary` ... v8 / istanbul coverage-summary.json を `CoverageSummary` に正規化、 total 不在時は files から自動集計
   - `checkThresholds` ... lines / branches / functions / statements の最低 % を gate
   - `renderDashboard({ coverage })` に Code coverage section 追加 (total line/branch/function/statement の表)
   - 6 件 test 追加 (合計 21 件 PASS)
 
-  ## C: @kiwa/ui に Vue 3 対応 (minor)
+  ## C: @kiwa-lab/ui に Vue 3 対応 (minor)
 
   - `setupVueComponentEnv({ mode, component, props, slots })` ... `@vue/test-utils` を lazy load して mount、 jsdom 環境で動作 (PoC 2 件 PASS)
   - `setupSvelteComponentEnv({ mode, component, props })` ... `@testing-library/svelte` を lazy load する API のみ提供 (test は PoC 側で実装)
@@ -103,7 +103,7 @@
 
 ### Minor Changes
 
-- 8afad1c: v5 — @kiwa/observability v0.1.0 新設: test 集計 + flaky 検出 + spec coverage gap dashboard
+- 8afad1c: v5 — @kiwa-lab/observability v0.1.0 新設: test 集計 + flaky 検出 + spec coverage gap dashboard
 
   設計 × 実装 × 観測 ループの観測 → 上流 spec フィードバック経路を SSOT 化する終端 adapter。
 

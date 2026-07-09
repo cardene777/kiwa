@@ -8,7 +8,7 @@
  *    (KIWA_TRIVY_ENDPOINT + KIWA_GITLEAKS_ENDPOINT + KIWA_ADVISORY_FEED_URL)
  *    when `KIWA_MODE=real` + `SBOM_SCANNER_READY=1` are set; otherwise every
  *    op reports `KIWA_SBOM_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa/security` v0.1 sbom +
+ *  - {@link makeMockAdapter} — backed by `@kiwa-lab/security` v0.1 sbom +
  *    secrets-scan semantics (toCycloneDx / toSpdx / validateSbom /
  *    lookupAdvisories / evaluateLicense / scanSecrets / isRotationOverdue /
  *    markRotated).
@@ -31,7 +31,7 @@
  * report can point at the ops that diverged.
  */
 
-import type { Advisory, LicenseVerdict, SbomComponent, SbomDocument, SecretFinding, SecretKind } from '@kiwa/security';
+import type { Advisory, LicenseVerdict, SbomComponent, SbomDocument, SecretFinding, SecretKind } from '@kiwa-lab/security';
 
 /** Result of publishing a component into the running SBOM session. */
 export interface SbomAddComponentResult {

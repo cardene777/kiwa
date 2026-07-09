@@ -56,7 +56,7 @@ describe('dogfood-kafka-event-pipeline — emit fidelity report to quality-repor
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/streaming/kafka-dogfood',
+      provider: '@kiwa-lab/streaming/kafka-dogfood',
       version: '0.2.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

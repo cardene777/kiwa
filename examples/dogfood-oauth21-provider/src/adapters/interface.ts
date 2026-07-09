@@ -4,7 +4,7 @@
  *
  * The Hono app talks to the AS only through this interface. Two
  * implementations exist —
- *  - {@link makeMockAdapter} (backed by `@kiwa/auth`'s `setupOAuth21Env`
+ *  - {@link makeMockAdapter} (backed by `@kiwa-lab/auth`'s `setupOAuth21Env`
  *    + `createAuthorizationServer` — deterministic, always available)
  *  - {@link makeRealAdapter} (spawns `oauth2-mock-server` through
  *    testcontainers — skipped when `KIWA_OAUTH21_REAL_READY=1` is unset or
@@ -24,7 +24,7 @@ import type {
   IntrospectionResponse,
   TokenRequest,
   TokenResponse,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 
 /**
  * Discovery metadata returned by `/.well-known/openid-configuration`.

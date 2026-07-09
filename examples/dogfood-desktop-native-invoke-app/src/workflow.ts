@@ -6,7 +6,7 @@ import {
   type NativeInvokeMatrixSummary,
   type NativeInvokeResult,
   type SpawnFn,
-} from '@kiwa/desktop';
+} from '@kiwa-lab/desktop';
 
 /** Pattern 1 — 単一 axis / target で probeAndInvoke 実行 */
 export async function invokeSingleAxis(input: {

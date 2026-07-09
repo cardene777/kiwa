@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/ai-llm` v0.4 hallucination + LLM eval
+ * Mock adapter — drives `@kiwa-lab/ai-llm` v0.4 hallucination + LLM eval
  * semantics so the same app code exercises a deterministic answer-quality
  * ceremony without a real OpenAI Chat Completions call. Both mock and real
  * adapters satisfy {@link LlmQualityAdapter}, so the fidelity harness can
@@ -30,7 +30,7 @@ import {
   verifyCitation,
   type EvalSession,
   type HallucinationSession,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 import type {
   CitationResult,
   ConfidenceResult,

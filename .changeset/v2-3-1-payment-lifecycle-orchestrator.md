@@ -1,8 +1,8 @@
 ---
-"@kiwa/payment": minor
+"@kiwa-lab/payment": minor
 ---
 
-v2.3-1 @kiwa/payment v2.1 = lifecycle-orchestrator 新設 (depth-5 pattern 4 例目 発生 candidate)。
+v2.3-1 @kiwa-lab/payment v2.1 = lifecycle-orchestrator 新設 (depth-5 pattern 4 例目 発生 candidate)。
 
 v1.33 Payment 深化 II で v0.4 到達 (9 axis advanced billing II semantics)、 v2.3 で lifecycle-orchestrator 追加 = subscription lifecycle + dunning + retry + revenue-recovery + chargeback の 継続合成 layer。 auth v0.7 continuous-auth pattern の Payment 版、 systematic pattern 45 度目 continuous state machine variant を Payment pair に転用。
 

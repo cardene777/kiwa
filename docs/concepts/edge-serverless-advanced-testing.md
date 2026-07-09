@@ -2,7 +2,7 @@
 
 ## What this covers
 
-`@kiwa/edge` v1.2 layers 8 advanced axes on top of the v1.1 8-axis base (durable-object / websocket-edge / edge-kv / geo-replicated / cron-trigger / subrequest-limit / cpu-time-limit / streaming-response) to give kiwa the full 16-axis Edge / Serverless testing surface. Each new axis pins a semantic that a real production edge platform exposes differently — cold-start latency profile, middleware chain execution order, KV eventual consistency guarantees, R2 multipart integrity, D1 read replica routing, DurableObject state migration, WebSocket hibernation, and Global routing. This document is the SSOT for the 8 axes, the 3-platform fidelity grid (`cloudflare` / `vercel` / `deno`), and the pair 第 12 新規 base pair introduction.
+`@kiwa-lab/edge` v1.2 layers 8 advanced axes on top of the v1.1 8-axis base (durable-object / websocket-edge / edge-kv / geo-replicated / cron-trigger / subrequest-limit / cpu-time-limit / streaming-response) to give kiwa the full 16-axis Edge / Serverless testing surface. Each new axis pins a semantic that a real production edge platform exposes differently — cold-start latency profile, middleware chain execution order, KV eventual consistency guarantees, R2 multipart integrity, D1 read replica routing, DurableObject state migration, WebSocket hibernation, and Global routing. This document is the SSOT for the 8 axes, the 3-platform fidelity grid (`cloudflare` / `vercel` / `deno`), and the pair 第 12 新規 base pair introduction.
 
 ## Pair 第 12 縦深化 pair introduction
 

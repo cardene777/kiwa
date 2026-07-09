@@ -18,7 +18,7 @@ import {
   negotiateBinlogFormat,
   updateGtidSet,
   type BinlogSession,
-} from '@kiwa/orm';
+} from '@kiwa-lab/orm';
 import type { BinlogAdvanceObservation } from '../adapters/interface.js';
 
 export interface DriveBinlogAdvanceInput {

@@ -1,11 +1,11 @@
 # dogfood-multimodal-chat
 
-Dogfood app (v1.15-4) — an Anthropic vision chat that exercises **image upload (base64 + url) + streaming response + cost tracking + multi-image comparison** across a provider-neutral interface so `@kiwa/ai-llm`'s Anthropic multimodal mock can be measured against a real Anthropic vision call.
-The resulting fidelity report feeds `@kiwa/quality-metrics` 11-axis release gate.
+Dogfood app (v1.15-4) — an Anthropic vision chat that exercises **image upload (base64 + url) + streaming response + cost tracking + multi-image comparison** across a provider-neutral interface so `@kiwa-lab/ai-llm`'s Anthropic multimodal mock can be measured against a real Anthropic vision call.
+The resulting fidelity report feeds `@kiwa-lab/quality-metrics` 11-axis release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/ai-llm` `createAnthropicMock` with `MessagePart` image, deterministic response bank).
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-lab/ai-llm` `createAnthropicMock` with `MessagePart` image, deterministic response bank).
 - `KIWA_MODE=real` — driven by `makeRealAdapter()` that calls the real Anthropic Messages API with `image` content blocks via `fetch` when `ANTHROPIC_API_KEY` is set. When the env var is missing, the adapter reports each method as `ANTHROPIC_ENV_MISSING` so the fidelity harness records the gap without failing the test suite.
 
 Real-mode envs.
@@ -24,7 +24,7 @@ src/
     real.ts            -- Anthropic HTTP adapter with image content blocks, graceful skip when env missing
   flows/
     chat-flows.ts      -- upload / stream / OCR-with-high-detail / 2-image compare
-    fidelity.ts        -- trace-diffing harness that feeds @kiwa/quality-metrics
+    fidelity.ts        -- trace-diffing harness that feeds @kiwa-lab/quality-metrics
 tests/
   e2e-mock-mode.test.ts        -- 7 mock-mode e2e tests
   fidelity-report.test.ts      -- 3 harness tests
@@ -46,7 +46,7 @@ The `quality-report/` directory is git-ignored — promote snapshots to `docs/qu
 
 ## Release gate (11 axes)
 
-Because the provider string is `@kiwa/ai-llm/multimodal-chat`, `evaluateReleaseGate` runs the AI-LLM branch (11 axes = common 7 + AI-LLM 4).
+Because the provider string is `@kiwa-lab/ai-llm/multimodal-chat`, `evaluateReleaseGate` runs the AI-LLM branch (11 axes = common 7 + AI-LLM 4).
 
 - cost per request ≤ $0.10
 - p95 latency ≤ 3000 ms
@@ -67,6 +67,6 @@ The adapter response includes `imageTokenEstimate` so the UI can render a "visio
 
 ## Related
 
-- v1.15-1 `@kiwa/ai-llm` v0.2 multimodal (`packages/ai-llm/src/multimodal.ts`)
-- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
+- v1.15-1 `@kiwa-lab/ai-llm` v0.2 multimodal (`packages/ai-llm/src/multimodal.ts`)
+- v1.11-1 `@kiwa-lab/quality-metrics` (`packages/quality-metrics/`)
 - v1.15 milestone parent [#745](https://github.com/cardene777/kiwa/issues/745), this sub [#749](https://github.com/cardene777/kiwa/issues/749)

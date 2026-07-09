@@ -1,6 +1,6 @@
 # remix-full — kiwa Remix v2 PoC (loader + action + Resource Route)
 
-`@kiwa/remix` v1.0.x の **2 helper** (`invokeLoader` / `invokeAction` / `invokeResourceRoute`) を **実 Remix v2 project** に統合した参考実装。
+`@kiwa-lab/remix` v1.0.x の **2 helper** (`invokeLoader` / `invokeAction` / `invokeResourceRoute`) を **実 Remix v2 project** に統合した参考実装。
 
 OSS contributor / kiwa を初めて触る user 向けに、 UI route の `loader` / `action` と Resource Route (JSON-only endpoint) をどう書けば kiwa 経由で test できるかを **コピペで動く形** で示す。
 
@@ -53,7 +53,7 @@ remix-full/
 
 ```bash
 pnpm install               # repo root から実行
-pnpm -F examples-remix-full build  # 依存 @kiwa/remix + @kiwa/core を先に build + Remix build
+pnpm -F examples-remix-full build  # 依存 @kiwa-lab/remix + @kiwa-lab/core を先に build + Remix build
 ```
 
 ### Step 2 — kiwa unit test (Remix 起動不要、 高速)
@@ -96,7 +96,7 @@ pnpm -F examples-remix-full test:e2e
 2. **`invokeAction`** (UI route の action) — formData / jsonBody seed + Response / redirect / error 全捕捉
 3. **`invokeResourceRoute`** (Resource Route の dispatcher) — method dispatch を helper に委譲、 405 method-not-allowed を branded signal で捕捉
 
-各 helper の API 詳細は [`@kiwa/remix` の README](../../packages/remix/README.md) を参照。
+各 helper の API 詳細は [`@kiwa-lab/remix` の README](../../packages/remix/README.md) を参照。
 
 ## 関連
 

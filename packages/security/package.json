@@ -1,5 +1,5 @@
 {
-  "name": "@kiwa/security",
+  "name": "@kiwa-lab/security",
   "version": "2.0.0",
   "description": "Security test harness for kiwa — v0.1 8 base axis (CSP + Rate limit + Authorization + WAF + Threat model + Secrets scanning + SBOM + Security headers) unified across 4 providers (helmet + express-rate-limit + casbin + coraza), plus v0.2 advanced II 8 axis (mTLS + Zero-trust + SIEM audit + Incident response + Cryptography advanced + Container/K8s + Supply chain + Web Vitals security) unified across 4 providers (istio + opa + siem-splunk + vault) with two 4 provider × 8 axis fidelity grids (32 + 32 = 64 combination coverage), real driver env-gate (KIWA_MODE=real + testcontainers), and quality-metrics 11-axis integration.",
   "license": "MIT",
@@ -133,11 +133,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
-    "@kiwa/perf-harness": "workspace:*",
+    "@kiwa-lab/perf-harness": "workspace:*",
     "@stryker-mutator/core": "^8.7.1",
     "@stryker-mutator/vitest-runner": "^8.7.1",
     "@types/node": "^22.10.0",

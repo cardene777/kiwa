@@ -4,7 +4,7 @@
 
 kiwa v1.42 is out — Observability 深化 III land.
 
-@kiwa/observability v2.1.0 → v2.2.0 minor bump. 8 axis advanced III observability production semantics across 4 provider × 8 axis = 32 cell advanced III fidelity grid (combined with v1.35 v2.1 advanced 32 cell = 64 combination coverage / 16 axis × 4 provider grid).
+@kiwa-lab/observability v2.1.0 → v2.2.0 minor bump. 8 axis advanced III observability production semantics across 4 provider × 8 axis = 32 cell advanced III fidelity grid (combined with v1.35 v2.1 advanced 32 cell = 64 combination coverage / 16 axis × 4 provider grid).
 
 Real driver env-gate (KIWA_MODE=real + provider _URL + optional Terraform / OPA / Istio / Linkerd / eBPF / LLM observability / FinOps / Chaos / OpenLineage / AIOps backend URL). 3 dogfood app new (observability-iac-drift-app + observability-llm-ops-app + observability-chaos-aiops-app) 全 7 軸 release gate PASS.
 
@@ -29,4 +29,4 @@ Auth / Realtime / Streaming / Database / Payment / Frontend / Observability / Se
 
 20 milestone 連続 snippet validation streak (v1.23-v1.42) 達成.
 
-`pnpm add -D @kiwa/observability` で v2.2.0 が入る. zero breaking changes. migration guide は https://cardene777.github.io/kiwa/migrations/v1.41-to-v1.42
+`pnpm add -D @kiwa-lab/observability` で v2.2.0 が入る. zero breaking changes. migration guide は https://cardene777.github.io/kiwa/migrations/v1.41-to-v1.42

@@ -1,6 +1,6 @@
 # dogfood-search-faceted-geo-app v1.36-3
 
-Dogfood application that exercises `@kiwa/search` v0.3
+Dogfood application that exercises `@kiwa-lab/search` v0.3
 faceted-advanced + geo axes through a provider-neutral 15-op contract
 satisfied by both a deterministic mock adapter and a `KIWA_MODE=real`
 Algolia wire-surface real adapter.
@@ -12,7 +12,7 @@ API closely enough that consumers can trust the mock in unit tests. The
 fidelity harness diffs mock vs real traces across 3 fixture sets
 (categories / restaurants / events) x 4 facet queries (nested /
 hierarchy / distinct / refined) x 3 geo queries (bounding-box / radius /
-polygon) and feeds the divergence count into `@kiwa/quality-metrics`
+polygon) and feeds the divergence count into `@kiwa-lab/quality-metrics`
 13-axis release gate.
 
 ## Surface — 15 ops

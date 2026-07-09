@@ -12,12 +12,12 @@ v1.14 は kiwa の 4 milestone 目です。 v1.11 (release gate) → v1.12 (非�
 
 ## 主な追加
 
-### `@kiwa/payment` v0.1
+### `@kiwa-lab/payment` v0.1
 
 Stripe + Paddle + Lemon Squeezy webhook mock。 3 provider を 1 API で扱えます。
 
 ```ts
-import { createStripeMock, checkoutCompleted } from '@kiwa/payment';
+import { createStripeMock, checkoutCompleted } from '@kiwa-lab/payment';
 
 const stripe = createStripeMock({ secret: 'whsec_test' });
 const { rawBody, signature } = checkoutCompleted(stripe, {
@@ -33,12 +33,12 @@ expect(verified.ok).toBe(true);
 - 3 provider の payload 差 (Stripe `data.object.*` / Paddle `data.attributes.*` / Lemon Squeezy `meta.event_name`) は engine config で吸収
 - Verify 3 failure mode (bad-signature / stale-timestamp / malformed-body) を SSOT 化
 
-### `@kiwa/search` v0.1
+### `@kiwa-lab/search` v0.1
 
 Meilisearch + Algolia + Typesense を統一 mock で扱えます。
 
 ```ts
-import { createMeilisearchMock } from '@kiwa/search';
+import { createMeilisearchMock } from '@kiwa-lab/search';
 
 const search = createMeilisearchMock();
 await search.addDocuments('docs', [{ id: '1', title: 'kiwa release gate' }]);
@@ -49,12 +49,12 @@ const r = await search.search('docs', { q: 'kiwa', facets: ['category'] });
 - word-overlap ranking + filter + facet + sort + pagination
 - 1-edit-distance typo tolerance (provider 別 default = Meili/Algolia ON / Typesense OFF)
 
-### `@kiwa/observability` v1.1 (telemetry 拡張)
+### `@kiwa-lab/observability` v1.1 (telemetry 拡張)
 
 3 telemetry mock 追加 = OpenTelemetry + Datadog + Sentry。 既存 flaky/spec-coverage/dashboard は据置き。
 
 ```ts
-import { createSentryMock } from '@kiwa/observability';
+import { createSentryMock } from '@kiwa-lab/observability';
 
 const sentry = createSentryMock();
 sentry.addBreadcrumb({ category: 'ui', message: 'clicked-button' });
@@ -80,7 +80,7 @@ kiwa が cover する Go web framework は **5 種類**になりました。
 
 ### perf-harness 実測完遂
 
-v1.13-1 で `@kiwa/perf-harness` を 5 target 適用 land。 v1.14-1 で **9 target** に拡張。
+v1.13-1 で `@kiwa-lab/perf-harness` を 5 target 適用 land。 v1.14-1 で **9 target** に拡張。
 
 | target | max p95 | verdict |
 |---|---|---|

@@ -4,9 +4,9 @@
  * The app talks to Supabase only through this interface. Two implementations
  * exist — {@link makeRealAdapter} (points at a real Supabase instance, e.g.
  * Supabase Local via testcontainers) and {@link makeMockAdapter} (backed by
- * `@kiwa/auth`'s Supabase core + advanced envs). Both must satisfy the
+ * `@kiwa-lab/auth`'s Supabase core + advanced envs). Both must satisfy the
  * same contract so behavioural fidelity between real vs mock can be measured
- * side-by-side and fed to `@kiwa/quality-metrics`.
+ * side-by-side and fed to `@kiwa-lab/quality-metrics`.
  */
 
 export interface AuthSession {

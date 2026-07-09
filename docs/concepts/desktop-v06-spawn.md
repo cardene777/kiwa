@@ -6,7 +6,7 @@ title: Desktop v0.6 実 child_process.spawn 実行 — v1.61 spawn-executor + sa
 
 ## What this covers
 
-`@kiwa/desktop` v0.6 の spawn-executor + 実 child_process.spawn 実行 SSOT。 v1.61 で v0.5 spawn stub → v0.6 実 spawn 実装完成、 kiwa 縦深化 pair 第 14 の第 6 段、 **depth-6 pattern 新設 = kiwa milestone 史上初 depth-6 record 到達** + **depth-5 pattern 2 例目確定** (Mobile depth-5 1 例目 + Desktop v1.60-v1.61 で 2 例目、 2 例安定化到達)、 Mobile v1.55 pattern (v0.6 spawn-executor + per-command env allowlist + timeout + buffer 上限 + DI + dry-run) 転用、 v0.5 baseline (`docs/concepts/desktop-spawn-stub.md`) を extend。
+`@kiwa-lab/desktop` v0.6 の spawn-executor + 実 child_process.spawn 実行 SSOT。 v1.61 で v0.5 spawn stub → v0.6 実 spawn 実装完成、 kiwa 縦深化 pair 第 14 の第 6 段、 **depth-6 pattern 新設 = kiwa milestone 史上初 depth-6 record 到達** + **depth-5 pattern 2 例目確定** (Mobile depth-5 1 例目 + Desktop v1.60-v1.61 で 2 例目、 2 例安定化到達)、 Mobile v1.55 pattern (v0.6 spawn-executor + per-command env allowlist + timeout + buffer 上限 + DI + dry-run) 転用、 v0.5 baseline (`docs/concepts/desktop-spawn-stub.md`) を extend。
 
 ## spawn-executor 3 type SSOT
 
@@ -80,7 +80,7 @@ Desktop v0.6 SpawnResult = Mobile v0.6 SpawnResult と 6 field 完全一致 (com
 
 ## backward compat 絶対維持
 
-v0.6 実 spawn 実行の追加は additive、 v0.1 + v0.2 + v0.3 + v0.4 + v0.5 の 12 axis / 48 method + adapter interface + fidelity harness + spawn stub 契約層 (invokeDesktopCli signature + SpawnResult 構造) は完全保持。 依存関係も `@kiwa/core` のみで v0.1-v0.5 と同じ、 他 44 package への影響 0、 semantics + adapters + spawn-driver 既存 layer からの API export 完全保持。
+v0.6 実 spawn 実行の追加は additive、 v0.1 + v0.2 + v0.3 + v0.4 + v0.5 の 12 axis / 48 method + adapter interface + fidelity harness + spawn stub 契約層 (invokeDesktopCli signature + SpawnResult 構造) は完全保持。 依存関係も `@kiwa-lab/core` のみで v0.1-v0.5 と同じ、 他 44 package への影響 0、 semantics + adapters + spawn-driver 既存 layer からの API export 完全保持。
 
 ## systematic pattern 36 度目適用
 

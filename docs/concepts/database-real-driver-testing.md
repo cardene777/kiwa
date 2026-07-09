@@ -32,7 +32,7 @@ Each axis has 3 shapes — a mock-only path (fast inner loop, ms scale), a real-
 Every axis emits both a `neutralEvent` (provider-neutral name) and a `backendEvent` (backend-specific dialect). The `collectFidelityCoverage()` helper walks the 144-row grid (3 provider × 3 backend × 16 axis) and returns the full mapping. This is the data structure downstream release-gate checks read to assert "every axis has a dialect entry".
 
 ```ts
-import { collectFidelityCoverage } from '@kiwa/orm';
+import { collectFidelityCoverage } from '@kiwa-lab/orm';
 
 const coverage = collectFidelityCoverage({
   providers: ['drizzle', 'prisma', 'kysely'],
@@ -107,7 +107,7 @@ The `PoolAdvancedState` state machine (`cold` → `healthy` → `warmed-up` → 
 
 ## How this ties into the 13-axis release gate
 
-v1.32 does not add a 14th release-gate axis. The 8 advanced axes gate the orm package's own tests (via `pnpm --filter @kiwa/orm test`) but do not surface as a per-package `@kiwa/quality-metrics` axis. The reasoning — the fidelity harness is backend-shape-specific, and a package that does not use a database has nothing to assert on. When a future milestone adds a `backend.fidelity` axis that describes "which backends this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.32 keeps the axis count at 13.
+v1.32 does not add a 14th release-gate axis. The 8 advanced axes gate the orm package's own tests (via `pnpm --filter @kiwa-lab/orm test`) but do not surface as a per-package `@kiwa-lab/quality-metrics` axis. The reasoning — the fidelity harness is backend-shape-specific, and a package that does not use a database has nothing to assert on. When a future milestone adds a `backend.fidelity` axis that describes "which backends this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.32 keeps the axis count at 13.
 
 ## SSOT boundaries
 

@@ -8,7 +8,7 @@
  *    Messages API when `KIWA_MODE=real` + `ANTHROPIC_API_KEY` +
  *    `KIWA_LLM_BUDGET_USD` are set; otherwise every op reports
  *    `KIWA_LLM_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa/ai-llm` v0.5
+ *  - {@link makeMockAdapter} — backed by `@kiwa-lab/ai-llm` v0.5
  *    multi-agent-orchestration + agent-swarm semantics (startMaoSession
  *    / assembleCrew / delegateBySupervisor / transitionGraph /
  *    completeRound / startSwarmSession / assignRoles / allocateTasks /
@@ -41,7 +41,7 @@ import type {
   MaoGraphNode,
   SwarmTask,
   SwarmVote,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 /** Result of assembling a crew for the multi-agent surface. */
 export interface AssembleCrewResult {

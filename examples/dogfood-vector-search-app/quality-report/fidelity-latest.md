@@ -1,4 +1,4 @@
-# Quality Report — @kiwa/orm/vector-search-dogfood @ 0.1.0
+# Quality Report — @kiwa-lab/orm/vector-search-dogfood @ 0.1.0
 
 _Reported at 2026-07-05T07:51:27.945Z._
 

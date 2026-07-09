@@ -12,7 +12,7 @@ function makeReport(overrides?: {
   mutationKillRate?: number;
 }): QualityReport {
   return {
-    provider: '@kiwa/example',
+    provider: '@kiwa-lab/example',
     version: '2.0.0',
     reportedAt: '2026-07-08T00:00:00Z',
     coverage: { line: overrides?.coverageLine ?? 90, branch: 82, function: 95 },

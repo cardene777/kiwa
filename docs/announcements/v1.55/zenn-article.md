@@ -2,11 +2,11 @@
 
 ## 概要
 
-kiwa v1.55 をリリースしました。 **Mobile 深化 VI** (@kiwa/mobile v0.6、 縦深化 pair 第 13 の 6 段目 Phase 6 完成、 **depth-5 pattern 実装完成、 kiwa milestone 史上初 6 段拡張 candidate**) 単軸 milestone。 v1.54 spawn stub 契約層 → v1.55 実 child_process.spawn 実行、 v0.5 shape 契約 preserving で backward compat 絶対維持。
+kiwa v1.55 をリリースしました。 **Mobile 深化 VI** (@kiwa-lab/mobile v0.6、 縦深化 pair 第 13 の 6 段目 Phase 6 完成、 **depth-5 pattern 実装完成、 kiwa milestone 史上初 6 段拡張 candidate**) 単軸 milestone。 v1.54 spawn stub 契約層 → v1.55 実 child_process.spawn 実行、 v0.5 shape 契約 preserving で backward compat 絶対維持。
 
 ## 何が変わったか
 
-### `@kiwa/mobile` v0.5 → v0.6 (depth-5 pattern 実装完成)
+### `@kiwa-lab/mobile` v0.5 → v0.6 (depth-5 pattern 実装完成)
 
 - **`invokeMobileCli` 実 spawn 実行** = stub → 実 child_process.spawn 実行、 v0.5 shape 契約 preserving (SpawnResult 構造 = `command` / `args` / `invoked` / `exitCode` / `stdout` / `stderr` / `durationMs` 無変更)
 - **stdout/stderr/exitCode/durationMs** = 実 spawn からの実測値
@@ -58,7 +58,7 @@ v1.23 → v1.55 = 33 milestone 連続、 kiwa 史上最長記録更新継続。 
 ## インストール
 
 ```bash
-pnpm add -D @kiwa/mobile@^0.6
+pnpm add -D @kiwa-lab/mobile@^0.6
 ```
 
 ## Migration guide

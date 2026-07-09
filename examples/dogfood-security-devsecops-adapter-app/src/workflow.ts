@@ -13,7 +13,7 @@ import {
   secretScanRealAdapter,
   type AdapterInvocation,
   type AdapterMode,
-} from '@kiwa/security-devsecops';
+} from '@kiwa-lab/security-devsecops';
 
 /**
  * DevSecOps 6 axis adapter workflow — v0.2 の mock/real adapter を横断的に

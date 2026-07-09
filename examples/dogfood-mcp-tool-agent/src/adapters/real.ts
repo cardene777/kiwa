@@ -1,4 +1,4 @@
-import type { McpTool, ToolCallResult } from '@kiwa/mcp';
+import type { McpTool, ToolCallResult } from '@kiwa-lab/mcp';
 import type {
   AgentLoopResult,
   McpAgentAdapter,

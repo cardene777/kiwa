@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/security` v0.1 sbom + secrets-scan
+ * Mock adapter — drives `@kiwa-lab/security` v0.1 sbom + secrets-scan
  * semantics (toCycloneDx / toSpdx / validateSbom / lookupAdvisories /
  * evaluateLicense / scanSecrets / isRotationOverdue / markRotated) so the
  * same app code exercises a deterministic SBOM + secrets + scanner
@@ -36,7 +36,7 @@ import {
   type RotationTracker,
   type SbomComponent,
   type SecretFinding,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 import type {
   AdvisoryFeedInput,
   ScannerLookupResult,

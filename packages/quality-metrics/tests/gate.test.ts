@@ -8,7 +8,7 @@ import {
 
 function passingReport(): QualityReport {
   return {
-    provider: '@kiwa/example',
+    provider: '@kiwa-lab/example',
     version: '0.1.0',
     reportedAt: '2026-07-02T00:00:00Z',
     coverage: { line: 90, branch: 82, function: 95 },

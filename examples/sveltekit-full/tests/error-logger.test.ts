@@ -1,7 +1,7 @@
 // kiwa unit test — errorLoggerHandle (handleError hook)。
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { setupSvelteKitHooksEnv } from '@kiwa/sveltekit';
+import { setupSvelteKitHooksEnv } from '@kiwa-lab/sveltekit';
 import {
   errorLoggerHandle,
   readErrorLogs,

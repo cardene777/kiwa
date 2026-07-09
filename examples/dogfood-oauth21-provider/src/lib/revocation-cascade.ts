@@ -33,7 +33,7 @@
  *    so a caller can drive it outside the Hono route as well.
  */
 
-import type { AuthorizationServer } from '@kiwa/auth';
+import type { AuthorizationServer } from '@kiwa-lab/auth';
 
 /**
  * Report emitted by {@link cascadeRevoke} describing the effect of a

@@ -1,4 +1,4 @@
-# Quality Report — @kiwa/search/vector-hybrid @ 0.3.0
+# Quality Report — @kiwa-lab/search/vector-hybrid @ 0.3.0
 
 _Reported at 2026-07-07T00:45:24.372Z._
 

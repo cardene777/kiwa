@@ -1,7 +1,7 @@
 # pgvector Vector Search + Hybrid Ranking + Embedding Cache — Quality Report (v1.26-4)
 
 Dogfood: [`examples/dogfood-vector-search-app`](../../../examples/dogfood-vector-search-app/).
-Package under exercise: [`@kiwa/orm`](../../../packages/orm/) (v0.9)
+Package under exercise: [`@kiwa-lab/orm`](../../../packages/orm/) (v0.9)
 vector-store axis.
 
 ## Scope
@@ -13,7 +13,7 @@ The dogfood exercises the 4 SvelteKit + Kysely + Postgres 16 + pgvector
    through the store captures the first embedding's dimensionality and
    enforces it on every subsequent upsert (`src/document/index.ts`);
    the vector index gate (`src/index-store/index.ts`) wraps
-   `@kiwa/orm`'s `createVectorStoreSession` / `buildIndex` and
+   `@kiwa-lab/orm`'s `createVectorStoreSession` / `buildIndex` and
    transitions the session to `indexed` after mount.
 2. **k-NN semantic search with cosine + L2 distance** — the adapter
    drives `knnSearch` through the gate and computes deterministic

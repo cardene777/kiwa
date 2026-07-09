@@ -28,7 +28,7 @@ describe('dogfood-trace-flame-graph — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/observability/trace-flame',
+      provider: '@kiwa-lab/observability/trace-flame',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -43,7 +43,7 @@ describe('dogfood-trace-flame-graph — fidelity harness', () => {
       mutation: { mutations: 40, killed: 28 },
       surfaceCoverage: { mockCoveredMethods: 5, realTotalMethods: 5 },
     });
-    expect(output.report.provider).toBe('@kiwa/observability/trace-flame');
+    expect(output.report.provider).toBe('@kiwa-lab/observability/trace-flame');
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThanOrEqual(5);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     await mock.reset();
@@ -61,7 +61,7 @@ describe('dogfood-trace-flame-graph — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/observability/trace-flame',
+      provider: '@kiwa-lab/observability/trace-flame',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -94,7 +94,7 @@ describe('dogfood-trace-flame-graph — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/observability/trace-flame',
+      provider: '@kiwa-lab/observability/trace-flame',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

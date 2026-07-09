@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/cache",
+  "package": "@kiwa-lab/cache",
   "tier": "SaaS",
   "thresholds": {
     "high": 65,

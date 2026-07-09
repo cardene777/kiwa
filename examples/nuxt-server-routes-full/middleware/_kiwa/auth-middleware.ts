@@ -4,7 +4,7 @@
 // /login へ redirect。 外部 SSO (to.query.external === 'true') の場合は 301 + external フラグ
 // 付き redirect、 admin-only route (to.meta.adminOnly) で role 不一致なら 403 abort。
 
-import type { SimulatedRouteLocation } from '@kiwa/nuxt';
+import type { SimulatedRouteLocation } from '@kiwa-lab/nuxt';
 
 export interface AuthMiddlewareSession {
   readonly userId?: string;

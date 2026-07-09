@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/nuxt",
+  "package": "@kiwa-lab/nuxt",
   "tier": "Framework",
   "thresholds": {
     "high": 70,

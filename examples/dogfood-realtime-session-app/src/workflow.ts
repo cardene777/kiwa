@@ -5,7 +5,7 @@ import {
   type RealtimeEvent,
   type RealtimeSession,
   type RealtimeSessionSummary,
-} from '@kiwa/realtime';
+} from '@kiwa-lab/realtime';
 
 /** Pattern 1 — WebSocket handshake で session 開始。 */
 export function openWebSocketSession(input: { timestamp: string }): RealtimeSession {

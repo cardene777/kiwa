@@ -6,7 +6,7 @@
  *  - {@link makeRealAdapter} — drives Playwright + Chromium headless when
  *    `KIWA_MODE=real` + `CSP_BROWSER_READY=1` are set; otherwise every op
  *    reports `KIWA_CSP_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa/security` v0.1
+ *  - {@link makeMockAdapter} — backed by `@kiwa-lab/security` v0.1
  *    csp + security-headers semantics.
  *
  * Both must satisfy the same 15-op contract so behavioural fidelity between

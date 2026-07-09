@@ -1,5 +1,5 @@
 ---
-title: "kiwa v2.0 リリース — brand shortening rename (`@kiwa-test/*` → `@kiwa/*`、 全 41 package major bump + deprecated re-export 6 ヶ月 window、 46 milestone streak 継続)"
+title: "kiwa v2.0 リリース — brand shortening rename (`@kiwa-test/*` → `@kiwa-lab/*`、 全 41 package major bump + deprecated re-export 6 ヶ月 window、 46 milestone streak 継続)"
 emoji: "🌱"
 type: "tech"
 topics: ["testing", "vitest", "kiwa", "monorepo", "npm"]
@@ -10,7 +10,7 @@ published: false
 
 ## Summary
 
-**pure rename milestone** で 全 41 kiwa package の scope を `@kiwa-test/*` から `@kiwa/*` に一斉変更、 全 package v2.0.0 に major bump。 API 変更 0、 shape 契約 preserving、 backward compat 絶対維持 (deprecated re-export 6 ヶ月 window、 2026-07-08 → 2027-01-08)。 Lean 形式検証 統合は v2.0 に含めず 別ライブラリで 独立展開予定、 kiwa brand は testing 特化のまま維持。
+**pure rename milestone** で 全 41 kiwa package の scope を `@kiwa-test/*` から `@kiwa-lab/*` に一斉変更、 全 package v2.0.0 に major bump。 API 変更 0、 shape 契約 preserving、 backward compat 絶対維持 (deprecated re-export 6 ヶ月 window、 2026-07-08 → 2027-01-08)。 Lean 形式検証 統合は v2.0 に含めず 別ライブラリで 独立展開予定、 kiwa brand は testing 特化のまま維持。
 
 ## Why rename
 
@@ -18,7 +18,7 @@ published: false
 |---|---|
 | brand mismatch | `@kiwa-test/*` は 「テスト特化」 を暗示、 v2.0+ 拡張時 に mismatch |
 | Lean integration | Lean 形式検証 は 別ライブラリ で 独立展開、 kiwa 本体 は testing 特化 維持 |
-| shorter name | `@kiwa/core` vs `@kiwa-test/core`、 4 文字 節約 |
+| shorter name | `@kiwa-lab/core` vs `@kiwa-test/core`、 4 文字 節約 |
 | compound assets | 45 milestone streak + depth-5 3 例目確定 + depth-6 2 例目確定 candidate は kiwa brand で 継承 |
 
 ## 5 PR 例外拡張
@@ -27,12 +27,12 @@ published: false
 - **v2.0-1** = 49 package 一斉 rename (1424 file、 900+ 参照、 #1304)
 - **v2.0-2** = docs 全 rewrite (827 file、 #1305)
 - **v2.0-3** = release-smoke SOP 追随 (#1306)
-- **v2.0-4** = 本 milestone = publish (@kiwa/* v2.0.0 一斉 + @kiwa-test/* deprecated re-export)
+- **v2.0-4** = 本 milestone = publish (@kiwa-lab/* v2.0.0 一斉 + @kiwa-test/* deprecated re-export)
 
 ## Install (new consumers)
 
 ```bash
-pnpm add -D @kiwa/core@^2.0
+pnpm add -D @kiwa-lab/core@^2.0
 ```
 
 ## Migration (existing consumers)
@@ -40,7 +40,7 @@ pnpm add -D @kiwa/core@^2.0
 ### Option A — 即時 migrate (推奨)
 
 ```bash
-grep -rl "@kiwa-test/" . | xargs sed -i '' 's|@kiwa-test/|@kiwa/|g'
+grep -rl "@kiwa-test/" . | xargs sed -i '' 's|@kiwa-test/|@kiwa-lab/|g'
 pnpm install
 ```
 
@@ -51,7 +51,7 @@ pnpm install
 ## Backward compat guarantee
 
 - v1.67 (@kiwa-test/* v0.x-v1.x) API 変更 0
-- @kiwa/* v2.0.0 の shape 契約 は @kiwa-test/* v1.67 と 完全一致
+- @kiwa-lab/* v2.0.0 の shape 契約 は @kiwa-test/* v1.67 と 完全一致
 - pure rename、 挙動 / shape / semantics 変更 0
 
 ## v2.0 完遂 signal

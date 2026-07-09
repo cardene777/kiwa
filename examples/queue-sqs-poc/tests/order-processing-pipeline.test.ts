@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupSQSEnv, type SQSTestEnv } from '@kiwa/queue';
+import { setupSQSEnv, type SQSTestEnv } from '@kiwa-lab/queue';
 import {
   collectFifoDeliveries,
   createBillingSink,

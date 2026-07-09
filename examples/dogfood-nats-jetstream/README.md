@@ -2,7 +2,7 @@
 
 Dogfood app for v1.31-4 — a NATS JetStream + KV + Object Store + subject
 routing pipeline that exercises **4 v1 patterns + 4 v2 axes** from
-`@kiwa/streaming` v0.3.
+`@kiwa-lab/streaming` v0.3.
 
 ## v1 patterns
 
@@ -45,7 +45,7 @@ routing pipeline that exercises **4 v1 patterns + 4 v2 axes** from
 The dogfood is driven end-to-end through a provider-neutral adapter
 (`src/adapters/interface.ts`) with two implementations:
 
-- `makeMockAdapter()` — backed by `@kiwa/streaming`'s NatsMock +
+- `makeMockAdapter()` — backed by `@kiwa-lab/streaming`'s NatsMock +
   the streaming v0.3 durable / kv-object semantics. Default for CI +
   local.
 - `makeRealAdapter()` — requires `KIWA_MODE=real` + `NATS_KEY` (or a

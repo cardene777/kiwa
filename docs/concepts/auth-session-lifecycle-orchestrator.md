@@ -1,12 +1,12 @@
 ---
-title: "@kiwa/auth v0.8 session-lifecycle-orchestrator SSOT"
+title: "@kiwa-lab/auth v0.8 session-lifecycle-orchestrator SSOT"
 ---
 
-# @kiwa/auth v0.8 session-lifecycle-orchestrator SSOT
+# @kiwa-lab/auth v0.8 session-lifecycle-orchestrator SSOT
 
 ## What this covers
 
-`@kiwa/auth` v0.8 session-lifecycle-orchestrator = continuous-auth + step-up-mfa + auth-continuity + session-hijack-detect + auth-telemetry の 5 axis を 継続合成する 上位 layer。 Auth pair v0.1 → v0.2 → ... → v0.7 → v0.8 = 8 段深化到達 = **depth-5 pattern 10 例目 candidate = systematic law 継続強化 第 4 例**、 **backend systems layer 第 2 例** (ORM v2.8 に続く)、 pattern 昇格階段 の 最上位 = kiwa 全体 で 必ず守る 最上位規範化、 systematic pattern 52 度目適用。
+`@kiwa-lab/auth` v0.8 session-lifecycle-orchestrator = continuous-auth + step-up-mfa + auth-continuity + session-hijack-detect + auth-telemetry の 5 axis を 継続合成する 上位 layer。 Auth pair v0.1 → v0.2 → ... → v0.7 → v0.8 = 8 段深化到達 = **depth-5 pattern 10 例目 candidate = systematic law 継続強化 第 4 例**、 **backend systems layer 第 2 例** (ORM v2.8 に続く)、 pattern 昇格階段 の 最上位 = kiwa 全体 で 必ず守る 最上位規範化、 systematic pattern 52 度目適用。
 
 ## 5 state SSOT
 

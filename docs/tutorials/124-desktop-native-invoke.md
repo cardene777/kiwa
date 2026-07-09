@@ -2,12 +2,12 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/desktop` v0.9 (実 native binding 呼出、 v1.64 で kiwa 縦深化 pair 第 14 の第 9 段 = **depth-9 pattern 新設 candidate**、 **systematic pattern 39 度目適用**、 42 milestone streak)、 probeAndInvoke 統合経路で 4 InvokeStatus (invoked / cli-unavailable / axis-skipped / no-cli-mapping)、 実 CLI 存在時のみ 実 spawn 呼出、 未 install 時は shape 契約 preserving。 v1.62 real behavior + v1.63 probe + v1.64 実 invoke の 3 layer separation の完全 pay off phase。
+A vitest suite wired to `@kiwa-lab/desktop` v0.9 (実 native binding 呼出、 v1.64 で kiwa 縦深化 pair 第 14 の第 9 段 = **depth-9 pattern 新設 candidate**、 **systematic pattern 39 度目適用**、 42 milestone streak)、 probeAndInvoke 統合経路で 4 InvokeStatus (invoked / cli-unavailable / axis-skipped / no-cli-mapping)、 実 CLI 存在時のみ 実 spawn 呼出、 未 install 時は shape 契約 preserving。 v1.62 real behavior + v1.63 probe + v1.64 実 invoke の 3 layer separation の完全 pay off phase。
 
 ## Prerequisites
 
 - Node.js ≥ 20 + pnpm
-- `@kiwa/desktop` v0.9 (`pnpm add -D @kiwa/desktop@^0.9`)
+- `@kiwa-lab/desktop` v0.9 (`pnpm add -D @kiwa-lab/desktop@^0.9`)
 
 ## Step-by-step build
 
@@ -15,7 +15,7 @@ A vitest suite wired to `@kiwa/desktop` v0.9 (実 native binding 呼出、 v1.64
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { probeAndInvoke } from '@kiwa/desktop';
+import { probeAndInvoke } from '@kiwa-lab/desktop';
 
 describe('probeAndInvoke single axis', () => {
   it('electron = no-cli-mapping (semantics-only)', async () => {
@@ -30,7 +30,7 @@ describe('probeAndInvoke single axis', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { probeAndInvokeAll } from '@kiwa/desktop';
+import { probeAndInvokeAll } from '@kiwa-lab/desktop';
 
 describe('probeAndInvokeAll matrix', () => {
   it('12 axis × 3 target = 36 pair 全走査', async () => {
@@ -50,7 +50,7 @@ describe('probeAndInvokeAll matrix', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { probeAndInvoke } from '@kiwa/desktop';
+import { probeAndInvoke } from '@kiwa-lab/desktop';
 
 describe('4 status routes', () => {
   it('全 status 経路 が type-safe', async () => {

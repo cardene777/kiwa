@@ -6,7 +6,7 @@ import {
   detectFlaky,
   fromVitestJson,
   renderDashboard,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('full-stack observability', () => {
   it('renders a dashboard combining run history + flaky + coverage gaps', () => {

@@ -15,7 +15,7 @@ import {
 
 function makeReport(overrides?: { coverageLine?: number }): QualityReport {
   return {
-    provider: '@kiwa/example',
+    provider: '@kiwa-lab/example',
     version: '2.1.0',
     reportedAt: '2026-07-08T00:00:00Z',
     coverage: { line: overrides?.coverageLine ?? 90, branch: 82, function: 95 },

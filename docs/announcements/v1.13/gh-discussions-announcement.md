@@ -1,13 +1,13 @@
-# 🌱 kiwa v1.13 — Realtime 縦軸 + perf harness (`@kiwa/realtime` v0.1 + `@kiwa/perf-harness` v0.1 + dogfood 3 app + docs 3 pillars + gh-pages 更新、 7 sub 全 resolved)
+# 🌱 kiwa v1.13 — Realtime 縦軸 + perf harness (`@kiwa-lab/realtime` v0.1 + `@kiwa-lab/perf-harness` v0.1 + dogfood 3 app + docs 3 pillars + gh-pages 更新、 7 sub 全 resolved)
 
 The v1.13 milestone (**7/7 GitHub Issues resolved**) just landed. v1.11 established the release-gate SSOT. v1.12 extended it to non-determinism (AI-LLM cost / latency / token / accuracy). v1.13 absorbs the **second axis of non-triviality — time**. Realtime providers push events over time; clients may be offline while pushes keep coming; order matters; buffers overflow. v1.13 lands a unified mock harness across Supabase Realtime + Ably + Pusher + Socket.io / SSE, wires 3 dogfood apps around it, and introduces `docs/concepts/realtime-testing.md` as the time-axis SSOT.
 
-## 1. `@kiwa/perf-harness` v0.1 — 5 target generic perf harness (v1.13-1)
+## 1. `@kiwa-lab/perf-harness` v0.1 — 5 target generic perf harness (v1.13-1)
 
 Feeds the 11-axis release gate's `perf.p95Ms` axis with p50 / p95 / p99 measurements + regression detection + baseline persistence + `/kiwa-perf` skill. 5 targets — `bench.request` / `bench.function` / `bench.stream` / `bench.batch` / `bench.worker`.
 
 ```ts
-import { bench, evaluateBaseline } from '@kiwa/perf-harness';
+import { bench, evaluateBaseline } from '@kiwa-lab/perf-harness';
 
 const result = await bench.function({
   name: 'add-1',
@@ -17,7 +17,7 @@ const result = await bench.function({
 console.log(result); // { p50: 0.02, p95: 0.05, p99: 0.11 }
 ```
 
-## 2. `@kiwa/realtime` v0.1 — 4 provider 統一 mock (v1.13-2)
+## 2. `@kiwa-lab/realtime` v0.1 — 4 provider 統一 mock (v1.13-2)
 
 One engine, 4 SDK adapters. All 5 realtime semantics covered — **presence** / **broadcast** / **postgres_changes** / **room** / **reconnect**.
 
@@ -30,7 +30,7 @@ The 4 adapters sit on top of one engine (`packages/realtime/src/engine.ts`) that
 
 ## 3. Dogfood app 3 種 — real vs mock, chat / cursor / notification (v1.13-3 / -4 / -5)
 
-Every realtime use-case pattern gets an example app that runs against **both the real provider and the kiwa mock**. Trace differences feed the fidelity axis of the 7-axis common branch (realtime providers do **not** activate the AI-LLM 11-axis branch — the `provider` prefix `@kiwa/realtime` does not match `@kiwa/ai-`).
+Every realtime use-case pattern gets an example app that runs against **both the real provider and the kiwa mock**. Trace differences feed the fidelity axis of the 7-axis common branch (realtime providers do **not** activate the AI-LLM 11-axis branch — the `provider` prefix `@kiwa-lab/realtime` does not match `@kiwa-lab/ai-`).
 
 - **`examples/dogfood-supabase-realtime-chat/`** (v1.13-3) — Supabase Realtime chat + presence + typing indicator + 500 ms typing debounce
 - **`examples/dogfood-ably-collab-cursor/`** (v1.13-4) — Ably shared cursor + 60 fps client-side throttle + history rewind for late joiners
@@ -57,10 +57,10 @@ The v1.11-6 VitePress skeleton is reused unchanged. `docs/.vitepress/config.mts`
 v1.12 users can adopt v1.13 without touching existing tests. Add the new packages when you want to test realtime or measure perf:
 
 ```bash
-pnpm add -D @kiwa/realtime @kiwa/perf-harness
+pnpm add -D @kiwa-lab/realtime @kiwa-lab/perf-harness
 ```
 
-The release gate does not gain new axes in v1.13 — realtime providers land on the 7-axis common branch. The `provider` prefix `@kiwa/realtime` does **not** match `@kiwa/ai-`, so the 11-axis branch stays exclusive to AI-LLM providers.
+The release gate does not gain new axes in v1.13 — realtime providers land on the 7-axis common branch. The `provider` prefix `@kiwa-lab/realtime` does **not** match `@kiwa-lab/ai-`, so the 11-axis branch stays exclusive to AI-LLM providers.
 
 Full migration guide: [v1.12 → v1.13](https://github.com/cardene777/kiwa/blob/main/docs/migrations/v1.12-to-v1.13.md).
 

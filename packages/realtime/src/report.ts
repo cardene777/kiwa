@@ -10,12 +10,12 @@ import {
   testCountFromCategories,
   tokenFromSamples,
   type QualityReport,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { RealtimeFidelityReport } from './fidelity.js';
 import type { RealtimeMock } from './types.js';
 
 /**
- * `@kiwa/realtime` 実測値を `@kiwa/quality-metrics` `QualityReport`
+ * `@kiwa-lab/realtime` 実測値を `@kiwa-lab/quality-metrics` `QualityReport`
  * に集約する adapter。
  *
  * dogfood app が realtime fidelity harness を回した後、 本 adapter で

@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa/realtime/sveltekit-http3-multiplex-app",
+  "provider": "@kiwa-lab/realtime/sveltekit-http3-multiplex-app",
   "version": "0.2.0",
   "reportedAt": "2026-07-06T02:44:27.838Z",
   "coverage": {

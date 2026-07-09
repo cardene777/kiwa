@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.38-2 — a Prompt injection + Guardrails defense service that drives an LLM safety surface backed by @kiwa/ai-llm v0.4 semantics (prompt-injection direct/indirect/jailbreak/role-hijacking + guardrails schema/regex/toxicity/PII/Constitutional), runnable in both KIWA_MODE=real (Anthropic Messages API when ANTHROPIC_API_KEY + budget guard are set) and KIWA_MODE=mock (in-memory injection classifier + guardrail pipeline) so behavioural fidelity feeds @kiwa/quality-metrics 11-axis release gate.",
+  "description": "Dogfood app v1.38-2 — a Prompt injection + Guardrails defense service that drives an LLM safety surface backed by @kiwa-lab/ai-llm v0.4 semantics (prompt-injection direct/indirect/jailbreak/role-hijacking + guardrails schema/regex/toxicity/PII/Constitutional), runnable in both KIWA_MODE=real (Anthropic Messages API when ANTHROPIC_API_KEY + budget guard are set) and KIWA_MODE=mock (in-memory injection classifier + guardrail pipeline) so behavioural fidelity feeds @kiwa-lab/quality-metrics 11-axis release gate.",
   "scripts": {
-    "test": "pnpm -F @kiwa/ai-llm -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/ai-llm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/ai-llm": "workspace:*",
-    "@kiwa/core": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/ai-llm": "workspace:*",
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

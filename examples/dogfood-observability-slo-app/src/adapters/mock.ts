@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/observability` v2.1 semantics/slo state
+ * Mock adapter — drives `@kiwa-lab/observability` v2.1 semantics/slo state
  * machine deterministically without any backend. The same app code
  * exercises a full SLO / error-budget / burn-rate / MWMBR ceremony
  * without launching Prometheus or Alertmanager.
@@ -10,12 +10,12 @@
  * per-SLO state in production.
  *
  * The mock adapter piggy-backs on the same neutral event vocabulary that
- * `@kiwa/observability` v2.1 semantics/slo emits — every op appends
+ * `@kiwa-lab/observability` v2.1 semantics/slo emits — every op appends
  * the matching neutral event onto the trace so the fidelity harness can
  * assert both adapters produce identical event orderings.
  */
 
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 import {
   KIWA_SLO_ENV_MISSING,
   type AlertRouteResult,

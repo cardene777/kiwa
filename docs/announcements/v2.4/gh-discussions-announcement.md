@@ -6,7 +6,7 @@ kiwa v2.4 is out。 **Realtime pair depth-5 到達** milestone、 session-orches
 
 ## What's new
 
-- `@kiwa/realtime` v2.0 → v2.1 minor bump
+- `@kiwa-lab/realtime` v2.0 → v2.1 minor bump
 - 3 export + 5 state SSOT + 8 event SSOT + heartbeat 動的 QoS + soft-reject pattern
 - `dogfood-realtime-session-app` 4 pattern workflow + 6 test
 - **[Tutorial 131](https://cardene777.github.io/kiwa/tutorials/131-realtime-session-orchestrator)** + migration + concept
@@ -15,7 +15,7 @@ kiwa v2.4 is out。 **Realtime pair depth-5 到達** milestone、 session-orches
 ## Install
 
 ```bash
-pnpm add -D @kiwa/realtime@^2.1
+pnpm add -D @kiwa-lab/realtime@^2.1
 ```
 
 ## Migration guide

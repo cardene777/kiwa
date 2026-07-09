@@ -6,7 +6,7 @@ function baseReport(): QualityReport {
   return {
     version: '1.0',
     reportedAt: '2026-07-08T00:00:00Z',
-    provider: '@kiwa/core',
+    provider: '@kiwa-lab/core',
     coverage: { line: 90, branch: 85, function: 95 },
     fidelity: { ratio: 80, methodTotal: 10, methodCovered: 8 },
     perf: { p50Ms: 5, p95Ms: 30, p99Ms: 50, samples: 100 },

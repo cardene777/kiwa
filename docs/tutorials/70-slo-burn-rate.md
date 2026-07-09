@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/observability` v2.1 that models the 4 pieces of a real SRE SLO loop that every non-trivial service eventually needs — an SLO session that pins a target objective (99.9% availability) and a rolling window, a request counter that keeps the total-request and total-error tallies without touching wall-clock, an error-budget compute step that turns the objective into a burn-second budget, and a multi-window multi-burn-rate (MWMB) alert evaluation that fires the correct page for "budget will exhaust in 2 hours" without paging on the noise-floor micro-burns. `startSLO()` + `openSLOWindow()` + `recordRequests()` + `computeErrorBudget()` + `evaluateBurnRate()` + `fireMultiWindowMultiBurnRateAlert()` give you every one of those pieces without booting a real Prometheus / Alertmanager pair. This is the pattern kiwa's `examples/dogfood-observability-slo-app` v2 exercises against real Grafana OSS + Prometheus under `KIWA_MODE=real` + `PROMETHEUS_URL` + `GRAFANA_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "SLO burn rate went 14.4× for 5 minutes but the pager did not fire" gap a reviewer sees in the incident post-mortem.
+A vitest suite wired to `@kiwa-lab/observability` v2.1 that models the 4 pieces of a real SRE SLO loop that every non-trivial service eventually needs — an SLO session that pins a target objective (99.9% availability) and a rolling window, a request counter that keeps the total-request and total-error tallies without touching wall-clock, an error-budget compute step that turns the objective into a burn-second budget, and a multi-window multi-burn-rate (MWMB) alert evaluation that fires the correct page for "budget will exhaust in 2 hours" without paging on the noise-floor micro-burns. `startSLO()` + `openSLOWindow()` + `recordRequests()` + `computeErrorBudget()` + `evaluateBurnRate()` + `fireMultiWindowMultiBurnRateAlert()` give you every one of those pieces without booting a real Prometheus / Alertmanager pair. This is the pattern kiwa's `examples/dogfood-observability-slo-app` v2 exercises against real Grafana OSS + Prometheus under `KIWA_MODE=real` + `PROMETHEUS_URL` + `GRAFANA_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "SLO burn rate went 14.4× for 5 minutes but the pager did not fire" gap a reviewer sees in the incident post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/observability` v2.1 that models the 4 pieces of a
 ```bash
 mkdir kiwa-slo-burn && cd kiwa-slo-burn
 pnpm init
-pnpm add -D @kiwa/observability@^2.1 vitest typescript @types/node
+pnpm add -D @kiwa-lab/observability@^2.1 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v2.1 surface exports the SLO axis through the `semantics/` barrel. This tuto
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 
 const { startSLO, openSLOWindow } = semantics;
 
@@ -99,7 +99,7 @@ The 3 tests pass. The invariant `state === 'window-open'` before recordRequests 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 
 const { computeErrorBudget, openSLOWindow, recordRequests, startSLO } = semantics;
 
@@ -156,7 +156,7 @@ The invariant `errors <= requests` is the compile-time equivalent of "the error-
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 
 const {
   computeErrorBudget,
@@ -237,7 +237,7 @@ The reason the workbook uses **2 windows × 2 thresholds** and not "just fire wh
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 
 const { collectFidelityCoverage } = semantics;
 
@@ -278,7 +278,7 @@ Under `KIWA_MODE=real` the same assertions run against real Grafana OSS + Promet
 
 ```ts
 import { describe, it } from 'vitest';
-import { skipUnlessReal } from '@kiwa/observability';
+import { skipUnlessReal } from '@kiwa-lab/observability';
 
 const gate = skipUnlessReal(process.env);
 const requiredEnv = ['PROMETHEUS_URL', 'GRAFANA_URL'] as const;

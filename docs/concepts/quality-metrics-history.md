@@ -6,7 +6,7 @@ title: quality-metrics v0.5 historical trend tracking + drift detection SSOT
 
 ## What this covers
 
-`@kiwa/quality-metrics` v0.5 の historical trend tracking + drift detection SSOT。 v1.65 で v0.4 release-gate context → v0.5 history layer 追加、 quality-metrics 縦深化 pair の第 5 段、 **depth-5 pattern 3 例目確定** (Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 で 3 例安定化到達)、 v0.4 baseline (`docs/concepts/quality-metrics-tier-aware.md` 等) を extend。
+`@kiwa-lab/quality-metrics` v0.5 の historical trend tracking + drift detection SSOT。 v1.65 で v0.4 release-gate context → v0.5 history layer 追加、 quality-metrics 縦深化 pair の第 5 段、 **depth-5 pattern 3 例目確定** (Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 で 3 例安定化到達)、 v0.4 baseline (`docs/concepts/quality-metrics-tier-aware.md` 等) を extend。
 
 ## 6 type SSOT
 

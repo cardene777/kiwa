@@ -7,7 +7,7 @@ import {
   type DesktopAxis,
   type DesktopTarget,
   type InvokeCacheConfig,
-} from '@kiwa/desktop';
+} from '@kiwa-lab/desktop';
 
 /**
  * Pattern 1 — warmupCacheWithMatrix = 12 axis × 3 target の invoke を 事前 warm-up、

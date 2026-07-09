@@ -13,7 +13,7 @@ import {
   type KafkaRawProtocol,
   type RedpandaSchemaEvolution,
   type StreamingMessage,
-} from '@kiwa/streaming';
+} from '@kiwa-lab/streaming';
 import type {
   ConsumerObservation,
   DlqObservation,

@@ -6,7 +6,7 @@ title: quality-metrics v0.6 evaluateReleaseGate に drift check opt-in 統合 SS
 
 ## What this covers
 
-`@kiwa/quality-metrics` v0.6 の evaluateReleaseGate に drift check opt-in 統合 SSOT。 v1.66 で v0.5 pure library (historical trend tracking + drift detection) を release gate の judgment path に格上げ、 quality-metrics 縦深化 pair の第 6 段、 **depth-5 pattern 3 例目確定 実運用 継続** (Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 で 3 例安定化到達 = 「絶対的 rule」 昇格 signal 到達済 の 継続深化)、 v0.5 baseline (`docs/concepts/quality-metrics-history.md`) を extend。
+`@kiwa-lab/quality-metrics` v0.6 の evaluateReleaseGate に drift check opt-in 統合 SSOT。 v1.66 で v0.5 pure library (historical trend tracking + drift detection) を release gate の judgment path に格上げ、 quality-metrics 縦深化 pair の第 6 段、 **depth-5 pattern 3 例目確定 実運用 継続** (Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 で 3 例安定化到達 = 「絶対的 rule」 昇格 signal 到達済 の 継続深化)、 v0.5 baseline (`docs/concepts/quality-metrics-history.md`) を extend。
 
 ## 3 新 context field SSOT
 

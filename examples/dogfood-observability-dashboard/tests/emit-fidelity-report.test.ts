@@ -30,7 +30,7 @@ describe('dogfood-observability-dashboard — emit fidelity report to quality-re
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/observability/dashboard',
+      provider: '@kiwa-lab/observability/dashboard',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

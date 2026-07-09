@@ -1,13 +1,13 @@
 // kiwa unit test for server/api/_kiwa/items-handler.ts
-// — invokes the pure handler through @kiwa/nuxt's invokeEventHandler.
+// — invokes the pure handler through @kiwa-lab/nuxt's invokeEventHandler.
 // Nitro / h3 / Nuxt の runtime 一切起動せず、 simulated H3 event だけで side-effect
 // (response headers / status code / branded redirect signal) を全捕捉する。
 
 import { describe, expect, it } from 'vitest';
-import { invokeEventHandler } from '@kiwa/nuxt';
+import { invokeEventHandler } from '@kiwa-lab/nuxt';
 import { itemsHandler } from '../server/api/_kiwa/items-handler.js';
 
-describe('itemsHandler via @kiwa/nuxt invokeEventHandler', () => {
+describe('itemsHandler via @kiwa-lab/nuxt invokeEventHandler', () => {
   it('T-NF-001: 認証成功時に全 items を返す + cache-control header 注入', async () => {
     const { result, env } = await invokeEventHandler({
       handler: itemsHandler,

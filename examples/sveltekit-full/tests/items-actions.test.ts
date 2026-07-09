@@ -1,11 +1,11 @@
 // kiwa unit test for src/routes/items/_kiwa/items-actions.ts
-// — invokes the pure action function through @kiwa/sveltekit's invokeAction.
+// — invokes the pure action function through @kiwa-lab/sveltekit's invokeAction.
 
 import { describe, expect, it } from 'vitest';
-import { invokeAction } from '@kiwa/sveltekit';
+import { invokeAction } from '@kiwa-lab/sveltekit';
 import { createItemAction } from '../src/routes/items/_kiwa/items-actions.js';
 
-describe('createItemAction via @kiwa/sveltekit invokeAction', () => {
+describe('createItemAction via @kiwa-lab/sveltekit invokeAction', () => {
   it('T-SF-101: session 不在で /login へ 302 redirect', async () => {
     const { redirect, result, fail, error } = await invokeAction({
       action: createItemAction,

@@ -49,7 +49,7 @@ describe('dogfood-postgres-cdc-outbox-app — emit fidelity report to quality-re
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/orm/postgres-cdc-dogfood',
+      provider: '@kiwa-lab/orm/postgres-cdc-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

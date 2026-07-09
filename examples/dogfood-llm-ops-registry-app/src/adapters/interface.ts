@@ -9,7 +9,7 @@
  *    Statsig / GitHub Deployments) when `KIWA_MODE=real` +
  *    `ANTHROPIC_API_KEY` + `KIWA_LLM_BUDGET_USD` are set; otherwise
  *    every op reports `KIWA_LLM_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa/ai-llm` v0.5 ops
+ *  - {@link makeMockAdapter} — backed by `@kiwa-lab/ai-llm` v0.5 ops
  *    semantics (startOpsSession / updateRegistry / advanceRollout /
  *    evaluateAb / promoteCanary / compareShadow).
  *
@@ -33,7 +33,7 @@
  * Each spec exercises a distinct subset of the ops below so the fidelity
  * report can point at the ops that diverged.
  */
-import type { OpsAbResult } from '@kiwa/ai-llm';
+import type { OpsAbResult } from '@kiwa-lab/ai-llm';
 
 /** Result of registering a new version in the model registry. */
 export interface UpdateRegistryResult {

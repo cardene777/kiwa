@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/perf-harness` v0.2 that measures a target function's latency envelope (p50 / p95 / p99), persists a JSON baseline to `.perf-baseline/`, and detects regressions on subsequent runs using a Welch t-test with a 20 % p95 delta threshold. The exact pattern that all 33 kiwa packages (v1.25 sweep) use — same `measure` + `saveBaseline` + `detectRegression` primitives, same 3 warmup + 100 iteration + 20 % threshold rules, same JSON schema on disk. You leave this tutorial with a runnable baseline and a working regression detector for any pure function you point it at.
+A vitest suite wired to `@kiwa-lab/perf-harness` v0.2 that measures a target function's latency envelope (p50 / p95 / p99), persists a JSON baseline to `.perf-baseline/`, and detects regressions on subsequent runs using a Welch t-test with a 20 % p95 delta threshold. The exact pattern that all 33 kiwa packages (v1.25 sweep) use — same `measure` + `saveBaseline` + `detectRegression` primitives, same 3 warmup + 100 iteration + 20 % threshold rules, same JSON schema on disk. You leave this tutorial with a runnable baseline and a working regression detector for any pure function you point it at.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/perf-harness` v0.2 that measures a target functio
 ```bash
 mkdir kiwa-perf-baseline && cd kiwa-perf-baseline
 pnpm init
-pnpm add -D @kiwa/perf-harness@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/perf-harness@^0.2 vitest typescript @types/node
 ```
 
 Add the vitest script in `package.json`.
@@ -54,7 +54,7 @@ The rule of thumb is that the function should be pure (no I/O, no random state, 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { measure } from '@kiwa/perf-harness';
+import { measure } from '@kiwa-lab/perf-harness';
 import { reverseString } from '../../src/index.js';
 
 describe('reverseString — single measurement', () => {
@@ -93,7 +93,7 @@ import {
   loadBaseline,
   measure,
   saveBaseline,
-} from '@kiwa/perf-harness';
+} from '@kiwa-lab/perf-harness';
 import { reverseString } from '../../src/index.js';
 
 describe('reverseString — baseline persistence', () => {
@@ -133,7 +133,7 @@ import {
   buildMeasureResult,
   detectRegression,
   measure,
-} from '@kiwa/perf-harness';
+} from '@kiwa-lab/perf-harness';
 import { reverseString } from '../../src/index.js';
 
 describe('reverseString — regression detection', () => {
@@ -186,7 +186,7 @@ describe('reverseString — regression detection', () => {
 
 ### 6. Gate the release
 
-`tests/perf/gate.perf.ts` — feed the measurement into the 11-axis release gate. `evaluatePerfGate` maps a bare `MeasureResult` onto the shared `evaluateReleaseGate` contract from `@kiwa/quality-metrics` so downstream reporting is uniform across 33 packages.
+`tests/perf/gate.perf.ts` — feed the measurement into the 11-axis release gate. `evaluatePerfGate` maps a bare `MeasureResult` onto the shared `evaluateReleaseGate` contract from `@kiwa-lab/quality-metrics` so downstream reporting is uniform across 33 packages.
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -194,7 +194,7 @@ import {
   buildMeasureResult,
   evaluatePerfGate,
   measure,
-} from '@kiwa/perf-harness';
+} from '@kiwa-lab/perf-harness';
 import { reverseString } from '../../src/index.js';
 
 describe('reverseString — release gate', () => {
@@ -242,7 +242,7 @@ pnpm test:perf
 
 First run seeds the baseline in `.perf-baseline/`. Subsequent runs load the baseline and flag any regression on p95. A regression fails the vitest suite so a downstream CI (or a local pre-push guard) can block a merge.
 
-The full end-to-end pattern lives in `packages/perf-harness/tests/docs-tutorial-v1.25.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa/perf-harness` v0.2 API.
+The full end-to-end pattern lives in `packages/perf-harness/tests/docs-tutorial-v1.25.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa-lab/perf-harness` v0.2 API.
 
 ## Where to next
 

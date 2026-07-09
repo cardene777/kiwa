@@ -1,13 +1,13 @@
 # dogfood-cloudflare-workers-durable-object-app
 
-Dogfood app v1.24-2 — a Cloudflare Workers Durable Object realtime chat room app that exercises the `durable-object` + `websocket-edge` axes of `@kiwa/edge` v0.2 end-to-end. Drivable in both `KIWA_MODE=real` (Miniflare + `wrangler dev` + `WRANGLER_KEY=1` env-gate) and `KIWA_MODE=mock` (`@kiwa/edge` v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.
+Dogfood app v1.24-2 — a Cloudflare Workers Durable Object realtime chat room app that exercises the `durable-object` + `websocket-edge` axes of `@kiwa-lab/edge` v0.2 end-to-end. Drivable in both `KIWA_MODE=real` (Miniflare + `wrangler dev` + `WRANGLER_KEY=1` env-gate) and `KIWA_MODE=mock` (`@kiwa-lab/edge` v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.
 
 Sub-Issue #915, land-order 2/6 in the v1.24 milestone.
 
 ## Two run modes
 
 - `KIWA_MODE=real` — Miniflare v3 + `wrangler dev` behind `WRANGLER_KEY=1` env-gate. Runs a real Durable Object + WebSocket + storage stack against a local miniflare workerd. Skipped when the environment cannot reach a working miniflare (no `WRANGLER_KEY=1`, no miniflare install, no local port).
-- `KIWA_MODE=mock` — `@kiwa/edge` v0.2 `createDurableObject` / `requestDurableObject` / `fireAlarm` / `writeStorage` / `requestWebSocketUpgrade` / `acceptWebSocket` / `sendMessage` / `closeWebSocket` deterministic mocks. Always runs.
+- `KIWA_MODE=mock` — `@kiwa-lab/edge` v0.2 `createDurableObject` / `requestDurableObject` / `fireAlarm` / `writeStorage` / `requestWebSocketUpgrade` / `acceptWebSocket` / `sendMessage` / `closeWebSocket` deterministic mocks. Always runs.
 
 `makeMockAdapter` (`src/lib/mock.ts`) drives the mock path; `makeRealAdapter` (`src/lib/real.ts`) drives the real path or falls back to the env-gate skip.
 
@@ -37,7 +37,7 @@ src/
     purge.ts        — 24-h retention alarm (runPurgeAlarm)
   lib/
     cf-adapter.ts   — CloudflareDurableObjectAdapter interface (8 ops)
-    mock.ts         — makeMockAdapter (backed by @kiwa/edge v0.2 semantics)
+    mock.ts         — makeMockAdapter (backed by @kiwa-lab/edge v0.2 semantics)
     real.ts         — makeRealAdapter (env-gate skip via KIWA_MODE + WRANGLER_KEY)
     fidelity.ts     — runFidelityHarness + runAdapterMatrix
 tests/
@@ -71,4 +71,4 @@ pnpm --filter dogfood-cloudflare-workers-durable-object-app test
 
 - Parent — v1.24 (#913)
 - Sub-Issue — v1.24-2 (#915)
-- Depends on — v1.24-1 (@kiwa/edge v1.1.0 = v0.2 with 8 axis semantics, PR #920)
+- Depends on — v1.24-1 (@kiwa-lab/edge v1.1.0 = v0.2 with 8 axis semantics, PR #920)

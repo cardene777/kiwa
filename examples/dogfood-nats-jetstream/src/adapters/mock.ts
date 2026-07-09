@@ -13,7 +13,7 @@
  * v2 axes assert against.
  */
 
-import { createNatsMock, type NatsMock } from '@kiwa/streaming';
+import { createNatsMock, type NatsMock } from '@kiwa-lab/streaming';
 import { createJetStreamRun, simulateRedelivery } from '../jetstream/index.js';
 import { driveDurableConsumer } from '../jetstream/durable.js';
 import { createKVRun } from '../kv/index.js';

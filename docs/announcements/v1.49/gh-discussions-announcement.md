@@ -6,14 +6,14 @@ kiwa v1.49 is out. **Frontend 深化 III** (component v0.4 + nextjs v1.3 pair mi
 
 ## What's new
 
-### `@kiwa/component` v0.3 → v0.4
+### `@kiwa-lab/component` v0.3 → v0.4
 
 - **react-19-actions axis 新規** = React 19 useActionState + useOptimistic + useFormStatus 統合、 4 state
 - **islands-architecture axis 新規** = Astro / Deno Fresh / Solid Start の Islands architecture、 5 state
 - 既存 4 axis (rsc-harness + streaming-ssr + view-transitions + form-action-advanced) API 変更 0
 - fidelity 3 target × 6 axis = 18 row (v1.34 12 row から拡張)
 
-### `@kiwa/nextjs` v1.2 → v1.3
+### `@kiwa-lab/nextjs` v1.2 → v1.3
 
 - **turbopack-hmr axis 新規** = Next.js 15 Turbopack HMR + fast refresh、 5 state
 - **concurrent-transitions axis 新規** = React 18/19 concurrent + interrupt-and-restart、 5 state
@@ -41,8 +41,8 @@ v1.23 → v1.49 = 27 milestone、 kiwa 史上最長記録更新継続。
 ## Install
 
 ```bash
-pnpm add -D @kiwa/component@^0.4
-pnpm add -D @kiwa/nextjs@^1.3
+pnpm add -D @kiwa-lab/component@^0.4
+pnpm add -D @kiwa-lab/nextjs@^1.3
 ```
 
 ## Migration guide

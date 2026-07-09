@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/auth`'s `setupWebAuthnEnv` +
+ * Mock adapter — drives `@kiwa-lab/auth`'s `setupWebAuthnEnv` +
  * `credentialCreation` so the same app code exercises a deterministic
  * WebAuthn ceremony without touching Chrome. Both mock and real adapters
  * satisfy {@link WebAuthnRPAdapter}, so the fidelity harness can diff them
@@ -17,7 +17,7 @@ import {
   type WebAuthnCredential,
   type WebAuthnTestEnv,
   type WebAuthnUserVerificationRequirement,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 import type {
   DogfoodAuthenticatorSelectionCriteria,
   DogfoodUserVerification,

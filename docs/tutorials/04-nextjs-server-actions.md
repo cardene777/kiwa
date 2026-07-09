@@ -1,4 +1,4 @@
-# Testing Next.js Server Actions with @kiwa/nextjs
+# Testing Next.js Server Actions with @kiwa-lab/nextjs
 
 ## What you'll build
 
@@ -15,7 +15,7 @@ A vitest test that drives a Next.js App Router server action (`'use server'`) en
 ```bash
 mkdir kiwa-nextjs-actions && cd kiwa-nextjs-actions
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa/nextjs
+pnpm add -D vitest typescript @types/node @kiwa-lab/nextjs
 ```
 
 Set `type: module` in `package.json`:
@@ -66,7 +66,7 @@ Add a test at `tests/login.spec.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeServerAction } from '@kiwa/nextjs';
+import { invokeServerAction } from '@kiwa-lab/nextjs';
 import { login } from '../app/actions.js';
 
 describe('login server action', () => {
@@ -109,11 +109,11 @@ pnpm test
 
 ## Troubleshoot
 
-- **`redirect() is not a function`** — Make sure `next/navigation` resolves to the Next.js 14+ runtime. `@kiwa/nextjs` peer-depends on `next@^14 || ^15`.
+- **`redirect() is not a function`** — Make sure `next/navigation` resolves to the Next.js 14+ runtime. `@kiwa-lab/nextjs` peer-depends on `next@^14 || ^15`.
 - **`cookies() outside request scope`** — You called `login()` outside `invokeServerAction`. The harness sets up the request scope on entry; anything that reads `cookies()` must run inside its callback.
 - **Redirect never fires** — Server actions raise the redirect as a distinguished throw. `invokeServerAction` catches it; your own `try/catch` around `action()` would swallow it before the harness sees it.
 
 ## Next steps
 
 - [Multi-provider auth](./05-multi-provider-auth.md) shows how to plug NextAuth + Clerk + Auth0 into the same action.
-- The App Router variants of the harness cover middleware, RSC, and RSC streaming — see [`@kiwa/nextjs`](../../packages/nextjs/README.md).
+- The App Router variants of the harness cover middleware, RSC, and RSC streaming — see [`@kiwa-lab/nextjs`](../../packages/nextjs/README.md).

@@ -15,7 +15,7 @@ import {
   createRedpandaMock,
   type CompatibilityMode,
   type RedpandaMock,
-} from '@kiwa/streaming';
+} from '@kiwa-lab/streaming';
 import {
   ORDER_V1_SCHEMA_STRING,
   USER_V1_SCHEMA_STRING,

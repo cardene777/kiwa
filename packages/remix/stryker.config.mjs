@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa/remix.
+ * Mutation testing config for @kiwa-lab/remix.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — SSR + loader / action + client hydration drift.
  * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
  */

@@ -45,7 +45,7 @@ describe('dogfood-form-ct — a11y-violation axis (all 5 form patterns)', () => 
   });
 
   it('T-DFFC-A11Y-005 profile form a11y is clean (displayName input has label)', async () => {
-    // The heuristic checker inside `@kiwa/component` walks <input>
+    // The heuristic checker inside `@kiwa-lab/component` walks <input>
     // elements — <textarea> and <select> are not currently in scope, so this
     // test verifies the input-level rule specifically. Widening the checker
     // to cover textarea / select is a follow-up in the component package.

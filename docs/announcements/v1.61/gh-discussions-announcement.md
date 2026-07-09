@@ -6,7 +6,7 @@ kiwa v1.61 is out。 **Desktop 深化 V** 単軸 milestone、 v1.56-v1.60 で構
 
 ## What's new
 
-### `@kiwa/desktop` v0.6 minor bump
+### `@kiwa-lab/desktop` v0.6 minor bump
 
 - **spawn-executor.ts 新設** = SpawnExecutorInput + SpawnExecutorResult + SpawnFn type SSOT + COMMAND_ENV_ALLOWLIST 8 CLI 分 SSOT + sanitizeEnv + executeSpawn (timeout 60s + buffer 上限 10MB + shell:false + detached:false + SIGKILL)
 - **spawn-driver.ts 更新** = invokeDesktopCli 実 spawn 実行 (executeSpawn 経由) + invokeDesktopCliWith DI 経路 + KIWA_DESKTOP_SPAWN=dry-run で v0.5 stub 相当 shape 復元
@@ -49,7 +49,7 @@ pair 深度 6 段拡張 (v0.1 → v0.2 → v0.3 → v0.4 → v0.5 → v0.6) の 
 ## Install
 
 ```bash
-pnpm add -D @kiwa/desktop@^0.6
+pnpm add -D @kiwa-lab/desktop@^0.6
 ```
 
 ## Migration guide

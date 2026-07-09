@@ -5,7 +5,7 @@ import {
   type PipelineEvent,
   type PipelineSession,
   type PipelineSummary,
-} from '@kiwa/streaming';
+} from '@kiwa-lab/streaming';
 
 export function bootPipeline(input: { timestamp: string }): PipelineSession {
   return startPipeline({ timestamp: input.timestamp });

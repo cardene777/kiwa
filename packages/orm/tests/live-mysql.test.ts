@@ -1,4 +1,4 @@
-// Live-mode tests for @kiwa/orm v0.2.1 (Drizzle + MySQL via testcontainers).
+// Live-mode tests for @kiwa-lab/orm v0.2.1 (Drizzle + MySQL via testcontainers).
 //
 // Mirrors live-mode.test.ts (Postgres) — each test starts a fresh MySQL container
 // (mysql:8.4). Startup overhead ~5-15s per container, so the suite stays focused

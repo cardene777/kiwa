@@ -18,7 +18,7 @@
 import { randomBytes, createHash } from 'node:crypto';
 
 // Encode a Buffer as base64url without padding — same recipe as
-// `@kiwa/auth`'s internal helper. Duplicated here so the Nitro server
+// `@kiwa-lab/auth`'s internal helper. Duplicated here so the Nitro server
 // bundle does not need to import the workspace package.
 function base64UrlEncode(input: Buffer): string {
   return input
@@ -29,7 +29,7 @@ function base64UrlEncode(input: Buffer): string {
 }
 
 // Generate a PKCE challenge pair. RFC 7636 §4.2 — SHA-256 the verifier +
-// base64url-encode. Matches the recipe the `@kiwa/auth` mock uses so a
+// base64url-encode. Matches the recipe the `@kiwa-lab/auth` mock uses so a
 // verifier produced here round-trips through the mock's `/token`.
 function derivePkceChallenge(verifier: string): string {
   return base64UrlEncode(createHash('sha256').update(verifier).digest());

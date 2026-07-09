@@ -1,9 +1,9 @@
-# kiwa v1.42 released — Observability 深化 III (@kiwa/observability v2.2.0 advanced III 8 axis + 縦深化 pair 第 7 pair 4 段拡張 — kiwa 史上 3 例目 pair 深度 4 段記録 = record 3 例安定化)
+# kiwa v1.42 released — Observability 深化 III (@kiwa-lab/observability v2.2.0 advanced III 8 axis + 縦深化 pair 第 7 pair 4 段拡張 — kiwa 史上 3 例目 pair 深度 4 段記録 = record 3 例安定化)
 
 ## TL;DR
 
 - **kiwa v1.42 released** — Observability 深化 III milestone
-- **`@kiwa/observability` v2.1.0 → v2.2.0 minor bump** — advanced III 8 axis + real driver env-gate + 4 provider × 8 axis neutral state machine
+- **`@kiwa-lab/observability` v2.1.0 → v2.2.0 minor bump** — advanced III 8 axis + real driver env-gate + 4 provider × 8 axis neutral state machine
 - **8 axis advanced III semantics** = IaC observability + Service mesh + eBPF profiling III + LLM observability + FinOps observability + Chaos engineering + Data pipeline + AIOps
 - **3 dogfood app 新規** — observability-iac-drift-app (68 test) + observability-llm-ops-app (70 test) + observability-chaos-aiops-app (103 test)
 - **縦深化 pair pattern 第 7 pair 4 段拡張 (kiwa 史上 3 例目 pair 深度 4 段記録 = record 3 例安定化)** — Observability v1.14 (v0.1 base) → v1.17 (v2.0 dashboard + alert routing) → v1.35 (v2.1 advanced) → v1.42 (v2.2 advanced III) の 4 段拡張、 v1.40 AI/LLM 4 段拡張 record + v1.41 Payment 4 段拡張 record に続く **3 例目**、 pair 深度 4 段 pattern の 3 例安定化を Observability 系で実証
@@ -15,7 +15,7 @@
 
 kiwa は v1.41 まで dApp / web app / full-stack framework / 実 backend / real-time / payment advanced III / observability advanced / search advanced / security advanced II / AI/LLM advanced III の 38 layer + release-invariants + a11y + component / performance / mutation の quality gate maximum grid を cover していたが、 Observability 領域は v1.35 で 4 provider (Grafana OSS + Prometheus + Loki + OTel Collector) の advanced 8 axis (SLO/burn-rate + RED/USE + exemplar + OTel-advanced + log-correlation + alert-routing + continuous-profiling + cardinality-control) 統一 mock を land した advanced layer に留まり、 production の advanced III semantics (IaC observability Terraform + OPA + BNPL Service mesh + eBPF profiling III + LLM observability + FinOps + Chaos engineering + Data pipeline OpenLineage + AIOps) が **未 cover** の状態だった.
 
-v1.42 で `@kiwa/observability` v2.1.0 → v2.2.0 minor bump し、 advanced III 8 axis を 4 provider 統一 mock として実装、 Terraform plan + drift detection + OPA policy + cost attribution、 Istio + Linkerd + mTLS + sidecar + circuit breaker + traffic split、 eBPF user-space + kernel LSM + syscall tracing + network flow、 token count + prompt log + hallucination + budget attribution + tool-call tracing、 cost per request + team attribution + rightsizing + spot policy、 fault injection + blast radius + auto-rollback + game day、 OpenLineage + Airflow / Dagster lineage + freshness SLA + schema drift + data quality、 anomaly detection + auto-remediation + RCA + alert correlation + change impact analysis を 1 test surface で扱える Observability advanced III backbone testing 基盤を追加した.
+v1.42 で `@kiwa-lab/observability` v2.1.0 → v2.2.0 minor bump し、 advanced III 8 axis を 4 provider 統一 mock として実装、 Terraform plan + drift detection + OPA policy + cost attribution、 Istio + Linkerd + mTLS + sidecar + circuit breaker + traffic split、 eBPF user-space + kernel LSM + syscall tracing + network flow、 token count + prompt log + hallucination + budget attribution + tool-call tracing、 cost per request + team attribution + rightsizing + spot policy、 fault injection + blast radius + auto-rollback + game day、 OpenLineage + Airflow / Dagster lineage + freshness SLA + schema drift + data quality、 anomaly detection + auto-remediation + RCA + alert correlation + change impact analysis を 1 test surface で扱える Observability advanced III backbone testing 基盤を追加した.
 
 ## v1.42 で追加した 8 axis advanced III observability semantics
 
@@ -72,7 +72,7 @@ Observability 縦深化 pair は v1.42 で **kiwa milestone 史上 3 例目の p
 ## Try it
 
 ```bash
-pnpm add -D @kiwa/observability
+pnpm add -D @kiwa-lab/observability
 ```
 
 Migration guide (additive-only、 breaking change なし):

@@ -1,9 +1,9 @@
-# kiwa v1.36 released — Search 深化 II (@kiwa/search v0.3.0 + 8 axis advanced search + 縦深化 pair 第 8 pair 連続化 + 3-stage 拡張 pattern 3 例目)
+# kiwa v1.36 released — Search 深化 II (@kiwa-lab/search v0.3.0 + 8 axis advanced search + 縦深化 pair 第 8 pair 連続化 + 3-stage 拡張 pattern 3 例目)
 
 ## TL;DR
 
 - **kiwa v1.36 released** — Search 深化 II milestone
-- **`@kiwa/search` v0.2.0 → v0.3.0 minor bump** — 8 axis advanced search semantics + real driver env-gate + 4 provider × 8 axis neutral state machine 追加
+- **`@kiwa-lab/search` v0.2.0 → v0.3.0 minor bump** — 8 axis advanced search semantics + real driver env-gate + 4 provider × 8 axis neutral state machine 追加
 - **8 axis semantics** = Vector search + Semantic search + Faceted advanced + Geo search + Relevance tuning + Synonym/stemming advanced + Index management advanced + Query DSL/aggregation advanced
 - **3 dogfood app v2 / 新規** — search-vector-app v2 + search-faceted-geo-app v2 + search-opensearch-app 新規
 - **縦深化 pair pattern 第 8 pair 連続化** — Search pair (v1.14→v1.15→v1.36)
@@ -12,7 +12,7 @@
 
 ## v1.36 が解決したい問題 — Search production semantics の testing gap
 
-v1.14 で `@kiwa/search` v0.1 (Meilisearch / Algolia / Typesense の 3 provider を統一 mock として提供する in-memory search envelope) を land、 v1.15 で search v0.2 に拡張した時点で、 kiwa は query / index / search / facet / typo tolerance の base semantics までは cover していた.
+v1.14 で `@kiwa-lab/search` v0.1 (Meilisearch / Algolia / Typesense の 3 provider を統一 mock として提供する in-memory search envelope) を land、 v1.15 で search v0.2 に拡張した時点で、 kiwa は query / index / search / facet / typo tolerance の base semantics までは cover していた.
 
 v1.36 は vector retrieval、 semantic rerank、 nested and hierarchical facet、 geo polygon / isochrone、 BM25 / TF-IDF / custom ranking、 synonym and stemming、 sharding and rolling reindex、 nested query and aggregation を 8 axis advanced search semantics として追加する深化 milestone.
 
@@ -67,7 +67,7 @@ OpenSearch relevance tuning + BM25 + TF-IDF + custom ranking + synonym advanced 
 ## Try it
 
 ```bash
-pnpm add -D @kiwa/search
+pnpm add -D @kiwa-lab/search
 ```
 
 Migration guide (additive-only、 breaking change なし):

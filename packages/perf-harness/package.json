@@ -1,5 +1,5 @@
 {
-  "name": "@kiwa/perf-harness",
+  "name": "@kiwa-lab/perf-harness",
   "version": "2.0.0",
   "description": "Generic performance harness v0.3 strict — p50/p95/p99 measurement + regression detection + baseline persistence + 3-layer harness (serial + concurrent + memory) + strict mode (iter 400 + Welch |t|>3 + p95 delta 10%) + 38 package coverage + 14-axis release gate integration + detectRegressionStrict + runPerf3LayerStrict",
   "license": "MIT",
@@ -51,19 +51,19 @@
     "node": ">=20"
   },
   "scripts": {
-    "prebuild": "pnpm -F @kiwa/core -F @kiwa/quality-metrics build",
+    "prebuild": "pnpm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build",
     "build": "tsup",
-    "pretest": "pnpm -F @kiwa/core -F @kiwa/quality-metrics build",
+    "pretest": "pnpm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "pretest:cov": "pnpm -F @kiwa/core -F @kiwa/quality-metrics build",
+    "pretest:cov": "pnpm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**'",
     "test:a11y": "node ../../scripts/run-axe-baseline.mjs",
-    "pretypecheck": "pnpm -F @kiwa/core -F @kiwa/quality-metrics build",
+    "pretypecheck": "pnpm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

@@ -17,7 +17,7 @@
  * - {@link PerfMetric} — 100 回実行の p95 ms、 setup / teardown 分離
  * - {@link MutationMetric} — mutation testing kill rate (stryker / cargo-mutants)
  *
- * AI-LLM 4 軸 (provider prefix `@kiwa/ai-` のみ強制) ...
+ * AI-LLM 4 軸 (provider prefix `@kiwa-lab/ai-` のみ強制) ...
  * - {@link CostMetric} — 1 request 当たりの US$ 実測 (LLM API 課金想定)
  * - {@link LatencyMetric} — p50 / p95 / p99 ms (non-deterministic 前提の end-to-end)
  * - {@link TokenMetric} — prompt / completion / total token 数
@@ -31,7 +31,7 @@
  *
  * {@link ReleaseGateThresholds} で 11 軸の閾値 SSOT を定義、
  * {@link evaluateReleaseGate} で `passed` / `blockers` を判定する。
- * AI-LLM provider (`@kiwa/ai-*`) のみ 4 軸を追加検査、 それ以外の
+ * AI-LLM provider (`@kiwa-lab/ai-*`) のみ 4 軸を追加検査、 それ以外の
  * provider は既存 7 軸のまま (breaking change なし)。 tier-aware 2 軸は
  * `context.mutationTier` / `context.a11yTier` 明示時のみ加算 (backward
  * compatible)。
@@ -271,7 +271,7 @@ export interface AccuracyMetric {
  * prefix で軸を選別する。
  */
 export interface QualityReport {
-  /** Provider / package identifier — e.g. `@kiwa/auth` or `@kiwa/ai-llm`. */
+  /** Provider / package identifier — e.g. `@kiwa-lab/auth` or `@kiwa-lab/ai-llm`. */
   provider: string;
   /** Version string as declared in package.json. */
   version: string;
@@ -282,7 +282,7 @@ export interface QualityReport {
   fidelity: FidelityMetric;
   perf: PerfMetric;
   mutation: MutationMetric;
-  /** AI-LLM 4 軸 — provider が `@kiwa/ai-*` のときのみ必須。 */
+  /** AI-LLM 4 軸 — provider が `@kiwa-lab/ai-*` のときのみ必須。 */
   cost?: CostMetric | undefined;
   latency?: LatencyMetric | undefined;
   token?: TokenMetric | undefined;
@@ -299,7 +299,7 @@ export interface QualityReport {
 
 /**
  * Release gate thresholds — 11 軸 SSOT。 共通 7 軸 (全 provider) + AI-LLM 4 軸
- * (`@kiwa/ai-*` provider のみ強制) の閾値。 provider は overrides で
+ * (`@kiwa-lab/ai-*` provider のみ強制) の閾値。 provider は overrides で
  * 個別調整可能。
  */
 export interface ReleaseGateThresholds {
@@ -456,9 +456,9 @@ export interface QualityReportDiff {
 }
 
 /**
- * `@kiwa/ai-*` provider か判定する helper。 release gate と emit が
+ * `@kiwa-lab/ai-*` provider か判定する helper。 release gate と emit が
  * AI-LLM 4 軸の有無を分岐する SSOT。
  */
 export function isAiLlmProvider(provider: string): boolean {
-  return provider.startsWith('@kiwa/ai-');
+  return provider.startsWith('@kiwa-lab/ai-');
 }

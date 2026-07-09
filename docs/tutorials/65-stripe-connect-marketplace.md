@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/payment` v0.4 that models the 4 pieces of a real Stripe Connect marketplace that every non-trivial payout system eventually needs — dispute lifecycle for chargebacks arising from destination-charged transactions (evidence submission + representment + arbitration escalation + 3DS-based liability shift), refund policy enforcement so a marketplace can split partial refunds across the platform + connected account fee legs, webhook idempotency for the retry storms that hit Connect endpoints during payout scheduling, and tax localization for DAC7 marketplace reporting (EU digital platforms must file annual seller-revenue-by-jurisdiction reports). `openDispute()` + `submitDisputeEvidence()` + `representDispute()` + `startRefund()` + `partialRefund()` + `calculateLocalizedTax()` + `reportDac7()` give you every one of those pieces as deterministic state machines. No live Stripe Connect endpoints, no manual `Stripe-Account: acct_xxx` header threading, no ad-hoc DAC7 CSV builder. This is the pattern kiwa's Stripe marketplace v2 dogfood app (v1.33-2) exercises against real Stripe test mode under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "one seller had a chargeback and it messed up the tax report" case reviewers ask about.
+A vitest suite wired to `@kiwa-lab/payment` v0.4 that models the 4 pieces of a real Stripe Connect marketplace that every non-trivial payout system eventually needs — dispute lifecycle for chargebacks arising from destination-charged transactions (evidence submission + representment + arbitration escalation + 3DS-based liability shift), refund policy enforcement so a marketplace can split partial refunds across the platform + connected account fee legs, webhook idempotency for the retry storms that hit Connect endpoints during payout scheduling, and tax localization for DAC7 marketplace reporting (EU digital platforms must file annual seller-revenue-by-jurisdiction reports). `openDispute()` + `submitDisputeEvidence()` + `representDispute()` + `startRefund()` + `partialRefund()` + `calculateLocalizedTax()` + `reportDac7()` give you every one of those pieces as deterministic state machines. No live Stripe Connect endpoints, no manual `Stripe-Account: acct_xxx` header threading, no ad-hoc DAC7 CSV builder. This is the pattern kiwa's Stripe marketplace v2 dogfood app (v1.33-2) exercises against real Stripe test mode under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "one seller had a chargeback and it messed up the tax report" case reviewers ask about.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/payment` v0.4 that models the 4 pieces of a real 
 ```bash
 mkdir kiwa-stripe-connect && cd kiwa-stripe-connect
 pnpm init
-pnpm add -D @kiwa/payment@^0.4 vitest typescript @types/node
+pnpm add -D @kiwa-lab/payment@^0.4 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -44,7 +44,7 @@ import {
   openDispute,
   submitDisputeEvidence,
   representDispute,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('marketplace — dispute evidence + representment', () => {
   it('opens a dispute then advances through evidence-submitted → represented', async () => {
@@ -99,7 +99,7 @@ import {
   representDispute,
   escalateArbitration,
   shiftLiability,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('marketplace — arbitration escalation + liability shift', () => {
   it('walks opened → evidence-submitted → represented → arbitration-opened', async () => {
@@ -147,7 +147,7 @@ The rule of thumb is that liability shift is what turns a chargeback from a merc
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createStripeMock, startRefund, partialRefund } from '@kiwa/payment';
+import { createStripeMock, startRefund, partialRefund } from '@kiwa-lab/payment';
 
 describe('marketplace — partial refund with policy', () => {
   it('issues a partial refund inside the window with per-refund caps', async () => {
@@ -197,7 +197,7 @@ The rule of thumb is that a marketplace refund policy is more restrictive than a
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createStripeMock, startIdempotency, deliver } from '@kiwa/payment';
+import { createStripeMock, startIdempotency, deliver } from '@kiwa-lab/payment';
 
 describe('marketplace — webhook idempotency for payout events', () => {
   it('dedups a second delivery of the same event id inside the window', async () => {
@@ -228,7 +228,7 @@ The rule of thumb is that idempotency has to be scoped by handler — the same w
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createStripeMock, calculateLocalizedTax, reportDac7 } from '@kiwa/payment';
+import { createStripeMock, calculateLocalizedTax, reportDac7 } from '@kiwa-lab/payment';
 
 describe('marketplace — DAC7 report', () => {
   it('rolls up 3 EU + UK lines into a single DAC7 report event', async () => {

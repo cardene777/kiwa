@@ -37,7 +37,7 @@ describe('dogfood-storybook-design-system — fidelity harness contract (7-axis 
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/component/storybook-design-system',
+      provider: '@kiwa-lab/component/storybook-design-system',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -79,7 +79,7 @@ describe('dogfood-storybook-design-system — fidelity harness contract (7-axis 
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/component/storybook-design-system',
+      provider: '@kiwa-lab/component/storybook-design-system',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

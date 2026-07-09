@@ -1,13 +1,13 @@
 # Fidelity — dogfood-alert-orchestrator (v1.17-3)
 
-Real-vs-mock behavioural fidelity for the Prometheus AlertManager style alert orchestrator dogfood, produced by `examples/dogfood-alert-orchestrator/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 7-axis release gate.
+Real-vs-mock behavioural fidelity for the Prometheus AlertManager style alert orchestrator dogfood, produced by `examples/dogfood-alert-orchestrator/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-lab/quality-metrics` 7-axis release gate.
 
 ## Baseline (real mode skipped — no `ALERTMANAGER_URL`)
 
 When the harness runs without an AlertManager URL, the real adapter emits `ALERTMANAGER_ENV_MISSING` for every lifecycle op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa/observability/alert
+provider   : @kiwa-lab/observability/alert
 version    : 2.0.0
 verdict    : PASS
 divergences: 4 (emitMetric noop + evaluateRules / routeAlert / advanceEscalation missing on real)
@@ -100,11 +100,11 @@ Escalation ladder (`src/escalation/index.ts`).
 
 ## Notes
 
-Provider prefix `@kiwa/observability/` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Prometheus AlertManager is an infrastructure primitive, not a token-priced generative call. Evaluation + routing latency samples feed `perf.p95Ms` so orchestrator performance stays visible in the report.
+Provider prefix `@kiwa-lab/observability/` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Prometheus AlertManager is an infrastructure primitive, not a token-priced generative call. Evaluation + routing latency samples feed `perf.p95Ms` so orchestrator performance stays visible in the report.
 
 `emitMetric` is deliberately excluded from `OPS_UNDER_TEST` — the real path is a Prometheus scrape-owned noop, so counting it as an op would over-report divergences. The mock adapter still accepts it (it appends to the collector so the rule engine has data to fire against); the real adapter records `ALERTMANAGER_METRIC_NOOP` in the trace.
 
-Rate + anomaly rule kinds compile down to threshold checks at emit time — rate divides `(latest.value - windowStart.value) / (windowMs / 1000)` and pushes the derived scalar under a synthetic `__derived.rate.{rule-id}` metric; anomaly tracks a rolling mean + variance (Welford one-pass) and pushes `latest - (mean + stddevMult × stddev)` under `__derived.anomaly.{rule-id}`. The underlying `@kiwa/observability` `AlertRouter` then fires on the derived scalar via the same operator + threshold predicate the threshold path uses.
+Rate + anomaly rule kinds compile down to threshold checks at emit time — rate divides `(latest.value - windowStart.value) / (windowMs / 1000)` and pushes the derived scalar under a synthetic `__derived.rate.{rule-id}` metric; anomaly tracks a rolling mean + variance (Welford one-pass) and pushes `latest - (mean + stddevMult × stddev)` under `__derived.anomaly.{rule-id}`. The underlying `@kiwa-lab/observability` `AlertRouter` then fires on the derived scalar via the same operator + threshold predicate the threshold path uses.
 
 ## Related
 

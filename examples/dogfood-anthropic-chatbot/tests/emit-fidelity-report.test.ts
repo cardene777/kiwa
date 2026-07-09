@@ -33,7 +33,7 @@ describe('dogfood-anthropic — emit fidelity report to quality-report/', () => 
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/ai-llm/anthropic-chatbot',
+      provider: '@kiwa-lab/ai-llm/anthropic-chatbot',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

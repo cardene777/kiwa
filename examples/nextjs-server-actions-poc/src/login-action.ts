@@ -5,7 +5,7 @@
 // the directive + the real Next.js bindings here because the PoC is a pure
 // Vitest workspace — but the runtime shape is identical.
 
-import { REDIRECT_SYMBOL } from '@kiwa/nextjs';
+import { REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
 
 export interface LoginEnv {
   redirect: (url: string) => never;

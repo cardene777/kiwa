@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-The v1.25 milestone (Issue #926) applied `@kiwa/perf-harness` v0.2 to every kiwa package. This tutorial captures the exact recipe you follow when a new package (or a fork of the monorepo) needs to join the sweep — the same primitives from tutorial 45, wired up through the 3-layer harness (`runPerf3Layer`) so that serial + concurrent + memory all get gated in one pass. Follow the 6 steps below and any pure package gets a p95 baseline + regression detector in under 15 minutes. This is the pattern kiwa's 33 packages already use, spelled out step-by-step.
+The v1.25 milestone (Issue #926) applied `@kiwa-lab/perf-harness` v0.2 to every kiwa package. This tutorial captures the exact recipe you follow when a new package (or a fork of the monorepo) needs to join the sweep — the same primitives from tutorial 45, wired up through the 3-layer harness (`runPerf3Layer`) so that serial + concurrent + memory all get gated in one pass. Follow the 6 steps below and any pure package gets a p95 baseline + regression detector in under 15 minutes. This is the pattern kiwa's 33 packages already use, spelled out step-by-step.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ The v1.25 milestone (Issue #926) applied `@kiwa/perf-harness` v0.2 to every kiwa
 
 ### 1. Pick the primary API paths
 
-For a package with 5-10 exported functions, pick the 2-3 that downstream users call most. In `@kiwa/core`, that is `parseSpec` (spec markdown → structured spec) + `createPool` (async resource pool). In `@kiwa/dapp`, it is `contractCall` + `readStorageSlot`. In `@kiwa/edge`, it is `invokeEdgeHandler` + `kvRead` + `kvWrite`.
+For a package with 5-10 exported functions, pick the 2-3 that downstream users call most. In `@kiwa-lab/core`, that is `parseSpec` (spec markdown → structured spec) + `createPool` (async resource pool). In `@kiwa-lab/dapp`, it is `contractCall` + `readStorageSlot`. In `@kiwa-lab/edge`, it is `invokeEdgeHandler` + `kvRead` + `kvWrite`.
 
 The rule is that each op should exercise a distinct primary code path, not a variation of the same one. Measuring 3 slightly different reads of the same KV is noise; measuring `parseSpec` + `createPool` catches independent regressions in independent modules.
 
@@ -34,7 +34,7 @@ By convention, the filename ends in `.perf.ts` so the vitest workspace filter ca
 ```ts
 import { describe, expect, it } from 'vitest';
 import path from 'node:path';
-import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa/perf-harness';
+import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-lab/perf-harness';
 import { primaryApi, secondaryApi } from '../../src/index.js';
 
 const MODULE = 'my-package';
@@ -104,7 +104,7 @@ Three things to notice.
 ### 5. Seed the baseline on the first run
 
 ```bash
-pnpm --filter @kiwa/my-package test:perf
+pnpm --filter @kiwa-lab/my-package test:perf
 ```
 
 On the first invocation, `runPerf3Layer` writes `packages/my-package/.perf-baseline/my-package.json` because `loadBaseline` returned `null`. On subsequent runs, it reads the baseline and every op's `regressionVerdict` reflects the delta against the persisted baseline (`stable` / `improved` / `regressed`).
@@ -118,12 +118,12 @@ Commit the baseline JSON to lock the envelope into the repo — a regression on 
 ```json
 {
   "scripts": {
-    "test:perf": "pnpm -r --filter '@kiwa/*' test:perf"
+    "test:perf": "pnpm -r --filter '@kiwa-lab/*' test:perf"
   }
 }
 ```
 
-The `-r --filter '@kiwa/*'` glob picks up every workspace package named `@kiwa/…` automatically, so as long as your `package.json` name follows the convention, no additional wiring is required.
+The `-r --filter '@kiwa-lab/*'` glob picks up every workspace package named `@kiwa-lab/…` automatically, so as long as your `package.json` name follows the convention, no additional wiring is required.
 
 ## Migration verification checklist
 
@@ -137,7 +137,7 @@ The `-r --filter '@kiwa/*'` glob picks up every workspace package named `@kiwa/�
 
 ## Pattern references — the 3 pilot packages
 
-The v1.13 milestone seeded `@kiwa/ai-llm`, `@kiwa/quality-metrics`, and `@kiwa/realtime` with the initial `measure` + `saveBaseline` pattern. v1.25 generalises the pattern to every other package. If you want to see the exact shape of a production-grade perf suite, read.
+The v1.13 milestone seeded `@kiwa-lab/ai-llm`, `@kiwa-lab/quality-metrics`, and `@kiwa-lab/realtime` with the initial `measure` + `saveBaseline` pattern. v1.25 generalises the pattern to every other package. If you want to see the exact shape of a production-grade perf suite, read.
 
 - [`packages/core/tests/perf/core.perf.ts`](https://github.com/cardene777/kiwa/blob/main/packages/core/tests/perf/core.perf.ts) — the reference implementation on `parseSpec` + `createPool`. Two ops, both pure, both sub-5-ms p95 caps.
 - [`packages/edge/tests/perf/edge.perf.ts`](https://github.com/cardene777/kiwa/blob/main/packages/edge/tests/perf/edge.perf.ts) — a stateful example with 8 axes (durable-object / websocket / kv / geo / cron / subrequest / cpu / streaming). Shows how to compose multiple op specs that share setup.

@@ -5,7 +5,7 @@ import {
   type AnthropicMessagesRequest,
   type MessagePart,
   type MockResponse,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 import type {
   ImageRef,
   StreamedVisionResult,
@@ -15,7 +15,7 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — drives the `@kiwa/ai-llm` Anthropic mock with
+ * Mock adapter — drives the `@kiwa-lab/ai-llm` Anthropic mock with
  * `image` content blocks so the same app code exercises multimodal
  * without touching the network. The mock returns deterministic responses
  * so fidelity tests can assert on the shape of vision request encoding,
@@ -36,7 +36,7 @@ export function makeMockAdapter(): VisionChatAdapter {
   const client = createAnthropicMock({
     model: 'claude-3-5-sonnet-mock',
     defaultResponse:
-      'This is a deterministic mock vision reply produced by @kiwa/ai-llm createAnthropicMock. The dogfood harness diffs this against a real Anthropic vision response.',
+      'This is a deterministic mock vision reply produced by @kiwa-lab/ai-llm createAnthropicMock. The dogfood harness diffs this against a real Anthropic vision response.',
     responses: buildResponseBank(),
     artificialLatencyMs: 8,
     // Sonnet-style pricing so cost tracking has realistic magnitudes

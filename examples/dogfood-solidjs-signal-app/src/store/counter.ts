@@ -1,4 +1,4 @@
-import { mockSignal, mockEffect, type EffectHandle, type SignalGetter, type SignalSetter } from '@kiwa/solidjs';
+import { mockSignal, mockEffect, type EffectHandle, type SignalGetter, type SignalSetter } from '@kiwa-lab/solidjs';
 
 /**
  * Counter store — a single Signal + a derived effect that mirrors the

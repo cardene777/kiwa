@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { MetricSnapshot, QualityReport } from '@kiwa/quality-metrics';
+import type { MetricSnapshot, QualityReport } from '@kiwa-lab/quality-metrics';
 import {
   collectRolling,
   evaluateWithLearnedThreshold,
@@ -13,7 +13,7 @@ function makeReport(overrides?: {
   perfP95Ms?: number;
 }): QualityReport {
   return {
-    provider: '@kiwa/example',
+    provider: '@kiwa-lab/example',
     version: '2.1.0',
     reportedAt: '2026-07-08T00:00:00Z',
     coverage: { line: overrides?.coverageLine ?? 90, branch: 82, function: 95 },

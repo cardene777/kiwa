@@ -1,4 +1,4 @@
-import type { SQSTestEnv, SQSReceivedMessage } from '@kiwa/queue';
+import type { SQSTestEnv, SQSReceivedMessage } from '@kiwa-lab/queue';
 
 /**
  * A small customer-order processing pipeline stitched together so the PoC

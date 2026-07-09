@@ -9,7 +9,7 @@
  *
  * The invoice surface pairs the parent v1.41-1 `crypto-payment` axis
  * (createCryptoInvoice + confirmTx + abstractGas + linkWallet) with
- * `@kiwa/payment` v0.5 — every op has a neutral event counterpart
+ * `@kiwa-lab/payment` v0.5 — every op has a neutral event counterpart
  * the fidelity harness can compare across mock vs real.
  */
 

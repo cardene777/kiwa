@@ -4,7 +4,7 @@
  * Layers id_token-specific behavioural fidelity axes on top of the Sub-Issue
  * v1.21-4a skeleton + Sub-Issue v1.21-4b DCR wiring. The wrapper in
  * `src/lib/id-token.ts` sits between the RP callback path + the underlying
- * `@kiwa/auth` `verifyIdToken`. The harness exercises the four OIDC
+ * `@kiwa-lab/auth` `verifyIdToken`. The harness exercises the four OIDC
  * Core 1.0 §3.1.3.7 + §3.1.3.6 axes —
  *
  *   1. JWS signature — kid lookup, alg match, signature recompute; tampering
@@ -25,7 +25,7 @@ import {
   computeTokenHash,
   setupOidcEnv,
   type OidcTestEnv,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 import {
   IdTokenVerifyError,
   mustVerifyIdToken,

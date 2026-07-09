@@ -4,7 +4,7 @@
  * drive mock and real symmetrically.
  *
  * The reflect surface pairs the parent v1.38-1 `agent-orchestration`
- * axis (reflection + self-correction) with `@kiwa/ai-llm` v0.4 —
+ * axis (reflection + self-correction) with `@kiwa-lab/ai-llm` v0.4 —
  * every op has a neutral event counterpart the fidelity harness can
  * compare across mock vs real.
  */

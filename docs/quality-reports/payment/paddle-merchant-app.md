@@ -8,7 +8,7 @@ v1.23-4 Lemon Squeezy license app.
 ## Scope
 
 Sub-Issue #902 exercises the Paddle Billing v2 half of the advanced
-billing landscape that `@kiwa/payment` v0.3 mocks: inline checkout
+billing landscape that `@kiwa-lab/payment` v0.3 mocks: inline checkout
 (embedded via Paddle.js), transaction lifecycle (Paddle's
 invoice-equivalent), subscription tier upgrade/downgrade + pause / resume
 / cancel / reactivate, webhook signature verification (`Paddle-Signature:
@@ -19,7 +19,7 @@ countries outside the coverage table.
 Layout:
 
 - `src/adapters/interface.ts` — provider-neutral Paddle merchant RP surface
-- `src/adapters/mock.ts` — `@kiwa/payment` `createPaddleMock` +
+- `src/adapters/mock.ts` — `@kiwa-lab/payment` `createPaddleMock` +
   9-axis semantics wired to Nuxt 3 server routes
 - `src/adapters/real.ts` — env-gated real driver skeleton
   (`KIWA_MODE=real` + `PADDLE_KEY` + `PADDLE_NOTIFICATION_SECRET` +
@@ -72,7 +72,7 @@ release gate mandate in Issue #899 (v1.23 parent).
 |---|---|---|---|
 | 1 | `lint` | Root workspace lint. Dogfood app source obeys the shared kiwa lint config with no per-file overrides. | pass |
 | 2 | `typecheck` | `pnpm --filter dogfood-paddle-merchant-app typecheck` — strict `tsc --noEmit` under `exactOptionalPropertyTypes`. | pass |
-| 3 | `build` | `pnpm --filter @kiwa/payment -F @kiwa/core build` runs as a precondition of `pnpm test`. The dogfood app itself is a Nuxt 3 consumer that does not ship a build artifact from tests. | pass |
+| 3 | `build` | `pnpm --filter @kiwa-lab/payment -F @kiwa-lab/core build` runs as a precondition of `pnpm test`. The dogfood app itself is a Nuxt 3 consumer that does not ship a build artifact from tests. | pass |
 | 4 | `test` | `pnpm --filter dogfood-paddle-merchant-app test` — 2 spec files, 40 tests. | pass (40 / 40) |
 | 5 | `test:cov` | Coverage delta of the 2 spec files against the RP surface. Every persisted-record code path in `store.ts`, `paddle-adapter.ts`, `adapters/mock.ts`, `adapters/real.ts`, `server/api/checkout.post.ts`, `server/api/webhook.post.ts`, `server/api/subscription.get.ts`, `server/api/subscription-action.post.ts`, `server/api/tax.get.ts`, `server/api/tax-calculate.post.ts` is executed by at least one test. `adapters/real.ts` is exercised through the 3 `detectRealEnvMissing` fixture tests + the checkout error path. | pass |
 | 6 | `test:e2e` | Playwright config lands the skeleton; the ad-hoc Node HTTP server wiring per the webauthn dogfood pattern will follow in a downstream Sub-Issue once the Paddle sandbox fidelity harness lands. Vitest already exercises the route handlers via direct `fetch()` in both spec files so the AC "Playwright e2e 2 spec + each mock/real fidelity 実測" is met by the 2 axis-focused vitest specs (checkout-tier + tax-vat), kept structured so the Playwright migration is a rename. | pass (per-axis vitest coverage) |

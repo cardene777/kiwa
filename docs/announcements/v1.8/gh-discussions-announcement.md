@@ -2,10 +2,10 @@
 
 The v1.8 milestone (**6/6 GitHub Issues resolved**) just landed. After deepening polyglot to 6 web frameworks across v1.5-v1.7, v1.8 pivots to fill the **3 kiwa blank spots most SaaS teams hit in prod testing**: auth, job queue, cache.
 
-## 1. `@kiwa/auth` v0.1 — 3 dominant 2026 providers
+## 1. `@kiwa-lab/auth` v0.1 — 3 dominant 2026 providers
 
 ```ts
-import { setupNextAuthEnv, setupLuciaEnv, setupBetterAuthEnv } from "@kiwa/auth";
+import { setupNextAuthEnv, setupLuciaEnv, setupBetterAuthEnv } from "@kiwa-lab/auth";
 
 // NextAuth v5 (Auth.js)
 const env = setupNextAuthEnv({
@@ -33,10 +33,10 @@ const env = setupBetterAuthEnv({
 - **Better Auth** — email/password + magic link (send + consume + expiry) + 2FA TOTP (RFC 6238, deterministic `generateTotpCode`), Prisma/Drizzle/Kysely, plugin system (`emailAndPassword` / `magicLink` / `twoFactor` / `organizations` / `passkey`)
 - 92 helper tests + 24 PoC tests, all passing
 
-## 2. `@kiwa/queue` v0.1 — BullMQ + Inngest
+## 2. `@kiwa-lab/queue` v0.1 — BullMQ + Inngest
 
 ```ts
-import { setupBullMQEnv, setupInngestEnv } from "@kiwa/queue";
+import { setupBullMQEnv, setupInngestEnv } from "@kiwa-lab/queue";
 
 // BullMQ (sandbox = in-process, testcontainers = real Redis)
 const env = setupBullMQEnv({ mode: "sandbox", queueName: "email" });
@@ -60,10 +60,10 @@ env.assertStepRan("send-welcome-email");
 - **6 Inngest helpers** + retry / step function (step.run + step.sleep) / concurrency cap semantics reproduced deterministically
 - 44 helper tests + 16 PoC tests, all passing
 
-## 3. `@kiwa/cache` v0.1 — Redis
+## 3. `@kiwa-lab/cache` v0.1 — Redis
 
 ```ts
-import { setupCacheEnv } from "@kiwa/cache";
+import { setupCacheEnv } from "@kiwa-lab/cache";
 
 const env = setupCacheEnv({ mode: "in-memory" });
 
@@ -142,13 +142,13 @@ Drop priorities on the [Discussions board](https://github.com/cardene777/kiwa/di
 /plugin install kiwa@kiwa-marketplace
 
 # Auth
-pnpm add -D @kiwa/auth
+pnpm add -D @kiwa-lab/auth
 
 # Job queue
-pnpm add -D @kiwa/queue
+pnpm add -D @kiwa-lab/queue
 
 # Cache
-pnpm add -D @kiwa/cache
+pnpm add -D @kiwa-lab/cache
 ```
 
 Repo ... https://github.com/cardene777/kiwa

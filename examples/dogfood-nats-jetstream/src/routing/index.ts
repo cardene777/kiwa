@@ -14,7 +14,7 @@ import type {
   NatsMock,
   NatsSubscription,
   StreamingMessage,
-} from '@kiwa/streaming';
+} from '@kiwa-lab/streaming';
 
 export interface RoutingRun {
   readonly subscribe: (input: SubscribeInput) => NatsSubscription;

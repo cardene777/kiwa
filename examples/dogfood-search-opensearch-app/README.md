@@ -1,6 +1,6 @@
 # dogfood-search-opensearch-app v1.36-4
 
-Dogfood application that exercises `@kiwa/search` v0.3 relevance +
+Dogfood application that exercises `@kiwa-lab/search` v0.3 relevance +
 synonym-advanced + index-management axes through a provider-neutral
 17-op contract satisfied by both a deterministic mock adapter and a
 `KIWA_MODE=real` OpenSearch OSS wire-surface real adapter.
@@ -11,7 +11,7 @@ Prove v0.3 relevance + synonym + index-management semantics track the
 real OpenSearch OSS HTTP API closely enough that consumers can trust
 the mock in unit tests. The fidelity harness diffs mock vs real traces
 across 3 fixture sets (articles / multilingual / cluster), feeds the
-divergence count into `@kiwa/quality-metrics` 13-axis release
+divergence count into `@kiwa-lab/quality-metrics` 13-axis release
 gate, and covers BM25 + TF-IDF + custom ranking + A/B variant +
 multi-language expansion + phonetic + stemmer + typo + rolling reindex
 + zero-downtime alias swap.

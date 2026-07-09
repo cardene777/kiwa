@@ -5,7 +5,7 @@
  * `driveRelevanceLifecycle` drives every relevance-axis op
  * (startRelevanceSession → seedRelevanceDocuments → scoreBm25 →
  * scoreTfIdf → applyCustomRanking → selectAbVariant) in the order
- * `@kiwa/search` v0.3 relevance semantics expect.
+ * `@kiwa-lab/search` v0.3 relevance semantics expect.
  *
  * `driveSynonymLifecycle` drives every synonym-axis op
  * (startSynonymSession → registerSynonyms → expandMultiLanguage →

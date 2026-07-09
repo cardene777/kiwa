@@ -150,7 +150,7 @@ After comparing both axes (dApp E2E fixture and spec-driven test generation), ki
 /kiwa-design (Layer 1)
   ├─ /kiwa-forge        → Foundry .t.sol
   ├─ /kiwa-hardhat      → Hardhat .test.ts
-  ├─ /kiwa-play         → Playwright .spec.ts (uses @kiwa/dapp fixture)
+  ├─ /kiwa-play         → Playwright .spec.ts (uses @kiwa-lab/dapp fixture)
   ├─ /kiwa-vitest       → Vitest .test.ts (unit)
   ├─ /kiwa-api          → Vitest + msw / supertest (integration)
   └─ /kiwa-review       → spec vs implementation drift + 11 viewpoint coverage

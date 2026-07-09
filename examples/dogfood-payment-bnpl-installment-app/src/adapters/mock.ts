@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/payment` v0.5 bnpl semantics
+ * Mock adapter — drives `@kiwa-lab/payment` v0.5 bnpl semantics
  * (createBnplPlan / scheduleInstallment / scoreRisk / chargeLateFee /
  * markInstallmentPaid) so the same app code exercises a deterministic
  * BNPL ceremony without a real Klarna / Affirm / Afterpay endpoint. Both
@@ -28,7 +28,7 @@ import {
   markInstallmentPaid as markInstallmentPaidSem,
   type BnplSession,
   type PaymentAdapter as PaymentWebhookAdapter,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import type {
   CollectionLateFeeResult,
   CollectionMarkPaidResult,

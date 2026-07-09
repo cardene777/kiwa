@@ -1,13 +1,13 @@
 # Fidelity — dogfood-anthropic-chatbot (v1.12-2)
 
-Real-vs-mock behavioural fidelity for the Anthropic Messages API dogfood, produced by `examples/dogfood-anthropic-chatbot/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 11-axis release gate.
+Real-vs-mock behavioural fidelity for the Anthropic Messages API dogfood, produced by `examples/dogfood-anthropic-chatbot/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-lab/quality-metrics` 11-axis release gate.
 
 ## Baseline (real mode skipped — no `ANTHROPIC_API_KEY`)
 
 When the harness runs without an Anthropic API key, the real adapter emits `ANTHROPIC_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa/ai-llm/anthropic-chatbot
+provider   : @kiwa-lab/ai-llm/anthropic-chatbot
 version    : 0.1.0
 verdict    : FAIL (accuracy.score 0.39 vs threshold 0.80)
 divergences: 3 (reply / replyStream / toolLoop — real mode absent)
@@ -57,4 +57,4 @@ Three provider-neutral ops on `ChatbotAdapter`.
 
 The mock's response bank in `examples/dogfood-anthropic-chatbot/src/adapters/mock.ts` keys by user prompt string. The 2-tool loop finalisation matches on empty prompt because the follow-up user turn only carries `tool_result` blocks (ai-llm's Anthropic adapter maps non-text content to an empty string on the way into the shared `MockEngine`).
 
-Provider prefix `@kiwa/ai-llm/` triggers the 11-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — the 4 AI-LLM axes cost / latency / token / accuracy are added on top of the shared 7).
+Provider prefix `@kiwa-lab/ai-llm/` triggers the 11-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — the 4 AI-LLM axes cost / latency / token / accuracy are added on top of the shared 7).

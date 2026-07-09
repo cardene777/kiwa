@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/observability` v2.1 `semantics/profiling`
+ * Mock adapter — drives `@kiwa-lab/observability` v2.1 `semantics/profiling`
  * + `semantics/cardinality` state machines deterministically without any
  * backend. The same app code exercises a full continuous-profiling
  * lifecycle (session start → resource → sample per kind → flame → drill
@@ -12,12 +12,12 @@
  * continuous-profiling pipelines keep per-service state.
  *
  * The mock adapter piggy-backs on the same neutral event vocabulary
- * that `@kiwa/observability` v2.1 profiling semantics emit — every
+ * that `@kiwa-lab/observability` v2.1 profiling semantics emit — every
  * op appends the matching neutral event onto the trace so the fidelity
  * harness can assert both adapters produce identical event orderings.
  */
 
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 import {
   type BuildFlameGraphResult,
   type CardinalityGuardResult,

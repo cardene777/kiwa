@@ -1,4 +1,4 @@
-// @kiwa/streaming — public API surface.
+// @kiwa-lab/streaming — public API surface.
 // v0.1.0 covers Kafka + Redpanda + NATS unified mock with 5 semantics
 // (producer / consumer / exactly-once / DLQ / schema-registry).
 

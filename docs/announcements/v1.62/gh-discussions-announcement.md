@@ -6,7 +6,7 @@ kiwa v1.62 is out。 **Desktop 深化 VI** 単軸 milestone、 v0.4 fidelity har
 
 ## What's new
 
-### `@kiwa/desktop` v0.7 minor bump
+### `@kiwa-lab/desktop` v0.7 minor bump
 
 - **real-runner.ts 新設** = 12 axis 別 real 経路 behavior 差別化 (electron real app / auto-updater 128MB / screen-recording 4K / clipboard URL 等)
 - **fidelity-harness 拡張** = FidelityDiff に metadataDiffs + durationDiffMs 追加、 summarizeFidelityBehaviorDiff 新設
@@ -37,7 +37,7 @@ v1.61 depth-6 record (kiwa milestone 史上初) 直後の v1.62 で depth-7 拡�
 ## Install
 
 ```bash
-pnpm add -D @kiwa/desktop@^0.7
+pnpm add -D @kiwa-lab/desktop@^0.7
 ```
 
 ## Migration guide

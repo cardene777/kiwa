@@ -1,6 +1,6 @@
 /**
  * HTTP/3 adapter routing — the entry point the SvelteKit app uses to pick
- * between real (nginx-quic testcontainers) and mock (@kiwa/realtime
+ * between real (nginx-quic testcontainers) and mock (@kiwa-lab/realtime
  * v0.2) at runtime. Inherits the 8-axis routing shape from v1.28-1 so
  * downstream dogfoods can reuse this pattern with a one-liner switch on the
  * axis.

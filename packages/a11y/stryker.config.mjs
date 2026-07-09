@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa/a11y.
+ * Mutation testing config for @kiwa-lab/a11y.
  * Runs against the compiled `.vitest-dist/src/` artefacts (pure ESM JS) so we
  * don't need to wire Stryker into our tsup/tsc build chain.
  *

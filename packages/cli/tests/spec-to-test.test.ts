@@ -686,7 +686,7 @@ describe('runSpecToTest body shape (boundary - generated strings)', () => {
     const out = join(dir, 'test.ts');
     runSpecToTest({ inPath: specPath, outPath: out, cwd: dir });
     const content = readFileSync(out, 'utf8');
-    expect(content).toContain("import { setupApiServer, type ApiTestEnv } from '@kiwa/api';");
+    expect(content).toContain("import { setupApiServer, type ApiTestEnv } from '@kiwa-lab/api';");
   });
 
   it('T-STT-BODY-003 ui - "UiTestEnv" type import', () => {
@@ -700,7 +700,7 @@ describe('runSpecToTest body shape (boundary - generated strings)', () => {
     const out = join(dir, 'test.tsx');
     runSpecToTest({ inPath: specPath, outPath: out, cwd: dir });
     const content = readFileSync(out, 'utf8');
-    expect(content).toContain("import { setupComponentEnv, type UiTestEnv } from '@kiwa/ui';");
+    expect(content).toContain("import { setupComponentEnv, type UiTestEnv } from '@kiwa-lab/ui';");
   });
 
   it('T-STT-BODY-004 ui includes reference types directive', () => {
@@ -728,7 +728,7 @@ describe('runSpecToTest body shape (boundary - generated strings)', () => {
     const out = join(dir, 'test.ts');
     runSpecToTest({ inPath: specPath, outPath: out, cwd: dir });
     const content = readFileSync(out, 'utf8');
-    expect(content).toContain("import { expectExitCode, setupCliEnv, type CliTestEnv } from '@kiwa/cli-test';");
+    expect(content).toContain("import { expectExitCode, setupCliEnv, type CliTestEnv } from '@kiwa-lab/cli-test';");
   });
 
   it('T-STT-BODY-006 data - "QueueTestEnv" type import', () => {
@@ -742,7 +742,7 @@ describe('runSpecToTest body shape (boundary - generated strings)', () => {
     const out = join(dir, 'test.ts');
     runSpecToTest({ inPath: specPath, outPath: out, cwd: dir });
     const content = readFileSync(out, 'utf8');
-    expect(content).toContain("import { createFakeClock, setupQueueEnv, type QueueTestEnv } from '@kiwa/data';");
+    expect(content).toContain("import { createFakeClock, setupQueueEnv, type QueueTestEnv } from '@kiwa-lab/data';");
   });
 
   it('T-STT-BODY-007 describe block uses module name', () => {

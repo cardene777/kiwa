@@ -1,6 +1,6 @@
 /**
- * Mock adapter — drives `@kiwa/component` v0.3 form-action-advanced
- * semantics helpers + `@kiwa/nextjs` v1.2 server-action-advanced
+ * Mock adapter — drives `@kiwa-lab/component` v0.3 form-action-advanced
+ * semantics helpers + `@kiwa-lab/nextjs` v1.2 server-action-advanced
  * semantics so the same app code exercises a deterministic Server Action +
  * form action + optimistic UI + revalidation + redirect ceremony without
  * launching Chromium. Both mock and real adapters satisfy
@@ -25,14 +25,14 @@ import {
   rejectFormAction,
   resolveFormAction,
   startFormActionSession,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 import {
   redirectAction,
   revalidateActionPath,
   revalidateActionTag,
   startServerActionAdvanced,
   submitFormAction as submitServerAction,
-} from '@kiwa/nextjs';
+} from '@kiwa-lab/nextjs';
 import type {
   RunLikeResult,
   RunLoginResult,

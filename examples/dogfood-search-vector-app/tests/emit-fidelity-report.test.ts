@@ -1,7 +1,7 @@
 /**
  * Emit fidelity report — drive the full 2 backends x 5 hybrid configs
  * x 3 fixtures matrix through both adapters, diff traces, feed the
- * divergence count into the @kiwa/quality-metrics 13-axis release
+ * divergence count into the @kiwa-lab/quality-metrics 13-axis release
  * gate, and write JSON + markdown snapshots to quality-report/.
  */
 
@@ -29,7 +29,7 @@ describe('dogfood-search-vector-app — emit fidelity report', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/search/vector-hybrid',
+      provider: '@kiwa-lab/search/vector-hybrid',
       version: '0.3.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -116,7 +116,7 @@ describe('dogfood-search-vector-app — emit fidelity report', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/search/vector-hybrid',
+      provider: '@kiwa-lab/search/vector-hybrid',
       version: '0.3.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -146,7 +146,7 @@ describe('dogfood-search-vector-app — emit fidelity report', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/search/vector-hybrid',
+      provider: '@kiwa-lab/search/vector-hybrid',
       version: '0.3.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -165,7 +165,7 @@ describe('dogfood-search-vector-app — emit fidelity report', () => {
     expect(parsed.fidelity.mockCoveredMethods).toBe(
       output.report.fidelity.mockCoveredMethods,
     );
-    expect(parsed.provider).toBe('@kiwa/search/vector-hybrid');
+    expect(parsed.provider).toBe('@kiwa-lab/search/vector-hybrid');
     expect(parsed.version).toBe('0.3.0');
   });
 
@@ -214,7 +214,7 @@ describe('dogfood-search-vector-app — emit fidelity report', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/search/vector-hybrid',
+      provider: '@kiwa-lab/search/vector-hybrid',
       version: '0.3.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

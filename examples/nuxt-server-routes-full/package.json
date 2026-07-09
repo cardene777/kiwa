@@ -4,15 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm -F @kiwa/nuxt -F @kiwa/core build",
+    "build": "pnpm -F @kiwa-lab/nuxt -F @kiwa-lab/core build",
     "dev": "nuxt dev",
     "test": "pnpm build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/nuxt": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/nuxt": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

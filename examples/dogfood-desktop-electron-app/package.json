@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.58-2 — Desktop 12 axis × 3 target workflow backed by @kiwa/desktop v0.3 (v0.1 3 axis + v0.2 5 axis に v0.3 で Screen recording + Global shortcut + Clipboard + Dark-mode の advanced III 4 axis 追加、 macos / windows / linux で横断的に扱う、 backward compat 維持 = runFullDesktopWorkflow 3 axis 保持 + runFullDesktopWorkflowV02 で 8 axis 全走査 + runFullDesktopWorkflowV03 で 12 axis × 3 target = 36 workflow 全走査)。",
+  "description": "Dogfood app v1.58-2 — Desktop 12 axis × 3 target workflow backed by @kiwa-lab/desktop v0.3 (v0.1 3 axis + v0.2 5 axis に v0.3 で Screen recording + Global shortcut + Clipboard + Dark-mode の advanced III 4 axis 追加、 macos / windows / linux で横断的に扱う、 backward compat 維持 = runFullDesktopWorkflow 3 axis 保持 + runFullDesktopWorkflowV02 で 8 axis 全走査 + runFullDesktopWorkflowV03 で 12 axis × 3 target = 36 workflow 全走査)。",
   "scripts": {
-    "test": "pnpm -F @kiwa/core -F @kiwa/desktop build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/core -F @kiwa-lab/desktop build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/desktop": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/desktop": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

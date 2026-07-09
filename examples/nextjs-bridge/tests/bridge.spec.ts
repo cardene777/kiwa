@@ -6,7 +6,7 @@ import {
   impersonateAccount,
   setBalance,
   stopImpersonateAccount,
-} from '@kiwa/dapp';
+} from '@kiwa-lab/dapp';
 import {
   createPublicClient,
   createWalletClient,

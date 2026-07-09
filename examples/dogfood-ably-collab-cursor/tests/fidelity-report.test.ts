@@ -24,7 +24,7 @@ describe('dogfood-ably-collab-cursor — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/realtime/ably-collab-cursor',
+      provider: '@kiwa-lab/realtime/ably-collab-cursor',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -39,7 +39,7 @@ describe('dogfood-ably-collab-cursor — fidelity harness', () => {
       mutation: { mutations: 40, killed: 28 },
       surfaceCoverage: { mockCoveredMethods: 4, realTotalMethods: 4 },
     });
-    expect(output.report.provider).toBe('@kiwa/realtime/ably-collab-cursor');
+    expect(output.report.provider).toBe('@kiwa-lab/realtime/ably-collab-cursor');
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThanOrEqual(4);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     await mock.reset();
@@ -57,7 +57,7 @@ describe('dogfood-ably-collab-cursor — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/realtime/ably-collab-cursor',
+      provider: '@kiwa-lab/realtime/ably-collab-cursor',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -90,7 +90,7 @@ describe('dogfood-ably-collab-cursor — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/realtime/ably-collab-cursor',
+      provider: '@kiwa-lab/realtime/ably-collab-cursor',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

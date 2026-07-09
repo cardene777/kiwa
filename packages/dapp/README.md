@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-logo.png" alt="kiwa logo" width="160" />
 </p>
 
-# @kiwa/dapp
+# @kiwa-lab/dapp
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
@@ -14,14 +14,14 @@
 
 Headless E2E test fixture for dApps on anvil forks (Playwright + viem).
 
-`@kiwa/dapp` is the runtime fixture used by [kiwa](https://github.com/cardene777/kiwa)'s Playwright-based dApp E2E layer. It injects `window.ethereum` into the test page, starts an anvil-backed wallet fixture, handles the core EIP-1193 flows directly, and forwards the rest of the JSON-RPC surface to anvil.
+`@kiwa-lab/dapp` is the runtime fixture used by [kiwa](https://github.com/cardene777/kiwa)'s Playwright-based dApp E2E layer. It injects `window.ethereum` into the test page, starts an anvil-backed wallet fixture, handles the core EIP-1193 flows directly, and forwards the rest of the JSON-RPC surface to anvil.
 
-You can use this package in two ways: (a) let Claude generate Playwright tests via `/kiwa-play`, or (b) import the fixture directly (`import { dappE2eTest as test } from "@kiwa/dapp"`) and write the tests by hand. See [kiwa README](https://github.com/cardene777/kiwa) for the full 3-path picture (contract test via `@kiwa/forge` + dApp e2e via `@kiwa/dapp` + manual write).
+You can use this package in two ways: (a) let Claude generate Playwright tests via `/kiwa-play`, or (b) import the fixture directly (`import { dappE2eTest as test } from "@kiwa-lab/dapp"`) and write the tests by hand. See [kiwa README](https://github.com/cardene777/kiwa) for the full 3-path picture (contract test via `@kiwa-lab/forge` + dApp e2e via `@kiwa-lab/dapp` + manual write).
 
 ## Installation
 
 ```bash
-pnpm add -D @kiwa/dapp @playwright/test viem
+pnpm add -D @kiwa-lab/dapp @playwright/test viem
 ```
 
 ### Bonus — Claude Code plugin
@@ -41,7 +41,7 @@ If you use Claude Code, install the kiwa skill chain in **one command** to get `
 
 ```ts
 import { expect } from "@playwright/test";
-import { dappE2eTest as test } from "@kiwa/dapp";
+import { dappE2eTest as test } from "@kiwa-lab/dapp";
 
 test("window.ethereum is injected", async ({ page, dappE2e }) => {
   await page.goto("/");
@@ -70,10 +70,10 @@ test("window.ethereum is injected", async ({ page, dappE2e }) => {
 
 ## Vitest helper (mock + real anvil with state load)
 
-`@kiwa/dapp` ships a vitest helper that lets the same test file run in either **mock mode** (no anvil process, default) or **real anvil mode** with a pre-built state file. The state file is produced once via `kiwa anvil seed`, then every test boots anvil with `--load-state` — equivalent to pasting the entire chain in one shot.
+`@kiwa-lab/dapp` ships a vitest helper that lets the same test file run in either **mock mode** (no anvil process, default) or **real anvil mode** with a pre-built state file. The state file is produced once via `kiwa anvil seed`, then every test boots anvil with `--load-state` — equivalent to pasting the entire chain in one shot.
 
 ```ts
-import { setupTestEnv } from "@kiwa/dapp";
+import { setupTestEnv } from "@kiwa-lab/dapp";
 
 // mock mode (default): no anvil process, viem mock transport
 const env = await setupTestEnv();
@@ -103,7 +103,7 @@ The seed script runs against a one-shot anvil; on exit, anvil's `--dump-state` w
 For test suites that need real anvil across many cases, `createAnvilPool` pre-spawns N instances and lets each test borrow/release one. Releasing runs `anvil_reset` so the next borrower sees a clean chain — borrow + release is **~0 ms** after the pool warms up.
 
 ```ts
-import { createAnvilPool, setupTestEnv, type AnvilPool } from "@kiwa/dapp";
+import { createAnvilPool, setupTestEnv, type AnvilPool } from "@kiwa-lab/dapp";
 
 let pool: AnvilPool;
 beforeAll(async () => {
@@ -135,7 +135,7 @@ await sendTransaction(
 
 ## Direct RPC Methods
 
-`@kiwa/dapp` handles these methods directly:
+`@kiwa-lab/dapp` handles these methods directly:
 
 - `eth_requestAccounts`
 - `eth_accounts`

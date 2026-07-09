@@ -5,9 +5,9 @@
  * this interface. Two implementations exist — {@link makeRealAdapter}
  * (would call `socket.io-client` when `SOCKETIO_URL` is set, otherwise
  * reports each method as `SOCKETIO_ENV_MISSING`) and {@link makeMockAdapter}
- * (backed by `@kiwa/realtime`'s {@link createSocketioMock}). Both must
+ * (backed by `@kiwa-lab/realtime`'s {@link createSocketioMock}). Both must
  * satisfy the same contract so behavioural fidelity between real vs mock
- * can be measured side-by-side and fed to `@kiwa/quality-metrics`
+ * can be measured side-by-side and fed to `@kiwa-lab/quality-metrics`
  * release gate.
  *
  * The 4 ops are chosen so Socket.io + SSE's notification difficulty surface

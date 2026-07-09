@@ -121,7 +121,7 @@ Drop priorities in the [Discussions board](https://github.com/cardene777/kiwa/di
 /plugin install kiwa@kiwa-marketplace
 
 # 5 languages, install only what you need
-pnpm add -D @kiwa/core              # TypeScript
+pnpm add -D @kiwa-lab/core              # TypeScript
 pip install kiwa-test-py                 # Python
 cargo add kiwa-test-rs                   # Rust (unit)
 cargo add --dev kiwa-test-rs --features integration  # Rust (integration)

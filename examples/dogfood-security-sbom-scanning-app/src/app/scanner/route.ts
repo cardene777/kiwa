@@ -12,7 +12,7 @@
  * vs real.
  */
 
-import type { Advisory } from '@kiwa/security';
+import type { Advisory } from '@kiwa-lab/security';
 import type { SecurityAdapter } from '../../adapters/interface.js';
 
 export type ScannerOpKind = 'lookup' | 'report';

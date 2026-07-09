@@ -1,18 +1,18 @@
-# @kiwa/streaming v2.1 pipeline-orchestrator in 15 min
+# @kiwa-lab/streaming v2.1 pipeline-orchestrator in 15 min
 
 ## What you'll build
 
-`@kiwa/streaming` v2.1 pipeline-orchestrator = producer + consumer group + exactly-once + DLQ + schema registry の 継続合成 layer。 5 state SSOT + 8 event SSOT + 40 セル 遷移表。 **depth-5 pattern 6 例目発生 = systematic law CONFIRMED** (Mobile + Desktop + quality-metrics + Payment + Realtime + Streaming = 6 pair)、 51 milestone streak、 systematic pattern 48 度目適用。
+`@kiwa-lab/streaming` v2.1 pipeline-orchestrator = producer + consumer group + exactly-once + DLQ + schema registry の 継続合成 layer。 5 state SSOT + 8 event SSOT + 40 セル 遷移表。 **depth-5 pattern 6 例目発生 = systematic law CONFIRMED** (Mobile + Desktop + quality-metrics + Payment + Realtime + Streaming = 6 pair)、 51 milestone streak、 systematic pattern 48 度目適用。
 
 ## Prerequisites
 
 - Node.js ≥ 20 + pnpm
-- `@kiwa/streaming` v2.1 (`pnpm add -D @kiwa/streaming@^2.1`)
+- `@kiwa-lab/streaming` v2.1 (`pnpm add -D @kiwa-lab/streaming@^2.1`)
 
 ## Step-by-step build
 
 ```ts
-import { startPipeline, dispatchPipelineEvent, summarizePipeline } from '@kiwa/streaming';
+import { startPipeline, dispatchPipelineEvent, summarizePipeline } from '@kiwa-lab/streaming';
 
 let s = startPipeline({ timestamp: new Date().toISOString() });
 // state = 'producing'

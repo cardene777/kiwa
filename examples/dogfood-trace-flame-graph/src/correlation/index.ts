@@ -1,4 +1,4 @@
-import { LogCorrelationIndex, type CorrelationKeys } from '@kiwa/observability';
+import { LogCorrelationIndex, type CorrelationKeys } from '@kiwa-lab/observability';
 import type {
   AdapterLog,
   AdapterSpan,
@@ -7,7 +7,7 @@ import type {
 
 /**
  * Bidirectional traceID index over an {@link AdapterSpan} + {@link AdapterLog}
- * pair. Thin wrapper around `@kiwa/observability` {@link LogCorrelationIndex}
+ * pair. Thin wrapper around `@kiwa-lab/observability` {@link LogCorrelationIndex}
  * that adapts the observability SpanRecord shape onto the dogfood's own
  * span shape. The mock adapter builds one of these per loadTrace so the
  * LogPanel + Drilldown UI can join logs / spans in constant time.

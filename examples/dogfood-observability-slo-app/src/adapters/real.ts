@@ -20,7 +20,7 @@ import {
   isKiwaModeReal,
   resolveObservabilityEndpoint,
   semantics,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 import {
   KIWA_SLO_ENV_MISSING,
   type AlertRouteResult,

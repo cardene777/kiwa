@@ -6,7 +6,7 @@ kiwa v1.44 をリリースしました。 **縦深化 pair 第 1 pair (Auth) 3 �
 
 ## 何が変わったか
 
-### `@kiwa/auth` v0.6.0 (v0.5.0 → v0.6.0 minor bump)
+### `@kiwa-lab/auth` v0.6.0 (v0.5.0 → v0.6.0 minor bump)
 
 8 個の advanced Passwordless UX axis を追加しました。
 
@@ -59,7 +59,7 @@ v1.23 → v1.44 で 22 milestone 連続で tutorial code snippet の validation 
 ## インストール
 
 ```bash
-pnpm add -D @kiwa/auth@^0.6
+pnpm add -D @kiwa-lab/auth@^0.6
 ```
 
 Additive-only。 breaking change はありません。

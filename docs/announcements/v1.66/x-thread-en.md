@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v1.66 is out — quality-metrics deepening III. **@kiwa/quality-metrics v0.6** integrates drift check opt-in into `evaluateReleaseGate`, ReleaseGateContext gets 3 new fields (driftBaseline / driftThresholdPct / driftEnabled), regression detected axes are promoted to `drift.{axis}` ReleaseGateBlocker 1:1. Inherits v1.55-v1.65 4-PR rhythm (**13 milestones = 52 PRs same rhythm**), **systematic pattern 41st application**, **depth-5 pattern 3rd case confirmed continued operation**.
+kiwa v1.66 is out — quality-metrics deepening III. **@kiwa-lab/quality-metrics v0.6** integrates drift check opt-in into `evaluateReleaseGate`, ReleaseGateContext gets 3 new fields (driftBaseline / driftThresholdPct / driftEnabled), regression detected axes are promoted to `drift.{axis}` ReleaseGateBlocker 1:1. Inherits v1.55-v1.65 4-PR rhythm (**13 milestones = 52 PRs same rhythm**), **systematic pattern 41st application**, **depth-5 pattern 3rd case confirmed continued operation**.
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-quality-metrics-drift-gate-app new, 4-pattern workflow (evaluateWithDrif
 
 ## Tweet 4
 
-`pnpm add -D @kiwa/quality-metrics@^0.6`. Migration: https://cardene777.github.io/kiwa/migrations/v1.65-to-v1.66
+`pnpm add -D @kiwa-lab/quality-metrics@^0.6`. Migration: https://cardene777.github.io/kiwa/migrations/v1.65-to-v1.66
 
 **depth-5 pattern 3rd case confirmed = continued operation** = Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 = 3-case stabilization + v1.66 continued deepening. 4th case = natural emergence wait (do not force).
 

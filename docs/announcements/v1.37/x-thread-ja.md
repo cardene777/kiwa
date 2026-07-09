@@ -4,7 +4,7 @@
 
 kiwa v1.37 リリース — Security 深化 が land.
 
-@kiwa/security v0.1.0 新規 package. 4 provider (helmet + express-rate-limit + casbin + coraza) 上に security semantics 8 axis を追加.
+@kiwa-lab/security v0.1.0 新規 package. 4 provider (helmet + express-rate-limit + casbin + coraza) 上に security semantics 8 axis を追加.
 
 real driver env-gate (KIWA_MODE=real + HELMET_VERSION / RATE_LIMIT_VERSION / CASBIN_VERSION / CORAZA_VERSION) で opt-in production fidelity 走査. dogfood 3 app 新規 (security-csp-headers-app + security-rbac-abac-app + security-sbom-scanning-app) 全 7 軸 release gate PASS.
 
@@ -20,4 +20,4 @@ Security v1.37 は 新規 base pair として登場. Auth + Realtime + Streaming
 
 15 milestone 連続 snippet validation streak (v1.23-v1.37) 達成.
 
-`pnpm add -D @kiwa/security` で v0.1.0 が入る. breaking change なし. migration guide は https://cardene777.github.io/kiwa/migrations/v1.36-to-v1.37
+`pnpm add -D @kiwa-lab/security` で v0.1.0 が入る. breaking change なし. migration guide は https://cardene777.github.io/kiwa/migrations/v1.36-to-v1.37

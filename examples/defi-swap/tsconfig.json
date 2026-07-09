@@ -5,7 +5,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@kiwa/dapp": ["../../packages/dapp/dist/index"]
+      "@kiwa-lab/dapp": ["../../packages/dapp/dist/index"]
     }
   },
   "include": ["tests/**/*", "playwright.config.ts"]

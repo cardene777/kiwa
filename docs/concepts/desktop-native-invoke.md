@@ -6,7 +6,7 @@ title: Desktop v0.9 実 native binding 呼出 SSOT
 
 ## What this covers
 
-`@kiwa/desktop` v0.9 の実 native binding 呼出 + probe + invoke 統合 SSOT。 v1.64 で v0.8 probe layer → v0.9 実 invoke 拡張、 kiwa 縦深化 pair 第 14 の第 9 段 (depth-9 pattern 新設 candidate)、 v1.62 real behavior + v1.63 probe + v1.64 実 invoke の 3 layer separation の完全 pay off phase、 v0.8 baseline (`docs/concepts/desktop-probe.md`) を extend。
+`@kiwa-lab/desktop` v0.9 の実 native binding 呼出 + probe + invoke 統合 SSOT。 v1.64 で v0.8 probe layer → v0.9 実 invoke 拡張、 kiwa 縦深化 pair 第 14 の第 9 段 (depth-9 pattern 新設 candidate)、 v1.62 real behavior + v1.63 probe + v1.64 実 invoke の 3 layer separation の完全 pay off phase、 v0.8 baseline (`docs/concepts/desktop-probe.md`) を extend。
 
 ## native-invoke 3 type SSOT
 

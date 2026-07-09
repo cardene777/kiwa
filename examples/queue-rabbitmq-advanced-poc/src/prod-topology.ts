@@ -1,4 +1,4 @@
-import type { RabbitMQAdvancedTestEnv } from '@kiwa/queue';
+import type { RabbitMQAdvancedTestEnv } from '@kiwa-lab/queue';
 
 /**
  * PoC — a production-grade RabbitMQ topology showcasing DLX + delayed

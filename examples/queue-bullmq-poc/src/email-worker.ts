@@ -1,4 +1,4 @@
-import type { BullMQTestEnv, QueueJobSnapshot } from '@kiwa/queue';
+import type { BullMQTestEnv, QueueJobSnapshot } from '@kiwa-lab/queue';
 
 /**
  * A small email-worker style processor stitched together so the PoC can prove

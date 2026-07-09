@@ -18,7 +18,7 @@ dogfood-security-devsecops-adapter-app で mock/real 一致検証 harness (runAd
 
 **25 milestone 連続 snippet validation streak** (v1.23-v1.47) 達成、 kiwa 史上最長記録更新継続。 backward compat 絶対維持 = v0.1 semantics function API 変更 0、 v0.2 adapter は新規 optional path。
 
-`pnpm add -D @kiwa/security-devsecops@^0.2`。 migration: https://cardene777.github.io/kiwa/migrations/v1.46-to-v1.47
+`pnpm add -D @kiwa-lab/security-devsecops@^0.2`。 migration: https://cardene777.github.io/kiwa/migrations/v1.46-to-v1.47
 
 7 sub 完遂 (v1.47-1 adapter interface + 6 mock / v1.47-2 6 real adapter + env-gate / v1.47-3 dogfood adapter app / v1.47-4 skill 4 種 SSOT / v1.47-5 tutorial 105 + snippet 25 streak / v1.47-6 publish / v1.47-7 retrospective)。
 

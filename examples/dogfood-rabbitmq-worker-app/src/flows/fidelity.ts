@@ -10,7 +10,7 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { QueueAdapter, TraceEvent } from '../adapters/interface.js';
 
 export interface FidelityRunInput {

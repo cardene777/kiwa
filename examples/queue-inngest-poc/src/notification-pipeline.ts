@@ -1,7 +1,7 @@
 import type {
   InngestFunctionDefinition,
   InngestTestEnv,
-} from '@kiwa/queue';
+} from '@kiwa-lab/queue';
 
 /**
  * A small notification-pipeline style Inngest function stitched together so the

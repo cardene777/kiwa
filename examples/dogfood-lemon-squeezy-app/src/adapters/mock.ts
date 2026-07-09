@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/payment`'s `createLemonSqueezyMock` +
+ * Mock adapter — drives `@kiwa-lab/payment`'s `createLemonSqueezyMock` +
  * the 8-axis semantics helpers so the same app code exercises a
  * deterministic Lemon Squeezy envelope without touching the real Lemon
  * Squeezy API.
@@ -12,14 +12,14 @@
  * adapter inject a Lemon Squeezy sandbox instance for real-vs-mock diffs.
  */
 
-import { createLemonSqueezyMock } from '@kiwa/payment';
+import { createLemonSqueezyMock } from '@kiwa-lab/payment';
 import type {
   Chargeback,
   DunningSession,
   Invoice as SemanticInvoice,
   PaymentWebhookEvent,
   Subscription as SemanticSubscription,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import type {
   CheckoutInput,
   CheckoutResult,

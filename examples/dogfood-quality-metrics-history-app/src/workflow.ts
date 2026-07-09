@@ -8,7 +8,7 @@ import {
   type MetricSnapshot,
   type QualityReport,
   type TrendReport,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 
 /** Pattern 1 — snapshot 単発 capture */
 export function captureReleaseSnapshot(input: {

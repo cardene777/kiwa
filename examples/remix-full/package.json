@@ -4,16 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm -F @kiwa/remix -F @kiwa/core build && remix vite:build",
+    "build": "pnpm -F @kiwa-lab/remix -F @kiwa-lab/core build && remix vite:build",
     "dev": "remix vite:dev",
     "start": "remix-serve ./build/server/index.js",
-    "test": "pnpm -F @kiwa/remix -F @kiwa/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/remix -F @kiwa-lab/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/remix": "workspace:*",
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/remix": "workspace:*",
     "@remix-run/node": "^2.15.0",
     "@remix-run/react": "^2.15.0",
     "@remix-run/serve": "^2.15.0",

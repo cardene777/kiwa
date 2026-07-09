@@ -1,6 +1,6 @@
 # Db advanced testing SSOT — 8 axis production semantics for kiwa v1.26
 
-Introduced in v1.14 as `@kiwa/orm` v0.8 (`setupOrmEnv` for 3 provider × 3 backend schema / migration / seed), extended in v1.26 as v0.9 (8 axis production semantics on the same 3 × 3 grid). This document is the SSOT for **which advanced database axes kiwa mocks, what neutral events each axis emits, and how provider × backend fidelity is measured**. Every downstream orm test in `packages/*/tests/**/*.test.ts` and every dogfood app in `examples/dogfood-{postgres-cdc-outbox,mysql-rls-tenant,vector-search}-app/` reads these rules from here — do not re-derive them locally.
+Introduced in v1.14 as `@kiwa-lab/orm` v0.8 (`setupOrmEnv` for 3 provider × 3 backend schema / migration / seed), extended in v1.26 as v0.9 (8 axis production semantics on the same 3 × 3 grid). This document is the SSOT for **which advanced database axes kiwa mocks, what neutral events each axis emits, and how provider × backend fidelity is measured**. Every downstream orm test in `packages/*/tests/**/*.test.ts` and every dogfood app in `examples/dogfood-{postgres-cdc-outbox,mysql-rls-tenant,vector-search}-app/` reads these rules from here — do not re-derive them locally.
 
 ## Why a db advanced semantics SSOT
 
@@ -14,7 +14,7 @@ The 4 rules below are the smallest set that make kiwa orm advanced semantics tes
 
 ## Rule 1 — 8 axes are the shared floor
 
-Every `@kiwa/orm` v0.9 axis session is one of the 8 axes below. New axes belong in a follow-up milestone; downstream tests should not roll a private axis alongside the 8.
+Every `@kiwa-lab/orm` v0.9 axis session is one of the 8 axes below. New axes belong in a follow-up milestone; downstream tests should not roll a private axis alongside the 8.
 
 | Axis | Session ctor | Neutral events |
 |---|---|---|
@@ -34,7 +34,7 @@ Every session ctor returns a plain object with a `state` field, a `history` arra
 Every step returns an `AxisStep<TState>` with both `neutralEvent` (portable across backends) and `backendEvent` (backend dialect). The `backendEventName(backend, neutral, provider?)` helper resolves the dialect lookup.
 
 ```ts
-import { backendEventName } from '@kiwa/orm';
+import { backendEventName } from '@kiwa-lab/orm';
 
 backendEventName('postgres', 'cdc.decoded');
 // -> 'pg_logical_slot.decoded'
@@ -77,7 +77,7 @@ These guards are asserted in `packages/orm/tests/semantics/*.test.ts` (v1.26-1) 
 `collectFidelityCoverage({ providers: [...], backends: [...] })` walks the requested providers × backends × axes and emits one `FidelityRow` per triple, with the 4 neutral events + 4 backend dialect strings for that combination.
 
 ```ts
-import { collectFidelityCoverage } from '@kiwa/orm';
+import { collectFidelityCoverage } from '@kiwa-lab/orm';
 
 const coverage = collectFidelityCoverage({
   providers: ['drizzle', 'prisma', 'kysely'],

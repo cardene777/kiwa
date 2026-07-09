@@ -38,7 +38,7 @@ describe('dogfood-form-ct — emit fidelity report to quality-report/', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/component/form-ct',
+      provider: '@kiwa-lab/component/form-ct',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

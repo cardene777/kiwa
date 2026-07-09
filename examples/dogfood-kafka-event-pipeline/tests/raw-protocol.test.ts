@@ -1,7 +1,7 @@
 /**
  * Kafka raw-protocol (v1.31-2) behavior — KIP-98 producer id + epoch fencing,
  * transaction coordinator state machine, incremental fetch sessions, ISR +
- * high-watermark. The adapter delegates to `@kiwa/streaming`'s
+ * high-watermark. The adapter delegates to `@kiwa-lab/streaming`'s
  * `createKafkaRawProtocol` axis, these tests assert the shape of the
  * observation returned to the caller.
  */

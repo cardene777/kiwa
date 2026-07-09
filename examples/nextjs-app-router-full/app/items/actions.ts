@@ -9,7 +9,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import type { CookieJar } from '@kiwa/nextjs';
+import type { CookieJar } from '@kiwa-lab/nextjs';
 import { createItemAction } from './_kiwa/items-action';
 
 async function buildCookieJar(): Promise<CookieJar> {

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-The v1.27 milestone (Issue #955) applied `@kiwa/quality-metrics` v0.3 tier-aware mutation gates to every kiwa package — 22 packages already had a `stryker.config.mjs` from earlier milestones, and 11 new packages were added in the v1.27-1 through v1.27-3 sweep. This tutorial captures the exact recipe you follow when a new package (or a fork of the monorepo) needs to join the sweep — the same primitives from tutorial 50, wired up through the 4-tier threshold SSOT so a core / framework / SaaS / test-type package each get a per-tier floor in one pass. Follow the 6 steps below and any pure package gets a mutation baseline + tier gate in under 15 minutes. This is the pattern kiwa's 33 packages already use, spelled out step-by-step.
+The v1.27 milestone (Issue #955) applied `@kiwa-lab/quality-metrics` v0.3 tier-aware mutation gates to every kiwa package — 22 packages already had a `stryker.config.mjs` from earlier milestones, and 11 new packages were added in the v1.27-1 through v1.27-3 sweep. This tutorial captures the exact recipe you follow when a new package (or a fork of the monorepo) needs to join the sweep — the same primitives from tutorial 50, wired up through the 4-tier threshold SSOT so a core / framework / SaaS / test-type package each get a per-tier floor in one pass. Follow the 6 steps below and any pure package gets a mutation baseline + tier gate in under 15 minutes. This is the pattern kiwa's 33 packages already use, spelled out step-by-step.
 
 ## Prerequisites
 
@@ -18,10 +18,10 @@ For a package you are onboarding, pick the tier that best describes the code Str
 
 | Tier | Kill-rate floor (`high`) | Applies to |
 |---|---|---|
-| Core | 80 % | Pure logic packages with deterministic tests. `@kiwa/core` / `data` / `cli-test` / `observability` / `cli`. |
-| Framework | 70 % | SSR / hydration / RSC / adapter-wrapper layers. `@kiwa/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `solidjs` / `fresh` / `hono` / `auth`. |
-| SaaS | 65 % | Provider-specific adapters where mocks approximate a live external API. `@kiwa/ai-llm` / `payment` / `queue` / `cache` / `streaming` / `realtime` / `mcp` / `agent` / `search` / `orm` / `dapp`. |
-| Test type | 60 % | Harness packages with DOM / measurement noise. `@kiwa/ui` / `a11y` / `visual` / `component` / `e2e`. |
+| Core | 80 % | Pure logic packages with deterministic tests. `@kiwa-lab/core` / `data` / `cli-test` / `observability` / `cli`. |
+| Framework | 70 % | SSR / hydration / RSC / adapter-wrapper layers. `@kiwa-lab/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `solidjs` / `fresh` / `hono` / `auth`. |
+| SaaS | 65 % | Provider-specific adapters where mocks approximate a live external API. `@kiwa-lab/ai-llm` / `payment` / `queue` / `cache` / `streaming` / `realtime` / `mcp` / `agent` / `search` / `orm` / `dapp`. |
+| Test type | 60 % | Harness packages with DOM / measurement noise. `@kiwa-lab/ui` / `a11y` / `visual` / `component` / `e2e`. |
 
 The rule is that each new package picks the tier whose code shape it most resembles. If none fits, add a new tier row to the SSOT **first** and cite it from your PR body — the tier table is what makes future reviews cheap.
 
@@ -31,7 +31,7 @@ The rule is that each new package picks the tier whose code shape it most resemb
 
 ```js
 /**
- * Mutation testing config for @kiwa/my-package.
+ * Mutation testing config for @kiwa-lab/my-package.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — provider-specific
  * adapter, external API drift expected.
  * SSOT: docs/quality/mutation-thresholds.md § SaaS tier.
@@ -56,7 +56,7 @@ export default {
 Three things to notice.
 
 - The `mutate` glob points at `.vitest-dist/src/*.js` — Stryker mutates the compiled JS, not the TS source. The kiwa monorepo builds a per-package vitest dist under `.vitest-dist/` before Stryker runs so the mutators see the exact code the tests execute.
-- Provider-specific files that **only** exercise against a live container (e.g. `testcontainers-queue.js` in `@kiwa/queue`) are excluded from `mutate`. Stryker would report every mutant on those files as `no-coverage` under the unit suite, which drags the `total MSI` down without a matching signal. The `.mutation-baseline/{package}.json` `note` field records the exclusion so a reviewer sees why.
+- Provider-specific files that **only** exercise against a live container (e.g. `testcontainers-queue.js` in `@kiwa-lab/queue`) are excluded from `mutate`. Stryker would report every mutant on those files as `no-coverage` under the unit suite, which drags the `total MSI` down without a matching signal. The `.mutation-baseline/{package}.json` `note` field records the exclusion so a reviewer sees why.
 - Set `thresholds.break` to the tier's `break` value (Core 50 / Framework 50 / SaaS 50 / Test type 40). `high` / `low` colour the HTML report but do not fail the build — `break` is the actual gate.
 
 ### 3. Add the `test:mutation` script
@@ -76,24 +76,24 @@ Root `package.json` — extend the workspace `test:mutation` sweep so `pnpm test
 ```json
 {
   "scripts": {
-    "test:mutation": "pnpm -r --filter '@kiwa/*' test:mutation"
+    "test:mutation": "pnpm -r --filter '@kiwa-lab/*' test:mutation"
   }
 }
 ```
 
-The `-r --filter '@kiwa/*'` glob picks up every workspace package named `@kiwa/…` automatically, so as long as your package name follows the convention no additional wiring is required. Add the new package to the `PACKAGE_TIER` map in `scripts/check-mutation-gates.mjs` so the CI gate reads the right floor.
+The `-r --filter '@kiwa-lab/*'` glob picks up every workspace package named `@kiwa-lab/…` automatically, so as long as your package name follows the convention no additional wiring is required. Add the new package to the `PACKAGE_TIER` map in `scripts/check-mutation-gates.mjs` so the CI gate reads the right floor.
 
 ### 4. Seed the baseline on the first run
 
 ```bash
-pnpm --filter @kiwa/my-package test:mutation
+pnpm --filter @kiwa-lab/my-package test:mutation
 ```
 
 On the first invocation, Stryker writes `packages/my-package/mutation-report/mutation.json` with the full mutant list, killed / survived / timeout / noCoverage counts, and the total / covered MSI. Copy the relevant fields into `.mutation-baseline/my-package.json` following the SSOT schema.
 
 ```json
 {
-  "package": "@kiwa/my-package",
+  "package": "@kiwa-lab/my-package",
   "tier": "SaaS",
   "thresholds": { "high": 65, "low": 55, "break": 50 },
   "killRate": 68.86,
@@ -122,9 +122,9 @@ Commit the baseline JSON — the file is **tracked in git** so a mutation regres
 export const PACKAGE_TIER = Object.freeze({
   // ...
   // SaaS tier (provider-specific adapters).
-  '@kiwa/my-package': { tier: 'saas' },
+  '@kiwa-lab/my-package': { tier: 'saas' },
   // Or with a documented looser override:
-  '@kiwa/my-package-b': {
+  '@kiwa-lab/my-package-b': {
     tier: 'saas',
     override: 60,
     reason: 'adapter.js branch coverage follow-up raises back to 65.',
@@ -132,7 +132,7 @@ export const PACKAGE_TIER = Object.freeze({
 });
 ```
 
-Stricter overrides (raising the floor above the tier default, e.g. `@kiwa/api` = 90 on Core) do **not** need a reason — a higher floor is always safe. Looser overrides require a one-line justification pinned to the follow-up work that will bring the floor back to the tier default (SSOT `docs/quality/mutation-thresholds.md` § Overrides).
+Stricter overrides (raising the floor above the tier default, e.g. `@kiwa-lab/api` = 90 on Core) do **not** need a reason — a higher floor is always safe. Looser overrides require a one-line justification pinned to the follow-up work that will bring the floor back to the tier default (SSOT `docs/quality/mutation-thresholds.md` § Overrides).
 
 ### 6. Wire the tier gate into `evaluateReleaseGate`
 
@@ -149,12 +149,12 @@ import {
   perfFromSamples,
   resolveMutationTier,
   testCountFromCategories,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 
-describe('@kiwa/my-package — 12-axis release gate', () => {
+describe('@kiwa-lab/my-package — 12-axis release gate', () => {
   it('passes the tier floor when the mutation baseline holds', () => {
     const report = assembleReport({
-      provider: '@kiwa/my-package',
+      provider: '@kiwa-lab/my-package',
       version: '0.1.0',
       coverage: coverageFromV8Summary({
         lines: { pct: 90 },

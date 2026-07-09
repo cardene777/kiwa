@@ -2,11 +2,11 @@
 
 ## Summary
 
-kiwa v1.51 is out。 **Mobile 深化 II** (@kiwa/mobile v0.2) 単軸 milestone、 **縦深化 pair 第 13 の 2 段目 (Phase 2) 完成**。 advanced II 4 new axis (navigation + reanimated + async-storage + secure-storage) + real driver env-gate 追加。
+kiwa v1.51 is out。 **Mobile 深化 II** (@kiwa-lab/mobile v0.2) 単軸 milestone、 **縦深化 pair 第 13 の 2 段目 (Phase 2) 完成**。 advanced II 4 new axis (navigation + reanimated + async-storage + secure-storage) + real driver env-gate 追加。
 
 ## What's new
 
-### `@kiwa/mobile` v0.1 → v0.2
+### `@kiwa-lab/mobile` v0.1 → v0.2
 
 - **navigation axis 新規** = React Navigation / Expo Router (stack + tab + modal + deep link、 5 state)
 - **reanimated axis 新規** = Reanimated 3 (shared value + worklet + animation lifecycle、 5 state)
@@ -38,7 +38,7 @@ v1.23 → v1.51 = 29 milestone、 kiwa 史上最長記録更新継続。
 ## Install
 
 ```bash
-pnpm add -D @kiwa/mobile@^0.2
+pnpm add -D @kiwa-lab/mobile@^0.2
 ```
 
 ## Migration guide

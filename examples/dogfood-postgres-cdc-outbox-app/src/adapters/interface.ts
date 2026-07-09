@@ -4,7 +4,7 @@
  *
  * The dogfood talks to the pipeline only through this interface. Two
  * implementations exist: {@link makeMockAdapter} (backed by
- * `@kiwa/orm`'s CDC + logical-replication + replication + orm v0.10
+ * `@kiwa-lab/orm`'s CDC + logical-replication + replication + orm v0.10
  * advanced semantics) and {@link makeRealAdapter} (probes a Postgres 16
  * broker via `POSTGRES_BOOTSTRAP` when set, else returns a skipped variant
  * whose every method records a `POSTGRES_ENV_MISSING` trace).
@@ -48,10 +48,10 @@
  *
  * All 9 ops (5 v1 + 4 v2) satisfy the same "op → observation → trace"
  * shape so behavioural fidelity between real vs mock can be measured side-
- * by-side and fed to `@kiwa/quality-metrics` 13-axis release gate.
+ * by-side and fed to `@kiwa-lab/quality-metrics` 13-axis release gate.
  */
 
-import type { CdcEvent } from '@kiwa/orm';
+import type { CdcEvent } from '@kiwa-lab/orm';
 
 export interface OrderRow {
   readonly orderId: string;

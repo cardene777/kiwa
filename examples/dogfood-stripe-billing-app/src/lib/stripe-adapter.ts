@@ -1,5 +1,5 @@
 /**
- * 8-axis routing wrapper over `@kiwa/payment`'s Stripe adapter surface.
+ * 8-axis routing wrapper over `@kiwa-lab/payment`'s Stripe adapter surface.
  *
  * This module is the SSOT for how the dogfood app converts a semantics-layer
  * call (e.g. `createSubscription`) into a webhook event, records the effect
@@ -53,7 +53,7 @@ import {
   type Subscription as SemanticSubscription,
   type ThreeDsSession,
   type ThreeDsTransStatus,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import { createBillingStore, type BillingStore } from './store.js';
 
 /**

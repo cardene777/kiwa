@@ -5,9 +5,9 @@
  * exist — {@link makeRealAdapter} (calls `@anthropic-ai/sdk` when
  * `ANTHROPIC_API_KEY` is set, otherwise reports each method as
  * `ANTHROPIC_ENV_MISSING`) and {@link makeMockAdapter} (backed by
- * `@kiwa/ai-llm`'s {@link createAnthropicMock}). Both must satisfy the
+ * `@kiwa-lab/ai-llm`'s {@link createAnthropicMock}). Both must satisfy the
  * same contract so behavioural fidelity between real vs mock can be measured
- * side-by-side and fed to `@kiwa/quality-metrics` 11-axis release gate.
+ * side-by-side and fed to `@kiwa-lab/quality-metrics` 11-axis release gate.
  */
 
 /** A completed chat turn — non-streaming. */

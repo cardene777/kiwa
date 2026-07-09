@@ -7,11 +7,11 @@
  *
  * The mao surface pairs the v1.40-1 `multi-agent-orchestration` axis
  * (CrewAI + AutoGen + LangGraph supervisor pattern) with
- * `@kiwa/ai-llm` v0.5 — every op has a neutral event counterpart
+ * `@kiwa-lab/ai-llm` v0.5 — every op has a neutral event counterpart
  * the fidelity harness can compare across mock vs real.
  */
 
-import type { MaoAgent } from '@kiwa/ai-llm';
+import type { MaoAgent } from '@kiwa-lab/ai-llm';
 import type {
   AssembleCrewResult,
   DelegateInput,

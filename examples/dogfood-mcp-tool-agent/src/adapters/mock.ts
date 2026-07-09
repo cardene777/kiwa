@@ -4,14 +4,14 @@ import {
   type AnthropicMessagesRequest,
   type AnthropicMessagesResponse,
   type MockResponse,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 import {
   McpServer,
   connectClientToServer,
   type McpClient,
   type McpTool,
   type ToolCallResult,
-} from '@kiwa/mcp';
+} from '@kiwa-lab/mcp';
 import { ALL_TOOLS, TOOL_HANDLERS } from '../tools/schema.js';
 import type {
   AgentLoopResult,
@@ -23,10 +23,10 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — spins up an in-process `@kiwa/mcp` `McpServer` with the
+ * Mock adapter — spins up an in-process `@kiwa-lab/mcp` `McpServer` with the
  * 3 dogfood tools registered, connects a `McpClient` via `InMemoryTransport`
  * (courtesy of {@link connectClientToServer}), and drives an Anthropic Claude
- * tool-use loop through `@kiwa/ai-llm` `createAnthropicMock`. Every
+ * tool-use loop through `@kiwa-lab/ai-llm` `createAnthropicMock`. Every
  * `tool_use` block the LLM emits is forwarded to `McpClient.callTool`, and
  * the MCP result is fed back as an Anthropic `tool_result` block on the next
  * turn.

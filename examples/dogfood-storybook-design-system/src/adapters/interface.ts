@@ -5,9 +5,9 @@
  * exist — {@link makeRealAdapter} (drives a real `@storybook/react` preview via
  * `STORYBOOK_URL` env, else returns a `skipped` adapter whose every method
  * records a `STORYBOOK_REAL_ENV_MISSING` trace) and {@link makeMockAdapter}
- * (backed by `@kiwa/component` `createStoryRegistry`). Both satisfy the
+ * (backed by `@kiwa-lab/component` `createStoryRegistry`). Both satisfy the
  * same contract so behavioural fidelity between real vs mock can be measured
- * side-by-side and fed to `@kiwa/quality-metrics` 7-axis release gate.
+ * side-by-side and fed to `@kiwa-lab/quality-metrics` 7-axis release gate.
  *
  * The 5 ops this contract supports mirror the AC in Issue #764 — story
  * registration, args resolution, mount, play function trace, a11y check.
@@ -16,7 +16,7 @@
 import type {
   A11yViolation,
   StoryMeta,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 
 /** Registered story identifier (Storybook 8 SB URL param compatible). */
 export interface StoryDescriptor {
@@ -122,7 +122,7 @@ export interface StorybookAdapter {
   /**
    * Run the a11y checker for 1 story. Real mode calls the Storybook a11y
    * addon (axe-core); mock mode calls the heuristic checker inside
-   * `@kiwa/component` + returns any injected violations.
+   * `@kiwa-lab/component` + returns any injected violations.
    */
   runA11y(title: string, storyName: string): Promise<A11yReport>;
 

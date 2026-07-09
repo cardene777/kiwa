@@ -7,7 +7,7 @@
  *
  * The injection surface pairs the parent v1.38-1 `prompt-injection` axis
  * (direct + indirect + jailbreak + role-hijacking + XML) with
- * `@kiwa/ai-llm` v0.4 — every op has a neutral event counterpart
+ * `@kiwa-lab/ai-llm` v0.4 — every op has a neutral event counterpart
  * the fidelity harness can compare across mock vs real.
  */
 

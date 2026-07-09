@@ -31,7 +31,7 @@ describe('dogfood-supabase — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/auth/supabase-dogfood',
+      provider: '@kiwa-lab/auth/supabase-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -46,7 +46,7 @@ describe('dogfood-supabase — fidelity harness', () => {
       mutation: { mutations: 40, killed: 26 },
     });
     // The harness always emits a report even when divergences exist.
-    expect(output.report.provider).toBe('@kiwa/auth/supabase-dogfood');
+    expect(output.report.provider).toBe('@kiwa-lab/auth/supabase-dogfood');
     // The mock adapter definitely covers onboarding ops.
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThanOrEqual(2);
     // divergences count is finite integer.
@@ -66,7 +66,7 @@ describe('dogfood-supabase — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/auth/supabase-dogfood',
+      provider: '@kiwa-lab/auth/supabase-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -96,7 +96,7 @@ describe('dogfood-supabase — fidelity harness', () => {
       run: async () => undefined,
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/auth/supabase-dogfood',
+      provider: '@kiwa-lab/auth/supabase-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

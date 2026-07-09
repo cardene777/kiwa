@@ -9,7 +9,7 @@
  * surface (opened / evidence_submitted / won or lost).
  */
 
-import type { ChargebackReason } from '@kiwa/payment';
+import type { ChargebackReason } from '@kiwa-lab/payment';
 import type {
   ChargebackEvidenceInput,
   ChargebackOpenInput,

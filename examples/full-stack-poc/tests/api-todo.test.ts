@@ -1,6 +1,6 @@
 // Layer: integration (api adapter, vitest --environment node)
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupApiServer, type ApiTestEnv } from '@kiwa/api';
+import { setupApiServer, type ApiTestEnv } from '@kiwa-lab/api';
 import { createTodoApi, createTodoStore } from '../src/api.js';
 import type { Todo } from '../src/todo.js';
 

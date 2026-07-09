@@ -1,6 +1,6 @@
-// Layer: end-to-end (real Chromium via @kiwa/e2e)
+// Layer: end-to-end (real Chromium via @kiwa-lab/e2e)
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupE2eEnv, type E2eTestEnv } from '@kiwa/e2e';
+import { setupE2eEnv, type E2eTestEnv } from '@kiwa-lab/e2e';
 import { STATIC_TODO_HTML } from '../src/static-app.js';
 
 const envs: E2eTestEnv[] = [];

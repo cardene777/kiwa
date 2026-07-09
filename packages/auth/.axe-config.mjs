@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/auth.
+ * A11y (axe-core) config for @kiwa-lab/auth.
  * Tier: Framework tier (critical 0 / serious 0-3 / moderate 0-10) — NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth.
  * SSOT: docs/quality/a11y-thresholds.md § Framework tier.
  *

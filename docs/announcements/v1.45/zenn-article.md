@@ -6,7 +6,7 @@ kiwa v1.45 をリリースしました。 **縦深化 pair 第 2 pair (Realtime)
 
 ## 何が変わったか
 
-### `@kiwa/realtime` v0.3.0 (v0.2.0 → v0.3.0 minor bump)
+### `@kiwa-lab/realtime` v0.3.0 (v0.2.0 → v0.3.0 minor bump)
 
 8 個の advanced III axis を追加しました。
 
@@ -59,7 +59,7 @@ v1.23 → v1.45 で 23 milestone 連続。
 ## インストール
 
 ```bash
-pnpm add -D @kiwa/realtime@^0.3
+pnpm add -D @kiwa-lab/realtime@^0.3
 ```
 
 ## Migration guide

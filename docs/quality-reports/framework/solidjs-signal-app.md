@@ -1,13 +1,13 @@
 # Fidelity — dogfood-solidjs-signal-app (v1.19-2)
 
-Real-vs-mock behavioural fidelity for the SolidJS Signal-based reactivity harness driven by `@kiwa/solidjs` under mock-mode + real-mode env-skip, produced by `examples/dogfood-solidjs-signal-app/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` release-gate 7-axis payload as the first modern-framework dogfood alongside `dogfood-storybook-design-system` (v1.16-2, Storybook 8 + Component test) and `dogfood-dapp-e2e-reorg` (v1.18-4, dApp e2e).
+Real-vs-mock behavioural fidelity for the SolidJS Signal-based reactivity harness driven by `@kiwa-lab/solidjs` under mock-mode + real-mode env-skip, produced by `examples/dogfood-solidjs-signal-app/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-lab/quality-metrics` release-gate 7-axis payload as the first modern-framework dogfood alongside `dogfood-storybook-design-system` (v1.16-2, Storybook 8 + Component test) and `dogfood-dapp-e2e-reorg` (v1.18-4, dApp e2e).
 
 ## Baseline (real mode skipped — `SOLID_LIVE` unset)
 
 When the harness runs without `SOLID_LIVE=1` in the environment, the real adapter emits `SOLID_REAL_ENV_MISSING` for each of the six ops (`mountCounter` / `driveCounter` / `mountTodos` / `driveTodos` / `mountResource` / `driveSuspense`). Divergences are recorded so the mock is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa/solidjs/signal-app
+provider   : @kiwa-lab/solidjs/signal-app
 version    : 0.1.0
 verdict    : PASS
 divergences: 6 (all six ops recorded as BEHAVIORAL_DIVERGENCE, real mode absent)
@@ -62,6 +62,6 @@ pnpm --filter dogfood-solidjs-signal-app test
 
 ## Related
 
-- v1.19-1a `@kiwa/solidjs` v0.1 (`packages/solidjs/`)
-- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
+- v1.19-1a `@kiwa-lab/solidjs` v0.1 (`packages/solidjs/`)
+- v1.11-1 `@kiwa-lab/quality-metrics` (`packages/quality-metrics/`)
 - v1.19 milestone parent [#806](https://github.com/cardene777/kiwa/issues/806), this sub [#808](https://github.com/cardene777/kiwa/issues/808)

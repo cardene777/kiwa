@@ -10,7 +10,7 @@ interface TemplateSpec {
 const TSCONFIG_TEMPLATE: TemplateSpec = { source: 'tsconfig.json.tpl', dest: 'tsconfig.json' };
 
 const DEV_DEPENDENCIES = {
-  '@kiwa/dapp': '^0.1.0',
+  '@kiwa-lab/dapp': '^0.1.0',
   '@playwright/test': '^1.49.0',
   viem: '^2',
 } as const;

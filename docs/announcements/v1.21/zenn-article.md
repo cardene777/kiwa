@@ -8,13 +8,13 @@ published: true
 
 # kiwa v1.21 released
 
-v1.21 は kiwa の 11 milestone 目です。 v1.20 (Streaming 深化、 Kafka (kafkajs-shaped producer / consumer / admin) + Redpanda (Kafka API 互換 broker + colocated schema registry) + NATS (core pub/sub + JetStream + KV / Object store) を 1 統一 mock として同時 land) の後、 v1.21 は 2026 の SaaS + 認証基盤 team が実運用で必要な **web-auth 主戦場 4 protocol (WebAuthn L3 (Chrome Virtual Authenticator + credential creation + assertion) + Passkey (platform + roaming + sync fabric) + OAuth 2.1 (RFC 9700 + PKCE mandatory + DPoP sender-constrained token) + OIDC (id_token 検証 + Discovery + Dynamic Client Registration + Federation)) を 1 統一 mock として同時 land** しました。 v1.8 で land した `@kiwa/auth` v0.1 (NextAuth v5 + Lucia v3 + Better Auth) → v1.9 (+ Clerk + Auth0) → v1.10 (+ Supabase Auth core + advanced (RLS + MFA + SSO SAML + Web3 SIWE)) の 6 provider adapter に、 v1.21 で 4 protocol 深化 layer を追加、 browser + Docker + 実 Keycloak / Auth0 tenant 不要で 4 protocol の testing 固有難所を SSOT 化。 producer / consumer / auth-protocol の共通思想は「実際に動く mock で本物と同じ shape を返す」 で、 provider 拡張 (横軸) に加えて protocol 深化 (縦軸) を land、 6 provider × 4 protocol の 24 交差点を統一 API surface でカバー可能。
+v1.21 は kiwa の 11 milestone 目です。 v1.20 (Streaming 深化、 Kafka (kafkajs-shaped producer / consumer / admin) + Redpanda (Kafka API 互換 broker + colocated schema registry) + NATS (core pub/sub + JetStream + KV / Object store) を 1 統一 mock として同時 land) の後、 v1.21 は 2026 の SaaS + 認証基盤 team が実運用で必要な **web-auth 主戦場 4 protocol (WebAuthn L3 (Chrome Virtual Authenticator + credential creation + assertion) + Passkey (platform + roaming + sync fabric) + OAuth 2.1 (RFC 9700 + PKCE mandatory + DPoP sender-constrained token) + OIDC (id_token 検証 + Discovery + Dynamic Client Registration + Federation)) を 1 統一 mock として同時 land** しました。 v1.8 で land した `@kiwa-lab/auth` v0.1 (NextAuth v5 + Lucia v3 + Better Auth) → v1.9 (+ Clerk + Auth0) → v1.10 (+ Supabase Auth core + advanced (RLS + MFA + SSO SAML + Web3 SIWE)) の 6 provider adapter に、 v1.21 で 4 protocol 深化 layer を追加、 browser + Docker + 実 Keycloak / Auth0 tenant 不要で 4 protocol の testing 固有難所を SSOT 化。 producer / consumer / auth-protocol の共通思想は「実際に動く mock で本物と同じ shape を返す」 で、 provider 拡張 (横軸) に加えて protocol 深化 (縦軸) を land、 6 provider × 4 protocol の 24 交差点を統一 API surface でカバー可能。
 
 v1.11 以降の連続完遂 10 milestone (release gate → 非決定性 → 時間軸 → 横軸拡張 → AI-LLM 深化 → component 縦軸 → Observability v2 → Blockchain 深化 → Framework 深化 → Streaming 深化) を受けて、 v1.21 は web-auth 縦軸 milestone、 kiwa runtime fixture 34 packages はそのまま維持 (auth 既存 package の minor 拡張)。
 
 ## 主な追加
 
-### `@kiwa/auth` v0.4.0 (4 protocol adapter 追加)
+### `@kiwa-lab/auth` v0.4.0 (4 protocol adapter 追加)
 
 4 protocol (WebAuthn L3 + Passkey + OAuth 2.1 + OIDC) を統一 mock 化した auth-protocol testing adapter。 browser + Docker + 実 Keycloak / Auth0 tenant 不要 + 4 testing 固有難所 (virtual authenticator / PKCE + DPoP / id_token 検証 / discovery + federation) 完全対応 + 6 provider adapter との combinable API surface の 3 特徴。
 
@@ -24,7 +24,7 @@ import {
   createPasskeyEnv,
   createOAuth21Env,
   createOIDCEnv,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 
 // 1. WebAuthn L3 — Virtual Authenticator + credential creation
 const webauthn = createWebAuthnEnv();
@@ -117,9 +117,9 @@ expect(claims.sub).toBe('user-1');
 
 ## 3 dogfood app
 
-- **`examples/dogfood-webauthn-passkey-app`** — Next.js 15 App Router + WebAuthn L3 + Passkey e2e。 `/register` (credential creation with attestation) + `/signin` (credential assertion) + `/manage` (credential list + delete + `residentKey=required`) の 3 route、 real driver は Playwright + Chrome Virtual Authenticator (`page.context().addVirtualAuthenticator`) 経由、 mock driver は `@kiwa/auth` の `createWebAuthnEnv` + `createPasskeyEnv` 経由。 `WebAuthnFidelityReport` は 4 pattern の mock vs real 差分を出力 (userVerification: required / preferred / discouraged / impossible-simulate + residentKey: discouraged / preferred / required + authenticatorAttachment: platform / cross-platform + sync fabric transition on the same credential ID)。 7 軸 release gate PASS。
-- **`examples/dogfood-oauth21-provider`** — Hono + Cloudflare Workers 自作 Authorization Server。 5 endpoint (`/authorize` + `/token` + `/revoke` + `/userinfo` + `/.well-known/oauth-authorization-server`) 実装、 PKCE S256 + DPoP proof binding + refresh token rotation with reuse detection + RFC 7009 revocation cascade をカバー。 real driver は `oauth2-mock-server`、 mock driver は `@kiwa/auth` の `createOAuth21Env`。 `OAuth21FidelityReport` は 4 pattern (PKCE S256 code_verifier verify — reject `plain` / mismatched verifier + DPoP proof `htu` + `htm` + `jti` uniqueness + `iat` skew — reject clock-skew > 60s + refresh token rotation reuse-detection + refresh chain revoke + revocation endpoint cascade to derived access + refresh tokens) を比較。 7 軸 release gate PASS。
-- **`examples/dogfood-oidc-federation`** — Nuxt 3 Relying Party + Deno 自作 OpenID Provider。 `.well-known/openid-configuration` Discovery + RFC 7591 Dynamic Client Registration (`none` / `client_secret_basic` / `client_secret_post` / `private_key_jwt` auth method + software_statement JWS) + JWKS endpoint with rotation + id_token 検証 (iss / aud / exp / iat / nonce / at_hash / c_hash / RS256 + ES256) + Federation trust chain (trust anchor + intermediate + statement chain verify) を実装。 real driver は mock Keycloak-shaped OP、 mock driver は `@kiwa/auth` の `createOIDCEnv`。 `OIDCFidelityReport` は 4 pattern (Discovery metadata field parity + DCR software_statement JWS verify + 3 auth-method issuance + JWKS rotation with `kid` rollover — old token still verifies during grace, new token verifies against new key + id_token full-claim verify — reject bad iss / aud / exp / nonce mismatch / at_hash / c_hash + Federation trust chain — 3-hop statement chain verify with intermediate substitution attack) を比較。 7 軸 release gate PASS。
+- **`examples/dogfood-webauthn-passkey-app`** — Next.js 15 App Router + WebAuthn L3 + Passkey e2e。 `/register` (credential creation with attestation) + `/signin` (credential assertion) + `/manage` (credential list + delete + `residentKey=required`) の 3 route、 real driver は Playwright + Chrome Virtual Authenticator (`page.context().addVirtualAuthenticator`) 経由、 mock driver は `@kiwa-lab/auth` の `createWebAuthnEnv` + `createPasskeyEnv` 経由。 `WebAuthnFidelityReport` は 4 pattern の mock vs real 差分を出力 (userVerification: required / preferred / discouraged / impossible-simulate + residentKey: discouraged / preferred / required + authenticatorAttachment: platform / cross-platform + sync fabric transition on the same credential ID)。 7 軸 release gate PASS。
+- **`examples/dogfood-oauth21-provider`** — Hono + Cloudflare Workers 自作 Authorization Server。 5 endpoint (`/authorize` + `/token` + `/revoke` + `/userinfo` + `/.well-known/oauth-authorization-server`) 実装、 PKCE S256 + DPoP proof binding + refresh token rotation with reuse detection + RFC 7009 revocation cascade をカバー。 real driver は `oauth2-mock-server`、 mock driver は `@kiwa-lab/auth` の `createOAuth21Env`。 `OAuth21FidelityReport` は 4 pattern (PKCE S256 code_verifier verify — reject `plain` / mismatched verifier + DPoP proof `htu` + `htm` + `jti` uniqueness + `iat` skew — reject clock-skew > 60s + refresh token rotation reuse-detection + refresh chain revoke + revocation endpoint cascade to derived access + refresh tokens) を比較。 7 軸 release gate PASS。
+- **`examples/dogfood-oidc-federation`** — Nuxt 3 Relying Party + Deno 自作 OpenID Provider。 `.well-known/openid-configuration` Discovery + RFC 7591 Dynamic Client Registration (`none` / `client_secret_basic` / `client_secret_post` / `private_key_jwt` auth method + software_statement JWS) + JWKS endpoint with rotation + id_token 検証 (iss / aud / exp / iat / nonce / at_hash / c_hash / RS256 + ES256) + Federation trust chain (trust anchor + intermediate + statement chain verify) を実装。 real driver は mock Keycloak-shaped OP、 mock driver は `@kiwa-lab/auth` の `createOIDCEnv`。 `OIDCFidelityReport` は 4 pattern (Discovery metadata field parity + DCR software_statement JWS verify + 3 auth-method issuance + JWKS rotation with `kid` rollover — old token still verifies during grace, new token verifies against new key + id_token full-claim verify — reject bad iss / aud / exp / nonce mismatch / at_hash / c_hash + Federation trust chain — 3-hop statement chain verify with intermediate substitution attack) を比較。 7 軸 release gate PASS。
 
 ## docs
 
@@ -133,7 +133,7 @@ VitePress sidebar には `Auth 深化 (v1.21)` セクションを追加、 gh-pa
 
 - **6 sub-Issues resolved** (#842-#847)
 - **6 PRs merged** (v1.21-1 + v1.21-2/3/4/5 + 本 publish PR)
-- **1 new npm minor bump** (`@kiwa/auth` v0.3.0 → v0.4.0)
+- **1 new npm minor bump** (`@kiwa-lab/auth` v0.3.0 → v0.4.0)
 - **3 new dogfood app** (webauthn-passkey-app + oauth21-provider + oidc-federation、 全 7 軸 release gate PASS)
 - **4 protocol** (WebAuthn L3 + Passkey + OAuth 2.1 + OIDC) 統一 mock、 4 testing 固有難所 (virtual authenticator / PKCE + DPoP / id_token 検証 / discovery + federation) SSOT
 - **kiwa runtime fixture 34 packages** (auth 既存 package の minor 拡張、 fixture count 変わらず)

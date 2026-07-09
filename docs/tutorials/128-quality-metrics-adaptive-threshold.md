@@ -2,12 +2,12 @@
 
 ## What you'll build
 
-`@kiwa/quality-metrics` v2.1 (adaptive drift threshold learning、 v0.5 historical trend + v0.6 drift-gate integration → v2.1 で 「driftThresholdPct を 過去 N snapshot から 自動学習」)。 統計的異常検知 (mean + k*stdev) で per-axis volatility を吸収、 kiwa 47 milestone streak 継続、 4 PR rhythm 復帰 milestone、 systematic pattern 44 度目 (statistical inference variant)。
+`@kiwa-lab/quality-metrics` v2.1 (adaptive drift threshold learning、 v0.5 historical trend + v0.6 drift-gate integration → v2.1 で 「driftThresholdPct を 過去 N snapshot から 自動学習」)。 統計的異常検知 (mean + k*stdev) で per-axis volatility を吸収、 kiwa 47 milestone streak 継続、 4 PR rhythm 復帰 milestone、 systematic pattern 44 度目 (statistical inference variant)。
 
 ## Prerequisites
 
 - Node.js ≥ 20 + pnpm
-- `@kiwa/quality-metrics` v2.1 (`pnpm add -D @kiwa/quality-metrics@^2.1`)
+- `@kiwa-lab/quality-metrics` v2.1 (`pnpm add -D @kiwa-lab/quality-metrics@^2.1`)
 
 ## Step-by-step build
 
@@ -16,7 +16,7 @@
 release cycle ごとに snapshot を rolling window で 蓄積。
 
 ```ts
-import { captureSnapshot, type MetricSnapshot } from '@kiwa/quality-metrics';
+import { captureSnapshot, type MetricSnapshot } from '@kiwa-lab/quality-metrics';
 
 let history: MetricSnapshot[] = [];
 const snap = captureSnapshot({
@@ -32,7 +32,7 @@ history = [...history, snap].slice(-10); // rolling window 10
 過去 N snapshot から axis 別 の deltaPct 分布 を 学習、 mean + k*stdev で 推奨 threshold を算出。
 
 ```ts
-import { learnAdaptiveThreshold } from '@kiwa/quality-metrics';
+import { learnAdaptiveThreshold } from '@kiwa-lab/quality-metrics';
 
 const learned = learnAdaptiveThreshold({
   snapshots: history,
@@ -48,7 +48,7 @@ const learned = learnAdaptiveThreshold({
 v0.6 の `evaluateReleaseGate` に learned aggregate を driftThresholdPct として injection。
 
 ```ts
-import { evaluateReleaseGate } from '@kiwa/quality-metrics';
+import { evaluateReleaseGate } from '@kiwa-lab/quality-metrics';
 
 const verdict = evaluateReleaseGate(currentReport, {}, {
   driftEnabled: true,
@@ -62,7 +62,7 @@ const verdict = evaluateReleaseGate(currentReport, {}, {
 `pickThresholdForAxis` で axis 個別 threshold を lookup、 aggregate と perAxis の 差別化。
 
 ```ts
-import { pickThresholdForAxis } from '@kiwa/quality-metrics';
+import { pickThresholdForAxis } from '@kiwa-lab/quality-metrics';
 
 const coverageThreshold = pickThresholdForAxis(learned, 'coverage.line');
 const perfThreshold = pickThresholdForAxis(learned, 'perf.p95Ms');

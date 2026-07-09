@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A provider-neutral `Http3MultiplexAdapter` with two implementations — a **mock adapter** backed by `@kiwa/realtime` v0.2's `createQuicMultiplexMock` + `createHttp3PushMock`, and a **real adapter** stub that would drive nginx-quic under `KIWA_MODE=real` + `HTTP3_KEY=1`. Both satisfy the same 9-op contract (`openConnection` / `closeConnection` / `openStream` / `concurrentSend` / `writeStream` / `readStream` / `closeStream` / `insertHpackHeader` / `resumeZeroRtt`), so a fidelity harness can diff them across the HTTP/3 + QUIC axes (priority scheduling / HPACK dynamic table / 0-RTT anti-replay). This is the exact pattern the `dogfood-sveltekit-http3-multiplex-app` (v1.28-4, PR #980 + fix #982) uses to run 36 tests against priority-ordered scheduling, HPACK insertion, and 0-RTT resumption tickets with anti-replay refusal.
+A provider-neutral `Http3MultiplexAdapter` with two implementations — a **mock adapter** backed by `@kiwa-lab/realtime` v0.2's `createQuicMultiplexMock` + `createHttp3PushMock`, and a **real adapter** stub that would drive nginx-quic under `KIWA_MODE=real` + `HTTP3_KEY=1`. Both satisfy the same 9-op contract (`openConnection` / `closeConnection` / `openStream` / `concurrentSend` / `writeStream` / `readStream` / `closeStream` / `insertHpackHeader` / `resumeZeroRtt`), so a fidelity harness can diff them across the HTTP/3 + QUIC axes (priority scheduling / HPACK dynamic table / 0-RTT anti-replay). This is the exact pattern the `dogfood-sveltekit-http3-multiplex-app` (v1.28-4, PR #980 + fix #982) uses to run 36 tests against priority-ordered scheduling, HPACK insertion, and 0-RTT resumption tickets with anti-replay refusal.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A provider-neutral `Http3MultiplexAdapter` with two implementations — a **mock
 ```bash
 mkdir kiwa-http3-multiplex && cd kiwa-http3-multiplex
 pnpm init
-pnpm add -D @kiwa/realtime@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/realtime@^0.2 vitest typescript @types/node
 ```
 
 `package.json`:
@@ -92,7 +92,7 @@ Three things to notice.
 - **HPACK dynamic table is a per-connection resource**. `insertHpackHeader` returns the entry's index + resulting table size so a caller can verify header compression is picking up newly inserted entries. Real HTTP/3 uses QPACK, but the compression ratio semantics are identical at the observable layer.
 - **0-RTT is a boolean decision + refusal reason**. Real QUIC 0-RTT resumption can be refused by the server for anti-replay reasons; the mock exposes that as an observable field so the caller cannot silently rely on 0-RTT acceptance.
 
-### 3. Wire the mock adapter with `@kiwa/realtime` v0.2
+### 3. Wire the mock adapter with `@kiwa-lab/realtime` v0.2
 
 `src/adapters/mock.ts` — one QUIC multiplex mock per connection so per-connection HPACK table + stream registry stay isolated.
 
@@ -101,7 +101,7 @@ import {
   createQuicMultiplexMock,
   type QuicMultiplexMock,
   type QuicStreamHandle,
-} from '@kiwa/realtime';
+} from '@kiwa-lab/realtime';
 import type { Http3MultiplexAdapter } from './interface.js';
 
 interface ConnectionState {

@@ -1,4 +1,4 @@
-# Quality Report — @kiwa/security/dogfood-mtls-zero-trust-app @ 0.2.0
+# Quality Report — @kiwa-lab/security/dogfood-mtls-zero-trust-app @ 0.2.0
 
 _Reported at 2026-07-07T07:02:36.303Z._
 

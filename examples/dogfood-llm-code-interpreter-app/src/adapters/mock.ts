@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/ai-llm` v0.5 code-interpreter
+ * Mock adapter — drives `@kiwa-lab/ai-llm` v0.5 code-interpreter
  * semantics so the same app code exercises a deterministic sandbox +
  * execution + tool-use + rollback ceremony without a real Anthropic /
  * Vercel AI SDK call. Both mock and real adapters satisfy
@@ -25,7 +25,7 @@ import {
   startSandbox,
   useTool,
   type CiSession,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 import type {
   CodeInterpreterPipelineResult,
   ExecuteCodeResult,

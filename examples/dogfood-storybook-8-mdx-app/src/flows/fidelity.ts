@@ -11,18 +11,18 @@ import {
   type MutationTier,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { StorybookMdxAdapter, TraceEvent } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares a Storybook 8 MDX run under
  * {@link makeMockAdapter} against one under {@link makeRealAdapter}, feeds
  * the divergence count (missing ops, unmatched behaviour) into the
- * `@kiwa/quality-metrics` 7-axis release gate, and emits a JSON +
+ * `@kiwa-lab/quality-metrics` 7-axis release gate, and emits a JSON +
  * markdown report so the release process can consume it.
  *
  * The dogfood app is the source of truth for whether the kiwa
- * `@kiwa/component` `createStoryRegistry` mock + MDX registry +
+ * `@kiwa-lab/component` `createStoryRegistry` mock + MDX registry +
  * InteractionRunner track real Storybook 8 closely enough to be trusted in
  * unit tests — this harness is where that trust is measured.
  *

@@ -1,4 +1,4 @@
-import { costForTokens } from '@kiwa/ai-llm';
+import { costForTokens } from '@kiwa-lab/ai-llm';
 import type {
   ChatbotAdapter,
   ChatResult,
@@ -354,7 +354,7 @@ function makeConnectedRealAdapter(env: RealAdapterEnv): ChatbotAdapter {
   };
 }
 
-// Finding 3 — cost lookup deferred to the shared @kiwa/ai-llm price
+// Finding 3 — cost lookup deferred to the shared @kiwa-lab/ai-llm price
 // table so a model swap (Sonnet → Haiku → Opus) picks up the right rate
 // without touching every dogfood adapter. Callers pass the vendor's raw
 // token counts unchanged so the migration is drop-in.

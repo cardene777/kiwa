@@ -1,12 +1,12 @@
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into `@kiwa/quality-metrics`
+ * (missing ops, unmatched behaviour) into `@kiwa-lab/quality-metrics`
  * release gate, and emits a JSON + markdown report so the release
  * process can consume it.
  *
  * The dogfood app is the source of truth for whether the v1.40-1
- * `@kiwa/ai-llm` v0.5 multi-agent-orchestration + agent-swarm
+ * `@kiwa-lab/ai-llm` v0.5 multi-agent-orchestration + agent-swarm
  * helpers track the real Vercel AI SDK + Anthropic Messages behaviour
  * closely enough to be trusted as a mock in unit tests. The report
  * tracks the same 13 ops the adapter contract exposes so any
@@ -15,7 +15,7 @@
  * AI-LLM dogfoods use the common 7 axes (coverage 3 / fidelity / perf
  * p95 / mutation / behavior test count) + the 4 AI-LLM sub-axes (cost /
  * latency / token / accuracy) — {@link evaluateReleaseGate} routes on
- * the `@kiwa/ai-` provider prefix. This dogfood exercises
+ * the `@kiwa-lab/ai-` provider prefix. This dogfood exercises
  * deterministic state-machine + majority-vote code paths (not a real LLM
  * call), so the 4 sub axes are populated with orchestration-specific
  * proxies —
@@ -44,7 +44,7 @@ import {
   tokenFromSamples,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { LlmMaoSwarmAdapter, TraceEvent } from '../adapters/interface.js';
 
 export interface FidelityRunInput {

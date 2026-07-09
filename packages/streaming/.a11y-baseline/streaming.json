@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/streaming",
+  "package": "@kiwa-lab/streaming",
   "generatedAt": "2026-07-06T01:52:04.757Z",
   "layers": {
     "jsdom": {

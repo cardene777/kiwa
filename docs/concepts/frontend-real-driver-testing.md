@@ -81,7 +81,7 @@ If the fidelity harness has a `planned` cell, the corresponding tutorial + dogfo
 
 ## How this ties into the 13-axis release gate
 
-v1.34 does not add a 14th release-gate axis. The 8 advanced frontend axes gate the component + nextjs package's own tests (via `pnpm --filter @kiwa/component test` and `pnpm --filter @kiwa/nextjs test`) but do not surface as a per-package `@kiwa/quality-metrics` axis. The reasoning — the fidelity harness is target-shape-specific, and a package that does not use Storybook 8 / Playwright CT / Chromatic or App Router / Pages Router / Edge Runtime has nothing to assert on. When a future milestone adds a `frontend.fidelity` axis that describes "which frontend targets this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.34 keeps the axis count at 13.
+v1.34 does not add a 14th release-gate axis. The 8 advanced frontend axes gate the component + nextjs package's own tests (via `pnpm --filter @kiwa-lab/component test` and `pnpm --filter @kiwa-lab/nextjs test`) but do not surface as a per-package `@kiwa-lab/quality-metrics` axis. The reasoning — the fidelity harness is target-shape-specific, and a package that does not use Storybook 8 / Playwright CT / Chromatic or App Router / Pages Router / Edge Runtime has nothing to assert on. When a future milestone adds a `frontend.fidelity` axis that describes "which frontend targets this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.34 keeps the axis count at 13.
 
 ## SSOT boundaries
 

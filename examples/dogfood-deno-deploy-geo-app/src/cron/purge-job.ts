@@ -2,7 +2,7 @@
  * `cron/purge-job.ts` — 24-h retention purge job for Deno KV keys. Fires
  * via Deno Deploy Cron on a daily schedule (`0 0 * * *`, UTC midnight)
  * and issues a range query over the `retention:` prefix to identify
- * expired keys. Uses the `@kiwa/edge` v0.2 `cron-trigger` axis
+ * expired keys. Uses the `@kiwa-lab/edge` v0.2 `cron-trigger` axis
  * (schedule + start + complete) alongside the `edge-kv` axis (range
  * query + write) via the adapter.
  *

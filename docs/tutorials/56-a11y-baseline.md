@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/a11y` v1.1 that runs [axe-core](https://github.com/dequelabs/axe-core) over a jsdom DOM fixture with the WCAG 2.1 AA rule set, aggregates the 3-layer harness verdict (jsdom / Playwright / SSR-hydration) into a persisted baseline JSON at `.a11y-baseline/{package}.json`, and gates a `@kiwa/quality-metrics` v0.4 release-gate 13th axis (`a11y.tier`) against the 4-tier threshold table (Core 0/0/3 / Framework 0/3/10 / SaaS 0/0/0 / Test type 0/3/10). The exact pattern all 34 kiwa packages (v1.30 sweep) use — same `runAxe` + `reportViolations` + `expectNoViolations` primitives, same `runLayerHarness` + `computeTotals` + `isHarnessOk` aggregator, same `a11yFromBaseline` + `assertA11yTier` + `resolveA11yTier` gate helpers, same JSON schema on disk. You leave this tutorial with a runnable axe-core suite, a persisted 3-layer baseline, and a working tier gate for any package you point it at.
+A vitest suite wired to `@kiwa-lab/a11y` v1.1 that runs [axe-core](https://github.com/dequelabs/axe-core) over a jsdom DOM fixture with the WCAG 2.1 AA rule set, aggregates the 3-layer harness verdict (jsdom / Playwright / SSR-hydration) into a persisted baseline JSON at `.a11y-baseline/{package}.json`, and gates a `@kiwa-lab/quality-metrics` v0.4 release-gate 13th axis (`a11y.tier`) against the 4-tier threshold table (Core 0/0/3 / Framework 0/3/10 / SaaS 0/0/0 / Test type 0/3/10). The exact pattern all 34 kiwa packages (v1.30 sweep) use — same `runAxe` + `reportViolations` + `expectNoViolations` primitives, same `runLayerHarness` + `computeTotals` + `isHarnessOk` aggregator, same `a11yFromBaseline` + `assertA11yTier` + `resolveA11yTier` gate helpers, same JSON schema on disk. You leave this tutorial with a runnable axe-core suite, a persisted 3-layer baseline, and a working tier gate for any package you point it at.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/a11y` v1.1 that runs [axe-core](https://github.co
 ```bash
 mkdir kiwa-a11y-baseline && cd kiwa-a11y-baseline
 pnpm init
-pnpm add -D @kiwa/a11y@^1.1 @kiwa/quality-metrics@^0.4 \
+pnpm add -D @kiwa-lab/a11y@^1.1 @kiwa-lab/quality-metrics@^0.4 \
   axe-core jsdom vitest typescript @types/node
 ```
 
@@ -33,7 +33,7 @@ Add the vitest scripts in `package.json`.
 }
 ```
 
-`axe-core` is a peer dependency of `@kiwa/a11y` — it must be installed alongside the adapter or `runAxe` throws at first call.
+`axe-core` is a peer dependency of `@kiwa-lab/a11y` — it must be installed alongside the adapter or `runAxe` throws at first call.
 
 ### 2. Write the target markup
 
@@ -57,7 +57,7 @@ The rule of thumb is that the markup should be deterministic — no random ids, 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runAxe, expectNoViolations } from '@kiwa/a11y';
+import { runAxe, expectNoViolations } from '@kiwa-lab/a11y';
 import { renderCounter } from '../../src/counter.js';
 
 describe('renderCounter — jsdom a11y audit', () => {
@@ -95,7 +95,7 @@ Three things to notice.
 import { describe, expect, it } from 'vitest';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { runLayerHarness } from '@kiwa/a11y';
+import { runLayerHarness } from '@kiwa-lab/a11y';
 import { renderCounter } from '../../src/counter.js';
 
 describe('renderCounter — 3-layer baseline', () => {
@@ -138,7 +138,7 @@ Three things to notice.
 
 ### 5. Wire the tier gate
 
-`tests/a11y/gate.a11y.test.ts` — feed the baseline totals into `@kiwa/quality-metrics` v0.4 and fail the vitest suite when any impact ceiling is breached.
+`tests/a11y/gate.a11y.test.ts` — feed the baseline totals into `@kiwa-lab/quality-metrics` v0.4 and fail the vitest suite when any impact ceiling is breached.
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -146,7 +146,7 @@ import {
   a11yFromBaseline,
   assertA11yTier,
   resolveA11yTier,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 
 describe('renderCounter — tier gate', () => {
   it('passes when all 3 impacts meet the Test type tier ceiling', () => {
@@ -190,11 +190,11 @@ import {
   a11yFromBaseline,
   evaluateReleaseGate,
   type QualityReport,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 
 function baseReport(): QualityReport {
   return {
-    provider: '@kiwa/example',
+    provider: '@kiwa-lab/example',
     version: '0.1.0',
     reportedAt: '2026-07-06T00:00:00Z',
     coverage: { line: 90, branch: 82, function: 95 },
@@ -250,7 +250,7 @@ pnpm test:a11y
 
 First run seeds the baseline in `.a11y-baseline/counter.json`. Subsequent runs regenerate the report; a regression on any future PR shows up as a diff on the baseline JSON alongside the code change.
 
-The full end-to-end pattern lives in `packages/a11y/tests/docs-tutorial-v1.30.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa/a11y` v1.1 API. Every v1.23 → v1.30 tutorial ships this snippet-validation pair; the 8-milestone streak is the SSOT for structural drift blocking.
+The full end-to-end pattern lives in `packages/a11y/tests/docs-tutorial-v1.30.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa-lab/a11y` v1.1 API. Every v1.23 → v1.30 tutorial ships this snippet-validation pair; the 8-milestone streak is the SSOT for structural drift blocking.
 
 ## Where to next
 

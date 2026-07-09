@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa/solidstart.
+ * Mutation testing config for @kiwa-lab/solidstart.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — Solid SSR + resource + server-function drift.
  * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
  */

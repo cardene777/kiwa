@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/security-devsecops` v0.2 adapter interface。 mock adapter (deterministic replay、 常時実行可能) と real adapter (env-gate 通過時のみ実 CLI 呼出隠蔽経路) を pair で使い、 dev-flow の security 4 skill を library 経由で再現性 test 可能にする。
+A vitest suite wired to `@kiwa-lab/security-devsecops` v0.2 adapter interface。 mock adapter (deterministic replay、 常時実行可能) と real adapter (env-gate 通過時のみ実 CLI 呼出隠蔽経路) を pair で使い、 dev-flow の security 4 skill を library 経由で再現性 test 可能にする。
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/security-devsecops` v0.2 adapter interface。 moc
 ```bash
 mkdir kiwa-devsecops-adapter && cd kiwa-devsecops-adapter
 pnpm init
-pnpm add -D @kiwa/security-devsecops@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/security-devsecops@^0.2 vitest typescript @types/node
 ```
 
 ### 2. Mock adapter chain — 6 axis 全実行
@@ -34,7 +34,7 @@ import {
   scaMockAdapter,
   secretScanMockAdapter,
   type AdapterInvocation,
-} from '@kiwa/security-devsecops';
+} from '@kiwa-lab/security-devsecops';
 
 const inv = (scanId: string, target: string): AdapterInvocation => ({
   scanId,
@@ -69,7 +69,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   sastRealAdapter,
   type AdapterInvocation,
-} from '@kiwa/security-devsecops';
+} from '@kiwa-lab/security-devsecops';
 
 const inv: AdapterInvocation = { scanId: 'r1', target: '/repo', mode: 'real' };
 
@@ -114,7 +114,7 @@ import {
   scaMockAdapter,
   scaRealAdapter,
   type AdapterInvocation,
-} from '@kiwa/security-devsecops';
+} from '@kiwa-lab/security-devsecops';
 
 const inv = (mode: 'mock' | 'real'): AdapterInvocation => ({
   scanId: 'fid',

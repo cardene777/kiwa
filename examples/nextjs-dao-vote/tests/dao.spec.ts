@@ -5,7 +5,7 @@ import {
   expectCustomError,
   mineBlock,
   setNextBlockTimestamp,
-} from '@kiwa/dapp';
+} from '@kiwa-lab/dapp';
 import {
   createPublicClient,
   createWalletClient,

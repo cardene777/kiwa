@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as sec from '../src/index.js';
 
-describe('index surface — @kiwa/security', () => {
+describe('index surface — @kiwa-lab/security', () => {
   it('T-SEC-IDX-001 exposes 8 axis builder / evaluator functions', () => {
     // CSP.
     expect(typeof sec.buildCspHeader).toBe('function');

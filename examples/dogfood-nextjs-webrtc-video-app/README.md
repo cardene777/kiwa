@@ -1,6 +1,6 @@
 # dogfood-nextjs-webrtc-video-app (v1.28-2)
 
-A Next.js 15 + mediasoup SFU + coturn TURN + WebRTC video/audio call room that exercises signaling / ice / track / simulcast / reconnect across a provider-neutral `VideoCallAdapter`. Both mock (`@kiwa/realtime` v0.2) and real (mediasoup + coturn testcontainers, opt-in) implementations satisfy the same 8-op contract so the fidelity harness can diff them side by side.
+A Next.js 15 + mediasoup SFU + coturn TURN + WebRTC video/audio call room that exercises signaling / ice / track / simulcast / reconnect across a provider-neutral `VideoCallAdapter`. Both mock (`@kiwa-lab/realtime` v0.2) and real (mediasoup + coturn testcontainers, opt-in) implementations satisfy the same 8-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -35,4 +35,4 @@ The real adapter defers the mediasoup worker + coturn testcontainers wiring to a
 
 ## Fidelity report
 
-The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa/quality-metrics` picks up for the 12-axis release gate. The doc counterpart lives at `docs/quality-reports/realtime/nextjs-webrtc-video-app.md`.
+The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa-lab/quality-metrics` picks up for the 12-axis release gate. The doc counterpart lives at `docs/quality-reports/realtime/nextjs-webrtc-video-app.md`.

@@ -5,7 +5,7 @@ import {
   type TransactionSession,
   type TransactionSummary,
   type TransactionEvent,
-} from '@kiwa/orm';
+} from '@kiwa-lab/orm';
 
 export function bootTransaction(input: { timestamp: string }): TransactionSession {
   return startTransaction({ timestamp: input.timestamp });

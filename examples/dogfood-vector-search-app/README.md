@@ -2,7 +2,7 @@
 
 Dogfood app for v1.26-4 — a SvelteKit + Kysely + Postgres 16 + pgvector
 + Redis embedding-cache app that exercises the 4 patterns
-`@kiwa/orm` (v0.9) promises for pgvector semantic search:
+`@kiwa-lab/orm` (v0.9) promises for pgvector semantic search:
 
 1. **IVFFlat / HNSW index build with dimension guard** — every write
    through the store captures the first embedding's dimensionality and
@@ -10,7 +10,7 @@ Dogfood app for v1.26-4 — a SvelteKit + Kysely + Postgres 16 + pgvector
    `vector(N)` column check does at INSERT time). Building the index
    transitions the vector-store session to `indexed`.
 2. **k-NN semantic search with cosine + L2 distance** — the adapter
-   runs a top-`k` query through `@kiwa/orm`'s `knnSearch` op,
+   runs a top-`k` query through `@kiwa-lab/orm`'s `knnSearch` op,
    computes deterministic per-document distances, and returns the
    ranked document ids.
 3. **Hybrid semantic + BM25 keyword search** — the adapter fuses the
@@ -34,17 +34,17 @@ Postgres 16 + pgvector + Redis 7 broker without breaking CI mock runs.
 src/
   adapters/
     interface.ts         # VectorSearchAdapter contract (index / knn / hybrid / cache / fidelity)
-    mock.ts              # makeMockAdapter — @kiwa/orm vector-store + in-memory store + cache
+    mock.ts              # makeMockAdapter — @kiwa-lab/orm vector-store + in-memory store + cache
     real.ts              # makeRealAdapter — Postgres 16 pgvector + Redis 7 probe (env-gated by VECTOR_KEY)
   document/
     index.ts             # DocumentStore + BM25 keyword score
   index-store/
-    index.ts             # VectorIndexGate (@kiwa/orm vector-store wrapper) + ivfFlatIndex / hnswIndex helpers
+    index.ts             # VectorIndexGate (@kiwa-lab/orm vector-store wrapper) + ivfFlatIndex / hnswIndex helpers
   cache/
     index.ts             # EmbeddingCache (LRU-ish + hit-rate metrics)
   flows/
     vector-flows.ts      # 5-op flow wrappers driven by both tests + fidelity harness
-    fidelity.ts          # Trace diff + @kiwa/quality-metrics report assembly
+    fidelity.ts          # Trace diff + @kiwa-lab/quality-metrics report assembly
 tests/
   semantic-search-e2e.spec.ts   # T-DVS-* — document store + index gate + cosine / L2 correctness
   hybrid-ranking-e2e.spec.ts    # T-DVH-* — semantic + BM25 fusion + tie-breaking

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that exercises **three payment webhook flows** — sign a webhook body with HMAC-SHA256, timing-safe verify it, and dispatch to registered handlers — across the three providers `@kiwa/payment` covers. The same test surface handles all three providers so a SaaS supporting multiple payment providers reuses one test spec.
+A vitest test file that exercises **three payment webhook flows** — sign a webhook body with HMAC-SHA256, timing-safe verify it, and dispatch to registered handlers — across the three providers `@kiwa-lab/payment` covers. The same test surface handles all three providers so a SaaS supporting multiple payment providers reuses one test spec.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that exercises **three payment webhook flows** — sign a web
 ```bash
 mkdir kiwa-payment && cd kiwa-payment
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa/payment
+pnpm add -D vitest typescript @types/node @kiwa-lab/payment
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -46,7 +46,7 @@ Add `tsconfig.json`:
 Create `src/webhook-handler.ts` — a provider-neutral surface that any of the three provider mocks satisfies:
 
 ```ts
-import type { PaymentAdapter, PaymentWebhookEvent } from '@kiwa/payment';
+import type { PaymentAdapter, PaymentWebhookEvent } from '@kiwa-lab/payment';
 
 export function attachHandler(adapter: PaymentAdapter, sink: PaymentWebhookEvent[]) {
   return adapter.onWebhook((event) => {
@@ -69,7 +69,7 @@ import {
   refunded,
   type PaymentAdapter,
   type PaymentWebhookEvent,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import { attachHandler } from '../src/webhook-handler';
 
 const providers: Array<[string, () => PaymentAdapter]> = [
@@ -140,7 +140,7 @@ You should see 12 passing tests (4 tests × 3 providers).
 
 ## Provider payload differences
 
-The 3 providers ship slightly different webhook payload shapes. `@kiwa/payment` normalises them via the shared engine so your handler code reads identical `PaymentWebhookEvent` fields — but the raw JSON body differs so signature-verify tests exercise the actual bytes each provider sends.
+The 3 providers ship slightly different webhook payload shapes. `@kiwa-lab/payment` normalises them via the shared engine so your handler code reads identical `PaymentWebhookEvent` fields — but the raw JSON body differs so signature-verify tests exercise the actual bytes each provider sends.
 
 | provider | payload shape | signature header |
 |---|---|---|
@@ -154,10 +154,10 @@ The 3 providers ship slightly different webhook payload shapes. `@kiwa/payment` 
 - **Paddle Billing** — merchant-of-record model, handles tax in-EU / worldwide sales. Choose when you want to offload tax compliance.
 - **Lemon Squeezy** — indie-friendly, simpler dashboard, still merchant-of-record. Choose when you want minimal setup.
 
-`@kiwa/payment` lets you test **all three at once** so migrating between providers (or supporting multiple simultaneously) doesn't force a test rewrite.
+`@kiwa-lab/payment` lets you test **all three at once** so migrating between providers (or supporting multiple simultaneously) doesn't force a test rewrite.
 
 ## Related
 
-- [`@kiwa/payment` on npm](https://www.npmjs.com/package/@kiwa/payment)
+- [`@kiwa-lab/payment` on npm](https://www.npmjs.com/package/@kiwa-lab/payment)
 - [Concept — payment testing SSOT](../concepts/payment-testing)
 - [Migration guide v1.13 → v1.14](../migrations/v1.13-to-v1.14)

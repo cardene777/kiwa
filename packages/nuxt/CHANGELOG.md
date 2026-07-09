@@ -1,4 +1,4 @@
-# @kiwa/nuxt
+# @kiwa-lab/nuxt
 
 ## 1.0.4
 
@@ -26,7 +26,7 @@
 
   ## Out of scope (separate Issues)
 
-  - 実 `h3` / `nitropack` runtime 起動 → 重量級 e2e test は `@kiwa/e2e` 推奨
+  - 実 `h3` / `nitropack` runtime 起動 → 重量級 e2e test は `@kiwa-lab/e2e` 推奨
   - `h3App` 詳細 stub → 必要なら caller が test 内で `vi.fn()` で置換
 
 - 5c3ad4b: Nuxt 3 route middleware test helper を追加 (Issue #523、 v1.2)。
@@ -51,14 +51,14 @@
 
   ## Out of scope (separate Issues)
 
-  - `useFetch` / `useState` 等 composables → `@kiwa/ui` Vue mode で client side cover
+  - `useFetch` / `useState` 等 composables → `@kiwa-lab/ui` Vue mode で client side cover
   - Nuxt server middleware (`server/middleware/*.ts`) → 別 Issue (server middleware は H3 event-based、 route middleware は client/server 両対応の navigation-time hook)
 
 ## 1.0.1
 
 ### Patch Changes
 
-- f19aae3: 🎉 New package `@kiwa/nuxt` v1.0 — Nuxt 3 Server Routes test adapter (Issue #496、 v1.1 milestone 5/7).
+- f19aae3: 🎉 New package `@kiwa-lab/nuxt` v1.0 — Nuxt 3 Server Routes test adapter (Issue #496、 v1.1 milestone 5/7).
 
   Invoke `defineEventHandler((event) => ...)` callbacks in isolation through `invokeEventHandler({ handler, url, method, body, query, headers, cookies })` and assert on the captured `result` / `redirect` / `env.responseHeaders` / `env.responseCookies` / `env.status` without a running Nitro server.
 
@@ -81,10 +81,10 @@
   - `scripts/check-coverage-gates.mjs` PACKAGES + PKG_DIRS に nuxt 追加.
   - `tests/release-smoke/` 4 file (package.json + coverage-gate.test.ts + coverage-diff.test.ts + import-surface.test.ts) に nuxt 追加.
   - `README.md` Limitations 表で Nuxt 3 ❌ → ✅ production-ready (v1.0.0+).
-  - `package.json` release script に -F @kiwa/nuxt build + --filter @kiwa/nuxt publish 追加.
+  - `package.json` release script に -F @kiwa-lab/nuxt build + --filter @kiwa-lab/nuxt publish 追加.
 
   ## Out of scope (separate Issues)
 
-  - Nuxt composables (`useFetch` / `useState` / `useNuxtApp`) — covered by `@kiwa/ui` Vue mode.
+  - Nuxt composables (`useFetch` / `useState` / `useNuxtApp`) — covered by `@kiwa-lab/ui` Vue mode.
   - Nitro plugin lifecycle.
   - Server-side route middleware (Nuxt route middleware prepass).

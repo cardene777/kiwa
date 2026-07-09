@@ -1,9 +1,9 @@
-// PoC tests — @kiwa/orm v0.6 (Prisma + testcontainers Postgres).
+// PoC tests — @kiwa-lab/orm v0.6 (Prisma + testcontainers Postgres).
 
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { resolve } from 'node:path';
-import { setupOrmEnv, expectRowCount } from '@kiwa/orm';
-import type { OrmTestEnvLivePrismaPostgres } from '@kiwa/orm';
+import { setupOrmEnv, expectRowCount } from '@kiwa-lab/orm';
+import type { OrmTestEnvLivePrismaPostgres } from '@kiwa-lab/orm';
 import { PrismaClient } from '../prisma/generated/index.js';
 import { UsersRepository } from '../src/users-repo.js';
 
@@ -35,7 +35,7 @@ async function newEnv(): Promise<OrmTestEnvLivePrismaPostgres<PrismaClient>> {
   });
 }
 
-describe('UsersRepository via @kiwa/orm (prisma + testcontainers postgres)', () => {
+describe('UsersRepository via @kiwa-lab/orm (prisma + testcontainers postgres)', () => {
   it('T-PP-001: create + findByEmail round-trip on real Postgres via Prisma', async () => {
     if (!dockerAvailable) return;
     env = await newEnv();

@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa/search.
+ * Mutation testing config for @kiwa-lab/search.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — search adapter covers
  * Algolia / Meilisearch / Typesense with provider-specific index + query
  * fidelity.

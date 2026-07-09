@@ -4,7 +4,7 @@
 
 kiwa v1.43 リリース — Edge / Serverless 深化 が land.
 
-@kiwa/edge v1.1.0 → v1.2.0 minor bump. 3 platform (Cloudflare Workers + Vercel Edge + Deno Deploy) 上に advanced edge production semantics 8 axis を追加 (v1.24 v0.2 8 axis と合わせて 48 combination coverage / 16 axis × 3 platform grid).
+@kiwa-lab/edge v1.1.0 → v1.2.0 minor bump. 3 platform (Cloudflare Workers + Vercel Edge + Deno Deploy) 上に advanced edge production semantics 8 axis を追加 (v1.24 v0.2 8 axis と合わせて 48 combination coverage / 16 axis × 3 platform grid).
 
 縦深化 pair pattern 第 12 新規 base pair 導入 — v1.37 Security 以来 5 milestone ぶりの新規 pair base、 3 例目 depth-4 record 達成後の 5-milestone new-base cadence の完成.
 
@@ -22,7 +22,7 @@ Edge / Serverless v1.43 で **pair 第 12 新規 base pair 導入** (v1.37 Secur
 
 21 milestone 連続 snippet validation streak (v1.23-v1.43) 達成.
 
-`pnpm add -D @kiwa/edge` で v1.2.0 が入る. breaking change なし. migration guide は https://cardene777.github.io/kiwa/migrations/v1.42-to-v1.43
+`pnpm add -D @kiwa-lab/edge` で v1.2.0 が入る. breaking change なし. migration guide は https://cardene777.github.io/kiwa/migrations/v1.42-to-v1.43
 
 sub-milestone 6 完遂 (v1.43-1 edge v1.2.0 + 8 axis semantics + 227 test / v1.43-2 dogfood-edge-serverless-cold-start-app + 64 test / v1.43-3 dogfood-edge-durable-object-migration-app + 60 test / v1.43-4 dogfood-edge-global-routing-app + 60 test / v1.43-5 docs 補強 + 241 test = 21 milestone snippet streak / v1.43-6 publish).
 

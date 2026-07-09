@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/orm.
+ * A11y (axe-core) config for @kiwa-lab/orm.
  * Tier: SaaS tier (critical 0 / serious 0 / moderate 0) — Prisma / Drizzle / Kysely. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § SaaS tier.
  *

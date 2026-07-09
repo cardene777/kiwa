@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/observability` v2.2 that models the 3 pieces of a real advanced III reliability posture that every non-trivial production platform eventually needs — a chaos `injectFault` step that pins a per-experiment fault (`network-latency` / `network-partition` / `pod-kill` / `cpu-stress` / `disk-fill`) so a Chaos Mesh-style experiment can be re-run against the same target without a per-fault YAML fork, a `computeBlastRadius` step that pins `blastRadiusRatio = affectedInstances / totalInstances` so a "how bad did it get?" question resolves to one number without walking the raw impact log, a `triggerRollback` step that flips `session.rollbackTriggered` when `errorRate >= threshold` (mirroring Argo Rollouts `analysis.progressive` gate) so a runaway experiment auto-unwinds instead of waiting for a human operator, a `recordGameDay` step that pins participants + issuesFound + durationMinutes so a post-mortem doc can graph "did the game day surface more or fewer issues than last quarter?" from one telemetry export, a data-pipeline `captureLineage` step that pins per-edge from → to relationships (mirroring OpenLineage 1.x namespace + name conventions) so a "which downstream tables depend on this source?" question lands on one directed graph, an `evaluateFreshness` step that computes `ageMinutes = (nowMs - lastEventAtMs) / 60000` against the operator-supplied `slaMinutes` so a "is this pipeline stale?" question resolves to one boolean, a `detectSchemaDrift` step that compares an expected column set against the actual column set (mirroring Great Expectations / dbt schema tests) so a silent column rename does not corrupt a downstream ML feature store, a `scoreDataQuality` step that computes `score = passedRuleCount / totalRuleCount` so a DQ dashboard can pin one summary number per pipeline, an AIOps `detectAnomaly` step that filters z-scores against a threshold (mirroring Prometheus `prophet` / Datadog `anomaly()` semantics) so a "which metric spiked?" question lands on a bounded list, an `executeRemediation` step that pins per-action runbook results with `succeeded` / `failed` / `allSucceeded` flags so the auto-remediation pipeline emits its own SLI, an `analyzeRootCause` step that walks a dependency graph to find the topological root of a failure set (mirroring Datadog Watchdog RCA / OpsRamp AI/RCA) so a cascade is diagnosed from one edge query instead of a manual trace tree, and a `correlateAlerts` step that groups alerts firing within a window (mirroring Grafana Incident correlation) so a paging storm collapses into one group instead of 50 pages. `startChaosSession()` + `injectFault()` + `computeBlastRadius()` + `triggerRollback()` + `recordGameDay()` + `startPipelineSession()` + `captureLineage()` + `evaluateFreshness()` + `detectSchemaDrift()` + `scoreDataQuality()` + `startAiopsSession()` + `detectAnomaly()` + `executeRemediation()` + `analyzeRootCause()` + `correlateAlerts()` give you every one of those pieces without booting a real Chaos Mesh + Litmus + Airflow + Dagster + Datadog Watchdog + Grafana Incident stack. This is the pattern kiwa's `examples/dogfood-observability-chaos-aiops-app` exercises against real Chaos Mesh 2.7+ + Litmus 3.9+ + Airflow 2.10+ + Dagster 1.9+ + Datadog Watchdog + Grafana Incident + PagerDuty backends under `KIWA_MODE=real` + the relevant `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the rollback never fired because `triggerRollback` compared `errorRate > threshold` instead of `>=`, the freshness eval passed on a 60-minute stale pipeline because `evaluateFreshness` used `<` instead of `<=`, the anomaly detector missed a negative-z-score outlier because `detectAnomaly` did not take absolute value, and the RCA returned the wrong root because `analyzeRootCause` walked outgoing edges instead of incoming edges" gap a reviewer sees in a chaos + data-pipeline + AIOps post-mortem.
+A vitest suite wired to `@kiwa-lab/observability` v2.2 that models the 3 pieces of a real advanced III reliability posture that every non-trivial production platform eventually needs — a chaos `injectFault` step that pins a per-experiment fault (`network-latency` / `network-partition` / `pod-kill` / `cpu-stress` / `disk-fill`) so a Chaos Mesh-style experiment can be re-run against the same target without a per-fault YAML fork, a `computeBlastRadius` step that pins `blastRadiusRatio = affectedInstances / totalInstances` so a "how bad did it get?" question resolves to one number without walking the raw impact log, a `triggerRollback` step that flips `session.rollbackTriggered` when `errorRate >= threshold` (mirroring Argo Rollouts `analysis.progressive` gate) so a runaway experiment auto-unwinds instead of waiting for a human operator, a `recordGameDay` step that pins participants + issuesFound + durationMinutes so a post-mortem doc can graph "did the game day surface more or fewer issues than last quarter?" from one telemetry export, a data-pipeline `captureLineage` step that pins per-edge from → to relationships (mirroring OpenLineage 1.x namespace + name conventions) so a "which downstream tables depend on this source?" question lands on one directed graph, an `evaluateFreshness` step that computes `ageMinutes = (nowMs - lastEventAtMs) / 60000` against the operator-supplied `slaMinutes` so a "is this pipeline stale?" question resolves to one boolean, a `detectSchemaDrift` step that compares an expected column set against the actual column set (mirroring Great Expectations / dbt schema tests) so a silent column rename does not corrupt a downstream ML feature store, a `scoreDataQuality` step that computes `score = passedRuleCount / totalRuleCount` so a DQ dashboard can pin one summary number per pipeline, an AIOps `detectAnomaly` step that filters z-scores against a threshold (mirroring Prometheus `prophet` / Datadog `anomaly()` semantics) so a "which metric spiked?" question lands on a bounded list, an `executeRemediation` step that pins per-action runbook results with `succeeded` / `failed` / `allSucceeded` flags so the auto-remediation pipeline emits its own SLI, an `analyzeRootCause` step that walks a dependency graph to find the topological root of a failure set (mirroring Datadog Watchdog RCA / OpsRamp AI/RCA) so a cascade is diagnosed from one edge query instead of a manual trace tree, and a `correlateAlerts` step that groups alerts firing within a window (mirroring Grafana Incident correlation) so a paging storm collapses into one group instead of 50 pages. `startChaosSession()` + `injectFault()` + `computeBlastRadius()` + `triggerRollback()` + `recordGameDay()` + `startPipelineSession()` + `captureLineage()` + `evaluateFreshness()` + `detectSchemaDrift()` + `scoreDataQuality()` + `startAiopsSession()` + `detectAnomaly()` + `executeRemediation()` + `analyzeRootCause()` + `correlateAlerts()` give you every one of those pieces without booting a real Chaos Mesh + Litmus + Airflow + Dagster + Datadog Watchdog + Grafana Incident stack. This is the pattern kiwa's `examples/dogfood-observability-chaos-aiops-app` exercises against real Chaos Mesh 2.7+ + Litmus 3.9+ + Airflow 2.10+ + Dagster 1.9+ + Datadog Watchdog + Grafana Incident + PagerDuty backends under `KIWA_MODE=real` + the relevant `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the rollback never fired because `triggerRollback` compared `errorRate > threshold` instead of `>=`, the freshness eval passed on a 60-minute stale pipeline because `evaluateFreshness` used `<` instead of `<=`, the anomaly detector missed a negative-z-score outlier because `detectAnomaly` did not take absolute value, and the RCA returned the wrong root because `analyzeRootCause` walked outgoing edges instead of incoming edges" gap a reviewer sees in a chaos + data-pipeline + AIOps post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/observability` v2.2 that models the 3 pieces of a
 ```bash
 mkdir kiwa-chaos-datapipeline-aiops && cd kiwa-chaos-datapipeline-aiops
 pnpm init
-pnpm add -D @kiwa/observability@^2.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/observability@^2.2 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v2.2 surface exports the chaos axis (`startChaosSession` / `injectFault` / `
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { injectFault, startChaosSession } from '@kiwa/observability';
+import { injectFault, startChaosSession } from '@kiwa-lab/observability';
 
 describe('chaos — fault injection', () => {
   it('injects a pod-kill fault and moves state', () => {
@@ -70,7 +70,7 @@ import {
   computeBlastRadius,
   injectFault,
   startChaosSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('chaos — blast radius', () => {
   it('computes affected ratio', () => {
@@ -101,7 +101,7 @@ import {
   injectFault,
   startChaosSession,
   triggerRollback,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('chaos — auto-rollback', () => {
   it('triggers rollback when errorRate >= threshold', () => {
@@ -136,7 +136,7 @@ import {
   recordGameDay,
   startChaosSession,
   triggerRollback,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('chaos — game day recording', () => {
   it('records participants + issues + duration', () => {
@@ -159,7 +159,7 @@ describe('chaos — game day recording', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { captureLineage, startPipelineSession } from '@kiwa/observability';
+import { captureLineage, startPipelineSession } from '@kiwa-lab/observability';
 
 describe('pipeline — lineage capture', () => {
   it('counts nodes and edges', () => {
@@ -192,7 +192,7 @@ import {
   captureLineage,
   evaluateFreshness,
   startPipelineSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('pipeline — freshness evaluation', () => {
   it('passes when the pipeline is within SLA', () => {
@@ -233,7 +233,7 @@ import {
   detectSchemaDrift,
   evaluateFreshness,
   startPipelineSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('pipeline — schema drift', () => {
   it('detects a renamed column as drift', () => {
@@ -268,7 +268,7 @@ import {
   evaluateFreshness,
   scoreDataQuality,
   startPipelineSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('pipeline — data quality score', () => {
   it('computes pass ratio across checks', () => {
@@ -304,7 +304,7 @@ import {
   detectAnomaly,
   executeRemediation,
   startAiopsSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('aiops — anomaly + remediation', () => {
   it('filters anomalies by absolute z-score', () => {
@@ -353,7 +353,7 @@ import {
   detectAnomaly,
   executeRemediation,
   startAiopsSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('aiops — RCA + correlation', () => {
   it('identifies the topological root of a failure set', () => {

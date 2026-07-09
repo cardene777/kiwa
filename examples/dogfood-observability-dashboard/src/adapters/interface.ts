@@ -2,14 +2,14 @@
  * Provider-neutral Grafana-style dashboard surface for the dogfood app.
  *
  * The app talks to its metric source (Prometheus in real mode, the kiwa
- * `@kiwa/observability` {@link DashboardMock} in mock mode) only
+ * `@kiwa-lab/observability` {@link DashboardMock} in mock mode) only
  * through this interface. Two implementations exist —
  * {@link makeRealAdapter} (calls the Prometheus HTTP API when
  * `PROMETHEUS_URL` is set, otherwise reports each op as
  * `PROMETHEUS_ENV_MISSING`) and {@link makeMockAdapter} (backed by the
- * `@kiwa/observability` DashboardMock + TelemetryCollector). Both
+ * `@kiwa-lab/observability` DashboardMock + TelemetryCollector). Both
  * satisfy the same contract so behavioural fidelity between real vs mock
- * can be measured side-by-side and fed to `@kiwa/quality-metrics`
+ * can be measured side-by-side and fed to `@kiwa-lab/quality-metrics`
  * release gate.
  *
  * The 4 ops below cover the Grafana dashboard difficulty surface end-to-end.
@@ -117,7 +117,7 @@ export interface TraceEvent {
 
 /**
  * Metrics captured by the adapter itself so the fidelity harness can feed
- * refresh cadence + query latency into `@kiwa/quality-metrics`.
+ * refresh cadence + query latency into `@kiwa-lab/quality-metrics`.
  */
 export interface DashboardMetrics {
   queryCount: number;

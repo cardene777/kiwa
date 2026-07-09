@@ -10,11 +10,11 @@ v1.51-v1.53 の 3 milestone 実証済 REST 経路 default 化 pattern (GraphQL r
 
 ## Tweet 3 — Mobile v0.5 spawn stub + 32 milestone streak
 
-`@kiwa/mobile` v0.5 = `invokeMobileCli` + 6 CLI stub (`expo build` / `metro bundle` / `codegen run` / `react-native start` / `pod install` / `gradle build`) + env-gate + fail-closed。 backward compat 絶対維持 = v0.1-v0.4 API 変更 0。 **32 milestone 連続 snippet validation streak** (v1.23-v1.54) 達成。
+`@kiwa-lab/mobile` v0.5 = `invokeMobileCli` + 6 CLI stub (`expo build` / `metro bundle` / `codegen run` / `react-native start` / `pod install` / `gradle build`) + env-gate + fail-closed。 backward compat 絶対維持 = v0.1-v0.4 API 変更 0。 **32 milestone 連続 snippet validation streak** (v1.23-v1.54) 達成。
 
 ## Tweet 4 — install + Phase 6 計画
 
-`pnpm add -D @kiwa/mobile@^0.5`。 migration: https://cardene777.github.io/kiwa/migrations/v1.53-to-v1.54
+`pnpm add -D @kiwa-lab/mobile@^0.5`。 migration: https://cardene777.github.io/kiwa/migrations/v1.53-to-v1.54
 
 v1.55+ で Mobile v0.6 実 child_process.spawn 実行 (stub → 実 CLI spawn 実行)、 systematic root cause pattern SSOT 29 度目適用。
 

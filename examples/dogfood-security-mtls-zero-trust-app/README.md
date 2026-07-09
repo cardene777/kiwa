@@ -1,6 +1,6 @@
 # dogfood-security-mtls-zero-trust-app (v1.39-2)
 
-An Istio + OPA style mutual-TLS + Zero-trust access broker that drives mTLS (handshake + SPKI certificate pinning + OCSP stapling + Certificate Transparency log check) + Zero-trust (device posture + risk scoring + Just-in-Time access + micro-segmentation) + broker (fused mtls + zero-trust decision) across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa/security` v0.2 mtls + zero-trust semantics) and real (Istio + OPA broker driver when `MTLS_STACK_READY=1` + `KIWA_MTLS_CA_PATH` + `KIWA_ISTIO_URL` + `KIWA_OPA_URL` are set) implementations satisfy the same 15-op contract so the fidelity harness can diff them side by side.
+An Istio + OPA style mutual-TLS + Zero-trust access broker that drives mTLS (handshake + SPKI certificate pinning + OCSP stapling + Certificate Transparency log check) + Zero-trust (device posture + risk scoring + Just-in-Time access + micro-segmentation) + broker (fused mtls + zero-trust decision) across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa-lab/security` v0.2 mtls + zero-trust semantics) and real (Istio + OPA broker driver when `MTLS_STACK_READY=1` + `KIWA_MTLS_CA_PATH` + `KIWA_ISTIO_URL` + `KIWA_OPA_URL` are set) implementations satisfy the same 15-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -49,4 +49,4 @@ The real adapter defers the Istio + OPA broker driver wiring to a follow-up mile
 
 ## Fidelity report
 
-The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa/quality-metrics` picks up for the 13-axis release gate.
+The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa-lab/quality-metrics` picks up for the 13-axis release gate.

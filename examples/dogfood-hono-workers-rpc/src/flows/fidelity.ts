@@ -10,18 +10,18 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { HonoAdapter, TraceEvent } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares a Hono / Workers run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into the `@kiwa/quality-metrics`
+ * (missing ops, unmatched behaviour) into the `@kiwa-lab/quality-metrics`
  * 7-axis release gate, and emits a JSON + markdown report so the release
  * process can consume it.
  *
  * The dogfood app is the source of truth for whether the kiwa
- * `@kiwa/hono` mock tracks real Cloudflare Workers + Hono closely
+ * `@kiwa-lab/hono` mock tracks real Cloudflare Workers + Hono closely
  * enough to be trusted in unit tests — this harness is where that trust
  * is measured.
  *

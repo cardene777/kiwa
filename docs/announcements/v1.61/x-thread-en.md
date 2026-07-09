@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.61 is out — Desktop deepening V. **@kiwa/desktop v0.6** adds real child_process.spawn execution, spawn-executor + 8 CLI per-command env allowlist + timeout 60s + buffer cap 10MB + shell:false + detached:false + SIGKILL + DI path + KIWA_DESKTOP_SPAWN=dry-run for v0.5 shape restoration. Inherits v1.55-v1.60 4-PR rhythm (**8 milestones consecutive = 32 PRs same rhythm**), **systematic pattern 36th application**, **depth-6 pattern new = kiwa milestone all-time first depth-6 record reached** + **depth-5 pattern 2nd case confirmed**.
+kiwa v1.61 is out — Desktop deepening V. **@kiwa-lab/desktop v0.6** adds real child_process.spawn execution, spawn-executor + 8 CLI per-command env allowlist + timeout 60s + buffer cap 10MB + shell:false + detached:false + SIGKILL + DI path + KIWA_DESKTOP_SPAWN=dry-run for v0.5 shape restoration. Inherits v1.55-v1.60 4-PR rhythm (**8 milestones consecutive = 32 PRs same rhythm**), **systematic pattern 36th application**, **depth-6 pattern new = kiwa milestone all-time first depth-6 record reached** + **depth-5 pattern 2nd case confirmed**.
 
 ## Tweet 2 — spawn-executor + safety layer 4 tiers
 
@@ -14,7 +14,7 @@ dogfood-desktop-v06-spawn-app new, 3 pattern workflow (dry-run + DI + env saniti
 
 ## Tweet 4 — install + Mobile v1.55 rhythm fully reproduced + v1.62 roadmap
 
-`pnpm add -D @kiwa/desktop@^0.6`. Migration: https://cardene777.github.io/kiwa/migrations/v1.60-to-v1.61
+`pnpm add -D @kiwa-lab/desktop@^0.6`. Migration: https://cardene777.github.io/kiwa/migrations/v1.60-to-v1.61
 
 **Mobile v1.50-v1.55 (base → advanced II → advanced III → adapter → spawn stub → real spawn) 6-milestone rhythm fully reproduced in Desktop pair (v1.56-v1.61)**, depth-6 reached (**kiwa milestone all-time first**) + depth-5 pattern 2nd case confirmed (2-case stabilization reached). v1.62+ will replace v0.4 real adapter with actual OS API calls (electron-updater / SCStream / NSPasteboard). Backward compat absolutely preserved — v0.1-v0.5 fully retained.
 

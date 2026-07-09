@@ -5,18 +5,18 @@
 ### Patch Changes
 
 - Updated dependencies [9f92567]
-  - @kiwa/nextjs@1.1.0
+  - @kiwa-lab/nextjs@1.1.0
 
 ## 0.0.2
 
 ### Patch Changes
 
 - Updated dependencies [5c3ad4b]
-  - @kiwa/nextjs@1.0.5
+  - @kiwa-lab/nextjs@1.0.5
 
 ## 0.0.1
 
 ### Patch Changes
 
 - Updated dependencies [9b35a2a]
-  - @kiwa/nextjs@1.0.3
+  - @kiwa-lab/nextjs@1.0.3

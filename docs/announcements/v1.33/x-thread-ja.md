@@ -4,7 +4,7 @@
 
 kiwa v1.33 リリース — Payment 深化 II が land。
 
-@kiwa/payment v0.3 → v0.4 minor bump。 3 provider (Stripe / Paddle / Lemon Squeezy) 上に advanced billing II semantics 8 axis を追加 (orchestration + revenue recovery + refund advanced + dispute + webhook idempotency advanced + tax localization + subscription state machine + payment method vault)。
+@kiwa-lab/payment v0.3 → v0.4 minor bump。 3 provider (Stripe / Paddle / Lemon Squeezy) 上に advanced billing II semantics 8 axis を追加 (orchestration + revenue recovery + refund advanced + dispute + webhook idempotency advanced + tax localization + subscription state machine + payment method vault)。
 
 real driver env-gate (KIWA_MODE=real) で opt-in production fidelity 走査。 dogfood 3 app v2 / 新規 (stripe-marketplace-app v2 + paddle-subscription-app v2 + lemonsqueezy-license-app 新規) 全 7 軸 release gate PASS。
 
@@ -45,6 +45,6 @@ payment-v1.23 / edge / perf-harness / orm-v1.26 / quality-metrics / realtime / r
 
 すべての tutorial code snippet が docs-tutorial-v1.XX.test.ts で自動検証されている。
 
-`pnpm add -D @kiwa/payment` で v0.4.0 が入る。 breaking change なし。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.32-to-v1.33
+`pnpm add -D @kiwa-lab/payment` で v0.4.0 が入る。 breaking change なし。 migration guide は https://cardene777.github.io/kiwa/migrations/v1.32-to-v1.33
 
 次は v2.0。 Multi-version Vitest matrix + desktop/mobile adapter + coverage 100 % milestone + cache depth II (Dragonfly + KeyDB failover + Redis cluster resharding) が有力候補。 feedback 歓迎。

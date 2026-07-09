@@ -61,7 +61,7 @@ async function main(): Promise<void> {
   );
 
   const report = runFidelityHarness({
-    provider: '@kiwa/dapp/reorg-dogfood',
+    provider: '@kiwa-lab/dapp/reorg-dogfood',
     version: '0.1.0',
     mockTraces: mock.traces(),
     realTraces: real.traces(),

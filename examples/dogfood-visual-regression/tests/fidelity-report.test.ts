@@ -66,7 +66,7 @@ describe('dogfood-visual-regression — fidelity harness contract', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/component/visual-regression',
+      provider: '@kiwa-lab/component/visual-regression',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -103,7 +103,7 @@ describe('dogfood-visual-regression — fidelity harness contract', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/component/visual-regression',
+      provider: '@kiwa-lab/component/visual-regression',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -135,7 +135,7 @@ describe('dogfood-visual-regression — fidelity harness contract', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/component/visual-regression',
+      provider: '@kiwa-lab/component/visual-regression',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

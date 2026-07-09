@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.36-4 — an OpenSearch-OSS-anchored relevance-tuning + synonym-advanced + rolling-reindex harness driven behind a provider-neutral 17-op contract backed by @kiwa/search v0.3 semantics (relevance + synonym-advanced + index-management axes) + real-driver env-gate against an OpenSearch OSS cluster (testcontainers-friendly). Two adapter implementations satisfy the same contract: makeMockAdapter walks the search v0.3 relevance + synonym + index-mgmt state machines deterministically without any backend; makeRealAdapter models the wire surface for the OpenSearch OSS HTTP API behind the KIWA_MODE=real env-gate (KIWA_OPENSEARCH_URL + OPENSEARCH_KEY) and otherwise reports KIWA_SEARCH_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 3 fixture sets (articles / multilingual / cluster) x BM25 + TF-IDF + custom ranking + A/B variant + multi-language expansion + phonetic + stemmer + typo + shard allocate + replica promote + rolling reindex + zero-downtime swap so behavioural drift between mock semantics and the real OpenSearch OSS wire surface stays observable and feeds the @kiwa/quality-metrics 13-axis release gate.",
+  "description": "Dogfood app v1.36-4 — an OpenSearch-OSS-anchored relevance-tuning + synonym-advanced + rolling-reindex harness driven behind a provider-neutral 17-op contract backed by @kiwa-lab/search v0.3 semantics (relevance + synonym-advanced + index-management axes) + real-driver env-gate against an OpenSearch OSS cluster (testcontainers-friendly). Two adapter implementations satisfy the same contract: makeMockAdapter walks the search v0.3 relevance + synonym + index-mgmt state machines deterministically without any backend; makeRealAdapter models the wire surface for the OpenSearch OSS HTTP API behind the KIWA_MODE=real env-gate (KIWA_OPENSEARCH_URL + OPENSEARCH_KEY) and otherwise reports KIWA_SEARCH_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 3 fixture sets (articles / multilingual / cluster) x BM25 + TF-IDF + custom ranking + A/B variant + multi-language expansion + phonetic + stemmer + typo + shard allocate + replica promote + rolling reindex + zero-downtime swap so behavioural drift between mock semantics and the real OpenSearch OSS wire surface stays observable and feeds the @kiwa-lab/quality-metrics 13-axis release gate.",
   "scripts": {
-    "test": "pnpm -F @kiwa/search -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/search -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/search": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/search": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

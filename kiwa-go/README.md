@@ -1,6 +1,6 @@
 # kiwa-test-go — Go `testing.T` adapter
 
-Port of [kiwa](https://github.com/cardene777/kiwa) `@kiwa/core` to the Go
+Port of [kiwa](https://github.com/cardene777/kiwa) `@kiwa-lab/core` to the Go
 ecosystem. Provides a deterministic fixture (`SetupUnitEnv`) with mode
 selection (`Mock` / `Live`), automatic cleanup via `t.Cleanup`, and
 diff-aware assertion helpers (`AssertEqual` / `AssertClose`).
@@ -441,7 +441,7 @@ same helpers can be reused in benchmarks and fuzz tests without rewrite.
 - PoC (unit + integration) — [`examples/go-testing-poc/`](../examples/go-testing-poc)
 - PoC (Gin Counter API) — [`examples/go-gin-poc/`](../examples/go-gin-poc)
 - PoC (Echo Counter API) — [`examples/go-echo-poc/`](../examples/go-echo-poc)
-- TypeScript core — [`@kiwa/core`](../packages/core)
+- TypeScript core — [`@kiwa-lab/core`](../packages/core)
 - Rust sibling — [`kiwa-test-rs`](../kiwa-rs)
 - Python sibling — [`kiwa-test-py`](../kiwa-py)
 

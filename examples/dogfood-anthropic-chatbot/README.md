@@ -1,10 +1,10 @@
 # dogfood-anthropic-chatbot
 
-Dogfood app 1 (v1.12-2) — an Anthropic Messages API chatbot that exercises **streaming + system prompt + tool_use + cost tracking** across a provider-neutral interface so `@kiwa/ai-llm`'s Anthropic mock can be measured against a real Anthropic call. The resulting fidelity report feeds `@kiwa/quality-metrics` 11-axis release gate.
+Dogfood app 1 (v1.12-2) — an Anthropic Messages API chatbot that exercises **streaming + system prompt + tool_use + cost tracking** across a provider-neutral interface so `@kiwa-lab/ai-llm`'s Anthropic mock can be measured against a real Anthropic call. The resulting fidelity report feeds `@kiwa-lab/quality-metrics` 11-axis release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/ai-llm` `createAnthropicMock`, deterministic response bank)
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-lab/ai-llm` `createAnthropicMock`, deterministic response bank)
 - `KIWA_MODE=real` — driven by `makeRealAdapter()` that calls the real Anthropic Messages API via `fetch` when `ANTHROPIC_API_KEY` is set. When the env var is missing, the adapter reports each method as `ANTHROPIC_ENV_MISSING` so the fidelity harness records the gap without failing the test suite.
 
 Real-mode envs.
@@ -23,7 +23,7 @@ src/
     real.ts            -- Anthropic HTTP adapter with graceful skip when env missing
   flows/
     chatbot-flows.ts   -- greet / stream story / system prompt / 2-tool loop
-    fidelity.ts        -- trace-diffing harness that feeds @kiwa/quality-metrics
+    fidelity.ts        -- trace-diffing harness that feeds @kiwa-lab/quality-metrics
 tests/
   e2e-mock-mode.test.ts        -- 6 mock-mode e2e tests
   fidelity-report.test.ts      -- 3 harness tests
@@ -42,7 +42,7 @@ The `quality-report/` directory is git-ignored — promote snapshots to `docs/qu
 
 ## Release gate (11 axes)
 
-Because the provider string is `@kiwa/ai-llm/anthropic-chatbot`, `evaluateReleaseGate` runs the AI-LLM branch (11 axes = common 7 + AI-LLM 4).
+Because the provider string is `@kiwa-lab/ai-llm/anthropic-chatbot`, `evaluateReleaseGate` runs the AI-LLM branch (11 axes = common 7 + AI-LLM 4).
 
 - cost per request ≤ $0.10
 - p95 latency ≤ 3000 ms
@@ -53,6 +53,6 @@ The default thresholds are provider-agnostic; overrides live in `packages/qualit
 
 ## Related
 
-- v1.12-1 `@kiwa/ai-llm` v0.1 (`packages/ai-llm/`)
-- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
+- v1.12-1 `@kiwa-lab/ai-llm` v0.1 (`packages/ai-llm/`)
+- v1.11-1 `@kiwa-lab/quality-metrics` (`packages/quality-metrics/`)
 - v1.12 milestone parent [#694](https://github.com/cardene777/kiwa/issues/694), this sub [#696](https://github.com/cardene777/kiwa/issues/696)

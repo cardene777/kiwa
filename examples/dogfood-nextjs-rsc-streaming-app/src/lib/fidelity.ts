@@ -1,12 +1,12 @@
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into `@kiwa/quality-metrics`
+ * (missing ops, unmatched behaviour) into `@kiwa-lab/quality-metrics`
  * 13-axis release gate, and emits a JSON + markdown report so the release
  * process can consume it.
  *
  * The dogfood app is the source of truth for whether the v1.34-1
- * `@kiwa/component` v0.3 + `@kiwa/nextjs` v1.2 helpers track the
+ * `@kiwa-lab/component` v0.3 + `@kiwa-lab/nextjs` v1.2 helpers track the
  * real Next.js 15.4 + React 19.1 App Router behaviour closely enough to be
  * trusted as a mock in unit tests. The report tracks the same 12 ops the
  * adapter contract exposes so any divergence surfaces the op that broke.
@@ -33,7 +33,7 @@ import {
   type A11yTier,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { RscStreamingAdapter, TraceEvent } from '../adapters/interface.js';
 
 export interface FidelityRunInput {

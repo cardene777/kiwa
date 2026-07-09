@@ -1,4 +1,4 @@
-import { appendChild, createNode } from '@kiwa/component';
+import { appendChild, createNode } from '@kiwa-lab/component';
 import {
   buildCheckbox,
   buildErrorRegion,

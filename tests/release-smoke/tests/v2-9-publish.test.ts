@@ -27,7 +27,7 @@ describe('v2.9-4 publish', () => {
       existsSync(resolve(REPO_ROOT, 'docs/announcements/v2.9/gh-discussions-announcement.md')),
     ).toBe(true);
   });
-  it('@kiwa/auth v2.2.0', () => {
+  it('@kiwa-lab/auth v2.2.0', () => {
     expect(readJson<{ version: string }>('packages/auth/package.json').version).toBe('2.2.0');
   });
   it('session-lifecycle-orchestrator source', () => {
@@ -36,9 +36,9 @@ describe('v2.9-4 publish', () => {
     expect(src).toContain("'init'");
     expect(src).toContain("'refreshing'");
   });
-  it('release filter @kiwa/auth', () => {
+  it('release filter @kiwa-lab/auth', () => {
     expect(readJson<{ scripts: { release: string } }>('package.json').scripts.release).toContain(
-      '-F @kiwa/auth',
+      '-F @kiwa-lab/auth',
     );
   });
   it('dogfood 5 pattern', () => {

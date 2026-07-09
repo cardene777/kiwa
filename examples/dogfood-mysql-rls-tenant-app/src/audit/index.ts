@@ -11,7 +11,7 @@
  * a deterministic, single-purpose hash so tests can assert exact values.
  */
 
-import type { RlsAuditEntry, RlsSession } from '@kiwa/orm';
+import type { RlsAuditEntry, RlsSession } from '@kiwa-lab/orm';
 
 export interface AuditRecord {
   readonly seq: number;
@@ -122,7 +122,7 @@ export function createAuditLog(): AuditLog {
 /**
  * Drain an RLS session's audit log into the tamper-evident chain. Called
  * once per gate op so the audit trail always mirrors the underlying
- * neutral RLS events emitted by `@kiwa/orm`'s RLS semantics.
+ * neutral RLS events emitted by `@kiwa-lab/orm`'s RLS semantics.
  */
 export function drainSessionAudit(session: RlsSession, log: AuditLog): number {
   let drained = 0;

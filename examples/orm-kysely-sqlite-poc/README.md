@@ -1,6 +1,6 @@
 # orm-kysely-sqlite-poc — kiwa ORM query test PoC (Kysely + in-memory SQLite)
 
-`@kiwa/orm` v0.4 を **Kysely query builder + in-memory SQLite (better-sqlite3)** で使う PoC。 既存 Drizzle / Prisma 経路と同じ `setupOrmEnv` API で Kysely 経路を呼出す reference。
+`@kiwa-lab/orm` v0.4 を **Kysely query builder + in-memory SQLite (better-sqlite3)** で使う PoC。 既存 Drizzle / Prisma 経路と同じ `setupOrmEnv` API で Kysely 経路を呼出す reference。
 
 ## 構造
 
@@ -59,5 +59,5 @@ pnpm -F examples-orm-kysely-sqlite-poc test
 - 上位 Issue ... CAR-294 (#527-4 Kysely adapter)
 - 親 Issue ... CAR-291 (#527)
 - 親 PR ... 本 PR (`feature/527-4-orm-kysely`)
-- runtime fixture ... [`@kiwa/orm`](../../packages/orm/README.md) v0.4
+- runtime fixture ... [`@kiwa-lab/orm`](../../packages/orm/README.md) v0.4
 - 関連 PoC ... [`orm-drizzle-sqlite-poc`](../orm-drizzle-sqlite-poc/README.md) (Drizzle mock) / [`orm-prisma-sqlite-poc`](../orm-prisma-sqlite-poc/README.md) (Prisma) / [`orm-drizzle-postgres-poc`](../orm-drizzle-postgres-poc/README.md) (Drizzle PG) / [`orm-drizzle-mysql-poc`](../orm-drizzle-mysql-poc/README.md) (Drizzle MySQL)

@@ -1,9 +1,9 @@
-import type { ComponentRender } from '@kiwa/component';
+import type { ComponentRender } from '@kiwa-lab/component';
 
 /**
  * Provider-neutral form contract — every form renders through a `ComponentRender`
  * function (framework agnostic `(args) => MockNode`) so the mock adapter
- * (`@kiwa/component` `createPlaywrightCTMock`) and the real adapter
+ * (`@kiwa-lab/component` `createPlaywrightCTMock`) and the real adapter
  * (`@playwright/experimental-ct-react` when `PW_CT_ENDPOINT` is set) drive the
  * same 4 assertions — mount / validation error / submit success / a11y violation
  * count = 0.

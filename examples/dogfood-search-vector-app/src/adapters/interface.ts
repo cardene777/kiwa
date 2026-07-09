@@ -4,7 +4,7 @@
  *
  * The dogfood app drives a Meilisearch + Typesense hybrid-search harness
  * through this contract only. Two implementations exist —
- *  - {@link makeMockAdapter} — walks the `@kiwa/search` v0.3
+ *  - {@link makeMockAdapter} — walks the `@kiwa-lab/search` v0.3
  *    `semantics/vector` + `semantics/semantic` state machines
  *    deterministically without any backend. Every op emits the neutral
  *    event onto the trace so the fidelity harness can diff ordering
@@ -26,8 +26,8 @@
  * real Meilisearch + Typesense wire surface.
  */
 
-import type { semantics } from '@kiwa/search';
-import type { SearchBackend } from '@kiwa/search';
+import type { semantics } from '@kiwa-lab/search';
+import type { SearchBackend } from '@kiwa-lab/search';
 
 /** Re-export from search semantics namespace. */
 export type SearchTarget = semantics.SearchTarget;

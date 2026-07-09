@@ -7,12 +7,12 @@
     "dev": "next dev -p 3036",
     "build": "next build",
     "start": "next start -p 3036",
-    "test": "pnpm -F @kiwa/dapp build && playwright test",
+    "test": "pnpm -F @kiwa-lab/dapp build && playwright test",
     "typecheck": "tsc --noEmit",
     "forge:build": "forge build"
   },
   "dependencies": {
-    "@kiwa/dapp": "workspace:*",
+    "@kiwa-lab/dapp": "workspace:*",
     "@rainbow-me/rainbowkit": "^2.2.0",
     "@tanstack/react-query": "^5.59.0",
     "next": "^14.2.15",

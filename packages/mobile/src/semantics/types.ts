@@ -1,5 +1,5 @@
 /**
- * @kiwa/mobile — Mobile test harness (v0.1、 new-base pair 第 13)。
+ * @kiwa-lab/mobile — Mobile test harness (v0.1、 new-base pair 第 13)。
  *
  * 3 axis (React Native + Expo + Metro) を target-neutral state machine で扱う。
  * target = ios + android + web (Expo Web) の 3 platform、 provider dialect も

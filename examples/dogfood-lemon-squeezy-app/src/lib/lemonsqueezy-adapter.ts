@@ -1,5 +1,5 @@
 /**
- * 8-axis routing wrapper over `@kiwa/payment`'s Lemon Squeezy adapter
+ * 8-axis routing wrapper over `@kiwa-lab/payment`'s Lemon Squeezy adapter
  * surface.
  *
  * This module is the SSOT for how the dogfood app converts a semantics-layer
@@ -66,7 +66,7 @@ import {
   type PaymentAdapter,
   type PaymentWebhookEvent,
   type Subscription as SemanticSubscription,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import {
   createDogfoodStore,
   type DogfoodStore,

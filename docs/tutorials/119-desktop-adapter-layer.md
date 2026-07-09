@@ -2,13 +2,13 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/desktop` v0.4 (adapter interface + fidelity harness、 v1.59 で kiwa 縦深化 pair 第 14 の第 4 段、 **depth-4 record 5 例目**、 **systematic pattern 34 度目適用**、 **Mobile v1.53 rhythm 再現**、 37 milestone streak)、 12 axis × mock/real = **24 adapter pair** + 3 target × 12 axis × 2 mode = **72 combination** + 3 target × 12 axis = **36 fidelity pair** の workflow を deterministic に扱う pattern。
+A vitest suite wired to `@kiwa-lab/desktop` v0.4 (adapter interface + fidelity harness、 v1.59 で kiwa 縦深化 pair 第 14 の第 4 段、 **depth-4 record 5 例目**、 **systematic pattern 34 度目適用**、 **Mobile v1.53 rhythm 再現**、 37 milestone streak)、 12 axis × mock/real = **24 adapter pair** + 3 target × 12 axis × 2 mode = **72 combination** + 3 target × 12 axis = **36 fidelity pair** の workflow を deterministic に扱う pattern。
 
 ## Prerequisites
 
 - Node.js ≥ 20
 - `pnpm`
-- `@kiwa/desktop` v0.4 (`pnpm add -D @kiwa/desktop@^0.4`)
+- `@kiwa-lab/desktop` v0.4 (`pnpm add -D @kiwa-lab/desktop@^0.4`)
 
 ## Step-by-step build
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/desktop` v0.4 (adapter interface + fidelity harne
 ```bash
 mkdir kiwa-desktop-v04 && cd kiwa-desktop-v04
 pnpm init
-pnpm add -D @kiwa/desktop@^0.4 vitest typescript @types/node
+pnpm add -D @kiwa-lab/desktop@^0.4 vitest typescript @types/node
 ```
 
 ### 2. Adapter interface (AdapterInvocation → AdapterResult)
@@ -28,7 +28,7 @@ import {
   MOCK_ADAPTERS,
   REAL_ADAPTERS,
   type AdapterInvocation,
-} from '@kiwa/desktop';
+} from '@kiwa-lab/desktop';
 
 describe('Adapter interface — 12 axis × mock/real', () => {
   it('electron mock adapter completes on macos', async () => {
@@ -69,7 +69,7 @@ describe('Adapter interface — 12 axis × mock/real', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runFidelityCheck, summarizeFidelity } from '@kiwa/desktop';
+import { runFidelityCheck, summarizeFidelity } from '@kiwa-lab/desktop';
 
 describe('Fidelity harness — 36 pair matched', () => {
   it('runFidelityCheck 全 36 pair matched', async () => {

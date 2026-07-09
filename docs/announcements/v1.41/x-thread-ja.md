@@ -4,7 +4,7 @@
 
 kiwa v1.41 リリース — Payment 深化 III が land.
 
-@kiwa/payment v0.4.0 → v0.5.0 minor bump. 3 provider (Stripe + Paddle + Lemon Squeezy) 上に advanced III payment production semantics 8 axis を追加 (v1.33 v0.4 advanced II 24 cell + v0.3 base 27 cell と合わせて 75 combination coverage / 25 axis × 3 provider grid).
+@kiwa-lab/payment v0.4.0 → v0.5.0 minor bump. 3 provider (Stripe + Paddle + Lemon Squeezy) 上に advanced III payment production semantics 8 axis を追加 (v1.33 v0.4 advanced II 24 cell + v0.3 base 27 cell と合わせて 75 combination coverage / 25 axis × 3 provider grid).
 
 real driver env-gate (KIWA_MODE=real + provider _URL + Stripe Treasury / Unit / Column / Klarna / Affirm / Afterpay / Coinbase Commerce / BitPay / Wise / Airwallex backend URL) で opt-in production fidelity 走査. dogfood 3 app 新規 (payment-embedded-finance-app + payment-bnpl-installment-app + payment-crypto-fx-app) 全 7 軸 release gate PASS.
 
@@ -20,4 +20,4 @@ Payment v1.14 → v1.19 → v1.33 → v1.41 の **4 段拡張 pattern** (v1.40 A
 
 19 milestone 連続 snippet validation streak (v1.23-v1.41) 達成.
 
-`pnpm add -D @kiwa/payment` で v0.5.0 が入る. breaking change なし. migration guide は https://cardene777.github.io/kiwa/migrations/v1.40-to-v1.41
+`pnpm add -D @kiwa-lab/payment` で v0.5.0 が入る. breaking change なし. migration guide は https://cardene777.github.io/kiwa/migrations/v1.40-to-v1.41

@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "pnpm -F @kiwa/orm -F @kiwa/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/orm -F @kiwa-lab/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/orm": "workspace:*",
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/orm": "workspace:*",
     "@testcontainers/mysql": "^10.16.0",
     "drizzle-orm": "^0.36.0",
     "mysql2": "^3.11.0",

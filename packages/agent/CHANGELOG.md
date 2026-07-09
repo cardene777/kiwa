@@ -1,10 +1,10 @@
-# @kiwa/agent
+# @kiwa-lab/agent
 
 ## 0.2.0
 
 ### Minor Changes
 
-- c119996: v1.15-3: @kiwa/agent v0.1 — agent orchestration mock (LangGraph 型 state machine + OpenAI Assistants v2)
+- c119996: v1.15-3: @kiwa-lab/agent v0.1 — agent orchestration mock (LangGraph 型 state machine + OpenAI Assistants v2)
 
   - `packages/agent/` を新設 (v0.1.0)。 agent orchestration の 2 系統 (LangGraph 型 state machine + OpenAI Assistants v2) を 1 統一 API で扱う。 SSOT 型 (`AgentState` / `NodeHandler` / `GraphEdge` / `GraphStep` / `Assistant` / `Thread` / `ThreadMessage` / `Run` / `RunStatus` / `ToolCall` / `ToolOutput` / `AssistantHandler`) を整理、 real LangGraph + Assistants v2 の shape に整合。
   - `StateMachine` (低水準) + `StateGraph` (LangGraph 語彙 wrapper) の 2 layer 責務分離。 `addNode` + `addEdge` + `compile` + `invoke` / `stream` の 5 op を提供、 START / END sentinel は real LangGraph に対応。 compile 時 6 validation (START edge の存在 / START edge の to / edge endpoints / isolated node / START edge 1 本上限) を fail-fast、 runtime は `maxSteps` guard (default 100) で runaway loop を遮断、 `MaxStepsExceededError` を throw。

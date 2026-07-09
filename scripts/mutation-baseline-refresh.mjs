@@ -3,7 +3,7 @@
  * Refresh `.mutation-baseline/<pkg>.json` snapshots from Stryker JSON reports.
  *
  * Reads each package's `mutation-report/mutation.json` (produced by
- * `pnpm -F @kiwa/<pkg> run test:mutation`) and rewrites the matching
+ * `pnpm -F @kiwa-lab/<pkg> run test:mutation`) and rewrites the matching
  * `.mutation-baseline/<pkg>.json` with the current kill-rate, mutant counts,
  * threshold snapshot, and the survivor mutant list.
  *
@@ -39,41 +39,41 @@ const REPO_ROOT = process.env.KIWA_BASELINE_ROOT
  */
 const PACKAGES = {
   // v1.27-2 scope (kept for `--all` refresh + backward compat).
-  '@kiwa/core': 'packages/core',
-  '@kiwa/dapp': 'packages/dapp',
-  '@kiwa/api': 'packages/api',
-  '@kiwa/ui': 'packages/ui',
-  '@kiwa/data': 'packages/data',
-  '@kiwa/cli-test': 'packages/cli-test',
-  '@kiwa/observability': 'packages/observability',
-  '@kiwa/e2e': 'packages/e2e',
-  '@kiwa/cli': 'packages/cli',
-  '@kiwa/nextjs': 'packages/nextjs',
-  '@kiwa/nuxt': 'packages/nuxt',
-  '@kiwa/sveltekit': 'packages/sveltekit',
-  '@kiwa/remix': 'packages/remix',
-  '@kiwa/astro': 'packages/astro',
-  '@kiwa/solidstart': 'packages/solidstart',
-  '@kiwa/qwikcity': 'packages/qwikcity',
-  '@kiwa/edge': 'packages/edge',
-  '@kiwa/solidjs': 'packages/solidjs',
-  '@kiwa/fresh': 'packages/fresh',
-  '@kiwa/hono': 'packages/hono',
+  '@kiwa-lab/core': 'packages/core',
+  '@kiwa-lab/dapp': 'packages/dapp',
+  '@kiwa-lab/api': 'packages/api',
+  '@kiwa-lab/ui': 'packages/ui',
+  '@kiwa-lab/data': 'packages/data',
+  '@kiwa-lab/cli-test': 'packages/cli-test',
+  '@kiwa-lab/observability': 'packages/observability',
+  '@kiwa-lab/e2e': 'packages/e2e',
+  '@kiwa-lab/cli': 'packages/cli',
+  '@kiwa-lab/nextjs': 'packages/nextjs',
+  '@kiwa-lab/nuxt': 'packages/nuxt',
+  '@kiwa-lab/sveltekit': 'packages/sveltekit',
+  '@kiwa-lab/remix': 'packages/remix',
+  '@kiwa-lab/astro': 'packages/astro',
+  '@kiwa-lab/solidstart': 'packages/solidstart',
+  '@kiwa-lab/qwikcity': 'packages/qwikcity',
+  '@kiwa-lab/edge': 'packages/edge',
+  '@kiwa-lab/solidjs': 'packages/solidjs',
+  '@kiwa-lab/fresh': 'packages/fresh',
+  '@kiwa-lab/hono': 'packages/hono',
   // v1.27-3 scope: test-type layer (3 packages).
-  '@kiwa/a11y': 'packages/a11y',
-  '@kiwa/visual': 'packages/visual',
-  '@kiwa/component': 'packages/component',
+  '@kiwa-lab/a11y': 'packages/a11y',
+  '@kiwa-lab/visual': 'packages/visual',
+  '@kiwa-lab/component': 'packages/component',
   // v1.27-3 scope: SaaS layer (10 packages).
-  '@kiwa/auth': 'packages/auth',
-  '@kiwa/queue': 'packages/queue',
-  '@kiwa/cache': 'packages/cache',
-  '@kiwa/orm': 'packages/orm',
-  '@kiwa/payment': 'packages/payment',
-  '@kiwa/streaming': 'packages/streaming',
-  '@kiwa/search': 'packages/search',
-  '@kiwa/mcp': 'packages/mcp',
-  '@kiwa/agent': 'packages/agent',
-  '@kiwa/realtime': 'packages/realtime',
+  '@kiwa-lab/auth': 'packages/auth',
+  '@kiwa-lab/queue': 'packages/queue',
+  '@kiwa-lab/cache': 'packages/cache',
+  '@kiwa-lab/orm': 'packages/orm',
+  '@kiwa-lab/payment': 'packages/payment',
+  '@kiwa-lab/streaming': 'packages/streaming',
+  '@kiwa-lab/search': 'packages/search',
+  '@kiwa-lab/mcp': 'packages/mcp',
+  '@kiwa-lab/agent': 'packages/agent',
+  '@kiwa-lab/realtime': 'packages/realtime',
 };
 
 /**
@@ -219,7 +219,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const argv = process.argv.slice(2);
   const requestedPkgs = argv.length === 0
     ? Object.keys(PACKAGES)
-    : argv.map((raw) => (raw.startsWith('@kiwa/') ? raw : `@kiwa/${raw}`));
+    : argv.map((raw) => (raw.startsWith('@kiwa-lab/') ? raw : `@kiwa-lab/${raw}`));
 
   for (const requested of requestedPkgs) {
     if (!(requested in PACKAGES)) {

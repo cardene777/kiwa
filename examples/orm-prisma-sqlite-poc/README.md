@@ -1,6 +1,6 @@
 # orm-prisma-sqlite-poc — kiwa ORM query test PoC (Prisma + tempdir SQLite)
 
-`@kiwa/orm` v0.3 を **Prisma + SQLite (file-based in isolated tempdir)** で使う PoC。 既存 Drizzle 経路 (SQLite mock / Postgres / MySQL live) と同じ `setupOrmEnv` API で Prisma adapter を呼出す reference。
+`@kiwa-lab/orm` v0.3 を **Prisma + SQLite (file-based in isolated tempdir)** で使う PoC。 既存 Drizzle 経路 (SQLite mock / Postgres / MySQL live) と同じ `setupOrmEnv` API で Prisma adapter を呼出す reference。
 
 ## 構造
 
@@ -20,7 +20,7 @@ orm-prisma-sqlite-poc/
 ```bash
 pnpm install
 pnpm -F examples-orm-prisma-sqlite-poc test
-# → 1) @kiwa/orm build  2) prisma generate  3) vitest run
+# → 1) @kiwa-lab/orm build  2) prisma generate  3) vitest run
 # → 8 test 全 pass、 数秒で完了 (file-based SQLite、 Docker 不要)
 ```
 
@@ -61,5 +61,5 @@ pnpm -F examples-orm-prisma-sqlite-poc test
 - 上位 Issue ... CAR-293 (#527-3 Prisma adapter)
 - 親 Issue ... CAR-291 (#527)
 - 親 PR ... 本 PR (`feature/527-3-orm-prisma-sqlite`)
-- runtime fixture ... [`@kiwa/orm`](../../packages/orm/README.md) v0.3
+- runtime fixture ... [`@kiwa-lab/orm`](../../packages/orm/README.md) v0.3
 - 関連 PoC ... [`orm-drizzle-sqlite-poc`](../orm-drizzle-sqlite-poc/README.md) (mock) / [`orm-drizzle-postgres-poc`](../orm-drizzle-postgres-poc/README.md) (live PG) / [`orm-drizzle-mysql-poc`](../orm-drizzle-mysql-poc/README.md) (live MySQL)

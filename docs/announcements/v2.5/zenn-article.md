@@ -25,14 +25,14 @@ published: false
 
 ## What's new
 
-- `@kiwa/streaming` v2.0 → v2.1
+- `@kiwa-lab/streaming` v2.0 → v2.1
 - 5 state (producing / consuming / rebalancing / dlq-active / stopped) + 8 event + 40 セル 遷移表
 - dogfood + tutorial + migration + concept
 
 ## Install
 
 ```bash
-pnpm add -D @kiwa/streaming@^2.1
+pnpm add -D @kiwa-lab/streaming@^2.1
 ```
 
 ## Migration guide

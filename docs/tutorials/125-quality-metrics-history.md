@@ -2,19 +2,19 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/quality-metrics` v0.5 (historical trend tracking + drift detection、 v1.65 で **depth-5 pattern 3 例目確定** = Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 で 3 例安定化到達、 **systematic pattern 40 度目適用**、 43 milestone streak)、 4 export (captureSnapshot + compareToBaseline + detectDrift + generateTrendReport) で release 品質 の 時系列 dimension を追加、 pass/fail 二値判定 の 手前で 「pass だが 前回より低下」 の regression signal を early warning 検知可能。
+A vitest suite wired to `@kiwa-lab/quality-metrics` v0.5 (historical trend tracking + drift detection、 v1.65 で **depth-5 pattern 3 例目確定** = Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 で 3 例安定化到達、 **systematic pattern 40 度目適用**、 43 milestone streak)、 4 export (captureSnapshot + compareToBaseline + detectDrift + generateTrendReport) で release 品質 の 時系列 dimension を追加、 pass/fail 二値判定 の 手前で 「pass だが 前回より低下」 の regression signal を early warning 検知可能。
 
 ## Prerequisites
 
 - Node.js ≥ 20 + pnpm
-- `@kiwa/quality-metrics` v0.5 (`pnpm add -D @kiwa/quality-metrics@^0.5`)
+- `@kiwa-lab/quality-metrics` v0.5 (`pnpm add -D @kiwa-lab/quality-metrics@^0.5`)
 
 ## Step-by-step build
 
 ### 1. Snapshot capture
 
 ```ts
-import { captureSnapshot } from '@kiwa/quality-metrics';
+import { captureSnapshot } from '@kiwa-lab/quality-metrics';
 
 const snapshot = captureSnapshot({
   report: myReport, // QualityReport (既存 v0.4 shape そのまま)
@@ -26,7 +26,7 @@ const snapshot = captureSnapshot({
 ### 2. Baseline comparison
 
 ```ts
-import { compareToBaseline } from '@kiwa/quality-metrics';
+import { compareToBaseline } from '@kiwa-lab/quality-metrics';
 
 const comparison = compareToBaseline({
   current: currentSnapshot,
@@ -38,7 +38,7 @@ const comparison = compareToBaseline({
 ### 3. Drift detection
 
 ```ts
-import { detectDrift } from '@kiwa/quality-metrics';
+import { detectDrift } from '@kiwa-lab/quality-metrics';
 
 const drift = detectDrift({
   comparison,
@@ -53,7 +53,7 @@ const drift = detectDrift({
 ### 4. Trend report (multi-snapshot)
 
 ```ts
-import { generateTrendReport } from '@kiwa/quality-metrics';
+import { generateTrendReport } from '@kiwa-lab/quality-metrics';
 
 const trend = generateTrendReport([snapshot1, snapshot2, snapshot3]);
 // trend.axisSummary = axis 別 first / last / delta / trend ('up' | 'down' | 'flat')

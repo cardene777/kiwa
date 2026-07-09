@@ -6,7 +6,7 @@ import {
   runE2EPrepareEnv,
   writePidEntry,
   type PidEntry,
-} from '@kiwa/dapp';
+} from '@kiwa-lab/dapp';
 import { getContractAddress, type Hex } from 'viem';
 
 const L1_PORT = 8554;

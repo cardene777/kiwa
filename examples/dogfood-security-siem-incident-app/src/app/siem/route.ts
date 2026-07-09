@@ -8,7 +8,7 @@
  *
  * The SIEM surface pairs the parent v1.39-1 `siem-audit` axis
  * (startSiemAuditSession + structureEvent + sealEvents + applyRetention
- * + correlate) with `@kiwa/security` v0.2 — every op has a
+ * + correlate) with `@kiwa-lab/security` v0.2 — every op has a
  * neutral event counterpart the fidelity harness can compare across
  * mock vs real.
  */

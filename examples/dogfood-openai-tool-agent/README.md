@@ -1,10 +1,10 @@
 # dogfood-openai-tool-agent
 
-Dogfood app 2 (v1.12-3) — an OpenAI Chat Completions tool-use agent that exercises **function calling + tool-use loop + multi-tool orchestration + parallel tool calls** across a provider-neutral interface so `@kiwa/ai-llm`'s OpenAI mock can be measured against the real Chat Completions endpoint. The resulting fidelity report feeds `@kiwa/quality-metrics` 11-axis release gate.
+Dogfood app 2 (v1.12-3) — an OpenAI Chat Completions tool-use agent that exercises **function calling + tool-use loop + multi-tool orchestration + parallel tool calls** across a provider-neutral interface so `@kiwa-lab/ai-llm`'s OpenAI mock can be measured against the real Chat Completions endpoint. The resulting fidelity report feeds `@kiwa-lab/quality-metrics` 11-axis release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/ai-llm` `createOpenAIMock`, per-turn response bank).
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-lab/ai-llm` `createOpenAIMock`, per-turn response bank).
 - `KIWA_MODE=real` — driven by `makeRealAdapter()` that calls `POST https://api.openai.com/v1/chat/completions` via `fetch` when `OPENAI_API_KEY` is set. Without the key each method reports `OPENAI_ENV_MISSING` so the fidelity harness records the gap without failing the suite.
 
 Real-mode envs.
@@ -26,7 +26,7 @@ src/
     real.ts         -- OpenAI HTTP adapter with graceful skip when env missing
   flows/
     agent-flows.ts  -- validate all schemas / ordered 3-tool loop / parallel weather flow
-    fidelity.ts     -- trace-diffing harness feeding @kiwa/quality-metrics
+    fidelity.ts     -- trace-diffing harness feeding @kiwa-lab/quality-metrics
 tests/
   e2e-mock-mode.test.ts        -- mock-mode end-to-end tests (8)
   tool-schema.test.ts          -- Task 3.1 schema validation (4)
@@ -52,7 +52,7 @@ OpenAI's function-calling loop has a subtle wrinkle vs Anthropic's — the follo
 
 ## Release gate (11 axes)
 
-Because the provider string is `@kiwa/ai-llm/openai-tool-agent`, `evaluateReleaseGate` runs the AI-LLM branch (11 axes = common 7 + AI-LLM 4).
+Because the provider string is `@kiwa-lab/ai-llm/openai-tool-agent`, `evaluateReleaseGate` runs the AI-LLM branch (11 axes = common 7 + AI-LLM 4).
 
 - cost per request ≤ $0.10
 - p95 latency ≤ 3000 ms
@@ -63,7 +63,7 @@ The default thresholds are provider-agnostic; overrides live in `packages/qualit
 
 ## Related
 
-- v1.12-1 `@kiwa/ai-llm` v0.1 (`packages/ai-llm/`)
+- v1.12-1 `@kiwa-lab/ai-llm` v0.1 (`packages/ai-llm/`)
 - v1.12-2 dogfood app 1 (`examples/dogfood-anthropic-chatbot/`)
-- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
+- v1.11-1 `@kiwa-lab/quality-metrics` (`packages/quality-metrics/`)
 - v1.12 milestone parent [#694](https://github.com/cardene777/kiwa/issues/694), this sub [#697](https://github.com/cardene777/kiwa/issues/697)

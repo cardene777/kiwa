@@ -1,4 +1,4 @@
-# Quality Report — @kiwa/ai-llm/dogfood-hallucination-eval-app @ 0.1.0
+# Quality Report — @kiwa-lab/ai-llm/dogfood-hallucination-eval-app @ 0.1.0
 
 _Reported at 2026-07-07T05:39:18.682Z._
 

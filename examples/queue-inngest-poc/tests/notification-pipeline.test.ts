@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupInngestEnv, type InngestTestEnv } from '@kiwa/queue';
+import { setupInngestEnv, type InngestTestEnv } from '@kiwa-lab/queue';
 import {
   attachSignupPipeline,
   createNotificationSink,

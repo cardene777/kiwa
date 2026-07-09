@@ -1,4 +1,4 @@
-import type { ApiHandlerSource } from '@kiwa/api';
+import type { ApiHandlerSource } from '@kiwa-lab/api';
 
 export interface Item {
   id: number;

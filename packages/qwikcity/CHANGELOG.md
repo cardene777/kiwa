@@ -1,4 +1,4 @@
-# @kiwa/qwikcity
+# @kiwa-lab/qwikcity
 
 ## 1.0.2
 
@@ -12,7 +12,7 @@
 
 ### Patch Changes
 
-- 5c276bc: 🎉 New package `@kiwa/qwikcity` v1.0 — Qwik City routeAction\$ + routeLoader\$ + Endpoints test adapter (Issue #519、 v1.2 milestone 3/10).
+- 5c276bc: 🎉 New package `@kiwa-lab/qwikcity` v1.0 — Qwik City routeAction\$ + routeLoader\$ + Endpoints test adapter (Issue #519、 v1.2 milestone 3/10).
 
   ## What's in the box
 
@@ -35,4 +35,4 @@
 
   ## v1.2 milestone closeout for framework adapters
 
-  This is the **final framework adapter** of v1.2 — `@kiwa/solidstart` (#518) + `@kiwa/qwikcity` (#519) で v1.2 framework 拡大が完了 (全ての主要 server-side framework に対応)、 残 v1.2 は Bun / Deno / Edge runtime / ORM / examples / hooks.server / sub-features の infrastructure 系。
+  This is the **final framework adapter** of v1.2 — `@kiwa-lab/solidstart` (#518) + `@kiwa-lab/qwikcity` (#519) で v1.2 framework 拡大が完了 (全ての主要 server-side framework に対応)、 残 v1.2 は Bun / Deno / Edge runtime / ORM / examples / hooks.server / sub-features の infrastructure 系。

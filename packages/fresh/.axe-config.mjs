@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/fresh.
+ * A11y (axe-core) config for @kiwa-lab/fresh.
  * Tier: Framework tier (critical 0 / serious 0-3 / moderate 0-10) — Deno Fresh islands + SSR drift.
  * SSOT: docs/quality/a11y-thresholds.md § Framework tier.
  */

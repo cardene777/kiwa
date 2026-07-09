@@ -3,14 +3,14 @@
  * real `@simplewebauthn/server` deployment exposes — issue creation options,
  * verify attestation, persist credential, look up credential — so the same
  * Next.js route handlers can flip between the real SimpleWebAuthn-shaped
- * driver and the `@kiwa/auth` mock without knowing which is in play.
+ * driver and the `@kiwa-lab/auth` mock without knowing which is in play.
  *
  * The store is in-memory + per-instance; production RPs swap this for a
  * database. The mock is fine for a dogfood app because every test bootstraps
  * a fresh server.
  */
 
-import type { WebAuthnCredential } from '@kiwa/auth';
+import type { WebAuthnCredential } from '@kiwa-lab/auth';
 
 /**
  * A challenge the RP issued during a registration or assertion ceremony.

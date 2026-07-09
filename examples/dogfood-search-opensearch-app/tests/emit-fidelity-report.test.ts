@@ -5,7 +5,7 @@
  * verdict are consistent with the observed divergence count.
  *
  * The fidelity harness is the seam through which the v1.36-1
- * `@kiwa/search` v0.3 relevance + synonym-advanced +
+ * `@kiwa-lab/search` v0.3 relevance + synonym-advanced +
  * index-management axes are validated against the real OpenSearch OSS
  * cluster surface. Any drift the harness detects surfaces here.
  */

@@ -60,8 +60,8 @@ The trade-off is that the mock cannot observe **rendered pixels** (only the sema
 Storybook 8's CSF3 defines the story surface as a plain object.
 
 ```ts
-import type { StoryObj } from '@kiwa/component';
-import { buildButton, createStoryRegistry, fireEvent } from '@kiwa/component';
+import type { StoryObj } from '@kiwa-lab/component';
+import { buildButton, createStoryRegistry, fireEvent } from '@kiwa-lab/component';
 
 const meta = {
   title: 'Components/Button',
@@ -155,7 +155,7 @@ Each dogfood app (`examples/dogfood-storybook-design-system/`, `examples/dogfood
 3. Emits a `FidelityReport` with per-op traces, latency samples, and a per-axis coverage summary
 4. Writes the report as `quality-report/fidelity-latest.md` (git-ignored — CI reads this) and `quality-report/fidelity-latest.json` (machine-readable)
 
-The report is then hand-promoted to `docs/quality-reports/component/<name>.md` when a release cuts. `@kiwa/quality-metrics`'s `evaluateReleaseGate` consumes the JSON directly and gates the release on the 7-axis pass.
+The report is then hand-promoted to `docs/quality-reports/component/<name>.md` when a release cuts. `@kiwa-lab/quality-metrics`'s `evaluateReleaseGate` consumes the JSON directly and gates the release on the 7-axis pass.
 
 ## Related reading
 

@@ -2,7 +2,7 @@
 // — verifies the pure session resolver against the simulated cookie jar.
 
 import { describe, expect, it } from 'vitest';
-import type { SimulatedAPIContext } from '@kiwa/astro';
+import type { SimulatedAPIContext } from '@kiwa-lab/astro';
 import { resolveUser } from '../src/utils/_kiwa/auth.js';
 
 function buildCookieJar(initial: Record<string, string>): SimulatedAPIContext['cookies'] {
@@ -24,7 +24,7 @@ function buildCookieJar(initial: Record<string, string>): SimulatedAPIContext['c
   };
 }
 
-describe('resolveUser via @kiwa/astro cookies jar', () => {
+describe('resolveUser via @kiwa-lab/astro cookies jar', () => {
   it('T-AF-301: cookie 不在で session=null', () => {
     expect(resolveUser(buildCookieJar({}))).toBeNull();
   });

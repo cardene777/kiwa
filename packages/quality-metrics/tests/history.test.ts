@@ -14,7 +14,7 @@ function makeReport(overrides?: {
   behaviorTests?: number;
 }): QualityReport {
   return {
-    provider: '@kiwa/example',
+    provider: '@kiwa-lab/example',
     version: '0.1.0',
     reportedAt: '2026-07-02T00:00:00Z',
     coverage: { line: overrides?.coverageLine ?? 90, branch: 82, function: 95 },
@@ -39,7 +39,7 @@ describe('v0.5 captureSnapshot', () => {
     });
     expect(snapshot.capturedAt).toBe('2026-07-08T00:00:00Z');
     expect(snapshot.label).toBe('release-v1.65');
-    expect(snapshot.report.provider).toBe('@kiwa/example');
+    expect(snapshot.report.provider).toBe('@kiwa-lab/example');
   });
 
   it('label 省略時は null', () => {

@@ -50,7 +50,7 @@ Reuse the exact same object for signing and verification so the domain separator
 
 ~~~ts
 import { expect } from '@playwright/test';
-import { dappE2eTest } from '@kiwa/dapp';
+import { dappE2eTest } from '@kiwa-lab/dapp';
 import { recoverMessageAddress, recoverTypedDataAddress } from 'viem';
 
 const test = dappE2eTest.extend({});

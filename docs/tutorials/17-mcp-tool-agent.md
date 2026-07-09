@@ -15,7 +15,7 @@ A vitest test file that boots an **in-process MCP server** with 3 fixture tools 
 ```bash
 mkdir kiwa-mcp-agent && cd kiwa-mcp-agent
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa/mcp
+pnpm add -D vitest typescript @types/node @kiwa-lab/mcp
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -51,7 +51,7 @@ import {
   registerCalc,
   registerEcho,
   registerWeather,
-} from '@kiwa/mcp';
+} from '@kiwa-lab/mcp';
 
 export function makeMcpServer() {
   const server = new McpServer({ name: 'kiwa-mcp-agent-demo', version: '1.0.0' });
@@ -62,7 +62,7 @@ export function makeMcpServer() {
 }
 ```
 
-`@kiwa/mcp` also ships `registerAllFixtureTools(server)` which registers all 5 fixture tools (echo / calc / weather / search / db-query) in one call — use the per-tool form when the test suite should only expose a subset.
+`@kiwa-lab/mcp` also ships `registerAllFixtureTools(server)` which registers all 5 fixture tools (echo / calc / weather / search / db-query) in one call — use the per-tool form when the test suite should only expose a subset.
 
 ## Test — 4-step chain + 3 error semantics
 
@@ -70,7 +70,7 @@ Create `tests/mcp-chain.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { connectClientToServer, InMemoryTransport, McpClient } from '@kiwa/mcp';
+import { connectClientToServer, InMemoryTransport, McpClient } from '@kiwa-lab/mcp';
 import { makeMcpServer } from '../src/server';
 
 describe('MCP chain — initialize → tools/list → tools/call', () => {
@@ -151,7 +151,7 @@ You should see 6 passing tests across the chain + 3 error scenarios.
 
 ## The 4 ops of MCP v0.1
 
-`@kiwa/mcp` v0.1 covers the tool-use half of the Model Context Protocol spec. The remaining ops (resources / prompts / sampling / logging) land in a future release.
+`@kiwa-lab/mcp` v0.1 covers the tool-use half of the Model Context Protocol spec. The remaining ops (resources / prompts / sampling / logging) land in a future release.
 
 | op | direction | shape | notes |
 |---|---|---|---|
@@ -183,8 +183,8 @@ The last four are MCP-specific extensions. Tests that assert on these codes will
 Real MCP-aware Claude clients treat the tool descriptors returned by `tools/list` as `input_schema` blocks in Claude's `tool_use` API. The dogfood app `examples/dogfood-mcp-tool-agent` shows the full loop.
 
 ```ts
-import { createAnthropicMock } from '@kiwa/ai-llm';
-import { connectClientToServer } from '@kiwa/mcp';
+import { createAnthropicMock } from '@kiwa-lab/ai-llm';
+import { connectClientToServer } from '@kiwa-lab/mcp';
 import { makeMcpServer } from './server';
 
 const server = makeMcpServer();
@@ -230,5 +230,5 @@ if (call?.type === 'tool_use') {
 - [Tutorial 07 — OpenAI tool-use agent](./07-openai-tool-agent) — non-MCP tool loop for comparison
 - [Tutorial 18 — Agent orchestration (LangGraph + Assistants v2)](./18-agent-orchestration) — stateful multi-turn agent
 - [Concept — AI-LLM multimodal testing SSOT](../concepts/ai-llm-multimodal-testing) — includes MCP handshake gotchas
-- [`@kiwa/mcp` on npm](https://www.npmjs.com/package/@kiwa/mcp)
+- [`@kiwa-lab/mcp` on npm](https://www.npmjs.com/package/@kiwa-lab/mcp)
 - [Model Context Protocol spec](https://modelcontextprotocol.io/)

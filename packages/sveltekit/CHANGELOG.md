@@ -1,4 +1,4 @@
-# @kiwa/sveltekit
+# @kiwa-lab/sveltekit
 
 ## 1.2.0
 
@@ -70,7 +70,7 @@
 
 ### Patch Changes
 
-- 0dc64e2: 🎉 SvelteKit `hooks.server.ts` test helper を `@kiwa/sveltekit` v1.0.1 に追加 (Issue #526、 v1.2 milestone 5/10).
+- 0dc64e2: 🎉 SvelteKit `hooks.server.ts` test helper を `@kiwa-lab/sveltekit` v1.0.1 に追加 (Issue #526、 v1.2 milestone 5/10).
 
   ## What's added
 
@@ -100,7 +100,7 @@
 
 ### Patch Changes
 
-- e4f34ef: 🎉 New package `@kiwa/sveltekit` v1.0 — SvelteKit `+page.server.ts` load + form actions test adapter (Issue #497、 v1.1 milestone 6/8).
+- e4f34ef: 🎉 New package `@kiwa-lab/sveltekit` v1.0 — SvelteKit `+page.server.ts` load + form actions test adapter (Issue #497、 v1.1 milestone 6/8).
 
   ## What's in the box
 

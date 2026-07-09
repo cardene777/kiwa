@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa/realtime.
+ * Mutation testing config for @kiwa-lab/realtime.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — realtime adapter
  * covers Ably / Pusher / Socket.IO with fidelity report + connection mocks;
  * provider WebSocket API drift is expected.
@@ -22,7 +22,7 @@ export default {
     // 35.97 in the pre-exclusion sweep). Real-provider coverage lives in the
     // dogfood adapter tests, not in the mutation baseline.
     // report.js is excluded because it is a thin adapter over
-    // `@kiwa/quality-metrics` aggregator functions — the interesting
+    // `@kiwa-lab/quality-metrics` aggregator functions — the interesting
     // logic sits in quality-metrics and is mutation-tested there. This shim
     // scored 34.33 % pre-exclusion, dragging the aggregate below the SaaS
     // break threshold without buying any real signal.

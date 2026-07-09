@@ -1,6 +1,6 @@
 /**
  * v1.38-5 docs 補強 (Issue #1106 / CAR-859) — tutorial 79-81 code snippet validation
- * for `@kiwa/ai-llm` v0.4 advanced 8 axis (Prompt injection + Hallucination +
+ * for `@kiwa-lab/ai-llm` v0.4 advanced 8 axis (Prompt injection + Hallucination +
  * LLM eval + Guardrails + RAG advanced + Agent orchestration + Fine-tuning eval +
  * Cost / latency SLA).
  *

@@ -4,7 +4,7 @@ import {
   type MockNode,
   type StoryMeta,
   type StoryRegistry,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 import type {
   A11yReport,
   PlayRunReport,
@@ -16,7 +16,7 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — spins up an in-process `@kiwa/component` `StoryRegistry`,
+ * Mock adapter — spins up an in-process `@kiwa-lab/component` `StoryRegistry`,
  * registers the 12 primitive metas, and drives args resolution + mount + play
  * + a11y through the harness API. Every op records a trace event, so the
  * fidelity harness can diff mock vs real behaviour without needing a live

@@ -1,7 +1,7 @@
 /**
  * Payment provider identifier — provider prefix used by release-gate to
- * dispatch axis evaluation. All @kiwa/payment mocks emit provider =
- * `@kiwa/payment/{stripe|paddle|lemonsqueezy}` so downstream harnesses
+ * dispatch axis evaluation. All @kiwa-lab/payment mocks emit provider =
+ * `@kiwa-lab/payment/{stripe|paddle|lemonsqueezy}` so downstream harnesses
  * can filter without pulling in this package.
  */
 export type PaymentProvider = 'stripe' | 'paddle' | 'lemonsqueezy';

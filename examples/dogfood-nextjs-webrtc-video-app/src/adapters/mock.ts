@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/realtime` v0.2's `createWebRtcSignalingMock`
+ * Mock adapter — drives `@kiwa-lab/realtime` v0.2's `createWebRtcSignalingMock`
  * + `createWebRtcIceMock` + `createWebRtcTrackMock` so the same app code
  * exercises a deterministic WebRTC ceremony without touching mediasoup or a
  * real getUserMedia device. Both mock and real adapters satisfy
@@ -20,7 +20,7 @@ import {
   type WebRtcIceMock,
   type WebRtcSignalingMock,
   type WebRtcTrackMock,
-} from '@kiwa/realtime';
+} from '@kiwa-lab/realtime';
 import type {
   IceRestartResult,
   JoinRoomResult,

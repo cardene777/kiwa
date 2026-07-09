@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.60 リリース — Desktop 深化 IV。 **@kiwa/desktop v0.5** で child_process.spawn stub 契約層追加、 12 axis から **8 CLI-backed axis 抽出** (electron-builder / electron-updater / ffmpeg / xclip / osascript / notify-send / defaults / reg) + 4 non-CLI axis、 KIWA_DESKTOP_MODE env-gate + args 上限 32 + fail-closed。 v1.55-v1.59 4 PR rhythm 継承 (**7 milestone 連続 = 28 PR 連続同 rhythm**)、 **systematic pattern 35 度目適用**、 **depth-5 pattern 2 例目 candidate 到達**。
+kiwa v1.60 リリース — Desktop 深化 IV。 **@kiwa-lab/desktop v0.5** で child_process.spawn stub 契約層追加、 12 axis から **8 CLI-backed axis 抽出** (electron-builder / electron-updater / ffmpeg / xclip / osascript / notify-send / defaults / reg) + 4 non-CLI axis、 KIWA_DESKTOP_MODE env-gate + args 上限 32 + fail-closed。 v1.55-v1.59 4 PR rhythm 継承 (**7 milestone 連続 = 28 PR 連続同 rhythm**)、 **systematic pattern 35 度目適用**、 **depth-5 pattern 2 例目 candidate 到達**。
 
 ## Tweet 2 — spawn stub 契約層
 
@@ -14,7 +14,7 @@ dogfood-desktop-spawn-app 新規、 8 CLI stub workflow + env-gate 3 pattern (re
 
 ## Tweet 4 — install + Mobile v1.54 rhythm 完全再現 + v1.61 計画
 
-`pnpm add -D @kiwa/desktop@^0.5`。 migration: https://cardene777.github.io/kiwa/migrations/v1.59-to-v1.60
+`pnpm add -D @kiwa-lab/desktop@^0.5`。 migration: https://cardene777.github.io/kiwa/migrations/v1.59-to-v1.60
 
 **Mobile v1.50-v1.54 (base → advanced II → advanced III → adapter → spawn stub) 5 milestone rhythm を Desktop pair (v1.56-v1.60) で完全再現**、 **depth-5 pattern 2 例目 candidate 到達** (Mobile depth-5 1 例目 + Desktop 2 例目 candidate)。 v1.61+ で Desktop v0.6 実 spawn (Mobile v0.6 pattern 転用、 depth-6 pattern 新設 candidate) 予定。 backward compat 絶対維持で v0.1-v0.4 完全保持。
 
