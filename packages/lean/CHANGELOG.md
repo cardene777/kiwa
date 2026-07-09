@@ -93,6 +93,28 @@ theorem authed_reachable : steps .Init [.AuthSucceeded] = .to .Authed := rfl
 
 Lean は診断を stdout に書く。 `VerifyResult.stderr` は常に空文字列だった。 `diagnostics` field を足し、 実際に喋った側の stream を載せる。
 
+#### 6. 生成される Lake project は何も建てていなかった
+
+`lakefile.lean` の `lean_lib` に `@[default_target]` が無く、 `lake build` は対象を 1 つも持たなかった。 型エラーを含む spec を置いても `Build completed successfully` と表示して 0 で終了する (実測)。
+
+さらに根 module は spec を `import` せず、 `globs` も無かった。 仮に対象があっても、 spec file は 1 度もコンパイルされない。 `lakefile.lean` 自身のコメントが「含めるには自分で追加せよ」 と書いていた。
+
+v0.3 は `@[default_target]` と `globs := #[.andSubmodules \`<rootNamespace>]` を出す。 `modules` を渡すと根 module が各 spec を `import` するので、 `import <rootNamespace>` だけで全 spec に届く。
+
+```lean
+@[default_target]
+lean_lib «KiwaSpecs» where
+  globs := #[.andSubmodules `KiwaSpecs]
+```
+
+#### 7. `verifyLeanSpec` は使わない Lake project を書いていた
+
+`generateLakeProject` の出力を一時 directory に書き、 `lake` を 1 度も呼ばずに `lean <file>` を実行していた。 `lakefile.lean` と根 module は何にも影響していない。
+
+影響していたのは `lean-toolchain` だけで、 `elan` がこの file を作業 directory から読んで実行する Lean の版を決める。 v0.3 はこの 1 file だけを書く。 生成 spec は何も `import` しないので、 検査に build system は要らない。
+
+`VerifyOptions.packageName` は使われなくなったため削除した。 `leanToolchain` は残り、 既定は `leanprover/lean4:v4.15.0`。
+
 ### 移行
 
 `OrchestratorSpec.transitions` の要素は 2 形になった。
@@ -138,6 +160,8 @@ Lean 4.15.0 を実際に install して実行した。 以下を test で固定�
 - 出ていける状態に `no_escape` を主張すると `rfl` が失敗する
 - 到達経路の証人を誤らせると証明が通らない
 - 削除した `dispatch_total` は遷移ゼロの表でも通る
+- 生成 Lake project を `lake build` すると spec が実際に建てられ、 壊れた spec で落ちる
+- `lean-toolchain` に存在しない版を書くと検証が失敗する (版の固定が効いている証拠)
 
 実食 app の 5 台 (transaction / session / cache / job / cli) は全状態が初期状態から到達可能で、 実 toolchain の検証を通る。 `job` の `dlq` だけが sink として検出される。
 

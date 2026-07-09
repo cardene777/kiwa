@@ -144,9 +144,18 @@ elan toolchain install leanprover/lean4:v4.15.0
 | Export | Purpose |
 |---|---|
 | `generateLeanSpec(spec)` | table → Lean 4 source, plus `meta` (cell counts, terminal states, sinks, reachability paths) |
-| `generateLakeProject(config)` | a minimal Lake package to hold generated specs |
+| `generateLakeProject(config)` | a Lake package whose `lake build` actually builds the specs put in it |
 | `verifyLeanSpec(specs, opts?)` | run Lean over generated specs |
 | `isInvalid(transition)` | narrow a `Transition` to its rejecting form |
+
+Check the Lake project into a repository when you want `lake build` to check the
+specs alongside the rest of the code. Its library is a `@[default_target]` and
+globs the spec directory, because a Lake library that is neither will report
+`Build completed successfully` having compiled nothing.
+
+`verifyLeanSpec` does not need it. It writes the specs and a `lean-toolchain` to
+a scratch directory and calls `lean` on each, since a generated spec imports
+nothing. The toolchain file is what decides which Lean runs.
 
 See [`CHANGELOG.md`](./CHANGELOG.md) for the 0.3.0 breaking changes and why they
 were breaking.

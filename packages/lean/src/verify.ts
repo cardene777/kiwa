@@ -2,7 +2,6 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { generateLakeProject } from './lake.js';
 import type { LeanSpecOutput } from './types.js';
 
 export type VerifyStatus =
@@ -11,14 +10,18 @@ export type VerifyStatus =
   | 'skipped-by-env'
   | 'verification-failed';
 
+/** Matches `generateLakeProject`, so a scratch check pins what a project pins. */
+const DEFAULT_TOOLCHAIN = 'leanprover/lean4:v4.15.0';
+
 export interface VerifyOptions {
   /** Root namespace under which specs will be organized. Default: `KiwaSpecs`. */
   rootNamespace?: string;
-  /** Lake package name for the scratch project. Default: `kiwa-lean-verify`. */
-  packageName?: string;
   /**
-   * Custom Lean toolchain to pin. Overrides `generateLakeProject` default.
-   * Ignored when Lean is not installed.
+   * Lean toolchain to pin, written to `lean-toolchain` beside the specs.
+   *
+   * `elan`, which is how Lean is normally installed, reads that file from the
+   * working directory and runs the version it names. Nothing else pins anything:
+   * without it a machine checks the specs with whatever Lean it happens to have.
    */
   leanToolchain?: string;
   /**
@@ -93,7 +96,13 @@ function detectLeanBinary(explicit?: string): string | null {
  * identically, which reads as "the spec is wrong" when it means "the command
  * was wrong".
  *
- * The scratch project is always cleaned up (best effort) on return.
+ * No Lake project is written. Building one and then never calling `lake` is what
+ * this used to do, and the lakefile it wrote had no effect on anything. The one
+ * file that does have an effect is `lean-toolchain`, which `elan` reads from the
+ * working directory to choose the Lean it runs. Generated specs import nothing,
+ * so they need no build system to be checked.
+ *
+ * The scratch directory is always cleaned up (best effort) on return.
  */
 export function verifyLeanSpec(
   specs: readonly LeanSpecOutput[],
@@ -101,8 +110,7 @@ export function verifyLeanSpec(
 ): VerifyResult {
   const {
     rootNamespace = 'KiwaSpecs',
-    packageName = 'kiwa-lean-verify',
-    leanToolchain,
+    leanToolchain = DEFAULT_TOOLCHAIN,
     skip,
     leanBin,
     workDir,
@@ -133,16 +141,7 @@ export function verifyLeanSpec(
   const rootDir = mkdtempSync(join(workDir ?? tmpdir(), 'kiwa-lean-'));
   const verifiedFiles: string[] = [];
   try {
-    const lake = generateLakeProject(
-      leanToolchain !== undefined
-        ? { packageName, rootNamespace, leanToolchain }
-        : { packageName, rootNamespace },
-    );
-    for (const [relPath, content] of Object.entries(lake.files)) {
-      const abs = resolve(rootDir, relPath);
-      mkdirSync(dirname(abs), { recursive: true });
-      writeFileSync(abs, content, 'utf-8');
-    }
+    writeFileSync(resolve(rootDir, 'lean-toolchain'), `${leanToolchain}\n`, 'utf-8');
     for (const spec of specs) {
       const relPath = `${rootNamespace}/${spec.path}`;
       const abs = resolve(rootDir, relPath);

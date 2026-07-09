@@ -13,7 +13,7 @@ v2.14 で追加した `@kiwa-lab/lean` v0.1 spec generator を v0.2 で `verifyL
 | Layer | v0.1 | v0.2 |
 |---|---|---|
 | generateLeanSpec | ✅ Lean source 生成 | ✅ 変更 0 (shape preserving) |
-| generateLakeProject | ✅ Lake scaffold 生成 | ✅ 変更 0 |
+| generateLakeProject | ✅ Lake scaffold 生成 | ✅ v0.3 で修正 (下記) |
 | verifyLeanSpec | ❌ | ✅ 新規 = 実 toolchain 呼出 (`lean <file>`) |
 
 ## verifyLeanSpec API SSOT
@@ -30,6 +30,14 @@ verifyLeanSpec(specs: readonly LeanSpecOutput[], opts?: VerifyOptions): VerifyRe
 | `verification-failed` | Lean install 済 + いずれかの spec の elaboration 失敗 (`diagnostics` に Lean の出力を添付) |
 | `lean-not-installed` | Lean toolchain 未 install (throw なし return) |
 | `skipped-by-env` | `KIWA_LEAN_SKIP_VERIFY=1` env or `opts.skip=true` |
+
+### Lake project は何も建てていなかった (v0.3 で修正)
+
+生成される `lakefile.lean` の `lean_lib` に `@[default_target]` が無く、 `lake build` は対象を 1 つも持たなかった。 spec に型エラーがあっても `Build completed successfully` と表示して 0 で終了する。 さらに根 module が spec を `import` せず、 `globs` も無いため、 仮に対象があっても spec file は 1 度もコンパイルされなかった。
+
+v0.3 は `@[default_target]` と `globs := #[.andSubmodules \`<rootNamespace>]` を出し、 `modules` を渡すと根 module が各 spec を `import` する。 壊れた spec を置いて `lake build` が落ちることを test で固定した。
+
+`verifyLeanSpec` は Lake project を書かない。 書いて `lake` を呼ばないのが v0.2 までの姿で、 `lakefile.lean` は何にも影響していなかった。 影響しているのは `lean-toolchain` だけで、 `elan` がこの file を作業 directory から読んで実行する Lean の版を決める。 生成 spec は何も `import` しないので、 検査に build system は要らない。
 
 ### 起動形と診断の出所 (v0.3 で修正)
 
