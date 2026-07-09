@@ -34,7 +34,7 @@ const spec = {
 const out = generateLeanSpec(spec);
 const result = verifyLeanSpec([out]);
 
-result.status; // 'ok' | 'verification-failed' | 'lean-not-installed' | 'skipped-by-env'
+result.status; // 'ok' | 'verification-failed' | 'timed-out' | 'lean-not-installed' | 'skipped-by-env'
 ```
 
 ## A rejection is not a self-loop
@@ -129,8 +129,13 @@ Lean is not blocked. It never returns `ok` for a check it did not run.
 |---|---|
 | `ok` | every spec elaborated |
 | `verification-failed` | Lean rejected one; `diagnostics` carries what it said |
-| `lean-not-installed` | no toolchain on `PATH` |
+| `timed-out` | Lean was still working when `timeoutMs` ran out |
+| `lean-not-installed` | no toolchain on `PATH`, or the binary is not Lean |
 | `skipped-by-env` | `opts.skip` or `KIWA_LEAN_SKIP_VERIFY=1` |
+
+`timed-out` is its own status because a timeout is not a verdict: nothing has been
+established about the spec. `checkLeanTable` reads the same switch and reports the
+same statuses, so a build that turns Lean off turns it off for both.
 
 To install a toolchain:
 
@@ -224,6 +229,43 @@ file you have on disk rather than one generated on the spot.
 
 With `checkConformance` this closes the triangle: the spec, the code, and the
 proof all hold one table.
+
+## What it refuses, and how it says so
+
+A spec is user input, and the generated Lean is text. Names become Lean
+constructors, file names and theorem names, so they are checked before anything
+reads them:
+
+```ts
+generateLeanSpec({ ...spec, states: ["a-b", "aB"] });
+// SpecError: generateLeanSpec: states a-b and aB both become the Lean
+// constructor AB; rename one of them
+```
+
+Two error types, so a caller need not match on message text:
+
+| type | thrown when |
+|---|---|
+| `SpecError` | the spec cannot become a machine: a name that is not an identifier, a cell nobody declared, a state nothing reaches, a table that contradicts its own `terminal` |
+| `UsageError` | the call is wrong whatever the spec says: no specs to verify, two specs on one path |
+
+Both extend `LeanError`.
+
+## Scale
+
+Generation is text and costs nothing. Lean elaborates a theorem per state, so
+checking cost grows with the state count, measured on Lean 4.15:
+
+| states × events | cells | generate | `lean` |
+|---|---|---|---|
+| 5 × 8 | 40 | 1 ms | 0.3 s |
+| 20 × 20 | 400 | &lt;1 ms | 0.7 s |
+| 30 × 30 | 900 | 2 ms | 2.6 s |
+| 50 × 50 | 2500 | 5 ms | 16 s |
+
+Naming an `initial` state roughly doubles the Lean time, since each state gains a
+reachability theorem. The default `timeoutMs` is 60 seconds; past a few thousand
+cells, raise it or split the machine.
 
 ## API
 

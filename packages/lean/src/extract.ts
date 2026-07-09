@@ -73,7 +73,9 @@ export type ExtractStatus =
   | 'lean-not-installed'
   | 'extraction-failed'
   /** Lean was still working when `timeoutMs` ran out. Nothing was established. */
-  | 'timed-out';
+  | 'timed-out'
+  /** `opts.skip` or `KIWA_LEAN_SKIP_VERIFY=1`. Nothing was established. */
+  | 'skipped-by-env';
 
 export interface ExtractResult {
   status: ExtractStatus;
@@ -81,6 +83,17 @@ export interface ExtractResult {
   table?: Table;
   /** What Lean said, when it refused or printed something unreadable. */
   diagnostics?: string;
+}
+
+export interface ExtractOptions extends LeanRunOptions {
+  /**
+   * Do not run Lean; report `skipped-by-env`.
+   *
+   * `verifyLeanSpec` has always read `KIWA_LEAN_SKIP_VERIFY`. This did not, so a
+   * caller who turned Lean off for a run turned it off for one of the two things
+   * that use it, and the other one went and ran Lean anyway.
+   */
+  skip?: boolean;
 }
 
 /**
@@ -92,8 +105,15 @@ export interface ExtractResult {
 export function extractLeanTable(
   source: string,
   spec: OrchestratorSpec,
-  opts: LeanRunOptions = {},
+  opts: ExtractOptions = {},
 ): ExtractResult {
+  if (opts.skip === true || process.env.KIWA_LEAN_SKIP_VERIFY === '1') {
+    return {
+      status: 'skipped-by-env',
+      diagnostics: opts.skip === true ? 'opts.skip=true' : 'KIWA_LEAN_SKIP_VERIFY=1',
+    };
+  }
+
   const run = runLeanSource(`${source}${renderTableProgram(spec)}`, ['--run'], opts);
   if (run === 'lean-not-installed') return { status: 'lean-not-installed' };
   if (!run.ok) {
@@ -141,7 +161,7 @@ export interface LeanTableReport {
   diagnostics?: string;
 }
 
-export interface CheckLeanTableOptions extends LeanRunOptions {
+export interface CheckLeanTableOptions extends ExtractOptions {
   /**
    * The Lean source to check. Defaults to what the generator produces for this
    * spec.

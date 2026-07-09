@@ -116,6 +116,13 @@ export function verifyLeanSpec(
   if (specs.length === 0) {
     throw new UsageError('verifyLeanSpec: at least one spec is required');
   }
+  // `verifiedFiles` is where a caller writes the specs, and what a Lake project
+  // names its library. `../../etc` is a directory, not a namespace.
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(rootNamespace)) {
+    throw new UsageError(
+      `verifyLeanSpec: rootNamespace ${JSON.stringify(rootNamespace)} is not a Lean identifier`,
+    );
+  }
 
   const verifiedFiles = specs.map((s) => `${rootNamespace}/${s.path}`);
   // Before anything else, including the skip paths. A call that could never

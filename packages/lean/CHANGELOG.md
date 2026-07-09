@@ -218,6 +218,57 @@ Lean が無ければ `status: 'lean-not-installed'` かつ `ok: false` を返す
 
 `src/table.ts` の `resolveTable` を、 生成器と突き合わせの双方が読む。 spec を 2 箇所で解釈すれば、 片方だけが `unspecified` policy を知る状態に必ず drift する。 v0.3 の初期は生成器の中に表の組み立てが埋まっており、 hook が同じ規則を `awk` で書き直していたのと同じ形だった。
 
+#### 15. spec は user 入力で、 生成される Lean は文字列だった
+
+名前は Lean の constructor / file 名 / 定理名になる。 何も検査していなかったので、 3 step 下流の compiler が代わりに文句を言っていた。
+
+| 入力 | v0.2 の結末 |
+|---|---|
+| `states: ['a', 'a']` | Lean kernel: `duplicate constructor name M.State.A` |
+| `states: ['a-b', 'aB']` | Lean kernel: `duplicate constructor name M.State.AB` |
+| `states: ['ab', 'aB']` | 2 state が同じ定理名を持つ |
+| `namespace: 'My Space'` | Lean parser: `unexpected identifier` |
+| `moduleName: '../../etc/passwd'` | `path` がそのまま呼出側の書込先になる |
+| `events: ['1st']` | identifier ではない |
+| `states` に引用符 | 名前を運ぶ文字列から escape する |
+
+最後の 1 つは cosmetic ではない。 `cellKey` は `state::event` なので、 state `a::b` と event `b::c` は state `a` + event `b::c` と同じ cell を指す。 2 cell が 1 つに融合し、 後者が前者の遷移先を継ぎ、 未宣言 cell の検査は宣言済みだと判断した。 名前を identifier に限ったので、 この衝突は到達不能になった。
+
+`validateSpec` は `resolveTable` から呼ばれる。 spec を読む者は全て検査を通る (生成器も突き合わせも)、 それぞれが error 中で自分の名を名乗る。 `generateLakeProject` も自分の入力を検査する。 file 名と import 文になるからだ。
+
+#### 16. error に型が無かった
+
+`SpecError` (spec が機械にならない) と `UsageError` (spec が何であれ呼出が誤り)、 いずれも `LeanError` を継ぐ。 型が区別しなければ呼出側は message 文字列を照合するしかなく、 文言を改善した瞬間に壊れる。
+
+#### 17. 偽の Lean が全 spec を検証済みにしていた
+
+`--version` に 0 を返す program は Lean ではない。 `/bin/echo` は 0 を返す。 `leanBin` をそこに向けると、 何も見ていない pass が返っていた。 Lean は自分が誰か名乗る (`Lean (version 4.15.0, ...)`)、 `detectLeanBinary` はその答えを読む。
+
+#### 18. timeout が「仕様が誤り」 として返っていた
+
+`timeoutMs` を超えた run は `verification-failed` と `spawnSync lean ETIMEDOUT` を返した。 Lean が読み終えていない表の bug を探しに行くことになる。 `timed-out` を独立した status にした (`verifyLeanSpec` / `checkLeanTable` 双方)。
+
+Lean は state ごとに定理を elaborate するので、 検証コストは state 数で伸びる。 900 cell で 2.5 秒、 2500 cell で 16 秒、 既定の 60 秒はその先で尽きる。 message はどの knob を回すか述べる。
+
+#### 19. `KIWA_LEAN_SKIP_VERIFY` を片方しか見ていなかった
+
+`verifyLeanSpec` は読み、 `checkLeanTable` は読まなかった。 build が Lean を切っても、 2 つのうち 1 つは Lean を起動していた。 `ExtractOptions.skip` を足し、 env も読む。 skip は pass ではない (`ok: false`)。
+
+#### 20. `rootNamespace` が検査されていなかった
+
+`verifiedFiles` は呼出側が spec を書き込む path で、 Lake project の library 名でもある。 `../../etc` は namespace ではない。
+
+#### 21. 依存 0 になった
+
+`@kiwa-lab/core` を dependencies に持っていたが、 `src` から 1 度も参照していない。 利用者に不要な package を引かせていた。 Node 組込のみを使う。 `sideEffects: false` を宣言し、 `CHANGELOG.md` を配布物に入れた。
+
+### 移行 (v0.3 の入力規約)
+
+- state / event 名は `[A-Za-z][A-Za-z0-9_-]*` (kebab-case / underscore 可)
+- `moduleName` は `[A-Za-z][A-Za-z0-9_]*` (ハイフン不可、 Lean module 名になるため)
+- `namespace` / `rootNamespace` は Lean identifier
+- 2 state が同じ constructor 名 / 定理名になる組合せは拒否
+
 ### 対応する Lean の版
 
 生成 source を **v4.12.0 / v4.15.0 / v4.23.0 / v4.31.0** の 4 版で検証した。 4 版とも、 完全な表を受理し、 同じ壊れ方 (cell の欠落 / 偽の absorbing 定理 / 偽の到達経路) を拒否する。
