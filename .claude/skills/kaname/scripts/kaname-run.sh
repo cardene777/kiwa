@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# spec-kit skill 用の @kiwa-lab/spec-kit API 呼出 helper。
+# kaname skill 用の @kiwa-lab/kaname API 呼出 helper。
 # node -e で classify() / splitSpec() を呼出、 JSON 経由で SpecDoc を渡し、
 # 2 file 生成 + classify report を stdout に返す。
 #
 # usage:
-#   spec-kit-run.sh --doc <path-to-spec-doc.json> --outdir <dir>
+#   kaname-run.sh --doc <path-to-spec-doc.json> --outdir <dir>
 #
-# spec-doc.json format = @kiwa-lab/spec-kit の SpecDoc 型 = { title, items: [...] }
+# spec-doc.json format = @kiwa-lab/kaname の SpecDoc 型 = { title, items: [...] }
 
 set -euo pipefail
 
@@ -22,7 +22,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ -z "$doc_path" ] || [ -z "$out_dir" ]; then
-  echo "usage: spec-kit-run.sh --doc <path> --outdir <dir>" >&2
+  echo "usage: kaname-run.sh --doc <path> --outdir <dir>" >&2
   exit 2
 fi
 
@@ -34,7 +34,7 @@ kiwa_root="$(cd "$script_dir/../../../.." && pwd)"
 node -e "
 const fs = require('node:fs');
 const path = require('node:path');
-const { classify, splitSpec } = require(process.argv[3] + '/packages/spec-kit/dist/index.cjs');
+const { classify, splitSpec } = require(process.argv[3] + '/packages/kaname/dist/index.cjs');
 const doc = JSON.parse(fs.readFileSync(process.argv[1], 'utf-8'));
 const report = classify(doc);
 if (!report.ok) {

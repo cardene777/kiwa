@@ -1,12 +1,12 @@
 ---
-title: "@kiwa-lab/spec-kit v0.1 — 3 layer specification model SSOT"
+title: "@kiwa-lab/kaname v0.1 — 3 layer specification model SSOT"
 ---
 
-# @kiwa-lab/spec-kit v0.1 — 3 layer specification model SSOT
+# @kiwa-lab/kaname v0.1 — 3 layer specification model SSOT
 
 ## What this covers
 
-`@kiwa-lab/spec-kit` = kiwa の 仕様駆動開発層。 仕様書を **3 layer に分類** し、 layer 別に paired file (`specFormal.md` + `specRuntime.md`) として書き出す。 kiwa MANIFESTO の 3 軸融合 (testing + 形式検証 + 仕様駆動開発) を 仕様書レベルで 実装。
+`@kiwa-lab/kaname` = kiwa の 仕様駆動開発層。 仕様書を **3 layer に分類** し、 layer 別に paired file (`specFormal.md` + `specRuntime.md`) として書き出す。 kiwa MANIFESTO の 3 軸融合 (testing + 形式検証 + 仕様駆動開発) を 仕様書レベルで 実装。
 
 ## 3 layer model SSOT
 
@@ -62,6 +62,6 @@ classify(doc: SpecDoc): ClassifyReport;       // 静的検査 (5 rule)
 - 61 milestone streak (v1.23-v2.16)
 - 4 PR rhythm 15 milestone 目 (v2.1-v2.16)
 - backward compat 絶対維持 24 milestone 連続 (v1.61-v2.16)
-- systematic pattern 58 度目 = @kiwa-lab/spec-kit 追加
-- **kiwa 3 軸融合完成** = testing + 形式検証 (v2.14 lean v0.1 / v2.15 lean v0.2) + 仕様駆動開発 (v2.16 spec-kit v0.1)
-- 43 package (42 + spec-kit) 到達
+- systematic pattern 58 度目 = @kiwa-lab/kaname 追加
+- **kiwa 3 軸融合完成** = testing + 形式検証 (v2.14 lean v0.1 / v2.15 lean v0.2) + 仕様駆動開発 (v2.16 で導入、 v2.19 で kaname に改名)
+- 43 package 到達
