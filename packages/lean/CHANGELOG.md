@@ -113,7 +113,13 @@ lean_lib «KiwaSpecs» where
 
 影響していたのは `lean-toolchain` だけで、 `elan` がこの file を作業 directory から読んで実行する Lean の版を決める。 v0.3 はこの 1 file だけを書く。 生成 spec は何も `import` しないので、 検査に build system は要らない。
 
-`VerifyOptions.packageName` は使われなくなったため削除した。 `leanToolchain` は残り、 既定は `leanprover/lean4:v4.15.0`。
+`VerifyOptions.packageName` は使われなくなったため削除した。
+
+#### 8. 版の固定を既定から外した
+
+`verifyLeanSpec` は既定で `lean-toolchain` を書かない。 machine の Lean が検査する。 版を固定すると、 既に Lean を持っている人が同じ判定に至るためだけに 2 つ目の toolchain を download することになる。 `leanToolchain` を渡した時だけ固定する。
+
+checked-in する Lake project は従来通り固定する。 repository は固定すべきだからだ。
 
 ### 移行
 
@@ -149,9 +155,22 @@ const spec: OrchestratorSpec = {
 };
 ```
 
+### 対応する Lean の版
+
+生成 source を **v4.12.0 / v4.15.0 / v4.23.0 / v4.31.0** の 4 版で検証した。 4 版とも、 完全な表を受理し、 同じ壊れ方 (cell の欠落 / 偽の absorbing 定理 / 偽の到達経路) を拒否する。
+
+診断の文言は版で変わる。 `missing cases` は v4.23 で `Missing cases` になり、 `tactic 'rfl' failed` は ``Tactic `rfl` failed`` になった。 変わらないのは Lean が echo し返す識別子で、 test はそちらを見る。
+
+行列は `tests/lean-versions.test.ts` に置いた。 各版が別 download なので opt-in にしてある。
+
+```bash
+elan toolchain install leanprover/lean4:v4.31.0
+KIWA_LEAN_TOOLCHAINS=v4.15.0,v4.31.0 pnpm test
+```
+
 ### 検証
 
-Lean 4.15.0 を実際に install して実行した。 以下を test で固定した (`tests/lean-toolchain.test.ts`)。
+Lean を実際に install して実行した。 以下を test で固定した (`tests/lean-toolchain.test.ts`)。
 
 - 生成 spec が elaborate に成功する
 - cell を 1 つ削ると `missing cases` で落ち、 Lean が cell 名を挙げる

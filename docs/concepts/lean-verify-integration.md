@@ -39,6 +39,12 @@ v0.3 は `@[default_target]` と `globs := #[.andSubmodules \`<rootNamespace>]` 
 
 `verifyLeanSpec` は Lake project を書かない。 書いて `lake` を呼ばないのが v0.2 までの姿で、 `lakefile.lean` は何にも影響していなかった。 影響しているのは `lean-toolchain` だけで、 `elan` がこの file を作業 directory から読んで実行する Lean の版を決める。 生成 spec は何も `import` しないので、 検査に build system は要らない。
 
+### 対応する Lean の版 (v0.3 で実測)
+
+生成 source を v4.12.0 / v4.15.0 / v4.23.0 / v4.31.0 の 4 版で検証した。 4 版とも完全な表を受理し、 同じ壊れ方を拒否する。 診断の文言は版で変わる (`missing cases` → `Missing cases` が v4.23) ので、 test は Lean が echo し返す識別子で判定する。
+
+`verifyLeanSpec` は既定で版を固定しない。 machine の Lean が検査する。 `leanToolchain` を渡した時だけ `lean-toolchain` を書き、 `elan` がその版を走らせる。
+
 ### 起動形と診断の出所 (v0.3 で修正)
 
 Lean に `--check` flag は存在しない。 file を elaborate すること自体が検査で、 証明の失敗も網羅性の欠落も非零終了になる。 v0.2 は `lean --check <file>` を実行しており、 Lean は `unrecognized option` で常に非零終了していた。 つまり Lean が入っている環境では、 正しい spec も壊れた spec も等しく `verification-failed` を返していた。 toolchain を入れて実行する test が 1 件も無かったため、 誰も気付けなかった。
