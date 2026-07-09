@@ -262,6 +262,34 @@ Lean は state ごとに定理を elaborate するので、 検証コストは s
 
 `@kiwa-lab/core` を dependencies に持っていたが、 `src` から 1 度も参照していない。 利用者に不要な package を引かせていた。 Node 組込のみを使う。 `sideEffects: false` を宣言し、 `CHANGELOG.md` を配布物に入れた。
 
+#### 22. 観測関数の壊れを、 実装の欠陥と取り違えていた
+
+`checkConformance` は observer が返したものをそのまま読んでいた。 `{ kind: 'to' }` に `state` が無ければ `undefined` という名の state として扱われ、 全 cell が `unknown-state` として報告される。 呼出側の関数が壊れているのに、 機械が悪いと読める report が返っていた。 `{}` も `{ kind: 'maybe' }` も同様。
+
+TypeScript は形を述べる。 だが公開 package の利用者はいずれ TypeScript を使わない誰かになる。 v0.3 は `UsageError` を投げ、 どの cell を観測していたかを名指しする。
+
+observer が throw した場合は素通しする。 呼出側の code の中で起きたことは呼出側が見るべきものだからだ。
+
+#### 23. `workDir` の誤りが素の Error だった
+
+`workDir: '/nope'` は `ENOENT: mkdtemp '/nope/kiwa-lean-'` を投げた。 呼出側が書いていない path を名指しし、 どの option がそれを生んだかを述べない。 `UsageError` に揃えた。
+
+#### 24. 失敗 message が 400 行になり得た
+
+20 state × 20 event が全 cell で食い違うと 400 行印字していた。 400 行目は誰も読まない。 20 件で打ち切り、 残り件数を述べる (`undeclaredError` と同じ規約)。 全件は `report.disagreements` に残る。
+
+#### 25. 印字した cell に marker を付けた
+
+Lean と source は stdout を共有する。 全行を cell として読んでいたので、 source 中の `#eval` や Lean が出力する warning が `unreadable line from Lean` になり、 正しい spec を落としていた。 marker 付きの行だけを読む。 これにより「印字された cell 数が machine の cell 数と一致するか」 の検査が到達可能になり、 test で固定できるようになった。
+
+#### 26. 配布物を、 利用者が導入するように導入して使う
+
+`pnpm test` は `src` を読む。 公開される package は `dist` と exports map と型定義で、 いずれも他の test が全て通ったまま壊れうる。 `tests/package.test.ts` が build → pack → install を行い、 ESM / CommonJS / `tsc` (strict, `skipLibCheck: false`) から使う。 `@ts-expect-error` を 2 箇所に置き、 型が誤用を弾くことを compiler に主張させる。
+
+`prepublishOnly` がこれを走らせる。 利用者が導入できない / require できない / 型検査を通らない package は publish されない。 3 通りに壊して `pnpm publish --dry-run` が止まることを実測した。
+
+書いている最中に 2 つ見つけた。 lifecycle は `npm_config_*` を環境に撒く。 `pack_destination` もその 1 つで、 `npm pack` が指定と違う場所に tarball を書いた。 内側の command は利用者の build が持つ環境で走らせる。 そして `beforeAll` が throw すると test は skip として数えられる。 飛ばされた検査は通った検査と見分けがつかない。 導入の失敗は `T-PKG-000` の失敗として現れる。
+
 ### 移行 (v0.3 の入力規約)
 
 - state / event 名は `[A-Za-z][A-Za-z0-9_-]*` (kebab-case / underscore 可)

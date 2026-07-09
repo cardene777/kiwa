@@ -189,6 +189,11 @@ It knows nothing about how your code is written: you say what it means for your
 implementation to refuse an event, since only you know whether that is a throw, a
 returned error, or an untouched state and a log line.
 
+The observer returns `{ kind: 'to', state }` or `{ kind: 'rejected' }`, and
+anything else is a `UsageError` naming the cell it was observing. An observer that
+returns `{ kind: 'to' }` with no state is broken; the machine it was watching is
+not, and a report saying otherwise would send you to fix the wrong thing.
+
 Four ways to disagree, and each is reported per cell:
 
 | kind | meaning |
