@@ -10,6 +10,8 @@ const MINI_SPEC: OrchestratorSpec = {
   events: ['e1', 'e2'],
   transitions: [
     { from: 'a', event: 'e1', to: 'b' },
+    { from: 'a', event: 'e2', invalid: true },
+    { from: 'b', event: 'e1', invalid: true },
     { from: 'b', event: 'e2', to: 'a' },
   ],
 };

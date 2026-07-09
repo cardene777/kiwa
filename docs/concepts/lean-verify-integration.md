@@ -14,7 +14,7 @@ v2.14 で追加した `@kiwa-lab/lean` v0.1 spec generator を v0.2 で `verifyL
 |---|---|---|
 | generateLeanSpec | ✅ Lean source 生成 | ✅ 変更 0 (shape preserving) |
 | generateLakeProject | ✅ Lake scaffold 生成 | ✅ 変更 0 |
-| verifyLeanSpec | ❌ | ✅ 新規 = lean --check 実行 |
+| verifyLeanSpec | ❌ | ✅ 新規 = 実 toolchain 呼出 (`lean <file>`) |
 
 ## verifyLeanSpec API SSOT
 
@@ -26,10 +26,16 @@ verifyLeanSpec(specs: readonly LeanSpecOutput[], opts?: VerifyOptions): VerifyRe
 
 | status | 発火条件 |
 |---|---|
-| `ok` | Lean install 済 + 全 spec の `lean --check` 成功 |
-| `verification-failed` | Lean install 済 + いずれかの spec の `lean --check` 失敗 (stderr 添付) |
+| `ok` | Lean install 済 + 全 spec の elaboration 成功 |
+| `verification-failed` | Lean install 済 + いずれかの spec の elaboration 失敗 (`diagnostics` に Lean の出力を添付) |
 | `lean-not-installed` | Lean toolchain 未 install (throw なし return) |
 | `skipped-by-env` | `KIWA_LEAN_SKIP_VERIFY=1` env or `opts.skip=true` |
+
+### 起動形と診断の出所 (v0.3 で修正)
+
+Lean に `--check` flag は存在しない。 file を elaborate すること自体が検査で、 証明の失敗も網羅性の欠落も非零終了になる。 v0.2 は `lean --check <file>` を実行しており、 Lean は `unrecognized option` で常に非零終了していた。 つまり Lean が入っている環境では、 正しい spec も壊れた spec も等しく `verification-failed` を返していた。 toolchain を入れて実行する test が 1 件も無かったため、 誰も気付けなかった。
+
+Lean は診断を **stdout** に書く。 `stderr` は空になる。 v0.2 の `VerifyResult.stderr` は常に空文字列で、 「検証に失敗した」 とだけ告げて理由を落としていた。 v0.3 は `diagnostics` に実際に喋った側の stream を載せる。
 
 ### 決定的 CI 動作
 
@@ -40,11 +46,11 @@ Lean toolchain 未 install 環境 (CI default / offline / sandbox) は `lean-not
 ```
 OrchestratorSpec (SSOT)
     ├─► generateLeanSpec → Lean 4 source
-    │       └─► verifyLeanSpec → lean --check → { status: 'ok' }
+    │       └─► verifyLeanSpec → lean <file> → { status: 'ok' }
     └─► TypeScript impl → vitest runtime testing
 ```
 
-同 SSOT (5 state / 8 event / 40 セル) を 両層で駆動、 Lean 側で型 + 定理 (`dispatch_total`) を検証、 TS 側で 実行時挙動 verify。
+同 SSOT (5 state / 8 event / 40 セル) を 両層で駆動、 Lean 側で網羅性 (catch-all 不在の match) と定理 (`<state>_absorbing` / `<state>_has_exit`) を検査、 TS 側で 実行時挙動 verify。
 
 ## v2.15 milestone signal
 

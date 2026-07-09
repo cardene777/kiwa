@@ -1,5 +1,10 @@
 import type { OrchestratorSpec } from '@kiwa-lab/lean';
 
+// Each machine lists the transitions it accepts and rejects everything else.
+// `unspecified: "invalid"` says so once, for the whole table, rather than
+// repeating 26 rejections per spec. Without it the generator refuses to run:
+// a cell nobody mentioned is a cell nobody decided about.
+
 export const TRANSACTION_SPEC: OrchestratorSpec = {
   moduleName: 'TransactionOrchestrator',
   namespace: 'Transaction',
@@ -14,6 +19,7 @@ export const TRANSACTION_SPEC: OrchestratorSpec = {
     'rollback-requested',
     'timeout',
   ],
+  unspecified: 'invalid',
   transitions: [
     { from: 'beginning', event: 'begin-completed', to: 'active' },
     { from: 'beginning', event: 'rollback-requested', to: 'aborted' },
@@ -46,6 +52,7 @@ export const SESSION_SPEC: OrchestratorSpec = {
     'revoke-requested',
     'timeout',
   ],
+  unspecified: 'invalid',
   transitions: [
     { from: 'init', event: 'auth-succeeded', to: 'authed' },
     { from: 'init', event: 'auth-failed', to: 'init' },
@@ -76,6 +83,7 @@ export const CACHE_SPEC: OrchestratorSpec = {
     'evict-requested',
     'timeout',
   ],
+  unspecified: 'invalid',
   transitions: [
     { from: 'filling', event: 'write-committed', to: 'hot' },
     { from: 'filling', event: 'timeout', to: 'evicted' },
@@ -109,6 +117,7 @@ export const JOB_SPEC: OrchestratorSpec = {
     'dlq-inspected',
     'timeout',
   ],
+  unspecified: 'invalid',
   transitions: [
     { from: 'queued', event: 'enqueue-succeeded', to: 'queued' },
     { from: 'queued', event: 'process-started', to: 'processing' },
@@ -137,6 +146,7 @@ export const CLI_SPEC: OrchestratorSpec = {
     'zombie-detected',
     'timeout',
   ],
+  unspecified: 'invalid',
   transitions: [
     { from: 'spawning', event: 'spawn-succeeded', to: 'running' },
     { from: 'spawning', event: 'timeout', to: 'exited' },
