@@ -39,6 +39,14 @@ v0.3 は `@[default_target]` と `globs := #[.andSubmodules \`<rootNamespace>]` 
 
 `verifyLeanSpec` は Lake project を書かない。 書いて `lake` を呼ばないのが v0.2 までの姿で、 `lakefile.lean` は何にも影響していなかった。 影響しているのは `lean-toolchain` だけで、 `elan` がこの file を作業 directory から読んで実行する Lean の版を決める。 生成 spec は何も `import` しないので、 検査に build system は要らない。
 
+### Lean の起動は 1 回 (v0.3)
+
+`lean` は file を 1 つしか受け取らない。 v0.2 は spec ごとに起動しており、 5 spec で約 660 ms かかった。 生成 spec は各自の namespace を開閉し何も import しないので、 1 file に結合しても検査内容は変わらない。 結合後は約 310 ms。
+
+診断の位置は結合 file ではなく spec の名前で述べる。 namespace が重複する 2 spec は Lean が 2 つ目を名指しで拒否する。
+
+`moduleName` が同じ 2 spec は拒否する。 v0.2 は同じ path に 2 度書き、 先の spec を検査しないまま `verifiedFiles` に載せていた。
+
 ### 対応する Lean の版 (v0.3 で実測)
 
 生成 source を v4.12.0 / v4.15.0 / v4.23.0 / v4.31.0 の 4 版で検証した。 4 版とも完全な表を受理し、 同じ壊れ方を拒否する。 診断の文言は版で変わる (`missing cases` → `Missing cases` が v4.23) ので、 test は Lean が echo し返す識別子で判定する。

@@ -91,15 +91,16 @@ function detectLeanBinary(explicit?: string): string | null {
  *   `{ status: 'lean-not-installed' }` without throwing.
  * - If `opts.skip === true` or `KIWA_LEAN_SKIP_VERIFY=1`, returns
  *   `{ status: 'skipped-by-env' }`.
- * - Otherwise runs `lean <file>` for each spec. Any non-zero exit surfaces as
- *   `{ status: 'verification-failed', stderr }`. Success returns
+ * - Otherwise writes the specs into one file and runs `lean` over it once. A
+ *   non-zero exit surfaces as `{ status: 'verification-failed', diagnostics }`,
+ *   with positions named after the spec they came from. Success returns
  *   `{ status: 'ok', verifiedFiles }`.
  *
- * Lean is invoked with the file as its only argument. It has no `--check` flag:
- * elaborating a file *is* checking it, and a failed proof or a non-exhaustive
- * match is a non-zero exit. Passing an unrecognized flag makes every file fail
- * identically, which reads as "the spec is wrong" when it means "the command
- * was wrong".
+ * Lean is invoked with the file as its only argument. It has no `--check` flag,
+ * and it refuses more than one file: elaborating a file *is* checking it, and a
+ * failed proof or a non-exhaustive match is a non-zero exit. Passing an
+ * unrecognized flag makes every file fail identically, which reads as "the spec
+ * is wrong" when it means "the command was wrong".
  *
  * No Lake project is written. Building one and then never calling `lake` is what
  * this used to do, and the lakefile it wrote had no effect on anything. Generated
@@ -126,10 +127,15 @@ export function verifyLeanSpec(
     throw new Error('verifyLeanSpec: at least one spec is required');
   }
 
+  const verifiedFiles = specs.map((s) => `${rootNamespace}/${s.path}`);
+  // Before anything else, including the skip paths. A call that could never
+  // check what it was handed is wrong whether or not this run does the checking.
+  assertUniquePaths(verifiedFiles);
+
   if (skip === true || process.env.KIWA_LEAN_SKIP_VERIFY === '1') {
     return {
       status: 'skipped-by-env',
-      verifiedFiles: specs.map((s) => `${rootNamespace}/${s.path}`),
+      verifiedFiles,
       reason: skip === true ? 'opts.skip=true' : 'KIWA_LEAN_SKIP_VERIFY=1',
     };
   }
@@ -144,42 +150,36 @@ export function verifyLeanSpec(
   }
 
   const rootDir = mkdtempSync(join(workDir ?? tmpdir(), 'kiwa-lean-'));
-  const verifiedFiles: string[] = [];
   try {
     if (leanToolchain !== undefined) {
       writeFileSync(resolve(rootDir, 'lean-toolchain'), `${leanToolchain}\n`, 'utf-8');
     }
-    for (const spec of specs) {
-      const relPath = `${rootNamespace}/${spec.path}`;
-      const abs = resolve(rootDir, relPath);
-      mkdirSync(dirname(abs), { recursive: true });
-      writeFileSync(abs, spec.source, 'utf-8');
-      verifiedFiles.push(relPath);
-    }
 
-    for (const relPath of verifiedFiles) {
-      const abs = resolve(rootDir, relPath);
-      try {
-        execFileSync(resolvedBin, [abs], {
-          cwd: rootDir,
-          stdio: ['ignore', 'pipe', 'pipe'],
-          timeout: timeoutMs,
-        });
-      } catch (err) {
-        const e = err as NodeJS.ErrnoException & { stderr?: Buffer; stdout?: Buffer };
-        const stdout = e.stdout?.toString('utf-8') ?? '';
-        const stderr = e.stderr?.toString('utf-8') ?? '';
-        // Prefer whichever stream carried a message; fall back to the thrown
-        // error, which is what speaks when Lean was killed by the timeout.
-        const spoke = [stdout, stderr].map((s) => s.trim()).filter((s) => s !== '');
-        return {
-          status: 'verification-failed',
-          diagnostics: spoke.length > 0 ? spoke.join('\n') : String(err),
-          stdout,
-          stderr,
-          verifiedFiles,
-        };
-      }
+    const { source, segments } = concatenate(specs, verifiedFiles);
+    const combined = resolve(rootDir, 'Specs.lean');
+    writeFileSync(combined, source, 'utf-8');
+
+    try {
+      execFileSync(resolvedBin, [combined], {
+        cwd: rootDir,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        timeout: timeoutMs,
+      });
+    } catch (err) {
+      const e = err as NodeJS.ErrnoException & { stderr?: Buffer; stdout?: Buffer };
+      const stdout = e.stdout?.toString('utf-8') ?? '';
+      const stderr = e.stderr?.toString('utf-8') ?? '';
+      // Prefer whichever stream carried a message; fall back to the thrown
+      // error, which is what speaks when Lean was killed by the timeout.
+      const spoke = [stdout, stderr].map((s) => s.trim()).filter((s) => s !== '');
+      const raw = spoke.length > 0 ? spoke.join('\n') : String(err);
+      return {
+        status: 'verification-failed',
+        diagnostics: attribute(raw, combined, segments),
+        stdout,
+        stderr,
+        verifiedFiles,
+      };
     }
 
     return {
@@ -193,4 +193,76 @@ export function verifyLeanSpec(
       // best-effort cleanup; ignore
     }
   }
+}
+
+/** Where one spec sits inside the combined file. */
+interface Segment {
+  /** The path the caller knows this spec by. */
+  path: string;
+  /** 1-based line of the spec's first line within the combined file. */
+  startLine: number;
+  /** How many lines the spec occupies. */
+  lineCount: number;
+}
+
+/**
+ * Two specs used to be written to their own files, so two sharing a path meant
+ * the first was overwritten before Lean read it. It was reported as verified
+ * having never been checked, and a broken spec passed whenever a good one
+ * followed it.
+ */
+function assertUniquePaths(paths: readonly string[]): void {
+  const duplicates = paths.filter((path, i) => paths.indexOf(path) !== i);
+  if (duplicates.length > 0) {
+    throw new Error(
+      `verifyLeanSpec: two specs share the path ${[...new Set(duplicates)].join(', ')}; ` +
+        'each spec needs its own moduleName',
+    );
+  }
+}
+
+/**
+ * Join every spec into one file, so Lean is started once rather than once per
+ * spec. Startup dominates: five specs cost about 660ms apart and about 310ms
+ * together, and the checking itself is the small part.
+ *
+ * Each generated spec opens and closes its own namespace and imports nothing, so
+ * concatenating them changes nothing about what Lean checks. Two specs sharing a
+ * namespace do collide, and Lean says so, naming the second one. That is the
+ * right answer: they collide in a Lake project too, where the root module imports
+ * both.
+ */
+function concatenate(
+  specs: readonly LeanSpecOutput[],
+  paths: readonly string[],
+): { source: string; segments: Segment[] } {
+  const segments: Segment[] = [];
+  const chunks: string[] = [];
+  let line = 1;
+  for (const [i, spec] of specs.entries()) {
+    const body = spec.source.endsWith('\n') ? spec.source : `${spec.source}\n`;
+    const lineCount = body.split('\n').length - 1;
+    segments.push({ path: paths[i] as string, startLine: line, lineCount });
+    chunks.push(body);
+    line += lineCount;
+  }
+  return { source: chunks.join(''), segments };
+}
+
+/**
+ * Rewrite Lean's positions so they name the spec rather than the combined file.
+ *
+ * A caller who sees `/var/folders/.../Specs.lean:214:2` learns nothing: the file
+ * is gone by the time they read the message, and the line belongs to a file they
+ * never wrote. `KiwaSpecs/JobOrchestrator.lean:32:2` is the same information in
+ * terms they have.
+ */
+function attribute(diagnostics: string, combinedPath: string, segments: readonly Segment[]): string {
+  const escaped = combinedPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return diagnostics.replace(new RegExp(`${escaped}:(\\d+):(\\d+)`, 'g'), (whole, rawLine, column) => {
+    const line = Number(rawLine);
+    const segment = segments.find((s) => line >= s.startLine && line < s.startLine + s.lineCount);
+    if (segment === undefined) return whole;
+    return `${segment.path}:${line - segment.startLine + 1}:${column}`;
+  });
 }

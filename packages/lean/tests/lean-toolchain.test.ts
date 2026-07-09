@@ -119,6 +119,59 @@ describe.skipIf(!HAS_LEAN)('the generated spec is accepted by Lean', () => {
   });
 });
 
+/**
+ * The specs go into one file and Lean runs once, so its positions refer to a
+ * combined file the caller never wrote, in a directory that is gone by the time
+ * they read the message. The diagnostics name the spec instead.
+ */
+describe.skipIf(!HAS_LEAN)('a failure names the spec it came from', () => {
+  const good = (namespace: string, moduleName: string) =>
+    generateLeanSpec({ ...SESSION, namespace, moduleName });
+
+  const broken = (namespace: string, moduleName: string) => ({
+    ...good(namespace, moduleName),
+    source: `namespace ${namespace}\ndef bad : Nat := "not a number"\nend ${namespace}\n`,
+  });
+
+  it('T-LEAN-160 the position names the spec and its own line, not a temp path', () => {
+    const result = verifyLeanSpec([good('First', 'First'), broken('Second', 'Second')]);
+
+    expect(result.status).toBe('verification-failed');
+    expect(result.diagnostics).toContain('KiwaSpecs/Second.lean:2:');
+    expect(result.diagnostics).not.toContain('Specs.lean');
+    expect(result.diagnostics).not.toContain(tmpdir());
+  });
+
+  it('T-LEAN-161 a broken spec is caught wherever it sits in the list', () => {
+    // It used to be overwritten by whatever followed it, and pass.
+    const first = verifyLeanSpec([broken('A', 'A'), good('B', 'B')]);
+    const last = verifyLeanSpec([good('B', 'B'), broken('A', 'A')]);
+
+    expect(first.status).toBe('verification-failed');
+    expect(last.status).toBe('verification-failed');
+    expect(first.diagnostics).toContain('KiwaSpecs/A.lean');
+    expect(last.diagnostics).toContain('KiwaSpecs/A.lean');
+  });
+
+  it('T-LEAN-162 two specs sharing a namespace collide, and Lean names the second', () => {
+    // Separate files hid this. A Lake project whose root module imports both
+    // would not have.
+    const result = verifyLeanSpec([good('Same', 'One'), good('Same', 'Two')]);
+
+    expect(result.status).toBe('verification-failed');
+    expect(result.diagnostics).toContain('KiwaSpecs/Two.lean');
+    expect(result.diagnostics).toMatch(/already been declared/i);
+  });
+
+  it('T-LEAN-163 several specs verify in one Lean run', () => {
+    const specs = ['A', 'B', 'C', 'D', 'E'].map((n) => good(n, `${n}Orchestrator`));
+    const result = verifyLeanSpec(specs);
+
+    expect(result.status).toBe('ok');
+    expect(result.verifiedFiles).toHaveLength(5);
+  });
+});
+
 describe.skipIf(!HAS_LEAN)('Lean rejects what the theorems forbid', () => {
   it('T-LEAN-110 a missing cell fails, and Lean names it', () => {
     const source = generateLeanSpec(SESSION).source;

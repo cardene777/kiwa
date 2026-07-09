@@ -177,9 +177,18 @@ specs alongside the rest of the code. Its library is a `@[default_target]` and
 globs the spec directory, because a Lake library that is neither will report
 `Build completed successfully` having compiled nothing.
 
-`verifyLeanSpec` does not need it. It writes the specs and a `lean-toolchain` to
-a scratch directory and calls `lean` on each, since a generated spec imports
-nothing. The toolchain file is what decides which Lean runs.
+`verifyLeanSpec` does not need it. It writes the specs into one scratch file and
+calls `lean` once, since a generated spec imports nothing and Lean takes one file
+at a time. Its diagnostics name the spec a failure came from, not the scratch
+file:
+
+```
+KiwaSpecs/JobOrchestrator.lean:30:2: error: missing cases:
+State.Dlq, Event.RetryScheduled
+```
+
+Two specs may not share a `moduleName`. They would land on one path, and the
+first would be reported as verified having never been read.
 
 See [`CHANGELOG.md`](./CHANGELOG.md) for the 0.3.0 breaking changes and why they
 were breaking.
