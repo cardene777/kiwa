@@ -212,6 +212,21 @@ describe.skipIf(!HAS_LEAN)('Lean checks the sink theorems', () => {
     expect(diagnostics).toContain("tactic 'rfl' failed");
   });
 
+  it('T-LEAN-144 a one-state sink verifies, though its steps definition goes unused', () => {
+    const solo = generateLeanSpec({
+      moduleName: 'SoloOrchestrator',
+      namespace: 'Solo',
+      states: ['idle'],
+      events: ['ping'],
+      unspecified: 'invalid',
+      initial: 'idle',
+      transitions: [{ from: 'idle', event: 'ping', to: 'idle' }],
+    });
+    expect(solo.source).toContain('def steps');
+    expect(solo.source).not.toContain('_reachable');
+    expect(verifyLeanSpec([solo]).status).toBe('ok');
+  });
+
   it('T-LEAN-143 a self-loop does not escape, and Lean computes that', () => {
     const source = `${generateLeanSpec(JOB).source.replace(/\nend Job\n$/, '')}
 theorem self_loop_does_not_escape : escapes .Queued .Start = false := rfl

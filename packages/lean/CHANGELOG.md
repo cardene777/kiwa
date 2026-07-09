@@ -141,4 +141,6 @@ Lean 4.15.0 を実際に install して実行した。 以下を test で固定�
 
 実食 app の 5 台 (transaction / session / cache / job / cli) は全状態が初期状態から到達可能で、 実 toolchain の検証を通る。 `job` の `dlq` だけが sink として検出される。
 
+端の場合も固定した。 初期状態自身が sink で他に状態があれば、 それらは到達不能として停止する。 状態が 1 つだけで自己遷移する機械は sink として扱われ、 到達可能性の定理を 1 つも持たないまま検証を通る。
+
 toolchain が無い環境では skip され、 skip は pass として報告されない。
