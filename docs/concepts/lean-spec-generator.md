@@ -101,6 +101,7 @@ end Transaction
 ## 統合方針
 
 - **同 SSOT** = TypeScript impl と Lean spec は 同じ 5 state / 8 event / 40 cell definition を共有、 `checkConformance(spec, observe)` が全 cell を実装に問うて突き合わせる
+- **生成器も検査対象** = `checkLeanTable(spec)` が生成 Lean に `lean --run` で自分の表を出力させ、 spec と突き合わせる。 定理は生成器と同じ表から導かれるので、 cell の移動を捕まえられない (欠落は網羅性検査が捕まえる)
 - **表の意味論は 1 箇所** = `src/table.ts` の `resolveTable` を生成器と突き合わせの双方が読む。 spec を 2 箇所で解釈すると、 片方だけが policy を知る状態に必ず drift する
 - **shape 契約 preserving** = 既存 41 package 変更 0、 packages/lean/ 追加のみ
 - **opt-in** = Lean toolchain 未 install 環境でも generator 単体 で動作、 生成 file を実 toolchain で検証するのは user 側 opt-in

@@ -10,8 +10,14 @@
  * five machines.
  */
 
+import { execFileSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
-import { checkConformance, formatConformance, type Observation } from '@kiwa-lab/lean';
+import {
+  checkConformance,
+  checkLeanTable,
+  formatConformance,
+  type Observation,
+} from '@kiwa-lab/lean';
 import { semantics as authSemantics } from '@kiwa-lab/auth';
 import { dispatchCacheEvent, startCache } from '@kiwa-lab/cache';
 import { dispatchCliEvent, startCli } from '@kiwa-lab/cli-test';
@@ -138,4 +144,48 @@ describe('the implementation and the Lean spec are driven by one table', () => {
     expect(report.disagreements.every((d) => d.kind === 'impl-accepts')).toBe(true);
     expect(report.disagreements).toHaveLength(8);
   });
+});
+
+function leanInstalled(): boolean {
+  try {
+    execFileSync('lean', ['--version'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Three things are supposed to agree: the spec, the implementation, and the Lean
+ * file. The tests above tie the first two together. The third edge goes through
+ * the generator, and the theorems cannot check it — they are derived from the
+ * same table, so a cell rendered to the wrong target produces a file that
+ * compiles and proves everything it claims.
+ *
+ * `checkLeanTable` makes Lean print the table it computes and compares it with
+ * the spec, closing the triangle.
+ */
+describe.skipIf(!leanInstalled())('the Lean file holds the table the spec describes', () => {
+  it.each(MACHINES.map((m) => [m.spec.namespace, m.spec] as const))(
+    '%s: Lean computes the same 40 cells',
+    (_name, spec) => {
+      const report = checkLeanTable(spec);
+
+      expect(report.status).toBe('ok');
+      expect(report.disagreements).toEqual([]);
+      expect(report.checked).toBe(40);
+    },
+    120_000,
+  );
+
+  it('the spec, the implementation, and the Lean file all agree, on 200 cells', () => {
+    for (const { spec, observe } of MACHINES) {
+      const againstCode = checkConformance(spec, observe);
+      const againstLean = checkLeanTable(spec);
+
+      expect(formatConformance(spec, againstCode)).toContain('cells agree');
+      expect(againstLean.status).toBe('ok');
+      expect(againstLean.ok).toBe(true);
+    }
+  }, 300_000);
 });

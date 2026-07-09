@@ -196,6 +196,35 @@ Four ways to disagree, and each is reported per cell:
 `impl-accepts` is the half a test written from the happy path never reaches: the
 machine takes an event the spec calls impossible.
 
+## Does the Lean file hold the table you wrote?
+
+The theorems cannot answer that. They are derived from the same table the
+generator emitted, so a cell rendered to the wrong target produces a file that
+compiles, whose theorems all prove, and whose table is wrong. Lean's
+exhaustiveness checker catches a cell that was *dropped*; nothing catches one that
+was *moved*.
+
+`checkLeanTable` makes Lean print the table it computes, and compares it with the
+spec:
+
+```ts
+const report = checkLeanTable(spec);
+// { status: 'ok', ok: true, checked: 40, disagreements: [] }
+```
+
+A disagreement names the cell and both answers:
+
+```
+authed + timeout: the spec says expired, the generated Lean says authed
+```
+
+`status` is `lean-not-installed` when there is no toolchain, and `ok` is false —
+a check that did not run has established nothing. Pass `source` to check a Lean
+file you have on disk rather than one generated on the spot.
+
+With `checkConformance` this closes the triangle: the spec, the code, and the
+proof all hold one table.
+
 ## API
 
 | Export | Purpose |
@@ -204,6 +233,8 @@ machine takes an event the spec calls impossible.
 | `generateLakeProject(config)` | a Lake package whose `lake build` actually builds the specs put in it |
 | `verifyLeanSpec(specs, opts?)` | run Lean over generated specs |
 | `checkConformance(spec, observe)` | walk every cell, comparing the spec with an implementation |
+| `checkLeanTable(spec, opts?)` | make Lean print its table, comparing it with the spec |
+| `extractLeanTable(source, spec, opts?)` | read the table out of a Lean source |
 | `formatConformance(spec, report)` | render a report as one failure message |
 | `isInvalid(transition)` | narrow a `Transition` to its rejecting form |
 

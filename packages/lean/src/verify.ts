@@ -1,7 +1,8 @@
-import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
+import {
+  DEFAULT_TIMEOUT_MS,
+  runLeanSource,
+  type LeanRunOptions,
+} from './lean-runner.js';
 import type { LeanSpecOutput } from './types.js';
 
 export type VerifyStatus =
@@ -41,9 +42,7 @@ export interface VerifyOptions {
    * Useful for testing / sandboxed environments.
    */
   leanBin?: string;
-  /**
-   * Working directory root for the scratch Lake project. Default: OS tmpdir.
-   */
+  /** Where the scratch directory is created. Default: the OS temp directory. */
   workDir?: string;
   /** Timeout for the Lean subprocess in ms. Default: 60_000. */
   timeoutMs?: number;
@@ -70,21 +69,8 @@ export interface VerifyResult {
   reason?: string;
 }
 
-const DEFAULT_TIMEOUT_MS = 60_000;
-
-function detectLeanBinary(explicit?: string): string | null {
-  const bin = explicit ?? 'lean';
-  try {
-    execFileSync(bin, ['--version'], { stdio: ['ignore', 'pipe', 'pipe'] });
-    return bin;
-  } catch {
-    return null;
-  }
-}
-
 /**
- * Verify one or more generated Lean specs by materializing them into a
- * scratch Lake project and elaborating each file with Lean.
+ * Verify one or more generated Lean specs by elaborating them with Lean.
  *
  * Behavior:
  * - If Lean is not installed (or `leanBin` is not on PATH), returns
@@ -140,8 +126,14 @@ export function verifyLeanSpec(
     };
   }
 
-  const resolvedBin = detectLeanBinary(leanBin);
-  if (!resolvedBin) {
+  const { source, segments } = concatenate(specs, verifiedFiles);
+  const runOpts: LeanRunOptions = { timeoutMs };
+  if (leanToolchain !== undefined) runOpts.leanToolchain = leanToolchain;
+  if (leanBin !== undefined) runOpts.leanBin = leanBin;
+  if (workDir !== undefined) runOpts.workDir = workDir;
+
+  const run = runLeanSource(source, [], runOpts);
+  if (run === 'lean-not-installed') {
     return {
       status: 'lean-not-installed',
       verifiedFiles: [],
@@ -149,50 +141,17 @@ export function verifyLeanSpec(
     };
   }
 
-  const rootDir = mkdtempSync(join(workDir ?? tmpdir(), 'kiwa-lean-'));
-  try {
-    if (leanToolchain !== undefined) {
-      writeFileSync(resolve(rootDir, 'lean-toolchain'), `${leanToolchain}\n`, 'utf-8');
-    }
-
-    const { source, segments } = concatenate(specs, verifiedFiles);
-    const combined = resolve(rootDir, 'Specs.lean');
-    writeFileSync(combined, source, 'utf-8');
-
-    try {
-      execFileSync(resolvedBin, [combined], {
-        cwd: rootDir,
-        stdio: ['ignore', 'pipe', 'pipe'],
-        timeout: timeoutMs,
-      });
-    } catch (err) {
-      const e = err as NodeJS.ErrnoException & { stderr?: Buffer; stdout?: Buffer };
-      const stdout = e.stdout?.toString('utf-8') ?? '';
-      const stderr = e.stderr?.toString('utf-8') ?? '';
-      // Prefer whichever stream carried a message; fall back to the thrown
-      // error, which is what speaks when Lean was killed by the timeout.
-      const spoke = [stdout, stderr].map((s) => s.trim()).filter((s) => s !== '');
-      const raw = spoke.length > 0 ? spoke.join('\n') : String(err);
-      return {
-        status: 'verification-failed',
-        diagnostics: attribute(raw, combined, segments),
-        stdout,
-        stderr,
-        verifiedFiles,
-      };
-    }
-
+  if (!run.ok) {
     return {
-      status: 'ok',
+      status: 'verification-failed',
+      diagnostics: attribute(run.diagnostics, run.filePath, segments),
+      stdout: run.stdout,
+      stderr: run.stderr,
       verifiedFiles,
     };
-  } finally {
-    try {
-      rmSync(rootDir, { recursive: true, force: true });
-    } catch {
-      // best-effort cleanup; ignore
-    }
   }
+
+  return { status: 'ok', verifiedFiles };
 }
 
 /** Where one spec sits inside the combined file. */
