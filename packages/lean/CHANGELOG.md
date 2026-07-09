@@ -169,6 +169,31 @@ const spec: OrchestratorSpec = {
 };
 ```
 
+### 追加 — `checkConformance`
+
+#### 11. 「同 SSOT」 は文書にしか無かった
+
+`docs/concepts/lean-spec-generator.md` は「TypeScript impl と Lean spec は 同じ 5 state / 8 event / 40 cell definition を共有」 と書き、 `MANIFESTO.md` は「同 SSOT を 両層で駆動」 と書いていた。 それを検査するものは、 code にも test にも 1 つも無かった。 Lean 側の表を 1 cell 変えても、 TS 側を 1 cell 変えても、 全 test が通る。
+
+`checkConformance(spec, observe)` を追加した。 spec の全 cell を実装に問い、 食い違いを 4 種に分けて報告する。
+
+| kind | 意味 |
+|---|---|
+| `different-target` | 双方が受理し、 着地する状態が違う |
+| `impl-rejects` | spec は遷移先を持つが、 実装が event を拒否した |
+| `impl-accepts` | spec が拒否する event を、 実装が受理して動いた |
+| `unknown-state` | 実装が状態空間の外へ出た |
+
+`impl-accepts` は、 spec の正常系から書いた test が決して到達しない側だ。 「起きえない」 と宣言した event を機械が受理する。
+
+実装の書き方は問わない。 何をもって「拒否した」 とするかは呼出側が決める。 throw なのか、 error を返すのか、 状態を変えず log に印を残すのかを知っているのは呼出側だけだからだ。
+
+`examples/dogfood-lean-orchestrator-specs-app/tests/conformance.test.ts` が本番実装 5 台 (orm / auth / cache / queue / cli-test) に対して 200 cell を突き合わせる。 今日は全 cell 一致する。 実装を 1 行変えても、 spec を 1 cell 動かしても落ちることを実測した。
+
+#### 12. 表の意味論を 1 箇所にまとめた
+
+`src/table.ts` の `resolveTable` を、 生成器と突き合わせの双方が読む。 spec を 2 箇所で解釈すれば、 片方だけが `unspecified` policy を知る状態に必ず drift する。 v0.3 の初期は生成器の中に表の組み立てが埋まっており、 hook が同じ規則を `awk` で書き直していたのと同じ形だった。
+
 ### 対応する Lean の版
 
 生成 source を **v4.12.0 / v4.15.0 / v4.23.0 / v4.31.0** の 4 版で検証した。 4 版とも、 完全な表を受理し、 同じ壊れ方 (cell の欠落 / 偽の absorbing 定理 / 偽の到達経路) を拒否する。

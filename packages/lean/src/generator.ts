@@ -1,4 +1,11 @@
-import { isInvalid, type LeanSpecOutput, type OrchestratorSpec, type Transition } from './types.js';
+import {
+  cellKey,
+  resolveTable,
+  sinkStates as findSinks,
+  terminalStates as findTerminals,
+  type Table,
+} from './table.js';
+import type { LeanSpecOutput, OrchestratorSpec } from './types.js';
 
 const toPascalCase = (input: string): string =>
   input
@@ -15,10 +22,6 @@ const toSnakeCase = (input: string): string =>
     .join('_')
     .toLowerCase();
 
-const cellKey = (state: string, event: string): string => `${state}::${event}`;
-
-/** How many undeclared cells to name before saying "and N more". */
-const MAX_REPORTED_CELLS = 8;
 
 /**
  * Generate a Lean 4 spec for a lifecycle-orchestrator state machine.
@@ -50,39 +53,15 @@ const MAX_REPORTED_CELLS = 8;
  * generator already knows the table, and they fail to compile if it is misread.
  */
 export function generateLeanSpec(spec: OrchestratorSpec): LeanSpecOutput {
-  const { moduleName, namespace, states, events, transitions, unspecified = 'error' } = spec;
+  const { moduleName, namespace, states, events } = spec;
 
-  if (states.length === 0) {
-    throw new Error('generateLeanSpec: at least one state is required');
-  }
-  if (events.length === 0) {
-    throw new Error('generateLeanSpec: at least one event is required');
-  }
-
-  const table = buildTable(states, events, transitions);
-  const undeclared = findUndeclared(states, events, table);
-
-  if (undeclared.length > 0) {
-    if (unspecified === 'error') throw undeclaredError(undeclared);
-    for (const cell of undeclared) table.set(cell, null);
-  }
+  const table = resolveTable(spec, 'generateLeanSpec');
 
   const validCount = [...table.values()].filter((target) => target !== null).length;
   const cellCount = states.length * events.length;
 
-  const terminalStates = states.filter((state) =>
-    events.every((event) => table.get(cellKey(state, event)) === null),
-  );
-  // A sink accepts events and never leaves, because every valid cell loops back.
-  // It is not terminal, and it is not a state anything escapes from either.
-  const sinkStates = states.filter(
-    (state) =>
-      !terminalStates.includes(state) &&
-      events.every((event) => {
-        const target = table.get(cellKey(state, event));
-        return target === null || target === undefined || target === state;
-      }),
-  );
+  const terminalStates = findTerminals(spec, table);
+  const sinkStates = findSinks(spec, table);
   if (spec.terminal !== undefined) {
     assertTerminalsAgree(states, spec.terminal, terminalStates);
   }
@@ -164,72 +143,6 @@ def steps : State → List Event → Step
     | .invalid => .invalid
 `;
 
-/** `null` marks a rejected cell; a string is the target state. */
-type Table = Map<string, string | null>;
-
-function buildTable(
-  states: readonly string[],
-  events: readonly string[],
-  transitions: readonly Transition[],
-): Table {
-  const table: Table = new Map();
-  for (const t of transitions) {
-    if (!states.includes(t.from)) {
-      throw new Error(`generateLeanSpec: unknown state in transition.from: ${t.from}`);
-    }
-    if (!events.includes(t.event)) {
-      throw new Error(`generateLeanSpec: unknown event in transition.event: ${t.event}`);
-    }
-    const key = cellKey(t.from, t.event);
-    if (table.has(key)) {
-      throw new Error(`generateLeanSpec: duplicate transition ${key}`);
-    }
-    if (isInvalid(t)) {
-      table.set(key, null);
-      continue;
-    }
-    if (!states.includes(t.to)) {
-      throw new Error(`generateLeanSpec: unknown state in transition.to: ${t.to}`);
-    }
-    table.set(key, t.to);
-  }
-  return table;
-}
-
-function findUndeclared(
-  states: readonly string[],
-  events: readonly string[],
-  table: Table,
-): string[] {
-  const missing: string[] = [];
-  for (const state of states) {
-    for (const event of events) {
-      const key = cellKey(state, event);
-      if (!table.has(key)) missing.push(key);
-    }
-  }
-  return missing;
-}
-
-/**
- * Undeclared cells are named, because "the table is incomplete" is not actionable
- * and "beginning::query-executed is undecided" is.
- */
-function undeclaredError(undeclared: readonly string[]): Error {
-  const shown = undeclared
-    .slice(0, MAX_REPORTED_CELLS)
-    .map((cell) => `  ${cell.replace('::', ' + ')}`)
-    .join('\n');
-  const rest =
-    undeclared.length > MAX_REPORTED_CELLS
-      ? `\n  ...and ${undeclared.length - MAX_REPORTED_CELLS} more`
-      : '';
-  return new Error(
-    `generateLeanSpec: ${undeclared.length} (state, event) cell(s) are undeclared:\n${shown}${rest}\n\n` +
-      'Give each a target, or mark it { invalid: true }. Pass `unspecified: "invalid"` ' +
-      'to reject every unmentioned cell instead.',
-  );
-}
 
 /**
  * Check the author's belief about which states are terminal against the table.

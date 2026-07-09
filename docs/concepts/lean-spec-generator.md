@@ -15,7 +15,7 @@ kiwa v2.14+ は 同じ SSOT (5 state / 8 event / 40 セル) を 2 層で駆動�
 - **Lean spec 層** = specification-level SSOT。 遷移表の網羅は Lean の網羅性検査が担い、 表から導ける不変条件は実装前に定理として証明される
 - **TypeScript impl 層** = runtime behavior with vitest testing、 実行時挙動 verify
 
-両層は 同じ OrchestratorSpec 型 SSOT を共有、 depth-5 pattern の 5 lifecycle-orchestrator (transaction / session / cache / job / cli) は 両層で 対称に定義。
+両層は 同じ OrchestratorSpec 型 SSOT を共有、 depth-5 pattern の 5 lifecycle-orchestrator (transaction / session / cache / job / cli) は 両層で 対称に定義。 対称であることは規約ではなく `checkConformance` が検査する (200 cell = 40 × 5 台)。
 
 ## API SSOT
 
@@ -100,7 +100,8 @@ end Transaction
 
 ## 統合方針
 
-- **同 SSOT** = TypeScript impl と Lean spec は 同じ 5 state / 8 event / 40 cell definition を共有
+- **同 SSOT** = TypeScript impl と Lean spec は 同じ 5 state / 8 event / 40 cell definition を共有、 `checkConformance(spec, observe)` が全 cell を実装に問うて突き合わせる
+- **表の意味論は 1 箇所** = `src/table.ts` の `resolveTable` を生成器と突き合わせの双方が読む。 spec を 2 箇所で解釈すると、 片方だけが policy を知る状態に必ず drift する
 - **shape 契約 preserving** = 既存 41 package 変更 0、 packages/lean/ 追加のみ
 - **opt-in** = Lean toolchain 未 install 環境でも generator 単体 で動作、 生成 file を実 toolchain で検証するのは user 側 opt-in
 - **網羅は定理でなく型検査** = catch-all を置かないので、 cell が欠ければ Lean が `missing cases` として cell 名を挙げて落ちる。 v0.2 までの `dispatch_total` は任意の関数について `rfl` で証明でき、 遷移ゼロの表でも通ったため v0.3 で削除した

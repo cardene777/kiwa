@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { generateLeanSpec, type OrchestratorSpec } from '@kiwa-lab/lean';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
@@ -37,12 +38,29 @@ describe('v2.14-4 publish', () => {
   it('lean generator source', () => {
     const src = readText('packages/lean/src/generator.ts');
     expect(src).toContain('export function generateLeanSpec');
-    // `dispatch_total` was replaced in 0.3.0: `∃ s', dispatch s e = s'` is
-    // provable by rfl for any function, so it passed on an empty table. These
-    // two fail to compile when the table contradicts them.
-    expect(src).not.toContain('theorem dispatch_total');
-    expect(src).toContain('_absorbing');
-    expect(src).toContain('_has_exit');
+  });
+
+  it('lean generator emits theorems that can fail', () => {
+    // This used to grep generator.ts for theorem names, and passed on a name
+    // that survived only in a doc comment after the theorem itself was renamed.
+    // Generate a spec and read what actually comes out.
+    const spec: OrchestratorSpec = {
+      moduleName: 'Probe',
+      namespace: 'Probe',
+      states: ['init', 'done'],
+      events: ['go', 'timeout'],
+      unspecified: 'invalid',
+      initial: 'init',
+      transitions: [{ from: 'init', event: 'go', to: 'done' }],
+    };
+    const { source } = generateLeanSpec(spec);
+
+    // `dispatch_total` was removed in 0.3.0: `∃ s', dispatch s e = s'` is
+    // provable by rfl for any function, so it passed on an empty table.
+    expect(source).not.toContain('dispatch_total');
+    expect(source).toContain('theorem done_absorbing');
+    expect(source).toContain('theorem init_can_leave');
+    expect(source).toContain('theorem done_reachable');
   });
   it('lean lake source', () => {
     const src = readText('packages/lean/src/lake.ts');
