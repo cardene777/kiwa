@@ -3,13 +3,16 @@ import {
   runLeanSource,
   type LeanRunOptions,
 } from './lean-runner.js';
+import { UsageError } from './errors.js';
 import type { LeanSpecOutput } from './types.js';
 
 export type VerifyStatus =
   | 'ok'
   | 'lean-not-installed'
   | 'skipped-by-env'
-  | 'verification-failed';
+  | 'verification-failed'
+  /** Lean was still working when `timeoutMs` ran out. Nothing was established. */
+  | 'timed-out';
 
 export interface VerifyOptions {
   /** Root namespace under which specs will be organized. Default: `KiwaSpecs`. */
@@ -79,7 +82,8 @@ export interface VerifyResult {
  *   `{ status: 'skipped-by-env' }`.
  * - Otherwise writes the specs into one file and runs `lean` over it once. A
  *   non-zero exit surfaces as `{ status: 'verification-failed', diagnostics }`,
- *   with positions named after the spec they came from. Success returns
+ *   with positions named after the spec they came from, and a run that outlives
+ *   `timeoutMs` as `{ status: 'timed-out' }`. Success returns
  *   `{ status: 'ok', verifiedFiles }`.
  *
  * Lean is invoked with the file as its only argument. It has no `--check` flag,
@@ -110,7 +114,7 @@ export function verifyLeanSpec(
   } = opts;
 
   if (specs.length === 0) {
-    throw new Error('verifyLeanSpec: at least one spec is required');
+    throw new UsageError('verifyLeanSpec: at least one spec is required');
   }
 
   const verifiedFiles = specs.map((s) => `${rootNamespace}/${s.path}`);
@@ -143,7 +147,9 @@ export function verifyLeanSpec(
 
   if (!run.ok) {
     return {
-      status: 'verification-failed',
+      // A timeout is not a verdict on the spec. Calling it a failed verification
+      // sends a caller looking for a bug in a table Lean never finished reading.
+      status: run.timedOut ? 'timed-out' : 'verification-failed',
       diagnostics: attribute(run.diagnostics, run.filePath, segments),
       stdout: run.stdout,
       stderr: run.stderr,
@@ -173,7 +179,7 @@ interface Segment {
 function assertUniquePaths(paths: readonly string[]): void {
   const duplicates = paths.filter((path, i) => paths.indexOf(path) !== i);
   if (duplicates.length > 0) {
-    throw new Error(
+    throw new UsageError(
       `verifyLeanSpec: two specs share the path ${[...new Set(duplicates)].join(', ')}; ` +
         'each spec needs its own moduleName',
     );

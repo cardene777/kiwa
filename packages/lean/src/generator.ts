@@ -5,6 +5,7 @@ import {
   terminalStates as findTerminals,
   type Table,
 } from './table.js';
+import { SpecError } from './errors.js';
 import type { LeanSpecOutput, OrchestratorSpec } from './types.js';
 
 const toPascalCase = (input: string): string =>
@@ -157,11 +158,6 @@ function assertTerminalsAgree(
   declared: readonly string[],
   actual: readonly string[],
 ): void {
-  const unknown = declared.filter((state) => !states.includes(state));
-  if (unknown.length > 0) {
-    throw new Error(`generateLeanSpec: unknown state in terminal: ${unknown.join(', ')}`);
-  }
-
   const claimedButLeaves = declared.filter((state) => !actual.includes(state));
   const stuckButUnclaimed = actual.filter((state) => !declared.includes(state));
 
@@ -173,7 +169,7 @@ function assertTerminalsAgree(
     problems.push(`  ${state} has no way out but is not declared terminal`);
   }
   if (problems.length > 0) {
-    throw new Error(
+    throw new SpecError(
       `generateLeanSpec: the table and the declared terminal states disagree:\n${problems.join('\n')}`,
     );
   }
@@ -193,10 +189,6 @@ function reachabilityPaths(
   events: readonly string[],
   table: Table,
 ): Map<string, string[]> {
-  if (!states.includes(initial)) {
-    throw new Error(`generateLeanSpec: unknown state in initial: ${initial}`);
-  }
-
   const paths = new Map<string, string[]>([[initial, []]]);
   const queue: string[] = [initial];
   while (queue.length > 0) {
@@ -213,7 +205,7 @@ function reachabilityPaths(
 
   const unreachable = states.filter((state) => !paths.has(state));
   if (unreachable.length > 0) {
-    throw new Error(
+    throw new SpecError(
       `generateLeanSpec: ${unreachable.length} state(s) cannot be reached from "${initial}":\n` +
         unreachable.map((state) => `  ${state}`).join('\n') +
         '\n\nGive each a transition that reaches it, or remove it from the machine.',

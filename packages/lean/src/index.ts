@@ -17,7 +17,8 @@ export type {
   Observe,
 } from './conformance.js';
 export { checkConformance, formatConformance } from './conformance.js';
-export { SpecError } from './table.js';
+export { LeanError, SpecError, UsageError } from './errors.js';
+export type { Table } from './table.js';
 
 export type {
   ExtractResult,

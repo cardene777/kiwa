@@ -68,7 +68,12 @@ def main : IO Unit := do
 `;
 }
 
-export type ExtractStatus = 'ok' | 'lean-not-installed' | 'extraction-failed';
+export type ExtractStatus =
+  | 'ok'
+  | 'lean-not-installed'
+  | 'extraction-failed'
+  /** Lean was still working when `timeoutMs` ran out. Nothing was established. */
+  | 'timed-out';
 
 export interface ExtractResult {
   status: ExtractStatus;
@@ -91,7 +96,12 @@ export function extractLeanTable(
 ): ExtractResult {
   const run = runLeanSource(`${source}${renderTableProgram(spec)}`, ['--run'], opts);
   if (run === 'lean-not-installed') return { status: 'lean-not-installed' };
-  if (!run.ok) return { status: 'extraction-failed', diagnostics: run.diagnostics };
+  if (!run.ok) {
+    return {
+      status: run.timedOut ? 'timed-out' : 'extraction-failed',
+      diagnostics: run.diagnostics,
+    };
+  }
 
   const table = new Map<string, string | null>();
   const lines = run.stdout.split('\n').filter((line) => line.trim() !== '');
