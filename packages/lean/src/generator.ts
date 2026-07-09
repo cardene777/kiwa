@@ -1,4 +1,4 @@
-import type { LeanSpecOutput, OrchestratorSpec } from './types.js';
+import { isInvalid, type LeanSpecOutput, type OrchestratorSpec, type Transition } from './types.js';
 
 const toPascalCase = (input: string): string =>
   input
@@ -7,37 +7,49 @@ const toPascalCase = (input: string): string =>
     .map((seg) => seg.charAt(0).toUpperCase() + seg.slice(1))
     .join('');
 
-const toLeanConstructor = (input: string): string => toPascalCase(input);
+/** Theorem names are Lean identifiers, so `savepoint-nested` becomes `savepoint_nested`. */
+const toSnakeCase = (input: string): string =>
+  input
+    .split(/[-\s]+/)
+    .filter(Boolean)
+    .join('_')
+    .toLowerCase();
+
+const cellKey = (state: string, event: string): string => `${state}::${event}`;
+
+/** How many undeclared cells to name before saying "and N more". */
+const MAX_REPORTED_CELLS = 8;
 
 /**
- * Generate a Lean 4 spec for a kiwa lifecycle-orchestrator state machine.
+ * Generate a Lean 4 spec for a lifecycle-orchestrator state machine.
  *
- * Output layout:
+ * The generated file lists every `(state, event)` cell and has no catch-all. That
+ * is deliberate: Lean refuses a non-exhaustive match, so the exhaustiveness of the
+ * table is checked by Lean rather than asserted by a theorem that cannot fail.
  *
  * ```lean
- * namespace {Namespace}
+ * inductive Step where
+ *   | to : State → Step
+ *   | invalid : Step
  *
- * inductive State where
- *   | Init : State
- *   | Authed : State
+ * def dispatch : State → Event → Step
+ *   | .Beginning, .BeginCompleted => .to .Active
+ *   | .Beginning, .QueryExecuted  => .invalid
  *   ...
- * deriving DecidableEq, Repr
  *
- * inductive Event where
- *   | AuthSucceeded : Event
- *   ...
- * deriving DecidableEq, Repr
+ * theorem aborted_absorbing : ∀ e, dispatch .Aborted e = .invalid := by
+ *   intro e; cases e <;> rfl
  *
- * def dispatch : State → Event → State
- *   | .Init, .AuthSucceeded => .Authed
- *   | s, _ => s  -- invalid transition falls through to identity
- *
- * theorem dispatch_total (s : State) (e : Event) : ∃ s', dispatch s e = s' := by
- *   exact ⟨dispatch s e, rfl⟩
+ * theorem beginning_has_exit : ∃ e s, dispatch .Beginning e = .to s :=
+ *   ⟨.BeginCompleted, .Active, rfl⟩
  * ```
+ *
+ * The theorems say something a reader could otherwise get wrong: which states are
+ * terminal, and which have a way out. Their proofs are mechanical because the
+ * generator already knows the table, and they fail to compile if it is misread.
  */
 export function generateLeanSpec(spec: OrchestratorSpec): LeanSpecOutput {
-  const { moduleName, namespace, states, events, transitions } = spec;
+  const { moduleName, namespace, states, events, transitions, unspecified = 'error' } = spec;
 
   if (states.length === 0) {
     throw new Error('generateLeanSpec: at least one state is required');
@@ -46,63 +58,52 @@ export function generateLeanSpec(spec: OrchestratorSpec): LeanSpecOutput {
     throw new Error('generateLeanSpec: at least one event is required');
   }
 
-  const stateConstructors = states.map(toLeanConstructor);
-  const eventConstructors = events.map(toLeanConstructor);
+  const table = buildTable(states, events, transitions);
+  const undeclared = findUndeclared(states, events, table);
 
-  const validPairs = new Set<string>();
-  const transitionLines: string[] = [];
-  for (const t of transitions) {
-    if (!states.includes(t.from)) {
-      throw new Error(`generateLeanSpec: unknown state in transition.from: ${t.from}`);
-    }
-    if (!events.includes(t.event)) {
-      throw new Error(`generateLeanSpec: unknown event in transition.event: ${t.event}`);
-    }
-    if (!states.includes(t.to)) {
-      throw new Error(`generateLeanSpec: unknown state in transition.to: ${t.to}`);
-    }
-    const key = `${t.from}::${t.event}`;
-    if (validPairs.has(key)) {
-      throw new Error(`generateLeanSpec: duplicate transition ${key}`);
-    }
-    validPairs.add(key);
-    transitionLines.push(
-      `  | .${toLeanConstructor(t.from)}, .${toLeanConstructor(t.event)} => .${toLeanConstructor(t.to)}`,
-    );
+  if (undeclared.length > 0) {
+    if (unspecified === 'error') throw undeclaredError(undeclared);
+    for (const cell of undeclared) table.set(cell, null);
   }
 
+  const validCount = [...table.values()].filter((target) => target !== null).length;
   const cellCount = states.length * events.length;
-  const validCount = validPairs.size;
-  const invalidCount = cellCount - validCount;
 
-  const stateBlock = stateConstructors.map((c) => `  | ${c} : State`).join('\n');
-  const eventBlock = eventConstructors.map((c) => `  | ${c} : Event`).join('\n');
-  const dispatchFallthrough = `  | s, _ => s -- invalid transition: stay in current state (identity)`;
+  const dispatchLines = renderDispatch(states, events, table);
+  const terminalStates = states.filter((state) =>
+    events.every((event) => table.get(cellKey(state, event)) === null),
+  );
+  const theorems = renderTheorems(states, events, table, terminalStates);
 
-  const source = `-- Generated by @kiwa-lab/lean v0.1 — do not edit by hand.
+  const source = `-- Generated by @kiwa-lab/lean — do not edit by hand.
 -- Spec: ${moduleName} (${states.length} states × ${events.length} events = ${cellCount} cells)
--- Valid transitions: ${validCount}  Invalid (identity): ${invalidCount}
+-- Valid transitions: ${validCount}  Rejected: ${cellCount - validCount}
+--
+-- Every cell is listed and there is no catch-all, so Lean's exhaustiveness
+-- checker is what proves the table is complete. Removing a line is a compile
+-- error naming the cell, not a silent fallthrough.
 
 namespace ${namespace}
 
 inductive State where
-${stateBlock}
+${states.map((s) => `  | ${toPascalCase(s)} : State`).join('\n')}
 deriving DecidableEq, Repr
 
 inductive Event where
-${eventBlock}
+${events.map((e) => `  | ${toPascalCase(e)} : Event`).join('\n')}
 deriving DecidableEq, Repr
 
-def dispatch : State → Event → State
-${transitionLines.join('\n')}
-${dispatchFallthrough}
+/-- The result of feeding an event to a state: either a next state, or a
+rejection. A self-loop steps back to the same state, which is a decision, and is
+therefore distinguishable from a rejection. -/
+inductive Step where
+  | to : State → Step
+  | invalid : Step
+deriving DecidableEq, Repr
 
--- Totality theorem: dispatch is defined for every (state, event) pair.
--- Proof is by construction — Lean's pattern-match exhaustiveness checker
--- guarantees the identity fallthrough covers every unlisted cell.
-theorem dispatch_total (s : State) (e : Event) : ∃ s', dispatch s e = s' := by
-  exact ⟨dispatch s e, rfl⟩
-
+def dispatch : State → Event → Step
+${dispatchLines.join('\n')}
+${theorems}
 end ${namespace}
 `;
 
@@ -114,7 +115,134 @@ end ${namespace}
       eventCount: events.length,
       cellCount,
       validTransitionCount: validCount,
-      invalidTransitionCount: invalidCount,
+      invalidTransitionCount: cellCount - validCount,
+      terminalStates,
     },
   };
+}
+
+/** `null` marks a rejected cell; a string is the target state. */
+type Table = Map<string, string | null>;
+
+function buildTable(
+  states: readonly string[],
+  events: readonly string[],
+  transitions: readonly Transition[],
+): Table {
+  const table: Table = new Map();
+  for (const t of transitions) {
+    if (!states.includes(t.from)) {
+      throw new Error(`generateLeanSpec: unknown state in transition.from: ${t.from}`);
+    }
+    if (!events.includes(t.event)) {
+      throw new Error(`generateLeanSpec: unknown event in transition.event: ${t.event}`);
+    }
+    const key = cellKey(t.from, t.event);
+    if (table.has(key)) {
+      throw new Error(`generateLeanSpec: duplicate transition ${key}`);
+    }
+    if (isInvalid(t)) {
+      table.set(key, null);
+      continue;
+    }
+    if (!states.includes(t.to)) {
+      throw new Error(`generateLeanSpec: unknown state in transition.to: ${t.to}`);
+    }
+    table.set(key, t.to);
+  }
+  return table;
+}
+
+function findUndeclared(
+  states: readonly string[],
+  events: readonly string[],
+  table: Table,
+): string[] {
+  const missing: string[] = [];
+  for (const state of states) {
+    for (const event of events) {
+      const key = cellKey(state, event);
+      if (!table.has(key)) missing.push(key);
+    }
+  }
+  return missing;
+}
+
+/**
+ * Undeclared cells are named, because "the table is incomplete" is not actionable
+ * and "beginning::query-executed is undecided" is.
+ */
+function undeclaredError(undeclared: readonly string[]): Error {
+  const shown = undeclared
+    .slice(0, MAX_REPORTED_CELLS)
+    .map((cell) => `  ${cell.replace('::', ' + ')}`)
+    .join('\n');
+  const rest =
+    undeclared.length > MAX_REPORTED_CELLS
+      ? `\n  ...and ${undeclared.length - MAX_REPORTED_CELLS} more`
+      : '';
+  return new Error(
+    `generateLeanSpec: ${undeclared.length} (state, event) cell(s) are undeclared:\n${shown}${rest}\n\n` +
+      'Give each a target, or mark it { invalid: true }. Pass `unspecified: "invalid"` ' +
+      'to reject every unmentioned cell instead.',
+  );
+}
+
+function renderDispatch(
+  states: readonly string[],
+  events: readonly string[],
+  table: Table,
+): string[] {
+  const statePad = Math.max(...states.map((s) => toPascalCase(s).length));
+  const eventPad = Math.max(...events.map((e) => toPascalCase(e).length));
+
+  const lines: string[] = [];
+  for (const state of states) {
+    for (const event of events) {
+      const target = table.get(cellKey(state, event));
+      const left = `.${toPascalCase(state)},`.padEnd(statePad + 2);
+      const right = `.${toPascalCase(event)}`.padEnd(eventPad + 1);
+      const result = target === null || target === undefined ? '.invalid' : `.to .${toPascalCase(target)}`;
+      lines.push(`  | ${left} ${right} => ${result}`);
+    }
+  }
+  return lines;
+}
+
+/**
+ * Two families of theorem, both mechanical and both falsifiable.
+ *
+ * A terminal state rejects every event. A non-terminal state has a way out, and
+ * the witness is the first valid cell in event order.
+ */
+function renderTheorems(
+  states: readonly string[],
+  events: readonly string[],
+  table: Table,
+  terminalStates: readonly string[],
+): string {
+  const blocks: string[] = [];
+
+  for (const state of terminalStates) {
+    blocks.push(
+      `/-- State ${state} is terminal: no event leads anywhere from it. -/
+theorem ${toSnakeCase(state)}_absorbing : ∀ e, dispatch .${toPascalCase(state)} e = .invalid := by
+  intro e; cases e <;> rfl`,
+    );
+  }
+
+  for (const state of states) {
+    if (terminalStates.includes(state)) continue;
+    const exit = events
+      .map((event) => ({ event, target: table.get(cellKey(state, event)) }))
+      .find((cell) => cell.target !== null && cell.target !== undefined);
+    if (exit === undefined) continue;
+    blocks.push(
+      `/-- State ${state} has at least one way out. -/
+theorem ${toSnakeCase(state)}_has_exit : ∃ e s, dispatch .${toPascalCase(state)} e = .to s :=
+  ⟨.${toPascalCase(exit.event)}, .${toPascalCase(exit.target as string)}, rfl⟩`,
+    );
+  }
+
+  return blocks.length === 0 ? '\n' : `\n${blocks.join('\n\n')}\n\n`;
 }

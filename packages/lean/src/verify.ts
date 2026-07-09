@@ -43,9 +43,18 @@ export interface VerifyOptions {
 
 export interface VerifyResult {
   status: VerifyStatus;
-  /** Non-empty only when `status === 'verification-failed'`. */
+  /**
+   * What Lean said when it refused. Non-empty only when
+   * `status === 'verification-failed'`.
+   *
+   * Lean writes its diagnostics to stdout, not stderr, so a caller reading
+   * `stderr` alone learns that verification failed and nothing about why. This
+   * field carries whichever stream spoke.
+   */
+  diagnostics?: string;
+  /** stderr captured from Lean. Usually empty; Lean reports on stdout. */
   stderr?: string;
-  /** stdout captured from Lean (may be empty on success). */
+  /** stdout captured from Lean. Carries the errors when a proof fails. */
   stdout?: string;
   /** Namespaced paths of files that were verified. */
   verifiedFiles: string[];
@@ -67,16 +76,22 @@ function detectLeanBinary(explicit?: string): string | null {
 
 /**
  * Verify one or more generated Lean specs by materializing them into a
- * scratch Lake project and invoking `lean --check` on each file.
+ * scratch Lake project and elaborating each file with Lean.
  *
  * Behavior:
  * - If Lean is not installed (or `leanBin` is not on PATH), returns
  *   `{ status: 'lean-not-installed' }` without throwing.
  * - If `opts.skip === true` or `KIWA_LEAN_SKIP_VERIFY=1`, returns
  *   `{ status: 'skipped-by-env' }`.
- * - Otherwise runs `lean --check <file>` for each spec. Any non-zero exit
- *   surfaces as `{ status: 'verification-failed', stderr }`. Success returns
+ * - Otherwise runs `lean <file>` for each spec. Any non-zero exit surfaces as
+ *   `{ status: 'verification-failed', stderr }`. Success returns
  *   `{ status: 'ok', verifiedFiles }`.
+ *
+ * Lean is invoked with the file as its only argument. It has no `--check` flag:
+ * elaborating a file *is* checking it, and a failed proof or a non-exhaustive
+ * match is a non-zero exit. Passing an unrecognized flag makes every file fail
+ * identically, which reads as "the spec is wrong" when it means "the command
+ * was wrong".
  *
  * The scratch project is always cleaned up (best effort) on return.
  */
@@ -139,21 +154,25 @@ export function verifyLeanSpec(
     for (const relPath of verifiedFiles) {
       const abs = resolve(rootDir, relPath);
       try {
-        execFileSync(resolvedBin, ['--check', abs], {
+        execFileSync(resolvedBin, [abs], {
           cwd: rootDir,
           stdio: ['ignore', 'pipe', 'pipe'],
           timeout: timeoutMs,
         });
       } catch (err) {
         const e = err as NodeJS.ErrnoException & { stderr?: Buffer; stdout?: Buffer };
-        const stdout = e.stdout?.toString('utf-8');
-        const failed: VerifyResult = {
+        const stdout = e.stdout?.toString('utf-8') ?? '';
+        const stderr = e.stderr?.toString('utf-8') ?? '';
+        // Prefer whichever stream carried a message; fall back to the thrown
+        // error, which is what speaks when Lean was killed by the timeout.
+        const spoke = [stdout, stderr].map((s) => s.trim()).filter((s) => s !== '');
+        return {
           status: 'verification-failed',
-          stderr: e.stderr?.toString('utf-8') ?? String(err),
+          diagnostics: spoke.length > 0 ? spoke.join('\n') : String(err),
+          stdout,
+          stderr,
           verifiedFiles,
         };
-        if (stdout !== undefined) failed.stdout = stdout;
-        return failed;
       }
     }
 

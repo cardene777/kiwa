@@ -12,7 +12,7 @@ title: "@kiwa-lab/lean v0.1 spec generator SSOT"
 
 kiwa v2.14+ は 同じ SSOT (5 state / 8 event / 40 セル) を 2 層で駆動する。
 
-- **Lean spec 層** = specification-level SSOT with type-level totality proof、 実装前に不変条件を証明可能
+- **Lean spec 層** = specification-level SSOT。 遷移表の網羅は Lean の網羅性検査が担い、 表から導ける不変条件は実装前に定理として証明される
 - **TypeScript impl 層** = runtime behavior with vitest testing、 実行時挙動 verify
 
 両層は 同じ OrchestratorSpec 型 SSOT を共有、 depth-5 pattern の 5 lifecycle-orchestrator (transaction / session / cache / job / cli) は 両層で 対称に定義。
@@ -32,7 +32,11 @@ generateLakeProject(config: LakeProjectConfig): LakeProjectFiles;
   namespace: string;         // Lean namespace (PascalCase)
   states: readonly string[]; // 5 state SSOT (kebab-case)
   events: readonly string[]; // 8 event SSOT (kebab-case)
-  transitions: ReadonlyArray<{ from: string; event: string; to: string }>;
+  transitions: ReadonlyArray<
+    | { from: string; event: string; to: string }   // 遷移 (to === from は意図した自己遷移)
+    | { from: string; event: string; invalid: true } // 拒否
+  >;
+  unspecified?: 'error' | 'invalid'; // 宣言されていない cell の扱い、 既定は error
 }
 ```
 
@@ -54,13 +58,25 @@ inductive Event where
   ...
 deriving DecidableEq, Repr
 
-def dispatch : State → Event → State
-  | .Beginning, .BeginCompleted => .Active
-  ...
-  | s, _ => s  -- invalid transition: identity fallthrough
+/-- 次状態か、 拒否か。 自己遷移は `to` で同じ状態に戻ることであり、 拒否とは別物。 -/
+inductive Step where
+  | to : State → Step
+  | invalid : Step
+deriving DecidableEq, Repr
 
-theorem dispatch_total (s : State) (e : Event) : ∃ s', dispatch s e = s' := by
-  exact ⟨dispatch s e, rfl⟩
+-- 40 cell を全て列挙する。 catch-all は置かない。
+def dispatch : State → Event → Step
+  | .Beginning, .BeginCompleted => .to .Active
+  | .Beginning, .QueryExecuted  => .invalid
+  ...
+
+/-- 終端状態: どの event でも動かない。 -/
+theorem aborted_absorbing : ∀ e, dispatch .Aborted e = .invalid := by
+  intro e; cases e <;> rfl
+
+/-- 非終端状態: 少なくとも 1 つ出口がある。 証人は生成器が知っている。 -/
+theorem beginning_has_exit : ∃ e s, dispatch .Beginning e = .to s :=
+  ⟨.BeginCompleted, .Active, rfl⟩
 
 end Transaction
 ```
@@ -69,8 +85,9 @@ end Transaction
 
 - **同 SSOT** = TypeScript impl と Lean spec は 同じ 5 state / 8 event / 40 cell definition を共有
 - **shape 契約 preserving** = 既存 41 package 変更 0、 packages/lean/ 追加のみ
-- **opt-in** = Lean toolchain 未 install 環境でも generator 単体 で動作、 生成 file を `lean --check` で検証は user 側 opt-in
-- **depth-5 pattern → 定理化** = systematic law の rule 昇格 から type-level 定理 (`dispatch_total`) に格上げ
+- **opt-in** = Lean toolchain 未 install 環境でも generator 単体 で動作、 生成 file を実 toolchain で検証するのは user 側 opt-in
+- **網羅は定理でなく型検査** = catch-all を置かないので、 cell が欠ければ Lean が `missing cases` として cell 名を挙げて落ちる。 v0.2 までの `dispatch_total` は任意の関数について `rfl` で証明でき、 遷移ゼロの表でも通ったため v0.3 で削除した
+- **定理は反証可能なものだけ** = `<state>_absorbing` と `<state>_has_exit` の 2 種。 表と矛盾すれば証明が通らない
 
 ## v2.14 milestone signal
 

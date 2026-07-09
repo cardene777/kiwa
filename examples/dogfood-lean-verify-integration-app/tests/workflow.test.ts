@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 import type { OrchestratorSpec } from '@kiwa-lab/lean';
 import {
@@ -20,6 +21,7 @@ const TRANSACTION_SPEC: OrchestratorSpec = {
     'rollback-requested',
     'timeout',
   ],
+  unspecified: 'invalid',
   transitions: [
     { from: 'beginning', event: 'begin-completed', to: 'active' },
     { from: 'active', event: 'commit-requested', to: 'committing' },
@@ -40,13 +42,25 @@ const SESSION_SPEC: OrchestratorSpec = {
     'revoke-requested',
     'timeout',
   ],
+  unspecified: 'invalid',
   transitions: [{ from: 'init', event: 'auth-succeeded', to: 'authed' }],
 };
 
+function leanInstalled(): boolean {
+  try {
+    execFileSync('lean', ['--version'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 describe('dogfood-lean-verify-integration (v2.15-2)', () => {
-  it('Pattern 1: specToVerify returns lean-not-installed on typical dev environment (or ok if Lean is installed)', () => {
+  it('Pattern 1: specToVerify verifies with Lean, and reports its absence otherwise', () => {
+    // `verification-failed` used to be accepted here too, so the assertion held
+    // whatever happened. With a toolchain present, a generated spec verifies.
     const result = specToVerify(TRANSACTION_SPEC);
-    expect(['lean-not-installed', 'ok', 'verification-failed']).toContain(result.status);
+    expect(result.status).toBe(leanInstalled() ? 'ok' : 'lean-not-installed');
   });
 
   it('Pattern 2: batchVerify with skip=true always returns skipped-by-env', () => {

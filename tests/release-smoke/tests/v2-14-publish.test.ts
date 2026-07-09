@@ -37,7 +37,12 @@ describe('v2.14-4 publish', () => {
   it('lean generator source', () => {
     const src = readText('packages/lean/src/generator.ts');
     expect(src).toContain('export function generateLeanSpec');
-    expect(src).toContain('theorem dispatch_total');
+    // `dispatch_total` was replaced in 0.3.0: `∃ s', dispatch s e = s'` is
+    // provable by rfl for any function, so it passed on an empty table. These
+    // two fail to compile when the table contradicts them.
+    expect(src).not.toContain('theorem dispatch_total');
+    expect(src).toContain('_absorbing');
+    expect(src).toContain('_has_exit');
   });
   it('lean lake source', () => {
     const src = readText('packages/lean/src/lake.ts');
