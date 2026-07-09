@@ -71,14 +71,13 @@ describe('v2.19 spec-kit -> kaname rename', () => {
     expect(md).toContain('github/spec-kit');
   });
 
-  it('no live source or manifest still names the retired package', () => {
-    // This spec file necessarily spells the retired name to assert against it.
-    const SELF = 'v2-19-publish.test.ts';
-    const roots = ['packages/kaname/src', 'tests/release-smoke/tests'];
+  it('no shipped source still names the retired package', () => {
+    // Only implementation code is scanned. Test files legitimately spell the old
+    // name -- this spec asserts against it, and publish-guard.test.ts documents
+    // which broken artifacts the old publish path produced.
     const offenders: string[] = [];
     const walk = (rel: string): void => {
       for (const entry of readdirSync(resolve(REPO_ROOT, rel), { withFileTypes: true })) {
-        if (entry.name === SELF) continue;
         const child = `${rel}/${entry.name}`;
         if (entry.isDirectory()) {
           walk(child);
@@ -87,7 +86,7 @@ describe('v2.19 spec-kit -> kaname rename', () => {
         }
       }
     };
-    for (const r of roots) walk(r);
+    walk('packages/kaname/src');
     expect(offenders).toEqual([]);
   });
 

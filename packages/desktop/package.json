@@ -54,7 +54,8 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs"
   },
   "dependencies": {
     "@kiwa-lab/core": "workspace:*"
