@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { checkConformance, formatConformance, type Observation } from '../src/conformance.js';
+import { UsageError } from '../src/errors.js';
 import type { OrchestratorSpec } from '../src/types.js';
 
 const SPEC: OrchestratorSpec = {
@@ -136,6 +137,39 @@ describe('checkConformance names each way the two can disagree', () => {
 
     expect(report.disagreements).toHaveLength(2);
     expect(report.disagreements.map((d) => d.kind)).toEqual(['impl-rejects', 'impl-accepts']);
+  });
+});
+
+describe('an observer that is broken is not an implementation that is wrong', () => {
+  // `{ kind: 'to' }` with no state used to read as a state named `undefined`, and
+  // every cell came back `unknown-state`: a report blaming the machine for what
+  // the observer did. TypeScript says the shape; a JavaScript caller gets the
+  // same answer, one call earlier.
+  it.each([
+    ['undefined', () => undefined],
+    ['null', () => null],
+    ['a string', () => 'to'],
+    ['an object with no kind', () => ({})],
+    ['an unknown kind', () => ({ kind: 'maybe' })],
+    ['to, with no state', () => ({ kind: 'to' })],
+    ['to, with a state that is not a string', () => ({ kind: 'to', state: 1 })],
+  ])('T-CONF-040 the observer returns %s', (_why, observe) => {
+    expect(() => checkConformance(SPEC, observe as never)).toThrow(UsageError);
+  });
+
+  it('T-CONF-041 the error names the cell that was being observed', () => {
+    expect(() => checkConformance(SPEC, () => ({ kind: 'to' }) as never)).toThrow(
+      /observing init \+ auth-succeeded/,
+    );
+  });
+
+  it('T-CONF-042 an observer that throws is not caught', () => {
+    // Whatever went wrong inside the caller's code is the caller's to see.
+    expect(() =>
+      checkConformance(SPEC, () => {
+        throw new Error('the session store is down');
+      }),
+    ).toThrow('the session store is down');
   });
 });
 

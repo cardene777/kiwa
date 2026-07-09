@@ -12,6 +12,7 @@
  * machine in a state, feeds it an event, and says where it landed.
  */
 
+import { UsageError } from './errors.js';
 import { cellKey, resolveTable } from './table.js';
 import type { OrchestratorSpec } from './types.js';
 
@@ -80,7 +81,7 @@ export function checkConformance(spec: OrchestratorSpec, observe: Observe): Conf
   for (const state of spec.states) {
     for (const event of spec.events) {
       const expected = table.get(cellKey(state, event)) ?? null;
-      const actual = observe(state, event);
+      const actual = asObservation(observe(state, event), state, event);
 
       if (actual.kind === 'rejected') {
         if (expected === null) agreedRejections += 1;
@@ -143,6 +144,34 @@ export function checkConformance(spec: OrchestratorSpec, observe: Observe): Conf
     agreedRejections,
     disagreements,
   };
+}
+
+/**
+ * An observer that returns something other than an `Observation` is broken, and
+ * the machine it was observing is not.
+ *
+ * Without this, `{ kind: 'to' }` with no state read as a state named `undefined`,
+ * and every cell came back as `unknown-state`: a report blaming an implementation
+ * for what the observer did. TypeScript says the shape; a caller who is not using
+ * TypeScript gets the same answer, one call earlier.
+ */
+function asObservation(value: unknown, state: string, event: string): Observation {
+  const where = `checkConformance: observing ${state} + ${event}`;
+  if (value === null || typeof value !== 'object') {
+    throw new UsageError(`${where}: the observer returned ${String(value)}, not an Observation`);
+  }
+  const observation = value as { kind?: unknown; state?: unknown };
+  if (observation.kind === 'rejected') return { kind: 'rejected' };
+  if (observation.kind === 'to') {
+    if (typeof observation.state !== 'string') {
+      throw new UsageError(`${where}: the observer returned { kind: 'to' } with no state`);
+    }
+    return { kind: 'to', state: observation.state };
+  }
+  throw new UsageError(
+    `${where}: the observer returned kind ${JSON.stringify(observation.kind)}; ` +
+      "expected 'to' or 'rejected'",
+  );
 }
 
 /** Render a report for a test failure message, one disagreement per line. */
