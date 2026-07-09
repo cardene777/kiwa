@@ -170,6 +170,39 @@ describe.skipIf(!HAS_LEAN)('a failure names the spec it came from', () => {
     expect(result.status).toBe('ok');
     expect(result.verifiedFiles).toHaveLength(5);
   });
+
+  it('T-LEAN-164 the first line of a later spec is line 1 of that spec', () => {
+    // The rewrite maps a line of the combined file back to a line of the spec it
+    // came from. A spec that starts where the previous one ends is where an
+    // off-by-one would show.
+    const first = good('First', 'First');
+    const second = good('Second', 'Second');
+    const brokenAtLineOne = {
+      ...second,
+      source: `def bad_at_line_1 : Nat := "x"\n${second.source}`,
+    };
+
+    const result = verifyLeanSpec([first, brokenAtLineOne]);
+
+    expect(result.status).toBe('verification-failed');
+    expect(result.diagnostics).toContain('KiwaSpecs/Second.lean:1:');
+    expect(result.diagnostics).not.toContain('KiwaSpecs/First.lean');
+  });
+
+  it('T-LEAN-165 the last line of an earlier spec stays in that spec', () => {
+    const first = good('First', 'First');
+    const second = good('Second', 'Second');
+    const brokenAtEnd = {
+      ...first,
+      source: first.source.replace(/end First\n$/, 'end First\ndef bad_at_end : Nat := "x"\n'),
+    };
+    expect(brokenAtEnd.source).toContain('bad_at_end');
+
+    const result = verifyLeanSpec([brokenAtEnd, second]);
+
+    expect(result.diagnostics).toContain('KiwaSpecs/First.lean:');
+    expect(result.diagnostics).not.toContain('KiwaSpecs/Second.lean');
+  });
 });
 
 describe.skipIf(!HAS_LEAN)('Lean rejects what the theorems forbid', () => {

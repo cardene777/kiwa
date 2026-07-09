@@ -11,6 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { UsageError } from './errors.js';
 
 export const DEFAULT_TIMEOUT_MS = 60_000;
 
@@ -97,7 +98,17 @@ export function runLeanSource(
   const bin = detectLeanBinary(leanBin);
   if (bin === null) return 'lean-not-installed';
 
-  const rootDir = mkdtempSync(join(workDir ?? tmpdir(), 'kiwa-lean-'));
+  let rootDir: string;
+  try {
+    rootDir = mkdtempSync(join(workDir ?? tmpdir(), 'kiwa-lean-'));
+  } catch (error) {
+    // `ENOENT: mkdtemp '/nope/kiwa-lean-'` names a path the caller never wrote
+    // and does not say which option produced it.
+    throw new UsageError(
+      `workDir ${JSON.stringify(workDir)} is not a directory Lean's scratch files can be ` +
+        `written to: ${(error as Error).message}`,
+    );
+  }
   const filePath = resolve(rootDir, 'Specs.lean');
   try {
     if (leanToolchain !== undefined) {

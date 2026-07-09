@@ -6,10 +6,14 @@
  */
 
 import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { detectLeanBinary } from '../src/lean-runner.js';
 import { generateLeanSpec } from '../src/generator.js';
 import { checkLeanTable } from '../src/extract.js';
+import { UsageError } from '../src/errors.js';
 import { verifyLeanSpec } from '../src/verify.js';
 import type { OrchestratorSpec } from '../src/types.js';
 
@@ -101,5 +105,37 @@ describe.skipIf(!HAS_LEAN)('a timeout is not a verdict on the spec', () => {
 
   it('T-RUNNER-013 a generous timeout leaves the verdict alone', () => {
     expect(verifyLeanSpec(output(), { timeoutMs: 120_000 }).status).toBe('ok');
+  });
+});
+
+describe.skipIf(!HAS_LEAN)('the scratch directory', () => {
+  it('T-RUNNER-020 a workDir that is not a directory is a usage error', () => {
+    // `ENOENT: mkdtemp '/nope/kiwa-lean-'` names a path the caller never wrote,
+    // and does not say which option produced it.
+    expect(() => verifyLeanSpec(output(), { workDir: '/definitely/not/a/dir/xyz' })).toThrow(
+      UsageError,
+    );
+    expect(() => checkLeanTable(SPEC, { workDir: '/definitely/not/a/dir/xyz' })).toThrow(
+      /workDir "\/definitely\/not\/a\/dir\/xyz"/,
+    );
+  });
+
+  it('T-RUNNER-021 nothing is left behind, on success or on failure', () => {
+    // A directory of its own: the OS temp directory is shared with every other
+    // test file running beside this one, and counting what is in it counts them.
+    const workDir = mkdtempSync(join(tmpdir(), 'kiwa-lean-runner-test-'));
+    try {
+      verifyLeanSpec(output(), { workDir });
+      verifyLeanSpec(output(), { workDir, timeoutMs: 1 });
+      checkLeanTable(SPEC, { workDir });
+      const broken = generateLeanSpec(SPEC);
+      verifyLeanSpec([{ ...broken, source: 'namespace Probe\ndef bad : Nat := "x"\nend Probe\n' }], {
+        workDir,
+      });
+
+      expect(readdirSync(workDir)).toEqual([]);
+    } finally {
+      rmSync(workDir, { recursive: true, force: true });
+    }
   });
 });
