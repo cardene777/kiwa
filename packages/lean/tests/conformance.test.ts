@@ -157,6 +157,14 @@ describe('an observer that is broken is not an implementation that is wrong', ()
     expect(() => checkConformance(SPEC, observe as never)).toThrow(UsageError);
   });
 
+  it('T-CONF-043 an unknown kind is refused even when it carries a state', () => {
+    // Reading the state before the kind would take `{ kind: 'maybe', state: 'b' }`
+    // for a transition. The kind is what says which shape this is.
+    expect(() =>
+      checkConformance(SPEC, () => ({ kind: 'maybe', state: 'authed' }) as never),
+    ).toThrow(/returned kind "maybe"/);
+  });
+
   it('T-CONF-041 the error names the cell that was being observed', () => {
     expect(() => checkConformance(SPEC, () => ({ kind: 'to' }) as never)).toThrow(
       /observing init \+ auth-succeeded/,
