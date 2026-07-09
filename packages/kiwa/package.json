@@ -1,0 +1,48 @@
+{
+  "name": "kiwa",
+  "version": "0.1.0",
+  "description": "Entry point for kiwa, the spec-driven development platform where testing, formal verification, and specification meet. Run `npx kiwa init` to scaffold a project. Every command is implemented by @kiwa-lab/cli, which this package delegates to.",
+  "license": "UNLICENSED",
+  "author": {
+    "name": "cardene",
+    "url": "https://github.com/cardene777"
+  },
+  "keywords": [
+    "kiwa",
+    "kiwa-lab",
+    "spec-driven-development",
+    "testing",
+    "formal-verification",
+    "scaffold",
+    "cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cardene777/kiwa.git",
+    "directory": "packages/kiwa"
+  },
+  "homepage": "https://github.com/cardene777/kiwa#readme",
+  "bugs": {
+    "url": "https://github.com/cardene777/kiwa/issues"
+  },
+  "type": "module",
+  "bin": {
+    "kiwa": "./bin/kiwa.mjs"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@kiwa-lab/cli": "workspace:*"
+  },
+  "scripts": {
+    "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs"
+  }
+}

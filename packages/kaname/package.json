@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/kaname",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "kiwa spec-driven development toolkit. Classify specification items into three layers (formal-verifiable, runtime-testable, human-review-only) and emit paired spec files: specFormal.md for Lean-verifiable state machines and pure contracts, specRuntime.md for side effects, integration, and UX. Structurally prevents the 'written but never verified' silent gap. Named for the kaname, the pivot that fastens every rib of a folding fan at a single point.",
   "license": "UNLICENSED",
   "author": {
@@ -56,7 +56,8 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs"
   },
   "dependencies": {
     "@kiwa-lab/core": "workspace:*",

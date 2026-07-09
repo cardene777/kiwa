@@ -57,7 +57,8 @@
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:mutation": "stryker run",
     "test:a11y": "node ../../scripts/run-axe-baseline.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs"
   },
   "dependencies": {
     "@kiwa-lab/core": "workspace:*",

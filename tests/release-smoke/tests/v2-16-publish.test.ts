@@ -40,8 +40,13 @@ describe('v2.16-3 publish', () => {
       existsSync(resolve(REPO_ROOT, 'docs/announcements/v2.16/gh-discussions-announcement.md')),
     ).toBe(true);
   });
-  it('@kiwa-lab/kaname v0.1.0', () => {
-    expect(readJson<{ version: string }>('packages/kaname/package.json').version).toBe('0.1.0');
+  it('@kiwa-lab/kaname version >= 0.1.0', () => {
+    const v = readJson<{ version: string }>('packages/kaname/package.json').version;
+    const parts = v.split('.').map(Number);
+    const major = parts[0] ?? 0;
+    const minor = parts[1] ?? 0;
+    const patch = parts[2] ?? 0;
+    expect(major > 0 || minor > 1 || (minor === 1 && patch >= 0)).toBe(true);
   });
   it('kaname classify source', () => {
     const src = readText('packages/kaname/src/classify.ts');

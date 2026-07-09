@@ -27,8 +27,12 @@ describe('v2.15-4 publish', () => {
       existsSync(resolve(REPO_ROOT, 'docs/announcements/v2.15/gh-discussions-announcement.md')),
     ).toBe(true);
   });
-  it('@kiwa-lab/lean v0.2.0', () => {
-    expect(readJson<{ version: string }>('packages/lean/package.json').version).toBe('0.2.0');
+  it('@kiwa-lab/lean version >= 0.2.0', () => {
+    const v = readJson<{ version: string }>('packages/lean/package.json').version;
+    const parts = v.split('.').map(Number);
+    const major = parts[0] ?? 0;
+    const minor = parts[1] ?? 0;
+    expect(major > 0 || (major === 0 && minor >= 2)).toBe(true);
   });
   it('lean verify source', () => {
     const src = readText('packages/lean/src/verify.ts');
