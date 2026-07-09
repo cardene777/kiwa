@@ -1,5 +1,5 @@
 {
-  "name": "@kiwa/queue",
+  "name": "@kiwa-lab/queue",
   "version": "2.1.0",
   "description": "Queue test adapter for kiwa — BullMQ (Redis-backed) sandbox (in-memory) + testcontainers Redis env + Inngest (event-driven) dev-server + stub env + Cloudflare Queues (miniflare + wrangler) env + AWS SQS (stub + localstack) env + RabbitMQ basic + advanced (DLX + delayed message + cluster + federation + auto-reconnect) env, with job / run / message assertion helpers",
   "license": "MIT",
@@ -79,7 +79,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "pretest:perf": "pnpm -F @kiwa/perf-harness build",
+    "pretest:perf": "pnpm -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**'",
     "test:mutation": "stryker run",
@@ -87,7 +87,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*"
+    "@kiwa-lab/core": "workspace:*"
   },
   "peerDependencies": {
     "bullmq": "^5",
@@ -119,7 +119,7 @@
     }
   },
   "devDependencies": {
-    "@kiwa/perf-harness": "workspace:*",
+    "@kiwa-lab/perf-harness": "workspace:*",
     "@stryker-mutator/core": "^8.7.1",
     "@stryker-mutator/vitest-runner": "^8.7.1",
     "@types/node": "^22.10.0",

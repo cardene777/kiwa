@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { QualityReport } from '@kiwa/quality-metrics';
+import type { QualityReport } from '@kiwa-lab/quality-metrics';
 import {
   captureReleaseSnapshot,
   findRegressions,
@@ -13,7 +13,7 @@ function makeReport(overrides?: {
   mutationKillRate?: number;
 }): QualityReport {
   return {
-    provider: '@kiwa/example',
+    provider: '@kiwa-lab/example',
     version: '0.1.0',
     reportedAt: '2026-07-02T00:00:00Z',
     coverage: { line: overrides?.coverageLine ?? 90, branch: 82, function: 95 },

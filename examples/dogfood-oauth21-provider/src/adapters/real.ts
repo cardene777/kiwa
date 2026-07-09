@@ -41,7 +41,7 @@ import type {
   IntrospectionResponse,
   TokenRequest,
   TokenResponse,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 import type {
   DiscoveryMetadata,
   OAuth21ASAdapter,

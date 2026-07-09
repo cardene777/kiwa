@@ -1,9 +1,9 @@
-// types.ts — public type definitions for @kiwa/orm.
+// types.ts — public type definitions for @kiwa-lab/orm.
 //
 // v0.1 (mock + drizzle + sqlite) + v0.2 (live + drizzle + postgres).
 // MySQL / Prisma / Kysely adapters land in follow-up Issues CAR-292.1 / CAR-293 / CAR-294.
 
-import type { TestEnvBase, TestMode } from '@kiwa/core';
+import type { TestEnvBase, TestMode } from '@kiwa-lab/core';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import type { MySql2Database } from 'drizzle-orm/mysql2';

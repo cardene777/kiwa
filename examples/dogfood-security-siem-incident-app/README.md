@@ -1,6 +1,6 @@
 # dogfood-security-siem-incident-app (v1.39-3)
 
-A Splunk + PagerDuty style SIEM + incident-response orchestrator that drives SIEM (CIM-formatted structured audit log + tamper-evident hash-chain seal + hot/warm/cold retention + correlation rule) + incident-response (playbook trigger + sev1-5 severity classification + escalation to on-call + forensics capture + post-mortem) + orchestrator (fused SIEM correlation → incident decision) across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa/security` v0.2 siem-audit + incident-response semantics) and real (Splunk + PagerDuty SOAR driver when `SIEM_STACK_READY=1` + `KIWA_SIEM_ENDPOINT` + `KIWA_PAGERDUTY_URL` + `KIWA_LOKI_URL` + `KIWA_SIEM_TOKEN` are set) implementations satisfy the same 16-op contract so the fidelity harness can diff them side by side.
+A Splunk + PagerDuty style SIEM + incident-response orchestrator that drives SIEM (CIM-formatted structured audit log + tamper-evident hash-chain seal + hot/warm/cold retention + correlation rule) + incident-response (playbook trigger + sev1-5 severity classification + escalation to on-call + forensics capture + post-mortem) + orchestrator (fused SIEM correlation → incident decision) across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa-lab/security` v0.2 siem-audit + incident-response semantics) and real (Splunk + PagerDuty SOAR driver when `SIEM_STACK_READY=1` + `KIWA_SIEM_ENDPOINT` + `KIWA_PAGERDUTY_URL` + `KIWA_LOKI_URL` + `KIWA_SIEM_TOKEN` are set) implementations satisfy the same 16-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -51,6 +51,6 @@ The real adapter defers the Splunk HEC + Loki push + PagerDuty escalation ceremo
 
 ## Fidelity harness
 
-`runFidelityHarness()` diffs the mock and real trace event streams and feeds the divergence count into `@kiwa/quality-metrics` release gate. Behavioral divergences are expected on non-integration environments — the real adapter refuses every op with `KIWA_SIEM_ENV_MISSING`, and the mock adapter succeeds, so every op appears in the divergence list. The harness treats those as `BEHAVIORAL_DIVERGENCE` records so the release-gate row can distinguish "not configured" from "ran and diverged".
+`runFidelityHarness()` diffs the mock and real trace event streams and feeds the divergence count into `@kiwa-lab/quality-metrics` release gate. Behavioral divergences are expected on non-integration environments — the real adapter refuses every op with `KIWA_SIEM_ENV_MISSING`, and the mock adapter succeeds, so every op appears in the divergence list. The harness treats those as `BEHAVIORAL_DIVERGENCE` records so the release-gate row can distinguish "not configured" from "ran and diverged".
 
 The report writes both markdown and JSON into `./quality-report/`, which the release script picks up alongside every other axis dogfood.

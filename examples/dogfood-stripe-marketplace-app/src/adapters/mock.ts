@@ -1,13 +1,13 @@
 /**
  * Mock adapter for the Stripe Connect marketplace dogfood app.
  *
- * Wraps `@kiwa/payment`'s `createStripeMock()` plus the marketplace
+ * Wraps `@kiwa-lab/payment`'s `createStripeMock()` plus the marketplace
  * runtime so tests exercise deterministic Connect ids, charge arithmetic,
  * payout ordering, tax-report aggregation, and Stripe-style webhook signing
  * without touching the real Stripe API.
  */
 
-import { createStripeMock } from '@kiwa/payment';
+import { createStripeMock } from '@kiwa-lab/payment';
 import type {
   StripeMarketplaceAdapter,
   TraceEvent,

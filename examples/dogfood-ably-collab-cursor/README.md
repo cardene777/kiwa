@@ -1,10 +1,10 @@
 # dogfood-ably-collab-cursor
 
-Dogfood app 2 (v1.13-4) — an Ably shared-cursor board app that exercises **cursor broadcast + presence + 60 fps client-side throttle + history rewind** across a provider-neutral interface so `@kiwa/realtime`'s Ably mock can be measured against a real Ably call. The resulting fidelity report feeds `@kiwa/quality-metrics` release gate.
+Dogfood app 2 (v1.13-4) — an Ably shared-cursor board app that exercises **cursor broadcast + presence + 60 fps client-side throttle + history rewind** across a provider-neutral interface so `@kiwa-lab/realtime`'s Ably mock can be measured against a real Ably call. The resulting fidelity report feeds `@kiwa-lab/quality-metrics` release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/realtime` `createAblyMock`, deterministic broadcast + presence + history rewind engine)
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-lab/realtime` `createAblyMock`, deterministic broadcast + presence + history rewind engine)
 - `KIWA_MODE=real` — driven by `makeRealAdapter()` that talks to `ably` when `ABLY_API_KEY` is set. When the variable is missing the adapter reports each method as `ABLY_ENV_MISSING` so the fidelity harness records the gap without failing the test suite. When the env is set but the SDK is not installed (the default in this workspace, which does not vendor `ably`), the adapter downgrades to `ABLY_SDK_MISSING` — the same harness path, one level closer to real IO.
 
 Real-mode envs.
@@ -23,7 +23,7 @@ src/
     real.ts            -- Ably adapter with graceful skip when env / SDK absent
   flows/
     cursor-flows.ts    -- join + draw / two-user collab / burst mousemove / late-joiner rewind
-    fidelity.ts        -- trace-diffing harness that feeds @kiwa/quality-metrics
+    fidelity.ts        -- trace-diffing harness that feeds @kiwa-lab/quality-metrics
 tests/
   e2e-mock-mode.test.ts        -- 10 mock-mode e2e tests
   fidelity-report.test.ts      -- 3 harness tests
@@ -42,7 +42,7 @@ The `quality-report/` directory is git-ignored — promote snapshots to `docs/qu
 
 ## Release gate (7 axes)
 
-Because the provider string is `@kiwa/realtime/ably-collab-cursor`, `evaluateReleaseGate` runs the common 7-axis branch. The AI-LLM 4 axes (cost per request / p95 latency / total tokens / accuracy) do not apply — Ably is a socket / pub-sub primitive, not a token-priced generative surface. Socket round-trip latency still feeds `perf.p95Ms` so the realtime performance axis stays visible in the report.
+Because the provider string is `@kiwa-lab/realtime/ably-collab-cursor`, `evaluateReleaseGate` runs the common 7-axis branch. The AI-LLM 4 axes (cost per request / p95 latency / total tokens / accuracy) do not apply — Ably is a socket / pub-sub primitive, not a token-priced generative surface. Socket round-trip latency still feeds `perf.p95Ms` so the realtime performance axis stays visible in the report.
 
 - `coverage.line` ≥ 85%
 - `coverage.branch` ≥ 80%
@@ -63,7 +63,7 @@ Four provider-neutral ops on `CursorBoardAdapter`.
 
 ## Related
 
-- v1.13-2 `@kiwa/realtime` v0.1 (`packages/realtime/`)
+- v1.13-2 `@kiwa-lab/realtime` v0.1 (`packages/realtime/`)
 - v1.13-3 `dogfood-supabase-realtime-chat` (`examples/dogfood-supabase-realtime-chat/`) — sibling dogfood with the same harness shape for Supabase Realtime
-- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
+- v1.11-1 `@kiwa-lab/quality-metrics` (`packages/quality-metrics/`)
 - v1.13 milestone parent [#709](https://github.com/cardene777/kiwa/issues/709), this sub [#712](https://github.com/cardene777/kiwa/issues/712)

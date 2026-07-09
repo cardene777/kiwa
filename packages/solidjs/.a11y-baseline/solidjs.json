@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/solidjs",
+  "package": "@kiwa-lab/solidjs",
   "generatedAt": "2026-07-06T01:15:07.817Z",
   "layers": {
     "jsdom": {

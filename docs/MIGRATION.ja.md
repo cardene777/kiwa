@@ -12,11 +12,11 @@
 
 | 種別 | 旧名 | 新名 |
 |---|---|---|
-| npm package (fixture) | `@dapp-e2e/core` | `@kiwa/dapp` |
-| npm package (CLI) | `@dapp-e2e/cli` | `@kiwa/cli` |
+| npm package (fixture) | `@dapp-e2e/core` | `@kiwa-lab/dapp` |
+| npm package (CLI) | `@dapp-e2e/cli` | `@kiwa-lab/cli` |
 | CLI bin | `dapp-e2e` | `kiwa` |
-| init command | `pnpm dlx @dapp-e2e/cli init` | `pnpm dlx @kiwa/cli init` |
-| import fixture | `import { dappE2eTest } from '@dapp-e2e/core'` | `import { dappE2eTest } from '@kiwa/dapp'` (関数名は維持) |
+| init command | `pnpm dlx @dapp-e2e/cli init` | `pnpm dlx @kiwa-lab/cli init` |
+| import fixture | `import { dappE2eTest } from '@dapp-e2e/core'` | `import { dappE2eTest } from '@kiwa-lab/dapp'` (関数名は維持) |
 | GitHub repo | `cardene777/dapp-e2e` | `cardene777/kiwa` (旧 URL は自動 redirect) |
 | Claude Code skill 名 | `test-design` / `contract-test-foundry` / `contract-test-hardhat` / `dapp-e2e-test` | `kiwa-design` / `kiwa-forge` / `kiwa-hardhat` / `kiwa-play` |
 
@@ -24,17 +24,17 @@
 
 ```bash
 # package.json の依存を一括置換
-sed -i.bak 's|@dapp-e2e/|@kiwa/|g' package.json && rm package.json.bak
+sed -i.bak 's|@dapp-e2e/|@kiwa-lab/|g' package.json && rm package.json.bak
 pnpm install
 ```
 
-import 文 / CLI 呼び出しも同様に `@dapp-e2e/` を `@kiwa/` に置換するだけで動きます。
+import 文 / CLI 呼び出しも同様に `@dapp-e2e/` を `@kiwa-lab/` に置換するだけで動きます。
 API シグネチャ (関数名 `dappE2eTest` / option key / event name) は **一切変更していません**。 名前空間 prefix だけが変わります。
 
 ### npm publish 状況
 
 - `@dapp-e2e/*` は npm に **未公開のまま** (registry 404)、 deprecate の必要なし
-- `@kiwa/*` は v0.1.0 で初版公開済 (changesets + GitHub Actions provenance、 2026-06-10、 https://www.npmjs.com/package/@kiwa/dapp / https://www.npmjs.com/package/@kiwa/cli)
+- `@kiwa-lab/*` は v0.1.0 で初版公開済 (changesets + GitHub Actions provenance、 2026-06-10、 https://www.npmjs.com/package/@kiwa-lab/dapp / https://www.npmjs.com/package/@kiwa-lab/cli)
 
 ### GitHub URL の自動 redirect
 
@@ -57,7 +57,7 @@ v1.0.0 以降は strict semver に切り替え、breaking change は major の�
 
 ### この file を更新するタイミング
 
-- `@kiwa/dapp` の API shape が変わるとき
+- `@kiwa-lab/dapp` の API shape が変わるとき
 - CLI の scaffold 内容が変わるとき
 - Quickstart の手順が変わるとき
 - 既存 test code の書き換えが必要になるとき
@@ -67,9 +67,9 @@ v1.0.0 以降は strict semver に切り替え、breaking change は major の�
 v0.1.0 は kiwa の最初の public release です。
 そのため、既存利用者向けの移行作業は実質ありません。
 
-- **新規**: `@kiwa/dapp`
+- **新規**: `@kiwa-lab/dapp`
   Playwright fixture、injector script、anvil lifecycle、9 RPC、4 event を提供します。
-- **新規**: `@kiwa/cli`
+- **新規**: `@kiwa-lab/cli`
   `init` と `doctor` を提供し、最小構成の scaffold を作れます。
 - **workspace 構成**: `packages/core` `packages/cli` `examples/basic-connect`
 - **依存方針**: `viem` と `@playwright/test` を peer / dev dependency 前提で扱います

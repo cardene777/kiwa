@@ -5,7 +5,7 @@ import {
   type MobileCliCommand,
   type SpawnFn,
   type SpawnResult,
-} from '@kiwa/mobile';
+} from '@kiwa-lab/mobile';
 
 /** dry-run mode = 実 CLI 未 install 環境でも決定的挙動、 shape 契約 のみ検証。 */
 export async function runDryRunWorkflow(): Promise<SpawnResult[]> {

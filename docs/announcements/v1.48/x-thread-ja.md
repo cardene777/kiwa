@@ -18,7 +18,7 @@ Phase 1 (v1.46 semantics) → Phase 2 (v1.47 adapter) → Phase 3 (v1.48 orchest
 
 **26 milestone 連続 snippet validation streak** (v1.23-v1.48) 達成、 kiwa 史上最長記録更新継続。 backward compat 絶対維持 = v0.1 semantics + v0.2 adapter API 変更 0。
 
-`pnpm add -D @kiwa/security-devsecops@^0.3`。 migration: https://cardene777.github.io/kiwa/migrations/v1.47-to-v1.48
+`pnpm add -D @kiwa-lab/security-devsecops@^0.3`。 migration: https://cardene777.github.io/kiwa/migrations/v1.47-to-v1.48
 
 5 sub 完遂 (v1.48-1 orchestrator / v1.48-2 dogfood / v1.48-3 docs 26 streak / v1.48-4 publish / v1.48-5 retrospective)。
 

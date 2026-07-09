@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.57 is out — Desktop deepening I. **@kiwa/desktop v0.2** adds 5 advanced axes (Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon), combined with v0.1's 3 axes gives **8 axes × 3 targets = 24 spec fidelity grid**. Inherits v1.55/v1.56's 4-PR rhythm, **systematic pattern 32nd application**.
+kiwa v1.57 is out — Desktop deepening I. **@kiwa-lab/desktop v0.2** adds 5 advanced axes (Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon), combined with v0.1's 3 axes gives **8 axes × 3 targets = 24 spec fidelity grid**. Inherits v1.55/v1.56's 4-PR rhythm, **systematic pattern 32nd application**.
 
 ## Tweet 2 — v0.2 5 axis semantics
 
@@ -14,7 +14,7 @@ dogfood-desktop-electron-app extended with v0.2 5-axis workflows, 21 tests all p
 
 ## Tweet 4 — install + v1.58 roadmap
 
-`pnpm add -D @kiwa/desktop@^0.2`. Migration: https://cardene777.github.io/kiwa/migrations/v1.56-to-v1.57
+`pnpm add -D @kiwa-lab/desktop@^0.2`. Migration: https://cardene777.github.io/kiwa/migrations/v1.56-to-v1.57
 
 v1.58+ will bring Desktop deepening II (v0.3 real driver: @electron/test-utils + tauri-driver + WebDriver). Backward compat absolutely preserved — v0.1 3-axis (12 methods / 12 events / 36 mappings) fully retained.
 

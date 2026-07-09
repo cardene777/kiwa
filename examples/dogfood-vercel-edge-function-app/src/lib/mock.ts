@@ -1,6 +1,6 @@
 /**
  * Mock adapter — drives the Vercel Edge Function harness directly using
- * `@kiwa/edge` v0.2 8 axis semantics helpers on 3 axes
+ * `@kiwa-lab/edge` v0.2 8 axis semantics helpers on 3 axes
  * (geo-replicated / edge-kv / streaming-response). Always runs; no
  * environment gate.
  *
@@ -28,7 +28,7 @@ import {
   type EdgeKvSession,
   type GeoReplicatedSession,
   type StreamSession,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 import {
   REGION_CATALOG,
   resolveRegion,

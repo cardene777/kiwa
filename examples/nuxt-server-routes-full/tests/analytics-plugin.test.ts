@@ -1,10 +1,10 @@
 // kiwa unit test for server/plugins/_kiwa/analytics-plugin.ts
-// — invokes the pure plugin factory through @kiwa/nuxt's invokeNitroPlugin.
+// — invokes the pure plugin factory through @kiwa-lab/nuxt's invokeNitroPlugin.
 // hook 登録 + payload mutation + handler error isolation + logger spy 全部 cover。
 // 実 Nitro 起動なしで lifecycle hook を任意 payload で fire できる。
 
 import { describe, expect, it, vi } from 'vitest';
-import { invokeNitroPlugin } from '@kiwa/nuxt';
+import { invokeNitroPlugin } from '@kiwa-lab/nuxt';
 import { createAnalyticsPlugin, type AnalyticsContext } from '../server/plugins/_kiwa/analytics-plugin.js';
 
 function makeCtx(): { ctx: AnalyticsContext; infoSpy: ReturnType<typeof vi.fn>; errorSpy: ReturnType<typeof vi.fn> } {
@@ -18,7 +18,7 @@ function makeCtx(): { ctx: AnalyticsContext; infoSpy: ReturnType<typeof vi.fn>; 
   return { ctx, infoSpy, errorSpy };
 }
 
-describe('analyticsPlugin via @kiwa/nuxt invokeNitroPlugin', () => {
+describe('analyticsPlugin via @kiwa-lab/nuxt invokeNitroPlugin', () => {
   it('T-NF-201: setup で 3 hook (request / beforeResponse / error) が registered される', async () => {
     const { ctx } = makeCtx();
     const result = await invokeNitroPlugin({ plugin: createAnalyticsPlugin(ctx) });

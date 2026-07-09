@@ -59,7 +59,7 @@ describe('dogfood-mysql-rls-tenant-app — emit fidelity report to quality-repor
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/orm/mysql-rls-dogfood',
+      provider: '@kiwa-lab/orm/mysql-rls-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

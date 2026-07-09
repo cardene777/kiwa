@@ -707,43 +707,43 @@ const V2_1_PAGES = [
 
 // v2.2 = Auth pair pioneer record 更新 (auth v0.7 continuous state machine)、 48 milestone streak、 systematic pattern 45 度目 continuous state machine variant。
 const V2_2_PAGES = [
-  { path: '/tutorials/129-auth-continuous-state-machine', title: '@kiwa/auth v0.7 continuous-auth state machine' },
-  { path: '/concepts/auth-continuous-state-machine', title: '@kiwa/auth v0.7 continuous-auth 状態機械 SSOT' },
+  { path: '/tutorials/129-auth-continuous-state-machine', title: '@kiwa-lab/auth v0.7 continuous-auth state machine' },
+  { path: '/concepts/auth-continuous-state-machine', title: '@kiwa-lab/auth v0.7 continuous-auth 状態機械 SSOT' },
   { path: '/migrations/v2.1-to-v2.2', title: 'v2.1 → v2.2' },
 ];
 
 // v2.3 = Payment pair depth-5 到達 (payment v2.1 lifecycle-orchestrator)、 depth-5 pattern 4 例目確定 dominant pattern 昇格 confirmed、 49 milestone streak、 systematic pattern 46 度目 continuous state machine variant Payment 転用。
 const V2_3_PAGES = [
-  { path: '/tutorials/130-payment-lifecycle-orchestrator', title: '@kiwa/payment v2.1 lifecycle-orchestrator' },
-  { path: '/concepts/payment-lifecycle-orchestrator', title: '@kiwa/payment v2.1 lifecycle-orchestrator SSOT' },
+  { path: '/tutorials/130-payment-lifecycle-orchestrator', title: '@kiwa-lab/payment v2.1 lifecycle-orchestrator' },
+  { path: '/concepts/payment-lifecycle-orchestrator', title: '@kiwa-lab/payment v2.1 lifecycle-orchestrator SSOT' },
   { path: '/migrations/v2.2-to-v2.3', title: 'v2.2 → v2.3' },
 ];
 
 // v2.4 = Realtime pair depth-5 到達 (realtime v2.1 session-orchestrator)、 depth-5 pattern 5 例目発生 = systematic law 昇格 candidate 到達、 50 milestone streak、 systematic pattern 47 度目 continuous state machine variant Realtime 転用。
 const V2_4_PAGES = [
-  { path: '/tutorials/131-realtime-session-orchestrator', title: '@kiwa/realtime v2.1 session-orchestrator' },
-  { path: '/concepts/realtime-session-orchestrator', title: '@kiwa/realtime v2.1 session-orchestrator SSOT' },
+  { path: '/tutorials/131-realtime-session-orchestrator', title: '@kiwa-lab/realtime v2.1 session-orchestrator' },
+  { path: '/concepts/realtime-session-orchestrator', title: '@kiwa-lab/realtime v2.1 session-orchestrator SSOT' },
   { path: '/migrations/v2.3-to-v2.4', title: 'v2.3 → v2.4' },
 ];
 
 // v2.5 = Streaming pair depth-5 到達 (streaming v2.1 pipeline-orchestrator)、 depth-5 pattern 6 例目発生 = systematic law CONFIRMED、 51 milestone streak、 systematic pattern 48 度目。
 const V2_5_PAGES = [
-  { path: '/tutorials/132-streaming-pipeline-orchestrator', title: '@kiwa/streaming v2.1 pipeline-orchestrator' },
-  { path: '/concepts/streaming-pipeline-orchestrator', title: '@kiwa/streaming v2.1 pipeline-orchestrator SSOT' },
+  { path: '/tutorials/132-streaming-pipeline-orchestrator', title: '@kiwa-lab/streaming v2.1 pipeline-orchestrator' },
+  { path: '/concepts/streaming-pipeline-orchestrator', title: '@kiwa-lab/streaming v2.1 pipeline-orchestrator SSOT' },
   { path: '/migrations/v2.4-to-v2.5', title: 'v2.4 → v2.5' },
 ];
 
 // v2.6 = Search pair depth-5 到達 (search v2.1 query-orchestrator)、 depth-5 pattern 7 例目発生 = systematic law 継続強化、 52 milestone streak、 systematic pattern 49 度目 systematic law 継承 第 1 例。
 const V2_6_PAGES = [
-  { path: '/tutorials/133-search-query-orchestrator', title: '@kiwa/search v2.1 query-orchestrator' },
-  { path: '/concepts/search-query-orchestrator', title: '@kiwa/search v2.1 query-orchestrator SSOT' },
+  { path: '/tutorials/133-search-query-orchestrator', title: '@kiwa-lab/search v2.1 query-orchestrator' },
+  { path: '/concepts/search-query-orchestrator', title: '@kiwa-lab/search v2.1 query-orchestrator SSOT' },
   { path: '/migrations/v2.5-to-v2.6', title: 'v2.5 → v2.6' },
 ];
 
 // v2.7 = Observability pair depth-5 到達、 depth-5 pattern 8 例目 = systematic law 継続強化 第 2 例、 systematic pattern 50 度到達 milestone、 53 milestone streak。
 const V2_7_PAGES = [
-  { path: '/tutorials/134-observability-incident-orchestrator', title: '@kiwa/observability v2.1 incident-orchestrator' },
-  { path: '/concepts/observability-incident-orchestrator', title: '@kiwa/observability v2.1 incident-orchestrator SSOT' },
+  { path: '/tutorials/134-observability-incident-orchestrator', title: '@kiwa-lab/observability v2.1 incident-orchestrator' },
+  { path: '/concepts/observability-incident-orchestrator', title: '@kiwa-lab/observability v2.1 incident-orchestrator SSOT' },
   { path: '/migrations/v2.6-to-v2.7', title: 'v2.6 → v2.7' },
 ];
 

@@ -1,10 +1,10 @@
 // kiwa unit test — sequence(requestIdHandle, authHandle) chain。
 //
-// `@kiwa/sveltekit` v1.1 の sequence + setupSvelteKitHooksEnv を直接使い、
+// `@kiwa-lab/sveltekit` v1.1 の sequence + setupSvelteKitHooksEnv を直接使い、
 // hook chain 内 locals 書込 / header 注入 / short-circuit を検証する。
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { setupSvelteKitHooksEnv, sequence } from '@kiwa/sveltekit';
+import { setupSvelteKitHooksEnv, sequence } from '@kiwa-lab/sveltekit';
 import { authHandle, type AuthLocals } from '../src/lib/_kiwa/auth-handle.js';
 import {
   requestIdHandle,

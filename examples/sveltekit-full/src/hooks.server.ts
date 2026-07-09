@@ -6,7 +6,7 @@
 // で direct invoke できるようにしてある。
 
 import type { Handle, HandleFetch, HandleServerError } from '@sveltejs/kit';
-import { sequence as kiwaSequence } from '@kiwa/sveltekit';
+import { sequence as kiwaSequence } from '@kiwa-lab/sveltekit';
 import { authHandle } from '$lib/_kiwa/auth-handle.js';
 import { requestIdHandle } from '$lib/_kiwa/request-id-handle.js';
 import { apiFetchHandle } from '$lib/_kiwa/api-fetch-handle.js';

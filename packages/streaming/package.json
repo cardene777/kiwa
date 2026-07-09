@@ -1,5 +1,5 @@
 {
-  "name": "@kiwa/streaming",
+  "name": "@kiwa-lab/streaming",
   "version": "2.1.0",
   "description": "Streaming test adapter for kiwa — Kafka (kafkajs API 互換 producer / consumer / admin) + Redpanda (Kafka API 互換 + schema-registry client) + NATS (nats.js API 互換 + JetStream + KV / Object Store) unified mock, with 5 base semantics (producer / consumer / exactly-once / DLQ / schema-registry) + 8 advanced-semantics axes (Kafka raw protocol + consumer group + Redpanda schema evolution + transactions + NATS JetStream durable + KV/Object + cross-provider exactly-once + consumer lag telemetry) + 3 provider × 8 axis fidelity harness",
   "license": "MIT",
@@ -83,7 +83,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "pretest:perf": "pnpm -F @kiwa/perf-harness build",
+    "pretest:perf": "pnpm -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js'",
     "test:mutation": "stryker run",
@@ -91,13 +91,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*"
+    "@kiwa-lab/core": "workspace:*"
   },
   "peerDependencies": {
     "vitest": "^2"
   },
   "devDependencies": {
-    "@kiwa/perf-harness": "workspace:*",
+    "@kiwa-lab/perf-harness": "workspace:*",
     "@stryker-mutator/core": "^8.7.1",
     "@stryker-mutator/vitest-runner": "^8.7.1",
     "@types/node": "^22.10.0",

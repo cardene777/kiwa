@@ -1,6 +1,6 @@
 # Security real-driver testing — 8 axis × 4 provider = 32 cell grid + real-driver env-gate (SSOT)
 
-kiwa's v1.37-1 security package (`@kiwa/security` v0.1.0) covers **8 axes** that model the security posture of a real production stack — CSP + rate limiting + authorization + WAF + threat modeling + secrets scanning + SBOM + advanced security headers. This concept doc is the SSOT for those 8 axes; the tutorials (76-78) and dogfood apps (v1.37-2/3/4) are the concrete implementations.
+kiwa's v1.37-1 security package (`@kiwa-lab/security` v0.1.0) covers **8 axes** that model the security posture of a real production stack — CSP + rate limiting + authorization + WAF + threat modeling + secrets scanning + SBOM + advanced security headers. This concept doc is the SSOT for those 8 axes; the tutorials (76-78) and dogfood apps (v1.37-2/3/4) are the concrete implementations.
 
 ## The 8-axis grid
 
@@ -73,7 +73,7 @@ If the fidelity harness has a `planned` cell, the corresponding tutorial + dogfo
 
 ## How this ties into the 13-axis release gate
 
-v1.37 does not add a 14th release-gate axis. The 8 security axes gate the security package's own tests (via `pnpm --filter @kiwa/security test`) but do not surface as a per-package `@kiwa/quality-metrics` axis. The reasoning — the fidelity harness is provider-shape-specific, and a package that does not export to helmet / express-rate-limit / casbin / coraza has nothing to assert on. When a future milestone adds a `security.fidelity` axis that describes "which security providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.37 keeps the axis count at 13.
+v1.37 does not add a 14th release-gate axis. The 8 security axes gate the security package's own tests (via `pnpm --filter @kiwa-lab/security test`) but do not surface as a per-package `@kiwa-lab/quality-metrics` axis. The reasoning — the fidelity harness is provider-shape-specific, and a package that does not export to helmet / express-rate-limit / casbin / coraza has nothing to assert on. When a future milestone adds a `security.fidelity` axis that describes "which security providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.37 keeps the axis count at 13.
 
 ## SSOT boundaries
 

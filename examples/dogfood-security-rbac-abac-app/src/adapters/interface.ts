@@ -7,7 +7,7 @@
  *    (KIWA_POLICY_STORE_URL) when `KIWA_MODE=real` +
  *    `AUTHZ_STORE_READY=1` are set; otherwise every op reports
  *    `KIWA_AUTHZ_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa/security` v0.1
+ *  - {@link makeMockAdapter} — backed by `@kiwa-lab/security` v0.1
  *    authorization semantics (createRbacPolicy / rbacAllows /
  *    evaluateAbac / evaluateCombined).
  *

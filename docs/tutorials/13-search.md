@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that exercises **five search behaviours** — index CRUD, word-overlap ranking, filter narrowing, facet distribution, and typo tolerance — across the three providers `@kiwa/search` covers.
+A vitest test file that exercises **five search behaviours** — index CRUD, word-overlap ranking, filter narrowing, facet distribution, and typo tolerance — across the three providers `@kiwa-lab/search` covers.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that exercises **five search behaviours** — index CRUD, wor
 ```bash
 mkdir kiwa-search && cd kiwa-search
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa/search
+pnpm add -D vitest typescript @types/node @kiwa-lab/search
 ```
 
 `package.json` + `tsconfig.json` — same shape as tutorial 12.
@@ -31,7 +31,7 @@ import {
   createAlgoliaMock,
   createTypesenseMock,
   type SearchAdapter,
-} from '@kiwa/search';
+} from '@kiwa-lab/search';
 
 const providers: Array<[string, () => SearchAdapter]> = [
   ['meilisearch', () => createMeilisearchMock({ typoTolerance: false })],
@@ -117,5 +117,5 @@ Override with `createMeilisearchMock({ typoTolerance: false })` etc. when a test
 
 ## Related
 
-- [`@kiwa/search` on npm](https://www.npmjs.com/package/@kiwa/search)
+- [`@kiwa-lab/search` on npm](https://www.npmjs.com/package/@kiwa-lab/search)
 - [Concept — search testing SSOT](../concepts/search-testing)

@@ -12,7 +12,7 @@ import {
   providerEventName,
   type PaymentAdapter,
   type PaymentWebhookEvent,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import type {
   ApplyProrationInput,
   CouponStackResult,

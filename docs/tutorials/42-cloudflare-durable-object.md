@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A Cloudflare Workers Durable Object chat room app wired to `@kiwa/edge` v0.2's `durable-object` + `websocket-edge` semantics. The suite covers the full realtime journey — DO instance creation on the first join, per-room WebSocket broadcast to every member, transactional storage that rolls back on failure, the Hibernation-driven wake-up that reroutes a stale request, and the 24-h retention alarm that purges an idle room. Every event goes through the same neutral envelope, so the `KIWA_MODE=real` switch flips the run to a Miniflare + `wrangler dev` stack without touching the test bodies.
+A Cloudflare Workers Durable Object chat room app wired to `@kiwa-lab/edge` v0.2's `durable-object` + `websocket-edge` semantics. The suite covers the full realtime journey — DO instance creation on the first join, per-room WebSocket broadcast to every member, transactional storage that rolls back on failure, the Hibernation-driven wake-up that reroutes a stale request, and the 24-h retention alarm that purges an idle room. Every event goes through the same neutral envelope, so the `KIWA_MODE=real` switch flips the run to a Miniflare + `wrangler dev` stack without touching the test bodies.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A Cloudflare Workers Durable Object chat room app wired to `@kiwa/edge` v0.2's `
 ```bash
 mkdir kiwa-cf-do && cd kiwa-cf-do
 pnpm init
-pnpm add -D @kiwa/edge@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/edge@^0.2 vitest typescript @types/node
 ```
 
 Add the vitest script in `package.json`.
@@ -46,7 +46,7 @@ import {
   acceptWebSocket,
   sendMessage,
   closeWebSocket,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 
 export function makeMockAdapter() {
   return {
@@ -94,7 +94,7 @@ import {
   requestWebSocketUpgrade,
   acceptWebSocket,
   sendMessage,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 
 describe('chat room broadcast', () => {
   it('creates the DO on the first join and broadcasts to every member', () => {
@@ -134,7 +134,7 @@ The `durable-object.created` event fires exactly once — the first `requestDura
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createDurableObject, writeStorage } from '@kiwa/edge';
+import { createDurableObject, writeStorage } from '@kiwa-lab/edge';
 
 describe('storage transactional rollback', () => {
   it('restores pre-tx values when the handler throws', () => {
@@ -162,7 +162,7 @@ describe('storage transactional rollback', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createDurableObject, fireAlarm, writeStorage } from '@kiwa/edge';
+import { createDurableObject, fireAlarm, writeStorage } from '@kiwa-lab/edge';
 
 describe('alarm-driven retention purge', () => {
   it('fires the alarm and lets the handler purge stale keys', () => {
@@ -197,7 +197,7 @@ import {
   requestWebSocketUpgrade,
   acceptWebSocket,
   closeWebSocket,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 
 describe('websocket hibernation wake-up', () => {
   it('drops the socket, re-routes the follow-up request, keeps the DO active', () => {
@@ -231,7 +231,7 @@ const mode = process.env.KIWA_MODE ?? 'mock';
 export function makeAdapter() {
   return mode === 'real' && process.env.WRANGLER_KEY === '1'
     ? makeRealAdapter()  // Miniflare + wrangler dev + real Durable Object
-    : makeMockAdapter(); // @kiwa/edge v0.2 semantics
+    : makeMockAdapter(); // @kiwa-lab/edge v0.2 semantics
 }
 ```
 

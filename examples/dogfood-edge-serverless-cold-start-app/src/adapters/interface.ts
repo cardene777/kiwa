@@ -9,7 +9,7 @@
  *    + KIWA_EDGE_PROVISIONED_URL) when `KIWA_MODE=real` +
  *    `EDGE_COLD_START_STACK_READY=1` are set; otherwise every op reports
  *    `KIWA_EDGE_COLD_START_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa/edge` v1.2 advanced
+ *  - {@link makeMockAdapter} — backed by `@kiwa-lab/edge` v1.2 advanced
  *    cold-start + middleware-chain + global-routing semantics
  *    (invokeColdStart / preWarmInstance / evictExpired / enterMiddleware /
  *    receiveAnycast / selectByLatency).
@@ -21,7 +21,7 @@
  *  - provisioned (session start + reserve provisioned + invoke provisioned + close)
  */
 
-import type { EdgePlatform as EdgeEdgePlatform } from '@kiwa/edge';
+import type { EdgePlatform as EdgeEdgePlatform } from '@kiwa-lab/edge';
 
 /** Edge platform (re-exported from edge semantics). */
 export type EdgePlatform = EdgeEdgePlatform;

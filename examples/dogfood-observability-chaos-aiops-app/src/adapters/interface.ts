@@ -9,7 +9,7 @@
  *    KIWA_AIOPS_API_URL + KIWA_RUNBOOK_URL) when `KIWA_MODE=real` +
  *    `CHAOS_AIOPS_STACK_READY=1` are set; otherwise every op reports
  *    `KIWA_CHAOS_AIOPS_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa/observability` v2.2
+ *  - {@link makeMockAdapter} — backed by `@kiwa-lab/observability` v2.2
  *    chaos + aiops semantics (injectFault / computeBlastRadius /
  *    triggerRollback / detectAnomaly / executeRemediation /
  *    analyzeRootCause / correlateAlerts).
@@ -30,7 +30,7 @@
  * report can point at the ops that diverged.
  */
 
-import type { semantics } from '@kiwa/observability';
+import type { semantics } from '@kiwa-lab/observability';
 
 /** Re-export from observability semantics namespace. */
 export type ObservabilityTarget = semantics.ObservabilityTarget;

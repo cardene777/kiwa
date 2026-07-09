@@ -4,7 +4,7 @@
  *
  * The dogfood app drives an OpenTelemetry Collector harness through this
  * contract only. Two implementations exist —
- *  - {@link makeMockAdapter} — walks the `@kiwa/observability` v2.1
+ *  - {@link makeMockAdapter} — walks the `@kiwa-lab/observability` v2.1
  *    `semantics/exemplar` + `semantics/otel-advanced` state machines
  *    deterministically without any backend. Every op emits the neutral
  *    event onto the trace so the fidelity harness can diff ordering
@@ -27,7 +27,7 @@
  * semantics and the real Collector + Jaeger + Prometheus pipeline.
  */
 
-import type { semantics } from '@kiwa/observability';
+import type { semantics } from '@kiwa-lab/observability';
 
 /** Re-export from observability semantics namespace. */
 export type ObservabilityTarget = semantics.ObservabilityTarget;

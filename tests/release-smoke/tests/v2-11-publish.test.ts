@@ -27,7 +27,7 @@ describe('v2.11-4 publish', () => {
       existsSync(resolve(REPO_ROOT, 'docs/announcements/v2.11/gh-discussions-announcement.md')),
     ).toBe(true);
   });
-  it('@kiwa/queue v2.1.0', () => {
+  it('@kiwa-lab/queue v2.1.0', () => {
     expect(readJson<{ version: string }>('packages/queue/package.json').version).toBe('2.1.0');
   });
   it('job-lifecycle-orchestrator source', () => {
@@ -36,9 +36,9 @@ describe('v2.11-4 publish', () => {
     expect(src).toContain("'queued'");
     expect(src).toContain("'dlq'");
   });
-  it('release filter @kiwa/queue', () => {
+  it('release filter @kiwa-lab/queue', () => {
     expect(readJson<{ scripts: { release: string } }>('package.json').scripts.release).toContain(
-      '-F @kiwa/queue',
+      '-F @kiwa-lab/queue',
     );
   });
   it('dogfood 5 pattern', () => {

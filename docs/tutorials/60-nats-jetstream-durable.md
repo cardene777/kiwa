@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/streaming` v0.3 that models a durable JetStream consumer — `durable_name` + `ack_wait` + `max_deliver` + `ack_policy` (`explicit` / `all` / `none`) + a `backoff[]` schedule + quarantine on the `maxDeliver`+1st failure — without booting a real `nats-server` binary. `createNatsJetStreamDurable()` gives you the ack-tracking state kept on the broker side (ack-pending window, ack-floor, redelivery-eligible-at) plus the 4 operations that drive it (`publish` / `deliver` / `ack` / `nack` / `sweepExpired`). This is the pattern kiwa's NATS dogfood app (v1.31-4) exercises against real NATS 2.10+ testcontainers under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "message was redelivered 4 times then quarantined" case reviewers ask about.
+A vitest suite wired to `@kiwa-lab/streaming` v0.3 that models a durable JetStream consumer — `durable_name` + `ack_wait` + `max_deliver` + `ack_policy` (`explicit` / `all` / `none`) + a `backoff[]` schedule + quarantine on the `maxDeliver`+1st failure — without booting a real `nats-server` binary. `createNatsJetStreamDurable()` gives you the ack-tracking state kept on the broker side (ack-pending window, ack-floor, redelivery-eligible-at) plus the 4 operations that drive it (`publish` / `deliver` / `ack` / `nack` / `sweepExpired`). This is the pattern kiwa's NATS dogfood app (v1.31-4) exercises against real NATS 2.10+ testcontainers under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "message was redelivered 4 times then quarantined" case reviewers ask about.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/streaming` v0.3 that models a durable JetStream c
 ```bash
 mkdir kiwa-jetstream-durable && cd kiwa-jetstream-durable
 pnpm init
-pnpm add -D @kiwa/streaming@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa-lab/streaming@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.3 surface exports `createNatsJetStreamDurable` from the semantics barrel.
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createNatsJetStreamDurable } from '@kiwa/streaming';
+import { createNatsJetStreamDurable } from '@kiwa-lab/streaming';
 
 describe('durable consumer — publish + deliver + ack', () => {
   it('delivers each unacked message once and acks it done', () => {
@@ -74,7 +74,7 @@ The rule of thumb is that `deliver(now)` takes an explicit `now` timestamp — r
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createNatsJetStreamDurable } from '@kiwa/streaming';
+import { createNatsJetStreamDurable } from '@kiwa-lab/streaming';
 
 describe('backoff schedule', () => {
   it('respects the per-attempt backoff between redeliveries', () => {
@@ -115,7 +115,7 @@ The nack-with-timestamp shape (`nack(seq, now)`) matches the real JetStream clie
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createNatsJetStreamDurable } from '@kiwa/streaming';
+import { createNatsJetStreamDurable } from '@kiwa-lab/streaming';
 
 describe('max_deliver + quarantine', () => {
   it('quarantines the message on the maxDeliver+1st failure', () => {
@@ -152,7 +152,7 @@ Quarantine is the JetStream analogue of a DLQ — the message is out of the rede
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createNatsJetStreamDurable } from '@kiwa/streaming';
+import { createNatsJetStreamDurable } from '@kiwa-lab/streaming';
 
 describe('ack_wait expiry sweep', () => {
   it('sweeps stuck deliveries and enables redelivery', () => {
@@ -182,7 +182,7 @@ The pair `sweepExpired(now)` + `deliver(now)` mirrors what real nats-server does
 
 ## What you learned
 
-The 4 durable-consumer pieces the tutorial covered — happy path, backoff-driven redelivery, quarantine on `max_deliver`, and ack-wait sweep — are the ones every retry-heavy NATS pipeline hits. `@kiwa/streaming` v0.3 models them with an explicit clock so tests run in milliseconds. Under `KIWA_MODE=real NATS_KEY=...`, the fidelity harness runs the same assertions against real NATS 2.10+ testcontainers — the v1.31-4 dogfood app does exactly that.
+The 4 durable-consumer pieces the tutorial covered — happy path, backoff-driven redelivery, quarantine on `max_deliver`, and ack-wait sweep — are the ones every retry-heavy NATS pipeline hits. `@kiwa-lab/streaming` v0.3 models them with an explicit clock so tests run in milliseconds. Under `KIWA_MODE=real NATS_KEY=...`, the fidelity harness runs the same assertions against real NATS 2.10+ testcontainers — the v1.31-4 dogfood app does exactly that.
 
 ## Next
 

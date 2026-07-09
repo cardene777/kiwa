@@ -1,4 +1,4 @@
-import { parseSpec } from '@kiwa/core';
+import { parseSpec } from '@kiwa-lab/core';
 import type { SpecCoverageGap } from './types.js';
 
 const TC_REGEX = /\bT-[A-Z0-9]+-\d+\b/g;

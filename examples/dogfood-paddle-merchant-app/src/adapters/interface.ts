@@ -7,7 +7,7 @@
  *  - {@link makeRealAdapter} (drives a real Paddle sandbox / Paddle
  *    Billing v2 API, skipped when the environment cannot reach `PADDLE_KEY`
  *    + `KIWA_MODE=real`)
- *  - {@link makeMockAdapter} (backed by `@kiwa/payment`'s
+ *  - {@link makeMockAdapter} (backed by `@kiwa-lab/payment`'s
  *    `createPaddleMock` + 9-axis semantics)
  *
  * Both must satisfy the same contract so behavioural fidelity between real
@@ -36,7 +36,7 @@ import type {
   TaxLine,
   DunningSession,
   WebhookVerifyResult,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 /**
  * Input for an inline checkout session creation. Mirrors the fields a real

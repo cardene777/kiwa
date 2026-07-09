@@ -1,22 +1,22 @@
 // Fail-fast detection for the release-script-filter systematic-root-cause pattern
 // (Issue #986, v1.29-1). The 4 milestone chain — v1.14 payment / v1.25 perf-harness /
 // v1.27 quality-metrics / v1.28 realtime — was the same lesson applied 4 times
-// after the fact: every publishable `@kiwa/*` package must appear in
+// after the fact: every publishable `@kiwa-lab/*` package must appear in
 // **both** the `pnpm -F {name} build` step **and** the `pnpm publish --filter {name}`
 // step of root `package.json > scripts.release`, or one half silently skips it
 // on the next `pnpm run release` invocation.
 //
-// This axis discovers `@kiwa/*` packages dynamically from `packages/*/package.json`
+// This axis discovers `@kiwa-lab/*` packages dynamically from `packages/*/package.json`
 // so the assertion stays honest as new packages land — no per-milestone SSOT edit
 // required. Packages whose `package.json` explicitly opts out (`private: true`) are
 // treated as non-publishable and skipped. A short manual allowlist (`NON_PUBLISHED_ALLOWLIST`)
 // is reserved for deliberate exclusions where the `private` flag alone cannot
 // capture the intent (e.g., a package published under a different pipeline);
 // it starts empty because the current 36-package set is all first-party
-// `@kiwa/*` scope.
+// `@kiwa-lab/*` scope.
 //
 // When this test fails, the fix is exactly one of:
-//   1. Add the missing `-F @kiwa/{name}` + `--filter @kiwa/{name}` pair to
+//   1. Add the missing `-F @kiwa-lab/{name}` + `--filter @kiwa-lab/{name}` pair to
 //      `scripts.release` (the 4th application of the systematic-root-cause pattern
 //      SSOT — v1.14 / v1.25 / v1.27 / v1.28 shape).
 //   2. Mark the package `"private": true` if it must not publish.
@@ -32,11 +32,11 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
 
 // Packages that are intentionally excluded from the standard release filter.
-// Keep empty unless there is a hard reason a `@kiwa/*` name cannot appear
+// Keep empty unless there is a hard reason a `@kiwa-lab/*` name cannot appear
 // in the pnpm build+publish pair. Each entry needs a one-line comment justifying
 // the exception so the next reviewer can decide whether to keep it.
 const NON_PUBLISHED_ALLOWLIST: readonly string[] = [
-  // (empty — all @kiwa/* packages currently publish through the standard filter)
+  // (empty — all @kiwa-lab/* packages currently publish through the standard filter)
 ];
 
 interface PackageJson {
@@ -64,7 +64,7 @@ function discoverPublishablePackages(): string[] {
       // Non-package directory (no package.json) — skip silently.
       continue;
     }
-    if (!pkg.name || !pkg.name.startsWith('@kiwa/')) continue;
+    if (!pkg.name || !pkg.name.startsWith('@kiwa-lab/')) continue;
     if (pkg.private === true) continue;
     publishable.push(pkg.name);
   }
@@ -81,8 +81,8 @@ function extractFilters(release: string, pattern: RegExp): Set<string> {
 
 const rootPkg = readJson<PackageJson>('package.json');
 const release = rootPkg.scripts?.release ?? '';
-const buildFilters = extractFilters(release, /-F\s+(@kiwa\/[a-z0-9-]+)/g);
-const publishFilters = extractFilters(release, /--filter\s+(@kiwa\/[a-z0-9-]+)/g);
+const buildFilters = extractFilters(release, /-F\s+(@kiwa-lab\/[a-z0-9-]+)/g);
+const publishFilters = extractFilters(release, /--filter\s+(@kiwa-lab\/[a-z0-9-]+)/g);
 const publishable = discoverPublishablePackages();
 const assertable = publishable.filter((name) => !NON_PUBLISHED_ALLOWLIST.includes(name));
 
@@ -94,7 +94,7 @@ describe('release script filter — systematic root cause pattern SSOT (Issue #9
     expect(release, 'scripts.release missing or empty').toBeTruthy();
   });
 
-  it('discovers publishable @kiwa/* packages from packages/*/package.json', () => {
+  it('discovers publishable @kiwa-lab/* packages from packages/*/package.json', () => {
     // The full 36-package set (v1.28 landing) has to be visible — otherwise the
     // per-package assertion below silently drops packages and stops catching drift.
     // The lower bound is deliberately conservative so a new package landing
@@ -120,7 +120,7 @@ describe('release script filter — systematic root cause pattern SSOT (Issue #9
     },
   );
 
-  it('every allowlisted name is a real @kiwa/* package (guard against stale entries)', () => {
+  it('every allowlisted name is a real @kiwa-lab/* package (guard against stale entries)', () => {
     // If NON_PUBLISHED_ALLOWLIST drifts (typo, renamed package), the per-package
     // assertion silently skips it — surface that here so the allowlist cannot rot.
     const allNames = new Set(publishable);

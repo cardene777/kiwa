@@ -1,7 +1,7 @@
 # dogfood-kafka-event-pipeline
 
 Dogfood app for v1.20-2 — a Kafka event pipeline that exercises the 4 patterns
-`@kiwa/streaming` promises for Kafka:
+`@kiwa-lab/streaming` promises for Kafka:
 
 1. **Idempotent producer** — partition-key hashing + batch send + duplicate
    sequence-number dedup.
@@ -18,7 +18,7 @@ Dogfood app for v1.20-2 — a Kafka event pipeline that exercises the 4 patterns
 The dogfood is driven end-to-end through a provider-neutral adapter
 (`src/adapters/interface.ts`) with two implementations:
 
-- `makeMockAdapter()` — backed by `@kiwa/streaming`'s KafkaMock +
+- `makeMockAdapter()` — backed by `@kiwa-lab/streaming`'s KafkaMock +
   idempotent / transactional producer + DLQ helpers. Default for CI + local.
 - `makeRealAdapter()` — probes a live Kafka broker via `KAFKA_BOOTSTRAP`
   (env-skip when the var is missing; TCP aliveness probe when it is set).

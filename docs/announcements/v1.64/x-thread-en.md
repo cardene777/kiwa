@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v1.64 is out — Desktop deepening VIII. **@kiwa/desktop v0.9** adds real native binding invocation (probeAndInvoke), probe availability check + real spawn when CLI present. Inherits v1.55-v1.63 4-PR rhythm (**11 milestones = 44 PRs same rhythm**), **systematic pattern 39th application**, **depth-9 pattern new candidate reached**.
+kiwa v1.64 is out — Desktop deepening VIII. **@kiwa-lab/desktop v0.9** adds real native binding invocation (probeAndInvoke), probe availability check + real spawn when CLI present. Inherits v1.55-v1.63 4-PR rhythm (**11 milestones = 44 PRs same rhythm**), **systematic pattern 39th application**, **depth-9 pattern new candidate reached**.
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-desktop-native-invoke-app new, 4-pattern workflow, 10 tests all pass. ki
 
 ## Tweet 4
 
-`pnpm add -D @kiwa/desktop@^0.9`. Migration: https://cardene777.github.io/kiwa/migrations/v1.63-to-v1.64
+`pnpm add -D @kiwa-lab/desktop@^0.9`. Migration: https://cardene777.github.io/kiwa/migrations/v1.63-to-v1.64
 
 v1.65+ will expand other pairs to depth-5/6. Backward compat absolutely preserved — v0.1-v0.8 fully retained.
 

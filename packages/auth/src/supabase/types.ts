@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa/core';
+import type { TestEnvBase } from '@kiwa-lab/core';
 
 /**
  * Supabase Auth exposes a hosted auth backend + GoTrue server + `@supabase/supabase-js`

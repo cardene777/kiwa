@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa/core';
+import type { TestEnvBase } from '@kiwa-lab/core';
 
 /**
  * Auth0 exposes two APIs — Management API (`auth0` node SDK's `ManagementClient`)

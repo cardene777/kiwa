@@ -1,20 +1,20 @@
-# @kiwa/nuxt
+# @kiwa-lab/nuxt
 
 Nuxt 3 Server Routes test adapter for [kiwa](https://github.com/cardene777/kiwa) — invoke `defineEventHandler` callbacks in isolation and capture redirect / cookies / response headers / status without a running Nitro server.
 
 ```bash
-pnpm add -D @kiwa/nuxt
+pnpm add -D @kiwa-lab/nuxt
 ```
 
 ## Why
 
-Nuxt 3's `defineEventHandler((event) => ...)` callbacks run inside the Nitro server runtime. Real-server tests are slow + flaky; testing the callback in Vitest with a simulated H3 event is fast + deterministic. `@kiwa/nuxt` provides the simulated event and captures all the side effects you'd normally have to inspect after a real HTTP round-trip.
+Nuxt 3's `defineEventHandler((event) => ...)` callbacks run inside the Nitro server runtime. Real-server tests are slow + flaky; testing the callback in Vitest with a simulated H3 event is fast + deterministic. `@kiwa-lab/nuxt` provides the simulated event and captures all the side effects you'd normally have to inspect after a real HTTP round-trip.
 
 ## Quick start
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeEventHandler, NUXT_REDIRECT_SYMBOL } from '@kiwa/nuxt';
+import { invokeEventHandler, NUXT_REDIRECT_SYMBOL } from '@kiwa-lab/nuxt';
 import { handler } from '../server/api/secure.get.js';
 
 describe('GET /api/secure', () => {
@@ -59,7 +59,7 @@ Returns `{ result, redirect, error, env }` where `env` exposes `responseHeaders`
 `setupNuxtMiddlewareEnv` is a higher-level wrapper around `invokeRouteMiddleware` that adds spy capture, a user-session fixture, and chain execution for `global` + route-specific middleware.
 
 ```ts
-import { setupNuxtMiddlewareEnv } from '@kiwa/nuxt';
+import { setupNuxtMiddlewareEnv } from '@kiwa-lab/nuxt';
 import { globalAuthGuard, adminRouteGuard } from '../middleware/_kiwa/route-guard.js';
 
 it('admin route — non-admin user is forbidden', async () => {
@@ -87,8 +87,8 @@ Returns `{ outcome, navigateToCalls, abortNavigationCalls, redirectedTo, aborted
 
 ## Out of scope (tracked separately)
 
-- Nuxt composables (`useFetch` / `useState` / `useNuxtApp`) — covered by `@kiwa/ui` Vue mode for the client side
-- Full HTTP round-trip — use Playwright + `@kiwa/e2e` for E2E coverage
+- Nuxt composables (`useFetch` / `useState` / `useNuxtApp`) — covered by `@kiwa-lab/ui` Vue mode for the client side
+- Full HTTP round-trip — use Playwright + `@kiwa-lab/e2e` for E2E coverage
 
 ## License
 

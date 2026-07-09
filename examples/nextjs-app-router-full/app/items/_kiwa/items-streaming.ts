@@ -8,7 +8,7 @@
 // 本 module は外部 fetch を simulate する slow data source として
 // async generator を export し、 PoC test で setupNextRscEnv に流す。
 
-import type { RscNode } from '@kiwa/nextjs';
+import type { RscNode } from '@kiwa-lab/nextjs';
 
 export interface StreamingItem {
   readonly id: number;

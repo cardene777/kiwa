@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.55 リリース — Mobile 深化 VI (@kiwa/mobile v0.6)、 **depth-5 pattern 実装完成** milestone。 v1.54 spawn stub 契約層 → v1.55 実 child_process.spawn 実行、 v0.5 shape 契約 preserving。 kiwa milestone 史上初 6 段拡張 candidate。
+kiwa v1.55 リリース — Mobile 深化 VI (@kiwa-lab/mobile v0.6)、 **depth-5 pattern 実装完成** milestone。 v1.54 spawn stub 契約層 → v1.55 実 child_process.spawn 実行、 v0.5 shape 契約 preserving。 kiwa milestone 史上初 6 段拡張 candidate。
 
 ## Tweet 2 — 3 経路 = 実 CLI 有無問わず決定的
 
@@ -14,7 +14,7 @@ env sanitize per-command allowlist (secret 漏洩防止) + timeout 60s + stdout/
 
 ## Tweet 4 — install + Phase 7 計画
 
-`pnpm add -D @kiwa/mobile@^0.6`。 migration: https://cardene777.github.io/kiwa/migrations/v1.54-to-v1.55
+`pnpm add -D @kiwa-lab/mobile@^0.6`。 migration: https://cardene777.github.io/kiwa/migrations/v1.54-to-v1.55
 
 v1.56+ で 他 pair depth-5 拡張 (v1.40 AI/LLM / v1.41 Payment / v1.42 Observability depth-4 record からの depth-5 拡張 candidate)、 depth-5 pattern 3 例安定化 candidate。
 

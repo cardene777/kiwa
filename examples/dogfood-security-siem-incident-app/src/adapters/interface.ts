@@ -9,7 +9,7 @@
  *    KIWA_LOKI_URL + KIWA_SIEM_TOKEN) when `KIWA_MODE=real` +
  *    `SIEM_STACK_READY=1` are set; otherwise every op reports
  *    `KIWA_SIEM_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa/security` v0.2
+ *  - {@link makeMockAdapter} — backed by `@kiwa-lab/security` v0.2
  *    siem-audit + incident-response semantics (startSiemAuditSession /
  *    structureEvent / sealEvents / applyRetention / correlate /
  *    startIncidentSession / triggerPlaybook / classifySeverity /

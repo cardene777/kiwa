@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/component` v0.3 that models the 5 pieces of a real Storybook 8 authoring loop that every non-trivial design system eventually needs — a story registry that indexes CSF3 `Meta` + `StoryObj` pairs, an args resolver that merges meta / story / render-time args in the right precedence, a mount step that materializes the story into a `CanvasElement` you can query like a real DOM, a play function runner that runs `@storybook/test` step blocks with per-step ok / error tracking, and an a11y checker + coverage reporter that answer "how many stories have MDX docs + interaction play + a11y coverage." `createStoryRegistry()` + `hashMarkup()` + `createCanvas()` give you every one of those pieces without booting a real Storybook 8 dev server. This is the pattern kiwa's `examples/dogfood-storybook-8-mdx-app` exercises against real Storybook 8 under `KIWA_MODE=real` + `STORYBOOK_URL` + `STORYBOOK_MDX_READY=1` + `STORYBOOK_TEST_READY=1`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "story registered but MDX doc missing" gap a reviewer sees in the design system audit.
+A vitest suite wired to `@kiwa-lab/component` v0.3 that models the 5 pieces of a real Storybook 8 authoring loop that every non-trivial design system eventually needs — a story registry that indexes CSF3 `Meta` + `StoryObj` pairs, an args resolver that merges meta / story / render-time args in the right precedence, a mount step that materializes the story into a `CanvasElement` you can query like a real DOM, a play function runner that runs `@storybook/test` step blocks with per-step ok / error tracking, and an a11y checker + coverage reporter that answer "how many stories have MDX docs + interaction play + a11y coverage." `createStoryRegistry()` + `hashMarkup()` + `createCanvas()` give you every one of those pieces without booting a real Storybook 8 dev server. This is the pattern kiwa's `examples/dogfood-storybook-8-mdx-app` exercises against real Storybook 8 under `KIWA_MODE=real` + `STORYBOOK_URL` + `STORYBOOK_MDX_READY=1` + `STORYBOOK_TEST_READY=1`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "story registered but MDX doc missing" gap a reviewer sees in the design system audit.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/component` v0.3 that models the 5 pieces of a rea
 ```bash
 mkdir kiwa-storybook-mdx && cd kiwa-storybook-mdx
 pnpm init
-pnpm add -D @kiwa/component@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa-lab/component@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.3 surface exports `createStoryRegistry` + the DOM primitives (`createNode
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createNode, createStoryRegistry } from '@kiwa/component';
+import { createNode, createStoryRegistry } from '@kiwa-lab/component';
 
 interface ButtonArgs extends Record<string, unknown> {
   label: string;
@@ -86,7 +86,7 @@ The rule of thumb is that the registry is the SSOT for what stories exist. The m
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createNode, createStoryRegistry, hashMarkup, renderMarkup } from '@kiwa/component';
+import { createNode, createStoryRegistry, hashMarkup, renderMarkup } from '@kiwa-lab/component';
 
 interface CardArgs extends Record<string, unknown> {
   title: string;
@@ -141,7 +141,7 @@ The rule of thumb is that renderMarkup + hashMarkup is the visual regression pip
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { addHandler, createNode, createStoryRegistry, fireEvent } from '@kiwa/component';
+import { addHandler, createNode, createStoryRegistry, fireEvent } from '@kiwa-lab/component';
 
 interface CounterArgs extends Record<string, unknown> {
   initial: number;
@@ -223,7 +223,7 @@ The rule of thumb is that the play function runner is what turns "the button cha
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createNode, createStoryRegistry } from '@kiwa/component';
+import { createNode, createStoryRegistry } from '@kiwa-lab/component';
 
 describe('story — runA11y', () => {
   it('detects a button with no accessible name', () => {
@@ -287,7 +287,7 @@ The rule of thumb is that a11y is a heuristic layer, not a formal proof. The moc
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createNode, createStoryRegistry } from '@kiwa/component';
+import { createNode, createStoryRegistry } from '@kiwa-lab/component';
 
 describe('coverage — hasChromatic + hasInteraction + hasA11y', () => {
   it('reports per-story coverage flags + overall percentage', () => {
@@ -348,7 +348,7 @@ All 5 files pass in under 3 seconds. The full v0.3 story registry surface — re
 
 ## What you learned
 
-- The 5 pieces of a real Storybook 8 authoring loop (registry + mount + play + a11y + coverage) all fit in one mock package (`@kiwa/component` v0.3) — the mock skips the addon layer + docs mode + decorators + loaders on purpose because those are the framework-specific pieces that a stable authoring test does not need.
+- The 5 pieces of a real Storybook 8 authoring loop (registry + mount + play + a11y + coverage) all fit in one mock package (`@kiwa-lab/component` v0.3) — the mock skips the addon layer + docs mode + decorators + loaders on purpose because those are the framework-specific pieces that a stable authoring test does not need.
 - The story id format (`title--storyName` lowercase / kebab-case) matches Storybook 8's SB URL param format exactly — a mock story id ports to real SB URL query strings without change.
 - The play function's `context.step(label, fn)` API matches `@storybook/test` exactly — tests written against the mock port to real Storybook 8 without change.
 - The coverage report walks `entry.parameters` + `entry.play` — no coverage-specific helper needed because the mock exposes the same fields Storybook 8's SB Manager UI reads.

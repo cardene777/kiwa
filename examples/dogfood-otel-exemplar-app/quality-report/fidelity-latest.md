@@ -1,4 +1,4 @@
-# Quality Report — @kiwa/observability/otel-exemplar @ 2.1.0
+# Quality Report — @kiwa-lab/observability/otel-exemplar @ 2.1.0
 
 _Reported at 2026-07-06T15:06:39.984Z._
 

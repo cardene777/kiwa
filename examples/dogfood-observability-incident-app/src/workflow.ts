@@ -1,4 +1,4 @@
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 
 type IncidentSession = semantics.IncidentSession;
 type IncidentSummary = semantics.IncidentSummary;

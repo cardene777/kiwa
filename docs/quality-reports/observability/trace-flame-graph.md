@@ -1,13 +1,13 @@
 # Fidelity — dogfood-trace-flame-graph (v1.17-4)
 
-Real-vs-mock behavioural fidelity for the trace flame graph explorer dogfood, produced by `examples/dogfood-trace-flame-graph/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 7-axis release gate.
+Real-vs-mock behavioural fidelity for the trace flame graph explorer dogfood, produced by `examples/dogfood-trace-flame-graph/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-lab/quality-metrics` 7-axis release gate.
 
 ## Baseline (real mode skipped — no `JAEGER_URL`)
 
 When the harness runs without a Jaeger URL, the real adapter emits `JAEGER_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa/observability/trace-flame
+provider   : @kiwa-lab/observability/trace-flame
 version    : 2.0.0
 verdict    : PASS
 divergences: 5 (loadTrace / renderFlame / drillDown / joinLogs / filterByName missing on real)
@@ -79,7 +79,7 @@ Log correlation — the mock builds a `LogCorrelationIndex` per trace id using t
 
 ## Notes
 
-Provider prefix `@kiwa/observability/` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Jaeger is a trace store primitive, not a token-priced generative call. Load + render round-trip latency feeds `perf.p95Ms` so explorer performance stays visible in the report.
+Provider prefix `@kiwa-lab/observability/` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Jaeger is a trace store primitive, not a token-priced generative call. Load + render round-trip latency feeds `perf.p95Ms` so explorer performance stays visible in the report.
 
 The 4 axes AC (Issue #781) — `10 trace × flame graph render × drill-down + log join`.
 

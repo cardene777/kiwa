@@ -2,7 +2,7 @@
  * Mock adapter — spins up 1 outbox run, 1 CDC publication run, 1 Redis
  * Streams consumer, 1 replication session, and 4 orm v0.10 advanced
  * sessions (logical replication + slot + pgvector) against
- * `@kiwa/orm`'s mock semantics. Every op appends 1 latency sample
+ * `@kiwa-lab/orm`'s mock semantics. Every op appends 1 latency sample
  * and 1 trace event so the fidelity harness never reads as 0-sample.
  *
  * The mock is drivable from tests deterministically — LSN counters are
@@ -25,7 +25,7 @@ import {
   promoteReplica,
   startFailover,
   type ReplicationSession,
-} from '@kiwa/orm';
+} from '@kiwa-lab/orm';
 import type {
   AdapterMetrics,
   AtLeastOnceObservation,

@@ -1,4 +1,4 @@
-import { createNatsMock } from '@kiwa/streaming';
+import { createNatsMock } from '@kiwa-lab/streaming';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createJetStreamRun, simulateRedelivery } from '../src/jetstream/index.js';
 

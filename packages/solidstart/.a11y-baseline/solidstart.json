@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/solidstart",
+  "package": "@kiwa-lab/solidstart",
   "generatedAt": "2026-07-06T01:15:07.787Z",
   "layers": {
     "jsdom": {

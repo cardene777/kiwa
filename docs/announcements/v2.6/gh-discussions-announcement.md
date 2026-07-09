@@ -7,7 +7,7 @@ kiwa v2.6 is out。 Search pair depth-5 到達、 query-orchestrator 新設 (que
 ## Install
 
 ```bash
-pnpm add -D @kiwa/search@^2.1
+pnpm add -D @kiwa-lab/search@^2.1
 ```
 
 ## Migration guide

@@ -1,13 +1,13 @@
 # Fidelity — dogfood-nextjs-server-action-app (v1.34-3)
 
-Real-vs-mock behavioural fidelity for the Next.js 15.4 + React 19.1 App Router + Server Action dogfood, produced by `examples/dogfood-nextjs-server-action-app/tests/emit-fidelity-report.spec.ts`. Feeds `@kiwa/quality-metrics` 13-axis release gate on the common 8-axis branch (7 core axes + a11y at SaaS-tier, since the Server Action harness emits no DOM in mock mode).
+Real-vs-mock behavioural fidelity for the Next.js 15.4 + React 19.1 App Router + Server Action dogfood, produced by `examples/dogfood-nextjs-server-action-app/tests/emit-fidelity-report.spec.ts`. Feeds `@kiwa-lab/quality-metrics` 13-axis release gate on the common 8-axis branch (7 core axes + a11y at SaaS-tier, since the Server Action harness emits no DOM in mock mode).
 
 ## Baseline (real mode skipped — no `SERVER_ACTION_BROWSER_READY=1`)
 
 When the harness runs without the Playwright + Chromium browser session env, the real adapter emits `KIWA_SERVER_ACTION_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa/component/nextjs-server-action-app
+provider   : @kiwa-lab/component/nextjs-server-action-app
 version    : 0.3.0
 verdict    : PASS
 divergences: 15 (startSubscribe / submitSubscribe / revalidateSubscribePath / startLike / markLikePending / applyOptimisticLike / submitLike / revalidateLikeTag / resolveLike / startLogin / enhanceLogin / markLoginPending / submitLogin / redirectLogin / resolveLogin — recorded as BEHAVIORAL_DIVERGENCE, real mode absent)

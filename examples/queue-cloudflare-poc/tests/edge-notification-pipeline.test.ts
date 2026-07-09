@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   setupCloudflareQueuesEnv,
   type CloudflareQueuesTestEnv,
-} from '@kiwa/queue';
+} from '@kiwa-lab/queue';
 import {
   attachEdgeAuditPipeline,
   createAuditConsumer,

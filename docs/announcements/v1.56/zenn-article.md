@@ -6,7 +6,7 @@ kiwa v1.56 をリリースしました。 **Desktop 新規 base pair 第 14 導�
 
 ## 何が変わったか
 
-### `@kiwa/desktop` v0.1 新規
+### `@kiwa-lab/desktop` v0.1 新規
 
 - 3 axis semantics = Electron (main + BrowserWindow + IPC + quit、 5 state) + Tauri (invoke command + event listen + window mgmt、 5 state) + Webview (preload + contextBridge + postMessage + isolation、 5 state)
 - 3 target (macos + windows + linux) × 3 axis = 9 row fidelity grid
@@ -31,7 +31,7 @@ v1.23 → v1.56 = 34 milestone 連続、 kiwa 史上最長記録更新継続。 
 ## インストール
 
 ```bash
-pnpm add -D @kiwa/desktop@^0.1
+pnpm add -D @kiwa-lab/desktop@^0.1
 ```
 
 ## Migration guide

@@ -7,7 +7,7 @@
  *
  * The mtls surface pairs the parent v1.39-1 `mtls` axis
  * (startMtlsSession + completeHandshake + verifyPin + verifyOcsp +
- * checkCtLog) with `@kiwa/security` v0.2 — every op has a neutral
+ * checkCtLog) with `@kiwa-lab/security` v0.2 — every op has a neutral
  * event counterpart the fidelity harness can compare across mock vs
  * real.
  */

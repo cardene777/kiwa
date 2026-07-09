@@ -27,7 +27,7 @@ describe('v2.8-4 publish', () => {
       existsSync(resolve(REPO_ROOT, 'docs/announcements/v2.8/gh-discussions-announcement.md')),
     ).toBe(true);
   });
-  it('@kiwa/orm v2.1.0', () => {
+  it('@kiwa-lab/orm v2.1.0', () => {
     expect(readJson<{ version: string }>('packages/orm/package.json').version).toBe('2.1.0');
   });
   it('transaction-orchestrator source', () => {
@@ -36,9 +36,9 @@ describe('v2.8-4 publish', () => {
     expect(src).toContain("'beginning'");
     expect(src).toContain("'savepoint-nested'");
   });
-  it('release filter @kiwa/orm', () => {
+  it('release filter @kiwa-lab/orm', () => {
     expect(readJson<{ scripts: { release: string } }>('package.json').scripts.release).toContain(
-      '-F @kiwa/orm',
+      '-F @kiwa-lab/orm',
     );
   });
   it('dogfood 5 pattern (backend systems layer 特化 = traceSavepointDepth 追加)', () => {

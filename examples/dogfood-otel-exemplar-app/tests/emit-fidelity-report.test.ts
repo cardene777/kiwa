@@ -1,7 +1,7 @@
 /**
  * Emit fidelity report — drive the multi-profile matrix through both
  * adapters, diff traces, feed the divergence count into the
- * @kiwa/quality-metrics 13-axis release gate, and write JSON +
+ * @kiwa-lab/quality-metrics 13-axis release gate, and write JSON +
  * markdown snapshots to quality-report/.
  */
 
@@ -29,7 +29,7 @@ describe('dogfood-otel-exemplar-app — emit fidelity report', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/observability/otel-exemplar',
+      provider: '@kiwa-lab/observability/otel-exemplar',
       version: '2.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -116,7 +116,7 @@ describe('dogfood-otel-exemplar-app — emit fidelity report', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/observability/otel-exemplar',
+      provider: '@kiwa-lab/observability/otel-exemplar',
       version: '2.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -146,7 +146,7 @@ describe('dogfood-otel-exemplar-app — emit fidelity report', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/observability/otel-exemplar',
+      provider: '@kiwa-lab/observability/otel-exemplar',
       version: '2.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -165,7 +165,7 @@ describe('dogfood-otel-exemplar-app — emit fidelity report', () => {
     expect(parsed.fidelity.mockCoveredMethods).toBe(
       output.report.fidelity.mockCoveredMethods,
     );
-    expect(parsed.provider).toBe('@kiwa/observability/otel-exemplar');
+    expect(parsed.provider).toBe('@kiwa-lab/observability/otel-exemplar');
     expect(parsed.version).toBe('2.1.0');
   });
 

@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.35-3 — an OpenTelemetry Collector + exemplar tracing (trace-to-metric / metric-to-trace) + baggage propagation + W3C context propagation harness driven behind a provider-neutral surface backed by @kiwa/observability v2.1 semantics (exemplar + otel-advanced axes) + real-driver env-gate. Two adapter implementations satisfy the same 16-op contract: makeMockAdapter walks the observability v2.1 exemplar + otel-advanced state machines deterministically without any backend; makeRealAdapter emits OTLP HTTP export + Collector pipeline requests through the KIWA_MODE=real testcontainers-driven OpenTelemetry Collector + Jaeger + Prometheus stack when KIWA_OTEL_COLLECTOR_URL / KIWA_JAEGER_URL / KIWA_PROMETHEUS_URL are wired, and otherwise reports KIWA_OTEL_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 3 pipeline profiles (traces / metrics / logs) × 4 baggage entry sets so behavioural drift between mock semantics and the real OpenTelemetry Collector stays observable and feeds the @kiwa/quality-metrics 13-axis release gate.",
+  "description": "Dogfood app v1.35-3 — an OpenTelemetry Collector + exemplar tracing (trace-to-metric / metric-to-trace) + baggage propagation + W3C context propagation harness driven behind a provider-neutral surface backed by @kiwa-lab/observability v2.1 semantics (exemplar + otel-advanced axes) + real-driver env-gate. Two adapter implementations satisfy the same 16-op contract: makeMockAdapter walks the observability v2.1 exemplar + otel-advanced state machines deterministically without any backend; makeRealAdapter emits OTLP HTTP export + Collector pipeline requests through the KIWA_MODE=real testcontainers-driven OpenTelemetry Collector + Jaeger + Prometheus stack when KIWA_OTEL_COLLECTOR_URL / KIWA_JAEGER_URL / KIWA_PROMETHEUS_URL are wired, and otherwise reports KIWA_OTEL_ENV_MISSING so callers can budget the fallback. The fidelity harness diffs both traces side-by-side across 3 pipeline profiles (traces / metrics / logs) × 4 baggage entry sets so behavioural drift between mock semantics and the real OpenTelemetry Collector stays observable and feeds the @kiwa-lab/quality-metrics 13-axis release gate.",
   "scripts": {
-    "test": "pnpm -F @kiwa/observability -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/observability -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/observability": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/observability": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

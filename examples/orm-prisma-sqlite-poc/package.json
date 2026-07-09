@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
-    "test": "pnpm -F @kiwa/orm -F @kiwa/core build && pnpm prisma:generate && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/orm -F @kiwa-lab/core build && pnpm prisma:generate && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "pnpm prisma:generate && tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/orm": "workspace:*",
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/orm": "workspace:*",
     "@prisma/client": "^5.22.0",
     "prisma": "^5.22.0"
   },

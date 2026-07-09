@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/security` v0.1 that models the 5 pieces of a real authorization pipeline that every non-trivial multi-tenant product eventually needs — an RBAC policy that pins named roles to permission strings, a role-hierarchy expander that walks parents recursively so an `admin` role inherits `editor` and `viewer` permissions without a copy-paste per role, an ABAC policy that evaluates attribute-based rules against a 4-bucket attribute shape (`subject / resource / action / environment`), a combining-algorithm selector (`deny-overrides` / `permit-overrides` / `first-applicable`) that resolves what happens when several rules match at once, and a combined RBAC + ABAC evaluator that layers the two decisions so an operator can start with roles and refine with attributes. `createRbacPolicy()` + `expandRoles()` + `rbacAllows()` + `evaluateAbac()` + `evaluateCombined()` + `toAuthorizationEvent()` give you every one of those pieces without booting a real casbin engine. This is the pattern kiwa's `examples/dogfood-security-rbac-abac-app` exercises against a real casbin policy file under `KIWA_MODE=real` + `KIWA_CASBIN_POLICY_PATH`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the `admin` role stopped inheriting `viewer` permissions after a role rename but nobody caught it until a support ticket asked why the audit UI was blank" gap a reviewer sees in the RBAC-drift post-mortem.
+A vitest suite wired to `@kiwa-lab/security` v0.1 that models the 5 pieces of a real authorization pipeline that every non-trivial multi-tenant product eventually needs — an RBAC policy that pins named roles to permission strings, a role-hierarchy expander that walks parents recursively so an `admin` role inherits `editor` and `viewer` permissions without a copy-paste per role, an ABAC policy that evaluates attribute-based rules against a 4-bucket attribute shape (`subject / resource / action / environment`), a combining-algorithm selector (`deny-overrides` / `permit-overrides` / `first-applicable`) that resolves what happens when several rules match at once, and a combined RBAC + ABAC evaluator that layers the two decisions so an operator can start with roles and refine with attributes. `createRbacPolicy()` + `expandRoles()` + `rbacAllows()` + `evaluateAbac()` + `evaluateCombined()` + `toAuthorizationEvent()` give you every one of those pieces without booting a real casbin engine. This is the pattern kiwa's `examples/dogfood-security-rbac-abac-app` exercises against a real casbin policy file under `KIWA_MODE=real` + `KIWA_CASBIN_POLICY_PATH`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the `admin` role stopped inheriting `viewer` permissions after a role rename but nobody caught it until a support ticket asked why the audit UI was blank" gap a reviewer sees in the RBAC-drift post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/security` v0.1 that models the 5 pieces of a real
 ```bash
 mkdir kiwa-authz && cd kiwa-authz
 pnpm init
-pnpm add -D @kiwa/security@^0.1 vitest typescript @types/node
+pnpm add -D @kiwa-lab/security@^0.1 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.1 surface exports the authorization axis (`createRbacPolicy` / `expandRol
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createRbacPolicy, rbacAllows } from '@kiwa/security';
+import { createRbacPolicy, rbacAllows } from '@kiwa-lab/security';
 
 describe('rbac — flat policy', () => {
   it('grants a permission that the subject role holds', () => {
@@ -84,7 +84,7 @@ The unknown-role case returns `false` rather than throwing — the default-deny 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createRbacPolicy, expandRoles, rbacAllows } from '@kiwa/security';
+import { createRbacPolicy, expandRoles, rbacAllows } from '@kiwa-lab/security';
 
 describe('rbac — role hierarchy', () => {
   it('expands parent permissions transitively', () => {
@@ -133,8 +133,8 @@ The cycle detection runs at `createRbacPolicy()` time, not at evaluate time — 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import type { AbacPolicy } from '@kiwa/security';
-import { evaluateAbac } from '@kiwa/security';
+import type { AbacPolicy } from '@kiwa-lab/security';
+import { evaluateAbac } from '@kiwa-lab/security';
 
 describe('abac — first-applicable', () => {
   const policy: AbacPolicy = {
@@ -187,8 +187,8 @@ describe('abac — first-applicable', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import type { AbacRule } from '@kiwa/security';
-import { evaluateAbac } from '@kiwa/security';
+import type { AbacRule } from '@kiwa-lab/security';
+import { evaluateAbac } from '@kiwa-lab/security';
 
 const rules: AbacRule[] = [
   { id: 'r-permit', effect: 'permit', condition: () => true },
@@ -231,7 +231,7 @@ The default-deny fallback still applies when no rule matches — the algorithm o
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createRbacPolicy, evaluateCombined } from '@kiwa/security';
+import { createRbacPolicy, evaluateCombined } from '@kiwa-lab/security';
 
 describe('combined — rbac + abac', () => {
   const rbacPolicy = createRbacPolicy([
@@ -302,7 +302,7 @@ The order of precedence (RBAC deny short-circuits, ABAC otherwise takes over) is
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { toAuthorizationEvent } from '@kiwa/security';
+import { toAuthorizationEvent } from '@kiwa-lab/security';
 
 describe('authorization — fidelity adapter', () => {
   it('normalizes a permit decision into the neutral SecurityEvent shape', () => {

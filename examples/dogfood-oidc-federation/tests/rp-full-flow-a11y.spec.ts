@@ -27,7 +27,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { expectNoViolations, runAxe } from '@kiwa/a11y';
+import { expectNoViolations, runAxe } from '@kiwa-lab/a11y';
 import {
   describeIndexError,
   escapeHtml,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { errorBoundary, h, renderWithSuspense, stringify } from '@kiwa/solidjs';
+import { errorBoundary, h, renderWithSuspense, stringify } from '@kiwa-lab/solidjs';
 import { UserProfileLoadingFallback, renderProfileErrorFallback } from '../src/components/UserProfile.js';
 
 describe('Suspense boundary + Error boundary', () => {

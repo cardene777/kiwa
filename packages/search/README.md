@@ -1,4 +1,4 @@
-# @kiwa/search
+# @kiwa-lab/search
 
 Unified in-memory search mock for the 3 major search providers — Meilisearch, Algolia, Typesense.
 
@@ -7,7 +7,7 @@ Unified in-memory search mock for the 3 major search providers — Meilisearch, 
 - 1-edit-distance typo tolerance (per-provider default: Meili ON / Algolia ON / Typesense OFF)
 
 ```ts
-import { createMeilisearchMock } from '@kiwa/search';
+import { createMeilisearchMock } from '@kiwa-lab/search';
 
 const search = createMeilisearchMock();
 await search.addDocuments('docs', [{ id: '1', title: 'kiwa release gate' }]);

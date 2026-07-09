@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/solidstart",
+  "package": "@kiwa-lab/solidstart",
   "tier": "Framework",
   "thresholds": {
     "high": 70,

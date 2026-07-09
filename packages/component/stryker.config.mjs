@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa/component.
+ * Mutation testing config for @kiwa-lab/component.
  * Threshold: test type tier (high 60 / low 50 / break 40) — component adapter
  * bridges Storybook / Playwright CT / Chromatic harness with visual + a11y
  * measurement noise inherent to DOM environments.

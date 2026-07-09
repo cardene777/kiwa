@@ -8,7 +8,7 @@
  * retired key remains verifiable until its `retiredAt` fires.
  */
 
-import type { JwksDocument, JwksKey } from '@kiwa/auth';
+import type { JwksDocument, JwksKey } from '@kiwa-lab/auth';
 
 /**
  * Error thrown when the JWKS document violates RFC 7517 §4 mandatory

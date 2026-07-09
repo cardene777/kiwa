@@ -1,8 +1,8 @@
 // kiwa unit test for app/lib/_kiwa/items-loader.ts
-// — invokes the pure loader through @kiwa/remix's invokeLoader.
+// — invokes the pure loader through @kiwa-lab/remix's invokeLoader.
 
 import { describe, expect, it } from 'vitest';
-import { invokeLoader } from '@kiwa/remix';
+import { invokeLoader } from '@kiwa-lab/remix';
 import { itemsLoader } from '../app/lib/_kiwa/items-loader.js';
 import type { ItemsLoaderData } from '../app/lib/_kiwa/items-loader.js';
 
@@ -11,7 +11,7 @@ async function readJson(response: Response | null): Promise<unknown> {
   return await response.clone().json();
 }
 
-describe('itemsLoader via @kiwa/remix invokeLoader', () => {
+describe('itemsLoader via @kiwa-lab/remix invokeLoader', () => {
   it('T-RF-001: session=admin で 200 + 全 items + cache-control header 注入', async () => {
     const { response, redirect } = await invokeLoader({
       loader: itemsLoader,

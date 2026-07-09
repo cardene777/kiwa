@@ -5,7 +5,7 @@ import {
   type FreshChild,
   type FreshHandlers,
   type FreshPageProps,
-} from '@kiwa/fresh';
+} from '@kiwa-lab/fresh';
 
 /**
  * Greet route + handler — the smallest Fresh route the dogfood ships. The

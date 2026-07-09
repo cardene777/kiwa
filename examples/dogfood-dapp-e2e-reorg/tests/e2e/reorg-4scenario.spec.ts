@@ -29,7 +29,7 @@ import {
   type PublicClient,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { snapshotChain, revertChain } from '@kiwa/dapp';
+import { snapshotChain, revertChain } from '@kiwa-lab/dapp';
 import { test, expect } from '../fixture';
 
 const OWNER_PK =

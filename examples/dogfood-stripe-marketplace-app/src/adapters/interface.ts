@@ -11,7 +11,7 @@
 import type {
   PaymentWebhookEvent,
   WebhookVerifyResult,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 export type MarketplaceMode = 'mock' | 'real';
 export type AccountStatus = 'pending' | 'verified' | 'restricted';

@@ -1,4 +1,4 @@
-import type { VisualDiff, VisualReviewEntry } from '@kiwa/component';
+import type { VisualDiff, VisualReviewEntry } from '@kiwa-lab/component';
 import type { SceneSpec } from '../scenes/index.js';
 
 /**
@@ -6,7 +6,7 @@ import type { SceneSpec } from '../scenes/index.js';
  * dogfood. The app talks to Chromatic only through this interface. Two
  * implementations exist —
  *
- * - `makeMockAdapter` (backed by `@kiwa/component` `createChromaticVisualMock`
+ * - `makeMockAdapter` (backed by `@kiwa-lab/component` `createChromaticVisualMock`
  *   + `hashMarkup`) — pseudo-HTML → SHA-256 hex substring → hash diff. No
  *   browser, no image bitmap.
  * - `makeRealAdapter` (drives `chromatic-cli` when `CHROMATIC_PROJECT_TOKEN`
@@ -14,7 +14,7 @@ import type { SceneSpec } from '../scenes/index.js';
  *   `CHROMATIC_REAL_ENV_MISSING` trace)
  *
  * Both satisfy the same contract so behavioural fidelity between real vs
- * mock can be measured side-by-side and fed to `@kiwa/quality-metrics`
+ * mock can be measured side-by-side and fed to `@kiwa-lab/quality-metrics`
  * 7-axis release gate. Ops match the AC in Issue #766 — baseline seed +
  * capture (multi-viewport) + diff detection on intent change + accept /
  * reject review workflow, generalised across the 10 scenes.

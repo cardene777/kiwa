@@ -1,7 +1,7 @@
 // users-repo.ts — production-shape MySQL repository wrapping Drizzle queries.
 
 import { eq } from 'drizzle-orm';
-import type { DrizzleMysqlDb } from '@kiwa/orm';
+import type { DrizzleMysqlDb } from '@kiwa-lab/orm';
 import { posts, schema, users, type Schema } from './schema.js';
 
 export interface CreateUserInput {

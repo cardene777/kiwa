@@ -1,7 +1,7 @@
 /**
  * Emit fidelity report — drive the multi-objective matrix through both
  * adapters, diff traces, feed the divergence count into the
- * @kiwa/quality-metrics 13-axis release gate, and write JSON +
+ * @kiwa-lab/quality-metrics 13-axis release gate, and write JSON +
  * markdown snapshots to quality-report/.
  */
 
@@ -29,7 +29,7 @@ describe('dogfood-observability-slo-app — emit fidelity report', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/observability/slo',
+      provider: '@kiwa-lab/observability/slo',
       version: '2.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -116,7 +116,7 @@ describe('dogfood-observability-slo-app — emit fidelity report', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/observability/slo',
+      provider: '@kiwa-lab/observability/slo',
       version: '2.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -145,7 +145,7 @@ describe('dogfood-observability-slo-app — emit fidelity report', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/observability/slo',
+      provider: '@kiwa-lab/observability/slo',
       version: '2.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -164,7 +164,7 @@ describe('dogfood-observability-slo-app — emit fidelity report', () => {
     expect(parsed.fidelity.mockCoveredMethods).toBe(
       output.report.fidelity.mockCoveredMethods,
     );
-    expect(parsed.provider).toBe('@kiwa/observability/slo');
+    expect(parsed.provider).toBe('@kiwa-lab/observability/slo');
     expect(parsed.version).toBe('2.1.0');
   });
 

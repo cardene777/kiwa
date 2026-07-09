@@ -7,11 +7,11 @@
  *
  * The sbom surface pairs the parent v1.37-1 `sbom` axis (CycloneDX +
  * SPDX + validation + license policy + advisory lookup) with
- * `@kiwa/security` v0.1 — every op has a neutral event counterpart
+ * `@kiwa-lab/security` v0.1 — every op has a neutral event counterpart
  * the fidelity harness can compare across mock vs real.
  */
 
-import type { SbomComponent } from '@kiwa/security';
+import type { SbomComponent } from '@kiwa-lab/security';
 import type { SecurityAdapter } from '../../adapters/interface.js';
 
 export type SbomOpKind =

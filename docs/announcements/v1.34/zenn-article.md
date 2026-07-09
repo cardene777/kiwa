@@ -1,9 +1,9 @@
-# kiwa v1.34 released — Frontend 深化 (@kiwa/component v0.3.0 + @kiwa/nextjs v1.2.0 + 8 axis advanced frontend + 縦深化 pair 第 6 pair 連続化)
+# kiwa v1.34 released — Frontend 深化 (@kiwa-lab/component v0.3.0 + @kiwa-lab/nextjs v1.2.0 + 8 axis advanced frontend + 縦深化 pair 第 6 pair 連続化)
 
 ## TL;DR
 
 - **kiwa v1.34 released** — Frontend 深化 milestone (advanced frontend semantics 8 axis + real driver + 縦深化 pair 第 6 pair 連続化)
-- **`@kiwa/component` v0.2.0 → v0.3.0 + `@kiwa/nextjs` v1.1.0 → v1.2.0 pair minor bump** — 8 axis advanced frontend semantics + real driver env-gate + 3 target × 8 axis neutral state machine 追加
+- **`@kiwa-lab/component` v0.2.0 → v0.3.0 + `@kiwa-lab/nextjs` v1.1.0 → v1.2.0 pair minor bump** — 8 axis advanced frontend semantics + real driver env-gate + 3 target × 8 axis neutral state machine 追加
 - **8 axis semantics** = rsc-harness + streaming-ssr + view-transitions + form-action-advanced + server-action-advanced + partial-prerendering + interception-routes + parallel-routes-advanced
 - **3 dogfood app 新規** — nextjs-rsc-streaming-app v2 + nextjs-server-action-app 新規 + storybook-8-mdx-app 新規、 全 7 軸 release gate PASS + real driver env-gate
 - **縦深化 pair pattern 第 6 pair 連続化** — Auth pair (v1.21→v1.22) + Realtime pair (v1.13→v1.28) + Streaming pair (v1.20→v1.31) + Database pair (v1.14→v1.32) + Payment pair (v1.23→v1.33) + **Frontend pair (v1.16→v1.34)**、 縦深化戦略 SSOT を frontend production layer に拡張
@@ -13,7 +13,7 @@
 
 ## v1.34 が解決したい問題 — Frontend production semantics の testing gap
 
-v1.16 で `@kiwa/component` v0.1 (Storybook 8 + Playwright Component Testing + Chromatic の 3 target を単一 API surface で unify する mock harness) を land、 v1.2 で `@kiwa/nextjs` v1.0 (Next.js App Router / Pages Router / Edge Runtime の unified adapter) を land した時点で、 kiwa は 3 target 上に単一の component + nextjs test envelope を統一 mock として提供していた。 browser 経由の live rendering 不要で mock only mode で走る、 実 test 環境の inner-loop 速度を確保する目的の layer。
+v1.16 で `@kiwa-lab/component` v0.1 (Storybook 8 + Playwright Component Testing + Chromatic の 3 target を単一 API surface で unify する mock harness) を land、 v1.2 で `@kiwa-lab/nextjs` v1.0 (Next.js App Router / Pages Router / Edge Runtime の unified adapter) を land した時点で、 kiwa は 3 target 上に単一の component + nextjs test envelope を統一 mock として提供していた。 browser 経由の live rendering 不要で mock only mode で走る、 実 test 環境の inner-loop 速度を確保する目的の layer。
 
 しかし v1.16 / v1.2 land 後の実行観測で判明したのは、 real production frontend setup (React 19 + Next.js 15 App Router + Server Components + Server Actions + view transitions) で頻繁に遭遇する **8 axis の advanced frontend semantics** — RSC で Suspense fallback が resolved chunk に置換されない sequencing bug / selective hydration が 4 boundary のうち 1 つだけ pending の状態で stuck / view transition の element transition promise を await 忘れて timing off / useOptimistic で optimistic patch が resolved shape 不一致で stuck / Server Action の revalidateTag typo で wrong path revalidate / Partial Prerendering で static shell の Suspense boundary が外れて dynamic hole flush 失敗 / (.)intercept が親 segment を swallowing / parallel route で default.tsx なしで loading slot 出ない — が v1.16 の 6 base semantics + v1.2 の 5 base semantics だけでは cover できないこと。
 
@@ -78,23 +78,23 @@ default.tsx slot (unmatched slot の fallback) + loading state slot (loading.tsx
 v1.34 で kiwa の縦深化 pair pattern (basic mock milestone → 深化 II milestone で real driver + advanced semantics) が **6 pair 連続完成**:
 
 1. **Auth pair** (v1.21 → v1.22)
-   - v1.21 = `@kiwa/auth` v0.4 4 protocol adapter (WebAuthn L3 / Passkey / OAuth 2.1 / OIDC) mock only
+   - v1.21 = `@kiwa-lab/auth` v0.4 4 protocol adapter (WebAuthn L3 / Passkey / OAuth 2.1 / OIDC) mock only
    - v1.22 = Keycloak testcontainers + oauth2-mock-server + Chrome caBLE hybrid transport (real driver) + a11y axe-core gate
 2. **Realtime pair** (v1.13 → v1.28)
-   - v1.13 = `@kiwa/realtime` v0.1 4 provider (Supabase / Ably / Pusher / Socket.io) × 5 base semantics mock only
+   - v1.13 = `@kiwa-lab/realtime` v0.1 4 provider (Supabase / Ably / Pusher / Socket.io) × 5 base semantics mock only
    - v1.28 = WebRTC + WebTransport + HTTP/3 + QUIC multiplexing + 8 axis advanced (real driver env-gate)
 3. **Streaming pair** (v1.20 → v1.31)
-   - v1.20 = `@kiwa/streaming` v0.1 3 provider (Kafka / Redpanda / NATS) × 5 semantics mock only
+   - v1.20 = `@kiwa-lab/streaming` v0.1 3 provider (Kafka / Redpanda / NATS) × 5 semantics mock only
    - v1.31 = Kafka raw + Redpanda schema + NATS JetStream + 8 axis advanced (real driver env-gate + testcontainers)
 4. **Database pair** (v1.14 → v1.32)
-   - v1.14-v1.26 = `@kiwa/orm` v0.1-v0.9 3 ORM × 3 backend + 8 base semantics mock only
+   - v1.14-v1.26 = `@kiwa-lab/orm` v0.1-v0.9 3 ORM × 3 backend + 8 base semantics mock only
    - v1.32 = Postgres logical replication + MySQL cluster + SQLite WAL/FTS5 + 8 axis advanced (real driver env-gate + testcontainers)
 5. **Payment pair** (v1.23 → v1.33)
-   - v1.14-v1.23 = `@kiwa/payment` v0.2-v0.3 3 provider webhook + 9 base billing semantics mock only
+   - v1.14-v1.23 = `@kiwa-lab/payment` v0.2-v0.3 3 provider webhook + 9 base billing semantics mock only
    - v1.33 = Stripe Connect + Paddle Billing v2 + Lemon Squeezy license + 8 axis advanced billing II (real driver env-gate)
 6. **Frontend pair** (v1.16 → v1.34、 this)
-   - v1.16 = `@kiwa/component` v0.1-v0.2 3 target (Storybook 8 / Playwright CT / Chromatic) 6 base semantics mock only
-   - v1.34 = `@kiwa/component` v0.3 + `@kiwa/nextjs` v1.2 8 axis advanced frontend semantics + real driver env-gate + Next.js 15 App Router + Storybook 8 MDX + Playwright CT + Chromatic
+   - v1.16 = `@kiwa-lab/component` v0.1-v0.2 3 target (Storybook 8 / Playwright CT / Chromatic) 6 base semantics mock only
+   - v1.34 = `@kiwa-lab/component` v0.3 + `@kiwa-lab/nextjs` v1.2 8 axis advanced frontend semantics + real driver env-gate + Next.js 15 App Router + Storybook 8 MDX + Playwright CT + Chromatic
 
 basic mock → advanced real driver の 2 phase pair を追加領域に横展開する pattern が SSOT 化された。 v1.25 perf + v1.27 mutation + v1.30 a11y の横串 triple pair と合わせて **kiwa quality gate 縦横 grid maximum extension**、 6 領域 (auth / realtime / streaming / database / payment / frontend) 完全 cover。
 
@@ -113,7 +113,7 @@ payment-v1.23 / edge-v1.24 / perf-harness-v1.25 / orm-v1.26 / quality-metrics-v1
 ## Try it
 
 ```bash
-pnpm add -D @kiwa/component @kiwa/nextjs
+pnpm add -D @kiwa-lab/component @kiwa-lab/nextjs
 ```
 
 Migration guide (additive-only、 breaking change なし):
@@ -141,4 +141,4 @@ Migration guide (additive-only、 breaking change なし):
 
 ## Thanks
 
-v1.34 sub-Issue を review していただいた方、 `@kiwa/component` v0.3 + `@kiwa/nextjs` v1.2 pre-release を試していただいた方、 縦深化 pair pattern SSOT を 6-pair grid に整理する議論に付き合っていただいた方、 ありがとうございます。 v2.0 へ。
+v1.34 sub-Issue を review していただいた方、 `@kiwa-lab/component` v0.3 + `@kiwa-lab/nextjs` v1.2 pre-release を試していただいた方、 縦深化 pair pattern SSOT を 6-pair grid に整理する議論に付き合っていただいた方、 ありがとうございます。 v2.0 へ。

@@ -1,6 +1,6 @@
 # dogfood-search-vector-app v1.36-2
 
-Dogfood application that exercises `@kiwa/search` v0.3 vector +
+Dogfood application that exercises `@kiwa-lab/search` v0.3 vector +
 semantic axes through a provider-neutral 14-op contract satisfied by
 both a deterministic mock adapter and a `KIWA_MODE=real`
 Meilisearch + Typesense wire-surface real adapter.
@@ -13,7 +13,7 @@ trust the mock in unit tests. The fidelity harness diffs mock vs real
 traces across 2 backends x 5 hybrid weight configs (vector-heavy 0.8/0.2
 / keyword-heavy 0.2/0.8 / balanced 0.5/0.5 / vector-only / keyword-only)
 x 3 query fixture sets (vector-recall / semantic-intent / hybrid-fusion)
-and feeds the divergence count into `@kiwa/quality-metrics` 13-axis
+and feeds the divergence count into `@kiwa-lab/quality-metrics` 13-axis
 release gate.
 
 ## Surface — 14 ops

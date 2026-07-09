@@ -7,7 +7,7 @@
  * append → order → deliver — so the dogfood re-uses the outbox session for
  * both the write and pickup sides.
  *
- * The module also wraps `@kiwa/orm`'s logical-replication semantics
+ * The module also wraps `@kiwa-lab/orm`'s logical-replication semantics
  * so tests can observe publisher / subscription lifecycle events that
  * mirror production Postgres publications.
  */
@@ -21,7 +21,7 @@ import {
   type CdcEvent,
   type ConflictStrategy,
   type LogicalRepSession,
-} from '@kiwa/orm';
+} from '@kiwa-lab/orm';
 
 export interface PickupResult {
   readonly events: readonly CdcEvent[];

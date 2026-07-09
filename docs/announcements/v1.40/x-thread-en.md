@@ -4,7 +4,7 @@
 
 kiwa v1.40 is out — AI/LLM 深化 III land.
 
-@kiwa/ai-llm v0.4.0 → v0.5.0 minor bump. 8 axis advanced III AI/LLM production semantics across 4 provider × 8 axis = 32 cell advanced III fidelity grid (combined with v1.38 v0.4 advanced 32 cell = 64 combination coverage).
+@kiwa-lab/ai-llm v0.4.0 → v0.5.0 minor bump. 8 axis advanced III AI/LLM production semantics across 4 provider × 8 axis = 32 cell advanced III fidelity grid (combined with v1.38 v0.4 advanced 32 cell = 64 combination coverage).
 
 Real driver env-gate (KIWA_MODE=real + provider API keys + KIWA_LLM_BUDGET_USD). 3 dogfood app new (llm-multi-agent-swarm-app + llm-code-interpreter-app + llm-ops-registry-app) 全 7 軸 release gate PASS.
 
@@ -29,4 +29,4 @@ Auth / Realtime / Streaming / Database / Payment / Frontend / Observability / Se
 
 18 milestone 連続 snippet validation streak (v1.23-v1.40) 達成.
 
-`pnpm add -D @kiwa/ai-llm` で v0.5.0 が入る. zero breaking changes. migration guide は https://cardene777.github.io/kiwa/migrations/v1.39-to-v1.40
+`pnpm add -D @kiwa-lab/ai-llm` で v0.5.0 が入る. zero breaking changes. migration guide は https://cardene777.github.io/kiwa/migrations/v1.39-to-v1.40

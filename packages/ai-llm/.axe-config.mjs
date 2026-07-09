@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/ai-llm.
+ * A11y (axe-core) config for @kiwa-lab/ai-llm.
  * Tier: SaaS tier (critical 0 / serious 0 / moderate 0) — Anthropic / OpenAI / Vercel AI SDK / LangChain adapters. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § SaaS tier.
  */

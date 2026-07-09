@@ -1,17 +1,17 @@
-# @kiwa/search v2.1 query-orchestrator in 15 min
+# @kiwa-lab/search v2.1 query-orchestrator in 15 min
 
-`@kiwa/search` v2.1 query-orchestrator = query DSL + faceted + semantic + geo + relevance の 継続合成 layer。 5 state + 8 event。 **depth-5 pattern 7 例目発生 = systematic law 継続強化** (Mobile + Desktop + quality-metrics + Payment + Realtime + Streaming + Search = 7 pair)、 52 milestone streak、 systematic pattern 49 度目適用 (systematic law 継承 第 1 例)。
+`@kiwa-lab/search` v2.1 query-orchestrator = query DSL + faceted + semantic + geo + relevance の 継続合成 layer。 5 state + 8 event。 **depth-5 pattern 7 例目発生 = systematic law 継続強化** (Mobile + Desktop + quality-metrics + Payment + Realtime + Streaming + Search = 7 pair)、 52 milestone streak、 systematic pattern 49 度目適用 (systematic law 継承 第 1 例)。
 
 ## Install
 
 ```bash
-pnpm add -D @kiwa/search@^2.1
+pnpm add -D @kiwa-lab/search@^2.1
 ```
 
 ## Step-by-step
 
 ```ts
-import { semantics } from '@kiwa/search';
+import { semantics } from '@kiwa-lab/search';
 
 let s = semantics.startQuery({ timestamp: new Date().toISOString() });
 // state = 'parsing'

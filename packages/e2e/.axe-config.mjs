@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/e2e.
+ * A11y (axe-core) config for @kiwa-lab/e2e.
  * Tier: Test type tier (critical 0 / serious 0-3 / moderate 0-10) — Playwright fixture + test env. Browser fixture noise.
  * SSOT: docs/quality/a11y-thresholds.md § Test type tier.
  */

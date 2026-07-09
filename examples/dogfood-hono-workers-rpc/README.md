@@ -1,10 +1,10 @@
 # dogfood-hono-workers-rpc
 
-Dogfood app (v1.19-4) — a Cloudflare Workers + Hono + `hc` RPC + middleware chain + KV / D1 / R2 bindings harness that exercises **4 flows** (route invoke through middleware chain / hc client request / Workers env KV+D1+R2 access / ExecutionContext waitUntil scheduling) inside 5 routes (`/health`, `/greet/:name`, `/kv-counter`, `/d1-list`, `/r2-upload`) with a 5-layer middleware chain (`cors` + `auth` + `logger` + `rate-limit` + `validator`). Drivable in both `KIWA_MODE=real` (spawns real `miniflare` through env-skip when `CF_ACCOUNT_ID=1`) and `KIWA_MODE=mock` (`@kiwa/hono` `createHonoApp` + `invokeRoute` + `createRpcClient` + `createWorkersEnv` + `createExecutionContext`). Behavioural fidelity feeds `@kiwa/quality-metrics` 7-axis release gate.
+Dogfood app (v1.19-4) — a Cloudflare Workers + Hono + `hc` RPC + middleware chain + KV / D1 / R2 bindings harness that exercises **4 flows** (route invoke through middleware chain / hc client request / Workers env KV+D1+R2 access / ExecutionContext waitUntil scheduling) inside 5 routes (`/health`, `/greet/:name`, `/kv-counter`, `/d1-list`, `/r2-upload`) with a 5-layer middleware chain (`cors` + `auth` + `logger` + `rate-limit` + `validator`). Drivable in both `KIWA_MODE=real` (spawns real `miniflare` through env-skip when `CF_ACCOUNT_ID=1`) and `KIWA_MODE=mock` (`@kiwa-lab/hono` `createHonoApp` + `invokeRoute` + `createRpcClient` + `createWorkersEnv` + `createExecutionContext`). Behavioural fidelity feeds `@kiwa-lab/quality-metrics` 7-axis release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/hono` `createHonoApp` + `invokeRoute` + `createRpcClient` + `createWorkersEnv` + `createExecutionContext` + `mockKVNamespace` + `mockD1Database` + `mockR2Bucket`).
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-lab/hono` `createHonoApp` + `invokeRoute` + `createRpcClient` + `createWorkersEnv` + `createExecutionContext` + `mockKVNamespace` + `mockD1Database` + `mockR2Bucket`).
 - `KIWA_MODE=real` — driven by `makeRealAdapter()`, which detects `CF_ACCOUNT_ID=1`. Without the env var each method reports `HONO_REAL_ENV_MISSING` and throws `SkippedError`; with the env var each method reports `HONO_LIVE_NOT_IMPLEMENTED` (a placeholder trace that keeps the divergence shape stable for follow-up work that swaps in a real `miniflare` driver).
 
 Real-mode envs.
@@ -23,11 +23,11 @@ src/
     bindings.ts               -- createDogfoodBindings() (env + kv + d1 + r2 + ctx)
   adapters/
     interface.ts              -- provider-neutral 6-op contract
-    mock.ts                   -- kiwa mock adapter (@kiwa/hono)
+    mock.ts                   -- kiwa mock adapter (@kiwa-lab/hono)
     real.ts                   -- real Cloudflare Workers adapter with env-skip when CF_ACCOUNT_ID is unset
   flows/
     hono-flows.ts             -- 5 user-facing flows (route/rpc / kv / d1 / r2 / exec-ctx)
-    fidelity.ts               -- trace-diffing harness feeding @kiwa/quality-metrics
+    fidelity.ts               -- trace-diffing harness feeding @kiwa-lab/quality-metrics
 tests/
   app-route.test.ts             -- 6 route + middleware chain invariants
   rpc-client.test.ts            -- 5 hc RPC client tests
@@ -66,7 +66,7 @@ Every method emits at least 1 trace event, so the fidelity harness can diff the 
 
 ## Release gate (7 axes)
 
-Because the provider string is `@kiwa/hono/workers-rpc`, `evaluateReleaseGate` includes the common 7 axes (coverage 3 / fidelity / perf p95 / mutation / behavior tests). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply — route dispatch and CF bindings are not token-priced generative surfaces.
+Because the provider string is `@kiwa-lab/hono/workers-rpc`, `evaluateReleaseGate` includes the common 7 axes (coverage 3 / fidelity / perf p95 / mutation / behavior tests). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply — route dispatch and CF bindings are not token-priced generative surfaces.
 
 - coverage — line >= 85%, branch >= 80%, function >= 90%
 - fidelity — ratio >= 70% (mock covered ops / real total ops, penalised by behavioural divergences)
@@ -108,6 +108,6 @@ Each of the 5 middleware layers exercises 1 specific contract so the fidelity ha
 
 ## Related
 
-- v1.19-1c `@kiwa/hono` v0.1 (`packages/hono/`)
-- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
+- v1.19-1c `@kiwa-lab/hono` v0.1 (`packages/hono/`)
+- v1.11-1 `@kiwa-lab/quality-metrics` (`packages/quality-metrics/`)
 - v1.19 milestone parent [#806](https://github.com/cardene777/kiwa/issues/806), this sub [#810](https://github.com/cardene777/kiwa/issues/810)

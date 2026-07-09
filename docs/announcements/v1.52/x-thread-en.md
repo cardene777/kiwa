@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.52 released — Mobile deepening III (@kiwa/mobile v0.3), **5th pair-depth-3 record achieved**. React Native 0.76+ New Architecture 4 axis (fabric + turbo-modules + codegen + new-architecture) added.
+kiwa v1.52 released — Mobile deepening III (@kiwa-lab/mobile v0.3), **5th pair-depth-3 record achieved**. React Native 0.76+ New Architecture 4 axis (fabric + turbo-modules + codegen + new-architecture) added.
 
 ## Tweet 2 — 11 axis fidelity + New Architecture
 
@@ -14,7 +14,7 @@ kiwa v1.52 released — Mobile deepening III (@kiwa/mobile v0.3), **5th pair-dep
 
 ## Tweet 4 — install + Phase 4
 
-`pnpm add -D @kiwa/mobile@^0.3`. Migration: https://cardene777.github.io/kiwa/migrations/v1.51-to-v1.52
+`pnpm add -D @kiwa-lab/mobile@^0.3`. Migration: https://cardene777.github.io/kiwa/migrations/v1.51-to-v1.52
 
 v1.53+ = Mobile v0.4 real driver (Metro real bundle + Expo EAS CLI + Fabric real renderer). systematic root cause pattern SSOT 27th application.
 

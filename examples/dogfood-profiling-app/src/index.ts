@@ -1,7 +1,7 @@
 /**
  * Public surface for dogfood-profiling-app v0.0.1 (v1.35-4).
  *
- * A dogfood app that drives the `@kiwa/observability` v2.1
+ * A dogfood app that drives the `@kiwa-lab/observability` v2.1
  * profiling axis (session start → resource detection → cpu / off-cpu /
  * memory / lock sample ingest → flame graph build → drill-down → compare
  * → cardinality guard → export → pyroscope query → parca query → eBPF
@@ -9,7 +9,7 @@
  * both a deterministic mock adapter and a `KIWA_MODE=real`
  * testcontainers-driven Pyroscope + Parca + eBPF profiler real adapter.
  * The fidelity harness diffs both traces and feeds the divergence count
- * into the `@kiwa/quality-metrics` 13-axis release gate.
+ * into the `@kiwa-lab/quality-metrics` 13-axis release gate.
  */
 
 export { makeMockAdapter } from './adapters/mock.js';

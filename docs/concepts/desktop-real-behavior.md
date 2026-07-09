@@ -6,7 +6,7 @@ title: Desktop v0.7 real behavior runner + fidelity harness behavior diff early 
 
 ## What this covers
 
-`@kiwa/desktop` v0.7 の real behavior runner + fidelity harness 拡張 SSOT。 v1.62 で v0.6 実 spawn → v0.7 real behavior runner 実装、 kiwa 縦深化 pair 第 14 の第 7 段 (depth-7 pattern 新設 candidate)、 v0.4 fidelity harness 設計思想 (「v1.62+ で real 実装後の behavior diff 発生時に本 harness が early warning を出す設計」) の実運用開始、 v0.6 baseline (`docs/concepts/desktop-v06-spawn.md`) を extend。
+`@kiwa-lab/desktop` v0.7 の real behavior runner + fidelity harness 拡張 SSOT。 v1.62 で v0.6 実 spawn → v0.7 real behavior runner 実装、 kiwa 縦深化 pair 第 14 の第 7 段 (depth-7 pattern 新設 candidate)、 v0.4 fidelity harness 設計思想 (「v1.62+ で real 実装後の behavior diff 発生時に本 harness が early warning を出す設計」) の実運用開始、 v0.6 baseline (`docs/concepts/desktop-v06-spawn.md`) を extend。
 
 ## real-runner 12 axis 別 behavior 差別化 pattern SSOT
 

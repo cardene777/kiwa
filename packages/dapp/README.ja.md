@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-logo.png" alt="kiwa ロゴ" width="160" />
 </p>
 
-# @kiwa/dapp
+# @kiwa-lab/dapp
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
@@ -14,14 +14,14 @@
 
 anvil fork 上で動く dApp 向け headless E2E test fixture (Playwright + viem)。
 
-`@kiwa/dapp` は [kiwa](https://github.com/cardene777/kiwa) の Playwright ベース dApp E2E layer が使う runtime fixture。 test page に `window.ethereum` を inject し、 anvil ベースの wallet fixture を起動、 EIP-1193 の主要 flow を直接処理し、 残りの JSON-RPC surface は anvil に転送する。
+`@kiwa-lab/dapp` は [kiwa](https://github.com/cardene777/kiwa) の Playwright ベース dApp E2E layer が使う runtime fixture。 test page に `window.ethereum` を inject し、 anvil ベースの wallet fixture を起動、 EIP-1193 の主要 flow を直接処理し、 残りの JSON-RPC surface は anvil に転送する。
 
-使い方は 2 通り。 (a) Claude に `/kiwa-play` で Playwright test を生成させる、 (b) fixture を直接 import (`import { dappE2eTest as test } from "@kiwa/dapp"`) して手書きする。 contract test (`@kiwa/forge`) + dApp e2e (`@kiwa/dapp`) + 手書き の 3 経路の全体像は [kiwa README](https://github.com/cardene777/kiwa) を参照。
+使い方は 2 通り。 (a) Claude に `/kiwa-play` で Playwright test を生成させる、 (b) fixture を直接 import (`import { dappE2eTest as test } from "@kiwa-lab/dapp"`) して手書きする。 contract test (`@kiwa-lab/forge`) + dApp e2e (`@kiwa-lab/dapp`) + 手書き の 3 経路の全体像は [kiwa README](https://github.com/cardene777/kiwa) を参照。
 
 ## インストール
 
 ```bash
-pnpm add -D @kiwa/dapp @playwright/test viem
+pnpm add -D @kiwa-lab/dapp @playwright/test viem
 ```
 
 ### Bonus — Claude Code plugin
@@ -41,7 +41,7 @@ Claude Code を併用するなら、 kiwa の skill chain を **1 コマンド�
 
 ```ts
 import { expect } from "@playwright/test";
-import { dappE2eTest as test } from "@kiwa/dapp";
+import { dappE2eTest as test } from "@kiwa-lab/dapp";
 
 test("window.ethereum が inject される", async ({ page, dappE2e }) => {
   await page.goto("/");
@@ -67,7 +67,7 @@ test("window.ethereum が inject される", async ({ page, dappE2e }) => {
 
 ## 直接処理する RPC method
 
-`@kiwa/dapp` は以下 method を直接処理する。
+`@kiwa-lab/dapp` は以下 method を直接処理する。
 
 - `eth_requestAccounts`
 - `eth_accounts`

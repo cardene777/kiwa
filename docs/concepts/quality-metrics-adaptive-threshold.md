@@ -6,7 +6,7 @@ title: quality-metrics v2.1 adaptive drift threshold learning SSOT
 
 ## What this covers
 
-`@kiwa/quality-metrics` v2.1 の adaptive drift threshold learning SSOT。 v0.5 で historical trend、 v0.6 で drift-gate integration、 v2.1 で 「driftThresholdPct を 過去 N snapshot から 自動学習」 の adaptive layer。 quality-metrics 縦深化 pair の第 7 段、 depth-5 実運用継続 pattern 3 例目 の compound 深化、 systematic pattern 44 度目適用 (statistical inference variant)。
+`@kiwa-lab/quality-metrics` v2.1 の adaptive drift threshold learning SSOT。 v0.5 で historical trend、 v0.6 で drift-gate integration、 v2.1 で 「driftThresholdPct を 過去 N snapshot から 自動学習」 の adaptive layer。 quality-metrics 縦深化 pair の第 7 段、 depth-5 実運用継続 pattern 3 例目 の compound 深化、 systematic pattern 44 度目適用 (statistical inference variant)。
 
 ## 統計的異常検知 SSOT
 

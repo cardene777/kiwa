@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/ai-llm` v0.5 that models the 5 pieces of a real LLM ops + advanced prompt engineering + GraphRAG III + cost-optimization pipeline that every non-trivial LLM-backed product eventually needs — an LLM ops registry that pins per-version model entries + an `active` flag so a follow-up rollout / canary / A/B step operates on a single SSOT, a rollout advancer that walks the `currentPercent` toward a target in `incrementPercent` steps so a 0 → 10 → 20 → 50 rollout ladder is a deterministic 3-call sequence, an A/B evaluator that filters variants by a `minSamples` floor then ranks the survivors by mean score so a variant with 20 samples and score 0.8 beats a variant with 20 samples and score 0.75, a canary promoter that gates on `errorRate <= threshold` so a canary with 5 % error and a 10 % threshold flips `promoted: true` and rewrites `active` on the registry, a shadow comparator that returns `(prodAvg, shadowAvg, delta, better)` so a shadow model that scores 0.85 vs prod's 0.80 lands on `better: true` without shipping any user-facing traffic, an advanced prompt-engineering axis that walks `expandChainOfThought` + `selectFewShot` + `cachePrompt` + `pinVersion` so a stalled prompt run can be replayed under a pinned `semver+hash` combination, a GraphRAG III axis that walks `traverseGraph` (BFS with edge-weight priority) + `stepAgentic` (fetch-vs-answer decision via `confidence >= threshold`) + `selfQuery` (NL → filter predicate via schema-field match) + `expandParent` (chunk → parent doc lookup) so a hybrid retrieval loop can be replayed deterministically, and a cost-optimization axis that walks `submitBatch` (0.5x savings estimate) + `compressPrompt` (char slice to `maxChars`) + `stepCascade` (cheapest-tier-first with escalation ladder) + `lookupSemanticCache` (hash lookup + backfill) so a per-request cost gate is a single object away. `startOpsSession()` + `updateRegistry()` + `advanceRollout()` + `evaluateAb()` + `promoteCanary()` + `compareShadow()` + `startPeaSession()` + `expandChainOfThought()` + `selectFewShot()` + `cachePrompt()` + `pinVersion()` + `startRag3Session()` + `traverseGraph()` + `stepAgentic()` + `selfQuery()` + `expandParent()` + `startCoSession()` + `submitBatch()` + `compressPrompt()` + `stepCascade()` + `lookupSemanticCache()` give you every one of those pieces without booting a real model registry or a real GraphRAG index. This is the pattern kiwa's `examples/dogfood-llm-ops-registry-app` exercises against a real Redis + Postgres model registry backend under `KIWA_MODE=real` + `KIWA_OPS_REGISTRY_URL` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the A/B evaluator picked the variant with 5 samples over the one with 500 samples because `minSamples` was not enforced" gap a reviewer sees in the LLM-ops-rollout post-mortem.
+A vitest suite wired to `@kiwa-lab/ai-llm` v0.5 that models the 5 pieces of a real LLM ops + advanced prompt engineering + GraphRAG III + cost-optimization pipeline that every non-trivial LLM-backed product eventually needs — an LLM ops registry that pins per-version model entries + an `active` flag so a follow-up rollout / canary / A/B step operates on a single SSOT, a rollout advancer that walks the `currentPercent` toward a target in `incrementPercent` steps so a 0 → 10 → 20 → 50 rollout ladder is a deterministic 3-call sequence, an A/B evaluator that filters variants by a `minSamples` floor then ranks the survivors by mean score so a variant with 20 samples and score 0.8 beats a variant with 20 samples and score 0.75, a canary promoter that gates on `errorRate <= threshold` so a canary with 5 % error and a 10 % threshold flips `promoted: true` and rewrites `active` on the registry, a shadow comparator that returns `(prodAvg, shadowAvg, delta, better)` so a shadow model that scores 0.85 vs prod's 0.80 lands on `better: true` without shipping any user-facing traffic, an advanced prompt-engineering axis that walks `expandChainOfThought` + `selectFewShot` + `cachePrompt` + `pinVersion` so a stalled prompt run can be replayed under a pinned `semver+hash` combination, a GraphRAG III axis that walks `traverseGraph` (BFS with edge-weight priority) + `stepAgentic` (fetch-vs-answer decision via `confidence >= threshold`) + `selfQuery` (NL → filter predicate via schema-field match) + `expandParent` (chunk → parent doc lookup) so a hybrid retrieval loop can be replayed deterministically, and a cost-optimization axis that walks `submitBatch` (0.5x savings estimate) + `compressPrompt` (char slice to `maxChars`) + `stepCascade` (cheapest-tier-first with escalation ladder) + `lookupSemanticCache` (hash lookup + backfill) so a per-request cost gate is a single object away. `startOpsSession()` + `updateRegistry()` + `advanceRollout()` + `evaluateAb()` + `promoteCanary()` + `compareShadow()` + `startPeaSession()` + `expandChainOfThought()` + `selectFewShot()` + `cachePrompt()` + `pinVersion()` + `startRag3Session()` + `traverseGraph()` + `stepAgentic()` + `selfQuery()` + `expandParent()` + `startCoSession()` + `submitBatch()` + `compressPrompt()` + `stepCascade()` + `lookupSemanticCache()` give you every one of those pieces without booting a real model registry or a real GraphRAG index. This is the pattern kiwa's `examples/dogfood-llm-ops-registry-app` exercises against a real Redis + Postgres model registry backend under `KIWA_MODE=real` + `KIWA_OPS_REGISTRY_URL` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the A/B evaluator picked the variant with 5 samples over the one with 500 samples because `minSamples` was not enforced" gap a reviewer sees in the LLM-ops-rollout post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/ai-llm` v0.5 that models the 5 pieces of a real L
 ```bash
 mkdir kiwa-ops-rag-cost && cd kiwa-ops-rag-cost
 pnpm init
-pnpm add -D @kiwa/ai-llm@^0.5 vitest typescript @types/node
+pnpm add -D @kiwa-lab/ai-llm@^0.5 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -43,7 +43,7 @@ import {
   advanceRollout,
   startOpsSession,
   updateRegistry,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('ops — registry + rollout', () => {
   it('registers and activates a version', () => {
@@ -101,7 +101,7 @@ import {
   promoteCanary,
   startOpsSession,
   updateRegistry,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('ops — A/B + canary', () => {
   it('picks the higher-mean variant with sufficient samples', () => {
@@ -157,7 +157,7 @@ import {
   compareShadow,
   startOpsSession,
   updateRegistry,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('ops — shadow compare', () => {
   it('reports better when shadow beats production', () => {
@@ -188,7 +188,7 @@ import {
   pinVersion,
   selectFewShot,
   startPeaSession,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('pea — advanced prompt engineering', () => {
   it('expands CoT steps in order', () => {
@@ -257,7 +257,7 @@ import {
   startRag3Session,
   stepAgentic,
   traverseGraph,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('rag3 — GraphRAG traversal', () => {
   it('walks nodes via edge-weight BFS', () => {
@@ -363,7 +363,7 @@ import {
   startCoSession,
   stepCascade,
   submitBatch,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('co — cost optimization', () => {
   it('estimates 0.5x batch savings', () => {

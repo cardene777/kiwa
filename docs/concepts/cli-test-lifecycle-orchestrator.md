@@ -1,12 +1,12 @@
 ---
-title: "@kiwa/cli-test v0.6 cli-lifecycle-orchestrator SSOT"
+title: "@kiwa-lab/cli-test v0.6 cli-lifecycle-orchestrator SSOT"
 ---
 
-# @kiwa/cli-test v0.6 cli-lifecycle-orchestrator SSOT
+# @kiwa-lab/cli-test v0.6 cli-lifecycle-orchestrator SSOT
 
 ## What this covers
 
-`@kiwa/cli-test` v0.6 cli-lifecycle-orchestrator = CLI process lifecycle (spawn + IO stream + signal + exit code + cleanup) の 継続合成 layer。 depth-5 pattern 13 例目 candidate = systematic law 継続強化 第 7 例、 **backend systems layer 第 5 例 = 完全普及** (ORM / Auth / Cache / Queue に続く、 全 backend layer 5 pair depth-5 到達で kiwa 全体 systematic law 完全普及達成)、 systematic pattern 55 度目適用。
+`@kiwa-lab/cli-test` v0.6 cli-lifecycle-orchestrator = CLI process lifecycle (spawn + IO stream + signal + exit code + cleanup) の 継続合成 layer。 depth-5 pattern 13 例目 candidate = systematic law 継続強化 第 7 例、 **backend systems layer 第 5 例 = 完全普及** (ORM / Auth / Cache / Queue に続く、 全 backend layer 5 pair depth-5 到達で kiwa 全体 systematic law 完全普及達成)、 systematic pattern 55 度目適用。
 
 ## 5 state SSOT
 

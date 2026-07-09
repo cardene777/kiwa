@@ -1,4 +1,4 @@
-import { createNatsMock } from '@kiwa/streaming';
+import { createNatsMock } from '@kiwa-lab/streaming';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createObjectRun } from '../src/object/index.js';
 

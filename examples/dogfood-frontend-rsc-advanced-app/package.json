@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.49-2 — React 19 RSC + Server Actions v2 3 axis × 3 target × fidelity harness backed by @kiwa/component v0.4 + @kiwa/nextjs v1.3。",
+  "description": "Dogfood app v1.49-2 — React 19 RSC + Server Actions v2 3 axis × 3 target × fidelity harness backed by @kiwa-lab/component v0.4 + @kiwa-lab/nextjs v1.3。",
   "scripts": {
-    "test": "pnpm -F @kiwa/core -F @kiwa/component -F @kiwa/nextjs build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/core -F @kiwa-lab/component -F @kiwa-lab/nextjs build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/component": "workspace:*",
-    "@kiwa/nextjs": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/component": "workspace:*",
+    "@kiwa-lab/nextjs": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

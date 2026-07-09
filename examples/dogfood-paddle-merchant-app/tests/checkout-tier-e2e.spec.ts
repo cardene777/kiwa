@@ -26,7 +26,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { providerEventName, type PaymentWebhookEvent } from '@kiwa/payment';
+import { providerEventName, type PaymentWebhookEvent } from '@kiwa-lab/payment';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { detectRealEnvMissing, makeRealAdapter } from '../src/adapters/real.js';
 import { createCheckoutHandler } from '../src/server/api/checkout.post.js';

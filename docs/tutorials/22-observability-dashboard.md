@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that models a Grafana-style dashboard with 3 panels — an HTTP error rate stat, a p99 latency timeseries, and a queue depth gauge — powered by `@kiwa/observability` v2.0's `DashboardMock`. The mock reads from the same `TelemetryCollector` the v1.1 provider mocks populate, so the SUT emits metrics through OpenTelemetry / Datadog / Sentry and the dashboard reads them back deterministically. You end up with 5 assertions that cover the 3 most-common Grafana regressions — wrong metric binding, wrong aggregation, and mis-tuned threshold badges — without needing a real Prometheus + Grafana stack.
+A vitest test file that models a Grafana-style dashboard with 3 panels — an HTTP error rate stat, a p99 latency timeseries, and a queue depth gauge — powered by `@kiwa-lab/observability` v2.0's `DashboardMock`. The mock reads from the same `TelemetryCollector` the v1.1 provider mocks populate, so the SUT emits metrics through OpenTelemetry / Datadog / Sentry and the dashboard reads them back deterministically. You end up with 5 assertions that cover the 3 most-common Grafana regressions — wrong metric binding, wrong aggregation, and mis-tuned threshold badges — without needing a real Prometheus + Grafana stack.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that models a Grafana-style dashboard with 3 panels — an HT
 ```bash
 mkdir kiwa-observability-dashboard && cd kiwa-observability-dashboard
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa/observability
+pnpm add -D vitest typescript @types/node @kiwa-lab/observability
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -53,7 +53,7 @@ import {
   panel_httpErrorRate,
   panel_p99Latency,
   panel_queueDepth,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 export function buildSREDashboard(now: () => number = () => 1_000) {
   // v1.14-4 provider mock — pass the same clock so refreshedAt matches.
@@ -160,7 +160,7 @@ You should see 5 passing tests. Every panel query executes against the collector
 
 ## The 3-panel wall
 
-The 3 fixtures shipped with `@kiwa/observability` v2 target the wall a typical SaaS SRE dashboard shows.
+The 3 fixtures shipped with `@kiwa-lab/observability` v2 target the wall a typical SaaS SRE dashboard shows.
 
 | Panel | Kind | Metric | Aggregation | Thresholds |
 |---|---|---|---|---|

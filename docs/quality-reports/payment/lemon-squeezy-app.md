@@ -8,7 +8,7 @@ the v1.23-3 Paddle merchant app.
 ## Scope
 
 Sub-Issue #903 exercises the Lemon Squeezy half of the advanced billing
-landscape that `@kiwa/payment` v0.3 mocks: hosted checkout (redirect
+landscape that `@kiwa-lab/payment` v0.3 mocks: hosted checkout (redirect
 to `checkout.lemonsqueezy.com`), order lifecycle (Lemon Squeezy's
 invoice-equivalent), subscription tier upgrade/downgrade + pause / resume
 / cancel / reactivate, webhook signature verification (`X-Signature`
@@ -20,7 +20,7 @@ won / lost).
 Layout:
 
 - `src/adapters/interface.ts` — provider-neutral Lemon Squeezy RP surface
-- `src/adapters/mock.ts` — `@kiwa/payment` `createLemonSqueezyMock` +
+- `src/adapters/mock.ts` — `@kiwa-lab/payment` `createLemonSqueezyMock` +
   8-axis semantics wired to SvelteKit route handlers
 - `src/adapters/real.ts` — env-gated real driver skeleton
   (`KIWA_MODE=real` + `LEMONSQUEEZY_KEY` + `LEMONSQUEEZY_SIGNING_SECRET`
@@ -76,7 +76,7 @@ release gate mandate in Issue #899 (v1.23 parent).
 |---|---|---|---|
 | 1 | `lint` | Root workspace lint. Dogfood app source obeys the shared kiwa lint config with no per-file overrides. | pass |
 | 2 | `typecheck` | `pnpm --filter dogfood-lemon-squeezy-app typecheck` — strict `tsc --noEmit` under `exactOptionalPropertyTypes`. | pass |
-| 3 | `build` | `pnpm --filter @kiwa/payment -F @kiwa/core build` runs as a precondition of `pnpm test`. The dogfood app itself is a SvelteKit consumer that does not ship a build artifact from tests. | pass |
+| 3 | `build` | `pnpm --filter @kiwa-lab/payment -F @kiwa-lab/core build` runs as a precondition of `pnpm test`. The dogfood app itself is a SvelteKit consumer that does not ship a build artifact from tests. | pass |
 | 4 | `test` | `pnpm --filter dogfood-lemon-squeezy-app test` — 2 spec files, 74 tests. | pass (74 / 74) |
 | 5 | `test:cov` | Coverage delta of the 2 spec files against the RP surface. Every persisted-record code path in `store.ts`, `lemonsqueezy-adapter.ts`, `adapters/mock.ts`, `adapters/real.ts`, `routes/checkout/handler.ts`, `routes/webhook/handler.ts`, `routes/license/handler.ts`, `routes/refund/handler.ts`, `routes/dispute/handler.ts` is executed by at least one test. `adapters/real.ts` is exercised through the 7 `detectRealEnvMissing` fixture tests + the checkout error path. | pass |
 | 6 | `test:e2e` | Playwright config lands the skeleton; the ad-hoc Node HTTP server wiring per the webauthn dogfood pattern will follow in a downstream Sub-Issue once the Lemon Squeezy sandbox fidelity harness lands. Vitest already exercises the route handlers via direct `fetch()` in both spec files so the AC "Playwright e2e 2 spec + each mock/real fidelity 実測" is met by the 2 axis-focused vitest specs (checkout-license + refund-chargeback), kept structured so the Playwright migration is a rename. | pass (per-axis vitest coverage) |

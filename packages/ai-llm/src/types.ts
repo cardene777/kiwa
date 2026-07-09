@@ -1,5 +1,5 @@
 /**
- * Shared types for `@kiwa/ai-llm` — 4 SDK 統一 mock の共通契約。
+ * Shared types for `@kiwa-lab/ai-llm` — 4 SDK 統一 mock の共通契約。
  *
  * v1.12 milestone (Issue #695) で新設。 kiwa の思想 = 「1 度書けば 4 SDK
  * 同一挙動で回せる mock」 を実現するため、 provider agnostic な message /

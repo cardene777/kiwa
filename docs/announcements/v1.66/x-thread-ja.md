@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v1.66 リリース — quality-metrics 深化 III。 **@kiwa/quality-metrics v0.6** で `evaluateReleaseGate` に drift check opt-in 統合、 ReleaseGateContext に 3 field (driftBaseline / driftThresholdPct / driftEnabled) 追加、 regression 検知 axis を `drift.{axis名}` の ReleaseGateBlocker に 1:1 格上げ。 v1.55-v1.65 4 PR rhythm 継承 (**13 milestone 連続 = 52 PR 連続同 rhythm**)、 **systematic pattern 41 度目適用**、 **depth-5 pattern 3 例目確定 実運用継続**。
+kiwa v1.66 リリース — quality-metrics 深化 III。 **@kiwa-lab/quality-metrics v0.6** で `evaluateReleaseGate` に drift check opt-in 統合、 ReleaseGateContext に 3 field (driftBaseline / driftThresholdPct / driftEnabled) 追加、 regression 検知 axis を `drift.{axis名}` の ReleaseGateBlocker に 1:1 格上げ。 v1.55-v1.65 4 PR rhythm 継承 (**13 milestone 連続 = 52 PR 連続同 rhythm**)、 **systematic pattern 41 度目適用**、 **depth-5 pattern 3 例目確定 実運用継続**。
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-quality-metrics-drift-gate-app 新規、 4 pattern workflow (evaluateWit
 
 ## Tweet 4
 
-`pnpm add -D @kiwa/quality-metrics@^0.6`。 migration: https://cardene777.github.io/kiwa/migrations/v1.65-to-v1.66
+`pnpm add -D @kiwa-lab/quality-metrics@^0.6`。 migration: https://cardene777.github.io/kiwa/migrations/v1.65-to-v1.66
 
 **depth-5 pattern 3 例目確定 実運用継続** = Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 で 3 例安定化到達 + v1.66 実運用継続。 4 例目 は 自然 発生 待ち (無理な 4 例目化 は 避ける)。
 

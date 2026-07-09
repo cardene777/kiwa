@@ -1,6 +1,6 @@
 /**
  * OpenID Federation 1.0 §7 trust chain wrapper — layers dogfood-app-specific
- * fidelity assertions on top of `@kiwa/auth`'s `resolveTrustChain`.
+ * fidelity assertions on top of `@kiwa-lab/auth`'s `resolveTrustChain`.
  * Sub-Issue v1.21-4d (this state) exercises the four Federation §7.2 chain-walk
  * axes end-to-end. The wrapper does not re-implement chain traversal — the
  * underlying `resolveOidcTrustChain` already walks `iss` → `sub` linkage,
@@ -11,7 +11,7 @@
  *     `FederationChainAxis` so tests pin the failure axis without grepping
  *     the underlying reason string (v1.21 follow-up — GH #880 / CAR-432);
  *   - `anchor_mismatch` axis that only `assertAnchorMatches` constructs
- *     (walker exit paths inside `@kiwa/auth` collapse onto
+ *     (walker exit paths inside `@kiwa-lab/auth` collapse onto
  *     `broken_link` when they exhaust intermediates, so this axis lives on
  *     the wrapper side alone);
  *   - a `mustResolveTrustChain` variant that throws on failure so the RP
@@ -40,7 +40,7 @@ import {
   type TrustAnchor,
   type TrustChainReasonCode,
   type TrustChainResult,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 
 /**
  * Fidelity axis a federation trust-chain failure maps onto. The wrapper
@@ -81,7 +81,7 @@ export type FederationResolveOutcome =
 /**
  * Classify a failure result from the underlying resolver onto one of the
  * federation fidelity axes. Consumes the structured `reason_code`
- * discriminator emitted by `@kiwa/auth`'s `resolveTrustChain` since
+ * discriminator emitted by `@kiwa-lab/auth`'s `resolveTrustChain` since
  * v1.21 — the `reason_code` axis tag is upstream SSOT, the wrapper is a
  * 1:1 forwarder。
  *

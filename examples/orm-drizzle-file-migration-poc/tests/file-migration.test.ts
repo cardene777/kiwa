@@ -1,10 +1,10 @@
-// PoC tests — @kiwa/orm v0.5 (file-based migration via drizzle-orm/migrator).
+// PoC tests — @kiwa-lab/orm v0.5 (file-based migration via drizzle-orm/migrator).
 
 import { afterEach, describe, expect, it } from 'vitest';
 import { resolve } from 'node:path';
 import { eq } from 'drizzle-orm';
-import { setupOrmEnv, expectRowCount } from '@kiwa/orm';
-import type { OrmTestEnvMock } from '@kiwa/orm';
+import { setupOrmEnv, expectRowCount } from '@kiwa-lab/orm';
+import type { OrmTestEnvMock } from '@kiwa-lab/orm';
 import { posts, schema, type Schema, users } from '../src/schema.js';
 
 const DRIZZLE_FOLDER = resolve(process.cwd(), 'drizzle');

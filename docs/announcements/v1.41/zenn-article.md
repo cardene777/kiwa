@@ -1,9 +1,9 @@
-# kiwa v1.41 released — Payment 深化 III (@kiwa/payment v0.5.0 advanced III 8 axis + 縦深化 pair 第 5 pair 4 段拡張 — kiwa 史上 2 例目 pair 深度 4 段記録 = record 再現性実証)
+# kiwa v1.41 released — Payment 深化 III (@kiwa-lab/payment v0.5.0 advanced III 8 axis + 縦深化 pair 第 5 pair 4 段拡張 — kiwa 史上 2 例目 pair 深度 4 段記録 = record 再現性実証)
 
 ## TL;DR
 
 - **kiwa v1.41 released** — Payment 深化 III milestone
-- **`@kiwa/payment` v0.4.0 → v0.5.0 minor bump** — advanced III 8 axis + real driver env-gate + 3 provider × 8 axis neutral state machine
+- **`@kiwa-lab/payment` v0.4.0 → v0.5.0 minor bump** — advanced III 8 axis + real driver env-gate + 3 provider × 8 axis neutral state machine
 - **8 axis advanced III semantics** = Embedded finance + BNPL + Crypto payment + FX cross-border + Recurring revenue advanced + Payment orchestration II + Fraud detection advanced + Regulatory reporting
 - **3 dogfood app 新規** — payment-embedded-finance-app (64 test) + payment-bnpl-installment-app (72 test) + payment-crypto-fx-app (53 test)
 - **縦深化 pair pattern 第 5 pair 4 段拡張 (kiwa 史上 2 例目 pair 深度 4 段記録 = record 再現性実証)** — Payment v1.14 (v0.1 base) → v1.19 (v0.2 advanced) → v1.33 (v0.4 advanced II) → v1.41 (v0.5 advanced III) の 4 段拡張、 v1.40 AI/LLM 4 段拡張 record に続く **2 例目**、 pair 深度 4 段 pattern の repeatability を Payment 系で実証
@@ -15,7 +15,7 @@
 
 kiwa は v1.40 まで dApp / web app / full-stack framework / 実 backend / real-time / payment base / observability / search / security / security advanced II / AI/LLM base / AI/LLM multimodal / AI/LLM advanced / AI/LLM advanced III の 37 layer + release-invariants + a11y + component / performance / mutation の quality gate maximum grid を cover していたが、 Payment 領域は v1.33 で 3 provider (Stripe + Paddle + Lemon Squeezy) の advanced II 8 axis (orchestration + revenue-recovery + refund-advanced + dispute + webhook-idempotency-advanced + tax-localization + subscription-state-machine + payment-method-vault) 統一 mock を land した advanced II layer に留まり、 production の advanced III semantics (Embedded finance BaaS + BNPL installment + Crypto stablecoin invoicing + FX cross-border settlement + Recurring revenue MRR/NRR + Payment orchestration II smart routing + Fraud detection advanced ML fusion + Regulatory reporting PCI/PSD2/DORA/SAR) が **未 cover** の状態だった.
 
-v1.41 で `@kiwa/payment` v0.4.0 → v0.5.0 minor bump し、 advanced III 8 axis を 3 provider 統一 mock として実装、 Stripe Treasury + Unit + Column BaaS + card issuance + KYC/KYB、 Klarna + Affirm + Afterpay BNPL + installment schedule + risk scoring + late fee、 stablecoin invoicing + on-chain confirmation + gas abstraction + wallet linking、 SWIFT/SEPA settlement + multi-currency rate lock + rate expiration、 MRR/ARR + churn + expansion + contraction + NRR rollup、 smart routing + ML score gate + fallback ladder + cascade exhaustion、 device fingerprint + behavioral biometrics + velocity + graph fraud + ML fusion、 PCI DSS + PSD2 SCA + PSD3 + DORA ICT + AML/KYC + SAR filing + audit lock を 1 test surface で扱える Payment advanced III backbone testing 基盤を追加した.
+v1.41 で `@kiwa-lab/payment` v0.4.0 → v0.5.0 minor bump し、 advanced III 8 axis を 3 provider 統一 mock として実装、 Stripe Treasury + Unit + Column BaaS + card issuance + KYC/KYB、 Klarna + Affirm + Afterpay BNPL + installment schedule + risk scoring + late fee、 stablecoin invoicing + on-chain confirmation + gas abstraction + wallet linking、 SWIFT/SEPA settlement + multi-currency rate lock + rate expiration、 MRR/ARR + churn + expansion + contraction + NRR rollup、 smart routing + ML score gate + fallback ladder + cascade exhaustion、 device fingerprint + behavioral biometrics + velocity + graph fraud + ML fusion、 PCI DSS + PSD2 SCA + PSD3 + DORA ICT + AML/KYC + SAR filing + audit lock を 1 test surface で扱える Payment advanced III backbone testing 基盤を追加した.
 
 ## v1.41 で追加した 8 axis advanced III payment semantics
 
@@ -72,7 +72,7 @@ Payment 縦深化 pair は v1.41 で **kiwa milestone 史上 2 例目の pair �
 ## Try it
 
 ```bash
-pnpm add -D @kiwa/payment
+pnpm add -D @kiwa-lab/payment
 ```
 
 Migration guide (additive-only、 breaking change なし):

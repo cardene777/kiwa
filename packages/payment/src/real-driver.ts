@@ -2,7 +2,7 @@ import type { PaymentProvider } from './types.js';
 
 /**
  * Real-driver env-gate — inspects `process.env` to decide whether the
- * @kiwa/payment adapter should behave like a mock (default) or defer
+ * @kiwa-lab/payment adapter should behave like a mock (default) or defer
  * to a real provider driver (Stripe test mode, Paddle sandbox, Lemon
  * Squeezy sandbox). The gate combines two flags per provider:
  *

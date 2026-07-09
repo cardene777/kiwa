@@ -10,17 +10,17 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { TraceEvent, VisualRegressionAdapter } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares a Chromatic-style capture run under
  * `makeMockAdapter` against one under `makeRealAdapter`, feeds the divergence
- * count (missing ops, unmatched behaviour) into the `@kiwa/quality-metrics`
+ * count (missing ops, unmatched behaviour) into the `@kiwa-lab/quality-metrics`
  * 7-axis release gate, and emits a JSON + markdown report.
  *
  * The dogfood app is the source of truth for whether the kiwa
- * `@kiwa/component` `createChromaticVisualMock` tracks real Chromatic
+ * `@kiwa-lab/component` `createChromaticVisualMock` tracks real Chromatic
  * closely enough to be trusted in unit tests — this harness is where that
  * trust is measured.
  *

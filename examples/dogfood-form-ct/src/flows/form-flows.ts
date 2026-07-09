@@ -68,7 +68,7 @@ export async function submitAllForms(
  *  the per-form outcome. Callers assert `violations.length === 0` on every
  *  form because the shared builders wire label[for], aria-label on the submit
  *  button, and aria-live on the error region so the heuristic checker in
- *  `@kiwa/component` finds nothing to report. */
+ *  `@kiwa-lab/component` finds nothing to report. */
 export async function a11yAllForms(
   adapter: FormCTAdapter,
 ): Promise<FormA11yOutcome[]> {

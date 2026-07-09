@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa/core';
+import type { TestEnvBase } from '@kiwa-lab/core';
 
 /**
  * Qwik component test adapter. Wraps @noma.to/qwik-testing-library's `render`

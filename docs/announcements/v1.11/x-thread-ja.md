@@ -4,7 +4,7 @@ v1.10 の「provider 拡張」 直交軸から、 「release 品質を数値で�
 
 全 provider が同 5 軸 score を出す統一 harness、 release gate SSOT 化、 dogfood 3 app で real-vs-mock の behavioural fidelity 実測、 docs 全部を CI 全面禁止規約に沿って GitHub Pages 公開まで land。
 
-2/ @kiwa/quality-metrics v0.1 — 5 軸統一 harness。
+2/ @kiwa-lab/quality-metrics v0.1 — 5 軸統一 harness。
 
 5 軸: coverage / test count / fidelity / perf p95 / mutation kill rate。
 

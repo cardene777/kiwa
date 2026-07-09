@@ -12,7 +12,7 @@
   (cold → healthy → warmed-up → draining → metrics-exported) with
   read + write route hit accounting, and MySQL 8 + MySQL Router
   testcontainers duck-typing probe. Adapter surface expands from
-  5 → 9 ops; both mock (backed by `@kiwa/orm` v0.10 semantics)
+  5 → 9 ops; both mock (backed by `@kiwa-lab/orm` v0.10 semantics)
   and real (env-gated on `MYSQL_KEY`, connected variant echoes the
   container-mapped host:port + image tags) implement the full surface.
   Playwright e2e covers v1 legacy + group-replication + binlog-advance
@@ -23,6 +23,6 @@
 ### Patch Changes
 
 - Initial release (v1.26-3) — Nuxt 3 + Prisma + MySQL 8 multi-tenant
-  SaaS dogfood on top of `@kiwa/orm` v0.9 RLS semantics
+  SaaS dogfood on top of `@kiwa-lab/orm` v0.9 RLS semantics
   (tenant_id auto-injection + cross-tenant read refuse + bypass_rls
   audit trail + tamper-evident audit log chain).

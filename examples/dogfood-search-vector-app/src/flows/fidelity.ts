@@ -1,12 +1,12 @@
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into `@kiwa/quality-metrics`
+ * (missing ops, unmatched behaviour) into `@kiwa-lab/quality-metrics`
  * 13-axis release gate, and emits a JSON + markdown report so the
  * release process can consume it.
  *
  * The dogfood app is the source of truth for whether the v1.36-1
- * `@kiwa/search` v0.3 vector + semantic axes track the production
+ * `@kiwa-lab/search` v0.3 vector + semantic axes track the production
  * Meilisearch + Typesense HTTP surfaces closely enough to be trusted
  * as a mock in unit tests. The report tracks the same 13 ops the
  * adapter contract exposes so any divergence surfaces the op that
@@ -29,7 +29,7 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { SearchHybridAdapter, TraceEvent } from '../adapters/interface.js';
 
 export interface FidelityRunInput {

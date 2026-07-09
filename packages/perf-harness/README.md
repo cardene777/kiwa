@@ -1,11 +1,11 @@
-# @kiwa/perf-harness
+# @kiwa-lab/perf-harness
 
-Generic performance harness for kiwa packages and dogfood apps. It measures p50/p95/p99 latency, persists baselines, detects regressions, and feeds perf data into `@kiwa/quality-metrics`.
+Generic performance harness for kiwa packages and dogfood apps. It measures p50/p95/p99 latency, persists baselines, detects regressions, and feeds perf data into `@kiwa-lab/quality-metrics`.
 
 ## Single measure
 
 ```ts
-import { measure } from '@kiwa/perf-harness';
+import { measure } from '@kiwa-lab/perf-harness';
 
 const result = await measure({
   name: 'reply',
@@ -26,7 +26,7 @@ import {
   loadBaseline,
   measure,
   saveBaseline,
-} from '@kiwa/perf-harness';
+} from '@kiwa-lab/perf-harness';
 
 const path = defaultBaselinePath('dogfood-anthropic-chatbot');
 const current = await measure({ name: 'reply', iterations: 100, warmup: 5, fn });
@@ -43,7 +43,7 @@ await saveBaseline(path, current);
 ## Release-gate integration
 
 ```ts
-import { evaluatePerfGate, measure } from '@kiwa/perf-harness';
+import { evaluatePerfGate, measure } from '@kiwa-lab/perf-harness';
 
 const result = await measure({ name: 'evaluateReleaseGate', iterations: 100, warmup: 5, fn });
 const gate = evaluatePerfGate({

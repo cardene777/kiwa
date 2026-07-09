@@ -14,9 +14,9 @@ v1.8 で新 layer 3 種 (auth / job queue / cache) を **各 1 provider ずつ**
 
 ```bash
 # 3 package version bump (v0.1 → v0.2)
-pnpm add -D @kiwa/auth@0.2   # + Clerk + Auth0
-pnpm add -D @kiwa/queue@0.2  # + Cloudflare Queues + SQS
-pnpm add -D @kiwa/cache@0.2  # + Memcached + KeyDB
+pnpm add -D @kiwa-lab/auth@0.2   # + Clerk + Auth0
+pnpm add -D @kiwa-lab/queue@0.2  # + Cloudflare Queues + SQS
+pnpm add -D @kiwa-lab/cache@0.2  # + Memcached + KeyDB
 ```
 
 ## v1.9 で追加した 6 provider
@@ -24,7 +24,7 @@ pnpm add -D @kiwa/cache@0.2  # + Memcached + KeyDB
 ### 1. auth — Clerk + Auth0
 
 ```ts
-import { setupClerkEnv, setupAuth0Env } from "@kiwa/auth";
+import { setupClerkEnv, setupAuth0Env } from "@kiwa-lab/auth";
 
 // Clerk (SaaS 2026 dominant) — user + session + orgs mock
 const clerk = await setupClerkEnv({
@@ -59,7 +59,7 @@ const roles = await auth0.mgmt.users.assignRoles("bob@corp.example", ["admin"]);
 ### 2. queue — Cloudflare Queues + AWS SQS
 
 ```ts
-import { setupCloudflareQueuesEnv, setupSQSEnv } from "@kiwa/queue";
+import { setupCloudflareQueuesEnv, setupSQSEnv } from "@kiwa-lab/queue";
 
 // Cloudflare Queues (edge queue) — miniflare (in-process) + wrangler (real)
 const cfq = await setupCloudflareQueuesEnv();
@@ -105,7 +105,7 @@ await sqs.assertDeleted("orders", { receiveCount: 1 });
 ### 3. cache — Memcached + KeyDB
 
 ```ts
-import { setupMemcachedEnv, setupKeyDBEnv } from "@kiwa/cache";
+import { setupMemcachedEnv, setupKeyDBEnv } from "@kiwa-lab/cache";
 
 // Memcached (legacy 定番) — 8 core commands + multi-server consistent hashing
 const mc = await setupMemcachedEnv({ servers: ["stub-a", "stub-b", "stub-c"] });
@@ -210,13 +210,13 @@ https://github.com/cardene777/kiwa/discussions
 /plugin install kiwa@kiwa-marketplace
 
 # Auth (5 providers)
-pnpm add -D @kiwa/auth
+pnpm add -D @kiwa-lab/auth
 
 # Job queue (4 providers)
-pnpm add -D @kiwa/queue
+pnpm add -D @kiwa-lab/queue
 
 # Cache (3 providers)
-pnpm add -D @kiwa/cache
+pnpm add -D @kiwa-lab/cache
 ```
 
 Repo ... https://github.com/cardene777/kiwa

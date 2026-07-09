@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that drives an OpenAI Chat Completions **function-calling agent** through two flows — a **3-tool sequential loop** (weather → calculator → search) and a **parallel tool call** (two weather calls at once) — using `@kiwa/ai-llm`'s `createOpenAIMock`. The mock preserves OpenAI's per-turn `role: 'tool'` message shape so tests can assert both call ordering and parallel-safe semantics.
+A vitest test file that drives an OpenAI Chat Completions **function-calling agent** through two flows — a **3-tool sequential loop** (weather → calculator → search) and a **parallel tool call** (two weather calls at once) — using `@kiwa-lab/ai-llm`'s `createOpenAIMock`. The mock preserves OpenAI's per-turn `role: 'tool'` message shape so tests can assert both call ordering and parallel-safe semantics.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that drives an OpenAI Chat Completions **function-calling age
 ```bash
 mkdir kiwa-openai-tool-agent && cd kiwa-openai-tool-agent
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa/ai-llm
+pnpm add -D vitest typescript @types/node @kiwa-lab/ai-llm
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -120,7 +120,7 @@ export async function executeTool(
 Create `src/mock-turns.ts` — per-turn response banks that mirror the dogfood app's approach:
 
 ```ts
-import type { MockResponse } from '@kiwa/ai-llm';
+import type { MockResponse } from '@kiwa-lab/ai-llm';
 
 /**
  * OpenAI's tool loop appends `role: 'tool'` messages after the assistant's
@@ -225,7 +225,7 @@ import {
   createOpenAIMock,
   type OpenAiChatCompletionsRequest,
   type OpenAiChatCompletionsResponse,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 import { AGENT_TOOLS, executeTool, type ToolSchema } from '../src/tools.js';
 import { bankForTurn, parallelBank, parallelFinaliser } from '../src/mock-turns.js';
 

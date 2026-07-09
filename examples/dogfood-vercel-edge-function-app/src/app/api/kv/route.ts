@@ -1,6 +1,6 @@
 /**
  * `/api/kv` route handler — Vercel KV Redis read/write + cache
- * invalidation. Uses the `@kiwa/edge` v0.2 `edge-kv` axis via the
+ * invalidation. Uses the `@kiwa-lab/edge` v0.2 `edge-kv` axis via the
  * adapter. On GET the handler reads from KV (cache-hit path when the key
  * is warm); on POST it writes to KV and invalidates the cache entry so
  * the next read pulls the fresh value.

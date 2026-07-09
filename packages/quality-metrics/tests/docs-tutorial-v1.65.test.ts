@@ -14,7 +14,7 @@ import {
 
 function makeReport(coverageLine = 90): QualityReport {
   return {
-    provider: '@kiwa/example',
+    provider: '@kiwa-lab/example',
     version: '0.1.0',
     reportedAt: '2026-07-02T00:00:00Z',
     coverage: { line: coverageLine, branch: 82, function: 95 },

@@ -1,7 +1,7 @@
 /**
  * Public surface for dogfood-search-opensearch-app v0.0.1 (v1.36-4).
  *
- * A dogfood app that drives the `@kiwa/search` v0.3 relevance +
+ * A dogfood app that drives the `@kiwa-lab/search` v0.3 relevance +
  * synonym-advanced + index-management axes (start relevance session →
  * seed docs → BM25 / TF-IDF / custom rank / A/B variant → start
  * synonym session → register synonyms → expand / phonetic / stemmer /
@@ -11,7 +11,7 @@
  * satisfied by both a deterministic mock adapter and a `KIWA_MODE=real`
  * OpenSearch OSS wire-surface real adapter. The fidelity harness diffs
  * both traces and feeds the divergence count into the
- * `@kiwa/quality-metrics` 13-axis release gate.
+ * `@kiwa-lab/quality-metrics` 13-axis release gate.
  */
 
 export { makeMockAdapter } from './adapters/mock.js';

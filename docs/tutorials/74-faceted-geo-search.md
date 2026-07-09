@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/search` v0.3 that models the 5 pieces of a real faceted + geo search pipeline that every non-trivial listing product (marketplace / restaurant finder / event platform) eventually needs — a faceted session that seeds documents with nested category hierarchies, a nested-facet builder that emits a tree with cumulative counts, a distinct-count aggregator that avoids double-counting sibling nodes, a geo session that pins an index id and seeds lat/lng-tagged documents, and 4 geo filters (bounding box / radius / polygon / isochrone) that select the subset within a shape. `startFacetedSession()` + `seedFacetedDocuments()` + `computeNestedFacets()` + `startGeoSession()` + `filterBoundingBox()` + `filterRadius()` + `filterPolygon()` + `resolveIsochrone()` give you every one of those pieces without booting a real Algolia sandbox. This is the pattern kiwa's `examples/dogfood-search-faceted-geo-app` v2 exercises against a real Algolia sandbox under `KIWA_MODE=real` + `KIWA_ALGOLIA_URL` + `ALGOLIA_KEY`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the restaurant panel showed 42 hits under Category > Italian > Pizza but the real Algolia counted 39 because the sibling 'Neapolitan' was double-counted" gap a reviewer sees in the facet-drift post-mortem.
+A vitest suite wired to `@kiwa-lab/search` v0.3 that models the 5 pieces of a real faceted + geo search pipeline that every non-trivial listing product (marketplace / restaurant finder / event platform) eventually needs — a faceted session that seeds documents with nested category hierarchies, a nested-facet builder that emits a tree with cumulative counts, a distinct-count aggregator that avoids double-counting sibling nodes, a geo session that pins an index id and seeds lat/lng-tagged documents, and 4 geo filters (bounding box / radius / polygon / isochrone) that select the subset within a shape. `startFacetedSession()` + `seedFacetedDocuments()` + `computeNestedFacets()` + `startGeoSession()` + `filterBoundingBox()` + `filterRadius()` + `filterPolygon()` + `resolveIsochrone()` give you every one of those pieces without booting a real Algolia sandbox. This is the pattern kiwa's `examples/dogfood-search-faceted-geo-app` v2 exercises against a real Algolia sandbox under `KIWA_MODE=real` + `KIWA_ALGOLIA_URL` + `ALGOLIA_KEY`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the restaurant panel showed 42 hits under Category > Italian > Pizza but the real Algolia counted 39 because the sibling 'Neapolitan' was double-counted" gap a reviewer sees in the facet-drift post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/search` v0.3 that models the 5 pieces of a real f
 ```bash
 mkdir kiwa-faceted-geo && cd kiwa-faceted-geo
 pnpm init
-pnpm add -D @kiwa/search@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa-lab/search@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -43,7 +43,7 @@ import {
   startFacetedSession,
   seedFacetedDocuments,
   computeNestedFacets,
-} from '@kiwa/search';
+} from '@kiwa-lab/search';
 
 const sampleDocs = [
   { id: '1', facets: { category: 'shoes', color: 'red' } },
@@ -96,7 +96,7 @@ import {
   startFacetedSession,
   seedFacetedDocuments,
   countDistinct,
-} from '@kiwa/search';
+} from '@kiwa-lab/search';
 
 describe('faceted — countDistinct', () => {
   it('counts distinct brand values across duplicates', () => {
@@ -128,7 +128,7 @@ import {
   seedFacetedDocuments,
   applyRefinedFilter,
   traverseHierarchy,
-} from '@kiwa/search';
+} from '@kiwa-lab/search';
 
 describe('faceted — refine + hierarchy', () => {
   it('narrows to documents whose facet value matches', () => {
@@ -177,7 +177,7 @@ import {
   startGeoSession,
   seedGeoDocuments,
   filterBoundingBox,
-} from '@kiwa/search';
+} from '@kiwa-lab/search';
 
 const sampleDocs = [
   { id: 'tokyo-station', lat: 35.681, lng: 139.767 },
@@ -218,7 +218,7 @@ import {
   startGeoSession,
   seedGeoDocuments,
   filterRadius,
-} from '@kiwa/search';
+} from '@kiwa-lab/search';
 
 const sampleDocs = [
   { id: 'tokyo-station', lat: 35.681, lng: 139.767 },
@@ -257,7 +257,7 @@ import {
   seedGeoDocuments,
   filterPolygon,
   resolveIsochrone,
-} from '@kiwa/search';
+} from '@kiwa-lab/search';
 
 const sampleDocs = [
   { id: 'tokyo-station', lat: 35.681, lng: 139.767 },
@@ -309,7 +309,7 @@ The polygon uses ray casting — count how many polygon edges a horizontal ray f
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { collectFidelityCoverage } from '@kiwa/search';
+import { collectFidelityCoverage } from '@kiwa-lab/search';
 
 describe('faceted + geo — fidelity coverage', () => {
   it('the 4 provider × faceted-advanced grid emits 4 rows', () => {

@@ -1,6 +1,6 @@
 # dogfood-storybook-8-mdx-app (v1.34-4)
 
-A Storybook 8 harness that binds 12 primitives + 3 layouts + 5 interaction-focus stories to MDX docs (component preview + prose + code sample), drives the `@storybook/test` interaction runner (click / type / assert), and emits a story-coverage report over a provider-neutral `StorybookMdxAdapter`. Both mock (`@kiwa/component` v0.3 `createStoryRegistry` + in-process MdxRegistry + InteractionRunner + CoverageReporter) and real (Storybook 8 preview via `STORYBOOK_URL` + `STORYBOOK_MDX_READY=1` + `STORYBOOK_TEST_READY=1`) implementations satisfy the same 8-op contract so the fidelity harness can diff them side by side.
+A Storybook 8 harness that binds 12 primitives + 3 layouts + 5 interaction-focus stories to MDX docs (component preview + prose + code sample), drives the `@storybook/test` interaction runner (click / type / assert), and emits a story-coverage report over a provider-neutral `StorybookMdxAdapter`. Both mock (`@kiwa-lab/component` v0.3 `createStoryRegistry` + in-process MdxRegistry + InteractionRunner + CoverageReporter) and real (Storybook 8 preview via `STORYBOOK_URL` + `STORYBOOK_MDX_READY=1` + `STORYBOOK_TEST_READY=1`) implementations satisfy the same 8-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -42,7 +42,7 @@ The real adapter defers the live preview wiring to a follow-up milestone. Until 
 
 The mock path exercises all 8 ops for every registered story; the real path skips every op with `STORYBOOK_MDX_REAL_ENV_MISSING` unless the env gates are set. Divergences accumulate as `MOCK_MISSING_OP` (when the real trace records an op the mock never did) or `BEHAVIORAL_DIVERGENCE` (mock ok=true vs real ok=false).
 
-The release gate the harness feeds is `@kiwa/quality-metrics` 7-axis (component provider, no AI-LLM axes) — coverage / test-count / fidelity / perf.p95 / mutation.
+The release gate the harness feeds is `@kiwa-lab/quality-metrics` 7-axis (component provider, no AI-LLM axes) — coverage / test-count / fidelity / perf.p95 / mutation.
 
 ## Stories
 

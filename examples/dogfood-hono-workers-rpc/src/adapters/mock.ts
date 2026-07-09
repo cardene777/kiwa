@@ -1,4 +1,4 @@
-import { invokeRoute, type HonoAppLike, type HttpMethod } from '@kiwa/hono';
+import { invokeRoute, type HonoAppLike, type HttpMethod } from '@kiwa-lab/hono';
 import {
   buildDogfoodApp,
   resetRateLimit,
@@ -22,7 +22,7 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — spins up a fresh `@kiwa/hono` app + Workers bindings
+ * Mock adapter — spins up a fresh `@kiwa-lab/hono` app + Workers bindings
  * per adapter instance, drives all 6 ops through the shared route surface
  * and records a trace event per op so the fidelity harness can diff mock
  * vs real without needing a real miniflare / wrangler runtime.

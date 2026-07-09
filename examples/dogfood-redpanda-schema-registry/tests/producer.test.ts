@@ -1,4 +1,4 @@
-import { createRedpandaMock } from '@kiwa/streaming';
+import { createRedpandaMock } from '@kiwa-lab/streaming';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createProducerRun } from '../src/producer/index.js';
 import {

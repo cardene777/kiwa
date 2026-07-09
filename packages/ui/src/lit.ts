@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa/core';
+import type { TestEnvBase } from '@kiwa-lab/core';
 
 /**
  * Lit (Web Components) component test adapter. Uses @open-wc/testing-helpers'

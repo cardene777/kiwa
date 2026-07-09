@@ -1,4 +1,4 @@
-// Unit tests for @kiwa/orm v0.7 — Kysely Migrator (file-based migration).
+// Unit tests for @kiwa-lab/orm v0.7 — Kysely Migrator (file-based migration).
 //
 // Exercises `migrations: { folder }` for `orm: 'kysely' + dialect: 'sqlite'`.
 // Folder fixtures are written into a per-test tmpdir to avoid relying on

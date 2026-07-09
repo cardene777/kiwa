@@ -4,7 +4,7 @@
 // kiwa helper 形式に変換して返す。 ここでは kiwa の MiddlewareFunction 型で
 // 直接書き、 unit test (invokeMiddleware) と production の両方で再利用する。
 
-import { middlewareActions, type MiddlewareFunction } from '@kiwa/nextjs';
+import { middlewareActions, type MiddlewareFunction } from '@kiwa-lab/nextjs';
 
 /**
  * authMiddleware —

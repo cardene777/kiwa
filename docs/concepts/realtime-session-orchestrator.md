@@ -1,12 +1,12 @@
 ---
-title: "@kiwa/realtime v2.1 session-orchestrator SSOT"
+title: "@kiwa-lab/realtime v2.1 session-orchestrator SSOT"
 ---
 
-# @kiwa/realtime v2.1 session-orchestrator SSOT
+# @kiwa-lab/realtime v2.1 session-orchestrator SSOT
 
 ## What this covers
 
-`@kiwa/realtime` v2.1 session-orchestrator SSOT = presence + broadcast + subscription + heartbeat + reconnect の 継続合成 layer。 Realtime pair v0.1 → v0.2 → v2.1 = 5 段深化到達 = **depth-5 pattern 5 例目発生** (Mobile + Desktop + quality-metrics + Payment + Realtime)、 「dominant pattern」 (4 例目) → **systematic law** 昇格 candidate 到達 (5 例目)、 systematic pattern 47 度目適用 (continuous state machine variant Realtime 転用)。
+`@kiwa-lab/realtime` v2.1 session-orchestrator SSOT = presence + broadcast + subscription + heartbeat + reconnect の 継続合成 layer。 Realtime pair v0.1 → v0.2 → v2.1 = 5 段深化到達 = **depth-5 pattern 5 例目発生** (Mobile + Desktop + quality-metrics + Payment + Realtime)、 「dominant pattern」 (4 例目) → **systematic law** 昇格 candidate 到達 (5 例目)、 systematic pattern 47 度目適用 (continuous state machine variant Realtime 転用)。
 
 ## 5 state SSOT
 

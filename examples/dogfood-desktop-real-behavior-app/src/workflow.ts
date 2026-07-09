@@ -5,7 +5,7 @@ import {
   type FidelityBehaviorSummary,
   type FidelityDiff,
   type FidelitySummary,
-} from '@kiwa/desktop';
+} from '@kiwa-lab/desktop';
 
 export interface EarlyWarningReport {
   shapeContractPreserving: boolean;

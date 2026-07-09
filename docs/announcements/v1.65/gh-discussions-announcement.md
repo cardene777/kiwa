@@ -6,7 +6,7 @@ kiwa v1.65 is out。 **quality-metrics 深化 II** 単軸 milestone、 v0.4 tier
 
 ## What's new
 
-### `@kiwa/quality-metrics` v0.5 minor bump
+### `@kiwa-lab/quality-metrics` v0.5 minor bump
 
 - **history.ts 新設** = MetricSnapshot + AxisDelta + BaselineComparison + DriftCategory + DriftDetection + TrendReport SSOT
 - **4 export** = captureSnapshot + compareToBaseline + detectDrift + generateTrendReport
@@ -38,7 +38,7 @@ v1.23 → v1.65 = **43 milestone**、 kiwa 史上最長記録更新継続。
 ## Install
 
 ```bash
-pnpm add -D @kiwa/quality-metrics@^0.5
+pnpm add -D @kiwa-lab/quality-metrics@^0.5
 ```
 
 ## Migration guide

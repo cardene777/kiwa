@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa/core';
+import type { TestEnvBase } from '@kiwa-lab/core';
 import type { ApiHandlerSource, NodeRequestHandler } from './http-server.js';
 
 export type E2eMode = 'live' | 'static';

@@ -3,7 +3,7 @@ import { buildReport, type RawInputs } from '../src/report-builder.js';
 
 function passingInputs(overrides?: Partial<RawInputs>): RawInputs {
   return {
-    provider: '@kiwa/example',
+    provider: '@kiwa-lab/example',
     version: '0.1.0',
     v8Summary: {
       lines: { pct: 92 },
@@ -36,7 +36,7 @@ describe('quality-metrics PoC — report builder', () => {
   it('T-QM-POC-003 emits JSON that round-trips into the report shape', () => {
     const out = buildReport(passingInputs());
     const parsed = JSON.parse(out.json);
-    expect(parsed.provider).toBe('@kiwa/example');
+    expect(parsed.provider).toBe('@kiwa-lab/example');
     expect(parsed.version).toBe('0.1.0');
   });
 

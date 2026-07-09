@@ -4,7 +4,7 @@ import {
   type MobileAxis,
   type MobileCliCommand,
   type SpawnResult,
-} from '@kiwa/mobile';
+} from '@kiwa-lab/mobile';
 
 const ALL_CLIS: MobileCliCommand[] = [
   'expo build',

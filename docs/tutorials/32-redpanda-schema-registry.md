@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite for a Redpanda-shaped event stream that exercises the three v1.20 schema-registry primitives — a colocated `SchemaRegistry` bound to the broker, three compatibility modes (`BACKWARD` / `FORWARD` / `FULL`) that gate schema evolution, and a Kafka-API round-trip on the same broker that proves Redpanda is a drop-in Kafka alternative. The tests never boot a real Redpanda binary; they drive the broker + registry surfaces through `@kiwa/streaming` v0.1's Redpanda mock so the same suite runs in Node.js without Docker, JVM, or a Confluent registry.
+A vitest suite for a Redpanda-shaped event stream that exercises the three v1.20 schema-registry primitives — a colocated `SchemaRegistry` bound to the broker, three compatibility modes (`BACKWARD` / `FORWARD` / `FULL`) that gate schema evolution, and a Kafka-API round-trip on the same broker that proves Redpanda is a drop-in Kafka alternative. The tests never boot a real Redpanda binary; they drive the broker + registry surfaces through `@kiwa-lab/streaming` v0.1's Redpanda mock so the same suite runs in Node.js without Docker, JVM, or a Confluent registry.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest suite for a Redpanda-shaped event stream that exercises the three v1.20
 ```bash
 mkdir kiwa-redpanda-first && cd kiwa-redpanda-first
 pnpm init
-pnpm add -D @kiwa/streaming@0.1 vitest typescript @types/node
+pnpm add -D @kiwa-lab/streaming@0.1 vitest typescript @types/node
 ```
 
 Add the vitest script and TypeScript configuration in `package.json`.
@@ -29,7 +29,7 @@ Add the vitest script and TypeScript configuration in `package.json`.
 }
 ```
 
-Ship a `tsconfig.json` that matches the ESM shape `@kiwa/streaming` exports.
+Ship a `tsconfig.json` that matches the ESM shape `@kiwa-lab/streaming` exports.
 
 ```json
 {
@@ -55,7 +55,7 @@ import {
   isKafkaMock,
   isRedpandaMock,
   isSchemaRegistry,
-} from '@kiwa/streaming';
+} from '@kiwa-lab/streaming';
 
 describe('Redpanda is a Kafka mock (API compat)', () => {
   it('exposes producer / consumer / admin via the Kafka surface', async () => {
@@ -155,7 +155,7 @@ Vitest picks up the file, runs the 5 tests in a single Node.js process, and exit
 
 Redpanda diverges from bare Kafka on one axis that shows up in every non-trivial pipeline test — **schema evolution**. Kafka moves opaque bytes; Redpanda (like Confluent's Schema Registry sidecar) attaches a versioned schema to every subject and gates every producer + consumer through a compatibility check. Get the compatibility mode wrong and the deploy either breaks old consumers (BACKWARD violation) or breaks the producer (FORWARD violation).
 
-`@kiwa/streaming` records each of the three modes.
+`@kiwa-lab/streaming` records each of the three modes.
 
 - **BACKWARD** (default) — new schema can read data written with the old schema. Old consumers on the new schema still work. Rule of thumb — safe to add optional fields with default, safe to remove required fields with default. This is the mode most Kafka-Streams / KSQL / consumer-first teams pick.
 - **FORWARD** — old schema can read data written with the new schema. New consumers on the old schema still work. Rule of thumb — safe to add required fields, safe to remove optional fields. This is the mode producer-first teams (e.g., an event-driven microservice writing to multiple downstream consumers) pick.
@@ -178,7 +178,7 @@ That matters because production bugs show up as "the deploy broke BACKWARD compa
 For a full 5-op fidelity harness that compares mock traces against a real `docker compose up -d` cluster with a Confluent registry sidecar, see `examples/dogfood-redpanda-schema-registry` and its `quality-report/fidelity-latest.md`.
 
 ```ts
-import { createRedpandaMock } from '@kiwa/streaming';
+import { createRedpandaMock } from '@kiwa-lab/streaming';
 
 const rp = createRedpandaMock();
 await rp.schemaRegistry.register({
@@ -201,5 +201,5 @@ expect(check.compatible).toBe(false);
 ## Related
 
 - Concept doc — [Streaming testing (producer / consumer / exactly-once / DLQ / schema-registry SSOT)](../concepts/streaming-testing)
-- v1.20-1 [#827](https://github.com/cardene777/kiwa/issues/827) — `@kiwa/streaming` v0.1 landing
+- v1.20-1 [#827](https://github.com/cardene777/kiwa/issues/827) — `@kiwa-lab/streaming` v0.1 landing
 - v1.20-3 [#829](https://github.com/cardene777/kiwa/issues/829) — `dogfood-redpanda-schema-registry` (the full 3-layer dogfood this tutorial cuts down)

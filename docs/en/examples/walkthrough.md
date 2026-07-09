@@ -21,7 +21,7 @@ No contract, a single inline HTML page so you can feel how the kiwa fixture beha
 pnpm -F examples-basic-connect test
 ```
 
-Expect — 11 cases from `connect.spec.ts` + 4 from `eip6963.spec.ts` = 15 passing, end-to-end in ~4s (the chain is `pnpm -F @kiwa/dapp build` → `playwright test`).
+Expect — 11 cases from `connect.spec.ts` + 4 from `eip6963.spec.ts` = 15 passing, end-to-end in ~4s (the chain is `pnpm -F @kiwa-lab/dapp build` → `playwright test`).
 
 What to watch for.
 
@@ -98,7 +98,7 @@ Expect — 4 cases from `connect-and-mint.spec.ts`, ~25s including Next.js dev-s
 
 Internally:
 
-1. `pnpm -F @kiwa/dapp build` refreshes the fixture dist
+1. `pnpm -F @kiwa-lab/dapp build` refreshes the fixture dist
 2. `tests/prepare-env.ts` starts anvil + `forge build` + `forge create` + writes `.env.local`
 3. Playwright boots Next.js → runs `connect-and-mint.spec.ts`
 4. globalTeardown stops anvil and clears the pidfile

@@ -1,9 +1,9 @@
-# kiwa v1.40 released — AI/LLM 深化 III (@kiwa/ai-llm v0.5.0 advanced III 8 axis + 縦深化 pair 第 10 pair 4 段拡張 — kiwa 史上初 pair 深度 4 段記録更新)
+# kiwa v1.40 released — AI/LLM 深化 III (@kiwa-lab/ai-llm v0.5.0 advanced III 8 axis + 縦深化 pair 第 10 pair 4 段拡張 — kiwa 史上初 pair 深度 4 段記録更新)
 
 ## TL;DR
 
 - **kiwa v1.40 released** — AI/LLM 深化 III milestone
-- **`@kiwa/ai-llm` v0.4.0 → v0.5.0 minor bump** — advanced III 8 axis + real driver env-gate + 4 provider × 8 axis neutral state machine
+- **`@kiwa-lab/ai-llm` v0.4.0 → v0.5.0 minor bump** — advanced III 8 axis + real driver env-gate + 4 provider × 8 axis neutral state machine
 - **8 axis advanced III semantics** = Multi-agent orchestration + Agent swarm coordination + Code interpreter + Fine-tuning pipeline + LLM ops + Prompt engineering advanced + RAG III + Cost optimization
 - **3 dogfood app 新規** — llm-multi-agent-swarm-app (94 test) + llm-code-interpreter-app (81 test) + llm-ops-registry-app (106 test)
 - **縦深化 pair pattern 第 10 pair 4 段拡張 (kiwa 史上初 pair 深度 4 段記録更新)** — AI/LLM v1.12 (v0.1 base) → v1.15 (v0.2 multimodal) → v1.38 (v0.4 advanced) → v1.40 (v0.5 advanced III) の 4 段拡張、 10 pair 連続化、 従来最深 3 段を 1 段更新
@@ -15,7 +15,7 @@
 
 kiwa は v1.38 まで dApp / web app / full-stack framework / 実 backend / real-time / payment / observability / search / security base / security advanced II / AI/LLM base / AI/LLM multimodal / AI/LLM advanced の 36 layer + release-invariants + a11y + component / performance / mutation の quality gate maximum grid を cover していたが、 AI/LLM 領域は v1.38 で 4 provider (Anthropic + OpenAI + Vercel AI SDK + LangChain) の advanced 8 axis (Prompt injection defense + Hallucination detection + LLM eval + Guardrails + RAG advanced + Agent orchestration + Fine-tuning eval + Cost / latency SLA) 統一 mock を land した advanced layer に留まり、 production の advanced III semantics (Multi-agent orchestration + Agent swarm coordination + Code interpreter sandboxed exec + Fine-tuning pipeline + LLM ops model registry + Prompt engineering advanced + RAG III + Cost optimization) が **未 cover** の状態だった.
 
-v1.40 で `@kiwa/ai-llm` v0.4.0 → v0.5.0 minor bump し、 advanced III 8 axis を 4 provider 統一 mock として実装、 LangGraph state graph + CrewAI supervisor + AutoGen role-based crew、 role assignment + majority-vote consensus + Byzantine PBFT-lite、 sandboxed Python REPL + tool use ledger + rollback、 SFT + DPO + RLHF + drift detection、 model registry + rollout + A/B + canary + shadow、 CoT + few-shot + caching + versioning、 GraphRAG + agentic + self-query + parent doc、 batch + cascade + semantic cache + budget SLA を 1 test surface で扱える AI/LLM advanced III backbone testing 基盤を追加した.
+v1.40 で `@kiwa-lab/ai-llm` v0.4.0 → v0.5.0 minor bump し、 advanced III 8 axis を 4 provider 統一 mock として実装、 LangGraph state graph + CrewAI supervisor + AutoGen role-based crew、 role assignment + majority-vote consensus + Byzantine PBFT-lite、 sandboxed Python REPL + tool use ledger + rollback、 SFT + DPO + RLHF + drift detection、 model registry + rollout + A/B + canary + shadow、 CoT + few-shot + caching + versioning、 GraphRAG + agentic + self-query + parent doc、 batch + cascade + semantic cache + budget SLA を 1 test surface で扱える AI/LLM advanced III backbone testing 基盤を追加した.
 
 ## v1.40 で追加した 8 axis advanced III AI/LLM semantics
 
@@ -72,7 +72,7 @@ AI/LLM 縦深化 pair は v1.40 で **kiwa milestone 史上初の pair 深度 4 
 ## Try it
 
 ```bash
-pnpm add -D @kiwa/ai-llm
+pnpm add -D @kiwa-lab/ai-llm
 ```
 
 Migration guide (additive-only、 breaking change なし):

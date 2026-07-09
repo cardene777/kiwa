@@ -6,7 +6,7 @@
  * real without spinning up a cosign + rekor binary.
  *
  * The supply-chain surface pairs the parent v1.39-1 `supply-chain` axis
- * (startSupplyChainSession + verifySlsaLevel) with `@kiwa/security`
+ * (startSupplyChainSession + verifySlsaLevel) with `@kiwa-lab/security`
  * v0.2 — the verifySlsaLevel op has a neutral event counterpart the
  * fidelity harness can compare across mock vs real.
  */

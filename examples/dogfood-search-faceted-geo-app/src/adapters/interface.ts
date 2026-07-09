@@ -4,7 +4,7 @@
  *
  * The dogfood app drives an Algolia-anchored faceted + geo harness through
  * this contract only. Two implementations exist —
- *  - {@link makeMockAdapter} — walks the `@kiwa/search` v0.3
+ *  - {@link makeMockAdapter} — walks the `@kiwa-lab/search` v0.3
  *    `semantics/faceted-advanced` + `semantics/geo` state machines
  *    deterministically without any backend. Every op emits the neutral
  *    event onto the trace so the fidelity harness can diff ordering
@@ -26,8 +26,8 @@
  * surface.
  */
 
-import type { semantics } from '@kiwa/search';
-import type { SearchBackend } from '@kiwa/search';
+import type { semantics } from '@kiwa-lab/search';
+import type { SearchBackend } from '@kiwa-lab/search';
 
 /** Re-export from search semantics namespace. */
 export type SearchTarget = semantics.SearchTarget;

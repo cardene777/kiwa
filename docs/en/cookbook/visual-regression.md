@@ -1,4 +1,4 @@
-# Visual regression with `@kiwa/visual`
+# Visual regression with `@kiwa-lab/visual`
 
 > [🇬🇧 English](./visual-regression.md) • [🇯🇵 日本語](../../ja/cookbook/visual-regression.md)
 
@@ -13,10 +13,10 @@ Pixel-level PNG diff backed by pixelmatch + pngjs — assert that a rendered scr
 ## Install
 
 ```bash
-pnpm add -D @kiwa/visual pixelmatch pngjs
+pnpm add -D @kiwa-lab/visual pixelmatch pngjs
 ```
 
-`pixelmatch` and `pngjs` are peer/optional — install them next to `@kiwa/visual`.
+`pixelmatch` and `pngjs` are peer/optional — install them next to `@kiwa-lab/visual`.
 
 ## Scenario A — Playwright screenshot vs baseline PNG
 
@@ -24,7 +24,7 @@ pnpm add -D @kiwa/visual pixelmatch pngjs
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { expectNoVisualDiff } from '@kiwa/visual';
+import { expectNoVisualDiff } from '@kiwa-lab/visual';
 
 const fixtureDir = join(__dirname, 'fixtures');
 
@@ -48,7 +48,7 @@ test('header matches baseline', async ({ page }) => {
 ```ts
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
-import { comparePngBuffers } from '@kiwa/visual';
+import { comparePngBuffers } from '@kiwa-lab/visual';
 
 test('rendered chart matches baseline', () => {
   const baseline = readFileSync('tests/fixtures/chart.baseline.png');
@@ -79,6 +79,6 @@ Cross-platform AA differences (macOS vs Linux CI) are the #1 cause of false posi
 
 ## Related
 
-- Package: [`@kiwa/visual`](../../../packages/visual/README.md)
+- Package: [`@kiwa-lab/visual`](../../../packages/visual/README.md)
 - A11y cookbook: [a11y-axe.md](./a11y-axe.md)
 - pixelmatch docs: https://github.com/mapbox/pixelmatch

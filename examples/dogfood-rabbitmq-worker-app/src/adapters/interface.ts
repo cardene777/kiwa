@@ -2,7 +2,7 @@
  * Queue adapter surface for the RabbitMQ dogfood worker.
  *
  * The worker talks to RabbitMQ only through this interface. `makeMockAdapter`
- * wraps `@kiwa/queue`'s basic + advanced envs (v1.10-3 + v1.10-4);
+ * wraps `@kiwa-lab/queue`'s basic + advanced envs (v1.10-3 + v1.10-4);
  * `makeRealAdapter` talks to a live rabbitmq:3-management broker via amqplib
  * whenever `RABBITMQ_URL` is exported. When the env var is missing, the real
  * adapter enters a graceful-skip mode so the fidelity harness records the

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/orm` v0.9 that walks the RLS (row-level security) axis end-to-end for a multi-tenant SaaS on MySQL 8. You will install a per-table policy, filter a tenant's read / write path, exercise a `bypass_rls` superuser role under audit, and record every access in an audit log. The exact pattern that `examples/dogfood-mysql-rls-tenant-app` (Nuxt 3 + Prisma + MySQL 8) uses — same `createRlsSession` + `installPolicy` + `filterTenant` + `bypassRls` + `logAudit` primitives, same state-machine guards, same tenant isolation invariants. You leave this tutorial with a runnable multi-tenant test and a working audit trail for any RLS flow you point it at.
+A vitest suite wired to `@kiwa-lab/orm` v0.9 that walks the RLS (row-level security) axis end-to-end for a multi-tenant SaaS on MySQL 8. You will install a per-table policy, filter a tenant's read / write path, exercise a `bypass_rls` superuser role under audit, and record every access in an audit log. The exact pattern that `examples/dogfood-mysql-rls-tenant-app` (Nuxt 3 + Prisma + MySQL 8) uses — same `createRlsSession` + `installPolicy` + `filterTenant` + `bypassRls` + `logAudit` primitives, same state-machine guards, same tenant isolation invariants. You leave this tutorial with a runnable multi-tenant test and a working audit trail for any RLS flow you point it at.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/orm` v0.9 that walks the RLS (row-level security)
 ```bash
 mkdir kiwa-mysql-rls && cd kiwa-mysql-rls
 pnpm init
-pnpm add -D @kiwa/orm@^0.9 vitest typescript @types/node
+pnpm add -D @kiwa-lab/orm@^0.9 vitest typescript @types/node
 ```
 
 Add the vitest script in `package.json`.
@@ -37,7 +37,7 @@ Add the vitest script in `package.json`.
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createRlsSession } from '@kiwa/orm';
+import { createRlsSession } from '@kiwa-lab/orm';
 
 describe('rls — session ctor', () => {
   it('starts at no-policy with an empty audit log', () => {
@@ -63,7 +63,7 @@ MySQL does not have a first-class `CREATE POLICY` — the mock emulates the sema
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createRlsSession, installPolicy } from '@kiwa/orm';
+import { createRlsSession, installPolicy } from '@kiwa-lab/orm';
 
 describe('rls — install policy', () => {
   it('captures the policy and moves to policy-installed', () => {
@@ -114,7 +114,7 @@ import {
   createRlsSession,
   filterTenant,
   installPolicy,
-} from '@kiwa/orm';
+} from '@kiwa-lab/orm';
 
 describe('rls — filter tenant', () => {
   it('records a per-tenant filter application', () => {
@@ -162,7 +162,7 @@ import {
   createRlsSession,
   filterTenant,
   installPolicy,
-} from '@kiwa/orm';
+} from '@kiwa-lab/orm';
 
 describe('rls — bypass', () => {
   it('records the bypass with role + reason and moves to bypassed', () => {
@@ -224,7 +224,7 @@ import {
   createRlsSession,
   installPolicy,
   logAudit,
-} from '@kiwa/orm';
+} from '@kiwa-lab/orm';
 
 describe('rls — audit log', () => {
   it('accumulates entries without changing state', () => {
@@ -265,7 +265,7 @@ The audit log is what a compliance report reads later. The `logAudit` step retur
 pnpm test
 ```
 
-Every step above returns an `AxisStep<RlsState>` envelope so downstream tests can assert on either the state machine outcome (`step.state === 'bypassed'`) or the emitted event (`step.neutralEvent === 'rls.tenant-isolated'`). The full end-to-end pattern lives in `packages/orm/tests/docs-tutorial-v1.26.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa/orm` v0.9 API.
+Every step above returns an `AxisStep<RlsState>` envelope so downstream tests can assert on either the state machine outcome (`step.state === 'bypassed'`) or the emitted event (`step.neutralEvent === 'rls.tenant-isolated'`). The full end-to-end pattern lives in `packages/orm/tests/docs-tutorial-v1.26.test.ts` — the snippet validation test that guarantees every code sample in this tutorial keeps matching the real `@kiwa-lab/orm` v0.9 API.
 
 ## Where to next
 

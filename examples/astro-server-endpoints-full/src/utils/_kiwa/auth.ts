@@ -4,7 +4,7 @@
 // session 値を解釈する pure 関数。 kiwa invokeEndpoint 経由でも実 Astro dev server
 // 経由でも同じ logic を共有する。
 
-import type { SimulatedAPIContext } from '@kiwa/astro';
+import type { SimulatedAPIContext } from '@kiwa-lab/astro';
 
 export type Role = 'admin' | 'guest' | 'banned';
 

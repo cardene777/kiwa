@@ -8,11 +8,11 @@ published: true
 
 # kiwa v1.25 released
 
-v1.25 は kiwa の 15 milestone 目です。 v1.13-1 (時間軸、 `@kiwa/perf-harness` v0.1 で `measure` p50 / p95 / p99 + `saveBaseline` + `detectRegression` + `evaluatePerfGate` primitive を land) + v1.14-post (`runPerf3Layer` serial + concurrent + memory 3-layer harness) を基盤に、 v1.25 は同 primitive を **33 全 kiwa package** に rollout、 各 package で `tests/perf/{package}.perf.ts` + `test:perf` script + `.perf-baseline/{package}.json` を追加。 v1.13-1 primitive は first-line contract のまま維持 (v0.1 signature 完全維持)、 33 package p95 baseline + regression detection は second-line envelope として並走。 `@kiwa/perf-harness` v0.1.1 → v0.2.0 minor bump は 33 package coverage extension + 3-layer harness 標準化を反映。 v1.11 以降の連続完遂 14 milestone (release gate → 非決定性 → 時間軸 → 横軸拡張 → AI-LLM 深化 → component 縦軸 → Observability v2 → Blockchain 深化 → Framework 深化 → Streaming 深化 → Auth 深化 → Auth 深化 II → Payment 深化 → Edge / Serverless 深化) を受けて、 v1.25 は Perf-harness sweep milestone、 kiwa runtime fixture 34 packages はそのまま維持 (perf-harness 既存 package の rollout)。
+v1.25 は kiwa の 15 milestone 目です。 v1.13-1 (時間軸、 `@kiwa-lab/perf-harness` v0.1 で `measure` p50 / p95 / p99 + `saveBaseline` + `detectRegression` + `evaluatePerfGate` primitive を land) + v1.14-post (`runPerf3Layer` serial + concurrent + memory 3-layer harness) を基盤に、 v1.25 は同 primitive を **33 全 kiwa package** に rollout、 各 package で `tests/perf/{package}.perf.ts` + `test:perf` script + `.perf-baseline/{package}.json` を追加。 v1.13-1 primitive は first-line contract のまま維持 (v0.1 signature 完全維持)、 33 package p95 baseline + regression detection は second-line envelope として並走。 `@kiwa-lab/perf-harness` v0.1.1 → v0.2.0 minor bump は 33 package coverage extension + 3-layer harness 標準化を反映。 v1.11 以降の連続完遂 14 milestone (release gate → 非決定性 → 時間軸 → 横軸拡張 → AI-LLM 深化 → component 縦軸 → Observability v2 → Blockchain 深化 → Framework 深化 → Streaming 深化 → Auth 深化 → Auth 深化 II → Payment 深化 → Edge / Serverless 深化) を受けて、 v1.25 は Perf-harness sweep milestone、 kiwa runtime fixture 34 packages はそのまま維持 (perf-harness 既存 package の rollout)。
 
 ## 主な追加
 
-### `@kiwa/perf-harness` v0.2.0 (33 package coverage extension)
+### `@kiwa-lab/perf-harness` v0.2.0 (33 package coverage extension)
 
 v1.13-1 で land した `measure` p50 / p95 / p99 + `saveBaseline` + `loadBaseline` + `detectRegression` + `evaluatePerfGate` primitive + v1.14-post `runPerf3Layer` (serial + concurrent + memory 3-layer harness) の signature を完全維持したまま、 v1.25 は 33 全 kiwa package に同 primitive を rollout。 各 package の `tests/perf/{package}.perf.ts` は shared SSOT (`docs/concepts/perf-testing-ssot.md`) に従い、 platform-specific event 名ではなく **transition** に対して assert 可能。
 
@@ -27,11 +27,11 @@ v1.13-1 で land した `measure` p50 / p95 / p99 + `saveBaseline` + `loadBaseli
 
 ### v1.25-1 core layer perf sweep (9 package)
 
-`@kiwa/core` / `dapp` / `api` / `ui` / `data` / `cli-test` / `observability` / `e2e` / `cli` の 9 core layer package に `tests/perf/{package}.perf.ts` + `test:perf` script + `.perf-baseline/{package}.json` を追加。 各 suite は `runPerf3Layer` (serial concurrency=1 200 iter + concurrent concurrency=10 500 iter + memory heap sampling) 経由で 3 axis を 1 call gate。
+`@kiwa-lab/core` / `dapp` / `api` / `ui` / `data` / `cli-test` / `observability` / `e2e` / `cli` の 9 core layer package に `tests/perf/{package}.perf.ts` + `test:perf` script + `.perf-baseline/{package}.json` を追加。 各 suite は `runPerf3Layer` (serial concurrency=1 200 iter + concurrent concurrency=10 500 iter + memory heap sampling) 経由で 3 axis を 1 call gate。
 
 ```ts
-import { runPerf3Layer } from '@kiwa/perf-harness';
-import { parseSpec } from '@kiwa/core';
+import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+import { parseSpec } from '@kiwa-lab/core';
 
 const result = await runPerf3Layer({
   name: 'core:parseSpec',
@@ -57,15 +57,15 @@ const result = await runPerf3Layer({
 
 ### v1.25-2 framework adapter perf sweep (11 package)
 
-`@kiwa/a11y` / `visual` / `nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `fresh` / `hono` / `solidjs` の 11 framework adapter package に同一 pattern を適用。 framework baseline path 分離で cross-adapter noise 抑制、 3-layer perf harness 経由。
+`@kiwa-lab/a11y` / `visual` / `nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `fresh` / `hono` / `solidjs` の 11 framework adapter package に同一 pattern を適用。 framework baseline path 分離で cross-adapter noise 抑制、 3-layer perf harness 経由。
 
 ### v1.25-3 test type perf sweep (3 package)
 
-`@kiwa/a11y` / `visual` / `component` の 3 test type package + 3-layer perf harness。 axe-core visitor tree walk / pixelmatch image diff / component mount + snapshot 各 op の p95 baseline 化。
+`@kiwa-lab/a11y` / `visual` / `component` の 3 test type package + 3-layer perf harness。 axe-core visitor tree walk / pixelmatch image diff / component mount + snapshot 各 op の p95 baseline 化。
 
 ### v1.25-4 SaaS layer perf sweep (10 package)
 
-`@kiwa/auth` / `queue` / `cache` / `orm` / `payment` / `streaming` / `search` / `mcp` / `agent` / `ai-llm` の 10 SaaS layer package + provider 別 baseline + `KIWA_MODE=real` opt-in。 mock 経路 default で <5 ms per test、 `KIWA_MODE=real` で real sandbox (Stripe test mode / Redis / Meilisearch 等) に切替、 fidelity 比較。
+`@kiwa-lab/auth` / `queue` / `cache` / `orm` / `payment` / `streaming` / `search` / `mcp` / `agent` / `ai-llm` の 10 SaaS layer package + provider 別 baseline + `KIWA_MODE=real` opt-in。 mock 経路 default で <5 ms per test、 `KIWA_MODE=real` で real sandbox (Stripe test mode / Redis / Meilisearch 等) に切替、 fidelity 比較。
 
 ### v1.25-5 release-gate 統合 + docs 補強
 
@@ -73,29 +73,29 @@ const result = await runPerf3Layer({
 
 docs は 3 pillar + 1 snippet validation を追加。
 
-- **tutorial 45** (`docs/tutorials/45-perf-harness-baseline.md`) ... p95 baseline + regression detection walkthrough、 空 project → `@kiwa/perf-harness@^0.2` install → `measure` + `saveBaseline` + `detectRegression` の 15 分完走 recipe。
+- **tutorial 45** (`docs/tutorials/45-perf-harness-baseline.md`) ... p95 baseline + regression detection walkthrough、 空 project → `@kiwa-lab/perf-harness@^0.2` install → `measure` + `saveBaseline` + `detectRegression` の 15 分完走 recipe。
 - **tutorial 46** (`docs/tutorials/46-perf-baseline-migration.md`) ... 3 → 33 package migration methodology、 v1.25 sweep で kiwa 33 package に適用した exact recipe を external repo で 15 分再現。
 - **concept doc** (`docs/concepts/perf-testing-ssot.md`) ... 4 rule SSOT の詳細 + `measure` API reference + `runPerf3Layer` reference + baseline JSON schema。
 - **migration guide** (`docs/migrations/v1.24-to-v1.25.md`) ... additive-only、 breaking change なし。
-- **snippet validation** (`packages/perf-harness/tests/docs-tutorial-v1.25.test.ts`) ... tutorial 45-46 の全 code snippet を実 `@kiwa/perf-harness` API import + execute + assertion で走査、 15 test で drift を検知 (`docs-tutorial-v1.21.test.ts` / `docs-tutorial-v1.22.test.ts` / `docs-tutorial-v1.23.test.ts` / `docs-tutorial-v1.24.test.ts` と同じ pattern)。
+- **snippet validation** (`packages/perf-harness/tests/docs-tutorial-v1.25.test.ts`) ... tutorial 45-46 の全 code snippet を実 `@kiwa-lab/perf-harness` API import + execute + assertion で走査、 15 test で drift を検知 (`docs-tutorial-v1.21.test.ts` / `docs-tutorial-v1.22.test.ts` / `docs-tutorial-v1.23.test.ts` / `docs-tutorial-v1.24.test.ts` と同じ pattern)。
 
 ### v1.25-6 publish (本 PR)
 
 - `plugin.json` v1.24.0 → v1.25.0 + description v1.24 → v1.25 marker + 26 perf keyword 追加 (`perf` / `perf-harness` / `perf-testing` / `p50` / `p95` / `p99` / `latency-percentile` / `regression-detection` / `welch-t-test` / `baseline-persistence` / `perf-baseline` / `perf-regression` / `3-layer-harness` / `serial-perf` / `concurrent-perf` / `memory-perf` / `heap-sampling` / `33-package-coverage` / `perf-sweep` / `release-gate-perf` / `p95-baseline` / `iteration-warmup` 他)。
-- `@kiwa/perf-harness` v0.1.1 → v0.2.0 minor bump。
+- `@kiwa-lab/perf-harness` v0.1.1 → v0.2.0 minor bump。
 - README `Roadmap ✅ v1.25` row を追加、 6 sub-Issue #927-#932 全 link + `6/6 resolved` copy。
 - 4 announcement file (gh-discussions + x-thread-en + x-thread-ja + zenn-article) 新規追加。
 - `tests/release-smoke/tests/v1-25-publish.test.ts` (7 axis publish artefact invariant) 新規 + `v1-24-publish.test.ts` 削除。
 - `tests/docs-site-e2e/site.spec.ts` に `V1_25_PAGES` (5 page: tutorial 45 + tutorial 46 + concept `perf-testing-ssot` + migration `v1.24-to-v1.25`、 nav + search widget mount check) 追加。
-- **`package.json` release script filter に `@kiwa/perf-harness` 追加** (v1.14 payment 漏れ再発防止、 v1.23 v1-23-payment fix の教訓反映)。 build + publish 両 filter に含める。
+- **`package.json` release script filter に `@kiwa-lab/perf-harness` 追加** (v1.14 payment 漏れ再発防止、 v1.23 v1-23-payment fix の教訓反映)。 build + publish 両 filter に含める。
 
 ## Numbers
 
 - **6 sub-Issue 解決** (#927-#932)
 - **6 PR merge** (v1.25-1 + v1.25-2 + v1.25-3 + v1.25-4 + v1.25-5 + 本 publish PR)
-- **1 npm minor bump** (`@kiwa/perf-harness` v0.1.1 → v0.2.0) — kiwa runtime fixture 34 packages 維持
+- **1 npm minor bump** (`@kiwa-lab/perf-harness` v0.1.1 → v0.2.0) — kiwa runtime fixture 34 packages 維持
 - **33 package perf sweep 完了** (core layer 9 + framework adapter 11 + test type 3 + SaaS layer 10)
-- **release script filter fix** — `@kiwa/perf-harness` を含めて v1.14 payment 漏れ再発防止
+- **release script filter fix** — `@kiwa-lab/perf-harness` を含めて v1.14 payment 漏れ再発防止
 
 ## なぜ 33 package coverage (3 pilot ではなく)
 

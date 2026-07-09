@@ -214,7 +214,7 @@ Rules of thumb.
 - [Collab cursor tutorial](../tutorials/10-ably-collab-cursor) — hands-on with `createAblyMock`
 - [Notification tutorial](../tutorials/11-socketio-notification) — hands-on with `createSocketioMock`
 - [Migration v1.12 → v1.13](../migrations/v1.12-to-v1.13) — how to adopt the realtime harness
-- [`@kiwa/realtime` README](https://github.com/cardene777/kiwa/blob/main/packages/realtime/README.md) — full API reference for the 4 mocks + fidelity harness
+- [`@kiwa-lab/realtime` README](https://github.com/cardene777/kiwa/blob/main/packages/realtime/README.md) — full API reference for the 4 mocks + fidelity harness
 - [AI-LLM testing concept guide](./ai-llm-testing) — sibling SSOT for the AI-LLM axes (v1.12)
 - [Release gate SSOT](../quality/release-gate) — thresholds + overrides + how the gate is wired
 

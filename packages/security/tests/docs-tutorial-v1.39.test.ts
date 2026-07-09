@@ -1,6 +1,6 @@
 /**
  * v1.39-5 docs 補強 (Issue #1121 / CAR-867) — tutorial 82-84 code snippet validation
- * for `@kiwa/security` v0.2 advanced II 8 axis (mTLS + Zero-trust + SIEM audit +
+ * for `@kiwa-lab/security` v0.2 advanced II 8 axis (mTLS + Zero-trust + SIEM audit +
  * Incident response + Cryptography advanced + Container/K8s + Supply chain +
  * Web Vitals security).
  *

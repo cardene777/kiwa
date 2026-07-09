@@ -4,7 +4,7 @@ import type { RagAdapter, RagResult, StreamedRagResult } from '../adapters/inter
  * User-facing RAG flows the dogfood app exposes. Each flow talks only
  * through {@link RagAdapter} so the same code powers both `KIWA_MODE=real`
  * (real Vercel AI SDK-shape HTTP + real OpenAI embeddings + Pinecone) and
- * `KIWA_MODE=mock` (`@kiwa/ai-llm` createVercelAiMock +
+ * `KIWA_MODE=mock` (`@kiwa-lab/ai-llm` createVercelAiMock +
  * createLangchainMock + in-memory store).
  *
  * The flows mirror AC in Issue #698 —
@@ -24,7 +24,7 @@ export const RAG_QA_PAIRS: Array<{
   },
   {
     question: 'How many axes does the release gate evaluate?',
-    groundTruth: '11 axes when the provider starts with @kiwa/ai-llm — 7 base plus 4 AI-LLM specific.',
+    groundTruth: '11 axes when the provider starts with @kiwa-lab/ai-llm — 7 base plus 4 AI-LLM specific.',
   },
   {
     question: 'What are the AI-LLM specific release gate axes?',
@@ -47,7 +47,7 @@ export const RAG_QA_PAIRS: Array<{
     groundTruth: 'accuracy threshold is 0.80.',
   },
   {
-    question: 'Which SDK mocks does @kiwa/ai-llm provide?',
+    question: 'Which SDK mocks does @kiwa-lab/ai-llm provide?',
     groundTruth: 'createAnthropicMock, createOpenAIMock, createVercelAiMock, createLangchainMock.',
   },
   {

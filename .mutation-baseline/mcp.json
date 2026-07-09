@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/mcp",
+  "package": "@kiwa-lab/mcp",
   "tier": "SaaS",
   "thresholds": {
     "high": 65,

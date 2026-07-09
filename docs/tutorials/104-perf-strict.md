@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/perf-harness` v0.3 that uses **strict mode** — iter 400 + Welch t-test |t|>3 + p95 delta 10% + fail-fast on missing baseline。 v0.2 lax mode (iter 200 + |t|>2 + delta 20%) より false negative を減らして test 漏れゼロを狙う。
+A vitest suite wired to `@kiwa-lab/perf-harness` v0.3 that uses **strict mode** — iter 400 + Welch t-test |t|>3 + p95 delta 10% + fail-fast on missing baseline。 v0.2 lax mode (iter 200 + |t|>2 + delta 20%) より false negative を減らして test 漏れゼロを狙う。
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ A vitest suite wired to `@kiwa/perf-harness` v0.3 that uses **strict mode** — 
 ```bash
 mkdir kiwa-perf-strict && cd kiwa-perf-strict
 pnpm init
-pnpm add -D @kiwa/perf-harness@^0.3 @kiwa/quality-metrics@^0.4 vitest typescript @types/node
+pnpm add -D @kiwa-lab/perf-harness@^0.3 @kiwa-lab/quality-metrics@^0.4 vitest typescript @types/node
 ```
 
 ### 2. Strict regression detection
@@ -29,7 +29,7 @@ import {
   buildMeasureResult,
   detectRegression,
   detectRegressionStrict,
-} from '@kiwa/perf-harness';
+} from '@kiwa-lab/perf-harness';
 
 describe('strict regression detection', () => {
   it('strict catches 15% delta that lax passes', () => {
@@ -60,7 +60,7 @@ describe('strict regression detection', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runPerf3LayerStrict } from '@kiwa/perf-harness';
+import { runPerf3LayerStrict } from '@kiwa-lab/perf-harness';
 import path from 'node:path';
 
 describe('strict 3-layer harness', () => {
@@ -89,14 +89,14 @@ describe('strict 3-layer harness', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { evaluateReleaseGate } from '@kiwa/quality-metrics';
+import { evaluateReleaseGate } from '@kiwa-lab/quality-metrics';
 
 describe('release gate strict axis', () => {
   it('fails on p95 exceed strict cap', () => {
     const report = {
       version: '1.0',
       reportedAt: '2026-07-08T00:00:00Z',
-      provider: '@kiwa/my-lib',
+      provider: '@kiwa-lab/my-lib',
       coverage: { line: 90, branch: 85, function: 95 },
       fidelity: { ratio: 80, methodTotal: 10, methodCovered: 8 },
       perf: {
@@ -119,7 +119,7 @@ describe('release gate strict axis', () => {
     const report = {
       version: '1.0',
       reportedAt: '2026-07-08T00:00:00Z',
-      provider: '@kiwa/my-lib',
+      provider: '@kiwa-lab/my-lib',
       coverage: { line: 90, branch: 85, function: 95 },
       fidelity: { ratio: 80, methodTotal: 10, methodCovered: 8 },
       perf: {

@@ -1,12 +1,12 @@
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into `@kiwa/quality-metrics`
+ * (missing ops, unmatched behaviour) into `@kiwa-lab/quality-metrics`
  * 13-axis release gate, and emits a JSON + markdown report so the release
  * process can consume it.
  *
  * The dogfood app is the source of truth for whether the v1.39-1
- * `@kiwa/security` v0.2 siem-audit + incident-response helpers
+ * `@kiwa-lab/security` v0.2 siem-audit + incident-response helpers
  * track the real Splunk + PagerDuty SIEM behaviour closely enough to
  * be trusted as a mock in unit tests. The report tracks the same 16
  * ops the adapter contract exposes so any divergence surfaces the op
@@ -33,7 +33,7 @@ import {
   type A11yTier,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { SecurityAdapter, TraceEvent } from '../adapters/interface.js';
 
 export interface FidelityRunInput {

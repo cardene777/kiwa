@@ -4,13 +4,13 @@ v1.11 の「release 品質を数値で判断」 縦軸を、 v1.12 は AI-LLM pr
 
 v1.11 release gate は mock が deterministic な前提。 Claude / GPT / Gemini はその前提を壊す。 v1.12 は cost / latency / token / accuracy を release-gate の第一級 axis に格上げして吸収する。
 
-2/ @kiwa/quality-metrics v0.2 — 11 軸に拡張。
+2/ @kiwa-lab/quality-metrics v0.2 — 11 軸に拡張。
 
 v1.11 の 5 軸 (coverage / test count / fidelity / perf p95 / mutation kill) はそのまま。
 
-AI-LLM provider (name が @kiwa/ai- で始まる) は追加 4 軸 — cost.perRequestUsd ≤ $0.10 / latency.p95Ms ≤ 3000 / token.totalTokens ≤ 4000 / accuracy.score ≥ 0.80。
+AI-LLM provider (name が @kiwa-lab/ai- で始まる) は追加 4 軸 — cost.perRequestUsd ≤ $0.10 / latency.p95Ms ≤ 3000 / token.totalTokens ≤ 4000 / accuracy.score ≥ 0.80。
 
-3/ @kiwa/ai-llm v0.1 — 4 SDK 統一 mock。
+3/ @kiwa-lab/ai-llm v0.1 — 4 SDK 統一 mock。
 
 createAnthropicMock — Messages API + streaming + tool_use + system prompt。
 createOpenAIMock — Chat Completions + stream + function calling + parallel tool calls。

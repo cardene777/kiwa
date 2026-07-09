@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa/ai-llm.
+ * Mutation testing config for @kiwa-lab/ai-llm.
  * Threshold: SaaS tier (high 65 / low 55 / break 50) — LLM adapter wraps
  * OpenAI / Anthropic / LangChain with fidelity report + multimodal mocks;
  * provider API surfaces evolve rapidly.

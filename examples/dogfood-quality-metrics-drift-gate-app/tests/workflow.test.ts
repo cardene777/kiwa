@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { QualityReport } from '@kiwa/quality-metrics';
+import type { QualityReport } from '@kiwa-lab/quality-metrics';
 import {
   buildBaselineSnapshot,
   evaluateWithDriftGate,
@@ -16,7 +16,7 @@ function makeReport(overrides?: {
   behaviorTests?: number;
 }): QualityReport {
   return {
-    provider: '@kiwa/example',
+    provider: '@kiwa-lab/example',
     version: '0.1.0',
     reportedAt: '2026-07-08T00:00:00Z',
     coverage: {

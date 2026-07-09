@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/edge` v1.2 that models the 4 pieces of a real global routing posture that every non-trivial production edge platform eventually needs — a `receiveAnycast` step that pins per-request POP visibility (mirroring Cloudflare Anycast + Vercel Edge Network + Deno Deploy anycast entry) so a "which POP handled this request?" question resolves to one telemetry event without walking the raw egress log, a `matchGeo` step that filters POPs by request region (mirroring Cloudflare `smart_placement` region hints) so a "how many POPs are in the user's region?" question lands on one number, a `selectByLatency` step that picks the lowest-latency healthy POP with `preferredRegion` bias (mirroring Cloudflare Argo Smart Routing + AWS Global Accelerator) so a "why did this request land 200ms away?" question maps to one probe result, and a `markUnhealthy` step that flips a POP out of rotation (mirroring health probe failures) so a bad POP is skipped without a full pool restart. `startRoutingPool()` + `receiveAnycast()` + `matchGeo()` + `selectByLatency()` + `markUnhealthy()` give you every one of those pieces for the routing decision tree, plus D1 read replica affinity with `startD1()` + `readFromReplica()` + `reportLag()` for the database side, without booting a real Cloudflare + Vercel + Deno Deploy stack. This is the pattern kiwa's `examples/dogfood-edge-global-routing-app` exercises against real Cloudflare + Vercel + Deno Deploy backends under `KIWA_MODE=real` + the relevant `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the failover picked a POP outside the preferred region because `selectByLatency` scanned globally when in-region was empty and did not emit `routing.failover-triggered`, the geo match returned 0 because the `region` filter was `===` but the POP registry used a case-different string, and the replica read fell back to primary because `lagMs < maxLagMs` used `<=` instead of `<`" gap a reviewer sees in a routing post-mortem.
+A vitest suite wired to `@kiwa-lab/edge` v1.2 that models the 4 pieces of a real global routing posture that every non-trivial production edge platform eventually needs — a `receiveAnycast` step that pins per-request POP visibility (mirroring Cloudflare Anycast + Vercel Edge Network + Deno Deploy anycast entry) so a "which POP handled this request?" question resolves to one telemetry event without walking the raw egress log, a `matchGeo` step that filters POPs by request region (mirroring Cloudflare `smart_placement` region hints) so a "how many POPs are in the user's region?" question lands on one number, a `selectByLatency` step that picks the lowest-latency healthy POP with `preferredRegion` bias (mirroring Cloudflare Argo Smart Routing + AWS Global Accelerator) so a "why did this request land 200ms away?" question maps to one probe result, and a `markUnhealthy` step that flips a POP out of rotation (mirroring health probe failures) so a bad POP is skipped without a full pool restart. `startRoutingPool()` + `receiveAnycast()` + `matchGeo()` + `selectByLatency()` + `markUnhealthy()` give you every one of those pieces for the routing decision tree, plus D1 read replica affinity with `startD1()` + `readFromReplica()` + `reportLag()` for the database side, without booting a real Cloudflare + Vercel + Deno Deploy stack. This is the pattern kiwa's `examples/dogfood-edge-global-routing-app` exercises against real Cloudflare + Vercel + Deno Deploy backends under `KIWA_MODE=real` + the relevant `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the failover picked a POP outside the preferred region because `selectByLatency` scanned globally when in-region was empty and did not emit `routing.failover-triggered`, the geo match returned 0 because the `region` filter was `===` but the POP registry used a case-different string, and the replica read fell back to primary because `lagMs < maxLagMs` used `<=` instead of `<`" gap a reviewer sees in a routing post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/edge` v1.2 that models the 4 pieces of a real glo
 ```bash
 mkdir kiwa-global-routing && cd kiwa-global-routing
 pnpm init
-pnpm add -D @kiwa/edge@^1.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/edge@^1.2 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -37,7 +37,7 @@ Add the vitest scripts in `package.json`.
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { matchGeo, receiveAnycast, startRoutingPool } from '@kiwa/edge';
+import { matchGeo, receiveAnycast, startRoutingPool } from '@kiwa-lab/edge';
 
 describe('routing — anycast + geo', () => {
   it('receiveAnycast emits anycast-received', () => {
@@ -73,7 +73,7 @@ describe('routing — anycast + geo', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { markUnhealthy, selectByLatency, startRoutingPool } from '@kiwa/edge';
+import { markUnhealthy, selectByLatency, startRoutingPool } from '@kiwa-lab/edge';
 
 describe('routing — select', () => {
   it('selectByLatency picks lowest latency POP in region', () => {
@@ -109,7 +109,7 @@ describe('routing — select', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { readFromReplica, reportLag, startD1 } from '@kiwa/edge';
+import { readFromReplica, reportLag, startD1 } from '@kiwa-lab/edge';
 
 describe('routing — D1 read replica', () => {
   it('read picks lowest-lag healthy replica in region', () => {

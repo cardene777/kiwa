@@ -1,4 +1,4 @@
-# @kiwa/astro
+# @kiwa-lab/astro
 
 ## 1.2.0
 
@@ -94,7 +94,7 @@
 
   ## Out of scope (separate Issues)
 
-  - Astro Islands (`client:*` directive) → `@kiwa/ui` Vue/React/Svelte adapter
+  - Astro Islands (`client:*` directive) → `@kiwa-lab/ui` Vue/React/Svelte adapter
   - View transitions / streaming SSR → 別 Issue
   - HTML-perfect snapshot → Astro Container API 直接利用推奨 (本 helper は redirect / notFound / locals 等の **動作** 検証に focus)
 
@@ -102,7 +102,7 @@
 
 ### Patch Changes
 
-- a21876d: 🎉 New package `@kiwa/astro` v1.0 — Astro Server Endpoints (`pages/api/*.ts`) test adapter (Issue #499、 v1.1 milestone 8/8 完成).
+- a21876d: 🎉 New package `@kiwa-lab/astro` v1.0 — Astro Server Endpoints (`pages/api/*.ts`) test adapter (Issue #499、 v1.1 milestone 8/8 完成).
 
   ## What's in the box
 
@@ -123,7 +123,7 @@
 
   ## Out of scope (separate Issues)
 
-  - Astro Islands (client-side hydration) — covered by `@kiwa/ui` framework adapters (React / Vue / Svelte / Solid / Lit / Qwik / Angular).
+  - Astro Islands (client-side hydration) — covered by `@kiwa-lab/ui` framework adapters (React / Vue / Svelte / Solid / Lit / Qwik / Angular).
   - `.astro` page SSR rendering — use Astro Container API directly (`experimental_AstroContainer`), helper not needed.
 
   ## v1.1 milestone closeout

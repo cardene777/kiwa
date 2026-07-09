@@ -1,6 +1,6 @@
 # dogfood-security-supply-chain-slsa-app (v1.39-4)
 
-An in-toto + sigstore + cosign style supply chain security orchestrator that drives SLSA level 0-4 gate + reproducible build hash matching + signed provenance (builder + material set + signature algorithm) + attestation policy verification (attestation type + trust root fingerprint + valid signature count) + orchestrator (fused SLSA level gate → reproducible → provenance → attestation policy pipeline) across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa/security` v0.2 supply-chain semantics) and real (cosign + rekor + in-toto driver when `COSIGN_STACK_READY=1` + `KIWA_COSIGN_BIN` + `KIWA_IN_TOTO_URL` + `KIWA_REKOR_URL` + `KIWA_COSIGN_TRUST_ROOT` are set) implementations satisfy the same 13-op contract so the fidelity harness can diff them side by side.
+An in-toto + sigstore + cosign style supply chain security orchestrator that drives SLSA level 0-4 gate + reproducible build hash matching + signed provenance (builder + material set + signature algorithm) + attestation policy verification (attestation type + trust root fingerprint + valid signature count) + orchestrator (fused SLSA level gate → reproducible → provenance → attestation policy pipeline) across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa-lab/security` v0.2 supply-chain semantics) and real (cosign + rekor + in-toto driver when `COSIGN_STACK_READY=1` + `KIWA_COSIGN_BIN` + `KIWA_IN_TOTO_URL` + `KIWA_REKOR_URL` + `KIWA_COSIGN_TRUST_ROOT` are set) implementations satisfy the same 13-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -49,6 +49,6 @@ The real adapter defers the cosign sign + rekor upload + in-toto attest ceremony
 
 ## Fidelity harness
 
-`runFidelityHarness()` diffs the mock and real trace event streams and feeds the divergence count into `@kiwa/quality-metrics` release gate. Behavioral divergences are expected on non-integration environments — the real adapter refuses every op with `KIWA_COSIGN_ENV_MISSING`, and the mock adapter succeeds, so every op appears in the divergence list. The harness treats those as `BEHAVIORAL_DIVERGENCE` records so the release-gate row can distinguish "not configured" from "ran and diverged".
+`runFidelityHarness()` diffs the mock and real trace event streams and feeds the divergence count into `@kiwa-lab/quality-metrics` release gate. Behavioral divergences are expected on non-integration environments — the real adapter refuses every op with `KIWA_COSIGN_ENV_MISSING`, and the mock adapter succeeds, so every op appears in the divergence list. The harness treats those as `BEHAVIORAL_DIVERGENCE` records so the release-gate row can distinguish "not configured" from "ran and diverged".
 
 The report writes both markdown and JSON into `./quality-report/`, which the release script picks up alongside every other axis dogfood.

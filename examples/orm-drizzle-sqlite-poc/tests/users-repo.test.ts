@@ -3,8 +3,8 @@
 
 import { afterEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { setupOrmEnv, expectRowCount } from '@kiwa/orm';
-import type { OrmTestEnv } from '@kiwa/orm';
+import { setupOrmEnv, expectRowCount } from '@kiwa-lab/orm';
+import type { OrmTestEnv } from '@kiwa-lab/orm';
 import { posts, schema, type Schema } from '../src/schema.js';
 import { INITIAL_MIGRATION } from '../src/migration.sql.js';
 import { UsersRepository } from '../src/users-repo.js';
@@ -14,7 +14,7 @@ afterEach(async () => {
   if (env) { await env.stop(); env = null; }
 });
 
-describe('UsersRepository via @kiwa/orm', () => {
+describe('UsersRepository via @kiwa-lab/orm', () => {
   it('T-POC-001: create + findByEmail で round-trip', async () => {
     env = await setupOrmEnv({
       mode: 'mock',

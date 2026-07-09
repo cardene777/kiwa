@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/ai-llm` v0.4 that models the 5 pieces of a real prompt-injection defense pipeline that every non-trivial LLM-backed product eventually needs — a 5-class classifier that separates direct (`ignore all previous instructions`) from indirect (HTML comment payload), jailbreak (`DAN mode`), role-hijacking (`act as system`), and XML injection (closing `</system>` tag) attacks, an `InjectionSession` state machine that walks `idle` → `analyzed` → `direct-detected` / `jailbreak-blocked` / `role-hijacking-blocked` so you can assert on the exact state a payload lands in, a Constitutional AI guardrail that runs after injection detection to catch the outputs that make it past the input filter (violation of `no-medical-advice` / `no-illegal-content` principles), a PII redactor that walks email + phone + SSN + credit-card patterns so a leaked prompt template does not turn into a leaked PII payload, and a `providerEvent` adapter that emits the same neutral event (`injection.direct_detected`) as an Anthropic-flavored dialect (`anthropic.injection.direct_detected`) so a downstream audit consumer can watch the 4 provider (`anthropic` / `openai` / `vercel-ai` / `langchain`) surface through one event schema. `startInjectionSession()` + `detectInjection()` + `classifyDirect()` + `blockJailbreak()` + `blockRoleHijacking()` + `startGuardrailSession()` + `checkConstitutional()` + `redactPii()` give you every one of those pieces without booting a real Anthropic Messages endpoint. This is the pattern kiwa's `examples/dogfood-llm-prompt-injection-defense-app` exercises against the real Anthropic Messages API under `KIWA_MODE=real` + `ANTHROPIC_API_KEY` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the jailbreak classifier fired on `DAN mode` in the input but the Constitutional guardrail let a `bomb recipe` output through because the two checks were never chained on the same session" gap a reviewer sees in the injection-drift post-mortem.
+A vitest suite wired to `@kiwa-lab/ai-llm` v0.4 that models the 5 pieces of a real prompt-injection defense pipeline that every non-trivial LLM-backed product eventually needs — a 5-class classifier that separates direct (`ignore all previous instructions`) from indirect (HTML comment payload), jailbreak (`DAN mode`), role-hijacking (`act as system`), and XML injection (closing `</system>` tag) attacks, an `InjectionSession` state machine that walks `idle` → `analyzed` → `direct-detected` / `jailbreak-blocked` / `role-hijacking-blocked` so you can assert on the exact state a payload lands in, a Constitutional AI guardrail that runs after injection detection to catch the outputs that make it past the input filter (violation of `no-medical-advice` / `no-illegal-content` principles), a PII redactor that walks email + phone + SSN + credit-card patterns so a leaked prompt template does not turn into a leaked PII payload, and a `providerEvent` adapter that emits the same neutral event (`injection.direct_detected`) as an Anthropic-flavored dialect (`anthropic.injection.direct_detected`) so a downstream audit consumer can watch the 4 provider (`anthropic` / `openai` / `vercel-ai` / `langchain`) surface through one event schema. `startInjectionSession()` + `detectInjection()` + `classifyDirect()` + `blockJailbreak()` + `blockRoleHijacking()` + `startGuardrailSession()` + `checkConstitutional()` + `redactPii()` give you every one of those pieces without booting a real Anthropic Messages endpoint. This is the pattern kiwa's `examples/dogfood-llm-prompt-injection-defense-app` exercises against the real Anthropic Messages API under `KIWA_MODE=real` + `ANTHROPIC_API_KEY` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the jailbreak classifier fired on `DAN mode` in the input but the Constitutional guardrail let a `bomb recipe` output through because the two checks were never chained on the same session" gap a reviewer sees in the injection-drift post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/ai-llm` v0.4 that models the 5 pieces of a real p
 ```bash
 mkdir kiwa-injection-defense && cd kiwa-injection-defense
 pnpm init
-pnpm add -D @kiwa/ai-llm@^0.4 vitest typescript @types/node
+pnpm add -D @kiwa-lab/ai-llm@^0.4 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.4 surface exports the prompt-injection axis (`startInjectionSession` / `d
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { detectInjection, startInjectionSession } from '@kiwa/ai-llm';
+import { detectInjection, startInjectionSession } from '@kiwa-lab/ai-llm';
 
 describe('injection — 5-class detection', () => {
   it('flags a direct injection ("ignore all previous instructions")', () => {
@@ -86,7 +86,7 @@ import {
   classifyIndirect,
   detectInjection,
   startInjectionSession,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('injection — narrow classifiers', () => {
   it('classifyDirect flips the session to direct-detected on a hit', () => {
@@ -127,7 +127,7 @@ import {
   blockRoleHijacking,
   detectInjection,
   startInjectionSession,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('injection — jailbreak + role-hijack block', () => {
   it('blockJailbreak flips the session to jailbreak-blocked on "DAN mode"', () => {
@@ -176,7 +176,7 @@ import {
   startGuardrailSession,
   validateSchema,
   type ConstitutionalPrinciple,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('guardrail — Constitutional + PII chain', () => {
   const principles: ConstitutionalPrinciple[] = [
@@ -245,7 +245,7 @@ import {
   detectInjection,
   startInjectionSession,
   type AiLlmTarget,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('injection — provider event dialect', () => {
   // The dialect prefix drops the `-ai` suffix for `vercel-ai` — the neutral

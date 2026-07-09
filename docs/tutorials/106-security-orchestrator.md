@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/security-devsecops` v0.3 orchestrator。 `runSecurityAudit(preset, target)` single entry で skill 4 種 (security-audit / supply-chain / specialty / threat-model) 相当の workflow を 1 行で実行、 `summarizeAuditReport` で結果集約。 DevSecOps library 化 Phase 3 完成の実装 pattern。
+A vitest suite wired to `@kiwa-lab/security-devsecops` v0.3 orchestrator。 `runSecurityAudit(preset, target)` single entry で skill 4 種 (security-audit / supply-chain / specialty / threat-model) 相当の workflow を 1 行で実行、 `summarizeAuditReport` で結果集約。 DevSecOps library 化 Phase 3 完成の実装 pattern。
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/security-devsecops` v0.3 orchestrator。 `runSecu
 ```bash
 mkdir kiwa-devsecops-orchestrator && cd kiwa-devsecops-orchestrator
 pnpm init
-pnpm add -D @kiwa/security-devsecops@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa-lab/security-devsecops@^0.3 vitest typescript @types/node
 ```
 
 ### 2. audit-all preset — 6 axis 全実行
@@ -26,7 +26,7 @@ pnpm add -D @kiwa/security-devsecops@^0.3 vitest typescript @types/node
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runSecurityAudit, summarizeAuditReport } from '@kiwa/security-devsecops';
+import { runSecurityAudit, summarizeAuditReport } from '@kiwa-lab/security-devsecops';
 
 describe('runSecurityAudit — audit-all', () => {
   it('6 axis all complete', async () => {
@@ -49,7 +49,7 @@ describe('runSecurityAudit — audit-all', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runSecurityAudit, summarizeAuditReport } from '@kiwa/security-devsecops';
+import { runSecurityAudit, summarizeAuditReport } from '@kiwa-lab/security-devsecops';
 
 describe('runSecurityAudit — supply-chain', () => {
   it('runs SCA + Container', async () => {
@@ -71,7 +71,7 @@ describe('runSecurityAudit — supply-chain', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { runSecurityAudit, summarizeAuditReport } from '@kiwa/security-devsecops';
+import { runSecurityAudit, summarizeAuditReport } from '@kiwa-lab/security-devsecops';
 
 describe('runSecurityAudit — threat-model', () => {
   it('runs 6 axis with STRIDE tags', async () => {

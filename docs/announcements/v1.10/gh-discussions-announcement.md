@@ -2,7 +2,7 @@
 
 The v1.10 milestone (**6/6 GitHub Issues resolved**) just landed. After v1.9 filled the provider gap for auth / queue / cache (Clerk / Auth0 / Cloudflare Queues / SQS / Memcached / KeyDB)、 v1.10 shifts from **symmetric provider expansion** to **3-axis parallel expansion**: SaaS teams get Supabase Auth (core + advanced with RLS / MFA / SSO SAML / Web3 SIWE)、 self-host teams get RabbitMQ (basic + advanced with DLX / delayed message / cluster / federation / auto-reconnect)、 dApp Rust teams get the first-class contract layer via Foundry-rs + alloy.rs integration in `kiwa-test-rs`.
 
-## 1. `@kiwa/auth` v0.3 — Supabase Auth (core + advanced)
+## 1. `@kiwa-lab/auth` v0.3 — Supabase Auth (core + advanced)
 
 Supabase Auth (GoTrue) is now a first-class kiwa provider with two layered adapters. The core adapter covers the daily SaaS flow (email/password + OAuth PKCE + magic link + SMS OTP + JWT session)、 the advanced adapter targets prod enterprise + dApp needs.
 
@@ -10,7 +10,7 @@ Supabase Auth (GoTrue) is now a first-class kiwa provider with two layered adapt
 import {
   setupSupabaseAuthEnv,
   setupSupabaseAdvancedEnv,
-} from "@kiwa/auth";
+} from "@kiwa-lab/auth";
 
 // Core adapter (v1.10-1) — email/password + OAuth + magic link + JWT.
 const supa = await setupSupabaseAuthEnv({
@@ -50,12 +50,12 @@ const chal = await adv.web3.createSiweChallenge({ address, domain, uri });
 - **Core adapter** — PKCE OAuth (Google / GitHub / Apple / Azure / Facebook / Twitter)、 magic link + SMS OTP、 JWT (HS256) + refresh token rotation、 admin API mirror
 - **Advanced adapter** — RLS policy simulator (SELECT / INSERT / UPDATE / DELETE + service_role bypass)、 MFA (TOTP + SMS + backup codes + AAL upgrade)、 SSO SAML 2.0 (IdP-initiated + SP-initiated + tampering detection)、 Web3 wallet auth (EIP-4361 SIWE + nonce replay protection)
 
-## 2. `@kiwa/queue` v0.3 — RabbitMQ (basic + advanced)
+## 2. `@kiwa-lab/queue` v0.3 — RabbitMQ (basic + advanced)
 
 RabbitMQ joins the queue provider family with two layered adapters. Both run in stub mode (docker-free AMQP 0.9.1 model emulator) and testcontainers mode (probe against a real `rabbitmq:3-management` broker).
 
 ```ts
-import { setupRabbitMQEnv, setupRabbitMQAdvancedEnv } from "@kiwa/queue";
+import { setupRabbitMQEnv, setupRabbitMQAdvancedEnv } from "@kiwa-lab/queue";
 
 // Basic adapter (v1.10-3) — 4 exchange type + consumer + ack/nack/prefetch.
 const rmq = await setupRabbitMQEnv({

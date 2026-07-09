@@ -6,7 +6,7 @@ kiwa v2.1 is out。 **quality-metrics 深化 IV** 単軸 milestone、 v0.5 histo
 
 ## What's new
 
-### `@kiwa/quality-metrics` v2.0 → v2.1 minor bump
+### `@kiwa-lab/quality-metrics` v2.0 → v2.1 minor bump
 
 - **`learnAdaptiveThreshold`** = 過去 N snapshot から axis 別 adaptive threshold 学習
 - **`pickThresholdForAxis`** = axis 別 fallback SSOT helper (perAxis 存在 → 個別 / 不在 → aggregate)
@@ -35,7 +35,7 @@ v2.0 rename milestone (5 PR 例外拡張) の 直後、 v2.1 で 4 PR rhythm 復
 ## Install
 
 ```bash
-pnpm add -D @kiwa/quality-metrics@^2.1
+pnpm add -D @kiwa-lab/quality-metrics@^2.1
 ```
 
 ## Migration guide

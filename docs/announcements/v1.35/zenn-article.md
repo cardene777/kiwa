@@ -1,9 +1,9 @@
-# kiwa v1.35 released — Observability 深化 II (@kiwa/observability v2.1.0 + 8 axis advanced observability + 縦深化 pair 第 7 pair 連続化 + 3-stage 拡張 pattern 2 例目)
+# kiwa v1.35 released — Observability 深化 II (@kiwa-lab/observability v2.1.0 + 8 axis advanced observability + 縦深化 pair 第 7 pair 連続化 + 3-stage 拡張 pattern 2 例目)
 
 ## TL;DR
 
 - **kiwa v1.35 released** — Observability 深化 II milestone (advanced observability semantics 8 axis + real driver + 縦深化 pair 第 7 pair 連続化 + 3-stage 拡張 pattern 2 例目)
-- **`@kiwa/observability` v2.0.0 → v2.1.0 minor bump** — 8 axis advanced observability semantics + real driver env-gate + 4 provider × 8 axis neutral state machine 追加
+- **`@kiwa-lab/observability` v2.0.0 → v2.1.0 minor bump** — 8 axis advanced observability semantics + real driver env-gate + 4 provider × 8 axis neutral state machine 追加
 - **8 axis semantics** = slo-burn-rate + red-use-golden-signals + exemplar-tracing + otel-advanced + log-correlation-advanced + alert-routing-advanced + continuous-profiling + cardinality-control
 - **3 dogfood app v2 / 新規** — observability-slo-app v2 + otel-exemplar-app v2 + profiling-app 新規、 全 7 軸 release gate PASS + real driver env-gate
 - **縦深化 pair pattern 第 7 pair 連続化** — Auth pair (v1.21→v1.22) + Realtime pair (v1.13→v1.28) + Streaming pair (v1.20→v1.31) + Database pair (v1.14→v1.32) + Payment pair (v1.14→v1.23→v1.33) + Frontend pair (v1.16→v1.34) + **Observability pair (v1.14→v1.17→v1.35)**、 3-stage 拡張 pattern は Payment + Observability の 2 例、 縦深化戦略 SSOT を observability production layer に拡張
@@ -13,7 +13,7 @@
 
 ## v1.35 が解決したい問題 — Observability production semantics の testing gap
 
-v1.14 で `@kiwa/observability` v1.0 (OpenTelemetry / Datadog / Sentry の 3 provider を統一 mock として提供する telemetry collector envelope) を land、 v1.17 で v2.0 に major bump (Grafana-style DashboardMock + Prometheus AlertManager-style AlertRouter + trace flame graph + LogCorrelationIndex の 4 module 追加、 v1 telemetry mock 基盤上に v2 dashboard/alert/flame graph/log correlation の 6 base semantics layer を確立) した時点で、 kiwa は telemetry provider mock + observability dashboard/alerting のうち base semantics までは cover していた。 broker binary + Grafana Enterprise + Prometheus + Loki 不要で mock only mode で走る、 実 test 環境の inner-loop 速度を確保する目的の layer。
+v1.14 で `@kiwa-lab/observability` v1.0 (OpenTelemetry / Datadog / Sentry の 3 provider を統一 mock として提供する telemetry collector envelope) を land、 v1.17 で v2.0 に major bump (Grafana-style DashboardMock + Prometheus AlertManager-style AlertRouter + trace flame graph + LogCorrelationIndex の 4 module 追加、 v1 telemetry mock 基盤上に v2 dashboard/alert/flame graph/log correlation の 6 base semantics layer を確立) した時点で、 kiwa は telemetry provider mock + observability dashboard/alerting のうち base semantics までは cover していた。 broker binary + Grafana Enterprise + Prometheus + Loki 不要で mock only mode で走る、 実 test 環境の inner-loop 速度を確保する目的の layer。
 
 しかし v1.17 v2.0 land 後の実行観測で判明したのは、 real production observability setup (Grafana OSS + Prometheus + Loki + OpenTelemetry Collector + pyroscope + eBPF profiler) で頻繁に遭遇する **8 axis の advanced observability semantics** — SLO burn rate の multi-window multi-burn-rate alert (5m/1h/6h/3d) 設計 error / RED/USE/four golden signals の service dependency graph 統一 / exemplar tracing の trace-to-metric / metric-to-trace 双方向 navigation / OTel batch processor + resource detection + baggage 3 axis の統一 / structured log の trace_id/span_id auto-injection + LogQL/PromQL join / alert routing の silence + inhibit + escalation ladder 3 axis / continuous profiling の pyroscope/parca/eBPF 3 provider 統一 + on-CPU/off-CPU/memory profile 3 axis / cardinality control の high-cardinality detection + label reduction + DDSketch/t-digest 統一 — が v1.17 v2.0 の 6 base semantics だけでは cover できないこと。
 
@@ -78,28 +78,28 @@ high-cardinality detection (label 組合せ爆発の検出 + threshold 超過 al
 v1.35 で kiwa の縦深化 pair pattern (basic mock milestone → 深化 II milestone で real driver + advanced semantics) が **7 pair 連続完成**。 特に Payment (v1.14 → v1.23 → v1.33) と Observability (v1.14 → v1.17 → v1.35) は **3-stage 拡張 pattern** で、 base mock → mid depth → advanced real driver の 3 段拡張パターン (2 例):
 
 1. **Auth pair** (v1.21 → v1.22)
-   - v1.21 = `@kiwa/auth` v0.4 4 protocol adapter (WebAuthn L3 / Passkey / OAuth 2.1 / OIDC) mock only
+   - v1.21 = `@kiwa-lab/auth` v0.4 4 protocol adapter (WebAuthn L3 / Passkey / OAuth 2.1 / OIDC) mock only
    - v1.22 = Keycloak testcontainers + oauth2-mock-server + Chrome caBLE hybrid transport (real driver) + a11y axe-core gate
 2. **Realtime pair** (v1.13 → v1.28)
-   - v1.13 = `@kiwa/realtime` v0.1 4 provider (Supabase / Ably / Pusher / Socket.io) × 5 base semantics mock only
+   - v1.13 = `@kiwa-lab/realtime` v0.1 4 provider (Supabase / Ably / Pusher / Socket.io) × 5 base semantics mock only
    - v1.28 = WebRTC + WebTransport + HTTP/3 + QUIC multiplexing + 8 axis advanced (real driver env-gate)
 3. **Streaming pair** (v1.20 → v1.31)
-   - v1.20 = `@kiwa/streaming` v0.1 3 provider (Kafka / Redpanda / NATS) × 5 semantics mock only
+   - v1.20 = `@kiwa-lab/streaming` v0.1 3 provider (Kafka / Redpanda / NATS) × 5 semantics mock only
    - v1.31 = Kafka raw + Redpanda schema + NATS JetStream + 8 axis advanced (real driver env-gate + testcontainers)
 4. **Database pair** (v1.14 → v1.32)
-   - v1.14-v1.26 = `@kiwa/orm` v0.1-v0.9 3 ORM × 3 backend + 8 base semantics mock only
+   - v1.14-v1.26 = `@kiwa-lab/orm` v0.1-v0.9 3 ORM × 3 backend + 8 base semantics mock only
    - v1.32 = Postgres logical replication + MySQL cluster + SQLite WAL/FTS5 + 8 axis advanced (real driver env-gate + testcontainers)
 5. **Payment pair** (v1.14 → v1.23 → v1.33) 【3-stage 拡張 pattern 1 例目】
-   - v1.14 = `@kiwa/payment` v0.1 3 provider webhook mock (Stripe / Paddle / Lemon Squeezy)
-   - v1.23 = `@kiwa/payment` v0.3 9 base billing semantics (subscription lifecycle + invoice + 3DS v2 + SCA + PSD2 + VAT/GST + dispute + refund + coupon)
-   - v1.33 = `@kiwa/payment` v0.4 8 advanced billing II semantics + real driver env-gate + Stripe Connect + Paddle Billing v2 + Lemon Squeezy license
+   - v1.14 = `@kiwa-lab/payment` v0.1 3 provider webhook mock (Stripe / Paddle / Lemon Squeezy)
+   - v1.23 = `@kiwa-lab/payment` v0.3 9 base billing semantics (subscription lifecycle + invoice + 3DS v2 + SCA + PSD2 + VAT/GST + dispute + refund + coupon)
+   - v1.33 = `@kiwa-lab/payment` v0.4 8 advanced billing II semantics + real driver env-gate + Stripe Connect + Paddle Billing v2 + Lemon Squeezy license
 6. **Frontend pair** (v1.16 → v1.34)
-   - v1.16 = `@kiwa/component` v0.1-v0.2 3 target (Storybook 8 / Playwright CT / Chromatic) 6 base semantics mock only
-   - v1.34 = `@kiwa/component` v0.3 + `@kiwa/nextjs` v1.2 8 axis advanced frontend semantics + real driver env-gate + Next.js 15 App Router + Storybook 8 MDX + Playwright CT + Chromatic
+   - v1.16 = `@kiwa-lab/component` v0.1-v0.2 3 target (Storybook 8 / Playwright CT / Chromatic) 6 base semantics mock only
+   - v1.34 = `@kiwa-lab/component` v0.3 + `@kiwa-lab/nextjs` v1.2 8 axis advanced frontend semantics + real driver env-gate + Next.js 15 App Router + Storybook 8 MDX + Playwright CT + Chromatic
 7. **Observability pair** (v1.14 → v1.17 → v1.35、 this) 【3-stage 拡張 pattern 2 例目】
-   - v1.14 = `@kiwa/observability` v1.0 3 provider mock (OpenTelemetry / Datadog / Sentry) + span + metric + log + exception + transaction 統一 collector
-   - v1.17 = `@kiwa/observability` v2.0 Grafana-style DashboardMock + Prometheus AlertManager-style AlertRouter + trace flame graph + LogCorrelationIndex の 4 module 追加 (v1 telemetry mock 基盤上に v2 dashboard / alert / flame graph / log correlation の 6 base semantics layer)
-   - v1.35 = `@kiwa/observability` v2.1 8 advanced observability semantics + real driver env-gate + Grafana OSS + Prometheus + Loki + OTel Collector
+   - v1.14 = `@kiwa-lab/observability` v1.0 3 provider mock (OpenTelemetry / Datadog / Sentry) + span + metric + log + exception + transaction 統一 collector
+   - v1.17 = `@kiwa-lab/observability` v2.0 Grafana-style DashboardMock + Prometheus AlertManager-style AlertRouter + trace flame graph + LogCorrelationIndex の 4 module 追加 (v1 telemetry mock 基盤上に v2 dashboard / alert / flame graph / log correlation の 6 base semantics layer)
+   - v1.35 = `@kiwa-lab/observability` v2.1 8 advanced observability semantics + real driver env-gate + Grafana OSS + Prometheus + Loki + OTel Collector
 
 basic mock → (mid depth →) advanced real driver の 2 phase (+ 3-stage 拡張 2 例) pair を追加領域に横展開する pattern が SSOT 化された。 v1.25 perf + v1.27 mutation + v1.30 a11y の横串 triple pair と合わせて **kiwa quality gate 縦横 grid maximum extension**、 7 領域 (auth / realtime / streaming / database / payment / frontend / observability) 完全 cover。
 
@@ -118,7 +118,7 @@ payment-v1.23 / edge-v1.24 / perf-harness-v1.25 / orm-v1.26 / quality-metrics-v1
 ## Try it
 
 ```bash
-pnpm add -D @kiwa/observability
+pnpm add -D @kiwa-lab/observability
 ```
 
 Migration guide (additive-only、 breaking change なし):
@@ -147,4 +147,4 @@ Migration guide (additive-only、 breaking change なし):
 
 ## Thanks
 
-v1.35 sub-Issue を review していただいた方、 `@kiwa/observability` v2.1 pre-release を試していただいた方、 縦深化 pair pattern SSOT を 7-pair grid (3-stage 拡張 2 例) に整理する議論に付き合っていただいた方、 ありがとうございます。 v2.0 へ。
+v1.35 sub-Issue を review していただいた方、 `@kiwa-lab/observability` v2.1 pre-release を試していただいた方、 縦深化 pair pattern SSOT を 7-pair grid (3-stage 拡張 2 例) に整理する議論に付き合っていただいた方、 ありがとうございます。 v2.0 へ。

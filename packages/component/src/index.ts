@@ -1,5 +1,5 @@
 /**
- * `@kiwa/component` v0.1 — 3 integration 統一 mock harness (Storybook 8 +
+ * `@kiwa-lab/component` v0.1 — 3 integration 統一 mock harness (Storybook 8 +
  * Playwright Component Testing + Chromatic)。 v1.16 milestone (Issue #762,
  * sub #763) で新設、 SaaS frontend の component test 層を 1 API で扱う。
  *

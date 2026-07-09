@@ -9,14 +9,14 @@ import {
   startRscHarness,
   streamHtmlChunk,
   type ComponentTarget,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 import {
   redirectAction,
   revalidateActionPath,
   startServerActionAdvanced,
   submitFormAction,
   type NextTarget,
-} from '@kiwa/nextjs';
+} from '@kiwa-lab/nextjs';
 
 /**
  * v1.49-2 RSC + Server Actions v2 workflow — 3 axis (RSC harness + React 19 Actions

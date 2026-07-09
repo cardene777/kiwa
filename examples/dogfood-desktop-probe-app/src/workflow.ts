@@ -9,7 +9,7 @@ import {
   type FidelityCheckWithProbeResult,
   type ProbeResult,
   type SpawnFn,
-} from '@kiwa/desktop';
+} from '@kiwa-lab/desktop';
 
 /** Pattern 1 — 8 CLI 全て probe (which/where 実行) して availability 判定 */
 export async function probeAllCliCommands(spawnFn?: SpawnFn): Promise<ProbeResult[]> {

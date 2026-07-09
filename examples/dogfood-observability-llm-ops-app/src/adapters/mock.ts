@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/observability` v2.2 advanced III
+ * Mock adapter — drives `@kiwa-lab/observability` v2.2 advanced III
  * LLM-obs semantics (startLlmObsSession / countTokens / logPrompt /
  * flagHallucination / checkBudget) so the same app code exercises a
  * deterministic OTel GenAI stable ceremony without a real OpenAI /
@@ -25,7 +25,7 @@
  * at the exact op that diverged.
  */
 
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 import {
   type BudgetCheckResult,
   type BudgetSessionInput,

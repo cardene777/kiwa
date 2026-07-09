@@ -4,7 +4,7 @@ import {
   type MockResponse,
   type VercelAiMock,
   type VercelGenerateTextResult,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 import type {
   RagAdapter,
   RagResult,
@@ -18,7 +18,7 @@ import { buildRagPrompt, retrieve } from '../rag/retriever.js';
 import { SEED_DOCS } from '../data/seed-docs.js';
 
 /**
- * Mock adapter — drives `@kiwa/ai-llm`'s Vercel AI SDK + LangChain
+ * Mock adapter — drives `@kiwa-lab/ai-llm`'s Vercel AI SDK + LangChain
  * mocks + an in-memory vector store. The vector store + embedder wrappers
  * are exported so the fidelity harness can compare them to the real
  * implementations 1-to-1.

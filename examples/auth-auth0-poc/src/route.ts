@@ -1,4 +1,4 @@
-import type { Auth0TestEnv } from '@kiwa/auth';
+import type { Auth0TestEnv } from '@kiwa-lab/auth';
 
 /**
  * Minimal Auth0-gated server handler that mirrors what real Auth0 middleware

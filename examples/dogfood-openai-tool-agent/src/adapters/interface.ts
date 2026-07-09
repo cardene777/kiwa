@@ -5,9 +5,9 @@
  * exist — {@link makeRealAdapter} (calls the real OpenAI Chat Completions
  * endpoint when `OPENAI_API_KEY` is set, otherwise reports each method as
  * `OPENAI_ENV_MISSING`) and {@link makeMockAdapter} (backed by
- * `@kiwa/ai-llm`'s {@link createOpenAIMock}). Both must satisfy the
+ * `@kiwa-lab/ai-llm`'s {@link createOpenAIMock}). Both must satisfy the
  * same contract so behavioural fidelity between real vs mock can be measured
- * side-by-side and fed to `@kiwa/quality-metrics` 11-axis release gate.
+ * side-by-side and fed to `@kiwa-lab/quality-metrics` 11-axis release gate.
  */
 
 import type { ToolSchema } from '../tools/schema.js';

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-`@kiwa/component` v0.4 の islands-architecture axis と `@kiwa/nextjs` v1.3 の turbopack-hmr axis + progressive-enhancement axis を組合せて Islands + HMR workflow を deterministic に扱う pattern。
+`@kiwa-lab/component` v0.4 の islands-architecture axis と `@kiwa-lab/nextjs` v1.3 の turbopack-hmr axis + progressive-enhancement axis を組合せて Islands + HMR workflow を deterministic に扱う pattern。
 
 ## Step-by-step build
 
@@ -11,7 +11,7 @@
 ```bash
 mkdir kiwa-islands-hmr && cd kiwa-islands-hmr
 pnpm init
-pnpm add -D @kiwa/component@^0.4 @kiwa/nextjs@^1.3 vitest typescript @types/node
+pnpm add -D @kiwa-lab/component@^0.4 @kiwa-lab/nextjs@^1.3 vitest typescript @types/node
 ```
 
 ### 2. Islands architecture axis
@@ -24,7 +24,7 @@ import {
   bootstrapIslandsRoute,
   markIslandInteractive,
   registerIsland,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 
 describe('Islands architecture', () => {
   it('bootstraps + hydrates + verifies static', () => {
@@ -48,7 +48,7 @@ import {
   findHmrBoundary,
   markModuleUpdated,
   startTurbopackHmr,
-} from '@kiwa/nextjs';
+} from '@kiwa-lab/nextjs';
 
 describe('Turbopack HMR', () => {
   it('completes full HMR chain', () => {

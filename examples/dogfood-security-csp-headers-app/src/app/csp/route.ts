@@ -5,7 +5,7 @@
  * same test can exercise mock and real without spinning up Next.js.
  *
  * The csp surface pairs the parent v1.37-1 `csp` axis (nonce + hash +
- * strict-dynamic + trusted-types + report-only) with `@kiwa/security`
+ * strict-dynamic + trusted-types + report-only) with `@kiwa-lab/security`
  * v0.1 — every op has a neutral event counterpart the fidelity harness
  * can compare across mock vs real.
  */

@@ -12,7 +12,7 @@ import {
   startMetroBundle,
   unmountReactNativeComponent,
   type MobileTarget,
-} from '@kiwa/mobile';
+} from '@kiwa-lab/mobile';
 
 export interface WorkflowResult {
   target: MobileTarget;

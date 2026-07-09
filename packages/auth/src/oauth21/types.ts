@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa/core';
+import type { TestEnvBase } from '@kiwa-lab/core';
 
 /**
  * OAuth 2.1 grant type. The mock intentionally exposes only the RFC 9700

@@ -6,7 +6,7 @@ kiwa v1.43 is out. **The 12th 縦深化 pair is introduced** — Edge / Serverle
 
 ## What's new
 
-### `@kiwa/edge` v1.2.0
+### `@kiwa-lab/edge` v1.2.0
 
 v1.1.0 → v1.2.0 minor bump. 8 new advanced axes added on top of the existing 8-axis base.
 
@@ -61,7 +61,7 @@ v1.23 → v1.43 = 21 milestones with tutorial code snippet validation tests. Eac
 ## Install
 
 ```bash
-pnpm add -D @kiwa/edge@^1.2
+pnpm add -D @kiwa-lab/edge@^1.2
 ```
 
 Additive-only. No breaking changes.

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that drives **5 SaaS form patterns** (login / signup / checkout / profile / search) through the `@kiwa/component` Playwright Component Testing mock. Each form runs the 3-tuple that real Playwright CT enforces — `mount(render, args) → locator`, `getByRole('button', { name }).click()`, `expect(await locator.getByRole(...).textContent()).toBe(...)`. The mock runs in-process (no browser), tracks `activeMounts()` for leak detection, and matches the Playwright API 1:1 so the same test file works against a real driver later.
+A vitest test file that drives **5 SaaS form patterns** (login / signup / checkout / profile / search) through the `@kiwa-lab/component` Playwright Component Testing mock. Each form runs the 3-tuple that real Playwright CT enforces — `mount(render, args) → locator`, `getByRole('button', { name }).click()`, `expect(await locator.getByRole(...).textContent()).toBe(...)`. The mock runs in-process (no browser), tracks `activeMounts()` for leak detection, and matches the Playwright API 1:1 so the same test file works against a real driver later.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that drives **5 SaaS form patterns** (login / signup / checko
 ```bash
 mkdir kiwa-form-ct && cd kiwa-form-ct
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa/component
+pnpm add -D vitest typescript @types/node @kiwa-lab/component
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -46,8 +46,8 @@ Add `tsconfig.json`:
 Create `src/forms.ts` — 5 forms via the built-in `buildForm` fixture:
 
 ```ts
-import { buildForm } from '@kiwa/component';
-import type { FormArgs } from '@kiwa/component';
+import { buildForm } from '@kiwa-lab/component';
+import type { FormArgs } from '@kiwa-lab/component';
 
 export const loginForm: FormArgs = {
   title: 'Sign in',
@@ -111,7 +111,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   createPlaywrightCTMock,
   fireEvent,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 import {
   buildForm,
   checkoutForm,
@@ -258,7 +258,7 @@ The `NodeLocator` methods are all async (return `Promise<void>` / `Promise<strin
 The mock does not open a browser, so it does not run.
 
 - **CSS layout** — flexbox / grid positioning is not computed. A component that visually breaks its layout under a Tailwind config change is not caught by the mock; the fidelity harness catches it via the Chromatic markup hash.
-- **Network intercepts** — `page.route()` and `page.fulfill()` are not modelled. Use `@kiwa/msw` or a dedicated network mock for XHR / fetch intercepts.
+- **Network intercepts** — `page.route()` and `page.fulfill()` are not modelled. Use `@kiwa-lab/msw` or a dedicated network mock for XHR / fetch intercepts.
 - **Keyboard focus traversal** — `Tab` / `Shift+Tab` cycles are not simulated. A11y checks are heuristic only (button-name / image-alt / label).
 
 Real Playwright CT covers all 3 through Chromium. Set `PW_CT_ENDPOINT` when running the v1.16-3 dogfood app to promote the report from mock-only to real vs mock.

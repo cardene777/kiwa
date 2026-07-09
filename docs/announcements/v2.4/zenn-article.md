@@ -26,7 +26,7 @@ v2.5+ で 6 例目 発生 → **systematic law confirmed** = kiwa 全体 の 必
 
 ## What's new
 
-- `@kiwa/realtime` v2.0 → v2.1 minor bump
+- `@kiwa-lab/realtime` v2.0 → v2.1 minor bump
 - 5 state SSOT (connecting / subscribed / reconnecting / degraded / closed)
 - 8 event SSOT (connect-succeeded / failed / subscribe-succeeded / heartbeat-lost / recovered / reconnect-succeeded / exhausted / user-disconnect)
 - heartbeat 動的 QoS (3 回失敗 → degraded、 recovered → subscribed 復帰 + counter リセット)
@@ -36,7 +36,7 @@ v2.5+ で 6 例目 発生 → **systematic law confirmed** = kiwa 全体 の 必
 ## Install
 
 ```bash
-pnpm add -D @kiwa/realtime@^2.1
+pnpm add -D @kiwa-lab/realtime@^2.1
 ```
 
 ## Migration guide

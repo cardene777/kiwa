@@ -1,8 +1,8 @@
 // kiwa unit test for app/lib/_kiwa/items-action.ts
-// — invokes the pure action through @kiwa/remix's invokeAction.
+// — invokes the pure action through @kiwa-lab/remix's invokeAction.
 
 import { describe, expect, it } from 'vitest';
-import { invokeAction } from '@kiwa/remix';
+import { invokeAction } from '@kiwa-lab/remix';
 import { createItemAction } from '../app/lib/_kiwa/items-action.js';
 import type { CreateItemFailure, CreateItemSuccess } from '../app/lib/_kiwa/items-action.js';
 
@@ -11,7 +11,7 @@ async function readJson(response: Response | null): Promise<unknown> {
   return await response.clone().json();
 }
 
-describe('createItemAction via @kiwa/remix invokeAction', () => {
+describe('createItemAction via @kiwa-lab/remix invokeAction', () => {
   it('T-RF-101: session 不在で /login に 302 redirect', async () => {
     const { redirect } = await invokeAction({
       action: createItemAction,

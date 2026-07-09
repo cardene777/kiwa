@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/qwikcity",
+  "package": "@kiwa-lab/qwikcity",
   "generatedAt": "2026-07-06T01:15:07.789Z",
   "layers": {
     "jsdom": {

@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v2.9-2 — @kiwa/auth v0.8 session-lifecycle-orchestrator 5 pattern workflow reference。 depth-5 pattern 10 例目 candidate dogfood、 backend systems layer 第 2 例。",
+  "description": "Dogfood app v2.9-2 — @kiwa-lab/auth v0.8 session-lifecycle-orchestrator 5 pattern workflow reference。 depth-5 pattern 10 例目 candidate dogfood、 backend systems layer 第 2 例。",
   "scripts": {
-    "test": "pnpm -F @kiwa/core -F @kiwa/auth build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/core -F @kiwa-lab/auth build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/auth": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/auth": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

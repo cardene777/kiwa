@@ -7,15 +7,15 @@
  *  - {@link makeRealAdapter} — drives Playwright + Chromium headless when
  *    `KIWA_MODE=real` + `RSC_STREAMING_BROWSER_READY=1` are set; otherwise
  *    every op reports `KIWA_RSC_STREAMING_ENV_MISSING`.
- *  - {@link makeMockAdapter} — backed by `@kiwa/component` v0.3 rsc-
+ *  - {@link makeMockAdapter} — backed by `@kiwa-lab/component` v0.3 rsc-
  *    harness + streaming-ssr + view-transitions + form-action-advanced
- *    semantics and `@kiwa/nextjs` v1.2 `renderServerComponent` +
+ *    semantics and `@kiwa-lab/nextjs` v1.2 `renderServerComponent` +
  *    `setupNextRscEnv` helpers.
  *
  * Both must satisfy the same 12-op contract so behavioural fidelity between
  * real vs mock can be measured side-by-side across the 4 v1.34-1 axes
  * (rsc-harness / streaming-ssr / view-transitions / form-action-advanced)
- * that `@kiwa/component` v0.3 + `@kiwa/nextjs` v1.2 expose in
+ * that `@kiwa-lab/component` v0.3 + `@kiwa-lab/nextjs` v1.2 expose in
  * production.
  *
  * The AC anchors this contract on the 3 domain surfaces the harness runs

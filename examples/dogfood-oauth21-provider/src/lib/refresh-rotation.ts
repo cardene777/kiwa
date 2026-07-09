@@ -8,7 +8,7 @@
  * (`invalid_grant`) because the token was already rotated, and the AS
  * tears down the whole token family (RFC 9700 §2.2.2).
  *
- * The `@kiwa/auth` package ships `rotateRefreshToken` +
+ * The `@kiwa-lab/auth` package ships `rotateRefreshToken` +
  * `mintRefreshToken` at the primitive layer; this wrapper adds
  * dogfood-level classifier + guard helpers so Hono route handlers can
  * distinguish rotation-family compromise (`invalid_grant`) from a
@@ -35,7 +35,7 @@
 import {
   rotateRefreshToken as kiwaRotateRefreshToken,
   type RefreshToken,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 
 /**
  * Kind tag used by {@link RefreshRotationError} so route handlers can
@@ -99,7 +99,7 @@ export function classifyRefreshTokenError(
 /**
  * Options accepted by {@link rotateAndMint}. Mirrors the kiwa
  * `rotateRefreshToken` signature but keeps the dogfood API surface
- * flat so callers do not have to import `@kiwa/auth` types.
+ * flat so callers do not have to import `@kiwa-lab/auth` types.
  */
 export interface RotateAndMintOptions {
   /** Refresh token being rotated. */
@@ -154,6 +154,6 @@ export function rotateAndMint(opts: RotateAndMintOptions): RefreshToken {
 
 /**
  * Re-export the `RefreshToken` type so callers depending on the dogfood
- * refresh-rotation module do not have to reach into `@kiwa/auth`.
+ * refresh-rotation module do not have to reach into `@kiwa-lab/auth`.
  */
 export type { RefreshToken };

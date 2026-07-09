@@ -9,7 +9,7 @@ import {
   type KVNamespaceLike,
   type R2BucketLike,
   type WorkersEnvLike,
-} from '@kiwa/hono';
+} from '@kiwa-lab/hono';
 import type { DogfoodEnv, KvBinding, R2Binding, D1Binding } from '../routes/app.js';
 
 /**

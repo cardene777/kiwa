@@ -53,6 +53,6 @@ go get github.com/cardene777/kiwa-test-go@v0.1.0
 - Adapter source — [`../../kiwa-go`](../../kiwa-go)
 - Parent v1.4 milestone — [#575](https://github.com/cardene777/kiwa/issues/575)
 - Resolving Issue — [#578](https://github.com/cardene777/kiwa/issues/578)
-- TypeScript core — [`@kiwa/core`](../../packages/core)
+- TypeScript core — [`@kiwa-lab/core`](../../packages/core)
 - Rust sibling — [`../../kiwa-rs`](../../kiwa-rs)
 - Python sibling — [`../../kiwa-py`](../../kiwa-py)

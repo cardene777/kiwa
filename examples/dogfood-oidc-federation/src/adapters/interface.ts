@@ -3,7 +3,7 @@
  *
  * The Hono OP talks to the driver only through this interface. Two
  * implementations exist —
- *  - {@link makeMockAdapter} — backed by `@kiwa/auth`'s `setupOidcEnv`.
+ *  - {@link makeMockAdapter} — backed by `@kiwa-lab/auth`'s `setupOidcEnv`.
  *    Deterministic + always available. Sub-Issue v1.21-4a wires the mock for
  *    discovery + JWKS + the OAuth 2.1 authorize / token layer already
  *    provided by the mock. DCR / id_token verify / federation land in
@@ -23,7 +23,7 @@ import type {
   JwksDocument,
   JwksKey,
   OpenIdProviderMetadata,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 import type {
   ExtendedClientRegistrationRequest,
   ExtendedClientRegistrationResponse,

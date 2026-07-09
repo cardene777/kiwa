@@ -2,11 +2,11 @@
 
 ## 概要
 
-kiwa v1.53 をリリースしました。 **Mobile 深化 IV** (@kiwa/mobile v0.4、 縦深化 pair 第 13 の 4 段目 Phase 4 完成、 **pair 深度 4 段拡張達成 4 例目 depth-4 record**、 **depth-4 pattern 4 例安定化を実証**) 単軸 milestone。 11 axis × mock/real = 22 adapter + fidelity harness 追加、 3 target × 11 axis × 2 mode = 66 combination adapter pair の complete production coverage matrix を確立。
+kiwa v1.53 をリリースしました。 **Mobile 深化 IV** (@kiwa-lab/mobile v0.4、 縦深化 pair 第 13 の 4 段目 Phase 4 完成、 **pair 深度 4 段拡張達成 4 例目 depth-4 record**、 **depth-4 pattern 4 例安定化を実証**) 単軸 milestone。 11 axis × mock/real = 22 adapter + fidelity harness 追加、 3 target × 11 axis × 2 mode = 66 combination adapter pair の complete production coverage matrix を確立。
 
 ## 何が変わったか
 
-### `@kiwa/mobile` v0.3 → v0.4 (Phase 4 完成、 pair 深度 4 段拡張達成 4 例目 depth-4 record)
+### `@kiwa-lab/mobile` v0.3 → v0.4 (Phase 4 完成、 pair 深度 4 段拡張達成 4 例目 depth-4 record)
 
 - **adapter interface** = `AdapterInvocation` + `AdapterResult` + `MobileAdapter`、 全 11 axis の共通契約
 - **22 adapter constant records** = `MOCK_ADAPTERS` + `REAL_ADAPTERS` (11 axis × 2 mode)
@@ -40,7 +40,7 @@ v1.23 → v1.53 = 31 milestone 連続、 kiwa 史上最長記録更新継続。 
 ## インストール
 
 ```bash
-pnpm add -D @kiwa/mobile@^0.4
+pnpm add -D @kiwa-lab/mobile@^0.4
 ```
 
 ## Migration guide

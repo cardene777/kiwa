@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/payment`'s `createStripeMock` +
+ * Mock adapter — drives `@kiwa-lab/payment`'s `createStripeMock` +
  * the 9-axis semantics helpers so the same app code exercises a
  * deterministic Stripe billing envelope without touching the real Stripe
  * API. Both mock and real adapters satisfy {@link StripeBillingAdapter}, so
@@ -11,7 +11,7 @@
  * diffs.
  */
 
-import { createStripeMock } from '@kiwa/payment';
+import { createStripeMock } from '@kiwa-lab/payment';
 import type {
   Invoice as SemanticInvoice,
   PaymentWebhookEvent,
@@ -19,7 +19,7 @@ import type {
   ThreeDsSession,
   ThreeDsTransStatus,
   DunningSession,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import type {
   CheckoutInput,
   CheckoutResult,

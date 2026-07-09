@@ -1,11 +1,11 @@
 # dogfood-oidc-federation
 
-Dogfood app for `@kiwa/auth` v1.21-1d (OIDC adapter)。
+Dogfood app for `@kiwa-lab/auth` v1.21-1d (OIDC adapter)。
 Deno + Hono self-hosted OpenID Provider (OP) が OIDC Core 1.0 + Discovery 1.0 + RFC 7591 DCR + JWKS rotation + Federation 1.0 §7 endpoint surface を exercise する。
 
 Sub-Issue 積層 = v1.21-4a skeleton → v1.21-4b RFC 7591 DCR fidelity harness (3 auth method + dropped-grant refusal + `software_statement` JWS + `redirect_uris` validation) → v1.21-4c `id_token` verification fidelity harness (JWS signature + claims 一致 + nonce echo + hash chain) + Nuxt 3 Relying Party (RP) skeleton under `rp/` → v1.21-4d OpenID Federation 1.0 §7 trust-chain axes + JWKS rotation e2e axes (親 Issue #845 close) → v1.22-1 Keycloak testcontainers real driver で axes 1 / 3 に live coverage を追加 (GH #887 / CAR-442) → v1.22-3 Nuxt 3 RP full journey + jsdom axe-core WCAG 2.1 AA gate (GH #889) → v1.22-5 (this state) real JWKS rotation e2e — Keycloak admin REST API rotation + `/certs` refresh + jose RS256 verify で axes 4a-4d に live coverage を追加 (CAR-446 / GH #891)。
 
-- `KIWA_MODE=mock` — `@kiwa/auth` `setupOidcEnv` deterministic mock. Always runs. Default state.
+- `KIWA_MODE=mock` — `@kiwa-lab/auth` `setupOidcEnv` deterministic mock. Always runs. Default state.
 - `OIDC_BOOTSTRAP=1` (v1.22-1+) — boots `quay.io/keycloak/keycloak:26.0` through `testcontainers` (docker required) so `axis 1 (discovery metadata shape)` + `axis 3 (JWKS active key shape)` gain live coverage. v1.22-5 layers `axes 4a-4d (JWKS rotation e2e)` on top through the same env gate — the e2e spec drives Keycloak's admin REST API for realm-key rotation + verifies id_tokens through jose. Falls back to `KEYCLOAK_URL` when the caller provisions Keycloak externally.
 - `OIDC_BOOTSTRAP` unset — every real-driver ceremony beyond `discovery()` refuses with `KIWA_OIDC_ENV_MISSING`. Discovery still returns the static shape derived from `issuer` so the fidelity harness always has a reference.
 
@@ -28,7 +28,7 @@ Sub-Issue **a** landed the shared surface — Hono OP, adapter interface, `KIWA_
 src/
   adapters/
     interface.ts       # OIDCOPAdapter contract (discovery / jwks / rotateJwks / registerClient with ExtendedClientRegistrationRequest)
-    mock.ts            # makeMockAdapter — @kiwa/auth setupOidcEnv + handleRegistration wrapper for DCR
+    mock.ts            # makeMockAdapter — @kiwa-lab/auth setupOidcEnv + handleRegistration wrapper for DCR
     real.ts            # makeRealAdapter — Keycloak via testcontainers (env-skip + live boot, v1.22-1 GH #887 / CAR-442)
   lib/
     discovery.ts       # assertIssuerMatchesFetchUrl + assertRequiredDiscoveryFields + assertOAuth21Restrictions
@@ -78,7 +78,7 @@ Total 106 tests across six spec files, all pass under `KIWA_MODE=mock`. See `doc
 
 ### federation-trust-chain (Sub-Issue #875, this state)
 
-| axis | mock (`@kiwa/auth` via `src/lib/federation.ts` wrapper) | real (Keycloak Federation, deferred to v1.22) | assertion |
+| axis | mock (`@kiwa-lab/auth` via `src/lib/federation.ts` wrapper) | real (Keycloak Federation, deferred to v1.22) | assertion |
 |---|---|---|---|
 | 13. 3-step chain | `resolveTrustChain({leaf, intermediates, anchor})` returns ordered `chain = [leaf, intermediate]`; resolved `anchor.entity_id` matches expected anchor; `describeChain` renders `leafSub -> intermediateSub -> anchor` | Keycloak Federation resolves via `/entity-configuration` + `/statement` | OpenID Federation 1.0 §7.2 遵守 |
 | 14. broken link | Intermediate whose `sub` does not match previous step's `iss` refuses; empty intermediates + non-anchor leaf `iss` refuses; axis === `broken_link` | Keycloak 4xx on chain resolution failure | OIDF §7.2 — chain break |
@@ -96,7 +96,7 @@ Total 106 tests across six spec files, all pass under `KIWA_MODE=mock`. See `doc
 
 ### id-token-verify (Sub-Issue #874)
 
-| axis | mock (`@kiwa/auth` via `src/lib/id-token.ts` wrapper) | real (Keycloak) | assertion |
+| axis | mock (`@kiwa-lab/auth` via `src/lib/id-token.ts` wrapper) | real (Keycloak) | assertion |
 |---|---|---|---|
 | 9. JWS signature | header + payload + kid recompute must match signature; wrong kid / tampering / unknown kid / alg mismatch refuse; rotated-but-in-window kid still verifies | Keycloak `/token` mints RS256 / ES256 signed id_tokens; RP verifies against `/certs` | OIDC Core 1.0 §3.1.3.7 遵守 |
 | 10. claims 一致 | iss / aud must match; exp within skew accepts, beyond refuses; iat in future beyond skew refuses (clock-drift attack) | Keycloak same claims check | OIDC Core 1.0 §3.1.3.7 遵守 |
@@ -105,7 +105,7 @@ Total 106 tests across six spec files, all pass under `KIWA_MODE=mock`. See `doc
 
 ### DCR-flow (Sub-Issue #873)
 
-| axis | mock (`@kiwa/auth` via `src/lib/dcr.ts`) | real (Keycloak + testcontainers) | assertion |
+| axis | mock (`@kiwa-lab/auth` via `src/lib/dcr.ts`) | real (Keycloak + testcontainers) | assertion |
 |---|---|---|---|
 | 5. auth method 3 shapes | `client_secret_basic` / `client_secret_post` mint a `client_secret`; `pk_jwt` requires `jwks_uri` or inline `jwks`, omits `client_secret`, echoes the requested method verbatim | Keycloak `/registrations` accepts the same three methods | RFC 7591 §2 — `token_endpoint_auth_method` must be one advertised by the OP; JWT-based methods require a JWKS source |
 | 6. dropped grant refusal | `password` / `implicit` / `client_credentials` refuse at the wrapper; `authorization_code + refresh_token` accepts | Keycloak refuses the same grants on OAuth 2.1 realm | OAuth 2.1 §1 — dropped grants MUST NOT be registered |
@@ -115,7 +115,7 @@ Total 106 tests across six spec files, all pass under `KIWA_MODE=mock`. See `doc
 ### Discovery-JWKS-skeleton (Sub-Issue #872)
 
 
-| axis | mock (`@kiwa/auth`) | real (Keycloak + testcontainers, gated by `OIDC_BOOTSTRAP=1`) | assertion |
+| axis | mock (`@kiwa-lab/auth`) | real (Keycloak + testcontainers, gated by `OIDC_BOOTSTRAP=1`) | assertion |
 |---|---|---|---|
 | 1. discovery metadata | Static shape derived from `issuer`; response_types=[code], id_token_signing_alg_values=[RS256, ES256], code_challenge_methods=[S256], scopes_supported includes `openid` | Keycloak realm boot-time metadata (Sub-Issue #873 wires the boot); env-missing state still returns the static shape so the fidelity harness has a reference | OIDC Discovery §3 mandatory keys present + OAuth 2.1 restrictions (implicit / plain PKCE / password grants explicitly omitted from advertised subsets). |
 | 2. discovery issuer 一致 guard | `assertIssuerMatchesFetchUrl` refuses when metadata.issuer diverges from the URL used to fetch (trailing-slash tolerant) | Same guard applied against Keycloak's realm URL | OIDC Discovery §4.3 — `issuer` claim MUST equal URL used to fetch, else refuse. |

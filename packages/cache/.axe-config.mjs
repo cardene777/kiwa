@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/cache.
+ * A11y (axe-core) config for @kiwa-lab/cache.
  * Tier: SaaS tier (critical 0 / serious 0 / moderate 0) — Redis / KeyDB / Memcached. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § SaaS tier.
  *

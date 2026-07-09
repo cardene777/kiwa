@@ -1,9 +1,9 @@
 // kiwa unit test for app/lib/_kiwa/items-resource.ts
-// — invokes the Resource Route module through @kiwa/remix's invokeResourceRoute,
+// — invokes the Resource Route module through @kiwa-lab/remix's invokeResourceRoute,
 // covering GET / POST dispatch + 401 / 403 / 400 / method-not-allowed (405) paths.
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { invokeResourceRoute } from '@kiwa/remix';
+import { invokeResourceRoute } from '@kiwa-lab/remix';
 import { itemsResourceRoute, readonlyItemsResource, resetItemsResourceCount } from '../app/lib/_kiwa/items-resource.js';
 
 async function readJson(response: Response | null): Promise<unknown> {
@@ -11,7 +11,7 @@ async function readJson(response: Response | null): Promise<unknown> {
   return await response.clone().json();
 }
 
-describe('itemsResourceRoute via @kiwa/remix invokeResourceRoute', () => {
+describe('itemsResourceRoute via @kiwa-lab/remix invokeResourceRoute', () => {
   beforeEach(() => {
     resetItemsResourceCount(0);
   });

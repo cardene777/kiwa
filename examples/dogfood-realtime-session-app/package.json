@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v2.4-2 — @kiwa/realtime v2.1 session-orchestrator の 4 pattern workflow reference。 depth-5 pattern 5 例目発生 dogfood = systematic law 昇格 candidate。",
+  "description": "Dogfood app v2.4-2 — @kiwa-lab/realtime v2.1 session-orchestrator の 4 pattern workflow reference。 depth-5 pattern 5 例目発生 dogfood = systematic law 昇格 candidate。",
   "scripts": {
-    "test": "pnpm -F @kiwa/core -F @kiwa/realtime build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/realtime": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/realtime": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

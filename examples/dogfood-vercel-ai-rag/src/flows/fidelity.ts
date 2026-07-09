@@ -14,8 +14,8 @@ import {
   tokenFromSamples,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
-import { jaccardSimilarity } from '@kiwa/ai-llm';
+} from '@kiwa-lab/quality-metrics';
+import { jaccardSimilarity } from '@kiwa-lab/ai-llm';
 import type { RagAdapter, TraceEvent } from '../adapters/interface.js';
 import { cosineSimilarity } from '../rag/embedder.js';
 
@@ -24,7 +24,7 @@ import { cosineSimilarity } from '../rag/embedder.js';
  * against one under {@link makeRealAdapter}, aggregates cost / token /
  * latency samples, computes embedding cosine similarity, retrieval F1, and
  * a Jaccard-based accuracy score between real and mock final answers, then
- * produces a `@kiwa/quality-metrics` 11-axis report + release gate
+ * produces a `@kiwa-lab/quality-metrics` 11-axis report + release gate
  * verdict + markdown / JSON snapshots.
  *
  * The dogfood app is the source of truth for whether the kiwa Vercel AI +

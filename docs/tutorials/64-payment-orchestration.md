@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/payment` v0.4 that models the 4 pieces of a real payment orchestration layer that every non-trivial merchant eventually needs — a router that picks a primary provider by BIN / currency / cost, a retry ladder that stays on the current provider until the per-provider retry cap is hit, a failover step that walks to the next provider in the cascade after the retry cap, and a circuit breaker that opens after N total failures and stays open for a configurable outage window. `startOrchestration()` + `routeCharge()` + `probeCircuit()` give you every one of those pieces as a deterministic state machine — `routing` → `failed-over` → `circuit-open` → `circuit-closed` → `terminated`. No live Stripe / Paddle / Lemon Squeezy endpoints, no manual `fetch()` retry loops, no ad-hoc circuit-breaker library. This is the pattern kiwa's Stripe marketplace dogfood app (v1.33-2) exercises against real Stripe test mode under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "Stripe was down for 4 minutes and we lost 2 % of revenue" case reviewers ask about.
+A vitest suite wired to `@kiwa-lab/payment` v0.4 that models the 4 pieces of a real payment orchestration layer that every non-trivial merchant eventually needs — a router that picks a primary provider by BIN / currency / cost, a retry ladder that stays on the current provider until the per-provider retry cap is hit, a failover step that walks to the next provider in the cascade after the retry cap, and a circuit breaker that opens after N total failures and stays open for a configurable outage window. `startOrchestration()` + `routeCharge()` + `probeCircuit()` give you every one of those pieces as a deterministic state machine — `routing` → `failed-over` → `circuit-open` → `circuit-closed` → `terminated`. No live Stripe / Paddle / Lemon Squeezy endpoints, no manual `fetch()` retry loops, no ad-hoc circuit-breaker library. This is the pattern kiwa's Stripe marketplace dogfood app (v1.33-2) exercises against real Stripe test mode under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "Stripe was down for 4 minutes and we lost 2 % of revenue" case reviewers ask about.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/payment` v0.4 that models the 4 pieces of a real 
 ```bash
 mkdir kiwa-payment-orch && cd kiwa-payment-orch
 pnpm init
-pnpm add -D @kiwa/payment@^0.4 vitest typescript @types/node
+pnpm add -D @kiwa-lab/payment@^0.4 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.4 surface exports `startOrchestration` + `routeCharge` + `probeCircuit` f
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { startOrchestration } from '@kiwa/payment';
+import { startOrchestration } from '@kiwa-lab/payment';
 
 describe('orchestration — startOrchestration', () => {
   it('constructs a session with defaults filled in', () => {
@@ -77,7 +77,7 @@ The rule of thumb is that the config is the SSOT — the same 3 knobs (`circuitB
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createStripeMock, startOrchestration, routeCharge } from '@kiwa/payment';
+import { createStripeMock, startOrchestration, routeCharge } from '@kiwa-lab/payment';
 
 describe('orchestration — routeCharge retry ladder', () => {
   it('stays on the primary while the per-provider cap has not been hit', async () => {
@@ -129,7 +129,7 @@ import {
   createPaddleMock,
   startOrchestration,
   routeCharge,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('orchestration — failover cascade', () => {
   it('failed_over after maxRetriesPerProvider consecutive failures', async () => {
@@ -170,7 +170,7 @@ The rule of thumb is that failover has to reset the per-provider counter — the
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createStripeMock, startOrchestration, routeCharge, probeCircuit } from '@kiwa/payment';
+import { createStripeMock, startOrchestration, routeCharge, probeCircuit } from '@kiwa-lab/payment';
 
 describe('orchestration — circuit breaker', () => {
   it('opens after circuitBreakerThreshold total failures', async () => {
@@ -233,7 +233,7 @@ import {
   createLemonSqueezyMock,
   createPaddleMock,
   createStripeMock,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('orchestration — fidelity coverage', () => {
   it('every provider covers the orchestration axis with 4 neutral events', () => {

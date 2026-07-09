@@ -8,8 +8,8 @@
 // | T-NA-004 | 状態遷移            | (empty)                | email=user@example.com         | env.cookies.get('session') === 'sid_…' |
 
 import { describe, expect, it } from 'vitest';
-import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa/nextjs';
-import type { RedirectSignal } from '@kiwa/nextjs';
+import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
+import type { RedirectSignal } from '@kiwa-lab/nextjs';
 import { login, type LoginEnv } from '../src/login-action.js';
 
 function buildEnv(): {

@@ -18,7 +18,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { providerEventName } from '@kiwa/payment';
+import { providerEventName } from '@kiwa-lab/payment';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { createTaxCalculateHandler } from '../src/server/api/tax-calculate.post.js';
 import { createTaxListHandler } from '../src/server/api/tax.get.js';

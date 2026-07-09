@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.67 リリース — Desktop 深化 IX (@kiwa/desktop v1.0 invoke-cache layer、 depth-6 pattern 2 例目確定 candidate、 systematic pattern 42 度目、 45 milestone streak)"
+title: "kiwa v1.67 リリース — Desktop 深化 IX (@kiwa-lab/desktop v1.0 invoke-cache layer、 depth-6 pattern 2 例目確定 candidate、 systematic pattern 42 度目、 45 milestone streak)"
 emoji: "💾"
 type: "tech"
 topics: ["testing", "vitest", "desktop", "cache", "lru"]
@@ -76,7 +76,7 @@ Desktop pair pioneer record 更新、 v1.68+ 実運用継続で 2 例目確定 �
 ## Install
 
 ```bash
-pnpm add -D @kiwa/desktop@^1.0
+pnpm add -D @kiwa-lab/desktop@^1.0
 ```
 
 ## Migration guide
@@ -85,4 +85,4 @@ pnpm add -D @kiwa/desktop@^1.0
 
 ## What's next
 
-- v1.68+ = depth-6 実運用継続 or v2.0 rename milestone (@kiwa/* → @kiwa/*)
+- v1.68+ = depth-6 実運用継続 or v2.0 rename milestone (@kiwa-lab/* → @kiwa-lab/*)

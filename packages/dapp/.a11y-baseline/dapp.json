@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/dapp",
+  "package": "@kiwa-lab/dapp",
   "generatedAt": "2026-07-06T01:15:07.702Z",
   "layers": {
     "jsdom": {

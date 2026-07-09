@@ -1,6 +1,6 @@
 # examples/nextjs-middleware-poc
 
-Proof of concept for `@kiwa/nextjs` middleware mode (Issue #495). Tests three real-world middleware patterns — auth gate, locale rewrite, header inject — through `invokeMiddleware` without a running Next.js server.
+Proof of concept for `@kiwa-lab/nextjs` middleware mode (Issue #495). Tests three real-world middleware patterns — auth gate, locale rewrite, header inject — through `invokeMiddleware` without a running Next.js server.
 
 ## What it covers
 

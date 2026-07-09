@@ -1,8 +1,8 @@
 ---
-"@kiwa/auth": minor
+"@kiwa-lab/auth": minor
 ---
 
-v2.2-1 @kiwa/auth v0.7 = continuous-auth 状態機械 新設 (Auth pair pioneer record 更新)。
+v2.2-1 @kiwa-lab/auth v0.7 = continuous-auth 状態機械 新設 (Auth pair pioneer record 更新)。
 
 v0.6 の Passwordless UX III 8 axis (risk-based-auth + auth-continuity + session-hijack-detect 等) の 上位 layer として、 「session 生存中に risk score を 動的評価 して session lifetime + step-up trigger を 動的調整」 する pure state machine を追加。 3 axis は そのまま 保持、 新規 continuous-auth layer で 統合判定 のみ 追加 = shape 契約 preserving。
 

@@ -3,7 +3,7 @@
  *
  * `driveVectorLifecycle` drives every vector-axis op (startVectorIndex →
  * addVectors → queryKnn → fuseHybrid → recallAnn) in the order
- * `@kiwa/search` v0.3 vector semantics expect. Any op that diverges
+ * `@kiwa-lab/search` v0.3 vector semantics expect. Any op that diverges
  * surfaces in the fidelity trace.
  *
  * `driveSemanticLifecycle` drives every semantic-axis op

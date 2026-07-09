@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/observability` v2.1 that models the 4 pieces of a real OpenTelemetry exemplar loop that every non-trivial service eventually needs — a metric-recorded step that attaches a trace_id + span_id to a numeric sample, a trace-attached step that lets a Grafana panel jump from "p99 latency > 500 ms" to the flame graph of the offending trace, an m2t / t2m resolver pair that walks the exemplar chain in both directions, and an OpenTelemetry Collector batch + resource + baggage + W3C context propagation pipeline that keeps the trace context alive across service boundaries. `startExemplarSession()` + `recordExemplarMetric()` + `attachTraceToMetric()` + `resolveMetricToTrace()` + `resolveTraceToMetric()` + `startOtelAdvanced()` + `enqueueSpan()` + `flushBatch()` + `propagateBaggage()` + `extractW3CContext()` give you every one of those pieces without booting a real OpenTelemetry Collector + Grafana Tempo pair. This is the pattern kiwa's `examples/dogfood-otel-exemplar-app` v2 exercises against real OpenTelemetry Collector 0.100+ under `KIWA_MODE=real` + `OTEL_COLLECTOR_URL` + `TEMPO_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the p99 panel shows red but clicking through goes nowhere" gap a debugger sees in the trace jump audit.
+A vitest suite wired to `@kiwa-lab/observability` v2.1 that models the 4 pieces of a real OpenTelemetry exemplar loop that every non-trivial service eventually needs — a metric-recorded step that attaches a trace_id + span_id to a numeric sample, a trace-attached step that lets a Grafana panel jump from "p99 latency > 500 ms" to the flame graph of the offending trace, an m2t / t2m resolver pair that walks the exemplar chain in both directions, and an OpenTelemetry Collector batch + resource + baggage + W3C context propagation pipeline that keeps the trace context alive across service boundaries. `startExemplarSession()` + `recordExemplarMetric()` + `attachTraceToMetric()` + `resolveMetricToTrace()` + `resolveTraceToMetric()` + `startOtelAdvanced()` + `enqueueSpan()` + `flushBatch()` + `propagateBaggage()` + `extractW3CContext()` give you every one of those pieces without booting a real OpenTelemetry Collector + Grafana Tempo pair. This is the pattern kiwa's `examples/dogfood-otel-exemplar-app` v2 exercises against real OpenTelemetry Collector 0.100+ under `KIWA_MODE=real` + `OTEL_COLLECTOR_URL` + `TEMPO_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the p99 panel shows red but clicking through goes nowhere" gap a debugger sees in the trace jump audit.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/observability` v2.1 that models the 4 pieces of a
 ```bash
 mkdir kiwa-otel-exemplar && cd kiwa-otel-exemplar
 pnpm init
-pnpm add -D @kiwa/observability@^2.1 vitest typescript @types/node
+pnpm add -D @kiwa-lab/observability@^2.1 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v2.1 surface exports the exemplar axis + OpenTelemetry advanced axis through
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 
 const { recordExemplarMetric, startExemplarSession } = semantics;
 
@@ -106,7 +106,7 @@ The 3 tests pass. The `traceId ≥ 8 chars` invariant matches the [W3C Trace Con
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 
 const {
   recordExemplarMetric,
@@ -176,7 +176,7 @@ The invariant `resolveMetricToTrace(metric) → traceIds` is the compile-time eq
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 
 const { attachTraceToMetric, recordExemplarMetric, startExemplarSession } = semantics;
 
@@ -221,7 +221,7 @@ describe('exemplar — trace attach', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 
 const { enqueueSpan, flushBatch, startOtelAdvanced } = semantics;
 
@@ -273,7 +273,7 @@ The invariant `batchSize <= maxBatchSize` is the compile-time equivalent of "the
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 
 const { extractW3CContext, propagateBaggage, startOtelAdvanced } = semantics;
 
@@ -329,7 +329,7 @@ Under `KIWA_MODE=real` the same assertions run against a real OpenTelemetry Coll
 
 ```ts
 import { describe, it } from 'vitest';
-import { skipUnlessReal } from '@kiwa/observability';
+import { skipUnlessReal } from '@kiwa-lab/observability';
 
 const gate = skipUnlessReal(process.env);
 const requiredEnv = ['OTEL_COLLECTOR_URL', 'TEMPO_URL'] as const;

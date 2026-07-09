@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.12 リリース — AI-LLM 縦軸 (11 軸 release gate + @kiwa/ai-llm 4 SDK 統一 mock + dogfood 3 app + non-determinism SSOT)"
+title: "kiwa v1.12 リリース — AI-LLM 縦軸 (11 軸 release gate + @kiwa-lab/ai-llm 4 SDK 統一 mock + dogfood 3 app + non-determinism SSOT)"
 emoji: "🌱"
 type: "tech"
 topics: ["oss", "testing", "anthropic", "openai", "llm"]
@@ -10,14 +10,14 @@ published: false
 
 kiwa v1.12 milestone (**6/6 GitHub Issues resolved**) を land した。 v1.11 で「release 品質を数値で判断可能にする」 縦軸 (5 軸統一 harness + release gate SSOT + dogfood 3 app + docs 3 pillars) を確立した。 v1.12 は同じ縦軸を AI-LLM provider に伸ばす。
 
-cost / latency / token / accuracy の 4 axis を release gate に追加、 `@kiwa/ai-llm` v0.1 で Anthropic + OpenAI + Vercel AI SDK + LangChain の 4 SDK を 1 mock engine で統一、 dogfood 3 app で streaming / tool-use / RAG の 3 主要 use case を real vs mock 実測、 `docs/concepts/ai-llm-testing.md` で non-determinism を第一級 concept として言語化。
+cost / latency / token / accuracy の 4 axis を release gate に追加、 `@kiwa-lab/ai-llm` v0.1 で Anthropic + OpenAI + Vercel AI SDK + LangChain の 4 SDK を 1 mock engine で統一、 dogfood 3 app で streaming / tool-use / RAG の 3 主要 use case を real vs mock 実測、 `docs/concepts/ai-llm-testing.md` で non-determinism を第一級 concept として言語化。
 
 - 親 Issue ... [#694](https://github.com/cardene777/kiwa/issues/694)
 - 6 sub-Issue ... [#695](https://github.com/cardene777/kiwa/issues/695) - [#700](https://github.com/cardene777/kiwa/issues/700)
 
-## 1. `@kiwa/quality-metrics` v0.2 — 11 軸 release gate SSOT (v1.12-1)
+## 1. `@kiwa-lab/quality-metrics` v0.2 — 11 軸 release gate SSOT (v1.12-1)
 
-v1.11 の 5 軸 (coverage / test count / fidelity / perf p95 / mutation kill) は unchanged。 name が `@kiwa/ai-` で始まる provider だけ AI-LLM 分岐に入り、 追加 4 軸を強制。
+v1.11 の 5 軸 (coverage / test count / fidelity / perf p95 / mutation kill) は unchanged。 name が `@kiwa-lab/ai-` で始まる provider だけ AI-LLM 分岐に入り、 追加 4 軸を強制。
 
 ### 追加 4 軸
 
@@ -29,9 +29,9 @@ v1.11 の 5 軸 (coverage / test count / fidelity / perf p95 / mutation kill) �
 ### 分岐 logic
 
 ```ts
-import { isAiLlmProvider, DEFAULT_AI_LLM_RELEASE_GATE_THRESHOLDS } from '@kiwa/quality-metrics';
+import { isAiLlmProvider, DEFAULT_AI_LLM_RELEASE_GATE_THRESHOLDS } from '@kiwa-lab/quality-metrics';
 
-// name が "@kiwa/ai-" で始まる時のみ AI-LLM 分岐に入る
+// name が "@kiwa-lab/ai-" で始まる時のみ AI-LLM 分岐に入る
 if (isAiLlmProvider(report.provider)) {
   // 11 軸で評価
 }
@@ -39,7 +39,7 @@ if (isAiLlmProvider(report.provider)) {
 
 `isAiLlmProvider` は `packages/quality-metrics/src/types.ts` に SSOT、 provider prefix 一致だけの単純判定。 v1.11 の 5 軸評価は破壊しない、 完全 additive。
 
-## 2. `@kiwa/ai-llm` v0.1 — 4 SDK 統一 mock (v1.12-1)
+## 2. `@kiwa-lab/ai-llm` v0.1 — 4 SDK 統一 mock (v1.12-1)
 
 1 mock engine、 4 SDK 別 adapter shape。 streaming / tool-use / system prompt / cost tracking を全 SDK で cover。
 
@@ -94,7 +94,7 @@ src/
 
 ### migration guide 1 本
 
-- v1.11 → v1.12 (additive-only、 diff 形式、 verification コマンド付、 `@kiwa/ai-llm` add 1 行 + AI-LLM provider は自動で 11 軸 gate に乗る)
+- v1.11 → v1.12 (additive-only、 diff 形式、 verification コマンド付、 `@kiwa-lab/ai-llm` add 1 行 + AI-LLM provider は自動で 11 軸 gate に乗る)
 
 ### concept doc 1 本
 
@@ -117,10 +117,10 @@ Playwright docs E2E (`tests/docs-site-e2e/`) は既存 canonical spec に加え�
 
 ## Migration
 
-v1.11 user は zero-migration。 既存 test file はそのまま動く。 v1.12 追加は全て opt-in、 `@kiwa/ai-*` provider を使わない限り 11 軸 branch には入らない。
+v1.11 user は zero-migration。 既存 test file はそのまま動く。 v1.12 追加は全て opt-in、 `@kiwa-lab/ai-*` provider を使わない限り 11 軸 branch には入らない。
 
 ```bash
-pnpm add -D @kiwa/ai-llm @kiwa/quality-metrics
+pnpm add -D @kiwa-lab/ai-llm @kiwa-lab/quality-metrics
 ```
 
 詳細 ... [v1.11 → v1.12 migration guide](https://github.com/cardene777/kiwa/blob/main/docs/migrations/v1.11-to-v1.12.md)。
@@ -142,8 +142,8 @@ v1.11 milestone parent (#680) で列挙した 8 候補のうち v1.12 で採用�
 
 - v1.12 親 Issue ... https://github.com/cardene777/kiwa/issues/694
 - v1.11 milestone 完遂 (5 軸 → 11 軸拡張の source of truth)
-- @kiwa/quality-metrics ... `packages/quality-metrics/`
-- @kiwa/ai-llm ... `packages/ai-llm/`
+- @kiwa-lab/quality-metrics ... `packages/quality-metrics/`
+- @kiwa-lab/ai-llm ... `packages/ai-llm/`
 - dogfood 3 app ... `examples/dogfood-{anthropic-chatbot,openai-tool-agent,vercel-ai-rag}/`
 - 4 SDK 選定理由 ... Anthropic + OpenAI = 直呼び 2 大 provider、 Vercel AI SDK + LangChain = orchestration layer 2 大 framework、 4 SDK で AI-LLM SaaS 実装の大半を cover
 - non-determinism SSOT ... `docs/concepts/ai-llm-testing.md`

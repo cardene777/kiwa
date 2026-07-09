@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/security` v0.2 that models the 9 signals of a real SIEM + incident-response chain that every non-trivial production stack eventually needs — a structured event emitter that walks a raw `SiemEvent` (actor + action + target + timestamp + result) into a Splunk-CIM-shaped `StructuredEvent` with an auto-assigned `eventId` and `cimSchemaVersion`, a tamper-evident seal that chains a SHA-hash of the batch onto a previous seal so an insertion or deletion invalidates the chain, a retention-policy applier that pins hot / warm / cold day counts and a `legalHold` toggle so long-lived incident artifacts are not accidentally purged, a correlation rule that fires when a set of `requiredEventIds` are all present in a given window, a playbook trigger that names the runbook the incident kicks off, a 5-tier severity classifier (`sev1` .. `sev5`) that walks affected users + data classification + service-down 3 signals, an escalation sender that requires at least one channel + a primary on-call, a forensics capture that records memory-dump / network-pcap / disk-image artifact sizes, and a post-mortem recorder that requires a root-cause of 10+ characters and at least one action item. `startSiemAuditSession()` + `structureEvent()` + `sealEvents()` + `applyRetention()` + `correlate()` + `startIncidentSession()` + `triggerPlaybook()` + `classifySeverity()` + `escalate()` + `captureForensics()` + `recordPostMortem()` give you every one of those signals without booting a real Splunk HEC endpoint or a Vault audit backend. This is the pattern kiwa's `examples/dogfood-security-siem-incident-app` exercises against real Splunk + Vault under `KIWA_MODE=real` + `KIWA_SPLUNK_HEC_URL` + `KIWA_VAULT_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the SIEM ingested the raw event but the correlation rule never fired because the retention step was skipped and the event id was missing from the correlation set" gap a reviewer sees in the SIEM rollout post-mortem.
+A vitest suite wired to `@kiwa-lab/security` v0.2 that models the 9 signals of a real SIEM + incident-response chain that every non-trivial production stack eventually needs — a structured event emitter that walks a raw `SiemEvent` (actor + action + target + timestamp + result) into a Splunk-CIM-shaped `StructuredEvent` with an auto-assigned `eventId` and `cimSchemaVersion`, a tamper-evident seal that chains a SHA-hash of the batch onto a previous seal so an insertion or deletion invalidates the chain, a retention-policy applier that pins hot / warm / cold day counts and a `legalHold` toggle so long-lived incident artifacts are not accidentally purged, a correlation rule that fires when a set of `requiredEventIds` are all present in a given window, a playbook trigger that names the runbook the incident kicks off, a 5-tier severity classifier (`sev1` .. `sev5`) that walks affected users + data classification + service-down 3 signals, an escalation sender that requires at least one channel + a primary on-call, a forensics capture that records memory-dump / network-pcap / disk-image artifact sizes, and a post-mortem recorder that requires a root-cause of 10+ characters and at least one action item. `startSiemAuditSession()` + `structureEvent()` + `sealEvents()` + `applyRetention()` + `correlate()` + `startIncidentSession()` + `triggerPlaybook()` + `classifySeverity()` + `escalate()` + `captureForensics()` + `recordPostMortem()` give you every one of those signals without booting a real Splunk HEC endpoint or a Vault audit backend. This is the pattern kiwa's `examples/dogfood-security-siem-incident-app` exercises against real Splunk + Vault under `KIWA_MODE=real` + `KIWA_SPLUNK_HEC_URL` + `KIWA_VAULT_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the SIEM ingested the raw event but the correlation rule never fired because the retention step was skipped and the event id was missing from the correlation set" gap a reviewer sees in the SIEM rollout post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/security` v0.2 that models the 9 signals of a rea
 ```bash
 mkdir kiwa-siem-incident && cd kiwa-siem-incident
 pnpm init
-pnpm add -D @kiwa/security@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/security@^0.2 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.2 surface exports the SIEM audit axis (`startSiemAuditSession` / `structu
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { startSiemAuditSession, structureEvent } from '@kiwa/security';
+import { startSiemAuditSession, structureEvent } from '@kiwa-lab/security';
 
 describe('siem — structureEvent', () => {
   it('normalizes a raw event into a Splunk-CIM-shaped structured event', () => {
@@ -104,7 +104,7 @@ import {
   sealEvents,
   startSiemAuditSession,
   structureEvent,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 
 describe('siem — sealEvents', () => {
   it('emits a hash chained onto the previous seal', () => {
@@ -170,7 +170,7 @@ import {
   sealEvents,
   startSiemAuditSession,
   structureEvent,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 
 describe('siem — applyRetention', () => {
   it('records hot + warm + cold days plus legal-hold toggle', () => {
@@ -231,7 +231,7 @@ import {
   sealEvents,
   startSiemAuditSession,
   structureEvent,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 
 describe('siem — correlate', () => {
   it('emits matched=true when every required event id is present', () => {
@@ -306,7 +306,7 @@ The "all required" semantics is what separates a correlation rule from a filter 
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { startIncidentSession, triggerPlaybook } from '@kiwa/security';
+import { startIncidentSession, triggerPlaybook } from '@kiwa-lab/security';
 
 describe('incident — triggerPlaybook', () => {
   it('records playbook id + detection source + initial alert', () => {
@@ -347,7 +347,7 @@ import {
   escalate,
   startIncidentSession,
   triggerPlaybook,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 
 describe('incident — classifySeverity + escalate', () => {
   it('classifies restricted + service-down as sev1', () => {
@@ -441,7 +441,7 @@ import {
   recordPostMortem,
   startIncidentSession,
   triggerPlaybook,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 
 describe('incident — forensics + post-mortem', () => {
   it('records artifact sizes and appends non-empty artifact names', () => {

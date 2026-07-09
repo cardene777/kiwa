@@ -20,7 +20,7 @@ describe('dogfood-sqlite-wal-fts-app — emit fidelity report to quality-report/
     const real = await makeRealAdapter();
     const matrix = await runAdapterMatrix({ mock, real, run: runFullSurface });
     const output = runFidelityHarness({
-      provider: '@kiwa/orm/sqlite-wal-fts-dogfood',
+      provider: '@kiwa-lab/orm/sqlite-wal-fts-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

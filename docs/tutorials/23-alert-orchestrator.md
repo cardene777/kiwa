@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest test file that walks the Prometheus AlertManager 4-state lifecycle — `pending → firing → escalated → resolved` — powered by `@kiwa/observability` v2.0's `AlertRouter`. You register 3 rules (error rate critical / latency degraded / queue backpressure), set a 3-level routing tree (severity → team → channel), attach a 2-step escalation ladder, add a maintenance-window silence, and assert on each state transition with deterministic time. No real AlertManager, no gossip protocol, no external HTTP call — the whole thing runs in-process against the same `TelemetryCollector` your v1.1 telemetry mock populates.
+A vitest test file that walks the Prometheus AlertManager 4-state lifecycle — `pending → firing → escalated → resolved` — powered by `@kiwa-lab/observability` v2.0's `AlertRouter`. You register 3 rules (error rate critical / latency degraded / queue backpressure), set a 3-level routing tree (severity → team → channel), attach a 2-step escalation ladder, add a maintenance-window silence, and assert on each state transition with deterministic time. No real AlertManager, no gossip protocol, no external HTTP call — the whole thing runs in-process against the same `TelemetryCollector` your v1.1 telemetry mock populates.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A vitest test file that walks the Prometheus AlertManager 4-state lifecycle — 
 ```bash
 mkdir kiwa-alert-orchestrator && cd kiwa-alert-orchestrator
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa/observability
+pnpm add -D vitest typescript @types/node @kiwa-lab/observability
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -54,7 +54,7 @@ import {
   rule_errorRateCritical,
   rule_latencyDegraded,
   rule_queueBackpressure,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 export function buildOrchestrator(now: () => number) {
   const otel = createOtelMock({ now });
@@ -178,7 +178,7 @@ You should see 5 passing tests. Every assertion targets a well-defined transitio
 
 ## The 3 rule fixtures
 
-The 3 fixtures shipped with `@kiwa/observability` v2 target the alerts a typical SaaS SRE dashboard raises during an incident.
+The 3 fixtures shipped with `@kiwa-lab/observability` v2 target the alerts a typical SaaS SRE dashboard raises during an incident.
 
 | Rule id | Metric | Operator + threshold | forSamples | Labels |
 |---|---|---|---|---|

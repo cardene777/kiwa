@@ -2,13 +2,13 @@
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-logo.png" alt="kiwa ロゴ" width="160" />
 </p>
 
-# @kiwa/cli
+# @kiwa-lab/cli
 
 > [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 
 [kiwa](https://github.com/cardene777/kiwa) の CLI、 `init` / `doctor` の 2 コマンドを提供。
 
-`@kiwa/cli` は `@kiwa/dapp` を使う Playwright ベース dApp E2E test を scaffold し、 ローカル環境の前提条件 check も行う。
+`@kiwa-lab/cli` は `@kiwa-lab/dapp` を使う Playwright ベース dApp E2E test を scaffold し、 ローカル環境の前提条件 check も行う。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-ja.gif" alt="kiwa 127 秒概要 — Web (Next.js) / Contract (Solidity) / dApp (Playwright) の 3 カテゴリで仕様書生成→テスト生成→実行→レビュー→修正→カバレッジ確認の 6 step を完結 (本 CLI は dApp e2e 経路を scaffold)" width="640" />
@@ -19,11 +19,11 @@
 ## インストール
 
 ```bash
-pnpm add -D @kiwa/cli
+pnpm add -D @kiwa-lab/cli
 
 # install せずに使うことも可能
-pnpm dlx @kiwa/cli init
-pnpm dlx @kiwa/cli doctor
+pnpm dlx @kiwa-lab/cli init
+pnpm dlx @kiwa-lab/cli doctor
 ```
 
 ### Bonus — Claude Code plugin
@@ -43,10 +43,10 @@ Claude Code を併用するなら、 kiwa の skill chain を **1 コマンド�
 
 ### `kiwa init`
 
-既存 dApp project に Playwright E2E file を scaffold し、 生成された test を `@kiwa/dapp` と連携させる。
+既存 dApp project に Playwright E2E file を scaffold し、 生成された test を `@kiwa-lab/dapp` と連携させる。
 
 ```bash
-pnpm dlx @kiwa/cli init
+pnpm dlx @kiwa-lab/cli init
 # 生成 — e2e/connect.spec.ts + playwright.config.ts
 # package.json も update、 tsconfig.json は無ければ作成
 ```
@@ -58,14 +58,14 @@ pnpm dlx @kiwa/cli init
 現環境で `anvil` binary が使えるか check。
 
 ```bash
-pnpm dlx @kiwa/cli doctor
+pnpm dlx @kiwa-lab/cli doctor
 ```
 
 ## 関連
 
 - [GitHub repository](https://github.com/cardene777/kiwa)
 - [Full documentation (ja)](https://github.com/cardene777/kiwa/tree/main/docs/ja)
-- [@kiwa/dapp](https://www.npmjs.com/package/@kiwa/dapp) — runtime fixture
+- [@kiwa-lab/dapp](https://www.npmjs.com/package/@kiwa-lab/dapp) — runtime fixture
 
 ## 作者
 

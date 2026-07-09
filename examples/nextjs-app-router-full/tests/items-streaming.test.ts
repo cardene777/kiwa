@@ -5,10 +5,10 @@
 // chunk 順序 / resolved / errorBoundary / timeout の 5 軸を assert する。
 
 import { describe, expect, it } from 'vitest';
-import { setupNextRscEnv } from '@kiwa/nextjs';
+import { setupNextRscEnv } from '@kiwa-lab/nextjs';
 import { streamItems, itemsSkeleton } from '../app/items/_kiwa/items-streaming.js';
 
-describe('items-streaming via @kiwa/nextjs setupNextRscEnv', () => {
+describe('items-streaming via @kiwa-lab/nextjs setupNextRscEnv', () => {
   it('T-NS-301: 正常 stream — fallback + 4 chunk + resolved=final list', async () => {
     const fallback = itemsSkeleton();
     const env = await setupNextRscEnv({

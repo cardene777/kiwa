@@ -23,14 +23,14 @@ v1.30 で **横 pattern に a11y 軸を追加** し、 「perf regression」「m
 
 ### 1. axe-core + WCAG 2.1 AA gate 一斉展開
 
-34 package (@kiwa/* 33 + release-invariants 1) + 3 dogfood app に `.axe-config.mjs` + `test:a11y` script + `.a11y-baseline/{package}.json` gitignore を追加。 各 package が個別に axe-core runner + baseline persistence を持つ。
+34 package (@kiwa-lab/* 33 + release-invariants 1) + 3 dogfood app に `.axe-config.mjs` + `test:a11y` script + `.a11y-baseline/{package}.json` gitignore を追加。 各 package が個別に axe-core runner + baseline persistence を持つ。
 
 ```bash
 # 34 package 並列走査
 pnpm test:a11y
 
 # 特定 package のみ
-pnpm --filter @kiwa/a11y test:a11y
+pnpm --filter @kiwa-lab/a11y test:a11y
 ```
 
 各 package の a11y baseline (`.a11y-baseline/{package}.json`) は violation count を tier ごとに persist、 増加時に `pnpm test:a11y` が fail する。
@@ -60,7 +60,7 @@ a11y violation は 1 経路の scan では捕捉しきれない。 v1.30 では 
 
 ### 4. release gate 13 axis 拡張
 
-`@kiwa/quality-metrics` に `a11y.violation` axis を 13 番目として統合、 4 tier threshold enforcement を追加した。
+`@kiwa-lab/quality-metrics` に `a11y.violation` axis を 13 番目として統合、 4 tier threshold enforcement を追加した。
 
 ```ts
 import {
@@ -68,13 +68,13 @@ import {
   DEFAULT_A11Y_TIER_THRESHOLDS,
   resolveA11yTier,
   assertA11yTier,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 
-const tier = resolveA11yTier('@kiwa/nextjs'); // → 'Framework'
+const tier = resolveA11yTier('@kiwa-lab/nextjs'); // → 'Framework'
 const threshold = DEFAULT_A11Y_TIER_THRESHOLDS[tier];
 // { critical: 0, serious: 3, moderate: 10, minor: Infinity }
 
-assertA11yTier(a11yReport, '@kiwa/nextjs', tier);
+assertA11yTier(a11yReport, '@kiwa-lab/nextjs', tier);
 // throws A11yTierBelowFloor if violation count exceeds threshold
 ```
 
@@ -82,7 +82,7 @@ v1.27 mutation.tier axis と同じ tier-aware pattern を踏襲、 kiwa 内部�
 
 ## 8 milestone 連続 snippet validation streak
 
-`packages/a11y/tests/docs-tutorial-v1.30.test.ts` が `docs/tutorials/56-a11y-baseline.md` + `57-a11y-baseline-migration.md` の全 code snippet を実 `@kiwa/a11y` v1.1 API で走査、 docs drift を構造的に遮断する。 v1.23 (payment) から始まる snippet validation streak が v1.30 で 8 milestone 連続達成した。
+`packages/a11y/tests/docs-tutorial-v1.30.test.ts` が `docs/tutorials/56-a11y-baseline.md` + `57-a11y-baseline-migration.md` の全 code snippet を実 `@kiwa-lab/a11y` v1.1 API で走査、 docs drift を構造的に遮断する。 v1.23 (payment) から始まる snippet validation streak が v1.30 で 8 milestone 連続達成した。
 
 - v1.23 payment / v1.24 edge / v1.25 perf-harness / v1.26 orm / v1.27 quality-metrics / v1.28 realtime / v1.29 release-invariants / **v1.30 a11y**
 
@@ -93,7 +93,7 @@ docs と実装が乖離した瞬間 CI (kiwa 内部の release-smoke) が fail �
 ### Step 1. kiwa install + a11y package
 
 ```bash
-npm install --save-dev @kiwa/core @kiwa/a11y
+npm install --save-dev @kiwa-lab/core @kiwa-lab/a11y
 ```
 
 ### Step 2. `.axe-config.mjs` を配置

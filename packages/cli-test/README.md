@@ -1,4 +1,4 @@
-# @kiwa/cli-test
+# @kiwa-lab/cli-test
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package covers the CLI test surface)" width="640" />
@@ -10,7 +10,7 @@ CLI / shell / file IO test adapter for kiwa.
 
 ## Overview
 
-`@kiwa/cli-test` provides isolated, deterministic primitives for testing CLI tools:
+`@kiwa-lab/cli-test` provides isolated, deterministic primitives for testing CLI tools:
 
 - `setupCliEnv({ seedFiles, env, prefix })` — isolated tempdir with optional seed files, env override, helper file IO.
 - `env.runCli({ cmd, args, stdin, env, cwd, timeoutMs })` — execFile with stdout/stderr capture, exit code, signal, duration.
@@ -19,7 +19,7 @@ CLI / shell / file IO test adapter for kiwa.
 ## Install
 
 ```bash
-pnpm add -D @kiwa/cli-test @kiwa/core vitest
+pnpm add -D @kiwa-lab/cli-test @kiwa-lab/core vitest
 ```
 
 ## Quick start
@@ -31,7 +31,7 @@ import {
   expectStdoutContains,
   setupCliEnv,
   type CliTestEnv,
-} from "@kiwa/cli-test";
+} from "@kiwa-lab/cli-test";
 
 const envs: CliTestEnv[] = [];
 afterEach(async () => {

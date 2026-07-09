@@ -1,6 +1,6 @@
 /**
  * Mock adapter — walks the edge do-state-migration state machine from
- * @kiwa/edge v1.2 semantics deterministically.
+ * @kiwa-lab/edge v1.2 semantics deterministically.
  */
 import {
   bumpSchema,
@@ -9,7 +9,7 @@ import {
   migrateInstance,
   rollbackMigration,
   type DoMigrationSession,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 import type {
   EdgeDoMigrationAdapter,
   MigrationSession,

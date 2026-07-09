@@ -1,5 +1,5 @@
-import type { McpTool, ToolHandler } from '@kiwa/mcp';
-import { textContent } from '@kiwa/mcp';
+import type { McpTool, ToolHandler } from '@kiwa-lab/mcp';
+import { textContent } from '@kiwa-lab/mcp';
 
 /**
  * 3 MCP tool definitions the dogfood app exposes.
@@ -13,7 +13,7 @@ import { textContent } from '@kiwa/mcp';
  * server implements.
  *
  * Each tool is a pair of `McpTool` (schema) + `ToolHandler` (executor).
- * `@kiwa/mcp` `McpServer.register(tool, handler)` accepts them directly.
+ * `@kiwa-lab/mcp` `McpServer.register(tool, handler)` accepts them directly.
  */
 
 // ---- weather ---------------------------------------------------------

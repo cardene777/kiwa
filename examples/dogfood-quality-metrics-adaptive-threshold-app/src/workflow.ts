@@ -8,7 +8,7 @@ import {
   type QualityReport,
   type ReleaseGateBlocker,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 
 /**
  * Pattern 1 — collectRolling = 直近 N release 分 の snapshot を rolling 窓 で

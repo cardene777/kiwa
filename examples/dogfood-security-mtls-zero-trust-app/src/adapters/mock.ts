@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/security` v0.2 mtls + zero-trust
+ * Mock adapter — drives `@kiwa-lab/security` v0.2 mtls + zero-trust
  * semantics (startMtlsSession / completeHandshake / verifyPin / verifyOcsp
  * / checkCtLog / startZeroTrustSession / evaluatePosture / scoreRisk /
  * requestJit / enforceMicroSegment) so the same app code exercises a
@@ -34,7 +34,7 @@ import {
   type MtlsSession,
   type SecurityAdvTarget,
   type ZeroTrustSession,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 import type {
   BrokerDecideResult,
   MtlsCtResult,

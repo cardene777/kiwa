@@ -67,7 +67,7 @@ framework 統合経路 (`anvil + forge build + forge create + .env.local`) を�
 
 ## 関連 docs
 
-- [Quickstart](../quickstart.md) — 最初の 5 分 (publish 後の `pnpm dlx @kiwa/cli init` 経路、 publish 前は本 examples docs を参照)
+- [Quickstart](../quickstart.md) — 最初の 5 分 (publish 後の `pnpm dlx @kiwa-lab/cli init` 経路、 publish 前は本 examples docs を参照)
 - [Concepts](../concepts/README.md) — fixture / EIP-6963 / RPC handling の仕組み
 - [Cookbook](../cookbook/README.md) — 機能別レシピ集
 - [API Reference](../api/README.md) — `dappE2eTest` / `startAnvil` 等の API

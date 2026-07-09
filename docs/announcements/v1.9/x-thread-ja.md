@@ -33,7 +33,7 @@ v1.9 で増えた provider。
 
 ## [3/8]
 
-@kiwa/auth v0.2 ...
+@kiwa-lab/auth v0.2 ...
 
 - **Clerk** ... user + session + orgs mock、 `signIn` / `assertSignedIn` / `assertOrgRole`、 publicMetadata / privateMetadata 区別維持
 - **Auth0** ... tenant + rules pipeline + Management API mock、 post-login rule 実行順序を production 準拠に再現
@@ -44,7 +44,7 @@ Clerk (SaaS 2026 dominant) + Auth0 (enterprise dominant) 2 大 provider が試�
 
 ## [4/8]
 
-@kiwa/queue v0.2 ...
+@kiwa-lab/queue v0.2 ...
 
 - **Cloudflare Queues** ... miniflare (in-process) + wrangler (real subprocess)、 consumer batch + ack/retry/DLQ + `maxBatchSize` chunking
 - **AWS SQS** ... stub + localstack、 standard + FIFO queue (`messageGroupId` + dedup)、 batch (10 entries cap) + visibility timeout + long polling + DLQ redrive
@@ -55,7 +55,7 @@ edge queue と AWS 定番 queue 両方対応。
 
 ## [5/8]
 
-@kiwa/cache v0.2 ...
+@kiwa-lab/cache v0.2 ...
 
 - **Memcached** ... stub + testcontainers、 8 core command (get/set/delete/add/replace/incr/decr/flush) + multi-server consistent hashing (FNV-1a + 128 vnode)
 - **KeyDB** ... stub + testcontainers、 Redis 互換 + multi-master replication (`{ master }` option) + cross-region Pub/Sub + replicationLag 模擬

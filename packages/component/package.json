@@ -1,5 +1,5 @@
 {
-  "name": "@kiwa/component",
+  "name": "@kiwa-lab/component",
   "version": "2.0.0",
   "description": "Component test mock harness for kiwa — unified Storybook 8 + Playwright Component Testing + Chromatic mocks with story registration, args resolution, play function runner, mount + interact API, and visual regression baseline/diff/accept workflow.",
   "license": "MIT",
@@ -57,18 +57,18 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "pretest:perf": "pnpm -F @kiwa/perf-harness build",
+    "pretest:perf": "pnpm -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:mutation": "stryker run",
     "test:a11y": "node ../../scripts/run-axe-baseline.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
-    "@kiwa/perf-harness": "workspace:*",
+    "@kiwa-lab/perf-harness": "workspace:*",
     "@stryker-mutator/core": "^8.7.1",
     "@stryker-mutator/vitest-runner": "^8.7.1",
     "@types/node": "^22.10.0",

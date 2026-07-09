@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/qwikcity",
+  "package": "@kiwa-lab/qwikcity",
   "tier": "Framework",
   "thresholds": {
     "high": 70,

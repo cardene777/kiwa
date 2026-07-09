@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.13 リリース — Realtime 縦軸 (@kiwa/realtime + @kiwa/perf-harness + dogfood 3 app + 時間軸 mock SSOT)"
+title: "kiwa v1.13 リリース — Realtime 縦軸 (@kiwa-lab/realtime + @kiwa-lab/perf-harness + dogfood 3 app + 時間軸 mock SSOT)"
 emoji: "🌱"
 type: "tech"
 topics: ["oss", "testing", "supabase", "ably", "realtime"]
@@ -10,12 +10,12 @@ published: false
 
 kiwa v1.13 milestone (**7/7 GitHub Issues resolved**) を land した。 v1.11 で「release 品質を数値で判断可能にする」 縦軸 (5 軸統一 harness + release gate SSOT + dogfood 3 app + docs 3 pillars) を確立、 v1.12 で「非決定性 (AI-LLM cost / latency / token / accuracy) を吸収」 に伸ばした。 v1.13 は同じ縦軸を **時間軸 (Realtime、 sequence の失敗)** に伸ばす。
 
-`@kiwa/realtime` v0.1 で Supabase Realtime + Ably + Pusher + Socket.io/SSE の 4 provider を 1 mock engine で統一、 5 semantics (presence / broadcast / postgres_changes / room / reconnect) を SSOT 化し、 dogfood 3 app (chat / cursor / notification) を real vs mock で並べる。 `@kiwa/perf-harness` v0.1 で 5 target 汎用性能測定 (p50 / p95 / p99 + regression) を 11 軸 release gate の `perf.p95Ms` 軸に feed。 `docs/concepts/realtime-testing.md` で時間軸 mock を第一級 concept として言語化する。
+`@kiwa-lab/realtime` v0.1 で Supabase Realtime + Ably + Pusher + Socket.io/SSE の 4 provider を 1 mock engine で統一、 5 semantics (presence / broadcast / postgres_changes / room / reconnect) を SSOT 化し、 dogfood 3 app (chat / cursor / notification) を real vs mock で並べる。 `@kiwa-lab/perf-harness` v0.1 で 5 target 汎用性能測定 (p50 / p95 / p99 + regression) を 11 軸 release gate の `perf.p95Ms` 軸に feed。 `docs/concepts/realtime-testing.md` で時間軸 mock を第一級 concept として言語化する。
 
 - 親 Issue ... [#709](https://github.com/cardene777/kiwa/issues/709)
 - 7 sub-Issue ... [#707](https://github.com/cardene777/kiwa/issues/707) (v1.13-1 perf-harness、 単発 land 済) / [#710](https://github.com/cardene777/kiwa/issues/710) - [#715](https://github.com/cardene777/kiwa/issues/715)
 
-## 1. `@kiwa/perf-harness` v0.1 — 5 target 汎用 perf (v1.13-1)
+## 1. `@kiwa-lab/perf-harness` v0.1 — 5 target 汎用 perf (v1.13-1)
 
 v1.11 の release gate `perf.p95Ms` 軸は「1 測定 helper に手を入れれば十分」 な軸だが、 実運用で使うには target 別の helper が必要。 v1.13-1 は 5 target を default で提供する。
 
@@ -33,7 +33,7 @@ v1.11 の release gate `perf.p95Ms` 軸は「1 測定 helper に手を入れれ�
 
 `buildPerfReport({ target, samples })` が `QualityReport` を出力、 v1.11 で確立した 11 軸 (v1.12 で 11 に拡張) の `perf.p95Ms` 軸に落とす。 perf-harness は既存の release gate 判定を壊さない完全 additive。
 
-## 2. `@kiwa/realtime` v0.1 — 4 provider 統一 mock (v1.13-2)
+## 2. `@kiwa-lab/realtime` v0.1 — 4 provider 統一 mock (v1.13-2)
 
 1 mock engine、 4 SDK 別 adapter shape。 5 semantics (presence / broadcast / postgres_changes / room / reconnect) を全 SDK で cover。
 
@@ -80,7 +80,7 @@ src/
 
 `SUPABASE_URL` / `SUPABASE_ANON_KEY` なしで Supabase Realtime dogfood を走らせると、 real adapter が `SUPABASE_ENV_MISSING` を返して 4 op (`joinRoom` / `sendMessage` / `getPresence` / `sendTyping`) 全てで divergence を記録、 mock adapter に不当な parity credit を与えない。 local dev で本番 API key を積まないままの走行でも gate が honest に働くことを実測データで実証。
 
-realtime provider は AI-LLM 分岐 (`@kiwa/ai-` prefix) に該当しないため 7 軸 common branch で判定される。 11 軸 gate 全体は unchanged、 realtime 特有の追加 axis はなし。
+realtime provider は AI-LLM 分岐 (`@kiwa-lab/ai-` prefix) に該当しないため 7 軸 common branch で判定される。 11 軸 gate 全体は unchanged、 realtime 特有の追加 axis はなし。
 
 ## 4. Docs 補強 (v1.13-6)
 
@@ -92,7 +92,7 @@ realtime provider は AI-LLM 分岐 (`@kiwa/ai-` prefix) に該当しないた�
 
 ### migration guide 1 本
 
-- v1.12 → v1.13 (additive-only、 diff 形式、 verification コマンド付、 `@kiwa/realtime` + `@kiwa/perf-harness` add 1 行 + realtime provider は 7 軸 common branch を維持)
+- v1.12 → v1.13 (additive-only、 diff 形式、 verification コマンド付、 `@kiwa-lab/realtime` + `@kiwa-lab/perf-harness` add 1 行 + realtime provider は 7 軸 common branch を維持)
 
 ### concept doc 1 本
 
@@ -115,10 +115,10 @@ Playwright docs E2E (`tests/docs-site-e2e/`) は既存 canonical + v1.12 spec �
 
 ## Migration
 
-v1.12 user は zero-migration。 既存 test file はそのまま動く。 v1.13 追加は全て opt-in、 realtime provider を使わない限り `@kiwa/realtime` は不要、 perf 測定を使わない限り `@kiwa/perf-harness` は不要。
+v1.12 user は zero-migration。 既存 test file はそのまま動く。 v1.13 追加は全て opt-in、 realtime provider を使わない限り `@kiwa-lab/realtime` は不要、 perf 測定を使わない限り `@kiwa-lab/perf-harness` は不要。
 
 ```bash
-pnpm add -D @kiwa/realtime @kiwa/perf-harness
+pnpm add -D @kiwa-lab/realtime @kiwa-lab/perf-harness
 ```
 
 release gate は v1.13 で軸追加なし、 realtime provider は 7 軸 common branch を維持。 詳細 ... [v1.12 → v1.13 migration guide](https://github.com/cardene777/kiwa/blob/main/docs/migrations/v1.12-to-v1.13.md)。
@@ -140,8 +140,8 @@ v1.11 milestone parent (#680) で列挙した候補のうち v1.12 / v1.13 で�
 
 - v1.13 親 Issue ... https://github.com/cardene777/kiwa/issues/709
 - v1.12 milestone 完遂 (11 軸 release gate + AI-LLM 4 SDK 統一 mock の source of truth)
-- @kiwa/realtime ... `packages/realtime/`
-- @kiwa/perf-harness ... `packages/perf-harness/`
+- @kiwa-lab/realtime ... `packages/realtime/`
+- @kiwa-lab/perf-harness ... `packages/perf-harness/`
 - dogfood 3 app ... `examples/dogfood-{supabase-realtime-chat,ably-collab-cursor,socketio-notification}/`
 - 4 provider 選定理由 ... Supabase Realtime + Ably = enterprise 2 大 provider、 Pusher = SaaS 標準、 Socket.io/SSE = 直呼び 2 種で自前実装 cover、 4 provider で realtime SaaS 実装の大半を cover
 - 5 semantics 選定理由 ... presence (誰がいるか) / broadcast (即時全 client 配信) / postgres_changes (DB 同期) / room (namespace 分離) / reconnect (backpressure + retry)、 5 つで realtime の mock 難所を網羅

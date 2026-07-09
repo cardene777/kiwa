@@ -22,7 +22,7 @@ describe('v2.12-4 publish', () => {
       existsSync(resolve(REPO_ROOT, 'docs/announcements/v2.12/gh-discussions-announcement.md')),
     ).toBe(true);
   });
-  it('@kiwa/cli-test v2.1.0', () => {
+  it('@kiwa-lab/cli-test v2.1.0', () => {
     expect(readJson<{ version: string }>('packages/cli-test/package.json').version).toBe('2.1.0');
   });
   it('cli-lifecycle-orchestrator source', () => {
@@ -31,9 +31,9 @@ describe('v2.12-4 publish', () => {
     expect(src).toContain("'spawning'");
     expect(src).toContain("'cleaned'");
   });
-  it('release filter @kiwa/cli-test', () => {
+  it('release filter @kiwa-lab/cli-test', () => {
     expect(readJson<{ scripts: { release: string } }>('package.json').scripts.release).toContain(
-      '-F @kiwa/cli-test',
+      '-F @kiwa-lab/cli-test',
     );
   });
   it('dogfood 5 pattern', () => {

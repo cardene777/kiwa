@@ -12,7 +12,7 @@ import type {
   KafkaConsumer,
   KafkaMock,
   StreamingMessage,
-} from '@kiwa/streaming';
+} from '@kiwa-lab/streaming';
 
 export interface ConsumedEnvelope<TValue = unknown> {
   readonly consumerId: string;

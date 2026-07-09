@@ -6,7 +6,7 @@ kiwa v2.5 is out。 **Streaming pair depth-5 到達** milestone、 pipeline-orch
 
 ## What's new
 
-- `@kiwa/streaming` v2.0 → v2.1
+- `@kiwa-lab/streaming` v2.0 → v2.1
 - 5 state SSOT + 8 event SSOT + 40 セル 遷移表
 - dogfood-streaming-pipeline-app + tutorial 132 + migration + concept
 
@@ -18,7 +18,7 @@ kiwa v2.5 is out。 **Streaming pair depth-5 到達** milestone、 pipeline-orch
 ## Install
 
 ```bash
-pnpm add -D @kiwa/streaming@^2.1
+pnpm add -D @kiwa-lab/streaming@^2.1
 ```
 
 ## Migration guide

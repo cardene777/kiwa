@@ -1,4 +1,4 @@
-import { resolveKiwaRepoRoot, runPerf3LayerLive } from '@kiwa/perf-harness';
+import { resolveKiwaRepoRoot, runPerf3LayerLive } from '@kiwa-lab/perf-harness';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { makeRealAdapter } from '../../src/adapters/real.js';

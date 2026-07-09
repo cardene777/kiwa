@@ -4,7 +4,7 @@
 // として直接 invoke できる。 production code では同じ class を実 Drizzle client で生成。
 
 import { eq } from 'drizzle-orm';
-import type { DrizzleSqliteDb } from '@kiwa/orm';
+import type { DrizzleSqliteDb } from '@kiwa-lab/orm';
 import { posts, schema, users, type Schema } from './schema.js';
 
 export interface CreateUserInput {

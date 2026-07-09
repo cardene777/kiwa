@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.58 is out — Desktop deepening II. **@kiwa/desktop v0.3** adds 4 advanced III axes (Screen recording + Global shortcut + Clipboard + Dark-mode), combined with v0.1 3 + v0.2 5 gives **12 axes × 3 targets = 36 spec fidelity grid**. Inherits v1.55-v1.57's 4-PR rhythm (**5 milestones consecutive**), **systematic pattern 33rd application**.
+kiwa v1.58 is out — Desktop deepening II. **@kiwa-lab/desktop v0.3** adds 4 advanced III axes (Screen recording + Global shortcut + Clipboard + Dark-mode), combined with v0.1 3 + v0.2 5 gives **12 axes × 3 targets = 36 spec fidelity grid**. Inherits v1.55-v1.57's 4-PR rhythm (**5 milestones consecutive**), **systematic pattern 33rd application**.
 
 ## Tweet 2 — v0.3 4 axis semantics
 
@@ -14,7 +14,7 @@ dogfood-desktop-electron-app extended with v0.3 4-axis workflows, 30 tests all p
 
 ## Tweet 4 — install + Mobile rhythm reproduction + v1.59 roadmap
 
-`pnpm add -D @kiwa/desktop@^0.3`. Migration: https://cardene777.github.io/kiwa/migrations/v1.57-to-v1.58
+`pnpm add -D @kiwa-lab/desktop@^0.3`. Migration: https://cardene777.github.io/kiwa/migrations/v1.57-to-v1.58
 
 **Mobile v1.50-v1.52 (base → advanced II → advanced III) 3-milestone rhythm fully reproduced in Desktop pair (v1.56-v1.58)**, depth-3 reached. v1.59+ will bring Desktop v0.4 adapter layer (Mobile v0.4 pattern port, depth-4 expansion). Backward compat absolutely preserved — v0.1 + v0.2 8 axes / 32 methods fully retained.
 

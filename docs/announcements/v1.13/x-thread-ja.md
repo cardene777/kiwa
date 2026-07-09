@@ -4,11 +4,11 @@ v1.12 の「非決定性 (AI-LLM) を release gate で吸収」 縦軸に対し�
 
 v1.11 + v1.12 の 11 軸は全て scalar。 realtime failure は sequence。 v1.13 は sequence を第一級 mock 対象として吸収する。
 
-2/ @kiwa/perf-harness v0.1 — 5 target 汎用 perf 測定。
+2/ @kiwa-lab/perf-harness v0.1 — 5 target 汎用 perf 測定。
 
 bench.request / bench.function / bench.stream / bench.batch / bench.worker で p50 / p95 / p99 + regression 検知 + baseline 比較。 11 軸 release gate の perf.p95Ms 軸に feed。
 
-3/ @kiwa/realtime v0.1 — 4 provider 統一 mock。
+3/ @kiwa-lab/realtime v0.1 — 4 provider 統一 mock。
 
 createSupabaseRealtimeMock — channel.on('presence' | 'broadcast' | 'postgres_changes', filter, handler) + track / send。
 createAblyMock — channels.get / subscribe / presence.subscribe / history rewind。

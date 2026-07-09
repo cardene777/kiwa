@@ -1,5 +1,5 @@
 /**
- * `@kiwa/realtime` v0.2 semantics — 3 protocol × 8 axis advanced
+ * `@kiwa-lab/realtime` v0.2 semantics — 3 protocol × 8 axis advanced
  * realtime semantics の barrel export。
  *
  * v1.13 の 5 semantics (Presence / Broadcast / PostgresChanges / Room /

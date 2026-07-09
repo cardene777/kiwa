@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/observability` v2.2 advanced III
+ * Mock adapter — drives `@kiwa-lab/observability` v2.2 advanced III
  * chaos + aiops semantics (startChaosSession / injectFault /
  * computeBlastRadius / triggerRollback + startAiopsSession /
  * detectAnomaly / executeRemediation / analyzeRootCause /
@@ -26,7 +26,7 @@
  * point at the exact op that diverged.
  */
 
-import { semantics } from '@kiwa/observability';
+import { semantics } from '@kiwa-lab/observability';
 import {
   type AlertCorrelateResult,
   type AlertRecord,

@@ -1,4 +1,4 @@
-// @kiwa/security — public API surface。
+// @kiwa-lab/security — public API surface。
 // v0.1 covers 8 axis (CSP / rate-limit / authorization / WAF / threat-model /
 // secrets-scan / SBOM / security-headers advanced) unified across 4 providers
 // (helmet / express-rate-limit / casbin / coraza) with 4 x 8 = 32 combination

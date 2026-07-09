@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa/search/vector-hybrid",
+  "provider": "@kiwa-lab/search/vector-hybrid",
   "version": "0.3.0",
   "reportedAt": "2026-07-07T00:45:24.372Z",
   "coverage": {

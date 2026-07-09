@@ -4,16 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm -F @kiwa/nextjs -F @kiwa/core build && next build",
+    "build": "pnpm -F @kiwa-lab/nextjs -F @kiwa-lab/core build && next build",
     "dev": "next dev",
     "start": "next start",
-    "test": "pnpm -F @kiwa/nextjs -F @kiwa/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/nextjs -F @kiwa-lab/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/nextjs": "workspace:*",
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/nextjs": "workspace:*",
     "next": "^15.0.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"

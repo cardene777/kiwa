@@ -40,7 +40,7 @@ describe('dogfood-storybook-design-system — emit fidelity report to quality-re
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/component/storybook-design-system',
+      provider: '@kiwa-lab/component/storybook-design-system',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -68,7 +68,7 @@ describe('dogfood-storybook-design-system — emit fidelity report to quality-re
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThan(0);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     expect(output.markdown).toContain('Quality Report');
-    // Component provider (@kiwa/component/...) is not an AI-LLM prefix,
+    // Component provider (@kiwa-lab/component/...) is not an AI-LLM prefix,
     // so the 7-axis gate must have run.
     expect(output.verdict.axesEvaluated).toBe(7);
     await mock.reset();

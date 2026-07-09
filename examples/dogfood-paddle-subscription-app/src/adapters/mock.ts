@@ -1,14 +1,14 @@
 /**
  * Mock adapter for the Paddle Billing v2 subscription dogfood app.
  *
- * Wraps `@kiwa/payment`'s `createPaddleMock()` plus the subscription
+ * Wraps `@kiwa-lab/payment`'s `createPaddleMock()` plus the subscription
  * runtime so tests exercise deterministic subscription ids, trial arithmetic,
  * proration deltas, retention offer flows, coupon stacking, refund window
  * enforcement, and Paddle-style webhook signing without touching the real
  * Paddle API.
  */
 
-import { createPaddleMock } from '@kiwa/payment';
+import { createPaddleMock } from '@kiwa-lab/payment';
 import type {
   PaddleSubscriptionAdapter,
   TraceEvent,

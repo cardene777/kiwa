@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/payment` v0.5 that models the 4 pieces of a real subscription-billing + payment-routing + fraud-defense + compliance-reporting product surface that every non-trivial global SaaS eventually needs — a recurring-revenue-advanced `startRecurringRevenue` step that pins a per-cohort `cohortId` + `customerId` + `mrrStartCents`, a `computeMrr` step that derives `mrrCents` + `arrCents` (= `mrrCents * 12`) from the current snapshot so a downstream dashboard can query the cohort with one field lookup, a `recordChurn` step that decrements `snapshot.mrrEndCents` per subscription cancellation, a `recordExpansion` step that classifies the growth signal (`'upgrade'` / `'seat-add'` / `'usage'`) so a follow-up NRR breakdown can attribute the growth source, a `computeNrr` step that computes NRR = `(mrrStart - churn - contraction + expansion) / mrrStart * 100` (industry-standard growth quality metric, `> 100 %` = the cohort grew despite churn), a `recordContraction` step that separates downgrade (without churn) from churn so NRR captures the difference; a payment-orchestration-II `startOrchestrationII` step that pins an `intentId` + `amountCents` + `config.providers` (ordered ladder) + `config.mlScoringEnabled` (default `true`), a `smartRoute` step that runs the primary route + increments `attemptCount`, a `scoreMl` step that gates route-decision on a 0-1 score against `config.minMlScore` (default `0.5`), a `triggerFallback` step that walks the fallback ladder and moves to `'cascade-exhausted'` once all providers are tried or `maxAttempts` is hit; a fraud-detection-advanced `startFraudDetection` step that pins a `transactionId` + `customerId` + `amountCents` + a `config.mlBlockThreshold` (default `0.85`, mirroring Stripe Radar / Sift production thresholds), a `scoreDevice` step that runs device fingerprint scoring, a `verifyBiometric` step that runs behavioral biometrics (typing rhythm + mouse motion + swipe pattern), a `flagVelocity` step that records attempts-in-window against `config.maxVelocityPerHour`, a `scoreMlBlock` step that runs the ML fusion model + flips `verdict` to `'block'` when score >= threshold; a regulatory-reporting `startRegulatoryReporting` step that pins an `entityId` + `customerId`, a `reportPci` step that files PCI DSS attestation with SAQ level (`'A'` / `'A-EP'` / `'D'`), a `reportPsd2` step that files PSD2 SCA challenge rate + exemption count with the EBA, a `reportDora` step that files DORA ICT risk score + third-party register with the ESA, a `fileSar` step that files a Suspicious Activity Report with FinCEN / NCA (non-deletable, one-shot per session), and a `lockForAudit` step that pins the terminal audit-locked state. `startRecurringRevenue()` + `computeMrr()` + `recordChurn()` + `recordExpansion()` + `computeNrr()` + `recordContraction()` + `startOrchestrationII()` + `smartRoute()` + `scoreMl()` + `triggerFallback()` + `startFraudDetection()` + `scoreDevice()` + `verifyBiometric()` + `flagVelocity()` + `scoreMlBlock()` + `startRegulatoryReporting()` + `reportPci()` + `reportPsd2()` + `reportDora()` + `fileSar()` + `lockForAudit()` give you every one of those pieces without booting a real Chargebee / Recurly / Stripe Radar / Sift / EBA reporting service. This is the pattern kiwa's 3 v1.41 dogfood apps + a hypothetical `examples/dogfood-payment-orchestration-fraud-app` exercise against real Chargebee / Recurly (recurring revenue analytics) + Spreedly (payment orchestration + smart routing) + Stripe Radar / Sift / Signifyd (fraud detection ML fusion) + EBA / FinCEN reporting endpoints (regulatory filing) under `KIWA_MODE=real`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the NRR came out negative because `recordChurn` decremented `mrrEnd` but `computeNrr` used `mrrStart` as the denominator without accounting for the churn in the numerator sign" gap a reviewer sees in the recurring-revenue-nrr post-mortem.
+A vitest suite wired to `@kiwa-lab/payment` v0.5 that models the 4 pieces of a real subscription-billing + payment-routing + fraud-defense + compliance-reporting product surface that every non-trivial global SaaS eventually needs — a recurring-revenue-advanced `startRecurringRevenue` step that pins a per-cohort `cohortId` + `customerId` + `mrrStartCents`, a `computeMrr` step that derives `mrrCents` + `arrCents` (= `mrrCents * 12`) from the current snapshot so a downstream dashboard can query the cohort with one field lookup, a `recordChurn` step that decrements `snapshot.mrrEndCents` per subscription cancellation, a `recordExpansion` step that classifies the growth signal (`'upgrade'` / `'seat-add'` / `'usage'`) so a follow-up NRR breakdown can attribute the growth source, a `computeNrr` step that computes NRR = `(mrrStart - churn - contraction + expansion) / mrrStart * 100` (industry-standard growth quality metric, `> 100 %` = the cohort grew despite churn), a `recordContraction` step that separates downgrade (without churn) from churn so NRR captures the difference; a payment-orchestration-II `startOrchestrationII` step that pins an `intentId` + `amountCents` + `config.providers` (ordered ladder) + `config.mlScoringEnabled` (default `true`), a `smartRoute` step that runs the primary route + increments `attemptCount`, a `scoreMl` step that gates route-decision on a 0-1 score against `config.minMlScore` (default `0.5`), a `triggerFallback` step that walks the fallback ladder and moves to `'cascade-exhausted'` once all providers are tried or `maxAttempts` is hit; a fraud-detection-advanced `startFraudDetection` step that pins a `transactionId` + `customerId` + `amountCents` + a `config.mlBlockThreshold` (default `0.85`, mirroring Stripe Radar / Sift production thresholds), a `scoreDevice` step that runs device fingerprint scoring, a `verifyBiometric` step that runs behavioral biometrics (typing rhythm + mouse motion + swipe pattern), a `flagVelocity` step that records attempts-in-window against `config.maxVelocityPerHour`, a `scoreMlBlock` step that runs the ML fusion model + flips `verdict` to `'block'` when score >= threshold; a regulatory-reporting `startRegulatoryReporting` step that pins an `entityId` + `customerId`, a `reportPci` step that files PCI DSS attestation with SAQ level (`'A'` / `'A-EP'` / `'D'`), a `reportPsd2` step that files PSD2 SCA challenge rate + exemption count with the EBA, a `reportDora` step that files DORA ICT risk score + third-party register with the ESA, a `fileSar` step that files a Suspicious Activity Report with FinCEN / NCA (non-deletable, one-shot per session), and a `lockForAudit` step that pins the terminal audit-locked state. `startRecurringRevenue()` + `computeMrr()` + `recordChurn()` + `recordExpansion()` + `computeNrr()` + `recordContraction()` + `startOrchestrationII()` + `smartRoute()` + `scoreMl()` + `triggerFallback()` + `startFraudDetection()` + `scoreDevice()` + `verifyBiometric()` + `flagVelocity()` + `scoreMlBlock()` + `startRegulatoryReporting()` + `reportPci()` + `reportPsd2()` + `reportDora()` + `fileSar()` + `lockForAudit()` give you every one of those pieces without booting a real Chargebee / Recurly / Stripe Radar / Sift / EBA reporting service. This is the pattern kiwa's 3 v1.41 dogfood apps + a hypothetical `examples/dogfood-payment-orchestration-fraud-app` exercise against real Chargebee / Recurly (recurring revenue analytics) + Spreedly (payment orchestration + smart routing) + Stripe Radar / Sift / Signifyd (fraud detection ML fusion) + EBA / FinCEN reporting endpoints (regulatory filing) under `KIWA_MODE=real`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the NRR came out negative because `recordChurn` decremented `mrrEnd` but `computeNrr` used `mrrStart` as the denominator without accounting for the churn in the numerator sign" gap a reviewer sees in the recurring-revenue-nrr post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/payment` v0.5 that models the 4 pieces of a real 
 ```bash
 mkdir kiwa-recurring-orchestration-fraud-regulatory && cd kiwa-recurring-orchestration-fraud-regulatory
 pnpm init
-pnpm add -D @kiwa/payment@^0.5 vitest typescript @types/node
+pnpm add -D @kiwa-lab/payment@^0.5 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -43,7 +43,7 @@ import {
   computeMrr,
   createStripeMock,
   startRecurringRevenue,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('rr — MRR + ARR computation', () => {
   it('computes MRR + ARR from the initial snapshot', async () => {
@@ -85,7 +85,7 @@ import {
   recordContraction,
   recordExpansion,
   startRecurringRevenue,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('rr — churn + expansion + contraction', () => {
   it('records churn and decrements mrrEnd', async () => {
@@ -148,7 +148,7 @@ import {
   recordChurn,
   recordExpansion,
   startRecurringRevenue,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('rr — NRR rollup', () => {
   it('computes NRR > 100 when expansion beats churn', async () => {
@@ -198,7 +198,7 @@ import {
   createStripeMock,
   smartRoute,
   startOrchestrationII,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('po2 — smart routing', () => {
   it('routes through the primary provider on first call', async () => {
@@ -244,7 +244,7 @@ import {
   smartRoute,
   startOrchestrationII,
   triggerFallback,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('po2 — ML score + fallback', () => {
   it('scores ML and flags pass/fail', async () => {
@@ -313,7 +313,7 @@ import {
   scoreDevice,
   startFraudDetection,
   verifyBiometric,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('fraud — device + biometric signals', () => {
   it('scores device fingerprint', async () => {
@@ -365,7 +365,7 @@ import {
   flagVelocity,
   scoreMlBlock,
   startFraudDetection,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('fraud — velocity + ML fusion', () => {
   it('flags velocity when over the hourly limit', async () => {
@@ -433,7 +433,7 @@ import {
   reportPci,
   reportPsd2,
   startRegulatoryReporting,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('reg — PCI + PSD2 + DORA reports', () => {
   it('files PCI DSS attestation', async () => {
@@ -503,7 +503,7 @@ import {
   fileSar,
   lockForAudit,
   startRegulatoryReporting,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 describe('reg — SAR + audit lock', () => {
   it('files a SAR with FinCEN', async () => {

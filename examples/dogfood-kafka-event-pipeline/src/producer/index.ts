@@ -1,7 +1,7 @@
 /**
  * Kafka producer flow — idempotent producer with partition key + batch send.
  *
- * The producer path wraps `@kiwa/streaming`'s idempotent producer so a
+ * The producer path wraps `@kiwa-lab/streaming`'s idempotent producer so a
  * caller can retry the exact same (producerId, sequenceNumber) pair without
  * producing double writes. Partition assignment is deterministic per key
  * (the mock hashes the key with a murmur2-shaped intent).
@@ -15,8 +15,8 @@ import type {
   KafkaMock,
   ProducerRecord,
   PublishResult,
-} from '@kiwa/streaming';
-import { createIdempotentProducer } from '@kiwa/streaming';
+} from '@kiwa-lab/streaming';
+import { createIdempotentProducer } from '@kiwa-lab/streaming';
 
 export interface OrderEvent {
   readonly orderId: string;

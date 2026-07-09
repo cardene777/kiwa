@@ -1,4 +1,4 @@
-import type { TestEnvBase } from '@kiwa/core';
+import type { TestEnvBase } from '@kiwa-lab/core';
 
 /**
  * Supabase Auth advanced adapter. Layers RLS policy simulation + MFA (TOTP +

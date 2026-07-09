@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.40-3 — a sandboxed code interpreter + Python REPL + tool use + rollback state-machine service that drives @kiwa/ai-llm v0.5 code-interpreter axis (sandbox lifecycle + execution history + tool call ledger + memory snapshot rollback) backed by both KIWA_MODE=real (Vercel AI SDK + Anthropic Messages API when ANTHROPIC_API_KEY + KIWA_LLM_BUDGET_USD are set) and KIWA_MODE=mock (in-memory sandbox + deterministic execution + memory snapshot stack) so behavioural fidelity feeds @kiwa/quality-metrics 11-axis release gate.",
+  "description": "Dogfood app v1.40-3 — a sandboxed code interpreter + Python REPL + tool use + rollback state-machine service that drives @kiwa-lab/ai-llm v0.5 code-interpreter axis (sandbox lifecycle + execution history + tool call ledger + memory snapshot rollback) backed by both KIWA_MODE=real (Vercel AI SDK + Anthropic Messages API when ANTHROPIC_API_KEY + KIWA_LLM_BUDGET_USD are set) and KIWA_MODE=mock (in-memory sandbox + deterministic execution + memory snapshot stack) so behavioural fidelity feeds @kiwa-lab/quality-metrics 11-axis release gate.",
   "scripts": {
-    "test": "pnpm -F @kiwa/ai-llm -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/ai-llm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/ai-llm": "workspace:*",
-    "@kiwa/core": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/ai-llm": "workspace:*",
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

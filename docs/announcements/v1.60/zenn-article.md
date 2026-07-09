@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.60 リリース — Desktop 深化 IV (@kiwa/desktop v0.5 child_process.spawn stub 契約層、 depth-5 pattern 2 例目 candidate、 systematic pattern 35 度目、 38 milestone streak、 Mobile v1.54 rhythm 完全再現)"
+title: "kiwa v1.60 リリース — Desktop 深化 IV (@kiwa-lab/desktop v0.5 child_process.spawn stub 契約層、 depth-5 pattern 2 例目 candidate、 systematic pattern 35 度目、 38 milestone streak、 Mobile v1.54 rhythm 完全再現)"
 emoji: "🛠"
 type: "tech"
 topics: ["testing", "vitest", "electron", "tauri", "desktop"]
@@ -14,7 +14,7 @@ published: false
 
 ## What's new
 
-### `@kiwa/desktop` v0.5 minor bump
+### `@kiwa-lab/desktop` v0.5 minor bump
 
 - **[Tutorial 120 — Desktop spawn stub 契約層](https://cardene777.github.io/kiwa/tutorials/120-desktop-spawn-stub)**
 - Migration v1.59 → v1.60 additive + 4 pattern SSOT + 縦深化 pair 第 14 の第 5 段 + depth-5 pattern 2 例目 candidate
@@ -71,7 +71,7 @@ pair 深度 5 段拡張達成 (v0.1 → v0.2 → v0.3 → v0.4 → v0.5) の 2 �
 ## Install
 
 ```bash
-pnpm add -D @kiwa/desktop@^0.5
+pnpm add -D @kiwa-lab/desktop@^0.5
 ```
 
 ## Code sample (4 patterns)
@@ -79,7 +79,7 @@ pnpm add -D @kiwa/desktop@^0.5
 ### Pattern 1 — invokeDesktopCli stub
 
 ```ts
-import { invokeDesktopCli, type SpawnInvocation } from '@kiwa/desktop';
+import { invokeDesktopCli, type SpawnInvocation } from '@kiwa-lab/desktop';
 
 const inv: SpawnInvocation = {
   command: 'ffmpeg',
@@ -93,7 +93,7 @@ console.log(result.stdout); // "[v0.5 stub] ffmpeg -i input.mp4 output.webm"
 ### Pattern 2 — cliForAxis mapping
 
 ```ts
-import { cliForAxis } from '@kiwa/desktop';
+import { cliForAxis } from '@kiwa-lab/desktop';
 
 console.log(cliForAxis('auto-updater'));    // 'electron-updater'
 console.log(cliForAxis('screen-recording')); // 'ffmpeg'
@@ -103,7 +103,7 @@ console.log(cliForAxis('electron'));         // null
 ### Pattern 3 — buildSpawnInvocation factory
 
 ```ts
-import { buildSpawnInvocation } from '@kiwa/desktop';
+import { buildSpawnInvocation } from '@kiwa-lab/desktop';
 
 const inv = buildSpawnInvocation({
   command: 'xclip',
@@ -116,7 +116,7 @@ const inv = buildSpawnInvocation({
 ### Pattern 4 — env-gate + fail-closed
 
 ```ts
-import { invokeDesktopCli } from '@kiwa/desktop';
+import { invokeDesktopCli } from '@kiwa-lab/desktop';
 
 await invokeDesktopCli({ command: 'ffmpeg', args: [], env: {} }); // throws
 await invokeDesktopCli({ command: 'ffmpeg', args: new Array(33).fill('a'), env: { KIWA_DESKTOP_MODE: 'real' } }); // throws

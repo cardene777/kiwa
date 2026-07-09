@@ -2,7 +2,7 @@
 
 ## Tweet 1 — hook
 
-kiwa v1.50 リリース — Mobile 新規 base pair 第 13 導入、 **@kiwa/mobile v0.1** 新規 (React Native + Expo + Metro 3 axis)、 **41 package 到達**。
+kiwa v1.50 リリース — Mobile 新規 base pair 第 13 導入、 **@kiwa-lab/mobile v0.1** 新規 (React Native + Expo + Metro 3 axis)、 **41 package 到達**。
 
 v1.43 Edge base 以来 6 milestone 経過、 5-milestone new-base cadence 完全到達で 12 pair → 13 pair 拡張。
 
@@ -16,7 +16,7 @@ dogfood-mobile-rn-app 新規 (3 axis × 3 target workflow、 11 test)。 **28 mi
 
 ## Tweet 4 — install + npm + Phase 2 計画
 
-`pnpm add -D @kiwa/mobile@^0.1`。 migration: https://cardene777.github.io/kiwa/migrations/v1.49-to-v1.50
+`pnpm add -D @kiwa-lab/mobile@^0.1`。 migration: https://cardene777.github.io/kiwa/migrations/v1.49-to-v1.50
 
 v1.51+ で Mobile 深化 (v0.2 real driver Expo EAS + Metro real bundle + RN new architecture) 予定。 systematic root cause pattern SSOT 25 度目適用。
 

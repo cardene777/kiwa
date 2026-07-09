@@ -16,7 +16,7 @@
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./*"],
-      "@kiwa/dapp": ["../../packages/dapp/dist/index"]
+      "@kiwa-lab/dapp": ["../../packages/dapp/dist/index"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

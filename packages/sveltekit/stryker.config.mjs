@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa/sveltekit.
+ * Mutation testing config for @kiwa-lab/sveltekit.
  * Threshold: Framework tier (high 70 / low 60 / break 50) — SSR + hydration + load / actions drift.
  * SSOT: docs/quality/mutation-thresholds.md § Framework tier.
  */

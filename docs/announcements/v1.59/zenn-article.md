@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.59 リリース — Desktop 深化 III (@kiwa/desktop v0.4 adapter layer + fidelity harness、 depth-4 record 5 例目、 systematic pattern 34 度目、 37 milestone streak、 Mobile v1.53 rhythm 完全再現)"
+title: "kiwa v1.59 リリース — Desktop 深化 III (@kiwa-lab/desktop v0.4 adapter layer + fidelity harness、 depth-4 record 5 例目、 systematic pattern 34 度目、 37 milestone streak、 Mobile v1.53 rhythm 完全再現)"
 emoji: "🔌"
 type: "tech"
 topics: ["testing", "vitest", "electron", "tauri", "desktop"]
@@ -14,7 +14,7 @@ published: false
 
 ## What's new
 
-### `@kiwa/desktop` v0.4 minor bump
+### `@kiwa-lab/desktop` v0.4 minor bump
 
 v0.1 3 axis + v0.2 5 axis + v0.3 4 axis = 12 axis semantics に **adapter layer + fidelity harness 追加**。
 
@@ -72,7 +72,7 @@ depth-4 pattern の 5 例安定化を実証。
 ## Install
 
 ```bash
-pnpm add -D @kiwa/desktop@^0.4
+pnpm add -D @kiwa-lab/desktop@^0.4
 ```
 
 ## Code sample (4 patterns)
@@ -80,7 +80,7 @@ pnpm add -D @kiwa/desktop@^0.4
 ### Pattern 1 — Adapter interface
 
 ```ts
-import { MOCK_ADAPTERS, REAL_ADAPTERS, type AdapterInvocation, type AdapterResult } from '@kiwa/desktop';
+import { MOCK_ADAPTERS, REAL_ADAPTERS, type AdapterInvocation, type AdapterResult } from '@kiwa-lab/desktop';
 
 const inv: AdapterInvocation = { scanId: 's', target: 'macos', mode: 'mock' };
 const result: AdapterResult = await MOCK_ADAPTERS['clipboard'].scan(inv);
@@ -91,7 +91,7 @@ console.log(result.neutralEvents); // clipboard.written, clipboard.read, ...
 ### Pattern 2 — Fidelity harness
 
 ```ts
-import { runFidelityCheck, summarizeFidelity } from '@kiwa/desktop';
+import { runFidelityCheck, summarizeFidelity } from '@kiwa-lab/desktop';
 
 const diffs = await runFidelityCheck({}); // 36 pair
 const summary = summarizeFidelity(diffs);
@@ -101,7 +101,7 @@ console.log(summary.matchedRatio); // 1.0
 ### Pattern 3 — Custom subset
 
 ```ts
-import { runFidelityCheck } from '@kiwa/desktop';
+import { runFidelityCheck } from '@kiwa-lab/desktop';
 
 const diffs = await runFidelityCheck({
   axes: ['electron', 'clipboard', 'dark-mode'],
@@ -113,7 +113,7 @@ const diffs = await runFidelityCheck({
 ### Pattern 4 — Individual factory
 
 ```ts
-import { makeMockAdapter, makeRealAdapter } from '@kiwa/desktop';
+import { makeMockAdapter, makeRealAdapter } from '@kiwa-lab/desktop';
 
 const mockElectron = makeMockAdapter('electron');
 const realClipboard = makeRealAdapter('clipboard');

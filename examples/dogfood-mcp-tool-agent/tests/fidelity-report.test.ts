@@ -24,7 +24,7 @@ describe('dogfood-mcp-tool-agent — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/ai-llm/mcp-tool-agent',
+      provider: '@kiwa-lab/ai-llm/mcp-tool-agent',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -48,7 +48,7 @@ describe('dogfood-mcp-tool-agent — fidelity harness', () => {
       mutation: { mutations: 40, killed: 28 },
       surfaceCoverage: { mockCoveredMethods: 4, realTotalMethods: 4 },
     });
-    expect(output.report.provider).toBe('@kiwa/ai-llm/mcp-tool-agent');
+    expect(output.report.provider).toBe('@kiwa-lab/ai-llm/mcp-tool-agent');
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThanOrEqual(3);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     await mock.reset();
@@ -66,7 +66,7 @@ describe('dogfood-mcp-tool-agent — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/ai-llm/mcp-tool-agent',
+      provider: '@kiwa-lab/ai-llm/mcp-tool-agent',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -105,7 +105,7 @@ describe('dogfood-mcp-tool-agent — fidelity harness', () => {
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/ai-llm/mcp-tool-agent',
+      provider: '@kiwa-lab/ai-llm/mcp-tool-agent',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -138,7 +138,7 @@ describe('dogfood-mcp-tool-agent — fidelity harness', () => {
       accuracy?: { score?: number };
     };
     expect(parsed.fidelity).toBeDefined();
-    // Provider prefix `@kiwa/ai-llm/` triggers the 11-axis AI-LLM branch
+    // Provider prefix `@kiwa-lab/ai-llm/` triggers the 11-axis AI-LLM branch
     // of the release gate — the MCP dogfood surfaces an LLM roundtrip through
     // the mock so cost / latency / token / accuracy all apply on top of the
     // shared 7.

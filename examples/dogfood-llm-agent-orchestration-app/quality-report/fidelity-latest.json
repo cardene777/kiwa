@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa/ai-llm/dogfood-agent-orchestration-app",
+  "provider": "@kiwa-lab/ai-llm/dogfood-agent-orchestration-app",
   "version": "0.1.0",
   "reportedAt": "2026-07-07T05:55:00.445Z",
   "coverage": {

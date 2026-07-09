@@ -1,7 +1,7 @@
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into `@kiwa/quality-metrics`
+ * (missing ops, unmatched behaviour) into `@kiwa-lab/quality-metrics`
  * 13-axis release gate, and emits a JSON + markdown report so the release
  * process can consume it.
  *
@@ -31,7 +31,7 @@ import {
   type A11yTier,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type {
   Http3MultiplexAdapter,
   TraceEvent,

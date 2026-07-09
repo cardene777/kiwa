@@ -1,20 +1,20 @@
-# @kiwa/realtime v2.1 session-orchestrator in 15 min
+# @kiwa-lab/realtime v2.1 session-orchestrator in 15 min
 
 ## What you'll build
 
-`@kiwa/realtime` v2.1 session-orchestrator = presence + broadcast + subscription + heartbeat + reconnect の 継続合成 layer。 5 state SSOT + 8 event SSOT + 40 セル 遷移表 + heartbeat 3 回連続失敗 で degraded 降格 の 動的 QoS。 **depth-5 pattern 5 例目発生** = Mobile + Desktop + quality-metrics + Payment + Realtime = 5 pair 到達 = **systematic law 昇格 candidate**、 50 milestone streak、 systematic pattern 47 度目適用。
+`@kiwa-lab/realtime` v2.1 session-orchestrator = presence + broadcast + subscription + heartbeat + reconnect の 継続合成 layer。 5 state SSOT + 8 event SSOT + 40 セル 遷移表 + heartbeat 3 回連続失敗 で degraded 降格 の 動的 QoS。 **depth-5 pattern 5 例目発生** = Mobile + Desktop + quality-metrics + Payment + Realtime = 5 pair 到達 = **systematic law 昇格 candidate**、 50 milestone streak、 systematic pattern 47 度目適用。
 
 ## Prerequisites
 
 - Node.js ≥ 20 + pnpm
-- `@kiwa/realtime` v2.1 (`pnpm add -D @kiwa/realtime@^2.1`)
+- `@kiwa-lab/realtime` v2.1 (`pnpm add -D @kiwa-lab/realtime@^2.1`)
 
 ## Step-by-step build
 
 ### 1. session 開始
 
 ```ts
-import { startSession } from '@kiwa/realtime';
+import { startSession } from '@kiwa-lab/realtime';
 const s = startSession({ timestamp: new Date().toISOString() });
 // s.state = 'connecting'
 ```
@@ -22,7 +22,7 @@ const s = startSession({ timestamp: new Date().toISOString() });
 ### 2. connect + subscribe
 
 ```ts
-import { dispatchEvent } from '@kiwa/realtime';
+import { dispatchEvent } from '@kiwa-lab/realtime';
 let next = dispatchEvent({ session: s, event: 'connect-succeeded', timestamp: t1 });
 // next.state = 'subscribed'
 next = dispatchEvent({ session: next, event: 'subscribe-succeeded', timestamp: t2 });

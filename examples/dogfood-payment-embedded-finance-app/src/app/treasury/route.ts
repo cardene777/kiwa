@@ -7,7 +7,7 @@
  *
  * The treasury surface pairs the parent v1.41-1 `embedded-finance` axis
  * (openAccount + verifyKyc + verifyKyb + issueCard + closeAccount) with
- * `@kiwa/payment` v0.5 — every op has a neutral event counterpart
+ * `@kiwa-lab/payment` v0.5 — every op has a neutral event counterpart
  * the fidelity harness can compare across mock vs real.
  */
 

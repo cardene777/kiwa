@@ -1,6 +1,6 @@
 # dogfood-security-rbac-abac-app (v1.37-3)
 
-A Casbin-style Authorization service that drives RBAC (role hierarchy + permission inheritance) + ABAC (attribute matching + combining algorithms) + policy engine (combined RBAC/ABAC decision) + policy store (versioning + rollback + activation) across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa/security` v0.1 authorization semantics) and real (Casbin-style policy store driver when `AUTHZ_STORE_READY=1` + `KIWA_POLICY_STORE_URL` are set) implementations satisfy the same 15-op contract so the fidelity harness can diff them side by side.
+A Casbin-style Authorization service that drives RBAC (role hierarchy + permission inheritance) + ABAC (attribute matching + combining algorithms) + policy engine (combined RBAC/ABAC decision) + policy store (versioning + rollback + activation) across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa-lab/security` v0.1 authorization semantics) and real (Casbin-style policy store driver when `AUTHZ_STORE_READY=1` + `KIWA_POLICY_STORE_URL` are set) implementations satisfy the same 15-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -47,4 +47,4 @@ The real adapter defers the Casbin policy store driver wiring to a follow-up mil
 
 ## Fidelity report
 
-The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa/quality-metrics` picks up for the 13-axis release gate. The doc counterpart is added alongside the existing security dogfood entry.
+The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa-lab/quality-metrics` picks up for the 13-axis release gate. The doc counterpart is added alongside the existing security dogfood entry.

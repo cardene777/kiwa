@@ -21,17 +21,17 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const PACKAGES = [
-  { name: '@kiwa/core', dir: 'packages/spec' },
-  { name: '@kiwa/api', dir: 'packages/api' },
-  { name: '@kiwa/ui', dir: 'packages/ui' },
-  { name: '@kiwa/data', dir: 'packages/data' },
-  { name: '@kiwa/cli-test', dir: 'packages/cli-test' },
-  { name: '@kiwa/observability', dir: 'packages/observability' },
-  { name: '@kiwa/e2e', dir: 'packages/e2e' },
-  { name: '@kiwa/cli', dir: 'packages/cli' },
-  { name: '@kiwa/dapp', dir: 'packages/core' },
-  { name: '@kiwa/a11y', dir: 'packages/a11y' },
-  { name: '@kiwa/visual', dir: 'packages/visual' },
+  { name: '@kiwa-lab/core', dir: 'packages/spec' },
+  { name: '@kiwa-lab/api', dir: 'packages/api' },
+  { name: '@kiwa-lab/ui', dir: 'packages/ui' },
+  { name: '@kiwa-lab/data', dir: 'packages/data' },
+  { name: '@kiwa-lab/cli-test', dir: 'packages/cli-test' },
+  { name: '@kiwa-lab/observability', dir: 'packages/observability' },
+  { name: '@kiwa-lab/e2e', dir: 'packages/e2e' },
+  { name: '@kiwa-lab/cli', dir: 'packages/cli' },
+  { name: '@kiwa-lab/dapp', dir: 'packages/core' },
+  { name: '@kiwa-lab/a11y', dir: 'packages/a11y' },
+  { name: '@kiwa-lab/visual', dir: 'packages/visual' },
 ];
 
 const METRICS = ['lines', 'branches', 'functions', 'statements'];

@@ -6,7 +6,7 @@
  * The dogfood app talks to Cloudflare Workers only through this interface.
  * Two implementations exist —
  *
- * - {@link makeMockAdapter} — backed by `@kiwa/edge` v0.2 8 axis
+ * - {@link makeMockAdapter} — backed by `@kiwa-lab/edge` v0.2 8 axis
  *   semantics helpers (`createDurableObject` / `requestDurableObject` /
  *   `fireAlarm` / `writeStorage` / `requestWebSocketUpgrade` /
  *   `acceptWebSocket` / `sendMessage` / `closeWebSocket`). Always runs.
@@ -19,7 +19,7 @@
  * vs mock can be measured side-by-side and fed to the fidelity harness.
  *
  * The 8 ops correspond to the 8 axis routing pattern inherited from
- * v1.24-1 (`@kiwa/edge` v0.2 semantics): durable-object (4 events) +
+ * v1.24-1 (`@kiwa-lab/edge` v0.2 semantics): durable-object (4 events) +
  * websocket-edge (4 events) = 8 op surface.
  *
  * Chat room use case — clients JOIN a room (Durable Object created), SEND

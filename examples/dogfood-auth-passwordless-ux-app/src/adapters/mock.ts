@@ -1,4 +1,4 @@
-import { semantics } from '@kiwa/auth';
+import { semantics } from '@kiwa-lab/auth';
 const {
   bindToDevice,
   completeHandshake,

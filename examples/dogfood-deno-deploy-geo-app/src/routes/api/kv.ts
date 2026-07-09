@@ -1,6 +1,6 @@
 /**
  * `/api/kv` Fresh route handler — Deno KV multi-region write + eventual
- * consistency observation. Uses the `@kiwa/edge` v0.2 `edge-kv` +
+ * consistency observation. Uses the `@kiwa-lab/edge` v0.2 `edge-kv` +
  * `geo-replicated` axes via the adapter. On POST the handler issues a
  * primary-region KV write (`kv.set`), bumps the geo replication version,
  * marks all replicas as lagging until a follow-up sync catches them up.

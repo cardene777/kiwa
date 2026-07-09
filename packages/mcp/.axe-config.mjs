@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/mcp.
+ * A11y (axe-core) config for @kiwa-lab/mcp.
  * Tier: SaaS tier (critical 0 / serious 0 / moderate 0) — MCP JSON-RPC protocol + transport. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § SaaS tier.
  */

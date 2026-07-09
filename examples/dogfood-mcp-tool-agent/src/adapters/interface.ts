@@ -6,17 +6,17 @@
  * `@modelcontextprotocol/sdk` stdio server + optional real Anthropic Messages
  * API when `ANTHROPIC_API_KEY` is set, otherwise reports each method as
  * `MCP_REAL_ENV_MISSING`) and {@link makeMockAdapter} (backed by
- * `@kiwa/mcp` `McpServer` + `@kiwa/ai-llm` `createAnthropicMock`).
+ * `@kiwa-lab/mcp` `McpServer` + `@kiwa-lab/ai-llm` `createAnthropicMock`).
  * Both must satisfy the same contract so behavioural fidelity between real
  * vs mock can be measured side-by-side and fed to
- * `@kiwa/quality-metrics` 11-axis release gate.
+ * `@kiwa-lab/quality-metrics` 11-axis release gate.
  *
  * The 3 ops this contract supports mirror the AC in Issue #750 — MCP
  * handshake (initialize + tools/list) + tool call chain (weather / calc /
  * search) + Claude-driven tool orchestration.
  */
 
-import type { McpTool, ToolCallResult } from '@kiwa/mcp';
+import type { McpTool, ToolCallResult } from '@kiwa-lab/mcp';
 
 /** A single tool_use block the LLM asked the agent to execute via MCP. */
 export interface AgentToolCall {

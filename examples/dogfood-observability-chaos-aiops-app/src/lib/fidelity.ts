@@ -1,12 +1,12 @@
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into `@kiwa/quality-metrics`
+ * (missing ops, unmatched behaviour) into `@kiwa-lab/quality-metrics`
  * 13-axis release gate, and emits a JSON + markdown report so the
  * release process can consume it.
  *
  * The dogfood app is the source of truth for whether the v1.42-1
- * `@kiwa/observability` v2.2 chaos + aiops helpers track the real
+ * `@kiwa-lab/observability` v2.2 chaos + aiops helpers track the real
  * LitmusChaos / Gremlin / PagerDuty AIOps + runbook API behaviour
  * closely enough to be trusted as a mock in unit tests. The report
  * tracks the same 12 ops the adapter contract exposes so any divergence
@@ -33,7 +33,7 @@ import {
   type A11yTier,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { ChaosAiopsAdapter, TraceEvent } from '../adapters/interface.js';
 
 export interface FidelityRunInput {

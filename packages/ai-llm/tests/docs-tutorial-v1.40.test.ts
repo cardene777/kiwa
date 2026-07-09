@@ -1,6 +1,6 @@
 /**
  * v1.40-5 docs 補強 (Issue #1135 / CAR-892) — tutorial 85-87 code snippet validation
- * for `@kiwa/ai-llm` v0.5 advanced III 8 axis (Multi-agent orchestration +
+ * for `@kiwa-lab/ai-llm` v0.5 advanced III 8 axis (Multi-agent orchestration +
  * Agent swarm + Code interpreter + Fine-tuning pipeline + LLM ops + Prompt
  * engineering advanced + RAG III + Cost optimization).
  *

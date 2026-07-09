@@ -1,6 +1,6 @@
 # dogfood-security-csp-headers-app (v1.37-2)
 
-A Next.js 15.4 + React 19.1 App Router app that drives CSP (nonce + hash + strict-dynamic + trusted-types + report-only) + advanced security headers (HSTS + X-Frame-Options + X-Content-Type-Options + Referrer-Policy + Permissions-Policy) + CSP violation reporting across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa/security` v0.1 csp + security-headers semantics) and real (Playwright + Chromium headless when `CSP_BROWSER_READY=1`) implementations satisfy the same 15-op contract so the fidelity harness can diff them side by side.
+A Next.js 15.4 + React 19.1 App Router app that drives CSP (nonce + hash + strict-dynamic + trusted-types + report-only) + advanced security headers (HSTS + X-Frame-Options + X-Content-Type-Options + Referrer-Policy + Permissions-Policy) + CSP violation reporting across a provider-neutral `SecurityAdapter`. Both mock (`@kiwa-lab/security` v0.1 csp + security-headers semantics) and real (Playwright + Chromium headless when `CSP_BROWSER_READY=1`) implementations satisfy the same 15-op contract so the fidelity harness can diff them side by side.
 
 ## Run
 
@@ -46,4 +46,4 @@ The real adapter defers the Playwright + Chromium browser session wiring to a fo
 
 ## Fidelity report
 
-The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa/quality-metrics` picks up for the 13-axis release gate. The doc counterpart lives at `docs/quality-reports/security/csp-headers-app.md`.
+The vitest suite writes `quality-report/fidelity-latest.md` + `quality-report/fidelity-latest.json` that `@kiwa-lab/quality-metrics` picks up for the 13-axis release gate. The doc counterpart lives at `docs/quality-reports/security/csp-headers-app.md`.

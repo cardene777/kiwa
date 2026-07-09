@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/realtime",
+  "package": "@kiwa-lab/realtime",
   "tier": "SaaS",
   "thresholds": {
     "high": 65,

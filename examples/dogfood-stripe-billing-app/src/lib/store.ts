@@ -2,7 +2,7 @@
  * Framework-agnostic in-memory store for subscriptions + invoices + emitted
  * events. Mirrors the surface a real database + audit log deployment would
  * expose so the same Next.js route handlers can flip between the real Stripe
- * driver and the `@kiwa/payment` mock without knowing which is in play.
+ * driver and the `@kiwa-lab/payment` mock without knowing which is in play.
  *
  * The store is in-memory + per-instance; production RPs swap this for a
  * database. The mock is fine for a dogfood app because every test bootstraps
@@ -15,7 +15,7 @@ import type {
   Subscription as SemanticSubscription,
   ThreeDsSession,
   DunningSession,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 export interface CheckoutRecord {
   sessionId: string;

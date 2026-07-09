@@ -21,7 +21,7 @@ import type {
   ThreeDsSession,
   ThreeDsTransStatus,
   DunningSession,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import type {
   CheckoutInput,
   CheckoutResult,

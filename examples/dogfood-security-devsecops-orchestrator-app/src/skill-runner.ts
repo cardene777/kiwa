@@ -5,7 +5,7 @@ import {
   type AuditPreset,
   type AuditReport,
   type AuditSummary,
-} from '@kiwa/security-devsecops';
+} from '@kiwa-lab/security-devsecops';
 
 /**
  * skill 4 種を library single entry で置換する dogfood。

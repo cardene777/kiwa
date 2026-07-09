@@ -1,12 +1,12 @@
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into `@kiwa/quality-metrics`
+ * (missing ops, unmatched behaviour) into `@kiwa-lab/quality-metrics`
  * 13-axis release gate, and emits a JSON + markdown report so the
  * release process can consume it.
  *
  * The dogfood app is the source of truth for whether the v1.35-1
- * `@kiwa/observability` v2.1 SLO axis tracks the production
+ * `@kiwa-lab/observability` v2.1 SLO axis tracks the production
  * Grafana + Prometheus + Alertmanager MWMBR pipeline closely enough to
  * be trusted as a mock in unit tests. The report tracks the same 14 ops
  * the adapter contract exposes so any divergence surfaces the op that
@@ -33,7 +33,7 @@ import {
   type A11yTier,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { SloAdapter, TraceEvent } from '../adapters/interface.js';
 import { SLO_HARNESS_OPS } from '../adapters/interface.js';
 

@@ -13,7 +13,7 @@
  *  3. transferFunds moves cents between two open accounts atomically and
  *     reports succeeded=false when the source is under-funded (no partial
  *     debits).
- *  4. closeTreasury forwards state to `@kiwa/payment` v0.5
+ *  4. closeTreasury forwards state to `@kiwa-lab/payment` v0.5
  *     closeAccount and further ops on the same session id fail.
  *  5. Route handler dispatches / rejects the shape variations exposed
  *     over HTTP without spinning up a Node server.

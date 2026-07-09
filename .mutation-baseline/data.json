@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/data",
+  "package": "@kiwa-lab/data",
   "tier": "Core",
   "thresholds": {
     "high": 80,

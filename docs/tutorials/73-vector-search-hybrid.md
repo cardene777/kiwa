@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/search` v0.3 that models the 4 pieces of a real vector-search pipeline that every non-trivial semantic-search product eventually needs — a vector session that pins an index id + dimension + algorithm (`hnsw` / `ivf` / `flat`), an index-build step that ingests the embedding rows without touching disk, a kNN query that ranks by cosine similarity, a hybrid fusion step that combines the kNN hits with keyword hits using weighted sums, and a recall@k assertion that turns a ground-truth list into a matched / total ratio. `startVectorSession()` + `buildVectorIndex()` + `queryKnn()` + `fuseHybrid()` + `recallAnn()` give you every one of those pieces without booting a real Meilisearch / Typesense pair. This is the pattern kiwa's `examples/dogfood-search-vector-app` v2 exercises against real Meilisearch v1 + Typesense v27 under `KIWA_MODE=real` + `KIWA_MEILI_URL` + `KIWA_TYPESENSE_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the p95 recall@10 dropped from 0.92 to 0.71 after the HNSW `M` parameter changed but the panel still showed green" gap a reviewer sees in the search-quality post-mortem.
+A vitest suite wired to `@kiwa-lab/search` v0.3 that models the 4 pieces of a real vector-search pipeline that every non-trivial semantic-search product eventually needs — a vector session that pins an index id + dimension + algorithm (`hnsw` / `ivf` / `flat`), an index-build step that ingests the embedding rows without touching disk, a kNN query that ranks by cosine similarity, a hybrid fusion step that combines the kNN hits with keyword hits using weighted sums, and a recall@k assertion that turns a ground-truth list into a matched / total ratio. `startVectorSession()` + `buildVectorIndex()` + `queryKnn()` + `fuseHybrid()` + `recallAnn()` give you every one of those pieces without booting a real Meilisearch / Typesense pair. This is the pattern kiwa's `examples/dogfood-search-vector-app` v2 exercises against real Meilisearch v1 + Typesense v27 under `KIWA_MODE=real` + `KIWA_MEILI_URL` + `KIWA_TYPESENSE_URL`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the p95 recall@10 dropped from 0.92 to 0.71 after the HNSW `M` parameter changed but the panel still showed green" gap a reviewer sees in the search-quality post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/search` v0.3 that models the 4 pieces of a real v
 ```bash
 mkdir kiwa-vector-search && cd kiwa-vector-search
 pnpm init
-pnpm add -D @kiwa/search@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa-lab/search@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.3 surface exports the vector axis through the `semantics/` barrel. This t
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { startVectorSession, buildVectorIndex } from '@kiwa/search';
+import { startVectorSession, buildVectorIndex } from '@kiwa-lab/search';
 
 const sampleVectors = [
   { id: 'a', vector: [1, 0, 0] },
@@ -95,7 +95,7 @@ The 3 tests pass. The invariant `dimensions > 0` before `buildVectorIndex` is wh
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { startVectorSession, buildVectorIndex, queryKnn } from '@kiwa/search';
+import { startVectorSession, buildVectorIndex, queryKnn } from '@kiwa-lab/search';
 
 const sampleVectors = [
   { id: 'a', vector: [1, 0, 0] },
@@ -158,7 +158,7 @@ import {
   buildVectorIndex,
   queryKnn,
   fuseHybrid,
-} from '@kiwa/search';
+} from '@kiwa-lab/search';
 
 const sampleVectors = [
   { id: 'a', vector: [1, 0, 0] },
@@ -221,7 +221,7 @@ import {
   buildVectorIndex,
   queryKnn,
   recallAnn,
-} from '@kiwa/search';
+} from '@kiwa-lab/search';
 
 const sampleVectors = [
   { id: 'a', vector: [1, 0, 0] },
@@ -275,7 +275,7 @@ The invariant is that `recallAnn` treats `groundTruth` as the denominator — th
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { collectFidelityCoverage } from '@kiwa/search';
+import { collectFidelityCoverage } from '@kiwa-lab/search';
 
 describe('vector — fidelity coverage', () => {
   it('the 4 provider × vector axis grid emits 4 rows', () => {

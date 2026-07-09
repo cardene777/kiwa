@@ -9,7 +9,7 @@
  * The incident surface pairs the parent v1.39-1 `incident-response`
  * axis (startIncidentSession + triggerPlaybook + classifySeverity +
  * escalate + captureForensics + recordPostMortem) with
- * `@kiwa/security` v0.2 — every op has a neutral event
+ * `@kiwa-lab/security` v0.2 — every op has a neutral event
  * counterpart the fidelity harness can compare across mock vs real.
  */
 

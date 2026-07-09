@@ -14,17 +14,17 @@ v1.5-v1.7 で polyglot Web layer を 6 web framework まで縦深化した後、
 
 ```bash
 # 3 新 package v0.1
-pnpm add -D @kiwa/auth   # NextAuth v5 + Lucia v3 + Better Auth
-pnpm add -D @kiwa/queue  # BullMQ + Inngest
-pnpm add -D @kiwa/cache  # Redis
+pnpm add -D @kiwa-lab/auth   # NextAuth v5 + Lucia v3 + Better Auth
+pnpm add -D @kiwa-lab/queue  # BullMQ + Inngest
+pnpm add -D @kiwa-lab/cache  # Redis
 ```
 
 ## v1.8 で land した 3 分野
 
-### 1. auth (`@kiwa/auth` v0.1)
+### 1. auth (`@kiwa-lab/auth` v0.1)
 
 ```ts
-import { setupNextAuthEnv, setupLuciaEnv, setupBetterAuthEnv } from "@kiwa/auth";
+import { setupNextAuthEnv, setupLuciaEnv, setupBetterAuthEnv } from "@kiwa-lab/auth";
 
 // NextAuth v5 (Auth.js)
 const env = setupNextAuthEnv({
@@ -53,10 +53,10 @@ const env = setupBetterAuthEnv({
 - **Better Auth** ... email/password + magic link + 2FA TOTP + passkey + organizations、 Prisma/Drizzle/Kysely
 - Auth.js `Adapter` 契約と 1:1 一致、 drop-in 保証
 
-### 2. job queue (`@kiwa/queue` v0.1)
+### 2. job queue (`@kiwa-lab/queue` v0.1)
 
 ```ts
-import { setupBullMQEnv, setupInngestEnv } from "@kiwa/queue";
+import { setupBullMQEnv, setupInngestEnv } from "@kiwa-lab/queue";
 
 // BullMQ (sandbox = in-process、 testcontainers = real Redis)
 const env = setupBullMQEnv({ mode: "sandbox", queueName: "email" });
@@ -77,10 +77,10 @@ env.assertStepRan("send-welcome-email");
 - **BullMQ** ... sandbox mode (in-process, deterministic) + testcontainers mode (real BullMQ + ioredis + Docker Redis)、 5 assertion helper (waitForJob / assertProcessed / assertFailed / assertRetried / assertQueueDrained)
 - **Inngest** ... stub mode (deterministic) + dev-server mode (real subprocess + HTTP round-trip)、 6 assertion helper + retry / step function (step.run + step.sleep) / concurrency cap の 3 semantics 再現
 
-### 3. cache (`@kiwa/cache` v0.1)
+### 3. cache (`@kiwa-lab/cache` v0.1)
 
 ```ts
-import { setupCacheEnv } from "@kiwa/cache";
+import { setupCacheEnv } from "@kiwa-lab/cache";
 
 // in-memory (default) / testcontainers (real Redis + ioredis / node-redis)
 const env = setupCacheEnv({ mode: "in-memory" });
@@ -158,13 +158,13 @@ Layer 2 skill 3 種 新規。
 /plugin install kiwa@kiwa-marketplace
 
 # auth
-pnpm add -D @kiwa/auth
+pnpm add -D @kiwa-lab/auth
 
 # job queue
-pnpm add -D @kiwa/queue
+pnpm add -D @kiwa-lab/queue
 
 # cache
-pnpm add -D @kiwa/cache
+pnpm add -D @kiwa-lab/cache
 ```
 
 repo ... https://github.com/cardene777/kiwa

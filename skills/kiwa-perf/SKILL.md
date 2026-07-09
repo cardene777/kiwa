@@ -1,6 +1,6 @@
 ---
 name: kiwa-perf
-description: 汎用性能 test 設計 + 実行 + report + release gate 発火の 5 step skill。 `@kiwa/perf-harness` を使って任意 package / example の性能を計測し、 baseline 比較 + regression 検知 + 11 軸 release gate 判定 + markdown report emit まで完結。 kiwa 内 dogfood app と harness 全てに適用可能な汎用 perf 経路。
+description: 汎用性能 test 設計 + 実行 + report + release gate 発火の 5 step skill。 `@kiwa-lab/perf-harness` を使って任意 package / example の性能を計測し、 baseline 比較 + regression 検知 + 11 軸 release gate 判定 + markdown report emit まで完結。 kiwa 内 dogfood app と harness 全てに適用可能な汎用 perf 経路。
 trigger_keywords:
   - 性能計測
   - perf test
@@ -34,7 +34,7 @@ Generate a perf spec at `tests/perf-spec-{module}.md`.
 
 Write `tests/perf/{module}.perf.ts`.
 
-- Import `@kiwa/perf-harness`.
+- Import `@kiwa-lab/perf-harness`.
 - Run each op through `measure()`.
 - Save a fresh baseline when invoked with `--baseline`.
 - Compare against stored baseline when invoked with `--compare`.

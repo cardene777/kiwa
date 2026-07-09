@@ -1,4 +1,4 @@
-# Quality Report — @kiwa/observability/slo @ 2.1.0
+# Quality Report — @kiwa-lab/observability/slo @ 2.1.0
 
 _Reported at 2026-07-06T14:50:28.486Z._
 

@@ -4,7 +4,7 @@ Focus shift from "add more providers" (v1.10) to "measure release quality with n
 
 Every provider now reports the same 5-axis score. Release gate has SSOT thresholds. 3 dogfood apps run real-vs-mock fidelity checks.
 
-2/ @kiwa/quality-metrics v0.1 — the unified harness.
+2/ @kiwa-lab/quality-metrics v0.1 — the unified harness.
 
 5 axes: coverage / test count / fidelity / perf p95 / mutation kill rate.
 

@@ -10,13 +10,13 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { ChatRoomAdapter, TraceEvent } from '../adapters/interface.js';
 
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into the `@kiwa/quality-metrics`
+ * (missing ops, unmatched behaviour) into the `@kiwa-lab/quality-metrics`
  * 7-axis release gate, and emits a JSON + markdown report so the release
  * process can consume it.
  *

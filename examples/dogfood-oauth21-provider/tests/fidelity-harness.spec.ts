@@ -32,7 +32,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   __resetOAuth21Counters,
   createPkceChallenge,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { makeRealAdapter, detectRealEnvMissing } from '../src/adapters/real.js';
 import { createHonoApp } from '../src/lib/hono-app.js';

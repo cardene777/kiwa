@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/dapp.
+ * A11y (axe-core) config for @kiwa-lab/dapp.
  * Tier: SaaS tier (critical 0 / serious 0 / moderate 0) — viem + anvil + wallet fixture. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § SaaS tier.
  */

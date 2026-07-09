@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A provider-neutral `ReleaseInvariantsAdapter` with two implementations — a **mock adapter** backed by `@kiwa/release-invariants` v0.1's `checkReleaseScriptFilter` + `checkProvenanceFlagAbsence` + `checkGateScriptPackageCoverage` + `buildReleaseInvariantsSummary`, and a **file adapter** stub that reads the real `package.json` under `REPO_ROOT`. Both satisfy the same 4-op contract (`loadPublishable` / `checkFilter` / `checkProvenance` / `checkGateCoverage`), so a fidelity harness can diff them against a repository under audit. This is the exact pattern the release-smoke `release-script-filter.test.ts` (v1.29-1, PR #989) uses to run 40 per-package assertions against the root `package.json` release script.
+A provider-neutral `ReleaseInvariantsAdapter` with two implementations — a **mock adapter** backed by `@kiwa-lab/release-invariants` v0.1's `checkReleaseScriptFilter` + `checkProvenanceFlagAbsence` + `checkGateScriptPackageCoverage` + `buildReleaseInvariantsSummary`, and a **file adapter** stub that reads the real `package.json` under `REPO_ROOT`. Both satisfy the same 4-op contract (`loadPublishable` / `checkFilter` / `checkProvenance` / `checkGateCoverage`), so a fidelity harness can diff them against a repository under audit. This is the exact pattern the release-smoke `release-script-filter.test.ts` (v1.29-1, PR #989) uses to run 40 per-package assertions against the root `package.json` release script.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A provider-neutral `ReleaseInvariantsAdapter` with two implementations — a **m
 ```bash
 mkdir kiwa-release-invariants && cd kiwa-release-invariants
 pnpm init
-pnpm add -D @kiwa/release-invariants@^0.1 vitest typescript @types/node
+pnpm add -D @kiwa-lab/release-invariants@^0.1 vitest typescript @types/node
 ```
 
 `package.json`:
@@ -39,7 +39,7 @@ pnpm add -D @kiwa/release-invariants@^0.1 vitest typescript @types/node
 import type {
   PublishablePackage,
   ReleaseInvariantsSummary,
-} from '@kiwa/release-invariants';
+} from '@kiwa-lab/release-invariants';
 
 export interface ReleaseInvariantsAdapter {
   readonly mode: 'file' | 'mock';
@@ -56,7 +56,7 @@ export interface ReleaseInvariantsAdapter {
 
 The adapter is intentionally thin. Every reader — release-smoke, docs snippet validation, a downstream monorepo's own gate — only needs the 3 script strings + the publishable list to construct the same summary shape.
 
-### 3. Write the mock adapter using `@kiwa/release-invariants`
+### 3. Write the mock adapter using `@kiwa-lab/release-invariants`
 
 `src/adapters/mock.ts` — a fully in-memory adapter that pretends to have loaded a `package.json` and returns a caller-supplied summary.
 
@@ -65,7 +65,7 @@ import {
   buildReleaseInvariantsSummary,
   type PublishablePackage,
   type ReleaseInvariantsSummary,
-} from '@kiwa/release-invariants';
+} from '@kiwa-lab/release-invariants';
 import type { ReleaseInvariantsAdapter } from './interface.js';
 
 export interface MockReleaseInvariantsInput {
@@ -108,8 +108,8 @@ import { describe, expect, it } from 'vitest';
 import { createMockReleaseInvariants } from '../src/adapters/mock.js';
 
 const PUBLISHABLE = [
-  { name: '@kiwa/core' },
-  { name: '@kiwa/realtime' },
+  { name: '@kiwa-lab/core' },
+  { name: '@kiwa-lab/realtime' },
 ];
 
 describe('release invariants', () => {
@@ -117,10 +117,10 @@ describe('release invariants', () => {
     const adapter = createMockReleaseInvariants({
       publishable: PUBLISHABLE,
       releaseScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime build && ' +
-        'pnpm publish --filter @kiwa/core --filter @kiwa/realtime',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime build && ' +
+        'pnpm publish --filter @kiwa-lab/core --filter @kiwa-lab/realtime',
       mutationGateScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime run test:mutation',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime run test:mutation',
     });
     const summary = await adapter.summarize();
     expect(summary.ok).toBe(true);
@@ -130,15 +130,15 @@ describe('release invariants', () => {
     const adapter = createMockReleaseInvariants({
       publishable: PUBLISHABLE,
       releaseScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime build && ' +
-        'pnpm publish --filter @kiwa/core',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime build && ' +
+        'pnpm publish --filter @kiwa-lab/core',
       mutationGateScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime run test:mutation',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime run test:mutation',
     });
     const summary = await adapter.summarize();
     expect(summary.ok).toBe(false);
     expect(summary.releaseScriptFilter.missingPublishFilter).toEqual([
-      '@kiwa/realtime',
+      '@kiwa-lab/realtime',
     ]);
   });
 
@@ -146,10 +146,10 @@ describe('release invariants', () => {
     const adapter = createMockReleaseInvariants({
       publishable: PUBLISHABLE,
       releaseScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime build && ' +
-        'pnpm publish --filter @kiwa/core --filter @kiwa/realtime --provenance',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime build && ' +
+        'pnpm publish --filter @kiwa-lab/core --filter @kiwa-lab/realtime --provenance',
       mutationGateScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime run test:mutation',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime run test:mutation',
     });
     const summary = await adapter.summarize();
     expect(summary.ok).toBe(false);
@@ -161,14 +161,14 @@ describe('release invariants', () => {
     const adapter = createMockReleaseInvariants({
       publishable: PUBLISHABLE,
       releaseScript:
-        'pnpm -F @kiwa/core -F @kiwa/realtime build && ' +
-        'pnpm publish --filter @kiwa/core --filter @kiwa/realtime',
-      mutationGateScript: 'pnpm -F @kiwa/core run test:mutation',
+        'pnpm -F @kiwa-lab/core -F @kiwa-lab/realtime build && ' +
+        'pnpm publish --filter @kiwa-lab/core --filter @kiwa-lab/realtime',
+      mutationGateScript: 'pnpm -F @kiwa-lab/core run test:mutation',
     });
     const summary = await adapter.summarize();
     expect(summary.ok).toBe(false);
     expect(summary.gateScriptPackageCoverage.missingMutationFilter).toEqual([
-      '@kiwa/realtime',
+      '@kiwa-lab/realtime',
     ]);
   });
 });
@@ -195,7 +195,7 @@ The 4 tests pass on the mock adapter with zero I/O — the invariants are pure f
 ```ts
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { buildReleaseInvariantsSummary } from '@kiwa/release-invariants';
+import { buildReleaseInvariantsSummary } from '@kiwa-lab/release-invariants';
 import type { ReleaseInvariantsAdapter } from './interface.js';
 
 interface RootPackageJson {

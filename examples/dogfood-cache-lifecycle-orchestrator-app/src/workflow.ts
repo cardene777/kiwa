@@ -5,7 +5,7 @@ import {
   type CacheSession,
   type CacheSummary,
   type CacheEvent,
-} from '@kiwa/cache';
+} from '@kiwa-lab/cache';
 
 export function bootCache(input: { timestamp: string }): CacheSession {
   return startCache({ timestamp: input.timestamp });

@@ -3,17 +3,17 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.34-3 — a Next.js 15.4 + React 19.1 App Router app that drives Server Action + form action + useFormStatus + useOptimistic + revalidatePath + revalidateTag + redirect + progressive enhancement across a provider-neutral surface backed by @kiwa/component v0.3 form-action-advanced semantics + @kiwa/nextjs v1.2 server-action-advanced semantics, runnable in both KIWA_MODE=real (Playwright + Chromium headless when SERVER_ACTION_BROWSER_READY=1) and KIWA_MODE=mock (in-memory session harness) so behavioural fidelity feeds @kiwa/quality-metrics.",
+  "description": "Dogfood app v1.34-3 — a Next.js 15.4 + React 19.1 App Router app that drives Server Action + form action + useFormStatus + useOptimistic + revalidatePath + revalidateTag + redirect + progressive enhancement across a provider-neutral surface backed by @kiwa-lab/component v0.3 form-action-advanced semantics + @kiwa-lab/nextjs v1.2 server-action-advanced semantics, runnable in both KIWA_MODE=real (Playwright + Chromium headless when SERVER_ACTION_BROWSER_READY=1) and KIWA_MODE=mock (in-memory session harness) so behavioural fidelity feeds @kiwa-lab/quality-metrics.",
   "scripts": {
-    "test": "pnpm -F @kiwa/component -F @kiwa/core -F @kiwa/nextjs -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/component -F @kiwa-lab/core -F @kiwa-lab/nextjs -F @kiwa-lab/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/component": "workspace:*",
-    "@kiwa/core": "workspace:*",
-    "@kiwa/nextjs": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/component": "workspace:*",
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/nextjs": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

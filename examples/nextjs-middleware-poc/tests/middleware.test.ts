@@ -10,7 +10,7 @@
 // | T-MW-006 | header inject       | (any)                       | x-frame-options=DENY, ... 3 headers        |
 
 import { describe, expect, it } from 'vitest';
-import { invokeMiddleware } from '@kiwa/nextjs';
+import { invokeMiddleware } from '@kiwa-lab/nextjs';
 import { authGate, localeRewrite, headerInject } from '../src/middleware.js';
 
 describe('authGate', () => {

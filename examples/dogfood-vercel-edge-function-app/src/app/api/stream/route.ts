@@ -1,6 +1,6 @@
 /**
  * `/api/stream` route handler — SSE (Server-Sent Events) Response with
- * backpressure. Uses the `@kiwa/edge` v0.2 `streaming-response` axis
+ * backpressure. Uses the `@kiwa-lab/edge` v0.2 `streaming-response` axis
  * via the adapter. On GET the handler opens a stream, writes N chunks
  * (respecting the high-water mark), and closes cleanly. The mock returns
  * a `SseBackpressureSnapshot` observable so the fidelity harness can

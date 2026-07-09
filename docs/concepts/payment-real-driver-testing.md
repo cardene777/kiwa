@@ -70,7 +70,7 @@ If the fidelity harness has a `planned` cell, the corresponding tutorial + dogfo
 
 ## How this ties into the 13-axis release gate
 
-v1.33 does not add a 14th release-gate axis. The 8 advanced payment axes gate the payment package's own tests (via `pnpm --filter @kiwa/payment test`) but do not surface as a per-package `@kiwa/quality-metrics` axis. The reasoning — the fidelity harness is provider-shape-specific, and a package that does not use Stripe / Paddle / Lemon Squeezy has nothing to assert on. When a future milestone adds a `provider.fidelity` axis that describes "which payment providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.33 keeps the axis count at 13.
+v1.33 does not add a 14th release-gate axis. The 8 advanced payment axes gate the payment package's own tests (via `pnpm --filter @kiwa-lab/payment test`) but do not surface as a per-package `@kiwa-lab/quality-metrics` axis. The reasoning — the fidelity harness is provider-shape-specific, and a package that does not use Stripe / Paddle / Lemon Squeezy has nothing to assert on. When a future milestone adds a `provider.fidelity` axis that describes "which payment providers this package's tests hit," it will slot into the 13-axis release gate as the 14th; v1.33 keeps the axis count at 13.
 
 ## SSOT boundaries
 

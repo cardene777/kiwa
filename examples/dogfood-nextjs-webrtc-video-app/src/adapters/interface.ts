@@ -6,7 +6,7 @@
  *  - {@link makeRealAdapter} (drives mediasoup + coturn testcontainers when
  *    `KIWA_MODE=real` + `WEBRTC_MEDIASOUP_READY=1` are set; otherwise every
  *    op reports `KIWA_WEBRTC_ENV_MISSING`)
- *  - {@link makeMockAdapter} (backed by `@kiwa/realtime` v0.2's
+ *  - {@link makeMockAdapter} (backed by `@kiwa-lab/realtime` v0.2's
  *    `createWebRtcSignalingMock` + `createWebRtcIceMock` +
  *    `createWebRtcTrackMock`)
  *

@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa/orm/sqlite-wal-fts-dogfood",
+  "provider": "@kiwa-lab/orm/sqlite-wal-fts-dogfood",
   "version": "0.1.0",
   "reportedAt": "2026-07-06T08:14:26.235Z",
   "coverage": {

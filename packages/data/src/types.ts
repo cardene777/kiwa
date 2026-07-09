@@ -1,4 +1,4 @@
-import type { TestEnvBase, TestMode } from '@kiwa/core';
+import type { TestEnvBase, TestMode } from '@kiwa-lab/core';
 
 export interface QueueMessage<T = unknown> {
   id: string;

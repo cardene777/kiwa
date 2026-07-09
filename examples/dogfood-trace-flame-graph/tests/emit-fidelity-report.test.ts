@@ -29,7 +29,7 @@ describe('dogfood-trace-flame-graph — emit fidelity report to quality-report/'
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/observability/trace-flame',
+      provider: '@kiwa-lab/observability/trace-flame',
       version: '2.0.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

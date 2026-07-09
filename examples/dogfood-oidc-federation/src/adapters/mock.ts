@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/auth`'s `setupOidcEnv` so the same Hono
+ * Mock adapter — drives `@kiwa-lab/auth`'s `setupOidcEnv` so the same Hono
  * OP exercises a deterministic OIDC surface without spawning Keycloak or a
  * docker container. Both mock + real adapters satisfy {@link OIDCOPAdapter}
  * so the fidelity harness can diff them side-by-side.
@@ -26,7 +26,7 @@ import {
   type JwksKey,
   type OidcTestEnv,
   type OpenIdProviderMetadata,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 import {
   handleRegistration,
   type ExtendedClientRegistrationRequest,

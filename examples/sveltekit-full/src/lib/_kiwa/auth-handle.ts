@@ -3,7 +3,7 @@
 // Pattern A (Dependency Injection) — 実 SvelteKit 側は src/hooks.server.ts で
 // export const handle = (args) => authHandle(args) として thin wrap する。
 
-import type { HandleFunction } from '@kiwa/sveltekit';
+import type { HandleFunction } from '@kiwa-lab/sveltekit';
 
 export interface AuthLocals extends Record<string, unknown> {
   user: { id: string; role: 'admin' | 'guest' } | null;

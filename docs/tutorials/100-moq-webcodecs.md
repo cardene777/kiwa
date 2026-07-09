@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/realtime` v0.3 that models the 3 pieces of a real MoQ + WebCodecs media stack — MoQT track announce + subscribe + object delivery, WebCodecs encoder direct API with hardware acceleration hints, and Simulcast/SVC layer selection + bitrate adaptation.
+A vitest suite wired to `@kiwa-lab/realtime` v0.3 that models the 3 pieces of a real MoQ + WebCodecs media stack — MoQT track announce + subscribe + object delivery, WebCodecs encoder direct API with hardware acceleration hints, and Simulcast/SVC layer selection + bitrate adaptation.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/realtime` v0.3 that models the 3 pieces of a real
 ```bash
 mkdir kiwa-moq-webcodecs && cd kiwa-moq-webcodecs
 pnpm init
-pnpm add -D @kiwa/realtime@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa-lab/realtime@^0.3 vitest typescript @types/node
 ```
 
 ### 2. MoQT track delivery
@@ -26,7 +26,7 @@ pnpm add -D @kiwa/realtime@^0.3 vitest typescript @types/node
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createMoqFetchMock } from '@kiwa/realtime';
+import { createMoqFetchMock } from '@kiwa-lab/realtime';
 
 describe('MoQT delivery', () => {
   it('announces and delivers object', async () => {
@@ -46,7 +46,7 @@ describe('MoQT delivery', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createWebCodecsEncoderMock } from '@kiwa/realtime';
+import { createWebCodecsEncoderMock } from '@kiwa-lab/realtime';
 
 describe('WebCodecs encoder', () => {
   it('configures with H264 + encodes with hardware path', async () => {
@@ -69,7 +69,7 @@ describe('WebCodecs encoder', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createSimulcastSvcMock } from '@kiwa/realtime';
+import { createSimulcastSvcMock } from '@kiwa-lab/realtime';
 
 describe('Simulcast + SVC', () => {
   it('adds L3T3 layer and adapts bitrate', async () => {

@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/hono",
+  "package": "@kiwa-lab/hono",
   "tier": "Framework",
   "thresholds": {
     "high": 70,

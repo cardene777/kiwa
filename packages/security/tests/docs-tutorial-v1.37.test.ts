@@ -1,6 +1,6 @@
 /**
  * v1.37-5 docs 補強 (Issue #1092 / CAR-829) — tutorial 76-78 code snippet validation
- * for `@kiwa/security` v0.1 8 axis (CSP + Rate limit + Authorization + WAF +
+ * for `@kiwa-lab/security` v0.1 8 axis (CSP + Rate limit + Authorization + WAF +
  * Threat model + Secrets scan + SBOM + Security headers advanced).
  *
  * `docs/tutorials/76-csp-strict-dynamic.md` / `docs/tutorials/77-rbac-abac-policy.md` /

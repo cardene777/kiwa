@@ -1,4 +1,4 @@
-# Quality Report — @kiwa/orm/postgres-cdc-dogfood @ 0.1.0
+# Quality Report — @kiwa-lab/orm/postgres-cdc-dogfood @ 0.1.0
 
 _Reported at 2026-07-06T07:42:03.154Z._
 

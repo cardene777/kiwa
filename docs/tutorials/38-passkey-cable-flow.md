@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite exercising the **CTAP 2.2 hybrid transport** (caBLE — Cloud-Assisted Bluetooth Low Energy) flow that Passkey uses to move credentials from a phone to a laptop that has no built-in authenticator. The test never boots a real Chrome + phone pair; it drives the 5-step hybrid handshake through `@kiwa/auth`'s caBLE mock — QR generation, BLE advertisement handshake, WebSocket tunnel establishment, credential migration payload, signature roundtrip. The v1.22 milestone added this surface (`v1.22-4`, dogfood app `dogfood-webauthn-passkey-app`); this tutorial walks the same harness in a fresh repo.
+A vitest suite exercising the **CTAP 2.2 hybrid transport** (caBLE — Cloud-Assisted Bluetooth Low Energy) flow that Passkey uses to move credentials from a phone to a laptop that has no built-in authenticator. The test never boots a real Chrome + phone pair; it drives the 5-step hybrid handshake through `@kiwa-lab/auth`'s caBLE mock — QR generation, BLE advertisement handshake, WebSocket tunnel establishment, credential migration payload, signature roundtrip. The v1.22 milestone added this surface (`v1.22-4`, dogfood app `dogfood-webauthn-passkey-app`); this tutorial walks the same harness in a fresh repo.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite exercising the **CTAP 2.2 hybrid transport** (caBLE — Cloud-Ass
 ```bash
 mkdir kiwa-cable-first && cd kiwa-cable-first
 pnpm init
-pnpm add -D @kiwa/auth@^0.5 vitest typescript @types/node
+pnpm add -D @kiwa-lab/auth@^0.5 vitest typescript @types/node
 ```
 
 `package.json`:
@@ -75,7 +75,7 @@ import {
   setupPasskeyEnv,
   type CaBLESessionOptions,
   type PasskeyTestEnv,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 
 const envs: PasskeyTestEnv[] = [];
 

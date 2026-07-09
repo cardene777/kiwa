@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/observability` v2.2 that models the 2 pieces of a real advanced III cost + LLM posture that every non-trivial production LLM stack eventually needs — an LLM `countTokens` step that pins per-model prompt + completion counts (mirroring OpenTelemetry GenAI semantic conventions 2026-06 stable — `gen_ai.usage.input_tokens` + `gen_ai.usage.output_tokens`) so a per-request telemetry export lands with the correct totals, a `logPrompt` step that pins a per-request system + user prompt payload with a `redacted` flag so a PII-sensitive workload can turn on redaction without a separate config axis, a `flagHallucination` step that runs a multi-signal check (`faithfulness` / `relevance` / `toxicity`) against per-signal thresholds — faithfulness + relevance flag when the score is _below_ the threshold, toxicity flags when the score is _above_ the threshold — so a "did the model hallucinate?" question resolves to one boolean without a hand-rolled per-signal branch, a `checkBudget` step that pins per-session spend against an operator-supplied limit so a runaway experiment fires a budget alert instead of silently burning through the monthly cap, a FinOps `recordCostPerRequest` step that pins the derived `costPerRequestUsd = totalCostUsd / requests` metric so a "how much does one API call cost?" question lands on one number, an `attributeTeam` step that sums per-team costs against the recorded total to compute an `unattributedUsd` remainder (mirroring FOCUS 1.0 attribution semantics) so a Finance dashboard can call out un-tagged spend without a separate reconciliation pass, a `recommendRightsizing` step that pins per-resource savings (current − recommended) and totals across a portfolio so a "what would rightsizing save this month?" question lands on one number, and an `optimizeSpot` step that pins the `savingsRatio = (onDemandUsd - spotUsd) / onDemandUsd` (via `session.spotSavingsRatio` for downstream state read) so the spot policy return can be graphed against the on-demand baseline in one panel. `startLlmObsSession()` + `countTokens()` + `logPrompt()` + `flagHallucination()` + `checkBudget()` + `startFinopsSession()` + `recordCostPerRequest()` + `attributeTeam()` + `recommendRightsizing()` + `optimizeSpot()` give you every one of those pieces without booting a real Anthropic / OpenAI / Datadog LLM Observability / AWS Cost Explorer backend. This is the pattern kiwa's `examples/dogfood-observability-llm-ops-app` exercises against real Anthropic Messages API + OpenAI Chat Completions + Datadog LLM Observability + Grafana + Prometheus + AWS Cost Explorer + Kubecost backends under `KIWA_MODE=real` + the relevant `_API_KEY` / `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the budget alert never fired because `checkBudget` compared `spentUsd > limitUsd` instead of `>=`, the hallucination check missed a signal because `flagHallucination` used the same direction for toxicity as faithfulness, and the cost-per-request came out as `NaN` because `recordCostPerRequest` divided by zero when `requests: 0` was passed" gap a reviewer sees in an LLM-ops + FinOps post-mortem.
+A vitest suite wired to `@kiwa-lab/observability` v2.2 that models the 2 pieces of a real advanced III cost + LLM posture that every non-trivial production LLM stack eventually needs — an LLM `countTokens` step that pins per-model prompt + completion counts (mirroring OpenTelemetry GenAI semantic conventions 2026-06 stable — `gen_ai.usage.input_tokens` + `gen_ai.usage.output_tokens`) so a per-request telemetry export lands with the correct totals, a `logPrompt` step that pins a per-request system + user prompt payload with a `redacted` flag so a PII-sensitive workload can turn on redaction without a separate config axis, a `flagHallucination` step that runs a multi-signal check (`faithfulness` / `relevance` / `toxicity`) against per-signal thresholds — faithfulness + relevance flag when the score is _below_ the threshold, toxicity flags when the score is _above_ the threshold — so a "did the model hallucinate?" question resolves to one boolean without a hand-rolled per-signal branch, a `checkBudget` step that pins per-session spend against an operator-supplied limit so a runaway experiment fires a budget alert instead of silently burning through the monthly cap, a FinOps `recordCostPerRequest` step that pins the derived `costPerRequestUsd = totalCostUsd / requests` metric so a "how much does one API call cost?" question lands on one number, an `attributeTeam` step that sums per-team costs against the recorded total to compute an `unattributedUsd` remainder (mirroring FOCUS 1.0 attribution semantics) so a Finance dashboard can call out un-tagged spend without a separate reconciliation pass, a `recommendRightsizing` step that pins per-resource savings (current − recommended) and totals across a portfolio so a "what would rightsizing save this month?" question lands on one number, and an `optimizeSpot` step that pins the `savingsRatio = (onDemandUsd - spotUsd) / onDemandUsd` (via `session.spotSavingsRatio` for downstream state read) so the spot policy return can be graphed against the on-demand baseline in one panel. `startLlmObsSession()` + `countTokens()` + `logPrompt()` + `flagHallucination()` + `checkBudget()` + `startFinopsSession()` + `recordCostPerRequest()` + `attributeTeam()` + `recommendRightsizing()` + `optimizeSpot()` give you every one of those pieces without booting a real Anthropic / OpenAI / Datadog LLM Observability / AWS Cost Explorer backend. This is the pattern kiwa's `examples/dogfood-observability-llm-ops-app` exercises against real Anthropic Messages API + OpenAI Chat Completions + Datadog LLM Observability + Grafana + Prometheus + AWS Cost Explorer + Kubecost backends under `KIWA_MODE=real` + the relevant `_API_KEY` / `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the budget alert never fired because `checkBudget` compared `spentUsd > limitUsd` instead of `>=`, the hallucination check missed a signal because `flagHallucination` used the same direction for toxicity as faithfulness, and the cost-per-request came out as `NaN` because `recordCostPerRequest` divided by zero when `requests: 0` was passed" gap a reviewer sees in an LLM-ops + FinOps post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/observability` v2.2 that models the 2 pieces of a
 ```bash
 mkdir kiwa-llm-obs-finops && cd kiwa-llm-obs-finops
 pnpm init
-pnpm add -D @kiwa/observability@^2.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/observability@^2.2 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v2.2 surface exports the LLM observability axis (`startLlmObsSession` / `cou
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { countTokens, startLlmObsSession } from '@kiwa/observability';
+import { countTokens, startLlmObsSession } from '@kiwa-lab/observability';
 
 describe('llm-observability — token counting', () => {
   it('sums prompt and completion tokens', () => {
@@ -74,7 +74,7 @@ import {
   countTokens,
   logPrompt,
   startLlmObsSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('llm-observability — prompt log', () => {
   it('records prompt lengths and redaction flag', () => {
@@ -105,7 +105,7 @@ import {
   flagHallucination,
   logPrompt,
   startLlmObsSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('llm-observability — hallucination flagging', () => {
   it('flags below-threshold faithfulness and relevance', () => {
@@ -148,7 +148,7 @@ import {
   flagHallucination,
   logPrompt,
   startLlmObsSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('llm-observability — budget check', () => {
   it('flags exhausted when spend >= limit', () => {
@@ -180,7 +180,7 @@ describe('llm-observability — budget check', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { recordCostPerRequest, startFinopsSession } from '@kiwa/observability';
+import { recordCostPerRequest, startFinopsSession } from '@kiwa-lab/observability';
 
 describe('finops — cost per request', () => {
   it('computes cost per request across a workload', () => {
@@ -210,7 +210,7 @@ import {
   attributeTeam,
   recordCostPerRequest,
   startFinopsSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('finops — team attribution', () => {
   it('computes unattributed remainder when teams under-account', () => {
@@ -252,7 +252,7 @@ import {
   recommendRightsizing,
   recordCostPerRequest,
   startFinopsSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('finops — rightsizing recommendations', () => {
   it('sums per-resource savings', () => {
@@ -284,7 +284,7 @@ import {
   recommendRightsizing,
   recordCostPerRequest,
   startFinopsSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('finops — spot optimization', () => {
   it('computes spot savings ratio', () => {

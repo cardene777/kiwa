@@ -6,7 +6,7 @@ kiwa v2.2 is out。 **Auth pair pioneer record 更新** milestone、 v0.6 Passwo
 
 ## What's new
 
-### `@kiwa/auth` v0.6 → v0.7 minor bump
+### `@kiwa-lab/auth` v0.6 → v0.7 minor bump
 
 - **6 export** = `startContinuousAuth` + `scoreToLevel` + `evaluateRisk` + `completeStepUp` + `freezeSession` + `terminateContinuousAuth`
 - **5 state SSOT** = monitoring / elevated / step-up-required / session-frozen / terminated
@@ -40,7 +40,7 @@ Desktop v1.67 depth-6 candidate + quality-metrics v2.1 継続深化 と 独立�
 ## Install
 
 ```bash
-pnpm add -D @kiwa/auth@^2.1
+pnpm add -D @kiwa-lab/auth@^2.1
 ```
 
 ## Migration guide

@@ -12,12 +12,12 @@ v1.15 は kiwa の 5 milestone 目です。 v1.14 (横軸拡張、 payment / sea
 
 ## 主な追加
 
-### `@kiwa/ai-llm` v0.2
+### `@kiwa-lab/ai-llm` v0.2
 
 multimodal (image + audio) input mock を 4 SDK 全部で統一。 `content: MessagePart[]` array は v0.1 の `content: string` の superset なので、 text-only v0.1 test は無変更で pass。
 
 ```ts
-import { createAnthropicMock } from '@kiwa/ai-llm';
+import { createAnthropicMock } from '@kiwa-lab/ai-llm';
 
 const client = createAnthropicMock({
   imageTokenCost: 1500,
@@ -49,12 +49,12 @@ const res = await client.messages.create({
 - Whisper transcription mock (`toTranscriptionKey` で URL + base64 の source 統一)
 - text-only v0.1 shape は完全温存
 
-### `@kiwa/mcp` v0.1
+### `@kiwa-lab/mcp` v0.1
 
 Model Context Protocol (JSON-RPC 2.0 の上に載る Anthropic 発 tool 交換 protocol) の server + client + transport を in-process で mock。
 
 ```ts
-import { connectClientToServer, McpServer, registerAllFixtureTools } from '@kiwa/mcp';
+import { connectClientToServer, McpServer, registerAllFixtureTools } from '@kiwa-lab/mcp';
 
 const server = new McpServer({ name: 'demo', version: '1.0.0' });
 registerAllFixtureTools(server);
@@ -72,12 +72,12 @@ const result = await client.callTool('calc', { op: 'add', a: 2, b: 3 });
 - 5 fixture tool (echo / calc / weather / search / db-query)
 - `tools/list` を `initialize` 前に呼ぶと `-32002 NotInitialized` — real MCP と同じ order 強制
 
-### `@kiwa/agent` v0.1
+### `@kiwa-lab/agent` v0.1
 
 LangGraph 型 StateGraph と OpenAI Assistants v2 client を 1 API に統一。
 
 ```ts
-import { END, START, StateGraph, AssistantsClient, toolCall } from '@kiwa/agent';
+import { END, START, StateGraph, AssistantsClient, toolCall } from '@kiwa-lab/agent';
 
 // LangGraph 型
 const graph = new StateGraph<{ reply: string | null }>()
@@ -115,7 +115,7 @@ const assistant = client.createAssistant({
 - `examples/dogfood-multimodal-chat` — Anthropic vision (image upload + streaming + cost tracking + multi-image compare)
 - `examples/dogfood-mcp-tool-agent` — Node.js MCP server (weather + calculator + search) + Claude tool-use loop、 real MCP SDK + real Anthropic API に対して fidelity 測定
 
-両 app とも provider prefix が `@kiwa/ai-*` なので 11 軸 release gate に載る。
+両 app とも provider prefix が `@kiwa-lab/ai-*` なので 11 軸 release gate に載る。
 
 ### docs 3 pillars + concept doc
 

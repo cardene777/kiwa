@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/streaming` v0.3 that runs the Confluent-compatible schema-registry evolution check — BACKWARD / FORWARD / FULL (and the `_TRANSITIVE` variants) — against a versioned subject registry, picks the subject name with the 3 naming strategies (`topic-name`, `record-name`, `topic-record-name`), and traces a schema reference graph (`Order` → `Address`) so composed schemas keep resolving after evolution. No real Redpanda binary, no `curl http://schema-registry:8081/subjects/orders-value/versions`. `createRedpandaSchemaEvolution()` is the test-side model — same `register` + `check` + `subjectFor` + `resolveReferences` shape as the real API, keyed by structural markers (`OPTIONAL_ADD`, `REQUIRED_ADD`, `REQUIRED_REMOVE`, `TYPE_CHANGE`) that let a test declare what a schema change *is* without parsing an Avro AST. This is the pattern kiwa's Redpanda dogfood app (v1.31-3) exercises against real Redpanda 23+ testcontainers under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds.
+A vitest suite wired to `@kiwa-lab/streaming` v0.3 that runs the Confluent-compatible schema-registry evolution check — BACKWARD / FORWARD / FULL (and the `_TRANSITIVE` variants) — against a versioned subject registry, picks the subject name with the 3 naming strategies (`topic-name`, `record-name`, `topic-record-name`), and traces a schema reference graph (`Order` → `Address`) so composed schemas keep resolving after evolution. No real Redpanda binary, no `curl http://schema-registry:8081/subjects/orders-value/versions`. `createRedpandaSchemaEvolution()` is the test-side model — same `register` + `check` + `subjectFor` + `resolveReferences` shape as the real API, keyed by structural markers (`OPTIONAL_ADD`, `REQUIRED_ADD`, `REQUIRED_REMOVE`, `TYPE_CHANGE`) that let a test declare what a schema change *is* without parsing an Avro AST. This is the pattern kiwa's Redpanda dogfood app (v1.31-3) exercises against real Redpanda 23+ testcontainers under the fidelity harness; the tutorial covers the mock-only path so you can iterate in milliseconds.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/streaming` v0.3 that runs the Confluent-compatibl
 ```bash
 mkdir kiwa-schema-evo && cd kiwa-schema-evo
 pnpm init
-pnpm add -D @kiwa/streaming@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa-lab/streaming@^0.3 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v0.3 surface exports `createRedpandaSchemaEvolution` from the semantics barr
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createRedpandaSchemaEvolution } from '@kiwa/streaming';
+import { createRedpandaSchemaEvolution } from '@kiwa-lab/streaming';
 
 describe('BACKWARD compatibility — new consumers read old data', () => {
   it('adding an optional field is BACKWARD-compatible', () => {
@@ -86,7 +86,7 @@ The rule of thumb is that the markers (`OPTIONAL_ADD:field_x`, `REQUIRED_ADD:fie
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createRedpandaSchemaEvolution } from '@kiwa/streaming';
+import { createRedpandaSchemaEvolution } from '@kiwa-lab/streaming';
 
 describe('FORWARD compatibility — old consumers read new data', () => {
   it('adding a required field is FORWARD-compatible', () => {
@@ -131,7 +131,7 @@ The marker is a *declaration* — the caller states what the change is (`REQUIRE
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createRedpandaSchemaEvolution } from '@kiwa/streaming';
+import { createRedpandaSchemaEvolution } from '@kiwa-lab/streaming';
 
 describe('FULL compatibility — bidirectional safety', () => {
   it('type change on a field breaks FULL', () => {
@@ -161,7 +161,7 @@ The `TYPE_CHANGE` marker is the marker that trips FULL under every mode — it n
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createRedpandaSchemaEvolution } from '@kiwa/streaming';
+import { createRedpandaSchemaEvolution } from '@kiwa-lab/streaming';
 
 describe('subject naming strategies', () => {
   it('topic-name — subject = "{topic}-{key|value}"', () => {
@@ -188,7 +188,7 @@ describe('subject naming strategies', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createRedpandaSchemaEvolution } from '@kiwa/streaming';
+import { createRedpandaSchemaEvolution } from '@kiwa-lab/streaming';
 
 describe('schema references', () => {
   it('registers Address, then Order references Address v1', () => {
@@ -229,7 +229,7 @@ describe('schema references', () => {
 
 ## What you learned
 
-The 5 evolution pieces the tutorial covered — BACKWARD, FORWARD, FULL, subject naming, references — are the ones every Redpanda / Confluent Schema Registry deployment hits within the first 3 months. `@kiwa/streaming` v0.3 models them with structural markers so tests iterate in milliseconds; the fidelity harness (see the concept doc) runs the same assertions against real Redpanda 23+ testcontainers under `KIWA_MODE=real REDPANDA_KEY=...`, which is what the v1.31-3 dogfood app does.
+The 5 evolution pieces the tutorial covered — BACKWARD, FORWARD, FULL, subject naming, references — are the ones every Redpanda / Confluent Schema Registry deployment hits within the first 3 months. `@kiwa-lab/streaming` v0.3 models them with structural markers so tests iterate in milliseconds; the fidelity harness (see the concept doc) runs the same assertions against real Redpanda 23+ testcontainers under `KIWA_MODE=real REDPANDA_KEY=...`, which is what the v1.31-3 dogfood app does.
 
 ## Next
 

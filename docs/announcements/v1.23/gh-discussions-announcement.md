@@ -4,7 +4,7 @@ v1.23 is out. After v1.14's payment layer landed the 3 provider webhook baseline
 
 ## What shipped
 
-- **`@kiwa/payment` v0.3.0** (9-axis advanced billing semantics). v0.2's webhook mock + 4 fixture events (`createStripeMock` / `createPaddleMock` / `createLemonSqueezyMock` / `signWebhook` / `emit` / `verify` / `checkoutCompleted` / `subscriptionCreated` / `paymentFailed` / `refunded`) keep every prior signature. v0.3 lands `packages/payment/src/semantics/*` — 1 axis = 1 file of pure state-machine helpers that operate on the shared `PaymentAdapter` interface every provider mock implements. Every axis emits a strongly typed `AxisStep` sequence so tests assert on the transitions, not the event names.
+- **`@kiwa-lab/payment` v0.3.0** (9-axis advanced billing semantics). v0.2's webhook mock + 4 fixture events (`createStripeMock` / `createPaddleMock` / `createLemonSqueezyMock` / `signWebhook` / `emit` / `verify` / `checkoutCompleted` / `subscriptionCreated` / `paymentFailed` / `refunded`) keep every prior signature. v0.3 lands `packages/payment/src/semantics/*` — 1 axis = 1 file of pure state-machine helpers that operate on the shared `PaymentAdapter` interface every provider mock implements. Every axis emits a strongly typed `AxisStep` sequence so tests assert on the transitions, not the event names.
   - `dunning.ts` — Stripe Smart Retries envelope (`active` → `in-grace-period` → `recovered` or `exhausted`, default `maxAttempts: 4`, `retryIntervalMs: 3 days`, `gracePeriodMs: 1 day`)
   - `retry.ts` — general-purpose exponential backoff with jitter (`pending` → `retrying` → `delivered` or `dead-letter`, default `maxAttempts: 5`)
   - `three-ds.ts` — EMVCo 3DS 2.2 challenge flow (`fingerprint` → `challenge-pending` → `completed`, or `fingerprint` → `frictionless`, accepts all 6 `transStatus` codes `Y`/`N`/`A`/`C`/`U`/`R`)
@@ -17,13 +17,13 @@ v1.23 is out. After v1.14's payment layer landed the 3 provider webhook baseline
 - **`examples/dogfood-stripe-billing-app`** — Next.js 15 App Router merchant app wired to Stripe. `createStripeMock` drives checkout session + webhook endpoint + subscription lifecycle + invoice + 3D Secure v2 + Smart Retries dunning across 35 vitest. The `KIWA_MODE=real` env-gate flips the entire suite from mock to the real Stripe sandbox without touching test bodies. Every axis semantic (dunning / retry / 3DS / SCA / subscription / invoice / tax / chargeback) exercises the same 4-method adapter surface.
 - **`examples/dogfood-paddle-merchant-app`** — Nuxt 3 merchant-of-record app wired to Paddle Billing v2. `createPaddleMock` drives inline checkout (`Paddle.Checkout.open` instead of hosted redirect), tier upgrade with proration, VAT/GST/sales-tax auto-calc, and reverse-charge for B2B intra-EU customers. 40 vitest. Paddle acts as Merchant-of-Record so the app never touches PSP details — Paddle handles fraud + chargeback + tax registration and the app just books neutralised events.
 - **`examples/dogfood-lemon-squeezy-app`** — SvelteKit merchant-of-record app wired to Lemon Squeezy. `createLemonSqueezyMock` drives hosted checkout (URL redirect, no inline SDK), license key issue+activate+revoke, refund full+partial via the neutral `refunded` fixture, and full chargeback dispute lifecycle (opened → evidence-submitted → won/lost + fee assessment). 74 vitest — the widest v1.23 dogfood app because license flow doubles as a chargeback signal source.
-- **docs** — 3 new tutorials (39 Stripe advanced billing + 40 Paddle merchant-of-record + 41 Lemon Squeezy license flow) + concept doc `billing-semantics.md` — SSOT for the 9 axes + provider-specific fidelity surface across all 3 dogfood merchant apps. Migration guide v1.22 → v1.23 (additive-only). Snippet validation test `packages/payment/tests/docs-tutorial-v1.23.test.ts` (18 tests) re-runs every code snippet against the real `@kiwa/payment` API. Same drift-detection pattern as `docs-tutorial-v1.21.test.ts` + `docs-tutorial-v1.22.test.ts`. VitePress sidebar gains a `Payment 深化 (v1.23)` tutorial section; gh-pages published via `/docs-publish-kiwa`.
+- **docs** — 3 new tutorials (39 Stripe advanced billing + 40 Paddle merchant-of-record + 41 Lemon Squeezy license flow) + concept doc `billing-semantics.md` — SSOT for the 9 axes + provider-specific fidelity surface across all 3 dogfood merchant apps. Migration guide v1.22 → v1.23 (additive-only). Snippet validation test `packages/payment/tests/docs-tutorial-v1.23.test.ts` (18 tests) re-runs every code snippet against the real `@kiwa-lab/payment` API. Same drift-detection pattern as `docs-tutorial-v1.21.test.ts` + `docs-tutorial-v1.22.test.ts`. VitePress sidebar gains a `Payment 深化 (v1.23)` tutorial section; gh-pages published via `/docs-publish-kiwa`.
 
 ## Numbers
 
 - **6 sub-Issues resolved** (#900-#905)
 - **6 PRs merged** (v1.23-1 + v1.23-2 + v1.23-3 + v1.23-4 + v1.23-5 + this publish PR)
-- **1 npm minor bump** (`@kiwa/payment` v0.2.0 → v0.3.0) — kiwa runtime fixture count stays 34
+- **1 npm minor bump** (`@kiwa-lab/payment` v0.2.0 → v0.3.0) — kiwa runtime fixture count stays 34
 - **3 new dogfood merchant apps** with fidelity reports feeding the 7-axis release gate
 - **~267 new tests** across 9 semantics axes (100) + Stripe (35) + Paddle (40) + Lemon Squeezy (74) + snippet validation (18)
 
@@ -35,7 +35,7 @@ Payment testing has three failure modes that a webhook-only mock can't catch, no
 - **Retry cadence** — real dunning is 4 attempts over ~1 week + a grace period. Tests that skip the retry loop miss uncollectible-flip regressions and let merchant apps ship without the grace-period UX.
 - **Cross-provider fidelity** — Stripe defers proration to the next invoice; Paddle charges the difference immediately; Lemon Squeezy hosts checkout while Paddle inlines it. A neutral test surface makes these differences **explicit assertions**, not silent regressions.
 
-The 9 axes are the smallest set that reproduces the full billing envelope across the 3 target providers. Each axis is an independent module under `@kiwa/payment/semantics/*`; each provides pure functions that operate on the shared `PaymentAdapter` interface + emit a strongly typed `AxisStep` sequence so tests can assert on the transitions, not the event shapes.
+The 9 axes are the smallest set that reproduces the full billing envelope across the 3 target providers. Each axis is an independent module under `@kiwa-lab/payment/semantics/*`; each provides pure functions that operate on the shared `PaymentAdapter` interface + emit a strongly typed `AxisStep` sequence so tests can assert on the transitions, not the event shapes.
 
 ## 3 dogfood merchant apps — one adapter surface, three billing envelopes
 

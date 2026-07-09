@@ -14,7 +14,7 @@ contract / API / component / e2e / a11y / visual に加えて、 **server-side f
 
 ```bash
 # 全 20 package が npm 公開済
-npm install @kiwa/orm @kiwa/edge @kiwa/sveltekit
+npm install @kiwa-lab/orm @kiwa-lab/edge @kiwa-lab/sveltekit
 # Python pytest adapter も継続
 pip install kiwa-test-py
 ```
@@ -27,21 +27,21 @@ pip install kiwa-test-py
 
 | Framework | Helper | release |
 |---|---|---|
-| Next.js (App Router / Server Actions / RSC) | `@kiwa/nextjs` | v1.0 (v1.1) |
-| Nuxt 3 (Nitro) | `@kiwa/nuxt` | v1.0 (v1.1) |
-| SvelteKit 2 (load + actions + hooks) | `@kiwa/sveltekit` | v1.0.1 (v1.2) |
-| Remix v2 (loader + action + Resource Routes) | `@kiwa/remix` | v1.0 (v1.1) |
-| Astro v5 (Server endpoints + `.astro` SSR) | `@kiwa/astro` | v1.0 (v1.1) |
-| SolidStart | `@kiwa/solidstart` | v1.0 (v1.2) |
-| Qwik City | `@kiwa/qwikcity` | v1.0 (v1.2) |
-| Cloudflare Workers / Vercel Edge | `@kiwa/edge` | v1.0 (v1.2) |
-| ORM (Drizzle / Prisma / Kysely) | `@kiwa/orm` | v0.6.0 (v1.2) |
+| Next.js (App Router / Server Actions / RSC) | `@kiwa-lab/nextjs` | v1.0 (v1.1) |
+| Nuxt 3 (Nitro) | `@kiwa-lab/nuxt` | v1.0 (v1.1) |
+| SvelteKit 2 (load + actions + hooks) | `@kiwa-lab/sveltekit` | v1.0.1 (v1.2) |
+| Remix v2 (loader + action + Resource Routes) | `@kiwa-lab/remix` | v1.0 (v1.1) |
+| Astro v5 (Server endpoints + `.astro` SSR) | `@kiwa-lab/astro` | v1.0 (v1.1) |
+| SolidStart | `@kiwa-lab/solidstart` | v1.0 (v1.2) |
+| Qwik City | `@kiwa-lab/qwikcity` | v1.0 (v1.2) |
+| Cloudflare Workers / Vercel Edge | `@kiwa-lab/edge` | v1.0 (v1.2) |
+| ORM (Drizzle / Prisma / Kysely) | `@kiwa-lab/orm` | v0.6.0 (v1.2) |
 
 全 adapter が `mode + stop()` 契約を共有し、 同じ `setupXxxEnv` パターンで使えます。 dynamic import + optional peer dep なので、 利用者は使う framework だけ install すれば動きます。
 
 ### 2. ORM query test を 9 組合せ matrix で網羅
 
-`@kiwa/orm` v0.6.0 で受入 matrix が 9 組合せに到達しました。
+`@kiwa-lab/orm` v0.6.0 で受入 matrix が 9 組合せに到達しました。
 
 | ORM | dialect | mode | container |
 |---|---|---|---|
@@ -66,7 +66,7 @@ CI workflow を 3 系統に拡張しました。
 | Node.js 20+ | `.github/workflows/test.yml` (主) |
 | Bun 1.3+ | `.github/workflows/test-bun.yml` (`bunx --bun vitest run`) |
 | Deno 2.x | `.github/workflows/test-deno.yml` (`deno run --allow-all npm:vitest run`) |
-| Cloudflare Workers / Vercel Edge | `@kiwa/edge` (KV mock + `invokeEdgeHandler`、 Miniflare 不要) |
+| Cloudflare Workers / Vercel Edge | `@kiwa-lab/edge` (KV mock + `invokeEdgeHandler`、 Miniflare 不要) |
 
 全 19 package が Node / Bun / Deno の 3 runtime で pass する状態を維持しています。
 
@@ -76,11 +76,11 @@ v1.2 の最後の山が GitHub Issue #525 (5 framework full PoC) でした。 `e
 
 ```
 examples/
-├── nuxt-server-routes-full/      # Nuxt 3 + @kiwa/nuxt v1.0.4 全 3 helper
-├── sveltekit-full/                # SvelteKit 2 + @kiwa/sveltekit 全 3 helper
-├── remix-full/                    # Remix v2 + @kiwa/remix loader/action/Resource Route
-├── astro-server-endpoints-full/   # Astro v5 SSR + @kiwa/astro invokeEndpoint
-└── nextjs-app-router-full/        # Next.js v15 + @kiwa/nextjs 全 4 layer 統合
+├── nuxt-server-routes-full/      # Nuxt 3 + @kiwa-lab/nuxt v1.0.4 全 3 helper
+├── sveltekit-full/                # SvelteKit 2 + @kiwa-lab/sveltekit 全 3 helper
+├── remix-full/                    # Remix v2 + @kiwa-lab/remix loader/action/Resource Route
+├── astro-server-endpoints-full/   # Astro v5 SSR + @kiwa-lab/astro invokeEndpoint
+└── nextjs-app-router-full/        # Next.js v15 + @kiwa-lab/nextjs 全 4 layer 統合
 ```
 
 retrofit したい場合の「ここから始める」 reference として使えます。
@@ -121,7 +121,7 @@ v1.2 が一段完成したので、 次の v1.3 は user feedback を集めな�
 /plugin install kiwa@kiwa-marketplace
 
 # 単体 fixture だけ使う
-pnpm add -D @kiwa/dapp @kiwa/orm
+pnpm add -D @kiwa-lab/dapp @kiwa-lab/orm
 
 # Python service の test も同じ spec で
 pip install kiwa-test-py

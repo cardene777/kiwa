@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-`@kiwa/component` v0.4 の view-transitions axis と `@kiwa/nextjs` v1.3 の concurrent-transitions axis を組合せて deterministic に扱う workflow。 interrupt-and-restart pattern も含む。
+`@kiwa-lab/component` v0.4 の view-transitions axis と `@kiwa-lab/nextjs` v1.3 の concurrent-transitions axis を組合せて deterministic に扱う workflow。 interrupt-and-restart pattern も含む。
 
 ## Step-by-step build
 
@@ -11,7 +11,7 @@
 ```bash
 mkdir kiwa-view-concurrent && cd kiwa-view-concurrent
 pnpm init
-pnpm add -D @kiwa/component@^0.4 @kiwa/nextjs@^1.3 vitest typescript @types/node
+pnpm add -D @kiwa-lab/component@^0.4 @kiwa-lab/nextjs@^1.3 vitest typescript @types/node
 ```
 
 ### 2. View Transitions axis
@@ -23,7 +23,7 @@ import {
   finishElementTransition,
   startElementTransition,
   startViewTransitionSession,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 
 describe('View Transitions', () => {
   it('animates element transition', () => {
@@ -45,7 +45,7 @@ import {
   interruptTransition,
   markTransitionPending,
   startConcurrentTransition,
-} from '@kiwa/nextjs';
+} from '@kiwa-lab/nextjs';
 
 describe('Concurrent React transitions', () => {
   it('interrupt then restart pattern', () => {

@@ -1,4 +1,4 @@
-import { createKafkaMock, type StreamingMessage } from '@kiwa/streaming';
+import { createKafkaMock, type StreamingMessage } from '@kiwa-lab/streaming';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createDlqRun, type WorkPayload } from '../src/dlq/index.js';
 

@@ -4,7 +4,7 @@
 
 kiwa v1.45 released — Realtime III deepening lands.
 
-@kiwa/realtime v0.2.0 → v0.3.0 minor bump. 3 new protocols (MoQ + WebCodecs + AI-media) × 8 advanced III axis.
+@kiwa-lab/realtime v0.2.0 → v0.3.0 minor bump. 3 new protocols (MoQ + WebCodecs + AI-media) × 8 advanced III axis.
 
 **Pair 2 (Realtime) achieves 3-stage extension** (v1.13 v0.1 → v1.28 v0.2 → v1.45 v0.3). Third pair to reach depth 3 after Search (v1.36) + Auth (v1.44).
 
@@ -20,7 +20,7 @@ Pair depth-3 record 3rd example achieved. 5-milestone new-base cadence (v1.37 �
 
 **23-milestone snippet validation streak** (v1.23-v1.45) achieved.
 
-`pnpm add -D @kiwa/realtime` gets v0.3.0. No breaking changes. Migration: https://cardene777.github.io/kiwa/migrations/v1.44-to-v1.45
+`pnpm add -D @kiwa-lab/realtime` gets v0.3.0. No breaking changes. Migration: https://cardene777.github.io/kiwa/migrations/v1.44-to-v1.45
 
 6 sub-milestone (v1.45-1 realtime v0.3 + 8 axis / v1.45-2 moq-webcodecs / v1.45-3 voice-streaming / v1.45-4 svc-adaptive / v1.45-5 docs + 23 streak / v1.45-6 publish).
 

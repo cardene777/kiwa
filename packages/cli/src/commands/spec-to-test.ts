@@ -142,7 +142,7 @@ function methodFromWhen(when: string, fallback: string): string {
 function generateApiTest(spec: ParsedSpec): string {
   const lines: string[] = [];
   lines.push(`import { afterEach, describe, expect, it } from 'vitest';`);
-  lines.push(`import { setupApiServer, type ApiTestEnv } from '@kiwa/api';`);
+  lines.push(`import { setupApiServer, type ApiTestEnv } from '@kiwa-lab/api';`);
   lines.push('');
   lines.push('const envs: ApiTestEnv[] = [];');
   lines.push('');
@@ -190,7 +190,7 @@ function generateUiTest(spec: ParsedSpec): string {
   const lines: string[] = [];
   lines.push(`/// <reference types="vitest/globals" />`);
   lines.push(`import { afterEach, describe, expect, it } from 'vitest';`);
-  lines.push(`import { setupComponentEnv, type UiTestEnv } from '@kiwa/ui';`);
+  lines.push(`import { setupComponentEnv, type UiTestEnv } from '@kiwa-lab/ui';`);
   lines.push('');
   lines.push('const envs: UiTestEnv[] = [];');
   lines.push('');
@@ -224,7 +224,7 @@ function generateUiTest(spec: ParsedSpec): string {
 function generateDataTest(spec: ParsedSpec): string {
   const lines: string[] = [];
   lines.push(`import { afterEach, describe, expect, it } from 'vitest';`);
-  lines.push(`import { createFakeClock, setupQueueEnv, type QueueTestEnv } from '@kiwa/data';`);
+  lines.push(`import { createFakeClock, setupQueueEnv, type QueueTestEnv } from '@kiwa-lab/data';`);
   lines.push('');
   lines.push('const envs: QueueTestEnv[] = [];');
   lines.push('');
@@ -264,7 +264,7 @@ function generateDataTest(spec: ParsedSpec): string {
 function generateCliTest(spec: ParsedSpec): string {
   const lines: string[] = [];
   lines.push(`import { afterEach, describe, expect, it } from 'vitest';`);
-  lines.push(`import { expectExitCode, setupCliEnv, type CliTestEnv } from '@kiwa/cli-test';`);
+  lines.push(`import { expectExitCode, setupCliEnv, type CliTestEnv } from '@kiwa-lab/cli-test';`);
   lines.push('');
   lines.push('const envs: CliTestEnv[] = [];');
   lines.push('');

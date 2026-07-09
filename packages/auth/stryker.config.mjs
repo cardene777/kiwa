@@ -1,5 +1,5 @@
 /**
- * Mutation testing config for @kiwa/auth.
+ * Mutation testing config for @kiwa-lab/auth.
  * Threshold: framework tier (high 70 / low 60 / break 50) — auth adapter wraps
  * NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase, includes
  * SSR / RSC / hydration paths + provider mocks with partial fidelity.

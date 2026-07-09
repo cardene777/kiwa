@@ -18,7 +18,7 @@ dogfood-security-devsecops-adapter-app provides mock/real fidelity harness (runA
 
 **25-milestone consecutive snippet validation streak** (v1.23-v1.47) achieved, kiwa all-time record updated. Backward compat strict = v0.1 semantics function API 0 changes, v0.2 adapter is new optional path.
 
-`pnpm add -D @kiwa/security-devsecops@^0.2`. Migration: https://cardene777.github.io/kiwa/migrations/v1.46-to-v1.47
+`pnpm add -D @kiwa-lab/security-devsecops@^0.2`. Migration: https://cardene777.github.io/kiwa/migrations/v1.46-to-v1.47
 
 7 sub complete (v1.47-1 adapter interface + 6 mock / v1.47-2 6 real + env-gate / v1.47-3 dogfood / v1.47-4 skill SSOT / v1.47-5 tutorial 105 + 25 streak / v1.47-6 publish / v1.47-7 retrospective).
 

@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v1.46-6 — DevSecOps 6 axis (SAST + SCA + Secret + IaC + DAST + Container) observability harness backed by @kiwa/security-devsecops v0.1 semantics.",
+  "description": "Dogfood app v1.46-6 — DevSecOps 6 axis (SAST + SCA + Secret + IaC + DAST + Container) observability harness backed by @kiwa-lab/security-devsecops v0.1 semantics.",
   "scripts": {
-    "test": "pnpm -F @kiwa/core -F @kiwa/security-devsecops build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/core -F @kiwa-lab/security-devsecops build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/security-devsecops": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/security-devsecops": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

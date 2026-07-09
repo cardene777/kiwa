@@ -1,4 +1,4 @@
-# Quality Report — @kiwa/payment/dogfood-bnpl-installment-app @ 0.5.0
+# Quality Report — @kiwa-lab/payment/dogfood-bnpl-installment-app @ 0.5.0
 
 _Reported at 2026-07-07T13:11:07.017Z._
 

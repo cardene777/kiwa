@@ -1,13 +1,13 @@
 # Fidelity — dogfood-ably-collab-cursor (v1.13-4)
 
-Real-vs-mock behavioural fidelity for the Ably collaborative-cursor dogfood, produced by `examples/dogfood-ably-collab-cursor/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 7-axis release gate.
+Real-vs-mock behavioural fidelity for the Ably collaborative-cursor dogfood, produced by `examples/dogfood-ably-collab-cursor/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-lab/quality-metrics` 7-axis release gate.
 
 ## Baseline (real mode skipped — no `ABLY_API_KEY`)
 
 When the harness runs without Ably credentials, the real adapter emits `ABLY_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa/realtime/ably-collab-cursor
+provider   : @kiwa-lab/realtime/ably-collab-cursor
 version    : 0.1.0
 verdict    : PASS
 divergences: 4 (joinBoard / moveCursor / rewindHistory / getPresence — recorded as BEHAVIORAL_DIVERGENCE, real mode absent)
@@ -60,4 +60,4 @@ The history rewind flow (`lateJoinerRewind`) exercises Ably's `channel.history()
 
 The `twoUsersCollab` flow uses a single adapter (= single Ably client) as a mock-only convenience. In real Ably, `presence.enter(data)` identifies a member by the client-authenticated `clientId` — a single client cannot represent two distinct presence members. The mock stays internally consistent because the adapter maintains its own `membersByBoard` map keyed by caller-supplied `userId`, but the flow does NOT reflect real Ably multi-user semantics. Wiring a real-Ably-faithful two-user flow is a follow-up when the SDK is vendored: instantiate two `AblyMock` clients (each with distinct `clientId`) and drive them in parallel.
 
-Provider prefix `@kiwa/realtime/` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Ably is a socket / pub-sub primitive, not a token-priced generative call. Socket round-trip latency feeds `perf.p95Ms` so realtime performance stays visible in the report.
+Provider prefix `@kiwa-lab/realtime/` triggers the common 7-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts`). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply because Ably is a socket / pub-sub primitive, not a token-priced generative call. Socket round-trip latency feeds `perf.p95Ms` so realtime performance stays visible in the report.

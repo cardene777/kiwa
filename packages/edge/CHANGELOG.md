@@ -1,4 +1,4 @@
-# @kiwa/edge
+# @kiwa-lab/edge
 
 ## 1.0.2
 
@@ -12,7 +12,7 @@
 
 ### Patch Changes
 
-- 7c60a7e: 🎉 New package `@kiwa/edge` v1.0 — Edge runtime fetch handler test adapter (Issue #522、 v1.2 milestone 4/10).
+- 7c60a7e: 🎉 New package `@kiwa-lab/edge` v1.0 — Edge runtime fetch handler test adapter (Issue #522、 v1.2 milestone 4/10).
 
   ## What's in the box
 
@@ -35,7 +35,7 @@
   ## Out of scope (separate Issues)
 
   - R2 bucket binding mock (blob 操作) — 需要次第で別 Issue。
-  - D1 database binding mock (SQL execute) — `@kiwa/orm` (#527) で testcontainers + Postgres 経路と整合検討。
+  - D1 database binding mock (SQL execute) — `@kiwa-lab/orm` (#527) で testcontainers + Postgres 経路と整合検討。
   - Durable Object binding mock (state coordination) — 別 Issue。
   - Queue producer / consumer / Service binding / Hyperdrive — 個別 Issue で対応。
 

@@ -5,7 +5,7 @@
 // a pure Vitest workspace — the runtime shape of the return values is identical
 // to what production code would produce via NextResponse.
 
-import { middlewareActions, type MiddlewareFunction } from '@kiwa/nextjs';
+import { middlewareActions, type MiddlewareFunction } from '@kiwa-lab/nextjs';
 
 // Auth gate: redirect unauthenticated requests to /login, but always allow /api/*.
 export const authGate: MiddlewareFunction = async (req) => {

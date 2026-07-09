@@ -1,13 +1,13 @@
 # dogfood-deno-deploy-geo-app
 
-Dogfood app v1.24-4 — a Deno Fresh app on Deno Deploy that exercises the `geo-replicated` + `edge-kv` + `cron-trigger` axes of `@kiwa/edge` v0.2 end-to-end. Drivable in both `KIWA_MODE=real` (Deno Deploy sandbox + `DENO_DEPLOY_KEY=1` env-gate) and `KIWA_MODE=mock` (`@kiwa/edge` v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.
+Dogfood app v1.24-4 — a Deno Fresh app on Deno Deploy that exercises the `geo-replicated` + `edge-kv` + `cron-trigger` axes of `@kiwa-lab/edge` v0.2 end-to-end. Drivable in both `KIWA_MODE=real` (Deno Deploy sandbox + `DENO_DEPLOY_KEY=1` env-gate) and `KIWA_MODE=mock` (`@kiwa-lab/edge` v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.
 
 Sub-Issue #917, land-order 4/6 in the v1.24 milestone.
 
 ## Two run modes
 
 - `KIWA_MODE=real` — Deno Deploy sandbox + `deno task dev` behind `DENO_DEPLOY_KEY=1` env-gate. Runs a real Deno Deploy runtime + Deno KV + Deno Deploy Cron against a local sandbox. Skipped when the environment cannot reach a working sandbox (no `DENO_DEPLOY_KEY=1`, no deno install, no local port).
-- `KIWA_MODE=mock` — `@kiwa/edge` v0.2 `createGeoReplicatedSession` / `geoPrimaryWrite` / `markReplicaLagged` / `syncReplica` / `createEdgeKvSession` / `kvRead` / `kvWrite` / `kvRangeQuery` / `scheduleCron` / `startCron` / `completeCron` / `failCron` deterministic mocks. Always runs.
+- `KIWA_MODE=mock` — `@kiwa-lab/edge` v0.2 `createGeoReplicatedSession` / `geoPrimaryWrite` / `markReplicaLagged` / `syncReplica` / `createEdgeKvSession` / `kvRead` / `kvWrite` / `kvRangeQuery` / `scheduleCron` / `startCron` / `completeCron` / `failCron` deterministic mocks. Always runs.
 
 `makeMockAdapter` (`src/lib/mock.ts`) drives the mock path; `makeRealAdapter` (`src/lib/real.ts`) drives the real path or falls back to the env-gate skip.
 
@@ -38,7 +38,7 @@ src/
     purge-job.ts                — 24-h retention purge job (scheduled + queue variants)
   lib/
     deno-adapter.ts             — DenoDeployAdapter interface (8 ops) + REGION_CATALOG
-    mock.ts                     — makeMockAdapter (backed by @kiwa/edge v0.2 semantics)
+    mock.ts                     — makeMockAdapter (backed by @kiwa-lab/edge v0.2 semantics)
     real.ts                     — makeRealAdapter (env-gate skip via KIWA_MODE + DENO_DEPLOY_KEY)
     fidelity.ts                 — runFidelityHarness + runAdapterMatrix
 tests/
@@ -85,5 +85,5 @@ pnpm --filter dogfood-deno-deploy-geo-app test
 
 - Parent — v1.24 (#913)
 - Sub-Issue — v1.24-4 (#917)
-- Depends on — v1.24-1 (@kiwa/edge v0.2 with 8 axis semantics, PR #920)
+- Depends on — v1.24-1 (@kiwa-lab/edge v0.2 with 8 axis semantics, PR #920)
 - Siblings — v1.24-2 (dogfood-cloudflare-workers-durable-object-app, PR #921) + v1.24-3 (dogfood-vercel-edge-function-app, PR #922)

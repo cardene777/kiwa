@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { invokeDefineRoute, invokeFreshHandler, stringify } from '@kiwa/fresh';
+import { invokeDefineRoute, invokeFreshHandler, stringify } from '@kiwa-lab/fresh';
 import { greetDefineRoute, greetHandlers, greetPage } from '../src/routes/greet.js';
 
 describe('greet route (defineRoute + Handlers)', () => {

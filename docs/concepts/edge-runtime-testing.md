@@ -1,6 +1,6 @@
-# Edge runtime testing — 8-axis SSOT for kiwa `@kiwa/edge` v0.2
+# Edge runtime testing — 8-axis SSOT for kiwa `@kiwa-lab/edge` v0.2
 
-Introduced in v1.24-1, `@kiwa/edge` v0.2 raises the edge mock harness from a **`fetch` handler invocation + minimal KV / R2 / D1 / DurableObject stubs** surface (v0.1) to a full **advanced edge semantics** surface. Where v0.1 gave you `invokeEdgeHandler` + `createKvNamespace` and a shallow DurableObject stub, v0.2 layers **8 axes** of platform-neutralised edge behaviour on top.
+Introduced in v1.24-1, `@kiwa-lab/edge` v0.2 raises the edge mock harness from a **`fetch` handler invocation + minimal KV / R2 / D1 / DurableObject stubs** surface (v0.1) to a full **advanced edge semantics** surface. Where v0.1 gave you `invokeEdgeHandler` + `createKvNamespace` and a shallow DurableObject stub, v0.2 layers **8 axes** of platform-neutralised edge behaviour on top.
 
 The 8 axes are the observable envelope every real edge platform (Cloudflare Workers, Vercel Edge, Deno Deploy) converges on — mapped to the same neutral event names + state machines — so tests write once and re-run against any platform. This document is the SSOT for what each axis exists to test, what state machine it defines, and which platform-specific behaviours it neutralises.
 
@@ -12,7 +12,7 @@ Edge testing has three failure modes that a `fetch`-only mock cannot catch.
 - **Consistency envelope**. Real edge KV trades strong consistency for low-latency edge reads (Cloudflare KV, Vercel Edge Config, Deno KV replicas). Tests that skip the primary-vs-replica distinction miss read-your-writes bugs and let merchant apps ship with stale-read races.
 - **Cross-platform fidelity**. Cloudflare fires cron on 3 sources (scheduled + queue + email), Vercel exposes only scheduled + queue, Deno Deploy exposes scheduled + queue. Streaming Response backpressure is measured in bytes on Vercel, in chunks on Cloudflare. A neutral test surface makes these differences **explicit assertions**, not silent regressions.
 
-The 8 axes below are the smallest set that reproduces the full edge envelope across the 3 target platforms. Each axis is an independent module under `@kiwa/edge/semantics/*`; each provides pure functions that operate on a session object and emit a strongly typed `AxisStep` sequence.
+The 8 axes below are the smallest set that reproduces the full edge envelope across the 3 target platforms. Each axis is an independent module under `@kiwa-lab/edge/semantics/*`; each provides pure functions that operate on a session object and emit a strongly typed `AxisStep` sequence.
 
 ## Axis 1 — Durable Object
 
@@ -172,7 +172,7 @@ The 8 neutral axes above expose 32 neutral events. Each real platform emits a **
 | streaming-response | `stream.backpressure` | `response_stream.backpressure` | `edge_function.stream_backpressure` | `deploy.stream.backpressure` |
 | streaming-response | `stream.closed` | `response_stream.closed` | `edge_function.stream_closed` | `deploy.stream.closed` |
 
-The full fidelity coverage grid is built by `collectFidelityCoverage()` from `@kiwa/edge/semantics/fidelity`. Downstream release-gate tests assert `rows.length === 24` (3 platforms × 8 axes) to guarantee full cross-platform coverage.
+The full fidelity coverage grid is built by `collectFidelityCoverage()` from `@kiwa-lab/edge/semantics/fidelity`. Downstream release-gate tests assert `rows.length === 24` (3 platforms × 8 axes) to guarantee full cross-platform coverage.
 
 ## Where each axis lands in the release gate
 

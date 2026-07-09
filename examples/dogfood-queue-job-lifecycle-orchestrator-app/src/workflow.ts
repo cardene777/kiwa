@@ -5,7 +5,7 @@ import {
   type JobSession,
   type JobSummary,
   type JobEvent,
-} from '@kiwa/queue';
+} from '@kiwa-lab/queue';
 
 export function bootJob(input: { timestamp: string }): JobSession {
   return startJob({ timestamp: input.timestamp });

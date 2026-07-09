@@ -8,7 +8,7 @@ Real chains are stateful. Every test that mutates the chain leaks state into the
 
 kiwa surfaces the pattern in three places.
 
-- `@kiwa/dapp` — `snapshotChain(client)` / `revertChain(client, snapshotId)` wrap the raw JSON-RPC calls through the viem `PublicClient` request path, returning the typed `Hex` snapshot id and anvil's boolean revert response.
+- `@kiwa-lab/dapp` — `snapshotChain(client)` / `revertChain(client, snapshotId)` wrap the raw JSON-RPC calls through the viem `PublicClient` request path, returning the typed `Hex` snapshot id and anvil's boolean revert response.
 - `kiwa::contract::foundry` — `Anvil::spawn(port)` returns a `Drop`-terminated handle so shell panics do not leak anvil processes.
 - `kiwa::contract::reth` — `RethNode::spawn_dev(port)` mirrors the `Anvil` handle. `reth_reorg(endpoint, blocks)` drives `debug_setHead` for depth-N rewinds.
 
@@ -108,7 +108,7 @@ export type ReorgOp =
 
 anvil ships `evm_snapshot` / `evm_revert` — a snapshot id acts as a bookmark. reth ships `debug_setHead` — a block hash argument names the target. Both roll back the chain state, but anvil's contract is *revert to a marker* while reth's is *rewind by N blocks*.
 
-The `@kiwa/dapp` reorg helpers (`snapshotChain` / `revertChain`) target anvil first because Foundry ships the primitive as a first-class RPC method. The `kiwa::contract::reth::reth_reorg` helper covers `debug_setHead` for the Rust-side fidelity report. When a downstream consumer wants to walk both, the adapter contract stays open — the `ReorgAdapter` interface accepts either primitive as long as the 4-op observable behaviour matches.
+The `@kiwa-lab/dapp` reorg helpers (`snapshotChain` / `revertChain`) target anvil first because Foundry ships the primitive as a first-class RPC method. The `kiwa::contract::reth::reth_reorg` helper covers `debug_setHead` for the Rust-side fidelity report. When a downstream consumer wants to walk both, the adapter contract stays open — the `ReorgAdapter` interface accepts either primitive as long as the 4-op observable behaviour matches.
 
 ## Assertion patterns
 

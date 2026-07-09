@@ -1,6 +1,6 @@
 # dogfood-otel-exemplar-app v1.35-3
 
-Dogfood application that exercises the `@kiwa/observability` v2.1 exemplar
+Dogfood application that exercises the `@kiwa-lab/observability` v2.1 exemplar
 + otel-advanced axes end-to-end through a provider-neutral 16-op contract
 satisfied by both a deterministic mock adapter and a `KIWA_MODE=real`
 testcontainers-driven OpenTelemetry Collector + Jaeger + Prometheus + Loki
@@ -13,7 +13,7 @@ Collector + Jaeger + Prometheus behaviour closely enough that consumers can
 trust the mock in unit tests. The fidelity harness diffs mock vs real traces
 across 3 pipeline profiles (traces / metrics / logs) × 4 canonical W3C
 baggage entry sets (session / user / tenant / feature-flag) and feeds the
-divergence count into the `@kiwa/quality-metrics` 13-axis release gate.
+divergence count into the `@kiwa-lab/quality-metrics` 13-axis release gate.
 
 ## Surface — 16 ops
 

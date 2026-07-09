@@ -1,4 +1,4 @@
-import { appendChild, createNode } from '@kiwa/component';
+import { appendChild, createNode } from '@kiwa-lab/component';
 import type {
   ButtonArgs,
   CardArgs,
@@ -8,18 +8,18 @@ import type {
   MockEvent,
   MockNode,
   ModalArgs,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 import {
   buildButton as buildButtonFixture,
   buildCard as buildCardFixture,
   buildInput as buildInputFixture,
   buildModal as buildModalFixture,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 
 /**
  * dogfood-storybook-design-system の 12 コンポーネント renderer 群。 5 primitive
  * (Button / Input / Card / Modal + Form-inspired input group) は
- * `@kiwa/component` の fixture を再利用、 残り 7 primitive (Dropdown /
+ * `@kiwa-lab/component` の fixture を再利用、 残り 7 primitive (Dropdown /
  * Tabs / Toast / Table / Tooltip / Badge / Avatar / Icon) は本 file で新規実装
  * する。 全 12 は framework agnostic な `(args) => MockNode` shape に統一され、
  * Storybook 8 StoryObj の render callback として使える。
@@ -29,7 +29,7 @@ import {
  */
 
 // ---- Button ----
-// primitive は @kiwa/component の fixture をそのまま再利用する。 dogfood は
+// primitive は @kiwa-lab/component の fixture をそのまま再利用する。 dogfood は
 // story 定義 (variant × state 組合せ) を追加する層。
 export const buildButton = buildButtonFixture;
 export type { ButtonArgs };
@@ -480,7 +480,7 @@ export interface FormArgs {
 }
 
 /**
- * Form — @kiwa/component の buildForm と同 semantic を dogfood 側で
+ * Form — @kiwa-lab/component の buildForm と同 semantic を dogfood 側で
  * 再定義 (form + submit + validation)。 story の args を型で縛る用途、
  * fixture との実装差はない。
  */

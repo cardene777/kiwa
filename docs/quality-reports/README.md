@@ -1,6 +1,6 @@
 # kiwa quality reports
 
-This directory hosts per-provider quality reports emitted by `@kiwa/quality-metrics`. Each report captures a snapshot of the 5-axis score (coverage / test count / fidelity / perf p95 / mutation kill) at a given version and shows whether the release gate SSOT (`docs/quality/release-gate.md`) was passed.
+This directory hosts per-provider quality reports emitted by `@kiwa-lab/quality-metrics`. Each report captures a snapshot of the 5-axis score (coverage / test count / fidelity / perf p95 / mutation kill) at a given version and shows whether the release gate SSOT (`docs/quality/release-gate.md`) was passed.
 
 ## Files
 
@@ -13,7 +13,7 @@ This directory hosts per-provider quality reports emitted by `@kiwa/quality-metr
 Reports are written when a provider's PR includes the harness. Manual emit for a provider without an automated hook:
 
 ```ts
-import { emitJson, emitMarkdown } from '@kiwa/quality-metrics';
+import { emitJson, emitMarkdown } from '@kiwa-lab/quality-metrics';
 import { writeFileSync } from 'node:fs';
 
 const md = emitMarkdown({ report, verdict });

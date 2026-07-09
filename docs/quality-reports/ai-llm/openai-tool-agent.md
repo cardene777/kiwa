@@ -1,13 +1,13 @@
 # Fidelity — dogfood-openai-tool-agent (v1.12-3)
 
-Real-vs-mock behavioural fidelity for the OpenAI Chat Completions tool-use agent dogfood, produced by `examples/dogfood-openai-tool-agent/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa/quality-metrics` 11-axis release gate.
+Real-vs-mock behavioural fidelity for the OpenAI Chat Completions tool-use agent dogfood, produced by `examples/dogfood-openai-tool-agent/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-lab/quality-metrics` 11-axis release gate.
 
 ## Baseline (real mode skipped — no `OPENAI_API_KEY`)
 
 When the harness runs without an OpenAI API key, the real adapter emits `OPENAI_ENV_MISSING` for every op. Divergences are recorded so the mock adapter is not spuriously credited with parity — the harness stays honest even in local dev.
 
 ```
-provider   : @kiwa/ai-llm/openai-tool-agent
+provider   : @kiwa-lab/ai-llm/openai-tool-agent
 version    : 0.1.0
 verdict    : FAIL (accuracy.score 0.65 vs threshold 0.80)
 divergences: 3 (validateToolSchemas / runToolLoop / runParallelToolCall — real mode absent)
@@ -59,4 +59,4 @@ OpenAI's function-calling loop keys follow-up turns on `role: 'tool'` messages, 
 
 ## Notes
 
-Provider prefix `@kiwa/ai-llm/` triggers the 11-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — the 4 AI-LLM axes cost / latency / token / accuracy are added on top of the shared 7).
+Provider prefix `@kiwa-lab/ai-llm/` triggers the 11-axis branch of `evaluateReleaseGate` (`packages/quality-metrics/src/gate.ts` — the 4 AI-LLM axes cost / latency / token / accuracy are added on top of the shared 7).

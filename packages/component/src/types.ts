@@ -1,5 +1,5 @@
 /**
- * Shared types for `@kiwa/component` — the 3-integration unified mock
+ * Shared types for `@kiwa-lab/component` — the 3-integration unified mock
  * harness for Storybook 8 + Playwright Component Testing + Chromatic.
  *
  * v1.16 milestone (Issue #762, sub #763) 新設。 kiwa の思想 =

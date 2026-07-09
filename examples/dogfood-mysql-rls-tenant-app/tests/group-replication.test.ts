@@ -3,7 +3,7 @@
  *
  * Asserts the 4-state walk (empty → joined → primary-elected →
  * conflict-detected → member-left) records the expected observation for
- * downstream fidelity comparison. The mock semantics from `@kiwa/orm`
+ * downstream fidelity comparison. The mock semantics from `@kiwa-lab/orm`
  * v0.10 enforce state ordering + member existence so we can pin the exact
  * final state without flaky timing.
  */

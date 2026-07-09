@@ -17,7 +17,7 @@ import type {
   PublishResult,
   SchemaKind,
   SchemaRegistry,
-} from '@kiwa/streaming';
+} from '@kiwa-lab/streaming';
 
 export interface ProducerRun {
   readonly connect: () => Promise<void>;

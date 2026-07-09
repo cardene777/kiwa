@@ -45,7 +45,7 @@ describe('dogfood-storybook-8-mdx-app — emit fidelity report to quality-report
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/component/storybook-8-mdx',
+      provider: '@kiwa-lab/component/storybook-8-mdx',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -69,7 +69,7 @@ describe('dogfood-storybook-8-mdx-app — emit fidelity report to quality-report
     expect(output.report.fidelity.mockCoveredMethods).toBeGreaterThan(0);
     expect(output.report.fidelity.behavioralDivergences).toBeGreaterThanOrEqual(0);
     expect(output.markdown).toContain('Quality Report');
-    // Component provider (@kiwa/component/...) is a 7-axis gate.
+    // Component provider (@kiwa-lab/component/...) is a 7-axis gate.
     expect(output.verdict.axesEvaluated).toBe(7);
     await mock.reset();
     await real.reset();

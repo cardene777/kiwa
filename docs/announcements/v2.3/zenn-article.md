@@ -31,7 +31,7 @@ payment-succeeded / payment-failed / dunning-succeeded / dunning-exhausted / cha
 ### 4 code pattern
 
 ```ts
-import { startLifecycle, handleEvent, summarizeLifecycle } from '@kiwa/payment';
+import { startLifecycle, handleEvent, summarizeLifecycle } from '@kiwa-lab/payment';
 
 // Pattern 1 — 初期化
 const s = startLifecycle({ timestamp: new Date().toISOString() });
@@ -72,7 +72,7 @@ v1.23 → v2.3 = **49 milestone**。
 ## Install
 
 ```bash
-pnpm add -D @kiwa/payment@^2.1
+pnpm add -D @kiwa-lab/payment@^2.1
 ```
 
 ## Migration guide

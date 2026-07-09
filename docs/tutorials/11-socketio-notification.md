@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A single vitest test file that drives a small notification service through **four Socket.io surfaces** — a per-room subscription with namespace + room routing, a server-side push, a disconnect → reconnect cycle that replays pending events in FIFO order, and a bounded backpressure queue that drops overflow deterministically — using `@kiwa/realtime`'s `createSocketioMock`. The same test file also works against a real Socket.io / SSE server when `SOCKETIO_URL` is set, so the fidelity harness can diff mock vs real behaviour.
+A single vitest test file that drives a small notification service through **four Socket.io surfaces** — a per-room subscription with namespace + room routing, a server-side push, a disconnect → reconnect cycle that replays pending events in FIFO order, and a bounded backpressure queue that drops overflow deterministically — using `@kiwa-lab/realtime`'s `createSocketioMock`. The same test file also works against a real Socket.io / SSE server when `SOCKETIO_URL` is set, so the fidelity harness can diff mock vs real behaviour.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A single vitest test file that drives a small notification service through **fou
 ```bash
 mkdir kiwa-socketio-notification && cd kiwa-socketio-notification
 pnpm init -y
-pnpm add -D vitest typescript @types/node @kiwa/realtime
+pnpm add -D vitest typescript @types/node @kiwa-lab/realtime
 ```
 
 Set `type: module` + test script in `package.json`:
@@ -50,7 +50,7 @@ import {
   createSocketioMock,
   type SocketIoMock,
   type SubscriptionHandle,
-} from '@kiwa/realtime';
+} from '@kiwa-lab/realtime';
 
 /** A notification event pushed by the server. */
 export interface NotificationEvent {

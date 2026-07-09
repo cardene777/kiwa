@@ -3,7 +3,7 @@
 // Pattern A (Dependency Injection) — 実 Astro 側は src/pages/api/items.ts で
 // export const GET = (context) => itemsGetEndpoint(context) として thin wrap する。
 
-import type { APIRoute } from '@kiwa/astro';
+import type { APIRoute } from '@kiwa-lab/astro';
 import { resolveUser } from '../../../utils/_kiwa/auth.js';
 
 export interface Item {

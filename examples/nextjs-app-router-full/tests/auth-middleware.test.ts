@@ -1,11 +1,11 @@
 // kiwa unit test for lib/_kiwa/auth-middleware.ts
-// — invokes the pure middleware through @kiwa/nextjs's invokeMiddleware.
+// — invokes the pure middleware through @kiwa-lab/nextjs's invokeMiddleware.
 
 import { describe, expect, it } from 'vitest';
-import { invokeMiddleware } from '@kiwa/nextjs';
+import { invokeMiddleware } from '@kiwa-lab/nextjs';
 import { authMiddleware } from '../lib/_kiwa/auth-middleware.js';
 
-describe('authMiddleware via @kiwa/nextjs invokeMiddleware', () => {
+describe('authMiddleware via @kiwa-lab/nextjs invokeMiddleware', () => {
   it('T-NF-101: session=banned で 403 JSON action', async () => {
     const { env } = await invokeMiddleware({
       middleware: authMiddleware,

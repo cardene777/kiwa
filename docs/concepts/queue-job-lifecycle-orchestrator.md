@@ -1,12 +1,12 @@
 ---
-title: "@kiwa/queue v0.6 job-lifecycle-orchestrator SSOT"
+title: "@kiwa-lab/queue v0.6 job-lifecycle-orchestrator SSOT"
 ---
 
-# @kiwa/queue v0.6 job-lifecycle-orchestrator SSOT
+# @kiwa-lab/queue v0.6 job-lifecycle-orchestrator SSOT
 
 ## What this covers
 
-`@kiwa/queue` v0.6 job-lifecycle-orchestrator = 5 provider (BullMQ + Inngest + Cloudflare Queues + AWS SQS + RabbitMQ) を 継続合成する 上位 layer。 depth-5 pattern 12 例目 candidate = systematic law 継続強化 第 6 例、 backend systems layer 第 4 例 (ORM / Auth / Cache に続く)、 systematic pattern 54 度目適用。
+`@kiwa-lab/queue` v0.6 job-lifecycle-orchestrator = 5 provider (BullMQ + Inngest + Cloudflare Queues + AWS SQS + RabbitMQ) を 継続合成する 上位 layer。 depth-5 pattern 12 例目 candidate = systematic law 継続強化 第 6 例、 backend systems layer 第 4 例 (ORM / Auth / Cache に続く)、 systematic pattern 54 度目適用。
 
 ## 5 state SSOT
 

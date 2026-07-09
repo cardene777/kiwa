@@ -5,7 +5,7 @@ import {
   type LifecycleEvent,
   type LifecycleSession,
   type LifecycleSummary,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 /** Pattern 1 — 通常契約成立 で lifecycle 初期化。 */
 export function bootstrapSubscription(input: { timestamp: string }): LifecycleSession {

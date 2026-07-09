@@ -9,7 +9,7 @@ import {
 
 function baseReport(overrides?: Partial<QualityReport>): QualityReport {
   return {
-    provider: '@kiwa/example',
+    provider: '@kiwa-lab/example',
     version: '0.1.0',
     reportedAt: '2026-07-02T00:00:00Z',
     coverage: { line: 90, branch: 82, function: 95 },
@@ -109,15 +109,15 @@ describe('diffReports', () => {
   });
 
   it('T-QM-EM-009 refuses diffing across different providers', () => {
-    const a = baseReport({ provider: '@kiwa/one' });
-    const b = baseReport({ provider: '@kiwa/two' });
+    const a = baseReport({ provider: '@kiwa-lab/one' });
+    const b = baseReport({ provider: '@kiwa-lab/two' });
     expect(() => diffReports(a, b)).toThrow(/provider mismatch/);
   });
 });
 
 function aiLlmReport(overrides?: Partial<QualityReport>): QualityReport {
   return {
-    ...baseReport({ provider: '@kiwa/ai-llm' }),
+    ...baseReport({ provider: '@kiwa-lab/ai-llm' }),
     cost: { perRequestUsd: 0.05, totalUsd: 5.0, requests: 100 },
     latency: { p50Ms: 500, p95Ms: 1500, p99Ms: 2500, samples: 100 },
     token: { promptTokens: 800, completionTokens: 400, totalTokens: 1200, requests: 100 },
@@ -194,7 +194,7 @@ describe('diffReports — AI-LLM 4 axes', () => {
   });
 
   it('T-QM-EM-015 omits AI-LLM diff when either report is missing the axis', () => {
-    const prev = baseReport({ provider: '@kiwa/ai-llm' });
+    const prev = baseReport({ provider: '@kiwa-lab/ai-llm' });
     const cur = aiLlmReport();
     const diff = diffReports(prev, cur);
     expect(diff.cost).toBeUndefined();

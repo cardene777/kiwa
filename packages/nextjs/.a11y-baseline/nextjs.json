@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/nextjs",
+  "package": "@kiwa-lab/nextjs",
   "generatedAt": "2026-07-06T01:15:07.727Z",
   "layers": {
     "jsdom": {

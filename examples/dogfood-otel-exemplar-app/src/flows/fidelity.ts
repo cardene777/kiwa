@@ -1,12 +1,12 @@
 /**
  * Fidelity harness — compares an app run under {@link makeMockAdapter}
  * against one under {@link makeRealAdapter}, feeds the divergence count
- * (missing ops, unmatched behaviour) into `@kiwa/quality-metrics`
+ * (missing ops, unmatched behaviour) into `@kiwa-lab/quality-metrics`
  * 13-axis release gate, and emits a JSON + markdown report so the
  * release process can consume it.
  *
  * The dogfood app is the source of truth for whether the v1.35-1
- * `@kiwa/observability` v2.1 exemplar + otel-advanced axes track
+ * `@kiwa-lab/observability` v2.1 exemplar + otel-advanced axes track
  * the production OpenTelemetry Collector + Jaeger + Prometheus + Loki
  * pipeline closely enough to be trusted as a mock in unit tests. The
  * report tracks the same 15 ops the adapter contract exposes so any
@@ -29,7 +29,7 @@ import {
   testCountFromCategories,
   type QualityReport,
   type ReleaseGateVerdict,
-} from '@kiwa/quality-metrics';
+} from '@kiwa-lab/quality-metrics';
 import type { OtelExemplarAdapter, TraceEvent } from '../adapters/interface.js';
 
 export interface FidelityRunInput {

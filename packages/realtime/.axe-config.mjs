@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/realtime.
+ * A11y (axe-core) config for @kiwa-lab/realtime.
  * Tier: SaaS tier (critical 0 / serious 0 / moderate 0) — Supabase Realtime / Ably / Pusher / Socket.io. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § SaaS tier.
  */

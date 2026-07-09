@@ -1,7 +1,7 @@
 # MySQL RLS + Multi-Tenant SaaS — Quality Report (v1.26-3)
 
 Dogfood: [`examples/dogfood-mysql-rls-tenant-app`](../../../examples/dogfood-mysql-rls-tenant-app/).
-Package under exercise: [`@kiwa/orm`](../../../packages/orm/) (v0.9)
+Package under exercise: [`@kiwa-lab/orm`](../../../packages/orm/) (v0.9)
 RLS axis.
 
 ## Scope
@@ -13,7 +13,7 @@ package promises in v0.9:
    RLS gate that mounts a `organizations_tenant_isolation` policy on the
    `organizations` table (tenant column `tenant_id`), then enforces the
    policy before touching the store (`src/rls/index.ts` wraps
-   `@kiwa/orm`'s `createRlsSession` / `installPolicy` /
+   `@kiwa-lab/orm`'s `createRlsSession` / `installPolicy` /
    `filterTenant` / `logAudit`).
 2. **Cross-tenant read refuse** — an acting tenant's caller cannot read
    another tenant's rows; the refusal returns `CROSS_TENANT_REFUSED`

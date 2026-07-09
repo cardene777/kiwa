@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/ai-llm` v0.5 llm-ops semantics so the
+ * Mock adapter — drives `@kiwa-lab/ai-llm` v0.5 llm-ops semantics so the
  * same app code exercises a deterministic registry + rollout + A/B +
  * canary + shadow ceremony without a real Anthropic / deployment control
  * plane call. Both mock and real adapters satisfy {@link LlmOpsAdapter},
@@ -25,7 +25,7 @@ import {
   startOpsSession,
   updateRegistry,
   type OpsSession,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 import type {
   AdvanceRolloutResult,
   CompareShadowResult,

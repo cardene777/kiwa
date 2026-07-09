@@ -13,7 +13,7 @@
  * when only the mock has an actual body.
  */
 
-import type { WebAuthnCredential } from '@kiwa/auth';
+import type { WebAuthnCredential } from '@kiwa-lab/auth';
 import type {
   RegisterInput,
   RegisterResult,

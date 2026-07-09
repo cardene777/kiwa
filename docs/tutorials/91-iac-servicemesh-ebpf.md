@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/observability` v2.2 that models the 3 pieces of a real advanced III observability posture that every non-trivial production platform eventually needs — an IaC `capturePlan` step that pins a per-workspace change catalog (create / update / delete / no-op counts) so a follow-up `detectDrift` step can compare the intended set against the actually-provisioned set, an `evaluatePolicy` step that gates the plan on OPA policy pass / fail (mirroring `terraform plan | conftest test` in a real Terraform + Sentinel / OPA stack), an `attributeCost` step that pins per-team monthly cost so a Finance dashboard can slice the same infra spend by team without a separate query, a service-mesh `handshakeMtls` step that pins a per-connection SPIFFE ID pair (mirroring Istio Citadel / Linkerd Proxy Identity) so a rogue workload cannot silently accept traffic on a mis-configured `spiffe://` URI, an `injectSidecar` step that counts envoy vs. linkerd2-proxy per-namespace so the mesh operator can audit adoption without a separate `kubectl get pods -o json` script, a `tripCircuitBreaker` step that pins the failure-rate threshold (mirroring Envoy `outlier_detection.consecutive_5xx` / Linkerd `service.circuit_breaker`) so a runaway upstream cannot cascade into the whole mesh, an `applyTrafficSplit` step that pins the per-service weight distribution (mirroring Istio VirtualService `weight` + Linkerd TrafficSplit v1alpha3) so a canary rollout can be re-computed in one place instead of a per-provider YAML diff, an eBPF-III `probeUserspace` step that pins per-symbol uprobe registration (mirroring `bpftrace 'uprobe:libc:malloc'`) so a memory-leak investigation can attach to a single `.so` without a full kernel-side sweep, a `traceKernel` step that separates kprobe / tracepoint / LSM hooks (mirroring `bpftool prog show` per-hook category counts) so the Linux 6.11+ Landlock LSM hook set can be audited independently of the older kprobe surface, a `recordSyscall` step that aggregates `read` / `write` / `open` / other syscall counts (mirroring `sysdig` / `falco` per-syscall totals) so a "which syscall is dominating my process?" investigation lands on one number, and a `captureNetworkFlow` step that pins per-flow bytes + packets (mirroring `bcc/tcpconnect` + `bpf/skops` egress instrumentation) so a "where is the bandwidth going?" investigation reproduces without a full `tcpdump` capture. `startIacSession()` + `capturePlan()` + `detectDrift()` + `evaluatePolicy()` + `attributeCost()` + `startMeshSession()` + `handshakeMtls()` + `injectSidecar()` + `tripCircuitBreaker()` + `applyTrafficSplit()` + `startEbpfIiiSession()` + `probeUserspace()` + `traceKernel()` + `recordSyscall()` + `captureNetworkFlow()` give you every one of those pieces without booting a real Terraform + OPA / Istio + Envoy / bpftrace kernel. This is the pattern kiwa's `examples/dogfood-observability-iac-drift-app` exercises against real Terraform 1.11+ + OPA 1.0 / Conftest + Kubernetes Istio 1.30+ / Linkerd 2.16+ + Linux 6.11+ bpftrace / bcc backends under `KIWA_MODE=real` + the relevant `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the drift detector missed a resource because `detectDrift` compared expected vs. actual with the wrong direction, the mTLS handshake accepted an un-scoped SPIFFE ID because `handshakeMtls` did not gate on `spiffe://` prefix, and the uprobe count double-fired because `probeUserspace` accepted a duplicate symbol without a set guard" gap a reviewer sees in an IaC + service-mesh + eBPF post-mortem.
+A vitest suite wired to `@kiwa-lab/observability` v2.2 that models the 3 pieces of a real advanced III observability posture that every non-trivial production platform eventually needs — an IaC `capturePlan` step that pins a per-workspace change catalog (create / update / delete / no-op counts) so a follow-up `detectDrift` step can compare the intended set against the actually-provisioned set, an `evaluatePolicy` step that gates the plan on OPA policy pass / fail (mirroring `terraform plan | conftest test` in a real Terraform + Sentinel / OPA stack), an `attributeCost` step that pins per-team monthly cost so a Finance dashboard can slice the same infra spend by team without a separate query, a service-mesh `handshakeMtls` step that pins a per-connection SPIFFE ID pair (mirroring Istio Citadel / Linkerd Proxy Identity) so a rogue workload cannot silently accept traffic on a mis-configured `spiffe://` URI, an `injectSidecar` step that counts envoy vs. linkerd2-proxy per-namespace so the mesh operator can audit adoption without a separate `kubectl get pods -o json` script, a `tripCircuitBreaker` step that pins the failure-rate threshold (mirroring Envoy `outlier_detection.consecutive_5xx` / Linkerd `service.circuit_breaker`) so a runaway upstream cannot cascade into the whole mesh, an `applyTrafficSplit` step that pins the per-service weight distribution (mirroring Istio VirtualService `weight` + Linkerd TrafficSplit v1alpha3) so a canary rollout can be re-computed in one place instead of a per-provider YAML diff, an eBPF-III `probeUserspace` step that pins per-symbol uprobe registration (mirroring `bpftrace 'uprobe:libc:malloc'`) so a memory-leak investigation can attach to a single `.so` without a full kernel-side sweep, a `traceKernel` step that separates kprobe / tracepoint / LSM hooks (mirroring `bpftool prog show` per-hook category counts) so the Linux 6.11+ Landlock LSM hook set can be audited independently of the older kprobe surface, a `recordSyscall` step that aggregates `read` / `write` / `open` / other syscall counts (mirroring `sysdig` / `falco` per-syscall totals) so a "which syscall is dominating my process?" investigation lands on one number, and a `captureNetworkFlow` step that pins per-flow bytes + packets (mirroring `bcc/tcpconnect` + `bpf/skops` egress instrumentation) so a "where is the bandwidth going?" investigation reproduces without a full `tcpdump` capture. `startIacSession()` + `capturePlan()` + `detectDrift()` + `evaluatePolicy()` + `attributeCost()` + `startMeshSession()` + `handshakeMtls()` + `injectSidecar()` + `tripCircuitBreaker()` + `applyTrafficSplit()` + `startEbpfIiiSession()` + `probeUserspace()` + `traceKernel()` + `recordSyscall()` + `captureNetworkFlow()` give you every one of those pieces without booting a real Terraform + OPA / Istio + Envoy / bpftrace kernel. This is the pattern kiwa's `examples/dogfood-observability-iac-drift-app` exercises against real Terraform 1.11+ + OPA 1.0 / Conftest + Kubernetes Istio 1.30+ / Linkerd 2.16+ + Linux 6.11+ bpftrace / bcc backends under `KIWA_MODE=real` + the relevant `_URL` env; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the drift detector missed a resource because `detectDrift` compared expected vs. actual with the wrong direction, the mTLS handshake accepted an un-scoped SPIFFE ID because `handshakeMtls` did not gate on `spiffe://` prefix, and the uprobe count double-fired because `probeUserspace` accepted a duplicate symbol without a set guard" gap a reviewer sees in an IaC + service-mesh + eBPF post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/observability` v2.2 that models the 3 pieces of a
 ```bash
 mkdir kiwa-iac-servicemesh-ebpf && cd kiwa-iac-servicemesh-ebpf
 pnpm init
-pnpm add -D @kiwa/observability@^2.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/observability@^2.2 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -39,7 +39,7 @@ The v2.2 surface exports the IaC axis (`startIacSession` / `capturePlan` / `dete
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { capturePlan, startIacSession } from '@kiwa/observability';
+import { capturePlan, startIacSession } from '@kiwa-lab/observability';
 
 describe('iac — plan capture', () => {
   it('captures a plan and counts create/update/delete', async () => {
@@ -73,7 +73,7 @@ describe('iac — plan capture', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { capturePlan, detectDrift, startIacSession } from '@kiwa/observability';
+import { capturePlan, detectDrift, startIacSession } from '@kiwa-lab/observability';
 
 describe('iac — drift detection', () => {
   it('detects a resource missing in actual state', () => {
@@ -112,7 +112,7 @@ import {
   detectDrift,
   evaluatePolicy,
   startIacSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('iac — policy evaluation', () => {
   it('counts passed vs failed policies', () => {
@@ -144,7 +144,7 @@ import {
   detectDrift,
   evaluatePolicy,
   startIacSession,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('iac — cost attribution', () => {
   it('sums the total monthly cost across teams', () => {
@@ -170,7 +170,7 @@ describe('iac — cost attribution', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { handshakeMtls, startMeshSession } from '@kiwa/observability';
+import { handshakeMtls, startMeshSession } from '@kiwa-lab/observability';
 
 describe('mesh — mTLS handshake', () => {
   it('accepts a valid SPIFFE pair', () => {
@@ -209,7 +209,7 @@ import {
   injectSidecar,
   startMeshSession,
   tripCircuitBreaker,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('mesh — sidecar + circuit breaker', () => {
   it('counts envoy vs linkerd sidecars separately', () => {
@@ -252,7 +252,7 @@ import {
   injectSidecar,
   startMeshSession,
   tripCircuitBreaker,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('mesh — traffic split', () => {
   it('records the weight sum across services', () => {
@@ -283,7 +283,7 @@ import {
   probeUserspace,
   startEbpfIiiSession,
   traceKernel,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('ebpf — userspace + kernel probes', () => {
   it('counts uprobes by symbol', () => {
@@ -327,7 +327,7 @@ import {
   recordSyscall,
   startEbpfIiiSession,
   traceKernel,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 
 describe('ebpf — syscall + network flow', () => {
   it('sums syscall counts across categories', () => {

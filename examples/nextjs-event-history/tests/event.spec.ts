@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expectEvent } from '@kiwa/dapp';
+import { expectEvent } from '@kiwa-lab/dapp';
 import {
   createPublicClient,
   createWalletClient,

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A Deno Fresh app on Deno Deploy wired to `@kiwa/edge` v0.2's `geo-replicated` + `edge-kv` + `cron-trigger` semantics. The suite covers the full geo journey — multi-region write to Deno KV, read-your-writes consistency on the primary vs eventual consistency on a lagging replica, scheduled + queue cron triggers with retry, and a 24-h retention purge job. Every event goes through the same neutral envelope, so the `KIWA_MODE=real` switch flips the run to a Deno Deploy sandbox without touching the test bodies.
+A Deno Fresh app on Deno Deploy wired to `@kiwa-lab/edge` v0.2's `geo-replicated` + `edge-kv` + `cron-trigger` semantics. The suite covers the full geo journey — multi-region write to Deno KV, read-your-writes consistency on the primary vs eventual consistency on a lagging replica, scheduled + queue cron triggers with retry, and a 24-h retention purge job. Every event goes through the same neutral envelope, so the `KIWA_MODE=real` switch flips the run to a Deno Deploy sandbox without touching the test bodies.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A Deno Fresh app on Deno Deploy wired to `@kiwa/edge` v0.2's `geo-replicated` + 
 ```bash
 mkdir kiwa-deno-geo && cd kiwa-deno-geo
 pnpm init
-pnpm add -D @kiwa/edge@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/edge@^0.2 vitest typescript @types/node
 ```
 
 Add the vitest script in `package.json`.
@@ -50,7 +50,7 @@ import {
   startCron,
   completeCron,
   failCron,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 
 export function makeMockAdapter() {
   return {
@@ -103,7 +103,7 @@ import {
   geoPrimaryWrite,
   markReplicaLagged,
   syncReplica,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 
 describe('multi-region write', () => {
   it('bumps the version on primary, syncs each replica in turn', () => {
@@ -144,7 +144,7 @@ import {
   createEdgeKvSession,
   kvRead,
   kvWrite,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 
 describe('read-your-writes', () => {
   it('a strong-consistency primary reads back its own write immediately', () => {
@@ -179,7 +179,7 @@ import {
   startCron,
   completeCron,
   failCron,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 
 describe('cron trigger lifecycle', () => {
   it('walks scheduled → running → completed on success', () => {
@@ -245,7 +245,7 @@ const mode = process.env.KIWA_MODE ?? 'mock';
 export function makeAdapter() {
   return mode === 'real' && process.env.DENO_DEPLOY_KEY === '1'
     ? makeRealAdapter()  // Deno Deploy sandbox + Deno KV + Deno Deploy Cron
-    : makeMockAdapter(); // @kiwa/edge v0.2 semantics
+    : makeMockAdapter(); // @kiwa-lab/edge v0.2 semantics
 }
 ```
 

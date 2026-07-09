@@ -1,14 +1,14 @@
 /**
  * Public surface for dogfood-search-faceted-geo-app v0.0.1 (v1.36-3).
  *
- * A dogfood app that drives the `@kiwa/search` v0.3 faceted-advanced
+ * A dogfood app that drives the `@kiwa-lab/search` v0.3 faceted-advanced
  * + geo axes (start session → seed docs → nested facet compute →
  * hierarchy traverse → distinct count → refined filter → geo bounding
  * box → radius → polygon → fidelity signal → Algolia health check →
  * reset) behind a provider-neutral 15-op contract, satisfied by both a
  * deterministic mock adapter and a `KIWA_MODE=real` Algolia wire-surface
  * real adapter. The fidelity harness diffs both traces and feeds the
- * divergence count into the `@kiwa/quality-metrics` 13-axis
+ * divergence count into the `@kiwa-lab/quality-metrics` 13-axis
  * release gate.
  */
 

@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/ui.
+ * A11y (axe-core) config for @kiwa-lab/ui.
  * Tier: Test type tier (critical 0 / serious 0-3 / moderate 0-10) — Vue / Solid / Lit / Qwik / Angular DOM harness. jsdom + framework noise.
  * SSOT: docs/quality/a11y-thresholds.md § Test type tier.
  */

@@ -1,6 +1,6 @@
 # nextjs-app-router-full — kiwa Next.js v15 App Router PoC (全 4 layer 統合)
 
-`@kiwa/nextjs` v1.0.x の **3 helper 全部** (`invokeServerAction` / `invokeMiddleware` / `renderServerComponent`) + **Route Handler** を **実 Next.js v15 App Router project** に統合した参考実装。 Issue #525 v1.2 milestone の 5/5 完遂例。
+`@kiwa-lab/nextjs` v1.0.x の **3 helper 全部** (`invokeServerAction` / `invokeMiddleware` / `renderServerComponent`) + **Route Handler** を **実 Next.js v15 App Router project** に統合した参考実装。 Issue #525 v1.2 milestone の 5/5 完遂例。
 
 OSS contributor / kiwa を初めて触る user 向けに、 Server Actions + middleware + RSC + REST Route Handler の **4 layer 全部** をどう書けば kiwa 経由で test できるかを **コピペで動く形** で示す。
 
@@ -58,7 +58,7 @@ nextjs-app-router-full/
 
 ```bash
 pnpm install               # repo root から実行
-pnpm -F examples-nextjs-app-router-full build  # 依存 @kiwa/nextjs + @kiwa/core + Next.js build
+pnpm -F examples-nextjs-app-router-full build  # 依存 @kiwa-lab/nextjs + @kiwa-lab/core + Next.js build
 ```
 
 ### Step 2 — kiwa unit test (Next.js 起動不要、 高速)
@@ -102,7 +102,7 @@ pnpm -F examples-nextjs-app-router-full test:e2e
 3. **`renderServerComponent`** (async RSC) — `await component(props)` で element tree を取得、 `findAll` / `textContent` で構造検証 (DOM 不要、 streaming 不要)
 4. **Route Handler は kiwa helper 不要** — pure `Request → Response` 関数なので Vitest から `new Request(url, ...)` で direct invoke 可能
 
-各 helper の API 詳細は [`@kiwa/nextjs` の README](../../packages/nextjs/README.md) を参照。
+各 helper の API 詳細は [`@kiwa-lab/nextjs` の README](../../packages/nextjs/README.md) を参照。
 
 ## 関連
 

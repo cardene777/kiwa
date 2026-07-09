@@ -1,8 +1,8 @@
 // kiwa unit test for app/items/_kiwa/items-action.ts
-// — invokes the pure Server Action through @kiwa/nextjs's invokeServerAction.
+// — invokes the pure Server Action through @kiwa-lab/nextjs's invokeServerAction.
 
 import { describe, expect, it } from 'vitest';
-import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa/nextjs';
+import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
 import { buildDefaultEnv, createItemAction } from '../app/items/_kiwa/items-action.js';
 
 function buildFormData(entries: Record<string, string>): FormData {
@@ -11,7 +11,7 @@ function buildFormData(entries: Record<string, string>): FormData {
   return fd;
 }
 
-describe('createItemAction via @kiwa/nextjs invokeServerAction', () => {
+describe('createItemAction via @kiwa-lab/nextjs invokeServerAction', () => {
   it('T-NF-001: session 不在で /login redirect (REDIRECT_SYMBOL)', async () => {
     const fd = buildFormData({ name: 'nextjs' });
     const { env, result } = await invokeServerAction({

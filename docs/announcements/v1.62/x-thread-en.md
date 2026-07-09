@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v1.62 is out — Desktop deepening VI. **@kiwa/desktop v0.7** launches real behavior runner + fidelity harness behavior diff early warning, 12 axis real behavior differentiation pattern (electron real app / auto-updater 128MB / screen-recording 4K / clipboard URL). Inherits v1.55-v1.61 4-PR rhythm (**9 milestones = 36 PRs same rhythm**), **systematic pattern 37th application**, **depth-7 pattern new candidate reached**.
+kiwa v1.62 is out — Desktop deepening VI. **@kiwa-lab/desktop v0.7** launches real behavior runner + fidelity harness behavior diff early warning, 12 axis real behavior differentiation pattern (electron real app / auto-updater 128MB / screen-recording 4K / clipboard URL). Inherits v1.55-v1.61 4-PR rhythm (**9 milestones = 36 PRs same rhythm**), **systematic pattern 37th application**, **depth-7 pattern new candidate reached**.
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-desktop-real-behavior-app new, verifyShapeContract + runEarlyWarningRepo
 
 ## Tweet 4
 
-`pnpm add -D @kiwa/desktop@^0.7`. Migration: https://cardene777.github.io/kiwa/migrations/v1.61-to-v1.62
+`pnpm add -D @kiwa-lab/desktop@^0.7`. Migration: https://cardene777.github.io/kiwa/migrations/v1.61-to-v1.62
 
 v1.63+ will implement real adapter native bindings (electron-updater real network call / SCStream real permission check). Backward compat absolutely preserved — v0.1-v0.6 fully retained.
 

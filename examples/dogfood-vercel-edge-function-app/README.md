@@ -1,13 +1,13 @@
 # dogfood-vercel-edge-function-app
 
-Dogfood app v1.24-3 — a Next.js 15 middleware + edge runtime app on Vercel that exercises the `geo-replicated` + `edge-kv` + `streaming-response` axes of `@kiwa/edge` v0.2 end-to-end. Drivable in both `KIWA_MODE=real` (Vercel Edge sandbox + `VERCEL_KEY=1` env-gate) and `KIWA_MODE=mock` (`@kiwa/edge` v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.
+Dogfood app v1.24-3 — a Next.js 15 middleware + edge runtime app on Vercel that exercises the `geo-replicated` + `edge-kv` + `streaming-response` axes of `@kiwa-lab/edge` v0.2 end-to-end. Drivable in both `KIWA_MODE=real` (Vercel Edge sandbox + `VERCEL_KEY=1` env-gate) and `KIWA_MODE=mock` (`@kiwa-lab/edge` v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.
 
 Sub-Issue #916, land-order 3/6 in the v1.24 milestone.
 
 ## Two run modes
 
 - `KIWA_MODE=real` — Vercel Edge sandbox + `vercel dev` behind `VERCEL_KEY=1` env-gate. Runs a real Vercel Edge runtime + Vercel KV Redis + streaming Response stack against a local sandbox. Skipped when the environment cannot reach a working sandbox (no `VERCEL_KEY=1`, no vercel install, no local port).
-- `KIWA_MODE=mock` — `@kiwa/edge` v0.2 `createGeoReplicatedSession` / `geoPrimaryWrite` / `markReplicaLagged` / `syncReplica` / `createEdgeKvSession` / `kvRead` / `kvWrite` / `kvRangeQuery` / `openStream` / `sendChunk` / `closeStream` deterministic mocks. Always runs.
+- `KIWA_MODE=mock` — `@kiwa-lab/edge` v0.2 `createGeoReplicatedSession` / `geoPrimaryWrite` / `markReplicaLagged` / `syncReplica` / `createEdgeKvSession` / `kvRead` / `kvWrite` / `kvRangeQuery` / `openStream` / `sendChunk` / `closeStream` deterministic mocks. Always runs.
 
 `makeMockAdapter` (`src/lib/mock.ts`) drives the mock path; `makeRealAdapter` (`src/lib/real.ts`) drives the real path or falls back to the env-gate skip.
 
@@ -38,7 +38,7 @@ src/
       stream/route.ts          — /api/stream route: SSE Response with backpressure
   lib/
     vercel-adapter.ts         — VercelEdgeAdapter interface (8 ops) + REGION_CATALOG
-    mock.ts                   — makeMockAdapter (backed by @kiwa/edge v0.2 semantics)
+    mock.ts                   — makeMockAdapter (backed by @kiwa-lab/edge v0.2 semantics)
     real.ts                   — makeRealAdapter (env-gate skip via KIWA_MODE + VERCEL_KEY)
     fidelity.ts               — runFidelityHarness + runAdapterMatrix
 tests/
@@ -85,5 +85,5 @@ pnpm --filter dogfood-vercel-edge-function-app test
 
 - Parent — v1.24 (#913)
 - Sub-Issue — v1.24-3 (#916)
-- Depends on — v1.24-1 (@kiwa/edge v0.2 with 8 axis semantics, PR #920)
+- Depends on — v1.24-1 (@kiwa-lab/edge v0.2 with 8 axis semantics, PR #920)
 - Sibling — v1.24-2 (dogfood-cloudflare-workers-durable-object-app, PR #921)

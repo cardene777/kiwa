@@ -1,5 +1,5 @@
 /**
- * 8-axis routing wrapper over `@kiwa/payment`'s Paddle adapter surface.
+ * 8-axis routing wrapper over `@kiwa-lab/payment`'s Paddle adapter surface.
  *
  * This module is the SSOT for how the dogfood app converts a semantics-layer
  * call (e.g. `createSubscription`) into a webhook event, records the effect
@@ -56,7 +56,7 @@ import {
   type PaymentWebhookEvent,
   type Subscription as SemanticSubscription,
   type TaxLine,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 import { createBillingStore, type BillingStore } from './store.js';
 
 /**

@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/ai-llm` v0.4 that models the 5 pieces of a real LLM evaluation pipeline that every non-trivial LLM-backed product eventually needs — a self-consistency scorer that runs multiple samples of the same prompt and measures the token-overlap Jaccard similarity so a low score flags a non-deterministic (hallucination-prone) response, a factuality checker that compares a `claim` against an `evidence` corpus and returns the overlap ratio so a low score flags a citation-less claim, a citation verifier that walks the response's `citations` list against a known-source `corpus` and returns the list of missing (fabricated) citations, an LLM-as-judge scorer that ranks candidate responses against a `prompt` and optional `groundTruth` and returns per-candidate score + reasoning, and a rubric + preference-pair + Elo pipeline (`applyRubric()` → `rankPreference()` → `updateElo()`) that layers a weighted rubric on top of the judge scores so a downstream ranking survives the noise of any single judgment. `startHallucinationSession()` + `scoreSelfConsistency()` + `checkFactuality()` + `verifyCitation()` + `scoreConfidence()` + `startEvalSession()` + `judgeCandidates()` + `applyRubric()` + `rankPreference()` + `updateElo()` give you every one of those pieces without booting a real OpenAI Chat Completions endpoint. This is the pattern kiwa's `examples/dogfood-llm-hallucination-eval-app` exercises against the real OpenAI Chat Completions API under `KIWA_MODE=real` + `OPENAI_API_KEY` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the factuality score said 0.9 but 3 of the 5 citations pointed to URLs the model hallucinated because the citation-verifier was never chained after `checkFactuality`" gap a reviewer sees in the eval-drift post-mortem.
+A vitest suite wired to `@kiwa-lab/ai-llm` v0.4 that models the 5 pieces of a real LLM evaluation pipeline that every non-trivial LLM-backed product eventually needs — a self-consistency scorer that runs multiple samples of the same prompt and measures the token-overlap Jaccard similarity so a low score flags a non-deterministic (hallucination-prone) response, a factuality checker that compares a `claim` against an `evidence` corpus and returns the overlap ratio so a low score flags a citation-less claim, a citation verifier that walks the response's `citations` list against a known-source `corpus` and returns the list of missing (fabricated) citations, an LLM-as-judge scorer that ranks candidate responses against a `prompt` and optional `groundTruth` and returns per-candidate score + reasoning, and a rubric + preference-pair + Elo pipeline (`applyRubric()` → `rankPreference()` → `updateElo()`) that layers a weighted rubric on top of the judge scores so a downstream ranking survives the noise of any single judgment. `startHallucinationSession()` + `scoreSelfConsistency()` + `checkFactuality()` + `verifyCitation()` + `scoreConfidence()` + `startEvalSession()` + `judgeCandidates()` + `applyRubric()` + `rankPreference()` + `updateElo()` give you every one of those pieces without booting a real OpenAI Chat Completions endpoint. This is the pattern kiwa's `examples/dogfood-llm-hallucination-eval-app` exercises against the real OpenAI Chat Completions API under `KIWA_MODE=real` + `OPENAI_API_KEY` + `KIWA_LLM_BUDGET_USD`; the tutorial covers the mock-only path so you can iterate in milliseconds and reproduce the exact "the factuality score said 0.9 but 3 of the 5 citations pointed to URLs the model hallucinated because the citation-verifier was never chained after `checkFactuality`" gap a reviewer sees in the eval-drift post-mortem.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/ai-llm` v0.4 that models the 5 pieces of a real L
 ```bash
 mkdir kiwa-llm-eval && cd kiwa-llm-eval
 pnpm init
-pnpm add -D @kiwa/ai-llm@^0.4 vitest typescript @types/node
+pnpm add -D @kiwa-lab/ai-llm@^0.4 vitest typescript @types/node
 ```
 
 Add the vitest scripts in `package.json`.
@@ -42,7 +42,7 @@ import { describe, expect, it } from 'vitest';
 import {
   scoreSelfConsistency,
   startHallucinationSession,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('hallucination — self-consistency', () => {
   it('returns a high score for near-identical samples', () => {
@@ -87,7 +87,7 @@ import {
   checkFactuality,
   scoreSelfConsistency,
   startHallucinationSession,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('hallucination — factuality', () => {
   it('returns 1.0 when every evidence item supports the claim', () => {
@@ -142,7 +142,7 @@ import {
   scoreSelfConsistency,
   startHallucinationSession,
   verifyCitation,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('hallucination — citation', () => {
   it('returns 1.0 when every citation is in the corpus', () => {
@@ -193,7 +193,7 @@ import {
   applyRubric,
   judgeCandidates,
   startEvalSession,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('eval — LLM-as-judge + rubric', () => {
   it('judgeCandidates scores each candidate and returns reasoning', () => {
@@ -257,7 +257,7 @@ import {
   rankPreference,
   startEvalSession,
   updateElo,
-} from '@kiwa/ai-llm';
+} from '@kiwa-lab/ai-llm';
 
 describe('eval — preference + Elo', () => {
   it('rankPreference tallies wins / losses / ties per candidate', () => {

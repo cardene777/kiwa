@@ -1,12 +1,12 @@
 ---
-title: "@kiwa/orm v0.6 transaction-orchestrator SSOT"
+title: "@kiwa-lab/orm v0.6 transaction-orchestrator SSOT"
 ---
 
-# @kiwa/orm v0.6 transaction-orchestrator SSOT
+# @kiwa-lab/orm v0.6 transaction-orchestrator SSOT
 
 ## What this covers
 
-`@kiwa/orm` v0.6 transaction-orchestrator = txn-isolation + mvcc + connection-pool + logical-replication + partitioning の 5 axis を 継続合成する 上位 layer。 ORM pair v0.1 → v0.2 → v0.3 → v0.4 → v0.5 → v0.6 = 6 段深化到達 = **depth-5 pattern 9 例目 candidate = systematic law 継続強化 第 3 例**、 **backend systems layer 初適用**、 pattern 昇格階段 の 最上位 = kiwa 全体 で 必ず守る 最上位規範化、 systematic pattern 51 度目適用 (lifecycle-orchestrator variant ORM 転用)。
+`@kiwa-lab/orm` v0.6 transaction-orchestrator = txn-isolation + mvcc + connection-pool + logical-replication + partitioning の 5 axis を 継続合成する 上位 layer。 ORM pair v0.1 → v0.2 → v0.3 → v0.4 → v0.5 → v0.6 = 6 段深化到達 = **depth-5 pattern 9 例目 candidate = systematic law 継続強化 第 3 例**、 **backend systems layer 初適用**、 pattern 昇格階段 の 最上位 = kiwa 全体 で 必ず守る 最上位規範化、 systematic pattern 51 度目適用 (lifecycle-orchestrator variant ORM 転用)。
 
 ## 5 state SSOT
 

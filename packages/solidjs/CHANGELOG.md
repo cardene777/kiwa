@@ -1,10 +1,10 @@
-# @kiwa/solidjs
+# @kiwa-lab/solidjs
 
 ## 0.1.0
 
 ### Minor Changes
 
-- 🎉 New package `@kiwa/solidjs` v0.1 — SolidJS Signal + Effect + createResource + Suspense boundary test adapter (Issue #813, v1.19-1a).
+- 🎉 New package `@kiwa-lab/solidjs` v0.1 — SolidJS Signal + Effect + createResource + Suspense boundary test adapter (Issue #813, v1.19-1a).
 
   ## What's in the box
 
@@ -39,7 +39,7 @@
 
   - v1.19-1 (#807) は本 pkg + Fresh (#814) + Hono (#8xx) の 3 分割で 1 pkg = 1 PR 化.
   - `packages/solidjs/{stryker.config.mjs,vitest.stryker.config.mjs}` 配置で mutation gate 統合準備.
-  - `scripts/check-coverage-gates.mjs` に `@kiwa/solidjs` 行追加.
+  - `scripts/check-coverage-gates.mjs` に `@kiwa-lab/solidjs` 行追加.
   - `tests/release-smoke/tests/import-surface.test.ts` に new export block 追加.
   - root README Limitations 表に SolidJS Signal ✅ 行追加、 Roadmap v1.19 行にカウント.
 

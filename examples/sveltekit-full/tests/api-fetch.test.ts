@@ -1,7 +1,7 @@
 // kiwa unit test — apiFetchHandle (handleFetch hook)。
 
 import { describe, expect, it } from 'vitest';
-import { setupSvelteKitHooksEnv } from '@kiwa/sveltekit';
+import { setupSvelteKitHooksEnv } from '@kiwa-lab/sveltekit';
 import { apiFetchHandle } from '../src/lib/_kiwa/api-fetch-handle.js';
 import type { AuthLocals } from '../src/lib/_kiwa/auth-handle.js';
 

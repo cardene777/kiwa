@@ -57,7 +57,7 @@ describe('dogfood-mysql-rls-tenant-app — fidelity harness', () => {
       run: runFull,
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/orm/mysql-rls-dogfood',
+      provider: '@kiwa-lab/orm/mysql-rls-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -91,7 +91,7 @@ describe('dogfood-mysql-rls-tenant-app — fidelity harness', () => {
       run: runFull,
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/orm/mysql-rls-dogfood',
+      provider: '@kiwa-lab/orm/mysql-rls-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -120,7 +120,7 @@ describe('dogfood-mysql-rls-tenant-app — fidelity harness', () => {
       run: runFull,
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/orm/mysql-rls-dogfood',
+      provider: '@kiwa-lab/orm/mysql-rls-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -141,7 +141,7 @@ describe('dogfood-mysql-rls-tenant-app — fidelity harness', () => {
   });
 
   it('T-DMF-004 v1.27-4 mutation tier context adds an 8th axis when opted in', async () => {
-    // The mysql-rls-tenant-app wraps @kiwa/orm (SaaS tier, default 65 %).
+    // The mysql-rls-tenant-app wraps @kiwa-lab/orm (SaaS tier, default 65 %).
     // Passing `mutationTier: 'saas'` opts the app into the 12-axis release
     // gate; the base harness stays 7-axis for backward compat when the field
     // is omitted (see T-DMF-001).
@@ -154,7 +154,7 @@ describe('dogfood-mysql-rls-tenant-app — fidelity harness', () => {
     });
     // 22 / 30 = 73.3 %, above SaaS 65 tier threshold.
     const output = runFidelityHarness({
-      provider: '@kiwa/orm/mysql-rls-dogfood',
+      provider: '@kiwa-lab/orm/mysql-rls-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,
@@ -188,7 +188,7 @@ describe('dogfood-mysql-rls-tenant-app — fidelity harness', () => {
       run: runFull,
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/orm/mysql-rls-dogfood',
+      provider: '@kiwa-lab/orm/mysql-rls-dogfood',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

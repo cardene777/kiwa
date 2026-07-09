@@ -1,7 +1,7 @@
 # dogfood-lemon-squeezy-app
 
 Sub-Issue #903 (v1.23-4) — SvelteKit dogfood app for Lemon Squeezy as a
-Merchant-of-Record. Wires `@kiwa/payment` v0.3 mock adapter + 8-axis
+Merchant-of-Record. Wires `@kiwa-lab/payment` v0.3 mock adapter + 8-axis
 semantics into a merchant-flow surface (hosted checkout / webhook /
 license key issue + activation + revoke / refund full + partial /
 chargeback dispute lifecycle) so end-to-end fidelity can be verified
@@ -13,7 +13,7 @@ without booting the real Lemon Squeezy API.
 src/
 ├── adapters/
 │   ├── interface.ts                provider-neutral Lemon Squeezy RP surface
-│   ├── mock.ts                     @kiwa/payment lemonsqueezy mock
+│   ├── mock.ts                     @kiwa-lab/payment lemonsqueezy mock
 │   └── real.ts                     env-gated real driver skeleton
 ├── routes/                         SvelteKit route logic (framework-neutral factories)
 │   ├── checkout/handler.ts         POST /checkout
@@ -40,13 +40,13 @@ pnpm --filter dogfood-lemon-squeezy-app test        # vitest — 2 spec files
 pnpm --filter dogfood-lemon-squeezy-app typecheck   # strict tsc
 ```
 
-The `pnpm test` script builds `@kiwa/payment` + `@kiwa/core`
+The `pnpm test` script builds `@kiwa-lab/payment` + `@kiwa-lab/core`
 first so the workspace symlink resolves the freshest `dist/`.
 
 ## Modes
 
 ```
-KIWA_MODE=mock  (default) — @kiwa/payment createLemonSqueezyMock + 8-axis semantics
+KIWA_MODE=mock  (default) — @kiwa-lab/payment createLemonSqueezyMock + 8-axis semantics
 KIWA_MODE=real            — real driver, requires LEMONSQUEEZY_KEY + LEMONSQUEEZY_SIGNING_SECRET + KIWA_LEMONSQUEEZY_REAL_READY=1
 ```
 
@@ -82,4 +82,4 @@ three axes the dogfood app makes explicit:
 - Parent Issue #899 (v1.23 Payment 深化 milestone)
 - Sub-Issue #901 (v1.23-2 Stripe billing app)
 - Sub-Issue #902 (v1.23-3 Paddle merchant app)
-- `@kiwa/payment` v0.3 advanced billing semantics (v1.23-1)
+- `@kiwa-lab/payment` v0.3 advanced billing semantics (v1.23-1)

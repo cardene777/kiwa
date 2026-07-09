@@ -11,7 +11,7 @@
  * behavioural drift.
  */
 
-import type { MaoAgent } from '@kiwa/ai-llm';
+import type { MaoAgent } from '@kiwa-lab/ai-llm';
 import type {
   GraphInput,
   LlmMaoSwarmAdapter,

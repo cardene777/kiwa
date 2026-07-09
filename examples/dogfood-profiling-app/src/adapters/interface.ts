@@ -4,7 +4,7 @@
  *
  * The dogfood app drives a continuous profiling harness through this
  * contract only. Two implementations exist —
- *  - {@link makeMockAdapter} — walks the `@kiwa/observability` v2.1
+ *  - {@link makeMockAdapter} — walks the `@kiwa-lab/observability` v2.1
  *    `semantics/profiling` state machine deterministically without any
  *    backend. Every op emits the matching neutral event onto the trace so
  *    the fidelity harness can diff ordering against the real adapter.
@@ -29,7 +29,7 @@
  * Parca + eBPF stack.
  */
 
-import type { semantics } from '@kiwa/observability';
+import type { semantics } from '@kiwa-lab/observability';
 
 /** Re-export from observability semantics namespace. */
 export type ObservabilityTarget = semantics.ObservabilityTarget;

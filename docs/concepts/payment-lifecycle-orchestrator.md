@@ -1,12 +1,12 @@
 ---
-title: "@kiwa/payment v2.1 lifecycle-orchestrator SSOT"
+title: "@kiwa-lab/payment v2.1 lifecycle-orchestrator SSOT"
 ---
 
-# @kiwa/payment v2.1 lifecycle-orchestrator SSOT
+# @kiwa-lab/payment v2.1 lifecycle-orchestrator SSOT
 
 ## What this covers
 
-`@kiwa/payment` v2.1 lifecycle-orchestrator SSOT = subscription lifecycle + dunning + retry + revenue-recovery + chargeback の 5 axis を 継続合成する 上位 layer。 Payment pair v0.1-v0.4 の 4 段深化 + v2.1 で 5 段深化到達 = **depth-5 pattern 4 例目確定** (Mobile + Desktop + quality-metrics + Payment)、 systematic pattern 46 度目適用 (continuous state machine variant Payment 転用)。
+`@kiwa-lab/payment` v2.1 lifecycle-orchestrator SSOT = subscription lifecycle + dunning + retry + revenue-recovery + chargeback の 5 axis を 継続合成する 上位 layer。 Payment pair v0.1-v0.4 の 4 段深化 + v2.1 で 5 段深化到達 = **depth-5 pattern 4 例目確定** (Mobile + Desktop + quality-metrics + Payment)、 systematic pattern 46 度目適用 (continuous state machine variant Payment 転用)。
 
 ## 5 state SSOT
 

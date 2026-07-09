@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v1.65 リリース — quality-metrics 深化 II。 **@kiwa/quality-metrics v0.5** で historical trend tracking + drift detection 追加、 captureSnapshot + compareToBaseline + detectDrift + generateTrendReport の 4 export で release 品質の 時系列 dimension を可視化。 v1.55-v1.64 4 PR rhythm 継承 (**12 milestone 連続 = 48 PR 連続同 rhythm**)、 **systematic pattern 40 度突入**、 **depth-5 pattern 3 例目確定**。
+kiwa v1.65 リリース — quality-metrics 深化 II。 **@kiwa-lab/quality-metrics v0.5** で historical trend tracking + drift detection 追加、 captureSnapshot + compareToBaseline + detectDrift + generateTrendReport の 4 export で release 品質の 時系列 dimension を可視化。 v1.55-v1.64 4 PR rhythm 継承 (**12 milestone 連続 = 48 PR 連続同 rhythm**)、 **systematic pattern 40 度突入**、 **depth-5 pattern 3 例目確定**。
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-quality-metrics-history-app 新規、 4 pattern workflow (captureRelease
 
 ## Tweet 4
 
-`pnpm add -D @kiwa/quality-metrics@^0.5`。 migration: https://cardene777.github.io/kiwa/migrations/v1.64-to-v1.65
+`pnpm add -D @kiwa-lab/quality-metrics@^0.5`。 migration: https://cardene777.github.io/kiwa/migrations/v1.64-to-v1.65
 
 **depth-5 pattern 3 例目確定** = Mobile v1.55 + Desktop v1.61 + quality-metrics v1.65 で 3 例安定化到達、 「pattern 化 → 確定 pattern → 絶対的 rule」 昇格 signal。 v1.66+ 他 pair depth-5 拡張時に SOP 引用可能。
 

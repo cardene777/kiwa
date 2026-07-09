@@ -4,7 +4,7 @@
 
 kiwa v1.39 リリース — Security 深化 II が land.
 
-@kiwa/security v0.1.0 → v0.2.0 minor bump. 4 provider (istio + opa + siem-splunk + vault) 上に advanced II security production semantics 8 axis を追加 (v1.37 v0.1 base 32 cell と合わせて 64 combination coverage).
+@kiwa-lab/security v0.1.0 → v0.2.0 minor bump. 4 provider (istio + opa + siem-splunk + vault) 上に advanced II security production semantics 8 axis を追加 (v1.37 v0.1 base 32 cell と合わせて 64 combination coverage).
 
 real driver env-gate (KIWA_MODE=real + testcontainers) で opt-in production fidelity 走査. dogfood 3 app 新規 (security-mtls-zero-trust-app + security-siem-incident-app + security-supply-chain-slsa-app) 全 7 軸 release gate PASS.
 
@@ -20,4 +20,4 @@ Security v1.37 → v1.39 の 2 段拡張 pattern (Auth v1.21→v1.22、 Realtime
 
 17 milestone 連続 snippet validation streak (v1.23-v1.39) 達成.
 
-`pnpm add -D @kiwa/security` で v0.2.0 が入る. breaking change なし. migration guide は https://cardene777.github.io/kiwa/migrations/v1.38-to-v1.39
+`pnpm add -D @kiwa-lab/security` で v0.2.0 が入る. breaking change なし. migration guide は https://cardene777.github.io/kiwa/migrations/v1.38-to-v1.39

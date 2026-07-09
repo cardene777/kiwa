@@ -6,7 +6,7 @@ kiwa v1.47 is out. **security-devsecops v0.2 adapter 統合 Phase 2 完成** の
 
 ## What's new
 
-### `@kiwa/security-devsecops` v0.1 → v0.2
+### `@kiwa-lab/security-devsecops` v0.1 → v0.2
 
 - 6 adapter interface = SastAdapter / ScaAdapter / SecretAdapter / IacAdapter / DastAdapter / ContainerAdapter
 - 12 adapter 実装 = 6 axis × mock (deterministic replay) + real (env-gate opt-in CLI 呼出隠蔽 stub)
@@ -30,7 +30,7 @@ v1.23 → v1.47 = 25 milestones、 kiwa 史上最長記録更新継続。
 ## Install
 
 ```bash
-pnpm add -D @kiwa/security-devsecops@^0.2
+pnpm add -D @kiwa-lab/security-devsecops@^0.2
 ```
 
 ## Migration guide

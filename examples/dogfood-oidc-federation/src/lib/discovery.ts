@@ -8,7 +8,7 @@
  * something to compare against.
  */
 
-import type { OpenIdProviderMetadata } from '@kiwa/auth';
+import type { OpenIdProviderMetadata } from '@kiwa-lab/auth';
 
 /**
  * Error thrown when the discovery response `issuer` field disagrees with

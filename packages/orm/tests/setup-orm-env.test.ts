@@ -1,4 +1,4 @@
-// Unit tests for @kiwa/orm v0.1 (Drizzle + SQLite MVP).
+// Unit tests for @kiwa-lab/orm v0.1 (Drizzle + SQLite MVP).
 
 import { afterEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';

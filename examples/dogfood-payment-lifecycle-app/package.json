@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app v2.3-2 — @kiwa/payment v2.1 lifecycle-orchestrator の 4 pattern workflow reference。 depth-5 pattern 4 例目確定 dogfood。",
+  "description": "Dogfood app v2.3-2 — @kiwa-lab/payment v2.1 lifecycle-orchestrator の 4 pattern workflow reference。 depth-5 pattern 4 例目確定 dogfood。",
   "scripts": {
-    "test": "pnpm -F @kiwa/core -F @kiwa/payment build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/core -F @kiwa-lab/payment build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/payment": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/payment": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

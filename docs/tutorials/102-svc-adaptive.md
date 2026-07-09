@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A vitest suite wired to `@kiwa/realtime` v0.3 that models the 3 pieces of a real adaptive media consumer stack — SVC layer selection with scalability mode (L1T1 → L3T3), WebCodecs decoder with key/delta frame handling + reorder buffer, and MoQ datagram delivery with FEC recovery.
+A vitest suite wired to `@kiwa-lab/realtime` v0.3 that models the 3 pieces of a real adaptive media consumer stack — SVC layer selection with scalability mode (L1T1 → L3T3), WebCodecs decoder with key/delta frame handling + reorder buffer, and MoQ datagram delivery with FEC recovery.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A vitest suite wired to `@kiwa/realtime` v0.3 that models the 3 pieces of a real
 ```bash
 mkdir kiwa-svc-adaptive && cd kiwa-svc-adaptive
 pnpm init
-pnpm add -D @kiwa/realtime@^0.3 vitest typescript @types/node
+pnpm add -D @kiwa-lab/realtime@^0.3 vitest typescript @types/node
 ```
 
 ### 2. SVC layer selection
@@ -26,7 +26,7 @@ pnpm add -D @kiwa/realtime@^0.3 vitest typescript @types/node
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createSimulcastSvcMock } from '@kiwa/realtime';
+import { createSimulcastSvcMock } from '@kiwa-lab/realtime';
 
 describe('SVC layer selection', () => {
   it('adds L3T3 layer + selects spatial 2 / temporal 2', async () => {
@@ -49,7 +49,7 @@ describe('SVC layer selection', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createWebCodecsDecoderMock } from '@kiwa/realtime';
+import { createWebCodecsDecoderMock } from '@kiwa-lab/realtime';
 
 describe('WebCodecs decoder', () => {
   it('decodes key + reorders + drops late frame', async () => {
@@ -73,7 +73,7 @@ describe('WebCodecs decoder', () => {
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createMoqDatagramMediaMock } from '@kiwa/realtime';
+import { createMoqDatagramMediaMock } from '@kiwa-lab/realtime';
 
 describe('MoQ datagram + FEC', () => {
   it('sends datagram, sets priority, recovers via FEC', async () => {

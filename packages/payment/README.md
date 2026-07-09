@@ -1,4 +1,4 @@
-# @kiwa/payment
+# @kiwa-lab/payment
 
 Unified webhook mock harness for the 3 major payment providers — Stripe, Paddle Billing, Lemon Squeezy — with advanced production billing semantics.
 
@@ -10,7 +10,7 @@ Unified webhook mock harness for the 3 major payment providers — Stripe, Paddl
 Basic webhook mock usage:
 
 ```ts
-import { createStripeMock, checkoutCompleted } from '@kiwa/payment';
+import { createStripeMock, checkoutCompleted } from '@kiwa-lab/payment';
 
 const stripe = createStripeMock({ secret: 'whsec_test' });
 const { rawBody, signature } = checkoutCompleted(stripe, {
@@ -23,7 +23,7 @@ const verified = stripe.verifyWebhook({ rawBody, signature });
 v0.3 advanced billing semantics — 9 axis dunning example:
 
 ```ts
-import { createStripeMock, startDunning, dunningAttempt, finalizeDunning } from '@kiwa/payment';
+import { createStripeMock, startDunning, dunningAttempt, finalizeDunning } from '@kiwa-lab/payment';
 
 const stripe = createStripeMock();
 const session = startDunning({
@@ -60,7 +60,7 @@ Each axis is a small state machine that emits provider-dialect webhook events th
 The `collectFidelityCoverage` helper returns the full 3 provider × 9 axis grid so release-gate can assert coverage without walking every neutral event by hand:
 
 ```ts
-import { collectFidelityCoverage, createStripeMock, createPaddleMock, createLemonSqueezyMock } from '@kiwa/payment';
+import { collectFidelityCoverage, createStripeMock, createPaddleMock, createLemonSqueezyMock } from '@kiwa-lab/payment';
 
 const coverage = collectFidelityCoverage([
   createStripeMock(),

@@ -9,7 +9,7 @@
  * deterministically.
  */
 
-import type { CdcEvent } from '@kiwa/orm';
+import type { CdcEvent } from '@kiwa-lab/orm';
 
 export interface StreamsMessage {
   readonly messageId: string;

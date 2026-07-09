@@ -3,16 +3,16 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Dogfood app (v1.32-4) — a SQLite WAL + FTS5 full-text search notebook backed by Bun-style edge deployment semantics driven by @kiwa/orm v0.10 in KIWA_MODE=mock and libsql/turso edge driver in KIWA_MODE=real (env-skip SQLITE_KEY). Behavioural fidelity feeds @kiwa/quality-metrics 13-axis release gate + Playwright e2e for wal-checkpoint / fts5-query / edge-latency / testcontainers-probe flows.",
+  "description": "Dogfood app (v1.32-4) — a SQLite WAL + FTS5 full-text search notebook backed by Bun-style edge deployment semantics driven by @kiwa-lab/orm v0.10 in KIWA_MODE=mock and libsql/turso edge driver in KIWA_MODE=real (env-skip SQLITE_KEY). Behavioural fidelity feeds @kiwa-lab/quality-metrics 13-axis release gate + Playwright e2e for wal-checkpoint / fts5-query / edge-latency / testcontainers-probe flows.",
   "scripts": {
-    "test": "pnpm -F @kiwa/orm -F @kiwa/core -F @kiwa/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "pnpm -F @kiwa-lab/orm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kiwa/core": "workspace:*",
-    "@kiwa/orm": "workspace:*",
-    "@kiwa/quality-metrics": "workspace:*"
+    "@kiwa-lab/core": "workspace:*",
+    "@kiwa-lab/orm": "workspace:*",
+    "@kiwa-lab/quality-metrics": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

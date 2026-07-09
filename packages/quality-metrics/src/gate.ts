@@ -176,7 +176,7 @@ export function assertA11yTier(input: {
  * - mutation 60% kill rate
  * - behavior test 10 件以上
  *
- * AI-LLM 4 軸 (`@kiwa/ai-*` provider のみ強制) ...
+ * AI-LLM 4 軸 (`@kiwa-lab/ai-*` provider のみ強制) ...
  * - cost ≤ $0.10 / request (Anthropic / OpenAI 実勢価格帯の bar)
  * - latency p95 ≤ 3000ms (streaming LLM の user-facing bar)
  * - token ≤ 4000 / request (context bloat 検出、 4k model 前提)
@@ -206,7 +206,7 @@ export const DEFAULT_RELEASE_GATE_THRESHOLDS: ReleaseGateThresholds = {
  * partial pass (some axes clear, some fail) still returns `passed = false`
  * because release gate is all-or-nothing.
  *
- * AI-LLM provider (`@kiwa/ai-*`) は共通 7 軸に加えて 4 軸 (cost /
+ * AI-LLM provider (`@kiwa-lab/ai-*`) は共通 7 軸に加えて 4 軸 (cost /
  * latency / token / accuracy) を追加検査、 4 軸のうち report にない field
  * は blocker として扱う (欠損 = 未計測 = 未満)。 それ以外の provider は
  * 7 軸のまま (breaking change なし)。

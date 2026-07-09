@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/security` v0.1 csp builder +
+ * Mock adapter — drives `@kiwa-lab/security` v0.1 csp builder +
  * security-headers builder + validator so the same app code exercises a
  * deterministic CSP header + violation reporting + advanced security
  * headers ceremony without launching Chromium. Both mock and real adapters
@@ -30,7 +30,7 @@ import {
   type PermissionsFeature,
   type PermissionsSource,
   type ReferrerPolicyValue,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 import type {
   BuildCspResult,
   BuildHeadersResult,

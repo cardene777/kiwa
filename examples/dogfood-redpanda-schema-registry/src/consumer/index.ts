@@ -20,7 +20,7 @@ import type {
   SchemaKind,
   SchemaRegistry,
   StreamingMessage,
-} from '@kiwa/streaming';
+} from '@kiwa-lab/streaming';
 
 export interface DeserializedRecord<TValue = unknown> {
   readonly topic: string;

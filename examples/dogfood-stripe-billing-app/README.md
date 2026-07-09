@@ -1,7 +1,7 @@
 # dogfood-stripe-billing-app
 
 Sub-Issue #901 (v1.23-2) — Next.js 15 App Router dogfood app for Stripe
-advanced billing. Wires `@kiwa/payment` v0.3 mock adapter + 9-axis
+advanced billing. Wires `@kiwa-lab/payment` v0.3 mock adapter + 9-axis
 semantics into a merchant-flow surface (checkout / webhook / subscription /
 invoice) so end-to-end fidelity can be verified without booting the real
 Stripe API.
@@ -12,7 +12,7 @@ Stripe API.
 src/
 ├── adapters/
 │   ├── interface.ts    — provider-neutral RP surface
-│   ├── mock.ts         — @kiwa/payment stripe mock
+│   ├── mock.ts         — @kiwa-lab/payment stripe mock
 │   └── real.ts         — env-gated real driver skeleton
 ├── app/                 — Next.js 15 App Router route handlers
 │   ├── checkout/route.ts
@@ -36,13 +36,13 @@ pnpm --filter dogfood-stripe-billing-app test        # vitest
 pnpm --filter dogfood-stripe-billing-app typecheck   # strict tsc
 ```
 
-The `pnpm test` script builds `@kiwa/payment` + `@kiwa/core`
+The `pnpm test` script builds `@kiwa-lab/payment` + `@kiwa-lab/core`
 first so the workspace symlink resolves the freshest `dist/`.
 
 ## Modes
 
 ```
-KIWA_MODE=mock  (default) — @kiwa/payment createStripeMock + 9-axis semantics
+KIWA_MODE=mock  (default) — @kiwa-lab/payment createStripeMock + 9-axis semantics
 KIWA_MODE=real            — real driver, requires STRIPE_KEY + STRIPE_WEBHOOK_SECRET + KIWA_STRIPE_REAL_READY=1
 ```
 
@@ -53,5 +53,5 @@ adapter method surfaces `KIWA_STRIPE_ENV_MISSING`.
 ## Related
 
 - Parent Issue #899 (v1.23 Payment 深化 milestone)
-- Sub-Issue #900 (v1.23-1) — `@kiwa/payment` v0.3 9-axis semantics
+- Sub-Issue #900 (v1.23-1) — `@kiwa-lab/payment` v0.3 9-axis semantics
 - docs/quality-reports/payment/stripe-billing-app.md — release gate SSOT

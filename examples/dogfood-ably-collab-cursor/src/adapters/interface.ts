@@ -4,10 +4,10 @@
  * The app talks to Ably only through this interface. Two implementations
  * exist — {@link makeRealAdapter} (calls `ably` when `ABLY_API_KEY` is set,
  * otherwise reports each method as `ABLY_ENV_MISSING`) and
- * {@link makeMockAdapter} (backed by `@kiwa/realtime`'s
+ * {@link makeMockAdapter} (backed by `@kiwa-lab/realtime`'s
  * {@link createAblyMock}). Both must satisfy the same contract so
  * behavioural fidelity between real vs mock can be measured side-by-side and
- * fed to `@kiwa/quality-metrics` release gate.
+ * fed to `@kiwa-lab/quality-metrics` release gate.
  *
  * The 4 ops are chosen so Ably's collab-cursor difficulty surface is
  * observable end-to-end ...

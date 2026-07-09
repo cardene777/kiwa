@@ -1,8 +1,8 @@
 ---
-"@kiwa/search": minor
+"@kiwa-lab/search": minor
 ---
 
-v2.6-1 @kiwa/search v2.1 = query-orchestrator 新設 (depth-5 pattern 7 例目発生 = systematic law 継続強化)。
+v2.6-1 @kiwa-lab/search v2.1 = query-orchestrator 新設 (depth-5 pattern 7 例目発生 = systematic law 継続強化)。
 
 Search pair v0.1 → v2.1 = 5 段深化到達 = **depth-5 pattern 7 例目発生** (Mobile + Desktop + quality-metrics + Payment + Realtime + Streaming + Search = 7 pair 到達 = systematic law confirmed 後 の 継続強化 実証)。
 

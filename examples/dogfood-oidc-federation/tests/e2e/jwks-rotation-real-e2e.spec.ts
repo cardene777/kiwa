@@ -2,7 +2,7 @@
  * v1.22-5 (CAR-446 / GH #891) — Federation JWKS rotation real e2e.
  *
  * The v1.21-4d harness (`tests/jwks-rotation-e2e.spec.ts`) proves axes 4a-4d
- * against the mock (`@kiwa/auth` `setupOidcEnv`) — sign → rotate →
+ * against the mock (`@kiwa-lab/auth` `setupOidcEnv`) — sign → rotate →
  * verify inside window / past retention / multi-rotation / fresh key after
  * rotation. v1.22-1 landed the Keycloak testcontainers real driver so
  * axes 1 + 3 (discovery + JWKS shape) gained live coverage, but axes 4 /

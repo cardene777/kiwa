@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/security` v0.2 supply-chain
+ * Mock adapter — drives `@kiwa-lab/security` v0.2 supply-chain
  * semantics (startSupplyChainSession / verifySlsaLevel /
  * matchReproducibleBuild / signProvenance / verifyAttestation) so the
  * same app code exercises a deterministic SLSA supply chain ceremony
@@ -31,7 +31,7 @@ import {
   type SecurityAdvTarget,
   type SlsaLevel,
   type SupplyChainSession,
-} from '@kiwa/security';
+} from '@kiwa-lab/security';
 import type {
   AttestationResult,
   OrchestrateResult,

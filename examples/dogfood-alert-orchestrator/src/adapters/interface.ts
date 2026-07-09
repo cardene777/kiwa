@@ -2,14 +2,14 @@
  * Provider-neutral Prometheus AlertManager style alert orchestrator surface.
  *
  * The app talks to its alert source (real Prometheus AlertManager in real
- * mode, the kiwa `@kiwa/observability` {@link AlertRouter} in mock
+ * mode, the kiwa `@kiwa-lab/observability` {@link AlertRouter} in mock
  * mode) only through this interface. Two implementations exist —
  * {@link makeRealAdapter} (posts fires to the AlertManager HTTP API when
  * `ALERTMANAGER_URL` is set, otherwise reports each op as
  * `ALERTMANAGER_ENV_MISSING`) and {@link makeMockAdapter} (backed by the
- * `@kiwa/observability` `AlertRouter` + `TelemetryCollector`). Both
+ * `@kiwa-lab/observability` `AlertRouter` + `TelemetryCollector`). Both
  * satisfy the same contract so behavioural fidelity between real vs mock
- * can be measured side-by-side and fed to `@kiwa/quality-metrics`
+ * can be measured side-by-side and fed to `@kiwa-lab/quality-metrics`
  * release gate.
  *
  * The 5 ops below cover the AlertManager alert lifecycle end-to-end.
@@ -142,7 +142,7 @@ export interface TraceEvent {
 
 /**
  * Adapter-level metrics — the fidelity harness feeds evaluation +
- * routing latency into `@kiwa/quality-metrics`.
+ * routing latency into `@kiwa-lab/quality-metrics`.
  */
 export interface AlertOrchestratorMetrics {
   evaluationCount: number;

@@ -5,7 +5,7 @@
 // useUserSession() composable は kiwa fixture の `user` 引数経由で
 // to.meta.userSession に inject される。
 
-import type { RouteMiddlewareFunction } from '@kiwa/nuxt';
+import type { RouteMiddlewareFunction } from '@kiwa-lab/nuxt';
 
 interface SessionState {
   readonly state: 'authenticated' | 'expired' | 'anonymous';

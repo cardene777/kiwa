@@ -1,5 +1,5 @@
 ---
-title: "kiwa v2.1 リリース — quality-metrics 深化 IV (@kiwa/quality-metrics v2.1 adaptive drift threshold learning、 statistical inference SSOT、 47 milestone streak、 4 PR rhythm 復帰、 systematic pattern 44 度目)"
+title: "kiwa v2.1 リリース — quality-metrics 深化 IV (@kiwa-lab/quality-metrics v2.1 adaptive drift threshold learning、 statistical inference SSOT、 47 milestone streak、 4 PR rhythm 復帰、 systematic pattern 44 度目)"
 emoji: "📈"
 type: "tech"
 topics: ["testing", "vitest", "quality-metrics", "statistics", "release-gate"]
@@ -86,7 +86,7 @@ v1.23 → v2.1 = **47 milestone**、 kiwa 史上最長記録更新継続。
 ## Install
 
 ```bash
-pnpm add -D @kiwa/quality-metrics@^2.1
+pnpm add -D @kiwa-lab/quality-metrics@^2.1
 ```
 
 ## Migration guide

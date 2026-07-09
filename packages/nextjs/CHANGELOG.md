@@ -1,4 +1,4 @@
-# @kiwa/nextjs
+# @kiwa-lab/nextjs
 
 ## 1.2.0 — 2026-07-06
 
@@ -43,7 +43,7 @@
 
   - 実 React `renderToReadableStream` rendering / flight payload byte format → leaf-level は `renderServerComponent` で十分、 wire protocol は別 Issue 候補
   - 同一 component 内の複数 Suspense boundary 並列 interleaving → 別 Issue 候補
-  - client-side hydration after a chunk arrives → `@kiwa/ui` React mode
+  - client-side hydration after a chunk arrives → `@kiwa-lab/ui` React mode
 
   関連: GitHub #558 (本 sub) / 親 #556 v1.3 milestone、 後続 sub = SvelteKit hooks (#559) / Astro view transitions (#560) / Remix Resource Routes (#561) / Nuxt middleware (#562) / ORM follow-up (#563)。
 
@@ -76,7 +76,7 @@
 
   - 実 React renderer / flight payload serialization → `renderServerComponent` (leaf-level) との併用推奨
   - matcher / `loading.tsx` / `error.tsx` evaluation → 別 Issue
-  - `'use client'` boundary → `@kiwa/ui` React mode
+  - `'use client'` boundary → `@kiwa-lab/ui` React mode
 
 ## 1.0.3
 
@@ -135,7 +135,7 @@
 
 ### Patch Changes
 
-- 9b53f75: 🎉 New package `@kiwa/nextjs` v1.0 — Next.js App Router Server Actions test adapter (Issue #493、 first v1.1 deliverable).
+- 9b53f75: 🎉 New package `@kiwa-lab/nextjs` v1.0 — Next.js App Router Server Actions test adapter (Issue #493、 first v1.1 deliverable).
 
   Invoke `'use server'` async functions in isolation through `invokeServerAction({ action, formData, args, cookies, headers })` and assert on the captured `env.redirect` / `env.cookies` / `env.headers` / `error` without a running Next.js server.
 

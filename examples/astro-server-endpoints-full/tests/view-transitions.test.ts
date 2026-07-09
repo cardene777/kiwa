@@ -8,7 +8,7 @@
 // 関連 e2e は tests/e2e/astro-view-transitions.spec.ts で real `astro dev` 経由で確認。
 
 import { describe, expect, it } from 'vitest';
-import { setupAstroViewTransitionEnv } from '@kiwa/astro';
+import { setupAstroViewTransitionEnv } from '@kiwa-lab/astro';
 
 describe('Astro View Transitions PoC (unit)', () => {
   it('blog list -> blog/[slug] への nav で 4 event が順に dispatch される', async () => {

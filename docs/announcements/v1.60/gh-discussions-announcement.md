@@ -6,7 +6,7 @@ kiwa v1.60 is out。 **Desktop 深化 IV** 単軸 milestone、 v1.56-v1.59 で�
 
 ## What's new
 
-### `@kiwa/desktop` v0.5 minor bump
+### `@kiwa-lab/desktop` v0.5 minor bump
 
 - **spawn stub 契約層** 追加 = DesktopCliCommand 8 種 + SpawnInvocation + SpawnResult (Mobile v0.5 と 1:1 shape 契約) + AXIS_TO_CLI mapping (12 axis) + invokeDesktopCli + cliForAxis + buildSpawnInvocation factory
 - **8 CLI 抽出** = electron-builder / electron-updater / ffmpeg / xclip / osascript / notify-send / defaults / reg
@@ -44,7 +44,7 @@ pair 深度 5 段拡張達成 (v0.1 → v0.2 → v0.3 → v0.4 → v0.5) の 2 �
 ## Install
 
 ```bash
-pnpm add -D @kiwa/desktop@^0.5
+pnpm add -D @kiwa-lab/desktop@^0.5
 ```
 
 ## Migration guide

@@ -1,4 +1,4 @@
-import type { LuciaTestEnv } from '@kiwa/auth';
+import type { LuciaTestEnv } from '@kiwa-lab/auth';
 
 /**
  * Minimal bare-metal server handler that consumes a Lucia session. Lucia is

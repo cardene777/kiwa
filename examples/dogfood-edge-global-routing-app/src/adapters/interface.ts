@@ -7,14 +7,14 @@
  * implementations exist —
  *  - {@link makeRealAdapter} — drives Cloudflare Anycast + Vercel Geo +
  *    Deno Deploy routing APIs when env-ready.
- *  - {@link makeMockAdapter} — backed by `@kiwa/edge` v1.2 advanced
+ *  - {@link makeMockAdapter} — backed by `@kiwa-lab/edge` v1.2 advanced
  *    global-routing + d1-read-replica semantics.
  *
  * 12-op contract — 3 axes × 4 ops (anycast-routing / geo-matching /
  * replica-affinity).
  */
 
-import type { EdgePlatform as EdgeEdgePlatform } from '@kiwa/edge';
+import type { EdgePlatform as EdgeEdgePlatform } from '@kiwa-lab/edge';
 
 export type EdgePlatform = EdgeEdgePlatform;
 

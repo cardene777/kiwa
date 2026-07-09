@@ -94,10 +94,10 @@ test('validateAxeConfig rejects an empty "baselinePath"', () => {
 
 test('buildLayersAbsentBaseline shapes the harness-report format with every layer absent', () => {
   const baseline = buildLayersAbsentBaseline(
-    '@kiwa/core',
+    '@kiwa-lab/core',
     new Date('2026-07-06T00:00:00Z'),
   );
-  assert.equal(baseline.package, '@kiwa/core');
+  assert.equal(baseline.package, '@kiwa-lab/core');
   assert.equal(baseline.generatedAt, '2026-07-06T00:00:00.000Z');
   assert.equal(baseline.ok, true);
   for (const layer of ['jsdom', 'playwright', 'ssrHydration']) {
@@ -115,7 +115,7 @@ test('buildLayersAbsentBaseline shapes the harness-report format with every laye
 });
 
 test('buildLayersAbsentBaseline reasons name the missing fixture for each layer', () => {
-  const baseline = buildLayersAbsentBaseline('@kiwa/nextjs');
+  const baseline = buildLayersAbsentBaseline('@kiwa-lab/nextjs');
   assert.match(baseline.layers.jsdom.reason, /no jsdom fixture/);
   assert.match(baseline.layers.playwright.reason, /no playwright fixture/);
   assert.match(baseline.layers.ssrHydration.reason, /no ssrHydration fixture/);
@@ -266,7 +266,7 @@ test('normalizeProviders returns an empty array for missing / non-array input', 
 
 test('buildLayersAbsentBaseline records providers when supplied', () => {
   const baseline = buildLayersAbsentBaseline(
-    '@kiwa/auth',
+    '@kiwa-lab/auth',
     new Date('2026-07-06T00:00:00Z'),
     [
       { name: 'nextauth', protocol: 'oauth2' },
@@ -280,7 +280,7 @@ test('buildLayersAbsentBaseline records providers when supplied', () => {
 
 test('buildLayersAbsentBaseline omits providers when list is empty', () => {
   const baseline = buildLayersAbsentBaseline(
-    '@kiwa/core',
+    '@kiwa-lab/core',
     new Date('2026-07-06T00:00:00Z'),
     [],
   );
@@ -305,7 +305,7 @@ test('N4 — .axe-config.mjs that touches document.createElement at module top l
   try {
     writeFileSync(
       join(dir, 'package.json'),
-      JSON.stringify({ name: '@kiwa/n4-fixture' }),
+      JSON.stringify({ name: '@kiwa-lab/n4-fixture' }),
     );
     // Config touches `document.createElement` at module top level — this
     // exercises the jsdom-before-config-import ordering fix.

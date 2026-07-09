@@ -1,14 +1,14 @@
-# @kiwa/streaming
+# @kiwa-lab/streaming
 
 Kafka + Redpanda + NATS unified streaming test adapter for [kiwa](https://github.com/cardene777/kiwa) — model event streaming systems (kafkajs / Redpanda schema-registry / nats.js JetStream) in Vitest without a real broker.
 
 ```bash
-pnpm add -D @kiwa/streaming
+pnpm add -D @kiwa-lab/streaming
 ```
 
 ## Why
 
-Event streaming testing has been fragmented across providers — Kafka uses `kafkajs` producer / consumer / admin, Redpanda ships a bundled schema registry, and NATS uses subject-based routing + JetStream + KV / Object Store. `@kiwa/streaming` gives you a single mock surface that covers all three provider shapes + the 5 core semantics (producer / consumer / exactly-once / DLQ / schema-registry) so tests can validate the event pipeline end-to-end without spinning up a real broker.
+Event streaming testing has been fragmented across providers — Kafka uses `kafkajs` producer / consumer / admin, Redpanda ships a bundled schema registry, and NATS uses subject-based routing + JetStream + KV / Object Store. `@kiwa-lab/streaming` gives you a single mock surface that covers all three provider shapes + the 5 core semantics (producer / consumer / exactly-once / DLQ / schema-registry) so tests can validate the event pipeline end-to-end without spinning up a real broker.
 
 ## 3 providers
 
@@ -51,7 +51,7 @@ Set `KIWA_MODE=real` and per-axis credentials (`KAFKA_KEY` / `REDPANDA_KEY` / `N
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { createKafkaMock } from '@kiwa/streaming';
+import { createKafkaMock } from '@kiwa-lab/streaming';
 
 it('kafka producer + consumer roundtrip', async () => {
   const kafka = createKafkaMock({ defaultPartitionCount: 3 });
@@ -80,7 +80,7 @@ it('kafka producer + consumer roundtrip', async () => {
 
 ```ts
 import { expect, it } from 'vitest';
-import { createRedpandaMock } from '@kiwa/streaming';
+import { createRedpandaMock } from '@kiwa-lab/streaming';
 
 it('redpanda + schema-registry evolution', async () => {
   const rp = createRedpandaMock({ schemaRegistry: { defaultCompatibility: 'BACKWARD' } });
@@ -102,7 +102,7 @@ it('redpanda + schema-registry evolution', async () => {
 
 ```ts
 import { expect, it } from 'vitest';
-import { createNatsMock } from '@kiwa/streaming';
+import { createNatsMock } from '@kiwa-lab/streaming';
 
 it('nats jetstream + kv', async () => {
   const nats = createNatsMock();
@@ -127,7 +127,7 @@ import { expect, it } from 'vitest';
 import {
   createKafkaMock,
   createTransactionalProducer,
-} from '@kiwa/streaming';
+} from '@kiwa-lab/streaming';
 
 it('transactional producer commit flushes atomically', async () => {
   const kafka = createKafkaMock();
@@ -147,7 +147,7 @@ it('transactional producer commit flushes atomically', async () => {
 
 ```ts
 import { expect, it } from 'vitest';
-import { createDeadLetterQueue } from '@kiwa/streaming';
+import { createDeadLetterQueue } from '@kiwa-lab/streaming';
 
 it('poison message hits DLQ after budget exhausted', async () => {
   const dlq = createDeadLetterQueue<{ id: number }>({
@@ -167,7 +167,7 @@ it('poison message hits DLQ after budget exhausted', async () => {
 
 ## API
 
-Public API surface exported from `@kiwa/streaming`:
+Public API surface exported from `@kiwa-lab/streaming`:
 
 - `createKafkaMock(config?)` — Kafka producer / consumer / admin
 - `createRedpandaMock(config?)` — Redpanda (Kafka API compat + `.schemaRegistry`)

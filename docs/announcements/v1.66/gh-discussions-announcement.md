@@ -6,7 +6,7 @@ kiwa v1.66 is out。 **quality-metrics 深化 III** 単軸 milestone、 v0.5 で
 
 ## What's new
 
-### `@kiwa/quality-metrics` v0.6 minor bump
+### `@kiwa-lab/quality-metrics` v0.6 minor bump
 
 - **ReleaseGateContext に 3 field 追加** = driftBaseline (MetricSnapshot) / driftThresholdPct (default 5.0) / driftEnabled (default undefined = off)
 - **drift 統合 axis 群** = driftEnabled === true かつ driftBaseline 存在時のみ発火、 evaluateReleaseGate 内部で v0.5 の captureSnapshot + compareToBaseline + detectDrift chain 実行、 regression 検知 axis を drift.{axis名} の ReleaseGateBlocker に 1:1 格上げ
@@ -40,7 +40,7 @@ v1.23 → v1.66 = **44 milestone**、 kiwa 史上最長記録更新継続。
 ## Install
 
 ```bash
-pnpm add -D @kiwa/quality-metrics@^0.6
+pnpm add -D @kiwa-lab/quality-metrics@^0.6
 ```
 
 ## Migration guide

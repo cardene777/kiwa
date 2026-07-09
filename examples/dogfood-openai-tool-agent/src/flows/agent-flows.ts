@@ -5,7 +5,7 @@ import { executeTool } from '../tools/executors.js';
 /**
  * User-facing agent flows the dogfood app exposes. Each flow talks only
  * through {@link AgentAdapter} so the same code powers both `KIWA_MODE=real`
- * (real OpenAI Chat Completions) and `KIWA_MODE=mock` (`@kiwa/ai-llm`
+ * (real OpenAI Chat Completions) and `KIWA_MODE=mock` (`@kiwa-lab/ai-llm`
  * createOpenAIMock).
  *
  * The flows mirror AC in Issue #697 —

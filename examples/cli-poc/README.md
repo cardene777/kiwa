@@ -1,6 +1,6 @@
 # examples/cli-poc
 
-Proof-of-concept that exercises `@kiwa/cli-test` by dogfooding the production `kiwa` CLI.
+Proof-of-concept that exercises `@kiwa-lab/cli-test` by dogfooding the production `kiwa` CLI.
 
 ## What this shows
 

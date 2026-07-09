@@ -39,13 +39,13 @@ describe('buildRealtimeReport', () => {
     await channel.send({ type: 'broadcast', event: 'chat', payload: { n: 1 } });
     await new Promise((r) => setTimeout(r, 20));
     const report = buildRealtimeReport({
-      provider: '@kiwa/realtime',
+      provider: '@kiwa-lab/realtime',
       version: '0.1.0',
       fidelity: fakeFidelity(),
       mockMetrics: mock.getMetrics(),
       testCount: { behavior: 10, integration: 5, e2e: 0 },
     });
-    expect(report.provider).toBe('@kiwa/realtime');
+    expect(report.provider).toBe('@kiwa-lab/realtime');
     expect(report.version).toBe('0.1.0');
     expect(report.cost).toBeDefined();
     expect(report.latency).toBeDefined();
@@ -80,7 +80,7 @@ describe('buildRealtimeReport', () => {
     };
     const mock = createSupabaseRealtimeMock({ artificialLatencyMs: 0 });
     const report = buildRealtimeReport({
-      provider: '@kiwa/realtime',
+      provider: '@kiwa-lab/realtime',
       version: '0.1.0',
       fidelity: fid,
       mockMetrics: mock.getMetrics(),
@@ -91,7 +91,7 @@ describe('buildRealtimeReport', () => {
   it('T-RT-REP-003 default coverage uses 100 when not provided', () => {
     const mock = createSupabaseRealtimeMock({ artificialLatencyMs: 0 });
     const report = buildRealtimeReport({
-      provider: '@kiwa/realtime',
+      provider: '@kiwa-lab/realtime',
       version: '0.1.0',
       fidelity: fakeFidelity(),
       mockMetrics: mock.getMetrics(),

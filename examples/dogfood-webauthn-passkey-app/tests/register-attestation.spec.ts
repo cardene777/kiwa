@@ -27,7 +27,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   base64UrlDecodeWebAuthn as base64UrlDecode,
   __resetWebAuthnCounters,
-} from '@kiwa/auth';
+} from '@kiwa-lab/auth';
 import { makeMockAdapter } from '../src/adapters/mock.js';
 import { detectRealEnvMissing, makeRealAdapter } from '../src/adapters/real.js';
 import { createRegisterHandler } from '../src/app/register/route.js';

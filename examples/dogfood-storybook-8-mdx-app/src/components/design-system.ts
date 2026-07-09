@@ -1,4 +1,4 @@
-import { appendChild, createNode } from '@kiwa/component';
+import { appendChild, createNode } from '@kiwa-lab/component';
 import type {
   ButtonArgs,
   CardArgs,
@@ -8,14 +8,14 @@ import type {
   MockEvent,
   MockNode,
   ModalArgs,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 import {
   buildButton as buildButtonFixture,
   buildCard as buildCardFixture,
   buildForm as buildFormFixture,
   buildInput as buildInputFixture,
   buildModal as buildModalFixture,
-} from '@kiwa/component';
+} from '@kiwa-lab/component';
 
 /**
  * dogfood-storybook-8-mdx-app の 12 primitive + 3 layout renderer 群。 v1.34-4

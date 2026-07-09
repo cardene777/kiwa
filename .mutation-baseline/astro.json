@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/astro",
+  "package": "@kiwa-lab/astro",
   "tier": "Framework",
   "thresholds": {
     "high": 70,

@@ -44,7 +44,7 @@ describe('dogfood-socketio-notification — emit fidelity report to quality-repo
     await backpressureOverflowDrops(offlineMock, () => offlineMock.disconnectClient());
     const mergedMockTraces = [...matrix.mockTraces, ...offlineMock.traces()];
     const output = runFidelityHarness({
-      provider: '@kiwa/realtime/socketio-notification',
+      provider: '@kiwa-lab/realtime/socketio-notification',
       version: '0.1.0',
       mockTraces: mergedMockTraces,
       realTraces: matrix.realTraces,

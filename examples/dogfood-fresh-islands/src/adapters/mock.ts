@@ -9,7 +9,7 @@ import {
   stringify,
   type HeadFragment,
   type IslandDefinition,
-} from '@kiwa/fresh';
+} from '@kiwa-lab/fresh';
 import {
   CounterIsland,
   getCounterState,
@@ -35,7 +35,7 @@ import type {
 } from './interface.js';
 
 /**
- * Mock adapter — spins up `@kiwa/fresh` mock primitives, drives the
+ * Mock adapter — spins up `@kiwa-lab/fresh` mock primitives, drives the
  * dogfood routes / islands / head / edge harness through the 6-op surface,
  * and records a trace event per op so the fidelity harness can diff mock
  * vs real behaviour without needing a live Deno runtime.

@@ -2,7 +2,7 @@
 
 ## Tweet 1
 
-kiwa v2.2 is out — Auth pair pioneer record update. **@kiwa/auth v0.7** adds continuous-auth state machine on top of v0.6's 8-axis Passwordless UX III. 5 states (monitoring / elevated / step-up-required / session-frozen / terminated), 4 risk levels (low / medium / high / critical), dynamic interval switching (elevated 15s, else 60s). **48 milestone streak**, **systematic pattern 45th** (continuous state machine variant).
+kiwa v2.2 is out — Auth pair pioneer record update. **@kiwa-lab/auth v0.7** adds continuous-auth state machine on top of v0.6's 8-axis Passwordless UX III. 5 states (monitoring / elevated / step-up-required / session-frozen / terminated), 4 risk levels (low / medium / high / critical), dynamic interval switching (elevated 15s, else 60s). **48 milestone streak**, **systematic pattern 45th** (continuous state machine variant).
 
 ## Tweet 2
 
@@ -14,7 +14,7 @@ dogfood-auth-continuous-app new, 4-pattern workflow (startWithBaselineRisk + esc
 
 ## Tweet 4
 
-`pnpm add -D @kiwa/auth@^2.1`. Migration: https://cardene777.github.io/kiwa/migrations/v2.1-to-v2.2
+`pnpm add -D @kiwa-lab/auth@^2.1`. Migration: https://cardene777.github.io/kiwa/migrations/v2.1-to-v2.2
 
 Auth pair v0.4 → v0.5 → v0.6 → v0.7 = 4 段深化, independent of Desktop v1.67 depth-6 candidate and quality-metrics v2.1 continued deepening.
 

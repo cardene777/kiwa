@@ -1,4 +1,4 @@
-# @kiwa/data
+# @kiwa-lab/data
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/cardene777/kiwa/main/assets/kiwa-promo-en.gif" alt="kiwa 127s overview — generate full-spec tests across Web (Next.js) / Contract (Solidity) / dApp (Playwright) in 6 steps (this package covers the data pipeline / queue / cron surface)" width="640" />
@@ -10,7 +10,7 @@ Data pipeline / queue / cron / batch test adapter for kiwa.
 
 ## Overview
 
-`@kiwa/data` provides deterministic primitives for testing message queues, cron-scheduled jobs, and batch pipelines without booting external infrastructure:
+`@kiwa-lab/data` provides deterministic primitives for testing message queues, cron-scheduled jobs, and batch pipelines without booting external infrastructure:
 
 - `setupQueueEnv({ mode })` — in-memory queue with FIFO ordering, dedupKey-based idempotency, at-least-once consume semantics, and DLQ.
 - `createFakeClock({ startMs })` — drive time forward in a single line; cron-style `schedule(intervalMs, fn)` fires deterministically.
@@ -19,13 +19,13 @@ Data pipeline / queue / cron / batch test adapter for kiwa.
 ## Install
 
 ```bash
-pnpm add -D @kiwa/data @kiwa/core vitest
+pnpm add -D @kiwa-lab/data @kiwa-lab/core vitest
 ```
 
 ## Queue env
 
 ```ts
-import { setupQueueEnv } from "@kiwa/data";
+import { setupQueueEnv } from "@kiwa-lab/data";
 
 const env = await setupQueueEnv<Order>({ mode: "mock", maxReceiveCount: 3 });
 const unsubscribe = env.client.consume(async (msg, ack) => {
@@ -42,7 +42,7 @@ await env.stop();
 ## Fake clock
 
 ```ts
-import { createFakeClock } from "@kiwa/data";
+import { createFakeClock } from "@kiwa-lab/data";
 
 const clock = createFakeClock();
 const id = clock.schedule(100, () => doWork());
@@ -53,7 +53,7 @@ clock.unschedule(id);
 ## Assertion helpers
 
 ```ts
-import { expectIdempotent, expectAtLeastOnce } from "@kiwa/data";
+import { expectIdempotent, expectAtLeastOnce } from "@kiwa-lab/data";
 
 await expectIdempotent(env.client, body, { dedupKey: "task-1" }, expect);
 await expectAtLeastOnce(env.client, body, 3, expect);

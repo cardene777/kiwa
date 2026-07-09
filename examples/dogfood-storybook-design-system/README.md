@@ -1,10 +1,10 @@
 # dogfood-storybook-design-system
 
-Dogfood app (v1.16-2) — a React design-system Storybook 8 harness that registers **12 primitives** (**Button / Input / Card / Modal / Dropdown / Tabs / Toast / Table / Tooltip / Badge / Avatar / Icon**) as `StoryObj` (CSF3) with `args`, `play`, and `parameters`, drivable in both `KIWA_MODE=real` (envelops a real `@storybook/react` preview when `STORYBOOK_URL` is set) and `KIWA_MODE=mock` (`@kiwa/component` `createStoryRegistry` + play + a11y). The resulting fidelity report feeds `@kiwa/quality-metrics` 7-axis release gate.
+Dogfood app (v1.16-2) — a React design-system Storybook 8 harness that registers **12 primitives** (**Button / Input / Card / Modal / Dropdown / Tabs / Toast / Table / Tooltip / Badge / Avatar / Icon**) as `StoryObj` (CSF3) with `args`, `play`, and `parameters`, drivable in both `KIWA_MODE=real` (envelops a real `@storybook/react` preview when `STORYBOOK_URL` is set) and `KIWA_MODE=mock` (`@kiwa-lab/component` `createStoryRegistry` + play + a11y). The resulting fidelity report feeds `@kiwa-lab/quality-metrics` 7-axis release gate.
 
 ## Modes
 
-- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa/component` `createStoryRegistry` + `mount` + `play` + `runA11y`).
+- `KIWA_MODE=mock` (default) — driven by `makeMockAdapter()` (`@kiwa-lab/component` `createStoryRegistry` + `mount` + `play` + `runA11y`).
 - `KIWA_MODE=real` — driven by `makeRealAdapter()`, which detects `STORYBOOK_URL`. Without the env var each method reports `STORYBOOK_REAL_ENV_MISSING`; with the env var each method reports `STORYBOOK_LIVE_NOT_IMPLEMENTED` (a placeholder trace that keeps the divergence shape stable for follow-up work that swaps in the real `@storybook/react` preview channel driver).
 
 Real-mode envs.
@@ -21,11 +21,11 @@ src/
     stories.ts         -- 12 StoryMeta + StoryObj definitions (CSF3)
   adapters/
     interface.ts       -- provider-neutral contract (registerAll / listStories / resolveArgs / mount / play / runA11y)
-    mock.ts            -- kiwa mock adapter (@kiwa/component createStoryRegistry)
+    mock.ts            -- kiwa mock adapter (@kiwa-lab/component createStoryRegistry)
     real.ts            -- real @storybook/react adapter with env-skip when STORYBOOK_URL is missing
   flows/
     story-flows.ts     -- 4 user-facing flows (register + resolve + play + a11y)
-    fidelity.ts        -- trace-diffing harness feeding @kiwa/quality-metrics
+    fidelity.ts        -- trace-diffing harness feeding @kiwa-lab/quality-metrics
 tests/
   story-registration.test.ts   -- 6 story registration invariants
   args-resolution.test.ts      -- 15 CSF3 meta+story merge assertions
@@ -57,13 +57,13 @@ The whole point of the design-system dogfood is to exercise the mock's story sur
 3. `resolveArgs` — merge `meta.args + story.args` per CSF3 semantics and return the resolved snapshot.
 4. `mount` — render 1 story to a `MockNode` tree and hash the resulting pseudo-HTML for Chromatic baseline capture.
 5. `play` — run the story's play function and record 1 trace step per `step()` call; non-play stories fast-path to `{ steps: [], ok: true }`.
-6. `runA11y` — invoke the heuristic checker inside `@kiwa/component` (button-name / image-alt / label) + include any injected violations.
+6. `runA11y` — invoke the heuristic checker inside `@kiwa-lab/component` (button-name / image-alt / label) + include any injected violations.
 
 Every method emits at least 1 trace event, so the fidelity harness can diff the mock vs the real preview channel without adding shape-level noise.
 
 ## Release gate (7 axes)
 
-Because the provider string is `@kiwa/component/storybook-design-system`, `evaluateReleaseGate` includes the common 7 axes (coverage 3 / fidelity / perf p95 / mutation / behavior tests). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply — Storybook is a rendering surface, not a token-priced generative surface.
+Because the provider string is `@kiwa-lab/component/storybook-design-system`, `evaluateReleaseGate` includes the common 7 axes (coverage 3 / fidelity / perf p95 / mutation / behavior tests). The AI-LLM 4 axes (cost / latency / token / accuracy) do not apply — Storybook is a rendering surface, not a token-priced generative surface.
 
 - coverage — line >= 85%, branch >= 80%, function >= 90%
 - fidelity — ratio >= 70% (mock covered ops / real total ops, penalised by behavioural divergences)
@@ -87,6 +87,6 @@ Each of the 6 play-story invocations exercises 1 specific interaction so the fid
 
 ## Related
 
-- v1.16-1 `@kiwa/component` v0.1 (`packages/component/`)
-- v1.11-1 `@kiwa/quality-metrics` (`packages/quality-metrics/`)
+- v1.16-1 `@kiwa-lab/component` v0.1 (`packages/component/`)
+- v1.11-1 `@kiwa-lab/quality-metrics` (`packages/quality-metrics/`)
 - v1.16 milestone parent [#762](https://github.com/cardene777/kiwa/issues/762), this sub [#764](https://github.com/cardene777/kiwa/issues/764)

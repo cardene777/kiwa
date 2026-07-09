@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-A Next.js 15 middleware + edge runtime app wired to `@kiwa/edge` v0.2's `geo-replicated` + `edge-kv` + `streaming-response` semantics. The suite covers the full edge journey — Accept-Language + `x-vercel-ip-country` region resolution, primary + replica multi-region writes, cache read-through + invalidation on the edge KV layer, and Server-Sent Events with high-water-mark backpressure. Every event goes through the same neutral envelope, so the `KIWA_MODE=real` switch flips the run to a Vercel Edge sandbox without touching the test bodies.
+A Next.js 15 middleware + edge runtime app wired to `@kiwa-lab/edge` v0.2's `geo-replicated` + `edge-kv` + `streaming-response` semantics. The suite covers the full edge journey — Accept-Language + `x-vercel-ip-country` region resolution, primary + replica multi-region writes, cache read-through + invalidation on the edge KV layer, and Server-Sent Events with high-water-mark backpressure. Every event goes through the same neutral envelope, so the `KIWA_MODE=real` switch flips the run to a Vercel Edge sandbox without touching the test bodies.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A Next.js 15 middleware + edge runtime app wired to `@kiwa/edge` v0.2's `geo-rep
 ```bash
 mkdir kiwa-vercel-edge && cd kiwa-vercel-edge
 pnpm init
-pnpm add -D @kiwa/edge@^0.2 vitest typescript @types/node
+pnpm add -D @kiwa-lab/edge@^0.2 vitest typescript @types/node
 ```
 
 Add the vitest script in `package.json`.
@@ -49,7 +49,7 @@ import {
   openStream,
   sendChunk,
   closeStream,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 
 export function makeMockAdapter() {
   return {
@@ -95,7 +95,7 @@ import {
   geoPrimaryWrite,
   markReplicaLagged,
   syncReplica,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 
 const REGION_BY_COUNTRY: Record<string, string> = {
   US: 'iad1',
@@ -146,7 +146,7 @@ import {
   kvRead,
   kvWrite,
   kvRangeQuery,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 
 describe('edge KV read-through cache', () => {
   it('populates the cache on the first read, serves warm on the second', () => {
@@ -201,7 +201,7 @@ import {
   sendChunk,
   resumeStream,
   closeStream,
-} from '@kiwa/edge';
+} from '@kiwa-lab/edge';
 
 describe('SSE stream backpressure', () => {
   it('flips to backpressure when bytesSent exceeds the high-water mark', () => {
@@ -255,7 +255,7 @@ const mode = process.env.KIWA_MODE ?? 'mock';
 export function makeAdapter() {
   return mode === 'real' && process.env.VERCEL_KEY === '1'
     ? makeRealAdapter()  // Vercel Edge sandbox + KV Redis + real SSE
-    : makeMockAdapter(); // @kiwa/edge v0.2 semantics
+    : makeMockAdapter(); // @kiwa-lab/edge v0.2 semantics
 }
 ```
 

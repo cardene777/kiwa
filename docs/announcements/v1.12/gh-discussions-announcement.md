@@ -1,16 +1,16 @@
-# 🌱 kiwa v1.12 — AI-LLM 縦軸 (quality-metrics 11 軸 + `@kiwa/ai-llm` v0.1 + dogfood 3 app + docs 3 pillars + gh-pages 更新、 6 sub 全 resolved)
+# 🌱 kiwa v1.12 — AI-LLM 縦軸 (quality-metrics 11 軸 + `@kiwa-lab/ai-llm` v0.1 + dogfood 3 app + docs 3 pillars + gh-pages 更新、 6 sub 全 resolved)
 
 The v1.12 milestone (**6/6 GitHub Issues resolved**) just landed. v1.11 introduced the 5-axis unified release gate. v1.12 extends the same gate to **AI-LLM providers** — 4 new axes (cost / latency / token / accuracy) that measure what real vs mock actually cost and how close they land, a unified mock across 4 SDKs (Anthropic + OpenAI + Vercel AI SDK + LangChain), 3 dogfood apps that run streaming / tool-use / RAG against both real APIs and the kiwa mock, and a concept doc that names non-determinism as a first-class constraint.
 
-## 1. `@kiwa/quality-metrics` v0.2 — 11-axis release gate SSOT
+## 1. `@kiwa-lab/quality-metrics` v0.2 — 11-axis release gate SSOT
 
-Every provider still emits the same 5 axes (coverage / test count / fidelity / perf p95 / mutation kill). Providers whose name starts with `@kiwa/ai-` enter the AI-LLM branch and additionally emit 4 axes.
+Every provider still emits the same 5 axes (coverage / test count / fidelity / perf p95 / mutation kill). Providers whose name starts with `@kiwa-lab/ai-` enter the AI-LLM branch and additionally emit 4 axes.
 
 ```ts
-import { assembleReport, evaluateReleaseGate, emitMarkdown } from '@kiwa/quality-metrics';
+import { assembleReport, evaluateReleaseGate, emitMarkdown } from '@kiwa-lab/quality-metrics';
 
 const report = assembleReport({
-  provider: '@kiwa/ai-llm/anthropic-chatbot',
+  provider: '@kiwa-lab/ai-llm/anthropic-chatbot',
   version: '0.1.0',
   coverage,
   testCount,
@@ -31,7 +31,7 @@ console.log(emitMarkdown({ report, verdict }));
 - **SSOT** at [`docs/quality/release-gate.md`](https://github.com/cardene777/kiwa/blob/main/docs/quality/release-gate.md)
 - **`isAiLlmProvider` branch** — non-AI providers keep the v1.11 semantics unchanged
 
-## 2. `@kiwa/ai-llm` v0.1 — 4 SDK 統一 mock
+## 2. `@kiwa-lab/ai-llm` v0.1 — 4 SDK 統一 mock
 
 One mock engine, 4 SDK adapters. Streaming / tool-use / system prompt / cost tracking all covered.
 
@@ -71,10 +71,10 @@ The v1.11-6 VitePress skeleton is reused unchanged. `docs/.vitepress/config.mts`
 v1.11 users can adopt v1.12 without touching existing tests. Add the new packages:
 
 ```bash
-pnpm add -D @kiwa/ai-llm @kiwa/quality-metrics
+pnpm add -D @kiwa-lab/ai-llm @kiwa-lab/quality-metrics
 ```
 
-The `@kiwa/quality-metrics` v0.2 upgrade is 100% additive — the 4 new axes only apply to `@kiwa/ai-*` providers, and existing 5-axis reports keep passing on the v1.11 semantics.
+The `@kiwa-lab/quality-metrics` v0.2 upgrade is 100% additive — the 4 new axes only apply to `@kiwa-lab/ai-*` providers, and existing 5-axis reports keep passing on the v1.11 semantics.
 
 Full migration guide: [v1.11 → v1.12](https://github.com/cardene777/kiwa/blob/main/docs/migrations/v1.11-to-v1.12.md).
 

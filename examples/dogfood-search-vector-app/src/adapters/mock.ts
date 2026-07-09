@@ -1,5 +1,5 @@
 /**
- * Mock adapter — drives `@kiwa/search` v0.3 `semantics/vector` +
+ * Mock adapter — drives `@kiwa-lab/search` v0.3 `semantics/vector` +
  * `semantics/semantic` state machines deterministically without any
  * backend. The same app code exercises a full vector index + kNN query
  * + hybrid fusion + semantic understand + intent classify + rerank +
@@ -12,13 +12,13 @@
  * mirrors how the real backends keep per-index state in production.
  *
  * The mock adapter piggy-backs on the same neutral event vocabulary
- * that `@kiwa/search` v0.3 vector + semantic semantics emit —
+ * that `@kiwa-lab/search` v0.3 vector + semantic semantics emit —
  * every op appends the matching neutral event onto the trace so the
  * fidelity harness can assert both adapters produce identical event
  * orderings.
  */
 
-import { semantics } from '@kiwa/search';
+import { semantics } from '@kiwa-lab/search';
 import {
   type AddVectorsResult,
   type CacheEmbeddingResult,

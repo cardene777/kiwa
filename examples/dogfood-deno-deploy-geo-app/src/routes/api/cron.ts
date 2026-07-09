@@ -1,6 +1,6 @@
 /**
  * `/api/cron` Fresh route handler — Deno Deploy Cron scheduled + queue
- * trigger paths. Uses the `@kiwa/edge` v0.2 `cron-trigger` axis via
+ * trigger paths. Uses the `@kiwa-lab/edge` v0.2 `cron-trigger` axis via
  * the adapter (`driveCronSchedule` + `driveCronComplete`). POST schedules
  * a cron with a 5-field spec + optional queue trigger; DELETE fires the
  * completion (success / failure with retry decision).

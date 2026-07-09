@@ -6,7 +6,7 @@ title: Mobile real driver adapter interface — v1.53 pair 深度 4 段記録 4 
 
 ## What this covers
 
-`@kiwa/mobile` v0.4 の real driver adapter layer SSOT (11 axis × mock/real = 22 adapter + fidelity harness)、 縦深化 pair 第 13 の 4 段目 (Phase 4、 pair 深度 4 段拡張達成 4 例目 depth-4 record)。 v1.52 semantics 11 axis の上に v1.53 で adapter layer を lay、 mock/real trace diff 一致検証で Mobile 領域を production layer 完全到達に導く。
+`@kiwa-lab/mobile` v0.4 の real driver adapter layer SSOT (11 axis × mock/real = 22 adapter + fidelity harness)、 縦深化 pair 第 13 の 4 段目 (Phase 4、 pair 深度 4 段拡張達成 4 例目 depth-4 record)。 v1.52 semantics 11 axis の上に v1.53 で adapter layer を lay、 mock/real trace diff 一致検証で Mobile 領域を production layer 完全到達に導く。
 
 ## adapter interface SSOT
 

@@ -1,4 +1,4 @@
-import { semantics } from '@kiwa/search';
+import { semantics } from '@kiwa-lab/search';
 
 type QuerySession = semantics.QuerySession;
 type QuerySummary = semantics.QuerySummary;

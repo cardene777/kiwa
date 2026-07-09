@@ -1,6 +1,6 @@
 # examples/react-component-poc
 
-Proof-of-concept that exercises `@kiwa/ui` and `@kiwa/core` against a single React component (`<Counter />`).
+Proof-of-concept that exercises `@kiwa-lab/ui` and `@kiwa-lab/core` against a single React component (`<Counter />`).
 
 ## What this shows
 

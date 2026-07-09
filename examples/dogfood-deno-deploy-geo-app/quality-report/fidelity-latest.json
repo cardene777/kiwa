@@ -1,5 +1,5 @@
 {
-  "provider": "@kiwa/edge/deno-deploy-geo",
+  "provider": "@kiwa-lab/edge/deno-deploy-geo",
   "version": "0.1.0",
   "reportedAt": "2026-07-05T02:04:47.720Z",
   "coverage": {

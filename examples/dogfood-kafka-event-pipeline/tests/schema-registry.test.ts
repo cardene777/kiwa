@@ -1,7 +1,7 @@
 /**
  * Schema Registry mock (v1.31-2) behavior — subject registration + evolution
  * compatibility check (BACKWARD / FORWARD / FULL) via
- * `@kiwa/streaming`'s `createRedpandaSchemaEvolution` axis.
+ * `@kiwa-lab/streaming`'s `createRedpandaSchemaEvolution` axis.
  */
 
 import { describe, expect, it } from 'vitest';

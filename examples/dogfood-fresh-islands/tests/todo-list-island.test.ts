@@ -8,7 +8,7 @@ import {
   type IslandDefinition,
   type IslandMount,
   type IslandProps,
-} from '@kiwa/fresh';
+} from '@kiwa-lab/fresh';
 import {
   TodoListIsland,
   getTodoListState,

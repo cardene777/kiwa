@@ -6,7 +6,7 @@ title: Mobile testing advanced III — v1.52 11 axis SSOT + pair 深度 3 段記
 
 ## What this covers
 
-`@kiwa/mobile` v0.3 の 11 axis target-neutral state machine SSOT (base 3 + advanced II 4 + advanced III 4)、 縦深化 pair 第 13 の 3 段目 (Phase 3、 pair 深度 3 段拡張達成 5 例目)。 v1.51 base + advanced II 7 axis に加えて v1.52 で fabric + turbo-modules + codegen + new-architecture を追加、 React Native 0.76+ New Architecture 領域を production layer に統合。
+`@kiwa-lab/mobile` v0.3 の 11 axis target-neutral state machine SSOT (base 3 + advanced II 4 + advanced III 4)、 縦深化 pair 第 13 の 3 段目 (Phase 3、 pair 深度 3 段拡張達成 5 例目)。 v1.51 base + advanced II 7 axis に加えて v1.52 で fabric + turbo-modules + codegen + new-architecture を追加、 React Native 0.76+ New Architecture 領域を production layer に統合。
 
 ## 11 axis 一覧
 

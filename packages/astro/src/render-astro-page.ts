@@ -10,7 +10,7 @@
 // SSR behavior without booting Astro.
 //
 // Out of scope on purpose:
-//   - Astro Islands hydration (client:* directives) → use `@kiwa/ui` Vue/React/Svelte adapters
+//   - Astro Islands hydration (client:* directives) → use `@kiwa-lab/ui` Vue/React/Svelte adapters
 //   - View transitions / streaming SSR
 //   - Astro Container API direct use (still recommended for HTML-perfect snapshot tests)
 

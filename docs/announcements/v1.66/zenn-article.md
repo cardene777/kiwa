@@ -1,5 +1,5 @@
 ---
-title: "kiwa v1.66 リリース — quality-metrics 深化 III (@kiwa/quality-metrics v0.6 evaluateReleaseGate に drift check opt-in 統合、 depth-5 pattern 3 例目確定 実運用継続、 systematic pattern 41 度目、 44 milestone streak)"
+title: "kiwa v1.66 リリース — quality-metrics 深化 III (@kiwa-lab/quality-metrics v0.6 evaluateReleaseGate に drift check opt-in 統合、 depth-5 pattern 3 例目確定 実運用継続、 systematic pattern 41 度目、 44 milestone streak)"
 emoji: "🔐"
 type: "tech"
 topics: ["testing", "vitest", "quality-metrics", "release-gate", "drift-detection"]
@@ -80,7 +80,7 @@ v1.23 → v1.66 = **44 milestone**、 kiwa 史上最長記録更新継続。
 ## Install
 
 ```bash
-pnpm add -D @kiwa/quality-metrics@^0.6
+pnpm add -D @kiwa-lab/quality-metrics@^0.6
 ```
 
 ## Migration guide

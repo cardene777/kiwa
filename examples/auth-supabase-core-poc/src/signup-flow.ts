@@ -1,4 +1,4 @@
-import type { SupabaseAuthTestEnv } from '@kiwa/auth';
+import type { SupabaseAuthTestEnv } from '@kiwa-lab/auth';
 
 /**
  * A small signup + email confirmation flow stitched together so the PoC proves

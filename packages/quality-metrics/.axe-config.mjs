@@ -1,5 +1,5 @@
 /**
- * A11y (axe-core) config for @kiwa/quality-metrics.
+ * A11y (axe-core) config for @kiwa-lab/quality-metrics.
  * Tier: Core tier (critical 0 / serious 0 / moderate 0-3) — Release gate calculator + tier resolver. No DOM.
  * SSOT: docs/quality/a11y-thresholds.md § Core tier.
  */

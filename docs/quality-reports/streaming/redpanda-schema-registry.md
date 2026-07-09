@@ -1,7 +1,7 @@
 # Redpanda Schema Registry — Quality Report (v1.20-3)
 
 Dogfood: [`examples/dogfood-redpanda-schema-registry`](../../../examples/dogfood-redpanda-schema-registry/).
-Package under exercise: [`@kiwa/streaming`](../../../packages/streaming/) (v0.1.0).
+Package under exercise: [`@kiwa-lab/streaming`](../../../packages/streaming/) (v0.1.0).
 
 ## Scope
 

@@ -33,7 +33,7 @@ describe('dogfood-multimodal — emit fidelity report to quality-report/', () =>
       },
     });
     const output = runFidelityHarness({
-      provider: '@kiwa/ai-llm/multimodal-chat',
+      provider: '@kiwa-lab/ai-llm/multimodal-chat',
       version: '0.1.0',
       mockTraces: matrix.mockTraces,
       realTraces: matrix.realTraces,

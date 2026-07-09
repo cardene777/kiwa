@@ -5,7 +5,7 @@
  *
  * Mirrors the surface a real database + audit log deployment would expose so
  * the same Nuxt 3 server routes can flip between the real Paddle sandbox
- * driver and the `@kiwa/payment` mock without knowing which is in play.
+ * driver and the `@kiwa-lab/payment` mock without knowing which is in play.
  *
  * The store is in-memory + per-instance; production RPs swap this for a
  * database. The mock is fine for a dogfood app because every test bootstraps
@@ -17,7 +17,7 @@ import type {
   PaymentWebhookEvent,
   Subscription as SemanticSubscription,
   TaxLine,
-} from '@kiwa/payment';
+} from '@kiwa-lab/payment';
 
 /**
  * Paddle inline checkout session. Real Paddle returns a checkout `id` +

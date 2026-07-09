@@ -1,4 +1,4 @@
-import type { MemcachedTestEnv } from '@kiwa/cache';
+import type { MemcachedTestEnv } from '@kiwa-lab/cache';
 
 /**
  * A small session-cache pipeline stitched together so the PoC proves the

@@ -1,4 +1,4 @@
-import type { QueueClient } from '@kiwa/data';
+import type { QueueClient } from '@kiwa-lab/data';
 
 export interface Order {
   orderId: string;

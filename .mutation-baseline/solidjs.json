@@ -1,5 +1,5 @@
 {
-  "package": "@kiwa/solidjs",
+  "package": "@kiwa-lab/solidjs",
   "tier": "Framework",
   "thresholds": {
     "high": 70,

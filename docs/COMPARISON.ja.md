@@ -148,7 +148,7 @@ transport 差し替えの自由度が主目的なら wallet-mock の方が設計
 /kiwa-design (Layer 1)
   ├─ /kiwa-forge        → Foundry .t.sol
   ├─ /kiwa-hardhat      → Hardhat .test.ts
-  ├─ /kiwa-play         → Playwright .spec.ts (@kiwa/dapp fixture を使用)
+  ├─ /kiwa-play         → Playwright .spec.ts (@kiwa-lab/dapp fixture を使用)
   ├─ /kiwa-vitest       → Vitest .test.ts (unit)
   ├─ /kiwa-api          → Vitest + msw / supertest (integration)
   └─ /kiwa-review       → spec vs 実装 drift + 11 観点 cover を check

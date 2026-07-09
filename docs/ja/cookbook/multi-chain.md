@@ -11,7 +11,7 @@
 ### 1. global-setup で複数 anvil を起動
 
 ~~~ts
-import { startAnvil, type AnvilHandle } from '@kiwa/dapp';
+import { startAnvil, type AnvilHandle } from '@kiwa-lab/dapp';
 
 const anvilHandles: AnvilHandle[] = [];
 

@@ -4,7 +4,7 @@
  *
  * The dogfood talks to the multi-tenant SaaS only through this interface.
  * Two implementations exist: {@link makeMockAdapter} (backed by
- * `@kiwa/orm`'s RLS + MySQL cluster + binlog + pool advanced
+ * `@kiwa-lab/orm`'s RLS + MySQL cluster + binlog + pool advanced
  * semantics) and {@link makeRealAdapter} (probes a MySQL 8 broker via
  * `MYSQL_KEY` when set, else returns a skipped variant whose every method
  * records a `MYSQL_ENV_MISSING` trace).
@@ -38,7 +38,7 @@
  *
  * All 9 ops (5 v1 + 4 v2) satisfy the same "op → observation → trace"
  * shape so behavioural fidelity between real vs mock can be measured side-
- * by-side and fed to `@kiwa/quality-metrics` release gate.
+ * by-side and fed to `@kiwa-lab/quality-metrics` release gate.
  */
 
 import type { OrganizationRow } from '../tenant/index.js';

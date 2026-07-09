@@ -1,7 +1,7 @@
 /**
  * Mock adapter — spins up 1 RLS session per policy, 1 organization store,
  * 1 audit-log chain, and 3 orm v0.10 advanced sessions (group replication
- * + binlog + router-split pool) against `@kiwa/orm`'s semantics.
+ * + binlog + router-split pool) against `@kiwa-lab/orm`'s semantics.
  * Every op appends 1 latency sample and 1 trace event so the fidelity
  * harness never reads as 0-sample.
  *

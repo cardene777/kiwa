@@ -6,7 +6,7 @@ title: Mobile testing advanced II — v1.51 7 axis SSOT
 
 ## What this covers
 
-`@kiwa/mobile` v0.2 の 7 axis target-neutral state machine SSOT (base 3 + advanced II 4)、 pair 第 13 の 2 段目 (Phase 2)。 v1.50 base に加えて v1.51 で navigation + reanimated + async-storage + secure-storage を追加、 3 target × 7 axis = 21 row fidelity grid + 48 dialect mapping。
+`@kiwa-lab/mobile` v0.2 の 7 axis target-neutral state machine SSOT (base 3 + advanced II 4)、 pair 第 13 の 2 段目 (Phase 2)。 v1.50 base に加えて v1.51 で navigation + reanimated + async-storage + secure-storage を追加、 3 target × 7 axis = 21 row fidelity grid + 48 dialect mapping。
 
 ## 7 axis 一覧
 

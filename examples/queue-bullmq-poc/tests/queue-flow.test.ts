@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupBullMQEnv, type BullMQTestEnv } from '@kiwa/queue';
+import { setupBullMQEnv, type BullMQTestEnv } from '@kiwa-lab/queue';
 import { createEmailSink, registerEmailProcessor, type EmailBody } from '../src/email-worker.js';
 
 const envs: BullMQTestEnv[] = [];
