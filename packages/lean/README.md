@@ -139,6 +139,30 @@ brew install elan-init
 elan toolchain install leanprover/lean4:v4.15.0
 ```
 
+## Which Lean
+
+The generated source is checked against **v4.12.0, v4.15.0, v4.23.0 and v4.31.0**.
+All four accept a complete table and reject the same broken ones: a missing cell,
+a false absorbing theorem, a false reachability witness.
+
+They do not word their complaints the same way — `missing cases` became `Missing
+cases` in v4.23, and `tactic 'rfl' failed` became ``Tactic `rfl` failed``. Match
+loosely if you read the diagnostics, or match on the terms Lean echoes, which
+stay put.
+
+By default `verifyLeanSpec` uses whatever Lean the machine has, since pinning one
+makes a contributor who already has a working toolchain fetch a second to reach
+the same verdict. Pass `leanToolchain` when a run has to be reproducible down to
+the compiler, and it writes the `lean-toolchain` that `elan` reads. A checked-in
+Lake project pins by default, because a repository should.
+
+To run the version matrix yourself:
+
+```bash
+elan toolchain install leanprover/lean4:v4.31.0
+KIWA_LEAN_TOOLCHAINS=v4.15.0,v4.31.0 pnpm test
+```
+
 ## API
 
 | Export | Purpose |

@@ -36,6 +36,18 @@ function installed(bin: string): boolean {
 const HAS_LEAN = installed('lean');
 const HAS_LAKE = installed('lake');
 
+/**
+ * Lean rewords its diagnostics between releases. `missing cases` became
+ * `Missing cases` in v4.23, and `tactic 'rfl' failed` became
+ * ``Tactic `rfl` failed``. What stays put is the terms it echoes back — the
+ * constructors and the goal — so assertions anchor on those and match the prose
+ * loosely. A test that pins one version's wording fails on the next one while
+ * the thing it was checking still works.
+ */
+const MISSING_CASES = /missing cases/i;
+const RFL_FAILED = /tactic .?rfl.? failed/i;
+const TYPE_MISMATCH = /type mismatch/i;
+
 const SESSION: OrchestratorSpec = {
   moduleName: 'SessionOrchestrator',
   namespace: 'Session',
@@ -87,16 +99,23 @@ describe.skipIf(!HAS_LEAN)('the generated spec is accepted by Lean', () => {
     expect(out).not.toContain('--check');
   });
 
-  it('T-LEAN-103 the lean-toolchain file decides which Lean runs, so verify writes one', () => {
-    // It is the only file the scratch directory needs. Naming a version that does
-    // not exist must fail rather than fall back to whatever is installed; if it
-    // passed, nothing would be pinning anything.
+  it('T-LEAN-103 a named toolchain is honored, so pinning actually pins', () => {
+    // elan reads `lean-toolchain` from the working directory. Naming a version
+    // that does not exist must fail rather than fall back to whatever is
+    // installed; if it passed, the option would be decoration.
     const result = verifyLeanSpec([generateLeanSpec(SESSION)], {
       leanToolchain: 'leanprover/lean4:v0.0.0-does-not-exist',
     });
 
     expect(result.status).toBe('verification-failed');
     expect(result.diagnostics).toContain('no such release');
+  });
+
+  it('T-LEAN-104 without one, the machine’s own Lean checks the specs', () => {
+    // Pinning by default makes a contributor who already has Lean download a
+    // second copy to reach the same verdict. The bogus pin above proves the
+    // file is read; this proves it is not written unasked.
+    expect(verifyLeanSpec([generateLeanSpec(SESSION)]).status).toBe('ok');
   });
 });
 
@@ -112,7 +131,7 @@ describe.skipIf(!HAS_LEAN)('Lean rejects what the theorems forbid', () => {
     const { ok, diagnostics } = checkSource(withoutCell);
 
     expect(ok).toBe(false);
-    expect(diagnostics).toContain('missing cases');
+    expect(diagnostics).toMatch(MISSING_CASES);
     expect(diagnostics).toContain('State.Authed, Event.Timeout');
   });
 
@@ -140,7 +159,7 @@ describe.skipIf(!HAS_LEAN)('Lean rejects what the theorems forbid', () => {
 
     expect(ok).toBe(false);
     // Lean reports the goal it could not close rather than the theorem's name.
-    expect(diagnostics).toContain("tactic 'rfl' failed");
+    expect(diagnostics).toMatch(RFL_FAILED);
     expect(diagnostics).toContain('dispatch State.Expired Event.Timeout');
     expect(diagnostics).toContain('Step.invalid');
   });
@@ -213,7 +232,7 @@ describe.skipIf(!HAS_LEAN)('Lean checks the sink theorems', () => {
     const { ok, diagnostics } = checkSource(source);
 
     expect(ok).toBe(false);
-    expect(diagnostics).toContain('type mismatch');
+    expect(diagnostics).toMatch(TYPE_MISMATCH);
   });
 
   it('T-LEAN-142 claiming an escapable state is a sink fails to prove', () => {
@@ -226,7 +245,7 @@ describe.skipIf(!HAS_LEAN)('Lean checks the sink theorems', () => {
     const { ok, diagnostics } = checkSource(source);
 
     expect(ok).toBe(false);
-    expect(diagnostics).toContain("tactic 'rfl' failed");
+    expect(diagnostics).toMatch(RFL_FAILED);
   });
 
   it('T-LEAN-144 a one-state sink verifies, though its steps definition goes unused', () => {
@@ -280,7 +299,10 @@ describe.skipIf(!HAS_LEAN)('Lean checks the reachability witnesses', () => {
     const { ok, diagnostics } = checkSource(source);
 
     expect(ok).toBe(false);
-    expect(diagnostics).toContain('error');
+    // v4.15 calls this a type mismatch, v4.23 a failed definitional equality.
+    // Both echo back the claim they could not make true.
+    expect(diagnostics).toContain('steps State.Init [Event.Timeout]');
+    expect(diagnostics).toContain('Step.to State.Authed');
   });
 
   it('T-LEAN-132 a path through a rejected cell fails to prove', () => {
@@ -376,6 +398,6 @@ describe.skipIf(!HAS_LAKE)('the generated Lake project builds the specs inside i
     const result = buildProject(source);
 
     expect(result.status).not.toBe(0);
-    expect(result.output).toContain('missing cases');
+    expect(result.output).toMatch(MISSING_CASES);
   });
 });
