@@ -174,11 +174,24 @@ function asObservation(value: unknown, state: string, event: string): Observatio
   );
 }
 
+/**
+ * How many disagreements a failure message prints before it stops.
+ *
+ * A machine with twenty states and twenty events disagreeing everywhere prints
+ * four hundred lines, and nobody reads the four hundredth. The full list is on
+ * `report.disagreements`, which is what a program should be reading anyway.
+ */
+const MAX_REPORTED_DISAGREEMENTS = 20;
+
 /** Render a report for a test failure message, one disagreement per line. */
 export function formatConformance(spec: OrchestratorSpec, report: ConformanceReport): string {
   if (report.ok) {
     return `${spec.namespace}: ${report.checked} cells agree (${report.agreedTransitions} transitions, ${report.agreedRejections} rejections)`;
   }
-  const lines = report.disagreements.map((d) => `  ${d.message}`);
+  const shown = report.disagreements.slice(0, MAX_REPORTED_DISAGREEMENTS);
+  const lines = shown.map((d) => `  ${d.message}`);
+  const hidden = report.disagreements.length - shown.length;
+  if (hidden > 0) lines.push(`  ...and ${hidden} more, in report.disagreements`);
+
   return `${spec.namespace}: ${report.disagreements.length} of ${report.checked} cells disagree\n${lines.join('\n')}`;
 }

@@ -205,4 +205,24 @@ describe('formatConformance says what happened in one message', () => {
     expect(out).toContain('init + timeout');
     expect(out).toContain('the implementation refuses the event');
   });
+
+  it('T-CONF-032 a machine that disagrees everywhere does not print everything', () => {
+    // Twenty states and twenty events disagreeing in every cell is four hundred
+    // lines, and nobody reads the four hundredth.
+    const wide: OrchestratorSpec = {
+      moduleName: 'Wide',
+      namespace: 'Wide',
+      states: Array.from({ length: 20 }, (_, i) => `s${i}`),
+      events: Array.from({ length: 20 }, (_, i) => `e${i}`),
+      unspecified: 'invalid',
+      transitions: [],
+    };
+    const report = checkConformance(wide, () => TO('s0'));
+    const out = formatConformance(wide, report);
+
+    expect(report.disagreements).toHaveLength(400);
+    expect(out.split('\n')).toHaveLength(22);
+    expect(out).toContain('400 of 400 cells disagree');
+    expect(out).toContain('...and 380 more, in report.disagreements');
+  });
 });
