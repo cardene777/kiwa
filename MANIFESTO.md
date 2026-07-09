@@ -49,7 +49,11 @@ kiwa の depth-5 pattern は、 全 orchestrator (transaction / session / cache 
 
 **systematic law の 型レベル格上げ** = `@kiwa-lab/lean` が 5 原則を Lean 4 の inductive type + `dispatch : State → Event → Step` に変換する。 `Step` は次状態 (`to`) と拒否 (`invalid`) を分けるので、 意図した自己遷移と書き忘れが別物になる。 catch-all を置かないため、 表が欠けていれば Lean の網羅性検査が cell 名を挙げて落ちる。 網羅の保証は定理ではなく型検査そのものが担う。
 
-生成される定理は表から機械的に導ける 2 種で、 表と矛盾すれば証明が通らない。 終端状態の `<state>_absorbing` (どの event でも `invalid`) と、 非終端状態の `<state>_has_exit` (少なくとも 1 つ出口がある) の 2 つ。 v0.2 までの `dispatch_total` (`∃ s', dispatch s e = s'`) は任意の関数について `rfl` で証明でき、 遷移を 1 つも定義していない表でも通ったため v0.3 で削除した。
+生成される定理は表から機械的に導ける 4 種で、 いずれも表と矛盾すれば証明が通らない。 終端状態の `<state>_absorbing` (どの event でも `invalid`)、 出ていける状態の `<state>_can_leave` (別の状態へ動かす event がある)、 sink の `<state>_no_escape` (event を受理するが、 どれも外へ出さない)、 そして `initial` を与えた場合の `<state>_reachable` (初期状態からの最短経路)。
+
+sink と終端は別物として扱う。 自己遷移しか持たない状態は event を受理するので終端ではないが、 二度と出られない。 「有効な event が 1 つでもあるか」 を出口の条件にすると、 この状態を「出口がある」 と報告してしまう。
+
+v0.2 までの `dispatch_total` (`∃ s', dispatch s e = s'`) は任意の関数について `rfl` で証明でき、 遷移を 1 つも定義していない表でも通ったため v0.3 で削除した。
 
 ## 検証の 3 段 pipeline
 
