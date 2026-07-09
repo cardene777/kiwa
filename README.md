@@ -4,9 +4,13 @@
 
 # kiwa
 
-**Every test layer · one spec · TypeScript / Solidity / Python.**
+**際を制するものが 開発を制する。 The dev-flow platform where testing, formal verification, and spec-driven development meet.**
 
-One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js (Server Actions / middleware / RSC) tests in parallel, across **12 npm packages + 1 PyPI package + Foundry / Hardhat bridges**. Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
+kiwa (「際」 = boundary, edge, connection) is a **spec-driven development platform** that fuses 3 axes: runtime testing (40+ npm packages), formal verification (Lean 4 spec generator + `lean --check`), and spec-driven workflow (specFormal / specRuntime 2-file separation with 3-layer classification). Read the [MANIFESTO](./MANIFESTO.md) for the full philosophy.
+
+**Every test layer · one spec · every verification path · TypeScript / Solidity / Python / Lean 4.**
+
+One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js (Server Actions / middleware / RSC) tests in parallel, across **42+ npm packages + 1 PyPI package + Foundry / Hardhat bridges + Lean 4 spec verification**. Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
 
 [![npm version](https://img.shields.io/npm/v/@kiwa-lab/dapp?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-lab/dapp)
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa-lab/dapp?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-lab/dapp)
