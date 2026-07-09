@@ -66,4 +66,29 @@ describe('dogfood-lean-orchestrator-specs (v2.14-2)', () => {
     expect(totalValid).toBe(14 + 12 + 15 + 10 + 12);
     expect(totalValid).toBe(63);
   });
+
+  it('Pattern 6: 全 5 spec の全状態が初期状態から到達可能', () => {
+    for (const spec of ALL_SPECS) {
+      const out = generateLeanSpec(spec);
+      const reached = Object.keys(out.meta.reachablePaths ?? {});
+      // 初期状態を除く全状態に、 それを指す経路がある。
+      expect(reached.sort()).toEqual(spec.states.filter((s) => s !== spec.initial).sort());
+    }
+  });
+
+  it('Pattern 7: job の dlq は終端ではなく sink (受理して二度と出ない)', () => {
+    // dlq は dlq-inspected を受理して dlq に留まる。 「出口がある」 が 「出ていける」
+    // ではない状態は、 表を見ただけでは終端と区別がつかない。
+    const job = generateLeanSpec(JOB_SPEC);
+    expect(job.meta.terminalStates).toEqual(['completed']);
+    expect(job.meta.sinkStates).toEqual(['dlq']);
+    expect(job.source).toContain('theorem dlq_no_escape');
+    expect(job.source).not.toContain('dlq_can_leave');
+  });
+
+  it('Pattern 8: 他 4 spec に sink はない', () => {
+    for (const spec of ALL_SPECS.filter((s) => s !== JOB_SPEC)) {
+      expect(generateLeanSpec(spec).meta.sinkStates).toEqual([]);
+    }
+  });
 });

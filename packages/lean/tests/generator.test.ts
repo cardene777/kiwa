@@ -84,7 +84,9 @@ describe('generateLeanSpec — types and table', () => {
 
   it('T-LEAN-004 lists every cell, so Lean checks exhaustiveness rather than a theorem', () => {
     const out = generateLeanSpec(TXN_SPEC);
-    const arms = out.source.split('\n').filter((line) => /^ {2}\| \./.test(line));
+    // `escapes` matches on Step below, so count only the arms of `dispatch`.
+    const body = out.source.split('def dispatch : State → Event → Step\n')[1]?.split('\n\n')[0] ?? '';
+    const arms = body.split('\n').filter((line) => /^ {2}\| \./.test(line));
     expect(arms).toHaveLength(40);
     expect(out.source).not.toContain('| s, _ => s');
   });
@@ -121,7 +123,14 @@ describe('generateLeanSpec — types and table', () => {
       validTransitionCount: 14,
       invalidTransitionCount: 26,
       terminalStates: ['aborted'],
+      sinkStates: [],
     });
+  });
+
+  it('T-LEAN-009 emits escapes, which tells a self-loop from a move', () => {
+    const out = generateLeanSpec(TXN_SPEC);
+    expect(out.source).toContain('def escapes (s : State) (e : Event) : Bool :=');
+    expect(out.source).toContain("| .to s' => !(decide (s' = s))");
   });
 });
 
@@ -133,22 +142,35 @@ describe('generateLeanSpec — theorems that can fail', () => {
     );
   });
 
-  it('T-LEAN-021 a non-terminal state gets a has-exit theorem with a witness', () => {
+  it('T-LEAN-021 a state that can leave gets a can-leave theorem with a witness', () => {
     const out = generateLeanSpec(TXN_SPEC);
-    expect(out.source).toContain('theorem beginning_has_exit : ∃ e s, dispatch .Beginning e = .to s');
-    expect(out.source).toContain('⟨.BeginCompleted, .Active, rfl⟩');
+    expect(out.source).toContain('theorem beginning_can_leave : ∃ e, escapes .Beginning e = true');
+    expect(out.source).toContain('⟨.BeginCompleted, rfl⟩');
   });
 
-  it('T-LEAN-022 a terminal state gets no has-exit theorem, and the reverse', () => {
+  it('T-LEAN-022 a terminal state gets no can-leave theorem, and the reverse', () => {
     const out = generateLeanSpec(TXN_SPEC);
-    expect(out.source).not.toContain('aborted_has_exit');
+    expect(out.source).not.toContain('aborted_can_leave');
     expect(out.source).not.toContain('beginning_absorbing');
   });
 
   it('T-LEAN-023 theorem names are Lean identifiers, so hyphens become underscores', () => {
     const out = generateLeanSpec(TXN_SPEC);
-    expect(out.source).toContain('theorem savepoint_nested_has_exit');
-    expect(out.source).not.toContain('savepoint-nested_has_exit');
+    expect(out.source).toContain('theorem savepoint_nested_can_leave');
+    expect(out.source).not.toContain('savepoint-nested_can_leave');
+  });
+
+  it('T-LEAN-026 the can-leave witness is an event that actually leaves, not a self-loop', () => {
+    // `active + query-executed` stays in `active`. It must not be the witness.
+    const out = generateLeanSpec(TXN_SPEC);
+    const line = out.source
+      .split('\n')
+      .find((l) => l.includes('active_can_leave') === false && l.includes('⟨.BeginCompleted, rfl⟩'));
+    expect(line).toBeDefined();
+
+    const activeWitness = out.source.split('theorem active_can_leave')[1]?.split('\n')[1];
+    expect(activeWitness).not.toContain('QueryExecuted');
+    expect(activeWitness).toContain('SavepointCreated');
   });
 
   it('T-LEAN-024 the old vacuous totality theorem is gone', () => {
@@ -169,9 +191,57 @@ describe('generateLeanSpec — theorems that can fail', () => {
       unspecified: 'invalid',
     });
     expect(out.meta.terminalStates).toEqual(['a', 'b']);
+    expect(out.meta.sinkStates).toEqual([]);
     expect(out.source).toContain('theorem a_absorbing');
     expect(out.source).toContain('theorem b_absorbing');
-    expect(out.source).not.toContain('_has_exit');
+    expect(out.source).not.toContain('_can_leave');
+  });
+});
+
+describe('generateLeanSpec — a sink accepts events and never leaves', () => {
+  // `dlq` takes `dlq-inspected` and stays in `dlq`. It is not terminal, because
+  // it accepts an event, and nothing ever leaves it. A theorem asking only for a
+  // valid event would call that a way out.
+  const JOB: OrchestratorSpec = {
+    moduleName: 'Job',
+    namespace: 'Job',
+    states: ['queued', 'processing', 'dlq', 'completed'],
+    events: ['enqueue-succeeded', 'process-started', 'process-succeeded', 'dlq-inspected', 'timeout'],
+    unspecified: 'invalid',
+    transitions: [
+      { from: 'queued', event: 'enqueue-succeeded', to: 'queued' },
+      { from: 'queued', event: 'process-started', to: 'processing' },
+      { from: 'queued', event: 'timeout', to: 'dlq' },
+      { from: 'processing', event: 'process-succeeded', to: 'completed' },
+      { from: 'processing', event: 'timeout', to: 'dlq' },
+      { from: 'dlq', event: 'dlq-inspected', to: 'dlq' },
+    ],
+  };
+
+  it('T-LEAN-070 a sink is neither terminal nor escapable', () => {
+    const out = generateLeanSpec(JOB);
+    expect(out.meta.terminalStates).toEqual(['completed']);
+    expect(out.meta.sinkStates).toEqual(['dlq']);
+  });
+
+  it('T-LEAN-071 a sink gets a no-escape theorem rather than a can-leave one', () => {
+    const out = generateLeanSpec(JOB);
+    expect(out.source).toContain('theorem dlq_no_escape : ∀ e, escapes .Dlq e = false := by');
+    expect(out.source).not.toContain('dlq_can_leave');
+    expect(out.source).not.toContain('dlq_absorbing');
+  });
+
+  it('T-LEAN-072 a state with a self-loop and a real exit is not a sink', () => {
+    const out = generateLeanSpec(JOB);
+    expect(out.meta.sinkStates).not.toContain('queued');
+    expect(out.source).toContain('theorem queued_can_leave');
+  });
+
+  it('T-LEAN-073 the witness for such a state is the event that leaves', () => {
+    const out = generateLeanSpec(JOB);
+    const witness = out.source.split('theorem queued_can_leave')[1]?.split('\n')[1];
+    expect(witness).toContain('ProcessStarted');
+    expect(witness).not.toContain('EnqueueSucceeded');
   });
 });
 
@@ -205,6 +275,131 @@ describe('generateLeanSpec — an undeclared cell is a cell nobody decided about
 
   it('T-LEAN-034 a fully declared table needs no policy', () => {
     expect(() => generateLeanSpec(TXN_SPEC)).not.toThrow();
+  });
+});
+
+describe('generateLeanSpec — reachability, when an initial state is named', () => {
+  const REACHABLE: OrchestratorSpec = {
+    moduleName: 'M',
+    namespace: 'M',
+    states: ['init', 'authed', 'expired'],
+    events: ['auth-succeeded', 'timeout'],
+    unspecified: 'invalid',
+    initial: 'init',
+    transitions: [
+      { from: 'init', event: 'auth-succeeded', to: 'authed' },
+      { from: 'init', event: 'timeout', to: 'expired' },
+      { from: 'authed', event: 'timeout', to: 'expired' },
+    ],
+  };
+
+  it('T-LEAN-050 without an initial state, reachability is not checked and steps is absent', () => {
+    const { initial: _initial, ...noInitial } = REACHABLE;
+    const out = generateLeanSpec(noInitial);
+    expect(out.source).not.toContain('def steps');
+    expect(out.source).not.toContain('_reachable');
+    expect(out.meta.reachablePaths).toBeUndefined();
+  });
+
+  it('T-LEAN-051 each other state gets a theorem carrying the path that reaches it', () => {
+    const out = generateLeanSpec(REACHABLE);
+    expect(out.source).toContain('def steps : State → List Event → Step');
+    expect(out.source).toContain(
+      'theorem authed_reachable : steps .Init [.AuthSucceeded] = .to .Authed := rfl',
+    );
+    expect(out.source).toContain(
+      'theorem expired_reachable : steps .Init [.Timeout] = .to .Expired := rfl',
+    );
+  });
+
+  it('T-LEAN-052 the initial state gets no reachability theorem of its own', () => {
+    const out = generateLeanSpec(REACHABLE);
+    expect(out.source).not.toContain('init_reachable');
+  });
+
+  it('T-LEAN-053 the path is the shortest one', () => {
+    const out = generateLeanSpec(REACHABLE);
+    // `expired` is reachable in one event, not via `authed`.
+    expect(out.meta.reachablePaths).toEqual({
+      authed: ['auth-succeeded'],
+      expired: ['timeout'],
+    });
+  });
+
+  it('T-LEAN-054 a state nothing reaches stops generation, and is named', () => {
+    const withOrphan: OrchestratorSpec = {
+      ...REACHABLE,
+      states: [...REACHABLE.states, 'orphan'],
+    };
+    expect(() => generateLeanSpec(withOrphan)).toThrow(/1 state\(s\) cannot be reached from "init"/);
+    expect(() => generateLeanSpec(withOrphan)).toThrow(/orphan/);
+  });
+
+  it('T-LEAN-055 rejects an unknown initial state', () => {
+    expect(() => generateLeanSpec({ ...REACHABLE, initial: 'nowhere' })).toThrow(
+      /unknown state in initial: nowhere/,
+    );
+  });
+
+  it('T-LEAN-056 the search is breadth-first, so a shorter path wins over one found sooner', () => {
+    // `x` is two events away through `a`, and three through `b` then `y`. A
+    // depth-first search reaches it the long way first and keeps that path.
+    const out = generateLeanSpec({
+      moduleName: 'M',
+      namespace: 'M',
+      states: ['init', 'a', 'b', 'y', 'x'],
+      events: ['e1', 'e2'],
+      unspecified: 'invalid',
+      initial: 'init',
+      transitions: [
+        { from: 'init', event: 'e1', to: 'a' },
+        { from: 'init', event: 'e2', to: 'b' },
+        { from: 'a', event: 'e1', to: 'x' },
+        { from: 'b', event: 'e1', to: 'y' },
+        { from: 'y', event: 'e1', to: 'x' },
+      ],
+    });
+
+    expect(out.meta.reachablePaths?.x).toEqual(['e1', 'e1']);
+    expect(out.source).toContain('theorem x_reachable : steps .Init [.E1, .E1] = .to .X := rfl');
+  });
+});
+
+describe('generateLeanSpec — the declared terminal states are checked against the table', () => {
+  const SPEC: OrchestratorSpec = {
+    moduleName: 'M',
+    namespace: 'M',
+    states: ['init', 'done'],
+    events: ['go', 'timeout'],
+    unspecified: 'invalid',
+    transitions: [{ from: 'init', event: 'go', to: 'done' }],
+  };
+
+  it('T-LEAN-060 an agreeing declaration passes', () => {
+    expect(() => generateLeanSpec({ ...SPEC, terminal: ['done'] })).not.toThrow();
+  });
+
+  it('T-LEAN-061 a state declared terminal that has a way out stops generation', () => {
+    expect(() => generateLeanSpec({ ...SPEC, terminal: ['init', 'done'] })).toThrow(
+      /init is declared terminal but the table gives it a way out/,
+    );
+  });
+
+  it('T-LEAN-062 a state with no way out that was not declared stops generation', () => {
+    expect(() => generateLeanSpec({ ...SPEC, terminal: [] })).toThrow(
+      /done has no way out but is not declared terminal/,
+    );
+  });
+
+  it('T-LEAN-063 rejects an unknown terminal state', () => {
+    expect(() => generateLeanSpec({ ...SPEC, terminal: ['ghost'] })).toThrow(
+      /unknown state in terminal: ghost/,
+    );
+  });
+
+  it('T-LEAN-064 without a declaration the table is taken at its word', () => {
+    expect(() => generateLeanSpec(SPEC)).not.toThrow();
+    expect(generateLeanSpec(SPEC).meta.terminalStates).toEqual(['done']);
   });
 });
 
