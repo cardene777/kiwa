@@ -213,6 +213,56 @@ describe('a check that did not run is not a check that passed', () => {
     expect(extracted.table).toBeUndefined();
   });
 
+  it.skipIf(!HAS_LEAN)('T-EXTRACT-034 the source and Lean may print, and the table still arrives', () => {
+    // Lean and the source share stdout. Reading every line as a cell turned an
+    // `#eval` into `unreadable line from Lean`, failing a spec that was fine.
+    const noisy = generateLeanSpec(SPEC).source.replace(
+      /^end Probe$/m,
+      '#eval IO.println "a line from the source"\n#eval IO.println "another,with,commas"\n\nend Probe',
+    );
+    expect(noisy).toContain('#eval');
+
+    const { status, table } = extractLeanTable(noisy, SPEC);
+
+    expect(status).toBe('ok');
+    expect(table?.size).toBe(9);
+  });
+
+  it.skipIf(!HAS_LEAN)('T-EXTRACT-035 a table with a cell too many is not a table', () => {
+    // The count is the whole check, since names are identifiers and no two cells
+    // share a key. A source that prints a cell of its own has stopped describing
+    // the machine the spec describes.
+    const source = generateLeanSpec(SPEC).source.replace(
+      /^end Probe$/m,
+      '#eval IO.println "kiwa-lean-cell:ghost,ghost,invalid"\n\nend Probe',
+    );
+
+    const { status, diagnostics } = extractLeanTable(source, SPEC);
+
+    expect(status).toBe('extraction-failed');
+    expect(diagnostics).toContain('Lean printed 10 cells, expected 9');
+  });
+
+  it.skipIf(!HAS_LEAN)('T-EXTRACT-036 a spec whose machine the source does not hold fails', () => {
+    // The Lean file defines two states; the spec names three. The printer asks
+    // for a constructor the file has no equivalent of, and nothing is read.
+    const smaller: OrchestratorSpec = {
+      ...SPEC,
+      states: ['init', 'authed'],
+      initial: 'init',
+      terminal: [],
+      transitions: [
+        { from: 'init', event: 'auth-succeeded', to: 'authed' },
+        { from: 'authed', event: 'timeout', to: 'init' },
+      ],
+    };
+
+    const report = checkLeanTable(SPEC, { source: generateLeanSpec(smaller).source });
+
+    expect(report.ok).toBe(false);
+    expect(report.status).not.toBe('ok');
+  });
+
   it.skipIf(!HAS_LEAN)('T-EXTRACT-033 the failure carries what Lean said, not a parse complaint', () => {
     // Lean prints its errors to stdout, the same stream the table comes back on.
     // Reading that stream as a table first turns "the proof failed" into

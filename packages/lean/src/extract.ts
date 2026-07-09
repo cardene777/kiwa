@@ -32,8 +32,19 @@ const toPascalCase = (input: string): string =>
 const REJECTED = 'invalid';
 
 /**
- * A Lean program that prints one line per cell: `state,event,target`, where the
- * target is a state name or `invalid`.
+ * Marks a line of the printed table.
+ *
+ * Lean and the source under it share stdout: an `#eval`, a `dbg_trace`, a warning
+ * Lean decides to print. Reading every line as a cell turns any of those into
+ * `unreadable line from Lean`, which fails a correct spec and names the wrong
+ * problem. Reading only the marked lines leaves the count as the thing that says
+ * whether the whole table arrived.
+ */
+const CELL_PREFIX = 'kiwa-lean-cell:';
+
+/**
+ * A Lean program that prints one marked line per cell: `state,event,target`,
+ * where the target is a state name or `invalid`.
  *
  * The constructor-to-name maps are generated from the spec, as the machine's
  * names only exist there. They are not what is under test — `dispatch` is — and a
@@ -64,7 +75,7 @@ def main : IO Unit := do
       let target := match ${namespace}.dispatch s e with
         | .to next => stateName next
         | .invalid => ${JSON.stringify(REJECTED)}
-      IO.println s!"{stateName s},{eventName e},{target}"
+      IO.println s!"${CELL_PREFIX}{stateName s},{eventName e},{target}"
 `;
 }
 
@@ -124,20 +135,28 @@ export function extractLeanTable(
   }
 
   const table = new Map<string, string | null>();
-  const lines = run.stdout.split('\n').filter((line) => line.trim() !== '');
-  for (const line of lines) {
-    const [state, event, target] = line.split(',');
+  const cells = run.stdout
+    .split('\n')
+    .filter((line) => line.startsWith(CELL_PREFIX))
+    .map((line) => line.slice(CELL_PREFIX.length));
+
+  for (const cell of cells) {
+    const [state, event, target] = cell.split(',');
     if (state === undefined || event === undefined || target === undefined) {
-      return { status: 'extraction-failed', diagnostics: `unreadable line from Lean: ${line}` };
+      return { status: 'extraction-failed', diagnostics: `unreadable cell from Lean: ${cell}` };
     }
     table.set(cellKey(state, event), target === REJECTED ? null : target);
   }
 
+  // Names are identifiers, so no two cells share a key and the count is the whole
+  // check: a table missing a cell would silently agree with the spec about it.
   const expected = spec.states.length * spec.events.length;
   if (table.size !== expected) {
     return {
       status: 'extraction-failed',
-      diagnostics: `Lean printed ${table.size} cells, expected ${expected}`,
+      diagnostics:
+        `Lean printed ${table.size} cells, expected ${expected}. ` +
+        'The source does not hold the machine this spec describes.',
     };
   }
   return { status: 'ok', table };
