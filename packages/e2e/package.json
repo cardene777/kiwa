@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/e2e",
   "version": "2.0.0",
   "description": "End-to-end test adapter for kiwa (Playwright + setupE2eEnv with built-in HTTP serve helper)",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

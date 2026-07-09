@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/qwikcity",
   "version": "2.0.0",
   "description": "Qwik City routeAction$ + routeLoader$ + Endpoints test adapter for kiwa — invoke action / loader / onGet|onPost handlers with simulated RequestEvent and capture JSON / redirect / status without a running Qwik dev server (part of the kiwa test framework family)",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

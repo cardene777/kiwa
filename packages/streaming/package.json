@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/streaming",
   "version": "2.1.0",
   "description": "Streaming test adapter for kiwa — Kafka (kafkajs API 互換 producer / consumer / admin) + Redpanda (Kafka API 互換 + schema-registry client) + NATS (nats.js API 互換 + JetStream + KV / Object Store) unified mock, with 5 base semantics (producer / consumer / exactly-once / DLQ / schema-registry) + 8 advanced-semantics axes (Kafka raw protocol + consumer group + Redpanda schema evolution + transactions + NATS JetStream durable + KV/Object + cross-provider exactly-once + consumer lag telemetry) + 3 provider × 8 axis fidelity harness",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

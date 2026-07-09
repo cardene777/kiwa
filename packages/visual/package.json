@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/visual",
   "version": "2.0.0",
   "description": "Visual regression test adapter for kiwa — pixelmatch + PNG diff with baseline + actual snapshot management",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

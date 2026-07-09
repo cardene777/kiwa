@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/nuxt",
   "version": "2.0.0",
   "description": "Nuxt 3 Server Routes + route middleware + Nitro plugin lifecycle test adapter for kiwa — invoke defineEventHandler / defineNuxtRouteMiddleware / defineNitroPlugin in isolation and capture redirect / cookies / response headers / body / hook registration without a running Nitro server (part of the kiwa test framework family)",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/quality-metrics",
   "version": "2.1.0",
   "description": "Quality metrics harness for kiwa v0.6 — 13-axis release gate + drift check opt-in integration。 v0.1 baseline → v0.2 mutation gate → v0.3 tier-aware → v0.4 release-gate context → v0.5 historical trend tracking → v0.6 で evaluateReleaseGate に drift check opt-in 統合。 ReleaseGateContext に driftBaseline + driftThresholdPct + driftEnabled 追加、 drift.regressions を drift.{axis名} 形式 の ReleaseGateBlocker に 1:1 格上げ、 default off で backward compat 絶対維持 (v0.1-v0.5 API 変更 0、 driftEnabled 省略 or driftBaseline 省略 で v0.5 まで の 7 / 11 / 13 axis 動作 厳密 維持)。 shape 契約 preserving = 既存 QualityReport 構造無変更、 additive のみ、 depth-5 pattern 3 例目確定 実運用 継続 = 「絶対的 rule」 昇格 signal 到達。",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

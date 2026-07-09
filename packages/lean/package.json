@@ -2,7 +2,7 @@
   "name": "@kiwa-lab/lean",
   "version": "0.2.0",
   "description": "Lean 4 spec generator for kiwa lifecycle-orchestrator state machines — converts 5 state + 8 event + 40-cell transition SSOT to Lean 4 inductive type + total function + coverage theorem, enables formal verification-driven testing alongside runtime testing。 Reifies kiwa's systematic pattern from convention (rule 昇格) to type-level theorem",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "author": {
     "name": "cardene",
     "url": "https://github.com/cardene777"

@@ -1,16 +1,39 @@
-MIT License
+Copyright (c) 2026 cardene777. All rights reserved.
 
-Copyright (c) 2026 cardene777
+This software and associated documentation files (the "Software") are the
+proprietary and confidential property of the copyright holder. This is a
+pre-release, work-in-progress project intended for public visibility during
+active development toward an eventual open-source release.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+No permission is granted, whether express or implied, to:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  - copy, fork, modify, adapt, translate, or create derivative works of the
+    Software, in whole or in part;
+  - redistribute, sublicense, publish, or otherwise transfer the Software or
+    any derivative work to any third party;
+  - use the Software for any commercial purpose;
+  - reverse engineer, decompile, or disassemble the Software except to the
+    extent expressly permitted by applicable law notwithstanding this
+    limitation.
+
+You MAY, for the sole purpose of evaluation and personal (non-production,
+non-commercial) experimentation:
+
+  - install published npm packages under the @kiwa-lab scope as a dependency
+    of your own private, non-redistributed projects;
+  - read the source code that has been made publicly viewable on GitHub;
+  - report issues and suggest improvements through the project's public issue
+    tracker.
+
+Contributions submitted through pull requests are welcome but, if accepted,
+become the property of the copyright holder under the terms of the Developer
+Certificate of Origin (DCO); the copyright holder may relicense contributed
+material under the eventual open-source license without further notice.
+
+This license will be replaced with an OSI-approved open-source license (such
+as MIT or Apache-2.0) at general availability. Until that replacement is
+published in this repository, this "All rights reserved" license applies to
+every commit, tag, package, and derived artifact.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
