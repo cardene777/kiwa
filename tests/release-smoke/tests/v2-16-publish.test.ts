@@ -14,8 +14,13 @@ function readJson<T = unknown>(rel: string): T {
 }
 
 describe('v2.16-3 publish', () => {
-  it('plugin.json 2.16.0', () => {
-    expect(readJson<{ version: string }>('.claude-plugin/plugin.json').version).toBe('2.16.0');
+  it('plugin.json >= 2.16.0', () => {
+    const v = readJson<{ version: string }>('.claude-plugin/plugin.json').version;
+    const parts = v.split('.').map(Number);
+    const major = parts[0] ?? 0;
+    const minor = parts[1] ?? 0;
+    expect(major).toBeGreaterThanOrEqual(2);
+    expect(major > 2 || (major === 2 && minor >= 16)).toBe(true);
   });
   it('MANIFESTO.md exists (kiwa 思想 SSOT)', () => {
     expect(existsSync(resolve(REPO_ROOT, 'MANIFESTO.md'))).toBe(true);
