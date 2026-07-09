@@ -1,0 +1,116 @@
+/**
+ * Running Lean over a file in a scratch directory.
+ *
+ * Both `verifyLeanSpec` and `extractLeanTable` need the same three things: find
+ * Lean, write a file where it can be reached, run it. Written twice, the two
+ * would learn different things about the toolchain — that Lean reports on stdout,
+ * that only `lean-toolchain` pins a version — and one would forget.
+ */
+
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+
+export const DEFAULT_TIMEOUT_MS = 60_000;
+
+export interface LeanRunOptions {
+  /**
+   * Lean toolchain to pin, written to `lean-toolchain` beside the source.
+   *
+   * `elan` reads that file from the working directory and runs the version it
+   * names, downloading it first if the machine does not have it. Left unset, the
+   * machine's own Lean does the work.
+   */
+  leanToolchain?: string;
+  /** Override for the Lean executable. Default: `lean` on PATH. */
+  leanBin?: string;
+  /** Where the scratch directory is created. Default: the OS temp directory. */
+  workDir?: string;
+  /** Timeout for the Lean subprocess in ms. Default: 60_000. */
+  timeoutMs?: number;
+}
+
+/** The Lean binary, or `null` when it is not on PATH. */
+export function detectLeanBinary(explicit?: string): string | null {
+  const bin = explicit ?? 'lean';
+  try {
+    execFileSync(bin, ['--version'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    return bin;
+  } catch {
+    return null;
+  }
+}
+
+export interface LeanRun {
+  ok: boolean;
+  stdout: string;
+  stderr: string;
+  /**
+   * Whichever stream spoke, when Lean refused. Lean writes its diagnostics to
+   * stdout, so a caller reading `stderr` alone learns that something failed and
+   * nothing about what.
+   */
+  diagnostics: string;
+  /** Where the source was written. Lean's positions name this path. */
+  filePath: string;
+}
+
+/**
+ * Write `source` to a scratch file and hand it to Lean.
+ *
+ * `args` decides what Lean does with it: nothing elaborates the file, which is
+ * how a file is checked, and `--run` also executes its `main`. Lean has no
+ * `--check` flag and refuses more than one file.
+ *
+ * The scratch directory is removed before returning, so `filePath` names a file
+ * that no longer exists — it is there to rewrite the positions Lean printed.
+ */
+export function runLeanSource(
+  source: string,
+  args: readonly string[],
+  opts: LeanRunOptions = {},
+): LeanRun | 'lean-not-installed' {
+  const { leanToolchain, leanBin, workDir, timeoutMs = DEFAULT_TIMEOUT_MS } = opts;
+
+  const bin = detectLeanBinary(leanBin);
+  if (bin === null) return 'lean-not-installed';
+
+  const rootDir = mkdtempSync(join(workDir ?? tmpdir(), 'kiwa-lean-'));
+  const filePath = resolve(rootDir, 'Specs.lean');
+  try {
+    if (leanToolchain !== undefined) {
+      writeFileSync(resolve(rootDir, 'lean-toolchain'), `${leanToolchain}\n`, 'utf-8');
+    }
+    writeFileSync(filePath, source, 'utf-8');
+
+    try {
+      const stdout = execFileSync(bin, [...args, filePath], {
+        cwd: rootDir,
+        encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+        timeout: timeoutMs,
+      });
+      return { ok: true, stdout, stderr: '', diagnostics: '', filePath };
+    } catch (err) {
+      const e = err as NodeJS.ErrnoException & { stderr?: Buffer; stdout?: Buffer };
+      const stdout = e.stdout?.toString('utf-8') ?? '';
+      const stderr = e.stderr?.toString('utf-8') ?? '';
+      const spoke = [stdout, stderr].map((s) => s.trim()).filter((s) => s !== '');
+      return {
+        ok: false,
+        stdout,
+        stderr,
+        // The thrown error is what speaks when Lean was killed by the timeout.
+        diagnostics: spoke.length > 0 ? spoke.join('\n') : String(err),
+        filePath,
+      };
+    }
+  } finally {
+    try {
+      rmSync(rootDir, { recursive: true, force: true });
+    } catch {
+      // best-effort cleanup; ignore
+    }
+  }
+}

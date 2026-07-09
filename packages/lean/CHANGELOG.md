@@ -190,7 +190,31 @@ const spec: OrchestratorSpec = {
 
 `examples/dogfood-lean-orchestrator-specs-app/tests/conformance.test.ts` が本番実装 5 台 (orm / auth / cache / queue / cli-test) に対して 200 cell を突き合わせる。 今日は全 cell 一致する。 実装を 1 行変えても、 spec を 1 cell 動かしても落ちることを実測した。
 
-#### 12. 表の意味論を 1 箇所にまとめた
+#### 12. 生成器が cell を移動しても、 誰も気付かなかった
+
+3 者 (spec / TypeScript 実装 / Lean file) のうち、 `checkConformance` が結ぶのは前 2 者だ。 3 辺目は生成器を通る暗黙の辺で、 検査するものが無かった。
+
+生成器が 1 cell を誤った遷移先に render すると、 Lean file は compile し、 全定理が証明され、 表だけが違う。 定理は生成器と同じ表から導かれるので、 表が間違っていれば定理も揃って間違う。 Lean の網羅性検査が捕まえるのは cell の**欠落**であって、 **移動**ではない。
+
+実測した。 `authed + timeout` を `expired` から `authed` に移すと、 `expired_absorbing` も `authed_can_leave` も `authed_reachable` も証明され、 `verifyLeanSpec` は `ok` を返す。 この cell はどの定理にも現れない。
+
+`checkLeanTable(spec)` を追加した。 生成 Lean に `lean --run` で自分の表を出力させ、 spec と突き合わせる。
+
+```
+authed + timeout: the spec says expired, the generated Lean says authed
+```
+
+循環していない。 検査対象は `dispatch` で、 spec はそれとは独立に読む。 constructor 名の対応表は spec から生成するが、 それが誤っていれば複数 cell が一斉にずれるので隠れられない。
+
+`source` を渡せば、 手元にある Lean file が今も spec の表を持っているかを検査できる。 生成器が書いた source を渡した場合は必ず一致するので、 この関数が食い違いを報告できることは、 手を入れた source を渡す test で確かめてある。
+
+Lean が無ければ `status: 'lean-not-installed'` かつ `ok: false` を返す。 走らなかった検査は何も確立していない。
+
+#### 13. Lean の起動処理を 1 箇所にまとめた
+
+`src/lean-runner.ts` の `runLeanSource` を `verifyLeanSpec` と `extractLeanTable` の双方が使う。 2 箇所に書けば、 片方だけが「Lean は診断を stdout に書く」「版を固定するのは `lean-toolchain` だけ」 を知っている状態になる。
+
+#### 14. 表の意味論を 1 箇所にまとめた
 
 `src/table.ts` の `resolveTable` を、 生成器と突き合わせの双方が読む。 spec を 2 箇所で解釈すれば、 片方だけが `unspecified` policy を知る状態に必ず drift する。 v0.3 の初期は生成器の中に表の組み立てが埋まっており、 hook が同じ規則を `awk` で書き直していたのと同じ形だった。
 

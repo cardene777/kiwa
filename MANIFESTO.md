@@ -68,7 +68,12 @@ OrchestratorSpec (SSOT)
 
 同 SSOT を 両層で駆動、 Lean 側で 型 + 定理検証 (Level 2)、 TS 側で 実挙動 verify + fidelity harness で real driver 差分 verify。
 
-両層が同じ表を駆動していることは `checkConformance` が検査する。 spec の全 cell を実装に問い、 遷移先の食い違い / 実装が拒否 / 実装が受理 / 状態空間の外 の 4 種を報告する。 v0.3 まで、 この主張は文書にしか無く、 どちらの層を 1 cell 変えても test は全て通った。
+3 者 (spec / TypeScript 実装 / Lean file) が同じ表を駆動していることを 2 つの機構が検査する。
+
+- `checkConformance` = spec の全 cell を実装に問い、 遷移先の食い違い / 実装が拒否 / 実装が受理 / 状態空間の外 の 4 種を報告する
+- `checkLeanTable` = 生成された Lean に自分の表を出力させ、 spec と突き合わせる
+
+後者が要る理由は、 定理が生成器と同じ表から導かれるからだ。 生成器が 1 cell を誤った遷移先に render すると、 file は compile し、 全定理が証明され、 表だけが違う。 Lean の網羅性検査は cell の欠落を捕まえるが、 移動は捕まえない。 v0.3 まで、 3 辺のうち 2 辺しか結ばれていなかった。
 
 ## Non-goals (kiwa は何を目指さないか)
 
