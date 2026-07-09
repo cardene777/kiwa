@@ -28,6 +28,42 @@ interface TemplateFile {
 }
 
 /**
+ * The file that wires the hooks into the project. A rule is read and a hook is
+ * run, so without this the rules persuade and nothing enforces them.
+ */
+export const SETTINGS_TARGET = '.claude/settings.json';
+
+/**
+ * Everything `init` places under `.claude`, and the ignore file beside it.
+ *
+ * The ignore file is `gitignore` in the templates directory and `.gitignore`
+ * once placed. npm reads a `.gitignore` inside a package as a real ignore rule
+ * while building the tarball, so a template under its true name deletes its own
+ * directory from the published package.
+ *
+ * `.kaname` holds the record of the last verification, and its ignore file
+ * excludes everything beside itself. The commit gate reads that record's
+ * modification time; committed, it would reach another machine asserting a
+ * verification that never ran there.
+ */
+const FIXED_FILES: readonly TemplateFile[] = [
+  { source: 'claude/rules/spec-layers.md', target: '.claude/rules/spec-layers.md' },
+  { source: 'claude/rules/verification.md', target: '.claude/rules/verification.md' },
+  { source: 'claude/rules/dev-flow.md', target: '.claude/rules/dev-flow.md' },
+  { source: 'claude/skills/spec/SKILL.md', target: '.claude/skills/spec/SKILL.md' },
+  { source: 'claude/skills/verify/SKILL.md', target: '.claude/skills/verify/SKILL.md' },
+  { source: 'claude/settings.json', target: SETTINGS_TARGET },
+  { source: 'claude/hooks/spec-gate.sh', target: '.claude/hooks/spec-gate.sh' },
+  { source: 'claude/hooks/verify-gate.sh', target: '.claude/hooks/verify-gate.sh' },
+  { source: 'kaname/gitignore', target: '.kaname/.gitignore' },
+];
+
+/** The gate scripts, by the name a settings file would call them under. */
+const GATE_SCRIPTS: readonly string[] = FIXED_FILES.filter((f) =>
+  f.target.startsWith('.claude/hooks/'),
+).map((f) => f.target.slice(f.target.lastIndexOf('/') + 1));
+
+/**
  * Everything `init` places, given a spec directory.
  *
  * `kaname.config.json` is absent: it is generated from the resolved config
@@ -35,13 +71,38 @@ interface TemplateFile {
  * user ends up with instead of being silently dropped.
  */
 export function templateFiles(specDir: string): TemplateFile[] {
-  return [
-    { source: 'claude/rules/spec-layers.md', target: '.claude/rules/spec-layers.md' },
-    { source: 'claude/rules/verification.md', target: '.claude/rules/verification.md' },
-    { source: 'claude/rules/dev-flow.md', target: '.claude/rules/dev-flow.md' },
-    { source: 'claude/skills/spec/SKILL.md', target: '.claude/skills/spec/SKILL.md' },
-    { source: 'spec/README.md', target: `${specDir}/README.md` },
-  ];
+  return [...FIXED_FILES, { source: 'spec/README.md', target: `${specDir}/README.md` }];
+}
+
+/**
+ * Whether a settings file already runs both gates before a tool call.
+ *
+ * An existing settings file is left alone, and there are two reasons it might be
+ * there: a previous `init` wrote it, or the project has its own. Only the first
+ * has the gates in it, and telling the two apart takes reading it — the plan
+ * knows a file was skipped, not what is inside it.
+ */
+export function settingsRunGates(body: string): boolean {
+  interface Handler {
+    command?: unknown;
+  }
+  interface Entry {
+    hooks?: Handler[];
+  }
+
+  let entries: Entry[];
+  try {
+    const parsed = JSON.parse(body) as { hooks?: { PreToolUse?: Entry[] } };
+    entries = parsed.hooks?.PreToolUse ?? [];
+  } catch {
+    return false;
+  }
+  if (!Array.isArray(entries)) return false;
+
+  const commands = entries.flatMap((entry) =>
+    Array.isArray(entry.hooks) ? entry.hooks.map((handler) => String(handler.command ?? '')) : [],
+  );
+  return GATE_SCRIPTS.every((script) => commands.some((command) => command.includes(script)));
 }
 
 /** Every path `init` would write, config file first. */

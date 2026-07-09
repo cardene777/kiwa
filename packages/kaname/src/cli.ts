@@ -6,10 +6,11 @@
  * only part that reads argv, prints, and exits.
  */
 
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { ConfigError, DEFAULT_CONFIG, parseConfigFile, type KanameConfig } from './config.js';
-import { runInit, type InitEntry } from './init.js';
+import { runInit, settingsRunGates, SETTINGS_TARGET, type InitEntry } from './init.js';
 
 export const USAGE = `kaname — spec-driven development
 
@@ -22,9 +23,14 @@ Options
   --force              replace files that already exist
   -h, --help           print this message
 
-init writes kaname.config.json, three rules and one skill under .claude, and a
-readme in the spec directory. Existing files are left alone unless --force is
-given, so it is safe to run again after an upgrade.`;
+init writes kaname.config.json, rules, skills, hooks and settings under .claude,
+a readme in the spec directory, and .kaname, where /verify records its result.
+
+The hooks refuse a criterion that names no verification target, and refuse a
+commit whose specification has not been verified.
+
+Existing files are left alone unless --force is given, so it is safe to run again
+after an upgrade.`;
 
 export type Command = { kind: 'help' } | { kind: 'init'; config: KanameConfig; force: boolean };
 
@@ -76,8 +82,14 @@ export function parseArgs(argv: readonly string[]): Command {
   };
 }
 
-/** Render the outcome of an init run. Pure, so its wording is testable. */
-export function formatPlan(plan: readonly InitEntry[]): string {
+/**
+ * Render the outcome of an init run. Pure, so its wording is testable.
+ *
+ * `unwired` says the project has a settings file that runs neither gate. Whether
+ * that is so cannot be read off the plan, which knows only that a file was left
+ * alone, so the caller decides it and this function only says it.
+ */
+export function formatPlan(plan: readonly InitEntry[], unwired = false): string {
   const mark: Record<InitEntry['action'], string> = {
     created: '+',
     overwritten: '~',
@@ -99,7 +111,17 @@ export function formatPlan(plan: readonly InitEntry[]): string {
       ? 'Nothing to do. Pass --force to replace these files.'
       : 'Next: run /spec to write your first specification.';
 
-  return `${lines.join('\n')}\n\n${summary}\n${next}`;
+  // Every other file left alone is a file the user chose to keep. This one is
+  // different: it is what runs the hooks, so a project holding its own settings
+  // has the rules with nothing enforcing them, and nothing else would say so.
+  const note = `${SETTINGS_TARGET} was already there, so nothing wired the hooks into it.
+Add a "hooks" block running .claude/hooks/spec-gate.sh before Write and Edit, and
+.claude/hooks/verify-gate.sh before Bash. Until then the rules are read and not enforced.`;
+
+  const sections = [lines.join('\n'), summary];
+  if (unwired) sections.push(note);
+  sections.push(next);
+  return sections.join('\n\n');
 }
 
 /** The templates ship beside the compiled output, one level up from `dist`. */
@@ -122,17 +144,30 @@ export function main(argv: readonly string[] = process.argv.slice(2)): number {
     return 0;
   }
 
+  const projectRoot = process.cwd();
   try {
     const plan = runInit({
-      projectRoot: process.cwd(),
+      projectRoot,
       templatesRoot: templatesRoot(),
       config: command.config,
       force: command.force,
     });
-    process.stdout.write(`${formatPlan(plan)}\n`);
+    const keptSettings = plan.some(
+      (e) => e.target === SETTINGS_TARGET && e.action === 'skipped',
+    );
+    process.stdout.write(`${formatPlan(plan, keptSettings && !gatesAreWired(projectRoot))}\n`);
     return 0;
   } catch (error) {
     process.stderr.write(`kaname: ${(error as Error).message}\n`);
     return 1;
+  }
+}
+
+/** An unreadable settings file runs no gates, which is what the caller asked. */
+function gatesAreWired(projectRoot: string): boolean {
+  try {
+    return settingsRunGates(readFileSync(resolve(projectRoot, SETTINGS_TARGET), 'utf-8'));
+  } catch {
+    return false;
   }
 }

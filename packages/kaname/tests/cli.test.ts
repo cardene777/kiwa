@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ConfigError, DEFAULT_CONFIG } from '../src/config.js';
+import { SETTINGS_TARGET, type InitEntry } from '../src/init.js';
 import { USAGE, formatPlan, parseArgs } from '../src/cli.js';
 
 describe('parseArgs', () => {
@@ -123,5 +124,26 @@ describe('formatPlan', () => {
     expect(out).toContain('~ a');
     expect(out).toContain('+ b');
     expect(out).toContain('1 created, 1 overwritten');
+  });
+
+  it('T-CLI-036 an unwired settings file is called out, as nothing then runs the hooks', () => {
+    const plan: InitEntry[] = [
+      { target: 'kaname.config.json', action: 'created' },
+      { target: SETTINGS_TARGET, action: 'skipped' },
+    ];
+    const out = formatPlan(plan, true);
+    expect(out).toContain('nothing wired the hooks into it');
+    expect(out).toContain('spec-gate.sh');
+    expect(out).toContain('verify-gate.sh');
+  });
+
+  it('T-CLI-037 a settings file that already runs the gates draws no warning', () => {
+    const plan: InitEntry[] = [{ target: SETTINGS_TARGET, action: 'skipped' }];
+    expect(formatPlan(plan, false)).not.toContain('nothing wired the hooks into it');
+  });
+
+  it('T-CLI-038 a freshly written settings file draws no warning', () => {
+    const out = formatPlan([{ target: SETTINGS_TARGET, action: 'created' }]);
+    expect(out).not.toContain('nothing wired the hooks into it');
   });
 });

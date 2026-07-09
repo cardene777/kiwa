@@ -27,4 +27,12 @@ export type { LoadConfigOptions } from './config-file.js';
 export { loadConfig, loadConfigFile } from './config-file.js';
 
 export type { InitAction, InitEntry, InitOptions } from './init.js';
-export { initTargets, planInit, renderConfig, runInit, templateFiles } from './init.js';
+export {
+  SETTINGS_TARGET,
+  initTargets,
+  planInit,
+  renderConfig,
+  runInit,
+  settingsRunGates,
+  templateFiles,
+} from './init.js';
