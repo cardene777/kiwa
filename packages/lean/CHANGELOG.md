@@ -115,7 +115,21 @@ lean_lib «KiwaSpecs» where
 
 `VerifyOptions.packageName` は使われなくなったため削除した。
 
-#### 8. 版の固定を既定から外した
+#### 8. 同じ `path` を持つ 2 spec は、 先のものが黙って消えていた
+
+`verifyLeanSpec` は spec ごとに file を書いていたので、 `moduleName` が同じ 2 spec は同じ file に書かれた。 先の spec は Lean が読む前に上書きされ、 検査されないまま `verifiedFiles` に載る。 壊れた spec を先に渡し、 正しい spec を後に渡すと `ok` が返った (実測)。
+
+v0.3 は `path` の重複を拒否する。 `skip` や Lean 不在よりも先に検査する。 渡された物を検査しようがない呼出は、 この run が検査するかどうかに関わらず誤りだからだ。
+
+#### 9. Lean の起動を 1 回にまとめた
+
+`lean` は file を 1 つしか受け取らない (`Expected exactly one file name`)。 spec ごとに起動していたため、 5 spec で約 660 ms かかっていた。 生成 spec は各自の namespace を開閉し何も import しないので、 1 file に結合しても Lean が検査する内容は変わらない。 結合後は約 310 ms。
+
+namespace が重複する 2 spec は結合すると衝突し、 Lean が 2 つ目を名指しで拒否する。 これは正しい。 root module が両方を import する Lake project でも同じく衝突するからだ。
+
+診断の位置は結合 file ではなく spec の名前で述べる。 `KiwaSpecs/JobOrchestrator.lean:32:2` は呼出側が持っている言葉で、 一時 directory の path は読む頃には消えている。
+
+#### 10. 版の固定を既定から外した
 
 `verifyLeanSpec` は既定で `lean-toolchain` を書かない。 machine の Lean が検査する。 版を固定すると、 既に Lean を持っている人が同じ判定に至るためだけに 2 つ目の toolchain を download することになる。 `leanToolchain` を渡した時だけ固定する。
 
