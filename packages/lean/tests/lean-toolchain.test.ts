@@ -318,6 +318,30 @@ describe.skipIf(!HAS_LEAN)('a namespace that is a Lean keyword', () => {
     expect(report.checked).toBe(4);
   });
 
+  it('T-LEAN-173 two specs sharing a keyword namespace still collide', () => {
+    // The quoting is syntax, not scoping. Two machines called «end» are still one
+    // namespace, and Lean names the second.
+    const result = verifyLeanSpec([
+      generateLeanSpec({ ...machine('end'), moduleName: 'One' }),
+      generateLeanSpec({ ...machine('end'), moduleName: 'Two' }),
+    ]);
+
+    expect(result.status).toBe('verification-failed');
+    expect(result.diagnostics).toContain('KiwaSpecs/Two.lean');
+    expect(result.diagnostics).toMatch(/already been declared/i);
+  });
+
+  it('T-LEAN-174 different keyword namespaces coexist in one run', () => {
+    const result = verifyLeanSpec([
+      generateLeanSpec({ ...machine('end'), moduleName: 'One' }),
+      generateLeanSpec({ ...machine('def'), moduleName: 'Two' }),
+      generateLeanSpec({ ...machine('Type'), moduleName: 'Three' }),
+    ]);
+
+    expect(result.status).toBe('ok');
+    expect(result.verifiedFiles).toHaveLength(3);
+  });
+
   it('T-LEAN-172 a keyword namespace still catches a missing cell', () => {
     // The escaping must not cost the checking.
     const source = generateLeanSpec(machine('end'))
