@@ -72,7 +72,7 @@ OrchestratorSpec (SSOT)
     └─► TypeScript impl → vitest runtime testing
 ```
 
-同 SSOT (5 state / 8 event / 40 セル) を 両層で駆動、 Lean 側で網羅性 (catch-all 不在の match) と定理 (`<state>_absorbing` / `<state>_has_exit`) を検査、 TS 側で 実行時挙動 verify。
+同 SSOT (5 state / 8 event / 40 セル) を 両層で駆動、 Lean 側で網羅性 (catch-all 不在の match) と定理 (`<state>_absorbing` / `<state>_can_leave` / `<state>_no_escape` / `<state>_reachable`) を検査、 TS 側で 実行時挙動 verify。
 
 ## v2.15 milestone signal
 

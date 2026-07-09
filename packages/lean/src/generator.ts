@@ -40,12 +40,13 @@ const MAX_REPORTED_CELLS = 8;
  * theorem aborted_absorbing : ∀ e, dispatch .Aborted e = .invalid := by
  *   intro e; cases e <;> rfl
  *
- * theorem beginning_has_exit : ∃ e s, dispatch .Beginning e = .to s :=
- *   ⟨.BeginCompleted, .Active, rfl⟩
+ * theorem beginning_can_leave : ∃ e, escapes .Beginning e = true :=
+ *   ⟨.BeginCompleted, rfl⟩
  * ```
  *
- * The theorems say something a reader could otherwise get wrong: which states are
- * terminal, and which have a way out. Their proofs are mechanical because the
+ * The theorems say things a reader could otherwise get wrong: which states are
+ * terminal, which can actually be left, which accept events and go nowhere, and
+ * which paths reach which states. Their proofs are mechanical because the
  * generator already knows the table, and they fail to compile if it is misread.
  */
 export function generateLeanSpec(spec: OrchestratorSpec): LeanSpecOutput {
