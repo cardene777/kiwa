@@ -31,12 +31,24 @@ export interface LeanRunOptions {
   timeoutMs?: number;
 }
 
-/** The Lean binary, or `null` when it is not on PATH. */
+/**
+ * The Lean binary, or `null` when it is not there.
+ *
+ * A program that exits zero for `--version` is not thereby Lean. `/bin/echo`
+ * does, and pointing `leanBin` at it made every spec verify — the worst shape a
+ * pass can take, since nothing looked at anything. Lean says who it is:
+ *
+ *   Lean (version 4.15.0, arm64-apple-darwin23.6.0, commit ..., Release)
+ */
 export function detectLeanBinary(explicit?: string): string | null {
   const bin = explicit ?? 'lean';
   try {
-    execFileSync(bin, ['--version'], { stdio: ['ignore', 'pipe', 'pipe'] });
-    return bin;
+    const version = execFileSync(bin, ['--version'], {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 10_000,
+    });
+    return /^Lean \(version /.test(version.trim()) ? bin : null;
   } catch {
     return null;
   }
@@ -44,6 +56,15 @@ export function detectLeanBinary(explicit?: string): string | null {
 
 export interface LeanRun {
   ok: boolean;
+  /**
+   * Lean was still working when `timeoutMs` ran out.
+   *
+   * A timeout is not a verdict. Reporting it as a failure says the spec is wrong
+   * when nothing has been established about the spec at all, and on a large
+   * machine — Lean's cost grows with the number of states, since each one carries
+   * a theorem — that is the failure a caller meets first.
+   */
+  timedOut: boolean;
   stdout: string;
   stderr: string;
   /**
@@ -91,18 +112,30 @@ export function runLeanSource(
         stdio: ['ignore', 'pipe', 'pipe'],
         timeout: timeoutMs,
       });
-      return { ok: true, stdout, stderr: '', diagnostics: '', filePath };
+      return { ok: true, timedOut: false, stdout, stderr: '', diagnostics: '', filePath };
     } catch (err) {
-      const e = err as NodeJS.ErrnoException & { stderr?: Buffer; stdout?: Buffer };
+      const e = err as NodeJS.ErrnoException & {
+        stderr?: Buffer;
+        stdout?: Buffer;
+        signal?: string;
+      };
       const stdout = e.stdout?.toString('utf-8') ?? '';
       const stderr = e.stderr?.toString('utf-8') ?? '';
+      // Node kills the child on timeout, so `code` is ETIMEDOUT or the signal is
+      // the one it sent. Either way Lean never said anything about the spec.
+      const timedOut = e.code === 'ETIMEDOUT' || e.signal === 'SIGTERM';
       const spoke = [stdout, stderr].map((s) => s.trim()).filter((s) => s !== '');
       return {
         ok: false,
+        timedOut,
         stdout,
         stderr,
-        // The thrown error is what speaks when Lean was killed by the timeout.
-        diagnostics: spoke.length > 0 ? spoke.join('\n') : String(err),
+        diagnostics: timedOut
+          ? `Lean did not finish within ${timeoutMs}ms. Raise timeoutMs, or split the machine: ` +
+            'Lean elaborates a theorem per state, so its cost grows with the state count.'
+          : spoke.length > 0
+            ? spoke.join('\n')
+            : String(err),
         filePath,
       };
     }

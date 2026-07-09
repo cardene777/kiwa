@@ -7,7 +7,9 @@
  * it here.
  */
 
+import { SpecError } from './errors.js';
 import { isInvalid, type OrchestratorSpec, type Transition } from './types.js';
+import { validateSpec } from './validate.js';
 
 /** `null` marks a rejected cell; a string is the target state. */
 export type Table = ReadonlyMap<string, string | null>;
@@ -17,13 +19,6 @@ export const cellKey = (state: string, event: string): string => `${state}::${ev
 /** How many undeclared cells to name before saying "and N more". */
 const MAX_REPORTED_CELLS = 8;
 
-export class SpecError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'SpecError';
-  }
-}
-
 /**
  * Read the table a spec declares, applying its `unspecified` policy.
  *
@@ -32,10 +27,8 @@ export class SpecError extends Error {
  * the same reasons and the reader wants to know which one is speaking.
  */
 export function resolveTable(spec: OrchestratorSpec, origin: string): Table {
+  validateSpec(spec, origin);
   const { states, events, transitions, unspecified = 'error' } = spec;
-
-  if (states.length === 0) throw new SpecError(`${origin}: at least one state is required`);
-  if (events.length === 0) throw new SpecError(`${origin}: at least one event is required`);
 
   const table = declared(states, events, transitions, origin);
   const undeclared = findUndeclared(states, events, table);
