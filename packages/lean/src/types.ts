@@ -66,6 +66,24 @@ export interface OrchestratorSpec {
   transitions: readonly Transition[];
   /** How to treat cells the table never mentions. Default: `error`. */
   unspecified?: UnspecifiedPolicy;
+  /**
+   * The state the machine starts in.
+   *
+   * Naming it turns on reachability. Every other state gets a theorem carrying a
+   * path of events from here to there, which Lean checks. A state with no such
+   * path cannot be given one, so generation stops and names it: a state nothing
+   * can reach is a state that exists only in the type.
+   */
+  initial?: string;
+  /**
+   * The states the author believes are terminal.
+   *
+   * Naming them checks the belief against the table. A state listed here that
+   * has a way out, or a state left out that has none, stops generation. Both are
+   * disagreements between what the author meant and what the table says, and the
+   * table is not always the one that is wrong.
+   */
+  terminal?: readonly string[];
 }
 
 export interface LeanSpecOutput {
@@ -82,5 +100,17 @@ export interface LeanSpecOutput {
     invalidTransitionCount: number;
     /** States from which no event leads anywhere. Each gets an absorbing theorem. */
     terminalStates: readonly string[];
+    /**
+     * States that accept events and never leave, because every valid cell loops
+     * back to themselves. Not terminal, and not escapable: a machine that enters
+     * one stays there while still answering events. Each gets a `no_escape`
+     * theorem, and each is worth a second look at the table.
+     */
+    sinkStates: readonly string[];
+    /**
+     * A shortest path of events from `initial` to each other state, present only
+     * when `initial` was given. Each becomes a reachability theorem.
+     */
+    reachablePaths?: Readonly<Record<string, readonly string[]>>;
   };
 }

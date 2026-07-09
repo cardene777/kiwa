@@ -4,6 +4,13 @@ import type { OrchestratorSpec } from '@kiwa-lab/lean';
 // `unspecified: "invalid"` says so once, for the whole table, rather than
 // repeating 26 rejections per spec. Without it the generator refuses to run:
 // a cell nobody mentioned is a cell nobody decided about.
+//
+// `initial` turns on reachability: every state gets a theorem carrying a path of
+// events that reaches it, and a state nothing can reach stops generation.
+// `terminal` states what the author believes, and the generator checks it against
+// the table. Note what is *not* listed as terminal: `dlq` accepts
+// `dlq-inspected` and stays put, so it is a sink rather than a terminal state,
+// and it gets a `no_escape` theorem instead.
 
 export const TRANSACTION_SPEC: OrchestratorSpec = {
   moduleName: 'TransactionOrchestrator',
@@ -20,6 +27,8 @@ export const TRANSACTION_SPEC: OrchestratorSpec = {
     'timeout',
   ],
   unspecified: 'invalid',
+  initial: 'beginning',
+  terminal: ['aborted'],
   transitions: [
     { from: 'beginning', event: 'begin-completed', to: 'active' },
     { from: 'beginning', event: 'rollback-requested', to: 'aborted' },
@@ -53,6 +62,8 @@ export const SESSION_SPEC: OrchestratorSpec = {
     'timeout',
   ],
   unspecified: 'invalid',
+  initial: 'init',
+  terminal: ['revoked'],
   transitions: [
     { from: 'init', event: 'auth-succeeded', to: 'authed' },
     { from: 'init', event: 'auth-failed', to: 'init' },
@@ -84,6 +95,8 @@ export const CACHE_SPEC: OrchestratorSpec = {
     'timeout',
   ],
   unspecified: 'invalid',
+  initial: 'filling',
+  terminal: ['evicted'],
   transitions: [
     { from: 'filling', event: 'write-committed', to: 'hot' },
     { from: 'filling', event: 'timeout', to: 'evicted' },
@@ -118,6 +131,8 @@ export const JOB_SPEC: OrchestratorSpec = {
     'timeout',
   ],
   unspecified: 'invalid',
+  initial: 'queued',
+  terminal: ['completed'],
   transitions: [
     { from: 'queued', event: 'enqueue-succeeded', to: 'queued' },
     { from: 'queued', event: 'process-started', to: 'processing' },
@@ -147,6 +162,8 @@ export const CLI_SPEC: OrchestratorSpec = {
     'timeout',
   ],
   unspecified: 'invalid',
+  initial: 'spawning',
+  terminal: ['cleaned'],
   transitions: [
     { from: 'spawning', event: 'spawn-succeeded', to: 'running' },
     { from: 'spawning', event: 'timeout', to: 'exited' },

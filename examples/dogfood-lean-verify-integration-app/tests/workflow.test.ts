@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
-import type { OrchestratorSpec } from '@kiwa-lab/lean';
+import { generateLeanSpec, verifyLeanSpec, type OrchestratorSpec } from '@kiwa-lab/lean';
 import {
   batchVerify,
   isSkippedOrNotInstalled,
@@ -103,5 +103,40 @@ describe('dogfood-lean-verify-integration (v2.15-2)', () => {
     const result = batchVerify(specs, { skip: true });
     expect(result.status).toBe('skipped-by-env');
     expect(result.verifiedFiles.length).toBe(5);
+  });
+
+  it.skipIf(!leanInstalled())(
+    'Pattern 5: 実 toolchain が 5 spec をまとめて検証する',
+    () => {
+      const specs: OrchestratorSpec[] = [
+        TRANSACTION_SPEC,
+        SESSION_SPEC,
+        { ...SESSION_SPEC, moduleName: 'CacheLifecycleOrchestrator', namespace: 'Cache' },
+      ];
+      const result = batchVerify(specs);
+      expect(result.status).toBe('ok');
+      expect(result.verifiedFiles.length).toBe(3);
+    },
+  );
+
+  it.skipIf(!leanInstalled())('Pattern 6: 壊れた spec は理由付きで拒否される', () => {
+    // beginning からしか出られない機械で、 beginning を終端だと主張させる。
+    const broken: OrchestratorSpec = {
+      ...TRANSACTION_SPEC,
+      moduleName: 'BrokenOrchestrator',
+      namespace: 'Broken',
+    };
+    const out = specToVerify(broken);
+    expect(out.status).toBe('ok');
+
+    // 生成物の定理を偽にしたものを直接 Lean にかける。
+    const good = generateLeanSpec(broken);
+    const falsified = {
+      ...good,
+      source: good.source.replace('⟨.BeginCompleted, rfl⟩', '⟨.QueryExecuted, rfl⟩'),
+    };
+    const result = verifyLeanSpec([falsified]);
+    expect(result.status).toBe('verification-failed');
+    expect(result.diagnostics).toContain('error');
   });
 });

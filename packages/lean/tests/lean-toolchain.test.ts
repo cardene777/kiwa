@@ -52,6 +52,7 @@ const PROBE_META = {
   validTransitionCount: 0,
   invalidTransitionCount: 0,
   terminalStates: [],
+  sinkStates: [],
 };
 
 /** Feed Lean a source string directly, bypassing the spec type. */
@@ -127,12 +128,13 @@ describe.skipIf(!HAS_LEAN)('Lean rejects what the theorems forbid', () => {
     expect(diagnostics).toContain('Step.invalid');
   });
 
-  it('T-LEAN-112 a falsified has-exit witness fails to prove', () => {
+  it('T-LEAN-112 a falsified can-leave witness fails to prove', () => {
+    // `authed + auth-succeeded` is rejected, so it escapes nowhere.
     const source = generateLeanSpec(SESSION).source.replace(
-      '⟨.AuthSucceeded, .Authed, rfl⟩',
-      '⟨.AuthSucceeded, .Expired, rfl⟩',
+      'theorem authed_can_leave : ∃ e, escapes .Authed e = true :=\n  ⟨.SessionExpired, rfl⟩',
+      'theorem authed_can_leave : ∃ e, escapes .Authed e = true :=\n  ⟨.AuthSucceeded, rfl⟩',
     );
-    expect(source).toContain('⟨.AuthSucceeded, .Expired, rfl⟩');
+    expect(source).toContain('⟨.AuthSucceeded, rfl⟩');
 
     const { ok } = checkSource(source);
 
@@ -160,6 +162,102 @@ theorem dispatch_total (s : State) (e : Event) : ∃ s', dispatch s e = s' := by
 end Vacuous
 `;
     expect(checkSource(vacuous).ok).toBe(true);
+  });
+});
+
+describe.skipIf(!HAS_LEAN)('Lean checks the sink theorems', () => {
+  const JOB: OrchestratorSpec = {
+    moduleName: 'JobOrchestrator',
+    namespace: 'Job',
+    states: ['queued', 'dlq', 'completed'],
+    events: ['start', 'succeed', 'inspect', 'timeout'],
+    unspecified: 'invalid',
+    transitions: [
+      { from: 'queued', event: 'start', to: 'queued' },
+      { from: 'queued', event: 'succeed', to: 'completed' },
+      { from: 'queued', event: 'timeout', to: 'dlq' },
+      { from: 'dlq', event: 'inspect', to: 'dlq' },
+    ],
+  };
+
+  it('T-LEAN-140 a spec with a sink verifies', () => {
+    const out = generateLeanSpec(JOB);
+    expect(out.meta.sinkStates).toEqual(['dlq']);
+    expect(verifyLeanSpec([out]).status).toBe('ok');
+  });
+
+  it('T-LEAN-141 claiming a sink can leave fails to prove', () => {
+    const source = generateLeanSpec(JOB).source.replace(
+      'theorem dlq_no_escape : ∀ e, escapes .Dlq e = false := by\n  intro e; cases e <;> rfl',
+      'theorem dlq_can_leave : ∃ e, escapes .Dlq e = true :=\n  ⟨.Inspect, rfl⟩',
+    );
+    expect(source).toContain('dlq_can_leave');
+
+    const { ok, diagnostics } = checkSource(source);
+
+    expect(ok).toBe(false);
+    expect(diagnostics).toContain('type mismatch');
+  });
+
+  it('T-LEAN-142 claiming an escapable state is a sink fails to prove', () => {
+    const source = generateLeanSpec(JOB).source.replace(
+      /theorem queued_can_leave[\s\S]*?\n\n/,
+      'theorem queued_no_escape : ∀ e, escapes .Queued e = false := by\n  intro e; cases e <;> rfl\n\n',
+    );
+    expect(source).toContain('queued_no_escape');
+
+    const { ok, diagnostics } = checkSource(source);
+
+    expect(ok).toBe(false);
+    expect(diagnostics).toContain("tactic 'rfl' failed");
+  });
+
+  it('T-LEAN-143 a self-loop does not escape, and Lean computes that', () => {
+    const source = `${generateLeanSpec(JOB).source.replace(/\nend Job\n$/, '')}
+theorem self_loop_does_not_escape : escapes .Queued .Start = false := rfl
+theorem real_move_escapes : escapes .Queued .Succeed = true := rfl
+
+end Job
+`;
+    expect(checkSource(source).ok).toBe(true);
+  });
+});
+
+describe.skipIf(!HAS_LEAN)('Lean checks the reachability witnesses', () => {
+  const REACHABLE: OrchestratorSpec = {
+    ...SESSION,
+    moduleName: 'ReachableOrchestrator',
+    namespace: 'Reachable',
+    initial: 'init',
+  };
+
+  it('T-LEAN-130 a spec with reachability theorems verifies', () => {
+    const out = generateLeanSpec(REACHABLE);
+    expect(out.source).toContain('_reachable');
+    expect(verifyLeanSpec([out]).status).toBe('ok');
+  });
+
+  it('T-LEAN-131 a witness path that does not lead there fails to prove', () => {
+    // `authed` is reached by AuthSucceeded. Claim Timeout gets there instead.
+    const source = generateLeanSpec(REACHABLE).source.replace(
+      'theorem authed_reachable : steps .Init [.AuthSucceeded] = .to .Authed := rfl',
+      'theorem authed_reachable : steps .Init [.Timeout] = .to .Authed := rfl',
+    );
+    expect(source).toContain('steps .Init [.Timeout] = .to .Authed');
+
+    const { ok, diagnostics } = checkSource(source);
+
+    expect(ok).toBe(false);
+    expect(diagnostics).toContain('error');
+  });
+
+  it('T-LEAN-132 a path through a rejected cell fails to prove', () => {
+    // SessionExpired is rejected in Init, so no path may start with it.
+    const source = generateLeanSpec(REACHABLE).source.replace(
+      'theorem authed_reachable : steps .Init [.AuthSucceeded] = .to .Authed := rfl',
+      'theorem authed_reachable : steps .Init [.SessionExpired, .AuthSucceeded] = .to .Authed := rfl',
+    );
+    expect(checkSource(source).ok).toBe(false);
   });
 });
 

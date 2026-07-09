@@ -21,6 +21,8 @@ const spec = {
   states: ['init', 'authed', 'expired'],
   events: ['auth-succeeded', 'session-expired', 'timeout'],
   unspecified: 'invalid',
+  initial: 'init',
+  terminal: ['expired'],
   transitions: [
     { from: 'init', event: 'auth-succeeded', to: 'authed' },
     { from: 'init', event: 'timeout', to: 'expired' },
@@ -77,10 +79,45 @@ compile when the table contradicts them:
 theorem expired_absorbing : ∀ e, dispatch .Expired e = .invalid := by
   intro e; cases e <;> rfl
 
-/-- init has at least one way out. -/
-theorem init_has_exit : ∃ e s, dispatch .Init e = .to s :=
-  ⟨.AuthSucceeded, .Authed, rfl⟩
+/-- init can leave, and this event does it. -/
+theorem init_can_leave : ∃ e, escapes .Init e = true :=
+  ⟨.AuthSucceeded, rfl⟩
 ```
+
+## A sink is not a terminal state
+
+A state whose only accepted events loop back to itself is not terminal — it
+answers events — and nothing ever leaves it. A job that reaches `dlq` and accepts
+`dlq-inspected` stays in `dlq` forever.
+
+Asking merely whether a state has a valid event would call that a way out. So the
+generated `escapes` asks whether an event moves the machine somewhere *else*, and
+a sink gets the theorem that says nothing does:
+
+```lean
+theorem dlq_no_escape : ∀ e, escapes .Dlq e = false := by
+  intro e; cases e <;> rfl
+```
+
+`meta.sinkStates` lists them, because a sink is usually either intended and worth
+naming, or an accident worth fixing.
+
+## Reachability, when you name the initial state
+
+Pass `initial` and every other state gets a theorem carrying a shortest path of
+events that reaches it, which Lean checks by computation:
+
+```lean
+theorem authed_reachable : steps .Init [.AuthSucceeded] = .to .Authed := rfl
+```
+
+A state with no such path cannot be given one. Generation stops and names it: a
+state nothing reaches exists only in the type.
+
+Pass `terminal` to state which states you believe are terminal, and the generator
+checks the belief against the table. Declaring one that has a way out, or leaving
+out one that has none, stops generation. Both mean the table and the author
+disagree, and the table is not always the one that is wrong.
 
 ## Verification is optional, and a skip is never a pass
 
@@ -106,7 +143,7 @@ elan toolchain install leanprover/lean4:v4.15.0
 
 | Export | Purpose |
 |---|---|
-| `generateLeanSpec(spec)` | table → Lean 4 source, plus `meta` (cell counts, terminal states) |
+| `generateLeanSpec(spec)` | table → Lean 4 source, plus `meta` (cell counts, terminal states, sinks, reachability paths) |
 | `generateLakeProject(config)` | a minimal Lake package to hold generated specs |
 | `verifyLeanSpec(specs, opts?)` | run Lean over generated specs |
 | `isInvalid(transition)` | narrow a `Transition` to its rejecting form |

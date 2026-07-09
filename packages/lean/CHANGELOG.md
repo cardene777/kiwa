@@ -45,7 +45,43 @@ State.Active, Event.Timeout
 
 #### 3. 定理は表から導ける、 反証可能なものだけになった
 
-終端状態には `<state>_absorbing` (どの event でも `invalid`)、 非終端状態には `<state>_has_exit` (少なくとも 1 つ出口があり、 証人は生成器が知っている) を出す。 表と矛盾すれば証明が通らない。
+4 種を出す。 いずれも表と矛盾すれば証明が通らない。
+
+| 定理 | 対象 | 述べていること |
+|---|---|---|
+| `<state>_absorbing` | 終端状態 | どの event も `invalid` |
+| `<state>_can_leave` | 出ていける状態 | 別の状態へ動かす event がある (証人付き) |
+| `<state>_no_escape` | sink | event を受理するが、 どれも外へ出さない |
+| `<state>_reachable` | `initial` を与えた場合 | 初期状態からの最短経路 (証人付き) |
+
+#### 3-a. sink は終端ではない
+
+自己遷移しか持たない状態は event を受理するので終端ではない。 だが二度と出られない。 「有効な event が 1 つでもあるか」 を出口の条件にすると、 この状態を「出口がある」 と報告してしまう。 実際に `JOB_SPEC` の `dlq` がこれに当たる。 `dlq-inspected` を受理して `dlq` に留まるので、 job は永遠に `dlq` にいる。
+
+そこで `escapes` を生成し、 「別の状態へ動かすか」 を問う。
+
+```lean
+def escapes (s : State) (e : Event) : Bool :=
+  match dispatch s e with
+  | .to s' => !(decide (s' = s))
+  | .invalid => false
+```
+
+`meta.sinkStates` に列挙する。 sink は意図されたものか事故かのどちらかで、 どちらであれ名前を付ける価値がある。
+
+#### 3-b. 到達可能性 (`initial` を与えた場合)
+
+`initial` を与えると、 他の全状態への最短経路を幅優先で求め、 経路を証人とする定理を出す。
+
+```lean
+theorem authed_reachable : steps .Init [.AuthSucceeded] = .to .Authed := rfl
+```
+
+経路を持たない状態には定理を書けない。 生成が停止し、 その状態名を挙げる。 何も到達できない状態は、 型の中にしか存在しない。
+
+#### 3-c. `terminal` は著者の主張であり、 表と突き合わせる
+
+終端だと宣言した状態に出口がある場合と、 出口のない状態を宣言し忘れた場合の双方で停止する。 どちらも著者の意図と表の食い違いで、 常に表が正しいとは限らない。
 
 #### 4. `lean --check` は存在しない引数だった
 
@@ -81,6 +117,28 @@ const spec: OrchestratorSpec = {
 
 生成された `dispatch` の戻り値が `State` から `Step` になったため、 Lean 側で `dispatch` を使う証明は `.to s` / `.invalid` で分岐する必要がある。
 
+`initial` と `terminal` は任意で、 与えなければ従来通り動く。 与えると到達可能性と終端の突き合わせが有効になる。
+
+```ts
+const spec: OrchestratorSpec = {
+  ...,
+  initial: 'queued',
+  terminal: ['completed'],
+};
+```
+
 ### 検証
 
-Lean 4.15.0 を実際に install して実行した。 生成 spec が elaborate に成功すること、 cell を 1 つ削ると `missing cases` で落ちること、 `absorbing` 定理を偽にすると `rfl` が失敗すること、 削除した `dispatch_total` が遷移ゼロの表でも通ることを、 それぞれ test で固定した (`tests/lean-toolchain.test.ts`)。 toolchain が無い環境では skip され、 skip は pass として報告されない。
+Lean 4.15.0 を実際に install して実行した。 以下を test で固定した (`tests/lean-toolchain.test.ts`)。
+
+- 生成 spec が elaborate に成功する
+- cell を 1 つ削ると `missing cases` で落ち、 Lean が cell 名を挙げる
+- `absorbing` 定理を偽にすると `rfl` が失敗する
+- sink に `can_leave` を主張すると型が合わない
+- 出ていける状態に `no_escape` を主張すると `rfl` が失敗する
+- 到達経路の証人を誤らせると証明が通らない
+- 削除した `dispatch_total` は遷移ゼロの表でも通る
+
+実食 app の 5 台 (transaction / session / cache / job / cli) は全状態が初期状態から到達可能で、 実 toolchain の検証を通る。 `job` の `dlq` だけが sink として検出される。
+
+toolchain が無い環境では skip され、 skip は pass として報告されない。
