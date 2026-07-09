@@ -243,6 +243,36 @@ describe('generateLeanSpec — a sink accepts events and never leaves', () => {
     expect(witness).toContain('ProcessStarted');
     expect(witness).not.toContain('EnqueueSucceeded');
   });
+
+  it('T-LEAN-074 an initial state that is a sink reaches nothing, and generation says so', () => {
+    expect(() =>
+      generateLeanSpec({
+        moduleName: 'M',
+        namespace: 'M',
+        states: ['idle', 'other'],
+        events: ['ping'],
+        unspecified: 'invalid',
+        initial: 'idle',
+        transitions: [{ from: 'idle', event: 'ping', to: 'idle' }],
+      }),
+    ).toThrow(/1 state\(s\) cannot be reached from "idle"/);
+  });
+
+  it('T-LEAN-075 a one-state machine that loops on itself is a sink with nothing to reach', () => {
+    const out = generateLeanSpec({
+      moduleName: 'Solo',
+      namespace: 'Solo',
+      states: ['idle'],
+      events: ['ping'],
+      unspecified: 'invalid',
+      initial: 'idle',
+      transitions: [{ from: 'idle', event: 'ping', to: 'idle' }],
+    });
+    expect(out.meta.sinkStates).toEqual(['idle']);
+    expect(out.meta.reachablePaths).toEqual({});
+    expect(out.source).toContain('theorem idle_no_escape');
+    expect(out.source).not.toContain('_reachable');
+  });
 });
 
 describe('generateLeanSpec — an undeclared cell is a cell nobody decided about', () => {
