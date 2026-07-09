@@ -1,5 +1,5 @@
 /**
- * @kiwa-lab/spec-kit v0.1 = spec-driven development toolkit for kiwa's
+ * @kiwa-lab/kaname v0.1 = spec-driven development toolkit for kiwa's
  * 3-layer specification model.
  *
  * The core idea: every specification item lives in exactly ONE of three layers.

@@ -14,25 +14,30 @@ function readJson<T = unknown>(rel: string): T {
 }
 
 describe('v2.17 publish', () => {
-  it('plugin.json 2.17.0', () => {
-    expect(readJson<{ version: string }>('.claude-plugin/plugin.json').version).toBe('2.17.0');
+  it('plugin.json >= 2.17.0', () => {
+    const v = readJson<{ version: string }>('.claude-plugin/plugin.json').version;
+    const parts = v.split('.').map(Number);
+    const major = parts[0] ?? 0;
+    const minor = parts[1] ?? 0;
+    expect(major).toBeGreaterThanOrEqual(2);
+    expect(major > 2 || (major === 2 && minor >= 17)).toBe(true);
   });
-  it('/spec-kit skill SKILL.md exists', () => {
-    expect(existsSync(resolve(REPO_ROOT, '.claude/skills/spec-kit/SKILL.md'))).toBe(true);
+  it('/kaname skill SKILL.md exists', () => {
+    expect(existsSync(resolve(REPO_ROOT, '.claude/skills/kaname/SKILL.md'))).toBe(true);
   });
   it('SKILL.md declares user_invocable + 5 段階 dialog flow', () => {
-    const src = readText('.claude/skills/spec-kit/SKILL.md');
+    const src = readText('.claude/skills/kaname/SKILL.md');
     expect(src).toContain('user_invocable: true');
     expect(src).toContain('5 段階 dialog flow SSOT');
     expect(src).toContain('3 layer specification model');
   });
-  it('spec-kit-run.sh helper script exists + executable', () => {
-    const script = '.claude/skills/spec-kit/scripts/spec-kit-run.sh';
+  it('kaname-run.sh helper script exists + executable', () => {
+    const script = '.claude/skills/kaname/scripts/kaname-run.sh';
     expect(existsSync(resolve(REPO_ROOT, script))).toBe(true);
     const src = readText(script);
     expect(src).toContain('classify');
     expect(src).toContain('splitSpec');
-    expect(src).toContain('packages/spec-kit/dist/index.cjs');
+    expect(src).toContain('packages/kaname/dist/index.cjs');
   });
   it('announcement v2.17 exists', () => {
     expect(
@@ -42,7 +47,7 @@ describe('v2.17 publish', () => {
   it('migration v2.16-to-v2.17 exists', () => {
     expect(existsSync(resolve(REPO_ROOT, 'docs/migrations/v2.16-to-v2.17.md'))).toBe(true);
   });
-  it('concept spec-kit-skill exists', () => {
-    expect(existsSync(resolve(REPO_ROOT, 'docs/concepts/spec-kit-skill.md'))).toBe(true);
+  it('concept kaname-skill exists', () => {
+    expect(existsSync(resolve(REPO_ROOT, 'docs/concepts/kaname-skill.md'))).toBe(true);
   });
 });

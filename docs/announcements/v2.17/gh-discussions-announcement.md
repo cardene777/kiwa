@@ -9,3 +9,5 @@ pnpm add -D @kiwa-lab/spec-kit @kiwa-lab/lean
 ```
 
 [Migration v2.16 → v2.17](https://cardene777.github.io/kiwa/migrations/v2.16-to-v2.17)
+
+> **Note** — This package was renamed to `@kiwa-lab/kaname` in v2.19 to avoid the name collision with `github/spec-kit`.

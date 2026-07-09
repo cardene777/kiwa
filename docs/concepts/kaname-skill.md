@@ -1,20 +1,20 @@
 ---
-title: "/spec-kit skill — kiwa plugin 経由 dialog flow SSOT"
+title: "/kaname skill — kiwa plugin 経由 dialog flow SSOT"
 ---
 
-# /spec-kit skill — kiwa plugin 経由 dialog flow SSOT
+# /kaname skill — kiwa plugin 経由 dialog flow SSOT
 
 ## What this covers
 
-v2.17 で kiwa plugin (`.claude/skills/spec-kit/`) に `/spec-kit` Claude Code skill 追加。 v2.16 の `@kiwa-lab/spec-kit` npm package (programmable API) と 対で、 dialog 経由の 対話的仕様生成入口を完成。 3 軸融合 (testing + 形式検証 + 仕様駆動開発) の 実運用経路。
+v2.17 で kiwa plugin (`.claude/skills/kaname/`) に `/kaname` Claude Code skill 追加。 v2.16 の `@kiwa-lab/kaname` npm package (programmable API) と 対で、 dialog 経由の 対話的仕様生成入口を完成。 3 軸融合 (testing + 形式検証 + 仕様駆動開発) の 実運用経路。
 
 ## 配布経路 SSOT
 
 | 配布物 | 配布経路 | 用途 |
 |---|---|---|
-| `@kiwa-lab/spec-kit` npm package | `pnpm add -D @kiwa-lab/spec-kit` | programmable API (script / CI) |
-| `/spec-kit` skill | kiwa plugin marketplace (`.claude/skills/`) | dialog flow (Claude Code Interactive) |
-| helper script | kiwa repo 内 (`.claude/skills/spec-kit/scripts/`) | skill 内部呼出 |
+| `@kiwa-lab/kaname` npm package | `pnpm add -D @kiwa-lab/kaname` | programmable API (script / CI) |
+| `/kaname` skill | kiwa plugin marketplace (`.claude/skills/`) | dialog flow (Claude Code Interactive) |
+| helper script | kiwa repo 内 (`.claude/skills/kaname/scripts/`) | skill 内部呼出 |
 
 **判断 pivot** = v2.16 で npm publish のみだったが、 skill は npm でなく kiwa GitHub 内定義が 自然。 skill は Claude Code plugin marketplace 経路で 配布、 npm package と 役割分担明確化。
 
@@ -38,7 +38,7 @@ skill 側で keyword 判定 hint 提供 (最終選択は user)。
 
 ### Step 4 = classify + splitSpec
 
-`spec-kit-run.sh` helper script 呼出 → `@kiwa-lab/spec-kit` の `classify()` + `splitSpec()` 経路。 5 rule 検査 pass 後、 `specFormal.md` + `specRuntime.md` + `classify-report.json` を Write。
+`kaname-run.sh` helper script 呼出 → `@kiwa-lab/kaname` の `classify()` + `splitSpec()` 経路。 5 rule 検査 pass 後、 `specFormal.md` + `specRuntime.md` + `classify-report.json` を Write。
 
 ### Step 5 = Lean verify (formal item のみ)
 
@@ -69,15 +69,15 @@ skill 起動時に MANIFESTO.md § 3 layer specification model を参照、 以�
 
 ## 統合経路
 
-- **上流** = `/spec` (自由記述 AC 収集) → `/spec-kit` (3 layer 分類 + 構造化)
+- **上流** = `/spec` (自由記述 AC 収集) → `/kaname` (3 layer 分類 + 構造化)
 - **下流** = `specFormal.md` → `@kiwa-lab/lean` で verify、 `specRuntime.md` → `/kiwa-*` skill 群で test 実装、 human items → PR review
 
 ## 引数仕様
 
 ```text
-/spec-kit --feature {kebab-case-name}         # feature 名指定
-/spec-kit --feature {name} --skip-lean-verify # Lean verify 省略
-/spec-kit --feature {name} --input {path}     # 既存 SpecDoc JSON 読込
+/kaname --feature {kebab-case-name}         # feature 名指定
+/kaname --feature {name} --skip-lean-verify # Lean verify 省略
+/kaname --feature {name} --input {path}     # 既存 SpecDoc JSON 読込
 ```
 
 ## v2.17 milestone signal
@@ -85,6 +85,6 @@ skill 起動時に MANIFESTO.md § 3 layer specification model を参照、 以�
 - 62 milestone streak (v1.23-v2.17)
 - 4 PR rhythm 16 milestone 目 (v2.1-v2.17)
 - backward compat 絶対維持 25 milestone 連続 (v1.61-v2.17)
-- systematic pattern 59 度目 = /spec-kit skill 追加
-- kiwa 3 軸融合実運用完成 = testing (40+ skill) + 形式検証 (@kiwa-lab/lean) + 仕様駆動開発 (@kiwa-lab/spec-kit + /spec-kit skill)
+- systematic pattern 59 度目 = /kaname skill 追加
+- kiwa 3 軸融合実運用完成 = testing (40+ skill) + 形式検証 (@kiwa-lab/lean) + 仕様駆動開発 (@kiwa-lab/kaname + /kaname skill)
 - 43 package 維持 (skill 追加、 npm publish なし)

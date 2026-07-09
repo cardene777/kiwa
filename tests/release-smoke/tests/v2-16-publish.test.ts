@@ -40,29 +40,29 @@ describe('v2.16-3 publish', () => {
       existsSync(resolve(REPO_ROOT, 'docs/announcements/v2.16/gh-discussions-announcement.md')),
     ).toBe(true);
   });
-  it('@kiwa-lab/spec-kit v0.1.0', () => {
-    expect(readJson<{ version: string }>('packages/spec-kit/package.json').version).toBe('0.1.0');
+  it('@kiwa-lab/kaname v0.1.0', () => {
+    expect(readJson<{ version: string }>('packages/kaname/package.json').version).toBe('0.1.0');
   });
-  it('spec-kit classify source', () => {
-    const src = readText('packages/spec-kit/src/classify.ts');
+  it('kaname classify source', () => {
+    const src = readText('packages/kaname/src/classify.ts');
     expect(src).toContain('export function classify');
     expect(src).toContain('both-layers-touch-same-artifact');
   });
-  it('spec-kit split source', () => {
-    const src = readText('packages/spec-kit/src/split.ts');
+  it('kaname split source', () => {
+    const src = readText('packages/kaname/src/split.ts');
     expect(src).toContain('export function splitSpec');
     expect(src).toContain('specFormal');
     expect(src).toContain('specRuntime');
   });
-  it('release filter @kiwa-lab/spec-kit', () => {
+  it('release filter @kiwa-lab/kaname', () => {
     expect(readJson<{ scripts: { release: string } }>('package.json').scripts.release).toContain(
-      '-F @kiwa-lab/spec-kit',
+      '-F @kiwa-lab/kaname',
     );
   });
   it('migration v2.15-to-v2.16 exists', () => {
     expect(existsSync(resolve(REPO_ROOT, 'docs/migrations/v2.15-to-v2.16.md'))).toBe(true);
   });
-  it('concept spec-kit-3-layer-model exists', () => {
-    expect(existsSync(resolve(REPO_ROOT, 'docs/concepts/spec-kit-3-layer-model.md'))).toBe(true);
+  it('concept kaname-3-layer-model exists', () => {
+    expect(existsSync(resolve(REPO_ROOT, 'docs/concepts/kaname-3-layer-model.md'))).toBe(true);
   });
 });

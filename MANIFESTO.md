@@ -35,7 +35,7 @@ kiwa は 「testing framework」 に留まらない。 **開発 workflow の 各
 
 - 仕様書を **形式検証可能** / **runtime test 対象** / **human review 対象** の **3 layer に分類**、 検証 gap を 構造的に排除
 - **仕様 = 検証の source of truth**、 書けなかった仕様は 検証されない
-- 実装 = `@kiwa-lab/spec-kit` (v2.16+) = specFormal / specRuntime 2 file 分離生成 + 3 layer 分類器
+- 実装 = `@kiwa-lab/kaname` (v2.16+) = specFormal / specRuntime 2 file 分離生成 + 3 layer 分類器
 
 ## 5 原則統合 pattern SSOT
 
