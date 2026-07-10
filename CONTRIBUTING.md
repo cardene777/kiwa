@@ -114,12 +114,18 @@ Measured, by hiding each tool and running the sweep — not by reading
 
 Nothing else. In particular:
 
-- **Docker is not needed.** Twenty-six examples name `testcontainers` somewhere.
-  Six declare it as a dependency; three more reach for it with
-  `await import('testcontainers' as string)` inside a `real` adapter, without
-  declaring it; the rest only mention it in prose. All twenty-six pass with
-  `DOCKER_HOST` pointed at a socket that does not exist, because a container is
-  only started by a `real` adapter and `pnpm test` never reaches one.
+- **Docker is not needed.** Thirty-four examples name `testcontainers` somewhere:
+
+  | | examples |
+  |---|---|
+  | declare it as a dependency | 6 |
+  | reach for it with `await import('testcontainers' as string)`, undeclared | 3 |
+  | name it only in a `package.json` description | 17 |
+  | mention it only in source or docs | 8 |
+
+  All of them pass with `DOCKER_HOST` pointed at a socket that does not exist,
+  because a container is only started by a `real` adapter and `pnpm test` never
+  reaches one.
 - **`expo`, `react-native`, `metro`, `gradle`, `electron-builder` and
   `electron-updater` are not needed.** Two dogfood examples used to spawn them,
   and one of them ran `/usr/bin/osascript` on macOS. They now drive

@@ -53,7 +53,7 @@
  */
 
 import { execFile, spawn } from 'node:child_process';
-import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync, readlinkSync, realpathSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -274,14 +274,26 @@ function listProjects() {
  * same length within one second would be reported clean. Hashing the bytes
  * would close that; nothing here has met a filesystem that needs it.
  */
-export function fingerprint(status, absolute, stat = statSync) {
+export function fingerprint(status, absolute, stat = lstatSync, readLink = readlinkSync) {
+  let info;
   try {
-    const info = stat(absolute);
-    return `${status}:${info.size}:${info.mtimeMs}`;
+    info = stat(absolute);
   } catch {
     // Deleted, or a path git names that no longer exists.
     return `${status}:gone`;
   }
+  if (info.isSymbolicLink?.()) {
+    // `statSync` follows the link and fingerprints whatever it points at, so
+    // retargeting it at a file of the same size and time looked like nothing
+    // happened — and two broken links both looked `gone`. What changed is the
+    // link, so read the link.
+    try {
+      return `${status}:link:${readLink(absolute)}`;
+    } catch {
+      return `${status}:link:unreadable`;
+    }
+  }
+  return `${status}:${info.size}:${info.mtimeMs}`;
 }
 
 /**
@@ -408,13 +420,20 @@ export function runCommand({
   tailBytes = 256 * 1024,
   flushMs = 500,
   killGraceMs = 5000,
+  classify = classifyFailure,
 }) {
   return new Promise((resolve) => {
     let child;
     try {
       child = spawn(command, args, { cwd, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
     } catch (error) {
-      resolve({ ok: false, timedOut: false, overflowed: false, output: String(error.message) });
+      resolve({
+        ok: false,
+        timedOut: false,
+        overflowed: false,
+        output: String(error.message),
+        cause: null,
+      });
       return;
     }
 
@@ -439,27 +458,45 @@ export function runCommand({
       clearTimeout(flushTimer);
       clearTimeout(graceTimer);
       const text = overflowed ? `${output}\n[... output truncated ...]\n${tail}` : output;
-      resolve({ ok: !timedOut && !overflowed && exitCode === 0, timedOut, overflowed, output: text });
+      resolve({
+        ok: !timedOut && !overflowed && exitCode === 0,
+        timedOut,
+        overflowed,
+        output: text,
+        cause,
+      });
     };
 
-    // Keep the head and the tail. Dropping everything past the cap threw away
-    // the line `classifyFailure` needs — a package that printed a megabyte and
-    // then `anvil not found in PATH` was reported red rather than blocked.
+    // Look for the tool signature as the output streams past, and remember the
+    // first one. Reading it out of what survives truncation is not enough: it
+    // can land in the head, at the seam, or in the middle that gets dropped.
+    // Every one of those was a blocked package reported red.
     //
-    // The tail starts with the end of the head, so a line that straddles the
-    // cap is whole in one of them. Without that, `...anv` stayed in the head
-    // and `il not found in PATH` went to the tail, with the truncation notice
-    // between: a signature nobody could match.
+    // `window` carries the end of the previous chunk so a line split across a
+    // chunk boundary is still whole somewhere.
     let tail = '';
+    let window = '';
+    let cause = null;
+    const OVERLAP = 4096;
+
     const collect = (chunk) => {
-      bytes += chunk.length;
+      const text = String(chunk);
+      if (cause === null) {
+        const seen = window + text;
+        cause = classify(seen);
+        window = seen.slice(-OVERLAP);
+      }
+
+      bytes += text.length;
       if (bytes > maxBytes) {
+        // The tail begins with the end of the head, so nothing is lost at the
+        // seam either.
         if (!overflowed) tail = output.slice(-tailBytes);
         overflowed = true;
-        tail = (tail + chunk).slice(-tailBytes);
+        tail = (tail + text).slice(-tailBytes);
         return;
       }
-      output += chunk;
+      output += text;
     };
     child.stdout.on('data', collect);
     child.stderr.on('data', collect);
@@ -557,6 +594,8 @@ export function failureLines(output) {
 export function argValue(argv, flag, fallback) {
   const at = argv.indexOf(flag);
   if (at === -1) return fallback;
+  // `--only nextjs --only safe` used to run the `nextjs` subset and say nothing.
+  if (argv.indexOf(flag, at + 1) !== -1) throw new Error(`${flag} given more than once`);
   const value = argv[at + 1];
   const looksLikeFlag = value !== undefined && value.startsWith('-') && Number.isNaN(Number(value));
   if (value === undefined || looksLikeFlag) throw new Error(`${flag} needs a value`);
@@ -615,7 +654,10 @@ async function main() {
     // wrote into the repository, red or not.
     if (touched.length > 0) dirty.push({ ...result, touched });
 
-    const cause = result.timedOut ? null : classifyFailure(result.output);
+    // `result.cause` was found while the output streamed, before anything was
+    // truncated. `result.output` is only a fallback for the `spawn` error path,
+    // which produces no chunks at all.
+    const cause = result.timedOut ? null : (result.cause ?? classifyFailure(result.output));
     const verdict = verdictOf({ ok: result.ok, cause, dirty: touched.length > 0 });
 
     if (verdict === 'green') {

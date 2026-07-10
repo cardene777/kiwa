@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -180,6 +180,57 @@ test('fingerprint says gone for a path that is not on disk', () => {
   assert.match(fingerprint(' D', '/no/such/file'), /^ D:gone$/);
 });
 
+// `statSync` follows a link and fingerprints its target. Retarget the link at a
+// file of the same size and time and nothing changed; point two broken links at
+// two different missing files and both were `gone`. On disk `lstatSync` would
+// separate them by the link's own mtime, so these stubs hold it still and leave
+// only what the link points at.
+test('fingerprint reads the link, not the file behind it', () => {
+  const link = (target) => ({
+    size: target.length,
+    mtimeMs: 1_000_000,
+    isSymbolicLink: () => true,
+  });
+  const a = fingerprint(' M', '/x/link', () => link('/x/aaaa'), () => '/x/aaaa');
+  const b = fingerprint(' M', '/x/link', () => link('/x/bbbb'), () => '/x/bbbb');
+  assert.notEqual(a, b, 'the link was retargeted, and nothing else changed');
+  assert.match(a, /^ M:link:\/x\/aaaa$/);
+});
+
+test('fingerprint separates two broken links, which both used to be gone', () => {
+  const link = () => ({ size: 6, mtimeMs: 1_000_000, isSymbolicLink: () => true });
+  const one = fingerprint(' M', '/x/link', link, () => '/x/gone-1');
+  const two = fingerprint(' M', '/x/link', link, () => '/x/gone-2');
+  assert.notEqual(one, two);
+});
+
+test('fingerprint says so when a link cannot be read', () => {
+  const link = () => ({ size: 6, mtimeMs: 1, isSymbolicLink: () => true });
+  const unreadable = () => {
+    throw new Error('EACCES');
+  };
+  assert.match(fingerprint(' M', '/x/link', link, unreadable), /link:unreadable$/);
+});
+
+// And the same thing on a real filesystem, where the link's own mtime moves too.
+test('fingerprint separates a retargeted link on disk', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'test-all-link-'));
+  const link = join(dir, 'link');
+  try {
+    writeFileSync(join(dir, 'aaaa'), 'x');
+    writeFileSync(join(dir, 'bbbb'), 'y');
+    symlinkSync(join(dir, 'aaaa'), link);
+    const toA = fingerprint(' M', link);
+    rmSync(link);
+    symlinkSync(join(dir, 'bbbb'), link);
+    const toB = fingerprint(' M', link);
+    assert.notEqual(toA, toB);
+    assert.match(toA, /:link:.*aaaa$/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('fingerprint changes when the file does', () => {
   const stat = (path) => ({ size: path === 'big' ? 2 : 1, mtimeMs: 100 });
   assert.notEqual(fingerprint(' M', 'small', stat), fingerprint(' M', 'big', stat));
@@ -261,6 +312,43 @@ test('runCommand keeps a tool signature that straddles the truncation', async ()
     'Foundry (anvil)',
     'the signature survived the seam',
   );
+});
+
+// The signature is not at the seam and not in the tail. It is in the middle,
+// which is exactly the part that gets dropped. Reading it out of what survives
+// truncation cannot work; `runCommand` reads it as the output streams past.
+test('runCommand finds a tool signature that truncation throws away', async () => {
+  const result = await runCommand({
+    command: 'sh',
+    args: [
+      '-c',
+      'head -c 1023 /dev/zero | tr "\\0" x; printf "anvil not found in PATH\\n"; head -c 5000 /dev/zero | tr "\\0" y',
+    ],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    maxBytes: 1024,
+    tailBytes: 512,
+  });
+  assert.equal(result.overflowed, true);
+  assert.equal(classifyFailure(result.output), null, 'it really is gone from the output');
+  assert.equal(result.cause?.tool, 'Foundry (anvil)', 'and it was seen on the way past');
+});
+
+// A line split across two chunks is whole in neither. The window carries the
+// end of the previous chunk.
+test('runCommand finds a signature split across two chunks', async () => {
+  const result = await runCommand({
+    command: 'sh',
+    args: ['-c', 'printf "anv"; sleep 0.1; printf "il not found in PATH\\n"'],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+  });
+  assert.equal(result.cause?.tool, 'Foundry (anvil)');
+});
+
+test('runCommand reports no cause when nothing blames a tool', async () => {
+  const result = await sh('echo "AssertionError: expected 3 to be 4"; exit 1');
+  assert.equal(result.cause, null, 'a red package is not excused');
 });
 
 // A package that prints a megabyte and then `anvil not found in PATH` is
@@ -681,6 +769,20 @@ test('argValue refuses a flag with no value, or with another flag after it', () 
 test('argValue takes a negative number as a value', () => {
   assert.equal(argValue(['node', 'x', '--timeout', '-5'], '--timeout', '900'), '-5');
   assert.equal(argValue(['node', 'x', '--timeout', '-0.5'], '--timeout', '900'), '-0.5');
+});
+
+// `--only nextjs --only safe` used to run the `nextjs` subset and say nothing
+// about the other one.
+test('argValue refuses a flag given more than once', () => {
+  assert.throws(
+    () => argValue(['node', 'x', '--only', 'a', '--only', 'b'], '--only', null),
+    /given more than once/,
+  );
+  assert.throws(
+    () => argValue(['node', 'x', '--timeout', '60', '--timeout', '5'], '--timeout', '900'),
+    /given more than once/,
+  );
+  assert.equal(argValue(['node', 'x', '--only', 'a', '--timeout', '5'], '--only', null), 'a');
 });
 
 test('failureLines picks out the lines that look like failures', () => {
