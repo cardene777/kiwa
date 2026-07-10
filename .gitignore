@@ -84,3 +84,7 @@ examples/python-todo-poc/dist/
 # to avoid noisy churn from build artifacts.
 target/
 Cargo.lock
+# Lake build artifacts. `specs/` is owned by generate-lean-project.ts;
+# these two are written by `lake build` and carry its version, not the spec.
+.lake/
+lake-manifest.json

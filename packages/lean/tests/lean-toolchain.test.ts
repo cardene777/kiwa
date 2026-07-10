@@ -375,6 +375,9 @@ describe.skipIf(!HAS_LEAN)('Lean may print more than the buffer holds', () => {
 
     expect(report.status).toBe('output-too-large');
     expect(report.status).not.toBe('extraction-failed');
+    // Nor a verdict on the specification: every theorem in that source is true,
+    // and a reader sent to look for a false one would find nothing.
+    expect(report.status).not.toBe('verification-failed');
     expect(report.ok).toBe(false);
     expect(report.diagnostics).toContain('the rest was lost');
     expect(report.diagnostics).toContain('split the machine');

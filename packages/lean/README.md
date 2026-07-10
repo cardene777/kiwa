@@ -156,7 +156,17 @@ The first says Lean never finished; the second says it finished and the answer d
 not fit.
 
 `checkLeanTable` reads the same switch and reports the same statuses, so a build
-that turns Lean off turns it off for both.
+that turns Lean off turns it off for both. It adds one of its own:
+
+| status | meaning |
+|---|---|
+| `extraction-failed` | Lean accepted the source, ran it, and what came back is not this machine's table |
+
+The two failures are different repairs. `verification-failed` means the source
+stopped being true — a theorem is false, or it no longer elaborates. It is what a
+checked-in `.lean` file earns when someone edits it. `extraction-failed` means the
+source is sound and the table it holds is not the one the spec describes: a cell
+short, a cell twice, a line that does not parse.
 
 To install a toolchain:
 
