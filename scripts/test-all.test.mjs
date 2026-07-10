@@ -3,6 +3,7 @@
 //   node --test scripts/test-all.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
 import { existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -14,6 +15,7 @@ import {
   dirtiedPaths,
   discoverPackages,
   failureLines,
+  groupAlive,
   parsePorcelain,
   parseProjectList,
   runCommand,
@@ -280,22 +282,124 @@ test('runCommand really does kill the group it timed out on', async () => {
   assert.equal(existsSync(marker), false, 'the group was killed, so nothing wrote the marker');
 });
 
-// After a child has exited and been reaped, its pid belongs to whoever the
-// operating system gives it to next. `settle` used to signal it anyway.
-test('runCommand sends no signal after a command exits on its own', async () => {
-  const signals = [];
+/** Record every signal actually sent, ignoring signal 0, which only asks. */
+async function withSignalsRecorded(body) {
+  const sent = [];
   const real = process.kill.bind(process);
   process.kill = (pid, signal) => {
-    signals.push([pid, signal]);
+    if (signal !== 0) sent.push([pid, signal]);
     return real(pid, signal);
   };
   try {
-    const r = await sh('exit 0', 5000);
-    assert.equal(r.ok, true);
+    return { result: await body(), sent };
   } finally {
     process.kill = real;
   }
-  assert.deepEqual(signals, [], 'a clean exit signals nothing');
+}
+
+/** Hold the event loop for `ms`, the way a synchronous build step would. */
+function stallTheLoop(ms) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) {
+    // Busy on purpose.
+  }
+}
+
+// After a child has exited and been reaped, its pid belongs to whoever the
+// operating system gives it to next. `settle` used to signal it anyway.
+test('runCommand sends no signal after a command exits on its own', async () => {
+  const { result, sent } = await withSignalsRecorded(() => sh('exit 0', 5000));
+  assert.equal(result.ok, true);
+  assert.deepEqual(sent, [], 'a clean exit signals nothing');
+});
+
+// `exitCode === null` means our `exit` handler has not run, not that the child
+// is alive. A busy loop delivers the timer first. This command finishes in a
+// millisecond and used to come back `{ ok: false, timedOut: true }`, having
+// SIGKILLed a pid it no longer owned.
+test('runCommand does not call a finished command timed out because the loop was busy', async () => {
+  const { result, sent } = await withSignalsRecorded(async () => {
+    const pending = sh('exit 0', 10);
+    stallTheLoop(200);
+    return pending;
+  });
+  assert.equal(result.timedOut, false, 'it exited; it did not run out of time');
+  assert.equal(result.ok, true);
+  assert.deepEqual(sent, [], 'nothing is signalled at a pid that has been released');
+});
+
+// And the same stall must not stop a real hang from being killed.
+test('runCommand still kills a real hang when the loop was busy', async () => {
+  const pending = sh('sleep 30', 10);
+  stallTheLoop(200);
+  const r = await pending;
+  assert.equal(r.timedOut, true);
+  assert.equal(r.ok, false);
+});
+
+// `groupAlive(pid)` asks about the group whose id is `pid` — that is, the group
+// led by the process with that pid. This process is not a group leader, so
+// `groupAlive(process.pid)` is correctly false. Its own group's id is a
+// different number, and `killGroup` is only ever handed the pid of a child
+// spawned `detached`, which is a leader by construction.
+test('groupAlive answers for a group that exists and one that does not', () => {
+  assert.equal(groupAlive(process.pid), false, 'this process leads no group');
+  assert.equal(groupAlive(2 ** 30), false, 'a pid that cannot exist');
+  assert.equal(groupAlive(undefined), false, 'no pid at all');
+  assert.equal(groupAlive(999999), false);
+});
+
+test('groupAlive says yes for a detached child, and no once it is gone', async () => {
+  const child = spawn('sh', ['-c', 'sleep 5'], { detached: true, stdio: 'ignore' });
+  await new Promise((r) => setTimeout(r, 100));
+  assert.equal(groupAlive(child.pid), true, 'a detached child leads its own group');
+  process.kill(-child.pid, 'SIGKILL');
+  await new Promise((r) => child.once('exit', r));
+  assert.equal(groupAlive(child.pid), false, 'and the group is gone with it');
+});
+
+// A child that has exited but has not been reaped is a zombie. Its pid is
+// taken, so `kill(-pid, 0)` answers `EPERM` rather than `ESRCH`, and there is
+// nothing there to kill. An implementation that reads `EPERM` as "alive" marks
+// a package that finished in a millisecond as a hang.
+test('groupAlive says no to a zombie, which answers EPERM rather than ESRCH', async () => {
+  const child = spawn('sh', ['-c', 'exit 0'], { detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  stallTheLoop(200); // it dies; nothing reaps it, because the loop is busy
+
+  let code = null;
+  try {
+    process.kill(-child.pid, 0);
+  } catch (error) {
+    code = error.code;
+  }
+  assert.equal(code, 'EPERM', 'a zombie group leader is neither gone nor killable');
+  assert.equal(child.exitCode, null, 'and Node has not reaped it yet');
+  assert.equal(groupAlive(child.pid), false, 'so it is not ours to signal');
+
+  await new Promise((r) => child.once('exit', r));
+});
+
+// How many turns of the loop it takes for `exit` to arrive is not something to
+// assert on. Ten samples said one `setImmediate`; inside this suite it took
+// more. So `runCommand` does not wait for the handler at all — it asks the
+// operating system whether the group is still there, which is the test above.
+
+// The branch `setImmediate` almost always skips: the child is gone, its `exit`
+// has not arrived, and the deadline has passed. Nothing may be signalled.
+test('runCommand signals nothing when the group is already gone at the deadline', async () => {
+  const { result, sent } = await withSignalsRecorded(() =>
+    runCommand({
+      command: 'sh',
+      args: ['-c', 'sleep 1'],
+      cwd: process.cwd(),
+      timeoutMs: 100,
+      killGraceMs: 4000,
+      aliveFn: () => false,
+    }),
+  );
+  assert.equal(result.timedOut, false, 'a group that is gone did not run out of time');
+  assert.equal(result.ok, true, 'the real exit code arrives and decides');
+  assert.deepEqual(sent, [], 'nothing is signalled at a group we no longer own');
 });
 
 test('runCommand reports a command that does not exist', async () => {

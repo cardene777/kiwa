@@ -243,6 +243,32 @@ function killGroup(child) {
 }
 
 /**
+ * Whether the process group led by `pid` is still ours to signal. Signal 0 asks
+ * without sending.
+ *
+ * The group's id is the leader's pid, so this is only meaningful for a process
+ * that leads one. Every child here is spawned `detached`, which makes it a
+ * leader. Asking about a process that leads no group — this one, for instance —
+ * correctly answers no.
+ *
+ * Three answers, not two. `ESRCH` is a group that has gone. `EPERM` is a group
+ * whose leader has exited but not yet been reaped: the pid is taken, the
+ * process is a zombie, and there is nothing there to kill. Only success means
+ * something is running. Reading `EPERM` as "alive" would mark a package that
+ * finished in a millisecond as a hang.
+ */
+export function groupAlive(pid) {
+  if (typeof pid !== 'number') return false;
+  try {
+    process.kill(-pid, 0);
+    return true;
+  } catch {
+    // `ESRCH`, `EPERM`, or anything else: not a group we may signal.
+    return false;
+  }
+}
+
+/**
  * Run a command, and decide for ourselves whether it ran out of time.
  *
  * `execFile`'s own `timeout` cannot be trusted here. It sends `SIGTERM` and
@@ -274,6 +300,10 @@ export function runCommand({
   maxBytes = 64 * 1024 * 1024,
   flushMs = 500,
   killGraceMs = 5000,
+  // Whether the group is still ours to signal. A test can say no; nothing else
+  // can reach the branch, because by the time `setImmediate` runs the child's
+  // `exit` has almost always been delivered.
+  aliveFn = groupAlive,
 }) {
   return new Promise((resolve) => {
     let child;
@@ -336,9 +366,22 @@ export function runCommand({
     });
 
     timer = setTimeout(() => {
-      // The child exited while we were waiting for its pipes. It finished; it
-      // did not run out of time. Its pid is no longer ours to signal.
       if (settled || exitCode !== null) return;
+
+      // `exitCode === null` means our `exit` handler has not run. It does not
+      // mean the child is alive. A busy event loop delivers this timer before
+      // it delivers the child's exit, so a command that finished in a
+      // millisecond arrives here looking like a hang — and would be killed, at
+      // a pid the operating system may already have given to somebody else.
+      //
+      // Ask the operating system rather than the handler.
+      if (!aliveFn(child.pid)) {
+        // It has exited. `exit` and `close` are on their way with the real
+        // answer; this timer is only here so that a lost event cannot hang the
+        // sweep, which has no outer timeout.
+        graceTimer = setTimeout(settle, killGraceMs);
+        return;
+      }
       timedOut = true;
       killGroup(child);
       graceTimer = setTimeout(settle, killGraceMs);
