@@ -29,9 +29,76 @@ please do not open bulk-translation PRs without discussing scope first.
 
 1. Fork and clone the repository
 2. Install dependencies (`pnpm install`)
-3. Run tests (`pnpm test`)
-4. Make sure typecheck passes (`pnpm typecheck`)
+3. Run tests (`pnpm test:all` — not `pnpm test`, which stops at the first failure)
+4. Make sure typecheck passes (`pnpm typecheck:all`)
 5. Make sure build passes (`pnpm build`)
+
+### When tests fail
+
+`pnpm test` runs `pnpm -r test`, which stops at the first package that fails.
+One red package hides every other one, and the count is invisible. Two example
+packages had been failing since a rewrite in `@kiwa-lab/mobile` and
+`@kiwa-lab/desktop`, and nobody saw it, because something earlier in the
+alphabet failed first.
+
+`pnpm test:all` runs all 219 of them and reports each failure. It takes about
+half an hour, and prints a line per package as it goes:
+
+```
+$ pnpm test:all
+testing 219 packages, one at a time
+
+[  1/219] ok    examples/astro-server-endpoints-full  2.5s
+[  9/219] RED   examples/basic-connect  2.5s
+        Error: No tests found
+[145/219] DIRTY examples/nextjs-safe-multisig  512.8s
+...
+
+green: 211   red: 7   dirty: 2   not run: 0
+```
+
+Four verdicts, and only one of them means the package is fine:
+
+- `ok` — passed, and left the working tree as it found it.
+- `RED` — failed, and its own output blames no missing tool.
+- `SKIP` — failed, and its output names a tool that is not installed. It is
+  printed with the line that says so, and the tool's install command. **This
+  never means "passed."** `--strict` makes it red.
+- `DIRTY` — the package's tests changed the working tree. A test that writes
+  into the repository is a test with a side effect, and a `git add -A`
+  afterwards sweeps it into an unrelated commit. This is a failure of the
+  package that did it, whatever its exit code.
+
+It exits 1 when anything is red or dirty. Like `typecheck:all`, it is sequential
+on purpose: many `test` scripts build the workspace packages they depend on, so
+two at once rewrite the same `dist` while the other reads it.
+
+Use `--only <substring>` while iterating on one package, and `--timeout <n>` to
+change the per-package limit (900 seconds by default; a package killed for
+exceeding it is reported red, never green).
+
+### What `pnpm test` actually needs
+
+Measured, by hiding each tool and running the sweep — not by reading
+`package.json`.
+
+| tool | needed by | what you see without it |
+|---|---|---|
+| Node.js 20+, pnpm 10+ | everything | — |
+| Playwright Chromium | the 22 packages whose `test` is `playwright test` | `Executable doesn't exist at .../chromium_headless_shell-1223` |
+| Foundry (`anvil` on `PATH`) | the packages that start a chain, through `@kiwa-lab/dapp` | `Error: anvil not found in PATH` |
+
+Nothing else. In particular:
+
+- **Docker is not needed.** Twenty-six examples depend on `testcontainers`, and
+  every one of them passes with `DOCKER_HOST` pointed at a socket that does not
+  exist. Containers are only started by the `real` adapters, which `pnpm test`
+  does not reach.
+- **`expo`, `react-native`, `metro`, `gradle`, `electron-builder` and
+  `electron-updater` are not needed.** Two dogfood examples used to spawn them,
+  and one of them ran `/usr/bin/osascript` on macOS. They now drive
+  `@kiwa-lab/mobile` and `@kiwa-lab/desktop` through the deterministic
+  `dry-run` path and spawn nothing.
 
 ### When typecheck fails
 
@@ -126,8 +193,8 @@ commit body or pull request description.
 
 ## Pull request checklist
 
-- [ ] `pnpm typecheck` passes
-- [ ] `pnpm test` passes
+- [ ] `pnpm typecheck:all` shows no red package
+- [ ] `pnpm test:all` shows no red or dirty package that `main` does not already show. As of writing that is seven red and two dirty, tracked in #1396 and #1397; adding to them is not allowed, and `pnpm test` cannot tell you either way because it stops at the ninth package
 - [ ] `pnpm build` passes
 - [ ] Documentation updated (if API changed)
 - [ ] Changeset added (`pnpm changeset`) for package version bumps
