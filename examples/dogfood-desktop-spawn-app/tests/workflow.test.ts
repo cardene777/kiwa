@@ -117,4 +117,15 @@ describe('dogfood-desktop-spawn-app — spawn workflow through the dry-run contr
     r.args.push('--three');
     expect(args).toEqual(['--one', '--two']);
   });
+
+  it('args upper bound (32) enforced', async () => {
+    const okArgs = new Array(32).fill('x');
+    const r = await invokeDesktopCli({ command: 'ffmpeg', args: okArgs, env: DRY_RUN_ENV });
+    expect(r.args).toHaveLength(32);
+
+    const overArgs = new Array(33).fill('x');
+    await expect(
+      invokeDesktopCli({ command: 'ffmpeg', args: overArgs, env: DRY_RUN_ENV }),
+    ).rejects.toThrow(/args exceeds max 32/);
+  });
 });
