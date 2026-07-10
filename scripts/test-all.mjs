@@ -260,6 +260,21 @@ export function killGroup(child) {
 }
 
 /**
+ * Why this script will not run here, or `null`.
+ *
+ * On Windows `detached` does not create a process group, and `process.kill`
+ * throws when handed a negative pid. `groupAlive` would answer no for a child
+ * that is running, and `killGroup` would signal nothing: a hung package would
+ * be left alive to poison the packages after it, and reported green if it
+ * happened to finish inside the grace period. Refusing is honest. Pretending
+ * the timeout works is not.
+ */
+export function unsupportedPlatform(platform) {
+  if (platform !== 'win32') return null;
+  return 'test-all.mjs enforces its per-package timeout with POSIX process groups, which Windows does not have. Run it under WSL.';
+}
+
+/**
  * Whether the process group led by `pid` is still ours to signal. Signal 0 asks
  * without sending.
  *
@@ -318,10 +333,6 @@ export function runCommand({
   tailBytes = 256 * 1024,
   flushMs = 500,
   killGraceMs = 5000,
-  // Whether the group is still ours to signal. A test can say no; nothing else
-  // can reach the branch, because by the time `setImmediate` runs the child's
-  // `exit` has almost always been delivered.
-  aliveFn = groupAlive,
 }) {
   return new Promise((resolve) => {
     let child;
@@ -399,7 +410,7 @@ export function runCommand({
       // a pid the operating system may already have given to somebody else.
       //
       // Ask the operating system rather than the handler.
-      if (!aliveFn(child.pid)) {
+      if (!groupAlive(child.pid)) {
         // It has exited. `exit` and `close` are on their way with the real
         // answer; this timer is only here so that a lost event cannot hang the
         // sweep, which has no outer timeout.
@@ -456,6 +467,9 @@ export function argValue(argv, flag, fallback) {
 }
 
 async function main() {
+  const refuse = unsupportedPlatform(process.platform);
+  if (refuse) throw new Error(refuse);
+
   const verbose = process.argv.includes('--verbose');
   const allowMissingTools = process.argv.includes('--allow-missing-tools');
   const only = argValue(process.argv, '--only', null);

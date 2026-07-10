@@ -20,6 +20,7 @@ import {
   parsePorcelain,
   parseProjectList,
   runCommand,
+  unsupportedPlatform,
   verdictOf,
 } from './test-all.mjs';
 
@@ -458,22 +459,30 @@ test('groupAlive says no to a zombie, which answers EPERM rather than ESRCH', as
 // more. So `runCommand` does not wait for the handler at all — it asks the
 // operating system whether the group is still there, which is the test above.
 
-// The branch `setImmediate` almost always skips: the child is gone, its `exit`
-// has not arrived, and the deadline has passed. Nothing may be signalled.
-test('runCommand signals nothing when the group is already gone at the deadline', async () => {
-  const { result, sent } = await withSignalsRecorded(() =>
-    runCommand({
-      command: 'sh',
-      args: ['-c', 'sleep 1'],
-      cwd: process.cwd(),
-      timeoutMs: 100,
-      killGraceMs: 4000,
-      aliveFn: () => false,
-    }),
-  );
-  assert.equal(result.timedOut, false, 'a group that is gone did not run out of time');
-  assert.equal(result.ok, true, 'the real exit code arrives and decides');
-  assert.deepEqual(sent, [], 'nothing is signalled at a group we no longer own');
+// A command that would have finished inside the grace period must still be
+// reported timed out, and killed. An earlier version of this test injected
+// `aliveFn: () => false` at a child that was plainly running and asserted
+// `ok === true`; an implementation that never timed out anything shorter than
+// `killGraceMs` passed it.
+test('runCommand times out a command that would have finished inside the grace period', async () => {
+  const started = Date.now();
+  const result = await runCommand({
+    command: 'sh',
+    args: ['-c', 'sleep 1'],
+    cwd: process.cwd(),
+    timeoutMs: 100,
+    killGraceMs: 5000,
+  });
+  assert.equal(result.timedOut, true, 'it passed its deadline');
+  assert.equal(result.ok, false);
+  assert.ok(Date.now() - started < 2000, 'and it did not wait out the grace period');
+});
+
+test('unsupportedPlatform refuses Windows and nothing else', () => {
+  assert.match(unsupportedPlatform('win32'), /process groups, which Windows does not have/);
+  assert.equal(unsupportedPlatform('darwin'), null);
+  assert.equal(unsupportedPlatform('linux'), null);
+  assert.equal(unsupportedPlatform('freebsd'), null);
 });
 
 test('runCommand reports a command that does not exist', async () => {
