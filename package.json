@@ -21,7 +21,8 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "test:docs-e2e": "playwright test tests/docs-site-e2e"
+    "test:docs-e2e": "playwright test tests/docs-site-e2e",
+    "typecheck:all": "node scripts/typecheck-all.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
@@ -34,6 +35,9 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "better-sqlite3"
-    ]
+    ],
+    "overrides": {
+      "kysely": "0.27.6"
+    }
   }
 }
