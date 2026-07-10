@@ -104,9 +104,21 @@ describe('UsersRepository via @kiwa-lab/orm', () => {
   });
 
   it('T-POC-007: orphan post (存在しない author_id) は FK 制約で reject', async () => {
-    env = await setupOrmEnv({ mode: 'mock', orm: 'drizzle', dialect: 'sqlite', schema, migrations: INITIAL_MIGRATION });
+    // Bound to a const because the assertion reads it inside a callback, and
+    // TypeScript will not carry a narrowing of `env` — a mutable `let` of the
+    // whole `OrmTestEnv` union — across that boundary. `!` only removes `null`,
+    // and the Prisma variants that remain have no `db`.
+    const drizzle = await setupOrmEnv({
+      mode: 'mock',
+      orm: 'drizzle',
+      dialect: 'sqlite',
+      schema,
+      migrations: INITIAL_MIGRATION,
+    });
+    env = drizzle;
+
     expect(() =>
-      env!.db.insert(schema.posts).values({ id: 99, authorId: 999, title: 'orphan', published: false }).run(),
+      drizzle.db.insert(schema.posts).values({ id: 99, authorId: 999, title: 'orphan', published: false }).run(),
     ).toThrow(/FOREIGN KEY/);
   });
 
