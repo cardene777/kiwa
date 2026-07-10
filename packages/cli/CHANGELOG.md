@@ -1,5 +1,43 @@
 # @kiwa-lab/cli
 
+## 2.0.2
+
+### Patch Changes
+
+`kiwa init` が生成する project が型検査を通らなかった。 2 つの欠陥。
+
+#### 1. `tsconfig.json` が、 `init` が書いた file を対象にしない
+
+```
+$ npx @kiwa-lab/cli@2.0.1 init
+$ npm install && npx tsc --noEmit -p tsconfig.json
+error TS18003: No inputs were found in config file 'tsconfig.json'.
+  Specified 'include' paths were '["tests/**/*.ts"]'.
+```
+
+template の `include` は `tests/**/*.ts` だけを指す。 `init` が必ず書く `e2e/connect.spec.ts` と `playwright.config.ts` は、 既定でも `--with-deploy` でも対象外だった。 既定 mode では対象 file が 0 件になる。
+
+`include` を `["e2e/**/*.ts", "tests/**/*.ts", "playwright.config.ts"]` に修正した。 `T-INIT-111` が「`init` が書いた `.ts` file を `include` が全部拾う」 を両 mode で検査する。 literal と比べず、 書かれた file 一覧と glob を突き合わせる。
+
+#### 2. `prepare-env.ts` が存在しない引数で `deployContract` を呼ぶ
+
+`include` を広げたことで、 この template が初めて型検査を受けた。
+
+```
+tests/prepare-env.ts(42,5): error TS2353: Object literal may only specify known
+properties, and 'rpcUrl' does not exist in type 'DeployContractOptions<Abi>'.
+```
+
+`deployContract` は `{ account, wallet, publicClient, abi, bytecode, args }` を取る。 template は `{ rpcUrl, privateKey, abiPath, args }` を渡していた。 旧 API の形で、 いつ変わったのかは記録に無い。 名前は export され続けていたので、 「import 先が実在するか」 の検査では捕まらない。
+
+template を現行 API に書き直した。 forge の artifact から `abi` と `bytecode.object` を読み、 `viem` の wallet / public client を組んで渡す。
+
+`T-INIT-103` が `DeployContractOptions` の key と template が渡す key を突き合わせる。 `rpcUrl` を戻すと落ちる。
+
+#### 確認
+
+build した `init` を空 dir で実行し、 `npm install` の後に `tsc --noEmit` を走らせた。 既定 mode と `--with-deploy` の両方で exit 0。
+
 ## 2.0.1
 
 ### Patch Changes

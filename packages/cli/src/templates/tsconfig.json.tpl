@@ -7,5 +7,5 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["tests/**/*.ts"]
+  "include": ["e2e/**/*.ts", "tests/**/*.ts", "playwright.config.ts"]
 }

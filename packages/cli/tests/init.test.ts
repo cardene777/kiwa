@@ -937,6 +937,32 @@ describe('the templates name packages that exist', () => {
     expect(named.map((file) => path.relative(TEMPLATE_DIR, file))).toEqual([]);
   });
 
+  it('T-INIT-103 the options a template passes to deployContract are options it accepts', () => {
+    // `prepare-env.ts.tpl` called `deployContract({ rpcUrl, privateKey, abiPath })`
+    // long after that signature stopped existing. The name was still exported, so
+    // checking the name proves nothing. Nothing compiled the template, and the
+    // generated `tsconfig.json` excluded the file it was written to, so the
+    // project a user received did not typecheck either.
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), '..', 'dapp', 'src', 'deploy-contract.ts'),
+      'utf-8',
+    );
+    const body = source.match(/export interface DeployContractOptions[^{]*\{([\s\S]*?)\n\}/);
+    if (body?.[1] === undefined) throw new Error('DeployContractOptions not found');
+    const accepted = new Set(
+      [...body[1].matchAll(/^\s{2}(\w+)\??:/gm)].map((match) => match[1] as string),
+    );
+
+    const template = fs.readFileSync(path.join(TEMPLATE_DIR, 'with-deploy', 'prepare-env.ts.tpl'), 'utf-8');
+    const call = template.match(/deployContract\(\{([\s\S]*?)\n {2}\}\)/);
+    if (call?.[1] === undefined) throw new Error('prepare-env.ts.tpl does not call deployContract');
+    const passed = [...call[1].matchAll(/^\s{4}(\w+)[:,]/gm)].map((match) => match[1] as string);
+
+    expect(accepted.size).toBeGreaterThan(0);
+    expect(passed.length).toBeGreaterThan(0);
+    expect(passed.filter((key) => !accepted.has(key))).toEqual([]);
+  });
+
   it('T-INIT-102 every kiwa package a template imports is one the project declares', () => {
     // `init` writes a `package.json` naming its devDependencies. A template that
     // imports anything else leaves the user with an import resolving to nothing
@@ -948,6 +974,64 @@ describe('the templates name packages that exist', () => {
     }
 
     expect([...imported].sort()).toEqual(['@kiwa-lab/dapp']);
+  });
+});
+
+/**
+ * `tsc` compiles what `include` names, and `init` wrote a `tsconfig.json` naming
+ * `tests/**` while it created `e2e/connect.spec.ts`. The default `init` produced
+ * a project whose typecheck failed for having no inputs at all, and neither mode
+ * ever typechecked the spec `init` exists to create.
+ *
+ * So this compares the files `init` actually wrote with the globs it actually
+ * wrote, rather than either against a literal.
+ */
+describe('the tsconfig init writes covers the files init writes', () => {
+  /** Enough of `tsc`'s globbing for the patterns `init` emits. */
+  function matches(glob: string, file: string): boolean {
+    const pattern = glob
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*\*\//g, '(?:.*/)?')
+      .replace(/(?<!\.)\*/g, '[^/]*');
+    return new RegExp(`^${pattern}$`).test(file);
+  }
+
+  function typescriptFilesUnder(dir: string): string[] {
+    return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) return typescriptFilesUnder(full);
+      return entry.name.endsWith('.ts') ? [path.relative(tempDir, full)] : [];
+    });
+  }
+
+  it('T-INIT-110 the glob matcher can say no', () => {
+    // A matcher that returns `true` for everything would pass every test below.
+    expect(matches('tests/**/*.ts', 'e2e/connect.spec.ts')).toBe(false);
+    expect(matches('e2e/**/*.ts', 'tests/fixture.ts')).toBe(false);
+    expect(matches('playwright.config.ts', 'playwright.ci.config.ts')).toBe(false);
+
+    expect(matches('tests/**/*.ts', 'tests/fixture.ts')).toBe(true);
+    expect(matches('e2e/**/*.ts', 'e2e/connect.spec.ts')).toBe(true);
+    expect(matches('playwright.config.ts', 'playwright.config.ts')).toBe(true);
+  });
+
+  it.each([
+    ['default', {}],
+    ['--with-deploy', { withDeploy: 'contract' }],
+  ])('T-INIT-111 every .ts file init writes (%s) is covered by the include', async (_mode, extra) => {
+    seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
+    const { runInit } = await loadInitModule();
+
+    runInit({ force: false, cwd: tempDir, ...extra } as Parameters<typeof runInit>[0]);
+
+    const config = JSON.parse(fs.readFileSync(path.join(tempDir, 'tsconfig.json'), 'utf-8')) as {
+      include: string[];
+    };
+    const written = typescriptFilesUnder(tempDir);
+    const uncovered = written.filter((file) => !config.include.some((g) => matches(g, file)));
+
+    expect(written.length).toBeGreaterThan(0);
+    expect(uncovered).toEqual([]);
   });
 });
 

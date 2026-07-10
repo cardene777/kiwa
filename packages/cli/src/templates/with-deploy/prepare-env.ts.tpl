@@ -7,6 +7,8 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { startAnvil, deployContract } from '@kiwa-lab/dapp';
+import { createPublicClient, createWalletClient, defineChain, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 
 const FOUNDRY_PATH = '{{FOUNDRY_PATH}}';
 const CONTRACT_NAME = 'YourContract';
@@ -31,17 +33,29 @@ export async function prepareEnv(cwd: string = process.cwd()): Promise<PreparedE
 
   execSync('forge build', { cwd: foundryDir, stdio: 'inherit' });
 
-  const abiPath = path.join(
-    foundryDir,
-    'out',
-    `${CONTRACT_NAME}.sol`,
-    `${CONTRACT_NAME}.json`,
-  );
+  // `forge build` writes `out/<Name>.sol/<Name>.json`, holding the ABI and the
+  // creation bytecode under `bytecode.object`.
+  const abiPath = path.join(foundryDir, 'out', `${CONTRACT_NAME}.sol`, `${CONTRACT_NAME}.json`);
+  const artifact = JSON.parse(fs.readFileSync(abiPath, 'utf8')) as {
+    abi: readonly unknown[];
+    bytecode: { object: `0x${string}` };
+  };
+
+  const anvilChain = defineChain({
+    id: 31337,
+    name: 'Anvil',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: { default: { http: [`http://127.0.0.1:${ANVIL_PORT}`] } },
+  });
+  const account = privateKeyToAccount(ANVIL_DEFAULT_KEY);
+  const transport = http(`http://127.0.0.1:${ANVIL_PORT}`);
 
   const deployed = await deployContract({
-    rpcUrl: `http://127.0.0.1:${ANVIL_PORT}`,
-    privateKey: ANVIL_DEFAULT_KEY,
-    abiPath,
+    account,
+    wallet: createWalletClient({ account, chain: anvilChain, transport }),
+    publicClient: createPublicClient({ chain: anvilChain, transport }),
+    abi: artifact.abi,
+    bytecode: artifact.bytecode.object,
     args: CONTRACT_ARGS,
   });
 
