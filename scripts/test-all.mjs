@@ -492,6 +492,7 @@ export function runCommand({
     let overflowed = false;
     let timedOut = false;
     let exitCode = null;
+    let exited = false;
     let settled = false;
     let timer;
     let flushTimer;
@@ -559,22 +560,29 @@ export function runCommand({
     child.on('error', (error) => {
       output += error.message;
       exitCode = -1;
+      exited = true;
       settle();
     });
 
     child.on('exit', (code) => {
+      // Signal termination arrives here as `code = null, signal = 'SIGTERM'`.
+      // Reading only `code` used to mean a shell that self-terminated was seen
+      // as "still running", so the timer path called it timed out and the
+      // sweep reported `(killed after 900s)` for a package that died in one.
       exitCode = code;
+      exited = true;
       flushTimer = setTimeout(settle, flushMs);
     });
 
     // Everything the child held is closed. Nothing left to wait for.
     child.on('close', (code) => {
       if (exitCode === null) exitCode = code;
+      exited = true;
       settle();
     });
 
     timer = setTimeout(() => {
-      if (settled || exitCode !== null) return;
+      if (settled || exited) return;
 
       // `exitCode === null` says our handler has not run. It says nothing about
       // the child, because a busy event loop delivers this timer before it

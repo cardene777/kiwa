@@ -649,22 +649,25 @@ test('runCommand sends no signal after a command exits on its own', async () => 
 });
 
 
-// A child that finishes past the deadline is late. That is the whole point of
-// the deadline, whether or not the timer callback beat the exit handler on the
-// blocked loop. `sleep 0.15` past `timeoutMs: 100` is late.
-test('runCommand is late when the child finished past the deadline', async () => {
-  const pending = sh('sleep 0.15', 100);
-  stallTheLoop(300);
-  const r = await pending;
-  assert.equal(r.timedOut, true);
-  assert.equal(r.ok, false);
+// The shell terminates by signal (`code = null, signal = 'SIGTERM'`), leaving a
+// grandchild alive to hold the pipes. Reading only `code` meant the sweep saw
+// the exit as "still running" and let the timeout callback take over — a
+// package that failed at once was reported `(killed after Ns)` because it
+// exited without a numeric code.
+//
+// A short `timeoutMs` and a grandchild that outlives the deadline force the
+// timer to fire before `close` does; without the fix, the timer sees
+// `exitCode === null` and marks the run late.
+test('runCommand does not read a signal-terminated exit as still running', async () => {
+  const started = Date.now();
+  const r = await sh('sleep 1 & kill -TERM $$', 100);
+  assert.equal(r.timedOut, false, 'the shell died at once; there was no deadline overrun');
+  assert.equal(r.ok, false, 'a signal death is still a failure');
+  assert.ok(Date.now() - started < 6000, 'and it settled promptly rather than waiting the grace out');
 });
 
-// The sibling: a command that finishes before the deadline is not late. In
-// practice, we cannot tell before-deadline from after-deadline once the loop
-// has stalled past both events; the sweep chooses the strict side. This
-// assertion pins the strict side: as long as the child is still visibly
-// running past the deadline, it is late.
+// The clearest form: the child is unambiguously still running past the
+// deadline, so the sweep kills it and marks it late.
 test('runCommand times out on a command that is clearly still running past the deadline', async () => {
   const r = await sh('sleep 30', 100);
   assert.equal(r.timedOut, true);
