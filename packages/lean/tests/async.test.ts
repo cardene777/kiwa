@@ -16,7 +16,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -28,6 +28,7 @@ import {
 } from '../src/extract.js';
 import { generateLeanSpec } from '../src/generator.js';
 import { UsageError } from '../src/errors.js';
+import { detectLeanBinaryAsync } from '../src/lean-runner.js';
 import { verifyLeanSpec, verifyLeanSpecAsync } from '../src/verify.js';
 import type { OrchestratorSpec } from '../src/types.js';
 
@@ -49,6 +50,58 @@ function leanPath(): string {
 
 /** Scratch directories the concurrency probes create, removed after each test. */
 const scratches: string[] = [];
+
+/**
+ * A `leanBin` that records how many Lean *runs* are alive at the same time.
+ *
+ * It ignores `--version`. `runLeanSourceAsync` asks `detectLeanBinaryAsync`
+ * whether the binary is Lean before it runs anything, so the wrapper is invoked
+ * twice per call. Under `Promise.all` the four detection calls overlap on their
+ * own, and a probe that counted them reported a peak of four while the Lean
+ * runs it was supposed to be watching went one at a time. Replacing
+ * `execFileAsync` with `execFileSync` in `lean-runner.ts` left that probe green.
+ *
+ * `mkdir` failing is fatal: two live wrappers cannot share a pid, so a
+ * collision would mean a stale directory, and a wrapper that shrugged would
+ * remove a directory another process is still counted by.
+ */
+function concurrencyProbe(prefix: string): { leanBin: string; peak: () => number } {
+  const scratch = mkdtempSync(join(tmpdir(), prefix));
+  scratches.push(scratch);
+  const live = join(scratch, 'live');
+  const peakFile = join(scratch, 'peak');
+  mkdirSync(live);
+
+  const leanBin = join(scratch, 'lean-wrapper');
+  writeFileSync(
+    leanBin,
+    [
+      '#!/bin/sh',
+      'for arg in "$@"; do',
+      `  [ "$arg" = "--version" ] && exec "${leanPath()}" "$@"`,
+      'done',
+      `mkdir "${live}/$$" || exit 97`,
+      `ls "${live}" | wc -l >> "${peakFile}"`,
+      `"${leanPath()}" "$@"`,
+      'code=$?',
+      `rmdir "${live}/$$"`,
+      'exit $code',
+    ].join('\n'),
+  );
+  chmodSync(leanBin, 0o755);
+
+  /** The most Lean runs alive at once. Zero when the probe saw nothing. */
+  const peak = () => {
+    if (!existsSync(peakFile)) return 0;
+    const counts = readFileSync(peakFile, 'utf-8')
+      .trim()
+      .split('\n')
+      .filter((line) => line.length > 0)
+      .map((line) => Number(line.trim()));
+    return counts.length === 0 ? 0 : Math.max(...counts);
+  };
+  return { leanBin, peak };
+}
 
 const SPEC: OrchestratorSpec = {
   moduleName: 'Probe',
@@ -222,95 +275,63 @@ describe('the reason for the async path', () => {
     clearInterval(timer);
 
     expect(report.status).toBe('ok');
-    // The sync call fires the timer zero times over the same work.
+    // A lower bound on elapsed time, not a ratio between two of them. Load can
+    // only make Lean take longer, and only makes the timer fire more often, so
+    // neither of these gets closer to failing on a busy machine. The assertion
+    // that had to go was `parallelMs < serialMs * 0.75`, which needed an idle
+    // core to be true. The sync call fires the timer zero times over this work.
     expect(elapsed).toBeGreaterThan(50);
     expect(ticks).toBeGreaterThanOrEqual(5);
   }, 120_000);
 
   it.skipIf(!HAS_LEAN)('T-ASYNC-031 the same work runs at once, not one after another', async () => {
-    // Count the Lean processes that are alive at the same time, rather than
-    // timing the two shapes and asserting one is faster. A wall-clock ratio
-    // says nothing on a machine with no spare core: this test read
+    // Count the Lean runs that are alive at the same time, rather than timing
+    // the two shapes and asserting one is faster. A wall-clock ratio says
+    // nothing on a machine with no spare core: this test read
     // `expected 767 to be less than 589.5` during a full workspace sweep,
     // because four Lean processes cannot overlap when nothing is idle. What
     // the async path promises is that it starts them; how fast they finish is
     // the machine's business.
-    const scratch = mkdtempSync(join(tmpdir(), 'lean-concurrency-'));
-    scratches.push(scratch);
-    const live = join(scratch, 'live');
-    const peakFile = join(scratch, 'peak');
-    mkdirSync(live);
-
-    const wrapper = join(scratch, 'lean-wrapper');
-    writeFileSync(
-      wrapper,
-      [
-        '#!/bin/sh',
-        `mkdir "${live}/$$"`,
-        `ls "${live}" | wc -l >> "${peakFile}"`,
-        `"${leanPath()}" "$@"`,
-        'code=$?',
-        `rmdir "${live}/$$"`,
-        'exit $code',
-      ].join('\n'),
-    );
-    chmodSync(wrapper, 0o755);
+    const { leanBin, peak } = concurrencyProbe('lean-concurrency-');
 
     const specs = Array.from({ length: 4 }, (_, i) => ({
       ...SPEC,
       moduleName: `Probe${i}`,
       namespace: `Probe${i}`,
     }));
-    const reports = await Promise.all(
-      specs.map((spec) => checkLeanTableAsync(spec, { leanBin: wrapper })),
-    );
+    const reports = await Promise.all(specs.map((spec) => checkLeanTableAsync(spec, { leanBin })));
     expect(reports.every((r) => r.status === 'ok')).toBe(true);
 
-    const peak = Math.max(
-      ...readFileSync(peakFile, 'utf-8')
-        .trim()
-        .split('\n')
-        .map((line) => Number(line.trim())),
-    );
     // Serial execution can never see two of its own processes alive at once.
-    expect(peak).toBeGreaterThanOrEqual(2);
+    expect(peak()).toBeGreaterThanOrEqual(2);
   }, 300_000);
 
   it.skipIf(!HAS_LEAN)('T-ASYNC-032 the same probe reports one when the calls are serial', async () => {
     // Without this, T-ASYNC-031 passes against a counter that always says 4.
-    const scratch = mkdtempSync(join(tmpdir(), 'lean-serial-'));
-    scratches.push(scratch);
-    const live = join(scratch, 'live');
-    const peakFile = join(scratch, 'peak');
-    mkdirSync(live);
-
-    const wrapper = join(scratch, 'lean-wrapper');
-    writeFileSync(
-      wrapper,
-      [
-        '#!/bin/sh',
-        `mkdir "${live}/$$"`,
-        `ls "${live}" | wc -l >> "${peakFile}"`,
-        `"${leanPath()}" "$@"`,
-        'code=$?',
-        `rmdir "${live}/$$"`,
-        'exit $code',
-      ].join('\n'),
-    );
-    chmodSync(wrapper, 0o755);
+    const { leanBin, peak } = concurrencyProbe('lean-serial-');
 
     for (let i = 0; i < 3; i += 1) {
       const spec = { ...SPEC, moduleName: `Serial${i}`, namespace: `Serial${i}` };
-      expect((await checkLeanTableAsync(spec, { leanBin: wrapper })).status).toBe('ok');
+      expect((await checkLeanTableAsync(spec, { leanBin })).status).toBe('ok');
     }
 
-    const peak = Math.max(
-      ...readFileSync(peakFile, 'utf-8')
-        .trim()
-        .split('\n')
-        .map((line) => Number(line.trim())),
-    );
-    expect(peak).toBe(1);
+    expect(peak()).toBe(1);
+  }, 300_000);
+
+  it.skipIf(!HAS_LEAN)('T-ASYNC-033 the probe watches the run, not the version check', async () => {
+    // `runLeanSourceAsync` asks the binary whether it is Lean before running
+    // anything, so the wrapper is invoked twice per call. Four of those
+    // detection calls overlap under `Promise.all` all by themselves. A probe
+    // that counted them reported a peak of four while the Lean runs went one at
+    // a time, and stayed green when `execFileAsync` was replaced with
+    // `execFileSync` in `lean-runner.ts`.
+    const { leanBin, peak } = concurrencyProbe('lean-version-');
+
+    // Four detection calls at once. They overlap; the probe must not count them.
+    const found = await Promise.all([0, 1, 2, 3].map(() => detectLeanBinaryAsync(leanBin)));
+    expect(found.every((bin) => bin !== null)).toBe(true);
+
+    expect(peak()).toBe(0);
   }, 300_000);
 });
 
