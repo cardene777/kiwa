@@ -2,11 +2,13 @@
 //
 // Every dogfood example's `pnpm test` runs an `emit-fidelity-report` spec that
 // writes `quality-report/fidelity-latest.{json,md}` next to the example, with a
-// fresh `reportedAt` on every run. The docs have always described that path as
-// git-ignored, and 27 examples ignored it in their own `.gitignore`. The other
-// 34 committed it. So a full test run left 56 modified files in the working
-// tree, and a `git add -A` afterwards swept them into an unrelated commit —
-// which is exactly how they got into the first commit of #1389.
+// fresh `reportedAt` on every run — and, in ten of them, a fresh `p50Ms` /
+// `p95Ms` / `p99Ms`, because those are measured wall-clock latencies. The docs
+// have always described that path as git-ignored, and 27 examples ignored it in
+// their own `.gitignore`. The other 34 committed it. So a full test run left 56
+// modified files in the working tree, and a `git add -A` afterwards swept them
+// into an unrelated commit — which is exactly how they got into the first
+// commit of #1389.
 //
 // The snapshot a release depends on is not this file. It is promoted by hand to
 // `docs/quality-reports/<domain>/<name>.md`, which stays tracked and reviewed.

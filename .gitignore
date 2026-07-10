@@ -29,12 +29,14 @@ examples/*/dist/
 examples/*/tsconfig.tsbuildinfo
 examples/*/.context/
 examples/*/lcov.info
-# Every dogfood example's `pnpm test` rewrites `quality-report/fidelity-latest.{json,md}`,
-# and only `reportedAt` changes between runs. 27 examples ignored the path in their own
-# `.gitignore`; 34 committed it, so a full test run left 56 modified files behind and a
-# `git add -A` swept them into whatever was being committed. The reviewed snapshot a
-# release depends on is promoted by hand to `docs/quality-reports/<domain>/<name>.md`,
-# which stays tracked. Nothing reads the per-example copy.
+# Every dogfood example's `pnpm test` rewrites `quality-report/fidelity-latest.{json,md}`.
+# `reportedAt` changes on every run, and ten of them also carry wall-clock latency
+# (`p50Ms` / `p95Ms` / `p99Ms`) that lands on a different float each time. 27 examples
+# ignored the path in their own `.gitignore`; 34 committed it, so a full test run left 56
+# modified files behind and a `git add -A` swept them into whatever was being committed.
+# The reviewed snapshot a release depends on is promoted by hand to
+# `docs/quality-reports/<domain>/<name>.md`, which stays tracked. Nothing reads the
+# per-example copy.
 examples/*/quality-report/
 
 # Local-only context (markers / spec drafts / scratch)
