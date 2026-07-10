@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/cli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "CLI for kiwa (init / doctor commands)",
   "license": "UNLICENSED",
   "author": {
@@ -28,7 +28,8 @@
   "files": [
     "dist",
     "README.md",
-    "README.ja.md"
+    "README.ja.md",
+    "CHANGELOG.md"
   ],
   "publishConfig": {
     "access": "public"

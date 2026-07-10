@@ -9,8 +9,17 @@ interface TemplateSpec {
 
 const TSCONFIG_TEMPLATE: TemplateSpec = { source: 'tsconfig.json.tpl', dest: 'tsconfig.json' };
 
+/**
+ * What the generated `package.json` asks for.
+ *
+ * `@kiwa-lab/dapp` sat at `^0.1.0` after the v2.0 rename bumped it to `2.0.0`, so
+ * `init` wrote a project whose `npm install` failed with `ETARGET`. The range
+ * must be one the published `@kiwa-lab/dapp` satisfies, and `T-INIT-053` compares
+ * it with the version in this repository rather than with a literal, since a
+ * literal is what pinned the mistake.
+ */
 const DEV_DEPENDENCIES = {
-  '@kiwa-lab/dapp': '^0.1.0',
+  '@kiwa-lab/dapp': '^2.0.0',
   '@playwright/test': '^1.49.0',
   viem: '^2',
 } as const;

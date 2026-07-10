@@ -3,6 +3,62 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+/**
+ * The range `init` writes for `@kiwa-lab/dapp`, read from the source rather than
+ * repeated here.
+ *
+ * It sat at `^0.1.0` while `@kiwa-lab/dapp` was published at `2.0.0`, so
+ * `npm install` in a generated project failed with `ETARGET`. These tests
+ * asserted `'^0.1.0'` as a literal, which is how a broken range survived the v2.0
+ * rename: the test that should have caught it was pinning it.
+ */
+const DAPP_RANGE = (() => {
+  const source = fs.readFileSync(
+    path.resolve(process.cwd(), 'src', 'commands', 'init.ts'),
+    'utf-8',
+  );
+  const match = source.match(/'@kiwa-lab\/dapp': '([^']+)'/);
+  if (match?.[1] === undefined) throw new Error('init.ts does not name a range for @kiwa-lab/dapp');
+  return match[1];
+})();
+
+/** The version of `@kiwa-lab/dapp` this repository builds and publishes. */
+const DAPP_VERSION = (
+  JSON.parse(
+    fs.readFileSync(path.resolve(process.cwd(), '..', 'dapp', 'package.json'), 'utf-8'),
+  ) as { version: string }
+).version;
+
+/** `[major, minor, patch]`, and anything after them ignored. */
+function parts(text: string): [number, number, number] {
+  const [major = 0, minor = 0, patch = 0] = text.replace(/^\^/, '').split('.').map(Number);
+  return [major, minor, patch];
+}
+
+function atLeast(version: [number, number, number], floor: [number, number, number]): boolean {
+  for (let i = 0; i < 3; i += 1) {
+    const [v, f] = [version[i] as number, floor[i] as number];
+    if (v !== f) return v > f;
+  }
+  return true;
+}
+
+/**
+ * Does `version` satisfy the caret `range`?
+ *
+ * Carets only, because that is all `init` writes. `^2.0.0` accepts `2.x.y` and
+ * refuses `3.0.0`. Below one, a caret pins the minor: `^0.1.0` accepts `0.1.y`
+ * and nothing else, which is why the old range matched no published version once
+ * `dapp` reached `2.0.0`.
+ */
+function satisfiesCaret(version: string, range: string): boolean {
+  const floor = parts(range);
+  const actual = parts(version);
+  if (floor[0] > 0) return actual[0] === floor[0] && atLeast(actual, floor);
+  if (floor[1] > 0) return actual[0] === 0 && actual[1] === floor[1] && atLeast(actual, floor);
+  return actual[0] === 0 && actual[1] === 0 && actual[2] === floor[2];
+}
+
 type InitModule = {
   InitConflictError: new (conflicts: string[]) => Error & { conflicts: string[] };
   runInit: (options: { force: boolean; cwd: string }) => {
@@ -96,7 +152,7 @@ describe('runInit', () => {
     // Then
     expect(packageJson.scripts['test:e2e']).toBe('playwright test');
     expect(packageJson.scripts.build).toBe('echo build');
-    expect(packageJson.devDependencies['@kiwa-lab/dapp']).toBe('^0.1.0');
+    expect(packageJson.devDependencies['@kiwa-lab/dapp']).toBe(DAPP_RANGE);
     expect(packageJson.devDependencies['@playwright/test']).toBe('^1.49.0');
     expect(packageJson.devDependencies.viem).toBe('^2');
     expect(packageJson.devDependencies.typescript).toBe('^5.0.0');
@@ -226,7 +282,7 @@ describe('runInit', () => {
     // Then
     expect(packageJson.devDependencies['@playwright/test']).toBe('^1.48.0');
     expect(packageJson.devDependencies.viem).toBe('^2.21.0');
-    expect(packageJson.devDependencies['@kiwa-lab/dapp']).toBe('^0.1.0');
+    expect(packageJson.devDependencies['@kiwa-lab/dapp']).toBe(DAPP_RANGE);
   });
 
   it('T-INIT-009 package.json が invalid JSON の場合は rollback して created file を残さない', async () => {
@@ -669,12 +725,12 @@ describe('runInit', () => {
     expect(fs.existsSync(path.join(tempDir, 'tests/fixture.ts'))).toBe(true);
   });
 
-  it('T-INIT-051 devDeps @kiwa-lab/dapp version = ^0.1.0', async () => {
+  it('T-INIT-051 devDeps @kiwa-lab/dapp uses the range this repository publishes', async () => {
     seedPackageJson(tempDir, { name: 'host', version: '1.0.0' });
     const { runInit } = await loadInitModule();
     runInit({ force: false, cwd: tempDir });
     const pkg = readPackageJson(tempDir);
-    expect(pkg.devDependencies['@kiwa-lab/dapp']).toBe('^0.1.0');
+    expect(pkg.devDependencies['@kiwa-lab/dapp']).toBe(DAPP_RANGE);
   });
 
   it('T-INIT-052 devDeps @playwright/test version = ^1.49.0', async () => {
@@ -892,5 +948,33 @@ describe('the templates name packages that exist', () => {
     }
 
     expect([...imported].sort()).toEqual(['@kiwa-lab/dapp']);
+  });
+});
+
+/**
+ * `init` names a version range for a package this repository publishes. Bump one
+ * and not the other, and `npm install` in a generated project fails on a version
+ * that exists nowhere. That is what `^0.1.0` did after the v2.0 rename took
+ * `@kiwa-lab/dapp` to `2.0.0`.
+ */
+describe('the range init writes is one this repository publishes', () => {
+  it('T-INIT-053 the version of @kiwa-lab/dapp satisfies the range init writes', () => {
+    expect(satisfiesCaret(DAPP_VERSION, DAPP_RANGE)).toBe(true);
+  });
+
+  it('T-INIT-054 satisfiesCaret can say no, and knows the rule below one', () => {
+    // A check that answers `true` for everything would pass the test above with a
+    // range matching nothing, which is exactly the state this replaces.
+    expect(satisfiesCaret('2.0.0', '^0.1.0')).toBe(false);
+    expect(satisfiesCaret('3.0.0', '^2.0.0')).toBe(false);
+    expect(satisfiesCaret('1.9.9', '^2.0.0')).toBe(false);
+    expect(satisfiesCaret('2.0.0', '^2.1.0')).toBe(false);
+
+    expect(satisfiesCaret('2.0.0', '^2.0.0')).toBe(true);
+    expect(satisfiesCaret('2.7.3', '^2.0.0')).toBe(true);
+
+    // Below one, a caret pins the minor.
+    expect(satisfiesCaret('0.1.9', '^0.1.0')).toBe(true);
+    expect(satisfiesCaret('0.2.0', '^0.1.0')).toBe(false);
   });
 });
