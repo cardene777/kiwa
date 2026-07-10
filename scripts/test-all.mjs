@@ -11,25 +11,33 @@
  *
  *   red      the package failed, and its own output does not blame a tool
  *   blocked  the package failed, and its output names a tool that is absent.
- *            Never read this as "passed". It is printed with the line from the
- *            package's output that says so, and `--strict` turns it red.
+ *            It is printed with the line from the package's output that says
+ *            so, and it counts as a failure. A package that did not run has
+ *            not passed, and a failure that happens to mention a missing tool
+ *            may also have failed for a reason of its own; the first signature
+ *            found wins, so classification is a hint and never an excuse.
+ *            `--allow-missing-tools` exits 0 anyway.
  *   dirty    the package's tests changed a tracked file. A test that writes
  *            into the repository is a test with a side effect, and a
  *            `git add -A` afterwards sweeps it into an unrelated commit. This
  *            is a failure of the package that did it, whatever its exit code.
+ *
+ * The dirty check reads `git status --porcelain` at the repository root. A test
+ * that writes outside the repository, or into a path `.gitignore` covers, is
+ * invisible to it.
  *
  * A line is printed as each package finishes, with how long it took. A sweep of
  * this repository takes the better part of an hour; a script that prints
  * nothing until the end cannot be told apart from one that has hung.
  *
  * Usage:
- *   node scripts/test-all.mjs                  summary, first error per package
- *   node scripts/test-all.mjs --verbose        every error line
- *   node scripts/test-all.mjs --strict         blocked packages count as red
- *   node scripts/test-all.mjs --only nextjs    only packages whose path matches
- *   node scripts/test-all.mjs --timeout 600    seconds per package (default 900)
+ *   node scripts/test-all.mjs                       summary, first error per package
+ *   node scripts/test-all.mjs --verbose            every error line
+ *   node scripts/test-all.mjs --allow-missing-tools  exit 0 even if a tool is absent
+ *   node scripts/test-all.mjs --only nextjs        only packages whose path matches
+ *   node scripts/test-all.mjs --timeout 600        seconds per package (default 900)
  *
- * Exits 1 when any package is red or left the working tree dirty.
+ * Exits 1 when any package is red, blocked, or left the working tree dirty.
  *
  * Sequential, always. Many `test` scripts build the workspace packages they
  * depend on, so two of them at once rewrite the same `dist` while the other
@@ -147,6 +155,20 @@ function defaultReadManifest(path) {
   }
 }
 
+/**
+ * The JSON array in `text`, ignoring anything printed before it.
+ *
+ * `pnpm` sometimes prints an update notice or a warning to stdout before the
+ * document it was asked for, and `JSON.parse` has no tolerance for it. A sweep
+ * that dies before running a single package because of a version banner is a
+ * bad way to learn this.
+ */
+export function parseProjectList(text) {
+  const start = text.indexOf('[');
+  if (start === -1) throw new Error('pnpm ls printed no JSON array');
+  return JSON.parse(text.slice(start));
+}
+
 /** Ask pnpm which projects the workspace has. */
 function listProjects() {
   return new Promise((resolve, reject) => {
@@ -154,7 +176,7 @@ function listProjects() {
     execFile('pnpm', ['ls', '-r', '--depth', '-1', '--json'], options, (error, stdout) => {
       if (error) return reject(new Error(`pnpm ls failed: ${error.message}`));
       try {
-        resolve(JSON.parse(stdout));
+        resolve(parseProjectList(stdout));
       } catch (e) {
         reject(new Error(`pnpm ls did not return JSON: ${e.message}`));
       }
@@ -171,22 +193,53 @@ function porcelain() {
   });
 }
 
+/** SIGKILL the child's process group, and the child if it has escaped it. */
+function killGroup(child) {
+  try {
+    // Negative pid: the whole process group, which `detached` gave us.
+    process.kill(-child.pid, 'SIGKILL');
+  } catch {
+    try {
+      child.kill('SIGKILL');
+    } catch {
+      // Already gone.
+    }
+  }
+}
+
 /**
  * Run a command, and decide for ourselves whether it ran out of time.
  *
- * `execFile`'s own `timeout` option cannot be trusted here. It sends `SIGTERM`
- * and then reports whatever the child's exit code turned out to be. `pnpm`
- * catches `SIGTERM` and exits 0, so `error` arrives as `null` and a package
- * that was killed for hanging is indistinguishable from one that passed. This
- * is not hypothetical: a sweep of this repository reported
- * `examples/nextjs-safe-multisig` as taking 420.5 seconds and passing, with the
- * per-package limit set to 420 seconds.
+ * `execFile`'s own `timeout` cannot be trusted here. It sends `SIGTERM` and
+ * then reports whatever the child's exit code turned out to be. `pnpm` catches
+ * `SIGTERM` and exits 0, so `error` arrives as `null` and a package killed for
+ * hanging is indistinguishable from one that passed. A sweep of this repository
+ * reported `examples/nextjs-safe-multisig` as taking 420.5 seconds and passing,
+ * with the per-package limit set to 420 seconds.
  *
- * So: our timer, our verdict. The child is detached so that killing the process
- * group takes its grandchildren — a `next build` or a dev server — with it,
- * rather than leaving them holding the pipes open.
+ * So: our timer, our verdict.
+ *
+ * We settle on `exit`, not on `close`. `close` waits for the stdio pipes, and a
+ * grandchild that outlives its parent — a dev server, a watcher — inherits them
+ * and holds them open. Waiting for `close` means a package whose tests passed
+ * in a second sits until the timer kills it and is then reported as a hang; and
+ * a grandchild that has left the process group (`setsid`) survives the kill and
+ * holds the pipes forever, so the promise never settles and the sweep, which
+ * has no outer timeout, stops.
+ *
+ * After `exit` we give the pipes `flushMs` to deliver what the child already
+ * wrote, then stop waiting. `killGraceMs` is the backstop for a child that
+ * never reports having exited at all.
  */
-export function runCommand({ command, args, cwd, timeoutMs, maxBytes = 64 * 1024 * 1024 }) {
+export function runCommand({
+  command,
+  args,
+  cwd,
+  timeoutMs,
+  maxBytes = 64 * 1024 * 1024,
+  flushMs = 500,
+  killGraceMs = 5000,
+}) {
   return new Promise((resolve) => {
     let child;
     try {
@@ -200,6 +253,24 @@ export function runCommand({ command, args, cwd, timeoutMs, maxBytes = 64 * 1024
     let bytes = 0;
     let overflowed = false;
     let timedOut = false;
+    let exitCode = null;
+    let settled = false;
+    let timer;
+    let flushTimer;
+    let graceTimer;
+
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      clearTimeout(flushTimer);
+      clearTimeout(graceTimer);
+      // Whatever the child left behind in its group goes now. A grandchild that
+      // called `setsid` has left the group and outlives us; nothing here can
+      // reach it, and the sweep does not wait for it.
+      killGroup(child);
+      resolve({ ok: !timedOut && !overflowed && exitCode === 0, timedOut, overflowed, output });
+    };
 
     const collect = (chunk) => {
       bytes += chunk.length;
@@ -212,25 +283,28 @@ export function runCommand({ command, args, cwd, timeoutMs, maxBytes = 64 * 1024
     child.stdout.on('data', collect);
     child.stderr.on('data', collect);
 
-    const timer = setTimeout(() => {
-      timedOut = true;
-      try {
-        // Negative pid: the whole process group, which `detached` gave us.
-        process.kill(-child.pid, 'SIGKILL');
-      } catch {
-        child.kill('SIGKILL');
-      }
-    }, timeoutMs);
-
     child.on('error', (error) => {
-      clearTimeout(timer);
-      resolve({ ok: false, timedOut, overflowed, output: `${output}${error.message}` });
+      output += error.message;
+      exitCode = -1;
+      settle();
     });
 
-    child.on('close', (code) => {
-      clearTimeout(timer);
-      resolve({ ok: !timedOut && !overflowed && code === 0, timedOut, overflowed, output });
+    child.on('exit', (code) => {
+      exitCode = code;
+      flushTimer = setTimeout(settle, flushMs);
     });
+
+    // Everything the child held is closed. Nothing left to wait for.
+    child.on('close', (code) => {
+      if (exitCode === null) exitCode = code;
+      settle();
+    });
+
+    timer = setTimeout(() => {
+      timedOut = true;
+      killGroup(child);
+      graceTimer = setTimeout(settle, killGraceMs);
+    }, timeoutMs);
   });
 }
 
@@ -269,7 +343,7 @@ function argValue(flag, fallback) {
 
 async function main() {
   const verbose = process.argv.includes('--verbose');
-  const strict = process.argv.includes('--strict');
+  const allowMissingTools = process.argv.includes('--allow-missing-tools');
   const only = argValue('--only', null);
   const timeoutSec = Number(argValue('--timeout', '900'));
   if (!Number.isFinite(timeoutSec) || timeoutSec <= 0) throw new Error('--timeout takes seconds');
@@ -337,6 +411,7 @@ async function main() {
 
   if (blocked.length > 0) {
     process.stdout.write('\nnot run, because a tool is missing. This is not "passed".\n');
+    if (allowMissingTools) process.stdout.write('(--allow-missing-tools: not counted against the exit code)\n');
     const byTool = new Map();
     for (const b of blocked) {
       if (!byTool.has(b.cause.tool)) byTool.set(b.cause.tool, []);
@@ -359,7 +434,7 @@ async function main() {
     }
   }
 
-  const failed = red.length + dirty.length + (strict ? blocked.length : 0);
+  const failed = red.length + dirty.length + (allowMissingTools ? 0 : blocked.length);
   process.stdout.write(
     `\ngreen: ${green}   red: ${red.length}   dirty: ${dirty.length}   not run: ${blocked.length}\n`,
   );

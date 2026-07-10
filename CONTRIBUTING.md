@@ -63,15 +63,20 @@ Four verdicts, and only one of them means the package is fine:
 - `RED` — failed, and its own output blames no missing tool.
 - `SKIP` — failed, and its output names a tool that is not installed. It is
   printed with the line that says so, and the tool's install command. **This
-  never means "passed."** `--strict` makes it red.
+  never means "passed," and it counts as a failure.** The first signature found
+  wins, so a package that failed on its own *and* mentioned a missing tool lands
+  here too; the classification tells you what to install, it does not excuse
+  anything. `--allow-missing-tools` exits 0 anyway.
 - `DIRTY` — the package's tests changed the working tree. A test that writes
   into the repository is a test with a side effect, and a `git add -A`
   afterwards sweeps it into an unrelated commit. This is a failure of the
-  package that did it, whatever its exit code.
+  package that did it, whatever its exit code. The check reads
+  `git status --porcelain` at the repository root: a test that writes outside
+  the repository, or into an ignored path, is invisible to it.
 
-It exits 1 when anything is red or dirty. Like `typecheck:all`, it is sequential
-on purpose: many `test` scripts build the workspace packages they depend on, so
-two at once rewrite the same `dist` while the other reads it.
+It exits 1 when anything is red, blocked or dirty. Like `typecheck:all`, it is
+sequential on purpose: many `test` scripts build the workspace packages they
+depend on, so two at once rewrite the same `dist` while the other reads it.
 
 Use `--only <substring>` while iterating on one package, and `--timeout <n>` to
 change the per-package limit (900 seconds by default; a package killed for
@@ -85,15 +90,17 @@ Measured, by hiding each tool and running the sweep — not by reading
 | tool | needed by | what you see without it |
 |---|---|---|
 | Node.js 20+, pnpm 10+ | everything | — |
-| Playwright Chromium | the 22 packages whose `test` is `playwright test` | `Executable doesn't exist at .../chromium_headless_shell-1223` |
+| Playwright Chromium | the 22 packages whose `test` script ends in `playwright test` | `Executable doesn't exist at .../chromium_headless_shell-1223` |
 | Foundry (`anvil` on `PATH`) | the packages that start a chain, through `@kiwa-lab/dapp` | `Error: anvil not found in PATH` |
 
 Nothing else. In particular:
 
-- **Docker is not needed.** Twenty-six examples depend on `testcontainers`, and
-  every one of them passes with `DOCKER_HOST` pointed at a socket that does not
-  exist. Containers are only started by the `real` adapters, which `pnpm test`
-  does not reach.
+- **Docker is not needed.** Six examples declare `testcontainers` as a
+  dependency, and all six pass with `DOCKER_HOST` pointed at a socket that does
+  not exist. Containers are only started by the `real` adapters, which
+  `pnpm test` does not reach. (Twenty more examples mention the word in their
+  `description` and never import it — counting those was how an earlier draft of
+  this file arrived at twenty-six.)
 - **`expo`, `react-native`, `metro`, `gradle`, `electron-builder` and
   `electron-updater` are not needed.** Two dogfood examples used to spawn them,
   and one of them ran `/usr/bin/osascript` on macOS. They now drive

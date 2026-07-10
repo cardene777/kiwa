@@ -11,6 +11,7 @@ import {
   discoverPackages,
   failureLines,
   parsePorcelain,
+  parseProjectList,
   runCommand,
 } from './test-all.mjs';
 
@@ -64,15 +65,33 @@ test('classifyFailure does not match a tool named in passing prose', () => {
   assert.equal(classifyFailure('✓ starts a docker container when configured (mocked)'), null);
 });
 
-test('every signature is a string some tool actually prints', () => {
-  for (const { tool, install, evidence } of TOOL_SIGNATURES) {
-    assert.ok(tool.length > 0, 'tool has a name');
-    assert.ok(install.length > 0, `${tool} says how to install it`);
-    assert.ok(evidence.length > 0, `${tool} has at least one signature`);
-    for (const needle of evidence) {
-      assert.equal(classifyFailure(`prefix ${needle} suffix`).tool, tool);
-    }
-  }
+// Pinning the strings, not restating the table. Asserting that
+// `classifyFailure(evidence)` matches `evidence` would pass for any invented
+// string; that is how `spawn anvil ENOENT` survived a first draft. Each of
+// these was copied out of a failure produced by hiding the tool.
+test('the signatures are the exact strings the tools print', () => {
+  assert.deepEqual(
+    TOOL_SIGNATURES.map((s) => [s.tool, s.evidence]),
+    [
+      ['Playwright Chromium', ["Executable doesn't exist at"]],
+      ['Foundry (anvil)', ['anvil not found in PATH']],
+    ],
+  );
+  for (const { install } of TOOL_SIGNATURES) assert.ok(install.length > 0, 'says how to install it');
+});
+
+test('classifyFailure says no to a plausible string no tool prints', () => {
+  assert.equal(classifyFailure('Error: chromium is not installed'), null);
+  assert.equal(classifyFailure('Error: could not find anvil'), null);
+});
+
+// The first signature found wins, so a failure that mentions a tool AND fails
+// on its own is classified blocked. That is why blocked counts as a failure by
+// default: the classification is a hint about what to install, never a reason
+// to call the sweep green.
+test('a failure that also mentions a missing tool is classified blocked', () => {
+  const output = ['AssertionError: expected 3 to be 4', "Executable doesn't exist at /x"].join('\n');
+  assert.equal(classifyFailure(output)?.tool, 'Playwright Chromium');
 });
 
 test('parsePorcelain reads modified, added, deleted and untracked paths', () => {
@@ -207,6 +226,28 @@ test('runCommand kills a child that ignores SIGTERM', async () => {
   assert.ok(Date.now() - started < 5000, 'SIGKILL to the process group, not SIGTERM to the leader');
 });
 
+// `close` fires when the stdio pipes close, not when the child exits. A
+// background grandchild inherits the pipes and holds them open. Waiting for
+// `close` reported this command — which exits 0 immediately — as a hang, and
+// burned the whole per-package limit doing it.
+test('runCommand does not wait for a grandchild that outlives a passing command', async () => {
+  const started = Date.now();
+  const r = await sh('sleep 5 & exit 0', 1500);
+  assert.equal(r.ok, true, 'exited 0, so it passed');
+  assert.equal(r.timedOut, false);
+  assert.ok(Date.now() - started < 2500, `settled in ${Date.now() - started}ms, not after the sleep`);
+});
+
+// The same shape, but the command really does hang. It must still settle
+// promptly once killed, rather than waiting on pipes a grandchild holds.
+test('runCommand settles after killing a command whose grandchild holds the pipes', async () => {
+  const started = Date.now();
+  const r = await sh('sleep 20 & sleep 20', 600);
+  assert.equal(r.timedOut, true);
+  assert.equal(r.ok, false);
+  assert.ok(Date.now() - started < 4000, `settled in ${Date.now() - started}ms`);
+});
+
 test('runCommand reports a command that does not exist', async () => {
   const r = await runCommand({
     command: 'this-command-does-not-exist',
@@ -228,6 +269,19 @@ test('runCommand refuses output larger than its cap', async () => {
   });
   assert.equal(r.overflowed, true);
   assert.equal(r.ok, false, 'truncated output is not evidence the tests passed');
+});
+
+// A sweep that dies before running a package because pnpm printed a version
+// banner is a bad way to learn that `JSON.parse` has no tolerance for prose.
+test('parseProjectList ignores anything pnpm prints before the JSON', () => {
+  assert.deepEqual(parseProjectList('[{"path":"/a"}]'), [{ path: '/a' }]);
+  assert.deepEqual(parseProjectList('Update available! 10.0.0 -> 10.1.0\n[{"path":"/a"}]'), [
+    { path: '/a' },
+  ]);
+});
+
+test('parseProjectList throws when there is no JSON at all', () => {
+  assert.throws(() => parseProjectList('command not found'), /no JSON array/);
 });
 
 test('failureLines picks out the lines that look like failures', () => {
