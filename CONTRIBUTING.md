@@ -58,6 +58,30 @@ packages they depend on, so two running at once rewrite the same `dist` while
 the other reads it, and `tsc` reports missing members that exist. `--jobs 4`
 runs them concurrently and will invent red packages that pass when run alone.
 
+### When typecheck passes
+
+A green typecheck says nothing about the files it never opened. Most packages
+exclude `tests/` from `tsconfig.json` and compile it in the `test` script
+instead; Playwright specs are compiled by neither, because Playwright transpiles
+with esbuild and never looks at a type.
+
+`pnpm typecheck:coverage` finds test files that nothing compiles, and exits 1 if
+there are any:
+
+```
+$ pnpm typecheck:coverage
+packages with test files: 218
+packages whose tests nothing compiles: 1
+
+  examples/remix-full   1/6
+      tests/e2e/remix-server.spec.ts
+```
+
+Run it after adding a test directory, a tsconfig, or a `typecheck` script. It
+asks `tsc --showConfig` which files each config resolves rather than reading
+`include` and `exclude` by hand, because `exclude` beats `include` and `extends`
+chains are not obvious.
+
 ## Development setup
 
 - Node.js 20+

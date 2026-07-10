@@ -22,7 +22,8 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "test:docs-e2e": "playwright test tests/docs-site-e2e",
-    "typecheck:all": "node scripts/typecheck-all.mjs"
+    "typecheck:all": "node scripts/typecheck-all.mjs",
+    "typecheck:coverage": "node scripts/typecheck-coverage.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
