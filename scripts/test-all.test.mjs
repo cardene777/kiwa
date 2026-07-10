@@ -575,19 +575,18 @@ test('runCommand sends no signal after a command exits on its own', async () => 
   assert.deepEqual(sent, [], 'a clean exit signals nothing');
 });
 
-// `exitCode === null` means our `exit` handler has not run, not that the child
-// is alive. A busy loop delivers the timer first. This command finishes in a
-// millisecond and used to come back `{ ok: false, timedOut: true }`, having
-// SIGKILLed a pid it no longer owned.
-test('runCommand does not call a finished command timed out because the loop was busy', async () => {
-  const { result, sent } = await withSignalsRecorded(async () => {
-    const pending = sh('exit 0', 10);
-    stallTheLoop(200);
-    return pending;
-  });
-  assert.equal(result.timedOut, false, 'it exited; it did not run out of time');
-  assert.equal(result.ok, true);
-  assert.deepEqual(sent, [], 'nothing is signalled at a pid that has been released');
+
+// The child finished after the deadline, but before the busy loop released.
+// The JS timer callback never got to fire, so nothing had flipped `timedOut` —
+// and the command was reported green. The deadline is now checked from `exit`,
+// against the wall clock, so the answer no longer depends on which of two
+// event-loop entries won a race that the loop was blocked out of.
+test('runCommand is late when it finishes late, even if the loop was blocked past the deadline', async () => {
+  const pending = sh('sleep 0.05', 10);
+  stallTheLoop(200);
+  const r = await pending;
+  assert.equal(r.timedOut, true, 'the deadline passed before the child was done');
+  assert.equal(r.ok, false);
 });
 
 // And the same stall must not stop a real hang from being killed.
@@ -769,6 +768,13 @@ test('argValue refuses a flag with no value, or with another flag after it', () 
 test('argValue takes a negative number as a value', () => {
   assert.equal(argValue(['node', 'x', '--timeout', '-5'], '--timeout', '900'), '-5');
   assert.equal(argValue(['node', 'x', '--timeout', '-0.5'], '--timeout', '900'), '-0.5');
+});
+
+// `--only ""` used to filter for the empty string, match every path, and run
+// the full sweep. An empty string is a value; it is just never a meaningful one.
+test('argValue refuses an empty string as a value', () => {
+  assert.throws(() => argValue(['node', 'x', '--only', ''], '--only', null), /needs a value/);
+  assert.throws(() => argValue(['node', 'x', '--timeout', ''], '--timeout', '900'), /needs a value/);
 });
 
 // `--only nextjs --only safe` used to run the `nextjs` subset and say nothing

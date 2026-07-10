@@ -423,6 +423,12 @@ export function runCommand({
   classify = classifyFailure,
 }) {
   return new Promise((resolve) => {
+    // Wall-clock deadline. A busy loop can hold the timer callback back past
+    // this instant, and if the child exits while the loop is blocked, the timer
+    // never gets to fire — every handler sees `timedOut === false`. Read the
+    // clock at `exit` and let the deadline itself decide.
+    const deadline = Date.now() + timeoutMs;
+
     let child;
     try {
       child = spawn(command, args, { cwd, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -539,15 +545,14 @@ export function runCommand({
       // hundred samples found no moment where Node had reaped and our `exit`
       // handler had not run. A defence nothing can reach is a defence nothing
       // has checked.
-      if (!groupAlive(child.pid)) {
-        // It has exited. `exit` and `close` are on their way with the real
-        // answer; this timer is only here so that a lost event cannot hang the
-        // sweep, which has no outer timeout.
-        graceTimer = setTimeout(settle, killGraceMs);
-        return;
-      }
+      // Whether the group is still there or a zombie, this timer only fires
+      // after `timeoutMs`, so we are past the deadline. If our `exit` handler
+      // had run in time it would have returned above. Late is late.
       timedOut = true;
-      killGroup(child);
+      if (groupAlive(child.pid)) killGroup(child);
+      // The child was already gone: nothing to kill, and `exit` is on its way
+      // with the real code. Either way we wait for it, so the summary carries
+      // the exit code even for a package the sweep killed.
       graceTimer = setTimeout(settle, killGraceMs);
     }, timeoutMs);
   });
@@ -598,7 +603,10 @@ export function argValue(argv, flag, fallback) {
   if (argv.indexOf(flag, at + 1) !== -1) throw new Error(`${flag} given more than once`);
   const value = argv[at + 1];
   const looksLikeFlag = value !== undefined && value.startsWith('-') && Number.isNaN(Number(value));
-  if (value === undefined || looksLikeFlag) throw new Error(`${flag} needs a value`);
+  // An empty string is a value the caller supplied, and it is not one that
+  // means anything here. `--only ""` used to filter for the empty string, match
+  // every path, and run the full sweep.
+  if (value === undefined || value === '' || looksLikeFlag) throw new Error(`${flag} needs a value`);
   return value;
 }
 

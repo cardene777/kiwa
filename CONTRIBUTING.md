@@ -226,7 +226,7 @@ commit body or pull request description.
 ## Pull request checklist
 
 - [ ] `pnpm typecheck:all` shows no red package
-- [ ] `pnpm test:all` shows no red or dirty package that `main` does not already show. As of writing that is seven red and two dirty, tracked in #1396 and #1397; adding to them is not allowed, and `pnpm test` cannot tell you either way because it stops at the ninth package
+- [ ] `pnpm test:all` shows no red or dirty package that `main` does not already show. The pre-existing red and dirty packages are tracked in #1396 and #1397; adding to them is not allowed, and `pnpm test` cannot tell you either way because it stops at the ninth package
 - [ ] `pnpm build` passes
 - [ ] Documentation updated (if API changed)
 - [ ] Changeset added (`pnpm changeset`) for package version bumps
