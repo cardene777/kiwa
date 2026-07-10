@@ -33,6 +33,31 @@ please do not open bulk-translation PRs without discussing scope first.
 4. Make sure typecheck passes (`pnpm typecheck`)
 5. Make sure build passes (`pnpm build`)
 
+### When typecheck fails
+
+`pnpm typecheck` runs `pnpm -r`, which stops at the first package that fails. One
+red package hides every other one, and the number of them is invisible: this
+repository once sat with eight red packages, failing for five different reasons,
+while a single error was all anyone ever saw.
+
+`pnpm typecheck:all` runs every package and reports each failure:
+
+```
+$ pnpm typecheck:all
+typechecking 221 packages, 1 at a time
+
+RED  examples/nuxt-server-routes-full
+       server/plugins/analytics.ts(17,34): error TS2345: Argument of type ...
+       ... and 16 more (--verbose)
+
+green: 220   red: 1
+```
+
+It is sequential on purpose. Many `typecheck` scripts build the workspace
+packages they depend on, so two running at once rewrite the same `dist` while
+the other reads it, and `tsc` reports missing members that exist. `--jobs 4`
+runs them concurrently and will invent red packages that pass when run alone.
+
 ## Development setup
 
 - Node.js 20+
