@@ -53,7 +53,7 @@
  */
 
 import { execFile, spawn } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -117,25 +117,38 @@ export function classifyFailure(output) {
  */
 export function parsePorcelain(text) {
   const records = text.split('\0').filter((record) => record.length > 0);
-  const paths = [];
+  const entries = [];
   for (let index = 0; index < records.length; index += 1) {
     const record = records[index];
     if (record.length < 4) continue;
     const status = record.slice(0, 2);
-    paths.push(record.slice(3));
+    entries.push({ status, path: record.slice(3) });
     // `R` and `C` are followed by a bare record holding the path they came from.
     if (status.includes('R') || status.includes('C')) {
       index += 1;
-      if (index < records.length) paths.push(records[index]);
+      if (index < records.length) entries.push({ status, path: records[index] });
     }
   }
-  return paths;
+  return entries;
 }
 
-/** What appears in `after` and not in `before`. */
+/**
+ * The paths a package touched: new since `before`, or changed since `before`.
+ *
+ * Set membership is not enough. If one package leaves `dist/index.js` modified
+ * and the next rewrites the same file, the path is in both snapshots and the
+ * second package is reported clean. Both snapshots carry a fingerprint per
+ * path — its status letters, size and modification time — so a rewrite of a
+ * path that was already dirty is still attributed to whoever rewrote it.
+ *
+ * Both arguments are `Map<path, fingerprint>`.
+ */
 export function dirtiedPaths(before, after) {
-  const seen = new Set(before);
-  return after.filter((p) => !seen.has(p));
+  const touched = [];
+  for (const [path, fingerprint] of after) {
+    if (before.get(path) !== fingerprint) touched.push(path);
+  }
+  return touched;
 }
 
 /**
@@ -222,12 +235,37 @@ function listProjects() {
   });
 }
 
-/** `git status --porcelain -z`, as a list of paths. */
+/**
+ * What a dirty path looked like: its git status, and the file on disk.
+ *
+ * Status matters because `git add` changes it without touching a byte. Size and
+ * modification time catch a rewrite. On this machine `mtimeMs` carries
+ * nanoseconds and separated two hundred back-to-back rewrites of the same
+ * length, two hundred times out of two hundred. A filesystem whose timestamps
+ * resolve to the second would not, and a package that rewrote a file to the
+ * same length within one second would be reported clean. Hashing the bytes
+ * would close that; nothing here has met a filesystem that needs it.
+ */
+export function fingerprint(status, absolute, stat = statSync) {
+  try {
+    const info = stat(absolute);
+    return `${status}:${info.size}:${info.mtimeMs}`;
+  } catch {
+    // Deleted, or a path git names that no longer exists.
+    return `${status}:gone`;
+  }
+}
+
+/** `git status --porcelain -z`, as `Map<path, fingerprint>`. */
 function porcelain() {
   const options = { cwd: ROOT, maxBuffer: 32 * 1024 * 1024, encoding: 'utf-8' };
   return new Promise((resolve) => {
     execFile('git', ['status', '--porcelain', '-z'], options, (_e, out) => {
-      resolve(parsePorcelain(out ?? ''));
+      const snapshot = new Map();
+      for (const { status, path } of parsePorcelain(out ?? '')) {
+        snapshot.set(path, fingerprint(status, join(ROOT, path)));
+      }
+      resolve(snapshot);
     });
   });
 }
@@ -403,13 +441,24 @@ export function runCommand({
     timer = setTimeout(() => {
       if (settled || exitCode !== null) return;
 
-      // `exitCode === null` means our `exit` handler has not run. It does not
-      // mean the child is alive. A busy event loop delivers this timer before
-      // it delivers the child's exit, so a command that finished in a
-      // millisecond arrives here looking like a hang — and would be killed, at
-      // a pid the operating system may already have given to somebody else.
+      // `exitCode === null` says our handler has not run. It says nothing about
+      // the child, because a busy event loop delivers this timer before it
+      // delivers the child's exit.
       //
-      // Ask the operating system rather than the handler.
+      // So ask the operating system. A zombie group answers `EPERM`, a gone one
+      // `ESRCH`, and only success means something is running there. Reaping is
+      // event-loop work, so a loop that was too busy to run our handler was
+      // also too busy to reap, and a child that died during the block is a
+      // zombie when this timer fires — measured, two hundred times out of two
+      // hundred. A zombie's pid is taken. Nobody else can have been given it.
+      //
+      // That is what keeps the window shut between "it exited" and "we
+      // signalled its pid". A guard on `child.exitCode` was here too, on the
+      // theory that Node's own view of reaping is earlier than ours. It is not:
+      // removing it fails no test, and removing `groupAlive` fails one. Two
+      // hundred samples found no moment where Node had reaped and our `exit`
+      // handler had not run. A defence nothing can reach is a defence nothing
+      // has checked.
       if (!groupAlive(child.pid)) {
         // It has exited. `exit` and `close` are on their way with the real
         // answer; this timer is only here so that a lost event cannot hang the
@@ -488,11 +537,12 @@ async function main() {
   // so the sweep ignores it — and therefore cannot see it. Say so, rather than
   // report `dirty: 0` about a tree that is not clean.
   const startingDirt = await porcelain();
-  if (startingDirt.length > 0) {
-    process.stdout.write(`the working tree is not clean. ${startingDirt.length} paths already changed:\n`);
-    for (const path of startingDirt.slice(0, 10)) process.stdout.write(`  ${path}\n`);
-    if (startingDirt.length > 10) process.stdout.write(`  ... and ${startingDirt.length - 10} more\n`);
-    process.stdout.write('a package that rewrites one of these will not be reported as dirty.\n\n');
+  if (startingDirt.size > 0) {
+    const paths = [...startingDirt.keys()];
+    process.stdout.write(`the working tree is not clean. ${paths.length} paths already changed:\n`);
+    for (const path of paths.slice(0, 10)) process.stdout.write(`  ${path}\n`);
+    if (paths.length > 10) process.stdout.write(`  ... and ${paths.length - 10} more\n`);
+    process.stdout.write('a package that rewrites one of these is still reported, by its fingerprint.\n\n');
   }
 
   process.stdout.write(`testing ${packages.length} packages, one at a time\n\n`);

@@ -15,6 +15,7 @@ import {
   dirtiedPaths,
   discoverPackages,
   failureLines,
+  fingerprint,
   groupAlive,
   killGroup,
   parsePorcelain,
@@ -105,34 +106,36 @@ test('a failure that also mentions a missing tool is classified blocked', () => 
 
 /** `git status --porcelain -z`: NUL after every record, nothing quoted. */
 const z = (...records) => records.map((record) => `${record}\0`).join('');
+const paths = (text) => parsePorcelain(text).map((entry) => entry.path);
 
 test('parsePorcelain reads modified, added, deleted and untracked paths', () => {
   const text = z(' M packages/core/src/index.ts', 'A  scripts/new.mjs', ' D docs/old.md', '?? out.json');
-  assert.deepEqual(parsePorcelain(text), [
+  assert.deepEqual(paths(text), [
     'packages/core/src/index.ts',
     'scripts/new.mjs',
     'docs/old.md',
     'out.json',
   ]);
+  assert.deepEqual(parsePorcelain(z(' M a.ts'))[0], { status: ' M', path: 'a.ts' });
 });
 
 test('parsePorcelain counts both sides of a rename', () => {
-  assert.deepEqual(parsePorcelain(z('R  new.ts', 'old.ts')), ['new.ts', 'old.ts']);
+  assert.deepEqual(paths(z('R  new.ts', 'old.ts')), ['new.ts', 'old.ts']);
 });
 
 // The human format writes `R  old -> new` and quotes anything with a space, so
 // a file named `a -> b.ts` came back as three mangled fragments. `-z` has no
 // separator to collide with and no quoting to undo.
 test('parsePorcelain survives a path that contains the rename separator', () => {
-  assert.deepEqual(parsePorcelain(z('R  c d.ts', 'a -> b.ts')), ['c d.ts', 'a -> b.ts']);
+  assert.deepEqual(paths(z('R  c d.ts', 'a -> b.ts')), ['c d.ts', 'a -> b.ts']);
 });
 
 test('parsePorcelain reads a path with a space, unquoted', () => {
-  assert.deepEqual(parsePorcelain(z('?? weird name.ts')), ['weird name.ts']);
+  assert.deepEqual(paths(z('?? weird name.ts')), ['weird name.ts']);
 });
 
 test('parsePorcelain reads an unmerged entry', () => {
-  assert.deepEqual(parsePorcelain(z('UU src/conflict.ts')), ['src/conflict.ts']);
+  assert.deepEqual(paths(z('UU src/conflict.ts')), ['src/conflict.ts']);
 });
 
 test('parsePorcelain returns nothing for a clean tree', () => {
@@ -140,17 +143,61 @@ test('parsePorcelain returns nothing for a clean tree', () => {
   assert.deepEqual(parsePorcelain('\0'), []);
 });
 
-test('dirtiedPaths reports only what a package added', () => {
-  const before = ['a.ts', 'b.ts'];
-  const after = ['a.ts', 'b.ts', 'report.json'];
+/** A snapshot: `Map<path, fingerprint>`. */
+const snapshot = (entries) => new Map(Object.entries(entries));
+
+test('dirtiedPaths reports a path that is new since the snapshot', () => {
+  const before = snapshot({ 'a.ts': ' M:1:100' });
+  const after = snapshot({ 'a.ts': ' M:1:100', 'report.json': '??:2:200' });
   assert.deepEqual(dirtiedPaths(before, after), ['report.json']);
 });
 
 // A tree that was already dirty before the sweep started must not be blamed on
 // the first package that happens to run.
-test('dirtiedPaths ignores dirt that was already there', () => {
-  assert.deepEqual(dirtiedPaths(['a.ts'], ['a.ts']), []);
-  assert.deepEqual(dirtiedPaths(['a.ts'], []), []);
+test('dirtiedPaths ignores dirt nobody touched', () => {
+  const before = snapshot({ 'a.ts': ' M:1:100' });
+  assert.deepEqual(dirtiedPaths(before, snapshot({ 'a.ts': ' M:1:100' })), []);
+  assert.deepEqual(dirtiedPaths(before, snapshot({})), []);
+});
+
+// Package A leaves `dist/index.js` modified; package B rewrites the same file.
+// Set membership says B is clean. It is not.
+test('dirtiedPaths reports a rewrite of a path that was already dirty', () => {
+  const before = snapshot({ 'dist/index.js': ' M:100:1000' });
+  const after = snapshot({ 'dist/index.js': ' M:120:2000' });
+  assert.deepEqual(dirtiedPaths(before, after), ['dist/index.js']);
+});
+
+test('dirtiedPaths reports a path whose git status changed but whose bytes did not', () => {
+  const before = snapshot({ 'a.ts': '??:5:100' });
+  const after = snapshot({ 'a.ts': 'A :5:100' });
+  assert.deepEqual(dirtiedPaths(before, after), ['a.ts']);
+});
+
+test('fingerprint says gone for a path that is not on disk', () => {
+  assert.match(fingerprint(' D', '/no/such/file'), /^ D:gone$/);
+});
+
+test('fingerprint changes when the file does', () => {
+  const stat = (path) => ({ size: path === 'big' ? 2 : 1, mtimeMs: 100 });
+  assert.notEqual(fingerprint(' M', 'small', stat), fingerprint(' M', 'big', stat));
+  assert.equal(fingerprint(' M', 'small', stat), fingerprint(' M', 'small', stat));
+});
+
+// `git add` changes the status letters and not one byte on disk. A fingerprint
+// built from size and mtime alone calls that file untouched.
+test('fingerprint changes when only the git status does', () => {
+  const stat = () => ({ size: 5, mtimeMs: 100 });
+  assert.notEqual(fingerprint('??', 'a.ts', stat), fingerprint('A ', 'a.ts', stat));
+  assert.notEqual(fingerprint(' M', 'a.ts', stat), fingerprint('M ', 'a.ts', stat));
+});
+
+// A rewrite that lands on the same number of bytes — a timestamp, a hash, a
+// counter — changes nothing but the modification time. Without it, a package
+// that rewrote `dist/index.js` to the same length is reported clean.
+test('fingerprint changes when only the modification time does', () => {
+  const at = (mtimeMs) => () => ({ size: 5, mtimeMs });
+  assert.notEqual(fingerprint(' M', 'a.ts', at(100)), fingerprint(' M', 'a.ts', at(200)));
 });
 
 // A package that failed AND dirtied the tree was pushed into both buckets, so

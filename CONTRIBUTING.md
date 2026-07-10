@@ -51,11 +51,18 @@ testing 219 packages, one at a time
 [  1/219] ok    examples/astro-server-endpoints-full  2.5s
 [  9/219] RED   examples/basic-connect  2.5s
         Error: No tests found
-[145/219] DIRTY examples/nextjs-safe-multisig  512.8s
+[145/219] RED   examples/nextjs-safe-multisig  (killed after 900s)  (and it dirtied the tree)  900.3s
+        anything it leaked outlives it. Later packages may fail because of this one.
 ...
 
-green: 211   red: 7   dirty: 2   not run: 0
+green: 211   red: 8   dirty: 0   not run: 0
+2 of the red packages also dirtied the tree.
 ```
+
+The four counters add up to the number of packages, always: one verdict each.
+A package that failed *and* wrote into the repository is counted red, said so on
+its own line, and listed in the dirty section, because that is where you look to
+find out what wrote.
 
 Four verdicts, and only one of them means the package is fine:
 
