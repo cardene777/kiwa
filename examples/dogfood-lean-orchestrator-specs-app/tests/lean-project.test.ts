@@ -74,6 +74,23 @@ describe('the Lake project is in the repository', () => {
 });
 
 describe('the checked-in files are what the specs render', () => {
+  it('T-PROJ-012 the render names every machine, and nothing else', () => {
+    // `T-PROJ-010` iterates the keys of the render, so a render that drops a
+    // machine drops a test case with it and stays green — as does `T-PROJ-002`,
+    // which reads the disk and never asks what the render would have written.
+    // A generator can lose a machine between the two of them.
+    const rendered = Object.keys(renderLeanProject()).sort();
+    const expected = [
+      'lakefile.lean',
+      'lean-toolchain',
+      `${ROOT_NAMESPACE}.lean`,
+      ...ALL_SPECS.map((spec) => `${ROOT_NAMESPACE}/${spec.moduleName}.lean`),
+    ].sort();
+
+    expect(rendered).toEqual(expected);
+    expect(rendered).toHaveLength(8);
+  });
+
   it.each(Object.keys(renderLeanProject()).sort())('T-PROJ-010 %s is byte-identical', (rel) => {
     // Edit a spec without regenerating and this fails. It is the only thing that
     // notices: `lake build` proves whatever is on disk, and it stays true of the
