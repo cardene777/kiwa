@@ -32,27 +32,41 @@ export interface ErrorPayload {
   readonly url?: string;
 }
 
+/**
+ * What each hook does, independent of who calls it.
+ *
+ * `createAnalyticsPlugin` registers these on the simulated NitroApp that
+ * `invokeNitroPlugin` builds, and `server/plugins/analytics.ts` registers them
+ * on the real one. The two differ: Nitro hands `request` an `H3Event` and
+ * `error` an `(error, context)` pair, while the simulator hands each hook a
+ * single payload. Keeping the work here means neither caller can drift from the
+ * other.
+ */
+export function onRequest(ctx: AnalyticsContext, payload: RequestPayload): void {
+  const requestId = ctx.generateRequestId();
+  const context = payload.context ?? {};
+  context.requestId = requestId;
+  context.startedAt = Date.now();
+  payload.context = context;
+  ctx.logger.info('request.start', { requestId, method: payload.method, url: payload.url });
+}
+
+export function onBeforeResponse(ctx: AnalyticsContext, payload: BeforeResponsePayload): void {
+  const context = payload.context ?? {};
+  const startedAt = typeof context.startedAt === 'number' ? context.startedAt : Date.now();
+  const requestId = typeof context.requestId === 'string' ? context.requestId : 'unknown';
+  const elapsedMs = Date.now() - startedAt;
+  ctx.logger.info('request.end', { requestId, status: payload.status, elapsedMs });
+}
+
+export function onError(ctx: AnalyticsContext, payload: ErrorPayload): void {
+  ctx.logger.error('request.error', { url: payload.url, message: payload.error.message });
+}
+
 export function createAnalyticsPlugin(ctx: AnalyticsContext) {
   return (nitroApp: SimulatedNitroApp): void => {
-    nitroApp.hooks.hook<RequestPayload>('request', (payload) => {
-      const requestId = ctx.generateRequestId();
-      const context = payload.context ?? {};
-      context.requestId = requestId;
-      context.startedAt = Date.now();
-      payload.context = context;
-      ctx.logger.info('request.start', { requestId, method: payload.method, url: payload.url });
-    });
-
-    nitroApp.hooks.hook<BeforeResponsePayload>('beforeResponse', (payload) => {
-      const context = payload.context ?? {};
-      const startedAt = typeof context.startedAt === 'number' ? context.startedAt : Date.now();
-      const requestId = typeof context.requestId === 'string' ? context.requestId : 'unknown';
-      const elapsedMs = Date.now() - startedAt;
-      ctx.logger.info('request.end', { requestId, status: payload.status, elapsedMs });
-    });
-
-    nitroApp.hooks.hook<ErrorPayload>('error', (payload) => {
-      ctx.logger.error('request.error', { url: payload.url, message: payload.error.message });
-    });
+    nitroApp.hooks.hook<RequestPayload>('request', (payload) => onRequest(ctx, payload));
+    nitroApp.hooks.hook<BeforeResponsePayload>('beforeResponse', (p) => onBeforeResponse(ctx, p));
+    nitroApp.hooks.hook<ErrorPayload>('error', (payload) => onError(ctx, payload));
   };
 }
