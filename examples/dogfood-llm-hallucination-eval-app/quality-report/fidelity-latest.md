@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/ai-llm/dogfood-hallucination-eval-app @ 0.1.0
 
-_Reported at 2026-07-10T04:13:03.151Z._
+_Reported at 2026-07-07T05:39:18.682Z._
 
 ## 11-axis summary
 
@@ -16,15 +16,15 @@ _Reported at 2026-07-10T04:13:03.151Z._
 | fidelity — ratio | 100.00% (14/14) |
 | fidelity — behavioralDivergences | 14 |
 | perf — p50 | 1.00ms |
-| perf — p95 | 1.00ms |
-| perf — p99 | 1.00ms |
+| perf — p95 | 4.00ms |
+| perf — p99 | 4.00ms |
 | perf — samples | 9 |
 | mutation — killRate | 70.00% (28/40) |
 | mutation — survived | 12 |
 | cost — perRequestUsd | $0.0000 (9 requests, total $0.0000) |
 | latency — p50 | 1.00ms |
-| latency — p95 | 1.00ms |
-| latency — p99 | 1.00ms |
+| latency — p95 | 4.00ms |
+| latency — p99 | 4.00ms |
 | token — total | 10 (prompt 10 + completion 0) |
 | accuracy — score | 1.0000 (deterministic-scorer-parity, 9 samples) |
 

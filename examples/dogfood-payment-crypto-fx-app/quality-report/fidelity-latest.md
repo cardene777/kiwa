@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/payment/dogfood-crypto-fx-app @ 0.5.0
 
-_Reported at 2026-07-10T04:14:36.664Z._
+_Reported at 2026-07-07T13:28:47.599Z._
 
 ## 6-axis summary
 

@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/component/nextjs-rsc-streaming-app",
   "version": "0.3.0",
-  "reportedAt": "2026-07-10T04:13:45.784Z",
+  "reportedAt": "2026-07-06T12:58:20.396Z",
   "coverage": {
     "line": 92,
     "branch": 88,

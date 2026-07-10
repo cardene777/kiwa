@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/edge/deno-deploy-geo @ 0.1.0
 
-_Reported at 2026-07-10T04:11:39.260Z._
+_Reported at 2026-07-05T02:04:47.720Z._
 
 ## 5-axis summary
 
@@ -15,9 +15,9 @@ _Reported at 2026-07-10T04:11:39.260Z._
 | test count — e2e | 6 |
 | fidelity — ratio | 100.00% (8/8) |
 | fidelity — behavioralDivergences | 8 |
-| perf — p50 | 0.06ms |
-| perf — p95 | 0.15ms |
-| perf — p99 | 0.15ms |
+| perf — p50 | 0.05ms |
+| perf — p95 | 0.12ms |
+| perf — p99 | 0.12ms |
 | perf — samples | 8 |
 | mutation — killRate | 70.00% (28/40) |
 | mutation — survived | 12 |

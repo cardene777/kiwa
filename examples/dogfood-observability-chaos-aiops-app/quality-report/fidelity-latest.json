@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/observability/dogfood-chaos-aiops-app",
   "version": "2.2.0",
-  "reportedAt": "2026-07-10T04:13:59.755Z",
+  "reportedAt": "2026-07-07T15:21:09.329Z",
   "coverage": {
     "line": 92,
     "branch": 87,

@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/realtime/nuxt-webtransport-stream-app @ 0.2.0
 
-_Reported at 2026-07-10T04:13:56.674Z._
+_Reported at 2026-07-06T02:44:24.241Z._
 
 ## 6-axis summary
 

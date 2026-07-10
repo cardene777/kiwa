@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/component/nextjs-server-action-app",
   "version": "0.3.0",
-  "reportedAt": "2026-07-10T04:13:49.321Z",
+  "reportedAt": "2026-07-06T13:13:21.490Z",
   "coverage": {
     "line": 93,
     "branch": 88,

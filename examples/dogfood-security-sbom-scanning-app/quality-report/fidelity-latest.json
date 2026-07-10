@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/security/dogfood-sbom-scanning-app",
   "version": "0.1.0",
-  "reportedAt": "2026-07-10T04:15:51.617Z",
+  "reportedAt": "2026-07-07T03:29:45.088Z",
   "coverage": {
     "line": 92,
     "branch": 87,

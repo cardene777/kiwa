@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/search/vector-hybrid @ 0.3.0
 
-_Reported at 2026-07-10T04:15:21.158Z._
+_Reported at 2026-07-07T00:45:24.372Z._
 
 ## 5-axis summary
 
@@ -15,9 +15,9 @@ _Reported at 2026-07-10T04:15:21.158Z._
 | test count — e2e | 0 |
 | fidelity — ratio | 100.00% (13/13) |
 | fidelity — behavioralDivergences | 0 |
-| perf — p50 | 1.96ms |
-| perf — p95 | 1.96ms |
-| perf — p99 | 1.96ms |
+| perf — p50 | 3.36ms |
+| perf — p95 | 3.36ms |
+| perf — p99 | 3.36ms |
 | perf — samples | 1 |
 | mutation — killRate | 76.00% (38/50) |
 | mutation — survived | 12 |

@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/payment/dogfood-embedded-finance-app",
   "version": "0.5.0",
-  "reportedAt": "2026-07-10T04:14:40.346Z",
+  "reportedAt": "2026-07-07T12:54:45.047Z",
   "coverage": {
     "line": 92,
     "branch": 87,

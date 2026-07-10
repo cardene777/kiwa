@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/observability/dogfood-iac-drift-app @ 2.2.0
 
-_Reported at 2026-07-10T04:14:06.081Z._
+_Reported at 2026-07-07T14:50:02.372Z._
 
 ## 6-axis summary
 

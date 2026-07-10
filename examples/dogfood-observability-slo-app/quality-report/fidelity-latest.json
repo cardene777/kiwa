@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/observability/slo",
   "version": "2.1.0",
-  "reportedAt": "2026-07-10T04:14:15.579Z",
+  "reportedAt": "2026-07-06T14:50:28.486Z",
   "coverage": {
     "line": 92,
     "branch": 88,
@@ -20,9 +20,9 @@
     "behavioralDivergences": 0
   },
   "perf": {
-    "p50Ms": 0.5531669999999735,
-    "p95Ms": 0.5531669999999735,
-    "p99Ms": 0.5531669999999735,
+    "p50Ms": 0.5602080000000171,
+    "p95Ms": 0.5602080000000171,
+    "p99Ms": 0.5602080000000171,
     "samples": 1
   },
   "mutation": {
