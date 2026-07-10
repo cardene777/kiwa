@@ -506,12 +506,17 @@ export function failureLines(output) {
  * A flag with nothing after it, or with another flag after it, is an error and
  * not a default. `--only --verbose` used to filter for the string `--verbose`,
  * match no package, and exit 0 having run nothing.
+ *
+ * `-5` is a value, not a flag. Refusing it here would tell the caller of
+ * `--timeout -5` that the flag "needs a value", when what it needs is a
+ * positive number, and only the caller's own validation can say so.
  */
 export function argValue(argv, flag, fallback) {
   const at = argv.indexOf(flag);
   if (at === -1) return fallback;
   const value = argv[at + 1];
-  if (value === undefined || value.startsWith('-')) throw new Error(`${flag} needs a value`);
+  const looksLikeFlag = value !== undefined && value.startsWith('-') && Number.isNaN(Number(value));
+  if (value === undefined || looksLikeFlag) throw new Error(`${flag} needs a value`);
   return value;
 }
 

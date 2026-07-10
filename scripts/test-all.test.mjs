@@ -592,6 +592,14 @@ test('argValue refuses a flag with no value, or with another flag after it', () 
   assert.throws(() => argValue(['node', 'x', '--only'], '--only', null), /needs a value/);
   assert.throws(() => argValue(['node', 'x', '--only', '--verbose'], '--only', null), /needs a value/);
   assert.throws(() => argValue(['node', 'x', '--timeout', '--only', 'lean'], '--timeout', '900'), /needs a value/);
+  assert.throws(() => argValue(['node', 'x', '--only', '-v'], '--only', null), /needs a value/);
+});
+
+// `-5` is a value. Telling the caller of `--timeout -5` that the flag "needs a
+// value" is a lie: what it needs is a positive number, which is `main`'s to say.
+test('argValue takes a negative number as a value', () => {
+  assert.equal(argValue(['node', 'x', '--timeout', '-5'], '--timeout', '900'), '-5');
+  assert.equal(argValue(['node', 'x', '--timeout', '-0.5'], '--timeout', '900'), '-0.5');
 });
 
 test('failureLines picks out the lines that look like failures', () => {
