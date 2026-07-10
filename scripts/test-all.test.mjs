@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import {
   TOOL_SIGNATURES,
   argValue,
+  canonicalPath,
   classifyFailure,
   dirtiedPaths,
   discoverPackages,
@@ -21,6 +22,7 @@ import {
   parsePorcelain,
   parseProjectList,
   runCommand,
+  sweepFailed,
   unsupportedPlatform,
   verdictOf,
 } from './test-all.mjs';
@@ -212,6 +214,24 @@ test('verdictOf gives exactly one verdict per package', () => {
   assert.equal(verdictOf({ ok: false, cause: { tool: 'x' }, dirty: true }), 'blocked');
 });
 
+test('sweepFailed treats a dirty tree as a failure, whatever the flags', () => {
+  const none = { red: 0, dirty: 0, blocked: 0, allowMissingTools: false };
+  assert.equal(sweepFailed(none), false);
+  assert.equal(sweepFailed({ ...none, red: 1 }), true);
+  assert.equal(sweepFailed({ ...none, blocked: 1 }), true);
+  assert.equal(sweepFailed({ ...none, blocked: 1, allowMissingTools: true }), false);
+});
+
+// A package that could not run *and* wrote into the repository. Counting it
+// only among the blocked let `--allow-missing-tools` exit 0 on a dirty tree.
+test('sweepFailed does not let --allow-missing-tools forgive a dirty tree', () => {
+  assert.equal(
+    sweepFailed({ red: 0, dirty: 1, blocked: 1, allowMissingTools: true }),
+    true,
+    'the tool was missing; the repository was still written to',
+  );
+});
+
 test('verdictOf never calls a failing package green or dirty', () => {
   for (const cause of [null, { tool: 'x' }]) {
     for (const dirty of [true, false]) {
@@ -220,6 +240,27 @@ test('verdictOf never calls a failing package green or dirty', () => {
       assert.notEqual(verdict, 'dirty', 'a failure is not merely untidy');
     }
   }
+});
+
+// The signature straddles the cap: `...anv` in the head, `il not found in PATH`
+// in the tail, and the truncation notice between them. The tail now starts with
+// the end of the head, so the line is whole in one of them.
+test('runCommand keeps a tool signature that straddles the truncation', async () => {
+  const result = await runCommand({
+    command: 'sh',
+    // Two chunks: the first fits under the cap, the second overflows it.
+    args: ['-c', 'printf "xxxxxxxxxxxxxxxxxanv"; sleep 0.1; printf "il not found in PATH\\n"'],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    maxBytes: 25,
+    tailBytes: 512,
+  });
+  assert.equal(result.overflowed, true);
+  assert.equal(
+    classifyFailure(result.output)?.tool,
+    'Foundry (anvil)',
+    'the signature survived the seam',
+  );
 });
 
 // A package that prints a megabyte and then `anvil not found in PATH` is
@@ -269,6 +310,46 @@ test('discoverPackages excludes the repository root', () => {
     '/repo/packages/alpha/package.json': { name: 'alpha', scripts: { test: 'x' } },
   });
   assert.deepEqual(discoverPackages(projects, '/repo', read).map((p) => p.name), ['alpha']);
+});
+
+// String equality let the root back in through a trailing slash, and the sweep
+// then ran `pnpm -r test` from inside one of its own steps.
+test('discoverPackages excludes the root through a trailing slash', () => {
+  const projects = [{ path: '/repo/' }, { path: '/repo/packages/alpha' }];
+  const read = manifests({
+    '//package.json': { name: 'kiwa', scripts: { test: 'pnpm -r test' } },
+    '/repo//package.json': { name: 'kiwa', scripts: { test: 'pnpm -r test' } },
+    '/repo/packages/alpha/package.json': { name: 'alpha', scripts: { test: 'x' } },
+  });
+  const canonical = (path) => path.replace(/\/+$/, '');
+  assert.deepEqual(
+    discoverPackages(projects, '/repo', read, canonical).map((p) => p.name),
+    ['alpha'],
+  );
+});
+
+// And through a symlinked checkout, where `pnpm ls` reports the real path and
+// `ROOT` is the link, or the other way round.
+test('discoverPackages excludes the root through a symlink', () => {
+  const projects = [{ path: '/real/repo' }, { path: '/real/repo/packages/alpha' }];
+  const read = manifests({
+    '/real/repo/package.json': { name: 'kiwa', scripts: { test: 'pnpm -r test' } },
+    '/real/repo/packages/alpha/package.json': { name: 'alpha', scripts: { test: 'x' } },
+  });
+  const canonical = (path) => path.replace('/sym/', '/real/');
+  assert.deepEqual(
+    discoverPackages(projects, '/sym/repo', read, canonical).map((p) => p.name),
+    ['alpha'],
+  );
+});
+
+test('canonicalPath resolves a symlink, and falls back for a path that is not there', () => {
+  const real = (path) => {
+    if (path === '/sym') return '/real';
+    throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+  };
+  assert.equal(canonicalPath('/sym', real), '/real');
+  assert.equal(canonicalPath('/repo/', real), '/repo', 'no trailing slash');
 });
 
 // A directory walk with a hand-kept list of top directories would miss this.

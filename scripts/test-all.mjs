@@ -22,12 +22,12 @@
  *            `git add -A` afterwards sweeps it into an unrelated commit. This
  *            is a failure of the package that did it, whatever its exit code.
  *
- * The dirty check reads `git status --porcelain` at the repository root. A test
- * that writes outside the repository, or into a path `.gitignore` covers, is
- * invisible to it — and anything *you* change while the sweep runs is blamed on
- * whichever package happened to be running. Do not edit the tree during a
- * sweep; a run of this script reported `packages/lean/tests/async.test.ts` as
- * dirtied by `examples/nextjs-safe-multisig`, which had never heard of it.
+ * The dirty check reads `git status --porcelain -z -uall` at the repository
+ * root. A test that writes outside the repository, or into a path `.gitignore`
+ * covers, is invisible to it — and anything *you* change while the sweep runs is
+ * blamed on whichever package happened to be running. Do not edit the tree
+ * during a sweep; a run of this script reported `packages/lean/tests/async.test.ts`
+ * as dirtied by `examples/nextjs-safe-multisig`, which had never heard of it.
  *
  * A package killed for hanging can leave a server running. Its results, and the
  * results of every package after it, are worth less than the ones from a clean
@@ -53,8 +53,8 @@
  */
 
 import { execFile, spawn } from 'node:child_process';
-import { existsSync, readFileSync, statSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -166,6 +166,20 @@ export function verdictOf({ ok, cause, dirty }) {
 }
 
 /**
+ * Whether the sweep failed.
+ *
+ * `dirty` is every package that wrote into the repository, whatever its verdict.
+ * Writing into the repository is a failure on its own: `--allow-missing-tools`
+ * forgives a package that could not run, not one that left the tree changed.
+ * It used to, because a package that was both blocked and dirty was counted
+ * only among the blocked.
+ */
+export function sweepFailed({ red, dirty, blocked, allowMissingTools }) {
+  if (red > 0 || dirty > 0) return true;
+  return !allowMissingTools && blocked > 0;
+}
+
+/**
  * Every workspace project that declares a `test` script, except the root.
  *
  * `projects` is what `pnpm ls -r --depth -1 --json` returns. Asking pnpm rather
@@ -177,16 +191,30 @@ export function verdictOf({ ok, cause, dirty }) {
  * The root is excluded because its `test` is `pnpm -r test`, which is the thing
  * this script replaces. Running it here would recurse.
  */
-export function discoverPackages(projects, rootDir, readManifest = defaultReadManifest) {
+export function discoverPackages(projects, rootDir, readManifest = defaultReadManifest, canonical = canonicalPath) {
+  const root = canonical(rootDir);
   const found = [];
   for (const project of projects) {
-    if (project.path === rootDir) continue;
+    // String equality let the root back in through a trailing slash or a
+    // symlinked checkout, and the sweep then ran the root's `test`, which is
+    // `pnpm -r test`, from inside one of its own steps.
+    if (canonical(project.path) === root) continue;
     const json = readManifest(join(project.path, 'package.json'));
     if (json?.scripts?.test) {
       found.push({ dir: project.path, name: json.name ?? relative(rootDir, project.path) });
     }
   }
   return found.sort((a, b) => a.dir.localeCompare(b.dir));
+}
+
+/** A path with its symlinks resolved and its trailing slash gone. */
+export function canonicalPath(path, real = realpathSync) {
+  try {
+    return real(path);
+  } catch {
+    // Not on disk; normalise what we were given.
+    return resolve(path);
+  }
 }
 
 function defaultReadManifest(path) {
@@ -256,16 +284,25 @@ export function fingerprint(status, absolute, stat = statSync) {
   }
 }
 
-/** `git status --porcelain -z`, as `Map<path, fingerprint>`. */
+/**
+ * `git status --porcelain -z -uall`, as `Map<path, fingerprint>`.
+ *
+ * Without `-uall`, git collapses an untracked directory to a single `?? dir/`
+ * record. Rewriting a file inside it changes neither the directory's size nor
+ * its modification time, so a package that rewrote `coverage/report.json` after
+ * another package created `coverage/` was reported clean. `-uall` names every
+ * file, and every file gets its own fingerprint.
+ */
 function porcelain() {
   const options = { cwd: ROOT, maxBuffer: 32 * 1024 * 1024, encoding: 'utf-8' };
-  return new Promise((resolve) => {
-    execFile('git', ['status', '--porcelain', '-z'], options, (_e, out) => {
+  const args = ['status', '--porcelain', '-z', '--untracked-files=all'];
+  return new Promise((done) => {
+    execFile('git', args, options, (_e, out) => {
       const snapshot = new Map();
       for (const { status, path } of parsePorcelain(out ?? '')) {
         snapshot.set(path, fingerprint(status, join(ROOT, path)));
       }
-      resolve(snapshot);
+      done(snapshot);
     });
   });
 }
@@ -408,10 +445,16 @@ export function runCommand({
     // Keep the head and the tail. Dropping everything past the cap threw away
     // the line `classifyFailure` needs — a package that printed a megabyte and
     // then `anvil not found in PATH` was reported red rather than blocked.
+    //
+    // The tail starts with the end of the head, so a line that straddles the
+    // cap is whole in one of them. Without that, `...anv` stayed in the head
+    // and `il not found in PATH` went to the tail, with the truncation notice
+    // between: a signature nobody could match.
     let tail = '';
     const collect = (chunk) => {
       bytes += chunk.length;
       if (bytes > maxBytes) {
+        if (!overflowed) tail = output.slice(-tailBytes);
         overflowed = true;
         tail = (tail + chunk).slice(-tailBytes);
         return;
@@ -645,14 +688,21 @@ async function main() {
     throw new Error(`verdicts do not add up: ${counted} of ${packages.length} packages`);
   }
 
-  const failed = red.length + dirtyOnly + (allowMissingTools ? 0 : blocked.length);
+  const failed = sweepFailed({
+    red: red.length,
+    dirty: dirty.length,
+    blocked: blocked.length,
+    allowMissingTools,
+  });
   process.stdout.write(
     `\ngreen: ${green}   red: ${red.length}   dirty: ${dirtyOnly}   not run: ${blocked.length}\n`,
   );
   if (dirty.length > dirtyOnly) {
-    process.stdout.write(`${dirty.length - dirtyOnly} of the red packages also dirtied the tree.\n`);
+    process.stdout.write(
+      `${dirty.length - dirtyOnly} package(s) counted red or blocked also dirtied the tree.\n`,
+    );
   }
-  process.exit(failed === 0 ? 0 : 1);
+  process.exit(failed ? 1 : 0);
 }
 
 // Only run as CLI when invoked directly (not when imported by tests).
