@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupComponentEnv, type UiTestEnv } from '@kiwa-test/ui';
+import { setupComponentEnv, type UiTestEnv } from '@kiwa-lab/ui';
 import { Counter } from '../src/counter.js';
 
 const envs: UiTestEnv[] = [];
