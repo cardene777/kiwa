@@ -53,6 +53,7 @@
  */
 
 import { execFile, spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, readFileSync, readlinkSync, realpathSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -277,7 +278,13 @@ function listProjects() {
  * same length within one second would be reported clean. Hashing the bytes
  * would close that; nothing here has met a filesystem that needs it.
  */
-export function fingerprint(status, absolute, stat = lstatSync, readLink = readlinkSync) {
+export function fingerprint(
+  status,
+  absolute,
+  stat = lstatSync,
+  readLink = readlinkSync,
+  read = readFileSync,
+) {
   let info;
   try {
     info = stat(absolute);
@@ -296,7 +303,22 @@ export function fingerprint(status, absolute, stat = lstatSync, readLink = readl
       return `${status}:link:unreadable`;
     }
   }
-  return `${status}:${info.size}:${info.mtimeMs}`;
+  // For directories, `size` and `mtimeMs` are all we have; hashing the bytes
+  // would mean hashing the dir listing, which is `-uall`'s job.
+  if (!info.isFile?.()) return `${status}:${info.size}:${info.mtimeMs}`;
+
+  // A rewrite that preserves size and mtime — a tool that touches the atime,
+  // a coarse timestamp filesystem, or a package that deliberately fakes it —
+  // must not look untouched. Hash the bytes. Dirty paths are usually a handful
+  // per sweep; the cost is not one worth arguing about.
+  let hash = 'unreadable';
+  try {
+    hash = createHash('sha1').update(read(absolute)).digest('hex').slice(0, 12);
+  } catch {
+    // A path git named but the reader cannot open (a race, a permission
+    // problem). Fall back to size + mtime; the caller sees enough of a change.
+  }
+  return `${status}:${info.size}:${info.mtimeMs}:${hash}`;
 }
 
 /**
@@ -334,6 +356,17 @@ function porcelain() {
   const options = { cwd: ROOT, maxBuffer: 32 * 1024 * 1024, encoding: 'utf-8' };
   const args = ['status', '--porcelain', '-z', '--untracked-files=all'];
   return readPorcelain(ROOT, (cb) => execFile('git', args, options, cb));
+}
+
+/** The last `n` bytes of `text` as UTF-8, without splitting a codepoint. */
+export function keepLastBytes(text, n) {
+  const buf = Buffer.from(text, 'utf-8');
+  if (buf.length <= n) return text;
+  // A leading byte matches `0xxxxxxx` or `11xxxxxx`; a continuation `10xxxxxx`.
+  // Walk forward from the cut until a leading byte, so decoding is clean.
+  let cut = buf.length - n;
+  while (cut < buf.length && (buf[cut] & 0xc0) === 0x80) cut += 1;
+  return buf.subarray(cut).toString('utf-8');
 }
 
 /**
@@ -510,10 +543,12 @@ export function runCommand({
       bytes += Buffer.byteLength(text, 'utf-8');
       if (bytes > maxBytes) {
         // The tail begins with the end of the head, so nothing is lost at the
-        // seam either.
-        if (!overflowed) tail = output.slice(-tailBytes);
+        // seam either. `slice(-tailBytes)` on a string is characters, so the
+        // retained suffix could be twice its budget on multibyte output — take
+        // it in bytes instead.
+        if (!overflowed) tail = keepLastBytes(output, tailBytes);
         overflowed = true;
-        tail = (tail + text).slice(-tailBytes);
+        tail = keepLastBytes(tail + text, tailBytes);
         return;
       }
       output += text;
@@ -563,6 +598,15 @@ export function runCommand({
       // means the child had not been observed to exit by the deadline. That is
       // late, whether or not it is still alive right this instant. Kill only
       // if the group is still there.
+      //
+      // This is a deliberate choice between two indistinguishable cases. Node
+      // does not tell us when the child actually exited; all we have is which
+      // handler the event loop delivered first, and a blocked loop delivers
+      // neither on time. So a fast child + a blocked parent looks the same as
+      // a slow child + a blocked parent, and this rule calls both late. False
+      // red on a package that finished at the edge is a signal worth checking;
+      // false green on one that overshot is the failure the sweep exists to
+      // catch. The trade-off was reviewed twice.
       timedOut = true;
       if (groupAlive(child.pid)) killGroup(child);
       graceTimer = setTimeout(settle, killGraceMs);

@@ -275,8 +275,25 @@ test('fingerprint changes when only the git status does', () => {
 // counter — changes nothing but the modification time. Without it, a package
 // that rewrote `dist/index.js` to the same length is reported clean.
 test('fingerprint changes when only the modification time does', () => {
-  const at = (mtimeMs) => () => ({ size: 5, mtimeMs });
-  assert.notEqual(fingerprint(' M', 'a.ts', at(100)), fingerprint(' M', 'a.ts', at(200)));
+  const at = (mtimeMs) => () => ({ size: 5, mtimeMs, isFile: () => true });
+  const read = () => Buffer.from('same');
+  assert.notEqual(
+    fingerprint(' M', 'a.ts', at(100), undefined, read),
+    fingerprint(' M', 'a.ts', at(200), undefined, read),
+  );
+});
+
+// A coarse-timestamp filesystem, or a tool that fakes the mtime, leaves size
+// and mtime unchanged even after rewriting the bytes. The content hash catches
+// what the timestamp cannot.
+test('fingerprint changes when only the bytes do, on a filesystem that hides the mtime', () => {
+  const stat = () => ({ size: 5, mtimeMs: 100, isFile: () => true });
+  const readA = () => Buffer.from('AAAAA');
+  const readB = () => Buffer.from('BBBBB');
+  assert.notEqual(
+    fingerprint(' M', 'a.ts', stat, undefined, readA),
+    fingerprint(' M', 'a.ts', stat, undefined, readB),
+  );
 });
 
 // A package that failed AND dirtied the tree was pushed into both buckets, so
@@ -375,6 +392,23 @@ test('runCommand finds a signature split across two chunks', async () => {
 test('runCommand reports no cause when nothing blames a tool', async () => {
   const result = await sh('echo "AssertionError: expected 3 to be 4"; exit 1');
   assert.equal(result.cause, null, 'a red package is not excused');
+});
+
+// `tailBytes` used to be characters too. Four `é` is 8 bytes; the retained
+// suffix could double its documented budget on any non-ASCII output.
+test('runCommand keeps the tail within its byte budget', async () => {
+  const r = await runCommand({
+    command: 'sh',
+    args: ['-c', 'for i in $(seq 100); do printf "é"; done'],
+    cwd: process.cwd(),
+    timeoutMs: 5000,
+    maxBytes: 10,
+    tailBytes: 4,
+  });
+  assert.equal(r.overflowed, true);
+  // The tail comes at the end after the truncation notice.
+  const tail = r.output.slice(r.output.indexOf('truncated ...]') + 15);
+  assert.ok(Buffer.byteLength(tail, 'utf-8') <= 4, `tail is ${Buffer.byteLength(tail, 'utf-8')} bytes`);
 });
 
 // `maxBytes` is bytes, not characters. `text.length` counted 800 for 800 `é`,
