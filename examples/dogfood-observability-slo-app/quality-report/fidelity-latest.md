@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/observability/slo @ 2.1.0
 
-_Reported at 2026-07-06T14:50:28.486Z._
+_Reported at 2026-07-10T04:14:15.579Z._
 
 ## 5-axis summary
 
@@ -15,9 +15,9 @@ _Reported at 2026-07-06T14:50:28.486Z._
 | test count — e2e | 0 |
 | fidelity — ratio | 100.00% (10/10) |
 | fidelity — behavioralDivergences | 0 |
-| perf — p50 | 0.56ms |
-| perf — p95 | 0.56ms |
-| perf — p99 | 0.56ms |
+| perf — p50 | 0.55ms |
+| perf — p95 | 0.55ms |
+| perf — p99 | 0.55ms |
 | perf — samples | 1 |
 | mutation — killRate | 76.00% (38/50) |
 | mutation — survived | 12 |

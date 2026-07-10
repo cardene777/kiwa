@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/security/dogfood-sbom-scanning-app @ 0.1.0
 
-_Reported at 2026-07-07T03:29:45.088Z._
+_Reported at 2026-07-10T04:15:51.617Z._
 
 ## 6-axis summary
 

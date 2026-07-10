@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/security/dogfood-csp-headers-app",
   "version": "0.1.0",
-  "reportedAt": "2026-07-07T02:56:51.802Z",
+  "reportedAt": "2026-07-10T04:15:25.447Z",
   "coverage": {
     "line": 92,
     "branch": 87,

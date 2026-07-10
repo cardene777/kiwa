@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/security/dogfood-csp-headers-app @ 0.1.0
 
-_Reported at 2026-07-07T02:56:51.802Z._
+_Reported at 2026-07-10T04:15:25.447Z._
 
 ## 6-axis summary
 

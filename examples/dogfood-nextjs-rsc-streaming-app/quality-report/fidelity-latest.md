@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/component/nextjs-rsc-streaming-app @ 0.3.0
 
-_Reported at 2026-07-06T12:58:20.396Z._
+_Reported at 2026-07-10T04:13:45.784Z._
 
 ## 6-axis summary
 

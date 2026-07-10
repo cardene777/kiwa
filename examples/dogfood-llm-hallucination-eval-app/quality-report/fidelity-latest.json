@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/ai-llm/dogfood-hallucination-eval-app",
   "version": "0.1.0",
-  "reportedAt": "2026-07-07T05:39:18.682Z",
+  "reportedAt": "2026-07-10T04:13:03.151Z",
   "coverage": {
     "line": 92,
     "branch": 87,
@@ -21,8 +21,8 @@
   },
   "perf": {
     "p50Ms": 1,
-    "p95Ms": 4,
-    "p99Ms": 4,
+    "p95Ms": 1,
+    "p99Ms": 1,
     "samples": 9
   },
   "mutation": {
@@ -38,8 +38,8 @@
   },
   "latency": {
     "p50Ms": 1,
-    "p95Ms": 4,
-    "p99Ms": 4,
+    "p95Ms": 1,
+    "p99Ms": 1,
     "samples": 9
   },
   "token": {

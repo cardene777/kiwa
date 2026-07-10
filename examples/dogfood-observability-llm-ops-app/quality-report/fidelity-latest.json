@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/observability/dogfood-llm-ops-app",
   "version": "2.2.0",
-  "reportedAt": "2026-07-07T15:04:37.764Z",
+  "reportedAt": "2026-07-10T04:14:12.404Z",
   "coverage": {
     "line": 92,
     "branch": 87,

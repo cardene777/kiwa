@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/ai-llm/dogfood-prompt-injection-defense-app @ 0.1.0
 
-_Reported at 2026-07-07T05:13:06.954Z._
+_Reported at 2026-07-10T04:13:15.759Z._
 
 ## 11-axis summary
 

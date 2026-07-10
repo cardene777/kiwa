@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/component/nextjs-server-action-app @ 0.3.0
 
-_Reported at 2026-07-06T13:13:21.490Z._
+_Reported at 2026-07-10T04:13:49.321Z._
 
 ## 6-axis summary
 

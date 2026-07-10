@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { dappE2eTest as test } from '@kiwa-test/dapp';
+import { dappE2eTest as test } from '@kiwa-lab/dapp';
 import { verifyMessage } from 'viem';
 
 // kiwa fixture injects an anvil-backed wallet; the address is obtained via

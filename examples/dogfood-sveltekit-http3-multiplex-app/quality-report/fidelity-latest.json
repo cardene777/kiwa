@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/realtime/sveltekit-http3-multiplex-app",
   "version": "0.2.0",
-  "reportedAt": "2026-07-06T02:44:27.838Z",
+  "reportedAt": "2026-07-10T04:16:35.473Z",
   "coverage": {
     "line": 92,
     "branch": 88,
@@ -21,8 +21,8 @@
   },
   "perf": {
     "p50Ms": 0,
-    "p95Ms": 3,
-    "p99Ms": 3,
+    "p95Ms": 2,
+    "p99Ms": 2,
     "samples": 4
   },
   "mutation": {

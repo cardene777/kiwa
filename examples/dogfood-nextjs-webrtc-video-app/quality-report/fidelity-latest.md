@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/realtime/nextjs-webrtc-video-app @ 0.2.0
 
-_Reported at 2026-07-06T02:44:15.072Z._
+_Reported at 2026-07-10T04:13:53.041Z._
 
 ## 6-axis summary
 
@@ -16,8 +16,8 @@ _Reported at 2026-07-06T02:44:15.072Z._
 | fidelity — ratio | 100.00% (8/8) |
 | fidelity — behavioralDivergences | 8 |
 | perf — p50 | 0.00ms |
-| perf — p95 | 0.00ms |
-| perf — p99 | 0.00ms |
+| perf — p95 | 1.00ms |
+| perf — p99 | 1.00ms |
 | perf — samples | 4 |
 | mutation — killRate | 70.00% (28/40) |
 | mutation — survived | 12 |

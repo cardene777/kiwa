@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/payment/dogfood-bnpl-installment-app @ 0.5.0
 
-_Reported at 2026-07-07T13:11:07.017Z._
+_Reported at 2026-07-10T04:14:33.063Z._
 
 ## 6-axis summary
 

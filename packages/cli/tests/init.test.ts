@@ -848,3 +848,49 @@ describe('runInit', () => {
     expect(fs.existsSync(path.join(tempDir, 'playwright.config.ts'))).toBe(false);
   });
 });
+
+/**
+ * A template is what a user ends up with, and it is not TypeScript until `init`
+ * writes it out. Three of them imported `@kiwa-test/dapp` — the scope this
+ * repository left in v2.13 — for as long as nobody ran these tests. The rename
+ * updated the assertions above and missed the `.tpl` files; the sweep that caught
+ * the same leftover elsewhere searched `*.ts` and `*.tsx`.
+ *
+ * So these read every file under `templates/`, whatever it is named.
+ */
+describe('the templates name packages that exist', () => {
+  const TEMPLATE_DIR = path.resolve(process.cwd(), 'src', 'templates');
+
+  function everyTemplate(dir: string): string[] {
+    return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const full = path.join(dir, entry.name);
+      return entry.isDirectory() ? everyTemplate(full) : [full];
+    });
+  }
+
+  it('T-INIT-100 the template directory is read, and it is not empty', () => {
+    // A search that finds nothing passes every test below it.
+    expect(everyTemplate(TEMPLATE_DIR).length).toBeGreaterThanOrEqual(7);
+  });
+
+  it('T-INIT-101 no template names the scope this repository left', () => {
+    const named = everyTemplate(TEMPLATE_DIR).filter((file) =>
+      fs.readFileSync(file, 'utf-8').includes('@kiwa-test'),
+    );
+
+    expect(named.map((file) => path.relative(TEMPLATE_DIR, file))).toEqual([]);
+  });
+
+  it('T-INIT-102 every kiwa package a template imports is one the project declares', () => {
+    // `init` writes a `package.json` naming its devDependencies. A template that
+    // imports anything else leaves the user with an import resolving to nothing
+    // they installed.
+    const imported = new Set<string>();
+    for (const file of everyTemplate(TEMPLATE_DIR)) {
+      const body = fs.readFileSync(file, 'utf-8');
+      for (const match of body.matchAll(/from '(@kiwa[^']+)'/g)) imported.add(match[1] as string);
+    }
+
+    expect([...imported].sort()).toEqual(['@kiwa-lab/dapp']);
+  });
+});

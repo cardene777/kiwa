@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/orm/vector-search-dogfood @ 0.1.0
 
-_Reported at 2026-07-05T07:51:27.945Z._
+_Reported at 2026-07-10T04:16:44.770Z._
 
 ## 5-axis summary
 
@@ -16,8 +16,8 @@ _Reported at 2026-07-05T07:51:27.945Z._
 | fidelity — ratio | 100.00% (5/5) |
 | fidelity — behavioralDivergences | 5 |
 | perf — p50 | 0.06ms |
-| perf — p95 | 0.87ms |
-| perf — p99 | 0.87ms |
+| perf — p95 | 3.22ms |
+| perf — p99 | 3.22ms |
 | perf — samples | 2 |
 | mutation — killRate | 73.33% (22/30) |
 | mutation — survived | 8 |

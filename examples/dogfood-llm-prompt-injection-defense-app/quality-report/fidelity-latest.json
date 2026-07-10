@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/ai-llm/dogfood-prompt-injection-defense-app",
   "version": "0.1.0",
-  "reportedAt": "2026-07-07T05:13:06.954Z",
+  "reportedAt": "2026-07-10T04:13:15.759Z",
   "coverage": {
     "line": 92,
     "branch": 87,

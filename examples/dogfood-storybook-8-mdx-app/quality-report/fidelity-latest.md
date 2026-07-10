@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/component/storybook-8-mdx @ 0.1.0
 
-_Reported at 2026-07-06T13:35:00.064Z._
+_Reported at 2026-07-10T04:16:10.573Z._
 
 ## 5-axis summary
 
@@ -16,8 +16,8 @@ _Reported at 2026-07-06T13:35:00.064Z._
 | fidelity — ratio | 100.00% (8/8) |
 | fidelity — behavioralDivergences | 8 |
 | perf — p50 | 0.02ms |
-| perf — p95 | 0.11ms |
-| perf — p99 | 1.90ms |
+| perf — p95 | 0.10ms |
+| perf — p99 | 0.43ms |
 | perf — samples | 122 |
 | mutation — killRate | 70.00% (28/40) |
 | mutation — survived | 12 |

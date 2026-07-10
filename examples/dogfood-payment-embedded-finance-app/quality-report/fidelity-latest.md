@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/payment/dogfood-embedded-finance-app @ 0.5.0
 
-_Reported at 2026-07-07T12:54:45.047Z._
+_Reported at 2026-07-10T04:14:40.346Z._
 
 ## 6-axis summary
 

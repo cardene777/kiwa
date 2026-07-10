@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/realtime/nuxt-webtransport-stream-app",
   "version": "0.2.0",
-  "reportedAt": "2026-07-06T02:44:24.241Z",
+  "reportedAt": "2026-07-10T04:13:56.674Z",
   "coverage": {
     "line": 92,
     "branch": 88,

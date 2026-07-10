@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/ai-llm/dogfood-code-interpreter-app",
   "version": "0.1.0",
-  "reportedAt": "2026-07-07T11:28:27.360Z",
+  "reportedAt": "2026-07-10T04:12:59.167Z",
   "coverage": {
     "line": 93,
     "branch": 88,

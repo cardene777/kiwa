@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/security/dogfood-mtls-zero-trust-app",
   "version": "0.2.0",
-  "reportedAt": "2026-07-07T07:02:36.303Z",
+  "reportedAt": "2026-07-10T04:15:39.691Z",
   "coverage": {
     "line": 92,
     "branch": 87,

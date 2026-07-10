@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/edge/deno-deploy-geo",
   "version": "0.1.0",
-  "reportedAt": "2026-07-05T02:04:47.720Z",
+  "reportedAt": "2026-07-10T04:11:39.260Z",
   "coverage": {
     "line": 92,
     "branch": 86,
@@ -20,9 +20,9 @@
     "behavioralDivergences": 8
   },
   "perf": {
-    "p50Ms": 0.052500000000009095,
-    "p95Ms": 0.11716700000002334,
-    "p99Ms": 0.11716700000002334,
+    "p50Ms": 0.055916999999965356,
+    "p95Ms": 0.15195799999997917,
+    "p99Ms": 0.15195799999997917,
     "samples": 8
   },
   "mutation": {

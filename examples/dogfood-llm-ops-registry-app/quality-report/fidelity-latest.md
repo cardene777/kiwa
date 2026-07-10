@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/ai-llm/dogfood-ops-registry-app @ 0.1.0
 
-_Reported at 2026-07-07T11:46:02.897Z._
+_Reported at 2026-07-10T04:13:11.754Z._
 
 ## 11-axis summary
 

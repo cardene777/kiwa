@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/ai-llm/dogfood-ops-registry-app",
   "version": "0.1.0",
-  "reportedAt": "2026-07-07T11:46:02.897Z",
+  "reportedAt": "2026-07-10T04:13:11.754Z",
   "coverage": {
     "line": 93,
     "branch": 88,

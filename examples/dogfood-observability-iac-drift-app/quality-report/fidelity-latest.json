@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/observability/dogfood-iac-drift-app",
   "version": "2.2.0",
-  "reportedAt": "2026-07-07T14:50:02.372Z",
+  "reportedAt": "2026-07-10T04:14:06.081Z",
   "coverage": {
     "line": 92,
     "branch": 87,

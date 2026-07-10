@@ -1,6 +1,6 @@
 # Quality Report — @kiwa-lab/realtime/sveltekit-http3-multiplex-app @ 0.2.0
 
-_Reported at 2026-07-06T02:44:27.838Z._
+_Reported at 2026-07-10T04:16:35.473Z._
 
 ## 6-axis summary
 
@@ -16,8 +16,8 @@ _Reported at 2026-07-06T02:44:27.838Z._
 | fidelity — ratio | 100.00% (9/9) |
 | fidelity — behavioralDivergences | 9 |
 | perf — p50 | 0.00ms |
-| perf — p95 | 3.00ms |
-| perf — p99 | 3.00ms |
+| perf — p95 | 2.00ms |
+| perf — p99 | 2.00ms |
 | perf — samples | 4 |
 | mutation — killRate | 70.00% (28/40) |
 | mutation — survived | 12 |

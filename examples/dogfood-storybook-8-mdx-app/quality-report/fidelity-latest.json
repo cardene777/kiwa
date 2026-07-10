@@ -1,7 +1,7 @@
 {
   "provider": "@kiwa-lab/component/storybook-8-mdx",
   "version": "0.1.0",
-  "reportedAt": "2026-07-06T13:35:00.064Z",
+  "reportedAt": "2026-07-10T04:16:10.573Z",
   "coverage": {
     "line": 92,
     "branch": 88,
@@ -20,9 +20,9 @@
     "behavioralDivergences": 8
   },
   "perf": {
-    "p50Ms": 0.016374999999982265,
-    "p95Ms": 0.11166700000001129,
-    "p99Ms": 1.9019579999999792,
+    "p50Ms": 0.015540999999984706,
+    "p95Ms": 0.09854100000001154,
+    "p99Ms": 0.4275000000000091,
     "samples": 122
   },
   "mutation": {
