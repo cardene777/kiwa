@@ -43,9 +43,26 @@ function leanInstalled(): boolean {
 
 const HAS_LEAN = leanInstalled();
 
-/** Where `lean` really is, so a wrapper script can hand its arguments on. */
+/**
+ * Where `lean` really is, so a wrapper script can hand its arguments on.
+ *
+ * `command -v` prints the name rather than a path when the name is a shell
+ * function or a builtin, and `sh` will define functions from `$ENV` before it
+ * runs anything. Handing `PATH` alone leaves nothing for it to read, and the
+ * result is checked rather than trusted.
+ */
 function leanPath(): string {
-  return execFileSync('sh', ['-c', 'command -v lean'], { encoding: 'utf-8' }).trim();
+  const found = execFileSync('sh', ['-c', 'command -v lean'], {
+    encoding: 'utf-8',
+    env: { PATH: process.env.PATH ?? '' },
+  }).trim();
+  if (!found.startsWith('/')) throw new Error(`lean did not resolve to a path: ${found}`);
+  return found;
+}
+
+/** `text` as one `sh` word, whatever it contains. */
+function shellQuote(text: string): string {
+  return `'${text.replaceAll("'", `'\\''`)}'`;
 }
 
 /** Scratch directories the concurrency probes create, removed after each test. */
@@ -72,19 +89,25 @@ function concurrencyProbe(prefix: string): { leanBin: string; peak: () => number
   const peakFile = join(scratch, 'peak');
   mkdirSync(live);
 
+  // Every path is one quoted `sh` word. A `TMPDIR` holding a `$`, a backtick or
+  // a quote would otherwise be read as shell source.
+  const lean = shellQuote(leanPath());
+  const liveDir = shellQuote(live);
+  const peakPath = shellQuote(peakFile);
+
   const leanBin = join(scratch, 'lean-wrapper');
   writeFileSync(
     leanBin,
     [
       '#!/bin/sh',
       'for arg in "$@"; do',
-      `  [ "$arg" = "--version" ] && exec "${leanPath()}" "$@"`,
+      `  [ "$arg" = "--version" ] && exec ${lean} "$@"`,
       'done',
-      `mkdir "${live}/$$" || exit 97`,
-      `ls "${live}" | wc -l >> "${peakFile}"`,
-      `"${leanPath()}" "$@"`,
+      `mkdir ${liveDir}/"$$" || exit 97`,
+      `ls ${liveDir} | wc -l >> ${peakPath}`,
+      `${lean} "$@"`,
       'code=$?',
-      `rmdir "${live}/$$"`,
+      `rmdir ${liveDir}/"$$"`,
       'exit $code',
     ].join('\n'),
   );
