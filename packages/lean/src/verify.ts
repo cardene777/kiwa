@@ -1,6 +1,8 @@
 import {
   DEFAULT_TIMEOUT_MS,
   runLeanSource,
+  runLeanSourceAsync,
+  type LeanRun,
   type LeanRunOptions,
 } from './lean-runner.js';
 import { UsageError } from './errors.js';
@@ -106,6 +108,55 @@ export function verifyLeanSpec(
   specs: readonly LeanSpecOutput[],
   opts: VerifyOptions = {},
 ): VerifyResult {
+  const plan = planVerify(specs, opts);
+  if (plan.done) return plan.result;
+
+  const run = runLeanSource(plan.source, [], plan.runOpts);
+  return interpretVerify(run, plan, opts);
+}
+
+/**
+ * The same verification, awaited.
+ *
+ * `execFileSync` stops the event loop for as long as Lean works — a hundred and
+ * thirty-nine milliseconds on the smallest machine in this repository, during
+ * which a five-millisecond timer fires exactly zero times. A build plugin, a watch
+ * mode, or a server sharing the process freezes with it.
+ *
+ * Everything this decides is decided by `planVerify` and `interpretVerify`, which
+ * the synchronous function calls too. The only difference is which of the two
+ * runners does the waiting.
+ */
+export async function verifyLeanSpecAsync(
+  specs: readonly LeanSpecOutput[],
+  opts: VerifyOptions = {},
+): Promise<VerifyResult> {
+  const plan = planVerify(specs, opts);
+  if (plan.done) return plan.result;
+
+  const run = await runLeanSourceAsync(plan.source, [], plan.runOpts);
+  return interpretVerify(run, plan, opts);
+}
+
+/** Either an answer that needs no Lean, or everything a Lean run needs. */
+type VerifyPlan =
+  | { done: true; result: VerifyResult }
+  | {
+      done: false;
+      result?: undefined;
+      source: string;
+      segments: readonly Segment[];
+      runOpts: LeanRunOptions;
+      verifiedFiles: string[];
+    };
+
+/**
+ * Check the call, then decide whether Lean has anything to do.
+ *
+ * The validation runs before the skip paths: a call that could never check what
+ * it was handed is wrong whether or not this run does the checking.
+ */
+function planVerify(specs: readonly LeanSpecOutput[], opts: VerifyOptions): VerifyPlan {
   const {
     rootNamespace = 'KiwaSpecs',
     leanToolchain,
@@ -127,15 +178,16 @@ export function verifyLeanSpec(
   }
 
   const verifiedFiles = specs.map((s) => `${rootNamespace}/${s.path}`);
-  // Before anything else, including the skip paths. A call that could never
-  // check what it was handed is wrong whether or not this run does the checking.
   assertUniquePaths(verifiedFiles);
 
   if (skip === true || process.env.KIWA_LEAN_SKIP_VERIFY === '1') {
     return {
-      status: 'skipped-by-env',
-      verifiedFiles,
-      reason: skip === true ? 'opts.skip=true' : 'KIWA_LEAN_SKIP_VERIFY=1',
+      done: true,
+      result: {
+        status: 'skipped-by-env',
+        verifiedFiles,
+        reason: skip === true ? 'opts.skip=true' : 'KIWA_LEAN_SKIP_VERIFY=1',
+      },
     };
   }
 
@@ -145,12 +197,20 @@ export function verifyLeanSpec(
   if (leanBin !== undefined) runOpts.leanBin = leanBin;
   if (workDir !== undefined) runOpts.workDir = workDir;
 
-  const run = runLeanSource(source, [], runOpts);
+  return { done: false, source, segments, runOpts, verifiedFiles };
+}
+
+/** What the run means. One reading, for both ways of running. */
+function interpretVerify(
+  run: LeanRun | 'lean-not-installed',
+  plan: Extract<VerifyPlan, { done: false }>,
+  opts: VerifyOptions,
+): VerifyResult {
   if (run === 'lean-not-installed') {
     return {
       status: 'lean-not-installed',
       verifiedFiles: [],
-      reason: `Lean toolchain not found (tried ${leanBin ?? 'lean'} --version)`,
+      reason: `Lean toolchain not found (tried ${opts.leanBin ?? 'lean'} --version)`,
     };
   }
 
@@ -160,14 +220,14 @@ export function verifyLeanSpec(
       // either a failed verification sends a caller looking for a bug in a table
       // Lean never finished reading, or finished reading and could not report.
       status: run.timedOut ? 'timed-out' : run.overflowed ? 'output-too-large' : 'verification-failed',
-      diagnostics: attribute(run.diagnostics, run.filePath, segments),
+      diagnostics: attribute(run.diagnostics, run.filePath, plan.segments),
       stdout: run.stdout,
       stderr: run.stderr,
-      verifiedFiles,
+      verifiedFiles: plan.verifiedFiles,
     };
   }
 
-  return { status: 'ok', verifiedFiles };
+  return { status: 'ok', verifiedFiles: plan.verifiedFiles };
 }
 
 /** Where one spec sits inside the combined file. */

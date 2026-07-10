@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/lean",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Lean 4 spec generator for lifecycle-orchestrator state machines. Compiles a transition table to a Lean 4 inductive type and a total dispatch function with no catch-all, so Lean’s exhaustiveness checker is what proves the table is complete, and a rejected transition is distinguishable from a deliberate self-loop. Emits absorbing and has-exit theorems that fail to compile when the table contradicts them, and runs the real toolchain via verifyLeanSpec.",
   "license": "UNLICENSED",
   "author": {
