@@ -106,19 +106,28 @@ export function classifyFailure(output) {
 }
 
 /**
- * The paths in `git status --porcelain` output.
+ * The paths in `git status --porcelain -z` output.
  *
- * Renames arrive as `R  old -> new`; both sides count as touched. Paths with
- * spaces or non-ASCII bytes arrive quoted, and are returned as git printed
- * them — this is a display of what changed, not a path to open.
+ * The human format quotes any path with a space or a non-ASCII byte, and writes
+ * a rename as `R  old -> new`. Splitting that on ` -> ` mangles a file actually
+ * named `a -> b.ts`, and unquoting it correctly means reimplementing git's
+ * escaping. `-z` does neither: records are NUL-terminated and nothing is quoted.
+ * A rename is two records, the new path and then the old one; both count as
+ * touched.
  */
 export function parsePorcelain(text) {
+  const records = text.split('\0').filter((record) => record.length > 0);
   const paths = [];
-  for (const line of text.split('\n')) {
-    if (line.length < 4) continue;
-    const rest = line.slice(3);
-    if (rest.includes(' -> ')) paths.push(...rest.split(' -> '));
-    else paths.push(rest);
+  for (let index = 0; index < records.length; index += 1) {
+    const record = records[index];
+    if (record.length < 4) continue;
+    const status = record.slice(0, 2);
+    paths.push(record.slice(3));
+    // `R` and `C` are followed by a bare record holding the path they came from.
+    if (status.includes('R') || status.includes('C')) {
+      index += 1;
+      if (index < records.length) paths.push(records[index]);
+    }
   }
   return paths;
 }
@@ -171,9 +180,17 @@ function defaultReadManifest(path) {
  * bad way to learn this.
  */
 export function parseProjectList(text) {
-  const start = text.indexOf('[');
-  if (start === -1) throw new Error('pnpm ls printed no JSON array');
-  return JSON.parse(text.slice(start));
+  // Every `[` is a candidate, because a banner can contain one — `warning [pnpm]`
+  // is a bracket that is not the start of a document. Take the first that parses.
+  for (let start = text.indexOf('['); start !== -1; start = text.indexOf('[', start + 1)) {
+    try {
+      const parsed = JSON.parse(text.slice(start));
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // Not the document. Keep looking.
+    }
+  }
+  throw new Error('pnpm ls printed no JSON array');
 }
 
 /** Ask pnpm which projects the workspace has. */
@@ -191,17 +208,28 @@ function listProjects() {
   });
 }
 
-/** `git status --porcelain`, as a list of paths. */
+/** `git status --porcelain -z`, as a list of paths. */
 function porcelain() {
+  const options = { cwd: ROOT, maxBuffer: 32 * 1024 * 1024, encoding: 'utf-8' };
   return new Promise((resolve) => {
-    execFile('git', ['status', '--porcelain'], { cwd: ROOT, maxBuffer: 32 * 1024 * 1024 }, (_e, out) => {
+    execFile('git', ['status', '--porcelain', '-z'], options, (_e, out) => {
       resolve(parsePorcelain(out ?? ''));
     });
   });
 }
 
-/** SIGKILL the child's process group, and the child if it has escaped it. */
+/**
+ * SIGKILL the child's process group.
+ *
+ * Only ever called while the child is known to be running. Once a child has
+ * exited and been reaped, its pid is free, and the operating system will hand
+ * it to somebody else. `process.kill(-pid)` then signals a process group this
+ * script never started — a dev server, an editor, another sweep. The window is
+ * small and hard to hit on purpose; forty thousand spawns did not reuse a pid
+ * on this machine. It is not a window worth standing in.
+ */
 function killGroup(child) {
+  if (typeof child.pid !== 'number') return;
   try {
     // Negative pid: the whole process group, which `detached` gave us.
     process.kill(-child.pid, 'SIGKILL');
@@ -266,16 +294,16 @@ export function runCommand({
     let flushTimer;
     let graceTimer;
 
+    // No signal is sent from here. By the time a child has exited, its pid
+    // belongs to whoever the operating system gives it to next. Anything the
+    // child left running outlives the sweep, and the sweep says so rather than
+    // firing a signal into a pid it no longer owns.
     const settle = () => {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
       clearTimeout(flushTimer);
       clearTimeout(graceTimer);
-      // Whatever the child left behind in its group goes now. A grandchild that
-      // called `setsid` has left the group and outlives us; nothing here can
-      // reach it, and the sweep does not wait for it.
-      killGroup(child);
       resolve({ ok: !timedOut && !overflowed && exitCode === 0, timedOut, overflowed, output });
     };
 
@@ -308,6 +336,9 @@ export function runCommand({
     });
 
     timer = setTimeout(() => {
+      // The child exited while we were waiting for its pipes. It finished; it
+      // did not run out of time. Its pid is no longer ours to signal.
+      if (settled || exitCode !== null) return;
       timedOut = true;
       killGroup(child);
       graceTimer = setTimeout(settle, killGraceMs);
@@ -342,21 +373,35 @@ export function failureLines(output) {
     .slice(-3);
 }
 
-function argValue(flag, fallback) {
-  const at = process.argv.indexOf(flag);
+/**
+ * The value after `flag`, or `fallback` when the flag is absent.
+ *
+ * A flag with nothing after it, or with another flag after it, is an error and
+ * not a default. `--only --verbose` used to filter for the string `--verbose`,
+ * match no package, and exit 0 having run nothing.
+ */
+export function argValue(argv, flag, fallback) {
+  const at = argv.indexOf(flag);
   if (at === -1) return fallback;
-  return process.argv[at + 1];
+  const value = argv[at + 1];
+  if (value === undefined || value.startsWith('-')) throw new Error(`${flag} needs a value`);
+  return value;
 }
 
 async function main() {
   const verbose = process.argv.includes('--verbose');
   const allowMissingTools = process.argv.includes('--allow-missing-tools');
-  const only = argValue('--only', null);
-  const timeoutSec = Number(argValue('--timeout', '900'));
+  const only = argValue(process.argv, '--only', null);
+  const timeoutSec = Number(argValue(process.argv, '--timeout', '900'));
   if (!Number.isFinite(timeoutSec) || timeoutSec <= 0) throw new Error('--timeout takes seconds');
 
-  let packages = discoverPackages(await listProjects(), ROOT);
-  if (only) packages = packages.filter((p) => relative(ROOT, p.dir).includes(only));
+  const all = discoverPackages(await listProjects(), ROOT);
+  const packages = only ? all.filter((p) => relative(ROOT, p.dir).includes(only)) : all;
+  // Running nothing is not the same as everything passing. A typo in `--only`
+  // used to print `testing 0 packages` and exit 0.
+  if (packages.length === 0) {
+    throw new Error(only ? `--only ${only} matched none of ${all.length} packages` : 'no packages have a test script');
+  }
 
   // Dirt that is already here cannot be blamed on the package that runs first,
   // so the sweep ignores it — and therefore cannot see it. Say so, rather than

@@ -3,9 +3,13 @@
 //   node --test scripts/test-all.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 import {
   TOOL_SIGNATURES,
+  argValue,
   classifyFailure,
   dirtiedPaths,
   discoverPackages,
@@ -94,8 +98,11 @@ test('a failure that also mentions a missing tool is classified blocked', () => 
   assert.equal(classifyFailure(output)?.tool, 'Playwright Chromium');
 });
 
+/** `git status --porcelain -z`: NUL after every record, nothing quoted. */
+const z = (...records) => records.map((record) => `${record}\0`).join('');
+
 test('parsePorcelain reads modified, added, deleted and untracked paths', () => {
-  const text = [' M packages/core/src/index.ts', 'A  scripts/new.mjs', ' D docs/old.md', '?? out.json'].join('\n');
+  const text = z(' M packages/core/src/index.ts', 'A  scripts/new.mjs', ' D docs/old.md', '?? out.json');
   assert.deepEqual(parsePorcelain(text), [
     'packages/core/src/index.ts',
     'scripts/new.mjs',
@@ -105,12 +112,27 @@ test('parsePorcelain reads modified, added, deleted and untracked paths', () => 
 });
 
 test('parsePorcelain counts both sides of a rename', () => {
-  assert.deepEqual(parsePorcelain('R  old.ts -> new.ts'), ['old.ts', 'new.ts']);
+  assert.deepEqual(parsePorcelain(z('R  new.ts', 'old.ts')), ['new.ts', 'old.ts']);
+});
+
+// The human format writes `R  old -> new` and quotes anything with a space, so
+// a file named `a -> b.ts` came back as three mangled fragments. `-z` has no
+// separator to collide with and no quoting to undo.
+test('parsePorcelain survives a path that contains the rename separator', () => {
+  assert.deepEqual(parsePorcelain(z('R  c d.ts', 'a -> b.ts')), ['c d.ts', 'a -> b.ts']);
+});
+
+test('parsePorcelain reads a path with a space, unquoted', () => {
+  assert.deepEqual(parsePorcelain(z('?? weird name.ts')), ['weird name.ts']);
+});
+
+test('parsePorcelain reads an unmerged entry', () => {
+  assert.deepEqual(parsePorcelain(z('UU src/conflict.ts')), ['src/conflict.ts']);
 });
 
 test('parsePorcelain returns nothing for a clean tree', () => {
   assert.deepEqual(parsePorcelain(''), []);
-  assert.deepEqual(parsePorcelain('\n'), []);
+  assert.deepEqual(parsePorcelain('\0'), []);
 });
 
 test('dirtiedPaths reports only what a package added', () => {
@@ -248,6 +270,34 @@ test('runCommand settles after killing a command whose grandchild holds the pipe
   assert.ok(Date.now() - started < 4000, `settled in ${Date.now() - started}ms`);
 });
 
+// The kill is what makes a timeout mean something. Removing it from `settle`
+// must not remove it from the timeout path.
+test('runCommand really does kill the group it timed out on', async () => {
+  const marker = join(tmpdir(), `test-all-kill-${process.pid}-${Math.random()}`);
+  // The child's own child writes the marker two seconds from now, if it lives.
+  await sh(`( sleep 2; : > ${marker} ) & sleep 30`, 400);
+  await new Promise((r) => setTimeout(r, 2500));
+  assert.equal(existsSync(marker), false, 'the group was killed, so nothing wrote the marker');
+});
+
+// After a child has exited and been reaped, its pid belongs to whoever the
+// operating system gives it to next. `settle` used to signal it anyway.
+test('runCommand sends no signal after a command exits on its own', async () => {
+  const signals = [];
+  const real = process.kill.bind(process);
+  process.kill = (pid, signal) => {
+    signals.push([pid, signal]);
+    return real(pid, signal);
+  };
+  try {
+    const r = await sh('exit 0', 5000);
+    assert.equal(r.ok, true);
+  } finally {
+    process.kill = real;
+  }
+  assert.deepEqual(signals, [], 'a clean exit signals nothing');
+});
+
 test('runCommand reports a command that does not exist', async () => {
   const r = await runCommand({
     command: 'this-command-does-not-exist',
@@ -280,8 +330,34 @@ test('parseProjectList ignores anything pnpm prints before the JSON', () => {
   ]);
 });
 
+// Taking the first `[` in the stream is not the same as finding the document.
+// A bracketed banner would have thrown, and the sweep dies before it runs one
+// package.
+test('parseProjectList survives a bracket in the banner', () => {
+  assert.deepEqual(parseProjectList('warning [pnpm] slow\n[{"path":"/a"}]'), [{ path: '/a' }]);
+  assert.deepEqual(parseProjectList('[deprecated] see docs\n[{"path":"/a"},{"path":"/b"}]'), [
+    { path: '/a' },
+    { path: '/b' },
+  ]);
+});
+
 test('parseProjectList throws when there is no JSON at all', () => {
   assert.throws(() => parseProjectList('command not found'), /no JSON array/);
+  assert.throws(() => parseProjectList('warning [pnpm] nothing follows'), /no JSON array/);
+});
+
+test('argValue reads the value after a flag', () => {
+  assert.equal(argValue(['node', 'x', '--only', 'lean'], '--only', null), 'lean');
+  assert.equal(argValue(['node', 'x'], '--only', null), null);
+  assert.equal(argValue(['node', 'x'], '--timeout', '900'), '900');
+});
+
+// `--only --verbose` filtered for the string `--verbose`, matched no package,
+// and exited 0 having run nothing.
+test('argValue refuses a flag with no value, or with another flag after it', () => {
+  assert.throws(() => argValue(['node', 'x', '--only'], '--only', null), /needs a value/);
+  assert.throws(() => argValue(['node', 'x', '--only', '--verbose'], '--only', null), /needs a value/);
+  assert.throws(() => argValue(['node', 'x', '--timeout', '--only', 'lean'], '--timeout', '900'), /needs a value/);
 });
 
 test('failureLines picks out the lines that look like failures', () => {
