@@ -18,7 +18,7 @@
 import { execFileSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   checkLeanTable,
@@ -51,13 +51,20 @@ const HAS_LEAN = leanInstalled();
  * runs anything. Handing `PATH` alone leaves nothing for it to read, and the
  * result is checked rather than trusted.
  */
+export function resolveLeanPath(found: string): string {
+  // A bare name is a function or a builtin. A relative path is a `PATH` entry
+  // like `bin/lean`, which is a real installation and only needs resolving.
+  if (!found.includes('/')) throw new Error(`lean did not resolve to a path: ${found}`);
+  return resolve(found);
+}
+
 function leanPath(): string {
-  const found = execFileSync('sh', ['-c', 'command -v lean'], {
-    encoding: 'utf-8',
-    env: { PATH: process.env.PATH ?? '' },
-  }).trim();
-  if (!found.startsWith('/')) throw new Error(`lean did not resolve to a path: ${found}`);
-  return found;
+  return resolveLeanPath(
+    execFileSync('sh', ['-c', 'command -v lean'], {
+      encoding: 'utf-8',
+      env: { PATH: process.env.PATH ?? '' },
+    }).trim(),
+  );
 }
 
 /** `text` as one `sh` word, whatever it contains. */
@@ -285,26 +292,79 @@ describe('a tool limit is not a verdict, on the async path either', () => {
   }, 60_000);
 });
 
-describe('the reason for the async path', () => {
-  it.skipIf(!HAS_LEAN)('T-ASYNC-030 the event loop keeps running', async () => {
-    let ticks = 0;
-    const timer = setInterval(() => {
-      ticks += 1;
-    }, 5);
+describe('the probe resolves the binary it wraps', () => {
+  it('T-ASYNC-034 a bare name is a shell function, not an installation', () => {
+    // `command -v` prints the name for a function or a builtin. Embedding that
+    // in the wrapper would have it call itself, or a builtin, or nothing.
+    expect(() => resolveLeanPath('lean')).toThrow(/did not resolve to a path/);
+    expect(() => resolveLeanPath('echo')).toThrow(/did not resolve to a path/);
+  });
 
-    const started = Date.now();
-    const report = await checkLeanTableAsync(SPEC);
-    const elapsed = Date.now() - started;
-    clearInterval(timer);
+  it('T-ASYNC-035 a relative path is an installation, and is made absolute', () => {
+    // A `PATH` entry like `bin` finds `bin/lean`. That is real, and only needs
+    // resolving. Rejecting it would fail on a machine where Lean works.
+    expect(resolveLeanPath('bin/lean')).toBe(resolve('bin/lean'));
+    expect(resolveLeanPath('/opt/homebrew/bin/lean')).toBe('/opt/homebrew/bin/lean');
+  });
+});
+
+describe('the reason for the async path', () => {
+  it.skipIf(!HAS_LEAN)('T-ASYNC-030 the event loop keeps running while Lean runs', async () => {
+    // No duration is asserted. `elapsed > 50` used to be here, on the argument
+    // that load can only make Lean slower. True, and beside the point: a faster
+    // machine or a quicker Lean makes it smaller, and the test fails while
+    // nothing is wrong.
+    //
+    // Nor is a queued callback enough on its own. `runLeanSourceAsync` awaits
+    // `detectLeanBinaryAsync` before it runs anything, so the event loop turns
+    // once no matter what the run does afterwards. A `setTimeout(0)` fires
+    // there and proves nothing.
+    //
+    // So make the run itself depend on the event loop, and only after it has
+    // started. The wrapper announces that it is running and then waits for the
+    // test to answer. The test can only answer from a timer callback, which a
+    // synchronous call does not let run. Then the wrapper gives up after ten
+    // seconds and exits non-zero, and the report is not `ok`.
+    //
+    // Announcing first is the point. A callback armed before the run cannot
+    // tell the two apart: it fires during the `await` on the version check,
+    // whatever happens next.
+    const scratch = mkdtempSync(join(tmpdir(), 'lean-eventloop-'));
+    scratches.push(scratch);
+    const started = join(scratch, 'started');
+    const go = join(scratch, 'go');
+    const wrapper = join(scratch, 'lean-wrapper');
+    const lean = shellQuote(leanPath());
+    writeFileSync(
+      wrapper,
+      [
+        '#!/bin/sh',
+        'for arg in "$@"; do',
+        `  [ "$arg" = "--version" ] && exec ${lean} "$@"`,
+        'done',
+        `: > ${shellQuote(started)}`,
+        'waited=0',
+        `while [ ! -f ${shellQuote(go)} ]; do`,
+        '  sleep 0.05',
+        '  waited=$((waited + 1))',
+        '  [ "$waited" -gt 200 ] && exit 98',
+        'done',
+        `exec ${lean} "$@"`,
+      ].join('\n'),
+    );
+    chmodSync(wrapper, 0o755);
+
+    const pending = checkLeanTableAsync(SPEC, { leanBin: wrapper });
+    const answer = setInterval(() => {
+      if (existsSync(started)) {
+        writeFileSync(go, '');
+        clearInterval(answer);
+      }
+    }, 10);
+    const report = await pending;
+    clearInterval(answer);
 
     expect(report.status).toBe('ok');
-    // A lower bound on elapsed time, not a ratio between two of them. Load can
-    // only make Lean take longer, and only makes the timer fire more often, so
-    // neither of these gets closer to failing on a busy machine. The assertion
-    // that had to go was `parallelMs < serialMs * 0.75`, which needed an idle
-    // core to be true. The sync call fires the timer zero times over this work.
-    expect(elapsed).toBeGreaterThan(50);
-    expect(ticks).toBeGreaterThanOrEqual(5);
   }, 120_000);
 
   it.skipIf(!HAS_LEAN)('T-ASYNC-031 the same work runs at once, not one after another', async () => {
