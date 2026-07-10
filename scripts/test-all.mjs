@@ -24,7 +24,14 @@
  *
  * The dirty check reads `git status --porcelain` at the repository root. A test
  * that writes outside the repository, or into a path `.gitignore` covers, is
- * invisible to it.
+ * invisible to it — and anything *you* change while the sweep runs is blamed on
+ * whichever package happened to be running. Do not edit the tree during a
+ * sweep; a run of this script reported `packages/lean/tests/async.test.ts` as
+ * dirtied by `examples/nextjs-safe-multisig`, which had never heard of it.
+ *
+ * A package killed for hanging can leave a server running. Its results, and the
+ * results of every package after it, are worth less than the ones from a clean
+ * run.
  *
  * A line is printed as each package finishes, with how long it took. A sweep of
  * this repository takes the better part of an hour; a script that prints
@@ -404,6 +411,14 @@ async function main() {
         ? '  (output too large)'
         : '';
     process.stdout.write(`${counter} RED   ${result.dir}${why}  ${took}\n`);
+    if (result.timedOut) {
+      // A killed package can leave a server behind. `examples/nextjs-safe-multisig`
+      // hangs, and the `next-server` its Playwright config starts survives the
+      // SIGKILL to the process group and keeps port 3046. The next package to
+      // want that port — `examples/nextjs-zk-verifier` uses the same one — then
+      // fails for a reason that has nothing to do with it.
+      process.stdout.write('        anything it leaked outlives it. Later packages may fail because of this one.\n');
+    }
     for (const line of verbose ? failureLines(result.output) : failureLines(result.output).slice(0, 1)) {
       process.stdout.write(`        ${line.slice(0, 150)}\n`);
     }

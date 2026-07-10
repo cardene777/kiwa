@@ -82,6 +82,18 @@ Use `--only <substring>` while iterating on one package, and `--timeout <n>` to
 change the per-package limit (900 seconds by default; a package killed for
 exceeding it is reported red, never green).
 
+Two things to know before you trust a number it prints:
+
+- **Do not edit the tree while a sweep runs.** Anything that changes during a
+  package's run is blamed on that package. A sweep once reported
+  `packages/lean/tests/async.test.ts` as dirtied by
+  `examples/nextjs-safe-multisig`, because that is where the file was edited.
+- **A killed package can poison the ones after it.** `examples/nextjs-safe-multisig`
+  hangs, and the `next-server` its Playwright config starts survives the kill
+  and keeps port 3046. `examples/nextjs-zk-verifier` uses the same port, and
+  fails with `already used` for a reason that has nothing to do with it. Until
+  #1397 lands, check any red package alone with `--only` before believing it.
+
 ### What `pnpm test` actually needs
 
 Measured, by hiding each tool and running the sweep — not by reading
