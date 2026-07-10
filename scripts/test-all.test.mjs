@@ -16,9 +16,11 @@ import {
   discoverPackages,
   failureLines,
   groupAlive,
+  killGroup,
   parsePorcelain,
   parseProjectList,
   runCommand,
+  verdictOf,
 } from './test-all.mjs';
 
 const sh = (script, timeoutMs = 5000) =>
@@ -148,6 +150,49 @@ test('dirtiedPaths reports only what a package added', () => {
 test('dirtiedPaths ignores dirt that was already there', () => {
   assert.deepEqual(dirtiedPaths(['a.ts'], ['a.ts']), []);
   assert.deepEqual(dirtiedPaths(['a.ts'], []), []);
+});
+
+// A package that failed AND dirtied the tree was pushed into both buckets, so
+// `green + red + dirty + not run` could exceed the number of packages. One
+// verdict each.
+test('verdictOf gives exactly one verdict per package', () => {
+  assert.equal(verdictOf({ ok: true, cause: null, dirty: false }), 'green');
+  assert.equal(verdictOf({ ok: true, cause: null, dirty: true }), 'dirty');
+  assert.equal(verdictOf({ ok: false, cause: null, dirty: false }), 'red');
+  assert.equal(verdictOf({ ok: false, cause: null, dirty: true }), 'red');
+  assert.equal(verdictOf({ ok: false, cause: { tool: 'x' }, dirty: false }), 'blocked');
+  assert.equal(verdictOf({ ok: false, cause: { tool: 'x' }, dirty: true }), 'blocked');
+});
+
+test('verdictOf never calls a failing package green or dirty', () => {
+  for (const cause of [null, { tool: 'x' }]) {
+    for (const dirty of [true, false]) {
+      const verdict = verdictOf({ ok: false, cause, dirty });
+      assert.notEqual(verdict, 'green');
+      assert.notEqual(verdict, 'dirty', 'a failure is not merely untidy');
+    }
+  }
+});
+
+// A package that prints a megabyte and then `anvil not found in PATH` is
+// blocked, not red. Dropping everything past the cap threw that line away.
+test('runCommand keeps the tail of an overflowing output', async () => {
+  const result = await runCommand({
+    command: 'sh',
+    args: ['-c', 'head -c 20000 /dev/zero | tr "\\0" "x"; echo; echo "anvil not found in PATH"'],
+    cwd: process.cwd(),
+    timeoutMs: 10_000,
+    maxBytes: 1024,
+    tailBytes: 512,
+  });
+  assert.equal(result.overflowed, true);
+  assert.equal(result.ok, false, 'truncated output is not evidence the tests passed');
+  assert.match(result.output, /output truncated/);
+  assert.equal(
+    classifyFailure(result.output)?.tool,
+    'Foundry (anvil)',
+    'the evidence survived the truncation',
+  );
 });
 
 /** A stand-in for reading `package.json` off disk. */
@@ -347,6 +392,35 @@ test('groupAlive answers for a group that exists and one that does not', () => {
   assert.equal(groupAlive(2 ** 30), false, 'a pid that cannot exist');
   assert.equal(groupAlive(undefined), false, 'no pid at all');
   assert.equal(groupAlive(999999), false);
+});
+
+// `killGroup` used to fall back to `child.kill('SIGKILL')` — a *positive* pid —
+// when the group kill threw. A positive pid that has been released belongs to
+// whoever the operating system gave it to. Losing the group means sending
+// nothing.
+test('killGroup does not fall back to the child pid when the group is gone', () => {
+  let childKilled = false;
+  const gone = {
+    pid: 2 ** 30, // no such group; `process.kill(-pid)` throws ESRCH
+    kill: () => {
+      childKilled = true;
+      return true;
+    },
+  };
+  assert.equal(killGroup(gone), false, 'it reports that it signalled nothing');
+  assert.equal(childKilled, false, 'and it did not reach for the positive pid');
+});
+
+test('killGroup signals a group that is there, and says so', async () => {
+  const child = spawn('sh', ['-c', 'sleep 5'], { detached: true, stdio: 'ignore' });
+  await new Promise((r) => setTimeout(r, 100));
+  assert.equal(killGroup(child), true);
+  await new Promise((r) => child.once('exit', r));
+  assert.equal(groupAlive(child.pid), false);
+});
+
+test('killGroup does nothing without a pid', () => {
+  assert.equal(killGroup({ pid: undefined, kill: () => assert.fail('never') }), false);
 });
 
 test('groupAlive says yes for a detached child, and no once it is gone', async () => {

@@ -139,6 +139,20 @@ export function dirtiedPaths(before, after) {
 }
 
 /**
+ * One verdict per package. The four counters must add up to the number of
+ * packages, or the summary is arithmetic rather than a report: a package that
+ * failed *and* dirtied the tree used to be counted twice.
+ *
+ * A package that dirtied the tree is still listed in the dirty section whatever
+ * its verdict, because that is where you look to find out what wrote into the
+ * repository.
+ */
+export function verdictOf({ ok, cause, dirty }) {
+  if (!ok) return cause ? 'blocked' : 'red';
+  return dirty ? 'dirty' : 'green';
+}
+
+/**
  * Every workspace project that declares a `test` script, except the root.
  *
  * `projects` is what `pnpm ls -r --depth -1 --json` returns. Asking pnpm rather
@@ -228,17 +242,20 @@ function porcelain() {
  * small and hard to hit on purpose; forty thousand spawns did not reuse a pid
  * on this machine. It is not a window worth standing in.
  */
-function killGroup(child) {
-  if (typeof child.pid !== 'number') return;
+export function killGroup(child) {
+  if (typeof child.pid !== 'number') return false;
   try {
     // Negative pid: the whole process group, which `detached` gave us.
     process.kill(-child.pid, 'SIGKILL');
+    return true;
   } catch {
-    try {
-      child.kill('SIGKILL');
-    } catch {
-      // Already gone.
-    }
+    // The group went between the check and here. There used to be a fallback
+    // to `child.kill('SIGKILL')`, a *positive* pid — and a positive pid that
+    // has been released belongs to whoever the operating system gave it to.
+    // Node happens to refuse it once the child is reaped (`child.kill()`
+    // returns false and signals nothing), but the window before reaping is not
+    // one worth arguing about. Losing the group means sending nothing.
+    return false;
   }
 }
 
@@ -298,6 +315,7 @@ export function runCommand({
   cwd,
   timeoutMs,
   maxBytes = 64 * 1024 * 1024,
+  tailBytes = 256 * 1024,
   flushMs = 500,
   killGraceMs = 5000,
   // Whether the group is still ours to signal. A test can say no; nothing else
@@ -334,13 +352,19 @@ export function runCommand({
       clearTimeout(timer);
       clearTimeout(flushTimer);
       clearTimeout(graceTimer);
-      resolve({ ok: !timedOut && !overflowed && exitCode === 0, timedOut, overflowed, output });
+      const text = overflowed ? `${output}\n[... output truncated ...]\n${tail}` : output;
+      resolve({ ok: !timedOut && !overflowed && exitCode === 0, timedOut, overflowed, output: text });
     };
 
+    // Keep the head and the tail. Dropping everything past the cap threw away
+    // the line `classifyFailure` needs — a package that printed a megabyte and
+    // then `anvil not found in PATH` was reported red rather than blocked.
+    let tail = '';
     const collect = (chunk) => {
       bytes += chunk.length;
       if (bytes > maxBytes) {
         overflowed = true;
+        tail = (tail + chunk).slice(-tailBytes);
         return;
       }
       output += chunk;
@@ -463,6 +487,7 @@ async function main() {
   const blocked = [];
   const dirty = [];
   let green = 0;
+  let dirtyOnly = 0;
   const width = String(packages.length).length;
 
   for (const [index, pkg] of packages.entries()) {
@@ -474,31 +499,37 @@ async function main() {
     const touched = dirtiedPaths(before, after);
     const took = `${((Date.now() - started) / 1000).toFixed(1)}s`;
 
+    // Listed wherever it lands, so the dirty section names every package that
+    // wrote into the repository, red or not.
     if (touched.length > 0) dirty.push({ ...result, touched });
 
-    if (result.ok) {
-      if (touched.length === 0) {
-        green += 1;
-        process.stdout.write(`${counter} ok    ${result.dir}  ${took}\n`);
-      } else {
-        process.stdout.write(`${counter} DIRTY ${result.dir}  ${took}\n`);
-      }
+    const cause = result.timedOut ? null : classifyFailure(result.output);
+    const verdict = verdictOf({ ok: result.ok, cause, dirty: touched.length > 0 });
+
+    if (verdict === 'green') {
+      green += 1;
+      process.stdout.write(`${counter} ok    ${result.dir}  ${took}\n`);
       continue;
     }
-
-    const cause = result.timedOut ? null : classifyFailure(result.output);
-    if (cause) {
+    if (verdict === 'dirty') {
+      dirtyOnly += 1;
+      process.stdout.write(`${counter} DIRTY ${result.dir}  ${took}\n`);
+      continue;
+    }
+    if (verdict === 'blocked') {
       blocked.push({ ...result, cause });
       process.stdout.write(`${counter} SKIP  ${result.dir}  (needs ${cause.tool})  ${took}\n`);
       continue;
     }
+
     red.push(result);
     const why = result.timedOut
       ? `  (killed after ${timeoutSec}s)`
       : result.overflowed
         ? '  (output too large)'
         : '';
-    process.stdout.write(`${counter} RED   ${result.dir}${why}  ${took}\n`);
+    const alsoDirty = touched.length > 0 ? '  (and it dirtied the tree)' : '';
+    process.stdout.write(`${counter} RED   ${result.dir}${why}${alsoDirty}  ${took}\n`);
     if (result.timedOut) {
       // A killed package can leave a server behind. `examples/nextjs-safe-multisig`
       // hangs, and the `next-server` its Playwright config starts survives the
@@ -537,10 +568,21 @@ async function main() {
     }
   }
 
-  const failed = red.length + dirty.length + (allowMissingTools ? 0 : blocked.length);
+  // One verdict per package, so the four add up. `dirty` here is the count of
+  // packages whose only complaint is that they wrote into the repository; a
+  // package that also failed is counted red, and named in the section above.
+  const counted = green + red.length + dirtyOnly + blocked.length;
+  if (counted !== packages.length) {
+    throw new Error(`verdicts do not add up: ${counted} of ${packages.length} packages`);
+  }
+
+  const failed = red.length + dirtyOnly + (allowMissingTools ? 0 : blocked.length);
   process.stdout.write(
-    `\ngreen: ${green}   red: ${red.length}   dirty: ${dirty.length}   not run: ${blocked.length}\n`,
+    `\ngreen: ${green}   red: ${red.length}   dirty: ${dirtyOnly}   not run: ${blocked.length}\n`,
   );
+  if (dirty.length > dirtyOnly) {
+    process.stdout.write(`${dirty.length - dirtyOnly} of the red packages also dirtied the tree.\n`);
+  }
   process.exit(failed === 0 ? 0 : 1);
 }
 
