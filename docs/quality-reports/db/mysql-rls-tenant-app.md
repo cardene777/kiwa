@@ -37,7 +37,7 @@ All 4 patterns are driven end-to-end through a provider-neutral adapter
 ## Release gate — 7 axis verdict (mock trace)
 
 Snapshot from
-[`examples/dogfood-mysql-rls-tenant-app/quality-report/fidelity-latest.md`](../../../examples/dogfood-mysql-rls-tenant-app/quality-report/fidelity-latest.md).
+`examples/dogfood-mysql-rls-tenant-app/quality-report/fidelity-latest.md`, which is generated locally by `pnpm -F dogfood-mysql-rls-tenant-app test` and is not tracked in the repository (see #1395).
 
 | axis | value | gate |
 |---|---|---|

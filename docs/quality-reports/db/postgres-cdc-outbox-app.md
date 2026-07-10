@@ -30,7 +30,7 @@ All 4 patterns are driven end-to-end through a provider-neutral adapter
 ## Release gate — 7 axis verdict (mock trace)
 
 Snapshot from
-[`examples/dogfood-postgres-cdc-outbox-app/quality-report/fidelity-latest.md`](../../../examples/dogfood-postgres-cdc-outbox-app/quality-report/fidelity-latest.md).
+`examples/dogfood-postgres-cdc-outbox-app/quality-report/fidelity-latest.md`, which is generated locally by `pnpm -F dogfood-postgres-cdc-outbox-app test` and is not tracked in the repository (see #1395).
 
 | axis | value | gate |
 |---|---|---|

@@ -28,7 +28,7 @@ All 8 axes drive through the provider-neutral 9-op adapter surface (5 v1 ops + 4
 
 ## Release gate — 13-axis verdict (mock trace)
 
-Snapshot from [`examples/dogfood-kafka-event-pipeline/quality-report/fidelity-latest.md`](../../../examples/dogfood-kafka-event-pipeline/quality-report/fidelity-latest.md).
+Snapshot from `examples/dogfood-kafka-event-pipeline/quality-report/fidelity-latest.md`, which is generated locally by `pnpm -F dogfood-kafka-event-pipeline test` and is not tracked in the repository (see #1395).
 
 | axis | value | gate |
 |---|---|---|
