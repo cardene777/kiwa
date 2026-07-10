@@ -1,7 +1,7 @@
-// Layer: UI component (jsdom + @kiwa-test/ui)
+// Layer: UI component (jsdom + @kiwa-lab/ui)
 /// <reference types="vitest/globals" />
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { setupComponentEnv, type UiTestEnv } from '@kiwa-test/ui';
+import { setupComponentEnv, type UiTestEnv } from '@kiwa-lab/ui';
 import { TodoForm } from '../src/ui.js';
 
 const envs: UiTestEnv[] = [];
