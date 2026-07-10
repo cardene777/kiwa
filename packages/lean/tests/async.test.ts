@@ -16,7 +16,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -41,6 +41,14 @@ function leanInstalled(): boolean {
 }
 
 const HAS_LEAN = leanInstalled();
+
+/** Where `lean` really is, so a wrapper script can hand its arguments on. */
+function leanPath(): string {
+  return execFileSync('sh', ['-c', 'command -v lean'], { encoding: 'utf-8' }).trim();
+}
+
+/** Scratch directories the concurrency probes create, removed after each test. */
+const scratches: string[] = [];
 
 const SPEC: OrchestratorSpec = {
   moduleName: 'Probe',
@@ -76,6 +84,7 @@ const malformed = (): string =>
 
 afterEach(() => {
   delete process.env.KIWA_LEAN_SKIP_VERIFY;
+  while (scratches.length > 0) rmSync(scratches.pop() as string, { recursive: true, force: true });
 });
 
 describe('the async path answers what the sync path answers', () => {
@@ -218,27 +227,90 @@ describe('the reason for the async path', () => {
     expect(ticks).toBeGreaterThanOrEqual(5);
   }, 120_000);
 
-  it.skipIf(!HAS_LEAN)('T-ASYNC-031 the same work, at once, beats one at a time', async () => {
+  it.skipIf(!HAS_LEAN)('T-ASYNC-031 the same work runs at once, not one after another', async () => {
+    // Count the Lean processes that are alive at the same time, rather than
+    // timing the two shapes and asserting one is faster. A wall-clock ratio
+    // says nothing on a machine with no spare core: this test read
+    // `expected 767 to be less than 589.5` during a full workspace sweep,
+    // because four Lean processes cannot overlap when nothing is idle. What
+    // the async path promises is that it starts them; how fast they finish is
+    // the machine's business.
+    const scratch = mkdtempSync(join(tmpdir(), 'lean-concurrency-'));
+    scratches.push(scratch);
+    const live = join(scratch, 'live');
+    const peakFile = join(scratch, 'peak');
+    mkdirSync(live);
+
+    const wrapper = join(scratch, 'lean-wrapper');
+    writeFileSync(
+      wrapper,
+      [
+        '#!/bin/sh',
+        `mkdir "${live}/$$"`,
+        `ls "${live}" | wc -l >> "${peakFile}"`,
+        `"${leanPath()}" "$@"`,
+        'code=$?',
+        `rmdir "${live}/$$"`,
+        'exit $code',
+      ].join('\n'),
+    );
+    chmodSync(wrapper, 0o755);
+
     const specs = Array.from({ length: 4 }, (_, i) => ({
       ...SPEC,
       moduleName: `Probe${i}`,
       namespace: `Probe${i}`,
     }));
-
-    const serialStart = Date.now();
-    for (const spec of specs) {
-      expect((await checkLeanTableAsync(spec)).status).toBe('ok');
-    }
-    const serialMs = Date.now() - serialStart;
-
-    const parallelStart = Date.now();
-    const reports = await Promise.all(specs.map((spec) => checkLeanTableAsync(spec)));
-    const parallelMs = Date.now() - parallelStart;
-
+    const reports = await Promise.all(
+      specs.map((spec) => checkLeanTableAsync(spec, { leanBin: wrapper })),
+    );
     expect(reports.every((r) => r.status === 'ok')).toBe(true);
-    // Four Lean processes on any machine with two cores. The margin is wide
-    // because a loaded CI box is slower at everything, including serially.
-    expect(parallelMs).toBeLessThan(serialMs * 0.75);
+
+    const peak = Math.max(
+      ...readFileSync(peakFile, 'utf-8')
+        .trim()
+        .split('\n')
+        .map((line) => Number(line.trim())),
+    );
+    // Serial execution can never see two of its own processes alive at once.
+    expect(peak).toBeGreaterThanOrEqual(2);
+  }, 300_000);
+
+  it.skipIf(!HAS_LEAN)('T-ASYNC-032 the same probe reports one when the calls are serial', async () => {
+    // Without this, T-ASYNC-031 passes against a counter that always says 4.
+    const scratch = mkdtempSync(join(tmpdir(), 'lean-serial-'));
+    scratches.push(scratch);
+    const live = join(scratch, 'live');
+    const peakFile = join(scratch, 'peak');
+    mkdirSync(live);
+
+    const wrapper = join(scratch, 'lean-wrapper');
+    writeFileSync(
+      wrapper,
+      [
+        '#!/bin/sh',
+        `mkdir "${live}/$$"`,
+        `ls "${live}" | wc -l >> "${peakFile}"`,
+        `"${leanPath()}" "$@"`,
+        'code=$?',
+        `rmdir "${live}/$$"`,
+        'exit $code',
+      ].join('\n'),
+    );
+    chmodSync(wrapper, 0o755);
+
+    for (let i = 0; i < 3; i += 1) {
+      const spec = { ...SPEC, moduleName: `Serial${i}`, namespace: `Serial${i}` };
+      expect((await checkLeanTableAsync(spec, { leanBin: wrapper })).status).toBe('ok');
+    }
+
+    const peak = Math.max(
+      ...readFileSync(peakFile, 'utf-8')
+        .trim()
+        .split('\n')
+        .map((line) => Number(line.trim())),
+    );
+    expect(peak).toBe(1);
   }, 300_000);
 });
 
