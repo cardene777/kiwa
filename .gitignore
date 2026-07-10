@@ -84,7 +84,9 @@ examples/python-todo-poc/dist/
 # to avoid noisy churn from build artifacts.
 target/
 Cargo.lock
-# Lake build artifacts. `specs/` is owned by generate-lean-project.ts;
-# these two are written by `lake build` and carry its version, not the spec.
+# Lake build artifacts. `.lake/` is never anything but output.
+# `lake-manifest.json` pins a project's dependencies and belongs in a repository
+# that has any; the dogfood specs have none, and `lake build` rewrites it with
+# whatever version of Lake ran. Ignore it there, and nowhere else.
 .lake/
-lake-manifest.json
+examples/dogfood-lean-orchestrator-specs-app/specs/lake-manifest.json
