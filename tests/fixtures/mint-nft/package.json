@@ -8,7 +8,8 @@
     "test:hardhat": "hardhat test --config hardhat.config.cjs",
     "test:hardhat:coverage": "hardhat coverage --config hardhat.config.cjs",
     "test:e2e": "playwright test",
-    "forge:build": "forge build"
+    "forge:build": "forge build",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "@kiwa-lab/dapp": "workspace:*"
