@@ -14,7 +14,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -207,7 +207,11 @@ describe.skipIf(!HAS_LAKE)('lake builds the project that is checked in', () => {
     //
     // Exit 0 alone does not say it built anything: a lakefile without
     // `@[default_target]` succeeds having compiled nothing at all. The artifacts
-    // are the evidence, one per machine.
+    // are the evidence — but only if this run produced them. Left in place, the
+    // oleans of an earlier run satisfy the assertion on behalf of a build that
+    // did nothing, which is the failure the assertion exists to catch.
+    rmSync(join(SPECS_ROOT, '.lake', 'build'), { recursive: true, force: true });
+
     const out = execFileSync('lake', ['build'], {
       cwd: SPECS_ROOT,
       encoding: 'utf-8',
