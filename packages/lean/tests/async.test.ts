@@ -16,9 +16,9 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   checkLeanTable,
@@ -28,6 +28,7 @@ import {
 } from '../src/extract.js';
 import { generateLeanSpec } from '../src/generator.js';
 import { UsageError } from '../src/errors.js';
+import { detectLeanBinaryAsync } from '../src/lean-runner.js';
 import { verifyLeanSpec, verifyLeanSpecAsync } from '../src/verify.js';
 import type { OrchestratorSpec } from '../src/types.js';
 
@@ -41,6 +42,96 @@ function leanInstalled(): boolean {
 }
 
 const HAS_LEAN = leanInstalled();
+
+/**
+ * Where `lean` really is, so a wrapper script can hand its arguments on.
+ *
+ * `command -v` prints the name rather than a path when the name is a shell
+ * function or a builtin, and `sh` will define functions from `$ENV` before it
+ * runs anything. Handing `PATH` alone leaves nothing for it to read, and the
+ * result is checked rather than trusted.
+ */
+export function resolveLeanPath(found: string): string {
+  // A bare name is a function or a builtin. A relative path is a `PATH` entry
+  // like `bin/lean`, which is a real installation and only needs resolving.
+  if (!found.includes('/')) throw new Error(`lean did not resolve to a path: ${found}`);
+  return resolve(found);
+}
+
+function leanPath(): string {
+  return resolveLeanPath(
+    execFileSync('sh', ['-c', 'command -v lean'], {
+      encoding: 'utf-8',
+      env: { PATH: process.env.PATH ?? '' },
+    }).trim(),
+  );
+}
+
+/** `text` as one `sh` word, whatever it contains. */
+function shellQuote(text: string): string {
+  return `'${text.replaceAll("'", `'\\''`)}'`;
+}
+
+/** Scratch directories the concurrency probes create, removed after each test. */
+const scratches: string[] = [];
+
+/**
+ * A `leanBin` that records how many Lean *runs* are alive at the same time.
+ *
+ * It ignores `--version`. `runLeanSourceAsync` asks `detectLeanBinaryAsync`
+ * whether the binary is Lean before it runs anything, so the wrapper is invoked
+ * twice per call. Under `Promise.all` the four detection calls overlap on their
+ * own, and a probe that counted them reported a peak of four while the Lean
+ * runs it was supposed to be watching went one at a time. Replacing
+ * `execFileAsync` with `execFileSync` in `lean-runner.ts` left that probe green.
+ *
+ * `mkdir` failing is fatal: two live wrappers cannot share a pid, so a
+ * collision would mean a stale directory, and a wrapper that shrugged would
+ * remove a directory another process is still counted by.
+ */
+function concurrencyProbe(prefix: string): { leanBin: string; peak: () => number } {
+  const scratch = mkdtempSync(join(tmpdir(), prefix));
+  scratches.push(scratch);
+  const live = join(scratch, 'live');
+  const peakFile = join(scratch, 'peak');
+  mkdirSync(live);
+
+  // Every path is one quoted `sh` word. A `TMPDIR` holding a `$`, a backtick or
+  // a quote would otherwise be read as shell source.
+  const lean = shellQuote(leanPath());
+  const liveDir = shellQuote(live);
+  const peakPath = shellQuote(peakFile);
+
+  const leanBin = join(scratch, 'lean-wrapper');
+  writeFileSync(
+    leanBin,
+    [
+      '#!/bin/sh',
+      'for arg in "$@"; do',
+      `  [ "$arg" = "--version" ] && exec ${lean} "$@"`,
+      'done',
+      `mkdir ${liveDir}/"$$" || exit 97`,
+      `ls ${liveDir} | wc -l >> ${peakPath}`,
+      `${lean} "$@"`,
+      'code=$?',
+      `rmdir ${liveDir}/"$$"`,
+      'exit $code',
+    ].join('\n'),
+  );
+  chmodSync(leanBin, 0o755);
+
+  /** The most Lean runs alive at once. Zero when the probe saw nothing. */
+  const peak = () => {
+    if (!existsSync(peakFile)) return 0;
+    const counts = readFileSync(peakFile, 'utf-8')
+      .trim()
+      .split('\n')
+      .filter((line) => line.length > 0)
+      .map((line) => Number(line.trim()));
+    return counts.length === 0 ? 0 : Math.max(...counts);
+  };
+  return { leanBin, peak };
+}
 
 const SPEC: OrchestratorSpec = {
   moduleName: 'Probe',
@@ -76,6 +167,7 @@ const malformed = (): string =>
 
 afterEach(() => {
   delete process.env.KIWA_LEAN_SKIP_VERIFY;
+  while (scratches.length > 0) rmSync(scratches.pop() as string, { recursive: true, force: true });
 });
 
 describe('the async path answers what the sync path answers', () => {
@@ -200,45 +292,129 @@ describe('a tool limit is not a verdict, on the async path either', () => {
   }, 60_000);
 });
 
-describe('the reason for the async path', () => {
-  it.skipIf(!HAS_LEAN)('T-ASYNC-030 the event loop keeps running', async () => {
-    let ticks = 0;
-    const timer = setInterval(() => {
-      ticks += 1;
-    }, 5);
+describe('the probe resolves the binary it wraps', () => {
+  it('T-ASYNC-034 a bare name is a shell function, not an installation', () => {
+    // `command -v` prints the name for a function or a builtin. Embedding that
+    // in the wrapper would have it call itself, or a builtin, or nothing.
+    expect(() => resolveLeanPath('lean')).toThrow(/did not resolve to a path/);
+    expect(() => resolveLeanPath('echo')).toThrow(/did not resolve to a path/);
+  });
 
-    const started = Date.now();
-    const report = await checkLeanTableAsync(SPEC);
-    const elapsed = Date.now() - started;
-    clearInterval(timer);
+  it('T-ASYNC-035 a relative path is an installation, and is made absolute', () => {
+    // A `PATH` entry like `bin` finds `bin/lean`. That is real, and only needs
+    // resolving. Rejecting it would fail on a machine where Lean works.
+    expect(resolveLeanPath('bin/lean')).toBe(resolve('bin/lean'));
+    expect(resolveLeanPath('/opt/homebrew/bin/lean')).toBe('/opt/homebrew/bin/lean');
+  });
+});
+
+describe('the reason for the async path', () => {
+  it.skipIf(!HAS_LEAN)('T-ASYNC-030 the event loop keeps running while Lean runs', async () => {
+    // No duration is asserted. `elapsed > 50` used to be here, on the argument
+    // that load can only make Lean slower. True, and beside the point: a faster
+    // machine or a quicker Lean makes it smaller, and the test fails while
+    // nothing is wrong.
+    //
+    // Nor is a queued callback enough on its own. `runLeanSourceAsync` awaits
+    // `detectLeanBinaryAsync` before it runs anything, so the event loop turns
+    // once no matter what the run does afterwards. A `setTimeout(0)` fires
+    // there and proves nothing.
+    //
+    // So make the run itself depend on the event loop, and only after it has
+    // started. The wrapper announces that it is running and then waits for the
+    // test to answer. The test can only answer from a timer callback, which a
+    // synchronous call does not let run. Then the wrapper gives up after ten
+    // seconds and exits non-zero, and the report is not `ok`.
+    //
+    // Announcing first is the point. A callback armed before the run cannot
+    // tell the two apart: it fires during the `await` on the version check,
+    // whatever happens next.
+    const scratch = mkdtempSync(join(tmpdir(), 'lean-eventloop-'));
+    scratches.push(scratch);
+    const started = join(scratch, 'started');
+    const go = join(scratch, 'go');
+    const wrapper = join(scratch, 'lean-wrapper');
+    const lean = shellQuote(leanPath());
+    writeFileSync(
+      wrapper,
+      [
+        '#!/bin/sh',
+        'for arg in "$@"; do',
+        `  [ "$arg" = "--version" ] && exec ${lean} "$@"`,
+        'done',
+        `: > ${shellQuote(started)}`,
+        'waited=0',
+        `while [ ! -f ${shellQuote(go)} ]; do`,
+        '  sleep 0.05',
+        '  waited=$((waited + 1))',
+        '  [ "$waited" -gt 200 ] && exit 98',
+        'done',
+        `exec ${lean} "$@"`,
+      ].join('\n'),
+    );
+    chmodSync(wrapper, 0o755);
+
+    const pending = checkLeanTableAsync(SPEC, { leanBin: wrapper });
+    const answer = setInterval(() => {
+      if (existsSync(started)) {
+        writeFileSync(go, '');
+        clearInterval(answer);
+      }
+    }, 10);
+    const report = await pending;
+    clearInterval(answer);
 
     expect(report.status).toBe('ok');
-    // The sync call fires the timer zero times over the same work.
-    expect(elapsed).toBeGreaterThan(50);
-    expect(ticks).toBeGreaterThanOrEqual(5);
   }, 120_000);
 
-  it.skipIf(!HAS_LEAN)('T-ASYNC-031 the same work, at once, beats one at a time', async () => {
+  it.skipIf(!HAS_LEAN)('T-ASYNC-031 the same work runs at once, not one after another', async () => {
+    // Count the Lean runs that are alive at the same time, rather than timing
+    // the two shapes and asserting one is faster. A wall-clock ratio says
+    // nothing on a machine with no spare core: this test read
+    // `expected 767 to be less than 589.5` during a full workspace sweep,
+    // because four Lean processes cannot overlap when nothing is idle. What
+    // the async path promises is that it starts them; how fast they finish is
+    // the machine's business.
+    const { leanBin, peak } = concurrencyProbe('lean-concurrency-');
+
     const specs = Array.from({ length: 4 }, (_, i) => ({
       ...SPEC,
       moduleName: `Probe${i}`,
       namespace: `Probe${i}`,
     }));
-
-    const serialStart = Date.now();
-    for (const spec of specs) {
-      expect((await checkLeanTableAsync(spec)).status).toBe('ok');
-    }
-    const serialMs = Date.now() - serialStart;
-
-    const parallelStart = Date.now();
-    const reports = await Promise.all(specs.map((spec) => checkLeanTableAsync(spec)));
-    const parallelMs = Date.now() - parallelStart;
-
+    const reports = await Promise.all(specs.map((spec) => checkLeanTableAsync(spec, { leanBin })));
     expect(reports.every((r) => r.status === 'ok')).toBe(true);
-    // Four Lean processes on any machine with two cores. The margin is wide
-    // because a loaded CI box is slower at everything, including serially.
-    expect(parallelMs).toBeLessThan(serialMs * 0.75);
+
+    // Serial execution can never see two of its own processes alive at once.
+    expect(peak()).toBeGreaterThanOrEqual(2);
+  }, 300_000);
+
+  it.skipIf(!HAS_LEAN)('T-ASYNC-032 the same probe reports one when the calls are serial', async () => {
+    // Without this, T-ASYNC-031 passes against a counter that always says 4.
+    const { leanBin, peak } = concurrencyProbe('lean-serial-');
+
+    for (let i = 0; i < 3; i += 1) {
+      const spec = { ...SPEC, moduleName: `Serial${i}`, namespace: `Serial${i}` };
+      expect((await checkLeanTableAsync(spec, { leanBin })).status).toBe('ok');
+    }
+
+    expect(peak()).toBe(1);
+  }, 300_000);
+
+  it.skipIf(!HAS_LEAN)('T-ASYNC-033 the probe watches the run, not the version check', async () => {
+    // `runLeanSourceAsync` asks the binary whether it is Lean before running
+    // anything, so the wrapper is invoked twice per call. Four of those
+    // detection calls overlap under `Promise.all` all by themselves. A probe
+    // that counted them reported a peak of four while the Lean runs went one at
+    // a time, and stayed green when `execFileAsync` was replaced with
+    // `execFileSync` in `lean-runner.ts`.
+    const { leanBin, peak } = concurrencyProbe('lean-version-');
+
+    // Four detection calls at once. They overlap; the probe must not count them.
+    const found = await Promise.all([0, 1, 2, 3].map(() => detectLeanBinaryAsync(leanBin)));
+    expect(found.every((bin) => bin !== null)).toBe(true);
+
+    expect(peak()).toBe(0);
   }, 300_000);
 });
 
