@@ -32,7 +32,7 @@ All 4 patterns are driven end-to-end through a provider-neutral adapter
 ## Release gate — 7 axis verdict (mock trace)
 
 Snapshot from
-[`examples/dogfood-redpanda-schema-registry/quality-report/fidelity-latest.md`](../../../examples/dogfood-redpanda-schema-registry/quality-report/fidelity-latest.md).
+`examples/dogfood-redpanda-schema-registry/quality-report/fidelity-latest.md`, which is generated locally by `pnpm -F dogfood-redpanda-schema-registry test` and is not tracked in the repository (see #1395).
 
 | axis | value | gate |
 |---|---|---|

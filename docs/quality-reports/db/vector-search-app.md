@@ -37,8 +37,7 @@ real (`src/adapters/real.ts`) implementations.
 
 ## Release gate — 7 axis verdict (mock trace)
 
-Snapshot from
-[`examples/dogfood-vector-search-app/quality-report/fidelity-latest.md`](../../../examples/dogfood-vector-search-app/quality-report/fidelity-latest.md).
+Snapshot from `examples/dogfood-vector-search-app/quality-report/fidelity-latest.md`, which is generated locally by `pnpm -F dogfood-vector-search-app test` and is not tracked in the repository (see #1395).
 
 | axis | value | gate |
 |---|---|---|
