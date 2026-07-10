@@ -46,7 +46,18 @@ export type WcProposal = {
 
 export type WcPairResult = {
   uri: string;
-  approval: () => Promise<WcSession>;
+  /**
+   * Settles when the wallet approves the pairing, or rejects when
+   * `approvalTimeoutMs` elapses.
+   *
+   * `pair` starts the timer and builds this promise before it returns, so this
+   * is the promise itself and not a function that makes one. It was declared as
+   * `() => Promise<WcSession>` — the shape WalletConnect's own client uses —
+   * while every caller here awaits it directly. `await` on a function returns
+   * the function, so `handleConnect` would have stored a function where a
+   * session belongs.
+   */
+  approval: Promise<WcSession>;
 };
 
 export type WcRequestArgs = {

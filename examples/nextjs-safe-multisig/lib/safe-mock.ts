@@ -253,7 +253,11 @@ export class SafeMock {
 
     for (const sig of signatures) {
       const recovered = await recoverTypedDataAddress({
-        domain: { chainId: this.chainId, verifyingContract: this.address },
+        // `SAFE_TX_TYPE.EIP712Domain` declares `chainId` as `uint256`, and viem
+        // reads the schema rather than its own domain type: the field it wants
+        // here is a bigint. The value is the same one `domainSeparator` encodes
+        // as a 32-byte word, so the recovered address does not move.
+        domain: { chainId: BigInt(this.chainId), verifyingContract: this.address },
         types: SAFE_TX_TYPE,
         primaryType: 'SafeTx',
         message,
