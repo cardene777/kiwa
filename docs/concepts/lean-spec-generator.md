@@ -102,6 +102,8 @@ end Transaction
 
 - **同 SSOT** = TypeScript impl と Lean spec は 同じ 5 state / 8 event / 40 cell definition を共有、 `checkConformance(spec, observe)` が全 cell を実装に問うて突き合わせる
 - **生成器も検査対象** = `checkLeanTable(spec)` が生成 Lean に `lean --run` で自分の表を出力させ、 spec と突き合わせる。 定理は生成器と同じ表から導かれるので、 cell の移動を捕まえられない (欠落は網羅性検査が捕まえる)
+- **拒否と誤印字は別の失敗** = `lean --run` は file 全体を elaborate するので、 定理が偽なら Lean は表を印字する前に file を撥ねる。 これを `verification-failed` と呼ぶ。 Lean が受理して走り、 返ってきた表が仕様の表でない (cell 不足 / cell 重複 / 読めない行) 場合が `extraction-failed`。 v0.3 は両方を後者と呼んでおり、 偽の定理を渡した読み手は印字の不具合を疑いに行った
+- **生成物は repo に置ける** = `checkLeanTable(spec, { source })` に手元の `.lean` file を渡すと、 その file がまだ仕様の表を保持しているかを問える。 `examples/dogfood-lean-orchestrator-specs-app/specs/` が実例で、 `generateLakeProject` が書いた Lake project を `lake build` が証明し、 file が仕様から drift すれば test が落ちる
 - **表の意味論は 1 箇所** = `src/table.ts` の `resolveTable` を生成器と突き合わせの双方が読む。 spec を 2 箇所で解釈すると、 片方だけが policy を知る状態に必ず drift する
 - **shape 契約 preserving** = 既存 41 package 変更 0、 packages/lean/ 追加のみ
 - **opt-in** = Lean toolchain 未 install 環境でも generator 単体 で動作、 生成 file を実 toolchain で検証するのは user 側 opt-in

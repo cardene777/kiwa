@@ -178,12 +178,13 @@ describe.skipIf(!HAS_LEAN)('a moved cell is invisible to Lean and visible in the
 
   it('T-EXTRACT-023 a cell a theorem does touch is caught by Lean already', () => {
     // Moving the cell that carries `authed_reachable`'s witness breaks the proof,
-    // so this half of the table was never unguarded.
+    // so this half of the table was never unguarded. Lean refuses the file, and
+    // no table is printed: that is a verification failure, not an extraction one.
     const flipped = flip(generateLeanSpec(SPEC).source, VISIBLE_FLIP);
 
     const extracted = extractLeanTable(flipped, SPEC);
 
-    expect(extracted.status).toBe('extraction-failed');
+    expect(extracted.status).toBe('verification-failed');
     expect(extracted.diagnostics).toContain('error');
   });
 });
@@ -209,7 +210,7 @@ describe('a check that did not run is not a check that passed', () => {
 
     const extracted = extractLeanTable(broken, SPEC);
 
-    expect(extracted.status).toBe('extraction-failed');
+    expect(extracted.status).toBe('verification-failed');
     expect(extracted.table).toBeUndefined();
   });
 
@@ -288,9 +289,83 @@ describe('a check that did not run is not a check that passed', () => {
 
     const extracted = extractLeanTable(flipped, SPEC);
 
-    expect(extracted.status).toBe('extraction-failed');
+    expect(extracted.status).toBe('verification-failed');
     expect(extracted.diagnostics).toContain('error:');
     expect(extracted.diagnostics).not.toContain('unreadable line');
     expect(extracted.diagnostics).not.toContain('cells, expected');
+  });
+});
+
+/**
+ * Two ways to fail, and a caller who branches on `status` needs to tell them
+ * apart. One says the file stopped being true; the other says the file is true
+ * and the table it holds is not the spec's.
+ *
+ * Both used to be called `extraction-failed`, and the reader of a false theorem
+ * was sent to look at the printer.
+ */
+describe.skipIf(!HAS_LEAN)('a refused source and a malformed table are different failures', () => {
+  /** `expired` accepts nothing; claim it goes to `init` and the proof breaks. */
+  const FALSE_ABSORBING = {
+    from: /theorem expired_absorbing[\s\S]*?rfl\n/,
+    to: 'theorem expired_absorbing : ∀ e, dispatch .Expired e = .to .Init := by\n  intro e; cases e <;> rfl\n',
+  };
+
+  /** `.SessionExpired` from `.Init` is rejected, so it reaches nothing. */
+  const FALSE_WITNESS = {
+    from: /theorem authed_reachable[^\n]*\n/,
+    to: 'theorem authed_reachable : steps .Init [.SessionExpired] = .to .Authed := rfl\n',
+  };
+
+  function rewrite(change: { from: RegExp; to: string }): string {
+    const source = generateLeanSpec(SPEC).source;
+    const out = source.replace(change.from, change.to);
+    expect(out).not.toBe(source);
+    return out;
+  }
+
+  it('T-EXTRACT-040 a false absorbing theorem is a verification failure', () => {
+    const report = checkLeanTable(SPEC, { source: rewrite(FALSE_ABSORBING) });
+
+    expect(report.status).toBe('verification-failed');
+    expect(report.ok).toBe(false);
+    expect(report.diagnostics).toContain('error:');
+  });
+
+  it('T-EXTRACT-041 a reachability witness that does not reach is a verification failure', () => {
+    const report = checkLeanTable(SPEC, { source: rewrite(FALSE_WITNESS) });
+
+    expect(report.status).toBe('verification-failed');
+    expect(report.ok).toBe(false);
+    expect(report.diagnostics).toContain('error:');
+  });
+
+  it('T-EXTRACT-042 a source Lean accepts, printing a bad table, is an extraction failure', () => {
+    // `#eval` elaborates and runs; Lean exits 0. The table that comes back has a
+    // cell twice, which is a table this machine does not have.
+    const source = generateLeanSpec(SPEC).source.replace(
+      /^end «Probe»$/m,
+      '#eval IO.println "kiwa-lean-cell:init,timeout,invalid"\n\nend «Probe»',
+    );
+
+    const report = checkLeanTable(SPEC, { source });
+
+    expect(report.status).toBe('extraction-failed');
+    expect(report.diagnostics).toContain('twice');
+  });
+
+  it('T-EXTRACT-043 the two statuses do not collapse into one', () => {
+    // Reverting the change makes both of these `extraction-failed`, and this
+    // fails. The one above it would not: it asserts the status it already had.
+    const refused = checkLeanTable(SPEC, { source: rewrite(FALSE_ABSORBING) }).status;
+    const malformed = checkLeanTable(SPEC, {
+      source: generateLeanSpec(SPEC).source.replace(
+        /^end «Probe»$/m,
+        '#eval IO.println "kiwa-lean-cell:init,timeout,invalid"\n\nend «Probe»',
+      ),
+    }).status;
+
+    expect(refused).not.toBe(malformed);
+    expect([refused, malformed]).toEqual(['verification-failed', 'extraction-failed']);
   });
 });

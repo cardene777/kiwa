@@ -1,5 +1,55 @@
 # @kiwa-lab/lean
 
+## 0.4.0
+
+### Major Changes
+
+破壊的変更。 `ExtractStatus` に `verification-failed` が加わり、 `checkLeanTable` と `extractLeanTable` が返す status が 1 つ変わった。
+
+#### `checkLeanTable` は証明の失敗を「抽出の失敗」 と呼んでいた
+
+Lean が source を撥ねた時、 v0.3.0 は `extraction-failed` を返していた。 何も抽出に失敗していない。 Lean は表を印字する段階まで到達せず、 file を拒否したのだ。
+
+```
+偽の absorbing 定理を食わせた時 (v0.3.0)
+  status:      extraction-failed
+  diagnostics: Specs.lean:68:23: error: tactic 'rfl' failed, ...
+```
+
+`diagnostics` には真実が入っている。 分岐に使う `status` には入っていなかった。 読み手は印字の不具合を疑いに行く。
+
+`CheckLeanTableOptions.source` の使い道は「手元に置いた `.lean` file を渡して、 それがまだ仕様の表を保持しているか確かめる」 ことだと文書に書いてある。 まさにその file が typecheck を通らなくなる場合が、 この status の主戦場だった。 `VerifyStatus` は同じ事象を `verification-failed` と呼んでおり、 2 つの語彙が食い違っていた。
+
+v0.4.0 では 2 つを分ける。
+
+| status | 意味 |
+|---|---|
+| `verification-failed` | Lean が source を撥ねた。 parse できない、 elaborate できない、 定理が偽 |
+| `extraction-failed` | Lean は source を受理して走らせた。 返ってきた表がこの機械の表ではない (cell 不足 / cell 重複 / 読めない行) |
+
+`extraction-failed` は消えていない。 `#eval IO.println` で cell を 1 つ余計に印字する source は elaborate に成功し、 exit 0 で壊れた表を返す。 2 つの枝はどちらも到達可能で、 `T-EXTRACT-043` がそれを固定している。
+
+##### 移行
+
+`status === 'extraction-failed'` で分岐している呼出は、 証明の失敗を捕まえられなくなる。
+
+```ts
+// v0.3.0
+if (report.status === 'extraction-failed') { /* 何かがおかしい */ }
+
+// v0.4.0
+if (report.status === 'verification-failed') { /* 仕様か Lean file が誤り */ }
+if (report.status === 'extraction-failed')   { /* Lean は正しく、 表が壊れている */ }
+```
+
+`ok` の意味は変わらない。 status を読まず `report.ok` だけを見ている呼出は影響を受けない。
+
+### Patch Changes
+
+`examples/dogfood-lean-orchestrator-specs-app` が `verifyLeanSpec` と `generateLakeProject` を実際に呼ぶようになった。 どちらも export され、 文書化され、 自分自身の unit test 以外どこからも呼ばれていなかった。 利用者がやること (生成した `.lean` を repo に置き、 `lake build` で証明する) を、 この repo は一度もやっていなかった。
+
+`examples/.../specs/` に Lake project の実体が入り、 test が 5 機械分の `.olean` が建つことと、 checked-in file が仕様から drift したら落ちることを固定する。
+
 ## 0.3.0
 
 ### Major Changes

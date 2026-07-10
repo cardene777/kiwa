@@ -85,6 +85,20 @@ def main : IO Unit := do
 export type ExtractStatus =
   | 'ok'
   | 'lean-not-installed'
+  /**
+   * Lean refused the source: it does not parse, does not elaborate, or one of its
+   * theorems is false. No table was printed, because Lean never ran the program.
+   *
+   * This is the status a checked-in `.lean` file earns when it stops being true,
+   * and it is the same word `VerifyStatus` uses for it.
+   */
+  | 'verification-failed'
+  /**
+   * Lean accepted the source and ran it, and what came back is not this machine's
+   * table: a cell short, a cell twice, a line that does not parse.
+   *
+   * The source is sound; its table is not the one the spec describes.
+   */
   | 'extraction-failed'
   /** Lean was still working when `timeoutMs` ran out. Nothing was established. */
   | 'timed-out'
@@ -132,9 +146,17 @@ export function extractLeanTable(
 
   const run = runLeanSource(`${source}${renderTableProgram(spec)}`, ['--run'], opts);
   if (run === 'lean-not-installed') return { status: 'lean-not-installed' };
+  // Lean exited non-zero. The program appended below only prints, so it is Lean
+  // that refused: the source does not elaborate, or a theorem in it is false.
+  // Nothing was extracted, and calling that an extraction failure sends the
+  // reader to look at the printer.
   if (!run.ok) {
     return {
-      status: run.timedOut ? 'timed-out' : run.overflowed ? 'output-too-large' : 'extraction-failed',
+      status: run.timedOut
+        ? 'timed-out'
+        : run.overflowed
+          ? 'output-too-large'
+          : 'verification-failed',
       diagnostics: run.diagnostics,
     };
   }
