@@ -145,8 +145,11 @@ export function parsePorcelain(text) {
  */
 export function dirtiedPaths(before, after) {
   const touched = [];
-  for (const [path, fingerprint] of after) {
-    if (before.get(path) !== fingerprint) touched.push(path);
+  const paths = new Set([...before.keys(), ...after.keys()]);
+  for (const path of paths) {
+    // A path that vanished from the snapshot is a change too: `git rm` or a
+    // clean of a dirty output directory that was there when the package began.
+    if (before.get(path) !== after.get(path)) touched.push(path);
   }
   return touched;
 }
@@ -556,14 +559,12 @@ export function runCommand({
       // hundred samples found no moment where Node had reaped and our `exit`
       // handler had not run. A defence nothing can reach is a defence nothing
       // has checked.
-      if (groupAlive(child.pid)) {
-        // Still running, past the deadline. Kill it, and mark it late.
-        timedOut = true;
-        killGroup(child);
-      }
-      // If the child was already gone, this timer fired only because the loop
-      // was blocked while it was exiting. Wait for `exit`; the handler will
-      // check the wall clock and decide.
+      // Reaching this timer callback without an `exit` handler having run
+      // means the child had not been observed to exit by the deadline. That is
+      // late, whether or not it is still alive right this instant. Kill only
+      // if the group is still there.
+      timedOut = true;
+      if (groupAlive(child.pid)) killGroup(child);
       graceTimer = setTimeout(settle, killGraceMs);
     }, timeoutMs);
   });

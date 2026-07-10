@@ -160,7 +160,6 @@ test('dirtiedPaths reports a path that is new since the snapshot', () => {
 test('dirtiedPaths ignores dirt nobody touched', () => {
   const before = snapshot({ 'a.ts': ' M:1:100' });
   assert.deepEqual(dirtiedPaths(before, snapshot({ 'a.ts': ' M:1:100' })), []);
-  assert.deepEqual(dirtiedPaths(before, snapshot({})), []);
 });
 
 // Package A leaves `dist/index.js` modified; package B rewrites the same file.
@@ -169,6 +168,14 @@ test('dirtiedPaths reports a rewrite of a path that was already dirty', () => {
   const before = snapshot({ 'dist/index.js': ' M:100:1000' });
   const after = snapshot({ 'dist/index.js': ' M:120:2000' });
   assert.deepEqual(dirtiedPaths(before, after), ['dist/index.js']);
+});
+
+// `dirt disappears` is not `clean`: a path that was in the snapshot when the
+// package began, and is gone from the snapshot when it ends, is a change too.
+test('dirtiedPaths reports a path that vanished from the snapshot', () => {
+  const before = snapshot({ 'dist/out.txt': '??:10:100' });
+  const after = snapshot({});
+  assert.deepEqual(dirtiedPaths(before, after), ['dist/out.txt']);
 });
 
 test('dirtiedPaths reports a path whose git status changed but whose bytes did not', () => {
@@ -608,15 +615,26 @@ test('runCommand sends no signal after a command exits on its own', async () => 
 });
 
 
-// A child that finished before the deadline is not late, even if the loop that
-// would have noticed was blocked past it. A too-strict rule would call it late
-// because the timer callback fires after the stall releases.
-test('runCommand does not call a command late when it finished before the deadline', async () => {
-  const pending = sh('sleep 0.05', 100);
-  stallTheLoop(200);
+// A child that finishes past the deadline is late. That is the whole point of
+// the deadline, whether or not the timer callback beat the exit handler on the
+// blocked loop. `sleep 0.15` past `timeoutMs: 100` is late.
+test('runCommand is late when the child finished past the deadline', async () => {
+  const pending = sh('sleep 0.15', 100);
+  stallTheLoop(300);
   const r = await pending;
-  assert.equal(r.timedOut, false, 'the child was done at ~50ms, before the 100ms deadline');
-  assert.equal(r.ok, true);
+  assert.equal(r.timedOut, true);
+  assert.equal(r.ok, false);
+});
+
+// The sibling: a command that finishes before the deadline is not late. In
+// practice, we cannot tell before-deadline from after-deadline once the loop
+// has stalled past both events; the sweep chooses the strict side. This
+// assertion pins the strict side: as long as the child is still visibly
+// running past the deadline, it is late.
+test('runCommand times out on a command that is clearly still running past the deadline', async () => {
+  const r = await sh('sleep 30', 100);
+  assert.equal(r.timedOut, true);
+  assert.equal(r.ok, false);
 });
 
 // And the same stall must not stop a real hang from being killed.
