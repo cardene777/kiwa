@@ -120,8 +120,8 @@ Nothing else. In particular:
   |---|---|
   | declare it as a dependency | 6 |
   | reach for it with `await import('testcontainers' as string)`, undeclared | 3 |
-  | name it only in a `package.json` description | 17 |
-  | mention it only in source or docs | 8 |
+  | name it only in a `package.json` description | 6 |
+  | name it in a README, source or test as well | 19 |
 
   All of them pass with `DOCKER_HOST` pointed at a socket that does not exist,
   because a container is only started by a `real` adapter and `pnpm test` never

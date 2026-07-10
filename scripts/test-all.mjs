@@ -54,6 +54,7 @@
 
 import { execFile, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { StringDecoder } from 'node:string_decoder';
 import { existsSync, lstatSync, readFileSync, readlinkSync, realpathSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -530,23 +531,25 @@ export function runCommand({
     let cause = null;
     const OVERLAP = 4096;
 
+    // A child can split one UTF-8 codepoint across two writes: `0xC3` in one
+    // chunk, `0xA9` in the next. `String(chunk)` on each half writes `�` twice
+    // — two bytes reported as six — so `maxBytes: 4` could false-trip on 2
+    // bytes of `é`. `StringDecoder` holds partial trail bytes back until the
+    // next chunk completes them.
+    const decoder = new StringDecoder('utf-8');
+
     const collect = (chunk) => {
-      const text = String(chunk);
+      const text = decoder.write(chunk);
       if (cause === null) {
         const seen = window + text;
         cause = classify(seen);
         window = seen.slice(-OVERLAP);
       }
 
-      // Bytes, not characters. A child that prints 800 `é` writes 1600 bytes,
-      // and `text.length` reports 800: `maxBytes: 1024` would not fire and the
-      // cap would be a lie on any non-ASCII output.
-      bytes += Buffer.byteLength(text, 'utf-8');
+      // Bytes, not characters, and using the raw chunk length so the accounting
+      // never depends on how the codepoints landed in `text`.
+      bytes += chunk.length;
       if (bytes > maxBytes) {
-        // The tail begins with the end of the head, so nothing is lost at the
-        // seam either. `slice(-tailBytes)` on a string is characters, so the
-        // retained suffix could be twice its budget on multibyte output — take
-        // it in bytes instead.
         if (!overflowed) tail = keepLastBytes(output, tailBytes);
         overflowed = true;
         tail = keepLastBytes(tail + text, tailBytes);
@@ -660,6 +663,21 @@ export function failureLines(output) {
  * `--timeout -5` that the flag "needs a value", when what it needs is a
  * positive number, and only the caller's own validation can say so.
  */
+/**
+ * Parse `--timeout` and refuse values that `setTimeout` would silently clamp.
+ *
+ * `setTimeout` takes a 32-bit signed integer of milliseconds. Larger values
+ * emit a `TimeoutOverflowWarning` and behave like `1`, so a caller who asked
+ * for a very long deadline would find every package timing out in a
+ * millisecond. Say so instead.
+ */
+export function validateTimeout(raw) {
+  const seconds = Number(raw);
+  if (!Number.isFinite(seconds) || seconds <= 0) throw new Error('--timeout takes seconds');
+  if (seconds * 1000 > 2_147_483_647) throw new Error('--timeout exceeds 2147483 seconds');
+  return seconds;
+}
+
 export function argValue(argv, flag, fallback) {
   const at = argv.indexOf(flag);
   if (at === -1) return fallback;
@@ -681,8 +699,7 @@ async function main() {
   const verbose = process.argv.includes('--verbose');
   const allowMissingTools = process.argv.includes('--allow-missing-tools');
   const only = argValue(process.argv, '--only', null);
-  const timeoutSec = Number(argValue(process.argv, '--timeout', '900'));
-  if (!Number.isFinite(timeoutSec) || timeoutSec <= 0) throw new Error('--timeout takes seconds');
+  const timeoutSec = validateTimeout(argValue(process.argv, '--timeout', '900'));
 
   const all = discoverPackages(await listProjects(), ROOT);
   const packages = only ? all.filter((p) => relative(ROOT, p.dir).includes(only)) : all;

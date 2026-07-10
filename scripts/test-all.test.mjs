@@ -24,6 +24,7 @@ import {
   readPorcelain,
   runCommand,
   sweepFailed,
+  validateTimeout,
   unsupportedPlatform,
   verdictOf,
 } from './test-all.mjs';
@@ -409,6 +410,21 @@ test('runCommand keeps the tail within its byte budget', async () => {
   // The tail comes at the end after the truncation notice.
   const tail = r.output.slice(r.output.indexOf('truncated ...]') + 15);
   assert.ok(Buffer.byteLength(tail, 'utf-8') <= 4, `tail is ${Buffer.byteLength(tail, 'utf-8')} bytes`);
+});
+
+// A UTF-8 codepoint can arrive as two writes: `0xC3` and then `0xA9`. Decoding
+// each chunk on its own turned `é` (2 bytes) into `��` (six bytes on the wire
+// after re-encoding) and could trip `overflowed: true` at `maxBytes: 4`.
+test('runCommand does not over-count a codepoint split across two chunks', async () => {
+  const r = await runCommand({
+    command: 'sh',
+    args: ['-c', 'printf "\\xc3"; sleep 0.05; printf "\\xa9"'],
+    cwd: process.cwd(),
+    timeoutMs: 5000,
+    maxBytes: 4,
+  });
+  assert.equal(r.overflowed, false, 'two bytes of `é` do not exceed a 4-byte cap');
+  assert.match(r.output, /^é$/, 'and the decoded output is one `é`');
 });
 
 // `maxBytes` is bytes, not characters. `text.length` counted 800 for 800 `é`,
@@ -853,6 +869,19 @@ test('argValue refuses a flag with no value, or with another flag after it', () 
 test('argValue takes a negative number as a value', () => {
   assert.equal(argValue(['node', 'x', '--timeout', '-5'], '--timeout', '900'), '-5');
   assert.equal(argValue(['node', 'x', '--timeout', '-0.5'], '--timeout', '900'), '-0.5');
+});
+
+// `setTimeout` takes a 32-bit signed integer. Anything larger emits a warning
+// and behaves like 1ms. A user who asked for a very long deadline used to find
+// every package timing out in a millisecond.
+test('validateTimeout refuses values setTimeout would silently clamp', () => {
+  assert.equal(validateTimeout('900'), 900);
+  assert.equal(validateTimeout('300'), 300);
+  assert.throws(() => validateTimeout('0'), /takes seconds/);
+  assert.throws(() => validateTimeout('-5'), /takes seconds/);
+  assert.throws(() => validateTimeout('abc'), /takes seconds/);
+  assert.throws(() => validateTimeout('3000000'), /exceeds 2147483 seconds/);
+  assert.throws(() => validateTimeout('1e400'), /takes seconds/);
 });
 
 // `--only ""` used to filter for the empty string, match every path, and run
