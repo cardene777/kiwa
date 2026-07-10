@@ -20,6 +20,7 @@ import {
   groupAlive,
   killGroup,
   parsePorcelain,
+  parsePorcelainBytes,
   parseProjectList,
   readPorcelain,
   runCommand,
@@ -108,6 +109,16 @@ test('a failure that also mentions a missing tool is classified blocked', () => 
   assert.equal(classifyFailure(output)?.tool, 'Playwright Chromium');
 });
 
+// The order of the table is not the order of the output. A package that
+// printed anvil-first-chromium-second must be classified Foundry, and the
+// same input reversed must be classified Playwright.
+test('classifyFailure returns the signature that comes first in the output', () => {
+  const anvilFirst = ["Error: anvil not found in PATH", "Executable doesn't exist at /x"].join('\n');
+  const chromeFirst = ["Executable doesn't exist at /x", "Error: anvil not found in PATH"].join('\n');
+  assert.equal(classifyFailure(anvilFirst)?.tool, 'Foundry (anvil)');
+  assert.equal(classifyFailure(chromeFirst)?.tool, 'Playwright Chromium');
+});
+
 /** `git status --porcelain -z`: NUL after every record, nothing quoted. */
 const z = (...records) => records.map((record) => `${record}\0`).join('');
 const paths = (text) => parsePorcelain(text).map((entry) => entry.path);
@@ -140,6 +151,25 @@ test('parsePorcelain reads a path with a space, unquoted', () => {
 
 test('parsePorcelain reads an unmerged entry', () => {
   assert.deepEqual(paths(z('UU src/conflict.ts')), ['src/conflict.ts']);
+});
+
+// A path with a non-UTF-8 byte — `0xFF` — reaches `parsePorcelainBytes` as
+// raw bytes and survives without corruption. Decoding to UTF-8 first, as the
+// old code did, replaced the byte with `�` and lost the file's identity.
+test('parsePorcelainBytes keeps raw bytes intact', () => {
+  const buf = Buffer.concat([
+    Buffer.from(' M '),
+    Buffer.from([0x66, 0x69, 0xff, 0x6c, 0x65]), // "fi<0xFF>le"
+    Buffer.from([0x00]),
+  ]);
+  const entries = parsePorcelainBytes(buf);
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].status, ' M');
+  assert.deepEqual([...entries[0].path], [0x66, 0x69, 0xff, 0x6c, 0x65]);
+});
+
+test('parsePorcelainBytes returns nothing for empty input', () => {
+  assert.deepEqual(parsePorcelainBytes(Buffer.alloc(0)), []);
 });
 
 test('parsePorcelain returns nothing for a clean tree', () => {
@@ -198,7 +228,8 @@ test('readPorcelain rejects when git fails, instead of pretending the tree was c
 
 test('readPorcelain returns a snapshot when git succeeds', async () => {
   // Use a path git will really stat: the test file itself.
-  const snap = await readPorcelain(process.cwd(), (cb) => cb(null, ' M scripts/test-all.mjs\0'));
+  const buf = Buffer.from(' M scripts/test-all.mjs\0');
+  const snap = await readPorcelain(process.cwd(), (cb) => cb(null, buf));
   assert.equal(snap.size, 1);
   assert.match(snap.get('scripts/test-all.mjs'), /^ M:/);
 });

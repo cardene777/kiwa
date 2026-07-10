@@ -98,10 +98,17 @@ export const TOOL_SIGNATURES = [
  * prevent.
  */
 export function classifyFailure(output) {
-  for (const { tool, install, evidence } of TOOL_SIGNATURES) {
-    for (const needle of evidence) {
-      const line = output.split('\n').find((l) => l.includes(needle));
-      if (line !== undefined) return { tool, install, line: line.trim() };
+  // Walk the output in order and return the first signature that matches. The
+  // previous version walked the table in order, so a package that printed
+  // `anvil not found in PATH` and then `Executable doesn't exist at` was
+  // classified Playwright because Playwright is the first table entry. The
+  // documented rule — "the first signature found wins" — is about output
+  // order, not table order.
+  for (const line of output.split('\n')) {
+    for (const { tool, install, evidence } of TOOL_SIGNATURES) {
+      for (const needle of evidence) {
+        if (line.includes(needle)) return { tool, install, line: line.trim() };
+      }
     }
   }
   return null;
@@ -126,6 +133,38 @@ export function parsePorcelain(text) {
     const status = record.slice(0, 2);
     entries.push({ status, path: record.slice(3) });
     // `R` and `C` are followed by a bare record holding the path they came from.
+    if (status.includes('R') || status.includes('C')) {
+      index += 1;
+      if (index < records.length) entries.push({ status, path: records[index] });
+    }
+  }
+  return entries;
+}
+
+/**
+ * The same, on raw NUL-separated `Buffer` bytes.
+ *
+ * Git allows any non-NUL byte in a filename on POSIX; decoding to UTF-8 first
+ * corrupts a path with `0xFF` or a Shift-JIS byte, and the sweep then either
+ * misses a rewrite or prints `�` in the dirty section. Paths come out as
+ * `Buffer`s; `absolute` for `fingerprint` is a Buffer too, and `lstatSync`
+ * accepts it.
+ */
+export function parsePorcelainBytes(buf) {
+  const records = [];
+  let start = 0;
+  for (let i = 0; i <= buf.length; i += 1) {
+    if (i === buf.length || buf[i] === 0) {
+      if (i > start) records.push(buf.subarray(start, i));
+      start = i + 1;
+    }
+  }
+  const entries = [];
+  for (let index = 0; index < records.length; index += 1) {
+    const record = records[index];
+    if (record.length < 4) continue;
+    const status = record.subarray(0, 2).toString('utf-8');
+    entries.push({ status, path: record.subarray(3) });
     if (status.includes('R') || status.includes('C')) {
       index += 1;
       if (index < records.length) entries.push({ status, path: records[index] });
@@ -345,8 +384,15 @@ export function readPorcelain(root, exec) {
     exec((error, out) => {
       if (error) return fail(new Error(`git status failed: ${error.message.trim()}`));
       const snapshot = new Map();
-      for (const { status, path } of parsePorcelain(out ?? '')) {
-        snapshot.set(path, fingerprint(status, join(root, path)));
+      // Paths are raw bytes: a Shift-JIS or Latin-1 filename would otherwise
+      // decode to `�` and be lost. The Map keys them by their UTF-8 form for
+      // display and comparison; `fingerprint` gets the original bytes.
+      const rootBuf = Buffer.from(root);
+      const sep = Buffer.from('/');
+      for (const { status, path } of parsePorcelainBytes(out ?? Buffer.alloc(0))) {
+        const key = path.toString('utf-8');
+        const absolute = Buffer.concat([rootBuf, sep, path]);
+        snapshot.set(key, fingerprint(status, absolute));
       }
       done(snapshot);
     });
@@ -354,7 +400,7 @@ export function readPorcelain(root, exec) {
 }
 
 function porcelain() {
-  const options = { cwd: ROOT, maxBuffer: 32 * 1024 * 1024, encoding: 'utf-8' };
+  const options = { cwd: ROOT, maxBuffer: 32 * 1024 * 1024, encoding: 'buffer' };
   const args = ['status', '--porcelain', '-z', '--untracked-files=all'];
   return readPorcelain(ROOT, (cb) => execFile('git', args, options, cb));
 }
