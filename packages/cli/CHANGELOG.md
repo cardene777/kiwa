@@ -1,5 +1,36 @@
 # @kiwa-lab/cli
 
+## 2.0.1
+
+### Patch Changes
+
+`kiwa init` が生成する project が install できなかった。 2 つの欠陥。
+
+#### 1. 生成される `package.json` が存在しない版を要求する
+
+```
+$ npx @kiwa-lab/cli init
+$ npm install
+npm error code ETARGET
+npm error notarget No matching version found for @kiwa-lab/dapp@^0.1.0.
+```
+
+v2.0 の一斉改名で `@kiwa-lab/dapp` は `2.0.0` に上がったが、 `init` が書き込む範囲は `^0.1.0` のまま据え置かれた。 `^0.1.0` はどの公開版とも一致しない。
+
+`packages/cli` 自身の test は `'^0.1.0'` を literal で assert していた。 欠陥を、 それを捕まえるはずの test が固定していた。
+
+範囲を `^2.0.0` に修正し、 test は `packages/dapp/package.json` の版が範囲を満たすことを検査する形に変えた (`T-INIT-053`)。 literal を繰り返さない。 `packages/dapp` を上げても、 範囲を戻しても落ちる。
+
+#### 2. 生成される spec が存在しない package を import する
+
+`src/templates/` の 3 枚が `@kiwa-test/dapp` を import していた。 v2.13 で離れた npm scope で、 生成される `package.json` は `@kiwa-lab/dapp` を宣言する。
+
+template dir を拡張子を問わず走査する test を追加した (`T-INIT-101` / `T-INIT-102`)。 `.tpl` を見逃した拡張子 filter が原因だった。
+
+#### 確認
+
+build した `init` を空 dir で実行し、 `npm install` を空の cache で走らせた。 exit 0、 生成物の 3 import (`@playwright/test` / `@kiwa-lab/dapp` / `viem`) がすべて解決する。
+
 ## 1.0.1
 
 ### Patch Changes
