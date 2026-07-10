@@ -1,5 +1,67 @@
 # @kiwa-lab/lean
 
+## 0.5.0
+
+### Minor Changes
+
+非破壊的な追加。 Lean を走らせる 3 つの入口に、 event loop を止めない版を足した。 同期版は 1 行も変わらない。
+
+#### `execFileSync` は Lean が終わるまで process 全体を止める
+
+計測した。
+
+```
+execFileSync が走った時間            139 ms
+その間に発火した 5ms timer の回数      0 (期待値 27)
+```
+
+build plugin / watch mode / 同一 process 上の server は、 Lean が elaborate している間まるごと固まる。 逃げ道は無かった。 `verifyLeanSpec` と `checkLeanTable` が唯一の入口で、 どちらも同期だからだ。
+
+#### 機械は 1 台ずつしか検証できなかった
+
+`checkLeanTable` は仕様を 1 つ取る。 5 台持つ呼出は Lean を 5 回、 順番に起動する。 API が他の形を許さないからだ。
+
+```
+直列   checkLeanTable × 5            957 ms
+並行   checkLeanTableAsync × 5       216 ms   77% 短縮
+```
+
+仕事は互いに独立している。 直列である必然性は API の形以外に無かった。
+
+#### 追加した 3 関数
+
+| 関数 | 戻り値 |
+|---|---|
+| `verifyLeanSpecAsync(specs, opts?)` | `Promise<VerifyResult>` |
+| `checkLeanTableAsync(spec, opts?)` | `Promise<LeanTableReport>` |
+| `extractLeanTableAsync(source, spec, opts?)` | `Promise<ExtractResult>` |
+
+`concurrency` option は付けない。 `checkLeanTableAsync` は仕様を 1 つ取る。 何本同時に走らせるかは、 全部を持っている呼出側の `Promise.all` の話だ。
+
+#### 2 経路が別々のことを学ばないようにする
+
+`runLeanSource` は「純粋な前処理 → Lean 起動 → 純粋な後処理」 だった。 違うのは真ん中だけなので、 前後を関数に切り出して同期版と非同期版の双方が呼ぶ形にした。
+
+二重に書けば片方が忘れる。 実際に一度起きている。 `KIWA_LEAN_SKIP_VERIFY` は `verifyLeanSpec` だけが読み、 `extractLeanTable` は読まなかった。 Lean を切った build で、 2 つのうち 1 つが Lean を走らせていた。
+
+#### 共有しても、 なお違っていたもの
+
+`execFile` は同じ事象を別の名前で綴る。 実測。
+
+| 事象 | `execFileSync` | `execFile` |
+|---|---|---|
+| `maxBuffer` 超過 | `code: 'ENOBUFS'` | `code: 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'` |
+| timeout | `code: 'ETIMEDOUT'` + `signal: 'SIGTERM'` | `code: null` + `signal: 'SIGTERM'` |
+| 非ゼロ終了 | `code` 無し | `code: 3` (数値) |
+
+`classifyFailure` は `ENOBUFS` しか知らなかったので、 非同期経路の buffer 溢れが `verification-failed` として返った。 「道具の限界」 が「仕様が誤り」 として報告される、 この package が 31 回潰してきたのと同じ形だ。
+
+`T-ASYNC-021` が実装中にこれを捕まえた。 `OVERFLOW_CODES` に 2 つの綴りを持たせ、 `T-RUNNER-035..037` で 3 つの形を直接固定した。
+
+### Patch Changes
+
+`SpawnFailure.code` の型が `string | number | null | undefined` になった (`execFile` が終了コードを数値で入れるため)。 内部型で、 公開 API には現れない。
+
 ## 0.4.0
 
 ### Major Changes

@@ -307,6 +307,37 @@ Naming an `initial` state roughly doubles the Lean time, since each state gains 
 reachability theorem. The default `timeoutMs` is 60 seconds; past a few thousand
 cells, raise it or split the machine.
 
+## Without stopping the event loop
+
+`verifyLeanSpec`, `checkLeanTable` and `extractLeanTable` run Lean with
+`execFileSync`. It stops the event loop until Lean is done — a build plugin, a
+watch mode, or a server on the same process stops with it. Over one 203ms run, a
+five-millisecond timer fires zero times.
+
+Each has an `Async` twin, which decides nothing of its own: they share one
+prelude and one interpretation with the synchronous functions, so a rule learned
+by either belongs to both. Same options, same statuses, awaited.
+
+```ts
+import { checkLeanTableAsync } from '@kiwa-lab/lean'
+
+const reports = await Promise.all(specs.map((spec) => checkLeanTableAsync(spec)))
+const drifted = reports.filter((report) => !report.ok)
+```
+
+Five machines through the synchronous call run Lean five times, one after
+another, because a synchronous call gives no other option. Awaited, they are the
+caller's `Promise.all`:
+
+```
+5 machines, serial       957 ms
+5 machines, concurrent   216 ms      77% shorter
+one run                  203 ms      35 five-millisecond timers fired meanwhile
+```
+
+There is no `concurrency` option, because `checkLeanTableAsync` takes one spec.
+How many run at once belongs to whoever holds all of them.
+
 ## API
 
 | Export | Purpose |
@@ -314,9 +345,12 @@ cells, raise it or split the machine.
 | `generateLeanSpec(spec)` | table → Lean 4 source, plus `meta` (cell counts, terminal states, sinks, reachability paths) |
 | `generateLakeProject(config)` | a Lake package whose `lake build` actually builds the specs put in it |
 | `verifyLeanSpec(specs, opts?)` | run Lean over generated specs |
+| `verifyLeanSpecAsync(specs, opts?)` | the same, awaited |
 | `checkConformance(spec, observe)` | walk every cell, comparing the spec with an implementation |
 | `checkLeanTable(spec, opts?)` | make Lean print its table, comparing it with the spec |
+| `checkLeanTableAsync(spec, opts?)` | the same, awaited |
 | `extractLeanTable(source, spec, opts?)` | read the table out of a Lean source |
+| `extractLeanTableAsync(source, spec, opts?)` | the same, awaited |
 | `formatConformance(spec, report)` | render a report as one failure message |
 | `isInvalid(transition)` | narrow a `Transition` to its rejecting form |
 

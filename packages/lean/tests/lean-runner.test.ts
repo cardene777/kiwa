@@ -143,6 +143,42 @@ describe('why Lean stopped, when it did not finish', () => {
   it('T-RUNNER-034 an ordinary non-zero exit is neither', () => {
     expect(classifyFailure({ signal: null })).toEqual({ timedOut: false, overflowed: false });
   });
+
+  /**
+   * `execFile` spells the same three events differently, and the shapes below are
+   * what it actually threw, read off the errors themselves:
+   *
+   *   maxBuffer     code: 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'
+   *   timeout       code: null, signal: 'SIGTERM', killed: true
+   *   exit 3        code: 3
+   *
+   * A classifier that knows only the synchronous spellings calls an overflow a
+   * failed verification, which is what the async path did before these existed.
+   */
+  it('T-RUNNER-035 execFile spells a full buffer differently, and it is still an overflow', () => {
+    expect(classifyFailure({ code: 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER' })).toEqual({
+      timedOut: false,
+      overflowed: true,
+    });
+  });
+
+  it('T-RUNNER-036 execFile reports a timeout with no code and a signal', () => {
+    expect(classifyFailure({ code: null, signal: 'SIGTERM' })).toEqual({
+      timedOut: true,
+      overflowed: false,
+    });
+  });
+
+  it('T-RUNNER-037 execFile puts the exit status in `code`, and a number is neither', () => {
+    expect(classifyFailure({ code: 3, signal: null })).toEqual({
+      timedOut: false,
+      overflowed: false,
+    });
+    expect(classifyFailure({ code: 1, signal: null })).toEqual({
+      timedOut: false,
+      overflowed: false,
+    });
+  });
 });
 
 describe.skipIf(!HAS_LEAN)('the scratch directory', () => {

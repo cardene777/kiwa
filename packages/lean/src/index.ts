@@ -28,9 +28,14 @@ export type {
   LeanTableReport,
   TableDisagreement,
 } from './extract.js';
-export { checkLeanTable, extractLeanTable } from './extract.js';
+export {
+  checkLeanTable,
+  checkLeanTableAsync,
+  extractLeanTable,
+  extractLeanTableAsync,
+} from './extract.js';
 export type { LeanRunOptions } from './lean-runner.js';
 export type { LakeProjectConfig, LakeProjectFiles } from './lake.js';
 export { generateLakeProject } from './lake.js';
 export type { VerifyOptions, VerifyResult, VerifyStatus } from './verify.js';
-export { verifyLeanSpec } from './verify.js';
+export { verifyLeanSpec, verifyLeanSpecAsync } from './verify.js';

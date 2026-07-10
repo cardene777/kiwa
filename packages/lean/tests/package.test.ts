@@ -157,13 +157,30 @@ describe.skipIf(!RUN)('the published package, installed as a consumer installs i
       'UsageError',
       'checkConformance',
       'checkLeanTable',
+      'checkLeanTableAsync',
       'extractLeanTable',
+      'extractLeanTableAsync',
       'formatConformance',
       'generateLakeProject',
       'generateLeanSpec',
       'isInvalid',
       'verifyLeanSpec',
+      'verifyLeanSpecAsync',
     ]);
+  });
+
+  it('T-PKG-007 the async functions are awaitable from a consumer', () => {
+    const out = run(
+      'async.mjs',
+      `import { checkLeanTableAsync, verifyLeanSpecAsync } from '@kiwa-lab/lean';
+       const spec = ${SPEC};
+       const table = await checkLeanTableAsync(spec, { skip: true });
+       const verify = await verifyLeanSpecAsync([{ path: 'S.lean', source: '', meta: {} }], { skip: true });
+       console.log(table.status, table.ok, verify.status);`,
+    );
+
+    // A skip establishes nothing, and says so, without a toolchain on the box.
+    expect(out).toBe('skipped-by-env false skipped-by-env');
   });
 
   it('T-PKG-005 typechecks against a strict consumer, without skipLibCheck', () => {

@@ -15,6 +15,7 @@ import { describe, expect, it } from 'vitest';
 import {
   checkConformance,
   checkLeanTable,
+  checkLeanTableAsync,
   formatConformance,
   type Observation,
 } from '@kiwa-lab/lean';
@@ -178,14 +179,31 @@ describe.skipIf(!leanInstalled())('the Lean file holds the table the spec descri
     120_000,
   );
 
-  it('the spec, the implementation, and the Lean file all agree, on 200 cells', () => {
-    for (const { spec, observe } of MACHINES) {
+  it('the spec, the implementation, and the Lean file all agree, on 200 cells', async () => {
+    // Five Lean processes, started together. Through `checkLeanTable` these run
+    // one after another — a synchronous call gives no other option — and the same
+    // five machines take about four times as long.
+    const againstLean = await Promise.all(MACHINES.map(({ spec }) => checkLeanTableAsync(spec)));
+
+    for (const [i, { spec, observe }] of MACHINES.entries()) {
       const againstCode = checkConformance(spec, observe);
-      const againstLean = checkLeanTable(spec);
 
       expect(formatConformance(spec, againstCode)).toContain('cells agree');
-      expect(againstLean.status).toBe('ok');
-      expect(againstLean.ok).toBe(true);
+      expect(againstLean[i]?.status).toBe('ok');
+      expect(againstLean[i]?.ok).toBe(true);
+    }
+  }, 300_000);
+
+  it('the async check answers what the sync one answers, on every machine', async () => {
+    // The reason to trust the concurrent run above.
+    for (const { spec } of MACHINES) {
+      const sync = checkLeanTable(spec);
+      const async = await checkLeanTableAsync(spec);
+
+      expect(async.status).toBe(sync.status);
+      expect(async.ok).toBe(sync.ok);
+      expect(async.checked).toBe(sync.checked);
+      expect(async.disagreements).toEqual(sync.disagreements);
     }
   }, 300_000);
 });

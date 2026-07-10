@@ -17,7 +17,12 @@
  */
 
 import { generateLeanSpec } from './generator.js';
-import { runLeanSource, type LeanRunOptions } from './lean-runner.js';
+import {
+  runLeanSource,
+  runLeanSourceAsync,
+  type LeanRun,
+  type LeanRunOptions,
+} from './lean-runner.js';
 import { cellKey, quoteIdentifier, resolveTable, type Table } from './table.js';
 import type { OrchestratorSpec } from './types.js';
 
@@ -137,19 +142,58 @@ export function extractLeanTable(
   spec: OrchestratorSpec,
   opts: ExtractOptions = {},
 ): ExtractResult {
+  const skipped = skipExtract(opts);
+  if (skipped !== null) return skipped;
+
+  const run = runLeanSource(program(source, spec), ['--run'], opts);
+  return interpretExtract(run, spec);
+}
+
+/**
+ * The same extraction, awaited.
+ *
+ * `execFileSync` stops the event loop while Lean works. This does not. Every
+ * decision below the run belongs to `interpretExtract`, which both call, so a rule
+ * learned by one path cannot be missed by the other.
+ */
+export async function extractLeanTableAsync(
+  source: string,
+  spec: OrchestratorSpec,
+  opts: ExtractOptions = {},
+): Promise<ExtractResult> {
+  const skipped = skipExtract(opts);
+  if (skipped !== null) return skipped;
+
+  const run = await runLeanSourceAsync(program(source, spec), ['--run'], opts);
+  return interpretExtract(run, spec);
+}
+
+/** The source, plus the program that makes Lean print the table it computes. */
+function program(source: string, spec: OrchestratorSpec): string {
+  return `${source}${renderTableProgram(spec)}`;
+}
+
+/** `skipped-by-env`, or `null` when Lean is to run. */
+function skipExtract(opts: ExtractOptions): ExtractResult | null {
   if (opts.skip === true || process.env.KIWA_LEAN_SKIP_VERIFY === '1') {
     return {
       status: 'skipped-by-env',
       diagnostics: opts.skip === true ? 'opts.skip=true' : 'KIWA_LEAN_SKIP_VERIFY=1',
     };
   }
+  return null;
+}
 
-  const run = runLeanSource(`${source}${renderTableProgram(spec)}`, ['--run'], opts);
+/** What came back, read once, whichever way Lean was run. */
+function interpretExtract(
+  run: LeanRun | 'lean-not-installed',
+  spec: OrchestratorSpec,
+): ExtractResult {
   if (run === 'lean-not-installed') return { status: 'lean-not-installed' };
-  // Lean exited non-zero. The program appended below only prints, so it is Lean
-  // that refused: the source does not elaborate, or a theorem in it is false.
-  // Nothing was extracted, and calling that an extraction failure sends the
-  // reader to look at the printer.
+  // Lean exited non-zero. The program appended to the source only prints, so it is
+  // Lean that refused: the source does not elaborate, or a theorem in it is false.
+  // Nothing was extracted, and calling that an extraction failure sends the reader
+  // to look at the printer.
   if (!run.ok) {
     return {
       status: run.timedOut
@@ -241,7 +285,27 @@ export function checkLeanTable(
   opts: CheckLeanTableOptions = {},
 ): LeanTableReport {
   const { source = generateLeanSpec(spec).source, ...runOpts } = opts;
-  const extracted = extractLeanTable(source, spec, runOpts);
+  return compareTable(extractLeanTable(source, spec, runOpts), spec);
+}
+
+/**
+ * The same comparison, awaited.
+ *
+ * A caller with five machines runs Lean five times. Through `checkLeanTable` they
+ * run one after another, because a synchronous call gives no other option: five
+ * of them took 1462ms, and the same five Lean processes started at once finished
+ * in 169ms. Awaiting these, a `Promise.all` is the caller's to write.
+ */
+export async function checkLeanTableAsync(
+  spec: OrchestratorSpec,
+  opts: CheckLeanTableOptions = {},
+): Promise<LeanTableReport> {
+  const { source = generateLeanSpec(spec).source, ...runOpts } = opts;
+  return compareTable(await extractLeanTableAsync(source, spec, runOpts), spec);
+}
+
+/** The spec's table against Lean's, once, for both ways of extracting it. */
+function compareTable(extracted: ExtractResult, spec: OrchestratorSpec): LeanTableReport {
   const checked = spec.states.length * spec.events.length;
 
   if (extracted.status !== 'ok' || extracted.table === undefined) {
