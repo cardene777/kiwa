@@ -21,6 +21,7 @@ import {
   killGroup,
   parsePorcelain,
   parseProjectList,
+  readPorcelain,
   runCommand,
   sweepFailed,
   unsupportedPlatform,
@@ -174,6 +175,24 @@ test('dirtiedPaths reports a path whose git status changed but whose bytes did n
   const before = snapshot({ 'a.ts': '??:5:100' });
   const after = snapshot({ 'a.ts': 'A :5:100' });
   assert.deepEqual(dirtiedPaths(before, after), ['a.ts']);
+});
+
+// An index lock, an unsafe-repo refusal, a missing git — the previous
+// implementation swallowed all of them and returned an empty snapshot, so the
+// sweep reported `dirty: 0` without ever having looked at the tree.
+test('readPorcelain rejects when git fails, instead of pretending the tree was clean', async () => {
+  const error = new Error('fatal: not a git repository');
+  await assert.rejects(
+    () => readPorcelain('/tmp', (cb) => cb(error, '')),
+    /git status failed:.*not a git repository/,
+  );
+});
+
+test('readPorcelain returns a snapshot when git succeeds', async () => {
+  // Use a path git will really stat: the test file itself.
+  const snap = await readPorcelain(process.cwd(), (cb) => cb(null, ' M scripts/test-all.mjs\0'));
+  assert.equal(snap.size, 1);
+  assert.match(snap.get('scripts/test-all.mjs'), /^ M:/);
 });
 
 test('fingerprint says gone for a path that is not on disk', () => {
@@ -349,6 +368,19 @@ test('runCommand finds a signature split across two chunks', async () => {
 test('runCommand reports no cause when nothing blames a tool', async () => {
   const result = await sh('echo "AssertionError: expected 3 to be 4"; exit 1');
   assert.equal(result.cause, null, 'a red package is not excused');
+});
+
+// `maxBytes` is bytes, not characters. `text.length` counted 800 for 800 `é`,
+// which is 1600 bytes: the cap was a lie on any non-ASCII output.
+test('runCommand counts bytes, not characters', async () => {
+  const r = await runCommand({
+    command: 'sh',
+    args: ['-c', 'for i in $(seq 800); do printf "é"; done'],
+    cwd: process.cwd(),
+    timeoutMs: 5000,
+    maxBytes: 1024,
+  });
+  assert.equal(r.overflowed, true, '800 × é is 1600 bytes, past a 1024 cap');
 });
 
 // A package that prints a megabyte and then `anvil not found in PATH` is
@@ -576,17 +608,15 @@ test('runCommand sends no signal after a command exits on its own', async () => 
 });
 
 
-// The child finished after the deadline, but before the busy loop released.
-// The JS timer callback never got to fire, so nothing had flipped `timedOut` —
-// and the command was reported green. The deadline is now checked from `exit`,
-// against the wall clock, so the answer no longer depends on which of two
-// event-loop entries won a race that the loop was blocked out of.
-test('runCommand is late when it finishes late, even if the loop was blocked past the deadline', async () => {
-  const pending = sh('sleep 0.05', 10);
+// A child that finished before the deadline is not late, even if the loop that
+// would have noticed was blocked past it. A too-strict rule would call it late
+// because the timer callback fires after the stall releases.
+test('runCommand does not call a command late when it finished before the deadline', async () => {
+  const pending = sh('sleep 0.05', 100);
   stallTheLoop(200);
   const r = await pending;
-  assert.equal(r.timedOut, true, 'the deadline passed before the child was done');
-  assert.equal(r.ok, false);
+  assert.equal(r.timedOut, false, 'the child was done at ~50ms, before the 100ms deadline');
+  assert.equal(r.ok, true);
 });
 
 // And the same stall must not stop a real hang from being killed.

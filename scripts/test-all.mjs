@@ -305,18 +305,32 @@ export function fingerprint(status, absolute, stat = lstatSync, readLink = readl
  * another package created `coverage/` was reported clean. `-uall` names every
  * file, and every file gets its own fingerprint.
  */
-function porcelain() {
-  const options = { cwd: ROOT, maxBuffer: 32 * 1024 * 1024, encoding: 'utf-8' };
-  const args = ['status', '--porcelain', '-z', '--untracked-files=all'];
-  return new Promise((done) => {
-    execFile('git', args, options, (_e, out) => {
+/**
+ * `git status --porcelain -z -uall`, as `Map<path, fingerprint>`.
+ *
+ * `exec` is a seam. In the sweep it runs `git`. In a test it returns whatever
+ * output — or error — the case wants. The previous implementation ignored
+ * `execFile`'s error and parsed `out ?? ''`, so an index lock, an unsafe-repo
+ * refusal or a missing `git` came back as an empty map and the sweep reported
+ * `dirty: 0` without ever having looked at the tree.
+ */
+export function readPorcelain(root, exec) {
+  return new Promise((done, fail) => {
+    exec((error, out) => {
+      if (error) return fail(new Error(`git status failed: ${error.message.trim()}`));
       const snapshot = new Map();
       for (const { status, path } of parsePorcelain(out ?? '')) {
-        snapshot.set(path, fingerprint(status, join(ROOT, path)));
+        snapshot.set(path, fingerprint(status, join(root, path)));
       }
       done(snapshot);
     });
   });
+}
+
+function porcelain() {
+  const options = { cwd: ROOT, maxBuffer: 32 * 1024 * 1024, encoding: 'utf-8' };
+  const args = ['status', '--porcelain', '-z', '--untracked-files=all'];
+  return readPorcelain(ROOT, (cb) => execFile('git', args, options, cb));
 }
 
 /**
@@ -423,12 +437,6 @@ export function runCommand({
   classify = classifyFailure,
 }) {
   return new Promise((resolve) => {
-    // Wall-clock deadline. A busy loop can hold the timer callback back past
-    // this instant, and if the child exits while the loop is blocked, the timer
-    // never gets to fire — every handler sees `timedOut === false`. Read the
-    // clock at `exit` and let the deadline itself decide.
-    const deadline = Date.now() + timeoutMs;
-
     let child;
     try {
       child = spawn(command, args, { cwd, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -493,7 +501,10 @@ export function runCommand({
         window = seen.slice(-OVERLAP);
       }
 
-      bytes += text.length;
+      // Bytes, not characters. A child that prints 800 `é` writes 1600 bytes,
+      // and `text.length` reports 800: `maxBytes: 1024` would not fire and the
+      // cap would be a lie on any non-ASCII output.
+      bytes += Buffer.byteLength(text, 'utf-8');
       if (bytes > maxBytes) {
         // The tail begins with the end of the head, so nothing is lost at the
         // seam either.
@@ -545,14 +556,14 @@ export function runCommand({
       // hundred samples found no moment where Node had reaped and our `exit`
       // handler had not run. A defence nothing can reach is a defence nothing
       // has checked.
-      // Whether the group is still there or a zombie, this timer only fires
-      // after `timeoutMs`, so we are past the deadline. If our `exit` handler
-      // had run in time it would have returned above. Late is late.
-      timedOut = true;
-      if (groupAlive(child.pid)) killGroup(child);
-      // The child was already gone: nothing to kill, and `exit` is on its way
-      // with the real code. Either way we wait for it, so the summary carries
-      // the exit code even for a package the sweep killed.
+      if (groupAlive(child.pid)) {
+        // Still running, past the deadline. Kill it, and mark it late.
+        timedOut = true;
+        killGroup(child);
+      }
+      // If the child was already gone, this timer fired only because the loop
+      // was blocked while it was exiting. Wait for `exit`; the handler will
+      // check the wall clock and decide.
       graceTimer = setTimeout(settle, killGraceMs);
     }, timeoutMs);
   });
