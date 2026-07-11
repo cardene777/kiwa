@@ -65,4 +65,46 @@ describe('fts5 axis — 3 provider × 3 backend', () => {
     matchFts5Query(session, { query: 'hello', rank: 0.1 });
     expect(() => inspectFts5Vocab(session, { term: 'hello', occurrences: -1 })).toThrow(/non-negative/);
   });
+
+  it('createFts5VirtualTable rejects a second create on the same session (state != empty)', () => {
+    const session = createFts5Session({ tableName: 'docs', provider: 'drizzle', backend: 'sqlite' });
+    createFts5VirtualTable(session, { columns: ['body'], tokenizer: 'porter' });
+    expect(() =>
+      createFts5VirtualTable(session, { columns: ['body'], tokenizer: 'porter' }),
+    ).toThrow(/requires empty state/);
+  });
+
+  it('tokenizeFts5Document rejects a call before the virtual table is created (state=empty)', () => {
+    const session = createFts5Session({ tableName: 'docs', provider: 'drizzle', backend: 'sqlite' });
+    expect(() => tokenizeFts5Document(session, { document: 'hello' })).toThrow(
+      /requires virtual-table-created state/,
+    );
+  });
+
+  it('matchFts5Query rejects an empty query string', () => {
+    const session = createFts5Session({ tableName: 'docs', provider: 'drizzle', backend: 'sqlite' });
+    createFts5VirtualTable(session, { columns: ['body'], tokenizer: 'porter' });
+    tokenizeFts5Document(session, { document: 'hello world' });
+    expect(() => matchFts5Query(session, { query: '', rank: 1 })).toThrow(/query is required/);
+  });
+
+  it('matchFts5Query rejects a non-finite rank (NaN / Infinity)', () => {
+    const session = createFts5Session({ tableName: 'docs', provider: 'drizzle', backend: 'sqlite' });
+    createFts5VirtualTable(session, { columns: ['body'], tokenizer: 'porter' });
+    tokenizeFts5Document(session, { document: 'hello world' });
+    expect(() => matchFts5Query(session, { query: 'hello', rank: Number.POSITIVE_INFINITY })).toThrow(
+      /rank must be finite/,
+    );
+    expect(() => matchFts5Query(session, { query: 'hello', rank: Number.NaN })).toThrow(
+      /rank must be finite/,
+    );
+  });
+
+  it('inspectFts5Vocab rejects an empty term', () => {
+    const session = createFts5Session({ tableName: 'docs', provider: 'drizzle', backend: 'sqlite' });
+    createFts5VirtualTable(session, { columns: ['body'], tokenizer: 'porter' });
+    tokenizeFts5Document(session, { document: 'hello world' });
+    matchFts5Query(session, { query: 'hello', rank: 0.1 });
+    expect(() => inspectFts5Vocab(session, { term: '', occurrences: 1 })).toThrow(/term is required/);
+  });
 });
