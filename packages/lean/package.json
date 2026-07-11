@@ -62,7 +62,7 @@
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs && pnpm test:package",
     "test:package": "KIWA_LEAN_PACKAGE_TEST=1 pnpm test",
-    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**'"
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='**/types.js'"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
