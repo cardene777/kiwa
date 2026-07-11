@@ -48,6 +48,21 @@ describe('setupCliEnv (runCli)', () => {
     expect(result.exitCode).toBe(3);
   });
 
+  it('resolves exitCode to 0 when the child self-signals SIGKILL (code arrives as null)', async () => {
+    // node's child_process emits `close(code=null, signal='SIGKILL')` when
+    // the child terminates via a signal. The `code ?? 0` fallback in
+    // `resolveFn` normalises that null. Before this test the ?? arm was
+    // never exercised because every prior test observed a real exit code.
+    const env = await setupCliEnv();
+    envs.push(env);
+    const result = await env.runCli({
+      cmd: 'node',
+      args: ['-e', 'process.kill(process.pid, "SIGKILL")'],
+    });
+    expect(result.exitCode).toBe(0);
+    expect(result.signal).toBe('SIGKILL');
+  });
+
   it('captures stderr', async () => {
     const env = await setupCliEnv();
     envs.push(env);
