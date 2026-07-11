@@ -283,4 +283,28 @@ describe('parseSpec', () => {
     const doc = parseSpec(md);
     expect(doc.cases[0]?.automation).toBe('manual');
   });
+
+  it('T-PARSE-034 non-pipe line after divider stops the row scan (pre-empty guard)', () => {
+    const md = `| ID | Observation | Given | When | Then | Priority | Automation |
+|---|---|---|---|---|---|---|
+prose paragraph without pipe
+| T-001 | a | b | c | d | P2 | yes |
+`;
+    const doc = parseSpec(md);
+    expect(doc.cases).toHaveLength(0);
+    expect(doc.warnings).toEqual([]);
+  });
+
+  it('T-PARSE-035 short row (fewer cells than header) uses "" fallback for missing tail cells', () => {
+    const md = `| ID | Observation | Given | When | Then | Priority | Automation |
+|---|---|---|---|---|---|---|
+| T-001 | a | b | c | d |
+`;
+    const doc = parseSpec(md);
+    expect(doc.cases).toHaveLength(1);
+    expect(doc.cases[0]?.id).toBe('T-001');
+    expect(doc.cases[0]?.then).toBe('d');
+    expect(doc.cases[0]?.priority).toBe('P2');
+    expect(doc.cases[0]?.automation).toBe('no');
+  });
 });
