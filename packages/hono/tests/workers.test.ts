@@ -216,6 +216,15 @@ describe('mockR2Bucket', () => {
     const { objects } = await r2.list({ prefix: 'img/' });
     expect(objects.map((o) => o.key).sort()).toEqual(['img/a.png', 'img/b.png']);
   });
+
+  it('T-H-246 __snapshot returns the whole R2 store', async () => {
+    // Same pattern as T-H-208 for KV — the R2 __snapshot() method has no test.
+    const r2 = mockR2Bucket();
+    await r2.put('a', '1');
+    await r2.put('b', '2');
+    const snap = r2.__snapshot();
+    expect(Object.keys(snap).sort()).toEqual(['a', 'b']);
+  });
 });
 
 describe('createExecutionContext', () => {
