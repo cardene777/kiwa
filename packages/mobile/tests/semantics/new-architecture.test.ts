@@ -47,4 +47,16 @@ describe('v1.52 new-architecture semantics', () => {
     enableConcurrentReact(s);
     expect(() => bridgeLegacyModule(s, '')).toThrow(/moduleName/);
   });
+
+  it('rejects startNewArchInit when init has already started (state != idle)', () => {
+    const s = initNewArchitecture({ target: 'ios', appName: 'X' });
+    startNewArchInit(s);
+    expect(() => startNewArchInit(s)).toThrow(/session is initializing/);
+  });
+
+  it('rejects markNewArchReady from initializing state (before concurrent-enabled)', () => {
+    const s = initNewArchitecture({ target: 'ios', appName: 'X' });
+    startNewArchInit(s);
+    expect(() => markNewArchReady(s)).toThrow(/session is initializing/);
+  });
 });

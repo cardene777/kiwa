@@ -4,7 +4,19 @@ import {
   completeMetroBundle,
   resolveMetroModule,
   startMetroBundle,
+  type MetroSession,
 } from '../../src/index.js';
+
+function idleMetroSession(): MetroSession {
+  return {
+    target: 'ios',
+    bundleId: 'idle-bundle',
+    state: 'idle',
+    resolvedModules: [],
+    hmrUpdateCount: 0,
+    history: [],
+  };
+}
 
 describe('metro axis semantics', () => {
   it('start → resolve → hmr → complete', () => {
@@ -37,5 +49,18 @@ describe('metro axis semantics', () => {
     expect(iosBundle.history[0]?.providerEvent).toContain('ios');
     expect(androidBundle.history[0]?.providerEvent).toContain('android');
     expect(webBundle.history[0]?.providerEvent).toContain('web');
+  });
+
+  // idle-state guards: existing tests always call startMetroBundle first, so the three throws never ran.
+  it('rejects resolveMetroModule when bundle has not been started (state=idle)', () => {
+    expect(() => resolveMetroModule(idleMetroSession(), 'x.tsx')).toThrow(/bundle must be started/);
+  });
+
+  it('rejects applyMetroHmr when bundle has not been started (state=idle)', () => {
+    expect(() => applyMetroHmr(idleMetroSession(), 'x.tsx')).toThrow(/bundle must be started/);
+  });
+
+  it('rejects completeMetroBundle when bundle has not been started (state=idle)', () => {
+    expect(() => completeMetroBundle(idleMetroSession())).toThrow(/bundle must be started/);
   });
 });
