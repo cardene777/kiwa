@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createHonoApp } from '../src/app.js';
-import { createRpcClient, defineRpcApp, isHcResponse, HC_REQUEST_SYMBOL } from '../src/rpc.js';
+import { createRpcClient, defineRpcApp, isHcResponse, HC_REQUEST_SYMBOL, HC_CLIENT_SYMBOL } from '../src/rpc.js';
 
 describe('createRpcClient', () => {
   it('T-H-100 GET terminal returns HcResponse with brand', async () => {
@@ -172,5 +172,32 @@ describe('isHcResponse', () => {
     expect(isHcResponse({ ok: true })).toBe(false);
     expect(isHcResponse(null)).toBe(false);
     expect(isHcResponse('string')).toBe(false);
+  });
+
+  it('T-H-132 client Proxy exposes HC_CLIENT_SYMBOL brand and returns undefined for other symbols', () => {
+    // Closes the symbol-arm at lines 51-55 in rpc.js: HC_CLIENT_SYMBOL → true, else undefined.
+    const app = createHonoApp();
+    app.get('/x', (c) => c.text('y'));
+    const client = createRpcClient(app);
+    const clientAsSymbolProbe = client as unknown as Record<symbol, unknown>;
+    expect(clientAsSymbolProbe[HC_CLIENT_SYMBOL]).toBe(true);
+    // any other symbol → undefined
+    expect(clientAsSymbolProbe[Symbol.for('kiwa.hono.rpc.definitely-not-the-brand')]).toBeUndefined();
+  });
+
+  it('T-H-133 hc response body helpers return the fallback when the response has bodyKind neither json nor text', async () => {
+    // Closes rpc.js:120 (json() → undefined) and rpc.js:127 (text() → '') where the
+    // response bodyKind is anything other than json/text (createContext() populates
+    // bodyKind='empty' for a void-returning handler).
+    const app = createHonoApp();
+    app.get('/empty', () => {
+      /* no-op — handler returns void, spec receives bodyKind='empty' */
+    });
+    const client = createRpcClient(app) as {
+      empty: { $get: () => Promise<{ json: () => Promise<unknown>; text: () => Promise<string> }> };
+    };
+    const res = await client.empty.$get();
+    expect(await res.json()).toBeUndefined();
+    expect(await res.text()).toBe('');
   });
 });
