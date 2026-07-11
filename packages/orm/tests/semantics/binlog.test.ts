@@ -64,4 +64,43 @@ describe('binlog axis — 3 provider × 3 backend', () => {
     negotiateBinlogFormat(session, { format: 'ROW' });
     expect(() => detectGtidGap(session, { expectedGtid: 'uuid:1' })).toThrow(/already present/);
   });
+
+  it('advanceBinlogPosition rejects empty file', () => {
+    const session = createBinlogSession({ serverId: 's1', provider: 'drizzle', backend: 'mysql' });
+    expect(() => advanceBinlogPosition(session, { file: '', position: 100 })).toThrow(
+      /file is required/,
+    );
+  });
+
+  it('advanceBinlogPosition rejects non-positive position', () => {
+    const session = createBinlogSession({ serverId: 's1', provider: 'drizzle', backend: 'mysql' });
+    expect(() =>
+      advanceBinlogPosition(session, { file: 'binlog.000001', position: 0 }),
+    ).toThrow(/position must be positive/);
+  });
+
+  it('updateGtidSet rejects empty gtid', () => {
+    const session = createBinlogSession({ serverId: 's1', provider: 'drizzle', backend: 'mysql' });
+    advanceBinlogPosition(session, { file: 'binlog.000001', position: 100 });
+    expect(() => updateGtidSet(session, { gtid: '' })).toThrow(/gtid is required/);
+  });
+
+  it('negotiateBinlogFormat requires gtid-updated state (state guard)', () => {
+    const session = createBinlogSession({ serverId: 's1', provider: 'drizzle', backend: 'mysql' });
+    advanceBinlogPosition(session, { file: 'binlog.000001', position: 100 });
+    // state = 'positioned', not 'gtid-updated'
+    expect(() => negotiateBinlogFormat(session, { format: 'ROW' })).toThrow(
+      /requires gtid-updated state/,
+    );
+  });
+
+  it('detectGtidGap requires format-negotiated state (state guard)', () => {
+    const session = createBinlogSession({ serverId: 's1', provider: 'drizzle', backend: 'mysql' });
+    advanceBinlogPosition(session, { file: 'binlog.000001', position: 100 });
+    updateGtidSet(session, { gtid: 'uuid:1' });
+    // state = 'gtid-updated', not 'format-negotiated'
+    expect(() => detectGtidGap(session, { expectedGtid: 'uuid:2' })).toThrow(
+      /requires format-negotiated state/,
+    );
+  });
 });
