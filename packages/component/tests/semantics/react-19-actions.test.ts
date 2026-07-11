@@ -47,4 +47,10 @@ describe('v1.49 react-19-actions semantics', () => {
   it('rejects empty actionId', () => {
     expect(() => initializeReactActions({ target: 'storybook8', actionId: '' })).toThrow(/actionId/);
   });
+
+  it('resolveAction throws when called from idle state (not transition-pending / optimistic-committed)', () => {
+    const s = initializeReactActions({ target: 'storybook8', actionId: 'a5' });
+    // state = 'idle', resolveAction requires 'transition-pending' or 'optimistic-committed'
+    expect(() => resolveAction(s, 'value')).toThrow(/is idle/);
+  });
 });
