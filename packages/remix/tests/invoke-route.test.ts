@@ -158,6 +158,25 @@ describe('invokeAction', () => {
     expect(r.redirect?.location).toBe('/success');
   });
 
+  it('T-RX-012a action thrown redirect signal captured as redirect (not error)', async () => {
+    const action: ActionFunction = async () => {
+      throw { [REMIX_REDIRECT_SYMBOL]: true, status: 307, location: '/after-thrown' };
+    };
+    const r = await invokeAction({ action, url: 'http://localhost/x' });
+    expect(r.redirect?.location).toBe('/after-thrown');
+    expect(r.redirect?.status).toBe(307);
+    expect(r.error).toBeUndefined();
+  });
+
+  it('T-RX-012b action thrown non-redirect surfaces as error', async () => {
+    const action: ActionFunction = async () => {
+      throw new Error('boom-action');
+    };
+    const r = await invokeAction({ action, url: 'http://localhost/x' });
+    expect(r.redirect).toBeNull();
+    expect((r.error as Error).message).toBe('boom-action');
+  });
+
   it('T-RX-013 action method default POST', async () => {
     let m: string | undefined;
     const action: ActionFunction = async ({ request }) => {

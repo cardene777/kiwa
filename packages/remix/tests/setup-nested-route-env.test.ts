@@ -794,3 +794,140 @@ describe('invokeLoader — MAJOR 3 fix: undefined return を throw', () => {
     expect(result.child.result).toEqual({ ok: true });
   });
 });
+
+describe('setupRemixNestedRouteEnv — Set-Cookie edge case parsing (branch closure)', () => {
+  // parseSetCookieName に `=` を含まない Set-Cookie が渡ると null 返す (line 170) →
+  // updateCookieStoreFromSetCookies が continue (line 225)。 Path=/ だけの Set-Cookie
+  // で発火する (attribute-only value)。
+  it('T-NR-030: malformed Set-Cookie without `=` is skipped, following cookies preserved', async () => {
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      loader: async () => new Response(null, {
+        // 1 番目 = malformed (no `=`)、 2 番目 = 正常。 combined split で 2 entry 化される
+        headers: { 'set-cookie': 'malformed-no-equals, session=abc123; Path=/' },
+      }),
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      loader: async () => ({ ok: true }),
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+    });
+    await env.runLoaderChain();
+    expect(env.cookies.get('session')).toBe('abc123');
+  });
+
+  // parseSetCookieName の `semi === -1` false 分岐 (line 174 col 31) を触る。
+  // これは attribute (`; Path=/`) を持たない Set-Cookie。 上記 T-NR-030 で `session=abc123; Path=/` を
+  // 通しているため semi != -1 側は cover 済、 逆 arm を別 test で触る。
+  it('T-NR-031: Set-Cookie without attribute suffix (no semicolon) is parsed', async () => {
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      loader: async () => new Response(null, {
+        headers: { 'set-cookie': 'lonely=raw' },
+      }),
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      loader: async () => ({ ok: true }),
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+    });
+    await env.runLoaderChain();
+    expect(env.cookies.get('lonely')).toBe('raw');
+  });
+
+  // isExpiredSetCookie の `eqValue === -1` (line 192) と attribute pair の `eq === -1` (line 199) を触る。
+  // parseSetCookieName に通る name=value ペアで `; attribute-without-value` の attribute があると
+  // for-of 内で eq === -1 → continue に入る (line 199)。
+  it('T-NR-032: attribute pair without `=` (bare attribute) is ignored, cookie still stored', async () => {
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      loader: async () => new Response(null, {
+        // `; HttpOnly` は bare attribute (RFC 6265 Secure/HttpOnly はそう書ける) → isExpiredSetCookie の
+        // attribute loop で eq === -1 continue に入る、 cookie 自体は正常保存
+        headers: { 'set-cookie': 'auth=token1; HttpOnly; Path=/' },
+      }),
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      loader: async () => ({ ok: true }),
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+    });
+    await env.runLoaderChain();
+    expect(env.cookies.get('auth')).toBe('token1');
+  });
+
+  // splitSetCookieString の length === 0 早期 return (line 59) を触る。
+  // parent loader が Set-Cookie header を空文字列で返す edge (`set-cookie: ''`)、
+  // Node の Headers は空文字を保持するので combined = '' が発生し得る。
+  it('T-NR-033: empty Set-Cookie header is skipped without inserting a cookie', async () => {
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      loader: async () => new Response(null, {
+        headers: new Headers([['set-cookie', ''], ['set-cookie', 'real=set; Path=/']]),
+      }),
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      loader: async () => ({ ok: true }),
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+    });
+    await env.runLoaderChain();
+    expect(env.cookies.get('real')).toBe('set');
+  });
+});
+
+describe('setupRemixNestedRouteEnv — options.context + options.method propagation (branch closure)', () => {
+  // Lines 277, 279, 308 の conditional spread ternary (options.context / options.method の
+  // truthy arm) を touch。 既存 T-NR-005 は params + headers のみ渡し、 context / method は
+  // undefined のままなので falsy arm しか cover していなかった。
+  it('T-NR-034: options.context 明示指定は parent + child loader の context にマージ', async () => {
+    let parentReceivedDb: string | undefined;
+    let childReceivedDb: string | undefined;
+    let parentMethod: string | undefined;
+    let childMethod: string | undefined;
+    const parent: RemixNestedRouteDefinition = {
+      id: 'routes/parent',
+      loader: async ({ context, request }) => {
+        parentReceivedDb = (context as { db?: string }).db;
+        parentMethod = request.method;
+        return { parentOk: true };
+      },
+    };
+    const child: RemixNestedRouteDefinition = {
+      id: 'routes/parent.child',
+      loader: async ({ context, request }) => {
+        childReceivedDb = (context as { db?: string }).db;
+        childMethod = request.method;
+        return { childOk: true };
+      },
+    };
+    const env = setupRemixNestedRouteEnv({
+      parentRoute: parent,
+      childRoute: child,
+      url: 'http://localhost/parent/child',
+      context: { db: 'pg-primary' },
+      method: 'POST',
+    });
+    await env.runLoaderChain();
+    expect(parentReceivedDb).toBe('pg-primary');
+    expect(childReceivedDb).toBe('pg-primary');
+    expect(parentMethod).toBe('POST');
+    expect(childMethod).toBe('POST');
+  });
+});
