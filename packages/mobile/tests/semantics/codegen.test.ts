@@ -36,4 +36,18 @@ describe('v1.52 codegen semantics', () => {
     const s = initCodegen({ target: 'ios', packageName: 'X' });
     expect(() => loadCodegenSchema(s, '')).toThrow(/schemaHash/);
   });
+
+  it('rejects completeCodegenBuild before spec-generated or type-emitted', () => {
+    const s = initCodegen({ target: 'ios', packageName: 'X' });
+    loadCodegenSchema(s, 'sha');
+    // state = 'schema-loaded' → completeCodegenBuild throws
+    expect(() => completeCodegenBuild(s)).toThrow(/session is schema-loaded/);
+  });
+
+  it('rejects emitCodegenType when filePath is empty', () => {
+    const s = initCodegen({ target: 'ios', packageName: 'X' });
+    loadCodegenSchema(s, 'sha');
+    generateSpec(s, { specCount: 1 });
+    expect(() => emitCodegenType(s, '')).toThrow(/filePath must not be empty/);
+  });
 });

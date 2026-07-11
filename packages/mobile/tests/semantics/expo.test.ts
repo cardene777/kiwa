@@ -4,7 +4,20 @@ import {
   loadExpoBuildConfig,
   receivePushNotification,
   resolveDeepLink,
+  type ExpoSession,
 } from '../../src/index.js';
+
+function idleExpoSession(): ExpoSession {
+  return {
+    target: 'ios',
+    appSlug: 'idle-app',
+    state: 'idle',
+    resolvedLinks: [],
+    pushNotifications: [],
+    configHash: null,
+    history: [],
+  };
+}
 
 describe('expo axis semantics', () => {
   it('load config → resolve link → push → build complete', () => {
@@ -37,5 +50,23 @@ describe('expo axis semantics', () => {
     receivePushNotification(s, { notificationId: 'n1', category: 'c' });
     receivePushNotification(s, { notificationId: 'n2', category: 'c' });
     expect(s.pushNotifications).toHaveLength(2);
+  });
+
+  // idle-state guards: existing tests always call loadExpoBuildConfig first, so the
+  // three throws never ran. We construct a raw ExpoSession in the idle state — the
+  // interface is exported specifically to let callers wire this up.
+  it('rejects resolveDeepLink when the build config has not been loaded (state=idle)', () => {
+    const s = idleExpoSession();
+    expect(() => resolveDeepLink(s, { scheme: 'x', path: 'y' })).toThrow(/build config must be loaded/);
+  });
+
+  it('rejects receivePushNotification when the build config has not been loaded (state=idle)', () => {
+    const s = idleExpoSession();
+    expect(() => receivePushNotification(s, { notificationId: 'n', category: 'c' })).toThrow(/build config must be loaded/);
+  });
+
+  it('rejects completeExpoBuild when the build config has not been loaded (state=idle)', () => {
+    const s = idleExpoSession();
+    expect(() => completeExpoBuild(s)).toThrow(/build config must be loaded/);
   });
 });

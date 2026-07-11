@@ -60,4 +60,17 @@ describe('mobile fidelity coverage', () => {
     expect(providerEventName('android', 'new-architecture.ready')).toBe('android.new-arch.ready');
     expect(providerEventName('web', 'new-architecture.concurrent_enabled')).toBe('web.concurrent-react.enable');
   });
+
+  it('providerEventName falls back to the neutral name for a per-target dialect miss', () => {
+    // The dialect map is typed `Partial<Record<...>>`, so a future neutral event added to the
+    // union but not to a per-target sub-map surfaces with its vendor-neutral name instead of
+    // undefined. Reaching this from a type-safe caller is not possible today; the cast
+    // exercises the runtime fallback that keeps future partial-map states safe.
+    // biome-ignore lint/suspicious/noExplicitAny: exercising the `?? neutral` runtime fallback
+    expect(providerEventName('ios', 'not-in-dialect' as any)).toBe('not-in-dialect');
+    // biome-ignore lint/suspicious/noExplicitAny: exercising the `?? neutral` runtime fallback
+    expect(providerEventName('android', 'not-in-dialect' as any)).toBe('not-in-dialect');
+    // biome-ignore lint/suspicious/noExplicitAny: exercising the `?? neutral` runtime fallback
+    expect(providerEventName('web', 'not-in-dialect' as any)).toBe('not-in-dialect');
+  });
 });
