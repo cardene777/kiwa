@@ -185,15 +185,13 @@ describe('isHcResponse', () => {
     expect(clientAsSymbolProbe[Symbol.for('kiwa.hono.rpc.definitely-not-the-brand')]).toBeUndefined();
   });
 
-  it('T-H-133 hc response body helpers return the fallback when the response has no matching bodyKind', async () => {
-    // Closes rpc.js:120 (json() → undefined when bodyKind is neither json nor text) and
-    // rpc.js:127 (text() → '' when bodyKind is neither text nor json). We exercise those
-    // fallback returns via a route that responds with an empty Response (bodyKind='none').
+  it('T-H-133 hc response body helpers return the fallback when the response has bodyKind neither json nor text', async () => {
+    // Closes rpc.js:120 (json() → undefined) and rpc.js:127 (text() → '') where the
+    // response bodyKind is anything other than json/text (createContext() populates
+    // bodyKind='empty' for a void-returning handler).
     const app = createHonoApp();
-    // A route that returns undefined (no HonoResponseSpec) creates a response with
-    // no bodyKind, so both fallback arms in json()/text() run.
     app.get('/empty', () => {
-      /* no-op — falls through to a bodyKind-less spec */
+      /* no-op — handler returns void, spec receives bodyKind='empty' */
     });
     const client = createRpcClient(app) as {
       empty: { $get: () => Promise<{ json: () => Promise<unknown>; text: () => Promise<string> }> };
