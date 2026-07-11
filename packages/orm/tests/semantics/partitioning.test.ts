@@ -245,4 +245,35 @@ describe('partitioning axis — 3 provider × 3 backend', () => {
     });
     expect(() => routeInsert(session, { key: 100 })).toThrow(/no bucket matches/);
   });
+
+  it('partitionWiseJoin rejects zero matchedBuckets', () => {
+    const session = createPartitioningSession({
+      tableId: 't', provider: 'drizzle', backend: 'postgres',
+    });
+    declarePartition(session, { name: 'b1', strategy: 'list', bounds: { values: [1] } });
+    expect(() => partitionWiseJoin(session, { otherTable: 'x', matchedBuckets: 0 })).toThrow(
+      /matchedBuckets must be positive/,
+    );
+  });
+
+  it('routeInsert rejects call before partitions declared', () => {
+    const session = createPartitioningSession({
+      tableId: 't', provider: 'drizzle', backend: 'postgres',
+    });
+    expect(() => routeInsert(session, { key: 1 })).toThrow(
+      /partitions must be declared first/,
+    );
+  });
+
+  it('routeInsert hash rejects a non-numeric key (returns false → no bucket)', () => {
+    // Closes the `typeof input.key !== 'number' → return false` guard at line 155-156.
+    const session = createPartitioningSession({
+      tableId: 't', provider: 'drizzle', backend: 'postgres',
+    });
+    declarePartition(session, {
+      name: 'h', strategy: 'hash', bounds: { modulus: 2, remainder: 0 },
+    });
+    // Non-numeric key against a hash-only partition finds no bucket.
+    expect(() => routeInsert(session, { key: 'not-a-number' })).toThrow(/no bucket matches/);
+  });
 });

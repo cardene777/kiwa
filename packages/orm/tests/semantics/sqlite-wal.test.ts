@@ -66,4 +66,21 @@ describe('sqlite-wal axis — 3 provider × 3 backend', () => {
     triggerWalCheckpoint(session, { mode: 'FULL' });
     expect(() => mapSharedMemory(session, { regionBytes: 0 })).toThrow(/positive/);
   });
+
+  it('crossWalSizeThreshold requires wal-enabled state (state guard)', () => {
+    const session = createSqliteWalSession({ databasePath: '/tmp/app.db', provider: 'drizzle', backend: 'sqlite' });
+    // state = 'rollback-journal' (initial), not 'wal-enabled'
+    expect(() =>
+      crossWalSizeThreshold(session, { walSizeBytes: 8192, thresholdBytes: 4096 }),
+    ).toThrow(/requires wal-enabled state/);
+  });
+
+  it('mapSharedMemory requires checkpointed state (state guard)', () => {
+    const session = createSqliteWalSession({ databasePath: '/tmp/app.db', provider: 'drizzle', backend: 'sqlite' });
+    switchJournalMode(session, { mode: 'WAL' });
+    // state = 'wal-enabled', not 'checkpointed'
+    expect(() => mapSharedMemory(session, { regionBytes: 4096 })).toThrow(
+      /requires checkpointed state/,
+    );
+  });
 });

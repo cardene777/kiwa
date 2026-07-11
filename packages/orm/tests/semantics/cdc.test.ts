@@ -141,4 +141,23 @@ describe('cdc axis — 3 provider × 3 backend', () => {
     expect(step.metadata.lsn).toBe(99);
     expect(session.outbox[0]?.lsn).toBe(99);
   });
+
+  it('appendOutbox rejects when decoded buffer is empty (no event to append)', () => {
+    // Force session.state = 'decoding' but leave session.decoded empty.
+    // decodeEvent auto-populates decoded, so we drop it after decoding.
+    const session = createCdcSession({ slotName: 's', provider: 'drizzle', backend: 'postgres' });
+    decodeEvent(session, { event: { lsn: 10, kind: 'insert', table: 't', payload: {} } });
+    session.decoded.length = 0; // drop the buffered event
+    expect(() => appendOutbox(session, {})).toThrow(/no event to append/);
+  });
+
+  it('confirmDelivery rejects a regressing upToLsn (below confirmedLsn)', () => {
+    const session = createCdcSession({ slotName: 's', provider: 'drizzle', backend: 'postgres' });
+    decodeEvent(session, { event: { lsn: 10, kind: 'insert', table: 't', payload: {} } });
+    appendOutbox(session, {});
+    markEventOrdered(session);
+    confirmDelivery(session, { upToLsn: 10 });
+    // now confirmedLsn=10; a subsequent upToLsn<10 must regress
+    expect(() => confirmDelivery(session, { upToLsn: 5 })).toThrow(/regresses confirmedLsn/);
+  });
 });
