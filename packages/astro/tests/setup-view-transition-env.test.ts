@@ -456,4 +456,75 @@ describe('setupAstroViewTransitionEnv', () => {
     expect(afterPrepKeys).toEqual(['type']);
     expect(afterSwapKeys).toEqual(['type']);
   });
+
+  it('T-AVT-027a parseDocument falls back to raw HTML when the input has no <body> tag', async () => {
+    // Closes the `bodyMatch ? bodyMatch[1] ?? '' : html` false arm at line 42. Passing
+    // a fragment without a body tag makes bodyMatch null so the parser walks the raw
+    // input; the top-level tag has to be detected there too.
+    const env = setupAstroViewTransitionEnv({
+      fromPath: '/',
+      toPath: '/x',
+      toHtml: '<main>bare</main><article>too</article>',
+    });
+    // Both top-level elements should be found even without a body wrapper.
+    const tags = Array.from(env.newDocument.body.children).map((c) => c.tagName);
+    expect(tags).toContain('MAIN');
+    expect(tags).toContain('ARTICLE');
+  });
+
+  it('T-AVT-028 parsed document exposes get/set innerHTML on body (round-trip)', async () => {
+    // Closes the innerHTML getter/setter (lines 77-82 of parseDocument's returned body).
+    // Existing tests read `newDocument.body.children` and the outerHTML on documentElement
+    // but never touch body.innerHTML directly.
+    const env = setupAstroViewTransitionEnv({
+      fromPath: '/',
+      toPath: '/x',
+      toHtml: '<!doctype html><html><body><main>alpha</main></body></html>',
+    });
+    // getter returns the parsed body inner HTML string
+    expect(env.newDocument.body.innerHTML).toContain('<main>alpha</main>');
+    // setter mutates the stored value; the getter reflects the new value
+    env.newDocument.body.innerHTML = '<article>beta</article>';
+    expect(env.newDocument.body.innerHTML).toBe('<article>beta</article>');
+  });
+
+  it('T-AVT-029 viewTransition.skipTransition() is invocable when supportsViewTransitions=true', async () => {
+    // Closes the empty skipTransition arrow (line 117) — no existing test calls it.
+    const env = setupAstroViewTransitionEnv({
+      fromPath: '/',
+      toPath: '/x',
+      supportsViewTransitions: true,
+    });
+    let vt: { skipTransition: () => void } | undefined;
+    env.on('astro:before-swap', (e) => {
+      vt = e.viewTransition;
+      // Explicitly exercising the runtime function — the harness stub is a no-op
+      // but must be callable so router code doing `e.viewTransition?.skipTransition()`
+      // works against the env.
+      vt?.skipTransition();
+    });
+    await env.dispatchAll();
+    expect(typeof vt?.skipTransition).toBe('function');
+  });
+
+  it('T-AVT-030 env.dispatch() individually reaches every case of the switch', async () => {
+    // Existing T-AVT-017 exercises the before-swap case only via env.dispatch().
+    // dispatchAll() calls all 4 cases, but the individual switch arms in dispatch()
+    // were only exercised for before-swap. This calls dispatch() explicitly for
+    // each of the 4 event types + verifies default throws for an unknown type.
+    const env = setupAstroViewTransitionEnv({
+      fromPath: '/',
+      toPath: '/x',
+    });
+    const bp = await env.dispatch('astro:before-preparation');
+    const ap = await env.dispatch('astro:after-preparation');
+    const bs = await env.dispatch('astro:before-swap');
+    const as = await env.dispatch('astro:after-swap');
+    expect(bp.type).toBe('astro:before-preparation');
+    expect(ap.type).toBe('astro:after-preparation');
+    expect(bs.type).toBe('astro:before-swap');
+    expect(as.type).toBe('astro:after-swap');
+    // biome-ignore lint/suspicious/noExplicitAny: exercising the default-throw arm
+    await expect(env.dispatch('astro:unknown' as any)).rejects.toThrow(/unknown event type/);
+  });
 });
