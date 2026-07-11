@@ -457,6 +457,21 @@ describe('setupAstroViewTransitionEnv', () => {
     expect(afterSwapKeys).toEqual(['type']);
   });
 
+  it('T-AVT-027a parseDocument falls back to raw HTML when the input has no <body> tag', async () => {
+    // Closes the `bodyMatch ? bodyMatch[1] ?? '' : html` false arm at line 42. Passing
+    // a fragment without a body tag makes bodyMatch null so the parser walks the raw
+    // input; the top-level tag has to be detected there too.
+    const env = setupAstroViewTransitionEnv({
+      fromPath: '/',
+      toPath: '/x',
+      toHtml: '<main>bare</main><article>too</article>',
+    });
+    // Both top-level elements should be found even without a body wrapper.
+    const tags = Array.from(env.newDocument.body.children).map((c) => c.tagName);
+    expect(tags).toContain('MAIN');
+    expect(tags).toContain('ARTICLE');
+  });
+
   it('T-AVT-028 parsed document exposes get/set innerHTML on body (round-trip)', async () => {
     // Closes the innerHTML getter/setter (lines 77-82 of parseDocument's returned body).
     // Existing tests read `newDocument.body.children` and the outerHTML on documentElement
