@@ -286,4 +286,26 @@ describe('extractHead', () => {
     const html = renderHead(merged);
     expect(html).toBe('<title>Round Trip</title><meta name="description" content="y" />');
   });
+
+  it('T-FR-059 bare meta without name/property/http-equiv keeps positional order (mergeHead)', () => {
+    // Closes the metaKey === null arm at lines 76-83 in mergeHead. All existing tests
+    // pass meta with a dedup key (name / property / http-equiv), so this arm never ran.
+    const merged = mergeHead([
+      defineHead({ meta: [{ content: 'content-only-a' }, { content: 'content-only-b' }] }),
+    ]);
+    expect(merged.meta.map((m) => m.content)).toEqual(['content-only-a', 'content-only-b']);
+  });
+
+  it('T-FR-060 extractHead walks non-head/meta/link/script/base element children recursively', () => {
+    // Closes the recursive `walk(child)` at lines 228-229 in extractHead. Existing tests
+    // put the head-relevant tags directly inside <head> or <Head>; this wraps them in a
+    // <div> so `walk` has to recurse into a non-head child before reaching the title.
+    const tree = h(
+      'html',
+      null,
+      h('head', null, h('div', null, h('title', null, 'deep-title'))),
+    );
+    const head = extractHead(tree);
+    expect(head.title).toBe('deep-title');
+  });
 });

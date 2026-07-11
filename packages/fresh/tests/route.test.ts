@@ -224,6 +224,20 @@ describe('invokeFreshHandler', () => {
     });
     expect(await response.text()).toBe('single');
   });
+
+  it('T-FR-020a handler returning page data directly (non-Response, non-undefined) is treated as a captured render', async () => {
+    // Closes the else-if arm at lines 219-224 in invokeFreshHandler where the handler
+    // returns page data directly (a shape defineRoute users lean on) instead of a
+    // Response or void.
+    const handlers: FreshHandlers = {
+      GET: () => ({ title: 'from-data', body: 'plain-object' }),
+    };
+    const { renderData } = await invokeFreshHandler({
+      handlers,
+      req: new Request('http://x/'),
+    });
+    expect(renderData).toEqual({ title: 'from-data', body: 'plain-object' });
+  });
 });
 
 describe('defineRoute + invokeDefineRoute', () => {
@@ -289,5 +303,52 @@ describe('defineRoute + invokeDefineRoute', () => {
       req: new Request('http://x/'),
     });
     expect(tree && stringify(tree)).toBe('<p>bare</p>');
+  });
+
+  // The four ctx helpers (render / renderNotFound / redirect / next) are inline
+  // arrow functions in invokeDefineRoute — none of the existing tests calls them,
+  // so branch + function coverage on lines 348..357 misses. These four tests each
+  // call one helper from the route body and assert the visible effect.
+
+  it('T-FR-027 invokeDefineRoute — ctx.render() returns the sentinel Response', async () => {
+    let renderResponse: Response | null = null;
+    const route = defineRoute((_req, ctx) => {
+      renderResponse = ctx.render();
+      return h('p', null, 'body');
+    });
+    await invokeDefineRoute({ route, req: new Request('http://x/') });
+    expect(renderResponse).not.toBeNull();
+    expect((renderResponse as unknown as Response).status).toBe(200);
+    expect(await (renderResponse as unknown as Response).text()).toBe('__kiwa_fresh_render__');
+  });
+
+  it('T-FR-028 invokeDefineRoute — ctx.renderNotFound() surfaces on result.notFound', async () => {
+    const route = defineRoute((_req, ctx) => {
+      ctx.renderNotFound();
+      return h('p', null, 'body');
+    });
+    const { notFound: nf } = await invokeDefineRoute({ route, req: new Request('http://x/') });
+    expect(nf).toBeTruthy();
+  });
+
+  it('T-FR-029 invokeDefineRoute — ctx.redirect(location, status) surfaces on result.redirect', async () => {
+    const route = defineRoute((_req, ctx) => {
+      ctx.redirect('/target', 307);
+      return h('p', null, 'body');
+    });
+    const { redirect: r } = await invokeDefineRoute({ route, req: new Request('http://x/') });
+    expect(r?.location).toBe('/target');
+    expect(r?.status).toBe(307);
+  });
+
+  it('T-FR-030 invokeDefineRoute — ctx.next() returns a 404 Response', async () => {
+    let nextResponse: Response | null = null;
+    const route = defineRoute(async (_req, ctx) => {
+      nextResponse = await ctx.next();
+      return h('p', null, 'body');
+    });
+    await invokeDefineRoute({ route, req: new Request('http://x/') });
+    expect(nextResponse).not.toBeNull();
+    expect((nextResponse as unknown as Response).status).toBe(404);
   });
 });
