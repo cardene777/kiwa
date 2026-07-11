@@ -6,4 +6,3 @@ out
 test-results
 playwright-report
 playwright/.cache
-next-env.d.ts
