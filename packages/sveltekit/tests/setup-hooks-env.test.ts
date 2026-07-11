@@ -139,6 +139,19 @@ describe('setupSvelteKitHooksEnv', () => {
     expect(await response.text()).toBe('fixed');
   });
 
+  it('T-SKE-008b runHandle resolveResponse を関数で渡すと event を受け取って Response を返す', async () => {
+    // The `typeof resolveResponse === 'function'` branch: the fixed-Response
+    // form was covered by T-SKE-008; the function form was not, and calling
+    // it is the point of the function form.
+    const env = setupSvelteKitHooksEnv({ url: 'http://localhost:5173/dynamic' });
+    const handle: HandleFunction = async ({ event, resolve }) => resolve(event);
+    const { response } = await env.runHandle(handle, (event) =>
+      new Response(`resolved:${event.url.pathname}`, { status: 201 }),
+    );
+    expect(response.status).toBe(201);
+    expect(await response.text()).toBe('resolved:/dynamic');
+  });
+
   it('T-SKE-009 runHandleFetch downstreamFetch 未指定で default downstream-ok response', async () => {
     const env = setupSvelteKitHooksEnv({ url: 'http://localhost:5173/' });
     const handleFetch: HandleFetchFunction = async ({ request, fetch }) => fetch(request);
@@ -147,6 +160,20 @@ describe('setupSvelteKitHooksEnv', () => {
     });
     expect(downstreamCalled).toBe(true);
     expect(await response.text()).toBe('downstream-ok');
+  });
+
+  it('T-SKE-009b runHandleFetch downstreamFetch 指定で custom response を返す', async () => {
+    // The `typeof opts.downstreamFetch !== 'undefined'` branch was the mirror
+    // of T-SKE-009: T-SKE-009 covered the undefined arm, this one covers the
+    // defined arm.
+    const env = setupSvelteKitHooksEnv({ url: 'http://localhost:5173/' });
+    const handleFetch: HandleFetchFunction = async ({ request, fetch }) => fetch(request);
+    const { response } = await env.runHandleFetch(handleFetch, {
+      fetchUrl: 'https://api.example.com/x',
+      downstreamFetch: async () => new Response('custom', { status: 418 }),
+    });
+    expect(response.status).toBe(418);
+    expect(await response.text()).toBe('custom');
   });
 
   it('T-SKE-010 runHandleError throw → thrown capture', async () => {
@@ -195,7 +222,10 @@ describe('setupSvelteKitHooksEnv', () => {
     expect(event.platform).toEqual({ foo: 'bar' });
     expect(event.request.method).toBe('POST');
     expect(event.request.headers.get('x-custom')).toBe('v');
+    // Both faces of the shared cookieStore — env-level (for the test to
+    // observe) and event-level (for the SvelteKit hook body to read).
     expect(env.cookies.get('a')).toBe('1');
+    expect(event.cookies.get('a')).toBe('1');
     expect(env.locals.count).toBe(5);
   });
 
