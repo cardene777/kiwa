@@ -37,6 +37,18 @@ describe('nextjs fidelity coverage', () => {
     expect(providerEventName('edge-runtime', 'action.redirected')).toBe('edge.response.redirect');
   });
 
+  it('providerEventName falls back to the neutral name when the per-target dialect has no entry', () => {
+    // dialect map is `Partial<Record<...>>` so a future neutral event added to the
+    // union without a per-target mapping surfaces with its vendor-neutral name
+    // instead of undefined. Reaching this branch from a type-safe caller is not
+    // possible today (every union member has an entry on every target), so this
+    // pins the runtime branch via a type cast.
+    // biome-ignore lint/suspicious/noExplicitAny: exercising a runtime fallback that types forbid
+    expect(providerEventName('app-router', 'not-mapped' as any)).toBe('not-mapped');
+    // biome-ignore lint/suspicious/noExplicitAny: exercising a runtime fallback that types forbid
+    expect(providerEventName('edge-runtime', 'not-mapped' as any)).toBe('not-mapped');
+  });
+
   it('supports subset target collection (6 axis v1.49)', () => {
     const coverage = collectFidelityCoverage(['edge-runtime']);
     expect(coverage.rows).toHaveLength(6);

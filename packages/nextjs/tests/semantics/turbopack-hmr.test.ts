@@ -32,4 +32,10 @@ describe('v1.49 turbopack-hmr semantics', () => {
   it('rejects empty sessionId', () => {
     expect(() => startTurbopackHmr({ target: 'app-router', sessionId: '' })).toThrow(/sessionId/);
   });
+
+  it('rejects completeFastRefresh before the patch has been applied', () => {
+    const s = startTurbopackHmr({ target: 'app-router', sessionId: 'hmr-4' });
+    // state = 'idle' → completeFastRefresh throws (only 'applied' allowed)
+    expect(() => completeFastRefresh(s)).toThrow(/is idle/);
+  });
 });
