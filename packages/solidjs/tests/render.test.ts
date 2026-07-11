@@ -7,10 +7,13 @@ import {
   stringify,
   findElements,
   isSolidElement,
+  popEffectScope,
   registerEffect,
   SOLID_ELEMENT_SYMBOL,
 } from '../src/render.js';
-import { mockEffect, mockSignal } from '../src/signal.js';
+import { mockEffect, mockSignal, EFFECT_SYMBOL } from '../src/signal.js';
+import type { SolidElement } from '../src/render.js';
+import type { EffectHandle } from '../src/signal.js';
 
 describe('h + isSolidElement', () => {
   it('T-SJ-019 h creates a Solid element with children flattened as array', () => {
@@ -147,5 +150,45 @@ describe('createRoot', () => {
     dispose();
     set(4);
     expect(observed).toBe(3);
+  });
+
+  it('T-SJ-033 a second dispose call is a no-op', () => {
+    let torn = 0;
+    const stubHandle: EffectHandle<void> = {
+      [EFFECT_SYMBOL]: true,
+      runCount: () => 0,
+      trace: () => [],
+      dispose: () => {
+        torn += 1;
+      },
+    };
+    const { dispose } = createRoot(() => {
+      registerEffect(stubHandle);
+    });
+    dispose();
+    dispose();
+    expect(torn).toBe(1);
+  });
+});
+
+describe('effect scope stack', () => {
+  it('T-SJ-034 popEffectScope on an empty stack returns []', () => {
+    // Guarantees a fresh stack: previous tests pop what they pushed. If
+    // that ever regresses, the ?? [] fallback catches the drift here.
+    expect(popEffectScope()).toEqual([]);
+  });
+});
+
+describe('stringify — attribute edge cases', () => {
+  it('T-SJ-035 a `children` key in props is skipped (children come from the varargs)', () => {
+    // `renderAttrs` guards against a JSX-style `children` prop; without the
+    // guard, the tree would render `<div children="oops">…</div>`.
+    const el: SolidElement = {
+      [SOLID_ELEMENT_SYMBOL]: true,
+      type: 'div',
+      props: { class: 'x', children: 'oops' },
+      children: ['ok'],
+    };
+    expect(stringify(el)).toBe('<div class="x">ok</div>');
   });
 });

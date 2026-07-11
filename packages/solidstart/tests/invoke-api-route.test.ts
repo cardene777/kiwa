@@ -160,6 +160,20 @@ describe('invokeApiRoute', () => {
     expect(await res.json()).toEqual({ ok: true });
   });
 
+  it('T-SS-API-013b json() forwards init.headers and does not overwrite an explicit content-type', async () => {
+    // Two branches the previous test never reached:
+    //   `init?.headers` when `init` is defined
+    //   `!headers.has('content-type')` when the caller already set one
+    const res = json(
+      { ok: true },
+      { status: 201, headers: { 'content-type': 'application/vnd.api+json', 'x-request-id': 'abc' } },
+    );
+    expect(res.status).toBe(201);
+    expect(res.headers.get('content-type')).toBe('application/vnd.api+json');
+    expect(res.headers.get('x-request-id')).toBe('abc');
+    expect(await res.json()).toEqual({ ok: true });
+  });
+
   it('T-SS-API-014 redirectResponse() default 302 + location header', () => {
     const res = redirectResponse('/x');
     expect(res.status).toBe(302);

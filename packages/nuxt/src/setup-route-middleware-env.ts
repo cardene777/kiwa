@@ -168,7 +168,10 @@ export async function setupNuxtMiddlewareEnv(
       halted = true;
     }
     if (stepResult.error !== undefined) {
-      firstError = firstError === undefined ? stepResult.error : firstError;
+      // `halted` stops the loop on the next iteration, so `firstError` is
+      // assigned at most once. The old `firstError === undefined ? ... :
+      // firstError` had a dead arm that dropped branch coverage.
+      firstError = stepResult.error;
       halted = true;
     }
     if (stepResult.result === false) {

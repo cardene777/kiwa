@@ -183,6 +183,44 @@ describe('invokeHandleFetch', () => {
     expect((error as Error).message).toBe('upstream down');
     expect(response.status).toBe(500);
   });
+
+  it('T-SKHF-005 method / headers / cookies / locals flow through into the built event', async () => {
+    // The spread-if-defined branches for the four optional fields on the
+    // event: without a caller passing them, they short-circuit and the
+    // event ends up with SvelteKit's defaults. Each of these is a separate
+    // branch, and every one used to be uncovered.
+    let observedEvent: {
+      request: Request;
+      cookies: { get(name: string): string | undefined };
+      locals: { requestId?: string };
+    } | null = null;
+    const handleFetch: HandleFetchFunction = async ({ event, request, fetch }) => {
+      observedEvent = {
+        request: event.request,
+        cookies: event.cookies,
+        locals: event.locals as { requestId?: string },
+      };
+      return fetch(request);
+    };
+    await invokeHandleFetch<{ requestId: string }>({
+      handleFetch,
+      eventUrl: 'http://localhost:5173/api',
+      fetchUrl: 'https://api.example.com/data',
+      method: 'POST',
+      headers: { 'x-custom': 'yes' },
+      cookies: { sid: 'abc' },
+      locals: { requestId: 'req_1' },
+    });
+    const seen = observedEvent as {
+      request: Request;
+      cookies: { get(name: string): string | undefined };
+      locals: { requestId?: string };
+    } | null;
+    expect(seen?.request.method).toBe('POST');
+    expect(seen?.request.headers.get('x-custom')).toBe('yes');
+    expect(seen?.cookies.get('sid')).toBe('abc');
+    expect(seen?.locals.requestId).toBe('req_1');
+  });
 });
 
 describe('invokeHandleError', () => {
@@ -198,6 +236,36 @@ describe('invokeHandleError', () => {
       message: 'Internal Server Error',
     });
     expect(report).toEqual({ message: '500: boom' });
+  });
+
+  it('T-SKHE-002a headers / cookies flow through into the invoked event', async () => {
+    // The spread-if-defined branches for headers / cookies on
+    // invokeHandleError's event. Locals is already tested by T-SKHE-004.
+    let seen: {
+      headers: string | null;
+      cookies: string | undefined;
+    } | null = null;
+    const handleError: HandleErrorFunction = ({ event }) => {
+      seen = {
+        headers: event.request.headers.get('x-request-id'),
+        cookies: event.cookies.get('sid'),
+      };
+    };
+    await invokeHandleError({
+      handleError,
+      error: new Error('with-context'),
+      url: 'http://localhost:5173/',
+      status: 500,
+      message: 'Internal Server Error',
+      headers: { 'x-request-id': 'req_42' },
+      cookies: { sid: 'session_1' },
+    });
+    const captured = seen as {
+      headers: string | null;
+      cookies: string | undefined;
+    } | null;
+    expect(captured?.headers).toBe('req_42');
+    expect(captured?.cookies).toBe('session_1');
   });
 
   it('T-SKHE-002 handleError can be a void-returning logger', async () => {
