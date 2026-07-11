@@ -1,10 +1,11 @@
 {
-  "name": "examples-basic-connect",
-  "version": "0.0.0",
+  "name": "tests-fixtures-basic-connect",
   "private": true,
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "test": "echo 'basic-connect is a display-only starter: real e2e lives in tests/fixtures/basic-connect (pnpm --dir tests/fixtures/basic-connect test:e2e)'"
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "@kiwa-lab/dapp": "workspace:*"
