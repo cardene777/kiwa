@@ -86,4 +86,55 @@ describe('logical-replication-advanced axis — 3 provider × 3 backend', () => 
       syncCascadedSubscription(session, { upstreamId: 'sub-a', subscriberId: 'sub-a' }),
     ).toThrow(/differ/);
   });
+
+  it('startLogicalStreaming rejects non-positive startLsn', () => {
+    const session = createLogicalReplicationAdvancedSession({
+      streamId: 's1', provider: 'drizzle', backend: 'postgres',
+    });
+    expect(() => startLogicalStreaming(session, { startLsn: 0, protocolVersion: 1 })).toThrow(
+      /startLsn must be positive/,
+    );
+  });
+
+  it('startLogicalStreaming rejects protocolVersion below 1', () => {
+    const session = createLogicalReplicationAdvancedSession({
+      streamId: 's1', provider: 'drizzle', backend: 'postgres',
+    });
+    expect(() => startLogicalStreaming(session, { startLsn: 10, protocolVersion: 0 })).toThrow(
+      /protocolVersion must be >= 1/,
+    );
+  });
+
+  it('trackReplicationOrigin rejects empty originId', () => {
+    const session = createLogicalReplicationAdvancedSession({
+      streamId: 's1', provider: 'drizzle', backend: 'postgres',
+    });
+    startLogicalStreaming(session, { startLsn: 10, protocolVersion: 1 });
+    expect(() => trackReplicationOrigin(session, { originId: '', remoteLsn: 20 })).toThrow(
+      /originId is required/,
+    );
+  });
+
+  it('confirmTwoSafeCommit rejects zero synchronousStandbys', () => {
+    const session = createLogicalReplicationAdvancedSession({
+      streamId: 's1', provider: 'drizzle', backend: 'postgres',
+    });
+    startLogicalStreaming(session, { startLsn: 10, protocolVersion: 1 });
+    trackReplicationOrigin(session, { originId: 'o1', remoteLsn: 20 });
+    expect(() =>
+      confirmTwoSafeCommit(session, { confirmedFlushLsn: 20, synchronousStandbys: 0 }),
+    ).toThrow(/at least one synchronous standby/);
+  });
+
+  it('syncCascadedSubscription requires two-safe-confirmed state (state guard)', () => {
+    const session = createLogicalReplicationAdvancedSession({
+      streamId: 's1', provider: 'drizzle', backend: 'postgres',
+    });
+    startLogicalStreaming(session, { startLsn: 10, protocolVersion: 1 });
+    trackReplicationOrigin(session, { originId: 'o1', remoteLsn: 20 });
+    // state = 'origin-tracked', not 'two-safe-confirmed'
+    expect(() =>
+      syncCascadedSubscription(session, { upstreamId: 'up', subscriberId: 'sub' }),
+    ).toThrow(/requires two-safe-confirmed state/);
+  });
 });

@@ -100,4 +100,46 @@ describe('v0.6 transaction-orchestrator', () => {
     ] as const;
     expect(states.length * events.length).toBe(40);
   });
+
+  // Per-branch coverage tests for switch arms not exercised by earlier scenarios.
+  it('T-O-TX-010 timeout from beginning state → aborted', () => {
+    const s = startTransaction({ timestamp: 't0' });
+    const next = dispatchEvent({ session: s, event: 'timeout', timestamp: 't1' });
+    expect(next.state).toBe('aborted');
+  });
+
+  it('T-O-TX-011 rollback-requested from active state → aborted', () => {
+    let s = startTransaction({ timestamp: 't0' });
+    s = dispatchEvent({ session: s, event: 'begin-completed', timestamp: 't1' });
+    const next = dispatchEvent({ session: s, event: 'rollback-requested', timestamp: 't2' });
+    expect(next.state).toBe('aborted');
+    expect(next.rollbacksExecuted).toBe(1);
+  });
+
+  it('T-O-TX-012 rollback-requested from savepoint-nested state → aborted', () => {
+    let s = startTransaction({ timestamp: 't0' });
+    s = dispatchEvent({ session: s, event: 'begin-completed', timestamp: 't1' });
+    s = dispatchEvent({ session: s, event: 'savepoint-created', timestamp: 't2' });
+    expect(s.state).toBe('savepoint-nested');
+    const next = dispatchEvent({ session: s, event: 'rollback-requested', timestamp: 't3' });
+    expect(next.state).toBe('aborted');
+    expect(next.rollbacksExecuted).toBe(1);
+  });
+
+  it('T-O-TX-013 timeout from savepoint-nested state → aborted', () => {
+    let s = startTransaction({ timestamp: 't0' });
+    s = dispatchEvent({ session: s, event: 'begin-completed', timestamp: 't1' });
+    s = dispatchEvent({ session: s, event: 'savepoint-created', timestamp: 't2' });
+    const next = dispatchEvent({ session: s, event: 'timeout', timestamp: 't3' });
+    expect(next.state).toBe('aborted');
+  });
+
+  it('T-O-TX-014 timeout from committing state → aborted', () => {
+    let s = startTransaction({ timestamp: 't0' });
+    s = dispatchEvent({ session: s, event: 'begin-completed', timestamp: 't1' });
+    s = dispatchEvent({ session: s, event: 'commit-requested', timestamp: 't2' });
+    expect(s.state).toBe('committing');
+    const next = dispatchEvent({ session: s, event: 'timeout', timestamp: 't3' });
+    expect(next.state).toBe('aborted');
+  });
 });
