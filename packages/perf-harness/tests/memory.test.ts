@@ -39,4 +39,28 @@ describe('measureMemory', () => {
     // exercise leak variable so lint/ts do not flag it as unused
     expect(leak.length).toBe(200);
   });
+
+  it('invokes globalThis.gc when it is exposed (before + after)', async () => {
+    // Node is normally started without --expose-gc, so `globalThis.gc` is
+    // undefined and the `gcExposed ? gcRef() : nothing` branches never fire.
+    // Injecting a stub for the duration of the run closes those branches and
+    // reports `gcExposed: true`.
+    let gcCalls = 0;
+    const originalGc = (globalThis as unknown as { gc?: () => void }).gc;
+    (globalThis as unknown as { gc: () => void }).gc = () => {
+      gcCalls += 1;
+    };
+    try {
+      const result = await measureMemory({ fn: async () => {}, iterations: 1 });
+      expect(result.gcExposed).toBe(true);
+      // gcRef() is invoked once before the loop and once after → at least 2.
+      expect(gcCalls).toBeGreaterThanOrEqual(2);
+    } finally {
+      if (originalGc === undefined) {
+        delete (globalThis as unknown as { gc?: () => void }).gc;
+      } else {
+        (globalThis as unknown as { gc: () => void }).gc = originalGc;
+      }
+    }
+  });
 });
