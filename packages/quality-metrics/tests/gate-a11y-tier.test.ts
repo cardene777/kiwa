@@ -194,6 +194,32 @@ describe('a11yFromBaseline — collector helper', () => {
     const metric = a11yFromBaseline({ totals: { critical: 0 } });
     expect(metric).toEqual({ critical: 0, serious: 0, moderate: 0, minor: 0 });
   });
+
+  it('T-QM-AT-016b rejects non-number impact totals', () => {
+    // The `typeof raw !== 'number' || NaN || < 0 || !Finite` throw arm was
+    // uncovered — every earlier test either supplied a non-negative number
+    // or left the field undefined.
+    expect(() =>
+      a11yFromBaseline({
+        totals: { critical: 'oops' as unknown as number, serious: 0, moderate: 0, minor: 0 },
+      }),
+    ).toThrow(/invalid critical count/);
+    expect(() =>
+      a11yFromBaseline({
+        totals: { critical: NaN, serious: 0, moderate: 0, minor: 0 },
+      }),
+    ).toThrow(/invalid critical/);
+    expect(() =>
+      a11yFromBaseline({
+        totals: { critical: -1, serious: 0, moderate: 0, minor: 0 },
+      }),
+    ).toThrow(/invalid critical/);
+    expect(() =>
+      a11yFromBaseline({
+        totals: { critical: Infinity, serious: 0, moderate: 0, minor: 0 },
+      }),
+    ).toThrow(/invalid critical/);
+  });
 });
 
 describe('evaluateReleaseGate — 13-axis mode via a11yTier', () => {
@@ -227,6 +253,22 @@ describe('evaluateReleaseGate — 13-axis mode via a11yTier', () => {
     expect(blocker?.op).toBe('<=');
     expect(blocker?.threshold).toBe(3);
     expect(blocker?.actual).toBe(5);
+  });
+
+  it('T-QM-AT-019b a11yTier blocks on moderate ceiling when critical and serious both stay under', () => {
+    // The `else if (moderate > ...)` arm at gate.js:283-290 was uncovered —
+    // T-QM-AT-019 exceeded serious, hitting the earlier arm. This test
+    // stays within critical and serious but exceeds the moderate ceiling.
+    const report = {
+      ...baseReport(),
+      a11y: { critical: 0, serious: 0, moderate: 11, minor: 0 },
+    };
+    const verdict = evaluateReleaseGate(report, {}, { a11yTier: 'framework' });
+    // Framework tier: moderate 10 ceiling — 11 exceeds.
+    expect(verdict.passed).toBe(false);
+    const blocker = verdict.blockers.find((b) => b.axis === 'a11y.tier');
+    expect(blocker?.op).toBe('<=');
+    expect(blocker?.actual).toBe(11);
   });
 
   it('T-QM-AT-020 a11yTier caller enforces critical > 0 in every tier', () => {

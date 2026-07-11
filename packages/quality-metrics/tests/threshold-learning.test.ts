@@ -150,6 +150,46 @@ describe('v2.1 pickThresholdForAxis — axis 別 fallback SSOT', () => {
   });
 });
 
+describe('v2.1 learnAdaptiveThreshold — a11y axis inclusion', () => {
+  it('T-QM-AT-014 records the a11y axes when snapshots include them', async () => {
+    // The `if (report.a11y)` block in threshold-learning was uncovered —
+    // baseline reports omit a11y, so the axis was never derived from a
+    // snapshot into the learn path. collectAxisDeltaSeries skips baselines
+    // where the axis value is 0 to avoid Infinity delta%, so every
+    // snapshot needs non-zero a11y counts.
+    const s1 = captureSnapshot({
+      report: {
+        ...makeReport(),
+        a11y: { critical: 2, serious: 4, moderate: 8, minor: 3 },
+      },
+      capturedAt: 't0',
+    });
+    const s2 = captureSnapshot({
+      report: {
+        ...makeReport(),
+        a11y: { critical: 3, serious: 5, moderate: 10, minor: 4 },
+      },
+      capturedAt: 't1',
+    });
+    const s3 = captureSnapshot({
+      report: {
+        ...makeReport(),
+        a11y: { critical: 4, serious: 6, moderate: 12, minor: 5 },
+      },
+      capturedAt: 't2',
+    });
+    // 3 snapshots produce 2 delta samples; drop minSampleCount to 2 so both
+    // fire under the default `minSample = 3` guard.
+    const learn = learnAdaptiveThreshold({
+      snapshots: [s1, s2, s3],
+      minSampleCount: 2,
+    });
+    expect(learn.perAxis).toHaveProperty('a11y.critical');
+    expect(learn.perAxis).toHaveProperty('a11y.serious');
+    expect(learn.perAxis).toHaveProperty('a11y.moderate');
+  });
+});
+
 describe('v2.1 shape 契約 preserving 絶対維持', () => {
   it('T-QM-AT-013 QualityReport / MetricSnapshot / DriftDetection は 触っていない (v0.5-v0.6 API 変更 0)', () => {
     // v2.1 は 新規 file の 追加 のみ、 既存 API は 触らない

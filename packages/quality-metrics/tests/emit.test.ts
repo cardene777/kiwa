@@ -202,4 +202,43 @@ describe('diffReports — AI-LLM 4 axes', () => {
     expect(diff.token).toBeUndefined();
     expect(diff.accuracy).toBeUndefined();
   });
+
+  it('T-QM-EM-016 renders a11y row when report.a11y is present', () => {
+    // The `if (report.a11y)` block in emitMarkdown was uncovered — every
+    // existing test used a baseReport without an a11y axis.
+    const md = emitMarkdown({
+      report: baseReport({
+        a11y: { critical: 0, serious: 1, moderate: 2, minor: 3 },
+      }),
+    });
+    expect(md).toContain('a11y — critical / serious / moderate');
+    expect(md).toContain('0 / 1 / 2 (minor 3)');
+  });
+
+  it('T-QM-EM-017 diff table lists a11y rows and diffReports computes the axis', () => {
+    // Two paths in one test:
+    //   emit.js:110-114 — the `if (diff.a11y)` block rendering three rows.
+    //   emit.js:183-193 — diffReports assembling `out.a11y` from prev/cur.
+    const prev = baseReport({
+      a11y: { critical: 2, serious: 3, moderate: 4, minor: 5 },
+    });
+    const cur = baseReport({
+      a11y: { critical: 1, serious: 1, moderate: 2, minor: 5 },
+    });
+    const diff = diffReports(prev, cur);
+    expect(diff.a11y).toEqual({ critical: -1, serious: -2, moderate: -2 });
+    const md = emitMarkdown({ report: cur, diff });
+    expect(md).toContain('a11y.critical');
+    expect(md).toContain('a11y.serious');
+    expect(md).toContain('a11y.moderate');
+  });
+
+  it('T-QM-EM-018 omits the a11y diff when either side is missing the axis', () => {
+    const prev = baseReport();
+    const cur = baseReport({
+      a11y: { critical: 0, serious: 0, moderate: 0, minor: 0 },
+    });
+    const diff = diffReports(prev, cur);
+    expect(diff.a11y).toBeUndefined();
+  });
 });

@@ -248,4 +248,31 @@ describe('v0.5 generateTrendReport', () => {
     const trend = generateTrendReport(snapshots);
     expect(trend.axisSummary.every((a) => a.trend === 'flat')).toBe(true);
   });
+
+  it('captureSnapshot records cost / latency / token / accuracy / a11y axes when present', () => {
+    // The optional-axis branches in `extractAxisValues` (history.ts:29-51)
+    // were uncovered — every earlier test used the 5-axis baseReport shape
+    // without AI-LLM or a11y fields.
+    const report: QualityReport = {
+      ...makeReport(),
+      provider: '@kiwa-lab/ai-llm',
+      cost: { perRequestUsd: 0.05, totalUsd: 5, requests: 100 },
+      latency: { p50Ms: 100, p95Ms: 500, p99Ms: 900, samples: 100 },
+      token: { promptTokens: 100, completionTokens: 200, totalTokens: 300, requests: 100 },
+      accuracy: { score: 0.85, samples: 10, method: 'cosine' },
+      a11y: { critical: 1, serious: 2, moderate: 3, minor: 4 },
+    };
+    const baseline = captureSnapshot({ report, capturedAt: 't-1' });
+    const current = captureSnapshot({ report, capturedAt: 't0' });
+    const diff = compareToBaseline({ baseline, current });
+    const axes = diff.axisDeltas.map((a) => a.axis);
+    expect(axes).toContain('cost.perRequestUsd');
+    expect(axes).toContain('latency.p95Ms');
+    expect(axes).toContain('token.totalTokens');
+    expect(axes).toContain('accuracy.score');
+    expect(axes).toContain('a11y.critical');
+    expect(axes).toContain('a11y.serious');
+    expect(axes).toContain('a11y.moderate');
+    expect(axes).toContain('a11y.minor');
+  });
 });
