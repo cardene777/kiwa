@@ -62,7 +62,8 @@
     "test:mutation": "stryker run",
     "test:a11y": "node ../../scripts/run-axe-baseline.mjs",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs"
+    "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**'"
   },
   "dependencies": {
     "@kiwa-lab/core": "workspace:*",
@@ -75,6 +76,7 @@
     "@types/node": "^22.10.0",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
-    "vitest": "^2.1.0"
+    "vitest": "^2.1.0",
+    "@vitest/coverage-v8": "^2.1.0"
   }
 }
