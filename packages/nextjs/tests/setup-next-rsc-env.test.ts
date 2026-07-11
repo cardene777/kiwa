@@ -245,18 +245,27 @@ describe('setupNextRscEnv', () => {
   });
 
   it('T-SNE-020 a stream whose final chunk is undefined makes resolved fall back to null', async () => {
-    // Closes the `chunks[chunks.length - 1] ?? null` fallback on line 60 by yielding a nullish
-    // value as the last chunk. Existing tests all yield defined RscNodes so the `?? null` never
-    // ran. Yielding null wouldn't reach the fallback because null is already a valid RscNode,
-    // so the check needs `undefined`, which the `??` treats as nullish.
-    async function* source(): AsyncGenerator<RscNode | undefined, void, unknown> {
+    // `chunks[chunks.length - 1] ?? null` — the nullish arm runs when the last chunk is
+    // undefined. `RscNode` already permits undefined via its `null | undefined` union so no
+    // cast is needed.
+    async function* source(): AsyncGenerator<RscNode, void, unknown> {
       yield h('div', {}, 'first');
-      // biome-ignore lint/suspicious/noExplicitAny: exercising the runtime `??` fallback
-      yield undefined as any;
+      yield undefined;
     }
-    // biome-ignore lint/suspicious/noExplicitAny: dataSource accepts any AsyncGenerator here
-    const env = await setupNextRscEnv({ dataSource: source() as any });
+    const env = await setupNextRscEnv({ dataSource: source() });
     expect(env.chunks).toHaveLength(2);
+    expect(env.resolved).toBeNull();
+  });
+
+  it('T-SNE-021 empty stream (no yield, no fallback) makes chunks empty and resolved null', async () => {
+    // Closes the outer ternary's empty-chunks arm on line 60 (`chunks.length > 0 ? ... : null`).
+    // Existing tests always produced at least one chunk (either a yielded value or a fallback),
+    // so the `: null` arm never ran.
+    async function* source(): AsyncGenerator<RscNode, void, unknown> {
+      // completes immediately without yielding
+    }
+    const env = await setupNextRscEnv({ dataSource: source() });
+    expect(env.chunks).toEqual([]);
     expect(env.resolved).toBeNull();
   });
 });
