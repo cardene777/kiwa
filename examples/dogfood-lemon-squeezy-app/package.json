@@ -6,7 +6,6 @@
   "description": "Dogfood app v1.23-4 — a SvelteKit + Lemon Squeezy Merchant-of-Record RP that exercises hosted checkout + license key issue / activation / revoke + refund (full + partial) + chargeback dispute (opened + evidence + won / lost) + webhook signature verify (X-Signature HMAC-SHA256 over the raw body). Drivable in both KIWA_MODE=real (Lemon Squeezy sandbox + LEMONSQUEEZY_KEY env-gate) and KIWA_MODE=mock (@kiwa-lab/payment createLemonSqueezyMock + 8 axis semantics) so behavioural fidelity feeds the release gate.",
   "scripts": {
     "test": "pnpm -F @kiwa-lab/payment -F @kiwa-lab/core build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
