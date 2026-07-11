@@ -53,7 +53,7 @@
   "scripts": {
     "build": "tsup",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment jsdom",
-    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment jsdom --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='**/types.js'",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment jsdom --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**'",
     "test:mutation": "stryker run",
     "test:a11y": "node ../../scripts/run-axe-baseline.mjs",
     "pretest:perf": "pnpm -F @kiwa-lab/perf-harness build",
