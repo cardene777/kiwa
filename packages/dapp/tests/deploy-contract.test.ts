@@ -45,6 +45,63 @@ describe('loadForgeArtifact', () => {
       }),
     ).toThrow();
   });
+
+  it('T-DPL-002b abi が array でない artifact は throw する', async () => {
+    const { mkdtempSync, writeFileSync, mkdirSync, rmSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const tmp = mkdtempSync(join(tmpdir(), 'kiwa-artifact-'));
+    mkdirSync(join(tmp, 'forge-out', 'Foo.sol'), { recursive: true });
+    writeFileSync(
+      join(tmp, 'forge-out', 'Foo.sol', 'Foo.json'),
+      JSON.stringify({ abi: 'not-an-array', bytecode: '0xdead' }),
+    );
+    try {
+      expect(() =>
+        loadForgeArtifact({ exampleRoot: tmp, contractSlug: 'Foo.sol/Foo' }),
+      ).toThrow(/abi missing or invalid/);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it('T-DPL-002c bytecode が不正な artifact は throw する', async () => {
+    const { mkdtempSync, writeFileSync, mkdirSync, rmSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const tmp = mkdtempSync(join(tmpdir(), 'kiwa-artifact-'));
+    mkdirSync(join(tmp, 'forge-out', 'Foo.sol'), { recursive: true });
+    writeFileSync(
+      join(tmp, 'forge-out', 'Foo.sol', 'Foo.json'),
+      JSON.stringify({ abi: [], bytecode: 'invalid-no-0x' }),
+    );
+    try {
+      expect(() =>
+        loadForgeArtifact({ exampleRoot: tmp, contractSlug: 'Foo.sol/Foo' }),
+      ).toThrow(/bytecode missing or invalid/);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it('T-DPL-002d bytecode object 形式 (Foundry v0.2+) も許容する', async () => {
+    const { mkdtempSync, writeFileSync, mkdirSync, rmSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const tmp = mkdtempSync(join(tmpdir(), 'kiwa-artifact-'));
+    mkdirSync(join(tmp, 'forge-out', 'Foo.sol'), { recursive: true });
+    writeFileSync(
+      join(tmp, 'forge-out', 'Foo.sol', 'Foo.json'),
+      JSON.stringify({ abi: [{ type: 'function', name: 'x' }], bytecode: { object: '0xdead' } }),
+    );
+    try {
+      const artifact = loadForgeArtifact({ exampleRoot: tmp, contractSlug: 'Foo.sol/Foo' });
+      expect(artifact.bytecode).toBe('0xdead');
+      expect(artifact.abi).toHaveLength(1);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
 });
 
 describe.skipIf(process.env.SKIP_ANVIL_TESTS === '1')('deployContract', () => {
