@@ -35,6 +35,17 @@ describe.each(providers)('addDocuments / updateDocuments / deleteDocuments — %
     expect(r.hits[0]?.document.title).toBe('updated');
   });
 
+  it('updateDocuments inserts a new doc when id is not yet in the index (upsert semantic)', async () => {
+    // The `else { state.docs.set(doc.id, ...) }` arm in updateDocuments was
+    // uncovered — every prior test only updated already-present ids.
+    const search = factory();
+    await search.updateDocuments('books', [{ id: 'brand-new', title: 'novel' }]);
+    // updated count is reported as 0 because the doc was not previously
+    // present, but the doc is now searchable.
+    const r = await search.search('books', { q: 'novel' });
+    expect(r.hits[0]?.document.id).toBe('brand-new');
+  });
+
   it('deleteDocuments reports deleted count', async () => {
     const search = factory();
     await search.addDocuments('books', [

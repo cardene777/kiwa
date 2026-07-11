@@ -83,6 +83,99 @@ describe('v2.1 統合 workflow', () => {
     s = dispatchEvent({ session: s, event: 'query-canceled', timestamp: 't2' });
     expect(s.state).toBe('completed');
   });
+
+  it('T-SR-QO-009b parsing: invalid event tags as invalid:{event}-in-parsing', () => {
+    // The trailing `invalid:${event}` fall-through arm for each state was
+    // uncovered — every earlier test drove valid transitions only.
+    const s = startQuery({ timestamp: 't0' });
+    const next = dispatchEvent({
+      session: s,
+      event: 'search-completed' as never,
+      timestamp: 't1',
+    });
+    expect(next.state).toBe('parsing');
+    expect(next.events.filter((e) => e.startsWith('invalid:'))).toContain(
+      'invalid:search-completed-in-parsing',
+    );
+  });
+
+  it('T-SR-QO-009c searching: query-timeout / cancel / invalid drive to completed or tag', () => {
+    // The searching-state timeout / cancel arms and the invalid fall-through
+    // were all uncovered.
+    let s = startQuery({ timestamp: 't0' });
+    s = dispatchEvent({ session: s, event: 'parse-succeeded', timestamp: 't1' });
+    const canceled = dispatchEvent({ session: s, event: 'query-canceled', timestamp: 't2' });
+    expect(canceled.state).toBe('completed');
+    const timedOut = dispatchEvent({ session: s, event: 'query-timeout', timestamp: 't3' });
+    expect(timedOut.state).toBe('completed');
+    expect(timedOut.timeoutCount).toBe(1);
+    const invalid = dispatchEvent({
+      session: s,
+      event: 'facet-computed' as never,
+      timestamp: 't4',
+    });
+    expect(invalid.state).toBe('searching');
+    expect(invalid.events.filter((e) => e.startsWith('invalid:'))).toContain(
+      'invalid:facet-computed-in-searching',
+    );
+  });
+
+  it('T-SR-QO-009d reranking: query-timeout / cancel / invalid arms', () => {
+    let s = startQuery({ timestamp: 't0' });
+    s = dispatchEvent({ session: s, event: 'parse-succeeded', timestamp: 't1' });
+    s = dispatchEvent({ session: s, event: 'search-completed', timestamp: 't2' });
+    expect(s.state).toBe('reranking');
+    const timedOut = dispatchEvent({ session: s, event: 'query-timeout', timestamp: 't3' });
+    expect(timedOut.state).toBe('completed');
+    expect(timedOut.timeoutCount).toBe(1);
+    const canceled = dispatchEvent({ session: s, event: 'query-canceled', timestamp: 't3' });
+    expect(canceled.state).toBe('completed');
+    const invalid = dispatchEvent({
+      session: s,
+      event: 'parse-succeeded' as never,
+      timestamp: 't3',
+    });
+    expect(invalid.state).toBe('reranking');
+    expect(invalid.events.filter((e) => e.startsWith('invalid:'))).toContain(
+      'invalid:parse-succeeded-in-reranking',
+    );
+  });
+
+  it('T-SR-QO-009e facet-aggregating: query-timeout / cancel / invalid arms', () => {
+    let s = startQuery({ timestamp: 't0' });
+    s = dispatchEvent({ session: s, event: 'parse-succeeded', timestamp: 't1' });
+    s = dispatchEvent({ session: s, event: 'search-completed', timestamp: 't2' });
+    s = dispatchEvent({ session: s, event: 'rerank-completed', timestamp: 't3' });
+    expect(s.state).toBe('facet-aggregating');
+    const timedOut = dispatchEvent({ session: s, event: 'query-timeout', timestamp: 't4' });
+    expect(timedOut.state).toBe('completed');
+    expect(timedOut.timeoutCount).toBe(1);
+    const canceled = dispatchEvent({ session: s, event: 'query-canceled', timestamp: 't4' });
+    expect(canceled.state).toBe('completed');
+    const invalid = dispatchEvent({
+      session: s,
+      event: 'search-completed' as never,
+      timestamp: 't4',
+    });
+    expect(invalid.state).toBe('facet-aggregating');
+    expect(invalid.events.filter((e) => e.startsWith('invalid:'))).toContain(
+      'invalid:search-completed-in-facet-aggregating',
+    );
+  });
+
+  it('T-SR-QO-009f completed: any event tags as terminal:{event}-in-completed', () => {
+    let s = startQuery({ timestamp: 't0' });
+    s = dispatchEvent({ session: s, event: 'parse-succeeded', timestamp: 't1' });
+    s = dispatchEvent({ session: s, event: 'search-completed', timestamp: 't2' });
+    s = dispatchEvent({ session: s, event: 'rerank-completed', timestamp: 't3' });
+    s = dispatchEvent({ session: s, event: 'facet-computed', timestamp: 't4' });
+    expect(s.state).toBe('completed');
+    const next = dispatchEvent({ session: s, event: 'parse-succeeded', timestamp: 't5' });
+    expect(next.state).toBe('completed');
+    expect(next.events.filter((e) => e.startsWith('terminal:'))).toContain(
+      'terminal:parse-succeeded-in-completed',
+    );
+  });
 });
 
 describe('v2.1 shape 契約 preserving', () => {
