@@ -194,4 +194,28 @@ describe('invokeResourceRoute', () => {
     });
     expect(auth).toBe('Bearer abc');
   });
+
+  it('T-RR-015: params + context + headers propagated to action (POST)', async () => {
+    let id: string | undefined;
+    let db: string | undefined;
+    let auth: string | null = '';
+    await invokeResourceRoute({
+      route: {
+        action: ({ request, params, context }) => {
+          id = params.id;
+          db = (context as { db?: string }).db;
+          auth = request.headers.get('authorization');
+          return new Response('ok');
+        },
+      },
+      url: 'http://x/api/items/42',
+      method: 'POST',
+      params: { id: '42' },
+      context: { db: 'pg' },
+      headers: { authorization: 'Bearer xyz' },
+    });
+    expect(id).toBe('42');
+    expect(db).toBe('pg');
+    expect(auth).toBe('Bearer xyz');
+  });
 });
