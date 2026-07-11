@@ -1,11 +1,12 @@
 // v1.48-1 orchestrator — runSecurityAudit + 4 preset behavior test。
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   axisForPreset,
   runSecurityAudit,
   summarizeAuditReport,
   type AuditInvocation,
 } from '../../src/index.js';
+import { sastMockAdapter } from '../../src/adapters/sast-mock.js';
 
 const inv = (preset: AuditInvocation['preset']): AuditInvocation => ({
   preset,
@@ -60,6 +61,41 @@ describe('runSecurityAudit — 4 preset', () => {
       expect(r.results.map((x) => x.axis)).toEqual(expected);
     }
   });
+
+  it('forwards caller-supplied metadata into the adapter scan input', async () => {
+    // The `input.metadata ? { metadata: input.metadata } : {}` spread was
+    // only exercised on its falsy arm — no test passed metadata. Spy on
+    // the sast mock adapter so the scan input is observable, then assert
+    // the metadata object arrives verbatim.
+    const spy = vi.spyOn(sastMockAdapter, 'scan');
+    try {
+      await runSecurityAudit({
+        preset: 'audit-all',
+        target: '/repo',
+        mode: 'mock',
+        metadata: { runId: 'rid_1' },
+      } as AuditInvocation);
+      expect(spy).toHaveBeenCalledOnce();
+      const seen = spy.mock.calls[0]?.[0] as { metadata?: Record<string, unknown> };
+      expect(seen?.metadata).toEqual({ runId: 'rid_1' });
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('omits metadata from the adapter scan input when the caller supplies none', async () => {
+    // Mirror for the falsy arm — proves the omission is by design and the
+    // spread has both arms behaving.
+    const spy = vi.spyOn(sastMockAdapter, 'scan');
+    try {
+      await runSecurityAudit(inv('audit-all'));
+      expect(spy).toHaveBeenCalledOnce();
+      const seen = spy.mock.calls[0]?.[0] as { metadata?: Record<string, unknown> };
+      expect(seen?.metadata).toBeUndefined();
+    } finally {
+      spy.mockRestore();
+    }
+  });
 });
 
 describe('summarizeAuditReport', () => {
@@ -94,6 +130,43 @@ describe('summarizeAuditReport', () => {
     const r = await runSecurityAudit(inv('specialty'));
     const s = summarizeAuditReport(r);
     expect(s.stridDreadTags).toBeUndefined();
+  });
+
+  it('threat-model with a non-completed result marks that axis with severity=high', async () => {
+    // The `r.completed ? 'medium' : 'high'` ternary — every mock run
+    // completes, so the `'high'` arm was uncovered. Build a synthetic
+    // report with one non-completed axis.
+    const r = await runSecurityAudit(inv('threat-model'));
+    const withOneFailed = {
+      ...r,
+      results: r.results.map((x, i) =>
+        i === 0 ? { ...x, completed: false } : x,
+      ),
+    };
+    const s = summarizeAuditReport(withOneFailed);
+    expect(s.stridDreadTags).toBeDefined();
+    expect(s.stridDreadTags?.[0]?.severity).toBe('high');
+    expect(s.stridDreadTags?.[1]?.severity).toBe('medium');
+  });
+
+  it('tagForAxis falls back to stride:unknown for an axis outside the STRIDE map', async () => {
+    // The `?? 'stride:unknown'` fallback — the six DevSecOps axes are all in
+    // the map, so the fallback needed a synthetic axis value to fire.
+    const r = await runSecurityAudit(inv('threat-model'));
+    const rogue = {
+      ...r,
+      results: [
+        ...r.results,
+        {
+          ...r.results[0]!,
+          axis: 'rogue-axis' as never,
+        },
+      ],
+    };
+    const s = summarizeAuditReport(rogue);
+    expect(s.stridDreadTags).toBeDefined();
+    const rogueTag = s.stridDreadTags?.find((t) => (t.axis as string) === 'rogue-axis');
+    expect(rogueTag?.tag).toBe('stride:unknown');
   });
 });
 
