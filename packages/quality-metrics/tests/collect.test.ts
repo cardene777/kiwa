@@ -73,6 +73,21 @@ describe('testCountFromCategories', () => {
       testCountFromCategories({ behavior: 1.5, integration: 0, e2e: 0 }),
     ).toThrow(/non-negative integer/);
   });
+
+  it('T-QM-COL-008b rejects non-number / NaN / Infinity counts (assertNonNegativeInteger first-throw arm)', () => {
+    // Every existing negative/non-integer test hit the "expected non-negative
+    // integer" arm. The `typeof v !== 'number' || NaN || !Finite` first-throw
+    // arm was uncovered.
+    expect(() =>
+      testCountFromCategories({ behavior: 'oops' as unknown as number, integration: 0, e2e: 0 }),
+    ).toThrow(/expected finite number/);
+    expect(() =>
+      testCountFromCategories({ behavior: NaN, integration: 0, e2e: 0 }),
+    ).toThrow(/expected finite number/);
+    expect(() =>
+      testCountFromCategories({ behavior: Infinity, integration: 0, e2e: 0 }),
+    ).toThrow(/expected finite number/);
+  });
 });
 
 describe('fidelityFromMethodCounts', () => {
