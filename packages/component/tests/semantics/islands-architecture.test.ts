@@ -39,4 +39,26 @@ describe('v1.49 islands-architecture semantics', () => {
   it('rejects empty routeId', () => {
     expect(() => bootstrapIslandsRoute({ target: 'storybook8', routeId: '' })).toThrow(/routeId/);
   });
+
+  it('rejects markIslandInteractive when session is not hydrating', () => {
+    const s = bootstrapIslandsRoute({ target: 'storybook8', routeId: '/r' });
+    // state = 'registered' (initial post-bootstrap), markIslandInteractive requires 'hydrating'
+    expect(() => markIslandInteractive(s, 'x')).toThrow(/session is/);
+  });
+
+  it('rejects markIslandInteractive when the island is already interactive', () => {
+    const s = bootstrapIslandsRoute({ target: 'chromatic', routeId: '/r' });
+    registerIsland(s, { islandId: 'i1', loadStrategy: 'load', interactiveBoundary: true });
+    registerIsland(s, { islandId: 'i2', loadStrategy: 'load', interactiveBoundary: true });
+    beginIslandHydration(s, 'i1');
+    markIslandInteractive(s, 'i1');
+    // state stays 'hydrating' because i2 is still pending; try to double-mark i1
+    expect(() => markIslandInteractive(s, 'i1')).toThrow(/already interactive/);
+  });
+
+  it('rejects assertStaticBoundary for an already-asserted boundary', () => {
+    const s = bootstrapIslandsRoute({ target: 'playwright-ct', routeId: '/r' });
+    assertStaticBoundary(s, 'footer');
+    expect(() => assertStaticBoundary(s, 'footer')).toThrow(/already asserted/);
+  });
 });
