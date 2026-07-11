@@ -234,3 +234,91 @@ describe('comparePngBuffers (mutation-kill)', () => {
     expect(result.diffRatio).toBe(0);
   });
 });
+
+describe('loader fallback branches', () => {
+  it('loadPixelmatch returns mod when default export is absent (covers `mod.default ?? mod` right arm)', async () => {
+    // Mock pixelmatch to have `default` explicitly nullish. loadPixelmatch's
+    // fallback `mod.default ?? mod` then evaluates to `mod`. The namespace is
+    // not callable so invoking it later throws — that is fine; the goal is
+    // to force the `??` right-arm branch to fire so v8 coverage marks it.
+    const baseline = await buildPng(2, 2, [0, 0, 0, 255]);
+    vi.resetModules();
+    vi.doMock('pixelmatch', () => ({ default: null }));
+    const fresh = (await import('../src/compare.js')) as typeof import('../src/compare.js');
+    await expect(fresh.comparePngBuffers(baseline, baseline)).rejects.toThrow();
+    vi.doUnmock('pixelmatch');
+    vi.resetModules();
+  });
+
+  it('loadPng returns mod.default.PNG when top-level PNG is absent (covers `mod.PNG ?? mod.default?.PNG` middle arm)', async () => {
+    // Mock pngjs to expose PNG only via `default.PNG`. loadPng's chain then
+    // must fall through the first `mod.PNG` (nullish) to `mod.default?.PNG`
+    // and return the fake PNG so downstream png.sync.read / write are called.
+    // We hand pixelmatch a callable so the whole flow completes without
+    // relying on the real dep for the diff step. The baseline buffer is built
+    // BEFORE mocking pngjs, so the module-level buildPng helper sees the real
+    // module.
+    const baseline = await buildPng(2, 2, [0, 0, 0, 255]);
+    vi.resetModules();
+    vi.doMock('pngjs', () => {
+      const fakePng = {
+        sync: {
+          read: () => ({ width: 2, height: 2, data: Buffer.alloc(2 * 2 * 4) }),
+          write: () => Buffer.from([137, 80, 78, 71]),
+        },
+      };
+      // Declare `PNG` explicitly as null so `mod.PNG` is nullish (fires the
+      // first `??` right-arm) without vitest throwing on an undeclared export.
+      // The actual PNG surface reaches loadPng via `mod.default.PNG`.
+      return { PNG: null, default: { PNG: fakePng } };
+    });
+    vi.doMock('pixelmatch', () => ({ default: () => 0 }));
+    const fresh = (await import('../src/compare.js')) as typeof import('../src/compare.js');
+    const result = await fresh.comparePngBuffers(baseline, baseline);
+    expect(result.size).toEqual({ width: 2, height: 2 });
+    expect(result.diffPixels).toBe(0);
+    vi.doUnmock('pngjs');
+    vi.doUnmock('pixelmatch');
+    vi.resetModules();
+  });
+
+  it('loadPng falls through to the final `?? mod.PNG` when both top-level and default.PNG are nullish', async () => {
+    // Mock pngjs so `mod.PNG` is nullish AND `mod.default` is nullish. The
+    // `mod.default?.PNG` middle arm then optional-chains to undefined and
+    // the chain exhausts to the last `?? mod.PNG` (also undefined). loadPng
+    // returns undefined, so downstream `png.sync.read` throws — that is
+    // fine; we only need to force the third `??` right-arm to evaluate so
+    // v8 marks the branch exercised.
+    const baseline = await buildPng(2, 2, [0, 0, 0, 255]);
+    vi.resetModules();
+    vi.doMock('pngjs', () => ({ PNG: null, default: null }));
+    const fresh = (await import('../src/compare.js')) as typeof import('../src/compare.js');
+    await expect(fresh.comparePngBuffers(baseline, baseline)).rejects.toThrow();
+    vi.doUnmock('pngjs');
+    vi.resetModules();
+  });
+
+  it('diffRatio is 0 when width * height is 0 (covers the `totalPixels === 0 ? 0` true arm)', async () => {
+    // Fabricate a 0x0 image via mocked pngjs, and stub pixelmatch to return
+    // 0. Real pngjs refuses 0x0 buffers, so a mock is the only route.
+    vi.resetModules();
+    vi.doMock('pngjs', () => ({
+      PNG: {
+        sync: {
+          read: () => ({ width: 0, height: 0, data: Buffer.alloc(0) }),
+          write: () => Buffer.alloc(0),
+        },
+      },
+    }));
+    vi.doMock('pixelmatch', () => ({ default: () => 0 }));
+    const fresh = (await import('../src/compare.js')) as typeof import('../src/compare.js');
+    const result = await fresh.comparePngBuffers(Buffer.alloc(0), Buffer.alloc(0));
+    expect(result.size).toEqual({ width: 0, height: 0 });
+    expect(result.diffPixels).toBe(0);
+    expect(result.diffRatio).toBe(0);
+    expect(result.ok).toBe(true);
+    vi.doUnmock('pngjs');
+    vi.doUnmock('pixelmatch');
+    vi.resetModules();
+  });
+});
