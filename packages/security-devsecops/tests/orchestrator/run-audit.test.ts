@@ -1,11 +1,12 @@
 // v1.48-1 orchestrator — runSecurityAudit + 4 preset behavior test。
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   axisForPreset,
   runSecurityAudit,
   summarizeAuditReport,
   type AuditInvocation,
 } from '../../src/index.js';
+import { sastMockAdapter } from '../../src/adapters/sast-mock.js';
 
 const inv = (preset: AuditInvocation['preset']): AuditInvocation => ({
   preset,
@@ -61,21 +62,39 @@ describe('runSecurityAudit — 4 preset', () => {
     }
   });
 
-  it('spreads metadata into every adapter scan when the caller supplies it', async () => {
+  it('forwards caller-supplied metadata into the adapter scan input', async () => {
     // The `input.metadata ? { metadata: input.metadata } : {}` spread was
-    // only exercised on its falsy arm — no test passed metadata. Adding it
-    // proves the object shape reaches the adapter and the arm is real.
-    const r = await runSecurityAudit({
-      preset: 'audit-all',
-      target: '/repo',
-      mode: 'mock',
-      metadata: { runId: 'rid_1' },
-    } as AuditInvocation);
-    // Any preset works — the spread runs on every axis. Assert the shape
-    // returned rather than digging for the metadata itself, which is not
-    // observable on the result.
-    expect(r.results.length).toBeGreaterThan(0);
-    expect(r.mode).toBe('mock');
+    // only exercised on its falsy arm — no test passed metadata. Spy on
+    // the sast mock adapter so the scan input is observable, then assert
+    // the metadata object arrives verbatim.
+    const spy = vi.spyOn(sastMockAdapter, 'scan');
+    try {
+      await runSecurityAudit({
+        preset: 'audit-all',
+        target: '/repo',
+        mode: 'mock',
+        metadata: { runId: 'rid_1' },
+      } as AuditInvocation);
+      expect(spy).toHaveBeenCalledOnce();
+      const seen = spy.mock.calls[0]?.[0] as { metadata?: Record<string, unknown> };
+      expect(seen?.metadata).toEqual({ runId: 'rid_1' });
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('omits metadata from the adapter scan input when the caller supplies none', async () => {
+    // Mirror for the falsy arm — proves the omission is by design and the
+    // spread has both arms behaving.
+    const spy = vi.spyOn(sastMockAdapter, 'scan');
+    try {
+      await runSecurityAudit(inv('audit-all'));
+      expect(spy).toHaveBeenCalledOnce();
+      const seen = spy.mock.calls[0]?.[0] as { metadata?: Record<string, unknown> };
+      expect(seen?.metadata).toBeUndefined();
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
 

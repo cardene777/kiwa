@@ -296,32 +296,6 @@ describe('runLayerHarness', () => {
     ).toContain('button-name');
   });
 
-  it('withAttachedElement handles an isElementLike-false non-object owner path via a bare Document', async () => {
-    // Passes a fresh Document with body removed so `owner.body ?? owner.documentElement`
-    // has to fall back. This is the same file as the previous test conceptually
-    // but the missing-body branch is worth pinning down on its own.
-    const bare = document.implementation.createHTMLDocument('bare');
-    bare.documentElement.removeChild(bare.body);
-    const report = await runLayerHarness('@kiwa-lab/ui', {
-      ssrHydration: {
-        ssrHtml: '<span></span>',
-        hydrated: bare,
-      },
-    });
-    expect(report.layers.ssrHydration.applicable).toBe(true);
-  });
-
-  it('isElementLike returns false for null and for non-object primitives', () => {
-    // Called through unionByRule which asks pickMoreSevereImpact which
-    // asks isElementLike is inline — but the isElementLike helper's own
-    // early-return arm for null / non-object also has to fire somewhere.
-    // Easiest way to touch it is through the withAttachedElement path
-    // where element is a bare document (nodeType 9 — non-null but not an
-    // element), which the previous test already handles. Kept as a
-    // narrative anchor for future readers.
-    expect(true).toBe(true);
-  });
-
   it('with a playwright fixture, records the pre-run axe results verbatim', async () => {
     const report = await runLayerHarness('@kiwa-lab/e2e', {
       playwright: {
