@@ -205,4 +205,22 @@ describe('tutorial 55 — direct API cross-check', () => {
     expect(result.entries).toHaveLength(2);
     expect(result.missingMutationFilter).toEqual([]);
   });
+
+  it('checkReleaseScriptFilter reports partial when the publish filter is present but the build filter is missing', () => {
+    // Closes the second arm of the partial ternary at release-script-filter.js:15-16:
+    // `(!buildFilterPresent && publishFilterPresent)`. Existing coverage exercises the
+    // reverse arm (build present + publish missing); this pins the mirror.
+    const result = checkReleaseScriptFilter(
+      'pnpm -F @kiwa-lab/core build && ' +
+        'pnpm publish --filter @kiwa-lab/core --filter @kiwa-lab/realtime',
+      PUBLISHABLE,
+    );
+    expect(result.ok).toBe(false);
+    expect(result.missingBuildFilter).toEqual(['@kiwa-lab/realtime']);
+    expect(result.missingPublishFilter).toEqual([]);
+    const realtime = result.entries.find((e) => e.name === '@kiwa-lab/realtime')!;
+    expect(realtime.partial).toBe(true);
+    expect(realtime.buildFilterPresent).toBe(false);
+    expect(realtime.publishFilterPresent).toBe(true);
+  });
 });
