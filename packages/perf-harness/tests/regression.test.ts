@@ -58,4 +58,36 @@ describe('detectRegression', () => {
     expect(result.welchT).toBe(0);
     expect(result.verdict).toBe('stable');
   });
+
+  it('T-PH-R-006 both baseline and current p95 = 0 gives deltaPct = 0 (not Infinity)', () => {
+    // Closes the inner ternary at line 8: `baseline.p95 === 0 ? current.p95 === 0 ? 0 : Infinity : ...`.
+    // All-zero samples exercise both p95 === 0 arms.
+    const baseline = makeResult('reply', [0, 0, 0, 0, 0]);
+    const current = makeResult('reply', [0, 0, 0, 0, 0]);
+    const result = detectRegression({ current, baseline });
+    expect(result.deltaPct).toBe(0);
+    expect(result.verdict).toBe('stable');
+  });
+
+  it('T-PH-R-007 empty-samples normalize early return (result passes through unchanged)', () => {
+    // Closes the `result.samples.length === 0` early return at line 43 in normalize().
+    // detectRegression treats an empty-samples baseline as a passthrough (no
+    // percentile recomputation) — the significance check then collapses via the
+    // <2-sample guard below.
+    const baseline = makeResult('reply', []);
+    const current = makeResult('reply', [10, 11, 12]);
+    const result = detectRegression({ current, baseline });
+    expect(result.verdict).toBe('stable');
+    expect(result.welchT).toBe(0);
+  });
+
+  it('T-PH-R-008 identical repeated samples produce zero variance → welchT = 0', () => {
+    // Closes the `!Number.isFinite(denominator) || denominator === 0` guard at
+    // line 57. Two samples with the same value give variance=0 on both sides so
+    // the denominator becomes 0.
+    const baseline = makeResult('reply', [10, 10]);
+    const current = makeResult('reply', [10, 10]);
+    const result = detectRegression({ current, baseline });
+    expect(result.welchT).toBe(0);
+  });
 });

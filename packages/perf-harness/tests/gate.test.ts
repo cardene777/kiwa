@@ -66,4 +66,35 @@ describe('evaluatePerfGate', () => {
       op: '<=',
     });
   });
+
+  it('T-PH-G-006 defaults to {} thresholds when the field is omitted entirely', () => {
+    // Closes the `input.thresholds ?? {}` fallback at line 3.
+    const gate = evaluatePerfGate({
+      result: resultFrom([10, 11, 12]),
+    });
+    expect(gate.verdict.passed).toBe(true);
+    expect(gate.verdict.axesEvaluated).toBe(0);
+  });
+
+  it('T-PH-G-007 treats missing metrics.costUsd as 0 in the report when the axis is thresholded', () => {
+    // Closes the `input.metrics?.costUsd ?? 0` fallback at line 61.
+    const gate = evaluatePerfGate({
+      result: resultFrom([10, 11, 12]),
+      thresholds: { costUsd: 0.5 },
+      // metrics.costUsd is intentionally undefined
+      metrics: {},
+    });
+    expect(gate.report.cost?.perRequestUsd).toBe(0);
+  });
+
+  it('T-PH-G-008 treats missing metrics.accuracy as 0 in the report when the axis is thresholded', () => {
+    // Closes the `input.metrics?.accuracy ?? 0` fallback at line 75.
+    const gate = evaluatePerfGate({
+      result: resultFrom([10, 11, 12]),
+      thresholds: { accuracy: 0.9 },
+      // metrics.accuracy is intentionally undefined
+      metrics: {},
+    });
+    expect(gate.report.accuracy?.score).toBe(0);
+  });
 });
