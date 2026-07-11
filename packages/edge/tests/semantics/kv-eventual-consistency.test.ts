@@ -59,6 +59,14 @@ describe('kv-eventual-consistency axis — 3 platform', () => {
     expect(session.observed['b']).toBe(100);
   });
 
+  it('forceConvergence treats never-observed key as observed=0 (defensive fallback)', () => {
+    const session = startKvConsistency({ platform: 'vercel' });
+    recordWriteQuorum(session, { key: 'lonely', ts: 42 });
+    const reconciled = forceConvergence(session);
+    expect(reconciled).toBe(1);
+    expect(session.observed['lonely']).toBe(42);
+  });
+
   it('unwritten key read is treated as converged (writeTs=0)', () => {
     const session = startKvConsistency({ platform: 'vercel' });
     const read = observeRead(session, { key: 'new-key', readTs: 0, replicaId: 'r' });

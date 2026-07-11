@@ -47,6 +47,19 @@ describe('global-routing axis — 3 platform', () => {
     expect(step.metadata).toMatchObject({ fallbackPopId: 'eu-1', latencyPenaltyMs: 200 });
   });
 
+  it('selectByLatency fallback picks lowest-latency when first candidate is not the minimum', () => {
+    const session = startRoutingPool({
+      platform: 'cloudflare',
+      pops: [
+        { popId: 'eu-1', region: 'eu', latencyMs: 300, healthy: true },
+        { popId: 'ap-1', region: 'ap', latencyMs: 80, healthy: true },
+      ],
+    });
+    const step = selectByLatency(session, { requestId: 'r', preferredRegion: 'us' });
+    expect(step.state).toBe('failing-over');
+    expect(step.metadata).toMatchObject({ fallbackPopId: 'ap-1', latencyPenaltyMs: 80 });
+  });
+
   it('selectByLatency emits no-healthy-pops when all unhealthy', () => {
     const session = startRoutingPool({
       platform: 'vercel',

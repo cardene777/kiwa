@@ -94,4 +94,20 @@ describe('cold-start axis — 3 platform', () => {
     const session = startColdStartPool({ platform: 'cloudflare' });
     expect(session.warmedTtlMs).toBe(60_000);
   });
+
+  it('invokeColdStart tolerates warm entry with missing lastInvokeAtMs (defensive fallback)', () => {
+    const session = startColdStartPool({ platform: 'cloudflare', warmedTtlMs: 60_000 });
+    session.warmedIds.add('fn-orphan');
+    const step = invokeColdStart(session, { instanceId: 'fn-orphan', nowMs: 1000 });
+    expect(step.state).toBe('warm');
+    expect(step.neutralEvent).toBe('cold-start.cache-hit');
+  });
+
+  it('evictExpired tolerates warm entry with missing lastInvokeAtMs (defensive fallback)', () => {
+    const session = startColdStartPool({ platform: 'deno', warmedTtlMs: 10_000 });
+    session.warmedIds.add('fn-orphan');
+    const evicted = evictExpired(session, { nowMs: 20_000 });
+    expect(evicted).toBe(1);
+    expect(session.warmedIds.has('fn-orphan')).toBe(false);
+  });
 });
