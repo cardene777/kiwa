@@ -2,7 +2,7 @@ import { mkdtempSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { ANVIL_DEFAULT_PRIVATE_KEYS, setupTestEnv, type TestEnv } from '../src/index.js';
+import { ANVIL_DEFAULT_PRIVATE_KEYS, setupTestEnv, withAnvil, type TestEnv } from '../src/index.js';
 
 const envs: TestEnv[] = [];
 
@@ -75,6 +75,74 @@ describe('setupTestEnv (anvil mode)', () => {
     if (env.mode !== 'anvil') throw new Error('expected anvil mode');
     const chainId = await getChainId(env.rpcUrl);
     expect(chainId).toBe(1234);
+  });
+
+  it('withAnvil throws immediately when beforeAll/afterAll are missing', async () => {
+    const holder = globalThis as unknown as {
+      beforeAll?: unknown;
+      afterAll?: unknown;
+    };
+    const prevBeforeAll = holder.beforeAll;
+    const prevAfterAll = holder.afterAll;
+    try {
+      holder.beforeAll = undefined;
+      holder.afterAll = undefined;
+      expect(() => withAnvil()).toThrow(/beforeAll \/ afterAll missing/);
+    } finally {
+      holder.beforeAll = prevBeforeAll;
+      holder.afterAll = prevAfterAll;
+    }
+  });
+
+  it('withAnvil returns a lifecycle whose env() throws before beforeAll runs', async () => {
+    // vitest global beforeAll/afterAll は describe scope 内でのみ register される。
+    // ここでは lifecycle 側 register を no-op で hijack して env() の pre-boot エラーだけを検証する。
+    const holder = globalThis as unknown as {
+      beforeAll?: (fn: () => Promise<void>) => void;
+      afterAll?: (fn: () => Promise<void>) => void;
+    };
+    const prevBeforeAll = holder.beforeAll;
+    const prevAfterAll = holder.afterAll;
+    try {
+      holder.beforeAll = () => undefined;
+      holder.afterAll = () => undefined;
+      const lifecycle = withAnvil();
+      expect(() => lifecycle.env()).toThrow(/env\(\) called before beforeAll resolved/);
+    } finally {
+      holder.beforeAll = prevBeforeAll;
+      holder.afterAll = prevAfterAll;
+    }
+  });
+
+  it('withAnvil beforeAll boots + env() resolves + afterAll stops', async () => {
+    let beforeFn: (() => Promise<void>) | undefined;
+    let afterFn: (() => Promise<void>) | undefined;
+    const holder = globalThis as unknown as {
+      beforeAll?: (fn: () => Promise<void>) => void;
+      afterAll?: (fn: () => Promise<void>) => void;
+    };
+    const prevBeforeAll = holder.beforeAll;
+    const prevAfterAll = holder.afterAll;
+    try {
+      holder.beforeAll = (fn) => {
+        beforeFn = fn;
+      };
+      holder.afterAll = (fn) => {
+        afterFn = fn;
+      };
+      const lifecycle = withAnvil();
+      expect(beforeFn).toBeDefined();
+      expect(afterFn).toBeDefined();
+      await beforeFn!();
+      const env = lifecycle.env();
+      expect(env.mode).toBe('mock');
+      await afterFn!();
+      // 停止後は env() が再び失敗する
+      expect(() => lifecycle.env()).toThrow(/env\(\) called before beforeAll resolved/);
+    } finally {
+      holder.beforeAll = prevBeforeAll;
+      holder.afterAll = prevAfterAll;
+    }
   });
 
   it('writes state file when dumpState is set and loads it back', async () => {

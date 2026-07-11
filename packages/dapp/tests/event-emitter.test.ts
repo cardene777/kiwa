@@ -45,4 +45,27 @@ describe('createEventEmitter', () => {
     // Then
     expect(handler).toHaveBeenCalledWith({ code: 4900, message: 'Disconnected' });
   });
+
+  it('T-EVT-005 off(event, handler) で登録解除後 emit しても handler は呼ばれない', () => {
+    const emitter = createEventEmitter();
+    const handler = vi.fn();
+    emitter.on('accountsChanged', handler);
+    emitter.off('accountsChanged', handler);
+
+    emitter.emit('accountsChanged', ['0xabc']);
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('T-EVT-006 listenerCount は登録数を返し、 off 後は減る', () => {
+    const emitter = createEventEmitter();
+    const h1 = vi.fn();
+    const h2 = vi.fn();
+
+    expect(emitter.listenerCount('chainChanged')).toBe(0);
+    emitter.on('chainChanged', h1);
+    emitter.on('chainChanged', h2);
+    expect(emitter.listenerCount('chainChanged')).toBe(2);
+    emitter.off('chainChanged', h1);
+    expect(emitter.listenerCount('chainChanged')).toBe(1);
+  });
 });

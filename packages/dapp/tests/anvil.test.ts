@@ -93,6 +93,27 @@ describe.skipIf(process.env.SKIP_ANVIL_TESTS === '1')('startAnvil', () => {
     expect(stillListening).toBe(false);
   });
 
+  it('T-ANV-004b killExistingOnPort:true + 未使用 port で lsof no-op 経路が通る', async () => {
+    const port = await getFreePort();
+    handle = await startAnvil({
+      port,
+      killExistingOnPort: true,
+    });
+    expect(handle.port).toBe(port);
+    expect(handle.pid).toBeGreaterThan(0);
+  });
+
+  it('T-ANV-004c chainId 指定で anvil が指定 chainId で起動する', async () => {
+    handle = await startAnvil({ chainId: 4242 });
+    const res = await fetch(`http://127.0.0.1:${handle.port}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] }),
+    });
+    const json = (await res.json()) as { result: string };
+    expect(Number.parseInt(json.result, 16)).toBe(4242);
+  });
+
 });
 
 describe.skipIf(process.env.SKIP_ANVIL_TESTS === '1')('startAnvilCluster', () => {
