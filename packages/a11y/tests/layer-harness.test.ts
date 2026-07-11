@@ -581,3 +581,47 @@ describe('runLayerHarness — SSR without jsdom-like document', () => {
     }
   });
 });
+
+describe('withAttachedElement — defensive branches (public API)', () => {
+  it('N4 — non-object hydrated fixture short-circuits isElementLike (covers OR left-arm)', async () => {
+    // `isElementLike` guards against non-object values with an early
+    // `return false`. A primitive `hydrated` fixture (a string) forces the
+    // OR arm to fire — the harness then tries to walk `element.documentElement`
+    // on the primitive and rejects. The assertion is the rejection itself,
+    // which proves control passed through the `return false` branch (target
+    // becomes `undefined` and downstream reads throw).
+    await expect(
+      runLayerHarness('@kiwa-lab/x', {
+        ssrHydration: {
+          ssrHtml: '<span aria-label="ok">ok</span>',
+          hydrated: 'not-a-node' as unknown as Element,
+        },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('N5 — detached Element whose ownerDocument has no body falls back to documentElement (covers ?? host fallback)', async () => {
+    // A caller-owned Element from a document whose `body` has been removed —
+    // the harness must fall back to `owner.documentElement` for the temp host,
+    // otherwise a detached fixture from a bodyless document would silently
+    // skip the axe scan.
+    const doc = document.implementation.createHTMLDocument('empty');
+    doc.body?.remove();
+    expect(doc.body).toBeNull();
+    expect(doc.documentElement).not.toBeNull();
+    const el = doc.createElement('div');
+    el.innerHTML = '<span aria-label="ok">ok</span>';
+    expect(el.isConnected).toBe(false);
+
+    const report = await runLayerHarness('@kiwa-lab/nextjs', {
+      ssrHydration: {
+        ssrHtml: '<span aria-label="ok">ok</span>',
+        hydrated: el,
+      },
+    });
+    // The layer completed and the caller's element was restored to a
+    // detached state (originalParent was null, so target.remove() ran).
+    expect(report.layers.ssrHydration.applicable).toBe(true);
+    expect(el.isConnected).toBe(false);
+  });
+});
