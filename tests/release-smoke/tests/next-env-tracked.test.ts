@@ -75,20 +75,50 @@ describe('every Next.js example commits next-env.d.ts', () => {
     }
   });
 
-  it('every tracked next-env.d.ts under a Next.js example has the Next.js reference triple-slashes', () => {
-    // The file's contents are fixed by Next.js: two triple-slash references
-    // and a "do not edit" note. If one drifts, it means someone edited it by
-    // hand — and Next.js will rewrite it on the next build anyway.
+  it('every tracked next-env.d.ts content matches what Next.js writes for its declared major version', () => {
+    // Next 14 writes a five-line file with two triple-slash references. Next
+    // 15 adds a third: `./.next/types/routes.d.ts`. If someone commits the
+    // wrong one, `next build` rewrites the file and leaves the tree dirty —
+    // exactly the problem #1397 tried to fix. Match content to major version.
     const examples = nextExamples();
     for (const dir of examples) {
       const path = `${dir}/next-env.d.ts`;
       const tracked = trackedUnder(path);
       if (tracked.length === 0) continue; // covered by the missing check above
-      // Read the working tree copy, not HEAD — this test also runs against
-      // staged-but-not-yet-committed additions.
-      const out = readFileSync(resolve(ROOT, path), 'utf-8');
-      // Reference name is stable across Next.js 13/14/15.
-      expect(out, `${basename(dir)}: ${path}`).toContain('/// <reference types="next" />');
+      const content = readFileSync(resolve(ROOT, path), 'utf-8');
+      const major = nextMajor(dir);
+      expect(content, `${basename(dir)}: ${path}`).toContain(
+        '/// <reference types="next" />',
+      );
+      expect(content, `${basename(dir)}: ${path}`).toContain(
+        '/// <reference types="next/image-types/global" />',
+      );
+      if (major >= 15) {
+        expect(content, `${basename(dir)} (next ${major}): routes.d.ts reference required`).toContain(
+          '/// <reference path="./.next/types/routes.d.ts" />',
+        );
+      } else {
+        expect(content, `${basename(dir)} (next ${major}): must not have routes.d.ts reference`).not.toContain(
+          'routes.d.ts',
+        );
+      }
     }
   });
 });
+
+/** Major version of `next` in an example's `package.json`. */
+function nextMajor(dir: string): number {
+  const raw = readFileSync(resolve(ROOT, dir, 'package.json'), 'utf-8');
+  const pkg = JSON.parse(raw) as { dependencies?: Record<string, string> };
+  const spec = pkg.dependencies?.next;
+  if (spec === undefined) {
+    throw new Error(`${dir}: no "next" in dependencies`);
+  }
+  // Spec looks like `^14.2.15` or `~15.0.0` or `15.0.0`. First digit run is
+  // the major.
+  const match = spec.match(/(\d+)/);
+  if (match === null) {
+    throw new Error(`${dir}: could not parse next spec "${spec}"`);
+  }
+  return Number(match[1]);
+}
