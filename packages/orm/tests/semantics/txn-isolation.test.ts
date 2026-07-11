@@ -64,4 +64,21 @@ describe('txn-isolation axis — 3 provider × 3 backend', () => {
     blockDirtyRead(session, { readerTxnId: 'tx2' });
     expect(() => blockPhantomRead(session, { predicate: 'id > 1' })).toThrow(/non-repeatable/);
   });
+
+  it('blockDirtyRead rejects a call before setTxnIsolationLevel (session.level === null)', () => {
+    const session = createTxnIsolationSession({ txnId: 'tx1', provider: 'drizzle', backend: 'postgres' });
+    // level is still null — the guard fires before the read-uncommitted arm.
+    expect(() => blockDirtyRead(session, { readerTxnId: 'tx2' })).toThrow(
+      /isolation level has not been set/,
+    );
+  });
+
+  it('blockNonRepeatableRead rejects a call before blockDirtyRead has run', () => {
+    const session = createTxnIsolationSession({ txnId: 'tx1', provider: 'drizzle', backend: 'postgres' });
+    setTxnIsolationLevel(session, { level: 'serializable' });
+    // level is valid but dirty-read guard hasn't been run yet.
+    expect(() => blockNonRepeatableRead(session, { rowKey: 'users:1' })).toThrow(
+      /dirty read guard must run first/,
+    );
+  });
 });

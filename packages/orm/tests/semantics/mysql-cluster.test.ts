@@ -67,4 +67,27 @@ describe('mysql-cluster axis — 3 provider × 3 backend', () => {
     const step = leaveClusterMember(session, { memberId: 'm1' });
     expect(step.metadata.primaryPresent).toBe(false);
   });
+
+  it('joinClusterMember rejects empty memberId', () => {
+    const session = createMysqlClusterSession({ groupName: 'g1', provider: 'drizzle', backend: 'mysql' });
+    expect(() => joinClusterMember(session, { memberId: '', weight: 1 })).toThrow(
+      /memberId is required/,
+    );
+  });
+
+  it('joinClusterMember rejects negative weight', () => {
+    const session = createMysqlClusterSession({ groupName: 'g1', provider: 'drizzle', backend: 'mysql' });
+    expect(() => joinClusterMember(session, { memberId: 'm1', weight: -1 })).toThrow(
+      /weight must be non-negative/,
+    );
+  });
+
+  it('detectClusterConflict rejects an unknown winnerMemberId even after primary election', () => {
+    const session = createMysqlClusterSession({ groupName: 'g1', provider: 'drizzle', backend: 'mysql' });
+    joinClusterMember(session, { memberId: 'm1', weight: 1 });
+    electClusterPrimary(session, { memberId: 'm1', mode: 'single-primary' });
+    expect(() =>
+      detectClusterConflict(session, { transactionId: 'tx1', winnerMemberId: 'ghost' }),
+    ).toThrow(/unknown winner/);
+  });
 });
