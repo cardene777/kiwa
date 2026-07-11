@@ -222,4 +222,36 @@ describe('runAxe + reportViolations (mutation-kill)', () => {
       globalThis.document = original;
     }
   });
+
+  it('loadAxeCore falls back to the bare module when mod.default is null (covers L10 ?? fallback branch)', async () => {
+    // axe-core is normally imported and exposes both `.default` (CJS interop)
+    // and bare named exports (`run`). The `?? mod` branch only fires when
+    // `mod.default` is nullish. Simulate a bundler that emits a module with a
+    // null `default` and a top-level `run` — the loader must fall through to
+    // the bare module.
+    vi.resetModules();
+    vi.doMock('axe-core', () => ({
+      default: null,
+      run: async () => ({
+        violations: [
+          {
+            id: 'stub-rule',
+            impact: 'minor' as const,
+            description: '',
+            help: 'stub',
+            helpUrl: '',
+            nodes: [{ target: ['x'], html: '' }],
+          },
+        ],
+        passes: [],
+        incomplete: [],
+        inapplicable: [],
+      }),
+    }));
+    const fresh = (await import('../src/audit.js')) as typeof import('../src/audit.js');
+    const results = await fresh.runAxe();
+    expect(results.violations.map((v) => v.id)).toEqual(['stub-rule']);
+    vi.doUnmock('axe-core');
+    vi.resetModules();
+  });
 });
