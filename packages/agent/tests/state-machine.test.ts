@@ -35,8 +35,17 @@ describe('StateMachine — node / edge registration', () => {
   it('addNode rejects empty / reserved names', () => {
     const m = new StateMachine<Counter>();
     expect(() => m.addNode('', inc)).toThrow(GraphCompileError);
+    expect(() => m.addNode('   ', inc)).toThrow(/non-empty string/);
     expect(() => m.addNode(START, inc)).toThrow(/reserved/);
     expect(() => m.addNode(END, inc)).toThrow(/reserved/);
+  });
+
+  it('addEdge rejects empty from/to', () => {
+    // The `!from || !to` guard's throw arm was uncovered — every existing
+    // test built valid edges.
+    const m = new StateMachine<Counter>();
+    expect(() => m.addEdge('', 'x')).toThrow(/non-empty strings/);
+    expect(() => m.addEdge('x', '')).toThrow(/non-empty strings/);
   });
 
   it('compile flips isCompiled to true on valid graph', () => {
@@ -70,6 +79,16 @@ describe('StateMachine — compile validation', () => {
     m.addNode('inc', inc);
     m.addEdge(START, 'unknown').addEdge('inc', END);
     expect(() => m.compile()).toThrow(/START edge targets unknown node/);
+  });
+
+  it('rejects edge.from referencing an unknown node', () => {
+    // Every existing "unknown" test used edge.to; the edge.from arm was
+    // uncovered because every graph that reached the validator had all its
+    // from-nodes already registered.
+    const m = new StateMachine<Counter>();
+    m.addNode('inc', inc);
+    m.addEdge(START, 'inc').addEdge('phantom', END);
+    expect(() => m.compile()).toThrow(/edge.from references unknown node/);
   });
 
   it('rejects edge.to referencing unknown node', () => {

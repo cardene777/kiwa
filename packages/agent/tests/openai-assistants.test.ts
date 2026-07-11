@@ -53,6 +53,102 @@ describe('AssistantsClient — resource CRUD', () => {
     expect(final.status).toBe('completed');
     expect(client.getThread(thread.id)?.messages.at(-1)?.content).toBe('late-bound');
   });
+
+  it('registerHandler for an unknown assistant id throws', () => {
+    // Guard branch: the client refuses to bind a handler to an assistant
+    // that was never created.
+    const client = new AssistantsClient();
+    expect(() =>
+      client.registerHandler('asst-nope', async () => ({
+        kind: 'message' as const,
+        content: '',
+      })),
+    ).toThrow(/unknown assistant id/);
+  });
+
+  it('getAssistant returns the assistant it just created and undefined for an unknown id', () => {
+    const client = new AssistantsClient({ idSeed: 'ga' });
+    const assistant = client.createAssistant({ name: 'a', instructions: '' });
+    expect(client.getAssistant(assistant.id)?.name).toBe('a');
+    expect(client.getAssistant('asst-nope')).toBeUndefined();
+  });
+
+  it('addMessage on an unknown thread id throws', () => {
+    // Guard: the addMessage entry validates the thread it was given.
+    const client = new AssistantsClient();
+    expect(() =>
+      client.addMessage('thread-nope', { role: 'user', content: 'x' }),
+    ).toThrow(/unknown thread id/);
+  });
+
+  it('createThread with initial messages routes through the addMessage guard cleanly', () => {
+    // Positive control for the previous test: the internal path (createThread
+    // building its own messages) does not run into the "unknown thread id"
+    // arm because the id was just minted.
+    const client = new AssistantsClient({ idSeed: 'ct' });
+    const thread = client.createThread({
+      messages: [{ role: 'user', content: 'one' }],
+    });
+    expect(thread.messages).toHaveLength(1);
+  });
+
+  it('createRun with an unknown thread / assistant id throws', () => {
+    const client = new AssistantsClient();
+    const assistant = client.createAssistant({
+      name: 'a',
+      instructions: '',
+      handler: async () => ({ kind: 'message' as const, content: '' }),
+    });
+    const thread = client.createThread();
+    expect(() =>
+      client.createRun({ threadId: 'thread-nope', assistantId: assistant.id }),
+    ).toThrow(/unknown thread id/);
+    expect(() =>
+      client.createRun({ threadId: thread.id, assistantId: 'asst-nope' }),
+    ).toThrow(/unknown assistant id/);
+  });
+
+  it('poll / submitToolOutputs / cancel throw for an unknown run id', async () => {
+    const client = new AssistantsClient();
+    await expect(client.poll('run-nope')).rejects.toThrow(/unknown run id/);
+    expect(() =>
+      client.submitToolOutputs('run-nope', { toolOutputs: [] }),
+    ).toThrow(/unknown run id/);
+    expect(() => client.cancel('run-nope')).toThrow(/unknown run id/);
+  });
+
+  it('cancel on an already-completed run is a no-op that returns the run', async () => {
+    // The `status === 'completed' || status === 'failed'` arm in cancel()
+    // returns a copy of the run without transitioning it — the "already
+    // final, nothing to do" arm was uncovered.
+    const client = new AssistantsClient({ idSeed: 'cx' });
+    const assistant = client.createAssistant({
+      name: 'a',
+      instructions: '',
+      handler: async () => ({ kind: 'message' as const, content: 'ok' }),
+    });
+    const thread = client.createThread();
+    const run = client.createRun({ threadId: thread.id, assistantId: assistant.id });
+    const completed = await client.pollUntilFinal(run.id);
+    expect(completed.status).toBe('completed');
+    const cancelled = client.cancel(run.id);
+    // Still completed; no failedAt, no cancelled lastError.
+    expect(cancelled.status).toBe('completed');
+    expect(cancelled.lastError).toBeUndefined();
+  });
+
+  it('getRun returns the run when it exists and undefined otherwise', async () => {
+    const client = new AssistantsClient({ idSeed: 'gr' });
+    const assistant = client.createAssistant({
+      name: 'a',
+      instructions: '',
+      handler: async () => ({ kind: 'message' as const, content: 'ok' }),
+    });
+    const thread = client.createThread();
+    const run = client.createRun({ threadId: thread.id, assistantId: assistant.id });
+    expect(client.getRun(run.id)?.id).toBe(run.id);
+    expect(client.getRun('run-nope')).toBeUndefined();
+  });
 });
 
 describe('AssistantsClient — Run status transition', () => {
