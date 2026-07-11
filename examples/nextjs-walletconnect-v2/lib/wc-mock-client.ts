@@ -78,11 +78,20 @@ class InMemoryRelay {
   private listeners = new Map<string, Set<Listener<unknown>>>();
 
   publish<T>(channel: string, payload: T): void {
-    const set = this.listeners.get(channel);
-    if (!set) return;
-    for (const listener of set) {
-      queueMicrotask(() => listener(payload));
-    }
+    // Look the set up inside the microtask, not out here. `client.pair()`
+    // publishes the proposal *before* `wallet.pair()` subscribes for it: the
+    // dApp holds the pairing topic the wallet is meant to read from, so the
+    // wallet only subscribes after `client.pair()` returns. Reading `set`
+    // now would land on an empty listener list and drop the proposal, and
+    // `status` would stay at `pairing` until the approval promise timed out.
+    // Deferring the lookup lets the same synchronous frame subscribe first.
+    queueMicrotask(() => {
+      const set = this.listeners.get(channel);
+      if (!set) return;
+      for (const listener of set) {
+        listener(payload);
+      }
+    });
   }
 
   subscribe<T>(channel: string, listener: Listener<T>): () => void {

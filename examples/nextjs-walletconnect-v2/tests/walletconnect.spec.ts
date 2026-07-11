@@ -22,7 +22,10 @@ test.describe('WalletConnect v2 (Level B mock)', () => {
     await page.getByTestId('connect-button').click();
 
     const uri = await page.getByTestId('uri').textContent({ timeout: 5_000 });
-    expect(uri).toMatch(/^wc:pairing-[0-9a-f]+@2\?relay-protocol=irn&symKey=symkey-[0-9a-f]+$/);
+    // The mock builds symKey with `newTopic('symkey').replace(/-/g, '')`, which
+    // gives `symkeyXXXXXXXX` — a hex-shaped identifier that stands in for the
+    // 32-byte hex WalletConnect really writes. No dash after `symkey`.
+    expect(uri).toMatch(/^wc:pairing-[0-9a-f]+@2\?relay-protocol=irn&symKey=symkey[0-9a-f]+$/);
   });
 
   test('T-WC-002 hands the URI to the wallet side and reaches the pairing state', async ({ page }) => {
