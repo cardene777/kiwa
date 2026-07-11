@@ -177,3 +177,19 @@ describe('setupLitComponentEnv (mutation-kill)', () => {
     expect(env.markup.length).toBeGreaterThan(0);
   });
 });
+
+describe('setupLitComponentEnv (missing-dep contract)', () => {
+  it('throws a friendly error when @open-wc/testing-helpers is absent', async () => {
+    const { vi } = await import('vitest');
+    vi.resetModules();
+    vi.doMock('@open-wc/testing-helpers', () => {
+      throw new Error('not installed');
+    });
+    const fresh = await import('../src/lit.js');
+    await expect(
+      fresh.setupLitComponentEnv({ mode: 'render', template: html`<div></div>` }),
+    ).rejects.toThrow(/@open-wc\/testing-helpers/);
+    vi.doUnmock('@open-wc/testing-helpers');
+    vi.resetModules();
+  });
+});
