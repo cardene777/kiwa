@@ -97,6 +97,20 @@ describe('d1-read-replica axis — 3 platform', () => {
     );
   });
 
+  it('read picks lowest-lag when the first candidate is not the minimum', () => {
+    const session = startD1({
+      platform: 'cloudflare',
+      primaryId: 'pg-primary',
+      replicas: [
+        { replicaId: 'r-us1', region: 'us', lagMs: 300 },
+        { replicaId: 'r-us2', region: 'us', lagMs: 50 },
+      ],
+      maxLagMs: 500,
+    });
+    const step = readFromReplica(session, { query: 'SELECT 1', preferredRegion: 'us' });
+    expect(step.metadata).toMatchObject({ replicaId: 'r-us2', lagMs: 50 });
+  });
+
   it('defaults maxLagMs=500', () => {
     const session = startD1({ platform: 'deno', primaryId: 'pg-primary' });
     expect(session.maxLagMs).toBe(500);

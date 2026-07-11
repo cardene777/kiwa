@@ -81,6 +81,18 @@ describe('do-state-migration axis — 3 platform', () => {
     );
   });
 
+  it('rejects migrateInstance before bumpSchema (state=initiated)', () => {
+    const session = initiateMigration({
+      platform: 'cloudflare',
+      fromVersion: 1,
+      toVersion: 2,
+      instanceIds: ['a'],
+    });
+    expect(() => migrateInstance(session, { instanceId: 'a' })).toThrow(
+      /session is initiated, cannot migrate/,
+    );
+  });
+
   it('rejects migrateInstance for already-migrated instance', () => {
     const session = initiateMigration({
       platform: 'cloudflare',
