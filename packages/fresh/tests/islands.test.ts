@@ -195,6 +195,27 @@ describe('simulateInteraction', () => {
   });
 });
 
+describe('renderAttrs — boolean-true bare attribute', () => {
+  it('T-FR-041a hydrateIslands emits boolean-true props as bare HTML attributes on the surrounding tree', () => {
+    // Closes the `value === true` bare-attribute arm at lines 192-195 in renderAttrs.
+    // `renderAttrs` runs on nodes in the SSR tree, so the boolean-true attribute needs
+    // to sit on a wrapper element (not inside the island component, whose HTML is
+    // pre-baked by mountIsland).
+    const Island = defineIsland<{ n: number }>({
+      name: 'Bare',
+      component: (p) => h('span', null, String(p.n)),
+    });
+    const ssrTree = h(
+      'form',
+      { autocomplete: 'off', novalidate: true },
+      islandPlaceholder(Island, { n: 1 }),
+    );
+    const { html } = hydrateIslands({ ssrTree, islands: [Island] });
+    expect(html).toContain(' novalidate');
+    expect(html).not.toContain(' novalidate="');
+  });
+});
+
 describe('multi-island scene', () => {
   it('T-FR-042 hydrates 2 islands in the same SSR tree independently', () => {
     const A = defineIsland<{ n: number }>({
