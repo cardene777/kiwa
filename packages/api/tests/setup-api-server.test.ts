@@ -337,14 +337,20 @@ describe('startMockServer (mutation-kill — direct surface)', () => {
     vi.doMock('msw/node', () => {
       throw new Error('mock-load-fail');
     });
-    // Import fresh so the mocked resolution takes effect.
-    vi.resetModules();
-    const { startMockServer } = await import('../src/msw-bridge.js');
-    await expect(startMockServer({ handlers: [] })).rejects.toThrow(
-      /requires "msw" to be installed/,
-    );
-    vi.doUnmock('msw/node');
-    vi.resetModules();
+    try {
+      // Import fresh so the mocked resolution takes effect.
+      vi.resetModules();
+      const { startMockServer } = await import('../src/msw-bridge.js');
+      await expect(startMockServer({ handlers: [] })).rejects.toThrow(
+        /requires "msw" to be installed/,
+      );
+    } finally {
+      // Restore module resolution in finally so a failing assertion above
+      // does not leave the mock registry dirty for subsequent tests in the
+      // same worker.
+      vi.doUnmock('msw/node');
+      vi.resetModules();
+    }
   });
 
   it('reset() side effect: handlers are re-registered (kills "reset: () => undefined" ArrowFunction mutation)', async () => {
@@ -491,20 +497,20 @@ describe('startLiveServer (node-style handler)', () => {
     }
   });
 
-  it('fetchHandlerAdapter defaults host to "localhost" and method to "GET" for headerless requests', async () => {
-    // The `req.headers.host ?? 'localhost'` and `req.method ?? 'GET'`
-    // fallbacks fire only when the incoming request omits the Host header
-    // (HTTP/1.0 allows this) or the method is missing. Every fetch client
-    // sends both, so both arms were uncovered. Send a raw HTTP/1.0 request
-    // with no Host header and observe the fetch-side URL.
+  it('fetchHandlerAdapter defaults host to "localhost" for a headerless HTTP/1.0 request', async () => {
+    // The `req.headers.host ?? 'localhost'` fallback fires only when the
+    // incoming request omits the Host header — HTTP/1.0 allows this and
+    // every fetch client always sends one. The `req.method ?? 'GET'`
+    // fallback is NOT exercised here: the raw request line is
+    // `GET / HTTP/1.0`, and node sets `req.method` to `GET` — the ?? never
+    // has to fall back. That arm remains as a defensive guard against a
+    // shape node's HTTP parser does not produce.
     const { startLiveServer } = await import('../src/live-server.js');
     let seenUrl: string | null = null;
-    let seenMethod: string | null = null;
     const handle = await startLiveServer({
       kind: 'fetch',
       handler: async (req) => {
         seenUrl = req.url;
-        seenMethod = req.method;
         return new Response('ok');
       },
     });
@@ -524,7 +530,6 @@ describe('startLiveServer (node-style handler)', () => {
       });
       // HTTP/1.0 without Host: url.host should default to localhost.
       expect(seenUrl).toMatch(/^http:\/\/localhost\//);
-      expect(seenMethod).toBe('GET');
     } finally {
       await handle.close();
     }
