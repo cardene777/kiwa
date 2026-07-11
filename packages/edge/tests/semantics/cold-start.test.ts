@@ -95,6 +95,13 @@ describe('cold-start axis — 3 platform', () => {
     expect(session.warmedTtlMs).toBe(60_000);
   });
 
+  // The two tests below pin the `?? 0` defensive fallback in invokeColdStart and
+  // evictExpired for a `warmedIds` entry whose `lastInvokeAtMs` entry is missing.
+  // No helper API produces this state naturally (invokeColdStart / preWarmInstance
+  // co-write both fields, evictExpired deletes both) — the state comes from
+  // externally-persisted sessions where lastInvokeAtMs was truncated or from
+  // serialization round-trips through partial JSON. The fallback exists so those
+  // callers see a well-defined result instead of NaN; the tests document that.
   it('invokeColdStart tolerates warm entry with missing lastInvokeAtMs (defensive fallback)', () => {
     const session = startColdStartPool({ platform: 'cloudflare', warmedTtlMs: 60_000 });
     session.warmedIds.add('fn-orphan');
