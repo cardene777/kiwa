@@ -44,6 +44,24 @@ describe('fixture tools — behavior', () => {
     });
   });
 
+  it('calc handles every op enum: add / subtract / multiply / divide', async () => {
+    // Every prior test only exercised divide (through the divide-by-zero
+    // error path). The subtract / multiply / divide branches of the switch
+    // in the calc handler were uncovered because `add` was the default and
+    // `divide` was the only other explicit call.
+    const server = new McpServer();
+    registerAllFixtureTools(server);
+    const { client } = await connectClientToServer(server);
+    const add = await client.callTool('calc', { op: 'add', a: 3, b: 4 });
+    expect(add.content[0]).toMatchObject({ type: 'text', text: '7' });
+    const sub = await client.callTool('calc', { op: 'subtract', a: 10, b: 4 });
+    expect(sub.content[0]).toMatchObject({ type: 'text', text: '6' });
+    const mul = await client.callTool('calc', { op: 'multiply', a: 6, b: 7 });
+    expect(mul.content[0]).toMatchObject({ type: 'text', text: '42' });
+    const div = await client.callTool('calc', { op: 'divide', a: 20, b: 4 });
+    expect(div.content[0]).toMatchObject({ type: 'text', text: '5' });
+  });
+
   it('weather returns fahrenheit when unit=fahrenheit', async () => {
     const server = new McpServer();
     registerAllFixtureTools(server);
