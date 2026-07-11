@@ -95,6 +95,41 @@ describe('renderAstroPage', () => {
     expect(result.html).toBe('abc');
   });
 
+  it('T-AP-006b: cookies.get() returns undefined for a non-existent cookie', async () => {
+    // Closes the `typeof value === 'undefined' ? undefined : ...` truthy arm at line 33.
+    let observedGet: { value: string } | undefined = { value: 'not-reset' };
+    await renderAstroPage({
+      page: ({ cookies }) => {
+        observedGet = cookies.get('does-not-exist');
+        return '';
+      },
+      url: 'https://x/',
+    });
+    expect(observedGet).toBeUndefined();
+  });
+
+  it('T-AP-006a: cookies.has() reports presence for seeded + newly-set cookies', async () => {
+    // Closes the has() method on the buildCookieJar (line 41-43 in render-astro-page.js).
+    // Existing tests only call get / set / delete, so has() was never invoked.
+    let observedHasSession = false;
+    let observedHasMissing = true;
+    let observedHasNewly = false;
+    await renderAstroPage({
+      page: ({ cookies }) => {
+        observedHasSession = cookies.has('session');
+        observedHasMissing = cookies.has('nonexistent');
+        cookies.set('newly', 'v');
+        observedHasNewly = cookies.has('newly');
+        return '';
+      },
+      url: 'https://x/',
+      cookies: { session: 'abc' },
+    });
+    expect(observedHasSession).toBe(true);
+    expect(observedHasMissing).toBe(false);
+    expect(observedHasNewly).toBe(true);
+  });
+
   it('T-AP-007: Astro.redirect() captured as redirect signal + 302 Response', async () => {
     const result = await renderAstroPage({
       page: ({ redirect }) => {
