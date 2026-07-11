@@ -101,6 +101,26 @@ describe('createTransactionalProducer', () => {
     await p.initTransactions();
     await expect(p.initTransactions()).rejects.toThrow(/already initialized/);
   });
+
+  it('T-EOS-009b double beginTransaction throws while a transaction is active', async () => {
+    // The `state === 'active'` throw arm on beginTransaction was uncovered.
+    const kafka = createKafkaMock();
+    const p = createTransactionalProducer({ kafka, transactionalId: 'tx-6' });
+    await p.connect();
+    await p.initTransactions();
+    await p.beginTransaction();
+    await expect(p.beginTransaction()).rejects.toThrow(/already active/);
+  });
+
+  it('T-EOS-009c abortTransaction throws when no active transaction', async () => {
+    // The state-check throw arm on abortTransaction was uncovered — every
+    // prior test either committed or aborted inside an active tx.
+    const kafka = createKafkaMock();
+    const p = createTransactionalProducer({ kafka, transactionalId: 'tx-7' });
+    await p.connect();
+    await p.initTransactions();
+    await expect(p.abortTransaction()).rejects.toThrow(/no active transaction/);
+  });
 });
 
 describe('createReadCommittedFilter', () => {
