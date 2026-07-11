@@ -141,4 +141,25 @@ describe('createDeadLetterQueue', () => {
     expect(calls).toBe(2);
     expect(elapsed).toBeGreaterThanOrEqual(0);
   });
+
+  it('exponential backoff walks the base * 2^(attempt-1) branch', async () => {
+    // constant and linear were covered above; the `else` arm on
+    // kind === 'exponential' was uncovered.
+    let calls = 0;
+    const dlq = createDeadLetterQueue({
+      topic: 'orders',
+      handler: async () => {
+        calls += 1;
+        throw new Error('exp');
+      },
+      retryPolicy: {
+        maxAttempts: 3,
+        backoff: 'exponential',
+        baseDelayMs: 1,
+        maxDelayMs: 5,
+      },
+    });
+    await dlq.handle(fixture(1));
+    expect(calls).toBe(3);
+  });
 });
