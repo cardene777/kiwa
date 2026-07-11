@@ -96,4 +96,56 @@ describe('mvcc-advanced axis — 3 provider × 3 backend', () => {
     applyHotUpdate(session, { oldTupleId: 't1', newTupleId: 't2', chainLength: 1 });
     expect(() => detectXidWraparound(session, { freezeXid: 90, warningAge: 20 })).toThrow(/threshold/);
   });
+
+  // Argument guards that had no test — each throw is now exercised through the
+  // public API.
+  it('checkTupleVisibility rejects empty tupleId', () => {
+    const session = createMvccAdvancedSession({
+      tableName: 'u', provider: 'drizzle', backend: 'postgres', currentXid: 10,
+    });
+    expect(() =>
+      checkTupleVisibility(session, { tupleId: '', xmin: 1, snapshotXmin: 2 }),
+    ).toThrow(/tupleId is required/);
+  });
+
+  it('checkTupleVisibility rejects tuple xmin newer than snapshot', () => {
+    const session = createMvccAdvancedSession({
+      tableName: 'u', provider: 'drizzle', backend: 'postgres', currentXid: 10,
+    });
+    expect(() =>
+      checkTupleVisibility(session, { tupleId: 't1', xmin: 10, snapshotXmin: 2 }),
+    ).toThrow(/newer than snapshot/);
+  });
+
+  it('measureBloat rejects non-positive total tuple counts', () => {
+    const session = createMvccAdvancedSession({
+      tableName: 'u', provider: 'drizzle', backend: 'postgres', currentXid: 10,
+    });
+    checkTupleVisibility(session, { tupleId: 't1', xmin: 1, snapshotXmin: 2 });
+    expect(() => measureBloat(session, { liveTuples: 0, deadTuples: 0 })).toThrow(
+      /tuple counts must be positive in total/,
+    );
+  });
+
+  it('applyHotUpdate requires bloat-measured state (state guard)', () => {
+    const session = createMvccAdvancedSession({
+      tableName: 'u', provider: 'drizzle', backend: 'postgres', currentXid: 10,
+    });
+    checkTupleVisibility(session, { tupleId: 't1', xmin: 1, snapshotXmin: 2 });
+    // state = 'visibility-checked', not 'bloat-measured'
+    expect(() =>
+      applyHotUpdate(session, { oldTupleId: 't1', newTupleId: 't2', chainLength: 1 }),
+    ).toThrow(/requires bloat-measured state/);
+  });
+
+  it('applyHotUpdate rejects non-positive chainLength', () => {
+    const session = createMvccAdvancedSession({
+      tableName: 'u', provider: 'drizzle', backend: 'postgres', currentXid: 10,
+    });
+    checkTupleVisibility(session, { tupleId: 't1', xmin: 1, snapshotXmin: 2 });
+    measureBloat(session, { liveTuples: 1, deadTuples: 1 });
+    expect(() =>
+      applyHotUpdate(session, { oldTupleId: 't1', newTupleId: 't2', chainLength: 0 }),
+    ).toThrow(/chainLength must be positive/);
+  });
 });

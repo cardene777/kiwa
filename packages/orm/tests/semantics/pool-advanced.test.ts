@@ -94,4 +94,46 @@ describe('pool-advanced axis — 3 provider × 3 backend', () => {
       /non-negative/,
     );
   });
+
+  // Remaining argument / state guards without a test.
+  it('runPoolHealthCheck rejects negative latencyMs', () => {
+    const session = createPoolAdvancedSession({
+      poolId: 'pool-1', provider: 'drizzle', backend: 'postgres', minWarmConnections: 1,
+    });
+    expect(() => runPoolHealthCheck(session, { latencyMs: -1, ok: true })).toThrow(/non-negative/);
+  });
+
+  it('drainPoolGracefully requires warmed-up state (state guard)', () => {
+    const session = createPoolAdvancedSession({
+      poolId: 'pool-1', provider: 'drizzle', backend: 'postgres', minWarmConnections: 1,
+    });
+    runPoolHealthCheck(session, { latencyMs: 1, ok: true });
+    // state = 'healthy', not 'warmed-up'
+    expect(() => drainPoolGracefully(session, { deadlineMs: 1000 })).toThrow(
+      /requires warmed-up state/,
+    );
+  });
+
+  it('drainPoolGracefully rejects non-positive deadlineMs', () => {
+    const session = createPoolAdvancedSession({
+      poolId: 'pool-1', provider: 'drizzle', backend: 'postgres', minWarmConnections: 1,
+    });
+    runPoolHealthCheck(session, { latencyMs: 1, ok: true });
+    warmPoolConnections(session, { connectionCount: 1 });
+    expect(() => drainPoolGracefully(session, { deadlineMs: 0 })).toThrow(
+      /deadlineMs must be positive/,
+    );
+  });
+
+  it('exportPoolMetrics requires draining state (state guard)', () => {
+    const session = createPoolAdvancedSession({
+      poolId: 'pool-1', provider: 'drizzle', backend: 'postgres', minWarmConnections: 1,
+    });
+    runPoolHealthCheck(session, { latencyMs: 1, ok: true });
+    warmPoolConnections(session, { connectionCount: 1 });
+    // state = 'warmed-up', not 'draining'
+    expect(() => exportPoolMetrics(session, { active: 0, idle: 0, waiting: 0 })).toThrow(
+      /requires draining state/,
+    );
+  });
 });
