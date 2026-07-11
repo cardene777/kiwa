@@ -42,4 +42,16 @@ describe('v1.49 concurrent-transitions semantics', () => {
   it('rejects empty transitionId', () => {
     expect(() => startConcurrentTransition({ target: 'app-router', transitionId: '' })).toThrow(/transitionId/);
   });
+
+  it('rejects markTransitionPending from committed state', () => {
+    const s = startConcurrentTransition({ target: 'app-router', transitionId: 't5' });
+    commitTransition(s, 'v1');
+    expect(() => markTransitionPending(s)).toThrow(/is committed/);
+  });
+
+  it('rejects commitTransition from committed state (no double-commit)', () => {
+    const s = startConcurrentTransition({ target: 'edge-runtime', transitionId: 't6' });
+    commitTransition(s, 'v1');
+    expect(() => commitTransition(s, 'v2')).toThrow(/is committed/);
+  });
 });

@@ -188,4 +188,84 @@ describe('setupNextRscEnv', () => {
     const env = await setupNextRscEnv({ dataSource: source(), streamingTimeout: 0 });
     expect(env.timedOut).toBe(true);
   });
+
+  it('T-SNE-016 streamingTimeout: 0 ms with a component times out synchronously too', async () => {
+    // Existing T-SNE-015 exercises the dataSource arm of `opts.dataSource || opts.component`;
+    // this pins the component arm so the fast-timeout branch runs on both inputs.
+    const Page = async () => h('div', {}, 'instant');
+    const env = await setupNextRscEnv({ component: Page, streamingTimeout: 0 });
+    expect(env.timedOut).toBe(true);
+    expect(env.chunks).toEqual([]);
+  });
+
+  it('T-SNE-017 streamingTimeout: 0 ms with a fallback puts the fallback into chunks[0]', async () => {
+    // Closes the `fallback !== null ? [fallback] : []` truthy arm on the fast-timeout return
+    // (line 100). Existing tests pass no fallback so only the [] arm ran.
+    const fallback = h('div', {}, 'spinner');
+    async function* source(): AsyncGenerator<RscNode, void, unknown> {
+      yield h('div', {}, 'instant');
+    }
+    const env = await setupNextRscEnv({
+      dataSource: source(),
+      streamingTimeout: 0,
+      suspenseFallback: fallback,
+    });
+    expect(env.timedOut).toBe(true);
+    expect(env.chunks).toEqual([fallback]);
+    expect(env.fallback).toBe(fallback);
+  });
+
+  it('T-SNE-018 empty opts with a fallback still populates chunks[0] with the fallback', async () => {
+    // Closes the `fallback !== null ? [fallback] : []` truthy arm on the empty-env return
+    // (line 121). Existing T-SNE-010 passes no fallback so only the [] arm ran.
+    const fallback = h('div', {}, 'empty-placeholder');
+    const env = await setupNextRscEnv({ suspenseFallback: fallback });
+    expect(env.chunks).toEqual([fallback]);
+    expect(env.fallback).toBe(fallback);
+    expect(env.resolved).toBeNull();
+    expect(env.timedOut).toBe(false);
+  });
+
+  it('T-SNE-019 slow stream with a fallback times out and carries the fallback back', async () => {
+    // Closes the `fallback !== null ? [fallback] : []` truthy arm on the runtime-timeout return
+    // (line 134). Existing T-SNE-006 timed out without a fallback, so only the [] arm ran there.
+    const fallback = h('div', {}, 'timeout-placeholder');
+    async function* source(): AsyncGenerator<RscNode, void, unknown> {
+      // Never resolves within the 10ms timeout.
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      yield h('div', {}, 'never');
+    }
+    const env = await setupNextRscEnv({
+      dataSource: source(),
+      streamingTimeout: 10,
+      suspenseFallback: fallback,
+    });
+    expect(env.timedOut).toBe(true);
+    expect(env.chunks).toEqual([fallback]);
+  });
+
+  it('T-SNE-020 a stream whose final chunk is undefined makes resolved fall back to null', async () => {
+    // `chunks[chunks.length - 1] ?? null` — the nullish arm runs when the last chunk is
+    // undefined. `RscNode` already permits undefined via its `null | undefined` union so no
+    // cast is needed.
+    async function* source(): AsyncGenerator<RscNode, void, unknown> {
+      yield h('div', {}, 'first');
+      yield undefined;
+    }
+    const env = await setupNextRscEnv({ dataSource: source() });
+    expect(env.chunks).toHaveLength(2);
+    expect(env.resolved).toBeNull();
+  });
+
+  it('T-SNE-021 empty stream (no yield, no fallback) makes chunks empty and resolved null', async () => {
+    // Closes the outer ternary's empty-chunks arm on line 60 (`chunks.length > 0 ? ... : null`).
+    // Existing tests always produced at least one chunk (either a yielded value or a fallback),
+    // so the `: null` arm never ran.
+    async function* source(): AsyncGenerator<RscNode, void, unknown> {
+      // completes immediately without yielding
+    }
+    const env = await setupNextRscEnv({ dataSource: source() });
+    expect(env.chunks).toEqual([]);
+    expect(env.resolved).toBeNull();
+  });
 });
