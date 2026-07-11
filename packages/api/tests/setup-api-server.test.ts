@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setupApiServer, type ApiHandlerSource, type ApiTestEnv } from '../src/index.js';
 
 const envs: ApiTestEnv[] = [];
@@ -330,6 +330,23 @@ describe('startMockServer (mutation-kill — direct surface)', () => {
     }
   });
 
+  it('throws a caller-actionable error when msw/node fails to import', async () => {
+    // The `import('msw/node')` catch arm — msw is installed in this repo,
+    // so the error path was never taken. `vi.doMock` intercepts the dynamic
+    // import and forces the module resolution to reject.
+    vi.doMock('msw/node', () => {
+      throw new Error('mock-load-fail');
+    });
+    // Import fresh so the mocked resolution takes effect.
+    vi.resetModules();
+    const { startMockServer } = await import('../src/msw-bridge.js');
+    await expect(startMockServer({ handlers: [] })).rejects.toThrow(
+      /requires "msw" to be installed/,
+    );
+    vi.doUnmock('msw/node');
+    vi.resetModules();
+  });
+
   it('reset() side effect: handlers are re-registered (kills "reset: () => undefined" ArrowFunction mutation)', async () => {
     // Same as the earlier reset test, but invoked twice to guarantee the
     // ArrowFunction body actually executes server.resetHandlers (a no-op
@@ -355,6 +372,239 @@ describe('startMockServer (mutation-kill — direct surface)', () => {
     } finally {
       handle.close();
     }
+  });
+});
+
+describe('startLiveServer (node-style handler)', () => {
+  it('accepts a raw (req, res) => void handler and returns 200 for it', async () => {
+    // The `resolveHandler` wraps a bare function as `kind: 'node'`. Every
+    // existing test passed an { kind: 'fetch', handler } object, so both
+    // that wrap and the node-handler branch of the createServer callback
+    // were uncovered.
+    const { startLiveServer } = await import('../src/live-server.js');
+    const handle = await startLiveServer((_req, res) => {
+      res.statusCode = 200;
+      res.setHeader('content-type', 'text/plain');
+      res.end('node-handled');
+    });
+    try {
+      const res = await fetch(`${handle.baseUrl}/`);
+      expect(res.status).toBe(200);
+      expect(await res.text()).toBe('node-handled');
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it('async node handler rejection turns into 500 internal error', async () => {
+    // The maybe.catch arm — the handler returns a Promise that rejects.
+    const { startLiveServer } = await import('../src/live-server.js');
+    const handle = await startLiveServer(async (_req, _res) => {
+      throw new Error('async boom');
+    });
+    try {
+      const res = await fetch(`${handle.baseUrl}/`);
+      expect(res.status).toBe(500);
+      expect(await res.text()).toContain('async boom');
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it('sync node handler throw turns into 500 internal error', async () => {
+    // The try/catch arm — the handler throws synchronously before returning.
+    const { startLiveServer } = await import('../src/live-server.js');
+    const handle = await startLiveServer((_req, _res) => {
+      throw new Error('sync boom');
+    });
+    try {
+      const res = await fetch(`${handle.baseUrl}/`);
+      expect(res.status).toBe(500);
+      expect(await res.text()).toContain('sync boom');
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it('fetch handler that throws turns into 500 internal error', async () => {
+    // fetchHandlerAdapter().catch — the fetch-handler path's error arm was
+    // uncovered because every fetch handler in the suite returned a
+    // Response cleanly.
+    const { startLiveServer } = await import('../src/live-server.js');
+    const handle = await startLiveServer({
+      kind: 'fetch',
+      handler: async () => {
+        throw new Error('fetch-handler boom');
+      },
+    });
+    try {
+      const res = await fetch(`${handle.baseUrl}/`);
+      expect(res.status).toBe(500);
+      expect(await res.text()).toContain('fetch-handler boom');
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it('buildHeaders forwards Set-Cookie array headers verbatim into the fetch Request', async () => {
+    // node's http parser lands `Set-Cookie` on `req.headers` as `string[]`,
+    // even when the request carries it (unusual but legal per RFC). The
+    // Array.isArray arm was uncovered because every test used scalar-only
+    // headers. We send two `Set-Cookie:` headers via a raw socket write and
+    // observe both survive into the fetch handler's Request via `getSetCookie`.
+    const { startLiveServer } = await import('../src/live-server.js');
+    let seen: string[] | null = null;
+    const handle = await startLiveServer({
+      kind: 'fetch',
+      handler: async (req) => {
+        seen = (req.headers as Headers & { getSetCookie(): string[] }).getSetCookie();
+        return new Response('ok');
+      },
+    });
+    try {
+      const net = await import('node:net');
+      const url = new URL(handle.baseUrl);
+      await new Promise<void>((resolve, reject) => {
+        const socket = net.createConnection(
+          { host: url.hostname, port: Number(url.port) },
+          () => {
+            socket.write(
+              [
+                'GET / HTTP/1.1',
+                `Host: ${url.host}`,
+                'Set-Cookie: a=1',
+                'Set-Cookie: b=2',
+                'Connection: close',
+                '',
+                '',
+              ].join('\r\n'),
+            );
+          },
+        );
+        socket.on('data', () => {});
+        socket.on('close', () => resolve());
+        socket.on('error', reject);
+      });
+      expect(seen).toEqual(['a=1', 'b=2']);
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it('fetchHandlerAdapter defaults host to "localhost" and method to "GET" for headerless requests', async () => {
+    // The `req.headers.host ?? 'localhost'` and `req.method ?? 'GET'`
+    // fallbacks fire only when the incoming request omits the Host header
+    // (HTTP/1.0 allows this) or the method is missing. Every fetch client
+    // sends both, so both arms were uncovered. Send a raw HTTP/1.0 request
+    // with no Host header and observe the fetch-side URL.
+    const { startLiveServer } = await import('../src/live-server.js');
+    let seenUrl: string | null = null;
+    let seenMethod: string | null = null;
+    const handle = await startLiveServer({
+      kind: 'fetch',
+      handler: async (req) => {
+        seenUrl = req.url;
+        seenMethod = req.method;
+        return new Response('ok');
+      },
+    });
+    try {
+      const net = await import('node:net');
+      const url = new URL(handle.baseUrl);
+      await new Promise<void>((resolve, reject) => {
+        const socket = net.createConnection(
+          { host: url.hostname, port: Number(url.port) },
+          () => {
+            socket.write('GET / HTTP/1.0\r\nConnection: close\r\n\r\n');
+          },
+        );
+        socket.on('data', () => {});
+        socket.on('close', () => resolve());
+        socket.on('error', reject);
+      });
+      // HTTP/1.0 without Host: url.host should default to localhost.
+      expect(seenUrl).toMatch(/^http:\/\/localhost\//);
+      expect(seenMethod).toBe('GET');
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it('fetch-handler POST body path buildHeaders forwards an array-valued header verbatim', async () => {
+    // buildHeaders iterates the raw node headers, which may include arrays
+    // for repeatable headers (e.g. `Set-Cookie`). The array branch and the
+    // fetch-handler POST body path (method !== GET/HEAD, body > 0 length)
+    // were uncovered because no live test sent a body.
+    const { startLiveServer } = await import('../src/live-server.js');
+    let receivedBody: string | null = null;
+    const handle = await startLiveServer({
+      kind: 'fetch',
+      handler: async (req) => {
+        receivedBody = await req.text();
+        return new Response('ok');
+      },
+    });
+    try {
+      const res = await fetch(`${handle.baseUrl}/`, {
+        method: 'POST',
+        headers: { 'content-type': 'text/plain' },
+        body: 'hello-body',
+      });
+      expect(res.status).toBe(200);
+      expect(receivedBody).toBe('hello-body');
+    } finally {
+      await handle.close();
+    }
+  });
+});
+
+describe('setupApiServer (defaultHeaders forwarding)', () => {
+  it('mock mode threads defaultHeaders into the request client', async () => {
+    // The `opts.defaultHeaders ? { defaultHeaders } : {}` spread was
+    // only exercised on its falsy arm.
+    const env = await setupApiServer({
+      mode: 'mock',
+      mockHandlers: [
+        http.get('http://kiwa.mock/api/echo', ({ request }) =>
+          HttpResponse.json({ tenant: request.headers.get('x-tenant') }),
+        ),
+      ],
+      defaultHeaders: { 'x-tenant': 'acme' },
+    });
+    envs.push(env);
+    const res = await env.request.get('/api/echo');
+    expect(res.json<{ tenant: string }>().tenant).toBe('acme');
+  });
+
+  it('live mode threads defaultHeaders through', async () => {
+    const env = await setupApiServer({
+      mode: 'live',
+      app: {
+        kind: 'fetch',
+        handler: async (req) =>
+          Response.json({ tenant: req.headers.get('x-tenant') }),
+      },
+      defaultHeaders: { 'x-tenant': 'beta' },
+    });
+    envs.push(env);
+    const res = await env.request.get('/');
+    expect(res.json<{ tenant: string }>().tenant).toBe('beta');
+  });
+
+  it('hybrid mode threads defaultHeaders through', async () => {
+    const env = await setupApiServer({
+      mode: 'hybrid',
+      app: {
+        kind: 'fetch',
+        handler: async (req) =>
+          Response.json({ tenant: req.headers.get('x-tenant') }),
+      },
+      mockHandlers: [],
+      defaultHeaders: { 'x-tenant': 'gamma' },
+    });
+    envs.push(env);
+    const res = await env.request.get('/');
+    expect(res.json<{ tenant: string }>().tenant).toBe('gamma');
   });
 });
 
