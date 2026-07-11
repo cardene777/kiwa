@@ -157,3 +157,22 @@ describe('setupSolidComponentEnv (mutation-kill)', () => {
     expect(env.kind).toBe('solid');
   });
 });
+
+describe('setupSolidComponentEnv (missing-dep contract)', () => {
+  it('throws a friendly error when @solidjs/testing-library is absent', async () => {
+    const { vi } = await import('vitest');
+    vi.resetModules();
+    vi.doMock('@solidjs/testing-library', () => {
+      throw new Error('not installed');
+    });
+    const fresh = await import('../src/solid.js');
+    await expect(
+      fresh.setupSolidComponentEnv({
+        mode: 'render',
+        component: () => createComponent(SolidCounter, {}),
+      }),
+    ).rejects.toThrow(/@solidjs\/testing-library/);
+    vi.doUnmock('@solidjs/testing-library');
+    vi.resetModules();
+  });
+});

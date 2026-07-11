@@ -147,3 +147,19 @@ describe('setupVueComponentEnv (mutation-kill)', () => {
     expect(env.wrapper.find('[data-testid="slot-host"]').text()).toBe('fallback');
   });
 });
+
+describe('setupVueComponentEnv (missing-dep contract)', () => {
+  it('throws a friendly error when @vue/test-utils is absent', async () => {
+    const { vi } = await import('vitest');
+    vi.resetModules();
+    vi.doMock('@vue/test-utils', () => {
+      throw new Error('not installed');
+    });
+    const fresh = await import('../src/vue.js');
+    await expect(
+      fresh.setupVueComponentEnv({ mode: 'render', component: VueCounter }),
+    ).rejects.toThrow(/@vue\/test-utils/);
+    vi.doUnmock('@vue/test-utils');
+    vi.resetModules();
+  });
+});
