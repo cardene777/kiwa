@@ -843,9 +843,10 @@ describe('setupRemixNestedRouteEnv — Set-Cookie edge case parsing (branch clos
     expect(env.cookies.get('lonely')).toBe('raw');
   });
 
-  // isExpiredSetCookie の `eqValue === -1` (line 192) と attribute pair の `eq === -1` (line 199) を触る。
   // parseSetCookieName に通る name=value ペアで `; attribute-without-value` の attribute があると
-  // for-of 内で eq === -1 → continue に入る (line 199)。
+  // isExpiredSetCookie の for-of 内で eq === -1 → continue に入る (line 199)。
+  // 注意: line 192 の `eqValue === -1` は parseSetCookieName で先に filter されるため
+  // public API 経由では到達不可、 本 test 対象外 (defensive guard として retain)。
   it('T-NR-032: attribute pair without `=` (bare attribute) is ignored, cookie still stored', async () => {
     const parent: RemixNestedRouteDefinition = {
       id: 'routes/parent',
@@ -868,10 +869,12 @@ describe('setupRemixNestedRouteEnv — Set-Cookie edge case parsing (branch clos
     expect(env.cookies.get('auth')).toBe('token1');
   });
 
-  // splitSetCookieString の length === 0 早期 return (line 59) を触る。
-  // parent loader が Set-Cookie header を空文字列で返す edge (`set-cookie: ''`)、
-  // Node の Headers は空文字を保持するので combined = '' が発生し得る。
-  it('T-NR-033: empty Set-Cookie header is skipped without inserting a cookie', async () => {
+  // parent loader が Set-Cookie header に空文字 entry を含めて返した場合でも、 following
+  // cookie 側は正常に保存される (`, real=set; Path=/` として combined 化されて非空 arm を通る)。
+  // 注意: splitSetCookieString の `combined.length === 0` 早期 return (line 59) は
+  // readSetCookies が length > 0 で guard するため public API 経由で到達不可、 本 test
+  // 対象外 (defensive guard として retain)。
+  it('T-NR-033: empty Set-Cookie entry is skipped while following cookie survives', async () => {
     const parent: RemixNestedRouteDefinition = {
       id: 'routes/parent',
       loader: async () => new Response(null, {
