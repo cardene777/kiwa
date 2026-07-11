@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "test:e2e": "playwright test",
+    "test:e2e": "pnpm -F @kiwa-lab/dapp build && playwright test",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
