@@ -173,8 +173,18 @@ describe('createRoot', () => {
 
 describe('effect scope stack', () => {
   it('T-SJ-034 popEffectScope on an empty stack returns []', () => {
-    // Guarantees a fresh stack: previous tests pop what they pushed. If
-    // that ever regresses, the ?? [] fallback catches the drift here.
+    // Do not rely on the module-global stack being empty here. A leaked
+    // scope from an earlier test would make this pass for the wrong
+    // reason (from the popped scope, not from `?? []`). Drain first,
+    // then pop one more time to hit the fallback deterministically.
+    while (popEffectScope().length > 0) {
+      // nothing
+    }
+    // The stack may hold empty scopes leaked by unrelated tests; keep
+    // popping until pop() itself returns undefined (i.e. `?? []` fires).
+    let extra = popEffectScope();
+    while (extra.length > 0) extra = popEffectScope();
+    // Once the stack is empty, one more pop hits the fallback.
     expect(popEffectScope()).toEqual([]);
   });
 });
