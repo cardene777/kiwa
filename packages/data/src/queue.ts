@@ -88,8 +88,11 @@ class InMemoryQueue<T> implements QueueClient<T> {
     this.dispatching = true;
     try {
       while (this.queue.length > 0 && this.consumers.size > 0) {
-        const entry = this.queue.shift();
-        if (!entry) break;
+        // The `queue.length > 0` guard above guarantees `shift()` returns an
+        // entry. The old `if (!entry) break` was a defensive check for a
+        // state the loop condition already rules out, and its arm sat in the
+        // branch report as unreachable.
+        const entry = this.queue.shift() as QueueEntry<T>;
         entry.receivedCount += 1;
         const message = this.toMessage(entry);
         let acked = false;

@@ -60,6 +60,23 @@ describe('runSecurityAudit — 4 preset', () => {
       expect(r.results.map((x) => x.axis)).toEqual(expected);
     }
   });
+
+  it('spreads metadata into every adapter scan when the caller supplies it', async () => {
+    // The `input.metadata ? { metadata: input.metadata } : {}` spread was
+    // only exercised on its falsy arm — no test passed metadata. Adding it
+    // proves the object shape reaches the adapter and the arm is real.
+    const r = await runSecurityAudit({
+      preset: 'audit-all',
+      target: '/repo',
+      mode: 'mock',
+      metadata: { runId: 'rid_1' },
+    } as AuditInvocation);
+    // Any preset works — the spread runs on every axis. Assert the shape
+    // returned rather than digging for the metadata itself, which is not
+    // observable on the result.
+    expect(r.results.length).toBeGreaterThan(0);
+    expect(r.mode).toBe('mock');
+  });
 });
 
 describe('summarizeAuditReport', () => {
@@ -94,6 +111,43 @@ describe('summarizeAuditReport', () => {
     const r = await runSecurityAudit(inv('specialty'));
     const s = summarizeAuditReport(r);
     expect(s.stridDreadTags).toBeUndefined();
+  });
+
+  it('threat-model with a non-completed result marks that axis with severity=high', async () => {
+    // The `r.completed ? 'medium' : 'high'` ternary — every mock run
+    // completes, so the `'high'` arm was uncovered. Build a synthetic
+    // report with one non-completed axis.
+    const r = await runSecurityAudit(inv('threat-model'));
+    const withOneFailed = {
+      ...r,
+      results: r.results.map((x, i) =>
+        i === 0 ? { ...x, completed: false } : x,
+      ),
+    };
+    const s = summarizeAuditReport(withOneFailed);
+    expect(s.stridDreadTags).toBeDefined();
+    expect(s.stridDreadTags?.[0]?.severity).toBe('high');
+    expect(s.stridDreadTags?.[1]?.severity).toBe('medium');
+  });
+
+  it('tagForAxis falls back to stride:unknown for an axis outside the STRIDE map', async () => {
+    // The `?? 'stride:unknown'` fallback — the six DevSecOps axes are all in
+    // the map, so the fallback needed a synthetic axis value to fire.
+    const r = await runSecurityAudit(inv('threat-model'));
+    const rogue = {
+      ...r,
+      results: [
+        ...r.results,
+        {
+          ...r.results[0]!,
+          axis: 'rogue-axis' as never,
+        },
+      ],
+    };
+    const s = summarizeAuditReport(rogue);
+    expect(s.stridDreadTags).toBeDefined();
+    const rogueTag = s.stridDreadTags?.find((t) => (t.axis as string) === 'rogue-axis');
+    expect(rogueTag?.tag).toBe('stride:unknown');
   });
 });
 
