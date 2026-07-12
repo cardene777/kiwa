@@ -221,7 +221,7 @@ export function query(root: MockNode, selector: string, all: boolean): MockNode[
       return [candidates[0]!];
     }
   }
-  return all ? candidates : candidates.length > 0 ? [candidates[0]!] : [];
+  return all ? candidates : [];
 }
 
 function collectTree(root: MockNode): MockNode[] {
