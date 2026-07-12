@@ -22,6 +22,18 @@ export type ConnectionState =
   | 'reconnecting'
   | 'closed';
 
+export const CONNECTION_STATES: readonly ConnectionState[] = [
+  'disconnected',
+  'connecting',
+  'connected',
+  'reconnecting',
+  'closed',
+];
+
+export function isConnectionState(value: string): value is ConnectionState {
+  return CONNECTION_STATES.includes(value as ConnectionState);
+}
+
 /**
  * Presence event の種類。 実 provider (Supabase / Ably / Pusher) 全てで
  * sync / join / leave の 3 event 相当が存在する。

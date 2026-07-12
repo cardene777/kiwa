@@ -13,6 +13,12 @@
 /** Chat message role — 4 SDK 全てで共通。 */
 export type MessageRole = 'system' | 'user' | 'assistant' | 'tool';
 
+export const MESSAGE_ROLES: readonly MessageRole[] = ['system', 'user', 'assistant', 'tool'];
+
+export function isMessageRole(value: string): value is MessageRole {
+  return MESSAGE_ROLES.includes(value as MessageRole);
+}
+
 /**
  * Provider agnostic chat message。 tool_call / tool_result は
  * `toolCalls` / `toolCallId` field で表現する。
