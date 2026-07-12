@@ -185,6 +185,71 @@ describe('isHcResponse', () => {
     expect(clientAsSymbolProbe[Symbol.for('kiwa.hono.rpc.definitely-not-the-brand')]).toBeUndefined();
   });
 
+  it('T-H-134 client proxy returns undefined for `then` so Promise-detection short-circuits', async () => {
+    // Closes rpc.js:57 — `if (prop === 'then') return undefined;`. Awaiting a
+    // proxy would otherwise unwrap it as a thenable and burn a request; the
+    // short-circuit guards against that.
+    const app = createHonoApp();
+    app.get('/x', (c) => c.text('y'));
+    const client = createRpcClient(app);
+    // Reach into the terminal-less client node and probe `.then` — TS types
+    // pretend it does not exist so we cast to a permissive shape.
+    const probe = client as unknown as { then?: unknown; users: { then?: unknown } };
+    expect(probe.then).toBeUndefined();
+    expect(probe.users.then).toBeUndefined();
+    // Sanity: awaiting the client (used to be an anti-pattern) yields the
+    // proxy itself — because `then` is undefined, Promise-detection short-
+    // circuits and the value is returned as-is.
+    const awaited = await (client as unknown as Promise<unknown>);
+    expect(awaited).toBe(client);
+  });
+
+  it('T-H-136 invoking the proxy node as a function returns the noop target', () => {
+    // Closes rpc.js:49 — the `function noop() {}` inner target that the
+    // Proxy wraps. Calling the proxy directly (rare in practice, but Hono
+    // hc supports `client(...)` as a route-typed builder) executes the
+    // wrapped no-op so the runtime does not error.
+    const app = createHonoApp();
+    app.get('/x', (c) => c.text('y'));
+    const client = createRpcClient(app);
+    // The proxy target is `function noop() {}`; calling the proxy directly
+    // triggers the target invocation and yields `undefined`.
+    const result = (client as unknown as () => unknown)();
+    expect(result).toBeUndefined();
+  });
+
+  it('T-H-135 rpc terminal forwards env + executionCtx into invokeRoute options', async () => {
+    // Closes rpc.js:89-90 — `env !== undefined ? { env } : {}` and
+    // `executionCtx !== undefined ? { executionCtx } : {}` in the terminal
+    // options builder. The receiving handler observes both fields.
+    const app = createHonoApp<{ TAG: string }>();
+    const captured: { tag?: string; waitUntilCalled: boolean } = { waitUntilCalled: false };
+    app.get('/tag', (c) => {
+      captured.tag = c.env.TAG;
+      c.executionCtx?.waitUntil(Promise.resolve());
+      return c.json({ tag: c.env.TAG });
+    });
+    const executionCtx = {
+      waitUntil: () => {
+        captured.waitUntilCalled = true;
+      },
+      passThroughOnException: () => {
+        /* no-op */
+      },
+    };
+    const client = createRpcClient<{ TAG: string }>(app) as {
+      tag: {
+        $get: (o: { env: { TAG: string }; executionCtx: typeof executionCtx }) => Promise<{
+          json: () => Promise<{ tag: string }>;
+        }>;
+      };
+    };
+    const res = await client.tag.$get({ env: { TAG: 'x' }, executionCtx });
+    expect(await res.json()).toEqual({ tag: 'x' });
+    expect(captured.tag).toBe('x');
+    expect(captured.waitUntilCalled).toBe(true);
+  });
+
   it('T-H-133 hc response body helpers return the fallback when the response has bodyKind neither json nor text', async () => {
     // Closes rpc.js:120 (json() → undefined) and rpc.js:127 (text() → '') where the
     // response bodyKind is anything other than json/text (createContext() populates

@@ -385,4 +385,117 @@ describe('app.request', () => {
     const spec = await app.request('/h2', { headers: hdrs });
     expect(spec.body).toBe('zebra');
   });
+
+  it('T-H-074 request(init-object) — non-string input skips url arg and routes to /', async () => {
+    // Closes app.js:299-300 — `typeof input === 'string' ? … : input` /
+    // `typeof input === 'string' ? input : '/'`. Passing an init-object as the
+    // first arg falls into the "input is not a string" arm on both lines.
+    const app = createHonoApp();
+    app.get('/', (c) => c.text('root'));
+    // The overload types expect a URL; cast to the raw shape so the runtime
+    // arms are exercised without a compile error.
+    const spec = await (app.request as unknown as (init: { method?: string }) => Promise<{ body: unknown }>)({
+      method: 'GET',
+    });
+    expect(spec.body).toBe('root');
+  });
+
+  it('T-H-075 request(url, init, env, executionCtx) forwards env + executionCtx through app.request', async () => {
+    // Closes app.js:277-278 — `env !== undefined ? { env } : {}` and
+    // `executionCtx !== undefined ? { executionCtx } : {}` on the request()
+    // options builder inside createHonoApp().
+    const app = createHonoApp<{ TAG: string }>();
+    const captured: { env?: { TAG: string }; waitUntilCalled: boolean } = { waitUntilCalled: false };
+    app.get('/env-probe', (c) => {
+      captured.env = c.env;
+      c.executionCtx?.waitUntil(Promise.resolve());
+      return c.json({ tag: c.env.TAG });
+    });
+    const executionCtx = {
+      waitUntil: () => {
+        captured.waitUntilCalled = true;
+      },
+      passThroughOnException: () => {
+        /* no-op */
+      },
+    };
+    const spec = await app.request('/env-probe', undefined, { TAG: 'v1' }, executionCtx);
+    expect(spec.body).toEqual({ tag: 'v1' });
+    expect(captured.env?.TAG).toBe('v1');
+    expect(captured.waitUntilCalled).toBe(true);
+  });
+});
+
+describe('route composition edge cases', () => {
+  it('T-H-035 route(prefix-ending-in-slash, sub) trims trailing slash from prefix', async () => {
+    // Closes app.js:293 — `prefix.endsWith('/') ? prefix.slice(0, -1) : prefix`.
+    const sub = createHonoApp();
+    sub.get('/hello', (c) => c.text('hi'));
+    const app = createHonoApp();
+    app.route('/api/', sub);
+    const spec = await app.request('/api/hello');
+    expect(spec.status).toBe(200);
+    expect(spec.body).toBe('hi');
+  });
+
+  it('T-H-036 route(prefix, sub-with-slashless-pattern) prepends slash to sub pattern', async () => {
+    // Closes app.js:294 — `sub.startsWith('/') ? sub : `/${sub}``. A route
+    // registered with a pattern that lacks the leading `/` is joined with an
+    // interposed slash.
+    const sub = createHonoApp();
+    sub.get('bare', (c) => c.text('bare-hit'));
+    const app = createHonoApp();
+    app.route('/api', sub);
+    const spec = await app.request('/api/bare');
+    expect(spec.status).toBe(200);
+    expect(spec.body).toBe('bare-hit');
+  });
+});
+
+describe('parseQuery + parsePath edge cases', () => {
+  it('T-H-046 buildRequest skips empty `&&` pairs in the query string', () => {
+    // Closes app.js:79 — `if (pair.length === 0) continue;` when the query
+    // contains an empty segment (leading `?&` or `&&`).
+    const req = buildRequest({ method: 'GET', url: '/x?&a=1&&b=2&' });
+    expect(req.queryValue('a')).toBe('1');
+    expect(req.queryValue('b')).toBe('2');
+  });
+
+  it('T-H-047 buildRequest normalizes an absolute URL with no path to `/`', () => {
+    // Closes app.js:96 — `path = rest.length === 0 ? '/' : rest;` when the
+    // absolute-URL prefix strip leaves nothing behind.
+    const req = buildRequest({ method: 'GET', url: 'http://example.com' });
+    expect(req.path).toBe('/');
+  });
+});
+
+describe('createContext extras', () => {
+  it('T-H-055 c.req.json() returns undefined when the raw body is an empty string', async () => {
+    // Closes app.js:123 — `if (rawBody === '') return undefined;` on the
+    // request json() helper.
+    const req = buildRequest({ method: 'POST', url: '/z' });
+    expect(await req.json()).toBeUndefined();
+  });
+
+  it('T-H-056 c.text(body, status) overrides both body and status', () => {
+    // Closes app.js:187 — `if (status !== undefined) response.status = status;`
+    // on the text() context helper (mirrors c.json(body, status) branch).
+    const req = buildRequest({ method: 'GET', url: '/' });
+    const c = createContext({ req });
+    c.text('gone', 410);
+    expect(c.response.body).toBe('gone');
+    expect(c.response.status).toBe(410);
+  });
+});
+
+describe('matchRoute defensive arms', () => {
+  it('T-H-065 matchRoute skips a paramNames entry that is undefined', () => {
+    // Closes app.js:64 — `if (name === undefined) continue;` on the
+    // paramNames iteration. Real compileRoute never produces undefined entries
+    // (it push()es concrete strings), but the runtime guard is defensive
+    // against a caller-crafted matcher that supplies a sparse paramNames.
+    const matcher = { regex: /^\/(.+)$/, paramNames: [undefined as unknown as string] } as unknown as ReturnType<typeof compileRoute>;
+    const params = matchRoute(matcher, '/hello');
+    expect(params).toEqual({});
+  });
 });
