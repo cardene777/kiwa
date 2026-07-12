@@ -130,18 +130,37 @@ describe('semantics: session-lifecycle-orchestrator state × event guards', () =
 describe('semantics: step-up-mfa state guards', () => {
   const { startStepUp, satisfyAal2, satisfyAal3 } = semantics;
 
-  it('satisfyAal2 throws when session is idle (not escalation-requested)', () => {
+  it('satisfyAal2 throws when session is idle (not escalation-requested) and preserves session state', () => {
     const s = startStepUp({ platform: 'chromium', userId: 'u', currentAal: 'AAL1' });
+    const snapshot = structuredClone(s);
     expect(() => satisfyAal2(s, { factor: 'sms', nowMs: 0 })).toThrow(
       /expected escalation-requested/,
     );
+    // HIGH-RISK auth: wrong-state throw must not mutate session (state / AAL /
+    // trust cache / history all preserved so a retry after the correct
+    // requestEscalation() call keeps the security invariant intact).
+    expect(s.state).toBe(snapshot.state);
+    expect(s.currentAal).toBe(snapshot.currentAal);
+    expect(s.requiredAal).toBe(snapshot.requiredAal);
+    expect(s.trustExpiresAtMs).toBe(snapshot.trustExpiresAtMs);
+    expect(s.history).toEqual(snapshot.history);
+    expect(s).toEqual(snapshot);
   });
 
-  it('satisfyAal3 throws when session is idle (not escalation-requested)', () => {
+  it('satisfyAal3 throws when session is idle (not escalation-requested) and preserves session state', () => {
     const s = startStepUp({ platform: 'webkit', userId: 'u', currentAal: 'AAL1' });
+    const snapshot = structuredClone(s);
     expect(() => satisfyAal3(s, { factor: 'webauthn', nowMs: 0 })).toThrow(
       /expected escalation-requested/,
     );
+    // HIGH-RISK auth: wrong-state throw must not mutate session (state / AAL /
+    // trust cache / history all preserved).
+    expect(s.state).toBe(snapshot.state);
+    expect(s.currentAal).toBe(snapshot.currentAal);
+    expect(s.requiredAal).toBe(snapshot.requiredAal);
+    expect(s.trustExpiresAtMs).toBe(snapshot.trustExpiresAtMs);
+    expect(s.history).toEqual(snapshot.history);
+    expect(s).toEqual(snapshot);
   });
 });
 
@@ -152,16 +171,31 @@ describe('semantics: step-up-mfa state guards', () => {
 describe('semantics: conditional-ui state guards', () => {
   const { startConditionalUi, triggerFallback, markTimeout } = semantics;
 
-  it('triggerFallback throws when state is idle (not hint-shown)', () => {
+  it('triggerFallback throws when state is idle (not hint-shown) and preserves session state', () => {
     const s = startConditionalUi({ platform: 'chromium', formId: 'login' });
+    const snapshot = structuredClone(s);
     expect(() => triggerFallback(s, { reason: 'no-cred', elapsedMs: 100 })).toThrow(
       /expected hint-shown/,
     );
+    // HIGH-RISK auth: wrong-state throw must not partially apply — elapsedMs
+    // must NOT flip to the requested value, state must NOT flip to
+    // fallback-triggered, and no history entry may leak in.
+    expect(s.state).toBe(snapshot.state);
+    expect(s.elapsedMs).toBe(snapshot.elapsedMs);
+    expect(s.history).toEqual(snapshot.history);
+    expect(s).toEqual(snapshot);
   });
 
-  it('markTimeout throws when state is idle (not hint-shown)', () => {
+  it('markTimeout throws when state is idle (not hint-shown) and preserves session state', () => {
     const s = startConditionalUi({ platform: 'firefox', formId: 'login', timeoutMs: 10 });
+    const snapshot = structuredClone(s);
     expect(() => markTimeout(s, { nowMs: 1000 })).toThrow(/expected hint-shown/);
+    // HIGH-RISK auth: wrong-state throw must not partially apply — elapsedMs
+    // and state must not update, no history entry may leak in.
+    expect(s.state).toBe(snapshot.state);
+    expect(s.elapsedMs).toBe(snapshot.elapsedMs);
+    expect(s.history).toEqual(snapshot.history);
+    expect(s).toEqual(snapshot);
   });
 });
 
@@ -172,24 +206,40 @@ describe('semantics: conditional-ui state guards', () => {
 describe('semantics: device-bound-passkey state guards', () => {
   const { startDevicePasskey, verifySyncFabric, migrateCredential } = semantics;
 
-  it('verifySyncFabric throws when session is idle (not device-bound)', () => {
+  it('verifySyncFabric throws when session is idle (not device-bound) and preserves session state', () => {
     const s = startDevicePasskey({
       platform: 'chromium',
       credentialId: 'c',
       boundDeviceId: 'd',
       syncFabric: 'chrome',
     });
+    const snapshot = structuredClone(s);
     expect(() => verifySyncFabric(s)).toThrow(/expected device-bound/);
+    // HIGH-RISK auth: wrong-state throw must not flip state to sync-verified
+    // or append a history entry — a passkey must not appear "sync-verified"
+    // without having been device-bound first.
+    expect(s.state).toBe(snapshot.state);
+    expect(s.history).toEqual(snapshot.history);
+    expect(s).toEqual(snapshot);
   });
 
-  it('migrateCredential throws when session is idle (not device-bound or sync-verified)', () => {
+  it('migrateCredential throws when session is idle (not device-bound or sync-verified) and preserves session state', () => {
     const s = startDevicePasskey({
       platform: 'webkit',
       credentialId: 'c',
       boundDeviceId: 'd',
       syncFabric: 'icloud',
     });
+    const snapshot = structuredClone(s);
     expect(() => migrateCredential(s, { toDeviceId: 'd2' })).toThrow(/cannot migrate/);
+    // HIGH-RISK auth: wrong-state throw must not partially migrate — the bound
+    // device ID must stay pinned to the original device, state stays idle,
+    // history stays empty. Otherwise an unbound credential could be migrated
+    // to an attacker's device.
+    expect(s.state).toBe(snapshot.state);
+    expect(s.boundDeviceId).toBe(snapshot.boundDeviceId);
+    expect(s.history).toEqual(snapshot.history);
+    expect(s).toEqual(snapshot);
   });
 });
 
@@ -208,18 +258,37 @@ describe('semantics: risk-based-auth state guards', () => {
     behavioralScore: 10,
   };
 
-  it('evaluateScore throws when state is not idle', () => {
+  it('evaluateScore throws when state is not idle and preserves session state', () => {
     const s = startRiskEval({ platform: 'chromium', userId: 'u' });
     evaluateScore(s, { signals });
+    // Snapshot AFTER the first (valid) evaluateScore — state=evaluated,
+    // score=50, one history entry — so the second call's throw must not
+    // clobber those.
+    const snapshot = structuredClone(s);
     expect(() => evaluateScore(s, { signals })).toThrow(/expected idle/);
+    // HIGH-RISK auth: a wrong-state re-evaluation must not overwrite the
+    // already-evaluated score / state / history — otherwise an attacker could
+    // trigger a rescore with benign signals to erase a high-risk verdict.
+    expect(s.state).toBe(snapshot.state);
+    expect(s.score).toBe(snapshot.score);
+    expect(s.history).toEqual(snapshot.history);
+    expect(s).toEqual(snapshot);
   });
 
-  it('injectChallenge throws when state is idle (not evaluated)', () => {
+  it('injectChallenge throws when state is idle (not evaluated) and preserves session state', () => {
     const s = startRiskEval({ platform: 'firefox', userId: 'u' });
+    const snapshot = structuredClone(s);
     expect(() => injectChallenge(s, { challenge: 'sms' })).toThrow(/expected evaluated/);
+    // HIGH-RISK auth: wrong-state throw must not flip state to challenged or
+    // record a history entry — a challenge must never be injected without a
+    // preceding score evaluation.
+    expect(s.state).toBe(snapshot.state);
+    expect(s.score).toBe(snapshot.score);
+    expect(s.history).toEqual(snapshot.history);
+    expect(s).toEqual(snapshot);
   });
 
-  it('injectChallenge throws when score is below allowThreshold', () => {
+  it('injectChallenge throws when score is below allowThreshold and preserves session state', () => {
     const s = startRiskEval({
       platform: 'chromium',
       userId: 'u',
@@ -235,10 +304,20 @@ describe('semantics: risk-based-auth state guards', () => {
         behavioralScore: 5,
       },
     });
+    // Snapshot the evaluated session (state=evaluated, score=25) so the
+    // out-of-range throw cannot promote it to challenged.
+    const snapshot = structuredClone(s);
     expect(() => injectChallenge(s, { challenge: 'sms' })).toThrow(/not in challenge range/);
+    // HIGH-RISK auth: below-threshold means "allow silently"; a stray
+    // challenged state here would surface a phishable challenge to a
+    // low-risk user.
+    expect(s.state).toBe(snapshot.state);
+    expect(s.score).toBe(snapshot.score);
+    expect(s.history).toEqual(snapshot.history);
+    expect(s).toEqual(snapshot);
   });
 
-  it('injectChallenge throws when score is at/above blockThreshold', () => {
+  it('injectChallenge throws when score is at/above blockThreshold and preserves session state', () => {
     const s = startRiskEval({
       platform: 'chromium',
       userId: 'u',
@@ -254,12 +333,30 @@ describe('semantics: risk-based-auth state guards', () => {
         behavioralScore: 20,
       },
     });
+    // Snapshot the evaluated block-range session (state=evaluated, score=100)
+    // so the throw cannot demote it to challenged.
+    const snapshot = structuredClone(s);
     expect(() => injectChallenge(s, { challenge: 'sms' })).toThrow(/not in challenge range/);
+    // HIGH-RISK auth: at/above-block means "hard block"; a stray challenged
+    // state here would let an attacker satisfy a challenge and bypass the
+    // block verdict.
+    expect(s.state).toBe(snapshot.state);
+    expect(s.score).toBe(snapshot.score);
+    expect(s.history).toEqual(snapshot.history);
+    expect(s).toEqual(snapshot);
   });
 
-  it('applyPolicy throws when state is idle', () => {
+  it('applyPolicy throws when state is idle and preserves session state', () => {
     const s = startRiskEval({ platform: 'webkit', userId: 'u' });
+    const snapshot = structuredClone(s);
     expect(() => applyPolicy(s)).toThrow(/cannot apply policy/);
+    // HIGH-RISK auth: applyPolicy from idle must not flip state to allowed
+    // (score=0 would otherwise wrongly satisfy the block-threshold check and
+    // silently allow the request).
+    expect(s.state).toBe(snapshot.state);
+    expect(s.score).toBe(snapshot.score);
+    expect(s.history).toEqual(snapshot.history);
+    expect(s).toEqual(snapshot);
   });
 
   it('applyPolicy blocks when score >= blockThreshold', () => {
@@ -914,6 +1011,12 @@ describe('webauthn: credentialCreation residentKey discouraged fallback', () => 
       challenge: 'c-create',
     });
     expect(response.credentialId).toMatch(/^credential-\d+$/);
+    // The Uint8Array user.id must round-trip through base64url encoding into
+    // the stored credential's userHandle (WebAuthn L3 §5.2). Bytes
+    // [0x01, 0x02, 0x03, 0x04] base64url-encode to "AQIDBA" (no padding).
+    // Without this assertion the test only proved the credentialId shape and
+    // silently missed a broken encoder branch.
+    expect(env.getCredential(response.credentialId)?.userHandle).toBe('AQIDBA');
   });
 });
 
