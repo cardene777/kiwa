@@ -4,6 +4,7 @@ export type {
   PaymentWebhookEvent,
   WebhookVerifyResult,
 } from './types.js';
+export { PAYMENT_PROVIDERS } from './types.js';
 export { PaymentEngine, type EngineConfig } from './engine.js';
 export { createStripeMock } from './stripe.js';
 export { createPaddleMock } from './paddle.js';

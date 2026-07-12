@@ -7,6 +7,15 @@
 export type PaymentProvider = 'stripe' | 'paddle' | 'lemonsqueezy';
 
 /**
+ * Runtime tuple of every payment provider, kept in sync with the
+ * `PaymentProvider` union above via `satisfies`. Downstream consumers use
+ * this to iterate provider ids at runtime (release-gate axis dispatch,
+ * fixture registration) without duplicating the string literals or
+ * reaching for reflection.
+ */
+export const PAYMENT_PROVIDERS = ['stripe', 'paddle', 'lemonsqueezy'] as const satisfies readonly PaymentProvider[];
+
+/**
  * A canonical webhook event shape shared across the three providers. Real
  * providers emit slightly different payloads (Stripe uses `data.object`,
  * Paddle uses `data.attributes`, Lemon Squeezy nests under `data.attributes`
