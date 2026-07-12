@@ -11,6 +11,12 @@ import type { AxisStep, DesktopAxis, DesktopTarget, NeutralEventName } from '../
 
 export type AdapterMode = 'mock' | 'real';
 
+export const ADAPTER_MODES: readonly AdapterMode[] = ['mock', 'real'];
+
+export function isAdapterMode(value: string): value is AdapterMode {
+  return ADAPTER_MODES.includes(value as AdapterMode);
+}
+
 export interface AdapterInvocation {
   scanId: string;
   target: DesktopTarget;
