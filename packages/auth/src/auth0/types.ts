@@ -28,6 +28,19 @@ export type Auth0Connection =
   | 'sms'
   | 'email';
 
+export const AUTH0_CONNECTIONS: readonly Auth0Connection[] = [
+  'Username-Password-Authentication',
+  'google-oauth2',
+  'github',
+  'auth0',
+  'sms',
+  'email',
+];
+
+export function isAuth0Connection(value: string): value is Auth0Connection {
+  return AUTH0_CONNECTIONS.includes(value as Auth0Connection);
+}
+
 export interface Auth0Identity {
   /** Provider name — same taxonomy as the connection. */
   provider: Auth0Connection;

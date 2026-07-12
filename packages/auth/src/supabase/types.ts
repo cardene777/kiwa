@@ -26,6 +26,20 @@ export type SupabaseIdentityProvider =
   | 'facebook'
   | 'twitter';
 
+export const SUPABASE_IDENTITY_PROVIDERS: readonly SupabaseIdentityProvider[] = [
+  'email',
+  'google',
+  'github',
+  'apple',
+  'azure',
+  'facebook',
+  'twitter',
+];
+
+export function isSupabaseIdentityProvider(value: string): value is SupabaseIdentityProvider {
+  return SUPABASE_IDENTITY_PROVIDERS.includes(value as SupabaseIdentityProvider);
+}
+
 export interface SupabaseIdentity {
   id: string;
   userId: string;

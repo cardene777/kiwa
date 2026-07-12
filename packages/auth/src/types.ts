@@ -2,6 +2,12 @@ import type { TestEnvBase } from '@kiwa-lab/core';
 
 export type SessionStrategy = 'jwt' | 'database';
 
+export const SESSION_STRATEGIES: readonly SessionStrategy[] = ['jwt', 'database'];
+
+export function isSessionStrategy(value: string): value is SessionStrategy {
+  return SESSION_STRATEGIES.includes(value as SessionStrategy);
+}
+
 export type ProviderKind = 'google' | 'github' | 'email';
 
 export interface ProviderMock {

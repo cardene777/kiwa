@@ -9,6 +9,12 @@ import type { TestEnvBase } from '@kiwa-lab/core';
  */
 export type OAuth21GrantType = 'authorization_code' | 'refresh_token';
 
+export const OAUTH21_GRANT_TYPES: readonly OAuth21GrantType[] = ['authorization_code', 'refresh_token'];
+
+export function isOAuth21GrantType(value: string): value is OAuth21GrantType {
+  return OAUTH21_GRANT_TYPES.includes(value as OAuth21GrantType);
+}
+
 /**
  * PKCE code challenge method. RFC 9700 §2.1.1 mandates `S256` for OAuth 2.1
  * and forbids `plain` — every parse path in the mock rejects `plain`

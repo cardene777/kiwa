@@ -19,6 +19,12 @@ import type { TestEnvBase } from '@kiwa-lab/core';
  */
 export type RlsCommand = 'select' | 'insert' | 'update' | 'delete' | 'all';
 
+export const RLS_COMMANDS: readonly RlsCommand[] = ['select', 'insert', 'update', 'delete', 'all'];
+
+export function isRlsCommand(value: string): value is RlsCommand {
+  return RLS_COMMANDS.includes(value as RlsCommand);
+}
+
 export interface RlsPolicyContext {
   /** Subject's role — `authenticated` / `anon` / `service_role`. */
   role: 'authenticated' | 'anon' | 'service_role';

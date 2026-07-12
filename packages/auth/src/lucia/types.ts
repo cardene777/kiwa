@@ -8,6 +8,12 @@ import type { TestEnvBase } from '@kiwa-lab/core';
  */
 export type LuciaDatabaseKind = 'sqlite' | 'postgresql';
 
+export const LUCIA_DATABASE_KINDS: readonly LuciaDatabaseKind[] = ['sqlite', 'postgresql'];
+
+export function isLuciaDatabaseKind(value: string): value is LuciaDatabaseKind {
+  return LUCIA_DATABASE_KINDS.includes(value as LuciaDatabaseKind);
+}
+
 export type LuciaProviderKind = 'google' | 'github';
 
 export interface LuciaUser {

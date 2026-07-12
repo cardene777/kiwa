@@ -101,6 +101,12 @@ export interface ClerkSessionClaims {
  */
 export type ClerkOrganizationRole = 'owner' | 'admin' | 'member';
 
+export const CLERK_ORGANIZATION_ROLES: readonly ClerkOrganizationRole[] = ['owner', 'admin', 'member'];
+
+export function isClerkOrganizationRole(value: string): value is ClerkOrganizationRole {
+  return CLERK_ORGANIZATION_ROLES.includes(value as ClerkOrganizationRole);
+}
+
 export interface ClerkOrganization {
   id: string;
   name: string;
