@@ -104,6 +104,89 @@ describe('mockKVNamespace', () => {
     const listed = await kv.list({ limit: 3 });
     expect(listed.keys.length).toBe(3);
   });
+
+  it('T-H-210 getWithMetadata expires stale entries and lazy-deletes them', async () => {
+    // Closes workers.js:54-57 — `if (isExpired(entry)) { store.delete(key);
+    // return { value: null, metadata: null }; }` inside getWithMetadata().
+    const kv = mockKVNamespace();
+    const originalNow = Date.now;
+    let now = 3_000_000;
+    Date.now = () => now;
+    try {
+      await kv.put('gone', 'v', { expirationTtl: 30, metadata: { tag: 't' } });
+      // sanity — still visible before expiry
+      const before = await kv.getWithMetadata('gone');
+      expect(before.value).toBe('v');
+      // advance past TTL
+      now += 61 * 1000;
+      const after = await kv.getWithMetadata('gone');
+      expect(after.value).toBeNull();
+      expect(after.metadata).toBeNull();
+      // subsequent snapshot no longer contains the stale key (proves delete ran)
+      const snap = kv.__snapshot();
+      expect(Object.prototype.hasOwnProperty.call(snap, 'gone')).toBe(false);
+    } finally {
+      Date.now = originalNow;
+    }
+  });
+
+  it('T-H-211 getWithMetadata returns null metadata when the entry was stored without any', async () => {
+    // Closes workers.js:58 — `entry.metadata ?? null` on the fallback arm for
+    // an entry saved without a metadata option.
+    const kv = mockKVNamespace();
+    await kv.put('plain', 'v'); // no metadata option → entry has no `metadata` field
+    const { value, metadata } = await kv.getWithMetadata('plain');
+    expect(value).toBe('v');
+    expect(metadata).toBeNull();
+  });
+
+  it('T-H-212 list() skips + deletes expired entries during iteration', async () => {
+    // Closes workers.js:84-87 — the `if (isExpired(entry)) { store.delete(name);
+    // continue; }` arm on the list() iterator. Also indirectly touches the
+    // truthy arms of workers.js:90-91 by including a live entry that carries
+    // both metadata and an expiresAt so the projection maps them into the result.
+    const kv = mockKVNamespace<{ tag: string }>();
+    const originalNow = Date.now;
+    let now = 4_000_000;
+    Date.now = () => now;
+    try {
+      await kv.put('stale:a', 'x', { expirationTtl: 10 });
+      await kv.put('stale:b', 'y', { expirationTtl: 10, metadata: { tag: 't' } });
+      await kv.put('fresh:c', 'z', { expirationTtl: 3600, metadata: { tag: 'kept' } });
+      now += 20 * 1000; // stale entries now past their TTL
+      const listed = await kv.list({ prefix: 'stale:' });
+      expect(listed.keys).toEqual([]);
+      const kept = await kv.list({ prefix: 'fresh:' });
+      expect(kept.keys.length).toBe(1);
+      expect(kept.keys[0]?.name).toBe('fresh:c');
+      expect(kept.keys[0]?.metadata).toEqual({ tag: 'kept' });
+      expect(typeof kept.keys[0]?.expiration).toBe('number');
+      // Stale entries were physically removed by the iterator.
+      const snap = kv.__snapshot();
+      expect(Object.prototype.hasOwnProperty.call(snap, 'stale:a')).toBe(false);
+      expect(Object.prototype.hasOwnProperty.call(snap, 'stale:b')).toBe(false);
+    } finally {
+      Date.now = originalNow;
+    }
+  });
+
+  it('T-H-213 __snapshot skips + deletes expired entries during iteration', async () => {
+    // Closes workers.js:101-104 — the `if (isExpired(v)) { store.delete(k);
+    // continue; }` arm on the __snapshot() reducer.
+    const kv = mockKVNamespace();
+    const originalNow = Date.now;
+    let now = 5_000_000;
+    Date.now = () => now;
+    try {
+      await kv.put('keep', 'v');
+      await kv.put('drop', 'v', { expirationTtl: 5 });
+      now += 60 * 1000;
+      const snap = kv.__snapshot();
+      expect(Object.keys(snap)).toEqual(['keep']);
+    } finally {
+      Date.now = originalNow;
+    }
+  });
 });
 
 describe('mockD1Database', () => {
@@ -167,6 +250,41 @@ describe('mockD1Database', () => {
     const { success } = await d1.exec('PRAGMA foreign_keys = ON');
     expect(success).toBe(true);
   });
+
+  it('T-H-228 first() falls back to [] when no canned response was registered', async () => {
+    // Closes workers.js:128 — `responses.get(query) ?? []` on the fallback arm
+    // (no __setResponse call → responses.get() returns undefined).
+    const d1 = mockD1Database();
+    const row = await d1.prepare('SELECT * FROM nowhere').first();
+    expect(row).toBeNull();
+  });
+
+  it('T-H-229 first(col) returns null when the row lacks that column', async () => {
+    // Closes workers.js:133 — `row[colName] ?? null` fallback arm when the
+    // canned row does not include the requested column.
+    const d1 = mockD1Database();
+    d1.__setResponse('SELECT * FROM sparse', [{ id: 1 } as Record<string, unknown>]);
+    const missing = await d1.prepare('SELECT * FROM sparse').first<string>('name');
+    expect(missing).toBeNull();
+  });
+
+  it('T-H-230 all() falls back to [] when no canned response was registered', async () => {
+    // Closes workers.js:138 — `responses.get(query) ?? []` on the fallback arm
+    // for all().
+    const d1 = mockD1Database();
+    const { results, success } = await d1.prepare('SELECT * FROM nowhere2').all();
+    expect(results).toEqual([]);
+    expect(success).toBe(true);
+  });
+
+  it('T-H-231 exec() falls back to [] when no canned response was registered', async () => {
+    // Closes workers.js:172 — `responses.get(query) ?? []` on the fallback arm
+    // for exec().
+    const d1 = mockD1Database();
+    const { results, success } = await d1.exec('PRAGMA journal_mode = WAL');
+    expect(results).toEqual([]);
+    expect(success).toBe(true);
+  });
 });
 
 describe('mockR2Bucket', () => {
@@ -224,6 +342,17 @@ describe('mockR2Bucket', () => {
     await r2.put('b', '2');
     const snap = r2.__snapshot();
     expect(Object.keys(snap).sort()).toEqual(['a', 'b']);
+  });
+
+  it('T-H-247 list() with no prefix defaults to matching everything + respects limit', async () => {
+    // Closes workers.js:216 — `options.prefix ?? ''` fallback arm when list()
+    // is called with no prefix option — and workers.js:224 — the
+    // `objects.length >= limit` break arm inside the iterator.
+    const r2 = mockR2Bucket();
+    for (let i = 0; i < 4; i += 1) await r2.put(`k${i}`, `v${i}`);
+    const { objects, truncated } = await r2.list({ limit: 2 });
+    expect(objects.length).toBe(2);
+    expect(truncated).toBe(true);
   });
 });
 
