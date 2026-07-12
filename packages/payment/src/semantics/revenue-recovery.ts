@@ -110,6 +110,7 @@ export async function advanceCascade(
     throw new Error('advanceCascade: cascade exhausted');
   }
   const channel = session.config.cascade[session.cascadeStepIndex];
+  /* c8 ignore next 3 -- unreachable: cascadeStepIndex was bounds-checked above */
   if (channel === undefined) {
     throw new Error('advanceCascade: cascade step index out of range');
   }

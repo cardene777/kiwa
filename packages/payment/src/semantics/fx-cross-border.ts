@@ -158,6 +158,7 @@ export async function completeSettlement(
       `completeSettlement: session is ${session.state}, must be settlement-initiated`,
     );
   }
+  /* c8 ignore next 3 -- unreachable: state=settlement-initiated implies quote was locked in initiateSettlement */
   if (!session.quote) {
     throw new Error('completeSettlement: no rate locked');
   }
