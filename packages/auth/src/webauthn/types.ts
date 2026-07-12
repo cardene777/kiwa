@@ -9,6 +9,18 @@ import type { TestEnvBase } from '@kiwa-lab/core';
  */
 export type WebAuthnTransport = 'internal' | 'usb' | 'nfc' | 'ble' | 'hybrid';
 
+export const WEBAUTHN_TRANSPORTS: readonly WebAuthnTransport[] = [
+  'internal',
+  'usb',
+  'nfc',
+  'ble',
+  'hybrid',
+];
+
+export function isWebAuthnTransport(value: string): value is WebAuthnTransport {
+  return WEBAUTHN_TRANSPORTS.includes(value as WebAuthnTransport);
+}
+
 /**
  * `platform` — authenticator is bound to the device (Touch ID, Windows Hello).
  * `cross-platform` — authenticator is a roaming key (YubiKey, phone via caBLE).

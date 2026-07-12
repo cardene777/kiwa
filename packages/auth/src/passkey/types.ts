@@ -22,6 +22,15 @@ import type {
  */
 export type SyncFabricVendor = 'icloud-keychain' | 'google-password-manager';
 
+export const SYNC_FABRIC_VENDORS: readonly SyncFabricVendor[] = [
+  'icloud-keychain',
+  'google-password-manager',
+];
+
+export function isSyncFabricVendor(value: string): value is SyncFabricVendor {
+  return SYNC_FABRIC_VENDORS.includes(value as SyncFabricVendor);
+}
+
 /**
  * Platform authenticator biometric modality. The mock does not distinguish the
  * biometric backend at the wire level — every modality resolves to UV=true —

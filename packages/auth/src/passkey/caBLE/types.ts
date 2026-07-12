@@ -16,6 +16,18 @@ export type CaBLEStep =
   | 'credential-migration'
   | 'signature-roundtrip';
 
+export const CABLE_STEPS: readonly CaBLEStep[] = [
+  'qr-code',
+  'ble-handshake',
+  'websocket-tunnel',
+  'credential-migration',
+  'signature-roundtrip',
+];
+
+export function isCaBLEStep(value: string): value is CaBLEStep {
+  return CABLE_STEPS.includes(value as CaBLEStep);
+}
+
 /**
  * QR code payload the initiator (laptop) prints for the phone to scan.
  * Real caBLE uses a base32-encoded EC public key + tunnel server hint +

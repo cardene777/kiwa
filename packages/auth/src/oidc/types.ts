@@ -315,6 +315,18 @@ export type TrustChainReasonCode =
   | 'expired_leaf'
   | 'anchor_mismatch';
 
+export const TRUST_CHAIN_REASON_CODES: readonly TrustChainReasonCode[] = [
+  'broken_link',
+  'cycle',
+  'expired_intermediate',
+  'expired_leaf',
+  'anchor_mismatch',
+];
+
+export function isTrustChainReasonCode(value: string): value is TrustChainReasonCode {
+  return TRUST_CHAIN_REASON_CODES.includes(value as TrustChainReasonCode);
+}
+
 /**
  * Trust chain returned by `resolveTrustChain`. The chain is ordered from the
  * leaf (index 0) to the trust anchor (last index). `valid` false always

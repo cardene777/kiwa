@@ -9,6 +9,16 @@ import type { TestEnvBase } from '@kiwa-lab/core';
  */
 export type BetterAuthDatabaseKind = 'prisma' | 'drizzle' | 'kysely';
 
+export const BETTER_AUTH_DATABASE_KINDS: readonly BetterAuthDatabaseKind[] = [
+  'prisma',
+  'drizzle',
+  'kysely',
+];
+
+export function isBetterAuthDatabaseKind(value: string): value is BetterAuthDatabaseKind {
+  return BETTER_AUTH_DATABASE_KINDS.includes(value as BetterAuthDatabaseKind);
+}
+
 /**
  * Built-in social provider mocks. Better Auth's real `socialProviders` config accepts
  * an open map, but for tests we only mock the two shapes documented in the quick-start
