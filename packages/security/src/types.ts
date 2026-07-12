@@ -32,6 +32,17 @@ export type SecurityAxis =
  */
 export type SecurityProvider = 'helmet' | 'express-rate-limit' | 'casbin' | 'coraza';
 
+export const SECURITY_PROVIDERS: readonly SecurityProvider[] = [
+  'helmet',
+  'express-rate-limit',
+  'casbin',
+  'coraza',
+];
+
+export function isSecurityProvider(value: string): value is SecurityProvider {
+  return SECURITY_PROVIDERS.includes(value as SecurityProvider);
+}
+
 /** 8 axis 全部の判定 verdict の共通契約。 */
 export type SecurityVerdict = 'allow' | 'deny' | 'warn';
 
