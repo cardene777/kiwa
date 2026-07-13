@@ -121,7 +121,28 @@ Q0 (本 SSOT) 準拠後、 meta lint tool を新設して以下を PR gate で�
 - skill 実装 lib に `skill/` が存在するか
 - 依存関係ある lib に `integration/` が存在するか
 
-不在なら PR block、 lib 開発者に強制する。 実装は `packages/test-existence-lint/` (仮) に置く予定。
+不在なら PR block、 lib 開発者に強制する。 実装は `tests/release-smoke/tests/test-taxonomy-existence.test.ts` (存在 chk) + `scripts/kiwa-taxonomy-run.mjs` (実行 chk CLI、 Q5) の 2 経路。
+
+## 分類別実行 chk CLI (Q5)
+
+meta lint (存在 chk) は 「file がある」 かのみ判定、 「file の中身が実行して pass するか」 は関与しない。 このため file 存在 = OK でも中身 broken の silent fail が起き得る。
+
+Q5 = `scripts/kiwa-taxonomy-run.mjs` = 分類 (perf / fidelity / skill / integration) を指定して該当 lib 横断で vitest を実行 + lib × category の pass / fail matrix を出力する CLI。 meta lint (存在) + Q5 CLI (実行) の 2 軸で test-taxonomy meta 経路が完成する。
+
+用法。
+
+```
+pnpm test:taxonomy -- --category fidelity
+pnpm test:taxonomy -- --category skill --lib agent
+pnpm test:taxonomy -- --category integration --format json
+```
+
+- `--category` = perf / fidelity / skill / integration のいずれか (必須)
+- `--lib` = 単一 lib 指定 (省略 = config 記載の該当 lib 全走査)
+- `--format` = table (default) or json
+- exit code = 0 (全 pass) / 1 (1 件でも fail or compile-fail)
+
+domain-specific test 中身の質 (case 網羅 / edge / coverage) は各 lib 開発者の責務、 meta lint + Q5 CLI の役割は 「test が正しく組立てられ実行して通っているか」 の構造的 gate に特化する (前提思想 = 汎用 tool で domain 精度は落ちるため domain 判断は各 lib に置く)。
 
 ## 現状 gap (2026-07-13 時点)
 
