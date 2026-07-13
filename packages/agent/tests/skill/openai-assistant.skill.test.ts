@@ -96,4 +96,134 @@ describe('AssistantsClient handler skill 発火 assertion', () => {
       assertToolCalledWith(spy, 'Read', { file: 'a.md' }),
     ).toThrow(/no call matched expected args/);
   });
+
+  it('同 tool を複数回呼出 = times で回数 assertion', async () => {
+    const spy = createToolSpy();
+    const client = new AssistantsClient({ idSeed: 'multi-call' });
+    const assistant = client.createAssistant({
+      name: 'multi',
+      instructions: '',
+      handler: async () => {
+        spy.record('Read', JSON.stringify({ file: 'a.md' }));
+        spy.record('Read', JSON.stringify({ file: 'b.md' }));
+        spy.record('Read', JSON.stringify({ file: 'c.md' }));
+        return { kind: 'message', content: '3 reads' };
+      },
+    });
+    const thread = client.createThread();
+    client.addMessage(thread.id, { role: 'user', content: 'read 3 files' });
+    const run = client.createRun({ threadId: thread.id, assistantId: assistant.id });
+    await client.poll(run.id);
+
+    assertToolCalled(spy, 'Read', { times: 3 });
+    // 各呼出 args も確認
+    assertToolCalledWith(spy, 'Read', { file: 'a.md' });
+    assertToolCalledWith(spy, 'Read', { file: 'b.md' });
+    assertToolCalledWith(spy, 'Read', { file: 'c.md' });
+  });
+
+  it('順序 assertion = 部分列 subset も検出できる', async () => {
+    const spy = createToolSpy();
+    const client = new AssistantsClient({ idSeed: 'order-subset' });
+    const assistant = client.createAssistant({
+      name: 'ordered',
+      instructions: '',
+      handler: async () => {
+        spy.record('Read', '{}');
+        spy.record('Grep', '{}');
+        spy.record('Edit', '{}');
+        spy.record('Write', '{}');
+        return { kind: 'message', content: 'done' };
+      },
+    });
+    const thread = client.createThread();
+    client.addMessage(thread.id, { role: 'user', content: 'flow' });
+    const run = client.createRun({ threadId: thread.id, assistantId: assistant.id });
+    await client.poll(run.id);
+
+    // 全順序 assert
+    assertToolCallOrder(spy, ['Read', 'Grep', 'Edit', 'Write']);
+    // 部分列 assert = 途中の tool 抜きでも順序が保たれる
+    assertToolCallOrder(spy, ['Read', 'Edit']);
+    assertToolCallOrder(spy, ['Read', 'Write']);
+  });
+
+  it('順序 assertion 失敗 = throw (逆順検知)', async () => {
+    const spy = createToolSpy();
+    const client = new AssistantsClient({ idSeed: 'order-fail' });
+    const assistant = client.createAssistant({
+      name: 'reverse',
+      instructions: '',
+      handler: async () => {
+        spy.record('Bash', '{}');
+        spy.record('Read', '{}');
+        return { kind: 'message', content: 'done' };
+      },
+    });
+    const thread = client.createThread();
+    client.addMessage(thread.id, { role: 'user', content: 'flow' });
+    const run = client.createRun({ threadId: thread.id, assistantId: assistant.id });
+    await client.poll(run.id);
+
+    // 実際は [Bash, Read] だが assert は [Read, Bash] を期待 = throw
+    expect(() =>
+      assertToolCallOrder(spy, ['Read', 'Bash']),
+    ).toThrow();
+  });
+
+  it('spy 未 record tool = assertToolCalled が throw する (呼出強制)', async () => {
+    const spy = createToolSpy();
+    const client = new AssistantsClient({ idSeed: 'never-call' });
+    const assistant = client.createAssistant({
+      name: 'no-op',
+      instructions: '',
+      handler: async () => {
+        // 何も record しない
+        return { kind: 'message', content: 'nothing' };
+      },
+    });
+    const thread = client.createThread();
+    client.addMessage(thread.id, { role: 'user', content: 'do nothing' });
+    const run = client.createRun({ threadId: thread.id, assistantId: assistant.id });
+    await client.poll(run.id);
+
+    // Read が呼ばれていない → assertToolCalled は throw
+    expect(() => assertToolCalled(spy, 'Read')).toThrow();
+    // assertToolNotCalled は成功
+    assertToolNotCalled(spy, 'Read');
+  });
+
+  it('複数 assistant で spy を共有 = 全 handler の呼出を集約', async () => {
+    const spy = createToolSpy();
+    const client = new AssistantsClient({ idSeed: 'multi-assistant' });
+
+    const a1 = client.createAssistant({
+      name: 'reader',
+      instructions: '',
+      handler: async () => {
+        spy.record('Read', JSON.stringify({ file: 'from-a1' }));
+        return { kind: 'message', content: 'a1 done' };
+      },
+    });
+    const a2 = client.createAssistant({
+      name: 'writer',
+      instructions: '',
+      handler: async () => {
+        spy.record('Write', JSON.stringify({ file: 'from-a2' }));
+        return { kind: 'message', content: 'a2 done' };
+      },
+    });
+
+    const t1 = client.createThread();
+    client.addMessage(t1.id, { role: 'user', content: 'read' });
+    await client.poll(client.createRun({ threadId: t1.id, assistantId: a1.id }).id);
+
+    const t2 = client.createThread();
+    client.addMessage(t2.id, { role: 'user', content: 'write' });
+    await client.poll(client.createRun({ threadId: t2.id, assistantId: a2.id }).id);
+
+    assertToolCalled(spy, 'Read', { times: 1 });
+    assertToolCalled(spy, 'Write', { times: 1 });
+    assertToolCallOrder(spy, ['Read', 'Write']);
+  });
 });
