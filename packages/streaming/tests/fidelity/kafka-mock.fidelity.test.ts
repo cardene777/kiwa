@@ -82,4 +82,76 @@ describe('createKafkaMock fidelity vs reference in-memory topic log', () => {
     expect(result.ratio).toBe(100);
     expect(result.divergences).toEqual([]);
   });
+
+  it('複数 topic 独立 = topic A の send は topic B に影響しない (両実装)', async () => {
+    const mock = createKafkaMock({ defaultPartitionCount: 1 });
+    const real = referenceKafka();
+
+    const producer = mock.producer();
+    await producer.connect();
+    await producer.send({ topic: 'topic-a', messages: [{ value: 'to-A' }] });
+    await real.send('topic-a', [{ value: 'to-A' }]);
+
+    const result = await assertFidelity({
+      mockFn: async () => mock.getTopicMessages('topic-b').length,
+      realFn: async () => real.getTopicMessages('topic-b').length,
+      cases: [{ name: 'topic-b 独立 0 件', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await producer.disconnect();
+  });
+
+  it('sendBatch で複数 record 一括 = 挿入順保存 (両実装)', async () => {
+    const mock = createKafkaMock({ defaultPartitionCount: 1 });
+    const real = referenceKafka();
+
+    const producer = mock.producer();
+    await producer.connect();
+    await producer.sendBatch([
+      { topic: 'batch', messages: [{ value: 'b1' }, { value: 'b2' }, { value: 'b3' }] },
+    ]);
+    await real.send('batch', [{ value: 'b1' }, { value: 'b2' }, { value: 'b3' }]);
+
+    const result = await assertFidelity({
+      mockFn: async () => mock.getTopicMessages('batch').map((m) => m.value),
+      realFn: async () => real.getTopicMessages('batch').map((m) => m.value),
+      cases: [{ name: 'sendBatch 順序', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await producer.disconnect();
+  });
+
+  it('reset() で全 topic クリア (両実装、 mock reset のみ)', async () => {
+    const mock = createKafkaMock({ defaultPartitionCount: 1 });
+    const producer = mock.producer();
+    await producer.connect();
+    await producer.send({ topic: 'to-reset', messages: [{ value: 'v' }] });
+    expect(mock.getTopicMessages('to-reset').length).toBe(1);
+
+    mock.reset();
+    expect(mock.getTopicMessages('to-reset').length).toBe(0);
+
+    await producer.disconnect();
+  });
+
+  it('message key 付き send = key も保持される (両実装)', async () => {
+    const mock = createKafkaMock({ defaultPartitionCount: 1 });
+    const real = referenceKafka();
+
+    const producer = mock.producer();
+    await producer.connect();
+    await producer.send({ topic: 'keyed', messages: [{ key: 'k1', value: 'v-with-key' }] });
+    await real.send('keyed', [{ key: 'k1', value: 'v-with-key' }]);
+
+    const result = await assertFidelity({
+      mockFn: async () => mock.getTopicMessages('keyed').map((m) => m.value),
+      realFn: async () => real.getTopicMessages('keyed').map((m) => m.value),
+      cases: [{ name: 'key 付き value 保存', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await producer.disconnect();
+  });
 });
