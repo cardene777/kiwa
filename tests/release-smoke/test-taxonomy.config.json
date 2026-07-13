@@ -54,8 +54,8 @@
   },
 
   "requireIntegration": {
-    "description": "他 lib 依存 lib のみ必須。 tests/integration/ dir + *.integration.test.ts が最低 1 件存在すること。 warn only (phase 1)、 命名統一 (Q2) 完了後 fail 化予定。",
-    "mode": "warn",
+    "description": "他 lib 依存 lib のみ必須。 tests/integration/ dir + *.integration.test.ts が最低 1 件存在すること。 phase 2 = fail (PR #1600-1602 で 3 lib exemplar 揃った後 flip)。",
+    "mode": "fail",
     "integrationLibs": [
       "dapp",
       "e2e",

@@ -104,17 +104,17 @@ describe('Q1 test taxonomy meta lint', () => {
     });
   });
 
-  describe('integration test (依存 lib のみ、 phase 1 warn only)', () => {
+  describe('integration test (依存 lib のみ、 phase 2 = fail)', () => {
     const target = config.requireIntegration.integrationLibs.filter((pkg) => packages.includes(pkg));
 
-    it.each(target)('%s に tests/integration/*.integration.test.ts が存在する (warn)', (pkg) => {
+    it.each(target)('%s に tests/integration/*.integration.test.ts が存在する', (pkg) => {
       const has = hasDirWithPattern(pkg, 'integration', '.integration.test.ts');
       if (!has) {
-        console.warn(
-          `[test-taxonomy][warn] integration test missing for pkg "${pkg}". Add tests/integration/*.integration.test.ts (dir/file 命名統一)。`,
+        throw new Error(
+          `integration test missing for pkg "${pkg}". Add tests/integration/*.integration.test.ts (real import で cross-lib flow 検証、 mock 使用禁止)、 or remove "${pkg}" from test-taxonomy.config.json requireIntegration.integrationLibs with justification.`,
         );
       }
-      expect(true).toBe(true);
+      expect(has).toBe(true);
     });
   });
 });
