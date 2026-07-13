@@ -41,4 +41,55 @@ describe('dapp × core integration — parseSpec re-export end-to-end', () => {
     const doc = parseSpec(SAMPLE_SPEC, { module: 'override-mod' });
     expect(doc.module).toBe('override-mod');
   });
+
+  it('cases 内容が given / when / then まで正しく parse される (core spec 契約)', () => {
+    const doc = parseSpec(SAMPLE_SPEC);
+    const t001 = doc.cases.find((c) => c.id === 'T-001');
+    expect(t001).toBeDefined();
+    // 各 case は given / when / then field を持つ (core parser 契約)
+    expect(t001?.given).toContain('正しい');
+    expect(t001?.when).toContain('login');
+    expect(t001?.then).toContain('session');
+  });
+
+  it('layer 抽出 = spec の layer 指定に従う (unit で parse される)', () => {
+    const doc = parseSpec(SAMPLE_SPEC);
+    expect(doc.layer).toBe('unit');
+  });
+
+  it('空 spec = cases 0 件 + warnings 記録', () => {
+    const emptySpec = '# Empty Test Spec\n\n- module: empty\n';
+    const doc = parseSpec(emptySpec);
+    expect(doc.module).toBe('empty');
+    expect(doc.cases).toEqual([]);
+    expect(doc.warnings.length).toBeGreaterThan(0);
+  });
+
+  it('複数 spec を独立に parse (state 共有なし、 core 契約)', () => {
+    const spec1 = `- module: spec-a
+- layer: unit
+
+| id | observation | given | when | then |
+|----|-------------|-------|------|------|
+| A-1 | one | g1 | w1 | t1 |
+`;
+    const spec2 = `- module: spec-b
+- layer: unit
+
+| id | observation | given | when | then |
+|----|-------------|-------|------|------|
+| B-1 | one | g1 | w1 | t1 |
+| B-2 | two | g2 | w2 | t2 |
+`;
+    const doc1 = parseSpec(spec1);
+    const doc2 = parseSpec(spec2);
+
+    expect(doc1.module).toBe('spec-a');
+    expect(doc1.cases.length).toBe(1);
+    expect(doc2.module).toBe('spec-b');
+    expect(doc2.cases.length).toBe(2);
+    // state 共有なし (第 1 spec parse が第 2 spec に影響しない)
+    expect(doc1.cases[0]?.id).toBe('A-1');
+    expect(doc2.cases.map((c) => c.id)).toEqual(['B-1', 'B-2']);
+  });
 });
