@@ -105,9 +105,10 @@ describe('tutorial 45 — baseline persistence', () => {
     const roundtrip = await loadBaseline(baselinePath);
 
     expect(roundtrip).not.toBeNull();
-    expect(roundtrip?.name).toBe('reverseString');
-    expect(roundtrip?.iterations).toBe(100);
-    expect(roundtrip?.samples).toHaveLength(100);
+    const result = roundtrip?.envelope.results['reverseString'];
+    expect(result?.name).toBe('reverseString');
+    expect(result?.iterations).toBe(100);
+    expect(result?.samples).toHaveLength(100);
   });
 
   it('returns null when the baseline does not yet exist', async () => {
@@ -145,7 +146,8 @@ describe('tutorial 45 — regression detection', () => {
     expect(['stable', 'improved', 'regressed']).toContain(verdict.verdict);
     expect(typeof verdict.regressed).toBe('boolean');
     expect(typeof verdict.deltaPct).toBe('number');
-    expect(typeof verdict.welchT).toBe('number');
+    expect(typeof verdict.ci.lower).toBe('number');
+    expect(typeof verdict.ci.upper).toBe('number');
     expect(typeof verdict.significant).toBe('boolean');
   });
 
@@ -316,8 +318,9 @@ describe('tutorial 45 + 46 — end-to-end integration', () => {
           primaryApi({ input: 'hello' });
         },
       });
-      const baseline = await loadBaseline(baselinePath);
-      expect(baseline).not.toBeNull();
+      const baselineLoaded = await loadBaseline(baselinePath);
+      expect(baselineLoaded).not.toBeNull();
+      const baseline = baselineLoaded?.envelope.results['primaryApi'];
       expect(baseline?.iterations).toBe(20);
 
       const regressionVerdict = detectRegression({

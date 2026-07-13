@@ -17,7 +17,26 @@ describe('baseline persistence', () => {
     await saveBaseline(file, result);
     const loaded = await loadBaseline(file);
 
-    expect(loaded).toEqual(result);
+    expect(loaded).not.toBeNull();
+    expect(loaded?.envelope.schema).toBe(1);
+    expect(loaded?.envelope.results['reply']).toEqual(result);
+    // env は現行 machine 情報なので envMismatch は空。
+    expect(loaded?.envMismatch).toEqual([]);
+  });
+
+  it('T-PH-B-001b legacy schema (envelope 化前の単一 result JSON) を自動 upgrade する', async () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
+    const file = path.join(dir, 'legacy.json');
+    const legacy = buildMeasureResult('op', 3, 1, [10, 11, 12]);
+    writeFileSync(file, JSON.stringify(legacy), 'utf8');
+
+    const loaded = await loadBaseline(file);
+    expect(loaded).not.toBeNull();
+    expect(loaded?.envelope.schema).toBe(1);
+    expect(loaded?.envelope.env.gitSha).toBe('unknown');
+    expect(loaded?.envelope.results['op']?.samples).toEqual([10, 11, 12]);
+    // legacy → env 全 field mismatch。
+    expect(loaded?.envMismatch.length).toBeGreaterThan(0);
   });
 
   it('T-PH-B-002 returns null when the file does not exist', async () => {
