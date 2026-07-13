@@ -90,17 +90,17 @@ describe('Q1 test taxonomy meta lint', () => {
     });
   });
 
-  describe('skill test (skill 実装 lib のみ、 phase 1 warn only)', () => {
+  describe('skill test (skill 実装 lib のみ、 phase 2 = fail)', () => {
     const target = config.requireSkill.skillLibs.filter((pkg) => packages.includes(pkg));
 
-    it.each(target)('%s に tests/skill/*.skill.test.ts が存在する (warn)', (pkg) => {
+    it.each(target)('%s に tests/skill/*.skill.test.ts が存在する', (pkg) => {
       const has = hasDirWithPattern(pkg, 'skill', '.skill.test.ts');
       if (!has) {
-        console.warn(
-          `[test-taxonomy][warn] skill test missing for pkg "${pkg}". Add tests/skill/*.skill.test.ts after @kiwa-lab/skill-test (Q4) is available.`,
+        throw new Error(
+          `skill test missing for pkg "${pkg}". Add tests/skill/*.skill.test.ts (use @kiwa-lab/skill-test primitive), or remove "${pkg}" from test-taxonomy.config.json requireSkill.skillLibs with justification.`,
         );
       }
-      expect(true).toBe(true);
+      expect(has).toBe(true);
     });
   });
 
