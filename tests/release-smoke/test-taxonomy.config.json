@@ -44,8 +44,8 @@
   },
 
   "requireSkill": {
-    "description": "skill 実装 lib のみ必須。 tests/skill/ dir + *.skill.test.ts が最低 1 件存在すること。 warn only (phase 1)、 skill-test primitive (Q4) 完了後 fail 化予定。",
-    "mode": "warn",
+    "description": "skill 実装 lib のみ必須。 tests/skill/ dir + *.skill.test.ts が最低 1 件存在すること。 phase 2 = fail (PR #1587-1588 で 3 skill lib exemplar 揃った後 flip)。",
+    "mode": "fail",
     "skillLibs": [
       "agent",
       "mcp",
