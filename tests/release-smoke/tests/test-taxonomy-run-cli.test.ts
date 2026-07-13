@@ -51,4 +51,15 @@ describe('Q5 test-taxonomy CLI shape', () => {
     expect(result.stdout).toMatch(/--include-real/);
     expect(result.stdout).toMatch(/KIWA_MODE=real/);
   });
+
+  it('config 記載外 lib × category で file 不在 = exit 1 (揃ってる chk 完全性、 Q5 bug fix)', () => {
+    // cache は skill 対象外 lib (config requireSkill.skillLibs に含まれない)、
+    // --lib cache --category skill = tests/skill dir 不在 → no-files → fail 判定 → exit 1
+    // CLI の目的は「揃ってる + 実行 pass」 の完全 chk、 file 不在は必ず fail に落ちる。
+    const result = spawnSync('node', [CLI_PATH, '--category', 'skill', '--lib', 'cache'], {
+      encoding: 'utf-8',
+    });
+    expect(result.status).toBe(1);
+    expect(result.stdout).toMatch(/FAIL \(no-files\)/);
+  });
 });
