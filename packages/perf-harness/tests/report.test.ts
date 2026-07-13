@@ -12,8 +12,8 @@ describe('emitPerfReport', () => {
       | iterations | 5 |
       | warmup | 1 |
       | p50 | 3.00ms |
-      | p95 | 5.00ms |
-      | p99 | 5.00ms |
+      | p95 | 4.80ms |
+      | p99 | 4.96ms |
       | mean | 3.00ms |
       | stdev | 1.58ms |
       | min | 1.00ms |
@@ -36,8 +36,8 @@ describe('emitPerfReport', () => {
       | iterations | 5 |
       | warmup | 1 |
       | p50 | 4.00ms |
-      | p95 | 6.00ms |
-      | p99 | 6.00ms |
+      | p95 | 5.80ms |
+      | p99 | 5.96ms |
       | mean | 4.00ms |
       | stdev | 1.58ms |
       | min | 2.00ms |
@@ -49,8 +49,8 @@ describe('emitPerfReport', () => {
       | metric | current | baseline | delta ms | delta % |
       |---|---|---|---|---|
       | p50 | 4.00ms | 3.00ms | +1.00ms | +33.33% |
-      | p95 | 6.00ms | 5.00ms | +1.00ms | +20.00% |
-      | p99 | 6.00ms | 5.00ms | +1.00ms | +20.00% |
+      | p95 | 5.80ms | 4.80ms | +1.00ms | +20.83% |
+      | p99 | 5.96ms | 4.96ms | +1.00ms | +20.16% |
       | mean | 4.00ms | 3.00ms | +1.00ms | +33.33% |
       | min | 2.00ms | 1.00ms | +1.00ms | +100.00% |
       | max | 6.00ms | 5.00ms | +1.00ms | +20.00% |

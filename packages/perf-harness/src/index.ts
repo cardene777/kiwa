@@ -12,7 +12,13 @@ export { buildMeasureResult, measure } from './measure.js';
 export { measureConcurrent, type ConcurrentInput } from './concurrent.js';
 export { measureMemory, type MemoryInput, type MemorySample } from './memory.js';
 export { detectRegression, detectRegressionStrict } from './regression.js';
-export { defaultBaselinePath, loadBaseline, saveBaseline } from './baseline.js';
+export {
+  captureEnv,
+  defaultBaselinePath,
+  loadBaseline,
+  saveBaseline,
+  saveBaselineEnvelope,
+} from './baseline.js';
 export { evaluatePerfGate } from './gate.js';
 export { emitPerfReport } from './report.js';
 export {

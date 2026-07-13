@@ -23,7 +23,7 @@ import { measure } from './measure.js';
 import { measureConcurrent } from './concurrent.js';
 import { measureMemory } from './memory.js';
 import { detectRegression } from './regression.js';
-import { defaultBaselinePath, loadBaseline, saveBaseline } from './baseline.js';
+import { captureEnv, defaultBaselinePath, loadBaseline, saveBaselineEnvelope } from './baseline.js';
 import { evaluatePerfGate } from './gate.js';
 import { emitPerfReport } from './report.js';
 import type { MeasureResult } from './types.js';
@@ -76,10 +76,10 @@ export async function runPerf3LayerLive(
     input.baselinePath ?? defaultBaselinePath(`${input.moduleName}.live`);
   const thresholdDocLink = input.thresholdDocLink ?? '../../quality/perf-thresholds';
 
-  const priorBaseline = (await loadBaseline(baselinePath)) as unknown as Record<
-    string,
-    MeasureResult
-  > | null;
+  const priorBaselineLoaded = await loadBaseline(baselinePath);
+  const priorBaseline: Record<string, MeasureResult> | null = priorBaselineLoaded
+    ? priorBaselineLoaded.envelope.results
+    : null;
   const combinedForBaseline: Record<string, MeasureResult> = {};
   const outcomes: LiveOpOutcome[] = [];
   let baselineSeeded = false;
@@ -158,7 +158,11 @@ export async function runPerf3LayerLive(
 
   const anyMeasured = outcomes.some((o) => !o.skipped);
   if (anyMeasured && priorBaseline === null) {
-    await saveBaseline(baselinePath, combinedForBaseline as unknown as MeasureResult);
+    await saveBaselineEnvelope(baselinePath, {
+      schema: 1,
+      env: captureEnv(),
+      results: combinedForBaseline,
+    });
     baselineSeeded = true;
   }
 

@@ -5,21 +5,24 @@ function makeResult(name: string, samples: number[]) {
   return buildMeasureResult(name, samples.length, 0, samples);
 }
 
-describe('detectRegression', () => {
+describe('detectRegression (bootstrap CI on p95)', () => {
   it('T-PH-R-001 flags a 20%+ p95 slowdown as regressed', () => {
-    const baseline = makeResult('reply', [9.8, 9.9, 10, 10.1, 10.15, 10.2]);
-    const current = makeResult('reply', [11.9, 12, 12.1, 12.15, 12.2, 12.3]);
+    // 大きめの sample を使い bootstrap CI が締まるようにする。
+    const baseline = makeResult('reply', Array.from({ length: 40 }, (_, i) => 10 + (i % 3) * 0.05));
+    const current = makeResult('reply', Array.from({ length: 40 }, (_, i) => 13 + (i % 3) * 0.05));
     const result = detectRegression({ current, baseline });
 
     expect(result.regressed).toBe(true);
     expect(result.deltaPct).toBeGreaterThanOrEqual(0.2);
     expect(result.verdict).toBe('regressed');
+    expect(result.significant).toBe(true);
+    expect(result.ci.lower).toBeGreaterThan(0);
   });
 
   it('T-PH-R-002 flags clear 30% and 50% slowdowns when significant', () => {
-    const baseline = makeResult('reply', [10, 10, 11, 9, 10, 10]);
-    const thirty = makeResult('reply', [13, 13, 14, 12, 13, 13]);
-    const fifty = makeResult('reply', [15, 15, 16, 14, 15, 15]);
+    const baseline = makeResult('reply', Array.from({ length: 40 }, (_, i) => 10 + (i % 4) * 0.1));
+    const thirty = makeResult('reply', Array.from({ length: 40 }, (_, i) => 13 + (i % 4) * 0.1));
+    const fifty = makeResult('reply', Array.from({ length: 40 }, (_, i) => 15 + (i % 4) * 0.1));
 
     const thirtyResult = detectRegression({ current: thirty, baseline });
     const fiftyResult = detectRegression({ current: fifty, baseline });
@@ -27,41 +30,43 @@ describe('detectRegression', () => {
     expect(thirtyResult.verdict).toBe('regressed');
     expect(thirtyResult.significant).toBe(true);
     expect(fiftyResult.verdict).toBe('regressed');
-    expect(fiftyResult.welchT).toBeGreaterThan(2);
+    // fifty は more strong signal、 CI 下限も上位。
+    expect(fiftyResult.ci.lower).toBeGreaterThan(thirtyResult.ci.lower);
   });
 
   it('T-PH-R-003 reports improved when p95 drops past the threshold', () => {
-    const baseline = makeResult('reply', [10, 10, 11, 9, 10, 10]);
-    const current = makeResult('reply', [7, 7, 8, 6, 7, 7]);
+    const baseline = makeResult('reply', Array.from({ length: 40 }, (_, i) => 10 + (i % 3) * 0.05));
+    const current = makeResult('reply', Array.from({ length: 40 }, (_, i) => 7 + (i % 3) * 0.05));
     const result = detectRegression({ current, baseline });
 
     expect(result.verdict).toBe('improved');
     expect(result.regressed).toBe(false);
     expect(result.deltaPct).toBeLessThan(-0.2);
+    expect(result.ci.upper).toBeLessThan(0);
   });
 
-  it('T-PH-R-004 uses Welch t-test as a smoke signal for significance', () => {
-    const baseline = makeResult('reply', [10, 10.1, 9.9, 10.2, 9.8, 10.1]);
-    const current = makeResult('reply', [13, 13.1, 12.9, 13.2, 12.8, 13.1]);
+  it('T-PH-R-004 threshold 超過してない差は stable (deltaPct < threshold)', () => {
+    // deltaPct 3% は 20% threshold 未満 = 統計的に有意でも regressed にならない。
+    const baseline = makeResult('reply', Array.from({ length: 40 }, (_, i) => 10 + (i % 5) * 0.02));
+    const current = makeResult('reply', Array.from({ length: 40 }, (_, i) => 10.3 + (i % 5) * 0.02));
     const result = detectRegression({ current, baseline, threshold: 0.2 });
 
-    expect(result.significant).toBe(true);
-    expect(result.welchT).toBeGreaterThan(2);
+    expect(result.deltaPct).toBeLessThan(0.2);
+    expect(result.verdict).toBe('stable');
+    expect(result.regressed).toBe(false);
   });
 
-  it('T-PH-R-005 stays stable for tiny sample counts', () => {
+  it('T-PH-R-005 stays stable for tiny sample counts (<2)', () => {
     const baseline = makeResult('reply', [10]);
     const current = makeResult('reply', [20]);
     const result = detectRegression({ current, baseline, threshold: 0.2 });
 
     expect(result.significant).toBe(false);
-    expect(result.welchT).toBe(0);
+    expect(result.ci).toEqual({ lower: 0, upper: 0 });
     expect(result.verdict).toBe('stable');
   });
 
   it('T-PH-R-006 both baseline and current p95 = 0 gives deltaPct = 0 (not Infinity)', () => {
-    // Closes the inner ternary at line 8: `baseline.p95 === 0 ? current.p95 === 0 ? 0 : Infinity : ...`.
-    // All-zero samples exercise both p95 === 0 arms.
     const baseline = makeResult('reply', [0, 0, 0, 0, 0]);
     const current = makeResult('reply', [0, 0, 0, 0, 0]);
     const result = detectRegression({ current, baseline });
@@ -69,25 +74,30 @@ describe('detectRegression', () => {
     expect(result.verdict).toBe('stable');
   });
 
-  it('T-PH-R-007 empty-samples normalize early return (result passes through unchanged)', () => {
-    // Closes the `result.samples.length === 0` early return at line 43 in normalize().
-    // detectRegression treats an empty-samples baseline as a passthrough (no
-    // percentile recomputation) — the significance check then collapses via the
-    // <2-sample guard below.
+  it('T-PH-R-007 empty-samples baseline は退化 CI で stable 判定', () => {
     const baseline = makeResult('reply', []);
     const current = makeResult('reply', [10, 11, 12]);
     const result = detectRegression({ current, baseline });
     expect(result.verdict).toBe('stable');
-    expect(result.welchT).toBe(0);
+    expect(result.significant).toBe(false);
   });
 
-  it('T-PH-R-008 identical repeated samples produce zero variance → welchT = 0', () => {
-    // Closes the `!Number.isFinite(denominator) || denominator === 0` guard at
-    // line 57. Two samples with the same value give variance=0 on both sides so
-    // the denominator becomes 0.
-    const baseline = makeResult('reply', [10, 10]);
-    const current = makeResult('reply', [10, 10]);
+  it('T-PH-R-008 identical repeated samples produce CI ≈ 0 → stable', () => {
+    const baseline = makeResult('reply', [10, 10, 10, 10, 10]);
+    const current = makeResult('reply', [10, 10, 10, 10, 10]);
     const result = detectRegression({ current, baseline });
-    expect(result.welchT).toBe(0);
+    expect(result.ci.lower).toBe(0);
+    expect(result.ci.upper).toBe(0);
+    expect(result.verdict).toBe('stable');
+  });
+
+  it('T-PH-R-009 baseline.p95 = 0 かつ current.p95 > 0 = Infinity delta', () => {
+    // Bootstrap CI は current 側 sample から p95 > 0 を復元、 baseline は 0 になるため
+    // CI 下限は正の値、 deltaPct は Infinity。 verdict は significant + threshold 超過。
+    const baseline = makeResult('reply', [0, 0, 0, 0, 0, 0]);
+    const current = makeResult('reply', [10, 10, 10, 10, 10, 10]);
+    const result = detectRegression({ current, baseline });
+    expect(result.deltaPct).toBe(Number.POSITIVE_INFINITY);
+    expect(result.verdict).toBe('regressed');
   });
 });
