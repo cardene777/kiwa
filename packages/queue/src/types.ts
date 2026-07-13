@@ -12,8 +12,26 @@ import type { TestEnvBase, TestMode } from '@kiwa-lab/core';
  */
 export type BullMQMode = 'testcontainers' | 'sandbox';
 
+export const BULLMQ_MODES: readonly BullMQMode[] = ['testcontainers', 'sandbox'];
+
+export function isBullMQMode(value: string): value is BullMQMode {
+  return BULLMQ_MODES.includes(value as BullMQMode);
+}
+
 /** Job lifecycle states surfaced by the helper. */
 export type JobState = 'waiting' | 'active' | 'completed' | 'failed' | 'delayed';
+
+export const JOB_STATES: readonly JobState[] = [
+  'waiting',
+  'active',
+  'completed',
+  'failed',
+  'delayed',
+];
+
+export function isJobState(value: string): value is JobState {
+  return JOB_STATES.includes(value as JobState);
+}
 
 /** Structural mirror of a persisted job — decoupled from BullMQ's own types. */
 export interface QueueJobSnapshot<TData = unknown, TResult = unknown> {
