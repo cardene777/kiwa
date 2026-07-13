@@ -633,6 +633,8 @@ Reference docs:
 | [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.x breaking-change policy + dapp-e2e → kiwa rebrand notice |
 | [`docs/COMPARISON.md`](./docs/COMPARISON.md) | Synpress / dappwright / wallet-mock comparison + spec-driven test generation axis (hardhat-test-suite-generator / Foundry AI / Claude Code) |
 | [`docs/RELEASING.md`](./docs/RELEASING.md) | Publish flow + provenance |
+| [`docs/api/test-taxonomy-guide.md`](./docs/api/test-taxonomy-guide.md) ⭐ | **test-taxonomy meta gate guide** — 5 分類 SSOT + `assertFidelity` / `resolveRealFidelityMode` / `@kiwa-lab/skill-test` primitive + `pnpm test:taxonomy:all` CLI user-facing 統合 guide |
+| [`docs/concepts/test-taxonomy.md`](./docs/concepts/test-taxonomy.md) | test-taxonomy 5 分類 SSOT (unit / perf / fidelity / skill / integration) + meta lint + CLI + real driver 経路 |
 
 For Claude Code users — full skill reference:
 
