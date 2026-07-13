@@ -13,6 +13,12 @@ import type { TestEnvBase, TestMode } from '@kiwa-lab/core';
  */
 export type InngestMode = 'stub' | 'dev-server';
 
+export const INNGEST_MODES: readonly InngestMode[] = ['stub', 'dev-server'];
+
+export function isInngestMode(value: string): value is InngestMode {
+  return INNGEST_MODES.includes(value as InngestMode);
+}
+
 /** Terminal + intermediate states an Inngest function run can reach. */
 export type InngestRunState =
   | 'queued'

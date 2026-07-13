@@ -11,6 +11,12 @@ import type { TestEnvBase, TestMode } from '@kiwa-lab/core';
  */
 export type SQSMode = 'stub' | 'localstack';
 
+export const SQS_MODES: readonly SQSMode[] = ['stub', 'localstack'];
+
+export function isSQSMode(value: string): value is SQSMode {
+  return SQS_MODES.includes(value as SQSMode);
+}
+
 /**
  * FIFO / standard queue kind. FIFO queues require `.fifo` suffix on the
  * queue name and honour `MessageGroupId` + `MessageDeduplicationId`.

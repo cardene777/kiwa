@@ -14,6 +14,12 @@ import type { TestEnvBase, TestMode } from '@kiwa-lab/core';
  */
 export type CloudflareQueuesMode = 'miniflare' | 'wrangler';
 
+export const CLOUDFLARE_QUEUES_MODES: readonly CloudflareQueuesMode[] = ['miniflare', 'wrangler'];
+
+export function isCloudflareQueuesMode(value: string): value is CloudflareQueuesMode {
+  return CLOUDFLARE_QUEUES_MODES.includes(value as CloudflareQueuesMode);
+}
+
 /**
  * Terminal + intermediate states surfaced by the helper. `pending` messages
  * live in the queue waiting for the next consumer batch. `delivered` messages

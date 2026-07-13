@@ -11,6 +11,12 @@ import type { TestEnvBase, TestMode } from '@kiwa-lab/core';
  */
 export type RabbitMQMode = 'stub' | 'testcontainers';
 
+export const RABBITMQ_MODES: readonly RabbitMQMode[] = ['stub', 'testcontainers'];
+
+export function isRabbitMQMode(value: string): value is RabbitMQMode {
+  return RABBITMQ_MODES.includes(value as RabbitMQMode);
+}
+
 /** AMQP 0.9.1 exchange types the adapter covers. */
 export type RabbitMQExchangeType = 'direct' | 'topic' | 'fanout' | 'headers';
 
