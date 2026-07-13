@@ -58,9 +58,12 @@ describe(MODULE, () => {
         ],
       });
 
-      // gate 通過を assert (fail-fast)
+      // gate 通過を assert (fail-fast)、 baseline seed 時 (initial run) は soft check
+      // で reference 生成、 2 回目以降で regression fail-fast。
+      expect(result.outcomes.length).toBeGreaterThan(0);
       for (const outcome of result.outcomes) {
-        // baseline seed 時はスキップ、 2 回目以降で regression fail-fast
+        expect.soft(outcome.serialGatePassed, `${outcome.name} serial p95`).toBe(true);
+        expect.soft(outcome.concurrentGatePassed, `${outcome.name} concurrent p95`).toBe(true);
       }
     },
     120_000,

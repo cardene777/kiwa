@@ -20,6 +20,7 @@
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+// readFileSync is used by analyzeTestFile
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -116,7 +117,88 @@ function collectFiles(dir, suffix) {
   return out;
 }
 
-function runOneCell(lib, category, includeReal = false) {
+/**
+ * source code の中身 chk = 3 軸。
+ * (1) it() block 数 = category 別 minCases 下限を満たすか
+ * (2) 各 it() block に expect(...) が 1 件以上あるか (assertion 保証)
+ * (3) trivial pattern 検出 = `expect(true).toBe(true)` / `expect(1).toBe(1)` / `expect(null).toBeNull()` 等の詐称 assertion
+ *
+ * 返り値 = { itCount, itsWithoutExpect, trivialCount, violations: string[] }
+ */
+function analyzeTestFile(filePath) {
+  const src = readFileSync(filePath, 'utf-8');
+  const lines = src.split('\n');
+
+  // it( / it.each( / it.skip( / it.only( / test( を検出、 コメント行 (// or /* / *) は除外
+  const itPattern = /^(?!\s*(\/\/|\*|\/\*))\s*(it|test)(\.each|\.skip|\.only|\.skipIf|\.runIf)?\s*\(/;
+  const itLines = [];
+  lines.forEach((line, idx) => {
+    if (itPattern.test(line)) itLines.push(idx);
+  });
+
+  // trivial assertion pattern
+  const trivialPatterns = [
+    /expect\(true\)\.toBe\(true\)/,
+    /expect\(false\)\.toBe\(false\)/,
+    /expect\(1\)\.toBe\(1\)/,
+    /expect\(0\)\.toBe\(0\)/,
+    /expect\(null\)\.toBeNull\(\)/,
+    /expect\(undefined\)\.toBeUndefined\(\)/,
+    /expect\('a'\)\.toBe\('a'\)/,
+    /expect\("a"\)\.toBe\("a"\)/,
+    /expect\(\[\]\)\.toEqual\(\[\]\)/,
+    /expect\(\{\}\)\.toEqual\(\{\}\)/,
+  ];
+
+  const violations = [];
+  let itsWithoutExpect = 0;
+  let trivialCount = 0;
+
+  // 各 it block の範囲 (次 it or ファイル末尾まで) を確認
+  for (let i = 0; i < itLines.length; i += 1) {
+    const start = itLines[i];
+    const end = i + 1 < itLines.length ? itLines[i + 1] : lines.length;
+    const body = lines.slice(start, end).join('\n');
+
+    // expect( 検索 (assertToolCalled 等の primitive 系も assertion とみなす)
+    const hasExpect = /\b(expect|assertToolCalled|assertToolNotCalled|assertToolCalledWith|assertToolCallOrder|assertFidelity|assertThrows|assert\.)\s*\(/.test(body);
+    if (!hasExpect) {
+      itsWithoutExpect += 1;
+      violations.push(`${filePath}:${start + 1} — it() block に expect/assert 呼出なし`);
+    }
+
+    // trivial pattern chk
+    for (const pat of trivialPatterns) {
+      if (pat.test(body)) {
+        trivialCount += 1;
+        violations.push(`${filePath}:${start + 1} — trivial assertion (${pat.source})`);
+        break;
+      }
+    }
+  }
+
+  return {
+    itCount: itLines.length,
+    itsWithoutExpect,
+    trivialCount,
+    violations,
+  };
+}
+
+/**
+ * category 別 minCases default。 config で override 可能 (test-taxonomy.config.json)。
+ * fidelity / skill / integration = domain-specific test で最低 5 case、
+ * perf = harness 分担があるため最低 3 case、
+ * unit は本 CLI 対象外。
+ */
+const DEFAULT_MIN_CASES = {
+  perf: 3,
+  fidelity: 5,
+  skill: 5,
+  integration: 5,
+};
+
+function runOneCell(lib, category, includeReal = false, config = null) {
   const libDir = join(PACKAGES_DIR, lib);
   const testDir = join(libDir, 'tests', category);
   const suffix = CATEGORY_SUFFIX[category];
@@ -125,6 +207,53 @@ function runOneCell(lib, category, includeReal = false) {
   if (files.length === 0) {
     return { status: 'no-files', passed: 0, failed: 0, total: 0 };
   }
+
+  // === 中身 chk 層 (Q7、 3 軸) ===
+  // (1) minCases 下限 (2) 各 it に expect 呼出 (3) trivial pattern 検出
+  const minCases = config?.minCases?.[category] ?? DEFAULT_MIN_CASES[category] ?? 0;
+  const perLibMinCases = config?.perLibMinCases?.[category]?.[lib];
+  const effectiveMin = perLibMinCases ?? minCases;
+
+  let totalIt = 0;
+  let totalItsWithoutExpect = 0;
+  let totalTrivial = 0;
+  const allViolations = [];
+  for (const f of files) {
+    const analysis = analyzeTestFile(f);
+    totalIt += analysis.itCount;
+    totalItsWithoutExpect += analysis.itsWithoutExpect;
+    totalTrivial += analysis.trivialCount;
+    allViolations.push(...analysis.violations);
+  }
+
+  if (totalIt < effectiveMin) {
+    return {
+      status: 'insufficient-cases',
+      passed: 0,
+      failed: 0,
+      total: totalIt,
+      violations: [`${lib} × ${category}: it 数 ${totalIt} < 下限 ${effectiveMin}`],
+    };
+  }
+  if (totalItsWithoutExpect > 0) {
+    return {
+      status: 'missing-assertion',
+      passed: 0,
+      failed: totalItsWithoutExpect,
+      total: totalIt,
+      violations: allViolations.slice(0, 5),
+    };
+  }
+  if (totalTrivial > 0) {
+    return {
+      status: 'trivial-assertion',
+      passed: 0,
+      failed: totalTrivial,
+      total: totalIt,
+      violations: allViolations.slice(0, 5),
+    };
+  }
+  // === /中身 chk 層 ===
 
   // perf は独自 config (vitest.perf.config.ts) + tsc compile 対象外 (tests/perf/**/* が
   // tsconfig.vitest.json の exclude)、 直接 vitest.perf.config.ts で実行する経路。
@@ -212,6 +341,9 @@ function statusLabel(r) {
   if (r.status === 'no-tests') return 'FAIL (no-tests)';
   if (r.status === 'compile-fail') return 'FAIL (compile)';
   if (r.status === 'parse-fail') return 'FAIL (parse)';
+  if (r.status === 'insufficient-cases') return `FAIL (min-cases ${r.total})`;
+  if (r.status === 'missing-assertion') return `FAIL (no-expect ${r.failed})`;
+  if (r.status === 'trivial-assertion') return `FAIL (trivial ${r.failed})`;
   return r.status === 'pass' ? `pass ${r.passed}/${r.total}` : `FAIL ${r.failed}/${r.total}`;
 }
 
@@ -226,12 +358,19 @@ function emitTable(results, category) {
 
 function summarize(results) {
   const passed = Object.values(results).filter((r) => r.status === 'pass').length;
-  // no-files = config 記載 lib で該当分類の test file 不在 = fail 判定。
-  // CLI の目的は「揃ってる + 実行 pass」 の完全 chk、 file 不在で pass 扱いは
-  // 意味を持たない (--lib は config 外 lib も指定可能だが、 default で該当 lib 全走査時は
-  // config 記載 lib のみが scope、 その scope 内で不在は必ず fail)。
+  // 中身 chk 3 軸 (insufficient-cases / missing-assertion / trivial-assertion) も fail 判定に統合。
+  // CLI 単独で release-worthy 判定完結する強度に引き上げ (Q7)。
   const failed = Object.values(results).filter((r) =>
-    ['fail', 'compile-fail', 'parse-fail', 'no-files', 'no-tests'].includes(r.status),
+    [
+      'fail',
+      'compile-fail',
+      'parse-fail',
+      'no-files',
+      'no-tests',
+      'insufficient-cases',
+      'missing-assertion',
+      'trivial-assertion',
+    ].includes(r.status),
   ).length;
   const noFiles = Object.values(results).filter((r) => r.status === 'no-files').length;
   return { passed, failed, noFiles, total: Object.keys(results).length };
@@ -243,7 +382,7 @@ function runSingleCategory(category, args, config, allPackages) {
   const realTag = args.includeReal ? ' [+real]' : '';
   for (const lib of scope) {
     process.stderr.write(`[taxonomy-run] ${lib} × ${category}${realTag} ...`);
-    const r = runOneCell(lib, category, args.includeReal);
+    const r = runOneCell(lib, category, args.includeReal, config);
     results[lib] = r;
     process.stderr.write(` ${statusLabel(r)}\n`);
   }
