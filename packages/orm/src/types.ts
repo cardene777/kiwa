@@ -11,6 +11,15 @@ import type { MySql2Database } from 'drizzle-orm/mysql2';
 /** ORM brand discriminator. v0.4 adds 'kysely'. */
 export type OrmBrand = 'drizzle' | 'prisma' | 'kysely';
 
+/** Runtime accessor for the `OrmBrand` union. */
+export const ORM_BRANDS: readonly OrmBrand[] = ['drizzle', 'prisma', 'kysely'];
+export function isOrmBrand(value: unknown): value is OrmBrand {
+  return (
+    typeof value === 'string' &&
+    (ORM_BRANDS as readonly string[]).includes(value)
+  );
+}
+
 /**
  * Phantom-typed `Database` interface for Kysely (caller-supplied).
  *
@@ -22,6 +31,15 @@ export type KyselyDatabase = any;
 
 /** SQL dialect. v0.2.1 adds 'mysql'. */
 export type SqlDialect = 'sqlite' | 'postgres' | 'mysql';
+
+/** Runtime accessor for the `SqlDialect` union. */
+export const SQL_DIALECTS: readonly SqlDialect[] = ['sqlite', 'postgres', 'mysql'];
+export function isSqlDialect(value: unknown): value is SqlDialect {
+  return (
+    typeof value === 'string' &&
+    (SQL_DIALECTS as readonly string[]).includes(value)
+  );
+}
 
 /** Drizzle schema = the object exported from `schema.ts` (table records). */
 export type DrizzleSchema = Record<string, unknown>;
