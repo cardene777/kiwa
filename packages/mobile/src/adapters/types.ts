@@ -10,6 +10,14 @@ import type { AxisStep, MobileAxis, MobileTarget, NeutralEventName } from '../se
 
 export type AdapterMode = 'mock' | 'real';
 
+export const ADAPTER_MODES: readonly AdapterMode[] = ['mock', 'real'];
+export function isAdapterMode(value: unknown): value is AdapterMode {
+  return (
+    typeof value === 'string' &&
+    (ADAPTER_MODES as readonly string[]).includes(value)
+  );
+}
+
 export interface AdapterInvocation {
   scanId: string;
   target: MobileTarget;
