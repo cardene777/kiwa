@@ -125,4 +125,78 @@ describe('runWatch skill 発火 (layer → spawn cmd 変換 assertion)', () => {
     assertToolCalled(spy, 'spawn-e2e');
     assertToolCallOrder(spy, ['spawn-unit', 'spawn-e2e']);
   });
+
+  it('layers 空配列 = throw (layer 必須契約)、 spawn 呼ばれない', () => {
+    const spy = createToolSpy();
+    expect(() =>
+      runWatch({
+        layers: [] as RunWatchLayer[],
+        cwd: process.cwd(),
+        spawnFn: (cmd, args) => {
+          spy.record('spawn', JSON.stringify({ cmd, args }));
+          return stubChild();
+        },
+      }),
+    ).toThrow(/at least one layer/);
+    assertToolNotCalled(spy, 'spawn');
+  });
+
+  it('未知 layer = throw (layer 検証契約)、 spawn 呼ばれない', () => {
+    const spy = createToolSpy();
+    expect(() =>
+      runWatch({
+        layers: ['unknown-layer'] as unknown as RunWatchLayer[],
+        cwd: process.cwd(),
+        spawnFn: (cmd, args) => {
+          spy.record('spawn', JSON.stringify({ cmd, args }));
+          return stubChild();
+        },
+      }),
+    ).toThrow(/unknown layer/);
+    assertToolNotCalled(spy, 'spawn');
+  });
+
+  it('layers 順序逆 (e2e → unit) で spawn 順序も逆になる', () => {
+    const spy = createToolSpy();
+    runWatch({
+      layers: ['e2e', 'unit'],
+      cwd: process.cwd(),
+      spawnFn: (cmd, args) => {
+        const argsStr = args.join(' ');
+        const layer = argsStr.includes('tests/e2e') ? 'e2e' : 'unit';
+        spy.record(`spawn-${layer}`, JSON.stringify({ cmd, args }));
+        return stubChild();
+      },
+    });
+    assertToolCallOrder(spy, ['spawn-e2e', 'spawn-unit']);
+  });
+
+  it('同 layer を複数回指定 = spawn も複数回 (times で確認)', () => {
+    const spy = createToolSpy();
+    runWatch({
+      layers: ['unit', 'unit', 'unit'],
+      cwd: process.cwd(),
+      spawnFn: (cmd, args) => {
+        spy.record('spawn', JSON.stringify({ cmd, args }));
+        return stubChild();
+      },
+    });
+    assertToolCalled(spy, 'spawn', { times: 3 });
+  });
+
+  it('全 4 layer (unit / api / e2e / ui) で spawn 4 回、 各 layer 一意 args', () => {
+    const spy = createToolSpy();
+    runWatch({
+      layers: ['unit', 'api', 'e2e', 'ui'] as RunWatchLayer[],
+      cwd: process.cwd(),
+      spawnFn: (cmd, args) => {
+        // spawn 順序を index で record することで layer 区別できる (全 args が --dir tests/... を含む)
+        spy.record('spawn', JSON.stringify({ cmd, args }));
+        return stubChild();
+      },
+    });
+
+    // 4 layer 全 spawn
+    assertToolCalled(spy, 'spawn', { times: 4 });
+  });
 });
