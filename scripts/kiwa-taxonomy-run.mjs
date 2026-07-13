@@ -64,12 +64,13 @@ function parseArgs(argv) {
 function printHelp() {
   process.stdout.write(`kiwa-taxonomy-run — test-taxonomy 分類別実行 chk\n\n`);
   process.stdout.write(`Usage:\n`);
-  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category <perf|fidelity|skill|integration> [--lib <name>] [--format <table|json>] [--include-real]\n\n`);
+  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category <perf|fidelity|skill|integration|all> [--lib <name>] [--format <table|json>] [--include-real]\n\n`);
   process.stdout.write(`Examples:\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category fidelity\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category skill --lib agent\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category integration --format json\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category fidelity --include-real  # KIWA_MODE=real real driver test 含む\n`);
+  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category all  # 4 分類 (perf/fidelity/skill/integration) 一括実行 + 統合 matrix\n`);
 }
 
 function loadConfig() {
@@ -122,6 +123,12 @@ function runOneCell(lib, category, includeReal = false) {
     return { status: 'no-files', passed: 0, failed: 0, total: 0 };
   }
 
+  // perf は独自 config (vitest.perf.config.ts) + tsc compile 対象外 (tests/perf/**/* が
+  // tsconfig.vitest.json の exclude)、 直接 vitest.perf.config.ts で実行する経路。
+  if (category === 'perf') {
+    return runPerfCell(libDir, includeReal);
+  }
+
   const build = spawnSync('pnpm', ['exec', '--', 'tsc', '-p', 'tsconfig.vitest.json'], {
     cwd: libDir,
     stdio: 'pipe',
@@ -151,6 +158,38 @@ function runOneCell(lib, category, includeReal = false) {
     encoding: 'utf-8',
     env: runEnv,
   });
+  let report;
+  try {
+    report = JSON.parse(vitest.stdout);
+  } catch {
+    return { status: 'parse-fail', passed: 0, failed: 0, total: 0, stderr: vitest.stderr };
+  }
+  const passed = report.numPassedTests ?? 0;
+  const failed = report.numFailedTests ?? 0;
+  const total = report.numTotalTests ?? passed + failed;
+  const status = failed === 0 && total > 0 ? 'pass' : failed > 0 ? 'fail' : 'no-tests';
+  return { status, passed, failed, total, realIncluded: includeReal };
+}
+
+function runPerfCell(libDir, includeReal) {
+  const configPath = join(libDir, 'vitest.perf.config.ts');
+  if (!existsSync(configPath)) {
+    return { status: 'no-files', passed: 0, failed: 0, total: 0 };
+  }
+  const runEnv = { ...process.env };
+  if (includeReal && !runEnv.KIWA_MODE) {
+    runEnv.KIWA_MODE = 'real';
+  }
+  const vitest = spawnSync(
+    'pnpm',
+    ['exec', '--', 'vitest', 'run', '-c', 'vitest.perf.config.ts', '--reporter=json'],
+    {
+      cwd: libDir,
+      stdio: 'pipe',
+      encoding: 'utf-8',
+      env: runEnv,
+    },
+  );
   let report;
   try {
     report = JSON.parse(vitest.stdout);
@@ -195,35 +234,92 @@ function summarize(results) {
   return { passed, failed, noFiles, total: Object.keys(results).length };
 }
 
+function runSingleCategory(category, args, config, allPackages) {
+  const scope = args.lib ? [args.lib] : libsForCategory(category, config, allPackages);
+  const results = {};
+  const realTag = args.includeReal ? ' [+real]' : '';
+  for (const lib of scope) {
+    process.stderr.write(`[taxonomy-run] ${lib} × ${category}${realTag} ...`);
+    const r = runOneCell(lib, category, args.includeReal);
+    results[lib] = r;
+    process.stderr.write(` ${statusLabel(r)}\n`);
+  }
+  return results;
+}
+
+function emitAllMatrix(allResults, includeReal) {
+  const categories = Object.keys(allResults);
+  const allLibs = new Set();
+  for (const cat of categories) {
+    for (const lib of Object.keys(allResults[cat])) allLibs.add(lib);
+  }
+  const sortedLibs = Array.from(allLibs).sort();
+
+  process.stdout.write(`\n## test-taxonomy matrix — all categories${includeReal ? ' [+real]' : ''}\n\n`);
+  process.stdout.write(`| lib | ${categories.join(' | ')} |\n`);
+  process.stdout.write(`| --- | ${categories.map(() => '---').join(' | ')} |\n`);
+  for (const lib of sortedLibs) {
+    const cells = categories.map((cat) => {
+      const r = allResults[cat][lib];
+      if (!r) return '—';  // config で該当 category 対象外の lib は空 cell
+      return statusLabel(r);
+    });
+    process.stdout.write(`| ${lib} | ${cells.join(' | ')} |\n`);
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || !args.category) {
     printHelp();
     process.exit(args.help ? 0 : 1);
   }
-  if (!VALID_CATEGORIES.includes(args.category)) {
-    process.stderr.write(`invalid --category "${args.category}". valid: ${VALID_CATEGORIES.join(', ')}\n`);
+  const isAll = args.category === 'all';
+  if (!isAll && !VALID_CATEGORIES.includes(args.category)) {
+    process.stderr.write(`invalid --category "${args.category}". valid: ${VALID_CATEGORIES.join(', ')}, all\n`);
     process.exit(1);
   }
 
   const config = loadConfig();
   const allPackages = listPackages();
-  const scope = args.lib ? [args.lib] : libsForCategory(args.category, config, allPackages);
 
   if (args.lib && !allPackages.includes(args.lib)) {
     process.stderr.write(`unknown --lib "${args.lib}"\n`);
     process.exit(1);
   }
 
-  const results = {};
-  const realTag = args.includeReal ? ' [+real]' : '';
-  for (const lib of scope) {
-    process.stderr.write(`[taxonomy-run] ${lib} × ${args.category}${realTag} ...`);
-    const r = runOneCell(lib, args.category, args.includeReal);
-    results[lib] = r;
-    process.stderr.write(` ${statusLabel(r)}\n`);
+  if (isAll) {
+    // 4 分類全実行 + 統合 matrix、 exit code = 1 分類でも fail で 1
+    const allResults = {};
+    const summaries = {};
+    let anyFail = false;
+    for (const category of VALID_CATEGORIES) {
+      allResults[category] = runSingleCategory(category, args, config, allPackages);
+      summaries[category] = summarize(allResults[category]);
+      if (summaries[category].failed > 0) anyFail = true;
+    }
+    if (args.format === 'json') {
+      process.stdout.write(
+        `${JSON.stringify({ category: 'all', includeReal: args.includeReal, results: allResults, summaries }, null, 2)}\n`,
+      );
+    } else {
+      emitAllMatrix(allResults, args.includeReal);
+      process.stdout.write(`\nsummary per category:\n`);
+      for (const category of VALID_CATEGORIES) {
+        const s = summaries[category];
+        process.stdout.write(
+          `  ${category}: pass=${s.passed} fail=${s.failed} total=${s.total}\n`,
+        );
+      }
+      if (args.includeReal) {
+        process.stdout.write(`(real driver test 含む、 KIWA_MODE=real)\n`);
+      }
+    }
+    process.exit(anyFail ? 1 : 0);
   }
 
+  // 単一 category 経路
+  const results = runSingleCategory(args.category, args, config, allPackages);
   const summary = summarize(results);
 
   if (args.format === 'json') {
