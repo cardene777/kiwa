@@ -76,19 +76,17 @@ describe('Q1 test taxonomy meta lint', () => {
     });
   });
 
-  describe('fidelity test (mock 提供 lib のみ、 phase 1 warn only)', () => {
+  describe('fidelity test (mock 提供 lib のみ、 phase 2 = fail)', () => {
     const target = config.requireFidelity.mockAdapterLibs.filter((pkg) => packages.includes(pkg));
 
-    it.each(target)('%s に tests/fidelity/*.fidelity.test.ts が存在する (warn)', (pkg) => {
+    it.each(target)('%s に tests/fidelity/*.fidelity.test.ts が存在する', (pkg) => {
       const has = hasDirWithPattern(pkg, 'fidelity', '.fidelity.test.ts');
       if (!has) {
-        // phase 1 = warn only、 phase 2 で fail 化予定 (@kiwa-lab/quality-metrics fidelity primitive 拡張後)。
-        console.warn(
-          `[test-taxonomy][warn] fidelity test missing for pkg "${pkg}". Add tests/fidelity/*.fidelity.test.ts. This will fail in phase 2.`,
+        throw new Error(
+          `fidelity test missing for pkg "${pkg}". Add tests/fidelity/*.fidelity.test.ts, or remove "${pkg}" from test-taxonomy.config.json requireFidelity.mockAdapterLibs with justification.`,
         );
       }
-      // phase 1 = 常に pass、 phase 2 で expect(has).toBe(true) に変更予定。
-      expect(true).toBe(true);
+      expect(has).toBe(true);
     });
   });
 
