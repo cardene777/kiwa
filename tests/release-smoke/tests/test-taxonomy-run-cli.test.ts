@@ -44,4 +44,11 @@ describe('Q5 test-taxonomy CLI shape', () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toMatch(/invalid --category/);
   });
+
+  it('--help 出力に --include-real flag 説明が含まれる (Q6-5)', () => {
+    const result = spawnSync('node', [CLI_PATH, '--help'], { encoding: 'utf-8' });
+    expect(result.status).toBe(0);
+    expect(result.stdout).toMatch(/--include-real/);
+    expect(result.stdout).toMatch(/KIWA_MODE=real/);
+  });
 });

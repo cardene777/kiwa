@@ -135,12 +135,16 @@ Q5 = `scripts/kiwa-taxonomy-run.mjs` = 分類 (perf / fidelity / skill / integra
 pnpm test:taxonomy -- --category fidelity
 pnpm test:taxonomy -- --category skill --lib agent
 pnpm test:taxonomy -- --category integration --format json
+pnpm test:taxonomy -- --category fidelity --include-real   # Q6-5 real driver test 含む (KIWA_MODE=real auto)
 ```
 
 - `--category` = perf / fidelity / skill / integration のいずれか (必須)
 - `--lib` = 単一 lib 指定 (省略 = config 記載の該当 lib 全走査)
 - `--format` = table (default) or json
+- `--include-real` = `*.real.<category>.test.ts` (real driver test) を実行対象に含める、 KIWA_MODE=real env auto 注入 (Q6-5)
 - exit code = 0 (全 pass) / 1 (1 件でも fail or compile-fail)
+
+**real driver test SSOT** (Q6)。 各 lib の `tests/fidelity/*.real.fidelity.test.ts` は mock adapter が real backend (testcontainers Redis / real Postgres / real BullMQ 等) 挙動を再現しているか動的検証する経路。 `resolveRealFidelityMode` primitive (`@kiwa-lab/quality-metrics`) で env-gate、 KIWA_MODE=real + 必須 env keys 全 set 時のみ実行、 default (未設定 or mock) は skip する opt-in 契約。 CLI 側 `--include-real` は Q6 exemplar (cache / queue / orm) を含めた matrix 実行の統一経路。
 
 domain-specific test 中身の質 (case 網羅 / edge / coverage) は各 lib 開発者の責務、 meta lint + Q5 CLI の役割は 「test が正しく組立てられ実行して通っているか」 の構造的 gate に特化する (前提思想 = 汎用 tool で domain 精度は落ちるため domain 判断は各 lib に置く)。
 
