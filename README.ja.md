@@ -405,6 +405,24 @@ pnpm gate:mutation                  # package 別 threshold で gate 強制
 pnpm gate:coverage                  # Lines/Branches/Functions gate 強制
 ```
 
+### Gate 3 — test-taxonomy meta gate (`pnpm test:taxonomy:all`)
+
+Coverage / Mutation に加えて、 kiwa は **構造 gate** も強制する。 mock adapter 提供 lib は `tests/fidelity/*.fidelity.test.ts` 必須、 skill 実装 lib は `tests/skill/*.skill.test.ts` 必須、 他 lib 依存 lib は `tests/integration/*.integration.test.ts` 必須、 exempt 外の全 lib は `tests/perf/*.perf.ts` 必須。 taxonomy CLI は 4 分類を該当 lib 全て横断実行し、 `lib × category` matrix を出力する。 `no-files` も fail 判定 = CLI の目的は「揃ってる + 実行 pass」 の 1 コマンド完全 chk。
+
+```bash
+# 1 コマンドで release-gate chk (perf + fidelity + skill + integration matrix)
+pnpm test:taxonomy:all
+
+# 単一 category
+pnpm test:taxonomy -- --category fidelity
+pnpm test:taxonomy -- --category skill --lib agent
+
+# real driver test 含む (testcontainers 起動、 KIWA_MODE=real 自動注入)
+pnpm test:taxonomy:all -- --include-real
+```
+
+exit code = 0 (該当 cell 全 pass) / 1 (1 件でも fail / compile-fail / no-files / no-tests)。 5 分類 SSOT (unit / perf / fidelity / skill / integration) は [`docs/concepts/test-taxonomy.md`](./docs/concepts/test-taxonomy.md) 定義、 `assertFidelity` / `resolveRealFidelityMode` / `@kiwa-lab/skill-test` primitive の user-facing 使用例は [`docs/api/test-taxonomy-guide.md`](./docs/api/test-taxonomy-guide.md)。
+
 ---
 
 ## Examples
