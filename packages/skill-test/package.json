@@ -1,0 +1,61 @@
+{
+  "name": "@kiwa-lab/skill-test",
+  "version": "0.1.0",
+  "description": "Skill 発火 assertion primitive for kiwa v0.6+ — agent / mcp / cli / assistant 系 lib の skill 実装が『想定 tool を実際に呼んだか / 順序 / 回数 / 引数』 を behavior test で検証する経路 SSOT。 docs/concepts/test-taxonomy.md § skill 準拠。 tool spy 経由で ToolCallRecord[] を蓄積、 assertToolCalled / assertToolNotCalled / assertToolCalledWith / assertToolCallOrder の 4 primitive で assertion を書く。 test-taxonomy.md Q4 実装。",
+  "license": "UNLICENSED",
+  "author": {
+    "name": "cardene",
+    "url": "https://github.com/cardene777"
+  },
+  "keywords": [
+    "kiwa",
+    "skill-test",
+    "agent",
+    "tool-spy",
+    "tool-call",
+    "assertion",
+    "vitest",
+    "testing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cardene777/kiwa.git",
+    "directory": "packages/skill-test"
+  },
+  "homepage": "https://github.com/cardene777/kiwa#readme",
+  "bugs": {
+    "url": "https://github.com/cardene777/kiwa/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "tsup": "^8.3.5",
+    "vitest": "^2.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

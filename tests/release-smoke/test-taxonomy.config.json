@@ -5,6 +5,7 @@
     "description": "全 pkg 必須。 tests/perf/ dir + *.perf.ts が最低 1 件存在すること。",
     "exempt": [
       "perf-harness",
+      "skill-test",
       "release-invariants",
       "kaname",
       "kiwa",
@@ -15,6 +16,7 @@
     ],
     "exemptReasons": {
       "perf-harness": "本体が perf primitive、 自己 dogfood は不要",
+      "skill-test": "本体が skill 発火 assertion primitive、 domain 実装なし = perf 対象外",
       "release-invariants": "release 時点の invariant chk のみ、 runtime perf 対象外",
       "kaname": "meta pkg (kiwa 内部 CLI wrapper)",
       "kiwa": "meta pkg (unified re-export)",
