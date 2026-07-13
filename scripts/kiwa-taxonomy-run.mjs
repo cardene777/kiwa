@@ -34,15 +34,28 @@ const CATEGORY_SUFFIX = {
   integration: '.integration.test.ts',
 };
 
+/**
+ * Q6-5 real driver suffix map = category × real の 2 軸で file を絞る。
+ * 例 = fidelity real driver test = `*.real.fidelity.test.ts` (2 段 suffix)。
+ * default では実行対象外 (KIWA_MODE=real env 経路)、 --include-real で明示 opt-in。
+ */
+const CATEGORY_REAL_SUFFIX = {
+  perf: '.real.perf.ts',
+  fidelity: '.real.fidelity.test.ts',
+  skill: '.real.skill.test.ts',
+  integration: '.real.integration.test.ts',
+};
+
 const VALID_CATEGORIES = Object.keys(CATEGORY_SUFFIX);
 
 function parseArgs(argv) {
-  const args = { category: null, lib: null, format: 'table' };
+  const args = { category: null, lib: null, format: 'table', includeReal: false };
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
     if (a === '--category') args.category = argv[++i];
     else if (a === '--lib') args.lib = argv[++i];
     else if (a === '--format') args.format = argv[++i];
+    else if (a === '--include-real') args.includeReal = true;
     else if (a === '--help' || a === '-h') args.help = true;
   }
   return args;
@@ -51,11 +64,12 @@ function parseArgs(argv) {
 function printHelp() {
   process.stdout.write(`kiwa-taxonomy-run — test-taxonomy 分類別実行 chk\n\n`);
   process.stdout.write(`Usage:\n`);
-  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category <perf|fidelity|skill|integration> [--lib <name>] [--format <table|json>]\n\n`);
+  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category <perf|fidelity|skill|integration> [--lib <name>] [--format <table|json>] [--include-real]\n\n`);
   process.stdout.write(`Examples:\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category fidelity\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category skill --lib agent\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category integration --format json\n`);
+  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category fidelity --include-real  # KIWA_MODE=real real driver test 含む\n`);
 }
 
 function loadConfig() {
@@ -98,10 +112,11 @@ function collectFiles(dir, suffix) {
   return out;
 }
 
-function runOneCell(lib, category) {
+function runOneCell(lib, category, includeReal = false) {
   const libDir = join(PACKAGES_DIR, lib);
   const testDir = join(libDir, 'tests', category);
   const suffix = CATEGORY_SUFFIX[category];
+  const realSuffix = CATEGORY_REAL_SUFFIX[category];
   const files = collectFiles(testDir, suffix);
   if (files.length === 0) {
     return { status: 'no-files', passed: 0, failed: 0, total: 0 };
@@ -118,16 +133,24 @@ function runOneCell(lib, category) {
   }
 
   const distDir = `.vitest-dist/tests/${category}`;
-  const vitest = spawnSync(
-    'pnpm',
-    ['exec', '--', 'vitest', 'run', distDir, '--reporter=json'],
-    {
-      cwd: libDir,
-      stdio: 'pipe',
-      encoding: 'utf-8',
-      env: process.env,
-    },
-  );
+  // includeReal=false 時 (default) = real driver test を exclude、
+  // includeReal=true 時 = real driver test を含めて実行、 KIWA_MODE=real env 併用が前提。
+  const vitestArgs = ['exec', '--', 'vitest', 'run', distDir];
+  if (!includeReal) {
+    const realJsSuffix = realSuffix.replace(/\.ts$/, '.js');
+    vitestArgs.push('--exclude', `**/*${realJsSuffix}`);
+  }
+  vitestArgs.push('--reporter=json');
+  const runEnv = { ...process.env };
+  if (includeReal && !runEnv.KIWA_MODE) {
+    runEnv.KIWA_MODE = 'real';
+  }
+  const vitest = spawnSync('pnpm', vitestArgs, {
+    cwd: libDir,
+    stdio: 'pipe',
+    encoding: 'utf-8',
+    env: runEnv,
+  });
   let report;
   try {
     report = JSON.parse(vitest.stdout);
@@ -138,7 +161,7 @@ function runOneCell(lib, category) {
   const failed = report.numFailedTests ?? 0;
   const total = report.numTotalTests ?? passed + failed;
   const status = failed === 0 && total > 0 ? 'pass' : failed > 0 ? 'fail' : 'no-tests';
-  return { status, passed, failed, total };
+  return { status, passed, failed, total, realIncluded: includeReal };
 }
 
 function statusLabel(r) {
@@ -189,9 +212,10 @@ async function main() {
   }
 
   const results = {};
+  const realTag = args.includeReal ? ' [+real]' : '';
   for (const lib of scope) {
-    process.stderr.write(`[taxonomy-run] ${lib} × ${args.category} ...`);
-    const r = runOneCell(lib, args.category);
+    process.stderr.write(`[taxonomy-run] ${lib} × ${args.category}${realTag} ...`);
+    const r = runOneCell(lib, args.category, args.includeReal);
     results[lib] = r;
     process.stderr.write(` ${statusLabel(r)}\n`);
   }
@@ -199,11 +223,15 @@ async function main() {
   const summary = summarize(results);
 
   if (args.format === 'json') {
-    process.stdout.write(`${JSON.stringify({ category: args.category, results, summary }, null, 2)}\n`);
+    process.stdout.write(
+      `${JSON.stringify({ category: args.category, includeReal: args.includeReal, results, summary }, null, 2)}\n`,
+    );
   } else {
     emitTable(results, args.category);
     process.stdout.write(
-      `\nsummary: pass=${summary.passed} fail=${summary.failed} no-files=${summary.noFiles} total=${summary.total}\n`,
+      `\nsummary: pass=${summary.passed} fail=${summary.failed} no-files=${summary.noFiles} total=${summary.total}${
+        args.includeReal ? ' (real driver test 含む、 KIWA_MODE=real)' : ''
+      }\n`,
     );
   }
 
