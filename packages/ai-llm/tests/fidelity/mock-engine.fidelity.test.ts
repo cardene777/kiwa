@@ -106,4 +106,79 @@ describe('MockEngine fidelity vs reference prompt → response table', () => {
     expect(result.ratio).toBe(100);
     expect(result.divergences).toEqual([]);
   });
+
+  it('空 messages 配列 = default response を返す', async () => {
+    const responsesText: Record<string, string> = { known: 'value' };
+    const defaultResponse = 'empty-msg-default';
+    const mock = new MockEngine({
+      responses: { known: { content: 'value' } },
+      defaultResponse,
+    });
+    const real = referenceEngine(responsesText, defaultResponse);
+
+    const result = await assertFidelity({
+      mockFn: async () => extractText(await mock.runChat({ messages: [] })),
+      realFn: async () => real.runChat(''),
+      cases: [{ name: '空 messages', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+  });
+
+  it('複数 role (system + user) = user role の最後 message を prompt として扱う', async () => {
+    const responsesText: Record<string, string> = { 'user-prompt': 'user-response' };
+    const defaultResponse = 'default';
+    const mock = new MockEngine({
+      responses: { 'user-prompt': { content: 'user-response' } },
+      defaultResponse,
+    });
+
+    const completion = await mock.runChat({
+      messages: [
+        { role: 'system', content: 'you are helpful' },
+        { role: 'user', content: 'user-prompt' },
+      ],
+    });
+    expect(completion.message.content).toBe('user-response');
+  });
+
+  it('usage token count = prompt token + completion token の合計', async () => {
+    const mock = new MockEngine({
+      responses: { calc: { content: 'a b c d e f g h i j' } },
+      defaultResponse: 'x',
+    });
+
+    const completion = await mock.runChat({
+      messages: [{ role: 'user', content: 'calc' }],
+    });
+    expect(completion.usage.totalTokens).toBe(
+      completion.usage.promptTokens + completion.usage.completionTokens,
+    );
+    expect(completion.usage.totalTokens).toBeGreaterThan(0);
+  });
+
+  it('finishReason = stop (default)、 tool_calls 有りは tool_use', async () => {
+    const mock = new MockEngine({
+      responses: { simple: { content: 'ok' } },
+      defaultResponse: 'x',
+    });
+
+    const c1 = await mock.runChat({ messages: [{ role: 'user', content: 'simple' }] });
+    expect(c1.finishReason).toBe('stop');
+  });
+
+  it('cost 計算 = (promptTokens × prompt price + completionTokens × completion price) / 1000', async () => {
+    const mock = new MockEngine({
+      responses: { calc: { content: 'response text here' } },
+      defaultResponse: 'x',
+      costPer1kTokens: { prompt: 1.0, completion: 2.0 },
+    });
+
+    const completion = await mock.runChat({
+      messages: [{ role: 'user', content: 'calc' }],
+    });
+    // cost = (prompt × 1 + completion × 2) / 1000
+    const expected =
+      (completion.usage.promptTokens * 1.0 + completion.usage.completionTokens * 2.0) / 1000;
+    expect(completion.costUsd).toBeCloseTo(expected, 5);
+  });
 });

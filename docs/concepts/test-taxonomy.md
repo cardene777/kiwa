@@ -146,6 +146,11 @@ pnpm test:taxonomy:all                                       # 4 分類 (perf/fi
 - `--include-real` = `*.real.<category>.test.ts` (real driver test) を実行対象に含める、 KIWA_MODE=real env auto 注入 (Q6-5)
 - exit code = 0 (全 pass) / 1 (1 件でも fail / compile-fail / parse-fail / no-files / no-tests)
 - **no-files も fail 判定** = CLI の目的は「揃ってる + 実行 pass」 の完全 chk、 file 不在で pass 扱いは意味を持たない。 config 記載 lib で該当分類 file 0 件 = 必ず exit 1 (flag なし)
+- **中身 chk 3 軸 (Q7)** = 「file 揃ってる + 実行 pass」 に加えて質 gate を強制。
+  - **insufficient-cases** = category 別 minCases (perf 3 / fidelity 5 / skill 5 / integration 5) 未達で fail
+  - **missing-assertion** = it() block に `expect(...)` / `assertToolCalled` / `assertFidelity` 等の assertion 呼出なしで fail
+  - **trivial-assertion** = `expect(true).toBe(true)` / `expect(1).toBe(1)` / `expect(null).toBeNull()` 等の詐称 pattern を検出して fail
+  - CLI 単独で 「file 有 + 実行 pass + 中身が空でない + trivial でない」 まで chk、 release-worthy 判定に近づく (但し coverage % / mutation MSI は別 gate、 domain-specific 中身の質は各 lib 開発者責務、 3 gate 統合運用が SSOT)
 - **perf 分類特殊経路** = perf は独自 config (`vitest.perf.config.ts`) 使用、 tsc compile 対象外 (`tests/perf/**/*` は `tsconfig.vitest.json` の exclude)、 CLI 側で `runPerfCell` に分岐して `vitest run -c vitest.perf.config.ts` 経路で実行する
 
 **real driver test SSOT** (Q6)。 各 lib の `tests/fidelity/*.real.fidelity.test.ts` は mock adapter が real backend (testcontainers Redis / real Postgres / real BullMQ 等) 挙動を再現しているか動的検証する経路。 `resolveRealFidelityMode` primitive (`@kiwa-lab/quality-metrics`) で env-gate、 KIWA_MODE=real + 必須 env keys 全 set 時のみ実行、 default (未設定 or mock) は skip する opt-in 契約。 CLI 側 `--include-real` は Q6 exemplar (cache / queue / orm) を含めた matrix 実行の統一経路。

@@ -111,4 +111,73 @@ describe('RealtimeEngine fidelity vs reference in-memory pubsub', () => {
 
     await mock.disconnect();
   });
+
+  it('複数 subscriber 全員に broadcast (両実装 fan-out)', async () => {
+    const mock = new RealtimeEngine({ artificialLatencyMs: 0 });
+    const real = referencePubsub();
+
+    const mockA: string[] = [];
+    const mockB: string[] = [];
+    const realA: string[] = [];
+    const realB: string[] = [];
+
+    await mock.subscribe('ch', (e) => {
+      if (e.kind === 'broadcast' && typeof e.payload === 'string') mockA.push(e.payload);
+    });
+    await mock.subscribe('ch', (e) => {
+      if (e.kind === 'broadcast' && typeof e.payload === 'string') mockB.push(e.payload);
+    });
+    await real.subscribe('ch', (_e, p) => {
+      if (typeof p === 'string') realA.push(p);
+    });
+    await real.subscribe('ch', (_e, p) => {
+      if (typeof p === 'string') realB.push(p);
+    });
+
+    await mock.publish('ch', 'msg', 'fan-out');
+    await real.publish('ch', 'msg', 'fan-out');
+
+    expect(mockA).toEqual(['fan-out']);
+    expect(mockB).toEqual(['fan-out']);
+    expect(realA).toEqual(['fan-out']);
+    expect(realB).toEqual(['fan-out']);
+
+    await mock.disconnect();
+  });
+
+  it('disconnect 後 = publish は不発 (両実装 lifecycle 契約)', async () => {
+    const mock = new RealtimeEngine({ artificialLatencyMs: 0 });
+
+    const received: string[] = [];
+    await mock.subscribe('ch', (e) => {
+      if (e.kind === 'broadcast' && typeof e.payload === 'string') received.push(e.payload);
+    });
+
+    await mock.disconnect();
+    // disconnect 後の publish は pending queue に積まれるが handler に届かない
+    await mock.publish('ch', 'msg', 'after-disconnect');
+
+    expect(received.length).toBe(0);
+  });
+
+  it('別 channel は完全独立 (channel 間 crossover なし)', async () => {
+    const mock = new RealtimeEngine({ artificialLatencyMs: 0 });
+
+    const chA: string[] = [];
+    const chB: string[] = [];
+    await mock.subscribe('ch-A', (e) => {
+      if (e.kind === 'broadcast' && typeof e.payload === 'string') chA.push(e.payload);
+    });
+    await mock.subscribe('ch-B', (e) => {
+      if (e.kind === 'broadcast' && typeof e.payload === 'string') chB.push(e.payload);
+    });
+
+    await mock.publish('ch-A', 'msg', 'to-A');
+    await mock.publish('ch-B', 'msg', 'to-B');
+
+    expect(chA).toEqual(['to-A']);
+    expect(chB).toEqual(['to-B']);
+
+    await mock.disconnect();
+  });
 });

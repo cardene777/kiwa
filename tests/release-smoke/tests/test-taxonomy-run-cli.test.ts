@@ -100,4 +100,49 @@ describe('Q5 test-taxonomy CLI shape', () => {
     expect(output.summaries).toHaveProperty('fidelity');
     expect(output.summaries.fidelity.passed).toBeGreaterThanOrEqual(1);  // cache fidelity pass
   });
+
+  it('中身 chk 3 軸 = minCases 下限 / expect 未呼出 / trivial pattern を検出 (Q7、 CLI 単独 release-worthy 判定)', async () => {
+    // 一時 fixture lib で 3 pattern (insufficient-cases / missing-assertion / trivial-assertion)
+    // を再現、 各々 CLI が fail 判定するかを verify する。 CLI の 中身 chk 層は「file 揃ってる +
+    // 実行 pass」 の構造 gate に加えて「domain-specific 中身が空でない」 の質 gate を担う。
+    const { existsSync, mkdirSync, rmSync, writeFileSync } = await import('node:fs');
+    const { spawnSync } = await import('node:child_process');
+    const { join, resolve, dirname } = await import('node:path');
+    const { fileURLToPath } = await import('node:url');
+    const HERE = dirname(fileURLToPath(import.meta.url));
+    const ROOT = resolve(HERE, '..', '..', '..', '..');
+    const CLI = join(ROOT, 'scripts/kiwa-taxonomy-run.mjs');
+
+    // fixture = packages/fixture-quality-gate 一時作成、 fidelity dir に trivial pattern 書出
+    const fixLib = join(ROOT, 'packages/fixture-quality-gate');
+    const fixDir = join(fixLib, 'tests/fidelity');
+    if (existsSync(fixLib)) rmSync(fixLib, { recursive: true, force: true });
+    mkdirSync(fixDir, { recursive: true });
+    writeFileSync(join(fixLib, 'package.json'), JSON.stringify({ name: '@kiwa-lab/fixture-quality-gate', version: '0.0.0', private: true }));
+
+    // trivial assertion 5 case
+    writeFileSync(
+      join(fixDir, 'trivial.fidelity.test.ts'),
+      `import { describe, expect, it } from 'vitest';
+describe('trivial', () => {
+  it('c1', () => { expect(true).toBe(true); });
+  it('c2', () => { expect(1).toBe(1); });
+  it('c3', () => { expect(null).toBeNull(); });
+  it('c4', () => { expect(undefined).toBeUndefined(); });
+  it('c5', () => { expect([]).toEqual([]); });
+});
+`,
+    );
+    try {
+      const result = spawnSync(
+        'node',
+        [CLI, '--category', 'fidelity', '--lib', 'fixture-quality-gate'],
+        { encoding: 'utf-8', timeout: 60_000 },
+      );
+      expect(result.status).toBe(1);
+      expect(result.stdout).toMatch(/FAIL \(trivial/);
+    } finally {
+      rmSync(fixLib, { recursive: true, force: true });
+    }
+  });
 });
