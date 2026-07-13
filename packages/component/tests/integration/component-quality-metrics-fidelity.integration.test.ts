@@ -92,4 +92,62 @@ describe('component × quality-metrics integration — story render × fidelity 
     expect(result.divergences.length).toBe(1);
     expect(result.divergences[0]?.reason).toBe('deepStrictEqual mismatch');
   });
+
+  it('createStoryRegistry の unregister 相当 = register 未実行 title で mount = throw', () => {
+    const registry = createStoryRegistry();
+    // 何も register していない状態で mount = 同期 throw
+    expect(() => registry.mount('Unregistered', 'Any')).toThrow(/no entry/);
+  });
+
+  it('複数 title を独立に register + mount = 各々 render 結果を返す', async () => {
+    const registry = createStoryRegistry();
+    registry.register({
+      title: 'ButtonA',
+      render: (args: ButtonArgs) => createNode('button', { text: `A:${args.label}` }),
+      stories: { Primary: { args: { label: 'click' } } },
+    });
+    registry.register({
+      title: 'ButtonB',
+      render: (args: ButtonArgs) => createNode('button', { text: `B:${args.label}` }),
+      stories: { Primary: { args: { label: 'click' } } },
+    });
+
+    const a = await registry.mount('ButtonA', 'Primary');
+    const b = await registry.mount('ButtonB', 'Primary');
+
+    expect(a.canvas.root.text).toBe('A:click');
+    expect(b.canvas.root.text).toBe('B:click');
+    // 独立性 = A の mount が B に影響しない
+    expect(a.canvas.root.text).not.toBe(b.canvas.root.text);
+  });
+
+  it('overrideArgs 経路 = args 上書きで render 動作 (component × quality-metrics 連携)', async () => {
+    const registry = createStoryRegistry();
+    registry.register({
+      title: 'Button',
+      render: (args: ButtonArgs) => createNode('button', { text: args.label }),
+      stories: { Primary: { args: { label: 'default' } } },
+    });
+
+    // overrideArgs で label 上書き
+    const canvas = await registry.mount('Button', 'Primary', { label: 'overridden' });
+
+    const result = await assertFidelity({
+      mockFn: async () => canvas.canvas.root.text ?? '',
+      realFn: async () => 'overridden',
+      cases: [{ name: 'override args 反映', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+  });
+
+  it('未存在 storyName = mount throw (register title は存在するが storyName 未定義)', () => {
+    const registry = createStoryRegistry();
+    registry.register({
+      title: 'Button',
+      render: (args: ButtonArgs) => createNode('button', { text: args.label }),
+      stories: { Primary: { args: { label: 'ok' } } },
+    });
+
+    expect(() => registry.mount('Button', 'Nonexistent')).toThrow(/no entry/);
+  });
 });
