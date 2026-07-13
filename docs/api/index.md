@@ -10,6 +10,10 @@ Auto-generated API documentation for every language kiwa ships.
 - **Rust** — [`/api/rust/kiwa/`](./rust/kiwa/) covers `kiwa-test-rs` (cargo doc output)
 - **Solidity** — [`/api/solidity/dogfood-foundry-dapp/`](./solidity/dogfood-foundry-dapp/) covers the dogfood Foundry project (forge doc output)
 
+## test-taxonomy guide (user-facing)
+
+- **[test-taxonomy-guide.md](./test-taxonomy-guide.md)** — 5 分類 SSOT + meta lint + fidelity primitive + skill-test + CLI + real driver 経路の user-facing 統合 guide。 新規 lib 追加時の手順 + 各 primitive 使用例。
+
 ## Regeneration
 
 The three generators are wired into a single local skill:
