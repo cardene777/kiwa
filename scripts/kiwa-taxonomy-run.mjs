@@ -166,10 +166,10 @@ function runOneCell(lib, category, includeReal = false) {
 
 function statusLabel(r) {
   if (!r) return '—';
-  if (r.status === 'no-files') return 'no-files';
-  if (r.status === 'no-tests') return 'no-tests';
-  if (r.status === 'compile-fail') return 'compile-fail';
-  if (r.status === 'parse-fail') return 'parse-fail';
+  if (r.status === 'no-files') return 'FAIL (no-files)';
+  if (r.status === 'no-tests') return 'FAIL (no-tests)';
+  if (r.status === 'compile-fail') return 'FAIL (compile)';
+  if (r.status === 'parse-fail') return 'FAIL (parse)';
   return r.status === 'pass' ? `pass ${r.passed}/${r.total}` : `FAIL ${r.failed}/${r.total}`;
 }
 
@@ -184,8 +184,12 @@ function emitTable(results, category) {
 
 function summarize(results) {
   const passed = Object.values(results).filter((r) => r.status === 'pass').length;
+  // no-files = config 記載 lib で該当分類の test file 不在 = fail 判定。
+  // CLI の目的は「揃ってる + 実行 pass」 の完全 chk、 file 不在で pass 扱いは
+  // 意味を持たない (--lib は config 外 lib も指定可能だが、 default で該当 lib 全走査時は
+  // config 記載 lib のみが scope、 その scope 内で不在は必ず fail)。
   const failed = Object.values(results).filter((r) =>
-    ['fail', 'compile-fail', 'parse-fail'].includes(r.status),
+    ['fail', 'compile-fail', 'parse-fail', 'no-files', 'no-tests'].includes(r.status),
   ).length;
   const noFiles = Object.values(results).filter((r) => r.status === 'no-files').length;
   return { passed, failed, noFiles, total: Object.keys(results).length };
