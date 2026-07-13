@@ -28,8 +28,8 @@
   },
 
   "requireFidelity": {
-    "description": "mock adapter 提供 lib のみ必須。 tests/fidelity/ dir + *.fidelity.test.ts が最低 1 件存在すること。 warn only (phase 1)、 将来 fail 化予定。",
-    "mode": "warn",
+    "description": "mock adapter 提供 lib のみ必須。 tests/fidelity/ dir + *.fidelity.test.ts が最低 1 件存在すること。 phase 2 = fail (PR #1590-1597 で全 8 lib 揃った後 flip、 storage は現存 package なしのため削除)。",
+    "mode": "fail",
     "mockAdapterLibs": [
       "auth",
       "cache",
@@ -37,7 +37,6 @@
       "search",
       "ai-llm",
       "realtime",
-      "storage",
       "streaming",
       "payment",
       "orm"
