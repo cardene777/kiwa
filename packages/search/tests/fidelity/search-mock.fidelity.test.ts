@@ -117,4 +117,103 @@ describe('createMeilisearchMock fidelity vs reference index store', () => {
     expect(result.ratio).toBe(100);
     expect(result.divergences).toEqual([]);
   });
+
+  it('addDocuments 重複 id = 上書き (両実装、 同じ id は inserted 増えない)', async () => {
+    const mock = createMeilisearchMock({ typoTolerance: false });
+    const real = referenceIndex();
+
+    const docs1: Doc[] = [{ id: 'dup', title: 'first title' }];
+    const docs2: Doc[] = [{ id: 'dup', title: 'updated title' }];
+
+    await mock.addDocuments('idx', docs1);
+    await real.addDocuments('idx', docs1);
+
+    const result = await assertFidelity({
+      mockFn: async () => {
+        const r = await mock.addDocuments('idx', docs2);
+        // 2 回目 = 既存 id で inserted=0
+        return r.inserted;
+      },
+      realFn: async () => {
+        const r = await real.addDocuments('idx', docs2);
+        return r.inserted;
+      },
+      cases: [{ name: '重複 id で inserted=0', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+  });
+
+  it('add 後 clear 前は全 doc が totalHits に含まれる (両実装 index 状態)', async () => {
+    const mock = createMeilisearchMock({ typoTolerance: false });
+    const real = referenceIndex();
+
+    const docs: Doc[] = [
+      { id: '1', title: 'foo bar baz' },
+      { id: '2', title: 'foo bar qux' },
+      { id: '3', title: 'nothing common' },
+    ];
+    await mock.addDocuments('idx', docs);
+    await real.addDocuments('idx', docs);
+
+    const result = await assertFidelity({
+      mockFn: async () => (await mock.search('idx', { q: 'foo' })).totalHits,
+      realFn: async () => (await real.search('idx', 'foo')).total,
+      cases: [
+        { name: '"foo" hit 2 件 (id=1,2)', args: [] as [] },
+      ],
+    });
+    expect(result.ratio).toBe(100);
+  });
+
+  it('空 query = 全件 return (両実装 no-filter)', async () => {
+    const mock = createMeilisearchMock({ typoTolerance: false });
+    const real = referenceIndex();
+
+    const docs: Doc[] = [
+      { id: '1', title: 'a' },
+      { id: '2', title: 'b' },
+      { id: '3', title: 'c' },
+    ];
+    await mock.addDocuments('idx', docs);
+    await real.addDocuments('idx', docs);
+
+    const result = await assertFidelity({
+      mockFn: async () => (await mock.search('idx', { q: '' })).totalHits,
+      realFn: async () => (await real.search('idx', '')).total,
+      cases: [{ name: '空 query 全件', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+  });
+
+  it('未 add index への search = 両実装で totalHits 0', async () => {
+    const mock = createMeilisearchMock({ typoTolerance: false });
+    const real = referenceIndex();
+
+    const result = await assertFidelity({
+      mockFn: async () => (await mock.search('never-added', { q: 'anything' })).totalHits,
+      realFn: async () => (await real.search('never-added', 'anything')).total,
+      cases: [{ name: '未 add index = 0 件', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+  });
+
+  it('大文字小文字を区別しない (両実装 case-insensitive、 lowercase 統一)', async () => {
+    const mock = createMeilisearchMock({ typoTolerance: false });
+    const real = referenceIndex();
+
+    const docs: Doc[] = [{ id: '1', title: 'Hello World' }];
+    await mock.addDocuments('idx', docs);
+    await real.addDocuments('idx', docs);
+
+    const result = await assertFidelity({
+      mockFn: async (q: string) => (await mock.search('idx', { q })).totalHits,
+      realFn: async (q: string) => (await real.search('idx', q)).total,
+      cases: [
+        { name: '"HELLO" (upper) hit', args: ['HELLO'] as [string] },
+        { name: '"hello" (lower) hit', args: ['hello'] as [string] },
+        { name: '"Hello" (mixed) hit', args: ['Hello'] as [string] },
+      ],
+    });
+    expect(result.ratio).toBe(100);
+  });
 });
