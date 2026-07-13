@@ -4843,6 +4843,9 @@ importers:
       '@kiwa-lab/perf-harness':
         specifier: workspace:*
         version: link:../perf-harness
+      '@kiwa-lab/quality-metrics':
+        specifier: workspace:*
+        version: link:../quality-metrics
       '@stryker-mutator/core':
         specifier: ^8.7.1
         version: 8.7.1

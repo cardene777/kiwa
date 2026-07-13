@@ -70,3 +70,12 @@ export {
   type AdaptiveThreshold,
   type AdaptiveThresholdReport,
 } from './threshold-learning.js';
+
+// Q2 = fidelity 実行 assertion primitive (docs/concepts/test-taxonomy.md § fidelity)
+export {
+  assertFidelity,
+  type FidelityAssertInput,
+  type FidelityAssertResult,
+  type FidelityCase,
+  type FidelityDivergence,
+} from './fidelity-assert.js';
