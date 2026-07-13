@@ -138,4 +138,109 @@ describe('setupOrmEnv (drizzle + sqlite mock) fidelity vs reference impl', () =>
 
     await env.stop();
   });
+
+  it('UNIQUE email 制約違反 = 両 throw (異 id で同 email 挿入)', async () => {
+    const env = await setupOrmEnv({
+      mode: 'mock',
+      orm: 'drizzle',
+      dialect: 'sqlite',
+      schema,
+      migrations: MIGRATION,
+    });
+    const real = referenceStore();
+
+    env.raw.prepare('INSERT INTO users (id, email) VALUES (?, ?)').run(1, 'shared@example.com');
+    real.insert({ id: 1, email: 'shared@example.com' });
+
+    const result = await assertFidelity({
+      mockFn: async () => {
+        env.raw.prepare('INSERT INTO users (id, email) VALUES (?, ?)').run(2, 'shared@example.com');
+      },
+      realFn: async () => {
+        real.insert({ id: 2, email: 'shared@example.com' });
+      },
+      cases: [{ name: 'email 衝突', args: [] as [] }],
+    });
+    expect(result.passed).toBe(1);
+    expect(result.failed).toBe(0);
+
+    await env.stop();
+  });
+
+  it('findById 存在 = row 返す、 未 insert = undefined (両実装)', async () => {
+    const env = await setupOrmEnv({
+      mode: 'mock',
+      orm: 'drizzle',
+      dialect: 'sqlite',
+      schema,
+      migrations: MIGRATION,
+    });
+    const real = referenceStore();
+
+    env.raw.prepare('INSERT INTO users (id, email) VALUES (?, ?)').run(1, 'find@example.com');
+    real.insert({ id: 1, email: 'find@example.com' });
+
+    const result = await assertFidelity({
+      mockFn: async (id: number) => {
+        const row = env.raw.prepare('SELECT id, email FROM users WHERE id = ?').get(id) as UserRow | undefined;
+        return row ?? null;
+      },
+      realFn: async (id: number) => real.findById(id) ?? null,
+      cases: [
+        { name: '存在 id=1', args: [1] as [number] },
+        { name: '未存在 id=999', args: [999] as [number] },
+      ],
+    });
+    expect(result.ratio).toBe(100);
+
+    await env.stop();
+  });
+
+  it('大量 insert (100 件) = 全 row 保持される (両実装)', async () => {
+    const env = await setupOrmEnv({
+      mode: 'mock',
+      orm: 'drizzle',
+      dialect: 'sqlite',
+      schema,
+      migrations: MIGRATION,
+    });
+    const real = referenceStore();
+
+    for (let i = 1; i <= 100; i += 1) {
+      env.raw.prepare('INSERT INTO users (id, email) VALUES (?, ?)').run(i, `u${i}@example.com`);
+      real.insert({ id: i, email: `u${i}@example.com` });
+    }
+
+    const result = await assertFidelity({
+      mockFn: async () => {
+        const row = env.raw.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number };
+        return row.c;
+      },
+      realFn: async () => real.selectAll().length,
+      cases: [{ name: '100 件 count', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await env.stop();
+  });
+
+  it('空 table = selectAll 空配列 (両実装)', async () => {
+    const env = await setupOrmEnv({
+      mode: 'mock',
+      orm: 'drizzle',
+      dialect: 'sqlite',
+      schema,
+      migrations: MIGRATION,
+    });
+    const real = referenceStore();
+
+    const result = await assertFidelity({
+      mockFn: async () => (env.raw.prepare('SELECT id, email FROM users').all() as UserRow[]).length,
+      realFn: async () => real.selectAll().length,
+      cases: [{ name: '空 table', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await env.stop();
+  });
 });
