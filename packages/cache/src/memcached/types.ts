@@ -11,6 +11,14 @@ import type { TestEnvBase, TestMode } from '@kiwa-lab/core';
  */
 export type MemcachedMode = 'stub' | 'testcontainers';
 
+export const MEMCACHED_MODES: readonly MemcachedMode[] = ['stub', 'testcontainers'];
+export function isMemcachedMode(value: unknown): value is MemcachedMode {
+  return (
+    typeof value === 'string' &&
+    (MEMCACHED_MODES as readonly string[]).includes(value)
+  );
+}
+
 /**
  * Wire-shape client selector. Mirrors the two dominant Memcached client
  * libraries so consumers can align the fixture with whichever they already
@@ -19,6 +27,14 @@ export type MemcachedMode = 'stub' | 'testcontainers';
  * - `memcached`: the classic Node.js Memcached client (peer `memcached@^2`).
  */
 export type MemcachedClient = 'memjs' | 'memcached';
+
+export const MEMCACHED_CLIENTS: readonly MemcachedClient[] = ['memjs', 'memcached'];
+export function isMemcachedClient(value: unknown): value is MemcachedClient {
+  return (
+    typeof value === 'string' &&
+    (MEMCACHED_CLIENTS as readonly string[]).includes(value)
+  );
+}
 
 /**
  * Snapshot of a stored Memcached entry. Values are stored as raw strings —
