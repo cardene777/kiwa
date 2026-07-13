@@ -486,6 +486,24 @@ pnpm gate:mutation                  # asserts the per-package thresholds
 pnpm gate:coverage                  # asserts Lines/Branches/Functions thresholds
 ```
 
+### Gate 3 — test-taxonomy meta gate (`pnpm test:taxonomy:all`)
+
+Beyond coverage / mutation, kiwa enforces a **structural gate** — every mock-adapter-providing lib must have `tests/fidelity/*.fidelity.test.ts`, every skill-implementing lib must have `tests/skill/*.skill.test.ts`, every dependency-crossing lib must have `tests/integration/*.integration.test.ts`, and every non-exempt lib must have `tests/perf/*.perf.ts`. The taxonomy CLI runs all 4 categories across every applicable lib and outputs a `lib × category` matrix. `no-files` is treated as failure — the CLI's job is to guarantee both **assembled** and **passing** in one command.
+
+```bash
+# 1-command release-gate check (perf + fidelity + skill + integration matrix)
+pnpm test:taxonomy:all
+
+# Single category
+pnpm test:taxonomy -- --category fidelity
+pnpm test:taxonomy -- --category skill --lib agent
+
+# Include real driver tests (testcontainers, KIWA_MODE=real auto-set)
+pnpm test:taxonomy:all -- --include-real
+```
+
+Exit code = 0 (every applicable cell pass) / 1 (any cell fail / compile-fail / no-files / no-tests). The 5-category SSOT (unit / perf / fidelity / skill / integration) is defined in [`docs/concepts/test-taxonomy.md`](./docs/concepts/test-taxonomy.md); the user-facing guide with usage examples for `assertFidelity` / `resolveRealFidelityMode` / `@kiwa-lab/skill-test` primitives is at [`docs/api/test-taxonomy-guide.md`](./docs/api/test-taxonomy-guide.md).
+
 ---
 
 ## Examples
