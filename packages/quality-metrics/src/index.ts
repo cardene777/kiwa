@@ -79,3 +79,11 @@ export {
   type FidelityCase,
   type FidelityDivergence,
 } from './fidelity-assert.js';
+
+// Q6 = real driver env-gate primitive (docs/concepts/test-taxonomy.md § fidelity real driver)
+export {
+  resolveRealFidelityMode,
+  type EnvSource,
+  type RealFidelityGateInput,
+  type RealFidelityGateResult,
+} from './real-fidelity-gate.js';
