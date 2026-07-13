@@ -199,4 +199,38 @@ describe(MODULE, () => {
     },
     240_000,
   );
+
+  it(
+    'timing baseline: performance.now() 100 回連続で serial p95 < 1ms (perf harness 環境 sanity)',
+    () => {
+      const N = 100;
+      const samples: number[] = [];
+      for (let i = 0; i < N; i += 1) {
+        const s = performance.now();
+        void performance.now();
+        samples.push(performance.now() - s);
+      }
+      samples.sort((a, b) => a - b);
+      const p95 = samples[Math.floor(samples.length * 0.95)] ?? 0;
+      expect(p95).toBeLessThan(1);
+    },
+    30_000,
+  );
+
+  it(
+    'allocation baseline: 小 object 100 回生成の max latency < 5ms (V8 alloc floor)',
+    () => {
+      const N = 100;
+      let maxLatency = 0;
+      for (let i = 0; i < N; i += 1) {
+        const start = performance.now();
+        const obj = { id: i, val: `v${i}`, ts: Date.now() };
+        if (obj.id < 0) throw new Error('unreachable');
+        const elapsed = performance.now() - start;
+        if (elapsed > maxLatency) maxLatency = elapsed;
+      }
+      expect(maxLatency).toBeLessThan(5);
+    },
+    30_000,
+  );
 });
