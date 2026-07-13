@@ -540,6 +540,8 @@ Reference docs:
 | [`docs/MIGRATION.ja.md`](./docs/MIGRATION.ja.md) | v0.x breaking change policy + dapp-e2e → kiwa リブランド案内 |
 | [`docs/COMPARISON.ja.md`](./docs/COMPARISON.ja.md) | Synpress / dappwright / wallet-mock 比較 + 仕様書ベース test 生成軸 (hardhat-test-suite-generator / Foundry AI / Claude Code) |
 | [`docs/RELEASING.ja.md`](./docs/RELEASING.ja.md) | Publish flow + provenance |
+| [`docs/api/test-taxonomy-guide.md`](./docs/api/test-taxonomy-guide.md) ⭐ | **test-taxonomy meta gate guide** — 5 分類 SSOT + `assertFidelity` / `resolveRealFidelityMode` / `@kiwa-lab/skill-test` primitive + `pnpm test:taxonomy:all` CLI 統合 guide |
+| [`docs/concepts/test-taxonomy.md`](./docs/concepts/test-taxonomy.md) | test-taxonomy 5 分類 SSOT (unit / perf / fidelity / skill / integration) + meta lint + CLI + real driver 経路 |
 
 Claude Code 利用者向け — skill 完全リファレンス:
 
