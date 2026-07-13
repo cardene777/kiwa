@@ -87,4 +87,117 @@ describe('cache in-memory adapter fidelity vs reference impl', () => {
 
     await mock.stop?.();
   });
+
+  it('上書き set = 新 value を get で返す (両実装 last-write-wins)', async () => {
+    const mock = createInMemoryCacheEnv({});
+    const real = referenceCache();
+
+    const result = await assertFidelity({
+      mockFn: async () => {
+        await mock.set('overwrite-key', 'v1');
+        await mock.set('overwrite-key', 'v2');
+        return mock.get('overwrite-key');
+      },
+      realFn: async () => {
+        await real.set('overwrite-key', 'v1');
+        await real.set('overwrite-key', 'v2');
+        return real.get('overwrite-key');
+      },
+      cases: [{ name: 'last write wins', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await mock.stop?.();
+  });
+
+  it('set → delete → get = null (両実装、 削除の即時可視化)', async () => {
+    const mock = createInMemoryCacheEnv({});
+    const real = referenceCache();
+
+    const result = await assertFidelity({
+      mockFn: async () => {
+        await mock.set('cycle', 'v');
+        await mock.delete('cycle');
+        return mock.get('cycle');
+      },
+      realFn: async () => {
+        await real.set('cycle', 'v');
+        await real.delete('cycle');
+        return real.get('cycle');
+      },
+      cases: [{ name: 'set→delete→get null', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await mock.stop?.();
+  });
+
+  it('複数 key の独立性 = key A の delete が key B に影響しない', async () => {
+    const mock = createInMemoryCacheEnv({});
+    const real = referenceCache();
+
+    // Map ベース reference では複数 key 独立、 mock も同じ挙動を期待
+    const result = await assertFidelity({
+      mockFn: async () => {
+        await mock.set('key-a', 'va');
+        await mock.set('key-b', 'vb');
+        await mock.delete('key-a');
+        return mock.get('key-b');
+      },
+      realFn: async () => {
+        await real.set('key-a', 'va');
+        await real.set('key-b', 'vb');
+        await real.delete('key-a');
+        return real.get('key-b');
+      },
+      cases: [{ name: 'key A delete 後も key B 保持', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await mock.stop?.();
+  });
+
+  it('空 string value = get で空 string を返す (両実装、 falsy 値の保持)', async () => {
+    const mock = createInMemoryCacheEnv({});
+    const real = referenceCache();
+
+    const result = await assertFidelity({
+      mockFn: async () => {
+        await mock.set('empty', '');
+        return mock.get('empty');
+      },
+      realFn: async () => {
+        await real.set('empty', '');
+        return real.get('empty');
+      },
+      cases: [{ name: '空 string 保持', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await mock.stop?.();
+  });
+
+  it('特殊文字 (unicode / space) を含む key/value が保持される (両実装)', async () => {
+    const mock = createInMemoryCacheEnv({});
+    const real = referenceCache();
+
+    const result = await assertFidelity({
+      mockFn: async (k: string, v: string) => {
+        await mock.set(k, v);
+        return mock.get(k);
+      },
+      realFn: async (k: string, v: string) => {
+        await real.set(k, v);
+        return real.get(k);
+      },
+      cases: [
+        { name: 'unicode key/value', args: ['日本語:キー', '値🎉'] },
+        { name: 'space in key', args: ['key with space', 'value with space'] },
+        { name: 'colon delimiter', args: ['ns:sub:key', 'ns-value'] },
+      ],
+    });
+    expect(result.ratio).toBe(100);
+
+    await mock.stop?.();
+  });
 });
