@@ -103,11 +103,14 @@ function libsForCategory(category, config, allPackages) {
 
 function collectFiles(dir, suffix) {
   if (!existsSync(dir)) return [];
+  // .ts と .tsx 両方を accept (JSX を含む component test も対象)。 SSOT = meta lint
+  // 側 (test-taxonomy-existence.test.ts) の `[baseSuffix, `${baseSuffix}x`]` と整合。
+  const tsxSuffix = suffix.endsWith('.ts') ? `${suffix}x` : suffix;
   const out = [];
   for (const entry of readdirSync(dir)) {
     const p = join(dir, entry);
     const s = statSync(p);
-    if (s.isFile() && entry.endsWith(suffix)) out.push(p);
+    if (s.isFile() && (entry.endsWith(suffix) || entry.endsWith(tsxSuffix))) out.push(p);
     else if (s.isDirectory()) out.push(...collectFiles(p, suffix));
   }
   return out;

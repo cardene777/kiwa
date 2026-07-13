@@ -63,6 +63,18 @@ describe('Q5 test-taxonomy CLI shape', () => {
     expect(result.stdout).toMatch(/FAIL \(no-files\)/);
   });
 
+  it('.ts + .tsx 両拡張子を accept する (ui × perf = ui.perf.tsx を pass 判定)', () => {
+    // collectFiles で .ts のみ match だと ui.perf.tsx (JSX 含む component perf test) が
+    // no-files 判定されて false-fail する bug fix。 meta lint 側 (test-taxonomy-existence.test.ts)
+    // は既に .ts + .tsx 両 accept、 CLI 側も整合させる SSOT。
+    const result = spawnSync('node', [CLI_PATH, '--category', 'perf', '--lib', 'ui'], {
+      encoding: 'utf-8',
+      timeout: 120_000,
+    });
+    expect(result.status).toBe(0);
+    expect(result.stdout).toMatch(/ui \| pass/);
+  });
+
   it('--category all で 4 分類統合 matrix 出力', () => {
     // 実 vitest 起動は時間かかるので、 --help 経路で all support を確認する軽量 verify、
     // + --format json で単一 lib 実 run して all 挙動 shape を確認する。
