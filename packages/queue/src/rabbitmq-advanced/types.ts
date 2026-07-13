@@ -10,6 +10,29 @@ import type {
   RabbitMQQueueSpec,
 } from '../rabbitmq/types.js';
 
+/** Advanced quorum-vs-classic queue kinds — runtime array for iteration. */
+export type RabbitMQAdvancedQueueKind = 'classic' | 'quorum';
+export const RABBITMQ_ADVANCED_QUEUE_KINDS: readonly RabbitMQAdvancedQueueKind[] = [
+  'classic',
+  'quorum',
+];
+export function isRabbitMQAdvancedQueueKind(
+  value: unknown,
+): value is RabbitMQAdvancedQueueKind {
+  return (
+    typeof value === 'string' &&
+    (RABBITMQ_ADVANCED_QUEUE_KINDS as readonly string[]).includes(value)
+  );
+}
+
+/** Delayed exchange sentinel — matches the `x-delayed-message` AMQP type. */
+export const RABBITMQ_DELAYED_EXCHANGE_TYPE = 'x-delayed-message' as const;
+export function isRabbitMQDelayedExchangeType(
+  value: unknown,
+): value is typeof RABBITMQ_DELAYED_EXCHANGE_TYPE {
+  return value === RABBITMQ_DELAYED_EXCHANGE_TYPE;
+}
+
 /**
  * RabbitMQ advanced adapter. Layers prod-grade RabbitMQ patterns on top of
  * the basic v1.10-3 adapter — DLX (dead-letter exchange) routing, delayed
