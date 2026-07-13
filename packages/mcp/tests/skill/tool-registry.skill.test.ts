@@ -137,4 +137,94 @@ describe('MCP ToolRegistry skill 発火 assertion', () => {
     assertToolCalled(spy, 'Read', { times: 3 });
     assertToolCalledWith(spy, 'Read', { file: '2.md' });
   });
+
+  it('順序 assertion = 部分列 subset も検出できる (Read → Grep → Edit → Write)', async () => {
+    const spy = createToolSpy();
+    const server = new McpServer({ name: 'test', version: '0.0.0' });
+    const grepTool: McpTool = {
+      name: 'Grep',
+      description: 'search',
+      inputSchema: { type: 'object', properties: {}, required: [] },
+    };
+    const editTool: McpTool = {
+      name: 'Edit',
+      description: 'edit',
+      inputSchema: { type: 'object', properties: {}, required: [] },
+    };
+    const writeTool: McpTool = {
+      name: 'Write',
+      description: 'write',
+      inputSchema: { type: 'object', properties: {}, required: [] },
+    };
+    server.register(readTool, spyWrap(spy, 'Read', async () => [textContent('r')]));
+    server.register(grepTool, spyWrap(spy, 'Grep', async () => [textContent('g')]));
+    server.register(editTool, spyWrap(spy, 'Edit', async () => [textContent('e')]));
+    server.register(writeTool, spyWrap(spy, 'Write', async () => [textContent('w')]));
+
+    const transport = new InMemoryTransport(server);
+    const client = new McpClient(transport);
+    await client.initialize();
+
+    await client.callTool('Read', { file: 'a.md' });
+    await client.callTool('Grep', {});
+    await client.callTool('Edit', {});
+    await client.callTool('Write', {});
+
+    // 全順序
+    assertToolCallOrder(spy, ['Read', 'Grep', 'Edit', 'Write']);
+    // 部分列 (中間 tool skip)
+    assertToolCallOrder(spy, ['Read', 'Edit']);
+    assertToolCallOrder(spy, ['Grep', 'Write']);
+  });
+
+  it('順序逆 = throw する (Bash → Read の後で [Read, Bash] を期待)', async () => {
+    const spy = createToolSpy();
+    const server = new McpServer({ name: 'test', version: '0.0.0' });
+    server.register(readTool, spyWrap(spy, 'Read', async () => [textContent('r')]));
+    server.register(bashTool, spyWrap(spy, 'Bash', async () => [textContent('b')]));
+
+    const transport = new InMemoryTransport(server);
+    const client = new McpClient(transport);
+    await client.initialize();
+
+    // 実際は Bash → Read の順
+    await client.callTool('Bash', { cmd: 'ls' });
+    await client.callTool('Read', { file: 'a.md' });
+
+    expect(() => assertToolCallOrder(spy, ['Read', 'Bash'])).toThrow();
+  });
+
+  it('未 initialize state = tool call throw (transport lifecycle 契約)', async () => {
+    const spy = createToolSpy();
+    const server = new McpServer({ name: 'test', version: '0.0.0' });
+    server.register(readTool, spyWrap(spy, 'Read', async () => [textContent('r')]));
+
+    const transport = new InMemoryTransport(server);
+    const client = new McpClient(transport);
+    // initialize せずに call する = throw
+    await expect(client.callTool('Read', { file: 'a.md' })).rejects.toThrow();
+    assertToolNotCalled(spy, 'Read');
+  });
+
+  it('複数 client 独立 = 同 server でも独立 request、 spy 共有時 集約', async () => {
+    const spy = createToolSpy();
+    const server = new McpServer({ name: 'test', version: '0.0.0' });
+    server.register(readTool, spyWrap(spy, 'Read', async () => [textContent('r')]));
+
+    const transport1 = new InMemoryTransport(server);
+    const client1 = new McpClient(transport1);
+    await client1.initialize();
+
+    const transport2 = new InMemoryTransport(server);
+    const client2 = new McpClient(transport2);
+    await client2.initialize();
+
+    await client1.callTool('Read', { file: 'from-c1' });
+    await client2.callTool('Read', { file: 'from-c2' });
+
+    // 共有 spy = 2 client から集約
+    assertToolCalled(spy, 'Read', { times: 2 });
+    assertToolCalledWith(spy, 'Read', { file: 'from-c1' });
+    assertToolCalledWith(spy, 'Read', { file: 'from-c2' });
+  });
 });
