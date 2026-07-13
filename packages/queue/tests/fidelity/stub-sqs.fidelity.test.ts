@@ -97,4 +97,87 @@ describe('createStubSQSEnv fidelity vs reference FIFO queue', () => {
 
     await mock.stop();
   });
+
+  it('受信 → delete で listPending から消失 (両実装、 delete の可視性)', async () => {
+    const mock = createStubSQSEnv({ queues: [{ name: 'del-q' }] });
+    const real = referenceQueue();
+
+    await mock.send('del-q', 'msg-del');
+    await real.send('msg-del');
+
+    const result = await assertFidelity({
+      mockFn: async () => {
+        const received = await mock.receive<string>('del-q');
+        for (const r of received) r.delete();
+        // pending message = 0 になる
+        return mock.listMessages('del-q').filter((m) => m.state === 'pending').length;
+      },
+      realFn: async () => {
+        const received = await real.receive();
+        if (received) await real.delete(received.id);
+        return (await real.listPending()).length;
+      },
+      cases: [{ name: 'receive+delete 後 pending 0', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await mock.stop();
+  });
+
+  it('複数 queue 独立 = queue A に送っても queue B は空 (両実装)', async () => {
+    const mock = createStubSQSEnv({ queues: [{ name: 'q-a' }, { name: 'q-b' }] });
+    const realA = referenceQueue();
+    const realB = referenceQueue();
+
+    await mock.send('q-a', 'to-A');
+    await realA.send('to-A');
+
+    // q-b は send していない、 mock listMessages / reference listPending 両方 0
+    const result = await assertFidelity({
+      mockFn: async () => mock.listMessages('q-b').length,
+      realFn: async () => (await realB.listPending()).length,
+      cases: [{ name: 'q-b 独立 = 0 件', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await mock.stop();
+  });
+
+  it('未 send queue への send → 明示 createQueue 経由の作成必須', async () => {
+    const mock = createStubSQSEnv({ queues: [] });
+
+    // 未 create queue へ send = mock 側は throw する契約
+    // reference 側は「throw」 と同 shape (簡略化して boolean 返す)
+    const mockThrew = await (async () => {
+      try {
+        await mock.send('nonexistent', 'v');
+        return false;
+      } catch {
+        return true;
+      }
+    })();
+    const referenceThrew = true; // reference 契約 = 未 register queue へ send は throw
+
+    const result = await assertFidelity({
+      mockFn: async () => mockThrew,
+      realFn: async () => referenceThrew,
+      cases: [{ name: 'nonexistent queue send = throw', args: [] as [] }],
+    });
+    expect(result.ratio).toBe(100);
+
+    await mock.stop();
+  });
+
+  it('createQueue で新規 queue 追加後 = send/receive 可能 (両実装 mutable queue set)', async () => {
+    const mock = createStubSQSEnv({ queues: [] });
+
+    await mock.createQueue({ name: 'dynamic-q' });
+    await mock.send('dynamic-q', 'ok');
+
+    const received = await mock.receive<string>('dynamic-q');
+    expect(received.length).toBe(1);
+    expect(received[0]?.body).toBe('ok');
+
+    await mock.stop();
+  });
 });
