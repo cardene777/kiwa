@@ -136,14 +136,17 @@ pnpm test:taxonomy -- --category fidelity
 pnpm test:taxonomy -- --category skill --lib agent
 pnpm test:taxonomy -- --category integration --format json
 pnpm test:taxonomy -- --category fidelity --include-real   # Q6-5 real driver test 含む (KIWA_MODE=real auto)
+pnpm test:taxonomy:all                                       # 4 分類 (perf/fidelity/skill/integration) 一括実行 + 統合 matrix
 ```
 
-- `--category` = perf / fidelity / skill / integration のいずれか (必須)
+- `--category` = perf / fidelity / skill / integration / all のいずれか (必須)
+  - `all` = 4 分類全実行 + 統合 matrix 出力、 1 分類でも fail で exit 1
 - `--lib` = 単一 lib 指定 (省略 = config 記載の該当 lib 全走査)
 - `--format` = table (default) or json
 - `--include-real` = `*.real.<category>.test.ts` (real driver test) を実行対象に含める、 KIWA_MODE=real env auto 注入 (Q6-5)
 - exit code = 0 (全 pass) / 1 (1 件でも fail / compile-fail / parse-fail / no-files / no-tests)
 - **no-files も fail 判定** = CLI の目的は「揃ってる + 実行 pass」 の完全 chk、 file 不在で pass 扱いは意味を持たない。 config 記載 lib で該当分類 file 0 件 = 必ず exit 1 (flag なし)
+- **perf 分類特殊経路** = perf は独自 config (`vitest.perf.config.ts`) 使用、 tsc compile 対象外 (`tests/perf/**/*` は `tsconfig.vitest.json` の exclude)、 CLI 側で `runPerfCell` に分岐して `vitest run -c vitest.perf.config.ts` 経路で実行する
 
 **real driver test SSOT** (Q6)。 各 lib の `tests/fidelity/*.real.fidelity.test.ts` は mock adapter が real backend (testcontainers Redis / real Postgres / real BullMQ 等) 挙動を再現しているか動的検証する経路。 `resolveRealFidelityMode` primitive (`@kiwa-lab/quality-metrics`) で env-gate、 KIWA_MODE=real + 必須 env keys 全 set 時のみ実行、 default (未設定 or mock) は skip する opt-in 契約。 CLI 側 `--include-real` は Q6 exemplar (cache / queue / orm) を含めた matrix 実行の統一経路。
 

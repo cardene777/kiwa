@@ -62,4 +62,30 @@ describe('Q5 test-taxonomy CLI shape', () => {
     expect(result.status).toBe(1);
     expect(result.stdout).toMatch(/FAIL \(no-files\)/);
   });
+
+  it('--category all で 4 分類統合 matrix 出力', () => {
+    // 実 vitest 起動は時間かかるので、 --help 経路で all support を確認する軽量 verify、
+    // + --format json で単一 lib 実 run して all 挙動 shape を確認する。
+    const helpResult = spawnSync('node', [CLI_PATH, '--help'], { encoding: 'utf-8' });
+    expect(helpResult.stdout).toMatch(/perf\|fidelity\|skill\|integration\|all/);
+    expect(helpResult.stdout).toMatch(/--category all/);
+
+    // 実 all run は cache のみ scope (--lib cache) で軽量確認、 all 出力 matrix + 4 分類の
+    // summary per category が出力される shape を検証。
+    const runResult = spawnSync(
+      'node',
+      [CLI_PATH, '--category', 'all', '--lib', 'cache', '--format', 'json'],
+      { encoding: 'utf-8', timeout: 300_000 },
+    );
+    // exit code = 1 (cache は skill/integration 対象外 で no-files fail が発生する)
+    expect(runResult.status).toBe(1);
+    const output = JSON.parse(runResult.stdout);
+    expect(output.category).toBe('all');
+    expect(output.results).toHaveProperty('perf');
+    expect(output.results).toHaveProperty('fidelity');
+    expect(output.results).toHaveProperty('skill');
+    expect(output.results).toHaveProperty('integration');
+    expect(output.summaries).toHaveProperty('fidelity');
+    expect(output.summaries.fidelity.passed).toBeGreaterThanOrEqual(1);  // cache fidelity pass
+  });
 });
