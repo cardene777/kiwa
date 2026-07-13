@@ -92,4 +92,94 @@ describe('createStripeMock fidelity vs reference HMAC signing store', () => {
     expect(result.ratio).toBe(100);
     expect(result.divergences).toEqual([]);
   });
+
+  it('rawBody 改竄 = verify 失敗 (bad-signature reason、 セキュリティ契約)', async () => {
+    const mock = createStripeMock({ secret: SECRET, now: () => NOW, toleranceMs: 60_000 });
+    const signed = mock.signWebhook({
+      type: 'payment.succeeded',
+      amountCents: 1000,
+      currency: 'usd',
+      customerId: 'cus_tamper',
+    });
+    const tamperedBody = signed.rawBody.replace('cus_tamper', 'cus_hacked');
+
+    const result = mock.verifyWebhook({
+      rawBody: tamperedBody,
+      signature: signed.signature,
+    });
+    expect(result.ok).toBe(false);
+    expect(result.reason).toBe('bad-signature');
+  });
+
+  it('古い timestamp = stale-timestamp reason で reject (tolerance 越え)', async () => {
+    const mock = createStripeMock({
+      secret: SECRET,
+      now: () => NOW,
+      toleranceMs: 60_000, // 1 分
+    });
+    const OLD = NOW - 5 * 60 * 1000; // 5 分前 = tolerance 越え
+    const signed = mock.signWebhook({
+      type: 'payment.succeeded',
+      amountCents: 1000,
+      currency: 'usd',
+      customerId: 'cus_old',
+      timestamp: OLD,
+    });
+
+    const result = mock.verifyWebhook({
+      rawBody: signed.rawBody,
+      signature: signed.signature,
+    });
+    expect(result.ok).toBe(false);
+    expect(result.reason).toBe('stale-timestamp');
+  });
+
+  it('malformed rawBody (JSON parse fail) = malformed-body reason', async () => {
+    const mock = createStripeMock({ secret: SECRET, now: () => NOW });
+
+    const result = mock.verifyWebhook({
+      rawBody: 'not-json-{',
+      signature: 'any-sig',
+    });
+    expect(result.ok).toBe(false);
+    expect(result.reason).toBe('malformed-body');
+  });
+
+  it('複数 signWebhook = 連続 event id が生成される (両実装 counter increment)', async () => {
+    const mock = createStripeMock({ secret: SECRET, now: () => NOW });
+
+    const s1 = mock.signWebhook({
+      type: 'payment.succeeded',
+      amountCents: 100,
+      currency: 'usd',
+      customerId: 'cus_a',
+    });
+    const s2 = mock.signWebhook({
+      type: 'payment.succeeded',
+      amountCents: 200,
+      currency: 'usd',
+      customerId: 'cus_b',
+    });
+    // 両 event の id が異なる
+    expect(s1.event.id).not.toBe(s2.event.id);
+    expect(s1.event.id.startsWith('evt_')).toBe(true);
+    expect(s2.event.id.startsWith('evt_')).toBe(true);
+  });
+
+  it('event body に amountCents / currency / customerId が保存される', async () => {
+    const mock = createStripeMock({ secret: SECRET, now: () => NOW });
+
+    const s = mock.signWebhook({
+      type: 'charge.succeeded',
+      amountCents: 3500,
+      currency: 'jpy',
+      customerId: 'cus_jp',
+    });
+    // rawBody parse で field 保持確認
+    const parsed = JSON.parse(s.rawBody);
+    expect(parsed.amountCents).toBe(3500);
+    expect(parsed.currency).toBe('jpy');
+    expect(parsed.customerId).toBe('cus_jp');
+    expect(parsed.type).toBe('charge.succeeded');
+  });
 });
