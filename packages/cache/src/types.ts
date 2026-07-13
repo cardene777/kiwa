@@ -12,6 +12,15 @@ import type { TestEnvBase, TestMode } from '@kiwa-lab/core';
  */
 export type CacheMode = 'testcontainers' | 'in-memory';
 
+/** Runtime accessor for all valid `CacheMode` values. */
+export const CACHE_MODES: readonly CacheMode[] = ['testcontainers', 'in-memory'];
+export function isCacheMode(value: unknown): value is CacheMode {
+  return (
+    typeof value === 'string' &&
+    (CACHE_MODES as readonly string[]).includes(value)
+  );
+}
+
 /**
  * Wire-shape client selector for `testcontainers` mode. Mirrors the two
  * dominant Redis client libraries so consumers can align the fixture with
@@ -20,6 +29,15 @@ export type CacheMode = 'testcontainers' | 'in-memory';
  * - `node-redis`: the official Redis client (peer `redis@^4`, v4 unified API).
  */
 export type CacheClient = 'ioredis' | 'node-redis';
+
+/** Runtime accessor for all valid `CacheClient` values. */
+export const CACHE_CLIENTS: readonly CacheClient[] = ['ioredis', 'node-redis'];
+export function isCacheClient(value: unknown): value is CacheClient {
+  return (
+    typeof value === 'string' &&
+    (CACHE_CLIENTS as readonly string[]).includes(value)
+  );
+}
 
 /**
  * Snapshot of a captured Pub/Sub delivery. Emitted to subscribers of a

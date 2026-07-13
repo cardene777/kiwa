@@ -11,11 +11,27 @@ import type { TestEnvBase, TestMode } from '@kiwa-lab/core';
  */
 export type KeyDBMode = 'stub' | 'testcontainers';
 
+export const KEYDB_MODES: readonly KeyDBMode[] = ['stub', 'testcontainers'];
+export function isKeyDBMode(value: unknown): value is KeyDBMode {
+  return (
+    typeof value === 'string' &&
+    (KEYDB_MODES as readonly string[]).includes(value)
+  );
+}
+
 /**
  * Wire-shape client selector. KeyDB is Redis-compatible so both dominant Redis
  * clients (`ioredis` + `redis` / node-redis v4) work with the same URL.
  */
 export type KeyDBClient = 'ioredis' | 'node-redis';
+
+export const KEYDB_CLIENTS: readonly KeyDBClient[] = ['ioredis', 'node-redis'];
+export function isKeyDBClient(value: unknown): value is KeyDBClient {
+  return (
+    typeof value === 'string' &&
+    (KEYDB_CLIENTS as readonly string[]).includes(value)
+  );
+}
 
 /**
  * Snapshot of a persisted KeyDB entry. Values are stored as raw strings —
