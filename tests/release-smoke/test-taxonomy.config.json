@@ -28,7 +28,7 @@
   },
 
   "requireFidelity": {
-    "description": "mock adapter 提供 lib のみ必須。 tests/fidelity/ dir + *.fidelity.test.ts が最低 1 件存在すること。 phase 2 = fail (PR #1590-1597 で全 8 lib 揃った後 flip、 storage は現存 package なしのため削除)。",
+    "description": "全 lib 必須 (user 要求で 9 lib exemplar → 全 lib 拡充、 CAR-fidelity-integration-all-libs)。 tests/fidelity/ dir + *.fidelity.test.ts が最低 1 件存在すること。",
     "mode": "fail",
     "mockAdapterLibs": [
       "auth",
@@ -39,7 +39,33 @@
       "realtime",
       "streaming",
       "payment",
-      "orm"
+      "orm",
+      "core",
+      "api",
+      "ui",
+      "data",
+      "cli-test",
+      "observability",
+      "e2e",
+      "dapp",
+      "a11y",
+      "visual",
+      "nextjs",
+      "nuxt",
+      "sveltekit",
+      "remix",
+      "astro",
+      "solidstart",
+      "qwikcity",
+      "edge",
+      "solidjs",
+      "fresh",
+      "hono",
+      "agent",
+      "mcp",
+      "cli",
+      "component",
+      "security"
     ]
   },
 
@@ -86,12 +112,44 @@
   },
 
   "requireIntegration": {
-    "description": "他 lib 依存 lib のみ必須。 tests/integration/ dir + *.integration.test.ts が最低 1 件存在すること。 phase 2 = fail (PR #1600-1602 で 3 lib exemplar 揃った後 flip)。",
+    "description": "全 lib 必須 (user 要求で 3 lib exemplar → 全 lib 拡充、 CAR-fidelity-integration-all-libs)。 tests/integration/ dir + *.integration.test.ts が最低 1 件存在すること。",
     "mode": "fail",
     "integrationLibs": [
       "dapp",
       "e2e",
-      "component"
+      "component",
+      "core",
+      "api",
+      "ui",
+      "data",
+      "cli-test",
+      "observability",
+      "cli",
+      "a11y",
+      "visual",
+      "nextjs",
+      "nuxt",
+      "sveltekit",
+      "remix",
+      "astro",
+      "solidstart",
+      "qwikcity",
+      "edge",
+      "solidjs",
+      "fresh",
+      "hono",
+      "auth",
+      "cache",
+      "queue",
+      "streaming",
+      "ai-llm",
+      "realtime",
+      "payment",
+      "search",
+      "orm",
+      "agent",
+      "mcp",
+      "security"
     ]
   }
 }
