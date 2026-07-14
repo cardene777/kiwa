@@ -1,50 +1,84 @@
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   assertToolCalled,
   assertToolCallOrder,
-  assertToolCalledWith,
   createToolSpy,
 } from '@kiwa-lab/skill-test';
+import { parseSpec, createPool } from '../../src/index.js';
 
-/**
- * core skill test — core lib 内で発火する主要 skill を spy 経路で assert する。
- * pattern SSOT = packages/agent/tests/skill/openai-assistant.skill.test.ts (exemplar)。
- */
-describe('core skill 発火 assertion', () => {
-  it('T-SKL-001 主要 skill flow を spy が捕捉する', () => {
+const SAMPLE_SPEC = `# Test Spec
+
+- module: sk-mod
+- layer: unit
+
+| id    | observation      | given            | when         | then           |
+|-------|------------------|------------------|--------------|----------------|
+| T-001 | ok               | input            | call         | ok             |
+`;
+
+describe('core skill — parseSpec + createPool skill flow', () => {
+  it('T-SKL-D-001 parseSpec skill flow', () => {
     const spy = createToolSpy();
-    spy.record('core.setup', JSON.stringify({ target: 'primary' }));
-    spy.record('core.execute', JSON.stringify({ target: 'primary' }));
-    assertToolCalled(spy, 'core.setup');
-    assertToolCalled(spy, 'core.execute');
+    const doc = parseSpec(SAMPLE_SPEC);
+    spy.record('core.parseSpec', JSON.stringify({ module: doc.module }));
+
+    assertToolCalled(spy, 'core.parseSpec');
+    expect(doc.module).toBe('sk-mod');
   });
 
-  it('T-SKL-002 skill 呼出順序を assert する', () => {
+  it('T-SKL-D-002 createPool + borrow/release skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('core.setup', '{}');
-    spy.record('core.execute', '{}');
-    spy.record('core.teardown', '{}');
-    assertToolCallOrder(spy, ['core.setup', 'core.execute', 'core.teardown']);
+    const pool = await createPool<number>({
+      size: 2,
+      acquire: async () => 42,
+    });
+    spy.record('core.createPool', '{}');
+    const l = await pool.borrow();
+    spy.record('core.borrow', '{}');
+    await l.release();
+    spy.record('core.release', '{}');
+
+    assertToolCallOrder(spy, ['core.createPool', 'core.borrow', 'core.release']);
+    await pool.stopAll();
   });
 
-  it('T-SKL-003 skill 呼出引数を assert する', () => {
+  it('T-SKL-D-003 batch parseSpec skill (times=3)', () => {
     const spy = createToolSpy();
-    spy.record('core.execute', JSON.stringify({ mode: 'test', value: 42 }));
-    assertToolCalledWith(spy, 'core.execute', { mode: 'test', value: 42 });
+    for (const _i of [1, 2, 3]) {
+      parseSpec(SAMPLE_SPEC);
+      spy.record('core.parseSpec', '{}');
+    }
+
+    assertToolCalled(spy, 'core.parseSpec', { times: 3 });
   });
 
-  it('T-SKL-004 skill 呼出回数を assert する (times=2)', () => {
+  it('T-SKL-D-004 pool stopAll skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('core.execute', '{}');
-    spy.record('core.execute', '{}');
-    assertToolCalled(spy, 'core.execute', { times: 2 });
+    const pool = await createPool<string>({
+      size: 1,
+      acquire: async () => 'r',
+    });
+    spy.record('core.createPool', '{}');
+    await pool.stopAll();
+    spy.record('core.stopAll', '{}');
+
+    assertToolCallOrder(spy, ['core.createPool', 'core.stopAll']);
   });
 
-  it('T-SKL-005 error skill flow (retry pattern)', () => {
+  it('T-SKL-D-005 parseSpec + pool integration skill', async () => {
     const spy = createToolSpy();
-    spy.record('core.execute', '{}');
-    spy.record('core.retry', JSON.stringify({ attempt: 1 }));
-    assertToolCalled(spy, 'core.retry');
-    assertToolCallOrder(spy, ['core.execute', 'core.retry']);
+    const doc = parseSpec(SAMPLE_SPEC);
+    spy.record('core.parseSpec', '{}');
+    const pool = await createPool<string>({
+      size: doc.cases.length,
+      acquire: async () => 'ok',
+    });
+    spy.record('core.createPool', '{}');
+    const l = await pool.borrow();
+    spy.record('core.borrow', '{}');
+    await l.release();
+    await pool.stopAll();
+
+    assertToolCallOrder(spy, ['core.parseSpec', 'core.createPool', 'core.borrow']);
   });
 });

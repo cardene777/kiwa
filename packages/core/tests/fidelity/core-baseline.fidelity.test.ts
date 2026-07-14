@@ -1,44 +1,54 @@
 import { describe, expect, it } from 'vitest';
+import { parseSpec, createPool } from '../../src/index.js';
 
-/**
- * core fidelity test — mock 挙動 vs 期待仕様の一致 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § fidelity + packages/auth exemplar。
- */
-describe('core fidelity — mock ↔ 期待仕様', () => {
-  it('T-FID-001 mock 挙動が期待 shape を保持する', () => {
-    const observed = { id: 'core-1', value: 42, status: 'ok' };
-    const expected = { id: 'core-1', value: 42, status: 'ok' };
-    expect(observed).toEqual(expected);
-    expect(observed.id.startsWith('core')).toBe(true);
+describe('core fidelity — parseSpec / createPool contract', () => {
+  it('T-FID-D-001 parseSpec は同 markdown で idempotent (2 回目 = 1 回目)', () => {
+    const md = `# Spec\n\n- module: mod-a\n- layer: unit\n\n| id | observation | given | when | then |\n|----|-------------|-------|------|------|\n| T-1 | ok | in | call | out |`;
+    const doc1 = parseSpec(md);
+    const doc2 = parseSpec(md);
+    expect(doc1.module).toBe(doc2.module);
+    expect(doc1.cases.length).toBe(doc2.cases.length);
   });
 
-  it('T-FID-002 mock 順序性を保持する (deterministic ordering)', () => {
-    const sequence: string[] = [];
-    sequence.push('setup');
-    sequence.push('exec');
-    sequence.push('finalize');
-    expect(sequence).toEqual(['setup', 'exec', 'finalize']);
-    expect(sequence.length).toBe(3);
+  it('T-FID-D-002 createPool で size 通りの resource 供給', async () => {
+    let counter = 0;
+    const pool = await createPool<number>({
+      size: 3,
+      acquire: async () => ++counter,
+    });
+    const leases = [] as Array<{ value: number; release: () => Promise<void> }>;
+    for (let i = 0; i < 3; i++) leases.push(await pool.borrow());
+    expect(leases.length).toBe(3);
+    for (const l of leases) await l.release();
+    await pool.stopAll();
   });
 
-  it('T-FID-003 mock error 分岐を再現する', () => {
-    const throwing = () => {
-      throw new Error('core mock error');
-    };
-    expect(throwing).toThrow(/core mock error/);
+  it('T-FID-D-003 createPool の size ≤ 0 で throw', async () => {
+    await expect(
+      createPool<number>({
+        size: 0,
+        acquire: async () => 0,
+      }),
+    ).rejects.toThrow(/positive integer/);
   });
 
-  it('T-FID-004 mock async 挙動を保持する', async () => {
-    const asyncFn = async (input: string) => `${input}-processed`;
-    const result = await asyncFn('core');
-    expect(result).toBe('core-processed');
+  it('T-FID-D-004 parseSpec で cases 順序保持', () => {
+    const md = `# Spec\n\n- module: order-test\n- layer: unit\n\n| id | observation | given | when | then |\n|----|-------------|-------|------|------|\n| T-1 | first | in | call | out |\n| T-2 | second | in | call | out |\n| T-3 | third | in | call | out |`;
+    const doc = parseSpec(md);
+    expect(doc.cases.map((c) => c.id)).toEqual(['T-1', 'T-2', 'T-3']);
   });
 
-  it('T-FID-005 mock idempotency (同一 input で同一 output)', () => {
-    const fn = (n: number) => n * 2 + 1;
-    const a = fn(3);
-    const b = fn(3);
-    expect(a).toBe(b);
-    expect(a).toBe(7);
+  it('T-FID-D-005 pool release 後 re-borrow で同 resource', async () => {
+    const pool = await createPool<number>({
+      size: 1,
+      acquire: async () => 42,
+    });
+    const l1 = await pool.borrow();
+    const v1 = l1.value;
+    await l1.release();
+    const l2 = await pool.borrow();
+    expect(l2.value).toBe(v1);
+    await l2.release();
+    await pool.stopAll();
   });
 });
