@@ -6,7 +6,8 @@
   "description": "Dogfood app v1.49-3 — View Transitions + concurrent React 3 axis × 3 target × fidelity harness backed by @kiwa-lab/component v0.4 + @kiwa-lab/nextjs v1.3。",
   "scripts": {
     "test": "pnpm -F @kiwa-lab/core -F @kiwa-lab/component -F @kiwa-lab/nextjs build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose"
   },
   "dependencies": {
     "@kiwa-lab/core": "workspace:*",
