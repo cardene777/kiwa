@@ -73,6 +73,12 @@ const FORWARDED_EVENTS: Eip1193EventName[] = [
   'disconnect',
 ];
 
+// Playwright fixture body callbacks (L76-265) は Playwright test runner でのみ
+// exercise される integration test 領域で、 vitest 単体経路では inherently
+// untestable。 fixture body 内の全 callback (_anvilHandle / _walletConfigs /
+// _rpcContexts / _rpcTracker / dappE2e / page 等) は Playwright integration
+// test で cover される契約、 unit test coverage measurement からは除外する。
+/* v8 ignore start */
 export const dappE2eTest = base.extend<
   DappE2eOptions & DappE2eFixtures & InternalFixtures
 >({
@@ -263,6 +269,7 @@ export const dappE2eTest = base.extend<
     }
   },
 });
+/* v8 ignore stop */
 
 export { dappE2eTest as test };
 
@@ -495,6 +502,11 @@ export function createRpcHandler(
   };
 }
 
+// createWalletApi は fixture body callback からのみ呼出される非 export internal で、
+// Playwright test runner 起動時にのみ execute される。 vitest 単体経路では inherently
+// untestable。 API surface に含めない SSOT (rules/quality.md § Scope Boundary Check
+// 条件 2 = production callee 予定確定なし = export 化不可) で、 v8 ignore で除外。
+/* v8 ignore start */
 function createWalletApi(
   page: Page,
   rpcContext: RpcContext,
@@ -565,7 +577,9 @@ function createWalletApi(
 
   return api;
 }
+/* v8 ignore stop */
 
+/* v8 ignore start */
 function createWalletApiRecord(
   wallets: ResolvedWalletConfig[],
   apis: WalletApi[],
@@ -585,6 +599,7 @@ function createWalletApiRecord(
       throw new TypeError(`kiwa: unknown wallet rdns "${prop}"`);
     },
   });
+  /* v8 ignore stop */
 }
 
 function getRpcBridgeName(rdns: string): string {
