@@ -112,6 +112,30 @@ function runAllGates() {
   // build/typecheck (subset)
   gates.push(runGate('build-check', 'pnpm', ['-r', '--if-present', 'run', 'typecheck']));
 
+  // Gate 5 = dogfood structural check (117 dogfood-* project の 3 条件 verify)
+  // --run 経路は skip default (117 project × test:perf = 時間かかる)、 structural のみ
+  const dogfoodScript = path.join(REPO_ROOT, 'scripts/check-dogfood-gate.mjs');
+  if (existsSync(dogfoodScript)) {
+    const dogfoodArgs = [dogfoodScript];
+    if (process.env.INCLUDE_DOGFOOD_RUN === '1') dogfoodArgs.push('--run');
+    gates.push(runGate('gate5-dogfood', 'node', dogfoodArgs));
+  } else {
+    gates.push({ name: 'gate5-dogfood', status: 'missing', durationMs: 0 });
+  }
+
+  // Gate 2 = mutation MSI (test 品質軸、 test の kill/survive ratio 検証)
+  // env INCLUDE_MUTATION=1 で opt-in、 default skip (mutation = 30+ min heavy)
+  const mutationScript = path.join(REPO_ROOT, 'scripts/check-mutation-gates.mjs');
+  if (existsSync(mutationScript)) {
+    if (process.env.INCLUDE_MUTATION === '1' && !SKIP_SET.has('gate2-mutation')) {
+      gates.push(runGate('gate2-mutation', 'node', [mutationScript]));
+    } else {
+      gates.push({ name: 'gate2-mutation', status: 'skipped', durationMs: 0 });
+    }
+  } else {
+    gates.push({ name: 'gate2-mutation', status: 'missing', durationMs: 0 });
+  }
+
   return gates;
 }
 
