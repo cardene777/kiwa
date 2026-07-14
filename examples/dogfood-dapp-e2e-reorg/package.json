@@ -12,7 +12,8 @@
     "test:e2e": "pnpm -F @kiwa-lab/dapp build && playwright test",
     "typecheck": "tsc --noEmit",
     "forge:build": "forge build",
-    "fidelity:report": "tsx scripts/emit-fidelity-report.ts"
+    "fidelity:report": "tsx scripts/emit-fidelity-report.ts",
+    "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose"
   },
   "dependencies": {
     "@kiwa-lab/dapp": "workspace:*",
