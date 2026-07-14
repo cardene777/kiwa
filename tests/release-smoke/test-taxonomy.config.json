@@ -1,6 +1,5 @@
 {
   "$schema-comment": "Q1 = test taxonomy meta lint config。 SSOT = docs/concepts/test-taxonomy.md § dir 構成。 各 pkg の分類 + 免除 pkg を宣言する。",
-
   "requirePerf": {
     "description": "全 pkg 必須。 tests/perf/ dir + *.perf.ts が最低 1 件存在すること。",
     "exempt": [
@@ -26,7 +25,6 @@
       "security-devsecops": "policy pkg、 runtime code 少ない"
     }
   },
-
   "requireFidelity": {
     "description": "全 lib 必須 (user 要求で 9 lib exemplar → 全 lib 拡充、 CAR-fidelity-integration-all-libs)。 tests/fidelity/ dir + *.fidelity.test.ts が最低 1 件存在すること。",
     "mode": "fail",
@@ -65,10 +63,10 @@
       "mcp",
       "cli",
       "component",
-      "security"
+      "security",
+      "design-check"
     ]
   },
-
   "requireSkill": {
     "description": "全 lib 必須 (user 要求で 3 lib exemplar → 全 lib 拡充、 CAR-skill-all-libs)。 tests/skill/ dir + *.skill.test.ts が最低 1 件存在すること。",
     "mode": "fail",
@@ -107,10 +105,10 @@
       "search",
       "orm",
       "component",
-      "security"
+      "security",
+      "design-check"
     ]
   },
-
   "requireIntegration": {
     "description": "全 lib 必須 (user 要求で 3 lib exemplar → 全 lib 拡充、 CAR-fidelity-integration-all-libs)。 tests/integration/ dir + *.integration.test.ts が最低 1 件存在すること。",
     "mode": "fail",
@@ -149,7 +147,8 @@
       "orm",
       "agent",
       "mcp",
-      "security"
+      "security",
+      "design-check"
     ]
   }
 }
