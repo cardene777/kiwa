@@ -35,7 +35,7 @@ describe('component app scenario perf (real workload)', () => {
         {
           name: 'chromatic_visual_snapshot (create mock x 30)',
           fn: () => {
-            for (let i = 0; i < 30; i++) createChromaticVisualMock({ projectId: `p-${i}` });
+            for (let i = 0; i < 30; i++) createChromaticVisualMock({ defaultDiffThreshold: i * 0.001 });
           },
           serialP95CapMs: 50,
         },

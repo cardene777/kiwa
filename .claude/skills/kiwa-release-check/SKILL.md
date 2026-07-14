@@ -35,14 +35,16 @@ build / dogfood) を統合実行して kiwa が release 可能な状態か判定
 node scripts/release-readiness-check.mjs
 ```
 
-内部で以下 4 gate を順次実行、 各 gate の pass/fail を判定。
+内部で以下 6 gate を順次実行、 各 gate の pass/fail を判定。
 
 - **Gate 1 = coverage** (`scripts/check-coverage-gates.mjs`)
   - Lines/Statements ≥ 90% + Functions ≥ 90% + Branches ≥ 80%
   - 全 kiwa lib で verify、 未達 lib は fail 報告
-- **Gate 2 = mutation MSI** (`scripts/check-mutation-gates.mjs`、 env `INCLUDE_MUTATION=1` で opt-in)
-  - test の kill/survive ratio = test 品質軸
-  - default skip (30+ min heavy)、 明示 opt-in 時のみ実行
+- **Gate 2 = mutation MSI** (`scripts/check-mutation-gates.mjs`)
+  - test の kill/survive ratio = test 品質軸、 tier 別 threshold (Core 80 / Framework 70 / SaaS 65 / Test-type 60)
+  - v2 (2026-07-14) = default 実行に格上げ (事前生成済 mutation.json を read する軽量 gate、 数秒)
+  - stryker run 自体は nightly cron / `pnpm -F <pkg> run test:mutation` で事前生成、 本 gate は read + 閾値判定のみ
+  - `--skip-mutation` or `--skip=gate2-mutation` で skip 可能
 - **Gate 3 = taxonomy CLI** (`scripts/kiwa-taxonomy-run.mjs --category all`)
   - perf / fidelity / skill / integration 4 category × 全 lib
   - 中身 chk 3 軸 (missing-assertion / trivial-assertion / minCases) 通過必須
@@ -54,7 +56,12 @@ node scripts/release-readiness-check.mjs
   - kiwa 設計思想 = 「各 lib の性能担保は複数 dogfood application で lib を実 use して verify」
   - 117 dogfood-* project × 3 条件 = tests/perf/ dir 存在 + scripts.test:perf 存在 + @kiwa-lab/* dependency 有
   - structural chk default = 各 dogfood project の実装状態確認 (fast)
-  - env `INCLUDE_DOGFOOD_RUN=1` で opt-in = 各 dogfood project の test:perf 実行 (heavy、 数十分)
+  - `--include-dogfood-run` flag or env `INCLUDE_DOGFOOD_RUN=1` で opt-in = 各 dogfood project の test:perf 実行 (heavy、 数十分)
+- **Gate 6 = app-scenario perf** (`scripts/check-app-scenario-gate.mjs`、 2026-07-14 新設)
+  - 各 lib の `tests/perf/{lib}-app-scenario.perf.{ts,tsx}` 存在 + 中身 3 op 構成 chk
+  - structural chk default = file 存在 + main API import + runPerf3Layer + op 数 3+ を regex chk (数秒)
+  - `--include-app-scenario-run` flag で opt-in = 各 lib の `pnpm test:perf` 実行 (heavy、 20-30 min)
+  - test 追加後の壊れ検知を release check に組込む gate (2026-07-14 の 36 lib 完遂後の資産保護)
 
 ### Step 2 — 結果集約 + 判定
 
@@ -73,8 +80,11 @@ node scripts/release-readiness-check.mjs
 skill 起動時に user が付けられる option。
 
 - `--skip=<gate-name>[,<gate-name>...]` = 特定 gate skip (release-smoke / build-check / gate3-taxonomy 等)
+- `--skip-mutation` = gate2-mutation を skip (mutation.json 未生成状態でも RELEASE READY 判定を許容する場合)
 - `--summary-only` = 詳細 log 抑制、 summary table のみ表示
-- 引数なし = 全 gate 実行 (推奨、 完全 release レベル判定)
+- `--include-dogfood-run` = gate5 の実 dogfood test:perf run を有効化 (heavy、 数十分)
+- `--include-app-scenario-run` = gate6 の各 lib `pnpm test:perf` 実行を有効化 (heavy、 20-30 min)
+- 引数なし = 全 6 gate 実行 (default = light 経路、 数分完了、 推奨)
 
 ## 使用例
 
@@ -85,14 +95,17 @@ skill 起動時に user が付けられる option。
 # quick verify (Gate 1 + dogfood structural のみ、 秒単位)
 /kiwa-release-check --skip=gate3-taxonomy,release-smoke,build-check
 
-# mutation 含む完全 verify (30+ min)
-INCLUDE_MUTATION=1 /kiwa-release-check
+# mutation skip (mutation.json 未生成環境用、 default では実行される)
+/kiwa-release-check --skip-mutation
 
 # dogfood 全 project test:perf も実行 (数十分)
-INCLUDE_DOGFOOD_RUN=1 /kiwa-release-check
+/kiwa-release-check --include-dogfood-run
 
-# 完全 release レベル (mutation + dogfood run 両方)
-INCLUDE_MUTATION=1 INCLUDE_DOGFOOD_RUN=1 /kiwa-release-check
+# app-scenario perf 実 run も実行 (20-30 min)
+/kiwa-release-check --include-app-scenario-run
+
+# 完全 release レベル (dogfood run + app-scenario run 両方、 heavy 完全確認)
+/kiwa-release-check --include-dogfood-run --include-app-scenario-run
 ```
 
 ## 完了条件
@@ -104,9 +117,12 @@ INCLUDE_MUTATION=1 INCLUDE_DOGFOOD_RUN=1 /kiwa-release-check
 
 ## 関連 file
 
-- `scripts/release-readiness-check.mjs` = 4 gate 統合 runner (本 skill 経由で呼出)
+- `scripts/release-readiness-check.mjs` = 6 gate 統合 runner (本 skill 経由で呼出)
 - `scripts/check-coverage-gates.mjs` = Gate 1 coverage check
+- `scripts/check-mutation-gates.mjs` = Gate 2 mutation MSI (v2 = default 有効、 事前生成 JSON read)
 - `scripts/kiwa-taxonomy-run.mjs` = Gate 3 taxonomy CLI
+- `scripts/check-dogfood-gate.mjs` = Gate 5 dogfood structural / --run で real behavior
+- `scripts/check-app-scenario-gate.mjs` = Gate 6 app-scenario perf test 存在 + 実行 (2026-07-14 新設)
 - `tests/release-smoke/` = release-smoke test 群 (379 test)
 - `package.json prerelease` script = `pnpm release` 実行時に自動発火する経路
 - `package.json release-check` script = 明示 quick check alias
@@ -114,5 +130,4 @@ INCLUDE_MUTATION=1 INCLUDE_DOGFOOD_RUN=1 /kiwa-release-check
 ## 免責事項
 
 - **CI 全面禁止** (rules/git-workflow.md) に沿って local 実行専用、 GitHub Actions 等 CI 経路は使わない
-- Gate 2 (mutation MSI) は kiwa release SSOT では非必須のため本 skill 対象外、 別 skill or `scripts/check-mutation-gates.mjs` 直接呼出
 - release-smoke の Playwright 依存 test は browser install 済前提、 未 install なら skip 推奨

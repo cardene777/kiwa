@@ -52,7 +52,7 @@ describe('queue integration — sandbox BullMQ workflow', () => {
     env.process(async () => 'done');
     await env.addJob('drain-task', {});
     await env.waitForJob('drain-task', { timeoutMs: 2000 });
-    await env.assertQueueDrained();
+    await expect(env.assertQueueDrained()).resolves.toBeUndefined();
     await env.stop();
   });
 });
