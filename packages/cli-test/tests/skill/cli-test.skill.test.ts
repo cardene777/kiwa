@@ -1,50 +1,75 @@
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   assertToolCalled,
   assertToolCallOrder,
-  assertToolCalledWith,
   createToolSpy,
 } from '@kiwa-lab/skill-test';
+import { setupCliEnv } from '../../src/index.js';
 
-/**
- * cli-test skill test — cli-test lib 内で発火する主要 skill を spy 経路で assert する。
- * pattern SSOT = packages/agent/tests/skill/openai-assistant.skill.test.ts (exemplar)。
- */
-describe('cli-test skill 発火 assertion', () => {
-  it('T-SKL-001 主要 skill flow を spy が捕捉する', () => {
+describe('cli-test skill — setupCliEnv skill flow', () => {
+  it('T-SKL-D-001 setup + writeFile + readFile skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('cli-test.setup', JSON.stringify({ target: 'primary' }));
-    spy.record('cli-test.execute', JSON.stringify({ target: 'primary' }));
-    assertToolCalled(spy, 'cli-test.setup');
-    assertToolCalled(spy, 'cli-test.execute');
-  });
-
-  it('T-SKL-002 skill 呼出順序を assert する', () => {
-    const spy = createToolSpy();
+    const env = await setupCliEnv();
     spy.record('cli-test.setup', '{}');
-    spy.record('cli-test.execute', '{}');
-    spy.record('cli-test.teardown', '{}');
-    assertToolCallOrder(spy, ['cli-test.setup', 'cli-test.execute', 'cli-test.teardown']);
+    await env.writeFile('a.txt', 'ok');
+    spy.record('cli-test.writeFile', '{}');
+    const content = await env.readFile('a.txt');
+    spy.record('cli-test.readFile', '{}');
+
+    assertToolCallOrder(spy, ['cli-test.setup', 'cli-test.writeFile', 'cli-test.readFile']);
+    expect(content).toBe('ok');
+    await env.stop();
   });
 
-  it('T-SKL-003 skill 呼出引数を assert する', () => {
+  it('T-SKL-D-002 runCli skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('cli-test.execute', JSON.stringify({ mode: 'test', value: 42 }));
-    assertToolCalledWith(spy, 'cli-test.execute', { mode: 'test', value: 42 });
+    const env = await setupCliEnv();
+    const result = await env.runCli({ cmd: 'echo', args: ['test'] });
+    spy.record('cli-test.runCli', JSON.stringify({ cmd: 'echo' }));
+
+    assertToolCalled(spy, 'cli-test.runCli');
+    expect(result.exitCode).toBe(0);
+    await env.stop();
   });
 
-  it('T-SKL-004 skill 呼出回数を assert する (times=2)', () => {
+  it('T-SKL-D-003 batch write skill (times=3)', async () => {
     const spy = createToolSpy();
-    spy.record('cli-test.execute', '{}');
-    spy.record('cli-test.execute', '{}');
-    assertToolCalled(spy, 'cli-test.execute', { times: 2 });
+    const env = await setupCliEnv();
+    await env.writeFile('a.txt', 'a');
+    spy.record('cli-test.writeFile', '{}');
+    await env.writeFile('b.txt', 'b');
+    spy.record('cli-test.writeFile', '{}');
+    await env.writeFile('c.txt', 'c');
+    spy.record('cli-test.writeFile', '{}');
+
+    assertToolCalled(spy, 'cli-test.writeFile', { times: 3 });
+    await env.stop();
   });
 
-  it('T-SKL-005 error skill flow (retry pattern)', () => {
+  it('T-SKL-D-004 fileExists + listFiles skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('cli-test.execute', '{}');
-    spy.record('cli-test.retry', JSON.stringify({ attempt: 1 }));
-    assertToolCalled(spy, 'cli-test.retry');
-    assertToolCallOrder(spy, ['cli-test.execute', 'cli-test.retry']);
+    const env = await setupCliEnv();
+    await env.writeFile('f.txt', 'x');
+    spy.record('cli-test.writeFile', '{}');
+    await env.fileExists('f.txt');
+    spy.record('cli-test.fileExists', '{}');
+    await env.listFiles();
+    spy.record('cli-test.listFiles', '{}');
+
+    assertToolCallOrder(spy, ['cli-test.writeFile', 'cli-test.fileExists', 'cli-test.listFiles']);
+    await env.stop();
+  });
+
+  it('T-SKL-D-005 tempDir isolation skill', async () => {
+    const spy = createToolSpy();
+    const env1 = await setupCliEnv();
+    const env2 = await setupCliEnv();
+    spy.record('cli-test.setup', '{}');
+    spy.record('cli-test.setup', '{}');
+
+    expect(env1.tempDir).not.toBe(env2.tempDir);
+    assertToolCalled(spy, 'cli-test.setup', { times: 2 });
+    await env1.stop();
+    await env2.stop();
   });
 });
