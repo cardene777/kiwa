@@ -1,44 +1,45 @@
 import { describe, expect, it } from 'vitest';
+import { setupQueueEnv, createFakeClock } from '../../src/index.js';
 
-/**
- * data fidelity test — mock 挙動 vs 期待仕様の一致 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § fidelity + packages/auth exemplar。
- */
-describe('data fidelity — mock ↔ 期待仕様', () => {
-  it('T-FID-001 mock 挙動が期待 shape を保持する', () => {
-    const observed = { id: 'data-1', value: 42, status: 'ok' };
-    const expected = { id: 'data-1', value: 42, status: 'ok' };
-    expect(observed).toEqual(expected);
-    expect(observed.id.startsWith('data')).toBe(true);
+describe('data fidelity — queue + clock contract', () => {
+  it('T-FID-D-001 queue send は 一意 id を返す', async () => {
+    const env = await setupQueueEnv<string>({ mode: 'mock' });
+    const id1 = env.client.send('a');
+    const id2 = env.client.send('b');
+    expect(id1).not.toBe(id2);
+    await env.stop();
   });
 
-  it('T-FID-002 mock 順序性を保持する (deterministic ordering)', () => {
-    const sequence: string[] = [];
-    sequence.push('setup');
-    sequence.push('exec');
-    sequence.push('finalize');
-    expect(sequence).toEqual(['setup', 'exec', 'finalize']);
-    expect(sequence.length).toBe(3);
+  it('T-FID-D-002 clock advance は monotonic', async () => {
+    const clock = createFakeClock({ startMs: 100 });
+    expect(clock.nowMs()).toBe(100);
+    await clock.advanceMs(50);
+    expect(clock.nowMs()).toBe(150);
+    await clock.advanceMs(50);
+    expect(clock.nowMs()).toBe(200);
   });
 
-  it('T-FID-003 mock error 分岐を再現する', () => {
-    const throwing = () => {
-      throw new Error('data mock error');
-    };
-    expect(throwing).toThrow(/data mock error/);
+  it('T-FID-D-003 queue size は send/receive で正確', async () => {
+    const env = await setupQueueEnv<string>({ mode: 'mock' });
+    env.client.send('a');
+    env.client.send('b');
+    expect(env.client.size()).toBe(2);
+    env.client.receive();
+    expect(env.client.size()).toBe(1);
+    await env.stop();
   });
 
-  it('T-FID-004 mock async 挙動を保持する', async () => {
-    const asyncFn = async (input: string) => `${input}-processed`;
-    const result = await asyncFn('data');
-    expect(result).toBe('data-processed');
+  it('T-FID-D-004 clock schedule/unschedule 対称性', async () => {
+    const clock = createFakeClock({ startMs: 0 });
+    const id = clock.schedule(100, () => undefined);
+    expect(clock.pendingEntries().length).toBe(1);
+    clock.unschedule(id);
+    expect(clock.pendingEntries().length).toBe(0);
   });
 
-  it('T-FID-005 mock idempotency (同一 input で同一 output)', () => {
-    const fn = (n: number) => n * 2 + 1;
-    const a = fn(3);
-    const b = fn(3);
-    expect(a).toBe(b);
-    expect(a).toBe(7);
+  it('T-FID-D-005 receive で empty queue null 返却', async () => {
+    const env = await setupQueueEnv<string>({ mode: 'mock' });
+    expect(env.client.receive()).toBeNull();
+    await env.stop();
   });
 });
