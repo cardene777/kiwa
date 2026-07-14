@@ -1,50 +1,86 @@
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   assertToolCalled,
   assertToolCallOrder,
-  assertToolCalledWith,
   createToolSpy,
 } from '@kiwa-lab/skill-test';
+import { createKafkaMock } from '../../src/index.js';
 
 /**
- * streaming skill test — streaming lib 内で発火する主要 skill を spy 経路で assert する。
- * pattern SSOT = packages/agent/tests/skill/openai-assistant.skill.test.ts (exemplar)。
+ * streaming skill domain test — Kafka mock 主要 skill flow を spy 経路で assert する。
  */
-describe('streaming skill 発火 assertion', () => {
-  it('T-SKL-001 主要 skill flow を spy が捕捉する', () => {
+describe('streaming skill — Kafka skill flow', () => {
+  it('T-SKL-D-001 producer connect + send skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('streaming.setup', JSON.stringify({ target: 'primary' }));
-    spy.record('streaming.execute', JSON.stringify({ target: 'primary' }));
-    assertToolCalled(spy, 'streaming.setup');
-    assertToolCalled(spy, 'streaming.execute');
+    const kafka = createKafkaMock();
+    const producer = kafka.producer();
+    await producer.connect();
+    spy.record('kafka.producer.connect', '{}');
+    await producer.send({ topic: 'sk', messages: [{ value: 'v' }] });
+    spy.record('kafka.producer.send', JSON.stringify({ topic: 'sk' }));
+
+    assertToolCallOrder(spy, ['kafka.producer.connect', 'kafka.producer.send']);
+    await producer.disconnect();
   });
 
-  it('T-SKL-002 skill 呼出順序を assert する', () => {
+  it('T-SKL-D-002 producer disconnect skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('streaming.setup', '{}');
-    spy.record('streaming.execute', '{}');
-    spy.record('streaming.teardown', '{}');
-    assertToolCallOrder(spy, ['streaming.setup', 'streaming.execute', 'streaming.teardown']);
+    const kafka = createKafkaMock();
+    const producer = kafka.producer();
+    await producer.connect();
+    spy.record('kafka.producer.connect', '{}');
+    await producer.disconnect();
+    spy.record('kafka.producer.disconnect', '{}');
+
+    assertToolCallOrder(spy, ['kafka.producer.connect', 'kafka.producer.disconnect']);
+    expect(producer.isConnected()).toBe(false);
   });
 
-  it('T-SKL-003 skill 呼出引数を assert する', () => {
+  it('T-SKL-D-003 batch send skill (times=3)', async () => {
     const spy = createToolSpy();
-    spy.record('streaming.execute', JSON.stringify({ mode: 'test', value: 42 }));
-    assertToolCalledWith(spy, 'streaming.execute', { mode: 'test', value: 42 });
+    const kafka = createKafkaMock();
+    const producer = kafka.producer();
+    await producer.connect();
+    await producer.send({ topic: 't', messages: [{ value: '1' }] });
+    spy.record('kafka.producer.send', '{}');
+    await producer.send({ topic: 't', messages: [{ value: '2' }] });
+    spy.record('kafka.producer.send', '{}');
+    await producer.send({ topic: 't', messages: [{ value: '3' }] });
+    spy.record('kafka.producer.send', '{}');
+
+    assertToolCalled(spy, 'kafka.producer.send', { times: 3 });
+    await producer.disconnect();
   });
 
-  it('T-SKL-004 skill 呼出回数を assert する (times=2)', () => {
+  it('T-SKL-D-004 consumer subscribe skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('streaming.execute', '{}');
-    spy.record('streaming.execute', '{}');
-    assertToolCalled(spy, 'streaming.execute', { times: 2 });
+    const kafka = createKafkaMock();
+    const consumer = kafka.consumer({ groupId: 'sk4' });
+    await consumer.connect();
+    spy.record('kafka.consumer.connect', '{}');
+    await consumer.subscribe({ topics: ['sk-t'] });
+    spy.record('kafka.consumer.subscribe', JSON.stringify({ topics: ['sk-t'] }));
+
+    assertToolCallOrder(spy, ['kafka.consumer.connect', 'kafka.consumer.subscribe']);
+    await consumer.disconnect();
   });
 
-  it('T-SKL-005 error skill flow (retry pattern)', () => {
+  it('T-SKL-D-005 admin listTopics skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('streaming.execute', '{}');
-    spy.record('streaming.retry', JSON.stringify({ attempt: 1 }));
-    assertToolCalled(spy, 'streaming.retry');
-    assertToolCallOrder(spy, ['streaming.execute', 'streaming.retry']);
+    const kafka = createKafkaMock();
+    const producer = kafka.producer();
+    await producer.connect();
+    await producer.send({ topic: 'adm', messages: [{ value: 'v' }] });
+    spy.record('kafka.producer.send', '{}');
+    const admin = kafka.admin();
+    await admin.connect();
+    spy.record('kafka.admin.connect', '{}');
+    const topics = await admin.listTopics();
+    spy.record('kafka.admin.listTopics', '{}');
+
+    assertToolCallOrder(spy, ['kafka.producer.send', 'kafka.admin.connect', 'kafka.admin.listTopics']);
+    expect(topics.length).toBeGreaterThan(0);
+    await admin.disconnect();
+    await producer.disconnect();
   });
 });
