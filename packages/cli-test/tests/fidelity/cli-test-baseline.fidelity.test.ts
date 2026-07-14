@@ -1,44 +1,49 @@
 import { describe, expect, it } from 'vitest';
+import { setupCliEnv } from '../../src/index.js';
 
-/**
- * cli-test fidelity test — mock 挙動 vs 期待仕様の一致 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § fidelity + packages/auth exemplar。
- */
-describe('cli-test fidelity — mock ↔ 期待仕様', () => {
-  it('T-FID-001 mock 挙動が期待 shape を保持する', () => {
-    const observed = { id: 'cli-test-1', value: 42, status: 'ok' };
-    const expected = { id: 'cli-test-1', value: 42, status: 'ok' };
-    expect(observed).toEqual(expected);
-    expect(observed.id.startsWith('cli-test')).toBe(true);
+describe('cli-test fidelity — setupCliEnv contract', () => {
+  it('T-FID-D-001 tempDir は unique per setup', async () => {
+    const env1 = await setupCliEnv();
+    const env2 = await setupCliEnv();
+    expect(env1.tempDir).not.toBe(env2.tempDir);
+    await env1.stop();
+    await env2.stop();
   });
 
-  it('T-FID-002 mock 順序性を保持する (deterministic ordering)', () => {
-    const sequence: string[] = [];
-    sequence.push('setup');
-    sequence.push('exec');
-    sequence.push('finalize');
-    expect(sequence).toEqual(['setup', 'exec', 'finalize']);
-    expect(sequence.length).toBe(3);
+  it('T-FID-D-002 writeFile idempotent (同 path で上書き)', async () => {
+    const env = await setupCliEnv();
+    await env.writeFile('a.txt', 'v1');
+    await env.writeFile('a.txt', 'v2');
+    const content = await env.readFile('a.txt');
+    expect(content).toBe('v2');
+    await env.stop();
   });
 
-  it('T-FID-003 mock error 分岐を再現する', () => {
-    const throwing = () => {
-      throw new Error('cli-test mock error');
-    };
-    expect(throwing).toThrow(/cli-test mock error/);
+  it('T-FID-D-003 fileExists で存在確認正確', async () => {
+    const env = await setupCliEnv();
+    await env.writeFile('exists.txt', 'x');
+    expect(await env.fileExists('exists.txt')).toBe(true);
+    expect(await env.fileExists('missing.txt')).toBe(false);
+    await env.stop();
   });
 
-  it('T-FID-004 mock async 挙動を保持する', async () => {
-    const asyncFn = async (input: string) => `${input}-processed`;
-    const result = await asyncFn('cli-test');
-    expect(result).toBe('cli-test-processed');
+  it('T-FID-D-004 readFile で存在しない file は throw', async () => {
+    const env = await setupCliEnv();
+    await expect(env.readFile('missing.txt')).rejects.toThrow();
+    await env.stop();
   });
 
-  it('T-FID-005 mock idempotency (同一 input で同一 output)', () => {
-    const fn = (n: number) => n * 2 + 1;
-    const a = fn(3);
-    const b = fn(3);
-    expect(a).toBe(b);
-    expect(a).toBe(7);
+  it('T-FID-D-005 stop で cleanup (tempDir 削除)', async () => {
+    const env = await setupCliEnv();
+    await env.writeFile('a.txt', 'x');
+    await env.stop();
+    // stop 後は fileExists が false or throw を期待
+    let exists = false;
+    try {
+      exists = await env.fileExists('a.txt');
+    } catch {
+      exists = false;
+    }
+    expect(exists).toBe(false);
   });
 });
