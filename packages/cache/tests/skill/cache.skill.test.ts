@@ -1,50 +1,83 @@
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   assertToolCalled,
   assertToolCallOrder,
-  assertToolCalledWith,
   createToolSpy,
 } from '@kiwa-lab/skill-test';
+import { createInMemoryCacheEnv } from '../../src/index.js';
 
 /**
- * cache skill test — cache lib 内で発火する主要 skill を spy 経路で assert する。
- * pattern SSOT = packages/agent/tests/skill/openai-assistant.skill.test.ts (exemplar)。
+ * cache skill domain test — cache lib の主要 skill flow (set / get / delete /
+ * pub-sub) を spy 経路で assert する。
  */
-describe('cache skill 発火 assertion', () => {
-  it('T-SKL-001 主要 skill flow を spy が捕捉する', () => {
+describe('cache skill — real client skill flow', () => {
+  it('T-SKL-D-001 cache set + get skill flow が順序で発火', async () => {
     const spy = createToolSpy();
-    spy.record('cache.setup', JSON.stringify({ target: 'primary' }));
-    spy.record('cache.execute', JSON.stringify({ target: 'primary' }));
-    assertToolCalled(spy, 'cache.setup');
-    assertToolCalled(spy, 'cache.execute');
+    const env = createInMemoryCacheEnv({ mode: 'in-memory' });
+    await env.set('sk1', 'v1');
+    spy.record('cache.set', JSON.stringify({ key: 'sk1' }));
+    const value = await env.get('sk1');
+    spy.record('cache.get', JSON.stringify({ key: 'sk1' }));
+
+    assertToolCallOrder(spy, ['cache.set', 'cache.get']);
+    expect(value).toBe('v1');
+    await env.stop();
   });
 
-  it('T-SKL-002 skill 呼出順序を assert する', () => {
+  it('T-SKL-D-002 cache delete skill flow (set + delete + get null)', async () => {
     const spy = createToolSpy();
-    spy.record('cache.setup', '{}');
-    spy.record('cache.execute', '{}');
-    spy.record('cache.teardown', '{}');
-    assertToolCallOrder(spy, ['cache.setup', 'cache.execute', 'cache.teardown']);
+    const env = createInMemoryCacheEnv({ mode: 'in-memory' });
+    await env.set('sk2', 'v2');
+    spy.record('cache.set', '{}');
+    await env.delete('sk2');
+    spy.record('cache.delete', JSON.stringify({ key: 'sk2' }));
+
+    assertToolCalled(spy, 'cache.delete');
+    const value = await env.get('sk2');
+    expect(value).toBeNull();
+    await env.stop();
   });
 
-  it('T-SKL-003 skill 呼出引数を assert する', () => {
+  it('T-SKL-D-003 batch set skill (times=3)', async () => {
     const spy = createToolSpy();
-    spy.record('cache.execute', JSON.stringify({ mode: 'test', value: 42 }));
-    assertToolCalledWith(spy, 'cache.execute', { mode: 'test', value: 42 });
+    const env = createInMemoryCacheEnv({ mode: 'in-memory' });
+    await env.set('a', '1');
+    spy.record('cache.set', '{}');
+    await env.set('b', '2');
+    spy.record('cache.set', '{}');
+    await env.set('c', '3');
+    spy.record('cache.set', '{}');
+
+    assertToolCalled(spy, 'cache.set', { times: 3 });
+    await env.stop();
   });
 
-  it('T-SKL-004 skill 呼出回数を assert する (times=2)', () => {
+  it('T-SKL-D-004 pub-sub skill flow (subscribe + publish)', async () => {
     const spy = createToolSpy();
-    spy.record('cache.execute', '{}');
-    spy.record('cache.execute', '{}');
-    assertToolCalled(spy, 'cache.execute', { times: 2 });
+    const env = createInMemoryCacheEnv({ mode: 'in-memory' });
+    const sub = await env.subscribe('sk-ch');
+    spy.record('cache.subscribe', JSON.stringify({ channel: 'sk-ch' }));
+    const received = sub.next();
+    await env.publish('sk-ch', 'msg');
+    spy.record('cache.publish', JSON.stringify({ channel: 'sk-ch' }));
+    const msg = await received;
+
+    assertToolCallOrder(spy, ['cache.subscribe', 'cache.publish']);
+    expect(msg.message).toBe('msg');
+    await sub.close();
+    await env.stop();
   });
 
-  it('T-SKL-005 error skill flow (retry pattern)', () => {
+  it('T-SKL-D-005 TTL skill flow (set with TTL + assertTTL)', async () => {
     const spy = createToolSpy();
-    spy.record('cache.execute', '{}');
-    spy.record('cache.retry', JSON.stringify({ attempt: 1 }));
-    assertToolCalled(spy, 'cache.retry');
-    assertToolCallOrder(spy, ['cache.execute', 'cache.retry']);
+    const env = createInMemoryCacheEnv({ mode: 'in-memory' });
+    await env.set('sk5', 'v5', { ttlSeconds: 30 });
+    spy.record('cache.set', JSON.stringify({ key: 'sk5', ttl: 30 }));
+    const ttl = await env.assertTTL('sk5', { atLeast: 1, atMost: 30 });
+    spy.record('cache.assertTTL', JSON.stringify({ key: 'sk5' }));
+
+    assertToolCallOrder(spy, ['cache.set', 'cache.assertTTL']);
+    expect(ttl).toBeGreaterThan(0);
+    await env.stop();
   });
 });
