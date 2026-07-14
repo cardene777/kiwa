@@ -1,44 +1,33 @@
 import { describe, expect, it } from 'vitest';
+import { McpServer, textContent, validateSchema } from '../../src/index.js';
 
-/**
- * mcp fidelity test — mock 挙動 vs 期待仕様の一致 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § fidelity + packages/auth exemplar。
- */
-describe('mcp fidelity — mock ↔ 期待仕様', () => {
-  it('T-FID-001 mock 挙動が期待 shape を保持する', () => {
-    const observed = { id: 'mcp-1', value: 42, status: 'ok' };
-    const expected = { id: 'mcp-1', value: 42, status: 'ok' };
-    expect(observed).toEqual(expected);
-    expect(observed.id.startsWith('mcp')).toBe(true);
+describe('mcp fidelity — McpServer + validateSchema contract', () => {
+  it('T-FID-D-001 protocolVersion default', () => {
+    const server = new McpServer();
+    expect(server.protocolVersion).toMatch(/\d+/);
   });
 
-  it('T-FID-002 mock 順序性を保持する (deterministic ordering)', () => {
-    const sequence: string[] = [];
-    sequence.push('setup');
-    sequence.push('exec');
-    sequence.push('finalize');
-    expect(sequence).toEqual(['setup', 'exec', 'finalize']);
-    expect(sequence.length).toBe(3);
+  it('T-FID-D-002 validateSchema で type mismatch 検知', () => {
+    const errors = validateSchema({ type: 'string' }, 42);
+    expect(errors.length).toBeGreaterThan(0);
   });
 
-  it('T-FID-003 mock error 分岐を再現する', () => {
-    const throwing = () => {
-      throw new Error('mcp mock error');
-    };
-    expect(throwing).toThrow(/mcp mock error/);
+  it('T-FID-D-003 validateSchema で valid input pass', () => {
+    const errors = validateSchema({ type: 'string' }, 'hello');
+    expect(errors).toEqual([]);
   });
 
-  it('T-FID-004 mock async 挙動を保持する', async () => {
-    const asyncFn = async (input: string) => `${input}-processed`;
-    const result = await asyncFn('mcp');
-    expect(result).toBe('mcp-processed');
+  it('T-FID-D-004 validateSchema object type check', () => {
+    const errors = validateSchema(
+      { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] },
+      { name: 'kiwa' },
+    );
+    expect(errors).toEqual([]);
   });
 
-  it('T-FID-005 mock idempotency (同一 input で同一 output)', () => {
-    const fn = (n: number) => n * 2 + 1;
-    const a = fn(3);
-    const b = fn(3);
-    expect(a).toBe(b);
-    expect(a).toBe(7);
+  it('T-FID-D-005 textContent で { type: text, text } shape', () => {
+    const result = textContent('hello');
+    expect(result.type).toBe('text');
+    expect((result as { type: 'text'; text: string }).text).toBe('hello');
   });
 });
