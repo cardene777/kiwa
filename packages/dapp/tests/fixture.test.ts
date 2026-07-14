@@ -510,3 +510,90 @@ describe('validateWalletConfigs uncovered branches', () => {
     );
   });
 });
+
+describe('waitForPendingRpcs final page.evaluate branches', () => {
+  it('T-FIX-013 waitForPendingRpcs の final page.evaluate reject はそのまま propagate する', async () => {
+    const page = {
+      evaluate: vi.fn().mockRejectedValue(new Error('evaluate boom')),
+    } as unknown as Parameters<typeof waitForPendingRpcs>[0];
+
+    await expect(waitForPendingRpcs(page, new Map(), 100)).rejects.toThrow(/evaluate boom/);
+  });
+
+  it('T-FIX-014 page.evaluate が unavailable なら waitForPendingRpcs は専用 error で reject する', async () => {
+    const page = {
+      evaluate: undefined,
+    } as unknown as Parameters<typeof waitForPendingRpcs>[0];
+
+    await expect(waitForPendingRpcs(page, new Map(), 100)).rejects.toThrow(
+      /page script runner is unavailable/,
+    );
+  });
+});
+
+describe('validateWalletConfigs additional uncovered branches', () => {
+  const PK: Hex =
+    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
+  it('T-RWC-018 validateWalletConfigs は rdns: \'\' を reverse-DNS 制約違反で throw する', () => {
+    expect(() =>
+      validateWalletConfigs([
+        { name: 'X', rdns: '', icon: 'data:,', privateKey: PK },
+      ]),
+    ).toThrow(/rdns.*reverse-DNS/);
+  });
+
+  it('T-RWC-019 validateWalletConfigs は contractAccountExecuteAbi: [] を reject する', () => {
+    expect(() =>
+      validateWalletConfigs([
+        {
+          name: 'X',
+          rdns: 'io.x',
+          icon: 'data:,',
+          privateKey: PK,
+          contractAccountExecuteAbi: [],
+        },
+      ]),
+    ).toThrow(/contractAccountExecuteAbi.*non-empty string\[\]/);
+  });
+
+  it('T-RWC-020 validateWalletConfigs は non-string ABI entry を reject する', () => {
+    expect(() =>
+      validateWalletConfigs([
+        {
+          name: 'X',
+          rdns: 'io.x',
+          icon: 'data:,',
+          privateKey: PK,
+          contractAccountExecuteAbi: ['function foo()', 123 as unknown as string],
+        },
+      ]),
+    ).toThrow(/contractAccountExecuteAbi.*non-empty string\[\]/);
+  });
+
+  it('T-RWC-021 validateWalletConfigs は icon: 123 を data URI 制約違反で throw する', () => {
+    expect(() =>
+      validateWalletConfigs([
+        {
+          name: 'X',
+          rdns: 'io.x',
+          icon: 123 as unknown as string,
+          privateKey: PK,
+        },
+      ]),
+    ).toThrow(/icon.*data URI/);
+  });
+
+  it('T-RWC-022 validateWalletConfigs は privateKey: 123 を 32 bytes 制約違反で throw する', () => {
+    expect(() =>
+      validateWalletConfigs([
+        {
+          name: 'X',
+          rdns: 'io.x',
+          icon: 'data:,',
+          privateKey: 123 as unknown as `0x${string}`,
+        },
+      ]),
+    ).toThrow(/privateKey.*32 bytes/);
+  });
+});
