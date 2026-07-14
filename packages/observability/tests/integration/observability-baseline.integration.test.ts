@@ -1,52 +1,81 @@
 import { describe, expect, it } from 'vitest';
+import { detectFlaky } from '../../src/index.js';
 
-/**
- * observability integration test — lib API の workflow + 依存整合 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § integration + packages/dapp exemplar。
- */
-describe('observability integration — workflow + 依存整合', () => {
-  it('T-INT-001 setup + execute + teardown workflow', () => {
-    const state = { step: 0, lib: 'observability' };
-    state.step = 1;
-    state.step = 2;
-    state.step = 3;
-    expect(state.step).toBe(3);
-    expect(state.lib).toBe('observability');
+function makeRecord(testId: string, status: 'passed' | 'failed', runId: string) {
+  return {
+    testId,
+    fullName: `test.${testId}`,
+    status,
+    durationMs: 10,
+    runId,
+    startedAt: Date.now(),
+  };
+}
+
+describe('observability integration — detectFlaky workflow', () => {
+  it('T-INT-D-001 detectFlaky 100% pass = flaky でない', () => {
+    const history = {
+      records: [
+        makeRecord('t1', 'passed', 'r1'),
+        makeRecord('t1', 'passed', 'r2'),
+        makeRecord('t1', 'passed', 'r3'),
+      ],
+    };
+    const result = detectFlaky({ history, minRuns: 3, threshold: 0.1 });
+    expect(result.length).toBe(0);
   });
 
-  it('T-INT-002 workflow 順序保持 (log check)', () => {
-    const log: string[] = [];
-    log.push('observability:setup');
-    log.push('observability:execute');
-    log.push('observability:teardown');
-    expect(log).toEqual(['observability:setup', 'observability:execute', 'observability:teardown']);
+  it('T-INT-D-002 detectFlaky mixed pass/fail = flaky 検知', () => {
+    const history = {
+      records: [
+        makeRecord('t1', 'passed', 'r1'),
+        makeRecord('t1', 'failed', 'r2'),
+        makeRecord('t1', 'passed', 'r3'),
+        makeRecord('t1', 'failed', 'r4'),
+      ],
+    };
+    const result = detectFlaky({ history, minRuns: 3, threshold: 0.1 });
+    expect(result.length).toBeGreaterThan(0);
+    expect(result[0]!.testId).toBe('t1');
   });
 
-  it('T-INT-003 error rollback (state 復元)', () => {
-    const state = { count: 0 };
-    try {
-      state.count = 5;
-      throw new Error('observability rollback');
-    } catch {
-      state.count = 0;
-    }
-    expect(state.count).toBe(0);
+  it('T-INT-D-003 minRuns 未達なら flaky 対象外', () => {
+    const history = {
+      records: [
+        makeRecord('t1', 'passed', 'r1'),
+        makeRecord('t1', 'failed', 'r2'),
+      ],
+    };
+    const result = detectFlaky({ history, minRuns: 5, threshold: 0.1 });
+    expect(result.length).toBe(0);
   });
 
-  it('T-INT-004 async pipeline chain', async () => {
-    const inputs = ['observability-a', 'observability-b', 'observability-c'];
-    const result = await Promise.all(inputs.map(async (s) => s.toUpperCase()));
-    expect(result).toEqual(['observability-A'.toUpperCase(), 'observability-B'.toUpperCase(), 'observability-C'.toUpperCase()]);
-    expect(result.length).toBe(3);
+  it('T-INT-D-004 全 fail は flaky ではない (常時 fail)', () => {
+    const history = {
+      records: [
+        makeRecord('t1', 'failed', 'r1'),
+        makeRecord('t1', 'failed', 'r2'),
+        makeRecord('t1', 'failed', 'r3'),
+      ],
+    };
+    const result = detectFlaky({ history, minRuns: 3, threshold: 0.1 });
+    // failure rate = 1.0 で threshold 0.1 超過だが 0 < rate < 1 でないため flaky でない
+    expect(result.length).toBe(0);
   });
 
-  it('T-INT-005 concurrent operation isolation', async () => {
-    const outputs = await Promise.all([
-      Promise.resolve('observability-op1'),
-      Promise.resolve('observability-op2'),
-    ]);
-    expect(outputs).toHaveLength(2);
-    expect(outputs[0]).toBe('observability-op1');
-    expect(outputs[1]).toBe('observability-op2');
+  it('T-INT-D-005 複数 test の flaky 検知', () => {
+    const history = {
+      records: [
+        makeRecord('t1', 'passed', 'r1'),
+        makeRecord('t1', 'failed', 'r2'),
+        makeRecord('t1', 'passed', 'r3'),
+        makeRecord('t2', 'passed', 'r1'),
+        makeRecord('t2', 'passed', 'r2'),
+        makeRecord('t2', 'passed', 'r3'),
+      ],
+    };
+    const result = detectFlaky({ history, minRuns: 3, threshold: 0.1 });
+    expect(result.map((r) => r.testId)).toContain('t1');
+    expect(result.map((r) => r.testId)).not.toContain('t2');
   });
 });

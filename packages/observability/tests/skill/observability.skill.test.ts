@@ -1,50 +1,74 @@
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   assertToolCalled,
   assertToolCallOrder,
-  assertToolCalledWith,
   createToolSpy,
 } from '@kiwa-lab/skill-test';
+import { detectFlaky } from '../../src/index.js';
 
-/**
- * observability skill test — observability lib 内で発火する主要 skill を spy 経路で assert する。
- * pattern SSOT = packages/agent/tests/skill/openai-assistant.skill.test.ts (exemplar)。
- */
-describe('observability skill 発火 assertion', () => {
-  it('T-SKL-001 主要 skill flow を spy が捕捉する', () => {
+function makeRecord(testId: string, status: 'passed' | 'failed', runId: string) {
+  return {
+    testId,
+    fullName: `test.${testId}`,
+    status,
+    durationMs: 10,
+    runId,
+    startedAt: Date.now(),
+  };
+}
+
+describe('observability skill — detectFlaky skill flow', () => {
+  it('T-SKL-D-001 detectFlaky skill', () => {
     const spy = createToolSpy();
-    spy.record('observability.setup', JSON.stringify({ target: 'primary' }));
-    spy.record('observability.execute', JSON.stringify({ target: 'primary' }));
-    assertToolCalled(spy, 'observability.setup');
-    assertToolCalled(spy, 'observability.execute');
+    const history = {
+      records: [makeRecord('t1', 'passed', 'r1'), makeRecord('t1', 'failed', 'r2'), makeRecord('t1', 'passed', 'r3')],
+    };
+    const result = detectFlaky({ history, minRuns: 3, threshold: 0.1 });
+    spy.record('obs.detectFlaky', JSON.stringify({ count: result.length }));
+
+    assertToolCalled(spy, 'obs.detectFlaky');
+    expect(result.length).toBeGreaterThan(0);
   });
 
-  it('T-SKL-002 skill 呼出順序を assert する', () => {
+  it('T-SKL-D-002 batch detectFlaky skill (times=3)', () => {
     const spy = createToolSpy();
-    spy.record('observability.setup', '{}');
-    spy.record('observability.execute', '{}');
-    spy.record('observability.teardown', '{}');
-    assertToolCallOrder(spy, ['observability.setup', 'observability.execute', 'observability.teardown']);
+    const history = { records: [makeRecord('t', 'passed', 'r1'), makeRecord('t', 'failed', 'r2'), makeRecord('t', 'passed', 'r3')] };
+    detectFlaky({ history, minRuns: 3 });
+    spy.record('obs.detectFlaky', '{}');
+    detectFlaky({ history, minRuns: 3 });
+    spy.record('obs.detectFlaky', '{}');
+    detectFlaky({ history, minRuns: 3 });
+    spy.record('obs.detectFlaky', '{}');
+
+    assertToolCalled(spy, 'obs.detectFlaky', { times: 3 });
   });
 
-  it('T-SKL-003 skill 呼出引数を assert する', () => {
+  it('T-SKL-D-003 threshold config skill', () => {
     const spy = createToolSpy();
-    spy.record('observability.execute', JSON.stringify({ mode: 'test', value: 42 }));
-    assertToolCalledWith(spy, 'observability.execute', { mode: 'test', value: 42 });
+    const history = { records: [makeRecord('t', 'passed', 'r1'), makeRecord('t', 'failed', 'r2'), makeRecord('t', 'passed', 'r3')] };
+    detectFlaky({ history, minRuns: 3, threshold: 0.5 });
+    spy.record('obs.detectFlaky.high-threshold', '{}');
+    detectFlaky({ history, minRuns: 3, threshold: 0.1 });
+    spy.record('obs.detectFlaky.low-threshold', '{}');
+
+    assertToolCallOrder(spy, ['obs.detectFlaky.high-threshold', 'obs.detectFlaky.low-threshold']);
   });
 
-  it('T-SKL-004 skill 呼出回数を assert する (times=2)', () => {
+  it('T-SKL-D-004 minRuns filter skill', () => {
     const spy = createToolSpy();
-    spy.record('observability.execute', '{}');
-    spy.record('observability.execute', '{}');
-    assertToolCalled(spy, 'observability.execute', { times: 2 });
+    const history = { records: [makeRecord('t', 'passed', 'r1')] };
+    detectFlaky({ history, minRuns: 5 });
+    spy.record('obs.detectFlaky.filtered', '{}');
+
+    assertToolCalled(spy, 'obs.detectFlaky.filtered');
   });
 
-  it('T-SKL-005 error skill flow (retry pattern)', () => {
+  it('T-SKL-D-005 empty history skill', () => {
     const spy = createToolSpy();
-    spy.record('observability.execute', '{}');
-    spy.record('observability.retry', JSON.stringify({ attempt: 1 }));
-    assertToolCalled(spy, 'observability.retry');
-    assertToolCallOrder(spy, ['observability.execute', 'observability.retry']);
+    const result = detectFlaky({ history: { records: [] }, minRuns: 3 });
+    spy.record('obs.detectFlaky.empty', '{}');
+
+    assertToolCalled(spy, 'obs.detectFlaky.empty');
+    expect(result.length).toBe(0);
   });
 });
