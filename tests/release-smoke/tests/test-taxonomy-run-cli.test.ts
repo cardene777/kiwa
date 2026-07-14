@@ -52,15 +52,16 @@ describe('Q5 test-taxonomy CLI shape', () => {
     expect(result.stdout).toMatch(/KIWA_MODE=real/);
   });
 
-  it('config 記載外 lib × category で file 不在 = exit 1 (揃ってる chk 完全性、 Q5 bug fix)', () => {
-    // cache は skill 対象外 lib (config requireSkill.skillLibs に含まれない)、
-    // --lib cache --category skill = tests/skill dir 不在 → no-files → fail 判定 → exit 1
-    // CLI の目的は「揃ってる + 実行 pass」 の完全 chk、 file 不在は必ず fail に落ちる。
+  it('config 拡張後 (全 lib skill 対象) は cache × skill も pass 判定', () => {
+    // CAR-fidelity-integration-all-libs (PR #1656) で skillLibs / mockAdapterLibs /
+    // integrationLibs を全 lib に拡張。 cache も全 category 対象化されたため、
+    // --lib cache --category skill = tests/skill/cache.skill.test.ts 存在 → pass。
+    // 元 test は「一部 lib は対象外」 前提だったが obsolete、 config 拡張後の期待に更新。
     const result = spawnSync('node', [CLI_PATH, '--category', 'skill', '--lib', 'cache'], {
       encoding: 'utf-8',
     });
-    expect(result.status).toBe(1);
-    expect(result.stdout).toMatch(/FAIL \(no-files\)/);
+    expect(result.status).toBe(0);
+    expect(result.stdout).toMatch(/cache \| pass/);
   });
 
   it('.ts + .tsx 両拡張子を accept する (ui × perf = ui.perf.tsx を pass 判定)', () => {
@@ -84,13 +85,14 @@ describe('Q5 test-taxonomy CLI shape', () => {
 
     // 実 all run は cache のみ scope (--lib cache) で軽量確認、 all 出力 matrix + 4 分類の
     // summary per category が出力される shape を検証。
+    // CAR-fidelity-integration-all-libs (PR #1656) で全 category 対象化、 cache は全 pass。
     const runResult = spawnSync(
       'node',
       [CLI_PATH, '--category', 'all', '--lib', 'cache', '--format', 'json'],
       { encoding: 'utf-8', timeout: 300_000 },
     );
-    // exit code = 1 (cache は skill/integration 対象外 で no-files fail が発生する)
-    expect(runResult.status).toBe(1);
+    // exit code = 0 (cache は全 4 category 対象化で全 pass)
+    expect(runResult.status).toBe(0);
     const output = JSON.parse(runResult.stdout);
     expect(output.category).toBe('all');
     expect(output.results).toHaveProperty('perf');
@@ -98,7 +100,7 @@ describe('Q5 test-taxonomy CLI shape', () => {
     expect(output.results).toHaveProperty('skill');
     expect(output.results).toHaveProperty('integration');
     expect(output.summaries).toHaveProperty('fidelity');
-    expect(output.summaries.fidelity.passed).toBeGreaterThanOrEqual(1);  // cache fidelity pass
+    expect(output.summaries.fidelity.passed).toBeGreaterThanOrEqual(1);
   });
 
   it('中身 chk 3 軸 = minCases 下限 / expect 未呼出 / trivial pattern を検出 (Q7、 CLI 単独 release-worthy 判定)', async () => {
