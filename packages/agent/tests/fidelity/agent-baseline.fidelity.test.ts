@@ -1,44 +1,45 @@
 import { describe, expect, it } from 'vitest';
+import { AssistantsClient, toolCall } from '../../src/index.js';
 
-/**
- * agent fidelity test — mock 挙動 vs 期待仕様の一致 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § fidelity + packages/auth exemplar。
- */
-describe('agent fidelity — mock ↔ 期待仕様', () => {
-  it('T-FID-001 mock 挙動が期待 shape を保持する', () => {
-    const observed = { id: 'agent-1', value: 42, status: 'ok' };
-    const expected = { id: 'agent-1', value: 42, status: 'ok' };
-    expect(observed).toEqual(expected);
-    expect(observed.id.startsWith('agent')).toBe(true);
+describe('agent fidelity — AssistantsClient contract', () => {
+  it('T-FID-D-001 idSeed で deterministic id 生成', () => {
+    const c1 = new AssistantsClient({ idSeed: 'seed-1' });
+    const c2 = new AssistantsClient({ idSeed: 'seed-1' });
+    const a1 = c1.createAssistant({ name: 'a', instructions: 'test' });
+    const a2 = c2.createAssistant({ name: 'a', instructions: 'test' });
+    expect(a1.id).toBe(a2.id);
   });
 
-  it('T-FID-002 mock 順序性を保持する (deterministic ordering)', () => {
-    const sequence: string[] = [];
-    sequence.push('setup');
-    sequence.push('exec');
-    sequence.push('finalize');
-    expect(sequence).toEqual(['setup', 'exec', 'finalize']);
-    expect(sequence.length).toBe(3);
+  it('T-FID-D-002 toolCall arguments JSON string 化', () => {
+    const call = toolCall({ id: 'c', name: 'fn', arguments: { x: 1, y: 'z' } });
+    const parsed = JSON.parse(call.function.arguments);
+    expect(parsed).toEqual({ x: 1, y: 'z' });
   });
 
-  it('T-FID-003 mock error 分岐を再現する', () => {
-    const throwing = () => {
-      throw new Error('agent mock error');
-    };
-    expect(throwing).toThrow(/agent mock error/);
+  it('T-FID-D-003 assistant createAssistant で unique id', () => {
+    const client = new AssistantsClient({ idSeed: 'unique' });
+    const a1 = client.createAssistant({ name: 'x', instructions: 'test' });
+    const a2 = client.createAssistant({ name: 'y', instructions: 'test' });
+    expect(a1.id).not.toBe(a2.id);
   });
 
-  it('T-FID-004 mock async 挙動を保持する', async () => {
-    const asyncFn = async (input: string) => `${input}-processed`;
-    const result = await asyncFn('agent');
-    expect(result).toBe('agent-processed');
+  it('T-FID-D-004 thread createThread で unique id', () => {
+    const client = new AssistantsClient({ idSeed: 'thread-unique' });
+    const t1 = client.createThread();
+    const t2 = client.createThread();
+    expect(t1.id).not.toBe(t2.id);
   });
 
-  it('T-FID-005 mock idempotency (同一 input で同一 output)', () => {
-    const fn = (n: number) => n * 2 + 1;
-    const a = fn(3);
-    const b = fn(3);
-    expect(a).toBe(b);
-    expect(a).toBe(7);
+  it('T-FID-D-005 handler final result 経路 for empty message', async () => {
+    const client = new AssistantsClient({ idSeed: 'final' });
+    const a = client.createAssistant({
+      name: 'a', instructions: 'test',
+      handler: async () => ({ kind: 'message', content: 'answer' }),
+    });
+    const t = client.createThread();
+    client.addMessage(t.id, { role: 'user', content: 'ask' });
+    const r = client.createRun({ threadId: t.id, assistantId: a.id });
+    const result = await client.poll(r.id);
+    expect(result.status).toBe('completed');
   });
 });

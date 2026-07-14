@@ -1,52 +1,56 @@
 import { describe, expect, it } from 'vitest';
+import { AssistantsClient, toolCall } from '../../src/index.js';
 
-/**
- * agent integration test — lib API の workflow + 依存整合 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § integration + packages/dapp exemplar。
- */
-describe('agent integration — workflow + 依存整合', () => {
-  it('T-INT-001 setup + execute + teardown workflow', () => {
-    const state = { step: 0, lib: 'agent' };
-    state.step = 1;
-    state.step = 2;
-    state.step = 3;
-    expect(state.step).toBe(3);
-    expect(state.lib).toBe('agent');
+describe('agent integration — AssistantsClient workflow', () => {
+  it('T-INT-D-001 createAssistant + createThread + createRun workflow', async () => {
+    const client = new AssistantsClient({ idSeed: 'int-1' });
+    const assistant = client.createAssistant({
+      name: 'a1', instructions: 'test',
+      handler: async () => ({ kind: 'message', content: 'done' }),
+    });
+    const thread = client.createThread();
+    client.addMessage(thread.id, { role: 'user', content: 'hi' });
+    const run = client.createRun({ threadId: thread.id, assistantId: assistant.id });
+    const finalRun = await client.poll(run.id);
+    expect(finalRun.status).toBe('completed');
   });
 
-  it('T-INT-002 workflow 順序保持 (log check)', () => {
-    const log: string[] = [];
-    log.push('agent:setup');
-    log.push('agent:execute');
-    log.push('agent:teardown');
-    expect(log).toEqual(['agent:setup', 'agent:execute', 'agent:teardown']);
+  it('T-INT-D-002 addMessage で thread 存在確認', () => {
+    const client = new AssistantsClient({ idSeed: 'int-2' });
+    const thread = client.createThread();
+    client.addMessage(thread.id, { role: 'user', content: 'q1' });
+    client.addMessage(thread.id, { role: 'user', content: 'q2' });
+    expect(thread.id).toBeDefined();
   });
 
-  it('T-INT-003 error rollback (state 復元)', () => {
-    const state = { count: 0 };
-    try {
-      state.count = 5;
-      throw new Error('agent rollback');
-    } catch {
-      state.count = 0;
-    }
-    expect(state.count).toBe(0);
+  it('T-INT-D-003 handler tool_calls 経路', async () => {
+    const client = new AssistantsClient({ idSeed: 'int-3' });
+    const assistant = client.createAssistant({
+      name: 'tool-caller', instructions: 'test',
+      handler: async () => ({
+        kind: 'tool_calls',
+        toolCalls: [toolCall({ id: 't1', name: 'read', arguments: { file: 'a.txt' } })],
+      }),
+    });
+    const thread = client.createThread();
+    client.addMessage(thread.id, { role: 'user', content: 'read' });
+    const run = client.createRun({ threadId: thread.id, assistantId: assistant.id });
+    const result = await client.poll(run.id);
+    expect(result.status).toMatch(/completed|requires_action/);
   });
 
-  it('T-INT-004 async pipeline chain', async () => {
-    const inputs = ['agent-a', 'agent-b', 'agent-c'];
-    const result = await Promise.all(inputs.map(async (s) => s.toUpperCase()));
-    expect(result).toEqual(['agent-A'.toUpperCase(), 'agent-B'.toUpperCase(), 'agent-C'.toUpperCase()]);
-    expect(result.length).toBe(3);
+  it('T-INT-D-004 multiple thread isolation', () => {
+    const client = new AssistantsClient({ idSeed: 'int-4' });
+    const t1 = client.createThread();
+    const t2 = client.createThread();
+    client.addMessage(t1.id, { role: 'user', content: 'in t1' });
+    client.addMessage(t2.id, { role: 'user', content: 'in t2' });
+    expect(t1.id).not.toBe(t2.id);
   });
 
-  it('T-INT-005 concurrent operation isolation', async () => {
-    const outputs = await Promise.all([
-      Promise.resolve('agent-op1'),
-      Promise.resolve('agent-op2'),
-    ]);
-    expect(outputs).toHaveLength(2);
-    expect(outputs[0]).toBe('agent-op1');
-    expect(outputs[1]).toBe('agent-op2');
+  it('T-INT-D-005 toolCall helper で shape 生成', () => {
+    const call = toolCall({ id: 'c1', name: 'search', arguments: { q: 'test' } });
+    expect(call.id).toBe('c1');
+    expect(call.function.name).toBe('search');
   });
 });
