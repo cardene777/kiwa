@@ -1,52 +1,99 @@
 import { describe, expect, it } from 'vitest';
+import { createRequestClient } from '../../src/index.js';
 
 /**
- * api integration test — lib API の workflow + 依存整合 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § integration + packages/dapp exemplar。
+ * api integration domain test — createRequestClient real workflow を assert する。
+ * fetcher を stub して HTTP method mapping と URL 生成を verify する。
  */
-describe('api integration — workflow + 依存整合', () => {
-  it('T-INT-001 setup + execute + teardown workflow', () => {
-    const state = { step: 0, lib: 'api' };
-    state.step = 1;
-    state.step = 2;
-    state.step = 3;
-    expect(state.step).toBe(3);
-    expect(state.lib).toBe('api');
+describe('api integration — createRequestClient workflow', () => {
+  function makeFetcher(status: number, body: unknown) {
+    return async (_url: RequestInfo | URL, _init?: RequestInit) => ({
+      status,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      text: async () => JSON.stringify(body),
+    }) as unknown as Response;
+  }
+
+  it('T-INT-D-001 GET request で response 取得', async () => {
+    const client = createRequestClient({
+      baseUrl: 'https://api.example.com',
+      fetcher: makeFetcher(200, { ok: true }),
+    });
+    const res = await client.get('/users/1');
+    expect(res.status).toBe(200);
+    expect(res.json<{ ok: boolean }>().ok).toBe(true);
   });
 
-  it('T-INT-002 workflow 順序保持 (log check)', () => {
-    const log: string[] = [];
-    log.push('api:setup');
-    log.push('api:execute');
-    log.push('api:teardown');
-    expect(log).toEqual(['api:setup', 'api:execute', 'api:teardown']);
+  it('T-INT-D-002 POST request で body 送信', async () => {
+    let capturedInit: RequestInit | undefined;
+    const client = createRequestClient({
+      baseUrl: 'https://api.example.com',
+      fetcher: (async (_url, init) => {
+        capturedInit = init;
+        return {
+          status: 201,
+          headers: new Headers(),
+          text: async () => '{}',
+        } as unknown as Response;
+      }) as typeof fetch,
+    });
+    await client.post('/users', { name: 'kiwa' });
+    expect(capturedInit?.method).toBe('POST');
+    expect(capturedInit?.body).toBeDefined();
   });
 
-  it('T-INT-003 error rollback (state 復元)', () => {
-    const state = { count: 0 };
-    try {
-      state.count = 5;
-      throw new Error('api rollback');
-    } catch {
-      state.count = 0;
-    }
-    expect(state.count).toBe(0);
+  it('T-INT-D-003 PUT + PATCH + DELETE で HTTP method mapping', async () => {
+    const methods: string[] = [];
+    const client = createRequestClient({
+      baseUrl: 'https://api.example.com',
+      fetcher: (async (_url, init) => {
+        methods.push(init?.method ?? '');
+        return {
+          status: 200,
+          headers: new Headers(),
+          text: async () => '{}',
+        } as unknown as Response;
+      }) as typeof fetch,
+    });
+    await client.put('/x', {});
+    await client.patch('/x', {});
+    await client.delete('/x');
+    expect(methods).toEqual(['PUT', 'PATCH', 'DELETE']);
   });
 
-  it('T-INT-004 async pipeline chain', async () => {
-    const inputs = ['api-a', 'api-b', 'api-c'];
-    const result = await Promise.all(inputs.map(async (s) => s.toUpperCase()));
-    expect(result).toEqual(['api-A'.toUpperCase(), 'api-B'.toUpperCase(), 'api-C'.toUpperCase()]);
-    expect(result.length).toBe(3);
+  it('T-INT-D-004 defaultHeaders で共通 header 付与', async () => {
+    let capturedHeaders: HeadersInit | undefined;
+    const client = createRequestClient({
+      baseUrl: 'https://api.example.com',
+      defaultHeaders: { 'x-api-key': 'secret' },
+      fetcher: (async (_url, init) => {
+        capturedHeaders = init?.headers;
+        return {
+          status: 200,
+          headers: new Headers(),
+          text: async () => '{}',
+        } as unknown as Response;
+      }) as typeof fetch,
+    });
+    await client.get('/x');
+    const h = capturedHeaders as Record<string, string>;
+    expect(h['x-api-key']).toBe('secret');
   });
 
-  it('T-INT-005 concurrent operation isolation', async () => {
-    const outputs = await Promise.all([
-      Promise.resolve('api-op1'),
-      Promise.resolve('api-op2'),
-    ]);
-    expect(outputs).toHaveLength(2);
-    expect(outputs[0]).toBe('api-op1');
-    expect(outputs[1]).toBe('api-op2');
+  it('T-INT-D-005 baseUrl + path 結合', async () => {
+    const urls: string[] = [];
+    const client = createRequestClient({
+      baseUrl: 'https://api.example.com',
+      fetcher: (async (url) => {
+        urls.push(String(url));
+        return {
+          status: 200,
+          headers: new Headers(),
+          text: async () => '{}',
+        } as unknown as Response;
+      }) as typeof fetch,
+    });
+    await client.get('/users/1');
+    expect(urls[0]).toBe('https://api.example.com/users/1');
   });
 });

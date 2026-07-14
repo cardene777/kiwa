@@ -1,44 +1,70 @@
 import { describe, expect, it } from 'vitest';
+import { createRequestClient } from '../../src/index.js';
 
-/**
- * api fidelity test — mock 挙動 vs 期待仕様の一致 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § fidelity + packages/auth exemplar。
- */
-describe('api fidelity — mock ↔ 期待仕様', () => {
-  it('T-FID-001 mock 挙動が期待 shape を保持する', () => {
-    const observed = { id: 'api-1', value: 42, status: 'ok' };
-    const expected = { id: 'api-1', value: 42, status: 'ok' };
-    expect(observed).toEqual(expected);
-    expect(observed.id.startsWith('api')).toBe(true);
+function makeFetcher(status = 200, body: unknown = { ok: true }) {
+  return (async () => ({
+    status,
+    headers: new Headers({ 'content-type': 'application/json' }),
+    text: async () => JSON.stringify(body),
+  })) as unknown as typeof fetch;
+}
+
+describe('api fidelity — createRequestClient contract', () => {
+  it('T-FID-D-001 baseUrl trailing slash 正規化', async () => {
+    const urls: string[] = [];
+    const client = createRequestClient({
+      baseUrl: 'https://api.example.com/',
+      fetcher: (async (url) => {
+        urls.push(String(url));
+        return { status: 200, headers: new Headers(), text: async () => '{}' } as unknown as Response;
+      }) as typeof fetch,
+    });
+    await client.get('/x');
+    expect(urls[0]).toBe('https://api.example.com/x');
   });
 
-  it('T-FID-002 mock 順序性を保持する (deterministic ordering)', () => {
-    const sequence: string[] = [];
-    sequence.push('setup');
-    sequence.push('exec');
-    sequence.push('finalize');
-    expect(sequence).toEqual(['setup', 'exec', 'finalize']);
-    expect(sequence.length).toBe(3);
+  it('T-FID-D-002 path 先頭 slash 補完', async () => {
+    const urls: string[] = [];
+    const client = createRequestClient({
+      baseUrl: 'https://api.example.com',
+      fetcher: (async (url) => {
+        urls.push(String(url));
+        return { status: 200, headers: new Headers(), text: async () => '{}' } as unknown as Response;
+      }) as typeof fetch,
+    });
+    await client.get('users');
+    expect(urls[0]).toBe('https://api.example.com/users');
   });
 
-  it('T-FID-003 mock error 分岐を再現する', () => {
-    const throwing = () => {
-      throw new Error('api mock error');
-    };
-    expect(throwing).toThrow(/api mock error/);
+  it('T-FID-D-003 absolute URL passthrough', async () => {
+    const urls: string[] = [];
+    const client = createRequestClient({
+      baseUrl: 'https://api.example.com',
+      fetcher: (async (url) => {
+        urls.push(String(url));
+        return { status: 200, headers: new Headers(), text: async () => '{}' } as unknown as Response;
+      }) as typeof fetch,
+    });
+    await client.get('https://other.com/x');
+    expect(urls[0]).toBe('https://other.com/x');
   });
 
-  it('T-FID-004 mock async 挙動を保持する', async () => {
-    const asyncFn = async (input: string) => `${input}-processed`;
-    const result = await asyncFn('api');
-    expect(result).toBe('api-processed');
+  it('T-FID-D-004 json() で response parse', async () => {
+    const client = createRequestClient({
+      baseUrl: 'https://x.com',
+      fetcher: makeFetcher(200, { data: 42 }),
+    });
+    const res = await client.get('/x');
+    const parsed = res.json<{ data: number }>();
+    expect(parsed.data).toBe(42);
   });
 
-  it('T-FID-005 mock idempotency (同一 input で同一 output)', () => {
-    const fn = (n: number) => n * 2 + 1;
-    const a = fn(3);
-    const b = fn(3);
-    expect(a).toBe(b);
-    expect(a).toBe(7);
+  it('T-FID-D-005 status code passthrough', async () => {
+    const client = createRequestClient({
+      baseUrl: 'https://x.com',
+      fetcher: makeFetcher(404, { error: 'not found' }),
+    });
+    const res = await client.get('/missing');
+    expect(res.status).toBe(404);
   });
 });
