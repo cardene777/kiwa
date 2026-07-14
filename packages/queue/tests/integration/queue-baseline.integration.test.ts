@@ -1,52 +1,58 @@
 import { describe, expect, it } from 'vitest';
+import { createSandboxBullMQEnv } from '../../src/index.js';
 
 /**
- * queue integration test — lib API の workflow + 依存整合 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § integration + packages/dapp exemplar。
+ * queue integration domain test — real sandbox queue (createSandboxBullMQEnv)
+ * で addJob / process / assertProcessed workflow を end-to-end で assert する。
  */
-describe('queue integration — workflow + 依存整合', () => {
-  it('T-INT-001 setup + execute + teardown workflow', () => {
-    const state = { step: 0, lib: 'queue' };
-    state.step = 1;
-    state.step = 2;
-    state.step = 3;
-    expect(state.step).toBe(3);
-    expect(state.lib).toBe('queue');
+describe('queue integration — sandbox BullMQ workflow', () => {
+  it('T-INT-D-001 addJob + process + assertProcessed の end-to-end', async () => {
+    const env = createSandboxBullMQEnv({ mode: 'sandbox', queueName: 'test-queue' });
+    env.process(async (job) => `processed:${(job.data as {value: number}).value}`);
+    await env.addJob('task', { value: 42 });
+    const snap = await env.assertProcessed('task', { returnValue: 'processed:42' });
+    expect(snap.state).toBe('completed');
+    await env.stop();
   });
 
-  it('T-INT-002 workflow 順序保持 (log check)', () => {
-    const log: string[] = [];
-    log.push('queue:setup');
-    log.push('queue:execute');
-    log.push('queue:teardown');
-    expect(log).toEqual(['queue:setup', 'queue:execute', 'queue:teardown']);
+  it('T-INT-D-002 addJob + waitForJob で terminal 到達', async () => {
+    const env = createSandboxBullMQEnv({ mode: 'sandbox', queueName: 'wait-queue' });
+    env.process(async () => 'done');
+    await env.addJob('wait-task', { id: 1 });
+    const snap = await env.waitForJob('wait-task', { timeoutMs: 2000 });
+    expect(snap.returnValue).toBe('done');
+    await env.stop();
   });
 
-  it('T-INT-003 error rollback (state 復元)', () => {
-    const state = { count: 0 };
-    try {
-      state.count = 5;
-      throw new Error('queue rollback');
-    } catch {
-      state.count = 0;
-    }
-    expect(state.count).toBe(0);
+  it('T-INT-D-003 process throw で assertFailed', async () => {
+    const env = createSandboxBullMQEnv({ mode: 'sandbox', queueName: 'fail-queue' });
+    env.process(async () => {
+      throw new Error('processor failure');
+    });
+    await env.addJob('fail-task', {});
+    const snap = await env.assertFailed('fail-task', { reasonMatch: /processor failure/ });
+    expect(snap.state).toBe('failed');
+    await env.stop();
   });
 
-  it('T-INT-004 async pipeline chain', async () => {
-    const inputs = ['queue-a', 'queue-b', 'queue-c'];
-    const result = await Promise.all(inputs.map(async (s) => s.toUpperCase()));
-    expect(result).toEqual(['queue-A'.toUpperCase(), 'queue-B'.toUpperCase(), 'queue-C'.toUpperCase()]);
-    expect(result.length).toBe(3);
+  it('T-INT-D-004 複数 addJob で listJobs 収集', async () => {
+    const env = createSandboxBullMQEnv({ mode: 'sandbox', queueName: 'multi-queue' });
+    env.process(async () => 'ok');
+    await env.addJob('t1', { i: 1 });
+    await env.addJob('t2', { i: 2 });
+    await env.addJob('t3', { i: 3 });
+    await env.waitForJob('t3', { timeoutMs: 2000 });
+    const jobs = env.listJobs();
+    expect(jobs.length).toBeGreaterThanOrEqual(3);
+    await env.stop();
   });
 
-  it('T-INT-005 concurrent operation isolation', async () => {
-    const outputs = await Promise.all([
-      Promise.resolve('queue-op1'),
-      Promise.resolve('queue-op2'),
-    ]);
-    expect(outputs).toHaveLength(2);
-    expect(outputs[0]).toBe('queue-op1');
-    expect(outputs[1]).toBe('queue-op2');
+  it('T-INT-D-005 assertQueueDrained で idle 判定', async () => {
+    const env = createSandboxBullMQEnv({ mode: 'sandbox', queueName: 'drain-queue' });
+    env.process(async () => 'done');
+    await env.addJob('drain-task', {});
+    await env.waitForJob('drain-task', { timeoutMs: 2000 });
+    await env.assertQueueDrained();
+    await env.stop();
   });
 });
