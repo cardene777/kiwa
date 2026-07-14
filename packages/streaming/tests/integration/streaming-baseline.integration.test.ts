@@ -1,52 +1,64 @@
 import { describe, expect, it } from 'vitest';
+import { createKafkaMock } from '../../src/index.js';
 
 /**
- * streaming integration test — lib API の workflow + 依存整合 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § integration + packages/dapp exemplar。
+ * streaming integration domain test — real Kafka mock で producer / consumer /
+ * send / subscribe workflow を end-to-end で assert する。
  */
-describe('streaming integration — workflow + 依存整合', () => {
-  it('T-INT-001 setup + execute + teardown workflow', () => {
-    const state = { step: 0, lib: 'streaming' };
-    state.step = 1;
-    state.step = 2;
-    state.step = 3;
-    expect(state.step).toBe(3);
-    expect(state.lib).toBe('streaming');
+describe('streaming integration — Kafka mock workflow', () => {
+  it('T-INT-D-001 producer connect + send workflow', async () => {
+    const kafka = createKafkaMock();
+    const producer = kafka.producer();
+    await producer.connect();
+    const results = await producer.send({
+      topic: 'test-topic',
+      messages: [{ value: 'hello' }],
+    });
+    expect(results.length).toBe(1);
+    expect(producer.isConnected()).toBe(true);
+    await producer.disconnect();
   });
 
-  it('T-INT-002 workflow 順序保持 (log check)', () => {
-    const log: string[] = [];
-    log.push('streaming:setup');
-    log.push('streaming:execute');
-    log.push('streaming:teardown');
-    expect(log).toEqual(['streaming:setup', 'streaming:execute', 'streaming:teardown']);
+  it('T-INT-D-002 producer send without connect throws', async () => {
+    const kafka = createKafkaMock();
+    const producer = kafka.producer();
+    await expect(
+      producer.send({ topic: 'x', messages: [{ value: 'v' }] }),
+    ).rejects.toThrow(/before connect/);
   });
 
-  it('T-INT-003 error rollback (state 復元)', () => {
-    const state = { count: 0 };
-    try {
-      state.count = 5;
-      throw new Error('streaming rollback');
-    } catch {
-      state.count = 0;
-    }
-    expect(state.count).toBe(0);
-  });
-
-  it('T-INT-004 async pipeline chain', async () => {
-    const inputs = ['streaming-a', 'streaming-b', 'streaming-c'];
-    const result = await Promise.all(inputs.map(async (s) => s.toUpperCase()));
-    expect(result).toEqual(['streaming-A'.toUpperCase(), 'streaming-B'.toUpperCase(), 'streaming-C'.toUpperCase()]);
-    expect(result.length).toBe(3);
-  });
-
-  it('T-INT-005 concurrent operation isolation', async () => {
-    const outputs = await Promise.all([
-      Promise.resolve('streaming-op1'),
-      Promise.resolve('streaming-op2'),
+  it('T-INT-D-003 sendBatch で複数 record 送信', async () => {
+    const kafka = createKafkaMock();
+    const producer = kafka.producer();
+    await producer.connect();
+    const results = await producer.sendBatch([
+      { topic: 't1', messages: [{ value: 'a' }] },
+      { topic: 't2', messages: [{ value: 'b' }, { value: 'c' }] },
     ]);
-    expect(outputs).toHaveLength(2);
-    expect(outputs[0]).toBe('streaming-op1');
-    expect(outputs[1]).toBe('streaming-op2');
+    expect(results.length).toBe(3);
+    await producer.disconnect();
+  });
+
+  it('T-INT-D-004 consumer subscribe + connect', async () => {
+    const kafka = createKafkaMock();
+    const consumer = kafka.consumer({ groupId: 'g1' });
+    await consumer.connect();
+    await consumer.subscribe({ topics: ['topic1'] });
+    // subscribe が反映されている状態で disconnect 成功で verify
+    expect(typeof consumer.assignments).toBe('function');
+    await consumer.disconnect();
+  });
+
+  it('T-INT-D-005 admin listTopics で topic 列挙', async () => {
+    const kafka = createKafkaMock();
+    const producer = kafka.producer();
+    await producer.connect();
+    await producer.send({ topic: 'admin-t', messages: [{ value: 'v' }] });
+    const admin = kafka.admin();
+    await admin.connect();
+    const topics = await admin.listTopics();
+    expect(topics).toContain('admin-t');
+    await admin.disconnect();
+    await producer.disconnect();
   });
 });
