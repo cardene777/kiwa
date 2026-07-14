@@ -1,52 +1,56 @@
 import { describe, expect, it } from 'vitest';
+import { MockEngine } from '../../src/index.js';
 
 /**
- * ai-llm integration test — lib API の workflow + 依存整合 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § integration + packages/dapp exemplar。
+ * ai-llm integration domain test — real MockEngine で runChat / runStream /
+ * getMetrics / reset workflow を end-to-end で assert する。
  */
-describe('ai-llm integration — workflow + 依存整合', () => {
-  it('T-INT-001 setup + execute + teardown workflow', () => {
-    const state = { step: 0, lib: 'ai-llm' };
-    state.step = 1;
-    state.step = 2;
-    state.step = 3;
-    expect(state.step).toBe(3);
-    expect(state.lib).toBe('ai-llm');
+describe('ai-llm integration — MockEngine workflow', () => {
+  it('T-INT-D-001 runChat で ChatCompletion 返却', async () => {
+    const engine = new MockEngine({ defaultResponse: 'hi' });
+    const result = await engine.runChat({ messages: [{ role: 'user', content: 'hello' }] });
+    expect(result.message.role).toBe('assistant');
+    expect(result.message.content).toBe('hi');
+    expect(result.usage.promptTokens).toBeGreaterThan(0);
   });
 
-  it('T-INT-002 workflow 順序保持 (log check)', () => {
-    const log: string[] = [];
-    log.push('ai-llm:setup');
-    log.push('ai-llm:execute');
-    log.push('ai-llm:teardown');
-    expect(log).toEqual(['ai-llm:setup', 'ai-llm:execute', 'ai-llm:teardown']);
-  });
-
-  it('T-INT-003 error rollback (state 復元)', () => {
-    const state = { count: 0 };
-    try {
-      state.count = 5;
-      throw new Error('ai-llm rollback');
-    } catch {
-      state.count = 0;
+  it('T-INT-D-002 runStream で chunk 列 stream', async () => {
+    const engine = new MockEngine({ defaultResponse: 'streaming response' });
+    const chunks: string[] = [];
+    for await (const event of engine.runStream({ messages: [{ role: 'user', content: 'hi' }] })) {
+      if (!event.done) chunks.push(event.delta);
     }
-    expect(state.count).toBe(0);
+    expect(chunks.length).toBeGreaterThan(0);
+    expect(chunks.join('')).toBe('streaming response');
   });
 
-  it('T-INT-004 async pipeline chain', async () => {
-    const inputs = ['ai-llm-a', 'ai-llm-b', 'ai-llm-c'];
-    const result = await Promise.all(inputs.map(async (s) => s.toUpperCase()));
-    expect(result).toEqual(['ai-llm-A'.toUpperCase(), 'ai-llm-B'.toUpperCase(), 'ai-llm-C'.toUpperCase()]);
-    expect(result.length).toBe(3);
+  it('T-INT-D-003 getMetrics で 累積 cost / tokens 集計', async () => {
+    const engine = new MockEngine({ defaultResponse: 'test' });
+    await engine.runChat({ messages: [{ role: 'user', content: 'q1' }] });
+    await engine.runChat({ messages: [{ role: 'user', content: 'q2' }] });
+    const metrics = engine.getMetrics();
+    expect(metrics.totalCostUsd).toBeGreaterThan(0);
+    expect(metrics.totalTokens.promptTokens).toBeGreaterThan(0);
   });
 
-  it('T-INT-005 concurrent operation isolation', async () => {
-    const outputs = await Promise.all([
-      Promise.resolve('ai-llm-op1'),
-      Promise.resolve('ai-llm-op2'),
-    ]);
-    expect(outputs).toHaveLength(2);
-    expect(outputs[0]).toBe('ai-llm-op1');
-    expect(outputs[1]).toBe('ai-llm-op2');
+  it('T-INT-D-004 reset で metrics 初期化', async () => {
+    const engine = new MockEngine({ defaultResponse: 'test' });
+    await engine.runChat({ messages: [{ role: 'user', content: 'q' }] });
+    engine.reset();
+    const metrics = engine.getMetrics();
+    expect(metrics.totalCostUsd).toBe(0);
+  });
+
+  it('T-INT-D-005 responses map で prompt 別 response', async () => {
+    const engine = new MockEngine({
+      defaultResponse: 'default',
+      responses: {
+        'hello': { content: 'hi there' },
+      },
+    });
+    const r1 = await engine.runChat({ messages: [{ role: 'user', content: 'hello' }] });
+    const r2 = await engine.runChat({ messages: [{ role: 'user', content: 'other' }] });
+    expect(r1.message.content).toBe('hi there');
+    expect(r2.message.content).toBe('default');
   });
 });

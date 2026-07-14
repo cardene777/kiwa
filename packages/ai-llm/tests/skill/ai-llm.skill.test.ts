@@ -1,50 +1,78 @@
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   assertToolCalled,
   assertToolCallOrder,
-  assertToolCalledWith,
   createToolSpy,
 } from '@kiwa-lab/skill-test';
+import { MockEngine } from '../../src/index.js';
 
 /**
- * ai-llm skill test — ai-llm lib 内で発火する主要 skill を spy 経路で assert する。
- * pattern SSOT = packages/agent/tests/skill/openai-assistant.skill.test.ts (exemplar)。
+ * ai-llm skill domain test — ai-llm lib の主要 skill flow (chat / stream /
+ * metrics / reset) を spy 経路で assert する。
  */
-describe('ai-llm skill 発火 assertion', () => {
-  it('T-SKL-001 主要 skill flow を spy が捕捉する', () => {
+describe('ai-llm skill — MockEngine skill flow', () => {
+  it('T-SKL-D-001 chat skill flow (runChat + getMetrics)', async () => {
     const spy = createToolSpy();
-    spy.record('ai-llm.setup', JSON.stringify({ target: 'primary' }));
-    spy.record('ai-llm.execute', JSON.stringify({ target: 'primary' }));
-    assertToolCalled(spy, 'ai-llm.setup');
-    assertToolCalled(spy, 'ai-llm.execute');
+    const engine = new MockEngine({ defaultResponse: 'ok' });
+    await engine.runChat({ messages: [{ role: 'user', content: 'q' }] });
+    spy.record('llm.runChat', JSON.stringify({ prompt: 'q' }));
+    const metrics = engine.getMetrics();
+    spy.record('llm.getMetrics', '{}');
+
+    assertToolCallOrder(spy, ['llm.runChat', 'llm.getMetrics']);
+    expect(metrics.totalCostUsd).toBeGreaterThan(0);
   });
 
-  it('T-SKL-002 skill 呼出順序を assert する', () => {
+  it('T-SKL-D-002 stream skill flow (runStream chunk 列)', async () => {
     const spy = createToolSpy();
-    spy.record('ai-llm.setup', '{}');
-    spy.record('ai-llm.execute', '{}');
-    spy.record('ai-llm.teardown', '{}');
-    assertToolCallOrder(spy, ['ai-llm.setup', 'ai-llm.execute', 'ai-llm.teardown']);
+    const engine = new MockEngine({ defaultResponse: 'streaming' });
+    let chunkCount = 0;
+    for await (const event of engine.runStream({ messages: [{ role: 'user', content: 'q' }] })) {
+      if (!event.done) chunkCount += 1;
+    }
+    spy.record('llm.runStream', JSON.stringify({ chunks: chunkCount }));
+
+    assertToolCalled(spy, 'llm.runStream');
+    expect(chunkCount).toBeGreaterThan(0);
   });
 
-  it('T-SKL-003 skill 呼出引数を assert する', () => {
+  it('T-SKL-D-003 batch chat skill (times=3)', async () => {
     const spy = createToolSpy();
-    spy.record('ai-llm.execute', JSON.stringify({ mode: 'test', value: 42 }));
-    assertToolCalledWith(spy, 'ai-llm.execute', { mode: 'test', value: 42 });
+    const engine = new MockEngine({ defaultResponse: 'ok' });
+    await engine.runChat({ messages: [{ role: 'user', content: 'q1' }] });
+    spy.record('llm.runChat', '{}');
+    await engine.runChat({ messages: [{ role: 'user', content: 'q2' }] });
+    spy.record('llm.runChat', '{}');
+    await engine.runChat({ messages: [{ role: 'user', content: 'q3' }] });
+    spy.record('llm.runChat', '{}');
+
+    assertToolCalled(spy, 'llm.runChat', { times: 3 });
   });
 
-  it('T-SKL-004 skill 呼出回数を assert する (times=2)', () => {
+  it('T-SKL-D-004 reset skill flow (chat + reset + verify)', async () => {
     const spy = createToolSpy();
-    spy.record('ai-llm.execute', '{}');
-    spy.record('ai-llm.execute', '{}');
-    assertToolCalled(spy, 'ai-llm.execute', { times: 2 });
+    const engine = new MockEngine({ defaultResponse: 'ok' });
+    await engine.runChat({ messages: [{ role: 'user', content: 'q' }] });
+    spy.record('llm.runChat', '{}');
+    engine.reset();
+    spy.record('llm.reset', '{}');
+    const metrics = engine.getMetrics();
+    spy.record('llm.getMetrics', '{}');
+
+    assertToolCallOrder(spy, ['llm.runChat', 'llm.reset', 'llm.getMetrics']);
+    expect(metrics.totalCostUsd).toBe(0);
   });
 
-  it('T-SKL-005 error skill flow (retry pattern)', () => {
+  it('T-SKL-D-005 response map skill flow (prompt-specific response)', async () => {
     const spy = createToolSpy();
-    spy.record('ai-llm.execute', '{}');
-    spy.record('ai-llm.retry', JSON.stringify({ attempt: 1 }));
-    assertToolCalled(spy, 'ai-llm.retry');
-    assertToolCallOrder(spy, ['ai-llm.execute', 'ai-llm.retry']);
+    const engine = new MockEngine({
+      defaultResponse: 'default',
+      responses: { 'skill': { content: 'skill-specific' } },
+    });
+    const result = await engine.runChat({ messages: [{ role: 'user', content: 'skill' }] });
+    spy.record('llm.runChat', JSON.stringify({ matched: 'skill' }));
+
+    assertToolCalled(spy, 'llm.runChat');
+    expect(result.message.content).toBe('skill-specific');
   });
 });
