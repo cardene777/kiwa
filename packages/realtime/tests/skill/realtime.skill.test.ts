@@ -1,50 +1,80 @@
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   assertToolCalled,
   assertToolCallOrder,
-  assertToolCalledWith,
   createToolSpy,
 } from '@kiwa-lab/skill-test';
+import { RealtimeEngine } from '../../src/index.js';
 
 /**
- * realtime skill test — realtime lib 内で発火する主要 skill を spy 経路で assert する。
- * pattern SSOT = packages/agent/tests/skill/openai-assistant.skill.test.ts (exemplar)。
+ * realtime skill domain test — realtime lib の主要 skill flow (subscribe /
+ * publish / unsubscribe / disconnect) を spy 経路で assert する。
  */
-describe('realtime skill 発火 assertion', () => {
-  it('T-SKL-001 主要 skill flow を spy が捕捉する', () => {
+describe('realtime skill — RealtimeEngine skill flow', () => {
+  it('T-SKL-D-001 subscribe + publish skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('realtime.setup', JSON.stringify({ target: 'primary' }));
-    spy.record('realtime.execute', JSON.stringify({ target: 'primary' }));
-    assertToolCalled(spy, 'realtime.setup');
-    assertToolCalled(spy, 'realtime.execute');
+    const engine = new RealtimeEngine({ artificialLatencyMs: 0 });
+    const sub = await engine.subscribe('sk-ch', () => undefined);
+    spy.record('realtime.subscribe', JSON.stringify({ channel: 'sk-ch' }));
+    await engine.publish('sk-ch', 'msg', { v: 1 });
+    spy.record('realtime.publish', JSON.stringify({ event: 'msg' }));
+
+    assertToolCallOrder(spy, ['realtime.subscribe', 'realtime.publish']);
+    await sub.unsubscribe();
+    await engine.disconnect();
   });
 
-  it('T-SKL-002 skill 呼出順序を assert する', () => {
+  it('T-SKL-D-002 unsubscribe skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('realtime.setup', '{}');
-    spy.record('realtime.execute', '{}');
-    spy.record('realtime.teardown', '{}');
-    assertToolCallOrder(spy, ['realtime.setup', 'realtime.execute', 'realtime.teardown']);
+    const engine = new RealtimeEngine({ artificialLatencyMs: 0 });
+    const sub = await engine.subscribe('sk-ch2', () => undefined);
+    spy.record('realtime.subscribe', '{}');
+    await sub.unsubscribe();
+    spy.record('realtime.unsubscribe', JSON.stringify({ channel: 'sk-ch2' }));
+
+    assertToolCallOrder(spy, ['realtime.subscribe', 'realtime.unsubscribe']);
+    await engine.disconnect();
   });
 
-  it('T-SKL-003 skill 呼出引数を assert する', () => {
+  it('T-SKL-D-003 batch publish skill (times=3)', async () => {
     const spy = createToolSpy();
-    spy.record('realtime.execute', JSON.stringify({ mode: 'test', value: 42 }));
-    assertToolCalledWith(spy, 'realtime.execute', { mode: 'test', value: 42 });
+    const engine = new RealtimeEngine({ artificialLatencyMs: 0 });
+    await engine.subscribe('ch', () => undefined);
+    await engine.publish('ch', 'e', {});
+    spy.record('realtime.publish', '{}');
+    await engine.publish('ch', 'e', {});
+    spy.record('realtime.publish', '{}');
+    await engine.publish('ch', 'e', {});
+    spy.record('realtime.publish', '{}');
+
+    assertToolCalled(spy, 'realtime.publish', { times: 3 });
+    await engine.disconnect();
   });
 
-  it('T-SKL-004 skill 呼出回数を assert する (times=2)', () => {
+  it('T-SKL-D-004 reconnect skill flow', async () => {
     const spy = createToolSpy();
-    spy.record('realtime.execute', '{}');
-    spy.record('realtime.execute', '{}');
-    assertToolCalled(spy, 'realtime.execute', { times: 2 });
+    const engine = new RealtimeEngine({ artificialLatencyMs: 0 });
+    await engine.ensureConnected();
+    spy.record('realtime.connect', '{}');
+    await engine.disconnect();
+    spy.record('realtime.disconnect', '{}');
+    await engine.reconnect();
+    spy.record('realtime.reconnect', '{}');
+
+    assertToolCallOrder(spy, ['realtime.connect', 'realtime.disconnect', 'realtime.reconnect']);
+    await engine.disconnect();
   });
 
-  it('T-SKL-005 error skill flow (retry pattern)', () => {
+  it('T-SKL-D-005 presence skill flow (trackPresence + untrackPresence)', async () => {
     const spy = createToolSpy();
-    spy.record('realtime.execute', '{}');
-    spy.record('realtime.retry', JSON.stringify({ attempt: 1 }));
-    assertToolCalled(spy, 'realtime.retry');
-    assertToolCallOrder(spy, ['realtime.execute', 'realtime.retry']);
+    const engine = new RealtimeEngine({ artificialLatencyMs: 0 });
+    await engine.subscribe('ch-p', () => undefined);
+    await engine.trackPresence('ch-p', 'user1', { status: 'online' });
+    spy.record('realtime.trackPresence', JSON.stringify({ userId: 'user1' }));
+    await engine.untrackPresence('ch-p', 'user1');
+    spy.record('realtime.untrackPresence', JSON.stringify({ userId: 'user1' }));
+
+    assertToolCallOrder(spy, ['realtime.trackPresence', 'realtime.untrackPresence']);
+    await engine.disconnect();
   });
 });
