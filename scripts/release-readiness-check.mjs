@@ -53,6 +53,9 @@ const SKIP_SET = new Set(
     .filter(Boolean),
 );
 const SUMMARY_ONLY = args.includes('--summary-only');
+const INCLUDE_DOGFOOD_RUN = args.includes('--include-dogfood-run') || process.env.INCLUDE_DOGFOOD_RUN === '1';
+const INCLUDE_APP_SCENARIO_RUN = args.includes('--include-app-scenario-run');
+const SKIP_MUTATION = args.includes('--skip-mutation') || SKIP_SET.has('gate2-mutation');
 
 /**
  * 1 gate 実行。 stdio inherit で出力を parent に流す (summary-only 時は pipe)。
@@ -113,24 +116,37 @@ function runAllGates() {
   gates.push(runGate('build-check', 'pnpm', ['-r', '--if-present', 'run', 'typecheck']));
 
   // Gate 5 = dogfood structural check (117 dogfood-* project の 3 条件 verify)
-  // --run 経路は skip default (117 project × test:perf = 時間かかる)、 structural のみ
+  // --include-dogfood-run flag or INCLUDE_DOGFOOD_RUN=1 env で実 test:perf run に切替
   const dogfoodScript = path.join(REPO_ROOT, 'scripts/check-dogfood-gate.mjs');
   if (existsSync(dogfoodScript)) {
     const dogfoodArgs = [dogfoodScript];
-    if (process.env.INCLUDE_DOGFOOD_RUN === '1') dogfoodArgs.push('--run');
+    if (INCLUDE_DOGFOOD_RUN) dogfoodArgs.push('--run');
     gates.push(runGate('gate5-dogfood', 'node', dogfoodArgs));
   } else {
     gates.push({ name: 'gate5-dogfood', status: 'missing', durationMs: 0 });
   }
 
+  // Gate 6 = app-scenario perf (real workload test 存在 + 実行 PASS)
+  // default = structural chk (数秒)、 --include-app-scenario-run で 20-30 min heavy run
+  const appScenarioScript = path.join(REPO_ROOT, 'scripts/check-app-scenario-gate.mjs');
+  if (existsSync(appScenarioScript)) {
+    const appArgs = [appScenarioScript];
+    if (INCLUDE_APP_SCENARIO_RUN) appArgs.push('--run');
+    gates.push(runGate('gate6-app-scenario', 'node', appArgs));
+  } else {
+    gates.push({ name: 'gate6-app-scenario', status: 'missing', durationMs: 0 });
+  }
+
   // Gate 2 = mutation MSI (test 品質軸、 test の kill/survive ratio 検証)
-  // env INCLUDE_MUTATION=1 で opt-in、 default skip (mutation = 30+ min heavy)
+  // v2 (2026-07-14) = 事前生成済 mutation.json を read する軽量 gate に降格
+  // (stryker run 自体は nightly cron / 手動 opt-in、 本 gate は結果 read + 閾値判定のみ)
+  // default = 実行 (数秒)、 --skip-mutation flag or --skip=gate2-mutation で skip
   const mutationScript = path.join(REPO_ROOT, 'scripts/check-mutation-gates.mjs');
   if (existsSync(mutationScript)) {
-    if (process.env.INCLUDE_MUTATION === '1' && !SKIP_SET.has('gate2-mutation')) {
-      gates.push(runGate('gate2-mutation', 'node', [mutationScript]));
-    } else {
+    if (SKIP_MUTATION) {
       gates.push({ name: 'gate2-mutation', status: 'skipped', durationMs: 0 });
+    } else {
+      gates.push(runGate('gate2-mutation', 'node', [mutationScript]));
     }
   } else {
     gates.push({ name: 'gate2-mutation', status: 'missing', durationMs: 0 });
