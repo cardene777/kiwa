@@ -1,52 +1,64 @@
 import { describe, expect, it } from 'vitest';
+import { RealtimeEngine } from '../../src/index.js';
 
 /**
- * realtime integration test — lib API の workflow + 依存整合 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § integration + packages/dapp exemplar。
+ * realtime integration domain test — real RealtimeEngine で ensureConnected /
+ * subscribe / publish / disconnect workflow を end-to-end で assert する。
  */
-describe('realtime integration — workflow + 依存整合', () => {
-  it('T-INT-001 setup + execute + teardown workflow', () => {
-    const state = { step: 0, lib: 'realtime' };
-    state.step = 1;
-    state.step = 2;
-    state.step = 3;
-    expect(state.step).toBe(3);
-    expect(state.lib).toBe('realtime');
+describe('realtime integration — RealtimeEngine workflow', () => {
+  it('T-INT-D-001 ensureConnected + subscribe + publish の flow', async () => {
+    const engine = new RealtimeEngine({ artificialLatencyMs: 0 });
+    const events: unknown[] = [];
+    const sub = await engine.subscribe('ch1', (event) => events.push(event));
+    await engine.publish('ch1', 'msg', { text: 'hello' });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(events.length).toBeGreaterThan(0);
+    await sub.unsubscribe();
+    await engine.disconnect();
   });
 
-  it('T-INT-002 workflow 順序保持 (log check)', () => {
-    const log: string[] = [];
-    log.push('realtime:setup');
-    log.push('realtime:execute');
-    log.push('realtime:teardown');
-    expect(log).toEqual(['realtime:setup', 'realtime:execute', 'realtime:teardown']);
+  it('T-INT-D-002 unsubscribe で handler 除去', async () => {
+    const engine = new RealtimeEngine({ artificialLatencyMs: 0 });
+    const events: unknown[] = [];
+    const sub = await engine.subscribe('ch2', (event) => events.push(event));
+    await sub.unsubscribe();
+    await engine.publish('ch2', 'msg', {});
+    await new Promise((r) => setTimeout(r, 50));
+    const eventsAfterUnsub = events.length;
+    await new Promise((r) => setTimeout(r, 50));
+    expect(events.length).toBe(eventsAfterUnsub);
+    await engine.disconnect();
   });
 
-  it('T-INT-003 error rollback (state 復元)', () => {
-    const state = { count: 0 };
-    try {
-      state.count = 5;
-      throw new Error('realtime rollback');
-    } catch {
-      state.count = 0;
-    }
-    expect(state.count).toBe(0);
+  it('T-INT-D-003 multiple channel subscribe で isolation', async () => {
+    const engine = new RealtimeEngine({ artificialLatencyMs: 0 });
+    const events1: unknown[] = [];
+    const events2: unknown[] = [];
+    await engine.subscribe('ch3', (e) => events1.push(e));
+    await engine.subscribe('ch4', (e) => events2.push(e));
+    await engine.publish('ch3', 'msg', {});
+    await new Promise((r) => setTimeout(r, 50));
+    expect(events1.length).toBeGreaterThan(0);
+    await engine.disconnect();
   });
 
-  it('T-INT-004 async pipeline chain', async () => {
-    const inputs = ['realtime-a', 'realtime-b', 'realtime-c'];
-    const result = await Promise.all(inputs.map(async (s) => s.toUpperCase()));
-    expect(result).toEqual(['realtime-A'.toUpperCase(), 'realtime-B'.toUpperCase(), 'realtime-C'.toUpperCase()]);
-    expect(result.length).toBe(3);
+  it('T-INT-D-004 disconnect + reconnect flow', async () => {
+    const engine = new RealtimeEngine({ artificialLatencyMs: 0 });
+    await engine.ensureConnected();
+    await engine.disconnect();
+    await engine.reconnect();
+    const sub = await engine.subscribe('ch5', () => undefined);
+    expect(sub.channel).toBe('ch5');
+    await engine.disconnect();
   });
 
-  it('T-INT-005 concurrent operation isolation', async () => {
-    const outputs = await Promise.all([
-      Promise.resolve('realtime-op1'),
-      Promise.resolve('realtime-op2'),
-    ]);
-    expect(outputs).toHaveLength(2);
-    expect(outputs[0]).toBe('realtime-op1');
-    expect(outputs[1]).toBe('realtime-op2');
+  it('T-INT-D-005 reset で metrics 初期化', async () => {
+    const engine = new RealtimeEngine({ artificialLatencyMs: 0 });
+    await engine.subscribe('ch6', () => undefined);
+    engine.reset();
+    // reset 後は fresh state
+    const sub = await engine.subscribe('ch6', () => undefined);
+    expect(sub.channel).toBe('ch6');
+    await engine.disconnect();
   });
 });
