@@ -293,3 +293,220 @@ describe('resolveWalletConfigs (normalizeWalletConfigs branches)', () => {
     );
   });
 });
+
+// -------------------------------------------------------------------
+// CAR-1528 段階 1: fixture.ts 未 cover 分岐に対する real behavior 追加 test。
+// 対象 = createRpcHandler DEBUG log 経路の helper 群 (formatRpcParams /
+// formatRpcValue / inspectForRpc / formatCompletedRpcEntry) と、
+// waitForPendingRpcs timeout 経路の formatPendingRpcEntry / formatDurationMs、
+// および validateWalletConfigs の未 cover 検証 branch (chainId 範囲 /
+// contractAccountAddress format / contractAccountExecuteAbi form /
+// isContractAccount+address 相関) を対象とする。
+// -------------------------------------------------------------------
+
+describe('createRpcHandler DEBUG log helper coverage', () => {
+  it('T-FIX-008 params 未指定 (undefined) は formatRpcParams が "[]" として整形する', async () => {
+    const ctx: RpcContext = {
+      privateKey: PRIVATE_KEY,
+      chainState: { current: 31337 },
+    };
+    const tracker = {
+      pendingRpcs: new Map(),
+      nextId: () => 1,
+    };
+    const rpcHandler = createRpcHandler(ctx, tracker);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const prevDebug = process.env.DEBUG;
+    process.env.DEBUG = 'kiwa:rpc';
+
+    try {
+      // eth_chainId は params 不要 → formatRpcParams(undefined) が "[]" 分岐に入る
+      await rpcHandler({ method: 'eth_chainId' });
+      // finally の debug log は microtask 経由で fire、 await 完了後に flush する
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringMatching(/\[kiwa:rpc\] eth_chainId \[\] start_time=/),
+      );
+    } finally {
+      process.env.DEBUG = prevDebug;
+      logSpy.mockRestore();
+    }
+  });
+
+  it('T-FIX-009 params.length >= 2 は formatRpcParams が array 全体を JSON 化して整形する', async () => {
+    const ctx: RpcContext = {
+      privateKey: PRIVATE_KEY,
+      chainState: { current: 31337 },
+    };
+    const tracker = {
+      pendingRpcs: new Map(),
+      nextId: () => 1,
+    };
+    const rpcHandler = createRpcHandler(ctx, tracker);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const prevDebug = process.env.DEBUG;
+    process.env.DEBUG = 'kiwa:rpc';
+
+    try {
+      // eth_sign は BLOCKED_METHODS で throw、 debug log は finally 経由で出る。
+      // params 2 個 → formatRpcParams が formatRpcValue(array) 分岐に入る。
+      await rpcHandler({
+        method: 'eth_sign',
+        params: ['0xdeadbeef', '0xabc'],
+      });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringMatching(/\[kiwa:rpc\] eth_sign \["0xdeadbeef","0xabc"\]/),
+      );
+    } finally {
+      process.env.DEBUG = prevDebug;
+      logSpy.mockRestore();
+    }
+  });
+
+  it('T-FIX-010 bigint param は inspectForRpc が "n" 接尾辞付き文字列に変換する', async () => {
+    const ctx: RpcContext = {
+      privateKey: PRIVATE_KEY,
+      chainState: { current: 31337 },
+    };
+    const tracker = {
+      pendingRpcs: new Map(),
+      nextId: () => 1,
+    };
+    const rpcHandler = createRpcHandler(ctx, tracker);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const prevDebug = process.env.DEBUG;
+    process.env.DEBUG = 'kiwa:rpc';
+
+    try {
+      // BLOCKED_METHODS で即 throw、 finally で debug log を出す。
+      // inspectForRpc の replacer が bigint → "12345n" (string) に変換する。
+      await rpcHandler({ method: 'eth_sign', params: [12345n] });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining('"12345n"'),
+      );
+    } finally {
+      process.env.DEBUG = prevDebug;
+      logSpy.mockRestore();
+    }
+  });
+});
+
+describe('waitForPendingRpcs timeout formatting coverage', () => {
+  it('T-FIX-011 複数 pending RPC は formatPendingRpcEntry を " | " で結合する', async () => {
+    const now = Date.now();
+    const pendingRpcs = new Map([
+      [
+        1,
+        {
+          request: { method: 'eth_call', params: [{ to: '0xabc', data: '0x1234' }] },
+          startedAt: now - 500,
+          promise: new Promise<never>(() => {}),
+        },
+      ],
+      [
+        2,
+        {
+          request: { method: 'eth_getBalance', params: ['0xdef', 'latest'] },
+          startedAt: now - 200,
+          promise: new Promise<never>(() => {}),
+        },
+      ],
+    ]);
+
+    await expect(waitForPendingRpcs({} as never, pendingRpcs, 10)).rejects.toSatisfy(
+      (error: unknown) =>
+        error instanceof Error &&
+        /2 pending RPCs:/.test(error.message) &&
+        /eth_call.*\|.*eth_getBalance/.test(error.message),
+    );
+  });
+
+  it('T-FIX-012 sub-second 経過は formatDurationMs が "Xms" 形式で出力する', async () => {
+    const pendingRpcs = new Map([
+      [
+        1,
+        {
+          request: { method: 'eth_call' },
+          // 250ms 経過 (< 1000ms) → formatDurationMs が ms 分岐に入る
+          startedAt: Date.now() - 250,
+          promise: new Promise<never>(() => {}),
+        },
+      ],
+    ]);
+
+    await expect(waitForPendingRpcs({} as never, pendingRpcs, 10)).rejects.toSatisfy(
+      (error: unknown) =>
+        error instanceof Error &&
+        /pending for \d+ms/.test(error.message) &&
+        // 秒表示 (x.xs) は出ない = ms 分岐が選ばれた証拠
+        !/pending for \d+\.\ds/.test(error.message),
+    );
+  });
+});
+
+describe('validateWalletConfigs uncovered branches', () => {
+  const PK: Hex =
+    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
+  it('T-RWC-013 wallet.chainId が 0 は positive integer 制約違反で throw する', () => {
+    const wallets: WalletConfig[] = [
+      { name: 'X', rdns: 'io.x', icon: 'data:,', privateKey: PK, chainId: 0 },
+    ];
+    expect(() => resolveWalletConfigs(PK, 31337, wallets)).toThrow(/chainId.*positive integer/);
+  });
+
+  it('T-RWC-014 wallet.chainId が 非整数 (1.5) は throw する', () => {
+    const wallets: WalletConfig[] = [
+      { name: 'X', rdns: 'io.x', icon: 'data:,', privateKey: PK, chainId: 1.5 },
+    ];
+    expect(() => resolveWalletConfigs(PK, 31337, wallets)).toThrow(/chainId.*positive integer/);
+  });
+
+  it('T-RWC-015 wallet.contractAccountAddress が 40-char hex address でなければ throw する', () => {
+    const wallets: WalletConfig[] = [
+      {
+        name: 'X',
+        rdns: 'io.x',
+        icon: 'data:,',
+        privateKey: PK,
+        isContractAccount: true,
+        contractAccountAddress: '0xdeadbeef' as `0x${string}`,
+      },
+    ];
+    expect(() => resolveWalletConfigs(PK, 31337, wallets)).toThrow(
+      /contractAccountAddress.*40-char address/,
+    );
+  });
+
+  it('T-RWC-016 wallet.contractAccountExecuteAbi が array でなければ throw する', () => {
+    const wallets: WalletConfig[] = [
+      {
+        name: 'X',
+        rdns: 'io.x',
+        icon: 'data:,',
+        privateKey: PK,
+        contractAccountExecuteAbi: 'function foo()' as unknown as string[],
+      },
+    ];
+    expect(() => resolveWalletConfigs(PK, 31337, wallets)).toThrow(
+      /contractAccountExecuteAbi.*non-empty string\[\]/,
+    );
+  });
+
+  it('T-RWC-017 isContractAccount=true で contractAccountAddress 未指定は throw する', () => {
+    const wallets: WalletConfig[] = [
+      {
+        name: 'X',
+        rdns: 'io.x',
+        icon: 'data:,',
+        privateKey: PK,
+        isContractAccount: true,
+      },
+    ];
+    expect(() => resolveWalletConfigs(PK, 31337, wallets)).toThrow(
+      /contractAccountAddress.*required when isContractAccount=true/,
+    );
+  });
+});
