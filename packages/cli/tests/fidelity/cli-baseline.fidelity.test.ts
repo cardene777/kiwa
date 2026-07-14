@@ -1,44 +1,52 @@
 import { describe, expect, it } from 'vitest';
+import { runInit, InitConflictError } from '../../src/index.js';
+import { setupCliEnv } from '@kiwa-lab/cli-test';
 
-/**
- * cli fidelity test — mock 挙動 vs 期待仕様の一致 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § fidelity + packages/auth exemplar。
- */
-describe('cli fidelity — mock ↔ 期待仕様', () => {
-  it('T-FID-001 mock 挙動が期待 shape を保持する', () => {
-    const observed = { id: 'cli-1', value: 42, status: 'ok' };
-    const expected = { id: 'cli-1', value: 42, status: 'ok' };
-    expect(observed).toEqual(expected);
-    expect(observed.id.startsWith('cli')).toBe(true);
+describe('cli fidelity — runInit contract', () => {
+  it('T-FID-D-001 runInit で 4 file scaffold', async () => {
+    const env = await setupCliEnv();
+    await runInit({ cwd: env.tempDir });
+    const spec = await env.fileExists('e2e/connect.spec.ts');
+    const config = await env.fileExists('playwright.config.ts');
+    const tsconfig = await env.fileExists('tsconfig.json');
+    const pkg = await env.fileExists('package.json');
+    expect(spec && config && tsconfig && pkg).toBe(true);
+    await env.stop();
   });
 
-  it('T-FID-002 mock 順序性を保持する (deterministic ordering)', () => {
-    const sequence: string[] = [];
-    sequence.push('setup');
-    sequence.push('exec');
-    sequence.push('finalize');
-    expect(sequence).toEqual(['setup', 'exec', 'finalize']);
-    expect(sequence.length).toBe(3);
+  it('T-FID-D-002 runInit 再実行で InitConflictError', async () => {
+    const env = await setupCliEnv();
+    await runInit({ cwd: env.tempDir });
+    await expect(runInit({ cwd: env.tempDir })).rejects.toThrow(InitConflictError);
+    await env.stop();
   });
 
-  it('T-FID-003 mock error 分岐を再現する', () => {
-    const throwing = () => {
-      throw new Error('cli mock error');
-    };
-    expect(throwing).toThrow(/cli mock error/);
+  it('T-FID-D-003 --force で conflict なし上書き', async () => {
+    const env = await setupCliEnv();
+    await runInit({ cwd: env.tempDir });
+    await expect(runInit({ cwd: env.tempDir, force: true })).resolves.toBeUndefined();
+    await env.stop();
   });
 
-  it('T-FID-004 mock async 挙動を保持する', async () => {
-    const asyncFn = async (input: string) => `${input}-processed`;
-    const result = await asyncFn('cli');
-    expect(result).toBe('cli-processed');
+  it('T-FID-D-004 InitConflictError は Error instance', async () => {
+    const env = await setupCliEnv();
+    await runInit({ cwd: env.tempDir });
+    try {
+      await runInit({ cwd: env.tempDir });
+      expect.fail('expected InitConflictError');
+    } catch (e) {
+      expect(e).toBeInstanceOf(InitConflictError);
+      expect(e).toBeInstanceOf(Error);
+    }
+    await env.stop();
   });
 
-  it('T-FID-005 mock idempotency (同一 input で同一 output)', () => {
-    const fn = (n: number) => n * 2 + 1;
-    const a = fn(3);
-    const b = fn(3);
-    expect(a).toBe(b);
-    expect(a).toBe(7);
+  it('T-FID-D-005 runInit idempotent under --force', async () => {
+    const env = await setupCliEnv();
+    await runInit({ cwd: env.tempDir });
+    await runInit({ cwd: env.tempDir, force: true });
+    await runInit({ cwd: env.tempDir, force: true });
+    expect(await env.fileExists('e2e/connect.spec.ts')).toBe(true);
+    await env.stop();
   });
 });

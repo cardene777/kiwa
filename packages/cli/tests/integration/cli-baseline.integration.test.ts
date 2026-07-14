@@ -1,52 +1,47 @@
 import { describe, expect, it } from 'vitest';
+import { runInit, runSpecToTest } from '../../src/index.js';
+import { setupCliEnv } from '@kiwa-lab/cli-test';
 
-/**
- * cli integration test — lib API の workflow + 依存整合 assertion。
- * pattern SSOT = docs/concepts/test-taxonomy.md § integration + packages/dapp exemplar。
- */
-describe('cli integration — workflow + 依存整合', () => {
-  it('T-INT-001 setup + execute + teardown workflow', () => {
-    const state = { step: 0, lib: 'cli' };
-    state.step = 1;
-    state.step = 2;
-    state.step = 3;
-    expect(state.step).toBe(3);
-    expect(state.lib).toBe('cli');
+describe('cli integration — CLI command workflow', () => {
+  it('T-INT-D-001 runInit で scaffold 実行', async () => {
+    const env = await setupCliEnv();
+    await runInit({ cwd: env.tempDir });
+    const hasSpec = await env.fileExists('e2e/connect.spec.ts');
+    expect(hasSpec).toBe(true);
+    await env.stop();
   });
 
-  it('T-INT-002 workflow 順序保持 (log check)', () => {
-    const log: string[] = [];
-    log.push('cli:setup');
-    log.push('cli:execute');
-    log.push('cli:teardown');
-    expect(log).toEqual(['cli:setup', 'cli:execute', 'cli:teardown']);
+  it('T-INT-D-002 runInit で playwright.config.ts 生成', async () => {
+    const env = await setupCliEnv();
+    await runInit({ cwd: env.tempDir });
+    const hasConfig = await env.fileExists('playwright.config.ts');
+    expect(hasConfig).toBe(true);
+    await env.stop();
   });
 
-  it('T-INT-003 error rollback (state 復元)', () => {
-    const state = { count: 0 };
-    try {
-      state.count = 5;
-      throw new Error('cli rollback');
-    } catch {
-      state.count = 0;
-    }
-    expect(state.count).toBe(0);
+  it('T-INT-D-003 runInit で tsconfig 生成', async () => {
+    const env = await setupCliEnv();
+    await runInit({ cwd: env.tempDir });
+    const hasTsconfig = await env.fileExists('tsconfig.json');
+    expect(hasTsconfig).toBe(true);
+    await env.stop();
   });
 
-  it('T-INT-004 async pipeline chain', async () => {
-    const inputs = ['cli-a', 'cli-b', 'cli-c'];
-    const result = await Promise.all(inputs.map(async (s) => s.toUpperCase()));
-    expect(result).toEqual(['cli-A'.toUpperCase(), 'cli-B'.toUpperCase(), 'cli-C'.toUpperCase()]);
-    expect(result.length).toBe(3);
+  it('T-INT-D-004 runInit --force で 既存 file 上書き', async () => {
+    const env = await setupCliEnv();
+    await runInit({ cwd: env.tempDir });
+    await runInit({ cwd: env.tempDir, force: true });
+    const hasSpec = await env.fileExists('e2e/connect.spec.ts');
+    expect(hasSpec).toBe(true);
+    await env.stop();
   });
 
-  it('T-INT-005 concurrent operation isolation', async () => {
-    const outputs = await Promise.all([
-      Promise.resolve('cli-op1'),
-      Promise.resolve('cli-op2'),
-    ]);
-    expect(outputs).toHaveLength(2);
-    expect(outputs[0]).toBe('cli-op1');
-    expect(outputs[1]).toBe('cli-op2');
+  it('T-INT-D-005 runSpecToTest で spec → test 変換', async () => {
+    const env = await setupCliEnv();
+    await env.writeFile('spec.md', `# Test\n\n- module: m\n- layer: unit\n\n| id | observation | given | when | then |\n|----|-------------|-------|------|------|\n| T-1 | ok | in | call | out |`);
+    await runSpecToTest({ input: `${env.tempDir}/spec.md`, output: `${env.tempDir}/test.ts`, layer: 'unit' });
+    const hasTest = await env.fileExists('test.ts');
+    expect(hasTest).toBe(true);
+    await env.stop();
   });
 });
