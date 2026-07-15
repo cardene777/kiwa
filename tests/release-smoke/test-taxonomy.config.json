@@ -75,7 +75,22 @@
       "trpc",
       "i18n",
       "workflow",
-      "macos-app"
+      "macos-app",
+      "python",
+      "ruby",
+      "rust-lib",
+      "go-lib",
+      "react-native",
+      "expo",
+      "form",
+      "state",
+      "query",
+      "date",
+      "chart",
+      "crypto",
+      "migration",
+      "websocket",
+      "grpc"
     ]
   },
   "requireSkill": {
@@ -128,7 +143,22 @@
       "trpc",
       "i18n",
       "workflow",
-      "macos-app"
+      "macos-app",
+      "python",
+      "ruby",
+      "rust-lib",
+      "go-lib",
+      "react-native",
+      "expo",
+      "form",
+      "state",
+      "query",
+      "date",
+      "chart",
+      "crypto",
+      "migration",
+      "websocket",
+      "grpc"
     ]
   },
   "requireIntegration": {
@@ -181,7 +211,22 @@
       "trpc",
       "i18n",
       "workflow",
-      "macos-app"
+      "macos-app",
+      "python",
+      "ruby",
+      "rust-lib",
+      "go-lib",
+      "react-native",
+      "expo",
+      "form",
+      "state",
+      "query",
+      "date",
+      "chart",
+      "crypto",
+      "migration",
+      "websocket",
+      "grpc"
     ]
   }
 }
