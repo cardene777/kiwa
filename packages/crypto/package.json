@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/crypto",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Cryptographic mock harness for kiwa — JWT (RS256/HS256/ES256) / RSA / AES (CBC/GCM) / hash (sha256/512/blake2) / HMAC / X.509 cert parse を統一 interface で in-process 実行する test infra。 real crypto library 差替なしで sign / verify / encrypt / decrypt / hash / cert parse workflow を検証。",
   "license": "UNLICENSED",
   "author": {

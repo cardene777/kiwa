@@ -24,3 +24,22 @@ export {
   registerField,
   getFieldError,
 } from './fields.js';
+
+// v2.1 extensions
+export {
+  validateAsync,
+  createFieldArray,
+  validateDependentFields,
+  retryWithBackoff,
+  createObservabilityHook,
+  withTimeout,
+  type AsyncValidationOptions,
+  type AsyncValidationResult,
+  type AsyncValidator,
+  type FieldArray,
+  type DependentFieldRule,
+  type DependentFieldResult,
+  type RetryOptions,
+  type RetryResult,
+  type ObservabilityHook,
+} from './extensions.js';

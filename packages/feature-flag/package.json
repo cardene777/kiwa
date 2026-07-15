@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/feature-flag",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Feature flag provider mock harness for kiwa — GrowthBook / LaunchDarkly / PostHog / Unleash を統一 interface で invoke する in-process mock。 flag evaluation (boolean / string / number variants) / targeting rule / percentage rollout / user attribute matching / register rule までを real provider と同じ signature で叩ける test infra。",
   "license": "UNLICENSED",
   "author": {

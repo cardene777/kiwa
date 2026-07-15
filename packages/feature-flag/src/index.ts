@@ -32,3 +32,9 @@ export {
   normalizeProviderConfig,
   type ProviderConfig,
 } from './provider.js';
+
+export { evaluateWithRetry, type RetryOptions } from './retry.js';
+export { evaluateBatch, type BatchEvaluateResult } from './batch.js';
+export { createIdempotencyCache, evaluateIdempotent, type IdempotencyCache } from './idempotency.js';
+export { createHookRegistry, evaluateObservable, type HookRegistry, type HookCallback, type HookContext, type EvalHookEvent } from './observability.js';
+export { createCircuitBreaker, type CircuitBreaker, type CircuitBreakerOptions, type CircuitState } from './circuit-breaker.js';

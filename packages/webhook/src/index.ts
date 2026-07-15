@@ -26,3 +26,37 @@ export {
   type DispatchRetryResult,
   type DispatchAttempt,
 } from './delivery.js';
+
+export {
+  verifyWithRetry,
+  type RetryOptions,
+  type RetryVerifyResult,
+} from './retry.js';
+
+export {
+  verifyBatch,
+  type BatchVerifyOptions,
+  type BatchVerifyResult,
+} from './batch.js';
+
+export {
+  createIdempotencyCache,
+  verifyIdempotent,
+  type IdempotencyCache,
+} from './idempotency.js';
+
+export {
+  createHookRegistry,
+  verifyObservable,
+  type HookRegistry,
+  type HookCallback,
+  type HookContext,
+  type VerifyHookEvent,
+} from './observability.js';
+
+export {
+  createCircuitBreaker,
+  type CircuitBreaker,
+  type CircuitBreakerOptions,
+  type CircuitState,
+} from './circuit-breaker.js';

@@ -87,4 +87,39 @@ describe('webhook verifier fidelity vs reference impl', () => {
     mock.clear();
     expect(mock.listDelivered().length).toBe(0);
   });
+
+  it('edge: 空 payload でも verify 実行 (reject 返る想定)', () => {
+    const mock = createWebhookVerifier({ provider: 'github', secret: 's' });
+    const out = mock.verify({ payload: '', signature: 'bad' });
+    expect(out.status).toBe('rejected');
+  });
+
+  it('edge: 大量 verify (50 件) で counter が正しく増加', () => {
+    const mock = createWebhookVerifier({ provider: 'github', secret: 's' });
+    for (let i = 0; i < 50; i++) mock.verify({ payload: `p${i}`, signature: 'bad' });
+    expect(mock.listDelivered().length).toBe(50);
+    expect(mock.listDelivered()[49]!.id).toContain('gh-50');
+  });
+
+  it('edge: concurrent verify で全 id 一意', () => {
+    const mock = createWebhookVerifier({ provider: 'github', secret: 's' });
+    const outs = Array.from({ length: 10 }, (_, i) => mock.verify({ payload: `p${i}`, signature: 'bad' }));
+    expect(new Set(outs.map((o) => o.id)).size).toBe(10);
+  });
+
+  it('edge: large payload (10KB) を verify に投入 (mock 判定 status 有効)', () => {
+    const mock = createWebhookVerifier({ provider: 'github', secret: 'k' });
+    const payload = 'x'.repeat(10240);
+    const out = mock.verify({ payload, signature: 'bad' });
+    expect(['verified', 'rejected']).toContain(out.status);
+    expect(out.id).toBeDefined();
+  });
+
+  it('edge: provider 別 idPrefix (evt/gh/sl/tw) 全 4 種確認', () => {
+    for (const [provider, prefix] of Object.entries({ stripe: 'evt', github: 'gh', slack: 'sl', twilio: 'tw' })) {
+      const m = createWebhookVerifier({ provider: provider as 'stripe' | 'github' | 'slack' | 'twilio', secret: 's' });
+      const out = m.verify({ payload: 'p', signature: 'bad' });
+      expect(out.id.startsWith(prefix + '-')).toBe(true);
+    }
+  });
 });

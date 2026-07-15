@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/query",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Data fetching cache mock harness for kiwa — TanStack Query / SWR / urql / Apollo Client を統一 interface で invoke する in-process mock。 fetchQuery / mutate / invalidateQuery / subscribeToQuery までを real provider と同じ signature で叩ける test infra。",
   "license": "UNLICENSED",
   "author": {

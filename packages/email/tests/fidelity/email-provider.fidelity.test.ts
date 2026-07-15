@@ -1,6 +1,5 @@
 /**
- * fidelity test — createEmailClient (kiwa mock) が reference impl と同じ挙動を示すことを検証。
- * 5 case で send / template / provider 差異 / failure path / clear の 5 観点を cover。
+ * fidelity test — createEmailClient (kiwa mock) が reference impl と同じ挙動を示す + v2.1 edge case cover。
  */
 import { assertFidelity } from '@kiwa-lab/quality-metrics';
 import { describe, expect, it } from 'vitest';
@@ -60,5 +59,49 @@ describe('email client fidelity vs reference impl', () => {
     expect(mock.listSent().length).toBe(1);
     mock.clear();
     expect(mock.listSent().length).toBe(0);
+  });
+
+  it('edge: 空 subject でも send 成功', async () => {
+    const mock = createEmailClient({ provider: 'resend' });
+    const res = await mock.send({ from: 'a@x', to: 'b@x', subject: '' });
+    expect(res.status).toBe('queued');
+  });
+
+  it('edge: to array 複数 recipient を保持', async () => {
+    const mock = createEmailClient({ provider: 'resend' });
+    await mock.send({ from: 'a@x', to: ['u1@x', 'u2@x', 'u3@x'], subject: 's' });
+    const sent = mock.listSent()[0]!;
+    expect(Array.isArray(sent.message.to)).toBe(true);
+    expect((sent.message.to as string[]).length).toBe(3);
+  });
+
+  it('edge: 大量 send (100 件) で counter 保持', async () => {
+    const mock = createEmailClient({ provider: 'resend' });
+    for (let i = 0; i < 100; i++) await mock.send({ from: 'a@x', to: `u${i}@x`, subject: 's' });
+    expect(mock.listSent().length).toBe(100);
+    expect(mock.listSent()[99]!.id).toContain('re-100');
+  });
+
+  it('edge: template 未登録 → failed + reason 明示', async () => {
+    const mock = createEmailClient({ provider: 'resend', templates: {} });
+    const res = await mock.send({ from: 'a@x', to: 'b@x', subject: 's', templateId: 'missing' });
+    expect(res.status).toBe('failed');
+    expect(res.reason).toContain('template not found');
+  });
+
+  it('edge: concurrent send (Promise.all) で全 id 一意', async () => {
+    const mock = createEmailClient({ provider: 'resend' });
+    const results = await Promise.all(
+      Array.from({ length: 10 }, (_, i) => mock.send({ from: 'a@x', to: `u${i}@x`, subject: 's' })),
+    );
+    const ids = new Set(results.map((r) => r.id));
+    expect(ids.size).toBe(10);
+  });
+
+  it('edge: large payload (10KB html) 保持', async () => {
+    const mock = createEmailClient({ provider: 'resend' });
+    const html = 'x'.repeat(10240);
+    await mock.send({ from: 'a@x', to: 'b@x', subject: 's', html });
+    expect(mock.listSent()[0]!.renderedHtml?.length).toBe(10240);
   });
 });

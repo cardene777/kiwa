@@ -25,3 +25,20 @@ export {
   type PluralCategory,
   type PluralRule,
 } from './plural.js';
+
+export {
+  withRetry,
+  withTimeout,
+  withRateLimit,
+  withCircuitBreaker,
+  withObservability,
+  withIdempotencyKey,
+  batchOperate,
+  type RetryOptions,
+  type TimeoutOptions,
+  type RateLimitOptions,
+  type CircuitBreakerOptions,
+  type ObservabilityHook,
+  type BatchItem,
+  type BatchResult,
+} from './resilience.js';

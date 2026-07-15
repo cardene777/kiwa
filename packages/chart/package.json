@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/chart",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Chart mock harness for kiwa — Recharts / Chart.js / D3 / Visx を統一 interface で invoke する in-process mock。 chart data + render (bar/line/pie/scatter) + axis 計算 + legend capture + tooltip dispatch までを real chart library と同じ signature で叩ける test infra。",
   "license": "UNLICENSED",
   "author": {

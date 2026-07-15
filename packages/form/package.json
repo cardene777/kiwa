@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/form",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Form validation + submit mock harness for kiwa — React Hook Form / Zod / Formik / Conform を統一 interface で叩ける in-process mock。 schema validate / field register / submit / error 取得までを real provider と同じ signature で書ける test infra。",
   "license": "UNLICENSED",
   "author": {

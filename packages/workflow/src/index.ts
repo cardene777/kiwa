@@ -29,3 +29,20 @@ export {
   type EventTriggerHandle,
   type EmittedEvent,
 } from './events.js';
+
+export {
+  withRetry,
+  withTimeout,
+  withRateLimit,
+  withCircuitBreaker,
+  withObservability,
+  withIdempotencyKey,
+  batchOperate,
+  type RetryOptions as ResilienceRetryOptions,
+  type TimeoutOptions,
+  type RateLimitOptions,
+  type CircuitBreakerOptions,
+  type ObservabilityHook,
+  type BatchItem,
+  type BatchResult,
+} from './resilience.js';

@@ -35,3 +35,21 @@ export {
   mergeMetadata,
   type MetadataEntry,
 } from './metadata.js';
+
+export {
+  createDeadlineContext,
+  remainingDeadlineMs,
+  isDeadlineExceeded,
+  type DeadlineContext,
+} from './deadline.js';
+
+export {
+  composeInterceptors,
+  type Interceptor,
+  type InterceptorContext,
+} from './interceptor.js';
+
+export {
+  createCancelToken,
+  type CancelToken,
+} from './cancel.js';

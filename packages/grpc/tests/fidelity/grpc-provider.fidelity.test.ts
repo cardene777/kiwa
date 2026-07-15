@@ -1,6 +1,18 @@
 import { assertFidelity } from '@kiwa-lab/quality-metrics';
 import { describe, expect, it } from 'vitest';
-import { createGrpcServer, defineService, invokeUnary, invokeServerStream, invokeBidi } from '../../src/index.js';
+import {
+  createGrpcServer,
+  defineService,
+  invokeUnary,
+  invokeServerStream,
+  invokeBidi,
+  createDeadlineContext,
+  remainingDeadlineMs,
+  isDeadlineExceeded,
+  composeInterceptors,
+  createCancelToken,
+  type Interceptor,
+} from '../../src/index.js';
 
 function referenceServer() {
   const services = new Map<string, Map<string, (req: unknown) => unknown>>();
@@ -15,7 +27,7 @@ function referenceServer() {
   };
 }
 
-describe('grpc server fidelity vs reference impl', () => {
+describe('grpc server fidelity v2.1', () => {
   it('invokeUnary = reference impl と同じ結果', async () => {
     const mock = createGrpcServer({ provider: 'grpc-js' });
     mock.addService(defineService('Echo', [{ name: 'ping', type: 'unary', handler: async (r: unknown) => ({ pong: (r as { v: number }).v }) }]));
@@ -64,5 +76,56 @@ describe('grpc server fidelity vs reference impl', () => {
     const r = await invokeUnary(s, 'E', 'fail', {});
     expect(r.ok).toBe(false);
     expect(r.status.code).toBe(5);
+  });
+
+  it('deadline context = remainingMs が経過で減少 → exceeded', () => {
+    let t = 0;
+    const ctx = createDeadlineContext(1000, () => t);
+    expect(remainingDeadlineMs(ctx)).toBe(1000);
+    t = 500;
+    expect(remainingDeadlineMs(ctx)).toBe(500);
+    t = 1500;
+    expect(isDeadlineExceeded(ctx)).toBe(true);
+  });
+
+  it('interceptor chain = 順序どおり before/after fires', async () => {
+    const log: string[] = [];
+    const a: Interceptor = async (_ctx, next) => { log.push('a-before'); const r = await next(); log.push('a-after'); return r; };
+    const b: Interceptor = async (_ctx, next) => { log.push('b-before'); const r = await next(); log.push('b-after'); return r; };
+    const chain = composeInterceptors([a, b]);
+    await chain(
+      { service: 'S', method: 'M', metadata: [], request: {} },
+      async () => ({ response: 'ok', status: { code: 0, message: '' } }),
+    );
+    expect(log).toEqual(['a-before', 'b-before', 'b-after', 'a-after']);
+  });
+
+  it('interceptor short-circuit = next() 呼ばない = final skip', async () => {
+    let finalCalled = false;
+    const gate: Interceptor = async () => ({ status: { code: 7, message: 'denied' } });
+    const chain = composeInterceptors([gate]);
+    const r = await chain(
+      { service: 'S', method: 'M', metadata: [], request: {} },
+      async () => { finalCalled = true; return { status: { code: 0, message: '' } }; },
+    );
+    expect(finalCalled).toBe(false);
+    expect(r.status.code).toBe(7);
+  });
+
+  it('cancel token = cancel 発火で onCancel handler が呼ばれる', () => {
+    const token = createCancelToken();
+    let reason: string | undefined;
+    token.onCancel((r) => { reason = r; });
+    token.cancel('client abort');
+    expect(token.isCanceled()).toBe(true);
+    expect(reason).toBe('client abort');
+  });
+
+  it('cancel token = cancel 後の onCancel は即 fire', () => {
+    const token = createCancelToken();
+    token.cancel('already');
+    let called = false;
+    token.onCancel(() => { called = true; });
+    expect(called).toBe(true);
   });
 });

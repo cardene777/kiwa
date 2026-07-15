@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/vector",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Vector DB provider mock harness for kiwa — Pinecone / Weaviate / Qdrant / pgvector を統一 interface で invoke する in-process mock。 upsert / query nearest (cosine / euclidean / dot product) / delete / namespace までを real provider と同じ signature で叩ける test infra。 embeddings storage + similarity search 経路を real service なしで verify。",
   "license": "UNLICENSED",
   "author": {

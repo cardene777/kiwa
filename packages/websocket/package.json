@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/websocket",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "WebSocket server + client mock harness for kiwa — ws / uWebSockets / Socket.IO / Colyseus を統一 interface で invoke する in-process mock。 raw WebSocket frame (text / binary) + broadcast + room + heartbeat + reconnect まで real provider と同じ signature で叩ける test infra。",
   "license": "UNLICENSED",
   "author": {

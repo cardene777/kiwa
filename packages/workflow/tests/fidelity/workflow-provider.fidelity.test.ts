@@ -73,3 +73,57 @@ describe('workflow client fidelity vs reference impl', () => {
     expect(mock.registered().length).toBe(0);
   });
 });
+
+describe('v2.1 resilience primitives (generic)', () => {
+  it('withRetry recovers after transient failure and eventually succeeds', async () => {
+    const { withRetry } = await import('../../src/index.js');
+    let attempts = 0;
+    const wrapped = withRetry(async () => {
+      attempts += 1;
+      if (attempts < 3) throw new Error('flaky');
+      return 'ok';
+    }, { maxAttempts: 5 });
+    expect(await wrapped()).toBe('ok');
+    expect(attempts).toBe(3);
+  });
+
+  it('withTimeout rejects after ms elapsed', async () => {
+    const { withTimeout } = await import('../../src/index.js');
+    const wrapped = withTimeout(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+      return 'never';
+    }, { ms: 5 });
+    await expect(wrapped()).rejects.toThrow(/timeout/);
+  });
+
+  it('withRateLimit throws when exceeding maxRequests', async () => {
+    const { withRateLimit } = await import('../../src/index.js');
+    const wrapped = withRateLimit(async () => 'ok', { maxRequests: 2, windowMs: 1000 });
+    await wrapped();
+    await wrapped();
+    await expect(wrapped()).rejects.toThrow(/rate limit/);
+  });
+
+  it('withCircuitBreaker opens after failureThreshold and rejects further calls', async () => {
+    const { withCircuitBreaker } = await import('../../src/index.js');
+    const wrapped = withCircuitBreaker(async () => { throw new Error('down'); }, {
+      failureThreshold: 2, resetMs: 1000,
+    });
+    await expect(wrapped()).rejects.toThrow('down');
+    await expect(wrapped()).rejects.toThrow('down');
+    await expect(wrapped()).rejects.toThrow('circuit breaker open');
+  });
+
+  it('withIdempotencyKey returns cached result on duplicate key', async () => {
+    const { withIdempotencyKey } = await import('../../src/index.js');
+    let counter = 0;
+    const wrapped = withIdempotencyKey(async (_key: string) => {
+      counter += 1;
+      return { id: counter };
+    });
+    const a = await wrapped('K');
+    const b = await wrapped('K');
+    expect(a.id).toBe(b.id);
+    expect(counter).toBe(1);
+  });
+});

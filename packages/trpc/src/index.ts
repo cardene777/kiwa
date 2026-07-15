@@ -31,3 +31,20 @@ export {
   type ProcedureContext,
   type CreateContextOptions,
 } from './context.js';
+
+export {
+  withRetry,
+  withTimeout,
+  withRateLimit,
+  withCircuitBreaker,
+  withObservability,
+  withIdempotencyKey,
+  batchInvoke,
+  type RetryOptions,
+  type TimeoutOptions,
+  type RateLimitOptions,
+  type CircuitBreakerOptions,
+  type ObservabilityHook,
+  type BatchInvokeItem,
+  type BatchInvokeResult,
+} from './resilience.js';

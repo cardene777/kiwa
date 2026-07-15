@@ -34,3 +34,20 @@ export {
   type ActiveRecordSnapshot,
   type ActiveRecordOp,
 } from './active-record.js';
+
+export {
+  withRetry,
+  withTimeout,
+  withRateLimit,
+  withCircuitBreaker,
+  withObservability,
+  withIdempotencyKey,
+  batchOperate,
+  type RetryOptions,
+  type TimeoutOptions,
+  type RateLimitOptions,
+  type CircuitBreakerOptions,
+  type ObservabilityHook,
+  type BatchItem,
+  type BatchResult,
+} from './resilience.js';

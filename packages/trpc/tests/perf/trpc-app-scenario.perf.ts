@@ -9,6 +9,8 @@ import {
   createClient,
   middleware,
   TRPCError,
+  withRetry,
+  batchInvoke,
 } from '../../src/index.js';
 
 const MODULE = 'trpc-app-scenario';
@@ -92,6 +94,46 @@ describe('trpc app scenario perf (real workload)', () => {
                   await invokeProcedure(router, 'admin.reset', {}, { userId: 'u' });
                 }
               } catch { /* handled */ }
+            }
+          },
+          serialP95CapMs: 100,
+        },
+        {
+          name: 'retry_recovery (5 flaky handler retry to success)',
+          fn: async () => {
+            let counter = 0;
+            const flakyHandler = withRetry(async () => {
+              counter += 1;
+              if (counter % 2 === 1) throw new Error('flake');
+              return { attempt: counter };
+            }, { maxAttempts: 3 });
+            const r = createRouter({
+              procedures: { flaky: defineProcedure('query', flakyHandler) },
+            });
+            for (let i = 0; i < 5; i += 1) {
+              await invokeProcedure(r, 'flaky', undefined).catch(() => null);
+            }
+          },
+          serialP95CapMs: 100,
+        },
+        {
+          name: 'concurrent_batch (5 batchInvoke of 4 procedures each)',
+          fn: async () => {
+            const r = createRouter({
+              procedures: {
+                q1: defineProcedure('query', async () => 'a'),
+                q2: defineProcedure('query', async () => 'b'),
+                q3: defineProcedure('query', async () => 'c'),
+                q4: defineProcedure('query', async () => 'd'),
+              },
+            });
+            for (let i = 0; i < 5; i += 1) {
+              await batchInvoke(r, [
+                { procedureName: 'q1', input: undefined },
+                { procedureName: 'q2', input: undefined },
+                { procedureName: 'q3', input: undefined },
+                { procedureName: 'q4', input: undefined },
+              ]);
             }
           },
           serialP95CapMs: 100,

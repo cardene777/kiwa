@@ -4,7 +4,18 @@
  */
 import { assertFidelity } from '@kiwa-lab/quality-metrics';
 import { describe, expect, it } from 'vitest';
-import { createStore, dispatch, subscribe, selectState, mockAction } from '../../src/index.js';
+import {
+  createStore,
+  dispatch,
+  subscribe,
+  selectState,
+  mockAction,
+  composeMiddleware,
+  createUndoRedoStack,
+  createMemoryPersistence,
+  createPersistedStore,
+  retryWithBackoff,
+} from '../../src/index.js';
 
 function referenceStore() {
   let state = { count: 0 };
@@ -79,5 +90,57 @@ describe('state store fidelity vs reference impl', () => {
     expect(store.getSnapshot().version).toBe(1);
     store.setState({ x: 2 });
     expect(store.getSnapshot().version).toBe(2);
+  });
+
+  // v2.1 追加 5 case
+  it('v2.1 undo/redo stack で push → undo で戻る', () => {
+    const stack = createUndoRedoStack<number>(0);
+    stack.push(1);
+    stack.push(2);
+    expect(stack.undo()).toBe(1);
+    expect(stack.undo()).toBe(0);
+    expect(stack.canUndo()).toBe(false);
+    expect(stack.canRedo()).toBe(true);
+    expect(stack.redo()).toBe(1);
+  });
+
+  it('v2.1 memory persistence で save → restore round-trip', async () => {
+    const adapter = createMemoryPersistence();
+    const persisted = createPersistedStore<{ count: number }>('state1', adapter);
+    await persisted.save({ count: 42 });
+    const restored = await persisted.restore();
+    expect(restored?.count).toBe(42);
+    await persisted.clear();
+    expect(await persisted.restore()).toBeUndefined();
+  });
+
+  it('v2.1 composeMiddleware で 2 middleware chain', () => {
+    const middleware = composeMiddleware<{ x: number }>(
+      (state, _action, next) => next(),
+      (state, _action, next) => next(),
+    );
+    const result = middleware({ x: 1 }, { type: 'noop' }, () => ({ x: 99 }));
+    expect(result.x).toBe(99);
+  });
+
+  it('v2.1 retryWithBackoff で 2 attempt 成功', async () => {
+    let n = 0;
+    const r = await retryWithBackoff(async () => {
+      n += 1;
+      if (n < 2) throw new Error('r');
+      return 'ok';
+    }, { maxAttempts: 3, initialDelayMs: 1 });
+    expect(r.attempts).toBe(2);
+    expect(r.ok).toBe(true);
+  });
+
+  it('v2.1 undo/redo size + clear', () => {
+    const stack = createUndoRedoStack<string>('a');
+    stack.push('b');
+    stack.push('c');
+    expect(stack.size().past).toBe(2);
+    stack.clear();
+    expect(stack.size().past).toBe(0);
+    expect(stack.size().future).toBe(0);
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/notification",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Notification provider mock harness for kiwa — FCM / APNs (push) / Twilio (SMS) / AWS SNS を統一 interface で invoke する in-process mock。 sendPush / sendSMS / sendInApp / multi-channel dispatch / delivery event を real provider と同じ signature で叩ける test infra。",
   "license": "UNLICENSED",
   "author": {

@@ -31,3 +31,11 @@ export {
   type SubscriptionHandle,
   type SubscriptionEvent,
 } from './subscription.js';
+
+export {
+  executeWithRetry, type RetryOptions,
+  executeBatch, type BatchExecuteResult,
+  createIdempotencyCache, executeIdempotent, type IdempotencyCache,
+  createHookRegistry, executeObservable, type HookRegistry, type HookCallback, type HookContext, type QueryHookEvent,
+  createCircuitBreaker, type CircuitBreaker, type CircuitBreakerOptions, type CircuitState,
+} from './enhancements.js';

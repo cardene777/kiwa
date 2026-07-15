@@ -85,4 +85,69 @@ describe('graphql integration — server + client + subscription workflow', () =
     expect(res.errors).toBeDefined();
     expect(res.errors?.[0]?.message).toContain('no resolver for field: missing');
   });
+
+  it('T-INT-G-006 executeWithRetry: 1 attempt success', async () => {
+    const { executeWithRetry } = await import('../../src/index.js');
+    const server = createGraphQLServer(
+      { typeDefs: 'type Query { hello: String }' },
+      { Query: { hello: () => 'world' } },
+    );
+    const result = await executeWithRetry(server, '{ hello }');
+    expect(result.attempts).toBe(1);
+    expect(result.data).toEqual({ hello: 'world' });
+  });
+
+  it('T-INT-G-007 executeBatch: 3 query 並列', async () => {
+    const { executeBatch } = await import('../../src/index.js');
+    const server = createGraphQLServer(
+      { typeDefs: 'type Query { a: String b: String c: String }' },
+      { Query: { a: () => '1', b: () => '2', c: () => '3' } },
+    );
+    const result = await executeBatch(server, [
+      { query: '{ a }' },
+      { query: '{ b }' },
+      { query: '{ c }' },
+    ]);
+    expect(result.total).toBe(3);
+    expect(result.succeeded).toBe(3);
+  });
+
+  it('T-INT-G-008 executeIdempotent: dedup', async () => {
+    const { createIdempotencyCache, executeIdempotent } = await import('../../src/index.js');
+    const server = createGraphQLServer(
+      { typeDefs: 'type Query { hello: String }' },
+      { Query: { hello: () => 'world' } },
+    );
+    const cache = createIdempotencyCache();
+    const first = await executeIdempotent(server, '{ hello }', {}, 'idem-1', cache);
+    expect(first.cached).toBe(false);
+    const second = await executeIdempotent(server, '{ hello }', {}, 'idem-1', cache);
+    expect(second.cached).toBe(true);
+  });
+
+  it('T-INT-G-009 executeObservable: hook 発火', async () => {
+    const { createHookRegistry, executeObservable } = await import('../../src/index.js');
+    const server = createGraphQLServer(
+      { typeDefs: 'type Query { hello: String }' },
+      { Query: { hello: () => 'world' } },
+    );
+    const hooks = createHookRegistry();
+    const events: string[] = [];
+    hooks.register('before-query', () => events.push('before'));
+    hooks.register('after-query', () => events.push('after'));
+    await executeObservable(server, '{ hello }', {}, hooks);
+    expect(events).toEqual(['before', 'after']);
+  });
+
+  it('T-INT-G-010 circuit-breaker: state closed で normal execute', async () => {
+    const { createCircuitBreaker } = await import('../../src/index.js');
+    const server = createGraphQLServer(
+      { typeDefs: 'type Query { hello: String }' },
+      { Query: { hello: () => 'world' } },
+    );
+    const breaker = createCircuitBreaker(server, { errorThreshold: 3, resetTimeoutMs: 100 });
+    const result = await breaker.execute('{ hello }');
+    expect(result.circuitState).toBe('closed');
+    expect(result.data).toEqual({ hello: 'world' });
+  });
 });

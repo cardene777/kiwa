@@ -22,3 +22,20 @@ export {
   timezoneConvert,
   type TimezoneResult,
 } from './timezone.js';
+
+// v2.1 extensions
+export {
+  parseDuration,
+  expandRecurrence,
+  createHolidayCalendar,
+  retryWithBackoff,
+  createObservabilityHook,
+  type DurationParseResult,
+  type RecurrenceFreq,
+  type RecurrenceRule,
+  type Holiday,
+  type HolidayCalendar,
+  type RetryOptions,
+  type RetryResult,
+  type ObservabilityHook,
+} from './extensions.js';

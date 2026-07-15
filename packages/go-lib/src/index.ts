@@ -40,3 +40,32 @@ export {
   type CaptureChiRouteOptions,
   type CaptureChiRouteResult,
 } from './chi.js';
+
+// v2.1 extensions
+export {
+  retryWithBackoff,
+  batchDispatch,
+  createObservabilityHook,
+  withTimeout,
+  createRateLimiter,
+  createCircuitBreaker,
+  createCancelToken,
+  composeMiddleware,
+  createRouteGroup,
+  type RetryOptions,
+  type RetryResult,
+  type BatchDispatchOptions,
+  type BatchDispatchResult,
+  type ObservabilityEvent,
+  type ObservabilityHook,
+  type TimeoutOptions,
+  type RateLimitOptions,
+  type RateLimiter,
+  type CircuitState,
+  type CircuitBreakerOptions,
+  type CircuitBreaker,
+  type CancelToken,
+  type MiddlewareFn,
+  type RouteGroupOptions,
+  type RouteGroup,
+} from './extensions.js';

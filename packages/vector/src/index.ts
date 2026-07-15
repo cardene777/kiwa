@@ -28,3 +28,11 @@ export {
   euclideanDistance,
   dotProduct,
 } from './distance.js';
+
+export {
+  upsertWithRetry, type RetryOptions,
+  upsertBatch, type BatchUpsertResult,
+  createIdempotencyCache, upsertIdempotent, type IdempotencyCache,
+  createHookRegistry, upsertObservable, type HookRegistry, type HookCallback, type HookContext, type UpsertHookEvent,
+  createCircuitBreaker, type CircuitBreaker, type CircuitBreakerOptions, type CircuitState,
+} from './enhancements.js';

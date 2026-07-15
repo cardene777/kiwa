@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/expo",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Expo SDK mock harness for kiwa — Expo Router / SecureStore / Notifications / FileSystem / Camera を統一 interface で invoke する in-process mock。 実 Expo runtime 不要で React Native + Expo app の SDK 連携経路 (routing / secure storage / push / file I/O / camera capture) を real device 起動なしで test 化する infra。",
   "license": "UNLICENSED",
   "author": {
