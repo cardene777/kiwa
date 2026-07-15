@@ -14,7 +14,7 @@ v2.14 で追加した `@kiwa-lab/lean` v0.1 spec generator を v0.2 で `verifyL
 |---|---|---|
 | generateLeanSpec | ✅ Lean source 生成 | ✅ 変更 0 (shape preserving) |
 | generateLakeProject | ✅ Lake scaffold 生成 | ✅ v0.3 で修正 (下記) |
-| verifyLeanSpec | ❌ | ✅ 新規 = 実 toolchain 呼出 (`lean <file>`) |
+| verifyLeanSpec | ❌ | ✅ 新規 = 実 toolchain 呼出 (`lean FILE`) |
 
 ## verifyLeanSpec API SSOT
 
@@ -35,7 +35,7 @@ verifyLeanSpec(specs: readonly LeanSpecOutput[], opts?: VerifyOptions): VerifyRe
 
 生成される `lakefile.lean` の `lean_lib` に `@[default_target]` が無く、 `lake build` は対象を 1 つも持たなかった。 spec に型エラーがあっても `Build completed successfully` と表示して 0 で終了する。 さらに根 module が spec を `import` せず、 `globs` も無いため、 仮に対象があっても spec file は 1 度もコンパイルされなかった。
 
-v0.3 は `@[default_target]` と `globs := #[.andSubmodules \`<rootNamespace>]` を出し、 `modules` を渡すと根 module が各 spec を `import` する。 壊れた spec を置いて `lake build` が落ちることを test で固定した。
+v0.3 は `@[default_target]` と `globs := #[.andSubmodules \`ROOT_NAMESPACE]` を出し、 `modules` を渡すと根 module が各 spec を `import` する。 壊れた spec を置いて `lake build` が落ちることを test で固定した。
 
 `verifyLeanSpec` は Lake project を書かない。 書いて `lake` を呼ばないのが v0.2 までの姿で、 `lakefile.lean` は何にも影響していなかった。 影響しているのは `lean-toolchain` だけで、 `elan` がこの file を作業 directory から読んで実行する Lean の版を決める。 生成 spec は何も `import` しないので、 検査に build system は要らない。
 
@@ -55,7 +55,7 @@ v0.3 は `@[default_target]` と `globs := #[.andSubmodules \`<rootNamespace>]` 
 
 ### 起動形と診断の出所 (v0.3 で修正)
 
-Lean に `--check` flag は存在しない。 file を elaborate すること自体が検査で、 証明の失敗も網羅性の欠落も非零終了になる。 v0.2 は `lean --check <file>` を実行しており、 Lean は `unrecognized option` で常に非零終了していた。 つまり Lean が入っている環境では、 正しい spec も壊れた spec も等しく `verification-failed` を返していた。 toolchain を入れて実行する test が 1 件も無かったため、 誰も気付けなかった。
+Lean に `--check` flag は存在しない。 file を elaborate すること自体が検査で、 証明の失敗も網羅性の欠落も非零終了になる。 v0.2 は `lean --check FILE` を実行しており、 Lean は `unrecognized option` で常に非零終了していた。 つまり Lean が入っている環境では、 正しい spec も壊れた spec も等しく `verification-failed` を返していた。 toolchain を入れて実行する test が 1 件も無かったため、 誰も気付けなかった。
 
 Lean は診断を **stdout** に書く。 `stderr` は空になる。 v0.2 の `VerifyResult.stderr` は常に空文字列で、 「検証に失敗した」 とだけ告げて理由を落としていた。 v0.3 は `diagnostics` に実際に喋った側の stream を載せる。
 
@@ -68,11 +68,11 @@ Lean toolchain 未 install 環境 (CI default / offline / sandbox) は `lean-not
 ```
 OrchestratorSpec (SSOT)
     ├─► generateLeanSpec → Lean 4 source
-    │       └─► verifyLeanSpec → lean <file> → { status: 'ok' }
+    │       └─► verifyLeanSpec → lean FILE → { status: 'ok' }
     └─► TypeScript impl → vitest runtime testing
 ```
 
-同 SSOT (5 state / 8 event / 40 セル) を 両層で駆動、 Lean 側で網羅性 (catch-all 不在の match) と定理 (`<state>_absorbing` / `<state>_can_leave` / `<state>_no_escape` / `<state>_reachable`) を検査、 TS 側で 実行時挙動 verify。
+同 SSOT (5 state / 8 event / 40 セル) を 両層で駆動、 Lean 側で網羅性 (catch-all 不在の match) と定理 (`STATE_absorbing` / `STATE_can_leave` / `STATE_no_escape` / `STATE_reachable`) を検査、 TS 側で 実行時挙動 verify。
 
 ## v2.15 milestone signal
 

@@ -1,11 +1,63 @@
 # @kiwa-lab/react-native
 
-React Native platform mock harness for kiwa — AsyncStorage / React Navigation / Platform / Linking / Dimensions 5 primitive を統一 interface で invoke する in-process mock。 real device / simulator なしで RN app の platform-dependent path の test を書ける。
+React Native platform API mock harness for kiwa — AsyncStorage / React Navigation / Platform / Linking / Dimensions を統一 interface で in-process から叩ける test infra。
 
-## API
+## Installation
 
-- `createRNTestEnv({ platform })` = RN test env (asyncStorage / navigation / platform / linking / dimensions を bundle)
-- `mockAsyncStorage(initial)` = @react-native-async-storage/async-storage 互換 mock
-- `mockNavigation(initialRoute)` = @react-navigation/native の navigation / route mock
-- `dispatchLinkingUrl(env, url)` = Linking.getInitialURL / addEventListener 経路の event 発火
-- `setPlatform(env, { os, version })` = Platform.OS / Platform.Version の値差替
+```bash
+pnpm add -D @kiwa-lab/react-native
+# or
+npm install -D @kiwa-lab/react-native
+# or
+yarn add -D @kiwa-lab/react-native
+```
+
+## Supported providers
+
+| Primitive | Status | Primary API |
+|---|---|---|
+| AsyncStorage | ✅ Ready | `mockAsyncStorage` |
+| React Navigation | ✅ Ready | `mockNavigation` |
+| Platform | ✅ Ready | `setPlatform` |
+| Linking | ✅ Ready | `dispatchLinkingUrl` |
+| Dimensions | ✅ Ready | `setDimensions` |
+
+## Quick start
+
+```ts
+import { describe, expect, it } from 'vitest';
+import {
+  createRNTestEnv,
+  mockAsyncStorage,
+  mockNavigation,
+} from '@kiwa-lab/react-native';
+
+describe('login flow', () => {
+  it('token を storage に保存 + Home へ遷移', async () => {
+    const env = createRNTestEnv({ platform: 'ios' });
+    const storage = mockAsyncStorage({});
+    const nav = mockNavigation({ initial: 'Login' });
+    await storage.setItem('token', 't-1');
+    nav.navigate('Home');
+    expect(await storage.getItem('token')).toBe('t-1');
+    expect(nav.current).toBe('Home');
+  });
+});
+```
+
+## API reference
+
+- `createRNTestEnv({ platform: 'ios' | 'android' | 'web' }): RNTestEnv` — platform 別 mock env
+- `mockAsyncStorage(initial: AsyncStorageInitial): AsyncStorageMock` — get/set/remove/clear の in-memory mock
+- `mockNavigation({ initial: string }): NavigationMock` — stack push/pop/reset trace
+- `dispatchLinkingUrl(url: string, listener: LinkingListener): void` — deep link 経路発火
+- `setPlatform(os: RNPlatformOS): PlatformState` — Platform.OS 書換
+- `setDimensions({ width, height }): DimensionsState` — Dimensions.get 書換
+
+## Test integration
+
+vitest + `/kiwa-react-native` skill で real device / simulator 不要で platform-dependent test を機械生成、 CI で headless に実行。
+
+## License
+
+UNLICENSED — see [github.com/cardene777/kiwa](https://github.com/cardene777/kiwa).

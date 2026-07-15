@@ -1,11 +1,63 @@
 # @kiwa-lab/query
 
-Data fetching cache mock harness for kiwa — TanStack Query / SWR / urql / Apollo Client を統一 interface で invoke する in-process mock。
+Data fetching cache mock harness for kiwa — TanStack Query / SWR / urql / Apollo Client を統一 interface で in-process から叩ける test infra。
 
-## API
+## Installation
 
-- `createQueryClient(options)` = provider mock client (fetch / mutate / invalidate / subscribe)
-- `fetchQuery(client, key, queryFn)` = cache-first fetch
-- `mutate(client, mutationFn, options)` = mutation + invalidate 連鎖
-- `invalidateQuery(client, key)` = 明示 cache invalidate
-- `subscribeToQuery(client, key, listener)` = state 変更 subscription
+```bash
+pnpm add -D @kiwa-lab/query
+# or
+npm install -D @kiwa-lab/query
+# or
+yarn add -D @kiwa-lab/query
+```
+
+## Supported providers
+
+| Provider | Status | Cache model |
+|---|---|---|
+| TanStack Query | ✅ Ready | query key + gcTime |
+| SWR | ✅ Ready | key + dedupe |
+| urql | ✅ Ready | document + variables |
+| Apollo Client | ✅ Ready | normalized cache |
+
+## Quick start
+
+```ts
+import { describe, expect, it } from 'vitest';
+import {
+  createQueryClient,
+  fetchQuery,
+  mutate,
+  invalidateQuery,
+} from '@kiwa-lab/query';
+
+describe('user cache flow', () => {
+  it('fetch → mutate → invalidate で refetch される', async () => {
+    const client = createQueryClient({ provider: 'tanstack-query' });
+    const first = await fetchQuery(client, {
+      key: ['user', 1],
+      queryFn: async () => ({ id: 1, name: 'a' }),
+    });
+    await mutate(client, { key: ['user', 1], mutationFn: async () => ({ id: 1, name: 'b' }) });
+    await invalidateQuery(client, ['user', 1]);
+    expect(first.status).toBe('success');
+  });
+});
+```
+
+## API reference
+
+- `createQueryClient({ provider: QueryProvider }): QueryClient` — provider 別 client
+- `fetchQuery(client, options: FetchQueryOptions): Promise<FetchQueryResult>` — cache-first fetch
+- `mutate(client, options: MutateOptions): Promise<MutateResult>` — mutation + optimistic update
+- `invalidateQuery(client, key: QueryKey): InvalidateResult` — 明示 invalidate + refetch trigger
+- `subscribeToQuery(client, key, listener: QueryListener): Subscription` — state 変更 subscription
+
+## Test integration
+
+vitest + `/kiwa-query` skill で React component render なしで cache 動作を高速に verify。
+
+## License
+
+UNLICENSED — see [github.com/cardene777/kiwa](https://github.com/cardene777/kiwa).
