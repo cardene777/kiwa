@@ -74,7 +74,8 @@
       "graphql",
       "trpc",
       "i18n",
-      "workflow"
+      "workflow",
+      "macos-app"
     ]
   },
   "requireSkill": {
@@ -126,7 +127,8 @@
       "graphql",
       "trpc",
       "i18n",
-      "workflow"
+      "workflow",
+      "macos-app"
     ]
   },
   "requireIntegration": {
@@ -178,7 +180,8 @@
       "graphql",
       "trpc",
       "i18n",
-      "workflow"
+      "workflow",
+      "macos-app"
     ]
   }
 }

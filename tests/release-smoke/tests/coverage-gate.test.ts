@@ -64,6 +64,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
       'packages/trpc',
       'packages/i18n',
       'packages/workflow',
+      'packages/macos-app',
     ];
     try {
       const passing = buildSummary({ lines: 95, branches: 85, functions: 95, statements: 95 });
@@ -119,6 +120,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
         'packages/trpc',
         'packages/i18n',
         'packages/workflow',
+        'packages/macos-app',
       ]) {
         const covDir = resolve(fakeRoot, dir, 'coverage');
         mkdirSync(covDir, { recursive: true });
