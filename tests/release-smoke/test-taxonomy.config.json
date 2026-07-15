@@ -64,7 +64,17 @@
       "cli",
       "component",
       "security",
-      "design-check"
+      "design-check",
+      "email",
+      "webhook",
+      "feature-flag",
+      "upload",
+      "notification",
+      "vector",
+      "graphql",
+      "trpc",
+      "i18n",
+      "workflow"
     ]
   },
   "requireSkill": {
@@ -106,7 +116,17 @@
       "orm",
       "component",
       "security",
-      "design-check"
+      "design-check",
+      "email",
+      "webhook",
+      "feature-flag",
+      "upload",
+      "notification",
+      "vector",
+      "graphql",
+      "trpc",
+      "i18n",
+      "workflow"
     ]
   },
   "requireIntegration": {
@@ -148,7 +168,17 @@
       "agent",
       "mcp",
       "security",
-      "design-check"
+      "design-check",
+      "email",
+      "webhook",
+      "feature-flag",
+      "upload",
+      "notification",
+      "vector",
+      "graphql",
+      "trpc",
+      "i18n",
+      "workflow"
     ]
   }
 }
