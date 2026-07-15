@@ -54,6 +54,16 @@ describe('scripts/check-coverage-gates.mjs', () => {
       'packages/hono',
       'packages/streaming',
       'packages/design-check',
+      'packages/email',
+      'packages/webhook',
+      'packages/feature-flag',
+      'packages/upload',
+      'packages/notification',
+      'packages/vector',
+      'packages/graphql',
+      'packages/trpc',
+      'packages/i18n',
+      'packages/workflow',
     ];
     try {
       const passing = buildSummary({ lines: 95, branches: 85, functions: 95, statements: 95 });
@@ -99,6 +109,16 @@ describe('scripts/check-coverage-gates.mjs', () => {
         'packages/hono',
         'packages/streaming',
         'packages/design-check',
+        'packages/email',
+        'packages/webhook',
+        'packages/feature-flag',
+        'packages/upload',
+        'packages/notification',
+        'packages/vector',
+        'packages/graphql',
+        'packages/trpc',
+        'packages/i18n',
+        'packages/workflow',
       ]) {
         const covDir = resolve(fakeRoot, dir, 'coverage');
         mkdirSync(covDir, { recursive: true });
