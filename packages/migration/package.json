@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/migration",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "DB migration mock harness for kiwa — Prisma / Drizzle / Kysely / Knex を統一 interface で invoke する in-process mock。 runUp / runDown / applyPendingMigrations / diffSchema / listAppliedMigrations までを real migration lib と同じ signature で叩ける test infra。",
   "license": "UNLICENSED",
   "author": {

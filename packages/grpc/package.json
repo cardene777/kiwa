@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/grpc",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "gRPC service mock harness for kiwa — @grpc/grpc-js / nice-grpc / twirp / ConnectRPC を統一 interface で invoke する in-process mock。 unary / server-stream / client-stream / bidi 全 4 RPC pattern + metadata + status code + deadline を real gRPC と同じ signature で叩ける test infra。",
   "license": "UNLICENSED",
   "author": {

@@ -90,6 +90,37 @@ describe('i18n app scenario perf (real workload)', () => {
           },
           serialP95CapMs: 100,
         },
+        {
+          name: 'retry_recovery (5 flaky async retry to success)',
+          fn: async () => {
+            const mod = await import('../../src/index.js');
+            const wr = mod.withRetry;
+            let ctr = 0;
+            const wrapped = wr(async () => {
+              ctr += 1;
+              if (ctr % 3 !== 0) throw new Error('flake');
+              return 'ok';
+            }, { maxAttempts: 3 });
+            for (let i = 0; i < 5; i += 1) {
+              await wrapped().catch(() => null);
+            }
+          },
+          serialP95CapMs: 100,
+        },
+        {
+          name: 'concurrent_batch (5 batches of 4 items with error isolation)',
+          fn: async () => {
+            const mod = await import('../../src/index.js');
+            const bo = mod.batchOperate;
+            for (let i = 0; i < 5; i += 1) {
+              await bo(
+                [{ name: 'a', input: 1 }, { name: 'b', input: 2 }, { name: 'c', input: 3 }, { name: 'd', input: 4 }],
+                async (item) => (item.input as number) * 2,
+              );
+            }
+          },
+          serialP95CapMs: 100,
+        },
       ],
     });
     expect(result).toBeDefined();

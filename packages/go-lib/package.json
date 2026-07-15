@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/go-lib",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Go web framework mock harness for kiwa — gin / echo / fiber / chi を統一 interface で invoke する in-process mock。 handler dispatch / middleware chain / request-response cycle / route matching を Go 実 framework の signature を再現した TypeScript test infra で叩く。",
   "license": "UNLICENSED",
   "author": {

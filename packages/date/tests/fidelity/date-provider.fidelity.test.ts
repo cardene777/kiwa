@@ -4,7 +4,16 @@
  */
 import { assertFidelity } from '@kiwa-lab/quality-metrics';
 import { describe, expect, it } from 'vitest';
-import { createDateClient, formatDate, parseDate, timezoneConvert } from '../../src/index.js';
+import {
+  createDateClient,
+  formatDate,
+  parseDate,
+  timezoneConvert,
+  parseDuration,
+  expandRecurrence,
+  createHolidayCalendar,
+  retryWithBackoff,
+} from '../../src/index.js';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -51,5 +60,53 @@ describe('date client fidelity vs reference impl', () => {
     const jp = timezoneConvert(utc, 'Asia/Tokyo', 'date-fns');
     expect(jp.offsetMinutes).toBe(540);
     expect(jp.date.getTime() - utc.getTime()).toBe(9 * 60 * 60 * 1000);
+  });
+
+  // v2.1 追加 5 case
+  it('v2.1 parseDuration = ISO 8601 P1Y2M3DT4H5M6S', () => {
+    const r = parseDuration('P1Y2M3DT4H5M6S');
+    expect(r.ok).toBe(true);
+    expect(r.components?.years).toBe(1);
+    expect(r.components?.months).toBe(2);
+    expect(r.components?.days).toBe(3);
+    expect(r.components?.hours).toBe(4);
+    expect(r.components?.minutes).toBe(5);
+    expect(r.components?.seconds).toBe(6);
+  });
+
+  it('v2.1 parseDuration = 不正 format で ok=false', () => {
+    const r = parseDuration('invalid');
+    expect(r.ok).toBe(false);
+    expect(r.error).toContain('invalid ISO 8601 duration');
+  });
+
+  it('v2.1 expandRecurrence DAILY 5 count', () => {
+    const start = new Date(Date.UTC(2026, 0, 1));
+    const dates = expandRecurrence({ freq: 'DAILY', interval: 1, count: 5 }, start);
+    expect(dates.length).toBe(5);
+    expect(dates[0]!.getUTCDate()).toBe(1);
+    expect(dates[4]!.getUTCDate()).toBe(5);
+  });
+
+  it('v2.1 holiday calendar isHoliday + nextHoliday', () => {
+    const cal = createHolidayCalendar([
+      { name: 'New Year', date: '2026-01-01', country: 'JP' },
+      { name: 'Golden Week', date: '2026-05-03', country: 'JP' },
+    ]);
+    expect(cal.isHoliday(new Date(Date.UTC(2026, 0, 1)))).toBe(true);
+    expect(cal.isHoliday(new Date(Date.UTC(2026, 0, 2)))).toBe(false);
+    const next = cal.nextHoliday(new Date(Date.UTC(2026, 1, 1)));
+    expect(next?.name).toBe('Golden Week');
+  });
+
+  it('v2.1 retryWithBackoff で 3 attempt 成功', async () => {
+    let n = 0;
+    const r = await retryWithBackoff(async () => {
+      n += 1;
+      if (n < 3) throw new Error('r');
+      return 'ok';
+    }, { maxAttempts: 5, initialDelayMs: 1 });
+    expect(r.ok).toBe(true);
+    expect(r.attempts).toBe(3);
   });
 });

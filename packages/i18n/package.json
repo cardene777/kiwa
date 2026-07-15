@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/i18n",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "i18n provider mock harness for kiwa — next-intl / vue-i18n / react-i18next / Lingui を統一 interface で invoke する in-process mock。 translate / locale switch / interpolation ({{name}}) / pluralization (one / other / few / many) / fallback locale / missing key handling までを real provider と同じ signature で叩ける test infra。",
   "license": "UNLICENSED",
   "author": {

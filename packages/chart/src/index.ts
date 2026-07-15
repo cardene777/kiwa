@@ -30,3 +30,25 @@ export {
   type TooltipEvent,
   type TooltipContent,
 } from './tooltip.js';
+
+export {
+  animateChartFrames,
+  computeResponsiveDimensions,
+  type AnimationFrame,
+  type AnimateChartOptions,
+  type ResponsiveDimensions,
+} from './animation.js';
+
+export {
+  drillDown,
+  exportChart,
+  type DrillDownRequest,
+  type DrillDownResult,
+  type ExportOptions,
+} from './drilldown.js';
+
+export {
+  withObservability,
+  type RenderMetric,
+  type ObservabilityHook,
+} from './observability.js';

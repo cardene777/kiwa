@@ -39,3 +39,26 @@ export {
   type CapturedVideo,
   type CameraPermissionStatus,
 } from './camera.js';
+
+// v2.1 extensions
+export {
+  mockEASUpdate,
+  mockModal,
+  retryWithBackoff,
+  batchAsync,
+  createObservabilityHook,
+  withTimeout,
+  createRateLimiter,
+  createCircuitBreaker,
+  type EASUpdateManifest,
+  type EASUpdateMock,
+  type ModalOptions,
+  type ModalMock,
+  type RetryOptions,
+  type RetryResult,
+  type BatchResult,
+  type ObservabilityHook,
+  type RateLimiter,
+  type CircuitState,
+  type CircuitBreaker,
+} from './extensions.js';

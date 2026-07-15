@@ -4,7 +4,17 @@
  */
 import { assertFidelity } from '@kiwa-lab/quality-metrics';
 import { describe, expect, it } from 'vitest';
-import { createQueryClient, fetchQuery, invalidateQuery, mutate, subscribeToQuery } from '../../src/index.js';
+import {
+  createQueryClient,
+  fetchQuery,
+  invalidateQuery,
+  mutate,
+  subscribeToQuery,
+  createInfiniteQuery,
+  createOptimisticUpdate,
+  prefetchQueries,
+  retryWithBackoff,
+} from '../../src/index.js';
 
 function referenceCache() {
   const store = new Map<string, unknown>();
@@ -65,5 +75,65 @@ describe('query client fidelity vs reference impl', () => {
     await fetchQuery(mock, ['s'], async () => ({ v: 1 }));
     expect(observed).toBe('success');
     sub.unsubscribe();
+  });
+
+  // v2.1 追加 5 case
+  it('v2.1 infiniteQuery で 3 page fetch', async () => {
+    const iq = createInfiniteQuery<number, number>({
+      initialCursor: 0,
+      fetchPage: async (cursor: number) => {
+        const nextCursor = cursor < 2 ? cursor + 1 : undefined;
+        const base = {
+          data: [cursor * 10, cursor * 10 + 1, cursor * 10 + 2],
+        } as { data: number[]; nextCursor?: number };
+        if (nextCursor !== undefined) base.nextCursor = nextCursor;
+        return base;
+      },
+    });
+    await iq.fetchNextPage();
+    await iq.fetchNextPage();
+    await iq.fetchNextPage();
+    expect(iq.pages.length).toBe(3);
+    expect(iq.hasNextPage).toBe(false);
+  });
+
+  it('v2.1 optimistic update commit で baseline 更新', () => {
+    const opt = createOptimisticUpdate({ count: 0 });
+    opt.applyOptimistic({ count: 5 });
+    expect(opt.current().count).toBe(5);
+    expect(opt.isPending()).toBe(true);
+    opt.commit();
+    expect(opt.isPending()).toBe(false);
+    expect(opt.current().count).toBe(5);
+  });
+
+  it('v2.1 optimistic update rollback で baseline に戻る', () => {
+    const opt = createOptimisticUpdate({ count: 0 });
+    opt.applyOptimistic({ count: 5 });
+    opt.rollback();
+    expect(opt.current().count).toBe(0);
+    expect(opt.isPending()).toBe(false);
+  });
+
+  it('v2.1 prefetchQueries で 5 key 並列 fetch', async () => {
+    const store: Record<string, number> = {};
+    const result = await prefetchQueries(
+      ['a', 'b', 'c', 'd', 'e'],
+      async (k) => { store[k] = k.length; },
+      { concurrency: 3 },
+    );
+    expect(result.successCount).toBe(5);
+    expect(result.failureCount).toBe(0);
+  });
+
+  it('v2.1 retryWithBackoff = fetch 失敗 → 成功', async () => {
+    let n = 0;
+    const r = await retryWithBackoff(async () => {
+      n += 1;
+      if (n < 3) throw new Error('flaky');
+      return 'ok';
+    }, { maxAttempts: 5, initialDelayMs: 1 });
+    expect(r.ok).toBe(true);
+    expect(r.attempts).toBe(3);
   });
 });

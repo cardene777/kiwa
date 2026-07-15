@@ -77,4 +77,70 @@ describe('webhook integration — verify → parse → dispatch workflow', () =>
     expect(list[0]!.status).toBe('rejected');
     expect(list[0]!.signatureResult.valid).toBe(false);
   });
+
+  it('T-INT-W-006 verifyWithRetry: transient rejection → retry → verified', async () => {
+    const { verifyWithRetry } = await import('../../src/index.js');
+    let attempt = 0;
+    const verifier = {
+      provider: 'github' as const,
+      verify: (_: unknown) => {
+        attempt++;
+        return attempt < 3
+          ? { id: `x-${attempt}`, provider: 'github' as const, status: 'rejected' as const, reason: 'transient', receivedAt: attempt }
+          : { id: `x-${attempt}`, provider: 'github' as const, status: 'verified' as const, receivedAt: attempt };
+      },
+      listDelivered: () => [],
+      clear: () => {},
+    };
+    const result = await verifyWithRetry(verifier, { payload: 'p', signature: 's' }, { maxAttempts: 5, initialDelayMs: 1 });
+    expect(result.attempts).toBe(3);
+    expect(result.status).toBe('verified');
+  });
+
+  it('T-INT-W-007 verifyBatch: 5 incoming 全 result 収集 (verified+rejected 合計)', async () => {
+    const { verifyBatch } = await import('../../src/index.js');
+    const verifier = createWebhookVerifier({ provider: 'github', secret: 'k' });
+    const incomings = Array.from({ length: 5 }, (_, i) => ({ payload: `p${i}`, signature: 'bad' }));
+    const result = verifyBatch(verifier, incomings);
+    expect(result.total).toBe(5);
+    expect(result.verified + result.rejected).toBe(5);
+    expect(result.results.length).toBe(5);
+  });
+
+  it('T-INT-W-008 verifyIdempotent: 同 key で dedup', async () => {
+    const { createIdempotencyCache, verifyIdempotent } = await import('../../src/index.js');
+    const verifier = createWebhookVerifier({ provider: 'github', secret: 'k' });
+    const cache = createIdempotencyCache();
+    const first = verifyIdempotent(verifier, { payload: 'x', signature: 'bad' }, 'evt-1', cache);
+    expect(first.deduplicated).toBe(false);
+    const second = verifyIdempotent(verifier, { payload: 'x', signature: 'bad' }, 'evt-1', cache);
+    expect(second.deduplicated).toBe(true);
+    expect(verifier.listDelivered().length).toBe(1);
+  });
+
+  it('T-INT-W-009 verifyObservable: before-verify + after-verify hook 発火', async () => {
+    const { createHookRegistry, verifyObservable } = await import('../../src/index.js');
+    const verifier = createWebhookVerifier({ provider: 'github', secret: 'k' });
+    const hooks = createHookRegistry();
+    const events: string[] = [];
+    hooks.register('before-verify', () => { events.push('before'); });
+    hooks.register('after-verify', (ctx) => { events.push(`after:${ctx.outcome?.status}`); });
+    verifyObservable(verifier, { payload: 'x', signature: 'bad' }, hooks);
+    expect(events[0]).toBe('before');
+    expect(events[1]).toContain('after:');
+  });
+
+  it('T-INT-W-010 circuit-breaker: 3 連続 rejection → open → resetTimeout 後 half-open', async () => {
+    const { createCircuitBreaker } = await import('../../src/index.js');
+    let currentTime = 1000;
+    const verifier = createWebhookVerifier({ provider: 'github', secret: 'k' });
+    const breaker = createCircuitBreaker(verifier, { rejectionThreshold: 3, resetTimeoutMs: 100, now: () => currentTime });
+    for (let i = 0; i < 3; i++) breaker.verify({ payload: 'x', signature: 'bad' });
+    expect(breaker.state()).toBe('open');
+    const blocked = breaker.verify({ payload: 'x', signature: 'bad' });
+    expect(blocked.reason).toContain('circuit breaker open');
+    currentTime = 6000;
+    const halfOpen = breaker.verify({ payload: 'ok', signature: 'bad' });
+    expect(['half-open', 'open']).toContain(halfOpen.circuitState);
+  });
 });

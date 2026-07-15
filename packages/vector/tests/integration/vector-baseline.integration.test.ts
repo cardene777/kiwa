@@ -61,4 +61,52 @@ describe('vector integration — upsert → query → delete workflow', () => {
     await expect(client.upsert([{ id: 'bad', values: [1, 2] }])).rejects.toThrow(/dimension mismatch/);
     expect(client.size()).toBe(0);
   });
+
+  it('T-INT-V-006 upsertWithRetry: 1 attempt success', async () => {
+    const { upsertWithRetry } = await import('../../src/index.js');
+    const client = createVectorClient({ provider: 'pinecone', dimension: 2 });
+    const result = await upsertWithRetry(client, [{ id: '1', values: [1, 2] }]);
+    expect(result.attempts).toBe(1);
+    expect(result.upsertedCount).toBe(1);
+  });
+
+  it('T-INT-V-007 upsertBatch: 250 vectors in batches of 100', async () => {
+    const { upsertBatch } = await import('../../src/index.js');
+    const client = createVectorClient({ provider: 'pinecone', dimension: 2 });
+    const records = Array.from({ length: 250 }, (_, i) => ({ id: `${i}`, values: [i, i] }));
+    const result = await upsertBatch(client, records, 100);
+    expect(result.totalRecords).toBe(250);
+    expect(result.batchCount).toBe(3);
+    expect(result.totalUpserted).toBe(250);
+  });
+
+  it('T-INT-V-008 upsertIdempotent: dedup', async () => {
+    const { createIdempotencyCache, upsertIdempotent } = await import('../../src/index.js');
+    const client = createVectorClient({ provider: 'pinecone', dimension: 2 });
+    const cache = createIdempotencyCache();
+    const first = await upsertIdempotent(client, [{ id: '1', values: [1, 2] }], 'idem-1', cache);
+    expect(first.cached).toBe(false);
+    const second = await upsertIdempotent(client, [{ id: '1', values: [1, 2] }], 'idem-1', cache);
+    expect(second.cached).toBe(true);
+  });
+
+  it('T-INT-V-009 upsertObservable: hook 発火', async () => {
+    const { createHookRegistry, upsertObservable } = await import('../../src/index.js');
+    const client = createVectorClient({ provider: 'pinecone', dimension: 2 });
+    const hooks = createHookRegistry();
+    const events: string[] = [];
+    hooks.register('before-upsert', () => events.push('before'));
+    hooks.register('after-upsert', () => events.push('after'));
+    await upsertObservable(client, [{ id: '1', values: [1, 2] }], hooks);
+    expect(events).toEqual(['before', 'after']);
+  });
+
+  it('T-INT-V-010 circuit-breaker: closed 状態で normal upsert', async () => {
+    const { createCircuitBreaker } = await import('../../src/index.js');
+    const client = createVectorClient({ provider: 'pinecone', dimension: 2 });
+    const breaker = createCircuitBreaker(client, { failureThreshold: 3, resetTimeoutMs: 100 });
+    const result = await breaker.upsert([{ id: '1', values: [1, 2] }]);
+    expect(result.circuitState).toBe('closed');
+    expect(result.upsertedCount).toBe(1);
+  });
 });

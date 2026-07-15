@@ -28,3 +28,11 @@ export {
   type VerifyUploadResult,
   type ChecksumAlgorithm,
 } from './checksum.js';
+
+export {
+  uploadWithRetry, type RetryOptions,
+  uploadBatch, type BatchUploadResult,
+  createIdempotencyCache, uploadIdempotent, type IdempotencyCache,
+  createHookRegistry, uploadObservable, type HookRegistry, type HookCallback, type HookContext, type UploadHookEvent,
+  createCircuitBreaker, type CircuitBreaker, type CircuitBreakerOptions, type CircuitState,
+} from './enhancements.js';

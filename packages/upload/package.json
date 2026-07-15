@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/upload",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Object storage upload provider mock harness for kiwa — AWS S3 / Google Cloud Storage / Cloudflare R2 / Cloudinary を統一 interface で invoke する in-process mock。 multipart upload / presigned URL 発行 / checksum + size 検証 / delivery event までを real provider と同じ signature で叩ける test infra。",
   "license": "UNLICENSED",
   "author": {

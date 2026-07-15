@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/rust-lib",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Rust web framework mock harness for kiwa — axum / actix-web / tower-http / rocket を統一 interface で invoke する in-process mock。 handler / middleware / extractor / router を real framework と同じ signature で叩ける test infra、 実 Rust binary 起動なしで request-response cycle を verify できる。",
   "license": "UNLICENSED",
   "author": {

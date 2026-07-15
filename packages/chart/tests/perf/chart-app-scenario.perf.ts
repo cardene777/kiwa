@@ -5,14 +5,18 @@ import { describe, expect, it } from 'vitest';
 import {
   createChartClient,
   computeAxis,
+  animateChartFrames,
+  drillDown,
+  exportChart,
+  renderChart,
   type ChartKind,
 } from '../../src/index.js';
 
 const MODULE = 'chart-app-scenario';
 const REPORT_PATH = path.join(resolveKiwaRepoRoot(process.cwd()), 'docs/quality-reports/perf', `${MODULE}.md`);
 
-describe('chart app scenario perf (real workload)', () => {
-  it('3-layer perf: dashboard_render_workflow / axis_recompute_batch / tooltip_hover_error', async () => {
+describe('chart app scenario perf v2.1 (real workload)', () => {
+  it('5-op perf: dashboard / axis / animation / drill / export', async () => {
     const kinds: ChartKind[] = ['bar', 'line', 'pie', 'scatter'];
 
     const result = await runPerf3Layer({
@@ -58,19 +62,41 @@ describe('chart app scenario perf (real workload)', () => {
           serialP95CapMs: 100,
         },
         {
-          name: 'tooltip_hover_error_handling (5 out-of-bounds hover)',
+          name: 'animation_frame_burst (5 series x 10 frames)',
           fn: async () => {
-            const client = createChartClient({ provider: 'visx' });
-            const rendered = client.renderChart({
-              kind: 'scatter',
-              series: [{ name: 'noise', data: [{ x: 0, y: 0 }] }],
+            for (let s = 0; s < 5; s++) {
+              const frames = animateChartFrames(
+                (values) => renderChart({ kind: 'line', series: [{ name: `s${s}`, data: values.map((y, x) => ({ x, y })) }] }),
+                { fromValues: [0, 20, 40], toValues: [80, 60, 40], frames: 10, easing: 'ease-in-out' },
+              );
+              if (frames.length !== 11) throw new Error('unexpected frame count');
+            }
+          },
+          serialP95CapMs: 100,
+        },
+        {
+          name: 'drilldown_batch (5 hit + 5 miss)',
+          fn: async () => {
+            const rendered = renderChart({
+              kind: 'bar',
+              series: [{ name: 'items', data: Array.from({ length: 20 }, (_, k) => ({ x: k, y: k * 3 })) }],
             });
             for (let i = 0; i < 5; i++) {
-              try {
-                const bad = { x: NaN, y: NaN };
-                const tip = client.dispatchTooltip(rendered, bad as unknown as { x: number; y: number });
-                if (tip.visible !== true && tip.visible !== false) throw new Error('unexpected visible flag');
-              } catch { /* handled */ }
+              const hit = drillDown(rendered, { seriesName: 'items', dataIndex: i });
+              const miss = drillDown(rendered, { seriesName: 'ghost', dataIndex: i });
+              if (!hit.found || miss.found) throw new Error('drilldown result mismatch');
+            }
+          },
+          serialP95CapMs: 100,
+        },
+        {
+          name: 'export_batch (3 SVG + 3 PNG)',
+          fn: async () => {
+            const rendered = renderChart({ kind: 'pie', series: [{ name: 's', data: [{ x: 0, y: 10 }, { x: 1, y: 20 }, { x: 2, y: 30 }] }] });
+            for (let i = 0; i < 3; i++) {
+              const svg = exportChart(rendered, { format: 'svg', scale: 1 + i * 0.5 });
+              const png = exportChart(rendered, { format: 'png', scale: 1 + i * 0.5 });
+              if (svg.bytes === 0 || png.bytes === 0) throw new Error('export empty');
             }
           },
           serialP95CapMs: 100,

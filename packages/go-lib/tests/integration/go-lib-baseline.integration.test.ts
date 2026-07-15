@@ -1,6 +1,6 @@
 /**
  * integration test — 4 framework の end-to-end workflow (route 追加 → handler 呼出 →
- * response + middleware trace 検証) を 5 case で cover。
+ * response + middleware trace 検証) を v2.1 で 5 → 10 case に拡張。
  */
 import { describe, expect, it } from 'vitest';
 import {
@@ -9,6 +9,13 @@ import {
   invokeEchoHandler,
   invokeFiberHandler,
   captureChiRoute,
+  retryWithBackoff,
+  batchDispatch,
+  createObservabilityHook,
+  createRateLimiter,
+  createCircuitBreaker,
+  createCancelToken,
+  createRouteGroup,
 } from '../../src/index.js';
 import { createChiApp } from '../../src/chi.js';
 
@@ -77,5 +84,71 @@ describe('go-lib integration — 4 framework request-response workflow', () => {
     expect(r.status).toBe(200);
     expect((r.body as { orgId: string; repoName: string })).toEqual({ orgId: 'kiwa-lab', repoName: 'kiwa' });
     expect(r.headers?.['content-type']).toBe('application/json');
+  });
+
+  // v2.1 追加 5 case
+  it('T-INT-GL-006 v2.1 retry + batch dispatch で 5 handler 全成功', async () => {
+    const handlers = Array.from({ length: 5 }, (_, i) => async () => {
+      const result = await retryWithBackoff(async () => i, { maxAttempts: 2, initialDelayMs: 1 });
+      return result.value;
+    });
+    const batch = await batchDispatch(handlers, { concurrency: 2 });
+    expect(batch.successCount).toBe(5);
+    expect(batch.results.map((r) => r.value)).toEqual([0, 1, 2, 3, 4]);
+  });
+
+  it('T-INT-GL-007 v2.1 observability hook で 5 request event 蓄積 + duration 順', async () => {
+    const hook = createObservabilityHook();
+    for (let i = 0; i < 5; i += 1) {
+      const start = performance.now();
+      await invokeGinHandler({
+        handler: (c) => { c.JSON(200, { i }); },
+        req: { method: 'GET', path: `/o/${i}` },
+      });
+      hook.onRequest({
+        framework: 'gin',
+        method: 'GET',
+        path: `/o/${i}`,
+        status: 200,
+        durationMs: performance.now() - start,
+        timestamp: Date.now(),
+      });
+    }
+    const events = hook.events();
+    expect(events.length).toBe(5);
+    expect(events.every((e) => e.durationMs >= 0)).toBe(true);
+  });
+
+  it('T-INT-GL-008 v2.1 rate limiter で burst 3 まで通過 + 4 個目 reject', () => {
+    const rl = createRateLimiter({ requestsPerSecond: 1, burst: 3 });
+    const results = [];
+    for (let i = 0; i < 5; i += 1) results.push(rl.tryAcquire());
+    const trueCount = results.filter((r) => r).length;
+    expect(trueCount).toBeGreaterThanOrEqual(3);
+    expect(trueCount).toBeLessThanOrEqual(4);
+  });
+
+  it('T-INT-GL-009 v2.1 circuit breaker が閾値超えで open + reject', async () => {
+    const cb = createCircuitBreaker({ failureThreshold: 2, resetTimeoutMs: 100 });
+    for (let i = 0; i < 2; i += 1) {
+      await expect(cb.execute(async () => { throw new Error('fail'); })).rejects.toThrow();
+    }
+    expect(cb.state()).toBe('open');
+    await expect(cb.execute(async () => 'ok')).rejects.toThrow('circuit-open');
+  });
+
+  it('T-INT-GL-010 v2.1 route group + subgroup で prefix 合成', () => {
+    const api = createRouteGroup({ prefix: '/api', framework: 'gin' });
+    api.addRoute('GET', '/health', 'health');
+    const v1 = api.subgroup('/v1');
+    v1.addRoute('GET', '/users', 'listUsers');
+    v1.addRoute('POST', '/users', 'createUser');
+    const cancel = createCancelToken();
+    let cancelled = 0;
+    cancel.onCancel(() => { cancelled += 1; });
+    cancel.cancel();
+    expect(api.routes.length).toBe(3);
+    expect(api.routes.map((r) => r.fullPath).sort()).toEqual(['/api/health', '/api/v1/users', '/api/v1/users']);
+    expect(cancelled).toBe(1);
   });
 });

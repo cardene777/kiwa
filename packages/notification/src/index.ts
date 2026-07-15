@@ -33,3 +33,11 @@ export {
   type RawNotificationEvent,
   type NotificationEventType,
 } from './delivery.js';
+
+export {
+  sendPushWithRetry, type RetryOptions,
+  sendPushBatch, type BatchSendResult,
+  createIdempotencyCache, sendPushIdempotent, type IdempotencyCache,
+  createHookRegistry, sendPushObservable, type HookRegistry, type HookCallback, type HookContext, type SendHookEvent,
+  createCircuitBreaker, type CircuitBreaker, type CircuitBreakerOptions, type CircuitState,
+} from './enhancements.js';

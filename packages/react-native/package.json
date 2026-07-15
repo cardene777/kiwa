@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/react-native",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "React Native platform mock harness for kiwa — AsyncStorage / React Navigation / Platform / Linking / Dimensions 5 primitive を統一 interface で invoke する in-process mock。 real device / simulator なしで RN app の platform-dependent path の test を書ける。",
   "license": "UNLICENSED",
   "author": {

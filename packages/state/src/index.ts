@@ -28,3 +28,20 @@ export {
   mockAction,
   type MockActionCreator,
 } from './mockAction.js';
+
+// v2.1 extensions
+export {
+  composeMiddleware,
+  createUndoRedoStack,
+  createMemoryPersistence,
+  createPersistedStore,
+  retryWithBackoff,
+  createObservabilityHook,
+  type StateMiddleware,
+  type UndoRedoStack,
+  type PersistenceAdapter,
+  type PersistedStore,
+  type RetryOptions,
+  type RetryResult,
+  type ObservabilityHook,
+} from './extensions.js';

@@ -58,4 +58,53 @@ describe('upload integration — presign → multipart → verify workflow', () 
     expect(result.valid).toBe(false);
     expect(result.reason).toContain('checksum mismatch');
   });
+
+  it('T-INT-U-006 uploadWithRetry: success 1 attempt', async () => {
+    const { uploadWithRetry } = await import('../../src/index.js');
+    const client = createUploadClient({ provider: 's3' });
+    const result = await uploadWithRetry(client, { bucket: 'b', key: 'k', body: 'data' });
+    expect(result.attempts).toBe(1);
+    expect(result.status).toBe('uploaded');
+  });
+
+  it('T-INT-U-007 uploadBatch: 5 file concurrent upload', async () => {
+    const { uploadBatch } = await import('../../src/index.js');
+    const client = createUploadClient({ provider: 's3' });
+    const reqs = Array.from({ length: 5 }, (_, i) => ({ bucket: 'b', key: `k${i}`, body: `data${i}` }));
+    const result = await uploadBatch(client, reqs, 2);
+    expect(result.total).toBe(5);
+    expect(result.succeeded).toBe(5);
+  });
+
+  it('T-INT-U-008 uploadIdempotent: 同 key dedup', async () => {
+    const { createIdempotencyCache, uploadIdempotent } = await import('../../src/index.js');
+    const client = createUploadClient({ provider: 's3' });
+    const cache = createIdempotencyCache();
+    const first = await uploadIdempotent(client, { bucket: 'b', key: 'k', body: 'data' }, 'idem-1', cache);
+    expect(first.cached).toBe(false);
+    const second = await uploadIdempotent(client, { bucket: 'b', key: 'k', body: 'data' }, 'idem-1', cache);
+    expect(second.cached).toBe(true);
+  });
+
+  it('T-INT-U-009 uploadObservable: before + after hook', async () => {
+    const { createHookRegistry, uploadObservable } = await import('../../src/index.js');
+    const client = createUploadClient({ provider: 's3' });
+    const hooks = createHookRegistry();
+    const events: string[] = [];
+    hooks.register('before-upload', () => events.push('before'));
+    hooks.register('after-upload', () => events.push('after'));
+    await uploadObservable(client, { bucket: 'b', key: 'k', body: 'data' }, hooks);
+    expect(events).toEqual(['before', 'after']);
+  });
+
+  it('T-INT-U-010 circuit-breaker: threshold で open', async () => {
+    const { createCircuitBreaker } = await import('../../src/index.js');
+    let currentTime = 1000;
+    const client = createUploadClient({ provider: 's3', maxSizeBytes: 1 });
+    const breaker = createCircuitBreaker(client, { failureThreshold: 3, resetTimeoutMs: 100, now: () => currentTime });
+    for (let i = 0; i < 3; i++) await breaker.upload({ bucket: 'b', key: `k${i}`, body: Buffer.alloc(10) });
+    expect(breaker.state()).toBe('open');
+    const blocked = await breaker.upload({ bucket: 'b', key: 'x', body: 'data' });
+    expect(blocked.id).toBe('circuit-open');
+  });
 });

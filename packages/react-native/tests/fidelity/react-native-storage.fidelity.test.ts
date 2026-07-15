@@ -4,7 +4,16 @@
  */
 import { assertFidelity } from '@kiwa-lab/quality-metrics';
 import { describe, expect, it } from 'vitest';
-import { mockAsyncStorage, mockNavigation, createRNTestEnv } from '../../src/index.js';
+import {
+  mockAsyncStorage,
+  mockNavigation,
+  createRNTestEnv,
+  matchDeepLink,
+  createNotificationPermissionMock,
+  retryWithBackoff,
+  batchAsync,
+  createRateLimiter,
+} from '../../src/index.js';
 
 function referenceStorage() {
   const m = new Map<string, string>();
@@ -66,5 +75,46 @@ describe('react-native async-storage fidelity', () => {
     expect(env.platform.os).toBe('ios');
     expect(env.dimensions.window.width).toBe(390);
     expect(env.dimensions.window.height).toBe(844);
+  });
+
+  // v2.1 追加 5 case
+  it('v2.1 deep link match で scheme + host 抽出', () => {
+    const m = matchDeepLink('myapp://open/user/42', [{ scheme: 'myapp', host: 'open' }]);
+    expect(m.matched).toBe(true);
+    expect(m.scheme).toBe('myapp');
+    expect(m.host).toBe('open');
+  });
+
+  it('v2.1 notification permission mock で granted 遷移', async () => {
+    const p = createNotificationPermissionMock('undetermined');
+    expect(p.status()).toBe('undetermined');
+    const requested = await p.request();
+    expect(requested).toBe('granted');
+    p.set('denied');
+    expect(p.status()).toBe('denied');
+  });
+
+  it('v2.1 retryWithBackoff = 3 attempt で成功', async () => {
+    let attempts = 0;
+    const result = await retryWithBackoff(async () => {
+      attempts += 1;
+      if (attempts < 3) throw new Error('flaky');
+      return 'ok';
+    }, { maxAttempts: 5, initialDelayMs: 1 });
+    expect(result.ok).toBe(true);
+    expect(result.attempts).toBe(3);
+  });
+
+  it('v2.1 batchAsync = 5 handler 並列 + successCount 集計', async () => {
+    const handlers = Array.from({ length: 5 }, (_, i) => async () => i);
+    const r = await batchAsync(handlers, { concurrency: 3 });
+    expect(r.successCount).toBe(5);
+    expect(r.failureCount).toBe(0);
+  });
+
+  it('v2.1 rate limiter burst で 3 tryAcquire 通過', () => {
+    const rl = createRateLimiter({ requestsPerSecond: 1, burst: 3 });
+    const ok = [rl.tryAcquire(), rl.tryAcquire(), rl.tryAcquire()];
+    expect(ok.every((v) => v)).toBe(true);
   });
 });

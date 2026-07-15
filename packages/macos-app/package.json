@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/macos-app",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "macOS native app test harness for kiwa — SwiftUI / AppKit / XCTest / accessibility / screencap / UserNotifications を in-process mock で invoke する test infra。 実 XCTest を起動せず、 window / view tree / accessibility descriptor / event dispatch / CGDisplay 相当 screencap / notification 経路を統一 interface で検証できる。",
   "license": "UNLICENSED",
   "author": {

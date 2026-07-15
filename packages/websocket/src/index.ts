@@ -28,3 +28,17 @@ export {
   type WSBinaryFrame,
   type WSOpcode,
 } from './binary.js';
+
+export {
+  computeReconnectDelay,
+  createHeartbeatState,
+  type ReconnectPolicy,
+  type ReconnectAttempt,
+  type HeartbeatState,
+} from './reconnect.js';
+
+export {
+  createRoomRegistry,
+  type RoomRegistry,
+  type PresenceInfo,
+} from './room.js';

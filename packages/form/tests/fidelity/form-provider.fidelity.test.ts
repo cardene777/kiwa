@@ -4,7 +4,15 @@
  */
 import { assertFidelity } from '@kiwa-lab/quality-metrics';
 import { describe, expect, it } from 'vitest';
-import { createFormClient, registerField, validateSchema } from '../../src/index.js';
+import {
+  createFormClient,
+  registerField,
+  validateSchema,
+  validateAsync,
+  createFieldArray,
+  validateDependentFields,
+  retryWithBackoff,
+} from '../../src/index.js';
 
 function referenceForm() {
   const values: Record<string, unknown> = {};
@@ -66,5 +74,63 @@ describe('form client fidelity vs reference impl', () => {
     client.clear();
     expect(client.listSubmitted().length).toBe(0);
     expect(client.getLastErrors().length).toBe(0);
+  });
+
+  // v2.1 追加 5 case
+  it('v2.1 validateAsync = parallel で 2 field 検証', async () => {
+    const result = await validateAsync(
+      { email: 'a@x', password: 'short' },
+      {
+        email: async (v) => (typeof v === 'string' && v.includes('@') ? null : 'invalid email'),
+        password: async (v) => (typeof v === 'string' && v.length >= 8 ? null : 'too short'),
+      },
+      { parallel: true },
+    );
+    expect(result.valid).toBe(false);
+    expect(result.errors.password).toBe('too short');
+    expect(result.errors.email).toBeUndefined();
+  });
+
+  it('v2.1 fieldArray append + remove で items 変化', () => {
+    const arr = createFieldArray<{ name: string }>([{ name: 'a' }]);
+    arr.append({ name: 'b' });
+    arr.append({ name: 'c' });
+    expect(arr.length()).toBe(3);
+    arr.remove(1);
+    expect(arr.items().map((i) => i.name)).toEqual(['a', 'c']);
+  });
+
+  it('v2.1 fieldArray move で順序入替', () => {
+    const arr = createFieldArray<string>(['a', 'b', 'c']);
+    arr.move(0, 2);
+    expect(arr.items()).toEqual(['b', 'c', 'a']);
+  });
+
+  it('v2.1 validateDependentFields = country=US なら zip 必須', () => {
+    const result = validateDependentFields(
+      { country: 'US', zip: '' },
+      [
+        {
+          field: 'zip',
+          dependsOn: 'country',
+          when: (c) => c === 'US',
+          validator: (v) => (typeof v === 'string' && v.length > 0 ? null : 'zip required for US'),
+        },
+      ],
+    );
+    expect(result.valid).toBe(false);
+    expect(result.triggered).toEqual(['zip']);
+    expect(result.errors.zip).toBe('zip required for US');
+  });
+
+  it('v2.1 retryWithBackoff 3 attempt', async () => {
+    let n = 0;
+    const r = await retryWithBackoff(async () => {
+      n += 1;
+      if (n < 3) throw new Error('retry');
+      return 'ok';
+    }, { maxAttempts: 5, initialDelayMs: 1 });
+    expect(r.ok).toBe(true);
+    expect(r.attempts).toBe(3);
   });
 });

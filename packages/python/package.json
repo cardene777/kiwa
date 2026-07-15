@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/python",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Python web framework request-response mock harness for kiwa — Django / Flask / FastAPI / Starlette を統一 interface で invoke する in-process mock。 dispatchRequest (WSGI/ASGI mock) / renderTemplate (Jinja2 相当) / captureMiddlewareCall まで real framework と同じ signature で叩ける test infra。",
   "license": "UNLICENSED",
   "author": {

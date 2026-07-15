@@ -9,7 +9,11 @@ import {
   applyPendingMigrations,
   diffSchema,
   listAppliedMigrations,
+  createLockRegistry,
+  planDryRun,
+  resolveDependencyOrder,
   type Migration,
+  type MigrationWithDeps,
   type Schema,
 } from '../../src/index.js';
 
@@ -23,8 +27,8 @@ const MIGRATIONS: Migration[] = Array.from({ length: 10 }, (_, i) => ({
   down: `DROP TABLE t${i}`,
 }));
 
-describe('migration app scenario perf (real workload)', () => {
-  it('3-layer perf: apply_workflow / diff_batch / down_error_handling', async () => {
+describe('migration app scenario perf v2.1 (real workload)', () => {
+  it('5-op perf: apply / diff / down_error / lock / dry-run+deps', async () => {
     const prev: Schema = {
       tables: Array.from({ length: 5 }, (_, i) => ({
         name: `t${i}`,
@@ -82,10 +86,40 @@ describe('migration app scenario perf (real workload)', () => {
           },
           serialP95CapMs: 100,
         },
+        {
+          name: 'lock_acquire_release_batch (10 acquire-release cycle)',
+          fn: async () => {
+            let t = 0;
+            const reg = createLockRegistry(() => (t += 1));
+            for (let i = 0; i < 10; i++) {
+              const lock = reg.acquire(`m-${i}`, 'w', 1000);
+              if (!lock) throw new Error('lock acquire failed');
+              reg.release(`m-${i}`, 'w');
+            }
+          },
+          serialP95CapMs: 100,
+        },
+        {
+          name: 'dryrun_dep_batch (5 plan + resolve)',
+          fn: async () => {
+            const migs: MigrationWithDeps[] = Array.from({ length: 5 }, (_, i) => ({
+              id: `d${i}`,
+              name: `d${i}`,
+              up: i === 2 ? `DROP TABLE t${i}` : `CREATE TABLE t${i} (id int)`,
+              down: '',
+              dependsOn: i === 0 ? [] : [`d${i - 1}`],
+            }));
+            for (let i = 0; i < 5; i++) {
+              const plan = planDryRun(migs);
+              const ordered = resolveDependencyOrder(migs);
+              if (plan.totalSteps !== 5 || ordered.length !== 5) throw new Error('unexpected sizes');
+            }
+          },
+          serialP95CapMs: 100,
+        },
       ],
     });
     expect(result).toBeDefined();
-    // sanity: apply + rollback loop works
     const client = createMigrationClient({ provider: 'kysely' });
     runUp(client, MIGRATIONS[0]!);
     expect(client.applied.length).toBe(1);

@@ -32,3 +32,21 @@ export {
   type Subscription,
   type QueryListener,
 } from './subscription.js';
+
+// v2.1 extensions
+export {
+  createInfiniteQuery,
+  createOptimisticUpdate,
+  prefetchQueries,
+  retryWithBackoff,
+  withTimeout,
+  createObservabilityHook,
+  type InfiniteQueryOptions,
+  type InfiniteQueryState,
+  type OptimisticUpdate,
+  type PrefetchOptions,
+  type PrefetchResult,
+  type RetryOptions,
+  type RetryResult,
+  type ObservabilityHook,
+} from './extensions.js';

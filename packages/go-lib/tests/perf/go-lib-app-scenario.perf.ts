@@ -7,6 +7,8 @@ import {
   invokeEchoHandler,
   invokeFiberHandler,
   captureChiRoute,
+  retryWithBackoff,
+  batchDispatch,
 } from '../../src/index.js';
 import { createChiApp } from '../../src/chi.js';
 
@@ -14,7 +16,7 @@ const MODULE = 'go-lib-app-scenario';
 const REPORT_PATH = path.join(resolveKiwaRepoRoot(process.cwd()), 'docs/quality-reports/perf', `${MODULE}.md`);
 
 describe('go-lib app scenario perf (real workload)', () => {
-  it('3-layer perf: 4_framework_workflow / rest_batch / route_error_handling', async () => {
+  it('5-op v2.1: framework_workflow / rest_batch / error / retry_workflow / batch_dispatch', async () => {
     const chi = createChiApp();
     chi.addRoute('GET', '/users/{id}', async (req) => ({ status: 200, body: { id: req.params?.id } }));
     chi.addRoute('POST', '/users', async (req) => ({ status: 201, body: req.body }));
@@ -79,6 +81,33 @@ describe('go-lib app scenario perf (real workload)', () => {
                 req: { method: 'GET', path: `/echo-fail/${i}` },
               });
             }
+          },
+          serialP95CapMs: 100,
+        },
+        {
+          name: 'v2.1 retry_workflow (5 flaky handler、 3 attempt で成功)',
+          fn: async () => {
+            for (let i = 0; i < 5; i++) {
+              let attempts = 0;
+              await retryWithBackoff(async () => {
+                attempts += 1;
+                if (attempts < 2) throw new Error(`flaky-${i}`);
+                return `ok-${i}`;
+              }, { maxAttempts: 3, initialDelayMs: 1 });
+            }
+          },
+          serialP95CapMs: 200,
+        },
+        {
+          name: 'v2.1 batch_dispatch (10 handler concurrent=4 で並列 dispatch)',
+          fn: async () => {
+            const handlers = Array.from({ length: 10 }, (_, i) => async () =>
+              (await invokeGinHandler({
+                handler: (c) => { c.JSON(200, { batch: i }); },
+                req: { method: 'GET', path: `/b/${i}` },
+              })).status,
+            );
+            await batchDispatch(handlers, { concurrency: 4 });
           },
           serialP95CapMs: 100,
         },

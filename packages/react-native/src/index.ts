@@ -32,3 +32,31 @@ export {
   setDimensions,
   type DimensionsState,
 } from './dimensions.js';
+
+// v2.1 extensions
+export {
+  retryWithBackoff,
+  matchDeepLink,
+  createNotificationPermissionMock,
+  createObservabilityHook,
+  withTimeout,
+  createRateLimiter,
+  createCircuitBreaker,
+  batchAsync,
+  type RetryOptions,
+  type RetryResult,
+  type DeepLinkPattern,
+  type DeepLinkMatch,
+  type NotificationPermission,
+  type NotificationPermissionMock,
+  type ObservabilityEvent,
+  type ObservabilityHook,
+  type TimeoutOptions,
+  type RateLimitOptions,
+  type RateLimiter,
+  type CircuitState,
+  type CircuitBreakerOptions,
+  type CircuitBreaker,
+  type BatchOptions,
+  type BatchResult,
+} from './extensions.js';

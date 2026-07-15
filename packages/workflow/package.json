@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/workflow",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Durable workflow / step orchestration mock harness for kiwa — Temporal / Inngest / Trigger.dev / AWS Step Functions を統一 interface で invoke する in-process mock。 defineWorkflow (steps) / executeWorkflow / retryStep (exponential backoff) / eventDrivenTrigger までを real provider と同じ signature で叩ける test infra。",
   "license": "UNLICENSED",
   "author": {

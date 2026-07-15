@@ -1,6 +1,6 @@
 {
   "name": "@kiwa-lab/ruby",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Ruby framework mock harness for kiwa — Rails / Sinatra / Roda / Hanami の request → controller → response cycle を統一 interface で in-process invoke する test infra。 ActiveRecord query 捕捉 + ERB render + session/cookies snapshot を real Ruby runtime なしで叩ける。",
   "license": "UNLICENSED",
   "author": {
