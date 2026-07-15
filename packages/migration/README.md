@@ -1,12 +1,63 @@
 # @kiwa-lab/migration
 
-DB migration mock harness for kiwa — Prisma / Drizzle / Kysely / Knex を統一 interface で invoke する in-process mock。
+DB migration mock harness for kiwa — Prisma / Drizzle / Kysely / Knex を統一 interface で in-process から叩ける test infra。
 
-## API
+## Installation
 
-- `createMigrationClient(options)` = provider mock client (runUp / runDown / applyPendingMigrations / listAppliedMigrations)
-- `diffSchema(prev, next)` = schema diff (added / removed / changed columns/tables)
-- `runUp(client, migration)` = 1 migration の up 実行
-- `runDown(client, migration)` = 1 migration の down 実行
-- `applyPendingMigrations(client, migrations)` = pending 全て順次適用
-- `listAppliedMigrations(client)` = 適用済 migration history 取得
+```bash
+pnpm add -D @kiwa-lab/migration
+# or
+npm install -D @kiwa-lab/migration
+# or
+yarn add -D @kiwa-lab/migration
+```
+
+## Supported providers
+
+| Provider | Status | Migration style |
+|---|---|---|
+| Prisma | ✅ Ready | migration_lock + SQL steps |
+| Drizzle | ✅ Ready | journal + snapshot |
+| Kysely | ✅ Ready | numeric prefix TS |
+| Knex | ✅ Ready | up/down JS |
+
+## Quick start
+
+```ts
+import { describe, expect, it } from 'vitest';
+import {
+  createMigrationClient,
+  runUp,
+  runDown,
+  diffSchema,
+  listAppliedMigrations,
+} from '@kiwa-lab/migration';
+
+describe('user table migration', () => {
+  it('up → down で schema が初期状態に戻る', async () => {
+    const client = createMigrationClient({ provider: 'prisma' });
+    const m = { id: '001', up: 'CREATE TABLE users (id INT)', down: 'DROP TABLE users' };
+    await runUp(client, m);
+    expect(listAppliedMigrations(client).map((r) => r.id)).toEqual(['001']);
+    await runDown(client, m);
+    expect(listAppliedMigrations(client)).toEqual([]);
+  });
+});
+```
+
+## API reference
+
+- `createMigrationClient({ provider: MigrationProvider }): MigrationClient` — provider 別 mock
+- `runUp(client, migration: Migration): Promise<MigrationResult>` — 1 migration 前進
+- `runDown(client, migration: Migration): Promise<MigrationResult>` — 1 migration 後退
+- `applyPendingMigrations(client, pending: Migration[]): Promise<ApplyPendingResult>` — 全 pending 順次適用
+- `diffSchema(prev: Schema, next: Schema): SchemaDiff` — 前後 schema 差分
+- `listAppliedMigrations(client): MigrationRecord[]` — history 取得
+
+## Test integration
+
+vitest + `/kiwa-migration` skill で real DB 起動なしで schema evolution を verify。
+
+## License
+
+UNLICENSED — see [github.com/cardene777/kiwa](https://github.com/cardene777/kiwa).

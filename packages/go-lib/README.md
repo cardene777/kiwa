@@ -1,15 +1,59 @@
 # @kiwa-lab/go-lib
 
-Go web framework mock harness for kiwa — gin / echo / fiber / chi の handler dispatch + middleware chain + request-response cycle を統一 interface で in-process mock。
+Go web framework request-response mock harness for kiwa — gin / echo / fiber / chi を統一 interface で in-process から叩ける test infra。
 
-## API
+## Installation
 
-- `createGoAppEnv({ framework })` = gin/echo/fiber/chi の mock app env (router + handlers + middleware chain)
-- `invokeGinHandler({ handler, req })` = gin.Context 相当を simulate、 c.JSON / c.String / c.Status を capture
-- `invokeEchoHandler({ handler, req })` = echo.Context 相当を simulate、 c.JSON / c.String / c.NoContent を capture
-- `invokeFiberHandler({ handler, req })` = fiber.Ctx 相当を simulate、 c.JSON / c.SendString / c.Status を capture
-- `captureChiRoute({ app, method, path })` = chi router pattern matching + middleware trace + handler dispatch を capture
+```bash
+pnpm add -D @kiwa-lab/go-lib
+# or
+npm install -D @kiwa-lab/go-lib
+# or
+yarn add -D @kiwa-lab/go-lib
+```
 
-## 対象 framework 4 種の共通 shape
+## Supported providers
 
-req = `{ method, path, body, headers, params, query }`、 response = `{ status, body, headers, framework }`。 framework 別の signature 差は adapter 内で吸収し、 呼び側は同じ shape で叩ける。
+| Framework | Status | Primary API |
+|---|---|---|
+| gin | ✅ Ready | `invokeGinHandler` |
+| echo | ✅ Ready | `invokeEchoHandler` |
+| fiber | ✅ Ready | `invokeFiberHandler` |
+| chi | ✅ Ready | `captureChiRoute` |
+
+## Quick start
+
+```ts
+import { describe, expect, it } from 'vitest';
+import { createGoAppEnv, invokeGinHandler } from '@kiwa-lab/go-lib';
+
+describe('gin handler', () => {
+  it('GET /users/:id returns user', async () => {
+    const env = createGoAppEnv({ framework: 'gin' });
+    const handler = async (c: any) => c.json(200, { id: c.param('id') });
+    const result = await invokeGinHandler({
+      env,
+      handler,
+      request: { method: 'GET', path: '/users/42', params: { id: '42' } },
+    });
+    expect(result.response.status).toBe(200);
+    expect(result.response.body).toEqual({ id: '42' });
+  });
+});
+```
+
+## API reference
+
+- `createGoAppEnv({ framework: GoFramework }): GoAppEnv` — framework 別 mock env
+- `invokeGinHandler({ env, handler, request }): Promise<InvokeGinHandlerResult>` — gin handler + context invoke
+- `invokeEchoHandler({ env, handler, request }): Promise<InvokeEchoHandlerResult>` — echo handler + context invoke
+- `invokeFiberHandler({ env, handler, request }): Promise<InvokeFiberHandlerResult>` — fiber handler + context invoke
+- `captureChiRoute({ app, request }): Promise<CaptureChiRouteResult>` — chi router pattern matching + middleware trace
+
+## Test integration
+
+vitest + `/kiwa-go-lib` skill で Layer 1 spec (`tests/spec/go-lib/{module}.md`) から Layer 2 test を機械生成、 real Go runtime 不要で handler dispatch を contract level で verify。
+
+## License
+
+UNLICENSED — see [github.com/cardene777/kiwa](https://github.com/cardene777/kiwa).

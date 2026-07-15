@@ -41,7 +41,7 @@ export default defineConfig({
       { text: 'Concepts', link: '/concepts/ai-llm-testing' },
       { text: 'Migrations', link: '/migrations/' },
       { text: 'Quality', link: '/quality/release-gate' },
-      { text: 'API Reference', link: '/api/' },
+      { text: 'Libraries', link: '/api/' },
       {
         text: 'Roadmap',
         link: 'https://github.com/cardene777/kiwa#roadmap',
@@ -508,11 +508,23 @@ export default defineConfig({
             { text: '134 — observability v2.1 incident-orchestrator (5 state SSOT + 8 event SSOT + detecting/triaging/escalating/mitigating/resolved walkthrough)', link: '/tutorials/134-observability-incident-orchestrator' },
           ],
         },
+        {
+          text: 'Composition patterns (v2.8、 SaaS + backend + mobile + DevX + infra 26 lib composition)',
+          items: [
+            { text: '200 — Email transactional flow (Resend + template + webhook signature verify)', link: '/tutorials/200-email-transactional' },
+            { text: '201 — Crypto pipeline (JWT RS256 + RSA + AES-GCM + hash + HMAC + X.509)', link: '/tutorials/201-crypto-jwt-flow' },
+            { text: '202 — Vector RAG pipeline (Pinecone upsert + top-k + metadata filter + LLM context)', link: '/tutorials/202-vector-rag-pipeline' },
+            { text: '203 — GraphQL server + typed client + subscription (Apollo)', link: '/tutorials/203-graphql-server-client' },
+            { text: '204 — macOS native app (SwiftUI + AppKit + accessibility + notification)', link: '/tutorials/204-macos-app-a11y' },
+          ],
+        },
       ],
       '/concepts/': [
         {
           text: 'Concepts',
           items: [
+            { text: 'Multi-provider mock pattern (統一 interface で複数 provider を mock する)', link: '/concepts/multi-provider-mock' },
+            { text: 'Lib composition pattern (26 lib を組合わせて real app test を書く)', link: '/concepts/lib-composition' },
             { text: 'AI-LLM testing (non-determinism SSOT)', link: '/concepts/ai-llm-testing' },
             { text: 'AI-LLM multimodal testing (image + audio + MCP + agent SSOT)', link: '/concepts/ai-llm-multimodal-testing' },
             { text: 'Realtime testing (time-axis mock SSOT)', link: '/concepts/realtime-testing' },
@@ -667,9 +679,66 @@ export default defineConfig({
           text: 'API Reference',
           items: [
             { text: 'Overview', link: '/api/' },
+            { text: 'Test taxonomy guide', link: '/api/test-taxonomy-guide' },
             { text: 'TypeScript (typedoc)', link: '/api/typescript/' },
             { text: 'Rust (cargo doc)', link: '/api/rust/kiwa/' },
             { text: 'Solidity (forge doc)', link: '/api/solidity/dogfood-foundry-dapp/' },
+          ],
+        },
+        {
+          text: 'SaaS (10)',
+          items: [
+            { text: 'email', link: '/api/email' },
+            { text: 'webhook', link: '/api/webhook' },
+            { text: 'feature-flag', link: '/api/feature-flag' },
+            { text: 'upload', link: '/api/upload' },
+            { text: 'notification', link: '/api/notification' },
+            { text: 'vector', link: '/api/vector' },
+            { text: 'graphql', link: '/api/graphql' },
+            { text: 'trpc', link: '/api/trpc' },
+            { text: 'i18n', link: '/api/i18n' },
+            { text: 'workflow', link: '/api/workflow' },
+          ],
+        },
+        {
+          text: 'Backend languages (4)',
+          items: [
+            { text: 'python', link: '/api/python' },
+            { text: 'ruby', link: '/api/ruby' },
+            { text: 'rust-lib', link: '/api/rust-lib' },
+            { text: 'go-lib', link: '/api/go-lib' },
+          ],
+        },
+        {
+          text: 'Mobile (2)',
+          items: [
+            { text: 'react-native', link: '/api/react-native' },
+            { text: 'expo', link: '/api/expo' },
+          ],
+        },
+        {
+          text: 'Platform (1)',
+          items: [
+            { text: 'macos-app', link: '/api/macos-app' },
+          ],
+        },
+        {
+          text: 'DevX (5)',
+          items: [
+            { text: 'form', link: '/api/form' },
+            { text: 'state', link: '/api/state' },
+            { text: 'query', link: '/api/query' },
+            { text: 'date', link: '/api/date' },
+            { text: 'chart', link: '/api/chart' },
+          ],
+        },
+        {
+          text: 'Infra (4)',
+          items: [
+            { text: 'crypto', link: '/api/crypto' },
+            { text: 'migration', link: '/api/migration' },
+            { text: 'websocket', link: '/api/websocket' },
+            { text: 'grpc', link: '/api/grpc' },
           ],
         },
       ],
