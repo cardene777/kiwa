@@ -174,3 +174,16 @@ Production code stays thin around the ORM client; tests inject a fresh `setupOrm
 - Skill: `/kiwa-orm` — generate Vitest tests from a Layer 1 spec.
 - Layer 1: `/kiwa-design --layer orm-query`.
 - Tracking Issues: [#527](https://github.com/cardene777/kiwa/issues/527) (v1.2 ORM milestone) / [#563](https://github.com/cardene777/kiwa/issues/563) (v1.3 ORM follow-up — Prisma + MySQL / Kysely Migrator).
+
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/services/orm/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/services/orm/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/services/orm/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/services/orm/reference)
+
+編集元は [docs/libraries/services/orm](../../docs/libraries/services/orm/) です。
+<!-- kiwa-docs:end -->

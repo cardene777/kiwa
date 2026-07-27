@@ -386,6 +386,19 @@ pnpm test:package                                # build, pack, install, and use
 `test:package` is what `prepublishOnly` runs, so a package that a consumer cannot
 install, import from CommonJS, or typecheck against does not get published.
 
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/foundation/lean/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/foundation/lean/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/foundation/lean/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/foundation/lean/reference)
+
+編集元は [docs/libraries/foundation/lean](../../docs/libraries/foundation/lean/) です。
+<!-- kiwa-docs:end -->
+
 ## License
 
 UNLICENSED. Part of [kiwa](https://github.com/cardene777/kiwa).

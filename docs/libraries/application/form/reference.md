@@ -1,0 +1,383 @@
+# @kiwa-lab/form リファレンス
+
+## client と field
+
+`createFormClient(options)` は `provider`、`defaultValues`、`now`、`idSeed` を受け取ります。provider の既定値は `react-hook-form` です。`registerField` は rule と default value を登録し、既に同名の値があれば default value で上書きしません。
+
+client の `setValue`、`getValues`、`getSchema`、`getLastErrors`、`listSubmitted`、`clear` は in-memory の状態を扱います。`getFieldError(client, field)` は error がなければ `undefined` ではなく `null` を返します。
+
+## validation
+
+`validateSchema(schema, values, provider)` は `ValidateResult` を返します。field rule は次を組み合わせられます。
+
+| rule | 対象 | error code |
+| --- | --- | --- |
+| `required` | `undefined` `null` 空文字 | `required` |
+| `min` | string の長さまたは number | `min` |
+| `max` | string の長さまたは number | `max` |
+| `pattern` | string | `pattern` |
+| `custom` | 任意の値 | `custom` |
+
+`custom` は error message または `null` を返します。未登録 field、value が undefined または null の required ではない field は、min、max、pattern の検証を通過します。
+
+## submit
+
+`client.submit({ onSubmit, onError })` は validation 後に `SubmitResult` を返します。失敗時は `onError` を呼び、成功時だけ `onSubmit` を await します。どちらの結果も `listSubmitted` へ記録されます。
+
+`submitForm(client, options)` は `overrideValues` をセットしてから `client.submit` を呼ぶ convenience API です。
+
+## 拡張 API
+
+`validateAsync` は validator を並列または直列に実行します。`createFieldArray` は array mutation、`validateDependentFields` は条件付き field validation を扱います。
+
+`retryWithBackoff`、`withTimeout`、`createObservabilityHook` は Promise の失敗制御と観測を扱う汎用 helper です。これらの state はテストごとに作ってください。
+
+<!-- kiwa-public-api:start -->
+## API 契約
+
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/form/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+
+### 値
+
+#### `createFieldArray`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L53) `packages/form/src/extensions.ts`
+
+field array — React Hook Form useFieldArray 相当
+
+```ts
+export function createFieldArray<T>(initial: T[] = []): FieldArray<T>;
+```
+
+#### `createFormClient`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L51) `packages/form/src/client.ts`
+
+form client は provider 別 (RHF/Zod/Formik/Conform) の validate + submit 挙動を統一 interface で叩く。 provider 差は id prefix と将来的な error message format のみで、 実 provider の SDK を差し替えても signature 一致で書ける想定。
+
+```ts
+export function createFormClient(options: CreateFormClientOptions = {}): FormClient;
+```
+
+#### `createObservabilityHook`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L124) `packages/form/src/extensions.ts`
+
+```ts
+export function createObservabilityHook(): ObservabilityHook;
+```
+
+#### `getFieldError`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/fields.ts#L16) `packages/form/src/fields.ts`
+
+getFieldError = 直近 submit の field-level error を取得。 UI 側 field error 表示 (RHF formState.errors / Formik touched+errors) を再現する経路。
+
+```ts
+export function getFieldError(client: FormClient, field: string): FieldError | null;
+```
+
+#### `registerField`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/fields.ts#L8) `packages/form/src/fields.ts`
+
+registerField = provider 別 field register API (RHF register / Formik useField 相当) を client に集約。 rule (required / min / max / pattern / custom) を同時に登録する経路。
+
+```ts
+export function registerField(client: FormClient, reg: FieldRegistration): void;
+```
+
+#### `retryWithBackoff`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L100) `packages/form/src/extensions.ts`
+
+```ts
+export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<RetryResult<T>>;
+```
+
+#### `submitForm`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/submitter.ts#L14) `packages/form/src/submitter.ts`
+
+client を受け取り、 optional な value override を setValue で反映してから submit を叩く convenience wrapper。 form submit workflow (form event → validate → onSubmit) の 1 shot 経路を shorten する。
+
+```ts
+export async function submitForm(client: FormClient, opts: SubmitFlowOptions): Promise<SubmitResult>;
+```
+
+#### `validateAsync`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L21) `packages/form/src/extensions.ts`
+
+async validation — server 側 uniqueness chk 相当
+
+```ts
+export async function validateAsync(
+  values: Record<string, unknown>,
+  validators: Record<string, AsyncValidator>,
+  options: AsyncValidationOptions = {},
+): Promise<AsyncValidationResult>;
+```
+
+#### `validateDependentFields`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L84) `packages/form/src/extensions.ts`
+
+dependent field validation — 「country=US なら zipCode 必須」 相当
+
+```ts
+export function validateDependentFields(values: Record<string, unknown>, rules: DependentFieldRule[]): DependentFieldResult;
+```
+
+#### `validateSchema`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L34) `packages/form/src/validator.ts`
+
+provider 別 validate 挙動を統一 result で返す。 実 provider (Zod safeParse / Yup validate / RHF resolver / Conform parseWithZod) に差し替えても signature は変わらない想定。
+
+```ts
+export function validateSchema(
+  schema: SchemaLike,
+  values: Record<string, unknown>,
+  provider: FormProvider = 'react-hook-form',
+): ValidateResult;
+```
+
+#### `withTimeout`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L129) `packages/form/src/extensions.ts`
+
+```ts
+export async function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T>;
+```
+
+### 型
+
+#### `AsyncValidationOptions`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L7) `packages/form/src/extensions.ts`
+
+v2.1 extensions — async validation, field array, dependent field validation, plus retry/batch/observability/timeout/rateLimit/circuitBreaker generics. React Hook Form v7.60+ / Zod v4 追随。
+
+```ts
+export interface AsyncValidationOptions {
+  debounceMs?: number;
+  parallel?: boolean;
+}
+```
+
+#### `AsyncValidationResult`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L12) `packages/form/src/extensions.ts`
+
+```ts
+export interface AsyncValidationResult {
+  valid: boolean;
+  errors: Record<string, string>;
+  durationMs: number;
+}
+```
+
+#### `AsyncValidator`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L18) `packages/form/src/extensions.ts`
+
+```ts
+export type AsyncValidator = (value: unknown, field: string) => Promise<string | null>;
+```
+
+#### `DependentFieldResult`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L77) `packages/form/src/extensions.ts`
+
+```ts
+export interface DependentFieldResult {
+  valid: boolean;
+  triggered: string[];
+  errors: Record<string, string>;
+}
+```
+
+#### `DependentFieldRule`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L70) `packages/form/src/extensions.ts`
+
+```ts
+export interface DependentFieldRule {
+  field: string;
+  dependsOn: string;
+  when: (dependsValue: unknown) => boolean;
+  validator: (value: unknown) => string | null;
+}
+```
+
+#### `FieldArray`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L42) `packages/form/src/extensions.ts`
+
+```ts
+export interface FieldArray<T> {
+  items: () => T[];
+  append: (item: T) => void;
+  remove: (index: number) => void;
+  move: (from: number, to: number) => void;
+  update: (index: number, item: T) => void;
+  clear: () => void;
+  length: () => number;
+}
+```
+
+#### `FieldError`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L3) `packages/form/src/validator.ts`
+
+```ts
+export interface FieldError {
+  field: string;
+  message: string;
+  code?: string;
+}
+```
+
+#### `FieldRegistration`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L5) `packages/form/src/client.ts`
+
+```ts
+export interface FieldRegistration {
+  name: string;
+  defaultValue?: unknown;
+  rule?: SchemaLike['fields'][string];
+}
+```
+
+#### `FormClient`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L27) `packages/form/src/client.ts`
+
+```ts
+export interface FormClient {
+  provider: FormProvider;
+  registerField: (reg: FieldRegistration) => void;
+  setValue: (name: string, value: unknown) => void;
+  getValues: () => Record<string, unknown>;
+  getSchema: () => SchemaLike;
+  submit: (opts: SubmitOptions) => Promise<SubmitResult>;
+  getLastErrors: () => FieldError[];
+  listSubmitted: () => SubmittedRecord[];
+  clear: () => void;
+}
+```
+
+#### `FormProvider`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L3) `packages/form/src/client.ts`
+
+```ts
+export type FormProvider = 'react-hook-form' | 'zod' | 'formik' | 'conform';
+```
+
+#### `ObservabilityHook`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L118) `packages/form/src/extensions.ts`
+
+```ts
+export interface ObservabilityHook {
+  emit: (event: { kind: string; data: Record<string, unknown> }) => void;
+  events: () => Array<{ kind: string; data: Record<string, unknown> }>;
+  clear: () => void;
+}
+```
+
+#### `RetryOptions`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L97) `packages/form/src/extensions.ts`
+
+```ts
+export interface RetryOptions { maxAttempts?: number; initialDelayMs?: number; backoffFactor?: number; }
+```
+
+#### `RetryResult`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L98) `packages/form/src/extensions.ts`
+
+```ts
+export interface RetryResult<T> { ok: boolean; attempts: number; value?: T; error?: unknown; }
+```
+
+#### `SchemaLike`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L20) `packages/form/src/validator.ts`
+
+SchemaLike = 4 provider の schema 表現を統一。 各 field に validate rule (required / min / max / pattern / customFn) を declaratively 持たせる。 実 provider (Zod object / yup object / RHF resolver) を差し替えても shape は変わらない想定。
+
+```ts
+export interface SchemaLike {
+  fields: Record<string, {
+    required?: boolean;
+    min?: number;
+    max?: number;
+    pattern?: RegExp;
+    custom?: (value: unknown) => string | null;
+  }>;
+}
+```
+
+#### `SubmitFlowOptions`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/submitter.ts#L3) `packages/form/src/submitter.ts`
+
+```ts
+export interface SubmitFlowOptions {
+  overrideValues?: Record<string, unknown>;
+  onSubmit: (values: Record<string, unknown>) => void | Promise<void>;
+  onError?: (errors: Array<{ field: string; message: string; code?: string }>) => void;
+}
+```
+
+#### `SubmitOptions`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L11) `packages/form/src/client.ts`
+
+```ts
+export interface SubmitOptions {
+  onSubmit: (values: Record<string, unknown>) => void | Promise<void>;
+  onError?: (errors: FieldError[]) => void;
+}
+```
+
+#### `SubmitResult`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L16) `packages/form/src/client.ts`
+
+```ts
+export interface SubmitResult {
+  ok: boolean;
+  id: string;
+  provider: FormProvider;
+  values: Record<string, unknown>;
+  errors: FieldError[];
+  submittedAt: number;
+}
+```
+
+#### `SubmittedRecord`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L25) `packages/form/src/client.ts`
+
+```ts
+export interface SubmittedRecord extends SubmitResult {}
+```
+
+#### `ValidateResult`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L9) `packages/form/src/validator.ts`
+
+```ts
+export interface ValidateResult {
+  ok: boolean;
+  errors: FieldError[];
+  values: Record<string, unknown>;
+}
+```
+<!-- kiwa-public-api:end -->

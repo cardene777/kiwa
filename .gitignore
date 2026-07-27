@@ -1,6 +1,8 @@
 node_modules/
 .pnpm-store/
 dist/
+docs/.vitepress/.temp/
+docs/.vitepress/cache/
 .vitest-dist/
 playwright-report/
 test-results/
@@ -64,6 +66,10 @@ Desktop.ini
 *.bak
 *.tmp
 .tmp/
+
+# tsup が config を bundle する際に生成する一時 file。 実行ごとに別名 (ランダム
+# suffix) で残り、 中身は tsup.config.ts の transpile 結果でしかない。
+tsup.config.bundled_*.mjs
 
 # Stryker mutation report
 mutation-report/

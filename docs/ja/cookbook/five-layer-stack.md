@@ -28,25 +28,6 @@ contract 単体機能 (例 ERC-721 mint で metadata URL 固定) には 5 layer 
 
 Layer 1 spec は依然として単一 SSOT。 `/kiwa-design --layer all` (or 各 `--layer contract` / `--layer e2e` / `--layer unit` / `--layer integration` を順に) で `tests/spec/{layer}/test-spec-{module}.md` 配下に spec を書き、 各 Layer 2 skill がそれを読む。
 
-```mermaid
-graph LR
-    A[Feature] --> B[/kiwa-design]
-    B --> C1[contract spec]
-    B --> C2[e2e spec]
-    B --> C3[unit spec]
-    B --> C4[integration spec]
-    C1 --> D1[/kiwa-forge]
-    C1 --> D2[/kiwa-hardhat]
-    C3 --> D3[/kiwa-vitest]
-    C4 --> D4[/kiwa-api]
-    C2 --> D5[/kiwa-play]
-    D1 --> E1[forge test]
-    D2 --> E2[hardhat test]
-    D3 --> E3[vitest run]
-    D4 --> E4[vitest run integration]
-    D5 --> E5[playwright test]
-```
-
 ## 既存 example に 5 layer 目を追加するには
 
 3 layer 並立済の example (mint-nft / defi-swap / nextjs-token-gating) を起点に、 不足する unit + integration layer を以下順で追加。

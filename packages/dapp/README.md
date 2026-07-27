@@ -173,6 +173,19 @@ From tests, you can drive them with `dappE2e.triggerEvent()` or use higher-level
 
 [cardene](https://github.com/cardene777) — [GitHub](https://github.com/cardene777) / [X](https://x.com/cardene777)
 
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/foundation/dapp/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/foundation/dapp/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/foundation/dapp/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/foundation/dapp/reference)
+
+編集元は [docs/libraries/foundation/dapp](../../docs/libraries/foundation/dapp/) です。
+<!-- kiwa-docs:end -->
+
 ## License
 
 MIT

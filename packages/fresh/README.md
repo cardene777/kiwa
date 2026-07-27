@@ -151,3 +151,16 @@ Brand symbols: `FRESH_REDIRECT_SYMBOL` / `FRESH_NOT_FOUND_SYMBOL` / `FRESH_ROUTE
 - `simulateInteraction` doesn't bubble events; it invokes each collected handler once with a synthetic event object.
 
 Companion: v1.19-1b of the [kiwa test framework](https://github.com/cardene777/kiwa) — released alongside `@kiwa-lab/solidjs` (#813) + `@kiwa-lab/hono` (v1.19-1c) as part of the v1.19 modern framework depth-drive.
+
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/frameworks/fresh/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/frameworks/fresh/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/frameworks/fresh/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/frameworks/fresh/reference)
+
+編集元は [docs/libraries/frameworks/fresh](../../docs/libraries/frameworks/fresh/) です。
+<!-- kiwa-docs:end -->

@@ -14,17 +14,14 @@ Test design is split into 3 layers:
 | **2. Test-runner specialization** | `/kiwa-forge`, `/kiwa-hardhat`, `/kiwa-play` (refactor) | Convert Layer 1 output into actual `*.t.sol` / `*.test.ts` / `*.spec.ts` files |
 | **3. Documentation** | docs cookbook + skill reference | Show how to chain the layers for a complete dApp test pyramid |
 
-A single user-facing skill invocation walks the full 5-step flow:
+A single user-facing skill invocation walks the full flow:
 
-```mermaid
-flowchart LR
-  A[Skill invocation] --> B[Organize input]
-  B --> C[Identify quality risks]
-  C --> D[Select test viewpoints]
-  D --> E[Generate test cases]
-  E --> F[Prioritize]
-  F --> G[Decide automation strategy]
-```
+1. Organize the input
+2. Identify quality risks
+3. Select test viewpoints
+4. Generate test cases
+5. Prioritize them
+6. Decide the automation strategy
 
 ---
 

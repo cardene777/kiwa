@@ -57,6 +57,19 @@ describe('auth pipeline', () => {
 
 vitest + `/kiwa-crypto` skill で auth / session / webhook signature の暗号処理を deterministic に verify。
 
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/services/crypto/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/services/crypto/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/services/crypto/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/services/crypto/reference)
+
+編集元は [docs/libraries/services/crypto](../../docs/libraries/services/crypto/) です。
+<!-- kiwa-docs:end -->
+
 ## License
 
 UNLICENSED — see [github.com/cardene777/kiwa](https://github.com/cardene777/kiwa).

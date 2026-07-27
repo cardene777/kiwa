@@ -151,3 +151,16 @@ for (const [name, render] of Object.entries(componentFixtures)) {
 
 - `@kiwa-lab/quality-metrics` — 11-axis release gate that this harness will feed component test results into (Chromatic `status=failed` and a11y violations map to axes).
 - `@kiwa-lab/e2e` — Playwright browser-driven end-to-end tests. Complement, not replacement — CT covers component surface, e2e covers page flows.
+
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/foundation/component/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/foundation/component/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/foundation/component/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/foundation/component/reference)
+
+編集元は [docs/libraries/foundation/component](../../docs/libraries/foundation/component/) です。
+<!-- kiwa-docs:end -->

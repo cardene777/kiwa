@@ -142,3 +142,16 @@ Brand symbols: `SIGNAL_SYMBOL` / `EFFECT_SYMBOL` / `RESOURCE_SYMBOL` / `SOLID_EL
 - `renderWithSuspense` follows a deterministic 2-phase model (fallback first, then resolved / timedOut). Real Solid can pause mid-render; that's out of scope here.
 
 Companion: v1.19-1a of the [kiwa test framework](https://github.com/cardene777/kiwa) — released alongside `@kiwa-lab/fresh` (#814) + `@kiwa-lab/hono` (v1.19-1c) as part of the v1.19 modern framework depth-drive.
+
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/frameworks/solidjs/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/frameworks/solidjs/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/frameworks/solidjs/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/frameworks/solidjs/reference)
+
+編集元は [docs/libraries/frameworks/solidjs](../../docs/libraries/frameworks/solidjs/) です。
+<!-- kiwa-docs:end -->

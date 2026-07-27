@@ -14,38 +14,31 @@ kiwa offers anvil launch / EIP-1193 injection / Playwright fixture wiring in one
 
 ## How
 
-```mermaid
-graph TB
-    A[playwright test starts] --> B[globalSetup or pretest]
-    B --> C[startAnvil launches anvil]
-    C --> D[deploy contracts and write .env.local]
-    D --> E[Playwright fixture initializes]
-    E --> F[dappE2eTest injects the provider script into page]
-    F --> G[window.ethereum is exposed via EIP-1193 / EIP-6963]
-    G --> H[user test code runs]
-    H --> I[connect / sign / sendTx via dappE2e helpers]
-```
+From test startup to the point where helpers are usable, the steps run in this order.
+
+1. The Playwright test starts
+2. `globalSetup` or `pretest` runs
+3. `startAnvil` launches anvil
+4. Contracts are deployed and `.env.local` is written
+5. The Playwright fixture initializes
+6. `dappE2eTest` injects the provider script into the page
+7. `window.ethereum` is exposed via EIP-1193 and EIP-6963
+8. Your test code runs
+9. connect / sign / sendTx are issued through `dappE2e` helpers
 
 ## Account-switch event order
 
 `setActiveAccount()` updates internal state before forwarding `accountsChanged` into the page,
 so wagmi `useAccount()` observes the flow as "state update -> event delivery -> re-render".
 
-```mermaid
-sequenceDiagram
-    participant T as test
-    participant F as fixture
-    participant API as DappE2eApi
-    participant W as window.ethereum (inject)
-    participant App as React app (wagmi useAccount)
+Calling `setActiveAccount(1)` breaks down as follows.
 
-    T->>API: setActiveAccount(1)
-    API->>F: rpcContext.activeIndex.current = 1
-    API->>W: emitPageEvent('accountsChanged', [newAddress])
-    W->>App: window.ethereum.emit('accountsChanged', [newAddress])
-    App->>App: wagmi internal: useAccount update -> re-render
-    F-->>T: accountsChanged event emitted
-```
+1. The test calls `setActiveAccount(1)` on `DappE2eApi`
+2. `DappE2eApi` sets the fixture's `rpcContext.activeIndex.current` to `1`
+3. `DappE2eApi` emits `emitPageEvent('accountsChanged', [newAddress])`
+4. The injected `window.ethereum` re-emits the same event inside the page
+5. wagmi updates `useAccount()` and React re-renders
+6. The fixture reports back to the test that `accountsChanged` was emitted
 
 ## Example
 

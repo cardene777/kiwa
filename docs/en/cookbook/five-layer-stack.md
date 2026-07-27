@@ -28,25 +28,6 @@ Concrete examples — `mint-nft` with a fee-calculation hook and an `/api/mint` 
 
 The Layer 1 spec is still the single source of truth. `/kiwa-design --layer all` (or each `--layer contract` / `--layer e2e` / `--layer unit` / `--layer integration` in sequence) writes a spec under `tests/spec/{layer}/test-spec-{module}.md` and every Layer 2 skill reads it.
 
-```mermaid
-graph LR
-    A[Feature] --> B[/kiwa-design]
-    B --> C1[contract spec]
-    B --> C2[e2e spec]
-    B --> C3[unit spec]
-    B --> C4[integration spec]
-    C1 --> D1[/kiwa-forge]
-    C1 --> D2[/kiwa-hardhat]
-    C3 --> D3[/kiwa-vitest]
-    C4 --> D4[/kiwa-api]
-    C2 --> D5[/kiwa-play]
-    D1 --> E1[forge test]
-    D2 --> E2[hardhat test]
-    D3 --> E3[vitest run]
-    D4 --> E4[vitest run integration]
-    D5 --> E5[playwright test]
-```
-
 ## How to add a fifth layer to an existing example
 
 Pick an example that already has the three-layer stack (mint-nft / defi-swap / nextjs-token-gating). Add the missing unit + integration layers in the following order.

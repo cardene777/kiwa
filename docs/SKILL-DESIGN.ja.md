@@ -14,17 +14,14 @@ kiwa が **テスト設計を自動化・標準化する Claude Code skill** を
 | **2. テストランナー特化** | `/kiwa-forge` / `/kiwa-hardhat` / `/kiwa-play` (refactor) | Layer 1 の出力を実 `*.t.sol` / `*.test.ts` / `*.spec.ts` に変換 |
 | **3. ドキュメント** | docs cookbook + skill reference | layer 連携で完全な dApp test pyramid を実現する手順を示す |
 
-1 回の skill 起動で 5 段階フローを完走:
+1 回の skill 起動で以下のフローを完走:
 
-```mermaid
-flowchart LR
-  A[Skill 起動] --> B[入力を整理]
-  B --> C[品質リスクを洗い出す]
-  C --> D[テスト観点を選ぶ]
-  D --> E[テストケースを作る]
-  E --> F[優先度を付ける]
-  F --> G[自動化方針を決める]
-```
+1. 入力を整理する
+2. 品質リスクを洗い出す
+3. テスト観点を選ぶ
+4. テストケースを生成する
+5. 優先度を付ける
+6. 自動化方針を決める
 
 ---
 
