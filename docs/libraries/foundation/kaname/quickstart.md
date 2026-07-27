@@ -73,7 +73,7 @@ pnpm exec vitest run tests/kaname.spec.test.ts
 /reload-plugins
 ```
 
-[skills guide](/kiwa/guides/skills) の手順で plugin を導入すると、plugin 経由では `/kiwa:kaname` と実行します。skill は受け入れ条件を対話で集め、formal、runtime、human に分けた文書を作ります。package API を使う test の代わりではありません。
+[skills guide](/guides/skills) の手順で plugin を導入すると、plugin 経由では `/kiwa:kaname` と実行します。skill は受け入れ条件を対話で集め、formal、runtime、human に分けた文書を作ります。package API を使う test の代わりではありません。
 
 ```text
 /kiwa:kaname --feature signup

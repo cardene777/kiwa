@@ -26,7 +26,7 @@ Overview は、対象にする処理を入力から結果までの文章で説�
 
 Quickstart のコードは保存する file 名、実行する command、成功時に確認できる出力または assertion までを一続きで示します。利用者が補完できない前提や暗黙の setup を残しません。How-to のコードは、ページ内の import と cleanup を含む一つの保存可能な file として提示します。断片を積み上げて利用者に結合させません。How-to は代表 test または再現用 file の実行 command を添え、失敗した場合にどの条件を見直すかを説明します。外部 provider、browser、queue、database などを使う場合は、mock で確認できる範囲と実環境で確認する範囲を分けます。
 
-専用 skill があるライブラリは Quickstart から [skills guide](/kiwa/guides/skills) へ導き、起動 command、生成物を確認する手順、生成後に実行する test command を具体的に記載します。専用 skill がないライブラリに、存在しない自動化手順を作りません。
+専用 skill があるライブラリは Quickstart から [skills guide](/guides/skills) へ導き、起動 command、生成物を確認する手順、生成後に実行する test command を具体的に記載します。専用 skill がないライブラリに、存在しない自動化手順を作りません。
 
 コード例は公開 entry point と代表 test で確認してから載せます。未実装の provider 挙動、推測した既定値、見た目だけのサンプルを書きません。API 宣言を同期する生成物は調査の入口であり、利用ガイドの代わりにはなりません。
 

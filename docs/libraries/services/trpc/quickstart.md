@@ -49,7 +49,7 @@ middleware と `TRPCError` は [使い方](./how-to) を確認してください
 /reload-plugins
 ```
 
-[skills guide](/kiwa/guides/skills) を確認してから、Quickstart の package 導入も済ませて実行します。skill は library の挙動を実行時に置き換えるものではなく、ここで確認したい境界を test の形にする入口です。
+[skills guide](/guides/skills) を確認してから、Quickstart の package 導入も済ませて実行します。skill は library の挙動を実行時に置き換えるものではなく、ここで確認したい境界を test の形にする入口です。
 
 次の例では、対象を表す名前と生成先を固定します。
 

@@ -1,8 +1,10 @@
 node_modules/
 .pnpm-store/
 dist/
-docs/.vitepress/.temp/
-docs/.vitepress/cache/
+# VitePress のビルド一時産物。実行時の作業ディレクトリによって docs/ 配下にも
+# repo root にも出るため、階層を固定しない。
+**/.vitepress/.temp/
+**/.vitepress/cache/
 .vitest-dist/
 playwright-report/
 test-results/

@@ -53,7 +53,7 @@ pnpm exec vitest run tests/queue-delivery.test.ts
 
 ## skill から仕様ベースの test を作る
 
-Claude Code を使う場合は、[skills guide](/kiwa/guides/skills) の導入後に data layer の specification から test の下書きを生成できます。
+Claude Code を使う場合は、[skills guide](/guides/skills) の導入後に data layer の specification から test の下書きを生成できます。
 
 初回は plugin を導入して再読込します。
 

@@ -65,7 +65,7 @@ pnpm exec playwright test tests/wallet.spec.ts
 
 ## skill から test の下書きを作る
 
-Claude Code を使う場合は、[skills guide](/kiwa/guides/skills) の plugin 導入後に `kiwa-play` が Playwright test の下書きを生成できます。仕様から設計して生成する場合は、対象画面の期待結果を先に渡します。
+Claude Code を使う場合は、[skills guide](/guides/skills) の plugin 導入後に `kiwa-play` が Playwright test の下書きを生成できます。仕様から設計して生成する場合は、対象画面の期待結果を先に渡します。
 
 ```text
 /plugin marketplace add cardene777/kiwa
