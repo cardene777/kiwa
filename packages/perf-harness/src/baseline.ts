@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { hostname, arch, platform as osPlatform, cpus } from 'node:os';
 import { dirname } from 'node:path';
 import type {
@@ -23,6 +24,10 @@ export async function loadBaseline(path: string): Promise<BaselineLoadResult | n
   }
   const parsed = JSON.parse(body) as unknown;
   const envelope = normalizeToEnvelope(parsed);
+  // baseline として解釈できない中身は「無い」ものとして返す。空の results を
+  // 返すと呼び出し側が「baseline はある」と判断して seed し直さず、回帰判定が
+  // 永久に n/a のまま修復されない。
+  if (envelope === null) return null;
   const envMismatch = diffEnv(envelope.env, captureEnv());
   return { envelope, envMismatch };
 }
@@ -50,7 +55,17 @@ export async function saveBaselineEnvelope(
   envelope: BaselineEnvelope,
 ): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, `${JSON.stringify(envelope, null, 2)}\n`, 'utf8');
+  // 直接書くと truncate 後の空ファイルを別 worker が読み、JSON.parse が
+  // "Unexpected end of JSON input" で落ちる。同一 directory の一時 file へ
+  // 書いてから rename して、読み手からは切り替わりが原子的に見えるようにする。
+  const tempPath = `${path}.${process.pid}.${randomUUID()}.tmp`;
+  try {
+    await writeFile(tempPath, `${JSON.stringify(envelope, null, 2)}\n`, 'utf8');
+    await rename(tempPath, path);
+  } catch (error) {
+    await rm(tempPath, { force: true });
+    throw error;
+  }
 }
 
 export function defaultBaselinePath(moduleName: string): string {
@@ -106,33 +121,94 @@ function diffEnv(baseline: BaselineEnv, current: BaselineEnv): BaselineLoadResul
   return mismatch;
 }
 
+const MEASURE_NUMERIC_FIELDS = [
+  'iterations',
+  'warmup',
+  'p50',
+  'p95',
+  'p99',
+] as const satisfies readonly (keyof MeasureResult)[];
+
 /**
- * legacy schema (単一 MeasureResult を直接保存) を envelope に upgrade する。
- * schema field 不在なら legacy と判定、 env は unknown で埋める。
+ * 統計値まで検査する。name と samples だけを見ると、たまたま同名の field を
+ * 持つ別物や配列の要素を result と誤認し、回帰計算が NaN や誤った stable へ
+ * 落ちる。
  */
-function normalizeToEnvelope(parsed: unknown): BaselineEnvelope {
+function isMeasureResult(value: unknown): value is MeasureResult {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  if (typeof candidate.name !== 'string') return false;
+  if (!Array.isArray(candidate.samples)) return false;
+  if (!candidate.samples.every((sample) => typeof sample === 'number' && Number.isFinite(sample))) {
+    return false;
+  }
+  return MEASURE_NUMERIC_FIELDS.every(
+    (field) => typeof candidate[field] === 'number' && Number.isFinite(candidate[field]),
+  );
+}
+
+function isBaselineEnv(value: unknown): value is BaselineEnv {
+  if (value === null || typeof value !== 'object') return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.nodeVersion === 'string' &&
+    typeof candidate.platform === 'string' &&
+    typeof candidate.hostname === 'string' &&
+    typeof candidate.cpuModel === 'string' &&
+    typeof candidate.cpuCount === 'number' &&
+    typeof candidate.gitSha === 'string' &&
+    typeof candidate.savedAt === 'string'
+  );
+}
+
+function isResultMap(value: unknown): value is Record<string, MeasureResult> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
+  const entries = Object.entries(value as Record<string, unknown>);
+  return entries.length > 0 && entries.every(([, entry]) => isMeasureResult(entry));
+}
+
+const UNKNOWN_ENV: BaselineEnv = {
+  nodeVersion: 'unknown',
+  platform: 'unknown',
+  hostname: 'unknown',
+  cpuModel: 'unknown',
+  cpuCount: 0,
+  gitSha: 'unknown',
+  savedAt: 'unknown',
+};
+
+/**
+ * envelope 化される前の baseline を現行 schema へ upgrade する。
+ *
+ * legacy には 2 形式がある。単一 MeasureResult を直接保存したものと、
+ * three-layer が op 名をキーにして複数 result を並べたものである。
+ * 後者を単一 result として畳むと op を引けなくなり、baseline が実在するのに
+ * 回帰判定が毎回 seed 扱いへ落ちる。形式を判別してから展開する。
+ */
+function normalizeToEnvelope(parsed: unknown): BaselineEnvelope | null {
   if (
     parsed !== null &&
     typeof parsed === 'object' &&
-    'schema' in parsed &&
-    (parsed as { schema: unknown }).schema === 1
+    !Array.isArray(parsed) &&
+    (parsed as { schema?: unknown }).schema === 1
   ) {
+    const candidate = parsed as { env?: unknown; results?: unknown };
+    // schema field だけを信じると、env 欠落で diffEnv が例外を投げる。
+    if (!isBaselineEnv(candidate.env) || !isResultMap(candidate.results)) return null;
     return parsed as BaselineEnvelope;
   }
-  const legacy = parsed as MeasureResult;
-  return {
-    schema: 1,
-    env: {
-      nodeVersion: 'unknown',
-      platform: 'unknown',
-      hostname: 'unknown',
-      cpuModel: 'unknown',
-      cpuCount: 0,
-      gitSha: 'unknown',
-      savedAt: 'unknown',
-    },
-    results: { [legacy.name ?? 'legacy']: legacy },
-  };
+
+  if (isMeasureResult(parsed)) {
+    return { schema: 1, env: UNKNOWN_ENV, results: { [parsed.name]: parsed } };
+  }
+
+  if (isResultMap(parsed)) {
+    return { schema: 1, env: UNKNOWN_ENV, results: parsed };
+  }
+
+  // baseline として解釈できない中身は、無いものとして扱う。誤った比較対象を
+  // 掴むより seed し直すほうが安全である。
+  return null;
 }
 
 function isMissingFile(error: unknown): error is NodeJS.ErrnoException {

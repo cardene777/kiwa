@@ -124,4 +124,36 @@ describe('setupComponentEnv (mutation-kill)', () => {
     await env.stop();
     expect(markupBefore).toContain('>4<');
   });
+
+  it('keeps other envs mounted when one render throws', async () => {
+    // 失敗した render の片付けに global な cleanup を使うと、同時に生きている
+    // 別の env まで unmount される。
+    const Broken = () => {
+      throw new Error('boom');
+    };
+
+    const alive = await setupComponentEnv({ mode: 'render', ui: <Counter initial={5} /> });
+    envs.push(alive);
+    if (alive.kind !== 'render') throw new Error('expected render env');
+
+    await expect(setupComponentEnv({ mode: 'render', ui: <Broken /> })).rejects.toThrow('boom');
+
+    expect(alive.screen.getByTestId('value').textContent).toBe('5');
+  });
+
+  it('leaves no mounted container behind when rendering throws', async () => {
+    // render 中に例外が出ると env を受け取れないため、呼び出し側は stop() を
+    // 呼べない。setupComponentEnv 自身が片付けないと container が document に
+    // 残り続け、繰り返すたびにメモリを消費する。
+    const Broken = () => {
+      throw new Error('boom');
+    };
+
+    const before = document.body.childElementCount;
+    for (let i = 0; i < 3; i++) {
+      await expect(setupComponentEnv({ mode: 'render', ui: <Broken /> })).rejects.toThrow('boom');
+    }
+
+    expect(document.body.childElementCount).toBe(before);
+  });
 });

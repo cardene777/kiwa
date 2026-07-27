@@ -80,11 +80,20 @@ describe('ui app scenario perf (real workload)', () => {
           name: 'mount_error_handling (3 throw + catch during render)',
           fn: async () => {
             const Broken = () => { throw new Error('boom'); };
-            for (let i = 0; i < 3; i++) {
-              try {
-                const env = await setupComponentEnv({ mode: 'render', ui: <Broken /> });
-                await env.stop();
-              } catch { /* handled */ }
+            // React は描画失敗ごとに console.error を 3 回出す。test runner が
+            // それを転送するバッファがメモリ計測に乗ってしまい、component の
+            // 確保ではなくログ量を測ることになる。想定内の失敗の間だけ黙らせる。
+            const originalError = console.error;
+            console.error = () => undefined;
+            try {
+              for (let i = 0; i < 3; i++) {
+                try {
+                  const env = await setupComponentEnv({ mode: 'render', ui: <Broken /> });
+                  await env.stop();
+                } catch { /* handled */ }
+              }
+            } finally {
+              console.error = originalError;
             }
           },
           serialP95CapMs: 200,
