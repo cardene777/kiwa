@@ -1,9 +1,9 @@
 ---
 name: kiwa-a11y
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.a11y.md`) を accessibility test (axe-core + @kiwa/a11y) に変換する Layer 2 a11y test skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.a11y.md`) を accessibility test (axe-core + @kiwa-lab/a11y) に変換する Layer 2 a11y test skill。
   jsdom (Vitest) と Playwright page の 2 経路で axe-core を実行し、 WCAG 2.1 AA 違反を検出する。
-  `/kiwa-design --layer a11y` が出力する 9 column 表を `@kiwa/a11y` の `runAxe` / `expectNoViolations` の引数に機械的に変換する。
+  `/kiwa-design --layer a11y` が出力する 9 column 表を `@kiwa-lab/a11y` の `runAxe` / `expectNoViolations` の引数に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -23,7 +23,7 @@ axe-core を 2 経路 (Vitest + jsdom / Playwright + 実 browser) で実行し�
 ## 前提
 
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.a11y.md`) が存在 (`/kiwa-design --layer a11y` で生成)
-- 対象 example に `package.json` があり、 `@kiwa/a11y` + `axe-core` + (jsdom 経路なら) `vitest` + `@testing-library/react` / (Playwright 経路なら) `@playwright/test` が devDependencies で利用可能
+- 対象 example に `package.json` があり、 `@kiwa-lab/a11y` + `axe-core` + (jsdom 経路なら) `vitest` + `@testing-library/react` / (Playwright 経路なら) `@playwright/test` が devDependencies で利用可能
 - 対象 component (`src/components/*.tsx`) or page route (`src/app/**/page.tsx`) が存在
 - 出力先 `tests/a11y/{module}.test.tsx` (jsdom 経路) or `tests/a11y/{module}.spec.ts` (Playwright 経路) への Write 権限
 
@@ -58,7 +58,7 @@ $ARGUMENTS
 ```ts
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/react';
-import { runAxe, expectNoViolations } from '@kiwa/a11y';
+import { runAxe, expectNoViolations } from '@kiwa-lab/a11y';
 import * as axe from 'axe-core';
 import { LoginForm } from '../src/components/LoginForm.js';
 ```
@@ -67,7 +67,7 @@ import { LoginForm } from '../src/components/LoginForm.js';
 
 ```ts
 import { test, expect } from '@playwright/test';
-import { runAxe, expectNoViolations } from '@kiwa/a11y';
+import { runAxe, expectNoViolations } from '@kiwa-lab/a11y';
 ```
 
 ### Step 2: TC → test code 変換 (jsdom)
@@ -141,7 +141,7 @@ violations 発生時は `reportViolations(results)` で詳細 markdown report �
 
 ## references
 
-- `@kiwa/a11y` 公式 API ... `packages/a11y/README.md`
+- `@kiwa-lab/a11y` 公式 API ... `packages/a11y/README.md`
 - axe-core rule catalog ... https://dequeuniversity.com/rules/axe/
 - WCAG 2.1 quick reference ... https://www.w3.org/WAI/WCAG21/quickref/
 

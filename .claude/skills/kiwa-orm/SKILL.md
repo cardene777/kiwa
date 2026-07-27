@@ -1,7 +1,7 @@
 ---
 name: kiwa-orm
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.orm.md`) を ORM query test (Vitest + @kiwa/orm) に変換する Layer 2 skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.orm.md`) を ORM query test (Vitest + @kiwa-lab/orm) に変換する Layer 2 skill。
   v0.1-0.2.1 = Drizzle (SQLite mock + Postgres/MySQL testcontainers)、 v0.3 = Prisma + SQLite tempdir、 v0.4 = Kysely (SQLite mock + Postgres/MySQL testcontainers)、 v0.5 = file-based migration (drizzle-orm/migrator { folder } 形式)、 v0.6 = Prisma + testcontainers Postgres を対象に `setupOrmEnv` + `expectQuery` + `expectRowCount` を 9 column 表から機械変換する。
   v1.2 ORM milestone CAR-291 完遂版。
 user_invocable: true
@@ -21,7 +21,7 @@ ORM query layer (Drizzle / Prisma / Kysely) の test を Layer 1 spec から自�
 ## 前提
 
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.orm.md`) が存在
-- `@kiwa/orm` v0.1+ + `drizzle-orm` + `better-sqlite3` + `vitest` が devDependencies
+- `@kiwa-lab/orm` v0.1+ + `drizzle-orm` + `better-sqlite3` + `vitest` が devDependencies
 - 対象 module の Drizzle schema (`schema.ts` 等) が存在
 - 出力先 `tests/{module}.test.ts` への Write 権限
 
@@ -61,8 +61,8 @@ $ARGUMENTS
 ```ts
 import { afterEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { setupOrmEnv, expectQuery, expectRowCount } from '@kiwa/orm';
-import type { OrmTestEnv } from '@kiwa/orm';
+import { setupOrmEnv, expectQuery, expectRowCount } from '@kiwa-lab/orm';
+import type { OrmTestEnv } from '@kiwa-lab/orm';
 import { schema } from '../src/schema.js';
 
 const MIGRATION = `
@@ -124,8 +124,8 @@ migrations は `string | string[] | { folder: string }` (v0.5 で folder 追加�
 ```ts
 import { afterEach, describe, expect, it } from 'vitest';
 import { resolve } from 'node:path';
-import { setupOrmEnv } from '@kiwa/orm';
-import type { OrmTestEnvMockPrisma } from '@kiwa/orm';
+import { setupOrmEnv } from '@kiwa-lab/orm';
+import type { OrmTestEnvMockPrisma } from '@kiwa-lab/orm';
 import { PrismaClient } from '../prisma/generated/index.js';
 
 const SCHEMA_PATH = resolve(process.cwd(), 'prisma/schema.prisma');
@@ -150,8 +150,8 @@ it('{ID} {Observation}', async () => {
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { pgTable, serial, text } from 'drizzle-orm/pg-core';
-import { setupOrmEnv } from '@kiwa/orm';
-import type { OrmTestEnvLive } from '@kiwa/orm';
+import { setupOrmEnv } from '@kiwa-lab/orm';
+import type { OrmTestEnvLive } from '@kiwa-lab/orm';
 
 const users = pgTable('users', { id: serial('id').primaryKey(), email: text('email').notNull().unique() });
 const schema = { users };
@@ -179,7 +179,7 @@ it('{ID} {Observation}', async () => {
 ## 関連
 
 - 上流 ... `/kiwa-design --layer orm-query`
-- runtime fixture ... `@kiwa/orm` v0.1+ (`packages/orm/`)
+- runtime fixture ... `@kiwa-lab/orm` v0.1+ (`packages/orm/`)
 - 下流 (review) ... `/kiwa-review --layer orm-query`
 - PoC ... `examples/orm-drizzle-sqlite-poc/`
 - tracking Issue ... [#527](https://github.com/cardene777/kiwa/issues/527)

@@ -1,9 +1,9 @@
 ---
 name: kiwa-ui
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.ui.md`) を React component test (Vitest + @testing-library/react + @kiwa/ui) に変換する Layer 2 UI test skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.ui.md`) を React component test (Vitest + @testing-library/react + @kiwa-lab/ui) に変換する Layer 2 UI test skill。
   contract / unit / api / e2e の間に立つ component layer を担当する。
-  `/kiwa-design --layer ui` が出力する 9 column 表 (Mode = render | interaction | snapshot) を `@kiwa/ui` の `setupComponentEnv` の引数に機械的に変換する。
+  `/kiwa-design --layer ui` が出力する 9 column 表 (Mode = render | interaction | snapshot) を `@kiwa-lab/ui` の `setupComponentEnv` の引数に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -25,7 +25,7 @@ trust boundary 違反検出時は spec 末尾「不足している仕様」 に 
 ## 前提
 
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.ui.md`) が存在 (`/kiwa-design --layer ui` で生成)
-- 対象 example に `package.json` があり、 vitest + `@testing-library/react` + `@kiwa/ui` + jsdom が devDependencies で利用可能 (未インストールなら install を強制)
+- 対象 example に `package.json` があり、 vitest + `@testing-library/react` + `@kiwa-lab/ui` + jsdom が devDependencies で利用可能 (未インストールなら install を強制)
 - 対象 component (`src/components/*.tsx` / `src/components/*/index.tsx`) が存在
 - 出力先 `tests/{module}.test.tsx` への Write 権限
 - vitest 環境は `jsdom` を使う (`pnpm test` script に `--environment jsdom` を指定済 or `vitest.config` で設定済)
@@ -58,7 +58,7 @@ Automation = `yes` の TC のみ test code に変換する (`no` / `manual` は 
 
 ```ts
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupComponentEnv, type UiTestEnv } from '@kiwa/ui';
+import { setupComponentEnv, type UiTestEnv } from '@kiwa-lab/ui';
 import { Counter } from '../src/components/counter.js'; // Component column から推測
 ```
 
@@ -87,7 +87,7 @@ afterEach(async () => {
 
 各 TC を以下の rule で変換。
 
-| spec column | Vitest + @kiwa/ui への変換 |
+| spec column | Vitest + @kiwa-lab/ui への変換 |
 |---|---|
 | ID | `it('{ID} {Observation}', async () => { ... })` |
 | Observation | test 名 + describe 階層 |
@@ -107,7 +107,7 @@ afterEach(async () => {
 
 ```tsx
 import { afterEach, describe, expect, it } from 'vitest';
-import { setupComponentEnv, type UiTestEnv } from '@kiwa/ui';
+import { setupComponentEnv, type UiTestEnv } from '@kiwa-lab/ui';
 import { Counter } from '../src/counter.js';
 
 const envs: UiTestEnv[] = [];
@@ -140,6 +140,6 @@ describe('Counter (interaction mode)', () => {
 
 ## references
 
-- `@kiwa/ui` API ... `packages/ui/README.md` (`/Users/cardene/Desktop/projects/kiwa/packages/ui/README.md`)
-- `@kiwa/core` 共通型 ... `packages/core/README.md`
+- `@kiwa-lab/ui` API ... `packages/ui/README.md` (`/Users/cardene/Desktop/projects/kiwa/packages/ui/README.md`)
+- `@kiwa-lab/core` 共通型 ... `packages/core/README.md`
 - 実 PoC ... `examples/react-component-poc/`

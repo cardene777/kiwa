@@ -108,10 +108,10 @@ report 4 section (`tests/reports/unit/coverage-report-{module}.md`)。
 ## anvil 実走経路 (mock / 実 anvil 両対応)
 
 unit test は default で **mock 経路** を使う (viem の mock transport / `vi.mock` で外部依存を遮断、 anvil process は起動しない)。
-contract / real-chain と連携した動作を verify したい case (例 storage slot 直書き / time-warp / EIP-1271 / 実 RPC 経路) は `@kiwa/dapp` の `setupTestEnv` helper で **実 anvil 経路** に opt-in する。
+contract / real-chain と連携した動作を verify したい case (例 storage slot 直書き / time-warp / EIP-1271 / 実 RPC 経路) は `@kiwa-lab/dapp` の `setupTestEnv` helper で **実 anvil 経路** に opt-in する。
 
 ```ts
-import { setupTestEnv } from '@kiwa/dapp';
+import { setupTestEnv } from '@kiwa-lab/dapp';
 
 // mock 経路 (default、 anvil 不起動)
 const env = await setupTestEnv();
@@ -137,7 +137,7 @@ test file 並列実行と組合せて test suite の壁時計を大幅短縮す�
 
 ```ts
 import { describe, it, beforeAll, afterAll, expect } from 'vitest';
-import { createAnvilPool, setupTestEnv, type AnvilPool } from '@kiwa/dapp';
+import { createAnvilPool, setupTestEnv, type AnvilPool } from '@kiwa-lab/dapp';
 
 let pool: AnvilPool;
 

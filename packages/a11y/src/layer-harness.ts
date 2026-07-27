@@ -11,7 +11,7 @@
  *                       Element if supplied — violations are the union with
  *                       provenance recorded).
  *
- * A package with no runtime DOM (all `@kiwa/*` packages currently — every
+ * A package with no runtime DOM (all `@kiwa-lab/*` packages currently — every
  * one of them is a test-adapter package that returns lightweight JSX-like
  * trees, not real DOM) marks each layer `applicable: false`. axe still needs
  * to run at least once per layer to prove the harness is wired, so an
@@ -373,7 +373,7 @@ export function isHarnessOk(layers: HarnessReport['layers']): boolean {
  * Run the 3-layer harness against a set of fixtures. Missing layers are
  * recorded as `absent`. Returns the whole baseline payload.
  *
- * @param pkgName — the `@kiwa/…` package name recorded in the report.
+ * @param pkgName — the `@kiwa-lab/…` package name recorded in the report.
  * @param fixtures — optional per-layer fixture bundle.
  * @param now — override for `generatedAt` so tests can be deterministic.
  */

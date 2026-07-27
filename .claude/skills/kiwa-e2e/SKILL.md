@@ -1,9 +1,9 @@
 ---
 name: kiwa-e2e
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.e2e.md`) を汎用 browser E2E test (Playwright + @kiwa/e2e) に変換する Layer 2 E2E test skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.e2e.md`) を汎用 browser E2E test (Playwright + @kiwa-lab/e2e) に変換する Layer 2 E2E test skill。
   dApp E2E (kiwa-play) と区別される非 web3 文脈の汎用 browser e2e (static html / fetch app / SSR app) を担当する。
-  `/kiwa-design --layer e2e` が出力する 9 column 表を `@kiwa/e2e` の `setupE2eEnv` の引数に機械的に変換する。
+  `/kiwa-design --layer e2e` が出力する 9 column 表を `@kiwa-lab/e2e` の `setupE2eEnv` の引数に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -25,7 +25,7 @@ trust boundary 違反検出時は spec 末尾「不足している仕様」 に 
 ## 前提
 
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.e2e.md`) が存在 (`/kiwa-design --layer e2e` で生成)
-- 対象 example に `package.json` があり、 `@playwright/test` + `@kiwa/e2e` + `@kiwa/core` が devDependencies で利用可能 (未インストールなら install を強制)
+- 対象 example に `package.json` があり、 `@playwright/test` + `@kiwa-lab/e2e` + `@kiwa-lab/core` が devDependencies で利用可能 (未インストールなら install を強制)
 - 対象 fetch handler / SSR app / static HTML directory が存在
 - 出力先 `tests/e2e/{module}.spec.ts` への Write 権限
 - Playwright Chromium binary が install 済 (`pnpm exec playwright install chromium`)
@@ -61,7 +61,7 @@ Automation = `yes` の TC のみ test code に変換する (`no` / `manual` は 
 
 ```ts
 import { test, expect } from '@playwright/test';
-import { setupE2eEnv, type E2eTestEnv } from '@kiwa/e2e';
+import { setupE2eEnv, type E2eTestEnv } from '@kiwa-lab/e2e';
 import { fetchHandler } from '../src/app.js'; // spec の Target column から推測
 ```
 
@@ -96,7 +96,7 @@ test.afterEach(async () => {
 
 各 TC を以下の rule で変換。
 
-| spec column | Playwright + @kiwa/e2e への変換 |
+| spec column | Playwright + @kiwa-lab/e2e への変換 |
 |---|---|
 | `Route` | `await page.goto(env.url + '{Route}')` |
 | `Action: click {selector}` | `await page.click('{selector}')` |
@@ -137,7 +137,7 @@ pnpm exec playwright test {module}.spec.ts --reporter=list,json:test-results.jso
 
 ## references
 
-- `@kiwa/e2e` 公式 API ... `packages/e2e/README.md`
+- `@kiwa-lab/e2e` 公式 API ... `packages/e2e/README.md`
 - `setupE2eEnv` 4 mode 詳細 ... `packages/e2e/src/setup-e2e-env.ts`
 - Layer 1 spec template ... `docs/SKILL-DESIGN.ja.md` § Layer 1 e2e
 

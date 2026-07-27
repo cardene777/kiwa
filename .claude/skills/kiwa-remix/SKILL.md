@@ -1,9 +1,9 @@
 ---
 name: kiwa-remix
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.{remix|remix-action|resource|remix-nested-chain}.md`) を Remix v2 / React Router v7 の 4 mode (loader + action + Resource Routes + nested route chain) test (Vitest + @kiwa/remix) に変換する Layer 2 skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.{remix|remix-action|resource|remix-nested-chain}.md`) を Remix v2 / React Router v7 の 4 mode (loader + action + Resource Routes + nested route chain) test (Vitest + @kiwa-lab/remix) に変換する Layer 2 skill。
   `loader({ request, params, context })` を `invokeLoader` で direct invoke、 `action({ request, params, context })` を `invokeAction` で invoke、 Resource Routes は `invokeResourceRoute` で HTTP method dispatch (GET/HEAD → loader、 POST/PUT/PATCH/DELETE → action) + 該当 export 不在は 405 + allow header + methodNotAllowed signal 自動 return、 nested route chain は `setupRemixNestedRouteEnv` で parent → child loader 連鎖 + parent JSON Response auto-deserialize + Set-Cookie の cookieStore persist + 公式 `getDocumentHeaders` 互換 logic で `headers()` export merge + `defer()` / `resolveDeferred()` で streaming resolve、 Response (200 / 3xx redirect / binary download / json) を自動 normalize して assert 可能化する。
-  `/kiwa-design --layer remix-loader` / `--layer remix-action` / `--layer remix-resource-route` / `--layer remix-nested-route-chain` が出力する 9 column 表を `@kiwa/remix` v1.1+ の API に機械的に変換する。
+  `/kiwa-design --layer remix-loader` / `--layer remix-action` / `--layer remix-resource-route` / `--layer remix-nested-route-chain` が出力する 9 column 表を `@kiwa-lab/remix` v1.1+ の API に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -12,7 +12,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /kiwa-remix — Remix v2 / React Router v7 loader + action test 生成 (Layer 2)
 
-`/kiwa-design --layer remix-loader` / `--layer remix-action` が出力した 9 column 表を、 `@kiwa/remix` v1.0+ の `invokeLoader` / `invokeAction` を使った Vitest test に機械変換する。
+`/kiwa-design --layer remix-loader` / `--layer remix-action` が出力した 9 column 表を、 `@kiwa-lab/remix` v1.0+ の `invokeLoader` / `invokeAction` を使った Vitest test に機械変換する。
 
 対象は **Remix v2 / React Router v7 の `app/routes/*.tsx` の `loader` + `action`** および **Resource Routes (UI を return しない loader/action 専用 route)**。 client component (React) は `/kiwa-ui` (React mode) で別 layer 対応済。
 
@@ -20,7 +20,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 - Remix v2 / React Router v7 project (`app/routes/`) が存在
 - Layer 1 spec が存在
-- `@kiwa/remix` v1.0+ install 済
+- `@kiwa-lab/remix` v1.0+ install 済
 
 ## 9 column 拡張表
 
@@ -56,7 +56,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 ```ts
 // loader
-import { invokeLoader, REMIX_REDIRECT_SYMBOL } from '@kiwa/remix';
+import { invokeLoader, REMIX_REDIRECT_SYMBOL } from '@kiwa-lab/remix';
 import { loader } from '../app/routes/items.tsx';
 
 it('{ID} {Observation}', async () => {
@@ -70,7 +70,7 @@ it('{ID} {Observation}', async () => {
 });
 
 // action
-import { invokeAction } from '@kiwa/remix';
+import { invokeAction } from '@kiwa-lab/remix';
 import { action } from '../app/routes/login.tsx';
 
 it('{ID} {Observation}', async () => {
@@ -104,7 +104,7 @@ Resource Routes は UI を return しない route module (`{ loader?, action? }`
 ### test 生成 template
 
 ```ts
-import { invokeResourceRoute, RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL } from '@kiwa/remix';
+import { invokeResourceRoute, RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL } from '@kiwa-lab/remix';
 import * as exportRoute from '../app/routes/api.export.csv.js';
 
 it('{ID} {Observation}', async () => {
@@ -158,7 +158,7 @@ Remix v2 の nested route (`app/routes/dashboard.tsx` + `app/routes/dashboard.pr
 ### test 生成 template
 
 ```ts
-import { setupRemixNestedRouteEnv, resolveDeferred, isDeferred } from '@kiwa/remix';
+import { setupRemixNestedRouteEnv, resolveDeferred, isDeferred } from '@kiwa-lab/remix';
 import { dashboardLayoutLoader, dashboardLayoutHeaders } from '../app/lib/_kiwa/dashboard-layout-loader.js';
 import { dashboardProfileLoader, dashboardProfileHeaders } from '../app/lib/_kiwa/dashboard-profile-loader.js';
 
@@ -201,6 +201,6 @@ it('{ID} {Observation}', async () => {
 ## 関連
 
 - 上流 ... `/kiwa-design --layer {remix-loader|remix-action|remix-resource-route|remix-nested-route-chain}`
-- runtime fixture ... `@kiwa/remix` v1.1+ (`packages/remix/`)
+- runtime fixture ... `@kiwa-lab/remix` v1.1+ (`packages/remix/`)
 - 下流 ... `/kiwa-review --layer {remix-loader|remix-action|remix-resource-route|remix-nested-route-chain}`
 - client component (React) ... `/kiwa-ui` (React mode)

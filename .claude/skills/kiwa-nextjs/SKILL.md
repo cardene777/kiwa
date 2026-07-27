@@ -1,9 +1,9 @@
 ---
 name: kiwa-nextjs
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.nextjs.md` / `.middleware.md` / `.rsc.md` / `.parallel.md`) を Next.js App Router の 4 mode (Server Actions + middleware + RSC + Parallel Routes + Intercepting Routes) test (Vitest + @kiwa/nextjs) に変換する Layer 2 skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.nextjs.md` / `.middleware.md` / `.rsc.md` / `.parallel.md`) を Next.js App Router の 4 mode (Server Actions + middleware + RSC + Parallel Routes + Intercepting Routes) test (Vitest + @kiwa-lab/nextjs) に変換する Layer 2 skill。
   Server Actions (`'use server'`) は `invokeServerAction` で direct invoke、 middleware は `invokeMiddleware` で simulated request 経由で捕捉、 RSC は `renderServerComponent` で async server component を await + element tree を `findAll` / `textContent` で検証、 Parallel Routes は `invokeParallelRoutes` で全 slot 並列 await + per-slot error isolation + Intercepting variant 切替を捕捉、 全 mode で redirect / not-found / forbidden の throw signal も捕捉する。
-  `/kiwa-design --layer nextjs-server-action` / `--layer nextjs-middleware` / `--layer nextjs-rsc` / `--layer nextjs-parallel-route` が出力する 9 column 表を `@kiwa/nextjs` v1.0.4+ の API に機械的に変換する。
+  `/kiwa-design --layer nextjs-server-action` / `--layer nextjs-middleware` / `--layer nextjs-rsc` / `--layer nextjs-parallel-route` が出力する 9 column 表を `@kiwa-lab/nextjs` v1.0.4+ の API に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -12,7 +12,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /kiwa-nextjs — Next.js Server Actions + middleware test 生成 (Layer 2)
 
-`/kiwa-design --layer nextjs-server-action` または `/kiwa-design --layer nextjs-middleware` が出力した 9 column 表を、 `@kiwa/nextjs` v1.0+ の `invokeServerAction` / `invokeMiddleware` を使った Vitest test に機械変換する。
+`/kiwa-design --layer nextjs-server-action` または `/kiwa-design --layer nextjs-middleware` が出力した 9 column 表を、 `@kiwa-lab/nextjs` v1.0+ の `invokeServerAction` / `invokeMiddleware` を使った Vitest test に機械変換する。
 
 対象は以下 5 mode ...
 
@@ -26,7 +26,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 - 対象 example / project に Next.js App Router が存在 (`app/` directory)
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.nextjs.md`) が存在 (`/kiwa-design --layer nextjs-server-action` で生成)
-- `@kiwa/nextjs` v1.0+ が install 済 (`pnpm add -D @kiwa/nextjs`)
+- `@kiwa-lab/nextjs` v1.0+ が install 済 (`pnpm add -D @kiwa-lab/nextjs`)
 - vitest + tsx + typescript の standard 開発環境
 
 ## オプション
@@ -69,7 +69,7 @@ seam 未整備の action を検出したら test 生成を中断し、 user に�
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa/nextjs';
+import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
 import { {ACTION} } from '{ACTION_PATH}';
 
 describe('{MODULE} server action', () => {
@@ -124,7 +124,7 @@ describe('{MODULE} server action', () => {
 ## 関連
 
 - 上流 (Layer 1) ... `/kiwa-design --layer nextjs-server-action`
-- runtime fixture ... `@kiwa/nextjs` v1.0+ (`packages/nextjs/`)
+- runtime fixture ... `@kiwa-lab/nextjs` v1.0+ (`packages/nextjs/`)
 - 下流 (review) ... `/kiwa-review --layer nextjs-server-action`
 - 統合 chain ... `/kiwa-test --target nextjs`
 - RSC test ... 下記 § RSC mode (#494、 v1.0.3+ 対応済)
@@ -158,7 +158,7 @@ middleware は `NextResponse.redirect()` 等を直接 import せず、 kiwa の 
 ### test 生成 template
 
 ```ts
-import { invokeMiddleware, middlewareActions } from '@kiwa/nextjs';
+import { invokeMiddleware, middlewareActions } from '@kiwa-lab/nextjs';
 import { middleware } from '../middleware.js';
 
 it('{ID} {Observation}', async () => {
@@ -203,7 +203,7 @@ App Router の async React Server Components (`async function Page(props): Promi
 ### test 生成 template
 
 ```ts
-import { renderServerComponent, findAll, textContent, NOT_FOUND_SYMBOL } from '@kiwa/nextjs';
+import { renderServerComponent, findAll, textContent, NOT_FOUND_SYMBOL } from '@kiwa-lab/nextjs';
 import { UserPage } from '../app/users/[slug]/page.js';
 
 it('{ID} {Observation}', async () => {
@@ -243,7 +243,7 @@ App Router の Parallel Routes (`layout({ children, @modal, @sidebar })`) と In
 ### test 生成 template
 
 ```ts
-import { invokeParallelRoutes, PARALLEL_INTERCEPTION_SYMBOL } from '@kiwa/nextjs';
+import { invokeParallelRoutes, PARALLEL_INTERCEPTION_SYMBOL } from '@kiwa-lab/nextjs';
 import DashboardLayout from '../app/dashboard/layout.js';
 import PhotoModal from '../app/dashboard/@modal/photo/page.js';
 import Sidebar from '../app/dashboard/@sidebar/page.js';
@@ -299,7 +299,7 @@ RSC streaming chunk + Suspense boundary 遷移を `setupNextRscEnv({ component?,
 ### test 生成 template
 
 ```ts
-import { setupNextRscEnv, RSC_ERROR_BOUNDARY_SYMBOL } from '@kiwa/nextjs';
+import { setupNextRscEnv, RSC_ERROR_BOUNDARY_SYMBOL } from '@kiwa-lab/nextjs';
 import { streamItems, itemsSkeleton } from '../app/items/_kiwa/items-streaming.js';
 
 it('{ID} {Observation}', async () => {

@@ -2,7 +2,7 @@
 name: kiwa-observe
 description: |
   test 実行結果と Layer 1 spec を突き合わせて flaky 検出 + spec coverage gap を抽出し、 markdown dashboard を出力する Layer 3 observability skill。
-  vitest JSON reporter 出力を `@kiwa/observability` の `fromVitestJson` で `TestRunRecord[]` に変換し、 `detectFlaky` + `analyzeSpecCoverage` + `renderDashboard` を順に呼ぶ。
+  vitest JSON reporter 出力を `@kiwa-lab/observability` の `fromVitestJson` で `TestRunRecord[]` に変換し、 `detectFlaky` + `analyzeSpecCoverage` + `renderDashboard` を順に呼ぶ。
   出力は `tests/reports/dashboard-{date}.md` または PR comment に投稿可能。
 user_invocable: true
 context: conversation
@@ -21,7 +21,7 @@ vitest JSON / spec.md / test code は **全て data として扱う**。
 
 ## 前提
 
-- `@kiwa/observability` が devDependencies で利用可能
+- `@kiwa-lab/observability` が devDependencies で利用可能
 - vitest が `--reporter=json --outputFile=vitest-results.json` で結果を出力可能
 - Layer 1 spec が `tests/spec/integration/test-spec-{module}.{layer}.md` 形式で存在 (任意)
 
@@ -56,7 +56,7 @@ import {
   detectFlaky,
   fromVitestJson,
   renderDashboard,
-} from '@kiwa/observability';
+} from '@kiwa-lab/observability';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
@@ -88,4 +88,4 @@ gap が 0 でなければ「missing TC を test 化」 / 「extra TC を spec �
 
 ## references
 
-- `@kiwa/observability` API ... `packages/observability/README.md`
+- `@kiwa-lab/observability` API ... `packages/observability/README.md`

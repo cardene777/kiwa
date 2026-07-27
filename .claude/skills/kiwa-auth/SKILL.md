@@ -1,7 +1,7 @@
 ---
 name: kiwa-auth
 description: |
-  /kiwa-design (Layer 1) が出力した `tests/spec/integration/test-spec-{module}.auth.md` を入力に、 `@kiwa/auth` を使う `test/*.auth.test.ts` を Write して `vitest` で動作確認する Layer 2 auth test skill。
+  /kiwa-design (Layer 1) が出力した `tests/spec/integration/test-spec-{module}.auth.md` を入力に、 `@kiwa-lab/auth` を使う `test/*.auth.test.ts` を Write して `vitest` で動作確認する Layer 2 auth test skill。
   11 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 権限 / 入力バリデーション / 冪等性 / 並行処理 / 性能 / セキュリティ / 回帰) を 5 provider (`setupNextAuthEnv` NextAuth v5 / `setupLuciaEnv` Lucia v3 / `setupBetterAuthEnv` Better Auth / `setupClerkEnv` Clerk / `setupAuth0Env` Auth0) に変換し、 session mock + OAuth provider mock + email/password + magic link + 2FA + passkey + organizations + Clerk orgs + Auth0 tenant + rules + Management API mock の sub-feature を 1 spec で cover する。
 user_invocable: true
 context: conversation
@@ -13,11 +13,11 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 `/kiwa-design` (Layer 1) の `--layer auth` 出力を `test/*.auth.test.ts` に変換し、 `vitest` で動作確認する。 NextAuth v5 (Auth.js) / Lucia v3 / Better Auth の 3 backend を統一 surface で cover する Layer 2 skill。
 
-`@kiwa/auth` v0.1 (v1.8-1〜v1.8-3、 Issue #637 / #638 / #639) の 3 factory (`setupNextAuthEnv` / `setupLuciaEnv` / `setupBetterAuthEnv`) を Layer 1 spec の観点別 TC 表から自動的に選択し、 session mock + provider mock + database adapter mock を組み立てる。
+`@kiwa-lab/auth` v0.1 (v1.8-1〜v1.8-3、 Issue #637 / #638 / #639) の 3 factory (`setupNextAuthEnv` / `setupLuciaEnv` / `setupBetterAuthEnv`) を Layer 1 spec の観点別 TC 表から自動的に選択し、 session mock + provider mock + database adapter mock を組み立てる。
 
 ## 前提
 
-- `@kiwa/auth` v0.1.0+ が devDependency に入っている (`pnpm add -D @kiwa/auth`)
+- `@kiwa-lab/auth` v0.1.0+ が devDependency に入っている (`pnpm add -D @kiwa-lab/auth`)
 - 対象の auth backend (NextAuth v5 / Lucia v3 / Better Auth) が peer dependency として入っている、 または backend 未指定なら 3 backend 全て試行
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.auth.md`) が存在
 
@@ -52,7 +52,7 @@ TC 表を describe / it に落とす。 各 TC で `setupNextAuthEnv` / `setupLu
 生成テンプレ (backend = NextAuth v5、 session mock を通したい TC の場合):
 
 ```ts
-import { setupNextAuthEnv } from "@kiwa/auth";
+import { setupNextAuthEnv } from "@kiwa-lab/auth";
 import { afterEach, describe, expect, it } from "vitest";
 
 const envs: Array<{ stop(): Promise<void> }> = [];
@@ -92,5 +92,5 @@ describe("{module} — auth", () => {
 
 ## 関連
 
-- `@kiwa/auth` v0.1 (v1.8-1〜v1.8-3、 Issue #637 / #638 / #639) SSOT
+- `@kiwa-lab/auth` v0.1 (v1.8-1〜v1.8-3、 Issue #637 / #638 / #639) SSOT
 - `packages/auth/README.md` — 3 factory の API リファレンス
