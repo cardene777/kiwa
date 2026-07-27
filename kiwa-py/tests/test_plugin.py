@@ -16,6 +16,7 @@ SPEC_MD = """- module: demo
 
 
 def test_kiwa_spec_fixture_loads_existing_file(pytester):
+    pytester.makeconftest('pytest_plugins = ["kiwa_test_py.plugin"]')
     (pytester.path / "tests" / "spec" / "unit").mkdir(parents=True)
     (pytester.path / "tests" / "spec" / "unit" / "test-spec-demo.md").write_text(SPEC_MD, encoding="utf-8")
     pytester.makepyfile(
@@ -33,6 +34,7 @@ def test_kiwa_spec_fixture_loads_existing_file(pytester):
 
 
 def test_kiwa_spec_fixture_returns_none_when_no_spec(pytester):
+    pytester.makeconftest('pytest_plugins = ["kiwa_test_py.plugin"]')
     pytester.makepyfile(
         test_demo="""
         def test_no_spec(kiwa_spec):
