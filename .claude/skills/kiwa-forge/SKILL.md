@@ -31,7 +31,8 @@ $ARGUMENTS
 - `--spec-path {path}` — Layer 1 spec の path を明示 (`--module` の代替)
 - `--contract {name}` — 対象 contract 名 (省略時は spec の「対象機能」section から推定)
 - `--gas-report` — `forge test --gas-report` で gas 測定込みで実行
-- `--coverage-threshold {N}` — `forge coverage` の line coverage 目標 (default 80%)
+- `--coverage-threshold {N}` — `forge coverage` の全 metric 共通 threshold (default 100%、 production target のみ評価対象)
+- `--coverage-lines {N}` / `--coverage-statements {N}` / `--coverage-branches {N}` / `--coverage-funcs {N}` — metric 別 threshold override (指定時は `--coverage-threshold` より優先)
 - `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-tests` — `forge test` 実行をスキップ (Write のみ、 dry-run 用途)
 - `--no-review` — Step 6 の kiwa-review 自動呼出 (test-review) を skip (CI / 自動化用)

@@ -36,7 +36,7 @@ $ARGUMENTS
 - `--input-spec {path}` — Layer 1 spec の path (省略時は `tests/spec/integration/test-spec-{module}.md`)
 - `--target {path}` — 対象実装 file (`app/api/*/route.ts` 等、 grep で識別)
 - `--backend {msw|supertest|playwright}` — integration test backend (default `msw` for Next.js App Router、 supertest / playwright も選択可)
-- `--coverage-threshold {N}` — integration coverage 目標 (default 80%)
+- `--coverage-threshold {N}` — integration coverage threshold (default 100%、 production target のみ評価対象)
 - `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion)
 - `--no-review` — Step 6 の kiwa-review 自動呼出を skip
 
@@ -253,7 +253,7 @@ describe('items API (mock mode)', () => {
 
 - Layer 1 spec の「自動化すべきテスト」 全 TC が `test/integration/{module}.test.ts` に Write 済
 - `pnpm exec vitest run test/integration/` 全 PASS (failure 0 件)
-- `pnpm exec vitest run --coverage` で production target が threshold 達成 (default 80%)
+- `pnpm exec vitest run --coverage` で production target が threshold 達成 (default 100%)、 もしくは残 uncovered が全て「不可能」分類と report で明示
 - `tests/reports/integration/coverage-report-{module}.md` が 4 section format で Write 済
 - 観点別 `describe` ブロックが spec の観点一覧と一致
 
