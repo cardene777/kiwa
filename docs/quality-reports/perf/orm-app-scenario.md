@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| bulk_insert (setup + 100 insert) | 0.41ms | 200ms | PASS | improved |
-| query_workload (100 insert + 100 select) | 0.89ms | 200ms | PASS | stable |
-| crud_cycle (10 rows × insert+update+delete) | 0.40ms | 200ms | PASS | improved |
+| bulk_insert (setup + 100 insert) | 0.46ms | 200ms | PASS | stable |
+| query_workload (100 insert + 100 select) | 0.59ms | 200ms | PASS | stable |
+| crud_cycle (10 rows × insert+update+delete) | 0.47ms | 200ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 3 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| bulk_insert (setup + 100 insert) | 1.07ms | 400ms | PASS |
-| query_workload (100 insert + 100 select) | 1.02ms | 400ms | PASS |
-| crud_cycle (10 rows × insert+update+delete) | 0.92ms | 400ms | PASS |
+| bulk_insert (setup + 100 insert) | 1.25ms | 400ms | PASS |
+| query_workload (100 insert + 100 select) | 1.15ms | 400ms | PASS |
+| crud_cycle (10 rows × insert+update+delete) | 0.84ms | 400ms | PASS |
 
 ## Memory retention (15 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| bulk_insert (setup + 100 insert) | 879848 B | 32846 B | 102400 B | PASS |
-| query_workload (100 insert + 100 select) | 1025984 B | 32835 B | 102400 B | PASS |
-| crud_cycle (10 rows × insert+update+delete) | 798088 B | 32851 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| bulk_insert (setup + 100 insert) | -45624 B | -2020 B | 102400 B | yes | PASS |
+| query_workload (100 insert + 100 select) | -17912 B | -2018 B | 102400 B | yes | PASS |
+| crud_cycle (10 rows × insert+update+delete) | -31696 B | -1009 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +36,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p50 | 0.33ms |
-| p95 | 0.41ms |
-| p99 | 0.41ms |
-| mean | 0.33ms |
+| p50 | 0.35ms |
+| p95 | 0.46ms |
+| p99 | 0.52ms |
+| mean | 0.36ms |
 | stdev | 0.07ms |
-| min | 0.23ms |
-| max | 0.42ms |
-| total | 4.88ms |
+| min | 0.27ms |
+| max | 0.53ms |
+| total | 5.35ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.33ms | 1.27ms | -0.94ms | -74.09% |
-| p95 | 0.41ms | 2.12ms | -1.71ms | -80.60% |
-| p99 | 0.41ms | 2.27ms | -1.85ms | -81.73% |
-| mean | 0.33ms | 1.43ms | -1.10ms | -77.20% |
-| min | 0.23ms | 0.65ms | -0.43ms | -65.44% |
-| max | 0.42ms | 2.31ms | -1.89ms | -81.98% |
-| total | 4.88ms | 21.40ms | -16.52ms | -77.20% |
+| p50 | 0.35ms | 0.38ms | -0.03ms | -8.04% |
+| p95 | 0.46ms | 0.52ms | -0.07ms | -12.71% |
+| p99 | 0.52ms | 0.54ms | -0.02ms | -3.70% |
+| mean | 0.36ms | 0.38ms | -0.02ms | -6.39% |
+| min | 0.27ms | 0.24ms | +0.04ms | +16.24% |
+| max | 0.53ms | 0.54ms | -0.01ms | -1.51% |
+| total | 5.35ms | 5.72ms | -0.37ms | -6.39% |
 
 ### query_workload (100 insert + 100 select)
 
@@ -65,26 +65,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p50 | 0.49ms |
-| p95 | 0.89ms |
-| p99 | 1.18ms |
-| mean | 0.53ms |
-| stdev | 0.23ms |
-| min | 0.29ms |
-| max | 1.25ms |
-| total | 7.92ms |
+| p50 | 0.46ms |
+| p95 | 0.59ms |
+| p99 | 0.68ms |
+| mean | 0.46ms |
+| stdev | 0.08ms |
+| min | 0.36ms |
+| max | 0.70ms |
+| total | 6.95ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.49ms | 0.72ms | -0.23ms | -32.26% |
-| p95 | 0.89ms | 1.25ms | -0.36ms | -28.43% |
-| p99 | 1.18ms | 1.32ms | -0.13ms | -10.17% |
-| mean | 0.53ms | 0.81ms | -0.28ms | -34.44% |
-| min | 0.29ms | 0.44ms | -0.15ms | -34.55% |
-| max | 1.25ms | 1.33ms | -0.08ms | -5.89% |
-| total | 7.92ms | 12.08ms | -4.16ms | -34.44% |
+| p50 | 0.46ms | 0.38ms | +0.08ms | +20.86% |
+| p95 | 0.59ms | 0.63ms | -0.04ms | -6.58% |
+| p99 | 0.68ms | 0.86ms | -0.18ms | -20.51% |
+| mean | 0.46ms | 0.42ms | +0.04ms | +10.16% |
+| min | 0.36ms | 0.32ms | +0.04ms | +11.89% |
+| max | 0.70ms | 0.91ms | -0.21ms | -22.92% |
+| total | 6.95ms | 6.31ms | +0.64ms | +10.16% |
 
 ### crud_cycle (10 rows × insert+update+delete)
 
@@ -94,24 +94,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p50 | 0.24ms |
-| p95 | 0.40ms |
-| p99 | 0.40ms |
-| mean | 0.27ms |
+| p50 | 0.36ms |
+| p95 | 0.47ms |
+| p99 | 0.49ms |
+| mean | 0.37ms |
 | stdev | 0.06ms |
-| min | 0.22ms |
-| max | 0.40ms |
-| total | 4.01ms |
+| min | 0.30ms |
+| max | 0.49ms |
+| total | 5.60ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.24ms | 0.83ms | -0.59ms | -70.68% |
-| p95 | 0.40ms | 1.45ms | -1.05ms | -72.32% |
-| p99 | 0.40ms | 1.59ms | -1.19ms | -74.61% |
-| mean | 0.27ms | 0.87ms | -0.60ms | -69.18% |
-| min | 0.22ms | 0.36ms | -0.13ms | -37.26% |
-| max | 0.40ms | 1.62ms | -1.22ms | -75.13% |
-| total | 4.01ms | 13.00ms | -9.00ms | -69.18% |
+| p50 | 0.36ms | 0.30ms | +0.06ms | +19.65% |
+| p95 | 0.47ms | 0.42ms | +0.05ms | +12.40% |
+| p99 | 0.49ms | 0.42ms | +0.06ms | +15.20% |
+| mean | 0.37ms | 0.30ms | +0.07ms | +23.80% |
+| min | 0.30ms | 0.22ms | +0.08ms | +37.06% |
+| max | 0.49ms | 0.42ms | +0.07ms | +15.89% |
+| total | 5.60ms | 4.53ms | +1.08ms | +23.80% |
 

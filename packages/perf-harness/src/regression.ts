@@ -15,6 +15,7 @@ export function detectRegression(input: RegressionInput): RegressionResult {
   const threshold = input.threshold ?? 0.2;
   const bootstrapIterations = input.bootstrapIterations ?? 2000;
   const confidenceLevel = input.confidenceLevel ?? 0.95;
+  const minDeltaMs = input.minDeltaMs ?? 0.5;
 
   const currentP95 = input.current.p95;
   const baselineP95 = input.baseline.p95;
@@ -35,10 +36,15 @@ export function detectRegression(input: RegressionInput): RegressionResult {
   // 有意 = CI が 0 を跨がない (両端が同符号)
   const significant = (ci.lower > 0 && ci.upper > 0) || (ci.lower < 0 && ci.upper < 0);
 
+  // 相対比だけで判定すると値が小さい op ほど厳しくなる。0.03ms → 0.04ms は
+  // サンプルが安定していれば「有意な 33% 悪化」になるが実害はない。
+  // 差の絶対量が下限に満たないものは揺らぎとして扱う。
+  const meaningfulDelta = Math.abs(currentP95 - baselineP95) >= minDeltaMs;
+
   let verdict: RegressionResult['verdict'] = 'stable';
-  if (significant && deltaPct >= threshold) {
+  if (significant && meaningfulDelta && deltaPct >= threshold) {
     verdict = 'regressed';
-  } else if (significant && deltaPct <= -threshold) {
+  } else if (significant && meaningfulDelta && deltaPct <= -threshold) {
     verdict = 'improved';
   }
 

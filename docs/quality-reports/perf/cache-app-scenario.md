@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| read_heavy_workload (80 get / 20 set / 100 ops burst) | 0.07ms | 30ms | PASS | regressed |
-| pub_sub_burst (subscribe + 50 publish + drain) | 0.09ms | 100ms | PASS | stable |
+| read_heavy_workload (80 get / 20 set / 100 ops burst) | 0.08ms | 30ms | PASS | stable |
+| pub_sub_burst (subscribe + 50 publish + drain) | 0.06ms | 100ms | PASS | stable |
 | ttl_expiry_cycle (set with TTL + get + assertTTL loop) | 0.03ms | 30ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 8 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| read_heavy_workload (80 get / 20 set / 100 ops burst) | 0.06ms | 60ms | PASS |
-| pub_sub_burst (subscribe + 50 publish + drain) | 0.14ms | 200ms | PASS |
-| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | 0.09ms | 60ms | PASS |
+| read_heavy_workload (80 get / 20 set / 100 ops burst) | 0.23ms | 60ms | PASS |
+| pub_sub_burst (subscribe + 50 publish + drain) | 0.15ms | 200ms | PASS |
+| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | 0.05ms | 60ms | PASS |
 
 ## Memory retention (30 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| read_heavy_workload (80 get / 20 set / 100 ops burst) | 1829496 B | 0 B | 102400 B | PASS |
-| pub_sub_burst (subscribe + 50 publish + drain) | -5519736 B | 0 B | 102400 B | PASS |
-| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | 1015040 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| read_heavy_workload (80 get / 20 set / 100 ops burst) | -10624 B | 0 B | 102400 B | yes | PASS |
+| pub_sub_burst (subscribe + 50 publish + drain) | -1560 B | 0 B | 102400 B | yes | PASS |
+| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | 4856 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +36,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p50 | 0.02ms |
-| p95 | 0.07ms |
-| p99 | 0.07ms |
-| mean | 0.03ms |
+| p50 | 0.04ms |
+| p95 | 0.08ms |
+| p99 | 0.09ms |
+| mean | 0.05ms |
 | stdev | 0.02ms |
-| min | 0.01ms |
-| max | 0.08ms |
-| total | 0.80ms |
+| min | 0.03ms |
+| max | 0.10ms |
+| total | 1.45ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | +0.00ms | +7.44% |
-| p95 | 0.07ms | 0.02ms | +0.04ms | +162.48% |
-| p99 | 0.07ms | 0.03ms | +0.05ms | +168.32% |
-| mean | 0.03ms | 0.02ms | +0.01ms | +57.86% |
-| min | 0.01ms | 0.01ms | +0.00ms | +35.53% |
-| max | 0.08ms | 0.03ms | +0.05ms | +169.96% |
-| total | 0.80ms | 0.51ms | +0.29ms | +57.86% |
+| p50 | 0.04ms | 0.01ms | +0.03ms | +186.07% |
+| p95 | 0.08ms | 0.03ms | +0.05ms | +199.19% |
+| p99 | 0.09ms | 0.03ms | +0.06ms | +211.72% |
+| mean | 0.05ms | 0.02ms | +0.03ms | +196.87% |
+| min | 0.03ms | 0.01ms | +0.02ms | +198.80% |
+| max | 0.10ms | 0.03ms | +0.07ms | +220.40% |
+| total | 1.45ms | 0.49ms | +0.96ms | +196.87% |
 
 ### pub_sub_burst (subscribe + 50 publish + drain)
 
@@ -66,25 +66,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 30 |
 | warmup | 5 |
 | p50 | 0.04ms |
-| p95 | 0.09ms |
-| p99 | 0.11ms |
-| mean | 0.04ms |
-| stdev | 0.02ms |
-| min | 0.03ms |
-| max | 0.12ms |
-| total | 1.32ms |
+| p95 | 0.06ms |
+| p99 | 0.08ms |
+| mean | 0.05ms |
+| stdev | 0.01ms |
+| min | 0.04ms |
+| max | 0.09ms |
+| total | 1.37ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.04ms | 0.03ms | +0.00ms | +11.53% |
-| p95 | 0.09ms | 0.08ms | +0.01ms | +12.63% |
-| p99 | 0.11ms | 0.20ms | -0.09ms | -44.50% |
-| mean | 0.04ms | 0.05ms | -0.00ms | -1.93% |
-| min | 0.03ms | 0.02ms | +0.01ms | +32.08% |
-| max | 0.12ms | 0.25ms | -0.13ms | -51.68% |
-| total | 1.32ms | 1.35ms | -0.03ms | -1.93% |
+| p50 | 0.04ms | 0.03ms | +0.01ms | +45.35% |
+| p95 | 0.06ms | 0.06ms | -0.00ms | -3.07% |
+| p99 | 0.08ms | 0.07ms | +0.01ms | +16.79% |
+| mean | 0.05ms | 0.03ms | +0.01ms | +33.91% |
+| min | 0.04ms | 0.02ms | +0.02ms | +83.09% |
+| max | 0.09ms | 0.07ms | +0.02ms | +28.55% |
+| total | 1.37ms | 1.03ms | +0.35ms | +33.91% |
 
 ### ttl_expiry_cycle (set with TTL + get + assertTTL loop)
 
@@ -96,22 +96,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.01ms |
 | p95 | 0.03ms |
-| p99 | 0.03ms |
+| p99 | 0.12ms |
 | mean | 0.02ms |
-| stdev | 0.00ms |
+| stdev | 0.03ms |
 | min | 0.01ms |
-| max | 0.03ms |
-| total | 0.50ms |
+| max | 0.15ms |
+| total | 0.63ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +25.66% |
-| p95 | 0.03ms | 0.02ms | +0.00ms | +5.51% |
-| p99 | 0.03ms | 0.04ms | -0.01ms | -32.05% |
-| mean | 0.02ms | 0.01ms | +0.00ms | +16.02% |
-| min | 0.01ms | 0.01ms | +0.00ms | +25.95% |
-| max | 0.03ms | 0.04ms | -0.02ms | -39.17% |
-| total | 0.50ms | 0.43ms | +0.07ms | +16.02% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +17.14% |
+| p95 | 0.03ms | 0.02ms | +0.01ms | +60.20% |
+| p99 | 0.12ms | 0.02ms | +0.10ms | +496.19% |
+| mean | 0.02ms | 0.01ms | +0.01ms | +55.83% |
+| min | 0.01ms | 0.01ms | +0.00ms | +15.50% |
+| max | 0.15ms | 0.02ms | +0.13ms | +638.55% |
+| total | 0.63ms | 0.40ms | +0.22ms | +55.83% |
 

@@ -20,11 +20,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| dispatchRequest | 420416 B | 0 B | 102400 B | PASS |
-| renderTemplate | 326904 B | 0 B | 102400 B | PASS |
-| captureMiddlewareCall | 162024 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| dispatchRequest | -5800 B | 0 B | 102400 B | yes | PASS |
+| renderTemplate | -3608 B | 0 B | 102400 B | yes | PASS |
+| captureMiddlewareCall | 912 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,24 +38,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.00ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.15ms |
+| max | 0.00ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -6.72% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -14.78% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -30.34% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -22.82% |
-| min | 0.00ms | 0.00ms | -0.00ms | -8.40% |
-| max | 0.01ms | 0.03ms | -0.02ms | -69.62% |
-| total | 0.15ms | 0.19ms | -0.04ms | -22.82% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -22.14% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -1.20% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -1.62% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.00ms | 0.00ms | -0.00ms | -15.97% |
+| total | 0.12ms | 0.13ms | -0.00ms | -1.62% |
 
 ### renderTemplate
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.12ms |
+| total | 0.11ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -8.20% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -62.83% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -4.24% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -6.21% |
-| min | 0.00ms | 0.00ms | +0.00ms | +9.83% |
-| max | 0.01ms | 0.01ms | +0.01ms | +139.01% |
-| total | 0.12ms | 0.13ms | -0.01ms | -6.21% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +9.52% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +84.67% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +7.69% |
+| min | 0.00ms | 0.00ms | -0.00ms | -9.86% |
+| max | 0.01ms | 0.01ms | +0.00ms | +34.34% |
+| total | 0.11ms | 0.10ms | +0.01ms | +7.69% |
 
 ### captureMiddlewareCall
 
@@ -96,22 +96,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.00ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.05ms |
-| total | 0.16ms |
+| max | 0.01ms |
+| total | 0.06ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -38.97% |
-| p99 | 0.01ms | 0.00ms | +0.01ms | +426.04% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +105.56% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.05ms | 0.01ms | +0.04ms | +463.19% |
-| total | 0.16ms | 0.08ms | +0.08ms | +105.56% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +0.48% |
+| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +28.22% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +22.30% |
+| min | 0.00ms | 0.00ms | +0.00ms | +32.80% |
+| max | 0.01ms | 0.01ms | +0.00ms | +40.72% |
+| total | 0.06ms | 0.05ms | +0.01ms | +22.30% |
 

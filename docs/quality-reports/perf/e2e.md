@@ -6,19 +6,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| fetchOverLoopback | 0.87ms | 20ms | PASS | regressed |
+| fetchOverLoopback | 0.50ms | 20ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 25 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| fetchOverLoopback | 1.51ms | 40ms | PASS |
+| fetchOverLoopback | 0.94ms | 40ms | PASS |
 
 ## Memory retention (100 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| fetchOverLoopback | 3835912 B | 6016 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| fetchOverLoopback | 232520 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -30,24 +30,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 100 |
 | warmup | 3 |
-| p50 | 0.25ms |
-| p95 | 0.87ms |
-| p99 | 1.10ms |
-| mean | 0.38ms |
-| stdev | 0.27ms |
+| p50 | 0.20ms |
+| p95 | 0.50ms |
+| p99 | 0.86ms |
+| mean | 0.26ms |
+| stdev | 0.14ms |
 | min | 0.16ms |
-| max | 1.56ms |
-| total | 38.35ms |
+| max | 0.86ms |
+| total | 25.94ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.25ms | 0.19ms | +0.06ms | +34.17% |
-| p95 | 0.87ms | 0.49ms | +0.37ms | +75.70% |
-| p99 | 1.10ms | 0.84ms | +0.25ms | +29.88% |
-| mean | 0.38ms | 0.24ms | +0.14ms | +58.67% |
-| min | 0.16ms | 0.13ms | +0.02ms | +15.56% |
-| max | 1.56ms | 0.88ms | +0.68ms | +78.14% |
-| total | 38.35ms | 24.17ms | +14.18ms | +58.67% |
+| p50 | 0.20ms | 0.21ms | -0.02ms | -7.85% |
+| p95 | 0.50ms | 0.57ms | -0.07ms | -12.18% |
+| p99 | 0.86ms | 0.72ms | +0.13ms | +18.60% |
+| mean | 0.26ms | 0.27ms | -0.01ms | -2.84% |
+| min | 0.16ms | 0.16ms | -0.00ms | -0.74% |
+| max | 0.86ms | 0.83ms | +0.03ms | +3.93% |
+| total | 25.94ms | 26.70ms | -0.76ms | -2.84% |
 

@@ -6,22 +6,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| invokeEdgeHandler | 0.03ms | 5ms | PASS | stable |
+| invokeEdgeHandler | 0.02ms | 5ms | PASS | stable |
 | invokeEdgeHandlerWithKv | 0.01ms | 5ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| invokeEdgeHandler | 0.16ms | 10ms | PASS |
-| invokeEdgeHandlerWithKv | 0.05ms | 10ms | PASS |
+| invokeEdgeHandler | 0.12ms | 10ms | PASS |
+| invokeEdgeHandlerWithKv | 0.07ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| invokeEdgeHandler | 3093232 B | 400 B | 102400 B | PASS |
-| invokeEdgeHandlerWithKv | -5891784 B | -2345 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| invokeEdgeHandler | -2040 B | 400 B | 102400 B | yes | PASS |
+| invokeEdgeHandlerWithKv | -520 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -34,25 +34,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 200 |
 | warmup | 5 |
 | p50 | 0.01ms |
-| p95 | 0.03ms |
-| p99 | 0.06ms |
+| p95 | 0.02ms |
+| p99 | 0.05ms |
 | mean | 0.01ms |
 | stdev | 0.01ms |
 | min | 0.01ms |
-| max | 0.11ms |
-| total | 2.88ms |
+| max | 0.09ms |
+| total | 2.48ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -17.66% |
-| p95 | 0.03ms | 0.03ms | -0.00ms | -12.70% |
-| p99 | 0.06ms | 0.07ms | -0.01ms | -18.39% |
-| mean | 0.01ms | 0.02ms | -0.00ms | -22.70% |
-| min | 0.01ms | 0.01ms | +0.00ms | +15.76% |
-| max | 0.11ms | 0.83ms | -0.72ms | -86.30% |
-| total | 2.88ms | 3.73ms | -0.85ms | -22.70% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -1.72% |
+| p95 | 0.02ms | 0.02ms | +0.00ms | +6.35% |
+| p99 | 0.05ms | 0.06ms | -0.01ms | -9.71% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -2.50% |
+| min | 0.01ms | 0.01ms | -0.00ms | -3.77% |
+| max | 0.09ms | 0.10ms | -0.00ms | -3.46% |
+| total | 2.48ms | 2.55ms | -0.06ms | -2.50% |
 
 ### invokeEdgeHandlerWithKv
 
@@ -64,22 +64,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.01ms |
 | p95 | 0.01ms |
-| p99 | 0.35ms |
-| mean | 0.02ms |
-| stdev | 0.12ms |
-| min | 0.00ms |
-| max | 1.37ms |
-| total | 4.20ms |
+| p99 | 0.01ms |
+| mean | 0.01ms |
+| stdev | 0.00ms |
+| min | 0.01ms |
+| max | 0.01ms |
+| total | 1.42ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.00ms | +0.00ms | +23.87% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +52.70% |
-| p99 | 0.35ms | 0.01ms | +0.34ms | +2410.12% |
-| mean | 0.02ms | 0.01ms | +0.02ms | +278.50% |
-| min | 0.00ms | 0.00ms | +0.00ms | +2.01% |
-| max | 1.37ms | 0.03ms | +1.34ms | +4208.06% |
-| total | 4.20ms | 1.11ms | +3.09ms | +278.50% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -0.01% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -0.87% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -8.85% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -0.82% |
+| min | 0.01ms | 0.01ms | +0.00ms | +3.92% |
+| max | 0.01ms | 0.03ms | -0.02ms | -56.40% |
+| total | 1.42ms | 1.43ms | -0.01ms | -0.82% |
 

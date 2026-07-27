@@ -8,7 +8,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|---|---|---|
 | createMacAppEnv | 0.00ms | 5ms | PASS | stable |
 | simulateUserInteraction | 0.00ms | 5ms | PASS | stable |
-| captureAccessibilityTree | 0.00ms | 5ms | PASS | improved |
+| captureAccessibilityTree | 0.00ms | 5ms | PASS | stable |
 | mockScreencap | 0.00ms | 5ms | PASS | stable |
 | emitUserNotification | 0.00ms | 5ms | PASS | stable |
 
@@ -24,13 +24,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| createMacAppEnv | 697560 B | 0 B | 102400 B | PASS |
-| simulateUserInteraction | 263592 B | 0 B | 102400 B | PASS |
-| captureAccessibilityTree | 227448 B | 0 B | 102400 B | PASS |
-| mockScreencap | 237248 B | 30400 B | 102400 B | PASS |
-| emitUserNotification | 210392 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| createMacAppEnv | -5336 B | 0 B | 102400 B | yes | PASS |
+| simulateUserInteraction | 31464 B | 0 B | 102400 B | yes | PASS |
+| captureAccessibilityTree | 664 B | 0 B | 102400 B | yes | PASS |
+| mockScreencap | 832 B | -22344 B | 102400 B | yes | PASS |
+| emitUserNotification | 33144 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -55,13 +55,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -6.56% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +18.81% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +10.33% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -0.56% |
-| min | 0.00ms | 0.00ms | -0.00ms | -0.18% |
-| max | 0.02ms | 0.01ms | +0.00ms | +20.65% |
-| total | 0.18ms | 0.18ms | -0.00ms | -0.56% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +0.17% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -18.02% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +31.32% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +11.14% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.01ms | +0.00ms | +30.98% |
+| total | 0.18ms | 0.16ms | +0.02ms | +11.14% |
 
 ### simulateUserInteraction
 
@@ -73,24 +73,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.00ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
-| stdev | 0.00ms |
+| stdev | 0.01ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.11ms |
+| max | 0.09ms |
+| total | 0.22ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -14.20% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +1.77% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -5.53% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +14.52% |
-| total | 0.11ms | 0.12ms | -0.01ms | -5.53% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +8.20% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +25.43% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +116.74% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +101.57% |
+| min | 0.00ms | 0.00ms | +0.00ms | +10.07% |
+| max | 0.09ms | 0.00ms | +0.09ms | +2099.04% |
+| total | 0.22ms | 0.11ms | +0.11ms | +101.57% |
 
 ### captureAccessibilityTree
 
@@ -107,19 +107,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.17ms |
+| total | 0.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -5.30% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -53.46% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +6.42% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -19.33% |
-| min | 0.00ms | 0.00ms | -0.00ms | -11.07% |
-| max | 0.01ms | 0.01ms | +0.00ms | +38.52% |
-| total | 0.17ms | 0.22ms | -0.04ms | -19.33% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +2.59% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +0.26% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +8.79% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +3.03% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | +0.00ms | +6.67% |
+| total | 0.19ms | 0.19ms | +0.01ms | +3.03% |
 
 ### mockScreencap
 
@@ -135,20 +135,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.02ms |
-| total | 0.57ms |
+| max | 0.01ms |
+| total | 0.50ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +6.47% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +2.59% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -6.00% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +9.10% |
-| min | 0.00ms | 0.00ms | +0.00ms | +4.47% |
-| max | 0.02ms | 0.01ms | +0.01ms | +43.19% |
-| total | 0.57ms | 0.52ms | +0.05ms | +9.10% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -6.16% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +0.00% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -12.71% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -13.14% |
+| min | 0.00ms | 0.00ms | -0.00ms | -4.38% |
+| max | 0.01ms | 0.01ms | -0.00ms | -16.77% |
+| total | 0.50ms | 0.58ms | -0.08ms | -13.14% |
 
 ### emitUserNotification
 
@@ -165,17 +165,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.11ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -58.85% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +33.93% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -82.41% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.50ms | -0.49ms | -98.11% |
-| total | 0.11ms | 0.60ms | -0.49ms | -82.41% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -10.07% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -37.17% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +2.17% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -11.07% |
+| min | 0.00ms | 0.00ms | -0.00ms | -11.20% |
+| max | 0.01ms | 0.01ms | +0.00ms | +4.14% |
+| total | 0.10ms | 0.11ms | -0.01ms | -11.07% |
 

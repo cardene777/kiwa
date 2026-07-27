@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| verify_workflow (10 verify across 4 providers) | 0.09ms | 100ms | PASS | stable |
-| dispatch_retry_batch (5 handler retry with backoff) | 0.03ms | 100ms | PASS | stable |
+| verify_workflow (10 verify across 4 providers) | 0.07ms | 100ms | PASS | stable |
+| dispatch_retry_batch (5 handler retry with backoff) | 0.02ms | 100ms | PASS | stable |
 | signature_reject_error (5 invalid signature detect) | 0.01ms | 100ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| verify_workflow (10 verify across 4 providers) | 0.27ms | 200ms | PASS |
-| dispatch_retry_batch (5 handler retry with backoff) | 0.08ms | 200ms | PASS |
-| signature_reject_error (5 invalid signature detect) | 0.04ms | 200ms | PASS |
+| verify_workflow (10 verify across 4 providers) | 0.22ms | 200ms | PASS |
+| dispatch_retry_batch (5 handler retry with backoff) | 0.07ms | 200ms | PASS |
+| signature_reject_error (5 invalid signature detect) | 0.03ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| verify_workflow (10 verify across 4 providers) | 757536 B | 16384 B | 102400 B | PASS |
-| dispatch_retry_batch (5 handler retry with backoff) | 415552 B | 0 B | 102400 B | PASS |
-| signature_reject_error (5 invalid signature detect) | 119872 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| verify_workflow (10 verify across 4 providers) | -4208 B | -62127 B | 102400 B | yes | PASS |
+| dispatch_retry_batch (5 handler retry with backoff) | 1984 B | 0 B | 102400 B | yes | PASS |
+| signature_reject_error (5 invalid signature detect) | 4152 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -37,25 +37,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.06ms |
-| p95 | 0.09ms |
+| p95 | 0.07ms |
 | p99 | 0.10ms |
-| mean | 0.07ms |
+| mean | 0.06ms |
 | stdev | 0.01ms |
 | min | 0.05ms |
 | max | 0.10ms |
-| total | 1.32ms |
+| total | 1.27ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.06ms | 0.06ms | +0.00ms | +5.03% |
-| p95 | 0.09ms | 0.09ms | -0.01ms | -6.91% |
-| p99 | 0.10ms | 0.23ms | -0.13ms | -56.98% |
-| mean | 0.07ms | 0.07ms | -0.01ms | -8.15% |
-| min | 0.05ms | 0.05ms | +0.00ms | +1.76% |
-| max | 0.10ms | 0.27ms | -0.16ms | -61.33% |
-| total | 1.32ms | 1.44ms | -0.12ms | -8.15% |
+| p50 | 0.06ms | 0.06ms | -0.00ms | -4.75% |
+| p95 | 0.07ms | 0.07ms | -0.00ms | -0.71% |
+| p99 | 0.10ms | 0.09ms | +0.01ms | +7.29% |
+| mean | 0.06ms | 0.07ms | -0.00ms | -3.11% |
+| min | 0.05ms | 0.05ms | -0.00ms | -4.81% |
+| max | 0.10ms | 0.09ms | +0.01ms | +8.87% |
+| total | 1.27ms | 1.31ms | -0.04ms | -3.11% |
 
 ### dispatch_retry_batch (5 handler retry with backoff)
 
@@ -66,7 +66,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.02ms |
-| p95 | 0.03ms |
+| p95 | 0.02ms |
 | p99 | 0.03ms |
 | mean | 0.02ms |
 | stdev | 0.00ms |
@@ -78,13 +78,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | +0.00ms | +4.64% |
-| p95 | 0.03ms | 0.03ms | +0.00ms | +6.91% |
-| p99 | 0.03ms | 0.03ms | +0.00ms | +16.68% |
-| mean | 0.02ms | 0.02ms | +0.00ms | +8.70% |
-| min | 0.02ms | 0.01ms | +0.00ms | +2.79% |
-| max | 0.03ms | 0.03ms | +0.01ms | +18.90% |
-| total | 0.39ms | 0.36ms | +0.03ms | +8.70% |
+| p50 | 0.02ms | 0.01ms | +0.00ms | +31.85% |
+| p95 | 0.02ms | 0.02ms | -0.00ms | -1.88% |
+| p99 | 0.03ms | 0.03ms | -0.00ms | -13.24% |
+| mean | 0.02ms | 0.02ms | +0.00ms | +22.37% |
+| min | 0.02ms | 0.01ms | +0.00ms | +14.03% |
+| max | 0.03ms | 0.03ms | -0.01ms | -15.26% |
+| total | 0.39ms | 0.32ms | +0.07ms | +22.37% |
 
 ### signature_reject_error (5 invalid signature detect)
 
@@ -99,19 +99,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p99 | 0.01ms |
 | mean | 0.01ms |
 | stdev | 0.00ms |
-| min | 0.00ms |
+| min | 0.01ms |
 | max | 0.01ms |
-| total | 0.12ms |
+| total | 0.13ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -20.32% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +24.17% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +27.73% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -3.65% |
-| min | 0.00ms | 0.00ms | +0.00ms | +7.40% |
-| max | 0.01ms | 0.01ms | +0.00ms | +28.56% |
-| total | 0.12ms | 0.13ms | -0.00ms | -3.65% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -15.28% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +1.65% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -14.23% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -11.46% |
+| min | 0.01ms | 0.01ms | -0.00ms | -11.88% |
+| max | 0.01ms | 0.01ms | -0.00ms | -16.86% |
+| total | 0.13ms | 0.14ms | -0.02ms | -11.46% |
 

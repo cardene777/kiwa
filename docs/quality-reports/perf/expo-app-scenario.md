@@ -8,7 +8,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|---|---|---|
 | onboarding_workflow (router + secureStore + notification x10 cycle) | 0.02ms | 100ms | PASS | stable |
 | file_capture_batch (camera picture + fileSystem write x5) | 0.01ms | 100ms | PASS | stable |
-| permission_error_handling (5 denied camera + secureStore fail) | 0.03ms | 100ms | PASS | stable |
+| permission_error_handling (5 denied camera + secureStore fail) | 0.04ms | 100ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
@@ -16,15 +16,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|---|---|
 | onboarding_workflow (router + secureStore + notification x10 cycle) | 0.08ms | 200ms | PASS |
 | file_capture_batch (camera picture + fileSystem write x5) | 0.02ms | 200ms | PASS |
-| permission_error_handling (5 denied camera + secureStore fail) | 0.10ms | 200ms | PASS |
+| permission_error_handling (5 denied camera + secureStore fail) | 0.11ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| onboarding_workflow (router + secureStore + notification x10 cycle) | 1935304 B | 0 B | 102400 B | PASS |
-| file_capture_batch (camera picture + fileSystem write x5) | 248336 B | 8192 B | 102400 B | PASS |
-| permission_error_handling (5 denied camera + secureStore fail) | 376288 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| onboarding_workflow (router + secureStore + notification x10 cycle) | 8840 B | -11830 B | 102400 B | yes | PASS |
+| file_capture_batch (camera picture + fileSystem write x5) | 256328 B | 0 B | 102400 B | yes | PASS |
+| permission_error_handling (5 denied camera + secureStore fail) | 1216 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -43,19 +43,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.01ms |
 | max | 0.02ms |
-| total | 0.22ms |
+| total | 0.25ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +4.26% |
-| p95 | 0.02ms | 0.02ms | -0.00ms | -6.02% |
-| p99 | 0.02ms | 0.03ms | -0.01ms | -30.73% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -3.73% |
-| min | 0.01ms | 0.01ms | +0.00ms | +6.34% |
-| max | 0.02ms | 0.03ms | -0.01ms | -34.92% |
-| total | 0.22ms | 0.23ms | -0.01ms | -3.73% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +2.79% |
+| p95 | 0.02ms | 0.02ms | +0.00ms | +0.23% |
+| p99 | 0.02ms | 0.02ms | +0.00ms | +10.37% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +4.55% |
+| min | 0.01ms | 0.01ms | +0.00ms | +0.42% |
+| max | 0.02ms | 0.02ms | +0.00ms | +12.69% |
+| total | 0.25ms | 0.24ms | +0.01ms | +4.55% |
 
 ### file_capture_batch (camera picture + fileSystem write x5)
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.10ms |
+| total | 0.11ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.01ms | -0.00ms | -15.27% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -6.44% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -16.99% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -15.51% |
-| min | 0.00ms | 0.00ms | -0.00ms | -22.02% |
-| max | 0.01ms | 0.01ms | -0.00ms | -18.73% |
-| total | 0.10ms | 0.12ms | -0.02ms | -15.51% |
+| p50 | 0.00ms | 0.01ms | -0.00ms | -4.49% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +31.29% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +42.46% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -0.11% |
+| min | 0.00ms | 0.00ms | -0.00ms | -23.55% |
+| max | 0.01ms | 0.01ms | +0.00ms | +44.55% |
+| total | 0.11ms | 0.11ms | -0.00ms | -0.11% |
 
 ### permission_error_handling (5 denied camera + secureStore fail)
 
@@ -94,24 +94,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.02ms |
-| p95 | 0.03ms |
-| p99 | 0.03ms |
-| mean | 0.02ms |
+| p50 | 0.03ms |
+| p95 | 0.04ms |
+| p99 | 0.04ms |
+| mean | 0.03ms |
 | stdev | 0.00ms |
 | min | 0.02ms |
-| max | 0.03ms |
-| total | 0.46ms |
+| max | 0.04ms |
+| total | 0.60ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | +0.00ms | +15.28% |
-| p95 | 0.03ms | 0.02ms | +0.01ms | +25.83% |
-| p99 | 0.03ms | 0.03ms | +0.00ms | +13.48% |
-| mean | 0.02ms | 0.02ms | +0.00ms | +15.62% |
-| min | 0.02ms | 0.02ms | +0.00ms | +16.02% |
-| max | 0.03ms | 0.03ms | +0.00ms | +10.80% |
-| total | 0.46ms | 0.39ms | +0.06ms | +15.62% |
+| p50 | 0.03ms | 0.02ms | +0.01ms | +57.87% |
+| p95 | 0.04ms | 0.02ms | +0.01ms | +60.97% |
+| p99 | 0.04ms | 0.03ms | +0.01ms | +42.74% |
+| mean | 0.03ms | 0.02ms | +0.01ms | +54.74% |
+| min | 0.02ms | 0.02ms | +0.01ms | +42.95% |
+| max | 0.04ms | 0.03ms | +0.01ms | +38.84% |
+| total | 0.60ms | 0.39ms | +0.21ms | +54.74% |
 

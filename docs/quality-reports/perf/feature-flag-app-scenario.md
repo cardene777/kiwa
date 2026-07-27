@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| evaluation_workflow (10 evaluateFlag across 4 providers) | 0.01ms | 100ms | PASS | stable |
-| all_flags_batch (5 evaluateAllFlags with 3 flags) | 0.02ms | 100ms | PASS | stable |
+| evaluation_workflow (10 evaluateFlag across 4 providers) | 0.02ms | 100ms | PASS | stable |
+| all_flags_batch (5 evaluateAllFlags with 3 flags) | 0.01ms | 100ms | PASS | stable |
 | rule_error_handling (5 unknown flag + attribute mismatch) | 0.01ms | 100ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| evaluation_workflow (10 evaluateFlag across 4 providers) | 0.06ms | 200ms | PASS |
-| all_flags_batch (5 evaluateAllFlags with 3 flags) | 0.03ms | 200ms | PASS |
+| evaluation_workflow (10 evaluateFlag across 4 providers) | 0.05ms | 200ms | PASS |
+| all_flags_batch (5 evaluateAllFlags with 3 flags) | 0.04ms | 200ms | PASS |
 | rule_error_handling (5 unknown flag + attribute mismatch) | 0.02ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| evaluation_workflow (10 evaluateFlag across 4 providers) | 937608 B | 0 B | 102400 B | PASS |
-| all_flags_batch (5 evaluateAllFlags with 3 flags) | 368768 B | 0 B | 102400 B | PASS |
-| rule_error_handling (5 unknown flag + attribute mismatch) | 208904 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| evaluation_workflow (10 evaluateFlag across 4 providers) | -3792 B | 0 B | 102400 B | yes | PASS |
+| all_flags_batch (5 evaluateAllFlags with 3 flags) | 17352 B | 0 B | 102400 B | yes | PASS |
+| rule_error_handling (5 unknown flag + attribute mismatch) | 1784 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -37,25 +37,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.01ms |
-| p95 | 0.01ms |
+| p95 | 0.02ms |
 | p99 | 0.02ms |
 | mean | 0.01ms |
 | stdev | 0.00ms |
 | min | 0.01ms |
 | max | 0.02ms |
-| total | 0.17ms |
+| total | 0.20ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +1.78% |
-| p95 | 0.01ms | 0.02ms | -0.00ms | -8.47% |
-| p99 | 0.02ms | 0.02ms | -0.00ms | -0.86% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -5.43% |
-| min | 0.01ms | 0.01ms | -0.00ms | -5.56% |
-| max | 0.02ms | 0.02ms | +0.00ms | +1.00% |
-| total | 0.17ms | 0.18ms | -0.01ms | -5.43% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +41.10% |
+| p95 | 0.02ms | 0.01ms | +0.00ms | +3.23% |
+| p99 | 0.02ms | 0.01ms | +0.00ms | +8.97% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +26.76% |
+| min | 0.01ms | 0.01ms | +0.00ms | +1.30% |
+| max | 0.02ms | 0.01ms | +0.00ms | +10.40% |
+| total | 0.20ms | 0.16ms | +0.04ms | +26.76% |
 
 ### all_flags_batch (5 evaluateAllFlags with 3 flags)
 
@@ -66,25 +66,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.01ms |
-| p95 | 0.02ms |
-| p99 | 0.10ms |
+| p95 | 0.01ms |
+| p99 | 0.01ms |
 | mean | 0.01ms |
-| stdev | 0.03ms |
+| stdev | 0.00ms |
 | min | 0.01ms |
-| max | 0.12ms |
-| total | 0.28ms |
+| max | 0.01ms |
+| total | 0.16ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -6.60% |
-| p95 | 0.02ms | 0.02ms | +0.00ms | +21.30% |
-| p99 | 0.10ms | 0.02ms | +0.08ms | +481.26% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +42.22% |
-| min | 0.01ms | 0.01ms | -0.00ms | -2.52% |
-| max | 0.12ms | 0.02ms | +0.10ms | +595.20% |
-| total | 0.28ms | 0.20ms | +0.08ms | +42.22% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +3.33% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -6.73% |
+| p99 | 0.01ms | 0.02ms | -0.00ms | -19.53% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +1.30% |
+| min | 0.01ms | 0.01ms | +0.00ms | +2.86% |
+| max | 0.01ms | 0.02ms | -0.00ms | -21.91% |
+| total | 0.16ms | 0.16ms | +0.00ms | +1.30% |
 
 ### rule_error_handling (5 unknown flag + attribute mismatch)
 
@@ -101,17 +101,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.07ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -28.73% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -20.92% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +21.02% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -20.01% |
-| min | 0.00ms | 0.00ms | -0.00ms | -8.92% |
-| max | 0.01ms | 0.01ms | +0.00ms | +31.09% |
-| total | 0.07ms | 0.08ms | -0.02ms | -20.01% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +3.61% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +35.92% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +21.66% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +14.13% |
+| min | 0.00ms | 0.00ms | +0.00ms | +6.40% |
+| max | 0.01ms | 0.01ms | +0.00ms | +19.32% |
+| total | 0.10ms | 0.09ms | +0.01ms | +14.13% |
 
