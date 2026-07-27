@@ -2,14 +2,14 @@
 name: kiwa-macos-app
 description: |
   @kiwa-lab/macos-app (SwiftUI / AppKit / XCTest / accessibility / screencap / notification 統合 mock harness) を使った macOS native app の test 生成 skill。
-  `createMacOSAppTestEnv` + `mountView` (SwiftUI) / `mountWindow` (AppKit) で UI mount、 `runAccessibilityAudit` で a11y 検証、 `captureScreenshot` で snapshot、 `dispatchNotification` で NSUserNotification 経路を in-process で叩ける。 real macOS Xcode runtime 不要で design-time に近い test を書く。
+  `createMacAppEnv` で view tree を作り、 `simulateUserInteraction`、 `captureAccessibilityTree`、 `mockScreencap`、 `emitUserNotification` を in-process で検証する。 real macOS Xcode runtime 不要で native API へ渡す契約を test にできる。
 user_invocable: true
 context: conversation
 agent: general-purpose
 allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 ---
 
-# /kiwa-macos-app — macOS native app (SwiftUI / AppKit) test 生成
+# /kiwa-macos-app — macOS native app test 生成
 
 `@kiwa-lab/macos-app` の SwiftUI / AppKit / accessibility / screencap / notification 統合 mock を使った macOS app test を Vitest 形式で生成する。 real Xcode / simulator 不要で view mount / a11y audit / screenshot / notification dispatch の test を書く。
 
@@ -31,17 +31,17 @@ macOS デスクトップアプリ (Menubar app / Preferences pane / Document bas
 
 ## 実行フロー
 
-### Step 1: view mount test 生成
+### view tree の操作 test を生成
 
-`createMacOSAppTestEnv()` で env、 SwiftUI = `mountView(env, { type: 'ContentView', props: { count: 0 } })`、 AppKit = `mountWindow(env, { title: 'Pref', contentSize: [400, 300] })` で mount、 return の `tree` / `label` / `bounds` を assert。 state 変化 → view update path も cover。
+`createMacAppEnv({ mode: 'swiftui' })` または `createMacAppEnv({ mode: 'appkit' })` で environment を作り、 `simulateUserInteraction(env, { type: 'click', target: 'action' })` の `targetFound`、 `dispatched`、 `handled` と event log を assert。app 固有の view tree は `initialView` と実際の node id を渡して検証する。
 
-### Step 2: accessibility audit test 生成
+### accessibility tree の test を生成
 
-`runAccessibilityAudit(env, view)` で label 欠落 / role 未指定 / focus order 違反 等の violation 検出、 `violations.length` + severity を assert。 clean view と dirty view の 2 case を cover。
+`captureAccessibilityTree(env)` で view tree から推定した accessibility role と label を取得する。Button が `AXButton`、Text が `AXStaticText` として表現されること、disabled node を interaction が dispatch しないことを assert。実 AX API と VoiceOver は統合 test に分ける。
 
-### Step 3: screencap + notification test 生成
+### screencap と notification の test を生成
 
-`captureScreenshot(env, view, { path: 'tmp/x.png' })` で snapshot 保存、 file 存在 + bytes 数を assert。 `dispatchNotification(env, { title: 'Done', body: '...' })` で NSUserNotification 発火、 `env.listDispatched()` で送信履歴を verify。
+`mockScreencap(env, { format: 'png' })` の format magic、region、byte length を assert。 `emitUserNotification(env, { title: 'Done', body: '...' })` は scheduled result と event log を返し、空白だけの title または body は rejected result を返す。実 OS notification callback は統合 test に分ける。
 
 ## 使用例
 
