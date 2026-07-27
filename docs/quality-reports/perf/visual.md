@@ -6,22 +6,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| comparePngBuffersIdentical | 1.40ms | 50ms | PASS | stable |
-| comparePngBuffersFullDiff | 9.54ms | 200ms | PASS | stable |
+| comparePngBuffersIdentical | 1.66ms | 50ms | PASS | stable |
+| comparePngBuffersFullDiff | 8.30ms | 200ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 8 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| comparePngBuffersIdentical | 1.31ms | 100ms | PASS |
-| comparePngBuffersFullDiff | 27.61ms | 400ms | PASS |
+| comparePngBuffersIdentical | 1.71ms | 100ms | PASS |
+| comparePngBuffersFullDiff | 26.44ms | 400ms | PASS |
 
 ## Memory retention (30 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| comparePngBuffersIdentical | 24864 B | 1859636 B | 8388608 B | yes | PASS |
-| comparePngBuffersFullDiff | 23416 B | -28733124 B | 16777216 B | yes | PASS |
+| comparePngBuffersIdentical | 46784 B | 1244645 B | 8388608 B | yes | PASS |
+| comparePngBuffersFullDiff | 30784 B | -10243806 B | 16777216 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -33,26 +33,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 3 |
-| p50 | 0.48ms |
-| p95 | 1.40ms |
-| p99 | 1.82ms |
-| mean | 0.63ms |
-| stdev | 0.36ms |
+| p50 | 0.51ms |
+| p95 | 1.66ms |
+| p99 | 2.16ms |
+| mean | 0.67ms |
+| stdev | 0.44ms |
 | min | 0.36ms |
-| max | 1.94ms |
-| total | 19.01ms |
+| max | 2.17ms |
+| total | 20.18ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.48ms | 0.81ms | -0.33ms | -40.22% |
-| p95 | 1.40ms | 2.11ms | -0.71ms | -33.62% |
-| p99 | 1.82ms | 2.25ms | -0.43ms | -19.16% |
-| mean | 0.63ms | 1.04ms | -0.41ms | -39.36% |
-| min | 0.36ms | 0.45ms | -0.09ms | -19.06% |
-| max | 1.94ms | 2.25ms | -0.31ms | -13.97% |
-| total | 19.01ms | 31.34ms | -12.33ms | -39.36% |
+| p50 | 0.51ms | 0.81ms | -0.30ms | -36.77% |
+| p95 | 1.66ms | 2.11ms | -0.46ms | -21.58% |
+| p99 | 2.16ms | 2.25ms | -0.09ms | -4.05% |
+| mean | 0.67ms | 1.04ms | -0.37ms | -35.60% |
+| min | 0.36ms | 0.45ms | -0.09ms | -19.14% |
+| max | 2.17ms | 2.25ms | -0.08ms | -3.62% |
+| total | 20.18ms | 31.34ms | -11.16ms | -35.60% |
 
 ### comparePngBuffersFullDiff
 
@@ -62,24 +62,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 3 |
-| p50 | 6.32ms |
-| p95 | 9.54ms |
-| p99 | 12.09ms |
-| mean | 6.81ms |
-| stdev | 1.52ms |
-| min | 5.38ms |
-| max | 12.82ms |
-| total | 204.33ms |
+| p50 | 6.46ms |
+| p95 | 8.30ms |
+| p99 | 9.33ms |
+| mean | 6.68ms |
+| stdev | 0.99ms |
+| min | 5.31ms |
+| max | 9.72ms |
+| total | 200.25ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 6.32ms | 7.15ms | -0.83ms | -11.54% |
-| p95 | 9.54ms | 9.25ms | +0.29ms | +3.10% |
-| p99 | 12.09ms | 9.53ms | +2.56ms | +26.81% |
-| mean | 6.81ms | 7.25ms | -0.44ms | -6.10% |
-| min | 5.38ms | 5.41ms | -0.02ms | -0.46% |
-| max | 12.82ms | 9.54ms | +3.27ms | +34.32% |
-| total | 204.33ms | 217.60ms | -13.27ms | -6.10% |
+| p50 | 6.46ms | 7.15ms | -0.69ms | -9.62% |
+| p95 | 8.30ms | 9.25ms | -0.95ms | -10.32% |
+| p99 | 9.33ms | 9.53ms | -0.20ms | -2.11% |
+| mean | 6.68ms | 7.25ms | -0.58ms | -7.97% |
+| min | 5.31ms | 5.41ms | -0.10ms | -1.86% |
+| max | 9.72ms | 9.54ms | +0.18ms | +1.84% |
+| total | 200.25ms | 217.60ms | -17.35ms | -7.97% |
 

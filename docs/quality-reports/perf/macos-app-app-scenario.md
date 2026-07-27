@@ -6,7 +6,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| user_flow_workflow (10 interaction+screencap cycle across modes) | 0.04ms | 100ms | PASS | stable |
+| user_flow_workflow (10 interaction+screencap cycle across modes) | 0.05ms | 100ms | PASS | stable |
 | a11y_batch (5 accessibility tree capture) | 0.01ms | 100ms | PASS | stable |
 | notification_error_handling (5 empty title/body reject) | 0.00ms | 100ms | PASS | stable |
 | retry_recovery (5 flaky async retry to success) | 0.04ms | 100ms | PASS | stable |
@@ -16,21 +16,21 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| user_flow_workflow (10 interaction+screencap cycle across modes) | 0.08ms | 200ms | PASS |
-| a11y_batch (5 accessibility tree capture) | 0.02ms | 200ms | PASS |
-| notification_error_handling (5 empty title/body reject) | 0.01ms | 200ms | PASS |
-| retry_recovery (5 flaky async retry to success) | 0.12ms | 200ms | PASS |
+| user_flow_workflow (10 interaction+screencap cycle across modes) | 0.73ms | 200ms | PASS |
+| a11y_batch (5 accessibility tree capture) | 0.03ms | 200ms | PASS |
+| notification_error_handling (5 empty title/body reject) | 0.02ms | 200ms | PASS |
+| retry_recovery (5 flaky async retry to success) | 0.15ms | 200ms | PASS |
 | concurrent_batch (5 batches of 4 items with error isolation) | 0.04ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| user_flow_workflow (10 interaction+screencap cycle across modes) | -2176 B | 0 B | 102400 B | yes | PASS |
-| a11y_batch (5 accessibility tree capture) | -2328 B | 0 B | 102400 B | yes | PASS |
-| notification_error_handling (5 empty title/body reject) | 624 B | 0 B | 102400 B | yes | PASS |
-| retry_recovery (5 flaky async retry to success) | 11152 B | 0 B | 102400 B | yes | PASS |
-| concurrent_batch (5 batches of 4 items with error isolation) | -160 B | 0 B | 102400 B | yes | PASS |
+| user_flow_workflow (10 interaction+screencap cycle across modes) | 9656 B | 30400 B | 102400 B | yes | PASS |
+| a11y_batch (5 accessibility tree capture) | 4248 B | 0 B | 102400 B | yes | PASS |
+| notification_error_handling (5 empty title/body reject) | -487064 B | 0 B | 102400 B | yes | PASS |
+| retry_recovery (5 flaky async retry to success) | 12232 B | 0 B | 102400 B | yes | PASS |
+| concurrent_batch (5 batches of 4 items with error isolation) | 3064 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -43,25 +43,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.03ms |
-| p95 | 0.04ms |
-| p99 | 0.04ms |
+| p95 | 0.05ms |
+| p99 | 0.06ms |
 | mean | 0.03ms |
 | stdev | 0.01ms |
-| min | 0.01ms |
-| max | 0.04ms |
-| total | 0.51ms |
+| min | 0.02ms |
+| max | 0.06ms |
+| total | 0.68ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.03ms | 0.03ms | +0.00ms | +0.55% |
-| p95 | 0.04ms | 0.04ms | -0.00ms | -3.72% |
-| p99 | 0.04ms | 0.04ms | -0.00ms | -1.81% |
-| mean | 0.03ms | 0.03ms | -0.00ms | -3.67% |
-| min | 0.01ms | 0.01ms | -0.00ms | -3.55% |
-| max | 0.04ms | 0.04ms | -0.00ms | -1.35% |
-| total | 0.51ms | 0.53ms | -0.02ms | -3.67% |
+| p50 | 0.03ms | 0.03ms | +0.01ms | +26.04% |
+| p95 | 0.05ms | 0.04ms | +0.00ms | +10.07% |
+| p99 | 0.06ms | 0.04ms | +0.01ms | +31.97% |
+| mean | 0.03ms | 0.03ms | +0.01ms | +28.95% |
+| min | 0.02ms | 0.01ms | +0.00ms | +16.32% |
+| max | 0.06ms | 0.04ms | +0.02ms | +37.31% |
+| total | 0.68ms | 0.53ms | +0.15ms | +28.95% |
 
 ### a11y_batch (5 accessibility tree capture)
 
@@ -78,19 +78,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.07ms |
+| total | 0.09ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -8.33% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +21.04% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -10.59% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -7.75% |
-| min | 0.00ms | 0.00ms | -0.00ms | -24.14% |
-| max | 0.01ms | 0.01ms | -0.00ms | -16.01% |
-| total | 0.07ms | 0.08ms | -0.01ms | -7.75% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +27.79% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +12.41% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +21.64% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +16.24% |
+| min | 0.00ms | 0.00ms | +0.00ms | +1.16% |
+| max | 0.01ms | 0.01ms | +0.00ms | +23.22% |
+| total | 0.09ms | 0.08ms | +0.01ms | +16.24% |
 
 ### notification_error_handling (5 empty title/body reject)
 
@@ -113,13 +113,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -11.69% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +17.12% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -7.79% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -8.34% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -9.13% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -7.84% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +2.33% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -8.57% |
 | min | 0.00ms | 0.00ms | -0.00ms | -5.69% |
-| max | 0.00ms | 0.00ms | -0.00ms | -11.11% |
-| total | 0.03ms | 0.04ms | -0.00ms | -8.34% |
+| max | 0.00ms | 0.00ms | +0.00ms | +3.69% |
+| total | 0.03ms | 0.04ms | -0.00ms | -8.57% |
 
 ### retry_recovery (5 flaky async retry to success)
 
@@ -136,19 +136,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.03ms |
 | max | 0.04ms |
-| total | 0.64ms |
+| total | 0.66ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.03ms | 0.03ms | +0.00ms | +3.81% |
-| p95 | 0.04ms | 0.04ms | +0.00ms | +0.79% |
-| p99 | 0.04ms | 0.04ms | +0.00ms | +2.41% |
-| mean | 0.03ms | 0.03ms | +0.00ms | +2.13% |
-| min | 0.03ms | 0.03ms | -0.00ms | -1.86% |
-| max | 0.04ms | 0.04ms | +0.00ms | +2.80% |
-| total | 0.64ms | 0.62ms | +0.01ms | +2.13% |
+| p50 | 0.03ms | 0.03ms | +0.00ms | +7.47% |
+| p95 | 0.04ms | 0.04ms | +0.00ms | +3.60% |
+| p99 | 0.04ms | 0.04ms | +0.00ms | +6.68% |
+| mean | 0.03ms | 0.03ms | +0.00ms | +6.16% |
+| min | 0.03ms | 0.03ms | +0.00ms | +6.75% |
+| max | 0.04ms | 0.04ms | +0.00ms | +7.42% |
+| total | 0.66ms | 0.62ms | +0.04ms | +6.16% |
 
 ### concurrent_batch (5 batches of 4 items with error isolation)
 
@@ -165,17 +165,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.01ms |
 | max | 0.02ms |
-| total | 0.23ms |
+| total | 0.22ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -14.18% |
-| p95 | 0.02ms | 0.02ms | -0.00ms | -3.27% |
-| p99 | 0.02ms | 0.02ms | -0.00ms | -8.13% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -10.00% |
-| min | 0.01ms | 0.01ms | -0.00ms | -11.88% |
-| max | 0.02ms | 0.02ms | -0.00ms | -9.24% |
-| total | 0.23ms | 0.26ms | -0.03ms | -10.00% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -14.36% |
+| p95 | 0.02ms | 0.02ms | -0.00ms | -14.09% |
+| p99 | 0.02ms | 0.02ms | -0.00ms | -15.82% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -14.22% |
+| min | 0.01ms | 0.01ms | -0.00ms | -10.73% |
+| max | 0.02ms | 0.02ms | -0.00ms | -16.22% |
+| total | 0.22ms | 0.26ms | -0.04ms | -14.22% |
 

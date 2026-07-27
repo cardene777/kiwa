@@ -16,15 +16,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|---|---|
 | redisEnvAccessor | 0.01ms | 10ms | PASS |
 | memcachedEnvAccessor | 0.01ms | 10ms | PASS |
-| keydbEnvAccessor | 0.01ms | 10ms | PASS |
+| keydbEnvAccessor | 0.00ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| redisEnvAccessor | -11944 B | 0 B | 102400 B | yes | PASS |
-| memcachedEnvAccessor | 656 B | 0 B | 102400 B | yes | PASS |
-| keydbEnvAccessor | 912 B | 0 B | 102400 B | yes | PASS |
+| redisEnvAccessor | -6648 B | 0 B | 102400 B | yes | PASS |
+| memcachedEnvAccessor | -14920 B | 0 B | 102400 B | yes | PASS |
+| keydbEnvAccessor | -216 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -50,12 +50,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -0.71% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +27.78% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +2.91% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +13.15% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +2.37% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +0.94% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +48.39% |
-| total | 0.05ms | 0.05ms | +0.00ms | +2.91% |
+| max | 0.00ms | 0.00ms | +0.00ms | +22.61% |
+| total | 0.05ms | 0.05ms | +0.00ms | +0.94% |
 
 ### memcachedEnvAccessor
 
@@ -80,11 +80,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
 | p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +9.91% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +1.39% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +29.58% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -0.41% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +55.95% |
-| total | 0.03ms | 0.03ms | +0.00ms | +1.39% |
+| max | 0.00ms | 0.00ms | -0.00ms | -0.10% |
+| total | 0.03ms | 0.03ms | -0.00ms | -0.41% |
 
 ### keydbEnvAccessor
 
@@ -101,7 +101,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.05ms |
+| total | 0.04ms |
 
 ## Baseline diff
 
@@ -109,9 +109,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
 | p95 | 0.00ms | 0.00ms | -0.00ms | -0.02% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +138.23% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +18.47% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +63.64% |
-| total | 0.05ms | 0.04ms | +0.01ms | +18.47% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +33.00% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +4.21% |
+| min | 0.00ms | 0.00ms | -0.00ms | -33.60% |
+| max | 0.01ms | 0.01ms | +0.00ms | +31.52% |
+| total | 0.04ms | 0.04ms | +0.00ms | +4.21% |
 

@@ -24,10 +24,10 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeAxumHandler | -1552 B | 0 B | 102400 B | yes | PASS |
-| invokeActixHandler | 5048 B | 0 B | 102400 B | yes | PASS |
-| captureTowerMiddleware | -216 B | 0 B | 102400 B | yes | PASS |
-| invokeRocketRoute | 5008 B | 0 B | 102400 B | yes | PASS |
+| invokeAxumHandler | -2544 B | 0 B | 102400 B | yes | PASS |
+| invokeActixHandler | 4880 B | 0 B | 102400 B | yes | PASS |
+| captureTowerMiddleware | 944 B | 0 B | 102400 B | yes | PASS |
+| invokeRocketRoute | 2720 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -46,19 +46,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.17ms |
+| total | 0.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -14.97% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -21.41% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -4.60% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +7.20% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -6.49% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -9.18% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +6.53% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | -0.00ms | -7.69% |
-| total | 0.17ms | 0.18ms | -0.01ms | -4.60% |
+| max | 0.01ms | 0.01ms | +0.00ms | +6.76% |
+| total | 0.19ms | 0.18ms | +0.01ms | +6.53% |
 
 ### invokeActixHandler
 
@@ -70,24 +70,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.00ms |
 | mean | 0.00ms |
-| stdev | 0.01ms |
+| stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.07ms |
-| total | 0.21ms |
+| max | 0.00ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +10.47% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +179.46% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +71.24% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -2.71% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +3.01% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -0.31% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.07ms | 0.00ms | +0.07ms | +1797.83% |
-| total | 0.21ms | 0.12ms | +0.09ms | +71.24% |
+| max | 0.00ms | 0.00ms | +0.00ms | +19.35% |
+| total | 0.12ms | 0.12ms | -0.00ms | -0.31% |
 
 ### captureTowerMiddleware
 
@@ -104,19 +104,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.17ms |
+| total | 0.18ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -17.51% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +14.40% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +0.32% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -5.03% |
-| min | 0.00ms | 0.00ms | -0.00ms | -13.44% |
-| max | 0.01ms | 0.01ms | +0.00ms | +15.72% |
-| total | 0.17ms | 0.18ms | -0.01ms | -5.03% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -17.66% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +42.37% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +29.62% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -2.18% |
+| min | 0.00ms | 0.00ms | -0.00ms | -20.00% |
+| max | 0.01ms | 0.01ms | +0.00ms | +29.43% |
+| total | 0.18ms | 0.18ms | -0.00ms | -2.18% |
 
 ### invokeRocketRoute
 
@@ -140,10 +140,10 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | -0.00ms | -7.75% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +6.47% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -1.32% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -6.23% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -14.13% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +4.34% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -3.73% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +10.00% |
-| total | 0.12ms | 0.13ms | -0.01ms | -6.23% |
+| max | 0.01ms | 0.01ms | +0.00ms | +8.32% |
+| total | 0.12ms | 0.13ms | -0.00ms | -3.73% |
 

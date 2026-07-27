@@ -15,16 +15,16 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate |
 |---|---|---|---|
 | validateSchema | 0.01ms | 10ms | PASS |
-| registerFieldAndSubmit | 0.08ms | 10ms | PASS |
+| registerFieldAndSubmit | 0.13ms | 10ms | PASS |
 | getFieldErrorAfterFailure | 0.06ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| validateSchema | -5096 B | 0 B | 102400 B | yes | PASS |
+| validateSchema | -9128 B | 0 B | 102400 B | yes | PASS |
 | registerFieldAndSubmit | -8984 B | 0 B | 102400 B | yes | PASS |
-| getFieldErrorAfterFailure | 816 B | 0 B | 102400 B | yes | PASS |
+| getFieldErrorAfterFailure | 1360 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -49,13 +49,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -7.75% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +5.15% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -7.64% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -4.79% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -22.40% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +36.93% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -2.95% |
 | min | 0.00ms | 0.00ms | -0.00ms | -8.40% |
-| max | 0.01ms | 0.01ms | +0.00ms | +10.30% |
-| total | 0.14ms | 0.15ms | -0.01ms | -4.79% |
+| max | 0.01ms | 0.01ms | -0.00ms | -19.39% |
+| total | 0.14ms | 0.15ms | -0.00ms | -2.95% |
 
 ### registerFieldAndSubmit
 
@@ -67,24 +67,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.01ms |
 | p95 | 0.02ms |
-| p99 | 0.03ms |
+| p99 | 0.05ms |
 | mean | 0.01ms |
 | stdev | 0.01ms |
 | min | 0.01ms |
-| max | 0.14ms |
-| total | 2.19ms |
+| max | 0.11ms |
+| total | 1.87ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +51.01% |
-| p95 | 0.02ms | 0.01ms | +0.01ms | +51.42% |
-| p99 | 0.03ms | 0.02ms | +0.01ms | +29.36% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +54.48% |
-| min | 0.01ms | 0.01ms | -0.00ms | -5.15% |
-| max | 0.14ms | 0.03ms | +0.11ms | +384.17% |
-| total | 2.19ms | 1.42ms | +0.77ms | +54.48% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +2.70% |
+| p95 | 0.02ms | 0.01ms | +0.00ms | +40.26% |
+| p99 | 0.05ms | 0.02ms | +0.03ms | +125.31% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +31.78% |
+| min | 0.01ms | 0.01ms | -0.00ms | -0.74% |
+| max | 0.11ms | 0.03ms | +0.09ms | +309.10% |
+| total | 1.87ms | 1.42ms | +0.45ms | +31.78% |
 
 ### getFieldErrorAfterFailure
 
@@ -98,20 +98,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.01ms |
 | p99 | 0.02ms |
 | mean | 0.01ms |
-| stdev | 0.00ms |
+| stdev | 0.01ms |
 | min | 0.00ms |
-| max | 0.04ms |
-| total | 1.04ms |
+| max | 0.15ms |
+| total | 1.15ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -9.26% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +4.83% |
-| p99 | 0.02ms | 0.01ms | +0.00ms | +34.43% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -3.36% |
-| min | 0.00ms | 0.00ms | -0.00ms | -9.12% |
-| max | 0.04ms | 0.02ms | +0.02ms | +77.97% |
-| total | 1.04ms | 1.07ms | -0.04ms | -3.36% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -10.93% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +11.39% |
+| p99 | 0.02ms | 0.01ms | +0.01ms | +73.13% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +7.13% |
+| min | 0.00ms | 0.00ms | -0.00ms | -9.10% |
+| max | 0.15ms | 0.02ms | +0.12ms | +580.51% |
+| total | 1.15ms | 1.07ms | +0.08ms | +7.13% |
 

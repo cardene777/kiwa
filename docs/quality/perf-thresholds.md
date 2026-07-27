@@ -74,7 +74,7 @@ Threshold: **20 % p95 delta** vs stored baseline (`.perf-baseline/{module}.json`
 - baseline is created automatically on the first run (no `--baseline` flag needed since v1.14-post)
 - subsequent runs compare against baseline; a > 20 % p95 increase with significant t-value fails the gate
 - the p95 difference must also be at least **0.5 ms** in absolute terms (`minDeltaMs`). A relative-only rule gets stricter as the measured value shrinks: 0.03 ms → 0.04 ms is a "significant 33 % regression" on stable samples, yet nothing is actually slower. Ops measured in microseconds would fail on jitter alone.
-- baselines are discarded and reseeded when the measurement premise changes (Node version, platform, or whether `--expose-gc` was available). Comparing across those boundaries reports regressions that no code change caused.
+- baselines are discarded and reseeded when the measurement premise changes (Node version, platform, CPU, or whether `--expose-gc` was available). Comparing across those boundaries reports regressions that no code change caused. The first valid run under the new premise reseeds; comparison resumes from the run after that. A run that is not itself valid — `requireGc: true` with no GC available, or one that fails a hard cap — leaves the stored baseline untouched, so a broken environment cannot become the new reference.
 - to intentionally accept the new baseline (e.g. after a deliberate optimisation regression), delete `.perf-baseline/{module}.json` and rerun
 
 ## Real-API measurement mode

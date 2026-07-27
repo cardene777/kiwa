@@ -15,16 +15,16 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate |
 |---|---|---|---|
 | uploadFile | 0.03ms | 10ms | PASS |
-| createPresignedUrl | 0.04ms | 10ms | PASS |
+| createPresignedUrl | 0.03ms | 10ms | PASS |
 | verifyUpload | 0.02ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| uploadFile | 102952 B | 8192 B | 102400 B | yes | PASS |
-| createPresignedUrl | -26288 B | 0 B | 102400 B | yes | PASS |
-| verifyUpload | -21568 B | 0 B | 102400 B | yes | PASS |
+| uploadFile | -190528 B | 8192 B | 102400 B | yes | PASS |
+| createPresignedUrl | -10880 B | 0 B | 102400 B | yes | PASS |
+| verifyUpload | 253776 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -42,20 +42,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.03ms |
-| total | 0.65ms |
+| max | 0.02ms |
+| total | 0.54ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +26.86% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +13.52% |
-| p99 | 0.02ms | 0.01ms | +0.00ms | +2.77% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +15.42% |
-| min | 0.00ms | 0.00ms | +0.00ms | +15.72% |
-| max | 0.03ms | 0.02ms | +0.00ms | +16.42% |
-| total | 0.65ms | 0.56ms | +0.09ms | +15.42% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -1.06% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -6.36% |
+| p99 | 0.02ms | 0.01ms | +0.00ms | +1.79% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -4.14% |
+| min | 0.00ms | 0.00ms | +0.00ms | +2.59% |
+| max | 0.02ms | 0.02ms | -0.00ms | -2.45% |
+| total | 0.54ms | 0.56ms | -0.02ms | -4.14% |
 
 ### createPresignedUrl
 
@@ -71,20 +71,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.02ms |
-| total | 0.57ms |
+| max | 0.01ms |
+| total | 0.45ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +18.89% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -4.39% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +6.77% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +17.34% |
-| min | 0.00ms | 0.00ms | +0.00ms | +36.39% |
-| max | 0.02ms | 0.01ms | +0.00ms | +10.89% |
-| total | 0.57ms | 0.49ms | +0.08ms | +17.34% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -13.22% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -3.97% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -12.61% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -8.49% |
+| min | 0.00ms | 0.00ms | -0.00ms | -2.29% |
+| max | 0.01ms | 0.01ms | -0.00ms | -5.74% |
+| total | 0.45ms | 0.49ms | -0.04ms | -8.49% |
 
 ### verifyUpload
 
@@ -101,17 +101,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.29ms |
+| total | 0.24ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +19.96% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +24.86% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +34.48% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +12.99% |
-| min | 0.00ms | 0.00ms | +0.00ms | +17.43% |
-| max | 0.01ms | 0.01ms | -0.01ms | -41.34% |
-| total | 0.29ms | 0.25ms | +0.03ms | +12.99% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -0.10% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -13.11% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +38.10% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -5.00% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | -0.01ms | -36.31% |
+| total | 0.24ms | 0.25ms | -0.01ms | -5.00% |
 

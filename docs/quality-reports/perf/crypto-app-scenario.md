@@ -6,30 +6,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| auth_token_workflow (10 sign+verify+hash) | 0.18ms | 100ms | PASS | stable |
-| data_encryption_batch (5 aes-gcm encrypt+decrypt+hash) | 0.05ms | 200ms | PASS | stable |
+| auth_token_workflow (10 sign+verify+hash) | 0.11ms | 100ms | PASS | stable |
+| data_encryption_batch (5 aes-gcm encrypt+decrypt+hash) | 0.04ms | 200ms | PASS | stable |
 | kdf_password_batch (5 pbkdf2 derive+verify) | 0.89ms | 1000ms | PASS | stable |
-| stream_cipher_batch (5 chacha20 encrypt+decrypt) | 0.07ms | 100ms | PASS | stable |
-| ed25519_batch (5 sign+verify + 5 RSA sig error) | 1.11ms | 500ms | PASS | stable |
+| stream_cipher_batch (5 chacha20 encrypt+decrypt) | 0.10ms | 100ms | PASS | stable |
+| ed25519_batch (5 sign+verify + 5 RSA sig error) | 1.66ms | 500ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| auth_token_workflow (10 sign+verify+hash) | 0.32ms | 200ms | PASS |
-| data_encryption_batch (5 aes-gcm encrypt+decrypt+hash) | 0.19ms | 400ms | PASS |
-| kdf_password_batch (5 pbkdf2 derive+verify) | 3.33ms | 2000ms | PASS |
-| stream_cipher_batch (5 chacha20 encrypt+decrypt) | 0.14ms | 200ms | PASS |
-| ed25519_batch (5 sign+verify + 5 RSA sig error) | 4.41ms | 1000ms | PASS |
+| auth_token_workflow (10 sign+verify+hash) | 0.29ms | 200ms | PASS |
+| data_encryption_batch (5 aes-gcm encrypt+decrypt+hash) | 0.18ms | 400ms | PASS |
+| kdf_password_batch (5 pbkdf2 derive+verify) | 3.64ms | 2000ms | PASS |
+| stream_cipher_batch (5 chacha20 encrypt+decrypt) | 0.15ms | 200ms | PASS |
+| ed25519_batch (5 sign+verify + 5 RSA sig error) | 5.02ms | 1000ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| auth_token_workflow (10 sign+verify+hash) | 120 B | 0 B | 102400 B | yes | PASS |
-| data_encryption_batch (5 aes-gcm encrypt+decrypt+hash) | -12632 B | 0 B | 102400 B | yes | PASS |
-| kdf_password_batch (5 pbkdf2 derive+verify) | 7840 B | 0 B | 102400 B | yes | PASS |
-| stream_cipher_batch (5 chacha20 encrypt+decrypt) | 2520 B | -13260 B | 102400 B | yes | PASS |
+| auth_token_workflow (10 sign+verify+hash) | 488 B | 0 B | 102400 B | yes | PASS |
+| data_encryption_batch (5 aes-gcm encrypt+decrypt+hash) | -13368 B | 0 B | 102400 B | yes | PASS |
+| kdf_password_batch (5 pbkdf2 derive+verify) | 6512 B | -9616 B | 102400 B | yes | PASS |
+| stream_cipher_batch (5 chacha20 encrypt+decrypt) | 5392 B | -13152 B | 102400 B | yes | PASS |
 | ed25519_batch (5 sign+verify + 5 RSA sig error) | -6712 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
@@ -42,26 +42,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.10ms |
-| p95 | 0.18ms |
-| p99 | 0.23ms |
-| mean | 0.11ms |
-| stdev | 0.04ms |
+| p50 | 0.09ms |
+| p95 | 0.11ms |
+| p99 | 0.12ms |
+| mean | 0.09ms |
+| stdev | 0.02ms |
 | min | 0.07ms |
-| max | 0.24ms |
-| total | 2.10ms |
+| max | 0.13ms |
+| total | 1.75ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.10ms | 0.10ms | -0.00ms | -4.37% |
-| p95 | 0.18ms | 0.47ms | -0.29ms | -62.49% |
-| p99 | 0.23ms | 0.55ms | -0.32ms | -58.91% |
-| mean | 0.11ms | 0.16ms | -0.05ms | -32.60% |
-| min | 0.07ms | 0.08ms | -0.01ms | -10.03% |
-| max | 0.24ms | 0.57ms | -0.33ms | -58.17% |
-| total | 2.10ms | 3.12ms | -1.02ms | -32.60% |
+| p50 | 0.09ms | 0.10ms | -0.01ms | -13.80% |
+| p95 | 0.11ms | 0.47ms | -0.36ms | -77.23% |
+| p99 | 0.12ms | 0.55ms | -0.43ms | -77.46% |
+| mean | 0.09ms | 0.16ms | -0.07ms | -43.83% |
+| min | 0.07ms | 0.08ms | -0.01ms | -11.40% |
+| max | 0.13ms | 0.57ms | -0.44ms | -77.51% |
+| total | 1.75ms | 3.12ms | -1.37ms | -43.83% |
 
 ### data_encryption_batch (5 aes-gcm encrypt+decrypt+hash)
 
@@ -72,25 +72,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.04ms |
-| p95 | 0.05ms |
+| p95 | 0.04ms |
 | p99 | 0.05ms |
 | mean | 0.04ms |
-| stdev | 0.01ms |
+| stdev | 0.00ms |
 | min | 0.03ms |
-| max | 0.06ms |
-| total | 0.76ms |
+| max | 0.05ms |
+| total | 0.74ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.04ms | 0.04ms | -0.01ms | -16.77% |
-| p95 | 0.05ms | 0.06ms | -0.01ms | -24.81% |
-| p99 | 0.05ms | 0.06ms | -0.01ms | -11.65% |
-| mean | 0.04ms | 0.04ms | -0.01ms | -13.81% |
-| min | 0.03ms | 0.04ms | -0.00ms | -11.43% |
-| max | 0.06ms | 0.06ms | -0.01ms | -8.38% |
-| total | 0.76ms | 0.88ms | -0.12ms | -13.81% |
+| p50 | 0.04ms | 0.04ms | -0.01ms | -16.33% |
+| p95 | 0.04ms | 0.06ms | -0.02ms | -26.94% |
+| p99 | 0.05ms | 0.06ms | -0.01ms | -20.73% |
+| mean | 0.04ms | 0.04ms | -0.01ms | -15.83% |
+| min | 0.03ms | 0.04ms | -0.00ms | -10.99% |
+| max | 0.05ms | 0.06ms | -0.01ms | -19.18% |
+| total | 0.74ms | 0.88ms | -0.14ms | -15.83% |
 
 ### kdf_password_batch (5 pbkdf2 derive+verify)
 
@@ -100,26 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.82ms |
+| p50 | 0.83ms |
 | p95 | 0.89ms |
-| p99 | 0.91ms |
-| mean | 0.83ms |
+| p99 | 0.92ms |
+| mean | 0.84ms |
 | stdev | 0.03ms |
-| min | 0.80ms |
-| max | 0.91ms |
-| total | 16.64ms |
+| min | 0.81ms |
+| max | 0.93ms |
+| total | 16.82ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.82ms | 0.84ms | -0.02ms | -2.78% |
-| p95 | 0.89ms | 0.97ms | -0.08ms | -8.52% |
-| p99 | 0.91ms | 0.99ms | -0.08ms | -8.01% |
-| mean | 0.83ms | 0.87ms | -0.04ms | -4.53% |
-| min | 0.80ms | 0.82ms | -0.01ms | -1.84% |
-| max | 0.91ms | 0.99ms | -0.08ms | -7.89% |
-| total | 16.64ms | 17.43ms | -0.79ms | -4.53% |
+| p50 | 0.83ms | 0.84ms | -0.01ms | -1.65% |
+| p95 | 0.89ms | 0.97ms | -0.08ms | -8.15% |
+| p99 | 0.92ms | 0.99ms | -0.07ms | -6.71% |
+| mean | 0.84ms | 0.87ms | -0.03ms | -3.45% |
+| min | 0.81ms | 0.82ms | -0.00ms | -0.56% |
+| max | 0.93ms | 0.99ms | -0.06ms | -6.36% |
+| total | 16.82ms | 17.43ms | -0.60ms | -3.45% |
 
 ### stream_cipher_batch (5 chacha20 encrypt+decrypt)
 
@@ -129,26 +129,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.03ms |
-| p95 | 0.07ms |
-| p99 | 0.08ms |
-| mean | 0.04ms |
-| stdev | 0.01ms |
+| p50 | 0.04ms |
+| p95 | 0.10ms |
+| p99 | 0.13ms |
+| mean | 0.05ms |
+| stdev | 0.03ms |
 | min | 0.03ms |
-| max | 0.08ms |
-| total | 0.77ms |
+| max | 0.14ms |
+| total | 0.90ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.03ms | 0.04ms | -0.01ms | -17.52% |
-| p95 | 0.07ms | 0.06ms | +0.02ms | +33.59% |
-| p99 | 0.08ms | 0.15ms | -0.07ms | -47.66% |
-| mean | 0.04ms | 0.05ms | -0.01ms | -17.96% |
-| min | 0.03ms | 0.04ms | -0.01ms | -14.44% |
-| max | 0.08ms | 0.18ms | -0.10ms | -54.00% |
-| total | 0.77ms | 0.94ms | -0.17ms | -17.96% |
+| p50 | 0.04ms | 0.04ms | -0.00ms | -7.19% |
+| p95 | 0.10ms | 0.06ms | +0.04ms | +70.04% |
+| p99 | 0.13ms | 0.15ms | -0.02ms | -13.46% |
+| mean | 0.05ms | 0.05ms | -0.00ms | -4.23% |
+| min | 0.03ms | 0.04ms | -0.00ms | -9.47% |
+| max | 0.14ms | 0.18ms | -0.04ms | -19.98% |
+| total | 0.90ms | 0.94ms | -0.04ms | -4.23% |
 
 ### ed25519_batch (5 sign+verify + 5 RSA sig error)
 
@@ -158,24 +158,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 1.05ms |
-| p95 | 1.11ms |
-| p99 | 1.13ms |
-| mean | 1.05ms |
-| stdev | 0.03ms |
-| min | 1.00ms |
-| max | 1.13ms |
-| total | 21.08ms |
+| p50 | 1.17ms |
+| p95 | 1.66ms |
+| p99 | 1.73ms |
+| mean | 1.21ms |
+| stdev | 0.18ms |
+| min | 1.03ms |
+| max | 1.75ms |
+| total | 24.24ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 1.05ms | 1.20ms | -0.16ms | -13.02% |
-| p95 | 1.11ms | 1.46ms | -0.35ms | -23.92% |
-| p99 | 1.13ms | 1.48ms | -0.35ms | -23.69% |
-| mean | 1.05ms | 1.25ms | -0.20ms | -15.63% |
-| min | 1.00ms | 1.07ms | -0.07ms | -6.29% |
-| max | 1.13ms | 1.48ms | -0.35ms | -23.64% |
-| total | 21.08ms | 24.98ms | -3.90ms | -15.63% |
+| p50 | 1.17ms | 1.20ms | -0.03ms | -2.53% |
+| p95 | 1.66ms | 1.46ms | +0.20ms | +13.33% |
+| p99 | 1.73ms | 1.48ms | +0.25ms | +17.10% |
+| mean | 1.21ms | 1.25ms | -0.04ms | -2.99% |
+| min | 1.03ms | 1.07ms | -0.04ms | -3.95% |
+| max | 1.75ms | 1.48ms | +0.27ms | +18.03% |
+| total | 24.24ms | 24.98ms | -0.75ms | -2.99% |
 

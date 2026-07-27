@@ -16,15 +16,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|---|---|
 | user_flow_workflow (10 setup + navigate + storage) | 0.04ms | 200ms | PASS |
 | multi_platform_batch (5 iOS+Android+web env switch) | 0.02ms | 200ms | PASS |
-| linking_error_handling (5 invalid url + listener cleanup) | 0.06ms | 200ms | PASS |
+| linking_error_handling (5 invalid url + listener cleanup) | 0.05ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| user_flow_workflow (10 setup + navigate + storage) | -4496 B | 0 B | 102400 B | yes | PASS |
-| multi_platform_batch (5 iOS+Android+web env switch) | 1336 B | 0 B | 102400 B | yes | PASS |
-| linking_error_handling (5 invalid url + listener cleanup) | 7200 B | 0 B | 102400 B | yes | PASS |
+| user_flow_workflow (10 setup + navigate + storage) | -8192 B | 0 B | 102400 B | yes | PASS |
+| multi_platform_batch (5 iOS+Android+web env switch) | 88 B | 0 B | 102400 B | yes | PASS |
+| linking_error_handling (5 invalid url + listener cleanup) | 6280 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -49,13 +49,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -3.84% |
-| p95 | 0.02ms | 0.02ms | +0.00ms | +5.09% |
-| p99 | 0.02ms | 0.02ms | -0.00ms | -12.67% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -4.76% |
-| min | 0.01ms | 0.01ms | -0.00ms | -5.00% |
-| max | 0.02ms | 0.02ms | -0.00ms | -15.88% |
-| total | 0.19ms | 0.20ms | -0.01ms | -4.76% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -3.62% |
+| p95 | 0.02ms | 0.02ms | +0.00ms | +5.48% |
+| p99 | 0.02ms | 0.02ms | -0.00ms | -14.11% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -5.05% |
+| min | 0.01ms | 0.01ms | -0.00ms | -2.77% |
+| max | 0.02ms | 0.02ms | -0.00ms | -17.65% |
+| total | 0.19ms | 0.20ms | -0.01ms | -5.05% |
 
 ### multi_platform_batch (5 iOS+Android+web env switch)
 
@@ -71,20 +71,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.06ms |
+| max | 0.02ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -7.03% |
-| p95 | 0.01ms | 0.00ms | +0.00ms | +51.33% |
-| p99 | 0.01ms | 0.00ms | +0.01ms | +119.31% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +9.91% |
-| min | 0.00ms | 0.00ms | -0.00ms | -5.56% |
-| max | 0.01ms | 0.00ms | +0.01ms | +132.68% |
-| total | 0.06ms | 0.05ms | +0.01ms | +9.91% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +76.29% |
+| p95 | 0.01ms | 0.00ms | +0.01ms | +159.89% |
+| p99 | 0.01ms | 0.00ms | +0.01ms | +229.30% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +90.74% |
+| min | 0.00ms | 0.00ms | +0.00ms | +9.29% |
+| max | 0.02ms | 0.00ms | +0.01ms | +242.95% |
+| total | 0.10ms | 0.05ms | +0.05ms | +90.74% |
 
 ### linking_error_handling (5 invalid url + listener cleanup)
 
@@ -107,11 +107,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -11.58% |
-| p95 | 0.01ms | 0.02ms | -0.00ms | -21.76% |
-| p99 | 0.01ms | 0.02ms | -0.01ms | -30.96% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -14.86% |
-| min | 0.01ms | 0.01ms | -0.00ms | -8.61% |
-| max | 0.01ms | 0.02ms | -0.01ms | -32.73% |
-| total | 0.24ms | 0.28ms | -0.04ms | -14.86% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -10.95% |
+| p95 | 0.01ms | 0.02ms | -0.00ms | -21.05% |
+| p99 | 0.01ms | 0.02ms | -0.01ms | -34.36% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -14.50% |
+| min | 0.01ms | 0.01ms | -0.00ms | -9.27% |
+| max | 0.01ms | 0.02ms | -0.01ms | -36.93% |
+| total | 0.24ms | 0.28ms | -0.04ms | -14.50% |
 

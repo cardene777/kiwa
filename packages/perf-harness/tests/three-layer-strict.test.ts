@@ -189,16 +189,15 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     }
   });
 
-  it('does not overwrite a baseline measured under a different premise', async () => {
+  it('does not overwrite a baseline from a measurement that is not valid', async () => {
     const tmpDir = tempDir();
     const baselinePath = join(tmpDir, 'baseline.json');
     const common = { fn: () => {}, serialP95CapMs: 1000 };
     const settings = { serialIterations: 30, concurrency: 3, memoryIterations: 30 };
 
     // GC を呼べる状態で baseline を作る。
-    const gcStub = () => undefined;
     const originalGc = (globalThis as unknown as { gc?: () => void }).gc;
-    (globalThis as unknown as { gc: () => void }).gc = gcStub;
+    (globalThis as unknown as { gc: () => void }).gc = () => undefined;
     let seeded: string;
     try {
       await runPerf3LayerStrict({
@@ -206,6 +205,7 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
         ops: [{ name: 'existing', ...common }],
         reportPath: join(tmpDir, 'r1.md'),
         baselinePath,
+        requireGc: true,
         ...settings,
       });
       seeded = readFileSync(baselinePath, 'utf8');
@@ -214,9 +214,9 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       else (globalThis as unknown as { gc: () => void }).gc = originalGc;
     }
 
-    // GC 無しで測る。前提が違うので比較対象にできないが、この値で上書きすると
-    // 次に正しい環境で測ったときも再 seed になり、その間の回帰を見逃す。
-    await runPerf3LayerStrict({
+    // GC を要求しているのに使えない実行は測定自体が成立しない。
+    // この値で作り直すと、成立しない前提を新しい正としてしまう。
+    const invalid = await runPerf3LayerStrict({
       moduleName: 'premise',
       ops: [
         { name: 'existing', ...common },
@@ -224,10 +224,58 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       ],
       reportPath: join(tmpDir, 'r2.md'),
       baselinePath,
+      requireGc: true,
       ...settings,
     });
 
+    expect(invalid.baselineSeeded).toBe(false);
     expect(readFileSync(baselinePath, 'utf8')).toBe(seeded);
+  });
+
+  it('reseeds under a new premise so comparison recovers', async () => {
+    const tmpDir = tempDir();
+    const baselinePath = join(tmpDir, 'baseline.json');
+    const common = { fn: () => {}, serialP95CapMs: 1000 };
+    const settings = { serialIterations: 30, concurrency: 3, memoryIterations: 30 };
+
+    // GC を呼べる状態で baseline を作る。
+    const originalGc = (globalThis as unknown as { gc?: () => void }).gc;
+    (globalThis as unknown as { gc: () => void }).gc = () => undefined;
+    try {
+      await runPerf3LayerStrict({
+        moduleName: 'reseed',
+        ops: [{ name: 'op', ...common }],
+        reportPath: join(tmpDir, 'r1.md'),
+        baselinePath,
+        ...settings,
+      });
+    } finally {
+      if (originalGc === undefined) delete (globalThis as unknown as { gc?: () => void }).gc;
+      else (globalThis as unknown as { gc: () => void }).gc = originalGc;
+    }
+
+    // 前提が変わった状態で測る。保存しないままだと手動削除まで永久に
+    // 比較できないので、測定が成立している実行なら作り直す。
+    const reseeded = await runPerf3LayerStrict({
+      moduleName: 'reseed',
+      ops: [{ name: 'op', ...common }],
+      reportPath: join(tmpDir, 'r2.md'),
+      baselinePath,
+      ...settings,
+    });
+    expect(reseeded.baselineSeeded).toBe(true);
+    expect(reseeded.outcomes[0]!.regressionVerdict).toBe('n/a (baseline seeded)');
+
+    // 作り直した前提の下では次回から比較が働く。
+    const compared = await runPerf3LayerStrict({
+      moduleName: 'reseed',
+      ops: [{ name: 'op', ...common }],
+      reportPath: join(tmpDir, 'r3.md'),
+      baselinePath,
+      ...settings,
+    });
+    expect(compared.baselineSeeded).toBe(false);
+    expect(compared.outcomes[0]!.regressionVerdict).not.toBe('n/a (baseline seeded)');
   });
 
   it('links to the threshold SSOT from nested report paths', async () => {

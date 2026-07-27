@@ -6,7 +6,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| multi_provider_workflow (5 provider x 2 dispatch cycles) | 0.01ms | 100ms | PASS | stable |
+| multi_provider_workflow (5 provider x 2 dispatch cycles) | 0.04ms | 100ms | PASS | stable |
 | subscribe_batch (5 listener + 5 state updates) | 0.01ms | 100ms | PASS | stable |
 | dispatch_error_handling (5 unknown action type dispatch) | 0.01ms | 100ms | PASS | stable |
 
@@ -14,17 +14,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| multi_provider_workflow (5 provider x 2 dispatch cycles) | 0.02ms | 200ms | PASS |
-| subscribe_batch (5 listener + 5 state updates) | 0.01ms | 200ms | PASS |
-| dispatch_error_handling (5 unknown action type dispatch) | 0.05ms | 200ms | PASS |
+| multi_provider_workflow (5 provider x 2 dispatch cycles) | 0.12ms | 200ms | PASS |
+| subscribe_batch (5 listener + 5 state updates) | 0.02ms | 200ms | PASS |
+| dispatch_error_handling (5 unknown action type dispatch) | 0.04ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| multi_provider_workflow (5 provider x 2 dispatch cycles) | 73832 B | -11186 B | 102400 B | yes | PASS |
-| subscribe_batch (5 listener + 5 state updates) | 944 B | 0 B | 102400 B | yes | PASS |
-| dispatch_error_handling (5 unknown action type dispatch) | -832 B | 0 B | 102400 B | yes | PASS |
+| multi_provider_workflow (5 provider x 2 dispatch cycles) | 8224 B | 0 B | 102400 B | yes | PASS |
+| subscribe_batch (5 listener + 5 state updates) | 1960 B | 0 B | 102400 B | yes | PASS |
+| dispatch_error_handling (5 unknown action type dispatch) | 912 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -37,25 +37,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.00ms |
-| p95 | 0.01ms |
-| p99 | 0.01ms |
+| p95 | 0.04ms |
+| p99 | 0.08ms |
 | mean | 0.01ms |
-| stdev | 0.00ms |
+| stdev | 0.02ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.11ms |
+| max | 0.09ms |
+| total | 0.23ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +38.27% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -31.13% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +22.17% |
-| mean | 0.01ms | 0.00ms | +0.00ms | +13.31% |
-| min | 0.00ms | 0.00ms | +0.00ms | +40.27% |
-| max | 0.01ms | 0.01ms | +0.00ms | +33.82% |
-| total | 0.11ms | 0.09ms | +0.01ms | +13.31% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +45.05% |
+| p95 | 0.04ms | 0.01ms | +0.03ms | +335.53% |
+| p99 | 0.08ms | 0.01ms | +0.07ms | +623.13% |
+| mean | 0.01ms | 0.00ms | +0.01ms | +142.63% |
+| min | 0.00ms | 0.00ms | +0.00ms | +0.03% |
+| max | 0.09ms | 0.01ms | +0.08ms | +686.04% |
+| total | 0.23ms | 0.09ms | +0.13ms | +142.63% |
 
 ### subscribe_batch (5 listener + 5 state updates)
 
@@ -78,13 +78,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +14.06% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -2.88% |
-| p99 | 0.01ms | 0.02ms | -0.01ms | -29.95% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +4.42% |
-| min | 0.00ms | 0.00ms | +0.00ms | +7.80% |
-| max | 0.01ms | 0.02ms | -0.01ms | -33.40% |
-| total | 0.09ms | 0.08ms | +0.00ms | +4.42% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +30.36% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +3.35% |
+| p99 | 0.01ms | 0.02ms | -0.01ms | -28.69% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +10.92% |
+| min | 0.00ms | 0.00ms | +0.00ms | +12.49% |
+| max | 0.01ms | 0.02ms | -0.01ms | -32.78% |
+| total | 0.09ms | 0.08ms | +0.01ms | +10.92% |
 
 ### dispatch_error_handling (5 unknown action type dispatch)
 
@@ -101,17 +101,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.01ms |
 | max | 0.02ms |
-| total | 0.24ms |
+| total | 0.20ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +31.60% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +28.92% |
-| p99 | 0.02ms | 0.01ms | +0.00ms | +27.60% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +31.24% |
-| min | 0.01ms | 0.01ms | +0.00ms | +30.11% |
-| max | 0.02ms | 0.01ms | +0.00ms | +27.35% |
-| total | 0.24ms | 0.18ms | +0.06ms | +31.24% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +9.42% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +24.31% |
+| p99 | 0.02ms | 0.01ms | +0.00ms | +15.00% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +9.81% |
+| min | 0.01ms | 0.01ms | +0.00ms | +3.89% |
+| max | 0.02ms | 0.01ms | +0.00ms | +13.23% |
+| total | 0.20ms | 0.18ms | +0.02ms | +9.81% |
 

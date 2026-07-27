@@ -6,28 +6,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| anthropicMessagesCreate | 10.11ms | 40ms | PASS | stable |
-| openAiChatCompletionsCreate | 10.11ms | 40ms | PASS | stable |
-| vercelGenerateText | 10.12ms | 40ms | PASS | stable |
-| langchainInvoke | 10.09ms | 40ms | PASS | stable |
+| anthropicMessagesCreate | 9.10ms | 40ms | PASS | stable |
+| openAiChatCompletionsCreate | 9.09ms | 40ms | PASS | stable |
+| vercelGenerateText | 9.12ms | 40ms | PASS | stable |
+| langchainInvoke | 9.10ms | 40ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| anthropicMessagesCreate | 10.76ms | 80ms | PASS |
-| openAiChatCompletionsCreate | 10.14ms | 80ms | PASS |
-| vercelGenerateText | 10.14ms | 80ms | PASS |
-| langchainInvoke | 10.12ms | 80ms | PASS |
+| anthropicMessagesCreate | 9.17ms | 80ms | PASS |
+| openAiChatCompletionsCreate | 9.12ms | 80ms | PASS |
+| vercelGenerateText | 9.32ms | 80ms | PASS |
+| langchainInvoke | 9.11ms | 80ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| anthropicMessagesCreate | 26728 B | 0 B | 102400 B | yes | PASS |
-| openAiChatCompletionsCreate | 4264 B | 0 B | 102400 B | yes | PASS |
-| vercelGenerateText | 4912 B | 0 B | 102400 B | yes | PASS |
-| langchainInvoke | 3992 B | 0 B | 102400 B | yes | PASS |
+| anthropicMessagesCreate | 28232 B | 0 B | 102400 B | yes | PASS |
+| openAiChatCompletionsCreate | -11696 B | 0 B | 102400 B | yes | PASS |
+| vercelGenerateText | 5920 B | 0 B | 102400 B | yes | PASS |
+| langchainInvoke | 2984 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -39,26 +39,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 9.86ms |
-| p95 | 10.11ms |
-| p99 | 10.14ms |
-| mean | 9.46ms |
-| stdev | 0.70ms |
-| min | 8.04ms |
-| max | 10.18ms |
-| total | 1892.53ms |
+| p50 | 9.05ms |
+| p95 | 9.10ms |
+| p99 | 9.11ms |
+| mean | 8.81ms |
+| stdev | 0.44ms |
+| min | 7.40ms |
+| max | 11.91ms |
+| total | 1761.87ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 9.86ms | 9.04ms | +0.82ms | +9.06% |
-| p95 | 10.11ms | 9.11ms | +1.00ms | +11.00% |
-| p99 | 10.14ms | 9.18ms | +0.96ms | +10.41% |
-| mean | 9.46ms | 8.81ms | +0.65ms | +7.42% |
-| min | 8.04ms | 7.48ms | +0.56ms | +7.44% |
-| max | 10.18ms | 9.62ms | +0.56ms | +5.79% |
-| total | 1892.53ms | 1761.78ms | +130.74ms | +7.42% |
+| p50 | 9.05ms | 9.04ms | +0.01ms | +0.11% |
+| p95 | 9.10ms | 9.11ms | -0.00ms | -0.05% |
+| p99 | 9.11ms | 9.18ms | -0.07ms | -0.77% |
+| mean | 8.81ms | 8.81ms | +0.00ms | +0.00% |
+| min | 7.40ms | 7.48ms | -0.09ms | -1.16% |
+| max | 11.91ms | 9.62ms | +2.29ms | +23.85% |
+| total | 1761.87ms | 1761.78ms | +0.08ms | +0.00% |
 
 ### openAiChatCompletionsCreate
 
@@ -68,26 +68,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 10.05ms |
-| p95 | 10.11ms |
-| p99 | 10.13ms |
-| mean | 9.54ms |
-| stdev | 0.68ms |
-| min | 8.08ms |
-| max | 10.53ms |
-| total | 1907.82ms |
+| p50 | 9.05ms |
+| p95 | 9.09ms |
+| p99 | 9.12ms |
+| mean | 8.87ms |
+| stdev | 0.31ms |
+| min | 7.63ms |
+| max | 9.19ms |
+| total | 1773.72ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 10.05ms | 9.06ms | +0.99ms | +10.90% |
-| p95 | 10.11ms | 9.18ms | +0.93ms | +10.10% |
-| p99 | 10.13ms | 9.76ms | +0.37ms | +3.84% |
-| mean | 9.54ms | 8.86ms | +0.68ms | +7.69% |
-| min | 8.08ms | 7.93ms | +0.15ms | +1.84% |
-| max | 10.53ms | 10.48ms | +0.05ms | +0.50% |
-| total | 1907.82ms | 1771.58ms | +136.24ms | +7.69% |
+| p50 | 9.05ms | 9.06ms | -0.01ms | -0.14% |
+| p95 | 9.09ms | 9.18ms | -0.09ms | -0.96% |
+| p99 | 9.12ms | 9.76ms | -0.63ms | -6.51% |
+| mean | 8.87ms | 8.86ms | +0.01ms | +0.12% |
+| min | 7.63ms | 7.93ms | -0.30ms | -3.76% |
+| max | 9.19ms | 10.48ms | -1.28ms | -12.25% |
+| total | 1773.72ms | 1771.58ms | +2.14ms | +0.12% |
 
 ### vercelGenerateText
 
@@ -97,26 +97,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 10.07ms |
-| p95 | 10.12ms |
-| p99 | 10.67ms |
-| mean | 9.61ms |
-| stdev | 0.77ms |
-| min | 7.56ms |
-| max | 13.33ms |
-| total | 1921.98ms |
+| p50 | 9.07ms |
+| p95 | 9.12ms |
+| p99 | 9.44ms |
+| mean | 8.86ms |
+| stdev | 0.41ms |
+| min | 7.30ms |
+| max | 10.45ms |
+| total | 1772.89ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 10.07ms | 8.84ms | +1.24ms | +13.99% |
-| p95 | 10.12ms | 11.27ms | -1.15ms | -10.20% |
-| p99 | 10.67ms | 17.24ms | -6.58ms | -38.13% |
-| mean | 9.61ms | 9.14ms | +0.47ms | +5.14% |
-| min | 7.56ms | 7.19ms | +0.37ms | +5.12% |
-| max | 13.33ms | 20.98ms | -7.66ms | -36.50% |
-| total | 1921.98ms | 1828.07ms | +93.91ms | +5.14% |
+| p50 | 9.07ms | 8.84ms | +0.23ms | +2.61% |
+| p95 | 9.12ms | 11.27ms | -2.15ms | -19.08% |
+| p99 | 9.44ms | 17.24ms | -7.80ms | -45.26% |
+| mean | 8.86ms | 9.14ms | -0.28ms | -3.02% |
+| min | 7.30ms | 7.19ms | +0.11ms | +1.54% |
+| max | 10.45ms | 20.98ms | -10.54ms | -50.22% |
+| total | 1772.89ms | 1828.07ms | -55.17ms | -3.02% |
 
 ### langchainInvoke
 
@@ -126,24 +126,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 10.04ms |
-| p95 | 10.09ms |
-| p99 | 10.12ms |
-| mean | 9.54ms |
-| stdev | 0.66ms |
-| min | 7.87ms |
-| max | 10.13ms |
-| total | 1908.64ms |
+| p50 | 9.05ms |
+| p95 | 9.10ms |
+| p99 | 9.12ms |
+| mean | 8.82ms |
+| stdev | 0.39ms |
+| min | 7.23ms |
+| max | 9.13ms |
+| total | 1764.87ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 10.04ms | 9.06ms | +0.97ms | +10.75% |
-| p95 | 10.09ms | 9.11ms | +0.98ms | +10.79% |
-| p99 | 10.12ms | 9.18ms | +0.94ms | +10.20% |
-| mean | 9.54ms | 8.86ms | +0.68ms | +7.68% |
-| min | 7.87ms | 7.93ms | -0.06ms | -0.81% |
-| max | 10.13ms | 9.34ms | +0.79ms | +8.45% |
-| total | 1908.64ms | 1772.55ms | +136.09ms | +7.68% |
+| p50 | 9.05ms | 9.06ms | -0.01ms | -0.11% |
+| p95 | 9.10ms | 9.11ms | -0.01ms | -0.11% |
+| p99 | 9.12ms | 9.18ms | -0.06ms | -0.64% |
+| mean | 8.82ms | 8.86ms | -0.04ms | -0.43% |
+| min | 7.23ms | 7.93ms | -0.70ms | -8.88% |
+| max | 9.13ms | 9.34ms | -0.21ms | -2.27% |
+| total | 1764.87ms | 1772.55ms | -7.68ms | -0.43% |
 

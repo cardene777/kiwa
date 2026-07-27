@@ -14,7 +14,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| dispatchRequest | 0.01ms | 10ms | PASS |
+| dispatchRequest | 0.03ms | 10ms | PASS |
 | renderTemplate | 0.01ms | 10ms | PASS |
 | captureMiddlewareCall | 0.01ms | 10ms | PASS |
 
@@ -22,9 +22,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| dispatchRequest | -1224 B | 0 B | 102400 B | yes | PASS |
-| renderTemplate | -3624 B | 0 B | 102400 B | yes | PASS |
-| captureMiddlewareCall | 912 B | 0 B | 102400 B | yes | PASS |
+| dispatchRequest | 2344 B | 0 B | 102400 B | yes | PASS |
+| renderTemplate | -18032 B | 0 B | 102400 B | yes | PASS |
+| captureMiddlewareCall | 464 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,24 +38,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.00ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.00ms |
-| total | 0.13ms |
+| max | 0.02ms |
+| total | 0.33ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +8.40% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -16.85% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +0.04% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +3.56% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +0.02% |
-| total | 0.13ms | 0.13ms | +0.00ms | +3.56% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +158.40% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +101.99% |
+| p99 | 0.01ms | 0.00ms | +0.01ms | +133.42% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +160.64% |
+| min | 0.00ms | 0.00ms | +0.00ms | +155.47% |
+| max | 0.02ms | 0.00ms | +0.02ms | +385.76% |
+| total | 0.33ms | 0.13ms | +0.20ms | +160.64% |
 
 ### renderTemplate
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.11ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +7.88% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +80.46% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +8.02% |
-| min | 0.00ms | 0.00ms | -0.00ms | -9.86% |
-| max | 0.01ms | 0.01ms | +0.00ms | +67.17% |
-| total | 0.11ms | 0.10ms | +0.01ms | +8.02% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +10.07% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +15.76% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +116.93% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +20.62% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | +0.00ms | +85.08% |
+| total | 0.12ms | 0.10ms | +0.02ms | +20.62% |
 
 ### captureMiddlewareCall
 
@@ -100,18 +100,18 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.06ms |
+| max | 0.02ms |
+| total | 0.08ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +64.18% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +16.24% |
-| min | 0.00ms | 0.00ms | +0.00ms | +32.80% |
-| max | 0.01ms | 0.01ms | +0.00ms | +49.29% |
-| total | 0.06ms | 0.05ms | +0.01ms | +16.24% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +28.42% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +139.28% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +49.62% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.01ms | +0.02ms | +282.17% |
+| total | 0.08ms | 0.05ms | +0.03ms | +49.62% |
 

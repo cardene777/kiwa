@@ -22,73 +22,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeProcedure_query | -14832 B | 0 B | 102400 B | yes | PASS |
-| invokeProcedure_mutation | -400 B | 0 B | 102400 B | yes | PASS |
-| client_query | -15152 B | 0 B | 102400 B | yes | PASS |
+| invokeProcedure_query | -8544 B | 0 B | 102400 B | yes | PASS |
+| invokeProcedure_mutation | 736 B | 0 B | 102400 B | yes | PASS |
+| client_query | -312 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
 ### invokeProcedure_query
 
 # Perf Report — invokeProcedure_query.serial
-
-| metric | value |
-|---|---|
-| iterations | 200 |
-| warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.02ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.02ms |
-| total | 0.25ms |
-
-## Baseline diff
-
-| metric | current | baseline | delta ms | delta % |
-|---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +14.24% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +146.77% |
-| p99 | 0.02ms | 0.01ms | +0.01ms | +136.53% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +56.82% |
-| min | 0.00ms | 0.00ms | +0.00ms | +9.17% |
-| max | 0.02ms | 0.01ms | +0.01ms | +55.27% |
-| total | 0.25ms | 0.16ms | +0.09ms | +56.82% |
-
-### invokeProcedure_mutation
-
-# Perf Report — invokeProcedure_mutation.serial
-
-| metric | value |
-|---|---|
-| iterations | 200 |
-| warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.01ms |
-| min | 0.00ms |
-| max | 0.08ms |
-| total | 0.20ms |
-
-## Baseline diff
-
-| metric | current | baseline | delta ms | delta % |
-|---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +27.02% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +13.39% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +86.12% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +95.64% |
-| min | 0.00ms | 0.00ms | +0.00ms | +30.05% |
-| max | 0.08ms | 0.00ms | +0.07ms | +4677.32% |
-| total | 0.20ms | 0.10ms | +0.10ms | +95.64% |
-
-### client_query
-
-# Perf Report — client_query.serial
 
 | metric | value |
 |---|---|
@@ -107,11 +49,69 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +7.75% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +19.23% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +52.94% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +21.42% |
-| min | 0.00ms | 0.00ms | +0.00ms | +8.40% |
-| max | 0.01ms | 0.01ms | +0.01ms | +113.36% |
-| total | 0.16ms | 0.13ms | +0.03ms | +21.42% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -7.20% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +7.34% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -4.95% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +0.33% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | +0.00ms | +10.22% |
+| total | 0.16ms | 0.16ms | +0.00ms | +0.33% |
+
+### invokeProcedure_mutation
+
+# Perf Report — invokeProcedure_mutation.serial
+
+| metric | value |
+|---|---|
+| iterations | 200 |
+| warmup | 5 |
+| p50 | 0.00ms |
+| p95 | 0.00ms |
+| p99 | 0.00ms |
+| mean | 0.00ms |
+| stdev | 0.00ms |
+| min | 0.00ms |
+| max | 0.00ms |
+| total | 0.10ms |
+
+## Baseline diff
+
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +0.26% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +1.78% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.00ms | 0.00ms | +0.00ms | +42.14% |
+| total | 0.10ms | 0.10ms | +0.00ms | +1.78% |
+
+### client_query
+
+# Perf Report — client_query.serial
+
+| metric | value |
+|---|---|
+| iterations | 200 |
+| warmup | 5 |
+| p50 | 0.00ms |
+| p95 | 0.00ms |
+| p99 | 0.01ms |
+| mean | 0.00ms |
+| stdev | 0.00ms |
+| min | 0.00ms |
+| max | 0.01ms |
+| total | 0.14ms |
+
+## Baseline diff
+
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | -0.00ms | -0.18% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -4.19% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +53.81% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +6.55% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | +0.01ms | +85.97% |
+| total | 0.14ms | 0.13ms | +0.01ms | +6.55% |
 

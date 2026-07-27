@@ -254,14 +254,33 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   const unseededOps = Object.fromEntries(
     Object.entries(combinedForBaseline).filter(([key]) => !(key in priorResults)),
   );
-  const baselineSeeded = priorBaseline === null;
   const staleDropped = Object.keys(priorResults).length !== Object.keys(retained).length;
-
-  // 前提が違う環境で測った値で保存すると、次に正しい環境で測ったときも
-  // 前提不一致として再 seed され、その間の回帰を比較せず通してしまう。
-  // 既存の baseline が読めているのに比較対象にできなかった場合は保存しない。
   const envMismatched = loadedBaseline !== null && priorBaselineLoaded === null;
-  if (!envMismatched && (Object.keys(unseededOps).length > 0 || staleDropped)) {
+
+  // 測定そのものが成立しているか。GC を要求しているのに使えない実行の値で
+  // baseline を作り直すと、成立しない前提を新しい正としてしまう。
+  const premiseValid = !input.requireGc || outcomes.every((o) => o.memory.gcExposed);
+  const hardGatePassed = outcomes.every(
+    (o) => o.serialGatePassed && o.concurrentGatePassed && o.memoryGatePassed,
+  );
+
+  // 前提が違う環境の値で既存 baseline を上書きすると、次に元の環境で測ったときも
+  // 不一致として扱われ、その間の回帰を比較せず通してしまう。
+  // 一方で保存しないままだと、Node 更新や CPU 変更のように前提が恒久的に変わった
+  // 場合に手動削除まで比較できない。測定が成立している実行なら作り直す。
+  const shouldReseed = envMismatched && premiseValid && hardGatePassed;
+  const shouldAppend =
+    !envMismatched && (Object.keys(unseededOps).length > 0 || staleDropped);
+
+  let baselineSeeded = false;
+  if (shouldReseed) {
+    await saveBaselineEnvelope(baselinePath, {
+      schema: 1,
+      env: captureEnv(),
+      results: combinedForBaseline,
+    });
+    baselineSeeded = true;
+  } else if (shouldAppend) {
     // 追記は現在の環境で測った値なので env も現在のものにする。
     // 古い env を残すと、どの環境の測定値と比較しているのか判別できない。
     await saveBaselineEnvelope(baselinePath, {
@@ -269,6 +288,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       env: captureEnv(),
       results: { ...retained, ...unseededOps },
     });
+    baselineSeeded = priorBaseline === null;
   }
 
   // 閾値内でも有意な回帰は gate を落とす (docs/quality/perf-thresholds.md

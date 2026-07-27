@@ -14,7 +14,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| executeWorkflow | 0.02ms | 10ms | PASS |
+| executeWorkflow | 0.01ms | 10ms | PASS |
 | defineWorkflow | 0.01ms | 10ms | PASS |
 | retryStepSucceed | 0.01ms | 10ms | PASS |
 
@@ -22,8 +22,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| executeWorkflow | 90552 B | 0 B | 102400 B | yes | PASS |
-| defineWorkflow | -16168 B | 0 B | 102400 B | yes | PASS |
+| executeWorkflow | 89608 B | 0 B | 102400 B | yes | PASS |
+| defineWorkflow | -576 B | 0 B | 102400 B | yes | PASS |
 | retryStepSucceed | -312 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
@@ -43,19 +43,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.20ms |
+| total | 0.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -5.04% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +18.38% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -3.50% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -6.96% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -14.99% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +8.38% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -10.17% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -12.87% |
 | min | 0.00ms | 0.00ms | -0.00ms | -26.30% |
-| max | 0.01ms | 0.01ms | -0.01ms | -46.39% |
-| total | 0.20ms | 0.22ms | -0.02ms | -6.96% |
+| max | 0.01ms | 0.01ms | -0.00ms | -29.17% |
+| total | 0.19ms | 0.22ms | -0.03ms | -12.87% |
 
 ### defineWorkflow
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.00ms |
-| total | 0.07ms |
+| total | 0.06ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -53.44% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -53.11% |
-| p99 | 0.00ms | 0.01ms | -0.00ms | -58.68% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -60.56% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -60.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -59.01% |
+| p99 | 0.00ms | 0.01ms | -0.00ms | -71.26% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -64.92% |
 | min | 0.00ms | 0.00ms | -0.00ms | -16.80% |
-| max | 0.00ms | 0.03ms | -0.03ms | -87.47% |
-| total | 0.07ms | 0.17ms | -0.10ms | -60.56% |
+| max | 0.00ms | 0.03ms | -0.03ms | -88.26% |
+| total | 0.06ms | 0.17ms | -0.11ms | -64.92% |
 
 ### retryStepSucceed
 
@@ -101,17 +101,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.13ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +9.83% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +68.47% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +33.20% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +21.78% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +29.18% |
-| total | 0.13ms | 0.11ms | +0.02ms | +21.78% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -10.07% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +23.50% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +38.72% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +4.99% |
+| min | 0.00ms | 0.00ms | -0.00ms | -22.40% |
+| max | 0.01ms | 0.01ms | +0.00ms | +18.18% |
+| total | 0.12ms | 0.11ms | +0.01ms | +4.99% |
 
