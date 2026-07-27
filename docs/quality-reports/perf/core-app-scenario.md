@@ -6,7 +6,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| spec_parsing (50 parseSpec of typical spec) | 0.26ms | 50ms | PASS | stable |
+| spec_parsing (50 parseSpec of typical spec) | 0.23ms | 50ms | PASS | stable |
 | pool_lifecycle (create + 10 borrow/release + stopAll) | 0.01ms | 50ms | PASS | stable |
 | spec_pool_integration (parseSpec + pool per case) | 0.01ms | 50ms | PASS | stable |
 
@@ -14,17 +14,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| spec_parsing (50 parseSpec of typical spec) | 0.65ms | 100ms | PASS |
-| pool_lifecycle (create + 10 borrow/release + stopAll) | 0.03ms | 100ms | PASS |
+| spec_parsing (50 parseSpec of typical spec) | 0.79ms | 100ms | PASS |
+| pool_lifecycle (create + 10 borrow/release + stopAll) | 0.04ms | 100ms | PASS |
 | spec_pool_integration (parseSpec + pool per case) | 0.02ms | 100ms | PASS |
 
 ## Memory retention (30 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
 |---|---|---|---|---|
-| spec_parsing (50 parseSpec of typical spec) | 2616144 B | 0 B | 102400 B | PASS |
-| pool_lifecycle (create + 10 borrow/release + stopAll) | 582904 B | 0 B | 102400 B | PASS |
-| spec_pool_integration (parseSpec + pool per case) | 507224 B | 0 B | 102400 B | PASS |
+| spec_parsing (50 parseSpec of typical spec) | 2647984 B | 0 B | 102400 B | PASS |
+| pool_lifecycle (create + 10 borrow/release + stopAll) | 98448 B | 0 B | 102400 B | PASS |
+| spec_pool_integration (parseSpec + pool per case) | 507200 B | 0 B | 102400 B | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +36,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p50 | 0.13ms |
-| p95 | 0.26ms |
-| p99 | 0.33ms |
-| mean | 0.15ms |
-| stdev | 0.05ms |
-| min | 0.11ms |
-| max | 0.34ms |
-| total | 4.52ms |
+| p50 | 0.15ms |
+| p95 | 0.23ms |
+| p99 | 0.29ms |
+| mean | 0.16ms |
+| stdev | 0.04ms |
+| min | 0.12ms |
+| max | 0.31ms |
+| total | 4.85ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.13ms | 0.15ms | -0.02ms | -15.17% |
-| p95 | 0.26ms | 0.28ms | -0.01ms | -4.58% |
-| p99 | 0.33ms | 0.32ms | +0.01ms | +2.31% |
-| mean | 0.15ms | 0.17ms | -0.02ms | -10.90% |
-| min | 0.11ms | 0.13ms | -0.02ms | -15.33% |
-| max | 0.34ms | 0.33ms | +0.01ms | +3.84% |
-| total | 4.52ms | 5.07ms | -0.55ms | -10.90% |
+| p50 | 0.15ms | 0.15ms | -0.01ms | -4.68% |
+| p95 | 0.23ms | 0.28ms | -0.05ms | -18.11% |
+| p99 | 0.29ms | 0.32ms | -0.03ms | -10.17% |
+| mean | 0.16ms | 0.17ms | -0.01ms | -4.39% |
+| min | 0.12ms | 0.13ms | -0.01ms | -4.16% |
+| max | 0.31ms | 0.33ms | -0.01ms | -4.17% |
+| total | 4.85ms | 5.07ms | -0.22ms | -4.39% |
 
 ### pool_lifecycle (create + 10 borrow/release + stopAll)
 
@@ -65,26 +65,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p50 | 0.00ms |
+| p50 | 0.01ms |
 | p95 | 0.01ms |
-| p99 | 0.02ms |
+| p99 | 0.01ms |
 | mean | 0.01ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.02ms |
-| total | 0.15ms |
+| max | 0.01ms |
+| total | 0.18ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -23.08% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +8.49% |
-| p99 | 0.02ms | 0.01ms | +0.01ms | +60.99% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -2.65% |
-| min | 0.00ms | 0.00ms | -0.00ms | -9.47% |
-| max | 0.02ms | 0.01ms | +0.01ms | +82.20% |
-| total | 0.15ms | 0.16ms | -0.00ms | -2.65% |
+| p50 | 0.01ms | 0.00ms | +0.00ms | +6.41% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +21.30% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +19.85% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +15.86% |
+| min | 0.00ms | 0.00ms | +0.00ms | +24.20% |
+| max | 0.01ms | 0.01ms | +0.00ms | +18.57% |
+| total | 0.18ms | 0.16ms | +0.02ms | +15.86% |
 
 ### spec_pool_integration (parseSpec + pool per case)
 
@@ -99,7 +99,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p99 | 0.01ms |
 | mean | 0.01ms |
 | stdev | 0.00ms |
-| min | 0.00ms |
+| min | 0.01ms |
 | max | 0.02ms |
 | total | 0.18ms |
 
@@ -107,11 +107,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -9.16% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -1.62% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +5.12% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -7.66% |
-| min | 0.00ms | 0.01ms | -0.00ms | -3.24% |
-| max | 0.02ms | 0.01ms | +0.00ms | +7.28% |
-| total | 0.18ms | 0.19ms | -0.01ms | -7.66% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -7.33% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +1.32% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +8.82% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -6.42% |
+| min | 0.01ms | 0.01ms | -0.00ms | -2.44% |
+| max | 0.02ms | 0.01ms | +0.00ms | +9.91% |
+| total | 0.18ms | 0.19ms | -0.01ms | -6.42% |
 

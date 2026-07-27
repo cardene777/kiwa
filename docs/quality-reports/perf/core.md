@@ -6,7 +6,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| parseSpec | 0.01ms | 5ms | PASS | stable |
+| parseSpec | 0.01ms | 5ms | PASS | regressed |
 | createPool | 0.00ms | 5ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
@@ -14,14 +14,14 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate |
 |---|---|---|---|
 | parseSpec | 0.06ms | 10ms | PASS |
-| createPool | 0.02ms | 10ms | PASS |
+| createPool | 0.03ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
 |---|---|---|---|---|
-| parseSpec | -6434616 B | -24464 B | 102400 B | PASS |
-| createPool | 1091888 B | 0 B | 102400 B | PASS |
+| parseSpec | -6404152 B | -8 B | 102400 B | PASS |
+| createPool | 1091936 B | 0 B | 102400 B | PASS |
 
 ## Detailed serial reports
 
@@ -35,24 +35,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.01ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
+| p99 | 0.02ms |
+| mean | 0.01ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.02ms |
-| total | 0.90ms |
+| max | 0.03ms |
+| total | 1.04ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -1.01% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -3.26% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +19.17% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -0.39% |
-| min | 0.00ms | 0.00ms | -0.00ms | -2.34% |
-| max | 0.02ms | 0.01ms | +0.00ms | +11.71% |
-| total | 0.90ms | 0.91ms | -0.00ms | -0.39% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +1.01% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +35.39% |
+| p99 | 0.02ms | 0.01ms | +0.01ms | +51.40% |
+| mean | 0.01ms | 0.00ms | +0.00ms | +13.96% |
+| min | 0.00ms | 0.00ms | -0.00ms | -1.16% |
+| max | 0.03ms | 0.01ms | +0.02ms | +112.58% |
+| total | 1.04ms | 0.91ms | +0.13ms | +13.96% |
 
 ### createPool
 
@@ -64,22 +64,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.02ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.30ms |
+| max | 0.02ms |
+| total | 0.46ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +3.48% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -6.43% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +31.35% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +2.37% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | -0.00ms | -6.03% |
-| total | 0.30ms | 0.29ms | +0.01ms | +2.37% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +41.39% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +58.83% |
+| p99 | 0.02ms | 0.01ms | +0.01ms | +115.46% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +54.58% |
+| min | 0.00ms | 0.00ms | +0.00ms | +38.50% |
+| max | 0.02ms | 0.01ms | +0.01ms | +105.32% |
+| total | 0.46ms | 0.29ms | +0.16ms | +54.58% |
 

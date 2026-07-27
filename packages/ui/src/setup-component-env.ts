@@ -45,7 +45,27 @@ async function loadUserEvent(): Promise<UserEventModule> {
 
 export async function setupComponentEnv(opts: SetupComponentEnvOptions): Promise<UiTestEnv> {
   const tl = await loadTestingLibrary();
-  const result = tl.render(opts.ui, opts.renderOptions);
+
+  // render が例外を投げると呼び出し側は env を受け取れず、stop() を呼ぶ術がない。
+  // container は既に document へ挿入されているため、片付けないと描画に失敗する
+  // たびに残骸が積み上がる。
+  //
+  // ここで testing-library の cleanup() を呼ぶと、同時に生きている他の env の
+  // container まで巻き込んで unmount してしまう。自前の container を渡して、
+  // 失敗した分だけを取り除く。
+  const ownContainer = opts.renderOptions?.container ? undefined : document.createElement('div');
+  if (ownContainer) document.body.appendChild(ownContainer);
+
+  let result: ReturnType<typeof tl.render>;
+  try {
+    result = tl.render(
+      opts.ui,
+      ownContainer ? { ...opts.renderOptions, container: ownContainer } : opts.renderOptions,
+    );
+  } catch (error) {
+    ownContainer?.remove();
+    throw error;
+  }
 
   if (opts.mode === 'interaction') {
     const ue = await loadUserEvent();
