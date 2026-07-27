@@ -1,9 +1,9 @@
 ---
 name: kiwa-solidstart
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.solidstart.md` / `.solidstart-api.md`) を SolidStart の Server Functions + API Routes test (Vitest + @kiwa/solidstart) に変換する Layer 2 skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.solidstart.md` / `.solidstart-api.md`) を SolidStart の Server Functions + API Routes test (Vitest + @kiwa-lab/solidstart) に変換する Layer 2 skill。
   Server Functions (`'use server'`) は `invokeServerFunction({ fn, args, headers, cookies })` で direct invoke、 API Routes は `invokeApiRoute({ handler, url, method, params, headers, formData, jsonBody, locals })` で simulated APIEvent 経由で捕捉、 redirect signal を normalize する。
-  `/kiwa-design --layer solidstart-server-function` / `--layer solidstart-api-route` が出力する 9 column 表を `@kiwa/solidstart` の API に機械的に変換する。
+  `/kiwa-design --layer solidstart-server-function` / `--layer solidstart-api-route` が出力する 9 column 表を `@kiwa-lab/solidstart` の API に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -12,7 +12,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /kiwa-solidstart — SolidStart Server Functions + API Routes test 生成 (Layer 2)
 
-`/kiwa-design --layer solidstart-server-function` / `--layer solidstart-api-route` が出力した 9 column 表を、 `@kiwa/solidstart` v1.0+ の `invokeServerFunction` / `invokeApiRoute` を使った Vitest test に機械変換する。
+`/kiwa-design --layer solidstart-server-function` / `--layer solidstart-api-route` が出力した 9 column 表を、 `@kiwa-lab/solidstart` v1.0+ の `invokeServerFunction` / `invokeApiRoute` を使った Vitest test に機械変換する。
 
 対象は **SolidStart の Server Functions (`'use server'` directive)** + **API Routes (`routes/api/*.ts` の `GET` / `POST` / 等 function exports)**。 client component (Solid) は `/kiwa-ui` (Solid mode) で別 layer 対応済。
 
@@ -50,7 +50,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 ```ts
 // server-function
-import { invokeServerFunction, redirect, SOLIDSTART_REDIRECT_SYMBOL } from '@kiwa/solidstart';
+import { invokeServerFunction, redirect, SOLIDSTART_REDIRECT_SYMBOL } from '@kiwa-lab/solidstart';
 import { createPost } from '../src/lib/posts.js';
 
 it('{ID} {Observation}', async () => {
@@ -64,7 +64,7 @@ it('{ID} {Observation}', async () => {
 });
 
 // api-route
-import { invokeApiRoute, json, redirectResponse } from '@kiwa/solidstart';
+import { invokeApiRoute, json, redirectResponse } from '@kiwa-lab/solidstart';
 import { GET, POST } from '../src/routes/api/items.ts';
 
 it('{ID} {Observation}', async () => {
@@ -84,6 +84,6 @@ it('{ID} {Observation}', async () => {
 ## 関連
 
 - 上流 ... `/kiwa-design --layer solidstart-server-function` / `--layer solidstart-api-route`
-- runtime fixture ... `@kiwa/solidstart` v1.0+ (`packages/solidstart/`)
+- runtime fixture ... `@kiwa-lab/solidstart` v1.0+ (`packages/solidstart/`)
 - 下流 ... `/kiwa-review --layer solidstart-server-function` / `--layer solidstart-api-route`
 - client component (Solid) ... `/kiwa-ui` (Solid mode)

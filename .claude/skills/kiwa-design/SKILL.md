@@ -58,39 +58,39 @@ $ARGUMENTS
 | `e2e-generic` | `tests/spec/integration/test-spec-{module}.e2e.md` | `/kiwa-e2e` (汎用 browser e2e、 static html / fetch app / SSR、 web3 非依存) |
 | `a11y` | `tests/spec/integration/test-spec-{module}.a11y.md` | `/kiwa-a11y` (axe-core + WCAG 2.1 AA、 jsdom / playwright 2 mode) |
 | `visual` | `tests/spec/integration/test-spec-{module}.visual.md` | `/kiwa-visual` (pixelmatch + threshold + mask、 Playwright screenshot / DOM snapshot) |
-| `integration` | `tests/spec/integration/test-spec-{module}.md` | `/kiwa-api` (Vitest + msw + supertest、 @kiwa/api) |
+| `integration` | `tests/spec/integration/test-spec-{module}.md` | `/kiwa-api` (Vitest + msw + supertest、 @kiwa-lab/api) |
 | `api` | `tests/spec/integration/test-spec-{module}.api.md` | `/kiwa-api` (HTTP / REST / GraphQL 専用、 mode column 必須) |
-| `ui` | `tests/spec/integration/test-spec-{module}.ui.md` | `/kiwa-ui` (React component 専用、 render / interaction / snapshot 3 mode、 `@kiwa/ui`) |
-| `data` | `tests/spec/integration/test-spec-{module}.data.md` | `/kiwa-data` (queue / cron / batch 専用、 mock / live mode + fake clock、 `@kiwa/data`) |
-| `cli` | `tests/spec/integration/test-spec-{module}.cli.md` | `/kiwa-cli-test` (CLI / shell / file IO 専用、 isolated tempdir + stdout/stderr snapshot、 `@kiwa/cli-test`) |
-| `orm-query` | `tests/spec/integration/test-spec-{module}.orm.md` | `/kiwa-orm` (ORM query 専用、 v0.1 は Drizzle + in-memory SQLite、 `setupOrmEnv` + `expectQuery` + `expectRowCount`、 `@kiwa/orm`、 Postgres / MySQL / Prisma / Kysely 対応は follow-up Issue #527-2 .. #527-5) |
-| `nextjs-server-action` | `tests/spec/integration/test-spec-{module}.nextjs.md` | `/kiwa-nextjs` (Next.js App Router `'use server'` action 専用、 `invokeServerAction` で redirect / cookies / headers 捕捉、 `@kiwa/nextjs`) |
-| `nextjs-middleware` | `tests/spec/integration/test-spec-{module}.middleware.md` | `/kiwa-nextjs` (Next.js `middleware.ts` 専用、 `invokeMiddleware` で auth gate / locale rewrite / geo block / response header inject 捕捉、 `@kiwa/nextjs`) |
-| `nextjs-rsc` | `tests/spec/integration/test-spec-{module}.rsc.md` | `/kiwa-nextjs` (Next.js async React Server Components 専用、 `renderServerComponent` で direct await + `findAll` / `textContent` で element tree 検証、 notFound / forbidden / redirect signal 捕捉、 `@kiwa/nextjs`) |
-| `nextjs-parallel-route` | `tests/spec/integration/test-spec-{module}.parallel.md` | `/kiwa-nextjs` (Next.js App Router Parallel Routes `@modal` / `@sidebar` + Intercepting Routes `(.)` / `(..)` / `(...)` 専用、 `invokeParallelRoutes` で全 slot 並列 await + per-slot error isolation + intercepting variant 切替 + default fallback 強制 render 捕捉、 `@kiwa/nextjs` v1.0.4+) |
-| `nextjs-rsc-streaming` | `tests/spec/integration/test-spec-{module}.rsc-streaming.md` | `/kiwa-nextjs` (Next.js RSC streaming + Suspense boundary 専用、 `setupNextRscEnv` で chunk 配列 + fallback / resolved 遷移 + errorBoundary + timeout を deterministic に capture、 `@kiwa/nextjs` v1.1+、 Issue #558) |
-| `nuxt-server-route` | `tests/spec/integration/test-spec-{module}.nuxt.md` | `/kiwa-nuxt` (Nuxt 3 `server/api/*.ts` defineEventHandler 専用、 `invokeEventHandler` で query / body / headers / cookies + sendRedirect / setHeader / setCookie / setStatusCode の side-effect 捕捉、 `@kiwa/nuxt`) |
-| `nuxt-route-middleware` | `tests/spec/integration/test-spec-{module}.nuxt-mw.md` | `/kiwa-nuxt` (Nuxt 3 `middleware/*.ts` defineNuxtRouteMiddleware 専用、 `invokeRouteMiddleware` で to/from RouteLocation seed + navigateTo / abortNavigation の throw を branded signal 化、 `@kiwa/nuxt` v1.0.2+) |
-| `nuxt-nitro-plugin` | `tests/spec/integration/test-spec-{module}.nitro.md` | `/kiwa-nuxt` (Nuxt 3 `server/plugins/*.ts` defineNitroPlugin 専用、 `invokeNitroPlugin` で hook 登録捕捉 + 7 lifecycle hook (request / beforeResponse / afterResponse / error / render:html / render:response / close) を任意 payload で fire、 hookOnce auto-detach + handler error isolation、 `@kiwa/nuxt` v1.0.3+) |
-| `sveltekit-load` | `tests/spec/integration/test-spec-{module}.svk.md` | `/kiwa-sveltekit` (SvelteKit `+page.server.ts` load 専用、 `invokeLoad` で params / url / cookies / locals / fetch を seed + setHeaders / redirect / error throw を捕捉、 `@kiwa/sveltekit`) |
-| `sveltekit-action` | `tests/spec/integration/test-spec-{module}.svk-action.md` | `/kiwa-sveltekit` (SvelteKit `+page.server.ts` form actions 専用、 `invokeAction` で FormData / cookies / locals + fail / redirect / cookies 操作を捕捉、 `@kiwa/sveltekit`) |
-| `sveltekit-handle` | `tests/spec/integration/test-spec-{module}.svk-hooks.md` | `/kiwa-sveltekit` (SvelteKit `hooks.server.ts` の `handle` 専用、 `invokeHandle` で resolve pass-through / short-circuit / locals 書込 / cookies 操作捕捉、 `@kiwa/sveltekit` v1.0.1+) |
-| `sveltekit-handle-fetch` | `tests/spec/integration/test-spec-{module}.svk-hooks.md` | `/kiwa-sveltekit` (SvelteKit `hooks.server.ts` の `handleFetch` 専用、 `invokeHandleFetch` で downstream fetch redirect / auth header 注入捕捉、 `@kiwa/sveltekit` v1.0.1+) |
-| `sveltekit-handle-error` | `tests/spec/integration/test-spec-{module}.svk-hooks.md` | `/kiwa-sveltekit` (SvelteKit `hooks.server.ts` の `handleError` 専用、 `invokeHandleError` で error logging / message format / event.url アクセス捕捉、 `@kiwa/sveltekit` v1.0.1+) |
-| `sveltekit-hooks-chain` | `tests/spec/integration/test-spec-{module}.svk-hooks-chain.md` | `/kiwa-sveltekit` (SvelteKit `hooks.server.ts` の chain (sequence) + locals injection 統一、 `setupSvelteKitHooksEnv` で env build + `sequence` で 4 hook (handle / handleFetch / handleError) を 1 env 内で順次 invoke + locals / cookies を hook 間共有 + reset で初期化、 `@kiwa/sveltekit` v1.1+、 framework-sub-feature) |
-| `remix-loader` | `tests/spec/integration/test-spec-{module}.remix.md` | `/kiwa-remix` (Remix v2 / React Router v7 loader 専用、 `invokeLoader` で request / params / context を seed + Response (200 / 3xx redirect) を自動 normalize、 `@kiwa/remix`) |
-| `remix-action` | `tests/spec/integration/test-spec-{module}.remix-action.md` | `/kiwa-remix` (Remix v2 / React Router v7 action 専用、 `invokeAction` で FormData / JSON body / cookies / context + Response 捕捉、 `@kiwa/remix`) |
-| `remix-resource-route` | `tests/spec/integration/test-spec-{module}.resource.md` | `/kiwa-remix` (Remix v2 Resource Routes 専用、 `invokeResourceRoute` で HTTP method dispatch (GET/HEAD → loader、 POST/PUT/PATCH/DELETE → action)、 該当 export 不在は 405 + allow header + methodNotAllowed signal 自動 return、 binary download / json / redirect 全 Response 形式 cover、 `@kiwa/remix` v1.0.2+) |
-| `remix-nested-route-chain` | `tests/spec/integration/test-spec-{module}.remix-nested-chain.md` | `/kiwa-remix` (Remix v2 nested route parent → child loader chain 専用、 `setupRemixNestedRouteEnv` で parent loader → child loader を順次 invoke + parent JSON Response の auto-deserialize + Set-Cookie の cookieStore persist + Remix 公式 `getDocumentHeaders` 互換 logic で `headers()` export merge + `defer()` / `resolveDeferred()` による streaming resolve、 `@kiwa/remix` v1.1+、 framework-sub-feature) |
-| `astro-endpoint` | `tests/spec/integration/test-spec-{module}.astro.md` | `/kiwa-astro` (Astro Server Endpoints `pages/api/*.ts` 専用、 `invokeEndpoint` で simulated APIContext (request / params / cookies / locals / site) + Response を normalize 捕捉、 `@kiwa/astro`) |
-| `astro-ssr` | `tests/spec/integration/test-spec-{module}.astro-ssr.md` | `/kiwa-astro` (Astro `.astro` page SSR 専用、 `renderAstroPage` で HTML string / Response 両 return + cookies mutate + Astro.redirect / kiwaAstroNotFound / Astro.rewrite signal 捕捉 + locals 伝搬、 Astro Container API 不要、 `@kiwa/astro` v1.0.2+) |
-| `astro-view-transitions` | `tests/spec/integration/test-spec-{module}.astro-vt.md` | `/kiwa-astro` (Astro v5 View Transitions API 専用、 `setupAstroViewTransitionEnv` で 4 lifecycle event (`astro:before-preparation` / `astro:after-preparation` / `astro:before-swap` / `astro:after-swap`) を 1 env で順次 dispatch、 preventDefault による nav cancel + loader override + cross-document fallback + diffDom() による top-level tag 差分抽出、 `@kiwa/astro` v1.1+) |
-| `solidstart-server-function` | `tests/spec/integration/test-spec-{module}.solidstart.md` | `/kiwa-solidstart` (SolidStart `'use server'` function 専用、 `invokeServerFunction` で args / headers / cookies + redirect signal 捕捉、 `@kiwa/solidstart`) |
-| `solidstart-api-route` | `tests/spec/integration/test-spec-{module}.solidstart-api.md` | `/kiwa-solidstart` (SolidStart `routes/api/*.ts` 専用、 `invokeApiRoute` で simulated APIEvent (request / params / locals) + Response を normalize 捕捉、 `@kiwa/solidstart`) |
-| `qwikcity-action` | `tests/spec/integration/test-spec-{module}.qwik-action.md` | `/kiwa-qwikcity` (Qwik City `routeAction$` 専用、 `invokeRouteAction` で formValues + cookies + headers + fail / redirect signal 捕捉、 `@kiwa/qwikcity`) |
-| `qwikcity-loader` | `tests/spec/integration/test-spec-{module}.qwik.md` | `/kiwa-qwikcity` (Qwik City `routeLoader$` 専用、 `invokeRouteLoader` で url / params / cookies / platform + redirect signal 捕捉、 `@kiwa/qwikcity`) |
-| `qwikcity-endpoint` | `tests/spec/integration/test-spec-{module}.qwik-endpoint.md` | `/kiwa-qwikcity` (Qwik City Endpoints `onGet` / `onPost` 専用、 `invokeEndpoint` で simulated RequestEvent (json / text / redirect / setHeader / status) + Response shape 捕捉、 `@kiwa/qwikcity`) |
-| `edge-handler` | `tests/spec/integration/test-spec-{module}.edge.md` | `/kiwa-edge` (Edge runtime fetch handler 専用、 Cloudflare Workers / Vercel Edge / 汎用 ESM 形式、 `invokeEdgeHandler` で env binding (KV / R2 / D1 / vars) + ExecutionContext (waitUntil / passThroughOnException) を捕捉、 `@kiwa/edge`) |
+| `ui` | `tests/spec/integration/test-spec-{module}.ui.md` | `/kiwa-ui` (React component 専用、 render / interaction / snapshot 3 mode、 `@kiwa-lab/ui`) |
+| `data` | `tests/spec/integration/test-spec-{module}.data.md` | `/kiwa-data` (queue / cron / batch 専用、 mock / live mode + fake clock、 `@kiwa-lab/data`) |
+| `cli` | `tests/spec/integration/test-spec-{module}.cli.md` | `/kiwa-cli-test` (CLI / shell / file IO 専用、 isolated tempdir + stdout/stderr snapshot、 `@kiwa-lab/cli-test`) |
+| `orm-query` | `tests/spec/integration/test-spec-{module}.orm.md` | `/kiwa-orm` (ORM query 専用、 v0.1 は Drizzle + in-memory SQLite、 `setupOrmEnv` + `expectQuery` + `expectRowCount`、 `@kiwa-lab/orm`、 Postgres / MySQL / Prisma / Kysely 対応は follow-up Issue #527-2 .. #527-5) |
+| `nextjs-server-action` | `tests/spec/integration/test-spec-{module}.nextjs.md` | `/kiwa-nextjs` (Next.js App Router `'use server'` action 専用、 `invokeServerAction` で redirect / cookies / headers 捕捉、 `@kiwa-lab/nextjs`) |
+| `nextjs-middleware` | `tests/spec/integration/test-spec-{module}.middleware.md` | `/kiwa-nextjs` (Next.js `middleware.ts` 専用、 `invokeMiddleware` で auth gate / locale rewrite / geo block / response header inject 捕捉、 `@kiwa-lab/nextjs`) |
+| `nextjs-rsc` | `tests/spec/integration/test-spec-{module}.rsc.md` | `/kiwa-nextjs` (Next.js async React Server Components 専用、 `renderServerComponent` で direct await + `findAll` / `textContent` で element tree 検証、 notFound / forbidden / redirect signal 捕捉、 `@kiwa-lab/nextjs`) |
+| `nextjs-parallel-route` | `tests/spec/integration/test-spec-{module}.parallel.md` | `/kiwa-nextjs` (Next.js App Router Parallel Routes `@modal` / `@sidebar` + Intercepting Routes `(.)` / `(..)` / `(...)` 専用、 `invokeParallelRoutes` で全 slot 並列 await + per-slot error isolation + intercepting variant 切替 + default fallback 強制 render 捕捉、 `@kiwa-lab/nextjs` v1.0.4+) |
+| `nextjs-rsc-streaming` | `tests/spec/integration/test-spec-{module}.rsc-streaming.md` | `/kiwa-nextjs` (Next.js RSC streaming + Suspense boundary 専用、 `setupNextRscEnv` で chunk 配列 + fallback / resolved 遷移 + errorBoundary + timeout を deterministic に capture、 `@kiwa-lab/nextjs` v1.1+、 Issue #558) |
+| `nuxt-server-route` | `tests/spec/integration/test-spec-{module}.nuxt.md` | `/kiwa-nuxt` (Nuxt 3 `server/api/*.ts` defineEventHandler 専用、 `invokeEventHandler` で query / body / headers / cookies + sendRedirect / setHeader / setCookie / setStatusCode の side-effect 捕捉、 `@kiwa-lab/nuxt`) |
+| `nuxt-route-middleware` | `tests/spec/integration/test-spec-{module}.nuxt-mw.md` | `/kiwa-nuxt` (Nuxt 3 `middleware/*.ts` defineNuxtRouteMiddleware 専用、 `invokeRouteMiddleware` で to/from RouteLocation seed + navigateTo / abortNavigation の throw を branded signal 化、 `@kiwa-lab/nuxt` v1.0.2+) |
+| `nuxt-nitro-plugin` | `tests/spec/integration/test-spec-{module}.nitro.md` | `/kiwa-nuxt` (Nuxt 3 `server/plugins/*.ts` defineNitroPlugin 専用、 `invokeNitroPlugin` で hook 登録捕捉 + 7 lifecycle hook (request / beforeResponse / afterResponse / error / render:html / render:response / close) を任意 payload で fire、 hookOnce auto-detach + handler error isolation、 `@kiwa-lab/nuxt` v1.0.3+) |
+| `sveltekit-load` | `tests/spec/integration/test-spec-{module}.svk.md` | `/kiwa-sveltekit` (SvelteKit `+page.server.ts` load 専用、 `invokeLoad` で params / url / cookies / locals / fetch を seed + setHeaders / redirect / error throw を捕捉、 `@kiwa-lab/sveltekit`) |
+| `sveltekit-action` | `tests/spec/integration/test-spec-{module}.svk-action.md` | `/kiwa-sveltekit` (SvelteKit `+page.server.ts` form actions 専用、 `invokeAction` で FormData / cookies / locals + fail / redirect / cookies 操作を捕捉、 `@kiwa-lab/sveltekit`) |
+| `sveltekit-handle` | `tests/spec/integration/test-spec-{module}.svk-hooks.md` | `/kiwa-sveltekit` (SvelteKit `hooks.server.ts` の `handle` 専用、 `invokeHandle` で resolve pass-through / short-circuit / locals 書込 / cookies 操作捕捉、 `@kiwa-lab/sveltekit` v1.0.1+) |
+| `sveltekit-handle-fetch` | `tests/spec/integration/test-spec-{module}.svk-hooks.md` | `/kiwa-sveltekit` (SvelteKit `hooks.server.ts` の `handleFetch` 専用、 `invokeHandleFetch` で downstream fetch redirect / auth header 注入捕捉、 `@kiwa-lab/sveltekit` v1.0.1+) |
+| `sveltekit-handle-error` | `tests/spec/integration/test-spec-{module}.svk-hooks.md` | `/kiwa-sveltekit` (SvelteKit `hooks.server.ts` の `handleError` 専用、 `invokeHandleError` で error logging / message format / event.url アクセス捕捉、 `@kiwa-lab/sveltekit` v1.0.1+) |
+| `sveltekit-hooks-chain` | `tests/spec/integration/test-spec-{module}.svk-hooks-chain.md` | `/kiwa-sveltekit` (SvelteKit `hooks.server.ts` の chain (sequence) + locals injection 統一、 `setupSvelteKitHooksEnv` で env build + `sequence` で 4 hook (handle / handleFetch / handleError) を 1 env 内で順次 invoke + locals / cookies を hook 間共有 + reset で初期化、 `@kiwa-lab/sveltekit` v1.1+、 framework-sub-feature) |
+| `remix-loader` | `tests/spec/integration/test-spec-{module}.remix.md` | `/kiwa-remix` (Remix v2 / React Router v7 loader 専用、 `invokeLoader` で request / params / context を seed + Response (200 / 3xx redirect) を自動 normalize、 `@kiwa-lab/remix`) |
+| `remix-action` | `tests/spec/integration/test-spec-{module}.remix-action.md` | `/kiwa-remix` (Remix v2 / React Router v7 action 専用、 `invokeAction` で FormData / JSON body / cookies / context + Response 捕捉、 `@kiwa-lab/remix`) |
+| `remix-resource-route` | `tests/spec/integration/test-spec-{module}.resource.md` | `/kiwa-remix` (Remix v2 Resource Routes 専用、 `invokeResourceRoute` で HTTP method dispatch (GET/HEAD → loader、 POST/PUT/PATCH/DELETE → action)、 該当 export 不在は 405 + allow header + methodNotAllowed signal 自動 return、 binary download / json / redirect 全 Response 形式 cover、 `@kiwa-lab/remix` v1.0.2+) |
+| `remix-nested-route-chain` | `tests/spec/integration/test-spec-{module}.remix-nested-chain.md` | `/kiwa-remix` (Remix v2 nested route parent → child loader chain 専用、 `setupRemixNestedRouteEnv` で parent loader → child loader を順次 invoke + parent JSON Response の auto-deserialize + Set-Cookie の cookieStore persist + Remix 公式 `getDocumentHeaders` 互換 logic で `headers()` export merge + `defer()` / `resolveDeferred()` による streaming resolve、 `@kiwa-lab/remix` v1.1+、 framework-sub-feature) |
+| `astro-endpoint` | `tests/spec/integration/test-spec-{module}.astro.md` | `/kiwa-astro` (Astro Server Endpoints `pages/api/*.ts` 専用、 `invokeEndpoint` で simulated APIContext (request / params / cookies / locals / site) + Response を normalize 捕捉、 `@kiwa-lab/astro`) |
+| `astro-ssr` | `tests/spec/integration/test-spec-{module}.astro-ssr.md` | `/kiwa-astro` (Astro `.astro` page SSR 専用、 `renderAstroPage` で HTML string / Response 両 return + cookies mutate + Astro.redirect / kiwaAstroNotFound / Astro.rewrite signal 捕捉 + locals 伝搬、 Astro Container API 不要、 `@kiwa-lab/astro` v1.0.2+) |
+| `astro-view-transitions` | `tests/spec/integration/test-spec-{module}.astro-vt.md` | `/kiwa-astro` (Astro v5 View Transitions API 専用、 `setupAstroViewTransitionEnv` で 4 lifecycle event (`astro:before-preparation` / `astro:after-preparation` / `astro:before-swap` / `astro:after-swap`) を 1 env で順次 dispatch、 preventDefault による nav cancel + loader override + cross-document fallback + diffDom() による top-level tag 差分抽出、 `@kiwa-lab/astro` v1.1+) |
+| `solidstart-server-function` | `tests/spec/integration/test-spec-{module}.solidstart.md` | `/kiwa-solidstart` (SolidStart `'use server'` function 専用、 `invokeServerFunction` で args / headers / cookies + redirect signal 捕捉、 `@kiwa-lab/solidstart`) |
+| `solidstart-api-route` | `tests/spec/integration/test-spec-{module}.solidstart-api.md` | `/kiwa-solidstart` (SolidStart `routes/api/*.ts` 専用、 `invokeApiRoute` で simulated APIEvent (request / params / locals) + Response を normalize 捕捉、 `@kiwa-lab/solidstart`) |
+| `qwikcity-action` | `tests/spec/integration/test-spec-{module}.qwik-action.md` | `/kiwa-qwikcity` (Qwik City `routeAction$` 専用、 `invokeRouteAction` で formValues + cookies + headers + fail / redirect signal 捕捉、 `@kiwa-lab/qwikcity`) |
+| `qwikcity-loader` | `tests/spec/integration/test-spec-{module}.qwik.md` | `/kiwa-qwikcity` (Qwik City `routeLoader$` 専用、 `invokeRouteLoader` で url / params / cookies / platform + redirect signal 捕捉、 `@kiwa-lab/qwikcity`) |
+| `qwikcity-endpoint` | `tests/spec/integration/test-spec-{module}.qwik-endpoint.md` | `/kiwa-qwikcity` (Qwik City Endpoints `onGet` / `onPost` 専用、 `invokeEndpoint` で simulated RequestEvent (json / text / redirect / setHeader / status) + Response shape 捕捉、 `@kiwa-lab/qwikcity`) |
+| `edge-handler` | `tests/spec/integration/test-spec-{module}.edge.md` | `/kiwa-edge` (Edge runtime fetch handler 専用、 Cloudflare Workers / Vercel Edge / 汎用 ESM 形式、 `invokeEdgeHandler` で env binding (KV / R2 / D1 / vars) + ExecutionContext (waitUntil / passThroughOnException) を捕捉、 `@kiwa-lab/edge`) |
 | `rust-unit` | `tests/spec/unit/test-spec-{module}.rs.md` | `kiwa-test-rs` (Rust cargo test 専用、 `kiwa::unit::setup_env(SetupOpts { mode, seed, label })` + `assert_kiwa_eq!` / `assert_kiwa_close!` + `Drop` 経由 auto cleanup、 `KiwaEnv` は `!Send` で test thread 局所、 v1.4-1 で追加) |
 | `rust-integration` | `tests/spec/integration/test-spec-{module}.rs.md` | `kiwa-test-rs` (Rust hyper backed API mock 専用、 `kiwa::integration::mock_server(MockServerOpts { routes, recorder })` で in-memory hyper server 起動 + `reqwest` PoC、 request recorder で method / path / body を捕捉、 v1.4-2 で追加) |
 | `go-unit` | `tests/spec/unit/test-spec-{module}.go.md` | `kiwa-test-go` (Go testing.T 専用、 `kiwa.SetupUnitEnv(t, UnitOpts{ Mode, Seed, Label })` + `kiwa.AssertEqual` / `kiwa.AssertClose` + `t.Cleanup` 経由 auto cleanup、 `UnitEnv` は cross-goroutine 非対応で test goroutine 局所、 v1.4-3 で追加) |
@@ -101,9 +101,9 @@ $ARGUMENTS
 | `go-echo` | `tests/spec/integration/test-spec-{module}.go-echo.md` | `kiwa-test-go` (Go Echo `*echo.Echo` 専用、 `kiwa_echo.NewTestServer(t, e)` + `srv.Request(kiwa.MethodGET, path)` + `.Header(k, v)` / `.Body(b)` / `.JSON(b)` / `.Send()` chain で `httptest.NewRecorder` + `e.ServeHTTP` 駆動、 surface は Gin adapter と 1:1 (`StatusCode()` / `Headers()` / `Body()` / `BodyString()` / `JSON()`)、 `srv.RecordedRequests()` で v1.4 互換 recorder 共有、 v1.5-4 で追加) |
 | `rust-tower-http` | `tests/spec/integration/test-spec-{module}.rust-tower-http.md` | `kiwa-test-rs` (Rust tower-http `ServiceBuilder<...>` middleware chain 専用、 `kiwa::tower_http::test_chain(layers, router)` で `ServiceBuilder` layer stack を axum Router に被せて in-process `oneshot` 駆動 + 6 middleware helper (`cors::test_cors` / `trace::assert_trace_id` / `compression::assert_compressed` / `auth::with_bearer` + `with_basic` / `rate_limit::exhaust` / `timeout::assert_timed_out`) で middleware 固有 assertion、 `TestApp` / `TestResponse` surface は axum adapter と 1:1、 real port bind なし + TIME_WAIT flakiness 回避、 v1.7-1 (chain helper PR #629) + v1.7-2 (6 middleware helper PR #630) で追加) |
 | `go-fiber` | `tests/spec/integration/test-spec-{module}.go-fiber.md` | `kiwa-test-go` (Go Fiber `*fiber.App` 専用、 `kiwa_fiber.NewTestServer(t, app)` + `srv.Request(kiwa.MethodGET, path)` + `.Header(k, v)` / `.Body(b)` / `.JSON(b)` / `.Send()` chain で Fiber の `*App.Test(*http.Request)` hook (fasthttp base + in-memory net conn) 駆動、 surface は Gin / Echo adapter と 1:1 (`StatusCode()` / `Headers()` / `Body()` / `BodyString()` / `JSON()`)、 `srv.RecordedRequests()` で v1.4 互換 recorder 共有、 real port bind なし + TIME_WAIT flakiness 回避、 v1.7-4 (fiber subpackage PR #632) + v1.7-5 (fasthttp 互換 API PR #633) で追加) |
-| `auth` | `tests/spec/integration/test-spec-{module}.auth.md` | `/kiwa-auth` (auth session / provider / DB adapter mock 専用、 `@kiwa/auth` の 5 provider (NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0) を statement-level に mapping、 session mock + OAuth provider mock + email/password + magic link + 2FA + passkey + organizations + Clerk orgs + Auth0 tenant + rules + Management API mock の sub-feature を 1 spec 内で cover、 v1.8-1〜v1.8-3 で `@kiwa/auth` v0.1 追加、 v1.8-6 で本 layer 追加、 v1.9-1/-2 で Clerk / Auth0 provider dimension 追加、 `--provider {nextauth|lucia|better-auth|clerk|auth0}` で provider 別 spec 生成対応) |
-| `job-queue` | `tests/spec/integration/test-spec-{module}.queue.md` | `/kiwa-queue` (job queue / event queue / edge queue / AWS queue 専用、 `@kiwa/queue` の 4 provider (BullMQ (sandbox / testcontainers) + Inngest (stub / dev-server) + Cloudflare Queues (miniflare / wrangler) + AWS SQS (stub / localstack)) を statement-level に mapping、 job add / process / retry / fail / drain / delay + event send / step function / concurrency + queue send / consumer batch / DLQ + SQS FIFO / batch / long polling / visibility timeout の sub-feature を 1 spec 内で cover、 v1.8-4〜v1.8-5 で v0.1 追加、 v1.8-6 で本 layer 追加、 v1.9-3/-4 で Cloudflare Queues / SQS provider dimension 追加、 `--provider {bullmq|inngest|cloudflare|sqs}` で provider 別 spec 生成対応) |
-| `cache` | `tests/spec/integration/test-spec-{module}.cache.md` | `/kiwa-cache` (cache 専用、 `@kiwa/cache` の 3 provider (Redis (`setupCacheEnv`、 in-memory / testcontainers) + Memcached (`setupMemcachedEnv`、 stub / testcontainers) + KeyDB (`setupKeyDBEnv`、 stub / testcontainers)) を statement-level に mapping、 get / set / delete / TTL / expiry / Pub/Sub / publish-subscribe / assertPublished + Memcached 8 command + consistent-hash + KeyDB multi-master + cross-region Pub/Sub の sub-feature を 1 spec 内で cover、 v1.8-6 で本 layer + `@kiwa/cache` v0.1 同時追加、 v1.9-5/-6 で Memcached / KeyDB provider dimension 追加、 `--provider {redis|memcached|keydb}` で provider 別 spec 生成対応) |
+| `auth` | `tests/spec/integration/test-spec-{module}.auth.md` | `/kiwa-auth` (auth session / provider / DB adapter mock 専用、 `@kiwa-lab/auth` の 5 provider (NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0) を statement-level に mapping、 session mock + OAuth provider mock + email/password + magic link + 2FA + passkey + organizations + Clerk orgs + Auth0 tenant + rules + Management API mock の sub-feature を 1 spec 内で cover、 v1.8-1〜v1.8-3 で `@kiwa-lab/auth` v0.1 追加、 v1.8-6 で本 layer 追加、 v1.9-1/-2 で Clerk / Auth0 provider dimension 追加、 `--provider {nextauth|lucia|better-auth|clerk|auth0}` で provider 別 spec 生成対応) |
+| `job-queue` | `tests/spec/integration/test-spec-{module}.queue.md` | `/kiwa-queue` (job queue / event queue / edge queue / AWS queue 専用、 `@kiwa-lab/queue` の 4 provider (BullMQ (sandbox / testcontainers) + Inngest (stub / dev-server) + Cloudflare Queues (miniflare / wrangler) + AWS SQS (stub / localstack)) を statement-level に mapping、 job add / process / retry / fail / drain / delay + event send / step function / concurrency + queue send / consumer batch / DLQ + SQS FIFO / batch / long polling / visibility timeout の sub-feature を 1 spec 内で cover、 v1.8-4〜v1.8-5 で v0.1 追加、 v1.8-6 で本 layer 追加、 v1.9-3/-4 で Cloudflare Queues / SQS provider dimension 追加、 `--provider {bullmq|inngest|cloudflare|sqs}` で provider 別 spec 生成対応) |
+| `cache` | `tests/spec/integration/test-spec-{module}.cache.md` | `/kiwa-cache` (cache 専用、 `@kiwa-lab/cache` の 3 provider (Redis (`setupCacheEnv`、 in-memory / testcontainers) + Memcached (`setupMemcachedEnv`、 stub / testcontainers) + KeyDB (`setupKeyDBEnv`、 stub / testcontainers)) を statement-level に mapping、 get / set / delete / TTL / expiry / Pub/Sub / publish-subscribe / assertPublished + Memcached 8 command + consistent-hash + KeyDB multi-master + cross-region Pub/Sub の sub-feature を 1 spec 内で cover、 v1.8-6 で本 layer + `@kiwa-lab/cache` v0.1 同時追加、 v1.9-5/-6 で Memcached / KeyDB provider dimension 追加、 `--provider {redis|memcached|keydb}` で provider 別 spec 生成対応) |
 | `contract-rust` | `tests/spec/contract/test-spec-{module}.contract-rust.md` | `/kiwa-rust --layer contract-rust --provider {foundry|alloy}` (Rust から Solidity contract test を driving する専用 layer、 `kiwa-test-rs` v0.4.1 で追加された `kiwa::contract::foundry` (feature `contract-foundry`、 forge / cast / anvil subprocess wrapper + Drop-based Anvil + coverage summary + lcov emit + graceful skip pattern) と v0.4.2 で追加された `kiwa::contract::alloy` (feature `contract-alloy`、 Foundry `out/*.json` の SolAbi parser + 4-byte selector 計算 (built-in keccak-256) + Signer 4 種 (LocalWallet / AwsKms / Ledger / Trezor) + Provider 3 種 (Http / Ws / Ipc) + ContractCall encoding) の 2 provider を statement-level に mapping、 対象 contract (Solidity file) / 対象 method / 呼出方向 (call / send) / signer path / provider transport / assertion 型 の 6 次元を 9 column 拡張表で cover、 `--provider {foundry|alloy}` で provider 別 spec 生成対応、 v1.10-5/-6 で追加) |
 | `unit` | `tests/spec/unit/test-spec-{module}.md` | `/kiwa-vitest` (Vitest 汎用 unit runner) |
 | `all` (default) | `tests/spec/test-spec-{module}.md` | 全 Layer 2 skill (旧 default 経路、 互換性維持) |
@@ -321,7 +321,7 @@ multiSelect: false
 
 #### api layer 専用 column (HTTP / REST / GraphQL)
 
-`--layer api` 指定時は HTTP セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa/api` の `setupApiServer` mode と直接 mapping するため)。
+`--layer api` 指定時は HTTP セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-lab/api` の `setupApiServer` mode と直接 mapping するため)。
 
 | 項目 | 内容 |
 |---|---|
@@ -336,13 +336,13 @@ multiSelect: false
 | Route | `/api/items` 等の URL path |
 
 mode column が `mock` = msw handler で固定応答、 `live` = 実 HTTP server で実装動作、 `hybrid` = 両者共存 (live 実装 + 必要時に msw で path 上書き)。
-`/kiwa-api` Layer 2 skill が本 9 column を `@kiwa/api/setupApiServer` の引数に機械変換する。
+`/kiwa-api` Layer 2 skill が本 9 column を `@kiwa-lab/api/setupApiServer` の引数に機械変換する。
 
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.api.md` (api layer 専用拡張、 `.api.md` suffix で `@kiwa/api` 経路向けと識別)。
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.api.md` (api layer 専用拡張、 `.api.md` suffix で `@kiwa-lab/api` 経路向けと識別)。
 
 #### ui layer 専用 column (React component)
 
-`--layer ui` 指定時は React component セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa/ui` の `setupComponentEnv` mode と直接 mapping するため)。
+`--layer ui` 指定時は React component セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-lab/ui` の `setupComponentEnv` mode と直接 mapping するため)。
 
 | 項目 | 内容 |
 |---|---|
@@ -357,13 +357,13 @@ mode column が `mock` = msw handler で固定応答、 `live` = 実 HTTP server
 | Component | `<Counter />` 等の component 識別子 |
 
 mode column が `render` = mount + screen query のみ、 `interaction` = `userEvent` で操作 + 状態遷移 assertion、 `snapshot` = markup 文字列の正規表現 / 部分一致 / file snapshot。
-`/kiwa-ui` Layer 2 skill が本 9 column を `@kiwa/ui/setupComponentEnv` の引数に機械変換する。
+`/kiwa-ui` Layer 2 skill が本 9 column を `@kiwa-lab/ui/setupComponentEnv` の引数に機械変換する。
 
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.ui.md` (ui layer 専用拡張、 `.ui.md` suffix で `@kiwa/ui` 経路向けと識別)。
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.ui.md` (ui layer 専用拡張、 `.ui.md` suffix で `@kiwa-lab/ui` 経路向けと識別)。
 
 #### data layer 専用 column (queue / cron / batch)
 
-`--layer data` 指定時は queue / cron / batch job のセマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa/data` の `setupQueueEnv` / `createFakeClock` と直接 mapping)。
+`--layer data` 指定時は queue / cron / batch job のセマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-lab/data` の `setupQueueEnv` / `createFakeClock` と直接 mapping)。
 
 | 項目 | 内容 |
 |---|---|
@@ -378,13 +378,13 @@ mode column が `render` = mount + screen query のみ、 `interaction` = `userE
 | Topic | `orders` / `cron` 等の queue / schedule 識別子 |
 
 mode column が `mock` = in-memory queue + fake clock、 `live` = 将来 SQS / Kafka / cron daemon 接続。
-`/kiwa-data` Layer 2 skill が本 9 column を `@kiwa/data` API に機械変換する。
+`/kiwa-data` Layer 2 skill が本 9 column を `@kiwa-lab/data` API に機械変換する。
 
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.data.md` (`.data.md` suffix で `@kiwa/data` 経路向けと識別)。
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.data.md` (`.data.md` suffix で `@kiwa-lab/data` 経路向けと識別)。
 
 #### cli layer 専用 column (CLI / shell / file IO)
 
-`--layer cli` 指定時は CLI のセマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa/cli-test` の `setupCliEnv` / `runCli` と直接 mapping)。
+`--layer cli` 指定時は CLI のセマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-lab/cli-test` の `setupCliEnv` / `runCli` と直接 mapping)。
 
 | 項目 | 内容 |
 |---|---|
@@ -398,9 +398,9 @@ mode column が `mock` = in-memory queue + fake clock、 `live` = 将来 SQS / K
 | Mode | `mock` / `live` (`setupCliEnv()` は両 mode 共通、 mode は live 系 CLI vs script test の区別) |
 | Topic | `help` / `doctor` / `init` 等の sub command 識別子 |
 
-`/kiwa-cli-test` Layer 2 skill が本 9 column を `@kiwa/cli-test` API に機械変換する。
+`/kiwa-cli-test` Layer 2 skill が本 9 column を `@kiwa-lab/cli-test` API に機械変換する。
 
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.cli.md` (`.cli.md` suffix で `@kiwa/cli-test` 経路向けと識別)。
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.cli.md` (`.cli.md` suffix で `@kiwa-lab/cli-test` 経路向けと識別)。
 
 例 (実装例 `examples/react-component-poc/tests/spec/integration/test-spec-counter.ui.md`):
 
@@ -429,7 +429,7 @@ mode column が `mock` = in-memory queue + fake clock、 `live` = 将来 SQS / K
 
 #### e2e-generic layer 専用 column (汎用 browser e2e)
 
-`--layer e2e-generic` 指定時は 非 web3 文脈の browser e2e セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa/e2e` の `setupE2eEnv` mode と直接 mapping するため、 dApp 文脈の `--layer e2e` (`/kiwa-play` 消費) とは独立)。
+`--layer e2e-generic` 指定時は 非 web3 文脈の browser e2e セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-lab/e2e` の `setupE2eEnv` mode と直接 mapping するため、 dApp 文脈の `--layer e2e` (`/kiwa-play` 消費) とは独立)。
 
 | 項目 | 内容 |
 |---|---|
@@ -444,13 +444,13 @@ mode column が `mock` = in-memory queue + fake clock、 `live` = 将来 SQS / K
 | Route | `/login` / `/dashboard` 等の URL path |
 
 mode column が `static` = file:// or static html、 `fetch` = client side fetch を mock、 `node` = node サーバ起動 + browser から接続、 `ssr` = Next.js / Nuxt 等 SSR 框架 dev server。
-`/kiwa-e2e` Layer 2 skill が本 9 column を `@kiwa/e2e/setupE2eEnv` の引数に機械変換する。
+`/kiwa-e2e` Layer 2 skill が本 9 column を `@kiwa-lab/e2e/setupE2eEnv` の引数に機械変換する。
 
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.e2e.md` (`.e2e.md` suffix で `@kiwa/e2e` 経路向けと識別、 dApp の `tests/spec/e2e/test-spec-{module}.md` とは path で区別)。
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.e2e.md` (`.e2e.md` suffix で `@kiwa-lab/e2e` 経路向けと識別、 dApp の `tests/spec/e2e/test-spec-{module}.md` とは path で区別)。
 
 #### a11y layer 専用 column (accessibility)
 
-`--layer a11y` 指定時は WCAG 2.1 AA セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa/a11y` の `runAxe` / `expectNoViolations` と直接 mapping)。
+`--layer a11y` 指定時は WCAG 2.1 AA セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-lab/a11y` の `runAxe` / `expectNoViolations` と直接 mapping)。
 
 | 項目 | 内容 |
 |---|---|
@@ -465,13 +465,13 @@ mode column が `static` = file:// or static html、 `fetch` = client side fetch
 | Mode | `jsdom` / `playwright` (`runAxe({ mode })` と 1 対 1) |
 
 mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `playwright` = 実 browser に @axe-core/playwright を inject して評価。
-`/kiwa-a11y` Layer 2 skill が本 9 column を `@kiwa/a11y` API に機械変換する。
+`/kiwa-a11y` Layer 2 skill が本 9 column を `@kiwa-lab/a11y` API に機械変換する。
 
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.a11y.md` (`.a11y.md` suffix で `@kiwa/a11y` 経路向けと識別)。
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.a11y.md` (`.a11y.md` suffix で `@kiwa-lab/a11y` 経路向けと識別)。
 
 #### visual layer 専用 column (visual regression)
 
-`--layer visual` 指定時は pixel-level 比較セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa/visual` の `comparePngBuffers` / `expectNoVisualDiff` と直接 mapping)。
+`--layer visual` 指定時は pixel-level 比較セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-lab/visual` の `comparePngBuffers` / `expectNoVisualDiff` と直接 mapping)。
 
 | 項目 | 内容 |
 |---|---|
@@ -485,13 +485,13 @@ mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `pla
 | Priority | `P0` / `P1` / `P2` / `P3` |
 | Automation | `yes` / `no` / `manual` |
 
-`/kiwa-visual` Layer 2 skill が本 9 column を `@kiwa/visual` API に機械変換する。 baseline 画像は `tests/visual/baseline/` 配下、 diff 失敗時は `tests/visual/diff/` に actual / expected / diff の 3 枚を生成する。
+`/kiwa-visual` Layer 2 skill が本 9 column を `@kiwa-lab/visual` API に機械変換する。 baseline 画像は `tests/visual/baseline/` 配下、 diff 失敗時は `tests/visual/diff/` に actual / expected / diff の 3 枚を生成する。
 
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.visual.md` (`.visual.md` suffix で `@kiwa/visual` 経路向けと識別)。
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.visual.md` (`.visual.md` suffix で `@kiwa-lab/visual` 経路向けと識別)。
 
 #### nextjs-server-action layer 専用 column (Next.js App Router `'use server'`)
 
-`--layer nextjs-server-action` 指定時は Next.js Server Action セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa/nextjs` の `invokeServerAction` と直接 mapping、 Issue #493)。
+`--layer nextjs-server-action` 指定時は Next.js Server Action セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-lab/nextjs` の `invokeServerAction` と直接 mapping、 Issue #493)。
 
 | 項目 | 内容 |
 |---|---|
@@ -505,13 +505,13 @@ mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `pla
 | Automation | `yes` / `no` / `manual` |
 | Action | 対象 Server Action の identifier (`login` / `createPost` / `deleteUser` 等) |
 
-`/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa/nextjs/invokeServerAction` の引数に機械変換する。 action は `redirect()` / `cookies().set()` / `revalidatePath()` を直接 import せず、 **injectable seam** 経由で env を受け取る形に refactor 済みであることが前提 (詳細 = `references/server-action-seam.md`)。
+`/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa-lab/nextjs/invokeServerAction` の引数に機械変換する。 action は `redirect()` / `cookies().set()` / `revalidatePath()` を直接 import せず、 **injectable seam** 経由で env を受け取る形に refactor 済みであることが前提 (詳細 = `references/server-action-seam.md`)。
 
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.nextjs.md` (`.nextjs.md` suffix で `@kiwa/nextjs` 経路向けと識別)。
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.nextjs.md` (`.nextjs.md` suffix で `@kiwa-lab/nextjs` 経路向けと識別)。
 
 #### nextjs-middleware layer 専用 column (Next.js `middleware.ts`)
 
-`--layer nextjs-middleware` 指定時は Next.js middleware セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa/nextjs` の `invokeMiddleware` と直接 mapping、 Issue #495)。
+`--layer nextjs-middleware` 指定時は Next.js middleware セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-lab/nextjs` の `invokeMiddleware` と直接 mapping、 Issue #495)。
 
 | 項目 | 内容 |
 |---|---|
@@ -525,13 +525,13 @@ mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `pla
 | Automation | `yes` / `no` / `manual` |
 | Middleware | 対象 middleware の identifier (`authGate` / `localeRewrite` / `geoBlock` 等、 多 middleware 構成は entry 別に行を分ける) |
 
-`/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa/nextjs/invokeMiddleware` の引数に機械変換する。 middleware は `NextResponse.redirect()` 等を直接 import せず、 kiwa の `middlewareActions.{next,redirect,rewrite,json}()` を return する形に refactor 済みであることが前提 (Pattern A 同等)。
+`/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa-lab/nextjs/invokeMiddleware` の引数に機械変換する。 middleware は `NextResponse.redirect()` 等を直接 import せず、 kiwa の `middlewareActions.{next,redirect,rewrite,json}()` を return する形に refactor 済みであることが前提 (Pattern A 同等)。
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.middleware.md` (`.middleware.md` suffix で middleware test 経路向けと識別)。
 
 #### nextjs-rsc layer 専用 column (Next.js React Server Components)
 
-`--layer nextjs-rsc` 指定時は Next.js async server component のセマンティクスを表現する **9 column 拡張表** を使う (`@kiwa/nextjs` の `renderServerComponent` と直接 mapping、 Issue #494)。
+`--layer nextjs-rsc` 指定時は Next.js async server component のセマンティクスを表現する **9 column 拡張表** を使う (`@kiwa-lab/nextjs` の `renderServerComponent` と直接 mapping、 Issue #494)。
 
 | 項目 | 内容 |
 |---|---|
@@ -545,7 +545,7 @@ mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `pla
 | Mode | `direct` (renderServerComponent 直 await) / `withFetch` (component 内 fetch を vi.stubGlobal で mock) |
 | Signal | 期待 throw signal (`none` / `notFound` / `forbidden` / `redirect`) |
 
-`/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa/nextjs/renderServerComponent` の引数に機械変換する。 server component は `notFound()` / `forbidden()` / `redirect()` を直接 import せず、 kiwa の `NOT_FOUND_SYMBOL` / `FORBIDDEN_SYMBOL` / `RSC_REDIRECT_SYMBOL` を持つ object を throw する形に refactor 済みであることが前提 (Pattern A 同等)。
+`/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa-lab/nextjs/renderServerComponent` の引数に機械変換する。 server component は `notFound()` / `forbidden()` / `redirect()` を直接 import せず、 kiwa の `NOT_FOUND_SYMBOL` / `FORBIDDEN_SYMBOL` / `RSC_REDIRECT_SYMBOL` を持つ object を throw する形に refactor 済みであることが前提 (Pattern A 同等)。
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.rsc.md` (`.rsc.md` suffix で RSC test 経路向けと識別)。
 

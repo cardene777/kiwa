@@ -2,7 +2,7 @@
 
 Next.js production code uses `redirect()` / `cookies()` / `revalidatePath()` from `next/navigation` / `next/headers` / `next/cache`. These imports throw / mutate global request scope and **cannot run inside a unit test** without a live Next.js server.
 
-`@kiwa/nextjs` works around this by requiring the Server Action under test to accept its environment via an **injectable seam** — a parameter or a module-level setter that defaults to the real Next.js bindings in production but can be replaced in tests.
+`@kiwa-lab/nextjs` works around this by requiring the Server Action under test to accept its environment via an **injectable seam** — a parameter or a module-level setter that defaults to the real Next.js bindings in production but can be replaced in tests.
 
 ## Pattern A — env parameter (recommended)
 
@@ -12,7 +12,7 @@ The action takes an optional `env` parameter holding `redirect` / `cookies` / `r
 // app/actions/login.ts
 import { redirect as nextRedirect } from 'next/navigation';
 import { cookies as nextCookies } from 'next/headers';
-import { REDIRECT_SYMBOL } from '@kiwa/nextjs';
+import { REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
 
 type LoginEnv = {
   redirect: (url: string) => never;
@@ -38,7 +38,7 @@ export async function login(formData: FormData, env: LoginEnv = defaultEnv) {
 The kiwa test supplies its own env that throws a `REDIRECT_SYMBOL` signal and writes into the captured cookie jar:
 
 ```ts
-import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa/nextjs';
+import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
 import { login } from '../app/actions/login.js';
 
 const env = await invokeServerAction({

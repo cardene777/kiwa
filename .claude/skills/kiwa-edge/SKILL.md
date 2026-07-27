@@ -1,10 +1,10 @@
 ---
 name: kiwa-edge
 description: |
-  Layer 1 spec (`tests/spec/integration/test-spec-{module}.edge.md`) を Edge runtime (Cloudflare Workers / Vercel Edge / 汎用 ESM fetch handler) の test (Vitest + @kiwa/edge) に変換する Layer 2 skill。
+  Layer 1 spec (`tests/spec/integration/test-spec-{module}.edge.md`) を Edge runtime (Cloudflare Workers / Vercel Edge / 汎用 ESM fetch handler) の test (Vitest + @kiwa-lab/edge) に変換する Layer 2 skill。
   `fetch(request, env, ctx)` を `invokeEdgeHandler({ handler, url, method, headers, formData, jsonBody, env })` 経由で direct invoke、 env binding (KV / R2 / D1 / vars) を test ごとに seed、 ExecutionContext の `waitUntil` / `passThroughOnException` を捕捉する。
   KV namespace は `createKvNamespace(initial)` の純 JS mock を提供 (Miniflare / workerd 不要)、 R2 / D1 / DurableObject は test 側で必要に応じて mock 投入。
-  `/kiwa-design --layer edge-handler` が出力する 9 column 表を `@kiwa/edge` の API に機械的に変換する。
+  `/kiwa-design --layer edge-handler` が出力する 9 column 表を `@kiwa-lab/edge` の API に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -13,7 +13,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /kiwa-edge — Edge runtime fetch handler test 生成 (Layer 2)
 
-`/kiwa-design --layer edge-handler` が出力した 9 column 表を、 `@kiwa/edge` v1.0+ の `invokeEdgeHandler` を使った Vitest test に機械変換する。
+`/kiwa-design --layer edge-handler` が出力した 9 column 表を、 `@kiwa-lab/edge` v1.0+ の `invokeEdgeHandler` を使った Vitest test に機械変換する。
 
 対象は **Cloudflare Workers**、 **Vercel Edge Functions**、 **汎用 ESM 形式 fetch handler** (`export default { fetch(request, env, ctx) { ... } }`)。 Next.js Edge runtime と直接統合する場合は `/kiwa-nextjs` (middleware mode) を併用、 SvelteKit Cloudflare adapter は `/kiwa-sveltekit` + 本 skill を併用。
 
@@ -21,7 +21,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 - Edge runtime project (Cloudflare Workers / Vercel Edge / etc) が存在
 - Layer 1 spec が存在
-- `@kiwa/edge` v1.0+ install 済 (`pnpm add -D @kiwa/edge`)
+- `@kiwa-lab/edge` v1.0+ install 済 (`pnpm add -D @kiwa-lab/edge`)
 - vitest standard 開発環境
 
 ## 9 column 拡張表 (`/kiwa-design --layer edge-handler`)
@@ -41,7 +41,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 ## test 生成 template
 
 ```ts
-import { invokeEdgeHandler, createKvNamespace, type EdgeFetchHandler } from '@kiwa/edge';
+import { invokeEdgeHandler, createKvNamespace, type EdgeFetchHandler } from '@kiwa-lab/edge';
 import worker from '../src/index.ts';
 
 it('{ID} {Observation}', async () => {
@@ -64,7 +64,7 @@ it('{ID} {Observation}', async () => {
 ## 関連
 
 - 上流 ... `/kiwa-design --layer edge-handler`
-- runtime fixture ... `@kiwa/edge` v1.0+ (`packages/edge/`)
+- runtime fixture ... `@kiwa-lab/edge` v1.0+ (`packages/edge/`)
 - 下流 ... `/kiwa-review --layer edge-handler`
 - Next.js Edge runtime ... `/kiwa-nextjs` (middleware mode) を併用
 - SvelteKit Cloudflare adapter ... `/kiwa-sveltekit` + 本 skill 併用

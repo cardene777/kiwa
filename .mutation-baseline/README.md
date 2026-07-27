@@ -2,7 +2,7 @@
 
 Per-package baseline snapshots of Stryker mutation-testing runs.
 
-Layout: `.mutation-baseline/<pkg>.json` — the last known green Stryker report for `@kiwa/<pkg>`.
+Layout: `.mutation-baseline/<pkg>.json` — the last known green Stryker report for `@kiwa-lab/<pkg>`.
 
 Each baseline records:
 
