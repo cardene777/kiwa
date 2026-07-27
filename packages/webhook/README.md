@@ -64,6 +64,19 @@ describe('stripe payment webhook', () => {
 
 `/kiwa-webhook` skill を起動すると 4 provider 別 signature format + retry 経路を含む test を生成できる。
 
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/services/webhook/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/services/webhook/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/services/webhook/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/services/webhook/reference)
+
+編集元は [docs/libraries/services/webhook](../../docs/libraries/services/webhook/) です。
+<!-- kiwa-docs:end -->
+
 ## License
 
 UNLICENSED — see [cardene777/kiwa](https://github.com/cardene777/kiwa) for repo terms.

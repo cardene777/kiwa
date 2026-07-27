@@ -1,10 +1,10 @@
-# kiwa release gate — 12 軸 SSOT (v1.27-4+)
+# kiwa リリース基準
 
 kiwa provider が「release 可」 と判定される 12 軸の閾値 SSOT。 `@kiwa-lab/quality-metrics` package の `DEFAULT_RELEASE_GATE_THRESHOLDS` (共通 7 軸 + AI-LLM 4 軸) と `DEFAULT_MUTATION_TIER_THRESHOLDS` (v1.27-4 で追加された 12 番目 axis の tier default 表) に 1:1 で対応する。 provider 個別に上書き可能だが、 その場合は overrides 理由を該当 provider の PR body に明記する。
 
 v1.11 で確立した共通 7 軸 (Issue #681) に、 v1.12 milestone (Issue #695) で AI-LLM 4 軸 (cost / latency / token / accuracy) を追加、 v1.27-4 (Issue #959) で mutation kill rate の 4-tier 判定を第 12 軸として追加した。 12 番目の `mutation.tier` axis は opt-in で有効化する (`evaluateReleaseGate` の第 3 引数 `context.mutationTier` を渡した provider のみ)、 legacy 7 / 11 軸経路は完全に後方互換に保つ。
 
-## SSOT 表 — 共通 7 軸 (全 provider)
+## 共通の基準
 
 | 軸 | 閾値 | 比較 | 根拠 |
 |---|---|---|---|
@@ -16,7 +16,7 @@ v1.11 で確立した共通 7 軸 (Issue #681) に、 v1.12 milestone (Issue #69
 | mutation — killRate | 60% | ≥ | mutation testing の「6 割は殺せる」 test suite の bar |
 | test count — behavior | 10 | ≥ | 最低 10 個の behavior test で API 網羅 |
 
-## SSOT 表 — AI-LLM 4 軸 (`@kiwa-lab/ai-*` provider のみ強制)
+## AIの基準
 
 | 軸 | 閾値 | 比較 | 根拠 |
 |---|---|---|---|
@@ -27,7 +27,7 @@ v1.11 で確立した共通 7 軸 (Issue #681) に、 v1.12 milestone (Issue #69
 
 非 AI-LLM provider は 7 軸全て clear で「release 可」、 AI-LLM provider は 11 軸全て clear で「release 可」。 1 軸でも不足なら release blocker として PR に明示する。
 
-## SSOT 表 — mutation.tier axis (v1.27-4、 opt-in で 12 軸目)
+## Mutationの基準
 
 | tier | 閾値 | 比較 | 根拠 |
 |---|---|---|---|
@@ -40,7 +40,7 @@ tier 判定 SSOT は `docs/quality/mutation-thresholds.md`。 `evaluateReleaseGa
 
 ## 使い方
 
-### 共通 7 軸 (非 AI-LLM provider)
+### 共通の使い方
 
 ```ts
 import {
@@ -72,7 +72,7 @@ if (!verdict.passed) {
 console.log(emitMarkdown({ report, verdict }));
 ```
 
-### AI-LLM 11 軸 (`@kiwa-lab/ai-*` provider)
+### AIの使い方
 
 ```ts
 import {
@@ -102,7 +102,7 @@ const verdict = evaluateReleaseGate(report);
 // verdict.axesEvaluated === 11
 ```
 
-### mutation.tier 12 番目 (opt-in、 v1.27-4+)
+### Mutationの使い方
 
 ```ts
 import {

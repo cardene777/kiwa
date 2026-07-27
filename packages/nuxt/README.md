@@ -90,6 +90,19 @@ Returns `{ outcome, navigateToCalls, abortNavigationCalls, redirectedTo, aborted
 - Nuxt composables (`useFetch` / `useState` / `useNuxtApp`) — covered by `@kiwa-lab/ui` Vue mode for the client side
 - Full HTTP round-trip — use Playwright + `@kiwa-lab/e2e` for E2E coverage
 
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/frameworks/nuxt/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/frameworks/nuxt/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/frameworks/nuxt/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/frameworks/nuxt/reference)
+
+編集元は [docs/libraries/frameworks/nuxt](../../docs/libraries/frameworks/nuxt/) です。
+<!-- kiwa-docs:end -->
+
 ## License
 
 MIT

@@ -14,22 +14,32 @@ kiwa は wallet の挙動を **コード側で完結** させることで CI フ
 
 ## 直接処理する 9 RPC
 
-```mermaid
-graph LR
-    A[dApp page.window.ethereum.request] --> B[kiwa injected provider]
-    B --> C{method?}
-    C -->|eth_requestAccounts| D[core handler]
-    C -->|personal_sign| D
-    C -->|eth_signTypedData_v4| D
-    C -->|eth_sendTransaction| D
-    C -->|eth_accounts| D
-    C -->|eth_chainId| D
-    C -->|wallet_switchEthereumChain| D
-    C -->|eth_subscribe| E[reject code 4200]
-    C -->|それ以外| F[anvil JSON-RPC へ forward]
-```
+inject された provider は以下 9 method を fixture の state から直接返します。
 
-詳細は [docs/RPC.md](../../RPC.md) を参照してください。
+| method | 返すもの |
+|---|---|
+| `eth_requestAccounts` | provider に紐づく anvil の開発用アカウント |
+| `eth_accounts` | 同上 |
+| `eth_chainId` | 現在の chain ID (16 進) |
+| `net_version` | 現在の chain ID (10 進の文字列) |
+| `personal_sign` | 署名 |
+| `eth_signTypedData_v4` | 型付きデータの署名 |
+| `wallet_switchEthereumChain` | `null` (切替後に `chainChanged` を送出) |
+| `wallet_addEthereumChain` | `null` (`chainRegistry` を設定している場合のみ registry へ追加、 いずれの場合もその chain へ切替えて `chainChanged` を送出) |
+| `eth_sendTransaction` | transaction hash (anvil へ broadcast) |
+
+`eth_requestAccounts` と `eth_accounts` は複数アカウントを扱い、 現在有効なアカウントは `setActiveAccount()` で切り替えます。
+接続を拒否する経路 (`rejectConnect`) やコントラクトアカウントを使う経路もあり、 詳細は [docs/RPC.md](../../RPC.md) を参照してください。
+
+以下 5 つの method はエラーコード `4200` で拒否し、 anvil へは一切転送しません。
+
+- `eth_subscribe`
+- `eth_unsubscribe`
+- `wallet_requestPermissions`
+- `wallet_getPermissions`
+- `eth_sign`
+
+上記 9 つと拒否 5 つ以外の method は anvil の JSON-RPC へそのまま転送します。
 
 ## Example: setApprovalMode
 

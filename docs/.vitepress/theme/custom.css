@@ -1,0 +1,25 @@
+.VPNavBarTitle .logo {
+  width: 42px;
+  height: 42px;
+  max-height: 42px;
+  margin-right: 2px;
+}
+
+.VPNavBarTranslations .button .text::after {
+  content: '言語';
+  margin-left: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+html[lang='en-US'] .VPNavBarTranslations .button .text::after {
+  content: 'Language';
+}
+
+@media (max-width: 768px) {
+  .VPNavBarTitle .logo {
+    width: 36px;
+    height: 36px;
+    max-height: 36px;
+  }
+}

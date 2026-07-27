@@ -14,22 +14,32 @@ kiwa keeps wallet behavior **inside code**, making it CI-friendly and giving swi
 
 ## The 9 directly-handled RPCs
 
-```mermaid
-graph LR
-    A[dApp page.window.ethereum.request] --> B[kiwa injected provider]
-    B --> C{method?}
-    C -->|eth_requestAccounts| D[core handler]
-    C -->|personal_sign| D
-    C -->|eth_signTypedData_v4| D
-    C -->|eth_sendTransaction| D
-    C -->|eth_accounts| D
-    C -->|eth_chainId| D
-    C -->|wallet_switchEthereumChain| D
-    C -->|eth_subscribe| E[reject code 4200]
-    C -->|otherwise| F[forward to anvil JSON-RPC]
-```
+The injected provider answers these 9 methods straight from fixture state.
 
-See [docs/RPC.md](../../RPC.md) for the full reference.
+| Method | Returns |
+|---|---|
+| `eth_requestAccounts` | The anvil dev account bound to the provider |
+| `eth_accounts` | Same as above |
+| `eth_chainId` | Current chain ID (hex) |
+| `net_version` | Current chain ID (base-10 string) |
+| `personal_sign` | Signature |
+| `eth_signTypedData_v4` | Typed-data signature |
+| `wallet_switchEthereumChain` | `null` (switches, then emits `chainChanged`) |
+| `wallet_addEthereumChain` | `null` (adds to the registry only when `chainRegistry` is configured; either way it switches to that chain and emits `chainChanged`) |
+| `eth_sendTransaction` | Transaction hash (broadcast to anvil) |
+
+`eth_requestAccounts` and `eth_accounts` handle multiple accounts; the active one is switched via `setActiveAccount()`.
+There are also paths for rejecting a connection (`rejectConnect`) and for contract accounts — see [docs/RPC.md](../../RPC.md).
+
+These 5 methods are rejected with error code `4200` and never forwarded to anvil.
+
+- `eth_subscribe`
+- `eth_unsubscribe`
+- `wallet_requestPermissions`
+- `wallet_getPermissions`
+- `eth_sign`
+
+Every method outside the 9 handled and 5 blocked ones is forwarded to anvil's JSON-RPC as-is.
 
 ## Example: setApprovalMode
 

@@ -1,53 +1,171 @@
 import { defineConfig } from 'vitepress';
 
-/**
- * VitePress configuration for the kiwa documentation site.
- *
- * v1.11-6 (Issue #686) introduces the site skeleton. VitePress itself is an
- * opt-in devDependency — install with `pnpm add -D vitepress` at the repo
- * root when you want to build locally. The `/docs-publish` skill wires up
- * the full generation → build → gh-pages push chain.
- *
- * Documentation lives under `docs/`:
- * - `docs/index.md` — landing page
- * - `docs/tutorials/*.md` — hands-on tutorials (v1.11-5)
- * - `docs/migrations/*.md` — per-milestone migration guides (v1.11-5)
- * - `docs/quality/release-gate.md` — release-gate SSOT (v1.11-1)
- * - `docs/quality-reports/*` — provider quality reports
- * - `docs/api/{typescript,rust,solidity}/**` — generated API references
- *
- * The theme is the default VitePress theme; brand colour follows the kiwa
- * "gentle green" (#5ba75b) used across the announcement banners.
- */
+type LibraryCategory = {
+  text: string;
+  slug: string;
+  packages: string[];
+};
+
+const libraryCategories: LibraryCategory[] = [
+  {
+    text: '基盤',
+    slug: 'foundation',
+    packages: [
+      'core', 'dapp', 'e2e', 'api', 'ui', 'cli', 'cli-test', 'component',
+      'data', 'design-check', 'kaname', 'lean', 'skill-test', 'desktop', 'mobile',
+    ],
+  },
+  {
+    text: 'アプリUI',
+    slug: 'application',
+    packages: ['form', 'state', 'query', 'chart', 'date', 'i18n', 'react-native', 'expo', 'macos-app'],
+  },
+  {
+    text: 'Webフレームワーク',
+    slug: 'frameworks',
+    packages: ['astro', 'edge', 'fresh', 'hono', 'nextjs', 'nuxt', 'qwikcity', 'remix', 'solidjs', 'solidstart', 'sveltekit'],
+  },
+  {
+    text: 'サービス',
+    slug: 'services',
+    packages: ['auth', 'cache', 'crypto', 'email', 'feature-flag', 'graphql', 'grpc', 'migration', 'notification', 'orm', 'payment', 'queue', 'trpc', 'upload', 'webhook', 'websocket', 'workflow'],
+  },
+  {
+    text: 'AIとリアルタイム',
+    slug: 'ai-realtime',
+    packages: ['agent', 'ai-llm', 'mcp', 'observability', 'realtime', 'search', 'streaming', 'vector', 'visual'],
+  },
+  {
+    text: '品質とセキュリティ',
+    slug: 'quality',
+    packages: ['a11y', 'perf-harness', 'quality-metrics', 'release-invariants', 'security', 'security-devsecops'],
+  },
+  {
+    text: '言語アダプター',
+    slug: 'languages',
+    packages: ['go-lib', 'python', 'ruby', 'rust-lib'],
+  },
+];
+
+const libraryPageItems = (slug: string, packageName: string) => [
+  { text: '概要', link: `/libraries/${slug}/${packageName}/` },
+  { text: 'はじめる', link: `/libraries/${slug}/${packageName}/quickstart` },
+  { text: '使い方', link: `/libraries/${slug}/${packageName}/how-to` },
+  { text: 'リファレンス', link: `/libraries/${slug}/${packageName}/reference` },
+];
+
+const categorySidebarItem = ({ text, slug, packages }: LibraryCategory) => ({
+  text,
+  collapsed: false,
+  items: [
+    { text: 'カテゴリ概要', link: `/libraries/${slug}/` },
+    ...(slug === 'foundation'
+      ? [{ text: 'kiwa 全体', collapsed: true, items: libraryPageItems(slug, 'kiwa') }]
+      : []),
+    ...packages.map((packageName) => ({
+      text: `@kiwa-lab/${packageName}`,
+      collapsed: true,
+      items: libraryPageItems(slug, packageName),
+    })),
+  ],
+});
+
+const nativeLanguageSidebarItem = {
+  text: 'ネイティブ言語',
+  collapsed: false,
+  items: [
+    { text: 'カテゴリ概要', link: '/libraries/native-languages/' },
+    { text: 'kiwa-test-go', collapsed: true, items: libraryPageItems('native-languages', 'go') },
+    { text: 'kiwa-test-py', collapsed: true, items: libraryPageItems('native-languages', 'python') },
+    { text: 'kiwa-test-rs', collapsed: true, items: libraryPageItems('native-languages', 'rust') },
+  ],
+};
+
+const librarySidebar = [
+  {
+    text: 'ライブラリ',
+    items: [
+      { text: '全体像', link: '/libraries/' },
+      ...libraryCategories.map(categorySidebarItem),
+      nativeLanguageSidebarItem,
+    ],
+  },
+];
+
+const englishFoundationSidebar = [
+  {
+    text: 'Libraries',
+    items: [
+      { text: 'Overview', link: '/en/libraries/' },
+      { text: 'Foundation', link: '/en/libraries/foundation/' },
+    ],
+  },
+  {
+    text: 'Foundation',
+    items: ['core', 'dapp', 'api', 'ui', 'e2e'].map((packageName) => ({
+      text: `@kiwa-lab/${packageName}`,
+      link: `/en/libraries/foundation/${packageName}/`,
+    })),
+  },
+];
 
 export default defineConfig({
   title: 'kiwa',
-  description:
-    'OSS test framework for dApps + web apps + full-stack frameworks — Solidity contract / e2e / a11y / visual / api / ui / data / cli / auth / queue / cache / Next.js / Nuxt / SvelteKit / Remix / Astro / SolidStart / Qwik City / Edge / Rust / Go / Python.',
-  lang: 'en-US',
+  description: 'OSS test libraries for application boundaries.',
+  lang: 'ja-JP',
   cleanUrls: true,
   ignoreDeadLinks: true,
   base: '/kiwa/',
-  head: [['link', { rel: 'icon', href: '/kiwa/favicon.svg' }]],
-
+  head: [
+    ['link', { rel: 'icon', type: 'image/png', href: '/kiwa/kiwa-mascot.png' }],
+    ['link', { rel: 'apple-touch-icon', href: '/kiwa/kiwa-mascot.png' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'kiwa' }],
+    ['meta', { property: 'og:title', content: 'kiwa' }],
+    ['meta', { property: 'og:description', content: 'OSS test libraries for application boundaries.' }],
+    ['meta', { property: 'og:image', content: 'https://cardene777.github.io/kiwa/kiwa-ogp.png' }],
+    ['meta', { property: 'og:image:alt', content: 'kiwa mascot for the documentation site' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:image', content: 'https://cardene777.github.io/kiwa/kiwa-ogp.png' }],
+  ],
+  locales: {
+    root: {
+      label: '日本語',
+      lang: 'ja-JP',
+    },
+    en: {
+      label: 'English',
+      lang: 'en-US',
+      link: '/en/',
+      title: 'kiwa',
+      description: 'OSS test libraries for application boundaries.',
+      themeConfig: {
+        logo: '/kiwa-mascot.png',
+        nav: [
+          { text: 'Home', link: '/en/' },
+          { text: 'Libraries', link: '/en/libraries/' },
+          { text: 'API reference', link: '/api/' },
+        ],
+        sidebar: { '/en/libraries/': englishFoundationSidebar },
+        langMenuLabel: 'Change language',
+        i18nRouting: false,
+        outlineTitle: 'On this page',
+      },
+    },
+  },
   themeConfig: {
-    logo: '/kiwa-logo.svg',
+    logo: '/kiwa-mascot.png',
     siteTitle: 'kiwa',
     outline: [2, 3],
-
+    langMenuLabel: '言語を切り替える',
+    i18nRouting: false,
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Tutorials', link: '/tutorials/' },
-      { text: 'Concepts', link: '/concepts/ai-llm-testing' },
-      { text: 'Migrations', link: '/migrations/' },
-      { text: 'Quality', link: '/quality/release-gate' },
-      { text: 'Libraries', link: '/api/' },
-      {
-        text: 'Roadmap',
-        link: 'https://github.com/cardene777/kiwa#roadmap',
-      },
+      { text: 'はじめる', link: '/libraries/foundation/dapp/quickstart' },
+      { text: 'ライブラリ', link: '/libraries/' },
+      { text: 'ガイド', link: '/guides/' },
+      { text: '品質', link: '/quality/release-gate' },
+      { text: 'API', link: '/api/' },
     ],
-
     sidebar: {
       '/tutorials/': [
         {
@@ -588,6 +706,15 @@ export default defineConfig({
             { text: 'streaming v2.1 pipeline-orchestrator (v2.5 pipeline-orchestrator.ts 新設 startPipeline + dispatchPipelineEvent + summarizePipeline + 5 state SSOT producing/consuming/rebalancing/dlq-active/stopped + 8 event SSOT + 40 セル 遷移表 + producer + consumer group + exactly-once + DLQ + schema registry 継続合成 + Streaming pair 5 段深化 = depth-5 pattern 6 例目発生 = **systematic law CONFIRMED** = kiwa 全体 最上位規範化 confirmed + systematic pattern 48 度目)', link: '/concepts/streaming-pipeline-orchestrator' },
             { text: 'search v2.1 query-orchestrator (v2.6 query-orchestrator.ts 新設 startQuery + dispatchQueryEvent + summarizeQuery + 5 state SSOT parsing/searching/reranking/facet-aggregating/completed + 8 event SSOT + query DSL + faceted + semantic + geo + relevance 継続合成 + Search pair 5 段深化 = depth-5 pattern 7 例目発生 systematic law 継続強化 + systematic pattern 49 度目 systematic law 継承 第 1 例)', link: '/concepts/search-query-orchestrator' },
             { text: 'observability v2.1 incident-orchestrator (v2.7 incident-orchestrator.ts 新設 startIncident + dispatchIncidentEvent + summarizeIncident + 5 state SSOT detecting/triaging/escalating/mitigating/resolved + 8 event SSOT + alert + escalation + AIOps + FinOps + chaos 継続合成 + Observability pair 5 段深化 = depth-5 pattern 8 例目発生 systematic law 継続強化 第 2 例 + **systematic pattern 50 度到達 milestone**)', link: '/concepts/observability-incident-orchestrator' },
+            { text: 'auth v0.8 session-lifecycle-orchestrator', link: '/concepts/auth-session-lifecycle-orchestrator' },
+            { text: 'cache v0.6 cache-lifecycle-orchestrator', link: '/concepts/cache-lifecycle-orchestrator' },
+            { text: 'cli-test v0.6 cli-lifecycle-orchestrator', link: '/concepts/cli-test-lifecycle-orchestrator' },
+            { text: 'orm v0.6 transaction-orchestrator', link: '/concepts/orm-transaction-orchestrator' },
+            { text: 'queue v0.6 job-lifecycle-orchestrator', link: '/concepts/queue-job-lifecycle-orchestrator' },
+            { text: 'kaname v0.1 3 layer specification model', link: '/concepts/kaname-3-layer-model' },
+            { text: 'kaname skill (kiwa plugin 経由 dialog flow)', link: '/concepts/kaname-skill' },
+            { text: 'lean v0.1 spec generator', link: '/concepts/lean-spec-generator' },
+            { text: 'lean v0.2 verify integration', link: '/concepts/lean-verify-integration' },
           ],
         },
       ],
@@ -662,31 +789,54 @@ export default defineConfig({
             { text: 'v2.4 → v2.5', link: '/migrations/v2.4-to-v2.5' },
             { text: 'v2.5 → v2.6', link: '/migrations/v2.5-to-v2.6' },
             { text: 'v2.6 → v2.7', link: '/migrations/v2.6-to-v2.7' },
+            { text: 'v2.7 → v2.8', link: '/migrations/v2.7-to-v2.8' },
+            { text: 'v2.8 → v2.9', link: '/migrations/v2.8-to-v2.9' },
+            { text: 'v2.9 → v2.10', link: '/migrations/v2.9-to-v2.10' },
+            { text: 'v2.10 → v2.11', link: '/migrations/v2.10-to-v2.11' },
+            { text: 'v2.11 → v2.12', link: '/migrations/v2.11-to-v2.12' },
+            { text: 'v2.12 → v2.13', link: '/migrations/v2.12-to-v2.13' },
+            { text: 'v2.13 → v2.14', link: '/migrations/v2.13-to-v2.14' },
+            { text: 'v2.14 → v2.15', link: '/migrations/v2.14-to-v2.15' },
+            { text: 'v2.15 → v2.16', link: '/migrations/v2.15-to-v2.16' },
+            { text: 'v2.16 → v2.17', link: '/migrations/v2.16-to-v2.17' },
+            { text: 'v2.18 → v2.19', link: '/migrations/v2.18-to-v2.19' },
+          ],
+        },
+      ],
+      '/libraries/': librarySidebar,
+      '/guides/': [
+        {
+          text: 'ガイド',
+          items: [
+            { text: '全体像', link: '/guides/' },
+            { text: 'skill を使う', link: '/guides/skills' },
+            { text: 'kiwa の考え方', link: '/guides/architecture' },
+            { text: '文書を更新する', link: '/guides/library-docs' },
+            { text: 'チュートリアル', link: '/tutorials/' },
+            { text: 'テスト設計', link: '/concepts/test-taxonomy' },
+            { text: '移行ガイド', link: '/migrations/' },
           ],
         },
       ],
       '/quality/': [
         {
-          text: 'Quality',
+          text: '品質',
           items: [
-            { text: 'Release gate SSOT', link: '/quality/release-gate' },
-            { text: 'Quality reports', link: '/quality-reports/' },
+            { text: 'リリース基準', link: '/quality/release-gate' },
+            { text: '品質レポート', link: '/quality-reports/' },
           ],
         },
       ],
       '/api/': [
         {
-          text: 'API Reference',
+          text: 'API',
           items: [
-            { text: 'Overview', link: '/api/' },
-            { text: 'Test taxonomy guide', link: '/api/test-taxonomy-guide' },
-            { text: 'TypeScript (typedoc)', link: '/api/typescript/' },
-            { text: 'Rust (cargo doc)', link: '/api/rust/kiwa/' },
-            { text: 'Solidity (forge doc)', link: '/api/solidity/dogfood-foundry-dapp/' },
+            { text: '全体像', link: '/api/' },
+            { text: 'テスト分類ガイド', link: '/api/test-taxonomy-guide' },
           ],
         },
         {
-          text: 'SaaS (10)',
+          text: 'SaaS',
           items: [
             { text: 'email', link: '/api/email' },
             { text: 'webhook', link: '/api/webhook' },
@@ -701,7 +851,7 @@ export default defineConfig({
           ],
         },
         {
-          text: 'Backend languages (4)',
+          text: 'バックエンド言語',
           items: [
             { text: 'python', link: '/api/python' },
             { text: 'ruby', link: '/api/ruby' },
@@ -710,20 +860,20 @@ export default defineConfig({
           ],
         },
         {
-          text: 'Mobile (2)',
+          text: 'モバイル',
           items: [
             { text: 'react-native', link: '/api/react-native' },
             { text: 'expo', link: '/api/expo' },
           ],
         },
         {
-          text: 'Platform (1)',
+          text: 'プラットフォーム',
           items: [
             { text: 'macos-app', link: '/api/macos-app' },
           ],
         },
         {
-          text: 'DevX (5)',
+          text: 'DevX',
           items: [
             { text: 'form', link: '/api/form' },
             { text: 'state', link: '/api/state' },
@@ -733,7 +883,7 @@ export default defineConfig({
           ],
         },
         {
-          text: 'Infra (4)',
+          text: 'インフラ',
           items: [
             { text: 'crypto', link: '/api/crypto' },
             { text: 'migration', link: '/api/migration' },
@@ -743,29 +893,24 @@ export default defineConfig({
         },
       ],
     },
-
     socialLinks: [
       { icon: 'github', link: 'https://github.com/cardene777/kiwa' },
       { icon: 'x', link: 'https://x.com/cardene777' },
     ],
-
     editLink: {
       pattern: 'https://github.com/cardene777/kiwa/edit/main/docs/:path',
-      text: 'Edit this page on GitHub',
+      text: 'GitHub で編集する',
     },
-
     footer: {
       message: 'Released under the MIT License.',
       copyright: `© ${new Date().getFullYear()} cardene`,
     },
-
     search: {
-      // MiniSearch — bundled with VitePress. Free-tier friendly.
       provider: 'local',
       options: {
         detailedView: true,
         translations: {
-          button: { buttonText: 'Search kiwa docs' },
+          button: { buttonText: 'kiwa を検索' },
         },
       },
     },

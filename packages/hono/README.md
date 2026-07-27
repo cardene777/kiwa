@@ -146,3 +146,16 @@ Brand symbols: `HONO_APP_SYMBOL` / `HONO_CONTEXT_SYMBOL` / `HONO_ROUTE_SYMBOL` /
 - Real Cloudflare Workers Durable Objects / Queues / Analytics Engine bindings are out of scope; supply a fake object under the same env binding name if a test needs them.
 
 Companion: v1.19-1c of the [kiwa test framework](https://github.com/cardene777/kiwa) — released alongside `@kiwa-lab/solidjs` (#813) + `@kiwa-lab/fresh` (#814) as part of the v1.19 modern framework depth-drive.
+
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/frameworks/hono/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/frameworks/hono/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/frameworks/hono/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/frameworks/hono/reference)
+
+編集元は [docs/libraries/frameworks/hono](../../docs/libraries/frameworks/hono/) です。
+<!-- kiwa-docs:end -->

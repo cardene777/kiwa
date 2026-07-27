@@ -54,6 +54,19 @@ describe('gin handler', () => {
 
 vitest + `/kiwa-go-lib` skill で Layer 1 spec (`tests/spec/go-lib/{module}.md`) から Layer 2 test を機械生成、 real Go runtime 不要で handler dispatch を contract level で verify。
 
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/languages/go-lib/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/languages/go-lib/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/languages/go-lib/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/languages/go-lib/reference)
+
+編集元は [docs/libraries/languages/go-lib](../../docs/libraries/languages/go-lib/) です。
+<!-- kiwa-docs:end -->
+
 ## License
 
 UNLICENSED — see [github.com/cardene777/kiwa](https://github.com/cardene777/kiwa).

@@ -60,7 +60,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests/setup-component-env.test.js .vitest-dist/tests/vue.test.js .vitest-dist/tests/solid.test.js .vitest-dist/tests/lit.test.js .vitest-dist/tests/qwik.test.js .vitest-dist/tests/angular.test.js --environment jsdom && vitest run .vitest-dist/tests/browser.test.js --environment node --testTimeout 30000",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --exclude '**/browser.test.js' --environment jsdom && vitest run .vitest-dist/tests/browser.test.js --environment node --testTimeout 30000",
     "pretest:perf": "pnpm -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment jsdom --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**'",

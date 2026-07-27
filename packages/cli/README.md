@@ -82,6 +82,19 @@ Flags: `--chain-id <n>` (default 31337), `--port <n>` (default: random free port
 
 [cardene](https://github.com/cardene777) — [GitHub](https://github.com/cardene777) / [X](https://x.com/cardene777)
 
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/foundation/cli/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/foundation/cli/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/foundation/cli/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/foundation/cli/reference)
+
+編集元は [docs/libraries/foundation/cli](../../docs/libraries/foundation/cli/) です。
+<!-- kiwa-docs:end -->
+
 ## License
 
 MIT

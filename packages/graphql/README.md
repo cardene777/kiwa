@@ -69,6 +69,19 @@ describe('user query', () => {
 
 `/kiwa-graphql` skill を起動すると query / mutation / subscription 3 経路の test を生成できる。
 
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/services/graphql/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/services/graphql/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/services/graphql/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/services/graphql/reference)
+
+編集元は [docs/libraries/services/graphql](../../docs/libraries/services/graphql/) です。
+<!-- kiwa-docs:end -->
+
 ## License
 
 UNLICENSED — see [cardene777/kiwa](https://github.com/cardene777/kiwa) for repo terms.

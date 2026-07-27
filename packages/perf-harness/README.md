@@ -137,3 +137,16 @@ await runPerf3Layer({
 
 - v0.1-0.3 = 旧実装 (nearest-rank percentile + Welch t-test on mean)。 精度契約は本 spec より弱い。
 - v0.4+ = 本 spec 準拠。 精度契約 5 軸を保証、 baseline schema v1 envelope 経路。 legacy schema は自動 upgrade で読める。
+
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/quality/perf-harness/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/quality/perf-harness/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/quality/perf-harness/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/quality/perf-harness/reference)
+
+編集元は [docs/libraries/quality/perf-harness](../../docs/libraries/quality/perf-harness/) です。
+<!-- kiwa-docs:end -->

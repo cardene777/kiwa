@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">kiwa</title>
+  <rect width="128" height="128" rx="28" fill="#173b2a"/>
+  <path d="M31 29h16v28l28-28h22L64 62l35 37H77L47 67v32H31z" fill="#c6f4b6"/>
+</svg>

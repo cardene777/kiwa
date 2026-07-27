@@ -74,6 +74,19 @@ describe('order workflow', () => {
 
 `/kiwa-workflow` skill を起動すると step / retry / event-driven 3 経路の test を生成できる。
 
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/services/workflow/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/services/workflow/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/services/workflow/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/services/workflow/reference)
+
+編集元は [docs/libraries/services/workflow](../../docs/libraries/services/workflow/) です。
+<!-- kiwa-docs:end -->
+
 ## License
 
 UNLICENSED — see [cardene777/kiwa](https://github.com/cardene777/kiwa) for repo terms.

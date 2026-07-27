@@ -53,6 +53,19 @@ describe('axum handler', () => {
 
 vitest + `/kiwa-rust-lib` skill で Layer 1 spec (`tests/spec/rust-lib/{module}.md`) から Layer 2 test を機械生成、 real Rust runtime 不要で contract level で verify。
 
+<!-- kiwa-docs:start -->
+## Documentation
+
+公開ドキュメントを正本として管理しています。
+
+- [概要](https://cardene777.github.io/kiwa/libraries/languages/rust-lib/)
+- [はじめる](https://cardene777.github.io/kiwa/libraries/languages/rust-lib/quickstart)
+- [使い方](https://cardene777.github.io/kiwa/libraries/languages/rust-lib/how-to)
+- [リファレンス](https://cardene777.github.io/kiwa/libraries/languages/rust-lib/reference)
+
+編集元は [docs/libraries/languages/rust-lib](../../docs/libraries/languages/rust-lib/) です。
+<!-- kiwa-docs:end -->
+
 ## License
 
 UNLICENSED — see [github.com/cardene777/kiwa](https://github.com/cardene777/kiwa).

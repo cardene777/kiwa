@@ -13,38 +13,36 @@ kiwa は core が anvil 起動 / EIP-1193 inject / Playwright fixture 化を 1 �
 
 ## 仕組み
 
-```mermaid
-graph TB
-    A[playwright test 起動] --> B[globalSetup or pretest]
-    B --> C[startAnvil で anvil 起動]
-    C --> D[contract deploy + .env.local 書き出し]
-    D --> E[Playwright fixture が起動]
-    E --> F[dappE2eTest が page に inject script を流し込む]
-    F --> G[window.ethereum が EIP-1193 / EIP-6963 で公開される]
-    G --> H[user の test code が実行]
-    H --> I[connect/sign/sendTx などを dappE2e helper で発行]
-```
+test を起動してから helper を呼べる状態になるまで、 以下の順に進みます。
+
+1. Playwright の test が起動する
+2. `globalSetup` または `pretest` が走る
+3. `startAnvil` が anvil を起動する
+4. contract を deploy し、 `.env.local` を書き出す
+5. Playwright の fixture が起動する
+6. `dappE2eTest` が page に inject script を流し込む
+7. `window.ethereum` が EIP-1193 と EIP-6963 で公開される
+8. ユーザーの test code が実行される
+9. connect / sign / sendTx などを `dappE2e` helper で発行する
 
 ## account switch event 順序
 
 `setActiveAccount()` は internal state を更新してから `accountsChanged` を page へ流すため、
 wagmi の `useAccount()` から見ると「state 更新 → event 通知 → 再 render」の順で観測できます。
 
-```mermaid
-sequenceDiagram
-    participant T as test
-    participant F as fixture
-    participant API as DappE2eApi
-    participant W as window.ethereum (inject)
-    participant App as React app (wagmi useAccount)
+`setActiveAccount(1)` を呼んだときの内訳は以下の通りです。
 
-    T->>API: setActiveAccount(1)
-    API->>F: rpcContext.activeIndex.current = 1
-    API->>W: emitPageEvent('accountsChanged', [newAddress])
-    W->>App: window.ethereum.emit('accountsChanged', [newAddress])
-    App->>App: wagmi internal: useAccount update -> re-render
-    F-->>T: accountsChanged event emitted
-```
+1. test が `DappE2eApi` の `setActiveAccount(1)` を呼ぶ
+2. 範囲外の index なら `-32602` で拒否する
+3. fixture の `rpcContext.activeIndex.current` を `1` に更新する
+4. `rpcContext.emitter` へ `accountsChanged` を emit する (Node 側の listener 向け)
+5. `emitPageEvent(page, bridgeName, 'accountsChanged', [newAddress])` を await する (page 側の listener 向け)
+6. inject された `window.ethereum` が page 側で event を emit する
+7. wagmi が `useAccount()` を更新し、 React が再 render する
+
+step 4 の emitter 送出は fixture が登録した転送 handler を経由して page へ届き、 step 5 の `emitPageEvent` も同じ page へ届きます。
+つまり `accountsChanged` は page へ 2 回届き、 page 側の listener も 2 回起動します。
+イベント回数を数える test を書く場合はこの前提で組んでください。
 
 ## Example
 

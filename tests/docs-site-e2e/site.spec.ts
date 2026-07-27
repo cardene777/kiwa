@@ -31,10 +31,31 @@ function pageUrl(pagePath: string): string {
 
 const CANONICAL_PAGES = [
   { path: '/', title: 'kiwa' },
+  { path: '/libraries/', title: 'kiwa ライブラリ' },
+  { path: '/libraries/foundation/', title: '基盤' },
+  { path: '/libraries/application/', title: 'アプリケーション' },
+  { path: '/libraries/frameworks/', title: 'フレームワーク' },
+  { path: '/libraries/services/', title: 'サービス' },
+  { path: '/libraries/ai-realtime/', title: 'AI とリアルタイム' },
+  { path: '/libraries/quality/', title: '品質' },
+  { path: '/libraries/languages/', title: '言語アダプター' },
+  { path: '/libraries/foundation/core/', title: '@kiwa-lab/core' },
+  { path: '/libraries/foundation/dapp/', title: '@kiwa-lab/dapp' },
+  { path: '/libraries/foundation/api/', title: '@kiwa-lab/api' },
+  { path: '/libraries/foundation/ui/', title: '@kiwa-lab/ui' },
+  { path: '/libraries/foundation/e2e/', title: '@kiwa-lab/e2e' },
+  { path: '/en/', title: 'kiwa' },
+  { path: '/en/libraries/', title: 'kiwa libraries' },
+  { path: '/en/libraries/foundation/', title: 'Foundation & test execution' },
+  { path: '/en/libraries/foundation/core/', title: '@kiwa-lab/core' },
+  { path: '/en/libraries/foundation/dapp/', title: '@kiwa-lab/dapp' },
+  { path: '/en/libraries/foundation/api/', title: '@kiwa-lab/api' },
+  { path: '/en/libraries/foundation/ui/', title: '@kiwa-lab/ui' },
+  { path: '/en/libraries/foundation/e2e/', title: '@kiwa-lab/e2e' },
   { path: '/tutorials/', title: 'kiwa tutorials' },
   { path: '/tutorials/01-supabase-auth-first-test', title: 'Your first Supabase Auth' },
   { path: '/migrations/v1.10-to-v1.11', title: 'v1.10 → v1.11' },
-  { path: '/quality/release-gate', title: 'kiwa release gate' },
+  { path: '/quality/release-gate', title: 'kiwa リリース基準' },
 ];
 
 // v1.12 pages — new tutorials + concept doc + migration guide added under the
@@ -1610,13 +1631,28 @@ test.describe('docs site — v1.45 pages render', () => {
 });
 
 test.describe('docs site — nav + search', () => {
+  test('language menu falls back to an existing locale home page', async ({ page }) => {
+    if (!existsSync(join(distDir, 'quality', 'release-gate.html'))) {
+      test.skip(true, 'dist not built');
+      return;
+    }
+
+    await page.goto(pageUrl('/quality/release-gate'));
+    await expect(page.locator('button[aria-label="言語を切り替える"]').first()).toBeVisible();
+    await expect(page.locator('a[href="/kiwa/en/"]').first()).toHaveText('English');
+
+    await page.goto(pageUrl('/en/libraries/foundation/core/'));
+    await expect(page.locator('button[aria-label="Change language"]').first()).toBeVisible();
+    await expect(page.locator('a[href="/kiwa/"]').first()).toHaveText('日本語');
+  });
+
   test('nav bar links to all trunk sections', async ({ page }) => {
     if (!existsSync(join(distDir, 'index.html'))) {
       test.skip(true, 'dist not built');
       return;
     }
     await page.goto(`file://${join(distDir, 'index.html')}`);
-    for (const label of ['Home', 'Tutorials', 'Migrations', 'Quality', 'API Reference']) {
+    for (const label of ['はじめる', 'ライブラリ', 'ガイド', '品質', 'API']) {
       const link = page.locator(`nav a >> text="${label}"`).first();
       await expect(link).toBeVisible({ timeout: 2000 });
     }
