@@ -103,6 +103,15 @@ export interface RunPerf3LayerInput {
    * 回す呼出だけが明示的に有効化する。
    */
   pruneStaleBaselineOps?: boolean;
+  /**
+   * GC を呼べない測定を memory gate の失敗として扱う (default false)。
+   *
+   * `--expose-gc` 無しの測定は解放される一時使用まで拾うため上限との比較が
+   * 成立しない。 ただし既定で失敗にすると、 GC 無しでも動いていた既存の
+   * 呼出が一斉に落ちる。 kiwa 内部の suite のように前提を固定できる呼出だけが
+   * 有効化する。
+   */
+  requireGc?: boolean;
 }
 
 export interface OpOutcome {
@@ -122,6 +131,24 @@ export interface RunPerf3LayerResult {
   baselineSeeded: boolean;
 }
 
+/**
+ * report の位置から閾値 SSOT (`docs/quality/perf-thresholds`) への相対 link を
+ * 組み立てる。 report を階層の深い場所へ置いても外れないようにする。
+ * `docs/` 配下でない場合は従来の固定値へ落とす。
+ */
+function resolveThresholdDocLink(reportPath: string): string {
+  const docsMarker = `${path.sep}docs${path.sep}`;
+  const at = path.resolve(reportPath).lastIndexOf(docsMarker);
+  if (at < 0) return '../../quality/perf-thresholds';
+
+  const docsRoot = path.resolve(reportPath).slice(0, at + docsMarker.length - 1);
+  const relative = path.relative(
+    path.dirname(path.resolve(reportPath)),
+    path.join(docsRoot, 'quality', 'perf-thresholds'),
+  );
+  return relative.split(path.sep).join('/');
+}
+
 export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3LayerResult> {
   const serialIterations = input.serialIterations ?? 200;
   const serialWarmup = input.serialWarmup ?? 5;
@@ -130,7 +157,10 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   const memoryIterations = input.memoryIterations ?? 200;
   const memoryCapDefault = 100 * 1024;
   const baselinePath = input.baselinePath ?? defaultBaselinePath(input.moduleName);
-  const thresholdDocLink = input.thresholdDocLink ?? '../../quality/perf-thresholds';
+  // 固定の相対 path だと、report を 1 階層深く置いた瞬間にリンクが外れる。
+  // 実際 framework/ と saas/ 配下の 20 件が docs/quality-reports/quality/ を
+  // 指して 404 になっていた。report の位置から SSOT までを毎回組み立てる。
+  const thresholdDocLink = input.thresholdDocLink ?? resolveThresholdDocLink(input.reportPath);
 
   const loadedBaseline = await loadBaseline(baselinePath);
   // 測定の前提が違う baseline とは比べない。とくに GC を呼べるかどうかで
@@ -182,8 +212,10 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       thresholds: { p95Ms: concurrentCap },
     });
     // GC を呼べない測定は解放される一時使用まで拾うため、上限との比較が成立しない。
-    // 表示だけで済ませると設定漏れの測定を PASS として公開してしまう。
-    const memoryGatePassed = memory.gcExposed && memory.arrayBuffersDeltaBytes < memoryCap;
+    // 前提を固定できる呼出は requireGc で失敗扱いにする。既定を失敗にすると
+    // GC 無しでも動いていた既存の呼出が一斉に落ちるため opt-in にしている。
+    const memoryGatePassed =
+      (!input.requireGc || memory.gcExposed) && memory.arrayBuffersDeltaBytes < memoryCap;
 
     const priorSerial = priorBaseline?.[`${op.name}.serial`];
     const regression = priorSerial
@@ -212,13 +244,8 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     });
   }
 
-  // 既存 op の基準値はそのまま残し、まだ記録の無い op だけ書き足す。
-  // baseline file の有無だけで判定すると、後から op を増やしたときに
-  // その op が永久に「基準値なし」のまま回帰判定できない。
   // 今回測った op のうち、まだ記録の無いものだけ書き足す。
   // 既存 op の値は保持しないと比較対象が毎回入れ替わって回帰を検出できない。
-  // 一方で今回測っていない op は落とす。op 名を別の処理へ付け替えたときに
-  // 無関係な過去値と比較してしまうため。
   const priorResults = priorBaseline ?? {};
   const currentKeys = new Set(Object.keys(combinedForBaseline));
   const retained = input.pruneStaleBaselineOps
@@ -229,7 +256,12 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   );
   const baselineSeeded = priorBaseline === null;
   const staleDropped = Object.keys(priorResults).length !== Object.keys(retained).length;
-  if (Object.keys(unseededOps).length > 0 || staleDropped) {
+
+  // 前提が違う環境で測った値で保存すると、次に正しい環境で測ったときも
+  // 前提不一致として再 seed され、その間の回帰を比較せず通してしまう。
+  // 既存の baseline が読めているのに比較対象にできなかった場合は保存しない。
+  const envMismatched = loadedBaseline !== null && priorBaselineLoaded === null;
+  if (!envMismatched && (Object.keys(unseededOps).length > 0 || staleDropped)) {
     // 追記は現在の環境で測った値なので env も現在のものにする。
     // 古い env を残すと、どの環境の測定値と比較しているのか判別できない。
     await saveBaselineEnvelope(baselinePath, {

@@ -11,6 +11,7 @@ describe('realtime app scenario perf (real workload)', () => {
   it('3-layer perf: chat room / presence broadcast / reconnect resilience', { timeout: 60_000 }, async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 15,
       serialWarmup: 3,

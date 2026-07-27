@@ -1,6 +1,6 @@
 # Perf Suite — hono
 
-Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
 ## Serial p95 (concurrency = 1)
 
@@ -20,8 +20,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeRoute | -8584 B | 0 B | 102400 B | yes | PASS |
-| rpcClient$get | 1392 B | 0 B | 102400 B | yes | PASS |
+| invokeRoute | -21536 B | 0 B | 102400 B | yes | PASS |
+| rpcClient$get | -912 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -35,24 +35,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.01ms |
-| p99 | 0.02ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.03ms |
-| total | 0.60ms |
+| total | 0.58ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +14.60% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -16.66% |
-| p99 | 0.02ms | 0.02ms | +0.00ms | +11.71% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +8.56% |
-| min | 0.00ms | 0.00ms | +0.00ms | +7.14% |
-| max | 0.03ms | 0.03ms | +0.00ms | +13.90% |
-| total | 0.60ms | 0.56ms | +0.05ms | +8.56% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +22.90% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -5.32% |
+| p99 | 0.01ms | 0.02ms | -0.00ms | -8.60% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +5.02% |
+| min | 0.00ms | 0.00ms | -0.00ms | -2.34% |
+| max | 0.03ms | 0.03ms | +0.00ms | +1.21% |
+| total | 0.58ms | 0.56ms | +0.03ms | +5.02% |
 
 ### rpcClient$get
 
@@ -69,17 +69,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.69ms |
+| total | 0.60ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -2.59% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +31.49% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +28.62% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +3.05% |
-| min | 0.00ms | 0.00ms | +0.00ms | +2.97% |
-| max | 0.01ms | 0.01ms | +0.00ms | +12.85% |
-| total | 0.69ms | 0.67ms | +0.02ms | +3.05% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -14.28% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -3.20% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -1.19% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -11.00% |
+| min | 0.00ms | 0.00ms | -0.00ms | -8.82% |
+| max | 0.01ms | 0.01ms | -0.00ms | -9.38% |
+| total | 0.60ms | 0.67ms | -0.07ms | -11.00% |
 

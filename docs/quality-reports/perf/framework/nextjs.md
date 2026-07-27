@@ -1,6 +1,6 @@
 # Perf Suite — nextjs
 
-Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
 ## Serial p95 (concurrency = 1)
 
@@ -22,9 +22,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeServerAction | -12384 B | 0 B | 102400 B | yes | PASS |
-| invokeMiddleware | -11384 B | 0 B | 102400 B | yes | PASS |
-| renderServerComponent | -14936 B | 0 B | 102400 B | yes | PASS |
+| invokeServerAction | 403088 B | 0 B | 102400 B | yes | PASS |
+| invokeMiddleware | -11400 B | 0 B | 102400 B | yes | PASS |
+| renderServerComponent | -14784 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -43,19 +43,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.02ms |
-| total | 0.22ms |
+| total | 0.20ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | -0.00ms | -5.79% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +7.52% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -5.92% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +1.95% |
-| min | 0.00ms | 0.00ms | +0.00ms | +7.76% |
-| max | 0.02ms | 0.02ms | -0.00ms | -8.61% |
-| total | 0.22ms | 0.21ms | +0.00ms | +1.95% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -9.33% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -4.88% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -4.74% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.02ms | -0.00ms | -17.04% |
+| total | 0.20ms | 0.21ms | -0.01ms | -4.74% |
 
 ### invokeMiddleware
 
@@ -69,22 +69,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.01ms |
 | p99 | 0.02ms |
 | mean | 0.01ms |
-| stdev | 0.02ms |
+| stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.23ms |
-| total | 1.33ms |
+| max | 0.05ms |
+| total | 1.09ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +3.52% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -17.59% |
-| p99 | 0.02ms | 0.03ms | -0.01ms | -26.51% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +10.78% |
-| min | 0.00ms | 0.00ms | +0.00ms | +3.68% |
-| max | 0.23ms | 0.08ms | +0.15ms | +195.21% |
-| total | 1.33ms | 1.20ms | +0.13ms | +10.78% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -2.63% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +18.03% |
+| p99 | 0.02ms | 0.03ms | -0.01ms | -35.64% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -8.84% |
+| min | 0.00ms | 0.00ms | -0.00ms | -2.75% |
+| max | 0.05ms | 0.08ms | -0.03ms | -39.98% |
+| total | 1.09ms | 1.20ms | -0.11ms | -8.84% |
 
 ### renderServerComponent
 
@@ -96,22 +96,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.00ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.12ms |
+| total | 0.11ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -8.95% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +4.95% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +98.26% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +5.75% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +12.50% |
-| total | 0.12ms | 0.12ms | +0.01ms | +5.75% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -9.17% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -7.12% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +21.76% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -8.44% |
+| min | 0.00ms | 0.00ms | -0.00ms | -10.93% |
+| max | 0.01ms | 0.01ms | -0.00ms | -20.57% |
+| total | 0.11ms | 0.12ms | -0.01ms | -8.44% |
 

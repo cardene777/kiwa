@@ -28,6 +28,7 @@ describe(MODULE, () => {
 
       const result = await runPerf3Layer({
         moduleName: MODULE,
+        requireGc: true,
         reportPath: REPORT_PATH,
         // HTTP socket round-trip is 10x slower than in-process code so we
         // relax iteration counts.

@@ -14,17 +14,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| sendEmail | 0.03ms | 10ms | PASS |
-| verifyWebhookSignature | 0.04ms | 10ms | PASS |
+| sendEmail | 0.01ms | 10ms | PASS |
+| verifyWebhookSignature | 0.03ms | 10ms | PASS |
 | parseDeliveryEvent | 0.01ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| sendEmail | -54384 B | 0 B | 102400 B | yes | PASS |
-| verifyWebhookSignature | -12896 B | 0 B | 102400 B | yes | PASS |
-| parseDeliveryEvent | 7744 B | 0 B | 102400 B | yes | PASS |
+| sendEmail | 35560 B | 0 B | 102400 B | yes | PASS |
+| verifyWebhookSignature | -29552 B | 0 B | 102400 B | yes | PASS |
+| parseDeliveryEvent | 912 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -42,20 +42,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.02ms |
-| total | 0.13ms |
+| max | 0.01ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +17.32% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +12.69% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +0.62% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.02ms | 0.01ms | +0.00ms | +6.46% |
-| total | 0.13ms | 0.13ms | +0.00ms | +0.62% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -8.95% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +2.93% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -13.92% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -9.08% |
+| min | 0.00ms | 0.00ms | -0.00ms | -11.20% |
+| max | 0.01ms | 0.01ms | -0.00ms | -16.01% |
+| total | 0.12ms | 0.13ms | -0.01ms | -9.08% |
 
 ### verifyWebhookSignature
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.02ms |
-| total | 0.64ms |
+| total | 0.59ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -13.71% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -1.73% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -3.04% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.02ms | 0.01ms | +0.00ms | +3.06% |
-| total | 0.64ms | 0.66ms | -0.02ms | -3.04% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -12.72% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -18.64% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +8.58% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -10.73% |
+| min | 0.00ms | 0.00ms | -0.00ms | -12.04% |
+| max | 0.02ms | 0.01ms | +0.01ms | +58.78% |
+| total | 0.59ms | 0.66ms | -0.07ms | -10.73% |
 
 ### parseDeliveryEvent
 
@@ -96,22 +96,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.00ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.13ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +133.64% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +76.72% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +23.48% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -10.07% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +33.07% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +36.10% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +6.33% |
 | min | 0.00ms | 0.00ms | -0.00ms | -12.61% |
-| max | 0.01ms | 0.01ms | +0.00ms | +51.69% |
-| total | 0.13ms | 0.11ms | +0.03ms | +23.48% |
+| max | 0.01ms | 0.01ms | +0.00ms | +28.02% |
+| total | 0.12ms | 0.11ms | +0.01ms | +6.33% |
 

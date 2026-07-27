@@ -14,14 +14,14 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate |
 |---|---|---|---|
 | eventEmitterEmit | 0.01ms | 10ms | PASS |
-| anvilKeyLookup | 0.01ms | 10ms | PASS |
+| anvilKeyLookup | 0.00ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| eventEmitterEmit | -44408 B | 0 B | 102400 B | yes | PASS |
-| anvilKeyLookup | -560 B | 0 B | 102400 B | yes | PASS |
+| eventEmitterEmit | 181504 B | 0 B | 102400 B | yes | PASS |
+| anvilKeyLookup | -5424 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -47,12 +47,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | -0.00ms | -12.31% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +9.46% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -36.21% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -11.11% |
-| min | 0.00ms | 0.00ms | -0.00ms | -28.52% |
-| max | 0.00ms | 0.01ms | -0.00ms | -33.77% |
-| total | 0.07ms | 0.08ms | -0.01ms | -11.11% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -8.40% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -44.07% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -19.36% |
+| min | 0.00ms | 0.00ms | -0.00ms | -14.09% |
+| max | 0.00ms | 0.01ms | -0.00ms | -41.72% |
+| total | 0.07ms | 0.08ms | -0.02ms | -19.36% |
 
 ### anvilKeyLookup
 
@@ -76,10 +76,10 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | -0.00ms | -19.71% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -13.68% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -5.56% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -11.92% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -28.42% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +5.99% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -17.40% |
 | min | 0.00ms | 0.00ms | -0.00ms | -24.70% |
-| max | 0.00ms | 0.00ms | -0.00ms | -38.09% |
-| total | 0.04ms | 0.05ms | -0.01ms | -11.92% |
+| max | 0.00ms | 0.00ms | -0.00ms | -45.26% |
+| total | 0.04ms | 0.05ms | -0.01ms | -17.40% |
 

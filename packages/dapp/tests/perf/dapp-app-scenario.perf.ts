@@ -13,6 +13,7 @@ describe('dapp app scenario perf (real workload)', () => {
   it('3-layer perf: dapp spec parsing / bulk parsing / spec integration', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 30,
       serialWarmup: 5,

@@ -7,24 +7,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
 | server_action_workflow (10 invokeServerAction) | 0.01ms | 100ms | PASS | stable |
-| form_submission_batch (5 invoke with FormData) | 0.02ms | 100ms | PASS | stable |
+| form_submission_batch (5 invoke with FormData) | 0.01ms | 100ms | PASS | stable |
 | action_error_handling (5 throw + catch) | 0.03ms | 100ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| server_action_workflow (10 invokeServerAction) | 0.04ms | 200ms | PASS |
-| form_submission_batch (5 invoke with FormData) | 0.10ms | 200ms | PASS |
-| action_error_handling (5 throw + catch) | 0.26ms | 200ms | PASS |
+| server_action_workflow (10 invokeServerAction) | 0.03ms | 200ms | PASS |
+| form_submission_batch (5 invoke with FormData) | 0.02ms | 200ms | PASS |
+| action_error_handling (5 throw + catch) | 0.09ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| server_action_workflow (10 invokeServerAction) | 576992 B | 0 B | 102400 B | yes | PASS |
-| form_submission_batch (5 invoke with FormData) | 360 B | 0 B | 102400 B | yes | PASS |
-| action_error_handling (5 throw + catch) | 640 B | 0 B | 102400 B | yes | PASS |
+| server_action_workflow (10 invokeServerAction) | 3872 B | 0 B | 102400 B | yes | PASS |
+| form_submission_batch (5 invoke with FormData) | 1528 B | 0 B | 102400 B | yes | PASS |
+| action_error_handling (5 throw + catch) | 736 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,7 +36,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.01ms |
+| p50 | 0.00ms |
 | p95 | 0.01ms |
 | p99 | 0.01ms |
 | mean | 0.01ms |
@@ -49,13 +49,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.00ms | +0.00ms | +4.32% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +4.87% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -0.17% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +6.21% |
-| min | 0.00ms | 0.00ms | +0.00ms | +6.49% |
-| max | 0.01ms | 0.01ms | -0.00ms | -0.89% |
-| total | 0.12ms | 0.12ms | +0.01ms | +6.21% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -3.90% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +13.36% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +6.36% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +0.54% |
+| min | 0.00ms | 0.00ms | -0.00ms | -1.87% |
+| max | 0.01ms | 0.01ms | +0.00ms | +5.36% |
+| total | 0.12ms | 0.12ms | +0.00ms | +0.54% |
 
 ### form_submission_batch (5 invoke with FormData)
 
@@ -65,26 +65,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.01ms |
-| p95 | 0.02ms |
-| p99 | 0.10ms |
-| mean | 0.02ms |
-| stdev | 0.02ms |
-| min | 0.01ms |
-| max | 0.11ms |
-| total | 0.33ms |
+| p50 | 0.00ms |
+| p95 | 0.01ms |
+| p99 | 0.01ms |
+| mean | 0.00ms |
+| stdev | 0.00ms |
+| min | 0.00ms |
+| max | 0.01ms |
+| total | 0.09ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.00ms | +0.01ms | +149.02% |
-| p95 | 0.02ms | 0.00ms | +0.02ms | +346.47% |
-| p99 | 0.10ms | 0.01ms | +0.09ms | +1590.98% |
-| mean | 0.02ms | 0.00ms | +0.01ms | +277.90% |
-| min | 0.01ms | 0.00ms | +0.01ms | +132.34% |
-| max | 0.11ms | 0.01ms | +0.11ms | +1853.91% |
-| total | 0.33ms | 0.09ms | +0.24ms | +277.90% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -2.45% |
+| p95 | 0.01ms | 0.00ms | +0.00ms | +30.13% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +14.04% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -0.81% |
+| min | 0.00ms | 0.00ms | -0.00ms | -26.25% |
+| max | 0.01ms | 0.01ms | +0.00ms | +10.64% |
+| total | 0.09ms | 0.09ms | -0.00ms | -0.81% |
 
 ### action_error_handling (5 throw + catch)
 
@@ -96,22 +96,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 3 |
 | p50 | 0.02ms |
 | p95 | 0.03ms |
-| p99 | 0.03ms |
+| p99 | 0.06ms |
 | mean | 0.02ms |
-| stdev | 0.00ms |
+| stdev | 0.01ms |
 | min | 0.02ms |
-| max | 0.03ms |
-| total | 0.46ms |
+| max | 0.07ms |
+| total | 0.45ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | +0.00ms | +13.56% |
-| p95 | 0.03ms | 0.02ms | +0.00ms | +14.17% |
-| p99 | 0.03ms | 0.03ms | +0.00ms | +16.02% |
-| mean | 0.02ms | 0.02ms | +0.00ms | +14.32% |
-| min | 0.02ms | 0.02ms | +0.00ms | +13.30% |
-| max | 0.03ms | 0.03ms | +0.00ms | +16.48% |
-| total | 0.46ms | 0.40ms | +0.06ms | +14.32% |
+| p50 | 0.02ms | 0.02ms | -0.00ms | -0.00% |
+| p95 | 0.03ms | 0.02ms | +0.00ms | +10.25% |
+| p99 | 0.06ms | 0.03ms | +0.03ms | +136.58% |
+| mean | 0.02ms | 0.02ms | +0.00ms | +11.57% |
+| min | 0.02ms | 0.02ms | -0.00ms | -2.44% |
+| max | 0.07ms | 0.03ms | +0.04ms | +167.72% |
+| total | 0.45ms | 0.40ms | +0.05ms | +11.57% |
 

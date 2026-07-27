@@ -19,6 +19,7 @@ describe('orm app scenario perf (real workload)', () => {
   it('3-layer perf: bulk insert / query workload / crud cycle', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 15,
       serialWarmup: 3,

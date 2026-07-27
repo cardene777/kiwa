@@ -20,7 +20,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| checkSpecConformance | -42728 B | 0 B | 102400 B | yes | PASS |
+| checkSpecConformance | 193912 B | 0 B | 102400 B | yes | PASS |
 | checkLayoutRegression | -2144 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
@@ -46,13 +46,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -10.98% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -15.40% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +39.81% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -16.36% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -12.18% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -3.84% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +49.74% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -16.56% |
 | min | 0.00ms | 0.00ms | -0.00ms | -34.62% |
-| max | 0.01ms | 0.01ms | +0.00ms | +68.55% |
-| total | 0.15ms | 0.18ms | -0.03ms | -16.36% |
+| max | 0.01ms | 0.01ms | +0.01ms | +97.21% |
+| total | 0.15ms | 0.18ms | -0.03ms | -16.56% |
 
 ### checkLayoutRegression
 
@@ -65,21 +65,21 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p50 | 0.01ms |
 | p95 | 0.03ms |
 | p99 | 0.03ms |
-| mean | 0.02ms |
+| mean | 0.01ms |
 | stdev | 0.01ms |
 | min | 0.01ms |
 | max | 0.03ms |
-| total | 0.80ms |
+| total | 0.74ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -0.49% |
-| p95 | 0.03ms | 0.05ms | -0.02ms | -40.67% |
-| p99 | 0.03ms | 0.07ms | -0.03ms | -50.41% |
-| mean | 0.02ms | 0.02ms | -0.00ms | -22.89% |
-| min | 0.01ms | 0.01ms | -0.00ms | -17.02% |
-| max | 0.03ms | 0.08ms | -0.05ms | -57.98% |
-| total | 0.80ms | 1.04ms | -0.24ms | -22.89% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -6.42% |
+| p95 | 0.03ms | 0.05ms | -0.02ms | -41.29% |
+| p99 | 0.03ms | 0.07ms | -0.04ms | -53.07% |
+| mean | 0.01ms | 0.02ms | -0.01ms | -29.39% |
+| min | 0.01ms | 0.01ms | -0.00ms | -22.88% |
+| max | 0.03ms | 0.08ms | -0.05ms | -59.64% |
+| total | 0.74ms | 1.04ms | -0.31ms | -29.39% |
 

@@ -22,9 +22,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| sendMessage | 368120 B | 0 B | 102400 B | yes | PASS |
-| broadcastMessage | 20648 B | 0 B | 102400 B | yes | PASS |
-| captureBinaryFrame | 480 B | 0 B | 102400 B | yes | PASS |
+| sendMessage | -7848 B | 0 B | 102400 B | yes | PASS |
+| broadcastMessage | 21400 B | 0 B | 102400 B | yes | PASS |
+| captureBinaryFrame | 1216 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -43,19 +43,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.12ms |
+| total | 0.11ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +11.35% |
-| p99 | 0.00ms | 0.01ms | -0.00ms | -34.51% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -0.82% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +6.43% |
+| p99 | 0.00ms | 0.01ms | -0.00ms | -36.24% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -6.82% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | -0.00ms | -9.66% |
-| total | 0.12ms | 0.12ms | -0.00ms | -0.82% |
+| max | 0.01ms | 0.01ms | -0.00ms | -28.96% |
+| total | 0.11ms | 0.12ms | -0.01ms | -6.82% |
 
 ### broadcastMessage
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.00ms |
-| total | 0.08ms |
+| total | 0.09ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +43.30% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +5.47% |
-| min | 0.00ms | 0.00ms | +0.00ms | +16.80% |
-| max | 0.00ms | 0.00ms | +0.00ms | +16.90% |
-| total | 0.08ms | 0.08ms | +0.00ms | +5.47% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +12.28% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +8.40% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +12.07% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +12.56% |
+| min | 0.00ms | 0.00ms | +0.00ms | +33.20% |
+| max | 0.00ms | 0.00ms | +0.00ms | +14.31% |
+| total | 0.09ms | 0.08ms | +0.01ms | +12.56% |
 
 ### captureBinaryFrame
 
@@ -100,18 +100,18 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.02ms |
-| total | 0.10ms |
+| max | 0.01ms |
+| total | 0.09ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +11.57% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +208.02% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +20.89% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +76.59% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +177.16% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +8.90% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.02ms | 0.01ms | +0.01ms | +78.71% |
-| total | 0.10ms | 0.08ms | +0.02ms | +20.89% |
+| max | 0.01ms | 0.01ms | -0.00ms | -5.56% |
+| total | 0.09ms | 0.08ms | +0.01ms | +8.90% |
 

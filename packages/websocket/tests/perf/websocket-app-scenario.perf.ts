@@ -20,6 +20,7 @@ describe('websocket app scenario perf v2.1 (real workload)', () => {
   it('5-op perf: chat / broadcast / binary / room / reconnect+heartbeat', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 20,
       serialWarmup: 3,

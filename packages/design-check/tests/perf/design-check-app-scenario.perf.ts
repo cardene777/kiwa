@@ -33,6 +33,7 @@ describe('design-check app scenario perf (real workload)', () => {
   it('3-layer perf: full design audit / large spec conformance / regression scan', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 30,
       serialWarmup: 5,

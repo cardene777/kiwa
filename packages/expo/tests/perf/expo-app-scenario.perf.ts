@@ -11,6 +11,7 @@ describe('expo app scenario perf (real workload)', () => {
   it('3-layer perf: onboarding_workflow / file_capture_batch / permission_error_handling', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 20,
       serialWarmup: 3,

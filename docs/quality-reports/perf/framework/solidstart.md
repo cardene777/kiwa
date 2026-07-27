@@ -1,6 +1,6 @@
 # Perf Suite — solidstart
 
-Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
 ## Serial p95 (concurrency = 1)
 
@@ -14,14 +14,14 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate |
 |---|---|---|---|
 | invokeServerFunction | 0.01ms | 10ms | PASS |
-| invokeApiRoute | 0.14ms | 10ms | PASS |
+| invokeApiRoute | 0.13ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeServerFunction | 6032 B | 0 B | 102400 B | yes | PASS |
-| invokeApiRoute | 3280 B | -22 B | 102400 B | yes | PASS |
+| invokeServerFunction | -5584 B | 0 B | 102400 B | yes | PASS |
+| invokeApiRoute | 51368 B | -22 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -46,13 +46,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -7.03% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -7.43% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -12.49% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -10.94% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -1.93% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -7.13% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -7.84% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.02ms | -0.01ms | -32.30% |
-| total | 0.16ms | 0.17ms | -0.02ms | -10.94% |
+| max | 0.01ms | 0.02ms | -0.00ms | -22.78% |
+| total | 0.16ms | 0.17ms | -0.01ms | -7.84% |
 
 ### invokeApiRoute
 
@@ -68,18 +68,18 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.01ms |
 | stdev | 0.01ms |
 | min | 0.01ms |
-| max | 0.11ms |
+| max | 0.10ms |
 | total | 2.81ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -9.50% |
-| p95 | 0.03ms | 0.02ms | +0.00ms | +10.03% |
-| p99 | 0.07ms | 0.06ms | +0.01ms | +12.54% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -0.44% |
-| min | 0.01ms | 0.01ms | -0.00ms | -0.46% |
-| max | 0.11ms | 0.10ms | +0.00ms | +4.17% |
-| total | 2.81ms | 2.82ms | -0.01ms | -0.44% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -6.99% |
+| p95 | 0.03ms | 0.02ms | +0.00ms | +13.70% |
+| p99 | 0.07ms | 0.06ms | +0.00ms | +7.59% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -0.45% |
+| min | 0.01ms | 0.01ms | +0.00ms | +0.92% |
+| max | 0.10ms | 0.10ms | +0.00ms | +0.16% |
+| total | 2.81ms | 2.82ms | -0.01ms | -0.45% |
 

@@ -26,6 +26,7 @@ describe('rust-lib app scenario perf (real workload)', () => {
 
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 20,
       serialWarmup: 3,

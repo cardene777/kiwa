@@ -17,6 +17,7 @@ describe('macos-app scenario perf (real workload)', () => {
   it('3-layer perf: user_flow_workflow / a11y_batch / notification_error_handling', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 20,
       serialWarmup: 3,

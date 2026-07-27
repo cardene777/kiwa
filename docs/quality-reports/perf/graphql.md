@@ -22,9 +22,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| parseGraphQLOperation | 600 B | 0 B | 102400 B | yes | PASS |
-| executeQuery | 26056 B | 0 B | 102400 B | yes | PASS |
-| clientQuery | 42504 B | 0 B | 102400 B | yes | PASS |
+| parseGraphQLOperation | -3664 B | 0 B | 102400 B | yes | PASS |
+| executeQuery | 8168 B | 0 B | 102400 B | yes | PASS |
+| clientQuery | 28712 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -42,20 +42,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.27ms |
+| max | 0.02ms |
+| total | 0.23ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -10.67% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +6.18% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -3.86% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -2.74% |
-| min | 0.00ms | 0.00ms | -0.00ms | -5.30% |
-| max | 0.01ms | 0.01ms | +0.00ms | +9.42% |
-| total | 0.27ms | 0.28ms | -0.01ms | -2.74% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -23.43% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -16.40% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -6.71% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -15.97% |
+| min | 0.00ms | 0.00ms | -0.00ms | -15.78% |
+| max | 0.02ms | 0.01ms | +0.00ms | +24.01% |
+| total | 0.23ms | 0.28ms | -0.04ms | -15.97% |
 
 ### executeQuery
 
@@ -71,20 +71,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.28ms |
+| max | 0.02ms |
+| total | 0.23ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -6.35% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +9.56% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +16.25% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -3.46% |
-| min | 0.00ms | 0.00ms | -0.00ms | -6.87% |
-| max | 0.01ms | 0.01ms | +0.00ms | +10.62% |
-| total | 0.28ms | 0.29ms | -0.01ms | -3.46% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -29.05% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +8.02% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -0.31% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -19.15% |
+| min | 0.00ms | 0.00ms | -0.00ms | -34.52% |
+| max | 0.02ms | 0.01ms | +0.01ms | +83.27% |
+| total | 0.23ms | 0.29ms | -0.06ms | -19.15% |
 
 ### clientQuery
 
@@ -100,18 +100,18 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.24ms |
+| max | 0.02ms |
+| total | 0.22ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -3.73% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -39.71% |
-| p99 | 0.00ms | 0.01ms | -0.00ms | -36.75% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -12.12% |
-| min | 0.00ms | 0.00ms | +0.00ms | +9.17% |
-| max | 0.01ms | 0.01ms | -0.00ms | -6.39% |
-| total | 0.24ms | 0.27ms | -0.03ms | -12.12% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -18.58% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -45.25% |
+| p99 | 0.00ms | 0.01ms | -0.00ms | -40.98% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -20.07% |
+| min | 0.00ms | 0.00ms | -0.00ms | -9.06% |
+| max | 0.02ms | 0.01ms | +0.00ms | +13.06% |
+| total | 0.22ms | 0.27ms | -0.06ms | -20.07% |
 

@@ -17,17 +17,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|---|---|
 | invokeAxumHandler | 0.01ms | 10ms | PASS |
 | invokeActixHandler | 0.01ms | 10ms | PASS |
-| captureTowerMiddleware | 0.02ms | 10ms | PASS |
+| captureTowerMiddleware | 0.01ms | 10ms | PASS |
 | invokeRocketRoute | 0.01ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeAxumHandler | -13536 B | 0 B | 102400 B | yes | PASS |
-| invokeActixHandler | 4024 B | 0 B | 102400 B | yes | PASS |
-| captureTowerMiddleware | 624 B | 0 B | 102400 B | yes | PASS |
-| invokeRocketRoute | 4856 B | 0 B | 102400 B | yes | PASS |
+| invokeAxumHandler | -1552 B | 0 B | 102400 B | yes | PASS |
+| invokeActixHandler | 5048 B | 0 B | 102400 B | yes | PASS |
+| captureTowerMiddleware | -216 B | 0 B | 102400 B | yes | PASS |
+| invokeRocketRoute | 5008 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -46,19 +46,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.20ms |
+| total | 0.17ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +14.24% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +7.82% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -7.78% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +8.64% |
-| min | 0.00ms | 0.00ms | +0.00ms | +9.17% |
-| max | 0.01ms | 0.01ms | -0.00ms | -4.00% |
-| total | 0.20ms | 0.18ms | +0.02ms | +8.64% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -14.97% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -21.41% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -4.60% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | -0.00ms | -7.69% |
+| total | 0.17ms | 0.18ms | -0.01ms | -4.60% |
 
 ### invokeActixHandler
 
@@ -70,24 +70,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.00ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
-| stdev | 0.00ms |
+| stdev | 0.01ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.14ms |
+| max | 0.07ms |
+| total | 0.21ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +16.60% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +10.60% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +16.07% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +13.25% |
-| min | 0.00ms | 0.00ms | +0.00ms | +9.17% |
-| max | 0.01ms | 0.00ms | +0.00ms | +32.26% |
-| total | 0.14ms | 0.12ms | +0.02ms | +13.25% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +10.47% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +179.46% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +71.24% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.07ms | 0.00ms | +0.07ms | +1797.83% |
+| total | 0.21ms | 0.12ms | +0.09ms | +71.24% |
 
 ### captureTowerMiddleware
 
@@ -104,19 +104,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.20ms |
+| total | 0.17ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +5.93% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +0.78% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +17.71% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +11.85% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +20.56% |
-| total | 0.20ms | 0.18ms | +0.02ms | +11.85% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -17.51% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +14.40% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +0.32% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -5.03% |
+| min | 0.00ms | 0.00ms | -0.00ms | -13.44% |
+| max | 0.01ms | 0.01ms | +0.00ms | +15.72% |
+| total | 0.17ms | 0.18ms | -0.01ms | -5.03% |
 
 ### invokeRocketRoute
 
@@ -133,17 +133,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.14ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +3.78% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +35.48% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +21.64% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +8.63% |
-| min | 0.00ms | 0.00ms | +0.00ms | +18.12% |
-| max | 0.01ms | 0.01ms | +0.00ms | +21.66% |
-| total | 0.14ms | 0.13ms | +0.01ms | +8.63% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -7.75% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +6.47% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -1.32% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -6.23% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | +0.00ms | +10.00% |
+| total | 0.12ms | 0.13ms | -0.01ms | -6.23% |
 

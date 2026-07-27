@@ -11,6 +11,7 @@ describe('cli-test app scenario perf (real workload)', () => {
   it('3-layer perf: file scaffold / batch cli run / cleanup cycle', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 15,
       serialWarmup: 3,

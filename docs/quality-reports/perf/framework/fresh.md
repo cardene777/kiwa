@@ -1,6 +1,6 @@
 # Perf Suite — fresh
 
-Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
 ## Serial p95 (concurrency = 1)
 
@@ -13,15 +13,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| invokeFreshHandler | 0.14ms | 10ms | PASS |
+| invokeFreshHandler | 0.13ms | 10ms | PASS |
 | mountIsland | 0.02ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeFreshHandler | -143072 B | -4 B | 102400 B | yes | PASS |
-| mountIsland | 1312 B | 0 B | 102400 B | yes | PASS |
+| invokeFreshHandler | 3016 B | -4 B | 102400 B | yes | PASS |
+| mountIsland | 1296 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -35,24 +35,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.01ms |
 | p95 | 0.02ms |
-| p99 | 0.05ms |
+| p99 | 0.11ms |
 | mean | 0.01ms |
 | stdev | 0.01ms |
 | min | 0.01ms |
-| max | 0.10ms |
-| total | 2.38ms |
+| max | 0.14ms |
+| total | 2.49ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -14.12% |
-| p95 | 0.02ms | 0.02ms | -0.00ms | -13.11% |
-| p99 | 0.05ms | 0.06ms | -0.00ms | -7.31% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -14.48% |
-| min | 0.01ms | 0.01ms | -0.00ms | -14.36% |
-| max | 0.10ms | 0.11ms | -0.02ms | -14.37% |
-| total | 2.38ms | 2.78ms | -0.40ms | -14.48% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -16.05% |
+| p95 | 0.02ms | 0.02ms | -0.00ms | -3.64% |
+| p99 | 0.11ms | 0.06ms | +0.05ms | +82.47% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -10.41% |
+| min | 0.01ms | 0.01ms | -0.00ms | -18.98% |
+| max | 0.14ms | 0.11ms | +0.02ms | +20.94% |
+| total | 2.49ms | 2.78ms | -0.29ms | -10.41% |
 
 ### mountIsland
 
@@ -68,7 +68,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
+| max | 0.02ms |
 | total | 0.31ms |
 
 ## Baseline diff
@@ -76,10 +76,10 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | -0.00ms | -16.21% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -24.53% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -32.30% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -20.02% |
-| min | 0.00ms | 0.00ms | -0.00ms | -16.67% |
-| max | 0.01ms | 0.02ms | -0.01ms | -27.59% |
-| total | 0.31ms | 0.38ms | -0.08ms | -20.02% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -26.38% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -41.15% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -18.25% |
+| min | 0.00ms | 0.00ms | -0.00ms | -19.47% |
+| max | 0.02ms | 0.02ms | +0.00ms | +15.30% |
+| total | 0.31ms | 0.38ms | -0.07ms | -18.25% |
 

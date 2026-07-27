@@ -17,6 +17,7 @@ describe('ruby app scenario perf (real workload)', () => {
   it('3-layer perf: rails_crud_workflow / multi_framework_batch / erb_error_handling', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 20,
       serialWarmup: 3,

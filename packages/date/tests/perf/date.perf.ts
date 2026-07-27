@@ -15,6 +15,7 @@ describe(MODULE, () => {
       const base = new Date(Date.UTC(2026, 0, 1));
       const result = await runPerf3Layer({
         moduleName: MODULE,
+        requireGc: true,
         reportPath: REPORT_PATH,
         baselinePath: BASELINE_PATH,
         ops: [

@@ -19,6 +19,7 @@ describe('date app scenario perf (real workload)', () => {
     const base = new Date(Date.UTC(2026, 0, 1));
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 20,
       serialWarmup: 3,

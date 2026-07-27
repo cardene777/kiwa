@@ -1,6 +1,6 @@
 # Perf Suite — mcp
 
-Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
 ## Serial p95 (concurrency = 1)
 
@@ -15,7 +15,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| mcpListTools | 0.02ms | 20ms | PASS |
+| mcpListTools | 0.01ms | 20ms | PASS |
 | mcpCallEcho | 0.02ms | 20ms | PASS |
 | mcpCallCalc | 0.02ms | 20ms | PASS |
 | toolRegistryRegister | 0.01ms | 10ms | PASS |
@@ -24,9 +24,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| mcpListTools | -5096 B | 0 B | 102400 B | yes | PASS |
-| mcpCallEcho | -384 B | 0 B | 102400 B | yes | PASS |
-| mcpCallCalc | -15304 B | 0 B | 102400 B | yes | PASS |
+| mcpListTools | -4336 B | 0 B | 102400 B | yes | PASS |
+| mcpCallEcho | 23560 B | 0 B | 102400 B | yes | PASS |
+| mcpCallCalc | 2464 B | 0 B | 102400 B | yes | PASS |
 | toolRegistryRegister | 912 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
@@ -46,19 +46,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.02ms |
-| total | 0.23ms |
+| total | 0.21ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +11.07% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -5.92% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +17.22% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +10.81% |
-| min | 0.00ms | 0.00ms | +0.00ms | +14.24% |
-| max | 0.02ms | 0.01ms | +0.00ms | +36.16% |
-| total | 0.23ms | 0.21ms | +0.02ms | +10.81% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -1.44% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +33.44% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +1.67% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.01ms | +0.00ms | +35.55% |
+| total | 0.21ms | 0.21ms | +0.00ms | +1.67% |
 
 ### mcpCallEcho
 
@@ -70,24 +70,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.00ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.27ms |
+| total | 0.24ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +4.20% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -17.00% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -22.81% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -15.81% |
-| min | 0.00ms | 0.00ms | +0.00ms | +9.17% |
-| max | 0.01ms | 0.04ms | -0.03ms | -77.88% |
-| total | 0.27ms | 0.32ms | -0.05ms | -15.81% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -4.15% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -34.48% |
+| p99 | 0.00ms | 0.01ms | -0.00ms | -39.92% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -23.51% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.04ms | -0.03ms | -80.83% |
+| total | 0.24ms | 0.32ms | -0.07ms | -23.51% |
 
 ### mcpCallCalc
 
@@ -103,20 +103,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.01ms |
 | min | 0.00ms |
-| max | 0.08ms |
-| total | 0.40ms |
+| max | 0.09ms |
+| total | 0.41ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +3.05% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +14.98% |
-| p99 | 0.01ms | 0.00ms | +0.01ms | +180.50% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +33.02% |
-| min | 0.00ms | 0.00ms | -0.00ms | -3.15% |
-| max | 0.08ms | 0.01ms | +0.07ms | +731.22% |
-| total | 0.40ms | 0.30ms | +0.10ms | +33.02% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +8.34% |
+| p99 | 0.01ms | 0.00ms | +0.01ms | +274.50% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +35.94% |
+| min | 0.00ms | 0.00ms | -0.00ms | -6.23% |
+| max | 0.09ms | 0.01ms | +0.08ms | +858.23% |
+| total | 0.41ms | 0.30ms | +0.11ms | +35.94% |
 
 ### toolRegistryRegister
 
@@ -140,10 +140,10 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +12.28% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +0.30% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +5.54% |
+| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +3.20% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +1.53% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +8.27% |
-| total | 0.07ms | 0.07ms | +0.00ms | +5.54% |
+| max | 0.00ms | 0.00ms | +0.00ms | +10.59% |
+| total | 0.07ms | 0.07ms | +0.00ms | +1.53% |
 

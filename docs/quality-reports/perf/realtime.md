@@ -24,9 +24,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| supabasePresenceTrack | -22512 B | -80459 B | 102400 B | yes | PASS |
-| ablyPublish | 34240 B | 0 B | 102400 B | yes | PASS |
-| pusherSubscribeChannel | 448 B | 0 B | 102400 B | yes | PASS |
+| supabasePresenceTrack | -24488 B | 0 B | 102400 B | yes | PASS |
+| ablyPublish | 13976 B | 0 B | 102400 B | yes | PASS |
+| pusherSubscribeChannel | 2760 B | 0 B | 102400 B | yes | PASS |
 | socketioEmit | 46040 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
@@ -41,24 +41,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.02ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
-| stdev | 0.01ms |
+| stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.14ms |
-| total | 0.53ms |
+| max | 0.02ms |
+| total | 0.37ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +3.36% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +5.56% |
-| p99 | 0.02ms | 0.01ms | +0.01ms | +132.73% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +54.78% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +29.00% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +31.99% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +8.75% |
 | min | 0.00ms | 0.00ms | -0.00ms | -3.52% |
-| max | 0.14ms | 0.01ms | +0.12ms | +899.35% |
-| total | 0.53ms | 0.34ms | +0.19ms | +54.78% |
+| max | 0.02ms | 0.01ms | +0.00ms | +35.23% |
+| total | 0.37ms | 0.34ms | +0.03ms | +8.75% |
 
 ### ablyPublish
 
@@ -75,19 +75,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.00ms |
-| total | 0.09ms |
+| total | 0.08ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +116.30% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +54.08% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +13.60% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +9.18% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +6.12% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +3.89% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +7.61% |
-| total | 0.09ms | 0.08ms | +0.01ms | +13.60% |
+| max | 0.00ms | 0.00ms | +0.00ms | +10.47% |
+| total | 0.08ms | 0.08ms | +0.00ms | +3.89% |
 
 ### pusherSubscribeChannel
 
@@ -104,19 +104,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.06ms |
+| total | 0.05ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +24.55% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +19.62% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +141.95% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +20.54% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +15.10% |
-| total | 0.06ms | 0.05ms | +0.01ms | +20.54% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +39.71% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +105.06% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +13.14% |
+| min | 0.00ms | 0.00ms | -0.00ms | -24.70% |
+| max | 0.01ms | 0.01ms | +0.00ms | +4.16% |
+| total | 0.05ms | 0.05ms | +0.01ms | +13.14% |
 
 ### socketioEmit
 
@@ -140,10 +140,10 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | -0.00ms | -0.30% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +10.56% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +13.79% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +4.80% |
+| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +17.89% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +5.10% |
 | min | 0.00ms | 0.00ms | -0.00ms | -0.34% |
-| max | 0.01ms | 0.01ms | +0.00ms | +58.38% |
-| total | 0.08ms | 0.08ms | +0.00ms | +4.80% |
+| max | 0.01ms | 0.01ms | +0.00ms | +60.78% |
+| total | 0.08ms | 0.08ms | +0.00ms | +5.10% |
 

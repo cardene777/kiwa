@@ -22,8 +22,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| dispatchRequest | -5800 B | 0 B | 102400 B | yes | PASS |
-| renderTemplate | -3608 B | 0 B | 102400 B | yes | PASS |
+| dispatchRequest | -1224 B | 0 B | 102400 B | yes | PASS |
+| renderTemplate | -3624 B | 0 B | 102400 B | yes | PASS |
 | captureMiddlewareCall | 912 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
@@ -43,19 +43,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.00ms |
-| total | 0.12ms |
+| total | 0.13ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -22.14% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -1.20% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -1.62% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +8.40% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -16.85% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +0.04% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +3.56% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | -0.00ms | -15.97% |
-| total | 0.12ms | 0.13ms | -0.00ms | -1.62% |
+| max | 0.00ms | 0.00ms | +0.00ms | +0.02% |
+| total | 0.13ms | 0.13ms | +0.00ms | +3.56% |
 
 ### renderTemplate
 
@@ -79,12 +79,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +9.52% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +84.67% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +7.69% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +7.88% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +80.46% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +8.02% |
 | min | 0.00ms | 0.00ms | -0.00ms | -9.86% |
-| max | 0.01ms | 0.01ms | +0.00ms | +34.34% |
-| total | 0.11ms | 0.10ms | +0.01ms | +7.69% |
+| max | 0.01ms | 0.01ms | +0.00ms | +67.17% |
+| total | 0.11ms | 0.10ms | +0.01ms | +8.02% |
 
 ### captureMiddlewareCall
 
@@ -107,11 +107,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +0.48% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
 | p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +28.22% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +22.30% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +64.18% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +16.24% |
 | min | 0.00ms | 0.00ms | +0.00ms | +32.80% |
-| max | 0.01ms | 0.01ms | +0.00ms | +40.72% |
-| total | 0.06ms | 0.05ms | +0.01ms | +22.30% |
+| max | 0.01ms | 0.01ms | +0.00ms | +49.29% |
+| total | 0.06ms | 0.05ms | +0.01ms | +16.24% |
 

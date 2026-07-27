@@ -1,6 +1,6 @@
 # Perf Suite — queue
 
-Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
 ## Serial p95 (concurrency = 1)
 
@@ -17,7 +17,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate |
 |---|---|---|---|
 | bullmqEnvAccessor | 0.01ms | 10ms | PASS |
-| inngestEnvAccessor | 0.00ms | 10ms | PASS |
+| inngestEnvAccessor | 0.01ms | 10ms | PASS |
 | cloudflareQueuesEnvAccessor | 0.00ms | 10ms | PASS |
 | sqsEnvAccessor | 0.00ms | 10ms | PASS |
 | rabbitmqEnvAccessor | 0.00ms | 10ms | PASS |
@@ -26,11 +26,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| bullmqEnvAccessor | -213072 B | 0 B | 102400 B | yes | PASS |
-| inngestEnvAccessor | -2488 B | 0 B | 102400 B | yes | PASS |
-| cloudflareQueuesEnvAccessor | -17360 B | 0 B | 102400 B | yes | PASS |
-| sqsEnvAccessor | -112 B | 0 B | 102400 B | yes | PASS |
-| rabbitmqEnvAccessor | 664 B | 0 B | 102400 B | yes | PASS |
+| bullmqEnvAccessor | -15792 B | 0 B | 102400 B | yes | PASS |
+| inngestEnvAccessor | -544 B | 0 B | 102400 B | yes | PASS |
+| cloudflareQueuesEnvAccessor | 1088 B | 0 B | 102400 B | yes | PASS |
+| sqsEnvAccessor | 880 B | 0 B | 102400 B | yes | PASS |
+| rabbitmqEnvAccessor | -328 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -48,20 +48,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.08ms |
+| max | 0.02ms |
+| total | 0.06ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +282.93% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +9.64% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +19.72% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | -0.00ms | -0.92% |
-| total | 0.08ms | 0.06ms | +0.01ms | +19.72% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -19.71% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -0.61% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -6.19% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +2.31% |
+| min | 0.00ms | 0.00ms | -0.00ms | -24.70% |
+| max | 0.02ms | 0.01ms | +0.00ms | +11.55% |
+| total | 0.06ms | 0.06ms | +0.00ms | +2.31% |
 
 ### inngestEnvAccessor
 
@@ -84,13 +84,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +33.60% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +1.23% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +30.87% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +16.09% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +15.52% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -0.01% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +40.00% |
-| total | 0.03ms | 0.03ms | +0.00ms | +16.09% |
+| max | 0.00ms | 0.00ms | +0.00ms | +26.72% |
+| total | 0.03ms | 0.03ms | -0.00ms | -0.01% |
 
 ### cloudflareQueuesEnvAccessor
 
@@ -106,20 +106,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.06ms |
+| max | 0.02ms |
+| total | 0.08ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +0.82% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +53.35% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +13.45% |
-| min | 0.00ms | 0.00ms | +0.00ms | +0.60% |
-| max | 0.01ms | 0.01ms | +0.00ms | +18.89% |
-| total | 0.06ms | 0.05ms | +0.01ms | +13.45% |
+| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +424.52% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +47.20% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.01ms | +0.01ms | +153.33% |
+| total | 0.08ms | 0.05ms | +0.02ms | +47.20% |
 
 ### sqsEnvAccessor
 
@@ -142,13 +142,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -19.71% |
 | p95 | 0.00ms | 0.00ms | -0.00ms | -16.40% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -0.59% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +1.62% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +12.96% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +0.37% |
 | min | 0.00ms | 0.00ms | +0.00ms | +32.80% |
-| max | 0.00ms | 0.00ms | +0.00ms | +52.83% |
-| total | 0.04ms | 0.04ms | +0.00ms | +1.62% |
+| max | 0.00ms | 0.00ms | +0.00ms | +29.96% |
+| total | 0.04ms | 0.04ms | +0.00ms | +0.37% |
 
 ### rabbitmqEnvAccessor
 
@@ -164,18 +164,18 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.02ms |
-| total | 0.05ms |
+| max | 0.01ms |
+| total | 0.04ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +24.55% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +52.66% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +47.20% |
+| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +41.26% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +43.62% |
 | min | 0.00ms | 0.00ms | +0.00ms | +50.60% |
-| max | 0.02ms | 0.00ms | +0.01ms | +746.37% |
-| total | 0.05ms | 0.03ms | +0.01ms | +47.20% |
+| max | 0.01ms | 0.00ms | +0.01ms | +711.50% |
+| total | 0.04ms | 0.03ms | +0.01ms | +43.62% |
 

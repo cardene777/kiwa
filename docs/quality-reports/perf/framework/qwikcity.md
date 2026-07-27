@@ -1,6 +1,6 @@
 # Perf Suite — qwikcity
 
-Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
 ## Serial p95 (concurrency = 1)
 
@@ -14,14 +14,14 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate |
 |---|---|---|---|
 | invokeRouteLoader | 0.02ms | 10ms | PASS |
-| invokeRouteAction | 0.01ms | 10ms | PASS |
+| invokeRouteAction | 0.02ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeRouteLoader | -291080 B | 0 B | 102400 B | yes | PASS |
-| invokeRouteAction | 704 B | 0 B | 102400 B | yes | PASS |
+| invokeRouteLoader | 152888 B | 0 B | 102400 B | yes | PASS |
+| invokeRouteAction | 720 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -40,19 +40,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.26ms |
+| total | 0.25ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +25.09% |
-| p95 | 0.00ms | 0.01ms | -0.01ms | -71.71% |
-| p99 | 0.01ms | 0.24ms | -0.23ms | -95.69% |
-| mean | 0.00ms | 0.01ms | -0.01ms | -81.03% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.43ms | -0.41ms | -96.57% |
-| total | 0.26ms | 1.37ms | -1.11ms | -81.03% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +25.03% |
+| p95 | 0.00ms | 0.01ms | -0.01ms | -72.76% |
+| p99 | 0.01ms | 0.24ms | -0.23ms | -95.86% |
+| mean | 0.00ms | 0.01ms | -0.01ms | -81.61% |
+| min | 0.00ms | 0.00ms | -0.00ms | -5.60% |
+| max | 0.01ms | 0.43ms | -0.41ms | -96.64% |
+| total | 0.25ms | 1.37ms | -1.12ms | -81.61% |
 
 ### invokeRouteAction
 
@@ -68,18 +68,18 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.20ms |
+| max | 0.02ms |
+| total | 0.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | -0.00ms | -10.61% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +9.14% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +46.40% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -1.81% |
-| min | 0.00ms | 0.00ms | -0.00ms | -6.16% |
-| max | 0.01ms | 0.01ms | +0.00ms | +4.61% |
-| total | 0.20ms | 0.20ms | -0.00ms | -1.81% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -9.48% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -10.30% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -3.45% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.01ms | +0.01ms | +69.15% |
+| total | 0.19ms | 0.20ms | -0.01ms | -3.45% |
 

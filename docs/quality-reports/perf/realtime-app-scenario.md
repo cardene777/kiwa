@@ -14,17 +14,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| chat_room_broadcast (subscribe + 20 publish) | 0.24ms | 200ms | PASS |
-| presence_workload (trackPresence 10 users + untrack) | 0.05ms | 200ms | PASS |
-| reconnect_resilience (5x connect/disconnect/reconnect) | 0.03ms | 200ms | PASS |
+| chat_room_broadcast (subscribe + 20 publish) | 0.07ms | 200ms | PASS |
+| presence_workload (trackPresence 10 users + untrack) | 0.09ms | 200ms | PASS |
+| reconnect_resilience (5x connect/disconnect/reconnect) | 0.02ms | 200ms | PASS |
 
 ## Memory retention (15 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| chat_room_broadcast (subscribe + 20 publish) | -21392 B | 0 B | 102400 B | yes | PASS |
+| chat_room_broadcast (subscribe + 20 publish) | -7424 B | 0 B | 102400 B | yes | PASS |
 | presence_workload (trackPresence 10 users + untrack) | 1688 B | 0 B | 102400 B | yes | PASS |
-| reconnect_resilience (5x connect/disconnect/reconnect) | -3960 B | 0 B | 102400 B | yes | PASS |
+| reconnect_resilience (5x connect/disconnect/reconnect) | -14432 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -40,22 +40,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.03ms |
 | p99 | 0.03ms |
 | mean | 0.02ms |
-| stdev | 0.01ms |
-| min | 0.02ms |
+| stdev | 0.00ms |
+| min | 0.01ms |
 | max | 0.03ms |
-| total | 0.32ms |
+| total | 0.28ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | +0.00ms | +4.54% |
-| p95 | 0.03ms | 0.03ms | +0.00ms | +10.76% |
-| p99 | 0.03ms | 0.03ms | +0.00ms | +6.53% |
-| mean | 0.02ms | 0.02ms | +0.00ms | +14.05% |
-| min | 0.02ms | 0.01ms | +0.00ms | +23.10% |
-| max | 0.03ms | 0.03ms | +0.00ms | +5.60% |
-| total | 0.32ms | 0.28ms | +0.04ms | +14.05% |
+| p50 | 0.02ms | 0.02ms | -0.00ms | -6.26% |
+| p95 | 0.03ms | 0.03ms | -0.00ms | -7.98% |
+| p99 | 0.03ms | 0.03ms | -0.00ms | -1.11% |
+| mean | 0.02ms | 0.02ms | -0.00ms | -0.86% |
+| min | 0.01ms | 0.01ms | +0.00ms | +5.94% |
+| max | 0.03ms | 0.03ms | +0.00ms | +0.39% |
+| total | 0.28ms | 0.28ms | -0.00ms | -0.86% |
 
 ### presence_workload (trackPresence 10 users + untrack)
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.01ms |
 | max | 0.02ms |
-| total | 0.20ms |
+| total | 0.18ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +2.54% |
-| p95 | 0.02ms | 0.02ms | +0.00ms | +12.72% |
-| p99 | 0.02ms | 0.02ms | +0.00ms | +6.15% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +7.19% |
-| min | 0.01ms | 0.01ms | +0.00ms | +3.77% |
-| max | 0.02ms | 0.02ms | +0.00ms | +4.86% |
-| total | 0.20ms | 0.19ms | +0.01ms | +7.19% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -6.52% |
+| p95 | 0.02ms | 0.02ms | -0.00ms | -0.55% |
+| p99 | 0.02ms | 0.02ms | -0.00ms | -2.75% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -3.85% |
+| min | 0.01ms | 0.01ms | -0.00ms | -1.68% |
+| max | 0.02ms | 0.02ms | -0.00ms | -3.18% |
+| total | 0.18ms | 0.19ms | -0.01ms | -3.85% |
 
 ### reconnect_resilience (5x connect/disconnect/reconnect)
 
@@ -107,11 +107,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -1.09% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +5.01% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +10.23% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -1.99% |
-| min | 0.00ms | 0.00ms | -0.00ms | -1.10% |
-| max | 0.01ms | 0.01ms | +0.00ms | +11.50% |
-| total | 0.06ms | 0.07ms | -0.00ms | -1.99% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -1.06% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +4.59% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +5.26% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -1.72% |
+| min | 0.00ms | 0.00ms | -0.00ms | -2.17% |
+| max | 0.01ms | 0.01ms | +0.00ms | +5.42% |
+| total | 0.06ms | 0.07ms | -0.00ms | -1.72% |
 

@@ -47,6 +47,7 @@ describe(MODULE, () => {
       try {
         const result = await runPerf3Layer({
           moduleName: MODULE,
+          requireGc: true,
           reportPath: REPORT_PATH,
           baselinePath: BASELINE_PATH,
           ops: [

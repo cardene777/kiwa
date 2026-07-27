@@ -13,15 +13,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| buildCspHeader | 0.06ms | 10ms | PASS |
+| buildCspHeader | 0.05ms | 10ms | PASS |
 | validateNonce | 0.01ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| buildCspHeader | 1312 B | 0 B | 102400 B | yes | PASS |
-| validateNonce | -2472 B | 0 B | 102400 B | yes | PASS |
+| buildCspHeader | 1232 B | 0 B | 102400 B | yes | PASS |
+| validateNonce | -3640 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -35,24 +35,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.01ms |
-| p99 | 0.02ms |
+| p99 | 0.01ms |
 | mean | 0.01ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.02ms |
-| total | 1.05ms |
+| total | 1.06ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.01ms | -0.00ms | -2.50% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +2.40% |
-| p99 | 0.02ms | 0.01ms | +0.00ms | +27.86% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -0.73% |
-| min | 0.00ms | 0.00ms | +0.00ms | +1.06% |
-| max | 0.02ms | 0.02ms | +0.00ms | +7.31% |
-| total | 1.05ms | 1.06ms | -0.01ms | -0.73% |
+| p50 | 0.00ms | 0.01ms | -0.00ms | -0.82% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +10.22% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +4.08% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +0.30% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.02ms | +0.00ms | +2.44% |
+| total | 1.06ms | 1.06ms | +0.00ms | +0.30% |
 
 ### validateNonce
 
@@ -68,18 +68,18 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.07ms |
+| max | 0.00ms |
+| total | 0.05ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | +0.00ms | +20.19% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +52.50% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +90.53% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +50.20% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.00ms | +0.01ms | +575.00% |
-| total | 0.07ms | 0.05ms | +0.02ms | +50.20% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +0.84% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +13.43% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +9.07% |
+| min | 0.00ms | 0.00ms | -0.00ms | -19.71% |
+| max | 0.00ms | 0.00ms | +0.00ms | +33.35% |
+| total | 0.05ms | 0.05ms | +0.00ms | +9.07% |
 

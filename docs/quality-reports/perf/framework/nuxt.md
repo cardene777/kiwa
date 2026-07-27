@@ -1,6 +1,6 @@
 # Perf Suite — nuxt
 
-Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
 ## Serial p95 (concurrency = 1)
 
@@ -13,15 +13,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| invokeEventHandler | 0.02ms | 10ms | PASS |
-| invokeRouteMiddleware | 0.01ms | 10ms | PASS |
+| invokeEventHandler | 0.03ms | 10ms | PASS |
+| invokeRouteMiddleware | 0.02ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeEventHandler | -5904 B | 0 B | 102400 B | yes | PASS |
-| invokeRouteMiddleware | 672 B | 0 B | 102400 B | yes | PASS |
+| invokeEventHandler | 265016 B | 0 B | 102400 B | yes | PASS |
+| invokeRouteMiddleware | -528 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -40,19 +40,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.02ms |
-| total | 0.35ms |
+| total | 0.32ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +3.36% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -19.73% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -8.56% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +3.98% |
-| min | 0.00ms | 0.00ms | +0.00ms | +4.69% |
-| max | 0.02ms | 0.02ms | -0.00ms | -9.58% |
-| total | 0.35ms | 0.33ms | +0.01ms | +3.98% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -3.28% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +24.80% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -26.85% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -3.45% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.02ms | -0.00ms | -6.13% |
+| total | 0.32ms | 0.33ms | -0.01ms | -3.45% |
 
 ### invokeRouteMiddleware
 
@@ -64,22 +64,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.00ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.17ms |
+| total | 0.16ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -5.60% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +34.35% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +20.18% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +3.63% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.00ms | +0.01ms | +131.63% |
-| total | 0.17ms | 0.17ms | +0.01ms | +3.63% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -16.67% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +25.69% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +7.64% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -1.52% |
+| min | 0.00ms | 0.00ms | +0.00ms | +8.20% |
+| max | 0.01ms | 0.00ms | +0.00ms | +35.90% |
+| total | 0.16ms | 0.17ms | -0.00ms | -1.52% |
 

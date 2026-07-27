@@ -16,15 +16,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|---|---|
 | multi_provider_workflow (5 provider x 2 dispatch cycles) | 0.02ms | 200ms | PASS |
 | subscribe_batch (5 listener + 5 state updates) | 0.01ms | 200ms | PASS |
-| dispatch_error_handling (5 unknown action type dispatch) | 0.04ms | 200ms | PASS |
+| dispatch_error_handling (5 unknown action type dispatch) | 0.05ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| multi_provider_workflow (5 provider x 2 dispatch cycles) | -4320 B | 0 B | 102400 B | yes | PASS |
-| subscribe_batch (5 listener + 5 state updates) | 792 B | 0 B | 102400 B | yes | PASS |
-| dispatch_error_handling (5 unknown action type dispatch) | 688 B | 0 B | 102400 B | yes | PASS |
+| multi_provider_workflow (5 provider x 2 dispatch cycles) | 73832 B | -11186 B | 102400 B | yes | PASS |
+| subscribe_batch (5 listener + 5 state updates) | 944 B | 0 B | 102400 B | yes | PASS |
+| dispatch_error_handling (5 unknown action type dispatch) | -832 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -43,19 +43,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.10ms |
+| total | 0.11ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +41.97% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -18.07% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +18.65% |
-| mean | 0.01ms | 0.00ms | +0.00ms | +9.25% |
-| min | 0.00ms | 0.00ms | -0.00ms | -2.59% |
-| max | 0.01ms | 0.01ms | +0.00ms | +26.69% |
-| total | 0.10ms | 0.09ms | +0.01ms | +9.25% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +38.27% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -31.13% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +22.17% |
+| mean | 0.01ms | 0.00ms | +0.00ms | +13.31% |
+| min | 0.00ms | 0.00ms | +0.00ms | +40.27% |
+| max | 0.01ms | 0.01ms | +0.00ms | +33.82% |
+| total | 0.11ms | 0.09ms | +0.01ms | +13.31% |
 
 ### subscribe_batch (5 listener + 5 state updates)
 
@@ -67,24 +67,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 3 |
 | p50 | 0.00ms |
 | p95 | 0.01ms |
-| p99 | 0.02ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.02ms |
+| max | 0.01ms |
 | total | 0.09ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +5.90% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +5.63% |
-| p99 | 0.02ms | 0.02ms | -0.00ms | -4.15% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +8.17% |
-| min | 0.00ms | 0.00ms | -0.00ms | -17.21% |
-| max | 0.02ms | 0.02ms | -0.00ms | -5.40% |
-| total | 0.09ms | 0.08ms | +0.01ms | +8.17% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +14.06% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -2.88% |
+| p99 | 0.01ms | 0.02ms | -0.01ms | -29.95% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +4.42% |
+| min | 0.00ms | 0.00ms | +0.00ms | +7.80% |
+| max | 0.01ms | 0.02ms | -0.01ms | -33.40% |
+| total | 0.09ms | 0.08ms | +0.00ms | +4.42% |
 
 ### dispatch_error_handling (5 unknown action type dispatch)
 
@@ -101,17 +101,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.01ms |
 | max | 0.02ms |
-| total | 0.20ms |
+| total | 0.24ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +9.19% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +33.92% |
-| p99 | 0.02ms | 0.01ms | +0.00ms | +22.23% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +10.40% |
-| min | 0.01ms | 0.01ms | +0.00ms | +1.46% |
-| max | 0.02ms | 0.01ms | +0.00ms | +20.00% |
-| total | 0.20ms | 0.18ms | +0.02ms | +10.40% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +31.60% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +28.92% |
+| p99 | 0.02ms | 0.01ms | +0.00ms | +27.60% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +31.24% |
+| min | 0.01ms | 0.01ms | +0.00ms | +30.11% |
+| max | 0.02ms | 0.01ms | +0.00ms | +27.35% |
+| total | 0.24ms | 0.18ms | +0.06ms | +31.24% |
 

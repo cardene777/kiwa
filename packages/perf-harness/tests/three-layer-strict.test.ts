@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import { join } from 'node:path';
 import { runPerf3LayerStrict } from '../src/index.js';
@@ -152,30 +152,102 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     expect(merged.results['added.serial']).toBeDefined();
   });
 
-  it('fails the memory gate when GC is not available', async () => {
+  it('fails the memory gate when GC is required but unavailable', async () => {
     const tmpDir = tempDir();
     // GC を呼べない測定は解放される一時使用まで拾うため、上限との比較が成立しない。
-    // 表示だけで済ませると設定漏れの測定を PASS として公開してしまう。
+    // 既定で失敗にすると GC 無しで動いていた既存の呼出が一斉に落ちるので opt-in。
     const originalGc = (globalThis as unknown as { gc?: () => void }).gc;
     delete (globalThis as unknown as { gc?: () => void }).gc;
     try {
-      const result = await runPerf3LayerStrict({
+      const base = {
         moduleName: 'gc-missing',
         ops: [{ name: 'noop', fn: () => {}, serialP95CapMs: 1000 }],
-        reportPath: join(tmpDir, 'report.md'),
         baselinePath: join(tmpDir, 'baseline.json'),
         serialIterations: 30,
         concurrency: 3,
         memoryIterations: 30,
+      };
+
+      const lenient = await runPerf3LayerStrict({
+        ...base,
+        reportPath: join(tmpDir, 'lenient.md'),
       });
-      expect(result.outcomes[0]!.memoryGatePassed).toBe(false);
-      expect(result.allPassed).toBe(false);
-      expect(readFileSync(join(tmpDir, 'report.md'), 'utf8')).toContain('| no |');
+      expect(lenient.outcomes[0]!.memoryGatePassed).toBe(true);
+
+      const strict = await runPerf3LayerStrict({
+        ...base,
+        reportPath: join(tmpDir, 'strict.md'),
+        requireGc: true,
+      });
+      expect(strict.outcomes[0]!.memoryGatePassed).toBe(false);
+      expect(strict.allPassed).toBe(false);
+      expect(readFileSync(join(tmpDir, 'strict.md'), 'utf8')).toContain('| no |');
     } finally {
       if (originalGc !== undefined) {
         (globalThis as unknown as { gc: () => void }).gc = originalGc;
       }
     }
+  });
+
+  it('does not overwrite a baseline measured under a different premise', async () => {
+    const tmpDir = tempDir();
+    const baselinePath = join(tmpDir, 'baseline.json');
+    const common = { fn: () => {}, serialP95CapMs: 1000 };
+    const settings = { serialIterations: 30, concurrency: 3, memoryIterations: 30 };
+
+    // GC を呼べる状態で baseline を作る。
+    const gcStub = () => undefined;
+    const originalGc = (globalThis as unknown as { gc?: () => void }).gc;
+    (globalThis as unknown as { gc: () => void }).gc = gcStub;
+    let seeded: string;
+    try {
+      await runPerf3LayerStrict({
+        moduleName: 'premise',
+        ops: [{ name: 'existing', ...common }],
+        reportPath: join(tmpDir, 'r1.md'),
+        baselinePath,
+        ...settings,
+      });
+      seeded = readFileSync(baselinePath, 'utf8');
+    } finally {
+      if (originalGc === undefined) delete (globalThis as unknown as { gc?: () => void }).gc;
+      else (globalThis as unknown as { gc: () => void }).gc = originalGc;
+    }
+
+    // GC 無しで測る。前提が違うので比較対象にできないが、この値で上書きすると
+    // 次に正しい環境で測ったときも再 seed になり、その間の回帰を見逃す。
+    await runPerf3LayerStrict({
+      moduleName: 'premise',
+      ops: [
+        { name: 'existing', ...common },
+        { name: 'added', ...common },
+      ],
+      reportPath: join(tmpDir, 'r2.md'),
+      baselinePath,
+      ...settings,
+    });
+
+    expect(readFileSync(baselinePath, 'utf8')).toBe(seeded);
+  });
+
+  it('links to the threshold SSOT from nested report paths', async () => {
+    const tmpDir = tempDir();
+    const nested = join(tmpDir, 'docs', 'quality-reports', 'perf', 'saas');
+    mkdirSync(nested, { recursive: true });
+
+    await runPerf3LayerStrict({
+      moduleName: 'nested-link',
+      ops: [{ name: 'noop', fn: () => {}, serialP95CapMs: 1000 }],
+      reportPath: join(nested, 'report.md'),
+      baselinePath: join(tmpDir, 'baseline.json'),
+      serialIterations: 30,
+      concurrency: 3,
+      memoryIterations: 30,
+    });
+
+    // 固定の相対 path だと 1 階層深いだけでリンクが外れる。
+    const body = readFileSync(join(nested, 'report.md'), 'utf8');
+    expect(body).toContain('../../../quality/perf-thresholds');
   });
 
   it('fails the gate when a significant regression is detected', async () => {
