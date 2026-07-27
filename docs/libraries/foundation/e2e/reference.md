@@ -105,7 +105,7 @@ type NodeRequestHandler = (
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -114,7 +114,7 @@ type NodeRequestHandler = (
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/setup-e2e-env.ts#L5) `packages/e2e/src/setup-e2e-env.ts`
 
 ```ts
-export async function setupE2eEnv(opts: SetupE2eEnvOptions = {}): Promise<E2eTestEnv>;
+export declare function setupE2eEnv(opts?: SetupE2eEnvOptions): Promise<E2eTestEnv>;
 ```
 
 #### `startServer`
@@ -122,7 +122,7 @@ export async function setupE2eEnv(opts: SetupE2eEnvOptions = {}): Promise<E2eTes
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/http-server.ts#L55) `packages/e2e/src/http-server.ts`
 
 ```ts
-export async function startServer(source: ApiHandlerSource | NodeRequestHandler): Promise<ServerHandle>;
+export declare function startServer(source: ApiHandlerSource | NodeRequestHandler): Promise<ServerHandle>;
 ```
 
 ### 型
@@ -132,9 +132,13 @@ export async function startServer(source: ApiHandlerSource | NodeRequestHandler)
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/http-server.ts#L3) `packages/e2e/src/http-server.ts`
 
 ```ts
-export type ApiHandlerSource =
-  | { kind: 'fetch'; handler: (req: Request) => Promise<Response> | Response }
-  | { kind: 'node'; handler: NodeRequestHandler };
+export type ApiHandlerSource = {
+    kind: 'fetch';
+    handler: (req: Request) => Promise<Response> | Response;
+} | {
+    kind: 'node';
+    handler: NodeRequestHandler;
+};
 ```
 
 #### `BrowserContextHandle`
@@ -143,8 +147,8 @@ export type ApiHandlerSource =
 
 ```ts
 export interface BrowserContextHandle {
-  newPage: () => Promise<BrowserPageHandle>;
-  close: () => Promise<void>;
+    newPage: () => Promise<BrowserPageHandle>;
+    close: () => Promise<void>;
 }
 ```
 
@@ -154,8 +158,8 @@ export interface BrowserContextHandle {
 
 ```ts
 export interface BrowserHandle {
-  close: () => Promise<void>;
-  newContext: () => Promise<BrowserContextHandle>;
+    close: () => Promise<void>;
+    newContext: () => Promise<BrowserContextHandle>;
 }
 ```
 
@@ -165,11 +169,11 @@ export interface BrowserHandle {
 
 ```ts
 export interface BrowserLocator {
-  textContent: () => Promise<string | null>;
-  click: () => Promise<void>;
-  fill: (value: string) => Promise<void>;
-  isVisible: () => Promise<boolean>;
-  count: () => Promise<number>;
+    textContent: () => Promise<string | null>;
+    click: () => Promise<void>;
+    fill: (value: string) => Promise<void>;
+    isVisible: () => Promise<boolean>;
+    count: () => Promise<number>;
 }
 ```
 
@@ -179,18 +183,26 @@ export interface BrowserLocator {
 
 ```ts
 export interface BrowserPageHandle {
-  goto: (url: string, opts?: { waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' }) => Promise<unknown>;
-  setContent: (html: string, opts?: { waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' }) => Promise<void>;
-  getByTestId: (id: string) => BrowserLocator;
-  getByRole: (role: string, opts?: { name?: string }) => BrowserLocator;
-  getByText: (text: string) => BrowserLocator;
-  fill: (selector: string, value: string) => Promise<void>;
-  click: (selector: string) => Promise<void>;
-  evaluate: <T>(fn: () => T | Promise<T>) => Promise<T>;
-  screenshot: (opts?: { path?: string }) => Promise<Buffer>;
-  content: () => Promise<string>;
-  url: () => string;
-  close: () => Promise<void>;
+    goto: (url: string, opts?: {
+        waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
+    }) => Promise<unknown>;
+    setContent: (html: string, opts?: {
+        waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
+    }) => Promise<void>;
+    getByTestId: (id: string) => BrowserLocator;
+    getByRole: (role: string, opts?: {
+        name?: string;
+    }) => BrowserLocator;
+    getByText: (text: string) => BrowserLocator;
+    fill: (selector: string, value: string) => Promise<void>;
+    click: (selector: string) => Promise<void>;
+    evaluate: <T>(fn: () => T | Promise<T>) => Promise<T>;
+    screenshot: (opts?: {
+        path?: string;
+    }) => Promise<Buffer>;
+    content: () => Promise<string>;
+    url: () => string;
+    close: () => Promise<void>;
 }
 ```
 
@@ -208,9 +220,9 @@ export type E2eMode = 'live' | 'static';
 
 ```ts
 export interface E2eTestEnv extends TestEnvBase<'live'> {
-  baseUrl: string;
-  page: import('./browser-bridge.js').BrowserPageHandle;
-  browser: 'chromium' | 'firefox' | 'webkit';
+    baseUrl: string;
+    page: import('./browser-bridge.js').BrowserPageHandle;
+    browser: 'chromium' | 'firefox' | 'webkit';
 }
 ```
 
@@ -219,10 +231,7 @@ export interface E2eTestEnv extends TestEnvBase<'live'> {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/http-server.ts#L7) `packages/e2e/src/http-server.ts`
 
 ```ts
-export type NodeRequestHandler = (
-  req: import('node:http').IncomingMessage,
-  res: import('node:http').ServerResponse,
-) => void | Promise<void>;
+export type NodeRequestHandler = (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => void | Promise<void>;
 ```
 
 #### `ServerHandle`
@@ -231,9 +240,9 @@ export type NodeRequestHandler = (
 
 ```ts
 export interface ServerHandle {
-  baseUrl: string;
-  port: number;
-  close: () => Promise<void>;
+    baseUrl: string;
+    port: number;
+    close: () => Promise<void>;
 }
 ```
 
@@ -243,16 +252,16 @@ export interface ServerHandle {
 
 ```ts
 export interface SetupE2eEnvOptions {
-  /** Mount the app under the given baseUrl (default http://127.0.0.1:auto) */
-  app?: ApiHandlerSource | NodeRequestHandler;
-  /** Static HTML to serve at "/" when no app is given */
-  staticHtml?: string;
-  /** Playwright browser (default chromium) */
-  browser?: 'chromium' | 'firefox' | 'webkit';
-  /** headless launch flag (default true) */
-  headless?: boolean;
-  /** initial route to navigate after launch */
-  initialPath?: string;
+    /** Mount the app under the given baseUrl (default http://127.0.0.1:auto) */
+    app?: ApiHandlerSource | NodeRequestHandler;
+    /** Static HTML to serve at "/" when no app is given */
+    staticHtml?: string;
+    /** Playwright browser (default chromium) */
+    browser?: 'chromium' | 'firefox' | 'webkit';
+    /** headless launch flag (default true) */
+    headless?: boolean;
+    /** initial route to navigate after launch */
+    initialPath?: string;
 }
 ```
 <!-- kiwa-public-api:end -->

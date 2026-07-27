@@ -116,7 +116,7 @@ rate limit は Token Bucket、Leaky Bucket、Sliding Window、Distributed Rate L
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/security/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/security/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -125,7 +125,7 @@ rate limit は Token Bucket、Leaky Bucket、Sliding Window、Distributed Rate L
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L90) `packages/security/src/waf.ts`
 
 ```ts
-export function addCustomRule(policy: WafPolicy, rule: WafRule): WafPolicy;
+export declare function addCustomRule(policy: WafPolicy, rule: WafRule): WafPolicy;
 ```
 
 #### `ADV_API_KEY_ENV_KEY`
@@ -157,10 +157,7 @@ export declare const ADV_REQUIRED_KEYS: Record<SecurityAdvTarget, string[]>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L102) `packages/security/src/semantics/container-k8s.ts`
 
 ```ts
-export function applyNetworkPolicy(
-  session: K8sSession,
-  policy: NetworkPolicySpec,
-): AxisAdvStep<K8sState>;
+export declare function applyNetworkPolicy(session: K8sSession, policy: NetworkPolicySpec): AxisAdvStep<K8sState>;
 ```
 
 #### `applyPermissionsPolicy`
@@ -168,10 +165,7 @@ export function applyNetworkPolicy(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L110) `packages/security/src/semantics/web-vitals-security.ts`
 
 ```ts
-export function applyPermissionsPolicy(
-  session: WvsSession,
-  input: PermissionsPolicyInput,
-): AxisAdvStep<WvsState>;
+export declare function applyPermissionsPolicy(session: WvsSession, input: PermissionsPolicyInput): AxisAdvStep<WvsState>;
 ```
 
 #### `applyRetention`
@@ -179,10 +173,7 @@ export function applyPermissionsPolicy(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L122) `packages/security/src/semantics/siem-audit.ts`
 
 ```ts
-export function applyRetention(
-  session: SiemAuditSession,
-  policy: RetentionPolicy,
-): AxisAdvStep<SiemAuditState>;
+export declare function applyRetention(session: SiemAuditSession, policy: RetentionPolicy): AxisAdvStep<SiemAuditState>;
 ```
 
 #### `buildAdvRealDriverConfig`
@@ -190,10 +181,7 @@ export function applyRetention(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L101) `packages/security/src/semantics/real-driver.ts`
 
 ```ts
-export function buildAdvRealDriverConfig(
-  provider: SecurityAdvTarget,
-  env: NodeJS.ProcessEnv = process.env,
-): AdvRealDriverConfig;
+export declare function buildAdvRealDriverConfig(provider: SecurityAdvTarget, env?: NodeJS.ProcessEnv): AdvRealDriverConfig;
 ```
 
 #### `buildCspHeader`
@@ -203,7 +191,7 @@ export function buildAdvRealDriverConfig(
 CSP header を SSOT 定義から build する。 nonce / hash / strict-dynamic は 5 sub-axis の中で最も間違えやすい組合せ (nonce が同 header 内 2 回以上 出ると browser reject / strict-dynamic は nonce or hash なしに書くと whole policy が effect なし) を build 段階で予防する。
 
 ```ts
-export function buildCspHeader(input: CspPolicyInput): CspHeaderOutput;
+export declare function buildCspHeader(input: CspPolicyInput): CspHeaderOutput;
 ```
 
 #### `buildSecurityHeaders`
@@ -211,7 +199,7 @@ export function buildCspHeader(input: CspPolicyInput): CspHeaderOutput;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L78) `packages/security/src/security-headers.ts`
 
 ```ts
-export function buildSecurityHeaders(input: SecurityHeadersInput): SecurityHeadersOutput;
+export declare function buildSecurityHeaders(input: SecurityHeadersInput): SecurityHeadersOutput;
 ```
 
 #### `captureForensics`
@@ -219,10 +207,7 @@ export function buildSecurityHeaders(input: SecurityHeadersInput): SecurityHeade
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L152) `packages/security/src/semantics/incident-response.ts`
 
 ```ts
-export function captureForensics(
-  session: IncidentSession,
-  input: ForensicsInput,
-): AxisAdvStep<IncidentState>;
+export declare function captureForensics(session: IncidentSession, input: ForensicsInput): AxisAdvStep<IncidentState>;
 ```
 
 #### `checkCtLog`
@@ -230,7 +215,7 @@ export function captureForensics(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L126) `packages/security/src/semantics/mtls.ts`
 
 ```ts
-export function checkCtLog(session: MtlsSession, input: CtLogInput): AxisAdvStep<MtlsState>;
+export declare function checkCtLog(session: MtlsSession, input: CtLogInput): AxisAdvStep<MtlsState>;
 ```
 
 #### `classifySeverity`
@@ -238,10 +223,7 @@ export function checkCtLog(session: MtlsSession, input: CtLogInput): AxisAdvStep
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L103) `packages/security/src/semantics/incident-response.ts`
 
 ```ts
-export function classifySeverity(
-  session: IncidentSession,
-  input: SeverityInput,
-): AxisAdvStep<IncidentState>;
+export declare function classifySeverity(session: IncidentSession, input: SeverityInput): AxisAdvStep<IncidentState>;
 ```
 
 #### `collectAdvFidelityCoverage`
@@ -249,9 +231,7 @@ export function classifySeverity(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/fidelity.ts#L84) `packages/security/src/semantics/fidelity.ts`
 
 ```ts
-export function collectAdvFidelityCoverage(
-  providers: SecurityAdvTarget[] = ['istio', 'opa', 'siem-splunk', 'vault'],
-): AdvFidelityCoverage;
+export declare function collectAdvFidelityCoverage(providers?: SecurityAdvTarget[]): AdvFidelityCoverage;
 ```
 
 #### `completeHandshake`
@@ -259,10 +239,7 @@ export function collectAdvFidelityCoverage(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L70) `packages/security/src/semantics/mtls.ts`
 
 ```ts
-export function completeHandshake(
-  session: MtlsSession,
-  input: HandshakeInput,
-): AxisAdvStep<MtlsState>;
+export declare function completeHandshake(session: MtlsSession, input: HandshakeInput): AxisAdvStep<MtlsState>;
 ```
 
 #### `correlate`
@@ -270,10 +247,7 @@ export function completeHandshake(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L143) `packages/security/src/semantics/siem-audit.ts`
 
 ```ts
-export function correlate(
-  session: SiemAuditSession,
-  rule: CorrelationRule,
-): AxisAdvStep<SiemAuditState>;
+export declare function correlate(session: SiemAuditSession, rule: CorrelationRule): AxisAdvStep<SiemAuditState>;
 ```
 
 #### `createRbacPolicy`
@@ -281,7 +255,7 @@ export function correlate(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L29) `packages/security/src/authorization.ts`
 
 ```ts
-export function createRbacPolicy(roles: RbacRole[]): RbacPolicy;
+export declare function createRbacPolicy(roles: RbacRole[]): RbacPolicy;
 ```
 
 #### `createWafPolicy`
@@ -289,7 +263,7 @@ export function createRbacPolicy(roles: RbacRole[]): RbacPolicy;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L85) `packages/security/src/waf.ts`
 
 ```ts
-export function createWafPolicy(rules: WafRule[] = OWASP_CRS_DEFAULT): WafPolicy;
+export declare function createWafPolicy(rules?: WafRule[]): WafPolicy;
 ```
 
 #### `decideAdmission`
@@ -297,11 +271,10 @@ export function createWafPolicy(rules: WafRule[] = OWASP_CRS_DEFAULT): WafPolicy
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L121) `packages/security/src/semantics/container-k8s.ts`
 
 ```ts
-export function decideAdmission(
-  session: K8sSession,
-  request: AdmissionRequest,
-  input: { requireLabel: string; allowedNamespaces: string[] },
-): AxisAdvStep<K8sState>;
+export declare function decideAdmission(session: K8sSession, request: AdmissionRequest, input: {
+    requireLabel: string;
+    allowedNamespaces: string[];
+}): AxisAdvStep<K8sState>;
 ```
 
 #### `DEFAULT_LICENSE_POLICY`
@@ -327,7 +300,7 @@ export declare const DEFAULT_SIGNATURES: SecretSignature[];
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L105) `packages/security/src/semantics/crypto-advanced.ts`
 
 ```ts
-export function deriveKey(session: CryptoSession, input: KdfInput): AxisAdvStep<CryptoState>;
+export declare function deriveKey(session: CryptoSession, input: KdfInput): AxisAdvStep<CryptoState>;
 ```
 
 #### `detectBoundaryCrossings`
@@ -335,11 +308,7 @@ export function deriveKey(session: CryptoSession, input: KdfInput): AxisAdvStep<
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L164) `packages/security/src/threat-model.ts`
 
 ```ts
-export function detectBoundaryCrossings(
-  zones: TrustZone[],
-  flows: DataFlow[],
-  membership: Map<string, string>,
-): BoundaryCrossing[];
+export declare function detectBoundaryCrossings(zones: TrustZone[], flows: DataFlow[], membership: Map<string, string>): BoundaryCrossing[];
 ```
 
 #### `DistributedRateLimiter`
@@ -348,10 +317,8 @@ export function detectBoundaryCrossings(
 
 ```ts
 export declare class DistributedRateLimiter {
-  private readonly windows: Map<string, SlidingWindow>;
-  private readonly config: DistributedRateLimitConfig;
-  constructor(config: DistributedRateLimitConfig);
-  check(clientId: string, nowMs: number = Date.now()): RateLimitDecision;
+    constructor(config: DistributedRateLimitConfig);
+    check(clientId: string, nowMs?: number): RateLimitDecision;
 }
 ```
 
@@ -360,10 +327,7 @@ export declare class DistributedRateLimiter {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L176) `packages/security/src/semantics/crypto-advanced.ts`
 
 ```ts
-export function encapsulatePq(
-  session: CryptoSession,
-  input: PqKemInput,
-): AxisAdvStep<CryptoState>;
+export declare function encapsulatePq(session: CryptoSession, input: PqKemInput): AxisAdvStep<CryptoState>;
 ```
 
 #### `enforceCrossOriginIsolation`
@@ -371,10 +335,7 @@ export function encapsulatePq(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L128) `packages/security/src/semantics/web-vitals-security.ts`
 
 ```ts
-export function enforceCrossOriginIsolation(
-  session: WvsSession,
-  input: CrossOriginInput,
-): AxisAdvStep<WvsState>;
+export declare function enforceCrossOriginIsolation(session: WvsSession, input: CrossOriginInput): AxisAdvStep<WvsState>;
 ```
 
 #### `enforceMicroSegment`
@@ -382,10 +343,7 @@ export function enforceCrossOriginIsolation(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L145) `packages/security/src/semantics/zero-trust.ts`
 
 ```ts
-export function enforceMicroSegment(
-  session: ZeroTrustSession,
-  policy: SegmentPolicy,
-): AxisAdvStep<ZeroTrustState>;
+export declare function enforceMicroSegment(session: ZeroTrustSession, policy: SegmentPolicy): AxisAdvStep<ZeroTrustState>;
 ```
 
 #### `enforcePodSecurity`
@@ -393,11 +351,7 @@ export function enforceMicroSegment(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L72) `packages/security/src/semantics/container-k8s.ts`
 
 ```ts
-export function enforcePodSecurity(
-  session: K8sSession,
-  level: PodSecurityLevel,
-  pod: PodSpec,
-): AxisAdvStep<K8sState>;
+export declare function enforcePodSecurity(session: K8sSession, level: PodSecurityLevel, pod: PodSpec): AxisAdvStep<K8sState>;
 ```
 
 #### `enforceTrustedTypes`
@@ -405,10 +359,7 @@ export function enforcePodSecurity(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L92) `packages/security/src/semantics/web-vitals-security.ts`
 
 ```ts
-export function enforceTrustedTypes(
-  session: WvsSession,
-  input: TrustedTypesInput,
-): AxisAdvStep<WvsState>;
+export declare function enforceTrustedTypes(session: WvsSession, input: TrustedTypesInput): AxisAdvStep<WvsState>;
 ```
 
 #### `escalate`
@@ -416,10 +367,7 @@ export function enforceTrustedTypes(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L130) `packages/security/src/semantics/incident-response.ts`
 
 ```ts
-export function escalate(
-  session: IncidentSession,
-  input: EscalationInput,
-): AxisAdvStep<IncidentState>;
+export declare function escalate(session: IncidentSession, input: EscalationInput): AxisAdvStep<IncidentState>;
 ```
 
 #### `evaluateAbac`
@@ -427,7 +375,7 @@ export function escalate(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L119) `packages/security/src/authorization.ts`
 
 ```ts
-export function evaluateAbac(policy: AbacPolicy, attrs: AbacAttributes): AbacDecision;
+export declare function evaluateAbac(policy: AbacPolicy, attrs: AbacAttributes): AbacDecision;
 ```
 
 #### `evaluateCombined`
@@ -435,7 +383,7 @@ export function evaluateAbac(policy: AbacPolicy, attrs: AbacAttributes): AbacDec
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L160) `packages/security/src/authorization.ts`
 
 ```ts
-export function evaluateCombined(input: CombinedPolicyInput): AbacDecision;
+export declare function evaluateCombined(input: CombinedPolicyInput): AbacDecision;
 ```
 
 #### `evaluateLicense`
@@ -443,7 +391,7 @@ export function evaluateCombined(input: CombinedPolicyInput): AbacDecision;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L169) `packages/security/src/sbom.ts`
 
 ```ts
-export function evaluateLicense(license: string | undefined, policy: LicensePolicy = DEFAULT_LICENSE_POLICY): LicenseVerdict;
+export declare function evaluateLicense(license: string | undefined, policy?: LicensePolicy): LicenseVerdict;
 ```
 
 #### `evaluatePosture`
@@ -451,10 +399,7 @@ export function evaluateLicense(license: string | undefined, policy: LicensePoli
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L70) `packages/security/src/semantics/zero-trust.ts`
 
 ```ts
-export function evaluatePosture(
-  session: ZeroTrustSession,
-  posture: DevicePosture,
-): AxisAdvStep<ZeroTrustState>;
+export declare function evaluatePosture(session: ZeroTrustSession, posture: DevicePosture): AxisAdvStep<ZeroTrustState>;
 ```
 
 #### `evaluateWaf`
@@ -462,7 +407,7 @@ export function evaluatePosture(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L94) `packages/security/src/waf.ts`
 
 ```ts
-export function evaluateWaf(policy: WafPolicy, request: WafRequest): WafDecision;
+export declare function evaluateWaf(policy: WafPolicy, request: WafRequest): WafDecision;
 ```
 
 #### `expandRoles`
@@ -472,7 +417,7 @@ export function evaluateWaf(policy: WafPolicy, request: WafRequest): WafDecision
 Given a subject, expand its assigned roles through the parent hierarchy and collect the transitive permission set. Used by the RBAC evaluator.
 
 ```ts
-export function expandRoles(policy: RbacPolicy, subject: RbacSubject): Set<string>;
+export declare function expandRoles(policy: RbacPolicy, subject: RbacSubject): Set<string>;
 ```
 
 #### `isKiwaAdvModeReal`
@@ -480,7 +425,7 @@ export function expandRoles(policy: RbacPolicy, subject: RbacSubject): Set<strin
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L13) `packages/security/src/semantics/real-driver.ts`
 
 ```ts
-export function isKiwaAdvModeReal(env: NodeJS.ProcessEnv = process.env): boolean;
+export declare function isKiwaAdvModeReal(env?: NodeJS.ProcessEnv): boolean;
 ```
 
 #### `isKiwaModeReal`
@@ -488,7 +433,7 @@ export function isKiwaAdvModeReal(env: NodeJS.ProcessEnv = process.env): boolean
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L60) `packages/security/src/real-driver.ts`
 
 ```ts
-export function isKiwaModeReal(env: NodeJS.ProcessEnv = process.env): boolean;
+export declare function isKiwaModeReal(env?: NodeJS.ProcessEnv): boolean;
 ```
 
 #### `isRotationOverdue`
@@ -496,7 +441,7 @@ export function isKiwaModeReal(env: NodeJS.ProcessEnv = process.env): boolean;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L156) `packages/security/src/secrets-scan.ts`
 
 ```ts
-export function isRotationOverdue(tracker: RotationTracker, nowMs: number = Date.now()): boolean;
+export declare function isRotationOverdue(tracker: RotationTracker, nowMs?: number): boolean;
 ```
 
 #### `LeakyBucket`
@@ -505,13 +450,8 @@ export function isRotationOverdue(tracker: RotationTracker, nowMs: number = Date
 
 ```ts
 export declare class LeakyBucket {
-  private queue: number;
-  private lastDrainMs: number;
-  private readonly capacity: number;
-  private readonly drainPerMs: number;
-  constructor(config: LeakyBucketConfig, nowMs: number = Date.now());
-  enqueue(count: number, nowMs: number = Date.now()): RateLimitDecision;
-  private drain(nowMs: number): void;
+    constructor(config: LeakyBucketConfig, nowMs?: number);
+    enqueue(count: number, nowMs?: number): RateLimitDecision;
 }
 ```
 
@@ -520,10 +460,7 @@ export declare class LeakyBucket {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L126) `packages/security/src/sbom.ts`
 
 ```ts
-export function lookupAdvisories(
-  doc: SbomDocument,
-  feed: AdvisoryFeed,
-): AdvisoryLookupResult[];
+export declare function lookupAdvisories(doc: SbomDocument, feed: AdvisoryFeed): AdvisoryLookupResult[];
 ```
 
 #### `markRotated`
@@ -531,7 +468,7 @@ export function lookupAdvisories(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L163) `packages/security/src/secrets-scan.ts`
 
 ```ts
-export function markRotated(tracker: RotationTracker, atMs: number = Date.now()): RotationTracker;
+export declare function markRotated(tracker: RotationTracker, atMs?: number): RotationTracker;
 ```
 
 #### `matchReproducibleBuild`
@@ -539,10 +476,7 @@ export function markRotated(tracker: RotationTracker, atMs: number = Date.now())
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L106) `packages/security/src/semantics/supply-chain.ts`
 
 ```ts
-export function matchReproducibleBuild(
-  session: SupplyChainSession,
-  input: ReproducibleInput,
-): AxisAdvStep<SupplyChainState>;
+export declare function matchReproducibleBuild(session: SupplyChainSession, input: ReproducibleInput): AxisAdvStep<SupplyChainState>;
 ```
 
 #### `OWASP_CRS_DEFAULT`
@@ -560,10 +494,10 @@ export declare const OWASP_CRS_DEFAULT: WafRule[];
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L68) `packages/security/src/threat-model.ts`
 
 ```ts
-export function pastaCoverage(findings: PastaFinding[]): {
-  overallCompleteness: number;
-  perStage: Record<PastaStage, number>;
-  gaps: PastaStage[];
+export declare function pastaCoverage(findings: PastaFinding[]): {
+    overallCompleteness: number;
+    perStage: Record<PastaStage, number>;
+    gaps: PastaStage[];
 };
 ```
 
@@ -572,10 +506,7 @@ export function pastaCoverage(findings: PastaFinding[]): {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L241) `packages/security/src/semantics/types.ts`
 
 ```ts
-export function providerAdvEventName(
-  target: SecurityAdvTarget,
-  neutral: NeutralAdvEventName,
-): string;
+export declare function providerAdvEventName(target: SecurityAdvTarget, neutral: NeutralAdvEventName): string;
 ```
 
 #### `rbacAllows`
@@ -583,11 +514,7 @@ export function providerAdvEventName(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L75) `packages/security/src/authorization.ts`
 
 ```ts
-export function rbacAllows(
-  policy: RbacPolicy,
-  subject: RbacSubject,
-  permission: string,
-): boolean;
+export declare function rbacAllows(policy: RbacPolicy, subject: RbacSubject, permission: string): boolean;
 ```
 
 #### `REAL_DRIVER_REQUIRED_KEYS`
@@ -603,7 +530,7 @@ export declare const REAL_DRIVER_REQUIRED_KEYS: Record<SecurityProvider, string[
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L112) `packages/security/src/fidelity.ts`
 
 ```ts
-export function reasonSimilarity(real: SecurityEvent[], mock: SecurityEvent[]): number;
+export declare function reasonSimilarity(real: SecurityEvent[], mock: SecurityEvent[]): number;
 ```
 
 #### `recordPostMortem`
@@ -611,10 +538,7 @@ export function reasonSimilarity(real: SecurityEvent[], mock: SecurityEvent[]): 
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L174) `packages/security/src/semantics/incident-response.ts`
 
 ```ts
-export function recordPostMortem(
-  session: IncidentSession,
-  input: PostMortemInput,
-): AxisAdvStep<IncidentState>;
+export declare function recordPostMortem(session: IncidentSession, input: PostMortemInput): AxisAdvStep<IncidentState>;
 ```
 
 #### `requestJit`
@@ -622,10 +546,7 @@ export function recordPostMortem(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L117) `packages/security/src/semantics/zero-trust.ts`
 
 ```ts
-export function requestJit(
-  session: ZeroTrustSession,
-  request: JitRequest,
-): AxisAdvStep<ZeroTrustState>;
+export declare function requestJit(session: ZeroTrustSession, request: JitRequest): AxisAdvStep<ZeroTrustState>;
 ```
 
 #### `resolveAdvApiKey`
@@ -633,10 +554,7 @@ export function requestJit(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L85) `packages/security/src/semantics/real-driver.ts`
 
 ```ts
-export function resolveAdvApiKey(
-  provider: SecurityAdvTarget,
-  env: NodeJS.ProcessEnv = process.env,
-): string | null;
+export declare function resolveAdvApiKey(provider: SecurityAdvTarget, env?: NodeJS.ProcessEnv): string | null;
 ```
 
 #### `resolveAdvEndpoint`
@@ -644,10 +562,7 @@ export function resolveAdvApiKey(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L76) `packages/security/src/semantics/real-driver.ts`
 
 ```ts
-export function resolveAdvEndpoint(
-  provider: SecurityAdvTarget,
-  env: NodeJS.ProcessEnv = process.env,
-): string | null;
+export declare function resolveAdvEndpoint(provider: SecurityAdvTarget, env?: NodeJS.ProcessEnv): string | null;
 ```
 
 #### `resolveAdvRealDriver`
@@ -655,9 +570,7 @@ export function resolveAdvEndpoint(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L49) `packages/security/src/semantics/real-driver.ts`
 
 ```ts
-export function resolveAdvRealDriver(
-  input: AdvRealDriverGateInput,
-): AdvRealDriverGateResult;
+export declare function resolveAdvRealDriver(input: AdvRealDriverGateInput): AdvRealDriverGateResult;
 ```
 
 #### `resolveClientId`
@@ -665,11 +578,11 @@ export function resolveAdvRealDriver(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L236) `packages/security/src/rate-limit.ts`
 
 ```ts
-export function resolveClientId(input: {
-  kind: ClientIdKind;
-  ip?: string;
-  userId?: string;
-  apiKey?: string;
+export declare function resolveClientId(input: {
+    kind: ClientIdKind;
+    ip?: string;
+    userId?: string;
+    apiKey?: string;
 }): string;
 ```
 
@@ -680,10 +593,7 @@ export function resolveClientId(input: {
 provider 別の endpoint / api key を env から解決する。 testcontainers container の host / port 情報を渡す想定。
 
 ```ts
-export function resolveEndpoint(
-  provider: SecurityProvider,
-  env: NodeJS.ProcessEnv = process.env,
-): RealDriverEndpoint;
+export declare function resolveEndpoint(provider: SecurityProvider, env?: NodeJS.ProcessEnv): RealDriverEndpoint;
 ```
 
 #### `resolveRealtimeDriver`
@@ -693,7 +603,7 @@ export function resolveEndpoint(
 env の状態から real driver を使うかどうか判定する。 KIWA_MODE=real + provider 別必須 env が揃った時のみ true。
 
 ```ts
-export function resolveRealtimeDriver(input: RealDriverGateInput): RealDriverGateResult;
+export declare function resolveRealtimeDriver(input: RealDriverGateInput): RealDriverGateResult;
 ```
 
 #### `rotateKey`
@@ -701,10 +611,7 @@ export function resolveRealtimeDriver(input: RealDriverGateInput): RealDriverGat
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L139) `packages/security/src/semantics/crypto-advanced.ts`
 
 ```ts
-export function rotateKey(
-  session: CryptoSession,
-  input: KeyRotationInput,
-): AxisAdvStep<CryptoState>;
+export declare function rotateKey(session: CryptoSession, input: KeyRotationInput): AxisAdvStep<CryptoState>;
 ```
 
 #### `runSecurityFidelityCheck`
@@ -712,9 +619,7 @@ export function rotateKey(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L55) `packages/security/src/fidelity.ts`
 
 ```ts
-export async function runSecurityFidelityCheck(
-  input: SecurityFidelityInput,
-): Promise<SecurityFidelityReport>;
+export declare function runSecurityFidelityCheck(input: SecurityFidelityInput): Promise<SecurityFidelityReport>;
 ```
 
 #### `scanSecrets`
@@ -722,10 +627,7 @@ export async function runSecurityFidelityCheck(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L111) `packages/security/src/secrets-scan.ts`
 
 ```ts
-export function scanSecrets(
-  source: string,
-  signatures: SecretSignature[] = DEFAULT_SIGNATURES,
-): SecretFinding[];
+export declare function scanSecrets(source: string, signatures?: SecretSignature[]): SecretFinding[];
 ```
 
 #### `scoreDread`
@@ -733,7 +635,7 @@ export function scanSecrets(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L116) `packages/security/src/threat-model.ts`
 
 ```ts
-export function scoreDread(input: DreadInput): DreadResult;
+export declare function scoreDread(input: DreadInput): DreadResult;
 ```
 
 #### `scoreRisk`
@@ -741,15 +643,12 @@ export function scoreDread(input: DreadInput): DreadResult;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L89) `packages/security/src/semantics/zero-trust.ts`
 
 ```ts
-export function scoreRisk(
-  session: ZeroTrustSession,
-  input: {
+export declare function scoreRisk(session: ZeroTrustSession, input: {
     unusualLocation: boolean;
     unusualTime: boolean;
     newDevice: boolean;
     threatIntelHit: boolean;
-  },
-): AxisAdvStep<ZeroTrustState>;
+}): AxisAdvStep<ZeroTrustState>;
 ```
 
 #### `scoreStride`
@@ -757,10 +656,10 @@ export function scoreRisk(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L29) `packages/security/src/threat-model.ts`
 
 ```ts
-export function scoreStride(threats: StrideThreat[]): {
-  total: number;
-  byCategory: Record<StrideCategory, number>;
-  highest: StrideThreat | null;
+export declare function scoreStride(threats: StrideThreat[]): {
+    total: number;
+    byCategory: Record<StrideCategory, number>;
+    highest: StrideThreat | null;
 };
 ```
 
@@ -769,7 +668,7 @@ export function scoreStride(threats: StrideThreat[]): {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L89) `packages/security/src/semantics/crypto-advanced.ts`
 
 ```ts
-export function sealAead(session: CryptoSession, input: AeadInput): AxisAdvStep<CryptoState>;
+export declare function sealAead(session: CryptoSession, input: AeadInput): AxisAdvStep<CryptoState>;
 ```
 
 #### `sealEvents`
@@ -777,10 +676,9 @@ export function sealAead(session: CryptoSession, input: AeadInput): AxisAdvStep<
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L101) `packages/security/src/semantics/siem-audit.ts`
 
 ```ts
-export function sealEvents(
-  session: SiemAuditSession,
-  input: { previousHash: string },
-): AxisAdvStep<SiemAuditState>;
+export declare function sealEvents(session: SiemAuditSession, input: {
+    previousHash: string;
+}): AxisAdvStep<SiemAuditState>;
 ```
 
 #### `SECURITY_ADV_AXIS_TO_EVENTS`
@@ -798,7 +696,10 @@ export declare const SECURITY_ADV_AXIS_TO_EVENTS: Record<SecurityAdvAxis, Neutra
 provider × axis = 4 × 8 = 32 grid の SSOT 列挙。
 
 ```ts
-export declare const SECURITY_ADV_FIDELITY_GRID: { provider: SecurityAdvTarget; axis: SecurityAdvAxis; }[];
+export declare const SECURITY_ADV_FIDELITY_GRID: Array<{
+    provider: SecurityAdvTarget;
+    axis: SecurityAdvAxis;
+}>;
 ```
 
 #### `SECURITY_FIDELITY_GRID`
@@ -808,7 +709,10 @@ export declare const SECURITY_ADV_FIDELITY_GRID: { provider: SecurityAdvTarget; 
 32 grid の全 combination を SSOT で列挙 — provider x axis の どの組合せが fidelity harness の一次対象か明示する。
 
 ```ts
-export declare const SECURITY_FIDELITY_GRID: { provider: SecurityProvider; axis: SecurityAxis; }[];
+export declare const SECURITY_FIDELITY_GRID: {
+    provider: SecurityProvider;
+    axis: SecurityAxis;
+}[];
 ```
 
 #### `shannonEntropy`
@@ -818,7 +722,7 @@ export declare const SECURITY_FIDELITY_GRID: { provider: SecurityProvider; axis:
 Shannon entropy of a string over its own byte histogram. Values &gt;= 3.5 are typical for random secrets over base64/hex alphabets; anything closer to natural language sits well below.
 
 ```ts
-export function shannonEntropy(input: string): number;
+export declare function shannonEntropy(input: string): number;
 ```
 
 #### `signProvenance`
@@ -826,10 +730,7 @@ export function shannonEntropy(input: string): number;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L126) `packages/security/src/semantics/supply-chain.ts`
 
 ```ts
-export function signProvenance(
-  session: SupplyChainSession,
-  input: ProvenanceInput,
-): AxisAdvStep<SupplyChainState>;
+export declare function signProvenance(session: SupplyChainSession, input: ProvenanceInput): AxisAdvStep<SupplyChainState>;
 ```
 
 #### `signWithHsm`
@@ -837,10 +738,7 @@ export function signProvenance(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L158) `packages/security/src/semantics/crypto-advanced.ts`
 
 ```ts
-export function signWithHsm(
-  session: CryptoSession,
-  input: HsmSignInput,
-): AxisAdvStep<CryptoState>;
+export declare function signWithHsm(session: CryptoSession, input: HsmSignInput): AxisAdvStep<CryptoState>;
 ```
 
 #### `skipUnlessAdvReal`
@@ -848,10 +746,10 @@ export function signWithHsm(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L113) `packages/security/src/semantics/real-driver.ts`
 
 ```ts
-export function skipUnlessAdvReal(
-  provider: SecurityAdvTarget,
-  env: NodeJS.ProcessEnv = process.env,
-): { skip: boolean; reason: string };
+export declare function skipUnlessAdvReal(provider: SecurityAdvTarget, env?: NodeJS.ProcessEnv): {
+    skip: boolean;
+    reason: string;
+};
 ```
 
 #### `skipUnlessReal`
@@ -861,10 +759,10 @@ export function skipUnlessAdvReal(
 vitest 用 skip helper — describe block を real driver 未該当時に skip する経路の SSOT。 return.skip=true なら describe.skip 相当。
 
 ```ts
-export function skipUnlessReal(
-  provider: SecurityProvider,
-  env: NodeJS.ProcessEnv = process.env,
-): { skip: boolean; reason: string };
+export declare function skipUnlessReal(provider: SecurityProvider, env?: NodeJS.ProcessEnv): {
+    skip: boolean;
+    reason: string;
+};
 ```
 
 #### `SlidingWindow`
@@ -873,11 +771,8 @@ export function skipUnlessReal(
 
 ```ts
 export declare class SlidingWindow {
-  private timestamps: number[] = [];
-  private readonly windowMs: number;
-  private readonly maxRequests: number;
-  constructor(config: SlidingWindowConfig);
-  record(nowMs: number = Date.now()): RateLimitDecision;
+    constructor(config: SlidingWindowConfig);
+    record(nowMs?: number): RateLimitDecision;
 }
 ```
 
@@ -886,9 +781,9 @@ export declare class SlidingWindow {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L73) `packages/security/src/semantics/crypto-advanced.ts`
 
 ```ts
-export function startCryptoSession(input: {
-  target: SecurityAdvTarget;
-  sessionId: string;
+export declare function startCryptoSession(input: {
+    target: SecurityAdvTarget;
+    sessionId: string;
 }): CryptoSession;
 ```
 
@@ -897,9 +792,9 @@ export function startCryptoSession(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L66) `packages/security/src/semantics/incident-response.ts`
 
 ```ts
-export function startIncidentSession(input: {
-  target: SecurityAdvTarget;
-  sessionId: string;
+export declare function startIncidentSession(input: {
+    target: SecurityAdvTarget;
+    sessionId: string;
 }): IncidentSession;
 ```
 
@@ -908,9 +803,9 @@ export function startIncidentSession(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L56) `packages/security/src/semantics/container-k8s.ts`
 
 ```ts
-export function startK8sSession(input: {
-  target: SecurityAdvTarget;
-  sessionId: string;
+export declare function startK8sSession(input: {
+    target: SecurityAdvTarget;
+    sessionId: string;
 }): K8sSession;
 ```
 
@@ -919,9 +814,9 @@ export function startK8sSession(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L54) `packages/security/src/semantics/mtls.ts`
 
 ```ts
-export function startMtlsSession(input: {
-  target: SecurityAdvTarget;
-  sessionId: string;
+export declare function startMtlsSession(input: {
+    target: SecurityAdvTarget;
+    sessionId: string;
 }): MtlsSession;
 ```
 
@@ -930,9 +825,9 @@ export function startMtlsSession(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L58) `packages/security/src/semantics/siem-audit.ts`
 
 ```ts
-export function startSiemAuditSession(input: {
-  target: SecurityAdvTarget;
-  sessionId: string;
+export declare function startSiemAuditSession(input: {
+    target: SecurityAdvTarget;
+    sessionId: string;
 }): SiemAuditSession;
 ```
 
@@ -941,9 +836,9 @@ export function startSiemAuditSession(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L62) `packages/security/src/semantics/supply-chain.ts`
 
 ```ts
-export function startSupplyChainSession(input: {
-  target: SecurityAdvTarget;
-  sessionId: string;
+export declare function startSupplyChainSession(input: {
+    target: SecurityAdvTarget;
+    sessionId: string;
 }): SupplyChainSession;
 ```
 
@@ -952,9 +847,9 @@ export function startSupplyChainSession(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L57) `packages/security/src/semantics/web-vitals-security.ts`
 
 ```ts
-export function startWvsSession(input: {
-  target: SecurityAdvTarget;
-  sessionId: string;
+export declare function startWvsSession(input: {
+    target: SecurityAdvTarget;
+    sessionId: string;
 }): WvsSession;
 ```
 
@@ -963,9 +858,9 @@ export function startWvsSession(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L53) `packages/security/src/semantics/zero-trust.ts`
 
 ```ts
-export function startZeroTrustSession(input: {
-  target: SecurityAdvTarget;
-  sessionId: string;
+export declare function startZeroTrustSession(input: {
+    target: SecurityAdvTarget;
+    sessionId: string;
 }): ZeroTrustSession;
 ```
 
@@ -974,10 +869,10 @@ export function startZeroTrustSession(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L75) `packages/security/src/semantics/siem-audit.ts`
 
 ```ts
-export function structureEvent(
-  session: SiemAuditSession,
-  raw: SiemEvent,
-): { step: AxisAdvStep<SiemAuditState>; event: StructuredEvent };
+export declare function structureEvent(session: SiemAuditSession, raw: SiemEvent): {
+    step: AxisAdvStep<SiemAuditState>;
+    event: StructuredEvent;
+};
 ```
 
 #### `suppressFalsePositive`
@@ -987,11 +882,7 @@ export function structureEvent(
 False positive suppression — allow-list per path で特定 rule を除外する partial policy override。 使い方は既存 policy + 部分 rule の rebuild。
 
 ```ts
-export function suppressFalsePositive(
-  policy: WafPolicy,
-  ruleId: string,
-  exceptionPath: string,
-): WafPolicy;
+export declare function suppressFalsePositive(policy: WafPolicy, ruleId: string, exceptionPath: string): WafPolicy;
 ```
 
 #### `toAuthorizationEvent`
@@ -999,12 +890,12 @@ export function suppressFalsePositive(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L176) `packages/security/src/authorization.ts`
 
 ```ts
-export function toAuthorizationEvent(input: {
-  provider: 'casbin' | 'coraza';
-  decision: AbacDecision;
-  subject: string;
-  action: string;
-  timestamp: number;
+export declare function toAuthorizationEvent(input: {
+    provider: 'casbin' | 'coraza';
+    decision: AbacDecision;
+    subject: string;
+    action: string;
+    timestamp: number;
 }): SecurityEvent;
 ```
 
@@ -1015,12 +906,12 @@ export function toAuthorizationEvent(input: {
 CSP violation を統一 event 形式に変換する adapter。 fidelity harness が real (Report-To API) と mock (unit test) の 両方の event 列を同型で扱えるようにする。
 
 ```ts
-export function toCspEvent(input: {
-  provider: 'helmet' | 'coraza';
-  verdict: 'allow' | 'deny' | 'warn';
-  reason: string;
-  payload: unknown;
-  timestamp: number;
+export declare function toCspEvent(input: {
+    provider: 'helmet' | 'coraza';
+    verdict: 'allow' | 'deny' | 'warn';
+    reason: string;
+    payload: unknown;
+    timestamp: number;
 }): SecurityEvent;
 ```
 
@@ -1031,7 +922,7 @@ export function toCspEvent(input: {
 CycloneDX 1.5 minimal — components が bomFormat = "CycloneDX"、 specVersion = "1.5"。
 
 ```ts
-export function toCycloneDx(components: SbomComponent[], nowIso: string = new Date().toISOString()): SbomDocument;
+export declare function toCycloneDx(components: SbomComponent[], nowIso?: string): SbomDocument;
 ```
 
 #### `TokenBucket`
@@ -1040,13 +931,8 @@ export function toCycloneDx(components: SbomComponent[], nowIso: string = new Da
 
 ```ts
 export declare class TokenBucket {
-  private tokens: number;
-  private lastRefillMs: number;
-  private readonly capacity: number;
-  private readonly refillPerMs: number;
-  constructor(config: TokenBucketConfig, nowMs: number = Date.now());
-  consume(count: number, nowMs: number = Date.now()): RateLimitDecision;
-  private refill(nowMs: number): void;
+    constructor(config: TokenBucketConfig, nowMs?: number);
+    consume(count: number, nowMs?: number): RateLimitDecision;
 }
 ```
 
@@ -1055,12 +941,12 @@ export declare class TokenBucket {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L255) `packages/security/src/rate-limit.ts`
 
 ```ts
-export function toRateLimitEvent(input: {
-  provider: 'express-rate-limit' | 'coraza';
-  decision: RateLimitDecision;
-  clientId: string;
-  strategy: RateLimitStrategy | 'distributed';
-  timestamp: number;
+export declare function toRateLimitEvent(input: {
+    provider: 'express-rate-limit' | 'coraza';
+    decision: RateLimitDecision;
+    clientId: string;
+    strategy: RateLimitStrategy | 'distributed';
+    timestamp: number;
 }): SecurityEvent;
 ```
 
@@ -1069,12 +955,12 @@ export function toRateLimitEvent(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L186) `packages/security/src/sbom.ts`
 
 ```ts
-export function toSbomEvent(input: {
-  provider: 'helmet' | 'coraza';
-  verdict: 'allow' | 'deny' | 'warn';
-  reason: string;
-  payload: unknown;
-  timestamp: number;
+export declare function toSbomEvent(input: {
+    provider: 'helmet' | 'coraza';
+    verdict: 'allow' | 'deny' | 'warn';
+    reason: string;
+    payload: unknown;
+    timestamp: number;
 }): SecurityEvent;
 ```
 
@@ -1083,10 +969,10 @@ export function toSbomEvent(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L167) `packages/security/src/secrets-scan.ts`
 
 ```ts
-export function toSecretsEvent(input: {
-  provider: 'helmet' | 'coraza';
-  finding: SecretFinding;
-  timestamp: number;
+export declare function toSecretsEvent(input: {
+    provider: 'helmet' | 'coraza';
+    finding: SecretFinding;
+    timestamp: number;
 }): SecurityEvent;
 ```
 
@@ -1095,12 +981,12 @@ export function toSecretsEvent(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L181) `packages/security/src/security-headers.ts`
 
 ```ts
-export function toSecurityHeadersEvent(input: {
-  provider: 'helmet';
-  verdict: 'allow' | 'warn' | 'deny';
-  reason: string;
-  payload: unknown;
-  timestamp: number;
+export declare function toSecurityHeadersEvent(input: {
+    provider: 'helmet';
+    verdict: 'allow' | 'warn' | 'deny';
+    reason: string;
+    payload: unknown;
+    timestamp: number;
 }): SecurityEvent;
 ```
 
@@ -1111,7 +997,7 @@ export function toSecurityHeadersEvent(input: {
 SPDX 2.3 minimal — packages list + relationships (DESCRIBES / DEPENDS_ON)。
 
 ```ts
-export function toSpdx(components: SbomComponent[], nowIso: string = new Date().toISOString()): SbomDocument;
+export declare function toSpdx(components: SbomComponent[], nowIso?: string): SbomDocument;
 ```
 
 #### `toThreatModelEvent`
@@ -1119,12 +1005,12 @@ export function toSpdx(components: SbomComponent[], nowIso: string = new Date().
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L201) `packages/security/src/threat-model.ts`
 
 ```ts
-export function toThreatModelEvent(input: {
-  provider: 'coraza' | 'helmet';
-  verdict: 'allow' | 'deny' | 'warn';
-  reason: string;
-  payload: unknown;
-  timestamp: number;
+export declare function toThreatModelEvent(input: {
+    provider: 'coraza' | 'helmet';
+    verdict: 'allow' | 'deny' | 'warn';
+    reason: string;
+    payload: unknown;
+    timestamp: number;
 }): SecurityEvent;
 ```
 
@@ -1133,11 +1019,11 @@ export function toThreatModelEvent(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L137) `packages/security/src/waf.ts`
 
 ```ts
-export function toWafEvent(input: {
-  provider: 'coraza' | 'helmet';
-  decision: WafDecision;
-  request: WafRequest;
-  timestamp: number;
+export declare function toWafEvent(input: {
+    provider: 'coraza' | 'helmet';
+    decision: WafDecision;
+    request: WafRequest;
+    timestamp: number;
 }): SecurityEvent;
 ```
 
@@ -1146,10 +1032,7 @@ export function toWafEvent(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L84) `packages/security/src/semantics/incident-response.ts`
 
 ```ts
-export function triggerPlaybook(
-  session: IncidentSession,
-  input: PlaybookInput,
-): AxisAdvStep<IncidentState>;
+export declare function triggerPlaybook(session: IncidentSession, input: PlaybookInput): AxisAdvStep<IncidentState>;
 ```
 
 #### `validateNonce`
@@ -1159,7 +1042,10 @@ export function triggerPlaybook(
 nonce 検証 — 同 header 内で同じ nonce が 2 回以上出ないか、 32 char 以上か。
 
 ```ts
-export function validateNonce(nonce: string): { ok: boolean; reason: string };
+export declare function validateNonce(nonce: string): {
+    ok: boolean;
+    reason: string;
+};
 ```
 
 #### `validateSbom`
@@ -1169,7 +1055,10 @@ export function validateNonce(nonce: string): { ok: boolean; reason: string };
 SBOM validation — mandatory fields + purl syntax check。
 
 ```ts
-export function validateSbom(doc: SbomDocument): { ok: boolean; errors: string[] };
+export declare function validateSbom(doc: SbomDocument): {
+    ok: boolean;
+    errors: string[];
+};
 ```
 
 #### `validateSecurityHeaders`
@@ -1179,9 +1068,9 @@ export function validateSbom(doc: SbomDocument): { ok: boolean; errors: string[]
 Header header 値の syntactic validation。 実 browser 実装との fidelity は fidelity harness 側で確認、 ここでは build 段階の misuse だけ検知。
 
 ```ts
-export function validateSecurityHeaders(input: SecurityHeadersInput): {
-  ok: boolean;
-  errors: string[];
+export declare function validateSecurityHeaders(input: SecurityHeadersInput): {
+    ok: boolean;
+    errors: string[];
 };
 ```
 
@@ -1190,7 +1079,7 @@ export function validateSecurityHeaders(input: SecurityHeadersInput): {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L102) `packages/security/src/fidelity.ts`
 
 ```ts
-export function verdictSimilarity(real: SecurityEvent[], mock: SecurityEvent[]): number;
+export declare function verdictSimilarity(real: SecurityEvent[], mock: SecurityEvent[]): number;
 ```
 
 #### `verifyAttestation`
@@ -1198,10 +1087,7 @@ export function verdictSimilarity(real: SecurityEvent[], mock: SecurityEvent[]):
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L147) `packages/security/src/semantics/supply-chain.ts`
 
 ```ts
-export function verifyAttestation(
-  session: SupplyChainSession,
-  input: AttestationInput,
-): AxisAdvStep<SupplyChainState>;
+export declare function verifyAttestation(session: SupplyChainSession, input: AttestationInput): AxisAdvStep<SupplyChainState>;
 ```
 
 #### `verifyOcsp`
@@ -1209,7 +1095,7 @@ export function verifyAttestation(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L111) `packages/security/src/semantics/mtls.ts`
 
 ```ts
-export function verifyOcsp(session: MtlsSession, input: OcspInput): AxisAdvStep<MtlsState>;
+export declare function verifyOcsp(session: MtlsSession, input: OcspInput): AxisAdvStep<MtlsState>;
 ```
 
 #### `verifyPin`
@@ -1217,7 +1103,7 @@ export function verifyOcsp(session: MtlsSession, input: OcspInput): AxisAdvStep<
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L88) `packages/security/src/semantics/mtls.ts`
 
 ```ts
-export function verifyPin(session: MtlsSession, input: PinInput): AxisAdvStep<MtlsState>;
+export declare function verifyPin(session: MtlsSession, input: PinInput): AxisAdvStep<MtlsState>;
 ```
 
 #### `verifySlsaLevel`
@@ -1225,10 +1111,7 @@ export function verifyPin(session: MtlsSession, input: PinInput): AxisAdvStep<Mt
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L78) `packages/security/src/semantics/supply-chain.ts`
 
 ```ts
-export function verifySlsaLevel(
-  session: SupplyChainSession,
-  input: SlsaLevelInput,
-): AxisAdvStep<SupplyChainState>;
+export declare function verifySlsaLevel(session: SupplyChainSession, input: SlsaLevelInput): AxisAdvStep<SupplyChainState>;
 ```
 
 #### `verifySri`
@@ -1236,7 +1119,7 @@ export function verifySlsaLevel(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L72) `packages/security/src/semantics/web-vitals-security.ts`
 
 ```ts
-export function verifySri(session: WvsSession, input: SriInput): AxisAdvStep<WvsState>;
+export declare function verifySri(session: WvsSession, input: SriInput): AxisAdvStep<WvsState>;
 ```
 
 #### `versionInRange`
@@ -1246,7 +1129,7 @@ export function verifySri(session: WvsSession, input: SriInput): AxisAdvStep<Wvs
 Simple semver "in range" check — accepts `&gt;= a.b.c`, `&lt; a.b.c`, `&lt; a.b.c || &gt;= x.y.z`, or an exact version string. Full semver range algebra is out of scope for the mock (real driver = actual OSV client)。
 
 ```ts
-export function versionInRange(version: string, range: string): boolean;
+export declare function versionInRange(version: string, range: string): boolean;
 ```
 
 #### `wrapEnvelope`
@@ -1254,10 +1137,7 @@ export function versionInRange(version: string, range: string): boolean;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L124) `packages/security/src/semantics/crypto-advanced.ts`
 
 ```ts
-export function wrapEnvelope(
-  session: CryptoSession,
-  input: EnvelopeInput,
-): AxisAdvStep<CryptoState>;
+export declare function wrapEnvelope(session: CryptoSession, input: EnvelopeInput): AxisAdvStep<CryptoState>;
 ```
 
 ### 型
@@ -1270,10 +1150,10 @@ ABAC — subject / resource / action / environment 4 属性 + expression evaluat
 
 ```ts
 export interface AbacAttributes {
-  subject: Record<string, unknown>;
-  resource: Record<string, unknown>;
-  action: string;
-  environment: Record<string, unknown>;
+    subject: Record<string, unknown>;
+    resource: Record<string, unknown>;
+    action: string;
+    environment: Record<string, unknown>;
 }
 ```
 
@@ -1293,9 +1173,9 @@ export type AbacCombiningAlgo = 'deny-overrides' | 'permit-overrides' | 'first-a
 
 ```ts
 export interface AbacDecision {
-  effect: AbacRuleEffect;
-  matchedRule: string | null;
-  reason: string;
+    effect: AbacRuleEffect;
+    matchedRule: string | null;
+    reason: string;
 }
 ```
 
@@ -1305,8 +1185,8 @@ export interface AbacDecision {
 
 ```ts
 export interface AbacPolicy {
-  rules: AbacRule[];
-  algorithm: AbacCombiningAlgo;
+    rules: AbacRule[];
+    algorithm: AbacCombiningAlgo;
 }
 ```
 
@@ -1316,10 +1196,10 @@ export interface AbacPolicy {
 
 ```ts
 export interface AbacRule {
-  id: string;
-  effect: AbacRuleEffect;
-  /** Predicate against the 4 attribute buckets. */
-  condition: (attrs: AbacAttributes) => boolean;
+    id: string;
+    effect: AbacRuleEffect;
+    /** Predicate against the 4 attribute buckets. */
+    condition: (attrs: AbacAttributes) => boolean;
 }
 ```
 
@@ -1337,10 +1217,10 @@ export type AbacRuleEffect = 'permit' | 'deny';
 
 ```ts
 export interface AdmissionRequest {
-  operation: 'CREATE' | 'UPDATE' | 'DELETE';
-  resource: 'Pod' | 'Deployment' | 'Service' | 'ConfigMap';
-  namespace: string;
-  labels: Record<string, string>;
+    operation: 'CREATE' | 'UPDATE' | 'DELETE';
+    resource: 'Pod' | 'Deployment' | 'Service' | 'ConfigMap';
+    namespace: string;
+    labels: Record<string, string>;
 }
 ```
 
@@ -1350,9 +1230,9 @@ export interface AdmissionRequest {
 
 ```ts
 export interface AdvFidelityCoverage {
-  providers: SecurityAdvTarget[];
-  axes: SecurityAdvAxis[];
-  rows: AdvFidelityRow[];
+    providers: SecurityAdvTarget[];
+    axes: SecurityAdvAxis[];
+    rows: AdvFidelityRow[];
 }
 ```
 
@@ -1364,10 +1244,10 @@ export interface AdvFidelityCoverage {
 
 ```ts
 export interface AdvFidelityRow {
-  provider: SecurityAdvTarget;
-  axis: SecurityAdvAxis;
-  neutralEvents: NeutralAdvEventName[];
-  providerEvents: string[];
+    provider: SecurityAdvTarget;
+    axis: SecurityAdvAxis;
+    neutralEvents: NeutralAdvEventName[];
+    providerEvents: string[];
 }
 ```
 
@@ -1379,11 +1259,14 @@ OSV / NVD advisory shape 。 kiwa の in-memory advisory feed で使用。
 
 ```ts
 export interface Advisory {
-  id: string;
-  affects: { purl: string; versionRange: string }[];
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  summary: string;
-  source: 'osv' | 'nvd';
+    id: string;
+    affects: {
+        purl: string;
+        versionRange: string;
+    }[];
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    summary: string;
+    source: 'osv' | 'nvd';
 }
 ```
 
@@ -1393,7 +1276,7 @@ export interface Advisory {
 
 ```ts
 export interface AdvisoryFeed {
-  advisories: Advisory[];
+    advisories: Advisory[];
 }
 ```
 
@@ -1403,8 +1286,8 @@ export interface AdvisoryFeed {
 
 ```ts
 export interface AdvisoryLookupResult {
-  component: SbomComponent;
-  advisories: Advisory[];
+    component: SbomComponent;
+    advisories: Advisory[];
 }
 ```
 
@@ -1414,10 +1297,10 @@ export interface AdvisoryLookupResult {
 
 ```ts
 export interface AdvRealDriverConfig {
-  provider: SecurityAdvTarget;
-  endpoint: string | null;
-  apiKey: string | null;
-  timeoutMs: number;
+    provider: SecurityAdvTarget;
+    endpoint: string | null;
+    apiKey: string | null;
+    timeoutMs: number;
 }
 ```
 
@@ -1427,8 +1310,8 @@ export interface AdvRealDriverConfig {
 
 ```ts
 export interface AdvRealDriverGateInput {
-  provider: SecurityAdvTarget;
-  env?: NodeJS.ProcessEnv;
+    provider: SecurityAdvTarget;
+    env?: NodeJS.ProcessEnv;
 }
 ```
 
@@ -1438,9 +1321,9 @@ export interface AdvRealDriverGateInput {
 
 ```ts
 export interface AdvRealDriverGateResult {
-  useRealDriver: boolean;
-  missingKeys: string[];
-  reason: string;
+    useRealDriver: boolean;
+    missingKeys: string[];
+    reason: string;
 }
 ```
 
@@ -1460,9 +1343,9 @@ export type AeadAlgo = 'AES-256-GCM' | 'ChaCha20-Poly1305' | 'AES-256-GCM-SIV';
 
 ```ts
 export interface AeadInput {
-  algo: AeadAlgo;
-  plaintextLen: number;
-  aadLen: number;
+    algo: AeadAlgo;
+    plaintextLen: number;
+    aadLen: number;
 }
 ```
 
@@ -1472,9 +1355,9 @@ export interface AeadInput {
 
 ```ts
 export interface AttestationInput {
-  attestationType: 'slsa-provenance' | 'spdx-sbom' | 'cyclone-dx-vex';
-  trustRootFingerprint: string;
-  validSignatures: number;
+    attestationType: 'slsa-provenance' | 'spdx-sbom' | 'cyclone-dx-vex';
+    trustRootFingerprint: string;
+    validSignatures: number;
 }
 ```
 
@@ -1484,11 +1367,11 @@ export interface AttestationInput {
 
 ```ts
 export interface AxisAdvStep<TState extends string> {
-  neutralEvent: NeutralAdvEventName;
-  providerEvent: string;
-  state: TState;
-  timestampMs: number;
-  metadata: Record<string, string | number | boolean>;
+    neutralEvent: NeutralAdvEventName;
+    providerEvent: string;
+    state: TState;
+    timestampMs: number;
+    metadata: Record<string, string | number | boolean>;
 }
 ```
 
@@ -1498,11 +1381,11 @@ export interface AxisAdvStep<TState extends string> {
 
 ```ts
 export interface BoundaryCrossing {
-  flow: DataFlow;
-  fromZone: TrustZone;
-  toZone: TrustZone;
-  requiredMitigations: string[];
-  missingMitigations: string[];
+    flow: DataFlow;
+    fromZone: TrustZone;
+    toZone: TrustZone;
+    requiredMitigations: string[];
+    missingMitigations: string[];
 }
 ```
 
@@ -1524,8 +1407,15 @@ Combined policy engine — RBAC decision と ABAC decision を組合せる。 RB
 
 ```ts
 export interface CombinedPolicyInput {
-  rbac?: { policy: RbacPolicy; subject: RbacSubject; permission: string };
-  abac?: { policy: AbacPolicy; attrs: AbacAttributes };
+    rbac?: {
+        policy: RbacPolicy;
+        subject: RbacSubject;
+        permission: string;
+    };
+    abac?: {
+        policy: AbacPolicy;
+        attrs: AbacAttributes;
+    };
 }
 ```
 
@@ -1535,9 +1425,9 @@ export interface CombinedPolicyInput {
 
 ```ts
 export interface CorrelationRule {
-  ruleId: string;
-  requiredEventIds: string[];
-  windowMs: number;
+    ruleId: string;
+    requiredEventIds: string[];
+    windowMs: number;
 }
 ```
 
@@ -1547,9 +1437,9 @@ export interface CorrelationRule {
 
 ```ts
 export interface CrossOriginInput {
-  coop: 'unsafe-none' | 'same-origin' | 'same-origin-allow-popups';
-  coep: 'unsafe-none' | 'require-corp' | 'credentialless';
-  corp: 'same-site' | 'same-origin' | 'cross-origin';
+    coop: 'unsafe-none' | 'same-origin' | 'same-origin-allow-popups';
+    coep: 'unsafe-none' | 'require-corp' | 'credentialless';
+    corp: 'same-site' | 'same-origin' | 'cross-origin';
 }
 ```
 
@@ -1559,11 +1449,11 @@ export interface CrossOriginInput {
 
 ```ts
 export interface CryptoSession {
-  target: SecurityAdvTarget;
-  sessionId: string;
-  state: CryptoState;
-  history: AxisAdvStep<CryptoState>[];
-  currentKeyId: string | null;
+    target: SecurityAdvTarget;
+    sessionId: string;
+    state: CryptoState;
+    history: AxisAdvStep<CryptoState>[];
+    currentKeyId: string | null;
 }
 ```
 
@@ -1572,14 +1462,7 @@ export interface CryptoSession {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L20) `packages/security/src/semantics/crypto-advanced.ts`
 
 ```ts
-export type CryptoState =
-  | 'idle'
-  | 'aead-sealed'
-  | 'kdf-derived'
-  | 'envelope-wrapped'
-  | 'key-rotated'
-  | 'hsm-signed'
-  | 'pq-encapsulated';
+export type CryptoState = 'idle' | 'aead-sealed' | 'kdf-derived' | 'envelope-wrapped' | 'key-rotated' | 'hsm-signed' | 'pq-encapsulated';
 ```
 
 #### `CspDirective`
@@ -1589,32 +1472,7 @@ export type CryptoState =
 CSP directive の完全列挙 (Fetch directive + Document directive + Reporting)。
 
 ```ts
-export type CspDirective =
-  | 'default-src'
-  | 'script-src'
-  | 'script-src-elem'
-  | 'script-src-attr'
-  | 'style-src'
-  | 'style-src-elem'
-  | 'style-src-attr'
-  | 'img-src'
-  | 'connect-src'
-  | 'font-src'
-  | 'frame-src'
-  | 'frame-ancestors'
-  | 'form-action'
-  | 'base-uri'
-  | 'object-src'
-  | 'worker-src'
-  | 'child-src'
-  | 'media-src'
-  | 'manifest-src'
-  | 'trusted-types'
-  | 'require-trusted-types-for'
-  | 'upgrade-insecure-requests'
-  | 'block-all-mixed-content'
-  | 'report-uri'
-  | 'report-to';
+export type CspDirective = 'default-src' | 'script-src' | 'script-src-elem' | 'script-src-attr' | 'style-src' | 'style-src-elem' | 'style-src-attr' | 'img-src' | 'connect-src' | 'font-src' | 'frame-src' | 'frame-ancestors' | 'form-action' | 'base-uri' | 'object-src' | 'worker-src' | 'child-src' | 'media-src' | 'manifest-src' | 'trusted-types' | 'require-trusted-types-for' | 'upgrade-insecure-requests' | 'block-all-mixed-content' | 'report-uri' | 'report-to';
 ```
 
 #### `CspHashAlgo`
@@ -1631,11 +1489,11 @@ export type CspHashAlgo = 'sha256' | 'sha384' | 'sha512';
 
 ```ts
 export interface CspHashOptions {
-  algorithm: CspHashAlgo;
-  /** Base64-encoded digest。 */
-  digest: string;
-  /** attach directive (default script-src)。 */
-  directives?: CspDirective[];
+    algorithm: CspHashAlgo;
+    /** Base64-encoded digest。 */
+    digest: string;
+    /** attach directive (default script-src)。 */
+    directives?: CspDirective[];
 }
 ```
 
@@ -1645,10 +1503,10 @@ export interface CspHashOptions {
 
 ```ts
 export interface CspHeaderOutput {
-  headerName: 'Content-Security-Policy' | 'Content-Security-Policy-Report-Only';
-  headerValue: string;
-  /** 各 directive を key に持つ debug 用の展開後 map。 */
-  expandedDirectives: Record<CspDirective, string[]>;
+    headerName: 'Content-Security-Policy' | 'Content-Security-Policy-Report-Only';
+    headerValue: string;
+    /** 各 directive を key に持つ debug 用の展開後 map。 */
+    expandedDirectives: Record<CspDirective, string[]>;
 }
 ```
 
@@ -1658,10 +1516,10 @@ export interface CspHeaderOutput {
 
 ```ts
 export interface CspNonceOptions {
-  /** Base64URL-encoded random nonce (16-32 bytes)。 */
-  nonce: string;
-  /** attach directive (default script-src)。 */
-  directives?: CspDirective[];
+    /** Base64URL-encoded random nonce (16-32 bytes)。 */
+    nonce: string;
+    /** attach directive (default script-src)。 */
+    directives?: CspDirective[];
 }
 ```
 
@@ -1671,23 +1529,23 @@ export interface CspNonceOptions {
 
 ```ts
 export interface CspPolicyInput {
-  /** directive -> source list の連想。 空 array は `'none'` 相当。 */
-  directives: Partial<Record<CspDirective, string[]>>;
-  /** 各 request で差替える nonce 群。 */
-  nonces?: CspNonceOptions[];
-  /** inline script/style hash 群。 */
-  hashes?: CspHashOptions[];
-  /** `strict-dynamic` を script-src に付与する。 nonce or hash 必須。 */
-  strictDynamic?: boolean;
-  /** trusted-types policy 名一覧 (`default` は無指定時) + require-trusted-types-for 'script'。 */
-  trustedTypes?: {
-    policies: string[];
-    requireForScript?: boolean;
-  };
-  /** report-only mode で発行する (header 名も切替)。 */
-  reportOnly?: boolean;
-  /** `report-to` group name (report-uri は同名で fallback)。 */
-  reportGroup?: string;
+    /** directive -> source list の連想。 空 array は `'none'` 相当。 */
+    directives: Partial<Record<CspDirective, string[]>>;
+    /** 各 request で差替える nonce 群。 */
+    nonces?: CspNonceOptions[];
+    /** inline script/style hash 群。 */
+    hashes?: CspHashOptions[];
+    /** `strict-dynamic` を script-src に付与する。 nonce or hash 必須。 */
+    strictDynamic?: boolean;
+    /** trusted-types policy 名一覧 (`default` は無指定時) + require-trusted-types-for 'script'。 */
+    trustedTypes?: {
+        policies: string[];
+        requireForScript?: boolean;
+    };
+    /** report-only mode で発行する (header 名も切替)。 */
+    reportOnly?: boolean;
+    /** `report-to` group name (report-uri は同名で fallback)。 */
+    reportGroup?: string;
 }
 ```
 
@@ -1697,8 +1555,8 @@ export interface CspPolicyInput {
 
 ```ts
 export interface CtLogInput {
-  sctCount: number;
-  minSctRequired: number;
+    sctCount: number;
+    minSctRequired: number;
 }
 ```
 
@@ -1708,11 +1566,11 @@ export interface CtLogInput {
 
 ```ts
 export interface DataFlow {
-  id: string;
-  from: string;
-  to: string;
-  data: string;
-  mitigations: string[];
+    id: string;
+    from: string;
+    to: string;
+    data: string;
+    mitigations: string[];
 }
 ```
 
@@ -1722,10 +1580,10 @@ export interface DataFlow {
 
 ```ts
 export interface DevicePosture {
-  osUpToDate: boolean;
-  diskEncrypted: boolean;
-  edrRunning: boolean;
-  mdmEnrolled: boolean;
+    osUpToDate: boolean;
+    diskEncrypted: boolean;
+    edrRunning: boolean;
+    mdmEnrolled: boolean;
 }
 ```
 
@@ -1737,9 +1595,9 @@ Distributed keyspace mock — Redis-backed のような multi-node coordination 
 
 ```ts
 export interface DistributedRateLimitConfig {
-  shards: number;
-  perShardMaxRequests: number;
-  windowMs: number;
+    shards: number;
+    perShardMaxRequests: number;
+    windowMs: number;
 }
 ```
 
@@ -1751,11 +1609,11 @@ DREAD scoring — each factor 1-10、 total = sum、 threshold = 30 (mitigation 
 
 ```ts
 export interface DreadInput {
-  damage: number;
-  reproducibility: number;
-  exploitability: number;
-  affectedUsers: number;
-  discoverability: number;
+    damage: number;
+    reproducibility: number;
+    exploitability: number;
+    affectedUsers: number;
+    discoverability: number;
 }
 ```
 
@@ -1765,9 +1623,9 @@ export interface DreadInput {
 
 ```ts
 export interface DreadResult {
-  total: number;
-  average: number;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+    total: number;
+    average: number;
+    severity: 'low' | 'medium' | 'high' | 'critical';
 }
 ```
 
@@ -1777,9 +1635,9 @@ export interface DreadResult {
 
 ```ts
 export interface EnvelopeInput {
-  cek: string;
-  kek: string;
-  masterKeyProvider: 'kms' | 'vault' | 'hsm';
+    cek: string;
+    kek: string;
+    masterKeyProvider: 'kms' | 'vault' | 'hsm';
 }
 ```
 
@@ -1789,9 +1647,9 @@ export interface EnvelopeInput {
 
 ```ts
 export interface EscalationInput {
-  channels: string[];
-  onCallPrimary: string;
-  onCallSecondary: string | null;
+    channels: string[];
+    onCallPrimary: string;
+    onCallSecondary: string | null;
 }
 ```
 
@@ -1801,9 +1659,9 @@ export interface EscalationInput {
 
 ```ts
 export interface ForensicsInput {
-  memoryDumpMb: number;
-  networkPcapMb: number;
-  diskImageGb: number;
+    memoryDumpMb: number;
+    networkPcapMb: number;
+    diskImageGb: number;
 }
 ```
 
@@ -1813,9 +1671,9 @@ export interface ForensicsInput {
 
 ```ts
 export interface HandshakeInput {
-  peerCn: string;
-  cipherSuite: string;
-  tlsVersion: '1.2' | '1.3';
+    peerCn: string;
+    cipherSuite: string;
+    tlsVersion: '1.2' | '1.3';
 }
 ```
 
@@ -1825,9 +1683,9 @@ export interface HandshakeInput {
 
 ```ts
 export interface HsmSignInput {
-  keyId: string;
-  digest: string;
-  algorithm: 'ECDSA-P256' | 'RSA-PSS-2048' | 'Ed25519';
+    keyId: string;
+    digest: string;
+    algorithm: 'ECDSA-P256' | 'RSA-PSS-2048' | 'Ed25519';
 }
 ```
 
@@ -1837,9 +1695,9 @@ export interface HsmSignInput {
 
 ```ts
 export interface HstsOptions {
-  maxAgeSec: number;
-  includeSubDomains?: boolean;
-  preload?: boolean;
+    maxAgeSec: number;
+    includeSubDomains?: boolean;
+    preload?: boolean;
 }
 ```
 
@@ -1849,13 +1707,13 @@ export interface HstsOptions {
 
 ```ts
 export interface IncidentSession {
-  target: SecurityAdvTarget;
-  sessionId: string;
-  state: IncidentState;
-  history: AxisAdvStep<IncidentState>[];
-  playbookId: string | null;
-  severity: IncidentSeverity | null;
-  forensicsArtifacts: string[];
+    target: SecurityAdvTarget;
+    sessionId: string;
+    state: IncidentState;
+    history: AxisAdvStep<IncidentState>[];
+    playbookId: string | null;
+    severity: IncidentSeverity | null;
+    forensicsArtifacts: string[];
 }
 ```
 
@@ -1874,13 +1732,7 @@ export type IncidentSeverity = 'sev1' | 'sev2' | 'sev3' | 'sev4' | 'sev5';
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L18) `packages/security/src/semantics/incident-response.ts`
 
 ```ts
-export type IncidentState =
-  | 'idle'
-  | 'playbook-triggered'
-  | 'severity-classified'
-  | 'escalated'
-  | 'forensics-captured'
-  | 'post-mortem-recorded';
+export type IncidentState = 'idle' | 'playbook-triggered' | 'severity-classified' | 'escalated' | 'forensics-captured' | 'post-mortem-recorded';
 ```
 
 #### `JitRequest`
@@ -1889,9 +1741,9 @@ export type IncidentState =
 
 ```ts
 export interface JitRequest {
-  requestedRole: string;
-  justification: string;
-  ttlSeconds: number;
+    requestedRole: string;
+    justification: string;
+    ttlSeconds: number;
 }
 ```
 
@@ -1901,11 +1753,11 @@ export interface JitRequest {
 
 ```ts
 export interface K8sSession {
-  target: SecurityAdvTarget;
-  sessionId: string;
-  state: K8sState;
-  history: AxisAdvStep<K8sState>[];
-  enforcedLevel: PodSecurityLevel | null;
+    target: SecurityAdvTarget;
+    sessionId: string;
+    state: K8sState;
+    history: AxisAdvStep<K8sState>[];
+    enforcedLevel: PodSecurityLevel | null;
 }
 ```
 
@@ -1914,11 +1766,7 @@ export interface K8sSession {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L19) `packages/security/src/semantics/container-k8s.ts`
 
 ```ts
-export type K8sState =
-  | 'idle'
-  | 'pod-security-enforced'
-  | 'network-policy-applied'
-  | 'admission-decided';
+export type K8sState = 'idle' | 'pod-security-enforced' | 'network-policy-applied' | 'admission-decided';
 ```
 
 #### `KdfAlgo`
@@ -1935,10 +1783,10 @@ export type KdfAlgo = 'HKDF-SHA256' | 'HKDF-SHA512' | 'PBKDF2' | 'Argon2id' | 's
 
 ```ts
 export interface KdfInput {
-  algo: KdfAlgo;
-  saltLen: number;
-  info: string;
-  iterations: number;
+    algo: KdfAlgo;
+    saltLen: number;
+    info: string;
+    iterations: number;
 }
 ```
 
@@ -1948,9 +1796,9 @@ export interface KdfInput {
 
 ```ts
 export interface KeyRotationInput {
-  oldKeyId: string;
-  newKeyId: string;
-  reason: 'scheduled' | 'compromised' | 'policy';
+    oldKeyId: string;
+    newKeyId: string;
+    reason: 'scheduled' | 'compromised' | 'policy';
 }
 ```
 
@@ -1962,9 +1810,9 @@ Leaky bucket — queue-based、 steady-state throughput 保証。
 
 ```ts
 export interface LeakyBucketConfig {
-  capacity: number;
-  /** queue drain rate (items per ms、 float 可)。 */
-  drainPerMs: number;
+    capacity: number;
+    /** queue drain rate (items per ms、 float 可)。 */
+    drainPerMs: number;
 }
 ```
 
@@ -1974,9 +1822,9 @@ export interface LeakyBucketConfig {
 
 ```ts
 export interface LicensePolicy {
-  allow: string[];
-  warn: string[];
-  deny: string[];
+    allow: string[];
+    warn: string[];
+    deny: string[];
 }
 ```
 
@@ -1996,11 +1844,11 @@ export type LicenseVerdict = 'allow' | 'warn' | 'deny';
 
 ```ts
 export interface MtlsSession {
-  target: SecurityAdvTarget;
-  sessionId: string;
-  state: MtlsState;
-  history: AxisAdvStep<MtlsState>[];
-  pinnedFingerprints: string[];
+    target: SecurityAdvTarget;
+    sessionId: string;
+    state: MtlsState;
+    history: AxisAdvStep<MtlsState>[];
+    pinnedFingerprints: string[];
 }
 ```
 
@@ -2011,13 +1859,7 @@ export interface MtlsSession {
 mTLS + certificate pinning axis — mutual TLS handshake + pin verification + OCSP stapling + Certificate Transparency log check state machine。 Deterministic mock で 4 signal 系統を提供。 real driver 経路では実 istio / envoy sidecar に対して TLS handshake を張り、 SPKI pin と OCSP staple を 検証する。
 
 ```ts
-export type MtlsState =
-  | 'idle'
-  | 'handshake-completed'
-  | 'pinned'
-  | 'ocsp-verified'
-  | 'ct-verified'
-  | 'failed';
+export type MtlsState = 'idle' | 'handshake-completed' | 'pinned' | 'ocsp-verified' | 'ct-verified' | 'failed';
 ```
 
 #### `NetworkPolicySpec`
@@ -2026,10 +1868,10 @@ export type MtlsState =
 
 ```ts
 export interface NetworkPolicySpec {
-  namespace: string;
-  podSelector: Record<string, string>;
-  ingressFromNamespaces: string[];
-  egressToNamespaces: string[];
+    namespace: string;
+    podSelector: Record<string, string>;
+    ingressFromNamespaces: string[];
+    egressToNamespaces: string[];
 }
 ```
 
@@ -2038,50 +1880,7 @@ export interface NetworkPolicySpec {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L37) `packages/security/src/semantics/types.ts`
 
 ```ts
-export type NeutralAdvEventName =
-  // mtls
-  | 'mtls.handshake_completed'
-  | 'mtls.cert_pinned'
-  | 'mtls.ocsp_verified'
-  | 'mtls.ct_log_checked'
-  // zero-trust
-  | 'zt.device_posture_evaluated'
-  | 'zt.risk_scored'
-  | 'zt.jit_granted'
-  | 'zt.micro_segment_enforced'
-  // siem-audit
-  | 'siem.event_structured'
-  | 'siem.tamper_evident_sealed'
-  | 'siem.retention_applied'
-  | 'siem.correlation_matched'
-  // incident-response
-  | 'ir.playbook_triggered'
-  | 'ir.severity_classified'
-  | 'ir.escalation_sent'
-  | 'ir.forensics_captured'
-  | 'ir.post_mortem_recorded'
-  // crypto-advanced
-  | 'crypto.aead_sealed'
-  | 'crypto.kdf_derived'
-  | 'crypto.envelope_wrapped'
-  | 'crypto.key_rotated'
-  | 'crypto.hsm_signed'
-  | 'crypto.pq_kem_encapsulated'
-  // container-k8s
-  | 'k8s.pod_security_enforced'
-  | 'k8s.network_policy_applied'
-  | 'k8s.admission_denied'
-  | 'k8s.admission_allowed'
-  // supply-chain
-  | 'sc.slsa_level_verified'
-  | 'sc.reproducible_build_matched'
-  | 'sc.provenance_signed'
-  | 'sc.attestation_verified'
-  // web-vitals-security
-  | 'wvs.sri_hash_verified'
-  | 'wvs.trusted_types_enforced'
-  | 'wvs.permissions_policy_applied'
-  | 'wvs.cross_origin_isolated';
+export type NeutralAdvEventName = 'mtls.handshake_completed' | 'mtls.cert_pinned' | 'mtls.ocsp_verified' | 'mtls.ct_log_checked' | 'zt.device_posture_evaluated' | 'zt.risk_scored' | 'zt.jit_granted' | 'zt.micro_segment_enforced' | 'siem.event_structured' | 'siem.tamper_evident_sealed' | 'siem.retention_applied' | 'siem.correlation_matched' | 'ir.playbook_triggered' | 'ir.severity_classified' | 'ir.escalation_sent' | 'ir.forensics_captured' | 'ir.post_mortem_recorded' | 'crypto.aead_sealed' | 'crypto.kdf_derived' | 'crypto.envelope_wrapped' | 'crypto.key_rotated' | 'crypto.hsm_signed' | 'crypto.pq_kem_encapsulated' | 'k8s.pod_security_enforced' | 'k8s.network_policy_applied' | 'k8s.admission_denied' | 'k8s.admission_allowed' | 'sc.slsa_level_verified' | 'sc.reproducible_build_matched' | 'sc.provenance_signed' | 'sc.attestation_verified' | 'wvs.sri_hash_verified' | 'wvs.trusted_types_enforced' | 'wvs.permissions_policy_applied' | 'wvs.cross_origin_isolated';
 ```
 
 #### `OcspInput`
@@ -2090,8 +1889,8 @@ export type NeutralAdvEventName =
 
 ```ts
 export interface OcspInput {
-  stapled: boolean;
-  goodResponse: boolean;
+    stapled: boolean;
+    goodResponse: boolean;
 }
 ```
 
@@ -2101,10 +1900,10 @@ export interface OcspInput {
 
 ```ts
 export interface PastaFinding {
-  stage: PastaStage;
-  summary: string;
-  /** stage 単位 completeness 0-1 (test coverage proxy)。 */
-  completeness: number;
+    stage: PastaStage;
+    summary: string;
+    /** stage 単位 completeness 0-1 (test coverage proxy)。 */
+    completeness: number;
 }
 ```
 
@@ -2115,14 +1914,7 @@ export interface PastaFinding {
 PASTA stage identifiers — 7 stage は Tony UcedaVélez / Marco Morana 定義に沿う。
 
 ```ts
-export type PastaStage =
-  | 'define-objectives'
-  | 'define-technical-scope'
-  | 'application-decomposition'
-  | 'threat-analysis'
-  | 'vulnerability-analysis'
-  | 'attack-modeling'
-  | 'risk-analysis';
+export type PastaStage = 'define-objectives' | 'define-technical-scope' | 'application-decomposition' | 'threat-analysis' | 'vulnerability-analysis' | 'attack-modeling' | 'risk-analysis';
 ```
 
 #### `PermissionsFeature`
@@ -2132,31 +1924,7 @@ export type PastaStage =
 Permissions-Policy feature 名 — Chrome/Firefox で実装されている代表 feature。
 
 ```ts
-export type PermissionsFeature =
-  | 'accelerometer'
-  | 'ambient-light-sensor'
-  | 'autoplay'
-  | 'battery'
-  | 'camera'
-  | 'display-capture'
-  | 'document-domain'
-  | 'encrypted-media'
-  | 'execution-while-not-rendered'
-  | 'execution-while-out-of-viewport'
-  | 'fullscreen'
-  | 'geolocation'
-  | 'gyroscope'
-  | 'magnetometer'
-  | 'microphone'
-  | 'midi'
-  | 'payment'
-  | 'picture-in-picture'
-  | 'publickey-credentials-get'
-  | 'screen-wake-lock'
-  | 'sync-xhr'
-  | 'usb'
-  | 'web-share'
-  | 'xr-spatial-tracking';
+export type PermissionsFeature = 'accelerometer' | 'ambient-light-sensor' | 'autoplay' | 'battery' | 'camera' | 'display-capture' | 'document-domain' | 'encrypted-media' | 'execution-while-not-rendered' | 'execution-while-out-of-viewport' | 'fullscreen' | 'geolocation' | 'gyroscope' | 'magnetometer' | 'microphone' | 'midi' | 'payment' | 'picture-in-picture' | 'publickey-credentials-get' | 'screen-wake-lock' | 'sync-xhr' | 'usb' | 'web-share' | 'xr-spatial-tracking';
 ```
 
 #### `PermissionsPolicyInput`
@@ -2165,10 +1933,10 @@ export type PermissionsFeature =
 
 ```ts
 export interface PermissionsPolicyInput {
-  features: Array<{
-    name: 'camera' | 'microphone' | 'geolocation' | 'payment' | 'usb' | 'gyroscope';
-    allowlist: 'none' | 'self' | 'src' | string;
-  }>;
+    features: Array<{
+        name: 'camera' | 'microphone' | 'geolocation' | 'payment' | 'usb' | 'gyroscope';
+        allowlist: 'none' | 'self' | 'src' | string;
+    }>;
 }
 ```
 
@@ -2179,7 +1947,9 @@ export interface PermissionsPolicyInput {
 allowlist source per feature — `*`, `self`, or explicit origin list.
 
 ```ts
-export type PermissionsSource = '*' | 'self' | 'none' | { origins: string[] };
+export type PermissionsSource = '*' | 'self' | 'none' | {
+    origins: string[];
+};
 ```
 
 #### `PinInput`
@@ -2188,8 +1958,8 @@ export type PermissionsSource = '*' | 'self' | 'none' | { origins: string[] };
 
 ```ts
 export interface PinInput {
-  spkiSha256: string;
-  expectedPins: string[];
+    spkiSha256: string;
+    expectedPins: string[];
 }
 ```
 
@@ -2199,9 +1969,9 @@ export interface PinInput {
 
 ```ts
 export interface PlaybookInput {
-  playbookId: string;
-  detectionSource: string;
-  initialAlert: string;
+    playbookId: string;
+    detectionSource: string;
+    initialAlert: string;
 }
 ```
 
@@ -2221,12 +1991,12 @@ export type PodSecurityLevel = 'privileged' | 'baseline' | 'restricted';
 
 ```ts
 export interface PodSpec {
-  namespace: string;
-  runAsRoot: boolean;
-  privileged: boolean;
-  allowPrivilegeEscalation: boolean;
-  hostNetwork: boolean;
-  hostPid: boolean;
+    namespace: string;
+    runAsRoot: boolean;
+    privileged: boolean;
+    allowPrivilegeEscalation: boolean;
+    hostNetwork: boolean;
+    hostPid: boolean;
 }
 ```
 
@@ -2236,9 +2006,9 @@ export interface PodSpec {
 
 ```ts
 export interface PostMortemInput {
-  rootCause: string;
-  contributingFactors: string[];
-  actionItems: string[];
+    rootCause: string;
+    contributingFactors: string[];
+    actionItems: string[];
 }
 ```
 
@@ -2256,8 +2026,8 @@ export type PqKemAlgo = 'ML-KEM-768' | 'ML-KEM-1024' | 'Kyber768';
 
 ```ts
 export interface PqKemInput {
-  algo: PqKemAlgo;
-  publicKeyLen: number;
+    algo: PqKemAlgo;
+    publicKeyLen: number;
 }
 ```
 
@@ -2267,9 +2037,9 @@ export interface PqKemInput {
 
 ```ts
 export interface ProvenanceInput {
-  builderId: string;
-  materialsCount: number;
-  signatureAlgorithm: 'sigstore-cosign' | 'in-toto' | 'gpg';
+    builderId: string;
+    materialsCount: number;
+    signatureAlgorithm: 'sigstore-cosign' | 'in-toto' | 'gpg';
 }
 ```
 
@@ -2279,10 +2049,10 @@ export interface ProvenanceInput {
 
 ```ts
 export interface RateLimitDecision {
-  allowed: boolean;
-  remaining: number;
-  resetAtMs: number;
-  reason: string;
+    allowed: boolean;
+    remaining: number;
+    resetAtMs: number;
+    reason: string;
 }
 ```
 
@@ -2300,7 +2070,7 @@ export type RateLimitStrategy = 'token-bucket' | 'leaky-bucket' | 'sliding-windo
 
 ```ts
 export interface RbacPolicy {
-  roles: Map<string, RbacRole>;
+    roles: Map<string, RbacRole>;
 }
 ```
 
@@ -2310,10 +2080,10 @@ export interface RbacPolicy {
 
 ```ts
 export interface RbacRole {
-  name: string;
-  permissions: string[];
-  /** parent roles — permissions を継承する上位 role 名。 */
-  parents?: string[];
+    name: string;
+    permissions: string[];
+    /** parent roles — permissions を継承する上位 role 名。 */
+    parents?: string[];
 }
 ```
 
@@ -2323,8 +2093,8 @@ export interface RbacRole {
 
 ```ts
 export interface RbacSubject {
-  id: string;
-  roles: string[];
+    id: string;
+    roles: string[];
 }
 ```
 
@@ -2334,9 +2104,9 @@ export interface RbacSubject {
 
 ```ts
 export interface RealDriverEndpoint {
-  provider: SecurityProvider;
-  endpoint: string | null;
-  apiKey: string | null;
+    provider: SecurityProvider;
+    endpoint: string | null;
+    apiKey: string | null;
 }
 ```
 
@@ -2346,8 +2116,8 @@ export interface RealDriverEndpoint {
 
 ```ts
 export interface RealDriverGateInput {
-  provider: SecurityProvider;
-  env?: NodeJS.ProcessEnv;
+    provider: SecurityProvider;
+    env?: NodeJS.ProcessEnv;
 }
 ```
 
@@ -2357,9 +2127,9 @@ export interface RealDriverGateInput {
 
 ```ts
 export interface RealDriverGateResult {
-  useRealDriver: boolean;
-  missingKeys: string[];
-  reason: string;
+    useRealDriver: boolean;
+    missingKeys: string[];
+    reason: string;
 }
 ```
 
@@ -2368,15 +2138,7 @@ export interface RealDriverGateResult {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L25) `packages/security/src/security-headers.ts`
 
 ```ts
-export type ReferrerPolicyValue =
-  | 'no-referrer'
-  | 'no-referrer-when-downgrade'
-  | 'origin'
-  | 'origin-when-cross-origin'
-  | 'same-origin'
-  | 'strict-origin'
-  | 'strict-origin-when-cross-origin'
-  | 'unsafe-url';
+export type ReferrerPolicyValue = 'no-referrer' | 'no-referrer-when-downgrade' | 'origin' | 'origin-when-cross-origin' | 'same-origin' | 'strict-origin' | 'strict-origin-when-cross-origin' | 'unsafe-url';
 ```
 
 #### `ReproducibleInput`
@@ -2385,9 +2147,9 @@ export type ReferrerPolicyValue =
 
 ```ts
 export interface ReproducibleInput {
-  buildA_hash: string;
-  buildB_hash: string;
-  toolchainVersion: string;
+    buildA_hash: string;
+    buildB_hash: string;
+    toolchainVersion: string;
 }
 ```
 
@@ -2397,10 +2159,10 @@ export interface ReproducibleInput {
 
 ```ts
 export interface RetentionPolicy {
-  hotDays: number;
-  warmDays: number;
-  coldDays: number;
-  legalHold: boolean;
+    hotDays: number;
+    warmDays: number;
+    coldDays: number;
+    legalHold: boolean;
 }
 ```
 
@@ -2412,10 +2174,10 @@ Rotation policy — secret 発見時の rotation SLA + tracking。
 
 ```ts
 export interface RotationPolicy {
-  /** 発見から X 日以内に rotation 必須。 */
-  rotateWithinDays: number;
-  /** 対象 kind (未指定 = 全 kind)。 */
-  appliesTo?: SecretKind[];
+    /** 発見から X 日以内に rotation 必須。 */
+    rotateWithinDays: number;
+    /** 対象 kind (未指定 = 全 kind)。 */
+    appliesTo?: SecretKind[];
 }
 ```
 
@@ -2425,10 +2187,10 @@ export interface RotationPolicy {
 
 ```ts
 export interface RotationTracker {
-  finding: SecretFinding;
-  discoveredAtMs: number;
-  rotatedAtMs: number | null;
-  policy: RotationPolicy;
+    finding: SecretFinding;
+    discoveredAtMs: number;
+    rotatedAtMs: number | null;
+    policy: RotationPolicy;
 }
 ```
 
@@ -2438,12 +2200,12 @@ export interface RotationTracker {
 
 ```ts
 export interface SbomComponent {
-  name: string;
-  version: string;
-  /** Package URL — e.g., pkg:npm/foo@1.2.3。 */
-  purl: string;
-  /** SPDX license expression (e.g., MIT, Apache-2.0, "MIT OR Apache-2.0")。 */
-  license?: string;
+    name: string;
+    version: string;
+    /** Package URL — e.g., pkg:npm/foo@1.2.3。 */
+    purl: string;
+    /** SPDX license expression (e.g., MIT, Apache-2.0, "MIT OR Apache-2.0")。 */
+    license?: string;
 }
 ```
 
@@ -2453,10 +2215,10 @@ export interface SbomComponent {
 
 ```ts
 export interface SbomDocument {
-  format: 'cyclonedx' | 'spdx';
-  formatVersion: string;
-  components: SbomComponent[];
-  generatedAtIso: string;
+    format: 'cyclonedx' | 'spdx';
+    formatVersion: string;
+    components: SbomComponent[];
+    generatedAtIso: string;
 }
 ```
 
@@ -2466,12 +2228,12 @@ export interface SbomDocument {
 
 ```ts
 export interface SecretFinding {
-  kind: SecretKind;
-  matched: string;
-  line: number;
-  column: number;
-  entropy: number;
-  ruleDescription: string;
+    kind: SecretKind;
+    matched: string;
+    line: number;
+    column: number;
+    entropy: number;
+    ruleDescription: string;
 }
 ```
 
@@ -2480,15 +2242,7 @@ export interface SecretFinding {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L13) `packages/security/src/secrets-scan.ts`
 
 ```ts
-export type SecretKind =
-  | 'aws-access-key'
-  | 'aws-secret-key'
-  | 'github-token'
-  | 'slack-token'
-  | 'openai-key'
-  | 'stripe-key'
-  | 'generic-jwt'
-  | 'generic-private-key';
+export type SecretKind = 'aws-access-key' | 'aws-secret-key' | 'github-token' | 'slack-token' | 'openai-key' | 'stripe-key' | 'generic-jwt' | 'generic-private-key';
 ```
 
 #### `SecretSignature`
@@ -2497,10 +2251,10 @@ export type SecretKind =
 
 ```ts
 export interface SecretSignature {
-  kind: SecretKind;
-  pattern: RegExp;
-  minEntropy?: number;
-  description: string;
+    kind: SecretKind;
+    pattern: RegExp;
+    minEntropy?: number;
+    description: string;
 }
 ```
 
@@ -2509,15 +2263,7 @@ export interface SecretSignature {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L27) `packages/security/src/semantics/types.ts`
 
 ```ts
-export type SecurityAdvAxis =
-  | 'mtls'
-  | 'zero-trust'
-  | 'siem-audit'
-  | 'incident-response'
-  | 'crypto-advanced'
-  | 'container-k8s'
-  | 'supply-chain'
-  | 'web-vitals-security';
+export type SecurityAdvAxis = 'mtls' | 'zero-trust' | 'siem-audit' | 'incident-response' | 'crypto-advanced' | 'container-k8s' | 'supply-chain' | 'web-vitals-security';
 ```
 
 #### `SecurityAdvTarget`
@@ -2537,15 +2283,7 @@ export type SecurityAdvTarget = 'istio' | 'opa' | 'siem-splunk' | 'vault';
 8 axis の識別子。 SSOT なので追加変更は quality-metrics `SECURITY_AXES` と同期する必要がある。
 
 ```ts
-export type SecurityAxis =
-  | 'csp'
-  | 'rate-limit'
-  | 'authorization'
-  | 'waf'
-  | 'threat-model'
-  | 'secrets-scan'
-  | 'sbom'
-  | 'security-headers';
+export type SecurityAxis = 'csp' | 'rate-limit' | 'authorization' | 'waf' | 'threat-model' | 'secrets-scan' | 'sbom' | 'security-headers';
 ```
 
 #### `SecurityDriver`
@@ -2556,10 +2294,10 @@ driver 共通契約 — real / mock 両方に同じ shape で実装される。 
 
 ```ts
 export interface SecurityDriver {
-  readonly provider: SecurityProvider;
-  readonly axis: SecurityAxis;
-  runScenario(scenarioId: string): Promise<SecurityEvent[]>;
-  reset(): void;
+    readonly provider: SecurityProvider;
+    readonly axis: SecurityAxis;
+    runScenario(scenarioId: string): Promise<SecurityEvent[]>;
+    reset(): void;
 }
 ```
 
@@ -2571,13 +2309,13 @@ export interface SecurityDriver {
 
 ```ts
 export interface SecurityEvent<TPayload = unknown> {
-  axis: SecurityAxis;
-  provider: SecurityProvider;
-  verdict: SecurityVerdict;
-  reason: string;
-  payload: TPayload;
-  /** event 発火の相対 timestamp (ms、 collector 起点)。 */
-  timestamp: number;
+    axis: SecurityAxis;
+    provider: SecurityProvider;
+    verdict: SecurityVerdict;
+    reason: string;
+    payload: TPayload;
+    /** event 発火の相対 timestamp (ms、 collector 起点)。 */
+    timestamp: number;
 }
 ```
 
@@ -2587,12 +2325,12 @@ export interface SecurityEvent<TPayload = unknown> {
 
 ```ts
 export interface SecurityFidelityInput {
-  provider: SecurityProvider;
-  axis: SecurityAxis;
-  realDriver: SecurityDriver;
-  mockDriver: SecurityDriver;
-  scenarios: string[];
-  perScenarioTimeoutMs?: number;
+    provider: SecurityProvider;
+    axis: SecurityAxis;
+    realDriver: SecurityDriver;
+    mockDriver: SecurityDriver;
+    scenarios: string[];
+    perScenarioTimeoutMs?: number;
 }
 ```
 
@@ -2602,19 +2340,19 @@ export interface SecurityFidelityInput {
 
 ```ts
 export interface SecurityFidelityRecord {
-  scenarioId: string;
-  provider: SecurityProvider;
-  axis: SecurityAxis;
-  real: SecurityEvent[];
-  mock: SecurityEvent[];
-  /** event 数の差 (real - mock)。 */
-  eventCountDiff: number;
-  /** verdict 一致率 0-1 (real と mock の verdict 列)。 */
-  verdictMatch: number;
-  /** reason 一致率 0-1 (loose match)。 */
-  reasonMatch: number;
-  /** 総合 accuracy score 0-1 (verdict * reason の平均)。 */
-  accuracyScore: number;
+    scenarioId: string;
+    provider: SecurityProvider;
+    axis: SecurityAxis;
+    real: SecurityEvent[];
+    mock: SecurityEvent[];
+    /** event 数の差 (real - mock)。 */
+    eventCountDiff: number;
+    /** verdict 一致率 0-1 (real と mock の verdict 列)。 */
+    verdictMatch: number;
+    /** reason 一致率 0-1 (loose match)。 */
+    reasonMatch: number;
+    /** 総合 accuracy score 0-1 (verdict * reason の平均)。 */
+    accuracyScore: number;
 }
 ```
 
@@ -2624,15 +2362,15 @@ export interface SecurityFidelityRecord {
 
 ```ts
 export interface SecurityFidelityReport {
-  records: SecurityFidelityRecord[];
-  summary: {
-    scenarios: number;
-    avgAccuracyScore: number;
-    avgEventCountDiff: number;
-    avgVerdictMatch: number;
-    avgReasonMatch: number;
-    accuracyMethod: 'sequence-jaccard';
-  };
+    records: SecurityFidelityRecord[];
+    summary: {
+        scenarios: number;
+        avgAccuracyScore: number;
+        avgEventCountDiff: number;
+        avgVerdictMatch: number;
+        avgReasonMatch: number;
+        accuracyMethod: 'sequence-jaccard';
+    };
 }
 ```
 
@@ -2642,12 +2380,12 @@ export interface SecurityFidelityReport {
 
 ```ts
 export interface SecurityHeadersInput {
-  hsts?: HstsOptions;
-  xFrame?: XFrameOption;
-  /** nosniff は固定なので on/off だけ。 */
-  xContentTypeOptions?: boolean;
-  referrerPolicy?: ReferrerPolicyValue;
-  permissionsPolicy?: Partial<Record<PermissionsFeature, PermissionsSource>>;
+    hsts?: HstsOptions;
+    xFrame?: XFrameOption;
+    /** nosniff は固定なので on/off だけ。 */
+    xContentTypeOptions?: boolean;
+    referrerPolicy?: ReferrerPolicyValue;
+    permissionsPolicy?: Partial<Record<PermissionsFeature, PermissionsSource>>;
 }
 ```
 
@@ -2657,7 +2395,7 @@ export interface SecurityHeadersInput {
 
 ```ts
 export interface SecurityHeadersOutput {
-  headers: Record<string, string>;
+    headers: Record<string, string>;
 }
 ```
 
@@ -2687,9 +2425,9 @@ export type SecurityVerdict = 'allow' | 'deny' | 'warn';
 
 ```ts
 export interface SegmentPolicy {
-  workload: string;
-  allowedPeers: string[];
-  requestedPeer: string;
+    workload: string;
+    allowedPeers: string[];
+    requestedPeer: string;
 }
 ```
 
@@ -2699,9 +2437,9 @@ export interface SegmentPolicy {
 
 ```ts
 export interface SeverityInput {
-  affectedUsers: number;
-  dataClassification: 'public' | 'internal' | 'confidential' | 'restricted';
-  serviceDown: boolean;
+    affectedUsers: number;
+    dataClassification: 'public' | 'internal' | 'confidential' | 'restricted';
+    serviceDown: boolean;
 }
 ```
 
@@ -2711,12 +2449,12 @@ export interface SeverityInput {
 
 ```ts
 export interface SiemAuditSession {
-  target: SecurityAdvTarget;
-  sessionId: string;
-  state: SiemAuditState;
-  history: AxisAdvStep<SiemAuditState>[];
-  structuredEvents: StructuredEvent[];
-  sealHashChain: string[];
+    target: SecurityAdvTarget;
+    sessionId: string;
+    state: SiemAuditState;
+    history: AxisAdvStep<SiemAuditState>[];
+    structuredEvents: StructuredEvent[];
+    sealHashChain: string[];
 }
 ```
 
@@ -2727,12 +2465,7 @@ export interface SiemAuditSession {
 SIEM / audit log axis — structured logging + tamper-evident sealing + retention policy + correlation rule state machine。 Deterministic mock で 4 signal 系統を提供。 real driver 経路では Splunk / Elastic SIEM に HEC endpoint 経由で event を送信する。
 
 ```ts
-export type SiemAuditState =
-  | 'idle'
-  | 'structured'
-  | 'sealed'
-  | 'retention-tagged'
-  | 'correlated';
+export type SiemAuditState = 'idle' | 'structured' | 'sealed' | 'retention-tagged' | 'correlated';
 ```
 
 #### `SiemEvent`
@@ -2741,11 +2474,11 @@ export type SiemAuditState =
 
 ```ts
 export interface SiemEvent {
-  actor: string;
-  action: string;
-  target: string;
-  timestamp: number;
-  result: 'success' | 'failure';
+    actor: string;
+    action: string;
+    target: string;
+    timestamp: number;
+    result: 'success' | 'failure';
 }
 ```
 
@@ -2757,8 +2490,8 @@ Sliding window — time window の request timestamp 全部を記録し、 過�
 
 ```ts
 export interface SlidingWindowConfig {
-  windowMs: number;
-  maxRequests: number;
+    windowMs: number;
+    maxRequests: number;
 }
 ```
 
@@ -2778,14 +2511,14 @@ export type SlsaLevel = 0 | 1 | 2 | 3 | 4;
 
 ```ts
 export interface SlsaLevelInput {
-  buildScriptedFromRepo: boolean;
-  buildServiceIsTrustworthy: boolean;
-  buildParameterizable: boolean;
-  buildIsolated: boolean;
-  provenanceExists: boolean;
-  provenanceAuthenticated: boolean;
-  provenanceServiceGenerated: boolean;
-  provenanceNonFalsifiable: boolean;
+    buildScriptedFromRepo: boolean;
+    buildServiceIsTrustworthy: boolean;
+    buildParameterizable: boolean;
+    buildIsolated: boolean;
+    provenanceExists: boolean;
+    provenanceAuthenticated: boolean;
+    provenanceServiceGenerated: boolean;
+    provenanceNonFalsifiable: boolean;
 }
 ```
 
@@ -2795,9 +2528,9 @@ export interface SlsaLevelInput {
 
 ```ts
 export interface SriInput {
-  resourceUrl: string;
-  integrity: string;
-  computedHash: string;
+    resourceUrl: string;
+    integrity: string;
+    computedHash: string;
 }
 ```
 
@@ -2806,13 +2539,7 @@ export interface SriInput {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L13) `packages/security/src/threat-model.ts`
 
 ```ts
-export type StrideCategory =
-  | 'spoofing'
-  | 'tampering'
-  | 'repudiation'
-  | 'information-disclosure'
-  | 'denial-of-service'
-  | 'elevation-of-privilege';
+export type StrideCategory = 'spoofing' | 'tampering' | 'repudiation' | 'information-disclosure' | 'denial-of-service' | 'elevation-of-privilege';
 ```
 
 #### `StrideThreat`
@@ -2821,11 +2548,11 @@ export type StrideCategory =
 
 ```ts
 export interface StrideThreat {
-  id: string;
-  category: StrideCategory;
-  description: string;
-  /** 1-5 severity。 */
-  severity: 1 | 2 | 3 | 4 | 5;
+    id: string;
+    category: StrideCategory;
+    description: string;
+    /** 1-5 severity。 */
+    severity: 1 | 2 | 3 | 4 | 5;
 }
 ```
 
@@ -2835,8 +2562,8 @@ export interface StrideThreat {
 
 ```ts
 export interface StructuredEvent extends SiemEvent {
-  eventId: string;
-  cimSchemaVersion: string;
+    eventId: string;
+    cimSchemaVersion: string;
 }
 ```
 
@@ -2846,11 +2573,11 @@ export interface StructuredEvent extends SiemEvent {
 
 ```ts
 export interface SupplyChainSession {
-  target: SecurityAdvTarget;
-  sessionId: string;
-  state: SupplyChainState;
-  history: AxisAdvStep<SupplyChainState>[];
-  verifiedLevel: SlsaLevel;
+    target: SecurityAdvTarget;
+    sessionId: string;
+    state: SupplyChainState;
+    history: AxisAdvStep<SupplyChainState>[];
+    verifiedLevel: SlsaLevel;
 }
 ```
 
@@ -2859,12 +2586,7 @@ export interface SupplyChainSession {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L18) `packages/security/src/semantics/supply-chain.ts`
 
 ```ts
-export type SupplyChainState =
-  | 'idle'
-  | 'slsa-verified'
-  | 'reproducible-matched'
-  | 'provenance-signed'
-  | 'attestation-verified';
+export type SupplyChainState = 'idle' | 'slsa-verified' | 'reproducible-matched' | 'provenance-signed' | 'attestation-verified';
 ```
 
 #### `TokenBucketConfig`
@@ -2875,9 +2597,9 @@ Token bucket — burst 対応 (max capacity まで貯蓄可)、 constant refill 
 
 ```ts
 export interface TokenBucketConfig {
-  capacity: number;
-  /** ms あたりの refill 量 (float 可、 内部で fraction accumulator)。 */
-  refillPerMs: number;
+    capacity: number;
+    /** ms あたりの refill 量 (float 可、 内部で fraction accumulator)。 */
+    refillPerMs: number;
 }
 ```
 
@@ -2887,9 +2609,9 @@ export interface TokenBucketConfig {
 
 ```ts
 export interface TrustedTypesInput {
-  policyNames: string[];
-  requireForScript: boolean;
-  reportOnly: boolean;
+    policyNames: string[];
+    requireForScript: boolean;
+    reportOnly: boolean;
 }
 ```
 
@@ -2901,10 +2623,10 @@ Trust boundary — DFD-style zone crossing modeler。 subject と resource が�
 
 ```ts
 export interface TrustZone {
-  id: string;
-  label: string;
-  /** 0=untrusted / 1=partially / 2=trusted。 */
-  level: 0 | 1 | 2;
+    id: string;
+    label: string;
+    /** 0=untrusted / 1=partially / 2=trusted。 */
+    level: 0 | 1 | 2;
 }
 ```
 
@@ -2914,10 +2636,10 @@ export interface TrustZone {
 
 ```ts
 export interface WafDecision {
-  action: WafRuleAction;
-  matchedRuleId: string | null;
-  matchedCategory: string | null;
-  reason: string;
+    action: WafRuleAction;
+    matchedRuleId: string | null;
+    matchedCategory: string | null;
+    reason: string;
 }
 ```
 
@@ -2927,7 +2649,7 @@ export interface WafDecision {
 
 ```ts
 export interface WafPolicy {
-  rules: WafRule[];
+    rules: WafRule[];
 }
 ```
 
@@ -2939,12 +2661,12 @@ WAF が判定する request の共通形状。
 
 ```ts
 export interface WafRequest {
-  method: string;
-  path: string;
-  headers: Record<string, string>;
-  query?: Record<string, string>;
-  body?: string;
-  ip?: string;
+    method: string;
+    path: string;
+    headers: Record<string, string>;
+    query?: Record<string, string>;
+    body?: string;
+    ip?: string;
 }
 ```
 
@@ -2954,16 +2676,16 @@ export interface WafRequest {
 
 ```ts
 export interface WafRule {
-  id: string;
-  /** OWASP CRS category (WAF_XSS / WAF_SQLI / WAF_LFI / WAF_RFI 等)。 */
-  category: string;
-  /** 適合すれば match、 検査対象は request.path + body の join 検査。 */
-  pattern: RegExp;
-  action: WafRuleAction;
-  /** 大きいほど先に評価。 default 100。 */
-  priority?: number;
-  /** false positive suppression 用の exception path。 */
-  exceptionPaths?: string[];
+    id: string;
+    /** OWASP CRS category (WAF_XSS / WAF_SQLI / WAF_LFI / WAF_RFI 等)。 */
+    category: string;
+    /** 適合すれば match、 検査対象は request.path + body の join 検査。 */
+    pattern: RegExp;
+    action: WafRuleAction;
+    /** 大きいほど先に評価。 default 100。 */
+    priority?: number;
+    /** false positive suppression 用の exception path。 */
+    exceptionPaths?: string[];
 }
 ```
 
@@ -2981,10 +2703,10 @@ export type WafRuleAction = 'block' | 'warn' | 'allow';
 
 ```ts
 export interface WvsSession {
-  target: SecurityAdvTarget;
-  sessionId: string;
-  state: WvsState;
-  history: AxisAdvStep<WvsState>[];
+    target: SecurityAdvTarget;
+    sessionId: string;
+    state: WvsState;
+    history: AxisAdvStep<WvsState>[];
 }
 ```
 
@@ -2995,13 +2717,7 @@ export interface WvsSession {
 Web Vitals security axis — Subresource Integrity (SRI) hash + Trusted Types + Permissions Policy + Cross-Origin Isolation (COOP/COEP) enforcement state machine。 Deterministic mock で 4 signal 系統を提供。 real driver 経路では headless browser (Playwright) に対して response header を発火する。
 
 ```ts
-export type WvsState =
-  | 'idle'
-  | 'sri-verified'
-  | 'trusted-types-enforced'
-  | 'permissions-policy-applied'
-  | 'cross-origin-isolated'
-  | 'failed';
+export type WvsState = 'idle' | 'sri-verified' | 'trusted-types-enforced' | 'permissions-policy-applied' | 'cross-origin-isolated' | 'failed';
 ```
 
 #### `XFrameOption`
@@ -3009,10 +2725,14 @@ export type WvsState =
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L20) `packages/security/src/security-headers.ts`
 
 ```ts
-export type XFrameOption =
-  | { mode: 'DENY' }
-  | { mode: 'SAMEORIGIN' }
-  | { mode: 'ALLOW-FROM'; uri: string };
+export type XFrameOption = {
+    mode: 'DENY';
+} | {
+    mode: 'SAMEORIGIN';
+} | {
+    mode: 'ALLOW-FROM';
+    uri: string;
+};
 ```
 
 #### `ZeroTrustSession`
@@ -3021,12 +2741,12 @@ export type XFrameOption =
 
 ```ts
 export interface ZeroTrustSession {
-  target: SecurityAdvTarget;
-  sessionId: string;
-  state: ZeroTrustState;
-  history: AxisAdvStep<ZeroTrustState>[];
-  riskScore: number;
-  grantedRoles: string[];
+    target: SecurityAdvTarget;
+    sessionId: string;
+    state: ZeroTrustState;
+    history: AxisAdvStep<ZeroTrustState>[];
+    riskScore: number;
+    grantedRoles: string[];
 }
 ```
 
@@ -3037,12 +2757,6 @@ export interface ZeroTrustSession {
 Zero-trust axis — device posture + risk scoring + Just-in-Time access + micro-segmentation state machine。 Deterministic mock で 4 signal 系統を提供。 real driver 経路では OPA rego policy や Google BeyondCorp 相当の verifier に対して posture 判定を 発火する。
 
 ```ts
-export type ZeroTrustState =
-  | 'idle'
-  | 'posture-evaluated'
-  | 'risk-scored'
-  | 'jit-granted'
-  | 'jit-denied'
-  | 'segment-enforced';
+export type ZeroTrustState = 'idle' | 'posture-evaluated' | 'risk-scored' | 'jit-granted' | 'jit-denied' | 'segment-enforced';
 ```
 <!-- kiwa-public-api:end -->

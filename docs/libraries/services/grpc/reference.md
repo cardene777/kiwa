@@ -50,7 +50,7 @@ method 未登録または type 不一致では code `12`、message `method not f
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -61,10 +61,13 @@ method 未登録または type 不一致では code `12`、message `method not f
 interceptor chain builder。 real gRPC (grpc-js / nice-grpc) の interceptor middleware 相当。 順序どおり呼び、 各 interceptor が before/after で ctx を操作。
 
 ```ts
-export function composeInterceptors(interceptors: readonly Interceptor[]): (
-  ctx: InterceptorContext,
-  final: () => Promise<{ response?: unknown; status: GrpcStatus }>,
-) => Promise<{ response?: unknown; status: GrpcStatus }>;
+export declare function composeInterceptors(interceptors: readonly Interceptor[]): (ctx: InterceptorContext, final: () => Promise<{
+    response?: unknown;
+    status: GrpcStatus;
+}>) => Promise<{
+    response?: unknown;
+    status: GrpcStatus;
+}>;
 ```
 
 #### `createCancelToken`
@@ -74,7 +77,7 @@ export function composeInterceptors(interceptors: readonly Interceptor[]): (
 bidirectional cancel token。 real gRPC の client / server 両方向 cancel propagation を mock。 handler を register して cancel 発火時に notification。
 
 ```ts
-export function createCancelToken(): CancelToken;
+export declare function createCancelToken(): CancelToken;
 ```
 
 #### `createDeadlineContext`
@@ -84,7 +87,7 @@ export function createCancelToken(): CancelToken;
 gRPC の deadline (call が終わる期限) を propagate する context 作成。 real gRPC の `context.WithDeadline` 相当 mock。 remainingMs で propagation 判定。
 
 ```ts
-export function createDeadlineContext(deadlineMs: number, now: () => number = () => 0): DeadlineContext;
+export declare function createDeadlineContext(deadlineMs: number, now?: () => number): DeadlineContext;
 ```
 
 #### `createGrpcServer`
@@ -92,7 +95,7 @@ export function createDeadlineContext(deadlineMs: number, now: () => number = ()
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/server.ts#L35) `packages/grpc/src/server.ts`
 
 ```ts
-export function createGrpcServer(options: CreateGrpcServerOptions = {}): GrpcServer;
+export declare function createGrpcServer(options?: CreateGrpcServerOptions): GrpcServer;
 ```
 
 #### `createMetadata`
@@ -100,7 +103,7 @@ export function createGrpcServer(options: CreateGrpcServerOptions = {}): GrpcSer
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/metadata.ts#L6) `packages/grpc/src/metadata.ts`
 
 ```ts
-export function createMetadata(entries: Record<string, string> = {}): MetadataEntry[];
+export declare function createMetadata(entries?: Record<string, string>): MetadataEntry[];
 ```
 
 #### `decodeStatus`
@@ -108,7 +111,7 @@ export function createMetadata(entries: Record<string, string> = {}): MetadataEn
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/status.ts#L36) `packages/grpc/src/status.ts`
 
 ```ts
-export function decodeStatus(headers: Record<string, string>): GrpcStatus;
+export declare function decodeStatus(headers: Record<string, string>): GrpcStatus;
 ```
 
 #### `defineService`
@@ -116,11 +119,11 @@ export function decodeStatus(headers: Record<string, string>): GrpcStatus;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/server.ts#L50) `packages/grpc/src/server.ts`
 
 ```ts
-export function defineService(
-  name: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  methods: Array<{ name: string; type: MethodType; handler: (...args: any[]) => any }>,
-): ServiceDefinition;
+export declare function defineService(name: string, methods: Array<{
+    name: string;
+    type: MethodType;
+    handler: (...args: any[]) => any;
+}>): ServiceDefinition;
 ```
 
 #### `encodeStatus`
@@ -128,7 +131,10 @@ export function defineService(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/status.ts#L29) `packages/grpc/src/status.ts`
 
 ```ts
-export function encodeStatus(status: GrpcStatus): { 'grpc-status': string; 'grpc-message': string };
+export declare function encodeStatus(status: GrpcStatus): {
+    'grpc-status': string;
+    'grpc-message': string;
+};
 ```
 
 #### `invokeBidi`
@@ -136,13 +142,7 @@ export function encodeStatus(status: GrpcStatus): { 'grpc-status': string; 'grpc
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/invoke.ts#L91) `packages/grpc/src/invoke.ts`
 
 ```ts
-export async function invokeBidi<Req, Res>(
-  server: GrpcServer,
-  serviceName: string,
-  methodName: string,
-  reqs: Req[],
-  metadata: GrpcMetadata = [],
-): Promise<StreamResult<Res>>;
+export declare function invokeBidi<Req, Res>(server: GrpcServer, serviceName: string, methodName: string, reqs: Req[], metadata?: GrpcMetadata): Promise<StreamResult<Res>>;
 ```
 
 #### `invokeClientStream`
@@ -150,13 +150,7 @@ export async function invokeBidi<Req, Res>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/invoke.ts#L70) `packages/grpc/src/invoke.ts`
 
 ```ts
-export async function invokeClientStream<Req, Res>(
-  server: GrpcServer,
-  serviceName: string,
-  methodName: string,
-  reqs: Req[],
-  metadata: GrpcMetadata = [],
-): Promise<UnaryResult<Res>>;
+export declare function invokeClientStream<Req, Res>(server: GrpcServer, serviceName: string, methodName: string, reqs: Req[], metadata?: GrpcMetadata): Promise<UnaryResult<Res>>;
 ```
 
 #### `invokeServerStream`
@@ -164,13 +158,7 @@ export async function invokeClientStream<Req, Res>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/invoke.ts#L51) `packages/grpc/src/invoke.ts`
 
 ```ts
-export async function invokeServerStream<Req, Res>(
-  server: GrpcServer,
-  serviceName: string,
-  methodName: string,
-  req: Req,
-  metadata: GrpcMetadata = [],
-): Promise<StreamResult<Res>>;
+export declare function invokeServerStream<Req, Res>(server: GrpcServer, serviceName: string, methodName: string, req: Req, metadata?: GrpcMetadata): Promise<StreamResult<Res>>;
 ```
 
 #### `invokeUnary`
@@ -178,13 +166,7 @@ export async function invokeServerStream<Req, Res>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/invoke.ts#L33) `packages/grpc/src/invoke.ts`
 
 ```ts
-export async function invokeUnary<Req, Res>(
-  server: GrpcServer,
-  serviceName: string,
-  methodName: string,
-  req: Req,
-  metadata: GrpcMetadata = [],
-): Promise<UnaryResult<Res>>;
+export declare function invokeUnary<Req, Res>(server: GrpcServer, serviceName: string, methodName: string, req: Req, metadata?: GrpcMetadata): Promise<UnaryResult<Res>>;
 ```
 
 #### `isDeadlineExceeded`
@@ -192,7 +174,7 @@ export async function invokeUnary<Req, Res>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/deadline.ts#L19) `packages/grpc/src/deadline.ts`
 
 ```ts
-export function isDeadlineExceeded(ctx: DeadlineContext): boolean;
+export declare function isDeadlineExceeded(ctx: DeadlineContext): boolean;
 ```
 
 #### `mergeMetadata`
@@ -200,7 +182,7 @@ export function isDeadlineExceeded(ctx: DeadlineContext): boolean;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/metadata.ts#L10) `packages/grpc/src/metadata.ts`
 
 ```ts
-export function mergeMetadata(a: MetadataEntry[], b: MetadataEntry[]): MetadataEntry[];
+export declare function mergeMetadata(a: MetadataEntry[], b: MetadataEntry[]): MetadataEntry[];
 ```
 
 #### `remainingDeadlineMs`
@@ -208,7 +190,7 @@ export function mergeMetadata(a: MetadataEntry[], b: MetadataEntry[]): MetadataE
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/deadline.ts#L15) `packages/grpc/src/deadline.ts`
 
 ```ts
-export function remainingDeadlineMs(ctx: DeadlineContext): number;
+export declare function remainingDeadlineMs(ctx: DeadlineContext): number;
 ```
 
 #### `STATUS_CODES`
@@ -216,7 +198,25 @@ export function remainingDeadlineMs(ctx: DeadlineContext): number;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/status.ts#L1) `packages/grpc/src/status.ts`
 
 ```ts
-export declare const STATUS_CODES: Readonly<{ OK: 0; CANCELLED: 1; UNKNOWN: 2; INVALID_ARGUMENT: 3; DEADLINE_EXCEEDED: 4; NOT_FOUND: 5; ALREADY_EXISTS: 6; PERMISSION_DENIED: 7; RESOURCE_EXHAUSTED: 8; FAILED_PRECONDITION: 9; ABORTED: 10; OUT_OF_RANGE: 11; UNIMPLEMENTED: 12; INTERNAL: 13; UNAVAILABLE: 14; DATA_LOSS: 15; UNAUTHENTICATED: 16; }>;
+export declare const STATUS_CODES: Readonly<{
+    OK: 0;
+    CANCELLED: 1;
+    UNKNOWN: 2;
+    INVALID_ARGUMENT: 3;
+    DEADLINE_EXCEEDED: 4;
+    NOT_FOUND: 5;
+    ALREADY_EXISTS: 6;
+    PERMISSION_DENIED: 7;
+    RESOURCE_EXHAUSTED: 8;
+    FAILED_PRECONDITION: 9;
+    ABORTED: 10;
+    OUT_OF_RANGE: 11;
+    UNIMPLEMENTED: 12;
+    INTERNAL: 13;
+    UNAVAILABLE: 14;
+    DATA_LOSS: 15;
+    UNAUTHENTICATED: 16;
+}>;
 ```
 
 ### 型
@@ -235,10 +235,10 @@ export type BidiHandler<Req = unknown, Res = unknown> = (reqs: AsyncIterable<Req
 
 ```ts
 export interface CancelToken {
-  isCanceled: () => boolean;
-  cancel: (reason?: string) => void;
-  reason: () => string | undefined;
-  onCancel: (handler: (reason?: string) => void) => void;
+    isCanceled: () => boolean;
+    cancel: (reason?: string) => void;
+    reason: () => string | undefined;
+    onCancel: (handler: (reason?: string) => void) => void;
 }
 ```
 
@@ -256,9 +256,9 @@ export type ClientStreamHandler<Req = unknown, Res = unknown> = (reqs: AsyncIter
 
 ```ts
 export interface DeadlineContext {
-  startAt: number;
-  deadlineMs: number;
-  now: () => number;
+    startAt: number;
+    deadlineMs: number;
+    now: () => number;
 }
 ```
 
@@ -284,10 +284,10 @@ export type GrpcProvider = 'grpc-js' | 'nice-grpc' | 'twirp' | 'connect';
 
 ```ts
 export interface GrpcServer {
-  provider: GrpcProvider;
-  services: Map<string, ServiceDefinition>;
-  addService: (service: ServiceDefinition) => void;
-  getMethod: (service: string, method: string) => MethodDefinition | undefined;
+    provider: GrpcProvider;
+    services: Map<string, ServiceDefinition>;
+    addService: (service: ServiceDefinition) => void;
+    getMethod: (service: string, method: string) => MethodDefinition | undefined;
 }
 ```
 
@@ -297,9 +297,9 @@ export interface GrpcServer {
 
 ```ts
 export interface GrpcStatus {
-  code: GrpcStatusCode;
-  message: string;
-  details?: unknown;
+    code: GrpcStatusCode;
+    message: string;
+    details?: unknown;
 }
 ```
 
@@ -316,10 +316,13 @@ export type GrpcStatusCode = (typeof STATUS_CODES)[keyof typeof STATUS_CODES];
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/grpc/src/interceptor.ts#L11) `packages/grpc/src/interceptor.ts`
 
 ```ts
-export type Interceptor = (
-  ctx: InterceptorContext,
-  next: () => Promise<{ response?: unknown; status: GrpcStatus }>,
-) => Promise<{ response?: unknown; status: GrpcStatus }>;
+export type Interceptor = (ctx: InterceptorContext, next: () => Promise<{
+    response?: unknown;
+    status: GrpcStatus;
+}>) => Promise<{
+    response?: unknown;
+    status: GrpcStatus;
+}>;
 ```
 
 #### `InterceptorContext`
@@ -328,10 +331,10 @@ export type Interceptor = (
 
 ```ts
 export interface InterceptorContext {
-  service: string;
-  method: string;
-  metadata: GrpcMetadata;
-  request: unknown;
+    service: string;
+    method: string;
+    metadata: GrpcMetadata;
+    request: unknown;
 }
 ```
 
@@ -341,8 +344,8 @@ export interface InterceptorContext {
 
 ```ts
 export interface MetadataEntry {
-  key: string;
-  value: string;
+    key: string;
+    value: string;
 }
 ```
 
@@ -352,10 +355,9 @@ export interface MetadataEntry {
 
 ```ts
 export interface MethodDefinition {
-  name: string;
-  type: MethodType;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handler: (...args: any[]) => any;
+    name: string;
+    type: MethodType;
+    handler: (...args: any[]) => any;
 }
 ```
 
@@ -381,8 +383,8 @@ export type ServerStreamHandler<Req = unknown, Res = unknown> = (req: Req, metad
 
 ```ts
 export interface ServiceDefinition {
-  name: string;
-  methods: Map<string, MethodDefinition>;
+    name: string;
+    methods: Map<string, MethodDefinition>;
 }
 ```
 
@@ -392,10 +394,10 @@ export interface ServiceDefinition {
 
 ```ts
 export interface StreamResult<Res> {
-  ok: boolean;
-  responses: Res[];
-  status: GrpcStatus;
-  trailingMetadata: GrpcMetadata;
+    ok: boolean;
+    responses: Res[];
+    status: GrpcStatus;
+    trailingMetadata: GrpcMetadata;
 }
 ```
 
@@ -413,10 +415,10 @@ export type UnaryHandler<Req = unknown, Res = unknown> = (req: Req, metadata?: G
 
 ```ts
 export interface UnaryResult<Res> {
-  ok: boolean;
-  response?: Res;
-  status: GrpcStatus;
-  trailingMetadata: GrpcMetadata;
+    ok: boolean;
+    response?: Res;
+    status: GrpcStatus;
+    trailingMetadata: GrpcMetadata;
 }
 ```
 <!-- kiwa-public-api:end -->

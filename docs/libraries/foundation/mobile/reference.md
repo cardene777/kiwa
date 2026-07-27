@@ -110,7 +110,7 @@
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -119,10 +119,7 @@
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L71) `packages/mobile/src/semantics/metro.ts`
 
 ```ts
-export function applyMetroHmr(
-  session: MetroSession,
-  moduleId: string,
-): AxisStep<MetroState>;
+export declare function applyMetroHmr(session: MetroSession, moduleId: string): AxisStep<MetroState>;
 ```
 
 #### `assertMobileRealDriverAvailable`
@@ -130,10 +127,7 @@ export function applyMetroHmr(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L51) `packages/mobile/src/adapters/real-driver.ts`
 
 ```ts
-export function assertMobileRealDriverAvailable(
-  axis: MobileRealDriverAxis,
-  env: MobileRealDriverEnv | null,
-): void;
+export declare function assertMobileRealDriverAvailable(axis: MobileRealDriverAxis, env: MobileRealDriverEnv | null): void;
 ```
 
 #### `bindJsiRuntime`
@@ -141,7 +135,7 @@ export function assertMobileRealDriverAvailable(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L66) `packages/mobile/src/semantics/turbo-modules.ts`
 
 ```ts
-export function bindJsiRuntime(session: TurboModulesSession): AxisStep<TurboModulesState>;
+export declare function bindJsiRuntime(session: TurboModulesSession): AxisStep<TurboModulesState>;
 ```
 
 #### `bridgeLegacyModule`
@@ -149,10 +143,7 @@ export function bindJsiRuntime(session: TurboModulesSession): AxisStep<TurboModu
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L70) `packages/mobile/src/semantics/new-architecture.ts`
 
 ```ts
-export function bridgeLegacyModule(
-  session: NewArchitectureSession,
-  moduleName: string,
-): AxisStep<NewArchitectureState>;
+export declare function bridgeLegacyModule(session: NewArchitectureSession, moduleName: string): AxisStep<NewArchitectureState>;
 ```
 
 #### `buildSpawnInvocation`
@@ -160,11 +151,11 @@ export function bridgeLegacyModule(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L118) `packages/mobile/src/adapters/spawn-driver.ts`
 
 ```ts
-export function buildSpawnInvocation(input: {
-  command: MobileCliCommand;
-  args?: string[];
-  env?: Record<string, string>;
-  cwd?: string;
+export declare function buildSpawnInvocation(input: {
+    command: MobileCliCommand;
+    args?: string[];
+    env?: Record<string, string>;
+    cwd?: string;
 }): SpawnInvocation;
 ```
 
@@ -173,10 +164,10 @@ export function buildSpawnInvocation(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L71) `packages/mobile/src/semantics/secure-storage.ts`
 
 ```ts
-export function challengeBiometric(
-  session: SecureStorageSession,
-  input: { method: 'face-id' | 'touch-id' | 'fingerprint' | 'webauthn'; success: boolean },
-): AxisStep<SecureStorageState>;
+export declare function challengeBiometric(session: SecureStorageSession, input: {
+    method: 'face-id' | 'touch-id' | 'fingerprint' | 'webauthn';
+    success: boolean;
+}): AxisStep<SecureStorageState>;
 ```
 
 #### `cliForAxis`
@@ -184,7 +175,7 @@ export function challengeBiometric(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L114) `packages/mobile/src/adapters/spawn-driver.ts`
 
 ```ts
-export function cliForAxis(axis: MobileAxis): MobileCliCommand | null;
+export declare function cliForAxis(axis: MobileAxis): MobileCliCommand | null;
 ```
 
 #### `collectFidelityCoverage`
@@ -192,9 +183,7 @@ export function cliForAxis(axis: MobileAxis): MobileCliCommand | null;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fidelity.ts#L87) `packages/mobile/src/semantics/fidelity.ts`
 
 ```ts
-export function collectFidelityCoverage(
-  providers: MobileTarget[] = ['ios', 'android', 'web'],
-): FidelityCoverage;
+export declare function collectFidelityCoverage(providers?: MobileTarget[]): FidelityCoverage;
 ```
 
 #### `commitShadowTree`
@@ -202,10 +191,9 @@ export function collectFidelityCoverage(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L57) `packages/mobile/src/semantics/fabric.ts`
 
 ```ts
-export function commitShadowTree(
-  session: FabricSession,
-  input: { nodeCount: number },
-): AxisStep<FabricState>;
+export declare function commitShadowTree(session: FabricSession, input: {
+    nodeCount: number;
+}): AxisStep<FabricState>;
 ```
 
 #### `completeCodegenBuild`
@@ -213,7 +201,7 @@ export function commitShadowTree(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L86) `packages/mobile/src/semantics/codegen.ts`
 
 ```ts
-export function completeCodegenBuild(session: CodegenSession): AxisStep<CodegenState>;
+export declare function completeCodegenBuild(session: CodegenSession): AxisStep<CodegenState>;
 ```
 
 #### `completeExpoBuild`
@@ -221,9 +209,7 @@ export function completeCodegenBuild(session: CodegenSession): AxisStep<CodegenS
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L95) `packages/mobile/src/semantics/expo.ts`
 
 ```ts
-export function completeExpoBuild(
-  session: ExpoSession,
-): AxisStep<ExpoState>;
+export declare function completeExpoBuild(session: ExpoSession): AxisStep<ExpoState>;
 ```
 
 #### `completeFabricMount`
@@ -231,7 +217,7 @@ export function completeExpoBuild(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L79) `packages/mobile/src/semantics/fabric.ts`
 
 ```ts
-export function completeFabricMount(session: FabricSession): AxisStep<FabricState>;
+export declare function completeFabricMount(session: FabricSession): AxisStep<FabricState>;
 ```
 
 #### `completeMetroBundle`
@@ -239,9 +225,7 @@ export function completeFabricMount(session: FabricSession): AxisStep<FabricStat
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L86) `packages/mobile/src/semantics/metro.ts`
 
 ```ts
-export function completeMetroBundle(
-  session: MetroSession,
-): AxisStep<MetroState>;
+export declare function completeMetroBundle(session: MetroSession): AxisStep<MetroState>;
 ```
 
 #### `completeReanimatedAnimation`
@@ -249,7 +233,7 @@ export function completeMetroBundle(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L83) `packages/mobile/src/semantics/reanimated.ts`
 
 ```ts
-export function completeReanimatedAnimation(session: ReanimatedSession): AxisStep<ReanimatedState>;
+export declare function completeReanimatedAnimation(session: ReanimatedSession): AxisStep<ReanimatedState>;
 ```
 
 #### `emitCodegenType`
@@ -257,10 +241,7 @@ export function completeReanimatedAnimation(session: ReanimatedSession): AxisSte
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L73) `packages/mobile/src/semantics/codegen.ts`
 
 ```ts
-export function emitCodegenType(
-  session: CodegenSession,
-  filePath: string,
-): AxisStep<CodegenState>;
+export declare function emitCodegenType(session: CodegenSession, filePath: string): AxisStep<CodegenState>;
 ```
 
 #### `enableConcurrentReact`
@@ -268,9 +249,7 @@ export function emitCodegenType(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L59) `packages/mobile/src/semantics/new-architecture.ts`
 
 ```ts
-export function enableConcurrentReact(
-  session: NewArchitectureSession,
-): AxisStep<NewArchitectureState>;
+export declare function enableConcurrentReact(session: NewArchitectureSession): AxisStep<NewArchitectureState>;
 ```
 
 #### `executeSpawn`
@@ -278,10 +257,7 @@ export function enableConcurrentReact(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L64) `packages/mobile/src/adapters/spawn-executor.ts`
 
 ```ts
-export async function executeSpawn(
-  input: SpawnExecutorInput,
-  spawnFn: SpawnFn = nodeSpawn,
-): Promise<SpawnExecutorResult>;
+export declare function executeSpawn(input: SpawnExecutorInput, spawnFn?: SpawnFn): Promise<SpawnExecutorResult>;
 ```
 
 #### `executeWorklet`
@@ -289,7 +265,7 @@ export async function executeSpawn(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L61) `packages/mobile/src/semantics/reanimated.ts`
 
 ```ts
-export function executeWorklet(session: ReanimatedSession, workletName: string): AxisStep<ReanimatedState>;
+export declare function executeWorklet(session: ReanimatedSession, workletName: string): AxisStep<ReanimatedState>;
 ```
 
 #### `flushAsyncStorageBatch`
@@ -297,7 +273,7 @@ export function executeWorklet(session: ReanimatedSession, workletName: string):
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L79) `packages/mobile/src/semantics/async-storage.ts`
 
 ```ts
-export function flushAsyncStorageBatch(session: AsyncStorageSession): AxisStep<AsyncStorageState>;
+export declare function flushAsyncStorageBatch(session: AsyncStorageSession): AxisStep<AsyncStorageState>;
 ```
 
 #### `generateSpec`
@@ -305,10 +281,9 @@ export function flushAsyncStorageBatch(session: AsyncStorageSession): AxisStep<A
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L61) `packages/mobile/src/semantics/codegen.ts`
 
 ```ts
-export function generateSpec(
-  session: CodegenSession,
-  input: { specCount: number },
-): AxisStep<CodegenState>;
+export declare function generateSpec(session: CodegenSession, input: {
+    specCount: number;
+}): AxisStep<CodegenState>;
 ```
 
 #### `initAsyncStorage`
@@ -316,7 +291,10 @@ export function generateSpec(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L36) `packages/mobile/src/semantics/async-storage.ts`
 
 ```ts
-export function initAsyncStorage(input: { target: MobileTarget; storeId: string }): AsyncStorageSession;
+export declare function initAsyncStorage(input: {
+    target: MobileTarget;
+    storeId: string;
+}): AsyncStorageSession;
 ```
 
 #### `initCodegen`
@@ -324,9 +302,9 @@ export function initAsyncStorage(input: { target: MobileTarget; storeId: string 
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L36) `packages/mobile/src/semantics/codegen.ts`
 
 ```ts
-export function initCodegen(input: {
-  target: MobileTarget;
-  packageName: string;
+export declare function initCodegen(input: {
+    target: MobileTarget;
+    packageName: string;
 }): CodegenSession;
 ```
 
@@ -335,7 +313,10 @@ export function initCodegen(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L36) `packages/mobile/src/semantics/fabric.ts`
 
 ```ts
-export function initFabric(input: { target: MobileTarget; rootId: string }): FabricSession;
+export declare function initFabric(input: {
+    target: MobileTarget;
+    rootId: string;
+}): FabricSession;
 ```
 
 #### `initNavigation`
@@ -343,7 +324,10 @@ export function initFabric(input: { target: MobileTarget; rootId: string }): Fab
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L38) `packages/mobile/src/semantics/navigation.ts`
 
 ```ts
-export function initNavigation(input: { target: MobileTarget; navigatorId: string }): NavigationSession;
+export declare function initNavigation(input: {
+    target: MobileTarget;
+    navigatorId: string;
+}): NavigationSession;
 ```
 
 #### `initNewArchitecture`
@@ -351,9 +335,9 @@ export function initNavigation(input: { target: MobileTarget; navigatorId: strin
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L36) `packages/mobile/src/semantics/new-architecture.ts`
 
 ```ts
-export function initNewArchitecture(input: {
-  target: MobileTarget;
-  appName: string;
+export declare function initNewArchitecture(input: {
+    target: MobileTarget;
+    appName: string;
 }): NewArchitectureSession;
 ```
 
@@ -362,7 +346,10 @@ export function initNewArchitecture(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L36) `packages/mobile/src/semantics/reanimated.ts`
 
 ```ts
-export function initReanimated(input: { target: MobileTarget; animationId: string }): ReanimatedSession;
+export declare function initReanimated(input: {
+    target: MobileTarget;
+    animationId: string;
+}): ReanimatedSession;
 ```
 
 #### `initSecureStorage`
@@ -370,7 +357,10 @@ export function initReanimated(input: { target: MobileTarget; animationId: strin
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L37) `packages/mobile/src/semantics/secure-storage.ts`
 
 ```ts
-export function initSecureStorage(input: { target: MobileTarget; vaultId: string }): SecureStorageSession;
+export declare function initSecureStorage(input: {
+    target: MobileTarget;
+    vaultId: string;
+}): SecureStorageSession;
 ```
 
 #### `initTurboModules`
@@ -378,9 +368,9 @@ export function initSecureStorage(input: { target: MobileTarget; vaultId: string
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L37) `packages/mobile/src/semantics/turbo-modules.ts`
 
 ```ts
-export function initTurboModules(input: {
-  target: MobileTarget;
-  moduleName: string;
+export declare function initTurboModules(input: {
+    target: MobileTarget;
+    moduleName: string;
 }): TurboModulesSession;
 ```
 
@@ -391,7 +381,7 @@ export function initTurboModules(input: {
 v0.6 実 spawn 実行 = env-gate 通過確認 + args 上限 32 + 実 child_process.spawn 実行。 `KIWA_MOBILE_MODE=real` + 対応 axis env 未設定なら throw で fail-closed。 `KIWA_MOBILE_SPAWN=dry-run` の時は v0.5 stub 相当の shape 契約を返す (実 CLI 未 install 環境向け backward compat 経路)。
 
 ```ts
-export async function invokeMobileCli(inv: SpawnInvocation): Promise<SpawnResult>;
+export declare function invokeMobileCli(inv: SpawnInvocation): Promise<SpawnResult>;
 ```
 
 #### `invokeMobileCliWith`
@@ -401,10 +391,7 @@ export async function invokeMobileCli(inv: SpawnInvocation): Promise<SpawnResult
 DI 経路 = spawnFn を注入可能、 test で dummy spawn を差し込んで 決定的挙動を検証できる。 default は nodeSpawn。
 
 ```ts
-export async function invokeMobileCliWith(
-  inv: SpawnInvocation,
-  spawnFn: SpawnFn,
-): Promise<SpawnResult>;
+export declare function invokeMobileCliWith(inv: SpawnInvocation, spawnFn: SpawnFn): Promise<SpawnResult>;
 ```
 
 #### `invokeNativeModule`
@@ -412,10 +399,7 @@ export async function invokeMobileCliWith(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L56) `packages/mobile/src/semantics/react-native.ts`
 
 ```ts
-export function invokeNativeModule(
-  session: ReactNativeSession,
-  moduleName: string,
-): AxisStep<ReactNativeState>;
+export declare function invokeNativeModule(session: ReactNativeSession, moduleName: string): AxisStep<ReactNativeState>;
 ```
 
 #### `invokeTurboMethod`
@@ -423,10 +407,7 @@ export function invokeNativeModule(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L75) `packages/mobile/src/semantics/turbo-modules.ts`
 
 ```ts
-export function invokeTurboMethod(
-  session: TurboModulesSession,
-  methodName: string,
-): AxisStep<TurboModulesState>;
+export declare function invokeTurboMethod(session: TurboModulesSession, methodName: string): AxisStep<TurboModulesState>;
 ```
 
 #### `loadCodegenSchema`
@@ -434,10 +415,7 @@ export function invokeTurboMethod(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L51) `packages/mobile/src/semantics/codegen.ts`
 
 ```ts
-export function loadCodegenSchema(
-  session: CodegenSession,
-  schemaHash: string,
-): AxisStep<CodegenState>;
+export declare function loadCodegenSchema(session: CodegenSession, schemaHash: string): AxisStep<CodegenState>;
 ```
 
 #### `loadExpoBuildConfig`
@@ -445,10 +423,10 @@ export function loadCodegenSchema(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L38) `packages/mobile/src/semantics/expo.ts`
 
 ```ts
-export function loadExpoBuildConfig(input: {
-  target: MobileTarget;
-  appSlug: string;
-  configHash: string;
+export declare function loadExpoBuildConfig(input: {
+    target: MobileTarget;
+    appSlug: string;
+    configHash: string;
 }): ExpoSession;
 ```
 
@@ -457,7 +435,7 @@ export function loadExpoBuildConfig(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/mock-factory.ts#L215) `packages/mobile/src/adapters/mock-factory.ts`
 
 ```ts
-export function makeMockAdapter(axis: MobileAxis): MobileAdapter;
+export declare function makeMockAdapter(axis: MobileAxis): MobileAdapter;
 ```
 
 #### `makeRealAdapter`
@@ -465,7 +443,7 @@ export function makeMockAdapter(axis: MobileAxis): MobileAdapter;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/mock-factory.ts#L225) `packages/mobile/src/adapters/mock-factory.ts`
 
 ```ts
-export function makeRealAdapter(axis: MobileAxis): MobileAdapter;
+export declare function makeRealAdapter(axis: MobileAxis): MobileAdapter;
 ```
 
 #### `markNewArchReady`
@@ -473,9 +451,7 @@ export function makeRealAdapter(axis: MobileAxis): MobileAdapter;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L86) `packages/mobile/src/semantics/new-architecture.ts`
 
 ```ts
-export function markNewArchReady(
-  session: NewArchitectureSession,
-): AxisStep<NewArchitectureState>;
+export declare function markNewArchReady(session: NewArchitectureSession): AxisStep<NewArchitectureState>;
 ```
 
 #### `MOBILE_AXIS_TO_EVENTS`
@@ -499,9 +475,9 @@ export declare const MOCK_ADAPTERS: Record<MobileAxis, MobileAdapter>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L37) `packages/mobile/src/semantics/react-native.ts`
 
 ```ts
-export function mountReactNativeComponent(input: {
-  target: MobileTarget;
-  componentId: string;
+export declare function mountReactNativeComponent(input: {
+    target: MobileTarget;
+    componentId: string;
 }): ReactNativeSession;
 ```
 
@@ -510,7 +486,7 @@ export function mountReactNativeComponent(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L72) `packages/mobile/src/semantics/navigation.ts`
 
 ```ts
-export function navigateDeepLink(session: NavigationSession, url: string): AxisStep<NavigationState>;
+export declare function navigateDeepLink(session: NavigationSession, url: string): AxisStep<NavigationState>;
 ```
 
 #### `openNavigationModal`
@@ -518,7 +494,7 @@ export function navigateDeepLink(session: NavigationSession, url: string): AxisS
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L65) `packages/mobile/src/semantics/navigation.ts`
 
 ```ts
-export function openNavigationModal(session: NavigationSession, modalId: string): AxisStep<NavigationState>;
+export declare function openNavigationModal(session: NavigationSession, modalId: string): AxisStep<NavigationState>;
 ```
 
 #### `providerEventName`
@@ -526,7 +502,7 @@ export function openNavigationModal(session: NavigationSession, modalId: string)
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L230) `packages/mobile/src/semantics/types.ts`
 
 ```ts
-export function providerEventName(target: MobileTarget, neutral: NeutralEventName): string;
+export declare function providerEventName(target: MobileTarget, neutral: NeutralEventName): string;
 ```
 
 #### `pushNavigationStack`
@@ -534,7 +510,7 @@ export function providerEventName(target: MobileTarget, neutral: NeutralEventNam
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L51) `packages/mobile/src/semantics/navigation.ts`
 
 ```ts
-export function pushNavigationStack(session: NavigationSession, screenName: string): AxisStep<NavigationState>;
+export declare function pushNavigationStack(session: NavigationSession, screenName: string): AxisStep<NavigationState>;
 ```
 
 #### `readAsyncStorageItem`
@@ -542,10 +518,7 @@ export function pushNavigationStack(session: NavigationSession, screenName: stri
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L59) `packages/mobile/src/semantics/async-storage.ts`
 
 ```ts
-export function readAsyncStorageItem(
-  session: AsyncStorageSession,
-  key: string,
-): AxisStep<AsyncStorageState>;
+export declare function readAsyncStorageItem(session: AsyncStorageSession, key: string): AxisStep<AsyncStorageState>;
 ```
 
 #### `readMobileRealDriverEnv`
@@ -553,7 +526,7 @@ export function readAsyncStorageItem(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L39) `packages/mobile/src/adapters/real-driver.ts`
 
 ```ts
-export function readMobileRealDriverEnv(env: NodeJS.ProcessEnv = process.env): MobileRealDriverEnv | null;
+export declare function readMobileRealDriverEnv(env?: NodeJS.ProcessEnv): MobileRealDriverEnv | null;
 ```
 
 #### `REAL_ADAPTERS`
@@ -569,10 +542,10 @@ export declare const REAL_ADAPTERS: Record<MobileAxis, MobileAdapter>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L79) `packages/mobile/src/semantics/expo.ts`
 
 ```ts
-export function receivePushNotification(
-  session: ExpoSession,
-  input: { notificationId: string; category: string },
-): AxisStep<ExpoState>;
+export declare function receivePushNotification(session: ExpoSession, input: {
+    notificationId: string;
+    category: string;
+}): AxisStep<ExpoState>;
 ```
 
 #### `recognizeGesture`
@@ -580,10 +553,7 @@ export function receivePushNotification(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L71) `packages/mobile/src/semantics/react-native.ts`
 
 ```ts
-export function recognizeGesture(
-  session: ReactNativeSession,
-  gesture: 'tap' | 'pan' | 'pinch' | 'rotation' | 'swipe',
-): AxisStep<ReactNativeState>;
+export declare function recognizeGesture(session: ReactNativeSession, gesture: 'tap' | 'pan' | 'pinch' | 'rotation' | 'swipe'): AxisStep<ReactNativeState>;
 ```
 
 #### `registerTurboSpec`
@@ -591,10 +561,7 @@ export function recognizeGesture(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L53) `packages/mobile/src/semantics/turbo-modules.ts`
 
 ```ts
-export function registerTurboSpec(
-  session: TurboModulesSession,
-  methods: string[],
-): AxisStep<TurboModulesState>;
+export declare function registerTurboSpec(session: TurboModulesSession, methods: string[]): AxisStep<TurboModulesState>;
 ```
 
 #### `removeAsyncStorageItem`
@@ -602,10 +569,7 @@ export function registerTurboSpec(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L69) `packages/mobile/src/semantics/async-storage.ts`
 
 ```ts
-export function removeAsyncStorageItem(
-  session: AsyncStorageSession,
-  key: string,
-): AxisStep<AsyncStorageState>;
+export declare function removeAsyncStorageItem(session: AsyncStorageSession, key: string): AxisStep<AsyncStorageState>;
 ```
 
 #### `removeCredential`
@@ -613,10 +577,7 @@ export function removeAsyncStorageItem(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L84) `packages/mobile/src/semantics/secure-storage.ts`
 
 ```ts
-export function removeCredential(
-  session: SecureStorageSession,
-  key: string,
-): AxisStep<SecureStorageState>;
+export declare function removeCredential(session: SecureStorageSession, key: string): AxisStep<SecureStorageState>;
 ```
 
 #### `resolveDeepLink`
@@ -624,10 +585,10 @@ export function removeCredential(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L62) `packages/mobile/src/semantics/expo.ts`
 
 ```ts
-export function resolveDeepLink(
-  session: ExpoSession,
-  input: { scheme: string; path: string },
-): AxisStep<ExpoState>;
+export declare function resolveDeepLink(session: ExpoSession, input: {
+    scheme: string;
+    path: string;
+}): AxisStep<ExpoState>;
 ```
 
 #### `resolveMetroModule`
@@ -635,10 +596,7 @@ export function resolveDeepLink(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L56) `packages/mobile/src/semantics/metro.ts`
 
 ```ts
-export function resolveMetroModule(
-  session: MetroSession,
-  modulePath: string,
-): AxisStep<MetroState>;
+export declare function resolveMetroModule(session: MetroSession, modulePath: string): AxisStep<MetroState>;
 ```
 
 #### `retrieveCredential`
@@ -646,10 +604,7 @@ export function resolveMetroModule(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L62) `packages/mobile/src/semantics/secure-storage.ts`
 
 ```ts
-export function retrieveCredential(
-  session: SecureStorageSession,
-  key: string,
-): AxisStep<SecureStorageState>;
+export declare function retrieveCredential(session: SecureStorageSession, key: string): AxisStep<SecureStorageState>;
 ```
 
 #### `runFidelityCheck`
@@ -657,10 +612,7 @@ export function retrieveCredential(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/fidelity-harness.ts#L18) `packages/mobile/src/adapters/fidelity-harness.ts`
 
 ```ts
-export async function runFidelityCheck(
-  axes: MobileAxis[],
-  targets: MobileTarget[] = ['ios', 'android', 'web'],
-): Promise<FidelityDiff[]>;
+export declare function runFidelityCheck(axes: MobileAxis[], targets?: MobileTarget[]): Promise<FidelityDiff[]>;
 ```
 
 #### `sanitizeEnv`
@@ -668,7 +620,7 @@ export async function runFidelityCheck(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L43) `packages/mobile/src/adapters/spawn-executor.ts`
 
 ```ts
-export function sanitizeEnv(command: MobileCliCommand, env: Record<string, string>): Record<string, string>;
+export declare function sanitizeEnv(command: MobileCliCommand, env: Record<string, string>): Record<string, string>;
 ```
 
 #### `scheduleFabricRender`
@@ -676,10 +628,7 @@ export function sanitizeEnv(command: MobileCliCommand, env: Record<string, strin
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L48) `packages/mobile/src/semantics/fabric.ts`
 
 ```ts
-export function scheduleFabricRender(
-  session: FabricSession,
-  priority: 'discrete' | 'continuous' | 'idle',
-): AxisStep<FabricState>;
+export declare function scheduleFabricRender(session: FabricSession, priority: 'discrete' | 'continuous' | 'idle'): AxisStep<FabricState>;
 ```
 
 #### `setAsyncStorageItem`
@@ -687,10 +636,10 @@ export function scheduleFabricRender(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L48) `packages/mobile/src/semantics/async-storage.ts`
 
 ```ts
-export function setAsyncStorageItem(
-  session: AsyncStorageSession,
-  input: { key: string; value: string },
-): AxisStep<AsyncStorageState>;
+export declare function setAsyncStorageItem(session: AsyncStorageSession, input: {
+    key: string;
+    value: string;
+}): AxisStep<AsyncStorageState>;
 ```
 
 #### `startMetroBundle`
@@ -698,9 +647,9 @@ export function setAsyncStorageItem(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L37) `packages/mobile/src/semantics/metro.ts`
 
 ```ts
-export function startMetroBundle(input: {
-  target: MobileTarget;
-  bundleId: string;
+export declare function startMetroBundle(input: {
+    target: MobileTarget;
+    bundleId: string;
 }): MetroSession;
 ```
 
@@ -709,7 +658,7 @@ export function startMetroBundle(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L51) `packages/mobile/src/semantics/new-architecture.ts`
 
 ```ts
-export function startNewArchInit(session: NewArchitectureSession): AxisStep<NewArchitectureState>;
+export declare function startNewArchInit(session: NewArchitectureSession): AxisStep<NewArchitectureState>;
 ```
 
 #### `startReanimatedAnimation`
@@ -717,10 +666,10 @@ export function startNewArchInit(session: NewArchitectureSession): AxisStep<NewA
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L71) `packages/mobile/src/semantics/reanimated.ts`
 
 ```ts
-export function startReanimatedAnimation(
-  session: ReanimatedSession,
-  input: { durationMs: number; easing: 'linear' | 'ease' | 'spring' },
-): AxisStep<ReanimatedState>;
+export declare function startReanimatedAnimation(session: ReanimatedSession, input: {
+    durationMs: number;
+    easing: 'linear' | 'ease' | 'spring';
+}): AxisStep<ReanimatedState>;
 ```
 
 #### `storeCredential`
@@ -728,10 +677,11 @@ export function startReanimatedAnimation(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L49) `packages/mobile/src/semantics/secure-storage.ts`
 
 ```ts
-export function storeCredential(
-  session: SecureStorageSession,
-  input: { key: string; encryptedValue: string; requireBiometric?: boolean },
-): AxisStep<SecureStorageState>;
+export declare function storeCredential(session: SecureStorageSession, input: {
+    key: string;
+    encryptedValue: string;
+    requireBiometric?: boolean;
+}): AxisStep<SecureStorageState>;
 ```
 
 #### `summarizeFidelity`
@@ -739,11 +689,15 @@ export function storeCredential(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/fidelity-harness.ts#L46) `packages/mobile/src/adapters/fidelity-harness.ts`
 
 ```ts
-export function summarizeFidelity(diffs: FidelityDiff[]): {
-  total: number;
-  matched: number;
-  mismatched: number;
-  perAxis: Array<{ axis: MobileAxis; matched: number; total: number }>;
+export declare function summarizeFidelity(diffs: FidelityDiff[]): {
+    total: number;
+    matched: number;
+    mismatched: number;
+    perAxis: Array<{
+        axis: MobileAxis;
+        matched: number;
+        total: number;
+    }>;
 };
 ```
 
@@ -752,7 +706,7 @@ export function summarizeFidelity(diffs: FidelityDiff[]): {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L58) `packages/mobile/src/semantics/navigation.ts`
 
 ```ts
-export function switchNavigationTab(session: NavigationSession, tabName: string): AxisStep<NavigationState>;
+export declare function switchNavigationTab(session: NavigationSession, tabName: string): AxisStep<NavigationState>;
 ```
 
 #### `unmountReactNativeComponent`
@@ -760,9 +714,7 @@ export function switchNavigationTab(session: NavigationSession, tabName: string)
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L86) `packages/mobile/src/semantics/react-native.ts`
 
 ```ts
-export function unmountReactNativeComponent(
-  session: ReactNativeSession,
-): AxisStep<ReactNativeState>;
+export declare function unmountReactNativeComponent(session: ReactNativeSession): AxisStep<ReactNativeState>;
 ```
 
 #### `unregisterTurboModule`
@@ -770,7 +722,7 @@ export function unmountReactNativeComponent(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L93) `packages/mobile/src/semantics/turbo-modules.ts`
 
 ```ts
-export function unregisterTurboModule(session: TurboModulesSession): AxisStep<TurboModulesState>;
+export declare function unregisterTurboModule(session: TurboModulesSession): AxisStep<TurboModulesState>;
 ```
 
 #### `updateFabricPriority`
@@ -778,10 +730,7 @@ export function unregisterTurboModule(session: TurboModulesSession): AxisStep<Tu
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L70) `packages/mobile/src/semantics/fabric.ts`
 
 ```ts
-export function updateFabricPriority(
-  session: FabricSession,
-  priority: 'discrete' | 'continuous' | 'idle',
-): AxisStep<FabricState>;
+export declare function updateFabricPriority(session: FabricSession, priority: 'discrete' | 'continuous' | 'idle'): AxisStep<FabricState>;
 ```
 
 #### `updateSharedValue`
@@ -789,10 +738,10 @@ export function updateFabricPriority(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L48) `packages/mobile/src/semantics/reanimated.ts`
 
 ```ts
-export function updateSharedValue(
-  session: ReanimatedSession,
-  input: { name: string; value: number },
-): AxisStep<ReanimatedState>;
+export declare function updateSharedValue(session: ReanimatedSession, input: {
+    name: string;
+    value: number;
+}): AxisStep<ReanimatedState>;
 ```
 
 ### 型
@@ -803,10 +752,10 @@ export function updateSharedValue(
 
 ```ts
 export interface AdapterInvocation {
-  scanId: string;
-  target: MobileTarget;
-  mode: AdapterMode;
-  metadata?: Record<string, string | number | boolean>;
+    scanId: string;
+    target: MobileTarget;
+    mode: AdapterMode;
+    metadata?: Record<string, string | number | boolean>;
 }
 ```
 
@@ -824,14 +773,14 @@ export type AdapterMode = 'mock' | 'real';
 
 ```ts
 export interface AdapterResult {
-  axis: MobileAxis;
-  target: MobileTarget;
-  mode: AdapterMode;
-  completed: boolean;
-  eventCount: number;
-  durationMs: number;
-  history: AxisStep<string>[];
-  neutralEvents: NeutralEventName[];
+    axis: MobileAxis;
+    target: MobileTarget;
+    mode: AdapterMode;
+    completed: boolean;
+    eventCount: number;
+    durationMs: number;
+    history: AxisStep<string>[];
+    neutralEvents: NeutralEventName[];
 }
 ```
 
@@ -841,12 +790,12 @@ export interface AdapterResult {
 
 ```ts
 export interface AsyncStorageSession {
-  target: MobileTarget;
-  storeId: string;
-  state: AsyncStorageState;
-  items: Map<string, string>;
-  operations: number;
-  history: AxisStep<AsyncStorageState>[];
+    target: MobileTarget;
+    storeId: string;
+    state: AsyncStorageState;
+    items: Map<string, string>;
+    operations: number;
+    history: AxisStep<AsyncStorageState>[];
 }
 ```
 
@@ -866,10 +815,10 @@ export type AsyncStorageState = 'idle' | 'set' | 'read' | 'removed' | 'batch-flu
 
 ```ts
 export interface AxisStep<TState extends string> {
-  neutralEvent: NeutralEventName;
-  providerEvent: string;
-  state: TState;
-  metadata: Record<string, string | number | boolean>;
+    neutralEvent: NeutralEventName;
+    providerEvent: string;
+    state: TState;
+    metadata: Record<string, string | number | boolean>;
 }
 ```
 
@@ -879,12 +828,12 @@ export interface AxisStep<TState extends string> {
 
 ```ts
 export interface CodegenSession {
-  target: MobileTarget;
-  packageName: string;
-  state: CodegenState;
-  schemaHash: string | null;
-  emittedFiles: string[];
-  history: AxisStep<CodegenState>[];
+    target: MobileTarget;
+    packageName: string;
+    state: CodegenState;
+    schemaHash: string | null;
+    emittedFiles: string[];
+    history: AxisStep<CodegenState>[];
 }
 ```
 
@@ -904,13 +853,13 @@ export type CodegenState = 'idle' | 'schema-loaded' | 'spec-generated' | 'type-e
 
 ```ts
 export interface ExpoSession {
-  target: MobileTarget;
-  appSlug: string;
-  state: ExpoState;
-  resolvedLinks: string[];
-  pushNotifications: string[];
-  configHash: string | null;
-  history: AxisStep<ExpoState>[];
+    target: MobileTarget;
+    appSlug: string;
+    state: ExpoState;
+    resolvedLinks: string[];
+    pushNotifications: string[];
+    configHash: string | null;
+    history: AxisStep<ExpoState>[];
 }
 ```
 
@@ -930,12 +879,12 @@ export type ExpoState = 'idle' | 'config-loaded' | 'link-resolved' | 'push-recei
 
 ```ts
 export interface FabricSession {
-  target: MobileTarget;
-  rootId: string;
-  state: FabricState;
-  scheduledPriority: 'discrete' | 'continuous' | 'idle' | null;
-  shadowNodeCount: number;
-  history: AxisStep<FabricState>[];
+    target: MobileTarget;
+    rootId: string;
+    state: FabricState;
+    scheduledPriority: 'discrete' | 'continuous' | 'idle' | null;
+    shadowNodeCount: number;
+    history: AxisStep<FabricState>[];
 }
 ```
 
@@ -955,9 +904,9 @@ export type FabricState = 'idle' | 'scheduled' | 'shadow-committed' | 'priority-
 
 ```ts
 export interface FidelityCoverage {
-  providers: MobileTarget[];
-  axes: MobileAxis[];
-  rows: FidelityRow[];
+    providers: MobileTarget[];
+    axes: MobileAxis[];
+    rows: FidelityRow[];
 }
 ```
 
@@ -967,12 +916,12 @@ export interface FidelityCoverage {
 
 ```ts
 export interface FidelityDiff {
-  axis: MobileAxis;
-  target: MobileTarget;
-  neutralEventsMatch: boolean;
-  completedMatch: boolean;
-  mockNeutralEvents: string[];
-  realNeutralEvents: string[];
+    axis: MobileAxis;
+    target: MobileTarget;
+    neutralEventsMatch: boolean;
+    completedMatch: boolean;
+    mockNeutralEvents: string[];
+    realNeutralEvents: string[];
 }
 ```
 
@@ -982,10 +931,10 @@ export interface FidelityDiff {
 
 ```ts
 export interface FidelityRow {
-  provider: MobileTarget;
-  axis: MobileAxis;
-  neutralEvents: NeutralEventName[];
-  providerEvents: string[];
+    provider: MobileTarget;
+    axis: MobileAxis;
+    neutralEvents: NeutralEventName[];
+    providerEvents: string[];
 }
 ```
 
@@ -995,12 +944,12 @@ export interface FidelityRow {
 
 ```ts
 export interface MetroSession {
-  target: MobileTarget;
-  bundleId: string;
-  state: MetroState;
-  resolvedModules: string[];
-  hmrUpdateCount: number;
-  history: AxisStep<MetroState>[];
+    target: MobileTarget;
+    bundleId: string;
+    state: MetroState;
+    resolvedModules: string[];
+    hmrUpdateCount: number;
+    history: AxisStep<MetroState>[];
 }
 ```
 
@@ -1020,8 +969,8 @@ export type MetroState = 'idle' | 'bundling' | 'resolved' | 'hmr-applied' | 'com
 
 ```ts
 export interface MobileAdapter {
-  axis: MobileAxis;
-  scan(input: AdapterInvocation): Promise<AdapterResult>;
+    axis: MobileAxis;
+    scan(input: AdapterInvocation): Promise<AdapterResult>;
 }
 ```
 
@@ -1030,20 +979,7 @@ export interface MobileAdapter {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L10) `packages/mobile/src/semantics/types.ts`
 
 ```ts
-export type MobileAxis =
-  | 'react-native'
-  | 'expo'
-  | 'metro'
-  // v1.51 advanced II
-  | 'navigation'
-  | 'reanimated'
-  | 'async-storage'
-  | 'secure-storage'
-  // v1.52 advanced III (New Architecture)
-  | 'fabric'
-  | 'turbo-modules'
-  | 'codegen'
-  | 'new-architecture';
+export type MobileAxis = 'react-native' | 'expo' | 'metro' | 'navigation' | 'reanimated' | 'async-storage' | 'secure-storage' | 'fabric' | 'turbo-modules' | 'codegen' | 'new-architecture';
 ```
 
 #### `MobileCliCommand`
@@ -1051,13 +987,7 @@ export type MobileAxis =
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L14) `packages/mobile/src/adapters/spawn-driver.ts`
 
 ```ts
-export type MobileCliCommand =
-  | 'expo build'
-  | 'metro bundle'
-  | 'codegen run'
-  | 'react-native start'
-  | 'pod install'
-  | 'gradle build';
+export type MobileCliCommand = 'expo build' | 'metro bundle' | 'codegen run' | 'react-native start' | 'pod install' | 'gradle build';
 ```
 
 #### `MobileRealDriverAxis`
@@ -1067,13 +997,7 @@ export type MobileCliCommand =
 Mobile real driver env-gate (v0.2)。 v1.51 で real CLI (Expo EAS + Metro real bundle + React Navigation deep link verify + Reanimated JSI worklet + AsyncStorage / MMKV native + Keychain / Keystore native) 呼出を stub 経由で隠蔽する契約。 env `KIWA_MOBILE_MODE=real` + 対応 URL env が全揃った時のみ real 呼出。 それ以外は explicit throw で fail-closed。
 
 ```ts
-export type MobileRealDriverAxis =
-  | 'expo-eas'
-  | 'metro'
-  | 'navigation'
-  | 'reanimated'
-  | 'async-storage'
-  | 'secure-storage';
+export type MobileRealDriverAxis = 'expo-eas' | 'metro' | 'navigation' | 'reanimated' | 'async-storage' | 'secure-storage';
 ```
 
 #### `MobileRealDriverEnv`
@@ -1082,13 +1006,13 @@ export type MobileRealDriverAxis =
 
 ```ts
 export interface MobileRealDriverEnv {
-  mode: 'real';
-  expoEasUrl?: string;
-  metroUrl?: string;
-  navigationUrl?: string;
-  reanimatedUrl?: string;
-  asyncStorageUrl?: string;
-  secureStorageUrl?: string;
+    mode: 'real';
+    expoEasUrl?: string;
+    metroUrl?: string;
+    navigationUrl?: string;
+    reanimatedUrl?: string;
+    asyncStorageUrl?: string;
+    secureStorageUrl?: string;
 }
 ```
 
@@ -1106,13 +1030,13 @@ export type MobileTarget = 'ios' | 'android' | 'web';
 
 ```ts
 export interface NavigationSession {
-  target: MobileTarget;
-  navigatorId: string;
-  state: NavigationState;
-  stackHistory: string[];
-  activeTab: string | null;
-  activeModals: string[];
-  history: AxisStep<NavigationState>[];
+    target: MobileTarget;
+    navigatorId: string;
+    state: NavigationState;
+    stackHistory: string[];
+    activeTab: string | null;
+    activeModals: string[];
+    history: AxisStep<NavigationState>[];
 }
 ```
 
@@ -1131,62 +1055,7 @@ export type NavigationState = 'idle' | 'stack-pushed' | 'tab-switched' | 'modal-
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L25) `packages/mobile/src/semantics/types.ts`
 
 ```ts
-export type NeutralEventName =
-  // React Native axis (component + native module + gesture)
-  | 'rn.component_mounted'
-  | 'rn.native_module_invoked'
-  | 'rn.gesture_recognized'
-  | 'rn.component_unmounted'
-  // Expo axis (build config + linking + push)
-  | 'expo.build_config_loaded'
-  | 'expo.deep_link_resolved'
-  | 'expo.push_notification_received'
-  | 'expo.build_completed'
-  // Metro axis (bundler + HMR + resolver)
-  | 'metro.bundle_started'
-  | 'metro.module_resolved'
-  | 'metro.hmr_applied'
-  | 'metro.bundle_completed'
-  // v1.51 navigation axis (React Navigation / Expo Router)
-  | 'navigation.stack_pushed'
-  | 'navigation.tab_switched'
-  | 'navigation.modal_opened'
-  | 'navigation.deep_link_navigated'
-  // v1.51 reanimated axis (shared value + worklet)
-  | 'reanimated.shared_value_updated'
-  | 'reanimated.worklet_executed'
-  | 'reanimated.animation_started'
-  | 'reanimated.animation_completed'
-  // v1.51 async-storage axis (AsyncStorage / MMKV)
-  | 'async-storage.item_set'
-  | 'async-storage.item_read'
-  | 'async-storage.item_removed'
-  | 'async-storage.batch_flushed'
-  // v1.51 secure-storage axis (Keychain / EncryptedStorage / Keystore)
-  | 'secure-storage.credential_stored'
-  | 'secure-storage.credential_retrieved'
-  | 'secure-storage.biometric_challenged'
-  | 'secure-storage.credential_removed'
-  // v1.52 fabric axis (concurrent renderer + priority + shadow tree)
-  | 'fabric.render_scheduled'
-  | 'fabric.shadow_tree_committed'
-  | 'fabric.priority_updated'
-  | 'fabric.mount_completed'
-  // v1.52 turbo-modules axis (typed native module + JSI + spec generation)
-  | 'turbo-modules.spec_registered'
-  | 'turbo-modules.jsi_bound'
-  | 'turbo-modules.method_invoked'
-  | 'turbo-modules.unregistered'
-  // v1.52 codegen axis (typed bridge + schema-first + type generation)
-  | 'codegen.schema_loaded'
-  | 'codegen.spec_generated'
-  | 'codegen.type_emitted'
-  | 'codegen.build_completed'
-  // v1.52 new-architecture axis (async init + concurrent React + interop layer)
-  | 'new-architecture.init_started'
-  | 'new-architecture.concurrent_enabled'
-  | 'new-architecture.interop_bridged'
-  | 'new-architecture.ready';
+export type NeutralEventName = 'rn.component_mounted' | 'rn.native_module_invoked' | 'rn.gesture_recognized' | 'rn.component_unmounted' | 'expo.build_config_loaded' | 'expo.deep_link_resolved' | 'expo.push_notification_received' | 'expo.build_completed' | 'metro.bundle_started' | 'metro.module_resolved' | 'metro.hmr_applied' | 'metro.bundle_completed' | 'navigation.stack_pushed' | 'navigation.tab_switched' | 'navigation.modal_opened' | 'navigation.deep_link_navigated' | 'reanimated.shared_value_updated' | 'reanimated.worklet_executed' | 'reanimated.animation_started' | 'reanimated.animation_completed' | 'async-storage.item_set' | 'async-storage.item_read' | 'async-storage.item_removed' | 'async-storage.batch_flushed' | 'secure-storage.credential_stored' | 'secure-storage.credential_retrieved' | 'secure-storage.biometric_challenged' | 'secure-storage.credential_removed' | 'fabric.render_scheduled' | 'fabric.shadow_tree_committed' | 'fabric.priority_updated' | 'fabric.mount_completed' | 'turbo-modules.spec_registered' | 'turbo-modules.jsi_bound' | 'turbo-modules.method_invoked' | 'turbo-modules.unregistered' | 'codegen.schema_loaded' | 'codegen.spec_generated' | 'codegen.type_emitted' | 'codegen.build_completed' | 'new-architecture.init_started' | 'new-architecture.concurrent_enabled' | 'new-architecture.interop_bridged' | 'new-architecture.ready';
 ```
 
 #### `NewArchitectureSession`
@@ -1195,12 +1064,12 @@ export type NeutralEventName =
 
 ```ts
 export interface NewArchitectureSession {
-  target: MobileTarget;
-  appName: string;
-  state: NewArchitectureState;
-  concurrentEnabled: boolean;
-  bridgedLegacyModules: string[];
-  history: AxisStep<NewArchitectureState>[];
+    target: MobileTarget;
+    appName: string;
+    state: NewArchitectureState;
+    concurrentEnabled: boolean;
+    bridgedLegacyModules: string[];
+    history: AxisStep<NewArchitectureState>[];
 }
 ```
 
@@ -1220,12 +1089,12 @@ export type NewArchitectureState = 'idle' | 'initializing' | 'concurrent-enabled
 
 ```ts
 export interface ReactNativeSession {
-  target: MobileTarget;
-  componentId: string;
-  state: ReactNativeState;
-  nativeModuleInvocations: number;
-  gesturesRecognized: string[];
-  history: AxisStep<ReactNativeState>[];
+    target: MobileTarget;
+    componentId: string;
+    state: ReactNativeState;
+    nativeModuleInvocations: number;
+    gesturesRecognized: string[];
+    history: AxisStep<ReactNativeState>[];
 }
 ```
 
@@ -1245,12 +1114,12 @@ export type ReactNativeState = 'idle' | 'mounted' | 'native-invoked' | 'gesture-
 
 ```ts
 export interface ReanimatedSession {
-  target: MobileTarget;
-  animationId: string;
-  state: ReanimatedState;
-  sharedValueUpdates: number;
-  workletExecutions: number;
-  history: AxisStep<ReanimatedState>[];
+    target: MobileTarget;
+    animationId: string;
+    state: ReanimatedState;
+    sharedValueUpdates: number;
+    workletExecutions: number;
+    history: AxisStep<ReanimatedState>[];
 }
 ```
 
@@ -1270,12 +1139,12 @@ export type ReanimatedState = 'idle' | 'value-updated' | 'worklet-run' | 'animat
 
 ```ts
 export interface SecureStorageSession {
-  target: MobileTarget;
-  vaultId: string;
-  state: SecureStorageState;
-  credentials: Map<string, string>;
-  biometricChallenges: number;
-  history: AxisStep<SecureStorageState>[];
+    target: MobileTarget;
+    vaultId: string;
+    state: SecureStorageState;
+    credentials: Map<string, string>;
+    biometricChallenges: number;
+    history: AxisStep<SecureStorageState>[];
 }
 ```
 
@@ -1295,12 +1164,12 @@ export type SecureStorageState = 'idle' | 'stored' | 'retrieved' | 'biometric-ch
 
 ```ts
 export interface SpawnExecutorInput {
-  command: MobileCliCommand;
-  args: string[];
-  env: Record<string, string>;
-  cwd?: string;
-  timeoutMs?: number;
-  maxBufferBytes?: number;
+    command: MobileCliCommand;
+    args: string[];
+    env: Record<string, string>;
+    cwd?: string;
+    timeoutMs?: number;
+    maxBufferBytes?: number;
 }
 ```
 
@@ -1310,12 +1179,12 @@ export interface SpawnExecutorInput {
 
 ```ts
 export interface SpawnExecutorResult {
-  stdout: string;
-  stderr: string;
-  exitCode: number | null;
-  signal: NodeJS.Signals | null;
-  timedOut: boolean;
-  durationMs: number;
+    stdout: string;
+    stderr: string;
+    exitCode: number | null;
+    signal: NodeJS.Signals | null;
+    timedOut: boolean;
+    durationMs: number;
 }
 ```
 
@@ -1333,10 +1202,10 @@ export type SpawnFn = typeof nodeSpawn;
 
 ```ts
 export interface SpawnInvocation {
-  command: MobileCliCommand;
-  args: string[];
-  env: Record<string, string>;
-  cwd?: string;
+    command: MobileCliCommand;
+    args: string[];
+    env: Record<string, string>;
+    cwd?: string;
 }
 ```
 
@@ -1346,13 +1215,13 @@ export interface SpawnInvocation {
 
 ```ts
 export interface SpawnResult {
-  command: MobileCliCommand;
-  args: string[];
-  invoked: boolean;
-  exitCode: number | null;
-  stdout: string;
-  stderr: string;
-  durationMs: number;
+    command: MobileCliCommand;
+    args: string[];
+    invoked: boolean;
+    exitCode: number | null;
+    stdout: string;
+    stderr: string;
+    durationMs: number;
 }
 ```
 
@@ -1362,13 +1231,13 @@ export interface SpawnResult {
 
 ```ts
 export interface TurboModulesSession {
-  target: MobileTarget;
-  moduleName: string;
-  state: TurboModulesState;
-  registeredMethods: string[];
-  methodInvocations: number;
-  jsiBound: boolean;
-  history: AxisStep<TurboModulesState>[];
+    target: MobileTarget;
+    moduleName: string;
+    state: TurboModulesState;
+    registeredMethods: string[];
+    methodInvocations: number;
+    jsiBound: boolean;
+    history: AxisStep<TurboModulesState>[];
 }
 ```
 

@@ -36,7 +36,7 @@ generic dispatch は一致時に `{ matched: true }`、不一致時に `{ matche
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -45,10 +45,7 @@ generic dispatch は一致時に `{ matched: true }`、不一致時に `{ matche
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L111) `packages/ruby/src/resilience.ts`
 
 ```ts
-export async function batchOperate<TIn, TOut>(
-  items: readonly BatchItem<TIn>[],
-  runner: (item: BatchItem<TIn>) => Promise<TOut>,
-): Promise<BatchResult[]>;
+export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
 #### `captureActiveRecord`
@@ -58,7 +55,7 @@ export async function batchOperate<TIn, TOut>(
 activeRecordLog の集計 snapshot。 op 別 / model 別 count を assertion で使える shape で 露出、 「Post.where 3 回 + User.find 1 回」 等の invariant を書ける。
 
 ```ts
-export function captureActiveRecord(env: RubyAppEnv): ActiveRecordSnapshot;
+export declare function captureActiveRecord(env: RubyAppEnv): ActiveRecordSnapshot;
 ```
 
 #### `createRubyAppEnv`
@@ -68,7 +65,7 @@ export function captureActiveRecord(env: RubyAppEnv): ActiveRecordSnapshot;
 Framework 別の request 転送先を返す minimal mock。 Rails は Sinatra 系より complex な before_action chain を持つが、 統一 shape に落とせる範囲は同一 interface で扱う。
 
 ```ts
-export function createRubyAppEnv(options: CreateRubyAppEnvOptions = {}): RubyAppEnv;
+export declare function createRubyAppEnv(options?: CreateRubyAppEnvOptions): RubyAppEnv;
 ```
 
 #### `dispatchGenericRequest`
@@ -78,10 +75,7 @@ export function createRubyAppEnv(options: CreateRubyAppEnvOptions = {}): RubyApp
 Sinatra / Roda / Hanami の統一 request dispatch。 routes を lookup し、 matched なら handler 実行、 unmatched なら 404 相当 default response を返す。
 
 ```ts
-export async function dispatchGenericRequest(
-  env: RubyAppEnv,
-  req: RubyRequest,
-): Promise<GenericDispatchResult>;
+export declare function dispatchGenericRequest(env: RubyAppEnv, req: RubyRequest): Promise<GenericDispatchResult>;
 ```
 
 #### `dispatchRailsRequest`
@@ -91,11 +85,7 @@ export async function dispatchGenericRequest(
 Rails controller の dispatch simulation。 before_action → action → render の chain を 順に走らせ、 redirect_to() 相当は throw で捕捉する。 実 Rails の render 経路 (json / text / partial) を統一 shape で捕捉して assertion 用に露出する。
 
 ```ts
-export async function dispatchRailsRequest(
-  env: RubyAppEnv,
-  req: RubyRequest,
-  controller: RailsControllerAction,
-): Promise<RailsDispatchResult>;
+export declare function dispatchRailsRequest(env: RubyAppEnv, req: RubyRequest, controller: RailsControllerAction): Promise<RailsDispatchResult>;
 ```
 
 #### `renderERB`
@@ -105,7 +95,7 @@ export async function dispatchRailsRequest(
 ERB `&lt;%= name %&gt;` interpolation の minimal mock。 実 ERB engine の control flow (`&lt;% if %&gt;` 等) は未対応、 pure variable substitution のみ。
 
 ```ts
-export function renderERB(template: string, locals: ERBLocals): ERBRenderResult;
+export declare function renderERB(template: string, locals: ERBLocals): ERBRenderResult;
 ```
 
 #### `withCircuitBreaker`
@@ -113,7 +103,7 @@ export function renderERB(template: string, locals: ERBLocals): ERBRenderResult;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L64) `packages/ruby/src/resilience.ts`
 
 ```ts
-export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
+export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
 #### `withIdempotencyKey`
@@ -121,7 +111,7 @@ export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBrea
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L101) `packages/ruby/src/resilience.ts`
 
 ```ts
-export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
+export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
 #### `withObservability`
@@ -129,7 +119,7 @@ export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: st
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L86) `packages/ruby/src/resilience.ts`
 
 ```ts
-export function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
+export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
 #### `withRateLimit`
@@ -137,7 +127,7 @@ export function withObservability<T>(name: string, fn: () => Promise<T>, hook: O
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L50) `packages/ruby/src/resilience.ts`
 
 ```ts
-export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
+export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
 #### `withRetry`
@@ -145,7 +135,7 @@ export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L20) `packages/ruby/src/resilience.ts`
 
 ```ts
-export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
+export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
 #### `withTimeout`
@@ -153,7 +143,7 @@ export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () =>
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L40) `packages/ruby/src/resilience.ts`
 
 ```ts
-export function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
+export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
 ```
 
 ### 型
@@ -172,10 +162,10 @@ export type ActiveRecordOp = 'find' | 'where' | 'create' | 'update' | 'destroy' 
 
 ```ts
 export interface ActiveRecordQuery {
-  op: ActiveRecordOp;
-  model: string;
-  args: unknown;
-  sql?: string;
+    op: ActiveRecordOp;
+    model: string;
+    args: unknown;
+    sql?: string;
 }
 ```
 
@@ -185,10 +175,10 @@ export interface ActiveRecordQuery {
 
 ```ts
 export interface ActiveRecordSnapshot {
-  total: number;
-  byOp: Record<ActiveRecordOp, number>;
-  byModel: Record<string, number>;
-  queries: ActiveRecordQuery[];
+    total: number;
+    byOp: Record<ActiveRecordOp, number>;
+    byModel: Record<string, number>;
+    queries: ActiveRecordQuery[];
 }
 ```
 
@@ -197,7 +187,10 @@ export interface ActiveRecordSnapshot {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L17) `packages/ruby/src/resilience.ts`
 
 ```ts
-export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
+export interface BatchItem<TIn = unknown> {
+    name: string;
+    input: TIn;
+}
 ```
 
 #### `BatchResult`
@@ -205,7 +198,14 @@ export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L18) `packages/ruby/src/resilience.ts`
 
 ```ts
-export interface BatchResult { ok: boolean; output?: unknown; error?: { code: string; message: string }; }
+export interface BatchResult {
+    ok: boolean;
+    output?: unknown;
+    error?: {
+        code: string;
+        message: string;
+    };
+}
 ```
 
 #### `CircuitBreakerOptions`
@@ -213,7 +213,10 @@ export interface BatchResult { ok: boolean; output?: unknown; error?: { code: st
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L11) `packages/ruby/src/resilience.ts`
 
 ```ts
-export interface CircuitBreakerOptions { failureThreshold: number; resetMs: number; }
+export interface CircuitBreakerOptions {
+    failureThreshold: number;
+    resetMs: number;
+}
 ```
 
 #### `CreateRubyAppEnvOptions`
@@ -222,10 +225,10 @@ export interface CircuitBreakerOptions { failureThreshold: number; resetMs: numb
 
 ```ts
 export interface CreateRubyAppEnvOptions {
-  framework?: RubyFramework;
-  routes?: RubyRoute[];
-  initialSession?: Record<string, unknown>;
-  initialCookies?: Record<string, string>;
+    framework?: RubyFramework;
+    routes?: RubyRoute[];
+    initialSession?: Record<string, unknown>;
+    initialCookies?: Record<string, string>;
 }
 ```
 
@@ -243,9 +246,9 @@ export type ERBLocals = Record<string, string | number | boolean>;
 
 ```ts
 export interface ERBRenderResult {
-  html: string;
-  variables: string[];
-  missing: string[];
+    html: string;
+    variables: string[];
+    missing: string[];
 }
 ```
 
@@ -255,9 +258,9 @@ export interface ERBRenderResult {
 
 ```ts
 export interface GenericDispatchResult {
-  response: RubyResponse;
-  matched: boolean;
-  framework: RubyAppEnv['framework'];
+    response: RubyResponse;
+    matched: boolean;
+    framework: RubyAppEnv['framework'];
 }
 ```
 
@@ -267,9 +270,9 @@ export interface GenericDispatchResult {
 
 ```ts
 export interface ObservabilityHook {
-  onStart?: (name: string, input?: unknown) => void;
-  onSuccess?: (name: string, output: unknown, durationMs: number) => void;
-  onError?: (name: string, err: unknown, durationMs: number) => void;
+    onStart?: (name: string, input?: unknown) => void;
+    onSuccess?: (name: string, output: unknown, durationMs: number) => void;
+    onError?: (name: string, err: unknown, durationMs: number) => void;
 }
 ```
 
@@ -279,10 +282,12 @@ export interface ObservabilityHook {
 
 ```ts
 export interface RailsControllerAction {
-  render?: (call: Omit<RailsRenderCall, 'status'> & { status?: number }) => RubyResponse;
-  redirectTo?: (url: string, status?: number) => never;
-  beforeActions?: Array<(req: RubyRequest, env: RubyAppEnv) => void | Promise<void>>;
-  action: (req: RubyRequest, env: RubyAppEnv) => RubyResponse | Promise<RubyResponse>;
+    render?: (call: Omit<RailsRenderCall, 'status'> & {
+        status?: number;
+    }) => RubyResponse;
+    redirectTo?: (url: string, status?: number) => never;
+    beforeActions?: Array<(req: RubyRequest, env: RubyAppEnv) => void | Promise<void>>;
+    action: (req: RubyRequest, env: RubyAppEnv) => RubyResponse | Promise<RubyResponse>;
 }
 ```
 
@@ -292,10 +297,10 @@ export interface RailsControllerAction {
 
 ```ts
 export interface RailsDispatchResult {
-  response: RubyResponse;
-  redirect?: RailsRedirectSignal;
-  renderCalls: RailsRenderCall[];
-  beforeActionCount: number;
+    response: RubyResponse;
+    redirect?: RailsRedirectSignal;
+    renderCalls: RailsRenderCall[];
+    beforeActionCount: number;
 }
 ```
 
@@ -305,9 +310,9 @@ export interface RailsDispatchResult {
 
 ```ts
 export interface RailsRedirectSignal {
-  readonly [RAILS_REDIRECT_SYMBOL]: true;
-  url: string;
-  status: number;
+    readonly [RAILS_REDIRECT_SYMBOL]: true;
+    url: string;
+    status: number;
 }
 ```
 
@@ -317,10 +322,10 @@ export interface RailsRedirectSignal {
 
 ```ts
 export interface RailsRenderCall {
-  template?: string;
-  json?: unknown;
-  text?: string;
-  status: number;
+    template?: string;
+    json?: unknown;
+    text?: string;
+    status: number;
 }
 ```
 
@@ -329,7 +334,10 @@ export interface RailsRenderCall {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L10) `packages/ruby/src/resilience.ts`
 
 ```ts
-export interface RateLimitOptions { maxRequests: number; windowMs: number; }
+export interface RateLimitOptions {
+    maxRequests: number;
+    windowMs: number;
+}
 ```
 
 #### `RetryOptions`
@@ -338,9 +346,9 @@ export interface RateLimitOptions { maxRequests: number; windowMs: number; }
 
 ```ts
 export interface RetryOptions {
-  maxAttempts: number;
-  backoffMs?: number;
-  retryOn?: (err: unknown) => boolean;
+    maxAttempts: number;
+    backoffMs?: number;
+    retryOn?: (err: unknown) => boolean;
 }
 ```
 
@@ -350,15 +358,15 @@ export interface RetryOptions {
 
 ```ts
 export interface RubyAppEnv {
-  framework: RubyFramework;
-  routes: RubyRoute[];
-  session: Record<string, unknown>;
-  cookies: Record<string, string>;
-  activeRecordLog: ActiveRecordQuery[];
-  addRoute: (route: RubyRoute) => void;
-  matchRoute: (method: RubyRequest['method'], path: string) => RubyRoute | undefined;
-  recordAR: (query: ActiveRecordQuery) => void;
-  clear: () => void;
+    framework: RubyFramework;
+    routes: RubyRoute[];
+    session: Record<string, unknown>;
+    cookies: Record<string, string>;
+    activeRecordLog: ActiveRecordQuery[];
+    addRoute: (route: RubyRoute) => void;
+    matchRoute: (method: RubyRequest['method'], path: string) => RubyRoute | undefined;
+    recordAR: (query: ActiveRecordQuery) => void;
+    clear: () => void;
 }
 ```
 
@@ -376,13 +384,13 @@ export type RubyFramework = 'rails' | 'sinatra' | 'roda' | 'hanami';
 
 ```ts
 export interface RubyRequest {
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  path: string;
-  params?: Record<string, string | number | boolean>;
-  headers?: Record<string, string>;
-  cookies?: Record<string, string>;
-  body?: unknown;
-  session?: Record<string, unknown>;
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    path: string;
+    params?: Record<string, string | number | boolean>;
+    headers?: Record<string, string>;
+    cookies?: Record<string, string>;
+    body?: unknown;
+    session?: Record<string, unknown>;
 }
 ```
 
@@ -392,11 +400,11 @@ export interface RubyRequest {
 
 ```ts
 export interface RubyResponse {
-  status: number;
-  body: string;
-  headers: Record<string, string>;
-  cookies: Record<string, string>;
-  session: Record<string, unknown>;
+    status: number;
+    body: string;
+    headers: Record<string, string>;
+    cookies: Record<string, string>;
+    session: Record<string, unknown>;
 }
 ```
 
@@ -406,9 +414,9 @@ export interface RubyResponse {
 
 ```ts
 export interface RubyRoute {
-  method: RubyRequest['method'];
-  path: string;
-  handler: RubyRouteHandler;
+    method: RubyRequest['method'];
+    path: string;
+    handler: RubyRouteHandler;
 }
 ```
 
@@ -425,6 +433,8 @@ export type RubyRouteHandler = (req: RubyRequest, env: RubyAppEnv) => RubyRespon
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L9) `packages/ruby/src/resilience.ts`
 
 ```ts
-export interface TimeoutOptions { ms: number; }
+export interface TimeoutOptions {
+    ms: number;
+}
 ```
 <!-- kiwa-public-api:end -->

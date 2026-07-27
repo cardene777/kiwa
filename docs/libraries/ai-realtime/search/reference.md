@@ -85,7 +85,7 @@ real driver helper は endpoint と API key の設定を作るだけで検索要
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/search/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/search/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -94,7 +94,7 @@ real driver helper は endpoint と API key の設定を作るだけで検索要
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/search/src/real-driver.ts#L49) `packages/search/src/real-driver.ts`
 
 ```ts
-export function apiKeyEnvVar(backend: SearchBackend): string;
+export declare function apiKeyEnvVar(backend: SearchBackend): string;
 ```
 
 #### `buildRealDriverConfig`
@@ -102,11 +102,7 @@ export function apiKeyEnvVar(backend: SearchBackend): string;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/search/src/real-driver.ts#L77) `packages/search/src/real-driver.ts`
 
 ```ts
-export function buildRealDriverConfig(
-  backend: SearchBackend,
-  overrides: Partial<Omit<RealDriverConfig, 'backend'>> = {},
-  env: NodeJS.ProcessEnv = process.env,
-): RealDriverConfig;
+export declare function buildRealDriverConfig(backend: SearchBackend, overrides?: Partial<Omit<RealDriverConfig, 'backend'>>, env?: NodeJS.ProcessEnv): RealDriverConfig;
 ```
 
 #### `createAlgoliaMock`
@@ -116,7 +112,9 @@ export function buildRealDriverConfig(
 Algolia mock. Real Algolia: search-only + admin API keys, per-index settings (searchableAttributes / customRanking). Typo tolerance ON by default (Algolia default). Filter syntax on real Algolia is `field:value`; the mock uses the plain object shape shared across the three providers.
 
 ```ts
-export function createAlgoliaMock(config?: { typoTolerance?: boolean }): SearchAdapter;
+export declare function createAlgoliaMock(config?: {
+    typoTolerance?: boolean;
+}): SearchAdapter;
 ```
 
 #### `createMeilisearchMock`
@@ -126,7 +124,9 @@ export function createAlgoliaMock(config?: { typoTolerance?: boolean }): SearchA
 Meilisearch mock. Real Meilisearch: HTTP client with settings (rankingRules / stopWords / filterableAttributes). This mock exposes the same 5-op adapter shape so kiwa tests can swap real vs mock. Typo tolerance ON by default (matches Meilisearch's out-of-the-box behaviour with typoTolerance = { enabled: true }).
 
 ```ts
-export function createMeilisearchMock(config?: { typoTolerance?: boolean }): SearchAdapter;
+export declare function createMeilisearchMock(config?: {
+    typoTolerance?: boolean;
+}): SearchAdapter;
 ```
 
 #### `createTypesenseMock`
@@ -136,7 +136,9 @@ export function createMeilisearchMock(config?: { typoTolerance?: boolean }): Sea
 Typesense mock. Real Typesense: schema-first (typed fields), typo tolerance controllable via `num_typos`. This mock defaults typo tolerance OFF (Typesense's num_typos = 0 is a common production choice for exact-match indices).
 
 ```ts
-export function createTypesenseMock(config?: { typoTolerance?: boolean }): SearchAdapter;
+export declare function createTypesenseMock(config?: {
+    typoTolerance?: boolean;
+}): SearchAdapter;
 ```
 
 #### `explicitEnvKey`
@@ -144,7 +146,7 @@ export function createTypesenseMock(config?: { typoTolerance?: boolean }): Searc
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/search/src/real-driver.ts#L36) `packages/search/src/real-driver.ts`
 
 ```ts
-export function explicitEnvKey(backend: SearchBackend): string;
+export declare function explicitEnvKey(backend: SearchBackend): string;
 ```
 
 #### `isKiwaModeReal`
@@ -152,7 +154,7 @@ export function explicitEnvKey(backend: SearchBackend): string;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/search/src/real-driver.ts#L19) `packages/search/src/real-driver.ts`
 
 ```ts
-export function isKiwaModeReal(env: NodeJS.ProcessEnv = process.env): boolean;
+export declare function isKiwaModeReal(env?: NodeJS.ProcessEnv): boolean;
 ```
 
 #### `resolveApiKey`
@@ -160,10 +162,7 @@ export function isKiwaModeReal(env: NodeJS.ProcessEnv = process.env): boolean;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/search/src/real-driver.ts#L62) `packages/search/src/real-driver.ts`
 
 ```ts
-export function resolveApiKey(
-  backend: SearchBackend,
-  env: NodeJS.ProcessEnv = process.env,
-): string | null;
+export declare function resolveApiKey(backend: SearchBackend, env?: NodeJS.ProcessEnv): string | null;
 ```
 
 #### `resolveSearchEndpoint`
@@ -171,10 +170,7 @@ export function resolveApiKey(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/search/src/real-driver.ts#L23) `packages/search/src/real-driver.ts`
 
 ```ts
-export function resolveSearchEndpoint(
-  backend: SearchBackend,
-  env: NodeJS.ProcessEnv = process.env,
-): string;
+export declare function resolveSearchEndpoint(backend: SearchBackend, env?: NodeJS.ProcessEnv): string;
 ```
 
 #### `SearchEngine`
@@ -183,180 +179,57 @@ export function resolveSearchEndpoint(
 
 ```ts
 export declare class SearchEngine implements SearchAdapter {
-  readonly provider: SearchProvider;
-  private readonly typoTolerance: boolean;
-  private readonly indices = new Map<string, IndexState>();
-  constructor(config: EngineConfig);
-  async addDocuments<T extends SearchDocument>(
-    index: string,
-    docs: T[],
-  ): Promise<{ inserted: number }>;
-  async updateDocuments<T extends SearchDocument>(
-    index: string,
-    docs: T[],
-  ): Promise<{ updated: number }>;
-  async deleteDocuments(index: string, ids: string[]): Promise<{ deleted: number }>;
-  async search<T extends SearchDocument = SearchDocument>(
-    index: string,
-    query: SearchQuery,
-  ): Promise<SearchResult<T>>;
-  async clearIndex(index: string): Promise<void>;
-  getIndexStats(index: string): { docCount: number };
-  private ensureIndex(index: string): IndexState;
-  private applyFilter(
-    docs: SearchDocument[],
-    filter: Record<string, unknown> | undefined,
-  ): SearchDocument[];
-  private scoreDoc(
-    doc: SearchDocument,
-    tokens: string[],
-  ): { score: number; matchedFields: string[] };
-  private applySort(hits: Array<SearchHit<SearchDocument>>, sort: string[] | undefined): void;
-  private buildFacets(
-    docs: SearchDocument[],
-    facets: string[] | undefined,
-  ): Record<string, Record<string, number>>;
+    readonly provider: SearchProvider;
+    constructor(config: EngineConfig);
+    addDocuments<T extends SearchDocument>(index: string, docs: T[]): Promise<{
+        inserted: number;
+    }>;
+    updateDocuments<T extends SearchDocument>(index: string, docs: T[]): Promise<{
+        updated: number;
+    }>;
+    deleteDocuments(index: string, ids: string[]): Promise<{
+        deleted: number;
+    }>;
+    search<T extends SearchDocument = SearchDocument>(index: string, query: SearchQuery): Promise<SearchResult<T>>;
+    clearIndex(index: string): Promise<void>;
+    getIndexStats(index: string): {
+        docCount: number;
+    };
 }
 ```
 
 #### `semantics`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/search/src/semantics/index.ts#L1) `packages/search/src/semantics/index.ts`
+公開 entry point から解決しています。
+
+`"/Users/cardene/Desktop/projects/kiwa/packages/search/src/semantics/index"` を `semantics` として公開しています。
 
 ```ts
-export {
-  providerEventName,
-  type AxisStep,
-  type NeutralEventName,
-  type SearchAxis,
-  type SearchTarget,
-} from './types.js';
-
-export {
-  buildVectorIndex,
-  fuseHybrid,
-  queryKnn,
-  recallAnn,
-  startVectorSession,
-  type KnnHit,
-  type VectorAlgo,
-  type VectorSession,
-  type VectorState,
-} from './vector.js';
-
-export {
-  cacheEmbedding,
-  classifyIntent,
-  crossEncoderRerank,
-  startSemanticSession,
-  understandQuery,
-  type Intent,
-  type RerankCandidate,
-  type RerankedHit,
-  type SemanticSession,
-  type SemanticState,
-} from './semantic.js';
-
-export {
-  applyRefinedFilter,
-  computeNestedFacets,
-  countDistinct,
-  seedFacetedDocuments,
-  startFacetedSession,
-  traverseHierarchy,
-  type FacetedDocument,
-  type FacetedSession,
-  type FacetedState,
-  type NestedFacetNode,
-} from './faceted-advanced.js';
-
-export {
-  filterBoundingBox,
-  filterPolygon,
-  filterRadius,
-  resolveIsochrone,
-  seedGeoDocuments,
-  startGeoSession,
-  type BoundingBox,
-  type GeoDocument,
-  type GeoSession,
-  type GeoState,
-  type Polygon,
-} from './geo.js';
-
-export {
-  applyCustomRanking,
-  scoreBm25,
-  scoreTfIdf,
-  seedRelevanceDocuments,
-  selectAbVariant,
-  startRelevanceSession,
-  type RelevanceDocument,
-  type RelevanceSession,
-  type RelevanceState,
-  type ScoredHit,
-} from './relevance.js';
-
-export {
-  bridgeTypo,
-  expandMultiLanguage,
-  matchPhonetic,
-  normalizeStemmer,
-  registerSynonyms,
-  startSynonymSession,
-  type Language,
-  type SynonymEntry,
-  type SynonymSession,
-  type SynonymState,
-} from './synonym-advanced.js';
-
-export {
-  advanceRollingReindex,
-  allocateShards,
-  promoteReplica,
-  startIndexMgmtSession,
-  swapZeroDowntime,
-  type IndexMgmtSession,
-  type IndexMgmtState,
-  type ShardAssignment,
-} from './index-management.js';
-
-export {
-  bucketHistogram,
-  computePercentile,
-  evaluateBooleanTree,
-  resolveNestedQuery,
-  seedQueryDslDocuments,
-  startQueryDslSession,
-  type BooleanClause,
-  type BooleanKind,
-  type LeafClause,
-  type LeafOp,
-  type QueryClause,
-  type QueryDslDocument,
-  type QueryDslSession,
-  type QueryDslState,
-} from './query-dsl.js';
-
-export {
-  SEARCH_AXIS_TO_EVENTS,
-  collectFidelityCoverage,
-  type FidelityCoverage,
-  type FidelityRow,
-} from './fidelity.js';
-
-// v2.1 query-orchestrator = query DSL + faceted + semantic + geo + relevance の 継続合成 layer
 export type {
-  QueryState,
-  QueryEvent,
-  QuerySession,
-  QuerySummary,
-} from './query-orchestrator.js';
+  SearchAdapter,
+  SearchDocument,
+  SearchHit,
+  SearchProvider,
+  SearchQuery,
+  SearchResult,
+} from './types.js';
+export { SearchEngine, type EngineConfig } from './engine.js';
+export { createMeilisearchMock } from './meilisearch.js';
+export { createAlgoliaMock } from './algolia.js';
+export { createTypesenseMock } from './typesense.js';
+
+export * as semantics from './semantics/index.js';
 export {
-  startQuery,
-  dispatchEvent as dispatchQueryEvent,
-  summarizeQuery,
-} from './query-orchestrator.js';
+  apiKeyEnvVar,
+  buildRealDriverConfig,
+  explicitEnvKey,
+  isKiwaModeReal,
+  resolveApiKey,
+  resolveSearchEndpoint,
+  skipUnlessReal,
+  type RealDriverConfig,
+  type SearchBackend,
+} from './real-driver.js';
 ```
 
 #### `skipUnlessReal`
@@ -364,9 +237,9 @@ export {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/search/src/real-driver.ts#L90) `packages/search/src/real-driver.ts`
 
 ```ts
-export function skipUnlessReal(env: NodeJS.ProcessEnv = process.env): {
-  skip: boolean;
-  reason: string;
+export declare function skipUnlessReal(env?: NodeJS.ProcessEnv): {
+    skip: boolean;
+    reason: string;
 };
 ```
 
@@ -380,8 +253,8 @@ Shared search engine. In-memory index with deterministic ranking so fixture test
 
 ```ts
 export interface EngineConfig {
-  provider: SearchProvider;
-  typoTolerance?: boolean;
+    provider: SearchProvider;
+    typoTolerance?: boolean;
 }
 ```
 
@@ -391,10 +264,10 @@ export interface EngineConfig {
 
 ```ts
 export interface RealDriverConfig {
-  backend: SearchBackend;
-  endpoint: string;
-  apiKey: string | null;
-  timeoutMs: number;
+    backend: SearchBackend;
+    endpoint: string;
+    apiKey: string | null;
+    timeoutMs: number;
 }
 ```
 
@@ -404,13 +277,21 @@ export interface RealDriverConfig {
 
 ```ts
 export interface SearchAdapter {
-  readonly provider: SearchProvider;
-  addDocuments<T extends SearchDocument>(index: string, docs: T[]): Promise<{ inserted: number }>;
-  updateDocuments<T extends SearchDocument>(index: string, docs: T[]): Promise<{ updated: number }>;
-  deleteDocuments(index: string, ids: string[]): Promise<{ deleted: number }>;
-  search<T extends SearchDocument = SearchDocument>(index: string, query: SearchQuery): Promise<SearchResult<T>>;
-  clearIndex(index: string): Promise<void>;
-  getIndexStats(index: string): { docCount: number };
+    readonly provider: SearchProvider;
+    addDocuments<T extends SearchDocument>(index: string, docs: T[]): Promise<{
+        inserted: number;
+    }>;
+    updateDocuments<T extends SearchDocument>(index: string, docs: T[]): Promise<{
+        updated: number;
+    }>;
+    deleteDocuments(index: string, ids: string[]): Promise<{
+        deleted: number;
+    }>;
+    search<T extends SearchDocument = SearchDocument>(index: string, query: SearchQuery): Promise<SearchResult<T>>;
+    clearIndex(index: string): Promise<void>;
+    getIndexStats(index: string): {
+        docCount: number;
+    };
 }
 ```
 
@@ -430,8 +311,8 @@ export type SearchBackend = 'meilisearch' | 'typesense' | 'algolia' | 'opensearc
 
 ```ts
 export interface SearchDocument {
-  id: string;
-  [field: string]: unknown;
+    id: string;
+    [field: string]: unknown;
 }
 ```
 
@@ -441,9 +322,9 @@ export interface SearchDocument {
 
 ```ts
 export interface SearchHit<T extends SearchDocument = SearchDocument> {
-  document: T;
-  score: number;
-  matchedFields: string[];
+    document: T;
+    score: number;
+    matchedFields: string[];
 }
 ```
 
@@ -461,12 +342,12 @@ export type SearchProvider = 'meilisearch' | 'algolia' | 'typesense';
 
 ```ts
 export interface SearchQuery {
-  q: string;
-  filter?: Record<string, unknown>;
-  facets?: string[];
-  limit?: number;
-  offset?: number;
-  sort?: string[];
+    q: string;
+    filter?: Record<string, unknown>;
+    facets?: string[];
+    limit?: number;
+    offset?: number;
+    sort?: string[];
 }
 ```
 
@@ -476,11 +357,11 @@ export interface SearchQuery {
 
 ```ts
 export interface SearchResult<T extends SearchDocument = SearchDocument> {
-  hits: SearchHit<T>[];
-  totalHits: number;
-  facetDistribution: Record<string, Record<string, number>>;
-  processingTimeMs: number;
-  query: string;
+    hits: SearchHit<T>[];
+    totalHits: number;
+    facetDistribution: Record<string, Record<string, number>>;
+    processingTimeMs: number;
+    query: string;
 }
 ```
 <!-- kiwa-public-api:end -->

@@ -31,7 +31,7 @@ KV は get、put、delete、metadata、expiration、prefix list を in-memory �
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -42,12 +42,12 @@ KV は get、put、delete、metadata、expiration、prefix list を in-memory �
 Build a `HonoRequest` shape from the primitives `invokeRoute` receives. Body handling is deferred (json() / text() re-parse the raw body on demand) so tests can assert on the raw string when needed.
 
 ```ts
-export function buildRequest(input: {
-  method: HttpMethod;
-  url: string;
-  headers?: Record<string, string>;
-  body?: string;
-  params?: RouteParams;
+export declare function buildRequest(input: {
+    method: HttpMethod;
+    url: string;
+    headers?: Record<string, string>;
+    body?: string;
+    params?: RouteParams;
 }): HonoRequest;
 ```
 
@@ -58,7 +58,7 @@ export function buildRequest(input: {
 Compile a Hono-shaped pattern (`/users/:id`, `/blog/*`, `/*`) into a regex + captured param name list. Kept intentionally small — real Hono uses a trie for prefix sharing; the subset we support is enough to model 90%+ of test targets without duplicating the runtime.
 
 ```ts
-export function compileRoute(pattern: string): RouteMatcher;
+export declare function compileRoute(pattern: string): RouteMatcher;
 ```
 
 #### `createContext`
@@ -68,10 +68,10 @@ export function compileRoute(pattern: string): RouteMatcher;
 Build a `HonoContext` — the `c` object handlers receive. `set` / `get` write to an internal Map; `json` / `text` capture the response into a spec the caller can inspect after the chain resolves.
 
 ```ts
-export function createContext<TEnv = Record<string, unknown>, TVars = Record<string, unknown>>(opts: {
-  req: HonoRequest;
-  env?: TEnv;
-  executionCtx?: ExecutionCtxLike;
+export declare function createContext<TEnv = Record<string, unknown>, TVars = Record<string, unknown>>(opts: {
+    req: HonoRequest;
+    env?: TEnv;
+    executionCtx?: ExecutionCtxLike;
 }): HonoContext<TEnv, TVars>;
 ```
 
@@ -82,7 +82,7 @@ export function createContext<TEnv = Record<string, unknown>, TVars = Record<str
 Build a Workers-shaped `ExecutionContext`. `waitUntil` collects the promises so tests can await them all with `ctx.waitUntilAll()` before asserting on side-effects (KV writes, log flushes, etc).
 
 ```ts
-export function createExecutionContext(): ExecutionContextMockLike;
+export declare function createExecutionContext(): ExecutionContextMockLike;
 ```
 
 #### `createHonoApp`
@@ -92,10 +92,7 @@ export function createExecutionContext(): ExecutionContextMockLike;
 Create a Hono-shaped app builder. Routes registered via `.get()` etc. get matched by `compileRoute`; middleware registered via `.use()` runs in registration order for every matching request.
 
 ```ts
-export function createHonoApp<
-  TEnv = Record<string, unknown>,
-  TVars = Record<string, unknown>,
->(): HonoAppLike<TEnv, TVars>;
+export declare function createHonoApp<TEnv = Record<string, unknown>, TVars = Record<string, unknown>>(): HonoAppLike<TEnv, TVars>;
 ```
 
 #### `createRpcClient`
@@ -105,10 +102,9 @@ export function createHonoApp<
 Build a hc-shaped RPC client for an app. Property access walks a route string (bracketed segments = `:name` params), terminals `$get` / `$post` / ... fire a request through `invokeRoute` and wrap the resulting response spec into an `HcResponse` object. The client is intentionally schemaless at runtime — TS `AppType` inference lives in the caller's app types; kiwa doesn't parse or enforce them. That keeps the runtime tiny (a Proxy tree) and matches real Hono `hc` behavior.
 
 ```ts
-export function createRpcClient<TEnv = Record<string, unknown>>(
-  app: HonoAppLike<TEnv>,
-  opts: { baseUrl?: string } = {},
-): HcClient;
+export declare function createRpcClient<TEnv = Record<string, unknown>>(app: HonoAppLike<TEnv>, opts?: {
+    baseUrl?: string;
+}): HcClient;
 ```
 
 #### `createWorkersEnv`
@@ -118,7 +114,7 @@ export function createRpcClient<TEnv = Record<string, unknown>>(
 Assemble a Workers-shaped `env` object. KV / D1 / R2 stubs get spread onto the env under their binding names + `vars` / `secrets` become plain string properties. Callers can pass the result directly to `HonoAppLike.request(url, init, env, ctx)` or attach it to `createContext({ env })`.
 
 ```ts
-export function createWorkersEnv(spec: WorkersEnvSpec = {}): WorkersEnvLike;
+export declare function createWorkersEnv(spec?: WorkersEnvSpec): WorkersEnvLike;
 ```
 
 #### `D1_DATABASE_SYMBOL`
@@ -126,7 +122,7 @@ export function createWorkersEnv(spec: WorkersEnvSpec = {}): WorkersEnvLike;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L29) `packages/hono/src/workers.ts`
 
 ```ts
-export declare const D1_DATABASE_SYMBOL: typeof D1_DATABASE_SYMBOL;
+export declare const D1_DATABASE_SYMBOL: unique symbol;
 ```
 
 #### `defineRpcApp`
@@ -136,9 +132,10 @@ export declare const D1_DATABASE_SYMBOL: typeof D1_DATABASE_SYMBOL;
 Convenience: build an app + client pair in one call. Useful for tests that want to declare the app + immediately drive it through the client without a separate `createHonoApp()` line.
 
 ```ts
-export function defineRpcApp<TEnv = Record<string, unknown>>(
-  opts: DefineRpcAppOptions<TEnv>,
-): { app: HonoAppLike<TEnv>; client: HcClient };
+export declare function defineRpcApp<TEnv = Record<string, unknown>>(opts: DefineRpcAppOptions<TEnv>): {
+    app: HonoAppLike<TEnv>;
+    client: HcClient;
+};
 ```
 
 #### `EXECUTION_CTX_SYMBOL`
@@ -146,7 +143,7 @@ export function defineRpcApp<TEnv = Record<string, unknown>>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L27) `packages/hono/src/workers.ts`
 
 ```ts
-export declare const EXECUTION_CTX_SYMBOL: typeof EXECUTION_CTX_SYMBOL;
+export declare const EXECUTION_CTX_SYMBOL: unique symbol;
 ```
 
 #### `HC_CLIENT_SYMBOL`
@@ -154,7 +151,7 @@ export declare const EXECUTION_CTX_SYMBOL: typeof EXECUTION_CTX_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L32) `packages/hono/src/rpc.ts`
 
 ```ts
-export declare const HC_CLIENT_SYMBOL: typeof HC_CLIENT_SYMBOL;
+export declare const HC_CLIENT_SYMBOL: unique symbol;
 ```
 
 #### `HC_REQUEST_SYMBOL`
@@ -162,7 +159,7 @@ export declare const HC_CLIENT_SYMBOL: typeof HC_CLIENT_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L33) `packages/hono/src/rpc.ts`
 
 ```ts
-export declare const HC_REQUEST_SYMBOL: typeof HC_REQUEST_SYMBOL;
+export declare const HC_REQUEST_SYMBOL: unique symbol;
 ```
 
 #### `HONO_APP_SYMBOL`
@@ -170,7 +167,7 @@ export declare const HC_REQUEST_SYMBOL: typeof HC_REQUEST_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L25) `packages/hono/src/app.ts`
 
 ```ts
-export declare const HONO_APP_SYMBOL: typeof HONO_APP_SYMBOL;
+export declare const HONO_APP_SYMBOL: unique symbol;
 ```
 
 #### `HONO_CONTEXT_SYMBOL`
@@ -178,7 +175,7 @@ export declare const HONO_APP_SYMBOL: typeof HONO_APP_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L26) `packages/hono/src/app.ts`
 
 ```ts
-export declare const HONO_CONTEXT_SYMBOL: typeof HONO_CONTEXT_SYMBOL;
+export declare const HONO_CONTEXT_SYMBOL: unique symbol;
 ```
 
 #### `HONO_ROUTE_SYMBOL`
@@ -186,7 +183,7 @@ export declare const HONO_CONTEXT_SYMBOL: typeof HONO_CONTEXT_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L27) `packages/hono/src/app.ts`
 
 ```ts
-export declare const HONO_ROUTE_SYMBOL: typeof HONO_ROUTE_SYMBOL;
+export declare const HONO_ROUTE_SYMBOL: unique symbol;
 ```
 
 #### `invokeRoute`
@@ -196,9 +193,7 @@ export declare const HONO_ROUTE_SYMBOL: typeof HONO_ROUTE_SYMBOL;
 Invoke a single request against an app: build request, walk registered middleware chain, dispatch to the first matching route handler, capture trace + response + error. Returns a `matched: false` result when nothing matches (so callers can assert the 404 fallback path).
 
 ```ts
-export async function invokeRoute<TEnv, TVars>(
-  opts: InvokeRouteOptions<TEnv, TVars>,
-): Promise<InvokeRouteResult>;
+export declare function invokeRoute<TEnv, TVars>(opts: InvokeRouteOptions<TEnv, TVars>): Promise<InvokeRouteResult>;
 ```
 
 #### `isD1DatabaseMock`
@@ -208,7 +203,7 @@ export async function invokeRoute<TEnv, TVars>(
 Type guard: recognize a D1 database mock.
 
 ```ts
-export function isD1DatabaseMock(value: unknown): value is D1DatabaseLike;
+export declare function isD1DatabaseMock(value: unknown): value is D1DatabaseLike;
 ```
 
 #### `isExecutionContextMock`
@@ -218,7 +213,7 @@ export function isD1DatabaseMock(value: unknown): value is D1DatabaseLike;
 Type guard: recognize an ExecutionContext mock.
 
 ```ts
-export function isExecutionContextMock(value: unknown): value is ExecutionContextMockLike;
+export declare function isExecutionContextMock(value: unknown): value is ExecutionContextMockLike;
 ```
 
 #### `isHcResponse`
@@ -228,7 +223,7 @@ export function isExecutionContextMock(value: unknown): value is ExecutionContex
 Type guard: recognize an HcResponse.
 
 ```ts
-export function isHcResponse(value: unknown): value is HcResponse;
+export declare function isHcResponse(value: unknown): value is HcResponse;
 ```
 
 #### `isHonoApp`
@@ -238,7 +233,7 @@ export function isHcResponse(value: unknown): value is HcResponse;
 Type guard: recognize a HonoAppLike.
 
 ```ts
-export function isHonoApp(value: unknown): value is HonoAppLike;
+export declare function isHonoApp(value: unknown): value is HonoAppLike;
 ```
 
 #### `isHonoContext`
@@ -248,7 +243,7 @@ export function isHonoApp(value: unknown): value is HonoAppLike;
 Type guard: recognize a HonoContext.
 
 ```ts
-export function isHonoContext(value: unknown): value is HonoContext;
+export declare function isHonoContext(value: unknown): value is HonoContext;
 ```
 
 #### `isKVNamespaceMock`
@@ -258,7 +253,7 @@ export function isHonoContext(value: unknown): value is HonoContext;
 Type guard: recognize a KV namespace mock.
 
 ```ts
-export function isKVNamespaceMock(value: unknown): value is KVNamespaceLike;
+export declare function isKVNamespaceMock(value: unknown): value is KVNamespaceLike;
 ```
 
 #### `isR2BucketMock`
@@ -268,7 +263,7 @@ export function isKVNamespaceMock(value: unknown): value is KVNamespaceLike;
 Type guard: recognize an R2 bucket mock.
 
 ```ts
-export function isR2BucketMock(value: unknown): value is R2BucketLike;
+export declare function isR2BucketMock(value: unknown): value is R2BucketLike;
 ```
 
 #### `isWorkersEnv`
@@ -278,7 +273,7 @@ export function isR2BucketMock(value: unknown): value is R2BucketLike;
 Type guard: recognize a WorkersEnvLike.
 
 ```ts
-export function isWorkersEnv(value: unknown): value is WorkersEnvLike;
+export declare function isWorkersEnv(value: unknown): value is WorkersEnvLike;
 ```
 
 #### `KV_NAMESPACE_SYMBOL`
@@ -286,7 +281,7 @@ export function isWorkersEnv(value: unknown): value is WorkersEnvLike;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L28) `packages/hono/src/workers.ts`
 
 ```ts
-export declare const KV_NAMESPACE_SYMBOL: typeof KV_NAMESPACE_SYMBOL;
+export declare const KV_NAMESPACE_SYMBOL: unique symbol;
 ```
 
 #### `matchRoute`
@@ -296,7 +291,7 @@ export declare const KV_NAMESPACE_SYMBOL: typeof KV_NAMESPACE_SYMBOL;
 Match a request `path` against a matcher and return `{params}` when it hits, `null` when it doesn't. Callers use this for both route dispatch + middleware scope checks (`app.use('/api/*', ...)`).
 
 ```ts
-export function matchRoute(matcher: RouteMatcher, path: string): RouteParams | null;
+export declare function matchRoute(matcher: RouteMatcher, path: string): RouteParams | null;
 ```
 
 #### `mockD1Database`
@@ -306,7 +301,7 @@ export function matchRoute(matcher: RouteMatcher, path: string): RouteParams | n
 Build an in-memory D1 database stub. Tests register canned responses per query text with `__setResponse` and inspect executed queries + bindings via `__log()`. Real D1 uses SQLite; the mock is intentionally query-string matched (no SQL parsing) so the behavior tests observe is deterministic.
 
 ```ts
-export function mockD1Database(): D1DatabaseLike;
+export declare function mockD1Database(): D1DatabaseLike;
 ```
 
 #### `mockKVNamespace`
@@ -316,7 +311,7 @@ export function mockD1Database(): D1DatabaseLike;
 Build an in-memory KV namespace stub with the Cloudflare Workers surface (`get` / `put` / `delete` / `list` / `getWithMetadata`). Expiration is evaluated against `Date.now()` on read, matching Workers behavior.
 
 ```ts
-export function mockKVNamespace<TMetadata = unknown>(): KVNamespaceLike<TMetadata>;
+export declare function mockKVNamespace<TMetadata = unknown>(): KVNamespaceLike<TMetadata>;
 ```
 
 #### `mockR2Bucket`
@@ -326,7 +321,7 @@ export function mockKVNamespace<TMetadata = unknown>(): KVNamespaceLike<TMetadat
 Build an in-memory R2 bucket stub. Values may be strings or ArrayBuffers; the mock does not parse content type or compute checksums — those are the caller's responsibility if a test asserts on them.
 
 ```ts
-export function mockR2Bucket(): R2BucketLike;
+export declare function mockR2Bucket(): R2BucketLike;
 ```
 
 #### `R2_BUCKET_SYMBOL`
@@ -334,7 +329,7 @@ export function mockR2Bucket(): R2BucketLike;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L30) `packages/hono/src/workers.ts`
 
 ```ts
-export declare const R2_BUCKET_SYMBOL: typeof R2_BUCKET_SYMBOL;
+export declare const R2_BUCKET_SYMBOL: unique symbol;
 ```
 
 #### `WORKERS_ENV_SYMBOL`
@@ -342,7 +337,7 @@ export declare const R2_BUCKET_SYMBOL: typeof R2_BUCKET_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L26) `packages/hono/src/workers.ts`
 
 ```ts
-export declare const WORKERS_ENV_SYMBOL: typeof WORKERS_ENV_SYMBOL;
+export declare const WORKERS_ENV_SYMBOL: unique symbol;
 ```
 
 ### 型
@@ -353,13 +348,16 @@ export declare const WORKERS_ENV_SYMBOL: typeof WORKERS_ENV_SYMBOL;
 
 ```ts
 export interface D1DatabaseLike {
-  readonly [D1_DATABASE_SYMBOL]: true;
-  prepare(query: string): D1PreparedStatementLike;
-  batch(statements: ReadonlyArray<D1PreparedStatementLike>): Promise<D1Result[]>;
-  exec(query: string): Promise<D1Result<D1Row>>;
-  /** Test-only: register a canned response for `prepare(query).all()` / `.first()`. */
-  __setResponse(query: string, rows: readonly D1Row[]): void;
-  __log(): ReadonlyArray<{ query: string; bindings: unknown[] }>;
+    readonly [D1_DATABASE_SYMBOL]: true;
+    prepare(query: string): D1PreparedStatementLike;
+    batch(statements: ReadonlyArray<D1PreparedStatementLike>): Promise<D1Result[]>;
+    exec(query: string): Promise<D1Result<D1Row>>;
+    /** Test-only: register a canned response for `prepare(query).all()` / `.first()`. */
+    __setResponse(query: string, rows: readonly D1Row[]): void;
+    __log(): ReadonlyArray<{
+        query: string;
+        bindings: unknown[];
+    }>;
 }
 ```
 
@@ -369,10 +367,10 @@ export interface D1DatabaseLike {
 
 ```ts
 export interface D1PreparedStatementLike {
-  bind(...values: unknown[]): D1PreparedStatementLike;
-  first<T = D1Row>(colName?: string): Promise<T | null>;
-  all<T = D1Row>(): Promise<D1Result<T>>;
-  run(): Promise<D1Result<D1Row>>;
+    bind(...values: unknown[]): D1PreparedStatementLike;
+    first<T = D1Row>(colName?: string): Promise<T | null>;
+    all<T = D1Row>(): Promise<D1Result<T>>;
+    run(): Promise<D1Result<D1Row>>;
 }
 ```
 
@@ -382,9 +380,13 @@ export interface D1PreparedStatementLike {
 
 ```ts
 export interface D1Result<T = D1Row> {
-  readonly results: T[];
-  readonly success: boolean;
-  readonly meta: { readonly duration: number; readonly changes: number; readonly last_row_id: number };
+    readonly results: T[];
+    readonly success: boolean;
+    readonly meta: {
+        readonly duration: number;
+        readonly changes: number;
+        readonly last_row_id: number;
+    };
 }
 ```
 
@@ -404,7 +406,7 @@ export type D1Row = Record<string, unknown>;
 
 ```ts
 export interface DefineRpcAppOptions<TEnv = Record<string, unknown>> {
-  readonly configure: (app: HonoAppLike<TEnv>) => void;
+    readonly configure: (app: HonoAppLike<TEnv>) => void;
 }
 ```
 
@@ -414,13 +416,13 @@ export interface DefineRpcAppOptions<TEnv = Record<string, unknown>> {
 
 ```ts
 export interface ExecutionContextMockLike extends ExecutionCtxLike {
-  readonly [EXECUTION_CTX_SYMBOL]: true;
-  /** Test hook — resolve every promise passed to `waitUntil`. */
-  waitUntilAll(): Promise<void>;
-  /** Was `passThroughOnException()` called at least once? */
-  didPassThrough(): boolean;
-  /** How many promises did `waitUntil()` receive? */
-  pendingCount(): number;
+    readonly [EXECUTION_CTX_SYMBOL]: true;
+    /** Test hook — resolve every promise passed to `waitUntil`. */
+    waitUntilAll(): Promise<void>;
+    /** Was `passThroughOnException()` called at least once? */
+    didPassThrough(): boolean;
+    /** How many promises did `waitUntil()` receive? */
+    pendingCount(): number;
 }
 ```
 
@@ -432,8 +434,8 @@ Shape of `ExecutionContext` from workers.ts (avoid circular import).
 
 ```ts
 export interface ExecutionCtxLike {
-  waitUntil(promise: Promise<unknown>): void;
-  passThroughOnException(): void;
+    waitUntil(promise: Promise<unknown>): void;
+    passThroughOnException(): void;
 }
 ```
 
@@ -444,9 +446,7 @@ export interface ExecutionCtxLike {
 Handler = `(c) =&gt; c.json(...) | Response spec | Promise&lt;...&gt;`.
 
 ```ts
-export type Handler<TEnv = Record<string, unknown>, TVars = Record<string, unknown>> = (
-  c: HonoContext<TEnv, TVars>,
-) => HonoResponseSpec | Promise<HonoResponseSpec> | void | Promise<void>;
+export type Handler<TEnv = Record<string, unknown>, TVars = Record<string, unknown>> = (c: HonoContext<TEnv, TVars>) => HonoResponseSpec | Promise<HonoResponseSpec> | void | Promise<void>;
 ```
 
 #### `HcClient`
@@ -467,13 +467,13 @@ Options passed at every `$get` / `$post` / ... call.
 
 ```ts
 export interface HcRequestOptions<TEnv = Record<string, unknown>> {
-  readonly param?: RouteParams;
-  readonly query?: QueryParams;
-  readonly json?: unknown;
-  readonly text?: string;
-  readonly headers?: Record<string, string>;
-  readonly env?: TEnv;
-  readonly executionCtx?: ExecutionCtxLike;
+    readonly param?: RouteParams;
+    readonly query?: QueryParams;
+    readonly json?: unknown;
+    readonly text?: string;
+    readonly headers?: Record<string, string>;
+    readonly env?: TEnv;
+    readonly executionCtx?: ExecutionCtxLike;
 }
 ```
 
@@ -485,15 +485,15 @@ Response returned to hc callers. Mirrors the parts of the Fetch `Response` shape
 
 ```ts
 export interface HcResponse<T = unknown> {
-  readonly [HC_REQUEST_SYMBOL]: true;
-  readonly ok: boolean;
-  readonly status: number;
-  readonly headers: Record<string, string>;
-  readonly trace: ReadonlyArray<MiddlewareTraceEntry>;
-  readonly matched: boolean;
-  readonly error: unknown;
-  json(): Promise<T>;
-  text(): Promise<string>;
+    readonly [HC_REQUEST_SYMBOL]: true;
+    readonly ok: boolean;
+    readonly status: number;
+    readonly headers: Record<string, string>;
+    readonly trace: ReadonlyArray<MiddlewareTraceEntry>;
+    readonly matched: boolean;
+    readonly error: unknown;
+    json(): Promise<T>;
+    text(): Promise<string>;
 }
 ```
 
@@ -503,23 +503,18 @@ export interface HcResponse<T = unknown> {
 
 ```ts
 export interface HonoAppLike<TEnv = Record<string, unknown>, TVars = Record<string, unknown>> {
-  readonly [HONO_APP_SYMBOL]: true;
-  get(path: string, handler: Handler<TEnv, TVars>): this;
-  post(path: string, handler: Handler<TEnv, TVars>): this;
-  put(path: string, handler: Handler<TEnv, TVars>): this;
-  delete(path: string, handler: Handler<TEnv, TVars>): this;
-  patch(path: string, handler: Handler<TEnv, TVars>): this;
-  all(path: string, handler: Handler<TEnv, TVars>): this;
-  use(pattern: string, middleware: Middleware<TEnv, TVars>): this;
-  route(prefix: string, sub: HonoAppLike<TEnv, TVars>): this;
-  request(
-    input: string | RequestInit,
-    init?: RequestInit,
-    env?: TEnv,
-    executionCtx?: ExecutionCtxLike,
-  ): Promise<HonoResponseSpec>;
-  readonly routes: ReadonlyArray<RouteEntry<TEnv, TVars>>;
-  readonly middlewares: ReadonlyArray<MiddlewareEntry<TEnv, TVars>>;
+    readonly [HONO_APP_SYMBOL]: true;
+    get(path: string, handler: Handler<TEnv, TVars>): this;
+    post(path: string, handler: Handler<TEnv, TVars>): this;
+    put(path: string, handler: Handler<TEnv, TVars>): this;
+    delete(path: string, handler: Handler<TEnv, TVars>): this;
+    patch(path: string, handler: Handler<TEnv, TVars>): this;
+    all(path: string, handler: Handler<TEnv, TVars>): this;
+    use(pattern: string, middleware: Middleware<TEnv, TVars>): this;
+    route(prefix: string, sub: HonoAppLike<TEnv, TVars>): this;
+    request(input: string | RequestInit, init?: RequestInit, env?: TEnv, executionCtx?: ExecutionCtxLike): Promise<HonoResponseSpec>;
+    readonly routes: ReadonlyArray<RouteEntry<TEnv, TVars>>;
+    readonly middlewares: ReadonlyArray<MiddlewareEntry<TEnv, TVars>>;
 }
 ```
 
@@ -531,17 +526,17 @@ Handler context — `c` in Hono.
 
 ```ts
 export interface HonoContext<TEnv = Record<string, unknown>, TVars = Record<string, unknown>> {
-  readonly [HONO_CONTEXT_SYMBOL]: true;
-  readonly req: HonoRequest;
-  readonly env: TEnv;
-  readonly executionCtx: ExecutionCtxLike | undefined;
-  status(code: number): HonoContext<TEnv, TVars>;
-  header(name: string, value: string): HonoContext<TEnv, TVars>;
-  json<T>(body: T, status?: number): HonoResponseSpec;
-  text(body: string, status?: number): HonoResponseSpec;
-  set(key: string, value: unknown): void;
-  get(key: string): unknown;
-  readonly response: HonoResponseSpec;
+    readonly [HONO_CONTEXT_SYMBOL]: true;
+    readonly req: HonoRequest;
+    readonly env: TEnv;
+    readonly executionCtx: ExecutionCtxLike | undefined;
+    status(code: number): HonoContext<TEnv, TVars>;
+    header(name: string, value: string): HonoContext<TEnv, TVars>;
+    json<T>(body: T, status?: number): HonoResponseSpec;
+    text(body: string, status?: number): HonoResponseSpec;
+    set(key: string, value: unknown): void;
+    get(key: string): unknown;
+    readonly response: HonoResponseSpec;
 }
 ```
 
@@ -553,17 +548,17 @@ Request contract exposed to handlers as `c.req`.
 
 ```ts
 export interface HonoRequest {
-  readonly method: HttpMethod;
-  readonly url: string;
-  readonly path: string;
-  readonly headers: Record<string, string>;
-  readonly params: RouteParams;
-  readonly query: QueryParams;
-  json<T = unknown>(): Promise<T>;
-  text(): Promise<string>;
-  header(name: string): string | undefined;
-  param(name: string): string | undefined;
-  queryValue(name: string): string | undefined;
+    readonly method: HttpMethod;
+    readonly url: string;
+    readonly path: string;
+    readonly headers: Record<string, string>;
+    readonly params: RouteParams;
+    readonly query: QueryParams;
+    json<T = unknown>(): Promise<T>;
+    text(): Promise<string>;
+    header(name: string): string | undefined;
+    param(name: string): string | undefined;
+    queryValue(name: string): string | undefined;
 }
 ```
 
@@ -575,10 +570,10 @@ Buffered response captured by `c.json()` / `c.text()` / `c.header()`.
 
 ```ts
 export interface HonoResponseSpec {
-  status: number;
-  headers: Record<string, string>;
-  body: unknown;
-  bodyKind: 'json' | 'text' | 'empty';
+    status: number;
+    headers: Record<string, string>;
+    body: unknown;
+    bodyKind: 'json' | 'text' | 'empty';
 }
 ```
 
@@ -596,13 +591,13 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS'
 
 ```ts
 export interface InvokeRouteOptions<TEnv, TVars> {
-  readonly app: HonoAppLike<TEnv, TVars>;
-  readonly method: HttpMethod;
-  readonly path: string;
-  readonly headers?: Record<string, string>;
-  readonly body?: string;
-  readonly env?: TEnv;
-  readonly executionCtx?: ExecutionCtxLike;
+    readonly app: HonoAppLike<TEnv, TVars>;
+    readonly method: HttpMethod;
+    readonly path: string;
+    readonly headers?: Record<string, string>;
+    readonly body?: string;
+    readonly env?: TEnv;
+    readonly executionCtx?: ExecutionCtxLike;
 }
 ```
 
@@ -612,10 +607,10 @@ export interface InvokeRouteOptions<TEnv, TVars> {
 
 ```ts
 export interface InvokeRouteResult {
-  readonly matched: boolean;
-  readonly response: HonoResponseSpec;
-  readonly trace: MiddlewareTraceEntry[];
-  readonly error: unknown;
+    readonly matched: boolean;
+    readonly response: HonoResponseSpec;
+    readonly trace: MiddlewareTraceEntry[];
+    readonly error: unknown;
 }
 ```
 
@@ -627,9 +622,9 @@ KV entry — value + optional metadata + expiration timestamp.
 
 ```ts
 export interface KVEntry<TMetadata = unknown> {
-  readonly value: string;
-  readonly metadata?: TMetadata;
-  readonly expiresAt: number | null;
+    readonly value: string;
+    readonly metadata?: TMetadata;
+    readonly expiresAt: number | null;
 }
 ```
 
@@ -639,9 +634,13 @@ export interface KVEntry<TMetadata = unknown> {
 
 ```ts
 export interface KVListResult<TMetadata = unknown> {
-  readonly keys: ReadonlyArray<{ readonly name: string; readonly metadata?: TMetadata; readonly expiration?: number }>;
-  readonly list_complete: boolean;
-  readonly cursor: string | null;
+    readonly keys: ReadonlyArray<{
+        readonly name: string;
+        readonly metadata?: TMetadata;
+        readonly expiration?: number;
+    }>;
+    readonly list_complete: boolean;
+    readonly cursor: string | null;
 }
 ```
 
@@ -651,14 +650,20 @@ export interface KVListResult<TMetadata = unknown> {
 
 ```ts
 export interface KVNamespaceLike<TMetadata = unknown> {
-  readonly [KV_NAMESPACE_SYMBOL]: true;
-  get(key: string): Promise<string | null>;
-  getWithMetadata(key: string): Promise<{ value: string | null; metadata: TMetadata | null }>;
-  put(key: string, value: string, options?: KVPutOptions<TMetadata>): Promise<void>;
-  delete(key: string): Promise<void>;
-  list(options?: { prefix?: string; limit?: number }): Promise<KVListResult<TMetadata>>;
-  /** Test-only escape hatch — snapshot every key + entry synchronously. */
-  __snapshot(): Record<string, KVEntry<TMetadata>>;
+    readonly [KV_NAMESPACE_SYMBOL]: true;
+    get(key: string): Promise<string | null>;
+    getWithMetadata(key: string): Promise<{
+        value: string | null;
+        metadata: TMetadata | null;
+    }>;
+    put(key: string, value: string, options?: KVPutOptions<TMetadata>): Promise<void>;
+    delete(key: string): Promise<void>;
+    list(options?: {
+        prefix?: string;
+        limit?: number;
+    }): Promise<KVListResult<TMetadata>>;
+    /** Test-only escape hatch — snapshot every key + entry synchronously. */
+    __snapshot(): Record<string, KVEntry<TMetadata>>;
 }
 ```
 
@@ -670,9 +675,9 @@ Options passed to `KVNamespace.put()`.
 
 ```ts
 export interface KVPutOptions<TMetadata = unknown> {
-  readonly expirationTtl?: number;
-  readonly expiration?: number;
-  readonly metadata?: TMetadata;
+    readonly expirationTtl?: number;
+    readonly expiration?: number;
+    readonly metadata?: TMetadata;
 }
 ```
 
@@ -683,10 +688,7 @@ export interface KVPutOptions<TMetadata = unknown> {
 Middleware = `(c, next) =&gt; await next()` shape.
 
 ```ts
-export type Middleware<TEnv = Record<string, unknown>, TVars = Record<string, unknown>> = (
-  c: HonoContext<TEnv, TVars>,
-  next: () => Promise<void>,
-) => void | Promise<void>;
+export type Middleware<TEnv = Record<string, unknown>, TVars = Record<string, unknown>> = (c: HonoContext<TEnv, TVars>, next: () => Promise<void>) => void | Promise<void>;
 ```
 
 #### `MiddlewareTraceEntry`
@@ -697,11 +699,11 @@ Trace entry produced by `invokeRoute` for the middleware chain.
 
 ```ts
 export interface MiddlewareTraceEntry {
-  readonly kind: 'middleware' | 'handler';
-  readonly pattern: string;
-  readonly method: HttpMethod | 'ALL';
-  readonly enteredAt: number;
-  readonly exitedAt: number | null;
+    readonly kind: 'middleware' | 'handler';
+    readonly pattern: string;
+    readonly method: HttpMethod | 'ALL';
+    readonly enteredAt: number;
+    readonly exitedAt: number | null;
 }
 ```
 
@@ -713,7 +715,7 @@ Parsed query object from a URL search string.
 
 ```ts
 export interface QueryParams {
-  readonly [key: string]: string | undefined;
+    readonly [key: string]: string | undefined;
 }
 ```
 
@@ -723,16 +725,18 @@ export interface QueryParams {
 
 ```ts
 export interface R2BucketLike {
-  readonly [R2_BUCKET_SYMBOL]: true;
-  get(key: string): Promise<R2Object | null>;
-  put(
-    key: string,
-    value: string | ArrayBuffer,
-    options?: { httpMetadata?: R2Object['httpMetadata']; customMetadata?: R2Object['customMetadata'] },
-  ): Promise<R2Object>;
-  delete(key: string): Promise<void>;
-  list(options?: { prefix?: string; limit?: number }): Promise<R2ListResult>;
-  __snapshot(): Record<string, R2Object>;
+    readonly [R2_BUCKET_SYMBOL]: true;
+    get(key: string): Promise<R2Object | null>;
+    put(key: string, value: string | ArrayBuffer, options?: {
+        httpMetadata?: R2Object['httpMetadata'];
+        customMetadata?: R2Object['customMetadata'];
+    }): Promise<R2Object>;
+    delete(key: string): Promise<void>;
+    list(options?: {
+        prefix?: string;
+        limit?: number;
+    }): Promise<R2ListResult>;
+    __snapshot(): Record<string, R2Object>;
 }
 ```
 
@@ -742,9 +746,9 @@ export interface R2BucketLike {
 
 ```ts
 export interface R2ListResult {
-  readonly objects: ReadonlyArray<R2Object>;
-  readonly truncated: boolean;
-  readonly cursor: string | null;
+    readonly objects: ReadonlyArray<R2Object>;
+    readonly truncated: boolean;
+    readonly cursor: string | null;
 }
 ```
 
@@ -754,12 +758,14 @@ export interface R2ListResult {
 
 ```ts
 export interface R2Object {
-  readonly key: string;
-  readonly value: string | ArrayBuffer;
-  readonly httpMetadata?: { readonly contentType?: string };
-  readonly customMetadata?: Record<string, string>;
-  readonly size: number;
-  readonly uploaded: Date;
+    readonly key: string;
+    readonly value: string | ArrayBuffer;
+    readonly httpMetadata?: {
+        readonly contentType?: string;
+    };
+    readonly customMetadata?: Record<string, string>;
+    readonly size: number;
+    readonly uploaded: Date;
 }
 ```
 
@@ -771,7 +777,7 @@ Params captured from a `:name` segment.
 
 ```ts
 export interface RouteParams {
-  readonly [key: string]: string | undefined;
+    readonly [key: string]: string | undefined;
 }
 ```
 
@@ -781,7 +787,7 @@ export interface RouteParams {
 
 ```ts
 export interface WorkersEnvLike extends Record<string, unknown> {
-  readonly [WORKERS_ENV_SYMBOL]: true;
+    readonly [WORKERS_ENV_SYMBOL]: true;
 }
 ```
 
@@ -791,11 +797,11 @@ export interface WorkersEnvLike extends Record<string, unknown> {
 
 ```ts
 export interface WorkersEnvSpec {
-  readonly kv?: Record<string, KVNamespaceLike>;
-  readonly d1?: Record<string, D1DatabaseLike>;
-  readonly r2?: Record<string, R2BucketLike>;
-  readonly vars?: Record<string, string>;
-  readonly secrets?: Record<string, string>;
+    readonly kv?: Record<string, KVNamespaceLike>;
+    readonly d1?: Record<string, D1DatabaseLike>;
+    readonly r2?: Record<string, R2BucketLike>;
+    readonly vars?: Record<string, string>;
+    readonly secrets?: Record<string, string>;
 }
 ```
 <!-- kiwa-public-api:end -->

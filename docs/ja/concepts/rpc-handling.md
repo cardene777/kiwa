@@ -24,12 +24,22 @@ inject された provider は以下 9 method を fixture の state から直接�
 | `net_version` | 現在の chain ID (10 進の文字列) |
 | `personal_sign` | 署名 |
 | `eth_signTypedData_v4` | 型付きデータの署名 |
-| `wallet_switchEthereumChain` | `null` (切替のみ) |
-| `wallet_addEthereumChain` | `null` (追加のみ) |
+| `wallet_switchEthereumChain` | `null` (切替後に `chainChanged` を送出) |
+| `wallet_addEthereumChain` | `null` (registry へ追加し、 その chain へ切替えて `chainChanged` も送出) |
 | `eth_sendTransaction` | transaction hash (anvil へ broadcast) |
 
-`eth_subscribe` と `eth_unsubscribe` はエラーコード `4200` で拒否し、 上記以外の method は anvil の JSON-RPC へそのまま転送します。
-各 method のパラメータとエラーコードは [docs/RPC.md](../../RPC.md) を参照してください。
+`eth_requestAccounts` と `eth_accounts` は複数アカウントを扱い、 現在有効なアカウントは `setActiveAccount()` で切り替えます。
+接続を拒否する経路 (`rejectConnect`) やコントラクトアカウントを使う経路もあり、 詳細は [docs/RPC.md](../../RPC.md) を参照してください。
+
+以下 5 つの method はエラーコード `4200` で拒否し、 anvil へは一切転送しません。
+
+- `eth_subscribe`
+- `eth_unsubscribe`
+- `wallet_requestPermissions`
+- `wallet_getPermissions`
+- `eth_sign`
+
+上記 9 つと拒否 5 つ以外の method は anvil の JSON-RPC へそのまま転送します。
 
 ## Example: setApprovalMode
 

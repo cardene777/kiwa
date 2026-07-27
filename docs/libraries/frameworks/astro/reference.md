@@ -54,7 +54,7 @@
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -63,7 +63,7 @@
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L18) `packages/astro/src/render-astro-page.ts`
 
 ```ts
-export declare const ASTRO_NOT_FOUND_SYMBOL: typeof ASTRO_NOT_FOUND_SYMBOL;
+export declare const ASTRO_NOT_FOUND_SYMBOL: unique symbol;
 ```
 
 #### `ASTRO_REDIRECT_SYMBOL`
@@ -71,7 +71,7 @@ export declare const ASTRO_NOT_FOUND_SYMBOL: typeof ASTRO_NOT_FOUND_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L17) `packages/astro/src/render-astro-page.ts`
 
 ```ts
-export declare const ASTRO_REDIRECT_SYMBOL: typeof ASTRO_REDIRECT_SYMBOL;
+export declare const ASTRO_REDIRECT_SYMBOL: unique symbol;
 ```
 
 #### `ASTRO_REWRITE_SYMBOL`
@@ -79,7 +79,7 @@ export declare const ASTRO_REDIRECT_SYMBOL: typeof ASTRO_REDIRECT_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L19) `packages/astro/src/render-astro-page.ts`
 
 ```ts
-export declare const ASTRO_REWRITE_SYMBOL: typeof ASTRO_REWRITE_SYMBOL;
+export declare const ASTRO_REWRITE_SYMBOL: unique symbol;
 ```
 
 #### `invokeEndpoint`
@@ -87,9 +87,7 @@ export declare const ASTRO_REWRITE_SYMBOL: typeof ASTRO_REWRITE_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L89) `packages/astro/src/invoke-endpoint.ts`
 
 ```ts
-export async function invokeEndpoint<TParams extends Record<string, string | undefined> = Record<string, string | undefined>>(
-  opts: InvokeEndpointOptions<TParams>,
-): Promise<InvokeEndpointResult>;
+export declare function invokeEndpoint<TParams extends Record<string, string | undefined> = Record<string, string | undefined>>(opts: InvokeEndpointOptions<TParams>): Promise<InvokeEndpointResult>;
 ```
 
 #### `kiwaAstroNotFound`
@@ -99,7 +97,7 @@ export async function invokeEndpoint<TParams extends Record<string, string | und
 Construct a notFound signal the same way `Astro.notFound(response?)` does in production. Pages can `throw Astro.notFound()` to short-circuit; in kiwa tests the page can `throw kiwaAstroNotFound()` to be captured.
 
 ```ts
-export function kiwaAstroNotFound(response?: Response): AstroNotFoundSignal;
+export declare function kiwaAstroNotFound(response?: Response): AstroNotFoundSignal;
 ```
 
 #### `renderAstroPage`
@@ -109,13 +107,7 @@ export function kiwaAstroNotFound(response?: Response): AstroNotFoundSignal;
 Render a `.astro` page in isolation and capture HTML / Response / redirect / notFound / rewrite signals. The page receives a synthetic AstroContext with the same shape as the real `Astro` global.
 
 ```ts
-export async function renderAstroPage<
-  TProps extends Record<string, unknown> = Record<string, unknown>,
-  TParams extends Record<string, string | undefined> = Record<string, string | undefined>,
-  TLocals extends Record<string, unknown> = Record<string, unknown>,
->(
-  opts: RenderAstroPageOptions<TProps, TParams, TLocals>,
-): Promise<RenderAstroPageResult>;
+export declare function renderAstroPage<TProps extends Record<string, unknown> = Record<string, unknown>, TParams extends Record<string, string | undefined> = Record<string, string | undefined>, TLocals extends Record<string, unknown> = Record<string, unknown>>(opts: RenderAstroPageOptions<TProps, TParams, TLocals>): Promise<RenderAstroPageResult>;
 ```
 
 #### `setupAstroViewTransitionEnv`
@@ -123,9 +115,7 @@ export async function renderAstroPage<
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L262) `packages/astro/src/setup-view-transition-env.ts`
 
 ```ts
-export function setupAstroViewTransitionEnv(
-  options: SetupAstroViewTransitionEnvOptions,
-): AstroViewTransitionEnv;
+export declare function setupAstroViewTransitionEnv(options: SetupAstroViewTransitionEnvOptions): AstroViewTransitionEnv;
 ```
 
 ### 型
@@ -135,9 +125,7 @@ export function setupAstroViewTransitionEnv(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L28) `packages/astro/src/invoke-endpoint.ts`
 
 ```ts
-export type APIRoute<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> = (
-  context: SimulatedAPIContext<TParams>,
-) => Promise<Response> | Response;
+export type APIRoute<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> = (context: SimulatedAPIContext<TParams>) => Promise<Response> | Response;
 ```
 
 #### `AstroAfterPreparationEvent`
@@ -148,7 +136,7 @@ Astro 公式 router は `triggerEvent(TRANSITION_AFTER_PREPARATION)` で plain `
 
 ```ts
 export interface AstroAfterPreparationEvent {
-  readonly type: 'astro:after-preparation';
+    readonly type: 'astro:after-preparation';
 }
 ```
 
@@ -160,7 +148,7 @@ Astro 公式 router は `triggerEvent(TRANSITION_AFTER_SWAP)` で plain `Event` 
 
 ```ts
 export interface AstroAfterSwapEvent {
-  readonly type: 'astro:after-swap';
+    readonly type: 'astro:after-swap';
 }
 ```
 
@@ -170,11 +158,11 @@ export interface AstroAfterSwapEvent {
 
 ```ts
 export interface AstroBeforePreparationEvent extends AstroViewTransitionEventPayload {
-  readonly type: 'astro:before-preparation';
-  defaultPrevented: boolean;
-  preventDefault(): void;
-  /** Loader を override 可能 (公式 router 互換、 navigate cancellation / replace 用) */
-  loader: (() => Promise<void>) | undefined;
+    readonly type: 'astro:before-preparation';
+    defaultPrevented: boolean;
+    preventDefault(): void;
+    /** Loader を override 可能 (公式 router 互換、 navigate cancellation / replace 用) */
+    loader: (() => Promise<void>) | undefined;
 }
 ```
 
@@ -184,14 +172,14 @@ export interface AstroBeforePreparationEvent extends AstroViewTransitionEventPay
 
 ```ts
 export interface AstroBeforeSwapEvent extends AstroViewTransitionEventPayload {
-  readonly type: 'astro:before-swap';
-  /**
-   * DOM swap 関数 (公式 router 互換)。 listener が override 可。
-   * 公式 router は listener dispatch 後に必ず event.swap() を 1 回呼ぶため、
-   * listener が swap() を呼ぶと swap が計 2 回実行される (swapCallCount で観測可能)。
-   * listener が swap を no-op 化したい場合は `event.swap = () => {}` で上書きする。
-   */
-  swap: () => void;
+    readonly type: 'astro:before-swap';
+    /**
+     * DOM swap 関数 (公式 router 互換)。 listener が override 可。
+     * 公式 router は listener dispatch 後に必ず event.swap() を 1 回呼ぶため、
+     * listener が swap() を呼ぶと swap が計 2 回実行される (swapCallCount で観測可能)。
+     * listener が swap を no-op 化したい場合は `event.swap = () => {}` で上書きする。
+     */
+    swap: () => void;
 }
 ```
 
@@ -201,8 +189,8 @@ export interface AstroBeforeSwapEvent extends AstroViewTransitionEventPayload {
 
 ```ts
 export interface AstroNotFoundSignal {
-  readonly [ASTRO_NOT_FOUND_SYMBOL]: true;
-  readonly response: Response | undefined;
+    readonly [ASTRO_NOT_FOUND_SYMBOL]: true;
+    readonly response: Response | undefined;
 }
 ```
 
@@ -211,13 +199,7 @@ export interface AstroNotFoundSignal {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L61) `packages/astro/src/render-astro-page.ts`
 
 ```ts
-export type AstroPageComponent<
-  TProps extends Record<string, unknown> = Record<string, unknown>,
-  TParams extends Record<string, string | undefined> = Record<string, string | undefined>,
-  TLocals extends Record<string, unknown> = Record<string, unknown>,
-> = (
-  context: SimulatedAstroContext<TProps, TParams, TLocals>,
-) => Promise<string | Response> | string | Response;
+export type AstroPageComponent<TProps extends Record<string, unknown> = Record<string, unknown>, TParams extends Record<string, string | undefined> = Record<string, string | undefined>, TLocals extends Record<string, unknown> = Record<string, unknown>> = (context: SimulatedAstroContext<TProps, TParams, TLocals>) => Promise<string | Response> | string | Response;
 ```
 
 #### `AstroRedirectSignal`
@@ -226,9 +208,9 @@ export type AstroPageComponent<
 
 ```ts
 export interface AstroRedirectSignal {
-  readonly [ASTRO_REDIRECT_SYMBOL]: true;
-  readonly url: string;
-  readonly status: number;
+    readonly [ASTRO_REDIRECT_SYMBOL]: true;
+    readonly url: string;
+    readonly status: number;
 }
 ```
 
@@ -238,8 +220,8 @@ export interface AstroRedirectSignal {
 
 ```ts
 export interface AstroRewriteSignal {
-  readonly [ASTRO_REWRITE_SYMBOL]: true;
-  readonly target: string | URL | Request;
+    readonly [ASTRO_REWRITE_SYMBOL]: true;
+    readonly target: string | URL | Request;
 }
 ```
 
@@ -257,18 +239,18 @@ export type AstroSignal = AstroRedirectSignal | AstroNotFoundSignal | AstroRewri
 
 ```ts
 export interface AstroViewTransitionDispatchResult {
-  readonly beforePreparation: AstroBeforePreparationEvent | null;
-  readonly afterPreparation: AstroAfterPreparationEvent | null;
-  readonly beforeSwap: AstroBeforeSwapEvent | null;
-  readonly afterSwap: AstroAfterSwapEvent | null;
-  /**
-   * swap() が呼ばれた回数。 公式 router は listener dispatch 後に必ず 1 回呼ぶため、
-   * listener が swap() を呼ばなければ 1、 listener も呼べば 2 になる。
-   * 2 を期待しない user code は double-swap bug 候補。
-   */
-  readonly swapCallCount: number;
-  /** before-preparation で preventDefault された場合 true (preparation 中断) */
-  readonly cancelled: boolean;
+    readonly beforePreparation: AstroBeforePreparationEvent | null;
+    readonly afterPreparation: AstroAfterPreparationEvent | null;
+    readonly beforeSwap: AstroBeforeSwapEvent | null;
+    readonly afterSwap: AstroAfterSwapEvent | null;
+    /**
+     * swap() が呼ばれた回数。 公式 router は listener dispatch 後に必ず 1 回呼ぶため、
+     * listener が swap() を呼ばなければ 1、 listener も呼べば 2 になる。
+     * 2 を期待しない user code は double-swap bug 候補。
+     */
+    readonly swapCallCount: number;
+    /** before-preparation で preventDefault された場合 true (preparation 中断) */
+    readonly cancelled: boolean;
 }
 ```
 
@@ -278,12 +260,12 @@ export interface AstroViewTransitionDispatchResult {
 
 ```ts
 export interface AstroViewTransitionDomDiff {
-  /** from-page にあって to-page にない top-level tag (順序保持) */
-  readonly removed: string[];
-  /** to-page にあって from-page にない top-level tag */
-  readonly added: string[];
-  /** 両方にある top-level tag */
-  readonly kept: string[];
+    /** from-page にあって to-page にない top-level tag (順序保持) */
+    readonly removed: string[];
+    /** to-page にあって from-page にない top-level tag */
+    readonly added: string[];
+    /** 両方にある top-level tag */
+    readonly kept: string[];
 }
 ```
 
@@ -293,47 +275,45 @@ export interface AstroViewTransitionDomDiff {
 
 ```ts
 export interface AstroViewTransitionEnv {
-  readonly fromUrl: URL;
-  readonly toUrl: URL;
-  /** named transition name (Astro `transition:name` SSOT) */
-  readonly transitionName: string;
-  /** browser supportsViewTransitions snapshot */
-  readonly supportsViewTransitions: boolean;
-  /**
-   * to-page 側 Document (newDocument)、 before-swap listener が mutate 可能。
-   * dispatchAll() の前後で同一参照、 reset() 後に initial HTML へ復元される。
-   */
-  readonly newDocument: Document;
-  /**
-   * 各 lifecycle event の listener を登録する (公式 `document.addEventListener` 相当)。
-   * 同型 event 複数登録時は登録順に呼ばれる。
-   */
-  on<TType extends AstroViewTransitionEventType>(
-    type: TType,
-    listener: AstroViewTransitionListener<Extract<AstroViewTransitionEvent, { type: TType }>>,
-  ): void;
-  /** 1 listener を解除 */
-  off<TType extends AstroViewTransitionEventType>(
-    type: TType,
-    listener: AstroViewTransitionListener<Extract<AstroViewTransitionEvent, { type: TType }>>,
-  ): void;
-  /**
-   * 4 event を順に dispatch ... before-preparation → after-preparation → before-swap → after-swap。
-   * before-preparation で preventDefault() / signal abort された場合は preparation 経路を中断
-   * (公式 `doPreparation` 同等、 router は event を return するが後続 transition は走らない)。
-   */
-  dispatchAll(): Promise<AstroViewTransitionDispatchResult>;
-  /** 個別 event のみ dispatch (sequence 検証用) */
-  dispatch<TType extends AstroViewTransitionEventType>(
-    type: TType,
-  ): Promise<Extract<AstroViewTransitionEvent, { type: TType }>>;
-  /**
-   * from-page DOM と to-page DOM の root-level innerHTML 差分を抽出。
-   * 子要素 tag-name 列で簡易比較する (real diff library は意図的に依存しない)。
-   */
-  diffDom(): AstroViewTransitionDomDiff;
-  /** newDocument / listener / formData を初期 snapshot に戻す */
-  reset(): void;
+    readonly fromUrl: URL;
+    readonly toUrl: URL;
+    /** named transition name (Astro `transition:name` SSOT) */
+    readonly transitionName: string;
+    /** browser supportsViewTransitions snapshot */
+    readonly supportsViewTransitions: boolean;
+    /**
+     * to-page 側 Document (newDocument)、 before-swap listener が mutate 可能。
+     * dispatchAll() の前後で同一参照、 reset() 後に initial HTML へ復元される。
+     */
+    readonly newDocument: Document;
+    /**
+     * 各 lifecycle event の listener を登録する (公式 `document.addEventListener` 相当)。
+     * 同型 event 複数登録時は登録順に呼ばれる。
+     */
+    on<TType extends AstroViewTransitionEventType>(type: TType, listener: AstroViewTransitionListener<Extract<AstroViewTransitionEvent, {
+        type: TType;
+    }>>): void;
+    /** 1 listener を解除 */
+    off<TType extends AstroViewTransitionEventType>(type: TType, listener: AstroViewTransitionListener<Extract<AstroViewTransitionEvent, {
+        type: TType;
+    }>>): void;
+    /**
+     * 4 event を順に dispatch ... before-preparation → after-preparation → before-swap → after-swap。
+     * before-preparation で preventDefault() / signal abort された場合は preparation 経路を中断
+     * (公式 `doPreparation` 同等、 router は event を return するが後続 transition は走らない)。
+     */
+    dispatchAll(): Promise<AstroViewTransitionDispatchResult>;
+    /** 個別 event のみ dispatch (sequence 検証用) */
+    dispatch<TType extends AstroViewTransitionEventType>(type: TType): Promise<Extract<AstroViewTransitionEvent, {
+        type: TType;
+    }>>;
+    /**
+     * from-page DOM と to-page DOM の root-level innerHTML 差分を抽出。
+     * 子要素 tag-name 列で簡易比較する (real diff library は意図的に依存しない)。
+     */
+    diffDom(): AstroViewTransitionDomDiff;
+    /** newDocument / listener / formData を初期 snapshot に戻す */
+    reset(): void;
 }
 ```
 
@@ -342,11 +322,7 @@ export interface AstroViewTransitionEnv {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L84) `packages/astro/src/setup-view-transition-env.ts`
 
 ```ts
-export type AstroViewTransitionEvent =
-  | AstroBeforePreparationEvent
-  | AstroAfterPreparationEvent
-  | AstroBeforeSwapEvent
-  | AstroAfterSwapEvent;
+export type AstroViewTransitionEvent = AstroBeforePreparationEvent | AstroAfterPreparationEvent | AstroBeforeSwapEvent | AstroAfterSwapEvent;
 ```
 
 #### `AstroViewTransitionEventPayload`
@@ -355,15 +331,17 @@ export type AstroViewTransitionEvent =
 
 ```ts
 export interface AstroViewTransitionEventPayload {
-  readonly from: URL;
-  readonly to: URL;
-  readonly navigationType: 'traverse' | 'push' | 'replace';
-  readonly direction: 'forward' | 'back' | string;
-  readonly sourceElement: Element | undefined;
-  readonly info: unknown;
-  readonly newDocument: Document;
-  readonly viewTransition: { skipTransition(): void } | undefined;
-  readonly formData: FormData | undefined;
+    readonly from: URL;
+    readonly to: URL;
+    readonly navigationType: 'traverse' | 'push' | 'replace';
+    readonly direction: 'forward' | 'back' | string;
+    readonly sourceElement: Element | undefined;
+    readonly info: unknown;
+    readonly newDocument: Document;
+    readonly viewTransition: {
+        skipTransition(): void;
+    } | undefined;
+    readonly formData: FormData | undefined;
 }
 ```
 
@@ -380,9 +358,7 @@ export type AstroViewTransitionEventType = AstroViewTransitionEvent['type'];
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L92) `packages/astro/src/setup-view-transition-env.ts`
 
 ```ts
-export type AstroViewTransitionListener<TEvent extends AstroViewTransitionEvent = AstroViewTransitionEvent> = (
-  event: TEvent,
-) => void | Promise<void>;
+export type AstroViewTransitionListener<TEvent extends AstroViewTransitionEvent = AstroViewTransitionEvent> = (event: TEvent) => void | Promise<void>;
 ```
 
 #### `InvokeEndpointOptions`
@@ -391,16 +367,16 @@ export type AstroViewTransitionListener<TEvent extends AstroViewTransitionEvent 
 
 ```ts
 export interface InvokeEndpointOptions<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> {
-  readonly endpoint: APIRoute<TParams>;
-  readonly url: string;
-  readonly method?: string;
-  readonly params?: TParams;
-  readonly headers?: Record<string, string>;
-  readonly cookies?: Record<string, string>;
-  readonly formData?: Record<string, string>;
-  readonly jsonBody?: unknown;
-  readonly locals?: Record<string, unknown>;
-  readonly site?: string;
+    readonly endpoint: APIRoute<TParams>;
+    readonly url: string;
+    readonly method?: string;
+    readonly params?: TParams;
+    readonly headers?: Record<string, string>;
+    readonly cookies?: Record<string, string>;
+    readonly formData?: Record<string, string>;
+    readonly jsonBody?: unknown;
+    readonly locals?: Record<string, unknown>;
+    readonly site?: string;
 }
 ```
 
@@ -410,8 +386,11 @@ export interface InvokeEndpointOptions<TParams extends Record<string, string | u
 
 ```ts
 export interface InvokeEndpointResult {
-  readonly response: Response;
-  readonly redirect: { url: string; status: number } | null;
+    readonly response: Response;
+    readonly redirect: {
+        url: string;
+        status: number;
+    } | null;
 }
 ```
 
@@ -420,21 +399,17 @@ export interface InvokeEndpointResult {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L69) `packages/astro/src/render-astro-page.ts`
 
 ```ts
-export interface RenderAstroPageOptions<
-  TProps extends Record<string, unknown> = Record<string, unknown>,
-  TParams extends Record<string, string | undefined> = Record<string, string | undefined>,
-  TLocals extends Record<string, unknown> = Record<string, unknown>,
-> {
-  readonly page: AstroPageComponent<TProps, TParams, TLocals>;
-  readonly url: string;
-  readonly method?: string;
-  readonly headers?: Record<string, string>;
-  readonly cookies?: Record<string, string>;
-  readonly params?: TParams;
-  readonly props?: TProps;
-  readonly locals?: TLocals;
-  readonly site?: string;
-  readonly generator?: string;
+export interface RenderAstroPageOptions<TProps extends Record<string, unknown> = Record<string, unknown>, TParams extends Record<string, string | undefined> = Record<string, string | undefined>, TLocals extends Record<string, unknown> = Record<string, unknown>> {
+    readonly page: AstroPageComponent<TProps, TParams, TLocals>;
+    readonly url: string;
+    readonly method?: string;
+    readonly headers?: Record<string, string>;
+    readonly cookies?: Record<string, string>;
+    readonly params?: TParams;
+    readonly props?: TProps;
+    readonly locals?: TLocals;
+    readonly site?: string;
+    readonly generator?: string;
 }
 ```
 
@@ -444,12 +419,12 @@ export interface RenderAstroPageOptions<
 
 ```ts
 export interface RenderAstroPageResult {
-  readonly html: string;
-  readonly response: Response;
-  readonly redirect: AstroRedirectSignal | null;
-  readonly notFound: AstroNotFoundSignal | null;
-  readonly rewrite: AstroRewriteSignal | null;
-  readonly error: unknown;
+    readonly html: string;
+    readonly response: Response;
+    readonly redirect: AstroRedirectSignal | null;
+    readonly notFound: AstroNotFoundSignal | null;
+    readonly rewrite: AstroRewriteSignal | null;
+    readonly error: unknown;
 }
 ```
 
@@ -459,31 +434,31 @@ export interface RenderAstroPageResult {
 
 ```ts
 export interface SetupAstroViewTransitionEnvOptions {
-  readonly fromPath: string;
-  readonly toPath: string;
-  /** named view transitions (Astro `transition:name` attribute、 default `''`) */
-  readonly transitionName?: string;
-  /** History API 動作種別 (default `'push'`) */
-  readonly navigationType?: 'traverse' | 'push' | 'replace';
-  /** ナビゲート方向 (`back` button / `forward` button、 default `'forward'`) */
-  readonly direction?: 'forward' | 'back' | string;
-  /** to-page side で render される HTML (default は最小の `<html><body></body></html>`) */
-  readonly toHtml?: string;
-  /** from-page side で初期表示される HTML (default は最小の `<html><body></body></html>`) */
-  readonly fromHtml?: string;
-  /**
-   * browser の View Transitions API support flag (default `true`)。
-   * 公式 router 動作と整合 ... preparation event は support 有無に **関係なく** dispatch される。
-   * 本 flag は before-swap event の `viewTransition` field 公開有無のみ制御する
-   * (= `document.startViewTransition()` を browser が持つかどうか、 視覚 transition 用)。
-   */
-  readonly supportsViewTransitions?: boolean;
-  /** Astro form submission event 由来 — submit data を formData として公開 */
-  readonly formData?: FormData;
-  /** sourceElement (a / area / form / Element) を listener に渡したい場合 */
-  readonly sourceElement?: Element;
-  /** navigate() の info 引数 (Astro custom payload、 default `undefined`) */
-  readonly info?: unknown;
+    readonly fromPath: string;
+    readonly toPath: string;
+    /** named view transitions (Astro `transition:name` attribute、 default `''`) */
+    readonly transitionName?: string;
+    /** History API 動作種別 (default `'push'`) */
+    readonly navigationType?: 'traverse' | 'push' | 'replace';
+    /** ナビゲート方向 (`back` button / `forward` button、 default `'forward'`) */
+    readonly direction?: 'forward' | 'back' | string;
+    /** to-page side で render される HTML (default は最小の `<html><body></body></html>`) */
+    readonly toHtml?: string;
+    /** from-page side で初期表示される HTML (default は最小の `<html><body></body></html>`) */
+    readonly fromHtml?: string;
+    /**
+     * browser の View Transitions API support flag (default `true`)。
+     * 公式 router 動作と整合 ... preparation event は support 有無に **関係なく** dispatch される。
+     * 本 flag は before-swap event の `viewTransition` field 公開有無のみ制御する
+     * (= `document.startViewTransition()` を browser が持つかどうか、 視覚 transition 用)。
+     */
+    readonly supportsViewTransitions?: boolean;
+    /** Astro form submission event 由来 — submit data を formData として公開 */
+    readonly formData?: FormData;
+    /** sourceElement (a / area / form / Element) を listener に渡したい場合 */
+    readonly sourceElement?: Element;
+    /** navigate() の info 引数 (Astro custom payload、 default `undefined`) */
+    readonly info?: unknown;
 }
 ```
 
@@ -493,18 +468,20 @@ export interface SetupAstroViewTransitionEnvOptions {
 
 ```ts
 export interface SimulatedAPIContext<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> {
-  readonly request: Request;
-  readonly params: TParams;
-  readonly cookies: {
-    get(name: string): { value: string } | undefined;
-    set(name: string, value: string, options?: Record<string, unknown>): void;
-    delete(name: string, options?: Record<string, unknown>): void;
-    has(name: string): boolean;
-  };
-  readonly url: URL;
-  readonly site: URL | undefined;
-  readonly locals: Record<string, unknown>;
-  redirect(path: string, status?: number): Response;
+    readonly request: Request;
+    readonly params: TParams;
+    readonly cookies: {
+        get(name: string): {
+            value: string;
+        } | undefined;
+        set(name: string, value: string, options?: Record<string, unknown>): void;
+        delete(name: string, options?: Record<string, unknown>): void;
+        has(name: string): boolean;
+    };
+    readonly url: URL;
+    readonly site: URL | undefined;
+    readonly locals: Record<string, unknown>;
+    redirect(path: string, status?: number): Response;
 }
 ```
 
@@ -513,26 +490,24 @@ export interface SimulatedAPIContext<TParams extends Record<string, string | und
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L39) `packages/astro/src/render-astro-page.ts`
 
 ```ts
-export interface SimulatedAstroContext<
-  TProps extends Record<string, unknown> = Record<string, unknown>,
-  TParams extends Record<string, string | undefined> = Record<string, string | undefined>,
-  TLocals extends Record<string, unknown> = Record<string, unknown>,
-> {
-  readonly request: Request;
-  readonly url: URL;
-  readonly params: TParams;
-  readonly props: TProps;
-  readonly site: URL | undefined;
-  readonly generator: string;
-  readonly locals: TLocals;
-  readonly cookies: {
-    get(name: string): { value: string } | undefined;
-    set(name: string, value: string, options?: Record<string, unknown>): void;
-    delete(name: string, options?: Record<string, unknown>): void;
-    has(name: string): boolean;
-  };
-  redirect(path: string, status?: number): never;
-  rewrite(target: string | URL | Request): never;
+export interface SimulatedAstroContext<TProps extends Record<string, unknown> = Record<string, unknown>, TParams extends Record<string, string | undefined> = Record<string, string | undefined>, TLocals extends Record<string, unknown> = Record<string, unknown>> {
+    readonly request: Request;
+    readonly url: URL;
+    readonly params: TParams;
+    readonly props: TProps;
+    readonly site: URL | undefined;
+    readonly generator: string;
+    readonly locals: TLocals;
+    readonly cookies: {
+        get(name: string): {
+            value: string;
+        } | undefined;
+        set(name: string, value: string, options?: Record<string, unknown>): void;
+        delete(name: string, options?: Record<string, unknown>): void;
+        has(name: string): boolean;
+    };
+    redirect(path: string, status?: number): never;
+    rewrite(target: string | URL | Request): never;
 }
 ```
 <!-- kiwa-public-api:end -->

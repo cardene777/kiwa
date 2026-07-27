@@ -65,7 +65,7 @@ expect(history.rolledBack).toHaveLength(1);
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -76,7 +76,7 @@ expect(history.rolledBack).toHaveLength(1);
 pending 全 migration を id 昇順で適用。 failed が出た時点で以降 skip。
 
 ```ts
-export function applyPendingMigrations(client: MigrationClient, migrations: Migration[]): ApplyPendingResult;
+export declare function applyPendingMigrations(client: MigrationClient, migrations: Migration[]): ApplyPendingResult;
 ```
 
 #### `createLockRegistry`
@@ -86,7 +86,14 @@ export function applyPendingMigrations(client: MigrationClient, migrations: Migr
 migration lock (advisory) を管理する mock。 real Postgres advisory lock / SQLite `PRAGMA locking_mode = EXCLUSIVE` 相当を in-memory で模倣。 並行走行を防ぎ、 duplicate migration apply を排除。
 
 ```ts
-export function createLockRegistry(now: () => number = () => 0);
+export declare function createLockRegistry(now?: () => number): {
+    acquire(scope: string, owner: string, ttlMs?: number): MigrationLock | null;
+    release(scope: string, owner: string): boolean;
+    listActive(): Array<{
+        scope: string;
+        lock: MigrationLock;
+    }>;
+};
 ```
 
 #### `createMigrationClient`
@@ -96,7 +103,7 @@ export function createLockRegistry(now: () => number = () => 0);
 provider 差 (Prisma / Drizzle / Kysely / Knex) を吸収した migration mock client。 runUp / runDown / applyPendingMigrations 経由でこの client の applied array を更新する。
 
 ```ts
-export function createMigrationClient(options: CreateMigrationClientOptions = {}): MigrationClient;
+export declare function createMigrationClient(options?: CreateMigrationClientOptions): MigrationClient;
 ```
 
 #### `diffSchema`
@@ -106,7 +113,7 @@ export function createMigrationClient(options: CreateMigrationClientOptions = {}
 prev / next schema の diff を計算。 実 provider (Prisma introspect / Drizzle schema push / Kysely migration generate) が返す diff の抽象 shape。
 
 ```ts
-export function diffSchema(prev: Schema, next: Schema): SchemaDiff;
+export declare function diffSchema(prev: Schema, next: Schema): SchemaDiff;
 ```
 
 #### `listAppliedMigrations`
@@ -116,7 +123,7 @@ export function diffSchema(prev: Schema, next: Schema): SchemaDiff;
 client.applied を category 別 (applied / rolled_back / failed) に集計。 latestApplied = appliedAt max の record (無ければ undefined)。
 
 ```ts
-export function listAppliedMigrations(client: MigrationClient): MigrationHistory;
+export declare function listAppliedMigrations(client: MigrationClient): MigrationHistory;
 ```
 
 #### `planDryRun`
@@ -126,7 +133,7 @@ export function listAppliedMigrations(client: MigrationClient): MigrationHistory
 migration 列を「dry-run」 で解析、 実 SQL を実行せずに safe / risky / destructive の 3 段階リスク分類 + 総 step 数 + destructive 数を返す。 real Prisma `migrate diff --dry-run` 相当。
 
 ```ts
-export function planDryRun(pending: readonly Migration[], direction: 'up' | 'down' = 'up'): DryRunPlan;
+export declare function planDryRun(pending: readonly Migration[], direction?: 'up' | 'down'): DryRunPlan;
 ```
 
 #### `resolveDependencyOrder`
@@ -134,7 +141,7 @@ export function planDryRun(pending: readonly Migration[], direction: 'up' | 'dow
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L40) `packages/migration/src/dryrun.ts`
 
 ```ts
-export function resolveDependencyOrder(migrations: readonly MigrationWithDeps[]): MigrationWithDeps[];
+export declare function resolveDependencyOrder(migrations: readonly MigrationWithDeps[]): MigrationWithDeps[];
 ```
 
 #### `runDown`
@@ -144,7 +151,7 @@ export function resolveDependencyOrder(migrations: readonly MigrationWithDeps[])
 1 migration の down 実行 mock。 markRolledBack で client.applied の status を更新。
 
 ```ts
-export function runDown(client: MigrationClient, migrationId: string): MigrationResult;
+export declare function runDown(client: MigrationClient, migrationId: string): MigrationResult;
 ```
 
 #### `runUp`
@@ -154,7 +161,7 @@ export function runDown(client: MigrationClient, migrationId: string): Migration
 1 migration の up 実行 mock。 実 provider (Prisma migrate / Drizzle push / Kysely migrator / Knex migrate) は client.applied を更新する経路で invoke される。
 
 ```ts
-export function runUp(client: MigrationClient, migration: Migration): MigrationResult;
+export declare function runUp(client: MigrationClient, migration: Migration): MigrationResult;
 ```
 
 ### 型
@@ -165,9 +172,9 @@ export function runUp(client: MigrationClient, migration: Migration): MigrationR
 
 ```ts
 export interface ApplyPendingResult {
-  applied: MigrationResult[];
-  skipped: string[];
-  failed: MigrationResult[];
+    applied: MigrationResult[];
+    skipped: string[];
+    failed: MigrationResult[];
 }
 ```
 
@@ -177,11 +184,11 @@ export interface ApplyPendingResult {
 
 ```ts
 export interface ColumnDiff {
-  table: string;
-  column: string;
-  change: 'added' | 'removed' | 'type_changed' | 'nullable_changed';
-  before?: SchemaColumn;
-  after?: SchemaColumn;
+    table: string;
+    column: string;
+    change: 'added' | 'removed' | 'type_changed' | 'nullable_changed';
+    before?: SchemaColumn;
+    after?: SchemaColumn;
 }
 ```
 
@@ -191,9 +198,14 @@ export interface ColumnDiff {
 
 ```ts
 export interface DryRunPlan {
-  operations: Array<{ id: string; direction: 'up' | 'down'; sql: string; estimated: 'safe' | 'risky' | 'destructive' }>;
-  totalSteps: number;
-  destructiveCount: number;
+    operations: Array<{
+        id: string;
+        direction: 'up' | 'down';
+        sql: string;
+        estimated: 'safe' | 'risky' | 'destructive';
+    }>;
+    totalSteps: number;
+    destructiveCount: number;
 }
 ```
 
@@ -203,10 +215,10 @@ export interface DryRunPlan {
 
 ```ts
 export interface Migration {
-  id: string;
-  name: string;
-  up: string;
-  down: string;
+    id: string;
+    name: string;
+    up: string;
+    down: string;
 }
 ```
 
@@ -216,13 +228,13 @@ export interface Migration {
 
 ```ts
 export interface MigrationClient {
-  provider: MigrationProvider;
-  applied: MigrationRecord[];
-  now: () => number;
-  markApplied: (migration: Migration) => MigrationResult;
-  markRolledBack: (id: string) => MigrationResult;
-  markFailed: (migration: Migration, reason: string) => MigrationResult;
-  clear: () => void;
+    provider: MigrationProvider;
+    applied: MigrationRecord[];
+    now: () => number;
+    markApplied: (migration: Migration) => MigrationResult;
+    markRolledBack: (id: string) => MigrationResult;
+    markFailed: (migration: Migration, reason: string) => MigrationResult;
+    clear: () => void;
 }
 ```
 
@@ -232,12 +244,12 @@ export interface MigrationClient {
 
 ```ts
 export interface MigrationHistory {
-  provider: string;
-  total: number;
-  applied: MigrationRecord[];
-  rolledBack: MigrationRecord[];
-  failed: MigrationRecord[];
-  latestApplied?: MigrationRecord;
+    provider: string;
+    total: number;
+    applied: MigrationRecord[];
+    rolledBack: MigrationRecord[];
+    failed: MigrationRecord[];
+    latestApplied?: MigrationRecord;
 }
 ```
 
@@ -247,9 +259,9 @@ export interface MigrationHistory {
 
 ```ts
 export interface MigrationLock {
-  owner: string;
-  acquiredAt: number;
-  ttlMs: number;
+    owner: string;
+    acquiredAt: number;
+    ttlMs: number;
 }
 ```
 
@@ -267,12 +279,12 @@ export type MigrationProvider = 'prisma' | 'drizzle' | 'kysely' | 'knex';
 
 ```ts
 export interface MigrationRecord {
-  id: string;
-  name: string;
-  status: MigrationStatus;
-  appliedAt?: number;
-  rolledBackAt?: number;
-  reason?: string;
+    id: string;
+    name: string;
+    status: MigrationStatus;
+    appliedAt?: number;
+    rolledBackAt?: number;
+    reason?: string;
 }
 ```
 
@@ -282,11 +294,11 @@ export interface MigrationRecord {
 
 ```ts
 export interface MigrationResult {
-  id: string;
-  provider: MigrationProvider;
-  status: MigrationStatus;
-  appliedAt: number;
-  reason?: string;
+    id: string;
+    provider: MigrationProvider;
+    status: MigrationStatus;
+    appliedAt: number;
+    reason?: string;
 }
 ```
 
@@ -306,7 +318,7 @@ migration 間の dependency (id 参照) を解決、 topological order で並び
 
 ```ts
 export interface MigrationWithDeps extends Migration {
-  dependsOn?: string[];
+    dependsOn?: string[];
 }
 ```
 
@@ -316,7 +328,7 @@ export interface MigrationWithDeps extends Migration {
 
 ```ts
 export interface Schema {
-  tables: SchemaTable[];
+    tables: SchemaTable[];
 }
 ```
 
@@ -326,11 +338,11 @@ export interface Schema {
 
 ```ts
 export interface SchemaColumn {
-  name: string;
-  type: string;
-  nullable: boolean;
-  primary?: boolean;
-  unique?: boolean;
+    name: string;
+    type: string;
+    nullable: boolean;
+    primary?: boolean;
+    unique?: boolean;
 }
 ```
 
@@ -340,9 +352,9 @@ export interface SchemaColumn {
 
 ```ts
 export interface SchemaDiff {
-  addedTables: string[];
-  removedTables: string[];
-  columnDiffs: ColumnDiff[];
+    addedTables: string[];
+    removedTables: string[];
+    columnDiffs: ColumnDiff[];
 }
 ```
 
@@ -352,8 +364,8 @@ export interface SchemaDiff {
 
 ```ts
 export interface SchemaTable {
-  name: string;
-  columns: SchemaColumn[];
+    name: string;
+    columns: SchemaColumn[];
 }
 ```
 <!-- kiwa-public-api:end -->

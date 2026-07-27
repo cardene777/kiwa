@@ -33,7 +33,7 @@ client 作成時に `provider`、`namespace`、`dimension` を指定します。
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -42,7 +42,7 @@ client 作成時に `provider`、`namespace`、`dimension` を指定します。
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L25) `packages/vector/src/distance.ts`
 
 ```ts
-export function cosineSimilarity(a: readonly number[], b: readonly number[]): number;
+export declare function cosineSimilarity(a: readonly number[], b: readonly number[]): number;
 ```
 
 #### `createCircuitBreaker`
@@ -50,10 +50,7 @@ export function cosineSimilarity(a: readonly number[], b: readonly number[]): nu
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L156) `packages/vector/src/enhancements.ts`
 
 ```ts
-export function createCircuitBreaker(
-  client: VectorClient,
-  options: CircuitBreakerOptions = {},
-): CircuitBreaker;
+export declare function createCircuitBreaker(client: VectorClient, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
 #### `createHookRegistry`
@@ -61,7 +58,7 @@ export function createCircuitBreaker(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L110) `packages/vector/src/enhancements.ts`
 
 ```ts
-export function createHookRegistry(): HookRegistry;
+export declare function createHookRegistry(): HookRegistry;
 ```
 
 #### `createIdempotencyCache`
@@ -69,7 +66,7 @@ export function createHookRegistry(): HookRegistry;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L69) `packages/vector/src/enhancements.ts`
 
 ```ts
-export function createIdempotencyCache(): IdempotencyCache;
+export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
 #### `createVectorClient`
@@ -79,7 +76,7 @@ export function createIdempotencyCache(): IdempotencyCache;
 provider 別 mock client。 実 Pinecone / Weaviate / Qdrant / pgvector の SDK を差替えても 同じ signature で呼べる想定 (upsert / query / delete)。 mock 内部は Map で保持。
 
 ```ts
-export function createVectorClient(options: CreateVectorClientOptions = {}): VectorClient;
+export declare function createVectorClient(options?: CreateVectorClientOptions): VectorClient;
 ```
 
 #### `deleteVectors`
@@ -87,7 +84,7 @@ export function createVectorClient(options: CreateVectorClientOptions = {}): Vec
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L68) `packages/vector/src/query.ts`
 
 ```ts
-export async function deleteVectors(client: VectorClient, ids: string[]): Promise<DeleteResult>;
+export declare function deleteVectors(client: VectorClient, ids: string[]): Promise<DeleteResult>;
 ```
 
 #### `dotProduct`
@@ -97,7 +94,7 @@ export async function deleteVectors(client: VectorClient, ids: string[]): Promis
 Vector distance primitives — real Pinecone / Weaviate / Qdrant / pgvector と同じ 距離計算式で similarity score を再現。 caller が metric を切替えても同じ結果を得られる。
 
 ```ts
-export function dotProduct(a: readonly number[], b: readonly number[]): number;
+export declare function dotProduct(a: readonly number[], b: readonly number[]): number;
 ```
 
 #### `euclideanDistance`
@@ -105,7 +102,7 @@ export function dotProduct(a: readonly number[], b: readonly number[]): number;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L15) `packages/vector/src/distance.ts`
 
 ```ts
-export function euclideanDistance(a: readonly number[], b: readonly number[]): number;
+export declare function euclideanDistance(a: readonly number[], b: readonly number[]): number;
 ```
 
 #### `queryNearest`
@@ -115,11 +112,7 @@ export function euclideanDistance(a: readonly number[], b: readonly number[]): n
 similarity search — provider に応じた metric (cosine default) で topK match を返す。 cosine / dot = 高いほど近い、 euclidean = 小さいほど近い、 の semantics に合わせて sort。
 
 ```ts
-export function queryNearest(
-  client: VectorClient,
-  query: number[],
-  options: QueryOptions = {},
-): QueryResult;
+export declare function queryNearest(client: VectorClient, query: number[], options?: QueryOptions): QueryResult;
 ```
 
 #### `upsertBatch`
@@ -127,11 +120,7 @@ export function queryNearest(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L44) `packages/vector/src/enhancements.ts`
 
 ```ts
-export async function upsertBatch(
-  client: VectorClient,
-  records: VectorRecord[],
-  batchSize = 100,
-): Promise<BatchUpsertResult>;
+export declare function upsertBatch(client: VectorClient, records: VectorRecord[], batchSize?: number): Promise<BatchUpsertResult>;
 ```
 
 #### `upsertIdempotent`
@@ -139,12 +128,9 @@ export async function upsertBatch(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L79) `packages/vector/src/enhancements.ts`
 
 ```ts
-export async function upsertIdempotent(
-  client: VectorClient,
-  records: VectorRecord[],
-  idempotencyKey: string,
-  cache: IdempotencyCache,
-): Promise<UpsertResult & { cached: boolean }>;
+export declare function upsertIdempotent(client: VectorClient, records: VectorRecord[], idempotencyKey: string, cache: IdempotencyCache): Promise<UpsertResult & {
+    cached: boolean;
+}>;
 ```
 
 #### `upsertObservable`
@@ -152,11 +138,7 @@ export async function upsertIdempotent(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L124) `packages/vector/src/enhancements.ts`
 
 ```ts
-export async function upsertObservable(
-  client: VectorClient,
-  records: VectorRecord[],
-  hooks: HookRegistry,
-): Promise<UpsertResult>;
+export declare function upsertObservable(client: VectorClient, records: VectorRecord[], hooks: HookRegistry): Promise<UpsertResult>;
 ```
 
 #### `upsertVectors`
@@ -166,11 +148,9 @@ export async function upsertObservable(
 batch upsert helper — 大量 record を chunk に分けて upsert し、 合計結果を返す。 real provider (Pinecone / Weaviate / Qdrant) の batch size 制限 (100 前後) を再現。
 
 ```ts
-export async function upsertVectors(
-  client: VectorClient,
-  vectors: VectorRecord[],
-  options: { batchSize?: number } = {},
-): Promise<UpsertVectorsResult>;
+export declare function upsertVectors(client: VectorClient, vectors: VectorRecord[], options?: {
+    batchSize?: number;
+}): Promise<UpsertVectorsResult>;
 ```
 
 #### `upsertWithRetry`
@@ -178,11 +158,9 @@ export async function upsertVectors(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L13) `packages/vector/src/enhancements.ts`
 
 ```ts
-export async function upsertWithRetry(
-  client: VectorClient,
-  records: VectorRecord[],
-  options: RetryOptions = {},
-): Promise<UpsertResult & { attempts: number }>;
+export declare function upsertWithRetry(client: VectorClient, records: VectorRecord[], options?: RetryOptions): Promise<UpsertResult & {
+    attempts: number;
+}>;
 ```
 
 ### 型
@@ -193,10 +171,10 @@ export async function upsertWithRetry(
 
 ```ts
 export interface BatchUpsertResult {
-  totalRecords: number;
-  batchCount: number;
-  totalUpserted: number;
-  results: UpsertResult[];
+    totalRecords: number;
+    batchCount: number;
+    totalUpserted: number;
+    results: UpsertResult[];
 }
 ```
 
@@ -206,10 +184,12 @@ export interface BatchUpsertResult {
 
 ```ts
 export interface CircuitBreaker {
-  state: () => CircuitState;
-  upsert: (records: VectorRecord[]) => Promise<UpsertResult & { circuitState: CircuitState }>;
-  reset: () => void;
-  failureCount: () => number;
+    state: () => CircuitState;
+    upsert: (records: VectorRecord[]) => Promise<UpsertResult & {
+        circuitState: CircuitState;
+    }>;
+    reset: () => void;
+    failureCount: () => number;
 }
 ```
 
@@ -219,9 +199,9 @@ export interface CircuitBreaker {
 
 ```ts
 export interface CircuitBreakerOptions {
-  failureThreshold?: number;
-  resetTimeoutMs?: number;
-  now?: () => number;
+    failureThreshold?: number;
+    resetTimeoutMs?: number;
+    now?: () => number;
 }
 ```
 
@@ -239,10 +219,10 @@ export type CircuitState = 'closed' | 'open' | 'half-open';
 
 ```ts
 export interface CreateVectorClientOptions {
-  provider?: VectorProvider;
-  namespace?: string;
-  dimension?: number;
-  failOn?: (record: VectorRecord) => boolean;
+    provider?: VectorProvider;
+    namespace?: string;
+    dimension?: number;
+    failOn?: (record: VectorRecord) => boolean;
 }
 ```
 
@@ -252,9 +232,9 @@ export interface CreateVectorClientOptions {
 
 ```ts
 export interface DeleteResult {
-  deletedCount: number;
-  requestedCount: number;
-  namespace: string;
+    deletedCount: number;
+    requestedCount: number;
+    namespace: string;
 }
 ```
 
@@ -280,10 +260,10 @@ export type HookCallback = (ctx: HookContext) => void;
 
 ```ts
 export interface HookContext {
-  event: UpsertHookEvent;
-  records: VectorRecord[];
-  result?: UpsertResult;
-  error?: string;
+    event: UpsertHookEvent;
+    records: VectorRecord[];
+    result?: UpsertResult;
+    error?: string;
 }
 ```
 
@@ -293,9 +273,9 @@ export interface HookContext {
 
 ```ts
 export interface HookRegistry {
-  register: (event: UpsertHookEvent, cb: HookCallback) => () => void;
-  emit: (event: UpsertHookEvent, ctx: HookContext) => void;
-  count: (event: UpsertHookEvent) => number;
+    register: (event: UpsertHookEvent, cb: HookCallback) => () => void;
+    emit: (event: UpsertHookEvent, ctx: HookContext) => void;
+    count: (event: UpsertHookEvent) => number;
 }
 ```
 
@@ -305,10 +285,10 @@ export interface HookRegistry {
 
 ```ts
 export interface IdempotencyCache {
-  get: (key: string) => UpsertResult | undefined;
-  set: (key: string, value: UpsertResult) => void;
-  size: () => number;
-  clear: () => void;
+    get: (key: string) => UpsertResult | undefined;
+    set: (key: string, value: UpsertResult) => void;
+    size: () => number;
+    clear: () => void;
 }
 ```
 
@@ -318,10 +298,10 @@ export interface IdempotencyCache {
 
 ```ts
 export interface QueryMatch {
-  id: string;
-  score: number;
-  metadata?: VectorMetadata;
-  values?: number[];
+    id: string;
+    score: number;
+    metadata?: VectorMetadata;
+    values?: number[];
 }
 ```
 
@@ -331,10 +311,10 @@ export interface QueryMatch {
 
 ```ts
 export interface QueryOptions {
-  topK?: number;
-  metric?: DistanceMetric;
-  filter?: (metadata: VectorMetadata | undefined) => boolean;
-  includeValues?: boolean;
+    topK?: number;
+    metric?: DistanceMetric;
+    filter?: (metadata: VectorMetadata | undefined) => boolean;
+    includeValues?: boolean;
 }
 ```
 
@@ -344,9 +324,9 @@ export interface QueryOptions {
 
 ```ts
 export interface QueryResult {
-  matches: QueryMatch[];
-  namespace: string;
-  metric: DistanceMetric;
+    matches: QueryMatch[];
+    namespace: string;
+    metric: DistanceMetric;
 }
 ```
 
@@ -356,9 +336,9 @@ export interface QueryResult {
 
 ```ts
 export interface RetryOptions {
-  maxAttempts?: number;
-  initialDelayMs?: number;
-  onRetry?: (attempt: number) => void;
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    onRetry?: (attempt: number) => void;
 }
 ```
 
@@ -376,9 +356,9 @@ export type UpsertHookEvent = 'before-upsert' | 'after-upsert' | 'error';
 
 ```ts
 export interface UpsertResult {
-  upsertedCount: number;
-  provider: VectorProvider;
-  namespace: string;
+    upsertedCount: number;
+    provider: VectorProvider;
+    namespace: string;
 }
 ```
 
@@ -388,8 +368,8 @@ export interface UpsertResult {
 
 ```ts
 export interface UpsertVectorsResult extends UpsertResult {
-  batchCount: number;
-  attempted: number;
+    batchCount: number;
+    attempted: number;
 }
 ```
 
@@ -399,17 +379,17 @@ export interface UpsertVectorsResult extends UpsertResult {
 
 ```ts
 export interface VectorClient {
-  provider: VectorProvider;
-  namespace: string;
-  dimension: number | null;
-  upsert: (records: VectorRecord[]) => Promise<UpsertResult>;
-  fetch: (id: string) => Promise<VectorRecord | null>;
-  list: () => VectorRecord[];
-  size: () => number;
-  clear: () => void;
-  /** internal helper for query.ts / delete */
-  _delete: (ids: string[]) => number;
-  _failOn?: (record: VectorRecord) => boolean;
+    provider: VectorProvider;
+    namespace: string;
+    dimension: number | null;
+    upsert: (records: VectorRecord[]) => Promise<UpsertResult>;
+    fetch: (id: string) => Promise<VectorRecord | null>;
+    list: () => VectorRecord[];
+    size: () => number;
+    clear: () => void;
+    /** internal helper for query.ts / delete */
+    _delete: (ids: string[]) => number;
+    _failOn?: (record: VectorRecord) => boolean;
 }
 ```
 
@@ -435,9 +415,9 @@ export type VectorProvider = 'pinecone' | 'weaviate' | 'qdrant' | 'pgvector';
 
 ```ts
 export interface VectorRecord {
-  id: string;
-  values: number[];
-  metadata?: VectorMetadata;
+    id: string;
+    values: number[];
+    metadata?: VectorMetadata;
 }
 ```
 <!-- kiwa-public-api:end -->

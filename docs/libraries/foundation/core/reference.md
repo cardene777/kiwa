@@ -69,7 +69,7 @@ const pool = await createPool({
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/core/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/core/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -78,7 +78,7 @@ const pool = await createPool({
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/pool.ts#L15) `packages/core/src/pool.ts`
 
 ```ts
-export async function createPool<T>(opts: PoolFactoryOptions<T>): Promise<Pool<T>>;
+export declare function createPool<T>(opts: PoolFactoryOptions<T>): Promise<Pool<T>>;
 ```
 
 #### `parseSpec`
@@ -86,7 +86,7 @@ export async function createPool<T>(opts: PoolFactoryOptions<T>): Promise<Pool<T
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/parser.ts#L74) `packages/core/src/parser.ts`
 
 ```ts
-export function parseSpec(markdown: string, opts: ParseOptions = {}): SpecDoc;
+export declare function parseSpec(markdown: string, opts?: ParseOptions): SpecDoc;
 ```
 
 ### 型
@@ -97,8 +97,8 @@ export function parseSpec(markdown: string, opts: ParseOptions = {}): SpecDoc;
 
 ```ts
 export interface Lease<T> {
-  value: T;
-  release: () => Promise<void>;
+    value: T;
+    release: () => Promise<void>;
 }
 ```
 
@@ -108,8 +108,8 @@ export interface Lease<T> {
 
 ```ts
 export interface ParseOptions {
-  module?: string;
-  defaultLayer?: TestLayer;
+    module?: string;
+    defaultLayer?: TestLayer;
 }
 ```
 
@@ -119,9 +119,9 @@ export interface ParseOptions {
 
 ```ts
 export interface Pool<T> {
-  size: number;
-  borrow: () => Promise<Lease<T>>;
-  stopAll: () => Promise<void>;
+    size: number;
+    borrow: () => Promise<Lease<T>>;
+    stopAll: () => Promise<void>;
 }
 ```
 
@@ -131,10 +131,10 @@ export interface Pool<T> {
 
 ```ts
 export interface PoolFactoryOptions<T> {
-  size: number;
-  acquire: () => Promise<T>;
-  reset?: (value: T) => Promise<void>;
-  release?: (value: T) => Promise<void>;
+    size: number;
+    acquire: () => Promise<T>;
+    reset?: (value: T) => Promise<void>;
+    release?: (value: T) => Promise<void>;
 }
 ```
 
@@ -144,16 +144,16 @@ export interface PoolFactoryOptions<T> {
 
 ```ts
 export interface SpecCase {
-  id: string;
-  observation: string;
-  given: string;
-  when: string;
-  then: string;
-  priority: 'P0' | 'P1' | 'P2' | 'P3';
-  automation: 'yes' | 'no' | 'manual';
-  mode?: TestMode;
-  route?: string;
-  notes?: string;
+    id: string;
+    observation: string;
+    given: string;
+    when: string;
+    then: string;
+    priority: 'P0' | 'P1' | 'P2' | 'P3';
+    automation: 'yes' | 'no' | 'manual';
+    mode?: TestMode;
+    route?: string;
+    notes?: string;
 }
 ```
 
@@ -163,11 +163,11 @@ export interface SpecCase {
 
 ```ts
 export interface SpecDoc {
-  module: string;
-  layer: TestLayer;
-  cases: SpecCase[];
-  raw: string;
-  warnings: string[];
+    module: string;
+    layer: TestLayer;
+    cases: SpecCase[];
+    raw: string;
+    warnings: string[];
 }
 ```
 
@@ -177,8 +177,8 @@ export interface SpecDoc {
 
 ```ts
 export interface TestEnvBase<TMode extends TestMode = TestMode> {
-  mode: TMode;
-  stop: () => Promise<void>;
+    mode: TMode;
+    stop: () => Promise<void>;
 }
 ```
 

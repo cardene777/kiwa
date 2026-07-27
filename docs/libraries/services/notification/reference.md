@@ -31,7 +31,7 @@
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -40,10 +40,7 @@
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L150) `packages/notification/src/enhancements.ts`
 
 ```ts
-export function createCircuitBreaker(
-  client: NotificationClient,
-  options: CircuitBreakerOptions = {},
-): CircuitBreaker;
+export declare function createCircuitBreaker(client: NotificationClient, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
 #### `createHookRegistry`
@@ -51,7 +48,7 @@ export function createCircuitBreaker(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L104) `packages/notification/src/enhancements.ts`
 
 ```ts
-export function createHookRegistry(): HookRegistry;
+export declare function createHookRegistry(): HookRegistry;
 ```
 
 #### `createIdempotencyCache`
@@ -59,7 +56,7 @@ export function createHookRegistry(): HookRegistry;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L63) `packages/notification/src/enhancements.ts`
 
 ```ts
-export function createIdempotencyCache(): IdempotencyCache;
+export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
 #### `createNotificationClient`
@@ -69,7 +66,7 @@ export function createIdempotencyCache(): IdempotencyCache;
 provider 別のみ id prefix + status label に mock 差を出しつつ、 全 channel を共通 interface で 叩ける。 実 SDK (Firebase Admin / apns2 / twilio /
 
 ```ts
-export function createNotificationClient(options: CreateNotificationClientOptions = {}): NotificationClient;
+export declare function createNotificationClient(options?: CreateNotificationClientOptions): NotificationClient;
 ```
 
 #### `parseNotificationEvent`
@@ -79,7 +76,7 @@ export function createNotificationClient(options: CreateNotificationClientOption
 provider 別 event payload を統一 shape に正規化。 fcm=notification_id / apns=apns-id / twilio=MessageSid / sns=MessageId / in-app=id の field 差を吸収。
 
 ```ts
-export function parseNotificationEvent(rawEvent: RawNotificationEvent): NormalizedNotificationEvent;
+export declare function parseNotificationEvent(rawEvent: RawNotificationEvent): NormalizedNotificationEvent;
 ```
 
 #### `sendInApp`
@@ -87,11 +84,7 @@ export function parseNotificationEvent(rawEvent: RawNotificationEvent): Normaliz
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/inapp.ts#L8) `packages/notification/src/inapp.ts`
 
 ```ts
-export async function sendInApp(
-  client: NotificationClient,
-  msg: InAppMessage,
-  _config: InAppDispatchConfig = {},
-): Promise<NotificationSendResult>;
+export declare function sendInApp(client: NotificationClient, msg: InAppMessage, _config?: InAppDispatchConfig): Promise<NotificationSendResult>;
 ```
 
 #### `sendPush`
@@ -101,11 +94,7 @@ export async function sendInApp(
 top-level helper — client.sendPush() の 1-shot 呼出 shim。 実 code base が `sendPush(client, msg)` の function-style を好む場合の代替 API。
 
 ```ts
-export async function sendPush(
-  client: NotificationClient,
-  msg: PushMessage,
-  _config: PushDeliveryConfig = {},
-): Promise<NotificationSendResult>;
+export declare function sendPush(client: NotificationClient, msg: PushMessage, _config?: PushDeliveryConfig): Promise<NotificationSendResult>;
 ```
 
 #### `sendPushBatch`
@@ -113,11 +102,7 @@ export async function sendPush(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L41) `packages/notification/src/enhancements.ts`
 
 ```ts
-export async function sendPushBatch(
-  client: NotificationClient,
-  messages: readonly PushMessage[],
-  concurrency = 5,
-): Promise<BatchSendResult>;
+export declare function sendPushBatch(client: NotificationClient, messages: readonly PushMessage[], concurrency?: number): Promise<BatchSendResult>;
 ```
 
 #### `sendPushIdempotent`
@@ -125,12 +110,9 @@ export async function sendPushBatch(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L73) `packages/notification/src/enhancements.ts`
 
 ```ts
-export async function sendPushIdempotent(
-  client: NotificationClient,
-  msg: PushMessage,
-  idempotencyKey: string,
-  cache: IdempotencyCache,
-): Promise<NotificationSendResult & { cached: boolean }>;
+export declare function sendPushIdempotent(client: NotificationClient, msg: PushMessage, idempotencyKey: string, cache: IdempotencyCache): Promise<NotificationSendResult & {
+    cached: boolean;
+}>;
 ```
 
 #### `sendPushObservable`
@@ -138,11 +120,7 @@ export async function sendPushIdempotent(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L118) `packages/notification/src/enhancements.ts`
 
 ```ts
-export async function sendPushObservable(
-  client: NotificationClient,
-  msg: PushMessage,
-  hooks: HookRegistry,
-): Promise<NotificationSendResult>;
+export declare function sendPushObservable(client: NotificationClient, msg: PushMessage, hooks: HookRegistry): Promise<NotificationSendResult>;
 ```
 
 #### `sendPushWithRetry`
@@ -150,11 +128,9 @@ export async function sendPushObservable(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L14) `packages/notification/src/enhancements.ts`
 
 ```ts
-export async function sendPushWithRetry(
-  client: NotificationClient,
-  msg: PushMessage,
-  options: RetryOptions = {},
-): Promise<NotificationSendResult & { attempts: number }>;
+export declare function sendPushWithRetry(client: NotificationClient, msg: PushMessage, options?: RetryOptions): Promise<NotificationSendResult & {
+    attempts: number;
+}>;
 ```
 
 #### `sendSMS`
@@ -162,11 +138,7 @@ export async function sendPushWithRetry(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/sms.ts#L8) `packages/notification/src/sms.ts`
 
 ```ts
-export async function sendSMS(
-  client: NotificationClient,
-  msg: SmsMessage,
-  _config: SmsDeliveryConfig = {},
-): Promise<NotificationSendResult>;
+export declare function sendSMS(client: NotificationClient, msg: SmsMessage, _config?: SmsDeliveryConfig): Promise<NotificationSendResult>;
 ```
 
 ### 型
@@ -177,10 +149,10 @@ export async function sendSMS(
 
 ```ts
 export interface BatchSendResult {
-  total: number;
-  succeeded: number;
-  failed: number;
-  results: NotificationSendResult[];
+    total: number;
+    succeeded: number;
+    failed: number;
+    results: NotificationSendResult[];
 }
 ```
 
@@ -190,10 +162,12 @@ export interface BatchSendResult {
 
 ```ts
 export interface CircuitBreaker {
-  state: () => CircuitState;
-  sendPush: (msg: PushMessage) => Promise<NotificationSendResult & { circuitState: CircuitState }>;
-  reset: () => void;
-  failureCount: () => number;
+    state: () => CircuitState;
+    sendPush: (msg: PushMessage) => Promise<NotificationSendResult & {
+        circuitState: CircuitState;
+    }>;
+    reset: () => void;
+    failureCount: () => number;
 }
 ```
 
@@ -203,9 +177,9 @@ export interface CircuitBreaker {
 
 ```ts
 export interface CircuitBreakerOptions {
-  failureThreshold?: number;
-  resetTimeoutMs?: number;
-  now?: () => number;
+    failureThreshold?: number;
+    resetTimeoutMs?: number;
+    now?: () => number;
 }
 ```
 
@@ -231,10 +205,10 @@ export type HookCallback = (ctx: HookContext) => void;
 
 ```ts
 export interface HookContext {
-  event: SendHookEvent;
-  message: PushMessage;
-  result?: NotificationSendResult;
-  error?: string;
+    event: SendHookEvent;
+    message: PushMessage;
+    result?: NotificationSendResult;
+    error?: string;
 }
 ```
 
@@ -244,9 +218,9 @@ export interface HookContext {
 
 ```ts
 export interface HookRegistry {
-  register: (event: SendHookEvent, cb: HookCallback) => () => void;
-  emit: (event: SendHookEvent, ctx: HookContext) => void;
-  count: (event: SendHookEvent) => number;
+    register: (event: SendHookEvent, cb: HookCallback) => () => void;
+    emit: (event: SendHookEvent, ctx: HookContext) => void;
+    count: (event: SendHookEvent) => number;
 }
 ```
 
@@ -256,10 +230,10 @@ export interface HookRegistry {
 
 ```ts
 export interface IdempotencyCache {
-  get: (key: string) => NotificationSendResult | undefined;
-  set: (key: string, value: NotificationSendResult) => void;
-  size: () => number;
-  clear: () => void;
+    get: (key: string) => NotificationSendResult | undefined;
+    set: (key: string, value: NotificationSendResult) => void;
+    size: () => number;
+    clear: () => void;
 }
 ```
 
@@ -269,8 +243,8 @@ export interface IdempotencyCache {
 
 ```ts
 export interface InAppDispatchConfig {
-  channel?: string;
-  broadcast?: boolean;
+    channel?: string;
+    broadcast?: boolean;
 }
 ```
 
@@ -280,11 +254,11 @@ export interface InAppDispatchConfig {
 
 ```ts
 export interface InAppMessage {
-  userId: string;
-  title: string;
-  body: string;
-  category?: string;
-  metadata?: Record<string, string | number | boolean>;
+    userId: string;
+    title: string;
+    body: string;
+    category?: string;
+    metadata?: Record<string, string | number | boolean>;
 }
 ```
 
@@ -294,13 +268,13 @@ export interface InAppMessage {
 
 ```ts
 export interface NormalizedNotificationEvent {
-  type: NotificationEventType;
-  provider: NotificationProvider;
-  channel: NotificationChannel;
-  notificationId: string;
-  timestamp: number;
-  recipient?: string;
-  reason?: string;
+    type: NotificationEventType;
+    provider: NotificationProvider;
+    channel: NotificationChannel;
+    notificationId: string;
+    timestamp: number;
+    recipient?: string;
+    reason?: string;
 }
 ```
 
@@ -318,18 +292,18 @@ export type NotificationChannel = 'push' | 'sms' | 'in-app';
 
 ```ts
 export interface NotificationClient {
-  pushProvider: PushProvider;
-  smsProvider: SmsProvider;
-  sendPush: (msg: PushMessage) => Promise<NotificationSendResult>;
-  sendSMS: (msg: SmsMessage) => Promise<NotificationSendResult>;
-  sendInApp: (msg: InAppMessage) => Promise<NotificationSendResult>;
-  dispatch: (channels: NotificationChannel[], payload: {
-    push?: PushMessage;
-    sms?: SmsMessage;
-    inApp?: InAppMessage;
-  }) => Promise<NotificationSendResult[]>;
-  listSent: () => SentNotificationRecord[];
-  clear: () => void;
+    pushProvider: PushProvider;
+    smsProvider: SmsProvider;
+    sendPush: (msg: PushMessage) => Promise<NotificationSendResult>;
+    sendSMS: (msg: SmsMessage) => Promise<NotificationSendResult>;
+    sendInApp: (msg: InAppMessage) => Promise<NotificationSendResult>;
+    dispatch: (channels: NotificationChannel[], payload: {
+        push?: PushMessage;
+        sms?: SmsMessage;
+        inApp?: InAppMessage;
+    }) => Promise<NotificationSendResult[]>;
+    listSent: () => SentNotificationRecord[];
+    clear: () => void;
 }
 ```
 
@@ -355,12 +329,12 @@ export type NotificationProvider = PushProvider | SmsProvider | 'in-app';
 
 ```ts
 export interface NotificationSendResult {
-  id: string;
-  channel: NotificationChannel;
-  provider: NotificationProvider;
-  status: 'queued' | 'sent' | 'failed';
-  acceptedAt: number;
-  reason?: string;
+    id: string;
+    channel: NotificationChannel;
+    provider: NotificationProvider;
+    status: 'queued' | 'sent' | 'failed';
+    acceptedAt: number;
+    reason?: string;
 }
 ```
 
@@ -370,8 +344,8 @@ export interface NotificationSendResult {
 
 ```ts
 export interface PushDeliveryConfig {
-  ttl?: number;
-  priority?: 'normal' | 'high';
+    ttl?: number;
+    priority?: 'normal' | 'high';
 }
 ```
 
@@ -381,12 +355,12 @@ export interface PushDeliveryConfig {
 
 ```ts
 export interface PushMessage {
-  deviceToken: string;
-  title: string;
-  body: string;
-  data?: Record<string, string>;
-  badge?: number;
-  sound?: string;
+    deviceToken: string;
+    title: string;
+    body: string;
+    data?: Record<string, string>;
+    badge?: number;
+    sound?: string;
 }
 ```
 
@@ -404,8 +378,8 @@ export type PushProvider = 'fcm' | 'apns';
 
 ```ts
 export interface RawNotificationEvent {
-  provider: NotificationProvider;
-  raw: Record<string, unknown>;
+    provider: NotificationProvider;
+    raw: Record<string, unknown>;
 }
 ```
 
@@ -415,9 +389,9 @@ export interface RawNotificationEvent {
 
 ```ts
 export interface RetryOptions {
-  maxAttempts?: number;
-  initialDelayMs?: number;
-  onRetry?: (attempt: number) => void;
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    onRetry?: (attempt: number) => void;
 }
 ```
 
@@ -435,7 +409,7 @@ export type SendHookEvent = 'before-send' | 'after-send' | 'error';
 
 ```ts
 export interface SentNotificationRecord extends NotificationSendResult {
-  message: PushMessage | SmsMessage | InAppMessage;
+    message: PushMessage | SmsMessage | InAppMessage;
 }
 ```
 
@@ -445,8 +419,8 @@ export interface SentNotificationRecord extends NotificationSendResult {
 
 ```ts
 export interface SmsDeliveryConfig {
-  statusCallback?: string;
-  maxPrice?: number;
+    statusCallback?: string;
+    maxPrice?: number;
 }
 ```
 
@@ -456,10 +430,10 @@ export interface SmsDeliveryConfig {
 
 ```ts
 export interface SmsMessage {
-  to: string;
-  from: string;
-  body: string;
-  mediaUrl?: string;
+    to: string;
+    from: string;
+    body: string;
+    mediaUrl?: string;
 }
 ```
 

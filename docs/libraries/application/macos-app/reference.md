@@ -34,7 +34,7 @@ accessibility の role と label を確認する場合は `captureAccessibilityT
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -43,10 +43,7 @@ accessibility の role と label を確認する場合は `captureAccessibilityT
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L111) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export async function batchOperate<TIn, TOut>(
-  items: readonly BatchItem<TIn>[],
-  runner: (item: BatchItem<TIn>) => Promise<TOut>,
-): Promise<BatchResult[]>;
+export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
 #### `captureAccessibilityTree`
@@ -56,7 +53,7 @@ export async function batchOperate<TIn, TOut>(
 SwiftUI / AppKit view tree を macOS accessibility API (AXUIElement) が返す tree に mapping。 tree walk 済み snapshot を返し、 user assert (label 存在 / role 一致 / total node 数) を可能にする。 実 AX API は起動せず view attributes から機械的に role を 推定する。
 
 ```ts
-export function captureAccessibilityTree(env: MacAppEnv): AccessibilityTree;
+export declare function captureAccessibilityTree(env: MacAppEnv): AccessibilityTree;
 ```
 
 #### `createMacAppEnv`
@@ -66,7 +63,7 @@ export function captureAccessibilityTree(env: MacAppEnv): AccessibilityTree;
 mock native app env を生成。 mode = 'swiftui' は declarative View tree の初期状態、 'appkit' は imperative responder chain の初期 window を返す。 real XCTest 起動なしで bundle info / window / view tree / accessibility descriptor を保持する。
 
 ```ts
-export function createMacAppEnv(options: CreateMacAppEnvOptions = {}): MacAppEnv;
+export declare function createMacAppEnv(options?: CreateMacAppEnvOptions): MacAppEnv;
 ```
 
 #### `emitUserNotification`
@@ -76,7 +73,7 @@ export function createMacAppEnv(options: CreateMacAppEnvOptions = {}): MacAppEnv
 UserNotifications framework の schedule API 相当を mock。 実 UNUserNotificationCenter は 起動せず、 env.eventLog に notification schedule を記録して user が listSent 相当で assert 可能にする。
 
 ```ts
-export function emitUserNotification(env: MacAppEnv, notification: UserNotification): NotificationResult;
+export declare function emitUserNotification(env: MacAppEnv, notification: UserNotification): NotificationResult;
 ```
 
 #### `mockScreencap`
@@ -86,7 +83,7 @@ export function emitUserNotification(env: MacAppEnv, notification: UserNotificat
 CGDisplayCreateImage 相当の mock screencap を生成。 実 GPU capture ではなく、 region + 決定的 pixel data (env.id + region ハッシュ) から magic 付きの mock byte 列を 返す。 caller は format magic + length + region 契約を assert 可能。
 
 ```ts
-export function mockScreencap(env: MacAppEnv, options: ScreencapOptions = {}): ScreencapResult;
+export declare function mockScreencap(env: MacAppEnv, options?: ScreencapOptions): ScreencapResult;
 ```
 
 #### `simulateUserInteraction`
@@ -96,7 +93,7 @@ export function mockScreencap(env: MacAppEnv, options: ScreencapOptions = {}): S
 view tree を walk して target id を探索、 見つかったら enabled かつ mode-specific な dispatchable node であれば event を eventLog に記録する。 responder chain (AppKit) や SwiftUI の
 
 ```ts
-export function simulateUserInteraction(env: MacAppEnv, event: InteractionEvent): InteractionResult;
+export declare function simulateUserInteraction(env: MacAppEnv, event: InteractionEvent): InteractionResult;
 ```
 
 #### `withCircuitBreaker`
@@ -104,7 +101,7 @@ export function simulateUserInteraction(env: MacAppEnv, event: InteractionEvent)
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L64) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
+export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
 #### `withIdempotencyKey`
@@ -112,7 +109,7 @@ export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBrea
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L101) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
+export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
 #### `withObservability`
@@ -120,7 +117,7 @@ export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: st
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L86) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
+export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
 #### `withRateLimit`
@@ -128,7 +125,7 @@ export function withObservability<T>(name: string, fn: () => Promise<T>, hook: O
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L50) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
+export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
 #### `withRetry`
@@ -136,7 +133,7 @@ export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L20) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
+export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
 #### `withTimeout`
@@ -144,7 +141,7 @@ export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () =>
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L40) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
+export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
 ```
 
 ### 型
@@ -155,12 +152,12 @@ export function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): (
 
 ```ts
 export interface AccessibilityNode {
-  id: string;
-  role: AccessibilityRole;
-  label: string | undefined;
-  value: string | undefined;
-  enabled: boolean;
-  children: AccessibilityNode[];
+    id: string;
+    role: AccessibilityRole;
+    label: string | undefined;
+    value: string | undefined;
+    enabled: boolean;
+    children: AccessibilityNode[];
 }
 ```
 
@@ -169,15 +166,7 @@ export interface AccessibilityNode {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/accessibility.ts#L3) `packages/macos-app/src/accessibility.ts`
 
 ```ts
-export type AccessibilityRole =
-  | 'AXWindow'
-  | 'AXGroup'
-  | 'AXStaticText'
-  | 'AXButton'
-  | 'AXTextField'
-  | 'AXCheckBox'
-  | 'AXImage'
-  | 'AXUnknown';
+export type AccessibilityRole = 'AXWindow' | 'AXGroup' | 'AXStaticText' | 'AXButton' | 'AXTextField' | 'AXCheckBox' | 'AXImage' | 'AXUnknown';
 ```
 
 #### `AccessibilityTree`
@@ -186,9 +175,9 @@ export type AccessibilityRole =
 
 ```ts
 export interface AccessibilityTree {
-  root: AccessibilityNode;
-  totalNodes: number;
-  capturedAt: number;
+    root: AccessibilityNode;
+    totalNodes: number;
+    capturedAt: number;
 }
 ```
 
@@ -197,7 +186,10 @@ export interface AccessibilityTree {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L17) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
+export interface BatchItem<TIn = unknown> {
+    name: string;
+    input: TIn;
+}
 ```
 
 #### `BatchResult`
@@ -205,7 +197,14 @@ export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L18) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export interface BatchResult { ok: boolean; output?: unknown; error?: { code: string; message: string }; }
+export interface BatchResult {
+    ok: boolean;
+    output?: unknown;
+    error?: {
+        code: string;
+        message: string;
+    };
+}
 ```
 
 #### `BundleInfo`
@@ -214,10 +213,10 @@ export interface BatchResult { ok: boolean; output?: unknown; error?: { code: st
 
 ```ts
 export interface BundleInfo {
-  bundleId: string;
-  version: string;
-  build: string;
-  executable: string;
+    bundleId: string;
+    version: string;
+    build: string;
+    executable: string;
 }
 ```
 
@@ -226,7 +225,10 @@ export interface BundleInfo {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L11) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export interface CircuitBreakerOptions { failureThreshold: number; resetMs: number; }
+export interface CircuitBreakerOptions {
+    failureThreshold: number;
+    resetMs: number;
+}
 ```
 
 #### `CreateMacAppEnvOptions`
@@ -235,11 +237,11 @@ export interface CircuitBreakerOptions { failureThreshold: number; resetMs: numb
 
 ```ts
 export interface CreateMacAppEnvOptions {
-  mode?: MacAppMode;
-  bundleId?: string;
-  windowTitle?: string;
-  initialView?: ViewNode;
-  now?: () => number;
+    mode?: MacAppMode;
+    bundleId?: string;
+    windowTitle?: string;
+    initialView?: ViewNode;
+    now?: () => number;
 }
 ```
 
@@ -249,11 +251,11 @@ export interface CreateMacAppEnvOptions {
 
 ```ts
 export interface InteractionEvent {
-  type: InteractionType;
-  target: string;
-  key?: string;
-  gesture?: 'swipe' | 'pinch' | 'rotate' | 'longPress';
-  modifiers?: Array<'cmd' | 'ctrl' | 'opt' | 'shift'>;
+    type: InteractionType;
+    target: string;
+    key?: string;
+    gesture?: 'swipe' | 'pinch' | 'rotate' | 'longPress';
+    modifiers?: Array<'cmd' | 'ctrl' | 'opt' | 'shift'>;
 }
 ```
 
@@ -263,11 +265,11 @@ export interface InteractionEvent {
 
 ```ts
 export interface InteractionResult {
-  dispatched: boolean;
-  targetFound: boolean;
-  targetType?: string;
-  handled: boolean;
-  reason?: string;
+    dispatched: boolean;
+    targetFound: boolean;
+    targetType?: string;
+    handled: boolean;
+    reason?: string;
 }
 ```
 
@@ -285,13 +287,17 @@ export type InteractionType = 'click' | 'keypress' | 'gesture' | 'focus';
 
 ```ts
 export interface MacAppEnv {
-  mode: MacAppMode;
-  bundle: BundleInfo;
-  window: WindowInfo;
-  rootView: ViewNode;
-  eventLog: Array<{ at: number; kind: string; detail: unknown }>;
-  now: () => number;
-  createdAt: number;
+    mode: MacAppMode;
+    bundle: BundleInfo;
+    window: WindowInfo;
+    rootView: ViewNode;
+    eventLog: Array<{
+        at: number;
+        kind: string;
+        detail: unknown;
+    }>;
+    now: () => number;
+    createdAt: number;
 }
 ```
 
@@ -309,9 +315,9 @@ export type MacAppMode = 'swiftui' | 'appkit';
 
 ```ts
 export interface NotificationAction {
-  id: string;
-  title: string;
-  destructive?: boolean;
+    id: string;
+    title: string;
+    destructive?: boolean;
 }
 ```
 
@@ -321,11 +327,11 @@ export interface NotificationAction {
 
 ```ts
 export interface NotificationResult {
-  id: string;
-  scheduled: boolean;
-  scheduledAt: number;
-  bundleId: string;
-  reason?: string;
+    id: string;
+    scheduled: boolean;
+    scheduledAt: number;
+    bundleId: string;
+    reason?: string;
 }
 ```
 
@@ -335,9 +341,9 @@ export interface NotificationResult {
 
 ```ts
 export interface ObservabilityHook {
-  onStart?: (name: string, input?: unknown) => void;
-  onSuccess?: (name: string, output: unknown, durationMs: number) => void;
-  onError?: (name: string, err: unknown, durationMs: number) => void;
+    onStart?: (name: string, input?: unknown) => void;
+    onSuccess?: (name: string, output: unknown, durationMs: number) => void;
+    onError?: (name: string, err: unknown, durationMs: number) => void;
 }
 ```
 
@@ -346,7 +352,10 @@ export interface ObservabilityHook {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L10) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export interface RateLimitOptions { maxRequests: number; windowMs: number; }
+export interface RateLimitOptions {
+    maxRequests: number;
+    windowMs: number;
+}
 ```
 
 #### `Rect`
@@ -355,10 +364,10 @@ export interface RateLimitOptions { maxRequests: number; windowMs: number; }
 
 ```ts
 export interface Rect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
 }
 ```
 
@@ -368,9 +377,9 @@ export interface Rect {
 
 ```ts
 export interface RetryOptions {
-  maxAttempts: number;
-  backoffMs?: number;
-  retryOn?: (err: unknown) => boolean;
+    maxAttempts: number;
+    backoffMs?: number;
+    retryOn?: (err: unknown) => boolean;
 }
 ```
 
@@ -380,9 +389,9 @@ export interface RetryOptions {
 
 ```ts
 export interface ScreencapOptions {
-  region?: Rect;
-  format?: 'png' | 'jpeg';
-  scale?: number;
+    region?: Rect;
+    format?: 'png' | 'jpeg';
+    scale?: number;
 }
 ```
 
@@ -392,11 +401,11 @@ export interface ScreencapOptions {
 
 ```ts
 export interface ScreencapResult {
-  format: 'png' | 'jpeg';
-  region: Rect;
-  bytes: Uint8Array;
-  capturedAt: number;
-  bytesLength: number;
+    format: 'png' | 'jpeg';
+    region: Rect;
+    bytes: Uint8Array;
+    capturedAt: number;
+    bytesLength: number;
 }
 ```
 
@@ -405,7 +414,9 @@ export interface ScreencapResult {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L9) `packages/macos-app/src/resilience.ts`
 
 ```ts
-export interface TimeoutOptions { ms: number; }
+export interface TimeoutOptions {
+    ms: number;
+}
 ```
 
 #### `UserNotification`
@@ -414,14 +425,14 @@ export interface TimeoutOptions { ms: number; }
 
 ```ts
 export interface UserNotification {
-  id?: string;
-  title: string;
-  body: string;
-  subtitle?: string;
-  sound?: string;
-  category?: string;
-  actions?: NotificationAction[];
-  userInfo?: Record<string, string | number | boolean>;
+    id?: string;
+    title: string;
+    body: string;
+    subtitle?: string;
+    sound?: string;
+    category?: string;
+    actions?: NotificationAction[];
+    userInfo?: Record<string, string | number | boolean>;
 }
 ```
 
@@ -431,13 +442,13 @@ export interface UserNotification {
 
 ```ts
 export interface ViewNode {
-  id: string;
-  type: string;
-  label?: string;
-  value?: string;
-  enabled: boolean;
-  children: ViewNode[];
-  attributes: Record<string, string | number | boolean>;
+    id: string;
+    type: string;
+    label?: string;
+    value?: string;
+    enabled: boolean;
+    children: ViewNode[];
+    attributes: Record<string, string | number | boolean>;
 }
 ```
 
@@ -447,13 +458,13 @@ export interface ViewNode {
 
 ```ts
 export interface WindowInfo {
-  id: string;
-  title: string;
-  width: number;
-  height: number;
-  x: number;
-  y: number;
-  visible: boolean;
+    id: string;
+    title: string;
+    width: number;
+    height: number;
+    x: number;
+    y: number;
+    visible: boolean;
 }
 ```
 <!-- kiwa-public-api:end -->

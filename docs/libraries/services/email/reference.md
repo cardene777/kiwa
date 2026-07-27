@@ -27,7 +27,7 @@ client は実メール provider、DNS、inbox に接続しません。provider �
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/email/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/email/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -38,10 +38,7 @@ client は実メール provider、DNS、inbox に接続しません。provider �
 circuit breaker: failureThreshold 連続 failure で state=open、 resetTimeoutMs 経過後 half-open で 1 回試行、 success で closed 復帰。
 
 ```ts
-export function createCircuitBreaker(
-  client: EmailClient,
-  options: CircuitBreakerOptions = {},
-): CircuitBreaker;
+export declare function createCircuitBreaker(client: EmailClient, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
 #### `createEmailClient`
@@ -51,7 +48,7 @@ export function createCircuitBreaker(
 provider 別のみ mock 差 (id prefix / accepted status label) を持たせつつ、 全 API 共通 interface。 実 provider (Resend / SendGrid / Postmark / SES) の SDK を差し替えても同じ signature で呼べる想定。
 
 ```ts
-export function createEmailClient(options: CreateEmailClientOptions = {}): EmailClient;
+export declare function createEmailClient(options?: CreateEmailClientOptions): EmailClient;
 ```
 
 #### `createHookRegistry`
@@ -61,7 +58,7 @@ export function createEmailClient(options: CreateEmailClientOptions = {}): Email
 observability hook registry。 send 前 / 後 / error 3 phase で callback を発火。
 
 ```ts
-export function createHookRegistry(): HookRegistry;
+export declare function createHookRegistry(): HookRegistry;
 ```
 
 #### `createIdempotencyCache`
@@ -71,7 +68,7 @@ export function createHookRegistry(): HookRegistry;
 in-memory idempotency cache (production では Redis 等に差替想定)。
 
 ```ts
-export function createIdempotencyCache(): IdempotencyCache;
+export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
 #### `parseDeliveryEvent`
@@ -81,7 +78,7 @@ export function createIdempotencyCache(): IdempotencyCache;
 provider 別 event payload を統一 shape に正規化。 実 provider が返す field 名の違い (Resend = type / SendGrid = event / Postmark = RecordType / SES = eventType) を吸収。
 
 ```ts
-export function parseDeliveryEvent(rawEvent: RawDeliveryEvent): NormalizedDeliveryEvent;
+export declare function parseDeliveryEvent(rawEvent: RawDeliveryEvent): NormalizedDeliveryEvent;
 ```
 
 #### `renderTemplate`
@@ -91,7 +88,7 @@ export function parseDeliveryEvent(rawEvent: RawDeliveryEvent): NormalizedDelive
 `&#123;&#123;name&#125;&#125;` placeholder を data で置換する mustache-lite template。 実 provider の template engine (Handlebars / MJML) を差し替えても同じ signature で呼べる想定。
 
 ```ts
-export function renderTemplate(template: string, data: EmailTemplateContext): TemplateRenderResult;
+export declare function renderTemplate(template: string, data: EmailTemplateContext): TemplateRenderResult;
 ```
 
 #### `sendBatch`
@@ -101,11 +98,7 @@ export function renderTemplate(template: string, data: EmailTemplateContext): Te
 batch send with limited concurrency。 default concurrency = 5、 stopOnFirstFailure=true で最初の failure で中断。
 
 ```ts
-export async function sendBatch(
-  client: EmailClient,
-  messages: readonly EmailMessage[],
-  options: BatchSendOptions = {},
-): Promise<BatchSendResult>;
+export declare function sendBatch(client: EmailClient, messages: readonly EmailMessage[], options?: BatchSendOptions): Promise<BatchSendResult>;
 ```
 
 #### `sendIdempotent`
@@ -115,11 +108,9 @@ export async function sendBatch(
 idempotent send: 同 idempotencyKey なら cached result を返却、 dup send 防止。 key 未登録なら send して cache に格納。
 
 ```ts
-export async function sendIdempotent(
-  client: EmailClient,
-  msg: EmailMessage,
-  options: IdempotentSendOptions,
-): Promise<EmailSendResult & { cached: boolean }>;
+export declare function sendIdempotent(client: EmailClient, msg: EmailMessage, options: IdempotentSendOptions): Promise<EmailSendResult & {
+    cached: boolean;
+}>;
 ```
 
 #### `sendObservable`
@@ -129,11 +120,7 @@ export async function sendIdempotent(
 observable send: before-send / after-send / error hook を発火しつつ send。 hook throw は catch して error hook に流す (send 自体は継続)。
 
 ```ts
-export async function sendObservable(
-  client: EmailClient,
-  msg: EmailMessage,
-  hooks: HookRegistry,
-): Promise<EmailSendResult>;
+export declare function sendObservable(client: EmailClient, msg: EmailMessage, hooks: HookRegistry): Promise<EmailSendResult>;
 ```
 
 #### `sendWithRetry`
@@ -143,11 +130,7 @@ export async function sendObservable(
 send with exponential backoff。 failed status で retry、 maxAttempts 到達で最後の result を返す。 default = maxAttempts 3 / initialDelayMs 100 / backoffMultiplier 2 / maxDelayMs 5000。
 
 ```ts
-export async function sendWithRetry(
-  client: EmailClient,
-  msg: EmailMessage,
-  options: RetryOptions = {},
-): Promise<RetrySendResult>;
+export declare function sendWithRetry(client: EmailClient, msg: EmailMessage, options?: RetryOptions): Promise<RetrySendResult>;
 ```
 
 #### `verifyWebhookSignature`
@@ -157,12 +140,7 @@ export async function sendWithRetry(
 provider 別 webhook 署名を検証。 real provider (Resend / SendGrid / Postmark / SES) が 実際に送る signature format (sha256 hex / base64) を再現。
 
 ```ts
-export function verifyWebhookSignature(
-  payload: string,
-  signature: string,
-  secret: string,
-  provider: EmailProvider,
-): SignatureVerifyResult;
+export declare function verifyWebhookSignature(payload: string, signature: string, secret: string, provider: EmailProvider): SignatureVerifyResult;
 ```
 
 ### 型
@@ -173,8 +151,8 @@ export function verifyWebhookSignature(
 
 ```ts
 export interface BatchSendOptions {
-  concurrency?: number;
-  stopOnFirstFailure?: boolean;
+    concurrency?: number;
+    stopOnFirstFailure?: boolean;
 }
 ```
 
@@ -184,10 +162,10 @@ export interface BatchSendOptions {
 
 ```ts
 export interface BatchSendResult {
-  total: number;
-  succeeded: number;
-  failed: number;
-  results: EmailSendResult[];
+    total: number;
+    succeeded: number;
+    failed: number;
+    results: EmailSendResult[];
 }
 ```
 
@@ -197,10 +175,12 @@ export interface BatchSendResult {
 
 ```ts
 export interface CircuitBreaker {
-  state: () => CircuitState;
-  send: (msg: EmailMessage) => Promise<EmailSendResult & { circuitState: CircuitState }>;
-  reset: () => void;
-  failureCount: () => number;
+    state: () => CircuitState;
+    send: (msg: EmailMessage) => Promise<EmailSendResult & {
+        circuitState: CircuitState;
+    }>;
+    reset: () => void;
+    failureCount: () => number;
 }
 ```
 
@@ -210,9 +190,9 @@ export interface CircuitBreaker {
 
 ```ts
 export interface CircuitBreakerOptions {
-  failureThreshold?: number;
-  resetTimeoutMs?: number;
-  now?: () => number;
+    failureThreshold?: number;
+    resetTimeoutMs?: number;
+    now?: () => number;
 }
 ```
 
@@ -238,11 +218,11 @@ export type DeliveryEventType = 'delivered' | 'bounced' | 'opened' | 'clicked' |
 
 ```ts
 export interface EmailClient {
-  provider: EmailProvider;
-  send: (msg: EmailMessage) => Promise<EmailSendResult>;
-  renderTemplate: (templateId: string, data: EmailTemplateContext) => string;
-  listSent: () => SentEmailRecord[];
-  clear: () => void;
+    provider: EmailProvider;
+    send: (msg: EmailMessage) => Promise<EmailSendResult>;
+    renderTemplate: (templateId: string, data: EmailTemplateContext) => string;
+    listSent: () => SentEmailRecord[];
+    clear: () => void;
 }
 ```
 
@@ -252,17 +232,17 @@ export interface EmailClient {
 
 ```ts
 export interface EmailMessage {
-  from: string;
-  to: string | string[];
-  subject: string;
-  html?: string;
-  text?: string;
-  templateId?: string;
-  templateData?: EmailTemplateContext;
-  headers?: Record<string, string>;
-  cc?: string[];
-  bcc?: string[];
-  replyTo?: string;
+    from: string;
+    to: string | string[];
+    subject: string;
+    html?: string;
+    text?: string;
+    templateId?: string;
+    templateData?: EmailTemplateContext;
+    headers?: Record<string, string>;
+    cc?: string[];
+    bcc?: string[];
+    replyTo?: string;
 }
 ```
 
@@ -280,11 +260,11 @@ export type EmailProvider = 'resend' | 'sendgrid' | 'postmark' | 'ses';
 
 ```ts
 export interface EmailSendResult {
-  id: string;
-  provider: EmailProvider;
-  status: 'queued' | 'sent' | 'failed';
-  acceptedAt: number;
-  reason?: string;
+    id: string;
+    provider: EmailProvider;
+    status: 'queued' | 'sent' | 'failed';
+    acceptedAt: number;
+    reason?: string;
 }
 ```
 
@@ -310,11 +290,11 @@ export type HookCallback = (ctx: HookContext) => void | Promise<void>;
 
 ```ts
 export interface HookContext {
-  event: SendHookEvent;
-  message: EmailMessage;
-  result?: EmailSendResult;
-  error?: string;
-  durationMs?: number;
+    event: SendHookEvent;
+    message: EmailMessage;
+    result?: EmailSendResult;
+    error?: string;
+    durationMs?: number;
 }
 ```
 
@@ -324,9 +304,9 @@ export interface HookContext {
 
 ```ts
 export interface HookRegistry {
-  register: (event: SendHookEvent, cb: HookCallback) => () => void;
-  emit: (event: SendHookEvent, ctx: HookContext) => Promise<void>;
-  count: (event: SendHookEvent) => number;
+    register: (event: SendHookEvent, cb: HookCallback) => () => void;
+    emit: (event: SendHookEvent, ctx: HookContext) => Promise<void>;
+    count: (event: SendHookEvent) => number;
 }
 ```
 
@@ -336,10 +316,10 @@ export interface HookRegistry {
 
 ```ts
 export interface IdempotencyCache {
-  get: (key: string) => EmailSendResult | undefined;
-  set: (key: string, value: EmailSendResult) => void;
-  size: () => number;
-  clear: () => void;
+    get: (key: string) => EmailSendResult | undefined;
+    set: (key: string, value: EmailSendResult) => void;
+    size: () => number;
+    clear: () => void;
 }
 ```
 
@@ -349,8 +329,8 @@ export interface IdempotencyCache {
 
 ```ts
 export interface IdempotentSendOptions {
-  cache: IdempotencyCache;
-  idempotencyKey: string;
+    cache: IdempotencyCache;
+    idempotencyKey: string;
 }
 ```
 
@@ -360,12 +340,12 @@ export interface IdempotentSendOptions {
 
 ```ts
 export interface NormalizedDeliveryEvent {
-  type: DeliveryEventType;
-  provider: EmailProvider;
-  emailId: string;
-  timestamp: number;
-  recipient?: string;
-  reason?: string;
+    type: DeliveryEventType;
+    provider: EmailProvider;
+    emailId: string;
+    timestamp: number;
+    recipient?: string;
+    reason?: string;
 }
 ```
 
@@ -375,8 +355,8 @@ export interface NormalizedDeliveryEvent {
 
 ```ts
 export interface RawDeliveryEvent {
-  provider: EmailProvider;
-  raw: Record<string, unknown>;
+    provider: EmailProvider;
+    raw: Record<string, unknown>;
 }
 ```
 
@@ -386,11 +366,11 @@ export interface RawDeliveryEvent {
 
 ```ts
 export interface RetryOptions {
-  maxAttempts?: number;
-  initialDelayMs?: number;
-  backoffMultiplier?: number;
-  maxDelayMs?: number;
-  onRetry?: (attempt: number, lastError: string) => void;
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    backoffMultiplier?: number;
+    maxDelayMs?: number;
+    onRetry?: (attempt: number, lastError: string) => void;
 }
 ```
 
@@ -400,7 +380,7 @@ export interface RetryOptions {
 
 ```ts
 export interface RetrySendResult extends EmailSendResult {
-  attempts: number;
+    attempts: number;
 }
 ```
 
@@ -418,9 +398,9 @@ export type SendHookEvent = 'before-send' | 'after-send' | 'error';
 
 ```ts
 export interface SentEmailRecord extends EmailSendResult {
-  message: EmailMessage;
-  renderedHtml?: string;
-  renderedText?: string;
+    message: EmailMessage;
+    renderedHtml?: string;
+    renderedText?: string;
 }
 ```
 
@@ -430,10 +410,10 @@ export interface SentEmailRecord extends EmailSendResult {
 
 ```ts
 export interface SignatureVerifyResult {
-  valid: boolean;
-  provider: EmailProvider;
-  algorithm: string;
-  reason?: string;
+    valid: boolean;
+    provider: EmailProvider;
+    algorithm: string;
+    reason?: string;
 }
 ```
 
@@ -443,9 +423,9 @@ export interface SignatureVerifyResult {
 
 ```ts
 export interface TemplateRenderResult {
-  html: string;
-  variables: string[];
-  missing: string[];
+    html: string;
+    variables: string[];
+    missing: string[];
 }
 ```
 <!-- kiwa-public-api:end -->

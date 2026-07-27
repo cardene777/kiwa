@@ -40,7 +40,7 @@ retry、batch、idempotency、observability、circuit breaker の API は server
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -49,10 +49,7 @@ retry、batch、idempotency、observability、circuit breaker の API は server
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L148) `packages/graphql/src/enhancements.ts`
 
 ```ts
-export function createCircuitBreaker(
-  server: GraphQLServer,
-  options: CircuitBreakerOptions = {},
-): CircuitBreaker;
+export declare function createCircuitBreaker(server: GraphQLServer, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
 #### `createGraphQLClient`
@@ -62,7 +59,7 @@ export function createCircuitBreaker(
 mock GraphQL client。 内部で server.executeQuery を叩くだけの thin wrapper だが、 client 側の呼出を独立に記録して urql / Relay 相当の caller inspection を可能にする。
 
 ```ts
-export function createGraphQLClient(options: GraphQLClientOptions): GraphQLClient;
+export declare function createGraphQLClient(options: GraphQLClientOptions): GraphQLClient;
 ```
 
 #### `createGraphQLServer`
@@ -72,11 +69,7 @@ export function createGraphQLClient(options: GraphQLClientOptions): GraphQLClien
 schema + resolvers を受け取って mock GraphQL server を作る。 executeQuery で query / mutation を dispatch し、 対応する resolver を呼出、 結果を data / errors 形式で返す。 subscription は subscribeSubscription 経由で呼出 (別 module)。
 
 ```ts
-export function createGraphQLServer(
-  schema: GraphQLSchemaDef,
-  resolvers: GraphQLResolvers,
-  options: CreateGraphQLServerOptions = {},
-): GraphQLServer;
+export declare function createGraphQLServer(schema: GraphQLSchemaDef, resolvers: GraphQLResolvers, options?: CreateGraphQLServerOptions): GraphQLServer;
 ```
 
 #### `createHookRegistry`
@@ -84,7 +77,7 @@ export function createGraphQLServer(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L101) `packages/graphql/src/enhancements.ts`
 
 ```ts
-export function createHookRegistry(): HookRegistry;
+export declare function createHookRegistry(): HookRegistry;
 ```
 
 #### `createIdempotencyCache`
@@ -92,7 +85,7 @@ export function createHookRegistry(): HookRegistry;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L58) `packages/graphql/src/enhancements.ts`
 
 ```ts
-export function createIdempotencyCache(): IdempotencyCache;
+export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
 #### `executeBatch`
@@ -100,10 +93,10 @@ export function createIdempotencyCache(): IdempotencyCache;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L41) `packages/graphql/src/enhancements.ts`
 
 ```ts
-export async function executeBatch(
-  server: GraphQLServer,
-  queries: readonly { query: string; variables?: GraphQLVariables }[],
-): Promise<BatchExecuteResult>;
+export declare function executeBatch(server: GraphQLServer, queries: readonly {
+    query: string;
+    variables?: GraphQLVariables;
+}[]): Promise<BatchExecuteResult>;
 ```
 
 #### `executeIdempotent`
@@ -111,13 +104,9 @@ export async function executeBatch(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L68) `packages/graphql/src/enhancements.ts`
 
 ```ts
-export async function executeIdempotent(
-  server: GraphQLServer,
-  query: string,
-  variables: GraphQLVariables,
-  idempotencyKey: string,
-  cache: IdempotencyCache,
-): Promise<GraphQLExecutionResult & { cached: boolean }>;
+export declare function executeIdempotent(server: GraphQLServer, query: string, variables: GraphQLVariables, idempotencyKey: string, cache: IdempotencyCache): Promise<GraphQLExecutionResult & {
+    cached: boolean;
+}>;
 ```
 
 #### `executeObservable`
@@ -125,12 +114,7 @@ export async function executeIdempotent(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L115) `packages/graphql/src/enhancements.ts`
 
 ```ts
-export async function executeObservable(
-  server: GraphQLServer,
-  query: string,
-  variables: GraphQLVariables,
-  hooks: HookRegistry,
-): Promise<GraphQLExecutionResult>;
+export declare function executeObservable(server: GraphQLServer, query: string, variables: GraphQLVariables, hooks: HookRegistry): Promise<GraphQLExecutionResult>;
 ```
 
 #### `executeQuery`
@@ -140,14 +124,7 @@ export async function executeObservable(
 mock server 経由で GraphQL query / mutation を実行する。 parser で operation を分解し、 対応する resolver を selection ごとに呼出、 data を組み立てる。 subscription は subscribeSubscription 経由で呼出。
 
 ```ts
-export async function executeQuery(
-  server: GraphQLServer,
-  query: string,
-  variables: GraphQLVariables = {},
-  context: GraphQLContext = {},
-  onCall?: (call: GraphQLServerCall) => void,
-  now: () => number = () => 0,
-): Promise<GraphQLExecutionResult>;
+export declare function executeQuery(server: GraphQLServer, query: string, variables?: GraphQLVariables, context?: GraphQLContext, onCall?: (call: GraphQLServerCall) => void, now?: () => number): Promise<GraphQLExecutionResult>;
 ```
 
 #### `executeWithRetry`
@@ -155,12 +132,9 @@ export async function executeQuery(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L13) `packages/graphql/src/enhancements.ts`
 
 ```ts
-export async function executeWithRetry(
-  server: GraphQLServer,
-  query: string,
-  variables: GraphQLVariables = {},
-  options: RetryOptions = {},
-): Promise<GraphQLExecutionResult & { attempts: number }>;
+export declare function executeWithRetry(server: GraphQLServer, query: string, variables?: GraphQLVariables, options?: RetryOptions): Promise<GraphQLExecutionResult & {
+    attempts: number;
+}>;
 ```
 
 #### `parseGraphQLOperation`
@@ -170,7 +144,7 @@ export async function executeWithRetry(
 最小 GraphQL parser。 operation type (query/mutation/subscription) + name + selection set + 引数を抜き出す。 fragment / directive / inline union は非対応 (mock 用途では十分)。
 
 ```ts
-export function parseGraphQLOperation(source: string): ParsedOperation;
+export declare function parseGraphQLOperation(source: string): ParsedOperation;
 ```
 
 #### `subscribeSubscription`
@@ -180,12 +154,7 @@ export function parseGraphQLOperation(source: string): ParsedOperation;
 subscription mock。 real WebSocket transport は張らず、 resolver が返す AsyncIterable を そのまま purely-in-process で iterate する。 close を呼ぶまで active。
 
 ```ts
-export function subscribeSubscription(
-  server: GraphQLServer,
-  query: string,
-  variables: GraphQLVariables = {},
-  context: GraphQLContext = {},
-): SubscriptionHandle;
+export declare function subscribeSubscription(server: GraphQLServer, query: string, variables?: GraphQLVariables, context?: GraphQLContext): SubscriptionHandle;
 ```
 
 ### 型
@@ -196,10 +165,10 @@ export function subscribeSubscription(
 
 ```ts
 export interface BatchExecuteResult {
-  total: number;
-  succeeded: number;
-  failed: number;
-  results: GraphQLExecutionResult[];
+    total: number;
+    succeeded: number;
+    failed: number;
+    results: GraphQLExecutionResult[];
 }
 ```
 
@@ -209,10 +178,12 @@ export interface BatchExecuteResult {
 
 ```ts
 export interface CircuitBreaker {
-  state: () => CircuitState;
-  execute: (query: string, variables?: GraphQLVariables) => Promise<GraphQLExecutionResult & { circuitState: CircuitState }>;
-  reset: () => void;
-  errorCount: () => number;
+    state: () => CircuitState;
+    execute: (query: string, variables?: GraphQLVariables) => Promise<GraphQLExecutionResult & {
+        circuitState: CircuitState;
+    }>;
+    reset: () => void;
+    errorCount: () => number;
 }
 ```
 
@@ -222,9 +193,9 @@ export interface CircuitBreaker {
 
 ```ts
 export interface CircuitBreakerOptions {
-  errorThreshold?: number;
-  resetTimeoutMs?: number;
-  now?: () => number;
+    errorThreshold?: number;
+    resetTimeoutMs?: number;
+    now?: () => number;
 }
 ```
 
@@ -242,11 +213,11 @@ export type CircuitState = 'closed' | 'open' | 'half-open';
 
 ```ts
 export interface GraphQLClient {
-  provider: GraphQLServer['provider'];
-  query: (query: string, variables?: GraphQLVariables) => Promise<GraphQLExecutionResult>;
-  mutate: (mutation: string, variables?: GraphQLVariables) => Promise<GraphQLExecutionResult>;
-  listCalls: () => GraphQLClientCall[];
-  clear: () => void;
+    provider: GraphQLServer['provider'];
+    query: (query: string, variables?: GraphQLVariables) => Promise<GraphQLExecutionResult>;
+    mutate: (mutation: string, variables?: GraphQLVariables) => Promise<GraphQLExecutionResult>;
+    listCalls: () => GraphQLClientCall[];
+    clear: () => void;
 }
 ```
 
@@ -256,10 +227,10 @@ export interface GraphQLClient {
 
 ```ts
 export interface GraphQLClientCall {
-  method: 'query' | 'mutate' | 'subscribe';
-  query: string;
-  variables: GraphQLVariables;
-  timestamp: number;
+    method: 'query' | 'mutate' | 'subscribe';
+    query: string;
+    variables: GraphQLVariables;
+    timestamp: number;
 }
 ```
 
@@ -269,8 +240,8 @@ export interface GraphQLClientCall {
 
 ```ts
 export interface GraphQLClientOptions {
-  server: GraphQLServer;
-  defaultContext?: GraphQLContext;
+    server: GraphQLServer;
+    defaultContext?: GraphQLContext;
 }
 ```
 
@@ -288,9 +259,9 @@ export type GraphQLContext = Record<string, unknown>;
 
 ```ts
 export interface GraphQLError {
-  message: string;
-  path?: (string | number)[];
-  extensions?: Record<string, unknown>;
+    message: string;
+    path?: (string | number)[];
+    extensions?: Record<string, unknown>;
 }
 ```
 
@@ -300,9 +271,9 @@ export interface GraphQLError {
 
 ```ts
 export interface GraphQLExecutionResult {
-  data?: Record<string, unknown> | null;
-  errors?: GraphQLError[];
-  extensions?: Record<string, unknown>;
+    data?: Record<string, unknown> | null;
+    errors?: GraphQLError[];
+    extensions?: Record<string, unknown>;
 }
 ```
 
@@ -320,9 +291,9 @@ export type GraphQLProvider = 'apollo' | 'yoga' | 'urql' | 'relay';
 
 ```ts
 export interface GraphQLResolvers {
-  Query?: Record<string, GraphQLResolverFn>;
-  Mutation?: Record<string, GraphQLResolverFn>;
-  Subscription?: Record<string, (args: Record<string, unknown>, context: GraphQLContext) => AsyncIterable<unknown>>;
+    Query?: Record<string, GraphQLResolverFn>;
+    Mutation?: Record<string, GraphQLResolverFn>;
+    Subscription?: Record<string, (args: Record<string, unknown>, context: GraphQLContext) => AsyncIterable<unknown>>;
 }
 ```
 
@@ -332,7 +303,7 @@ export interface GraphQLResolvers {
 
 ```ts
 export interface GraphQLSchemaDef {
-  typeDefs: string;
+    typeDefs: string;
 }
 ```
 
@@ -342,16 +313,12 @@ export interface GraphQLSchemaDef {
 
 ```ts
 export interface GraphQLServer {
-  provider: GraphQLProvider;
-  schema: GraphQLSchemaDef;
-  resolvers: GraphQLResolvers;
-  executeQuery: (
-    query: string,
-    variables?: GraphQLVariables,
-    context?: GraphQLContext,
-  ) => Promise<GraphQLExecutionResult>;
-  listCalls: () => GraphQLServerCall[];
-  clear: () => void;
+    provider: GraphQLProvider;
+    schema: GraphQLSchemaDef;
+    resolvers: GraphQLResolvers;
+    executeQuery: (query: string, variables?: GraphQLVariables, context?: GraphQLContext) => Promise<GraphQLExecutionResult>;
+    listCalls: () => GraphQLServerCall[];
+    clear: () => void;
 }
 ```
 
@@ -361,12 +328,12 @@ export interface GraphQLServer {
 
 ```ts
 export interface GraphQLServerCall {
-  operationType: 'query' | 'mutation' | 'subscription';
-  operationName?: string;
-  query: string;
-  variables: GraphQLVariables;
-  status: 'ok' | 'error';
-  timestamp: number;
+    operationType: 'query' | 'mutation' | 'subscription';
+    operationName?: string;
+    query: string;
+    variables: GraphQLVariables;
+    status: 'ok' | 'error';
+    timestamp: number;
 }
 ```
 
@@ -392,11 +359,11 @@ export type HookCallback = (ctx: HookContext) => void;
 
 ```ts
 export interface HookContext {
-  event: QueryHookEvent;
-  query: string;
-  variables?: GraphQLVariables;
-  result?: GraphQLExecutionResult;
-  error?: string;
+    event: QueryHookEvent;
+    query: string;
+    variables?: GraphQLVariables;
+    result?: GraphQLExecutionResult;
+    error?: string;
 }
 ```
 
@@ -406,9 +373,9 @@ export interface HookContext {
 
 ```ts
 export interface HookRegistry {
-  register: (event: QueryHookEvent, cb: HookCallback) => () => void;
-  emit: (event: QueryHookEvent, ctx: HookContext) => void;
-  count: (event: QueryHookEvent) => number;
+    register: (event: QueryHookEvent, cb: HookCallback) => () => void;
+    emit: (event: QueryHookEvent, ctx: HookContext) => void;
+    count: (event: QueryHookEvent) => number;
 }
 ```
 
@@ -418,10 +385,10 @@ export interface HookRegistry {
 
 ```ts
 export interface IdempotencyCache {
-  get: (key: string) => GraphQLExecutionResult | undefined;
-  set: (key: string, value: GraphQLExecutionResult) => void;
-  size: () => number;
-  clear: () => void;
+    get: (key: string) => GraphQLExecutionResult | undefined;
+    set: (key: string, value: GraphQLExecutionResult) => void;
+    size: () => number;
+    clear: () => void;
 }
 ```
 
@@ -439,10 +406,10 @@ export type OperationType = 'query' | 'mutation' | 'subscription';
 
 ```ts
 export interface ParsedOperation {
-  type: OperationType;
-  name?: string;
-  variableDefs: string[];
-  selections: SelectionField[];
+    type: OperationType;
+    name?: string;
+    variableDefs: string[];
+    selections: SelectionField[];
 }
 ```
 
@@ -460,9 +427,9 @@ export type QueryHookEvent = 'before-query' | 'after-query' | 'error';
 
 ```ts
 export interface RetryOptions {
-  maxAttempts?: number;
-  initialDelayMs?: number;
-  onRetry?: (attempt: number) => void;
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    onRetry?: (attempt: number) => void;
 }
 ```
 
@@ -472,10 +439,10 @@ export interface RetryOptions {
 
 ```ts
 export interface SelectionField {
-  name: string;
-  alias?: string;
-  arguments: Record<string, string | number | boolean | null>;
-  selections: SelectionField[];
+    name: string;
+    alias?: string;
+    arguments: Record<string, string | number | boolean | null>;
+    selections: SelectionField[];
 }
 ```
 
@@ -485,8 +452,10 @@ export interface SelectionField {
 
 ```ts
 export interface SubscriptionEvent {
-  data?: Record<string, unknown> | null;
-  errors?: { message: string }[];
+    data?: Record<string, unknown> | null;
+    errors?: {
+        message: string;
+    }[];
 }
 ```
 
@@ -496,8 +465,8 @@ export interface SubscriptionEvent {
 
 ```ts
 export interface SubscriptionHandle {
-  events: AsyncIterable<SubscriptionEvent>;
-  close: () => void;
+    events: AsyncIterable<SubscriptionEvent>;
+    close: () => void;
 }
 ```
 <!-- kiwa-public-api:end -->

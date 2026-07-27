@@ -43,7 +43,7 @@ in-memory state store、action、subscription、extensionの公開APIです。
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/state/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/state/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -54,7 +54,7 @@ in-memory state store、action、subscription、extensionの公開APIです。
 middleware chain — dispatch を wrap して logger / crash reporter / persistence を注入
 
 ```ts
-export function composeMiddleware<S>(...middlewares: StateMiddleware<S>[]): StateMiddleware<S>;
+export declare function composeMiddleware<S>(...middlewares: StateMiddleware<S>[]): StateMiddleware<S>;
 ```
 
 #### `createMemoryPersistence`
@@ -64,7 +64,7 @@ export function composeMiddleware<S>(...middlewares: StateMiddleware<S>[]): Stat
 in-memory persistence adapter (localStorage / AsyncStorage 相当)
 
 ```ts
-export function createMemoryPersistence(): PersistenceAdapter;
+export declare function createMemoryPersistence(): PersistenceAdapter;
 ```
 
 #### `createObservabilityHook`
@@ -72,7 +72,7 @@ export function createMemoryPersistence(): PersistenceAdapter;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L129) `packages/state/src/extensions.ts`
 
 ```ts
-export function createObservabilityHook(): ObservabilityHook;
+export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
 #### `createPersistedStore`
@@ -82,7 +82,7 @@ export function createObservabilityHook(): ObservabilityHook;
 persist store to adapter with serialization
 
 ```ts
-export function createPersistedStore<S>(key: string, adapter: PersistenceAdapter): PersistedStore<S>;
+export declare function createPersistedStore<S>(key: string, adapter: PersistenceAdapter): PersistedStore<S>;
 ```
 
 #### `createStore`
@@ -90,7 +90,7 @@ export function createPersistedStore<S>(key: string, adapter: PersistenceAdapter
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/client.ts#L29) `packages/state/src/client.ts`
 
 ```ts
-export function createStore<S extends object>(options: StateStoreOptions<S>): StateStore<S>;
+export declare function createStore<S extends object>(options: StateStoreOptions<S>): StateStore<S>;
 ```
 
 #### `createUndoRedoStack`
@@ -100,7 +100,7 @@ export function createStore<S extends object>(options: StateStoreOptions<S>): St
 undo/redo stack — history persistence + timeline navigation
 
 ```ts
-export function createUndoRedoStack<S>(initial?: S, maxSize = 100): UndoRedoStack<S>;
+export declare function createUndoRedoStack<S>(initial?: S, maxSize?: number): UndoRedoStack<S>;
 ```
 
 #### `dispatch`
@@ -110,7 +110,7 @@ export function createUndoRedoStack<S>(initial?: S, maxSize = 100): UndoRedoStac
 provider 別 dispatch。 Redux reducer / Zustand setState / Jotai atom write / Valtio proxy mutation / MobX action の 5 経路を統一 interface で叩く。
 
 ```ts
-export function dispatch<S extends object>(store: StateStore<S>, action: Action): DispatchResult<S>;
+export declare function dispatch<S extends object>(store: StateStore<S>, action: Action): DispatchResult<S>;
 ```
 
 #### `mockAction`
@@ -120,7 +120,7 @@ export function dispatch<S extends object>(store: StateStore<S>, action: Action)
 action creator mock。 Redux Toolkit createAction 相当、 type 判定 helper (match) を含む。
 
 ```ts
-export function mockAction<P = unknown>(name: string): MockActionCreator<P>;
+export declare function mockAction<P = unknown>(name: string): MockActionCreator<P>;
 ```
 
 #### `retryWithBackoff`
@@ -128,7 +128,7 @@ export function mockAction<P = unknown>(name: string): MockActionCreator<P>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L105) `packages/state/src/extensions.ts`
 
 ```ts
-export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<RetryResult<T>>;
+export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
 #### `selectState`
@@ -138,7 +138,7 @@ export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOp
 store から state slice を抽出。 Zustand selector / Redux useSelector / Jotai atom read / Valtio snapshot read / MobX computed 相当。
 
 ```ts
-export function selectState<S extends object, R>(store: StateStore<S>, selector: Selector<S, R>): R;
+export declare function selectState<S extends object, R>(store: StateStore<S>, selector: Selector<S, R>): R;
 ```
 
 #### `subscribe`
@@ -148,7 +148,7 @@ export function selectState<S extends object, R>(store: StateStore<S>, selector:
 store の state 変更に listener を登録。 unsubscribe 関数と callCount helper を返却。 Redux subscribe / Zustand subscribe / Jotai atom subscribe / Valtio subscribe / MobX autorun 相当。
 
 ```ts
-export function subscribe<S extends object>(store: StateStore<S>, listener: StateListener<S>): Subscription<S>;
+export declare function subscribe<S extends object>(store: StateStore<S>, listener: StateListener<S>): Subscription<S>;
 ```
 
 ### 型
@@ -159,8 +159,8 @@ export function subscribe<S extends object>(store: StateStore<S>, listener: Stat
 
 ```ts
 export interface Action {
-  type: string;
-  payload?: unknown;
+    type: string;
+    payload?: unknown;
 }
 ```
 
@@ -170,10 +170,10 @@ export interface Action {
 
 ```ts
 export interface DispatchResult<S extends object> {
-  action: Action;
-  prevState: S;
-  nextState: S;
-  version: number;
+    action: Action;
+    prevState: S;
+    nextState: S;
+    version: number;
 }
 ```
 
@@ -183,9 +183,9 @@ export interface DispatchResult<S extends object> {
 
 ```ts
 export interface MockActionCreator<P = unknown> {
-  type: string;
-  (payload?: P): Action;
-  match: (action: Action) => boolean;
+    type: string;
+    (payload?: P): Action;
+    match: (action: Action) => boolean;
 }
 ```
 
@@ -195,9 +195,15 @@ export interface MockActionCreator<P = unknown> {
 
 ```ts
 export interface ObservabilityHook {
-  emit: (event: { kind: string; data: Record<string, unknown> }) => void;
-  events: () => Array<{ kind: string; data: Record<string, unknown> }>;
-  clear: () => void;
+    emit: (event: {
+        kind: string;
+        data: Record<string, unknown>;
+    }) => void;
+    events: () => Array<{
+        kind: string;
+        data: Record<string, unknown>;
+    }>;
+    clear: () => void;
 }
 ```
 
@@ -207,9 +213,9 @@ export interface ObservabilityHook {
 
 ```ts
 export interface PersistedStore<S> {
-  save: (state: S) => Promise<void>;
-  restore: () => Promise<S | undefined>;
-  clear: () => Promise<void>;
+    save: (state: S) => Promise<void>;
+    restore: () => Promise<S | undefined>;
+    clear: () => Promise<void>;
 }
 ```
 
@@ -219,9 +225,9 @@ export interface PersistedStore<S> {
 
 ```ts
 export interface PersistenceAdapter {
-  save: (key: string, value: string) => Promise<void>;
-  load: (key: string) => Promise<string | null>;
-  remove: (key: string) => Promise<void>;
+    save: (key: string, value: string) => Promise<void>;
+    load: (key: string) => Promise<string | null>;
+    remove: (key: string) => Promise<void>;
 }
 ```
 
@@ -230,7 +236,11 @@ export interface PersistenceAdapter {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L102) `packages/state/src/extensions.ts`
 
 ```ts
-export interface RetryOptions { maxAttempts?: number; initialDelayMs?: number; backoffFactor?: number; }
+export interface RetryOptions {
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    backoffFactor?: number;
+}
 ```
 
 #### `RetryResult`
@@ -238,7 +248,12 @@ export interface RetryOptions { maxAttempts?: number; initialDelayMs?: number; b
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L103) `packages/state/src/extensions.ts`
 
 ```ts
-export interface RetryResult<T> { ok: boolean; attempts: number; value?: T; error?: unknown; }
+export interface RetryResult<T> {
+    ok: boolean;
+    attempts: number;
+    value?: T;
+    error?: unknown;
+}
 ```
 
 #### `Selector`
@@ -264,7 +279,10 @@ export type StateListener<S extends object> = (state: S) => void;
 v2.1 extensions — middleware chain, undo/redo, persistence, plus retry/batch/observability/timeout generics. Zustand v5 / Redux Toolkit v2 追随。
 
 ```ts
-export type StateMiddleware<S> = (state: S, action: { type: string; payload?: unknown }, next: () => S) => S;
+export type StateMiddleware<S> = (state: S, action: {
+    type: string;
+    payload?: unknown;
+}, next: () => S) => S;
 ```
 
 #### `StateProvider`
@@ -281,9 +299,9 @@ export type StateProvider = 'zustand' | 'redux' | 'jotai' | 'valtio' | 'mobx';
 
 ```ts
 export interface StateSnapshot<S extends object> {
-  provider: StateProvider;
-  state: S;
-  version: number;
+    provider: StateProvider;
+    state: S;
+    version: number;
 }
 ```
 
@@ -293,15 +311,18 @@ export interface StateSnapshot<S extends object> {
 
 ```ts
 export interface StateStore<S extends object> {
-  provider: StateProvider;
-  getState: () => S;
-  setState: (updater: Partial<S> | ((prev: S) => Partial<S>)) => void;
-  getSnapshot: () => StateSnapshot<S>;
-  _subscribers: Set<StateListener<S>>;
-  _reducer?: (state: S, action: { type: string; payload?: unknown }) => S;
-  _addSubscriber: (listener: StateListener<S>) => Unsubscribe;
-  _notify: () => void;
-  _incrementVersion: () => void;
+    provider: StateProvider;
+    getState: () => S;
+    setState: (updater: Partial<S> | ((prev: S) => Partial<S>)) => void;
+    getSnapshot: () => StateSnapshot<S>;
+    _subscribers: Set<StateListener<S>>;
+    _reducer?: (state: S, action: {
+        type: string;
+        payload?: unknown;
+    }) => S;
+    _addSubscriber: (listener: StateListener<S>) => Unsubscribe;
+    _notify: () => void;
+    _incrementVersion: () => void;
 }
 ```
 
@@ -311,9 +332,12 @@ export interface StateStore<S extends object> {
 
 ```ts
 export interface StateStoreOptions<S extends object> {
-  provider?: StateProvider;
-  initialState: S;
-  reducer?: (state: S, action: { type: string; payload?: unknown }) => S;
+    provider?: StateProvider;
+    initialState: S;
+    reducer?: (state: S, action: {
+        type: string;
+        payload?: unknown;
+    }) => S;
 }
 ```
 
@@ -323,9 +347,9 @@ export interface StateStoreOptions<S extends object> {
 
 ```ts
 export interface Subscription<S extends object> {
-  listener: StateListener<S>;
-  unsubscribe: Unsubscribe;
-  callCount: () => number;
+    listener: StateListener<S>;
+    unsubscribe: Unsubscribe;
+    callCount: () => number;
 }
 ```
 
@@ -335,13 +359,16 @@ export interface Subscription<S extends object> {
 
 ```ts
 export interface UndoRedoStack<S> {
-  push: (state: S) => void;
-  undo: () => S | undefined;
-  redo: () => S | undefined;
-  canUndo: () => boolean;
-  canRedo: () => boolean;
-  clear: () => void;
-  size: () => { past: number; future: number };
+    push: (state: S) => void;
+    undo: () => S | undefined;
+    redo: () => S | undefined;
+    canUndo: () => boolean;
+    canRedo: () => boolean;
+    clear: () => void;
+    size: () => {
+        past: number;
+        future: number;
+    };
 }
 ```
 

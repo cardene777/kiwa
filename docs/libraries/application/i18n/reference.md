@@ -39,7 +39,7 @@ message は string、plural form の object、入れ子 object を使えます�
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -48,10 +48,7 @@ message は string、plural form の object、入れ子 object を使えます�
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L111) `packages/i18n/src/resilience.ts`
 
 ```ts
-export async function batchOperate<TIn, TOut>(
-  items: readonly BatchItem<TIn>[],
-  runner: (item: BatchItem<TIn>) => Promise<TOut>,
-): Promise<BatchResult[]>;
+export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
 #### `createI18nClient`
@@ -61,7 +58,7 @@ export async function batchOperate<TIn, TOut>(
 provider 別 mock 差 (setLocale event fire pattern / missing key marker) を持たせつつ、 全 API 共通 interface。 実 provider (next-intl / vue-i18n / react-i18next / Lingui) の SDK を差し替えても同じ signature で呼べる想定。
 
 ```ts
-export function createI18nClient(options: CreateI18nClientOptions = {}): I18nClient;
+export declare function createI18nClient(options?: CreateI18nClientOptions): I18nClient;
 ```
 
 #### `interpolate`
@@ -71,7 +68,7 @@ export function createI18nClient(options: CreateI18nClientOptions = {}): I18nCli
 `&#123;&#123;name&#125;&#125;` placeholder を values で置換する mustache-lite interpolation。 実 provider (next-intl / vue-i18n / react-i18next / Lingui) の interpolation engine を差し替えても 同じ signature で呼べる想定。
 
 ```ts
-export function interpolate(template: string, values: InterpolationValues): InterpolateResult;
+export declare function interpolate(template: string, values: InterpolationValues): InterpolateResult;
 ```
 
 #### `selectPlural`
@@ -81,7 +78,7 @@ export function interpolate(template: string, values: InterpolationValues): Inte
 Intl.PluralRules 経由で count に対する plural category を返す。 実 provider の pluralization rule (CLDR SSOT) を差し替えても同じ signature で呼べる想定。 失敗時は 'other' を返す (safe default)。
 
 ```ts
-export function selectPlural(locale: string, count: number): PluralCategory;
+export declare function selectPlural(locale: string, count: number): PluralCategory;
 ```
 
 #### `translate`
@@ -91,7 +88,7 @@ export function selectPlural(locale: string, count: number): PluralCategory;
 translation lookup + fallback + pluralization + interpolation の統合 entry。 実 provider の t() / $t() / gettext() を差し替えても同じ signature で呼べる想定。
 
 ```ts
-export function translate(input: TranslateInput): TranslateResult;
+export declare function translate(input: TranslateInput): TranslateResult;
 ```
 
 #### `withCircuitBreaker`
@@ -99,7 +96,7 @@ export function translate(input: TranslateInput): TranslateResult;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L64) `packages/i18n/src/resilience.ts`
 
 ```ts
-export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
+export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
 #### `withIdempotencyKey`
@@ -107,7 +104,7 @@ export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBrea
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L101) `packages/i18n/src/resilience.ts`
 
 ```ts
-export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
+export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
 #### `withObservability`
@@ -115,7 +112,7 @@ export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: st
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L86) `packages/i18n/src/resilience.ts`
 
 ```ts
-export function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
+export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
 #### `withRateLimit`
@@ -123,7 +120,7 @@ export function withObservability<T>(name: string, fn: () => Promise<T>, hook: O
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L50) `packages/i18n/src/resilience.ts`
 
 ```ts
-export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
+export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
 #### `withRetry`
@@ -131,7 +128,7 @@ export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L20) `packages/i18n/src/resilience.ts`
 
 ```ts
-export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
+export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
 #### `withTimeout`
@@ -139,7 +136,7 @@ export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () =>
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L40) `packages/i18n/src/resilience.ts`
 
 ```ts
-export function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
+export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
 ```
 
 ### 型
@@ -149,7 +146,10 @@ export function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): (
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L17) `packages/i18n/src/resilience.ts`
 
 ```ts
-export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
+export interface BatchItem<TIn = unknown> {
+    name: string;
+    input: TIn;
+}
 ```
 
 #### `BatchResult`
@@ -157,7 +157,14 @@ export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L18) `packages/i18n/src/resilience.ts`
 
 ```ts
-export interface BatchResult { ok: boolean; output?: unknown; error?: { code: string; message: string }; }
+export interface BatchResult {
+    ok: boolean;
+    output?: unknown;
+    error?: {
+        code: string;
+        message: string;
+    };
+}
 ```
 
 #### `CircuitBreakerOptions`
@@ -165,7 +172,10 @@ export interface BatchResult { ok: boolean; output?: unknown; error?: { code: st
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L11) `packages/i18n/src/resilience.ts`
 
 ```ts
-export interface CircuitBreakerOptions { failureThreshold: number; resetMs: number; }
+export interface CircuitBreakerOptions {
+    failureThreshold: number;
+    resetMs: number;
+}
 ```
 
 #### `CreateI18nClientOptions`
@@ -174,10 +184,10 @@ export interface CircuitBreakerOptions { failureThreshold: number; resetMs: numb
 
 ```ts
 export interface CreateI18nClientOptions {
-  provider?: I18nProvider;
-  locale?: Locale;
-  fallbackLocale?: Locale;
-  messages?: Messages;
+    provider?: I18nProvider;
+    locale?: Locale;
+    fallbackLocale?: Locale;
+    messages?: Messages;
 }
 ```
 
@@ -187,15 +197,15 @@ export interface CreateI18nClientOptions {
 
 ```ts
 export interface I18nClient {
-  provider: I18nProvider;
-  locale: Locale;
-  fallbackLocale: Locale;
-  setLocale: (locale: Locale) => void;
-  translate: (key: string, options?: TranslateOptions) => TranslateResult;
-  formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string;
-  formatDate: (value: number | Date, options?: Intl.DateTimeFormatOptions) => string;
-  listRecorded: () => TranslateResult[];
-  clear: () => void;
+    provider: I18nProvider;
+    locale: Locale;
+    fallbackLocale: Locale;
+    setLocale: (locale: Locale) => void;
+    translate: (key: string, options?: TranslateOptions) => TranslateResult;
+    formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string;
+    formatDate: (value: number | Date, options?: Intl.DateTimeFormatOptions) => string;
+    listRecorded: () => TranslateResult[];
+    clear: () => void;
 }
 ```
 
@@ -213,9 +223,9 @@ export type I18nProvider = 'next-intl' | 'vue-i18n' | 'react-i18next' | 'lingui'
 
 ```ts
 export interface InterpolateResult {
-  text: string;
-  variables: string[];
-  missing: string[];
+    text: string;
+    variables: string[];
+    missing: string[];
 }
 ```
 
@@ -232,7 +242,9 @@ export type Locale = string;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L9) `packages/i18n/src/client.ts`
 
 ```ts
-export type MessageBundle = { [key: string]: MessageEntry };
+export type MessageBundle = {
+    [key: string]: MessageEntry;
+};
 ```
 
 #### `Messages`
@@ -249,9 +261,9 @@ export type Messages = Record<Locale, MessageBundle>;
 
 ```ts
 export interface ObservabilityHook {
-  onStart?: (name: string, input?: unknown) => void;
-  onSuccess?: (name: string, output: unknown, durationMs: number) => void;
-  onError?: (name: string, err: unknown, durationMs: number) => void;
+    onStart?: (name: string, input?: unknown) => void;
+    onSuccess?: (name: string, output: unknown, durationMs: number) => void;
+    onError?: (name: string, err: unknown, durationMs: number) => void;
 }
 ```
 
@@ -269,9 +281,9 @@ export type PluralCategory = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';
 
 ```ts
 export interface PluralRule {
-  locale: string;
-  category: PluralCategory;
-  count: number;
+    locale: string;
+    category: PluralCategory;
+    count: number;
 }
 ```
 
@@ -280,7 +292,10 @@ export interface PluralRule {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L10) `packages/i18n/src/resilience.ts`
 
 ```ts
-export interface RateLimitOptions { maxRequests: number; windowMs: number; }
+export interface RateLimitOptions {
+    maxRequests: number;
+    windowMs: number;
+}
 ```
 
 #### `RetryOptions`
@@ -289,9 +304,9 @@ export interface RateLimitOptions { maxRequests: number; windowMs: number; }
 
 ```ts
 export interface RetryOptions {
-  maxAttempts: number;
-  backoffMs?: number;
-  retryOn?: (err: unknown) => boolean;
+    maxAttempts: number;
+    backoffMs?: number;
+    retryOn?: (err: unknown) => boolean;
 }
 ```
 
@@ -300,7 +315,9 @@ export interface RetryOptions {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L9) `packages/i18n/src/resilience.ts`
 
 ```ts
-export interface TimeoutOptions { ms: number; }
+export interface TimeoutOptions {
+    ms: number;
+}
 ```
 
 #### `TranslateInput`
@@ -309,13 +326,13 @@ export interface TimeoutOptions { ms: number; }
 
 ```ts
 export interface TranslateInput {
-  key: string;
-  messages: Messages;
-  locale: Locale;
-  fallbackLocale: Locale;
-  values?: InterpolationValues;
-  count?: number;
-  defaultMessage?: string;
+    key: string;
+    messages: Messages;
+    locale: Locale;
+    fallbackLocale: Locale;
+    values?: InterpolationValues;
+    count?: number;
+    defaultMessage?: string;
 }
 ```
 
@@ -325,10 +342,10 @@ export interface TranslateInput {
 
 ```ts
 export interface TranslateOptions {
-  values?: InterpolationValues;
-  count?: number;
-  defaultMessage?: string;
-  locale?: Locale;
+    values?: InterpolationValues;
+    count?: number;
+    defaultMessage?: string;
+    locale?: Locale;
 }
 ```
 
@@ -338,10 +355,10 @@ export interface TranslateOptions {
 
 ```ts
 export interface TranslateResult {
-  text: string;
-  locale: Locale;
-  used: 'primary' | 'fallback' | 'default' | 'missing';
-  missing?: string[];
+    text: string;
+    locale: Locale;
+    used: 'primary' | 'fallback' | 'default' | 'missing';
+    missing?: string[];
 }
 ```
 <!-- kiwa-public-api:end -->

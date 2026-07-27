@@ -38,7 +38,7 @@ route実行はstatus、body、header、matchedを返します。chiの未一致�
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -49,10 +49,7 @@ route実行はstatus、body、header、matchedを返します。chiの未一致�
 batch handler dispatch — 並列/直列両対応
 
 ```ts
-export async function batchDispatch<T>(
-  handlers: Array<() => Promise<T>>,
-  options: BatchDispatchOptions = {},
-): Promise<BatchDispatchResult<T>>;
+export declare function batchDispatch<T>(handlers: Array<() => Promise<T>>, options?: BatchDispatchOptions): Promise<BatchDispatchResult<T>>;
 ```
 
 #### `captureChiRoute`
@@ -60,7 +57,7 @@ export async function batchDispatch<T>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L72) `packages/go-lib/src/chi.ts`
 
 ```ts
-export async function captureChiRoute(options: CaptureChiRouteOptions): Promise<CaptureChiRouteResult>;
+export declare function captureChiRoute(options: CaptureChiRouteOptions): Promise<CaptureChiRouteResult>;
 ```
 
 #### `composeMiddleware`
@@ -70,7 +67,7 @@ export async function captureChiRoute(options: CaptureChiRouteOptions): Promise<
 middleware compose helper — 複数 middleware を 1 chain に連結
 
 ```ts
-export function composeMiddleware(...middlewares: MiddlewareFn[]): MiddlewareFn;
+export declare function composeMiddleware(...middlewares: MiddlewareFn[]): MiddlewareFn;
 ```
 
 #### `createCancelToken`
@@ -80,7 +77,7 @@ export function composeMiddleware(...middlewares: MiddlewareFn[]): MiddlewareFn;
 context.WithCancel simulation — Go の context 相当
 
 ```ts
-export function createCancelToken(): CancelToken;
+export declare function createCancelToken(): CancelToken;
 ```
 
 #### `createCircuitBreaker`
@@ -90,7 +87,7 @@ export function createCancelToken(): CancelToken;
 circuit breaker — 失敗閾値超えで open、 resetTimeout 経過で half-open
 
 ```ts
-export function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBreaker;
+export declare function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBreaker;
 ```
 
 #### `createGoAppEnv`
@@ -100,7 +97,7 @@ export function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBre
 gin/echo/fiber/chi の mock env を生成。 route 一覧の宣言 + reset で 4 framework 共通で router state を扱えるようにする。
 
 ```ts
-export function createGoAppEnv(options: CreateGoAppEnvOptions): GoAppEnv;
+export declare function createGoAppEnv(options: CreateGoAppEnvOptions): GoAppEnv;
 ```
 
 #### `createObservabilityHook`
@@ -110,7 +107,7 @@ export function createGoAppEnv(options: CreateGoAppEnvOptions): GoAppEnv;
 observability hook — request 一覧を蓄積
 
 ```ts
-export function createObservabilityHook(): ObservabilityHook;
+export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
 #### `createRateLimiter`
@@ -120,7 +117,7 @@ export function createObservabilityHook(): ObservabilityHook;
 token bucket rate limiter
 
 ```ts
-export function createRateLimiter(options: RateLimitOptions): RateLimiter;
+export declare function createRateLimiter(options: RateLimitOptions): RateLimiter;
 ```
 
 #### `createRouteGroup`
@@ -130,7 +127,7 @@ export function createRateLimiter(options: RateLimitOptions): RateLimiter;
 route group + subrouter helper — gin.Group / echo.Group / fiber.Group / chi.Route を統一
 
 ```ts
-export function createRouteGroup(options: RouteGroupOptions): RouteGroup;
+export declare function createRouteGroup(options: RouteGroupOptions): RouteGroup;
 ```
 
 #### `invokeEchoHandler`
@@ -140,7 +137,7 @@ export function createRouteGroup(options: RouteGroupOptions): RouteGroup;
 echo.Context 相当を simulate。 JSON/String/NoContent/Response/Param/QueryParam を capture、 echo 慣例通り Error return を尊重 (nil = 成功 / err = handler error) して結果に含める。
 
 ```ts
-export async function invokeEchoHandler(options: InvokeEchoHandlerOptions): Promise<InvokeEchoHandlerResult>;
+export declare function invokeEchoHandler(options: InvokeEchoHandlerOptions): Promise<InvokeEchoHandlerResult>;
 ```
 
 #### `invokeFiberHandler`
@@ -150,7 +147,7 @@ export async function invokeEchoHandler(options: InvokeEchoHandlerOptions): Prom
 fiber.Ctx 相当を simulate。 Status chain + JSON/SendString/SendStatus + Set/Params/Query/Body を fiber 慣例通り expose、 handler の Error return を結果に反映する。
 
 ```ts
-export async function invokeFiberHandler(options: InvokeFiberHandlerOptions): Promise<InvokeFiberHandlerResult>;
+export declare function invokeFiberHandler(options: InvokeFiberHandlerOptions): Promise<InvokeFiberHandlerResult>;
 ```
 
 #### `invokeGinHandler`
@@ -160,7 +157,7 @@ export async function invokeFiberHandler(options: InvokeFiberHandlerOptions): Pr
 gin.Context 相当を simulate。 JSON/String/Header/Param/Query の 5 primitive を capture し、 c.AbortWithStatus 相当の abort も expose。 gin の実 handler がそのまま渡せる signature。
 
 ```ts
-export async function invokeGinHandler(options: InvokeGinHandlerOptions): Promise<InvokeGinHandlerResult>;
+export declare function invokeGinHandler(options: InvokeGinHandlerOptions): Promise<InvokeGinHandlerResult>;
 ```
 
 #### `retryWithBackoff`
@@ -170,10 +167,7 @@ export async function invokeGinHandler(options: InvokeGinHandlerOptions): Promis
 exponential backoff retry — echo/gin middleware に組み込む想定
 
 ```ts
-export async function retryWithBackoff<T>(
-  fn: () => Promise<T>,
-  options: RetryOptions = {},
-): Promise<RetryResult<T>>;
+export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
 #### `withTimeout`
@@ -183,7 +177,7 @@ export async function retryWithBackoff<T>(
 handler timeout — timeoutMs 経過で reject
 
 ```ts
-export async function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): Promise<T>;
+export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): Promise<T>;
 ```
 
 ### 型
@@ -194,8 +188,8 @@ export async function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptio
 
 ```ts
 export interface BatchDispatchOptions {
-  concurrency?: number;
-  stopOnError?: boolean;
+    concurrency?: number;
+    stopOnError?: boolean;
 }
 ```
 
@@ -205,9 +199,14 @@ export interface BatchDispatchOptions {
 
 ```ts
 export interface BatchDispatchResult<T> {
-  results: Array<{ index: number; ok: boolean; value?: T; error?: unknown }>;
-  successCount: number;
-  failureCount: number;
+    results: Array<{
+        index: number;
+        ok: boolean;
+        value?: T;
+        error?: unknown;
+    }>;
+    successCount: number;
+    failureCount: number;
 }
 ```
 
@@ -217,9 +216,9 @@ export interface BatchDispatchResult<T> {
 
 ```ts
 export interface CancelToken {
-  cancelled: () => boolean;
-  cancel: () => void;
-  onCancel: (fn: () => void) => void;
+    cancelled: () => boolean;
+    cancel: () => void;
+    onCancel: (fn: () => void) => void;
 }
 ```
 
@@ -229,12 +228,12 @@ export interface CancelToken {
 
 ```ts
 export interface CaptureChiRouteOptions {
-  app: ChiApp;
-  method: string;
-  path: string;
-  body?: unknown;
-  headers?: Record<string, string>;
-  query?: Record<string, string>;
+    app: ChiApp;
+    method: string;
+    path: string;
+    body?: unknown;
+    headers?: Record<string, string>;
+    query?: Record<string, string>;
 }
 ```
 
@@ -244,9 +243,9 @@ export interface CaptureChiRouteOptions {
 
 ```ts
 export interface CaptureChiRouteResult extends GoResponse {
-  matched: boolean;
-  middlewareTrace: GoMiddlewareTraceEntry[];
-  matchedPattern?: string;
+    matched: boolean;
+    middlewareTrace: GoMiddlewareTraceEntry[];
+    matchedPattern?: string;
 }
 ```
 
@@ -256,11 +255,22 @@ export interface CaptureChiRouteResult extends GoResponse {
 
 ```ts
 export interface ChiApp {
-  routes: Map<string, { method: string; pattern: string; handler: ChiHandler }>;
-  middlewares: Array<{ name: string; fn: ChiMiddleware }>;
-  addRoute: (method: string, pattern: string, handler: ChiHandler) => void;
-  use: (name: string, fn: ChiMiddleware) => void;
-  match: (method: string, path: string) => { pattern: string; handler: ChiHandler; params: Record<string, string> } | null;
+    routes: Map<string, {
+        method: string;
+        pattern: string;
+        handler: ChiHandler;
+    }>;
+    middlewares: Array<{
+        name: string;
+        fn: ChiMiddleware;
+    }>;
+    addRoute: (method: string, pattern: string, handler: ChiHandler) => void;
+    use: (name: string, fn: ChiMiddleware) => void;
+    match: (method: string, path: string) => {
+        pattern: string;
+        handler: ChiHandler;
+        params: Record<string, string>;
+    } | null;
 }
 ```
 
@@ -269,7 +279,15 @@ export interface ChiApp {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L3) `packages/go-lib/src/chi.ts`
 
 ```ts
-export type ChiHandler = (req: GoRequest) => { status: number; body?: unknown; headers?: Record<string, string> } | Promise<{ status: number; body?: unknown; headers?: Record<string, string> }>;
+export type ChiHandler = (req: GoRequest) => {
+    status: number;
+    body?: unknown;
+    headers?: Record<string, string>;
+} | Promise<{
+    status: number;
+    body?: unknown;
+    headers?: Record<string, string>;
+}>;
 ```
 
 #### `ChiMiddleware`
@@ -286,9 +304,9 @@ export type ChiMiddleware = (name: string, next: () => void | Promise<void>) => 
 
 ```ts
 export interface CircuitBreaker {
-  state: () => CircuitState;
-  execute: <T>(fn: () => Promise<T>) => Promise<T>;
-  reset: () => void;
+    state: () => CircuitState;
+    execute: <T>(fn: () => Promise<T>) => Promise<T>;
+    reset: () => void;
 }
 ```
 
@@ -298,8 +316,8 @@ export interface CircuitBreaker {
 
 ```ts
 export interface CircuitBreakerOptions {
-  failureThreshold: number;
-  resetTimeoutMs: number;
+    failureThreshold: number;
+    resetTimeoutMs: number;
 }
 ```
 
@@ -317,13 +335,16 @@ export type CircuitState = 'closed' | 'open' | 'half-open';
 
 ```ts
 export interface EchoContext {
-  request: GoRequest;
-  JSON: (code: number, body: unknown) => Error | null;
-  String: (code: number, body: string) => Error | null;
-  NoContent: (code: number) => Error | null;
-  Response: () => { status: number; header: Record<string, string> };
-  Param: (key: string) => string;
-  QueryParam: (key: string) => string;
+    request: GoRequest;
+    JSON: (code: number, body: unknown) => Error | null;
+    String: (code: number, body: string) => Error | null;
+    NoContent: (code: number) => Error | null;
+    Response: () => {
+        status: number;
+        header: Record<string, string>;
+    };
+    Param: (key: string) => string;
+    QueryParam: (key: string) => string;
 }
 ```
 
@@ -341,15 +362,15 @@ export type EchoHandler = (c: EchoContext) => Error | null | Promise<Error | nul
 
 ```ts
 export interface FiberContext {
-  request: GoRequest;
-  Status: (code: number) => FiberContext;
-  JSON: (body: unknown) => Error | null;
-  SendString: (body: string) => Error | null;
-  SendStatus: (code: number) => Error | null;
-  Set: (key: string, value: string) => void;
-  Params: (key: string) => string;
-  Query: (key: string) => string;
-  Body: () => unknown;
+    request: GoRequest;
+    Status: (code: number) => FiberContext;
+    JSON: (body: unknown) => Error | null;
+    SendString: (body: string) => Error | null;
+    SendStatus: (code: number) => Error | null;
+    Set: (key: string, value: string) => void;
+    Params: (key: string) => string;
+    Query: (key: string) => string;
+    Body: () => unknown;
 }
 ```
 
@@ -367,15 +388,15 @@ export type FiberHandler = (c: FiberContext) => Error | null | Promise<Error | n
 
 ```ts
 export interface GinContext {
-  request: GoRequest;
-  status: (code: number) => GinContext;
-  JSON: (code: number, body: unknown) => void;
-  String: (code: number, body: string) => void;
-  Header: (key: string, value: string) => void;
-  Param: (key: string) => string | undefined;
-  Query: (key: string) => string | undefined;
-  aborted: boolean;
-  abort: () => void;
+    request: GoRequest;
+    status: (code: number) => GinContext;
+    JSON: (code: number, body: unknown) => void;
+    String: (code: number, body: string) => void;
+    Header: (key: string, value: string) => void;
+    Param: (key: string) => string | undefined;
+    Query: (key: string) => string | undefined;
+    aborted: boolean;
+    abort: () => void;
 }
 ```
 
@@ -393,11 +414,11 @@ export type GinHandler = (c: GinContext) => void | Promise<void>;
 
 ```ts
 export interface GoAppEnv {
-  framework: GoFramework;
-  routes: GoRouteDefinition[];
-  addRoute: (route: GoRouteDefinition) => void;
-  listRoutes: () => GoRouteDefinition[];
-  reset: () => void;
+    framework: GoFramework;
+    routes: GoRouteDefinition[];
+    addRoute: (route: GoRouteDefinition) => void;
+    listRoutes: () => GoRouteDefinition[];
+    reset: () => void;
 }
 ```
 
@@ -415,9 +436,9 @@ export type GoFramework = 'gin' | 'echo' | 'fiber' | 'chi';
 
 ```ts
 export interface GoMiddlewareTraceEntry {
-  name: string;
-  order: number;
-  ranAt: number;
+    name: string;
+    order: number;
+    ranAt: number;
 }
 ```
 
@@ -427,12 +448,12 @@ export interface GoMiddlewareTraceEntry {
 
 ```ts
 export interface GoRequest {
-  method: string;
-  path: string;
-  body?: unknown;
-  headers?: Record<string, string>;
-  params?: Record<string, string>;
-  query?: Record<string, string>;
+    method: string;
+    path: string;
+    body?: unknown;
+    headers?: Record<string, string>;
+    params?: Record<string, string>;
+    query?: Record<string, string>;
 }
 ```
 
@@ -442,10 +463,10 @@ export interface GoRequest {
 
 ```ts
 export interface GoResponse {
-  status: number;
-  body?: unknown;
-  headers?: Record<string, string>;
-  framework: GoFramework;
+    status: number;
+    body?: unknown;
+    headers?: Record<string, string>;
+    framework: GoFramework;
 }
 ```
 
@@ -455,9 +476,9 @@ export interface GoResponse {
 
 ```ts
 export interface GoRouteDefinition {
-  method: string;
-  path: string;
-  handlerName: string;
+    method: string;
+    path: string;
+    handlerName: string;
 }
 ```
 
@@ -467,8 +488,8 @@ export interface GoRouteDefinition {
 
 ```ts
 export interface InvokeEchoHandlerOptions {
-  handler: EchoHandler;
-  req: GoRequest;
+    handler: EchoHandler;
+    req: GoRequest;
 }
 ```
 
@@ -478,7 +499,7 @@ export interface InvokeEchoHandlerOptions {
 
 ```ts
 export interface InvokeEchoHandlerResult extends GoResponse {
-  handlerError?: string;
+    handlerError?: string;
 }
 ```
 
@@ -488,8 +509,8 @@ export interface InvokeEchoHandlerResult extends GoResponse {
 
 ```ts
 export interface InvokeFiberHandlerOptions {
-  handler: FiberHandler;
-  req: GoRequest;
+    handler: FiberHandler;
+    req: GoRequest;
 }
 ```
 
@@ -499,7 +520,7 @@ export interface InvokeFiberHandlerOptions {
 
 ```ts
 export interface InvokeFiberHandlerResult extends GoResponse {
-  handlerError?: string;
+    handlerError?: string;
 }
 ```
 
@@ -509,8 +530,8 @@ export interface InvokeFiberHandlerResult extends GoResponse {
 
 ```ts
 export interface InvokeGinHandlerOptions {
-  handler: GinHandler;
-  req: GoRequest;
+    handler: GinHandler;
+    req: GoRequest;
 }
 ```
 
@@ -520,7 +541,7 @@ export interface InvokeGinHandlerOptions {
 
 ```ts
 export interface InvokeGinHandlerResult extends GoResponse {
-  aborted: boolean;
+    aborted: boolean;
 }
 ```
 
@@ -538,12 +559,12 @@ export type MiddlewareFn = (req: GoRequest, next: () => Promise<GoResponse>) => 
 
 ```ts
 export interface ObservabilityEvent {
-  framework: GoFramework;
-  method: string;
-  path: string;
-  status: number;
-  durationMs: number;
-  timestamp: number;
+    framework: GoFramework;
+    method: string;
+    path: string;
+    status: number;
+    durationMs: number;
+    timestamp: number;
 }
 ```
 
@@ -553,9 +574,9 @@ export interface ObservabilityEvent {
 
 ```ts
 export interface ObservabilityHook {
-  onRequest: (event: ObservabilityEvent) => void;
-  events: () => ObservabilityEvent[];
-  clear: () => void;
+    onRequest: (event: ObservabilityEvent) => void;
+    events: () => ObservabilityEvent[];
+    clear: () => void;
 }
 ```
 
@@ -565,9 +586,9 @@ export interface ObservabilityHook {
 
 ```ts
 export interface RateLimiter {
-  tryAcquire: () => boolean;
-  reset: () => void;
-  remaining: () => number;
+    tryAcquire: () => boolean;
+    reset: () => void;
+    remaining: () => number;
 }
 ```
 
@@ -577,8 +598,8 @@ export interface RateLimiter {
 
 ```ts
 export interface RateLimitOptions {
-  requestsPerSecond: number;
-  burst?: number;
+    requestsPerSecond: number;
+    burst?: number;
 }
 ```
 
@@ -588,10 +609,10 @@ export interface RateLimitOptions {
 
 ```ts
 export interface RetryOptions {
-  maxAttempts?: number;
-  initialDelayMs?: number;
-  backoffFactor?: number;
-  onRetry?: (attempt: number, error: unknown) => void;
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    backoffFactor?: number;
+    onRetry?: (attempt: number, error: unknown) => void;
 }
 ```
 
@@ -601,10 +622,10 @@ export interface RetryOptions {
 
 ```ts
 export interface RetryResult<T> {
-  ok: boolean;
-  attempts: number;
-  value?: T;
-  error?: unknown;
+    ok: boolean;
+    attempts: number;
+    value?: T;
+    error?: unknown;
 }
 ```
 
@@ -614,11 +635,15 @@ export interface RetryResult<T> {
 
 ```ts
 export interface RouteGroup {
-  prefix: string;
-  framework: GoFramework;
-  routes: Array<{ method: string; fullPath: string; handlerName: string }>;
-  addRoute: (method: string, subpath: string, handlerName: string) => void;
-  subgroup: (childPrefix: string) => RouteGroup;
+    prefix: string;
+    framework: GoFramework;
+    routes: Array<{
+        method: string;
+        fullPath: string;
+        handlerName: string;
+    }>;
+    addRoute: (method: string, subpath: string, handlerName: string) => void;
+    subgroup: (childPrefix: string) => RouteGroup;
 }
 ```
 
@@ -628,8 +653,8 @@ export interface RouteGroup {
 
 ```ts
 export interface RouteGroupOptions {
-  prefix: string;
-  framework: GoFramework;
+    prefix: string;
+    framework: GoFramework;
 }
 ```
 
@@ -639,8 +664,8 @@ export interface RouteGroupOptions {
 
 ```ts
 export interface TimeoutOptions {
-  timeoutMs: number;
-  onTimeout?: () => void;
+    timeoutMs: number;
+    onTimeout?: () => void;
 }
 ```
 <!-- kiwa-public-api:end -->

@@ -20,8 +20,7 @@ A single user-facing skill invocation walks the full flow:
 2. Identify quality risks
 3. Select test viewpoints
 4. Generate test cases
-5. Prioritize them
-6. Decide the automation strategy
+5. Prioritize them and decide the automation strategy
 
 ---
 

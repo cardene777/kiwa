@@ -19,7 +19,7 @@ load と form action は data、fail、redirect、error を区別します。`re
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -28,7 +28,7 @@ load と form action は data、fail、redirect、error を区別します。`re
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L116) `packages/sveltekit/src/invoke-load.ts`
 
 ```ts
-export function error(status: number, message: string): SvelteKitErrorSignal;
+export declare function error(status: number, message: string): SvelteKitErrorSignal;
 ```
 
 #### `fail`
@@ -36,7 +36,7 @@ export function error(status: number, message: string): SvelteKitErrorSignal;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L104) `packages/sveltekit/src/invoke-action.ts`
 
 ```ts
-export function fail(status: number, data: unknown): SvelteKitFailSignal;
+export declare function fail(status: number, data: unknown): SvelteKitFailSignal;
 ```
 
 #### `invokeAction`
@@ -44,7 +44,7 @@ export function fail(status: number, data: unknown): SvelteKitFailSignal;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L59) `packages/sveltekit/src/invoke-action.ts`
 
 ```ts
-export async function invokeAction<TResult = unknown>(opts: InvokeActionOptions<TResult>): Promise<InvokeActionResult<TResult>>;
+export declare function invokeAction<TResult = unknown>(opts: InvokeActionOptions<TResult>): Promise<InvokeActionResult<TResult>>;
 ```
 
 #### `invokeHandle`
@@ -52,9 +52,7 @@ export async function invokeAction<TResult = unknown>(opts: InvokeActionOptions<
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L116) `packages/sveltekit/src/invoke-hooks.ts`
 
 ```ts
-export async function invokeHandle<TLocals extends Record<string, unknown> = Record<string, unknown>>(
-  opts: InvokeHandleOptions<TLocals>,
-): Promise<InvokeHandleResult<TLocals>>;
+export declare function invokeHandle<TLocals extends Record<string, unknown> = Record<string, unknown>>(opts: InvokeHandleOptions<TLocals>): Promise<InvokeHandleResult<TLocals>>;
 ```
 
 #### `invokeHandleError`
@@ -62,9 +60,7 @@ export async function invokeHandle<TLocals extends Record<string, unknown> = Rec
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L218) `packages/sveltekit/src/invoke-hooks.ts`
 
 ```ts
-export async function invokeHandleError<TLocals extends Record<string, unknown> = Record<string, unknown>>(
-  opts: InvokeHandleErrorOptions<TLocals>,
-): Promise<InvokeHandleErrorResult>;
+export declare function invokeHandleError<TLocals extends Record<string, unknown> = Record<string, unknown>>(opts: InvokeHandleErrorOptions<TLocals>): Promise<InvokeHandleErrorResult>;
 ```
 
 #### `invokeHandleFetch`
@@ -72,9 +68,7 @@ export async function invokeHandleError<TLocals extends Record<string, unknown> 
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L169) `packages/sveltekit/src/invoke-hooks.ts`
 
 ```ts
-export async function invokeHandleFetch<TLocals extends Record<string, unknown> = Record<string, unknown>>(
-  opts: InvokeHandleFetchOptions<TLocals>,
-): Promise<InvokeHandleFetchResult>;
+export declare function invokeHandleFetch<TLocals extends Record<string, unknown> = Record<string, unknown>>(opts: InvokeHandleFetchOptions<TLocals>): Promise<InvokeHandleFetchResult>;
 ```
 
 #### `invokeLoad`
@@ -82,7 +76,7 @@ export async function invokeHandleFetch<TLocals extends Record<string, unknown> 
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L65) `packages/sveltekit/src/invoke-load.ts`
 
 ```ts
-export async function invokeLoad<TResult = unknown>(opts: InvokeLoadOptions<TResult>): Promise<InvokeLoadResult<TResult>>;
+export declare function invokeLoad<TResult = unknown>(opts: InvokeLoadOptions<TResult>): Promise<InvokeLoadResult<TResult>>;
 ```
 
 #### `redirect`
@@ -90,7 +84,7 @@ export async function invokeLoad<TResult = unknown>(opts: InvokeLoadOptions<TRes
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L112) `packages/sveltekit/src/invoke-load.ts`
 
 ```ts
-export function redirect(status: number, location: string): SvelteKitRedirectSignal;
+export declare function redirect(status: number, location: string): SvelteKitRedirectSignal;
 ```
 
 #### `sequence`
@@ -100,9 +94,7 @@ export function redirect(status: number, location: string): SvelteKitRedirectSig
 sequence — SvelteKit 公式 `sequence(...handlers)` 相当の handle chain composer。 sequence(h1, h2) は h1 の resolve として h2 を渡し、 h2 の resolve として 最終の resolve を渡す。 結果として h1-before → h2-before → resolve → h2-after → h1-after の順で実行される。 引数なし時は no-op (resolve(event) を直接呼ぶ)。
 
 ```ts
-export function sequence<TLocals extends Record<string, unknown> = Record<string, unknown>>(
-  ...handles: HandleFunction<TLocals>[]
-): HandleFunction<TLocals>;
+export declare function sequence<TLocals extends Record<string, unknown> = Record<string, unknown>>(...handles: HandleFunction<TLocals>[]): HandleFunction<TLocals>;
 ```
 
 #### `setupSvelteKitHooksEnv`
@@ -110,9 +102,7 @@ export function sequence<TLocals extends Record<string, unknown> = Record<string
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L83) `packages/sveltekit/src/setup-hooks-env.ts`
 
 ```ts
-export function setupSvelteKitHooksEnv<TLocals extends Record<string, unknown> = Record<string, unknown>>(
-  options: SetupSvelteKitHooksEnvOptions<TLocals>,
-): SvelteKitHooksEnv<TLocals>;
+export declare function setupSvelteKitHooksEnv<TLocals extends Record<string, unknown> = Record<string, unknown>>(options: SetupSvelteKitHooksEnvOptions<TLocals>): SvelteKitHooksEnv<TLocals>;
 ```
 
 #### `SK_ERROR_SYMBOL`
@@ -120,7 +110,7 @@ export function setupSvelteKitHooksEnv<TLocals extends Record<string, unknown> =
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L9) `packages/sveltekit/src/invoke-load.ts`
 
 ```ts
-export declare const SK_ERROR_SYMBOL: typeof SK_ERROR_SYMBOL;
+export declare const SK_ERROR_SYMBOL: unique symbol;
 ```
 
 #### `SK_FAIL_SYMBOL`
@@ -128,7 +118,7 @@ export declare const SK_ERROR_SYMBOL: typeof SK_ERROR_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L12) `packages/sveltekit/src/invoke-action.ts`
 
 ```ts
-export declare const SK_FAIL_SYMBOL: typeof SK_FAIL_SYMBOL;
+export declare const SK_FAIL_SYMBOL: unique symbol;
 ```
 
 #### `SK_REDIRECT_SYMBOL`
@@ -136,7 +126,7 @@ export declare const SK_FAIL_SYMBOL: typeof SK_FAIL_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L8) `packages/sveltekit/src/invoke-load.ts`
 
 ```ts
-export declare const SK_REDIRECT_SYMBOL: typeof SK_REDIRECT_SYMBOL;
+export declare const SK_REDIRECT_SYMBOL: unique symbol;
 ```
 
 ### 型
@@ -155,8 +145,8 @@ export type ActionFunction<TResult = unknown> = (event: SimulatedActionEvent) =>
 
 ```ts
 export type HandleArgs<TLocals extends Record<string, unknown> = Record<string, unknown>> = {
-  readonly event: SimulatedHookRequestEvent<TLocals>;
-  resolve(event: SimulatedHookRequestEvent<TLocals>): Promise<Response> | Response;
+    readonly event: SimulatedHookRequestEvent<TLocals>;
+    resolve(event: SimulatedHookRequestEvent<TLocals>): Promise<Response> | Response;
 };
 ```
 
@@ -166,10 +156,10 @@ export type HandleArgs<TLocals extends Record<string, unknown> = Record<string, 
 
 ```ts
 export type HandleErrorArgs<TLocals extends Record<string, unknown> = Record<string, unknown>> = {
-  readonly error: unknown;
-  readonly event: SimulatedHookRequestEvent<TLocals>;
-  readonly status: number;
-  readonly message: string;
+    readonly error: unknown;
+    readonly event: SimulatedHookRequestEvent<TLocals>;
+    readonly status: number;
+    readonly message: string;
 };
 ```
 
@@ -178,9 +168,11 @@ export type HandleErrorArgs<TLocals extends Record<string, unknown> = Record<str
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L51) `packages/sveltekit/src/invoke-hooks.ts`
 
 ```ts
-export type HandleErrorFunction<TLocals extends Record<string, unknown> = Record<string, unknown>> = (
-  args: HandleErrorArgs<TLocals>,
-) => Promise<{ message: string } | void> | { message: string } | void;
+export type HandleErrorFunction<TLocals extends Record<string, unknown> = Record<string, unknown>> = (args: HandleErrorArgs<TLocals>) => Promise<{
+    message: string;
+} | void> | {
+    message: string;
+} | void;
 ```
 
 #### `HandleFetchArgs`
@@ -189,9 +181,9 @@ export type HandleErrorFunction<TLocals extends Record<string, unknown> = Record
 
 ```ts
 export type HandleFetchArgs<TLocals extends Record<string, unknown> = Record<string, unknown>> = {
-  readonly event: SimulatedHookRequestEvent<TLocals>;
-  readonly request: Request;
-  fetch(req: Request): Promise<Response>;
+    readonly event: SimulatedHookRequestEvent<TLocals>;
+    readonly request: Request;
+    fetch(req: Request): Promise<Response>;
 };
 ```
 
@@ -200,9 +192,7 @@ export type HandleFetchArgs<TLocals extends Record<string, unknown> = Record<str
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L40) `packages/sveltekit/src/invoke-hooks.ts`
 
 ```ts
-export type HandleFetchFunction<TLocals extends Record<string, unknown> = Record<string, unknown>> = (
-  args: HandleFetchArgs<TLocals>,
-) => Promise<Response> | Response;
+export type HandleFetchFunction<TLocals extends Record<string, unknown> = Record<string, unknown>> = (args: HandleFetchArgs<TLocals>) => Promise<Response> | Response;
 ```
 
 #### `HandleFunction`
@@ -210,9 +200,7 @@ export type HandleFetchFunction<TLocals extends Record<string, unknown> = Record
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L30) `packages/sveltekit/src/invoke-hooks.ts`
 
 ```ts
-export type HandleFunction<TLocals extends Record<string, unknown> = Record<string, unknown>> = (
-  args: HandleArgs<TLocals>,
-) => Promise<Response> | Response;
+export type HandleFunction<TLocals extends Record<string, unknown> = Record<string, unknown>> = (args: HandleArgs<TLocals>) => Promise<Response> | Response;
 ```
 
 #### `InvokeActionOptions`
@@ -221,12 +209,12 @@ export type HandleFunction<TLocals extends Record<string, unknown> = Record<stri
 
 ```ts
 export interface InvokeActionOptions<TResult = unknown> {
-  readonly action: ActionFunction<TResult>;
-  readonly url: string;
-  readonly formData?: Record<string, string>;
-  readonly cookies?: Record<string, string>;
-  readonly locals?: Record<string, unknown>;
-  readonly method?: string;
+    readonly action: ActionFunction<TResult>;
+    readonly url: string;
+    readonly formData?: Record<string, string>;
+    readonly cookies?: Record<string, string>;
+    readonly locals?: Record<string, unknown>;
+    readonly method?: string;
 }
 ```
 
@@ -236,13 +224,13 @@ export interface InvokeActionOptions<TResult = unknown> {
 
 ```ts
 export interface InvokeActionResult<TResult = unknown> {
-  readonly result: TResult | undefined;
-  readonly fail: SvelteKitFailSignal | null;
-  readonly redirect: SvelteKitRedirectSignal | null;
-  readonly error: unknown;
-  readonly env: {
-    readonly cookies: Map<string, string>;
-  };
+    readonly result: TResult | undefined;
+    readonly fail: SvelteKitFailSignal | null;
+    readonly redirect: SvelteKitRedirectSignal | null;
+    readonly error: unknown;
+    readonly env: {
+        readonly cookies: Map<string, string>;
+    };
 }
 ```
 
@@ -252,14 +240,14 @@ export interface InvokeActionResult<TResult = unknown> {
 
 ```ts
 export interface InvokeHandleErrorOptions<TLocals extends Record<string, unknown>> {
-  readonly handleError: HandleErrorFunction<TLocals>;
-  readonly error: unknown;
-  readonly url: string;
-  readonly status: number;
-  readonly message: string;
-  readonly headers?: Record<string, string>;
-  readonly cookies?: Record<string, string>;
-  readonly locals?: TLocals;
+    readonly handleError: HandleErrorFunction<TLocals>;
+    readonly error: unknown;
+    readonly url: string;
+    readonly status: number;
+    readonly message: string;
+    readonly headers?: Record<string, string>;
+    readonly cookies?: Record<string, string>;
+    readonly locals?: TLocals;
 }
 ```
 
@@ -269,8 +257,10 @@ export interface InvokeHandleErrorOptions<TLocals extends Record<string, unknown
 
 ```ts
 export interface InvokeHandleErrorResult {
-  readonly report: { message: string } | void;
-  readonly thrown: unknown;
+    readonly report: {
+        message: string;
+    } | void;
+    readonly thrown: unknown;
 }
 ```
 
@@ -280,18 +270,18 @@ export interface InvokeHandleErrorResult {
 
 ```ts
 export interface InvokeHandleFetchOptions<TLocals extends Record<string, unknown>> {
-  readonly handleFetch: HandleFetchFunction<TLocals>;
-  readonly eventUrl: string;
-  readonly fetchUrl: string;
-  readonly method?: string;
-  readonly headers?: Record<string, string>;
-  readonly cookies?: Record<string, string>;
-  readonly locals?: TLocals;
-  /**
-   * Fake fetch that handleFetch delegates to via `fetch(req)`. Default returns
-   * an empty 200 Response.
-   */
-  readonly downstreamFetch?: (req: Request) => Promise<Response>;
+    readonly handleFetch: HandleFetchFunction<TLocals>;
+    readonly eventUrl: string;
+    readonly fetchUrl: string;
+    readonly method?: string;
+    readonly headers?: Record<string, string>;
+    readonly cookies?: Record<string, string>;
+    readonly locals?: TLocals;
+    /**
+     * Fake fetch that handleFetch delegates to via `fetch(req)`. Default returns
+     * an empty 200 Response.
+     */
+    readonly downstreamFetch?: (req: Request) => Promise<Response>;
 }
 ```
 
@@ -301,10 +291,10 @@ export interface InvokeHandleFetchOptions<TLocals extends Record<string, unknown
 
 ```ts
 export interface InvokeHandleFetchResult {
-  readonly response: Response;
-  readonly downstreamCalled: boolean;
-  readonly downstreamRequest: Request | null;
-  readonly error: unknown;
+    readonly response: Response;
+    readonly downstreamCalled: boolean;
+    readonly downstreamRequest: Request | null;
+    readonly error: unknown;
 }
 ```
 
@@ -314,20 +304,20 @@ export interface InvokeHandleFetchResult {
 
 ```ts
 export interface InvokeHandleOptions<TLocals extends Record<string, unknown>> {
-  readonly handle: HandleFunction<TLocals>;
-  readonly url: string;
-  readonly method?: string;
-  readonly headers?: Record<string, string>;
-  readonly cookies?: Record<string, string>;
-  readonly params?: Record<string, string>;
-  readonly locals?: TLocals;
-  readonly routeId?: string;
-  readonly platform?: Record<string, unknown>;
-  /**
-   * What `resolve(event)` should return when the handler delegates to the
-   * downstream layer. Default = `new Response('ok', { status: 200 })`.
-   */
-  readonly resolveResponse?: Response | ((event: SimulatedHookRequestEvent<TLocals>) => Response | Promise<Response>);
+    readonly handle: HandleFunction<TLocals>;
+    readonly url: string;
+    readonly method?: string;
+    readonly headers?: Record<string, string>;
+    readonly cookies?: Record<string, string>;
+    readonly params?: Record<string, string>;
+    readonly locals?: TLocals;
+    readonly routeId?: string;
+    readonly platform?: Record<string, unknown>;
+    /**
+     * What `resolve(event)` should return when the handler delegates to the
+     * downstream layer. Default = `new Response('ok', { status: 200 })`.
+     */
+    readonly resolveResponse?: Response | ((event: SimulatedHookRequestEvent<TLocals>) => Response | Promise<Response>);
 }
 ```
 
@@ -337,13 +327,13 @@ export interface InvokeHandleOptions<TLocals extends Record<string, unknown>> {
 
 ```ts
 export interface InvokeHandleResult<TLocals extends Record<string, unknown>> {
-  readonly response: Response;
-  readonly resolveCalled: boolean;
-  readonly localsAtResolve: TLocals | null;
-  readonly error: unknown;
-  readonly env: {
-    readonly cookies: Map<string, string>;
-  };
+    readonly response: Response;
+    readonly resolveCalled: boolean;
+    readonly localsAtResolve: TLocals | null;
+    readonly error: unknown;
+    readonly env: {
+        readonly cookies: Map<string, string>;
+    };
 }
 ```
 
@@ -353,12 +343,12 @@ export interface InvokeHandleResult<TLocals extends Record<string, unknown>> {
 
 ```ts
 export interface InvokeLoadOptions<TResult = unknown> {
-  readonly load: LoadFunction<TResult>;
-  readonly url: string;
-  readonly params?: Record<string, string>;
-  readonly cookies?: Record<string, string>;
-  readonly locals?: Record<string, unknown>;
-  readonly fetch?: typeof globalThis.fetch;
+    readonly load: LoadFunction<TResult>;
+    readonly url: string;
+    readonly params?: Record<string, string>;
+    readonly cookies?: Record<string, string>;
+    readonly locals?: Record<string, unknown>;
+    readonly fetch?: typeof globalThis.fetch;
 }
 ```
 
@@ -368,13 +358,13 @@ export interface InvokeLoadOptions<TResult = unknown> {
 
 ```ts
 export interface InvokeLoadResult<TResult = unknown> {
-  readonly data: TResult | undefined;
-  readonly redirect: SvelteKitRedirectSignal | null;
-  readonly error: SvelteKitErrorSignal | unknown;
-  readonly env: {
-    readonly responseHeaders: Map<string, string>;
-    readonly cookies: Map<string, string>;
-  };
+    readonly data: TResult | undefined;
+    readonly redirect: SvelteKitRedirectSignal | null;
+    readonly error: SvelteKitErrorSignal | unknown;
+    readonly env: {
+        readonly responseHeaders: Map<string, string>;
+        readonly cookies: Map<string, string>;
+    };
 }
 ```
 
@@ -392,9 +382,9 @@ export type LoadFunction<TResult = unknown> = (event: SimulatedLoadEvent) => Pro
 
 ```ts
 export interface RunHandleErrorOptions {
-  readonly error: unknown;
-  readonly status: number;
-  readonly message: string;
+    readonly error: unknown;
+    readonly status: number;
+    readonly message: string;
 }
 ```
 
@@ -404,8 +394,10 @@ export interface RunHandleErrorOptions {
 
 ```ts
 export interface RunHandleErrorResult {
-  readonly report: { message: string } | void;
-  readonly thrown: unknown;
+    readonly report: {
+        message: string;
+    } | void;
+    readonly thrown: unknown;
 }
 ```
 
@@ -415,10 +407,10 @@ export interface RunHandleErrorResult {
 
 ```ts
 export interface RunHandleFetchOptions {
-  readonly fetchUrl: string;
-  readonly fetchMethod?: string;
-  readonly fetchHeaders?: Record<string, string>;
-  readonly downstreamFetch?: (req: Request) => Promise<Response>;
+    readonly fetchUrl: string;
+    readonly fetchMethod?: string;
+    readonly fetchHeaders?: Record<string, string>;
+    readonly downstreamFetch?: (req: Request) => Promise<Response>;
 }
 ```
 
@@ -428,10 +420,10 @@ export interface RunHandleFetchOptions {
 
 ```ts
 export interface RunHandleFetchResult {
-  readonly response: Response;
-  readonly downstreamCalled: boolean;
-  readonly downstreamRequest: Request | null;
-  readonly error: unknown;
+    readonly response: Response;
+    readonly downstreamCalled: boolean;
+    readonly downstreamRequest: Request | null;
+    readonly error: unknown;
 }
 ```
 
@@ -441,10 +433,10 @@ export interface RunHandleFetchResult {
 
 ```ts
 export interface RunHandleResult<TLocals extends Record<string, unknown>> {
-  readonly response: Response;
-  readonly resolveCalled: boolean;
-  readonly localsAtResolve: TLocals | null;
-  readonly error: unknown;
+    readonly response: Response;
+    readonly resolveCalled: boolean;
+    readonly localsAtResolve: TLocals | null;
+    readonly error: unknown;
 }
 ```
 
@@ -454,14 +446,14 @@ export interface RunHandleResult<TLocals extends Record<string, unknown>> {
 
 ```ts
 export interface SetupSvelteKitHooksEnvOptions<TLocals extends Record<string, unknown>> {
-  readonly url: string;
-  readonly method?: string;
-  readonly headers?: Record<string, string>;
-  readonly cookies?: Record<string, string>;
-  readonly params?: Record<string, string>;
-  readonly locals?: TLocals;
-  readonly routeId?: string;
-  readonly platform?: Record<string, unknown>;
+    readonly url: string;
+    readonly method?: string;
+    readonly headers?: Record<string, string>;
+    readonly cookies?: Record<string, string>;
+    readonly params?: Record<string, string>;
+    readonly locals?: TLocals;
+    readonly routeId?: string;
+    readonly platform?: Record<string, unknown>;
 }
 ```
 
@@ -471,14 +463,14 @@ export interface SetupSvelteKitHooksEnvOptions<TLocals extends Record<string, un
 
 ```ts
 export interface SimulatedActionEvent {
-  readonly request: Request;
-  readonly cookies: {
-    get(name: string): string | undefined;
-    set(name: string, value: string, options?: Record<string, unknown>): void;
-    delete(name: string): void;
-  };
-  readonly locals: Record<string, unknown>;
-  readonly url: URL;
+    readonly request: Request;
+    readonly cookies: {
+        get(name: string): string | undefined;
+        set(name: string, value: string, options?: Record<string, unknown>): void;
+        delete(name: string): void;
+    };
+    readonly locals: Record<string, unknown>;
+    readonly url: URL;
 }
 ```
 
@@ -488,17 +480,19 @@ export interface SimulatedActionEvent {
 
 ```ts
 export interface SimulatedHookRequestEvent<TLocals extends Record<string, unknown> = Record<string, unknown>> {
-  readonly request: Request;
-  readonly url: URL;
-  readonly params: Readonly<Record<string, string>>;
-  readonly cookies: {
-    get(name: string): string | undefined;
-    set(name: string, value: string): void;
-    delete(name: string): void;
-  };
-  readonly locals: TLocals;
-  readonly route: { readonly id: string | null };
-  readonly platform: Record<string, unknown> | undefined;
+    readonly request: Request;
+    readonly url: URL;
+    readonly params: Readonly<Record<string, string>>;
+    readonly cookies: {
+        get(name: string): string | undefined;
+        set(name: string, value: string): void;
+        delete(name: string): void;
+    };
+    readonly locals: TLocals;
+    readonly route: {
+        readonly id: string | null;
+    };
+    readonly platform: Record<string, unknown> | undefined;
 }
 ```
 
@@ -508,17 +502,17 @@ export interface SimulatedHookRequestEvent<TLocals extends Record<string, unknow
 
 ```ts
 export interface SimulatedLoadEvent {
-  readonly url: URL;
-  readonly params: Readonly<Record<string, string>>;
-  readonly cookies: {
-    get(name: string): string | undefined;
-    set(name: string, value: string, options?: Record<string, unknown>): void;
-    delete(name: string): void;
-    getAll(): Array<[string, string]>;
-  };
-  readonly fetch: typeof globalThis.fetch;
-  readonly locals: Record<string, unknown>;
-  setHeaders(headers: Record<string, string>): void;
+    readonly url: URL;
+    readonly params: Readonly<Record<string, string>>;
+    readonly cookies: {
+        get(name: string): string | undefined;
+        set(name: string, value: string, options?: Record<string, unknown>): void;
+        delete(name: string): void;
+        getAll(): Array<[string, string]>;
+    };
+    readonly fetch: typeof globalThis.fetch;
+    readonly locals: Record<string, unknown>;
+    setHeaders(headers: Record<string, string>): void;
 }
 ```
 
@@ -528,9 +522,11 @@ export interface SimulatedLoadEvent {
 
 ```ts
 export interface SvelteKitErrorSignal {
-  readonly [SK_ERROR_SYMBOL]: true;
-  readonly status: number;
-  readonly body: { readonly message: string } | string;
+    readonly [SK_ERROR_SYMBOL]: true;
+    readonly status: number;
+    readonly body: {
+        readonly message: string;
+    } | string;
 }
 ```
 
@@ -540,9 +536,9 @@ export interface SvelteKitErrorSignal {
 
 ```ts
 export interface SvelteKitFailSignal {
-  readonly [SK_FAIL_SYMBOL]: true;
-  readonly status: number;
-  readonly data: unknown;
+    readonly [SK_FAIL_SYMBOL]: true;
+    readonly status: number;
+    readonly data: unknown;
 }
 ```
 
@@ -552,15 +548,15 @@ export interface SvelteKitFailSignal {
 
 ```ts
 export interface SvelteKitHooksEnv<TLocals extends Record<string, unknown>> {
-  readonly cookies: Map<string, string>;
-  readonly locals: TLocals;
-  /** 現在の state で SimulatedHookRequestEvent を build (cookies / locals は共有参照) */
-  buildEvent(): SimulatedHookRequestEvent<TLocals>;
-  runHandle(handle: HandleFunction<TLocals>, resolveResponse?: Response | ((event: SimulatedHookRequestEvent<TLocals>) => Response | Promise<Response>)): Promise<RunHandleResult<TLocals>>;
-  runHandleFetch(handleFetch: HandleFetchFunction<TLocals>, options: RunHandleFetchOptions): Promise<RunHandleFetchResult>;
-  runHandleError(handleError: HandleErrorFunction<TLocals>, options: RunHandleErrorOptions): Promise<RunHandleErrorResult>;
-  /** cookies / locals を初期 snapshot に戻す (同 env を別 test で再利用するため) */
-  reset(): void;
+    readonly cookies: Map<string, string>;
+    readonly locals: TLocals;
+    /** 現在の state で SimulatedHookRequestEvent を build (cookies / locals は共有参照) */
+    buildEvent(): SimulatedHookRequestEvent<TLocals>;
+    runHandle(handle: HandleFunction<TLocals>, resolveResponse?: Response | ((event: SimulatedHookRequestEvent<TLocals>) => Response | Promise<Response>)): Promise<RunHandleResult<TLocals>>;
+    runHandleFetch(handleFetch: HandleFetchFunction<TLocals>, options: RunHandleFetchOptions): Promise<RunHandleFetchResult>;
+    runHandleError(handleError: HandleErrorFunction<TLocals>, options: RunHandleErrorOptions): Promise<RunHandleErrorResult>;
+    /** cookies / locals を初期 snapshot に戻す (同 env を別 test で再利用するため) */
+    reset(): void;
 }
 ```
 
@@ -570,9 +566,9 @@ export interface SvelteKitHooksEnv<TLocals extends Record<string, unknown>> {
 
 ```ts
 export interface SvelteKitRedirectSignal {
-  readonly [SK_REDIRECT_SYMBOL]: true;
-  readonly status: number;
-  readonly location: string;
+    readonly [SK_REDIRECT_SYMBOL]: true;
+    readonly status: number;
+    readonly location: string;
 }
 ```
 <!-- kiwa-public-api:end -->

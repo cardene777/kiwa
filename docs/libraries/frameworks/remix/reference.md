@@ -31,7 +31,7 @@ request と context は呼び出しごとに作られます。`undefined` loader
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -40,10 +40,7 @@ request と context は呼び出しごとに作られます。`undefined` loader
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L423) `packages/remix/src/setup-nested-route-env.ts`
 
 ```ts
-export function defer<TData extends Record<string, unknown>>(
-  data: TData,
-  init?: ResponseInit,
-): DeferredData<TData>;
+export declare function defer<TData extends Record<string, unknown>>(data: TData, init?: ResponseInit): DeferredData<TData>;
 ```
 
 #### `DEFERRED_DATA_SYMBOL`
@@ -53,7 +50,7 @@ export function defer<TData extends Record<string, unknown>>(
 defer() 互換 — `Record&lt;string, T | Promise&lt;T&gt;&gt;` を返す helper。 Remix 公式 `defer()` の TypedDeferredData と異なり、 kiwa は real Promise をそのまま保持し、 `resolveDeferred()` で deterministic に全 Promise を await する。
 
 ```ts
-export declare const DEFERRED_DATA_SYMBOL: typeof DEFERRED_DATA_SYMBOL;
+export declare const DEFERRED_DATA_SYMBOL: unique symbol;
 ```
 
 #### `invokeAction`
@@ -61,7 +58,7 @@ export declare const DEFERRED_DATA_SYMBOL: typeof DEFERRED_DATA_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L138) `packages/remix/src/invoke-route.ts`
 
 ```ts
-export async function invokeAction(opts: InvokeActionOptions): Promise<InvokeRouteResult>;
+export declare function invokeAction(opts: InvokeActionOptions): Promise<InvokeRouteResult>;
 ```
 
 #### `invokeLoader`
@@ -69,7 +66,7 @@ export async function invokeAction(opts: InvokeActionOptions): Promise<InvokeRou
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L111) `packages/remix/src/invoke-route.ts`
 
 ```ts
-export async function invokeLoader(opts: InvokeLoaderOptions): Promise<InvokeRouteResult>;
+export declare function invokeLoader(opts: InvokeLoaderOptions): Promise<InvokeRouteResult>;
 ```
 
 #### `invokeResourceRoute`
@@ -79,9 +76,7 @@ export async function invokeLoader(opts: InvokeLoaderOptions): Promise<InvokeRou
 Resource Route dispatcher — picks `loader` for GET/HEAD and `action` for POST/PUT/PATCH/DELETE. Method is required (no implicit default) because Resource Routes intentionally rely on HTTP semantics to choose behavior. Methods not implemented by the route module return a 405 Response and a branded `methodNotAllowed` signal so tests can assert dispatch behavior without conflating it with the route's own 4xx responses.
 
 ```ts
-export async function invokeResourceRoute(
-  opts: InvokeResourceRouteOptions,
-): Promise<InvokeResourceRouteResult>;
+export declare function invokeResourceRoute(opts: InvokeResourceRouteOptions): Promise<InvokeResourceRouteResult>;
 ```
 
 #### `isDeferred`
@@ -89,7 +84,7 @@ export async function invokeResourceRoute(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L432) `packages/remix/src/setup-nested-route-env.ts`
 
 ```ts
-export function isDeferred(value: unknown): value is DeferredData<Record<string, unknown>>;
+export declare function isDeferred(value: unknown): value is DeferredData<Record<string, unknown>>;
 ```
 
 #### `json`
@@ -97,7 +92,7 @@ export function isDeferred(value: unknown): value is DeferredData<Record<string,
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L160) `packages/remix/src/invoke-route.ts`
 
 ```ts
-export function json<T>(body: T, init?: ResponseInit): Response;
+export declare function json<T>(body: T, init?: ResponseInit): Response;
 ```
 
 #### `redirect`
@@ -105,7 +100,7 @@ export function json<T>(body: T, init?: ResponseInit): Response;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L156) `packages/remix/src/invoke-route.ts`
 
 ```ts
-export function redirect(location: string, status = 302): Response;
+export declare function redirect(location: string, status?: number): Response;
 ```
 
 #### `REMIX_REDIRECT_SYMBOL`
@@ -113,7 +108,7 @@ export function redirect(location: string, status = 302): Response;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L9) `packages/remix/src/invoke-route.ts`
 
 ```ts
-export declare const REMIX_REDIRECT_SYMBOL: typeof REMIX_REDIRECT_SYMBOL;
+export declare const REMIX_REDIRECT_SYMBOL: unique symbol;
 ```
 
 #### `resolveDeferred`
@@ -123,9 +118,7 @@ export declare const REMIX_REDIRECT_SYMBOL: typeof REMIX_REDIRECT_SYMBOL;
 defer() の値を全て deterministic に await。 settled Promise (resolved / rejected) を一括追跡、 errors map で個別 rejection を assertion 可能。 pendingKeys は 起動時に既に Promise だった key (= 「streaming で resolve した」 key) を保持する。
 
 ```ts
-export async function resolveDeferred<TData extends Record<string, unknown>>(
-  deferred: DeferredData<TData>,
-): Promise<ResolveDeferredResult<TData>>;
+export declare function resolveDeferred<TData extends Record<string, unknown>>(deferred: DeferredData<TData>): Promise<ResolveDeferredResult<TData>>;
 ```
 
 #### `RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL`
@@ -133,7 +126,7 @@ export async function resolveDeferred<TData extends Record<string, unknown>>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L25) `packages/remix/src/invoke-resource-route.ts`
 
 ```ts
-export declare const RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL: typeof RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL;
+export declare const RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL: unique symbol;
 ```
 
 #### `setupRemixNestedRouteEnv`
@@ -141,9 +134,7 @@ export declare const RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL: typeof RESOURCE_R
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L321) `packages/remix/src/setup-nested-route-env.ts`
 
 ```ts
-export function setupRemixNestedRouteEnv(
-  options: SetupRemixNestedRouteEnvOptions,
-): RemixNestedRouteEnv;
+export declare function setupRemixNestedRouteEnv(options: SetupRemixNestedRouteEnvOptions): RemixNestedRouteEnv;
 ```
 
 ### 型
@@ -162,9 +153,9 @@ export type ActionFunction<TResult = unknown> = (args: SimulatedRouteArgs) => Pr
 
 ```ts
 export interface DeferredData<TData extends Record<string, unknown>> {
-  readonly [DEFERRED_DATA_SYMBOL]: true;
-  readonly data: TData;
-  readonly init?: ResponseInit;
+    readonly [DEFERRED_DATA_SYMBOL]: true;
+    readonly data: TData;
+    readonly init?: ResponseInit;
 }
 ```
 
@@ -174,14 +165,14 @@ export interface DeferredData<TData extends Record<string, unknown>> {
 
 ```ts
 export interface InvokeActionOptions {
-  readonly action: ActionFunction;
-  readonly url: string;
-  readonly params?: Record<string, string>;
-  readonly context?: Record<string, unknown>;
-  readonly headers?: Record<string, string>;
-  readonly method?: string;
-  readonly formData?: Record<string, string>;
-  readonly jsonBody?: unknown;
+    readonly action: ActionFunction;
+    readonly url: string;
+    readonly params?: Record<string, string>;
+    readonly context?: Record<string, unknown>;
+    readonly headers?: Record<string, string>;
+    readonly method?: string;
+    readonly formData?: Record<string, string>;
+    readonly jsonBody?: unknown;
 }
 ```
 
@@ -191,12 +182,12 @@ export interface InvokeActionOptions {
 
 ```ts
 export interface InvokeLoaderOptions {
-  readonly loader: LoaderFunction;
-  readonly url: string;
-  readonly params?: Record<string, string>;
-  readonly context?: Record<string, unknown>;
-  readonly headers?: Record<string, string>;
-  readonly method?: string;
+    readonly loader: LoaderFunction;
+    readonly url: string;
+    readonly params?: Record<string, string>;
+    readonly context?: Record<string, unknown>;
+    readonly headers?: Record<string, string>;
+    readonly method?: string;
 }
 ```
 
@@ -206,14 +197,14 @@ export interface InvokeLoaderOptions {
 
 ```ts
 export interface InvokeResourceRouteOptions {
-  readonly route: ResourceRouteModule;
-  readonly url: string;
-  readonly method: string;
-  readonly params?: Record<string, string>;
-  readonly context?: Record<string, unknown>;
-  readonly headers?: Record<string, string>;
-  readonly formData?: Record<string, string>;
-  readonly jsonBody?: unknown;
+    readonly route: ResourceRouteModule;
+    readonly url: string;
+    readonly method: string;
+    readonly params?: Record<string, string>;
+    readonly context?: Record<string, unknown>;
+    readonly headers?: Record<string, string>;
+    readonly formData?: Record<string, string>;
+    readonly jsonBody?: unknown;
 }
 ```
 
@@ -223,8 +214,8 @@ export interface InvokeResourceRouteOptions {
 
 ```ts
 export interface InvokeResourceRouteResult extends InvokeRouteResult {
-  readonly dispatch: 'loader' | 'action' | 'method-not-allowed';
-  readonly methodNotAllowed: ResourceRouteMethodNotAllowedSignal | null;
+    readonly dispatch: 'loader' | 'action' | 'method-not-allowed';
+    readonly methodNotAllowed: ResourceRouteMethodNotAllowedSignal | null;
 }
 ```
 
@@ -234,10 +225,10 @@ export interface InvokeResourceRouteResult extends InvokeRouteResult {
 
 ```ts
 export interface InvokeRouteResult {
-  readonly result: unknown;
-  readonly response: Response | null;
-  readonly redirect: RemixRedirectSignal | null;
-  readonly error: unknown;
+    readonly result: unknown;
+    readonly response: Response | null;
+    readonly redirect: RemixRedirectSignal | null;
+    readonly error: unknown;
 }
 ```
 
@@ -255,9 +246,9 @@ export type LoaderFunction<TResult = unknown> = (args: SimulatedRouteArgs) => Pr
 
 ```ts
 export interface RemixNestedRouteDefinition<TResult = unknown> {
-  readonly id: string;
-  readonly loader?: LoaderFunction<TResult>;
-  readonly headers?: RemixNestedRouteHeadersFunction;
+    readonly id: string;
+    readonly loader?: LoaderFunction<TResult>;
+    readonly headers?: RemixNestedRouteHeadersFunction;
 }
 ```
 
@@ -267,11 +258,11 @@ export interface RemixNestedRouteDefinition<TResult = unknown> {
 
 ```ts
 export interface RemixNestedRouteEnv {
-  readonly cookies: Map<string, string>;
-  /** parent → child loader chain を 1 request で順次 invoke、 child は parent の result を context.parentData として受け取る */
-  runLoaderChain(): Promise<RunLoaderChainResult>;
-  /** cookies / locals を初期 snapshot に戻す (同 env を別 test で再利用するため) */
-  reset(): void;
+    readonly cookies: Map<string, string>;
+    /** parent → child loader chain を 1 request で順次 invoke、 child は parent の result を context.parentData として受け取る */
+    runLoaderChain(): Promise<RunLoaderChainResult>;
+    /** cookies / locals を初期 snapshot に戻す (同 env を別 test で再利用するため) */
+    reset(): void;
 }
 ```
 
@@ -281,10 +272,10 @@ export interface RemixNestedRouteEnv {
 
 ```ts
 export interface RemixNestedRouteHeadersArgs {
-  readonly loaderHeaders: Headers;
-  readonly parentHeaders: Headers;
-  readonly actionHeaders: Headers;
-  readonly errorHeaders?: Headers | undefined;
+    readonly loaderHeaders: Headers;
+    readonly parentHeaders: Headers;
+    readonly actionHeaders: Headers;
+    readonly errorHeaders?: Headers | undefined;
 }
 ```
 
@@ -293,9 +284,7 @@ export interface RemixNestedRouteHeadersArgs {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L32) `packages/remix/src/setup-nested-route-env.ts`
 
 ```ts
-export type RemixNestedRouteHeadersFunction =
-  | ((args: RemixNestedRouteHeadersArgs) => HeadersInit)
-  | HeadersInit;
+export type RemixNestedRouteHeadersFunction = ((args: RemixNestedRouteHeadersArgs) => HeadersInit) | HeadersInit;
 ```
 
 #### `RemixRedirectSignal`
@@ -304,9 +293,9 @@ export type RemixNestedRouteHeadersFunction =
 
 ```ts
 export interface RemixRedirectSignal {
-  readonly [REMIX_REDIRECT_SYMBOL]: true;
-  readonly status: number;
-  readonly location: string;
+    readonly [REMIX_REDIRECT_SYMBOL]: true;
+    readonly status: number;
+    readonly location: string;
 }
 ```
 
@@ -316,10 +305,14 @@ export interface RemixRedirectSignal {
 
 ```ts
 export interface ResolveDeferredResult<TData extends Record<string, unknown>> {
-  readonly resolved: { [K in keyof TData]: Awaited<TData[K]> };
-  readonly pendingKeys: ReadonlyArray<keyof TData>;
-  readonly errors: { readonly [K in keyof TData]?: unknown };
-  readonly init?: ResponseInit;
+    readonly resolved: {
+        [K in keyof TData]: Awaited<TData[K]>;
+    };
+    readonly pendingKeys: ReadonlyArray<keyof TData>;
+    readonly errors: {
+        readonly [K in keyof TData]?: unknown;
+    };
+    readonly init?: ResponseInit;
 }
 ```
 
@@ -329,9 +322,9 @@ export interface ResolveDeferredResult<TData extends Record<string, unknown>> {
 
 ```ts
 export interface ResourceRouteMethodNotAllowedSignal {
-  readonly [RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL]: true;
-  readonly method: string;
-  readonly allow: ReadonlyArray<'GET' | 'HEAD' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'>;
+    readonly [RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL]: true;
+    readonly method: string;
+    readonly allow: ReadonlyArray<'GET' | 'HEAD' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'>;
 }
 ```
 
@@ -341,8 +334,8 @@ export interface ResourceRouteMethodNotAllowedSignal {
 
 ```ts
 export interface ResourceRouteModule {
-  readonly loader?: LoaderFunction;
-  readonly action?: ActionFunction;
+    readonly loader?: LoaderFunction;
+    readonly action?: ActionFunction;
 }
 ```
 
@@ -352,12 +345,12 @@ export interface ResourceRouteModule {
 
 ```ts
 export interface RunLoaderChainResult {
-  readonly parent: InvokeRouteResult;
-  readonly child: InvokeRouteResult;
-  readonly parentLoaderHeaders: Headers;
-  readonly childLoaderHeaders: Headers;
-  readonly mergedHeaders: Headers;
-  readonly cookies: Map<string, string>;
+    readonly parent: InvokeRouteResult;
+    readonly child: InvokeRouteResult;
+    readonly parentLoaderHeaders: Headers;
+    readonly childLoaderHeaders: Headers;
+    readonly mergedHeaders: Headers;
+    readonly cookies: Map<string, string>;
 }
 ```
 
@@ -367,14 +360,14 @@ export interface RunLoaderChainResult {
 
 ```ts
 export interface SetupRemixNestedRouteEnvOptions {
-  readonly parentRoute: RemixNestedRouteDefinition;
-  readonly childRoute: RemixNestedRouteDefinition;
-  readonly url: string;
-  readonly params?: Record<string, string>;
-  readonly context?: Record<string, unknown>;
-  readonly headers?: Record<string, string>;
-  readonly cookies?: Record<string, string>;
-  readonly method?: string;
+    readonly parentRoute: RemixNestedRouteDefinition;
+    readonly childRoute: RemixNestedRouteDefinition;
+    readonly url: string;
+    readonly params?: Record<string, string>;
+    readonly context?: Record<string, unknown>;
+    readonly headers?: Record<string, string>;
+    readonly cookies?: Record<string, string>;
+    readonly method?: string;
 }
 ```
 
@@ -384,9 +377,9 @@ export interface SetupRemixNestedRouteEnvOptions {
 
 ```ts
 export interface SimulatedRouteArgs<TContext = Record<string, unknown>> {
-  readonly request: Request;
-  readonly params: Readonly<Record<string, string>>;
-  readonly context: TContext;
+    readonly request: Request;
+    readonly params: Readonly<Record<string, string>>;
+    readonly context: TContext;
 }
 ```
 <!-- kiwa-public-api:end -->

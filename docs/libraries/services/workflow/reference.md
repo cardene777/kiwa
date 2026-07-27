@@ -56,7 +56,7 @@
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -65,10 +65,7 @@
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L111) `packages/workflow/src/resilience.ts`
 
 ```ts
-export async function batchOperate<TIn, TOut>(
-  items: readonly BatchItem<TIn>[],
-  runner: (item: BatchItem<TIn>) => Promise<TOut>,
-): Promise<BatchResult[]>;
+export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
 #### `createWorkflowClient`
@@ -78,7 +75,7 @@ export async function batchOperate<TIn, TOut>(
 provider 別のみ id prefix を差別化し、 execute pipeline は共通実装。 実 provider (Temporal SDK / Inngest / Trigger.dev / AWS SFN) の差し替え可能 signature を再現。
 
 ```ts
-export function createWorkflowClient(options: CreateWorkflowClientOptions = {}): WorkflowClient;
+export declare function createWorkflowClient(options?: CreateWorkflowClientOptions): WorkflowClient;
 ```
 
 #### `defineWorkflow`
@@ -86,7 +83,7 @@ export function createWorkflowClient(options: CreateWorkflowClientOptions = {}):
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L22) `packages/workflow/src/steps.ts`
 
 ```ts
-export function defineWorkflow(name: string, steps: WorkflowStep[]): WorkflowDefinition;
+export declare function defineWorkflow(name: string, steps: WorkflowStep[]): WorkflowDefinition;
 ```
 
 #### `emitEvent`
@@ -96,10 +93,7 @@ export function defineWorkflow(name: string, steps: WorkflowStep[]): WorkflowDef
 event を emit して登録済 workflow を全 execute する。 emit 順で workflow 実行が並ぶ。
 
 ```ts
-export async function emitEvent(
-  client: WorkflowClient,
-  event: EmittedEvent,
-): Promise<WorkflowExecutionResult[]>;
+export declare function emitEvent(client: WorkflowClient, event: EmittedEvent): Promise<WorkflowExecutionResult[]>;
 ```
 
 #### `eventDrivenTrigger`
@@ -109,11 +103,7 @@ export async function emitEvent(
 event 名で workflow を trigger 登録する。 event が emit されると同名の workflow が execute される (Inngest event-driven / AWS EventBridge → SFN の挙動を再現)。
 
 ```ts
-export function eventDrivenTrigger(
-  client: WorkflowClient,
-  eventName: string,
-  workflow: WorkflowDefinition,
-): EventTriggerHandle;
+export declare function eventDrivenTrigger(client: WorkflowClient, eventName: string, workflow: WorkflowDefinition): EventTriggerHandle;
 ```
 
 #### `executeWorkflow`
@@ -123,10 +113,10 @@ export function eventDrivenTrigger(
 内部 helper — step 群を順次実行して各 step の output を次 step の previous に渡す。 実 provider (Temporal activity / Inngest step) が step 単位で durable state を保持する挙動を再現。
 
 ```ts
-export async function executeWorkflow(
-  workflow: WorkflowDefinition,
-  input: WorkflowInput,
-): Promise<{ output: WorkflowOutput; stepOutputs: WorkflowOutput[] }>;
+export declare function executeWorkflow(workflow: WorkflowDefinition, input: WorkflowInput): Promise<{
+    output: WorkflowOutput;
+    stepOutputs: WorkflowOutput[];
+}>;
 ```
 
 #### `retryStep`
@@ -136,10 +126,7 @@ export async function executeWorkflow(
 exponential backoff で fn を retry。 実 provider (Temporal RetryPolicy / Inngest step retry) の指数バックオフ挙動を再現。 delay は `baseDelayMs * 2 ** (attempt-1)`、 maxDelayMs で cap。
 
 ```ts
-export async function retryStep<T>(
-  fn: (attempt: number) => Promise<T>,
-  options: RetryOptions,
-): Promise<RetryResult<T>>;
+export declare function retryStep<T>(fn: (attempt: number) => Promise<T>, options: RetryOptions): Promise<RetryResult<T>>;
 ```
 
 #### `withCircuitBreaker`
@@ -147,7 +134,7 @@ export async function retryStep<T>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L64) `packages/workflow/src/resilience.ts`
 
 ```ts
-export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
+export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
 #### `withIdempotencyKey`
@@ -155,7 +142,7 @@ export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBrea
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L101) `packages/workflow/src/resilience.ts`
 
 ```ts
-export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
+export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
 #### `withObservability`
@@ -163,7 +150,7 @@ export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: st
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L86) `packages/workflow/src/resilience.ts`
 
 ```ts
-export function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
+export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
 #### `withRateLimit`
@@ -171,7 +158,7 @@ export function withObservability<T>(name: string, fn: () => Promise<T>, hook: O
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L50) `packages/workflow/src/resilience.ts`
 
 ```ts
-export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
+export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
 #### `withRetry`
@@ -179,7 +166,7 @@ export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L20) `packages/workflow/src/resilience.ts`
 
 ```ts
-export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
+export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
 #### `withTimeout`
@@ -187,7 +174,7 @@ export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () =>
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L40) `packages/workflow/src/resilience.ts`
 
 ```ts
-export function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
+export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
 ```
 
 ### 型
@@ -197,7 +184,10 @@ export function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): (
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L17) `packages/workflow/src/resilience.ts`
 
 ```ts
-export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
+export interface BatchItem<TIn = unknown> {
+    name: string;
+    input: TIn;
+}
 ```
 
 #### `BatchResult`
@@ -205,7 +195,14 @@ export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L18) `packages/workflow/src/resilience.ts`
 
 ```ts
-export interface BatchResult { ok: boolean; output?: unknown; error?: { code: string; message: string }; }
+export interface BatchResult {
+    ok: boolean;
+    output?: unknown;
+    error?: {
+        code: string;
+        message: string;
+    };
+}
 ```
 
 #### `CircuitBreakerOptions`
@@ -213,7 +210,10 @@ export interface BatchResult { ok: boolean; output?: unknown; error?: { code: st
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L11) `packages/workflow/src/resilience.ts`
 
 ```ts
-export interface CircuitBreakerOptions { failureThreshold: number; resetMs: number; }
+export interface CircuitBreakerOptions {
+    failureThreshold: number;
+    resetMs: number;
+}
 ```
 
 #### `CreateWorkflowClientOptions`
@@ -222,9 +222,9 @@ export interface CircuitBreakerOptions { failureThreshold: number; resetMs: numb
 
 ```ts
 export interface CreateWorkflowClientOptions {
-  provider?: WorkflowProvider;
-  now?: () => number;
-  idSeed?: number;
+    provider?: WorkflowProvider;
+    now?: () => number;
+    idSeed?: number;
 }
 ```
 
@@ -234,9 +234,9 @@ export interface CreateWorkflowClientOptions {
 
 ```ts
 export interface EmittedEvent {
-  name: string;
-  payload: WorkflowInput;
-  emittedAt: number;
+    name: string;
+    payload: WorkflowInput;
+    emittedAt: number;
 }
 ```
 
@@ -246,10 +246,10 @@ export interface EmittedEvent {
 
 ```ts
 export interface EventTriggerHandle {
-  eventName: string;
-  workflowName: string;
-  handledCount: () => number;
-  dispose: () => void;
+    eventName: string;
+    workflowName: string;
+    handledCount: () => number;
+    dispose: () => void;
 }
 ```
 
@@ -259,9 +259,9 @@ export interface EventTriggerHandle {
 
 ```ts
 export interface ObservabilityHook {
-  onStart?: (name: string, input?: unknown) => void;
-  onSuccess?: (name: string, output: unknown, durationMs: number) => void;
-  onError?: (name: string, err: unknown, durationMs: number) => void;
+    onStart?: (name: string, input?: unknown) => void;
+    onSuccess?: (name: string, output: unknown, durationMs: number) => void;
+    onError?: (name: string, err: unknown, durationMs: number) => void;
 }
 ```
 
@@ -270,19 +270,35 @@ export interface ObservabilityHook {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L10) `packages/workflow/src/resilience.ts`
 
 ```ts
-export interface RateLimitOptions { maxRequests: number; windowMs: number; }
+export interface RateLimitOptions {
+    maxRequests: number;
+    windowMs: number;
+}
 ```
 
 #### `ResilienceRetryOptions`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L4) `packages/workflow/src/resilience.ts`
+公開 entry point から解決しています。
+
+`RetryOptions` を `ResilienceRetryOptions` として公開しています。
 
 ```ts
-export interface ResilienceRetryOptions {
-  maxAttempts: number;
-  backoffMs?: number;
-  retryOn?: (err: unknown) => boolean;
-}
+export {
+  withRetry,
+  withTimeout,
+  withRateLimit,
+  withCircuitBreaker,
+  withObservability,
+  withIdempotencyKey,
+  batchOperate,
+  type RetryOptions as ResilienceRetryOptions,
+  type TimeoutOptions,
+  type RateLimitOptions,
+  type CircuitBreakerOptions,
+  type ObservabilityHook,
+  type BatchItem,
+  type BatchResult,
+} from './resilience.js';
 ```
 
 #### `RetryOptions`
@@ -291,11 +307,11 @@ export interface ResilienceRetryOptions {
 
 ```ts
 export interface RetryOptions {
-  maxAttempts: number;
-  baseDelayMs: number;
-  maxDelayMs?: number;
-  onAttempt?: (attempt: number, delayMs: number) => void;
-  sleep?: (ms: number) => Promise<void>;
+    maxAttempts: number;
+    baseDelayMs: number;
+    maxDelayMs?: number;
+    onAttempt?: (attempt: number, delayMs: number) => void;
+    sleep?: (ms: number) => Promise<void>;
 }
 ```
 
@@ -305,11 +321,11 @@ export interface RetryOptions {
 
 ```ts
 export interface RetryResult<T> {
-  value?: T;
-  attempts: number;
-  succeeded: boolean;
-  error?: string;
-  delaysMs: number[];
+    value?: T;
+    attempts: number;
+    succeeded: boolean;
+    error?: string;
+    delaysMs: number[];
 }
 ```
 
@@ -318,7 +334,9 @@ export interface RetryResult<T> {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L9) `packages/workflow/src/resilience.ts`
 
 ```ts
-export interface TimeoutOptions { ms: number; }
+export interface TimeoutOptions {
+    ms: number;
+}
 ```
 
 #### `WorkflowClient`
@@ -327,13 +345,13 @@ export interface TimeoutOptions { ms: number; }
 
 ```ts
 export interface WorkflowClient {
-  provider: WorkflowProvider;
-  register: (workflow: WorkflowDefinition) => void;
-  registered: () => WorkflowDefinition[];
-  execute: (workflowName: string, input: WorkflowInput) => Promise<WorkflowExecutionResult>;
-  listExecutions: () => WorkflowExecutionRecord[];
-  clear: () => void;
-  defineWorkflow: (name: string, steps: WorkflowStep[]) => WorkflowDefinition;
+    provider: WorkflowProvider;
+    register: (workflow: WorkflowDefinition) => void;
+    registered: () => WorkflowDefinition[];
+    execute: (workflowName: string, input: WorkflowInput) => Promise<WorkflowExecutionResult>;
+    listExecutions: () => WorkflowExecutionRecord[];
+    clear: () => void;
+    defineWorkflow: (name: string, steps: WorkflowStep[]) => WorkflowDefinition;
 }
 ```
 
@@ -343,8 +361,8 @@ export interface WorkflowClient {
 
 ```ts
 export interface WorkflowDefinition {
-  name: string;
-  steps: WorkflowStep[];
+    name: string;
+    steps: WorkflowStep[];
 }
 ```
 
@@ -354,8 +372,8 @@ export interface WorkflowDefinition {
 
 ```ts
 export interface WorkflowExecutionRecord extends WorkflowExecutionResult {
-  input: WorkflowInput;
-  stepOutputs: WorkflowOutput[];
+    input: WorkflowInput;
+    stepOutputs: WorkflowOutput[];
 }
 ```
 
@@ -365,14 +383,14 @@ export interface WorkflowExecutionRecord extends WorkflowExecutionResult {
 
 ```ts
 export interface WorkflowExecutionResult {
-  id: string;
-  provider: WorkflowProvider;
-  workflow: string;
-  status: 'running' | 'completed' | 'failed';
-  startedAt: number;
-  completedAt: number;
-  output?: WorkflowOutput;
-  error?: string;
+    id: string;
+    provider: WorkflowProvider;
+    workflow: string;
+    status: 'running' | 'completed' | 'failed';
+    startedAt: number;
+    completedAt: number;
+    output?: WorkflowOutput;
+    error?: string;
 }
 ```
 
@@ -406,8 +424,8 @@ export type WorkflowProvider = 'temporal' | 'inngest' | 'trigger' | 'aws-sfn';
 
 ```ts
 export interface WorkflowStep {
-  name: string;
-  run: (ctx: WorkflowStepContext) => Promise<WorkflowOutput> | WorkflowOutput;
+    name: string;
+    run: (ctx: WorkflowStepContext) => Promise<WorkflowOutput> | WorkflowOutput;
 }
 ```
 
@@ -417,11 +435,11 @@ export interface WorkflowStep {
 
 ```ts
 export interface WorkflowStepContext {
-  workflowName: string;
-  stepIndex: number;
-  attempt: number;
-  input: WorkflowInput;
-  previous: WorkflowOutput;
+    workflowName: string;
+    stepIndex: number;
+    attempt: number;
+    input: WorkflowInput;
+    previous: WorkflowOutput;
 }
 ```
 <!-- kiwa-public-api:end -->

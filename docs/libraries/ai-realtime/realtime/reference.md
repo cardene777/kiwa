@@ -48,7 +48,7 @@ WebRTC、WebTransport、HTTP 3、QUIC、Media over QUIC、WebCodecs、音声 str
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -59,7 +59,7 @@ WebRTC、WebTransport、HTTP 3、QUIC、Media over QUIC、WebCodecs、音声 str
 実測 fidelity + coverage + test count + mutation + perf を `QualityReport` に統合する。 Realtime 4 軸は fidelity + mockMetrics から 自動集計。
 
 ```ts
-export function buildRealtimeReport(input: BuildRealtimeReportInput): QualityReport;
+export declare function buildRealtimeReport(input: BuildRealtimeReportInput): QualityReport;
 ```
 
 #### `createAblyMock`
@@ -67,7 +67,9 @@ export function buildRealtimeReport(input: BuildRealtimeReportInput): QualityRep
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L81) `packages/realtime/src/ably.ts`
 
 ```ts
-export function createAblyMock(config: RealtimeMockConfig & { clientId?: string } = {}): AblyMock;
+export declare function createAblyMock(config?: RealtimeMockConfig & {
+    clientId?: string;
+}): AblyMock;
 ```
 
 #### `createHttp3PushMock`
@@ -75,7 +77,7 @@ export function createAblyMock(config: RealtimeMockConfig & { clientId?: string 
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/http3-push.ts#L54) `packages/realtime/src/semantics/http3-push.ts`
 
 ```ts
-export function createHttp3PushMock(config: SemanticsMockConfig = {}): Http3PushMock;
+export declare function createHttp3PushMock(config?: SemanticsMockConfig): Http3PushMock;
 ```
 
 #### `createMockCollector`
@@ -85,9 +87,9 @@ export function createHttp3PushMock(config: SemanticsMockConfig = {}): Http3Push
 便利 helper — RealtimeMock を CollectedEvent stream に変換する minimum driver。 scenario 実装は user 側だが、 event collector は本 helper 経由で共通化できる。
 
 ```ts
-export function createMockCollector(mock: RealtimeMock, expectedEvents: number): {
-  driver: RealtimeDriver;
-  collected: CollectedEvent[];
+export declare function createMockCollector(mock: RealtimeMock, expectedEvents: number): {
+    driver: RealtimeDriver;
+    collected: CollectedEvent[];
 };
 ```
 
@@ -96,7 +98,7 @@ export function createMockCollector(mock: RealtimeMock, expectedEvents: number):
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-datagram-media.ts#L32) `packages/realtime/src/semantics/moq-datagram-media.ts`
 
 ```ts
-export function createMoqDatagramMediaMock(config: SemanticsMockConfig = {}): MoqDatagramMediaMock;
+export declare function createMoqDatagramMediaMock(config?: SemanticsMockConfig): MoqDatagramMediaMock;
 ```
 
 #### `createMoqFetchMock`
@@ -104,7 +106,7 @@ export function createMoqDatagramMediaMock(config: SemanticsMockConfig = {}): Mo
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-fetch.ts#L39) `packages/realtime/src/semantics/moq-fetch.ts`
 
 ```ts
-export function createMoqFetchMock(config: SemanticsMockConfig = {}): MoqFetchMock;
+export declare function createMoqFetchMock(config?: SemanticsMockConfig): MoqFetchMock;
 ```
 
 #### `createPusherMock`
@@ -112,7 +114,9 @@ export function createMoqFetchMock(config: SemanticsMockConfig = {}): MoqFetchMo
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/pusher.ts#L61) `packages/realtime/src/pusher.ts`
 
 ```ts
-export function createPusherMock(config: RealtimeMockConfig & { userId?: string } = {}): PusherMock;
+export declare function createPusherMock(config?: RealtimeMockConfig & {
+    userId?: string;
+}): PusherMock;
 ```
 
 #### `createQuicMultiplexMock`
@@ -120,9 +124,9 @@ export function createPusherMock(config: RealtimeMockConfig & { userId?: string 
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L61) `packages/realtime/src/semantics/quic-multiplex.ts`
 
 ```ts
-export function createQuicMultiplexMock(
-  config: SemanticsMockConfig & { enable0RTT?: boolean } = {},
-): QuicMultiplexMock;
+export declare function createQuicMultiplexMock(config?: SemanticsMockConfig & {
+    enable0RTT?: boolean;
+}): QuicMultiplexMock;
 ```
 
 #### `createRealtimeAiInferenceMock`
@@ -130,9 +134,7 @@ export function createQuicMultiplexMock(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/realtime-ai-inference.ts#L37) `packages/realtime/src/semantics/realtime-ai-inference.ts`
 
 ```ts
-export function createRealtimeAiInferenceMock(
-  config: SemanticsMockConfig = {},
-): RealtimeAiInferenceMock;
+export declare function createRealtimeAiInferenceMock(config?: SemanticsMockConfig): RealtimeAiInferenceMock;
 ```
 
 #### `createSimulcastSvcMock`
@@ -140,7 +142,7 @@ export function createRealtimeAiInferenceMock(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/simulcast-svc.ts#L32) `packages/realtime/src/semantics/simulcast-svc.ts`
 
 ```ts
-export function createSimulcastSvcMock(config: SemanticsMockConfig = {}): SimulcastSvcMock;
+export declare function createSimulcastSvcMock(config?: SemanticsMockConfig): SimulcastSvcMock;
 ```
 
 #### `createSocketioMock`
@@ -148,7 +150,7 @@ export function createSimulcastSvcMock(config: SemanticsMockConfig = {}): Simulc
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/socketio.ts#L54) `packages/realtime/src/socketio.ts`
 
 ```ts
-export function createSocketioMock(config: RealtimeMockConfig = {}): SocketIoMock;
+export declare function createSocketioMock(config?: RealtimeMockConfig): SocketIoMock;
 ```
 
 #### `createSupabaseRealtimeMock`
@@ -156,7 +158,7 @@ export function createSocketioMock(config: RealtimeMockConfig = {}): SocketIoMoc
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L94) `packages/realtime/src/supabase.ts`
 
 ```ts
-export function createSupabaseRealtimeMock(config: RealtimeMockConfig = {}): SupabaseMock;
+export declare function createSupabaseRealtimeMock(config?: RealtimeMockConfig): SupabaseMock;
 ```
 
 #### `createVoiceStreamingMock`
@@ -164,7 +166,7 @@ export function createSupabaseRealtimeMock(config: RealtimeMockConfig = {}): Sup
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/voice-streaming.ts#L37) `packages/realtime/src/semantics/voice-streaming.ts`
 
 ```ts
-export function createVoiceStreamingMock(config: SemanticsMockConfig = {}): VoiceStreamingMock;
+export declare function createVoiceStreamingMock(config?: SemanticsMockConfig): VoiceStreamingMock;
 ```
 
 #### `createWebCodecsDecoderMock`
@@ -172,7 +174,7 @@ export function createVoiceStreamingMock(config: SemanticsMockConfig = {}): Voic
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-decoder.ts#L29) `packages/realtime/src/semantics/webcodecs-decoder.ts`
 
 ```ts
-export function createWebCodecsDecoderMock(config: SemanticsMockConfig = {}): WebCodecsDecoderMock;
+export declare function createWebCodecsDecoderMock(config?: SemanticsMockConfig): WebCodecsDecoderMock;
 ```
 
 #### `createWebCodecsEncoderMock`
@@ -180,7 +182,7 @@ export function createWebCodecsDecoderMock(config: SemanticsMockConfig = {}): We
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-encoder.ts#L39) `packages/realtime/src/semantics/webcodecs-encoder.ts`
 
 ```ts
-export function createWebCodecsEncoderMock(config: SemanticsMockConfig = {}): WebCodecsEncoderMock;
+export declare function createWebCodecsEncoderMock(config?: SemanticsMockConfig): WebCodecsEncoderMock;
 ```
 
 #### `createWebRtcDataChannelMock`
@@ -188,9 +190,7 @@ export function createWebCodecsEncoderMock(config: SemanticsMockConfig = {}): We
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L57) `packages/realtime/src/semantics/webrtc-data-channel.ts`
 
 ```ts
-export function createWebRtcDataChannelMock(
-  config: SemanticsMockConfig = {},
-): WebRtcDataChannelMock;
+export declare function createWebRtcDataChannelMock(config?: SemanticsMockConfig): WebRtcDataChannelMock;
 ```
 
 #### `createWebRtcIceMock`
@@ -198,7 +198,7 @@ export function createWebRtcDataChannelMock(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-ice.ts#L57) `packages/realtime/src/semantics/webrtc-ice.ts`
 
 ```ts
-export function createWebRtcIceMock(config: SemanticsMockConfig = {}): WebRtcIceMock;
+export declare function createWebRtcIceMock(config?: SemanticsMockConfig): WebRtcIceMock;
 ```
 
 #### `createWebRtcSignalingMock`
@@ -206,9 +206,7 @@ export function createWebRtcIceMock(config: SemanticsMockConfig = {}): WebRtcIce
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-signaling.ts#L65) `packages/realtime/src/semantics/webrtc-signaling.ts`
 
 ```ts
-export function createWebRtcSignalingMock(
-  config: SemanticsMockConfig = {},
-): WebRtcSignalingMock;
+export declare function createWebRtcSignalingMock(config?: SemanticsMockConfig): WebRtcSignalingMock;
 ```
 
 #### `createWebRtcTrackMock`
@@ -216,7 +214,7 @@ export function createWebRtcSignalingMock(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L69) `packages/realtime/src/semantics/webrtc-track.ts`
 
 ```ts
-export function createWebRtcTrackMock(config: SemanticsMockConfig = {}): WebRtcTrackMock;
+export declare function createWebRtcTrackMock(config?: SemanticsMockConfig): WebRtcTrackMock;
 ```
 
 #### `createWebTransportBiMock`
@@ -224,9 +222,7 @@ export function createWebRtcTrackMock(config: SemanticsMockConfig = {}): WebRtcT
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L49) `packages/realtime/src/semantics/webtransport-bi.ts`
 
 ```ts
-export function createWebTransportBiMock(
-  config: SemanticsMockConfig = {},
-): WebTransportBiMock;
+export declare function createWebTransportBiMock(config?: SemanticsMockConfig): WebTransportBiMock;
 ```
 
 #### `createWebTransportUniMock`
@@ -234,9 +230,7 @@ export function createWebTransportBiMock(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-uni.ts#L49) `packages/realtime/src/semantics/webtransport-uni.ts`
 
 ```ts
-export function createWebTransportUniMock(
-  config: SemanticsMockConfig = {},
-): WebTransportUniMock;
+export declare function createWebTransportUniMock(config?: SemanticsMockConfig): WebTransportUniMock;
 ```
 
 #### `createWhisperStreamingMock`
@@ -244,7 +238,7 @@ export function createWebTransportUniMock(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/whisper-streaming.ts#L32) `packages/realtime/src/semantics/whisper-streaming.ts`
 
 ```ts
-export function createWhisperStreamingMock(config: SemanticsMockConfig = {}): WhisperStreamingMock;
+export declare function createWhisperStreamingMock(config?: SemanticsMockConfig): WhisperStreamingMock;
 ```
 
 #### `dispatchEvent`
@@ -254,21 +248,67 @@ export function createWhisperStreamingMock(config: SemanticsMockConfig = {}): Wh
 event driven state 遷移 SSOT。 5 state × 8 event = 40 セル。 payment 同様 soft-reject + invalid log (realtime 経路 も webhook 相当 の event 重複配信 が normal、 throw だと consumer が例外処理コード膨張)。
 
 ```ts
-export function dispatchEvent(input: {
-  session: RealtimeSession;
-  event: RealtimeEvent;
-  timestamp: string;
+export declare function dispatchEvent(input: {
+    session: RealtimeSession;
+    event: RealtimeEvent;
+    timestamp: string;
 }): RealtimeSession;
 ```
 
 #### `initialSemanticsMetrics`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L186) `packages/realtime/src/semantics/types.ts`
+公開 entry point から解決しています。
+
+`initialMetrics` を `initialSemanticsMetrics` として公開しています。
 
 helper — default metrics。
 
 ```ts
-export function initialSemanticsMetrics(): SemanticsMetrics;
+export {
+  createHttp3PushMock,
+  createQuicMultiplexMock,
+  createWebRtcDataChannelMock,
+  createWebRtcIceMock,
+  createWebRtcSignalingMock,
+  createWebRtcTrackMock,
+  createWebTransportBiMock,
+  createWebTransportUniMock,
+  initialMetrics as initialSemanticsMetrics,
+  type BiStreamHandle,
+  type BiStreamOptions,
+  type DataChannelHandle,
+  type DataChannelOptions,
+  type HpackEntry,
+  type Http3PushMock,
+  type IceCandidate,
+  type IceConnectionState,
+  type IceGatheringState,
+  type IceStats,
+  type MediaTrack,
+  type PushPriority,
+  type PushPromise,
+  type QuicMultiplexMock,
+  type QuicStreamHandle,
+  type QuicStreamOptions,
+  type SemanticsAxis,
+  type SemanticsEvent,
+  type SemanticsEventKind,
+  type SemanticsMetrics,
+  type SemanticsMock,
+  type SemanticsMockConfig,
+  type SemanticsProtocol,
+  type SignalingSdp,
+  type SimulcastLayer,
+  type TrackKind,
+  type UniStreamHandle,
+  type WebRtcDataChannelMock,
+  type WebRtcIceMock,
+  type WebRtcMediaStream,
+  type WebRtcSignalingMock,
+  type WebRtcTrackMock,
+  type WebTransportBiMock,
+  type WebTransportUniMock,
+} from './semantics/index.js';
 ```
 
 #### `measureSemanticsAxis`
@@ -278,9 +318,7 @@ export function initialSemanticsMetrics(): SemanticsMetrics;
 単一 axis の fidelity 計測。 mock を初期化 → scenario を実行 → event 列を 収集 → metrics + events を返す。
 
 ```ts
-export async function measureSemanticsAxis(
-  input: SemanticsFidelityInput,
-): Promise<SemanticsFidelityRow>;
+export declare function measureSemanticsAxis(input: SemanticsFidelityInput): Promise<SemanticsFidelityRow>;
 ```
 
 #### `measureSemanticsGrid`
@@ -288,9 +326,7 @@ export async function measureSemanticsAxis(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L123) `packages/realtime/src/semantics-fidelity.ts`
 
 ```ts
-export async function measureSemanticsGrid(
-  input: SemanticsGridScenarios,
-): Promise<SemanticsFidelityRow[]>;
+export declare function measureSemanticsGrid(input: SemanticsGridScenarios): Promise<SemanticsFidelityRow[]>;
 ```
 
 #### `REAL_DRIVER_REQUIRED_KEYS`
@@ -309,48 +345,20 @@ export declare const REAL_DRIVER_REQUIRED_KEYS: Record<RealtimeProviderName, str
 
 ```ts
 export declare class RealtimeEngine {
-  readonly config: ResolvedConfig;
-  private channels = new Map<string, ChannelState>();
-  private connectionState: ConnectionState = 'disconnected';
-  private metrics: RealtimeMetrics = {
-    subscribeCount: 0,
-    publishCount: 0,
-    eventsDelivered: 0,
-    eventsDropped: 0,
-    reconnectCount: 0,
-    subscribeLatencyMs: [],
-    publishLatencyMs: [],
-  };
-  private pendingQueue: Array<() => void> = [];
-  constructor(config: RealtimeMockConfig = {});
-  getConnectionState(): ConnectionState;
-  async ensureConnected(): Promise<void>;
-  async disconnect(): Promise<void>;
-  async reconnect(): Promise<void>;
-  async subscribe(
-    channel: string,
-    handler: RealtimeEventHandler,
-  ): Promise<SubscriptionHandle>;
-  async publish(channel: string, event: string, payload: unknown): Promise<void>;
-  async trackPresence(
-    channel: string,
-    userId: string,
-    payload: Record<string, unknown> = {},
-  ): Promise<void>;
-  async untrackPresence(channel: string, userId: string): Promise<void>;
-  emitPostgresChange(
-    channel: string,
-    ev: Omit<PostgresChangeEvent, 'timestamp' | 'channel'>,
-  ): void;
-  getMetrics(): ReturnType<RealtimeMock['getMetrics']>;
-  reset(): void;
-  private getOrCreateChannel(channel: string): ChannelState;
-  private setConnectionState(next: ConnectionState): void;
-  private deliverToChannel(channel: string, event: RealtimeAnyEvent): void;
-  private scheduleScenarioEvents(channel: string): void;
-  private fireScenarioEvent(channel: string, ev: ScenarioEvent, _index: number): void;
-  private computeBackoff(attempt: number): number;
-  private sleep(ms: number): Promise<void>;
+    readonly config: ResolvedConfig;
+    constructor(config?: RealtimeMockConfig);
+    getConnectionState(): ConnectionState;
+    ensureConnected(): Promise<void>;
+    disconnect(): Promise<void>;
+    reconnect(): Promise<void>;
+    subscribe(channel: string, handler: RealtimeEventHandler): Promise<SubscriptionHandle>;
+    publish(channel: string, event: string, payload: unknown): Promise<void>;
+    trackPresence(channel: string, userId: string, payload?: Record<string, unknown>): Promise<void>;
+    untrackPresence(channel: string, userId: string): Promise<void>;
+    /** postgres_changes event を手動で emit (test / scenario 用)。 */
+    emitPostgresChange(channel: string, ev: Omit<PostgresChangeEvent, 'timestamp' | 'channel'>): void;
+    getMetrics(): ReturnType<RealtimeMock['getMetrics']>;
+    reset(): void;
 }
 ```
 
@@ -359,9 +367,7 @@ export declare class RealtimeEngine {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L61) `packages/realtime/src/real-driver.ts`
 
 ```ts
-export function resolveRealtimeDriver<TDriver>(
-  input: RealDriverGateInput<TDriver>,
-): RealDriverGateResult<TDriver>;
+export declare function resolveRealtimeDriver<TDriver>(input: RealDriverGateInput<TDriver>): RealDriverGateResult<TDriver>;
 ```
 
 #### `resolveRealtimeDriverByProvider`
@@ -371,12 +377,7 @@ export function resolveRealtimeDriver<TDriver>(
 shorthand — provider 名から必須 key を lookup して gate 判定する。 使い分けは自由だが、 4 provider の default key set (SSOT `REAL_DRIVER_REQUIRED_KEYS`) を尊重する場合はこちらを使う。
 
 ```ts
-export function resolveRealtimeDriverByProvider<TDriver>(
-  provider: RealtimeProviderName,
-  createReal: (env: Record<string, string>) => TDriver,
-  createMock: () => TDriver,
-  envSource?: Record<string, string | undefined>,
-): RealDriverGateResult<TDriver>;
+export declare function resolveRealtimeDriverByProvider<TDriver>(provider: RealtimeProviderName, createReal: (env: Record<string, string>) => TDriver, createMock: () => TDriver, envSource?: Record<string, string | undefined>): RealDriverGateResult<TDriver>;
 ```
 
 #### `runRealtimeFidelityCheck`
@@ -384,9 +385,7 @@ export function resolveRealtimeDriverByProvider<TDriver>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L74) `packages/realtime/src/fidelity.ts`
 
 ```ts
-export async function runRealtimeFidelityCheck(
-  input: RealtimeFidelityInput,
-): Promise<RealtimeFidelityReport>;
+export declare function runRealtimeFidelityCheck(input: RealtimeFidelityInput): Promise<RealtimeFidelityReport>;
 ```
 
 #### `SEMANTICS_GRID`
@@ -406,7 +405,7 @@ export declare const SEMANTICS_GRID: SemanticsGridRow[];
 順序考慮 sequence similarity — LCS 系ではなく position-aware Jaccard で 計算する。 完全一致 = 1、 順序ずれ = 中間値、 完全不一致 = 0。
 
 ```ts
-export function sequenceSimilarity<T>(a: T[], b: T[]): number;
+export declare function sequenceSimilarity<T>(a: T[], b: T[]): number;
 ```
 
 #### `startSession`
@@ -414,7 +413,9 @@ export function sequenceSimilarity<T>(a: T[], b: T[]): number;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L45) `packages/realtime/src/semantics/session-orchestrator.ts`
 
 ```ts
-export function startSession(input: { timestamp: string }): RealtimeSession;
+export declare function startSession(input: {
+    timestamp: string;
+}): RealtimeSession;
 ```
 
 #### `summarizeSession`
@@ -422,7 +423,7 @@ export function startSession(input: { timestamp: string }): RealtimeSession;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L168) `packages/realtime/src/semantics/session-orchestrator.ts`
 
 ```ts
-export function summarizeSession(session: RealtimeSession): RealtimeSessionSummary;
+export declare function summarizeSession(session: RealtimeSession): RealtimeSessionSummary;
 ```
 
 ### 型
@@ -433,15 +434,19 @@ export function summarizeSession(session: RealtimeSession): RealtimeSessionSumma
 
 ```ts
 export interface AblyChannel {
-  readonly name: string;
-  attach(): Promise<void>;
-  detach(): Promise<void>;
-  subscribe(event: string, handler: (msg: AblyMessage) => void): Promise<void>;
-  subscribe(handler: (msg: AblyMessage) => void): Promise<void>;
-  unsubscribe(): void;
-  publish(event: string, data: unknown): Promise<void>;
-  history(options?: { limit?: number }): Promise<{ items: AblyMessage[] }>;
-  presence: AblyPresence;
+    readonly name: string;
+    attach(): Promise<void>;
+    detach(): Promise<void>;
+    subscribe(event: string, handler: (msg: AblyMessage) => void): Promise<void>;
+    subscribe(handler: (msg: AblyMessage) => void): Promise<void>;
+    unsubscribe(): void;
+    publish(event: string, data: unknown): Promise<void>;
+    history(options?: {
+        limit?: number;
+    }): Promise<{
+        items: AblyMessage[];
+    }>;
+    presence: AblyPresence;
 }
 ```
 
@@ -451,8 +456,8 @@ export interface AblyChannel {
 
 ```ts
 export interface AblyChannels {
-  get(name: string): AblyChannel;
-  release(name: string): void;
+    get(name: string): AblyChannel;
+    release(name: string): void;
 }
 ```
 
@@ -464,11 +469,11 @@ Ably mock。 SDK 呼出形式 (real `ably`) は以下 ... ```ts const client = n
 
 ```ts
 export interface AblyMessage<T = unknown> {
-  name: string;
-  data: T;
-  id: string;
-  timestamp: number;
-  clientId?: string;
+    name: string;
+    data: T;
+    id: string;
+    timestamp: number;
+    clientId?: string;
 }
 ```
 
@@ -478,15 +483,17 @@ export interface AblyMessage<T = unknown> {
 
 ```ts
 export interface AblyMock extends RealtimeMock {
-  readonly provider: 'ably';
-  channels: AblyChannels;
-  connection: {
-    state: string;
-    on(state: string, handler: () => void): void;
-    close(): Promise<void>;
-  };
-  /** clientId (Ably 固有、 presence の identify 用)。 */
-  auth: { clientId: string };
+    readonly provider: 'ably';
+    channels: AblyChannels;
+    connection: {
+        state: string;
+        on(state: string, handler: () => void): void;
+        close(): Promise<void>;
+    };
+    /** clientId (Ably 固有、 presence の identify 用)。 */
+    auth: {
+        clientId: string;
+    };
 }
 ```
 
@@ -496,13 +503,10 @@ export interface AblyMock extends RealtimeMock {
 
 ```ts
 export interface AblyPresence {
-  subscribe(
-    action: 'enter' | 'leave' | 'update',
-    handler: (msg: AblyPresenceMessage) => void,
-  ): Promise<void>;
-  enter(data?: Record<string, unknown>): Promise<void>;
-  leave(): Promise<void>;
-  get(): Promise<AblyPresenceMessage[]>;
+    subscribe(action: 'enter' | 'leave' | 'update', handler: (msg: AblyPresenceMessage) => void): Promise<void>;
+    enter(data?: Record<string, unknown>): Promise<void>;
+    leave(): Promise<void>;
+    get(): Promise<AblyPresenceMessage[]>;
 }
 ```
 
@@ -512,10 +516,10 @@ export interface AblyPresence {
 
 ```ts
 export interface AblyPresenceMessage {
-  action: 'enter' | 'leave' | 'update' | 'present';
-  clientId: string;
-  data: Record<string, unknown>;
-  timestamp: number;
+    action: 'enter' | 'leave' | 'update' | 'present';
+    clientId: string;
+    data: Record<string, unknown>;
+    timestamp: number;
 }
 ```
 
@@ -527,10 +531,10 @@ Realtime AI inference axis — per-frame prediction + latency budget enforcement
 
 ```ts
 export interface AiInferenceRequest {
-  requestId: string;
-  frameNumber: number;
-  modelName: string;
-  budgetMs: number;
+    requestId: string;
+    frameNumber: number;
+    modelName: string;
+    budgetMs: number;
 }
 ```
 
@@ -540,9 +544,9 @@ export interface AiInferenceRequest {
 
 ```ts
 export interface AiInferenceResponse {
-  requestId: string;
-  latencyMs: number;
-  outputBytes: number;
+    requestId: string;
+    latencyMs: number;
+    outputBytes: number;
 }
 ```
 
@@ -552,12 +556,12 @@ export interface AiInferenceResponse {
 
 ```ts
 export interface BiStreamHandle {
-  readonly id: string;
-  readonly state: 'open' | 'closed';
-  readonly windowRemaining: number;
-  write(data: Uint8Array): Promise<void>;
-  read(): Promise<Uint8Array | null>;
-  close(): Promise<void>;
+    readonly id: string;
+    readonly state: 'open' | 'closed';
+    readonly windowRemaining: number;
+    write(data: Uint8Array): Promise<void>;
+    read(): Promise<Uint8Array | null>;
+    close(): Promise<void>;
 }
 ```
 
@@ -569,8 +573,8 @@ WebTransport bi-directional axis — bi stream + flow control + backpressure + c
 
 ```ts
 export interface BiStreamOptions {
-  /** flow control window size (byte、 default 16384)。 */
-  windowSize?: number;
+    /** flow control window size (byte、 default 16384)。 */
+    windowSize?: number;
 }
 ```
 
@@ -582,12 +586,12 @@ Broadcast event — channel 内の任意 event 名 payload 配信。 provider �
 
 ```ts
 export interface BroadcastEvent<TPayload = unknown> {
-  channel: string;
-  event: string;
-  payload: TPayload;
-  /** server 割当 ID (Ably message ID / Pusher socket_id 等の抽象)。 */
-  id: string;
-  timestamp: number;
+    channel: string;
+    event: string;
+    payload: TPayload;
+    /** server 割当 ID (Ably message ID / Pusher socket_id 等の抽象)。 */
+    id: string;
+    timestamp: number;
 }
 ```
 
@@ -599,29 +603,45 @@ export interface BroadcastEvent<TPayload = unknown> {
 
 ```ts
 export interface BuildRealtimeReportInput {
-  provider: string;
-  version: string;
-  /** fidelity harness の結果 (real vs mock scenario 一致率) */
-  fidelity: RealtimeFidelityReport;
-  /** mock 実測 metrics (cost / latency 集計用)。 */
-  mockMetrics: ReturnType<RealtimeMock['getMetrics']>;
-  /** mock 側 API 表面 cover 数。 default `{ mock: 4, real: 4 }` (4 provider)。 */
-  surfaceCoverage?: { mockCoveredMethods: number; realTotalMethods: number };
-  /** vitest 由来の test count breakdown。 */
-  testCount?: { behavior: number; integration: number; e2e: number };
-  /** v8 coverage summary。 */
-  coverageV8Summary?: {
-    lines: { pct: number };
-    branches: { pct: number };
-    functions: { pct: number };
-  };
-  /** stryker / mutation テスト結果。 */
-  mutation?: { mutations: number; killed: number };
-  /** perf sample (ms、 別軸 p95 用)。 */
-  perfSamplesMs?: number[];
-  /** 1 event あたりの想定通信費 (USD、 default $0.00001 = $10/million events)。 */
-  costPerEventUsd?: number;
-  notes?: string;
+    provider: string;
+    version: string;
+    /** fidelity harness の結果 (real vs mock scenario 一致率) */
+    fidelity: RealtimeFidelityReport;
+    /** mock 実測 metrics (cost / latency 集計用)。 */
+    mockMetrics: ReturnType<RealtimeMock['getMetrics']>;
+    /** mock 側 API 表面 cover 数。 default `{ mock: 4, real: 4 }` (4 provider)。 */
+    surfaceCoverage?: {
+        mockCoveredMethods: number;
+        realTotalMethods: number;
+    };
+    /** vitest 由来の test count breakdown。 */
+    testCount?: {
+        behavior: number;
+        integration: number;
+        e2e: number;
+    };
+    /** v8 coverage summary。 */
+    coverageV8Summary?: {
+        lines: {
+            pct: number;
+        };
+        branches: {
+            pct: number;
+        };
+        functions: {
+            pct: number;
+        };
+    };
+    /** stryker / mutation テスト結果。 */
+    mutation?: {
+        mutations: number;
+        killed: number;
+    };
+    /** perf sample (ms、 別軸 p95 用)。 */
+    perfSamplesMs?: number[];
+    /** 1 event あたりの想定通信費 (USD、 default $0.00001 = $10/million events)。 */
+    costPerEventUsd?: number;
+    notes?: string;
 }
 ```
 
@@ -633,13 +653,13 @@ driver から返される event の統一形式。 provider 別詳細は payload
 
 ```ts
 export interface CollectedEvent {
-  kind: RealtimeAnyEvent['kind'];
-  channel?: string;
-  event?: string;
-  payload?: unknown;
-  order: number;
-  /** 集計開始からの相対 ms (ordering 検証用)。 */
-  relativeTimeMs: number;
+    kind: RealtimeAnyEvent['kind'];
+    channel?: string;
+    event?: string;
+    payload?: unknown;
+    order: number;
+    /** 集計開始からの相対 ms (ordering 検証用)。 */
+    relativeTimeMs: number;
 }
 ```
 
@@ -650,12 +670,7 @@ export interface CollectedEvent {
 接続状態の 5 state machine。 disconnected → connecting → connected → reconnecting → disconnected を 4 provider 全てで模倣する。
 
 ```ts
-export type ConnectionState =
-  | 'disconnected'
-  | 'connecting'
-  | 'connected'
-  | 'reconnecting'
-  | 'closed';
+export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'closed';
 ```
 
 #### `DataChannelHandle`
@@ -664,12 +679,12 @@ export type ConnectionState =
 
 ```ts
 export interface DataChannelHandle {
-  readonly id: string;
-  readonly label: string;
-  readonly options: Required<DataChannelOptions>;
-  readonly readyState: 'connecting' | 'open' | 'closing' | 'closed';
-  send(data: string | ArrayBuffer): Promise<void>;
-  close(): Promise<void>;
+    readonly id: string;
+    readonly label: string;
+    readonly options: Required<DataChannelOptions>;
+    readonly readyState: 'connecting' | 'open' | 'closing' | 'closed';
+    send(data: string | ArrayBuffer): Promise<void>;
+    close(): Promise<void>;
 }
 ```
 
@@ -681,14 +696,14 @@ WebRTC data channel axis — ordered / unordered + reliable / unreliable + maxRe
 
 ```ts
 export interface DataChannelOptions {
-  /** default true — 順序保証。 */
-  ordered?: boolean;
-  /** unordered 時の最大 retransmit 回数 (default 0)。 */
-  maxRetransmits?: number;
-  /** binary type — arraybuffer / blob (default arraybuffer)。 */
-  binaryType?: 'arraybuffer' | 'blob';
-  /** label (mock は識別子のみ、 SDK では channel 名として使う)。 */
-  label?: string;
+    /** default true — 順序保証。 */
+    ordered?: boolean;
+    /** unordered 時の最大 retransmit 回数 (default 0)。 */
+    maxRetransmits?: number;
+    /** binary type — arraybuffer / blob (default arraybuffer)。 */
+    binaryType?: 'arraybuffer' | 'blob';
+    /** label (mock は識別子のみ、 SDK では channel 名として使う)。 */
+    label?: string;
 }
 ```
 
@@ -700,8 +715,8 @@ WebCodecs decoder axis — VideoDecoder / AudioDecoder + frame buffer + reorder 
 
 ```ts
 export interface DecoderConfig {
-  codec: 'H264' | 'VP9' | 'AV1' | 'Opus' | 'AAC';
-  description?: string;
+    codec: 'H264' | 'VP9' | 'AV1' | 'Opus' | 'AAC';
+    description?: string;
 }
 ```
 
@@ -711,10 +726,10 @@ export interface DecoderConfig {
 
 ```ts
 export interface EncodedFrame {
-  encoderId: string;
-  frameNumber: number;
-  type: 'key' | 'delta';
-  byteLength: number;
+    encoderId: string;
+    frameNumber: number;
+    type: 'key' | 'delta';
+    byteLength: number;
 }
 ```
 
@@ -726,11 +741,11 @@ WebCodecs encoder axis — VideoEncoder / AudioEncoder direct API + hardware acc
 
 ```ts
 export interface EncoderConfig {
-  codec: 'H264' | 'VP9' | 'AV1' | 'Opus' | 'AAC';
-  width: number;
-  height: number;
-  bitrate: number;
-  hardwareAcceleration: 'prefer-hardware' | 'prefer-software' | 'no-preference';
+    codec: 'H264' | 'VP9' | 'AV1' | 'Opus' | 'AAC';
+    width: number;
+    height: number;
+    bitrate: number;
+    hardwareAcceleration: 'prefer-hardware' | 'prefer-software' | 'no-preference';
 }
 ```
 
@@ -740,10 +755,10 @@ export interface EncoderConfig {
 
 ```ts
 export interface HpackEntry {
-  name: string;
-  value: string;
-  /** 挿入順 (dynamic table index)。 */
-  index: number;
+    name: string;
+    value: string;
+    /** 挿入順 (dynamic table index)。 */
+    index: number;
 }
 ```
 
@@ -753,10 +768,10 @@ export interface HpackEntry {
 
 ```ts
 export interface Http3PushMock extends SemanticsMock {
-  readonly protocol: 'http3-quic';
-  readonly axis: 'http3-push';
-  /** server push を promise、 client 側に push_promise event を送出。 */
-  pushStream(path: string, priority?: Partial<PushPriority>): Promise<PushPromise>;
+    readonly protocol: 'http3-quic';
+    readonly axis: 'http3-push';
+    /** server push を promise、 client 側に push_promise event を送出。 */
+    pushStream(path: string, priority?: Partial<PushPriority>): Promise<PushPromise>;
 }
 ```
 
@@ -768,13 +783,13 @@ ICE candidate 1 件 (mock は host / srflx / relay を type 別に配布)。
 
 ```ts
 export interface IceCandidate {
-  type: 'host' | 'srflx' | 'prflx' | 'relay';
-  /** candidate protocol (udp / tcp、 mock は udp default)。 */
-  protocol: 'udp' | 'tcp';
-  /** priority (RFC 5245 準拠の値域、 0 〜 2^32-1)。 */
-  priority: number;
-  /** candidate string の識別子 (RTCIceCandidate.candidate 相当)。 */
-  candidate: string;
+    type: 'host' | 'srflx' | 'prflx' | 'relay';
+    /** candidate protocol (udp / tcp、 mock は udp default)。 */
+    protocol: 'udp' | 'tcp';
+    /** priority (RFC 5245 準拠の値域、 0 〜 2^32-1)。 */
+    priority: number;
+    /** candidate string の識別子 (RTCIceCandidate.candidate 相当)。 */
+    candidate: string;
 }
 ```
 
@@ -802,12 +817,12 @@ export type IceGatheringState = 'new' | 'gathering' | 'complete';
 
 ```ts
 export interface IceStats {
-  candidatesGathered: number;
-  candidatesRemote: number;
-  activeCandidatePairs: number;
-  /** relay 経路経由 (TURN) が使われた回数。 */
-  relayUsedCount: number;
-  gatheringDurationMs: number;
+    candidatesGathered: number;
+    candidatesRemote: number;
+    activeCandidatePairs: number;
+    /** relay 経路経由 (TURN) が使われた回数。 */
+    relayUsedCount: number;
+    gatheringDurationMs: number;
 }
 ```
 
@@ -817,12 +832,12 @@ export interface IceStats {
 
 ```ts
 export interface MediaTrack {
-  readonly id: string;
-  readonly kind: TrackKind;
-  readonly label: string;
-  enabled: boolean;
-  /** simulcast layer 定義 (video のみ、 audio は空)。 */
-  readonly simulcastLayers: SimulcastLayer[];
+    readonly id: string;
+    readonly kind: TrackKind;
+    readonly label: string;
+    enabled: boolean;
+    /** simulcast layer 定義 (video のみ、 audio は空)。 */
+    readonly simulcastLayers: SimulcastLayer[];
 }
 ```
 
@@ -834,9 +849,9 @@ Media over QUIC / MOQT axis — track announce + subscribe + object delivery. MO
 
 ```ts
 export interface MoqAnnouncement {
-  trackName: string;
-  namespace: string;
-  authInfo: string;
+    trackName: string;
+    namespace: string;
+    authInfo: string;
 }
 ```
 
@@ -848,10 +863,10 @@ MoQ datagram media axis — partial reliability + priority + FEC recovery. MOQT 
 
 ```ts
 export interface MoqDatagram {
-  trackName: string;
-  sequenceNumber: number;
-  payloadBytes: number;
-  priority: number;
+    trackName: string;
+    sequenceNumber: number;
+    payloadBytes: number;
+    priority: number;
 }
 ```
 
@@ -861,12 +876,21 @@ export interface MoqDatagram {
 
 ```ts
 export interface MoqDatagramMediaMock extends SemanticsMock {
-  readonly protocol: 'moqt';
-  readonly axis: 'moq-datagram-media';
-  sendDatagram(input: MoqDatagram): Promise<void>;
-  dropDatagram(input: { trackName: string; sequenceNumber: number }): Promise<void>;
-  setPriority(input: { trackName: string; priority: number }): Promise<void>;
-  recoverFec(input: { trackName: string; recoveredCount: number }): Promise<void>;
+    readonly protocol: 'moqt';
+    readonly axis: 'moq-datagram-media';
+    sendDatagram(input: MoqDatagram): Promise<void>;
+    dropDatagram(input: {
+        trackName: string;
+        sequenceNumber: number;
+    }): Promise<void>;
+    setPriority(input: {
+        trackName: string;
+        priority: number;
+    }): Promise<void>;
+    recoverFec(input: {
+        trackName: string;
+        recoveredCount: number;
+    }): Promise<void>;
 }
 ```
 
@@ -876,12 +900,15 @@ export interface MoqDatagramMediaMock extends SemanticsMock {
 
 ```ts
 export interface MoqFetchMock extends SemanticsMock {
-  readonly protocol: 'moqt';
-  readonly axis: 'moq-fetch';
-  announceTrack(input: MoqAnnouncement): Promise<void>;
-  subscribeTrack(input: { trackName: string; namespace: string }): Promise<void>;
-  sendObject(input: MoqObject): Promise<void>;
-  receiveObject(input: MoqObject): Promise<void>;
+    readonly protocol: 'moqt';
+    readonly axis: 'moq-fetch';
+    announceTrack(input: MoqAnnouncement): Promise<void>;
+    subscribeTrack(input: {
+        trackName: string;
+        namespace: string;
+    }): Promise<void>;
+    sendObject(input: MoqObject): Promise<void>;
+    receiveObject(input: MoqObject): Promise<void>;
 }
 ```
 
@@ -891,10 +918,10 @@ export interface MoqFetchMock extends SemanticsMock {
 
 ```ts
 export interface MoqObject {
-  trackName: string;
-  groupId: number;
-  objectId: number;
-  payloadBytes: number;
+    trackName: string;
+    groupId: number;
+    objectId: number;
+    payloadBytes: number;
 }
 ```
 
@@ -904,15 +931,15 @@ export interface MoqObject {
 
 ```ts
 export interface PostgresChangeEvent<TRow = Record<string, unknown>> {
-  channel: string;
-  eventType: PostgresChangeType;
-  schema: string;
-  table: string;
-  /** UPDATE / DELETE 時の旧 row (INSERT 時は null)。 */
-  oldRecord: TRow | null;
-  /** INSERT / UPDATE 時の新 row (DELETE 時は null)。 */
-  newRecord: TRow | null;
-  timestamp: number;
+    channel: string;
+    eventType: PostgresChangeType;
+    schema: string;
+    table: string;
+    /** UPDATE / DELETE 時の旧 row (INSERT 時は null)。 */
+    oldRecord: TRow | null;
+    /** INSERT / UPDATE 時の新 row (DELETE 時は null)。 */
+    newRecord: TRow | null;
+    timestamp: number;
 }
 ```
 
@@ -934,11 +961,11 @@ Presence event 1 件 (join / leave / sync)。
 
 ```ts
 export interface PresenceEvent {
-  type: PresenceEventType;
-  channel: string;
-  /** sync 時は全 member、 join/leave は該当 user のみ。 */
-  members: PresenceMember[];
-  timestamp: number;
+    type: PresenceEventType;
+    channel: string;
+    /** sync 時は全 member、 join/leave は該当 user のみ。 */
+    members: PresenceMember[];
+    timestamp: number;
 }
 ```
 
@@ -960,11 +987,11 @@ export type PresenceEventType = 'sync' | 'join' | 'leave';
 
 ```ts
 export interface PresenceMember {
-  userId: string;
-  /** provider 別の任意 metadata (Supabase `presence_ref` / Ably `clientId` 等)。 */
-  payload: Record<string, unknown>;
-  /** presence が最後に更新された server timestamp (ms)。 */
-  updatedAt: number;
+    userId: string;
+    /** provider 別の任意 metadata (Supabase `presence_ref` / Ably `clientId` 等)。 */
+    payload: Record<string, unknown>;
+    /** presence が最後に更新された server timestamp (ms)。 */
+    updatedAt: number;
 }
 ```
 
@@ -974,11 +1001,11 @@ export interface PresenceMember {
 
 ```ts
 export interface PusherChannel {
-  readonly name: string;
-  bind(event: string, handler: (data: unknown, metadata?: unknown) => void): PusherChannel;
-  unbind(event?: string): PusherChannel;
-  trigger(event: string, data: unknown): boolean;
-  members?: PusherMembers;
+    readonly name: string;
+    bind(event: string, handler: (data: unknown, metadata?: unknown) => void): PusherChannel;
+    unbind(event?: string): PusherChannel;
+    trigger(event: string, data: unknown): boolean;
+    members?: PusherMembers;
 }
 ```
 
@@ -990,8 +1017,8 @@ Pusher mock。 SDK 呼出形式 (real `pusher-js`) は以下 ... ```ts const pus
 
 ```ts
 export interface PusherMember {
-  id: string;
-  info: Record<string, unknown>;
+    id: string;
+    info: Record<string, unknown>;
 }
 ```
 
@@ -1001,10 +1028,10 @@ export interface PusherMember {
 
 ```ts
 export interface PusherMembers {
-  count: number;
-  each(callback: (member: PusherMember) => void): void;
-  get(id: string): PusherMember | null;
-  me: PusherMember | null;
+    count: number;
+    each(callback: (member: PusherMember) => void): void;
+    get(id: string): PusherMember | null;
+    me: PusherMember | null;
 }
 ```
 
@@ -1014,12 +1041,14 @@ export interface PusherMembers {
 
 ```ts
 export interface PusherMock extends RealtimeMock {
-  readonly provider: 'pusher';
-  /** Pusher 固有 — channel 購読 (real `pusher.subscribe` 相当、 sync 返却)。 */
-  subscribeChannel(channelName: string): PusherChannel;
-  unsubscribeChannel(channelName: string): void;
-  /** Pusher 固有 — user auth 識別子。 */
-  config: { userId: string };
+    readonly provider: 'pusher';
+    /** Pusher 固有 — channel 購読 (real `pusher.subscribe` 相当、 sync 返却)。 */
+    subscribeChannel(channelName: string): PusherChannel;
+    unsubscribeChannel(channelName: string): void;
+    /** Pusher 固有 — user auth 識別子。 */
+    config: {
+        userId: string;
+    };
 }
 ```
 
@@ -1031,10 +1060,10 @@ HTTP/3 priority signal (RFC 9218 準拠)。
 
 ```ts
 export interface PushPriority {
-  /** 0 (最高) 〜 7 (最低)、 default 3。 */
-  urgency: number;
-  /** progressive delivery 可否 (default false)。 */
-  incremental: boolean;
+    /** 0 (最高) 〜 7 (最低)、 default 3。 */
+    urgency: number;
+    /** progressive delivery 可否 (default false)。 */
+    incremental: boolean;
 }
 ```
 
@@ -1044,13 +1073,13 @@ export interface PushPriority {
 
 ```ts
 export interface PushPromise {
-  readonly id: string;
-  readonly path: string;
-  readonly priority: PushPriority;
-  readonly state: 'promised' | 'headers-sent' | 'body-sent' | 'cancelled';
-  sendHeaders(headers: Record<string, string>): Promise<void>;
-  sendBody(body: string | Uint8Array): Promise<void>;
-  cancel(errorCode: number): Promise<void>;
+    readonly id: string;
+    readonly path: string;
+    readonly priority: PushPriority;
+    readonly state: 'promised' | 'headers-sent' | 'body-sent' | 'cancelled';
+    sendHeaders(headers: Record<string, string>): Promise<void>;
+    sendBody(body: string | Uint8Array): Promise<void>;
+    cancel(errorCode: number): Promise<void>;
 }
 ```
 
@@ -1060,16 +1089,16 @@ export interface PushPromise {
 
 ```ts
 export interface QuicMultiplexMock extends SemanticsMock {
-  readonly protocol: 'http3-quic';
-  readonly axis: 'quic-multiplex';
-  readonly zeroRttEnabled: boolean;
-  readonly hpackTableSize: number;
-  openStream(options?: QuicStreamOptions): Promise<QuicStreamHandle>;
-  insertHpackHeader(name: string, value: string): Promise<HpackEntry>;
-  /** 0-RTT で resume (以前の session ticket があると想定)。 */
-  resumeWithZeroRtt(): Promise<void>;
-  /** 現在 open な stream を priority 順に返す (低い値 = 高優先)。 */
-  getActiveStreams(): QuicStreamHandle[];
+    readonly protocol: 'http3-quic';
+    readonly axis: 'quic-multiplex';
+    readonly zeroRttEnabled: boolean;
+    readonly hpackTableSize: number;
+    openStream(options?: QuicStreamOptions): Promise<QuicStreamHandle>;
+    insertHpackHeader(name: string, value: string): Promise<HpackEntry>;
+    /** 0-RTT で resume (以前の session ticket があると想定)。 */
+    resumeWithZeroRtt(): Promise<void>;
+    /** 現在 open な stream を priority 順に返す (低い値 = 高優先)。 */
+    getActiveStreams(): QuicStreamHandle[];
 }
 ```
 
@@ -1079,10 +1108,10 @@ export interface QuicMultiplexMock extends SemanticsMock {
 
 ```ts
 export interface QuicStreamHandle {
-  readonly id: string;
-  readonly priority: number;
-  readonly state: 'open' | 'closed';
-  close(): Promise<void>;
+    readonly id: string;
+    readonly priority: number;
+    readonly state: 'open' | 'closed';
+    close(): Promise<void>;
 }
 ```
 
@@ -1094,8 +1123,8 @@ QUIC multiplex axis — stream multiplex + stream priority + HPACK dynamic table
 
 ```ts
 export interface QuicStreamOptions {
-  /** priority (0=最高、 255=最低、 default 128)。 */
-  priority?: number;
+    /** priority (0=最高、 255=最低、 default 128)。 */
+    priority?: number;
 }
 ```
 
@@ -1105,15 +1134,15 @@ export interface QuicStreamOptions {
 
 ```ts
 export interface RealDriverGateInput<TDriver> {
-  provider: RealtimeProviderName;
-  /** real driver に必要な env variable key 一覧 (全 set で real 起動)。 */
-  requiredKeys: string[];
-  /** real driver factory — 全 env が揃った時のみ呼ばれる。 */
-  createReal: (env: Record<string, string>) => TDriver;
-  /** mock driver factory — env 不揃い時の fallback。 */
-  createMock: () => TDriver;
-  /** env source (default `process.env`)。 test で override 可能。 */
-  envSource?: Record<string, string | undefined>;
+    provider: RealtimeProviderName;
+    /** real driver に必要な env variable key 一覧 (全 set で real 起動)。 */
+    requiredKeys: string[];
+    /** real driver factory — 全 env が揃った時のみ呼ばれる。 */
+    createReal: (env: Record<string, string>) => TDriver;
+    /** mock driver factory — env 不揃い時の fallback。 */
+    createMock: () => TDriver;
+    /** env source (default `process.env`)。 test で override 可能。 */
+    envSource?: Record<string, string | undefined>;
 }
 ```
 
@@ -1123,13 +1152,13 @@ export interface RealDriverGateInput<TDriver> {
 
 ```ts
 export interface RealDriverGateResult<TDriver> {
-  driver: TDriver;
-  /** 実際に real 経路を選んだか。 mock fallback 時 false。 */
-  isReal: boolean;
-  /** real 選択の判定理由 — log 出力 / provenance に使う。 */
-  reason: string;
-  /** 不足した env key (isReal=false の時のみ non-empty)。 */
-  missingKeys: string[];
+    driver: TDriver;
+    /** 実際に real 経路を選んだか。 mock fallback 時 false。 */
+    isReal: boolean;
+    /** real 選択の判定理由 — log 出力 / provenance に使う。 */
+    reason: string;
+    /** 不足した env key (isReal=false の時のみ non-empty)。 */
+    missingKeys: string[];
 }
 ```
 
@@ -1139,12 +1168,19 @@ export interface RealDriverGateResult<TDriver> {
 
 ```ts
 export interface RealtimeAiInferenceMock extends SemanticsMock {
-  readonly protocol: 'ai-media';
-  readonly axis: 'realtime-ai-inference';
-  sendRequest(input: AiInferenceRequest): Promise<void>;
-  receiveResponse(input: AiInferenceResponse): Promise<void>;
-  reportBudget(input: { requestId: string; budgetMs: number; consumedMs: number }): Promise<void>;
-  dropRequest(input: { requestId: string; reason: string }): Promise<void>;
+    readonly protocol: 'ai-media';
+    readonly axis: 'realtime-ai-inference';
+    sendRequest(input: AiInferenceRequest): Promise<void>;
+    receiveResponse(input: AiInferenceResponse): Promise<void>;
+    reportBudget(input: {
+        requestId: string;
+        budgetMs: number;
+        consumedMs: number;
+    }): Promise<void>;
+    dropRequest(input: {
+        requestId: string;
+        reason: string;
+    }): Promise<void>;
 }
 ```
 
@@ -1155,11 +1191,17 @@ export interface RealtimeAiInferenceMock extends SemanticsMock {
 subscribe の union event 型 (adapter 側で filter する)。
 
 ```ts
-export type RealtimeAnyEvent =
-  | ({ kind: 'presence' } & PresenceEvent)
-  | ({ kind: 'broadcast' } & BroadcastEvent)
-  | ({ kind: 'postgres_changes' } & PostgresChangeEvent)
-  | { kind: 'connection'; state: ConnectionState; timestamp: number };
+export type RealtimeAnyEvent = ({
+    kind: 'presence';
+} & PresenceEvent) | ({
+    kind: 'broadcast';
+} & BroadcastEvent) | ({
+    kind: 'postgres_changes';
+} & PostgresChangeEvent) | {
+    kind: 'connection';
+    state: ConnectionState;
+    timestamp: number;
+};
 ```
 
 #### `RealtimeDriver`
@@ -1170,9 +1212,9 @@ export type RealtimeAnyEvent =
 
 ```ts
 export interface RealtimeDriver {
-  /** 期待する event 数だけ collect する。 timeout で強制終了。 */
-  runScenario(scenarioId: string): Promise<CollectedEvent[]>;
-  reset(): void;
+    /** 期待する event 数だけ collect する。 timeout で強制終了。 */
+    runScenario(scenarioId: string): Promise<CollectedEvent[]>;
+    reset(): void;
 }
 ```
 
@@ -1181,15 +1223,7 @@ export interface RealtimeDriver {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L25) `packages/realtime/src/semantics/session-orchestrator.ts`
 
 ```ts
-export type RealtimeEvent =
-  | 'connect-succeeded'
-  | 'connect-failed'
-  | 'subscribe-succeeded'
-  | 'heartbeat-lost'
-  | 'heartbeat-recovered'
-  | 'reconnect-succeeded'
-  | 'reconnect-exhausted'
-  | 'user-disconnect';
+export type RealtimeEvent = 'connect-succeeded' | 'connect-failed' | 'subscribe-succeeded' | 'heartbeat-lost' | 'heartbeat-recovered' | 'reconnect-succeeded' | 'reconnect-exhausted' | 'user-disconnect';
 ```
 
 #### `RealtimeEventHandler`
@@ -1208,12 +1242,12 @@ export type RealtimeEventHandler = (event: RealtimeAnyEvent) => void;
 
 ```ts
 export interface RealtimeFidelityInput {
-  realDriver: RealtimeDriver;
-  mockDriver: RealtimeDriver;
-  /** 実行する scenario 名リスト。 */
-  scenarios: string[];
-  /** 1 scenario あたりの timeout (ms、 default 3000)。 */
-  perScenarioTimeoutMs?: number;
+    realDriver: RealtimeDriver;
+    mockDriver: RealtimeDriver;
+    /** 実行する scenario 名リスト。 */
+    scenarios: string[];
+    /** 1 scenario あたりの timeout (ms、 default 3000)。 */
+    perScenarioTimeoutMs?: number;
 }
 ```
 
@@ -1223,19 +1257,19 @@ export interface RealtimeFidelityInput {
 
 ```ts
 export interface RealtimeFidelityRecord {
-  scenarioId: string;
-  real: CollectedEvent[];
-  mock: CollectedEvent[];
-  /** event 数の差 (real - mock)。 */
-  eventCountDiff: number;
-  /** kind 列の順序一致率 0-1。 */
-  kindOrderMatch: number;
-  /** payload / event 名の一致率 0-1。 */
-  payloadMatch: number;
-  /** 総合 accuracy score 0-1 (順序 * payload の平均)。 */
-  accuracyScore: number;
-  /** 集計開始からの合計時間差 (ms)。 */
-  totalDurationDiffMs: number;
+    scenarioId: string;
+    real: CollectedEvent[];
+    mock: CollectedEvent[];
+    /** event 数の差 (real - mock)。 */
+    eventCountDiff: number;
+    /** kind 列の順序一致率 0-1。 */
+    kindOrderMatch: number;
+    /** payload / event 名の一致率 0-1。 */
+    payloadMatch: number;
+    /** 総合 accuracy score 0-1 (順序 * payload の平均)。 */
+    accuracyScore: number;
+    /** 集計開始からの合計時間差 (ms)。 */
+    totalDurationDiffMs: number;
 }
 ```
 
@@ -1245,16 +1279,16 @@ export interface RealtimeFidelityRecord {
 
 ```ts
 export interface RealtimeFidelityReport {
-  records: RealtimeFidelityRecord[];
-  summary: {
-    scenarios: number;
-    avgAccuracyScore: number;
-    avgEventCountDiff: number;
-    avgKindOrderMatch: number;
-    avgPayloadMatch: number;
-    avgTotalDurationDiffMs: number;
-    accuracyMethod: 'sequence-jaccard';
-  };
+    records: RealtimeFidelityRecord[];
+    summary: {
+        scenarios: number;
+        avgAccuracyScore: number;
+        avgEventCountDiff: number;
+        avgKindOrderMatch: number;
+        avgPayloadMatch: number;
+        avgTotalDurationDiffMs: number;
+        accuracyMethod: 'sequence-jaccard';
+    };
 }
 ```
 
@@ -1266,20 +1300,20 @@ mock が公開する累積 metric。 fidelity harness が集計に使う。
 
 ```ts
 export interface RealtimeMetrics {
-  /** subscribe 回数。 */
-  subscribeCount: number;
-  /** publish 回数。 */
-  publishCount: number;
-  /** 実際に配信された event 総数 (drop 前)。 */
-  eventsDelivered: number;
-  /** backpressure で drop された event 数。 */
-  eventsDropped: number;
-  /** reconnect 発生回数 (auto + manual)。 */
-  reconnectCount: number;
-  /** subscribe → 初 event までの latency サンプル (ms)。 */
-  subscribeLatencyMs: number[];
-  /** publish → subscriber 受信までの latency サンプル (ms)。 */
-  publishLatencyMs: number[];
+    /** subscribe 回数。 */
+    subscribeCount: number;
+    /** publish 回数。 */
+    publishCount: number;
+    /** 実際に配信された event 総数 (drop 前)。 */
+    eventsDelivered: number;
+    /** backpressure で drop された event 数。 */
+    eventsDropped: number;
+    /** reconnect 発生回数 (auto + manual)。 */
+    reconnectCount: number;
+    /** subscribe → 初 event までの latency サンプル (ms)。 */
+    subscribeLatencyMs: number[];
+    /** publish → subscriber 受信までの latency サンプル (ms)。 */
+    publishLatencyMs: number[];
 }
 ```
 
@@ -1291,38 +1325,29 @@ kiwa realtime mock を全 SDK adapter が満たすべき最小 interface。 SDK 
 
 ```ts
 export interface RealtimeMock {
-  /** provider 名 (`supabase` / `ably` / `pusher` / `socketio`)。 */
-  readonly provider: string;
-
-  /**
-   * channel 購読 — subscribe 後 scenario event が順次 handler に流れる。
-   * unsubscribe は返り値 handle の `.unsubscribe()` で行う。
-   */
-  subscribe(channel: string, handler: RealtimeEventHandler): Promise<SubscriptionHandle>;
-
-  /** broadcast event を channel に publish (server 経由の擬似 emit)。 */
-  publish(channel: string, event: string, payload: unknown): Promise<void>;
-
-  /** presence state を track (join)。 unsubscribe or leave で自動 leave。 */
-  trackPresence(channel: string, userId: string, payload?: Record<string, unknown>): Promise<void>;
-
-  /** presence untrack (leave)。 */
-  untrackPresence(channel: string, userId: string): Promise<void>;
-
-  /** 現時点の connection state。 */
-  getConnectionState(): ConnectionState;
-
-  /** 手動 disconnect (test 用)。 */
-  disconnect(): Promise<void>;
-
-  /** 手動 reconnect (test 用)。 */
-  reconnect(): Promise<void>;
-
-  /** 累積 metric (fidelity 計測用)。 */
-  getMetrics(): RealtimeMetrics;
-
-  /** metric + subscription state を初期化。 */
-  reset(): void;
+    /** provider 名 (`supabase` / `ably` / `pusher` / `socketio`)。 */
+    readonly provider: string;
+    /**
+     * channel 購読 — subscribe 後 scenario event が順次 handler に流れる。
+     * unsubscribe は返り値 handle の `.unsubscribe()` で行う。
+     */
+    subscribe(channel: string, handler: RealtimeEventHandler): Promise<SubscriptionHandle>;
+    /** broadcast event を channel に publish (server 経由の擬似 emit)。 */
+    publish(channel: string, event: string, payload: unknown): Promise<void>;
+    /** presence state を track (join)。 unsubscribe or leave で自動 leave。 */
+    trackPresence(channel: string, userId: string, payload?: Record<string, unknown>): Promise<void>;
+    /** presence untrack (leave)。 */
+    untrackPresence(channel: string, userId: string): Promise<void>;
+    /** 現時点の connection state。 */
+    getConnectionState(): ConnectionState;
+    /** 手動 disconnect (test 用)。 */
+    disconnect(): Promise<void>;
+    /** 手動 reconnect (test 用)。 */
+    reconnect(): Promise<void>;
+    /** 累積 metric (fidelity 計測用)。 */
+    getMetrics(): RealtimeMetrics;
+    /** metric + subscription state を初期化。 */
+    reset(): void;
 }
 ```
 
@@ -1334,22 +1359,22 @@ Mock 設定 — 4 provider adapter で共通に使う。 `scenarios` は channel
 
 ```ts
 export interface RealtimeMockConfig {
-  /** artificial latency (ms、 default 5)。 subscribe / publish 遅延。 */
-  artificialLatencyMs?: number;
-  /** provider 識別子 (report 用、 default 'mock-realtime')。 */
-  provider?: string;
-  /** reconnect policy (default {maxAttempts: 5, initialBackoffMs: 100})。 */
-  reconnect?: ReconnectPolicy;
-  /**
-   * channel 別の scenario (subscribe 後に順次 emit される event 列)。
-   * key = channel 名。 value = event 列 (順序保持)。
-   */
-  scenarios?: Record<string, ScenarioEvent[]>;
-  /**
-   * pending event backpressure — queue 満杯 event drop 数の閾値。
-   * default = Infinity (drop なし)、 Socket.io 実装で意味を持つ。
-   */
-  backpressureLimit?: number;
+    /** artificial latency (ms、 default 5)。 subscribe / publish 遅延。 */
+    artificialLatencyMs?: number;
+    /** provider 識別子 (report 用、 default 'mock-realtime')。 */
+    provider?: string;
+    /** reconnect policy (default {maxAttempts: 5, initialBackoffMs: 100})。 */
+    reconnect?: ReconnectPolicy;
+    /**
+     * channel 別の scenario (subscribe 後に順次 emit される event 列)。
+     * key = channel 名。 value = event 列 (順序保持)。
+     */
+    scenarios?: Record<string, ScenarioEvent[]>;
+    /**
+     * pending event backpressure — queue 満杯 event drop 数の閾値。
+     * default = Infinity (drop なし)、 Socket.io 実装で意味を持つ。
+     */
+    backpressureLimit?: number;
 }
 ```
 
@@ -1369,13 +1394,13 @@ export type RealtimeProviderName = 'supabase' | 'ably' | 'pusher' | 'socketio';
 
 ```ts
 export interface RealtimeSession {
-  state: RealtimeSessionState;
-  connectAttempts: number;
-  reconnectRounds: number;
-  heartbeatFailures: number;
-  broadcastsReceived: number;
-  lastEventAt: string;
-  events: string[];
+    state: RealtimeSessionState;
+    connectAttempts: number;
+    reconnectRounds: number;
+    heartbeatFailures: number;
+    broadcastsReceived: number;
+    lastEventAt: string;
+    events: string[];
 }
 ```
 
@@ -1386,12 +1411,7 @@ export interface RealtimeSession {
 v2.1 realtime session-orchestrator = presence + broadcast + subscription + heartbeat + reconnect の 5 axis を 継続合成 する 上位 layer。 Realtime pair v0.1 → v2.1 = 5 段深化到達、 **depth-5 pattern 5 例目発生** (Mobile + Desktop + quality-metrics + Payment + Realtime = 5 pair 到達で pattern 「rule」 化 → **systematic law** 昇格 candidate)。 auth v0.7 + payment v2.1 の 上位層 pattern を Realtime pair に転用、 systematic pattern 47 度目適用 (continuous state machine variant Realtime 転用)。 4 provider (Supabase / Ably / Pusher / Socket.io) 抽象 の 上位、 provider 独立 な pure state machine、 5 state SSOT + 8 event SSOT + 40 セル 遷移表。 shape 契約 preserving 絶対維持 = 既存 API (v0.1-v0.2) 変更 0、 新規 file 追加 のみ、 backward compat 絶対維持。
 
 ```ts
-export type RealtimeSessionState =
-  | 'connecting'        // 初期接続中
-  | 'subscribed'        // 通常 subscribe active、 broadcast / presence 受信中
-  | 'reconnecting'      // reconnect 中、 backoff 待ち
-  | 'degraded'          // heartbeat 失敗多発、 lower QoS mode
-  | 'closed';
+export type RealtimeSessionState = 'connecting' | 'subscribed' | 'reconnecting' | 'degraded' | 'closed';
 ```
 
 #### `RealtimeSessionSummary`
@@ -1400,14 +1420,14 @@ export type RealtimeSessionState =
 
 ```ts
 export interface RealtimeSessionSummary {
-  currentState: RealtimeSessionState;
-  totalEvents: number;
-  validEvents: number;
-  invalidEvents: number;
-  terminalEvents: number;
-  broadcastsReceived: number;
-  reconnectRounds: number;
-  heartbeatFailures: number;
+    currentState: RealtimeSessionState;
+    totalEvents: number;
+    validEvents: number;
+    invalidEvents: number;
+    terminalEvents: number;
+    broadcastsReceived: number;
+    reconnectRounds: number;
+    heartbeatFailures: number;
 }
 ```
 
@@ -1419,16 +1439,16 @@ Reconnect policy — provider 全てで指数 backoff + jitter が実装され�
 
 ```ts
 export interface ReconnectPolicy {
-  /** 最大再接続試行回数 (default 5)。 */
-  maxAttempts?: number;
-  /** 初期 backoff delay (ms、 default 100)。 */
-  initialBackoffMs?: number;
-  /** 最大 backoff delay (ms、 default 5000)。 */
-  maxBackoffMs?: number;
-  /** backoff 倍率 (default 2)。 */
-  backoffMultiplier?: number;
-  /** 0-1 の jitter 割合 (default 0.1)。 */
-  jitter?: number;
+    /** 最大再接続試行回数 (default 5)。 */
+    maxAttempts?: number;
+    /** 初期 backoff delay (ms、 default 100)。 */
+    initialBackoffMs?: number;
+    /** 最大 backoff delay (ms、 default 5000)。 */
+    maxBackoffMs?: number;
+    /** backoff 倍率 (default 2)。 */
+    backoffMultiplier?: number;
+    /** 0-1 の jitter 割合 (default 0.1)。 */
+    jitter?: number;
 }
 ```
 
@@ -1440,9 +1460,9 @@ Room semantics — Socket.io namespace + room の 2 階層構造、 Ably では 
 
 ```ts
 export interface Room {
-  /** Socket.io 固有 (default 未指定 = `/`)。 */
-  namespace?: string;
-  room: string;
+    /** Socket.io 固有 (default 未指定 = `/`)。 */
+    namespace?: string;
+    room: string;
 }
 ```
 
@@ -1453,17 +1473,26 @@ export interface Room {
 1 scenario event — subscribe 後の n 番目に発火する event。 `delay` が指定されると、 直前 event から `delay` ms 後に emit される。
 
 ```ts
-export type ScenarioEvent =
-  | ({ kind: 'presence' } & Omit<PresenceEvent, 'channel' | 'timestamp'> & { delay?: number })
-  | ({ kind: 'broadcast' } & Omit<BroadcastEvent, 'channel' | 'timestamp' | 'id'> & {
-      delay?: number;
-      id?: string;
-    })
-  | ({ kind: 'postgres_changes' } & Omit<PostgresChangeEvent, 'channel' | 'timestamp'> & {
-      delay?: number;
-    })
-  | { kind: 'disconnect'; delay?: number }
-  | { kind: 'reconnect'; delay?: number };
+export type ScenarioEvent = ({
+    kind: 'presence';
+} & Omit<PresenceEvent, 'channel' | 'timestamp'> & {
+    delay?: number;
+}) | ({
+    kind: 'broadcast';
+} & Omit<BroadcastEvent, 'channel' | 'timestamp' | 'id'> & {
+    delay?: number;
+    id?: string;
+}) | ({
+    kind: 'postgres_changes';
+} & Omit<PostgresChangeEvent, 'channel' | 'timestamp'> & {
+    delay?: number;
+}) | {
+    kind: 'disconnect';
+    delay?: number;
+} | {
+    kind: 'reconnect';
+    delay?: number;
+};
 ```
 
 #### `SemanticsAxis`
@@ -1473,24 +1502,7 @@ export type ScenarioEvent =
 axis tag — 8 base axis + 8 advanced III axis の identifier。
 
 ```ts
-export type SemanticsAxis =
-  | 'webrtc-signaling'
-  | 'webrtc-data-channel'
-  | 'webrtc-track'
-  | 'webrtc-ice'
-  | 'webtransport-uni'
-  | 'webtransport-bi'
-  | 'http3-push'
-  | 'quic-multiplex'
-  // v0.3 advanced III (v1.45)
-  | 'moq-fetch'
-  | 'moq-datagram-media'
-  | 'webcodecs-encoder'
-  | 'webcodecs-decoder'
-  | 'simulcast-svc'
-  | 'voice-streaming'
-  | 'whisper-streaming'
-  | 'realtime-ai-inference';
+export type SemanticsAxis = 'webrtc-signaling' | 'webrtc-data-channel' | 'webrtc-track' | 'webrtc-ice' | 'webtransport-uni' | 'webtransport-bi' | 'http3-push' | 'quic-multiplex' | 'moq-fetch' | 'moq-datagram-media' | 'webcodecs-encoder' | 'webcodecs-decoder' | 'simulcast-svc' | 'voice-streaming' | 'whisper-streaming' | 'realtime-ai-inference';
 ```
 
 #### `SemanticsEvent`
@@ -1501,14 +1513,14 @@ export type SemanticsAxis =
 
 ```ts
 export interface SemanticsEvent<TPayload = unknown> {
-  kind: SemanticsEventKind;
-  /** stream id / channel id / peer id 等 (axis 固有)。 */
-  streamId?: string;
-  payload?: TPayload;
-  /** collect 開始からの相対 ms。 */
-  relativeTimeMs: number;
-  /** 順番 (0 origin)。 */
-  order: number;
+    kind: SemanticsEventKind;
+    /** stream id / channel id / peer id 等 (axis 固有)。 */
+    streamId?: string;
+    payload?: TPayload;
+    /** collect 開始からの相対 ms。 */
+    relativeTimeMs: number;
+    /** 順番 (0 origin)。 */
+    order: number;
 }
 ```
 
@@ -1519,87 +1531,7 @@ export interface SemanticsEvent<TPayload = unknown> {
 共通 transport event kind (8 axis 横断)。
 
 ```ts
-export type SemanticsEventKind =
-  // WebRTC signaling
-  | 'offer'
-  | 'answer'
-  | 'ice-candidate'
-  | 'renegotiation'
-  // WebRTC data channel
-  | 'data-open'
-  | 'data-message'
-  | 'data-close'
-  // WebRTC track
-  | 'track-add'
-  | 'track-remove'
-  | 'track-mute'
-  | 'track-unmute'
-  // ICE
-  | 'ice-gathering'
-  | 'ice-checking'
-  | 'ice-connected'
-  | 'ice-relay-used'
-  // WebTransport uni
-  | 'uni-stream-open'
-  | 'uni-stream-write'
-  | 'uni-stream-reset'
-  | 'datagram-recv'
-  // WebTransport bi
-  | 'bi-stream-open'
-  | 'bi-stream-write'
-  | 'bi-stream-close'
-  | 'bi-backpressure'
-  // HTTP/3 push
-  | 'push-promise'
-  | 'push-headers'
-  | 'push-body'
-  | 'push-cancelled'
-  // QUIC multiplex
-  | 'stream-open'
-  | 'stream-close'
-  | 'hpack-insert'
-  | 'zero-rtt-used'
-  // v0.3 advanced III (v1.45)
-  // MoQ fetch (Media over QUIC / MOQT delivery + subscribe + publish)
-  | 'moq-track-announce'
-  | 'moq-track-subscribe'
-  | 'moq-object-sent'
-  | 'moq-object-received'
-  // MoQ datagram media (partial reliability + priority)
-  | 'moq-datagram-sent'
-  | 'moq-datagram-dropped'
-  | 'moq-priority-set'
-  | 'moq-fec-recovered'
-  // WebCodecs encoder (VideoEncoder / AudioEncoder direct API)
-  | 'encoder-config-set'
-  | 'encoder-frame-encoded'
-  | 'encoder-keyframe-forced'
-  | 'encoder-hardware-used'
-  // WebCodecs decoder (VideoDecoder / AudioDecoder + reorder buffer)
-  | 'decoder-config-set'
-  | 'decoder-frame-decoded'
-  | 'decoder-frame-reordered'
-  | 'decoder-frame-dropped'
-  // Simulcast + SVC layer selection
-  | 'simulcast-layer-added'
-  | 'svc-layer-selected'
-  | 'bitrate-adapted'
-  | 'layer-dropped'
-  // LLM voice streaming (OpenAI Realtime API + Anthropic voice)
-  | 'voice-session-open'
-  | 'voice-audio-chunk-sent'
-  | 'voice-response-chunk-received'
-  | 'voice-turn-completed'
-  // Whisper streaming ASR (partial transcript + VAD)
-  | 'whisper-audio-chunk-sent'
-  | 'whisper-partial-transcript'
-  | 'whisper-final-transcript'
-  | 'whisper-vad-triggered'
-  // Realtime AI inference (per-frame prediction + latency budget)
-  | 'ai-inference-request'
-  | 'ai-inference-response'
-  | 'ai-inference-latency-budget'
-  | 'ai-inference-dropped';
+export type SemanticsEventKind = 'offer' | 'answer' | 'ice-candidate' | 'renegotiation' | 'data-open' | 'data-message' | 'data-close' | 'track-add' | 'track-remove' | 'track-mute' | 'track-unmute' | 'ice-gathering' | 'ice-checking' | 'ice-connected' | 'ice-relay-used' | 'uni-stream-open' | 'uni-stream-write' | 'uni-stream-reset' | 'datagram-recv' | 'bi-stream-open' | 'bi-stream-write' | 'bi-stream-close' | 'bi-backpressure' | 'push-promise' | 'push-headers' | 'push-body' | 'push-cancelled' | 'stream-open' | 'stream-close' | 'hpack-insert' | 'zero-rtt-used' | 'moq-track-announce' | 'moq-track-subscribe' | 'moq-object-sent' | 'moq-object-received' | 'moq-datagram-sent' | 'moq-datagram-dropped' | 'moq-priority-set' | 'moq-fec-recovered' | 'encoder-config-set' | 'encoder-frame-encoded' | 'encoder-keyframe-forced' | 'encoder-hardware-used' | 'decoder-config-set' | 'decoder-frame-decoded' | 'decoder-frame-reordered' | 'decoder-frame-dropped' | 'simulcast-layer-added' | 'svc-layer-selected' | 'bitrate-adapted' | 'layer-dropped' | 'voice-session-open' | 'voice-audio-chunk-sent' | 'voice-response-chunk-received' | 'voice-turn-completed' | 'whisper-audio-chunk-sent' | 'whisper-partial-transcript' | 'whisper-final-transcript' | 'whisper-vad-triggered' | 'ai-inference-request' | 'ai-inference-response' | 'ai-inference-latency-budget' | 'ai-inference-dropped';
 ```
 
 #### `SemanticsFidelityInput`
@@ -1608,11 +1540,11 @@ export type SemanticsEventKind =
 
 ```ts
 export interface SemanticsFidelityInput {
-  mock: SemanticsMock;
-  /** scenario 実行本体 — mock を操作して event を発火させる。 */
-  scenario: () => Promise<void>;
-  /** collect timeout (ms、 default 3000)。 */
-  timeoutMs?: number;
+    mock: SemanticsMock;
+    /** scenario 実行本体 — mock を操作して event を発火させる。 */
+    scenario: () => Promise<void>;
+    /** collect timeout (ms、 default 3000)。 */
+    timeoutMs?: number;
 }
 ```
 
@@ -1622,16 +1554,16 @@ export interface SemanticsFidelityInput {
 
 ```ts
 export interface SemanticsFidelityRow {
-  protocol: SemanticsProtocol;
-  axis: SemanticsAxis;
-  applicable: boolean;
-  eventsEmitted: number;
-  streamsOpened: number;
-  streamsClosed: number;
-  streamsReset: number;
-  backpressureCount: number;
-  /** scenario 実行中に発生した event 列 (順序保持)。 */
-  events: SemanticsEvent[];
+    protocol: SemanticsProtocol;
+    axis: SemanticsAxis;
+    applicable: boolean;
+    eventsEmitted: number;
+    streamsOpened: number;
+    streamsClosed: number;
+    streamsReset: number;
+    backpressureCount: number;
+    /** scenario 実行中に発生した event 列 (順序保持)。 */
+    events: SemanticsEvent[];
 }
 ```
 
@@ -1641,10 +1573,10 @@ export interface SemanticsFidelityRow {
 
 ```ts
 export interface SemanticsGridRow {
-  protocol: SemanticsProtocol;
-  axis: SemanticsAxis;
-  /** 該当 protocol × axis の組合せが有効か。 false なら計測不要。 */
-  applicable: boolean;
+    protocol: SemanticsProtocol;
+    axis: SemanticsAxis;
+    /** 該当 protocol × axis の組合せが有効か。 false なら計測不要。 */
+    applicable: boolean;
 }
 ```
 
@@ -1656,10 +1588,10 @@ grid 全 24 row 分の scenario を map に登録して一括計測。 applicabl
 
 ```ts
 export interface SemanticsGridScenarios {
-  scenarios: Map<
-    SemanticsAxis,
-    { mock: SemanticsMock; scenario: () => Promise<void> }
-  >;
+    scenarios: Map<SemanticsAxis, {
+        mock: SemanticsMock;
+        scenario: () => Promise<void>;
+    }>;
 }
 ```
 
@@ -1671,18 +1603,18 @@ export interface SemanticsGridScenarios {
 
 ```ts
 export interface SemanticsMetrics {
-  /** emit された event 総数。 */
-  eventsEmitted: number;
-  /** open された stream 数 (axis 固有、 signaling 系は 0 のまま)。 */
-  streamsOpened: number;
-  /** close された stream 数。 */
-  streamsClosed: number;
-  /** reset された stream 数 (WebTransport / QUIC 固有)。 */
-  streamsReset: number;
-  /** backpressure イベント発火数 (bi stream 固有)。 */
-  backpressureCount: number;
-  /** axis 固有の任意 metric。 */
-  custom: Record<string, number>;
+    /** emit された event 総数。 */
+    eventsEmitted: number;
+    /** open された stream 数 (axis 固有、 signaling 系は 0 のまま)。 */
+    streamsOpened: number;
+    /** close された stream 数。 */
+    streamsClosed: number;
+    /** reset された stream 数 (WebTransport / QUIC 固有)。 */
+    streamsReset: number;
+    /** backpressure イベント発火数 (bi stream 固有)。 */
+    backpressureCount: number;
+    /** axis 固有の任意 metric。 */
+    custom: Record<string, number>;
 }
 ```
 
@@ -1694,14 +1626,14 @@ export interface SemanticsMetrics {
 
 ```ts
 export interface SemanticsMock {
-  readonly protocol: SemanticsProtocol;
-  readonly axis: SemanticsAxis;
-  /** subscribe 相当 — event stream の handler を登録。 */
-  onEvent(handler: (event: SemanticsEvent) => void): () => void;
-  /** 累積 metric。 */
-  getMetrics(): SemanticsMetrics;
-  /** state + metric を初期化。 */
-  reset(): void;
+    readonly protocol: SemanticsProtocol;
+    readonly axis: SemanticsAxis;
+    /** subscribe 相当 — event stream の handler を登録。 */
+    onEvent(handler: (event: SemanticsEvent) => void): () => void;
+    /** 累積 metric。 */
+    getMetrics(): SemanticsMetrics;
+    /** state + metric を初期化。 */
+    reset(): void;
 }
 ```
 
@@ -1713,10 +1645,10 @@ export interface SemanticsMock {
 
 ```ts
 export interface SemanticsMockConfig {
-  /** event 間の default delay (ms、 default 1)。 */
-  artificialLatencyMs?: number;
-  /** deterministic random seed (default 1)。 */
-  seed?: number;
+    /** event 間の default delay (ms、 default 1)。 */
+    artificialLatencyMs?: number;
+    /** deterministic random seed (default 1)。 */
+    seed?: number;
 }
 ```
 
@@ -1727,14 +1659,7 @@ export interface SemanticsMockConfig {
 protocol tag — fidelity harness で grid 分類に使う。
 
 ```ts
-export type SemanticsProtocol =
-  | 'webrtc'
-  | 'webtransport'
-  | 'http3-quic'
-  // v0.3 advanced III (v1.45)
-  | 'moqt'
-  | 'webcodecs'
-  | 'ai-media';
+export type SemanticsProtocol = 'webrtc' | 'webtransport' | 'http3-quic' | 'moqt' | 'webcodecs' | 'ai-media';
 ```
 
 #### `SignalingSdp`
@@ -1745,13 +1670,13 @@ signaling 1 セッション分の SDP 情報 (mock 用の簡略化された JSON
 
 ```ts
 export interface SignalingSdp {
-  type: 'offer' | 'answer';
-  /** SDP 本文 (mock は fingerprint hash + 属性列のみ、 完全な SDP 文字列ではない)。 */
-  fingerprint: string;
-  /** media section 数 (audio / video / data 3 section を default とする)。 */
-  mediaSections: number;
-  /** BUNDLE / RTCP-mux フラグ (mock では always true)。 */
-  bundleEnabled: boolean;
+    type: 'offer' | 'answer';
+    /** SDP 本文 (mock は fingerprint hash + 属性列のみ、 完全な SDP 文字列ではない)。 */
+    fingerprint: string;
+    /** media section 数 (audio / video / data 3 section を default とする)。 */
+    mediaSections: number;
+    /** BUNDLE / RTCP-mux フラグ (mock では always true)。 */
+    bundleEnabled: boolean;
 }
 ```
 
@@ -1761,9 +1686,9 @@ export interface SignalingSdp {
 
 ```ts
 export interface SimulcastLayer {
-  rid: 'low' | 'med' | 'high';
-  maxBitrate: number;
-  scaleResolutionDownBy: number;
+    rid: 'low' | 'med' | 'high';
+    maxBitrate: number;
+    scaleResolutionDownBy: number;
 }
 ```
 
@@ -1775,10 +1700,10 @@ Simulcast + SVC axis — Simulcast (複数解像度 stream) + Scalable Video Cod
 
 ```ts
 export interface SimulcastSvcLayer {
-  layerId: string;
-  resolution: string;
-  bitrateKbps: number;
-  scalabilityMode: 'L1T1' | 'L1T2' | 'L1T3' | 'L2T1' | 'L2T3' | 'L3T3';
+    layerId: string;
+    resolution: string;
+    bitrateKbps: number;
+    scalabilityMode: 'L1T1' | 'L1T2' | 'L1T3' | 'L2T1' | 'L2T3' | 'L3T3';
 }
 ```
 
@@ -1788,12 +1713,23 @@ export interface SimulcastSvcLayer {
 
 ```ts
 export interface SimulcastSvcMock extends SemanticsMock {
-  readonly protocol: 'webcodecs';
-  readonly axis: 'simulcast-svc';
-  addSimulcastLayer(input: SimulcastSvcLayer): Promise<void>;
-  selectSvcLayer(input: { layerId: string; temporalId: number; spatialId: number }): Promise<void>;
-  adaptBitrate(input: { layerId: string; targetKbps: number; reason: string }): Promise<void>;
-  dropLayer(input: { layerId: string; reason: string }): Promise<void>;
+    readonly protocol: 'webcodecs';
+    readonly axis: 'simulcast-svc';
+    addSimulcastLayer(input: SimulcastSvcLayer): Promise<void>;
+    selectSvcLayer(input: {
+        layerId: string;
+        temporalId: number;
+        spatialId: number;
+    }): Promise<void>;
+    adaptBitrate(input: {
+        layerId: string;
+        targetKbps: number;
+        reason: string;
+    }): Promise<void>;
+    dropLayer(input: {
+        layerId: string;
+        reason: string;
+    }): Promise<void>;
 }
 ```
 
@@ -1803,11 +1739,11 @@ export interface SimulcastSvcMock extends SemanticsMock {
 
 ```ts
 export interface SocketIoMock extends RealtimeMock {
-  readonly provider: 'socketio';
-  /** client socket (default namespace '/')。 */
-  io(namespace?: string): SocketIoSocket;
-  /** server side namespace (test で `.to(room).emit()` する用)。 */
-  of(namespace: string): SocketIoNamespace;
+    readonly provider: 'socketio';
+    /** client socket (default namespace '/')。 */
+    io(namespace?: string): SocketIoSocket;
+    /** server side namespace (test で `.to(room).emit()` する用)。 */
+    of(namespace: string): SocketIoNamespace;
 }
 ```
 
@@ -1817,10 +1753,10 @@ export interface SocketIoMock extends RealtimeMock {
 
 ```ts
 export interface SocketIoNamespace {
-  readonly name: string;
-  to(room: string): SocketIoNamespace;
-  emit(event: string, ...args: unknown[]): void;
-  sockets: Map<string, SocketIoSocket>;
+    readonly name: string;
+    to(room: string): SocketIoNamespace;
+    emit(event: string, ...args: unknown[]): void;
+    sockets: Map<string, SocketIoSocket>;
 }
 ```
 
@@ -1832,18 +1768,18 @@ Socket.io mock。 SDK 呼出形式 (real `socket.io-client`) は以下 ... ```ts
 
 ```ts
 export interface SocketIoSocket {
-  readonly id: string;
-  readonly namespace: string;
-  connected: boolean;
-  on(event: string, handler: (...args: unknown[]) => void): SocketIoSocket;
-  off(event: string, handler?: (...args: unknown[]) => void): SocketIoSocket;
-  emit(event: string, ...args: unknown[]): SocketIoSocket;
-  join(room: string): Promise<void>;
-  leave(room: string): Promise<void>;
-  disconnect(): SocketIoSocket;
-  connect(): SocketIoSocket;
-  /** 現在 join 中の room 集合。 */
-  rooms(): Set<string>;
+    readonly id: string;
+    readonly namespace: string;
+    connected: boolean;
+    on(event: string, handler: (...args: unknown[]) => void): SocketIoSocket;
+    off(event: string, handler?: (...args: unknown[]) => void): SocketIoSocket;
+    emit(event: string, ...args: unknown[]): SocketIoSocket;
+    join(room: string): Promise<void>;
+    leave(room: string): Promise<void>;
+    disconnect(): SocketIoSocket;
+    connect(): SocketIoSocket;
+    /** 現在 join 中の room 集合。 */
+    rooms(): Set<string>;
 }
 ```
 
@@ -1855,8 +1791,8 @@ subscribe の返り値 handle。
 
 ```ts
 export interface SubscriptionHandle {
-  channel: string;
-  unsubscribe(): Promise<void>;
+    channel: string;
+    unsubscribe(): Promise<void>;
 }
 ```
 
@@ -1866,7 +1802,7 @@ export interface SubscriptionHandle {
 
 ```ts
 export interface SupabaseBroadcastFilter {
-  event: string;
+    event: string;
 }
 ```
 
@@ -1876,9 +1812,9 @@ export interface SupabaseBroadcastFilter {
 
 ```ts
 export interface SupabaseBroadcastPayload<T = unknown> {
-  type: 'broadcast';
-  event: string;
-  payload: T;
+    type: 'broadcast';
+    event: string;
+    payload: T;
 }
 ```
 
@@ -1888,27 +1824,21 @@ export interface SupabaseBroadcastPayload<T = unknown> {
 
 ```ts
 export interface SupabaseChannel {
-  readonly topic: string;
-  on(
-    type: 'presence',
-    filter: SupabasePresenceFilter,
-    handler: (payload: SupabasePresencePayload) => void,
-  ): SupabaseChannel;
-  on(
-    type: 'broadcast',
-    filter: SupabaseBroadcastFilter,
-    handler: (payload: SupabaseBroadcastPayload) => void,
-  ): SupabaseChannel;
-  on(
-    type: 'postgres_changes',
-    filter: SupabasePostgresChangesFilter,
-    handler: (payload: SupabasePostgresChangesPayload) => void,
-  ): SupabaseChannel;
-  subscribe(cb?: (status: 'SUBSCRIBED' | 'CHANNEL_ERROR' | 'CLOSED') => void): Promise<SupabaseChannel>;
-  unsubscribe(): Promise<'ok' | 'timed out' | 'error'>;
-  track(payload: Record<string, unknown> & { userId: string }): Promise<'ok' | 'error'>;
-  untrack(): Promise<'ok' | 'error'>;
-  send(msg: { type: 'broadcast'; event: string; payload: unknown }): Promise<'ok' | 'error'>;
+    readonly topic: string;
+    on(type: 'presence', filter: SupabasePresenceFilter, handler: (payload: SupabasePresencePayload) => void): SupabaseChannel;
+    on(type: 'broadcast', filter: SupabaseBroadcastFilter, handler: (payload: SupabaseBroadcastPayload) => void): SupabaseChannel;
+    on(type: 'postgres_changes', filter: SupabasePostgresChangesFilter, handler: (payload: SupabasePostgresChangesPayload) => void): SupabaseChannel;
+    subscribe(cb?: (status: 'SUBSCRIBED' | 'CHANNEL_ERROR' | 'CLOSED') => void): Promise<SupabaseChannel>;
+    unsubscribe(): Promise<'ok' | 'timed out' | 'error'>;
+    track(payload: Record<string, unknown> & {
+        userId: string;
+    }): Promise<'ok' | 'error'>;
+    untrack(): Promise<'ok' | 'error'>;
+    send(msg: {
+        type: 'broadcast';
+        event: string;
+        payload: unknown;
+    }): Promise<'ok' | 'error'>;
 }
 ```
 
@@ -1928,9 +1858,9 @@ export type SupabaseListenerType = 'presence' | 'broadcast' | 'postgres_changes'
 
 ```ts
 export interface SupabaseMock extends RealtimeMock {
-  readonly provider: 'supabase';
-  channel(topic: string): SupabaseChannel;
-  removeAllChannels(): Promise<void>;
+    readonly provider: 'supabase';
+    channel(topic: string): SupabaseChannel;
+    removeAllChannels(): Promise<void>;
 }
 ```
 
@@ -1940,9 +1870,9 @@ export interface SupabaseMock extends RealtimeMock {
 
 ```ts
 export interface SupabasePostgresChangesFilter {
-  event: '*' | 'INSERT' | 'UPDATE' | 'DELETE';
-  schema?: string;
-  table?: string;
+    event: '*' | 'INSERT' | 'UPDATE' | 'DELETE';
+    schema?: string;
+    table?: string;
 }
 ```
 
@@ -1952,12 +1882,12 @@ export interface SupabasePostgresChangesFilter {
 
 ```ts
 export interface SupabasePostgresChangesPayload<TRow = Record<string, unknown>> {
-  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
-  schema: string;
-  table: string;
-  old: TRow | null;
-  new: TRow | null;
-  commit_timestamp: string;
+    eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+    schema: string;
+    table: string;
+    old: TRow | null;
+    new: TRow | null;
+    commit_timestamp: string;
 }
 ```
 
@@ -1967,7 +1897,7 @@ export interface SupabasePostgresChangesPayload<TRow = Record<string, unknown>> 
 
 ```ts
 export interface SupabasePresenceFilter {
-  event: 'sync' | 'join' | 'leave';
+    event: 'sync' | 'join' | 'leave';
 }
 ```
 
@@ -1977,9 +1907,15 @@ export interface SupabasePresenceFilter {
 
 ```ts
 export interface SupabasePresencePayload {
-  event: 'sync' | 'join' | 'leave';
-  newPresences?: Array<{ userId: string; [k: string]: unknown }>;
-  leftPresences?: Array<{ userId: string; [k: string]: unknown }>;
+    event: 'sync' | 'join' | 'leave';
+    newPresences?: Array<{
+        userId: string;
+        [k: string]: unknown;
+    }>;
+    leftPresences?: Array<{
+        userId: string;
+        [k: string]: unknown;
+    }>;
 }
 ```
 
@@ -2001,12 +1937,12 @@ WebTransport uni-directional axis — uni stream + Datagram + reset stream を m
 
 ```ts
 export interface UniStreamHandle {
-  readonly id: string;
-  readonly state: 'open' | 'reset' | 'closed';
-  write(data: Uint8Array): Promise<void>;
-  close(): Promise<void>;
-  /** stream を強制 reset (WebTransport writer.abort() 相当)。 */
-  reset(errorCode: number): Promise<void>;
+    readonly id: string;
+    readonly state: 'open' | 'reset' | 'closed';
+    write(data: Uint8Array): Promise<void>;
+    close(): Promise<void>;
+    /** stream を強制 reset (WebTransport writer.abort() 相当)。 */
+    reset(errorCode: number): Promise<void>;
 }
 ```
 
@@ -2016,10 +1952,10 @@ export interface UniStreamHandle {
 
 ```ts
 export interface VoiceAudioChunk {
-  sessionId: string;
-  sequenceNumber: number;
-  byteLength: number;
-  durationMs: number;
+    sessionId: string;
+    sequenceNumber: number;
+    byteLength: number;
+    durationMs: number;
 }
 ```
 
@@ -2031,9 +1967,9 @@ LLM voice streaming axis — OpenAI Realtime API + Anthropic voice + audio strea
 
 ```ts
 export interface VoiceSession {
-  sessionId: string;
-  model: string;
-  voice: string;
+    sessionId: string;
+    model: string;
+    voice: string;
 }
 ```
 
@@ -2043,12 +1979,15 @@ export interface VoiceSession {
 
 ```ts
 export interface VoiceStreamingMock extends SemanticsMock {
-  readonly protocol: 'ai-media';
-  readonly axis: 'voice-streaming';
-  openSession(input: VoiceSession): Promise<void>;
-  sendAudioChunk(input: VoiceAudioChunk): Promise<void>;
-  receiveResponseChunk(input: VoiceAudioChunk): Promise<void>;
-  completeTurn(input: { sessionId: string; totalDurationMs: number }): Promise<void>;
+    readonly protocol: 'ai-media';
+    readonly axis: 'voice-streaming';
+    openSession(input: VoiceSession): Promise<void>;
+    sendAudioChunk(input: VoiceAudioChunk): Promise<void>;
+    receiveResponseChunk(input: VoiceAudioChunk): Promise<void>;
+    completeTurn(input: {
+        sessionId: string;
+        totalDurationMs: number;
+    }): Promise<void>;
 }
 ```
 
@@ -2058,12 +1997,27 @@ export interface VoiceStreamingMock extends SemanticsMock {
 
 ```ts
 export interface WebCodecsDecoderMock extends SemanticsMock {
-  readonly protocol: 'webcodecs';
-  readonly axis: 'webcodecs-decoder';
-  configure(input: { decoderId: string; config: DecoderConfig }): Promise<void>;
-  decodeFrame(input: { decoderId: string; frameNumber: number; type: 'key' | 'delta' }): Promise<void>;
-  reorderFrame(input: { decoderId: string; frameNumber: number; delayMs: number }): Promise<void>;
-  dropFrame(input: { decoderId: string; frameNumber: number; reason: string }): Promise<void>;
+    readonly protocol: 'webcodecs';
+    readonly axis: 'webcodecs-decoder';
+    configure(input: {
+        decoderId: string;
+        config: DecoderConfig;
+    }): Promise<void>;
+    decodeFrame(input: {
+        decoderId: string;
+        frameNumber: number;
+        type: 'key' | 'delta';
+    }): Promise<void>;
+    reorderFrame(input: {
+        decoderId: string;
+        frameNumber: number;
+        delayMs: number;
+    }): Promise<void>;
+    dropFrame(input: {
+        decoderId: string;
+        frameNumber: number;
+        reason: string;
+    }): Promise<void>;
 }
 ```
 
@@ -2073,12 +2027,25 @@ export interface WebCodecsDecoderMock extends SemanticsMock {
 
 ```ts
 export interface WebCodecsEncoderMock extends SemanticsMock {
-  readonly protocol: 'webcodecs';
-  readonly axis: 'webcodecs-encoder';
-  configure(input: { encoderId: string; config: EncoderConfig }): Promise<void>;
-  encodeFrame(input: { encoderId: string; frameNumber: number; byteLength: number }): Promise<void>;
-  forceKeyframe(input: { encoderId: string; frameNumber: number }): Promise<void>;
-  reportHardwareUsed(input: { encoderId: string; hardware: boolean }): Promise<void>;
+    readonly protocol: 'webcodecs';
+    readonly axis: 'webcodecs-encoder';
+    configure(input: {
+        encoderId: string;
+        config: EncoderConfig;
+    }): Promise<void>;
+    encodeFrame(input: {
+        encoderId: string;
+        frameNumber: number;
+        byteLength: number;
+    }): Promise<void>;
+    forceKeyframe(input: {
+        encoderId: string;
+        frameNumber: number;
+    }): Promise<void>;
+    reportHardwareUsed(input: {
+        encoderId: string;
+        hardware: boolean;
+    }): Promise<void>;
 }
 ```
 
@@ -2088,9 +2055,9 @@ export interface WebCodecsEncoderMock extends SemanticsMock {
 
 ```ts
 export interface WebRtcDataChannelMock extends SemanticsMock {
-  readonly protocol: 'webrtc';
-  readonly axis: 'webrtc-data-channel';
-  createDataChannel(options?: DataChannelOptions): DataChannelHandle;
+    readonly protocol: 'webrtc';
+    readonly axis: 'webrtc-data-channel';
+    createDataChannel(options?: DataChannelOptions): DataChannelHandle;
 }
 ```
 
@@ -2100,32 +2067,75 @@ export interface WebRtcDataChannelMock extends SemanticsMock {
 
 ```ts
 export interface WebRtcIceMock extends SemanticsMock {
-  readonly protocol: 'webrtc';
-  readonly axis: 'webrtc-ice';
-  readonly gatheringState: IceGatheringState;
-  readonly connectionState: IceConnectionState;
-  /** ICE gathering 開始 — n 件の local candidate を trickle 送出。 */
-  startGathering(localCount: number): Promise<void>;
-  /** remote candidate を追加。 */
-  addRemoteCandidate(candidateId: string): Promise<void>;
-  /** connectivity check 開始。 */
-  startConnectivityCheck(): Promise<void>;
-  /** TURN relay 経路を強制 (host / srflx 失敗時の fallback 用)。 */
-  forceRelay(): Promise<void>;
-  /** 統計取得。 */
-  getIceStats(): IceStats;
+    readonly protocol: 'webrtc';
+    readonly axis: 'webrtc-ice';
+    readonly gatheringState: IceGatheringState;
+    readonly connectionState: IceConnectionState;
+    /** ICE gathering 開始 — n 件の local candidate を trickle 送出。 */
+    startGathering(localCount: number): Promise<void>;
+    /** remote candidate を追加。 */
+    addRemoteCandidate(candidateId: string): Promise<void>;
+    /** connectivity check 開始。 */
+    startConnectivityCheck(): Promise<void>;
+    /** TURN relay 経路を強制 (host / srflx 失敗時の fallback 用)。 */
+    forceRelay(): Promise<void>;
+    /** 統計取得。 */
+    getIceStats(): IceStats;
 }
 ```
 
 #### `WebRtcMediaStream`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L49) `packages/realtime/src/semantics/webrtc-track.ts`
+公開 entry point から解決しています。
+
+`MediaStream` を `WebRtcMediaStream` として公開しています。
 
 ```ts
-export interface WebRtcMediaStream {
-  readonly id: string;
-  readonly tracks: MediaTrack[];
-}
+export {
+  createHttp3PushMock,
+  createQuicMultiplexMock,
+  createWebRtcDataChannelMock,
+  createWebRtcIceMock,
+  createWebRtcSignalingMock,
+  createWebRtcTrackMock,
+  createWebTransportBiMock,
+  createWebTransportUniMock,
+  initialMetrics as initialSemanticsMetrics,
+  type BiStreamHandle,
+  type BiStreamOptions,
+  type DataChannelHandle,
+  type DataChannelOptions,
+  type HpackEntry,
+  type Http3PushMock,
+  type IceCandidate,
+  type IceConnectionState,
+  type IceGatheringState,
+  type IceStats,
+  type MediaTrack,
+  type PushPriority,
+  type PushPromise,
+  type QuicMultiplexMock,
+  type QuicStreamHandle,
+  type QuicStreamOptions,
+  type SemanticsAxis,
+  type SemanticsEvent,
+  type SemanticsEventKind,
+  type SemanticsMetrics,
+  type SemanticsMock,
+  type SemanticsMockConfig,
+  type SemanticsProtocol,
+  type SignalingSdp,
+  type SimulcastLayer,
+  type TrackKind,
+  type UniStreamHandle,
+  type WebRtcDataChannelMock,
+  type WebRtcIceMock,
+  type WebRtcMediaStream,
+  type WebRtcSignalingMock,
+  type WebRtcTrackMock,
+  type WebTransportBiMock,
+  type WebTransportUniMock,
+} from './semantics/index.js';
 ```
 
 #### `WebRtcSignalingMock`
@@ -2134,16 +2144,16 @@ export interface WebRtcMediaStream {
 
 ```ts
 export interface WebRtcSignalingMock extends SemanticsMock {
-  readonly protocol: 'webrtc';
-  readonly axis: 'webrtc-signaling';
-  /** 新規セッション開始 → offer 生成 + emit。 */
-  createOffer(): Promise<SignalingSdp>;
-  /** offer 受信 → answer 生成 + emit。 */
-  createAnswer(offer: SignalingSdp): Promise<SignalingSdp>;
-  /** ICE candidate を n 件 trickle 送出。 */
-  emitIceCandidates(count: number): Promise<IceCandidate[]>;
-  /** track 追加時の renegotiation 発火。 */
-  renegotiate(): Promise<SignalingSdp>;
+    readonly protocol: 'webrtc';
+    readonly axis: 'webrtc-signaling';
+    /** 新規セッション開始 → offer 生成 + emit。 */
+    createOffer(): Promise<SignalingSdp>;
+    /** offer 受信 → answer 生成 + emit。 */
+    createAnswer(offer: SignalingSdp): Promise<SignalingSdp>;
+    /** ICE candidate を n 件 trickle 送出。 */
+    emitIceCandidates(count: number): Promise<IceCandidate[]>;
+    /** track 追加時の renegotiation 発火。 */
+    renegotiate(): Promise<SignalingSdp>;
 }
 ```
 
@@ -2153,18 +2163,23 @@ export interface WebRtcSignalingMock extends SemanticsMock {
 
 ```ts
 export interface WebRtcTrackMock extends SemanticsMock {
-  readonly protocol: 'webrtc';
-  readonly axis: 'webrtc-track';
-  /** getUserMedia 相当 — audio / video track を含む stream を生成。 */
-  getUserMedia(constraints?: { audio?: boolean; video?: boolean }): Promise<MediaStream>;
-  /** track 追加 — sender 相当の handle を返す。 */
-  addTrack(track: MediaTrack, stream: MediaStream): Promise<{ trackId: string }>;
-  /** track 削除。 */
-  removeTrack(trackId: string): Promise<void>;
-  /** track mute (enabled=false 相当)。 */
-  muteTrack(trackId: string): Promise<void>;
-  /** track unmute。 */
-  unmuteTrack(trackId: string): Promise<void>;
+    readonly protocol: 'webrtc';
+    readonly axis: 'webrtc-track';
+    /** getUserMedia 相当 — audio / video track を含む stream を生成。 */
+    getUserMedia(constraints?: {
+        audio?: boolean;
+        video?: boolean;
+    }): Promise<MediaStream>;
+    /** track 追加 — sender 相当の handle を返す。 */
+    addTrack(track: MediaTrack, stream: MediaStream): Promise<{
+        trackId: string;
+    }>;
+    /** track 削除。 */
+    removeTrack(trackId: string): Promise<void>;
+    /** track mute (enabled=false 相当)。 */
+    muteTrack(trackId: string): Promise<void>;
+    /** track unmute。 */
+    unmuteTrack(trackId: string): Promise<void>;
 }
 ```
 
@@ -2174,9 +2189,9 @@ export interface WebRtcTrackMock extends SemanticsMock {
 
 ```ts
 export interface WebTransportBiMock extends SemanticsMock {
-  readonly protocol: 'webtransport';
-  readonly axis: 'webtransport-bi';
-  createBiStream(options?: BiStreamOptions): Promise<BiStreamHandle>;
+    readonly protocol: 'webtransport';
+    readonly axis: 'webtransport-bi';
+    createBiStream(options?: BiStreamOptions): Promise<BiStreamHandle>;
 }
 ```
 
@@ -2186,10 +2201,10 @@ export interface WebTransportBiMock extends SemanticsMock {
 
 ```ts
 export interface WebTransportUniMock extends SemanticsMock {
-  readonly protocol: 'webtransport';
-  readonly axis: 'webtransport-uni';
-  createUniStream(): Promise<UniStreamHandle>;
-  sendDatagram(data: Uint8Array): Promise<void>;
+    readonly protocol: 'webtransport';
+    readonly axis: 'webtransport-uni';
+    createUniStream(): Promise<UniStreamHandle>;
+    sendDatagram(data: Uint8Array): Promise<void>;
 }
 ```
 
@@ -2199,12 +2214,20 @@ export interface WebTransportUniMock extends SemanticsMock {
 
 ```ts
 export interface WhisperStreamingMock extends SemanticsMock {
-  readonly protocol: 'ai-media';
-  readonly axis: 'whisper-streaming';
-  sendAudioChunk(input: { streamId: string; byteLength: number; durationMs: number }): Promise<void>;
-  emitPartialTranscript(input: WhisperTranscript): Promise<void>;
-  emitFinalTranscript(input: WhisperTranscript): Promise<void>;
-  triggerVad(input: { streamId: string; type: 'start' | 'end'; timestampMs: number }): Promise<void>;
+    readonly protocol: 'ai-media';
+    readonly axis: 'whisper-streaming';
+    sendAudioChunk(input: {
+        streamId: string;
+        byteLength: number;
+        durationMs: number;
+    }): Promise<void>;
+    emitPartialTranscript(input: WhisperTranscript): Promise<void>;
+    emitFinalTranscript(input: WhisperTranscript): Promise<void>;
+    triggerVad(input: {
+        streamId: string;
+        type: 'start' | 'end';
+        timestampMs: number;
+    }): Promise<void>;
 }
 ```
 
@@ -2216,11 +2239,11 @@ Whisper streaming ASR axis — Whisper streaming API (OpenAI + local WhisperCPP)
 
 ```ts
 export interface WhisperTranscript {
-  streamId: string;
-  text: string;
-  startMs: number;
-  endMs: number;
-  confidence: number;
+    streamId: string;
+    text: string;
+    startMs: number;
+    endMs: number;
+    confidence: number;
 }
 ```
 <!-- kiwa-public-api:end -->

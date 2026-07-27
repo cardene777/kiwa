@@ -21,7 +21,7 @@
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -30,9 +30,7 @@
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L61) `packages/solidstart/src/invoke-api-route.ts`
 
 ```ts
-export async function invokeApiRoute<TParams extends Record<string, string | undefined> = Record<string, string | undefined>>(
-  opts: InvokeApiRouteOptions<TParams>,
-): Promise<InvokeApiRouteResult>;
+export declare function invokeApiRoute<TParams extends Record<string, string | undefined> = Record<string, string | undefined>>(opts: InvokeApiRouteOptions<TParams>): Promise<InvokeApiRouteResult>;
 ```
 
 #### `invokeServerFunction`
@@ -42,9 +40,7 @@ export async function invokeApiRoute<TParams extends Record<string, string | und
 Invoke a SolidStart server function in isolation and capture its return value + redirect signal. Headers / cookies are exposed for assertion but the function itself receives them via the args contract (kiwa stays minimal: pass any context the function needs through `args`).
 
 ```ts
-export async function invokeServerFunction<TArgs extends readonly unknown[] = readonly unknown[], TResult = unknown>(
-  opts: InvokeServerFunctionOptions<TArgs, TResult>,
-): Promise<InvokeServerFunctionResult<TResult>>;
+export declare function invokeServerFunction<TArgs extends readonly unknown[] = readonly unknown[], TResult = unknown>(opts: InvokeServerFunctionOptions<TArgs, TResult>): Promise<InvokeServerFunctionResult<TResult>>;
 ```
 
 #### `json`
@@ -52,7 +48,7 @@ export async function invokeServerFunction<TArgs extends readonly unknown[] = re
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L95) `packages/solidstart/src/invoke-api-route.ts`
 
 ```ts
-export function json<T>(body: T, init?: ResponseInit): Response;
+export declare function json<T>(body: T, init?: ResponseInit): Response;
 ```
 
 #### `redirect`
@@ -60,7 +56,7 @@ export function json<T>(body: T, init?: ResponseInit): Response;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L80) `packages/solidstart/src/invoke-server-function.ts`
 
 ```ts
-export function redirect(url: string, status = 302): SolidStartRedirectSignal;
+export declare function redirect(url: string, status?: number): SolidStartRedirectSignal;
 ```
 
 #### `redirectResponse`
@@ -68,7 +64,7 @@ export function redirect(url: string, status = 302): SolidStartRedirectSignal;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L101) `packages/solidstart/src/invoke-api-route.ts`
 
 ```ts
-export function redirectResponse(location: string, status = 302): Response;
+export declare function redirectResponse(location: string, status?: number): Response;
 ```
 
 #### `SOLIDSTART_REDIRECT_SYMBOL`
@@ -76,7 +72,7 @@ export function redirectResponse(location: string, status = 302): Response;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L8) `packages/solidstart/src/invoke-server-function.ts`
 
 ```ts
-export declare const SOLIDSTART_REDIRECT_SYMBOL: typeof SOLIDSTART_REDIRECT_SYMBOL;
+export declare const SOLIDSTART_REDIRECT_SYMBOL: unique symbol;
 ```
 
 ### 型
@@ -86,9 +82,7 @@ export declare const SOLIDSTART_REDIRECT_SYMBOL: typeof SOLIDSTART_REDIRECT_SYMB
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L15) `packages/solidstart/src/invoke-api-route.ts`
 
 ```ts
-export type APIRouteHandler<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> = (
-  event: SimulatedAPIEvent<TParams>,
-) => Promise<Response> | Response;
+export type APIRouteHandler<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> = (event: SimulatedAPIEvent<TParams>) => Promise<Response> | Response;
 ```
 
 #### `InvokeApiRouteOptions`
@@ -97,14 +91,14 @@ export type APIRouteHandler<TParams extends Record<string, string | undefined> =
 
 ```ts
 export interface InvokeApiRouteOptions<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> {
-  readonly handler: APIRouteHandler<TParams>;
-  readonly url: string;
-  readonly method?: string;
-  readonly params?: TParams;
-  readonly headers?: Record<string, string>;
-  readonly formData?: Record<string, string>;
-  readonly jsonBody?: unknown;
-  readonly locals?: Record<string, unknown>;
+    readonly handler: APIRouteHandler<TParams>;
+    readonly url: string;
+    readonly method?: string;
+    readonly params?: TParams;
+    readonly headers?: Record<string, string>;
+    readonly formData?: Record<string, string>;
+    readonly jsonBody?: unknown;
+    readonly locals?: Record<string, unknown>;
 }
 ```
 
@@ -114,8 +108,11 @@ export interface InvokeApiRouteOptions<TParams extends Record<string, string | u
 
 ```ts
 export interface InvokeApiRouteResult {
-  readonly response: Response;
-  readonly redirect: { url: string; status: number } | null;
+    readonly response: Response;
+    readonly redirect: {
+        url: string;
+        status: number;
+    } | null;
 }
 ```
 
@@ -125,10 +122,10 @@ export interface InvokeApiRouteResult {
 
 ```ts
 export interface InvokeServerFunctionOptions<TArgs extends readonly unknown[], TResult> {
-  readonly fn: ServerFunctionFunction<TArgs, TResult>;
-  readonly args?: TArgs;
-  readonly headers?: Record<string, string>;
-  readonly cookies?: Record<string, string>;
+    readonly fn: ServerFunctionFunction<TArgs, TResult>;
+    readonly args?: TArgs;
+    readonly headers?: Record<string, string>;
+    readonly cookies?: Record<string, string>;
 }
 ```
 
@@ -138,13 +135,13 @@ export interface InvokeServerFunctionOptions<TArgs extends readonly unknown[], T
 
 ```ts
 export interface InvokeServerFunctionResult<TResult> {
-  readonly result: TResult | undefined;
-  readonly redirect: SolidStartRedirectSignal | null;
-  readonly error: unknown;
-  readonly env: {
-    readonly requestHeaders: Map<string, string>;
-    readonly requestCookies: Map<string, string>;
-  };
+    readonly result: TResult | undefined;
+    readonly redirect: SolidStartRedirectSignal | null;
+    readonly error: unknown;
+    readonly env: {
+        readonly requestHeaders: Map<string, string>;
+        readonly requestCookies: Map<string, string>;
+    };
 }
 ```
 
@@ -153,9 +150,7 @@ export interface InvokeServerFunctionResult<TResult> {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L16) `packages/solidstart/src/invoke-server-function.ts`
 
 ```ts
-export type ServerFunctionFunction<TArgs extends readonly unknown[] = readonly unknown[], TResult = unknown> = (
-  ...args: TArgs
-) => Promise<TResult> | TResult;
+export type ServerFunctionFunction<TArgs extends readonly unknown[] = readonly unknown[], TResult = unknown> = (...args: TArgs) => Promise<TResult> | TResult;
 ```
 
 #### `SimulatedAPIEvent`
@@ -164,10 +159,10 @@ export type ServerFunctionFunction<TArgs extends readonly unknown[] = readonly u
 
 ```ts
 export interface SimulatedAPIEvent<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> {
-  readonly request: Request;
-  readonly params: TParams;
-  readonly locals: Record<string, unknown>;
-  readonly nativeEvent: Record<string, unknown>;
+    readonly request: Request;
+    readonly params: TParams;
+    readonly locals: Record<string, unknown>;
+    readonly nativeEvent: Record<string, unknown>;
 }
 ```
 
@@ -177,9 +172,9 @@ export interface SimulatedAPIEvent<TParams extends Record<string, string | undef
 
 ```ts
 export interface SolidStartRedirectSignal {
-  readonly [SOLIDSTART_REDIRECT_SYMBOL]: true;
-  readonly url: string;
-  readonly status: number;
+    readonly [SOLIDSTART_REDIRECT_SYMBOL]: true;
+    readonly url: string;
+    readonly status: number;
 }
 ```
 <!-- kiwa-public-api:end -->

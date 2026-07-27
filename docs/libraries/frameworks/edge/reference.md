@@ -62,7 +62,7 @@ semantics entry point は edge platform の state machine を公開します。D
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/edge/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/edge/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -73,7 +73,7 @@ semantics entry point は edge platform の state machine を公開します。D
 Accept the pending upgrade, moving the socket 'open'. Rejects if the socket is not awaiting acceptance. Emits `websocket.accepted`.
 
 ```ts
-export function acceptWebSocket(session: WebSocketSession): AxisStep<WsState>;
+export declare function acceptWebSocket(session: WebSocketSession): AxisStep<WsState>;
 ```
 
 #### `AXIS_TO_EVENTS`
@@ -91,7 +91,7 @@ export declare const AXIS_TO_EVENTS: Record<EdgeAxis, NeutralEventName[]>;
 Bump schema version registry. Emits `do-migration.schema-bumped` and transitions to `schema-bumped`. Instances still hold old data until migrateInstance is called per instance.
 
 ```ts
-export function bumpSchema(session: DoMigrationSession): AxisStep<DoMigrationState>;
+export declare function bumpSchema(session: DoMigrationSession): AxisStep<DoMigrationState>;
 ```
 
 #### `closeStream`
@@ -101,10 +101,9 @@ export function bumpSchema(session: DoMigrationSession): AxisStep<DoMigrationSta
 Close the stream. Transitions to `closed` and emits `stream.closed` with the final chunk + byte totals. Rejects if the stream is already `closed`.
 
 ```ts
-export function closeStream(
-  session: StreamSession,
-  input: { reason: string },
-): AxisStep<StreamState>;
+export declare function closeStream(session: StreamSession, input: {
+    reason: string;
+}): AxisStep<StreamState>;
 ```
 
 #### `closeWebSocket`
@@ -114,10 +113,9 @@ export function closeStream(
 Close the socket with a status code. Rejects if already closed. Emits `websocket.closed`.
 
 ```ts
-export function closeWebSocket(
-  session: WebSocketSession,
-  input: { code: number },
-): AxisStep<WsState>;
+export declare function closeWebSocket(session: WebSocketSession, input: {
+    code: number;
+}): AxisStep<WsState>;
 ```
 
 #### `collectFidelityCoverage`
@@ -127,7 +125,7 @@ export function closeWebSocket(
 Collect the platform × axis coverage grid. `platforms` is the list of platforms to inspect — usually all 3 (`cloudflare`, `vercel`, `deno`). The output is a flat row list `platforms.length * 16 = 48` for the default setup (8 v0.2 axes + 8 v1.2 advanced axes), plus `platforms` + `axes` roll-up lists so callers can assert on the grid dimensions.
 
 ```ts
-export function collectFidelityCoverage(platforms: EdgePlatform[]): FidelityCoverage;
+export declare function collectFidelityCoverage(platforms: EdgePlatform[]): FidelityCoverage;
 ```
 
 #### `completeCpu`
@@ -137,7 +135,7 @@ export function collectFidelityCoverage(platforms: EdgePlatform[]): FidelityCove
 Finish the invocation. Transitions to `completed` and emits `cpu.completed` with the used ratio. Rejects if the session never started (`idle`).
 
 ```ts
-export function completeCpu(session: CpuSession): AxisStep<CpuState>;
+export declare function completeCpu(session: CpuSession): AxisStep<CpuState>;
 ```
 
 #### `completeCron`
@@ -147,10 +145,9 @@ export function completeCpu(session: CpuSession): AxisStep<CpuState>;
 Finish a running invocation successfully. Transitions `running` → `completed` and emits `cron.completed`. Rejects if not `running`.
 
 ```ts
-export function completeCron(
-  session: CronSession,
-  input: { durationMs: number },
-): AxisStep<CronState>;
+export declare function completeCron(session: CronSession, input: {
+    durationMs: number;
+}): AxisStep<CronState>;
 ```
 
 #### `completeMiddleware`
@@ -160,7 +157,7 @@ export function completeCron(
 Complete the chain after every stage has been entered (or after the final stage). Emits `middleware.completed` with the total stage count.
 
 ```ts
-export function completeMiddleware(session: MiddlewareSession): AxisStep<MiddlewareState>;
+export declare function completeMiddleware(session: MiddlewareSession): AxisStep<MiddlewareState>;
 ```
 
 #### `completeMultipart`
@@ -170,7 +167,7 @@ export function completeMiddleware(session: MiddlewareSession): AxisStep<Middlew
 Complete the multipart upload once all parts are uploaded and verified. Emits `r2.multipart-completed`. Rejects if any part is missing or unverified.
 
 ```ts
-export function completeMultipart(session: R2MultipartSession): AxisStep<R2State>;
+export declare function completeMultipart(session: R2MultipartSession): AxisStep<R2State>;
 ```
 
 #### `completeReconnect`
@@ -180,7 +177,7 @@ export function completeMultipart(session: R2MultipartSession): AxisStep<R2State
 Complete reconnection — connection is fully live again. Transitions to `reconnected` and emits `ws-hibernation.reconnected`.
 
 ```ts
-export function completeReconnect(session: WsHibernationSession): AxisStep<WsHibernationState>;
+export declare function completeReconnect(session: WsHibernationSession): AxisStep<WsHibernationState>;
 ```
 
 #### `completeRollout`
@@ -190,7 +187,7 @@ export function completeReconnect(session: WsHibernationSession): AxisStep<WsHib
 Complete the rollout once every instance is at `toVersion`. Emits `do-migration.rolled-out`. Rejects if any instance is still on the old version (partial rollout).
 
 ```ts
-export function completeRollout(session: DoMigrationSession): AxisStep<DoMigrationState>;
+export declare function completeRollout(session: DoMigrationSession): AxisStep<DoMigrationState>;
 ```
 
 #### `completeSubrequest`
@@ -200,10 +197,10 @@ export function completeRollout(session: DoMigrationSession): AxisStep<DoMigrati
 Mark an outbound subrequest as finished. Emits `subrequest.completed` with the final count. Does not mutate state — a completed request that already tripped the limit stays `limited`.
 
 ```ts
-export function completeSubrequest(
-  session: SubrequestSession,
-  input: { url: string; durationMs: number },
-): AxisStep<SubrequestState>;
+export declare function completeSubrequest(session: SubrequestSession, input: {
+    url: string;
+    durationMs: number;
+}): AxisStep<SubrequestState>;
 ```
 
 #### `countSubrequest`
@@ -213,7 +210,7 @@ export function completeSubrequest(
 Count an admitted subrequest against the budget. Increments the count and emits `subrequest.limited` when the count reaches the hard limit (state → `limited`), otherwise `subrequest.counted` — flipping to `approaching-limit` once the warning threshold is crossed.
 
 ```ts
-export function countSubrequest(session: SubrequestSession): AxisStep<SubrequestState>;
+export declare function countSubrequest(session: SubrequestSession): AxisStep<SubrequestState>;
 ```
 
 #### `createDurableObject`
@@ -223,9 +220,9 @@ export function countSubrequest(session: SubrequestSession): AxisStep<Subrequest
 Create a durable object instance. State starts at 'initialized' and no request has been served yet. Emits `durable-object.created`.
 
 ```ts
-export function createDurableObject(input: {
-  id: string;
-  platform: EdgePlatform;
+export declare function createDurableObject(input: {
+    id: string;
+    platform: EdgePlatform;
 }): DurableObjectSession;
 ```
 
@@ -236,9 +233,9 @@ export function createDurableObject(input: {
 Construct a KV session. No event is emitted — the store is simply opened. Defaults to eventual consistency, the common edge-KV replication model.
 
 ```ts
-export function createEdgeKvSession(input: {
-  platform: EdgePlatform;
-  state?: KvState;
+export declare function createEdgeKvSession(input: {
+    platform: EdgePlatform;
+    state?: KvState;
 }): EdgeKvSession;
 ```
 
@@ -249,10 +246,10 @@ export function createEdgeKvSession(input: {
 Construct a geo-replicated session. Starts 'in-sync' at version 0 with every replica at zero lag. No event is emitted.
 
 ```ts
-export function createGeoReplicatedSession(input: {
-  platform: EdgePlatform;
-  primaryRegion: GeoRegion;
-  replicaRegions: GeoRegion[];
+export declare function createGeoReplicatedSession(input: {
+    platform: EdgePlatform;
+    primaryRegion: GeoRegion;
+    replicaRegions: GeoRegion[];
 }): GeoReplicatedSession;
 ```
 
@@ -261,7 +258,7 @@ export function createGeoReplicatedSession(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/edge/src/kv-mock.ts#L42) `packages/edge/src/kv-mock.ts`
 
 ```ts
-export function createKvNamespace(initial: Record<string, string> = {}): KVNamespace;
+export declare function createKvNamespace(initial?: Record<string, string>): KVNamespace;
 ```
 
 #### `enterMiddleware`
@@ -271,7 +268,7 @@ export function createKvNamespace(initial: Record<string, string> = {}): KVNames
 Enter the next stage. Emits `middleware.entered` and transitions to `running`. Rejects if the chain has already short-circuited or completed.
 
 ```ts
-export function enterMiddleware(session: MiddlewareSession): AxisStep<MiddlewareState>;
+export declare function enterMiddleware(session: MiddlewareSession): AxisStep<MiddlewareState>;
 ```
 
 #### `evictExpired`
@@ -281,7 +278,9 @@ export function enterMiddleware(session: MiddlewareSession): AxisStep<Middleware
 Evict warm instances whose last invocation is older than TTL at the simulated wall-clock `nowMs`. Returns the count evicted. Provisioned instances are never evicted.
 
 ```ts
-export function evictExpired(session: ColdStartSession, input: { nowMs: number }): number;
+export declare function evictExpired(session: ColdStartSession, input: {
+    nowMs: number;
+}): number;
 ```
 
 #### `failCron`
@@ -291,10 +290,9 @@ export function evictExpired(session: ColdStartSession, input: { nowMs: number }
 Fail a running invocation. Increments `retryCount`; if retries remain the session re-enters the `scheduled` state (to be picked up again), otherwise it terminates in `failed`. Emits `cron.failed` with `willRetry` reflecting the decision. Rejects if the session already `completed`.
 
 ```ts
-export function failCron(
-  session: CronSession,
-  input: { reason: string },
-): AxisStep<CronState>;
+export declare function failCron(session: CronSession, input: {
+    reason: string;
+}): AxisStep<CronState>;
 ```
 
 #### `fireAlarm`
@@ -304,7 +302,7 @@ export function failCron(
 Fire the scheduled alarm. Wakes the object into 'active' regardless of the prior state and clears the pending alarm. Emits `durable-object.alarm-fired`.
 
 ```ts
-export function fireAlarm(session: DurableObjectSession): AxisStep<DoState>;
+export declare function fireAlarm(session: DurableObjectSession): AxisStep<DoState>;
 ```
 
 #### `forceConvergence`
@@ -314,7 +312,7 @@ export function fireAlarm(session: DurableObjectSession): AxisStep<DoState>;
 Force convergence by advancing the observed pointer on every replica to the latest write. Returns the count of keys reconciled.
 
 ```ts
-export function forceConvergence(session: KvConsistencySession): number;
+export declare function forceConvergence(session: KvConsistencySession): number;
 ```
 
 #### `geoPrimaryWrite`
@@ -324,10 +322,9 @@ export function forceConvergence(session: KvConsistencySession): number;
 Write to the primary region. Bumps the version and marks every replica as lagging (they have not yet received the new version). Emits `geo.primary-write`.
 
 ```ts
-export function geoPrimaryWrite(
-  session: GeoReplicatedSession,
-  input: { data: string },
-): AxisStep<GeoState>;
+export declare function geoPrimaryWrite(session: GeoReplicatedSession, input: {
+    data: string;
+}): AxisStep<GeoState>;
 ```
 
 #### `hibernate`
@@ -337,10 +334,9 @@ export function geoPrimaryWrite(
 Hibernate the connection (idle timeout). Transitions to `hibernated` and emits `ws-hibernation.entered`. State is preserved in storage.
 
 ```ts
-export function hibernate(
-  session: WsHibernationSession,
-  input: { nowMs: number },
-): AxisStep<WsHibernationState>;
+export declare function hibernate(session: WsHibernationSession, input: {
+    nowMs: number;
+}): AxisStep<WsHibernationState>;
 ```
 
 #### `initiateMigration`
@@ -350,11 +346,11 @@ export function hibernate(
 Initiate a migration from `fromVersion` to `toVersion` for a set of instances. Emits `do-migration.initiated`. All instances start at `fromVersion`.
 
 ```ts
-export function initiateMigration(input: {
-  platform: EdgePlatform;
-  fromVersion: number;
-  toVersion: number;
-  instanceIds: string[];
+export declare function initiateMigration(input: {
+    platform: EdgePlatform;
+    fromVersion: number;
+    toVersion: number;
+    instanceIds: string[];
 }): DoMigrationSession;
 ```
 
@@ -365,10 +361,10 @@ export function initiateMigration(input: {
 Initiate a multipart upload with a known total part count. Emits `r2.multipart-initiated` and enters `initiated`.
 
 ```ts
-export function initiateMultipart(input: {
-  platform: EdgePlatform;
-  uploadId: string;
-  totalParts: number;
+export declare function initiateMultipart(input: {
+    platform: EdgePlatform;
+    uploadId: string;
+    totalParts: number;
 }): R2MultipartSession;
 ```
 
@@ -379,10 +375,10 @@ export function initiateMultipart(input: {
 Invoke a function with `instanceId` at simulated wall-clock `nowMs`. The class emitted depends on pool state — `provisioned` if reserved, `warm` if within TTL of last invoke, `cold` otherwise. After invocation the instance is marked warm.
 
 ```ts
-export function invokeColdStart(
-  session: ColdStartSession,
-  input: { instanceId: string; nowMs: number },
-): AxisStep<ColdStartClass>;
+export declare function invokeColdStart(session: ColdStartSession, input: {
+    instanceId: string;
+    nowMs: number;
+}): AxisStep<ColdStartClass>;
 ```
 
 #### `invokeEdgeHandler`
@@ -392,9 +388,7 @@ export function invokeColdStart(
 Invoke an edge runtime fetch handler in isolation and capture the returned Response + ExecutionContext side effects. The caller supplies `env` so KV / R2 / vars stay explicit in each test (no global state).
 
 ```ts
-export async function invokeEdgeHandler<TEnv extends EdgeEnvBindings = EdgeEnvBindings>(
-  opts: InvokeEdgeHandlerOptions<TEnv>,
-): Promise<InvokeEdgeHandlerResult>;
+export declare function invokeEdgeHandler<TEnv extends EdgeEnvBindings = EdgeEnvBindings>(opts: InvokeEdgeHandlerOptions<TEnv>): Promise<InvokeEdgeHandlerResult>;
 ```
 
 #### `kvRangeQuery`
@@ -404,10 +398,13 @@ export async function invokeEdgeHandler<TEnv extends EdgeEnvBindings = EdgeEnvBi
 Range query over a key prefix. Returns the matching keys (sorted, up to `limit`) alongside the emitted step. Emits `kv.read` since a range scan is a store read. `limit` defaults to no cap.
 
 ```ts
-export function kvRangeQuery(
-  session: EdgeKvSession,
-  input: { prefix: string; limit?: number },
-): { matches: string[]; step: AxisStep<KvState> };
+export declare function kvRangeQuery(session: EdgeKvSession, input: {
+    prefix: string;
+    limit?: number;
+}): {
+    matches: string[];
+    step: AxisStep<KvState>;
+};
 ```
 
 #### `kvRead`
@@ -417,7 +414,9 @@ export function kvRangeQuery(
 Read a key. Three outcomes: - cache warm → `kv.cache-hit` - store only → `kv.read` and the cache is populated (read-through) - absent → `kv.cache-miss`
 
 ```ts
-export function kvRead(session: EdgeKvSession, input: { key: string }): AxisStep<KvState>;
+export declare function kvRead(session: EdgeKvSession, input: {
+    key: string;
+}): AxisStep<KvState>;
 ```
 
 #### `kvWrite`
@@ -427,10 +426,10 @@ export function kvRead(session: EdgeKvSession, input: { key: string }): AxisStep
 Write a key. Updates the backing store and invalidates the cache entry so the next read goes through to the store. Emits `kv.write`.
 
 ```ts
-export function kvWrite(
-  session: EdgeKvSession,
-  input: { key: string; value: string },
-): AxisStep<KvState>;
+export declare function kvWrite(session: EdgeKvSession, input: {
+    key: string;
+    value: string;
+}): AxisStep<KvState>;
 ```
 
 #### `markReplicaLagged`
@@ -440,10 +439,10 @@ export function kvWrite(
 Report replication lag for a specific replica. Rejects an unknown region. Emits `geo.replica-lagged`.
 
 ```ts
-export function markReplicaLagged(
-  session: GeoReplicatedSession,
-  input: { region: GeoRegion; lagMs: number },
-): AxisStep<GeoState>;
+export declare function markReplicaLagged(session: GeoReplicatedSession, input: {
+    region: GeoRegion;
+    lagMs: number;
+}): AxisStep<GeoState>;
 ```
 
 #### `markUnhealthy`
@@ -453,10 +452,9 @@ export function markReplicaLagged(
 Mark a POP unhealthy (e.g. probe failed). Later selectByLatency calls will skip it.
 
 ```ts
-export function markUnhealthy(
-  session: RoutingSession,
-  input: { popId: string },
-): void;
+export declare function markUnhealthy(session: RoutingSession, input: {
+    popId: string;
+}): void;
 ```
 
 #### `matchGeo`
@@ -466,10 +464,10 @@ export function markUnhealthy(
 Match request geo to a region. Returns POPs in that region (empty if none). Emits `routing.geo-matched` with match count.
 
 ```ts
-export function matchGeo(
-  session: RoutingSession,
-  input: { requestId: string; region: string },
-): AxisStep<RoutingState>;
+export declare function matchGeo(session: RoutingSession, input: {
+    requestId: string;
+    region: string;
+}): AxisStep<RoutingState>;
 ```
 
 #### `migrateInstance`
@@ -479,10 +477,9 @@ export function matchGeo(
 Migrate a single instance's data. Advances that instance's version to `toVersion` and increments the migrated count. Emits `do-migration.data-migrated`. Rejects if the instance is not registered or already migrated.
 
 ```ts
-export function migrateInstance(
-  session: DoMigrationSession,
-  input: { instanceId: string },
-): AxisStep<DoMigrationState>;
+export declare function migrateInstance(session: DoMigrationSession, input: {
+    instanceId: string;
+}): AxisStep<DoMigrationState>;
 ```
 
 #### `observeRead`
@@ -492,10 +489,11 @@ export function migrateInstance(
 Observe a read of `key` returning value at timestamp `readTs` from replica `replicaId`. Classifies: `stale` if readTs &lt; writes[key], `converged` if equal, `violated` if this read is older than a previously observed monotonic read on same session (monotonic-reads violation).
 
 ```ts
-export function observeRead(
-  session: KvConsistencySession,
-  input: { key: string; readTs: number; replicaId: string },
-): AxisStep<KvConsistencyState>;
+export declare function observeRead(session: KvConsistencySession, input: {
+    key: string;
+    readTs: number;
+    replicaId: string;
+}): AxisStep<KvConsistencyState>;
 ```
 
 #### `openStream`
@@ -505,11 +503,11 @@ export function observeRead(
 Open a response stream. `kind` defaults to `chunked` and `highWaterMark` to 65536 bytes (64 KiB). Emits `stream.opened` and seeds counters at zero.
 
 ```ts
-export function openStream(input: {
-  id: string;
-  platform: EdgePlatform;
-  kind?: StreamKind;
-  highWaterMark?: number;
+export declare function openStream(input: {
+    id: string;
+    platform: EdgePlatform;
+    kind?: StreamKind;
+    highWaterMark?: number;
 }): StreamSession;
 ```
 
@@ -520,10 +518,7 @@ export function openStream(input: {
 Translate a neutral event name to the platform dialect. Falls back to the neutral name if the platform has no specific dialect entry — this makes the map partial-safe without silent typos.
 
 ```ts
-export function platformEventName(
-  platform: EdgePlatform,
-  neutral: NeutralEventName,
-): string;
+export declare function platformEventName(platform: EdgePlatform, neutral: NeutralEventName): string;
 ```
 
 #### `preWarmInstance`
@@ -533,10 +528,10 @@ export function platformEventName(
 Explicitly pre-warm an instance without producing latency (e.g. via scheduled ping). Emits `cold-start.warmed` and marks the instance warm.
 
 ```ts
-export function preWarmInstance(
-  session: ColdStartSession,
-  input: { instanceId: string; nowMs: number },
-): AxisStep<ColdStartClass>;
+export declare function preWarmInstance(session: ColdStartSession, input: {
+    instanceId: string;
+    nowMs: number;
+}): AxisStep<ColdStartClass>;
 ```
 
 #### `readFromReplica`
@@ -546,10 +541,10 @@ export function preWarmInstance(
 Route a read. Picks the healthiest replica in the given region (or any healthy replica if region has none), or falls back to primary if all replicas are unhealthy. Emits `d1.replica-read` on success, `d1.replica-failover` on fallback.
 
 ```ts
-export function readFromReplica(
-  session: D1Session,
-  input: { query: string; preferredRegion?: string },
-): AxisStep<D1RoutingState>;
+export declare function readFromReplica(session: D1Session, input: {
+    query: string;
+    preferredRegion?: string;
+}): AxisStep<D1RoutingState>;
 ```
 
 #### `receiveAnycast`
@@ -559,10 +554,9 @@ export function readFromReplica(
 Receive an Anycast request at the network edge. Emits `routing.anycast-received` and returns the initial state.
 
 ```ts
-export function receiveAnycast(
-  session: RoutingSession,
-  input: { requestId: string },
-): AxisStep<RoutingState>;
+export declare function receiveAnycast(session: RoutingSession, input: {
+    requestId: string;
+}): AxisStep<RoutingState>;
 ```
 
 #### `recordWriteQuorum`
@@ -572,10 +566,10 @@ export function receiveAnycast(
 Record a write with monotonic timestamp `ts` reaching quorum. Emits `kv-consistency.write-quorum` and updates the write pointer. Later timestamps overwrite earlier ones (last-writer-wins).
 
 ```ts
-export function recordWriteQuorum(
-  session: KvConsistencySession,
-  input: { key: string; ts: number },
-): AxisStep<KvConsistencyState>;
+export declare function recordWriteQuorum(session: KvConsistencySession, input: {
+    key: string;
+    ts: number;
+}): AxisStep<KvConsistencyState>;
 ```
 
 #### `remainingBudget`
@@ -585,7 +579,7 @@ export function recordWriteQuorum(
 Remaining subrequest budget (never negative).
 
 ```ts
-export function remainingBudget(session: SubrequestSession): number;
+export declare function remainingBudget(session: SubrequestSession): number;
 ```
 
 #### `reportLag`
@@ -595,10 +589,10 @@ export function remainingBudget(session: SubrequestSession): number;
 Report replica lag observed (e.g. from replication log). If lag exceeds threshold, marks replica unhealthy and emits `d1.replica-lagged`.
 
 ```ts
-export function reportLag(
-  session: D1Session,
-  input: { replicaId: string; lagMs: number },
-): AxisStep<D1RoutingState>;
+export declare function reportLag(session: D1Session, input: {
+    replicaId: string;
+    lagMs: number;
+}): AxisStep<D1RoutingState>;
 ```
 
 #### `requestDurableObject`
@@ -608,10 +602,9 @@ export function reportLag(
 Route a fetch request to the object. Pins the instance 'active' and bumps the request counter. Emits `durable-object.requested`.
 
 ```ts
-export function requestDurableObject(
-  session: DurableObjectSession,
-  input: { url: string },
-): AxisStep<DoState>;
+export declare function requestDurableObject(session: DurableObjectSession, input: {
+    url: string;
+}): AxisStep<DoState>;
 ```
 
 #### `requestWebSocketUpgrade`
@@ -621,9 +614,9 @@ export function requestDurableObject(
 Begin the upgrade handshake. State starts 'pending' until the server accepts. Emits `websocket.upgrade-requested`.
 
 ```ts
-export function requestWebSocketUpgrade(input: {
-  id: string;
-  platform: EdgePlatform;
+export declare function requestWebSocketUpgrade(input: {
+    id: string;
+    platform: EdgePlatform;
 }): WebSocketSession;
 ```
 
@@ -634,10 +627,10 @@ export function requestWebSocketUpgrade(input: {
 Resolve a write conflict for a region by picking a winning version. Rejects an unknown region. Adopts the chosen version, clears every replica's lag and forces the session back to 'in-sync'. Emits `geo.conflict-resolved`.
 
 ```ts
-export function resolveConflict(
-  session: GeoReplicatedSession,
-  input: { region: GeoRegion; chosenVersion: number },
-): AxisStep<GeoState>;
+export declare function resolveConflict(session: GeoReplicatedSession, input: {
+    region: GeoRegion;
+    chosenVersion: number;
+}): AxisStep<GeoState>;
 ```
 
 #### `restoreState`
@@ -647,10 +640,9 @@ export function resolveConflict(
 Restore state from storage back into the resumed session. Confirms all expected keys are present and emits `ws-hibernation.state-restored`.
 
 ```ts
-export function restoreState(
-  session: WsHibernationSession,
-  input: { expectedKeys: string[] },
-): AxisStep<WsHibernationState>;
+export declare function restoreState(session: WsHibernationSession, input: {
+    expectedKeys: string[];
+}): AxisStep<WsHibernationState>;
 ```
 
 #### `resume`
@@ -660,10 +652,9 @@ export function restoreState(
 Resume a hibernated connection on inbound message. Transitions to `resuming` and emits `ws-hibernation.resumed` with time in hibernation.
 
 ```ts
-export function resume(
-  session: WsHibernationSession,
-  input: { nowMs: number },
-): AxisStep<WsHibernationState>;
+export declare function resume(session: WsHibernationSession, input: {
+    nowMs: number;
+}): AxisStep<WsHibernationState>;
 ```
 
 #### `resumeStream`
@@ -673,7 +664,7 @@ export function resume(
 Resume a back-pressured stream after the consumer drained. Transitions `backpressure` → `open`, drains one high-water mark worth of buffered bytes, and re-emits `stream.chunk-sent` tagged `resumed: true` (there is no distinct neutral resume event). Rejects unless the stream is `backpressure`.
 
 ```ts
-export function resumeStream(session: StreamSession): AxisStep<StreamState>;
+export declare function resumeStream(session: StreamSession): AxisStep<StreamState>;
 ```
 
 #### `rewriteRequest`
@@ -683,10 +674,9 @@ export function resumeStream(session: StreamSession): AxisStep<StreamState>;
 Rewrite the URL/request within the current stage (e.g. locale prefix, a/b split). Records the rewritten URL and emits `middleware.rewritten`.
 
 ```ts
-export function rewriteRequest(
-  session: MiddlewareSession,
-  input: { url: string },
-): AxisStep<MiddlewareState>;
+export declare function rewriteRequest(session: MiddlewareSession, input: {
+    url: string;
+}): AxisStep<MiddlewareState>;
 ```
 
 #### `rollbackMigration`
@@ -696,7 +686,7 @@ export function rewriteRequest(
 Roll back the migration by resetting every instance to `fromVersion`. Used on rollout failure or a bad schema shipping. Transitions to `rolled-back`.
 
 ```ts
-export function rollbackMigration(session: DoMigrationSession): void;
+export declare function rollbackMigration(session: DoMigrationSession): void;
 ```
 
 #### `scheduleCron`
@@ -706,12 +696,12 @@ export function rollbackMigration(session: DoMigrationSession): void;
 Schedule a cron invocation. Emits `cron.scheduled` and seeds the session in the `scheduled` state. `triggerType` defaults to `scheduled` (a plain time trigger) and `maxRetries` defaults to 3.
 
 ```ts
-export function scheduleCron(input: {
-  id: string;
-  platform: EdgePlatform;
-  triggerType?: CronTriggerType;
-  cronSpec: string;
-  maxRetries?: number;
+export declare function scheduleCron(input: {
+    id: string;
+    platform: EdgePlatform;
+    triggerType?: CronTriggerType;
+    cronSpec: string;
+    maxRetries?: number;
 }): CronSession;
 ```
 
@@ -722,10 +712,10 @@ export function scheduleCron(input: {
 Select the lowest-latency healthy POP. If no healthy POP exists, emits `routing.failover-triggered` and returns the healthiest fallback (accepting some latency penalty).
 
 ```ts
-export function selectByLatency(
-  session: RoutingSession,
-  input: { requestId: string; preferredRegion?: string },
-): AxisStep<RoutingState>;
+export declare function selectByLatency(session: RoutingSession, input: {
+    requestId: string;
+    preferredRegion?: string;
+}): AxisStep<RoutingState>;
 ```
 
 #### `sendChunk`
@@ -735,10 +725,9 @@ export function selectByLatency(
 Write a chunk to the stream. Advances `chunksSent` + `bytesSent`; when the buffered byte total exceeds the high-water mark the stream flips to `backpressure` and emits `stream.backpressure`, otherwise `stream.chunk-sent`. Rejects if the stream is already `closed`.
 
 ```ts
-export function sendChunk(
-  session: StreamSession,
-  input: { data: string },
-): AxisStep<StreamState>;
+export declare function sendChunk(session: StreamSession, input: {
+    data: string;
+}): AxisStep<StreamState>;
 ```
 
 #### `sendMessage`
@@ -748,10 +737,9 @@ export function sendChunk(
 Send a frame over the open socket. Rejects unless the socket is 'open'. Emits `websocket.message`.
 
 ```ts
-export function sendMessage(
-  session: WebSocketSession,
-  input: { data: string },
-): AxisStep<WsState>;
+export declare function sendMessage(session: WebSocketSession, input: {
+    data: string;
+}): AxisStep<WsState>;
 ```
 
 #### `shortCircuit`
@@ -761,10 +749,9 @@ export function sendMessage(
 Short-circuit the chain (auth reject, cache hit, terminating rewrite). Transitions to `short-circuited` and emits `middleware.short-circuited`. Downstream stages are not invoked.
 
 ```ts
-export function shortCircuit(
-  session: MiddlewareSession,
-  input: { reason: string },
-): AxisStep<MiddlewareState>;
+export declare function shortCircuit(session: MiddlewareSession, input: {
+    reason: string;
+}): AxisStep<MiddlewareState>;
 ```
 
 #### `startColdStartPool`
@@ -774,10 +761,10 @@ export function shortCircuit(
 Open a cold-start pool. `warmedTtlMs` defines how long a warm instance lives after last invocation before eviction. `provisionedIds` are always-on reservations that never fall back to cold.
 
 ```ts
-export function startColdStartPool(input: {
-  platform: EdgePlatform;
-  warmedTtlMs?: number;
-  provisionedIds?: string[];
+export declare function startColdStartPool(input: {
+    platform: EdgePlatform;
+    warmedTtlMs?: number;
+    provisionedIds?: string[];
 }): ColdStartSession;
 ```
 
@@ -788,7 +775,7 @@ export function startColdStartPool(input: {
 Begin consuming the CPU budget. Transitions `idle` → `running` and emits `cpu.started`. Rejects if the session is not `idle`.
 
 ```ts
-export function startCpu(session: CpuSession): AxisStep<CpuState>;
+export declare function startCpu(session: CpuSession): AxisStep<CpuState>;
 ```
 
 #### `startCpuBudget`
@@ -798,10 +785,10 @@ export function startCpu(session: CpuSession): AxisStep<CpuState>;
 Open a CPU budget. `budgetMs` defaults to 50 (Workers free-plan default) and `warningAtMs` to 40 (80% of the default budget). Emits nothing — the budget is `idle` until {@link startCpu}.
 
 ```ts
-export function startCpuBudget(input: {
-  platform: EdgePlatform;
-  budgetMs?: number;
-  warningAtMs?: number;
+export declare function startCpuBudget(input: {
+    platform: EdgePlatform;
+    budgetMs?: number;
+    warningAtMs?: number;
 }): CpuSession;
 ```
 
@@ -812,7 +799,7 @@ export function startCpuBudget(input: {
 Begin executing a scheduled invocation. Transitions `scheduled` → `running`, stamps `startedAt`, and emits `cron.started`. Rejects if the session is not currently `scheduled` (already running / terminal).
 
 ```ts
-export function startCron(session: CronSession): AxisStep<CronState>;
+export declare function startCron(session: CronSession): AxisStep<CronState>;
 ```
 
 #### `startD1`
@@ -822,11 +809,11 @@ export function startCron(session: CronSession): AxisStep<CronState>;
 Open a D1 session with primary + replica pool. `maxLagMs` is the threshold above which a replica is considered unhealthy and failover kicks in.
 
 ```ts
-export function startD1(input: {
-  platform: EdgePlatform;
-  primaryId: string;
-  replicas?: Omit<D1Replica, 'healthy'>[];
-  maxLagMs?: number;
+export declare function startD1(input: {
+    platform: EdgePlatform;
+    primaryId: string;
+    replicas?: Omit<D1Replica, 'healthy'>[];
+    maxLagMs?: number;
 }): D1Session;
 ```
 
@@ -837,10 +824,10 @@ export function startD1(input: {
 Open a hibernation session. Initial state is `live` with given `storedState` (persisted across hibernation).
 
 ```ts
-export function startHibernationSession(input: {
-  platform: EdgePlatform;
-  connectionId: string;
-  initialState?: Record<string, string | number | boolean>;
+export declare function startHibernationSession(input: {
+    platform: EdgePlatform;
+    connectionId: string;
+    initialState?: Record<string, string | number | boolean>;
 }): WsHibernationSession;
 ```
 
@@ -851,8 +838,8 @@ export function startHibernationSession(input: {
 Open a consistency session. Writes and observations start empty.
 
 ```ts
-export function startKvConsistency(input: {
-  platform: EdgePlatform;
+export declare function startKvConsistency(input: {
+    platform: EdgePlatform;
 }): KvConsistencySession;
 ```
 
@@ -863,9 +850,9 @@ export function startKvConsistency(input: {
 Open a middleware chain over the given ordered stages. The chain begins `idle` and needs an explicit `enterMiddleware` call per stage.
 
 ```ts
-export function startMiddlewareChain(input: {
-  platform: EdgePlatform;
-  stages: MiddlewareStage[];
+export declare function startMiddlewareChain(input: {
+    platform: EdgePlatform;
+    stages: MiddlewareStage[];
 }): MiddlewareSession;
 ```
 
@@ -876,9 +863,9 @@ export function startMiddlewareChain(input: {
 Open a routing session with a POP pool. Each POP has a region tag, measured latency, and health flag.
 
 ```ts
-export function startRoutingPool(input: {
-  platform: EdgePlatform;
-  pops: Pop[];
+export declare function startRoutingPool(input: {
+    platform: EdgePlatform;
+    pops: Pop[];
 }): RoutingSession;
 ```
 
@@ -889,10 +876,9 @@ export function startRoutingPool(input: {
 Announce an outbound subrequest. Emits `subrequest.started` but does not advance the count (starting is distinct from counting — a started request only counts once it is admitted via {@link countSubrequest}). Rejects when the budget is already `limited`.
 
 ```ts
-export function startSubrequest(
-  session: SubrequestSession,
-  input: { url: string },
-): AxisStep<SubrequestState>;
+export declare function startSubrequest(session: SubrequestSession, input: {
+    url: string;
+}): AxisStep<SubrequestState>;
 ```
 
 #### `startSubrequestBudget`
@@ -902,10 +888,10 @@ export function startSubrequest(
 Open a subrequest budget. `limit` defaults to 50 (Workers free-plan default) and `warningThreshold` to 40 (80% of the default limit). Emits nothing — the budget is inert until the first {@link startSubrequest}.
 
 ```ts
-export function startSubrequestBudget(input: {
-  platform: EdgePlatform;
-  limit?: number;
-  warningThreshold?: number;
+export declare function startSubrequestBudget(input: {
+    platform: EdgePlatform;
+    limit?: number;
+    warningThreshold?: number;
 }): SubrequestSession;
 ```
 
@@ -916,10 +902,9 @@ export function startSubrequestBudget(input: {
 Mark a replica caught up (lag → 0). When every replica has zero lag the session returns 'in-sync'. Rejects an unknown region. Emits `geo.replica-synced`.
 
 ```ts
-export function syncReplica(
-  session: GeoReplicatedSession,
-  input: { region: GeoRegion },
-): AxisStep<GeoState>;
+export declare function syncReplica(session: GeoReplicatedSession, input: {
+    region: GeoRegion;
+}): AxisStep<GeoState>;
 ```
 
 #### `tickCpu`
@@ -929,10 +914,9 @@ export function syncReplica(
 Advance the CPU clock by `deltaMs`. Emits `cpu.limited` when the accumulated time reaches the budget (state → `throttled`), `cpu.budget-warning` when it crosses the warning threshold (state → `warning`), otherwise a `cpu.started` heartbeat carrying the remaining budget. Rejects once the session is `throttled` or `completed`.
 
 ```ts
-export function tickCpu(
-  session: CpuSession,
-  input: { deltaMs: number },
-): AxisStep<CpuState>;
+export declare function tickCpu(session: CpuSession, input: {
+    deltaMs: number;
+}): AxisStep<CpuState>;
 ```
 
 #### `uploadPart`
@@ -942,10 +926,11 @@ export function tickCpu(
 Upload a single part with declared checksum. Transitions to `uploading` (first part) and emits `r2.part-uploaded`. Rejects if the part number is outside `[1, totalParts]`.
 
 ```ts
-export function uploadPart(
-  session: R2MultipartSession,
-  input: { partNumber: number; sizeBytes: number; checksum: string },
-): AxisStep<R2State>;
+export declare function uploadPart(session: R2MultipartSession, input: {
+    partNumber: number;
+    sizeBytes: number;
+    checksum: string;
+}): AxisStep<R2State>;
 ```
 
 #### `verifyChecksum`
@@ -955,10 +940,10 @@ export function uploadPart(
 Verify part checksum by comparing against expected. If mismatch, transitions to `checksum-failed` and requires the part to be re-uploaded. On match, marks verified and emits `r2.checksum-verified`.
 
 ```ts
-export function verifyChecksum(
-  session: R2MultipartSession,
-  input: { partNumber: number; expected: string },
-): AxisStep<R2State>;
+export declare function verifyChecksum(session: R2MultipartSession, input: {
+    partNumber: number;
+    expected: string;
+}): AxisStep<R2State>;
 ```
 
 #### `writeStorage`
@@ -968,10 +953,10 @@ export function verifyChecksum(
 Write a key to transactional storage. Implies an active handler, so the object stays 'active'. Emits `durable-object.storage-written`.
 
 ```ts
-export function writeStorage(
-  session: DurableObjectSession,
-  input: { key: string; value: string },
-): AxisStep<DoState>;
+export declare function writeStorage(session: DurableObjectSession, input: {
+    key: string;
+    value: string;
+}): AxisStep<DoState>;
 ```
 
 #### `writeToPrimary`
@@ -981,10 +966,9 @@ export function writeStorage(
 Route a write to primary. Emits `d1.primary-write`.
 
 ```ts
-export function writeToPrimary(
-  session: D1Session,
-  input: { query: string },
-): AxisStep<D1RoutingState>;
+export declare function writeToPrimary(session: D1Session, input: {
+    query: string;
+}): AxisStep<D1RoutingState>;
 ```
 
 ### 型
@@ -997,11 +981,11 @@ Axis result envelope returned by every state-machine step. Edge semantics are pu
 
 ```ts
 export interface AxisStep<TState> {
-  neutralEvent: NeutralEventName;
-  platformEvent: string;
-  state: TState;
-  platform: EdgePlatform;
-  metadata: Record<string, string | number | boolean>;
+    neutralEvent: NeutralEventName;
+    platformEvent: string;
+    state: TState;
+    platform: EdgePlatform;
+    metadata: Record<string, string | number | boolean>;
 }
 ```
 
@@ -1021,12 +1005,12 @@ export type ColdStartClass = 'cold' | 'warm' | 'provisioned';
 
 ```ts
 export interface ColdStartSession {
-  platform: EdgePlatform;
-  warmedIds: Set<string>;
-  provisionedIds: Set<string>;
-  warmedTtlMs: number;
-  lastInvokeAtMs: Record<string, number>;
-  history: AxisStep<ColdStartClass>[];
+    platform: EdgePlatform;
+    warmedIds: Set<string>;
+    provisionedIds: Set<string>;
+    warmedTtlMs: number;
+    lastInvokeAtMs: Record<string, number>;
+    history: AxisStep<ColdStartClass>[];
 }
 ```
 
@@ -1036,12 +1020,12 @@ export interface ColdStartSession {
 
 ```ts
 export interface CpuSession {
-  platform: EdgePlatform;
-  budgetMs: number;
-  warningAtMs: number;
-  elapsedMs: number;
-  state: CpuState;
-  history: AxisStep<CpuState>[];
+    platform: EdgePlatform;
+    budgetMs: number;
+    warningAtMs: number;
+    elapsedMs: number;
+    state: CpuState;
+    history: AxisStep<CpuState>[];
 }
 ```
 
@@ -1061,15 +1045,15 @@ export type CpuState = 'idle' | 'running' | 'warning' | 'throttled' | 'completed
 
 ```ts
 export interface CronSession {
-  id: string;
-  platform: EdgePlatform;
-  triggerType: CronTriggerType;
-  cronSpec: string;
-  state: CronState;
-  startedAt: number | null;
-  retryCount: number;
-  maxRetries: number;
-  history: AxisStep<CronState>[];
+    id: string;
+    platform: EdgePlatform;
+    triggerType: CronTriggerType;
+    cronSpec: string;
+    state: CronState;
+    startedAt: number | null;
+    retryCount: number;
+    maxRetries: number;
+    history: AxisStep<CronState>[];
 }
 ```
 
@@ -1099,10 +1083,10 @@ export type CronTriggerType = 'scheduled' | 'queue' | 'email';
 
 ```ts
 export interface D1Replica {
-  replicaId: string;
-  region: string;
-  lagMs: number;
-  healthy: boolean;
+    replicaId: string;
+    region: string;
+    lagMs: number;
+    healthy: boolean;
 }
 ```
 
@@ -1122,11 +1106,11 @@ export type D1RoutingState = 'primary' | 'replica' | 'lagged' | 'failing-over';
 
 ```ts
 export interface D1Session {
-  platform: EdgePlatform;
-  primaryId: string;
-  replicas: Map<string, D1Replica>;
-  maxLagMs: number;
-  history: AxisStep<D1RoutingState>[];
+    platform: EdgePlatform;
+    primaryId: string;
+    replicas: Map<string, D1Replica>;
+    maxLagMs: number;
+    history: AxisStep<D1RoutingState>[];
 }
 ```
 
@@ -1136,13 +1120,13 @@ export interface D1Session {
 
 ```ts
 export interface DoMigrationSession {
-  platform: EdgePlatform;
-  fromVersion: number;
-  toVersion: number;
-  instances: Map<string, number>;
-  migratedCount: number;
-  state: DoMigrationState;
-  history: AxisStep<DoMigrationState>[];
+    platform: EdgePlatform;
+    fromVersion: number;
+    toVersion: number;
+    instances: Map<string, number>;
+    migratedCount: number;
+    state: DoMigrationState;
+    history: AxisStep<DoMigrationState>[];
 }
 ```
 
@@ -1172,13 +1156,13 @@ export type DoState = 'initialized' | 'active' | 'hibernated' | 'terminated';
 
 ```ts
 export interface DurableObjectSession {
-  id: string;
-  platform: EdgePlatform;
-  state: DoState;
-  requestCount: number;
-  storageKeys: Map<string, string>;
-  scheduledAlarmAt: number | null;
-  history: AxisStep<DoState>[];
+    id: string;
+    platform: EdgePlatform;
+    state: DoState;
+    requestCount: number;
+    storageKeys: Map<string, string>;
+    scheduledAlarmAt: number | null;
+    history: AxisStep<DoState>[];
 }
 ```
 
@@ -1187,23 +1171,7 @@ export interface DurableObjectSession {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/edge/src/semantics/types.ts#L22) `packages/edge/src/semantics/types.ts`
 
 ```ts
-export type EdgeAxis =
-  | 'durable-object'
-  | 'websocket-edge'
-  | 'edge-kv'
-  | 'geo-replicated'
-  | 'cron-trigger'
-  | 'subrequest-limit'
-  | 'cpu-time-limit'
-  | 'streaming-response'
-  | 'cold-start'
-  | 'middleware-chain'
-  | 'kv-eventual-consistency'
-  | 'r2-multipart'
-  | 'd1-read-replica'
-  | 'do-state-migration'
-  | 'websocket-hibernation'
-  | 'global-routing';
+export type EdgeAxis = 'durable-object' | 'websocket-edge' | 'edge-kv' | 'geo-replicated' | 'cron-trigger' | 'subrequest-limit' | 'cpu-time-limit' | 'streaming-response' | 'cold-start' | 'middleware-chain' | 'kv-eventual-consistency' | 'r2-multipart' | 'd1-read-replica' | 'do-state-migration' | 'websocket-hibernation' | 'global-routing';
 ```
 
 #### `EdgeEnvBindings`
@@ -1212,7 +1180,7 @@ export type EdgeAxis =
 
 ```ts
 export interface EdgeEnvBindings {
-  readonly [bindingName: string]: KVNamespace | Record<string, unknown> | string | undefined;
+    readonly [bindingName: string]: KVNamespace | Record<string, unknown> | string | undefined;
 }
 ```
 
@@ -1221,11 +1189,7 @@ export interface EdgeEnvBindings {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/edge/src/invoke-edge-handler.ts#L23) `packages/edge/src/invoke-edge-handler.ts`
 
 ```ts
-export type EdgeFetchHandler<TEnv extends EdgeEnvBindings = EdgeEnvBindings> = (
-  request: Request,
-  env: TEnv,
-  ctx: SimulatedExecutionContext,
-) => Promise<Response> | Response;
+export type EdgeFetchHandler<TEnv extends EdgeEnvBindings = EdgeEnvBindings> = (request: Request, env: TEnv, ctx: SimulatedExecutionContext) => Promise<Response> | Response;
 ```
 
 #### `EdgeKvSession`
@@ -1234,11 +1198,11 @@ export type EdgeFetchHandler<TEnv extends EdgeEnvBindings = EdgeEnvBindings> = (
 
 ```ts
 export interface EdgeKvSession {
-  platform: EdgePlatform;
-  store: Map<string, string>;
-  cache: Map<string, string>;
-  state: KvState;
-  history: AxisStep<KvState>[];
+    platform: EdgePlatform;
+    store: Map<string, string>;
+    cache: Map<string, string>;
+    state: KvState;
+    history: AxisStep<KvState>[];
 }
 ```
 
@@ -1258,9 +1222,9 @@ export type EdgePlatform = 'cloudflare' | 'vercel' | 'deno';
 
 ```ts
 export interface FidelityCoverage {
-  platforms: EdgePlatform[];
-  axes: EdgeAxis[];
-  rows: FidelityRow[];
+    platforms: EdgePlatform[];
+    axes: EdgeAxis[];
+    rows: FidelityRow[];
 }
 ```
 
@@ -1272,10 +1236,10 @@ Fidelity harness — collects the platform × axis coverage grid that downstream
 
 ```ts
 export interface FidelityRow {
-  platform: EdgePlatform;
-  axis: EdgeAxis;
-  neutralEvents: NeutralEventName[];
-  platformEvents: string[];
+    platform: EdgePlatform;
+    axis: EdgeAxis;
+    neutralEvents: NeutralEventName[];
+    platformEvents: string[];
 }
 ```
 
@@ -1295,13 +1259,13 @@ export type GeoRegion = string;
 
 ```ts
 export interface GeoReplicatedSession {
-  platform: EdgePlatform;
-  primaryRegion: GeoRegion;
-  replicaRegions: GeoRegion[];
-  state: GeoState;
-  version: number;
-  lagMs: Record<GeoRegion, number>;
-  history: AxisStep<GeoState>[];
+    platform: EdgePlatform;
+    primaryRegion: GeoRegion;
+    replicaRegions: GeoRegion[];
+    state: GeoState;
+    version: number;
+    lagMs: Record<GeoRegion, number>;
+    history: AxisStep<GeoState>[];
 }
 ```
 
@@ -1319,13 +1283,13 @@ export type GeoState = 'in-sync' | 'lagging' | 'conflict-detected';
 
 ```ts
 export interface InvokeEdgeHandlerOptions<TEnv extends EdgeEnvBindings = EdgeEnvBindings> {
-  readonly handler: EdgeFetchHandler<TEnv>;
-  readonly url: string;
-  readonly method?: string;
-  readonly headers?: Record<string, string>;
-  readonly formData?: Record<string, string>;
-  readonly jsonBody?: unknown;
-  readonly env: TEnv;
+    readonly handler: EdgeFetchHandler<TEnv>;
+    readonly url: string;
+    readonly method?: string;
+    readonly headers?: Record<string, string>;
+    readonly formData?: Record<string, string>;
+    readonly jsonBody?: unknown;
+    readonly env: TEnv;
 }
 ```
 
@@ -1335,10 +1299,13 @@ export interface InvokeEdgeHandlerOptions<TEnv extends EdgeEnvBindings = EdgeEnv
 
 ```ts
 export interface InvokeEdgeHandlerResult {
-  readonly response: Response;
-  readonly redirect: { url: string; status: number } | null;
-  readonly ctx: SimulatedExecutionContext;
-  readonly error: unknown;
+    readonly response: Response;
+    readonly redirect: {
+        url: string;
+        status: number;
+    } | null;
+    readonly ctx: SimulatedExecutionContext;
+    readonly error: unknown;
 }
 ```
 
@@ -1348,10 +1315,10 @@ export interface InvokeEdgeHandlerResult {
 
 ```ts
 export interface KvConsistencySession {
-  platform: EdgePlatform;
-  writes: Record<string, number>;
-  observed: Record<string, number>;
-  history: AxisStep<KvConsistencyState>[];
+    platform: EdgePlatform;
+    writes: Record<string, number>;
+    observed: Record<string, number>;
+    history: AxisStep<KvConsistencyState>[];
 }
 ```
 
@@ -1371,8 +1338,8 @@ export type KvConsistencyState = 'writing' | 'converged' | 'stale' | 'violated';
 
 ```ts
 export interface KVMockEntry {
-  readonly value: string;
-  readonly metadata?: Record<string, unknown>;
+    readonly value: string;
+    readonly metadata?: Record<string, unknown>;
 }
 ```
 
@@ -1382,13 +1349,13 @@ export interface KVMockEntry {
 
 ```ts
 export interface KVNamespace {
-  get(key: string): Promise<string | null>;
-  get(key: string, type: 'text'): Promise<string | null>;
-  get<T>(key: string, type: 'json'): Promise<T | null>;
-  get(key: string, type: 'arrayBuffer'): Promise<ArrayBuffer | null>;
-  put(key: string, value: string, options?: KVNamespacePutOptions): Promise<void>;
-  delete(key: string): Promise<void>;
-  list(options?: KVNamespaceListOptions): Promise<KVNamespaceListResult>;
+    get(key: string): Promise<string | null>;
+    get(key: string, type: 'text'): Promise<string | null>;
+    get<T>(key: string, type: 'json'): Promise<T | null>;
+    get(key: string, type: 'arrayBuffer'): Promise<ArrayBuffer | null>;
+    put(key: string, value: string, options?: KVNamespacePutOptions): Promise<void>;
+    delete(key: string): Promise<void>;
+    list(options?: KVNamespaceListOptions): Promise<KVNamespaceListResult>;
 }
 ```
 
@@ -1398,8 +1365,8 @@ export interface KVNamespace {
 
 ```ts
 export interface KVNamespaceListOptions {
-  readonly prefix?: string;
-  readonly limit?: number;
+    readonly prefix?: string;
+    readonly limit?: number;
 }
 ```
 
@@ -1409,8 +1376,11 @@ export interface KVNamespaceListOptions {
 
 ```ts
 export interface KVNamespaceListResult {
-  readonly keys: ReadonlyArray<{ readonly name: string; readonly metadata?: Record<string, unknown> }>;
-  readonly list_complete: true;
+    readonly keys: ReadonlyArray<{
+        readonly name: string;
+        readonly metadata?: Record<string, unknown>;
+    }>;
+    readonly list_complete: true;
 }
 ```
 
@@ -1420,8 +1390,8 @@ export interface KVNamespaceListResult {
 
 ```ts
 export interface KVNamespacePutOptions {
-  readonly expirationTtl?: number;
-  readonly metadata?: Record<string, unknown>;
+    readonly expirationTtl?: number;
+    readonly metadata?: Record<string, unknown>;
 }
 ```
 
@@ -1441,12 +1411,12 @@ export type KvState = 'consistent' | 'eventually-consistent';
 
 ```ts
 export interface MiddlewareSession {
-  platform: EdgePlatform;
-  stages: MiddlewareStage[];
-  currentIndex: number;
-  state: MiddlewareState;
-  history: AxisStep<MiddlewareState>[];
-  rewrittenUrl?: string;
+    platform: EdgePlatform;
+    stages: MiddlewareStage[];
+    currentIndex: number;
+    state: MiddlewareState;
+    history: AxisStep<MiddlewareState>[];
+    rewrittenUrl?: string;
 }
 ```
 
@@ -1475,88 +1445,7 @@ export type MiddlewareState = 'idle' | 'running' | 'short-circuited' | 'complete
 Platform-neutral event names used inside the axis helpers. Real edge platforms expose different string ids (Cloudflare `durable_object.fetch`, Vercel `edge_function.session_affinity`, Deno Deploy `deploy.stateful_fetch`) — the {@link platformEventName} map handles the translation. Tests can assert on the neutral name via `step.neutralEvent` or on the platform-specific one via `step.platformEvent`.
 
 ```ts
-export type NeutralEventName =
-  // durable object / stateful affinity
-  | 'durable-object.created'
-  | 'durable-object.requested'
-  | 'durable-object.alarm-fired'
-  | 'durable-object.storage-written'
-  // websocket edge
-  | 'websocket.upgrade-requested'
-  | 'websocket.accepted'
-  | 'websocket.message'
-  | 'websocket.closed'
-  // edge KV
-  | 'kv.read'
-  | 'kv.write'
-  | 'kv.cache-hit'
-  | 'kv.cache-miss'
-  // geo replication
-  | 'geo.primary-write'
-  | 'geo.replica-lagged'
-  | 'geo.replica-synced'
-  | 'geo.conflict-resolved'
-  // cron trigger
-  | 'cron.scheduled'
-  | 'cron.started'
-  | 'cron.completed'
-  | 'cron.failed'
-  // subrequest limit
-  | 'subrequest.started'
-  | 'subrequest.counted'
-  | 'subrequest.limited'
-  | 'subrequest.completed'
-  // CPU time limit
-  | 'cpu.started'
-  | 'cpu.budget-warning'
-  | 'cpu.limited'
-  | 'cpu.completed'
-  // streaming response
-  | 'stream.opened'
-  | 'stream.chunk-sent'
-  | 'stream.backpressure'
-  | 'stream.closed'
-  // v1.2 advanced axis
-  // cold-start
-  | 'cold-start.invoked'
-  | 'cold-start.cache-hit'
-  | 'cold-start.provisioned-hit'
-  | 'cold-start.warmed'
-  // middleware-chain
-  | 'middleware.entered'
-  | 'middleware.rewritten'
-  | 'middleware.short-circuited'
-  | 'middleware.completed'
-  // kv-eventual-consistency
-  | 'kv-consistency.write-quorum'
-  | 'kv-consistency.stale-read'
-  | 'kv-consistency.read-your-writes'
-  | 'kv-consistency.monotonic-violation'
-  // r2-multipart
-  | 'r2.multipart-initiated'
-  | 'r2.part-uploaded'
-  | 'r2.checksum-verified'
-  | 'r2.multipart-completed'
-  // d1-read-replica
-  | 'd1.primary-write'
-  | 'd1.replica-read'
-  | 'd1.replica-lagged'
-  | 'd1.replica-failover'
-  // do-state-migration
-  | 'do-migration.initiated'
-  | 'do-migration.schema-bumped'
-  | 'do-migration.data-migrated'
-  | 'do-migration.rolled-out'
-  // websocket-hibernation
-  | 'ws-hibernation.entered'
-  | 'ws-hibernation.resumed'
-  | 'ws-hibernation.state-restored'
-  | 'ws-hibernation.reconnected'
-  // global-routing
-  | 'routing.anycast-received'
-  | 'routing.geo-matched'
-  | 'routing.latency-selected'
-  | 'routing.failover-triggered';
+export type NeutralEventName = 'durable-object.created' | 'durable-object.requested' | 'durable-object.alarm-fired' | 'durable-object.storage-written' | 'websocket.upgrade-requested' | 'websocket.accepted' | 'websocket.message' | 'websocket.closed' | 'kv.read' | 'kv.write' | 'kv.cache-hit' | 'kv.cache-miss' | 'geo.primary-write' | 'geo.replica-lagged' | 'geo.replica-synced' | 'geo.conflict-resolved' | 'cron.scheduled' | 'cron.started' | 'cron.completed' | 'cron.failed' | 'subrequest.started' | 'subrequest.counted' | 'subrequest.limited' | 'subrequest.completed' | 'cpu.started' | 'cpu.budget-warning' | 'cpu.limited' | 'cpu.completed' | 'stream.opened' | 'stream.chunk-sent' | 'stream.backpressure' | 'stream.closed' | 'cold-start.invoked' | 'cold-start.cache-hit' | 'cold-start.provisioned-hit' | 'cold-start.warmed' | 'middleware.entered' | 'middleware.rewritten' | 'middleware.short-circuited' | 'middleware.completed' | 'kv-consistency.write-quorum' | 'kv-consistency.stale-read' | 'kv-consistency.read-your-writes' | 'kv-consistency.monotonic-violation' | 'r2.multipart-initiated' | 'r2.part-uploaded' | 'r2.checksum-verified' | 'r2.multipart-completed' | 'd1.primary-write' | 'd1.replica-read' | 'd1.replica-lagged' | 'd1.replica-failover' | 'do-migration.initiated' | 'do-migration.schema-bumped' | 'do-migration.data-migrated' | 'do-migration.rolled-out' | 'ws-hibernation.entered' | 'ws-hibernation.resumed' | 'ws-hibernation.state-restored' | 'ws-hibernation.reconnected' | 'routing.anycast-received' | 'routing.geo-matched' | 'routing.latency-selected' | 'routing.failover-triggered';
 ```
 
 #### `Pop`
@@ -1565,10 +1454,10 @@ export type NeutralEventName =
 
 ```ts
 export interface Pop {
-  popId: string;
-  region: string;
-  latencyMs: number;
-  healthy: boolean;
+    popId: string;
+    region: string;
+    latencyMs: number;
+    healthy: boolean;
 }
 ```
 
@@ -1578,12 +1467,12 @@ export interface Pop {
 
 ```ts
 export interface R2MultipartSession {
-  platform: EdgePlatform;
-  uploadId: string;
-  parts: Map<number, R2Part>;
-  totalParts: number;
-  state: R2State;
-  history: AxisStep<R2State>[];
+    platform: EdgePlatform;
+    uploadId: string;
+    parts: Map<number, R2Part>;
+    totalParts: number;
+    state: R2State;
+    history: AxisStep<R2State>[];
 }
 ```
 
@@ -1593,10 +1482,10 @@ export interface R2MultipartSession {
 
 ```ts
 export interface R2Part {
-  partNumber: number;
-  sizeBytes: number;
-  checksum: string;
-  verified: boolean;
+    partNumber: number;
+    sizeBytes: number;
+    checksum: string;
+    verified: boolean;
 }
 ```
 
@@ -1616,9 +1505,9 @@ export type R2State = 'initiated' | 'uploading' | 'checksum-failed' | 'completed
 
 ```ts
 export interface RoutingSession {
-  platform: EdgePlatform;
-  pops: Map<string, Pop>;
-  history: AxisStep<RoutingState>[];
+    platform: EdgePlatform;
+    pops: Map<string, Pop>;
+    history: AxisStep<RoutingState>[];
 }
 ```
 
@@ -1638,10 +1527,10 @@ export type RoutingState = 'anycast' | 'geo-matched' | 'latency-selected' | 'fai
 
 ```ts
 export interface SimulatedExecutionContext {
-  waitUntil(promise: Promise<unknown>): void;
-  passThroughOnException(): void;
-  readonly waitedPromises: Promise<unknown>[];
-  passThroughCalled: boolean;
+    waitUntil(promise: Promise<unknown>): void;
+    passThroughOnException(): void;
+    readonly waitedPromises: Promise<unknown>[];
+    passThroughCalled: boolean;
 }
 ```
 
@@ -1661,14 +1550,14 @@ export type StreamKind = 'chunked' | 'sse' | 'websocket';
 
 ```ts
 export interface StreamSession {
-  id: string;
-  platform: EdgePlatform;
-  kind: StreamKind;
-  state: StreamState;
-  chunksSent: number;
-  bytesSent: number;
-  highWaterMark: number;
-  history: AxisStep<StreamState>[];
+    id: string;
+    platform: EdgePlatform;
+    kind: StreamKind;
+    state: StreamState;
+    chunksSent: number;
+    bytesSent: number;
+    highWaterMark: number;
+    history: AxisStep<StreamState>[];
 }
 ```
 
@@ -1688,12 +1577,12 @@ export type StreamState = 'open' | 'backpressure' | 'closed';
 
 ```ts
 export interface SubrequestSession {
-  platform: EdgePlatform;
-  count: number;
-  limit: number;
-  warningThreshold: number;
-  state: SubrequestState;
-  history: AxisStep<SubrequestState>[];
+    platform: EdgePlatform;
+    count: number;
+    limit: number;
+    warningThreshold: number;
+    state: SubrequestState;
+    history: AxisStep<SubrequestState>[];
 }
 ```
 
@@ -1713,11 +1602,11 @@ export type SubrequestState = 'ok' | 'approaching-limit' | 'limited';
 
 ```ts
 export interface WebSocketSession {
-  id: string;
-  platform: EdgePlatform;
-  state: WsState;
-  messages: string[];
-  history: AxisStep<WsState>[];
+    id: string;
+    platform: EdgePlatform;
+    state: WsState;
+    messages: string[];
+    history: AxisStep<WsState>[];
 }
 ```
 
@@ -1727,12 +1616,12 @@ export interface WebSocketSession {
 
 ```ts
 export interface WsHibernationSession {
-  platform: EdgePlatform;
-  connectionId: string;
-  state: WsHibernationState;
-  storedState: Record<string, string | number | boolean>;
-  hibernatedAtMs: number;
-  history: AxisStep<WsHibernationState>[];
+    platform: EdgePlatform;
+    connectionId: string;
+    state: WsHibernationState;
+    storedState: Record<string, string | number | boolean>;
+    hibernatedAtMs: number;
+    history: AxisStep<WsHibernationState>[];
 }
 ```
 

@@ -42,13 +42,11 @@
 | 'runAxe: no context and no global document (jsdom env required).' | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L29) |
 | report.summary | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L64) |
 | 'ssrHydration layer requires a jsdom-like global document (vitest env=jsdom).' | [packages/a11y/src/layer-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L312) |
-| 'ssrHydration layer requires a string ssrHtml fixture — got ' +
-        typeof fixture.ssrHtml +
-        '.' | [packages/a11y/src/layer-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L320) |
+| 'ssrHydration layer requires a string ssrHtml fixture — got ' + typeof fixture.ssrHtml + '.' | [packages/a11y/src/layer-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L320) |
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -59,9 +57,10 @@
 Bucket a set of axe violations by impact, returning the same shape as `LayerReport.violations`. Exported so tests can call it without hitting axe-core. `Object.hasOwn` gates the `counts` write to protect against prototype chain contamination — a violation whose `impact` accidentally names `toString` or `constructor` cannot corrupt the counts record.
 
 ```ts
-export function bucketViolations(
-  violations: AxeViolation[],
-): { counts: Record<Impact, number>; surviving: LayerReport['surviving'] };
+export declare function bucketViolations(violations: AxeViolation[]): {
+    counts: Record<Impact, number>;
+    surviving: LayerReport['surviving'];
+};
 ```
 
 #### `computeTotals`
@@ -71,9 +70,7 @@ export function bucketViolations(
 Compute the totals (sum by impact across every applicable layer) — a layer marked `absent` contributes zero.
 
 ```ts
-export function computeTotals(
-  layers: HarnessReport['layers'],
-): Record<Impact, number>;
+export declare function computeTotals(layers: HarnessReport['layers']): Record<Impact, number>;
 ```
 
 #### `expectNoViolations`
@@ -81,11 +78,13 @@ export function computeTotals(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L57) `packages/a11y/src/audit.ts`
 
 ```ts
-export function expectNoViolations(
-  results: AxeResults,
-  expect: { (actual: unknown): { toBe: (expected: unknown) => void } },
-  opts: { maxImpact?: AuditOptions['maxImpact'] } = {},
-): void;
+export declare function expectNoViolations(results: AxeResults, expect: {
+    (actual: unknown): {
+        toBe: (expected: unknown) => void;
+    };
+}, opts?: {
+    maxImpact?: AuditOptions['maxImpact'];
+}): void;
 ```
 
 #### `IMPACTS`
@@ -105,7 +104,7 @@ export declare const IMPACTS: readonly ["critical", "serious", "moderate", "mino
 True iff every applicable layer has zero critical + zero serious + zero moderate violations. `minor` never gates `ok`. Absent layers pass. Critical, serious, and moderate all block because a downstream tier threshold breach at any of the three levels should never flip `report.ok` to true. `minor` is excluded because it is unbounded on every current tier (SSOT: docs/quality/a11y-thresholds.md).
 
 ```ts
-export function isHarnessOk(layers: HarnessReport['layers']): boolean;
+export declare function isHarnessOk(layers: HarnessReport['layers']): boolean;
 ```
 
 #### `reportViolations`
@@ -113,10 +112,9 @@ export function isHarnessOk(layers: HarnessReport['layers']): boolean;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L40) `packages/a11y/src/audit.ts`
 
 ```ts
-export function reportViolations(
-  results: AxeResults,
-  opts: { maxImpact?: AuditOptions['maxImpact'] } = {},
-): ViolationReport;
+export declare function reportViolations(results: AxeResults, opts?: {
+    maxImpact?: AuditOptions['maxImpact'];
+}): ViolationReport;
 ```
 
 #### `runAxe`
@@ -124,7 +122,7 @@ export function reportViolations(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L24) `packages/a11y/src/audit.ts`
 
 ```ts
-export async function runAxe(opts: AuditOptions = {}): Promise<AxeResults>;
+export declare function runAxe(opts?: AuditOptions): Promise<AxeResults>;
 ```
 
 #### `runLayerHarness`
@@ -134,11 +132,7 @@ export async function runAxe(opts: AuditOptions = {}): Promise<AxeResults>;
 Run the 3-layer harness against a set of fixtures. Missing layers are recorded as `absent`. Returns the whole baseline payload.
 
 ```ts
-export async function runLayerHarness(
-  pkgName: string,
-  fixtures: HarnessFixtures = {},
-  now: Date = new Date(),
-): Promise<HarnessReport>;
+export declare function runLayerHarness(pkgName: string, fixtures?: HarnessFixtures, now?: Date): Promise<HarnessReport>;
 ```
 
 #### `summariseHarness`
@@ -148,7 +142,7 @@ export async function runLayerHarness(
 Turn a `HarnessReport` into a `reportViolations`-style summary string, unioned across every applicable layer with cross-layer dedup by rule id. A rule that fires in both `jsdom` and `ssrHydration` surfaces once with node counts summed and the most severe impact preserved.
 
 ```ts
-export function summariseHarness(report: HarnessReport): string;
+export declare function summariseHarness(report: HarnessReport): string;
 ```
 
 #### `unionByRule`
@@ -158,10 +152,7 @@ export function summariseHarness(report: HarnessReport): string;
 Merge the SSR-parsed violation set with the hydrated violation set, deduplicated by rule id. Node arrays are concatenated across sides so a rule that fires against 3 nodes in SSR and 5 nodes in the hydrated tree is recorded with 8 nodes rather than dropped to whichever side landed first. Impact is taken from whichever side reports a non-null value first, so hydration-only impact metadata surfaces even when the SSR side reports null. Exposed for tests.
 
 ```ts
-export function unionByRule(
-  a: AxeViolation[],
-  b: AxeViolation[],
-): AxeViolation[];
+export declare function unionByRule(a: AxeViolation[], b: AxeViolation[]): AxeViolation[];
 ```
 
 #### `zeroImpacts`
@@ -171,7 +162,7 @@ export function unionByRule(
 Empty impact bucket used both as the zero baseline and as a reset target.
 
 ```ts
-export function zeroImpacts(): Record<Impact, number>;
+export declare function zeroImpacts(): Record<Impact, number>;
 ```
 
 ### 型
@@ -182,12 +173,12 @@ export function zeroImpacts(): Record<Impact, number>;
 
 ```ts
 export interface AuditOptions {
-  /** Element / selector / Document to scan (default: document) */
-  context?: Element | Document | string;
-  /** axe-core run options (passed verbatim) */
-  runOptions?: Record<string, unknown>;
-  /** Maximum impact level allowed before reportViolations throws */
-  maxImpact?: 'minor' | 'moderate' | 'serious' | 'critical';
+    /** Element / selector / Document to scan (default: document) */
+    context?: Element | Document | string;
+    /** axe-core run options (passed verbatim) */
+    runOptions?: Record<string, unknown>;
+    /** Maximum impact level allowed before reportViolations throws */
+    maxImpact?: 'minor' | 'moderate' | 'serious' | 'critical';
 }
 ```
 
@@ -197,10 +188,16 @@ export interface AuditOptions {
 
 ```ts
 export interface AxeResults {
-  violations: AxeViolation[];
-  passes: Array<{ id: string }>;
-  incomplete: Array<{ id: string }>;
-  inapplicable: Array<{ id: string }>;
+    violations: AxeViolation[];
+    passes: Array<{
+        id: string;
+    }>;
+    incomplete: Array<{
+        id: string;
+    }>;
+    inapplicable: Array<{
+        id: string;
+    }>;
 }
 ```
 
@@ -210,10 +207,7 @@ export interface AxeResults {
 
 ```ts
 export interface AxeRunModule {
-  run: (
-    context?: Element | Document | string,
-    options?: Record<string, unknown>,
-  ) => Promise<AxeResults>;
+    run: (context?: Element | Document | string, options?: Record<string, unknown>) => Promise<AxeResults>;
 }
 ```
 
@@ -223,12 +217,16 @@ export interface AxeRunModule {
 
 ```ts
 export interface AxeViolation {
-  id: string;
-  impact: 'minor' | 'moderate' | 'serious' | 'critical' | null;
-  description: string;
-  help: string;
-  helpUrl: string;
-  nodes: Array<{ target: string[]; html: string; failureSummary?: string }>;
+    id: string;
+    impact: 'minor' | 'moderate' | 'serious' | 'critical' | null;
+    description: string;
+    help: string;
+    helpUrl: string;
+    nodes: Array<{
+        target: string[];
+        html: string;
+        failureSummary?: string;
+    }>;
 }
 ```
 
@@ -240,34 +238,34 @@ Fixture surface a `.axe-config.mjs` can hand to the harness. A missing field mea
 
 ```ts
 export interface HarnessFixtures {
-  jsdom?: {
-    /** Element / Document / selector to hand to axe-core. */
-    context: AuditOptions['context'];
-    /** Optional axe-core `runOptions` override for this layer. */
-    runOptions?: AuditOptions['runOptions'];
-  };
-  playwright?: {
-    /**
-     * Awaited result of `page.evaluate(() => axe.run(document, opts))` —
-     * axe-playwright caller is responsible for wiring; the harness only
-     * aggregates the result to keep this module Playwright-free at build
-     * time (Playwright is a peerDep, not a dep, so requiring it at import
-     * time would break Node-only consumers).
-     */
-    results: AxeResults;
-  };
-  ssrHydration?: {
-    /** SSR HTML string produced by the framework adapter under test. */
-    ssrHtml: string;
-    /**
-     * Optional post-hydration Element — when supplied, axe runs against both
-     * the SSR-parsed Element and this Element, and violations are unioned by
-     * rule id with provenance recorded per layer.
-     */
-    hydrated?: Element | Document;
-    /** Optional axe-core `runOptions` override for this layer. */
-    runOptions?: AuditOptions['runOptions'];
-  };
+    jsdom?: {
+        /** Element / Document / selector to hand to axe-core. */
+        context: AuditOptions['context'];
+        /** Optional axe-core `runOptions` override for this layer. */
+        runOptions?: AuditOptions['runOptions'];
+    };
+    playwright?: {
+        /**
+         * Awaited result of `page.evaluate(() => axe.run(document, opts))` —
+         * axe-playwright caller is responsible for wiring; the harness only
+         * aggregates the result to keep this module Playwright-free at build
+         * time (Playwright is a peerDep, not a dep, so requiring it at import
+         * time would break Node-only consumers).
+         */
+        results: AxeResults;
+    };
+    ssrHydration?: {
+        /** SSR HTML string produced by the framework adapter under test. */
+        ssrHtml: string;
+        /**
+         * Optional post-hydration Element — when supplied, axe runs against both
+         * the SSR-parsed Element and this Element, and violations are unioned by
+         * rule id with provenance recorded per layer.
+         */
+        hydrated?: Element | Document;
+        /** Optional axe-core `runOptions` override for this layer. */
+        runOptions?: AuditOptions['runOptions'];
+    };
 }
 ```
 
@@ -279,21 +277,21 @@ Aggregated 3-layer report — the whole baseline payload for one package.
 
 ```ts
 export interface HarnessReport {
-  package: string;
-  generatedAt: string;
-  layers: {
-    jsdom: LayerReport;
-    playwright: LayerReport;
-    ssrHydration: LayerReport;
-  };
-  /** Sum of all impact counts across every applicable layer. */
-  totals: Record<Impact, number>;
-  /**
-   * True when every applicable layer has zero critical, zero serious, and
-   * zero moderate violations. `minor` never gates `ok`. Absent layers do
-   * not affect `ok`.
-   */
-  ok: boolean;
+    package: string;
+    generatedAt: string;
+    layers: {
+        jsdom: LayerReport;
+        playwright: LayerReport;
+        ssrHydration: LayerReport;
+    };
+    /** Sum of all impact counts across every applicable layer. */
+    totals: Record<Impact, number>;
+    /**
+     * True when every applicable layer has zero critical, zero serious, and
+     * zero moderate violations. `minor` never gates `ok`. Absent layers do
+     * not affect `ok`.
+     */
+    ok: boolean;
 }
 ```
 
@@ -313,13 +311,18 @@ Per-layer violation summary — the shape that lands in `.a11y-baseline/{pkg}.js
 
 ```ts
 export interface LayerReport {
-  layer: 'jsdom' | 'playwright' | 'ssrHydration';
-  applicable: boolean;
-  /** One-line reason recorded when applicable is false. */
-  reason?: string;
-  violations: Record<Impact, number>;
-  /** Rule ids of every surviving violation, deduplicated per layer. */
-  surviving: Array<{ id: string; impact: Impact | null; help: string; nodes: number }>;
+    layer: 'jsdom' | 'playwright' | 'ssrHydration';
+    applicable: boolean;
+    /** One-line reason recorded when applicable is false. */
+    reason?: string;
+    violations: Record<Impact, number>;
+    /** Rule ids of every surviving violation, deduplicated per layer. */
+    surviving: Array<{
+        id: string;
+        impact: Impact | null;
+        help: string;
+        nodes: number;
+    }>;
 }
 ```
 
@@ -329,9 +332,9 @@ export interface LayerReport {
 
 ```ts
 export interface ViolationReport {
-  violations: AxeViolation[];
-  blocking: AxeViolation[];
-  summary: string;
+    violations: AxeViolation[];
+    blocking: AxeViolation[];
+    summary: string;
 }
 ```
 <!-- kiwa-public-api:end -->

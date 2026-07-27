@@ -42,7 +42,7 @@ consumerのackはentryを完了にします。nackまたはackなしは再queue�
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/data/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/data/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -51,7 +51,7 @@ consumerのackはentryを完了にします。nackまたはackなしは再queue�
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L8) `packages/data/src/fake-clock.ts`
 
 ```ts
-export function createFakeClock(opts: FakeClockOptions = {}): FakeClock;
+export declare function createFakeClock(opts?: FakeClockOptions): FakeClock;
 ```
 
 #### `expectAtLeastOnce`
@@ -61,12 +61,11 @@ export function createFakeClock(opts: FakeClockOptions = {}): FakeClock;
 Asserts that a handler is invoked at least `minTimes` for a message that nacks before finally acking (at-least-once delivery semantics).
 
 ```ts
-export async function expectAtLeastOnce<T>(
-  client: QueueClient<T>,
-  body: T,
-  minTimes: number,
-  expect: { (actual: unknown): { toBeGreaterThanOrEqual: (expected: number) => void } },
-): Promise<number>;
+export declare function expectAtLeastOnce<T>(client: QueueClient<T>, body: T, minTimes: number, expect: {
+    (actual: unknown): {
+        toBeGreaterThanOrEqual: (expected: number) => void;
+    };
+}): Promise<number>;
 ```
 
 #### `expectIdempotent`
@@ -76,12 +75,11 @@ export async function expectAtLeastOnce<T>(
 Asserts that two sends with the same dedupKey collapse into one queue entry (caller is expected to consume + ack the entry).
 
 ```ts
-export async function expectIdempotent<T>(
-  client: QueueClient<T>,
-  body: T,
-  opts: IdempotencyOptions,
-  expect: { (actual: unknown): { toBe: (expected: unknown) => void } },
-): Promise<void>;
+export declare function expectIdempotent<T>(client: QueueClient<T>, body: T, opts: IdempotencyOptions, expect: {
+    (actual: unknown): {
+        toBe: (expected: unknown) => void;
+    };
+}): Promise<void>;
 ```
 
 #### `setupQueueEnv`
@@ -89,9 +87,7 @@ export async function expectIdempotent<T>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/queue.ts#L129) `packages/data/src/queue.ts`
 
 ```ts
-export async function setupQueueEnv<T = unknown>(
-  opts: SetupQueueEnvOptions<T>,
-): Promise<QueueTestEnv<T>>;
+export declare function setupQueueEnv<T = unknown>(opts: SetupQueueEnvOptions<T>): Promise<QueueTestEnv<T>>;
 ```
 
 ### 型
@@ -102,10 +98,10 @@ export async function setupQueueEnv<T = unknown>(
 
 ```ts
 export interface CronEntry {
-  id: string;
-  intervalMs: number;
-  lastRunMs: number;
-  fn: () => void | Promise<void>;
+    id: string;
+    intervalMs: number;
+    lastRunMs: number;
+    fn: () => void | Promise<void>;
 }
 ```
 
@@ -115,11 +111,11 @@ export interface CronEntry {
 
 ```ts
 export interface FakeClock {
-  nowMs: () => number;
-  advanceMs: (ms: number) => Promise<void>;
-  schedule: (intervalMs: number, fn: () => void | Promise<void>) => string;
-  unschedule: (id: string) => void;
-  pendingEntries: () => CronEntry[];
+    nowMs: () => number;
+    advanceMs: (ms: number) => Promise<void>;
+    schedule: (intervalMs: number, fn: () => void | Promise<void>) => string;
+    unschedule: (id: string) => void;
+    pendingEntries: () => CronEntry[];
 }
 ```
 
@@ -129,8 +125,8 @@ export interface FakeClock {
 
 ```ts
 export interface FakeClockOptions {
-  /** initial wall-clock time in ms (default 0 for deterministic tests) */
-  startMs?: number;
+    /** initial wall-clock time in ms (default 0 for deterministic tests) */
+    startMs?: number;
 }
 ```
 
@@ -140,7 +136,7 @@ export interface FakeClockOptions {
 
 ```ts
 export interface IdempotencyOptions {
-  dedupKey: string;
+    dedupKey: string;
 }
 ```
 
@@ -150,8 +146,8 @@ export interface IdempotencyOptions {
 
 ```ts
 export interface QueueAckHandle {
-  ack: () => void;
-  nack: () => void;
+    ack: () => void;
+    nack: () => void;
 }
 ```
 
@@ -161,13 +157,15 @@ export interface QueueAckHandle {
 
 ```ts
 export interface QueueClient<T = unknown> {
-  send: (body: T, opts?: { dedupKey?: string }) => string;
-  receive: () => QueueMessage<T> | null;
-  /** Subscribe a handler that processes every send + retries until ack */
-  consume: (handler: QueueHandler<T>) => () => void;
-  size: () => number;
-  dlqSize: () => number;
-  drainDlq: () => QueueMessage<T>[];
+    send: (body: T, opts?: {
+        dedupKey?: string;
+    }) => string;
+    receive: () => QueueMessage<T> | null;
+    /** Subscribe a handler that processes every send + retries until ack */
+    consume: (handler: QueueHandler<T>) => () => void;
+    size: () => number;
+    dlqSize: () => number;
+    drainDlq: () => QueueMessage<T>[];
 }
 ```
 
@@ -176,10 +174,7 @@ export interface QueueClient<T = unknown> {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L16) `packages/data/src/types.ts`
 
 ```ts
-export type QueueHandler<T> = (
-  message: QueueMessage<T>,
-  ack: QueueAckHandle,
-) => void | Promise<void>;
+export type QueueHandler<T> = (message: QueueMessage<T>, ack: QueueAckHandle) => void | Promise<void>;
 ```
 
 #### `QueueMessage`
@@ -188,11 +183,11 @@ export type QueueHandler<T> = (
 
 ```ts
 export interface QueueMessage<T = unknown> {
-  id: string;
-  body: T;
-  receivedCount: number;
-  /** Optional dedup key for idempotency tests */
-  dedupKey?: string;
+    id: string;
+    body: T;
+    receivedCount: number;
+    /** Optional dedup key for idempotency tests */
+    dedupKey?: string;
 }
 ```
 
@@ -202,7 +197,7 @@ export interface QueueMessage<T = unknown> {
 
 ```ts
 export interface QueueTestEnv<T = unknown> extends TestEnvBase<'mock' | 'live'> {
-  client: QueueClient<T>;
+    client: QueueClient<T>;
 }
 ```
 
@@ -212,11 +207,11 @@ export interface QueueTestEnv<T = unknown> extends TestEnvBase<'mock' | 'live'> 
 
 ```ts
 export interface SetupQueueEnvOptions<T = unknown> {
-  mode: Extract<TestMode, 'mock' | 'live'>;
-  /** Maximum receive count before a message is sent to the dead letter queue */
-  maxReceiveCount?: number;
-  /** Optional initial messages */
-  seed?: T[];
+    mode: Extract<TestMode, 'mock' | 'live'>;
+    /** Maximum receive count before a message is sent to the dead letter queue */
+    maxReceiveCount?: number;
+    /** Optional initial messages */
+    seed?: T[];
 }
 ```
 <!-- kiwa-public-api:end -->

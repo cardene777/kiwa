@@ -41,7 +41,7 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -50,14 +50,7 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L82) `packages/perf-harness/src/measure.ts`
 
 ```ts
-export function buildMeasureResult(
-  name: string,
-  iterations: number,
-  warmup: number,
-  samples: number[],
-  trimPercent = 0,
-  warmupConverged = true,
-): MeasureResult;
+export declare function buildMeasureResult(name: string, iterations: number, warmup: number, samples: number[], trimPercent?: number, warmupConverged?: boolean): MeasureResult;
 ```
 
 #### `captureEnv`
@@ -67,7 +60,7 @@ export function buildMeasureResult(
 現行環境の env metadata を取得する。 git 未 install / 非 repo 環境では gitSha は "unknown"。
 
 ```ts
-export function captureEnv(): BaselineEnv;
+export declare function captureEnv(): BaselineEnv;
 ```
 
 #### `defaultBaselinePath`
@@ -75,7 +68,7 @@ export function captureEnv(): BaselineEnv;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L56) `packages/perf-harness/src/baseline.ts`
 
 ```ts
-export function defaultBaselinePath(moduleName: string): string;
+export declare function defaultBaselinePath(moduleName: string): string;
 ```
 
 #### `detectRegression`
@@ -85,7 +78,7 @@ export function defaultBaselinePath(moduleName: string): string;
 Bootstrap CI on p95 delta で regression を判定する。 旧実装は mean で Welch t-test を回しつつ deltaPct を p95 で計算していたため、 統計軸が矛盾していた。 (mean で「有意差なし」 と判定しつつ p95 が 20% 悪化 → stable と誤判定される事故) 本実装は p95 の差そのものに対して bootstrap 分布を作り、 (1) 信頼区間が 0 を含まない (= 有意な差) かつ (2) delta が threshold を超えた 場合のみ regressed / improved と判定する。
 
 ```ts
-export function detectRegression(input: RegressionInput): RegressionResult;
+export declare function detectRegression(input: RegressionInput): RegressionResult;
 ```
 
 #### `detectRegressionStrict`
@@ -95,7 +88,7 @@ export function detectRegression(input: RegressionInput): RegressionResult;
 strict mode — CI 99% + threshold 10%。 false negative を最小化。 見逃し (regressed を stable と判定) が致命的な release gate 経路で使う。
 
 ```ts
-export function detectRegressionStrict(input: RegressionInput): RegressionResult;
+export declare function detectRegressionStrict(input: RegressionInput): RegressionResult;
 ```
 
 #### `emitPerfReport`
@@ -103,13 +96,10 @@ export function detectRegressionStrict(input: RegressionInput): RegressionResult
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/report.ts#L3) `packages/perf-harness/src/report.ts`
 
 ```ts
-export function emitPerfReport(
-  result: MeasureResult,
-  opts: {
+export declare function emitPerfReport(result: MeasureResult, opts?: {
     baseline?: MeasureResult;
     includeSamples?: boolean;
-  } = {},
-): string;
+}): string;
 ```
 
 #### `evaluatePerfGate`
@@ -117,7 +107,7 @@ export function emitPerfReport(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/gate.ts#L13) `packages/perf-harness/src/gate.ts`
 
 ```ts
-export function evaluatePerfGate(input: PerfGateInput): PerfGateResult;
+export declare function evaluatePerfGate(input: PerfGateInput): PerfGateResult;
 ```
 
 #### `loadBaseline`
@@ -127,7 +117,7 @@ export function evaluatePerfGate(input: PerfGateInput): PerfGateResult;
 Baseline を load して現行環境と envelope の env を比較、 mismatch field を検出する。 legacy schema (単一 MeasureResult) は自動 upgrade して読む。
 
 ```ts
-export async function loadBaseline(path: string): Promise<BaselineLoadResult | null>;
+export declare function loadBaseline(path: string): Promise<BaselineLoadResult | null>;
 ```
 
 #### `measure`
@@ -135,7 +125,7 @@ export async function loadBaseline(path: string): Promise<BaselineLoadResult | n
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L13) `packages/perf-harness/src/measure.ts`
 
 ```ts
-export async function measure(input: MeasureInput): Promise<MeasureResult>;
+export declare function measure(input: MeasureInput): Promise<MeasureResult>;
 ```
 
 #### `measureConcurrent`
@@ -143,7 +133,7 @@ export async function measure(input: MeasureInput): Promise<MeasureResult>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L35) `packages/perf-harness/src/concurrent.ts`
 
 ```ts
-export async function measureConcurrent(input: ConcurrentInput): Promise<MeasureResult>;
+export declare function measureConcurrent(input: ConcurrentInput): Promise<MeasureResult>;
 ```
 
 #### `measureMemory`
@@ -151,7 +141,7 @@ export async function measureConcurrent(input: ConcurrentInput): Promise<Measure
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L28) `packages/perf-harness/src/memory.ts`
 
 ```ts
-export async function measureMemory(input: MemoryInput): Promise<MemorySample>;
+export declare function measureMemory(input: MemoryInput): Promise<MemorySample>;
 ```
 
 #### `resolveKiwaRepoRoot`
@@ -161,7 +151,7 @@ export async function measureMemory(input: MemoryInput): Promise<MemorySample>;
 resolveKiwaRepoRoot — walk upward from `start` until finding a package.json whose `name` matches `kiwa-monorepo`. Used by every kiwa perf test to resolve the report path regardless of vitest cwd.
 
 ```ts
-export function resolveKiwaRepoRoot(start: string): string;
+export declare function resolveKiwaRepoRoot(start: string): string;
 ```
 
 #### `runPerf3Layer`
@@ -169,7 +159,7 @@ export function resolveKiwaRepoRoot(start: string): string;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L102) `packages/perf-harness/src/three-layer.ts`
 
 ```ts
-export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3LayerResult>;
+export declare function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3LayerResult>;
 ```
 
 #### `runPerf3LayerLive`
@@ -177,9 +167,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L66) `packages/perf-harness/src/live.ts`
 
 ```ts
-export async function runPerf3LayerLive(
-  input: RunPerf3LayerLiveInput,
-): Promise<RunPerf3LayerLiveResult>;
+export declare function runPerf3LayerLive(input: RunPerf3LayerLiveInput): Promise<RunPerf3LayerLiveResult>;
 ```
 
 #### `runPerf3LayerStrict`
@@ -189,9 +177,7 @@ export async function runPerf3LayerLive(
 runPerf3LayerStrict — v0.3 strict variant。 iter 2 倍 + Welch |t|&gt;3 + delta 10%。 test 漏れゼロを狙う fail-fast mode。 defaults ... - serialIterations: 400 (v0.2 200) - serialWarmup: 10 (v0.2 5) - concurrency: 20 (v0.2 10) - iterationsPerWorker: 100 (v0.2 50) - memoryIterations: 400 (v0.2 200) regression 判定は detectRegressionStrict 経由 (|t|&gt;3 + delta 10%)。
 
 ```ts
-export async function runPerf3LayerStrict(
-  input: RunPerf3LayerInput,
-): Promise<RunPerf3LayerResult>;
+export declare function runPerf3LayerStrict(input: RunPerf3LayerInput): Promise<RunPerf3LayerResult>;
 ```
 
 #### `saveBaseline`
@@ -201,11 +187,9 @@ export async function runPerf3LayerStrict(
 単一結果 baseline を保存する compat 経路。 内部で envelope に wrap して保存する。 `moduleName` は複数 op を 1 baseline に集約する時 (three-layer) に使う default key。
 
 ```ts
-export async function saveBaseline(
-  path: string,
-  result: MeasureResult,
-  opts?: { key?: string },
-): Promise<void>;
+export declare function saveBaseline(path: string, result: MeasureResult, opts?: {
+    key?: string;
+}): Promise<void>;
 ```
 
 #### `saveBaselineEnvelope`
@@ -215,10 +199,7 @@ export async function saveBaseline(
 Envelope を直接保存する経路。 three-layer 等で複数 op を集約する場合に使う。
 
 ```ts
-export async function saveBaselineEnvelope(
-  path: string,
-  envelope: BaselineEnvelope,
-): Promise<void>;
+export declare function saveBaselineEnvelope(path: string, envelope: BaselineEnvelope): Promise<void>;
 ```
 
 ### 型
@@ -231,11 +212,11 @@ measureConcurrent — drive `fn` under a fixed concurrency load and record per-c
 
 ```ts
 export interface ConcurrentInput {
-  name: string;
-  fn: () => Promise<unknown> | unknown;
-  concurrency: number;
-  iterationsPerWorker: number;
-  warmup?: number;
+    name: string;
+    fn: () => Promise<unknown> | unknown;
+    concurrency: number;
+    iterationsPerWorker: number;
+    warmup?: number;
 }
 ```
 
@@ -245,9 +226,9 @@ export interface ConcurrentInput {
 
 ```ts
 export interface LiveOpOutcome extends Partial<OpOutcome> {
-  name: string;
-  skipped: boolean;
-  skipReason: string | null;
+    name: string;
+    skipped: boolean;
+    skipReason: string | null;
 }
 ```
 
@@ -257,11 +238,11 @@ export interface LiveOpOutcome extends Partial<OpOutcome> {
 
 ```ts
 export interface LivePerfOpSpec extends PerfOpSpec {
-  /**
-   * Env vars that must all be set for this op to reach the live API.
-   * When any is missing the op is skipped and reported as LIVE_ENV_MISSING.
-   */
-  requiredEnv: string[];
+    /**
+     * Env vars that must all be set for this op to reach the live API.
+     * When any is missing the op is skipped and reported as LIVE_ENV_MISSING.
+     */
+    requiredEnv: string[];
 }
 ```
 
@@ -271,20 +252,20 @@ export interface LivePerfOpSpec extends PerfOpSpec {
 
 ```ts
 export interface MeasureInput {
-  name: string;
-  fn: () => void | Promise<void>;
-  iterations: number;
-  /** Fixed strategy 時の warmup 回数 (default 0)。 convergent strategy 時は無視される。 */
-  warmup?: number;
-  /** default = `fixed`。 */
-  warmupStrategy?: WarmupStrategy;
-  /** `warmupStrategy = 'convergent'` 時のみ効く。 */
-  warmupConvergence?: WarmupConvergence;
-  /**
-   * outlier trim 比率 (%)。 default = 0 (無効)。 例 `2` なら top 2% + bottom 2% を除外して統計を再計算する。
-   * samples 配列は元のまま保持し、 trimmed 系フィールド (trimmedMean / trimmedP95 等) を別途返す。
-   */
-  trimPercent?: number;
+    name: string;
+    fn: () => void | Promise<void>;
+    iterations: number;
+    /** Fixed strategy 時の warmup 回数 (default 0)。 convergent strategy 時は無視される。 */
+    warmup?: number;
+    /** default = `fixed`。 */
+    warmupStrategy?: WarmupStrategy;
+    /** `warmupStrategy = 'convergent'` 時のみ効く。 */
+    warmupConvergence?: WarmupConvergence;
+    /**
+     * outlier trim 比率 (%)。 default = 0 (無効)。 例 `2` なら top 2% + bottom 2% を除外して統計を再計算する。
+     * samples 配列は元のまま保持し、 trimmed 系フィールド (trimmedMean / trimmedP95 等) を別途返す。
+     */
+    trimPercent?: number;
 }
 ```
 
@@ -294,43 +275,37 @@ export interface MeasureInput {
 
 ```ts
 export interface MeasureResult {
-  name: string;
-  iterations: number;
-  warmup: number;
-  /** 収束判定を通ったかどうか。 fixed strategy では常に true、 convergent で maxIterations 到達時は false。 */
-  warmupConverged: boolean;
-  /** 実測 sample 配列 (単位 = ms、 trim 前)。 */
-  samples: number[];
-
-  // === 分布サマリ (Type 7 linear interpolation percentile) ===
-  p50: number;
-  p95: number;
-  p99: number;
-  mean: number;
-  stdev: number;
-  minMs: number;
-  maxMs: number;
-  totalMs: number;
-
-  // === robust 統計 (long-tail / GC pause 耐性) ===
-  /** 中央値 = p50 (別名、 API 明示化のため冗長保持)。 */
-  median: number;
-  /** Median Absolute Deviation。 stdev の非パラメトリック版、 log-normal 分布で robust。 */
-  mad: number;
-  /** 外れ値検出 = median ± 3 * MAD の外側にある sample 数。 */
-  outlierCount: number;
-
-  // === trim 後統計 (trimPercent > 0 時のみ非 undefined) ===
-  trimmed?: {
-    percent: number;
-    /** trim 後の sample 数。 */
-    sampleCount: number;
+    name: string;
+    iterations: number;
+    warmup: number;
+    /** 収束判定を通ったかどうか。 fixed strategy では常に true、 convergent で maxIterations 到達時は false。 */
+    warmupConverged: boolean;
+    /** 実測 sample 配列 (単位 = ms、 trim 前)。 */
+    samples: number[];
     p50: number;
     p95: number;
     p99: number;
     mean: number;
     stdev: number;
-  };
+    minMs: number;
+    maxMs: number;
+    totalMs: number;
+    /** 中央値 = p50 (別名、 API 明示化のため冗長保持)。 */
+    median: number;
+    /** Median Absolute Deviation。 stdev の非パラメトリック版、 log-normal 分布で robust。 */
+    mad: number;
+    /** 外れ値検出 = median ± 3 * MAD の外側にある sample 数。 */
+    outlierCount: number;
+    trimmed?: {
+        percent: number;
+        /** trim 後の sample 数。 */
+        sampleCount: number;
+        p50: number;
+        p95: number;
+        p99: number;
+        mean: number;
+        stdev: number;
+    };
 }
 ```
 
@@ -340,8 +315,8 @@ export interface MeasureResult {
 
 ```ts
 export interface MemoryInput {
-  fn: () => Promise<unknown> | unknown;
-  iterations: number;
+    fn: () => Promise<unknown> | unknown;
+    iterations: number;
 }
 ```
 
@@ -353,13 +328,13 @@ measureMemory — capture heap deltas around a target function. Real production 
 
 ```ts
 export interface MemorySample {
-  iterationCount: number;
-  heapUsedDeltaBytes: number;
-  heapUsedDeltaPerIterationBytes: number;
-  rssDeltaBytes: number;
-  externalDeltaBytes: number;
-  arrayBuffersDeltaBytes: number;
-  gcExposed: boolean;
+    iterationCount: number;
+    heapUsedDeltaBytes: number;
+    heapUsedDeltaPerIterationBytes: number;
+    rssDeltaBytes: number;
+    externalDeltaBytes: number;
+    arrayBuffersDeltaBytes: number;
+    gcExposed: boolean;
 }
 ```
 
@@ -369,14 +344,14 @@ export interface MemorySample {
 
 ```ts
 export interface OpOutcome {
-  name: string;
-  serial: MeasureResult;
-  concurrent: MeasureResult;
-  memory: MemorySample;
-  serialGatePassed: boolean;
-  concurrentGatePassed: boolean;
-  memoryGatePassed: boolean;
-  regressionVerdict: 'stable' | 'improved' | 'regressed' | 'n/a (baseline seeded)';
+    name: string;
+    serial: MeasureResult;
+    concurrent: MeasureResult;
+    memory: MemorySample;
+    serialGatePassed: boolean;
+    concurrentGatePassed: boolean;
+    memoryGatePassed: boolean;
+    regressionVerdict: 'stable' | 'improved' | 'regressed' | 'n/a (baseline seeded)';
 }
 ```
 
@@ -386,14 +361,14 @@ export interface OpOutcome {
 
 ```ts
 export interface PerfGateInput {
-  result: MeasureResult;
-  baseline?: MeasureResult | null;
-  thresholds?: Thresholds;
-  metrics?: {
-    costUsd?: number;
-    tokens?: number;
-    accuracy?: number;
-  };
+    result: MeasureResult;
+    baseline?: MeasureResult | null;
+    thresholds?: Thresholds;
+    metrics?: {
+        costUsd?: number;
+        tokens?: number;
+        accuracy?: number;
+    };
 }
 ```
 
@@ -403,9 +378,9 @@ export interface PerfGateInput {
 
 ```ts
 export interface PerfGateResult {
-  report: QualityReport;
-  verdict: ReleaseGateVerdict;
-  breaches: ReleaseGateBlocker[];
+    report: QualityReport;
+    verdict: ReleaseGateVerdict;
+    breaches: ReleaseGateBlocker[];
 }
 ```
 
@@ -415,21 +390,21 @@ export interface PerfGateResult {
 
 ```ts
 export interface PerfOpSpec {
-  name: string;
-  fn: () => Promise<unknown> | unknown;
-  /**
-   * Serial p95 hard cap (ms). Source: docs/quality/perf-thresholds.md.
-   */
-  serialP95CapMs: number;
-  /**
-   * Optional override for concurrent cap. Default = 2 × serial cap per SSOT.
-   */
-  concurrentP95CapMs?: number;
-  /**
-   * Optional override for memory arrayBuffers cap.
-   * Default = 100 KB across 200 iterations.
-   */
-  memoryArrayBuffersCapBytes?: number;
+    name: string;
+    fn: () => Promise<unknown> | unknown;
+    /**
+     * Serial p95 hard cap (ms). Source: docs/quality/perf-thresholds.md.
+     */
+    serialP95CapMs: number;
+    /**
+     * Optional override for concurrent cap. Default = 2 × serial cap per SSOT.
+     */
+    concurrentP95CapMs?: number;
+    /**
+     * Optional override for memory arrayBuffers cap.
+     * Default = 100 KB across 200 iterations.
+     */
+    memoryArrayBuffersCapBytes?: number;
 }
 ```
 
@@ -441,14 +416,14 @@ Regression 判定 input。 bootstrap CI 経路。
 
 ```ts
 export interface RegressionInput {
-  current: MeasureResult;
-  baseline: MeasureResult;
-  /** p95 delta の判定 threshold (default 0.2 = 20%)。 */
-  threshold?: number;
-  /** bootstrap 反復回数 (default 2000)。 少ないと CI が広くなり検出感度が下がる。 */
-  bootstrapIterations?: number;
-  /** 信頼区間 (default 0.95)。 */
-  confidenceLevel?: number;
+    current: MeasureResult;
+    baseline: MeasureResult;
+    /** p95 delta の判定 threshold (default 0.2 = 20%)。 */
+    threshold?: number;
+    /** bootstrap 反復回数 (default 2000)。 少ないと CI が広くなり検出感度が下がる。 */
+    bootstrapIterations?: number;
+    /** 信頼区間 (default 0.95)。 */
+    confidenceLevel?: number;
 }
 ```
 
@@ -458,14 +433,17 @@ export interface RegressionInput {
 
 ```ts
 export interface RegressionResult {
-  regressed: boolean;
-  /** p95 の変化率。 例 0.15 = 15% 悪化。 */
-  deltaPct: number;
-  /** bootstrap で推定した p95 delta の 95% CI (lower / upper、 単位 = ms)。 */
-  ci: { lower: number; upper: number };
-  /** CI が 0 を含まないかつ delta > threshold なら true。 */
-  significant: boolean;
-  verdict: 'improved' | 'stable' | 'regressed';
+    regressed: boolean;
+    /** p95 の変化率。 例 0.15 = 15% 悪化。 */
+    deltaPct: number;
+    /** bootstrap で推定した p95 delta の 95% CI (lower / upper、 単位 = ms)。 */
+    ci: {
+        lower: number;
+        upper: number;
+    };
+    /** CI が 0 を含まないかつ delta > threshold なら true。 */
+    significant: boolean;
+    verdict: 'improved' | 'stable' | 'regressed';
 }
 ```
 
@@ -475,41 +453,41 @@ export interface RegressionResult {
 
 ```ts
 export interface RunPerf3LayerInput {
-  moduleName: string;
-  ops: PerfOpSpec[];
-  /**
-   * Absolute path to the markdown report file. Overwritten each run.
-   */
-  reportPath: string;
-  /**
-   * Optional override for baseline path. Default = defaultBaselinePath(moduleName).
-   */
-  baselinePath?: string;
-  /**
-   * Iterations for the serial phase. Default 200.
-   */
-  serialIterations?: number;
-  /**
-   * Warmup iterations for the serial phase (discarded). Default 5.
-   */
-  serialWarmup?: number;
-  /**
-   * Worker count for the concurrent phase. Default 10.
-   */
-  concurrency?: number;
-  /**
-   * Per-worker iterations for the concurrent phase. Default 50.
-   */
-  iterationsPerWorker?: number;
-  /**
-   * Iterations for the memory phase. Default 200.
-   */
-  memoryIterations?: number;
-  /**
-   * Path (relative to reportPath's directory tree) that the report references
-   * as the threshold SSOT. Default: '../../quality/perf-thresholds'.
-   */
-  thresholdDocLink?: string;
+    moduleName: string;
+    ops: PerfOpSpec[];
+    /**
+     * Absolute path to the markdown report file. Overwritten each run.
+     */
+    reportPath: string;
+    /**
+     * Optional override for baseline path. Default = defaultBaselinePath(moduleName).
+     */
+    baselinePath?: string;
+    /**
+     * Iterations for the serial phase. Default 200.
+     */
+    serialIterations?: number;
+    /**
+     * Warmup iterations for the serial phase (discarded). Default 5.
+     */
+    serialWarmup?: number;
+    /**
+     * Worker count for the concurrent phase. Default 10.
+     */
+    concurrency?: number;
+    /**
+     * Per-worker iterations for the concurrent phase. Default 50.
+     */
+    iterationsPerWorker?: number;
+    /**
+     * Iterations for the memory phase. Default 200.
+     */
+    memoryIterations?: number;
+    /**
+     * Path (relative to reportPath's directory tree) that the report references
+     * as the threshold SSOT. Default: '../../quality/perf-thresholds'.
+     */
+    thresholdDocLink?: string;
 }
 ```
 
@@ -519,16 +497,16 @@ export interface RunPerf3LayerInput {
 
 ```ts
 export interface RunPerf3LayerLiveInput {
-  moduleName: string;
-  ops: LivePerfOpSpec[];
-  reportPath: string;
-  baselinePath?: string;
-  serialIterations?: number;
-  serialWarmup?: number;
-  concurrency?: number;
-  iterationsPerWorker?: number;
-  memoryIterations?: number;
-  thresholdDocLink?: string;
+    moduleName: string;
+    ops: LivePerfOpSpec[];
+    reportPath: string;
+    baselinePath?: string;
+    serialIterations?: number;
+    serialWarmup?: number;
+    concurrency?: number;
+    iterationsPerWorker?: number;
+    memoryIterations?: number;
+    thresholdDocLink?: string;
 }
 ```
 
@@ -538,10 +516,10 @@ export interface RunPerf3LayerLiveInput {
 
 ```ts
 export interface RunPerf3LayerLiveResult {
-  outcomes: LiveOpOutcome[];
-  allPassed: boolean;
-  anySkipped: boolean;
-  baselineSeeded: boolean;
+    outcomes: LiveOpOutcome[];
+    allPassed: boolean;
+    anySkipped: boolean;
+    baselineSeeded: boolean;
 }
 ```
 
@@ -551,9 +529,9 @@ export interface RunPerf3LayerLiveResult {
 
 ```ts
 export interface RunPerf3LayerResult {
-  outcomes: OpOutcome[];
-  allPassed: boolean;
-  baselineSeeded: boolean;
+    outcomes: OpOutcome[];
+    allPassed: boolean;
+    baselineSeeded: boolean;
 }
 ```
 
@@ -563,10 +541,10 @@ export interface RunPerf3LayerResult {
 
 ```ts
 export interface Thresholds {
-  p95Ms?: number;
-  costUsd?: number;
-  tokens?: number;
-  accuracy?: number;
+    p95Ms?: number;
+    costUsd?: number;
+    tokens?: number;
+    accuracy?: number;
 }
 ```
 <!-- kiwa-public-api:end -->

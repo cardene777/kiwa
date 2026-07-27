@@ -36,7 +36,7 @@ Tower traceはenteredとexitedを返します。handlerを省略した場合は 
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -45,10 +45,7 @@ Tower traceはenteredとexitedを返します。handlerを省略した場合は 
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L111) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export async function batchOperate<TIn, TOut>(
-  items: readonly BatchItem<TIn>[],
-  runner: (item: BatchItem<TIn>) => Promise<TOut>,
-): Promise<BatchResult[]>;
+export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
 #### `captureTowerMiddleware`
@@ -58,7 +55,7 @@ export async function batchOperate<TIn, TOut>(
 tower-http middleware layer trace capture。 real tower の Service::call を chain させ、 entered / exited を record して middleware 実行順序を verify できる。
 
 ```ts
-export async function captureTowerMiddleware(options: CaptureTowerOptions): Promise<TowerTrace>;
+export declare function captureTowerMiddleware(options: CaptureTowerOptions): Promise<TowerTrace>;
 ```
 
 #### `createRustAppEnv`
@@ -68,7 +65,7 @@ export async function captureTowerMiddleware(options: CaptureTowerOptions): Prom
 framework 別 route registry を持つ mock env。 real axum / actix / tower / rocket の router 相当を in-process で保持し、 method + path match で handler を dispatch する。
 
 ```ts
-export function createRustAppEnv(options: CreateRustAppEnvOptions = {}): RustAppEnv;
+export declare function createRustAppEnv(options?: CreateRustAppEnvOptions): RustAppEnv;
 ```
 
 #### `invokeActixHandler`
@@ -78,9 +75,7 @@ export function createRustAppEnv(options: CreateRustAppEnvOptions = {}): RustApp
 actix-web handler mock invoke。 real actix の `async fn handler(...) -&gt; impl Responder` を TypeScript 側で模倣、 extractor 群 (web::Path / web::Json / web::Data) を Record として保持。
 
 ```ts
-export async function invokeActixHandler<TReq = unknown>(
-  options: InvokeActixOptions<TReq>,
-): Promise<InvokeActixResult>;
+export declare function invokeActixHandler<TReq = unknown>(options: InvokeActixOptions<TReq>): Promise<InvokeActixResult>;
 ```
 
 #### `invokeAxumHandler`
@@ -90,9 +85,7 @@ export async function invokeActixHandler<TReq = unknown>(
 axum handler mock invoke。 real axum の `async fn handler(...) -&gt; impl IntoResponse` を TypeScript 側で模倣、 body / headers / method / path を snapshot して結果を wrap。
 
 ```ts
-export async function invokeAxumHandler<TReq = unknown>(
-  options: InvokeAxumOptions<TReq>,
-): Promise<InvokeAxumResult>;
+export declare function invokeAxumHandler<TReq = unknown>(options: InvokeAxumOptions<TReq>): Promise<InvokeAxumResult>;
 ```
 
 #### `invokeRocketRoute`
@@ -102,9 +95,7 @@ export async function invokeAxumHandler<TReq = unknown>(
 rocket route mock invoke。 real rocket の `#[get("/x")] fn route(...) -&gt; impl Responder` を TypeScript 側で模倣、 request guard 群を name 配列で保持して guard 通過を record。
 
 ```ts
-export async function invokeRocketRoute<TReq = unknown>(
-  options: InvokeRocketOptions<TReq>,
-): Promise<InvokeRocketResult>;
+export declare function invokeRocketRoute<TReq = unknown>(options: InvokeRocketOptions<TReq>): Promise<InvokeRocketResult>;
 ```
 
 #### `withCircuitBreaker`
@@ -112,7 +103,7 @@ export async function invokeRocketRoute<TReq = unknown>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L64) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
+export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
 #### `withIdempotencyKey`
@@ -120,7 +111,7 @@ export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBrea
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L101) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
+export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
 #### `withObservability`
@@ -128,7 +119,7 @@ export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: st
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L86) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
+export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
 #### `withRateLimit`
@@ -136,7 +127,7 @@ export function withObservability<T>(name: string, fn: () => Promise<T>, hook: O
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L50) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
+export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
 #### `withRetry`
@@ -144,7 +135,7 @@ export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L20) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
+export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
 #### `withTimeout`
@@ -152,7 +143,7 @@ export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () =>
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L40) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
+export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
 ```
 
 ### 型
@@ -178,7 +169,10 @@ export type AxumHandler<TReq = unknown, TRes = unknown> = (req: TReq) => Promise
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L17) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
+export interface BatchItem<TIn = unknown> {
+    name: string;
+    input: TIn;
+}
 ```
 
 #### `BatchResult`
@@ -186,7 +180,14 @@ export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L18) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export interface BatchResult { ok: boolean; output?: unknown; error?: { code: string; message: string }; }
+export interface BatchResult {
+    ok: boolean;
+    output?: unknown;
+    error?: {
+        code: string;
+        message: string;
+    };
+}
 ```
 
 #### `CircuitBreakerOptions`
@@ -194,7 +195,10 @@ export interface BatchResult { ok: boolean; output?: unknown; error?: { code: st
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L11) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export interface CircuitBreakerOptions { failureThreshold: number; resetMs: number; }
+export interface CircuitBreakerOptions {
+    failureThreshold: number;
+    resetMs: number;
+}
 ```
 
 #### `InvokeActixOptions`
@@ -203,11 +207,11 @@ export interface CircuitBreakerOptions { failureThreshold: number; resetMs: numb
 
 ```ts
 export interface InvokeActixOptions<TReq = unknown> {
-  handler: ActixHandler<TReq, unknown>;
-  method: string;
-  path: string;
-  body?: TReq;
-  extractors?: Record<string, unknown>;
+    handler: ActixHandler<TReq, unknown>;
+    method: string;
+    path: string;
+    body?: TReq;
+    extractors?: Record<string, unknown>;
 }
 ```
 
@@ -217,13 +221,13 @@ export interface InvokeActixOptions<TReq = unknown> {
 
 ```ts
 export interface InvokeActixResult {
-  status: number;
-  body: unknown;
-  method: string;
-  path: string;
-  extractors: Record<string, unknown>;
-  durationMs: number;
-  reason?: string;
+    status: number;
+    body: unknown;
+    method: string;
+    path: string;
+    extractors: Record<string, unknown>;
+    durationMs: number;
+    reason?: string;
 }
 ```
 
@@ -233,11 +237,11 @@ export interface InvokeActixResult {
 
 ```ts
 export interface InvokeAxumOptions<TReq = unknown> {
-  handler: AxumHandler<TReq, unknown>;
-  method: string;
-  path: string;
-  body?: TReq;
-  headers?: Record<string, string>;
+    handler: AxumHandler<TReq, unknown>;
+    method: string;
+    path: string;
+    body?: TReq;
+    headers?: Record<string, string>;
 }
 ```
 
@@ -247,13 +251,13 @@ export interface InvokeAxumOptions<TReq = unknown> {
 
 ```ts
 export interface InvokeAxumResult {
-  status: number;
-  body: unknown;
-  method: string;
-  path: string;
-  headers: Record<string, string>;
-  durationMs: number;
-  reason?: string;
+    status: number;
+    body: unknown;
+    method: string;
+    path: string;
+    headers: Record<string, string>;
+    durationMs: number;
+    reason?: string;
 }
 ```
 
@@ -263,11 +267,11 @@ export interface InvokeAxumResult {
 
 ```ts
 export interface InvokeRocketOptions<TReq = unknown> {
-  route: RocketRoute<TReq, unknown>;
-  method: string;
-  path: string;
-  body?: TReq;
-  guards?: string[];
+    route: RocketRoute<TReq, unknown>;
+    method: string;
+    path: string;
+    body?: TReq;
+    guards?: string[];
 }
 ```
 
@@ -277,13 +281,13 @@ export interface InvokeRocketOptions<TReq = unknown> {
 
 ```ts
 export interface InvokeRocketResult {
-  status: number;
-  body: unknown;
-  method: string;
-  path: string;
-  guardsPassed: string[];
-  durationMs: number;
-  reason?: string;
+    status: number;
+    body: unknown;
+    method: string;
+    path: string;
+    guardsPassed: string[];
+    durationMs: number;
+    reason?: string;
 }
 ```
 
@@ -293,9 +297,9 @@ export interface InvokeRocketResult {
 
 ```ts
 export interface ObservabilityHook {
-  onStart?: (name: string, input?: unknown) => void;
-  onSuccess?: (name: string, output: unknown, durationMs: number) => void;
-  onError?: (name: string, err: unknown, durationMs: number) => void;
+    onStart?: (name: string, input?: unknown) => void;
+    onSuccess?: (name: string, output: unknown, durationMs: number) => void;
+    onError?: (name: string, err: unknown, durationMs: number) => void;
 }
 ```
 
@@ -304,7 +308,10 @@ export interface ObservabilityHook {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L10) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export interface RateLimitOptions { maxRequests: number; windowMs: number; }
+export interface RateLimitOptions {
+    maxRequests: number;
+    windowMs: number;
+}
 ```
 
 #### `RetryOptions`
@@ -313,9 +320,9 @@ export interface RateLimitOptions { maxRequests: number; windowMs: number; }
 
 ```ts
 export interface RetryOptions {
-  maxAttempts: number;
-  backoffMs?: number;
-  retryOn?: (err: unknown) => boolean;
+    maxAttempts: number;
+    backoffMs?: number;
+    retryOn?: (err: unknown) => boolean;
 }
 ```
 
@@ -333,12 +340,12 @@ export type RocketRoute<TReq = unknown, TRes = unknown> = (req: TReq) => Promise
 
 ```ts
 export interface RustAppEnv {
-  framework: RustFramework;
-  routes: RustRoute[];
-  addRoute: (route: RustRoute) => void;
-  matchRoute: (method: string, path: string) => RustRoute | undefined;
-  listRoutes: () => RustRoute[];
-  clear: () => void;
+    framework: RustFramework;
+    routes: RustRoute[];
+    addRoute: (route: RustRoute) => void;
+    matchRoute: (method: string, path: string) => RustRoute | undefined;
+    listRoutes: () => RustRoute[];
+    clear: () => void;
 }
 ```
 
@@ -356,9 +363,9 @@ export type RustFramework = 'axum' | 'actix-web' | 'tower-http' | 'rocket';
 
 ```ts
 export interface RustResponse {
-  status: number;
-  body: unknown;
-  headers: Record<string, string>;
+    status: number;
+    body: unknown;
+    headers: Record<string, string>;
 }
 ```
 
@@ -368,9 +375,9 @@ export interface RustResponse {
 
 ```ts
 export interface RustRoute {
-  method: string;
-  path: string;
-  handler: (req: unknown) => Promise<unknown> | unknown;
+    method: string;
+    path: string;
+    handler: (req: unknown) => Promise<unknown> | unknown;
 }
 ```
 
@@ -379,7 +386,9 @@ export interface RustRoute {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L9) `packages/rust-lib/src/resilience.ts`
 
 ```ts
-export interface TimeoutOptions { ms: number; }
+export interface TimeoutOptions {
+    ms: number;
+}
 ```
 
 #### `TowerMiddleware`
@@ -387,7 +396,13 @@ export interface TimeoutOptions { ms: number; }
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/tower.ts#L15) `packages/rust-lib/src/tower.ts`
 
 ```ts
-export type TowerMiddleware = (req: TowerRequest, next: (req: TowerRequest) => Promise<{ status: number; body: unknown }>) => Promise<{ status: number; body: unknown }>;
+export type TowerMiddleware = (req: TowerRequest, next: (req: TowerRequest) => Promise<{
+    status: number;
+    body: unknown;
+}>) => Promise<{
+    status: number;
+    body: unknown;
+}>;
 ```
 
 #### `TowerRequest`
@@ -396,10 +411,10 @@ export type TowerMiddleware = (req: TowerRequest, next: (req: TowerRequest) => P
 
 ```ts
 export interface TowerRequest {
-  method: string;
-  path: string;
-  headers: Record<string, string>;
-  body?: unknown;
+    method: string;
+    path: string;
+    headers: Record<string, string>;
+    body?: unknown;
 }
 ```
 
@@ -409,10 +424,13 @@ export interface TowerRequest {
 
 ```ts
 export interface TowerTrace {
-  entered: string[];
-  exited: string[];
-  request: TowerRequest;
-  response?: { status: number; body: unknown };
+    entered: string[];
+    exited: string[];
+    request: TowerRequest;
+    response?: {
+        status: number;
+        body: unknown;
+    };
 }
 ```
 <!-- kiwa-public-api:end -->

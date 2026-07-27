@@ -34,7 +34,7 @@ AES 256 は 32 byte、AES 128 は 16 byte の key だけを受け付けます。
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -43,11 +43,11 @@ AES 256 は 32 byte、AES 128 は 16 byte の key だけを受け付けます。
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L35) `packages/crypto/src/aes.ts`
 
 ```ts
-export function aesDecrypt(
-  input: { ciphertext: Buffer; iv: Buffer; authTag?: Buffer },
-  key: Buffer,
-  mode: AesMode = 'aes-256-gcm',
-): Buffer;
+export declare function aesDecrypt(input: {
+    ciphertext: Buffer;
+    iv: Buffer;
+    authTag?: Buffer;
+}, key: Buffer, mode?: AesMode): Buffer;
 ```
 
 #### `aesEncrypt`
@@ -55,7 +55,7 @@ export function aesDecrypt(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L19) `packages/crypto/src/aes.ts`
 
 ```ts
-export function aesEncrypt(plaintext: string | Buffer, key: Buffer, mode: AesMode = 'aes-256-gcm'): AesEncryptResult;
+export declare function aesEncrypt(plaintext: string | Buffer, key: Buffer, mode?: AesMode): AesEncryptResult;
 ```
 
 #### `deriveKey`
@@ -65,7 +65,7 @@ export function aesEncrypt(plaintext: string | Buffer, key: Buffer, mode: AesMod
 password → derived key の KDF ラッパー。 PBKDF2 と scrypt は node:crypto、 Argon2 は node:crypto 未対応のため scrypt を argon2-mock として代替 (bytes 契約は同一)。
 
 ```ts
-export function deriveKey(password: string, opts: KdfOptions = {}): KdfResult;
+export declare function deriveKey(password: string, opts?: KdfOptions): KdfResult;
 ```
 
 #### `ed25519Sign`
@@ -75,7 +75,7 @@ export function deriveKey(password: string, opts: KdfOptions = {}): KdfResult;
 Ed25519 で data に署名。 PEM 形式の privateKey (generateKeyPair('ed25519') の出力) を受取り、 base64 signature を返す。 real Ed25519 実装は node:crypto 経路。
 
 ```ts
-export function ed25519Sign(data: string, privateKeyPem: string): Ed25519SignResult;
+export declare function ed25519Sign(data: string, privateKeyPem: string): Ed25519SignResult;
 ```
 
 #### `ed25519Verify`
@@ -83,7 +83,7 @@ export function ed25519Sign(data: string, privateKeyPem: string): Ed25519SignRes
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L23) `packages/crypto/src/ed25519.ts`
 
 ```ts
-export function ed25519Verify(data: string, signatureBase64: string, publicKeyPem: string): Ed25519VerifyResult;
+export declare function ed25519Verify(data: string, signatureBase64: string, publicKeyPem: string): Ed25519VerifyResult;
 ```
 
 #### `generateKeyPair`
@@ -91,7 +91,10 @@ export function ed25519Verify(data: string, signatureBase64: string, publicKeyPe
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/keypair.ts#L11) `packages/crypto/src/keypair.ts`
 
 ```ts
-export function generateKeyPair(type: KeyPairType = 'rsa', options?: { modulusLength?: number; namedCurve?: string }): KeyPairResult;
+export declare function generateKeyPair(type?: KeyPairType, options?: {
+    modulusLength?: number;
+    namedCurve?: string;
+}): KeyPairResult;
 ```
 
 #### `generateRsaKeyPair`
@@ -99,7 +102,10 @@ export function generateKeyPair(type: KeyPairType = 'rsa', options?: { modulusLe
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L47) `packages/crypto/src/rsa.ts`
 
 ```ts
-export function generateRsaKeyPair(modulusLength: number = 2048): { publicKey: string; privateKey: string };
+export declare function generateRsaKeyPair(modulusLength?: number): {
+    publicKey: string;
+    privateKey: string;
+};
 ```
 
 #### `hashData`
@@ -107,11 +113,7 @@ export function generateRsaKeyPair(modulusLength: number = 2048): { publicKey: s
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/hash.ts#L7) `packages/crypto/src/hash.ts`
 
 ```ts
-export function hashData(
-  data: string | Buffer,
-  algorithm: HashAlgorithm = 'sha256',
-  encoding: 'hex' | 'base64' | 'binary' = 'hex',
-): string;
+export declare function hashData(data: string | Buffer, algorithm?: HashAlgorithm, encoding?: 'hex' | 'base64' | 'binary'): string;
 ```
 
 #### `hmacDigest`
@@ -119,12 +121,7 @@ export function hashData(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/hash.ts#L17) `packages/crypto/src/hash.ts`
 
 ```ts
-export function hmacDigest(
-  data: string | Buffer,
-  secret: string | Buffer,
-  algorithm: HmacAlgorithm = 'sha256',
-  encoding: 'hex' | 'base64' | 'binary' = 'hex',
-): string;
+export declare function hmacDigest(data: string | Buffer, secret: string | Buffer, algorithm?: HmacAlgorithm, encoding?: 'hex' | 'base64' | 'binary'): string;
 ```
 
 #### `parseX509`
@@ -132,7 +129,7 @@ export function hmacDigest(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/x509.ts#L15) `packages/crypto/src/x509.ts`
 
 ```ts
-export function parseX509(pem: string): X509CertInfo;
+export declare function parseX509(pem: string): X509CertInfo;
 ```
 
 #### `rsaDecrypt`
@@ -140,7 +137,7 @@ export function parseX509(pem: string): X509CertInfo;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L43) `packages/crypto/src/rsa.ts`
 
 ```ts
-export function rsaDecrypt(cipher: Buffer, privateKey: KeyLike): Buffer;
+export declare function rsaDecrypt(cipher: Buffer, privateKey: KeyLike): Buffer;
 ```
 
 #### `rsaEncrypt`
@@ -148,7 +145,7 @@ export function rsaDecrypt(cipher: Buffer, privateKey: KeyLike): Buffer;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L38) `packages/crypto/src/rsa.ts`
 
 ```ts
-export function rsaEncrypt(data: string | Buffer, publicKey: KeyLike): Buffer;
+export declare function rsaEncrypt(data: string | Buffer, publicKey: KeyLike): Buffer;
 ```
 
 #### `rsaSign`
@@ -156,7 +153,7 @@ export function rsaEncrypt(data: string | Buffer, publicKey: KeyLike): Buffer;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L15) `packages/crypto/src/rsa.ts`
 
 ```ts
-export function rsaSign(data: string | Buffer, privateKey: KeyLike, algorithm: string = 'RSA-SHA256'): Buffer;
+export declare function rsaSign(data: string | Buffer, privateKey: KeyLike, algorithm?: string): Buffer;
 ```
 
 #### `rsaVerify`
@@ -164,12 +161,7 @@ export function rsaSign(data: string | Buffer, privateKey: KeyLike, algorithm: s
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L21) `packages/crypto/src/rsa.ts`
 
 ```ts
-export function rsaVerify(
-  data: string | Buffer,
-  signature: Buffer,
-  publicKey: KeyLike,
-  algorithm: string = 'RSA-SHA256',
-): RsaVerifyResult;
+export declare function rsaVerify(data: string | Buffer, signature: Buffer, publicKey: KeyLike, algorithm?: string): RsaVerifyResult;
 ```
 
 #### `signJWT`
@@ -177,7 +169,7 @@ export function rsaVerify(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L37) `packages/crypto/src/jwt.ts`
 
 ```ts
-export function signJWT(payload: JWTPayload, secret: string | KeyLike, algorithm: JWTAlgorithm = 'HS256'): string;
+export declare function signJWT(payload: JWTPayload, secret: string | KeyLike, algorithm?: JWTAlgorithm): string;
 ```
 
 #### `streamDecrypt`
@@ -185,7 +177,7 @@ export function signJWT(payload: JWTPayload, secret: string | KeyLike, algorithm
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/stream.ts#L29) `packages/crypto/src/stream.ts`
 
 ```ts
-export function streamDecrypt(result: StreamEncryptResult, key: Buffer): string;
+export declare function streamDecrypt(result: StreamEncryptResult, key: Buffer): string;
 ```
 
 #### `streamEncrypt`
@@ -195,7 +187,7 @@ export function streamDecrypt(result: StreamEncryptResult, key: Buffer): string;
 stream cipher (AES-CTR / ChaCha20-Poly1305) で byte 流を encrypt。 real TLS record layer / Signal Protocol の対称暗号 stream mode 相当。
 
 ```ts
-export function streamEncrypt(plaintext: string, key: Buffer, algorithm: StreamCipherAlgorithm = 'aes-256-ctr'): StreamEncryptResult;
+export declare function streamEncrypt(plaintext: string, key: Buffer, algorithm?: StreamCipherAlgorithm): StreamEncryptResult;
 ```
 
 #### `verifyJWT`
@@ -203,7 +195,7 @@ export function streamEncrypt(plaintext: string, key: Buffer, algorithm: StreamC
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L58) `packages/crypto/src/jwt.ts`
 
 ```ts
-export function verifyJWT(token: string, secret: string | KeyLike, algorithm: JWTAlgorithm = 'HS256'): JWTVerifyResult;
+export declare function verifyJWT(token: string, secret: string | KeyLike, algorithm?: JWTAlgorithm): JWTVerifyResult;
 ```
 
 #### `verifyPassword`
@@ -213,7 +205,7 @@ export function verifyJWT(token: string, secret: string | KeyLike, algorithm: JW
 password + 既存 salt/params で KDF を再実行、 hashHex 一致で verification 成功。
 
 ```ts
-export function verifyPassword(password: string, stored: KdfResult): boolean;
+export declare function verifyPassword(password: string, stored: KdfResult): boolean;
 ```
 
 #### `x25519Ecdh`
@@ -223,7 +215,7 @@ export function verifyPassword(password: string, stored: KdfResult): boolean;
 X25519 ECDH で共有秘密を導出。 real Signal Protocol / DTLS 相当の一時鍵交換を mock。
 
 ```ts
-export function x25519Ecdh(privateKeyPem: string, remotePublicKeyPem: string): EcdhResult;
+export declare function x25519Ecdh(privateKeyPem: string, remotePublicKeyPem: string): EcdhResult;
 ```
 
 ### 型
@@ -234,9 +226,9 @@ export function x25519Ecdh(privateKeyPem: string, remotePublicKeyPem: string): E
 
 ```ts
 export interface AesEncryptResult {
-  ciphertext: Buffer;
-  iv: Buffer;
-  authTag?: Buffer;
+    ciphertext: Buffer;
+    iv: Buffer;
+    authTag?: Buffer;
 }
 ```
 
@@ -254,8 +246,8 @@ export type AesMode = 'aes-256-cbc' | 'aes-256-gcm' | 'aes-128-cbc' | 'aes-128-g
 
 ```ts
 export interface EcdhResult {
-  sharedSecretHex: string;
-  algorithm: 'x25519';
+    sharedSecretHex: string;
+    algorithm: 'x25519';
 }
 ```
 
@@ -265,8 +257,8 @@ export interface EcdhResult {
 
 ```ts
 export interface Ed25519SignResult {
-  signature: string;
-  algorithm: 'ed25519';
+    signature: string;
+    algorithm: 'ed25519';
 }
 ```
 
@@ -276,8 +268,8 @@ export interface Ed25519SignResult {
 
 ```ts
 export interface Ed25519VerifyResult {
-  valid: boolean;
-  algorithm: 'ed25519';
+    valid: boolean;
+    algorithm: 'ed25519';
 }
 ```
 
@@ -319,10 +311,10 @@ export type JWTPayload = Record<string, unknown>;
 
 ```ts
 export interface JWTVerifyResult {
-  valid: boolean;
-  payload?: JWTPayload;
-  algorithm: JWTAlgorithm;
-  reason?: string;
+    valid: boolean;
+    payload?: JWTPayload;
+    algorithm: JWTAlgorithm;
+    reason?: string;
 }
 ```
 
@@ -340,14 +332,14 @@ export type KdfAlgorithm = 'pbkdf2' | 'scrypt' | 'argon2-mock';
 
 ```ts
 export interface KdfOptions {
-  algorithm?: KdfAlgorithm;
-  saltBytes?: number;
-  iterations?: number;
-  keyLength?: number;
-  digest?: 'sha256' | 'sha512';
-  N?: number;
-  r?: number;
-  p?: number;
+    algorithm?: KdfAlgorithm;
+    saltBytes?: number;
+    iterations?: number;
+    keyLength?: number;
+    digest?: 'sha256' | 'sha512';
+    N?: number;
+    r?: number;
+    p?: number;
 }
 ```
 
@@ -357,11 +349,11 @@ export interface KdfOptions {
 
 ```ts
 export interface KdfResult {
-  algorithm: KdfAlgorithm;
-  hashHex: string;
-  saltHex: string;
-  iterations: number;
-  keyLength: number;
+    algorithm: KdfAlgorithm;
+    hashHex: string;
+    saltHex: string;
+    iterations: number;
+    keyLength: number;
 }
 ```
 
@@ -371,9 +363,9 @@ export interface KdfResult {
 
 ```ts
 export interface KeyPairResult {
-  publicKey: string;
-  privateKey: string;
-  type: KeyPairType;
+    publicKey: string;
+    privateKey: string;
+    type: KeyPairType;
 }
 ```
 
@@ -391,8 +383,8 @@ export type KeyPairType = 'rsa' | 'ec' | 'ed25519';
 
 ```ts
 export interface RsaVerifyResult {
-  valid: boolean;
-  reason?: string;
+    valid: boolean;
+    reason?: string;
 }
 ```
 
@@ -410,10 +402,10 @@ export type StreamCipherAlgorithm = 'aes-256-ctr' | 'chacha20-poly1305';
 
 ```ts
 export interface StreamEncryptResult {
-  ciphertext: string;
-  iv: string;
-  authTag?: string;
-  algorithm: StreamCipherAlgorithm;
+    ciphertext: string;
+    iv: string;
+    authTag?: string;
+    algorithm: StreamCipherAlgorithm;
 }
 ```
 
@@ -423,15 +415,15 @@ export interface StreamEncryptResult {
 
 ```ts
 export interface X509CertInfo {
-  subject: string;
-  issuer: string;
-  validFrom: string;
-  validTo: string;
-  serialNumber: string;
-  fingerprint: string;
-  fingerprint256: string;
-  keyUsage?: readonly string[];
-  isValidNow: boolean;
+    subject: string;
+    issuer: string;
+    validFrom: string;
+    validTo: string;
+    serialNumber: string;
+    fingerprint: string;
+    fingerprint256: string;
+    keyUsage?: readonly string[];
+    isValidNow: boolean;
 }
 ```
 <!-- kiwa-public-api:end -->

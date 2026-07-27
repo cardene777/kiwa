@@ -35,7 +35,7 @@ targeting rule は user id、percentage rule は再現可能な hash bucket、at
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -44,7 +44,7 @@ targeting rule は user id、percentage rule は再現可能な hash bucket、at
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/circuit-breaker.ts#L20) `packages/feature-flag/src/circuit-breaker.ts`
 
 ```ts
-export function createCircuitBreaker(options: CircuitBreakerOptions = {}): CircuitBreaker;
+export declare function createCircuitBreaker(options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
 #### `createFlagClient`
@@ -54,7 +54,7 @@ export function createCircuitBreaker(options: CircuitBreakerOptions = {}): Circu
 provider 別 mock 差 (id prefix / evaluation stream 名) を持たせつつ、 全 API 共通 interface。 実 provider (GrowthBook / LaunchDarkly / PostHog / Unleash) の SDK を差し替えても同じ signature で呼べる想定。
 
 ```ts
-export function createFlagClient(options: CreateFlagClientOptions = {}): FlagClient;
+export declare function createFlagClient(options?: CreateFlagClientOptions): FlagClient;
 ```
 
 #### `createHookRegistry`
@@ -62,7 +62,7 @@ export function createFlagClient(options: CreateFlagClientOptions = {}): FlagCli
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L22) `packages/feature-flag/src/observability.ts`
 
 ```ts
-export function createHookRegistry(): HookRegistry;
+export declare function createHookRegistry(): HookRegistry;
 ```
 
 #### `createIdempotencyCache`
@@ -70,7 +70,7 @@ export function createHookRegistry(): HookRegistry;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/idempotency.ts#L11) `packages/feature-flag/src/idempotency.ts`
 
 ```ts
-export function createIdempotencyCache(): IdempotencyCache;
+export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
 #### `evaluateAllFlags`
@@ -80,7 +80,7 @@ export function createIdempotencyCache(): IdempotencyCache;
 全登録 flag を user 1 人に対して bulk evaluate。 SPA/mobile client の起動時に 1 回だけ 全 flag を pre-fetch する pattern を再現。
 
 ```ts
-export function evaluateAllFlags(client: FlagClient, user: FlagUser): EvaluateAllFlagsResult;
+export declare function evaluateAllFlags(client: FlagClient, user: FlagUser): EvaluateAllFlagsResult;
 ```
 
 #### `evaluateBatch`
@@ -90,10 +90,10 @@ export function evaluateAllFlags(client: FlagClient, user: FlagUser): EvaluateAl
 batch evaluate: 複数 (key, user) pair を一括評価。
 
 ```ts
-export function evaluateBatch(
-  client: FlagClient,
-  entries: readonly { key: string; user: FlagUser }[],
-): BatchEvaluateResult;
+export declare function evaluateBatch(client: FlagClient, entries: readonly {
+    key: string;
+    user: FlagUser;
+}[]): BatchEvaluateResult;
 ```
 
 #### `evaluateFlag`
@@ -103,7 +103,7 @@ export function evaluateBatch(
 flag key + user から value を決定。 rule chain を順次評価し、 最初に matched した rule の value を採用。 全 rule miss / 未登録 flag は defaultValue に fallback。
 
 ```ts
-export function evaluateFlag(client: FlagClient, key: string, user: FlagUser): EvaluateFlagResult;
+export declare function evaluateFlag(client: FlagClient, key: string, user: FlagUser): EvaluateFlagResult;
 ```
 
 #### `evaluateIdempotent`
@@ -113,12 +113,9 @@ export function evaluateFlag(client: FlagClient, key: string, user: FlagUser): E
 cached evaluate: 同 (flagKey, user.id) で cached result を返却。
 
 ```ts
-export function evaluateIdempotent(
-  client: FlagClient,
-  key: string,
-  user: FlagUser,
-  cache: IdempotencyCache,
-): EvaluateFlagResult & { cached: boolean };
+export declare function evaluateIdempotent(client: FlagClient, key: string, user: FlagUser, cache: IdempotencyCache): EvaluateFlagResult & {
+    cached: boolean;
+};
 ```
 
 #### `evaluateObservable`
@@ -126,12 +123,7 @@ export function evaluateIdempotent(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L36) `packages/feature-flag/src/observability.ts`
 
 ```ts
-export function evaluateObservable(
-  client: FlagClient,
-  key: string,
-  user: FlagUser,
-  hooks: HookRegistry,
-): EvaluateFlagResult;
+export declare function evaluateObservable(client: FlagClient, key: string, user: FlagUser, hooks: HookRegistry): EvaluateFlagResult;
 ```
 
 #### `evaluateWithRetry`
@@ -139,12 +131,9 @@ export function evaluateObservable(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/retry.ts#L11) `packages/feature-flag/src/retry.ts`
 
 ```ts
-export async function evaluateWithRetry(
-  client: FlagClient,
-  key: string,
-  user: FlagUser,
-  options: RetryOptions = {},
-): Promise<EvaluateFlagResult & { attempts: number }>;
+export declare function evaluateWithRetry(client: FlagClient, key: string, user: FlagUser, options?: RetryOptions): Promise<EvaluateFlagResult & {
+    attempts: number;
+}>;
 ```
 
 #### `matchRule`
@@ -154,7 +143,7 @@ export async function evaluateWithRetry(
 user + rule 評価 = 最初にヒットした rule の value を返す。 全 rule miss で fallback / defaultValue。 percentage は hash(userId + key) % 100 で決定 (再現性)。
 
 ```ts
-export function matchRule(rule: FlagRule, user: FlagUser, key: string): RuleMatchResult;
+export declare function matchRule(rule: FlagRule, user: FlagUser, key: string): RuleMatchResult;
 ```
 
 #### `normalizeProviderConfig`
@@ -164,7 +153,9 @@ export function matchRule(rule: FlagRule, user: FlagUser, key: string): RuleMatc
 provider config を統一 shape に正規化。 実 provider の SDK config 差 (LaunchDarkly = sdkKey, PostHog = apiKey + host, GrowthBook = clientKey, Unleash = url + appName) を吸収。
 
 ```ts
-export function normalizeProviderConfig(config: Partial<ProviderConfig> & { provider: FlagProvider }): ProviderConfig;
+export declare function normalizeProviderConfig(config: Partial<ProviderConfig> & {
+    provider: FlagProvider;
+}): ProviderConfig;
 ```
 
 #### `providerIdPrefix`
@@ -184,7 +175,7 @@ export declare const providerIdPrefix: Record<FlagProvider, string>;
 rule を registry に登録するための builder。 client 側の rule Map に push される想定。
 
 ```ts
-export function registerRule(rules: Map<string, FlagRule[]>, key: string, rule: FlagRule): void;
+export declare function registerRule(rules: Map<string, FlagRule[]>, key: string, rule: FlagRule): void;
 ```
 
 ### 型
@@ -195,12 +186,12 @@ export function registerRule(rules: Map<string, FlagRule[]>, key: string, rule: 
 
 ```ts
 export interface AttributeMatchRule {
-  type: 'attribute';
-  attribute: string;
-  operator: 'eq' | 'ne' | 'in' | 'gt' | 'lt';
-  value: string | number | boolean | string[];
-  matchValue: FlagValue;
-  fallback: FlagValue;
+    type: 'attribute';
+    attribute: string;
+    operator: 'eq' | 'ne' | 'in' | 'gt' | 'lt';
+    value: string | number | boolean | string[];
+    matchValue: FlagValue;
+    fallback: FlagValue;
 }
 ```
 
@@ -210,9 +201,9 @@ export interface AttributeMatchRule {
 
 ```ts
 export interface BatchEvaluateResult {
-  total: number;
-  results: EvaluateFlagResult[];
-  byKey: Record<string, EvaluateFlagResult>;
+    total: number;
+    results: EvaluateFlagResult[];
+    byKey: Record<string, EvaluateFlagResult>;
 }
 ```
 
@@ -222,10 +213,12 @@ export interface BatchEvaluateResult {
 
 ```ts
 export interface CircuitBreaker {
-  state: () => CircuitState;
-  evaluate: (client: FlagClient, key: string, user: FlagUser) => EvaluateFlagResult & { circuitState: CircuitState };
-  reset: () => void;
-  errorCount: () => number;
+    state: () => CircuitState;
+    evaluate: (client: FlagClient, key: string, user: FlagUser) => EvaluateFlagResult & {
+        circuitState: CircuitState;
+    };
+    reset: () => void;
+    errorCount: () => number;
 }
 ```
 
@@ -235,10 +228,10 @@ export interface CircuitBreaker {
 
 ```ts
 export interface CircuitBreakerOptions {
-  errorThreshold?: number;
-  resetTimeoutMs?: number;
-  fallbackValue?: unknown;
-  now?: () => number;
+    errorThreshold?: number;
+    resetTimeoutMs?: number;
+    fallbackValue?: unknown;
+    now?: () => number;
 }
 ```
 
@@ -256,10 +249,10 @@ export type CircuitState = 'closed' | 'open' | 'half-open';
 
 ```ts
 export interface CreateFlagClientOptions {
-  provider?: FlagProvider;
-  flags?: FlagDefinition[];
-  now?: () => number;
-  idSeed?: number;
+    provider?: FlagProvider;
+    flags?: FlagDefinition[];
+    now?: () => number;
+    idSeed?: number;
 }
 ```
 
@@ -277,8 +270,8 @@ export type EvalHookEvent = 'before-eval' | 'after-eval' | 'error';
 
 ```ts
 export interface EvaluateAllFlagsResult {
-  user: FlagUser;
-  results: EvaluateFlagResult[];
+    user: FlagUser;
+    results: EvaluateFlagResult[];
 }
 ```
 
@@ -288,14 +281,14 @@ export interface EvaluateAllFlagsResult {
 
 ```ts
 export interface EvaluatedFlagRecord {
-  id: string;
-  provider: FlagProvider;
-  key: string;
-  value: FlagValue;
-  variant: FlagVariant;
-  user: FlagUser;
-  reason: string;
-  evaluatedAt: number;
+    id: string;
+    provider: FlagProvider;
+    key: string;
+    value: FlagValue;
+    variant: FlagVariant;
+    user: FlagUser;
+    reason: string;
+    evaluatedAt: number;
 }
 ```
 
@@ -305,10 +298,10 @@ export interface EvaluatedFlagRecord {
 
 ```ts
 export interface EvaluateFlagResult {
-  key: string;
-  value: FlagValue;
-  reason: string;
-  record: EvaluatedFlagRecord;
+    key: string;
+    value: FlagValue;
+    reason: string;
+    record: EvaluatedFlagRecord;
 }
 ```
 
@@ -318,14 +311,14 @@ export interface EvaluateFlagResult {
 
 ```ts
 export interface FlagClient {
-  provider: FlagProvider;
-  registerFlag: (def: FlagDefinition) => void;
-  registerRule: (key: string, rule: FlagRule) => void;
-  getFlags: () => FlagDefinition[];
-  getRules: (key: string) => FlagRule[];
-  listEvaluated: () => EvaluatedFlagRecord[];
-  recordEvaluation: (rec: Omit<EvaluatedFlagRecord, 'id' | 'evaluatedAt' | 'provider'>) => EvaluatedFlagRecord;
-  clear: () => void;
+    provider: FlagProvider;
+    registerFlag: (def: FlagDefinition) => void;
+    registerRule: (key: string, rule: FlagRule) => void;
+    getFlags: () => FlagDefinition[];
+    getRules: (key: string) => FlagRule[];
+    listEvaluated: () => EvaluatedFlagRecord[];
+    recordEvaluation: (rec: Omit<EvaluatedFlagRecord, 'id' | 'evaluatedAt' | 'provider'>) => EvaluatedFlagRecord;
+    clear: () => void;
 }
 ```
 
@@ -335,10 +328,10 @@ export interface FlagClient {
 
 ```ts
 export interface FlagDefinition {
-  key: string;
-  variant: FlagVariant;
-  defaultValue: FlagValue;
-  description?: string;
+    key: string;
+    variant: FlagVariant;
+    defaultValue: FlagValue;
+    description?: string;
 }
 ```
 
@@ -364,8 +357,8 @@ export type FlagRule = TargetingRule | PercentageRolloutRule | AttributeMatchRul
 
 ```ts
 export interface FlagUser {
-  id: string;
-  attributes?: Record<string, string | number | boolean>;
+    id: string;
+    attributes?: Record<string, string | number | boolean>;
 }
 ```
 
@@ -399,11 +392,11 @@ export type HookCallback = (ctx: HookContext) => void;
 
 ```ts
 export interface HookContext {
-  event: EvalHookEvent;
-  key: string;
-  user: FlagUser;
-  result?: EvaluateFlagResult;
-  error?: string;
+    event: EvalHookEvent;
+    key: string;
+    user: FlagUser;
+    result?: EvaluateFlagResult;
+    error?: string;
 }
 ```
 
@@ -413,9 +406,9 @@ export interface HookContext {
 
 ```ts
 export interface HookRegistry {
-  register: (event: EvalHookEvent, cb: HookCallback) => () => void;
-  emit: (event: EvalHookEvent, ctx: HookContext) => void;
-  count: (event: EvalHookEvent) => number;
+    register: (event: EvalHookEvent, cb: HookCallback) => () => void;
+    emit: (event: EvalHookEvent, ctx: HookContext) => void;
+    count: (event: EvalHookEvent) => number;
 }
 ```
 
@@ -425,10 +418,10 @@ export interface HookRegistry {
 
 ```ts
 export interface IdempotencyCache {
-  get: (key: string) => EvaluateFlagResult | undefined;
-  set: (key: string, value: EvaluateFlagResult) => void;
-  size: () => number;
-  clear: () => void;
+    get: (key: string) => EvaluateFlagResult | undefined;
+    set: (key: string, value: EvaluateFlagResult) => void;
+    size: () => number;
+    clear: () => void;
 }
 ```
 
@@ -438,10 +431,10 @@ export interface IdempotencyCache {
 
 ```ts
 export interface PercentageRolloutRule {
-  type: 'percentage';
-  percentage: number;
-  value: FlagValue;
-  fallback: FlagValue;
+    type: 'percentage';
+    percentage: number;
+    value: FlagValue;
+    fallback: FlagValue;
 }
 ```
 
@@ -451,10 +444,10 @@ export interface PercentageRolloutRule {
 
 ```ts
 export interface ProviderConfig {
-  provider: FlagProvider;
-  apiKey?: string;
-  environment?: string;
-  clientKey?: string;
+    provider: FlagProvider;
+    apiKey?: string;
+    environment?: string;
+    clientKey?: string;
 }
 ```
 
@@ -464,10 +457,10 @@ export interface ProviderConfig {
 
 ```ts
 export interface RetryOptions {
-  maxAttempts?: number;
-  initialDelayMs?: number;
-  isRetryable?: (result: EvaluateFlagResult) => boolean;
-  onRetry?: (attempt: number) => void;
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    isRetryable?: (result: EvaluateFlagResult) => boolean;
+    onRetry?: (attempt: number) => void;
 }
 ```
 
@@ -477,9 +470,9 @@ export interface RetryOptions {
 
 ```ts
 export interface RuleMatchResult {
-  matched: boolean;
-  value: FlagValue;
-  reason: string;
+    matched: boolean;
+    value: FlagValue;
+    reason: string;
 }
 ```
 
@@ -489,9 +482,9 @@ export interface RuleMatchResult {
 
 ```ts
 export interface TargetingRule {
-  type: 'targeting';
-  userIds: string[];
-  value: FlagValue;
+    type: 'targeting';
+    userIds: string[];
+    value: FlagValue;
 }
 ```
 <!-- kiwa-public-api:end -->

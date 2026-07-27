@@ -21,7 +21,7 @@ effect と root の `dispose` を呼びます。これは Solid の実 owner tre
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -32,7 +32,7 @@ effect と root の `dispose` を呼びます。これは Solid の実 owner tre
 Group multiple signal writes so subscribed effects run at most once for the whole batch (dedup via Set). Matches Solid's `batch()` semantics for tests.
 
 ```ts
-export function batch<T>(fn: () => T): T;
+export declare function batch<T>(fn: () => T): T;
 ```
 
 #### `createResourceStub`
@@ -42,7 +42,7 @@ export function batch<T>(fn: () => T): T;
 Mock Solid's `createResource(fetcher)` — awaits the fetcher, exposes `resource()` accessor + `resource.state` + `refetch()` + `mutate()`. Tests can drive the resource lifecycle explicitly without racing against a real async runtime.
 
 ```ts
-export function createResourceStub<T>(fetcher: () => Promise<T> | T): ResourceHandle<T>;
+export declare function createResourceStub<T>(fetcher: () => Promise<T> | T): ResourceHandle<T>;
 ```
 
 #### `createRoot`
@@ -52,7 +52,11 @@ export function createResourceStub<T>(fetcher: () => Promise<T> | T): ResourceHa
 Emulate Solid's `createRoot(fn)` — runs `fn(dispose)` inside a fresh effect scope and returns the accumulated dispose handle plus a scope object so tests can assert on `scope.disposed()`.
 
 ```ts
-export function createRoot<T>(fn: (dispose: () => void) => T): { result: T; scope: RootScope; dispose: () => void };
+export declare function createRoot<T>(fn: (dispose: () => void) => T): {
+    result: T;
+    scope: RootScope;
+    dispose: () => void;
+};
 ```
 
 #### `EFFECT_SYMBOL`
@@ -60,7 +64,7 @@ export function createRoot<T>(fn: (dispose: () => void) => T): { result: T; scop
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/signal.ts#L18) `packages/solidjs/src/signal.ts`
 
 ```ts
-export declare const EFFECT_SYMBOL: typeof EFFECT_SYMBOL;
+export declare const EFFECT_SYMBOL: unique symbol;
 ```
 
 #### `ERROR_BOUNDARY_SYMBOL`
@@ -68,7 +72,7 @@ export declare const EFFECT_SYMBOL: typeof EFFECT_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/route.ts#L29) `packages/solidjs/src/route.ts`
 
 ```ts
-export declare const ERROR_BOUNDARY_SYMBOL: typeof ERROR_BOUNDARY_SYMBOL;
+export declare const ERROR_BOUNDARY_SYMBOL: unique symbol;
 ```
 
 #### `errorBoundary`
@@ -78,7 +82,7 @@ export declare const ERROR_BOUNDARY_SYMBOL: typeof ERROR_BOUNDARY_SYMBOL;
 Wrap a component in a Solid-shaped `&lt;ErrorBoundary fallback={err =&gt; ...}&gt;` so a throw in the body materializes the fallback tree instead of bubbling.
 
 ```ts
-export function errorBoundary(opts: ErrorBoundaryOptions): SolidChild | ErrorBoundarySignal;
+export declare function errorBoundary(opts: ErrorBoundaryOptions): SolidChild | ErrorBoundarySignal;
 ```
 
 #### `findElements`
@@ -88,7 +92,7 @@ export function errorBoundary(opts: ErrorBoundaryOptions): SolidChild | ErrorBou
 Depth-first traversal of a Solid virtual tree. Collects every element whose `type` matches the predicate; strings / numbers / nulls are skipped.
 
 ```ts
-export function findElements(tree: SolidChild, predicate: (el: SolidElement) => boolean): SolidElement[];
+export declare function findElements(tree: SolidChild, predicate: (el: SolidElement) => boolean): SolidElement[];
 ```
 
 #### `h`
@@ -98,7 +102,7 @@ export function findElements(tree: SolidChild, predicate: (el: SolidElement) => 
 Lightweight JSX-shaped element factory. Callers can write `h('div', { class: 'x' }, 'hello')` in tests and pass the result to `renderSolid` or return it from a component body.
 
 ```ts
-export function h(type: string, props: Record<string, unknown> | null, ...children: SolidChild[]): SolidElement;
+export declare function h(type: string, props: Record<string, unknown> | null, ...children: SolidChild[]): SolidElement;
 ```
 
 #### `hydrate`
@@ -108,7 +112,7 @@ export function h(type: string, props: Record<string, unknown> | null, ...childr
 Mount a component in "hydration" mode. Compares the freshly-rendered HTML against `ssrMarkup` and reports whether hydration matched (mirrors Solid's `hydrate()` mismatch warning path).
 
 ```ts
-export function hydrate<TProps>(opts: HydrateOptions<TProps>): HydrateResult;
+export declare function hydrate<TProps>(opts: HydrateOptions<TProps>): HydrateResult;
 ```
 
 #### `invokeSolidRoute`
@@ -118,9 +122,7 @@ export function hydrate<TProps>(opts: HydrateOptions<TProps>): HydrateResult;
 Run a SolidStart-shaped route: awaits the loader (if any), invokes the page component with `{ params, query, data }`, and captures redirect / not-found signals that either the loader or the page body throws.
 
 ```ts
-export async function invokeSolidRoute<TData>(
-  opts: InvokeSolidRouteOptions<TData>,
-): Promise<InvokeSolidRouteResult<TData>>;
+export declare function invokeSolidRoute<TData>(opts: InvokeSolidRouteOptions<TData>): Promise<InvokeSolidRouteResult<TData>>;
 ```
 
 #### `isEffectHandle`
@@ -130,7 +132,7 @@ export async function invokeSolidRoute<TData>(
 Type guard: recognize a mockEffect handle.
 
 ```ts
-export function isEffectHandle(value: unknown): value is EffectHandle<unknown>;
+export declare function isEffectHandle(value: unknown): value is EffectHandle<unknown>;
 ```
 
 #### `isErrorBoundary`
@@ -140,7 +142,7 @@ export function isEffectHandle(value: unknown): value is EffectHandle<unknown>;
 Type guard: recognize an ErrorBoundary signal.
 
 ```ts
-export function isErrorBoundary(value: unknown): value is ErrorBoundarySignal;
+export declare function isErrorBoundary(value: unknown): value is ErrorBoundarySignal;
 ```
 
 #### `isResourceAccessor`
@@ -150,7 +152,7 @@ export function isErrorBoundary(value: unknown): value is ErrorBoundarySignal;
 Type guard: recognize a createResourceStub accessor.
 
 ```ts
-export function isResourceAccessor(value: unknown): value is ResourceAccessor<unknown>;
+export declare function isResourceAccessor(value: unknown): value is ResourceAccessor<unknown>;
 ```
 
 #### `isSignal`
@@ -160,7 +162,7 @@ export function isResourceAccessor(value: unknown): value is ResourceAccessor<un
 Type guard: recognize a mockSignal getter (used by helpers + tests).
 
 ```ts
-export function isSignal(value: unknown): value is SignalGetter<unknown>;
+export declare function isSignal(value: unknown): value is SignalGetter<unknown>;
 ```
 
 #### `isSolidElement`
@@ -170,7 +172,7 @@ export function isSignal(value: unknown): value is SignalGetter<unknown>;
 Type guard: recognize a Solid virtual element (used by walkers + tests).
 
 ```ts
-export function isSolidElement(value: unknown): value is SolidElement;
+export declare function isSolidElement(value: unknown): value is SolidElement;
 ```
 
 #### `isSuspenseBoundary`
@@ -180,7 +182,7 @@ export function isSolidElement(value: unknown): value is SolidElement;
 Type guard: recognize a Suspense boundary signal.
 
 ```ts
-export function isSuspenseBoundary(value: unknown): value is SuspenseBoundarySignal<unknown>;
+export declare function isSuspenseBoundary(value: unknown): value is SuspenseBoundarySignal<unknown>;
 ```
 
 #### `mockEffect`
@@ -190,7 +192,7 @@ export function isSuspenseBoundary(value: unknown): value is SuspenseBoundarySig
 Run a Solid-shaped `createEffect(fn)` — the body is invoked immediately and again every time a subscribed signal changes. Every run captures which signal values were read into an ordered trace so tests can assert on the exact sequence of transitions.
 
 ```ts
-export function mockEffect<T>(fn: () => T): EffectHandle<T>;
+export declare function mockEffect<T>(fn: () => T): EffectHandle<T>;
 ```
 
 #### `mockSignal`
@@ -200,7 +202,7 @@ export function mockEffect<T>(fn: () => T): EffectHandle<T>;
 Create a Solid-shaped Signal without a Solid runtime. Returns `[get, set]` where reading the getter inside a `mockEffect` body subscribes the effect, and writing through the setter re-runs subscribed effects (deduplicated inside `batch()`).
 
 ```ts
-export function mockSignal<T>(initial: T): readonly [SignalGetter<T>, SignalSetter<T>];
+export declare function mockSignal<T>(initial: T): readonly [SignalGetter<T>, SignalSetter<T>];
 ```
 
 #### `notFound`
@@ -210,7 +212,7 @@ export function mockSignal<T>(initial: T): readonly [SignalGetter<T>, SignalSett
 Throw this from a route loader / page body to signal a 404.
 
 ```ts
-export function notFound(): SolidRouteNotFoundSignal;
+export declare function notFound(): SolidRouteNotFoundSignal;
 ```
 
 #### `popEffectScope`
@@ -220,7 +222,7 @@ export function notFound(): SolidRouteNotFoundSignal;
 Pop the current effect-collection scope and return the collected handles.
 
 ```ts
-export function popEffectScope(): EffectHandle<unknown>[];
+export declare function popEffectScope(): EffectHandle<unknown>[];
 ```
 
 #### `pushEffectScope`
@@ -230,7 +232,7 @@ export function popEffectScope(): EffectHandle<unknown>[];
 Push a fresh effect-collection scope onto the stack. Used internally by `renderSolid` / `createRoot` so any effects registered during the callback are attributed to that scope.
 
 ```ts
-export function pushEffectScope(): void;
+export declare function pushEffectScope(): void;
 ```
 
 #### `redirect`
@@ -240,7 +242,7 @@ export function pushEffectScope(): void;
 Throw this from a route loader / page body to signal a redirect.
 
 ```ts
-export function redirect(url: string, status = 302): SolidRouteRedirectSignal;
+export declare function redirect(url: string, status?: number): SolidRouteRedirectSignal;
 ```
 
 #### `registerEffect`
@@ -250,7 +252,7 @@ export function redirect(url: string, status = 302): SolidRouteRedirectSignal;
 Register an effect handle with the innermost active scope (if any). Skill tests call this directly after `mockEffect(...)` when they want the effect cleaned up on `dispose()`.
 
 ```ts
-export function registerEffect(handle: EffectHandle<unknown>): void;
+export declare function registerEffect(handle: EffectHandle<unknown>): void;
 ```
 
 #### `renderSolid`
@@ -260,7 +262,7 @@ export function registerEffect(handle: EffectHandle<unknown>): void;
 Mount a Solid component synchronously, capture effects registered during the mount, and expose a `dispose()` handle that tears down every effect.
 
 ```ts
-export function renderSolid<TProps>(opts: RenderSolidOptions<TProps>): RenderSolidResult;
+export declare function renderSolid<TProps>(opts: RenderSolidOptions<TProps>): RenderSolidResult;
 ```
 
 #### `renderWithSuspense`
@@ -270,9 +272,10 @@ export function renderSolid<TProps>(opts: RenderSolidOptions<TProps>): RenderSol
 Model a `&lt;Suspense fallback={...}&gt;{component}&lt;/Suspense&gt;` boundary. First mounts the fallback (matching Solid's first-render behavior when a resource is still pending), awaits `waitFor`, then remounts the real component and records both trees in a boundary signal.
 
 ```ts
-export async function renderWithSuspense<T>(
-  opts: RenderWithSuspenseOptions<T>,
-): Promise<SuspenseBoundarySignal<T> & { component: RenderSolidResult; fallbackResult: RenderSolidResult }>;
+export declare function renderWithSuspense<T>(opts: RenderWithSuspenseOptions<T>): Promise<SuspenseBoundarySignal<T> & {
+    component: RenderSolidResult;
+    fallbackResult: RenderSolidResult;
+}>;
 ```
 
 #### `RESOURCE_SYMBOL`
@@ -280,7 +283,7 @@ export async function renderWithSuspense<T>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/signal.ts#L19) `packages/solidjs/src/signal.ts`
 
 ```ts
-export declare const RESOURCE_SYMBOL: typeof RESOURCE_SYMBOL;
+export declare const RESOURCE_SYMBOL: unique symbol;
 ```
 
 #### `SIGNAL_SYMBOL`
@@ -288,7 +291,7 @@ export declare const RESOURCE_SYMBOL: typeof RESOURCE_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/signal.ts#L17) `packages/solidjs/src/signal.ts`
 
 ```ts
-export declare const SIGNAL_SYMBOL: typeof SIGNAL_SYMBOL;
+export declare const SIGNAL_SYMBOL: unique symbol;
 ```
 
 #### `SOLID_ELEMENT_SYMBOL`
@@ -296,7 +299,7 @@ export declare const SIGNAL_SYMBOL: typeof SIGNAL_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/render.ts#L28) `packages/solidjs/src/render.ts`
 
 ```ts
-export declare const SOLID_ELEMENT_SYMBOL: typeof SOLID_ELEMENT_SYMBOL;
+export declare const SOLID_ELEMENT_SYMBOL: unique symbol;
 ```
 
 #### `SOLID_NOT_FOUND_SYMBOL`
@@ -304,7 +307,7 @@ export declare const SOLID_ELEMENT_SYMBOL: typeof SOLID_ELEMENT_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/route.ts#L27) `packages/solidjs/src/route.ts`
 
 ```ts
-export declare const SOLID_NOT_FOUND_SYMBOL: typeof SOLID_NOT_FOUND_SYMBOL;
+export declare const SOLID_NOT_FOUND_SYMBOL: unique symbol;
 ```
 
 #### `SOLID_REDIRECT_SYMBOL`
@@ -312,7 +315,7 @@ export declare const SOLID_NOT_FOUND_SYMBOL: typeof SOLID_NOT_FOUND_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/route.ts#L26) `packages/solidjs/src/route.ts`
 
 ```ts
-export declare const SOLID_REDIRECT_SYMBOL: typeof SOLID_REDIRECT_SYMBOL;
+export declare const SOLID_REDIRECT_SYMBOL: unique symbol;
 ```
 
 #### `SOLID_ROOT_SYMBOL`
@@ -320,7 +323,7 @@ export declare const SOLID_REDIRECT_SYMBOL: typeof SOLID_REDIRECT_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/render.ts#L29) `packages/solidjs/src/render.ts`
 
 ```ts
-export declare const SOLID_ROOT_SYMBOL: typeof SOLID_ROOT_SYMBOL;
+export declare const SOLID_ROOT_SYMBOL: unique symbol;
 ```
 
 #### `stringify`
@@ -330,7 +333,7 @@ export declare const SOLID_ROOT_SYMBOL: typeof SOLID_ROOT_SYMBOL;
 Recursively serialize a Solid virtual tree into an SSR-shaped HTML string. Boolean attributes are elided, `class` maps to the `class` attribute (Solid convention, not React's `className`), and children are stringified without any XSS escaping — tests assert on shape, not on production output.
 
 ```ts
-export function stringify(node: SolidChild): string;
+export declare function stringify(node: SolidChild): string;
 ```
 
 #### `SUSPENSE_BOUNDARY_SYMBOL`
@@ -338,7 +341,7 @@ export function stringify(node: SolidChild): string;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/route.ts#L28) `packages/solidjs/src/route.ts`
 
 ```ts
-export declare const SUSPENSE_BOUNDARY_SYMBOL: typeof SUSPENSE_BOUNDARY_SYMBOL;
+export declare const SUSPENSE_BOUNDARY_SYMBOL: unique symbol;
 ```
 
 #### `track`
@@ -348,7 +351,10 @@ export declare const SUSPENSE_BOUNDARY_SYMBOL: typeof SUSPENSE_BOUNDARY_SYMBOL;
 Run `fn` and capture every signal it reads. Useful for asserting a component body reads the expected signals before committing to a full effect subscribe.
 
 ```ts
-export function track<T>(fn: () => T): { result: T; reads: SignalGetter<unknown>[] };
+export declare function track<T>(fn: () => T): {
+    result: T;
+    reads: SignalGetter<unknown>[];
+};
 ```
 
 ### 型
@@ -359,10 +365,10 @@ export function track<T>(fn: () => T): { result: T; reads: SignalGetter<unknown>
 
 ```ts
 export interface EffectHandle<T> {
-  readonly [EFFECT_SYMBOL]: true;
-  readonly runCount: () => number;
-  readonly trace: () => ReadonlyArray<EffectTraceEntry<T>>;
-  readonly dispose: () => void;
+    readonly [EFFECT_SYMBOL]: true;
+    readonly runCount: () => number;
+    readonly trace: () => ReadonlyArray<EffectTraceEntry<T>>;
+    readonly dispose: () => void;
 }
 ```
 
@@ -374,8 +380,8 @@ Effect trace entry — captures which signal values the body observed on that ru
 
 ```ts
 export interface EffectTraceEntry<T> {
-  readonly runIndex: number;
-  readonly readValues: T[];
+    readonly runIndex: number;
+    readonly readValues: T[];
 }
 ```
 
@@ -385,8 +391,8 @@ export interface EffectTraceEntry<T> {
 
 ```ts
 export interface ErrorBoundaryOptions {
-  readonly component: SolidComponent<Record<string, unknown>>;
-  readonly fallback: (error: unknown) => SolidChild;
+    readonly component: SolidComponent<Record<string, unknown>>;
+    readonly fallback: (error: unknown) => SolidChild;
 }
 ```
 
@@ -396,9 +402,9 @@ export interface ErrorBoundaryOptions {
 
 ```ts
 export interface ErrorBoundarySignal {
-  readonly [ERROR_BOUNDARY_SYMBOL]: true;
-  readonly caught: unknown;
-  readonly fallback: SolidChild;
+    readonly [ERROR_BOUNDARY_SYMBOL]: true;
+    readonly caught: unknown;
+    readonly fallback: SolidChild;
 }
 ```
 
@@ -408,7 +414,7 @@ export interface ErrorBoundarySignal {
 
 ```ts
 export interface HydrateOptions<TProps> extends RenderSolidOptions<TProps> {
-  readonly ssrMarkup: string;
+    readonly ssrMarkup: string;
 }
 ```
 
@@ -418,8 +424,8 @@ export interface HydrateOptions<TProps> extends RenderSolidOptions<TProps> {
 
 ```ts
 export interface HydrateResult extends RenderSolidResult {
-  readonly hydrated: boolean;
-  readonly mismatch: string | null;
+    readonly hydrated: boolean;
+    readonly mismatch: string | null;
 }
 ```
 
@@ -429,10 +435,10 @@ export interface HydrateResult extends RenderSolidResult {
 
 ```ts
 export interface InvokeSolidRouteOptions<TData> {
-  readonly page: SolidComponent<RouteSectionProps<TData>>;
-  readonly load?: RouteLoader<TData>;
-  readonly params?: RouteParams;
-  readonly query?: RouteQuery;
+    readonly page: SolidComponent<RouteSectionProps<TData>>;
+    readonly load?: RouteLoader<TData>;
+    readonly params?: RouteParams;
+    readonly query?: RouteQuery;
 }
 ```
 
@@ -442,11 +448,11 @@ export interface InvokeSolidRouteOptions<TData> {
 
 ```ts
 export interface InvokeSolidRouteResult<TData> {
-  readonly tree: SolidChild | null;
-  readonly data: TData | undefined;
-  readonly redirect: SolidRouteRedirectSignal | null;
-  readonly notFound: SolidRouteNotFoundSignal | null;
-  readonly error: unknown;
+    readonly tree: SolidChild | null;
+    readonly data: TData | undefined;
+    readonly redirect: SolidRouteRedirectSignal | null;
+    readonly notFound: SolidRouteNotFoundSignal | null;
+    readonly error: unknown;
 }
 ```
 
@@ -456,8 +462,8 @@ export interface InvokeSolidRouteResult<TData> {
 
 ```ts
 export interface RenderSolidOptions<TProps> {
-  readonly component: SolidComponent<TProps>;
-  readonly props?: TProps;
+    readonly component: SolidComponent<TProps>;
+    readonly props?: TProps;
 }
 ```
 
@@ -467,10 +473,10 @@ export interface RenderSolidOptions<TProps> {
 
 ```ts
 export interface RenderSolidResult {
-  readonly tree: SolidChild;
-  readonly effects: EffectHandle<unknown>[];
-  readonly dispose: () => void;
-  readonly html: () => string;
+    readonly tree: SolidChild;
+    readonly effects: EffectHandle<unknown>[];
+    readonly dispose: () => void;
+    readonly html: () => string;
 }
 ```
 
@@ -480,11 +486,11 @@ export interface RenderSolidResult {
 
 ```ts
 export interface RenderWithSuspenseOptions<T> {
-  readonly component: SolidComponent<Record<string, unknown>>;
-  readonly fallback: SolidComponent<Record<string, unknown>> | SolidChild;
-  readonly waitFor: Promise<T>;
-  /** ms before the boundary reports `timedOut: true`; default 5000. */
-  readonly timeoutMs?: number;
+    readonly component: SolidComponent<Record<string, unknown>>;
+    readonly fallback: SolidComponent<Record<string, unknown>> | SolidChild;
+    readonly waitFor: Promise<T>;
+    /** ms before the boundary reports `timedOut: true`; default 5000. */
+    readonly timeoutMs?: number;
 }
 ```
 
@@ -494,12 +500,12 @@ export interface RenderWithSuspenseOptions<T> {
 
 ```ts
 export interface ResourceAccessor<T> {
-  (): T | undefined;
-  readonly state: ResourceState;
-  readonly loading: boolean;
-  readonly error: unknown;
-  readonly latest: T | undefined;
-  readonly [RESOURCE_SYMBOL]: true;
+    (): T | undefined;
+    readonly state: ResourceState;
+    readonly loading: boolean;
+    readonly error: unknown;
+    readonly latest: T | undefined;
+    readonly [RESOURCE_SYMBOL]: true;
 }
 ```
 
@@ -509,8 +515,8 @@ export interface ResourceAccessor<T> {
 
 ```ts
 export interface ResourceActions<T> {
-  readonly refetch: () => Promise<T | undefined>;
-  readonly mutate: (value: T | undefined) => T | undefined;
+    readonly refetch: () => Promise<T | undefined>;
+    readonly mutate: (value: T | undefined) => T | undefined;
 }
 ```
 
@@ -520,9 +526,9 @@ export interface ResourceActions<T> {
 
 ```ts
 export interface ResourceHandle<T> {
-  readonly accessor: ResourceAccessor<T>;
-  readonly actions: ResourceActions<T>;
-  readonly initialFetch: Promise<T | undefined>;
+    readonly accessor: ResourceAccessor<T>;
+    readonly actions: ResourceActions<T>;
+    readonly initialFetch: Promise<T | undefined>;
 }
 ```
 
@@ -542,7 +548,7 @@ export type ResourceState = 'unresolved' | 'pending' | 'ready' | 'errored' | 're
 
 ```ts
 export interface RootScope {
-  readonly disposed: () => boolean;
+    readonly disposed: () => boolean;
 }
 ```
 
@@ -551,7 +557,10 @@ export interface RootScope {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/src/route.ts#L69) `packages/solidjs/src/route.ts`
 
 ```ts
-export type RouteLoader<TData> = (ctx: { params: RouteParams; query: RouteQuery }) => Promise<TData> | TData;
+export type RouteLoader<TData> = (ctx: {
+    params: RouteParams;
+    query: RouteQuery;
+}) => Promise<TData> | TData;
 ```
 
 #### `RouteParams`
@@ -560,7 +569,7 @@ export type RouteLoader<TData> = (ctx: { params: RouteParams; query: RouteQuery 
 
 ```ts
 export interface RouteParams {
-  readonly [key: string]: string | undefined;
+    readonly [key: string]: string | undefined;
 }
 ```
 
@@ -570,7 +579,7 @@ export interface RouteParams {
 
 ```ts
 export interface RouteQuery {
-  readonly [key: string]: string | undefined;
+    readonly [key: string]: string | undefined;
 }
 ```
 
@@ -580,9 +589,9 @@ export interface RouteQuery {
 
 ```ts
 export interface RouteSectionProps<TData = unknown> {
-  readonly params: RouteParams;
-  readonly query: RouteQuery;
-  readonly data: TData | undefined;
+    readonly params: RouteParams;
+    readonly query: RouteQuery;
+    readonly data: TData | undefined;
 }
 ```
 
@@ -594,8 +603,8 @@ Read accessor for a mockSignal — mirrors Solid's `[getter, setter] = createSig
 
 ```ts
 export type SignalGetter<T> = {
-  (): T;
-  readonly [SIGNAL_SYMBOL]: true;
+    (): T;
+    readonly [SIGNAL_SYMBOL]: true;
 };
 ```
 
@@ -631,10 +640,10 @@ export type SolidComponent<TProps = Record<string, unknown>> = (props: TProps) =
 
 ```ts
 export interface SolidElement {
-  readonly [SOLID_ELEMENT_SYMBOL]: true;
-  readonly type: string;
-  readonly props: Record<string, unknown>;
-  readonly children: SolidChild[];
+    readonly [SOLID_ELEMENT_SYMBOL]: true;
+    readonly type: string;
+    readonly props: Record<string, unknown>;
+    readonly children: SolidChild[];
 }
 ```
 
@@ -644,7 +653,7 @@ export interface SolidElement {
 
 ```ts
 export interface SolidRouteNotFoundSignal {
-  readonly [SOLID_NOT_FOUND_SYMBOL]: true;
+    readonly [SOLID_NOT_FOUND_SYMBOL]: true;
 }
 ```
 
@@ -654,9 +663,9 @@ export interface SolidRouteNotFoundSignal {
 
 ```ts
 export interface SolidRouteRedirectSignal {
-  readonly [SOLID_REDIRECT_SYMBOL]: true;
-  readonly url: string;
-  readonly status: number;
+    readonly [SOLID_REDIRECT_SYMBOL]: true;
+    readonly url: string;
+    readonly status: number;
 }
 ```
 
@@ -666,11 +675,11 @@ export interface SolidRouteRedirectSignal {
 
 ```ts
 export interface SuspenseBoundarySignal<T> {
-  readonly [SUSPENSE_BOUNDARY_SYMBOL]: true;
-  readonly fallback: SolidChild;
-  readonly resolved: SolidChild | null;
-  readonly waitedFor: Promise<T>;
-  readonly timedOut: boolean;
+    readonly [SUSPENSE_BOUNDARY_SYMBOL]: true;
+    readonly fallback: SolidChild;
+    readonly resolved: SolidChild | null;
+    readonly waitedFor: Promise<T>;
+    readonly timedOut: boolean;
 }
 ```
 <!-- kiwa-public-api:end -->

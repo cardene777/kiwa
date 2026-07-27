@@ -137,7 +137,7 @@ Tauri command の payload は文字列として扱われます。command handler
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -146,10 +146,7 @@ Tauri command の payload は文字列として扱われます。command handler
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L59) `packages/desktop/src/semantics/menu-bar.ts`
 
 ```ts
-export function appendMenuBarItem(
-  session: MenuBarSession,
-  item: MenuBarItem,
-): AxisStep<MenuBarState>;
+export declare function appendMenuBarItem(session: MenuBarSession, item: MenuBarItem): AxisStep<MenuBarState>;
 ```
 
 #### `applyDownloadedUpdate`
@@ -157,7 +154,7 @@ export function appendMenuBarItem(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/auto-updater.ts#L79) `packages/desktop/src/semantics/auto-updater.ts`
 
 ```ts
-export function applyDownloadedUpdate(session: AutoUpdaterSession): AxisStep<AutoUpdaterState>;
+export declare function applyDownloadedUpdate(session: AutoUpdaterSession): AxisStep<AutoUpdaterState>;
 ```
 
 #### `assertContextIsolation`
@@ -165,7 +162,7 @@ export function applyDownloadedUpdate(session: AutoUpdaterSession): AxisStep<Aut
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/webview.ts#L78) `packages/desktop/src/semantics/webview.ts`
 
 ```ts
-export function assertContextIsolation(session: WebviewSession, isolated: boolean): AxisStep<WebviewState>;
+export declare function assertContextIsolation(session: WebviewSession, isolated: boolean): AxisStep<WebviewState>;
 ```
 
 #### `bindContextBridge`
@@ -173,7 +170,7 @@ export function assertContextIsolation(session: WebviewSession, isolated: boolea
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/webview.ts#L52) `packages/desktop/src/semantics/webview.ts`
 
 ```ts
-export function bindContextBridge(session: WebviewSession, apiName: string): AxisStep<WebviewState>;
+export declare function bindContextBridge(session: WebviewSession, apiName: string): AxisStep<WebviewState>;
 ```
 
 #### `buildCacheKey`
@@ -183,10 +180,10 @@ export function bindContextBridge(session: WebviewSession, apiName: string): Axi
 axis + target + args を 決定的 に key 化 する SSOT helper。 args は 順序を 保持 (spawn 引数 の semantics 依存)、 env は cache key に 含めない (env は sanitize 済 で spawn 副作用のみ、 result semantics に 影響しない 前提、 v1.62 real behavior SSOT に 準拠)。
 
 ```ts
-export function buildCacheKey(input: {
-  axis: DesktopAxis;
-  target: DesktopTarget;
-  args?: string[];
+export declare function buildCacheKey(input: {
+    axis: DesktopAxis;
+    target: DesktopTarget;
+    args?: string[];
 }): string;
 ```
 
@@ -195,7 +192,10 @@ export function buildCacheKey(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L44) `packages/desktop/src/semantics/menu-bar.ts`
 
 ```ts
-export function buildMenuBar(input: { target: DesktopTarget; menuId: string }): MenuBarSession;
+export declare function buildMenuBar(input: {
+    target: DesktopTarget;
+    menuId: string;
+}): MenuBarSession;
 ```
 
 #### `buildSpawnInvocation`
@@ -203,11 +203,11 @@ export function buildMenuBar(input: { target: DesktopTarget; menuId: string }): 
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/spawn-driver.ts#L121) `packages/desktop/src/adapters/spawn-driver.ts`
 
 ```ts
-export function buildSpawnInvocation(input: {
-  command: DesktopCliCommand;
-  args?: string[];
-  env?: Record<string, string>;
-  cwd?: string;
+export declare function buildSpawnInvocation(input: {
+    command: DesktopCliCommand;
+    args?: string[];
+    env?: Record<string, string>;
+    cwd?: string;
 }): SpawnInvocation;
 ```
 
@@ -216,10 +216,7 @@ export function buildSpawnInvocation(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/screen-recording.ts#L78) `packages/desktop/src/semantics/screen-recording.ts`
 
 ```ts
-export function captureScreenChunk(
-  session: ScreenRecordingSession,
-  chunkBytes: number,
-): AxisStep<ScreenRecordingState>;
+export declare function captureScreenChunk(session: ScreenRecordingSession, chunkBytes: number): AxisStep<ScreenRecordingState>;
 ```
 
 #### `clearAllGlobalShortcuts`
@@ -227,7 +224,7 @@ export function captureScreenChunk(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L106) `packages/desktop/src/semantics/global-shortcut.ts`
 
 ```ts
-export function clearAllGlobalShortcuts(session: GlobalShortcutSession): AxisStep<GlobalShortcutState>;
+export declare function clearAllGlobalShortcuts(session: GlobalShortcutSession): AxisStep<GlobalShortcutState>;
 ```
 
 #### `clearClipboard`
@@ -235,7 +232,7 @@ export function clearAllGlobalShortcuts(session: GlobalShortcutSession): AxisSte
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/clipboard.ts#L95) `packages/desktop/src/semantics/clipboard.ts`
 
 ```ts
-export function clearClipboard(session: ClipboardSession): AxisStep<ClipboardState>;
+export declare function clearClipboard(session: ClipboardSession): AxisStep<ClipboardState>;
 ```
 
 #### `clickMenuBarItem`
@@ -243,10 +240,7 @@ export function clearClipboard(session: ClipboardSession): AxisStep<ClipboardSta
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L79) `packages/desktop/src/semantics/menu-bar.ts`
 
 ```ts
-export function clickMenuBarItem(
-  session: MenuBarSession,
-  itemId: string,
-): AxisStep<MenuBarState>;
+export declare function clickMenuBarItem(session: MenuBarSession, itemId: string): AxisStep<MenuBarState>;
 ```
 
 #### `clickTrayIcon`
@@ -254,7 +248,7 @@ export function clickMenuBarItem(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tray-icon.ts#L77) `packages/desktop/src/semantics/tray-icon.ts`
 
 ```ts
-export function clickTrayIcon(session: TrayIconSession): AxisStep<TrayIconState>;
+export declare function clickTrayIcon(session: TrayIconSession): AxisStep<TrayIconState>;
 ```
 
 #### `cliForAxis`
@@ -262,7 +256,7 @@ export function clickTrayIcon(session: TrayIconSession): AxisStep<TrayIconState>
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/spawn-driver.ts#L117) `packages/desktop/src/adapters/spawn-driver.ts`
 
 ```ts
-export function cliForAxis(axis: DesktopAxis): DesktopCliCommand | null;
+export declare function cliForAxis(axis: DesktopAxis): DesktopCliCommand | null;
 ```
 
 #### `closeTauriWindow`
@@ -270,7 +264,7 @@ export function cliForAxis(axis: DesktopAxis): DesktopCliCommand | null;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tauri.ts#L90) `packages/desktop/src/semantics/tauri.ts`
 
 ```ts
-export function closeTauriWindow(session: TauriSession, windowLabel: string): AxisStep<TauriState>;
+export declare function closeTauriWindow(session: TauriSession, windowLabel: string): AxisStep<TauriState>;
 ```
 
 #### `collectFidelityCoverage`
@@ -278,9 +272,7 @@ export function closeTauriWindow(session: TauriSession, windowLabel: string): Ax
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/fidelity.ts#L94) `packages/desktop/src/semantics/fidelity.ts`
 
 ```ts
-export function collectFidelityCoverage(
-  providers: DesktopTarget[] = ['macos', 'windows', 'linux'],
-): FidelityCoverage;
+export declare function collectFidelityCoverage(providers?: DesktopTarget[]): FidelityCoverage;
 ```
 
 #### `computeSkipMatrix`
@@ -290,7 +282,12 @@ export function collectFidelityCoverage(
 全 12 axis × 3 target の skip decision matrix を計算。 v0.8 fidelity harness で skip した pair を追跡するのに使用。
 
 ```ts
-export function computeSkipMatrix(): { axis: DesktopAxis; target: DesktopTarget; skip: boolean; reason: string | null }[];
+export declare function computeSkipMatrix(): {
+    axis: DesktopAxis;
+    target: DesktopTarget;
+    skip: boolean;
+    reason: string | null;
+}[];
 ```
 
 #### `createBrowserWindow`
@@ -298,7 +295,7 @@ export function computeSkipMatrix(): { axis: DesktopAxis; target: DesktopTarget;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/electron.ts#L50) `packages/desktop/src/semantics/electron.ts`
 
 ```ts
-export function createBrowserWindow(session: ElectronSession, windowId: string): AxisStep<ElectronState>;
+export declare function createBrowserWindow(session: ElectronSession, windowId: string): AxisStep<ElectronState>;
 ```
 
 #### `createGlobalShortcutSession`
@@ -306,9 +303,9 @@ export function createBrowserWindow(session: ElectronSession, windowId: string):
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L42) `packages/desktop/src/semantics/global-shortcut.ts`
 
 ```ts
-export function createGlobalShortcutSession(input: {
-  target: DesktopTarget;
-  namespace: string;
+export declare function createGlobalShortcutSession(input: {
+    target: DesktopTarget;
+    namespace: string;
 }): GlobalShortcutSession;
 ```
 
@@ -317,10 +314,10 @@ export function createGlobalShortcutSession(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tray-icon.ts#L39) `packages/desktop/src/semantics/tray-icon.ts`
 
 ```ts
-export function createTrayIcon(input: {
-  target: DesktopTarget;
-  trayId: string;
-  iconPath: string;
+export declare function createTrayIcon(input: {
+    target: DesktopTarget;
+    trayId: string;
+    iconPath: string;
 }): TrayIconSession;
 ```
 
@@ -337,7 +334,7 @@ export declare const DESKTOP_AXIS_TO_EVENTS: Record<DesktopAxis, NeutralEventNam
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L95) `packages/desktop/src/semantics/menu-bar.ts`
 
 ```ts
-export function destroyMenuBar(session: MenuBarSession): AxisStep<MenuBarState>;
+export declare function destroyMenuBar(session: MenuBarSession): AxisStep<MenuBarState>;
 ```
 
 #### `dismissNotification`
@@ -345,9 +342,7 @@ export function destroyMenuBar(session: MenuBarSession): AxisStep<MenuBarState>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L106) `packages/desktop/src/semantics/notification.ts`
 
 ```ts
-export function dismissNotification(
-  session: NotificationSession,
-): AxisStep<NotificationState>;
+export declare function dismissNotification(session: NotificationSession): AxisStep<NotificationState>;
 ```
 
 #### `dispatchIpcMessage`
@@ -355,10 +350,10 @@ export function dismissNotification(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/electron.ts#L61) `packages/desktop/src/semantics/electron.ts`
 
 ```ts
-export function dispatchIpcMessage(
-  session: ElectronSession,
-  input: { channel: string; payload: string },
-): AxisStep<ElectronState>;
+export declare function dispatchIpcMessage(session: ElectronSession, input: {
+    channel: string;
+    payload: string;
+}): AxisStep<ElectronState>;
 ```
 
 #### `displayNotification`
@@ -366,10 +361,7 @@ export function dispatchIpcMessage(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L74) `packages/desktop/src/semantics/notification.ts`
 
 ```ts
-export function displayNotification(
-  session: NotificationSession,
-  displayedAtMs: number,
-): AxisStep<NotificationState>;
+export declare function displayNotification(session: NotificationSession, displayedAtMs: number): AxisStep<NotificationState>;
 ```
 
 #### `emitTauriEvent`
@@ -377,10 +369,10 @@ export function displayNotification(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tauri.ts#L76) `packages/desktop/src/semantics/tauri.ts`
 
 ```ts
-export function emitTauriEvent(
-  session: TauriSession,
-  input: { eventName: string; payload: string },
-): AxisStep<TauriState>;
+export declare function emitTauriEvent(session: TauriSession, input: {
+    eventName: string;
+    payload: string;
+}): AxisStep<TauriState>;
 ```
 
 #### `executeSpawn`
@@ -388,10 +380,7 @@ export function emitTauriEvent(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/spawn-executor.ts#L57) `packages/desktop/src/adapters/spawn-executor.ts`
 
 ```ts
-export async function executeSpawn(
-  input: SpawnExecutorInput,
-  spawnFn: SpawnFn = nodeSpawn,
-): Promise<SpawnExecutorResult>;
+export declare function executeSpawn(input: SpawnExecutorInput, spawnFn?: SpawnFn): Promise<SpawnExecutorResult>;
 ```
 
 #### `grantFsPermission`
@@ -399,10 +388,7 @@ export async function executeSpawn(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/fs-permissions.ts#L59) `packages/desktop/src/semantics/fs-permissions.ts`
 
 ```ts
-export function grantFsPermission(
-  session: FsPermissionsSession,
-  scope: FsPermissionScope,
-): AxisStep<FsPermissionsState>;
+export declare function grantFsPermission(session: FsPermissionsSession, scope: FsPermissionScope): AxisStep<FsPermissionsState>;
 ```
 
 #### `InvokeCache`
@@ -412,20 +398,38 @@ export function grantFsPermission(
 v1.0 InvokeCache class = LRU + TTL 両立 の in-memory cache。 test で new InvokeCache() 直接生成、 dogfood consumer は withCache helper を使う。 LRU 実装 = Map の insertion order (JS spec で保証) を再挿入 で 更新、 eviction 時は 最古 key を 削除。 TTL 判定 は get 時に entry.capturedAt + ttlMs を 現在時刻 と 比較。
 
 ```ts
+/**
+ * v1.0 InvokeCache class = LRU + TTL 両立 の in-memory cache。 test で
+ * new InvokeCache() 直接生成、 dogfood consumer は withCache helper を使う。
+ *
+ * LRU 実装 = Map の insertion order (JS spec で保証) を再挿入 で 更新、
+ * eviction 時は 最古 key を 削除。 TTL 判定 は get 時に entry.capturedAt +
+ * ttlMs を 現在時刻 と 比較。
+ */
 export declare class InvokeCache {
-  private readonly ttlMs: number;
-  private readonly maxEntries: number;
-  private readonly enabled: boolean;
-  private readonly entries: Map<string, CachedInvokeEntry>;
-  private readonly clock: () => number;
-  constructor(config?: InvokeCacheConfig, clock?: () => number);
-  isEnabled(): boolean;
-  size(): number;
-  getClockValue(): number;
-  get(key: string): { entry: CachedInvokeEntry; status: 'cache-hit' } | { status: 'cache-miss' | 'cache-invalidated' | 'cache-disabled' };
-  set(key: string, result: NativeInvokeResult): CachedInvokeEntry;
-  invalidate(key: string): boolean;
-  clear(): void;
+    constructor(config?: InvokeCacheConfig, clock?: () => number);
+    /** cache 全体 の enable 状態。 disabled なら 全 op で cache-disabled 返却。 */
+    isEnabled(): boolean;
+    /** cache 現状 の entry 数、 test / dogfood consumer で observability に使う。 */
+    size(): number;
+    /** 内部 clock を dogfood consumer に 露出、 withCache helper が 使用。 */
+    getClockValue(): number;
+    /**
+     * cache から 取り出す。 TTL 超過 は cache-invalidated として entry 削除 +
+     * null 返却、 未 hit は null 返却、 hit は entry を Map 末尾に 再挿入 (LRU)。
+     */
+    get(key: string): {
+        entry: CachedInvokeEntry;
+        status: 'cache-hit';
+    } | {
+        status: 'cache-miss' | 'cache-invalidated' | 'cache-disabled';
+    };
+    /** cache に 書込 む。 maxEntries 超過 時 は 最古 (Map 先頭) を evict。 */
+    set(key: string, result: NativeInvokeResult): CachedInvokeEntry;
+    /** 手動 invalidate、 特定 key の entry を 削除。 存在しない key は no-op。 */
+    invalidate(key: string): boolean;
+    /** cache 全体 clear、 dogfood 経路 で release 前 に 呼出。 */
+    clear(): void;
 }
 ```
 
@@ -436,7 +440,7 @@ export declare class InvokeCache {
 v0.6 実 spawn 実行 = env-gate 通過確認 + args 上限 32 + 実 child_process.spawn 実行。 `KIWA_DESKTOP_MODE=real` + 対応 axis env 未設定なら throw で fail-closed。 `KIWA_DESKTOP_SPAWN=dry-run` の時は v0.5 stub 相当の shape 契約を返す (実 CLI 未 install 環境向け backward compat 経路)。
 
 ```ts
-export async function invokeDesktopCli(inv: SpawnInvocation): Promise<SpawnResult>;
+export declare function invokeDesktopCli(inv: SpawnInvocation): Promise<SpawnResult>;
 ```
 
 #### `invokeDesktopCliWith`
@@ -446,10 +450,7 @@ export async function invokeDesktopCli(inv: SpawnInvocation): Promise<SpawnResul
 DI 経路 = spawnFn を注入可能、 test で dummy spawn を差し込んで 決定的挙動を検証できる。 default は nodeSpawn。
 
 ```ts
-export async function invokeDesktopCliWith(
-  inv: SpawnInvocation,
-  spawnFn: SpawnFn,
-): Promise<SpawnResult>;
+export declare function invokeDesktopCliWith(inv: SpawnInvocation, spawnFn: SpawnFn): Promise<SpawnResult>;
 ```
 
 #### `invokeNotificationAction`
@@ -457,10 +458,7 @@ export async function invokeDesktopCliWith(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L90) `packages/desktop/src/semantics/notification.ts`
 
 ```ts
-export function invokeNotificationAction(
-  session: NotificationSession,
-  actionId: string,
-): AxisStep<NotificationState>;
+export declare function invokeNotificationAction(session: NotificationSession, actionId: string): AxisStep<NotificationState>;
 ```
 
 #### `invokeTauriCommand`
@@ -468,10 +466,10 @@ export function invokeNotificationAction(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tauri.ts#L60) `packages/desktop/src/semantics/tauri.ts`
 
 ```ts
-export function invokeTauriCommand(
-  session: TauriSession,
-  input: { commandName: string; payload: string },
-): AxisStep<TauriState>;
+export declare function invokeTauriCommand(session: TauriSession, input: {
+    commandName: string;
+    payload: string;
+}): AxisStep<TauriState>;
 ```
 
 #### `loadPreloadScript`
@@ -479,7 +477,10 @@ export function invokeTauriCommand(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/webview.ts#L37) `packages/desktop/src/semantics/webview.ts`
 
 ```ts
-export function loadPreloadScript(input: { target: DesktopTarget; webviewId: string }): WebviewSession;
+export declare function loadPreloadScript(input: {
+    target: DesktopTarget;
+    webviewId: string;
+}): WebviewSession;
 ```
 
 #### `logFsPermissionAudit`
@@ -487,10 +488,7 @@ export function loadPreloadScript(input: { target: DesktopTarget; webviewId: str
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/fs-permissions.ts#L87) `packages/desktop/src/semantics/fs-permissions.ts`
 
 ```ts
-export function logFsPermissionAudit(
-  session: FsPermissionsSession,
-  reason: string,
-): AxisStep<FsPermissionsState>;
+export declare function logFsPermissionAudit(session: FsPermissionsSession, reason: string): AxisStep<FsPermissionsState>;
 ```
 
 #### `makeMockAdapter`
@@ -498,7 +496,7 @@ export function logFsPermissionAudit(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/mock-factory.ts#L247) `packages/desktop/src/adapters/mock-factory.ts`
 
 ```ts
-export function makeMockAdapter(axis: DesktopAxis): DesktopAdapter;
+export declare function makeMockAdapter(axis: DesktopAxis): DesktopAdapter;
 ```
 
 #### `makeRealAdapter`
@@ -506,7 +504,7 @@ export function makeMockAdapter(axis: DesktopAxis): DesktopAdapter;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/mock-factory.ts#L256) `packages/desktop/src/adapters/mock-factory.ts`
 
 ```ts
-export function makeRealAdapter(axis: DesktopAxis): DesktopAdapter;
+export declare function makeRealAdapter(axis: DesktopAxis): DesktopAdapter;
 ```
 
 #### `MOCK_ADAPTERS`
@@ -522,10 +520,7 @@ export declare const MOCK_ADAPTERS: Record<DesktopAxis, DesktopAdapter>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/clipboard.ts#L81) `packages/desktop/src/semantics/clipboard.ts`
 
 ```ts
-export function notifyClipboardChange(
-  session: ClipboardSession,
-  externalContents: string,
-): AxisStep<ClipboardState>;
+export declare function notifyClipboardChange(session: ClipboardSession, externalContents: string): AxisStep<ClipboardState>;
 ```
 
 #### `notifyThemeChange`
@@ -533,10 +528,7 @@ export function notifyClipboardChange(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/dark-mode.ts#L64) `packages/desktop/src/semantics/dark-mode.ts`
 
 ```ts
-export function notifyThemeChange(
-  session: DarkModeSession,
-  newTheme: ThemeMode,
-): AxisStep<DarkModeState>;
+export declare function notifyThemeChange(session: DarkModeSession, newTheme: ThemeMode): AxisStep<DarkModeState>;
 ```
 
 #### `openClipboard`
@@ -544,9 +536,9 @@ export function notifyThemeChange(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/clipboard.ts#L40) `packages/desktop/src/semantics/clipboard.ts`
 
 ```ts
-export function openClipboard(input: {
-  target: DesktopTarget;
-  clipboardId: string;
+export declare function openClipboard(input: {
+    target: DesktopTarget;
+    clipboardId: string;
 }): ClipboardSession;
 ```
 
@@ -557,7 +549,7 @@ export function openClipboard(input: {
 DesktopTarget と NodePlatform の互換性 gate。 macOS target = darwin のみ、 windows target = win32 のみ、 linux target = linux のみ。
 
 ```ts
-export function platformGate(target: DesktopTarget): PlatformGate;
+export declare function platformGate(target: DesktopTarget): PlatformGate;
 ```
 
 #### `postWebviewMessage`
@@ -565,10 +557,10 @@ export function platformGate(target: DesktopTarget): PlatformGate;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/webview.ts#L63) `packages/desktop/src/semantics/webview.ts`
 
 ```ts
-export function postWebviewMessage(
-  session: WebviewSession,
-  input: { channel: string; payload: string },
-): AxisStep<WebviewState>;
+export declare function postWebviewMessage(session: WebviewSession, input: {
+    channel: string;
+    payload: string;
+}): AxisStep<WebviewState>;
 ```
 
 #### `probeAndInvoke`
@@ -578,7 +570,7 @@ export function postWebviewMessage(
 probeAndInvoke = probe + invoke 統合経路。 1. shouldSkipAxis(axis, target) = skip 判定 → 'axis-skipped' 2. cliForAxis(axis) = null (semantics-only axis) → 'no-cli-mapping' 3. probeCliAvailable(cmd) = 実 CLI 存在確認 → 未 install 時 'cli-unavailable' 4. 実 CLI 存在確認 OK → invokeDesktopCliWith で 実 spawn 呼出 → 'invoked' shape 契約 preserving = SpawnResult 構造保持、 skip 時は spawnResult=null で明示。
 
 ```ts
-export async function probeAndInvoke(input: NativeInvokeInput): Promise<NativeInvokeResult>;
+export declare function probeAndInvoke(input: NativeInvokeInput): Promise<NativeInvokeResult>;
 ```
 
 #### `probeAndInvokeAll`
@@ -586,12 +578,12 @@ export async function probeAndInvoke(input: NativeInvokeInput): Promise<NativeIn
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/native-invoke.ts#L118) `packages/desktop/src/adapters/native-invoke.ts`
 
 ```ts
-export async function probeAndInvokeAll(input?: {
-  axes?: DesktopAxis[];
-  targets?: DesktopTarget[];
-  args?: string[];
-  env?: Record<string, string>;
-  spawnFn?: SpawnFn;
+export declare function probeAndInvokeAll(input?: {
+    axes?: DesktopAxis[];
+    targets?: DesktopTarget[];
+    args?: string[];
+    env?: Record<string, string>;
+    spawnFn?: SpawnFn;
 }): Promise<NativeInvokeMatrixSummary>;
 ```
 
@@ -602,7 +594,7 @@ export async function probeAndInvokeAll(input?: {
 CLI availability probe = which (unix) / where (windows) で CLI 存在確認。 DI 経路 = spawnFn 注入で test 環境で decode 可能。
 
 ```ts
-export async function probeCliAvailable(input: ProbeInput): Promise<ProbeResult>;
+export declare function probeCliAvailable(input: ProbeInput): Promise<ProbeResult>;
 ```
 
 #### `providerEventName`
@@ -610,7 +602,7 @@ export async function probeCliAvailable(input: ProbeInput): Promise<ProbeResult>
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/types.ts#L278) `packages/desktop/src/semantics/types.ts`
 
 ```ts
-export function providerEventName(target: DesktopTarget, neutral: NeutralEventName): string;
+export declare function providerEventName(target: DesktopTarget, neutral: NeutralEventName): string;
 ```
 
 #### `quitElectronApp`
@@ -618,7 +610,7 @@ export function providerEventName(target: DesktopTarget, neutral: NeutralEventNa
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/electron.ts#L76) `packages/desktop/src/semantics/electron.ts`
 
 ```ts
-export function quitElectronApp(session: ElectronSession): AxisStep<ElectronState>;
+export declare function quitElectronApp(session: ElectronSession): AxisStep<ElectronState>;
 ```
 
 #### `readClipboard`
@@ -626,7 +618,7 @@ export function quitElectronApp(session: ElectronSession): AxisStep<ElectronStat
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/clipboard.ts#L72) `packages/desktop/src/semantics/clipboard.ts`
 
 ```ts
-export function readClipboard(session: ClipboardSession): AxisStep<ClipboardState>;
+export declare function readClipboard(session: ClipboardSession): AxisStep<ClipboardState>;
 ```
 
 #### `REAL_ADAPTERS`
@@ -650,10 +642,10 @@ export declare const REAL_AXIS_RUNNERS: Record<DesktopAxis, (inv: AdapterInvocat
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/auto-updater.ts#L63) `packages/desktop/src/semantics/auto-updater.ts`
 
 ```ts
-export function recordUpdateDownloaded(
-  session: AutoUpdaterSession,
-  input: { version: string; bytes: number },
-): AxisStep<AutoUpdaterState>;
+export declare function recordUpdateDownloaded(session: AutoUpdaterSession, input: {
+    version: string;
+    bytes: number;
+}): AxisStep<AutoUpdaterState>;
 ```
 
 #### `recordUserPreference`
@@ -661,10 +653,7 @@ export function recordUpdateDownloaded(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/dark-mode.ts#L83) `packages/desktop/src/semantics/dark-mode.ts`
 
 ```ts
-export function recordUserPreference(
-  session: DarkModeSession,
-  preference: ThemeMode,
-): AxisStep<DarkModeState>;
+export declare function recordUserPreference(session: DarkModeSession, preference: ThemeMode): AxisStep<DarkModeState>;
 ```
 
 #### `registerGlobalShortcut`
@@ -672,10 +661,7 @@ export function recordUserPreference(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L57) `packages/desktop/src/semantics/global-shortcut.ts`
 
 ```ts
-export function registerGlobalShortcut(
-  session: GlobalShortcutSession,
-  accelerator: string,
-): AxisStep<GlobalShortcutState>;
+export declare function registerGlobalShortcut(session: GlobalShortcutSession, accelerator: string): AxisStep<GlobalShortcutState>;
 ```
 
 #### `registerTauriCommand`
@@ -683,7 +669,7 @@ export function registerGlobalShortcut(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tauri.ts#L50) `packages/desktop/src/semantics/tauri.ts`
 
 ```ts
-export function registerTauriCommand(session: TauriSession, commandName: string): AxisStep<TauriState>;
+export declare function registerTauriCommand(session: TauriSession, commandName: string): AxisStep<TauriState>;
 ```
 
 #### `removeTrayIcon`
@@ -691,7 +677,7 @@ export function registerTauriCommand(session: TauriSession, commandName: string)
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tray-icon.ts#L87) `packages/desktop/src/semantics/tray-icon.ts`
 
 ```ts
-export function removeTrayIcon(session: TrayIconSession): AxisStep<TrayIconState>;
+export declare function removeTrayIcon(session: TrayIconSession): AxisStep<TrayIconState>;
 ```
 
 #### `requestFsPermission`
@@ -699,10 +685,10 @@ export function removeTrayIcon(session: TrayIconSession): AxisStep<TrayIconState
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/fs-permissions.ts#L40) `packages/desktop/src/semantics/fs-permissions.ts`
 
 ```ts
-export function requestFsPermission(input: {
-  target: DesktopTarget;
-  path: string;
-  scope: FsPermissionScope;
+export declare function requestFsPermission(input: {
+    target: DesktopTarget;
+    path: string;
+    scope: FsPermissionScope;
 }): FsPermissionsSession;
 ```
 
@@ -711,10 +697,10 @@ export function requestFsPermission(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/screen-recording.ts#L44) `packages/desktop/src/semantics/screen-recording.ts`
 
 ```ts
-export function requestScreenRecordingPermission(input: {
-  target: DesktopTarget;
-  sessionId: string;
-  displayId: string;
+export declare function requestScreenRecordingPermission(input: {
+    target: DesktopTarget;
+    sessionId: string;
+    displayId: string;
 }): ScreenRecordingSession;
 ```
 
@@ -723,10 +709,7 @@ export function requestScreenRecordingPermission(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/fs-permissions.ts#L72) `packages/desktop/src/semantics/fs-permissions.ts`
 
 ```ts
-export function revokeFsPermission(
-  session: FsPermissionsSession,
-  scope: FsPermissionScope,
-): AxisStep<FsPermissionsState>;
+export declare function revokeFsPermission(session: FsPermissionsSession, scope: FsPermissionScope): AxisStep<FsPermissionsState>;
 ```
 
 #### `runFidelityCheck`
@@ -734,10 +717,10 @@ export function revokeFsPermission(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/fidelity-harness.ts#L89) `packages/desktop/src/adapters/fidelity-harness.ts`
 
 ```ts
-export async function runFidelityCheck(input: {
-  scanIdPrefix?: string;
-  axes?: DesktopAxis[];
-  targets?: DesktopTarget[];
+export declare function runFidelityCheck(input: {
+    scanIdPrefix?: string;
+    axes?: DesktopAxis[];
+    targets?: DesktopTarget[];
 }): Promise<FidelityDiff[]>;
 ```
 
@@ -746,10 +729,10 @@ export async function runFidelityCheck(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/fidelity-harness.ts#L186) `packages/desktop/src/adapters/fidelity-harness.ts`
 
 ```ts
-export async function runFidelityCheckWithProbe(input: {
-  scanIdPrefix?: string;
-  axes?: DesktopAxis[];
-  targets?: DesktopTarget[];
+export declare function runFidelityCheckWithProbe(input: {
+    scanIdPrefix?: string;
+    axes?: DesktopAxis[];
+    targets?: DesktopTarget[];
 }): Promise<FidelityCheckWithProbeResult>;
 ```
 
@@ -758,7 +741,7 @@ export async function runFidelityCheckWithProbe(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/spawn-executor.ts#L45) `packages/desktop/src/adapters/spawn-executor.ts`
 
 ```ts
-export function sanitizeEnv(command: DesktopCliCommand, env: Record<string, string>): Record<string, string>;
+export declare function sanitizeEnv(command: DesktopCliCommand, env: Record<string, string>): Record<string, string>;
 ```
 
 #### `scheduleNotification`
@@ -766,11 +749,11 @@ export function sanitizeEnv(command: DesktopCliCommand, env: Record<string, stri
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L45) `packages/desktop/src/semantics/notification.ts`
 
 ```ts
-export function scheduleNotification(input: {
-  target: DesktopTarget;
-  notificationId: string;
-  title: string;
-  scheduledAtMs: number;
+export declare function scheduleNotification(input: {
+    target: DesktopTarget;
+    notificationId: string;
+    title: string;
+    scheduledAtMs: number;
 }): NotificationSession;
 ```
 
@@ -779,10 +762,7 @@ export function scheduleNotification(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/auto-updater.ts#L91) `packages/desktop/src/semantics/auto-updater.ts`
 
 ```ts
-export function scheduleRelaunch(
-  session: AutoUpdaterSession,
-  delayMs: number,
-): AxisStep<AutoUpdaterState>;
+export declare function scheduleRelaunch(session: AutoUpdaterSession, delayMs: number): AxisStep<AutoUpdaterState>;
 ```
 
 #### `shouldSkipAxis`
@@ -792,9 +772,9 @@ export function scheduleRelaunch(
 axis + target の組合せで skip 判定。 platform-specific CLI (osascript = darwin only / defaults = darwin only / reg = win32 only) は 該当 platform 以外の target で常に skip。
 
 ```ts
-export function shouldSkipAxis(axis: DesktopAxis, target: DesktopTarget): {
-  skip: boolean;
-  reason: string | null;
+export declare function shouldSkipAxis(axis: DesktopAxis, target: DesktopTarget): {
+    skip: boolean;
+    reason: string | null;
 };
 ```
 
@@ -803,9 +783,9 @@ export function shouldSkipAxis(axis: DesktopAxis, target: DesktopTarget): {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/auto-updater.ts#L44) `packages/desktop/src/semantics/auto-updater.ts`
 
 ```ts
-export function startAutoUpdaterCheck(input: {
-  target: DesktopTarget;
-  channel: string;
+export declare function startAutoUpdaterCheck(input: {
+    target: DesktopTarget;
+    channel: string;
 }): AutoUpdaterSession;
 ```
 
@@ -814,7 +794,10 @@ export function startAutoUpdaterCheck(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/electron.ts#L36) `packages/desktop/src/semantics/electron.ts`
 
 ```ts
-export function startElectronApp(input: { target: DesktopTarget; appId: string }): ElectronSession;
+export declare function startElectronApp(input: {
+    target: DesktopTarget;
+    appId: string;
+}): ElectronSession;
 ```
 
 #### `startScreenRecording`
@@ -822,10 +805,7 @@ export function startElectronApp(input: { target: DesktopTarget; appId: string }
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/screen-recording.ts#L65) `packages/desktop/src/semantics/screen-recording.ts`
 
 ```ts
-export function startScreenRecording(
-  session: ScreenRecordingSession,
-  granted: boolean,
-): AxisStep<ScreenRecordingState>;
+export declare function startScreenRecording(session: ScreenRecordingSession, granted: boolean): AxisStep<ScreenRecordingState>;
 ```
 
 #### `startTauriApp`
@@ -833,7 +813,10 @@ export function startScreenRecording(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tauri.ts#L37) `packages/desktop/src/semantics/tauri.ts`
 
 ```ts
-export function startTauriApp(input: { target: DesktopTarget; appName: string }): TauriSession;
+export declare function startTauriApp(input: {
+    target: DesktopTarget;
+    appName: string;
+}): TauriSession;
 ```
 
 #### `stopScreenRecording`
@@ -841,7 +824,7 @@ export function startTauriApp(input: { target: DesktopTarget; appName: string })
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/screen-recording.ts#L96) `packages/desktop/src/semantics/screen-recording.ts`
 
 ```ts
-export function stopScreenRecording(session: ScreenRecordingSession): AxisStep<ScreenRecordingState>;
+export declare function stopScreenRecording(session: ScreenRecordingSession): AxisStep<ScreenRecordingState>;
 ```
 
 #### `subscribeDarkMode`
@@ -849,10 +832,10 @@ export function stopScreenRecording(session: ScreenRecordingSession): AxisStep<S
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/dark-mode.ts#L45) `packages/desktop/src/semantics/dark-mode.ts`
 
 ```ts
-export function subscribeDarkMode(input: {
-  target: DesktopTarget;
-  observerId: string;
-  initialTheme: ThemeMode;
+export declare function subscribeDarkMode(input: {
+    target: DesktopTarget;
+    observerId: string;
+    initialTheme: ThemeMode;
 }): DarkModeSession;
 ```
 
@@ -861,7 +844,7 @@ export function subscribeDarkMode(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/fidelity-harness.ts#L130) `packages/desktop/src/adapters/fidelity-harness.ts`
 
 ```ts
-export function summarizeFidelity(diffs: FidelityDiff[]): FidelitySummary;
+export declare function summarizeFidelity(diffs: FidelityDiff[]): FidelitySummary;
 ```
 
 #### `summarizeFidelityBehaviorDiff`
@@ -869,7 +852,7 @@ export function summarizeFidelity(diffs: FidelityDiff[]): FidelitySummary;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/fidelity-harness.ts#L226) `packages/desktop/src/adapters/fidelity-harness.ts`
 
 ```ts
-export function summarizeFidelityBehaviorDiff(diffs: FidelityDiff[]): FidelityBehaviorSummary;
+export declare function summarizeFidelityBehaviorDiff(diffs: FidelityDiff[]): FidelityBehaviorSummary;
 ```
 
 #### `triggerGlobalShortcut`
@@ -877,10 +860,7 @@ export function summarizeFidelityBehaviorDiff(diffs: FidelityDiff[]): FidelityBe
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L75) `packages/desktop/src/semantics/global-shortcut.ts`
 
 ```ts
-export function triggerGlobalShortcut(
-  session: GlobalShortcutSession,
-  accelerator: string,
-): AxisStep<GlobalShortcutState>;
+export declare function triggerGlobalShortcut(session: GlobalShortcutSession, accelerator: string): AxisStep<GlobalShortcutState>;
 ```
 
 #### `unregisterGlobalShortcut`
@@ -888,10 +868,7 @@ export function triggerGlobalShortcut(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L90) `packages/desktop/src/semantics/global-shortcut.ts`
 
 ```ts
-export function unregisterGlobalShortcut(
-  session: GlobalShortcutSession,
-  accelerator: string,
-): AxisStep<GlobalShortcutState>;
+export declare function unregisterGlobalShortcut(session: GlobalShortcutSession, accelerator: string): AxisStep<GlobalShortcutState>;
 ```
 
 #### `unsubscribeDarkMode`
@@ -899,7 +876,7 @@ export function unregisterGlobalShortcut(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/dark-mode.ts#L98) `packages/desktop/src/semantics/dark-mode.ts`
 
 ```ts
-export function unsubscribeDarkMode(session: DarkModeSession): AxisStep<DarkModeState>;
+export declare function unsubscribeDarkMode(session: DarkModeSession): AxisStep<DarkModeState>;
 ```
 
 #### `updateTrayTooltip`
@@ -907,10 +884,7 @@ export function unsubscribeDarkMode(session: DarkModeSession): AxisStep<DarkMode
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tray-icon.ts#L63) `packages/desktop/src/semantics/tray-icon.ts`
 
 ```ts
-export function updateTrayTooltip(
-  session: TrayIconSession,
-  tooltip: string,
-): AxisStep<TrayIconState>;
+export declare function updateTrayTooltip(session: TrayIconSession, tooltip: string): AxisStep<TrayIconState>;
 ```
 
 #### `withCache`
@@ -920,9 +894,9 @@ export function updateTrayTooltip(
 withCache = probeAndInvoke を cache 経由 で 呼出す 統合 helper。 cache-miss / cache-invalidated / cache-disabled 時 は 実 probeAndInvoke を 実行 して 結果 を cache に 書込む、 cache-hit 時 は そのまま 返却。 shape 契約 preserving = NativeInvokeResult は そのまま 保持、 cache 経由 判定 は cacheStatus field で 別軸 露出。 dogfood consumer は invokeResult を 触るだけ で v0.9 相当 の 動作、 cacheStatus は observability 目的。
 
 ```ts
-export async function withCache(input: {
-  cache: InvokeCache;
-  invokeInput: NativeInvokeInput;
+export declare function withCache(input: {
+    cache: InvokeCache;
+    invokeInput: NativeInvokeInput;
 }): Promise<CachedNativeInvokeResult>;
 ```
 
@@ -931,10 +905,10 @@ export async function withCache(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/clipboard.ts#L56) `packages/desktop/src/semantics/clipboard.ts`
 
 ```ts
-export function writeClipboard(
-  session: ClipboardSession,
-  input: { contents: string; format: ClipboardFormat },
-): AxisStep<ClipboardState>;
+export declare function writeClipboard(session: ClipboardSession, input: {
+    contents: string;
+    format: ClipboardFormat;
+}): AxisStep<ClipboardState>;
 ```
 
 ### 型
@@ -945,10 +919,10 @@ export function writeClipboard(
 
 ```ts
 export interface AdapterInvocation {
-  scanId: string;
-  target: DesktopTarget;
-  mode: AdapterMode;
-  metadata?: Record<string, string | number | boolean>;
+    scanId: string;
+    target: DesktopTarget;
+    mode: AdapterMode;
+    metadata?: Record<string, string | number | boolean>;
 }
 ```
 
@@ -966,14 +940,14 @@ export type AdapterMode = 'mock' | 'real';
 
 ```ts
 export interface AdapterResult {
-  axis: DesktopAxis;
-  target: DesktopTarget;
-  mode: AdapterMode;
-  completed: boolean;
-  eventCount: number;
-  durationMs: number;
-  history: AxisStep<string>[];
-  neutralEvents: NeutralEventName[];
+    axis: DesktopAxis;
+    target: DesktopTarget;
+    mode: AdapterMode;
+    completed: boolean;
+    eventCount: number;
+    durationMs: number;
+    history: AxisStep<string>[];
+    neutralEvents: NeutralEventName[];
 }
 ```
 
@@ -983,14 +957,14 @@ export interface AdapterResult {
 
 ```ts
 export interface AutoUpdaterSession {
-  target: DesktopTarget;
-  channel: string;
-  state: AutoUpdaterState;
-  latestVersion: string | null;
-  downloadedBytes: number;
-  applied: boolean;
-  relaunchDelayMs: number;
-  history: AxisStep<AutoUpdaterState>[];
+    target: DesktopTarget;
+    channel: string;
+    state: AutoUpdaterState;
+    latestVersion: string | null;
+    downloadedBytes: number;
+    applied: boolean;
+    relaunchDelayMs: number;
+    history: AxisStep<AutoUpdaterState>[];
 }
 ```
 
@@ -1001,12 +975,7 @@ export interface AutoUpdaterSession {
 Auto-updater axis (v0.2) — check + download + apply + relaunch の 4 step 状態遷移。 Squirrel.Mac / Squirrel.Windows / AppImage の 3 target を uniform state machine で扱う。
 
 ```ts
-export type AutoUpdaterState =
-  | 'idle'
-  | 'check-started'
-  | 'update-downloaded'
-  | 'update-applied'
-  | 'relaunch-scheduled';
+export type AutoUpdaterState = 'idle' | 'check-started' | 'update-downloaded' | 'update-applied' | 'relaunch-scheduled';
 ```
 
 #### `AxisStep`
@@ -1015,10 +984,10 @@ export type AutoUpdaterState =
 
 ```ts
 export interface AxisStep<TState extends string> {
-  neutralEvent: NeutralEventName;
-  providerEvent: string;
-  state: TState;
-  metadata: Record<string, string | number | boolean>;
+    neutralEvent: NeutralEventName;
+    providerEvent: string;
+    state: TState;
+    metadata: Record<string, string | number | boolean>;
 }
 ```
 
@@ -1030,9 +999,9 @@ cache 済 invoke 結果 の envelope、 TTL 判定 用 の capturedAt 保持。
 
 ```ts
 export interface CachedInvokeEntry {
-  key: string;
-  capturedAt: number;
-  result: NativeInvokeResult;
+    key: string;
+    capturedAt: number;
+    result: NativeInvokeResult;
 }
 ```
 
@@ -1044,11 +1013,11 @@ v1.0 invoke-cache の 結果、 NativeInvokeResult 拡張 additive。
 
 ```ts
 export interface CachedNativeInvokeResult {
-  invokeResult: NativeInvokeResult;
-  cacheStatus: CacheStatus;
-  cacheKey: string;
-  cachedAt: number | null;
-  cacheAgeMs: number | null;
+    invokeResult: NativeInvokeResult;
+    cacheStatus: CacheStatus;
+    cacheKey: string;
+    cachedAt: number | null;
+    cacheAgeMs: number | null;
 }
 ```
 
@@ -1074,13 +1043,13 @@ export type ClipboardFormat = 'text' | 'html' | 'image' | 'file-list';
 
 ```ts
 export interface ClipboardSession {
-  target: DesktopTarget;
-  clipboardId: string;
-  state: ClipboardState;
-  contents: string | null;
-  format: ClipboardFormat | null;
-  changeCount: number;
-  history: AxisStep<ClipboardState>[];
+    target: DesktopTarget;
+    clipboardId: string;
+    state: ClipboardState;
+    contents: string | null;
+    format: ClipboardFormat | null;
+    changeCount: number;
+    history: AxisStep<ClipboardState>[];
 }
 ```
 
@@ -1100,13 +1069,13 @@ export type ClipboardState = 'idle' | 'written' | 'read' | 'changed' | 'cleared'
 
 ```ts
 export interface DarkModeSession {
-  target: DesktopTarget;
-  observerId: string;
-  state: DarkModeState;
-  currentTheme: ThemeMode;
-  userPreference: ThemeMode;
-  changeCount: number;
-  history: AxisStep<DarkModeState>[];
+    target: DesktopTarget;
+    observerId: string;
+    state: DarkModeState;
+    currentTheme: ThemeMode;
+    userPreference: ThemeMode;
+    changeCount: number;
+    history: AxisStep<DarkModeState>[];
 }
 ```
 
@@ -1117,12 +1086,7 @@ export interface DarkModeSession {
 Dark-mode axis (v0.3) — subscribe + theme-change + user-preferred + unsubscribe の 4 step 遷移。 macOS AppleInterfaceTheme + Windows ImmersiveColorSet + Linux xdg-portal Settings color-scheme を uniform 扱い。
 
 ```ts
-export type DarkModeState =
-  | 'idle'
-  | 'subscribed'
-  | 'theme-changed'
-  | 'user-preferred'
-  | 'unsubscribed';
+export type DarkModeState = 'idle' | 'subscribed' | 'theme-changed' | 'user-preferred' | 'unsubscribed';
 ```
 
 #### `DesktopAdapter`
@@ -1131,8 +1095,8 @@ export type DarkModeState =
 
 ```ts
 export interface DesktopAdapter {
-  axis: DesktopAxis;
-  scan(input: AdapterInvocation): Promise<AdapterResult>;
+    axis: DesktopAxis;
+    scan(input: AdapterInvocation): Promise<AdapterResult>;
 }
 ```
 
@@ -1141,19 +1105,7 @@ export interface DesktopAdapter {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/types.ts#L12) `packages/desktop/src/semantics/types.ts`
 
 ```ts
-export type DesktopAxis =
-  | 'electron'
-  | 'tauri'
-  | 'webview'
-  | 'auto-updater'
-  | 'fs-permissions'
-  | 'notification'
-  | 'menu-bar'
-  | 'tray-icon'
-  | 'screen-recording'
-  | 'global-shortcut'
-  | 'clipboard'
-  | 'dark-mode';
+export type DesktopAxis = 'electron' | 'tauri' | 'webview' | 'auto-updater' | 'fs-permissions' | 'notification' | 'menu-bar' | 'tray-icon' | 'screen-recording' | 'global-shortcut' | 'clipboard' | 'dark-mode';
 ```
 
 #### `DesktopCliCommand`
@@ -1161,15 +1113,7 @@ export type DesktopAxis =
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/spawn-driver.ts#L14) `packages/desktop/src/adapters/spawn-driver.ts`
 
 ```ts
-export type DesktopCliCommand =
-  | 'electron-builder'
-  | 'electron-updater'
-  | 'ffmpeg'
-  | 'xclip'
-  | 'osascript'
-  | 'notify-send'
-  | 'defaults'
-  | 'reg';
+export type DesktopCliCommand = 'electron-builder' | 'electron-updater' | 'ffmpeg' | 'xclip' | 'osascript' | 'notify-send' | 'defaults' | 'reg';
 ```
 
 #### `DesktopTarget`
@@ -1186,12 +1130,12 @@ export type DesktopTarget = 'macos' | 'windows' | 'linux';
 
 ```ts
 export interface ElectronSession {
-  target: DesktopTarget;
-  appId: string;
-  state: ElectronState;
-  windowIds: string[];
-  ipcMessages: number;
-  history: AxisStep<ElectronState>[];
+    target: DesktopTarget;
+    appId: string;
+    state: ElectronState;
+    windowIds: string[];
+    ipcMessages: number;
+    history: AxisStep<ElectronState>[];
 }
 ```
 
@@ -1213,17 +1157,14 @@ v0.7 behavior diff summary — shape 契約 preserving (matched=true) を保っ�
 
 ```ts
 export interface FidelityBehaviorSummary {
-  total: number;
-  axesWithBehaviorDiff: DesktopAxis[];
-  totalMetadataDiffs: number;
-  perAxis: Record<
-    DesktopAxis,
-    {
-      metadataDiffCount: number;
-      maxDurationDiffMs: number;
-      hasBehaviorDiff: boolean;
-    }
-  >;
+    total: number;
+    axesWithBehaviorDiff: DesktopAxis[];
+    totalMetadataDiffs: number;
+    perAxis: Record<DesktopAxis, {
+        metadataDiffCount: number;
+        maxDurationDiffMs: number;
+        hasBehaviorDiff: boolean;
+    }>;
 }
 ```
 
@@ -1233,8 +1174,8 @@ export interface FidelityBehaviorSummary {
 
 ```ts
 export interface FidelityCheckWithProbeResult {
-  diffs: FidelityDiff[];
-  skippedPairs: SkippedPair[];
+    diffs: FidelityDiff[];
+    skippedPairs: SkippedPair[];
 }
 ```
 
@@ -1244,9 +1185,9 @@ export interface FidelityCheckWithProbeResult {
 
 ```ts
 export interface FidelityCoverage {
-  providers: DesktopTarget[];
-  axes: DesktopAxis[];
-  rows: FidelityRow[];
+    providers: DesktopTarget[];
+    axes: DesktopAxis[];
+    rows: FidelityRow[];
 }
 ```
 
@@ -1256,17 +1197,17 @@ export interface FidelityCoverage {
 
 ```ts
 export interface FidelityDiff {
-  axis: DesktopAxis;
-  target: DesktopTarget;
-  mockEvents: NeutralEventName[];
-  realEvents: NeutralEventName[];
-  matched: boolean;
-  mockCompleted: boolean;
-  realCompleted: boolean;
-  /** v0.7: mock/real の metadata 差異検知 (step 別) */
-  metadataDiffs: MetadataDiff[];
-  /** v0.7: mock/real の duration 差異 (絶対値 ms) */
-  durationDiffMs: number;
+    axis: DesktopAxis;
+    target: DesktopTarget;
+    mockEvents: NeutralEventName[];
+    realEvents: NeutralEventName[];
+    matched: boolean;
+    mockCompleted: boolean;
+    realCompleted: boolean;
+    /** v0.7: mock/real の metadata 差異検知 (step 別) */
+    metadataDiffs: MetadataDiff[];
+    /** v0.7: mock/real の duration 差異 (絶対値 ms) */
+    durationDiffMs: number;
 }
 ```
 
@@ -1276,10 +1217,10 @@ export interface FidelityDiff {
 
 ```ts
 export interface FidelityRow {
-  provider: DesktopTarget;
-  axis: DesktopAxis;
-  neutralEvents: NeutralEventName[];
-  providerEvents: string[];
+    provider: DesktopTarget;
+    axis: DesktopAxis;
+    neutralEvents: NeutralEventName[];
+    providerEvents: string[];
 }
 ```
 
@@ -1289,11 +1230,14 @@ export interface FidelityRow {
 
 ```ts
 export interface FidelitySummary {
-  total: number;
-  matched: number;
-  unmatched: number;
-  matchedRatio: number;
-  perAxis: Record<DesktopAxis, { matched: number; total: number }>;
+    total: number;
+    matched: number;
+    unmatched: number;
+    matchedRatio: number;
+    perAxis: Record<DesktopAxis, {
+        matched: number;
+        total: number;
+    }>;
 }
 ```
 
@@ -1311,13 +1255,13 @@ export type FsPermissionScope = 'read' | 'write' | 'read-write' | 'execute';
 
 ```ts
 export interface FsPermissionsSession {
-  target: DesktopTarget;
-  path: string;
-  scope: FsPermissionScope;
-  state: FsPermissionsState;
-  grantedScopes: FsPermissionScope[];
-  auditEntries: number;
-  history: AxisStep<FsPermissionsState>[];
+    target: DesktopTarget;
+    path: string;
+    scope: FsPermissionScope;
+    state: FsPermissionsState;
+    grantedScopes: FsPermissionScope[];
+    auditEntries: number;
+    history: AxisStep<FsPermissionsState>[];
 }
 ```
 
@@ -1337,12 +1281,12 @@ export type FsPermissionsState = 'idle' | 'requested' | 'granted' | 'revoked' | 
 
 ```ts
 export interface GlobalShortcutSession {
-  target: DesktopTarget;
-  namespace: string;
-  state: GlobalShortcutState;
-  registered: string[];
-  triggerCounts: Record<string, number>;
-  history: AxisStep<GlobalShortcutState>[];
+    target: DesktopTarget;
+    namespace: string;
+    state: GlobalShortcutState;
+    registered: string[];
+    triggerCounts: Record<string, number>;
+    history: AxisStep<GlobalShortcutState>[];
 }
 ```
 
@@ -1353,12 +1297,7 @@ export interface GlobalShortcutSession {
 Global-shortcut axis (v0.3) — register + trigger + unregister + all-clear の 4 step 遷移。 macOS Carbon RegisterEventHotKey + Windows User32.RegisterHotKey + Linux xdg-portal GlobalShortcuts を uniform 扱い。
 
 ```ts
-export type GlobalShortcutState =
-  | 'idle'
-  | 'registered'
-  | 'triggered'
-  | 'unregistered'
-  | 'all-cleared';
+export type GlobalShortcutState = 'idle' | 'registered' | 'triggered' | 'unregistered' | 'all-cleared';
 ```
 
 #### `InvokeCacheConfig`
@@ -1369,12 +1308,12 @@ cache 設定 SSOT、 全 field default 明示。
 
 ```ts
 export interface InvokeCacheConfig {
-  /** TTL (ms)、 default 5 分。 0 = 無期限、 負値 = disabled。 */
-  ttlMs?: number;
-  /** LRU 最大 entry 数、 default 128。 0 = 無制限、 負値 = disabled。 */
-  maxEntries?: number;
-  /** cache 全体 の enable flag、 default true。 */
-  enabled?: boolean;
+    /** TTL (ms)、 default 5 分。 0 = 無期限、 負値 = disabled。 */
+    ttlMs?: number;
+    /** LRU 最大 entry 数、 default 128。 0 = 無制限、 負値 = disabled。 */
+    maxEntries?: number;
+    /** cache 全体 の enable flag、 default true。 */
+    enabled?: boolean;
 }
 ```
 
@@ -1392,9 +1331,9 @@ export type InvokeStatus = 'invoked' | 'cli-unavailable' | 'axis-skipped' | 'no-
 
 ```ts
 export interface MenuBarItem {
-  id: string;
-  label: string;
-  accelerator: string | null;
+    id: string;
+    label: string;
+    accelerator: string | null;
 }
 ```
 
@@ -1404,13 +1343,13 @@ export interface MenuBarItem {
 
 ```ts
 export interface MenuBarSession {
-  target: DesktopTarget;
-  menuId: string;
-  state: MenuBarState;
-  items: MenuBarItem[];
-  clickCount: number;
-  destroyed: boolean;
-  history: AxisStep<MenuBarState>[];
+    target: DesktopTarget;
+    menuId: string;
+    state: MenuBarState;
+    items: MenuBarItem[];
+    clickCount: number;
+    destroyed: boolean;
+    history: AxisStep<MenuBarState>[];
 }
 ```
 
@@ -1430,11 +1369,11 @@ export type MenuBarState = 'idle' | 'built' | 'item-appended' | 'item-clicked' |
 
 ```ts
 export interface MetadataDiff {
-  stepIndex: number;
-  neutralEvent: NeutralEventName;
-  key: string;
-  mockValue: string | number | boolean | undefined;
-  realValue: string | number | boolean | undefined;
+    stepIndex: number;
+    neutralEvent: NeutralEventName;
+    key: string;
+    mockValue: string | number | boolean | undefined;
+    realValue: string | number | boolean | undefined;
 }
 ```
 
@@ -1444,11 +1383,11 @@ export interface MetadataDiff {
 
 ```ts
 export interface NativeInvokeInput {
-  axis: DesktopAxis;
-  target: DesktopTarget;
-  args?: string[];
-  env?: Record<string, string>;
-  spawnFn?: SpawnFn;
+    axis: DesktopAxis;
+    target: DesktopTarget;
+    args?: string[];
+    env?: Record<string, string>;
+    spawnFn?: SpawnFn;
 }
 ```
 
@@ -1460,11 +1399,11 @@ probeAndInvokeAll = 12 axis × 3 target の probe + invoke matrix 集計。 stat
 
 ```ts
 export interface NativeInvokeMatrixSummary {
-  total: number;
-  invoked: NativeInvokeResult[];
-  cliUnavailable: NativeInvokeResult[];
-  axisSkipped: NativeInvokeResult[];
-  noCliMapping: NativeInvokeResult[];
+    total: number;
+    invoked: NativeInvokeResult[];
+    cliUnavailable: NativeInvokeResult[];
+    axisSkipped: NativeInvokeResult[];
+    noCliMapping: NativeInvokeResult[];
 }
 ```
 
@@ -1474,11 +1413,11 @@ export interface NativeInvokeMatrixSummary {
 
 ```ts
 export interface NativeInvokeResult {
-  axis: DesktopAxis;
-  target: DesktopTarget;
-  status: InvokeStatus;
-  reason: string | null;
-  spawnResult: SpawnResult | null;
+    axis: DesktopAxis;
+    target: DesktopTarget;
+    status: InvokeStatus;
+    reason: string | null;
+    spawnResult: SpawnResult | null;
 }
 ```
 
@@ -1487,67 +1426,7 @@ export interface NativeInvokeResult {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/types.ts#L26) `packages/desktop/src/semantics/types.ts`
 
 ```ts
-export type NeutralEventName =
-  // v0.1 Electron axis (main + renderer + IPC + window)
-  | 'electron.app_ready'
-  | 'electron.window_created'
-  | 'electron.ipc_message_dispatched'
-  | 'electron.app_quit'
-  // v0.1 Tauri axis (invoke command + event listen + window mgmt)
-  | 'tauri.command_registered'
-  | 'tauri.command_invoked'
-  | 'tauri.event_emitted'
-  | 'tauri.window_closed'
-  // v0.1 Webview axis (bridge + preload script + context isolation)
-  | 'webview.preload_loaded'
-  | 'webview.bridge_bound'
-  | 'webview.message_posted'
-  | 'webview.isolation_asserted'
-  // v0.2 Auto-updater axis (check + download + apply + relaunch)
-  | 'auto-updater.check_started'
-  | 'auto-updater.update_downloaded'
-  | 'auto-updater.update_applied'
-  | 'auto-updater.relaunch_scheduled'
-  // v0.2 File-system permissions axis (request + grant + revoke + audit)
-  | 'fs-permissions.request_submitted'
-  | 'fs-permissions.permission_granted'
-  | 'fs-permissions.permission_revoked'
-  | 'fs-permissions.audit_logged'
-  // v0.2 Notification axis (schedule + display + action + dismiss)
-  | 'notification.scheduled'
-  | 'notification.displayed'
-  | 'notification.action_invoked'
-  | 'notification.dismissed'
-  // v0.2 Menu-bar axis (build + item + click + destroy)
-  | 'menu-bar.built'
-  | 'menu-bar.item_appended'
-  | 'menu-bar.item_clicked'
-  | 'menu-bar.destroyed'
-  // v0.2 Tray-icon axis (created + tooltip + click + removed)
-  | 'tray-icon.created'
-  | 'tray-icon.tooltip_updated'
-  | 'tray-icon.clicked'
-  | 'tray-icon.removed'
-  // v0.3 Screen-recording axis (permission + started + chunk + stopped)
-  | 'screen-recording.permission_requested'
-  | 'screen-recording.started'
-  | 'screen-recording.chunk_captured'
-  | 'screen-recording.stopped'
-  // v0.3 Global-shortcut axis (register + triggered + unregister + all-cleared)
-  | 'global-shortcut.registered'
-  | 'global-shortcut.triggered'
-  | 'global-shortcut.unregistered'
-  | 'global-shortcut.all_cleared'
-  // v0.3 Clipboard axis (write + read + change + cleared)
-  | 'clipboard.written'
-  | 'clipboard.read'
-  | 'clipboard.changed'
-  | 'clipboard.cleared'
-  // v0.3 Dark-mode axis (subscribed + theme-changed + user-preferred + unsubscribed)
-  | 'dark-mode.subscribed'
-  | 'dark-mode.theme_changed'
-  | 'dark-mode.user_preferred'
-  | 'dark-mode.unsubscribed';
+export type NeutralEventName = 'electron.app_ready' | 'electron.window_created' | 'electron.ipc_message_dispatched' | 'electron.app_quit' | 'tauri.command_registered' | 'tauri.command_invoked' | 'tauri.event_emitted' | 'tauri.window_closed' | 'webview.preload_loaded' | 'webview.bridge_bound' | 'webview.message_posted' | 'webview.isolation_asserted' | 'auto-updater.check_started' | 'auto-updater.update_downloaded' | 'auto-updater.update_applied' | 'auto-updater.relaunch_scheduled' | 'fs-permissions.request_submitted' | 'fs-permissions.permission_granted' | 'fs-permissions.permission_revoked' | 'fs-permissions.audit_logged' | 'notification.scheduled' | 'notification.displayed' | 'notification.action_invoked' | 'notification.dismissed' | 'menu-bar.built' | 'menu-bar.item_appended' | 'menu-bar.item_clicked' | 'menu-bar.destroyed' | 'tray-icon.created' | 'tray-icon.tooltip_updated' | 'tray-icon.clicked' | 'tray-icon.removed' | 'screen-recording.permission_requested' | 'screen-recording.started' | 'screen-recording.chunk_captured' | 'screen-recording.stopped' | 'global-shortcut.registered' | 'global-shortcut.triggered' | 'global-shortcut.unregistered' | 'global-shortcut.all_cleared' | 'clipboard.written' | 'clipboard.read' | 'clipboard.changed' | 'clipboard.cleared' | 'dark-mode.subscribed' | 'dark-mode.theme_changed' | 'dark-mode.user_preferred' | 'dark-mode.unsubscribed';
 ```
 
 #### `NodePlatform`
@@ -1564,15 +1443,15 @@ export type NodePlatform = 'darwin' | 'linux' | 'win32' | 'other';
 
 ```ts
 export interface NotificationSession {
-  target: DesktopTarget;
-  notificationId: string;
-  title: string;
-  state: NotificationState;
-  scheduledAtMs: number;
-  displayedAtMs: number;
-  actions: string[];
-  dismissed: boolean;
-  history: AxisStep<NotificationState>[];
+    target: DesktopTarget;
+    notificationId: string;
+    title: string;
+    state: NotificationState;
+    scheduledAtMs: number;
+    displayedAtMs: number;
+    actions: string[];
+    dismissed: boolean;
+    history: AxisStep<NotificationState>[];
 }
 ```
 
@@ -1583,12 +1462,7 @@ export interface NotificationSession {
 Notification axis (v0.2) — schedule + display + action + dismiss の 4 step 遷移。 macOS UserNotifications + Windows Toast + Linux libnotify の 3 target を uniform 扱い。
 
 ```ts
-export type NotificationState =
-  | 'idle'
-  | 'scheduled'
-  | 'displayed'
-  | 'action-invoked'
-  | 'dismissed';
+export type NotificationState = 'idle' | 'scheduled' | 'displayed' | 'action-invoked' | 'dismissed';
 ```
 
 #### `PlatformGate`
@@ -1597,9 +1471,9 @@ export type NotificationState =
 
 ```ts
 export interface PlatformGate {
-  target: DesktopTarget;
-  platform: NodePlatform;
-  compatible: boolean;
+    target: DesktopTarget;
+    platform: NodePlatform;
+    compatible: boolean;
 }
 ```
 
@@ -1609,9 +1483,9 @@ export interface PlatformGate {
 
 ```ts
 export interface ProbeInput {
-  command: DesktopCliCommand;
-  platform?: NodePlatform;
-  spawnFn?: SpawnFn;
+    command: DesktopCliCommand;
+    platform?: NodePlatform;
+    spawnFn?: SpawnFn;
 }
 ```
 
@@ -1621,11 +1495,11 @@ export interface ProbeInput {
 
 ```ts
 export interface ProbeResult {
-  command: DesktopCliCommand;
-  platform: NodePlatform;
-  available: boolean;
-  probePath: string | null;
-  durationMs: number;
+    command: DesktopCliCommand;
+    platform: NodePlatform;
+    available: boolean;
+    probePath: string | null;
+    durationMs: number;
 }
 ```
 
@@ -1635,14 +1509,14 @@ export interface ProbeResult {
 
 ```ts
 export interface ScreenRecordingSession {
-  target: DesktopTarget;
-  sessionId: string;
-  displayId: string;
-  state: ScreenRecordingState;
-  permissionGranted: boolean;
-  chunksCaptured: number;
-  totalBytes: number;
-  history: AxisStep<ScreenRecordingState>[];
+    target: DesktopTarget;
+    sessionId: string;
+    displayId: string;
+    state: ScreenRecordingState;
+    permissionGranted: boolean;
+    chunksCaptured: number;
+    totalBytes: number;
+    history: AxisStep<ScreenRecordingState>[];
 }
 ```
 
@@ -1653,12 +1527,7 @@ export interface ScreenRecordingSession {
 Screen-recording axis (v0.3) — permission + start + chunk + stop の 4 step 遷移。 macOS ScreenCaptureKit + Windows Windows.Graphics.Capture + Linux xdg-portal ScreenCast を uniform 扱い。
 
 ```ts
-export type ScreenRecordingState =
-  | 'idle'
-  | 'permission-requested'
-  | 'recording'
-  | 'chunk-captured'
-  | 'stopped';
+export type ScreenRecordingState = 'idle' | 'permission-requested' | 'recording' | 'chunk-captured' | 'stopped';
 ```
 
 #### `SkippedPair`
@@ -1669,9 +1538,9 @@ v0.8 = probe integration 経路の fidelity check。 shouldSkipAxis で skip 判
 
 ```ts
 export interface SkippedPair {
-  axis: DesktopAxis;
-  target: DesktopTarget;
-  reason: string;
+    axis: DesktopAxis;
+    target: DesktopTarget;
+    reason: string;
 }
 ```
 
@@ -1681,12 +1550,12 @@ export interface SkippedPair {
 
 ```ts
 export interface SpawnExecutorInput {
-  command: DesktopCliCommand;
-  args: string[];
-  env: Record<string, string>;
-  cwd?: string;
-  timeoutMs?: number;
-  maxBufferBytes?: number;
+    command: DesktopCliCommand;
+    args: string[];
+    env: Record<string, string>;
+    cwd?: string;
+    timeoutMs?: number;
+    maxBufferBytes?: number;
 }
 ```
 
@@ -1696,12 +1565,12 @@ export interface SpawnExecutorInput {
 
 ```ts
 export interface SpawnExecutorResult {
-  stdout: string;
-  stderr: string;
-  exitCode: number | null;
-  signal: NodeJS.Signals | null;
-  timedOut: boolean;
-  durationMs: number;
+    stdout: string;
+    stderr: string;
+    exitCode: number | null;
+    signal: NodeJS.Signals | null;
+    timedOut: boolean;
+    durationMs: number;
 }
 ```
 
@@ -1719,10 +1588,10 @@ export type SpawnFn = typeof nodeSpawn;
 
 ```ts
 export interface SpawnInvocation {
-  command: DesktopCliCommand;
-  args: string[];
-  env: Record<string, string>;
-  cwd?: string;
+    command: DesktopCliCommand;
+    args: string[];
+    env: Record<string, string>;
+    cwd?: string;
 }
 ```
 
@@ -1732,13 +1601,13 @@ export interface SpawnInvocation {
 
 ```ts
 export interface SpawnResult {
-  command: DesktopCliCommand;
-  args: string[];
-  invoked: boolean;
-  exitCode: number | null;
-  stdout: string;
-  stderr: string;
-  durationMs: number;
+    command: DesktopCliCommand;
+    args: string[];
+    invoked: boolean;
+    exitCode: number | null;
+    stdout: string;
+    stderr: string;
+    durationMs: number;
 }
 ```
 
@@ -1748,13 +1617,13 @@ export interface SpawnResult {
 
 ```ts
 export interface TauriSession {
-  target: DesktopTarget;
-  appName: string;
-  state: TauriState;
-  registeredCommands: string[];
-  invocations: number;
-  emittedEvents: number;
-  history: AxisStep<TauriState>[];
+    target: DesktopTarget;
+    appName: string;
+    state: TauriState;
+    registeredCommands: string[];
+    invocations: number;
+    emittedEvents: number;
+    history: AxisStep<TauriState>[];
 }
 ```
 
@@ -1782,14 +1651,14 @@ export type ThemeMode = 'light' | 'dark' | 'no-preference';
 
 ```ts
 export interface TrayIconSession {
-  target: DesktopTarget;
-  trayId: string;
-  iconPath: string;
-  tooltip: string;
-  state: TrayIconState;
-  clickCount: number;
-  removed: boolean;
-  history: AxisStep<TrayIconState>[];
+    target: DesktopTarget;
+    trayId: string;
+    iconPath: string;
+    tooltip: string;
+    state: TrayIconState;
+    clickCount: number;
+    removed: boolean;
+    history: AxisStep<TrayIconState>[];
 }
 ```
 
@@ -1809,13 +1678,13 @@ export type TrayIconState = 'idle' | 'created' | 'tooltip-updated' | 'clicked' |
 
 ```ts
 export interface WebviewSession {
-  target: DesktopTarget;
-  webviewId: string;
-  state: WebviewState;
-  exposedApis: string[];
-  postedMessages: number;
-  contextIsolated: boolean;
-  history: AxisStep<WebviewState>[];
+    target: DesktopTarget;
+    webviewId: string;
+    state: WebviewState;
+    exposedApis: string[];
+    postedMessages: number;
+    contextIsolated: boolean;
+    history: AxisStep<WebviewState>[];
 }
 ```
 

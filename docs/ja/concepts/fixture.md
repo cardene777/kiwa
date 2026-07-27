@@ -33,11 +33,15 @@ wagmi の `useAccount()` から見ると「state 更新 → event 通知 → 再
 `setActiveAccount(1)` を呼んだときの内訳は以下の通りです。
 
 1. test が `DappE2eApi` の `setActiveAccount(1)` を呼ぶ
-2. `DappE2eApi` が fixture の `rpcContext.activeIndex.current` を `1` に更新する
-3. `DappE2eApi` が `emitPageEvent('accountsChanged', [newAddress])` を発行する
-4. inject された `window.ethereum` が page 側で同じ event を emit する
-5. wagmi が `useAccount()` を更新し、 React が再 render する
-6. fixture が test へ `accountsChanged` の発行完了を返す
+2. 範囲外の index なら `-32602` で拒否する
+3. fixture の `rpcContext.activeIndex.current` を `1` に更新する
+4. `rpcContext.emitter` へ `accountsChanged` を emit する (Node 側の listener 向け)
+5. `emitPageEvent(page, bridgeName, 'accountsChanged', [newAddress])` を await する (page 側の listener 向け)
+6. inject された `window.ethereum` が page 側で event を emit する
+7. wagmi が `useAccount()` を更新し、 React が再 render する
+
+`accountsChanged` は Node 側の emitter と page 側の bridge の 2 経路へ送出されます。
+同じ page 内の listener が 2 回起動するわけではありませんが、 Node 側で emitter を購読している場合は両方を数えないよう注意してください。
 
 ## Example
 

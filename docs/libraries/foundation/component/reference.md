@@ -63,7 +63,7 @@ Playwright CT mock は `activeMounts` と `unmountAll` を提供します。loca
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/component/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/component/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -74,7 +74,7 @@ Playwright CT mock は `activeMounts` と `unmountAll` を提供します。loca
 event handler を登録、 同一 event に複数 handler を許容する。
 
 ```ts
-export function addHandler(node: MockNode, event: string, handler: (event: MockEvent) => void): void;
+export declare function addHandler(node: MockNode, event: string, handler: (event: MockEvent) => void): void;
 ```
 
 #### `appendChild`
@@ -84,7 +84,7 @@ export function addHandler(node: MockNode, event: string, handler: (event: MockE
 node に child を追加、 parent back reference も更新する。
 
 ```ts
-export function appendChild(parent: MockNode, child: MockNode): void;
+export declare function appendChild(parent: MockNode, child: MockNode): void;
 ```
 
 #### `applyOptimisticUpdate`
@@ -92,21 +92,24 @@ export function appendChild(parent: MockNode, child: MockNode): void;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L47) `packages/component/src/semantics/form-action-advanced.ts`
 
 ```ts
-export function applyOptimisticUpdate<TForm extends Record<string, unknown>>(
-  session: FormActionSession<TForm>,
-  patch: Partial<TForm>,
-): AxisStep<FormActionState>;
+export declare function applyOptimisticUpdate<TForm extends Record<string, unknown>>(session: FormActionSession<TForm>, patch: Partial<TForm>): AxisStep<FormActionState>;
 ```
 
 #### `applyReactActionOptimistic`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L76) `packages/component/src/semantics/react-19-actions.ts`
+公開 entry point から解決しています。
+
+`applyOptimisticUpdate` を `applyReactActionOptimistic` として公開しています。
 
 ```ts
-export function applyReactActionOptimistic(
-  session: ReactActionsSession,
-  optimisticValue: string,
-): AxisStep<ReactActionsState>;
+export {
+  applyOptimisticUpdate as applyReactActionOptimistic,
+  beginActionTransition,
+  initializeReactActions,
+  resolveAction,
+  type ReactActionsSession,
+  type ReactActionsState,
+} from './react-19-actions.js';
 ```
 
 #### `assertAnimation`
@@ -114,10 +117,11 @@ export function applyReactActionOptimistic(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L77) `packages/component/src/semantics/view-transitions.ts`
 
 ```ts
-export function assertAnimation(
-  session: ViewTransitionSession,
-  input: { assertionId: string; durationMs: number; easing?: string },
-): AxisStep<ViewTransitionState>;
+export declare function assertAnimation(session: ViewTransitionSession, input: {
+    assertionId: string;
+    durationMs: number;
+    easing?: string;
+}): AxisStep<ViewTransitionState>;
 ```
 
 #### `assertMode`
@@ -125,11 +129,7 @@ export function assertAnimation(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L42) `packages/component/src/real-driver.ts`
 
 ```ts
-export function assertMode(
-  provider: ComponentTarget,
-  expected: KiwaTestMode,
-  env: Record<string, string | undefined> = process.env,
-): void;
+export declare function assertMode(provider: ComponentTarget, expected: KiwaTestMode, env?: Record<string, string | undefined>): void;
 ```
 
 #### `assertStaticBoundary`
@@ -137,10 +137,7 @@ export function assertMode(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L122) `packages/component/src/semantics/islands-architecture.ts`
 
 ```ts
-export function assertStaticBoundary(
-  session: IslandsSession,
-  boundaryId: string,
-): AxisStep<IslandsState>;
+export declare function assertStaticBoundary(session: IslandsSession, boundaryId: string): AxisStep<IslandsState>;
 ```
 
 #### `beginActionTransition`
@@ -148,9 +145,7 @@ export function assertStaticBoundary(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L63) `packages/component/src/semantics/react-19-actions.ts`
 
 ```ts
-export function beginActionTransition(
-  session: ReactActionsSession,
-): AxisStep<ReactActionsState>;
+export declare function beginActionTransition(session: ReactActionsSession): AxisStep<ReactActionsState>;
 ```
 
 #### `beginIslandHydration`
@@ -158,10 +153,7 @@ export function beginActionTransition(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L82) `packages/component/src/semantics/islands-architecture.ts`
 
 ```ts
-export function beginIslandHydration(
-  session: IslandsSession,
-  islandId: string,
-): AxisStep<IslandsState>;
+export declare function beginIslandHydration(session: IslandsSession, islandId: string): AxisStep<IslandsState>;
 ```
 
 #### `beginRscRender`
@@ -169,7 +161,7 @@ export function beginIslandHydration(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L34) `packages/component/src/semantics/rsc-harness.ts`
 
 ```ts
-export function beginRscRender(session: RscHarnessSession): AxisStep<RscHarnessState>;
+export declare function beginRscRender(session: RscHarnessSession): AxisStep<RscHarnessState>;
 ```
 
 #### `bootstrapIslandsRoute`
@@ -177,9 +169,9 @@ export function beginRscRender(session: RscHarnessSession): AxisStep<RscHarnessS
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L51) `packages/component/src/semantics/islands-architecture.ts`
 
 ```ts
-export function bootstrapIslandsRoute(input: {
-  target: ComponentTarget;
-  routeId: string;
+export declare function bootstrapIslandsRoute(input: {
+    target: ComponentTarget;
+    routeId: string;
 }): IslandsSession;
 ```
 
@@ -238,10 +230,11 @@ export declare const buildModal: ComponentRender<ModalArgs>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L48) `packages/component/src/semantics/streaming-ssr.ts`
 
 ```ts
-export function captureErrorBoundary(
-  session: StreamingSsrSession,
-  input: { boundaryId: string; error: Error | string; recoverable?: boolean },
-): AxisStep<StreamingSsrState>;
+export declare function captureErrorBoundary(session: StreamingSsrSession, input: {
+    boundaryId: string;
+    error: Error | string;
+    recoverable?: boolean;
+}): AxisStep<StreamingSsrState>;
 ```
 
 #### `collectFidelityCoverage`
@@ -249,9 +242,7 @@ export function captureErrorBoundary(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/fidelity.ts#L56) `packages/component/src/semantics/fidelity.ts`
 
 ```ts
-export function collectFidelityCoverage(
-  providers: ComponentTarget[] = ['storybook8', 'playwright-ct', 'chromatic'],
-): FidelityCoverage;
+export declare function collectFidelityCoverage(providers?: ComponentTarget[]): FidelityCoverage;
 ```
 
 #### `completeRscRender`
@@ -259,7 +250,7 @@ export function collectFidelityCoverage(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L73) `packages/component/src/semantics/rsc-harness.ts`
 
 ```ts
-export function completeRscRender(session: RscHarnessSession): AxisStep<RscHarnessState>;
+export declare function completeRscRender(session: RscHarnessSession): AxisStep<RscHarnessState>;
 ```
 
 #### `completeSelectiveHydration`
@@ -267,10 +258,7 @@ export function completeRscRender(session: RscHarnessSession): AxisStep<RscHarne
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L78) `packages/component/src/semantics/streaming-ssr.ts`
 
 ```ts
-export function completeSelectiveHydration(
-  session: StreamingSsrSession,
-  boundaryId: string,
-): AxisStep<StreamingSsrState>;
+export declare function completeSelectiveHydration(session: StreamingSsrSession, boundaryId: string): AxisStep<StreamingSsrState>;
 ```
 
 #### `COMPONENT_AXIS_TO_EVENTS`
@@ -298,7 +286,7 @@ export declare const componentFixtures: Record<string, ComponentRender<Record<st
 CanvasElement 生成 — root node と lookup helpers を wrap する。 mount 完了後 story / component test / visual capture の全経路で使う。
 
 ```ts
-export function createCanvas(root: MockNode): CanvasElement;
+export declare function createCanvas(root: MockNode): CanvasElement;
 ```
 
 #### `createChromaticVisualMock`
@@ -308,7 +296,7 @@ export function createCanvas(root: MockNode): CanvasElement;
 ChromaticVisualMock を新規作成する。 baseline / current / review を全て in-memory Map で保持し、 reset() で全 clear できる (test isolation 用)。
 
 ```ts
-export function createChromaticVisualMock(config: ChromaticConfig = {}): ChromaticVisualMock;
+export declare function createChromaticVisualMock(config?: ChromaticConfig): ChromaticVisualMock;
 ```
 
 #### `createNode`
@@ -318,7 +306,7 @@ export function createChromaticVisualMock(config: ChromaticConfig = {}): Chromat
 node factory — attrs / children / text / value を任意で与える。
 
 ```ts
-export function createNode(tag: string, options: NodeOptions = {}): MockNode;
+export declare function createNode(tag: string, options?: NodeOptions): MockNode;
 ```
 
 #### `createPlaywrightCTMock`
@@ -328,7 +316,7 @@ export function createNode(tag: string, options: NodeOptions = {}): MockNode;
 PlaywrightCTMock を新規作成する。 mount 毎に in-memory canvas を組み、 ComponentLocator に wrap して返す。 activeMounts count は resource leak 検出用 (test で unmount 忘れを assert できる)。
 
 ```ts
-export function createPlaywrightCTMock(): PlaywrightCTMock;
+export declare function createPlaywrightCTMock(): PlaywrightCTMock;
 ```
 
 #### `createStoryRegistry`
@@ -338,7 +326,7 @@ export function createPlaywrightCTMock(): PlaywrightCTMock;
 Registry を新規作成する。 内部は `Map&lt;storyId, StoryEntry&gt;`、 story id は `title--storyName` (Storybook 8 の SB URL param 互換 lowercase / kebab-case)。
 
 ```ts
-export function createStoryRegistry(): StoryRegistry;
+export declare function createStoryRegistry(): StoryRegistry;
 ```
 
 #### `enableProgressiveEnhancement`
@@ -346,10 +334,10 @@ export function createStoryRegistry(): StoryRegistry;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L63) `packages/component/src/semantics/form-action-advanced.ts`
 
 ```ts
-export function enableProgressiveEnhancement<TForm extends Record<string, unknown>>(
-  session: FormActionSession<TForm>,
-  input: { method?: 'post' | 'get'; actionUrl: string },
-): AxisStep<FormActionState>;
+export declare function enableProgressiveEnhancement<TForm extends Record<string, unknown>>(session: FormActionSession<TForm>, input: {
+    method?: 'post' | 'get';
+    actionUrl: string;
+}): AxisStep<FormActionState>;
 ```
 
 #### `enterSuspenseBoundary`
@@ -357,10 +345,7 @@ export function enableProgressiveEnhancement<TForm extends Record<string, unknow
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L42) `packages/component/src/semantics/rsc-harness.ts`
 
 ```ts
-export function enterSuspenseBoundary(
-  session: RscHarnessSession,
-  fallback: string = session.suspenseFallback ?? '<template data-suspense="pending"></template>',
-): AxisStep<RscHarnessState>;
+export declare function enterSuspenseBoundary(session: RscHarnessSession, fallback?: string): AxisStep<RscHarnessState>;
 ```
 
 #### `failRscRender`
@@ -368,10 +353,7 @@ export function enterSuspenseBoundary(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L84) `packages/component/src/semantics/rsc-harness.ts`
 
 ```ts
-export function failRscRender(
-  session: RscHarnessSession,
-  error: Error | string,
-): AxisStep<RscHarnessState>;
+export declare function failRscRender(session: RscHarnessSession, error: Error | string): AxisStep<RscHarnessState>;
 ```
 
 #### `findByRole`
@@ -381,7 +363,7 @@ export function failRscRender(
 role 属性 (`role="button"`) or implicit role (button tag) と、 aria-label / text で一致する node を返す。 mock は最小 subset (button / link / heading / textbox / checkbox) のみ。
 
 ```ts
-export function findByRole(node: MockNode, role: string, accessibleName?: string): MockNode | null;
+export declare function findByRole(node: MockNode, role: string, accessibleName?: string): MockNode | null;
 ```
 
 #### `findByText`
@@ -391,7 +373,7 @@ export function findByRole(node: MockNode, role: string, accessibleName?: string
 text 一致で最初に見つかった node を返す。 深い node を優先する — root 側の aggregated text ではなく、 実際に text を持つ leaf 相当の node を先に返す (Storybook / Testing Library の getByText 挙動と揃える)。
 
 ```ts
-export function findByText(node: MockNode, text: string): MockNode | null;
+export declare function findByText(node: MockNode, text: string): MockNode | null;
 ```
 
 #### `finishElementTransition`
@@ -399,10 +381,7 @@ export function findByText(node: MockNode, text: string): MockNode | null;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L50) `packages/component/src/semantics/view-transitions.ts`
 
 ```ts
-export function finishElementTransition(
-  session: ViewTransitionSession,
-  elementId: string,
-): AxisStep<ViewTransitionState>;
+export declare function finishElementTransition(session: ViewTransitionSession, elementId: string): AxisStep<ViewTransitionState>;
 ```
 
 #### `fireEvent`
@@ -412,7 +391,7 @@ export function finishElementTransition(
 event を発火する。 実 DOM のような bubble はせず target 単発、 mock harness では component 側で bubble 相当を実装する。 fill 相当は input event を発火。
 
 ```ts
-export function fireEvent(node: MockNode, event: MockEvent): void;
+export declare function fireEvent(node: MockNode, event: MockEvent): void;
 ```
 
 #### `hashMarkup`
@@ -422,7 +401,7 @@ export function fireEvent(node: MockNode, event: MockEvent): void;
 markup 文字列を deterministic SHA-256 hex substring (先頭 16) に変換。
 
 ```ts
-export function hashMarkup(markup: string): string;
+export declare function hashMarkup(markup: string): string;
 ```
 
 #### `initializeReactActions`
@@ -430,9 +409,9 @@ export function hashMarkup(markup: string): string;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L43) `packages/component/src/semantics/react-19-actions.ts`
 
 ```ts
-export function initializeReactActions(input: {
-  target: ComponentTarget;
-  actionId: string;
+export declare function initializeReactActions(input: {
+    target: ComponentTarget;
+    actionId: string;
 }): ReactActionsSession;
 ```
 
@@ -441,10 +420,7 @@ export function initializeReactActions(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L36) `packages/component/src/semantics/form-action-advanced.ts`
 
 ```ts
-export function markFormStatusPending<TForm extends Record<string, unknown>>(
-  session: FormActionSession<TForm>,
-  submitter: string,
-): AxisStep<FormActionState>;
+export declare function markFormStatusPending<TForm extends Record<string, unknown>>(session: FormActionSession<TForm>, submitter: string): AxisStep<FormActionState>;
 ```
 
 #### `markIslandInteractive`
@@ -452,10 +428,7 @@ export function markFormStatusPending<TForm extends Record<string, unknown>>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L100) `packages/component/src/semantics/islands-architecture.ts`
 
 ```ts
-export function markIslandInteractive(
-  session: IslandsSession,
-  islandId: string,
-): AxisStep<IslandsState>;
+export declare function markIslandInteractive(session: IslandsSession, islandId: string): AxisStep<IslandsState>;
 ```
 
 #### `markSuspensePending`
@@ -463,10 +436,7 @@ export function markIslandInteractive(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L38) `packages/component/src/semantics/streaming-ssr.ts`
 
 ```ts
-export function markSuspensePending(
-  session: StreamingSsrSession,
-  boundaryId: string,
-): AxisStep<StreamingSsrState>;
+export declare function markSuspensePending(session: StreamingSsrSession, boundaryId: string): AxisStep<StreamingSsrState>;
 ```
 
 #### `providerEventName`
@@ -474,7 +444,7 @@ export function markSuspensePending(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L112) `packages/component/src/semantics/types.ts`
 
 ```ts
-export function providerEventName(target: ComponentTarget, neutral: NeutralEventName): string;
+export declare function providerEventName(target: ComponentTarget, neutral: NeutralEventName): string;
 ```
 
 #### `query`
@@ -484,7 +454,7 @@ export function providerEventName(target: ComponentTarget, neutral: NeutralEvent
 querySelector の最小 subset。 tag / .class / #id / [attr=value] / 子孫 (space) 結合子を support する。 実 CSS selector 全対応ではないが、 mock 用途では十分。 MockNode tree では canvas.root が component 自体を指すため、 root も検査対象 に含める (実 DOM の `document.querySelector` は container を除くが、 mock は component rendering root = 検索対象という semantics に揃える)。
 
 ```ts
-export function query(root: MockNode, selector: string, all: boolean): MockNode[];
+export declare function query(root: MockNode, selector: string, all: boolean): MockNode[];
 ```
 
 #### `registerIsland`
@@ -492,10 +462,7 @@ export function query(root: MockNode, selector: string, all: boolean): MockNode[
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L69) `packages/component/src/semantics/islands-architecture.ts`
 
 ```ts
-export function registerIsland(
-  session: IslandsSession,
-  island: IslandSpec,
-): AxisStep<IslandsState>;
+export declare function registerIsland(session: IslandsSession, island: IslandSpec): AxisStep<IslandsState>;
 ```
 
 #### `rejectFormAction`
@@ -503,10 +470,7 @@ export function registerIsland(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L93) `packages/component/src/semantics/form-action-advanced.ts`
 
 ```ts
-export function rejectFormAction<TForm extends Record<string, unknown>>(
-  session: FormActionSession<TForm>,
-  error: Error | string,
-): AxisStep<FormActionState>;
+export declare function rejectFormAction<TForm extends Record<string, unknown>>(session: FormActionSession<TForm>, error: Error | string): AxisStep<FormActionState>;
 ```
 
 #### `renderMarkup`
@@ -516,7 +480,7 @@ export function rejectFormAction<TForm extends Record<string, unknown>>(
 MockNode subtree を deterministic な pseudo-HTML 文字列に変換する。 event handler は含めず、 tag / attrs / text / children のみ。 Chromatic の hash / markup 保存に使う。
 
 ```ts
-export function renderMarkup(node: MockNode): string;
+export declare function renderMarkup(node: MockNode): string;
 ```
 
 #### `resolveAction`
@@ -524,10 +488,7 @@ export function renderMarkup(node: MockNode): string;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L88) `packages/component/src/semantics/react-19-actions.ts`
 
 ```ts
-export function resolveAction(
-  session: ReactActionsSession,
-  resolvedValue: string,
-): AxisStep<ReactActionsState>;
+export declare function resolveAction(session: ReactActionsSession, resolvedValue: string): AxisStep<ReactActionsState>;
 ```
 
 #### `resolveAllModes`
@@ -535,9 +496,7 @@ export function resolveAction(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L35) `packages/component/src/real-driver.ts`
 
 ```ts
-export function resolveAllModes(
-  env: Record<string, string | undefined> = process.env,
-): ResolvedMode[];
+export declare function resolveAllModes(env?: Record<string, string | undefined>): ResolvedMode[];
 ```
 
 #### `resolveFormAction`
@@ -545,10 +504,7 @@ export function resolveAllModes(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L78) `packages/component/src/semantics/form-action-advanced.ts`
 
 ```ts
-export function resolveFormAction<TForm extends Record<string, unknown>>(
-  session: FormActionSession<TForm>,
-  result: Partial<TForm>,
-): AxisStep<FormActionState>;
+export declare function resolveFormAction<TForm extends Record<string, unknown>>(session: FormActionSession<TForm>, result: Partial<TForm>): AxisStep<FormActionState>;
 ```
 
 #### `resolveMode`
@@ -556,10 +512,7 @@ export function resolveFormAction<TForm extends Record<string, unknown>>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L17) `packages/component/src/real-driver.ts`
 
 ```ts
-export function resolveMode(
-  provider: ComponentTarget,
-  env: Record<string, string | undefined> = process.env,
-): ResolvedMode;
+export declare function resolveMode(provider: ComponentTarget, env?: Record<string, string | undefined>): ResolvedMode;
 ```
 
 #### `startDocumentTransition`
@@ -567,10 +520,11 @@ export function resolveMode(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L65) `packages/component/src/semantics/view-transitions.ts`
 
 ```ts
-export function startDocumentTransition(
-  session: ViewTransitionSession,
-  input: { name: string; fromUrl: string; toUrl: string },
-): AxisStep<ViewTransitionState>;
+export declare function startDocumentTransition(session: ViewTransitionSession, input: {
+    name: string;
+    fromUrl: string;
+    toUrl: string;
+}): AxisStep<ViewTransitionState>;
 ```
 
 #### `startElementTransition`
@@ -578,10 +532,11 @@ export function startDocumentTransition(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L38) `packages/component/src/semantics/view-transitions.ts`
 
 ```ts
-export function startElementTransition(
-  session: ViewTransitionSession,
-  input: { elementId: string; from: string; to: string },
-): AxisStep<ViewTransitionState>;
+export declare function startElementTransition(session: ViewTransitionSession, input: {
+    elementId: string;
+    from: string;
+    to: string;
+}): AxisStep<ViewTransitionState>;
 ```
 
 #### `startFormActionSession`
@@ -589,10 +544,10 @@ export function startElementTransition(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L16) `packages/component/src/semantics/form-action-advanced.ts`
 
 ```ts
-export function startFormActionSession<TForm extends Record<string, unknown>>(input: {
-  target: ComponentTarget;
-  formId: string;
-  initial: TForm;
+export declare function startFormActionSession<TForm extends Record<string, unknown>>(input: {
+    target: ComponentTarget;
+    formId: string;
+    initial: TForm;
 }): FormActionSession<TForm>;
 ```
 
@@ -601,10 +556,7 @@ export function startFormActionSession<TForm extends Record<string, unknown>>(in
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L66) `packages/component/src/semantics/streaming-ssr.ts`
 
 ```ts
-export function startProgressiveHydration(
-  session: StreamingSsrSession,
-  boundaryId: string,
-): AxisStep<StreamingSsrState>;
+export declare function startProgressiveHydration(session: StreamingSsrSession, boundaryId: string): AxisStep<StreamingSsrState>;
 ```
 
 #### `startRscHarness`
@@ -612,10 +564,10 @@ export function startProgressiveHydration(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L15) `packages/component/src/semantics/rsc-harness.ts`
 
 ```ts
-export function startRscHarness(input: {
-  target: ComponentTarget;
-  componentId: string;
-  suspenseFallback?: string;
+export declare function startRscHarness(input: {
+    target: ComponentTarget;
+    componentId: string;
+    suspenseFallback?: string;
 }): RscHarnessSession;
 ```
 
@@ -624,9 +576,9 @@ export function startRscHarness(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L20) `packages/component/src/semantics/streaming-ssr.ts`
 
 ```ts
-export function startStreamingSsr(input: {
-  target: ComponentTarget;
-  routeId: string;
+export declare function startStreamingSsr(input: {
+    target: ComponentTarget;
+    routeId: string;
 }): StreamingSsrSession;
 ```
 
@@ -635,9 +587,9 @@ export function startStreamingSsr(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L20) `packages/component/src/semantics/view-transitions.ts`
 
 ```ts
-export function startViewTransitionSession(input: {
-  target: ComponentTarget;
-  transitionId: string;
+export declare function startViewTransitionSession(input: {
+    target: ComponentTarget;
+    transitionId: string;
 }): ViewTransitionSession;
 ```
 
@@ -646,10 +598,7 @@ export function startViewTransitionSession(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L54) `packages/component/src/semantics/rsc-harness.ts`
 
 ```ts
-export function streamHtmlChunk(
-  session: RscHarnessSession,
-  chunk: string,
-): AxisStep<RscHarnessState>;
+export declare function streamHtmlChunk(session: RscHarnessSession, chunk: string): AxisStep<RscHarnessState>;
 ```
 
 ### 型
@@ -662,11 +611,14 @@ a11y violation を 1 件模倣。 実 axe-core の Result と field を揃える
 
 ```ts
 export interface A11yViolation {
-  id: string;
-  impact: 'minor' | 'moderate' | 'serious' | 'critical';
-  description: string;
-  helpUrl?: string;
-  nodes: Array<{ target: string[]; html: string }>;
+    id: string;
+    impact: 'minor' | 'moderate' | 'serious' | 'critical';
+    description: string;
+    helpUrl?: string;
+    nodes: Array<{
+        target: string[];
+        html: string;
+    }>;
 }
 ```
 
@@ -676,11 +628,11 @@ export interface A11yViolation {
 
 ```ts
 export interface AxisStep<TState extends string> {
-  neutralEvent: NeutralEventName;
-  providerEvent: string;
-  state: TState;
-  amountCents: number;
-  metadata: Record<string, string | number | boolean>;
+    neutralEvent: NeutralEventName;
+    providerEvent: string;
+    state: TState;
+    amountCents: number;
+    metadata: Record<string, string | number | boolean>;
 }
 ```
 
@@ -692,10 +644,10 @@ export interface AxisStep<TState extends string> {
 
 ```ts
 export interface ButtonArgs {
-  label: string;
-  disabled?: boolean;
-  variant?: 'primary' | 'secondary' | 'danger';
-  onClick?: (event: MockEvent) => void;
+    label: string;
+    disabled?: boolean;
+    variant?: 'primary' | 'secondary' | 'danger';
+    onClick?: (event: MockEvent) => void;
 }
 ```
 
@@ -707,15 +659,17 @@ mount 済 root の抽象 handle。 実 DOM ではなく、 in-memory な要素 t
 
 ```ts
 export interface CanvasElement {
-  /** mount 時に render された root node。 */
-  root: MockNode;
-  /** 要素 lookup helpers (最小 subset)。 */
-  getByText(text: string): MockNode;
-  getByRole(role: string, options?: { name?: string }): MockNode;
-  querySelector(selector: string): MockNode | null;
-  querySelectorAll(selector: string): MockNode[];
-  /** capture 時のセルフ dump (Chromatic に渡す markup 表現)。 */
-  toMarkup(): string;
+    /** mount 時に render された root node。 */
+    root: MockNode;
+    /** 要素 lookup helpers (最小 subset)。 */
+    getByText(text: string): MockNode;
+    getByRole(role: string, options?: {
+        name?: string;
+    }): MockNode;
+    querySelector(selector: string): MockNode | null;
+    querySelectorAll(selector: string): MockNode[];
+    /** capture 時のセルフ dump (Chromatic に渡す markup 表現)。 */
+    toMarkup(): string;
 }
 ```
 
@@ -725,10 +679,10 @@ export interface CanvasElement {
 
 ```ts
 export interface CardArgs {
-  title: string;
-  body: string;
-  footer?: string;
-  variant?: 'default' | 'outlined' | 'elevated';
+    title: string;
+    body: string;
+    footer?: string;
+    variant?: 'default' | 'outlined' | 'elevated';
 }
 ```
 
@@ -738,12 +692,12 @@ export interface CardArgs {
 
 ```ts
 export interface ChromaticConfig {
-  /** viewport 名の default (未指定 story の 1 件 capture 時に使う)。 */
-  defaultViewport?: string;
-  /** parameters.chromatic.diffThreshold 未指定時の default。 default = 0 (完全一致で pass)。 */
-  defaultDiffThreshold?: number;
-  /** capturedAt / reviewedAt 用の deterministic time source (test 決定性)。 */
-  now?: () => number;
+    /** viewport 名の default (未指定 story の 1 件 capture 時に使う)。 */
+    defaultViewport?: string;
+    /** parameters.chromatic.diffThreshold 未指定時の default。 default = 0 (完全一致で pass)。 */
+    defaultDiffThreshold?: number;
+    /** capturedAt / reviewedAt 用の deterministic time source (test 決定性)。 */
+    now?: () => number;
 }
 ```
 
@@ -755,43 +709,43 @@ Chromatic 型の visual regression mock。 real Chromatic は Storybook 8 を he
 
 ```ts
 export interface ChromaticVisualMock {
-  /** baseline / current 群を全 clear。 test 間の isolation 用。 */
-  reset(): void;
-  /** baseline を明示 seed (test setup で初期状態を作る時使う)。 */
-  seedBaseline(input: {
-    storyId: string;
-    viewport: string;
-    markup: string;
-    capturedAt?: number;
-  }): VisualBaseline;
-  /** 1 story × 1 viewport を capture、 baseline 不在なら status='new'。 */
-  capture(input: {
-    entry: StoryEntry;
-    canvas: CanvasElement;
-    viewport?: string;
-    now?: number;
-  }): VisualDiff;
-  /**
-   * 1 story を parameters.chromatic.viewports 全 viewport で一括 capture。
-   * viewports 未指定 or 空なら 'default' viewport 1 件のみ。 disabled story は
-   * skip (空配列を返す)。
-   */
-  captureAll(input: {
-    entry: StoryEntry;
-    canvas: CanvasElement;
-    now?: number;
-  }): VisualDiff[];
-  /** accept / reject 1 件。 accept は baseline を current 相当で置換する。 */
-  review(input: {
-    storyId: string;
-    viewport: string;
-    action: VisualReviewAction;
-    reviewedAt?: number;
-  }): VisualReviewEntry;
-  /** review 履歴一覧 (test で workflow を assert する時使う)。 */
-  reviewHistory(): VisualReviewEntry[];
-  /** baseline 一覧 (test 用 introspection)。 */
-  baselines(): VisualBaseline[];
+    /** baseline / current 群を全 clear。 test 間の isolation 用。 */
+    reset(): void;
+    /** baseline を明示 seed (test setup で初期状態を作る時使う)。 */
+    seedBaseline(input: {
+        storyId: string;
+        viewport: string;
+        markup: string;
+        capturedAt?: number;
+    }): VisualBaseline;
+    /** 1 story × 1 viewport を capture、 baseline 不在なら status='new'。 */
+    capture(input: {
+        entry: StoryEntry;
+        canvas: CanvasElement;
+        viewport?: string;
+        now?: number;
+    }): VisualDiff;
+    /**
+     * 1 story を parameters.chromatic.viewports 全 viewport で一括 capture。
+     * viewports 未指定 or 空なら 'default' viewport 1 件のみ。 disabled story は
+     * skip (空配列を返す)。
+     */
+    captureAll(input: {
+        entry: StoryEntry;
+        canvas: CanvasElement;
+        now?: number;
+    }): VisualDiff[];
+    /** accept / reject 1 件。 accept は baseline を current 相当で置換する。 */
+    review(input: {
+        storyId: string;
+        viewport: string;
+        action: VisualReviewAction;
+        reviewedAt?: number;
+    }): VisualReviewEntry;
+    /** review 履歴一覧 (test で workflow を assert する時使う)。 */
+    reviewHistory(): VisualReviewEntry[];
+    /** baseline 一覧 (test 用 introspection)。 */
+    baselines(): VisualBaseline[];
 }
 ```
 
@@ -800,14 +754,7 @@ export interface ChromaticVisualMock {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L10) `packages/component/src/semantics/types.ts`
 
 ```ts
-export type ComponentAxis =
-  | 'rsc-harness'
-  | 'streaming-ssr'
-  | 'view-transitions'
-  | 'form-action-advanced'
-  // v1.49 advanced III (pair 第 6 pair 3 段拡張)
-  | 'react-19-actions'
-  | 'islands-architecture';
+export type ComponentAxis = 'rsc-harness' | 'streaming-ssr' | 'view-transitions' | 'form-action-advanced' | 'react-19-actions' | 'islands-architecture';
 ```
 
 #### `ComponentLocator`
@@ -818,15 +765,17 @@ Playwright CT の `mount(component)` が返す ComponentLocator の subset。 �
 
 ```ts
 export interface ComponentLocator {
-  /** mount 時に生成された canvas。 */
-  canvas: CanvasElement;
-  /** locator chain の起点 element。 */
-  root: MockNode;
-  /** テキスト locator の subset。 */
-  getByText(text: string): NodeLocator;
-  getByRole(role: string, options?: { name?: string }): NodeLocator;
-  /** element を unmount して event handler を全 clear する。 */
-  unmount(): void;
+    /** mount 時に生成された canvas。 */
+    canvas: CanvasElement;
+    /** locator chain の起点 element。 */
+    root: MockNode;
+    /** テキスト locator の subset。 */
+    getByText(text: string): NodeLocator;
+    getByRole(role: string, options?: {
+        name?: string;
+    }): NodeLocator;
+    /** element を unmount して event handler を全 clear する。 */
+    unmount(): void;
 }
 ```
 
@@ -866,9 +815,9 @@ export type ComponentTarget = 'storybook8' | 'playwright-ct' | 'chromatic';
 
 ```ts
 export interface FidelityCoverage {
-  providers: ComponentTarget[];
-  axes: ComponentAxis[];
-  rows: FidelityRow[];
+    providers: ComponentTarget[];
+    axes: ComponentAxis[];
+    rows: FidelityRow[];
 }
 ```
 
@@ -878,10 +827,10 @@ export interface FidelityCoverage {
 
 ```ts
 export interface FidelityRow {
-  provider: ComponentTarget;
-  axis: ComponentAxis;
-  neutralEvents: NeutralEventName[];
-  providerEvents: string[];
+    provider: ComponentTarget;
+    axis: ComponentAxis;
+    neutralEvents: NeutralEventName[];
+    providerEvents: string[];
 }
 ```
 
@@ -891,14 +840,14 @@ export interface FidelityRow {
 
 ```ts
 export interface FormActionSession<TForm extends Record<string, unknown> = Record<string, unknown>> {
-  target: ComponentTarget;
-  formId: string;
-  state: FormActionState;
-  form: TForm;
-  optimisticPatches: Array<Partial<TForm>>;
-  enhanced: boolean;
-  history: AxisStep<FormActionState>[];
-  error: string | null;
+    target: ComponentTarget;
+    formId: string;
+    state: FormActionState;
+    form: TForm;
+    optimisticPatches: Array<Partial<TForm>>;
+    enhanced: boolean;
+    history: AxisStep<FormActionState>[];
+    error: string | null;
 }
 ```
 
@@ -916,10 +865,10 @@ export type FormActionState = 'idle' | 'pending' | 'optimistic' | 'enhanced' | '
 
 ```ts
 export interface FormArgs {
-  title: string;
-  fields: FormField[];
-  submitLabel?: string;
-  onSubmit?: (data: Record<string, string>) => void;
+    title: string;
+    fields: FormField[];
+    submitLabel?: string;
+    onSubmit?: (data: Record<string, string>) => void;
 }
 ```
 
@@ -929,11 +878,11 @@ export interface FormArgs {
 
 ```ts
 export interface FormField {
-  id: string;
-  label: string;
-  type?: InputArgs['type'];
-  required?: boolean;
-  value?: string;
+    id: string;
+    label: string;
+    type?: InputArgs['type'];
+    required?: boolean;
+    value?: string;
 }
 ```
 
@@ -943,13 +892,13 @@ export interface FormField {
 
 ```ts
 export interface InputArgs {
-  id: string;
-  label: string;
-  value?: string;
-  type?: 'text' | 'email' | 'password' | 'number';
-  required?: boolean;
-  placeholder?: string;
-  onChange?: (event: MockEvent) => void;
+    id: string;
+    label: string;
+    value?: string;
+    type?: 'text' | 'email' | 'password' | 'number';
+    required?: boolean;
+    placeholder?: string;
+    onChange?: (event: MockEvent) => void;
 }
 ```
 
@@ -959,9 +908,9 @@ export interface InputArgs {
 
 ```ts
 export interface IslandSpec {
-  islandId: string;
-  loadStrategy: 'load' | 'idle' | 'visible' | 'media' | 'only';
-  interactiveBoundary: boolean;
+    islandId: string;
+    loadStrategy: 'load' | 'idle' | 'visible' | 'media' | 'only';
+    interactiveBoundary: boolean;
 }
 ```
 
@@ -971,13 +920,13 @@ export interface IslandSpec {
 
 ```ts
 export interface IslandsSession {
-  target: ComponentTarget;
-  routeId: string;
-  islands: IslandSpec[];
-  state: IslandsState;
-  hydratedIslandIds: string[];
-  staticBoundaryIds: string[];
-  history: AxisStep<IslandsState>[];
+    target: ComponentTarget;
+    routeId: string;
+    islands: IslandSpec[];
+    state: IslandsState;
+    hydratedIslandIds: string[];
+    staticBoundaryIds: string[];
+    history: AxisStep<IslandsState>[];
 }
 ```
 
@@ -988,12 +937,7 @@ export interface IslandsSession {
 v1.49 islands-architecture axis — Astro / Deno Fresh / Solid Start の Islands architecture (partial hydration + selective interactivity) を target-neutral に扱う state machine。
 
 ```ts
-export type IslandsState =
-  | 'idle'
-  | 'registered'
-  | 'hydrating'
-  | 'interactive'
-  | 'static-verified';
+export type IslandsState = 'idle' | 'registered' | 'hydrating' | 'interactive' | 'static-verified';
 ```
 
 #### `KiwaTestMode`
@@ -1012,10 +956,10 @@ event handler に渡す minimal event object。
 
 ```ts
 export interface MockEvent {
-  type: string;
-  target: MockNode;
-  /** input event 時の value。 */
-  value?: string;
+    type: string;
+    target: MockNode;
+    /** input event 時の value。 */
+    value?: string;
 }
 ```
 
@@ -1027,16 +971,16 @@ in-memory な DOM node 表現。 実 DOM を使わず tag / attrs / children / t
 
 ```ts
 export interface MockNode {
-  tag: string;
-  attrs: Record<string, string>;
-  text?: string;
-  children: MockNode[];
-  /** input / textarea の value (fill 操作で更新)。 */
-  value?: string;
-  /** on{event} handlers ({ click: [fn1, fn2], input: [fn3] })。 */
-  handlers: Record<string, Array<(event: MockEvent) => void>>;
-  /** parent への back reference (querySelector traversal 用)。 */
-  parent: MockNode | null;
+    tag: string;
+    attrs: Record<string, string>;
+    text?: string;
+    children: MockNode[];
+    /** input / textarea の value (fill 操作で更新)。 */
+    value?: string;
+    /** on{event} handlers ({ click: [fn1, fn2], input: [fn3] })。 */
+    handlers: Record<string, Array<(event: MockEvent) => void>>;
+    /** parent への back reference (querySelector traversal 用)。 */
+    parent: MockNode | null;
 }
 ```
 
@@ -1046,11 +990,11 @@ export interface MockNode {
 
 ```ts
 export interface ModalArgs {
-  open: boolean;
-  title: string;
-  body: string;
-  onClose?: () => void;
-  closeOnBackdrop?: boolean;
+    open: boolean;
+    title: string;
+    body: string;
+    onClose?: () => void;
+    closeOnBackdrop?: boolean;
 }
 ```
 
@@ -1059,33 +1003,7 @@ export interface ModalArgs {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L19) `packages/component/src/semantics/types.ts`
 
 ```ts
-export type NeutralEventName =
-  | 'rsc.render_started'
-  | 'rsc.suspense_boundary'
-  | 'rsc.html_chunk_streamed'
-  | 'rsc.render_completed'
-  | 'ssr.suspense_pending'
-  | 'ssr.error_boundary_captured'
-  | 'ssr.progressive_hydration_started'
-  | 'ssr.selective_hydration_completed'
-  | 'transition.element_started'
-  | 'transition.element_finished'
-  | 'transition.document_started'
-  | 'transition.animation_asserted'
-  | 'form.status_pending'
-  | 'form.optimistic_applied'
-  | 'form.progressive_enhanced'
-  | 'form.action_resolved'
-  // v1.49 react-19-actions (useActionState + useOptimistic + useFormStatus 統合)
-  | 'action.state_initialized'
-  | 'action.transition_pending'
-  | 'action.optimistic_committed'
-  | 'action.resolved'
-  // v1.49 islands-architecture (partial hydration + selective interactivity)
-  | 'islands.registered'
-  | 'islands.hydration_started'
-  | 'islands.interactive_ready'
-  | 'islands.static_boundary_asserted';
+export type NeutralEventName = 'rsc.render_started' | 'rsc.suspense_boundary' | 'rsc.html_chunk_streamed' | 'rsc.render_completed' | 'ssr.suspense_pending' | 'ssr.error_boundary_captured' | 'ssr.progressive_hydration_started' | 'ssr.selective_hydration_completed' | 'transition.element_started' | 'transition.element_finished' | 'transition.document_started' | 'transition.animation_asserted' | 'form.status_pending' | 'form.optimistic_applied' | 'form.progressive_enhanced' | 'form.action_resolved' | 'action.state_initialized' | 'action.transition_pending' | 'action.optimistic_committed' | 'action.resolved' | 'islands.registered' | 'islands.hydration_started' | 'islands.interactive_ready' | 'islands.static_boundary_asserted';
 ```
 
 #### `NodeLocator`
@@ -1096,12 +1014,12 @@ Playwright Locator の subset — click / fill / textContent / count / expect。
 
 ```ts
 export interface NodeLocator {
-  click(): Promise<void>;
-  fill(value: string): Promise<void>;
-  textContent(): Promise<string | null>;
-  count(): Promise<number>;
-  /** 対象 node への直接 access (mock 側 assert 用)。 */
-  node(): MockNode | null;
+    click(): Promise<void>;
+    fill(value: string): Promise<void>;
+    textContent(): Promise<string | null>;
+    count(): Promise<number>;
+    /** 対象 node への直接 access (mock 側 assert 用)。 */
+    node(): MockNode | null;
 }
 ```
 
@@ -1111,11 +1029,11 @@ export interface NodeLocator {
 
 ```ts
 export interface NodeOptions {
-  attrs?: Record<string, string>;
-  text?: string;
-  value?: string;
-  children?: MockNode[];
-  on?: Record<string, (event: MockEvent) => void>;
+    attrs?: Record<string, string>;
+    text?: string;
+    value?: string;
+    children?: MockNode[];
+    on?: Record<string, (event: MockEvent) => void>;
 }
 ```
 
@@ -1127,15 +1045,15 @@ Storybook 8 の PlayFunction が受ける context。 mock 互換用に最小 sha
 
 ```ts
 export interface PlayContext<TArgs = Record<string, unknown>> {
-  /** mount 済 root element (mock では in-memory DOM の抽象 handle)。 */
-  canvasElement: CanvasElement;
-  /** resolve 済 args (default + override の merge 後)。 */
-  args: TArgs;
-  /**
-   * step wrapper — Storybook 8 の `step('label', async () => {...})` 互換。
-   * mock では single-thread に順次実行、 label を trace に記録する。
-   */
-  step: (label: string, fn: () => Promise<void> | void) => Promise<void>;
+    /** mount 済 root element (mock では in-memory DOM の抽象 handle)。 */
+    canvasElement: CanvasElement;
+    /** resolve 済 args (default + override の merge 後)。 */
+    args: TArgs;
+    /**
+     * step wrapper — Storybook 8 の `step('label', async () => {...})` 互換。
+     * mock では single-thread に順次実行、 label を trace に記録する。
+     */
+    step: (label: string, fn: () => Promise<void> | void) => Promise<void>;
 }
 ```
 
@@ -1147,14 +1065,11 @@ Playwright Component Testing (CT) 互換の最小 mock。 real Playwright CT は
 
 ```ts
 export interface PlaywrightCTMock {
-  mount<TArgs>(
-    render: ComponentRender<TArgs>,
-    args: TArgs,
-  ): ComponentLocator;
-  /** mount 済 locator 一覧 (test teardown で全 unmount する時使う)。 */
-  activeMounts(): number;
-  /** 全 mount を解放する — vitest afterEach 相当の cleanup。 */
-  unmountAll(): void;
+    mount<TArgs>(render: ComponentRender<TArgs>, args: TArgs): ComponentLocator;
+    /** mount 済 locator 一覧 (test teardown で全 unmount する時使う)。 */
+    activeMounts(): number;
+    /** 全 mount を解放する — vitest afterEach 相当の cleanup。 */
+    unmountAll(): void;
 }
 ```
 
@@ -1164,13 +1079,13 @@ export interface PlaywrightCTMock {
 
 ```ts
 export interface ReactActionsSession {
-  target: ComponentTarget;
-  actionId: string;
-  state: ReactActionsState;
-  pendingCount: number;
-  optimisticValues: string[];
-  resolvedValue: string | null;
-  history: AxisStep<ReactActionsState>[];
+    target: ComponentTarget;
+    actionId: string;
+    state: ReactActionsState;
+    pendingCount: number;
+    optimisticValues: string[];
+    resolvedValue: string | null;
+    history: AxisStep<ReactActionsState>[];
 }
 ```
 
@@ -1181,11 +1096,7 @@ export interface ReactActionsSession {
 v1.49 react-19-actions axis — useActionState + useOptimistic + useFormStatus を統合した React 19 Actions API の deterministic state machine。
 
 ```ts
-export type ReactActionsState =
-  | 'idle'
-  | 'transition-pending'
-  | 'optimistic-committed'
-  | 'resolved';
+export type ReactActionsState = 'idle' | 'transition-pending' | 'optimistic-committed' | 'resolved';
 ```
 
 #### `ResolvedMode`
@@ -1194,9 +1105,9 @@ export type ReactActionsState =
 
 ```ts
 export interface ResolvedMode {
-  mode: KiwaTestMode;
-  provider: ComponentTarget;
-  reason: 'default-mock' | 'kiwa-mode-real' | 'missing-key' | 'invalid-mode';
+    mode: KiwaTestMode;
+    provider: ComponentTarget;
+    reason: 'default-mock' | 'kiwa-mode-real' | 'missing-key' | 'invalid-mode';
 }
 ```
 
@@ -1206,13 +1117,13 @@ export interface ResolvedMode {
 
 ```ts
 export interface RscHarnessSession {
-  target: ComponentTarget;
-  componentId: string;
-  state: RscHarnessState;
-  chunks: string[];
-  suspenseFallback: string | null;
-  history: AxisStep<RscHarnessState>[];
-  error: string | null;
+    target: ComponentTarget;
+    componentId: string;
+    state: RscHarnessState;
+    chunks: string[];
+    suspenseFallback: string | null;
+    history: AxisStep<RscHarnessState>[];
+    error: string | null;
 }
 ```
 
@@ -1232,13 +1143,13 @@ StoryRegistry の 1 entry — story ID → StoryObj + render + meta の bind。 
 
 ```ts
 export interface StoryEntry<TArgs = Record<string, unknown>> {
-  id: string;
-  title: string;
-  storyName: string;
-  args: TArgs;
-  render: ComponentRender<TArgs>;
-  play?: (context: PlayContext<TArgs>) => Promise<void> | void;
-  parameters: StoryParameters;
+    id: string;
+    title: string;
+    storyName: string;
+    args: TArgs;
+    render: ComponentRender<TArgs>;
+    play?: (context: PlayContext<TArgs>) => Promise<void> | void;
+    parameters: StoryParameters;
 }
 ```
 
@@ -1250,16 +1161,16 @@ Storybook 8 の CSF3 と互換な最小 mock。 real Storybook (SB8) は Meta + 
 
 ```ts
 export interface StoryMeta<TArgs = Record<string, unknown>> {
-  /** Storybook の title (e.g. 'Components/Button')。 */
-  title: string;
-  /** args → MockNode の render 関数、 framework agnostic。 */
-  render: ComponentRender<TArgs>;
-  /** meta 単位の default args (story 単位で override 可)。 */
-  args?: Partial<TArgs>;
-  /** meta 単位の default parameters (story 単位で shallow merge)。 */
-  parameters?: StoryParameters;
-  /** 登録する story 群、 key が story 名になる。 */
-  stories: Record<string, StoryObj<TArgs>>;
+    /** Storybook の title (e.g. 'Components/Button')。 */
+    title: string;
+    /** args → MockNode の render 関数、 framework agnostic。 */
+    render: ComponentRender<TArgs>;
+    /** meta 単位の default args (story 単位で override 可)。 */
+    args?: Partial<TArgs>;
+    /** meta 単位の default parameters (story 単位で shallow merge)。 */
+    parameters?: StoryParameters;
+    /** 登録する story 群、 key が story 名になる。 */
+    stories: Record<string, StoryObj<TArgs>>;
 }
 ```
 
@@ -1269,8 +1180,8 @@ export interface StoryMeta<TArgs = Record<string, unknown>> {
 
 ```ts
 export interface StoryMountResult {
-  canvas: CanvasElement;
-  entry: StoryEntry<Record<string, unknown>>;
+    canvas: CanvasElement;
+    entry: StoryEntry<Record<string, unknown>>;
 }
 ```
 
@@ -1282,17 +1193,17 @@ Storybook 8 の `StoryObj` (CSF3) と互換な最小 shape。 args + play + para
 
 ```ts
 export interface StoryObj<TArgs = Record<string, unknown>> {
-  /** story 表示名 (未指定時は export 名を使う想定、 mock では登録時に必須)。 */
-  name?: string;
-  /** default args (registry で resolve 時 override args と shallow merge)。 */
-  args?: Partial<TArgs>;
-  /**
-   * play function — story mount 後に interaction を実行する。 Storybook 8 の
-   * PlayFunction と互換な `{ canvasElement, args, step }` を受ける。
-   */
-  play?: (context: PlayContext<TArgs>) => Promise<void> | void;
-  /** story 単位の parameters (chromatic viewport, layout 等)。 */
-  parameters?: StoryParameters;
+    /** story 表示名 (未指定時は export 名を使う想定、 mock では登録時に必須)。 */
+    name?: string;
+    /** default args (registry で resolve 時 override args と shallow merge)。 */
+    args?: Partial<TArgs>;
+    /**
+     * play function — story mount 後に interaction を実行する。 Storybook 8 の
+     * PlayFunction と互換な `{ canvasElement, args, step }` を受ける。
+     */
+    play?: (context: PlayContext<TArgs>) => Promise<void> | void;
+    /** story 単位の parameters (chromatic viewport, layout 等)。 */
+    parameters?: StoryParameters;
 }
 ```
 
@@ -1304,25 +1215,25 @@ Storybook 8 の `parameters` field の最小 shape。 mock で意味のある値
 
 ```ts
 export interface StoryParameters {
-  /** chromatic diffThreshold (0-1)、 viewport 名一覧、 delay ms 等。 */
-  chromatic?: {
-    /** pixel diff の許容率 (0-1)、 default 0)。 */
-    diffThreshold?: number;
-    /** capture 時の viewport 名一覧 (ChromaticVisualMock で切替)。 */
-    viewports?: string[];
-    /** capture 前に待つ ms、 mock では noop。 */
-    delay?: number;
-    /** true なら chromatic capture 対象外。 */
-    disable?: boolean;
-  };
-  /** a11y addon parameters (rules disable/enable、 mock で violations を模倣)。 */
-  a11y?: {
-    disable?: boolean;
-    /** violation を 1 件模倣、 test で violations 検出を assert できる。 */
-    injectViolations?: A11yViolation[];
-  };
-  /** layout hint (centered / fullscreen / padded)、 mock では未使用。 */
-  layout?: 'centered' | 'fullscreen' | 'padded';
+    /** chromatic diffThreshold (0-1)、 viewport 名一覧、 delay ms 等。 */
+    chromatic?: {
+        /** pixel diff の許容率 (0-1)、 default 0)。 */
+        diffThreshold?: number;
+        /** capture 時の viewport 名一覧 (ChromaticVisualMock で切替)。 */
+        viewports?: string[];
+        /** capture 前に待つ ms、 mock では noop。 */
+        delay?: number;
+        /** true なら chromatic capture 対象外。 */
+        disable?: boolean;
+    };
+    /** a11y addon parameters (rules disable/enable、 mock で violations を模倣)。 */
+    a11y?: {
+        disable?: boolean;
+        /** violation を 1 件模倣、 test で violations 検出を assert できる。 */
+        injectViolations?: A11yViolation[];
+    };
+    /** layout hint (centered / fullscreen / padded)、 mock では未使用。 */
+    layout?: 'centered' | 'fullscreen' | 'padded';
 }
 ```
 
@@ -1332,8 +1243,12 @@ export interface StoryParameters {
 
 ```ts
 export interface StoryPlayResult {
-  steps: Array<{ label: string; ok: boolean; error?: string }>;
-  ok: boolean;
+    steps: Array<{
+        label: string;
+        ok: boolean;
+        error?: string;
+    }>;
+    ok: boolean;
 }
 ```
 
@@ -1343,12 +1258,14 @@ export interface StoryPlayResult {
 
 ```ts
 export interface StoryRegistry {
-  register<TArgs>(meta: StoryMeta<TArgs>): void;
-  list(): StoryEntry[];
-  get(title: string, storyName: string): StoryEntry;
-  mount(title: string, storyName: string, overrideArgs?: Record<string, unknown>): StoryMountResult;
-  play(title: string, storyName: string, canvas: CanvasElement, args?: Record<string, unknown>): Promise<StoryPlayResult>;
-  runA11y(title: string, storyName: string, canvas: CanvasElement): { violations: A11yViolation[] };
+    register<TArgs>(meta: StoryMeta<TArgs>): void;
+    list(): StoryEntry[];
+    get(title: string, storyName: string): StoryEntry;
+    mount(title: string, storyName: string, overrideArgs?: Record<string, unknown>): StoryMountResult;
+    play(title: string, storyName: string, canvas: CanvasElement, args?: Record<string, unknown>): Promise<StoryPlayResult>;
+    runA11y(title: string, storyName: string, canvas: CanvasElement): {
+        violations: A11yViolation[];
+    };
 }
 ```
 
@@ -1358,13 +1275,16 @@ export interface StoryRegistry {
 
 ```ts
 export interface StreamingSsrSession {
-  target: ComponentTarget;
-  routeId: string;
-  state: StreamingSsrState;
-  pendingBoundaries: Set<string>;
-  hydratedBoundaries: Set<string>;
-  errors: Array<{ boundaryId: string; message: string }>;
-  history: AxisStep<StreamingSsrState>[];
+    target: ComponentTarget;
+    routeId: string;
+    state: StreamingSsrState;
+    pendingBoundaries: Set<string>;
+    hydratedBoundaries: Set<string>;
+    errors: Array<{
+        boundaryId: string;
+        message: string;
+    }>;
+    history: AxisStep<StreamingSsrState>[];
 }
 ```
 
@@ -1373,12 +1293,7 @@ export interface StreamingSsrSession {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L3) `packages/component/src/semantics/streaming-ssr.ts`
 
 ```ts
-export type StreamingSsrState =
-  | 'idle'
-  | 'suspense-pending'
-  | 'error-captured'
-  | 'progressive-hydrating'
-  | 'selective-hydrated';
+export type StreamingSsrState = 'idle' | 'suspense-pending' | 'error-captured' | 'progressive-hydrating' | 'selective-hydrated';
 ```
 
 #### `ViewTransitionSession`
@@ -1387,13 +1302,13 @@ export type StreamingSsrState =
 
 ```ts
 export interface ViewTransitionSession {
-  target: ComponentTarget;
-  transitionId: string;
-  state: ViewTransitionState;
-  activeElements: Set<string>;
-  documentTransition: string | null;
-  assertions: string[];
-  history: AxisStep<ViewTransitionState>[];
+    target: ComponentTarget;
+    transitionId: string;
+    state: ViewTransitionState;
+    activeElements: Set<string>;
+    documentTransition: string | null;
+    assertions: string[];
+    history: AxisStep<ViewTransitionState>[];
 }
 ```
 
@@ -1402,12 +1317,7 @@ export interface ViewTransitionSession {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L3) `packages/component/src/semantics/view-transitions.ts`
 
 ```ts
-export type ViewTransitionState =
-  | 'idle'
-  | 'element-transitioning'
-  | 'document-transitioning'
-  | 'asserted'
-  | 'finished';
+export type ViewTransitionState = 'idle' | 'element-transitioning' | 'document-transitioning' | 'asserted' | 'finished';
 ```
 
 #### `VisualBaseline`
@@ -1418,13 +1328,13 @@ Chromatic の 1 baseline entry — story id + viewport + markup + hash。 baseli
 
 ```ts
 export interface VisualBaseline {
-  storyId: string;
-  viewport: string;
-  markup: string;
-  /** markup の deterministic hash (SHA-256 hex substring)。 */
-  hash: string;
-  /** baseline 生成時刻 (ms)、 accept workflow で比較に使う。 */
-  capturedAt: number;
+    storyId: string;
+    viewport: string;
+    markup: string;
+    /** markup の deterministic hash (SHA-256 hex substring)。 */
+    hash: string;
+    /** baseline 生成時刻 (ms)、 accept workflow で比較に使う。 */
+    capturedAt: number;
 }
 ```
 
@@ -1436,16 +1346,16 @@ Chromatic の diff 結果 1 件。 changed=true なら pixel diff 検出、 pixe
 
 ```ts
 export interface VisualDiff {
-  storyId: string;
-  viewport: string;
-  baselineHash: string;
-  currentHash: string;
-  changed: boolean;
-  /** markup 差分 (0-1)、 hash 完全一致で 0、 完全不一致で 1。 */
-  pixelDiffRatio: number;
-  status: 'passed' | 'failed' | 'new';
-  /** threshold 判定に使った値 (parameters.chromatic.diffThreshold or default)。 */
-  threshold: number;
+    storyId: string;
+    viewport: string;
+    baselineHash: string;
+    currentHash: string;
+    changed: boolean;
+    /** markup 差分 (0-1)、 hash 完全一致で 0、 完全不一致で 1。 */
+    pixelDiffRatio: number;
+    status: 'passed' | 'failed' | 'new';
+    /** threshold 判定に使った値 (parameters.chromatic.diffThreshold or default)。 */
+    threshold: number;
 }
 ```
 
@@ -1465,10 +1375,10 @@ export type VisualReviewAction = 'accept' | 'reject';
 
 ```ts
 export interface VisualReviewEntry {
-  storyId: string;
-  viewport: string;
-  action: VisualReviewAction;
-  reviewedAt: number;
+    storyId: string;
+    viewport: string;
+    action: VisualReviewAction;
+    reviewedAt: number;
 }
 ```
 <!-- kiwa-public-api:end -->

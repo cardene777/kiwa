@@ -35,7 +35,7 @@
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -46,29 +46,99 @@
 Assistants v2 client mock — real openai.beta.assistants の thin wrapper API。 assistant / thread / run resource を in-memory Map で保持、 id は seed 付き incrementing で generate する。
 
 ```ts
+/**
+ * Assistants v2 client mock — real openai.beta.assistants の thin wrapper API。
+ * assistant / thread / run resource を in-memory Map で保持、 id は seed 付き
+ * incrementing で generate する。
+ */
 export declare class AssistantsClient {
-  private readonly assistants = new Map<string, Assistant>();
-  private readonly threads = new Map<string, Thread>();
-  private readonly runs = new Map<string, Run>();
-  private readonly handlers = new Map<string, AssistantHandler>();
-  private nextId = 1;
-  private readonly idSeed: string;
-  constructor(config: AssistantsClientConfig = {});
-  createAssistant(params: { name: string; instructions: string; handler?: AssistantHandler }): Assistant;
-  registerHandler(assistantId: string, handler: AssistantHandler): void;
-  getAssistant(id: string): Assistant | undefined;
-  createThread(params: { messages?: Array<{ role: ThreadMessageRole; content: string }> } = {}): Thread;
-  addMessage(threadId: string, params: { role: ThreadMessageRole; content: string }): ThreadMessage;
-  getThread(id: string): Thread | undefined;
-  createRun(params: { threadId: string; assistantId: string }): Run;
-  async poll(runId: string): Promise<Run>;
-  async pollUntilFinal(runId: string, options: { maxAttempts?: number } = {}): Promise<Run>;
-  submitToolOutputs(runId: string, params: { toolOutputs: ToolOutput[] }): Run;
-  cancel(runId: string): Run;
-  getRun(id: string): Run | undefined;
-  private readonly pendingToolOutputs = new Map<string, readonly ToolOutput[]>();
-  private async executeRun(run: Run): Promise<Run>;
-  private mintId(kind: string): string;
+    constructor(config?: AssistantsClientConfig);
+    /**
+     * Assistant resource を発行。 real API と同じく id + name + instructions を持つ。
+     * handler は必須ではないが、 createRun() までに registerHandler() で紐付け必要。
+     */
+    createAssistant(params: {
+        name: string;
+        instructions: string;
+        handler?: AssistantHandler;
+    }): Assistant;
+    /**
+     * assistant に handler を後付け登録。 test で「先に assistant を作って後で handler
+     * を差し替える」 シナリオ (behavior injection) 用。
+     */
+    registerHandler(assistantId: string, handler: AssistantHandler): void;
+    /** assistant 参照 (test / debug 用)。 */
+    getAssistant(id: string): Assistant | undefined;
+    /**
+     * Thread resource を発行。 初期 messages を渡すと user message として append される
+     * (real API と同じ挙動)。
+     */
+    createThread(params?: {
+        messages?: Array<{
+            role: ThreadMessageRole;
+            content: string;
+        }>;
+    }): Thread;
+    /**
+     * Thread に message を append。 real API と同じく role は user / assistant、
+     * v0.1 は tool role 未対応 (Assistants v2 の tool message は submitToolOutputs
+     * 経路に統一)。
+     */
+    addMessage(threadId: string, params: {
+        role: ThreadMessageRole;
+        content: string;
+    }): ThreadMessage;
+    /** thread 参照 (test / debug 用、 messages は readonly view として返す)。 */
+    getThread(id: string): Thread | undefined;
+    /**
+     * Run 発行 — thread + assistant を紐付けた Run resource (queued) を返す。 実際の
+     * assistant 実行は `poll(runId)` を呼び出した時に走る (real API の polling model と
+     * 同構造、 real でも create 直後は queued で 1 tick 後に進行する)。
+     */
+    createRun(params: {
+        threadId: string;
+        assistantId: string;
+    }): Run;
+    /**
+     * poll — Run の 1 tick を進める。 real API polling は同じ retrieveRun で status
+     * を確認する model、 mock は「poll 呼出 = 1 tick 進行」 と扱う。 呼出後の Run
+     * (copy) を返す。 呼出前 status に応じて next status が deterministic に決まる。
+     *
+     * 1. queued → poll 1 回目で handler 呼出、 result に応じて completed / requires_action / failed
+     * 2. in_progress → poll 呼出でも遷移しない (v0.1 は 1 tick = 1 handler 呼出 model、
+     *    in_progress は queued → completed の間の transient state として使用しない)、
+     *    そのまま返す。 実質 queued と completed / requires_action / failed の 3 状態が
+     *    caller に見える。
+     * 3. requires_action → poll でも遷移しない (submitToolOutputs 待ち)
+     * 4. completed / failed → 変化なし、 そのまま返す
+     */
+    poll(runId: string): Promise<Run>;
+    /**
+     * pollUntilFinal — completed / failed / requires_action に到達するまで poll を
+     * 繰り返す utility。 requires_action は「final ではない」 が「client 側 action 待ち」
+     * なので、 これも終端扱いで返す (client 側で submitToolOutputs → 再度 pollUntilFinal
+     * を呼ぶ想定)。 real API では intervalMs で backoff するが、 mock は同期実行のため
+     * poll = 1 tick 進行 model で maxAttempts のみ意味を持つ。
+     */
+    pollUntilFinal(runId: string, options?: {
+        maxAttempts?: number;
+    }): Promise<Run>;
+    /**
+     * submitToolOutputs — requires_action 中の Run に tool 実行結果を差し込む。 status
+     * を queued に戻し、 次 poll で handler が再度呼び出される (context.toolOutputs
+     * で結果参照可能)。 real API と同じ semantic。
+     */
+    submitToolOutputs(runId: string, params: {
+        toolOutputs: ToolOutput[];
+    }): Run;
+    /**
+     * cancel — queued / in_progress の Run を強制終了させる。 status は failed に倒す
+     * (real API は cancelled status を持つが v0.1 は failed に統合、 lastError.code =
+     * 'cancelled' で識別可能)。
+     */
+    cancel(runId: string): Run;
+    /** run 参照 (test / debug 用)。 */
+    getRun(id: string): Run | undefined;
 }
 ```
 
@@ -79,13 +149,23 @@ export declare class AssistantsClient {
 CompiledGraph — StateGraph.compile() 後の実行可能 graph。 real LangGraph の compiled graph に対応、 invoke + stream の 2 実行モード。
 
 ```ts
-export declare class CompiledGraph {
-  constructor(private readonly machine: StateMachine<TState>);
-  async invoke(initialState: TState, options?: RunOptions): Promise<TState>;
-  async *stream(
-    initialState: TState,
-    options?: RunOptions,
-  ): AsyncGenerator<GraphStep<TState>, void, void>;
+/**
+ * CompiledGraph — StateGraph.compile() 後の実行可能 graph。 real LangGraph の
+ * compiled graph に対応、 invoke + stream の 2 実行モード。
+ */
+export declare class CompiledGraph<TState extends AgentState = AgentState> {
+    constructor(machine: StateMachine<TState>);
+    /**
+     * invoke — 初期 state から実行し END 到達時の final state を返す。 中間 step
+     * を捨てて final だけ欲しい場合の shortcut。
+     */
+    invoke(initialState: TState, options?: RunOptions): Promise<TState>;
+    /**
+     * stream — 各 node 実行後の GraphStep (node 名 + patch + merge 後 state) を
+     * 順次 yield。 END 到達時点で generator 終了。 real LangGraph の `stream()`
+     * (default mode = "values") に整合。
+     */
+    stream(initialState: TState, options?: RunOptions): AsyncGenerator<GraphStep<TState>, void, void>;
 }
 ```
 
@@ -96,7 +176,7 @@ export declare class CompiledGraph {
 runtime cycle 検出 — 同一 node が 2 回以上 visit されたら循環と判定する。 real LangGraph は cycle 許容だが (agent loop の中核)、 v0.1 mock は simplicity 優先で 「visit 上限を突破したら halt + throw」 に倒す。 default 上限は 100 step。
 
 ```ts
-export declare const DEFAULT_MAX_STEPS: 100;
+export declare const DEFAULT_MAX_STEPS = 100;
 ```
 
 #### `END`
@@ -117,7 +197,7 @@ compile 失敗 error — validate 時に投げる。
 
 ```ts
 export declare class GraphCompileError extends Error {
-  constructor(message: string);
+    constructor(message: string);
 }
 ```
 
@@ -129,8 +209,8 @@ runtime 最大 step 突破 error。
 
 ```ts
 export declare class MaxStepsExceededError extends Error {
-  readonly steps: number;
-  constructor(steps: number);
+    readonly steps: number;
+    constructor(steps: number);
 }
 ```
 
@@ -151,13 +231,24 @@ export declare const START: "__start__";
 StateGraph builder — node / edge を組んで compile() で `CompiledGraph` を得る。 real LangGraph の `StateGraph` に対応。
 
 ```ts
-export declare class StateGraph {
-  private readonly machine = new StateMachine<TState>();
-  addNode(name: string, handler: NodeHandler<TState>): this;
-  addEdge(from: string | typeof START, to: string | typeof END): this;
-  compile(): CompiledGraph<TState>;
-  get nodeCount(): number;
-  get edgeCount(): number;
+/**
+ * StateGraph builder — node / edge を組んで compile() で `CompiledGraph` を得る。
+ * real LangGraph の `StateGraph` に対応。
+ */
+export declare class StateGraph<TState extends AgentState = AgentState> {
+    /** node を追加。 handler は現 state から partial state を返す (同期 / 非同期両対応)。 */
+    addNode(name: string, handler: NodeHandler<TState>): this;
+    /**
+     * edge を追加。 `from` は node 名 or `START`、 `to` は node 名 or `END`。
+     * v0.1 は unconditional edge のみ (conditional_edges は v0.2)。
+     */
+    addEdge(from: string | typeof START, to: string | typeof END): this;
+    /** compile + validate、 CompiledGraph を返す。 */
+    compile(): CompiledGraph<TState>;
+    /** node 数 (test / debug 用)。 */
+    get nodeCount(): number;
+    /** edge 数 (test / debug 用)。 */
+    get edgeCount(): number;
 }
 ```
 
@@ -168,23 +259,40 @@ export declare class StateGraph {
 StateMachine — pure state graph 実行 engine。 langgraph.ts の StateGraph が 内部で使う。 直接叩くのも可 (低水準 API として export)。
 
 ```ts
-export declare class StateMachine {
-  private readonly nodes = new Map<string, NodeHandler<TState>>();
-  private readonly edges: GraphEdge[] = [];
-  private compiled = false;
-  addNode(name: string, handler: NodeHandler<TState>): this;
-  addEdge(from: string, to: string): this;
-  get nodeCount(): number;
-  get edgeCount(): number;
-  get isCompiled(): boolean;
-  compile(): this;
-  async invoke(initialState: TState, options: RunOptions = {}): Promise<TState>;
-  async *stream(
-    initialState: TState,
-    options: RunOptions = {},
-  ): AsyncGenerator<{ node: string; patch: Partial<TState>; state: TState }, void, void>;
-  private startNode(): string | typeof END;
-  private nextNode(from: string): string | typeof END | undefined;
+/**
+ * StateMachine — pure state graph 実行 engine。 langgraph.ts の StateGraph が
+ * 内部で使う。 直接叩くのも可 (低水準 API として export)。
+ */
+export declare class StateMachine<TState extends AgentState = AgentState> {
+    /** node を登録。 同名 node は上書きする。 */
+    addNode(name: string, handler: NodeHandler<TState>): this;
+    /** edge を追加。 from / to は node 名 or START / END sentinel。 */
+    addEdge(from: string, to: string): this;
+    /** node 数 (test / debug 用)。 */
+    get nodeCount(): number;
+    /** edge 数 (test / debug 用)。 */
+    get edgeCount(): number;
+    /** compile 済かどうか (test / debug 用)。 */
+    get isCompiled(): boolean;
+    /**
+     * validate + compile — validate 6 項目を fail-fast で確認、 pass なら
+     * `compiled = true` を立てて invoke / stream 可能状態にする。
+     */
+    compile(): this;
+    /**
+     * invoke — 初期 state から実行、 END に到達した final state を返す。 compile
+     * 未実施なら throw。
+     */
+    invoke(initialState: TState, options?: RunOptions): Promise<TState>;
+    /**
+     * stream — 各 node 実行後の {node, patch, state} を順次 yield。 END に到達した
+     * 時点で generator は終了する。
+     */
+    stream(initialState: TState, options?: RunOptions): AsyncGenerator<{
+        node: string;
+        patch: Partial<TState>;
+        state: TState;
+    }, void, void>;
 }
 ```
 
@@ -195,10 +303,10 @@ export declare class StateMachine {
 ToolCall builder shortcut — test で `{ id, type: 'function', function: { name, arguments: JSON } }` を書くのは冗長なので helper を出す。
 
 ```ts
-export function toolCall(params: {
-  id: string;
-  name: string;
-  arguments: Record<string, unknown>;
+export declare function toolCall(params: {
+    id: string;
+    name: string;
+    arguments: Record<string, unknown>;
 }): ToolCall;
 ```
 
@@ -222,10 +330,10 @@ Assistant resource — real API と同じく id + name + instructions を保持�
 
 ```ts
 export interface Assistant {
-  id: string;
-  name: string;
-  instructions: string;
-  createdAt: number;
+    id: string;
+    name: string;
+    instructions: string;
+    createdAt: number;
 }
 ```
 
@@ -236,9 +344,7 @@ export interface Assistant {
 Assistant handler — 1 run で assistant が「thread 履歴を見て次の action を決める」 1 step 分の logic。 return が string なら completed で assistant message として append、 return が `{ toolCalls }` なら requires_action に遷移して pending tool_calls を保持。
 
 ```ts
-export type AssistantHandler = (
-  ctx: AssistantHandlerContext,
-) => Promise<AssistantHandlerResult> | AssistantHandlerResult;
+export type AssistantHandler = (ctx: AssistantHandlerContext) => Promise<AssistantHandlerResult> | AssistantHandlerResult;
 ```
 
 #### `AssistantHandlerContext`
@@ -249,14 +355,14 @@ handler に渡す context — thread 履歴 + 現在の run。
 
 ```ts
 export interface AssistantHandlerContext {
-  thread: readonly ThreadMessage[];
-  runId: string;
-  assistantId: string;
-  /**
-   * 前 step の tool 実行結果 (submit_tool_outputs で受け取ったもの)、 requires_action
-   * を解除した直後の再呼出でのみ set される。 それ以外は undefined。
-   */
-  toolOutputs?: readonly ToolOutput[];
+    thread: readonly ThreadMessage[];
+    runId: string;
+    assistantId: string;
+    /**
+     * 前 step の tool 実行結果 (submit_tool_outputs で受け取ったもの)、 requires_action
+     * を解除した直後の再呼出でのみ set される。 それ以外は undefined。
+     */
+    toolOutputs?: readonly ToolOutput[];
 }
 ```
 
@@ -267,9 +373,13 @@ export interface AssistantHandlerContext {
 handler が返す result — completed か requires_action の 2 種。
 
 ```ts
-export type AssistantHandlerResult =
-  | { kind: 'message'; content: string }
-  | { kind: 'tool_calls'; toolCalls: ToolCall[] };
+export type AssistantHandlerResult = {
+    kind: 'message';
+    content: string;
+} | {
+    kind: 'tool_calls';
+    toolCalls: ToolCall[];
+};
 ```
 
 #### `AssistantsClientConfig`
@@ -280,8 +390,8 @@ AssistantsClient config。 handler は必須 (registerHandler で後付けも可
 
 ```ts
 export interface AssistantsClientConfig {
-  /** id 生成の deterministic 化用 seed prefix (test の snapshot 用)、 default random。 */
-  idSeed?: string;
+    /** id 生成の deterministic 化用 seed prefix (test の snapshot 用)、 default random。 */
+    idSeed?: string;
 }
 ```
 
@@ -301,8 +411,8 @@ Graph edge — `from` node の実行後に `to` node を実行する矢印。 `t
 
 ```ts
 export interface GraphEdge {
-  from: string | StartNode;
-  to: string | EndNode;
+    from: string | StartNode;
+    to: string | EndNode;
 }
 ```
 
@@ -314,12 +424,12 @@ export interface GraphEdge {
 
 ```ts
 export interface GraphStep<TState extends AgentState = AgentState> {
-  /** 実行した node 名。 START edge の直後は最初の node 名。 */
-  node: string;
-  /** node handler が返した partial state (merge 前)。 */
-  patch: Partial<TState>;
-  /** patch merge 後の state。 */
-  state: TState;
+    /** 実行した node 名。 START edge の直後は最初の node 名。 */
+    node: string;
+    /** node handler が返した partial state (merge 前)。 */
+    patch: Partial<TState>;
+    /** patch merge 後の state。 */
+    state: TState;
 }
 ```
 
@@ -330,9 +440,7 @@ export interface GraphStep<TState extends AgentState = AgentState> {
 Node handler — 現 state を受け取り、 更新分 (partial state) を返す。 同期 or 非同期。
 
 ```ts
-export type NodeHandler<TState extends AgentState = AgentState> = (
-  state: TState,
-) => Partial<TState> | Promise<Partial<TState>>;
+export type NodeHandler<TState extends AgentState = AgentState> = (state: TState) => Partial<TState> | Promise<Partial<TState>>;
 ```
 
 #### `Run`
@@ -343,23 +451,23 @@ Run entity — real Assistants v2 の Run resource に対応。 v0.1 は mock �
 
 ```ts
 export interface Run {
-  id: string;
-  threadId: string;
-  assistantId: string;
-  status: RunStatus;
-  createdAt: number;
-  completedAt?: number;
-  failedAt?: number;
-  /** requires_action 時に pending の tool_calls、 それ以外は undefined。 */
-  requiredAction?: {
-    type: 'submit_tool_outputs';
-    toolCalls: ToolCall[];
-  };
-  /** failed 時のみ set、 real API の Run.last_error に整合。 */
-  lastError?: {
-    code: string;
-    message: string;
-  };
+    id: string;
+    threadId: string;
+    assistantId: string;
+    status: RunStatus;
+    createdAt: number;
+    completedAt?: number;
+    failedAt?: number;
+    /** requires_action 時に pending の tool_calls、 それ以外は undefined。 */
+    requiredAction?: {
+        type: 'submit_tool_outputs';
+        toolCalls: ToolCall[];
+    };
+    /** failed 時のみ set、 real API の Run.last_error に整合。 */
+    lastError?: {
+        code: string;
+        message: string;
+    };
 }
 ```
 
@@ -371,8 +479,8 @@ invoke / stream 実行時 config。
 
 ```ts
 export interface RunOptions {
-  /** 最大 step 数、 突破したら `MaxStepsExceededError` を throw。 default 100。 */
-  maxSteps?: number;
+    /** 最大 step 数、 突破したら `MaxStepsExceededError` を throw。 default 100。 */
+    maxSteps?: number;
 }
 ```
 
@@ -383,12 +491,7 @@ export interface RunOptions {
 Assistants v2 の Run status SSOT — real API と同じ 5 状態。 v0.1 mock は queued → in_progress → completed / failed / requires_action の deterministic transition を model する。 | status | 意味 | |---|---| | queued | createRun 直後、 まだ polling で 1 回も進んでいない | | in_progress | polling 1 回で queued から遷移、 assistant が work 中 | | completed | assistant が response 生成完了、 final message が thread に append 済 | | failed | handler が throw、 final error は run.lastError に格納 | | requires_action | tool_calls が pending、 submit_tool_outputs で解除 |
 
 ```ts
-export type RunStatus =
-  | 'queued'
-  | 'in_progress'
-  | 'completed'
-  | 'failed'
-  | 'requires_action';
+export type RunStatus = 'queued' | 'in_progress' | 'completed' | 'failed' | 'requires_action';
 ```
 
 #### `StartNode`
@@ -407,9 +510,9 @@ Thread resource — id + createdAt + messages 配列。
 
 ```ts
 export interface Thread {
-  id: string;
-  createdAt: number;
-  messages: ThreadMessage[];
+    id: string;
+    createdAt: number;
+    messages: ThreadMessage[];
 }
 ```
 
@@ -421,10 +524,10 @@ Thread message — real Assistants v2 の Message resource に対応。
 
 ```ts
 export interface ThreadMessage {
-  id: string;
-  role: ThreadMessageRole;
-  content: string;
-  createdAt: number;
+    id: string;
+    role: ThreadMessageRole;
+    content: string;
+    createdAt: number;
 }
 ```
 
@@ -446,13 +549,13 @@ Assistants v2 の tool_call — real API と同じ shape (function only)。 v0.1
 
 ```ts
 export interface ToolCall {
-  id: string;
-  type: 'function';
-  function: {
-    name: string;
-    /** JSON string、 real API に整合。 */
-    arguments: string;
-  };
+    id: string;
+    type: 'function';
+    function: {
+        name: string;
+        /** JSON string、 real API に整合。 */
+        arguments: string;
+    };
 }
 ```
 
@@ -464,8 +567,8 @@ submit_tool_outputs で client が返す 1 tool 実行結果。
 
 ```ts
 export interface ToolOutput {
-  toolCallId: string;
-  output: string;
+    toolCallId: string;
+    output: string;
 }
 ```
 <!-- kiwa-public-api:end -->

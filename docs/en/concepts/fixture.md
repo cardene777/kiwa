@@ -34,11 +34,15 @@ so wagmi `useAccount()` observes the flow as "state update -> event delivery -> 
 Calling `setActiveAccount(1)` breaks down as follows.
 
 1. The test calls `setActiveAccount(1)` on `DappE2eApi`
-2. `DappE2eApi` sets the fixture's `rpcContext.activeIndex.current` to `1`
-3. `DappE2eApi` emits `emitPageEvent('accountsChanged', [newAddress])`
-4. The injected `window.ethereum` re-emits the same event inside the page
-5. wagmi updates `useAccount()` and React re-renders
-6. The fixture reports back to the test that `accountsChanged` was emitted
+2. An out-of-range index is rejected with `-32602`
+3. The fixture's `rpcContext.activeIndex.current` is set to `1`
+4. `accountsChanged` is emitted on `rpcContext.emitter` (for Node-side listeners)
+5. `emitPageEvent(page, bridgeName, 'accountsChanged', [newAddress])` is awaited (for page-side listeners)
+6. The injected `window.ethereum` emits the event inside the page
+7. wagmi updates `useAccount()` and React re-renders
+
+`accountsChanged` goes out on two paths: the Node-side emitter and the page-side bridge.
+Listeners inside the page do not fire twice, but if you subscribe to the Node-side emitter, take care not to count both.
 
 ## Example
 

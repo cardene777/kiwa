@@ -24,12 +24,22 @@ The injected provider answers these 9 methods straight from fixture state.
 | `net_version` | Current chain ID (base-10 string) |
 | `personal_sign` | Signature |
 | `eth_signTypedData_v4` | Typed-data signature |
-| `wallet_switchEthereumChain` | `null` (switch only) |
-| `wallet_addEthereumChain` | `null` (add only) |
+| `wallet_switchEthereumChain` | `null` (switches, then emits `chainChanged`) |
+| `wallet_addEthereumChain` | `null` (adds to the registry, switches to that chain, and emits `chainChanged`) |
 | `eth_sendTransaction` | Transaction hash (broadcast to anvil) |
 
-`eth_subscribe` and `eth_unsubscribe` are rejected with error code `4200`, and every other method is forwarded to anvil's JSON-RPC as-is.
-See [docs/RPC.md](../../RPC.md) for per-method params and error codes.
+`eth_requestAccounts` and `eth_accounts` handle multiple accounts; the active one is switched via `setActiveAccount()`.
+There are also paths for rejecting a connection (`rejectConnect`) and for contract accounts — see [docs/RPC.md](../../RPC.md).
+
+These 5 methods are rejected with error code `4200` and never forwarded to anvil.
+
+- `eth_subscribe`
+- `eth_unsubscribe`
+- `wallet_requestPermissions`
+- `wallet_getPermissions`
+- `eth_sign`
+
+Every method outside the 9 handled and 5 blocked ones is forwarded to anvil's JSON-RPC as-is.
 
 ## Example: setApprovalMode
 

@@ -63,7 +63,7 @@ const snapshot = {
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -74,10 +74,7 @@ const snapshot = {
 assertion helper — spec conformance が pass しない場合 throw する。 vitest の expect と同じ contract (test body で自然に fail する)。
 
 ```ts
-export function assertDesignConformance(
-  spec: DesignSpec,
-  actual: DesignActual,
-): void;
+export declare function assertDesignConformance(spec: DesignSpec, actual: DesignActual): void;
 ```
 
 #### `assertNoLayoutRegression`
@@ -87,11 +84,7 @@ export function assertDesignConformance(
 assertion helper — layout regression 検知時 throw。
 
 ```ts
-export function assertNoLayoutRegression(
-  baseline: LayoutSnapshot,
-  actual: LayoutSnapshot,
-  opts: CheckLayoutRegressionOptions = {},
-): void;
+export declare function assertNoLayoutRegression(baseline: LayoutSnapshot, actual: LayoutSnapshot, opts?: CheckLayoutRegressionOptions): void;
 ```
 
 #### `checkLayoutRegression`
@@ -101,11 +94,7 @@ export function assertNoLayoutRegression(
 layout regression check — baseline と actual の bounding box 差分を検知する。 pass = true when 全 element が tolerance 内 + missing なし、 false when 差分あり。
 
 ```ts
-export function checkLayoutRegression(
-  baseline: LayoutSnapshot,
-  actual: LayoutSnapshot,
-  opts: CheckLayoutRegressionOptions = {},
-): LayoutRegressionResult;
+export declare function checkLayoutRegression(baseline: LayoutSnapshot, actual: LayoutSnapshot, opts?: CheckLayoutRegressionOptions): LayoutRegressionResult;
 ```
 
 #### `checkSpecConformance`
@@ -115,10 +104,7 @@ export function checkLayoutRegression(
 spec conformance check — design spec と actual UI values の差分を検知する。 pass = true when 全 spec key が actual に存在 + 値一致、 false when 差分あり。
 
 ```ts
-export function checkSpecConformance(
-  spec: DesignSpec,
-  actual: DesignActual,
-): SpecConformanceResult;
+export declare function checkSpecConformance(spec: DesignSpec, actual: DesignActual): SpecConformanceResult;
 ```
 
 ### 型
@@ -141,10 +127,14 @@ design spec object shape。 デザイン仕様書 (colors / spacing / typography
 
 ```ts
 export interface DesignSpec {
-  colors?: Record<string, string>;
-  spacing?: Record<string, number>;
-  typography?: Record<string, { fontSize?: number; fontWeight?: number; lineHeight?: number }>;
-  components?: Record<string, Record<string, unknown>>;
+    colors?: Record<string, string>;
+    spacing?: Record<string, number>;
+    typography?: Record<string, {
+        fontSize?: number;
+        fontWeight?: number;
+        lineHeight?: number;
+    }>;
+    components?: Record<string, Record<string, unknown>>;
 }
 ```
 
@@ -154,11 +144,23 @@ export interface DesignSpec {
 
 ```ts
 export interface LayoutRegression {
-  selector: string;
-  kind: 'position-shift' | 'size-change' | 'visibility-change' | 'missing' | 'overflow' | 'overlap';
-  detail: string;
-  baseline?: { x: number; y: number; width: number; height: number; visible: boolean };
-  actual?: { x: number; y: number; width: number; height: number; visible: boolean };
+    selector: string;
+    kind: 'position-shift' | 'size-change' | 'visibility-change' | 'missing' | 'overflow' | 'overlap';
+    detail: string;
+    baseline?: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        visible: boolean;
+    };
+    actual?: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        visible: boolean;
+    };
 }
 ```
 
@@ -168,9 +170,9 @@ export interface LayoutRegression {
 
 ```ts
 export interface LayoutRegressionResult {
-  pass: boolean;
-  regressions: LayoutRegression[];
-  checkedCount: number;
+    pass: boolean;
+    regressions: LayoutRegression[];
+    checkedCount: number;
 }
 ```
 
@@ -182,14 +184,14 @@ layout snapshot = element ごとの bounding box + visibility。 Playwright / js
 
 ```ts
 export interface LayoutSnapshot {
-  elements: Array<{
-    selector: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    visible: boolean;
-  }>;
+    elements: Array<{
+        selector: string;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        visible: boolean;
+    }>;
 }
 ```
 
@@ -199,9 +201,9 @@ export interface LayoutSnapshot {
 
 ```ts
 export interface SpecConformanceResult {
-  pass: boolean;
-  divergences: SpecDivergence[];
-  checkedCount: number;
+    pass: boolean;
+    divergences: SpecDivergence[];
+    checkedCount: number;
 }
 ```
 
@@ -211,10 +213,10 @@ export interface SpecConformanceResult {
 
 ```ts
 export interface SpecDivergence {
-  path: string;
-  expected: unknown;
-  actual: unknown;
-  category: 'missing' | 'mismatch' | 'unexpected';
+    path: string;
+    expected: unknown;
+    actual: unknown;
+    category: 'missing' | 'mismatch' | 'unexpected';
 }
 ```
 <!-- kiwa-public-api:end -->

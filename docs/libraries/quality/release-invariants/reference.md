@@ -19,7 +19,7 @@
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -30,9 +30,7 @@
 Build the 3-invariant summary in one shot. `ok` is the AND of every invariant — a caller (usually a release-smoke suite) can short-circuit on this single boolean.
 
 ```ts
-export function buildReleaseInvariantsSummary(
-  input: BuildReleaseInvariantsSummaryInput,
-): ReleaseInvariantsSummary;
+export declare function buildReleaseInvariantsSummary(input: BuildReleaseInvariantsSummaryInput): ReleaseInvariantsSummary;
 ```
 
 #### `checkGateScriptPackageCoverage`
@@ -42,10 +40,7 @@ export function buildReleaseInvariantsSummary(
 Check that every publishable package appears in the mutation gate script (typically `scripts.test:mutation`).
 
 ```ts
-export function checkGateScriptPackageCoverage(
-  mutationGateScript: string,
-  publishable: PublishablePackage[],
-): GateScriptPackageCoverageResult;
+export declare function checkGateScriptPackageCoverage(mutationGateScript: string, publishable: PublishablePackage[]): GateScriptPackageCoverageResult;
 ```
 
 #### `checkProvenanceFlagAbsence`
@@ -55,9 +50,7 @@ export function checkGateScriptPackageCoverage(
 Assert `--provenance` is absent from the release script. A match reports `ok: false` with up to 3 excerpts around the offending flag.
 
 ```ts
-export function checkProvenanceFlagAbsence(
-  releaseScript: string,
-): ProvenanceFlagAbsenceResult;
+export declare function checkProvenanceFlagAbsence(releaseScript: string): ProvenanceFlagAbsenceResult;
 ```
 
 #### `checkReleaseScriptFilter`
@@ -67,10 +60,7 @@ export function checkProvenanceFlagAbsence(
 Check that every publishable package appears in **both** halves (`-F {name}` build + `--filter {name}` publish) of the release script.
 
 ```ts
-export function checkReleaseScriptFilter(
-  releaseScript: string,
-  publishable: PublishablePackage[],
-): ReleaseScriptFilterResult;
+export declare function checkReleaseScriptFilter(releaseScript: string, publishable: PublishablePackage[]): ReleaseScriptFilterResult;
 ```
 
 ### 型
@@ -81,9 +71,9 @@ export function checkReleaseScriptFilter(
 
 ```ts
 export interface BuildReleaseInvariantsSummaryInput {
-  releaseScript: string;
-  mutationGateScript: string;
-  publishable: PublishablePackage[];
+    releaseScript: string;
+    mutationGateScript: string;
+    publishable: PublishablePackage[];
 }
 ```
 
@@ -95,8 +85,8 @@ Per-package result of the `checkGateScriptPackageCoverage` invariant. `test:muta
 
 ```ts
 export interface GateScriptPackageCoverageEntry {
-  name: string;
-  mutationFilterPresent: boolean;
+    name: string;
+    mutationFilterPresent: boolean;
 }
 ```
 
@@ -106,9 +96,9 @@ export interface GateScriptPackageCoverageEntry {
 
 ```ts
 export interface GateScriptPackageCoverageResult {
-  ok: boolean;
-  entries: GateScriptPackageCoverageEntry[];
-  missingMutationFilter: string[];
+    ok: boolean;
+    entries: GateScriptPackageCoverageEntry[];
+    missingMutationFilter: string[];
 }
 ```
 
@@ -120,13 +110,13 @@ Per-package result of the `checkProvenanceFlagAbsence` invariant. `provenanceFla
 
 ```ts
 export interface ProvenanceFlagAbsenceResult {
-  ok: boolean;
-  provenanceFlagPresent: boolean;
-  /**
-   * Offending code excerpts (up to 3 matches) for the failure message.
-   * Empty when `ok = true`.
-   */
-  excerpts: string[];
+    ok: boolean;
+    provenanceFlagPresent: boolean;
+    /**
+     * Offending code excerpts (up to 3 matches) for the failure message.
+     * Empty when `ok = true`.
+     */
+    excerpts: string[];
 }
 ```
 
@@ -138,8 +128,8 @@ A publishable npm package descriptor. `name` is the `@scope/pkg` string as it ap
 
 ```ts
 export interface PublishablePackage {
-  name: string;
-  dir?: string;
+    name: string;
+    dir?: string;
 }
 ```
 
@@ -151,10 +141,10 @@ Aggregate SSOT — the shape v1.29's `docs/concepts/release-invariants.md` pins 
 
 ```ts
 export interface ReleaseInvariantsSummary {
-  releaseScriptFilter: ReleaseScriptFilterResult;
-  provenanceFlagAbsence: ProvenanceFlagAbsenceResult;
-  gateScriptPackageCoverage: GateScriptPackageCoverageResult;
-  ok: boolean;
+    releaseScriptFilter: ReleaseScriptFilterResult;
+    provenanceFlagAbsence: ProvenanceFlagAbsenceResult;
+    gateScriptPackageCoverage: GateScriptPackageCoverageResult;
+    ok: boolean;
 }
 ```
 
@@ -166,17 +156,17 @@ Per-package result of the `checkReleaseScriptFilter` invariant.
 
 ```ts
 export interface ReleaseScriptFilterEntry {
-  name: string;
-  buildFilterPresent: boolean;
-  publishFilterPresent: boolean;
-  /**
-   * `true` iff **both** halves of the release script contain the package.
-   * Half-only entries (`-F` without `--filter` or vice versa) are the exact
-   * failure mode v1.14 payment + v1.25 perf-harness + v1.27 quality-metrics
-   * + v1.28 realtime all hit; the SSOT calls it `partial: true`.
-   */
-  ok: boolean;
-  partial: boolean;
+    name: string;
+    buildFilterPresent: boolean;
+    publishFilterPresent: boolean;
+    /**
+     * `true` iff **both** halves of the release script contain the package.
+     * Half-only entries (`-F` without `--filter` or vice versa) are the exact
+     * failure mode v1.14 payment + v1.25 perf-harness + v1.27 quality-metrics
+     * + v1.28 realtime all hit; the SSOT calls it `partial: true`.
+     */
+    ok: boolean;
+    partial: boolean;
 }
 ```
 
@@ -188,10 +178,10 @@ Aggregate result of the `checkReleaseScriptFilter` invariant.
 
 ```ts
 export interface ReleaseScriptFilterResult {
-  ok: boolean;
-  entries: ReleaseScriptFilterEntry[];
-  missingBuildFilter: string[];
-  missingPublishFilter: string[];
+    ok: boolean;
+    entries: ReleaseScriptFilterEntry[];
+    missingBuildFilter: string[];
+    missingPublishFilter: string[];
 }
 ```
 <!-- kiwa-public-api:end -->

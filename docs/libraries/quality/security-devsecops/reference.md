@@ -29,7 +29,7 @@ orchestratorが返すreportは値です。mock runにもreal-mode runにも外�
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -38,10 +38,10 @@ orchestratorが返すreportは値です。mock runにもreal-mode runにも外�
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L98) `packages/security-devsecops/src/semantics/secret-scan.ts`
 
 ```ts
-export function allowlistSecret(
-  session: SecretScanSession,
-  input: { ruleId: string; reason: string },
-): AxisStep<SecretScanState>;
+export declare function allowlistSecret(session: SecretScanSession, input: {
+    ruleId: string;
+    reason: string;
+}): AxisStep<SecretScanState>;
 ```
 
 #### `analyzeIacResource`
@@ -49,10 +49,9 @@ export function allowlistSecret(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L56) `packages/security-devsecops/src/semantics/iac-scan.ts`
 
 ```ts
-export function analyzeIacResource(
-  session: IacScanSession,
-  input: { count: number },
-): AxisStep<IacScanState>;
+export declare function analyzeIacResource(session: IacScanSession, input: {
+    count: number;
+}): AxisStep<IacScanState>;
 ```
 
 #### `analyzeScaDependency`
@@ -60,10 +59,9 @@ export function analyzeIacResource(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L55) `packages/security-devsecops/src/semantics/sca.ts`
 
 ```ts
-export function analyzeScaDependency(
-  session: ScaSession,
-  input: { count: number },
-): AxisStep<ScaState>;
+export declare function analyzeScaDependency(session: ScaSession, input: {
+    count: number;
+}): AxisStep<ScaState>;
 ```
 
 #### `assertRealDriverAvailable`
@@ -71,10 +69,7 @@ export function analyzeScaDependency(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L40) `packages/security-devsecops/src/adapters/real-driver.ts`
 
 ```ts
-export function assertRealDriverAvailable(
-  spec: CliDriverSpec,
-  env: RealDriverEnv | null,
-): void;
+export declare function assertRealDriverAvailable(spec: CliDriverSpec, env: RealDriverEnv | null): void;
 ```
 
 #### `attemptDastAttack`
@@ -82,10 +77,7 @@ export function assertRealDriverAvailable(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L71) `packages/security-devsecops/src/semantics/dast.ts`
 
 ```ts
-export function attemptDastAttack(
-  session: DastSession,
-  attack: DastAttack,
-): AxisStep<DastState>;
+export declare function attemptDastAttack(session: DastSession, attack: DastAttack): AxisStep<DastState>;
 ```
 
 #### `axisForPreset`
@@ -93,7 +85,7 @@ export function attemptDastAttack(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/preset.ts#L19) `packages/security-devsecops/src/orchestrator/preset.ts`
 
 ```ts
-export function axisForPreset(preset: AuditPreset): DevSecOpsAxis[];
+export declare function axisForPreset(preset: AuditPreset): DevSecOpsAxis[];
 ```
 
 #### `checkIacCompliance`
@@ -101,10 +93,7 @@ export function axisForPreset(preset: AuditPreset): DevSecOpsAxis[];
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L92) `packages/security-devsecops/src/semantics/iac-scan.ts`
 
 ```ts
-export function checkIacCompliance(
-  session: IacScanSession,
-  check: IacComplianceCheck,
-): AxisStep<IacScanState>;
+export declare function checkIacCompliance(session: IacScanSession, check: IacComplianceCheck): AxisStep<IacScanState>;
 ```
 
 #### `completeContainerScan`
@@ -112,9 +101,7 @@ export function checkIacCompliance(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L124) `packages/security-devsecops/src/semantics/container-security.ts`
 
 ```ts
-export function completeContainerScan(
-  session: ContainerSecuritySession,
-): AxisStep<ContainerSecState>;
+export declare function completeContainerScan(session: ContainerSecuritySession): AxisStep<ContainerSecState>;
 ```
 
 #### `completeDastScan`
@@ -122,7 +109,7 @@ export function completeContainerScan(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L114) `packages/security-devsecops/src/semantics/dast.ts`
 
 ```ts
-export function completeDastScan(session: DastSession): AxisStep<DastState>;
+export declare function completeDastScan(session: DastSession): AxisStep<DastState>;
 ```
 
 #### `completeIacScan`
@@ -130,7 +117,7 @@ export function completeDastScan(session: DastSession): AxisStep<DastState>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L112) `packages/security-devsecops/src/semantics/iac-scan.ts`
 
 ```ts
-export function completeIacScan(session: IacScanSession): AxisStep<IacScanState>;
+export declare function completeIacScan(session: IacScanSession): AxisStep<IacScanState>;
 ```
 
 #### `completeSastScan`
@@ -138,7 +125,7 @@ export function completeIacScan(session: IacScanSession): AxisStep<IacScanState>
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L92) `packages/security-devsecops/src/semantics/sast.ts`
 
 ```ts
-export function completeSastScan(session: SastSession): AxisStep<SastState>;
+export declare function completeSastScan(session: SastSession): AxisStep<SastState>;
 ```
 
 #### `completeScaScan`
@@ -146,7 +133,7 @@ export function completeSastScan(session: SastSession): AxisStep<SastState>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L106) `packages/security-devsecops/src/semantics/sca.ts`
 
 ```ts
-export function completeScaScan(session: ScaSession): AxisStep<ScaState>;
+export declare function completeScaScan(session: ScaSession): AxisStep<ScaState>;
 ```
 
 #### `completeSecretScan`
@@ -154,7 +141,7 @@ export function completeScaScan(session: ScaSession): AxisStep<ScaState>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L117) `packages/security-devsecops/src/semantics/secret-scan.ts`
 
 ```ts
-export function completeSecretScan(session: SecretScanSession): AxisStep<SecretScanState>;
+export declare function completeSecretScan(session: SecretScanSession): AxisStep<SecretScanState>;
 ```
 
 #### `confirmDastVuln`
@@ -162,10 +149,7 @@ export function completeSecretScan(session: SecretScanSession): AxisStep<SecretS
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L92) `packages/security-devsecops/src/semantics/dast.ts`
 
 ```ts
-export function confirmDastVuln(
-  session: DastSession,
-  vuln: DastVuln,
-): AxisStep<DastState>;
+export declare function confirmDastVuln(session: DastSession, vuln: DastVuln): AxisStep<DastState>;
 ```
 
 #### `containerSecurityMockAdapter`
@@ -193,10 +177,9 @@ export declare const containerSecurityRealAdapter: ContainerAdapter;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L56) `packages/security-devsecops/src/semantics/dast.ts`
 
 ```ts
-export function crawlDastUrls(
-  session: DastSession,
-  input: { count: number },
-): AxisStep<DastState>;
+export declare function crawlDastUrls(session: DastSession, input: {
+    count: number;
+}): AxisStep<DastState>;
 ```
 
 #### `dastMockAdapter`
@@ -224,10 +207,7 @@ export declare const dastRealAdapter: DastAdapter;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L80) `packages/security-devsecops/src/semantics/container-security.ts`
 
 ```ts
-export function detectContainerCve(
-  session: ContainerSecuritySession,
-  cve: ContainerCve,
-): AxisStep<ContainerSecState>;
+export declare function detectContainerCve(session: ContainerSecuritySession, cve: ContainerCve): AxisStep<ContainerSecState>;
 ```
 
 #### `detectIacMisconfig`
@@ -235,10 +215,7 @@ export function detectContainerCve(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L71) `packages/security-devsecops/src/semantics/iac-scan.ts`
 
 ```ts
-export function detectIacMisconfig(
-  session: IacScanSession,
-  misconfig: IacMisconfig,
-): AxisStep<IacScanState>;
+export declare function detectIacMisconfig(session: IacScanSession, misconfig: IacMisconfig): AxisStep<IacScanState>;
 ```
 
 #### `detectSastFinding`
@@ -246,10 +223,7 @@ export function detectIacMisconfig(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L48) `packages/security-devsecops/src/semantics/sast.ts`
 
 ```ts
-export function detectSastFinding(
-  session: SastSession,
-  finding: SastFinding,
-): AxisStep<SastState>;
+export declare function detectSastFinding(session: SastSession, finding: SastFinding): AxisStep<SastState>;
 ```
 
 #### `detectScaVuln`
@@ -257,7 +231,7 @@ export function detectSastFinding(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L70) `packages/security-devsecops/src/semantics/sca.ts`
 
 ```ts
-export function detectScaVuln(session: ScaSession, vuln: ScaVuln): AxisStep<ScaState>;
+export declare function detectScaVuln(session: ScaSession, vuln: ScaVuln): AxisStep<ScaState>;
 ```
 
 #### `flagContainerMalware`
@@ -265,10 +239,7 @@ export function detectScaVuln(session: ScaSession, vuln: ScaVuln): AxisStep<ScaS
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L103) `packages/security-devsecops/src/semantics/container-security.ts`
 
 ```ts
-export function flagContainerMalware(
-  session: ContainerSecuritySession,
-  malware: ContainerMalware,
-): AxisStep<ContainerSecState>;
+export declare function flagContainerMalware(session: ContainerSecuritySession, malware: ContainerMalware): AxisStep<ContainerSecState>;
 ```
 
 #### `flagScaLicense`
@@ -276,7 +247,7 @@ export function flagContainerMalware(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L89) `packages/security-devsecops/src/semantics/sca.ts`
 
 ```ts
-export function flagScaLicense(session: ScaSession, flag: ScaLicenseFlag): AxisStep<ScaState>;
+export declare function flagScaLicense(session: ScaSession, flag: ScaLicenseFlag): AxisStep<ScaState>;
 ```
 
 #### `flagSecretEntropy`
@@ -284,10 +255,12 @@ export function flagScaLicense(session: ScaSession, flag: ScaLicenseFlag): AxisS
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L70) `packages/security-devsecops/src/semantics/secret-scan.ts`
 
 ```ts
-export function flagSecretEntropy(
-  session: SecretScanSession,
-  input: { filePath: string; line: number; entropyScore: number; redactedValue: string },
-): AxisStep<SecretScanState>;
+export declare function flagSecretEntropy(session: SecretScanSession, input: {
+    filePath: string;
+    line: number;
+    entropyScore: number;
+    redactedValue: string;
+}): AxisStep<SecretScanState>;
 ```
 
 #### `iacScanMockAdapter`
@@ -315,10 +288,7 @@ export declare const iacScanRealAdapter: IacAdapter;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L48) `packages/security-devsecops/src/semantics/secret-scan.ts`
 
 ```ts
-export function matchSecretPattern(
-  session: SecretScanSession,
-  match: Omit<SecretMatch, 'matchType'>,
-): AxisStep<SecretScanState>;
+export declare function matchSecretPattern(session: SecretScanSession, match: Omit<SecretMatch, 'matchType'>): AxisStep<SecretScanState>;
 ```
 
 #### `PRESET_AXIS_MAP`
@@ -334,7 +304,7 @@ export declare const PRESET_AXIS_MAP: Record<AuditPreset, DevSecOpsAxis[]>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L22) `packages/security-devsecops/src/adapters/real-driver.ts`
 
 ```ts
-export function readRealDriverEnv(env: NodeJS.ProcessEnv = process.env): RealDriverEnv | null;
+export declare function readRealDriverEnv(env?: NodeJS.ProcessEnv): RealDriverEnv | null;
 ```
 
 #### `runSecurityAudit`
@@ -344,7 +314,7 @@ export function readRealDriverEnv(env: NodeJS.ProcessEnv = process.env): RealDri
 DevSecOps library single entry (v0.3、 Phase 3)。 skill 4 種の workflow を library 内に集約、 skill 側は preset 選択だけで 6 axis を横断的に扱える。 backward compat 維持 = v0.1 semantics 直接使用 + v0.2 adapter 個別使用も引き続き動作。
 
 ```ts
-export async function runSecurityAudit(input: AuditInvocation): Promise<AuditReport>;
+export declare function runSecurityAudit(input: AuditInvocation): Promise<AuditReport>;
 ```
 
 #### `sastMockAdapter`
@@ -382,10 +352,9 @@ export declare const scaMockAdapter: ScaAdapter;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L61) `packages/security-devsecops/src/semantics/container-security.ts`
 
 ```ts
-export function scanContainerImage(
-  session: ContainerSecuritySession,
-  input: { layerCount: number },
-): AxisStep<ContainerSecState>;
+export declare function scanContainerImage(session: ContainerSecuritySession, input: {
+    layerCount: number;
+}): AxisStep<ContainerSecState>;
 ```
 
 #### `scaRealAdapter`
@@ -423,9 +392,9 @@ export declare const secretScanRealAdapter: SecretAdapter;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L37) `packages/security-devsecops/src/semantics/container-security.ts`
 
 ```ts
-export function startContainerScan(input: {
-  scanId: string;
-  imageRef: string;
+export declare function startContainerScan(input: {
+    scanId: string;
+    imageRef: string;
 }): ContainerSecuritySession;
 ```
 
@@ -434,7 +403,10 @@ export function startContainerScan(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L35) `packages/security-devsecops/src/semantics/dast.ts`
 
 ```ts
-export function startDastScan(input: { scanId: string; target: string }): DastSession;
+export declare function startDastScan(input: {
+    scanId: string;
+    target: string;
+}): DastSession;
 ```
 
 #### `startIacScan`
@@ -442,7 +414,10 @@ export function startDastScan(input: { scanId: string; target: string }): DastSe
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L35) `packages/security-devsecops/src/semantics/iac-scan.ts`
 
 ```ts
-export function startIacScan(input: { scanId: string; target: string }): IacScanSession;
+export declare function startIacScan(input: {
+    scanId: string;
+    target: string;
+}): IacScanSession;
 ```
 
 #### `startSastScan`
@@ -450,7 +425,10 @@ export function startIacScan(input: { scanId: string; target: string }): IacScan
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L28) `packages/security-devsecops/src/semantics/sast.ts`
 
 ```ts
-export function startSastScan(input: { scanId: string; target: string }): SastSession;
+export declare function startSastScan(input: {
+    scanId: string;
+    target: string;
+}): SastSession;
 ```
 
 #### `startScaScan`
@@ -458,7 +436,10 @@ export function startSastScan(input: { scanId: string; target: string }): SastSe
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L34) `packages/security-devsecops/src/semantics/sca.ts`
 
 ```ts
-export function startScaScan(input: { scanId: string; target: string }): ScaSession;
+export declare function startScaScan(input: {
+    scanId: string;
+    target: string;
+}): ScaSession;
 ```
 
 #### `startSecretScan`
@@ -466,7 +447,10 @@ export function startScaScan(input: { scanId: string; target: string }): ScaSess
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L28) `packages/security-devsecops/src/semantics/secret-scan.ts`
 
 ```ts
-export function startSecretScan(input: { scanId: string; target: string }): SecretScanSession;
+export declare function startSecretScan(input: {
+    scanId: string;
+    target: string;
+}): SecretScanSession;
 ```
 
 #### `summarizeAuditReport`
@@ -476,7 +460,7 @@ export function startSecretScan(input: { scanId: string; target: string }): Secr
 Audit report 集約 API — skill 出力層 (STRIDE / DREAD 分類 tag 添付) に流し込む。 threat-model preset の時のみ STRIDE tag 添付、 他 preset は tag 空。
 
 ```ts
-export function summarizeAuditReport(report: AuditReport): AuditSummary;
+export declare function summarizeAuditReport(report: AuditReport): AuditSummary;
 ```
 
 #### `suppressSastFinding`
@@ -484,10 +468,10 @@ export function summarizeAuditReport(report: AuditReport): AuditSummary;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L73) `packages/security-devsecops/src/semantics/sast.ts`
 
 ```ts
-export function suppressSastFinding(
-  session: SastSession,
-  input: { ruleId: string; reason: string },
-): AxisStep<SastState>;
+export declare function suppressSastFinding(session: SastSession, input: {
+    ruleId: string;
+    reason: string;
+}): AxisStep<SastState>;
 ```
 
 ### 型
@@ -498,10 +482,10 @@ export function suppressSastFinding(
 
 ```ts
 export interface AdapterInvocation {
-  scanId: string;
-  target: string;
-  mode: AdapterMode;
-  metadata?: Record<string, string | number | boolean>;
+    scanId: string;
+    target: string;
+    mode: AdapterMode;
+    metadata?: Record<string, string | number | boolean>;
 }
 ```
 
@@ -519,11 +503,11 @@ export type AdapterMode = 'mock' | 'real';
 
 ```ts
 export interface AdapterResult<TState> {
-  axis: DevSecOpsAxis;
-  mode: AdapterMode;
-  history: AxisStep<TState>[];
-  completed: boolean;
-  durationMs: number;
+    axis: DevSecOpsAxis;
+    mode: AdapterMode;
+    history: AxisStep<TState>[];
+    completed: boolean;
+    durationMs: number;
 }
 ```
 
@@ -532,13 +516,7 @@ export interface AdapterResult<TState> {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L66) `packages/security-devsecops/src/adapters/types.ts`
 
 ```ts
-export type AnyAdapter =
-  | SastAdapter
-  | ScaAdapter
-  | SecretAdapter
-  | IacAdapter
-  | DastAdapter
-  | ContainerAdapter;
+export type AnyAdapter = SastAdapter | ScaAdapter | SecretAdapter | IacAdapter | DastAdapter | ContainerAdapter;
 ```
 
 #### `AuditInvocation`
@@ -547,10 +525,10 @@ export type AnyAdapter =
 
 ```ts
 export interface AuditInvocation {
-  preset: AuditPreset;
-  target: string;
-  mode: AdapterMode;
-  metadata?: Record<string, string | number | boolean>;
+    preset: AuditPreset;
+    target: string;
+    mode: AdapterMode;
+    metadata?: Record<string, string | number | boolean>;
 }
 ```
 
@@ -559,11 +537,7 @@ export interface AuditInvocation {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/types.ts#L15) `packages/security-devsecops/src/orchestrator/types.ts`
 
 ```ts
-export type AuditPreset =
-  | 'audit-all'
-  | 'supply-chain'
-  | 'specialty'
-  | 'threat-model';
+export type AuditPreset = 'audit-all' | 'supply-chain' | 'specialty' | 'threat-model';
 ```
 
 #### `AuditReport`
@@ -572,12 +546,12 @@ export type AuditPreset =
 
 ```ts
 export interface AuditReport {
-  preset: AuditPreset;
-  target: string;
-  mode: AdapterMode;
-  startedAt: number;
-  finishedAt: number;
-  results: AxisAuditResult[];
+    preset: AuditPreset;
+    target: string;
+    mode: AdapterMode;
+    startedAt: number;
+    finishedAt: number;
+    results: AxisAuditResult[];
 }
 ```
 
@@ -587,17 +561,21 @@ export interface AuditReport {
 
 ```ts
 export interface AuditSummary {
-  preset: AuditPreset;
-  totalAxis: number;
-  completedAxis: number;
-  totalEvents: number;
-  totalDurationMs: number;
-  perAxis: Array<{
-    axis: DevSecOpsAxis;
-    completed: boolean;
-    eventCount: number;
-  }>;
-  stridDreadTags?: Array<{ axis: DevSecOpsAxis; tag: string; severity: Severity }>;
+    preset: AuditPreset;
+    totalAxis: number;
+    completedAxis: number;
+    totalEvents: number;
+    totalDurationMs: number;
+    perAxis: Array<{
+        axis: DevSecOpsAxis;
+        completed: boolean;
+        eventCount: number;
+    }>;
+    stridDreadTags?: Array<{
+        axis: DevSecOpsAxis;
+        tag: string;
+        severity: Severity;
+    }>;
 }
 ```
 
@@ -607,12 +585,12 @@ export interface AuditSummary {
 
 ```ts
 export interface AxisAuditResult {
-  axis: DevSecOpsAxis;
-  mode: AdapterMode;
-  completed: boolean;
-  eventCount: number;
-  durationMs: number;
-  history: AdapterResult<unknown>['history'];
+    axis: DevSecOpsAxis;
+    mode: AdapterMode;
+    completed: boolean;
+    eventCount: number;
+    durationMs: number;
+    history: AdapterResult<unknown>['history'];
 }
 ```
 
@@ -622,10 +600,10 @@ export interface AxisAuditResult {
 
 ```ts
 export interface AxisStep<TState> {
-  neutralEvent: NeutralEventName;
-  provider: ScanProvider;
-  state: TState;
-  metadata: Record<string, string | number | boolean>;
+    neutralEvent: NeutralEventName;
+    provider: ScanProvider;
+    state: TState;
+    metadata: Record<string, string | number | boolean>;
 }
 ```
 
@@ -635,9 +613,9 @@ export interface AxisStep<TState> {
 
 ```ts
 export interface CliDriverSpec {
-  cliName: string;
-  urlEnvKey: keyof RealDriverEnv;
-  requiredEnvValue: string | undefined;
+    cliName: string;
+    urlEnvKey: keyof RealDriverEnv;
+    requiredEnvValue: string | undefined;
 }
 ```
 
@@ -647,8 +625,8 @@ export interface CliDriverSpec {
 
 ```ts
 export interface ContainerAdapter {
-  axis: 'container-security';
-  scan(input: AdapterInvocation): Promise<AdapterResult<ContainerSecState>>;
+    axis: 'container-security';
+    scan(input: AdapterInvocation): Promise<AdapterResult<ContainerSecState>>;
 }
 ```
 
@@ -658,12 +636,12 @@ export interface ContainerAdapter {
 
 ```ts
 export interface ContainerCve {
-  cveId: string;
-  package: string;
-  version: string;
-  layer: string;
-  severity: Severity;
-  fixedVersion?: string;
+    cveId: string;
+    package: string;
+    version: string;
+    layer: string;
+    severity: Severity;
+    fixedVersion?: string;
 }
 ```
 
@@ -673,11 +651,11 @@ export interface ContainerCve {
 
 ```ts
 export interface ContainerMalware {
-  malwareType: 'trojan' | 'backdoor' | 'cryptominer' | 'rootkit' | 'ransomware';
-  filePath: string;
-  layer: string;
-  signature: string;
-  severity: Severity;
+    malwareType: 'trojan' | 'backdoor' | 'cryptominer' | 'rootkit' | 'ransomware';
+    filePath: string;
+    layer: string;
+    signature: string;
+    severity: Severity;
 }
 ```
 
@@ -697,14 +675,14 @@ export type ContainerSecState = 'idle' | 'scanning' | 'threats-found' | 'complet
 
 ```ts
 export interface ContainerSecuritySession {
-  scanId: string;
-  provider: 'grype';
-  imageRef: string;
-  layerCount: number;
-  cves: ContainerCve[];
-  malwares: ContainerMalware[];
-  state: ContainerSecState;
-  history: AxisStep<ContainerSecState>[];
+    scanId: string;
+    provider: 'grype';
+    imageRef: string;
+    layerCount: number;
+    cves: ContainerCve[];
+    malwares: ContainerMalware[];
+    state: ContainerSecState;
+    history: AxisStep<ContainerSecState>[];
 }
 ```
 
@@ -714,8 +692,8 @@ export interface ContainerSecuritySession {
 
 ```ts
 export interface DastAdapter {
-  axis: 'dast';
-  scan(input: AdapterInvocation): Promise<AdapterResult<DastState>>;
+    axis: 'dast';
+    scan(input: AdapterInvocation): Promise<AdapterResult<DastState>>;
 }
 ```
 
@@ -725,10 +703,10 @@ export interface DastAdapter {
 
 ```ts
 export interface DastAttack {
-  attackType: 'xss' | 'sqli' | 'csrf' | 'xxe' | 'ssrf' | 'command-injection' | 'path-traversal';
-  targetUrl: string;
-  payload: string;
-  successful: boolean;
+    attackType: 'xss' | 'sqli' | 'csrf' | 'xxe' | 'ssrf' | 'command-injection' | 'path-traversal';
+    targetUrl: string;
+    payload: string;
+    successful: boolean;
 }
 ```
 
@@ -738,14 +716,14 @@ export interface DastAttack {
 
 ```ts
 export interface DastSession {
-  scanId: string;
-  provider: 'owasp-zap';
-  target: string;
-  crawledUrls: number;
-  attacks: DastAttack[];
-  vulns: DastVuln[];
-  state: DastState;
-  history: AxisStep<DastState>[];
+    scanId: string;
+    provider: 'owasp-zap';
+    target: string;
+    crawledUrls: number;
+    attacks: DastAttack[];
+    vulns: DastVuln[];
+    state: DastState;
+    history: AxisStep<DastState>[];
 }
 ```
 
@@ -765,11 +743,11 @@ export type DastState = 'idle' | 'crawling' | 'attacking' | 'vuln-found' | 'comp
 
 ```ts
 export interface DastVuln {
-  vulnClass: string;
-  cweId: string;
-  targetUrl: string;
-  severity: Severity;
-  evidence: string;
+    vulnClass: string;
+    cweId: string;
+    targetUrl: string;
+    severity: Severity;
+    evidence: string;
 }
 ```
 
@@ -778,13 +756,7 @@ export interface DastVuln {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L21) `packages/security-devsecops/src/semantics/types.ts`
 
 ```ts
-export type DevSecOpsAxis =
-  | 'sast'
-  | 'sca'
-  | 'secret-scan'
-  | 'iac-scan'
-  | 'dast'
-  | 'container-security';
+export type DevSecOpsAxis = 'sast' | 'sca' | 'secret-scan' | 'iac-scan' | 'dast' | 'container-security';
 ```
 
 #### `IacAdapter`
@@ -793,8 +765,8 @@ export type DevSecOpsAxis =
 
 ```ts
 export interface IacAdapter {
-  axis: 'iac-scan';
-  scan(input: AdapterInvocation): Promise<AdapterResult<IacScanState>>;
+    axis: 'iac-scan';
+    scan(input: AdapterInvocation): Promise<AdapterResult<IacScanState>>;
 }
 ```
 
@@ -804,9 +776,9 @@ export interface IacAdapter {
 
 ```ts
 export interface IacComplianceCheck {
-  framework: 'soc2' | 'cis-benchmark' | 'pci-dss' | 'hipaa';
-  controlId: string;
-  passed: boolean;
+    framework: 'soc2' | 'cis-benchmark' | 'pci-dss' | 'hipaa';
+    controlId: string;
+    passed: boolean;
 }
 ```
 
@@ -816,12 +788,12 @@ export interface IacComplianceCheck {
 
 ```ts
 export interface IacMisconfig {
-  ruleId: string;
-  resourceType: string;
-  resourceName: string;
-  filePath: string;
-  severity: Severity;
-  message: string;
+    ruleId: string;
+    resourceType: string;
+    resourceName: string;
+    filePath: string;
+    severity: Severity;
+    message: string;
 }
 ```
 
@@ -831,14 +803,14 @@ export interface IacMisconfig {
 
 ```ts
 export interface IacScanSession {
-  scanId: string;
-  provider: 'tfsec';
-  target: string;
-  misconfigs: IacMisconfig[];
-  compliance: IacComplianceCheck[];
-  resourceCount: number;
-  state: IacScanState;
-  history: AxisStep<IacScanState>[];
+    scanId: string;
+    provider: 'tfsec';
+    target: string;
+    misconfigs: IacMisconfig[];
+    compliance: IacComplianceCheck[];
+    resourceCount: number;
+    state: IacScanState;
+    history: AxisStep<IacScanState>[];
 }
 ```
 
@@ -857,37 +829,7 @@ export type IacScanState = 'idle' | 'analyzing' | 'misconfig-found' | 'completed
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L29) `packages/security-devsecops/src/semantics/types.ts`
 
 ```ts
-export type NeutralEventName =
-  // SAST
-  | 'sast.scan-started'
-  | 'sast.finding-detected'
-  | 'sast.suppressed'
-  | 'sast.scan-completed'
-  // SCA
-  | 'sca.dependency-analyzed'
-  | 'sca.vuln-detected'
-  | 'sca.license-flagged'
-  | 'sca.scan-completed'
-  // Secret scan
-  | 'secret.pattern-matched'
-  | 'secret.entropy-flagged'
-  | 'secret.allowlisted'
-  | 'secret.scan-completed'
-  // IaC scan
-  | 'iac.resource-analyzed'
-  | 'iac.misconfig-detected'
-  | 'iac.compliance-checked'
-  | 'iac.scan-completed'
-  // DAST
-  | 'dast.crawl-started'
-  | 'dast.attack-attempted'
-  | 'dast.vulnerability-confirmed'
-  | 'dast.scan-completed'
-  // Container security
-  | 'container.image-scanned'
-  | 'container.cve-detected'
-  | 'container.malware-flagged'
-  | 'container.scan-completed';
+export type NeutralEventName = 'sast.scan-started' | 'sast.finding-detected' | 'sast.suppressed' | 'sast.scan-completed' | 'sca.dependency-analyzed' | 'sca.vuln-detected' | 'sca.license-flagged' | 'sca.scan-completed' | 'secret.pattern-matched' | 'secret.entropy-flagged' | 'secret.allowlisted' | 'secret.scan-completed' | 'iac.resource-analyzed' | 'iac.misconfig-detected' | 'iac.compliance-checked' | 'iac.scan-completed' | 'dast.crawl-started' | 'dast.attack-attempted' | 'dast.vulnerability-confirmed' | 'dast.scan-completed' | 'container.image-scanned' | 'container.cve-detected' | 'container.malware-flagged' | 'container.scan-completed';
 ```
 
 #### `RealDriverEnv`
@@ -898,13 +840,13 @@ Real driver 共通 helper — 実 CLI 呼出を child_process 経由で隠蔽す
 
 ```ts
 export interface RealDriverEnv {
-  mode: 'real';
-  semgrepUrl?: string;
-  trivyUrl?: string;
-  gitleaksUrl?: string;
-  tfsecUrl?: string;
-  zapUrl?: string;
-  grypeUrl?: string;
+    mode: 'real';
+    semgrepUrl?: string;
+    trivyUrl?: string;
+    gitleaksUrl?: string;
+    tfsecUrl?: string;
+    zapUrl?: string;
+    grypeUrl?: string;
 }
 ```
 
@@ -914,8 +856,8 @@ export interface RealDriverEnv {
 
 ```ts
 export interface SastAdapter {
-  axis: 'sast';
-  scan(input: AdapterInvocation): Promise<AdapterResult<SastState>>;
+    axis: 'sast';
+    scan(input: AdapterInvocation): Promise<AdapterResult<SastState>>;
 }
 ```
 
@@ -925,11 +867,11 @@ export interface SastAdapter {
 
 ```ts
 export interface SastFinding {
-  ruleId: string;
-  filePath: string;
-  line: number;
-  severity: Severity;
-  message: string;
+    ruleId: string;
+    filePath: string;
+    line: number;
+    severity: Severity;
+    message: string;
 }
 ```
 
@@ -939,13 +881,13 @@ export interface SastFinding {
 
 ```ts
 export interface SastSession {
-  scanId: string;
-  provider: 'semgrep';
-  target: string;
-  findings: SastFinding[];
-  suppressed: Set<string>;
-  state: SastState;
-  history: AxisStep<SastState>[];
+    scanId: string;
+    provider: 'semgrep';
+    target: string;
+    findings: SastFinding[];
+    suppressed: Set<string>;
+    state: SastState;
+    history: AxisStep<SastState>[];
 }
 ```
 
@@ -965,8 +907,8 @@ export type SastState = 'idle' | 'scanning' | 'findings-detected' | 'completed';
 
 ```ts
 export interface ScaAdapter {
-  axis: 'sca';
-  scan(input: AdapterInvocation): Promise<AdapterResult<ScaState>>;
+    axis: 'sca';
+    scan(input: AdapterInvocation): Promise<AdapterResult<ScaState>>;
 }
 ```
 
@@ -976,9 +918,9 @@ export interface ScaAdapter {
 
 ```ts
 export interface ScaLicenseFlag {
-  package: string;
-  license: string;
-  reason: 'copyleft' | 'unknown' | 'restricted';
+    package: string;
+    license: string;
+    reason: 'copyleft' | 'unknown' | 'restricted';
 }
 ```
 
@@ -989,13 +931,7 @@ export interface ScaLicenseFlag {
 DevSecOps semantics — provider-neutral axis SSOT (v0.1)。 v0.1 covers 6 axis = SAST (Static Application Security Testing) + SCA (Software Composition Analysis) + Secret scan + IaC scan + DAST (Dynamic Application Security Testing) + Container security。 Each axis is a small pure state-machine helper that returns a neutral envelope。 downstream tests can drive the axis without knowing the provider payload dialect (Semgrep / Trivy / Gitleaks / tfsec / OWASP ZAP / Grype)。
 
 ```ts
-export type ScanProvider =
-  | 'semgrep'
-  | 'trivy'
-  | 'gitleaks'
-  | 'tfsec'
-  | 'owasp-zap'
-  | 'grype';
+export type ScanProvider = 'semgrep' | 'trivy' | 'gitleaks' | 'tfsec' | 'owasp-zap' | 'grype';
 ```
 
 #### `ScaSession`
@@ -1004,14 +940,14 @@ export type ScanProvider =
 
 ```ts
 export interface ScaSession {
-  scanId: string;
-  provider: 'trivy';
-  target: string;
-  vulns: ScaVuln[];
-  licenseFlags: ScaLicenseFlag[];
-  dependencyCount: number;
-  state: ScaState;
-  history: AxisStep<ScaState>[];
+    scanId: string;
+    provider: 'trivy';
+    target: string;
+    vulns: ScaVuln[];
+    licenseFlags: ScaLicenseFlag[];
+    dependencyCount: number;
+    state: ScaState;
+    history: AxisStep<ScaState>[];
 }
 ```
 
@@ -1031,11 +967,11 @@ export type ScaState = 'idle' | 'analyzing' | 'vulns-detected' | 'completed';
 
 ```ts
 export interface ScaVuln {
-  cveId: string;
-  package: string;
-  version: string;
-  severity: Severity;
-  fixedVersion?: string;
+    cveId: string;
+    package: string;
+    version: string;
+    severity: Severity;
+    fixedVersion?: string;
 }
 ```
 
@@ -1045,8 +981,8 @@ export interface ScaVuln {
 
 ```ts
 export interface SecretAdapter {
-  axis: 'secret-scan';
-  scan(input: AdapterInvocation): Promise<AdapterResult<SecretScanState>>;
+    axis: 'secret-scan';
+    scan(input: AdapterInvocation): Promise<AdapterResult<SecretScanState>>;
 }
 ```
 
@@ -1056,12 +992,12 @@ export interface SecretAdapter {
 
 ```ts
 export interface SecretMatch {
-  ruleId: string;
-  matchType: 'pattern' | 'entropy';
-  filePath: string;
-  line: number;
-  redactedValue: string;
-  severity: Severity;
+    ruleId: string;
+    matchType: 'pattern' | 'entropy';
+    filePath: string;
+    line: number;
+    redactedValue: string;
+    severity: Severity;
 }
 ```
 
@@ -1071,13 +1007,13 @@ export interface SecretMatch {
 
 ```ts
 export interface SecretScanSession {
-  scanId: string;
-  provider: 'gitleaks';
-  target: string;
-  matches: SecretMatch[];
-  allowlisted: Set<string>;
-  state: SecretScanState;
-  history: AxisStep<SecretScanState>[];
+    scanId: string;
+    provider: 'gitleaks';
+    target: string;
+    matches: SecretMatch[];
+    allowlisted: Set<string>;
+    state: SecretScanState;
+    history: AxisStep<SecretScanState>[];
 }
 ```
 

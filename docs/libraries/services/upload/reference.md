@@ -31,7 +31,7 @@
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -40,7 +40,7 @@
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/checksum.ts#L39) `packages/upload/src/checksum.ts`
 
 ```ts
-export function computeChecksum(body: Buffer | Uint8Array | string, algorithm: ChecksumAlgorithm = 'md5'): string;
+export declare function computeChecksum(body: Buffer | Uint8Array | string, algorithm?: ChecksumAlgorithm): string;
 ```
 
 #### `createCircuitBreaker`
@@ -48,10 +48,7 @@ export function computeChecksum(body: Buffer | Uint8Array | string, algorithm: C
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L153) `packages/upload/src/enhancements.ts`
 
 ```ts
-export function createCircuitBreaker(
-  client: UploadClient,
-  options: CircuitBreakerOptions = {},
-): CircuitBreaker;
+export declare function createCircuitBreaker(client: UploadClient, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
 #### `createHookRegistry`
@@ -59,7 +56,7 @@ export function createCircuitBreaker(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L106) `packages/upload/src/enhancements.ts`
 
 ```ts
-export function createHookRegistry(): HookRegistry;
+export declare function createHookRegistry(): HookRegistry;
 ```
 
 #### `createIdempotencyCache`
@@ -67,7 +64,7 @@ export function createHookRegistry(): HookRegistry;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L64) `packages/upload/src/enhancements.ts`
 
 ```ts
-export function createIdempotencyCache(): IdempotencyCache;
+export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
 #### `createPresignedUrl`
@@ -77,7 +74,7 @@ export function createIdempotencyCache(): IdempotencyCache;
 provider 別 presigned URL 発行 mock。 real SDK が生成する URL 形式に近い shape で host / query / signature を組み立てる。
 
 ```ts
-export function createPresignedUrl(options: PresignedUrlOptions): PresignedUrlResult;
+export declare function createPresignedUrl(options: PresignedUrlOptions): PresignedUrlResult;
 ```
 
 #### `createUploadClient`
@@ -87,7 +84,7 @@ export function createPresignedUrl(options: PresignedUrlOptions): PresignedUrlRe
 provider 別のみ mock 差 (id prefix / etag format) を持たせつつ、 全 API 共通 interface。 実 provider (S3 / GCS / R2 / Cloudinary) の SDK を差し替えても同じ signature で呼べる想定。
 
 ```ts
-export function createUploadClient(options: CreateUploadClientOptions = {}): UploadClient;
+export declare function createUploadClient(options?: CreateUploadClientOptions): UploadClient;
 ```
 
 #### `uploadBatch`
@@ -95,11 +92,7 @@ export function createUploadClient(options: CreateUploadClientOptions = {}): Upl
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L41) `packages/upload/src/enhancements.ts`
 
 ```ts
-export async function uploadBatch(
-  client: UploadClient,
-  requests: readonly UploadRequest[],
-  concurrency = 5,
-): Promise<BatchUploadResult>;
+export declare function uploadBatch(client: UploadClient, requests: readonly UploadRequest[], concurrency?: number): Promise<BatchUploadResult>;
 ```
 
 #### `uploadIdempotent`
@@ -107,12 +100,9 @@ export async function uploadBatch(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L74) `packages/upload/src/enhancements.ts`
 
 ```ts
-export async function uploadIdempotent(
-  client: UploadClient,
-  req: UploadRequest,
-  idempotencyKey: string,
-  cache: IdempotencyCache,
-): Promise<UploadResult & { cached: boolean }>;
+export declare function uploadIdempotent(client: UploadClient, req: UploadRequest, idempotencyKey: string, cache: IdempotencyCache): Promise<UploadResult & {
+    cached: boolean;
+}>;
 ```
 
 #### `uploadMultipart`
@@ -122,13 +112,7 @@ export async function uploadIdempotent(
 multipart chunked upload workflow。 部分 part を結合して 1 回の upload に集約する mock。 実 provider (S3 multipart / GCS resumable / R2 multipart) と同じ「N part を 1 object に統合」 経路を再現。
 
 ```ts
-export async function uploadMultipart(
-  client: UploadClient,
-  bucket: string,
-  key: string,
-  parts: MultipartPart[],
-  contentType?: string,
-): Promise<MultipartUploadResult>;
+export declare function uploadMultipart(client: UploadClient, bucket: string, key: string, parts: MultipartPart[], contentType?: string): Promise<MultipartUploadResult>;
 ```
 
 #### `uploadObservable`
@@ -136,11 +120,7 @@ export async function uploadMultipart(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L120) `packages/upload/src/enhancements.ts`
 
 ```ts
-export async function uploadObservable(
-  client: UploadClient,
-  req: UploadRequest,
-  hooks: HookRegistry,
-): Promise<UploadResult>;
+export declare function uploadObservable(client: UploadClient, req: UploadRequest, hooks: HookRegistry): Promise<UploadResult>;
 ```
 
 #### `uploadWithRetry`
@@ -148,11 +128,9 @@ export async function uploadObservable(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L14) `packages/upload/src/enhancements.ts`
 
 ```ts
-export async function uploadWithRetry(
-  client: UploadClient,
-  req: UploadRequest,
-  options: RetryOptions = {},
-): Promise<UploadResult & { attempts: number }>;
+export declare function uploadWithRetry(client: UploadClient, req: UploadRequest, options?: RetryOptions): Promise<UploadResult & {
+    attempts: number;
+}>;
 ```
 
 #### `verifyUpload`
@@ -162,7 +140,7 @@ export async function uploadWithRetry(
 upload された object の checksum + size を検証。 provider 側の etag と caller side で 事前計算した checksum の一致確認に使う。
 
 ```ts
-export function verifyUpload(input: VerifyUploadInput): VerifyUploadResult;
+export declare function verifyUpload(input: VerifyUploadInput): VerifyUploadResult;
 ```
 
 ### 型
@@ -173,10 +151,10 @@ export function verifyUpload(input: VerifyUploadInput): VerifyUploadResult;
 
 ```ts
 export interface BatchUploadResult {
-  total: number;
-  succeeded: number;
-  failed: number;
-  results: UploadResult[];
+    total: number;
+    succeeded: number;
+    failed: number;
+    results: UploadResult[];
 }
 ```
 
@@ -194,10 +172,12 @@ export type ChecksumAlgorithm = 'md5' | 'sha1' | 'sha256';
 
 ```ts
 export interface CircuitBreaker {
-  state: () => CircuitState;
-  upload: (req: UploadRequest) => Promise<UploadResult & { circuitState: CircuitState }>;
-  reset: () => void;
-  failureCount: () => number;
+    state: () => CircuitState;
+    upload: (req: UploadRequest) => Promise<UploadResult & {
+        circuitState: CircuitState;
+    }>;
+    reset: () => void;
+    failureCount: () => number;
 }
 ```
 
@@ -207,9 +187,9 @@ export interface CircuitBreaker {
 
 ```ts
 export interface CircuitBreakerOptions {
-  failureThreshold?: number;
-  resetTimeoutMs?: number;
-  now?: () => number;
+    failureThreshold?: number;
+    resetTimeoutMs?: number;
+    now?: () => number;
 }
 ```
 
@@ -227,11 +207,11 @@ export type CircuitState = 'closed' | 'open' | 'half-open';
 
 ```ts
 export interface CreateUploadClientOptions {
-  provider?: UploadProvider;
-  maxSizeBytes?: number;
-  failOn?: (req: UploadRequest) => boolean;
-  now?: () => number;
-  idSeed?: number;
+    provider?: UploadProvider;
+    maxSizeBytes?: number;
+    failOn?: (req: UploadRequest) => boolean;
+    now?: () => number;
+    idSeed?: number;
 }
 ```
 
@@ -249,11 +229,11 @@ export type HookCallback = (ctx: HookContext) => void;
 
 ```ts
 export interface HookContext {
-  event: UploadHookEvent;
-  request: UploadRequest;
-  result?: UploadResult;
-  error?: string;
-  durationMs?: number;
+    event: UploadHookEvent;
+    request: UploadRequest;
+    result?: UploadResult;
+    error?: string;
+    durationMs?: number;
 }
 ```
 
@@ -263,9 +243,9 @@ export interface HookContext {
 
 ```ts
 export interface HookRegistry {
-  register: (event: UploadHookEvent, cb: HookCallback) => () => void;
-  emit: (event: UploadHookEvent, ctx: HookContext) => void;
-  count: (event: UploadHookEvent) => number;
+    register: (event: UploadHookEvent, cb: HookCallback) => () => void;
+    emit: (event: UploadHookEvent, ctx: HookContext) => void;
+    count: (event: UploadHookEvent) => number;
 }
 ```
 
@@ -275,10 +255,10 @@ export interface HookRegistry {
 
 ```ts
 export interface IdempotencyCache {
-  get: (key: string) => UploadResult | undefined;
-  set: (key: string, value: UploadResult) => void;
-  size: () => number;
-  clear: () => void;
+    get: (key: string) => UploadResult | undefined;
+    set: (key: string, value: UploadResult) => void;
+    size: () => number;
+    clear: () => void;
 }
 ```
 
@@ -288,8 +268,8 @@ export interface IdempotencyCache {
 
 ```ts
 export interface MultipartPart {
-  partNumber: number;
-  body: Buffer | Uint8Array | string;
+    partNumber: number;
+    body: Buffer | Uint8Array | string;
 }
 ```
 
@@ -299,11 +279,11 @@ export interface MultipartPart {
 
 ```ts
 export interface MultipartUploadResult {
-  bucket: string;
-  key: string;
-  parts: number;
-  totalSize: number;
-  result: UploadResult;
+    bucket: string;
+    key: string;
+    parts: number;
+    totalSize: number;
+    result: UploadResult;
 }
 ```
 
@@ -321,13 +301,13 @@ export type PresignedOperation = 'get' | 'put';
 
 ```ts
 export interface PresignedUrlOptions {
-  provider: UploadProvider;
-  bucket: string;
-  key: string;
-  operation: PresignedOperation;
-  expiresIn?: number;
-  secret?: string;
-  region?: string;
+    provider: UploadProvider;
+    bucket: string;
+    key: string;
+    operation: PresignedOperation;
+    expiresIn?: number;
+    secret?: string;
+    region?: string;
 }
 ```
 
@@ -337,11 +317,11 @@ export interface PresignedUrlOptions {
 
 ```ts
 export interface PresignedUrlResult {
-  url: string;
-  provider: UploadProvider;
-  operation: PresignedOperation;
-  expiresAt: number;
-  signature: string;
+    url: string;
+    provider: UploadProvider;
+    operation: PresignedOperation;
+    expiresAt: number;
+    signature: string;
 }
 ```
 
@@ -351,9 +331,9 @@ export interface PresignedUrlResult {
 
 ```ts
 export interface RetryOptions {
-  maxAttempts?: number;
-  initialDelayMs?: number;
-  onRetry?: (attempt: number, reason: string) => void;
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    onRetry?: (attempt: number, reason: string) => void;
 }
 ```
 
@@ -363,12 +343,12 @@ export interface RetryOptions {
 
 ```ts
 export interface UploadClient {
-  provider: UploadProvider;
-  upload: (req: UploadRequest) => Promise<UploadResult>;
-  get: (bucket: string, key: string) => UploadedObjectRecord | undefined;
-  delete: (bucket: string, key: string) => boolean;
-  list: (bucket: string) => UploadedObjectRecord[];
-  clear: () => void;
+    provider: UploadProvider;
+    upload: (req: UploadRequest) => Promise<UploadResult>;
+    get: (bucket: string, key: string) => UploadedObjectRecord | undefined;
+    delete: (bucket: string, key: string) => boolean;
+    list: (bucket: string) => UploadedObjectRecord[];
+    clear: () => void;
 }
 ```
 
@@ -378,8 +358,8 @@ export interface UploadClient {
 
 ```ts
 export interface UploadedObjectRecord extends UploadResult {
-  request: UploadRequest;
-  body: Buffer;
+    request: UploadRequest;
+    body: Buffer;
 }
 ```
 
@@ -405,13 +385,13 @@ export type UploadProvider = 's3' | 'gcs' | 'r2' | 'cloudinary';
 
 ```ts
 export interface UploadRequest {
-  bucket: string;
-  key: string;
-  body: Buffer | Uint8Array | string;
-  contentType?: string;
-  metadata?: Record<string, string>;
-  cacheControl?: string;
-  acl?: 'private' | 'public-read';
+    bucket: string;
+    key: string;
+    body: Buffer | Uint8Array | string;
+    contentType?: string;
+    metadata?: Record<string, string>;
+    cacheControl?: string;
+    acl?: 'private' | 'public-read';
 }
 ```
 
@@ -421,15 +401,15 @@ export interface UploadRequest {
 
 ```ts
 export interface UploadResult {
-  id: string;
-  provider: UploadProvider;
-  status: 'uploaded' | 'failed';
-  bucket: string;
-  key: string;
-  size: number;
-  etag: string;
-  uploadedAt: number;
-  reason?: string;
+    id: string;
+    provider: UploadProvider;
+    status: 'uploaded' | 'failed';
+    bucket: string;
+    key: string;
+    size: number;
+    etag: string;
+    uploadedAt: number;
+    reason?: string;
 }
 ```
 
@@ -439,10 +419,10 @@ export interface UploadResult {
 
 ```ts
 export interface VerifyUploadInput {
-  body: Buffer | Uint8Array | string;
-  expectedSize?: number;
-  expectedChecksum?: string;
-  algorithm?: ChecksumAlgorithm;
+    body: Buffer | Uint8Array | string;
+    expectedSize?: number;
+    expectedChecksum?: string;
+    algorithm?: ChecksumAlgorithm;
 }
 ```
 
@@ -452,11 +432,11 @@ export interface VerifyUploadInput {
 
 ```ts
 export interface VerifyUploadResult {
-  valid: boolean;
-  size: number;
-  checksum: string;
-  algorithm: ChecksumAlgorithm;
-  reason?: string;
+    valid: boolean;
+    size: number;
+    checksum: string;
+    algorithm: ChecksumAlgorithm;
+    reason?: string;
 }
 ```
 <!-- kiwa-public-api:end -->

@@ -73,7 +73,7 @@ object body は JSON に変換されます。string、`ArrayBuffer`、`Uint8Arra
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/api/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/api/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -82,7 +82,7 @@ object body は JSON に変換されます。string、`ArrayBuffer`、`Uint8Arra
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/request-client.ts#L30) `packages/api/src/request-client.ts`
 
 ```ts
-export function createRequestClient(opts: RequestClientOptions): ApiRequestClient;
+export declare function createRequestClient(opts: RequestClientOptions): ApiRequestClient;
 ```
 
 #### `setupApiServer`
@@ -90,9 +90,7 @@ export function createRequestClient(opts: RequestClientOptions): ApiRequestClien
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L15) `packages/api/src/setup-api-server.ts`
 
 ```ts
-export async function setupApiServer<TMode extends TestMode>(
-  opts: SetupApiServerOptions<TMode>,
-): Promise<ApiTestEnv>;
+export declare function setupApiServer<TMode extends TestMode>(opts: SetupApiServerOptions<TMode>): Promise<ApiTestEnv>;
 ```
 
 #### `startLiveServer`
@@ -100,9 +98,7 @@ export async function setupApiServer<TMode extends TestMode>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/live-server.ts#L64) `packages/api/src/live-server.ts`
 
 ```ts
-export async function startLiveServer(
-  source: ApiHandlerSource | NodeRequestHandler,
-): Promise<LiveServerHandle>;
+export declare function startLiveServer(source: ApiHandlerSource | NodeRequestHandler): Promise<LiveServerHandle>;
 ```
 
 #### `startMockServer`
@@ -110,7 +106,7 @@ export async function startLiveServer(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/msw-bridge.ts#L33) `packages/api/src/msw-bridge.ts`
 
 ```ts
-export async function startMockServer(opts: StartMockServerOptions): Promise<MockServerHandle>;
+export declare function startMockServer(opts: StartMockServerOptions): Promise<MockServerHandle>;
 ```
 
 ### 型
@@ -120,9 +116,13 @@ export async function startMockServer(opts: StartMockServerOptions): Promise<Moc
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L3) `packages/api/src/types.ts`
 
 ```ts
-export type ApiHandlerSource =
-  | { kind: 'fetch'; handler: (req: Request) => Promise<Response> | Response }
-  | { kind: 'node'; handler: NodeRequestHandler };
+export type ApiHandlerSource = {
+    kind: 'fetch';
+    handler: (req: Request) => Promise<Response> | Response;
+} | {
+    kind: 'node';
+    handler: NodeRequestHandler;
+};
 ```
 
 #### `ApiRequestClient`
@@ -131,11 +131,11 @@ export type ApiHandlerSource =
 
 ```ts
 export interface ApiRequestClient {
-  get: (path: string, init?: RequestInit) => Promise<ApiResponseSnapshot>;
-  post: (path: string, body?: unknown, init?: RequestInit) => Promise<ApiResponseSnapshot>;
-  put: (path: string, body?: unknown, init?: RequestInit) => Promise<ApiResponseSnapshot>;
-  patch: (path: string, body?: unknown, init?: RequestInit) => Promise<ApiResponseSnapshot>;
-  delete: (path: string, init?: RequestInit) => Promise<ApiResponseSnapshot>;
+    get: (path: string, init?: RequestInit) => Promise<ApiResponseSnapshot>;
+    post: (path: string, body?: unknown, init?: RequestInit) => Promise<ApiResponseSnapshot>;
+    put: (path: string, body?: unknown, init?: RequestInit) => Promise<ApiResponseSnapshot>;
+    patch: (path: string, body?: unknown, init?: RequestInit) => Promise<ApiResponseSnapshot>;
+    delete: (path: string, init?: RequestInit) => Promise<ApiResponseSnapshot>;
 }
 ```
 
@@ -145,10 +145,10 @@ export interface ApiRequestClient {
 
 ```ts
 export interface ApiResponseSnapshot {
-  status: number;
-  headers: Record<string, string>;
-  bodyText: string;
-  json: <T = unknown>() => T;
+    status: number;
+    headers: Record<string, string>;
+    bodyText: string;
+    json: <T = unknown>() => T;
 }
 ```
 
@@ -166,9 +166,11 @@ export type ApiTestEnv = MockTestEnvApi | LiveTestEnvApi | HybridTestEnvApi;
 
 ```ts
 export interface HybridTestEnvApi extends TestEnvBase<'hybrid'> {
-  baseUrl: string;
-  request: ApiRequestClient;
-  mocks: { reset: () => void };
+    baseUrl: string;
+    request: ApiRequestClient;
+    mocks: {
+        reset: () => void;
+    };
 }
 ```
 
@@ -178,9 +180,9 @@ export interface HybridTestEnvApi extends TestEnvBase<'hybrid'> {
 
 ```ts
 export interface LiveServerHandle {
-  baseUrl: string;
-  port: number;
-  close: () => Promise<void>;
+    baseUrl: string;
+    port: number;
+    close: () => Promise<void>;
 }
 ```
 
@@ -190,8 +192,8 @@ export interface LiveServerHandle {
 
 ```ts
 export interface LiveTestEnvApi extends TestEnvBase<'live'> {
-  baseUrl: string;
-  request: ApiRequestClient;
+    baseUrl: string;
+    request: ApiRequestClient;
 }
 ```
 
@@ -209,8 +211,8 @@ export type MockHandler = unknown;
 
 ```ts
 export interface MockServerHandle {
-  reset: () => void;
-  close: () => void;
+    reset: () => void;
+    close: () => void;
 }
 ```
 
@@ -220,9 +222,11 @@ export interface MockServerHandle {
 
 ```ts
 export interface MockTestEnvApi extends TestEnvBase<'mock'> {
-  baseUrl: string;
-  request: ApiRequestClient;
-  mocks: { reset: () => void };
+    baseUrl: string;
+    request: ApiRequestClient;
+    mocks: {
+        reset: () => void;
+    };
 }
 ```
 
@@ -231,10 +235,7 @@ export interface MockTestEnvApi extends TestEnvBase<'mock'> {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L7) `packages/api/src/types.ts`
 
 ```ts
-export type NodeRequestHandler = (
-  req: import('node:http').IncomingMessage,
-  res: import('node:http').ServerResponse,
-) => void | Promise<void>;
+export type NodeRequestHandler = (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => void | Promise<void>;
 ```
 
 #### `RequestClientOptions`
@@ -243,9 +244,9 @@ export type NodeRequestHandler = (
 
 ```ts
 export interface RequestClientOptions {
-  baseUrl: string;
-  defaultHeaders?: Record<string, string>;
-  fetcher?: typeof fetch;
+    baseUrl: string;
+    defaultHeaders?: Record<string, string>;
+    fetcher?: typeof fetch;
 }
 ```
 
@@ -255,15 +256,15 @@ export interface RequestClientOptions {
 
 ```ts
 export interface SetupApiServerOptions<TMode extends TestMode = TestMode> {
-  mode: TMode;
-  /** msw v2 RequestHandler[] (mode = "mock" / "hybrid") */
-  mockHandlers?: MockHandler[];
-  /** Live HTTP handler (mode = "live" / "hybrid") */
-  app?: ApiHandlerSource | NodeRequestHandler;
-  /** Optional base URL applied to issued requests */
-  baseUrl?: string;
-  /** Optional headers applied to every request */
-  defaultHeaders?: Record<string, string>;
+    mode: TMode;
+    /** msw v2 RequestHandler[] (mode = "mock" / "hybrid") */
+    mockHandlers?: MockHandler[];
+    /** Live HTTP handler (mode = "live" / "hybrid") */
+    app?: ApiHandlerSource | NodeRequestHandler;
+    /** Optional base URL applied to issued requests */
+    baseUrl?: string;
+    /** Optional headers applied to every request */
+    defaultHeaders?: Record<string, string>;
 }
 ```
 
@@ -273,8 +274,8 @@ export interface SetupApiServerOptions<TMode extends TestMode = TestMode> {
 
 ```ts
 export interface StartMockServerOptions {
-  handlers: MockHandler[];
-  onUnhandledRequest?: 'error' | 'warn' | 'bypass';
+    handlers: MockHandler[];
+    onUnhandledRequest?: 'error' | 'warn' | 'bypass';
 }
 ```
 <!-- kiwa-public-api:end -->

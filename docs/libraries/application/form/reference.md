@@ -35,7 +35,7 @@ client の `setValue`、`getValues`、`getSchema`、`getLastErrors`、`listSubmi
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/form/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/form/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -46,7 +46,7 @@ client の `setValue`、`getValues`、`getSchema`、`getLastErrors`、`listSubmi
 field array — React Hook Form useFieldArray 相当
 
 ```ts
-export function createFieldArray<T>(initial: T[] = []): FieldArray<T>;
+export declare function createFieldArray<T>(initial?: T[]): FieldArray<T>;
 ```
 
 #### `createFormClient`
@@ -56,7 +56,7 @@ export function createFieldArray<T>(initial: T[] = []): FieldArray<T>;
 form client は provider 別 (RHF/Zod/Formik/Conform) の validate + submit 挙動を統一 interface で叩く。 provider 差は id prefix と将来的な error message format のみで、 実 provider の SDK を差し替えても signature 一致で書ける想定。
 
 ```ts
-export function createFormClient(options: CreateFormClientOptions = {}): FormClient;
+export declare function createFormClient(options?: CreateFormClientOptions): FormClient;
 ```
 
 #### `createObservabilityHook`
@@ -64,7 +64,7 @@ export function createFormClient(options: CreateFormClientOptions = {}): FormCli
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L124) `packages/form/src/extensions.ts`
 
 ```ts
-export function createObservabilityHook(): ObservabilityHook;
+export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
 #### `getFieldError`
@@ -74,7 +74,7 @@ export function createObservabilityHook(): ObservabilityHook;
 getFieldError = 直近 submit の field-level error を取得。 UI 側 field error 表示 (RHF formState.errors / Formik touched+errors) を再現する経路。
 
 ```ts
-export function getFieldError(client: FormClient, field: string): FieldError | null;
+export declare function getFieldError(client: FormClient, field: string): FieldError | null;
 ```
 
 #### `registerField`
@@ -84,7 +84,7 @@ export function getFieldError(client: FormClient, field: string): FieldError | n
 registerField = provider 別 field register API (RHF register / Formik useField 相当) を client に集約。 rule (required / min / max / pattern / custom) を同時に登録する経路。
 
 ```ts
-export function registerField(client: FormClient, reg: FieldRegistration): void;
+export declare function registerField(client: FormClient, reg: FieldRegistration): void;
 ```
 
 #### `retryWithBackoff`
@@ -92,7 +92,7 @@ export function registerField(client: FormClient, reg: FieldRegistration): void;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L100) `packages/form/src/extensions.ts`
 
 ```ts
-export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<RetryResult<T>>;
+export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
 #### `submitForm`
@@ -102,7 +102,7 @@ export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOp
 client を受け取り、 optional な value override を setValue で反映してから submit を叩く convenience wrapper。 form submit workflow (form event → validate → onSubmit) の 1 shot 経路を shorten する。
 
 ```ts
-export async function submitForm(client: FormClient, opts: SubmitFlowOptions): Promise<SubmitResult>;
+export declare function submitForm(client: FormClient, opts: SubmitFlowOptions): Promise<SubmitResult>;
 ```
 
 #### `validateAsync`
@@ -112,11 +112,7 @@ export async function submitForm(client: FormClient, opts: SubmitFlowOptions): P
 async validation — server 側 uniqueness chk 相当
 
 ```ts
-export async function validateAsync(
-  values: Record<string, unknown>,
-  validators: Record<string, AsyncValidator>,
-  options: AsyncValidationOptions = {},
-): Promise<AsyncValidationResult>;
+export declare function validateAsync(values: Record<string, unknown>, validators: Record<string, AsyncValidator>, options?: AsyncValidationOptions): Promise<AsyncValidationResult>;
 ```
 
 #### `validateDependentFields`
@@ -126,7 +122,7 @@ export async function validateAsync(
 dependent field validation — 「country=US なら zipCode 必須」 相当
 
 ```ts
-export function validateDependentFields(values: Record<string, unknown>, rules: DependentFieldRule[]): DependentFieldResult;
+export declare function validateDependentFields(values: Record<string, unknown>, rules: DependentFieldRule[]): DependentFieldResult;
 ```
 
 #### `validateSchema`
@@ -136,11 +132,7 @@ export function validateDependentFields(values: Record<string, unknown>, rules: 
 provider 別 validate 挙動を統一 result で返す。 実 provider (Zod safeParse / Yup validate / RHF resolver / Conform parseWithZod) に差し替えても signature は変わらない想定。
 
 ```ts
-export function validateSchema(
-  schema: SchemaLike,
-  values: Record<string, unknown>,
-  provider: FormProvider = 'react-hook-form',
-): ValidateResult;
+export declare function validateSchema(schema: SchemaLike, values: Record<string, unknown>, provider?: FormProvider): ValidateResult;
 ```
 
 #### `withTimeout`
@@ -148,7 +140,7 @@ export function validateSchema(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L129) `packages/form/src/extensions.ts`
 
 ```ts
-export async function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T>;
+export declare function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T>;
 ```
 
 ### 型
@@ -161,8 +153,8 @@ v2.1 extensions — async validation, field array, dependent field validation, p
 
 ```ts
 export interface AsyncValidationOptions {
-  debounceMs?: number;
-  parallel?: boolean;
+    debounceMs?: number;
+    parallel?: boolean;
 }
 ```
 
@@ -172,9 +164,9 @@ export interface AsyncValidationOptions {
 
 ```ts
 export interface AsyncValidationResult {
-  valid: boolean;
-  errors: Record<string, string>;
-  durationMs: number;
+    valid: boolean;
+    errors: Record<string, string>;
+    durationMs: number;
 }
 ```
 
@@ -192,9 +184,9 @@ export type AsyncValidator = (value: unknown, field: string) => Promise<string |
 
 ```ts
 export interface DependentFieldResult {
-  valid: boolean;
-  triggered: string[];
-  errors: Record<string, string>;
+    valid: boolean;
+    triggered: string[];
+    errors: Record<string, string>;
 }
 ```
 
@@ -204,10 +196,10 @@ export interface DependentFieldResult {
 
 ```ts
 export interface DependentFieldRule {
-  field: string;
-  dependsOn: string;
-  when: (dependsValue: unknown) => boolean;
-  validator: (value: unknown) => string | null;
+    field: string;
+    dependsOn: string;
+    when: (dependsValue: unknown) => boolean;
+    validator: (value: unknown) => string | null;
 }
 ```
 
@@ -217,13 +209,13 @@ export interface DependentFieldRule {
 
 ```ts
 export interface FieldArray<T> {
-  items: () => T[];
-  append: (item: T) => void;
-  remove: (index: number) => void;
-  move: (from: number, to: number) => void;
-  update: (index: number, item: T) => void;
-  clear: () => void;
-  length: () => number;
+    items: () => T[];
+    append: (item: T) => void;
+    remove: (index: number) => void;
+    move: (from: number, to: number) => void;
+    update: (index: number, item: T) => void;
+    clear: () => void;
+    length: () => number;
 }
 ```
 
@@ -233,9 +225,9 @@ export interface FieldArray<T> {
 
 ```ts
 export interface FieldError {
-  field: string;
-  message: string;
-  code?: string;
+    field: string;
+    message: string;
+    code?: string;
 }
 ```
 
@@ -245,9 +237,9 @@ export interface FieldError {
 
 ```ts
 export interface FieldRegistration {
-  name: string;
-  defaultValue?: unknown;
-  rule?: SchemaLike['fields'][string];
+    name: string;
+    defaultValue?: unknown;
+    rule?: SchemaLike['fields'][string];
 }
 ```
 
@@ -257,15 +249,15 @@ export interface FieldRegistration {
 
 ```ts
 export interface FormClient {
-  provider: FormProvider;
-  registerField: (reg: FieldRegistration) => void;
-  setValue: (name: string, value: unknown) => void;
-  getValues: () => Record<string, unknown>;
-  getSchema: () => SchemaLike;
-  submit: (opts: SubmitOptions) => Promise<SubmitResult>;
-  getLastErrors: () => FieldError[];
-  listSubmitted: () => SubmittedRecord[];
-  clear: () => void;
+    provider: FormProvider;
+    registerField: (reg: FieldRegistration) => void;
+    setValue: (name: string, value: unknown) => void;
+    getValues: () => Record<string, unknown>;
+    getSchema: () => SchemaLike;
+    submit: (opts: SubmitOptions) => Promise<SubmitResult>;
+    getLastErrors: () => FieldError[];
+    listSubmitted: () => SubmittedRecord[];
+    clear: () => void;
 }
 ```
 
@@ -283,9 +275,15 @@ export type FormProvider = 'react-hook-form' | 'zod' | 'formik' | 'conform';
 
 ```ts
 export interface ObservabilityHook {
-  emit: (event: { kind: string; data: Record<string, unknown> }) => void;
-  events: () => Array<{ kind: string; data: Record<string, unknown> }>;
-  clear: () => void;
+    emit: (event: {
+        kind: string;
+        data: Record<string, unknown>;
+    }) => void;
+    events: () => Array<{
+        kind: string;
+        data: Record<string, unknown>;
+    }>;
+    clear: () => void;
 }
 ```
 
@@ -294,7 +292,11 @@ export interface ObservabilityHook {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L97) `packages/form/src/extensions.ts`
 
 ```ts
-export interface RetryOptions { maxAttempts?: number; initialDelayMs?: number; backoffFactor?: number; }
+export interface RetryOptions {
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    backoffFactor?: number;
+}
 ```
 
 #### `RetryResult`
@@ -302,7 +304,12 @@ export interface RetryOptions { maxAttempts?: number; initialDelayMs?: number; b
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L98) `packages/form/src/extensions.ts`
 
 ```ts
-export interface RetryResult<T> { ok: boolean; attempts: number; value?: T; error?: unknown; }
+export interface RetryResult<T> {
+    ok: boolean;
+    attempts: number;
+    value?: T;
+    error?: unknown;
+}
 ```
 
 #### `SchemaLike`
@@ -313,13 +320,13 @@ SchemaLike = 4 provider の schema 表現を統一。 各 field に validate rul
 
 ```ts
 export interface SchemaLike {
-  fields: Record<string, {
-    required?: boolean;
-    min?: number;
-    max?: number;
-    pattern?: RegExp;
-    custom?: (value: unknown) => string | null;
-  }>;
+    fields: Record<string, {
+        required?: boolean;
+        min?: number;
+        max?: number;
+        pattern?: RegExp;
+        custom?: (value: unknown) => string | null;
+    }>;
 }
 ```
 
@@ -329,9 +336,13 @@ export interface SchemaLike {
 
 ```ts
 export interface SubmitFlowOptions {
-  overrideValues?: Record<string, unknown>;
-  onSubmit: (values: Record<string, unknown>) => void | Promise<void>;
-  onError?: (errors: Array<{ field: string; message: string; code?: string }>) => void;
+    overrideValues?: Record<string, unknown>;
+    onSubmit: (values: Record<string, unknown>) => void | Promise<void>;
+    onError?: (errors: Array<{
+        field: string;
+        message: string;
+        code?: string;
+    }>) => void;
 }
 ```
 
@@ -341,8 +352,8 @@ export interface SubmitFlowOptions {
 
 ```ts
 export interface SubmitOptions {
-  onSubmit: (values: Record<string, unknown>) => void | Promise<void>;
-  onError?: (errors: FieldError[]) => void;
+    onSubmit: (values: Record<string, unknown>) => void | Promise<void>;
+    onError?: (errors: FieldError[]) => void;
 }
 ```
 
@@ -352,12 +363,12 @@ export interface SubmitOptions {
 
 ```ts
 export interface SubmitResult {
-  ok: boolean;
-  id: string;
-  provider: FormProvider;
-  values: Record<string, unknown>;
-  errors: FieldError[];
-  submittedAt: number;
+    ok: boolean;
+    id: string;
+    provider: FormProvider;
+    values: Record<string, unknown>;
+    errors: FieldError[];
+    submittedAt: number;
 }
 ```
 
@@ -366,7 +377,8 @@ export interface SubmitResult {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L25) `packages/form/src/client.ts`
 
 ```ts
-export interface SubmittedRecord extends SubmitResult {}
+export interface SubmittedRecord extends SubmitResult {
+}
 ```
 
 #### `ValidateResult`
@@ -375,9 +387,9 @@ export interface SubmittedRecord extends SubmitResult {}
 
 ```ts
 export interface ValidateResult {
-  ok: boolean;
-  errors: FieldError[];
-  values: Record<string, unknown>;
+    ok: boolean;
+    errors: FieldError[];
+    values: Record<string, unknown>;
 }
 ```
 <!-- kiwa-public-api:end -->

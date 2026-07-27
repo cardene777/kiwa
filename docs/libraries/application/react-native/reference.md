@@ -29,7 +29,7 @@ Navigation listener は返り値の解除関数を呼んでください。これ
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -38,7 +38,7 @@ Navigation listener は返り値の解除関数を呼んでください。これ
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L228) `packages/react-native/src/extensions.ts`
 
 ```ts
-export async function batchAsync<T>(fns: Array<() => Promise<T>>, options: BatchOptions = {}): Promise<BatchResult<T>>;
+export declare function batchAsync<T>(fns: Array<() => Promise<T>>, options?: BatchOptions): Promise<BatchResult<T>>;
 ```
 
 #### `createCircuitBreaker`
@@ -46,7 +46,7 @@ export async function batchAsync<T>(fns: Array<() => Promise<T>>, options: Batch
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L192) `packages/react-native/src/extensions.ts`
 
 ```ts
-export function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBreaker;
+export declare function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBreaker;
 ```
 
 #### `createNotificationPermissionMock`
@@ -56,7 +56,7 @@ export function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBre
 notification permission mock — iOS/Android 統一
 
 ```ts
-export function createNotificationPermissionMock(initial: NotificationPermission = 'undetermined'): NotificationPermissionMock;
+export declare function createNotificationPermissionMock(initial?: NotificationPermission): NotificationPermissionMock;
 ```
 
 #### `createObservabilityHook`
@@ -64,7 +64,7 @@ export function createNotificationPermissionMock(initial: NotificationPermission
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L120) `packages/react-native/src/extensions.ts`
 
 ```ts
-export function createObservabilityHook(): ObservabilityHook;
+export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
 #### `createRateLimiter`
@@ -72,7 +72,7 @@ export function createObservabilityHook(): ObservabilityHook;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L159) `packages/react-native/src/extensions.ts`
 
 ```ts
-export function createRateLimiter(options: RateLimitOptions): RateLimiter;
+export declare function createRateLimiter(options: RateLimitOptions): RateLimiter;
 ```
 
 #### `createRNTestEnv`
@@ -82,7 +82,7 @@ export function createRateLimiter(options: RateLimitOptions): RateLimiter;
 RN test env bundle。 5 primitive (platform / dimensions / asyncStorage / navigation / linking) を 1 env に集約、 test setup で 1 呼出しすれば全 API mock が使える。
 
 ```ts
-export function createRNTestEnv(options: CreateRNTestEnvOptions = {}): RNTestEnv;
+export declare function createRNTestEnv(options?: CreateRNTestEnvOptions): RNTestEnv;
 ```
 
 #### `dispatchLinkingUrl`
@@ -92,11 +92,7 @@ export function createRNTestEnv(options: CreateRNTestEnvOptions = {}): RNTestEnv
 Linking.addEventListener 相当 event 発火 mock。 deep link / universal link の simulation を in-process で行う。
 
 ```ts
-export function dispatchLinkingUrl(
-  state: LinkingState,
-  url: string,
-  timestamp: number = 0,
-): LinkingEvent;
+export declare function dispatchLinkingUrl(state: LinkingState, url: string, timestamp?: number): LinkingEvent;
 ```
 
 #### `matchDeepLink`
@@ -106,7 +102,7 @@ export function dispatchLinkingUrl(
 deep link URL を pattern に対して match、 param 抽出
 
 ```ts
-export function matchDeepLink(url: string, patterns: DeepLinkPattern[]): DeepLinkMatch;
+export declare function matchDeepLink(url: string, patterns: DeepLinkPattern[]): DeepLinkMatch;
 ```
 
 #### `mockAsyncStorage`
@@ -114,7 +110,7 @@ export function matchDeepLink(url: string, patterns: DeepLinkPattern[]): DeepLin
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/async-storage.ts#L17) `packages/react-native/src/async-storage.ts`
 
 ```ts
-export function mockAsyncStorage(initial: AsyncStorageInitial = {}): AsyncStorageMock;
+export declare function mockAsyncStorage(initial?: AsyncStorageInitial): AsyncStorageMock;
 ```
 
 #### `mockNavigation`
@@ -122,7 +118,7 @@ export function mockAsyncStorage(initial: AsyncStorageInitial = {}): AsyncStorag
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/navigation.ts#L19) `packages/react-native/src/navigation.ts`
 
 ```ts
-export function mockNavigation(initialRoute: NavigationRoute): NavigationMock;
+export declare function mockNavigation(initialRoute: NavigationRoute): NavigationMock;
 ```
 
 #### `retryWithBackoff`
@@ -130,7 +126,7 @@ export function mockNavigation(initialRoute: NavigationRoute): NavigationMock;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L21) `packages/react-native/src/extensions.ts`
 
 ```ts
-export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<RetryResult<T>>;
+export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
 #### `setDimensions`
@@ -140,13 +136,10 @@ export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOp
 Dimensions.get('window') / .get('screen') 値差替。 iPhone / iPad / Android 各 form factor を切替、 responsive layout の test を書く経路。
 
 ```ts
-export function setDimensions(
-  state: DimensionsState,
-  next: {
+export declare function setDimensions(state: DimensionsState, next: {
     window?: Partial<DimensionsState['window']>;
     screen?: Partial<DimensionsState['screen']>;
-  },
-): DimensionsState;
+}): DimensionsState;
 ```
 
 #### `setPlatform`
@@ -156,10 +149,12 @@ export function setDimensions(
 Platform.OS / Platform.Version 値差替。 iOS / Android / web / windows / macos の 5 OS を 切替可能、 test 内で platform-dependent path の分岐を verify する経路。
 
 ```ts
-export function setPlatform(
-  state: PlatformState,
-  next: { os?: RNPlatformOS; version?: number | string; isPad?: boolean; isTV?: boolean },
-): PlatformState;
+export declare function setPlatform(state: PlatformState, next: {
+    os?: RNPlatformOS;
+    version?: number | string;
+    isPad?: boolean;
+    isTV?: boolean;
+}): PlatformState;
 ```
 
 #### `withTimeout`
@@ -167,7 +162,7 @@ export function setPlatform(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L134) `packages/react-native/src/extensions.ts`
 
 ```ts
-export async function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): Promise<T>;
+export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): Promise<T>;
 ```
 
 ### 型
@@ -186,13 +181,13 @@ export type AsyncStorageInitial = Record<string, string>;
 
 ```ts
 export interface AsyncStorageMock {
-  getItem: (key: string) => Promise<string | null>;
-  setItem: (key: string, value: string) => Promise<void>;
-  removeItem: (key: string) => Promise<void>;
-  clear: () => Promise<void>;
-  getAllKeys: () => Promise<string[]>;
-  multiGet: (keys: string[]) => Promise<Array<[string, string | null]>>;
-  multiSet: (pairs: Array<[string, string]>) => Promise<void>;
+    getItem: (key: string) => Promise<string | null>;
+    setItem: (key: string, value: string) => Promise<void>;
+    removeItem: (key: string) => Promise<void>;
+    clear: () => Promise<void>;
+    getAllKeys: () => Promise<string[]>;
+    multiGet: (keys: string[]) => Promise<Array<[string, string | null]>>;
+    multiSet: (pairs: Array<[string, string]>) => Promise<void>;
 }
 ```
 
@@ -202,7 +197,7 @@ export interface AsyncStorageMock {
 
 ```ts
 export interface BatchOptions {
-  concurrency?: number;
+    concurrency?: number;
 }
 ```
 
@@ -212,9 +207,13 @@ export interface BatchOptions {
 
 ```ts
 export interface BatchResult<T> {
-  successCount: number;
-  failureCount: number;
-  results: Array<{ ok: boolean; value?: T; error?: unknown }>;
+    successCount: number;
+    failureCount: number;
+    results: Array<{
+        ok: boolean;
+        value?: T;
+        error?: unknown;
+    }>;
 }
 ```
 
@@ -224,9 +223,9 @@ export interface BatchResult<T> {
 
 ```ts
 export interface CircuitBreaker {
-  state: () => CircuitState;
-  execute: <T>(fn: () => Promise<T>) => Promise<T>;
-  reset: () => void;
+    state: () => CircuitState;
+    execute: <T>(fn: () => Promise<T>) => Promise<T>;
+    reset: () => void;
 }
 ```
 
@@ -236,8 +235,8 @@ export interface CircuitBreaker {
 
 ```ts
 export interface CircuitBreakerOptions {
-  failureThreshold: number;
-  resetTimeoutMs: number;
+    failureThreshold: number;
+    resetTimeoutMs: number;
 }
 ```
 
@@ -255,13 +254,21 @@ export type CircuitState = 'closed' | 'open' | 'half-open';
 
 ```ts
 export interface CreateRNTestEnvOptions {
-  platform?: RNPlatformOS;
-  version?: number | string;
-  initialRoute?: NavigationRoute;
-  asyncStorageInitial?: AsyncStorageInitial;
-  initialUrl?: string;
-  window?: { width: number; height: number; scale?: number };
-  screen?: { width: number; height: number; scale?: number };
+    platform?: RNPlatformOS;
+    version?: number | string;
+    initialRoute?: NavigationRoute;
+    asyncStorageInitial?: AsyncStorageInitial;
+    initialUrl?: string;
+    window?: {
+        width: number;
+        height: number;
+        scale?: number;
+    };
+    screen?: {
+        width: number;
+        height: number;
+        scale?: number;
+    };
 }
 ```
 
@@ -271,11 +278,11 @@ export interface CreateRNTestEnvOptions {
 
 ```ts
 export interface DeepLinkMatch {
-  matched: boolean;
-  scheme: string;
-  host?: string;
-  path?: string;
-  params?: Record<string, string>;
+    matched: boolean;
+    scheme: string;
+    host?: string;
+    path?: string;
+    params?: Record<string, string>;
 }
 ```
 
@@ -285,9 +292,9 @@ export interface DeepLinkMatch {
 
 ```ts
 export interface DeepLinkPattern {
-  scheme: string;
-  host?: string;
-  pathPattern?: RegExp;
+    scheme: string;
+    host?: string;
+    pathPattern?: RegExp;
 }
 ```
 
@@ -297,8 +304,16 @@ export interface DeepLinkPattern {
 
 ```ts
 export interface DimensionsState {
-  window: { width: number; height: number; scale: number };
-  screen: { width: number; height: number; scale: number };
+    window: {
+        width: number;
+        height: number;
+        scale: number;
+    };
+    screen: {
+        width: number;
+        height: number;
+        scale: number;
+    };
 }
 ```
 
@@ -308,8 +323,8 @@ export interface DimensionsState {
 
 ```ts
 export interface LinkingEvent {
-  url: string;
-  timestamp: number;
+    url: string;
+    timestamp: number;
 }
 ```
 
@@ -327,12 +342,12 @@ export type LinkingListener = (event: LinkingEvent) => void;
 
 ```ts
 export interface NavigationMock {
-  currentRoute: () => NavigationRoute;
-  navigate: (name: string, params?: Record<string, unknown>) => void;
-  goBack: () => boolean;
-  reset: (route: NavigationRoute) => void;
-  history: () => NavigationRoute[];
-  addListener: (event: 'focus' | 'blur' | 'state', cb: (payload: NavigationRoute) => void) => () => void;
+    currentRoute: () => NavigationRoute;
+    navigate: (name: string, params?: Record<string, unknown>) => void;
+    goBack: () => boolean;
+    reset: (route: NavigationRoute) => void;
+    history: () => NavigationRoute[];
+    addListener: (event: 'focus' | 'blur' | 'state', cb: (payload: NavigationRoute) => void) => () => void;
 }
 ```
 
@@ -342,8 +357,8 @@ export interface NavigationMock {
 
 ```ts
 export interface NavigationRoute {
-  name: string;
-  params?: Record<string, unknown>;
+    name: string;
+    params?: Record<string, unknown>;
 }
 ```
 
@@ -361,9 +376,9 @@ export type NotificationPermission = 'granted' | 'denied' | 'undetermined';
 
 ```ts
 export interface NotificationPermissionMock {
-  status: () => NotificationPermission;
-  request: () => Promise<NotificationPermission>;
-  set: (status: NotificationPermission) => void;
+    status: () => NotificationPermission;
+    request: () => Promise<NotificationPermission>;
+    set: (status: NotificationPermission) => void;
 }
 ```
 
@@ -373,9 +388,9 @@ export interface NotificationPermissionMock {
 
 ```ts
 export interface ObservabilityEvent {
-  kind: string;
-  data: Record<string, unknown>;
-  timestamp: number;
+    kind: string;
+    data: Record<string, unknown>;
+    timestamp: number;
 }
 ```
 
@@ -385,9 +400,9 @@ export interface ObservabilityEvent {
 
 ```ts
 export interface ObservabilityHook {
-  emit: (event: ObservabilityEvent) => void;
-  events: () => ObservabilityEvent[];
-  clear: () => void;
+    emit: (event: ObservabilityEvent) => void;
+    events: () => ObservabilityEvent[];
+    clear: () => void;
 }
 ```
 
@@ -397,10 +412,10 @@ export interface ObservabilityHook {
 
 ```ts
 export interface PlatformState {
-  os: RNPlatformOS;
-  version: number | string;
-  isPad?: boolean;
-  isTV?: boolean;
+    os: RNPlatformOS;
+    version: number | string;
+    isPad?: boolean;
+    isTV?: boolean;
 }
 ```
 
@@ -410,9 +425,9 @@ export interface PlatformState {
 
 ```ts
 export interface RateLimiter {
-  tryAcquire: () => boolean;
-  reset: () => void;
-  remaining: () => number;
+    tryAcquire: () => boolean;
+    reset: () => void;
+    remaining: () => number;
 }
 ```
 
@@ -422,8 +437,8 @@ export interface RateLimiter {
 
 ```ts
 export interface RateLimitOptions {
-  requestsPerSecond: number;
-  burst?: number;
+    requestsPerSecond: number;
+    burst?: number;
 }
 ```
 
@@ -435,10 +450,10 @@ v2.1 extensions — deep link handling, notification permission, retry, batch, o
 
 ```ts
 export interface RetryOptions {
-  maxAttempts?: number;
-  initialDelayMs?: number;
-  backoffFactor?: number;
-  onRetry?: (attempt: number, error: unknown) => void;
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    backoffFactor?: number;
+    onRetry?: (attempt: number, error: unknown) => void;
 }
 ```
 
@@ -448,10 +463,10 @@ export interface RetryOptions {
 
 ```ts
 export interface RetryResult<T> {
-  ok: boolean;
-  attempts: number;
-  value?: T;
-  error?: unknown;
+    ok: boolean;
+    attempts: number;
+    value?: T;
+    error?: unknown;
 }
 ```
 
@@ -469,11 +484,11 @@ export type RNPlatformOS = 'ios' | 'android' | 'web' | 'windows' | 'macos';
 
 ```ts
 export interface RNTestEnv {
-  platform: PlatformState;
-  dimensions: DimensionsState;
-  asyncStorage: AsyncStorageMock;
-  navigation: NavigationMock;
-  linking: LinkingState;
+    platform: PlatformState;
+    dimensions: DimensionsState;
+    asyncStorage: AsyncStorageMock;
+    navigation: NavigationMock;
+    linking: LinkingState;
 }
 ```
 
@@ -483,8 +498,8 @@ export interface RNTestEnv {
 
 ```ts
 export interface TimeoutOptions {
-  timeoutMs: number;
-  onTimeout?: () => void;
+    timeoutMs: number;
+    onTimeout?: () => void;
 }
 ```
 <!-- kiwa-public-api:end -->

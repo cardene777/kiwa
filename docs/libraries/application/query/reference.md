@@ -29,7 +29,7 @@
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/query/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/query/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -40,7 +40,7 @@
 infinite query — TanStack useInfiniteQuery 相当
 
 ```ts
-export function createInfiniteQuery<TData, TCursor>(options: InfiniteQueryOptions<TData, TCursor>): InfiniteQueryState<TData, TCursor>;
+export declare function createInfiniteQuery<TData, TCursor>(options: InfiniteQueryOptions<TData, TCursor>): InfiniteQueryState<TData, TCursor>;
 ```
 
 #### `createObservabilityHook`
@@ -48,7 +48,7 @@ export function createInfiniteQuery<TData, TCursor>(options: InfiniteQueryOption
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L134) `packages/query/src/extensions.ts`
 
 ```ts
-export function createObservabilityHook(): ObservabilityHook;
+export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
 #### `createOptimisticUpdate`
@@ -58,7 +58,7 @@ export function createObservabilityHook(): ObservabilityHook;
 optimistic update — server response 前に UI を更新、 失敗時 rollback
 
 ```ts
-export function createOptimisticUpdate<T>(initial: T): OptimisticUpdate<T>;
+export declare function createOptimisticUpdate<T>(initial: T): OptimisticUpdate<T>;
 ```
 
 #### `createQueryClient`
@@ -68,7 +68,7 @@ export function createOptimisticUpdate<T>(initial: T): OptimisticUpdate<T>;
 provider 差 (tanstack = infinite scroll / swr = revalidateOnFocus / urql = exchange chain / apollo = normalized cache) は abstract、 4 provider 共通の cache + fetchCount 挙動を mock する。
 
 ```ts
-export function createQueryClient(options: CreateQueryClientOptions = {}): QueryClient;
+export declare function createQueryClient(options?: CreateQueryClientOptions): QueryClient;
 ```
 
 #### `fetchQuery`
@@ -78,12 +78,7 @@ export function createQueryClient(options: CreateQueryClientOptions = {}): Query
 cache-first fetch。 staleMs 内なら cache hit で queryFn を呼ばず、 force=true or stale なら queryFn 実行 + cache 更新。
 
 ```ts
-export async function fetchQuery<T>(
-  client: QueryClient,
-  key: QueryKey,
-  queryFn: QueryFn<T>,
-  options: FetchQueryOptions = {},
-): Promise<FetchQueryResult<T>>;
+export declare function fetchQuery<T>(client: QueryClient, key: QueryKey, queryFn: QueryFn<T>, options?: FetchQueryOptions): Promise<FetchQueryResult<T>>;
 ```
 
 #### `invalidateQuery`
@@ -93,7 +88,7 @@ export async function fetchQuery<T>(
 cache から key を削除、 listener に invalidation を通知。 TanStack Query の queryClient.invalidateQueries 相当。
 
 ```ts
-export function invalidateQuery(client: QueryClient, key: QueryKey): InvalidateResult;
+export declare function invalidateQuery(client: QueryClient, key: QueryKey): InvalidateResult;
 ```
 
 #### `mutate`
@@ -103,12 +98,7 @@ export function invalidateQuery(client: QueryClient, key: QueryKey): InvalidateR
 mutationFn 実行 + 成功時に invalidateKeys を全 invalidate、 失敗時は onError 発火。 TanStack Query の useMutation.mutateAsync 相当。
 
 ```ts
-export async function mutate<TArgs, TResult>(
-  client: QueryClient,
-  mutationFn: MutationFn<TArgs, TResult>,
-  args: TArgs,
-  options: MutateOptions<TResult> = {},
-): Promise<MutateResult<TResult>>;
+export declare function mutate<TArgs, TResult>(client: QueryClient, mutationFn: MutationFn<TArgs, TResult>, args: TArgs, options?: MutateOptions<TResult>): Promise<MutateResult<TResult>>;
 ```
 
 #### `prefetchQueries`
@@ -118,11 +108,7 @@ export async function mutate<TArgs, TResult>(
 prefetch — 複数 queryKey を並列 fetch して cache に格納
 
 ```ts
-export async function prefetchQueries(
-  keys: string[],
-  fetcher: (key: string) => Promise<unknown>,
-  options: PrefetchOptions = {},
-): Promise<PrefetchResult>;
+export declare function prefetchQueries(keys: string[], fetcher: (key: string) => Promise<unknown>, options?: PrefetchOptions): Promise<PrefetchResult>;
 ```
 
 #### `retryWithBackoff`
@@ -130,7 +116,7 @@ export async function prefetchQueries(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L102) `packages/query/src/extensions.ts`
 
 ```ts
-export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<RetryResult<T>>;
+export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
 #### `subscribeToQuery`
@@ -140,11 +126,7 @@ export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOp
 key に state 変更を subscribe。 fetchQuery / invalidateQuery が触ると listener に通知。 SWR の subscribe / TanStack Query の queryClient.getQueryCache().subscribe 相当。
 
 ```ts
-export function subscribeToQuery(
-  client: QueryClient,
-  key: QueryKey,
-  listener: QueryListener,
-): Subscription;
+export declare function subscribeToQuery(client: QueryClient, key: QueryKey, listener: QueryListener): Subscription;
 ```
 
 #### `withTimeout`
@@ -152,7 +134,7 @@ export function subscribeToQuery(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L120) `packages/query/src/extensions.ts`
 
 ```ts
-export async function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T>;
+export declare function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T>;
 ```
 
 ### 型
@@ -163,9 +145,9 @@ export async function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): P
 
 ```ts
 export interface CreateQueryClientOptions {
-  provider?: QueryProvider;
-  defaultStaleMs?: number;
-  now?: () => number;
+    provider?: QueryProvider;
+    defaultStaleMs?: number;
+    now?: () => number;
 }
 ```
 
@@ -175,8 +157,8 @@ export interface CreateQueryClientOptions {
 
 ```ts
 export interface FetchQueryOptions {
-  staleMs?: number;
-  force?: boolean;
+    staleMs?: number;
+    force?: boolean;
 }
 ```
 
@@ -186,10 +168,10 @@ export interface FetchQueryOptions {
 
 ```ts
 export interface FetchQueryResult<T> {
-  data: T;
-  fromCache: boolean;
-  fetchCount: number;
-  staleAgeMs: number;
+    data: T;
+    fromCache: boolean;
+    fetchCount: number;
+    staleAgeMs: number;
 }
 ```
 
@@ -201,9 +183,12 @@ v2.1 extensions — infinite query, optimistic update, prefetch, plus retry/batc
 
 ```ts
 export interface InfiniteQueryOptions<TData, TCursor> {
-  initialCursor: TCursor;
-  fetchPage: (cursor: TCursor) => Promise<{ data: TData[]; nextCursor?: TCursor }>;
-  maxPages?: number;
+    initialCursor: TCursor;
+    fetchPage: (cursor: TCursor) => Promise<{
+        data: TData[];
+        nextCursor?: TCursor;
+    }>;
+    maxPages?: number;
 }
 ```
 
@@ -213,10 +198,13 @@ export interface InfiniteQueryOptions<TData, TCursor> {
 
 ```ts
 export interface InfiniteQueryState<TData, TCursor> {
-  pages: Array<{ cursor: TCursor; data: TData[] }>;
-  hasNextPage: boolean;
-  fetchNextPage: () => Promise<void>;
-  reset: () => void;
+    pages: Array<{
+        cursor: TCursor;
+        data: TData[];
+    }>;
+    hasNextPage: boolean;
+    fetchNextPage: () => Promise<void>;
+    reset: () => void;
 }
 ```
 
@@ -226,8 +214,8 @@ export interface InfiniteQueryState<TData, TCursor> {
 
 ```ts
 export interface InvalidateResult {
-  key: string;
-  existed: boolean;
+    key: string;
+    existed: boolean;
 }
 ```
 
@@ -237,9 +225,9 @@ export interface InvalidateResult {
 
 ```ts
 export interface MutateOptions<TResult> {
-  invalidateKeys?: QueryKey[];
-  onSuccess?: (result: TResult) => void;
-  onError?: (err: Error) => void;
+    invalidateKeys?: QueryKey[];
+    onSuccess?: (result: TResult) => void;
+    onError?: (err: Error) => void;
 }
 ```
 
@@ -249,8 +237,8 @@ export interface MutateOptions<TResult> {
 
 ```ts
 export interface MutateResult<TResult> {
-  result: TResult;
-  invalidated: string[];
+    result: TResult;
+    invalidated: string[];
 }
 ```
 
@@ -268,9 +256,15 @@ export type MutationFn<TArgs, TResult> = (args: TArgs) => Promise<TResult>;
 
 ```ts
 export interface ObservabilityHook {
-  emit: (event: { kind: string; data: Record<string, unknown> }) => void;
-  events: () => Array<{ kind: string; data: Record<string, unknown> }>;
-  clear: () => void;
+    emit: (event: {
+        kind: string;
+        data: Record<string, unknown>;
+    }) => void;
+    events: () => Array<{
+        kind: string;
+        data: Record<string, unknown>;
+    }>;
+    clear: () => void;
 }
 ```
 
@@ -280,11 +274,11 @@ export interface ObservabilityHook {
 
 ```ts
 export interface OptimisticUpdate<T> {
-  applyOptimistic: (value: T) => void;
-  commit: () => void;
-  rollback: () => void;
-  current: () => T;
-  isPending: () => boolean;
+    applyOptimistic: (value: T) => void;
+    commit: () => void;
+    rollback: () => void;
+    current: () => T;
+    isPending: () => boolean;
 }
 ```
 
@@ -294,8 +288,8 @@ export interface OptimisticUpdate<T> {
 
 ```ts
 export interface PrefetchOptions {
-  concurrency?: number;
-  timeoutMs?: number;
+    concurrency?: number;
+    timeoutMs?: number;
 }
 ```
 
@@ -305,10 +299,13 @@ export interface PrefetchOptions {
 
 ```ts
 export interface PrefetchResult {
-  successCount: number;
-  failureCount: number;
-  prefetched: string[];
-  failed: Array<{ key: string; error: unknown }>;
+    successCount: number;
+    failureCount: number;
+    prefetched: string[];
+    failed: Array<{
+        key: string;
+        error: unknown;
+    }>;
 }
 ```
 
@@ -318,13 +315,13 @@ export interface PrefetchResult {
 
 ```ts
 export interface QueryClient {
-  provider: QueryProvider;
-  cache: Map<string, QueryState>;
-  defaultStaleMs: number;
-  now: () => number;
-  listeners: Map<string, Set<(state: QueryState) => void>>;
-  clear: () => void;
-  snapshot: () => QueryState[];
+    provider: QueryProvider;
+    cache: Map<string, QueryState>;
+    defaultStaleMs: number;
+    now: () => number;
+    listeners: Map<string, Set<(state: QueryState) => void>>;
+    clear: () => void;
+    snapshot: () => QueryState[];
 }
 ```
 
@@ -366,12 +363,12 @@ export type QueryProvider = 'tanstack' | 'swr' | 'urql' | 'apollo';
 
 ```ts
 export interface QueryState<T = unknown> {
-  key: string;
-  status: QueryStatus;
-  data?: T;
-  error?: Error;
-  updatedAt: number;
-  fetchCount: number;
+    key: string;
+    status: QueryStatus;
+    data?: T;
+    error?: Error;
+    updatedAt: number;
+    fetchCount: number;
 }
 ```
 
@@ -388,7 +385,11 @@ export type QueryStatus = 'idle' | 'loading' | 'success' | 'error';
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L99) `packages/query/src/extensions.ts`
 
 ```ts
-export interface RetryOptions { maxAttempts?: number; initialDelayMs?: number; backoffFactor?: number; }
+export interface RetryOptions {
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    backoffFactor?: number;
+}
 ```
 
 #### `RetryResult`
@@ -396,7 +397,12 @@ export interface RetryOptions { maxAttempts?: number; initialDelayMs?: number; b
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L100) `packages/query/src/extensions.ts`
 
 ```ts
-export interface RetryResult<T> { ok: boolean; attempts: number; value?: T; error?: unknown; }
+export interface RetryResult<T> {
+    ok: boolean;
+    attempts: number;
+    value?: T;
+    error?: unknown;
+}
 ```
 
 #### `Subscription`
@@ -405,8 +411,8 @@ export interface RetryResult<T> { ok: boolean; attempts: number; value?: T; erro
 
 ```ts
 export interface Subscription {
-  unsubscribe: () => void;
-  key: string;
+    unsubscribe: () => void;
+    key: string;
 }
 ```
 <!-- kiwa-public-api:end -->

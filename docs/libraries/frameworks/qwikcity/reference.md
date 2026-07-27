@@ -30,7 +30,7 @@ response headers は小文字の Map です。Endpoint の redirect signal と�
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -39,9 +39,7 @@ response headers は小文字の Map です。Endpoint の redirect signal と�
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L85) `packages/qwikcity/src/invoke-endpoint.ts`
 
 ```ts
-export async function invokeEndpoint<TParams extends Record<string, string> = Record<string, string>>(
-  opts: InvokeEndpointOptions<TParams>,
-): Promise<InvokeEndpointResult>;
+export declare function invokeEndpoint<TParams extends Record<string, string> = Record<string, string>>(opts: InvokeEndpointOptions<TParams>): Promise<InvokeEndpointResult>;
 ```
 
 #### `invokeRouteAction`
@@ -49,9 +47,7 @@ export async function invokeEndpoint<TParams extends Record<string, string> = Re
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L67) `packages/qwikcity/src/invoke-route-action.ts`
 
 ```ts
-export async function invokeRouteAction<TFormValues extends Record<string, unknown> = Record<string, unknown>, TResult = unknown>(
-  opts: InvokeRouteActionOptions<TFormValues, TResult>,
-): Promise<InvokeRouteActionResult<TResult>>;
+export declare function invokeRouteAction<TFormValues extends Record<string, unknown> = Record<string, unknown>, TResult = unknown>(opts: InvokeRouteActionOptions<TFormValues, TResult>): Promise<InvokeRouteActionResult<TResult>>;
 ```
 
 #### `invokeRouteLoader`
@@ -59,9 +55,7 @@ export async function invokeRouteAction<TFormValues extends Record<string, unkno
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L48) `packages/qwikcity/src/invoke-route-loader.ts`
 
 ```ts
-export async function invokeRouteLoader<TParams extends Record<string, string> = Record<string, string>, TResult = unknown>(
-  opts: InvokeRouteLoaderOptions<TParams, TResult>,
-): Promise<InvokeRouteLoaderResult<TResult>>;
+export declare function invokeRouteLoader<TParams extends Record<string, string> = Record<string, string>, TResult = unknown>(opts: InvokeRouteLoaderOptions<TParams, TResult>): Promise<InvokeRouteLoaderResult<TResult>>;
 ```
 
 #### `QWIK_ENDPOINT_REDIRECT_SYMBOL`
@@ -69,7 +63,7 @@ export async function invokeRouteLoader<TParams extends Record<string, string> =
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L8) `packages/qwikcity/src/invoke-endpoint.ts`
 
 ```ts
-export declare const QWIK_ENDPOINT_REDIRECT_SYMBOL: typeof QWIK_ENDPOINT_REDIRECT_SYMBOL;
+export declare const QWIK_ENDPOINT_REDIRECT_SYMBOL: unique symbol;
 ```
 
 #### `QWIK_FAIL_SYMBOL`
@@ -77,7 +71,7 @@ export declare const QWIK_ENDPOINT_REDIRECT_SYMBOL: typeof QWIK_ENDPOINT_REDIREC
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L9) `packages/qwikcity/src/invoke-route-action.ts`
 
 ```ts
-export declare const QWIK_FAIL_SYMBOL: typeof QWIK_FAIL_SYMBOL;
+export declare const QWIK_FAIL_SYMBOL: unique symbol;
 ```
 
 #### `QWIK_REDIRECT_SYMBOL`
@@ -85,7 +79,7 @@ export declare const QWIK_FAIL_SYMBOL: typeof QWIK_FAIL_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L10) `packages/qwikcity/src/invoke-route-action.ts`
 
 ```ts
-export declare const QWIK_REDIRECT_SYMBOL: typeof QWIK_REDIRECT_SYMBOL;
+export declare const QWIK_REDIRECT_SYMBOL: unique symbol;
 ```
 
 ### 型
@@ -95,9 +89,7 @@ export declare const QWIK_REDIRECT_SYMBOL: typeof QWIK_REDIRECT_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L35) `packages/qwikcity/src/invoke-endpoint.ts`
 
 ```ts
-export type EndpointHandler<TParams extends Record<string, string> = Record<string, string>> = (
-  event: SimulatedRequestEvent<TParams>,
-) => Promise<void> | void;
+export type EndpointHandler<TParams extends Record<string, string> = Record<string, string>> = (event: SimulatedRequestEvent<TParams>) => Promise<void> | void;
 ```
 
 #### `EndpointResponse`
@@ -106,10 +98,10 @@ export type EndpointHandler<TParams extends Record<string, string> = Record<stri
 
 ```ts
 export interface EndpointResponse<T = unknown> {
-  readonly kind: 'json' | 'text' | 'noop';
-  readonly status: number;
-  readonly body?: T;
-  readonly headers: Map<string, string>;
+    readonly kind: 'json' | 'text' | 'noop';
+    readonly status: number;
+    readonly body?: T;
+    readonly headers: Map<string, string>;
 }
 ```
 
@@ -119,13 +111,13 @@ export interface EndpointResponse<T = unknown> {
 
 ```ts
 export interface InvokeEndpointOptions<TParams extends Record<string, string> = Record<string, string>> {
-  readonly handler: EndpointHandler<TParams>;
-  readonly url: string;
-  readonly method?: string;
-  readonly params?: TParams;
-  readonly headers?: Record<string, string>;
-  readonly formData?: Record<string, string>;
-  readonly jsonBody?: unknown;
+    readonly handler: EndpointHandler<TParams>;
+    readonly url: string;
+    readonly method?: string;
+    readonly params?: TParams;
+    readonly headers?: Record<string, string>;
+    readonly formData?: Record<string, string>;
+    readonly jsonBody?: unknown;
 }
 ```
 
@@ -135,9 +127,9 @@ export interface InvokeEndpointOptions<TParams extends Record<string, string> = 
 
 ```ts
 export interface InvokeEndpointResult {
-  readonly response: EndpointResponse;
-  readonly redirect: QwikEndpointRedirectSignal | null;
-  readonly error: unknown;
+    readonly response: EndpointResponse;
+    readonly redirect: QwikEndpointRedirectSignal | null;
+    readonly error: unknown;
 }
 ```
 
@@ -147,11 +139,11 @@ export interface InvokeEndpointResult {
 
 ```ts
 export interface InvokeRouteActionOptions<TFormValues extends Record<string, unknown>, TResult> {
-  readonly action: RouteActionFunction<TFormValues, TResult>;
-  readonly formValues: TFormValues;
-  readonly url?: string;
-  readonly cookies?: Record<string, string>;
-  readonly headers?: Record<string, string>;
+    readonly action: RouteActionFunction<TFormValues, TResult>;
+    readonly formValues: TFormValues;
+    readonly url?: string;
+    readonly cookies?: Record<string, string>;
+    readonly headers?: Record<string, string>;
 }
 ```
 
@@ -161,14 +153,14 @@ export interface InvokeRouteActionOptions<TFormValues extends Record<string, unk
 
 ```ts
 export interface InvokeRouteActionResult<TResult> {
-  readonly result: TResult | undefined;
-  readonly fail: QwikFailSignal | null;
-  readonly redirect: QwikRedirectSignal | null;
-  readonly error: unknown;
-  readonly env: {
-    readonly cookies: Map<string, string>;
-    readonly requestHeaders: Map<string, string>;
-  };
+    readonly result: TResult | undefined;
+    readonly fail: QwikFailSignal | null;
+    readonly redirect: QwikRedirectSignal | null;
+    readonly error: unknown;
+    readonly env: {
+        readonly cookies: Map<string, string>;
+        readonly requestHeaders: Map<string, string>;
+    };
 }
 ```
 
@@ -178,12 +170,12 @@ export interface InvokeRouteActionResult<TResult> {
 
 ```ts
 export interface InvokeRouteLoaderOptions<TParams extends Record<string, string>, TResult> {
-  readonly loader: RouteLoaderFunction<TParams, TResult>;
-  readonly url: string;
-  readonly params?: TParams;
-  readonly cookies?: Record<string, string>;
-  readonly headers?: Record<string, string>;
-  readonly platform?: Record<string, unknown>;
+    readonly loader: RouteLoaderFunction<TParams, TResult>;
+    readonly url: string;
+    readonly params?: TParams;
+    readonly cookies?: Record<string, string>;
+    readonly headers?: Record<string, string>;
+    readonly platform?: Record<string, unknown>;
 }
 ```
 
@@ -193,9 +185,9 @@ export interface InvokeRouteLoaderOptions<TParams extends Record<string, string>
 
 ```ts
 export interface InvokeRouteLoaderResult<TResult> {
-  readonly data: TResult | undefined;
-  readonly redirect: QwikRedirectSignal | null;
-  readonly error: unknown;
+    readonly data: TResult | undefined;
+    readonly redirect: QwikRedirectSignal | null;
+    readonly error: unknown;
 }
 ```
 
@@ -205,9 +197,9 @@ export interface InvokeRouteLoaderResult<TResult> {
 
 ```ts
 export interface QwikEndpointRedirectSignal {
-  readonly [QWIK_ENDPOINT_REDIRECT_SYMBOL]: true;
-  readonly status: number;
-  readonly location: string;
+    readonly [QWIK_ENDPOINT_REDIRECT_SYMBOL]: true;
+    readonly status: number;
+    readonly location: string;
 }
 ```
 
@@ -217,9 +209,9 @@ export interface QwikEndpointRedirectSignal {
 
 ```ts
 export interface QwikFailSignal {
-  readonly [QWIK_FAIL_SYMBOL]: true;
-  readonly status: number;
-  readonly data: unknown;
+    readonly [QWIK_FAIL_SYMBOL]: true;
+    readonly status: number;
+    readonly data: unknown;
 }
 ```
 
@@ -229,9 +221,9 @@ export interface QwikFailSignal {
 
 ```ts
 export interface QwikRedirectSignal {
-  readonly [QWIK_REDIRECT_SYMBOL]: true;
-  readonly status: number;
-  readonly location: string;
+    readonly [QWIK_REDIRECT_SYMBOL]: true;
+    readonly status: number;
+    readonly location: string;
 }
 ```
 
@@ -240,10 +232,7 @@ export interface QwikRedirectSignal {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L36) `packages/qwikcity/src/invoke-route-action.ts`
 
 ```ts
-export type RouteActionFunction<TFormValues extends Record<string, unknown> = Record<string, unknown>, TResult = unknown> = (
-  formValues: TFormValues,
-  event: SimulatedActionEvent,
-) => Promise<TResult | QwikFailSignal> | TResult | QwikFailSignal;
+export type RouteActionFunction<TFormValues extends Record<string, unknown> = Record<string, unknown>, TResult = unknown> = (formValues: TFormValues, event: SimulatedActionEvent) => Promise<TResult | QwikFailSignal> | TResult | QwikFailSignal;
 ```
 
 #### `RouteLoaderFunction`
@@ -251,9 +240,7 @@ export type RouteActionFunction<TFormValues extends Record<string, unknown> = Re
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L25) `packages/qwikcity/src/invoke-route-loader.ts`
 
 ```ts
-export type RouteLoaderFunction<TParams extends Record<string, string> = Record<string, string>, TResult = unknown> = (
-  event: SimulatedLoaderEvent<TParams>,
-) => Promise<TResult> | TResult;
+export type RouteLoaderFunction<TParams extends Record<string, string> = Record<string, string>, TResult = unknown> = (event: SimulatedLoaderEvent<TParams>) => Promise<TResult> | TResult;
 ```
 
 #### `SimulatedActionEvent`
@@ -262,15 +249,17 @@ export type RouteLoaderFunction<TParams extends Record<string, string> = Record<
 
 ```ts
 export interface SimulatedActionEvent {
-  readonly url: URL;
-  readonly cookie: {
-    get(name: string): { value: string } | null;
-    set(name: string, value: string, options?: Record<string, unknown>): void;
-    delete(name: string, options?: Record<string, unknown>): void;
-  };
-  readonly headers: ReadonlyMap<string, string>;
-  fail<T>(status: number, data: T): QwikFailSignal;
-  redirect(status: number, location: string): never;
+    readonly url: URL;
+    readonly cookie: {
+        get(name: string): {
+            value: string;
+        } | null;
+        set(name: string, value: string, options?: Record<string, unknown>): void;
+        delete(name: string, options?: Record<string, unknown>): void;
+    };
+    readonly headers: ReadonlyMap<string, string>;
+    fail<T>(status: number, data: T): QwikFailSignal;
+    redirect(status: number, location: string): never;
 }
 ```
 
@@ -280,15 +269,17 @@ export interface SimulatedActionEvent {
 
 ```ts
 export interface SimulatedLoaderEvent<TParams extends Record<string, string> = Record<string, string>> {
-  readonly url: URL;
-  readonly params: TParams;
-  readonly query: URLSearchParams;
-  readonly cookie: {
-    get(name: string): { value: string } | null;
-  };
-  readonly headers: ReadonlyMap<string, string>;
-  readonly platform: Record<string, unknown>;
-  redirect(status: number, location: string): never;
+    readonly url: URL;
+    readonly params: TParams;
+    readonly query: URLSearchParams;
+    readonly cookie: {
+        get(name: string): {
+            value: string;
+        } | null;
+    };
+    readonly headers: ReadonlyMap<string, string>;
+    readonly platform: Record<string, unknown>;
+    redirect(status: number, location: string): never;
 }
 ```
 
@@ -298,15 +289,15 @@ export interface SimulatedLoaderEvent<TParams extends Record<string, string> = R
 
 ```ts
 export interface SimulatedRequestEvent<TParams extends Record<string, string> = Record<string, string>> {
-  readonly request: Request;
-  readonly params: TParams;
-  readonly url: URL;
-  readonly headers: ReadonlyMap<string, string>;
-  json<T>(status: number, body: T): void;
-  text(status: number, body: string): void;
-  redirect(status: number, location: string): never;
-  status(code: number): void;
-  setHeader(name: string, value: string): void;
+    readonly request: Request;
+    readonly params: TParams;
+    readonly url: URL;
+    readonly headers: ReadonlyMap<string, string>;
+    json<T>(status: number, body: T): void;
+    text(status: number, body: string): void;
+    redirect(status: number, location: string): never;
+    status(code: number): void;
+    setHeader(name: string, value: string): void;
 }
 ```
 <!-- kiwa-public-api:end -->

@@ -21,7 +21,7 @@ API は入力を変更しません。生成した Markdown file は project 側�
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/kaname/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/kaname/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -32,7 +32,7 @@ API は入力を変更しません。生成した Markdown file は project 側�
 Statically classify a SpecDoc and surface layer-model violations. Rules enforced: 1. every item must have a non-empty statement 2. every item must have a non-empty verifyBy target 3. every item must declare a known layer (formal / runtime / human) 4. every item id is unique within the doc 5. no formal item may reuse a verifyBy target that a runtime item also names (this catches the "specified twice, verified nowhere" pattern where the author put the same acceptance criterion in both layers hoping one side would catch it — always ends in a silent gap).
 
 ```ts
-export function classify(doc: SpecDoc): ClassifyReport;
+export declare function classify(doc: SpecDoc): ClassifyReport;
 ```
 
 #### `splitSpec`
@@ -42,7 +42,7 @@ export function classify(doc: SpecDoc): ClassifyReport;
 Split a SpecDoc into two paired markdown files: - `specFormal.md` → items with `layer === 'formal'` - `specRuntime.md` → items with `layer === 'runtime'` or `'human'` The intent is that a caller writes each acceptance criterion once, tags it with the layer that will verify it, and gets two files back that never disagree with each other. If the caller wants the same idea verified in two places, they must write two separate items (with distinct verifyBy targets), so the "written but never verified" silent gap is impossible.
 
 ```ts
-export function splitSpec(doc: SpecDoc): SplitResult;
+export declare function splitSpec(doc: SpecDoc): SplitResult;
 ```
 
 ### 型
@@ -53,14 +53,9 @@ export function splitSpec(doc: SpecDoc): SplitResult;
 
 ```ts
 export interface ClassifyIssue {
-  itemId: string;
-  reason:
-    | 'duplicate-id'
-    | 'empty-statement'
-    | 'unknown-layer'
-    | 'empty-verify-by'
-    | 'both-layers-touch-same-artifact';
-  message: string;
+    itemId: string;
+    reason: 'duplicate-id' | 'empty-statement' | 'unknown-layer' | 'empty-verify-by' | 'both-layers-touch-same-artifact';
+    message: string;
 }
 ```
 
@@ -70,9 +65,9 @@ export interface ClassifyIssue {
 
 ```ts
 export interface ClassifyReport {
-  ok: boolean;
-  issues: readonly ClassifyIssue[];
-  perLayer: Readonly<Record<SpecLayer, number>>;
+    ok: boolean;
+    issues: readonly ClassifyIssue[];
+    perLayer: Readonly<Record<SpecLayer, number>>;
 }
 ```
 
@@ -82,12 +77,12 @@ export interface ClassifyReport {
 
 ```ts
 export interface SpecDoc {
-  /** Human-readable title of the whole specification. */
-  title: string;
-  /** GitHub issue / Linear ID this spec covers, if any. */
-  issueRef?: string;
-  /** Ordered list of specification items. Order = source order. */
-  items: readonly SpecItem[];
+    /** Human-readable title of the whole specification. */
+    title: string;
+    /** GitHub issue / Linear ID this spec covers, if any. */
+    issueRef?: string;
+    /** Ordered list of specification items. Order = source order. */
+    items: readonly SpecItem[];
 }
 ```
 
@@ -97,21 +92,21 @@ export interface SpecDoc {
 
 ```ts
 export interface SpecItem {
-  /** Stable identifier, e.g. `AC-001`. Must be unique within a SpecDoc. */
-  id: string;
-  /** One-sentence acceptance criterion. */
-  statement: string;
-  /** Layer this item must be verified in. */
-  layer: SpecLayer;
-  /**
-   * How this item will be verified.
-   * - formal → Lean namespace or orchestrator name (e.g., `Transaction`)
-   * - runtime → test path or category (e.g., `tests/integration/auth.test.ts`)
-   * - human   → review checkpoint (e.g., `UX walkthrough`, `Product approval`)
-   */
-  verifyBy: string;
-  /** Optional freeform notes. */
-  notes?: string;
+    /** Stable identifier, e.g. `AC-001`. Must be unique within a SpecDoc. */
+    id: string;
+    /** One-sentence acceptance criterion. */
+    statement: string;
+    /** Layer this item must be verified in. */
+    layer: SpecLayer;
+    /**
+     * How this item will be verified.
+     * - formal → Lean namespace or orchestrator name (e.g., `Transaction`)
+     * - runtime → test path or category (e.g., `tests/integration/auth.test.ts`)
+     * - human   → review checkpoint (e.g., `UX walkthrough`, `Product approval`)
+     */
+    verifyBy: string;
+    /** Optional freeform notes. */
+    notes?: string;
 }
 ```
 
@@ -129,17 +124,17 @@ export type SpecLayer = 'formal' | 'runtime' | 'human';
 
 ```ts
 export interface SplitResult {
-  /** Contents of `specFormal.md` — items with `layer === 'formal'`. */
-  specFormal: string;
-  /** Contents of `specRuntime.md` — items with `layer === 'runtime'` or `'human'`. */
-  specRuntime: string;
-  /** Coverage summary for downstream tooling. */
-  summary: {
-    total: number;
-    formalCount: number;
-    runtimeCount: number;
-    humanCount: number;
-  };
+    /** Contents of `specFormal.md` — items with `layer === 'formal'`. */
+    specFormal: string;
+    /** Contents of `specRuntime.md` — items with `layer === 'runtime'` or `'human'`. */
+    specRuntime: string;
+    /** Coverage summary for downstream tooling. */
+    summary: {
+        total: number;
+        formalCount: number;
+        runtimeCount: number;
+        humanCount: number;
+    };
 }
 ```
 <!-- kiwa-public-api:end -->

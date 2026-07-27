@@ -112,7 +112,7 @@ KV の `watch` は変更を待ち続ける watcher ではなく、呼び出し�
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -123,7 +123,7 @@ KV の `watch` は変更を待ち続ける watcher ではなく、呼び出し�
 Compile a NATS subject pattern (`orders.&gt;`, `orders.*.created`) into a regex. `*` matches exactly one token, `&gt;` matches one or more trailing tokens. Literal matches are supported as-is.
 
 ```ts
-export function compileSubject(pattern: string): SubjectMatcher;
+export declare function compileSubject(pattern: string): SubjectMatcher;
 ```
 
 #### `CONSUMER_LAG_TELEMETRY_SYMBOL`
@@ -131,7 +131,7 @@ export function compileSubject(pattern: string): SubjectMatcher;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L13) `packages/streaming/src/semantics/consumer-lag-telemetry.ts`
 
 ```ts
-export declare const CONSUMER_LAG_TELEMETRY_SYMBOL: typeof CONSUMER_LAG_TELEMETRY_SYMBOL;
+export declare const CONSUMER_LAG_TELEMETRY_SYMBOL: unique symbol;
 ```
 
 #### `createConsumerLagTelemetry`
@@ -141,9 +141,7 @@ export declare const CONSUMER_LAG_TELEMETRY_SYMBOL: typeof CONSUMER_LAG_TELEMETR
 Create a consumer-lag + telemetry aggregator. Producers call `recordHighWatermark` on each append, consumers call `recordCommittedOffset` on each commit. `snapshot()` returns the pair as a single row — the same shape observability platforms pull off Kafka via JMX exports.
 
 ```ts
-export function createConsumerLagTelemetry(
-  config: ConsumerLagTelemetryConfig,
-): ConsumerLagTelemetry;
+export declare function createConsumerLagTelemetry(config: ConsumerLagTelemetryConfig): ConsumerLagTelemetry;
 ```
 
 #### `createDeadLetterQueue`
@@ -153,9 +151,7 @@ export function createConsumerLagTelemetry(
 Create a DLQ-aware handler. Each incoming message is invoked against `handler`; on error, the message is re-tried up to `retryPolicy.maxAttempts` total attempts. When the budget is exhausted, the message is quarantined with the last error message + attempt count.
 
 ```ts
-export function createDeadLetterQueue<TValue = unknown, TKey = string>(
-  config: DeadLetterQueueConfig<TValue, TKey>,
-): DeadLetterQueue<TValue, TKey>;
+export declare function createDeadLetterQueue<TValue = unknown, TKey = string>(config: DeadLetterQueueConfig<TValue, TKey>): DeadLetterQueue<TValue, TKey>;
 ```
 
 #### `createExactlyOnceSemantics`
@@ -165,9 +161,7 @@ export function createDeadLetterQueue<TValue = unknown, TKey = string>(
 Create the cross-provider exactly-once semantics wrapper. Records enqueued between `begin()` and `commit()` become part of an atomic batch — nothing lands until commit succeeds. `abort()` discards the batch, and a `read-committed` filter excludes any message tagged with an aborted batch id (delivered as a header `x-kiwa-txn-aborted: true`).
 
 ```ts
-export function createExactlyOnceSemantics<TValue = unknown>(
-  config: ExactlyOnceConfig,
-): ExactlyOnceSemantics<TValue>;
+export declare function createExactlyOnceSemantics<TValue = unknown>(config: ExactlyOnceConfig): ExactlyOnceSemantics<TValue>;
 ```
 
 #### `createFidelityHarness`
@@ -177,7 +171,7 @@ export function createExactlyOnceSemantics<TValue = unknown>(
 Default grid — Kafka + Redpanda cover the Kafka-shaped axes (raw protocol, consumer group, schema evolution, transactions, exactly-once, lag). NATS covers the JetStream + KV/Object axes + shares exactly-once + lag. `not-applicable` marks a real-world mismatch (e.g. NATS has no raw Kafka wire protocol) so tests can distinguish "missing on purpose" from "todo".
 
 ```ts
-export function createFidelityHarness(): FidelityHarness;
+export declare function createFidelityHarness(): FidelityHarness;
 ```
 
 #### `createIdempotentProducer`
@@ -187,7 +181,7 @@ export function createFidelityHarness(): FidelityHarness;
 Idempotent producer — dedups (producerId, sequenceNumber) pairs so retries from the client side don't produce double writes. Kafka's real implementation stores (pid, seq) → last offset per partition; the mock uses a single global set which is enough to model the observable behavior.
 
 ```ts
-export function createIdempotentProducer(config: IdempotentProducerConfig): IdempotentProducer;
+export declare function createIdempotentProducer(config: IdempotentProducerConfig): IdempotentProducer;
 ```
 
 #### `createKafkaConsumerGroup`
@@ -197,7 +191,7 @@ export function createIdempotentProducer(config: IdempotentProducerConfig): Idem
 Create a coordinator-side consumer-group model. Static members (`groupInstanceId` set) survive a re-join without triggering a rebalance — this is the KIP-345 flow that keeps assignments sticky across pod restarts. Cooperative protocol emits `reassignedMembers` = only those whose partitions moved, so tests can assert incremental behavior.
 
 ```ts
-export function createKafkaConsumerGroup(config: KafkaConsumerGroupConfig): KafkaConsumerGroup;
+export declare function createKafkaConsumerGroup(config: KafkaConsumerGroupConfig): KafkaConsumerGroup;
 ```
 
 #### `createKafkaMock`
@@ -207,7 +201,7 @@ export function createKafkaConsumerGroup(config: KafkaConsumerGroupConfig): Kafk
 Create a Kafka-shaped mock — the object returned mirrors the surface of `new Kafka({...})` from the `kafkajs` package. Every producer / consumer / admin issued from the same mock shares topic state so tests can write in one client and assert in another.
 
 ```ts
-export function createKafkaMock(config?: KafkaMockConfig): KafkaMock;
+export declare function createKafkaMock(config?: KafkaMockConfig): KafkaMock;
 ```
 
 #### `createKafkaRawProtocol`
@@ -217,7 +211,7 @@ export function createKafkaMock(config?: KafkaMockConfig): KafkaMock;
 Create a Kafka raw-protocol semantics model. Exposes the pieces of the wire protocol that show up in exactly-once tests: producer id + epoch, txn coordinator state, incremental fetch sessions, and ISR + high-watermark.
 
 ```ts
-export function createKafkaRawProtocol(config?: KafkaRawProtocolConfig): KafkaRawProtocol;
+export declare function createKafkaRawProtocol(config?: KafkaRawProtocolConfig): KafkaRawProtocol;
 ```
 
 #### `createNatsJetStreamDurable`
@@ -227,9 +221,7 @@ export function createKafkaRawProtocol(config?: KafkaRawProtocolConfig): KafkaRa
 Create a durable-consumer model. `deliver(now)` picks the next eligible message (either a new one or a redelivery whose backoff has elapsed) and increments its attempt count. On the `maxDeliver`+1st failure, the message is quarantined for inspection.
 
 ```ts
-export function createNatsJetStreamDurable<TValue = unknown>(
-  config: DurableConsumerConfig,
-): NatsJetStreamDurable<TValue>;
+export declare function createNatsJetStreamDurable<TValue = unknown>(config: DurableConsumerConfig): NatsJetStreamDurable<TValue>;
 ```
 
 #### `createNatsKvObject`
@@ -239,7 +231,7 @@ export function createNatsJetStreamDurable<TValue = unknown>(
 Create a combined KV + Object-store model. KV supports history depth + delete tombstones; Object splits inputs into chunks with per-chunk digest and an optional LZ4-tagged compression pass so tests can validate the chunk boundary + digest + reassembly.
 
 ```ts
-export function createNatsKvObject(): NatsKvObject;
+export declare function createNatsKvObject(): NatsKvObject;
 ```
 
 #### `createNatsMock`
@@ -249,7 +241,7 @@ export function createNatsKvObject(): NatsKvObject;
 Create a NATS-shaped mock — the returned object mirrors the surface of `connect({...})` from the `nats` package. All subscriptions / streams / stores share one instance so tests can publish in one place and observe in another.
 
 ```ts
-export function createNatsMock(config?: NatsMockConfig): NatsMock;
+export declare function createNatsMock(config?: NatsMockConfig): NatsMock;
 ```
 
 #### `createReadCommittedFilter`
@@ -259,9 +251,7 @@ export function createNatsMock(config?: NatsMockConfig): NatsMock;
 Read-committed filter — shaped like kafkajs's `isolationLevel: 'read_committed'` consumer flag. In the mock, aborted transactions are never flushed to the underlying broker so the filter is a no-op by construction; the identity exists as a symmetric API surface for tests.
 
 ```ts
-export function createReadCommittedFilter(
-  level: IsolationLevel = 'read-committed',
-): ReadCommittedFilter;
+export declare function createReadCommittedFilter(level?: IsolationLevel): ReadCommittedFilter;
 ```
 
 #### `createRedpandaMock`
@@ -271,7 +261,7 @@ export function createReadCommittedFilter(
 Create a Redpanda-shaped mock. Under the hood it's the same broker mock as Kafka + a schema registry — the split exists so tests targeting Redpanda can pick the exact symbol / surface they want to assert against.
 
 ```ts
-export function createRedpandaMock(config?: RedpandaMockConfig): RedpandaMock;
+export declare function createRedpandaMock(config?: RedpandaMockConfig): RedpandaMock;
 ```
 
 #### `createRedpandaSchemaEvolution`
@@ -281,9 +271,7 @@ export function createRedpandaMock(config?: RedpandaMockConfig): RedpandaMock;
 Create a Redpanda schema-evolution registry. Registration enforces the subject's current compat mode + tracks a schema reference graph (`references`) so tests can validate composed schemas (Order → Address).
 
 ```ts
-export function createRedpandaSchemaEvolution(
-  config?: RedpandaSchemaEvolutionConfig,
-): RedpandaSchemaEvolution;
+export declare function createRedpandaSchemaEvolution(config?: RedpandaSchemaEvolutionConfig): RedpandaSchemaEvolution;
 ```
 
 #### `createRedpandaTransactions`
@@ -293,9 +281,7 @@ export function createRedpandaSchemaEvolution(
 Create the Redpanda transaction coordinator model. Fencing is enforced via `guardEpoch(transactionalId, providedEpoch)` — the same call the broker uses to reject stale producers when the same `transactional.id` re-registers.
 
 ```ts
-export function createRedpandaTransactions(
-  config?: RedpandaTransactionsConfig,
-): RedpandaTransactions;
+export declare function createRedpandaTransactions(config?: RedpandaTransactionsConfig): RedpandaTransactions;
 ```
 
 #### `createSchemaRegistry`
@@ -305,7 +291,7 @@ export function createRedpandaTransactions(
 Create a Confluent-shaped schema registry mock. Every registered schema gets a monotonically increasing id + subject-scoped version. Compatibility enforcement is structural — see `checkCompatibility` for the rule set.
 
 ```ts
-export function createSchemaRegistry(config?: SchemaRegistryConfig): SchemaRegistry;
+export declare function createSchemaRegistry(config?: SchemaRegistryConfig): SchemaRegistry;
 ```
 
 #### `createTransactionalProducer`
@@ -315,21 +301,21 @@ export function createSchemaRegistry(config?: SchemaRegistryConfig): SchemaRegis
 Transactional producer — messages sent between beginTransaction() and commitTransaction() are only visible to read-committed consumers after the commit lands. abortTransaction() marks the batch aborted and read-committed consumers skip it entirely. The mock defers the actual `producer.send()` until commit — this matches the observable behavior read-committed consumers see, without modeling the transaction coordinator's on-disk state.
 
 ```ts
-export function createTransactionalProducer(
-  config: TransactionalProducerConfig,
-): TransactionalProducer;
+export declare function createTransactionalProducer(config: TransactionalProducerConfig): TransactionalProducer;
 ```
 
 #### `dispatchPipelineEvent`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L53) `packages/streaming/src/semantics/pipeline-orchestrator.ts`
+公開 entry point から解決しています。
+
+`dispatchEvent` を `dispatchPipelineEvent` として公開しています。
 
 ```ts
-export function dispatchPipelineEvent(input: {
-  session: PipelineSession;
-  event: PipelineEvent;
-  timestamp: string;
-}): PipelineSession;
+export {
+  startPipeline,
+  dispatchEvent as dispatchPipelineEvent,
+  summarizePipeline,
+} from './pipeline-orchestrator.js';
 ```
 
 #### `DLQ_SYMBOL`
@@ -337,7 +323,7 @@ export function dispatchPipelineEvent(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L10) `packages/streaming/src/dlq.ts`
 
 ```ts
-export declare const DLQ_SYMBOL: typeof DLQ_SYMBOL;
+export declare const DLQ_SYMBOL: unique symbol;
 ```
 
 #### `EXACTLY_ONCE_SEMANTICS_SYMBOL`
@@ -345,7 +331,7 @@ export declare const DLQ_SYMBOL: typeof DLQ_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L12) `packages/streaming/src/semantics/exactly-once.ts`
 
 ```ts
-export declare const EXACTLY_ONCE_SEMANTICS_SYMBOL: typeof EXACTLY_ONCE_SEMANTICS_SYMBOL;
+export declare const EXACTLY_ONCE_SEMANTICS_SYMBOL: unique symbol;
 ```
 
 #### `FIDELITY_HARNESS_SYMBOL`
@@ -353,7 +339,7 @@ export declare const EXACTLY_ONCE_SEMANTICS_SYMBOL: typeof EXACTLY_ONCE_SEMANTIC
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L9) `packages/streaming/src/semantics/fidelity-harness.ts`
 
 ```ts
-export declare const FIDELITY_HARNESS_SYMBOL: typeof FIDELITY_HARNESS_SYMBOL;
+export declare const FIDELITY_HARNESS_SYMBOL: unique symbol;
 ```
 
 #### `IDEMPOTENT_PRODUCER_SYMBOL`
@@ -361,7 +347,7 @@ export declare const FIDELITY_HARNESS_SYMBOL: typeof FIDELITY_HARNESS_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L10) `packages/streaming/src/exactly-once.ts`
 
 ```ts
-export declare const IDEMPOTENT_PRODUCER_SYMBOL: typeof IDEMPOTENT_PRODUCER_SYMBOL;
+export declare const IDEMPOTENT_PRODUCER_SYMBOL: unique symbol;
 ```
 
 #### `isConsumerLagTelemetry`
@@ -371,7 +357,7 @@ export declare const IDEMPOTENT_PRODUCER_SYMBOL: typeof IDEMPOTENT_PRODUCER_SYMB
 Type guard: recognize a ConsumerLagTelemetry.
 
 ```ts
-export function isConsumerLagTelemetry(value: unknown): value is ConsumerLagTelemetry;
+export declare function isConsumerLagTelemetry(value: unknown): value is ConsumerLagTelemetry;
 ```
 
 #### `isDeadLetterQueue`
@@ -381,7 +367,7 @@ export function isConsumerLagTelemetry(value: unknown): value is ConsumerLagTele
 Type guard: recognize a DeadLetterQueue.
 
 ```ts
-export function isDeadLetterQueue(value: unknown): value is DeadLetterQueue;
+export declare function isDeadLetterQueue(value: unknown): value is DeadLetterQueue;
 ```
 
 #### `isExactlyOnceSemantics`
@@ -391,7 +377,7 @@ export function isDeadLetterQueue(value: unknown): value is DeadLetterQueue;
 Type guard: recognize an ExactlyOnceSemantics wrapper.
 
 ```ts
-export function isExactlyOnceSemantics(value: unknown): value is ExactlyOnceSemantics<unknown>;
+export declare function isExactlyOnceSemantics(value: unknown): value is ExactlyOnceSemantics<unknown>;
 ```
 
 #### `isFidelityHarness`
@@ -401,7 +387,7 @@ export function isExactlyOnceSemantics(value: unknown): value is ExactlyOnceSema
 Type guard: recognize a FidelityHarness.
 
 ```ts
-export function isFidelityHarness(value: unknown): value is FidelityHarness;
+export declare function isFidelityHarness(value: unknown): value is FidelityHarness;
 ```
 
 #### `isIdempotentProducer`
@@ -411,7 +397,7 @@ export function isFidelityHarness(value: unknown): value is FidelityHarness;
 Type guard: recognize an IdempotentProducer.
 
 ```ts
-export function isIdempotentProducer(value: unknown): value is IdempotentProducer;
+export declare function isIdempotentProducer(value: unknown): value is IdempotentProducer;
 ```
 
 #### `isKafkaConsumerGroup`
@@ -421,7 +407,7 @@ export function isIdempotentProducer(value: unknown): value is IdempotentProduce
 Type guard: recognize a KafkaConsumerGroup.
 
 ```ts
-export function isKafkaConsumerGroup(value: unknown): value is KafkaConsumerGroup;
+export declare function isKafkaConsumerGroup(value: unknown): value is KafkaConsumerGroup;
 ```
 
 #### `isKafkaMock`
@@ -431,7 +417,7 @@ export function isKafkaConsumerGroup(value: unknown): value is KafkaConsumerGrou
 Type guard: recognize a KafkaMock.
 
 ```ts
-export function isKafkaMock(value: unknown): value is KafkaMock;
+export declare function isKafkaMock(value: unknown): value is KafkaMock;
 ```
 
 #### `isKafkaRawProtocol`
@@ -441,7 +427,7 @@ export function isKafkaMock(value: unknown): value is KafkaMock;
 Type guard: recognize a KafkaRawProtocol.
 
 ```ts
-export function isKafkaRawProtocol(value: unknown): value is KafkaRawProtocol;
+export declare function isKafkaRawProtocol(value: unknown): value is KafkaRawProtocol;
 ```
 
 #### `isNatsJetStreamDurable`
@@ -451,7 +437,7 @@ export function isKafkaRawProtocol(value: unknown): value is KafkaRawProtocol;
 Type guard: recognize a NatsJetStreamDurable.
 
 ```ts
-export function isNatsJetStreamDurable(value: unknown): value is NatsJetStreamDurable<unknown>;
+export declare function isNatsJetStreamDurable(value: unknown): value is NatsJetStreamDurable<unknown>;
 ```
 
 #### `isNatsKvObject`
@@ -461,7 +447,7 @@ export function isNatsJetStreamDurable(value: unknown): value is NatsJetStreamDu
 Type guard: recognize a NatsKvObject.
 
 ```ts
-export function isNatsKvObject(value: unknown): value is NatsKvObject;
+export declare function isNatsKvObject(value: unknown): value is NatsKvObject;
 ```
 
 #### `isNatsMock`
@@ -471,7 +457,7 @@ export function isNatsKvObject(value: unknown): value is NatsKvObject;
 Type guard: recognize a NatsMock.
 
 ```ts
-export function isNatsMock(value: unknown): value is NatsMock;
+export declare function isNatsMock(value: unknown): value is NatsMock;
 ```
 
 #### `isRealDriverMode`
@@ -481,7 +467,7 @@ export function isNatsMock(value: unknown): value is NatsMock;
 Env-gate — returns whether tests should also run the real driver against KIWA_MODE=real.
 
 ```ts
-export function isRealDriverMode(env: NodeJS.ProcessEnv = process.env): boolean;
+export declare function isRealDriverMode(env?: NodeJS.ProcessEnv): boolean;
 ```
 
 #### `isRedpandaMock`
@@ -491,7 +477,7 @@ export function isRealDriverMode(env: NodeJS.ProcessEnv = process.env): boolean;
 Type guard: recognize a RedpandaMock.
 
 ```ts
-export function isRedpandaMock(value: unknown): value is RedpandaMock;
+export declare function isRedpandaMock(value: unknown): value is RedpandaMock;
 ```
 
 #### `isRedpandaSchemaEvolution`
@@ -501,7 +487,7 @@ export function isRedpandaMock(value: unknown): value is RedpandaMock;
 Type guard: recognize a RedpandaSchemaEvolution.
 
 ```ts
-export function isRedpandaSchemaEvolution(value: unknown): value is RedpandaSchemaEvolution;
+export declare function isRedpandaSchemaEvolution(value: unknown): value is RedpandaSchemaEvolution;
 ```
 
 #### `isRedpandaTransactions`
@@ -511,7 +497,7 @@ export function isRedpandaSchemaEvolution(value: unknown): value is RedpandaSche
 Type guard: recognize a RedpandaTransactions instance.
 
 ```ts
-export function isRedpandaTransactions(value: unknown): value is RedpandaTransactions;
+export declare function isRedpandaTransactions(value: unknown): value is RedpandaTransactions;
 ```
 
 #### `isSchemaRegistry`
@@ -521,7 +507,7 @@ export function isRedpandaTransactions(value: unknown): value is RedpandaTransac
 Type guard: recognize a SchemaRegistry.
 
 ```ts
-export function isSchemaRegistry(value: unknown): value is SchemaRegistry;
+export declare function isSchemaRegistry(value: unknown): value is SchemaRegistry;
 ```
 
 #### `isTransactionalProducer`
@@ -531,7 +517,7 @@ export function isSchemaRegistry(value: unknown): value is SchemaRegistry;
 Type guard: recognize a TransactionalProducer.
 
 ```ts
-export function isTransactionalProducer(value: unknown): value is TransactionalProducer;
+export declare function isTransactionalProducer(value: unknown): value is TransactionalProducer;
 ```
 
 #### `KAFKA_ADMIN_SYMBOL`
@@ -539,7 +525,7 @@ export function isTransactionalProducer(value: unknown): value is TransactionalP
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L18) `packages/streaming/src/kafka.ts`
 
 ```ts
-export declare const KAFKA_ADMIN_SYMBOL: typeof KAFKA_ADMIN_SYMBOL;
+export declare const KAFKA_ADMIN_SYMBOL: unique symbol;
 ```
 
 #### `KAFKA_CONSUMER_GROUP_SYMBOL`
@@ -547,7 +533,7 @@ export declare const KAFKA_ADMIN_SYMBOL: typeof KAFKA_ADMIN_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L10) `packages/streaming/src/semantics/kafka-consumer-group.ts`
 
 ```ts
-export declare const KAFKA_CONSUMER_GROUP_SYMBOL: typeof KAFKA_CONSUMER_GROUP_SYMBOL;
+export declare const KAFKA_CONSUMER_GROUP_SYMBOL: unique symbol;
 ```
 
 #### `KAFKA_CONSUMER_SYMBOL`
@@ -555,7 +541,7 @@ export declare const KAFKA_CONSUMER_GROUP_SYMBOL: typeof KAFKA_CONSUMER_GROUP_SY
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L17) `packages/streaming/src/kafka.ts`
 
 ```ts
-export declare const KAFKA_CONSUMER_SYMBOL: typeof KAFKA_CONSUMER_SYMBOL;
+export declare const KAFKA_CONSUMER_SYMBOL: unique symbol;
 ```
 
 #### `KAFKA_MOCK_SYMBOL`
@@ -563,7 +549,7 @@ export declare const KAFKA_CONSUMER_SYMBOL: typeof KAFKA_CONSUMER_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L15) `packages/streaming/src/kafka.ts`
 
 ```ts
-export declare const KAFKA_MOCK_SYMBOL: typeof KAFKA_MOCK_SYMBOL;
+export declare const KAFKA_MOCK_SYMBOL: unique symbol;
 ```
 
 #### `KAFKA_PRODUCER_SYMBOL`
@@ -571,7 +557,7 @@ export declare const KAFKA_MOCK_SYMBOL: typeof KAFKA_MOCK_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L16) `packages/streaming/src/kafka.ts`
 
 ```ts
-export declare const KAFKA_PRODUCER_SYMBOL: typeof KAFKA_PRODUCER_SYMBOL;
+export declare const KAFKA_PRODUCER_SYMBOL: unique symbol;
 ```
 
 #### `KAFKA_RAW_PROTOCOL_SYMBOL`
@@ -579,7 +565,7 @@ export declare const KAFKA_PRODUCER_SYMBOL: typeof KAFKA_PRODUCER_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L15) `packages/streaming/src/semantics/kafka-raw-protocol.ts`
 
 ```ts
-export declare const KAFKA_RAW_PROTOCOL_SYMBOL: typeof KAFKA_RAW_PROTOCOL_SYMBOL;
+export declare const KAFKA_RAW_PROTOCOL_SYMBOL: unique symbol;
 ```
 
 #### `matchSubject`
@@ -589,7 +575,7 @@ export declare const KAFKA_RAW_PROTOCOL_SYMBOL: typeof KAFKA_RAW_PROTOCOL_SYMBOL
 Match a subject against a compiled pattern.
 
 ```ts
-export function matchSubject(matcher: SubjectMatcher, subject: string): boolean;
+export declare function matchSubject(matcher: SubjectMatcher, subject: string): boolean;
 ```
 
 #### `NATS_JETSTREAM_DURABLE_SYMBOL`
@@ -597,7 +583,7 @@ export function matchSubject(matcher: SubjectMatcher, subject: string): boolean;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L12) `packages/streaming/src/semantics/nats-jetstream-durable.ts`
 
 ```ts
-export declare const NATS_JETSTREAM_DURABLE_SYMBOL: typeof NATS_JETSTREAM_DURABLE_SYMBOL;
+export declare const NATS_JETSTREAM_DURABLE_SYMBOL: unique symbol;
 ```
 
 #### `NATS_JETSTREAM_SYMBOL`
@@ -605,7 +591,7 @@ export declare const NATS_JETSTREAM_DURABLE_SYMBOL: typeof NATS_JETSTREAM_DURABL
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L13) `packages/streaming/src/nats.ts`
 
 ```ts
-export declare const NATS_JETSTREAM_SYMBOL: typeof NATS_JETSTREAM_SYMBOL;
+export declare const NATS_JETSTREAM_SYMBOL: unique symbol;
 ```
 
 #### `NATS_KV_OBJECT_SYMBOL`
@@ -613,7 +599,7 @@ export declare const NATS_JETSTREAM_SYMBOL: typeof NATS_JETSTREAM_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L11) `packages/streaming/src/semantics/nats-kv-object.ts`
 
 ```ts
-export declare const NATS_KV_OBJECT_SYMBOL: typeof NATS_KV_OBJECT_SYMBOL;
+export declare const NATS_KV_OBJECT_SYMBOL: unique symbol;
 ```
 
 #### `NATS_KV_SYMBOL`
@@ -621,7 +607,7 @@ export declare const NATS_KV_OBJECT_SYMBOL: typeof NATS_KV_OBJECT_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L14) `packages/streaming/src/nats.ts`
 
 ```ts
-export declare const NATS_KV_SYMBOL: typeof NATS_KV_SYMBOL;
+export declare const NATS_KV_SYMBOL: unique symbol;
 ```
 
 #### `NATS_MOCK_SYMBOL`
@@ -629,7 +615,7 @@ export declare const NATS_KV_SYMBOL: typeof NATS_KV_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L12) `packages/streaming/src/nats.ts`
 
 ```ts
-export declare const NATS_MOCK_SYMBOL: typeof NATS_MOCK_SYMBOL;
+export declare const NATS_MOCK_SYMBOL: unique symbol;
 ```
 
 #### `NATS_OBJECT_SYMBOL`
@@ -637,7 +623,7 @@ export declare const NATS_MOCK_SYMBOL: typeof NATS_MOCK_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L15) `packages/streaming/src/nats.ts`
 
 ```ts
-export declare const NATS_OBJECT_SYMBOL: typeof NATS_OBJECT_SYMBOL;
+export declare const NATS_OBJECT_SYMBOL: unique symbol;
 ```
 
 #### `READ_COMMITTED_SYMBOL`
@@ -645,7 +631,7 @@ export declare const NATS_OBJECT_SYMBOL: typeof NATS_OBJECT_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L12) `packages/streaming/src/exactly-once.ts`
 
 ```ts
-export declare const READ_COMMITTED_SYMBOL: typeof READ_COMMITTED_SYMBOL;
+export declare const READ_COMMITTED_SYMBOL: unique symbol;
 ```
 
 #### `REDPANDA_MOCK_SYMBOL`
@@ -653,7 +639,7 @@ export declare const READ_COMMITTED_SYMBOL: typeof READ_COMMITTED_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/redpanda.ts#L14) `packages/streaming/src/redpanda.ts`
 
 ```ts
-export declare const REDPANDA_MOCK_SYMBOL: typeof REDPANDA_MOCK_SYMBOL;
+export declare const REDPANDA_MOCK_SYMBOL: unique symbol;
 ```
 
 #### `REDPANDA_SCHEMA_EVOLUTION_SYMBOL`
@@ -661,7 +647,7 @@ export declare const REDPANDA_MOCK_SYMBOL: typeof REDPANDA_MOCK_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L13) `packages/streaming/src/semantics/redpanda-schema-evolution.ts`
 
 ```ts
-export declare const REDPANDA_SCHEMA_EVOLUTION_SYMBOL: typeof REDPANDA_SCHEMA_EVOLUTION_SYMBOL;
+export declare const REDPANDA_SCHEMA_EVOLUTION_SYMBOL: unique symbol;
 ```
 
 #### `REDPANDA_TRANSACTIONS_SYMBOL`
@@ -669,7 +655,7 @@ export declare const REDPANDA_SCHEMA_EVOLUTION_SYMBOL: typeof REDPANDA_SCHEMA_EV
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L11) `packages/streaming/src/semantics/redpanda-transactions.ts`
 
 ```ts
-export declare const REDPANDA_TRANSACTIONS_SYMBOL: typeof REDPANDA_TRANSACTIONS_SYMBOL;
+export declare const REDPANDA_TRANSACTIONS_SYMBOL: unique symbol;
 ```
 
 #### `requiredKeyFor`
@@ -679,7 +665,7 @@ export declare const REDPANDA_TRANSACTIONS_SYMBOL: typeof REDPANDA_TRANSACTIONS_
 Which real-driver key an axis requires when KIWA_MODE=real is set. Tests check `requiredKeyFor(cell.axis)` and skip the real-driver assertion when the corresponding env var isn't present.
 
 ```ts
-export function requiredKeyFor(axis: SemanticsAxis): string | null;
+export declare function requiredKeyFor(axis: SemanticsAxis): string | null;
 ```
 
 #### `SCHEMA_REGISTRY_SYMBOL`
@@ -687,7 +673,7 @@ export function requiredKeyFor(axis: SemanticsAxis): string | null;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L12) `packages/streaming/src/schema-registry.ts`
 
 ```ts
-export declare const SCHEMA_REGISTRY_SYMBOL: typeof SCHEMA_REGISTRY_SYMBOL;
+export declare const SCHEMA_REGISTRY_SYMBOL: unique symbol;
 ```
 
 #### `startPipeline`
@@ -695,7 +681,9 @@ export declare const SCHEMA_REGISTRY_SYMBOL: typeof SCHEMA_REGISTRY_SYMBOL;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L41) `packages/streaming/src/semantics/pipeline-orchestrator.ts`
 
 ```ts
-export function startPipeline(input: { timestamp: string }): PipelineSession;
+export declare function startPipeline(input: {
+    timestamp: string;
+}): PipelineSession;
 ```
 
 #### `summarizePipeline`
@@ -703,7 +691,7 @@ export function startPipeline(input: { timestamp: string }): PipelineSession;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L158) `packages/streaming/src/semantics/pipeline-orchestrator.ts`
 
 ```ts
-export function summarizePipeline(session: PipelineSession): PipelineSummary;
+export declare function summarizePipeline(session: PipelineSession): PipelineSummary;
 ```
 
 #### `TRANSACTIONAL_PRODUCER_SYMBOL`
@@ -711,7 +699,7 @@ export function summarizePipeline(session: PipelineSession): PipelineSummary;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L11) `packages/streaming/src/exactly-once.ts`
 
 ```ts
-export declare const TRANSACTIONAL_PRODUCER_SYMBOL: typeof TRANSACTIONAL_PRODUCER_SYMBOL;
+export declare const TRANSACTIONAL_PRODUCER_SYMBOL: unique symbol;
 ```
 
 ### 型
@@ -722,9 +710,9 @@ export declare const TRANSACTIONAL_PRODUCER_SYMBOL: typeof TRANSACTIONAL_PRODUCE
 
 ```ts
 export interface AckPendingEntry {
-  readonly seq: number;
-  readonly deliveries: number;
-  readonly lastDeliveredAt: number;
+    readonly seq: number;
+    readonly deliveries: number;
+    readonly lastDeliveredAt: number;
 }
 ```
 
@@ -758,9 +746,9 @@ export type CellStatus = 'implemented' | 'not-applicable' | 'planned';
 
 ```ts
 export interface CommittedOffset {
-  readonly topic: string;
-  readonly partition: number;
-  readonly offset: number;
+    readonly topic: string;
+    readonly partition: number;
+    readonly offset: number;
 }
 ```
 
@@ -770,9 +758,9 @@ export interface CommittedOffset {
 
 ```ts
 export interface CompatibilityCheckResult {
-  readonly compatible: boolean;
-  readonly mode: CompatibilityMode;
-  readonly reasons: readonly string[];
+    readonly compatible: boolean;
+    readonly mode: CompatibilityMode;
+    readonly reasons: readonly string[];
 }
 ```
 
@@ -783,14 +771,7 @@ export interface CompatibilityCheckResult {
 Compatibility mode — controls whether a new schema version can be registered against an existing subject. See Confluent Schema Registry docs for the canonical semantics; the mock enforces the intent, not every corner case.
 
 ```ts
-export type CompatibilityMode =
-  | 'BACKWARD'
-  | 'FORWARD'
-  | 'FULL'
-  | 'BACKWARD_TRANSITIVE'
-  | 'FORWARD_TRANSITIVE'
-  | 'FULL_TRANSITIVE'
-  | 'NONE';
+export type CompatibilityMode = 'BACKWARD' | 'FORWARD' | 'FULL' | 'BACKWARD_TRANSITIVE' | 'FORWARD_TRANSITIVE' | 'FULL_TRANSITIVE' | 'NONE';
 ```
 
 #### `CompressionKind`
@@ -807,9 +788,9 @@ export type CompressionKind = 'none' | 'lz4';
 
 ```ts
 export interface ConsumerConfig {
-  readonly groupId: string;
-  readonly partitionAssigner?: PartitionAssigner;
-  readonly sessionTimeoutMs?: number;
+    readonly groupId: string;
+    readonly partitionAssigner?: PartitionAssigner;
+    readonly sessionTimeoutMs?: number;
 }
 ```
 
@@ -819,40 +800,28 @@ export interface ConsumerConfig {
 
 ```ts
 export interface ConsumerLagTelemetry {
-  readonly [CONSUMER_LAG_TELEMETRY_SYMBOL]: true;
-  readonly config: Required<ConsumerLagTelemetryConfig>;
-
-  /** Update the broker-side high watermark for a topic-partition. */
-  recordHighWatermark(topic: string, partition: number, offset: number, timestamp: number): void;
-
-  /** Update the consumer group's committed offset for a topic-partition. */
-  recordCommittedOffset(
-    consumerGroup: string,
-    topic: string,
-    partition: number,
-    offset: number,
-    timestamp: number,
-  ): void;
-
-  /** Capture a snapshot for a single (group, topic, partition). */
-  snapshot(input: {
-    readonly consumerGroup: string;
-    readonly topic: string;
-    readonly partition: number;
-    readonly now: number;
-  }): OffsetSnapshot | null;
-
-  /** Capture snapshots for every (group, topic, partition) known to the telemetry. */
-  snapshotAll(now: number): readonly OffsetSnapshot[];
-
-  /** Aggregate lag across all partitions of a topic for a single group. */
-  aggregateGroupLag(consumerGroup: string, topic: string, now: number): {
-    readonly totalOffsetLag: number;
-    readonly maxOffsetLag: number;
-    readonly partitionCount: number;
-  };
-
-  reset(): void;
+    readonly [CONSUMER_LAG_TELEMETRY_SYMBOL]: true;
+    readonly config: Required<ConsumerLagTelemetryConfig>;
+    /** Update the broker-side high watermark for a topic-partition. */
+    recordHighWatermark(topic: string, partition: number, offset: number, timestamp: number): void;
+    /** Update the consumer group's committed offset for a topic-partition. */
+    recordCommittedOffset(consumerGroup: string, topic: string, partition: number, offset: number, timestamp: number): void;
+    /** Capture a snapshot for a single (group, topic, partition). */
+    snapshot(input: {
+        readonly consumerGroup: string;
+        readonly topic: string;
+        readonly partition: number;
+        readonly now: number;
+    }): OffsetSnapshot | null;
+    /** Capture snapshots for every (group, topic, partition) known to the telemetry. */
+    snapshotAll(now: number): readonly OffsetSnapshot[];
+    /** Aggregate lag across all partitions of a topic for a single group. */
+    aggregateGroupLag(consumerGroup: string, topic: string, now: number): {
+        readonly totalOffsetLag: number;
+        readonly maxOffsetLag: number;
+        readonly partitionCount: number;
+    };
+    reset(): void;
 }
 ```
 
@@ -862,9 +831,9 @@ export interface ConsumerLagTelemetry {
 
 ```ts
 export interface ConsumerLagTelemetryConfig {
-  readonly provider: StreamingProvider;
-  /** Refresh interval in ms — throttles snapshot generation. Default 5_000. */
-  readonly refreshIntervalMs?: number;
+    readonly provider: StreamingProvider;
+    /** Refresh interval in ms — throttles snapshot generation. Default 5_000. */
+    readonly refreshIntervalMs?: number;
 }
 ```
 
@@ -876,10 +845,10 @@ DLQ (dead-letter queue) entry — a message that exceeded retry budget.
 
 ```ts
 export interface DeadLetterEntry<TValue = unknown, TKey = string> {
-  readonly original: StreamingMessage<TValue, TKey>;
-  readonly attempts: number;
-  readonly reason: string;
-  readonly quarantinedAt: number;
+    readonly original: StreamingMessage<TValue, TKey>;
+    readonly attempts: number;
+    readonly reason: string;
+    readonly quarantinedAt: number;
 }
 ```
 
@@ -889,16 +858,16 @@ export interface DeadLetterEntry<TValue = unknown, TKey = string> {
 
 ```ts
 export interface DeadLetterQueue<TValue = unknown, TKey = string> {
-  readonly [DLQ_SYMBOL]: true;
-  readonly topic: string;
-  readonly deadLetterTopic: string;
-  /** Process one message through the retry + quarantine chain. */
-  handle(message: StreamingMessage<TValue, TKey>): Promise<'handled' | 'quarantined'>;
-  /** Immutable snapshot of currently quarantined entries. */
-  quarantined(): readonly DeadLetterEntry<TValue, TKey>[];
-  /** Manually enqueue an entry into the DLQ (useful for injecting fixtures). */
-  quarantine(entry: DeadLetterEntry<TValue, TKey>): void;
-  reset(): void;
+    readonly [DLQ_SYMBOL]: true;
+    readonly topic: string;
+    readonly deadLetterTopic: string;
+    /** Process one message through the retry + quarantine chain. */
+    handle(message: StreamingMessage<TValue, TKey>): Promise<'handled' | 'quarantined'>;
+    /** Immutable snapshot of currently quarantined entries. */
+    quarantined(): readonly DeadLetterEntry<TValue, TKey>[];
+    /** Manually enqueue an entry into the DLQ (useful for injecting fixtures). */
+    quarantine(entry: DeadLetterEntry<TValue, TKey>): void;
+    reset(): void;
 }
 ```
 
@@ -908,11 +877,11 @@ export interface DeadLetterQueue<TValue = unknown, TKey = string> {
 
 ```ts
 export interface DeadLetterQueueConfig<TValue = unknown, TKey = string> {
-  readonly topic: string;
-  readonly handler: MessageHandler<TValue, TKey>;
-  readonly retryPolicy: RetryPolicy;
-  /** Optional callback that receives every quarantined entry — useful for alert wiring. */
-  readonly onDeadLetter?: (entry: DeadLetterEntry<TValue, TKey>) => void;
+    readonly topic: string;
+    readonly handler: MessageHandler<TValue, TKey>;
+    readonly retryPolicy: RetryPolicy;
+    /** Optional callback that receives every quarantined entry — useful for alert wiring. */
+    readonly onDeadLetter?: (entry: DeadLetterEntry<TValue, TKey>) => void;
 }
 ```
 
@@ -922,10 +891,10 @@ export interface DeadLetterQueueConfig<TValue = unknown, TKey = string> {
 
 ```ts
 export interface DeliveryAttempt<TValue = unknown> {
-  readonly seq: number;
-  readonly attempt: number;
-  readonly deliveredAt: number;
-  readonly message: StreamingMessage<TValue>;
+    readonly seq: number;
+    readonly attempt: number;
+    readonly deliveredAt: number;
+    readonly message: StreamingMessage<TValue>;
 }
 ```
 
@@ -935,18 +904,18 @@ export interface DeliveryAttempt<TValue = unknown> {
 
 ```ts
 export interface DurableConsumerConfig {
-  readonly durableName: string;
-  readonly filterSubject?: string;
-  /** ack_wait — after this many ms with no ack, the message is redelivered. Default 30_000. */
-  readonly ackWaitMs?: number;
-  /** max_deliver — total delivery attempts before quarantine. Default 3. */
-  readonly maxDeliver?: number;
-  readonly ackPolicy?: AckPolicy;
-  /**
-   * backoff schedule (ms) — delay between redelivery attempts. When exhausted,
-   * the last entry is used for further redeliveries. Empty ⇒ immediate.
-   */
-  readonly backoff?: readonly number[];
+    readonly durableName: string;
+    readonly filterSubject?: string;
+    /** ack_wait — after this many ms with no ack, the message is redelivered. Default 30_000. */
+    readonly ackWaitMs?: number;
+    /** max_deliver — total delivery attempts before quarantine. Default 3. */
+    readonly maxDeliver?: number;
+    readonly ackPolicy?: AckPolicy;
+    /**
+     * backoff schedule (ms) — delay between redelivery attempts. When exhausted,
+     * the last entry is used for further redeliveries. Empty ⇒ immediate.
+     */
+    readonly backoff?: readonly number[];
 }
 ```
 
@@ -956,9 +925,9 @@ export interface DurableConsumerConfig {
 
 ```ts
 export interface EvolutionCheckResult {
-  readonly compatible: boolean;
-  readonly mode: CompatibilityMode;
-  readonly reasons: readonly string[];
+    readonly compatible: boolean;
+    readonly mode: CompatibilityMode;
+    readonly reasons: readonly string[];
 }
 ```
 
@@ -968,13 +937,13 @@ export interface EvolutionCheckResult {
 
 ```ts
 export interface EvolutionSchema {
-  readonly id: number;
-  readonly subject: string;
-  readonly version: number;
-  readonly kind: SchemaKind;
-  readonly schema: string;
-  readonly references: readonly SchemaReference[];
-  readonly registeredAt: number;
+    readonly id: number;
+    readonly subject: string;
+    readonly version: number;
+    readonly kind: SchemaKind;
+    readonly schema: string;
+    readonly references: readonly SchemaReference[];
+    readonly registeredAt: number;
 }
 ```
 
@@ -984,18 +953,29 @@ export interface EvolutionSchema {
 
 ```ts
 export interface ExactlyOnceConfig {
-  readonly provider: StreamingProvider;
-  readonly transactionalId: string;
-  readonly isolationLevel?: IsolationLevel;
+    readonly provider: StreamingProvider;
+    readonly transactionalId: string;
+    readonly isolationLevel?: IsolationLevel;
 }
 ```
 
 #### `ExactlyOnceIsolationLevel`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L16) `packages/streaming/src/semantics/exactly-once.ts`
+公開 entry point から解決しています。
+
+`IsolationLevel` を `ExactlyOnceIsolationLevel` として公開しています。
 
 ```ts
-export type ExactlyOnceIsolationLevel = 'read-uncommitted' | 'read-committed';
+export {
+  createExactlyOnceSemantics,
+  EXACTLY_ONCE_SEMANTICS_SYMBOL,
+  isExactlyOnceSemantics,
+  type ExactlyOnceConfig,
+  type ExactlyOnceSemantics,
+  type IsolationLevel as ExactlyOnceIsolationLevel,
+  type PendingRecord,
+  type TxnState as ExactlyOnceTxnState,
+} from './exactly-once.js';
 ```
 
 #### `ExactlyOnceSemantics`
@@ -1004,28 +984,36 @@ export type ExactlyOnceIsolationLevel = 'read-uncommitted' | 'read-committed';
 
 ```ts
 export interface ExactlyOnceSemantics<TValue = unknown> {
-  readonly [EXACTLY_ONCE_SEMANTICS_SYMBOL]: true;
-  readonly config: Required<ExactlyOnceConfig>;
-
-  begin(): void;
-  send(record: PendingRecord<TValue>): void;
-  commit(): readonly StreamingMessage<TValue>[];
-  abort(): void;
-  state(): TxnState;
-
-  /** Filter a stream according to the configured isolation level. */
-  filter(messages: readonly StreamingMessage<TValue>[]): readonly StreamingMessage<TValue>[];
-
-  reset(): void;
+    readonly [EXACTLY_ONCE_SEMANTICS_SYMBOL]: true;
+    readonly config: Required<ExactlyOnceConfig>;
+    begin(): void;
+    send(record: PendingRecord<TValue>): void;
+    commit(): readonly StreamingMessage<TValue>[];
+    abort(): void;
+    state(): TxnState;
+    /** Filter a stream according to the configured isolation level. */
+    filter(messages: readonly StreamingMessage<TValue>[]): readonly StreamingMessage<TValue>[];
+    reset(): void;
 }
 ```
 
 #### `ExactlyOnceTxnState`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L30) `packages/streaming/src/semantics/exactly-once.ts`
+公開 entry point から解決しています。
+
+`TxnState` を `ExactlyOnceTxnState` として公開しています。
 
 ```ts
-export type ExactlyOnceTxnState = 'idle' | 'active' | 'committed' | 'aborted';
+export {
+  createExactlyOnceSemantics,
+  EXACTLY_ONCE_SEMANTICS_SYMBOL,
+  isExactlyOnceSemantics,
+  type ExactlyOnceConfig,
+  type ExactlyOnceSemantics,
+  type IsolationLevel as ExactlyOnceIsolationLevel,
+  type PendingRecord,
+  type TxnState as ExactlyOnceTxnState,
+} from './exactly-once.js';
 ```
 
 #### `FetchSession`
@@ -1034,8 +1022,8 @@ export type ExactlyOnceTxnState = 'idle' | 'active' | 'committed' | 'aborted';
 
 ```ts
 export interface FetchSession {
-  readonly sessionId: number;
-  epoch: number;
+    readonly sessionId: number;
+    epoch: number;
 }
 ```
 
@@ -1045,10 +1033,10 @@ export interface FetchSession {
 
 ```ts
 export interface FidelityCell {
-  readonly provider: StreamingProvider;
-  readonly axis: SemanticsAxis;
-  readonly status: CellStatus;
-  readonly note?: string;
+    readonly provider: StreamingProvider;
+    readonly axis: SemanticsAxis;
+    readonly status: CellStatus;
+    readonly note?: string;
 }
 ```
 
@@ -1058,12 +1046,12 @@ export interface FidelityCell {
 
 ```ts
 export interface FidelityHarness {
-  readonly [FIDELITY_HARNESS_SYMBOL]: true;
-  readonly cells: readonly FidelityCell[];
-  cellFor(provider: StreamingProvider, axis: SemanticsAxis): FidelityCell | null;
-  cellsFor(provider: StreamingProvider): readonly FidelityCell[];
-  axesFor(provider: StreamingProvider, status: CellStatus): readonly SemanticsAxis[];
-  totalCells(): number;
+    readonly [FIDELITY_HARNESS_SYMBOL]: true;
+    readonly cells: readonly FidelityCell[];
+    cellFor(provider: StreamingProvider, axis: SemanticsAxis): FidelityCell | null;
+    cellsFor(provider: StreamingProvider): readonly FidelityCell[];
+    axesFor(provider: StreamingProvider, status: CellStatus): readonly SemanticsAxis[];
+    totalCells(): number;
 }
 ```
 
@@ -1073,12 +1061,12 @@ export interface FidelityHarness {
 
 ```ts
 export interface GroupMember {
-  readonly memberId: string;
-  /** Group instance id from KIP-345. Present ⇒ member is "static". */
-  readonly groupInstanceId: string | undefined;
-  readonly subscribedTopics: readonly string[];
-  lastHeartbeatAt: number;
-  assignedPartitions: Map<string, number[]>;
+    readonly memberId: string;
+    /** Group instance id from KIP-345. Present ⇒ member is "static". */
+    readonly groupInstanceId: string | undefined;
+    readonly subscribedTopics: readonly string[];
+    lastHeartbeatAt: number;
+    assignedPartitions: Map<string, number[]>;
 }
 ```
 
@@ -1088,16 +1076,13 @@ export interface GroupMember {
 
 ```ts
 export interface IdempotentProducer {
-  readonly [IDEMPOTENT_PRODUCER_SYMBOL]: true;
-  readonly producerId: string;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
-  send<TValue = unknown, TKey = string>(
-    record: ProducerRecord<TValue, TKey>,
-    sequenceNumber: number,
-  ): Promise<PublishResult[]>;
-  /** Returns true when the (producerId, sequenceNumber) has already been observed. */
-  isDuplicate(sequenceNumber: number): boolean;
+    readonly [IDEMPOTENT_PRODUCER_SYMBOL]: true;
+    readonly producerId: string;
+    connect(): Promise<void>;
+    disconnect(): Promise<void>;
+    send<TValue = unknown, TKey = string>(record: ProducerRecord<TValue, TKey>, sequenceNumber: number): Promise<PublishResult[]>;
+    /** Returns true when the (producerId, sequenceNumber) has already been observed. */
+    isDuplicate(sequenceNumber: number): boolean;
 }
 ```
 
@@ -1107,9 +1092,9 @@ export interface IdempotentProducer {
 
 ```ts
 export interface IdempotentProducerConfig {
-  readonly kafka: KafkaMock;
-  /** Producer identity used for dedup. In real Kafka this is broker-assigned. */
-  readonly producerId?: string;
+    readonly kafka: KafkaMock;
+    /** Producer identity used for dedup. In real Kafka this is broker-assigned. */
+    readonly producerId?: string;
 }
 ```
 
@@ -1127,11 +1112,11 @@ export type IsolationLevel = 'read-committed' | 'read-uncommitted';
 
 ```ts
 export interface JetStreamConfig {
-  readonly name: string;
-  readonly subjects: readonly string[];
-  /** Retention policy — `limits` = size/time based, `interest` = consumer-based, `workqueue` = consume-once. */
-  readonly retention?: 'limits' | 'interest' | 'workqueue';
-  readonly maxMsgs?: number;
+    readonly name: string;
+    readonly subjects: readonly string[];
+    /** Retention policy — `limits` = size/time based, `interest` = consumer-based, `workqueue` = consume-once. */
+    readonly retention?: 'limits' | 'interest' | 'workqueue';
+    readonly maxMsgs?: number;
 }
 ```
 
@@ -1141,10 +1126,13 @@ export interface JetStreamConfig {
 
 ```ts
 export interface JetStreamConsumer {
-  readonly durable: string;
-  fetch(batch: number): Promise<StreamingMessage[]>;
-  ack(message: StreamingMessage): void;
-  info(): { readonly delivered: number; readonly ackFloor: number };
+    readonly durable: string;
+    fetch(batch: number): Promise<StreamingMessage[]>;
+    ack(message: StreamingMessage): void;
+    info(): {
+        readonly delivered: number;
+        readonly ackFloor: number;
+    };
 }
 ```
 
@@ -1154,9 +1142,9 @@ export interface JetStreamConsumer {
 
 ```ts
 export interface JetStreamConsumerConfig {
-  readonly durable: string;
-  readonly filterSubject?: string;
-  readonly ackPolicy?: 'explicit' | 'none' | 'all';
+    readonly durable: string;
+    readonly filterSubject?: string;
+    readonly ackPolicy?: 'explicit' | 'none' | 'all';
 }
 ```
 
@@ -1166,9 +1154,9 @@ export interface JetStreamConsumerConfig {
 
 ```ts
 export interface JetStreamPublishAck {
-  readonly stream: string;
-  readonly seq: number;
-  readonly duplicate: boolean;
+    readonly stream: string;
+    readonly seq: number;
+    readonly duplicate: boolean;
 }
 ```
 
@@ -1178,12 +1166,12 @@ export interface JetStreamPublishAck {
 
 ```ts
 export interface JetStreamStore {
-  readonly [NATS_JETSTREAM_SYMBOL]: true;
-  addStream(config: JetStreamConfig): Promise<void>;
-  publish<TValue = unknown>(subject: string, data: TValue): Promise<JetStreamPublishAck>;
-  consumer(streamName: string, config: JetStreamConsumerConfig): Promise<JetStreamConsumer>;
-  listStreams(): readonly string[];
-  getStreamMessages(streamName: string): readonly StreamingMessage[];
+    readonly [NATS_JETSTREAM_SYMBOL]: true;
+    addStream(config: JetStreamConfig): Promise<void>;
+    publish<TValue = unknown>(subject: string, data: TValue): Promise<JetStreamPublishAck>;
+    consumer(streamName: string, config: JetStreamConsumerConfig): Promise<JetStreamConsumer>;
+    listStreams(): readonly string[];
+    getStreamMessages(streamName: string): readonly StreamingMessage[];
 }
 ```
 
@@ -1193,20 +1181,24 @@ export interface JetStreamStore {
 
 ```ts
 export interface KafkaAdmin {
-  readonly [KAFKA_ADMIN_SYMBOL]: true;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
-  createTopics(opts: {
-    readonly topics: readonly {
-      readonly topic: string;
-      readonly numPartitions?: number;
-    }[];
-  }): Promise<void>;
-  listTopics(): Promise<string[]>;
-  deleteTopics(opts: { readonly topics: readonly string[] }): Promise<void>;
-  fetchTopicMetadata(opts: {
-    readonly topics: readonly string[];
-  }): Promise<{ readonly topics: readonly KafkaTopicSpec[] }>;
+    readonly [KAFKA_ADMIN_SYMBOL]: true;
+    connect(): Promise<void>;
+    disconnect(): Promise<void>;
+    createTopics(opts: {
+        readonly topics: readonly {
+            readonly topic: string;
+            readonly numPartitions?: number;
+        }[];
+    }): Promise<void>;
+    listTopics(): Promise<string[]>;
+    deleteTopics(opts: {
+        readonly topics: readonly string[];
+    }): Promise<void>;
+    fetchTopicMetadata(opts: {
+        readonly topics: readonly string[];
+    }): Promise<{
+        readonly topics: readonly KafkaTopicSpec[];
+    }>;
 }
 ```
 
@@ -1216,19 +1208,26 @@ export interface KafkaAdmin {
 
 ```ts
 export interface KafkaConsumer {
-  readonly [KAFKA_CONSUMER_SYMBOL]: true;
-  readonly groupId: string;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
-  subscribe(opts: { readonly topics: readonly string[]; readonly fromBeginning?: boolean }): Promise<void>;
-  run<TValue = unknown, TKey = string>(opts: {
-    readonly eachMessage: MessageHandler<TValue, TKey>;
-    readonly autoCommit?: boolean;
-  }): Promise<void>;
-  commitOffsets(offsets: readonly CommittedOffset[]): Promise<void>;
-  seek(opts: { readonly topic: string; readonly partition: number; readonly offset: number }): void;
-  assignments(): ReadonlyMap<string, readonly number[]>;
-  isConnected(): boolean;
+    readonly [KAFKA_CONSUMER_SYMBOL]: true;
+    readonly groupId: string;
+    connect(): Promise<void>;
+    disconnect(): Promise<void>;
+    subscribe(opts: {
+        readonly topics: readonly string[];
+        readonly fromBeginning?: boolean;
+    }): Promise<void>;
+    run<TValue = unknown, TKey = string>(opts: {
+        readonly eachMessage: MessageHandler<TValue, TKey>;
+        readonly autoCommit?: boolean;
+    }): Promise<void>;
+    commitOffsets(offsets: readonly CommittedOffset[]): Promise<void>;
+    seek(opts: {
+        readonly topic: string;
+        readonly partition: number;
+        readonly offset: number;
+    }): void;
+    assignments(): ReadonlyMap<string, readonly number[]>;
+    isConnected(): boolean;
 }
 ```
 
@@ -1238,40 +1237,34 @@ export interface KafkaConsumer {
 
 ```ts
 export interface KafkaConsumerGroup {
-  readonly [KAFKA_CONSUMER_GROUP_SYMBOL]: true;
-  readonly groupId: string;
-  readonly config: Required<KafkaConsumerGroupConfig>;
-
-  /** Register topic partition counts so the coordinator can compute assignments. */
-  registerTopic(topic: string, numPartitions: number): void;
-
-  /** JoinGroup RPC — returns the assigned memberId. Blocks until SyncGroup. */
-  joinGroup(input: {
-    readonly subscribedTopics: readonly string[];
-    readonly groupInstanceId?: string;
-  }): { readonly memberId: string; readonly generationId: number };
-
-  /** LeaveGroup RPC — removes the member and triggers a rebalance. */
-  leaveGroup(memberId: string): void;
-
-  /** Heartbeat — extend the member's liveness. Throws if the member is unknown. */
-  heartbeat(memberId: string, now?: number): void;
-
-  /**
-   * Detect expired members (no heartbeat within `sessionTimeoutMs`) and remove
-   * them. Returns removed member ids. Callers typically loop this on a timer.
-   */
-  expireDeadMembers(now: number): readonly string[];
-
-  /** Force a rebalance — recomputes assignments across the current member set. */
-  rebalance(): RebalanceResult;
-
-  /** Current generation id. */
-  generation(): number;
-
-  listMembers(): readonly GroupMember[];
-
-  reset(): void;
+    readonly [KAFKA_CONSUMER_GROUP_SYMBOL]: true;
+    readonly groupId: string;
+    readonly config: Required<KafkaConsumerGroupConfig>;
+    /** Register topic partition counts so the coordinator can compute assignments. */
+    registerTopic(topic: string, numPartitions: number): void;
+    /** JoinGroup RPC — returns the assigned memberId. Blocks until SyncGroup. */
+    joinGroup(input: {
+        readonly subscribedTopics: readonly string[];
+        readonly groupInstanceId?: string;
+    }): {
+        readonly memberId: string;
+        readonly generationId: number;
+    };
+    /** LeaveGroup RPC — removes the member and triggers a rebalance. */
+    leaveGroup(memberId: string): void;
+    /** Heartbeat — extend the member's liveness. Throws if the member is unknown. */
+    heartbeat(memberId: string, now?: number): void;
+    /**
+     * Detect expired members (no heartbeat within `sessionTimeoutMs`) and remove
+     * them. Returns removed member ids. Callers typically loop this on a timer.
+     */
+    expireDeadMembers(now: number): readonly string[];
+    /** Force a rebalance — recomputes assignments across the current member set. */
+    rebalance(): RebalanceResult;
+    /** Current generation id. */
+    generation(): number;
+    listMembers(): readonly GroupMember[];
+    reset(): void;
 }
 ```
 
@@ -1281,11 +1274,11 @@ export interface KafkaConsumerGroup {
 
 ```ts
 export interface KafkaConsumerGroupConfig {
-  readonly groupId: string;
-  /** `sessionTimeoutMs` from KIP-32 — heartbeat expiry window. Default 30_000. */
-  readonly sessionTimeoutMs?: number;
-  /** Rebalance protocol — `cooperative` = KIP-429 incremental. Default `eager`. */
-  readonly protocol?: RebalanceProtocol;
+    readonly groupId: string;
+    /** `sessionTimeoutMs` from KIP-32 — heartbeat expiry window. Default 30_000. */
+    readonly sessionTimeoutMs?: number;
+    /** Rebalance protocol — `cooperative` = KIP-429 incremental. Default `eager`. */
+    readonly protocol?: RebalanceProtocol;
 }
 ```
 
@@ -1295,16 +1288,16 @@ export interface KafkaConsumerGroupConfig {
 
 ```ts
 export interface KafkaMock {
-  readonly [KAFKA_MOCK_SYMBOL]: true;
-  readonly config: KafkaMockConfig;
-  producer(): KafkaProducer;
-  consumer(config: ConsumerConfig): KafkaConsumer;
-  admin(): KafkaAdmin;
-  /** Reset all producers / consumers / topics — useful between test cases. */
-  reset(): void;
-  /** Direct topic access for lower-level assertions. */
-  getTopicMessages(topic: string): readonly StreamingMessage[];
-  getCommittedOffset(groupId: string, topic: string, partition: number): number | undefined;
+    readonly [KAFKA_MOCK_SYMBOL]: true;
+    readonly config: KafkaMockConfig;
+    producer(): KafkaProducer;
+    consumer(config: ConsumerConfig): KafkaConsumer;
+    admin(): KafkaAdmin;
+    /** Reset all producers / consumers / topics — useful between test cases. */
+    reset(): void;
+    /** Direct topic access for lower-level assertions. */
+    getTopicMessages(topic: string): readonly StreamingMessage[];
+    getCommittedOffset(groupId: string, topic: string, partition: number): number | undefined;
 }
 ```
 
@@ -1314,10 +1307,10 @@ export interface KafkaMock {
 
 ```ts
 export interface KafkaMockConfig {
-  readonly clientId?: string;
-  readonly brokers?: readonly string[];
-  /** Default partition count for auto-created topics. */
-  readonly defaultPartitionCount?: number;
+    readonly clientId?: string;
+    readonly brokers?: readonly string[];
+    /** Default partition count for auto-created topics. */
+    readonly defaultPartitionCount?: number;
 }
 ```
 
@@ -1327,14 +1320,12 @@ export interface KafkaMockConfig {
 
 ```ts
 export interface KafkaProducer {
-  readonly [KAFKA_PRODUCER_SYMBOL]: true;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
-  send<TValue = unknown, TKey = string>(
-    record: ProducerRecord<TValue, TKey>,
-  ): Promise<PublishResult[]>;
-  sendBatch(records: readonly ProducerRecord[]): Promise<PublishResult[]>;
-  isConnected(): boolean;
+    readonly [KAFKA_PRODUCER_SYMBOL]: true;
+    connect(): Promise<void>;
+    disconnect(): Promise<void>;
+    send<TValue = unknown, TKey = string>(record: ProducerRecord<TValue, TKey>): Promise<PublishResult[]>;
+    sendBatch(records: readonly ProducerRecord[]): Promise<PublishResult[]>;
+    isConnected(): boolean;
 }
 ```
 
@@ -1344,54 +1335,41 @@ export interface KafkaProducer {
 
 ```ts
 export interface KafkaRawProtocol {
-  readonly [KAFKA_RAW_PROTOCOL_SYMBOL]: true;
-  readonly config: Required<KafkaRawProtocolConfig>;
-
-  /** InitProducerId — assigns a fresh (producerId, epoch=0) pair. */
-  initProducerId(): ProducerIdentity;
-
-  /**
-   * Fence a producer identity — bumps the current epoch, which causes any
-   * older-epoch send to be rejected as `INVALID_PRODUCER_EPOCH`. Matches the
-   * KIP-98 fencing rule that a coordinator re-init bumps epoch.
-   */
-  fenceProducer(producerId: number): ProducerIdentity;
-
-  /** Return true if (producerId, epoch) is still the latest identity. */
-  isValidEpoch(identity: ProducerIdentity): boolean;
-
-  /** Transition the transaction coordinator state machine. Rejects invalid transitions. */
-  transitionTransaction(from: TransactionCoordinatorState, to: TransactionCoordinatorState): void;
-
-  /** Current transaction coordinator state. */
-  transactionState(): TransactionCoordinatorState;
-
-  /** Open a new incremental fetch session (KIP-227). */
-  openFetchSession(): FetchSession;
-
-  /** Advance a fetch session epoch and return the current one. Throws on stale sessions. */
-  bumpFetchSession(sessionId: number): number;
-
-  /** Add a broker id to the ISR set for the given topic-partition. */
-  addToIsr(topic: string, partition: number, brokerId: number): void;
-
-  /** Remove a broker id from the ISR set (lag / heartbeat timeout). */
-  removeFromIsr(topic: string, partition: number, brokerId: number): void;
-
-  /** Current ISR set for a topic-partition. */
-  getIsr(topic: string, partition: number): readonly number[];
-
-  /**
-   * Try to advance the high-watermark to `nextOffset`. Only succeeds when the
-   * ISR set size >= `minInSyncReplicas`. Returns the resulting HW.
-   */
-  advanceHighWatermark(topic: string, partition: number, nextOffset: number): number;
-
-  /** Current high watermark for a topic-partition. */
-  getHighWatermark(topic: string, partition: number): number;
-
-  /** Reset all state — useful between test cases. */
-  reset(): void;
+    readonly [KAFKA_RAW_PROTOCOL_SYMBOL]: true;
+    readonly config: Required<KafkaRawProtocolConfig>;
+    /** InitProducerId — assigns a fresh (producerId, epoch=0) pair. */
+    initProducerId(): ProducerIdentity;
+    /**
+     * Fence a producer identity — bumps the current epoch, which causes any
+     * older-epoch send to be rejected as `INVALID_PRODUCER_EPOCH`. Matches the
+     * KIP-98 fencing rule that a coordinator re-init bumps epoch.
+     */
+    fenceProducer(producerId: number): ProducerIdentity;
+    /** Return true if (producerId, epoch) is still the latest identity. */
+    isValidEpoch(identity: ProducerIdentity): boolean;
+    /** Transition the transaction coordinator state machine. Rejects invalid transitions. */
+    transitionTransaction(from: TransactionCoordinatorState, to: TransactionCoordinatorState): void;
+    /** Current transaction coordinator state. */
+    transactionState(): TransactionCoordinatorState;
+    /** Open a new incremental fetch session (KIP-227). */
+    openFetchSession(): FetchSession;
+    /** Advance a fetch session epoch and return the current one. Throws on stale sessions. */
+    bumpFetchSession(sessionId: number): number;
+    /** Add a broker id to the ISR set for the given topic-partition. */
+    addToIsr(topic: string, partition: number, brokerId: number): void;
+    /** Remove a broker id from the ISR set (lag / heartbeat timeout). */
+    removeFromIsr(topic: string, partition: number, brokerId: number): void;
+    /** Current ISR set for a topic-partition. */
+    getIsr(topic: string, partition: number): readonly number[];
+    /**
+     * Try to advance the high-watermark to `nextOffset`. Only succeeds when the
+     * ISR set size >= `minInSyncReplicas`. Returns the resulting HW.
+     */
+    advanceHighWatermark(topic: string, partition: number, nextOffset: number): number;
+    /** Current high watermark for a topic-partition. */
+    getHighWatermark(topic: string, partition: number): number;
+    /** Reset all state — useful between test cases. */
+    reset(): void;
 }
 ```
 
@@ -1401,10 +1379,10 @@ export interface KafkaRawProtocol {
 
 ```ts
 export interface KafkaRawProtocolConfig {
-  /** How many replicas a partition has. Default 3, matches broker.default. */
-  readonly replicationFactor?: number;
-  /** min.insync.replicas — commit gate. Default 2. */
-  readonly minInSyncReplicas?: number;
+    /** How many replicas a partition has. Default 3, matches broker.default. */
+    readonly replicationFactor?: number;
+    /** min.insync.replicas — commit gate. Default 2. */
+    readonly minInSyncReplicas?: number;
 }
 ```
 
@@ -1414,10 +1392,10 @@ export interface KafkaRawProtocolConfig {
 
 ```ts
 export interface KafkaTopicSpec {
-  readonly topic: string;
-  readonly numPartitions: number;
-  /** Optional per-partition ownership map — group id → member id. */
-  readonly assignments?: ReadonlyMap<number, string>;
+    readonly topic: string;
+    readonly numPartitions: number;
+    /** Optional per-partition ownership map — group id → member id. */
+    readonly assignments?: ReadonlyMap<number, string>;
 }
 ```
 
@@ -1427,11 +1405,11 @@ export interface KafkaTopicSpec {
 
 ```ts
 export interface KvBucketConfig {
-  readonly bucket: string;
-  /** History depth — max revisions kept per key. Default 1. */
-  readonly historyDepth?: number;
-  /** ttl in ms — 0 = keep forever. Default 0. */
-  readonly ttlMs?: number;
+    readonly bucket: string;
+    /** History depth — max revisions kept per key. Default 1. */
+    readonly historyDepth?: number;
+    /** ttl in ms — 0 = keep forever. Default 0. */
+    readonly ttlMs?: number;
 }
 ```
 
@@ -1441,11 +1419,11 @@ export interface KvBucketConfig {
 
 ```ts
 export interface KVEntry<TValue = unknown> {
-  readonly bucket: string;
-  readonly key: string;
-  readonly value: TValue;
-  readonly revision: number;
-  readonly timestamp: number;
+    readonly bucket: string;
+    readonly key: string;
+    readonly value: TValue;
+    readonly revision: number;
+    readonly timestamp: number;
 }
 ```
 
@@ -1455,12 +1433,12 @@ export interface KVEntry<TValue = unknown> {
 
 ```ts
 export interface KvRevision<TValue = unknown> {
-  readonly bucket: string;
-  readonly key: string;
-  readonly value: TValue;
-  readonly revision: number;
-  readonly createdAt: number;
-  readonly operation: 'put' | 'delete';
+    readonly bucket: string;
+    readonly key: string;
+    readonly value: TValue;
+    readonly revision: number;
+    readonly createdAt: number;
+    readonly operation: 'put' | 'delete';
 }
 ```
 
@@ -1470,13 +1448,13 @@ export interface KvRevision<TValue = unknown> {
 
 ```ts
 export interface KVStore {
-  readonly [NATS_KV_SYMBOL]: true;
-  readonly bucket: string;
-  put<TValue = unknown>(key: string, value: TValue): Promise<number>;
-  get<TValue = unknown>(key: string): Promise<KVEntry<TValue> | null>;
-  delete(key: string): Promise<void>;
-  keys(): Promise<string[]>;
-  watch(): AsyncIterable<KVEntry>;
+    readonly [NATS_KV_SYMBOL]: true;
+    readonly bucket: string;
+    put<TValue = unknown>(key: string, value: TValue): Promise<number>;
+    get<TValue = unknown>(key: string): Promise<KVEntry<TValue> | null>;
+    delete(key: string): Promise<void>;
+    keys(): Promise<string[]>;
+    watch(): AsyncIterable<KVEntry>;
 }
 ```
 
@@ -1486,7 +1464,7 @@ export interface KVStore {
 
 ```ts
 export interface KvWatchEvent<TValue = unknown> {
-  readonly revision: KvRevision<TValue>;
+    readonly revision: KvRevision<TValue>;
 }
 ```
 
@@ -1497,9 +1475,7 @@ export interface KvWatchEvent<TValue = unknown> {
 Handler shape shared by consumer / group / subject subscribers.
 
 ```ts
-export type MessageHandler<TValue = unknown, TKey = string> = (
-  message: StreamingMessage<TValue, TKey>,
-) => void | Promise<void>;
+export type MessageHandler<TValue = unknown, TKey = string> = (message: StreamingMessage<TValue, TKey>) => void | Promise<void>;
 ```
 
 #### `NatsJetStreamDurable`
@@ -1508,38 +1484,36 @@ export type MessageHandler<TValue = unknown, TKey = string> = (
 
 ```ts
 export interface NatsJetStreamDurable<TValue = unknown> {
-  readonly [NATS_JETSTREAM_DURABLE_SYMBOL]: true;
-  readonly config: Required<
-    Pick<DurableConsumerConfig, 'durableName' | 'ackWaitMs' | 'maxDeliver' | 'ackPolicy'>
-  > & { readonly backoff: readonly number[]; readonly filterSubject: string | undefined };
-
-  /** Enqueue a fresh message onto the stream. Returns the assigned seq. */
-  publish(message: Omit<StreamingMessage<TValue>, 'offset'> & { readonly subject?: string }): number;
-
-  /** Deliver the next unacked / pending message to the consumer. */
-  deliver(now: number): DeliveryAttempt<TValue> | null;
-
-  /** Ack a delivered message by seq — marks it done. */
-  ack(seq: number): void;
-
-  /** Nack — mark the delivery failed. Redelivered on next `deliver()` respecting backoff. */
-  nack(seq: number, now: number): void;
-
-  /**
-   * Sweep — advance any pending deliveries whose `ack_wait` has elapsed. This
-   * is what real JetStream does on a timer; tests drive it explicitly.
-   */
-  sweepExpired(now: number): readonly number[];
-
-  /** Current ack-pending window (seq → deliveries + lastDeliveredAt). */
-  ackPending(): readonly AckPendingEntry[];
-
-  /** Messages that exceeded `maxDeliver` and were quarantined. */
-  quarantined(): readonly QuarantinedMessage<TValue>[];
-
-  info(): { readonly delivered: number; readonly ackFloor: number; readonly pending: number };
-
-  reset(): void;
+    readonly [NATS_JETSTREAM_DURABLE_SYMBOL]: true;
+    readonly config: Required<Pick<DurableConsumerConfig, 'durableName' | 'ackWaitMs' | 'maxDeliver' | 'ackPolicy'>> & {
+        readonly backoff: readonly number[];
+        readonly filterSubject: string | undefined;
+    };
+    /** Enqueue a fresh message onto the stream. Returns the assigned seq. */
+    publish(message: Omit<StreamingMessage<TValue>, 'offset'> & {
+        readonly subject?: string;
+    }): number;
+    /** Deliver the next unacked / pending message to the consumer. */
+    deliver(now: number): DeliveryAttempt<TValue> | null;
+    /** Ack a delivered message by seq — marks it done. */
+    ack(seq: number): void;
+    /** Nack — mark the delivery failed. Redelivered on next `deliver()` respecting backoff. */
+    nack(seq: number, now: number): void;
+    /**
+     * Sweep — advance any pending deliveries whose `ack_wait` has elapsed. This
+     * is what real JetStream does on a timer; tests drive it explicitly.
+     */
+    sweepExpired(now: number): readonly number[];
+    /** Current ack-pending window (seq → deliveries + lastDeliveredAt). */
+    ackPending(): readonly AckPendingEntry[];
+    /** Messages that exceeded `maxDeliver` and were quarantined. */
+    quarantined(): readonly QuarantinedMessage<TValue>[];
+    info(): {
+        readonly delivered: number;
+        readonly ackFloor: number;
+        readonly pending: number;
+    };
+    reset(): void;
 }
 ```
 
@@ -1549,22 +1523,19 @@ export interface NatsJetStreamDurable<TValue = unknown> {
 
 ```ts
 export interface NatsKvObject {
-  readonly [NATS_KV_OBJECT_SYMBOL]: true;
-
-  createKvBucket(config: KvBucketConfig): void;
-  putKv<TValue = unknown>(bucket: string, key: string, value: TValue): KvRevision<TValue>;
-  getKv<TValue = unknown>(bucket: string, key: string): KvRevision<TValue> | null;
-  historyKv<TValue = unknown>(bucket: string, key: string): readonly KvRevision<TValue>[];
-  deleteKv(bucket: string, key: string): KvRevision<null>;
-  watchKv(bucket: string): AsyncIterable<KvWatchEvent>;
-  emitWatchEvents(bucket: string, now: number): void;
-
-  createObjectBucket(config: ObjectBucketConfig): void;
-  putObject(bucket: string, name: string, bytes: Uint8Array): ObjectRecord;
-  getObject(bucket: string, name: string): ObjectRecord | null;
-  reassembleObject(bucket: string, name: string): Uint8Array | null;
-
-  reset(): void;
+    readonly [NATS_KV_OBJECT_SYMBOL]: true;
+    createKvBucket(config: KvBucketConfig): void;
+    putKv<TValue = unknown>(bucket: string, key: string, value: TValue): KvRevision<TValue>;
+    getKv<TValue = unknown>(bucket: string, key: string): KvRevision<TValue> | null;
+    historyKv<TValue = unknown>(bucket: string, key: string): readonly KvRevision<TValue>[];
+    deleteKv(bucket: string, key: string): KvRevision<null>;
+    watchKv(bucket: string): AsyncIterable<KvWatchEvent>;
+    emitWatchEvents(bucket: string, now: number): void;
+    createObjectBucket(config: ObjectBucketConfig): void;
+    putObject(bucket: string, name: string, bytes: Uint8Array): ObjectRecord;
+    getObject(bucket: string, name: string): ObjectRecord | null;
+    reassembleObject(bucket: string, name: string): Uint8Array | null;
+    reset(): void;
 }
 ```
 
@@ -1574,21 +1545,17 @@ export interface NatsKvObject {
 
 ```ts
 export interface NatsMock {
-  readonly [NATS_MOCK_SYMBOL]: true;
-  readonly config: NatsMockConfig;
-  publish<TValue = unknown>(
-    subject: string,
-    data: TValue,
-    options?: NatsPublishOptions,
-  ): Promise<PublishResult>;
-  subscribe<TValue = unknown>(subject: string, handler: MessageHandler<TValue>): NatsSubscription;
-  request<TIn = unknown, TOut = unknown>(subject: string, data: TIn): Promise<StreamingMessage<TOut>>;
-  jetstream(): JetStreamStore;
-  kv(bucket: string): KVStore;
-  objectStore(bucket: string): ObjectStore;
-  drain(): Promise<void>;
-  reset(): void;
-  getSubjectMessages(subject: string): readonly StreamingMessage[];
+    readonly [NATS_MOCK_SYMBOL]: true;
+    readonly config: NatsMockConfig;
+    publish<TValue = unknown>(subject: string, data: TValue, options?: NatsPublishOptions): Promise<PublishResult>;
+    subscribe<TValue = unknown>(subject: string, handler: MessageHandler<TValue>): NatsSubscription;
+    request<TIn = unknown, TOut = unknown>(subject: string, data: TIn): Promise<StreamingMessage<TOut>>;
+    jetstream(): JetStreamStore;
+    kv(bucket: string): KVStore;
+    objectStore(bucket: string): ObjectStore;
+    drain(): Promise<void>;
+    reset(): void;
+    getSubjectMessages(subject: string): readonly StreamingMessage[];
 }
 ```
 
@@ -1598,8 +1565,8 @@ export interface NatsMock {
 
 ```ts
 export interface NatsMockConfig {
-  readonly servers?: readonly string[];
-  readonly name?: string;
+    readonly servers?: readonly string[];
+    readonly name?: string;
 }
 ```
 
@@ -1609,8 +1576,8 @@ export interface NatsMockConfig {
 
 ```ts
 export interface NatsPublishOptions {
-  readonly headers?: Record<string, string>;
-  readonly reply?: string;
+    readonly headers?: Record<string, string>;
+    readonly reply?: string;
 }
 ```
 
@@ -1620,9 +1587,9 @@ export interface NatsPublishOptions {
 
 ```ts
 export interface NatsSubscription {
-  readonly subject: string;
-  unsubscribe(): void;
-  isClosed(): boolean;
+    readonly subject: string;
+    unsubscribe(): void;
+    isClosed(): boolean;
 }
 ```
 
@@ -1632,10 +1599,10 @@ export interface NatsSubscription {
 
 ```ts
 export interface ObjectBucketConfig {
-  readonly bucket: string;
-  /** Chunk size in bytes for object writes. Default 128 * 1024. */
-  readonly chunkSizeBytes?: number;
-  readonly compression?: CompressionKind;
+    readonly bucket: string;
+    /** Chunk size in bytes for object writes. Default 128 * 1024. */
+    readonly chunkSizeBytes?: number;
+    readonly compression?: CompressionKind;
 }
 ```
 
@@ -1645,9 +1612,9 @@ export interface ObjectBucketConfig {
 
 ```ts
 export interface ObjectChunk {
-  readonly index: number;
-  readonly bytes: Uint8Array;
-  readonly digest: string;
+    readonly index: number;
+    readonly bytes: Uint8Array;
+    readonly digest: string;
 }
 ```
 
@@ -1657,8 +1624,8 @@ export interface ObjectChunk {
 
 ```ts
 export interface ObjectEntry {
-  readonly info: ObjectInfo;
-  readonly data: Uint8Array;
+    readonly info: ObjectInfo;
+    readonly data: Uint8Array;
 }
 ```
 
@@ -1668,11 +1635,11 @@ export interface ObjectEntry {
 
 ```ts
 export interface ObjectInfo {
-  readonly bucket: string;
-  readonly name: string;
-  readonly size: number;
-  readonly digest: string;
-  readonly timestamp: number;
+    readonly bucket: string;
+    readonly name: string;
+    readonly size: number;
+    readonly digest: string;
+    readonly timestamp: number;
 }
 ```
 
@@ -1682,12 +1649,12 @@ export interface ObjectInfo {
 
 ```ts
 export interface ObjectRecord {
-  readonly bucket: string;
-  readonly name: string;
-  readonly size: number;
-  readonly chunks: readonly ObjectChunk[];
-  readonly compression: CompressionKind;
-  readonly writtenAt: number;
+    readonly bucket: string;
+    readonly name: string;
+    readonly size: number;
+    readonly chunks: readonly ObjectChunk[];
+    readonly compression: CompressionKind;
+    readonly writtenAt: number;
 }
 ```
 
@@ -1697,12 +1664,12 @@ export interface ObjectRecord {
 
 ```ts
 export interface ObjectStore {
-  readonly [NATS_OBJECT_SYMBOL]: true;
-  readonly bucket: string;
-  put(name: string, data: Uint8Array | string): Promise<ObjectInfo>;
-  get(name: string): Promise<ObjectEntry | null>;
-  delete(name: string): Promise<void>;
-  list(): Promise<ObjectInfo[]>;
+    readonly [NATS_OBJECT_SYMBOL]: true;
+    readonly bucket: string;
+    put(name: string, data: Uint8Array | string): Promise<ObjectInfo>;
+    get(name: string): Promise<ObjectEntry | null>;
+    delete(name: string): Promise<void>;
+    list(): Promise<ObjectInfo[]>;
 }
 ```
 
@@ -1712,16 +1679,16 @@ export interface ObjectStore {
 
 ```ts
 export interface OffsetSnapshot {
-  readonly topic: string;
-  readonly partition: number;
-  readonly consumerGroup: string;
-  readonly highWatermark: number;
-  readonly committedOffset: number;
-  readonly offsetLag: number;
-  readonly headTimestamp: number;
-  readonly lastConsumedTimestamp: number;
-  readonly timeLagMs: number;
-  readonly capturedAt: number;
+    readonly topic: string;
+    readonly partition: number;
+    readonly consumerGroup: string;
+    readonly highWatermark: number;
+    readonly committedOffset: number;
+    readonly offsetLag: number;
+    readonly headTimestamp: number;
+    readonly lastConsumedTimestamp: number;
+    readonly timeLagMs: number;
+    readonly capturedAt: number;
 }
 ```
 
@@ -1739,9 +1706,9 @@ export type PartitionAssigner = 'range' | 'round-robin';
 
 ```ts
 export interface PendingRecord<TValue = unknown> {
-  readonly topic: string;
-  readonly value: TValue;
-  readonly key: string | null;
+    readonly topic: string;
+    readonly value: TValue;
+    readonly key: string | null;
 }
 ```
 
@@ -1750,15 +1717,7 @@ export interface PendingRecord<TValue = unknown> {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L21) `packages/streaming/src/semantics/pipeline-orchestrator.ts`
 
 ```ts
-export type PipelineEvent =
-  | 'produce-succeeded'
-  | 'produce-failed'
-  | 'consume-succeeded'
-  | 'consume-failed'
-  | 'rebalance-triggered'
-  | 'rebalance-completed'
-  | 'dlq-message-added'
-  | 'stop-requested';
+export type PipelineEvent = 'produce-succeeded' | 'produce-failed' | 'consume-succeeded' | 'consume-failed' | 'rebalance-triggered' | 'rebalance-completed' | 'dlq-message-added' | 'stop-requested';
 ```
 
 #### `PipelineSession`
@@ -1767,13 +1726,13 @@ export type PipelineEvent =
 
 ```ts
 export interface PipelineSession {
-  state: PipelineState;
-  messagesProduced: number;
-  messagesConsumed: number;
-  rebalancesExecuted: number;
-  dlqMessagesCount: number;
-  lastEventAt: string;
-  events: string[];
+    state: PipelineState;
+    messagesProduced: number;
+    messagesConsumed: number;
+    rebalancesExecuted: number;
+    dlqMessagesCount: number;
+    lastEventAt: string;
+    events: string[];
 }
 ```
 
@@ -1784,12 +1743,7 @@ export interface PipelineSession {
 v2.1 pipeline-orchestrator = producer + consumer group + exactly-once + DLQ + schema registry の 継続合成 layer。 Streaming pair v0.1 → v2.1 = 5 段深化到達 = **depth-5 pattern 6 例目発生** (Mobile + Desktop + quality-metrics + Payment + Realtime + Streaming = 6 pair 到達 = **systematic law confirmed**)、 pattern 昇格階段 の 最上位 = kiwa 全体 の 必ず守る 最上位規範化 confirmed。 shape 契約 preserving 絶対維持 = 既存 API (v0.1-v0.3) 変更 0、 新規 file 追加 のみ、 backward compat 絶対維持。
 
 ```ts
-export type PipelineState =
-  | 'producing'          // producer active、 message 送信中
-  | 'consuming'          // consumer active、 message 処理中
-  | 'rebalancing'        // consumer group rebalance 中
-  | 'dlq-active'         // DLQ に message 蓄積中 (poison message 隔離)
-  | 'stopped';
+export type PipelineState = 'producing' | 'consuming' | 'rebalancing' | 'dlq-active' | 'stopped';
 ```
 
 #### `PipelineSummary`
@@ -1798,15 +1752,15 @@ export type PipelineState =
 
 ```ts
 export interface PipelineSummary {
-  currentState: PipelineState;
-  totalEvents: number;
-  validEvents: number;
-  invalidEvents: number;
-  terminalEvents: number;
-  messagesProduced: number;
-  messagesConsumed: number;
-  rebalancesExecuted: number;
-  dlqMessagesCount: number;
+    currentState: PipelineState;
+    totalEvents: number;
+    validEvents: number;
+    invalidEvents: number;
+    terminalEvents: number;
+    messagesProduced: number;
+    messagesConsumed: number;
+    rebalancesExecuted: number;
+    dlqMessagesCount: number;
 }
 ```
 
@@ -1816,9 +1770,9 @@ export interface PipelineSummary {
 
 ```ts
 export interface ProducerEpoch {
-  readonly producerId: number;
-  readonly epoch: number;
-  readonly transactionalId?: string;
+    readonly producerId: number;
+    readonly epoch: number;
+    readonly transactionalId?: string;
 }
 ```
 
@@ -1828,8 +1782,8 @@ export interface ProducerEpoch {
 
 ```ts
 export interface ProducerIdentity {
-  readonly producerId: number;
-  readonly epoch: number;
+    readonly producerId: number;
+    readonly epoch: number;
 }
 ```
 
@@ -1839,11 +1793,11 @@ export interface ProducerIdentity {
 
 ```ts
 export interface ProducerMessage<TValue = unknown, TKey = string> {
-  readonly key?: TKey;
-  readonly value: TValue;
-  readonly partition?: number;
-  readonly headers?: Record<string, string>;
-  readonly timestamp?: number;
+    readonly key?: TKey;
+    readonly value: TValue;
+    readonly partition?: number;
+    readonly headers?: Record<string, string>;
+    readonly timestamp?: number;
 }
 ```
 
@@ -1853,8 +1807,8 @@ export interface ProducerMessage<TValue = unknown, TKey = string> {
 
 ```ts
 export interface ProducerRecord<TValue = unknown, TKey = string> {
-  readonly topic: string;
-  readonly messages: readonly ProducerMessage<TValue, TKey>[];
+    readonly topic: string;
+    readonly messages: readonly ProducerMessage<TValue, TKey>[];
 }
 ```
 
@@ -1866,10 +1820,10 @@ Result of a single message publish.
 
 ```ts
 export interface PublishResult {
-  readonly topic: string;
-  readonly partition: number;
-  readonly offset: number;
-  readonly timestamp: number;
+    readonly topic: string;
+    readonly partition: number;
+    readonly offset: number;
+    readonly timestamp: number;
 }
 ```
 
@@ -1879,10 +1833,10 @@ export interface PublishResult {
 
 ```ts
 export interface QuarantinedMessage<TValue = unknown> {
-  readonly seq: number;
-  readonly attempts: number;
-  readonly message: StreamingMessage<TValue>;
-  readonly reason: string;
+    readonly seq: number;
+    readonly attempts: number;
+    readonly message: StreamingMessage<TValue>;
+    readonly reason: string;
 }
 ```
 
@@ -1892,19 +1846,17 @@ export interface QuarantinedMessage<TValue = unknown> {
 
 ```ts
 export interface ReadCommittedFilter {
-  readonly [READ_COMMITTED_SYMBOL]: true;
-  readonly isolationLevel: IsolationLevel;
-  /**
-   * Filter a raw message stream to only committed records. The mock treats
-   * every message emitted through `createTransactionalProducer.commit()` as
-   * committed; uncommitted / aborted batches never reach the underlying
-   * KafkaMock so this filter is effectively an identity for messages sourced
-   * through the mock's own flow — but the shape mirrors kafkajs so tests can
-   * assert against the same field.
-   */
-  filter<TValue = unknown, TKey = string>(
-    messages: readonly StreamingMessage<TValue, TKey>[],
-  ): readonly StreamingMessage<TValue, TKey>[];
+    readonly [READ_COMMITTED_SYMBOL]: true;
+    readonly isolationLevel: IsolationLevel;
+    /**
+     * Filter a raw message stream to only committed records. The mock treats
+     * every message emitted through `createTransactionalProducer.commit()` as
+     * committed; uncommitted / aborted batches never reach the underlying
+     * KafkaMock so this filter is effectively an identity for messages sourced
+     * through the mock's own flow — but the shape mirrors kafkajs so tests can
+     * assert against the same field.
+     */
+    filter<TValue = unknown, TKey = string>(messages: readonly StreamingMessage<TValue, TKey>[]): readonly StreamingMessage<TValue, TKey>[];
 }
 ```
 
@@ -1922,11 +1874,11 @@ export type RebalanceProtocol = 'eager' | 'cooperative';
 
 ```ts
 export interface RebalanceResult {
-  readonly generationId: number;
-  readonly protocol: RebalanceProtocol;
-  readonly assignments: ReadonlyMap<string, ReadonlyMap<string, readonly number[]>>;
-  /** Members whose assignments changed compared to the previous generation. */
-  readonly reassignedMembers: readonly string[];
+    readonly generationId: number;
+    readonly protocol: RebalanceProtocol;
+    readonly assignments: ReadonlyMap<string, ReadonlyMap<string, readonly number[]>>;
+    /** Members whose assignments changed compared to the previous generation. */
+    readonly reassignedMembers: readonly string[];
 }
 ```
 
@@ -1938,8 +1890,8 @@ RedpandaMock exposes the same producer/consumer/admin surface as KafkaMock (stru
 
 ```ts
 export interface RedpandaMock extends KafkaMock {
-  readonly [REDPANDA_MOCK_SYMBOL]: true;
-  readonly schemaRegistry: SchemaRegistry;
+    readonly [REDPANDA_MOCK_SYMBOL]: true;
+    readonly schemaRegistry: SchemaRegistry;
 }
 ```
 
@@ -1949,7 +1901,7 @@ export interface RedpandaMock extends KafkaMock {
 
 ```ts
 export interface RedpandaMockConfig extends KafkaMockConfig {
-  readonly schemaRegistry?: SchemaRegistryConfig;
+    readonly schemaRegistry?: SchemaRegistryConfig;
 }
 ```
 
@@ -1959,26 +1911,26 @@ export interface RedpandaMockConfig extends KafkaMockConfig {
 
 ```ts
 export interface RedpandaSchemaEvolution {
-  readonly [REDPANDA_SCHEMA_EVOLUTION_SYMBOL]: true;
-  readonly config: Required<RedpandaSchemaEvolutionConfig>;
-  register(input: {
-    readonly subject: string;
-    readonly kind: SchemaKind;
-    readonly schema: string;
-    readonly references?: readonly SchemaReference[];
-  }): EvolutionSchema;
-  latest(subject: string): EvolutionSchema | null;
-  versions(subject: string): readonly EvolutionSchema[];
-  setCompatibility(subject: string, mode: CompatibilityMode): void;
-  getCompatibility(subject: string): CompatibilityMode;
-  check(input: {
-    readonly subject: string;
-    readonly kind: SchemaKind;
-    readonly schema: string;
-  }): EvolutionCheckResult;
-  subjectFor(topic: string, part: 'key' | 'value', recordName?: string): string;
-  resolveReferences(schema: EvolutionSchema): readonly EvolutionSchema[];
-  reset(): void;
+    readonly [REDPANDA_SCHEMA_EVOLUTION_SYMBOL]: true;
+    readonly config: Required<RedpandaSchemaEvolutionConfig>;
+    register(input: {
+        readonly subject: string;
+        readonly kind: SchemaKind;
+        readonly schema: string;
+        readonly references?: readonly SchemaReference[];
+    }): EvolutionSchema;
+    latest(subject: string): EvolutionSchema | null;
+    versions(subject: string): readonly EvolutionSchema[];
+    setCompatibility(subject: string, mode: CompatibilityMode): void;
+    getCompatibility(subject: string): CompatibilityMode;
+    check(input: {
+        readonly subject: string;
+        readonly kind: SchemaKind;
+        readonly schema: string;
+    }): EvolutionCheckResult;
+    subjectFor(topic: string, part: 'key' | 'value', recordName?: string): string;
+    resolveReferences(schema: EvolutionSchema): readonly EvolutionSchema[];
+    reset(): void;
 }
 ```
 
@@ -1988,8 +1940,8 @@ export interface RedpandaSchemaEvolution {
 
 ```ts
 export interface RedpandaSchemaEvolutionConfig {
-  readonly defaultCompatibility?: CompatibilityMode;
-  readonly subjectNamingStrategy?: SubjectNamingStrategy;
+    readonly defaultCompatibility?: CompatibilityMode;
+    readonly subjectNamingStrategy?: SubjectNamingStrategy;
 }
 ```
 
@@ -1999,40 +1951,30 @@ export interface RedpandaSchemaEvolutionConfig {
 
 ```ts
 export interface RedpandaTransactions {
-  readonly [REDPANDA_TRANSACTIONS_SYMBOL]: true;
-  readonly config: Required<RedpandaTransactionsConfig>;
-
-  /** InitTransactions equivalent — assign producer id + starting epoch. */
-  initTransactions(transactionalId: string): ProducerEpoch;
-
-  /**
-   * Bump the epoch when a new client with the same transactionalId connects.
-   * The old epoch is fenced — subsequent writes with it get InvalidProducerEpoch.
-   */
-  bumpEpoch(transactionalId: string): ProducerEpoch;
-
-  /** Open a new transaction for the given producer. */
-  beginTransaction(transactionalId: string, producer: ProducerEpoch): void;
-
-  /** Register a partition that will receive writes inside the open transaction. */
-  addPartition(transactionalId: string, topic: string, partition: number): void;
-
-  /** Commit — moves phase idle → prepareCommit → committed. */
-  commitTransaction(transactionalId: string): void;
-
-  /** Abort — moves phase ongoing → prepareAbort → aborted, or short-circuits on fence. */
-  abortTransaction(transactionalId: string, reason?: string): void;
-
-  /** Auto-abort any transactions that have exceeded `transactionTimeoutMs`. */
-  expireStale(now: number): readonly string[];
-
-  currentPhase(transactionalId: string): TxnPhase;
-  currentProducer(transactionalId: string): ProducerEpoch | null;
-
-  /** Guard: throw InvalidProducerEpoch if `provided` is older than the current. */
-  guardEpoch(transactionalId: string, provided: ProducerEpoch): void;
-
-  reset(): void;
+    readonly [REDPANDA_TRANSACTIONS_SYMBOL]: true;
+    readonly config: Required<RedpandaTransactionsConfig>;
+    /** InitTransactions equivalent — assign producer id + starting epoch. */
+    initTransactions(transactionalId: string): ProducerEpoch;
+    /**
+     * Bump the epoch when a new client with the same transactionalId connects.
+     * The old epoch is fenced — subsequent writes with it get InvalidProducerEpoch.
+     */
+    bumpEpoch(transactionalId: string): ProducerEpoch;
+    /** Open a new transaction for the given producer. */
+    beginTransaction(transactionalId: string, producer: ProducerEpoch): void;
+    /** Register a partition that will receive writes inside the open transaction. */
+    addPartition(transactionalId: string, topic: string, partition: number): void;
+    /** Commit — moves phase idle → prepareCommit → committed. */
+    commitTransaction(transactionalId: string): void;
+    /** Abort — moves phase ongoing → prepareAbort → aborted, or short-circuits on fence. */
+    abortTransaction(transactionalId: string, reason?: string): void;
+    /** Auto-abort any transactions that have exceeded `transactionTimeoutMs`. */
+    expireStale(now: number): readonly string[];
+    currentPhase(transactionalId: string): TxnPhase;
+    currentProducer(transactionalId: string): ProducerEpoch | null;
+    /** Guard: throw InvalidProducerEpoch if `provided` is older than the current. */
+    guardEpoch(transactionalId: string, provided: ProducerEpoch): void;
+    reset(): void;
 }
 ```
 
@@ -2042,8 +1984,8 @@ export interface RedpandaTransactions {
 
 ```ts
 export interface RedpandaTransactionsConfig {
-  /** Transaction timeout after which the coordinator auto-aborts. Default 60_000ms. */
-  readonly transactionTimeoutMs?: number;
+    /** Transaction timeout after which the coordinator auto-aborts. Default 60_000ms. */
+    readonly transactionTimeoutMs?: number;
 }
 ```
 
@@ -2053,12 +1995,12 @@ export interface RedpandaTransactionsConfig {
 
 ```ts
 export interface RegisteredSchema {
-  readonly id: number;
-  readonly subject: string;
-  readonly version: number;
-  readonly kind: SchemaKind;
-  readonly schema: string;
-  readonly registeredAt: number;
+    readonly id: number;
+    readonly subject: string;
+    readonly version: number;
+    readonly kind: SchemaKind;
+    readonly schema: string;
+    readonly registeredAt: number;
 }
 ```
 
@@ -2068,12 +2010,12 @@ export interface RegisteredSchema {
 
 ```ts
 export interface RetryPolicy {
-  readonly maxAttempts: number;
-  readonly backoff?: BackoffKind;
-  /** Backoff base in ms — constant returns this, linear multiplies by attempt, exponential = base * 2^(attempt-1). */
-  readonly baseDelayMs?: number;
-  /** Cap the backoff delay so retries don't stall long-running tests. */
-  readonly maxDelayMs?: number;
+    readonly maxAttempts: number;
+    readonly backoff?: BackoffKind;
+    /** Backoff base in ms — constant returns this, linear multiplies by attempt, exponential = base * 2^(attempt-1). */
+    readonly baseDelayMs?: number;
+    /** Cap the backoff delay so retries don't stall long-running tests. */
+    readonly maxDelayMs?: number;
 }
 ```
 
@@ -2093,9 +2035,9 @@ export type SchemaKind = 'avro' | 'protobuf' | 'json';
 
 ```ts
 export interface SchemaReference {
-  readonly name: string;
-  readonly subject: string;
-  readonly version: number;
+    readonly name: string;
+    readonly subject: string;
+    readonly version: number;
 }
 ```
 
@@ -2105,30 +2047,30 @@ export interface SchemaReference {
 
 ```ts
 export interface SchemaRegistry {
-  readonly [SCHEMA_REGISTRY_SYMBOL]: true;
-  readonly config: SchemaRegistryConfig;
-  /**
-   * Register a schema version against a subject. Enforces the subject's
-   * current compat mode; throws when incompatible.
-   */
-  register(input: {
-    readonly subject: string;
-    readonly kind: SchemaKind;
-    readonly schema: string;
-  }): Promise<RegisteredSchema>;
-  getById(id: number): Promise<RegisteredSchema | null>;
-  getLatestVersion(subject: string): Promise<RegisteredSchema | null>;
-  listVersions(subject: string): Promise<RegisteredSchema[]>;
-  listSubjects(): Promise<string[]>;
-  setCompatibility(subject: string, mode: CompatibilityMode): Promise<void>;
-  getCompatibility(subject: string): CompatibilityMode;
-  checkCompatibility(input: {
-    readonly subject: string;
-    readonly kind: SchemaKind;
-    readonly schema: string;
-  }): CompatibilityCheckResult;
-  subjectFor(topic: string, kind: 'key' | 'value'): string;
-  reset(): void;
+    readonly [SCHEMA_REGISTRY_SYMBOL]: true;
+    readonly config: SchemaRegistryConfig;
+    /**
+     * Register a schema version against a subject. Enforces the subject's
+     * current compat mode; throws when incompatible.
+     */
+    register(input: {
+        readonly subject: string;
+        readonly kind: SchemaKind;
+        readonly schema: string;
+    }): Promise<RegisteredSchema>;
+    getById(id: number): Promise<RegisteredSchema | null>;
+    getLatestVersion(subject: string): Promise<RegisteredSchema | null>;
+    listVersions(subject: string): Promise<RegisteredSchema[]>;
+    listSubjects(): Promise<string[]>;
+    setCompatibility(subject: string, mode: CompatibilityMode): Promise<void>;
+    getCompatibility(subject: string): CompatibilityMode;
+    checkCompatibility(input: {
+        readonly subject: string;
+        readonly kind: SchemaKind;
+        readonly schema: string;
+    }): CompatibilityCheckResult;
+    subjectFor(topic: string, kind: 'key' | 'value'): string;
+    reset(): void;
 }
 ```
 
@@ -2138,10 +2080,10 @@ export interface SchemaRegistry {
 
 ```ts
 export interface SchemaRegistryConfig {
-  /** Default compat mode applied to new subjects. */
-  readonly defaultCompatibility?: CompatibilityMode;
-  /** Subject naming strategy — how tests derive subject from topic. */
-  readonly subjectNamingStrategy?: SubjectNamingStrategy;
+    /** Default compat mode applied to new subjects. */
+    readonly defaultCompatibility?: CompatibilityMode;
+    /** Subject naming strategy — how tests derive subject from topic. */
+    readonly subjectNamingStrategy?: SubjectNamingStrategy;
 }
 ```
 
@@ -2150,15 +2092,7 @@ export interface SchemaRegistryConfig {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L11) `packages/streaming/src/semantics/fidelity-harness.ts`
 
 ```ts
-export type SemanticsAxis =
-  | 'kafka-raw-protocol'
-  | 'kafka-consumer-group'
-  | 'redpanda-schema-evolution'
-  | 'redpanda-transactions'
-  | 'nats-jetstream-durable'
-  | 'nats-kv-object'
-  | 'exactly-once'
-  | 'consumer-lag-telemetry';
+export type SemanticsAxis = 'kafka-raw-protocol' | 'kafka-consumer-group' | 'redpanda-schema-evolution' | 'redpanda-transactions' | 'nats-jetstream-durable' | 'nats-kv-object' | 'exactly-once' | 'consumer-lag-telemetry';
 ```
 
 #### `StreamingMessage`
@@ -2169,13 +2103,13 @@ Single received message shared across all provider mocks.
 
 ```ts
 export interface StreamingMessage<TValue = unknown, TKey = string> {
-  readonly topic: string;
-  readonly partition: number;
-  readonly offset: number;
-  readonly timestamp: number;
-  readonly key: TKey | null;
-  readonly value: TValue;
-  readonly headers: Record<string, string>;
+    readonly topic: string;
+    readonly partition: number;
+    readonly offset: number;
+    readonly timestamp: number;
+    readonly key: TKey | null;
+    readonly value: TValue;
+    readonly headers: Record<string, string>;
 }
 ```
 
@@ -2203,18 +2137,16 @@ export type SubjectNamingStrategy = 'topic-name' | 'record-name' | 'topic-record
 
 ```ts
 export interface TransactionalProducer {
-  readonly [TRANSACTIONAL_PRODUCER_SYMBOL]: true;
-  readonly transactionalId: string;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
-  initTransactions(): Promise<void>;
-  beginTransaction(): Promise<void>;
-  send<TValue = unknown, TKey = string>(
-    record: ProducerRecord<TValue, TKey>,
-  ): Promise<PublishResult[]>;
-  commitTransaction(): Promise<void>;
-  abortTransaction(): Promise<void>;
-  currentState(): TransactionState;
+    readonly [TRANSACTIONAL_PRODUCER_SYMBOL]: true;
+    readonly transactionalId: string;
+    connect(): Promise<void>;
+    disconnect(): Promise<void>;
+    initTransactions(): Promise<void>;
+    beginTransaction(): Promise<void>;
+    send<TValue = unknown, TKey = string>(record: ProducerRecord<TValue, TKey>): Promise<PublishResult[]>;
+    commitTransaction(): Promise<void>;
+    abortTransaction(): Promise<void>;
+    currentState(): TransactionState;
 }
 ```
 
@@ -2224,8 +2156,8 @@ export interface TransactionalProducer {
 
 ```ts
 export interface TransactionalProducerConfig {
-  readonly kafka: KafkaMock;
-  readonly transactionalId: string;
+    readonly kafka: KafkaMock;
+    readonly transactionalId: string;
 }
 ```
 
@@ -2234,13 +2166,7 @@ export interface TransactionalProducerConfig {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L24) `packages/streaming/src/semantics/kafka-raw-protocol.ts`
 
 ```ts
-export type TransactionCoordinatorState =
-  | 'Empty'
-  | 'Ongoing'
-  | 'PrepareCommit'
-  | 'CompleteCommit'
-  | 'PrepareAbort'
-  | 'CompleteAbort';
+export type TransactionCoordinatorState = 'Empty' | 'Ongoing' | 'PrepareCommit' | 'CompleteCommit' | 'PrepareAbort' | 'CompleteAbort';
 ```
 
 #### `TransactionState`
@@ -2256,13 +2182,7 @@ export type TransactionState = 'idle' | 'active' | 'committed' | 'aborted';
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L24) `packages/streaming/src/semantics/redpanda-transactions.ts`
 
 ```ts
-export type TxnPhase =
-  | 'idle'
-  | 'ongoing'
-  | 'prepareCommit'
-  | 'prepareAbort'
-  | 'committed'
-  | 'aborted';
+export type TxnPhase = 'idle' | 'ongoing' | 'prepareCommit' | 'prepareAbort' | 'committed' | 'aborted';
 ```
 
 #### `TxnRecord`
@@ -2271,11 +2191,11 @@ export type TxnPhase =
 
 ```ts
 export interface TxnRecord {
-  readonly transactionalId: string;
-  readonly producer: ProducerEpoch;
-  phase: TxnPhase;
-  readonly openedAt: number;
-  readonly participatingPartitions: Set<string>;
+    readonly transactionalId: string;
+    readonly producer: ProducerEpoch;
+    phase: TxnPhase;
+    readonly openedAt: number;
+    readonly participatingPartitions: Set<string>;
 }
 ```
 <!-- kiwa-public-api:end -->

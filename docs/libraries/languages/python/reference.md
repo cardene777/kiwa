@@ -39,7 +39,7 @@ template描画は `html`、検出した `variables`、不足した `missing` を
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/python/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/python/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -48,10 +48,7 @@ template描画は `html`、検出した `variables`、不足した `missing` を
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L111) `packages/python/src/resilience.ts`
 
 ```ts
-export async function batchOperate<TIn, TOut>(
-  items: readonly BatchItem<TIn>[],
-  runner: (item: BatchItem<TIn>) => Promise<TOut>,
-): Promise<BatchResult[]>;
+export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
 #### `captureMiddlewareCall`
@@ -61,7 +58,7 @@ export async function batchOperate<TIn, TOut>(
 dispatch 経由で invoke された middleware の呼出履歴を返す。 middleware chain の順序 / 呼出回数 / 対象 path を assertion するための API。
 
 ```ts
-export function captureMiddlewareCall(env: PythonAppEnv): MiddlewareCall[];
+export declare function captureMiddlewareCall(env: PythonAppEnv): MiddlewareCall[];
 ```
 
 #### `createPythonAppEnv`
@@ -71,7 +68,7 @@ export function captureMiddlewareCall(env: PythonAppEnv): MiddlewareCall[];
 framework 別 mock env を返す。 real Django/Flask/FastAPI/Starlette の request pipeline を再現する in-process env。 django/flask = WSGI default、 fastapi/starlette = ASGI default (option で override 可能)。
 
 ```ts
-export function createPythonAppEnv(options: CreatePythonAppEnvOptions = {}): PythonAppEnv;
+export declare function createPythonAppEnv(options?: CreatePythonAppEnvOptions): PythonAppEnv;
 ```
 
 #### `dispatchRequest`
@@ -81,7 +78,7 @@ export function createPythonAppEnv(options: CreatePythonAppEnvOptions = {}): Pyt
 WSGI/ASGI request-response cycle を in-process で dispatch。 middleware chain を 順次実行 → route handler にたどり着き response を返す。 route 未登録は 404。
 
 ```ts
-export async function dispatchRequest(env: PythonAppEnv, request: PythonRequest): Promise<PythonResponse>;
+export declare function dispatchRequest(env: PythonAppEnv, request: PythonRequest): Promise<PythonResponse>;
 ```
 
 #### `renderTemplate`
@@ -91,7 +88,7 @@ export async function dispatchRequest(env: PythonAppEnv, request: PythonRequest)
 Jinja2 相当の `&#123;&#123; var &#125;&#125;` interpolation。 template を env に register してから name 指定で render。 real Jinja2 の filter / for loop は含まない minimal 実装。
 
 ```ts
-export function renderTemplate(env: PythonAppEnv, name: string, context: TemplateContext): TemplateRenderResult;
+export declare function renderTemplate(env: PythonAppEnv, name: string, context: TemplateContext): TemplateRenderResult;
 ```
 
 #### `withCircuitBreaker`
@@ -99,7 +96,7 @@ export function renderTemplate(env: PythonAppEnv, name: string, context: Templat
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L64) `packages/python/src/resilience.ts`
 
 ```ts
-export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
+export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
 #### `withIdempotencyKey`
@@ -107,7 +104,7 @@ export function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBrea
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L101) `packages/python/src/resilience.ts`
 
 ```ts
-export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
+export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
 #### `withObservability`
@@ -115,7 +112,7 @@ export function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: st
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L86) `packages/python/src/resilience.ts`
 
 ```ts
-export function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
+export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
 #### `withRateLimit`
@@ -123,7 +120,7 @@ export function withObservability<T>(name: string, fn: () => Promise<T>, hook: O
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L50) `packages/python/src/resilience.ts`
 
 ```ts
-export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
+export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
 #### `withRetry`
@@ -131,7 +128,7 @@ export function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L20) `packages/python/src/resilience.ts`
 
 ```ts
-export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
+export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
 #### `withTimeout`
@@ -139,7 +136,7 @@ export function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () =>
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L40) `packages/python/src/resilience.ts`
 
 ```ts
-export function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
+export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
 ```
 
 ### 型
@@ -149,7 +146,10 @@ export function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): (
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L17) `packages/python/src/resilience.ts`
 
 ```ts
-export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
+export interface BatchItem<TIn = unknown> {
+    name: string;
+    input: TIn;
+}
 ```
 
 #### `BatchResult`
@@ -157,7 +157,14 @@ export interface BatchItem<TIn = unknown> { name: string; input: TIn; }
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L18) `packages/python/src/resilience.ts`
 
 ```ts
-export interface BatchResult { ok: boolean; output?: unknown; error?: { code: string; message: string }; }
+export interface BatchResult {
+    ok: boolean;
+    output?: unknown;
+    error?: {
+        code: string;
+        message: string;
+    };
+}
 ```
 
 #### `CircuitBreakerOptions`
@@ -165,7 +172,10 @@ export interface BatchResult { ok: boolean; output?: unknown; error?: { code: st
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L11) `packages/python/src/resilience.ts`
 
 ```ts
-export interface CircuitBreakerOptions { failureThreshold: number; resetMs: number; }
+export interface CircuitBreakerOptions {
+    failureThreshold: number;
+    resetMs: number;
+}
 ```
 
 #### `CreatePythonAppEnvOptions`
@@ -174,9 +184,9 @@ export interface CircuitBreakerOptions { failureThreshold: number; resetMs: numb
 
 ```ts
 export interface CreatePythonAppEnvOptions {
-  framework?: PythonFramework;
-  mode?: PythonMode;
-  now?: () => number;
+    framework?: PythonFramework;
+    mode?: PythonMode;
+    now?: () => number;
 }
 ```
 
@@ -186,9 +196,9 @@ export interface CreatePythonAppEnvOptions {
 
 ```ts
 export interface MiddlewareCall {
-  name: string;
-  path: string;
-  at: number;
+    name: string;
+    path: string;
+    at: number;
 }
 ```
 
@@ -198,8 +208,8 @@ export interface MiddlewareCall {
 
 ```ts
 export interface MiddlewareEntry {
-  name: string;
-  handler: (req: PythonRequest, next: () => Promise<PythonResponse>) => Promise<PythonResponse>;
+    name: string;
+    handler: (req: PythonRequest, next: () => Promise<PythonResponse>) => Promise<PythonResponse>;
 }
 ```
 
@@ -209,9 +219,9 @@ export interface MiddlewareEntry {
 
 ```ts
 export interface ObservabilityHook {
-  onStart?: (name: string, input?: unknown) => void;
-  onSuccess?: (name: string, output: unknown, durationMs: number) => void;
-  onError?: (name: string, err: unknown, durationMs: number) => void;
+    onStart?: (name: string, input?: unknown) => void;
+    onSuccess?: (name: string, output: unknown, durationMs: number) => void;
+    onError?: (name: string, err: unknown, durationMs: number) => void;
 }
 ```
 
@@ -221,15 +231,19 @@ export interface ObservabilityHook {
 
 ```ts
 export interface PythonAppEnv {
-  framework: PythonFramework;
-  mode: PythonMode;
-  routes: Map<string, (req: PythonRequest) => Promise<PythonResponse>>;
-  middleware: MiddlewareEntry[];
-  templates: Map<string, string>;
-  middlewareCalls: Array<{ name: string; path: string; at: number }>;
-  registerRoute: (method: string, path: string, handler: (req: PythonRequest) => Promise<PythonResponse>) => void;
-  registerMiddleware: (entry: MiddlewareEntry) => void;
-  registerTemplate: (name: string, tmpl: string) => void;
+    framework: PythonFramework;
+    mode: PythonMode;
+    routes: Map<string, (req: PythonRequest) => Promise<PythonResponse>>;
+    middleware: MiddlewareEntry[];
+    templates: Map<string, string>;
+    middlewareCalls: Array<{
+        name: string;
+        path: string;
+        at: number;
+    }>;
+    registerRoute: (method: string, path: string, handler: (req: PythonRequest) => Promise<PythonResponse>) => void;
+    registerMiddleware: (entry: MiddlewareEntry) => void;
+    registerTemplate: (name: string, tmpl: string) => void;
 }
 ```
 
@@ -263,11 +277,11 @@ export type PythonMode = 'wsgi' | 'asgi';
 
 ```ts
 export interface PythonRequest {
-  method: string;
-  path: string;
-  headers?: PythonHeaders;
-  body?: string;
-  query?: Record<string, string>;
+    method: string;
+    path: string;
+    headers?: PythonHeaders;
+    body?: string;
+    query?: Record<string, string>;
 }
 ```
 
@@ -277,9 +291,9 @@ export interface PythonRequest {
 
 ```ts
 export interface PythonResponse {
-  status: number;
-  headers: PythonHeaders;
-  body: string;
+    status: number;
+    headers: PythonHeaders;
+    body: string;
 }
 ```
 
@@ -288,7 +302,10 @@ export interface PythonResponse {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L10) `packages/python/src/resilience.ts`
 
 ```ts
-export interface RateLimitOptions { maxRequests: number; windowMs: number; }
+export interface RateLimitOptions {
+    maxRequests: number;
+    windowMs: number;
+}
 ```
 
 #### `RetryOptions`
@@ -297,9 +314,9 @@ export interface RateLimitOptions { maxRequests: number; windowMs: number; }
 
 ```ts
 export interface RetryOptions {
-  maxAttempts: number;
-  backoffMs?: number;
-  retryOn?: (err: unknown) => boolean;
+    maxAttempts: number;
+    backoffMs?: number;
+    retryOn?: (err: unknown) => boolean;
 }
 ```
 
@@ -317,9 +334,9 @@ export type TemplateContext = Record<string, string | number | boolean>;
 
 ```ts
 export interface TemplateRenderResult {
-  html: string;
-  variables: string[];
-  missing: string[];
+    html: string;
+    variables: string[];
+    missing: string[];
 }
 ```
 
@@ -328,6 +345,8 @@ export interface TemplateRenderResult {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L9) `packages/python/src/resilience.ts`
 
 ```ts
-export interface TimeoutOptions { ms: number; }
+export interface TimeoutOptions {
+    ms: number;
+}
 ```
 <!-- kiwa-public-api:end -->

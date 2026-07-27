@@ -32,7 +32,7 @@
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/date/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/date/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -43,7 +43,7 @@
 `addDays(date, N, provider)` は date から N 日進めた Date を返す。 全 provider で同一挙動 (UTC ベース、 DST 影響回避のため timestamp 演算)。
 
 ```ts
-export function addDays(date: Date, days: number, provider: DateProvider): ArithmeticResult;
+export declare function addDays(date: Date, days: number, provider: DateProvider): ArithmeticResult;
 ```
 
 #### `createDateClient`
@@ -53,7 +53,7 @@ export function addDays(date: Date, days: number, provider: DateProvider): Arith
 4 provider (date-fns / dayjs / Luxon / Temporal) を統一 interface で叩ける mock client。 実 provider (real deps) を差替えても同じ signature で呼べる想定。
 
 ```ts
-export function createDateClient(options: CreateDateClientOptions = {}): DateClient;
+export declare function createDateClient(options?: CreateDateClientOptions): DateClient;
 ```
 
 #### `createHolidayCalendar`
@@ -63,7 +63,7 @@ export function createDateClient(options: CreateDateClientOptions = {}): DateCli
 holiday calendar — country 別祝日判定
 
 ```ts
-export function createHolidayCalendar(initial: Holiday[] = []): HolidayCalendar;
+export declare function createHolidayCalendar(initial?: Holiday[]): HolidayCalendar;
 ```
 
 #### `createObservabilityHook`
@@ -71,7 +71,7 @@ export function createHolidayCalendar(initial: Holiday[] = []): HolidayCalendar;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L123) `packages/date/src/extensions.ts`
 
 ```ts
-export function createObservabilityHook(): ObservabilityHook;
+export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
 #### `diffDays`
@@ -81,7 +81,7 @@ export function createObservabilityHook(): ObservabilityHook;
 `diffDays(a, b, provider)` は (a - b) の日数差を整数で返す。 fractional は切捨て。
 
 ```ts
-export function diffDays(a: Date, b: Date, provider: DateProvider): ArithmeticResult;
+export declare function diffDays(a: Date, b: Date, provider: DateProvider): ArithmeticResult;
 ```
 
 #### `expandRecurrence`
@@ -91,7 +91,7 @@ export function diffDays(a: Date, b: Date, provider: DateProvider): ArithmeticRe
 RRULE subset expand — DAILY/WEEKLY/MONTHLY/YEARLY
 
 ```ts
-export function expandRecurrence(rule: RecurrenceRule, start: Date): Date[];
+export declare function expandRecurrence(rule: RecurrenceRule, start: Date): Date[];
 ```
 
 #### `formatDate`
@@ -101,7 +101,7 @@ export function expandRecurrence(rule: RecurrenceRule, start: Date): Date[];
 pattern token = `YYYY / MM / DD / HH / mm / ss` を UTC ベースで置換。 全 provider (date-fns/dayjs/Luxon/Temporal) が最低限 support する共通 subset。
 
 ```ts
-export function formatDate(date: Date, pattern: string, provider: DateProvider): FormatResult;
+export declare function formatDate(date: Date, pattern: string, provider: DateProvider): FormatResult;
 ```
 
 #### `parseDate`
@@ -111,7 +111,7 @@ export function formatDate(date: Date, pattern: string, provider: DateProvider):
 pattern に沿って date string を parse。 未対応 pattern は Date コンストラクタに fallback。
 
 ```ts
-export function parseDate(str: string, pattern: string, provider: DateProvider): ParseResult;
+export declare function parseDate(str: string, pattern: string, provider: DateProvider): ParseResult;
 ```
 
 #### `parseDuration`
@@ -121,7 +121,7 @@ export function parseDate(str: string, pattern: string, provider: DateProvider):
 ISO 8601 duration parse — "P1Y2M3DT4H5M6S" 対応
 
 ```ts
-export function parseDuration(iso: string): DurationParseResult;
+export declare function parseDuration(iso: string): DurationParseResult;
 ```
 
 #### `retryWithBackoff`
@@ -129,7 +129,7 @@ export function parseDuration(iso: string): DurationParseResult;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L99) `packages/date/src/extensions.ts`
 
 ```ts
-export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<RetryResult<T>>;
+export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
 #### `timezoneConvert`
@@ -139,7 +139,7 @@ export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOp
 `timezoneConvert(date, tz, provider)` は date を tz オフセット分ずらした Date を返す。 未知の tz は 0 offset (UTC 相当) に fallback。 DST 未対応 = mock として cover 十分。
 
 ```ts
-export function timezoneConvert(date: Date, timezone: string, provider: DateProvider): TimezoneResult;
+export declare function timezoneConvert(date: Date, timezone: string, provider: DateProvider): TimezoneResult;
 ```
 
 ### 型
@@ -150,9 +150,9 @@ export function timezoneConvert(date: Date, timezone: string, provider: DateProv
 
 ```ts
 export interface ArithmeticResult {
-  result: Date;
-  days: number;
-  provider: DateProvider;
+    result: Date;
+    days: number;
+    provider: DateProvider;
 }
 ```
 
@@ -162,8 +162,8 @@ export interface ArithmeticResult {
 
 ```ts
 export interface CreateDateClientOptions {
-  provider?: DateProvider;
-  defaultTimezone?: string;
+    provider?: DateProvider;
+    defaultTimezone?: string;
 }
 ```
 
@@ -173,12 +173,12 @@ export interface CreateDateClientOptions {
 
 ```ts
 export interface DateClient {
-  provider: DateProvider;
-  addDays: (date: Date, days: number) => Date;
-  diffDays: (a: Date, b: Date) => number;
-  format: (date: Date, pattern: string) => string;
-  parse: (str: string, pattern: string) => Date;
-  toTimezone: (date: Date, tz: string) => Date;
+    provider: DateProvider;
+    addDays: (date: Date, days: number) => Date;
+    diffDays: (a: Date, b: Date) => number;
+    format: (date: Date, pattern: string) => string;
+    parse: (str: string, pattern: string) => Date;
+    toTimezone: (date: Date, tz: string) => Date;
 }
 ```
 
@@ -198,10 +198,17 @@ v2.1 extensions — duration parse, recurrence rule (RRULE subset), holiday cale
 
 ```ts
 export interface DurationParseResult {
-  ok: boolean;
-  totalMs: number;
-  components?: { years?: number; months?: number; days?: number; hours?: number; minutes?: number; seconds?: number };
-  error?: string;
+    ok: boolean;
+    totalMs: number;
+    components?: {
+        years?: number;
+        months?: number;
+        days?: number;
+        hours?: number;
+        minutes?: number;
+        seconds?: number;
+    };
+    error?: string;
 }
 ```
 
@@ -211,9 +218,9 @@ export interface DurationParseResult {
 
 ```ts
 export interface FormatResult {
-  formatted: string;
-  pattern: string;
-  provider: DateProvider;
+    formatted: string;
+    pattern: string;
+    provider: DateProvider;
 }
 ```
 
@@ -223,9 +230,9 @@ export interface FormatResult {
 
 ```ts
 export interface Holiday {
-  name: string;
-  date: string;
-  country: string;
+    name: string;
+    date: string;
+    country: string;
 }
 ```
 
@@ -235,11 +242,11 @@ export interface Holiday {
 
 ```ts
 export interface HolidayCalendar {
-  isHoliday: (date: Date) => boolean;
-  getHoliday: (date: Date) => Holiday | undefined;
-  addHoliday: (holiday: Holiday) => void;
-  list: () => Holiday[];
-  nextHoliday: (from: Date) => Holiday | undefined;
+    isHoliday: (date: Date) => boolean;
+    getHoliday: (date: Date) => Holiday | undefined;
+    addHoliday: (holiday: Holiday) => void;
+    list: () => Holiday[];
+    nextHoliday: (from: Date) => Holiday | undefined;
 }
 ```
 
@@ -249,9 +256,15 @@ export interface HolidayCalendar {
 
 ```ts
 export interface ObservabilityHook {
-  emit: (event: { kind: string; data: Record<string, unknown> }) => void;
-  events: () => Array<{ kind: string; data: Record<string, unknown> }>;
-  clear: () => void;
+    emit: (event: {
+        kind: string;
+        data: Record<string, unknown>;
+    }) => void;
+    events: () => Array<{
+        kind: string;
+        data: Record<string, unknown>;
+    }>;
+    clear: () => void;
 }
 ```
 
@@ -261,9 +274,9 @@ export interface ObservabilityHook {
 
 ```ts
 export interface ParseResult {
-  date: Date;
-  pattern: string;
-  provider: DateProvider;
+    date: Date;
+    pattern: string;
+    provider: DateProvider;
 }
 ```
 
@@ -281,10 +294,10 @@ export type RecurrenceFreq = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
 
 ```ts
 export interface RecurrenceRule {
-  freq: RecurrenceFreq;
-  interval?: number;
-  count?: number;
-  until?: Date;
+    freq: RecurrenceFreq;
+    interval?: number;
+    count?: number;
+    until?: Date;
 }
 ```
 
@@ -293,7 +306,11 @@ export interface RecurrenceRule {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L96) `packages/date/src/extensions.ts`
 
 ```ts
-export interface RetryOptions { maxAttempts?: number; initialDelayMs?: number; backoffFactor?: number; }
+export interface RetryOptions {
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    backoffFactor?: number;
+}
 ```
 
 #### `RetryResult`
@@ -301,7 +318,12 @@ export interface RetryOptions { maxAttempts?: number; initialDelayMs?: number; b
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L97) `packages/date/src/extensions.ts`
 
 ```ts
-export interface RetryResult<T> { ok: boolean; attempts: number; value?: T; error?: unknown; }
+export interface RetryResult<T> {
+    ok: boolean;
+    attempts: number;
+    value?: T;
+    error?: unknown;
+}
 ```
 
 #### `TimezoneResult`
@@ -310,10 +332,10 @@ export interface RetryResult<T> { ok: boolean; attempts: number; value?: T; erro
 
 ```ts
 export interface TimezoneResult {
-  date: Date;
-  timezone: string;
-  offsetMinutes: number;
-  provider: DateProvider;
+    date: Date;
+    timezone: string;
+    offsetMinutes: number;
+    provider: DateProvider;
 }
 ```
 <!-- kiwa-public-api:end -->

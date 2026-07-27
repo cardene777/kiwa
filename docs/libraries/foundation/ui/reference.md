@@ -67,7 +67,7 @@ helper ごとに container、wrapper、element の型と操作が異なります
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -76,9 +76,7 @@ helper ごとに container、wrapper、element の型と操作が異なります
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L62) `packages/ui/src/angular.ts`
 
 ```ts
-export async function setupAngularComponentEnv(
-  opts: SetupAngularComponentEnvOptions,
-): Promise<AngularTestEnvUi>;
+export declare function setupAngularComponentEnv(opts: SetupAngularComponentEnvOptions): Promise<AngularTestEnvUi>;
 ```
 
 #### `setupBrowserComponentEnv`
@@ -86,9 +84,7 @@ export async function setupAngularComponentEnv(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L95) `packages/ui/src/browser.ts`
 
 ```ts
-export async function setupBrowserComponentEnv(
-  opts: SetupBrowserComponentEnvOptions,
-): Promise<BrowserTestEnvUi>;
+export declare function setupBrowserComponentEnv(opts: SetupBrowserComponentEnvOptions): Promise<BrowserTestEnvUi>;
 ```
 
 #### `setupComponentEnv`
@@ -96,7 +92,7 @@ export async function setupBrowserComponentEnv(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L46) `packages/ui/src/setup-component-env.ts`
 
 ```ts
-export async function setupComponentEnv(opts: SetupComponentEnvOptions): Promise<UiTestEnv>;
+export declare function setupComponentEnv(opts: SetupComponentEnvOptions): Promise<UiTestEnv>;
 ```
 
 #### `setupLitComponentEnv`
@@ -104,9 +100,7 @@ export async function setupComponentEnv(opts: SetupComponentEnvOptions): Promise
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L44) `packages/ui/src/lit.ts`
 
 ```ts
-export async function setupLitComponentEnv(
-  opts: SetupLitComponentEnvOptions,
-): Promise<LitTestEnvUi>;
+export declare function setupLitComponentEnv(opts: SetupLitComponentEnvOptions): Promise<LitTestEnvUi>;
 ```
 
 #### `setupQwikComponentEnv`
@@ -114,9 +108,7 @@ export async function setupLitComponentEnv(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L52) `packages/ui/src/qwik.ts`
 
 ```ts
-export async function setupQwikComponentEnv(
-  opts: SetupQwikComponentEnvOptions,
-): Promise<QwikTestEnvUi>;
+export declare function setupQwikComponentEnv(opts: SetupQwikComponentEnvOptions): Promise<QwikTestEnvUi>;
 ```
 
 #### `setupSolidComponentEnv`
@@ -124,9 +116,7 @@ export async function setupQwikComponentEnv(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L45) `packages/ui/src/solid.ts`
 
 ```ts
-export async function setupSolidComponentEnv(
-  opts: SetupSolidComponentEnvOptions,
-): Promise<SolidTestEnvUi>;
+export declare function setupSolidComponentEnv(opts: SetupSolidComponentEnvOptions): Promise<SolidTestEnvUi>;
 ```
 
 #### `setupSvelteComponentEnv`
@@ -134,9 +124,7 @@ export async function setupSolidComponentEnv(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L42) `packages/ui/src/svelte.ts`
 
 ```ts
-export async function setupSvelteComponentEnv(
-  opts: SetupSvelteComponentEnvOptions,
-): Promise<SvelteTestEnvUi>;
+export declare function setupSvelteComponentEnv(opts: SetupSvelteComponentEnvOptions): Promise<SvelteTestEnvUi>;
 ```
 
 #### `setupVueComponentEnv`
@@ -144,9 +132,7 @@ export async function setupSvelteComponentEnv(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L53) `packages/ui/src/vue.ts`
 
 ```ts
-export async function setupVueComponentEnv(
-  opts: SetupVueComponentEnvOptions,
-): Promise<VueTestEnvUi>;
+export declare function setupVueComponentEnv(opts: SetupVueComponentEnvOptions): Promise<VueTestEnvUi>;
 ```
 
 ### 型
@@ -157,9 +143,9 @@ export async function setupVueComponentEnv(
 
 ```ts
 export interface AngularContainerLike {
-  container: HTMLElement;
-  getByTestId: (id: string) => HTMLElement;
-  getByText: (text: string | RegExp) => HTMLElement;
+    container: HTMLElement;
+    getByTestId: (id: string) => HTMLElement;
+    getByText: (text: string | RegExp) => HTMLElement;
 }
 ```
 
@@ -169,9 +155,9 @@ export interface AngularContainerLike {
 
 ```ts
 export interface AngularTestEnvUi extends TestEnvBase<'mock' | 'live'> {
-  kind: 'angular';
-  result: AngularContainerLike;
-  markup: string;
+    kind: 'angular';
+    result: AngularContainerLike;
+    markup: string;
 }
 ```
 
@@ -181,10 +167,10 @@ export interface AngularTestEnvUi extends TestEnvBase<'mock' | 'live'> {
 
 ```ts
 export interface BrowserLocator {
-  textContent: () => Promise<string | null>;
-  click: () => Promise<void>;
-  isVisible: () => Promise<boolean>;
-  count: () => Promise<number>;
+    textContent: () => Promise<string | null>;
+    click: () => Promise<void>;
+    isVisible: () => Promise<boolean>;
+    count: () => Promise<number>;
 }
 ```
 
@@ -194,15 +180,21 @@ export interface BrowserLocator {
 
 ```ts
 export interface BrowserPageHandle {
-  setContent: (html: string, opts?: { waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' }) => Promise<void>;
-  getByTestId: (id: string) => BrowserLocator;
-  getByRole: (role: string, opts?: { name?: string }) => BrowserLocator;
-  getByText: (text: string) => BrowserLocator;
-  evaluate: <T>(fn: () => T | Promise<T>) => Promise<T>;
-  click: (selector: string) => Promise<void>;
-  screenshot: (opts?: { path?: string }) => Promise<Buffer>;
-  close: () => Promise<void>;
-  content: () => Promise<string>;
+    setContent: (html: string, opts?: {
+        waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
+    }) => Promise<void>;
+    getByTestId: (id: string) => BrowserLocator;
+    getByRole: (role: string, opts?: {
+        name?: string;
+    }) => BrowserLocator;
+    getByText: (text: string) => BrowserLocator;
+    evaluate: <T>(fn: () => T | Promise<T>) => Promise<T>;
+    click: (selector: string) => Promise<void>;
+    screenshot: (opts?: {
+        path?: string;
+    }) => Promise<Buffer>;
+    close: () => Promise<void>;
+    content: () => Promise<string>;
 }
 ```
 
@@ -212,12 +204,12 @@ export interface BrowserPageHandle {
 
 ```ts
 export interface BrowserTestEnvUi {
-  mode: 'live';
-  kind: 'browser';
-  browser: BrowserName;
-  page: BrowserPageHandle;
-  markup: string;
-  stop: () => Promise<void>;
+    mode: 'live';
+    kind: 'browser';
+    browser: BrowserName;
+    page: BrowserPageHandle;
+    markup: string;
+    stop: () => Promise<void>;
 }
 ```
 
@@ -227,10 +219,10 @@ export interface BrowserTestEnvUi {
 
 ```ts
 export interface InteractionTestEnvUi extends TestEnvBase<'live'> {
-  kind: 'interaction';
-  result: RenderResult;
-  screen: typeof ScreenApi;
-  user: UserEvent;
+    kind: 'interaction';
+    result: RenderResult;
+    screen: typeof ScreenApi;
+    user: UserEvent;
 }
 ```
 
@@ -240,12 +232,12 @@ export interface InteractionTestEnvUi extends TestEnvBase<'live'> {
 
 ```ts
 export interface LitElementHandle {
-  element: HTMLElement;
-  shadowRoot: ShadowRoot | null;
-  /** Query inside light DOM. */
-  querySelector: <T extends Element = Element>(selector: string) => T | null;
-  /** Query inside shadow DOM if present, otherwise light DOM. */
-  shadowQuerySelector: <T extends Element = Element>(selector: string) => T | null;
+    element: HTMLElement;
+    shadowRoot: ShadowRoot | null;
+    /** Query inside light DOM. */
+    querySelector: <T extends Element = Element>(selector: string) => T | null;
+    /** Query inside shadow DOM if present, otherwise light DOM. */
+    shadowQuerySelector: <T extends Element = Element>(selector: string) => T | null;
 }
 ```
 
@@ -255,9 +247,9 @@ export interface LitElementHandle {
 
 ```ts
 export interface LitTestEnvUi extends TestEnvBase<'mock' | 'live'> {
-  kind: 'lit';
-  handle: LitElementHandle;
-  markup: string;
+    kind: 'lit';
+    handle: LitElementHandle;
+    markup: string;
 }
 ```
 
@@ -267,9 +259,9 @@ export interface LitTestEnvUi extends TestEnvBase<'mock' | 'live'> {
 
 ```ts
 export interface QwikContainerLike {
-  container: HTMLElement;
-  getByTestId: (id: string) => HTMLElement;
-  getByText: (text: string | RegExp) => HTMLElement;
+    container: HTMLElement;
+    getByTestId: (id: string) => HTMLElement;
+    getByText: (text: string | RegExp) => HTMLElement;
 }
 ```
 
@@ -279,9 +271,9 @@ export interface QwikContainerLike {
 
 ```ts
 export interface QwikTestEnvUi extends TestEnvBase<'mock' | 'live'> {
-  kind: 'qwik';
-  result: QwikContainerLike;
-  markup: string;
+    kind: 'qwik';
+    result: QwikContainerLike;
+    markup: string;
 }
 ```
 
@@ -291,9 +283,9 @@ export interface QwikTestEnvUi extends TestEnvBase<'mock' | 'live'> {
 
 ```ts
 export interface RenderTestEnvUi extends TestEnvBase<'mock'> {
-  kind: 'render';
-  result: RenderResult;
-  screen: typeof ScreenApi;
+    kind: 'render';
+    result: RenderResult;
+    screen: typeof ScreenApi;
 }
 ```
 
@@ -303,9 +295,9 @@ export interface RenderTestEnvUi extends TestEnvBase<'mock'> {
 
 ```ts
 export interface SetupAngularComponentEnvOptions {
-  mode: 'render' | 'interaction' | 'snapshot';
-  component: AngularComponentLike;
-  inputs?: Record<string, unknown>;
+    mode: 'render' | 'interaction' | 'snapshot';
+    component: AngularComponentLike;
+    inputs?: Record<string, unknown>;
 }
 ```
 
@@ -315,13 +307,13 @@ export interface SetupAngularComponentEnvOptions {
 
 ```ts
 export interface SetupBrowserComponentEnvOptions {
-  ui: ReactElement;
-  /** which browser engine to launch (default chromium) */
-  browser?: BrowserName;
-  /** headless flag forwarded to playwright launch (default true) */
-  headless?: boolean;
-  /** optional HTML wrapper template (`{{children}}` is replaced with the rendered React markup) */
-  template?: string;
+    ui: ReactElement;
+    /** which browser engine to launch (default chromium) */
+    browser?: BrowserName;
+    /** headless flag forwarded to playwright launch (default true) */
+    headless?: boolean;
+    /** optional HTML wrapper template (`{{children}}` is replaced with the rendered React markup) */
+    template?: string;
 }
 ```
 
@@ -331,14 +323,12 @@ export interface SetupBrowserComponentEnvOptions {
 
 ```ts
 export interface SetupComponentEnvOptions<TMode extends UiTestMode = UiTestMode> {
-  mode: TMode;
-  ui: ReactElement;
-  /** Options forwarded to @testing-library/react render() */
-  renderOptions?: RenderOptions;
-  /** Initial userEvent setup (interaction mode only) */
-  userEventOptions?: Parameters<UserEvent['setup']> extends [infer Opts]
-    ? Opts
-    : Record<string, unknown>;
+    mode: TMode;
+    ui: ReactElement;
+    /** Options forwarded to @testing-library/react render() */
+    renderOptions?: RenderOptions;
+    /** Initial userEvent setup (interaction mode only) */
+    userEventOptions?: Parameters<UserEvent['setup']> extends [infer Opts] ? Opts : Record<string, unknown>;
 }
 ```
 
@@ -348,8 +338,8 @@ export interface SetupComponentEnvOptions<TMode extends UiTestMode = UiTestMode>
 
 ```ts
 export interface SetupLitComponentEnvOptions {
-  mode: 'render' | 'interaction' | 'snapshot';
-  template: LitTemplateLike;
+    mode: 'render' | 'interaction' | 'snapshot';
+    template: LitTemplateLike;
 }
 ```
 
@@ -359,8 +349,8 @@ export interface SetupLitComponentEnvOptions {
 
 ```ts
 export interface SetupQwikComponentEnvOptions {
-  mode: 'render' | 'interaction' | 'snapshot';
-  component: QwikComponentLike;
+    mode: 'render' | 'interaction' | 'snapshot';
+    component: QwikComponentLike;
 }
 ```
 
@@ -370,9 +360,9 @@ export interface SetupQwikComponentEnvOptions {
 
 ```ts
 export interface SetupSolidComponentEnvOptions {
-  mode: 'render' | 'interaction' | 'snapshot';
-  component: () => unknown;
-  props?: Record<string, unknown>;
+    mode: 'render' | 'interaction' | 'snapshot';
+    component: () => unknown;
+    props?: Record<string, unknown>;
 }
 ```
 
@@ -382,9 +372,9 @@ export interface SetupSolidComponentEnvOptions {
 
 ```ts
 export interface SetupSvelteComponentEnvOptions {
-  mode: 'render' | 'interaction' | 'snapshot';
-  component: SvelteComponentLike;
-  props?: Record<string, unknown>;
+    mode: 'render' | 'interaction' | 'snapshot';
+    component: SvelteComponentLike;
+    props?: Record<string, unknown>;
 }
 ```
 
@@ -394,10 +384,10 @@ export interface SetupSvelteComponentEnvOptions {
 
 ```ts
 export interface SetupVueComponentEnvOptions {
-  mode: 'render' | 'interaction' | 'snapshot';
-  component: VueComponentLike;
-  props?: Record<string, unknown>;
-  slots?: Record<string, unknown>;
+    mode: 'render' | 'interaction' | 'snapshot';
+    component: VueComponentLike;
+    props?: Record<string, unknown>;
+    slots?: Record<string, unknown>;
 }
 ```
 
@@ -407,10 +397,10 @@ export interface SetupVueComponentEnvOptions {
 
 ```ts
 export interface SnapshotTestEnvUi extends TestEnvBase<'mock'> {
-  kind: 'snapshot';
-  result: RenderResult;
-  /** Serialized DOM markup of the rendered tree, ready for inline / file snapshot */
-  markup: string;
+    kind: 'snapshot';
+    result: RenderResult;
+    /** Serialized DOM markup of the rendered tree, ready for inline / file snapshot */
+    markup: string;
 }
 ```
 
@@ -420,9 +410,9 @@ export interface SnapshotTestEnvUi extends TestEnvBase<'mock'> {
 
 ```ts
 export interface SolidContainerLike {
-  container: HTMLElement;
-  getByTestId: (id: string) => HTMLElement;
-  getByText: (text: string | RegExp) => HTMLElement;
+    container: HTMLElement;
+    getByTestId: (id: string) => HTMLElement;
+    getByText: (text: string | RegExp) => HTMLElement;
 }
 ```
 
@@ -432,9 +422,9 @@ export interface SolidContainerLike {
 
 ```ts
 export interface SolidTestEnvUi extends TestEnvBase<'mock' | 'live'> {
-  kind: 'solid';
-  result: SolidContainerLike;
-  markup: string;
+    kind: 'solid';
+    result: SolidContainerLike;
+    markup: string;
 }
 ```
 
@@ -444,9 +434,9 @@ export interface SolidTestEnvUi extends TestEnvBase<'mock' | 'live'> {
 
 ```ts
 export interface SvelteContainerLike {
-  container: HTMLElement;
-  getByTestId: (id: string) => HTMLElement;
-  getByText: (text: string | RegExp) => HTMLElement;
+    container: HTMLElement;
+    getByTestId: (id: string) => HTMLElement;
+    getByText: (text: string | RegExp) => HTMLElement;
 }
 ```
 
@@ -456,9 +446,9 @@ export interface SvelteContainerLike {
 
 ```ts
 export interface SvelteTestEnvUi extends TestEnvBase<'mock' | 'live'> {
-  kind: 'svelte';
-  result: SvelteContainerLike;
-  markup: string;
+    kind: 'svelte';
+    result: SvelteContainerLike;
+    markup: string;
 }
 ```
 
@@ -484,9 +474,9 @@ export type UiTestMode = 'render' | 'interaction' | 'snapshot' | 'browser';
 
 ```ts
 export interface VueTestEnvUi extends TestEnvBase<'mock' | 'live'> {
-  kind: 'vue';
-  wrapper: VueWrapperLike;
-  markup: string;
+    kind: 'vue';
+    wrapper: VueWrapperLike;
+    markup: string;
 }
 ```
 
@@ -496,12 +486,12 @@ export interface VueTestEnvUi extends TestEnvBase<'mock' | 'live'> {
 
 ```ts
 export interface VueWrapperLike {
-  html: () => string;
-  find: (selector: string) => VueDomWrapperLike;
-  findAll: (selector: string) => VueDomWrapperLike[];
-  trigger: (eventName: string) => Promise<void>;
-  setValue?: (value: unknown) => Promise<void>;
-  unmount: () => void;
+    html: () => string;
+    find: (selector: string) => VueDomWrapperLike;
+    findAll: (selector: string) => VueDomWrapperLike[];
+    trigger: (eventName: string) => Promise<void>;
+    setValue?: (value: unknown) => Promise<void>;
+    unmount: () => void;
 }
 ```
 <!-- kiwa-public-api:end -->

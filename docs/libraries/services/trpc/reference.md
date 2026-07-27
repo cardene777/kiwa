@@ -42,7 +42,7 @@ procedure の `type` と handler を指定します。router の global middlewa
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -53,11 +53,7 @@ procedure の `type` と handler を指定します。router の global middlewa
 batchInvoke — 複数 procedure を Promise.all で並列 invoke、 各結果を BatchInvokeResult shape で正規化 (individual failure が全体 fail しない)。
 
 ```ts
-export async function batchInvoke(
-  router: Router,
-  items: BatchInvokeItem[],
-  ctx?: ProcedureContext,
-): Promise<BatchInvokeResult[]>;
+export declare function batchInvoke(router: Router, items: BatchInvokeItem[], ctx?: ProcedureContext): Promise<BatchInvokeResult[]>;
 ```
 
 #### `createClient`
@@ -67,7 +63,7 @@ export async function batchInvoke(
 tRPC の createTRPCProxyClient 相当。 client.&lt;path&gt;.query(input) / .mutate(input) を呼ぶと 内部で invokeProcedure に translate される。 real tRPC の typed client と同じ shape の assertion が書ける。
 
 ```ts
-export function createClient(router: Router): TypedClient;
+export declare function createClient(router: Router): TypedClient;
 ```
 
 #### `createContext`
@@ -77,7 +73,7 @@ export function createClient(router: Router): TypedClient;
 tRPC 実 server の createContext 相当。 request 単位で context を組み立てる。 実運用では cookie / auth header を読んで userId / session を注入する pattern を mock で再現。
 
 ```ts
-export function createContext(options: CreateContextOptions = {}): ProcedureContext;
+export declare function createContext(options?: CreateContextOptions): ProcedureContext;
 ```
 
 #### `createRouter`
@@ -87,7 +83,7 @@ export function createContext(options: CreateContextOptions = {}): ProcedureCont
 tRPC v10 の router() 相当。 path (dot-notation もフラット key もサポート) と procedure の map を保持する。 globalMiddlewares は全 procedure 呼出前に走らせる。
 
 ```ts
-export function createRouter(options: CreateRouterOptions): Router;
+export declare function createRouter(options: CreateRouterOptions): Router;
 ```
 
 #### `defineProcedure`
@@ -97,11 +93,7 @@ export function createRouter(options: CreateRouterOptions): Router;
 tRPC v10 の t.procedure.query(handler) / .mutation(handler) / .subscription(handler) 相当。 middleware 配列を挟めるようにして、 procedure 単位で auth / logging を宣言する pattern を 再現する。
 
 ```ts
-export function defineProcedure<TInput = unknown, TOutput = unknown>(
-  type: ProcedureType,
-  handler: ProcedureHandler<TInput, TOutput>,
-  middlewares: Middleware[] = [],
-): ProcedureDefinition<TInput, TOutput>;
+export declare function defineProcedure<TInput = unknown, TOutput = unknown>(type: ProcedureType, handler: ProcedureHandler<TInput, TOutput>, middlewares?: Middleware[]): ProcedureDefinition<TInput, TOutput>;
 ```
 
 #### `invokeProcedure`
@@ -111,12 +103,7 @@ export function defineProcedure<TInput = unknown, TOutput = unknown>(
 router に対して procedure を実行。 middleware chain (global → per-procedure) を順に走らせ、 全 middleware 通過後に handler を呼び出す。 途中 throw で TRPCError を包んで返す。
 
 ```ts
-export async function invokeProcedure(
-  router: Router,
-  path: string,
-  input: unknown,
-  ctx: ProcedureContext = {},
-): Promise<unknown>;
+export declare function invokeProcedure(router: Router, path: string, input: unknown, ctx?: ProcedureContext): Promise<unknown>;
 ```
 
 #### `middleware`
@@ -126,7 +113,7 @@ export async function invokeProcedure(
 middleware wrapper。 実 tRPC の t.middleware(async ({ ctx, next }) =&gt; ...) と同じ形。 内部で next() を呼ぶことで chain 継続、 呼ばずに throw で早期 abort を表現する。
 
 ```ts
-export function middleware(fn: Middleware): Middleware;
+export declare function middleware(fn: Middleware): Middleware;
 ```
 
 #### `TRPCError`
@@ -135,8 +122,11 @@ export function middleware(fn: Middleware): Middleware;
 
 ```ts
 export declare class TRPCError extends Error {
-  code: TRPCErrorCode;
-  constructor(params: { code: TRPCErrorCode; message?: string });
+    code: TRPCErrorCode;
+    constructor(params: {
+        code: TRPCErrorCode;
+        message?: string;
+    });
 }
 ```
 
@@ -147,7 +137,7 @@ export declare class TRPCError extends Error {
 withCircuitBreaker — 連続失敗が failureThreshold 超で「open」 状態に切替、 resetMs 経過で half-open で 1 attempt allow、 成功で closed 復帰。
 
 ```ts
-export function withCircuitBreaker<T>(handler: ProcedureHandler<unknown, T>, options: CircuitBreakerOptions): ProcedureHandler<unknown, T>;
+export declare function withCircuitBreaker<T>(handler: ProcedureHandler<unknown, T>, options: CircuitBreakerOptions): ProcedureHandler<unknown, T>;
 ```
 
 #### `withIdempotencyKey`
@@ -157,7 +147,7 @@ export function withCircuitBreaker<T>(handler: ProcedureHandler<unknown, T>, opt
 withIdempotencyKey — 同一 key の重複 invoke で cached result を返す。 downstream への 副作用を防ぐ (payment / charge / booking 系で重要)。
 
 ```ts
-export function withIdempotencyKey<T>(handler: ProcedureHandler<unknown, T>): ProcedureHandler<unknown, T>;
+export declare function withIdempotencyKey<T>(handler: ProcedureHandler<unknown, T>): ProcedureHandler<unknown, T>;
 ```
 
 #### `withObservability`
@@ -167,7 +157,7 @@ export function withIdempotencyKey<T>(handler: ProcedureHandler<unknown, T>): Pr
 withObservability — handler の start / success / error / duration を hook 通知。 tracing / metrics / logging の統合を統一 interface で実現。
 
 ```ts
-export function withObservability<T>(name: string, handler: ProcedureHandler<unknown, T>, hook: ObservabilityHook): ProcedureHandler<unknown, T>;
+export declare function withObservability<T>(name: string, handler: ProcedureHandler<unknown, T>, hook: ObservabilityHook): ProcedureHandler<unknown, T>;
 ```
 
 #### `withRateLimit`
@@ -177,7 +167,7 @@ export function withObservability<T>(name: string, handler: ProcedureHandler<unk
 withRateLimit — sliding window rate limiter。 window 内 request 数が maxRequests 超で throw。
 
 ```ts
-export function withRateLimit<T>(handler: ProcedureHandler<unknown, T>, options: RateLimitOptions): ProcedureHandler<unknown, T>;
+export declare function withRateLimit<T>(handler: ProcedureHandler<unknown, T>, options: RateLimitOptions): ProcedureHandler<unknown, T>;
 ```
 
 #### `withRetry`
@@ -187,7 +177,7 @@ export function withRateLimit<T>(handler: ProcedureHandler<unknown, T>, options:
 withRetry — procedure handler を retry policy でラップ。 exponential backoff (backoffMs * 2^(attempt-1)) を default で適用、 retryOn callback で条件付き retry も可能。
 
 ```ts
-export function withRetry<T>(handler: ProcedureHandler<unknown, T>, options: RetryOptions): ProcedureHandler<unknown, T>;
+export declare function withRetry<T>(handler: ProcedureHandler<unknown, T>, options: RetryOptions): ProcedureHandler<unknown, T>;
 ```
 
 #### `withTimeout`
@@ -197,7 +187,7 @@ export function withRetry<T>(handler: ProcedureHandler<unknown, T>, options: Ret
 withTimeout — handler を timeout でラップ。 ms 経過で Promise.race で timeout error throw。
 
 ```ts
-export function withTimeout<T>(handler: ProcedureHandler<unknown, T>, options: TimeoutOptions): ProcedureHandler<unknown, T>;
+export declare function withTimeout<T>(handler: ProcedureHandler<unknown, T>, options: TimeoutOptions): ProcedureHandler<unknown, T>;
 ```
 
 ### 型
@@ -208,8 +198,8 @@ export function withTimeout<T>(handler: ProcedureHandler<unknown, T>, options: T
 
 ```ts
 export interface BatchInvokeItem<TInput = unknown> {
-  procedureName: string;
-  input: TInput;
+    procedureName: string;
+    input: TInput;
 }
 ```
 
@@ -219,9 +209,12 @@ export interface BatchInvokeItem<TInput = unknown> {
 
 ```ts
 export interface BatchInvokeResult {
-  ok: boolean;
-  output?: unknown;
-  error?: { code: string; message: string };
+    ok: boolean;
+    output?: unknown;
+    error?: {
+        code: string;
+        message: string;
+    };
 }
 ```
 
@@ -231,8 +224,8 @@ export interface BatchInvokeResult {
 
 ```ts
 export interface CircuitBreakerOptions {
-  failureThreshold: number;
-  resetMs: number;
+    failureThreshold: number;
+    resetMs: number;
 }
 ```
 
@@ -242,9 +235,9 @@ export interface CircuitBreakerOptions {
 
 ```ts
 export interface CreateContextOptions {
-  headers?: Record<string, string>;
-  userId?: string;
-  session?: Record<string, unknown>;
+    headers?: Record<string, string>;
+    userId?: string;
+    session?: Record<string, unknown>;
 }
 ```
 
@@ -254,8 +247,8 @@ export interface CreateContextOptions {
 
 ```ts
 export interface CreateRouterOptions {
-  procedures: Record<string, ProcedureDefinition>;
-  middlewares?: Middleware[];
+    procedures: Record<string, ProcedureDefinition>;
+    middlewares?: Middleware[];
 }
 ```
 
@@ -273,10 +266,12 @@ export type Middleware = (params: MiddlewareParams) => Promise<MiddlewareResult>
 
 ```ts
 export interface MiddlewareParams {
-  ctx: ProcedureContext;
-  input: unknown;
-  path: string;
-  next: (params?: { ctx?: ProcedureContext }) => Promise<MiddlewareResult>;
+    ctx: ProcedureContext;
+    input: unknown;
+    path: string;
+    next: (params?: {
+        ctx?: ProcedureContext;
+    }) => Promise<MiddlewareResult>;
 }
 ```
 
@@ -286,9 +281,9 @@ export interface MiddlewareParams {
 
 ```ts
 export interface MiddlewareResult {
-  ok: boolean;
-  data?: unknown;
-  error?: TRPCError;
+    ok: boolean;
+    data?: unknown;
+    error?: TRPCError;
 }
 ```
 
@@ -298,9 +293,9 @@ export interface MiddlewareResult {
 
 ```ts
 export interface ObservabilityHook {
-  onStart?: (name: string, input: unknown) => void;
-  onSuccess?: (name: string, output: unknown, durationMs: number) => void;
-  onError?: (name: string, err: unknown, durationMs: number) => void;
+    onStart?: (name: string, input: unknown) => void;
+    onSuccess?: (name: string, output: unknown, durationMs: number) => void;
+    onError?: (name: string, err: unknown, durationMs: number) => void;
 }
 ```
 
@@ -318,9 +313,9 @@ export type ProcedureContext = Record<string, unknown>;
 
 ```ts
 export interface ProcedureDefinition<TInput = unknown, TOutput = unknown> {
-  type: ProcedureType;
-  handler: ProcedureHandler<TInput, TOutput>;
-  middlewares: Middleware[];
+    type: ProcedureType;
+    handler: ProcedureHandler<TInput, TOutput>;
+    middlewares: Middleware[];
 }
 ```
 
@@ -330,8 +325,8 @@ export interface ProcedureDefinition<TInput = unknown, TOutput = unknown> {
 
 ```ts
 export type ProcedureHandler<TInput = unknown, TOutput = unknown> = (params: {
-  input: TInput;
-  ctx: ProcedureContext;
+    input: TInput;
+    ctx: ProcedureContext;
 }) => Promise<TOutput> | TOutput;
 ```
 
@@ -349,8 +344,8 @@ export type ProcedureType = 'query' | 'mutation' | 'subscription';
 
 ```ts
 export interface RateLimitOptions {
-  maxRequests: number;
-  windowMs: number;
+    maxRequests: number;
+    windowMs: number;
 }
 ```
 
@@ -360,9 +355,9 @@ export interface RateLimitOptions {
 
 ```ts
 export interface RetryOptions {
-  maxAttempts: number;
-  backoffMs?: number;
-  retryOn?: (err: unknown) => boolean;
+    maxAttempts: number;
+    backoffMs?: number;
+    retryOn?: (err: unknown) => boolean;
 }
 ```
 
@@ -372,8 +367,8 @@ export interface RetryOptions {
 
 ```ts
 export interface Router {
-  procedures: Record<string, ProcedureDefinition>;
-  globalMiddlewares: Middleware[];
+    procedures: Record<string, ProcedureDefinition>;
+    globalMiddlewares: Middleware[];
 }
 ```
 
@@ -383,7 +378,7 @@ export interface Router {
 
 ```ts
 export interface TimeoutOptions {
-  ms: number;
+    ms: number;
 }
 ```
 
@@ -392,12 +387,7 @@ export interface TimeoutOptions {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L18) `packages/trpc/src/middleware.ts`
 
 ```ts
-export type TRPCErrorCode =
-  | 'BAD_REQUEST'
-  | 'UNAUTHORIZED'
-  | 'FORBIDDEN'
-  | 'NOT_FOUND'
-  | 'INTERNAL_SERVER_ERROR';
+export type TRPCErrorCode = 'BAD_REQUEST' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'NOT_FOUND' | 'INTERNAL_SERVER_ERROR';
 ```
 
 #### `TypedClient`
@@ -406,11 +396,11 @@ export type TRPCErrorCode =
 
 ```ts
 export interface TypedClient {
-  [path: string]: {
-    query: (input?: unknown, ctx?: ProcedureContext) => Promise<unknown>;
-    mutate: (input?: unknown, ctx?: ProcedureContext) => Promise<unknown>;
-    subscribe: (input?: unknown, ctx?: ProcedureContext) => Promise<unknown>;
-  };
+    [path: string]: {
+        query: (input?: unknown, ctx?: ProcedureContext) => Promise<unknown>;
+        mutate: (input?: unknown, ctx?: ProcedureContext) => Promise<unknown>;
+        subscribe: (input?: unknown, ctx?: ProcedureContext) => Promise<unknown>;
+    };
 }
 ```
 <!-- kiwa-public-api:end -->

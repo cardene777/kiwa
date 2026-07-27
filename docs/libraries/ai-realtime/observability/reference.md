@@ -207,7 +207,7 @@ buildRealDriverConfig はendpointとtimeoutの設定値を作るhelperです。K
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -218,27 +218,33 @@ buildRealDriverConfig はendpointとtimeoutの設定値を作るhelperです。K
 Prometheus AlertManager style alert router + rule engine + silence store + escalation state machine, glued to a TelemetryCollector.
 
 ```ts
+/**
+ * Prometheus AlertManager style alert router + rule engine + silence
+ * store + escalation state machine, glued to a TelemetryCollector.
+ */
 export declare class AlertRouter {
-  private readonly rules = new Map<string, AlertRule>();
-  private readonly silences: Silence[] = [];
-  private readonly escalations = new Map<string, EscalationStep[]>();
-  private readonly deliveries: AlertReceiverEvent[] = [];
-  private readonly active = new Map<string, AlertFire>();
-  private route: RouteEntry | null = null;
-  private readonly collector: TelemetryCollector;
-  private readonly now: () => number;
-  private pendingCounts = new Map<string, number>();
-  constructor(collector: TelemetryCollector, options?: { now?: () => number });
-  registerRule(rule: AlertRule): void;
-  setRoute(route: RouteEntry): void;
-  addSilence(silence: Silence): void;
-  setEscalation(ruleId: string, steps: EscalationStep[]): void;
-  evaluate(): AlertReceiverEvent[];
-  tickEscalation(): AlertReceiverEvent[];
-  getDeliveries(): AlertReceiverEvent[];
-  getActive(): AlertFire[];
-  private isSilenced(fire: AlertFire): boolean;
-  private pickReceiver(fire: AlertFire): string | null;
+    constructor(collector: TelemetryCollector, options?: {
+        now?: () => number;
+    });
+    registerRule(rule: AlertRule): void;
+    setRoute(route: RouteEntry): void;
+    addSilence(silence: Silence): void;
+    setEscalation(ruleId: string, steps: EscalationStep[]): void;
+    /**
+     * Evaluate every registered rule against the current collector
+     * state. Rules whose predicate holds continuously for `forSamples`
+     * evaluations transition pending → firing and are routed. Rules
+     * whose predicate flips back to false transition to resolved.
+     */
+    evaluate(): AlertReceiverEvent[];
+    /**
+     * Advance the escalation clock. Any active fire whose escalation
+     * step's `afterMs` has elapsed since firedAt gets routed to the
+     * escalation receiver and transitions firing → escalated.
+     */
+    tickEscalation(): AlertReceiverEvent[];
+    getDeliveries(): AlertReceiverEvent[];
+    getActive(): AlertFire[];
 }
 ```
 
@@ -247,7 +253,7 @@ export declare class AlertRouter {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/spec-coverage.ts#L21) `packages/observability/src/spec-coverage.ts`
 
 ```ts
-export function analyzeSpecCoverage(opts: AnalyzeSpecCoverageOptions): SpecCoverageGap;
+export declare function analyzeSpecCoverage(opts: AnalyzeSpecCoverageOptions): SpecCoverageGap;
 ```
 
 #### `buildDashboardMock`
@@ -257,15 +263,13 @@ export function analyzeSpecCoverage(opts: AnalyzeSpecCoverageOptions): SpecCover
 Builder helper — construct a DashboardMock from an already-populated collector plus a panel list. Sugar for the common test setup.
 
 ```ts
-export function buildDashboardMock(
-  input: {
+export declare function buildDashboardMock(input: {
     id: string;
     title: string;
     panels: PanelConfig[];
     collector: TelemetryCollector;
     now?: () => number;
-  },
-): DashboardMock;
+}): DashboardMock;
 ```
 
 #### `buildRealDriverConfig`
@@ -273,11 +277,7 @@ export function buildDashboardMock(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/real-driver.ts#L54) `packages/observability/src/real-driver.ts`
 
 ```ts
-export function buildRealDriverConfig(
-  backend: ObservabilityBackend,
-  overrides: Partial<Omit<RealDriverConfig, 'backend'>> = {},
-  env: NodeJS.ProcessEnv = process.env,
-): RealDriverConfig;
+export declare function buildRealDriverConfig(backend: ObservabilityBackend, overrides?: Partial<Omit<RealDriverConfig, 'backend'>>, env?: NodeJS.ProcessEnv): RealDriverConfig;
 ```
 
 #### `buildSpanTree`
@@ -287,7 +287,7 @@ export function buildRealDriverConfig(
 Build a tree of SpanNodes from a flat span array. Spans reference their parent by `parentSpanName`; when the parent is null the span becomes a root. Children order preserves the collector insertion order (matches call order in the SUT).
 
 ```ts
-export function buildSpanTree(spans: SpanRecord[]): SpanNode[];
+export declare function buildSpanTree(spans: SpanRecord[]): SpanNode[];
 ```
 
 #### `checkThresholds`
@@ -295,10 +295,7 @@ export function buildSpanTree(spans: SpanRecord[]): SpanNode[];
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/coverage.ts#L109) `packages/observability/src/coverage.ts`
 
 ```ts
-export function checkThresholds(
-  summary: CoverageSummary,
-  thresholds: CoverageThresholds,
-): ThresholdCheckResult;
+export declare function checkThresholds(summary: CoverageSummary, thresholds: CoverageThresholds): ThresholdCheckResult;
 ```
 
 #### `collectRunHistory`
@@ -306,7 +303,7 @@ export function checkThresholds(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L12) `packages/observability/src/collect.ts`
 
 ```ts
-export function collectRunHistory(opts: CollectRunHistoryOptions): RunHistory;
+export declare function collectRunHistory(opts: CollectRunHistoryOptions): RunHistory;
 ```
 
 #### `correlateLogsAndSpans`
@@ -316,10 +313,10 @@ export function collectRunHistory(opts: CollectRunHistoryOptions): RunHistory;
 Sugar for the common case: build an index over the entire collector state.
 
 ```ts
-export function correlateLogsAndSpans(
-  input: { logs: LogRecord[]; spans: SpanRecord[] },
-  keys?: CorrelationKeys,
-): LogCorrelationIndex;
+export declare function correlateLogsAndSpans(input: {
+    logs: LogRecord[];
+    spans: SpanRecord[];
+}, keys?: CorrelationKeys): LogCorrelationIndex;
 ```
 
 #### `createDatadogMock`
@@ -327,7 +324,9 @@ export function correlateLogsAndSpans(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/telemetry.ts#L191) `packages/observability/src/telemetry.ts`
 
 ```ts
-export function createDatadogMock(config?: { now?: () => number }): DatadogMock;
+export declare function createDatadogMock(config?: {
+    now?: () => number;
+}): DatadogMock;
 ```
 
 #### `createOtelMock`
@@ -335,7 +334,9 @@ export function createDatadogMock(config?: { now?: () => number }): DatadogMock;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/telemetry.ts#L113) `packages/observability/src/telemetry.ts`
 
 ```ts
-export function createOtelMock(config?: { now?: () => number }): OtelMock;
+export declare function createOtelMock(config?: {
+    now?: () => number;
+}): OtelMock;
 ```
 
 #### `createSentryMock`
@@ -343,7 +344,9 @@ export function createOtelMock(config?: { now?: () => number }): OtelMock;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/telemetry.ts#L245) `packages/observability/src/telemetry.ts`
 
 ```ts
-export function createSentryMock(config?: { now?: () => number }): SentryMock;
+export declare function createSentryMock(config?: {
+    now?: () => number;
+}): SentryMock;
 ```
 
 #### `DashboardMock`
@@ -353,25 +356,34 @@ export function createSentryMock(config?: { now?: () => number }): SentryMock;
 Grafana-style dashboard mock. A single dashboard binds to a single TelemetryCollector and re-queries metrics on each `refresh()` call.
 
 ```ts
+/**
+ * Grafana-style dashboard mock. A single dashboard binds to a single
+ * TelemetryCollector and re-queries metrics on each `refresh()` call.
+ */
 export declare class DashboardMock {
-  readonly id: string;
-  readonly title: string;
-  private readonly panels: PanelConfig[];
-  private readonly collector: TelemetryCollector;
-  private readonly now: () => number;
-  private refreshCount = 0;
-  private lastResults: PanelResult[] = [];
-  constructor(
-    config: DashboardConfig,
-    collector: TelemetryCollector,
-    options?: { now?: () => number },
-  );
-  refresh(): PanelResult[];
-  getRefreshCount(): number;
-  getLastResults(): PanelResult[];
-  panel(panelId: string): PanelResult | undefined;
-  private evaluatePanel(panel: PanelConfig, at: number): PanelResult;
-  private matchesQuery(m: MetricRecord, q: MetricQuery): boolean;
+    readonly id: string;
+    readonly title: string;
+    constructor(config: DashboardConfig, collector: TelemetryCollector, options?: {
+        now?: () => number;
+    });
+    /**
+     * Re-execute every panel query against the current collector state.
+     * Returns the new panel results and increments refreshCount.
+     */
+    refresh(): PanelResult[];
+    /**
+     * Number of times refresh() has been called since construction.
+     */
+    getRefreshCount(): number;
+    /**
+     * The most recent set of panel results (empty array before first
+     * refresh call).
+     */
+    getLastResults(): PanelResult[];
+    /**
+     * Convenience accessor by panel id from the most recent results.
+     */
+    panel(panelId: string): PanelResult | undefined;
 }
 ```
 
@@ -382,7 +394,7 @@ export declare class DashboardMock {
 Alert routing tree — deepest match wins.
 
 ```ts
-export function defaultRoute(): RouteEntry;
+export declare function defaultRoute(): RouteEntry;
 ```
 
 #### `detectFlaky`
@@ -390,7 +402,7 @@ export function defaultRoute(): RouteEntry;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/flaky.ts#L11) `packages/observability/src/flaky.ts`
 
 ```ts
-export function detectFlaky(opts: DetectFlakyOptions): FlakyTest[];
+export declare function detectFlaky(opts: DetectFlakyOptions): FlakyTest[];
 ```
 
 #### `drillDown`
@@ -400,7 +412,7 @@ export function detectFlaky(opts: DetectFlakyOptions): FlakyTest[];
 Drill-down — return the subtree rooted at the first node whose name matches. Depth is normalized so the drilled-in root sits at depth 0. Returns null when no matching node exists.
 
 ```ts
-export function drillDown(roots: FlameNode[], name: string): FlameNode | null;
+export declare function drillDown(roots: FlameNode[], name: string): FlameNode | null;
 ```
 
 #### `escalation_pagerDutyTwoStep`
@@ -408,7 +420,7 @@ export function drillDown(roots: FlameNode[], name: string): FlameNode | null;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/fixtures.ts#L142) `packages/observability/src/fixtures.ts`
 
 ```ts
-export function escalation_pagerDutyTwoStep(): EscalationStep[];
+export declare function escalation_pagerDutyTwoStep(): EscalationStep[];
 ```
 
 #### `explicitEnvKey`
@@ -416,7 +428,7 @@ export function escalation_pagerDutyTwoStep(): EscalationStep[];
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/real-driver.ts#L35) `packages/observability/src/real-driver.ts`
 
 ```ts
-export function explicitEnvKey(backend: ObservabilityBackend): string;
+export declare function explicitEnvKey(backend: ObservabilityBackend): string;
 ```
 
 #### `flattenFlame`
@@ -426,7 +438,7 @@ export function explicitEnvKey(backend: ObservabilityBackend): string;
 Flatten a flame tree into a depth-first list. Handy for kiwa assertions that need to iterate every node without recursing.
 
 ```ts
-export function flattenFlame(roots: FlameNode[]): FlameNode[];
+export declare function flattenFlame(roots: FlameNode[]): FlameNode[];
 ```
 
 #### `fromIstanbulCoverageSummary`
@@ -434,7 +446,7 @@ export function flattenFlame(roots: FlameNode[]): FlameNode[];
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/coverage.ts#L74) `packages/observability/src/coverage.ts`
 
 ```ts
-export function fromIstanbulCoverageSummary(raw: IstanbulCoverageSummary): CoverageSummary;
+export declare function fromIstanbulCoverageSummary(raw: IstanbulCoverageSummary): CoverageSummary;
 ```
 
 #### `fromVitestJson`
@@ -442,7 +454,7 @@ export function fromIstanbulCoverageSummary(raw: IstanbulCoverageSummary): Cover
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L58) `packages/observability/src/collect.ts`
 
 ```ts
-export function fromVitestJson(report: VitestStyleReport, opts: FromVitestJsonOptions): TestRunRecord[];
+export declare function fromVitestJson(report: VitestStyleReport, opts: FromVitestJsonOptions): TestRunRecord[];
 ```
 
 #### `isKiwaModeReal`
@@ -450,7 +462,7 @@ export function fromVitestJson(report: VitestStyleReport, opts: FromVitestJsonOp
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/real-driver.ts#L19) `packages/observability/src/real-driver.ts`
 
 ```ts
-export function isKiwaModeReal(env: NodeJS.ProcessEnv = process.env): boolean;
+export declare function isKiwaModeReal(env?: NodeJS.ProcessEnv): boolean;
 ```
 
 #### `LogCorrelationIndex`
@@ -460,25 +472,40 @@ export function isKiwaModeReal(env: NodeJS.ProcessEnv = process.env): boolean;
 Bidirectional index over the collector's logs / spans sinks. The index is built once from the current collector state; callers who mutate the collector after building must rebuild.
 
 ```ts
+/**
+ * Bidirectional index over the collector's logs / spans sinks. The
+ * index is built once from the current collector state; callers who
+ * mutate the collector after building must rebuild.
+ */
 export declare class LogCorrelationIndex {
-  private readonly logs: LogRecord[];
-  private readonly spans: SpanRecord[];
-  private readonly keys: Required<CorrelationKeys>;
-  private readonly logsBySpanId = new Map<string, LogRecord[]>();
-  private readonly logsByTraceId = new Map<string, LogRecord[]>();
-  private readonly spansById = new Map<string, SpanRecord>();
-  private readonly spansByTraceId = new Map<string, SpanRecord[]>();
-  constructor(
-    input: { logs: LogRecord[]; spans: SpanRecord[] },
-    keys?: CorrelationKeys,
-  );
-  private buildIndex(): void;
-  private readTraceId(attributes: Record<string, unknown>): string | null;
-  logsForSpan(spanId: string): LogRecord[];
-  logsForTrace(traceId: string): LogRecord[];
-  spansForTrace(traceId: string): SpanRecord[];
-  linkAll(): LogSpanLink[];
-  correlatedCount(): number;
+    constructor(input: {
+        logs: LogRecord[];
+        spans: SpanRecord[];
+    }, keys?: CorrelationKeys);
+    /**
+     * Logs whose spanId attribute equals the given span id.
+     */
+    logsForSpan(spanId: string): LogRecord[];
+    /**
+     * Logs whose traceId attribute equals the given trace id (across
+     * every span in the trace).
+     */
+    logsForTrace(traceId: string): LogRecord[];
+    /**
+     * Spans in the given trace, insertion order.
+     */
+    spansForTrace(traceId: string): SpanRecord[];
+    /**
+     * Convenience — return every log with the span it joins to, or
+     * null when the log carries no correlatable id.
+     */
+    linkAll(): LogSpanLink[];
+    /**
+     * Count logs that carry at least one correlatable id. Useful for
+     * kiwa tests that measure the SUT's instrumentation coverage of
+     * its own log surface.
+     */
+    correlatedCount(): number;
 }
 ```
 
@@ -489,7 +516,7 @@ export declare class LogCorrelationIndex {
 Log correlation fixture — matched log lines for the http handler trace. Timestamps sit inside the parent span window so join by timestamp bucket also works for callers that do not carry ids.
 
 ```ts
-export function logs_forHttpTrace(startAt = 1_000): LogRecord[];
+export declare function logs_forHttpTrace(startAt?: number): LogRecord[];
 ```
 
 #### `metricsForRule`
@@ -499,10 +526,7 @@ export function logs_forHttpTrace(startAt = 1_000): LogRecord[];
 Convenience — narrow accessor: metric records for a metric name. Kept exported so kiwa test scenarios can double-check assertion denominators without duplicating the filter predicate.
 
 ```ts
-export function metricsForRule(
-  collector: TelemetryCollector,
-  rule: AlertRule,
-): MetricRecord[];
+export declare function metricsForRule(collector: TelemetryCollector, rule: AlertRule): MetricRecord[];
 ```
 
 #### `panel_httpErrorRate`
@@ -512,7 +536,7 @@ export function metricsForRule(
 Dashboard panel builders — 3 named scenarios covering the common SaaS observability wall.
 
 ```ts
-export function panel_httpErrorRate(id = 'panel-http-error-rate'): PanelConfig;
+export declare function panel_httpErrorRate(id?: string): PanelConfig;
 ```
 
 #### `panel_p99Latency`
@@ -520,7 +544,7 @@ export function panel_httpErrorRate(id = 'panel-http-error-rate'): PanelConfig;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/fixtures.ts#L46) `packages/observability/src/fixtures.ts`
 
 ```ts
-export function panel_p99Latency(id = 'panel-p99-latency'): PanelConfig;
+export declare function panel_p99Latency(id?: string): PanelConfig;
 ```
 
 #### `panel_queueDepth`
@@ -528,7 +552,7 @@ export function panel_p99Latency(id = 'panel-p99-latency'): PanelConfig;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/fixtures.ts#L63) `packages/observability/src/fixtures.ts`
 
 ```ts
-export function panel_queueDepth(id = 'panel-queue-depth', queue = 'default'): PanelConfig;
+export declare function panel_queueDepth(id?: string, queue?: string): PanelConfig;
 ```
 
 #### `renderDashboard`
@@ -536,7 +560,7 @@ export function panel_queueDepth(id = 'panel-queue-depth', queue = 'default'): P
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/dashboard.ts#L29) `packages/observability/src/dashboard.ts`
 
 ```ts
-export function renderDashboard(input: DashboardInput): string;
+export declare function renderDashboard(input: DashboardInput): string;
 ```
 
 #### `renderFlameGraph`
@@ -546,7 +570,7 @@ export function renderDashboard(input: DashboardInput): string;
 Render a flame graph structure. Nodes with the same name at the same depth in the same parent chain collapse into one flame node whose `samples` counts how many spans contributed. Only closed spans (endedAt != null) contribute to the numeric aggregate; open spans are counted but contribute 0 ms.
 
 ```ts
-export function renderFlameGraph(roots: SpanNode[]): FlameNode[];
+export declare function renderFlameGraph(roots: SpanNode[]): FlameNode[];
 ```
 
 #### `resolveObservabilityEndpoint`
@@ -554,10 +578,7 @@ export function renderFlameGraph(roots: SpanNode[]): FlameNode[];
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/real-driver.ts#L23) `packages/observability/src/real-driver.ts`
 
 ```ts
-export function resolveObservabilityEndpoint(
-  backend: ObservabilityBackend,
-  env: NodeJS.ProcessEnv = process.env,
-): string;
+export declare function resolveObservabilityEndpoint(backend: ObservabilityBackend, env?: NodeJS.ProcessEnv): string;
 ```
 
 #### `rule_errorRateCritical`
@@ -567,7 +588,7 @@ export function resolveObservabilityEndpoint(
 Alert rule builders — 3 named scenarios matching the panel wall.
 
 ```ts
-export function rule_errorRateCritical(id = 'rule-error-rate-critical'): AlertRule;
+export declare function rule_errorRateCritical(id?: string): AlertRule;
 ```
 
 #### `rule_latencyDegraded`
@@ -575,7 +596,7 @@ export function rule_errorRateCritical(id = 'rule-error-rate-critical'): AlertRu
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/fixtures.ts#L92) `packages/observability/src/fixtures.ts`
 
 ```ts
-export function rule_latencyDegraded(id = 'rule-latency-degraded'): AlertRule;
+export declare function rule_latencyDegraded(id?: string): AlertRule;
 ```
 
 #### `rule_queueBackpressure`
@@ -583,246 +604,127 @@ export function rule_latencyDegraded(id = 'rule-latency-degraded'): AlertRule;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/fixtures.ts#L104) `packages/observability/src/fixtures.ts`
 
 ```ts
-export function rule_queueBackpressure(id = 'rule-queue-backpressure', queue = 'default'): AlertRule;
+export declare function rule_queueBackpressure(id?: string, queue?: string): AlertRule;
 ```
 
 #### `semantics`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/semantics/index.ts#L1) `packages/observability/src/semantics/index.ts`
+公開 entry point から解決しています。
+
+`"/Users/cardene/Desktop/projects/kiwa/packages/observability/src/semantics/index"` を `semantics` として公開しています。
 
 ```ts
-export {
-  providerEventName,
-  type AxisStep,
-  type NeutralEventName,
-  type ObservabilityAxis,
-  type ObservabilityTarget,
-} from './types.js';
-
-export {
-  computeErrorBudget,
-  evaluateBurnRate,
-  fireMultiWindowMultiBurnRateAlert,
-  openSLOWindow,
-  recordRequests,
-  startSLO,
-  type BurnRateThreshold,
-  type SLOSession,
-  type SLOState,
-} from './slo.js';
-
-export {
-  computeFourGoldenSignals,
-  recordDuration,
-  recordErrors,
-  recordRequestRate,
-  recordSaturation,
-  startRedUse,
-  type FourGoldenSignals,
-  type RedUseSession,
-  type RedUseState,
-} from './red-use.js';
-
-export {
-  attachTraceToMetric,
-  recordExemplarMetric,
-  resolveMetricToTrace,
-  resolveTraceToMetric,
-  startExemplarSession,
-  type ExemplarRecord,
-  type ExemplarSession,
-  type ExemplarState,
-} from './exemplar.js';
-
-export {
-  detectResource,
-  enqueueSpan,
-  extractW3CContext,
-  flushBatch,
-  propagateBaggage,
-  startOtelAdvanced,
-  type OtelAdvancedSession,
-  type OtelAdvancedState,
-  type OtelSpanQueueItem,
-} from './otel-advanced.js';
-
-export {
-  buildCorrelationIndex,
-  emitStructuredLog,
-  joinLogQLAndPromQL,
-  joinTraceIds,
-  startLogCorrelationAdvanced,
-  type LogCorrelationAdvancedSession,
-  type LogCorrelationAdvancedState,
-  type LogQLPromQLJoinQuery,
-  type StructuredLog,
-} from './log-correlation-advanced.js';
-
-export {
-  advanceEscalation,
-  applyInhibit,
-  applySilence,
-  isSilenced,
-  pageOncall,
-  setEscalationChain,
-  startAlertRoutingAdvanced,
-  type AlertRoutingAdvancedSession,
-  type AlertRoutingAdvancedState,
-  type EscalationStep,
-  type InhibitRule,
-  type Silence,
-} from './alert-routing-advanced.js';
-
-export {
-  buildFlameGraph,
-  flattenFlameGraph,
-  sampleCpu,
-  sampleMemory,
-  sampleOffCpu,
-  startProfiling,
-  type FlameNode,
-  type ProfileKind,
-  type ProfileSample,
-  type ProfilingSession,
-  type ProfilingState,
-} from './profiling.js';
-
-export {
-  bucketHistogram,
-  detectHighCardinality,
-  reduceLabel,
-  scanSeries,
-  startCardinalitySession,
-  type CardinalitySession,
-  type CardinalityState,
-  type HighCardinalityFinding,
-  type SeriesFingerprint,
-} from './cardinality.js';
-
-export {
-  OBSERVABILITY_AXIS_TO_EVENTS,
-  collectFidelityCoverage,
-  type FidelityCoverage,
-  type FidelityRow,
-} from './fidelity.js';
-
-// v2.2 advanced III
-
-export {
-  attributeCost,
-  capturePlan,
-  detectDrift,
-  evaluatePolicy,
-  startIacSession,
-  type IacCostAttribution,
-  type IacPolicyResult,
-  type IacResourceChange,
-  type IacSession,
-  type IacState,
-} from './iac.js';
-
-export {
-  applyTrafficSplit,
-  handshakeMtls,
-  injectSidecar,
-  startMeshSession,
-  tripCircuitBreaker,
-  type MeshMtlsHandshake,
-  type MeshSession,
-  type MeshSidecarInjection,
-  type MeshState,
-  type MeshTrafficSplit,
-} from './service-mesh.js';
-
-export {
-  captureNetworkFlow,
-  probeUserspace,
-  recordSyscall,
-  startEbpfIiiSession,
-  traceKernel,
-  type EbpfIiiSession,
-  type EbpfIiiState,
-  type EbpfNetworkFlow,
-  type EbpfProbe,
-} from './ebpf-iii.js';
-
-export {
-  checkBudget,
-  countTokens,
-  flagHallucination,
-  logPrompt,
-  startLlmObsSession,
-  type LlmHallucinationSignal,
-  type LlmObsSession,
-  type LlmObsState,
-  type LlmPromptRecord,
-  type LlmTokenUsage,
-} from './llm-observability.js';
-
-export {
-  attributeTeam,
-  optimizeSpot,
-  recommendRightsizing,
-  recordCostPerRequest,
-  startFinopsSession,
-  type FinopsRightsizingRecommendation,
-  type FinopsSession,
-  type FinopsState,
-  type FinopsTeamCost,
-} from './finops.js';
-
-export {
-  computeBlastRadius,
-  injectFault,
-  recordGameDay,
-  startChaosSession,
-  triggerRollback,
-  type ChaosFault,
-  type ChaosFaultKind,
-  type ChaosGameDayLog,
-  type ChaosSession,
-  type ChaosState,
-} from './chaos.js';
-
-export {
-  captureLineage,
-  detectSchemaDrift,
-  evaluateFreshness,
-  scoreDataQuality,
-  startPipelineSession,
-  type PipelineDataQualityCheck,
-  type PipelineLineageEdge,
-  type PipelineSchemaColumn,
-  type PipelineSession,
-  type PipelineState,
-} from './data-pipeline.js';
-
-export {
-  analyzeRootCause,
-  correlateAlerts,
-  detectAnomaly,
-  executeRemediation,
-  startAiopsSession,
-  type AiopsAlert,
-  type AiopsAnomalyPoint,
-  type AiopsDependencyEdge,
-  type AiopsRemediationAction,
-  type AiopsSession,
-  type AiopsState,
-} from './aiops.js';
-
-// v2.1 incident-orchestrator = alert + escalation + AIOps + FinOps + chaos の 継続合成 layer
 export type {
-  IncidentState,
-  IncidentEvent,
-  IncidentSession,
-  IncidentSummary,
-} from './incident-orchestrator.js';
+  TestStatus,
+  TestRunRecord,
+  RunHistory,
+  FlakyTest,
+  SpecCoverageGap,
+  DashboardInput,
+} from './types.js';
 export {
-  startIncident,
-  dispatchEvent as dispatchIncidentEvent,
-  summarizeIncident,
-} from './incident-orchestrator.js';
+  collectRunHistory,
+  fromVitestJson,
+  type CollectRunHistoryOptions,
+  type FromVitestJsonOptions,
+  type VitestStyleAssertionResult,
+  type VitestStyleReport,
+  type VitestStyleTestResult,
+} from './collect.js';
+export { detectFlaky, type DetectFlakyOptions } from './flaky.js';
+export { analyzeSpecCoverage, type AnalyzeSpecCoverageOptions } from './spec-coverage.js';
+export { renderDashboard } from './dashboard.js';
+export {
+  fromIstanbulCoverageSummary,
+  checkThresholds,
+  type CoverageMetric,
+  type CoverageFileEntry,
+  type CoverageSummary,
+  type CoverageThresholds,
+  type ThresholdCheckResult,
+  type IstanbulCoverageSummary,
+} from './coverage.js';
+export {
+  TelemetryCollector,
+  createOtelMock,
+  createDatadogMock,
+  createSentryMock,
+  type TelemetryProvider,
+  type SpanRecord,
+  type MetricRecord,
+  type LogRecord,
+  type ExceptionRecord,
+  type TransactionRecord,
+  type OtelMock,
+  type DatadogMock,
+  type SentryMock,
+} from './telemetry.js';
+export {
+  DashboardMock,
+  buildDashboardMock,
+  type DashboardConfig,
+  type PanelConfig,
+  type PanelKind,
+  type PanelResult,
+  type PanelThreshold,
+  type MetricQuery,
+  type MetricAggregation,
+} from './dashboard-mock.js';
+export {
+  AlertRouter,
+  metricsForRule,
+  type AlertRule,
+  type AlertOperator,
+  type AlertSeverity,
+  type AlertState,
+  type AlertFire,
+  type AlertReceiverEvent,
+  type EscalationStep,
+  type RouteEntry,
+  type Silence,
+} from './alert.js';
+export {
+  buildSpanTree,
+  renderFlameGraph,
+  drillDown,
+  flattenFlame,
+  type SpanNode,
+  type FlameNode,
+} from './trace-flame.js';
+export {
+  LogCorrelationIndex,
+  correlateLogsAndSpans,
+  type CorrelationKeys,
+  type LogSpanLink,
+} from './log-correlation.js';
+export {
+  panel_httpErrorRate,
+  panel_p99Latency,
+  panel_queueDepth,
+  rule_errorRateCritical,
+  rule_latencyDegraded,
+  rule_queueBackpressure,
+  defaultRoute,
+  escalation_pagerDutyTwoStep,
+  silence_maintenanceWindow,
+  trace_httpHandler,
+  trace_fanoutParallel,
+  trace_nestedRetry,
+  logs_forHttpTrace,
+} from './fixtures.js';
+
+// v2.1 advanced 8-axis semantics + real driver (namespaced via `semantics/` and
+// `real-driver` to avoid name collisions with v2.0 exports).
+export * as semantics from './semantics/index.js';
+export {
+  buildRealDriverConfig,
+  explicitEnvKey,
+  isKiwaModeReal,
+  resolveObservabilityEndpoint,
+  skipUnlessReal,
+  type ObservabilityBackend,
+  type RealDriverConfig,
+} from './real-driver.js';
 ```
 
 #### `silence_maintenanceWindow`
@@ -830,7 +732,7 @@ export {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/fixtures.ts#L149) `packages/observability/src/fixtures.ts`
 
 ```ts
-export function silence_maintenanceWindow(id: string, minutesFromNow: number, now: number): Silence;
+export declare function silence_maintenanceWindow(id: string, minutesFromNow: number, now: number): Silence;
 ```
 
 #### `skipUnlessReal`
@@ -838,9 +740,9 @@ export function silence_maintenanceWindow(id: string, minutesFromNow: number, no
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/real-driver.ts#L66) `packages/observability/src/real-driver.ts`
 
 ```ts
-export function skipUnlessReal(env: NodeJS.ProcessEnv = process.env): {
-  skip: boolean;
-  reason: string;
+export declare function skipUnlessReal(env?: NodeJS.ProcessEnv): {
+    skip: boolean;
+    reason: string;
 };
 ```
 
@@ -852,15 +754,15 @@ Shared collector — every provider mock writes into the same shape so kiwa test
 
 ```ts
 export declare class TelemetryCollector {
-  readonly spans: SpanRecord[] = [];
-  readonly metrics: MetricRecord[] = [];
-  readonly logs: LogRecord[] = [];
-  readonly exceptions: ExceptionRecord[] = [];
-  readonly transactions: TransactionRecord[] = [];
-  clear(): void;
-  spanByName(name: string): SpanRecord | undefined;
-  metricSum(name: string): number;
-  hasException(fingerprint: string): boolean;
+    readonly spans: SpanRecord[];
+    readonly metrics: MetricRecord[];
+    readonly logs: LogRecord[];
+    readonly exceptions: ExceptionRecord[];
+    readonly transactions: TransactionRecord[];
+    clear(): void;
+    spanByName(name: string): SpanRecord | undefined;
+    metricSum(name: string): number;
+    hasException(fingerprint: string): boolean;
 }
 ```
 
@@ -869,7 +771,7 @@ export declare class TelemetryCollector {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/fixtures.ts#L191) `packages/observability/src/fixtures.ts`
 
 ```ts
-export function trace_fanoutParallel(startAt = 1_000): SpanRecord[];
+export declare function trace_fanoutParallel(startAt?: number): SpanRecord[];
 ```
 
 #### `trace_httpHandler`
@@ -879,7 +781,7 @@ export function trace_fanoutParallel(startAt = 1_000): SpanRecord[];
 Trace scenario builders — 3 named span shapes covering the common SUT flame graph patterns.
 
 ```ts
-export function trace_httpHandler(startAt = 1_000): SpanRecord[];
+export declare function trace_httpHandler(startAt?: number): SpanRecord[];
 ```
 
 #### `trace_nestedRetry`
@@ -887,7 +789,7 @@ export function trace_httpHandler(startAt = 1_000): SpanRecord[];
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/fixtures.ts#L229) `packages/observability/src/fixtures.ts`
 
 ```ts
-export function trace_nestedRetry(startAt = 1_000): SpanRecord[];
+export declare function trace_nestedRetry(startAt?: number): SpanRecord[];
 ```
 
 ### 型
@@ -898,12 +800,12 @@ export function trace_nestedRetry(startAt = 1_000): SpanRecord[];
 
 ```ts
 export interface AlertFire {
-  ruleId: string;
-  severity: AlertSeverity;
-  labels: Record<string, string>;
-  value: number;
-  firedAt: number;
-  state: AlertState;
+    ruleId: string;
+    severity: AlertSeverity;
+    labels: Record<string, string>;
+    value: number;
+    firedAt: number;
+    state: AlertState;
 }
 ```
 
@@ -921,10 +823,10 @@ export type AlertOperator = 'gt' | 'gte' | 'lt' | 'lte' | 'eq';
 
 ```ts
 export interface AlertReceiverEvent {
-  receiver: string;
-  fire: AlertFire;
-  reason: 'route' | 'escalation';
-  deliveredAt: number;
+    receiver: string;
+    fire: AlertFire;
+    reason: 'route' | 'escalation';
+    deliveredAt: number;
 }
 ```
 
@@ -934,17 +836,17 @@ export interface AlertReceiverEvent {
 
 ```ts
 export interface AlertRule {
-  id: string;
-  metricName: string;
-  operator: AlertOperator;
-  threshold: number;
-  /**
-   * Sample count required over which the operator must hold before
-   * the rule transitions from pending → firing. Default: 1.
-   */
-  forSamples?: number;
-  labels: Record<string, string>;
-  severity: AlertSeverity;
+    id: string;
+    metricName: string;
+    operator: AlertOperator;
+    threshold: number;
+    /**
+     * Sample count required over which the operator must hold before
+     * the rule transitions from pending → firing. Default: 1.
+     */
+    forSamples?: number;
+    labels: Record<string, string>;
+    severity: AlertSeverity;
 }
 ```
 
@@ -970,18 +872,10 @@ export type AlertState = 'pending' | 'firing' | 'escalated' | 'resolved';
 
 ```ts
 export interface AnalyzeSpecCoverageOptions {
-  specMarkdown: string;
-  testCode: string;
-  module?: string;
-  defaultLayer?:
-    | 'contract'
-    | 'unit'
-    | 'integration'
-    | 'e2e'
-    | 'api'
-    | 'ui'
-    | 'data'
-    | 'cli';
+    specMarkdown: string;
+    testCode: string;
+    module?: string;
+    defaultLayer?: 'contract' | 'unit' | 'integration' | 'e2e' | 'api' | 'ui' | 'data' | 'cli';
 }
 ```
 
@@ -991,12 +885,12 @@ export interface AnalyzeSpecCoverageOptions {
 
 ```ts
 export interface CollectRunHistoryOptions {
-  /** Existing history to extend */
-  history?: RunHistory;
-  /** New records to append */
-  records: TestRunRecord[];
-  /** Cap the number of retained records per testId (FIFO eviction) */
-  maxPerTest?: number;
+    /** Existing history to extend */
+    history?: RunHistory;
+    /** New records to append */
+    records: TestRunRecord[];
+    /** Cap the number of retained records per testId (FIFO eviction) */
+    maxPerTest?: number;
 }
 ```
 
@@ -1008,13 +902,13 @@ Attribute keys used to look up trace / span ids on both sides. Callers can overr
 
 ```ts
 export interface CorrelationKeys {
-  traceIdKey?: string;
-  spanIdKey?: string;
-  /**
-   * Fallback trace key checked when `traceIdKey` is not present.
-   * Useful when the SUT mixes conventions during a migration.
-   */
-  altTraceIdKeys?: string[];
+    traceIdKey?: string;
+    spanIdKey?: string;
+    /**
+     * Fallback trace key checked when `traceIdKey` is not present.
+     * Useful when the SUT mixes conventions during a migration.
+     */
+    altTraceIdKeys?: string[];
 }
 ```
 
@@ -1024,11 +918,11 @@ export interface CorrelationKeys {
 
 ```ts
 export interface CoverageFileEntry {
-  path: string;
-  statements: CoverageMetric;
-  branches: CoverageMetric;
-  functions: CoverageMetric;
-  lines: CoverageMetric;
+    path: string;
+    statements: CoverageMetric;
+    branches: CoverageMetric;
+    functions: CoverageMetric;
+    lines: CoverageMetric;
 }
 ```
 
@@ -1038,10 +932,10 @@ export interface CoverageFileEntry {
 
 ```ts
 export interface CoverageMetric {
-  total: number;
-  covered: number;
-  skipped: number;
-  pct: number;
+    total: number;
+    covered: number;
+    skipped: number;
+    pct: number;
 }
 ```
 
@@ -1051,8 +945,8 @@ export interface CoverageMetric {
 
 ```ts
 export interface CoverageSummary {
-  total: CoverageFileEntry;
-  files: CoverageFileEntry[];
+    total: CoverageFileEntry;
+    files: CoverageFileEntry[];
 }
 ```
 
@@ -1062,10 +956,10 @@ export interface CoverageSummary {
 
 ```ts
 export interface CoverageThresholds {
-  statements?: number;
-  branches?: number;
-  functions?: number;
-  lines?: number;
+    statements?: number;
+    branches?: number;
+    functions?: number;
+    lines?: number;
 }
 ```
 
@@ -1075,9 +969,9 @@ export interface CoverageThresholds {
 
 ```ts
 export interface DashboardConfig {
-  id: string;
-  title: string;
-  panels: PanelConfig[];
+    id: string;
+    title: string;
+    panels: PanelConfig[];
 }
 ```
 
@@ -1087,10 +981,10 @@ export interface DashboardConfig {
 
 ```ts
 export interface DashboardInput {
-  history: RunHistory;
-  flaky: FlakyTest[];
-  gaps: SpecCoverageGap[];
-  coverage?: import('./coverage.js').CoverageSummary;
+    history: RunHistory;
+    flaky: FlakyTest[];
+    gaps: SpecCoverageGap[];
+    coverage?: import('./coverage.js').CoverageSummary;
 }
 ```
 
@@ -1100,20 +994,23 @@ export interface DashboardInput {
 
 ```ts
 export interface DatadogMock {
-  readonly provider: 'datadog';
-  readonly collector: TelemetryCollector;
-  statsd: {
-    increment(name: string, value?: number, tags?: Record<string, string>): void;
-    gauge(name: string, value: number, tags?: Record<string, string>): void;
-    histogram(name: string, value: number, tags?: Record<string, string>): void;
-  };
-  tracer: {
-    startSpan(name: string, options?: { tags?: Record<string, string>; childOf?: string }): {
-      addTags(tags: Record<string, string>): void;
-      log(fields: Record<string, unknown>): void;
-      finish(): void;
+    readonly provider: 'datadog';
+    readonly collector: TelemetryCollector;
+    statsd: {
+        increment(name: string, value?: number, tags?: Record<string, string>): void;
+        gauge(name: string, value: number, tags?: Record<string, string>): void;
+        histogram(name: string, value: number, tags?: Record<string, string>): void;
     };
-  };
+    tracer: {
+        startSpan(name: string, options?: {
+            tags?: Record<string, string>;
+            childOf?: string;
+        }): {
+            addTags(tags: Record<string, string>): void;
+            log(fields: Record<string, unknown>): void;
+            finish(): void;
+        };
+    };
 }
 ```
 
@@ -1123,11 +1020,11 @@ export interface DatadogMock {
 
 ```ts
 export interface DetectFlakyOptions {
-  history: RunHistory;
-  /** Minimum number of runs before a test is eligible for flaky scoring */
-  minRuns?: number;
-  /** Failure rate threshold; tests with 0 < rate < 1 are flaky; tests above this are reported */
-  threshold?: number;
+    history: RunHistory;
+    /** Minimum number of runs before a test is eligible for flaky scoring */
+    minRuns?: number;
+    /** Failure rate threshold; tests with 0 < rate < 1 are flaky; tests above this are reported */
+    threshold?: number;
 }
 ```
 
@@ -1137,9 +1034,9 @@ export interface DetectFlakyOptions {
 
 ```ts
 export interface EscalationStep {
-  /** Milliseconds after firing before this step applies. */
-  afterMs: number;
-  receiver: string;
+    /** Milliseconds after firing before this step applies. */
+    afterMs: number;
+    receiver: string;
 }
 ```
 
@@ -1149,12 +1046,17 @@ export interface EscalationStep {
 
 ```ts
 export interface ExceptionRecord {
-  message: string;
-  fingerprint: string;
-  stack: string | null;
-  breadcrumbs: Array<{ category: string; message: string; level: string; timestamp: number }>;
-  tags: Record<string, string>;
-  timestamp: number;
+    message: string;
+    fingerprint: string;
+    stack: string | null;
+    breadcrumbs: Array<{
+        category: string;
+        message: string;
+        level: string;
+        timestamp: number;
+    }>;
+    tags: Record<string, string>;
+    timestamp: number;
 }
 ```
 
@@ -1164,12 +1066,12 @@ export interface ExceptionRecord {
 
 ```ts
 export interface FlakyTest {
-  testId: string;
-  fullName: string;
-  totalRuns: number;
-  passes: number;
-  failures: number;
-  failureRate: number;
+    testId: string;
+    fullName: string;
+    totalRuns: number;
+    passes: number;
+    failures: number;
+    failureRate: number;
 }
 ```
 
@@ -1179,17 +1081,17 @@ export interface FlakyTest {
 
 ```ts
 export interface FlameNode {
-  name: string;
-  depth: number;
-  totalMs: number;
-  selfMs: number;
-  /**
-   * Sample count — how many spans with this name aggregated into
-   * this flame node. When multiple root/parent chains share a name
-   * they collapse into a single flame node.
-   */
-  samples: number;
-  children: FlameNode[];
+    name: string;
+    depth: number;
+    totalMs: number;
+    selfMs: number;
+    /**
+     * Sample count — how many spans with this name aggregated into
+     * this flame node. When multiple root/parent chains share a name
+     * they collapse into a single flame node.
+     */
+    samples: number;
+    children: FlameNode[];
 }
 ```
 
@@ -1199,7 +1101,7 @@ export interface FlameNode {
 
 ```ts
 export interface FromVitestJsonOptions {
-  runId: string;
+    runId: string;
 }
 ```
 
@@ -1217,10 +1119,10 @@ export type IstanbulCoverageSummary = Record<string, IstanbulFileSummary>;
 
 ```ts
 export interface LogRecord {
-  level: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
-  message: string;
-  attributes: Record<string, unknown>;
-  timestamp: number;
+    level: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+    message: string;
+    attributes: Record<string, unknown>;
+    timestamp: number;
 }
 ```
 
@@ -1230,10 +1132,10 @@ export interface LogRecord {
 
 ```ts
 export interface LogSpanLink {
-  log: LogRecord;
-  span: SpanRecord | null;
-  traceId: string | null;
-  spanId: string | null;
+    log: LogRecord;
+    span: SpanRecord | null;
+    traceId: string | null;
+    spanId: string | null;
 }
 ```
 
@@ -1251,19 +1153,19 @@ export type MetricAggregation = 'sum' | 'avg' | 'max' | 'min' | 'count' | 'last'
 
 ```ts
 export interface MetricQuery {
-  metricName: string;
-  aggregation: MetricAggregation;
-  /**
-   * Optional tag filter. All tag key/value pairs must match on a
-   * MetricRecord for it to enter the aggregation.
-   */
-  tagFilter?: Record<string, string>;
-  /**
-   * Optional time window. `sinceMs` and `untilMs` bound the
-   * MetricRecord.timestamp against the collector clock.
-   */
-  sinceMs?: number;
-  untilMs?: number;
+    metricName: string;
+    aggregation: MetricAggregation;
+    /**
+     * Optional tag filter. All tag key/value pairs must match on a
+     * MetricRecord for it to enter the aggregation.
+     */
+    tagFilter?: Record<string, string>;
+    /**
+     * Optional time window. `sinceMs` and `untilMs` bound the
+     * MetricRecord.timestamp against the collector clock.
+     */
+    sinceMs?: number;
+    untilMs?: number;
 }
 ```
 
@@ -1273,11 +1175,11 @@ export interface MetricQuery {
 
 ```ts
 export interface MetricRecord {
-  name: string;
-  kind: 'counter' | 'gauge' | 'histogram';
-  value: number;
-  tags: Record<string, string>;
-  timestamp: number;
+    name: string;
+    kind: 'counter' | 'gauge' | 'histogram';
+    value: number;
+    tags: Record<string, string>;
+    timestamp: number;
 }
 ```
 
@@ -1297,23 +1199,32 @@ export type ObservabilityBackend = 'grafana-oss' | 'prometheus' | 'loki' | 'otel
 
 ```ts
 export interface OtelMock {
-  readonly provider: 'otel';
-  readonly collector: TelemetryCollector;
-  tracer: {
-    startSpan(name: string, options?: { attributes?: Record<string, unknown>; parent?: string }): {
-      addEvent(name: string, attributes?: Record<string, unknown>): void;
-      setAttribute(key: string, value: unknown): void;
-      end(): void;
+    readonly provider: 'otel';
+    readonly collector: TelemetryCollector;
+    tracer: {
+        startSpan(name: string, options?: {
+            attributes?: Record<string, unknown>;
+            parent?: string;
+        }): {
+            addEvent(name: string, attributes?: Record<string, unknown>): void;
+            setAttribute(key: string, value: unknown): void;
+            end(): void;
+        };
     };
-  };
-  meter: {
-    createCounter(name: string): { add(value: number, tags?: Record<string, string>): void };
-    createGauge(name: string): { record(value: number, tags?: Record<string, string>): void };
-    createHistogram(name: string): { record(value: number, tags?: Record<string, string>): void };
-  };
-  logger: {
-    emit(record: Omit<LogRecord, 'timestamp'>): void;
-  };
+    meter: {
+        createCounter(name: string): {
+            add(value: number, tags?: Record<string, string>): void;
+        };
+        createGauge(name: string): {
+            record(value: number, tags?: Record<string, string>): void;
+        };
+        createHistogram(name: string): {
+            record(value: number, tags?: Record<string, string>): void;
+        };
+    };
+    logger: {
+        emit(record: Omit<LogRecord, 'timestamp'>): void;
+    };
 }
 ```
 
@@ -1323,11 +1234,11 @@ export interface OtelMock {
 
 ```ts
 export interface PanelConfig {
-  id: string;
-  title: string;
-  kind: PanelKind;
-  query: MetricQuery;
-  thresholds?: PanelThreshold[];
+    id: string;
+    title: string;
+    kind: PanelKind;
+    query: MetricQuery;
+    thresholds?: PanelThreshold[];
 }
 ```
 
@@ -1345,13 +1256,13 @@ export type PanelKind = 'stat' | 'timeseries' | 'gauge' | 'table';
 
 ```ts
 export interface PanelResult {
-  panelId: string;
-  title: string;
-  kind: PanelKind;
-  value: number;
-  matchedRecords: number;
-  badge: PanelThreshold['label'] | null;
-  refreshedAt: number;
+    panelId: string;
+    title: string;
+    kind: PanelKind;
+    value: number;
+    matchedRecords: number;
+    badge: PanelThreshold['label'] | null;
+    refreshedAt: number;
 }
 ```
 
@@ -1361,12 +1272,12 @@ export interface PanelResult {
 
 ```ts
 export interface PanelThreshold {
-  /** Comparison operator against the aggregated numeric result. */
-  operator: 'gt' | 'gte' | 'lt' | 'lte' | 'eq';
-  /** Threshold value; result compared with `operator` decides badge. */
-  value: number;
-  /** Badge label emitted when the comparison is true. */
-  label: 'ok' | 'warn' | 'critical';
+    /** Comparison operator against the aggregated numeric result. */
+    operator: 'gt' | 'gte' | 'lt' | 'lte' | 'eq';
+    /** Threshold value; result compared with `operator` decides badge. */
+    value: number;
+    /** Badge label emitted when the comparison is true. */
+    label: 'ok' | 'warn' | 'critical';
 }
 ```
 
@@ -1376,9 +1287,9 @@ export interface PanelThreshold {
 
 ```ts
 export interface RealDriverConfig {
-  backend: ObservabilityBackend;
-  endpoint: string;
-  timeoutMs: number;
+    backend: ObservabilityBackend;
+    endpoint: string;
+    timeoutMs: number;
 }
 ```
 
@@ -1388,19 +1299,19 @@ export interface RealDriverConfig {
 
 ```ts
 export interface RouteEntry {
-  /**
-   * Label match — all key/value pairs must be present on the fire's
-   * labels for the entry to be considered.
-   */
-  match: Record<string, string>;
-  receiver: string;
-  /**
-   * Nested routes are evaluated when the parent match holds; the
-   * first nested match that satisfies wins over the parent (deepest
-   * match wins). Nested routes without a match are treated as a
-   * catch-all inside the parent branch.
-   */
-  routes?: RouteEntry[];
+    /**
+     * Label match — all key/value pairs must be present on the fire's
+     * labels for the entry to be considered.
+     */
+    match: Record<string, string>;
+    receiver: string;
+    /**
+     * Nested routes are evaluated when the parent match holds; the
+     * first nested match that satisfies wins over the parent (deepest
+     * match wins). Nested routes without a match are treated as a
+     * catch-all inside the parent branch.
+     */
+    routes?: RouteEntry[];
 }
 ```
 
@@ -1410,7 +1321,7 @@ export interface RouteEntry {
 
 ```ts
 export interface RunHistory {
-  records: TestRunRecord[];
+    records: TestRunRecord[];
 }
 ```
 
@@ -1420,13 +1331,26 @@ export interface RunHistory {
 
 ```ts
 export interface SentryMock {
-  readonly provider: 'sentry';
-  readonly collector: TelemetryCollector;
-  captureException(err: Error | { message: string; stack?: string }, options?: { tags?: Record<string, string> }): string;
-  addBreadcrumb(input: { category: string; message: string; level?: string }): void;
-  startTransaction(input: { name: string; op: string; tags?: Record<string, string> }): {
-    finish(): void;
-  };
+    readonly provider: 'sentry';
+    readonly collector: TelemetryCollector;
+    captureException(err: Error | {
+        message: string;
+        stack?: string;
+    }, options?: {
+        tags?: Record<string, string>;
+    }): string;
+    addBreadcrumb(input: {
+        category: string;
+        message: string;
+        level?: string;
+    }): void;
+    startTransaction(input: {
+        name: string;
+        op: string;
+        tags?: Record<string, string>;
+    }): {
+        finish(): void;
+    };
 }
 ```
 
@@ -1436,9 +1360,9 @@ export interface SentryMock {
 
 ```ts
 export interface Silence {
-  id: string;
-  match: Record<string, string>;
-  expiresAt: number;
+    id: string;
+    match: Record<string, string>;
+    expiresAt: number;
 }
 ```
 
@@ -1448,16 +1372,16 @@ export interface Silence {
 
 ```ts
 export interface SpanNode {
-  name: string;
-  attributes: Record<string, unknown>;
-  startedAt: number;
-  endedAt: number | null;
-  /** Total time (endedAt - startedAt); null when span is still open. */
-  totalMs: number | null;
-  /** Time spent in this node minus time spent in its children. */
-  selfMs: number | null;
-  children: SpanNode[];
-  depth: number;
+    name: string;
+    attributes: Record<string, unknown>;
+    startedAt: number;
+    endedAt: number | null;
+    /** Total time (endedAt - startedAt); null when span is still open. */
+    totalMs: number | null;
+    /** Time spent in this node minus time spent in its children. */
+    selfMs: number | null;
+    children: SpanNode[];
+    depth: number;
 }
 ```
 
@@ -1467,12 +1391,16 @@ export interface SpanNode {
 
 ```ts
 export interface SpanRecord {
-  name: string;
-  attributes: Record<string, unknown>;
-  startedAt: number;
-  endedAt: number | null;
-  parentSpanName: string | null;
-  events: Array<{ name: string; attributes: Record<string, unknown>; timestamp: number }>;
+    name: string;
+    attributes: Record<string, unknown>;
+    startedAt: number;
+    endedAt: number | null;
+    parentSpanName: string | null;
+    events: Array<{
+        name: string;
+        attributes: Record<string, unknown>;
+        timestamp: number;
+    }>;
 }
 ```
 
@@ -1482,10 +1410,10 @@ export interface SpanRecord {
 
 ```ts
 export interface SpecCoverageGap {
-  module: string;
-  layer: string;
-  missingTcIds: string[];
-  extraTcIds: string[];
+    module: string;
+    layer: string;
+    missingTcIds: string[];
+    extraTcIds: string[];
 }
 ```
 
@@ -1505,12 +1433,12 @@ export type TelemetryProvider = 'otel' | 'datadog' | 'sentry';
 
 ```ts
 export interface TestRunRecord {
-  testId: string;
-  fullName: string;
-  status: TestStatus;
-  durationMs: number;
-  runId: string;
-  startedAt: number;
+    testId: string;
+    fullName: string;
+    status: TestStatus;
+    durationMs: number;
+    runId: string;
+    startedAt: number;
 }
 ```
 
@@ -1528,8 +1456,12 @@ export type TestStatus = 'passed' | 'failed' | 'skipped';
 
 ```ts
 export interface ThresholdCheckResult {
-  ok: boolean;
-  failures: Array<{ metric: keyof CoverageThresholds; required: number; actual: number }>;
+    ok: boolean;
+    failures: Array<{
+        metric: keyof CoverageThresholds;
+        required: number;
+        actual: number;
+    }>;
 }
 ```
 
@@ -1539,11 +1471,11 @@ export interface ThresholdCheckResult {
 
 ```ts
 export interface TransactionRecord {
-  name: string;
-  operation: string;
-  startedAt: number;
-  endedAt: number | null;
-  tags: Record<string, string>;
+    name: string;
+    operation: string;
+    startedAt: number;
+    endedAt: number | null;
+    tags: Record<string, string>;
 }
 ```
 
@@ -1553,10 +1485,10 @@ export interface TransactionRecord {
 
 ```ts
 export interface VitestStyleAssertionResult {
-  fullName?: string;
-  title?: string;
-  status: 'passed' | 'failed' | 'skipped' | 'pending';
-  duration?: number;
+    fullName?: string;
+    title?: string;
+    status: 'passed' | 'failed' | 'skipped' | 'pending';
+    duration?: number;
 }
 ```
 
@@ -1566,8 +1498,8 @@ export interface VitestStyleAssertionResult {
 
 ```ts
 export interface VitestStyleReport {
-  testResults: VitestStyleTestResult[];
-  startTime?: number;
+    testResults: VitestStyleTestResult[];
+    startTime?: number;
 }
 ```
 
@@ -1577,8 +1509,8 @@ export interface VitestStyleReport {
 
 ```ts
 export interface VitestStyleTestResult {
-  testFilePath?: string;
-  assertionResults: VitestStyleAssertionResult[];
+    testFilePath?: string;
+    assertionResults: VitestStyleAssertionResult[];
 }
 ```
 <!-- kiwa-public-api:end -->

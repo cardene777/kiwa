@@ -72,12 +72,10 @@
 | 'registerConsumer: `queue` must be a non-empty string identifying the source queue' | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L74) |
 | `setupCloudflareQueuesEnv: unknown mode "${String(mode)}" — expected "miniflare" or "wrangler"` | [packages/queue/src/cloudflare-queues/setup-cloudflare-queues-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/setup-cloudflare-queues-env.ts#L25) |
 | `@kiwa-lab/queue: wrangler dev did not respond at ${probeUrl} within ${timeoutMs}ms` | [packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts#L42) |
-| "@kiwa-lab/queue: wrangler mode requires node:child_process (Node >= 20). Original error: " +
-        (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts#L55) |
+| "@kiwa-lab/queue: wrangler mode requires node:child_process (Node >= 20). Original error: " + (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts#L55) |
 | `@kiwa-lab/queue: dev-server rejected event "${event.name}" (HTTP ${response.status}): ${body}` | [packages/queue/src/inngest/dev-server-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L136) |
 | `@kiwa-lab/queue: Inngest dev-server did not respond at ${probeUrl} within ${timeoutMs}ms` | [packages/queue/src/inngest/dev-server-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L42) |
-| "@kiwa-lab/queue: dev-server mode requires node:child_process (Node >= 20). Original error: " +
-        (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/inngest/dev-server-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L55) |
+| "@kiwa-lab/queue: dev-server mode requires node:child_process (Node >= 20). Original error: " + (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/inngest/dev-server-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L55) |
 | `setupInngestEnv: unknown mode "${String(mode)}" — expected "stub" or "dev-server"` | [packages/queue/src/inngest/setup-inngest-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/setup-inngest-env.ts#L24) |
 | `waitForRun: timeout waiting for function "${functionId}" after ${timeoutMs}ms` | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L213) |
 | `assertFunctionRan: expected function "${functionId}" to complete, got state=${snap.state} reason=${snap.failedReason ?? 'unknown'}` | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L230) |
@@ -89,8 +87,7 @@
 | `assertStepRan: expected step "${stepId}" to run in function "${functionId}", observed steps=${JSON.stringify(snap.stepsRun)}` | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L287) |
 | 'assertQueueDrained: env still has queued / running runs after 250ms' | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L309) |
 | 'setupInngestEnv: cannot use env after stop()' | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L69) |
-| `assertDeadLettered: no dead-letter observed for queue ${queue}` +
-            (expected ? ` matching ${JSON.stringify(expected)}` : '') | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L212) |
+| `assertDeadLettered: no dead-letter observed for queue ${queue}` + (expected ? ` matching ${JSON.stringify(expected)}` : '') | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L212) |
 | `publishDelayed: exchange ${input.exchange} is not a delayed exchange` | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L235) |
 | 'publishDelayed: delayMs must be non-negative' | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L240) |
 | `waitForDelivery: no delayed message delivered to ${exchange} within ${timeoutMs}ms` | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L280) |
@@ -116,9 +113,7 @@
 | `assertRequeued: timeout waiting for requeued delivery on ${queueName}` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L511) |
 | `assertQueueDrained: queue ${queueName} still has ${pending.length} pending messages` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L518) |
 | 'setupRabbitMQEnv: mode="testcontainers" requires testcontainers.amqpUrl (v0.3 scope). Provide the URL of a running RabbitMQ broker, or use mode="stub" for zero-infra tests.' | [packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts#L22) |
-| `setupRabbitMQEnv: RabbitMQ broker at ${amqpUrl} did not respond within ${timeoutMs}ms: ${
-      lastError instanceof Error ? lastError.message : String(lastError)
-    }` | [packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts#L97) |
+| `setupRabbitMQEnv: RabbitMQ broker at ${amqpUrl} did not respond within ${timeoutMs}ms: ${ lastError instanceof Error ? lastError.message : String(lastError) }` | [packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts#L97) |
 | 'setupBullMQEnv: cannot addJob after stop()' | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L147) |
 | 'addJob: attempts must be at least 1' | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L153) |
 | 'addJob: delay must be non-negative' | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L156) |
@@ -159,14 +154,12 @@
 | `assertFailed: failedReason "${snap.failedReason ?? ''}" did not match ${expected.reasonMatch}` | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L322) |
 | `assertRetried: expected ${expectedRetry} attempt(s) for "${name}", observed ${snap.attemptsMade}` | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L334) |
 | 'assertQueueDrained: queue still has waiting / active / delayed jobs after 1s' | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L353) |
-| "@kiwa-lab/queue: testcontainers mode requires 'bullmq' + 'ioredis' peer dependencies. Install with `pnpm add -D bullmq ioredis`. Original error: " +
-        (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L73) |
-| "@kiwa-lab/queue: testcontainers mode requires the 'testcontainers' peer dependency. Install with `pnpm add -D testcontainers`. Original error: " +
-        (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L92) |
+| "@kiwa-lab/queue: testcontainers mode requires 'bullmq' + 'ioredis' peer dependencies. Install with `pnpm add -D bullmq ioredis`. Original error: " + (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L73) |
+| "@kiwa-lab/queue: testcontainers mode requires the 'testcontainers' peer dependency. Install with `pnpm add -D testcontainers`. Original error: " + (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L92) |
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -177,9 +170,9 @@
 Build a dev-server-backed Inngest env. When `devServer.url` is supplied the helper reuses that dev-server; otherwise it spawns one via `npx inngest-cli@latest dev`. The env still runs function handlers in-process (matching v0.1 scope) but every event goes through the real dev-server HTTP round-trip, so the wire shape is prod-parity.
 
 ```ts
-export async function createDevServerInngestEnv(
-  opts: SetupInngestEnvOptions & { appId: string },
-): Promise<InngestTestEnv<'live'>>;
+export declare function createDevServerInngestEnv(opts: SetupInngestEnvOptions & {
+    appId: string;
+}): Promise<InngestTestEnv<'live'>>;
 ```
 
 #### `createLocalstackSQSEnv`
@@ -189,9 +182,7 @@ export async function createDevServerInngestEnv(
 Build a LocalStack-backed SQS env. When `opts.localstack?.endpoint` is provided the helper connects directly to that endpoint and verifies responsiveness. Otherwise the helper would spawn a testcontainers LocalStack instance — kept out of the v0.2 scope so callers wanting fully-managed containers can opt in later. The v0.2 wire path shares the stub simulation for message state (so assertion helpers stay deterministic) while surfacing the LocalStack `endpoint` on the env for callers that want to point their own `@aws-sdk/client-sqs` at it.
 
 ```ts
-export async function createLocalstackSQSEnv(
-  opts: SetupSQSEnvOptions,
-): Promise<SQSTestEnv<'live'>>;
+export declare function createLocalstackSQSEnv(opts: SetupSQSEnvOptions): Promise<SQSTestEnv<'live'>>;
 ```
 
 #### `createMiniflareCloudflareQueuesEnv`
@@ -201,9 +192,7 @@ export async function createLocalstackSQSEnv(
 Build a miniflare-shaped (offline, in-process) Cloudflare Queues env. The simulation covers the message lifecycle observed by production Workers — `send` / consumer batch / retry / DLQ — deterministically, without spinning up a wrangler dev-server. When `opts.miniflare?.miniflare` is supplied the helper leaves lifecycle to the caller and only consumes the injected instance for structural parity; the internal simulation still drives message state so tests stay deterministic.
 
 ```ts
-export function createMiniflareCloudflareQueuesEnv(
-  opts: SetupCloudflareQueuesEnvOptions,
-): CloudflareQueuesTestEnv<'mock'>;
+export declare function createMiniflareCloudflareQueuesEnv(opts: SetupCloudflareQueuesEnvOptions): CloudflareQueuesTestEnv<'mock'>;
 ```
 
 #### `createSandboxBullMQEnv`
@@ -213,9 +202,9 @@ export function createMiniflareCloudflareQueuesEnv(
 Build a sandbox (offline, in-process) BullMQ-shaped queue. Suitable for unit tests that need to exercise the job lifecycle (add / process / retry / fail / drain) without spinning up a Redis container.
 
 ```ts
-export function createSandboxBullMQEnv(
-  opts: SetupBullMQEnvOptions & { queueName: string },
-): BullMQTestEnv<'mock'>;
+export declare function createSandboxBullMQEnv(opts: SetupBullMQEnvOptions & {
+    queueName: string;
+}): BullMQTestEnv<'mock'>;
 ```
 
 #### `createStubInngestEnv`
@@ -225,9 +214,9 @@ export function createSandboxBullMQEnv(
 Build a stub (offline, in-process) Inngest env. Deterministic enough to exercise the retry / step / concurrency semantics needed by unit tests without spinning up a real dev-server.
 
 ```ts
-export function createStubInngestEnv(
-  opts: SetupInngestEnvOptions & { appId: string },
-): InngestTestEnv<'mock'>;
+export declare function createStubInngestEnv(opts: SetupInngestEnvOptions & {
+    appId: string;
+}): InngestTestEnv<'mock'>;
 ```
 
 #### `createStubRabbitMQEnv`
@@ -237,9 +226,7 @@ export function createStubInngestEnv(
 Build the stub RabbitMQ env — in-process, deterministic AMQP 0.9.1 model emulation. No docker required.
 
 ```ts
-export function createStubRabbitMQEnv(
-  opts: SetupRabbitMQEnvOptions = {},
-): RabbitMQTestEnv<'mock'>;
+export declare function createStubRabbitMQEnv(opts?: SetupRabbitMQEnvOptions): RabbitMQTestEnv<'mock'>;
 ```
 
 #### `createStubSQSEnv`
@@ -249,7 +236,7 @@ export function createStubRabbitMQEnv(
 Build an in-process stub of AWS SQS covering the message lifecycle observed by production consumers — `send` / `receive` / `delete` / batch / visibility timeout / DLQ / FIFO deduplication — deterministically, without spinning up localstack.
 
 ```ts
-export function createStubSQSEnv(opts: SetupSQSEnvOptions): SQSTestEnv<'mock'>;
+export declare function createStubSQSEnv(opts: SetupSQSEnvOptions): SQSTestEnv<'mock'>;
 ```
 
 #### `createTestcontainersBullMQEnv`
@@ -259,9 +246,9 @@ export function createStubSQSEnv(opts: SetupSQSEnvOptions): SQSTestEnv<'mock'>;
 Build a testcontainers-backed BullMQ environment. Requires Docker; the real bullmq + ioredis peers do the heavy lifting so semantic drift from prod is limited to whatever bullmq itself abstracts.
 
 ```ts
-export async function createTestcontainersBullMQEnv(
-  opts: SetupBullMQEnvOptions & { queueName: string },
-): Promise<BullMQTestEnv<'live'>>;
+export declare function createTestcontainersBullMQEnv(opts: SetupBullMQEnvOptions & {
+    queueName: string;
+}): Promise<BullMQTestEnv<'live'>>;
 ```
 
 #### `createTestcontainersRabbitMQEnv`
@@ -271,9 +258,7 @@ export async function createTestcontainersBullMQEnv(
 Build a testcontainers-backed RabbitMQ env. When `opts.testcontainers?.amqpUrl` is provided the helper connects directly to that URL and verifies responsiveness. Otherwise the helper would spawn a testcontainers RabbitMQ instance — kept out of the v0.3 scope so callers wanting fully-managed containers can opt in later (add the `testcontainers` peer dep + a small container factory). The v0.3 wire path shares the stub simulation for message state (so assertion helpers stay deterministic) while surfacing the `amqpUrl` + `managementUrl` on the env for callers that want to point their own `amqplib` at it.
 
 ```ts
-export async function createTestcontainersRabbitMQEnv(
-  opts: SetupRabbitMQEnvOptions,
-): Promise<RabbitMQTestEnv<'live'>>;
+export declare function createTestcontainersRabbitMQEnv(opts: SetupRabbitMQEnvOptions): Promise<RabbitMQTestEnv<'live'>>;
 ```
 
 #### `createWranglerCloudflareQueuesEnv`
@@ -283,21 +268,21 @@ export async function createTestcontainersRabbitMQEnv(
 Build a wrangler-backed Cloudflare Queues env. When `wrangler.url` is supplied the helper reuses that dev-server; otherwise it spawns one via `npx wrangler@latest dev`. The env still runs consumer batch handlers in-process (matching v0.2 scope) via the miniflare simulation so retry / DLQ semantics stay deterministic; the wrangler process provides the live wire so consumers can verify their local `wrangler.toml` binds correctly.
 
 ```ts
-export async function createWranglerCloudflareQueuesEnv(
-  opts: SetupCloudflareQueuesEnvOptions,
-): Promise<CloudflareQueuesTestEnv<'live'>>;
+export declare function createWranglerCloudflareQueuesEnv(opts: SetupCloudflareQueuesEnvOptions): Promise<CloudflareQueuesTestEnv<'live'>>;
 ```
 
 #### `dispatchJobEvent`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L50) `packages/queue/src/semantics/job-lifecycle-orchestrator.ts`
+公開 entry point から解決しています。
+
+`dispatchEvent` を `dispatchJobEvent` として公開しています。
 
 ```ts
-export function dispatchJobEvent(input: {
-  session: JobSession;
-  event: JobEvent;
-  timestamp: string;
-}): JobSession;
+export {
+  startJob,
+  dispatchEvent as dispatchJobEvent,
+  summarizeJob,
+} from './job-lifecycle-orchestrator.js';
 ```
 
 #### `setupBullMQEnv`
@@ -307,9 +292,7 @@ export function dispatchJobEvent(input: {
 Factory for BullMQ test environments. `mode: 'sandbox'` (default) returns a fast, in-process fake — no Docker, no peer dependencies required beyond `bullmq`'s type shape via structural duck-typing. Use it for the fast unit-test lane. `mode: 'testcontainers'` boots a real Redis under testcontainers and wires up a real `bullmq.Queue` + `bullmq.Worker`. Use it for the integration lane that needs prod-shape parity.
 
 ```ts
-export async function setupBullMQEnv(
-  opts: SetupBullMQEnvOptions = {},
-): Promise<BullMQTestEnv>;
+export declare function setupBullMQEnv(opts?: SetupBullMQEnvOptions): Promise<BullMQTestEnv>;
 ```
 
 #### `setupCloudflareQueuesEnv`
@@ -319,9 +302,7 @@ export async function setupBullMQEnv(
 Factory for Cloudflare Queues test environments. `mode: 'miniflare'` (default) returns a fast, in-process fake — no wrangler subprocess, no network. Deterministic enough to exercise send / consumer batch / retry / DLQ semantics without spinning up an external process. `mode: 'wrangler'` boots (or connects to) a real `wrangler dev --local` process and verifies it responds before returning the env. The env still runs consumer batch handlers in-process (v0.2 scope) so retry / DLQ assertions stay deterministic across backends.
 
 ```ts
-export async function setupCloudflareQueuesEnv(
-  opts: SetupCloudflareQueuesEnvOptions = {},
-): Promise<CloudflareQueuesTestEnv>;
+export declare function setupCloudflareQueuesEnv(opts?: SetupCloudflareQueuesEnvOptions): Promise<CloudflareQueuesTestEnv>;
 ```
 
 #### `setupInngestEnv`
@@ -331,9 +312,7 @@ export async function setupCloudflareQueuesEnv(
 Factory for Inngest test environments. `mode: 'stub'` (default) returns a fast, in-process fake — no dev-server, no network. Suitable for unit tests that need to exercise retry / step / concurrency semantics deterministically. `mode: 'dev-server'` boots (or connects to) a real Inngest dev-server and routes every event through the wire before dispatching function handlers. Suitable for integration tests that need prod-shape parity.
 
 ```ts
-export async function setupInngestEnv(
-  opts: SetupInngestEnvOptions = {},
-): Promise<InngestTestEnv>;
+export declare function setupInngestEnv(opts?: SetupInngestEnvOptions): Promise<InngestTestEnv>;
 ```
 
 #### `setupRabbitMQAdvancedEnv`
@@ -343,9 +322,7 @@ export async function setupInngestEnv(
 Build the advanced RabbitMQ test env. Composes over the basic stub adapter (v1.10-3) — the basic env owns exchange / queue / binding / consumer bookkeeping, while this env layers DLX routing, delayed message plugin, cluster simulation, federation, and auto-reconnect.
 
 ```ts
-export async function setupRabbitMQAdvancedEnv(
-  opts: SetupRabbitMQAdvancedEnvOptions = {},
-): Promise<RabbitMQAdvancedTestEnv<'mock'>>;
+export declare function setupRabbitMQAdvancedEnv(opts?: SetupRabbitMQAdvancedEnvOptions): Promise<RabbitMQAdvancedTestEnv<'mock'>>;
 ```
 
 #### `setupRabbitMQEnv`
@@ -355,9 +332,7 @@ export async function setupRabbitMQAdvancedEnv(
 Factory for RabbitMQ test environments. `mode: 'stub'` (default) returns a fast, in-process AMQP 0.9.1 model emulator. No docker, no network. Deterministic enough to exercise exchange / queue / binding / consumer / ack / nack / prefetch semantics. `mode: 'testcontainers'` connects to a running RabbitMQ broker (URL provided via `testcontainers.amqpUrl`) and verifies responsiveness via the management API. The env still runs the message simulation in-process (v0.3 scope) so assertions stay deterministic across backends; callers that want to drive the real wire can point their own `amqplib` at the exposed `env.amqpUrl`.
 
 ```ts
-export async function setupRabbitMQEnv(
-  opts: SetupRabbitMQEnvOptions = {},
-): Promise<RabbitMQTestEnv>;
+export declare function setupRabbitMQEnv(opts?: SetupRabbitMQEnvOptions): Promise<RabbitMQTestEnv>;
 ```
 
 #### `setupSQSEnv`
@@ -367,9 +342,7 @@ export async function setupRabbitMQEnv(
 Factory for AWS SQS test environments. `mode: 'stub'` (default) returns a fast, in-process fake — no docker, no network. Deterministic enough to exercise send / receive / delete / batch / visibility timeout / DLQ / FIFO deduplication semantics without spinning up localstack. `mode: 'localstack'` connects to a running LocalStack endpoint (URL provided via `localstack.endpoint`) and verifies responsiveness before returning the env. The env still runs the message simulation in-process (v0.2 scope) so assertions stay deterministic across backends; callers that want to drive the real wire can point their own `@aws-sdk/client-sqs` at the exposed `env.endpoint`.
 
 ```ts
-export async function setupSQSEnv(
-  opts: SetupSQSEnvOptions = {},
-): Promise<SQSTestEnv>;
+export declare function setupSQSEnv(opts?: SetupSQSEnvOptions): Promise<SQSTestEnv>;
 ```
 
 #### `startJob`
@@ -377,7 +350,9 @@ export async function setupSQSEnv(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L36) `packages/queue/src/semantics/job-lifecycle-orchestrator.ts`
 
 ```ts
-export function startJob(input: { timestamp: string }): JobSession;
+export declare function startJob(input: {
+    timestamp: string;
+}): JobSession;
 ```
 
 #### `summarizeJob`
@@ -385,7 +360,7 @@ export function startJob(input: { timestamp: string }): JobSession;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L138) `packages/queue/src/semantics/job-lifecycle-orchestrator.ts`
 
 ```ts
-export function summarizeJob(session: JobSession): JobSummary;
+export declare function summarizeJob(session: JobSession): JobSummary;
 ```
 
 ### 型
@@ -407,59 +382,39 @@ export type BullMQMode = 'testcontainers' | 'sandbox';
 Return type of {@link setupBullMQEnv }. Reads much like a mini BullMQ facade — consumers register a processor, add jobs, then use the assertion helpers to observe outcomes without touching BullMQ directly.
 
 ```ts
-export interface BullMQTestEnv<TMode extends TestMode = TestMode>
-  extends TestEnvBase<TMode> {
-  /** Chosen backend — mirrors the `mode` parameter. */
-  backend: BullMQMode;
-  /** Queue name in use. */
-  queueName: string;
-  /** Optional Redis connection URL — undefined in sandbox mode. */
-  redisUrl: string | undefined;
-
-  /** Register the processor. Overwrites any previous processor. */
-  process: <TData = unknown, TResult = unknown>(
-    processor: JobProcessor<TData, TResult>,
-  ) => void;
-
-  /** Enqueue a job by name + data. Returns the snapshot at enqueue time. */
-  addJob: <TData = unknown>(
-    name: string,
-    data: TData,
-    options?: QueueJobOptions,
-  ) => Promise<QueueJobSnapshot<TData>>;
-
-  /**
-   * Wait for at least one job matching `name` to reach a terminal state
-   * (`completed` or `failed`). Rejects on timeout (default 5s).
-   */
-  waitForJob: <TData = unknown, TResult = unknown>(
-    name: string,
-    opts?: { timeoutMs?: number | undefined },
-  ) => Promise<QueueJobSnapshot<TData, TResult>>;
-
-  /** Assertion — the first job named `name` reached `completed`. */
-  assertProcessed: <TData = unknown, TResult = unknown>(
-    name: string,
-    expected?: { returnValue?: TResult | undefined } | undefined,
-  ) => Promise<QueueJobSnapshot<TData, TResult>>;
-
-  /** Assertion — the first job named `name` reached `failed`. */
-  assertFailed: <TData = unknown>(
-    name: string,
-    expected?: { retry?: number | undefined; reasonMatch?: RegExp | undefined } | undefined,
-  ) => Promise<QueueJobSnapshot<TData>>;
-
-  /** Assertion — the first job named `name` ran `expectedRetry` times before terminal. */
-  assertRetried: <TData = unknown>(
-    name: string,
-    expectedRetry: number,
-  ) => Promise<QueueJobSnapshot<TData>>;
-
-  /** Assertion — the queue has no waiting / active jobs. */
-  assertQueueDrained: () => Promise<void>;
-
-  /** Introspection helper — list every snapshot the queue has ever seen. */
-  listJobs: () => QueueJobSnapshot[];
+export interface BullMQTestEnv<TMode extends TestMode = TestMode> extends TestEnvBase<TMode> {
+    /** Chosen backend — mirrors the `mode` parameter. */
+    backend: BullMQMode;
+    /** Queue name in use. */
+    queueName: string;
+    /** Optional Redis connection URL — undefined in sandbox mode. */
+    redisUrl: string | undefined;
+    /** Register the processor. Overwrites any previous processor. */
+    process: <TData = unknown, TResult = unknown>(processor: JobProcessor<TData, TResult>) => void;
+    /** Enqueue a job by name + data. Returns the snapshot at enqueue time. */
+    addJob: <TData = unknown>(name: string, data: TData, options?: QueueJobOptions) => Promise<QueueJobSnapshot<TData>>;
+    /**
+     * Wait for at least one job matching `name` to reach a terminal state
+     * (`completed` or `failed`). Rejects on timeout (default 5s).
+     */
+    waitForJob: <TData = unknown, TResult = unknown>(name: string, opts?: {
+        timeoutMs?: number | undefined;
+    }) => Promise<QueueJobSnapshot<TData, TResult>>;
+    /** Assertion — the first job named `name` reached `completed`. */
+    assertProcessed: <TData = unknown, TResult = unknown>(name: string, expected?: {
+        returnValue?: TResult | undefined;
+    } | undefined) => Promise<QueueJobSnapshot<TData, TResult>>;
+    /** Assertion — the first job named `name` reached `failed`. */
+    assertFailed: <TData = unknown>(name: string, expected?: {
+        retry?: number | undefined;
+        reasonMatch?: RegExp | undefined;
+    } | undefined) => Promise<QueueJobSnapshot<TData>>;
+    /** Assertion — the first job named `name` ran `expectedRetry` times before terminal. */
+    assertRetried: <TData = unknown>(name: string, expectedRetry: number) => Promise<QueueJobSnapshot<TData>>;
+    /** Assertion — the queue has no waiting / active jobs. */
+    assertQueueDrained: () => Promise<void>;
+    /** Introspection helper — list every snapshot the queue has ever seen. */
+    listJobs: () => QueueJobSnapshot[];
 }
 ```
 
@@ -471,14 +426,14 @@ The consumer batch delivered to the handler. Mirrors the shape production Worker
 
 ```ts
 export interface CloudflareQueueBatch<TBody = unknown> {
-  /** Queue name that produced the batch. */
-  queue: string;
-  /** Messages included in this batch. */
-  messages: CloudflareQueueMessage<TBody>[];
-  /** Convenience — ack every message in the batch. */
-  ackAll: () => void;
-  /** Convenience — retry every message in the batch. */
-  retryAll: () => void;
+    /** Queue name that produced the batch. */
+    queue: string;
+    /** Messages included in this batch. */
+    messages: CloudflareQueueMessage<TBody>[];
+    /** Convenience — ack every message in the batch. */
+    ackAll: () => void;
+    /** Convenience — retry every message in the batch. */
+    retryAll: () => void;
 }
 ```
 
@@ -489,9 +444,7 @@ export interface CloudflareQueueBatch<TBody = unknown> {
 Consumer handler signature — mirrors the shape of the Workers `queue()` entrypoint.
 
 ```ts
-export type CloudflareQueueConsumer<TBody = unknown> = (
-  batch: CloudflareQueueBatch<TBody>,
-) => Promise<void> | void;
+export type CloudflareQueueConsumer<TBody = unknown> = (batch: CloudflareQueueBatch<TBody>) => Promise<void> | void;
 ```
 
 #### `CloudflareQueueConsumerRegistration`
@@ -502,32 +455,32 @@ Consumer registration — mirrors the [[queues.consumers]] entry in `wrangler.to
 
 ```ts
 export interface CloudflareQueueConsumerRegistration<TBody = unknown> {
-  /** Queue name the consumer listens on. */
-  queue: string;
-  /** Handler executed for every batch. */
-  handler: CloudflareQueueConsumer<TBody>;
-  /**
-   * Batch delivery limit. Real Cloudflare Queues supports 1-100; helper
-   * enforces `>= 1` but does not cap the upper bound so tests can inject
-   * bespoke shapes. Defaults to 10 (matching production default).
-   */
-  maxBatchSize?: number | undefined;
-  /**
-   * Max time (ms) the helper waits before flushing a partial batch. Defaults
-   * to 5000 (matching production default of 5s).
-   */
-  maxBatchTimeoutMs?: number | undefined;
-  /**
-   * Max number of retries before the message is shunted to the dead-letter
-   * queue. Defaults to 3 (matching production default).
-   */
-  maxRetries?: number | undefined;
-  /**
-   * Name of the dead-letter queue that receives messages after `maxRetries`
-   * failures. When omitted messages that exhaust their retries transition to
-   * the `dead` state but are not routed anywhere.
-   */
-  deadLetterQueue?: string | undefined;
+    /** Queue name the consumer listens on. */
+    queue: string;
+    /** Handler executed for every batch. */
+    handler: CloudflareQueueConsumer<TBody>;
+    /**
+     * Batch delivery limit. Real Cloudflare Queues supports 1-100; helper
+     * enforces `>= 1` but does not cap the upper bound so tests can inject
+     * bespoke shapes. Defaults to 10 (matching production default).
+     */
+    maxBatchSize?: number | undefined;
+    /**
+     * Max time (ms) the helper waits before flushing a partial batch. Defaults
+     * to 5000 (matching production default of 5s).
+     */
+    maxBatchTimeoutMs?: number | undefined;
+    /**
+     * Max number of retries before the message is shunted to the dead-letter
+     * queue. Defaults to 3 (matching production default).
+     */
+    maxRetries?: number | undefined;
+    /**
+     * Name of the dead-letter queue that receives messages after `maxRetries`
+     * failures. When omitted messages that exhaust their retries transition to
+     * the `dead` state but are not routed anywhere.
+     */
+    deadLetterQueue?: string | undefined;
 }
 ```
 
@@ -539,12 +492,12 @@ Individual message inside a batch. Consumers call `.ack()` on success or `.retry
 
 ```ts
 export interface CloudflareQueueMessage<TBody = unknown> {
-  id: string;
-  body: TBody;
-  timestamp: number;
-  attempts: number;
-  ack: () => void;
-  retry: () => void;
+    id: string;
+    body: TBody;
+    timestamp: number;
+    attempts: number;
+    ack: () => void;
+    retry: () => void;
 }
 ```
 
@@ -556,19 +509,19 @@ Structural mirror of a persisted Cloudflare Queues message.
 
 ```ts
 export interface CloudflareQueueMessageSnapshot<TBody = unknown> {
-  id: string;
-  queueName: string;
-  body: TBody;
-  attempts: number;
-  state: CloudflareQueueMessageState;
-  failedReason?: string | undefined;
-  /**
-   * ISO timestamp (ms since epoch) capturing when the message became visible
-   * for the next consumer batch. For pending messages the value reflects the
-   * scheduled visibility (send + delay); for terminal messages it reflects the
-   * final observed batch time.
-   */
-  visibleAt: number;
+    id: string;
+    queueName: string;
+    body: TBody;
+    attempts: number;
+    state: CloudflareQueueMessageState;
+    failedReason?: string | undefined;
+    /**
+     * ISO timestamp (ms since epoch) capturing when the message became visible
+     * for the next consumer batch. For pending messages the value reflects the
+     * scheduled visibility (send + delay); for terminal messages it reflects the
+     * final observed batch time.
+     */
+    visibleAt: number;
 }
 ```
 
@@ -579,12 +532,7 @@ export interface CloudflareQueueMessageSnapshot<TBody = unknown> {
 Terminal + intermediate states surfaced by the helper. `pending` messages live in the queue waiting for the next consumer batch. `delivered` messages are the ones consumer batches saw and either ack'd or retried. `retrying` covers explicit `msg.retry()` calls that pushed a message back for another batch. `dead` covers messages that exhausted `maxRetries` and were shunted into the dead-letter queue.
 
 ```ts
-export type CloudflareQueueMessageState =
-  | 'pending'
-  | 'delivered'
-  | 'retrying'
-  | 'ack'
-  | 'dead';
+export type CloudflareQueueMessageState = 'pending' | 'delivered' | 'retrying' | 'ack' | 'dead';
 ```
 
 #### `CloudflareQueueSendOptions`
@@ -595,18 +543,18 @@ Options accepted by every {@link CloudflareQueuesTestEnv.send} call. Mirrors the
 
 ```ts
 export interface CloudflareQueueSendOptions {
-  /**
-   * Delay before the message becomes eligible for the next consumer batch
-   * (seconds). Real Cloudflare Queues uses seconds so the helper follows
-   * suit. Defaults to 0.
-   */
-  delaySeconds?: number | undefined;
-  /**
-   * Optional content type hint — real Cloudflare Queues honours JSON / text /
-   * bytes / v8 for serialisation. The helper records the value on the
-   * message snapshot but stores the body as-is (structural clone).
-   */
-  contentType?: 'json' | 'text' | 'bytes' | 'v8' | undefined;
+    /**
+     * Delay before the message becomes eligible for the next consumer batch
+     * (seconds). Real Cloudflare Queues uses seconds so the helper follows
+     * suit. Defaults to 0.
+     */
+    delaySeconds?: number | undefined;
+    /**
+     * Optional content type hint — real Cloudflare Queues honours JSON / text /
+     * bytes / v8 for serialisation. The helper records the value on the
+     * message snapshot but stores the body as-is (structural clone).
+     */
+    contentType?: 'json' | 'text' | 'bytes' | 'v8' | undefined;
 }
 ```
 
@@ -618,18 +566,18 @@ Options for the miniflare backend. Ignored when `mode === 'wrangler'`.
 
 ```ts
 export interface CloudflareQueuesMiniflareOptions {
-  /**
-   * How often the miniflare-shaped scheduler pumps pending messages (ms).
-   * Defaults to 1 which is the finest resolution the implementation supports.
-   */
-  pollIntervalMs?: number | undefined;
-  /**
-   * Optional externally-managed Miniflare instance. When supplied the helper
-   * hooks into that instance instead of building an internal simulation. The
-   * external instance is not owned by the env — the caller stays responsible
-   * for its lifecycle.
-   */
-  miniflare?: unknown | undefined;
+    /**
+     * How often the miniflare-shaped scheduler pumps pending messages (ms).
+     * Defaults to 1 which is the finest resolution the implementation supports.
+     */
+    pollIntervalMs?: number | undefined;
+    /**
+     * Optional externally-managed Miniflare instance. When supplied the helper
+     * hooks into that instance instead of building an internal simulation. The
+     * external instance is not owned by the env — the caller stays responsible
+     * for its lifecycle.
+     */
+    miniflare?: unknown | undefined;
 }
 ```
 
@@ -650,72 +598,48 @@ export type CloudflareQueuesMode = 'miniflare' | 'wrangler';
 Return type of {@link setupCloudflareQueuesEnv }. Reads much like a mini Cloudflare Queues facade — consumers register batch handlers, then use the assertion helpers to observe outcomes without touching the wire.
 
 ```ts
-export interface CloudflareQueuesTestEnv<TMode extends TestMode = TestMode>
-  extends TestEnvBase<TMode> {
-  /** Chosen backend — mirrors the `mode` parameter. */
-  backend: CloudflareQueuesMode;
-  /** Optional dev-server URL — undefined in miniflare mode. */
-  devServerUrl: string | undefined;
-  /** Queue names the env has observed at least one send / consumer for. */
-  queues: string[];
-
-  /** Register (or replace) a consumer for a queue. */
-  registerConsumer: <TBody = unknown>(
-    registration: CloudflareQueueConsumerRegistration<TBody>,
-  ) => void;
-
-  /**
-   * Enqueue a message. Returns the snapshot at enqueue time so tests can
-   * capture the assigned id.
-   */
-  send: <TBody = unknown>(
-    queueName: string,
-    body: TBody,
-    options?: CloudflareQueueSendOptions,
-  ) => Promise<CloudflareQueueMessageSnapshot<TBody>>;
-
-  /**
-   * Wait for at least one message on `queueName` to reach a terminal state
-   * (`ack` or `dead`). Rejects on timeout (default 5s).
-   */
-  waitForMessage: <TBody = unknown>(
-    queueName: string,
-    opts?: { timeoutMs?: number | undefined },
-  ) => Promise<CloudflareQueueMessageSnapshot<TBody>>;
-
-  /** Assertion — the first message on `queueName` reached `ack`. */
-  assertAcknowledged: <TBody = unknown>(
-    queueName: string,
-    expected?: { attempts?: number | undefined } | undefined,
-  ) => Promise<CloudflareQueueMessageSnapshot<TBody>>;
-
-  /** Assertion — the first message on `queueName` was routed to the DLQ. */
-  assertDeadLettered: <TBody = unknown>(
-    queueName: string,
-    expected?: {
-      dlq?: string | undefined;
-      reasonMatch?: RegExp | undefined;
-      attempts?: number | undefined;
-    } | undefined,
-  ) => Promise<CloudflareQueueMessageSnapshot<TBody>>;
-
-  /** Assertion — the first message on `queueName` was retried `expectedRetries` times. */
-  assertRetried: <TBody = unknown>(
-    queueName: string,
-    expectedRetries: number,
-  ) => Promise<CloudflareQueueMessageSnapshot<TBody>>;
-
-  /** Assertion — the queue has no pending / delivered messages. */
-  assertQueueDrained: (queueName?: string | undefined) => Promise<void>;
-
-  /** Introspection helper — every message snapshot the env has ever seen. */
-  listMessages: (queueName?: string | undefined) => CloudflareQueueMessageSnapshot[];
-
-  /**
-   * Introspection helper — every message routed to the DLQ (per queue). Empty
-   * when no consumer is registered with `deadLetterQueue`.
-   */
-  listDeadLetters: (dlqName?: string | undefined) => CloudflareQueueMessageSnapshot[];
+export interface CloudflareQueuesTestEnv<TMode extends TestMode = TestMode> extends TestEnvBase<TMode> {
+    /** Chosen backend — mirrors the `mode` parameter. */
+    backend: CloudflareQueuesMode;
+    /** Optional dev-server URL — undefined in miniflare mode. */
+    devServerUrl: string | undefined;
+    /** Queue names the env has observed at least one send / consumer for. */
+    queues: string[];
+    /** Register (or replace) a consumer for a queue. */
+    registerConsumer: <TBody = unknown>(registration: CloudflareQueueConsumerRegistration<TBody>) => void;
+    /**
+     * Enqueue a message. Returns the snapshot at enqueue time so tests can
+     * capture the assigned id.
+     */
+    send: <TBody = unknown>(queueName: string, body: TBody, options?: CloudflareQueueSendOptions) => Promise<CloudflareQueueMessageSnapshot<TBody>>;
+    /**
+     * Wait for at least one message on `queueName` to reach a terminal state
+     * (`ack` or `dead`). Rejects on timeout (default 5s).
+     */
+    waitForMessage: <TBody = unknown>(queueName: string, opts?: {
+        timeoutMs?: number | undefined;
+    }) => Promise<CloudflareQueueMessageSnapshot<TBody>>;
+    /** Assertion — the first message on `queueName` reached `ack`. */
+    assertAcknowledged: <TBody = unknown>(queueName: string, expected?: {
+        attempts?: number | undefined;
+    } | undefined) => Promise<CloudflareQueueMessageSnapshot<TBody>>;
+    /** Assertion — the first message on `queueName` was routed to the DLQ. */
+    assertDeadLettered: <TBody = unknown>(queueName: string, expected?: {
+        dlq?: string | undefined;
+        reasonMatch?: RegExp | undefined;
+        attempts?: number | undefined;
+    } | undefined) => Promise<CloudflareQueueMessageSnapshot<TBody>>;
+    /** Assertion — the first message on `queueName` was retried `expectedRetries` times. */
+    assertRetried: <TBody = unknown>(queueName: string, expectedRetries: number) => Promise<CloudflareQueueMessageSnapshot<TBody>>;
+    /** Assertion — the queue has no pending / delivered messages. */
+    assertQueueDrained: (queueName?: string | undefined) => Promise<void>;
+    /** Introspection helper — every message snapshot the env has ever seen. */
+    listMessages: (queueName?: string | undefined) => CloudflareQueueMessageSnapshot[];
+    /**
+     * Introspection helper — every message routed to the DLQ (per queue). Empty
+     * when no consumer is registered with `deadLetterQueue`.
+     */
+    listDeadLetters: (dlqName?: string | undefined) => CloudflareQueueMessageSnapshot[];
 }
 ```
 
@@ -727,18 +651,18 @@ Options for the wrangler backend. Ignored when `mode === 'miniflare'`.
 
 ```ts
 export interface CloudflareQueuesWranglerOptions {
-  /**
-   * Path to an externally-managed Wrangler dev-server binding. When set the
-   * helper reuses the process instead of spawning `wrangler dev --queue`.
-   */
-  url?: string | undefined;
-  /** Port for the auto-spawned wrangler dev-server. Defaults to `8787`. */
-  port?: number | undefined;
-  /**
-   * Milliseconds to wait for the auto-spawned wrangler dev-server before
-   * timing out. Defaults to `15000`.
-   */
-  startupTimeoutMs?: number | undefined;
+    /**
+     * Path to an externally-managed Wrangler dev-server binding. When set the
+     * helper reuses the process instead of spawning `wrangler dev --queue`.
+     */
+    url?: string | undefined;
+    /** Port for the auto-spawned wrangler dev-server. Defaults to `8787`. */
+    port?: number | undefined;
+    /**
+     * Milliseconds to wait for the auto-spawned wrangler dev-server before
+     * timing out. Defaults to `15000`.
+     */
+    startupTimeoutMs?: number | undefined;
 }
 ```
 
@@ -750,15 +674,15 @@ Options for the `dev-server` backend. Either supply `url` to point at an externa
 
 ```ts
 export interface InngestDevServerOptions {
-  /** Existing dev-server URL (e.g. `http://127.0.0.1:8288`). */
-  url?: string | undefined;
-  /** Port for the auto-spawned dev-server. Defaults to `8288`. */
-  port?: number | undefined;
-  /**
-   * Milliseconds to wait for the auto-spawned dev-server before timing out.
-   * Defaults to `15000`.
-   */
-  startupTimeoutMs?: number | undefined;
+    /** Existing dev-server URL (e.g. `http://127.0.0.1:8288`). */
+    url?: string | undefined;
+    /** Port for the auto-spawned dev-server. Defaults to `8288`. */
+    port?: number | undefined;
+    /**
+     * Milliseconds to wait for the auto-spawned dev-server before timing out.
+     * Defaults to `15000`.
+     */
+    startupTimeoutMs?: number | undefined;
 }
 ```
 
@@ -770,16 +694,16 @@ Structural mirror of an Inngest event — decoupled from the `inngest` SDK types
 
 ```ts
 export interface InngestEvent<TData = unknown> {
-  /** Event name — Inngest routes events to functions by matching this field. */
-  name: string;
-  /** Arbitrary event payload. */
-  data: TData;
-  /** Optional event id — dev-server assigns one when omitted. */
-  id?: string | undefined;
-  /** Optional ISO timestamp — defaults to the send time. */
-  ts?: number | undefined;
-  /** Optional user object — matches the `user` field on real Inngest events. */
-  user?: Record<string, unknown> | undefined;
+    /** Event name — Inngest routes events to functions by matching this field. */
+    name: string;
+    /** Arbitrary event payload. */
+    data: TData;
+    /** Optional event id — dev-server assigns one when omitted. */
+    id?: string | undefined;
+    /** Optional ISO timestamp — defaults to the send time. */
+    ts?: number | undefined;
+    /** Optional user object — matches the `user` field on real Inngest events. */
+    user?: Record<string, unknown> | undefined;
 }
 ```
 
@@ -791,9 +715,9 @@ Context surfaced to an Inngest function handler.
 
 ```ts
 export interface InngestFunctionContext<TData = unknown> {
-  event: InngestEvent<TData>;
-  step: InngestStepContext;
-  attempt: number;
+    event: InngestEvent<TData>;
+    step: InngestStepContext;
+    attempt: number;
 }
 ```
 
@@ -805,22 +729,22 @@ Registered function definition. Structural mirror of the `inngest.createFunction
 
 ```ts
 export interface InngestFunctionDefinition<TData = unknown, TResult = unknown> {
-  /** Stable identifier for the function — matches `id` in `inngest.createFunction`. */
-  id: string;
-  /** Event that triggers this function. Matches `event.name` on send. */
-  event: string;
-  /**
-   * Retry count — total number of attempts including the first. Defaults to 1
-   * (no retries). Matches the `retries` field on `inngest.createFunction`.
-   */
-  retries?: number | undefined;
-  /**
-   * Optional concurrency cap. `stub` mode enforces this by queuing extra events
-   * behind the cap and running them sequentially. Defaults to unbounded.
-   */
-  concurrency?: number | undefined;
-  /** Function body — receives `event` + `step` + `attempt`. */
-  handler: InngestFunctionHandler<TData, TResult>;
+    /** Stable identifier for the function — matches `id` in `inngest.createFunction`. */
+    id: string;
+    /** Event that triggers this function. Matches `event.name` on send. */
+    event: string;
+    /**
+     * Retry count — total number of attempts including the first. Defaults to 1
+     * (no retries). Matches the `retries` field on `inngest.createFunction`.
+     */
+    retries?: number | undefined;
+    /**
+     * Optional concurrency cap. `stub` mode enforces this by queuing extra events
+     * behind the cap and running them sequentially. Defaults to unbounded.
+     */
+    concurrency?: number | undefined;
+    /** Function body — receives `event` + `step` + `attempt`. */
+    handler: InngestFunctionHandler<TData, TResult>;
 }
 ```
 
@@ -831,9 +755,7 @@ export interface InngestFunctionDefinition<TData = unknown, TResult = unknown> {
 Function handler signature — mirrors the `handler` parameter of `inngest.createFunction`.
 
 ```ts
-export type InngestFunctionHandler<TData = unknown, TResult = unknown> = (
-  ctx: InngestFunctionContext<TData>,
-) => Promise<TResult> | TResult;
+export type InngestFunctionHandler<TData = unknown, TResult = unknown> = (ctx: InngestFunctionContext<TData>) => Promise<TResult> | TResult;
 ```
 
 #### `InngestMode`
@@ -854,15 +776,15 @@ Snapshot of a single function run — the shape assertion helpers observe.
 
 ```ts
 export interface InngestRunSnapshot<TData = unknown, TResult = unknown> {
-  runId: string;
-  functionId: string;
-  event: InngestEvent<TData>;
-  state: InngestRunState;
-  attemptsMade: number;
-  returnValue?: TResult | undefined;
-  failedReason?: string | undefined;
-  /** Ordered list of step ids the run executed (including sleeps). */
-  stepsRun: string[];
+    runId: string;
+    functionId: string;
+    event: InngestEvent<TData>;
+    state: InngestRunState;
+    attemptsMade: number;
+    returnValue?: TResult | undefined;
+    failedReason?: string | undefined;
+    /** Ordered list of step ids the run executed (including sleeps). */
+    stepsRun: string[];
 }
 ```
 
@@ -873,12 +795,7 @@ export interface InngestRunSnapshot<TData = unknown, TResult = unknown> {
 Terminal + intermediate states an Inngest function run can reach.
 
 ```ts
-export type InngestRunState =
-  | 'queued'
-  | 'running'
-  | 'completed'
-  | 'failed'
-  | 'cancelled';
+export type InngestRunState = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
 ```
 
 #### `InngestStepContext`
@@ -889,13 +806,13 @@ Shape passed to a step's handler. Mirrors the surface the `step` object on a rea
 
 ```ts
 export interface InngestStepContext {
-  /**
-   * Run a named step. The `run` name is what tests observe through
-   * `assertStepRan(functionId, stepId)`.
-   */
-  run: <T>(stepId: string, fn: () => Promise<T> | T) => Promise<T>;
-  /** Sleep for `ms` milliseconds — stub mode advances a virtual clock. */
-  sleep: (stepId: string, ms: number) => Promise<void>;
+    /**
+     * Run a named step. The `run` name is what tests observe through
+     * `assertStepRan(functionId, stepId)`.
+     */
+    run: <T>(stepId: string, fn: () => Promise<T> | T) => Promise<T>;
+    /** Sleep for `ms` milliseconds — stub mode advances a virtual clock. */
+    sleep: (stepId: string, ms: number) => Promise<void>;
 }
 ```
 
@@ -906,70 +823,48 @@ export interface InngestStepContext {
 Return type of {@link setupInngestEnv }. Same surface across both backends so consumer tests can switch modes with a one-argument change.
 
 ```ts
-export interface InngestTestEnv<TMode extends TestMode = TestMode>
-  extends TestEnvBase<TMode> {
-  /** Chosen backend — mirrors the `mode` parameter. */
-  backend: InngestMode;
-  /** App id in use. */
-  appId: string;
-  /** Optional dev-server URL — undefined in stub mode. */
-  devServerUrl: string | undefined;
-
-  /** Register (or replace) a function definition after env creation. */
-  registerFunction: <TData = unknown, TResult = unknown>(
-    fn: InngestFunctionDefinition<TData, TResult>,
-  ) => void;
-
-  /**
-   * Send an event by name + data. Returns the event id. The env dispatches
-   * matching functions asynchronously — use `assertFunctionRan` / etc. to await
-   * outcomes.
-   */
-  sendEvent: <TData = unknown>(name: string, data: TData) => Promise<string>;
-
-  /**
-   * Await the first run of `functionId` reaching a terminal state
-   * (`completed` / `failed` / `cancelled`). Rejects on timeout (default 5s).
-   */
-  waitForRun: <TData = unknown, TResult = unknown>(
-    functionId: string,
-    opts?: { timeoutMs?: number | undefined },
-  ) => Promise<InngestRunSnapshot<TData, TResult>>;
-
-  /** Assertion — the first run of `functionId` reached `completed`. */
-  assertFunctionRan: <TData = unknown, TResult = unknown>(
-    functionId: string,
-    expected?: { returnValue?: TResult | undefined } | undefined,
-  ) => Promise<InngestRunSnapshot<TData, TResult>>;
-
-  /** Assertion — the first run of `functionId` failed. */
-  assertFunctionFailed: <TData = unknown>(
-    functionId: string,
-    expected?:
-      | { attempts?: number | undefined; reasonMatch?: RegExp | undefined }
-      | undefined,
-  ) => Promise<InngestRunSnapshot<TData>>;
-
-  /** Assertion — the first run of `functionId` ran `expectedAttempts` times. */
-  assertRetried: <TData = unknown>(
-    functionId: string,
-    expectedAttempts: number,
-  ) => Promise<InngestRunSnapshot<TData>>;
-
-  /** Assertion — the first run of `functionId` executed `stepId`. */
-  assertStepRan: <TData = unknown>(
-    functionId: string,
-    stepId: string,
-  ) => Promise<InngestRunSnapshot<TData>>;
-
-  /**
-   * Assertion — the queue has no queued / running runs. Waits up to 250ms for
-   * inflight runs to settle, then throws if any remain.
-   */
-  assertQueueDrained: () => Promise<void>;
-
-  /** Introspection helper — every run snapshot the env has ever seen. */
-  listRuns: () => InngestRunSnapshot[];
+export interface InngestTestEnv<TMode extends TestMode = TestMode> extends TestEnvBase<TMode> {
+    /** Chosen backend — mirrors the `mode` parameter. */
+    backend: InngestMode;
+    /** App id in use. */
+    appId: string;
+    /** Optional dev-server URL — undefined in stub mode. */
+    devServerUrl: string | undefined;
+    /** Register (or replace) a function definition after env creation. */
+    registerFunction: <TData = unknown, TResult = unknown>(fn: InngestFunctionDefinition<TData, TResult>) => void;
+    /**
+     * Send an event by name + data. Returns the event id. The env dispatches
+     * matching functions asynchronously — use `assertFunctionRan` / etc. to await
+     * outcomes.
+     */
+    sendEvent: <TData = unknown>(name: string, data: TData) => Promise<string>;
+    /**
+     * Await the first run of `functionId` reaching a terminal state
+     * (`completed` / `failed` / `cancelled`). Rejects on timeout (default 5s).
+     */
+    waitForRun: <TData = unknown, TResult = unknown>(functionId: string, opts?: {
+        timeoutMs?: number | undefined;
+    }) => Promise<InngestRunSnapshot<TData, TResult>>;
+    /** Assertion — the first run of `functionId` reached `completed`. */
+    assertFunctionRan: <TData = unknown, TResult = unknown>(functionId: string, expected?: {
+        returnValue?: TResult | undefined;
+    } | undefined) => Promise<InngestRunSnapshot<TData, TResult>>;
+    /** Assertion — the first run of `functionId` failed. */
+    assertFunctionFailed: <TData = unknown>(functionId: string, expected?: {
+        attempts?: number | undefined;
+        reasonMatch?: RegExp | undefined;
+    } | undefined) => Promise<InngestRunSnapshot<TData>>;
+    /** Assertion — the first run of `functionId` ran `expectedAttempts` times. */
+    assertRetried: <TData = unknown>(functionId: string, expectedAttempts: number) => Promise<InngestRunSnapshot<TData>>;
+    /** Assertion — the first run of `functionId` executed `stepId`. */
+    assertStepRan: <TData = unknown>(functionId: string, stepId: string) => Promise<InngestRunSnapshot<TData>>;
+    /**
+     * Assertion — the queue has no queued / running runs. Waits up to 250ms for
+     * inflight runs to settle, then throws if any remain.
+     */
+    assertQueueDrained: () => Promise<void>;
+    /** Introspection helper — every run snapshot the env has ever seen. */
+    listRuns: () => InngestRunSnapshot[];
 }
 ```
 
@@ -978,15 +873,7 @@ export interface InngestTestEnv<TMode extends TestMode = TestMode>
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L14) `packages/queue/src/semantics/job-lifecycle-orchestrator.ts`
 
 ```ts
-export type JobEvent =
-  | 'enqueue-succeeded'
-  | 'process-started'
-  | 'process-succeeded'
-  | 'process-failed'
-  | 'retry-scheduled'
-  | 'retry-exhausted'
-  | 'dlq-inspected'
-  | 'timeout';
+export type JobEvent = 'enqueue-succeeded' | 'process-started' | 'process-succeeded' | 'process-failed' | 'retry-scheduled' | 'retry-exhausted' | 'dlq-inspected' | 'timeout';
 ```
 
 #### `JobProcessor`
@@ -996,9 +883,7 @@ export type JobEvent =
 Processor signature — matches the shape of a bullmq `Worker` processor fn.
 
 ```ts
-export type JobProcessor<TData = unknown, TResult = unknown> = (
-  job: QueueJobSnapshot<TData, TResult>,
-) => Promise<TResult> | TResult;
+export type JobProcessor<TData = unknown, TResult = unknown> = (job: QueueJobSnapshot<TData, TResult>) => Promise<TResult> | TResult;
 ```
 
 #### `JobSession`
@@ -1007,15 +892,15 @@ export type JobProcessor<TData = unknown, TResult = unknown> = (
 
 ```ts
 export interface JobSession {
-  state: JobState;
-  enqueues: number;
-  processStarts: number;
-  processSuccesses: number;
-  processFailures: number;
-  retries: number;
-  dlqInspections: number;
-  lastEventAt: string;
-  events: string[];
+    state: JobState;
+    enqueues: number;
+    processStarts: number;
+    processSuccesses: number;
+    processFailures: number;
+    retries: number;
+    dlqInspections: number;
+    lastEventAt: string;
+    events: string[];
 }
 ```
 
@@ -1035,17 +920,17 @@ export type JobState = 'waiting' | 'active' | 'completed' | 'failed' | 'delayed'
 
 ```ts
 export interface JobSummary {
-  currentState: JobState;
-  totalEvents: number;
-  validEvents: number;
-  invalidEvents: number;
-  terminalEvents: number;
-  enqueues: number;
-  processStarts: number;
-  processSuccesses: number;
-  processFailures: number;
-  retries: number;
-  dlqInspections: number;
+    currentState: JobState;
+    totalEvents: number;
+    validEvents: number;
+    invalidEvents: number;
+    terminalEvents: number;
+    enqueues: number;
+    processStarts: number;
+    processSuccesses: number;
+    processFailures: number;
+    retries: number;
+    dlqInspections: number;
 }
 ```
 
@@ -1057,12 +942,12 @@ Options accepted by every {@link BullMQTestEnv.addJob} call. Mirrors the subset 
 
 ```ts
 export interface QueueJobOptions {
-  /** Retry count when the processor throws. `bullmq.JobsOptions.attempts`. */
-  attempts?: number | undefined;
-  /** Delay before the job becomes eligible (ms). */
-  delay?: number | undefined;
-  /** Explicit job id — otherwise the queue assigns a monotonically increasing id. */
-  jobId?: string | undefined;
+    /** Retry count when the processor throws. `bullmq.JobsOptions.attempts`. */
+    attempts?: number | undefined;
+    /** Delay before the job becomes eligible (ms). */
+    delay?: number | undefined;
+    /** Explicit job id — otherwise the queue assigns a monotonically increasing id. */
+    jobId?: string | undefined;
 }
 ```
 
@@ -1074,13 +959,13 @@ Structural mirror of a persisted job — decoupled from BullMQ's own types.
 
 ```ts
 export interface QueueJobSnapshot<TData = unknown, TResult = unknown> {
-  id: string;
-  name: string;
-  data: TData;
-  state: JobState;
-  attemptsMade: number;
-  returnValue?: TResult | undefined;
-  failedReason?: string | undefined;
+    id: string;
+    name: string;
+    data: TData;
+    state: JobState;
+    attemptsMade: number;
+    returnValue?: TResult | undefined;
+    failedReason?: string | undefined;
 }
 ```
 
@@ -1092,33 +977,33 @@ Extension of the basic queue spec to accept DLX + TTL + quorum arguments.
 
 ```ts
 export interface RabbitMQAdvancedQueueSpec extends RabbitMQQueueSpec {
-  /**
-   * When set, messages that are nacked (requeue=false) or that exceed the
-   * queue-level `messageTtlMs` are routed to this exchange. Mirrors the AMQP
-   * `x-dead-letter-exchange` argument.
-   */
-  deadLetterExchange?: string | undefined;
-  /**
-   * Overrides the routing key used when a message is dead-lettered. Real
-   * RabbitMQ keeps the original routing key when this is unset — the mock
-   * mirrors that behavior.
-   */
-  deadLetterRoutingKey?: string | undefined;
-  /**
-   * Queue-level message TTL (milliseconds). Messages older than this are
-   * dead-lettered on the next dispatch attempt. Mirrors `x-message-ttl`.
-   */
-  messageTtlMs?: number | undefined;
-  /**
-   * Max delivery count before the message is dead-lettered. Mirrors
-   * `x-delivery-limit` used with quorum queues.
-   */
-  maxDeliveries?: number | undefined;
-  /**
-   * Queue kind — `classic` (default) or `quorum`. Quorum queues carry
-   * additional guarantees when running in a cluster.
-   */
-  kind?: 'classic' | 'quorum' | undefined;
+    /**
+     * When set, messages that are nacked (requeue=false) or that exceed the
+     * queue-level `messageTtlMs` are routed to this exchange. Mirrors the AMQP
+     * `x-dead-letter-exchange` argument.
+     */
+    deadLetterExchange?: string | undefined;
+    /**
+     * Overrides the routing key used when a message is dead-lettered. Real
+     * RabbitMQ keeps the original routing key when this is unset — the mock
+     * mirrors that behavior.
+     */
+    deadLetterRoutingKey?: string | undefined;
+    /**
+     * Queue-level message TTL (milliseconds). Messages older than this are
+     * dead-lettered on the next dispatch attempt. Mirrors `x-message-ttl`.
+     */
+    messageTtlMs?: number | undefined;
+    /**
+     * Max delivery count before the message is dead-lettered. Mirrors
+     * `x-delivery-limit` used with quorum queues.
+     */
+    maxDeliveries?: number | undefined;
+    /**
+     * Queue kind — `classic` (default) or `quorum`. Quorum queues carry
+     * additional guarantees when running in a cluster.
+     */
+    kind?: 'classic' | 'quorum' | undefined;
 }
 ```
 
@@ -1129,137 +1014,129 @@ export interface RabbitMQAdvancedQueueSpec extends RabbitMQQueueSpec {
 Advanced test env. Adds `dlx`, `delayed`, `cluster`, `federation`, `autoReconnect` handles on top of the basic env API (which is re-exported verbatim so a single call site can drive both surfaces).
 
 ```ts
-export interface RabbitMQAdvancedTestEnv<TMode extends TestMode = TestMode>
-  extends TestEnvBase<TMode> {
-  backend: 'stub';
-  /** Basic API surface — same shape as the v1.10-3 basic adapter. */
-  declareExchange: (spec: RabbitMQExchangeSpec) => Promise<void>;
-  declareQueue: (spec: RabbitMQAdvancedQueueSpec) => Promise<void>;
-  bindQueue: (spec: RabbitMQBindingSpec) => Promise<void>;
-  unbindQueue: (spec: RabbitMQBindingSpec) => Promise<void>;
-  publish: <TBody = unknown>(input: {
-    exchange: string;
-    routingKey: string;
-    body: TBody;
-    options?: RabbitMQPublishOptions;
-  }) => Promise<RabbitMQMessageSnapshot<TBody>>;
-  sendToQueue: <TBody = unknown>(input: {
-    queue: string;
-    body: TBody;
-    options?: RabbitMQPublishOptions;
-  }) => Promise<RabbitMQMessageSnapshot<TBody>>;
-  peek: <TBody = unknown>(queueName: string) => RabbitMQMessageSnapshot<TBody>[];
-  get: <TBody = unknown>(input: {
-    queue: string;
-    noAck?: boolean;
-  }) => Promise<RabbitMQDelivery<TBody> | null>;
-  consume: <TBody = unknown>(input: {
-    queue: string;
-    handler: (delivery: RabbitMQDelivery<TBody>) => void | Promise<void>;
-    options?: RabbitMQConsumeOptions;
-  }) => Promise<RabbitMQConsumer<TBody>>;
-
-  /** DLX helpers. */
-  dlx: {
-    /** Introspection — every dead-letter that has fired. */
-    listDeadLetters: <TBody = unknown>() => RabbitMQDeadLetterSnapshot<TBody>[];
-    /**
-     * Assertion — the given queue's last dead-letter matches the expected
-     * shape. Returns the snapshot on success.
-     */
-    assertDeadLettered: <TBody = unknown>(
-      queue: string,
-      expected?: {
-        reason?: RabbitMQDeadLetterSnapshot['reason'];
-        deadLetterExchange?: string;
-      },
-    ) => Promise<RabbitMQDeadLetterSnapshot<TBody>>;
-  };
-
-  /** Delayed message plugin helpers. */
-  delayed: {
-    /** Declare a delayed exchange (equivalent to `type: 'x-delayed-message'`). */
-    declareDelayedExchange: (spec: RabbitMQDelayedExchangeSpec) => Promise<void>;
-    /** Publish with an explicit delay (mirrors the `x-delay` header). */
-    publishDelayed: <TBody = unknown>(input: {
-      exchange: string;
-      routingKey: string;
-      body: TBody;
-      delayMs: number;
-      options?: RabbitMQPublishOptions;
-    }) => Promise<RabbitMQDelayedMessageSnapshot<TBody>>;
-    /**
-     * Wait until scheduled delivery lands on the target queue. Rejects on
-     * timeout.
-     */
-    waitForDelivery: <TBody = unknown>(
-      exchange: string,
-      opts?: { timeoutMs?: number },
-    ) => Promise<RabbitMQMessageSnapshot<TBody>>;
-    /**
-     * Advance the internal clock, causing any due delayed messages to fire
-     * synchronously. Useful for deterministic tests.
-     */
-    advanceClock: (ms: number) => Promise<void>;
-    /** Introspection — all delayed messages the env has seen. */
-    listPending: <TBody = unknown>() => RabbitMQDelayedMessageSnapshot<TBody>[];
-  };
-
-  /** Cluster helpers. */
-  cluster: {
-    listNodes: () => RabbitMQClusterNode[];
-    /** Simulate a node going offline — messages route to other active nodes. */
-    stopNode: (id: string) => Promise<void>;
-    /** Bring a node back online. */
-    startNode: (id: string) => Promise<void>;
-    /**
-     * Report which node currently hosts a given quorum queue. Round-robin
-     * across active nodes.
-     */
-    resolveQueueNode: (queueName: string) => string | null;
-    /**
-     * Assertion — the queue is a quorum queue and it is currently hosted on
-     * an active node with the required replica count. Real quorum queues
-     * demand `initialReplicas` copies; the mock enforces a minimum active
-     * node count.
-     */
-    assertQuorumHealthy: (
-      queueName: string,
-      opts?: { minReplicas?: number },
-    ) => void;
-  };
-
-  /** Federation helpers. */
-  federation: {
-    listUpstreams: () => RabbitMQFederationUpstream[];
-    listLinks: () => RabbitMQFederationLink[];
-    /**
-     * Simulate a message arriving on an upstream that is federated into this
-     * broker. Mirrors what a federation plugin would do on the wire.
-     */
-    ingestFromUpstream: <TBody = unknown>(input: {
-      upstreamName: string;
-      exchange: string;
-      routingKey: string;
-      body: TBody;
+export interface RabbitMQAdvancedTestEnv<TMode extends TestMode = TestMode> extends TestEnvBase<TMode> {
+    backend: 'stub';
+    /** Basic API surface — same shape as the v1.10-3 basic adapter. */
+    declareExchange: (spec: RabbitMQExchangeSpec) => Promise<void>;
+    declareQueue: (spec: RabbitMQAdvancedQueueSpec) => Promise<void>;
+    bindQueue: (spec: RabbitMQBindingSpec) => Promise<void>;
+    unbindQueue: (spec: RabbitMQBindingSpec) => Promise<void>;
+    publish: <TBody = unknown>(input: {
+        exchange: string;
+        routingKey: string;
+        body: TBody;
+        options?: RabbitMQPublishOptions;
     }) => Promise<RabbitMQMessageSnapshot<TBody>>;
-  };
-
-  /** amqp-connection-manager style auto-reconnect helpers. */
-  autoReconnect: {
-    /**
-     * Simulate the connection dropping and reconnecting after N attempts.
-     * Returns the number of attempts + total delay observed.
-     */
-    simulateReconnect: (opts: {
-      failAttempts: number;
-    }) => Promise<{ attempts: number; totalDelayMs: number; succeeded: boolean }>;
-    /** Introspection — current reconnect config. */
-    getConfig: () => Required<NonNullable<SetupRabbitMQAdvancedEnvOptions['autoReconnect']>>;
-  };
-
-  /** Full reset. */
-  reset: () => Promise<void>;
+    sendToQueue: <TBody = unknown>(input: {
+        queue: string;
+        body: TBody;
+        options?: RabbitMQPublishOptions;
+    }) => Promise<RabbitMQMessageSnapshot<TBody>>;
+    peek: <TBody = unknown>(queueName: string) => RabbitMQMessageSnapshot<TBody>[];
+    get: <TBody = unknown>(input: {
+        queue: string;
+        noAck?: boolean;
+    }) => Promise<RabbitMQDelivery<TBody> | null>;
+    consume: <TBody = unknown>(input: {
+        queue: string;
+        handler: (delivery: RabbitMQDelivery<TBody>) => void | Promise<void>;
+        options?: RabbitMQConsumeOptions;
+    }) => Promise<RabbitMQConsumer<TBody>>;
+    /** DLX helpers. */
+    dlx: {
+        /** Introspection — every dead-letter that has fired. */
+        listDeadLetters: <TBody = unknown>() => RabbitMQDeadLetterSnapshot<TBody>[];
+        /**
+         * Assertion — the given queue's last dead-letter matches the expected
+         * shape. Returns the snapshot on success.
+         */
+        assertDeadLettered: <TBody = unknown>(queue: string, expected?: {
+            reason?: RabbitMQDeadLetterSnapshot['reason'];
+            deadLetterExchange?: string;
+        }) => Promise<RabbitMQDeadLetterSnapshot<TBody>>;
+    };
+    /** Delayed message plugin helpers. */
+    delayed: {
+        /** Declare a delayed exchange (equivalent to `type: 'x-delayed-message'`). */
+        declareDelayedExchange: (spec: RabbitMQDelayedExchangeSpec) => Promise<void>;
+        /** Publish with an explicit delay (mirrors the `x-delay` header). */
+        publishDelayed: <TBody = unknown>(input: {
+            exchange: string;
+            routingKey: string;
+            body: TBody;
+            delayMs: number;
+            options?: RabbitMQPublishOptions;
+        }) => Promise<RabbitMQDelayedMessageSnapshot<TBody>>;
+        /**
+         * Wait until scheduled delivery lands on the target queue. Rejects on
+         * timeout.
+         */
+        waitForDelivery: <TBody = unknown>(exchange: string, opts?: {
+            timeoutMs?: number;
+        }) => Promise<RabbitMQMessageSnapshot<TBody>>;
+        /**
+         * Advance the internal clock, causing any due delayed messages to fire
+         * synchronously. Useful for deterministic tests.
+         */
+        advanceClock: (ms: number) => Promise<void>;
+        /** Introspection — all delayed messages the env has seen. */
+        listPending: <TBody = unknown>() => RabbitMQDelayedMessageSnapshot<TBody>[];
+    };
+    /** Cluster helpers. */
+    cluster: {
+        listNodes: () => RabbitMQClusterNode[];
+        /** Simulate a node going offline — messages route to other active nodes. */
+        stopNode: (id: string) => Promise<void>;
+        /** Bring a node back online. */
+        startNode: (id: string) => Promise<void>;
+        /**
+         * Report which node currently hosts a given quorum queue. Round-robin
+         * across active nodes.
+         */
+        resolveQueueNode: (queueName: string) => string | null;
+        /**
+         * Assertion — the queue is a quorum queue and it is currently hosted on
+         * an active node with the required replica count. Real quorum queues
+         * demand `initialReplicas` copies; the mock enforces a minimum active
+         * node count.
+         */
+        assertQuorumHealthy: (queueName: string, opts?: {
+            minReplicas?: number;
+        }) => void;
+    };
+    /** Federation helpers. */
+    federation: {
+        listUpstreams: () => RabbitMQFederationUpstream[];
+        listLinks: () => RabbitMQFederationLink[];
+        /**
+         * Simulate a message arriving on an upstream that is federated into this
+         * broker. Mirrors what a federation plugin would do on the wire.
+         */
+        ingestFromUpstream: <TBody = unknown>(input: {
+            upstreamName: string;
+            exchange: string;
+            routingKey: string;
+            body: TBody;
+        }) => Promise<RabbitMQMessageSnapshot<TBody>>;
+    };
+    /** amqp-connection-manager style auto-reconnect helpers. */
+    autoReconnect: {
+        /**
+         * Simulate the connection dropping and reconnecting after N attempts.
+         * Returns the number of attempts + total delay observed.
+         */
+        simulateReconnect: (opts: {
+            failAttempts: number;
+        }) => Promise<{
+            attempts: number;
+            totalDelayMs: number;
+            succeeded: boolean;
+        }>;
+        /** Introspection — current reconnect config. */
+        getConfig: () => Required<NonNullable<SetupRabbitMQAdvancedEnvOptions['autoReconnect']>>;
+    };
+    /** Full reset. */
+    reset: () => Promise<void>;
 }
 ```
 
@@ -1271,18 +1148,18 @@ Binding declaration.
 
 ```ts
 export interface RabbitMQBindingSpec {
-  exchange: string;
-  queue: string;
-  /**
-   * Routing key. Empty string for `fanout` (ignored) and headers exchanges.
-   * For `topic` supports `*` (single word) + `#` (multiple words) wildcards.
-   */
-  routingKey: string;
-  /**
-   * Header match args for `headers` exchanges. `x-match=all` (all headers must
-   * match) or `x-match=any` (any). Defaults to `all` when omitted.
-   */
-  args?: Record<string, unknown> | undefined;
+    exchange: string;
+    queue: string;
+    /**
+     * Routing key. Empty string for `fanout` (ignored) and headers exchanges.
+     * For `topic` supports `*` (single word) + `#` (multiple words) wildcards.
+     */
+    routingKey: string;
+    /**
+     * Header match args for `headers` exchanges. `x-match=all` (all headers must
+     * match) or `x-match=any` (any). Defaults to `all` when omitted.
+     */
+    args?: Record<string, unknown> | undefined;
 }
 ```
 
@@ -1294,10 +1171,10 @@ Node in a cluster.
 
 ```ts
 export interface RabbitMQClusterNode {
-  id: string;
-  role: 'primary' | 'replica';
-  /** True while the node is participating in the cluster. */
-  active: boolean;
+    id: string;
+    role: 'primary' | 'replica';
+    /** True while the node is participating in the cluster. */
+    active: boolean;
 }
 ```
 
@@ -1309,26 +1186,26 @@ Consume options.
 
 ```ts
 export interface RabbitMQConsumeOptions {
-  /**
-   * When true, messages are auto-acknowledged upon receipt (no consumer ack
-   * required). Defaults to false — consumers must call `ack(msg)` or
-   * `nack(msg)` explicitly.
-   */
-  noAck?: boolean | undefined;
-  /**
-   * Consumer tag — mirrors AMQP's `consumerTag`. Auto-generated when omitted.
-   */
-  consumerTag?: string | undefined;
-  /**
-   * Per-consumer prefetch (QoS) — max unacked messages the consumer holds at
-   * once. Real RabbitMQ enforces via `basic.qos`. Defaults to 0 (unlimited).
-   */
-  prefetch?: number | undefined;
-  /**
-   * When true the consumer is invoked exclusively (no other consumers on the
-   * queue). The stub honours this by rejecting subsequent consumer registrations.
-   */
-  exclusive?: boolean | undefined;
+    /**
+     * When true, messages are auto-acknowledged upon receipt (no consumer ack
+     * required). Defaults to false — consumers must call `ack(msg)` or
+     * `nack(msg)` explicitly.
+     */
+    noAck?: boolean | undefined;
+    /**
+     * Consumer tag — mirrors AMQP's `consumerTag`. Auto-generated when omitted.
+     */
+    consumerTag?: string | undefined;
+    /**
+     * Per-consumer prefetch (QoS) — max unacked messages the consumer holds at
+     * once. Real RabbitMQ enforces via `basic.qos`. Defaults to 0 (unlimited).
+     */
+    prefetch?: number | undefined;
+    /**
+     * When true the consumer is invoked exclusively (no other consumers on the
+     * queue). The stub honours this by rejecting subsequent consumer registrations.
+     */
+    exclusive?: boolean | undefined;
 }
 ```
 
@@ -1340,11 +1217,11 @@ Consumer registration handle.
 
 ```ts
 export interface RabbitMQConsumer<TBody = unknown> {
-  consumerTag: string;
-  queueName: string;
-  cancel: () => Promise<void>;
-  /** Introspection — every delivery the consumer received. */
-  deliveries: () => Array<RabbitMQMessageSnapshot<TBody>>;
+    consumerTag: string;
+    queueName: string;
+    cancel: () => Promise<void>;
+    /** Introspection — every delivery the consumer received. */
+    deliveries: () => Array<RabbitMQMessageSnapshot<TBody>>;
 }
 ```
 
@@ -1356,14 +1233,14 @@ Dead-letter snapshot — captured every time a message enters a DLX.
 
 ```ts
 export interface RabbitMQDeadLetterSnapshot<TBody = unknown> {
-  originalMessageId: string;
-  originalQueue: string;
-  deadLetterExchange: string;
-  deadLetterRoutingKey: string;
-  reason: 'rejected' | 'expired' | 'maxlen' | 'delivery-limit';
-  body: TBody;
-  deliveryCount: number;
-  timestamp: number;
+    originalMessageId: string;
+    originalQueue: string;
+    deadLetterExchange: string;
+    deadLetterRoutingKey: string;
+    reason: 'rejected' | 'expired' | 'maxlen' | 'delivery-limit';
+    body: TBody;
+    deliveryCount: number;
+    timestamp: number;
 }
 ```
 
@@ -1375,16 +1252,16 @@ Delayed exchange declaration.
 
 ```ts
 export interface RabbitMQDelayedExchangeSpec extends Omit<RabbitMQExchangeSpec, 'type'> {
-  /**
-   * Delayed message plugin exchange type — real RabbitMQ uses the fixed
-   * value `x-delayed-message` when the plugin is enabled.
-   */
-  type: 'x-delayed-message';
-  /**
-   * Backing exchange type — the plugin routes as the backing type once the
-   * delay elapses. Defaults to `direct`.
-   */
-  delayedType?: 'direct' | 'topic' | 'fanout' | 'headers' | undefined;
+    /**
+     * Delayed message plugin exchange type — real RabbitMQ uses the fixed
+     * value `x-delayed-message` when the plugin is enabled.
+     */
+    type: 'x-delayed-message';
+    /**
+     * Backing exchange type — the plugin routes as the backing type once the
+     * delay elapses. Defaults to `direct`.
+     */
+    delayedType?: 'direct' | 'topic' | 'fanout' | 'headers' | undefined;
 }
 ```
 
@@ -1396,13 +1273,13 @@ Delayed message snapshot — inspection helper.
 
 ```ts
 export interface RabbitMQDelayedMessageSnapshot<TBody = unknown> {
-  messageId: string;
-  exchange: string;
-  routingKey: string;
-  body: TBody;
-  delayMs: number;
-  scheduledAt: number;
-  delivered: boolean;
+    messageId: string;
+    exchange: string;
+    routingKey: string;
+    body: TBody;
+    delayMs: number;
+    scheduledAt: number;
+    delivered: boolean;
 }
 ```
 
@@ -1414,22 +1291,24 @@ Delivered message wrapper — consumer receives one of these per delivery.
 
 ```ts
 export interface RabbitMQDelivery<TBody = unknown> {
-  messageId: string;
-  queueName: string;
-  exchange: string;
-  routingKey: string;
-  body: TBody;
-  headers: Record<string, unknown>;
-  deliveryCount: number;
-  deliveryTag: string;
-  /** Acknowledge the delivery — removes the message from the queue. */
-  ack: () => void;
-  /**
-   * Negative acknowledge — when `requeue=true` the message goes back to the
-   * head of the queue; when false it is discarded (or routed to the DLX if
-   * bound).
-   */
-  nack: (opts?: { requeue?: boolean }) => void;
+    messageId: string;
+    queueName: string;
+    exchange: string;
+    routingKey: string;
+    body: TBody;
+    headers: Record<string, unknown>;
+    deliveryCount: number;
+    deliveryTag: string;
+    /** Acknowledge the delivery — removes the message from the queue. */
+    ack: () => void;
+    /**
+     * Negative acknowledge — when `requeue=true` the message goes back to the
+     * head of the queue; when false it is discarded (or routed to the DLX if
+     * bound).
+     */
+    nack: (opts?: {
+        requeue?: boolean;
+    }) => void;
 }
 ```
 
@@ -1441,15 +1320,15 @@ Exchange declaration.
 
 ```ts
 export interface RabbitMQExchangeSpec {
-  name: string;
-  type: RabbitMQExchangeType;
-  /** Durable flag — mirrors AMQP `durable=true` (stub tracks the flag). */
-  durable?: boolean | undefined;
-  /** Auto-delete flag — mirrors AMQP `autoDelete`. */
-  autoDelete?: boolean | undefined;
-  internal?: boolean | undefined;
-  /** Additional exchange arguments. */
-  args?: Record<string, unknown> | undefined;
+    name: string;
+    type: RabbitMQExchangeType;
+    /** Durable flag — mirrors AMQP `durable=true` (stub tracks the flag). */
+    durable?: boolean | undefined;
+    /** Auto-delete flag — mirrors AMQP `autoDelete`. */
+    autoDelete?: boolean | undefined;
+    internal?: boolean | undefined;
+    /** Additional exchange arguments. */
+    args?: Record<string, unknown> | undefined;
 }
 ```
 
@@ -1471,9 +1350,9 @@ Federation link — binds an upstream to a downstream exchange or queue.
 
 ```ts
 export interface RabbitMQFederationLink {
-  upstreamName: string;
-  downstreamExchange?: string | undefined;
-  downstreamQueue?: string | undefined;
+    upstreamName: string;
+    downstreamExchange?: string | undefined;
+    downstreamQueue?: string | undefined;
 }
 ```
 
@@ -1485,13 +1364,13 @@ Federation upstream (source broker).
 
 ```ts
 export interface RabbitMQFederationUpstream {
-  name: string;
-  /** Upstream URI — recorded so tests can assert against it. */
-  uri: string;
-  /** Prefetch on the federation link. Mirrors real federation configuration. */
-  prefetchCount?: number | undefined;
-  /** Optional expiry — how long the federated link stays alive. */
-  expires?: number | undefined;
+    name: string;
+    /** Upstream URI — recorded so tests can assert against it. */
+    uri: string;
+    /** Prefetch on the federation link. Mirrors real federation configuration. */
+    prefetchCount?: number | undefined;
+    /** Optional expiry — how long the federated link stays alive. */
+    expires?: number | undefined;
 }
 ```
 
@@ -1503,19 +1382,19 @@ Structural mirror of a persisted AMQP message.
 
 ```ts
 export interface RabbitMQMessageSnapshot<TBody = unknown> {
-  messageId: string;
-  queueName: string;
-  exchange: string;
-  routingKey: string;
-  body: TBody;
-  headers: Record<string, unknown>;
-  deliveryCount: number;
-  state: RabbitMQMessageState;
-  failedReason?: string | undefined;
-  /** Persistent flag — AMQP `deliveryMode=2` mirror. */
-  persistent: boolean;
-  /** ISO ms timestamp — enqueue time. */
-  enqueuedAt: number;
+    messageId: string;
+    queueName: string;
+    exchange: string;
+    routingKey: string;
+    body: TBody;
+    headers: Record<string, unknown>;
+    deliveryCount: number;
+    state: RabbitMQMessageState;
+    failedReason?: string | undefined;
+    /** Persistent flag — AMQP `deliveryMode=2` mirror. */
+    persistent: boolean;
+    /** ISO ms timestamp — enqueue time. */
+    enqueuedAt: number;
 }
 ```
 
@@ -1526,13 +1405,7 @@ export interface RabbitMQMessageSnapshot<TBody = unknown> {
 Terminal + intermediate states surfaced by the helper.
 
 ```ts
-export type RabbitMQMessageState =
-  | 'ready'
-  | 'unacked'
-  | 'acked'
-  | 'nacked'
-  | 'requeued'
-  | 'dead';
+export type RabbitMQMessageState = 'ready' | 'unacked' | 'acked' | 'nacked' | 'requeued' | 'dead';
 ```
 
 #### `RabbitMQMode`
@@ -1553,25 +1426,25 @@ Options accepted by every publish.
 
 ```ts
 export interface RabbitMQPublishOptions {
-  /** Overrides `messageId` — otherwise auto-generated. */
-  messageId?: string | undefined;
-  /** Additional AMQP headers (also read by `headers` exchanges). */
-  headers?: Record<string, unknown> | undefined;
-  /**
-   * Delivery mode. `persistent` messages survive broker restarts in production;
-   * the stub tracks the flag so tests can assert against it.
-   */
-  persistent?: boolean | undefined;
-  /**
-   * Mandatory flag — real RabbitMQ returns the message when no binding matches
-   * and `mandatory=true`. The stub records the return so tests can assert on
-   * unroutable publishes.
-   */
-  mandatory?: boolean | undefined;
-  /** AMQP `expiration` per-message TTL (milliseconds), applied on the stub. */
-  expirationMs?: number | undefined;
-  /** AMQP `priority` — 0..9. */
-  priority?: number | undefined;
+    /** Overrides `messageId` — otherwise auto-generated. */
+    messageId?: string | undefined;
+    /** Additional AMQP headers (also read by `headers` exchanges). */
+    headers?: Record<string, unknown> | undefined;
+    /**
+     * Delivery mode. `persistent` messages survive broker restarts in production;
+     * the stub tracks the flag so tests can assert against it.
+     */
+    persistent?: boolean | undefined;
+    /**
+     * Mandatory flag — real RabbitMQ returns the message when no binding matches
+     * and `mandatory=true`. The stub records the return so tests can assert on
+     * unroutable publishes.
+     */
+    mandatory?: boolean | undefined;
+    /** AMQP `expiration` per-message TTL (milliseconds), applied on the stub. */
+    expirationMs?: number | undefined;
+    /** AMQP `priority` — 0..9. */
+    priority?: number | undefined;
 }
 ```
 
@@ -1583,17 +1456,17 @@ Queue declaration.
 
 ```ts
 export interface RabbitMQQueueSpec {
-  name: string;
-  durable?: boolean | undefined;
-  autoDelete?: boolean | undefined;
-  exclusive?: boolean | undefined;
-  /**
-   * Queue-level max unacked messages — mirrors `x-max-length` in real Rabbit.
-   * The stub tracks the limit for assertion purposes but does not block sends.
-   */
-  maxLength?: number | undefined;
-  /** Additional queue arguments (x-* fields). */
-  args?: Record<string, unknown> | undefined;
+    name: string;
+    durable?: boolean | undefined;
+    autoDelete?: boolean | undefined;
+    exclusive?: boolean | undefined;
+    /**
+     * Queue-level max unacked messages — mirrors `x-max-length` in real Rabbit.
+     * The stub tracks the limit for assertion purposes but does not block sends.
+     */
+    maxLength?: number | undefined;
+    /** Additional queue arguments (x-* fields). */
+    args?: Record<string, unknown> | undefined;
 }
 ```
 
@@ -1605,17 +1478,17 @@ Options for the testcontainers backend.
 
 ```ts
 export interface RabbitMQTestcontainersOptions {
-  /** Docker image. Defaults to `rabbitmq:3-management`. */
-  image?: string | undefined;
-  /**
-   * Reuse an existing amqp URL (e.g. `amqp://guest:guest@localhost:5672`)
-   * instead of spawning a container.
-   */
-  amqpUrl?: string | undefined;
-  /** Startup timeout for auto-spawn (ms). Defaults to 60_000. */
-  startupTimeoutMs?: number | undefined;
-  /** Extra environment vars for the container. */
-  env?: Record<string, string> | undefined;
+    /** Docker image. Defaults to `rabbitmq:3-management`. */
+    image?: string | undefined;
+    /**
+     * Reuse an existing amqp URL (e.g. `amqp://guest:guest@localhost:5672`)
+     * instead of spawning a container.
+     */
+    amqpUrl?: string | undefined;
+    /** Startup timeout for auto-spawn (ms). Defaults to 60_000. */
+    startupTimeoutMs?: number | undefined;
+    /** Extra environment vars for the container. */
+    env?: Record<string, string> | undefined;
 }
 ```
 
@@ -1626,94 +1499,77 @@ export interface RabbitMQTestcontainersOptions {
 RabbitMQ test env. Reads much like a mini AMQP channel facade — consumers declare topology, publish + consume messages, and use the assertion helpers to observe outcomes without touching a real broker.
 
 ```ts
-export interface RabbitMQTestEnv<TMode extends TestMode = TestMode>
-  extends TestEnvBase<TMode> {
-  backend: RabbitMQMode;
-  /** Amqp URL — undefined in stub mode. */
-  amqpUrl: string | undefined;
-  /** Management UI URL — populated in testcontainers mode. */
-  managementUrl: string | undefined;
-
-  /** Declare an exchange. Idempotent for identical redeclarations. */
-  declareExchange: (spec: RabbitMQExchangeSpec) => Promise<void>;
-  /** Declare a queue. */
-  declareQueue: (spec: RabbitMQQueueSpec) => Promise<void>;
-  /** Bind a queue to an exchange. */
-  bindQueue: (spec: RabbitMQBindingSpec) => Promise<void>;
-  /** Unbind a queue from an exchange. */
-  unbindQueue: (spec: RabbitMQBindingSpec) => Promise<void>;
-
-  /** Publish a message to an exchange with routing key. */
-  publish: <TBody = unknown>(input: {
-    exchange: string;
-    routingKey: string;
-    body: TBody;
-    options?: RabbitMQPublishOptions;
-  }) => Promise<RabbitMQMessageSnapshot<TBody>>;
-
-  /**
-   * Directly enqueue on a queue — mirrors amqplib's default-exchange shortcut
-   * where publishing on `""` with a routing key equal to the queue name puts
-   * the message straight on the queue.
-   */
-  sendToQueue: <TBody = unknown>(input: {
-    queue: string;
-    body: TBody;
-    options?: RabbitMQPublishOptions;
-  }) => Promise<RabbitMQMessageSnapshot<TBody>>;
-
-  /**
-   * Peek at the messages currently on a queue — read-only, does not consume.
-   */
-  peek: <TBody = unknown>(queueName: string) => RabbitMQMessageSnapshot<TBody>[];
-
-  /**
-   * Get one message off the queue — mirrors AMQP `basic.get`. Returns null
-   * when the queue is empty.
-   */
-  get: <TBody = unknown>(input: {
-    queue: string;
-    noAck?: boolean;
-  }) => Promise<RabbitMQDelivery<TBody> | null>;
-
-  /** Register a push-based consumer. */
-  consume: <TBody = unknown>(input: {
-    queue: string;
-    handler: (delivery: RabbitMQDelivery<TBody>) => void | Promise<void>;
-    options?: RabbitMQConsumeOptions;
-  }) => Promise<RabbitMQConsumer<TBody>>;
-
-  /**
-   * Wait for a queue's next message (or a matching one) to reach a terminal
-   * state (`acked` / `nacked` / `dead`). Rejects on timeout.
-   */
-  waitForMessage: <TBody = unknown>(
-    queueName: string,
-    opts?: { timeoutMs?: number; match?: (m: RabbitMQMessageSnapshot<TBody>) => boolean },
-  ) => Promise<RabbitMQMessageSnapshot<TBody>>;
-
-  /** Assertion — the next message on `queueName` was acked. */
-  assertAcknowledged: <TBody = unknown>(
-    queueName: string,
-    expected?: { deliveryCount?: number } | undefined,
-  ) => Promise<RabbitMQMessageSnapshot<TBody>>;
-
-  /** Assertion — the next message on `queueName` was requeued after a nack. */
-  assertRequeued: <TBody = unknown>(
-    queueName: string,
-  ) => Promise<RabbitMQMessageSnapshot<TBody>>;
-
-  /** Assertion — the queue is empty (no ready + no unacked). */
-  assertQueueDrained: (queueName: string) => Promise<void>;
-
-  /** Introspection — every publish the env has observed. */
-  listPublished: <TBody = unknown>() => RabbitMQMessageSnapshot<TBody>[];
-
-  /** Introspection — messages that were published as mandatory + unroutable. */
-  listReturned: <TBody = unknown>() => RabbitMQMessageSnapshot<TBody>[];
-
-  /** Reset all in-memory state. */
-  reset: () => Promise<void>;
+export interface RabbitMQTestEnv<TMode extends TestMode = TestMode> extends TestEnvBase<TMode> {
+    backend: RabbitMQMode;
+    /** Amqp URL — undefined in stub mode. */
+    amqpUrl: string | undefined;
+    /** Management UI URL — populated in testcontainers mode. */
+    managementUrl: string | undefined;
+    /** Declare an exchange. Idempotent for identical redeclarations. */
+    declareExchange: (spec: RabbitMQExchangeSpec) => Promise<void>;
+    /** Declare a queue. */
+    declareQueue: (spec: RabbitMQQueueSpec) => Promise<void>;
+    /** Bind a queue to an exchange. */
+    bindQueue: (spec: RabbitMQBindingSpec) => Promise<void>;
+    /** Unbind a queue from an exchange. */
+    unbindQueue: (spec: RabbitMQBindingSpec) => Promise<void>;
+    /** Publish a message to an exchange with routing key. */
+    publish: <TBody = unknown>(input: {
+        exchange: string;
+        routingKey: string;
+        body: TBody;
+        options?: RabbitMQPublishOptions;
+    }) => Promise<RabbitMQMessageSnapshot<TBody>>;
+    /**
+     * Directly enqueue on a queue — mirrors amqplib's default-exchange shortcut
+     * where publishing on `""` with a routing key equal to the queue name puts
+     * the message straight on the queue.
+     */
+    sendToQueue: <TBody = unknown>(input: {
+        queue: string;
+        body: TBody;
+        options?: RabbitMQPublishOptions;
+    }) => Promise<RabbitMQMessageSnapshot<TBody>>;
+    /**
+     * Peek at the messages currently on a queue — read-only, does not consume.
+     */
+    peek: <TBody = unknown>(queueName: string) => RabbitMQMessageSnapshot<TBody>[];
+    /**
+     * Get one message off the queue — mirrors AMQP `basic.get`. Returns null
+     * when the queue is empty.
+     */
+    get: <TBody = unknown>(input: {
+        queue: string;
+        noAck?: boolean;
+    }) => Promise<RabbitMQDelivery<TBody> | null>;
+    /** Register a push-based consumer. */
+    consume: <TBody = unknown>(input: {
+        queue: string;
+        handler: (delivery: RabbitMQDelivery<TBody>) => void | Promise<void>;
+        options?: RabbitMQConsumeOptions;
+    }) => Promise<RabbitMQConsumer<TBody>>;
+    /**
+     * Wait for a queue's next message (or a matching one) to reach a terminal
+     * state (`acked` / `nacked` / `dead`). Rejects on timeout.
+     */
+    waitForMessage: <TBody = unknown>(queueName: string, opts?: {
+        timeoutMs?: number;
+        match?: (m: RabbitMQMessageSnapshot<TBody>) => boolean;
+    }) => Promise<RabbitMQMessageSnapshot<TBody>>;
+    /** Assertion — the next message on `queueName` was acked. */
+    assertAcknowledged: <TBody = unknown>(queueName: string, expected?: {
+        deliveryCount?: number;
+    } | undefined) => Promise<RabbitMQMessageSnapshot<TBody>>;
+    /** Assertion — the next message on `queueName` was requeued after a nack. */
+    assertRequeued: <TBody = unknown>(queueName: string) => Promise<RabbitMQMessageSnapshot<TBody>>;
+    /** Assertion — the queue is empty (no ready + no unacked). */
+    assertQueueDrained: (queueName: string) => Promise<void>;
+    /** Introspection — every publish the env has observed. */
+    listPublished: <TBody = unknown>() => RabbitMQMessageSnapshot<TBody>[];
+    /** Introspection — messages that were published as mandatory + unroutable. */
+    listReturned: <TBody = unknown>() => RabbitMQMessageSnapshot<TBody>[];
+    /** Reset all in-memory state. */
+    reset: () => Promise<void>;
 }
 ```
 
@@ -1725,17 +1581,16 @@ Common options for the `setupBullMQEnv` factory. `mode` chooses the backend; `re
 
 ```ts
 export interface SetupBullMQEnvOptions {
-  /**
-   * Backend selector. Defaults to `'sandbox'` when omitted — the fast, offline
-   * path suitable for unit tests. Use `'testcontainers'` for integration-shaped
-   * suites that exercise the real BullMQ + Redis roundtrip.
-   */
-  mode?: BullMQMode | undefined;
-  /**
-   * testcontainers overrides. Ignored when `mode === 'sandbox'`.
-   */
-  redis?:
-    | {
+    /**
+     * Backend selector. Defaults to `'sandbox'` when omitted — the fast, offline
+     * path suitable for unit tests. Use `'testcontainers'` for integration-shaped
+     * suites that exercise the real BullMQ + Redis roundtrip.
+     */
+    mode?: BullMQMode | undefined;
+    /**
+     * testcontainers overrides. Ignored when `mode === 'sandbox'`.
+     */
+    redis?: {
         /** Docker image tag. Defaults to `redis:7-alpine`. */
         image?: string | undefined;
         /**
@@ -1743,26 +1598,23 @@ export interface SetupBullMQEnvOptions {
          * helper skips container creation entirely.
          */
         url?: string | undefined;
-      }
-    | undefined;
-  /**
-   * sandbox overrides. Ignored when `mode === 'testcontainers'`.
-   */
-  sandbox?:
-    | {
+    } | undefined;
+    /**
+     * sandbox overrides. Ignored when `mode === 'testcontainers'`.
+     */
+    sandbox?: {
         /**
          * How often to poll the sandbox scheduler when processing delayed jobs
          * (ms). Defaults to 1 which is the finest resolution the current
          * implementation supports.
          */
         pollIntervalMs?: number | undefined;
-      }
-    | undefined;
-  /**
-   * Queue name — mirrors `new Queue(name)` in real BullMQ. Defaults to
-   * `'test-queue'`.
-   */
-  queueName?: string | undefined;
+    } | undefined;
+    /**
+     * Queue name — mirrors `new Queue(name)` in real BullMQ. Defaults to
+     * `'test-queue'`.
+     */
+    queueName?: string | undefined;
 }
 ```
 
@@ -1774,22 +1626,22 @@ Common options for the `setupCloudflareQueuesEnv` factory.
 
 ```ts
 export interface SetupCloudflareQueuesEnvOptions {
-  /** Backend selector. Defaults to `'miniflare'`. */
-  mode?: CloudflareQueuesMode | undefined;
-  /**
-   * Queue names the env pre-provisions. Additional queues are created lazily
-   * on the first `send` / `registerConsumer` call, so this list is optional.
-   */
-  queues?: string[] | undefined;
-  /**
-   * Consumers registered at env creation time. Registering a duplicate
-   * `queue` overwrites the previous handler.
-   */
-  consumers?: CloudflareQueueConsumerRegistration[] | undefined;
-  /** miniflare overrides. */
-  miniflare?: CloudflareQueuesMiniflareOptions | undefined;
-  /** wrangler overrides. */
-  wrangler?: CloudflareQueuesWranglerOptions | undefined;
+    /** Backend selector. Defaults to `'miniflare'`. */
+    mode?: CloudflareQueuesMode | undefined;
+    /**
+     * Queue names the env pre-provisions. Additional queues are created lazily
+     * on the first `send` / `registerConsumer` call, so this list is optional.
+     */
+    queues?: string[] | undefined;
+    /**
+     * Consumers registered at env creation time. Registering a duplicate
+     * `queue` overwrites the previous handler.
+     */
+    consumers?: CloudflareQueueConsumerRegistration[] | undefined;
+    /** miniflare overrides. */
+    miniflare?: CloudflareQueuesMiniflareOptions | undefined;
+    /** wrangler overrides. */
+    wrangler?: CloudflareQueuesWranglerOptions | undefined;
 }
 ```
 
@@ -1801,20 +1653,20 @@ Common options for the `setupInngestEnv` factory.
 
 ```ts
 export interface SetupInngestEnvOptions {
-  /** Backend selector. Defaults to `'stub'`. */
-  mode?: InngestMode | undefined;
-  /**
-   * Function definitions registered against the env. Registering a duplicate
-   * `id` overwrites the previous one.
-   */
-  functions?: InngestFunctionDefinition[] | undefined;
-  /** dev-server overrides. Ignored when `mode === 'stub'`. */
-  devServer?: InngestDevServerOptions | undefined;
-  /**
-   * Inngest app name — mirrors `new Inngest({ id })` on the real SDK. Defaults
-   * to `'kiwa-test-app'`.
-   */
-  appId?: string | undefined;
+    /** Backend selector. Defaults to `'stub'`. */
+    mode?: InngestMode | undefined;
+    /**
+     * Function definitions registered against the env. Registering a duplicate
+     * `id` overwrites the previous one.
+     */
+    functions?: InngestFunctionDefinition[] | undefined;
+    /** dev-server overrides. Ignored when `mode === 'stub'`. */
+    devServer?: InngestDevServerOptions | undefined;
+    /**
+     * Inngest app name — mirrors `new Inngest({ id })` on the real SDK. Defaults
+     * to `'kiwa-test-app'`.
+     */
+    appId?: string | undefined;
 }
 ```
 
@@ -1826,32 +1678,34 @@ Options accepted by {@link setupRabbitMQAdvancedEnv }.
 
 ```ts
 export interface SetupRabbitMQAdvancedEnvOptions {
-  /** Standard exchanges (v1.10-3 basic API). */
-  exchanges?: RabbitMQExchangeSpec[] | undefined;
-  /** Delayed exchanges (this adapter). */
-  delayedExchanges?: RabbitMQDelayedExchangeSpec[] | undefined;
-  /** Queues with advanced arguments. */
-  queues?: RabbitMQAdvancedQueueSpec[] | undefined;
-  /** Bindings. */
-  bindings?: RabbitMQBindingSpec[] | undefined;
-  /** Cluster nodes — sizing simulation. */
-  cluster?: { nodes: RabbitMQClusterNode[] } | undefined;
-  /** Federation configuration. */
-  federation?: {
-    upstreams?: RabbitMQFederationUpstream[] | undefined;
-    links?: RabbitMQFederationLink[] | undefined;
-  } | undefined;
-  /** amqp-connection-manager style auto-reconnect config. */
-  autoReconnect?: {
-    /** Initial retry delay in ms. Defaults to 100. */
-    initialDelayMs?: number | undefined;
-    /** Max retry delay in ms. Defaults to 1000. */
-    maxDelayMs?: number | undefined;
-    /** Multiplier applied between retries. Defaults to 2. */
-    factor?: number | undefined;
-    /** Max attempts before giving up. Defaults to 10. */
-    maxAttempts?: number | undefined;
-  } | undefined;
+    /** Standard exchanges (v1.10-3 basic API). */
+    exchanges?: RabbitMQExchangeSpec[] | undefined;
+    /** Delayed exchanges (this adapter). */
+    delayedExchanges?: RabbitMQDelayedExchangeSpec[] | undefined;
+    /** Queues with advanced arguments. */
+    queues?: RabbitMQAdvancedQueueSpec[] | undefined;
+    /** Bindings. */
+    bindings?: RabbitMQBindingSpec[] | undefined;
+    /** Cluster nodes — sizing simulation. */
+    cluster?: {
+        nodes: RabbitMQClusterNode[];
+    } | undefined;
+    /** Federation configuration. */
+    federation?: {
+        upstreams?: RabbitMQFederationUpstream[] | undefined;
+        links?: RabbitMQFederationLink[] | undefined;
+    } | undefined;
+    /** amqp-connection-manager style auto-reconnect config. */
+    autoReconnect?: {
+        /** Initial retry delay in ms. Defaults to 100. */
+        initialDelayMs?: number | undefined;
+        /** Max retry delay in ms. Defaults to 1000. */
+        maxDelayMs?: number | undefined;
+        /** Multiplier applied between retries. Defaults to 2. */
+        factor?: number | undefined;
+        /** Max attempts before giving up. Defaults to 10. */
+        maxAttempts?: number | undefined;
+    } | undefined;
 }
 ```
 
@@ -1863,14 +1717,14 @@ Common options for the `setupRabbitMQEnv` factory.
 
 ```ts
 export interface SetupRabbitMQEnvOptions {
-  mode?: RabbitMQMode | undefined;
-  /** Exchanges to declare at env creation time. */
-  exchanges?: RabbitMQExchangeSpec[] | undefined;
-  /** Queues to declare at env creation time. */
-  queues?: RabbitMQQueueSpec[] | undefined;
-  /** Bindings to declare at env creation time. */
-  bindings?: RabbitMQBindingSpec[] | undefined;
-  testcontainers?: RabbitMQTestcontainersOptions | undefined;
+    mode?: RabbitMQMode | undefined;
+    /** Exchanges to declare at env creation time. */
+    exchanges?: RabbitMQExchangeSpec[] | undefined;
+    /** Queues to declare at env creation time. */
+    queues?: RabbitMQQueueSpec[] | undefined;
+    /** Bindings to declare at env creation time. */
+    bindings?: RabbitMQBindingSpec[] | undefined;
+    testcontainers?: RabbitMQTestcontainersOptions | undefined;
 }
 ```
 
@@ -1882,20 +1736,20 @@ Common options for the `setupSQSEnv` factory.
 
 ```ts
 export interface SetupSQSEnvOptions {
-  /** Backend selector. Defaults to `'stub'`. */
-  mode?: SQSMode | undefined;
-  /**
-   * Queue specs to create at env creation time. Additional queues can be
-   * created later via `createQueue`.
-   */
-  queues?: SQSQueueSpec[] | undefined;
-  /** AWS access credentials (localstack mode uses dummy defaults). */
-  credentials?: {
-    accessKeyId: string;
-    secretAccessKey: string;
-  } | undefined;
-  /** localstack overrides. */
-  localstack?: SQSLocalstackOptions | undefined;
+    /** Backend selector. Defaults to `'stub'`. */
+    mode?: SQSMode | undefined;
+    /**
+     * Queue specs to create at env creation time. Additional queues can be
+     * created later via `createQueue`.
+     */
+    queues?: SQSQueueSpec[] | undefined;
+    /** AWS access credentials (localstack mode uses dummy defaults). */
+    credentials?: {
+        accessKeyId: string;
+        secretAccessKey: string;
+    } | undefined;
+    /** localstack overrides. */
+    localstack?: SQSLocalstackOptions | undefined;
 }
 ```
 
@@ -1907,8 +1761,8 @@ Options for a batch delete.
 
 ```ts
 export interface SQSBatchDeleteEntry {
-  id: string;
-  receiptHandle: string;
+    id: string;
+    receiptHandle: string;
 }
 ```
 
@@ -1920,9 +1774,9 @@ Options for a batch send.
 
 ```ts
 export interface SQSBatchSendEntry<TBody = unknown> {
-  id: string;
-  body: TBody;
-  options?: SQSSendOptions | undefined;
+    id: string;
+    body: TBody;
+    options?: SQSSendOptions | undefined;
 }
 ```
 
@@ -1934,21 +1788,21 @@ Options for the localstack backend. Ignored when `mode === 'stub'`.
 
 ```ts
 export interface SQSLocalstackOptions {
-  /** Docker image for LocalStack. Defaults to `localstack/localstack:3`. */
-  image?: string | undefined;
-  /**
-   * Reuse an existing LocalStack endpoint URL (e.g. `http://localhost:4566`)
-   * instead of spawning a container. When set, the helper skips
-   * testcontainers and connects directly.
-   */
-  endpoint?: string | undefined;
-  /** AWS region. Defaults to `us-east-1`. */
-  region?: string | undefined;
-  /**
-   * Milliseconds to wait for the auto-spawned container before timing out.
-   * Defaults to `60000`.
-   */
-  startupTimeoutMs?: number | undefined;
+    /** Docker image for LocalStack. Defaults to `localstack/localstack:3`. */
+    image?: string | undefined;
+    /**
+     * Reuse an existing LocalStack endpoint URL (e.g. `http://localhost:4566`)
+     * instead of spawning a container. When set, the helper skips
+     * testcontainers and connects directly.
+     */
+    endpoint?: string | undefined;
+    /** AWS region. Defaults to `us-east-1`. */
+    region?: string | undefined;
+    /**
+     * Milliseconds to wait for the auto-spawned container before timing out.
+     * Defaults to `60000`.
+     */
+    startupTimeoutMs?: number | undefined;
 }
 ```
 
@@ -1960,21 +1814,21 @@ Structural mirror of a persisted SQS message.
 
 ```ts
 export interface SQSMessageSnapshot<TBody = unknown> {
-  messageId: string;
-  queueName: string;
-  body: TBody;
-  receiveCount: number;
-  state: SQSMessageState;
-  failedReason?: string | undefined;
-  /** FIFO — non-empty when kind === 'fifo'. */
-  messageGroupId?: string | undefined;
-  messageDeduplicationId?: string | undefined;
-  /**
-   * ISO ms timestamp — when the message becomes visible for the next receive
-   * (send time + delaySeconds, or receive time + visibilityTimeoutSeconds
-   * while in-flight).
-   */
-  visibleAt: number;
+    messageId: string;
+    queueName: string;
+    body: TBody;
+    receiveCount: number;
+    state: SQSMessageState;
+    failedReason?: string | undefined;
+    /** FIFO — non-empty when kind === 'fifo'. */
+    messageGroupId?: string | undefined;
+    messageDeduplicationId?: string | undefined;
+    /**
+     * ISO ms timestamp — when the message becomes visible for the next receive
+     * (send time + delaySeconds, or receive time + visibilityTimeoutSeconds
+     * while in-flight).
+     */
+    visibleAt: number;
 }
 ```
 
@@ -1985,11 +1839,7 @@ export interface SQSMessageSnapshot<TBody = unknown> {
 Terminal + intermediate states surfaced by the helper. `pending` messages live in the queue waiting for the next receive. `inflight` messages have been received and are within their visibility timeout window. `deleted` covers messages the consumer explicitly deleted. `dead` covers messages that exhausted `maxReceiveCount` and were routed to the DLQ.
 
 ```ts
-export type SQSMessageState =
-  | 'pending'
-  | 'inflight'
-  | 'deleted'
-  | 'dead';
+export type SQSMessageState = 'pending' | 'inflight' | 'deleted' | 'dead';
 ```
 
 #### `SQSMode`
@@ -2020,24 +1870,24 @@ Queue declaration — passed to `setupSQSEnv({ queues: [...] })` to create the q
 
 ```ts
 export interface SQSQueueSpec {
-  /** Queue name — for FIFO queues must end with `.fifo`. */
-  name: string;
-  /** Queue kind — defaults to `standard`. */
-  kind?: SQSQueueKind | undefined;
-  /**
-   * Queue-level default visibility timeout (seconds). Defaults to 30 which
-   * matches production SQS.
-   */
-  visibilityTimeoutSeconds?: number | undefined;
-  /**
-   * DLQ config — when set, messages that exceed `maxReceiveCount` receives
-   * are routed to `deadLetterTargetArn` (in stub mode the arn is treated as
-   * a plain queue name).
-   */
-  redrivePolicy?: {
-    deadLetterTargetArn: string;
-    maxReceiveCount: number;
-  } | undefined;
+    /** Queue name — for FIFO queues must end with `.fifo`. */
+    name: string;
+    /** Queue kind — defaults to `standard`. */
+    kind?: SQSQueueKind | undefined;
+    /**
+     * Queue-level default visibility timeout (seconds). Defaults to 30 which
+     * matches production SQS.
+     */
+    visibilityTimeoutSeconds?: number | undefined;
+    /**
+     * DLQ config — when set, messages that exceed `maxReceiveCount` receives
+     * are routed to `deadLetterTargetArn` (in stub mode the arn is treated as
+     * a plain queue name).
+     */
+    redrivePolicy?: {
+        deadLetterTargetArn: string;
+        maxReceiveCount: number;
+    } | undefined;
 }
 ```
 
@@ -2049,14 +1899,14 @@ Received message wrapper — consumers call `.delete()` to remove the message af
 
 ```ts
 export interface SQSReceivedMessage<TBody = unknown> {
-  messageId: string;
-  receiptHandle: string;
-  body: TBody;
-  receiveCount: number;
-  messageGroupId?: string | undefined;
-  messageDeduplicationId?: string | undefined;
-  delete: () => void;
-  changeVisibility: (timeoutSeconds: number) => void;
+    messageId: string;
+    receiptHandle: string;
+    body: TBody;
+    receiveCount: number;
+    messageGroupId?: string | undefined;
+    messageDeduplicationId?: string | undefined;
+    delete: () => void;
+    changeVisibility: (timeoutSeconds: number) => void;
 }
 ```
 
@@ -2068,21 +1918,21 @@ Options accepted by {@link SQSTestEnv.receive}.
 
 ```ts
 export interface SQSReceiveOptions {
-  /**
-   * Max messages returned in one receive call. SQS caps at 10 — the helper
-   * honours the same cap. Defaults to 1.
-   */
-  maxMessages?: number | undefined;
-  /**
-   * Visibility timeout for the returned messages (seconds). Defaults to the
-   * queue-level `visibilityTimeoutSeconds` (30s if unset).
-   */
-  visibilityTimeoutSeconds?: number | undefined;
-  /**
-   * Long-poll wait time. When > 0 the helper will wait up to this many
-   * seconds for a message to become visible. Defaults to 0.
-   */
-  waitTimeSeconds?: number | undefined;
+    /**
+     * Max messages returned in one receive call. SQS caps at 10 — the helper
+     * honours the same cap. Defaults to 1.
+     */
+    maxMessages?: number | undefined;
+    /**
+     * Visibility timeout for the returned messages (seconds). Defaults to the
+     * queue-level `visibilityTimeoutSeconds` (30s if unset).
+     */
+    visibilityTimeoutSeconds?: number | undefined;
+    /**
+     * Long-poll wait time. When > 0 the helper will wait up to this many
+     * seconds for a message to become visible. Defaults to 0.
+     */
+    waitTimeSeconds?: number | undefined;
 }
 ```
 
@@ -2094,22 +1944,22 @@ Options accepted by every {@link SQSTestEnv.send} call.
 
 ```ts
 export interface SQSSendOptions {
-  /**
-   * Delay before the message becomes eligible for the next receive
-   * (seconds). Real SQS caps at 900. Defaults to 0.
-   */
-  delaySeconds?: number | undefined;
-  /**
-   * FIFO — required when the queue kind is `fifo`. Groups messages so
-   * consumers in the same group process them in order.
-   */
-  messageGroupId?: string | undefined;
-  /**
-   * FIFO — optional deduplication token. Duplicate `send` calls with the
-   * same deduplication id within the 5-minute production window are treated
-   * as no-ops. The helper uses the same rule but without the time bound.
-   */
-  messageDeduplicationId?: string | undefined;
+    /**
+     * Delay before the message becomes eligible for the next receive
+     * (seconds). Real SQS caps at 900. Defaults to 0.
+     */
+    delaySeconds?: number | undefined;
+    /**
+     * FIFO — required when the queue kind is `fifo`. Groups messages so
+     * consumers in the same group process them in order.
+     */
+    messageGroupId?: string | undefined;
+    /**
+     * FIFO — optional deduplication token. Duplicate `send` calls with the
+     * same deduplication id within the 5-minute production window are treated
+     * as no-ops. The helper uses the same rule but without the time bound.
+     */
+    messageDeduplicationId?: string | undefined;
 }
 ```
 
@@ -2120,75 +1970,45 @@ export interface SQSSendOptions {
 Return type of {@link setupSQSEnv }. Reads much like a mini SQS facade — consumers create queues, send / receive / delete messages, and use the assertion helpers to observe outcomes without touching the wire.
 
 ```ts
-export interface SQSTestEnv<TMode extends TestMode = TestMode>
-  extends TestEnvBase<TMode> {
-  /** Chosen backend — mirrors the `mode` parameter. */
-  backend: SQSMode;
-  /** Localstack endpoint URL — undefined in stub mode. */
-  endpoint: string | undefined;
-  /** Queue names the env has observed. */
-  queues: string[];
-
-  /** Create (or replace) a queue. */
-  createQueue: (spec: SQSQueueSpec) => Promise<void>;
-
-  /** Enqueue a message. Returns the snapshot at enqueue time. */
-  send: <TBody = unknown>(
-    queueName: string,
-    body: TBody,
-    options?: SQSSendOptions,
-  ) => Promise<SQSMessageSnapshot<TBody>>;
-
-  /** Batch enqueue — up to 10 messages per call (mirrors SQS SendMessageBatch). */
-  sendBatch: <TBody = unknown>(
-    queueName: string,
-    entries: SQSBatchSendEntry<TBody>[],
-  ) => Promise<SQSMessageSnapshot<TBody>[]>;
-
-  /** Receive a batch — up to 10 messages per call. */
-  receive: <TBody = unknown>(
-    queueName: string,
-    options?: SQSReceiveOptions,
-  ) => Promise<SQSReceivedMessage<TBody>[]>;
-
-  /** Batch delete — mirrors SQS DeleteMessageBatch. */
-  deleteBatch: (
-    queueName: string,
-    entries: SQSBatchDeleteEntry[],
-  ) => Promise<void>;
-
-  /**
-   * Wait for the first message on `queueName` to reach a terminal state
-   * (`deleted` or `dead`). Rejects on timeout (default 5s).
-   */
-  waitForMessage: <TBody = unknown>(
-    queueName: string,
-    opts?: { timeoutMs?: number | undefined },
-  ) => Promise<SQSMessageSnapshot<TBody>>;
-
-  /** Assertion — the first message on `queueName` was successfully deleted. */
-  assertDeleted: <TBody = unknown>(
-    queueName: string,
-    expected?: { receiveCount?: number | undefined } | undefined,
-  ) => Promise<SQSMessageSnapshot<TBody>>;
-
-  /** Assertion — the first message on `queueName` was routed to the DLQ. */
-  assertDeadLettered: <TBody = unknown>(
-    queueName: string,
-    expected?: {
-      dlq?: string | undefined;
-      receiveCount?: number | undefined;
-    } | undefined,
-  ) => Promise<SQSMessageSnapshot<TBody>>;
-
-  /** Assertion — the queue has no pending / inflight messages. */
-  assertQueueDrained: (queueName?: string | undefined) => Promise<void>;
-
-  /** Introspection helper — every message snapshot in a queue. */
-  listMessages: (queueName?: string | undefined) => SQSMessageSnapshot[];
-
-  /** Introspection helper — every message routed to a DLQ. */
-  listDeadLetters: (dlqName?: string | undefined) => SQSMessageSnapshot[];
+export interface SQSTestEnv<TMode extends TestMode = TestMode> extends TestEnvBase<TMode> {
+    /** Chosen backend — mirrors the `mode` parameter. */
+    backend: SQSMode;
+    /** Localstack endpoint URL — undefined in stub mode. */
+    endpoint: string | undefined;
+    /** Queue names the env has observed. */
+    queues: string[];
+    /** Create (or replace) a queue. */
+    createQueue: (spec: SQSQueueSpec) => Promise<void>;
+    /** Enqueue a message. Returns the snapshot at enqueue time. */
+    send: <TBody = unknown>(queueName: string, body: TBody, options?: SQSSendOptions) => Promise<SQSMessageSnapshot<TBody>>;
+    /** Batch enqueue — up to 10 messages per call (mirrors SQS SendMessageBatch). */
+    sendBatch: <TBody = unknown>(queueName: string, entries: SQSBatchSendEntry<TBody>[]) => Promise<SQSMessageSnapshot<TBody>[]>;
+    /** Receive a batch — up to 10 messages per call. */
+    receive: <TBody = unknown>(queueName: string, options?: SQSReceiveOptions) => Promise<SQSReceivedMessage<TBody>[]>;
+    /** Batch delete — mirrors SQS DeleteMessageBatch. */
+    deleteBatch: (queueName: string, entries: SQSBatchDeleteEntry[]) => Promise<void>;
+    /**
+     * Wait for the first message on `queueName` to reach a terminal state
+     * (`deleted` or `dead`). Rejects on timeout (default 5s).
+     */
+    waitForMessage: <TBody = unknown>(queueName: string, opts?: {
+        timeoutMs?: number | undefined;
+    }) => Promise<SQSMessageSnapshot<TBody>>;
+    /** Assertion — the first message on `queueName` was successfully deleted. */
+    assertDeleted: <TBody = unknown>(queueName: string, expected?: {
+        receiveCount?: number | undefined;
+    } | undefined) => Promise<SQSMessageSnapshot<TBody>>;
+    /** Assertion — the first message on `queueName` was routed to the DLQ. */
+    assertDeadLettered: <TBody = unknown>(queueName: string, expected?: {
+        dlq?: string | undefined;
+        receiveCount?: number | undefined;
+    } | undefined) => Promise<SQSMessageSnapshot<TBody>>;
+    /** Assertion — the queue has no pending / inflight messages. */
+    assertQueueDrained: (queueName?: string | undefined) => Promise<void>;
+    /** Introspection helper — every message snapshot in a queue. */
+    listMessages: (queueName?: string | undefined) => SQSMessageSnapshot[];
+    /** Introspection helper — every message routed to a DLQ. */
+    listDeadLetters: (dlqName?: string | undefined) => SQSMessageSnapshot[];
 }
 ```
 <!-- kiwa-public-api:end -->

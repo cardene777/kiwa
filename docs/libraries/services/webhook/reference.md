@@ -32,7 +32,7 @@
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -43,10 +43,7 @@
 circuit breaker: rejectionThreshold 連続 rejection で open、 resetTimeoutMs 後 half-open。
 
 ```ts
-export function createCircuitBreaker(
-  verifier: WebhookVerifier,
-  options: CircuitBreakerOptions = {},
-): CircuitBreaker;
+export declare function createCircuitBreaker(verifier: WebhookVerifier, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
 #### `createHookRegistry`
@@ -54,7 +51,7 @@ export function createCircuitBreaker(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L20) `packages/webhook/src/observability.ts`
 
 ```ts
-export function createHookRegistry(): HookRegistry;
+export declare function createHookRegistry(): HookRegistry;
 ```
 
 #### `createIdempotencyCache`
@@ -62,7 +59,7 @@ export function createHookRegistry(): HookRegistry;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/idempotency.ts#L10) `packages/webhook/src/idempotency.ts`
 
 ```ts
-export function createIdempotencyCache(): IdempotencyCache;
+export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
 #### `createWebhookVerifier`
@@ -72,7 +69,7 @@ export function createIdempotencyCache(): IdempotencyCache;
 provider 別 verifier を作成。 verify() 呼出で signature + payload parse + record を atomic に実行し、 listDelivered() で受信ログを取り出せる in-process mock。 実 provider (Stripe Events API / GitHub webhook / Slack Events API / Twilio) の signature 検証と event shape を同じ signature で再現する。
 
 ```ts
-export function createWebhookVerifier(options: CreateWebhookVerifierOptions): WebhookVerifier;
+export declare function createWebhookVerifier(options: CreateWebhookVerifierOptions): WebhookVerifier;
 ```
 
 #### `dispatchWithRetry`
@@ -82,11 +79,7 @@ export function createWebhookVerifier(options: CreateWebhookVerifierOptions): We
 exponential backoff で handler を retry する delivery loop。 実 webhook subscriber (Stripe / GitHub の redelivery loop) を再現するための test helper。 sleep は injectable なので test では即 resolve で回せる。
 
 ```ts
-export async function dispatchWithRetry(
-  handler: (event: NormalizedWebhookEvent) => Promise<void>,
-  event: NormalizedWebhookEvent,
-  options: DispatchRetryOptions = {},
-): Promise<DispatchRetryResult>;
+export declare function dispatchWithRetry(handler: (event: NormalizedWebhookEvent) => Promise<void>, event: NormalizedWebhookEvent, options?: DispatchRetryOptions): Promise<DispatchRetryResult>;
 ```
 
 #### `parseWebhookPayload`
@@ -96,7 +89,7 @@ export async function dispatchWithRetry(
 provider 別 event payload を統一 shape に正規化。 field 名の違い (Stripe = type / GitHub = X-GitHub-Event header header → raw.event / Slack = event.type / Twilio = MessageStatus) を吸収する。
 
 ```ts
-export function parseWebhookPayload(rawEvent: RawWebhookEvent): NormalizedWebhookEvent;
+export declare function parseWebhookPayload(rawEvent: RawWebhookEvent): NormalizedWebhookEvent;
 ```
 
 #### `verifyBatch`
@@ -106,11 +99,7 @@ export function parseWebhookPayload(rawEvent: RawWebhookEvent): NormalizedWebhoo
 batch verify: 複数 incoming webhook を一括 verify、 stopOnFirstRejection で中断。
 
 ```ts
-export function verifyBatch(
-  verifier: WebhookVerifier,
-  incomings: readonly IncomingWebhook[],
-  options: BatchVerifyOptions = {},
-): BatchVerifyResult;
+export declare function verifyBatch(verifier: WebhookVerifier, incomings: readonly IncomingWebhook[], options?: BatchVerifyOptions): BatchVerifyResult;
 ```
 
 #### `verifyIdempotent`
@@ -120,12 +109,9 @@ export function verifyBatch(
 idempotent verify: event id (or dedup key) で dup detection、 cached outcome 返却。
 
 ```ts
-export function verifyIdempotent(
-  verifier: WebhookVerifier,
-  incoming: IncomingWebhook,
-  idempotencyKey: string,
-  cache: IdempotencyCache,
-): WebhookVerifyOutcome & { deduplicated: boolean };
+export declare function verifyIdempotent(verifier: WebhookVerifier, incoming: IncomingWebhook, idempotencyKey: string, cache: IdempotencyCache): WebhookVerifyOutcome & {
+    deduplicated: boolean;
+};
 ```
 
 #### `verifyObservable`
@@ -133,11 +119,7 @@ export function verifyIdempotent(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L38) `packages/webhook/src/observability.ts`
 
 ```ts
-export function verifyObservable(
-  verifier: WebhookVerifier,
-  incoming: IncomingWebhook,
-  hooks: HookRegistry,
-): WebhookVerifyOutcome;
+export declare function verifyObservable(verifier: WebhookVerifier, incoming: IncomingWebhook, hooks: HookRegistry): WebhookVerifyOutcome;
 ```
 
 #### `verifyWebhookSignature`
@@ -147,13 +129,7 @@ export function verifyObservable(
 provider 別 webhook 署名を検証。 実 provider が送る signature format を再現。 - stripe = `t=&lt;ts&gt;,v1=&lt;hex&gt;` 形式、 sha256 hex、 toleranceSec 内のみ valid - github = `sha256=&lt;hex&gt;` 形式、 sha256 hex - slack = `v0=&lt;hex&gt;` 形式 (`v0:&lt;ts&gt;:&lt;body&gt;` を base string に)、 sha256 hex - twilio = base64、 sha1 (URL + form params) - mock では payload そのままを署名対象にする
 
 ```ts
-export function verifyWebhookSignature(
-  payload: string,
-  signature: string,
-  secret: string,
-  provider: WebhookProvider,
-  options?: VerifySignatureOptions,
-): SignatureVerifyResult;
+export declare function verifyWebhookSignature(payload: string, signature: string, secret: string, provider: WebhookProvider, options?: VerifySignatureOptions): SignatureVerifyResult;
 ```
 
 #### `verifyWithRetry`
@@ -163,11 +139,7 @@ export function verifyWebhookSignature(
 verify with exponential backoff (transient signature failure retry)。
 
 ```ts
-export async function verifyWithRetry(
-  verifier: WebhookVerifier,
-  incoming: IncomingWebhook,
-  options: RetryOptions = {},
-): Promise<RetryVerifyResult>;
+export declare function verifyWithRetry(verifier: WebhookVerifier, incoming: IncomingWebhook, options?: RetryOptions): Promise<RetryVerifyResult>;
 ```
 
 ### 型
@@ -178,7 +150,7 @@ export async function verifyWithRetry(
 
 ```ts
 export interface BatchVerifyOptions {
-  stopOnFirstRejection?: boolean;
+    stopOnFirstRejection?: boolean;
 }
 ```
 
@@ -188,10 +160,10 @@ export interface BatchVerifyOptions {
 
 ```ts
 export interface BatchVerifyResult {
-  total: number;
-  verified: number;
-  rejected: number;
-  results: WebhookVerifyOutcome[];
+    total: number;
+    verified: number;
+    rejected: number;
+    results: WebhookVerifyOutcome[];
 }
 ```
 
@@ -201,10 +173,12 @@ export interface BatchVerifyResult {
 
 ```ts
 export interface CircuitBreaker {
-  state: () => CircuitState;
-  verify: (incoming: IncomingWebhook) => WebhookVerifyOutcome & { circuitState: CircuitState };
-  reset: () => void;
-  rejectionCount: () => number;
+    state: () => CircuitState;
+    verify: (incoming: IncomingWebhook) => WebhookVerifyOutcome & {
+        circuitState: CircuitState;
+    };
+    reset: () => void;
+    rejectionCount: () => number;
 }
 ```
 
@@ -214,9 +188,9 @@ export interface CircuitBreaker {
 
 ```ts
 export interface CircuitBreakerOptions {
-  rejectionThreshold?: number;
-  resetTimeoutMs?: number;
-  now?: () => number;
+    rejectionThreshold?: number;
+    resetTimeoutMs?: number;
+    now?: () => number;
 }
 ```
 
@@ -234,8 +208,8 @@ export type CircuitState = 'closed' | 'open' | 'half-open';
 
 ```ts
 export interface DeliveredWebhookRecord extends WebhookVerifyOutcome {
-  raw: IncomingWebhook;
-  signatureResult: SignatureVerifyResult;
+    raw: IncomingWebhook;
+    signatureResult: SignatureVerifyResult;
 }
 ```
 
@@ -245,10 +219,10 @@ export interface DeliveredWebhookRecord extends WebhookVerifyOutcome {
 
 ```ts
 export interface DispatchAttempt {
-  attempt: number;
-  ok: boolean;
-  durationMs: number;
-  error?: string;
+    attempt: number;
+    ok: boolean;
+    durationMs: number;
+    error?: string;
 }
 ```
 
@@ -258,10 +232,10 @@ export interface DispatchAttempt {
 
 ```ts
 export interface DispatchRetryOptions {
-  maxAttempts?: number;
-  initialDelayMs?: number;
-  backoffFactor?: number;
-  sleep?: (ms: number) => Promise<void>;
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    backoffFactor?: number;
+    sleep?: (ms: number) => Promise<void>;
 }
 ```
 
@@ -271,9 +245,9 @@ export interface DispatchRetryOptions {
 
 ```ts
 export interface DispatchRetryResult {
-  delivered: boolean;
-  attempts: DispatchAttempt[];
-  totalDurationMs: number;
+    delivered: boolean;
+    attempts: DispatchAttempt[];
+    totalDurationMs: number;
 }
 ```
 
@@ -291,10 +265,10 @@ export type HookCallback = (ctx: HookContext) => void;
 
 ```ts
 export interface HookContext {
-  event: VerifyHookEvent;
-  incoming: IncomingWebhook;
-  outcome?: WebhookVerifyOutcome;
-  durationMs?: number;
+    event: VerifyHookEvent;
+    incoming: IncomingWebhook;
+    outcome?: WebhookVerifyOutcome;
+    durationMs?: number;
 }
 ```
 
@@ -304,9 +278,9 @@ export interface HookContext {
 
 ```ts
 export interface HookRegistry {
-  register: (event: VerifyHookEvent, cb: HookCallback) => () => void;
-  emit: (event: VerifyHookEvent, ctx: HookContext) => void;
-  count: (event: VerifyHookEvent) => number;
+    register: (event: VerifyHookEvent, cb: HookCallback) => () => void;
+    emit: (event: VerifyHookEvent, ctx: HookContext) => void;
+    count: (event: VerifyHookEvent) => number;
 }
 ```
 
@@ -316,10 +290,10 @@ export interface HookRegistry {
 
 ```ts
 export interface IdempotencyCache {
-  seen: (key: string) => boolean;
-  mark: (key: string, outcome: WebhookVerifyOutcome) => void;
-  get: (key: string) => WebhookVerifyOutcome | undefined;
-  clear: () => void;
+    seen: (key: string) => boolean;
+    mark: (key: string, outcome: WebhookVerifyOutcome) => void;
+    get: (key: string) => WebhookVerifyOutcome | undefined;
+    clear: () => void;
 }
 ```
 
@@ -329,9 +303,9 @@ export interface IdempotencyCache {
 
 ```ts
 export interface IncomingWebhook {
-  payload: string;
-  signature: string;
-  headers?: Record<string, string>;
+    payload: string;
+    signature: string;
+    headers?: Record<string, string>;
 }
 ```
 
@@ -341,11 +315,11 @@ export interface IncomingWebhook {
 
 ```ts
 export interface NormalizedWebhookEvent {
-  type: WebhookEventType;
-  provider: WebhookProvider;
-  eventId: string;
-  occurredAt: number;
-  resource?: string;
+    type: WebhookEventType;
+    provider: WebhookProvider;
+    eventId: string;
+    occurredAt: number;
+    resource?: string;
 }
 ```
 
@@ -355,8 +329,8 @@ export interface NormalizedWebhookEvent {
 
 ```ts
 export interface RawWebhookEvent {
-  provider: WebhookProvider;
-  raw: Record<string, unknown>;
+    provider: WebhookProvider;
+    raw: Record<string, unknown>;
 }
 ```
 
@@ -366,10 +340,10 @@ export interface RawWebhookEvent {
 
 ```ts
 export interface RetryOptions {
-  maxAttempts?: number;
-  initialDelayMs?: number;
-  backoffMultiplier?: number;
-  onRetry?: (attempt: number, reason: string) => void;
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    backoffMultiplier?: number;
+    onRetry?: (attempt: number, reason: string) => void;
 }
 ```
 
@@ -379,7 +353,7 @@ export interface RetryOptions {
 
 ```ts
 export interface RetryVerifyResult extends WebhookVerifyOutcome {
-  attempts: number;
+    attempts: number;
 }
 ```
 
@@ -389,10 +363,10 @@ export interface RetryVerifyResult extends WebhookVerifyOutcome {
 
 ```ts
 export interface SignatureVerifyResult {
-  valid: boolean;
-  provider: WebhookProvider;
-  algorithm: string;
-  reason?: string;
+    valid: boolean;
+    provider: WebhookProvider;
+    algorithm: string;
+    reason?: string;
 }
 ```
 
@@ -410,8 +384,8 @@ export type VerifyHookEvent = 'before-verify' | 'after-verify' | 'rejected';
 
 ```ts
 export interface VerifySignatureOptions {
-  toleranceSec?: number;
-  now?: () => number;
+    toleranceSec?: number;
+    now?: () => number;
 }
 ```
 
@@ -420,18 +394,7 @@ export interface VerifySignatureOptions {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/payload.ts#L3) `packages/webhook/src/payload.ts`
 
 ```ts
-export type WebhookEventType =
-  | 'payment.succeeded'
-  | 'payment.failed'
-  | 'subscription.updated'
-  | 'push'
-  | 'pull_request'
-  | 'issues'
-  | 'message'
-  | 'app_mention'
-  | 'sms.delivered'
-  | 'sms.failed'
-  | 'unknown';
+export type WebhookEventType = 'payment.succeeded' | 'payment.failed' | 'subscription.updated' | 'push' | 'pull_request' | 'issues' | 'message' | 'app_mention' | 'sms.delivered' | 'sms.failed' | 'unknown';
 ```
 
 #### `WebhookProvider`
@@ -448,10 +411,10 @@ export type WebhookProvider = 'stripe' | 'github' | 'slack' | 'twilio';
 
 ```ts
 export interface WebhookVerifier {
-  provider: WebhookProvider;
-  verify: (incoming: IncomingWebhook) => WebhookVerifyOutcome;
-  listDelivered: () => DeliveredWebhookRecord[];
-  clear: () => void;
+    provider: WebhookProvider;
+    verify: (incoming: IncomingWebhook) => WebhookVerifyOutcome;
+    listDelivered: () => DeliveredWebhookRecord[];
+    clear: () => void;
 }
 ```
 
@@ -461,12 +424,12 @@ export interface WebhookVerifier {
 
 ```ts
 export interface WebhookVerifyOutcome {
-  id: string;
-  provider: WebhookProvider;
-  status: 'verified' | 'rejected';
-  reason?: string;
-  event?: NormalizedWebhookEvent;
-  receivedAt: number;
+    id: string;
+    provider: WebhookProvider;
+    status: 'verified' | 'rejected';
+    reason?: string;
+    event?: NormalizedWebhookEvent;
+    receivedAt: number;
 }
 ```
 <!-- kiwa-public-api:end -->

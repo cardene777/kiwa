@@ -57,7 +57,7 @@ in-process WebSocket server、client、message、binary frame、reconnect、room
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -68,7 +68,7 @@ in-process WebSocket server、client、message、binary frame、reconnect、room
 server-side broadcast。 filter で選別可能 (room / tag 等の subset broadcast simulate)。
 
 ```ts
-export function broadcastMessage(server: WSServer, payload: WSPayload, filter?: WSBroadcastFilter): void;
+export declare function broadcastMessage(server: WSServer, payload: WSPayload, filter?: WSBroadcastFilter): void;
 ```
 
 #### `captureBinaryFrame`
@@ -78,7 +78,7 @@ export function broadcastMessage(server: WSServer, payload: WSPayload, filter?: 
 RFC 6455 binary frame parse mock。 real ws.parser の subset (fin + opcode + mask + payload)。 mask key + extended payload length は簡易対応。
 
 ```ts
-export function captureBinaryFrame(frame: Uint8Array): WSBinaryFrame;
+export declare function captureBinaryFrame(frame: Uint8Array): WSBinaryFrame;
 ```
 
 #### `computeReconnectDelay`
@@ -88,7 +88,7 @@ export function captureBinaryFrame(frame: Uint8Array): WSBinaryFrame;
 exponential backoff で reconnect delay を計算。 real WS client の reconnect strategy (Socket.IO / uWebSockets client) を mock。 jitter で thundering herd 回避。
 
 ```ts
-export function computeReconnectDelay(attempt: number, policy: ReconnectPolicy, rng: () => number = () => 0.5): ReconnectAttempt;
+export declare function computeReconnectDelay(attempt: number, policy: ReconnectPolicy, rng?: () => number): ReconnectAttempt;
 ```
 
 #### `connectClient`
@@ -98,7 +98,7 @@ export function computeReconnectDelay(attempt: number, policy: ReconnectPolicy, 
 client mock。 server を受け取ってすぐ accept する経路 (auto handshake、 real WS の open event 相当)。
 
 ```ts
-export function connectClient(server: WSServer, options: WSClientOptions = {}): WSClient;
+export declare function connectClient(server: WSServer, options?: WSClientOptions): WSClient;
 ```
 
 #### `createHeartbeatState`
@@ -108,11 +108,11 @@ export function connectClient(server: WSServer, options: WSClientOptions = {}): 
 ping/pong heartbeat 状態を追跡、 pong 未受信で missedPongs を increment、 閾値超えで healthy=false。 real WS keepalive パターンの mock。
 
 ```ts
-export function createHeartbeatState(now: () => number = () => 0): {
-  state: HeartbeatState;
-  ping: () => void;
-  pong: () => void;
-  check: (thresholdMs: number, maxMissed: number) => HeartbeatState;
+export declare function createHeartbeatState(now?: () => number): {
+    state: HeartbeatState;
+    ping: () => void;
+    pong: () => void;
+    check: (thresholdMs: number, maxMissed: number) => HeartbeatState;
 };
 ```
 
@@ -123,7 +123,7 @@ export function createHeartbeatState(now: () => number = () => 0): {
 room/channel 抽象。 client を roomName で group 化し、 broadcastToRoom で 該当 member にのみ配信。 real Socket.IO room / Colyseus room 相当を mock。
 
 ```ts
-export function createRoomRegistry(now: () => number = () => 0): RoomRegistry;
+export declare function createRoomRegistry(now?: () => number): RoomRegistry;
 ```
 
 #### `createWSServer`
@@ -133,7 +133,7 @@ export function createRoomRegistry(now: () => number = () => 0): RoomRegistry;
 provider 別 mock server。 provider 差は id prefix と挙動 default のみ、 API は共通 interface。
 
 ```ts
-export function createWSServer(options: WSServerOptions = {}): WSServer;
+export declare function createWSServer(options?: WSServerOptions): WSServer;
 ```
 
 #### `encodeBinaryFrame`
@@ -143,7 +143,7 @@ export function createWSServer(options: WSServerOptions = {}): WSServer;
 text / binary payload を simple frame にエンコード (unmasked、 server → client 経路想定)。
 
 ```ts
-export function encodeBinaryFrame(opcode: WSOpcode, payload: Uint8Array): Uint8Array;
+export declare function encodeBinaryFrame(opcode: WSOpcode, payload: Uint8Array): Uint8Array;
 ```
 
 #### `sendMessage`
@@ -153,11 +153,7 @@ export function encodeBinaryFrame(opcode: WSOpcode, payload: Uint8Array): Uint8A
 target = server なら該当 client に direct send、 client なら server 経由で emit。
 
 ```ts
-export function sendMessage(
-  from: WSServer | WSClient,
-  target: WSClient | string | null,
-  payload: WSPayload,
-): void;
+export declare function sendMessage(from: WSServer | WSClient, target: WSClient | string | null, payload: WSPayload): void;
 ```
 
 ### 型
@@ -168,10 +164,10 @@ export function sendMessage(
 
 ```ts
 export interface HeartbeatState {
-  lastPingAt: number;
-  lastPongAt: number;
-  missedPongs: number;
-  healthy: boolean;
+    lastPingAt: number;
+    lastPongAt: number;
+    missedPongs: number;
+    healthy: boolean;
 }
 ```
 
@@ -181,9 +177,9 @@ export interface HeartbeatState {
 
 ```ts
 export interface PresenceInfo {
-  clientId: string;
-  joinedAt: number;
-  metadata?: Record<string, unknown>;
+    clientId: string;
+    joinedAt: number;
+    metadata?: Record<string, unknown>;
 }
 ```
 
@@ -193,9 +189,9 @@ export interface PresenceInfo {
 
 ```ts
 export interface ReconnectAttempt {
-  attempt: number;
-  delayMs: number;
-  giveUp: boolean;
+    attempt: number;
+    delayMs: number;
+    giveUp: boolean;
 }
 ```
 
@@ -205,10 +201,10 @@ export interface ReconnectAttempt {
 
 ```ts
 export interface ReconnectPolicy {
-  maxAttempts: number;
-  initialDelayMs: number;
-  maxDelayMs: number;
-  jitter?: boolean;
+    maxAttempts: number;
+    initialDelayMs: number;
+    maxDelayMs: number;
+    jitter?: boolean;
 }
 ```
 
@@ -218,12 +214,12 @@ export interface ReconnectPolicy {
 
 ```ts
 export interface RoomRegistry {
-  join: (roomName: string, client: WSClient) => void;
-  leave: (roomName: string, clientId: string) => void;
-  listMembers: (roomName: string) => WSClient[];
-  broadcastToRoom: (roomName: string, payload: WSPayload) => number;
-  listRooms: () => string[];
-  presenceOf: (roomName: string) => PresenceInfo[];
+    join: (roomName: string, client: WSClient) => void;
+    leave: (roomName: string, clientId: string) => void;
+    listMembers: (roomName: string) => WSClient[];
+    broadcastToRoom: (roomName: string, payload: WSPayload) => number;
+    listRooms: () => string[];
+    presenceOf: (roomName: string) => PresenceInfo[];
 }
 ```
 
@@ -233,11 +229,11 @@ export interface RoomRegistry {
 
 ```ts
 export interface WSBinaryFrame {
-  opcode: WSOpcode;
-  fin: boolean;
-  masked: boolean;
-  payloadLength: number;
-  payload: Uint8Array;
+    opcode: WSOpcode;
+    fin: boolean;
+    masked: boolean;
+    payloadLength: number;
+    payload: Uint8Array;
 }
 ```
 
@@ -255,17 +251,17 @@ export type WSBroadcastFilter = (client: WSClient) => boolean;
 
 ```ts
 export interface WSClient {
-  id: string;
-  server?: WSServer;
-  isOpen: boolean;
-  send: (payload: WSPayload) => void;
-  onMessage: (handler: WSMessageHandler) => void;
-  onClose: (handler: WSCloseHandler) => void;
-  close: (code?: number, reason?: string) => void;
-  received: () => WSPayload[];
-  _attachServer: (server: WSServer) => void;
-  _receive: (payload: WSPayload) => void;
-  _markClosed: () => void;
+    id: string;
+    server?: WSServer;
+    isOpen: boolean;
+    send: (payload: WSPayload) => void;
+    onMessage: (handler: WSMessageHandler) => void;
+    onClose: (handler: WSCloseHandler) => void;
+    close: (code?: number, reason?: string) => void;
+    received: () => WSPayload[];
+    _attachServer: (server: WSServer) => void;
+    _receive: (payload: WSPayload) => void;
+    _markClosed: () => void;
 }
 ```
 
@@ -275,8 +271,8 @@ export interface WSClient {
 
 ```ts
 export interface WSClientOptions {
-  id?: string;
-  now?: () => number;
+    id?: string;
+    now?: () => number;
 }
 ```
 
@@ -309,7 +305,10 @@ export type WSOpcode = 'continuation' | 'text' | 'binary' | 'close' | 'ping' | '
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L4) `packages/websocket/src/message.ts`
 
 ```ts
-export type WSPayload = string | Uint8Array | { type: string; data: unknown };
+export type WSPayload = string | Uint8Array | {
+    type: string;
+    data: unknown;
+};
 ```
 
 #### `WSProvider`
@@ -326,12 +325,12 @@ export type WSProvider = 'ws' | 'uwebsockets' | 'socketio' | 'colyseus';
 
 ```ts
 export interface WSSentRecord {
-  id: string;
-  provider: WSProvider;
-  target: 'client' | 'broadcast';
-  clientId?: string;
-  payload: WSPayload;
-  sentAt: number;
+    id: string;
+    provider: WSProvider;
+    target: 'client' | 'broadcast';
+    clientId?: string;
+    payload: WSPayload;
+    sentAt: number;
 }
 ```
 
@@ -341,17 +340,17 @@ export interface WSSentRecord {
 
 ```ts
 export interface WSServer {
-  provider: WSProvider;
-  clients: () => WSClient[];
-  accept: (client: WSClient) => void;
-  disconnect: (clientId: string) => void;
-  broadcast: (payload: WSPayload) => void;
-  listSent: () => WSSentRecord[];
-  clear: () => void;
-  on: <K extends keyof WSServerEvents>(event: K, handler: NonNullable<WSServerEvents[K]>) => void;
-  nextId: () => string;
-  recordSent: (record: WSSentRecord) => void;
-  emit: (client: WSClient, payload: WSPayload) => void;
+    provider: WSProvider;
+    clients: () => WSClient[];
+    accept: (client: WSClient) => void;
+    disconnect: (clientId: string) => void;
+    broadcast: (payload: WSPayload) => void;
+    listSent: () => WSSentRecord[];
+    clear: () => void;
+    on: <K extends keyof WSServerEvents>(event: K, handler: NonNullable<WSServerEvents[K]>) => void;
+    nextId: () => string;
+    recordSent: (record: WSSentRecord) => void;
+    emit: (client: WSClient, payload: WSPayload) => void;
 }
 ```
 
@@ -361,9 +360,9 @@ export interface WSServer {
 
 ```ts
 export interface WSServerEvents {
-  onConnect?: (client: WSClient) => void;
-  onDisconnect?: (client: WSClient) => void;
-  onMessage?: (client: WSClient, payload: WSPayload) => void;
+    onConnect?: (client: WSClient) => void;
+    onDisconnect?: (client: WSClient) => void;
+    onMessage?: (client: WSClient, payload: WSPayload) => void;
 }
 ```
 
@@ -373,9 +372,9 @@ export interface WSServerEvents {
 
 ```ts
 export interface WSServerOptions {
-  provider?: WSProvider;
-  now?: () => number;
-  idSeed?: number;
+    provider?: WSProvider;
+    now?: () => number;
+    idSeed?: number;
 }
 ```
 <!-- kiwa-public-api:end -->

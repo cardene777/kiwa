@@ -54,7 +54,7 @@
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -63,11 +63,7 @@
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L41) `packages/visual/src/compare.ts`
 
 ```ts
-export async function comparePngBuffers(
-  baseline: Buffer,
-  actual: Buffer,
-  opts: CompareOptions = {},
-): Promise<CompareResult>;
+export declare function comparePngBuffers(baseline: Buffer, actual: Buffer, opts?: CompareOptions): Promise<CompareResult>;
 ```
 
 #### `expectNoVisualDiff`
@@ -75,10 +71,11 @@ export async function comparePngBuffers(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L76) `packages/visual/src/compare.ts`
 
 ```ts
-export function expectNoVisualDiff(
-  result: CompareResult,
-  expect: { (actual: unknown): { toBe: (expected: unknown) => void } },
-): void;
+export declare function expectNoVisualDiff(result: CompareResult, expect: {
+    (actual: unknown): {
+        toBe: (expected: unknown) => void;
+    };
+}): void;
 ```
 
 ### 型
@@ -89,14 +86,14 @@ export function expectNoVisualDiff(
 
 ```ts
 export interface CompareOptions {
-  /** Maximum mismatched pixel ratio allowed (0-1, default 0.005 = 0.5%) */
-  maxDiffRatio?: number;
-  /** Pixelmatch threshold (default 0.1) */
-  threshold?: number;
-  /** Whether to populate the diff PNG buffer (default true) */
-  emitDiff?: boolean;
-  /** Antialiasing tolerance (default false) */
-  includeAA?: boolean;
+    /** Maximum mismatched pixel ratio allowed (0-1, default 0.005 = 0.5%) */
+    maxDiffRatio?: number;
+    /** Pixelmatch threshold (default 0.1) */
+    threshold?: number;
+    /** Whether to populate the diff PNG buffer (default true) */
+    emitDiff?: boolean;
+    /** Antialiasing tolerance (default false) */
+    includeAA?: boolean;
 }
 ```
 
@@ -106,11 +103,11 @@ export interface CompareOptions {
 
 ```ts
 export interface CompareResult {
-  size: PixelSize;
-  diffPixels: number;
-  diffRatio: number;
-  ok: boolean;
-  diffBuffer: Buffer | null;
+    size: PixelSize;
+    diffPixels: number;
+    diffRatio: number;
+    ok: boolean;
+    diffBuffer: Buffer | null;
 }
 ```
 
@@ -120,8 +117,8 @@ export interface CompareResult {
 
 ```ts
 export interface PixelSize {
-  width: number;
-  height: number;
+    width: number;
+    height: number;
 }
 ```
 <!-- kiwa-public-api:end -->

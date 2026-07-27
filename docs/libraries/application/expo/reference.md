@@ -41,7 +41,7 @@
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -50,7 +50,7 @@
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L113) `packages/expo/src/extensions.ts`
 
 ```ts
-export async function batchAsync<T>(fns: Array<() => Promise<T>>, concurrency = 4): Promise<BatchResult<T>>;
+export declare function batchAsync<T>(fns: Array<() => Promise<T>>, concurrency?: number): Promise<BatchResult<T>>;
 ```
 
 #### `createCircuitBreaker`
@@ -58,7 +58,7 @@ export async function batchAsync<T>(fns: Array<() => Promise<T>>, concurrency = 
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L173) `packages/expo/src/extensions.ts`
 
 ```ts
-export function createCircuitBreaker(failureThreshold: number, resetTimeoutMs: number): CircuitBreaker;
+export declare function createCircuitBreaker(failureThreshold: number, resetTimeoutMs: number): CircuitBreaker;
 ```
 
 #### `createExpoTestEnv`
@@ -68,7 +68,7 @@ export function createCircuitBreaker(failureThreshold: number, resetTimeoutMs: n
 Expo runtime mock env。 Router / SecureStore / Notifications / FileSystem / Camera の 5 SDK mock を集約、 単一 env object 経由で全 SDK を叩ける。
 
 ```ts
-export function createExpoTestEnv(options: CreateExpoTestEnvOptions = {}): ExpoTestEnv;
+export declare function createExpoTestEnv(options?: CreateExpoTestEnvOptions): ExpoTestEnv;
 ```
 
 #### `createObservabilityHook`
@@ -76,7 +76,7 @@ export function createExpoTestEnv(options: CreateExpoTestEnvOptions = {}): ExpoT
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L132) `packages/expo/src/extensions.ts`
 
 ```ts
-export function createObservabilityHook(): ObservabilityHook;
+export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
 #### `createRateLimiter`
@@ -84,7 +84,7 @@ export function createObservabilityHook(): ObservabilityHook;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L151) `packages/expo/src/extensions.ts`
 
 ```ts
-export function createRateLimiter(rps: number, burst = rps): RateLimiter;
+export declare function createRateLimiter(rps: number, burst?: number): RateLimiter;
 ```
 
 #### `dispatchNotification`
@@ -94,10 +94,11 @@ export function createRateLimiter(rps: number, burst = rps): RateLimiter;
 expo-notifications の scheduleNotificationAsync / presentNotificationAsync mock。 env が保持する scheduled list に push、 identifier を返す。
 
 ```ts
-export function dispatchNotification(
-  env: { scheduled: ScheduledNotification[]; nowFn: () => number; nextId: () => string },
-  payload: NotificationPayload,
-): NotificationDispatchResult;
+export declare function dispatchNotification(env: {
+    scheduled: ScheduledNotification[];
+    nowFn: () => number;
+    nextId: () => string;
+}, payload: NotificationPayload): NotificationDispatchResult;
 ```
 
 #### `mockCamera`
@@ -107,7 +108,7 @@ export function dispatchNotification(
 expo-camera mock。 permission request + takePicture + recordVideo を deterministic に返す。 実 camera 起動なしで permission flow + capture pipeline の test を書ける。
 
 ```ts
-export function mockCamera(options: CameraOptions = {}): CameraMock;
+export declare function mockCamera(options?: CameraOptions): CameraMock;
 ```
 
 #### `mockEASUpdate`
@@ -117,7 +118,7 @@ export function mockCamera(options: CameraOptions = {}): CameraMock;
 EAS Update API mock — expo-updates 相当
 
 ```ts
-export function mockEASUpdate(initial: EASUpdateManifest[] = []): EASUpdateMock;
+export declare function mockEASUpdate(initial?: EASUpdateManifest[]): EASUpdateMock;
 ```
 
 #### `mockExpoRouter`
@@ -127,7 +128,7 @@ export function mockEASUpdate(initial: EASUpdateManifest[] = []): EASUpdateMock;
 expo-router (file-based routing) mock。 push / replace / back の 3 navigation を 内部 stack で管理、 history を snapshot 経由で verify 可能にする。
 
 ```ts
-export function mockExpoRouter(options: ExpoRouterOptions = {}): ExpoRouterMock;
+export declare function mockExpoRouter(options?: ExpoRouterOptions): ExpoRouterMock;
 ```
 
 #### `mockFileSystem`
@@ -137,7 +138,7 @@ export function mockExpoRouter(options: ExpoRouterOptions = {}): ExpoRouterMock;
 expo-file-system の read / write / info / delete mock。 in-memory Map で uri → content 保管、 実 file I/O なしで file 経路の test を書ける。
 
 ```ts
-export function mockFileSystem(options: FileSystemOptions = {}): FileSystemMock;
+export declare function mockFileSystem(options?: FileSystemOptions): FileSystemMock;
 ```
 
 #### `mockModal`
@@ -147,7 +148,7 @@ export function mockFileSystem(options: FileSystemOptions = {}): FileSystemMock;
 Modal presentation mock
 
 ```ts
-export function mockModal(): ModalMock;
+export declare function mockModal(): ModalMock;
 ```
 
 #### `mockSecureStore`
@@ -157,7 +158,7 @@ export function mockModal(): ModalMock;
 expo-secure-store (Keychain / Keystore backed) mock。 in-memory Map で key-value 保管、 async signature を維持して production code と同 API で叩ける。
 
 ```ts
-export function mockSecureStore(options: SecureStoreOptions = {}): SecureStoreMock;
+export declare function mockSecureStore(options?: SecureStoreOptions): SecureStoreMock;
 ```
 
 #### `retryWithBackoff`
@@ -165,7 +166,7 @@ export function mockSecureStore(options: SecureStoreOptions = {}): SecureStoreMo
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L93) `packages/expo/src/extensions.ts`
 
 ```ts
-export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<RetryResult<T>>;
+export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
 #### `withTimeout`
@@ -173,7 +174,7 @@ export async function retryWithBackoff<T>(fn: () => Promise<T>, options: RetryOp
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L141) `packages/expo/src/extensions.ts`
 
 ```ts
-export async function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T>;
+export declare function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T>;
 ```
 
 ### 型
@@ -183,7 +184,15 @@ export async function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): P
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L111) `packages/expo/src/extensions.ts`
 
 ```ts
-export interface BatchResult<T> { successCount: number; failureCount: number; results: Array<{ ok: boolean; value?: T; error?: unknown }>; }
+export interface BatchResult<T> {
+    successCount: number;
+    failureCount: number;
+    results: Array<{
+        ok: boolean;
+        value?: T;
+        error?: unknown;
+    }>;
+}
 ```
 
 #### `CameraMock`
@@ -192,14 +201,25 @@ export interface BatchResult<T> { successCount: number; failureCount: number; re
 
 ```ts
 export interface CameraMock {
-  requestCameraPermissionsAsync: () => Promise<{ status: CameraPermissionStatus; granted: boolean }>;
-  getCameraPermissionsAsync: () => Promise<{ status: CameraPermissionStatus; granted: boolean }>;
-  takePictureAsync: (options?: { base64?: boolean; exif?: boolean }) => Promise<CapturedPicture>;
-  recordAsync: (options?: { maxDurationMs?: number }) => Promise<CapturedVideo>;
-  setPermission: (status: CameraPermissionStatus) => void;
-  getCapturedPictures: () => CapturedPicture[];
-  getRecordedVideos: () => CapturedVideo[];
-  clear: () => void;
+    requestCameraPermissionsAsync: () => Promise<{
+        status: CameraPermissionStatus;
+        granted: boolean;
+    }>;
+    getCameraPermissionsAsync: () => Promise<{
+        status: CameraPermissionStatus;
+        granted: boolean;
+    }>;
+    takePictureAsync: (options?: {
+        base64?: boolean;
+        exif?: boolean;
+    }) => Promise<CapturedPicture>;
+    recordAsync: (options?: {
+        maxDurationMs?: number;
+    }) => Promise<CapturedVideo>;
+    setPermission: (status: CameraPermissionStatus) => void;
+    getCapturedPictures: () => CapturedPicture[];
+    getRecordedVideos: () => CapturedVideo[];
+    clear: () => void;
 }
 ```
 
@@ -209,10 +229,10 @@ export interface CameraMock {
 
 ```ts
 export interface CameraOptions {
-  initialPermission?: CameraPermissionStatus;
-  defaultWidth?: number;
-  defaultHeight?: number;
-  uriPrefix?: string;
+    initialPermission?: CameraPermissionStatus;
+    defaultWidth?: number;
+    defaultHeight?: number;
+    uriPrefix?: string;
 }
 ```
 
@@ -230,11 +250,11 @@ export type CameraPermissionStatus = 'granted' | 'denied' | 'undetermined';
 
 ```ts
 export interface CapturedPicture {
-  uri: string;
-  width: number;
-  height: number;
-  base64?: string;
-  exif?: Record<string, unknown>;
+    uri: string;
+    width: number;
+    height: number;
+    base64?: string;
+    exif?: Record<string, unknown>;
 }
 ```
 
@@ -244,8 +264,8 @@ export interface CapturedPicture {
 
 ```ts
 export interface CapturedVideo {
-  uri: string;
-  durationMs: number;
+    uri: string;
+    durationMs: number;
 }
 ```
 
@@ -254,7 +274,11 @@ export interface CapturedVideo {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L171) `packages/expo/src/extensions.ts`
 
 ```ts
-export interface CircuitBreaker { state: () => CircuitState; execute: <T>(fn: () => Promise<T>) => Promise<T>; reset: () => void; }
+export interface CircuitBreaker {
+    state: () => CircuitState;
+    execute: <T>(fn: () => Promise<T>) => Promise<T>;
+    reset: () => void;
+}
 ```
 
 #### `CircuitState`
@@ -271,11 +295,11 @@ export type CircuitState = 'closed' | 'open' | 'half-open';
 
 ```ts
 export interface CreateExpoTestEnvOptions {
-  router?: ExpoRouterOptions;
-  secureStore?: SecureStoreOptions;
-  fileSystem?: FileSystemOptions;
-  camera?: CameraOptions;
-  nowFn?: () => number;
+    router?: ExpoRouterOptions;
+    secureStore?: SecureStoreOptions;
+    fileSystem?: FileSystemOptions;
+    camera?: CameraOptions;
+    nowFn?: () => number;
 }
 ```
 
@@ -287,11 +311,11 @@ v2.1 extensions — EAS Update API mock, Modal presentation, retry, batch, obser
 
 ```ts
 export interface EASUpdateManifest {
-  id: string;
-  runtimeVersion: string;
-  createdAt: number;
-  isEnabled: boolean;
-  channel: string;
+    id: string;
+    runtimeVersion: string;
+    createdAt: number;
+    isEnabled: boolean;
+    channel: string;
 }
 ```
 
@@ -301,11 +325,20 @@ export interface EASUpdateManifest {
 
 ```ts
 export interface EASUpdateMock {
-  checkForUpdateAsync: () => Promise<{ isAvailable: boolean; manifest?: EASUpdateManifest }>;
-  fetchUpdateAsync: () => Promise<{ isNew: boolean; manifest?: EASUpdateManifest }>;
-  reloadAsync: () => Promise<void>;
-  addListener: (fn: (event: { type: string; manifest?: EASUpdateManifest }) => void) => () => void;
-  publishUpdate: (manifest: EASUpdateManifest) => void;
+    checkForUpdateAsync: () => Promise<{
+        isAvailable: boolean;
+        manifest?: EASUpdateManifest;
+    }>;
+    fetchUpdateAsync: () => Promise<{
+        isNew: boolean;
+        manifest?: EASUpdateManifest;
+    }>;
+    reloadAsync: () => Promise<void>;
+    addListener: (fn: (event: {
+        type: string;
+        manifest?: EASUpdateManifest;
+    }) => void) => () => void;
+    publishUpdate: (manifest: EASUpdateManifest) => void;
 }
 ```
 
@@ -315,14 +348,14 @@ export interface EASUpdateMock {
 
 ```ts
 export interface ExpoRouterMock {
-  push: (path: string, params?: Record<string, string>) => void;
-  replace: (path: string, params?: Record<string, string>) => void;
-  back: () => void;
-  getCurrentPath: () => string;
-  getCurrentParams: () => Record<string, string>;
-  getSegments: () => string[];
-  getHistory: () => RouterNavigation[];
-  clear: () => void;
+    push: (path: string, params?: Record<string, string>) => void;
+    replace: (path: string, params?: Record<string, string>) => void;
+    back: () => void;
+    getCurrentPath: () => string;
+    getCurrentParams: () => Record<string, string>;
+    getSegments: () => string[];
+    getHistory: () => RouterNavigation[];
+    clear: () => void;
 }
 ```
 
@@ -332,8 +365,8 @@ export interface ExpoRouterMock {
 
 ```ts
 export interface ExpoRouterOptions {
-  initialPath?: string;
-  initialParams?: Record<string, string>;
+    initialPath?: string;
+    initialParams?: Record<string, string>;
 }
 ```
 
@@ -343,14 +376,14 @@ export interface ExpoRouterOptions {
 
 ```ts
 export interface ExpoTestEnv {
-  router: ExpoRouterMock;
-  secureStore: SecureStoreMock;
-  fileSystem: FileSystemMock;
-  camera: CameraMock;
-  scheduled: ScheduledNotification[];
-  nowFn: () => number;
-  nextId: () => string;
-  reset: () => void;
+    router: ExpoRouterMock;
+    secureStore: SecureStoreMock;
+    fileSystem: FileSystemMock;
+    camera: CameraMock;
+    scheduled: ScheduledNotification[];
+    nowFn: () => number;
+    nextId: () => string;
+    reset: () => void;
 }
 ```
 
@@ -360,11 +393,11 @@ export interface ExpoTestEnv {
 
 ```ts
 export interface FileInfo {
-  exists: boolean;
-  uri: string;
-  size?: number;
-  isDirectory?: boolean;
-  modificationTime?: number;
+    exists: boolean;
+    uri: string;
+    size?: number;
+    isDirectory?: boolean;
+    modificationTime?: number;
 }
 ```
 
@@ -374,14 +407,14 @@ export interface FileInfo {
 
 ```ts
 export interface FileSystemMock {
-  documentDirectory: string;
-  cacheDirectory: string;
-  readAsStringAsync: (uri: string) => Promise<string>;
-  writeAsStringAsync: (uri: string, content: string) => Promise<void>;
-  getInfoAsync: (uri: string) => Promise<FileInfo>;
-  deleteAsync: (uri: string) => Promise<void>;
-  listUris: () => string[];
-  clear: () => void;
+    documentDirectory: string;
+    cacheDirectory: string;
+    readAsStringAsync: (uri: string) => Promise<string>;
+    writeAsStringAsync: (uri: string, content: string) => Promise<void>;
+    getInfoAsync: (uri: string) => Promise<FileInfo>;
+    deleteAsync: (uri: string) => Promise<void>;
+    listUris: () => string[];
+    clear: () => void;
 }
 ```
 
@@ -391,8 +424,8 @@ export interface FileSystemMock {
 
 ```ts
 export interface FileSystemOptions {
-  initial?: Record<string, string>;
-  nowFn?: () => number;
+    initial?: Record<string, string>;
+    nowFn?: () => number;
 }
 ```
 
@@ -402,10 +435,14 @@ export interface FileSystemOptions {
 
 ```ts
 export interface ModalMock {
-  present: (options?: ModalOptions) => void;
-  dismiss: () => void;
-  isVisible: () => boolean;
-  history: () => Array<{ action: 'present' | 'dismiss'; options?: ModalOptions; at: number }>;
+    present: (options?: ModalOptions) => void;
+    dismiss: () => void;
+    isVisible: () => boolean;
+    history: () => Array<{
+        action: 'present' | 'dismiss';
+        options?: ModalOptions;
+        at: number;
+    }>;
 }
 ```
 
@@ -415,9 +452,9 @@ export interface ModalMock {
 
 ```ts
 export interface ModalOptions {
-  animation?: 'slide' | 'fade' | 'none';
-  presentationStyle?: 'fullScreen' | 'pageSheet' | 'formSheet' | 'overFullScreen';
-  transparent?: boolean;
+    animation?: 'slide' | 'fade' | 'none';
+    presentationStyle?: 'fullScreen' | 'pageSheet' | 'formSheet' | 'overFullScreen';
+    transparent?: boolean;
 }
 ```
 
@@ -427,9 +464,9 @@ export interface ModalOptions {
 
 ```ts
 export interface NotificationDispatchResult {
-  identifier: string;
-  status: 'scheduled' | 'delivered' | 'failed';
-  reason?: string;
+    identifier: string;
+    status: 'scheduled' | 'delivered' | 'failed';
+    reason?: string;
 }
 ```
 
@@ -439,11 +476,15 @@ export interface NotificationDispatchResult {
 
 ```ts
 export interface NotificationPayload {
-  title: string;
-  body: string;
-  data?: Record<string, unknown>;
-  trigger?: { seconds: number } | { channelId: string } | null;
-  channelId?: string;
+    title: string;
+    body: string;
+    data?: Record<string, unknown>;
+    trigger?: {
+        seconds: number;
+    } | {
+        channelId: string;
+    } | null;
+    channelId?: string;
 }
 ```
 
@@ -453,9 +494,17 @@ export interface NotificationPayload {
 
 ```ts
 export interface ObservabilityHook {
-  emit: (event: { kind: string; data: Record<string, unknown>; timestamp: number }) => void;
-  events: () => Array<{ kind: string; data: Record<string, unknown>; timestamp: number }>;
-  clear: () => void;
+    emit: (event: {
+        kind: string;
+        data: Record<string, unknown>;
+        timestamp: number;
+    }) => void;
+    events: () => Array<{
+        kind: string;
+        data: Record<string, unknown>;
+        timestamp: number;
+    }>;
+    clear: () => void;
 }
 ```
 
@@ -464,7 +513,11 @@ export interface ObservabilityHook {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L149) `packages/expo/src/extensions.ts`
 
 ```ts
-export interface RateLimiter { tryAcquire: () => boolean; reset: () => void; remaining: () => number; }
+export interface RateLimiter {
+    tryAcquire: () => boolean;
+    reset: () => void;
+    remaining: () => number;
+}
 ```
 
 #### `RetryOptions`
@@ -473,9 +526,9 @@ export interface RateLimiter { tryAcquire: () => boolean; reset: () => void; rem
 
 ```ts
 export interface RetryOptions {
-  maxAttempts?: number;
-  initialDelayMs?: number;
-  backoffFactor?: number;
+    maxAttempts?: number;
+    initialDelayMs?: number;
+    backoffFactor?: number;
 }
 ```
 
@@ -484,7 +537,12 @@ export interface RetryOptions {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L91) `packages/expo/src/extensions.ts`
 
 ```ts
-export interface RetryResult<T> { ok: boolean; attempts: number; value?: T; error?: unknown; }
+export interface RetryResult<T> {
+    ok: boolean;
+    attempts: number;
+    value?: T;
+    error?: unknown;
+}
 ```
 
 #### `RouterNavigation`
@@ -492,7 +550,11 @@ export interface RetryResult<T> { ok: boolean; attempts: number; value?: T; erro
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/router.ts#L1) `packages/expo/src/router.ts`
 
 ```ts
-export type RouterNavigation = { type: 'push' | 'replace' | 'back'; path?: string; params?: Record<string, string> };
+export type RouterNavigation = {
+    type: 'push' | 'replace' | 'back';
+    path?: string;
+    params?: Record<string, string>;
+};
 ```
 
 #### `ScheduledNotification`
@@ -501,9 +563,9 @@ export type RouterNavigation = { type: 'push' | 'replace' | 'back'; path?: strin
 
 ```ts
 export interface ScheduledNotification {
-  identifier: string;
-  payload: NotificationPayload;
-  scheduledAt: number;
+    identifier: string;
+    payload: NotificationPayload;
+    scheduledAt: number;
 }
 ```
 
@@ -513,11 +575,11 @@ export interface ScheduledNotification {
 
 ```ts
 export interface SecureStoreMock {
-  setItemAsync: (key: string, value: string) => Promise<void>;
-  getItemAsync: (key: string) => Promise<string | null>;
-  deleteItemAsync: (key: string) => Promise<void>;
-  listKeys: () => string[];
-  clear: () => void;
+    setItemAsync: (key: string, value: string) => Promise<void>;
+    getItemAsync: (key: string) => Promise<string | null>;
+    deleteItemAsync: (key: string) => Promise<void>;
+    listKeys: () => string[];
+    clear: () => void;
 }
 ```
 
@@ -527,8 +589,8 @@ export interface SecureStoreMock {
 
 ```ts
 export interface SecureStoreOptions {
-  initial?: Record<string, string>;
-  failOn?: (key: string) => boolean;
+    initial?: Record<string, string>;
+    failOn?: (key: string) => boolean;
 }
 ```
 <!-- kiwa-public-api:end -->

@@ -102,7 +102,7 @@ import { dappE2eTest as test } from "@kiwa-lab/dapp";
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
@@ -113,7 +113,7 @@ import { dappE2eTest as test } from "@kiwa-lab/dapp";
 anvil default mnemonic から生成される 10 個の dev account private keys。 anvil は `--mnemonic "test test test test test test test test test test test junk"` を default に持ち、固定 10 account の private key を生成する。これらは public で安全な値。 `setActiveAccount(index)` で 0-9 のいずれかに切替えて test 内で account picker UI を検証する。
 
 ```ts
-export declare const ANVIL_DEFAULT_PRIVATE_KEYS: readonly `0x${string}`[];
+export declare const ANVIL_DEFAULT_PRIVATE_KEYS: readonly Hex[];
 ```
 
 #### `createAnvilPool`
@@ -121,7 +121,7 @@ export declare const ANVIL_DEFAULT_PRIVATE_KEYS: readonly `0x${string}`[];
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-pool.ts#L38) `packages/dapp/src/anvil-pool.ts`
 
 ```ts
-export async function createAnvilPool(opts: AnvilPoolOptions): Promise<AnvilPool>;
+export declare function createAnvilPool(opts: AnvilPoolOptions): Promise<AnvilPool>;
 ```
 
 #### `createEventEmitter`
@@ -129,7 +129,7 @@ export async function createAnvilPool(opts: AnvilPoolOptions): Promise<AnvilPool
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/event-emitter.ts#L8) `packages/dapp/src/event-emitter.ts`
 
 ```ts
-export function createEventEmitter(): DappE2eEventEmitter;
+export declare function createEventEmitter(): DappE2eEventEmitter;
 ```
 
 #### `createInjectorScript`
@@ -137,7 +137,7 @@ export function createEventEmitter(): DappE2eEventEmitter;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/injector-script.ts#L6) `packages/dapp/src/injector-script.ts`
 
 ```ts
-export function createInjectorScript(opts: InjectorOptions): string;
+export declare function createInjectorScript(opts: InjectorOptions): string;
 ```
 
 #### `createRpcHandler`
@@ -145,10 +145,10 @@ export function createInjectorScript(opts: InjectorOptions): string;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L472) `packages/dapp/src/fixture.ts`
 
 ```ts
-export function createRpcHandler(
-  ctx: RpcContext,
-  tracker: InternalFixtures['_rpcTracker'],
-): (request: { method: string; params?: unknown[] }) => Promise<unknown>;
+export declare function createRpcHandler(ctx: RpcContext, tracker: InternalFixtures['_rpcTracker']): (request: {
+    method: string;
+    params?: unknown[];
+}) => Promise<unknown>;
 ```
 
 #### `dappE2eTest`
@@ -156,7 +156,7 @@ export function createRpcHandler(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L82) `packages/dapp/src/fixture.ts`
 
 ```ts
-export declare const dappE2eTest: TestType<PlaywrightTestArgs & PlaywrightTestOptions & DappE2eOptions & DappE2eFixtures & InternalFixtures, PlaywrightWorkerArgs & PlaywrightWorkerOptions>;
+export declare const dappE2eTest: import("@playwright/test").TestType<import("@playwright/test").PlaywrightTestArgs & import("@playwright/test").PlaywrightTestOptions & DappE2eOptions & DappE2eFixtures & InternalFixtures, import("@playwright/test").PlaywrightWorkerArgs & import("@playwright/test").PlaywrightWorkerOptions>;
 ```
 
 #### `DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI`
@@ -172,9 +172,7 @@ export declare const DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI: readonly ["function e
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L45) `packages/dapp/src/deploy-contract.ts`
 
 ```ts
-export async function deployContract<TAbi extends Abi | readonly unknown[] = Abi>(
-  opts: DeployContractOptions<TAbi>,
-): Promise<DeployContractResult>;
+export declare function deployContract<TAbi extends Abi | readonly unknown[] = Abi>(opts: DeployContractOptions<TAbi>): Promise<DeployContractResult>;
 ```
 
 #### `Eip1193Error`
@@ -183,8 +181,8 @@ export async function deployContract<TAbi extends Abi | readonly unknown[] = Abi
 
 ```ts
 export declare class Eip1193Error extends Error {
-  readonly code: number;
-  constructor(code: number, message: string);
+    readonly code: number;
+    constructor(code: number, message: string);
 }
 ```
 
@@ -201,13 +199,7 @@ export declare const EIP1271_MAGIC_VALUE: "0x1626ba7e";
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/balance-change.ts#L4) `packages/dapp/src/balance-change.ts`
 
 ```ts
-export async function expectBalanceChange(
-  client: PublicClient,
-  token: Address,
-  account: Address,
-  delta: bigint,
-  action: () => Promise<void>,
-): Promise<void>;
+export declare function expectBalanceChange(client: PublicClient, token: Address, account: Address, delta: bigint, action: () => Promise<void>): Promise<void>;
 ```
 
 #### `expectCustomError`
@@ -215,11 +207,7 @@ export async function expectBalanceChange(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/expect-custom-error.ts#L52) `packages/dapp/src/expect-custom-error.ts`
 
 ```ts
-export function expectCustomError(
-  error: unknown,
-  errorName: string,
-  expectedArgs?: readonly unknown[],
-): void;
+export declare function expectCustomError(error: unknown, errorName: string, expectedArgs?: readonly unknown[]): void;
 ```
 
 #### `expectEthBalanceChange`
@@ -227,12 +215,7 @@ export function expectCustomError(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/balance-change.ts#L30) `packages/dapp/src/balance-change.ts`
 
 ```ts
-export async function expectEthBalanceChange(
-  client: PublicClient,
-  account: Address,
-  delta: bigint,
-  action: () => Promise<void>,
-): Promise<void>;
+export declare function expectEthBalanceChange(client: PublicClient, account: Address, delta: bigint, action: () => Promise<void>): Promise<void>;
 ```
 
 #### `expectEvent`
@@ -240,12 +223,7 @@ export async function expectEthBalanceChange(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/expect-event.ts#L4) `packages/dapp/src/expect-event.ts`
 
 ```ts
-export function expectEvent<TAbi extends Abi>(
-  receipt: TransactionReceipt,
-  abi: TAbi,
-  eventName: string,
-  expectedArgs?: Record<string, unknown>,
-): void;
+export declare function expectEvent<TAbi extends Abi>(receipt: TransactionReceipt, abi: TAbi, eventName: string, expectedArgs?: Record<string, unknown>): void;
 ```
 
 #### `getFreePort`
@@ -253,7 +231,7 @@ export function expectEvent<TAbi extends Abi>(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L22) `packages/dapp/src/anvil.ts`
 
 ```ts
-export async function getFreePort(): Promise<number>;
+export declare function getFreePort(): Promise<number>;
 ```
 
 #### `handleRpcRequest`
@@ -263,10 +241,7 @@ export async function getFreePort(): Promise<number>;
 Handle a single EIP-1193 JSON-RPC request from the injected provider. personal_sign accepts either: - A 0x-prefixed even-length hex string (signed as raw bytes, MetaMask compatible) - A plain UTF-8 string (signed with the \x19Ethereum Signed Message:\n prefix) Strings prefixed with 0x that contain non-hex characters or have odd length are rejected with EIP-1193 code -32602 (invalid params).
 
 ```ts
-export async function handleRpcRequest(
-  ctx: RpcContext,
-  request: Eip1193Request,
-): Promise<unknown>;
+export declare function handleRpcRequest(ctx: RpcContext, request: Eip1193Request): Promise<unknown>;
 ```
 
 #### `impersonateAccount`
@@ -274,7 +249,7 @@ export async function handleRpcRequest(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/impersonate.ts#L12) `packages/dapp/src/impersonate.ts`
 
 ```ts
-export async function impersonateAccount(client: PublicClient, address: Address): Promise<void>;
+export declare function impersonateAccount(client: PublicClient, address: Address): Promise<void>;
 ```
 
 #### `increaseTime`
@@ -282,10 +257,7 @@ export async function impersonateAccount(client: PublicClient, address: Address)
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/time.ts#L12) `packages/dapp/src/time.ts`
 
 ```ts
-export async function increaseTime(
-  client: PublicClient,
-  seconds: number | bigint,
-): Promise<void>;
+export declare function increaseTime(client: PublicClient, seconds: number | bigint): Promise<void>;
 ```
 
 #### `injectMultipleWallets`
@@ -293,11 +265,7 @@ export async function increaseTime(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/inject-multiple-wallets.ts#L24) `packages/dapp/src/inject-multiple-wallets.ts`
 
 ```ts
-export async function injectMultipleWallets<TName extends string>(
-  browser: Browser,
-  entries: Record<TName, InjectMultipleWalletsEntry>,
-  options: InjectMultipleWalletsOptions = {},
-): Promise<Record<TName, InjectMultipleWalletsResult>>;
+export declare function injectMultipleWallets<TName extends string>(browser: Browser, entries: Record<TName, InjectMultipleWalletsEntry>, options?: InjectMultipleWalletsOptions): Promise<Record<TName, InjectMultipleWalletsResult>>;
 ```
 
 #### `killAnvilFromPidFile`
@@ -307,7 +275,7 @@ export async function injectMultipleWallets<TName extends string>(
 Kill anvil whose pid was recorded by previous prepare-env run. Used by `tests/global-teardown.ts` (and idempotently by prepare-env itself before respawn).
 
 ```ts
-export function killAnvilFromPidFile(pidFilePath: string): void;
+export declare function killAnvilFromPidFile(pidFilePath: string): void;
 ```
 
 #### `loadForgeArtifact`
@@ -315,9 +283,9 @@ export function killAnvilFromPidFile(pidFilePath: string): void;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L78) `packages/dapp/src/deploy-contract.ts`
 
 ```ts
-export function loadForgeArtifact(opts: LoadForgeArtifactOptions): {
-  abi: readonly unknown[];
-  bytecode: `0x${string}`;
+export declare function loadForgeArtifact(opts: LoadForgeArtifactOptions): {
+    abi: readonly unknown[];
+    bytecode: `0x${string}`;
 };
 ```
 
@@ -326,7 +294,7 @@ export function loadForgeArtifact(opts: LoadForgeArtifactOptions): {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/time.ts#L20) `packages/dapp/src/time.ts`
 
 ```ts
-export async function mineBlock(client: PublicClient, count: number = 1): Promise<void>;
+export declare function mineBlock(client: PublicClient, count?: number): Promise<void>;
 ```
 
 #### `parseEip712TypedDataJson`
@@ -334,15 +302,15 @@ export async function mineBlock(client: PublicClient, count: number = 1): Promis
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L543) `packages/dapp/src/rpc-handlers.ts`
 
 ```ts
-export function parseEip712TypedDataJson(typedDataJson: string): NormalizedEip712TypedData;
+export declare function parseEip712TypedDataJson(typedDataJson: string): NormalizedEip712TypedData;
 ```
 
 #### `parseSpec`
 
-公開 entry point から型を解決しています。
+公開 entry point から解決しています。
 
 ```ts
-declare function parseSpec(markdown: string, opts?: ParseOptions): SpecDoc;
+export { parseSpec } from '@kiwa-lab/core';
 ```
 
 #### `resolveActiveAddress`
@@ -350,7 +318,7 @@ declare function parseSpec(markdown: string, opts?: ParseOptions): SpecDoc;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L136) `packages/dapp/src/rpc-handlers.ts`
 
 ```ts
-export function resolveActiveAddress(ctx: RpcContext): Address;
+export declare function resolveActiveAddress(ctx: RpcContext): Address;
 ```
 
 #### `resolveActivePrivateKey`
@@ -360,7 +328,7 @@ export function resolveActiveAddress(ctx: RpcContext): Address;
 現在 active な private key を返す。accounts / activeIndex が設定されていればそこから解決、 なければ ctx.privateKey にフォールバックする (下位互換)。
 
 ```ts
-export function resolveActivePrivateKey(ctx: RpcContext): Hex;
+export declare function resolveActivePrivateKey(ctx: RpcContext): Hex;
 ```
 
 #### `revertChain`
@@ -368,7 +336,7 @@ export function resolveActivePrivateKey(ctx: RpcContext): Hex;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/snapshot.ts#L16) `packages/dapp/src/snapshot.ts`
 
 ```ts
-export async function revertChain(client: PublicClient, snapshotId: Hex): Promise<boolean>;
+export declare function revertChain(client: PublicClient, snapshotId: Hex): Promise<boolean>;
 ```
 
 #### `runE2EPrepareEnv`
@@ -378,7 +346,7 @@ export async function revertChain(client: PublicClient, snapshotId: Hex): Promis
 Prepare anvil + contracts + .env.local before Next.js build. Designed to be invoked from `playwright.config.ts` webServer.command as `tsx tests/prepare-env.ts && pnpm build && pnpm start`. After deploy finishes the anvil child is detached so the prepare-env Node process can exit (event loop empty), letting `pnpm build` start next.
 
 ```ts
-export async function runE2EPrepareEnv(opts: PrepareEnvOptions): Promise<void>;
+export declare function runE2EPrepareEnv(opts: PrepareEnvOptions): Promise<void>;
 ```
 
 #### `sendTransaction`
@@ -386,10 +354,7 @@ export async function runE2EPrepareEnv(opts: PrepareEnvOptions): Promise<void>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/tx.ts#L79) `packages/dapp/src/tx.ts`
 
 ```ts
-export async function sendTransaction(
-  ctx: TxBroadcastCtx,
-  params: SendTxParams,
-): Promise<Hex>;
+export declare function sendTransaction(ctx: TxBroadcastCtx, params: SendTxParams): Promise<Hex>;
 ```
 
 #### `setBalance`
@@ -397,11 +362,7 @@ export async function sendTransaction(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/impersonate.ts#L23) `packages/dapp/src/impersonate.ts`
 
 ```ts
-export async function setBalance(
-  client: PublicClient,
-  address: Address,
-  wei: bigint,
-): Promise<void>;
+export declare function setBalance(client: PublicClient, address: Address, wei: bigint): Promise<void>;
 ```
 
 #### `setNextBlockTimestamp`
@@ -409,10 +370,7 @@ export async function setBalance(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/time.ts#L26) `packages/dapp/src/time.ts`
 
 ```ts
-export async function setNextBlockTimestamp(
-  client: PublicClient,
-  ts: number | bigint,
-): Promise<void>;
+export declare function setNextBlockTimestamp(client: PublicClient, ts: number | bigint): Promise<void>;
 ```
 
 #### `setStorageSlot`
@@ -420,7 +378,7 @@ export async function setNextBlockTimestamp(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L13) `packages/dapp/src/set-storage-slot.ts`
 
 ```ts
-export async function setStorageSlot(params: SetStorageSlotParams): Promise<void>;
+export declare function setStorageSlot(params: SetStorageSlotParams): Promise<void>;
 ```
 
 #### `setupTestEnv`
@@ -428,7 +386,7 @@ export async function setStorageSlot(params: SetStorageSlotParams): Promise<void
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L51) `packages/dapp/src/vitest.ts`
 
 ```ts
-export async function setupTestEnv(opts: SetupTestEnvOptions = {}): Promise<TestEnv>;
+export declare function setupTestEnv(opts?: SetupTestEnvOptions): Promise<TestEnv>;
 ```
 
 #### `snapshotChain`
@@ -436,7 +394,7 @@ export async function setupTestEnv(opts: SetupTestEnvOptions = {}): Promise<Test
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/snapshot.ts#L12) `packages/dapp/src/snapshot.ts`
 
 ```ts
-export async function snapshotChain(client: PublicClient): Promise<Hex>;
+export declare function snapshotChain(client: PublicClient): Promise<Hex>;
 ```
 
 #### `startAnvil`
@@ -444,7 +402,7 @@ export async function snapshotChain(client: PublicClient): Promise<Hex>;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L80) `packages/dapp/src/anvil.ts`
 
 ```ts
-export async function startAnvil(opts: StartAnvilOptions = {}): Promise<AnvilHandle>;
+export declare function startAnvil(opts?: StartAnvilOptions): Promise<AnvilHandle>;
 ```
 
 #### `startAnvilCluster`
@@ -452,9 +410,7 @@ export async function startAnvil(opts: StartAnvilOptions = {}): Promise<AnvilHan
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-cluster.ts#L15) `packages/dapp/src/anvil-cluster.ts`
 
 ```ts
-export async function startAnvilCluster(
-  opts: AnvilClusterConfig,
-): Promise<AnvilClusterHandle>;
+export declare function startAnvilCluster(opts: AnvilClusterConfig): Promise<AnvilClusterHandle>;
 ```
 
 #### `startAnvilFork`
@@ -462,7 +418,7 @@ export async function startAnvilCluster(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-fork.ts#L9) `packages/dapp/src/anvil-fork.ts`
 
 ```ts
-export async function startAnvilFork(options: ForkOptions): Promise<AnvilHandle>;
+export declare function startAnvilFork(options: ForkOptions): Promise<AnvilHandle>;
 ```
 
 #### `stopImpersonateAccount`
@@ -470,10 +426,7 @@ export async function startAnvilFork(options: ForkOptions): Promise<AnvilHandle>
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/impersonate.ts#L16) `packages/dapp/src/impersonate.ts`
 
 ```ts
-export async function stopImpersonateAccount(
-  client: PublicClient,
-  address: Address,
-): Promise<void>;
+export declare function stopImpersonateAccount(client: PublicClient, address: Address): Promise<void>;
 ```
 
 #### `verifyAnvilChainId`
@@ -481,10 +434,7 @@ export async function stopImpersonateAccount(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L574) `packages/dapp/src/rpc-handlers.ts`
 
 ```ts
-export async function verifyAnvilChainId(
-  anvilPort: number,
-  expectedChainId: number,
-): Promise<void>;
+export declare function verifyAnvilChainId(anvilPort: number, expectedChainId: number): Promise<void>;
 ```
 
 #### `verifyEip1271Signature`
@@ -492,9 +442,7 @@ export async function verifyAnvilChainId(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/eip1271.ts#L26) `packages/dapp/src/eip1271.ts`
 
 ```ts
-export async function verifyEip1271Signature(
-  params: VerifyEip1271SignatureParams,
-): Promise<boolean>;
+export declare function verifyEip1271Signature(params: VerifyEip1271SignatureParams): Promise<boolean>;
 ```
 
 #### `verifySignature`
@@ -502,11 +450,9 @@ export async function verifyEip1271Signature(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L688) `packages/dapp/src/fixture.ts`
 
 ```ts
-export async function verifySignature(
-  address: Hex,
-  signature: Hex,
-  message: string | { raw: Hex },
-): Promise<boolean>;
+export declare function verifySignature(address: Hex, signature: Hex, message: string | {
+    raw: Hex;
+}): Promise<boolean>;
 ```
 
 #### `waitForChainState`
@@ -516,21 +462,7 @@ export async function verifySignature(
 Poll a contract view function until `predicate` returns true. Replaces `await page.waitForTimeout(N)` + UI text scraping by direct on-chain read with a deterministic stop condition. Used by examples to remove order-dependent assertion timing.
 
 ```ts
-export async function waitForChainState<
-  TValue = unknown,
-  TAbi extends Abi = Abi,
-  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'> = ContractFunctionName<
-    TAbi,
-    'pure' | 'view'
-  >,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'pure' | 'view',
-    TFunctionName
-  > = ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
->(
-  opts: WaitForChainStateOptions<TValue, TAbi, TFunctionName, TArgs>,
-): Promise<TValue>;
+export declare function waitForChainState<TValue = unknown, TAbi extends Abi = Abi, TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'> = ContractFunctionName<TAbi, 'pure' | 'view'>, TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName> = ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>>(opts: WaitForChainStateOptions<TValue, TAbi, TFunctionName, TArgs>): Promise<TValue>;
 ```
 
 #### `waitForPendingRpcs`
@@ -538,11 +470,7 @@ export async function waitForChainState<
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L331) `packages/dapp/src/fixture.ts`
 
 ```ts
-export async function waitForPendingRpcs(
-  page: Page,
-  pendingRpcs: Map<number, PendingRpcEntry>,
-  timeoutMs = 10_000,
-): Promise<void>;
+export declare function waitForPendingRpcs(page: Page, pendingRpcs: Map<number, PendingRpcEntry>, timeoutMs?: number): Promise<void>;
 ```
 
 #### `waitForWalletConnected`
@@ -550,10 +478,7 @@ export async function waitForPendingRpcs(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-wallet-connected.ts#L15) `packages/dapp/src/wait-for-wallet-connected.ts`
 
 ```ts
-export async function waitForWalletConnected(
-  page: Page,
-  options: WaitForWalletConnectedOptions = {},
-): Promise<void>;
+export declare function waitForWalletConnected(page: Page, options?: WaitForWalletConnectedOptions): Promise<void>;
 ```
 
 #### `withAnvil`
@@ -561,7 +486,7 @@ export async function waitForWalletConnected(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L94) `packages/dapp/src/vitest.ts`
 
 ```ts
-export function withAnvil(opts: SetupTestEnvOptions = {}): WithAnvilLifecycle;
+export declare function withAnvil(opts?: SetupTestEnvOptions): WithAnvilLifecycle;
 ```
 
 #### `writePidEntry`
@@ -569,7 +494,7 @@ export function withAnvil(opts: SetupTestEnvOptions = {}): WithAnvilLifecycle;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L165) `packages/dapp/src/e2e-prepare-env.ts`
 
 ```ts
-export function writePidEntry(pidFilePath: string, entry: PidEntry): void;
+export declare function writePidEntry(pidFilePath: string, entry: PidEntry): void;
 ```
 
 ### 型
@@ -588,10 +513,10 @@ export type Address = `0x${string}`;
 
 ```ts
 export interface AnvilClusterConfig {
-  chains: Array<{
-    chainId: number;
-    port: number;
-  }>;
+    chains: Array<{
+        chainId: number;
+        port: number;
+    }>;
 }
 ```
 
@@ -601,8 +526,10 @@ export interface AnvilClusterConfig {
 
 ```ts
 export interface AnvilClusterHandle {
-  chains: Array<AnvilHandle & { chainId: number }>;
-  stopAll: () => Promise<void>;
+    chains: Array<AnvilHandle & {
+        chainId: number;
+    }>;
+    stopAll: () => Promise<void>;
 }
 ```
 
@@ -612,9 +539,9 @@ export interface AnvilClusterHandle {
 
 ```ts
 export interface AnvilHandle {
-  port: number;
-  pid: number;
-  stop: () => Promise<void>;
+    port: number;
+    pid: number;
+    stop: () => Promise<void>;
 }
 ```
 
@@ -624,10 +551,10 @@ export interface AnvilHandle {
 
 ```ts
 export interface AnvilLease {
-  handle: AnvilHandle;
-  rpcUrl: string;
-  /** return this anvil to the pool (anvil_reset is invoked before reuse) */
-  release: () => Promise<void>;
+    handle: AnvilHandle;
+    rpcUrl: string;
+    /** return this anvil to the pool (anvil_reset is invoked before reuse) */
+    release: () => Promise<void>;
 }
 ```
 
@@ -636,7 +563,9 @@ export interface AnvilLease {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L5) `packages/dapp/src/vitest.ts`
 
 ```ts
-export type AnvilModeOption = boolean | (StartAnvilOptions & { enabled?: boolean });
+export type AnvilModeOption = boolean | (StartAnvilOptions & {
+    enabled?: boolean;
+});
 ```
 
 #### `AnvilPool`
@@ -645,11 +574,11 @@ export type AnvilModeOption = boolean | (StartAnvilOptions & { enabled?: boolean
 
 ```ts
 export interface AnvilPool {
-  size: number;
-  /** take an anvil out of the pool, waiting if none are free */
-  borrow: () => Promise<AnvilLease>;
-  /** stop every anvil and clear the pool */
-  stopAll: () => Promise<void>;
+    size: number;
+    /** take an anvil out of the pool, waiting if none are free */
+    borrow: () => Promise<AnvilLease>;
+    /** stop every anvil and clear the pool */
+    stopAll: () => Promise<void>;
 }
 ```
 
@@ -659,10 +588,10 @@ export interface AnvilPool {
 
 ```ts
 export interface AnvilPoolOptions {
-  /** number of anvil instances to pre-spawn */
-  size: number;
-  /** options applied to every anvil in the pool */
-  anvil?: Omit<StartAnvilOptions, 'port'>;
+    /** number of anvil instances to pre-spawn */
+    size: number;
+    /** options applied to every anvil in the pool */
+    anvil?: Omit<StartAnvilOptions, 'port'>;
 }
 ```
 
@@ -672,12 +601,12 @@ export interface AnvilPoolOptions {
 
 ```ts
 export interface AnvilTestEnv {
-  mode: 'anvil';
-  rpcUrl: string;
-  port: number;
-  anvil: AnvilHandle;
-  privateKeys: readonly string[];
-  stop: () => Promise<void>;
+    mode: 'anvil';
+    rpcUrl: string;
+    port: number;
+    anvil: AnvilHandle;
+    privateKeys: readonly string[];
+    stop: () => Promise<void>;
 }
 ```
 
@@ -695,8 +624,11 @@ export type ApprovalMode = 'approve' | 'reject';
 
 ```ts
 export interface ApprovalPolicy {
-  default: ApprovalMode;
-  perToken?: Record<Hex, { mode: ApprovalMode; limit?: bigint }>;
+    default: ApprovalMode;
+    perToken?: Record<Hex, {
+        mode: ApprovalMode;
+        limit?: bigint;
+    }>;
 }
 ```
 
@@ -708,15 +640,15 @@ EIP-3085 (wallet_addEthereumChain) parameters の subset。 chain registry に�
 
 ```ts
 export interface ChainConfig {
-  chainId: Hex;
-  chainName?: string;
-  rpcUrls?: readonly string[];
-  nativeCurrency?: {
-    name: string;
-    symbol: string;
-    decimals: number;
-  };
-  blockExplorerUrls?: readonly string[];
+    chainId: Hex;
+    chainName?: string;
+    rpcUrls?: readonly string[];
+    nativeCurrency?: {
+        name: string;
+        symbol: string;
+        decimals: number;
+    };
+    blockExplorerUrls?: readonly string[];
 }
 ```
 
@@ -726,8 +658,8 @@ export interface ChainConfig {
 
 ```ts
 export interface ContractAccountRpcConfig {
-  address: Address;
-  executeAbi: readonly string[];
+    address: Address;
+    executeAbi: readonly string[];
 }
 ```
 
@@ -737,33 +669,33 @@ export interface ContractAccountRpcConfig {
 
 ```ts
 export interface DappE2eApi {
-  triggerEvent(event: Eip1193EventName, ...args: unknown[]): Promise<void>;
-  getAnvilPort(): number;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
-  switchChain(chainIdHex: Hex): Promise<void>;
-  setApprovalMode(mode: ApprovalMode): Promise<void>;
-  setApprovalModeForToken?(
-    tokenAddress: Hex,
-    policy: { mode: ApprovalMode; limit?: bigint },
-  ): Promise<void>;
-  /**
-   * 複数 account を持つ wallet で active account を切替える (primary wallet 経由)。
-   * 内部で `accountsChanged` event を自動発火する。
-   */
-  setActiveAccount?(index: number): Promise<void>;
-  /**
-   * chain registry を test 内から書き換える (primary wallet 経由)。
-   * 以後の `wallet_switchEthereumChain` で未登録 chainId は EIP-1193 code 4902 で reject。
-   */
-  setChainRegistry?(chains: readonly ChainConfig[]): Promise<void>;
-  /**
-   * `eth_requestAccounts` を approval policy の対象に含めるか切替える (primary wallet 経由)。
-   * `setApprovalMode('reject')` と組み合わせて connect reject UI flow を検証する。
-   */
-  setRejectConnect?(enabled: boolean): Promise<void>;
-  waitForRpcIdle?(timeoutMs?: number): Promise<void>;
-  wallets?: Record<string, WalletApi>;
+    triggerEvent(event: Eip1193EventName, ...args: unknown[]): Promise<void>;
+    getAnvilPort(): number;
+    connect(): Promise<void>;
+    disconnect(): Promise<void>;
+    switchChain(chainIdHex: Hex): Promise<void>;
+    setApprovalMode(mode: ApprovalMode): Promise<void>;
+    setApprovalModeForToken?(tokenAddress: Hex, policy: {
+        mode: ApprovalMode;
+        limit?: bigint;
+    }): Promise<void>;
+    /**
+     * 複数 account を持つ wallet で active account を切替える (primary wallet 経由)。
+     * 内部で `accountsChanged` event を自動発火する。
+     */
+    setActiveAccount?(index: number): Promise<void>;
+    /**
+     * chain registry を test 内から書き換える (primary wallet 経由)。
+     * 以後の `wallet_switchEthereumChain` で未登録 chainId は EIP-1193 code 4902 で reject。
+     */
+    setChainRegistry?(chains: readonly ChainConfig[]): Promise<void>;
+    /**
+     * `eth_requestAccounts` を approval policy の対象に含めるか切替える (primary wallet 経由)。
+     * `setApprovalMode('reject')` と組み合わせて connect reject UI flow を検証する。
+     */
+    setRejectConnect?(enabled: boolean): Promise<void>;
+    waitForRpcIdle?(timeoutMs?: number): Promise<void>;
+    wallets?: Record<string, WalletApi>;
 }
 ```
 
@@ -773,10 +705,10 @@ export interface DappE2eApi {
 
 ```ts
 export interface DappE2eEventEmitter {
-  on(event: Eip1193EventName, handler: Eip1193EventHandler): void;
-  off(event: Eip1193EventName, handler: Eip1193EventHandler): void;
-  emit(event: Eip1193EventName, ...args: unknown[]): void;
-  listenerCount(event: Eip1193EventName): number;
+    on(event: Eip1193EventName, handler: Eip1193EventHandler): void;
+    off(event: Eip1193EventName, handler: Eip1193EventHandler): void;
+    emit(event: Eip1193EventName, ...args: unknown[]): void;
+    listenerCount(event: Eip1193EventName): number;
 }
 ```
 
@@ -786,12 +718,14 @@ export interface DappE2eEventEmitter {
 
 ```ts
 export interface DeployContractOptions<TAbi extends Abi | readonly unknown[] = Abi> {
-  account: PrivateKeyAccount | { address: `0x${string}` };
-  wallet: WalletClient;
-  publicClient: PublicClient;
-  abi: TAbi;
-  bytecode: `0x${string}`;
-  args?: ContractConstructorArgs<TAbi>;
+    account: PrivateKeyAccount | {
+        address: `0x${string}`;
+    };
+    wallet: WalletClient;
+    publicClient: PublicClient;
+    abi: TAbi;
+    bytecode: `0x${string}`;
+    args?: ContractConstructorArgs<TAbi>;
 }
 ```
 
@@ -801,9 +735,9 @@ export interface DeployContractOptions<TAbi extends Abi | readonly unknown[] = A
 
 ```ts
 export interface DeployContractResult {
-  address: `0x${string}`;
-  txHash: `0x${string}`;
-  receipt: TransactionReceipt;
+    address: `0x${string}`;
+    txHash: `0x${string}`;
+    receipt: TransactionReceipt;
 }
 ```
 
@@ -820,11 +754,7 @@ export type Eip1193EventHandler = (...args: unknown[]) => void;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L64) `packages/dapp/src/types.ts`
 
 ```ts
-export type Eip1193EventName =
-  | 'accountsChanged'
-  | 'chainChanged'
-  | 'connect'
-  | 'disconnect';
+export type Eip1193EventName = 'accountsChanged' | 'chainChanged' | 'connect' | 'disconnect';
 ```
 
 #### `Eip1193Provider`
@@ -833,8 +763,8 @@ export type Eip1193EventName =
 
 ```ts
 export interface Eip1193Provider {
-  request(args: Eip1193Request): Promise<unknown>;
-  isMetaMask?: boolean;
+    request(args: Eip1193Request): Promise<unknown>;
+    isMetaMask?: boolean;
 }
 ```
 
@@ -844,8 +774,8 @@ export interface Eip1193Provider {
 
 ```ts
 export interface Eip1193Request {
-  method: string;
-  params?: readonly unknown[];
+    method: string;
+    params?: readonly unknown[];
 }
 ```
 
@@ -855,10 +785,10 @@ export interface Eip1193Request {
 
 ```ts
 export interface Eip6963ProviderInfo {
-  uuid: string;
-  name: string;
-  icon: string;
-  rdns: string;
+    uuid: string;
+    name: string;
+    icon: string;
+    rdns: string;
 }
 ```
 
@@ -868,11 +798,11 @@ export interface Eip6963ProviderInfo {
 
 ```ts
 export interface Eip712Domain {
-  name?: string;
-  version?: string;
-  chainId?: number;
-  verifyingContract?: Hex;
-  salt?: Hex;
+    name?: string;
+    version?: string;
+    chainId?: number;
+    verifyingContract?: Hex;
+    salt?: Hex;
 }
 ```
 
@@ -882,13 +812,13 @@ export interface Eip712Domain {
 
 ```ts
 export interface Eip712TypedData {
-  domain: Eip712Domain;
-  types: Record<
-    string,
-    ReadonlyArray<{ readonly name: string; readonly type: string }>
-  >;
-  primaryType: string;
-  message: Record<string, unknown>;
+    domain: Eip712Domain;
+    types: Record<string, ReadonlyArray<{
+        readonly name: string;
+        readonly type: string;
+    }>>;
+    primaryType: string;
+    message: Record<string, unknown>;
 }
 ```
 
@@ -898,9 +828,9 @@ export interface Eip712TypedData {
 
 ```ts
 export interface ForkOptions {
-  forkUrl: string;
-  forkBlockNumber?: bigint;
-  port?: number;
+    forkUrl: string;
+    forkBlockNumber?: bigint;
+    port?: number;
 }
 ```
 
@@ -918,9 +848,9 @@ export type Hex = `0x${string}`;
 
 ```ts
 export interface InjectMultipleWalletsEntry {
-  privateKey: Hex;
-  chainId?: number;
-  wallets?: WalletConfig[];
+    privateKey: Hex;
+    chainId?: number;
+    wallets?: WalletConfig[];
 }
 ```
 
@@ -930,8 +860,8 @@ export interface InjectMultipleWalletsEntry {
 
 ```ts
 export interface InjectMultipleWalletsOptions {
-  defaultChainId?: number;
-  baseUrl?: string;
+    defaultChainId?: number;
+    baseUrl?: string;
 }
 ```
 
@@ -941,9 +871,9 @@ export interface InjectMultipleWalletsOptions {
 
 ```ts
 export interface InjectMultipleWalletsResult {
-  context: BrowserContext;
-  page: Page;
-  close: () => Promise<void>;
+    context: BrowserContext;
+    page: Page;
+    close: () => Promise<void>;
 }
 ```
 
@@ -953,9 +883,9 @@ export interface InjectMultipleWalletsResult {
 
 ```ts
 export interface InjectorOptions {
-  privateKey: Hex;
-  chainId: number;
-  wallets?: WalletConfig[];
+    privateKey: Hex;
+    chainId: number;
+    wallets?: WalletConfig[];
 }
 ```
 
@@ -965,8 +895,8 @@ export interface InjectorOptions {
 
 ```ts
 export interface LoadForgeArtifactOptions {
-  exampleRoot: string;
-  contractSlug: string;
+    exampleRoot: string;
+    contractSlug: string;
 }
 ```
 
@@ -976,12 +906,12 @@ export interface LoadForgeArtifactOptions {
 
 ```ts
 export interface MockTestEnv {
-  mode: 'mock';
-  rpcUrl: null;
-  port: null;
-  anvil: null;
-  privateKeys: readonly string[];
-  stop: () => Promise<void>;
+    mode: 'mock';
+    rpcUrl: null;
+    port: null;
+    anvil: null;
+    privateKeys: readonly string[];
+    stop: () => Promise<void>;
 }
 ```
 
@@ -991,10 +921,10 @@ export interface MockTestEnv {
 
 ```ts
 export interface PidEntry {
-  pid: number;
-  port?: number;
-  startedAt?: string;
-  command?: string;
+    pid: number;
+    port?: number;
+    startedAt?: string;
+    command?: string;
 }
 ```
 
@@ -1004,12 +934,12 @@ export interface PidEntry {
 
 ```ts
 export interface PrepareEnvDeployContext {
-  account: PrivateKeyAccount;
-  wallet: PrepareEnvWalletClient;
-  publicClient: PrepareEnvPublicClient;
-  chain: Chain;
-  port: number;
-  exampleRoot: string;
+    account: PrivateKeyAccount;
+    wallet: PrepareEnvWalletClient;
+    publicClient: PrepareEnvPublicClient;
+    chain: Chain;
+    port: number;
+    exampleRoot: string;
 }
 ```
 
@@ -1018,9 +948,7 @@ export interface PrepareEnvDeployContext {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L47) `packages/dapp/src/e2e-prepare-env.ts`
 
 ```ts
-export type PrepareEnvDeployFn = (
-  ctx: PrepareEnvDeployContext,
-) => Promise<Record<string, string>>;
+export type PrepareEnvDeployFn = (ctx: PrepareEnvDeployContext) => Promise<Record<string, string>>;
 ```
 
 #### `PrepareEnvOptions`
@@ -1029,17 +957,17 @@ export type PrepareEnvDeployFn = (
 
 ```ts
 export interface PrepareEnvOptions {
-  exampleRoot: string;
-  port?: number;
-  chainId?: number;
-  privateKey?: Hex;
-  /** path to write `.env.local`, relative to exampleRoot (default: '.env.local') */
-  envLocalPath?: string;
-  /** path to .next directory to clean before build, relative to exampleRoot (default: '.next') */
-  nextCacheDir?: string;
-  /** path to store anvil pid, relative to exampleRoot (default: '.context/anvil.pid') */
-  pidFilePath?: string;
-  deploy: PrepareEnvDeployFn;
+    exampleRoot: string;
+    port?: number;
+    chainId?: number;
+    privateKey?: Hex;
+    /** path to write `.env.local`, relative to exampleRoot (default: '.env.local') */
+    envLocalPath?: string;
+    /** path to .next directory to clean before build, relative to exampleRoot (default: '.next') */
+    nextCacheDir?: string;
+    /** path to store anvil pid, relative to exampleRoot (default: '.context/anvil.pid') */
+    pidFilePath?: string;
+    deploy: PrepareEnvDeployFn;
 }
 ```
 
@@ -1065,37 +993,49 @@ export type PrepareEnvWalletClient = WalletClient<HttpTransport, Chain, PrivateK
 
 ```ts
 export interface RpcContext {
-  privateKey: Hex;
-  /**
-   * setActiveAccount(index) で切替可能な複数 dev account の private key 配列。
-   * 未指定の場合は `[privateKey]` 相当として扱い (下位互換)、activeIndex も常に 0 に固定。
-   */
-  accounts?: readonly Hex[];
-  /**
-   * accounts 配列内の active な index。setActiveAccount で更新される。
-   * 範囲は `[0, accounts.length - 1]`、accounts 未指定なら 0 固定。
-   */
-  activeIndex?: { current: number };
-  chainState: { current: number };
-  approvalMode?: { current: ApprovalMode };
-  approvalPolicy?: { current: ApprovalPolicy };
-  anvilPort?: number;
-  emitter?: DappE2eEventEmitter;
-  /**
-   * 登録済 chain の registry。
-   * `wallet_switchEthereumChain` が参照し、未登録 chainId は EIP-1193 code 4902 で reject する。
-   * 未指定 (undefined) の場合は registry チェック自体が無効化される (下位互換、従来挙動)。
-   */
-  chainRegistry?: { current: ChainConfig[] };
-  contractAccount?: ContractAccountRpcConfig;
-  /**
-   * true の場合 `eth_requestAccounts` を approval policy の対象とし、
-   * approvalPolicy.default === 'reject' (または approvalMode === 'reject') のとき
-   * EIP-1193 code 4001 で reject する。connect reject UI flow の検証用 opt-in。
-   * `eth_accounts` は EIP-1193 上 read-only (現在 connected account の確認) のため対象外。
-   * 未指定 (undefined) または false の場合は従来挙動 (常に accounts を返す) を維持。
-   */
-  rejectConnect?: { current: boolean };
+    privateKey: Hex;
+    /**
+     * setActiveAccount(index) で切替可能な複数 dev account の private key 配列。
+     * 未指定の場合は `[privateKey]` 相当として扱い (下位互換)、activeIndex も常に 0 に固定。
+     */
+    accounts?: readonly Hex[];
+    /**
+     * accounts 配列内の active な index。setActiveAccount で更新される。
+     * 範囲は `[0, accounts.length - 1]`、accounts 未指定なら 0 固定。
+     */
+    activeIndex?: {
+        current: number;
+    };
+    chainState: {
+        current: number;
+    };
+    approvalMode?: {
+        current: ApprovalMode;
+    };
+    approvalPolicy?: {
+        current: ApprovalPolicy;
+    };
+    anvilPort?: number;
+    emitter?: DappE2eEventEmitter;
+    /**
+     * 登録済 chain の registry。
+     * `wallet_switchEthereumChain` が参照し、未登録 chainId は EIP-1193 code 4902 で reject する。
+     * 未指定 (undefined) の場合は registry チェック自体が無効化される (下位互換、従来挙動)。
+     */
+    chainRegistry?: {
+        current: ChainConfig[];
+    };
+    contractAccount?: ContractAccountRpcConfig;
+    /**
+     * true の場合 `eth_requestAccounts` を approval policy の対象とし、
+     * approvalPolicy.default === 'reject' (または approvalMode === 'reject') のとき
+     * EIP-1193 code 4001 で reject する。connect reject UI flow の検証用 opt-in。
+     * `eth_accounts` は EIP-1193 上 read-only (現在 connected account の確認) のため対象外。
+     * 未指定 (undefined) または false の場合は従来挙動 (常に accounts を返す) を維持。
+     */
+    rejectConnect?: {
+        current: boolean;
+    };
 }
 ```
 
@@ -1105,11 +1045,11 @@ export interface RpcContext {
 
 ```ts
 export interface SendTxParams {
-  to?: Hex;
-  value?: Hex | bigint;
-  data?: Hex;
-  from?: Hex;
-  gas?: Hex | bigint;
+    to?: Hex;
+    value?: Hex | bigint;
+    data?: Hex;
+    from?: Hex;
+    gas?: Hex | bigint;
 }
 ```
 
@@ -1119,10 +1059,10 @@ export interface SendTxParams {
 
 ```ts
 export interface SetStorageSlotParams {
-  rpcUrl: string;
-  address: Address;
-  slot: number | bigint | Hex;
-  value: Hex;
+    rpcUrl: string;
+    address: Address;
+    slot: number | bigint | Hex;
+    value: Hex;
 }
 ```
 
@@ -1132,76 +1072,88 @@ export interface SetStorageSlotParams {
 
 ```ts
 export interface SetupTestEnvOptions {
-  /**
-   * anvil 起動方針。
-   * - 未指定 / false ... anvil を起動しない (mock 経路)
-   * - true ... clean chain で anvil を起動
-   * - object ... StartAnvilOptions を全て透過 (loadState / dumpState / chainId / port 等)
-   */
-  anvil?: AnvilModeOption;
-  /**
-   * Anvil pool を指定すると spawn ではなく pool.borrow() で取得し、
-   * stop() で pool.release() (anvil_reset) を呼んで再利用する。
-   * anvil option と排他、 pool 指定時は pool が anvil 起動を担う。
-   */
-  pool?: AnvilPool;
+    /**
+     * anvil 起動方針。
+     * - 未指定 / false ... anvil を起動しない (mock 経路)
+     * - true ... clean chain で anvil を起動
+     * - object ... StartAnvilOptions を全て透過 (loadState / dumpState / chainId / port 等)
+     */
+    anvil?: AnvilModeOption;
+    /**
+     * Anvil pool を指定すると spawn ではなく pool.borrow() で取得し、
+     * stop() で pool.release() (anvil_reset) を呼んで再利用する。
+     * anvil option と排他、 pool 指定時は pool が anvil 起動を担う。
+     */
+    pool?: AnvilPool;
 }
 ```
 
 #### `SpecCase`
 
-公開 entry point から型を解決しています。
+公開 entry point から解決しています。
 
 ```ts
-interface SpecCase {
-    id: string;
-    observation: string;
-    given: string;
-    when: string;
-    then: string;
-    priority: 'P0' | 'P1' | 'P2' | 'P3';
-    automation: 'yes' | 'no' | 'manual';
-    mode?: TestMode;
-    route?: string;
-    notes?: string;
-}
+export type {
+  TestLayer,
+  TestMode,
+  TestEnvBase,
+  Lease as SpecLease,
+  Pool as SpecPool,
+  SpecDoc,
+  SpecCase,
+} from '@kiwa-lab/core';
 ```
 
 #### `SpecDoc`
 
-公開 entry point から型を解決しています。
+公開 entry point から解決しています。
 
 ```ts
-interface SpecDoc {
-    module: string;
-    layer: TestLayer;
-    cases: SpecCase[];
-    raw: string;
-    warnings: string[];
-}
+export type {
+  TestLayer,
+  TestMode,
+  TestEnvBase,
+  Lease as SpecLease,
+  Pool as SpecPool,
+  SpecDoc,
+  SpecCase,
+} from '@kiwa-lab/core';
 ```
 
 #### `SpecLease`
 
-公開 entry point から型を解決しています。
+公開 entry point から解決しています。
+
+`Lease` を `SpecLease` として公開しています。
 
 ```ts
-interface SpecLease<T> {
-    value: T;
-    release: () => Promise<void>;
-}
+export type {
+  TestLayer,
+  TestMode,
+  TestEnvBase,
+  Lease as SpecLease,
+  Pool as SpecPool,
+  SpecDoc,
+  SpecCase,
+} from '@kiwa-lab/core';
 ```
 
 #### `SpecPool`
 
-公開 entry point から型を解決しています。
+公開 entry point から解決しています。
+
+`Pool` を `SpecPool` として公開しています。
 
 ```ts
-interface SpecPool<T> {
-    size: number;
-    borrow: () => Promise<Lease<T>>;
-    stopAll: () => Promise<void>;
-}
+export type {
+  TestLayer,
+  TestMode,
+  TestEnvBase,
+  Lease as SpecLease,
+  Pool as SpecPool,
+  SpecDoc,
+  SpecCase,
+} from '@kiwa-lab/core';
 ```
 
 #### `StartAnvilOptions`
@@ -1210,16 +1162,16 @@ interface SpecPool<T> {
 
 ```ts
 export interface StartAnvilOptions {
-  port?: number;
-  chainId?: number;
-  /** detach child so Node parent can exit while anvil keeps running (default: false) */
-  detached?: boolean;
-  /** kill existing anvil on the port before spawn (default: false) */
-  killExistingOnPort?: boolean;
-  /** path to pre-built state json to load at startup (anvil --load-state) */
-  loadState?: string;
-  /** path to write state json when anvil shuts down (anvil --dump-state) */
-  dumpState?: string;
+    port?: number;
+    chainId?: number;
+    /** detach child so Node parent can exit while anvil keeps running (default: false) */
+    detached?: boolean;
+    /** kill existing anvil on the port before spawn (default: false) */
+    killExistingOnPort?: boolean;
+    /** path to pre-built state json to load at startup (anvil --load-state) */
+    loadState?: string;
+    /** path to write state json when anvil shuts down (anvil --dump-state) */
+    dumpState?: string;
 }
 ```
 
@@ -1233,29 +1185,50 @@ export type TestEnv = MockTestEnv | AnvilTestEnv;
 
 #### `TestEnvBase`
 
-公開 entry point から型を解決しています。
+公開 entry point から解決しています。
 
 ```ts
-interface TestEnvBase<TMode extends TestMode = TestMode> {
-    mode: TMode;
-    stop: () => Promise<void>;
-}
+export type {
+  TestLayer,
+  TestMode,
+  TestEnvBase,
+  Lease as SpecLease,
+  Pool as SpecPool,
+  SpecDoc,
+  SpecCase,
+} from '@kiwa-lab/core';
 ```
 
 #### `TestLayer`
 
-公開 entry point から型を解決しています。
+公開 entry point から解決しています。
 
 ```ts
-type TestLayer = 'contract' | 'unit' | 'integration' | 'e2e' | 'api' | 'ui' | 'data' | 'cli';
+export type {
+  TestLayer,
+  TestMode,
+  TestEnvBase,
+  Lease as SpecLease,
+  Pool as SpecPool,
+  SpecDoc,
+  SpecCase,
+} from '@kiwa-lab/core';
 ```
 
 #### `TestMode`
 
-公開 entry point から型を解決しています。
+公開 entry point から解決しています。
 
 ```ts
-type TestMode = 'mock' | 'live' | 'hybrid';
+export type {
+  TestLayer,
+  TestMode,
+  TestEnvBase,
+  Lease as SpecLease,
+  Pool as SpecPool,
+  SpecDoc,
+  SpecCase,
+} from '@kiwa-lab/core';
 ```
 
 #### `TxBroadcastCtx`
@@ -1264,13 +1237,13 @@ type TestMode = 'mock' | 'live' | 'hybrid';
 
 ```ts
 export interface TxBroadcastCtx {
-  privateKey: Hex;
-  chainId: number;
-  anvilPort: number;
-  /** viem http transport timeout in ms (default 5000) */
-  transportTimeoutMs?: number;
-  /** viem http transport retry count (default 0, fail-fast for transport errors) */
-  transportRetryCount?: number;
+    privateKey: Hex;
+    chainId: number;
+    anvilPort: number;
+    /** viem http transport timeout in ms (default 5000) */
+    transportTimeoutMs?: number;
+    /** viem http transport retry count (default 0, fail-fast for transport errors) */
+    transportRetryCount?: number;
 }
 ```
 
@@ -1280,10 +1253,10 @@ export interface TxBroadcastCtx {
 
 ```ts
 export interface VerifyEip1271SignatureParams {
-  publicClient: Pick<PublicClient, 'call'>;
-  contractAddress: Hex;
-  messageHash: Hex;
-  signature: Hex;
+    publicClient: Pick<PublicClient, 'call'>;
+    contractAddress: Hex;
+    messageHash: Hex;
+    signature: Hex;
 }
 ```
 
@@ -1292,27 +1265,15 @@ export interface VerifyEip1271SignatureParams {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-chain-state.ts#L8) `packages/dapp/src/wait-for-chain-state.ts`
 
 ```ts
-export interface WaitForChainStateOptions<
-  TValue,
-  TAbi extends Abi = Abi,
-  TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'> = ContractFunctionName<
-    TAbi,
-    'pure' | 'view'
-  >,
-  TArgs extends ContractFunctionArgs<
-    TAbi,
-    'pure' | 'view',
-    TFunctionName
-  > = ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>,
-> {
-  publicClient: PublicClient;
-  address: `0x${string}`;
-  abi: TAbi;
-  functionName: TFunctionName;
-  args?: TArgs;
-  predicate: (value: TValue) => boolean;
-  timeoutMs?: number;
-  pollIntervalMs?: number;
+export interface WaitForChainStateOptions<TValue, TAbi extends Abi = Abi, TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'> = ContractFunctionName<TAbi, 'pure' | 'view'>, TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName> = ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>> {
+    publicClient: PublicClient;
+    address: `0x${string}`;
+    abi: TAbi;
+    functionName: TFunctionName;
+    args?: TArgs;
+    predicate: (value: TValue) => boolean;
+    timeoutMs?: number;
+    pollIntervalMs?: number;
 }
 ```
 
@@ -1322,10 +1283,10 @@ export interface WaitForChainStateOptions<
 
 ```ts
 export interface WaitForWalletConnectedOptions {
-  testId?: string;
-  expectedText?: string;
-  timeout?: number;
-  pollInterval?: number;
+    testId?: string;
+    expectedText?: string;
+    timeout?: number;
+    pollInterval?: number;
 }
 ```
 
@@ -1335,30 +1296,30 @@ export interface WaitForWalletConnectedOptions {
 
 ```ts
 export interface WalletApi {
-  triggerEvent(event: Eip1193EventName, ...args: unknown[]): Promise<void>;
-  connect(): Promise<void>;
-  disconnect(): Promise<void>;
-  switchChain(chainIdHex: Hex): Promise<void>;
-  setApprovalMode(mode: ApprovalMode): Promise<void>;
-  setApprovalModeForToken?(
-    tokenAddress: Hex,
-    policy: { mode: ApprovalMode; limit?: bigint },
-  ): Promise<void>;
-  /**
-   * 複数 account を持つ wallet で active account を切替える。
-   * 範囲外 index で throw、内部で `accountsChanged` event を自動発火する。
-   */
-  setActiveAccount?(index: number): Promise<void>;
-  /**
-   * chain registry を test 内から書き換える。
-   * 以後の `wallet_switchEthereumChain` は本 registry を参照し、未登録 chainId は 4902 で reject する。
-   */
-  setChainRegistry?(chains: readonly ChainConfig[]): Promise<void>;
-  /**
-   * `eth_requestAccounts` を approval policy (reject mode) の対象に含めるかを切替える。
-   * 試用先で connect reject UI flow を検証するときに `true` にする。default は `false` (従来挙動)。
-   */
-  setRejectConnect?(enabled: boolean): Promise<void>;
+    triggerEvent(event: Eip1193EventName, ...args: unknown[]): Promise<void>;
+    connect(): Promise<void>;
+    disconnect(): Promise<void>;
+    switchChain(chainIdHex: Hex): Promise<void>;
+    setApprovalMode(mode: ApprovalMode): Promise<void>;
+    setApprovalModeForToken?(tokenAddress: Hex, policy: {
+        mode: ApprovalMode;
+        limit?: bigint;
+    }): Promise<void>;
+    /**
+     * 複数 account を持つ wallet で active account を切替える。
+     * 範囲外 index で throw、内部で `accountsChanged` event を自動発火する。
+     */
+    setActiveAccount?(index: number): Promise<void>;
+    /**
+     * chain registry を test 内から書き換える。
+     * 以後の `wallet_switchEthereumChain` は本 registry を参照し、未登録 chainId は 4902 で reject する。
+     */
+    setChainRegistry?(chains: readonly ChainConfig[]): Promise<void>;
+    /**
+     * `eth_requestAccounts` を approval policy (reject mode) の対象に含めるかを切替える。
+     * 試用先で connect reject UI flow を検証するときに `true` にする。default は `false` (従来挙動)。
+     */
+    setRejectConnect?(enabled: boolean): Promise<void>;
 }
 ```
 
@@ -1368,14 +1329,14 @@ export interface WalletApi {
 
 ```ts
 export interface WalletConfig {
-  name: string;
-  rdns: string;
-  icon: string;
-  privateKey: Hex;
-  chainId?: number;
-  isContractAccount?: boolean;
-  contractAccountAddress?: Address;
-  contractAccountExecuteAbi?: string[];
+    name: string;
+    rdns: string;
+    icon: string;
+    privateKey: Hex;
+    chainId?: number;
+    isContractAccount?: boolean;
+    contractAccountAddress?: Address;
+    contractAccountExecuteAbi?: string[];
 }
 ```
 
@@ -1385,7 +1346,7 @@ export interface WalletConfig {
 
 ```ts
 export interface WithAnvilLifecycle {
-  env: () => TestEnv;
+    env: () => TestEnv;
 }
 ```
 <!-- kiwa-public-api:end -->

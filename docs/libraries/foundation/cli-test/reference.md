@@ -49,20 +49,22 @@ state は `spawning`、`running`、`signaled`、`exited`、`cleaned` です。in
 <!-- kiwa-public-api:start -->
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/index.ts) から同期しています。各項目は公開名、実際の TypeScript 宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
 ### 値
 
 #### `dispatchCliEvent`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L50) `packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts`
+公開 entry point から解決しています。
+
+`dispatchEvent` を `dispatchCliEvent` として公開しています。
 
 ```ts
-export function dispatchCliEvent(input: {
-  session: CliSession;
-  event: CliEvent;
-  timestamp: string;
-}): CliSession;
+export {
+  startCli,
+  dispatchEvent as dispatchCliEvent,
+  summarizeCli,
+} from './cli-lifecycle-orchestrator.js';
 ```
 
 #### `expectExitCode`
@@ -70,11 +72,11 @@ export function dispatchCliEvent(input: {
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/expectations.ts#L3) `packages/cli-test/src/expectations.ts`
 
 ```ts
-export function expectExitCode(
-  result: CliRunResult,
-  expected: number,
-  expect: { (actual: unknown): { toBe: (expected: unknown) => void } },
-): void;
+export declare function expectExitCode(result: CliRunResult, expected: number, expect: {
+    (actual: unknown): {
+        toBe: (expected: unknown) => void;
+    };
+}): void;
 ```
 
 #### `expectStderrContains`
@@ -82,11 +84,11 @@ export function expectExitCode(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/expectations.ts#L19) `packages/cli-test/src/expectations.ts`
 
 ```ts
-export function expectStderrContains(
-  result: CliRunResult,
-  needle: string,
-  expect: { (actual: unknown): { toContain: (expected: string) => void } },
-): void;
+export declare function expectStderrContains(result: CliRunResult, needle: string, expect: {
+    (actual: unknown): {
+        toContain: (expected: string) => void;
+    };
+}): void;
 ```
 
 #### `expectStdoutContains`
@@ -94,11 +96,11 @@ export function expectStderrContains(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/expectations.ts#L11) `packages/cli-test/src/expectations.ts`
 
 ```ts
-export function expectStdoutContains(
-  result: CliRunResult,
-  needle: string,
-  expect: { (actual: unknown): { toContain: (expected: string) => void } },
-): void;
+export declare function expectStdoutContains(result: CliRunResult, needle: string, expect: {
+    (actual: unknown): {
+        toContain: (expected: string) => void;
+    };
+}): void;
 ```
 
 #### `setupCliEnv`
@@ -106,7 +108,7 @@ export function expectStdoutContains(
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/setup-cli-env.ts#L106) `packages/cli-test/src/setup-cli-env.ts`
 
 ```ts
-export async function setupCliEnv(opts: SetupCliEnvOptions = {}): Promise<CliTestEnv>;
+export declare function setupCliEnv(opts?: SetupCliEnvOptions): Promise<CliTestEnv>;
 ```
 
 #### `startCli`
@@ -114,7 +116,9 @@ export async function setupCliEnv(opts: SetupCliEnvOptions = {}): Promise<CliTes
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L36) `packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts`
 
 ```ts
-export function startCli(input: { timestamp: string }): CliSession;
+export declare function startCli(input: {
+    timestamp: string;
+}): CliSession;
 ```
 
 #### `summarizeCli`
@@ -122,7 +126,7 @@ export function startCli(input: { timestamp: string }): CliSession;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L132) `packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts`
 
 ```ts
-export function summarizeCli(session: CliSession): CliSummary;
+export declare function summarizeCli(session: CliSession): CliSummary;
 ```
 
 ### 型
@@ -132,15 +136,7 @@ export function summarizeCli(session: CliSession): CliSummary;
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L14) `packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts`
 
 ```ts
-export type CliEvent =
-  | 'spawn-succeeded'
-  | 'stdout-received'
-  | 'stderr-received'
-  | 'signal-sent'
-  | 'exit-detected'
-  | 'cleanup-requested'
-  | 'zombie-detected'
-  | 'timeout';
+export type CliEvent = 'spawn-succeeded' | 'stdout-received' | 'stderr-received' | 'signal-sent' | 'exit-detected' | 'cleanup-requested' | 'zombie-detected' | 'timeout';
 ```
 
 #### `CliRunOptions`
@@ -149,16 +145,16 @@ export type CliEvent =
 
 ```ts
 export interface CliRunOptions {
-  cmd: string;
-  args?: string[];
-  /** stdin to pipe to the child (string is utf8-encoded) */
-  stdin?: string;
-  /** override env merged on top of the env captured at setupCliEnv() */
-  env?: Record<string, string>;
-  /** cwd within the temp dir; absolute paths are passed through unchanged */
-  cwd?: string;
-  /** Timeout for the process in ms (default 10s) */
-  timeoutMs?: number;
+    cmd: string;
+    args?: string[];
+    /** stdin to pipe to the child (string is utf8-encoded) */
+    stdin?: string;
+    /** override env merged on top of the env captured at setupCliEnv() */
+    env?: Record<string, string>;
+    /** cwd within the temp dir; absolute paths are passed through unchanged */
+    cwd?: string;
+    /** Timeout for the process in ms (default 10s) */
+    timeoutMs?: number;
 }
 ```
 
@@ -168,11 +164,11 @@ export interface CliRunOptions {
 
 ```ts
 export interface CliRunResult {
-  exitCode: number;
-  signal: NodeJS.Signals | null;
-  stdout: string;
-  stderr: string;
-  durationMs: number;
+    exitCode: number;
+    signal: NodeJS.Signals | null;
+    stdout: string;
+    stderr: string;
+    durationMs: number;
 }
 ```
 
@@ -182,15 +178,15 @@ export interface CliRunResult {
 
 ```ts
 export interface CliSession {
-  state: CliState;
-  spawns: number;
-  stdoutChunks: number;
-  stderrChunks: number;
-  signals: number;
-  cleanups: number;
-  zombies: number;
-  lastEventAt: string;
-  events: string[];
+    state: CliState;
+    spawns: number;
+    stdoutChunks: number;
+    stderrChunks: number;
+    signals: number;
+    cleanups: number;
+    zombies: number;
+    lastEventAt: string;
+    events: string[];
 }
 ```
 
@@ -201,12 +197,7 @@ export interface CliSession {
 v0.6 cli-lifecycle-orchestrator = CLI process lifecycle (spawn + IO stream + signal + exit code + cleanup) の 継続合成 layer。 depth-5 pattern 13 例目 candidate、 backend systems layer 第 5 例 (backend layer 完全普及)、 systematic pattern 55 度目。
 
 ```ts
-export type CliState =
-  | 'spawning'
-  | 'running'
-  | 'signaled'
-  | 'exited'
-  | 'cleaned';
+export type CliState = 'spawning' | 'running' | 'signaled' | 'exited' | 'cleaned';
 ```
 
 #### `CliSummary`
@@ -215,17 +206,17 @@ export type CliState =
 
 ```ts
 export interface CliSummary {
-  currentState: CliState;
-  totalEvents: number;
-  validEvents: number;
-  invalidEvents: number;
-  terminalEvents: number;
-  spawns: number;
-  stdoutChunks: number;
-  stderrChunks: number;
-  signals: number;
-  cleanups: number;
-  zombies: number;
+    currentState: CliState;
+    totalEvents: number;
+    validEvents: number;
+    invalidEvents: number;
+    terminalEvents: number;
+    spawns: number;
+    stdoutChunks: number;
+    stderrChunks: number;
+    signals: number;
+    cleanups: number;
+    zombies: number;
 }
 ```
 
@@ -235,17 +226,17 @@ export interface CliSummary {
 
 ```ts
 export interface CliTestEnv extends TestEnvBase<'mock'> {
-  tempDir: string;
-  /** Run a CLI in the isolated tempdir with merged env */
-  runCli: (opts: CliRunOptions) => Promise<CliRunResult>;
-  /** Read a file relative to tempDir as utf8 */
-  readFile: (relPath: string) => Promise<string>;
-  /** Write a file relative to tempDir (creates parents) */
-  writeFile: (relPath: string, content: string | Buffer) => Promise<void>;
-  /** List files relative to tempDir */
-  listFiles: (relDir?: string) => Promise<string[]>;
-  /** Returns true when the relPath exists */
-  fileExists: (relPath: string) => Promise<boolean>;
+    tempDir: string;
+    /** Run a CLI in the isolated tempdir with merged env */
+    runCli: (opts: CliRunOptions) => Promise<CliRunResult>;
+    /** Read a file relative to tempDir as utf8 */
+    readFile: (relPath: string) => Promise<string>;
+    /** Write a file relative to tempDir (creates parents) */
+    writeFile: (relPath: string, content: string | Buffer) => Promise<void>;
+    /** List files relative to tempDir */
+    listFiles: (relDir?: string) => Promise<string[]>;
+    /** Returns true when the relPath exists */
+    fileExists: (relPath: string) => Promise<boolean>;
 }
 ```
 
@@ -255,12 +246,12 @@ export interface CliTestEnv extends TestEnvBase<'mock'> {
 
 ```ts
 export interface SetupCliEnvOptions {
-  /** Optional initial files seeded into the isolated tempdir before tests run */
-  seedFiles?: Record<string, string | Buffer>;
-  /** Optional env overrides applied to every runCli invocation */
-  env?: Record<string, string>;
-  /** Optional subdir name within OS tempdir (default "kiwa-cli-") */
-  prefix?: string;
+    /** Optional initial files seeded into the isolated tempdir before tests run */
+    seedFiles?: Record<string, string | Buffer>;
+    /** Optional env overrides applied to every runCli invocation */
+    env?: Record<string, string>;
+    /** Optional subdir name within OS tempdir (default "kiwa-cli-") */
+    prefix?: string;
 }
 ```
 <!-- kiwa-public-api:end -->
