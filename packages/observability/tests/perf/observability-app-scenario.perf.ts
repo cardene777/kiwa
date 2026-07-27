@@ -28,6 +28,7 @@ describe('observability app scenario perf (real workload)', () => {
   it('3-layer perf: flaky detect burst / large history / threshold varying', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 30,
       serialWarmup: 5,

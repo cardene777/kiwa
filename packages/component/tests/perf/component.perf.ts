@@ -23,6 +23,7 @@ describe(MODULE, () => {
     async () => {
       const result = await runPerf3Layer({
         moduleName: MODULE,
+        requireGc: true,
         reportPath: REPORT_PATH,
         // MockNode tree の生成 + serialization は非常に軽量なので他 kiwa
         // package (core / api) と同じくらいの iteration に近付けても run

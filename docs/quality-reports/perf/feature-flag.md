@@ -7,7 +7,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
 | evaluateFlag | 0.00ms | 5ms | PASS | stable |
-| evaluateAllFlags | 0.00ms | 5ms | PASS | improved |
+| evaluateAllFlags | 0.00ms | 5ms | PASS | stable |
 | registerRule | 0.00ms | 5ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
@@ -20,11 +20,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| evaluateFlag | 326112 B | 0 B | 102400 B | PASS |
-| evaluateAllFlags | 698152 B | 0 B | 102400 B | PASS |
-| registerRule | 192592 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| evaluateFlag | 23912 B | 0 B | 102400 B | yes | PASS |
+| evaluateAllFlags | 87232 B | 0 B | 102400 B | yes | PASS |
+| registerRule | 3328 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -43,19 +43,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.17ms |
+| total | 0.16ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -6.72% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +17.19% |
-| p99 | 0.01ms | 0.01ms | +0.01ms | +117.45% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +10.16% |
-| min | 0.00ms | 0.00ms | -0.00ms | -9.86% |
-| max | 0.01ms | 0.01ms | +0.00ms | +39.60% |
-| total | 0.17ms | 0.15ms | +0.02ms | +10.16% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +7.56% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +9.05% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +16.22% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +8.28% |
+| min | 0.00ms | 0.00ms | +0.00ms | +10.93% |
+| max | 0.01ms | 0.01ms | +0.00ms | +6.18% |
+| total | 0.16ms | 0.14ms | +0.01ms | +8.28% |
 
 ### evaluateAllFlags
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.21ms |
+| total | 0.24ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -8.06% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -38.65% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -4.38% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -8.71% |
-| min | 0.00ms | 0.00ms | -0.00ms | -8.66% |
-| max | 0.01ms | 0.00ms | +0.01ms | +244.52% |
-| total | 0.21ms | 0.23ms | -0.02ms | -8.71% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +13.15% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +10.07% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +55.20% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +19.69% |
+| min | 0.00ms | 0.00ms | +0.00ms | +9.17% |
+| max | 0.01ms | 0.00ms | +0.01ms | +251.12% |
+| total | 0.24ms | 0.20ms | +0.04ms | +19.69% |
 
 ### registerRule
 
@@ -101,17 +101,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.07ms |
+| total | 0.06ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -16.40% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -60.15% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +41.77% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -5.75% |
-| min | 0.00ms | 0.00ms | -0.00ms | -20.19% |
-| max | 0.01ms | 0.01ms | +0.00ms | +46.48% |
-| total | 0.07ms | 0.07ms | -0.00ms | -5.75% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +0.48% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +70.75% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -13.15% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +5.87% |
+| min | 0.00ms | 0.00ms | +0.00ms | +32.80% |
+| max | 0.01ms | 0.01ms | -0.00ms | -9.63% |
+| total | 0.06ms | 0.06ms | +0.00ms | +5.87% |
 

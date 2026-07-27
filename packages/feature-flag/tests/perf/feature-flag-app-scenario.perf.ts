@@ -11,6 +11,7 @@ describe('feature-flag app scenario perf (real workload)', () => {
   it('3-layer perf: evaluation_workflow / all_flags_batch / rule_error_handling', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 20,
       serialWarmup: 3,

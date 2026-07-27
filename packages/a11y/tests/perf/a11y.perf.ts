@@ -70,6 +70,7 @@ describe(MODULE, () => {
     async () => {
       const result = await runPerf3Layer({
         moduleName: MODULE,
+        requireGc: true,
         reportPath: REPORT_PATH,
         // axe walk + reportViolations は React render 相当のコストがあるため、
         // ui pattern と同様に iteration / concurrency を落とす。 issue 記載どおり

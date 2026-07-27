@@ -19,6 +19,7 @@ describe(MODULE, () => {
       const key = randomBytes(32);
       const result = await runPerf3Layer({
         moduleName: MODULE,
+        requireGc: true,
         reportPath: REPORT_PATH,
         baselinePath: BASELINE_PATH,
         ops: [

@@ -1,6 +1,6 @@
 # Perf Suite — astro
 
-Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
 ## Serial p95 (concurrency = 1)
 
@@ -13,15 +13,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| renderAstroPage | 0.17ms | 10ms | PASS |
-| invokeEndpoint | 0.58ms | 10ms | PASS |
+| renderAstroPage | 0.13ms | 10ms | PASS |
+| invokeEndpoint | 0.09ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| renderAstroPage | 3069456 B | 2800 B | 102400 B | PASS |
-| invokeEndpoint | 2687304 B | 2200 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| renderAstroPage | -4384 B | -28 B | 102400 B | yes | PASS |
+| invokeEndpoint | -7880 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -35,24 +35,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.01ms |
 | p95 | 0.03ms |
-| p99 | 0.08ms |
-| mean | 0.02ms |
+| p99 | 0.07ms |
+| mean | 0.01ms |
 | stdev | 0.01ms |
 | min | 0.01ms |
-| max | 0.12ms |
-| total | 3.49ms |
+| max | 0.09ms |
+| total | 2.90ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +17.16% |
-| p95 | 0.03ms | 0.03ms | -0.00ms | -1.78% |
-| p99 | 0.08ms | 0.10ms | -0.03ms | -26.03% |
-| mean | 0.02ms | 0.02ms | +0.00ms | +2.51% |
-| min | 0.01ms | 0.01ms | +0.00ms | +12.92% |
-| max | 0.12ms | 0.19ms | -0.07ms | -37.90% |
-| total | 3.49ms | 3.40ms | +0.09ms | +2.51% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -0.55% |
+| p95 | 0.03ms | 0.03ms | -0.00ms | -4.87% |
+| p99 | 0.07ms | 0.07ms | +0.00ms | +0.60% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +0.10% |
+| min | 0.01ms | 0.01ms | -0.00ms | -1.78% |
+| max | 0.09ms | 0.10ms | -0.00ms | -2.65% |
+| total | 2.90ms | 2.90ms | +0.00ms | +0.10% |
 
 ### invokeEndpoint
 
@@ -64,22 +64,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.01ms |
 | p95 | 0.01ms |
-| p99 | 0.05ms |
-| mean | 0.02ms |
-| stdev | 0.22ms |
+| p99 | 0.02ms |
+| mean | 0.01ms |
+| stdev | 0.01ms |
 | min | 0.01ms |
-| max | 3.06ms |
-| total | 4.76ms |
+| max | 0.07ms |
+| total | 1.73ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +5.54% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +34.75% |
-| p99 | 0.05ms | 0.02ms | +0.03ms | +140.36% |
-| mean | 0.02ms | 0.01ms | +0.02ms | +224.77% |
-| min | 0.01ms | 0.00ms | +0.00ms | +7.89% |
-| max | 3.06ms | 0.26ms | +2.79ms | +1053.77% |
-| total | 4.76ms | 1.46ms | +3.29ms | +224.77% |
+| p50 | 0.01ms | 0.00ms | +0.00ms | +57.62% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +36.17% |
+| p99 | 0.02ms | 0.02ms | +0.01ms | +31.10% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +56.00% |
+| min | 0.01ms | 0.00ms | +0.00ms | +59.05% |
+| max | 0.07ms | 0.03ms | +0.04ms | +141.80% |
+| total | 1.73ms | 1.11ms | +0.62ms | +56.00% |
 

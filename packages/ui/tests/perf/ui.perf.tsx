@@ -26,6 +26,7 @@ describe(MODULE, () => {
     async () => {
       const result = await runPerf3Layer({
         moduleName: MODULE,
+        requireGc: true,
         reportPath: REPORT_PATH,
         // React render + jsdom mount is expensive vs pure code paths so we
         // relax concurrency + iteration counts to keep the harness responsive.

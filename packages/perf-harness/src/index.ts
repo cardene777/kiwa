@@ -14,6 +14,7 @@ export { measureMemory, type MemoryInput, type MemorySample } from './memory.js'
 export { detectRegression, detectRegressionStrict } from './regression.js';
 export {
   captureEnv,
+  isComparableEnv,
   defaultBaselinePath,
   loadBaseline,
   saveBaseline,

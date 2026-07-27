@@ -11,6 +11,7 @@ describe('nuxt app scenario perf (real workload)', () => {
   it('3-layer perf: event handler workflow / middleware chain / error handling', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 20,
       serialWarmup: 3,

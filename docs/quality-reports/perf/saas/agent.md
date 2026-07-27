@@ -1,6 +1,6 @@
 # Perf Suite — agent
 
-Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
 ## Serial p95 (concurrency = 1)
 
@@ -8,26 +8,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|---|---|---|
 | stateMachineInvoke | 0.00ms | 5ms | PASS | stable |
 | stateGraphInvoke | 0.00ms | 5ms | PASS | stable |
-| assistantsCreateThread | 0.00ms | 5ms | PASS | regressed |
-| assistantsAddMessage | 0.00ms | 5ms | PASS | regressed |
+| assistantsCreateThread | 0.00ms | 5ms | PASS | stable |
+| assistantsAddMessage | 0.00ms | 5ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| stateMachineInvoke | 0.03ms | 10ms | PASS |
-| stateGraphInvoke | 0.05ms | 10ms | PASS |
-| assistantsCreateThread | 0.02ms | 10ms | PASS |
-| assistantsAddMessage | 0.05ms | 10ms | PASS |
+| stateMachineInvoke | 0.02ms | 10ms | PASS |
+| stateGraphInvoke | 0.02ms | 10ms | PASS |
+| assistantsCreateThread | 0.01ms | 10ms | PASS |
+| assistantsAddMessage | 0.01ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| stateMachineInvoke | 1305296 B | 0 B | 102400 B | PASS |
-| stateGraphInvoke | 506568 B | 0 B | 102400 B | PASS |
-| assistantsCreateThread | 195696 B | 0 B | 102400 B | PASS |
-| assistantsAddMessage | 272424 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| stateMachineInvoke | -19696 B | 0 B | 102400 B | yes | PASS |
+| stateGraphInvoke | -544 B | 0 B | 102400 B | yes | PASS |
+| assistantsCreateThread | 37712 B | 0 B | 102400 B | yes | PASS |
+| assistantsAddMessage | 95520 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -46,19 +46,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.41ms |
+| total | 0.32ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +75.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -3.02% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +43.94% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +54.16% |
-| min | 0.00ms | 0.00ms | +0.00ms | +81.68% |
-| max | 0.01ms | 0.01ms | +0.00ms | +50.75% |
-| total | 0.41ms | 0.27ms | +0.14ms | +54.16% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -0.78% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -1.63% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +5.63% |
+| min | 0.00ms | 0.00ms | -0.00ms | -4.38% |
+| max | 0.01ms | 0.01ms | -0.00ms | -15.57% |
+| total | 0.32ms | 0.30ms | +0.02ms | +5.63% |
 
 ### stateGraphInvoke
 
@@ -75,19 +75,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.33ms |
+| total | 0.24ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +30.34% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +19.98% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -38.46% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +3.25% |
-| min | 0.00ms | 0.00ms | +0.00ms | +33.37% |
-| max | 0.01ms | 0.04ms | -0.03ms | -77.50% |
-| total | 0.33ms | 0.32ms | +0.01ms | +3.25% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -3.79% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +12.05% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +129.83% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +2.01% |
+| min | 0.00ms | 0.00ms | -0.00ms | -8.40% |
+| max | 0.01ms | 0.01ms | +0.00ms | +15.11% |
+| total | 0.24ms | 0.23ms | +0.00ms | +2.01% |
 
 ### assistantsCreateThread
 
@@ -103,20 +103,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.23ms |
+| max | 0.02ms |
+| total | 0.11ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +161.98% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +400.17% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +135.08% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +179.47% |
-| min | 0.00ms | 0.00ms | +0.00ms | +157.73% |
-| max | 0.01ms | 0.00ms | +0.01ms | +138.82% |
-| total | 0.23ms | 0.08ms | +0.15ms | +179.47% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -5.78% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +49.77% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +60.36% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +17.50% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.01ms | +0.01ms | +117.15% |
+| total | 0.11ms | 0.09ms | +0.02ms | +17.50% |
 
 ### assistantsAddMessage
 
@@ -128,22 +128,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.03ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
-| stdev | 0.01ms |
+| stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.07ms |
-| total | 0.44ms |
+| max | 0.01ms |
+| total | 0.13ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +166.67% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +666.60% |
-| p99 | 0.03ms | 0.00ms | +0.03ms | +1819.91% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +376.61% |
-| min | 0.00ms | 0.00ms | +0.00ms | +137.54% |
-| max | 0.07ms | 0.01ms | +0.07ms | +1205.19% |
-| total | 0.44ms | 0.09ms | +0.35ms | +376.61% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -8.95% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +13.63% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +144.62% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +0.64% |
+| min | 0.00ms | 0.00ms | -0.00ms | -11.20% |
+| max | 0.01ms | 0.02ms | -0.01ms | -35.54% |
+| total | 0.13ms | 0.12ms | +0.00ms | +0.64% |
 

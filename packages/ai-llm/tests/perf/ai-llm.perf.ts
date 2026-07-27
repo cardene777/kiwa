@@ -52,6 +52,7 @@ describe(MODULE, () => {
       // 10 % rule) so their per-call latency budget is identical.
       const result = await runPerf3Layer({
         moduleName: MODULE,
+        requireGc: true,
         reportPath: REPORT_PATH,
         ops: [
           {

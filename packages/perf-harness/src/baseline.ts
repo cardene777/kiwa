@@ -81,8 +81,30 @@ export function captureEnv(): BaselineEnv {
     cpuModel: cpus()[0]?.model ?? 'unknown',
     cpuCount: cpus().length,
     gitSha: captureGitSha(),
+    gcExposed: typeof (globalThis as { gc?: () => void }).gc === 'function',
     savedAt: new Date().toISOString(),
   };
+}
+
+/**
+ * baseline を比較対象として使えるかを判定する。
+ *
+ * `gitSha` や `hostname` の違いは測定値の意味を変えないが、GC を呼べるかどうかは
+ * memory 測定の前提そのものを変える。前提が違う baseline と比べると、実装が
+ * 変わっていなくても回帰と判定されてしまう。
+ */
+export function isComparableEnv(baseline: BaselineEnv, current: BaselineEnv): boolean {
+  // GC の有無が記録されていない baseline は、どちらの条件で測ったか判別できない。
+  // 不明なまま比較すると、実装が変わっていなくても回帰と判定され得る。
+  if (baseline.gcExposed === undefined) return false;
+  return (
+    baseline.gcExposed === current.gcExposed &&
+    baseline.nodeVersion === current.nodeVersion &&
+    baseline.platform === current.platform &&
+    // 別 CPU の測定値と比べると、実装ではなく機械の差を回帰として報告する。
+    baseline.cpuModel === current.cpuModel &&
+    baseline.cpuCount === current.cpuCount
+  );
 }
 
 function captureGitSha(): string {
@@ -107,18 +129,26 @@ function diffEnv(baseline: BaselineEnv, current: BaselineEnv): BaselineLoadResul
     'cpuModel',
     'cpuCount',
     'gitSha',
+    'gcExposed',
   ];
   const mismatch: BaselineLoadResult['envMismatch'] = [];
   for (const field of fields) {
     if (baseline[field] !== current[field]) {
       mismatch.push({
         field,
-        baseline: baseline[field],
-        current: current[field],
+        baseline: describeEnvValue(baseline[field]),
+        current: describeEnvValue(current[field]),
       });
     }
   }
   return mismatch;
+}
+
+/** boolean と欠落を文字列へ寄せる。 利用側の `string | number` を壊さないため。 */
+function describeEnvValue(value: string | number | boolean | undefined): string | number {
+  if (value === undefined) return 'missing';
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  return value;
 }
 
 const MEASURE_NUMERIC_FIELDS = [

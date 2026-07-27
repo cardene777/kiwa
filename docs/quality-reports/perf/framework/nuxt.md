@@ -1,27 +1,27 @@
 # Perf Suite — nuxt
 
-Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
+Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
 ## Serial p95 (concurrency = 1)
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
 | invokeEventHandler | 0.00ms | 5ms | PASS | stable |
-| invokeRouteMiddleware | 0.01ms | 5ms | PASS | regressed |
+| invokeRouteMiddleware | 0.00ms | 5ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| invokeEventHandler | 0.04ms | 10ms | PASS |
-| invokeRouteMiddleware | 0.02ms | 10ms | PASS |
+| invokeEventHandler | 0.02ms | 10ms | PASS |
+| invokeRouteMiddleware | 0.01ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| invokeEventHandler | 820960 B | 0 B | 102400 B | PASS |
-| invokeRouteMiddleware | 579656 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| invokeEventHandler | 9424 B | 0 B | 102400 B | yes | PASS |
+| invokeRouteMiddleware | 656 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -40,19 +40,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.02ms |
-| total | 0.40ms |
+| total | 0.33ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +58.30% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +17.58% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +49.44% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +37.82% |
-| min | 0.00ms | 0.00ms | +0.00ms | +17.43% |
-| max | 0.02ms | 0.02ms | +0.00ms | +13.84% |
-| total | 0.40ms | 0.29ms | +0.11ms | +37.82% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -1.64% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -23.57% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -2.59% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -1.60% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.02ms | -0.00ms | -6.13% |
+| total | 0.33ms | 0.33ms | -0.01ms | -1.60% |
 
 ### invokeRouteMiddleware
 
@@ -63,23 +63,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 200 |
 | warmup | 5 |
 | p50 | 0.00ms |
-| p95 | 0.01ms |
-| p99 | 0.02ms |
+| p95 | 0.00ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.05ms |
-| total | 0.48ms |
+| max | 0.01ms |
+| total | 0.16ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +149.83% |
-| p95 | 0.01ms | 0.00ms | +0.00ms | +197.76% |
-| p99 | 0.02ms | 0.00ms | +0.01ms | +384.95% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +172.64% |
-| min | 0.00ms | 0.00ms | +0.00ms | +33.20% |
-| max | 0.05ms | 0.01ms | +0.04ms | +711.87% |
-| total | 0.48ms | 0.18ms | +0.30ms | +172.64% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -22.27% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +7.92% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +12.30% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -5.30% |
+| min | 0.00ms | 0.00ms | +0.00ms | +8.20% |
+| max | 0.01ms | 0.00ms | +0.00ms | +86.32% |
+| total | 0.16ms | 0.17ms | -0.01ms | -5.30% |
 

@@ -21,6 +21,7 @@ describe(MODULE, () => {
       const keyRing = ANVIL_DEFAULT_PRIVATE_KEYS;
       const result = await runPerf3Layer({
         moduleName: MODULE,
+        requireGc: true,
         reportPath: REPORT_PATH,
         ops: [
           {

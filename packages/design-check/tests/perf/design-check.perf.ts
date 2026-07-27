@@ -33,6 +33,7 @@ describe('design-check perf', () => {
   it('3-layer perf: spec conformance + layout regression primary paths', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 50,
       serialWarmup: 5,

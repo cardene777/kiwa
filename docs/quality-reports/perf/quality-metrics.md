@@ -6,9 +6,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| evaluateReleaseGate_7axis | 0.00ms | 5ms | PASS | n/a (baseline seeded) |
-| evaluateReleaseGate_11axis | 0.00ms | 5ms | PASS | n/a (baseline seeded) |
-| diffReports | 0.00ms | 5ms | PASS | n/a (baseline seeded) |
+| evaluateReleaseGate_7axis | 0.00ms | 5ms | PASS | stable |
+| evaluateReleaseGate_11axis | 0.00ms | 5ms | PASS | stable |
+| diffReports | 0.00ms | 5ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -20,11 +20,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| evaluateReleaseGate_7axis | 79960 B | 0 B | 102400 B | PASS |
-| evaluateReleaseGate_11axis | 224424 B | 0 B | 102400 B | PASS |
-| diffReports | 253256 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| evaluateReleaseGate_7axis | -7720 B | 0 B | 102400 B | yes | PASS |
+| evaluateReleaseGate_11axis | -14856 B | 0 B | 102400 B | yes | PASS |
+| diffReports | 7000 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -42,8 +42,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.13ms |
+| max | 0.02ms |
+| total | 0.16ms |
+
+## Baseline diff
+
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | +0.00ms | +0.18% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -10.49% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -10.68% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +4.26% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.01ms | +0.00ms | +19.21% |
+| total | 0.16ms | 0.15ms | +0.01ms | +4.26% |
 
 ### evaluateReleaseGate_11axis
 
@@ -60,7 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.00ms |
-| total | 0.08ms |
+| total | 0.09ms |
+
+## Baseline diff
+
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +0.45% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +9.69% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +0.82% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.00ms | 0.00ms | +0.00ms | +62.09% |
+| total | 0.09ms | 0.09ms | +0.00ms | +0.82% |
 
 ### diffReports
 
@@ -74,8 +98,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.00ms |
 | p99 | 0.01ms |
 | mean | 0.00ms |
-| stdev | 0.00ms |
+| stdev | 0.01ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.14ms |
+| max | 0.09ms |
+| total | 0.25ms |
+
+## Baseline diff
+
+| metric | current | baseline | delta ms | delta % |
+|---|---|---|---|---|
+| p50 | 0.00ms | 0.00ms | +0.00ms | +9.17% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +4.06% |
+| p99 | 0.01ms | 0.01ms | +0.01ms | +108.86% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +79.00% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.09ms | 0.01ms | +0.08ms | +624.29% |
+| total | 0.25ms | 0.14ms | +0.11ms | +79.00% |
 

@@ -64,6 +64,7 @@ describe('a11y app scenario perf (real workload)', () => {
     const fixtures = [LOGIN_FORM, DASHBOARD, CHECKOUT_FORM];
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 20,
       serialWarmup: 3,

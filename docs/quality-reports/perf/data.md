@@ -13,15 +13,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| queueSend | 0.01ms | 10ms | PASS |
+| queueSend | 0.02ms | 10ms | PASS |
 | fakeClockAdvance | 0.01ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| queueSend | 567440 B | 0 B | 102400 B | PASS |
-| fakeClockAdvance | 135968 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| queueSend | 29064 B | 0 B | 102400 B | yes | PASS |
+| fakeClockAdvance | -5168 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -39,20 +39,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.11ms |
+| max | 0.02ms |
+| total | 0.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -34.53% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +65.48% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +12.62% |
-| min | 0.00ms | 0.00ms | +0.00ms | +33.20% |
-| max | 0.01ms | 0.01ms | +0.00ms | +10.28% |
-| total | 0.11ms | 0.10ms | +0.01ms | +12.62% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +22.13% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +210.61% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -6.68% |
+| mean | 0.00ms | 0.01ms | -0.01ms | -87.82% |
+| min | 0.00ms | 0.00ms | +0.00ms | +12.61% |
+| max | 0.02ms | 1.47ms | -1.44ms | -98.31% |
+| total | 0.19ms | 1.59ms | -1.40ms | -87.82% |
 
 ### fakeClockAdvance
 
@@ -66,20 +66,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.00ms |
 | p99 | 0.00ms |
 | mean | 0.00ms |
-| stdev | 0.01ms |
+| stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.19ms |
-| total | 0.29ms |
+| max | 0.01ms |
+| total | 0.09ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -11.20% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +50.00% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +83.32% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +215.57% |
-| min | 0.00ms | 0.00ms | -0.00ms | -12.61% |
-| max | 0.19ms | 0.00ms | +0.19ms | +4050.46% |
-| total | 0.29ms | 0.09ms | +0.19ms | +215.57% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -14.49% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -28.23% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -22.88% |
+| min | 0.00ms | 0.00ms | -0.00ms | -0.34% |
+| max | 0.01ms | 0.02ms | -0.02ms | -70.64% |
+| total | 0.09ms | 0.12ms | -0.03ms | -22.88% |
 

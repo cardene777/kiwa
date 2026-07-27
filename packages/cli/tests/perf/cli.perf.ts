@@ -37,6 +37,7 @@ describe(MODULE, () => {
 
       const result = await runPerf3Layer({
         moduleName: MODULE,
+        requireGc: true,
         reportPath: REPORT_PATH,
         // fs.write per iteration keeps this comparable to cli-test perf.
         serialIterations: 100,

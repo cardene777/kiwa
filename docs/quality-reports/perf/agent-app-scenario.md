@@ -7,7 +7,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
 | assistant_run_cycle (create + thread + run + poll) | 0.02ms | 50ms | PASS | stable |
-| multi_thread_conversation (5 thread × 3 message) | 0.02ms | 100ms | PASS | stable |
+| multi_thread_conversation (5 thread × 3 message) | 0.01ms | 100ms | PASS | stable |
 | tool_call_chain (10 toolCall build) | 0.00ms | 30ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
@@ -15,16 +15,16 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate |
 |---|---|---|---|
 | assistant_run_cycle (create + thread + run + poll) | 0.01ms | 100ms | PASS |
-| multi_thread_conversation (5 thread × 3 message) | 0.03ms | 200ms | PASS |
+| multi_thread_conversation (5 thread × 3 message) | 0.04ms | 200ms | PASS |
 | tool_call_chain (10 toolCall build) | 0.02ms | 60ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| assistant_run_cycle (create + thread + run + poll) | 287856 B | 0 B | 102400 B | PASS |
-| multi_thread_conversation (5 thread × 3 message) | 416616 B | 0 B | 102400 B | PASS |
-| tool_call_chain (10 toolCall build) | 86896 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| assistant_run_cycle (create + thread + run + poll) | 1032 B | 0 B | 102400 B | yes | PASS |
+| multi_thread_conversation (5 thread × 3 message) | -19544 B | 0 B | 102400 B | yes | PASS |
+| tool_call_chain (10 toolCall build) | 14560 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -40,7 +40,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.02ms |
 | p99 | 0.02ms |
 | mean | 0.01ms |
-| stdev | 0.00ms |
+| stdev | 0.01ms |
 | min | 0.00ms |
 | max | 0.02ms |
 | total | 0.12ms |
@@ -49,13 +49,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -10.13% |
-| p95 | 0.02ms | 0.02ms | -0.00ms | -17.57% |
-| p99 | 0.02ms | 0.04ms | -0.02ms | -57.97% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -19.51% |
-| min | 0.00ms | 0.00ms | -0.00ms | -7.12% |
-| max | 0.02ms | 0.05ms | -0.03ms | -61.73% |
-| total | 0.12ms | 0.16ms | -0.03ms | -19.51% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -12.66% |
+| p95 | 0.02ms | 0.01ms | +0.00ms | +12.57% |
+| p99 | 0.02ms | 0.02ms | +0.00ms | +2.28% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -1.01% |
+| min | 0.00ms | 0.00ms | -0.00ms | -3.76% |
+| max | 0.02ms | 0.02ms | +0.00ms | +0.41% |
+| total | 0.12ms | 0.12ms | -0.00ms | -1.01% |
 
 ### multi_thread_conversation (5 thread × 3 message)
 
@@ -66,25 +66,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.01ms |
-| p95 | 0.02ms |
-| p99 | 0.02ms |
+| p95 | 0.01ms |
+| p99 | 0.01ms |
 | mean | 0.01ms |
 | stdev | 0.00ms |
 | min | 0.01ms |
-| max | 0.03ms |
-| total | 0.20ms |
+| max | 0.01ms |
+| total | 0.16ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +6.74% |
-| p95 | 0.02ms | 0.01ms | +0.00ms | +33.44% |
-| p99 | 0.02ms | 0.02ms | +0.01ms | +44.89% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +14.15% |
-| min | 0.01ms | 0.01ms | +0.00ms | +2.44% |
-| max | 0.03ms | 0.02ms | +0.01ms | +47.23% |
-| total | 0.20ms | 0.18ms | +0.02ms | +14.15% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -1.43% |
+| p95 | 0.01ms | 0.02ms | -0.01ms | -45.75% |
+| p99 | 0.01ms | 0.02ms | -0.01ms | -55.49% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -10.95% |
+| min | 0.01ms | 0.01ms | -0.00ms | -1.24% |
+| max | 0.01ms | 0.03ms | -0.01ms | -57.40% |
+| total | 0.16ms | 0.18ms | -0.02ms | -10.95% |
 
 ### tool_call_chain (10 toolCall build)
 
@@ -107,11 +107,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +0.02% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +1.79% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +1.66% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +1.23% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +1.63% |
-| total | 0.04ms | 0.04ms | +0.00ms | +1.23% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -7.38% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -14.19% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +7.09% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -7.36% |
+| min | 0.00ms | 0.00ms | -0.00ms | -5.77% |
+| max | 0.00ms | 0.00ms | +0.00ms | +12.33% |
+| total | 0.04ms | 0.05ms | -0.00ms | -7.36% |
 

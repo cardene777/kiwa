@@ -11,6 +11,7 @@ describe('search app scenario perf (real workload)', () => {
   it('3-layer perf: index build / search-heavy / filter+search', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 20,
       serialWarmup: 3,

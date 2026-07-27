@@ -14,17 +14,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| sendEmail | 0.01ms | 10ms | PASS |
-| verifyWebhookSignature | 0.03ms | 10ms | PASS |
+| sendEmail | 0.03ms | 10ms | PASS |
+| verifyWebhookSignature | 0.18ms | 10ms | PASS |
 | parseDeliveryEvent | 0.01ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| sendEmail | 513736 B | 0 B | 102400 B | PASS |
-| verifyWebhookSignature | 319320 B | 16384 B | 102400 B | PASS |
-| parseDeliveryEvent | 213288 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| sendEmail | 36088 B | -48041 B | 102400 B | yes | PASS |
+| verifyWebhookSignature | -28008 B | 0 B | 102400 B | yes | PASS |
+| parseDeliveryEvent | 816 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,24 +38,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.00ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.11ms |
+| max | 0.03ms |
+| total | 0.30ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +0.24% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -3.21% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -3.87% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +4.61% |
-| min | 0.00ms | 0.00ms | +0.00ms | +14.43% |
-| max | 0.01ms | 0.01ms | +0.00ms | +35.53% |
-| total | 0.11ms | 0.11ms | +0.01ms | +4.61% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +154.80% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +65.51% |
+| p99 | 0.01ms | 0.00ms | +0.01ms | +174.07% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +139.58% |
+| min | 0.00ms | 0.00ms | +0.00ms | +44.53% |
+| max | 0.03ms | 0.01ms | +0.01ms | +74.72% |
+| total | 0.30ms | 0.13ms | +0.18ms | +139.58% |
 
 ### verifyWebhookSignature
 
@@ -67,24 +67,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.01ms |
-| p99 | 0.01ms |
+| p99 | 0.03ms |
 | mean | 0.00ms |
-| stdev | 0.00ms |
+| stdev | 0.01ms |
 | min | 0.00ms |
-| max | 0.02ms |
-| total | 0.57ms |
+| max | 0.13ms |
+| total | 0.89ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +1.87% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +10.31% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +38.21% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +3.74% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.02ms | 0.01ms | +0.01ms | +59.23% |
-| total | 0.57ms | 0.55ms | +0.02ms | +3.74% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +1.60% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +34.84% |
+| p99 | 0.03ms | 0.01ms | +0.02ms | +152.61% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +34.73% |
+| min | 0.00ms | 0.00ms | -0.00ms | -5.17% |
+| max | 0.13ms | 0.01ms | +0.12ms | +772.16% |
+| total | 0.89ms | 0.66ms | +0.23ms | +34.73% |
 
 ### parseDeliveryEvent
 
@@ -107,11 +107,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +12.28% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -4.64% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +31.71% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +3.44% |
-| min | 0.00ms | 0.00ms | +0.00ms | +16.40% |
-| max | 0.01ms | 0.01ms | +0.00ms | +11.06% |
-| total | 0.11ms | 0.11ms | +0.00ms | +3.44% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -10.07% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +5.10% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +16.84% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +3.13% |
+| min | 0.00ms | 0.00ms | -0.00ms | -24.92% |
+| max | 0.01ms | 0.01ms | +0.00ms | +52.17% |
+| total | 0.11ms | 0.11ms | +0.00ms | +3.13% |
 

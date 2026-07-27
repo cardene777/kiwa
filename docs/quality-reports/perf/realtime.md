@@ -7,27 +7,27 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
 | supabasePresenceTrack | 0.00ms | 20ms | PASS | stable |
-| ablyPublish | 0.00ms | 20ms | PASS | improved |
+| ablyPublish | 0.00ms | 20ms | PASS | stable |
 | pusherSubscribeChannel | 0.00ms | 20ms | PASS | stable |
-| socketioEmit | 0.00ms | 20ms | PASS | improved |
+| socketioEmit | 0.00ms | 20ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| supabasePresenceTrack | 0.02ms | 40ms | PASS |
+| supabasePresenceTrack | 0.03ms | 40ms | PASS |
 | ablyPublish | 0.01ms | 40ms | PASS |
 | pusherSubscribeChannel | 0.00ms | 40ms | PASS |
-| socketioEmit | 0.02ms | 40ms | PASS |
+| socketioEmit | 0.01ms | 40ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| supabasePresenceTrack | 656584 B | 0 B | 102400 B | PASS |
-| ablyPublish | 380448 B | 0 B | 102400 B | PASS |
-| pusherSubscribeChannel | 155624 B | 0 B | 102400 B | PASS |
-| socketioEmit | 675576 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| supabasePresenceTrack | -23832 B | 0 B | 102400 B | yes | PASS |
+| ablyPublish | 13032 B | 0 B | 102400 B | yes | PASS |
+| pusherSubscribeChannel | -480 B | 0 B | 102400 B | yes | PASS |
+| socketioEmit | 44552 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -52,13 +52,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +14.76% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +26.84% |
-| p99 | 0.01ms | 0.00ms | +0.01ms | +158.01% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +30.86% |
-| min | 0.00ms | 0.00ms | +0.00ms | +3.88% |
-| max | 0.02ms | 0.01ms | +0.01ms | +52.38% |
-| total | 0.38ms | 0.29ms | +0.09ms | +30.86% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +1.64% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +5.36% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +22.78% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +9.88% |
+| min | 0.00ms | 0.00ms | -0.00ms | -3.52% |
+| max | 0.02ms | 0.01ms | +0.00ms | +13.55% |
+| total | 0.38ms | 0.34ms | +0.03ms | +9.88% |
 
 ### ablyPublish
 
@@ -74,20 +74,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.00ms |
-| total | 0.08ms |
+| max | 0.01ms |
+| total | 0.09ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | +0.00ms | +0.30% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -61.14% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -54.10% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -22.24% |
-| min | 0.00ms | 0.00ms | +0.00ms | +16.40% |
-| max | 0.00ms | 0.01ms | -0.00ms | -6.66% |
-| total | 0.08ms | 0.10ms | -0.02ms | -22.24% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +57.74% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +40.61% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +10.59% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.00ms | +0.00ms | +34.29% |
+| total | 0.09ms | 0.08ms | +0.01ms | +10.59% |
 
 ### pusherSubscribeChannel
 
@@ -99,24 +99,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.00ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
-| stdev | 0.00ms |
+| stdev | 0.01ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.05ms |
+| max | 0.10ms |
+| total | 0.15ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -19.71% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -76.01% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -48.52% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -12.92% |
-| min | 0.00ms | 0.00ms | +0.00ms | +32.80% |
-| max | 0.01ms | 0.00ms | +0.01ms | +137.38% |
-| total | 0.05ms | 0.06ms | -0.01ms | -12.92% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +19.62% |
+| p99 | 0.01ms | 0.00ms | +0.01ms | +777.85% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +215.15% |
+| min | 0.00ms | 0.00ms | -0.00ms | -24.70% |
+| max | 0.10ms | 0.01ms | +0.09ms | +1110.42% |
+| total | 0.15ms | 0.05ms | +0.10ms | +215.15% |
 
 ### socketioEmit
 
@@ -133,17 +133,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.08ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -51.82% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -30.36% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -6.04% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.00ms | +0.00ms | +128.23% |
-| total | 0.08ms | 0.09ms | -0.01ms | -6.04% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -0.30% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +60.44% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +212.17% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +24.08% |
+| min | 0.00ms | 0.00ms | -0.00ms | -0.34% |
+| max | 0.01ms | 0.01ms | +0.01ms | +159.97% |
+| total | 0.10ms | 0.08ms | +0.02ms | +24.08% |
 

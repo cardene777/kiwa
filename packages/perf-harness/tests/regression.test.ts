@@ -91,6 +91,31 @@ describe('detectRegression (bootstrap CI on p95)', () => {
     expect(result.verdict).toBe('stable');
   });
 
+  it('T-PH-R-010 差が小さすぎる悪化は回帰と判定しない', () => {
+    // 0.03ms → 0.04ms は 33% 悪化だが実害がない。相対比だけで判定すると
+    // 値が小さい op ほど揺らぎで落ちる。
+    const baseline = makeResult('reply', [0.03, 0.03, 0.03, 0.03, 0.03, 0.03]);
+    const current = makeResult('reply', [0.04, 0.04, 0.04, 0.04, 0.04, 0.04]);
+    const result = detectRegression({ current, baseline });
+    expect(result.deltaPct).toBeGreaterThan(0.2);
+    expect(result.significant).toBe(true);
+    expect(result.verdict).toBe('stable');
+  });
+
+  it('T-PH-R-011 下限を超える悪化は従来どおり回帰と判定する', () => {
+    const baseline = makeResult('reply', [10, 10, 10, 10, 10, 10]);
+    const current = makeResult('reply', [13, 13, 13, 13, 13, 13]);
+    const result = detectRegression({ current, baseline });
+    expect(result.verdict).toBe('regressed');
+  });
+
+  it('T-PH-R-012 下限は minDeltaMs で調整できる', () => {
+    const baseline = makeResult('reply', [0.03, 0.03, 0.03, 0.03, 0.03, 0.03]);
+    const current = makeResult('reply', [0.04, 0.04, 0.04, 0.04, 0.04, 0.04]);
+    const result = detectRegression({ current, baseline, minDeltaMs: 0 });
+    expect(result.verdict).toBe('regressed');
+  });
+
   it('T-PH-R-009 baseline.p95 = 0 かつ current.p95 > 0 = Infinity delta', () => {
     // Bootstrap CI は current 側 sample から p95 > 0 を復元、 baseline は 0 になるため
     // CI 下限は正の値、 deltaPct は Infinity。 verdict は significant + threshold 超過。

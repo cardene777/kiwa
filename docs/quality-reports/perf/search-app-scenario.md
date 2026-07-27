@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| index_build (100 docs addDocuments + 10 search) | 0.54ms | 100ms | PASS | stable |
-| search_heavy_workload (50 docs + 50 search) | 1.25ms | 100ms | PASS | regressed |
-| filter_search_cycle (20 docs + 20 filtered search) | 0.13ms | 80ms | PASS | stable |
+| index_build (100 docs addDocuments + 10 search) | 0.57ms | 100ms | PASS | stable |
+| search_heavy_workload (50 docs + 50 search) | 0.84ms | 100ms | PASS | improved |
+| filter_search_cycle (20 docs + 20 filtered search) | 0.21ms | 80ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| index_build (100 docs addDocuments + 10 search) | 1.25ms | 200ms | PASS |
-| search_heavy_workload (50 docs + 50 search) | 2.74ms | 200ms | PASS |
-| filter_search_cycle (20 docs + 20 filtered search) | 0.50ms | 160ms | PASS |
+| index_build (100 docs addDocuments + 10 search) | 1.11ms | 200ms | PASS |
+| search_heavy_workload (50 docs + 50 search) | 2.93ms | 200ms | PASS |
+| filter_search_cycle (20 docs + 20 filtered search) | 0.44ms | 160ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| index_build (100 docs addDocuments + 10 search) | 120416 B | 0 B | 102400 B | PASS |
-| search_heavy_workload (50 docs + 50 search) | -754264 B | 0 B | 102400 B | PASS |
-| filter_search_cycle (20 docs + 20 filtered search) | -6158688 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| index_build (100 docs addDocuments + 10 search) | -11200 B | 0 B | 102400 B | yes | PASS |
+| search_heavy_workload (50 docs + 50 search) | -19920 B | 0 B | 102400 B | yes | PASS |
+| filter_search_cycle (20 docs + 20 filtered search) | -1952 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -37,25 +37,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.35ms |
-| p95 | 0.54ms |
-| p99 | 0.65ms |
+| p95 | 0.57ms |
+| p99 | 0.68ms |
 | mean | 0.36ms |
-| stdev | 0.11ms |
-| min | 0.28ms |
-| max | 0.68ms |
-| total | 7.25ms |
+| stdev | 0.12ms |
+| min | 0.26ms |
+| max | 0.71ms |
+| total | 7.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.35ms | 0.35ms | -0.00ms | -1.35% |
-| p95 | 0.54ms | 0.50ms | +0.03ms | +6.52% |
-| p99 | 0.65ms | 0.60ms | +0.05ms | +8.45% |
-| mean | 0.36ms | 0.36ms | +0.00ms | +1.22% |
-| min | 0.28ms | 0.26ms | +0.02ms | +6.91% |
-| max | 0.68ms | 0.62ms | +0.06ms | +8.84% |
-| total | 7.25ms | 7.16ms | +0.09ms | +1.22% |
+| p50 | 0.35ms | 0.32ms | +0.02ms | +7.52% |
+| p95 | 0.57ms | 0.50ms | +0.07ms | +13.09% |
+| p99 | 0.68ms | 0.61ms | +0.07ms | +11.31% |
+| mean | 0.36ms | 0.35ms | +0.01ms | +2.12% |
+| min | 0.26ms | 0.25ms | +0.00ms | +1.39% |
+| max | 0.71ms | 0.64ms | +0.07ms | +10.96% |
+| total | 7.19ms | 7.04ms | +0.15ms | +2.12% |
 
 ### search_heavy_workload (50 docs + 50 search)
 
@@ -65,26 +65,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.89ms |
-| p95 | 1.25ms |
-| p99 | 1.38ms |
-| mean | 0.96ms |
-| stdev | 0.17ms |
-| min | 0.83ms |
-| max | 1.41ms |
-| total | 19.17ms |
+| p50 | 0.71ms |
+| p95 | 0.84ms |
+| p99 | 0.86ms |
+| mean | 0.73ms |
+| stdev | 0.08ms |
+| min | 0.62ms |
+| max | 0.87ms |
+| total | 14.61ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.89ms | 0.66ms | +0.23ms | +35.19% |
-| p95 | 1.25ms | 0.82ms | +0.44ms | +53.79% |
-| p99 | 1.38ms | 0.94ms | +0.44ms | +46.74% |
-| mean | 0.96ms | 0.68ms | +0.28ms | +41.62% |
-| min | 0.83ms | 0.62ms | +0.21ms | +32.82% |
-| max | 1.41ms | 0.97ms | +0.44ms | +45.26% |
-| total | 19.17ms | 13.53ms | +5.63ms | +41.62% |
+| p50 | 0.71ms | 0.80ms | -0.09ms | -11.73% |
+| p95 | 0.84ms | 1.45ms | -0.62ms | -42.48% |
+| p99 | 0.86ms | 1.45ms | -0.59ms | -40.82% |
+| mean | 0.73ms | 0.96ms | -0.23ms | -23.69% |
+| min | 0.62ms | 0.69ms | -0.07ms | -9.68% |
+| max | 0.87ms | 1.46ms | -0.59ms | -40.41% |
+| total | 14.61ms | 19.14ms | -4.53ms | -23.69% |
 
 ### filter_search_cycle (20 docs + 20 filtered search)
 
@@ -94,24 +94,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.09ms |
-| p95 | 0.13ms |
-| p99 | 0.19ms |
-| mean | 0.10ms |
-| stdev | 0.03ms |
-| min | 0.09ms |
-| max | 0.20ms |
-| total | 2.04ms |
+| p50 | 0.18ms |
+| p95 | 0.21ms |
+| p99 | 0.26ms |
+| mean | 0.16ms |
+| stdev | 0.05ms |
+| min | 0.10ms |
+| max | 0.27ms |
+| total | 3.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.09ms | 0.10ms | -0.01ms | -9.52% |
-| p95 | 0.13ms | 0.18ms | -0.04ms | -24.87% |
-| p99 | 0.19ms | 0.19ms | +0.00ms | +0.22% |
-| mean | 0.10ms | 0.11ms | -0.01ms | -8.18% |
-| min | 0.09ms | 0.09ms | -0.00ms | -4.47% |
-| max | 0.20ms | 0.19ms | +0.01ms | +6.17% |
-| total | 2.04ms | 2.23ms | -0.18ms | -8.18% |
+| p50 | 0.18ms | 0.10ms | +0.07ms | +69.85% |
+| p95 | 0.21ms | 0.14ms | +0.07ms | +47.34% |
+| p99 | 0.26ms | 0.19ms | +0.07ms | +39.06% |
+| mean | 0.16ms | 0.11ms | +0.05ms | +44.35% |
+| min | 0.10ms | 0.09ms | +0.01ms | +13.30% |
+| max | 0.27ms | 0.20ms | +0.07ms | +37.55% |
+| total | 3.12ms | 2.16ms | +0.96ms | +44.35% |
 

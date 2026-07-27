@@ -11,6 +11,7 @@ describe('security app scenario perf (real workload)', () => {
   it('3-layer perf: csp build burst / security headers validation / hardening flow', async () => {
     const result = await runPerf3Layer({
       moduleName: MODULE,
+      requireGc: true,
       reportPath: REPORT_PATH,
       serialIterations: 30,
       serialWarmup: 5,

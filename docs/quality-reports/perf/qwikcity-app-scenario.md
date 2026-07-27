@@ -16,15 +16,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|---|---|
 | route_loader_workflow (10 invokeRouteLoader) | 0.04ms | 200ms | PASS |
 | route_action_form_batch (5 invokeRouteAction with FormData) | 0.03ms | 200ms | PASS |
-| loader_error_handling (5 throw + catch) | 0.07ms | 200ms | PASS |
+| loader_error_handling (5 throw + catch) | 0.09ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| route_loader_workflow (10 invokeRouteLoader) | 854496 B | 0 B | 102400 B | PASS |
-| route_action_form_batch (5 invokeRouteAction with FormData) | 494760 B | 0 B | 102400 B | PASS |
-| loader_error_handling (5 throw + catch) | 376904 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| route_loader_workflow (10 invokeRouteLoader) | 6784 B | 0 B | 102400 B | yes | PASS |
+| route_action_form_batch (5 invokeRouteAction with FormData) | 5600 B | 0 B | 102400 B | yes | PASS |
+| loader_error_handling (5 throw + catch) | -14496 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,24 +38,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 3 |
 | p50 | 0.01ms |
 | p95 | 0.01ms |
-| p99 | 0.05ms |
+| p99 | 0.02ms |
 | mean | 0.01ms |
-| stdev | 0.01ms |
+| stdev | 0.00ms |
 | min | 0.01ms |
-| max | 0.05ms |
-| total | 0.22ms |
+| max | 0.03ms |
+| total | 0.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +3.39% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +10.24% |
-| p99 | 0.05ms | 0.02ms | +0.02ms | +88.30% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +16.96% |
-| min | 0.01ms | 0.01ms | 0.00ms | 0.00% |
-| max | 0.05ms | 0.03ms | +0.03ms | +96.70% |
-| total | 0.22ms | 0.19ms | +0.03ms | +16.96% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -24.70% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -4.49% |
+| p99 | 0.02ms | 0.02ms | +0.01ms | +28.05% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -10.70% |
+| min | 0.01ms | 0.01ms | -0.00ms | -10.53% |
+| max | 0.03ms | 0.02ms | +0.01ms | +33.26% |
+| total | 0.19ms | 0.21ms | -0.02ms | -10.70% |
 
 ### route_action_form_batch (5 invokeRouteAction with FormData)
 
@@ -70,21 +70,21 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p99 | 0.01ms |
 | mean | 0.01ms |
 | stdev | 0.00ms |
-| min | 0.01ms |
+| min | 0.00ms |
 | max | 0.01ms |
-| total | 0.14ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +7.74% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +17.90% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +14.84% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +13.58% |
-| min | 0.01ms | 0.00ms | +0.00ms | +24.28% |
-| max | 0.01ms | 0.01ms | +0.00ms | +14.22% |
-| total | 0.14ms | 0.12ms | +0.02ms | +13.58% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +0.73% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +0.95% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -13.53% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +1.01% |
+| min | 0.00ms | 0.00ms | +0.00ms | +3.02% |
+| max | 0.01ms | 0.01ms | -0.00ms | -15.56% |
+| total | 0.12ms | 0.12ms | +0.00ms | +1.01% |
 
 ### loader_error_handling (5 throw + catch)
 
@@ -96,22 +96,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 3 |
 | p50 | 0.02ms |
 | p95 | 0.02ms |
-| p99 | 0.03ms |
+| p99 | 0.02ms |
 | mean | 0.02ms |
-| stdev | 0.01ms |
-| min | 0.01ms |
-| max | 0.03ms |
-| total | 0.36ms |
+| stdev | 0.00ms |
+| min | 0.02ms |
+| max | 0.02ms |
+| total | 0.40ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | +0.00ms | +28.46% |
-| p95 | 0.02ms | 0.03ms | -0.01ms | -26.05% |
-| p99 | 0.03ms | 0.03ms | -0.00ms | -7.84% |
-| mean | 0.02ms | 0.02ms | -0.00ms | -2.92% |
-| min | 0.01ms | 0.01ms | -0.00ms | -3.52% |
-| max | 0.03ms | 0.03ms | -0.00ms | -3.67% |
-| total | 0.36ms | 0.38ms | -0.01ms | -2.92% |
+| p50 | 0.02ms | 0.02ms | -0.00ms | -5.27% |
+| p95 | 0.02ms | 0.08ms | -0.06ms | -73.26% |
+| p99 | 0.02ms | 0.14ms | -0.12ms | -83.92% |
+| mean | 0.02ms | 0.03ms | -0.01ms | -34.27% |
+| min | 0.02ms | 0.02ms | -0.00ms | -4.77% |
+| max | 0.02ms | 0.15ms | -0.13ms | -85.31% |
+| total | 0.40ms | 0.61ms | -0.21ms | -34.27% |
 

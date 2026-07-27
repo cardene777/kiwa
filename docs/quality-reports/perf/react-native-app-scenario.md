@@ -15,16 +15,16 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | op | p95 | cap | gate |
 |---|---|---|---|
 | user_flow_workflow (10 setup + navigate + storage) | 0.04ms | 200ms | PASS |
-| multi_platform_batch (5 iOS+Android+web env switch) | 0.01ms | 200ms | PASS |
-| linking_error_handling (5 invalid url + listener cleanup) | 0.06ms | 200ms | PASS |
+| multi_platform_batch (5 iOS+Android+web env switch) | 0.02ms | 200ms | PASS |
+| linking_error_handling (5 invalid url + listener cleanup) | 0.05ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |
-|---|---|---|---|---|
-| user_flow_workflow (10 setup + navigate + storage) | 952256 B | 0 B | 102400 B | PASS |
-| multi_platform_batch (5 iOS+Android+web env switch) | 243760 B | 0 B | 102400 B | PASS |
-| linking_error_handling (5 invalid url + listener cleanup) | 372536 B | 0 B | 102400 B | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
+|---|---|---|---|---|---|
+| user_flow_workflow (10 setup + navigate + storage) | -8192 B | 0 B | 102400 B | yes | PASS |
+| multi_platform_batch (5 iOS+Android+web env switch) | 88 B | 0 B | 102400 B | yes | PASS |
+| linking_error_handling (5 invalid url + listener cleanup) | 6280 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -49,13 +49,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -0.25% |
-| p95 | 0.02ms | 0.02ms | +0.00ms | +5.54% |
-| p99 | 0.02ms | 0.02ms | +0.00ms | +7.95% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -2.31% |
-| min | 0.01ms | 0.01ms | -0.00ms | -11.63% |
-| max | 0.02ms | 0.02ms | +0.00ms | +8.46% |
-| total | 0.19ms | 0.19ms | -0.00ms | -2.31% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -3.62% |
+| p95 | 0.02ms | 0.02ms | +0.00ms | +5.48% |
+| p99 | 0.02ms | 0.02ms | -0.00ms | -14.11% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -5.05% |
+| min | 0.01ms | 0.01ms | -0.00ms | -2.77% |
+| max | 0.02ms | 0.02ms | -0.00ms | -17.65% |
+| total | 0.19ms | 0.20ms | -0.01ms | -5.05% |
 
 ### multi_platform_batch (5 iOS+Android+web env switch)
 
@@ -71,20 +71,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.08ms |
+| max | 0.02ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +43.72% |
-| p95 | 0.01ms | 0.00ms | +0.00ms | +130.72% |
-| p99 | 0.01ms | 0.00ms | +0.01ms | +129.15% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +61.62% |
-| min | 0.00ms | 0.00ms | +0.00ms | +18.58% |
-| max | 0.01ms | 0.01ms | +0.01ms | +128.89% |
-| total | 0.08ms | 0.05ms | +0.03ms | +61.62% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +76.29% |
+| p95 | 0.01ms | 0.00ms | +0.01ms | +159.89% |
+| p99 | 0.01ms | 0.00ms | +0.01ms | +229.30% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +90.74% |
+| min | 0.00ms | 0.00ms | +0.00ms | +9.29% |
+| max | 0.02ms | 0.00ms | +0.01ms | +242.95% |
+| total | 0.10ms | 0.05ms | +0.05ms | +90.74% |
 
 ### linking_error_handling (5 invalid url + listener cleanup)
 
@@ -96,22 +96,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 3 |
 | p50 | 0.01ms |
 | p95 | 0.01ms |
-| p99 | 0.02ms |
+| p99 | 0.01ms |
 | mean | 0.01ms |
 | stdev | 0.00ms |
 | min | 0.01ms |
-| max | 0.03ms |
-| total | 0.25ms |
+| max | 0.01ms |
+| total | 0.24ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -9.70% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +0.75% |
-| p99 | 0.02ms | 0.01ms | +0.01ms | +64.62% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -4.39% |
-| min | 0.01ms | 0.01ms | -0.00ms | -8.00% |
-| max | 0.03ms | 0.01ms | +0.01ms | +80.46% |
-| total | 0.25ms | 0.27ms | -0.01ms | -4.39% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -10.95% |
+| p95 | 0.01ms | 0.02ms | -0.00ms | -21.05% |
+| p99 | 0.01ms | 0.02ms | -0.01ms | -34.36% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -14.50% |
+| min | 0.01ms | 0.01ms | -0.00ms | -9.27% |
+| max | 0.01ms | 0.02ms | -0.01ms | -36.93% |
+| total | 0.24ms | 0.28ms | -0.04ms | -14.50% |
 

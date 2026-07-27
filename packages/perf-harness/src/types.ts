@@ -97,6 +97,13 @@ export interface RegressionInput {
   bootstrapIterations?: number;
   /** 信頼区間 (default 0.95)。 */
   confidenceLevel?: number;
+  /**
+   * p95 の差がこの ms 未満なら回帰と判定しない (default 0.5)。
+   *
+   * 相対比だけで判定すると値が小さいほど厳しくなる。 0.03ms から 0.04ms への
+   * 変化はサンプルが安定していれば「有意な 33% 悪化」になるが、 実害はない。
+   */
+  minDeltaMs?: number;
 }
 
 export interface RegressionResult {
@@ -121,6 +128,12 @@ export interface BaselineEnv {
   cpuCount: number;
   /** git commit sha (short 7)、 取得失敗時は `unknown`。 */
   gitSha: string;
+  /**
+   * 測定時に global.gc() を呼べたか。 `--expose-gc` の有無で memory 測定の
+   * 意味が変わる (無しでは解放される一時使用まで拾う) ため、 この値が違う
+   * baseline とは比較せず作り直す。 v1 baseline には無いので optional。
+   */
+  gcExposed?: boolean;
   /** ISO8601 UTC。 */
   savedAt: string;
 }
@@ -138,7 +151,12 @@ export interface BaselineEnvelope {
 /** load 時の env mismatch 検出結果。 */
 export interface BaselineLoadResult {
   envelope: BaselineEnvelope;
-  /** 現行環境と mismatch した field 名。 empty ならば同一環境。 */
+  /**
+   * 現行環境と mismatch した field 名。 empty ならば同一環境。
+   *
+   * `gcExposed` は boolean で v1 baseline には値そのものが無いが、 利用側の型を
+   * 壊さないよう `"true"` / `"false"` / `"missing"` の文字列へ寄せて格納する。
+   */
   envMismatch: Array<{
     field: keyof BaselineEnv;
     baseline: string | number;
