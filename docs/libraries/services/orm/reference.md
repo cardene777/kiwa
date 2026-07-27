@@ -1104,6 +1104,14 @@ export declare function setTxnIsolationLevel(session: TxnIsolationSession, input
 
 ```ts
 export declare function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(opts: MockSqliteOptions<TSchema>): Promise<OrmTestEnvMockT<TSchema>>;
+export declare function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(opts: LivePostgresOptions<TSchema>): Promise<OrmTestEnvLiveT<TSchema>>;
+export declare function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(opts: LiveMysqlOptions<TSchema>): Promise<OrmTestEnvLiveMysqlT<TSchema>>;
+export declare function setupOrmEnv<TClient>(opts: MockPrismaSqliteOptions<TClient>): Promise<OrmTestEnvMockPrismaT<TClient>>;
+export declare function setupOrmEnv<TClient>(opts: LivePrismaPostgresOptions<TClient>): Promise<import('./types.js').OrmTestEnvLivePrismaPostgres<TClient>>;
+export declare function setupOrmEnv<TClient>(opts: LivePrismaMysqlOptions<TClient>): Promise<import('./types.js').OrmTestEnvLivePrismaMysql<TClient>>;
+export declare function setupOrmEnv<TDatabase extends KyselyDatabase>(opts: MockKyselySqliteOptions<TDatabase>): Promise<OrmTestEnvMockKyselyT<TDatabase>>;
+export declare function setupOrmEnv<TDatabase extends KyselyDatabase>(opts: LiveKyselyPostgresOptions<TDatabase>): Promise<OrmTestEnvLiveKyselyPostgresT<TDatabase>>;
+export declare function setupOrmEnv<TDatabase extends KyselyDatabase>(opts: LiveKyselyMysqlOptions<TDatabase>): Promise<OrmTestEnvLiveKyselyMysqlT<TDatabase>>;
 ```
 
 #### `startFailover`

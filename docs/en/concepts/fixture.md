@@ -41,8 +41,9 @@ Calling `setActiveAccount(1)` breaks down as follows.
 6. The injected `window.ethereum` emits the event inside the page
 7. wagmi updates `useAccount()` and React re-renders
 
-`accountsChanged` goes out on two paths: the Node-side emitter and the page-side bridge.
-Listeners inside the page do not fire twice, but if you subscribe to the Node-side emitter, take care not to count both.
+The emitter call in step 4 reaches the page through a forwarding handler the fixture registered, and `emitPageEvent` in step 5 reaches the same page.
+So `accountsChanged` arrives at the page twice, and page-side listeners fire twice.
+Keep that in mind when writing a test that counts event occurrences.
 
 ## Example
 

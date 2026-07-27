@@ -25,7 +25,7 @@ The injected provider answers these 9 methods straight from fixture state.
 | `personal_sign` | Signature |
 | `eth_signTypedData_v4` | Typed-data signature |
 | `wallet_switchEthereumChain` | `null` (switches, then emits `chainChanged`) |
-| `wallet_addEthereumChain` | `null` (adds to the registry, switches to that chain, and emits `chainChanged`) |
+| `wallet_addEthereumChain` | `null` (adds to the registry only when `chainRegistry` is configured; either way it switches to that chain and emits `chainChanged`) |
 | `eth_sendTransaction` | Transaction hash (broadcast to anvil) |
 
 `eth_requestAccounts` and `eth_accounts` handle multiple accounts; the active one is switched via `setActiveAccount()`.

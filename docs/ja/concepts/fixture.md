@@ -40,8 +40,9 @@ wagmi の `useAccount()` から見ると「state 更新 → event 通知 → 再
 6. inject された `window.ethereum` が page 側で event を emit する
 7. wagmi が `useAccount()` を更新し、 React が再 render する
 
-`accountsChanged` は Node 側の emitter と page 側の bridge の 2 経路へ送出されます。
-同じ page 内の listener が 2 回起動するわけではありませんが、 Node 側で emitter を購読している場合は両方を数えないよう注意してください。
+step 4 の emitter 送出は fixture が登録した転送 handler を経由して page へ届き、 step 5 の `emitPageEvent` も同じ page へ届きます。
+つまり `accountsChanged` は page へ 2 回届き、 page 側の listener も 2 回起動します。
+イベント回数を数える test を書く場合はこの前提で組んでください。
 
 ## Example
 

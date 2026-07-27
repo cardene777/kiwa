@@ -25,7 +25,7 @@ inject された provider は以下 9 method を fixture の state から直接�
 | `personal_sign` | 署名 |
 | `eth_signTypedData_v4` | 型付きデータの署名 |
 | `wallet_switchEthereumChain` | `null` (切替後に `chainChanged` を送出) |
-| `wallet_addEthereumChain` | `null` (registry へ追加し、 その chain へ切替えて `chainChanged` も送出) |
+| `wallet_addEthereumChain` | `null` (`chainRegistry` を設定している場合のみ registry へ追加、 いずれの場合もその chain へ切替えて `chainChanged` を送出) |
 | `eth_sendTransaction` | transaction hash (anvil へ broadcast) |
 
 `eth_requestAccounts` と `eth_accounts` は複数アカウントを扱い、 現在有効なアカウントは `setActiveAccount()` で切り替えます。

@@ -202,34 +202,8 @@ export declare class SearchEngine implements SearchAdapter {
 
 公開 entry point から解決しています。
 
-`"/Users/cardene/Desktop/projects/kiwa/packages/search/src/semantics/index"` を `semantics` として公開しています。
-
 ```ts
-export type {
-  SearchAdapter,
-  SearchDocument,
-  SearchHit,
-  SearchProvider,
-  SearchQuery,
-  SearchResult,
-} from './types.js';
-export { SearchEngine, type EngineConfig } from './engine.js';
-export { createMeilisearchMock } from './meilisearch.js';
-export { createAlgoliaMock } from './algolia.js';
-export { createTypesenseMock } from './typesense.js';
-
 export * as semantics from './semantics/index.js';
-export {
-  apiKeyEnvVar,
-  buildRealDriverConfig,
-  explicitEnvKey,
-  isKiwaModeReal,
-  resolveApiKey,
-  resolveSearchEndpoint,
-  skipUnlessReal,
-  type RealDriverConfig,
-  type SearchBackend,
-} from './real-driver.js';
 ```
 
 #### `skipUnlessReal`

@@ -134,18 +134,23 @@ function emittedDeclaration(emitted, sourceFileName, name) {
   const dts = declarationSourceFile(emitted, sourceFileName);
   if (!dts) return null;
 
+  // オーバーロードは同じ名前の宣言が並ぶ。最初の 1 件で打ち切ると、
+  // 呼び出し形が複数ある関数の契約が 1 つしか見えなくなる。
+  const matched = [];
   for (const statement of dts.statements) {
     if (ts.isVariableStatement(statement)) {
-      const matched = statement.declarationList.declarations.some(
+      const hit = statement.declarationList.declarations.some(
         (declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === name,
       );
-      if (matched) return statement.getText(dts).trim();
+      if (hit) matched.push(statement.getText(dts).trim());
       continue;
     }
     const declared = statement.name && ts.isIdentifier(statement.name) ? statement.name.text : null;
-    if (declared === name) return withoutPrivateMembers(statement, dts) ?? statement.getText(dts).trim();
+    if (declared === name) {
+      matched.push(withoutPrivateMembers(statement, dts) ?? statement.getText(dts).trim());
+    }
   }
-  return null;
+  return matched.length > 0 ? matched.join('\n') : null;
 }
 
 // 実装のソースから宣言を組み立てる最終手段。emitter の出力が得られない場合
@@ -169,10 +174,15 @@ function fallbackDeclaration(node) {
 // の中身や、公開されていない名前を参照する宣言が出てしまう。
 function reExportStatement(exported) {
   for (const declaration of exported.declarations ?? []) {
-    if (ts.isNamespaceExport(declaration) || ts.isExportSpecifier(declaration)) {
-      const statement = ts.isNamespaceExport(declaration)
+    // NamespaceExport の親は ExportDeclaration だが、ExportSpecifier は
+    // NamedExports を挟むので 1 段深い。ここを揃えて辿ると SourceFile を掴み、
+    // entry point 全体が契約として出力されてしまう。
+    const statement = ts.isNamespaceExport(declaration)
+      ? declaration.parent
+      : ts.isExportSpecifier(declaration)
         ? declaration.parent.parent
-        : declaration.parent.parent;
+        : null;
+    if (statement && ts.isExportDeclaration(statement)) {
       return statement.getText(statement.getSourceFile()).trim();
     }
   }
@@ -189,9 +199,11 @@ function displayContract(checker, exported, symbol, library, emitted) {
   if (aliased || namespaceExport || !declaration) {
     const statement = reExportStatement(exported);
     if (statement) {
-      const note = aliased
-        ? `\`${symbol.getName()}\` を \`${name}\` として公開しています。`
-        : null;
+      // namespace 公開は名前が付け替わったわけではないので注記しない。
+      const note =
+        aliased && !namespaceExport
+          ? `\`${symbol.getName()}\` を \`${name}\` として公開しています。`
+          : null;
       return { code: statement, source: null, note };
     }
   }
