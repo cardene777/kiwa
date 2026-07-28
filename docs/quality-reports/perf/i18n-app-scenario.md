@@ -6,31 +6,31 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| translation_workflow (10 translate across 4 providers) | 0.11ms | 100ms | PASS | stable |
-| locale_switch_batch (5 setLocale + translate) | 0.05ms | 100ms | PASS | stable |
-| missing_key_error_handling (5 missing translations) | 0.01ms | 100ms | PASS | stable |
-| retry_recovery (5 flaky async retry to success) | 0.15ms | 100ms | PASS | stable |
-| concurrent_batch (5 batches of 4 items with error isolation) | 0.01ms | 100ms | PASS | stable |
+| translation_workflow (10 translate across 4 providers) | 0.11ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +331%) 以上の悪化が必要) |
+| locale_switch_batch (5 setLocale + translate) | 0.05ms | 100ms | PASS | stable (差 0.21ms が下限 0.5ms 未満で判定を保留) |
+| missing_key_error_handling (5 missing translations) | 0.01ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +9580%) 以上の悪化が必要) |
+| retry_recovery (5 flaky async retry to success) | 0.03ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +1309%) 以上の悪化が必要) |
+| concurrent_batch (5 batches of 4 items with error isolation) | 0.01ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +4106%) 以上の悪化が必要) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| translation_workflow (10 translate across 4 providers) | 0.37ms | 200ms | PASS |
-| locale_switch_batch (5 setLocale + translate) | 0.16ms | 200ms | PASS |
+| translation_workflow (10 translate across 4 providers) | 0.36ms | 200ms | PASS |
+| locale_switch_batch (5 setLocale + translate) | 0.15ms | 200ms | PASS |
 | missing_key_error_handling (5 missing translations) | 0.03ms | 200ms | PASS |
-| retry_recovery (5 flaky async retry to success) | 0.13ms | 200ms | PASS |
-| concurrent_batch (5 batches of 4 items with error isolation) | 0.05ms | 200ms | PASS |
+| retry_recovery (5 flaky async retry to success) | 0.12ms | 200ms | PASS |
+| concurrent_batch (5 batches of 4 items with error isolation) | 0.04ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| translation_workflow (10 translate across 4 providers) | 15552 B | 0 B | 102400 B | yes | PASS |
-| locale_switch_batch (5 setLocale + translate) | -18856 B | 0 B | 102400 B | yes | PASS |
-| missing_key_error_handling (5 missing translations) | 6952 B | 0 B | 102400 B | yes | PASS |
-| retry_recovery (5 flaky async retry to success) | 4528 B | 0 B | 102400 B | yes | PASS |
-| concurrent_batch (5 batches of 4 items with error isolation) | 984 B | 0 B | 102400 B | yes | PASS |
+| translation_workflow (10 translate across 4 providers) | 8800 B | 0 B | 102400 B | yes | PASS |
+| locale_switch_batch (5 setLocale + translate) | -20488 B | 0 B | 102400 B | yes | PASS |
+| missing_key_error_handling (5 missing translations) | 6784 B | 0 B | 102400 B | yes | PASS |
+| retry_recovery (5 flaky async retry to success) | 3664 B | 0 B | 102400 B | yes | PASS |
+| concurrent_batch (5 batches of 4 items with error isolation) | 584 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -49,19 +49,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.01ms |
 | min | 0.08ms |
 | max | 0.11ms |
-| total | 1.80ms |
+| total | 1.78ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.09ms | 0.10ms | -0.01ms | -11.02% |
-| p95 | 0.11ms | 0.11ms | -0.00ms | -1.84% |
-| p99 | 0.11ms | 0.11ms | -0.00ms | -2.90% |
-| mean | 0.09ms | 0.10ms | -0.01ms | -8.77% |
-| min | 0.08ms | 0.09ms | -0.01ms | -10.65% |
-| max | 0.11ms | 0.11ms | -0.00ms | -3.16% |
-| total | 1.80ms | 1.97ms | -0.17ms | -8.77% |
+| p50 | 0.09ms | 0.10ms | -0.01ms | -12.58% |
+| p95 | 0.11ms | 0.15ms | -0.04ms | -29.22% |
+| p99 | 0.11ms | 0.60ms | -0.48ms | -81.21% |
+| mean | 0.09ms | 0.13ms | -0.04ms | -31.59% |
+| min | 0.08ms | 0.09ms | -0.01ms | -10.05% |
+| max | 0.11ms | 0.71ms | -0.59ms | -83.98% |
+| total | 1.78ms | 2.60ms | -0.82ms | -31.59% |
 
 ### locale_switch_batch (5 setLocale + translate)
 
@@ -78,19 +78,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.04ms |
 | max | 0.05ms |
-| total | 0.81ms |
+| total | 0.79ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.04ms | 0.04ms | -0.00ms | -8.00% |
-| p95 | 0.05ms | 0.06ms | -0.01ms | -10.59% |
-| p99 | 0.05ms | 0.06ms | -0.00ms | -3.80% |
-| mean | 0.04ms | 0.04ms | -0.00ms | -8.21% |
-| min | 0.04ms | 0.04ms | -0.01ms | -12.36% |
-| max | 0.05ms | 0.06ms | -0.00ms | -2.11% |
-| total | 0.81ms | 0.88ms | -0.07ms | -8.21% |
+| p50 | 0.04ms | 0.04ms | -0.00ms | -8.63% |
+| p95 | 0.05ms | 0.26ms | -0.21ms | -81.74% |
+| p99 | 0.05ms | 2.18ms | -2.13ms | -97.77% |
+| mean | 0.04ms | 0.18ms | -0.14ms | -77.85% |
+| min | 0.04ms | 0.04ms | -0.00ms | -8.90% |
+| max | 0.05ms | 2.66ms | -2.61ms | -98.15% |
+| total | 0.79ms | 3.58ms | -2.78ms | -77.85% |
 
 ### missing_key_error_handling (5 missing translations)
 
@@ -107,19 +107,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.08ms |
+| total | 0.07ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -14.13% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +28.16% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +60.53% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -2.66% |
-| min | 0.00ms | 0.00ms | -0.00ms | -14.58% |
-| max | 0.01ms | 0.01ms | +0.00ms | +67.52% |
-| total | 0.08ms | 0.09ms | -0.00ms | -2.66% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -8.06% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +31.08% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +26.46% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -3.30% |
+| min | 0.00ms | 0.00ms | -0.00ms | -10.47% |
+| max | 0.01ms | 0.01ms | +0.00ms | +25.50% |
+| total | 0.07ms | 0.08ms | -0.00ms | -3.30% |
 
 ### retry_recovery (5 flaky async retry to success)
 
@@ -129,26 +129,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.04ms |
-| p95 | 0.15ms |
-| p99 | 0.15ms |
-| mean | 0.07ms |
-| stdev | 0.04ms |
+| p50 | 0.03ms |
+| p95 | 0.03ms |
+| p99 | 0.04ms |
+| mean | 0.03ms |
+| stdev | 0.00ms |
 | min | 0.03ms |
-| max | 0.16ms |
-| total | 1.31ms |
+| max | 0.04ms |
+| total | 0.58ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.04ms | 0.03ms | +0.01ms | +32.11% |
-| p95 | 0.15ms | 0.04ms | +0.10ms | +243.45% |
-| p99 | 0.15ms | 0.05ms | +0.11ms | +228.84% |
-| mean | 0.07ms | 0.03ms | +0.03ms | +88.92% |
-| min | 0.03ms | 0.03ms | -0.00ms | -11.77% |
-| max | 0.16ms | 0.05ms | +0.11ms | +225.59% |
-| total | 1.31ms | 0.69ms | +0.62ms | +88.92% |
+| p50 | 0.03ms | 0.03ms | +0.00ms | +4.39% |
+| p95 | 0.03ms | 0.04ms | -0.00ms | -9.88% |
+| p99 | 0.04ms | 0.04ms | -0.00ms | -2.55% |
+| mean | 0.03ms | 0.03ms | +0.00ms | +2.96% |
+| min | 0.03ms | 0.03ms | +0.00ms | +4.47% |
+| max | 0.04ms | 0.04ms | -0.00ms | -0.75% |
+| total | 0.58ms | 0.56ms | +0.02ms | +2.96% |
 
 ### concurrent_batch (5 batches of 4 items with error isolation)
 
@@ -171,11 +171,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -6.80% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -18.68% |
-| p99 | 0.01ms | 0.02ms | -0.00ms | -16.55% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -8.87% |
-| min | 0.01ms | 0.01ms | -0.00ms | -4.74% |
-| max | 0.01ms | 0.02ms | -0.00ms | -16.12% |
-| total | 0.20ms | 0.22ms | -0.02ms | -8.87% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -13.83% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -5.97% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -11.56% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -13.40% |
+| min | 0.01ms | 0.01ms | -0.00ms | -13.33% |
+| max | 0.01ms | 0.01ms | -0.00ms | -12.71% |
+| total | 0.20ms | 0.23ms | -0.03ms | -13.40% |
 

@@ -6,22 +6,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| renderAstroPage | 0.03ms | 5ms | PASS | stable |
-| invokeEndpoint | 0.01ms | 5ms | PASS | stable |
+| renderAstroPage | 0.03ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +1709%) 以上の悪化が必要) |
+| invokeEndpoint | 0.01ms | 5ms | PASS | stable (差 0.01ms が下限 0.5ms 未満で判定を保留) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| renderAstroPage | 0.13ms | 10ms | PASS |
-| invokeEndpoint | 0.09ms | 10ms | PASS |
+| renderAstroPage | 0.31ms | 10ms | PASS |
+| invokeEndpoint | 0.07ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| renderAstroPage | -4384 B | -28 B | 102400 B | yes | PASS |
-| invokeEndpoint | -7880 B | 0 B | 102400 B | yes | PASS |
+| renderAstroPage | 47056 B | 2800 B | 102400 B | yes | PASS |
+| invokeEndpoint | -121296 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,23 +36,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | p50 | 0.01ms |
 | p95 | 0.03ms |
 | p99 | 0.07ms |
-| mean | 0.01ms |
+| mean | 0.02ms |
 | stdev | 0.01ms |
 | min | 0.01ms |
-| max | 0.09ms |
-| total | 2.90ms |
+| max | 0.10ms |
+| total | 3.38ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -0.55% |
-| p95 | 0.03ms | 0.03ms | -0.00ms | -4.87% |
-| p99 | 0.07ms | 0.07ms | +0.00ms | +0.60% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +0.10% |
-| min | 0.01ms | 0.01ms | -0.00ms | -1.78% |
-| max | 0.09ms | 0.10ms | -0.00ms | -2.65% |
-| total | 2.90ms | 2.90ms | +0.00ms | +0.10% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +4.82% |
+| p95 | 0.03ms | 0.03ms | +0.00ms | +5.09% |
+| p99 | 0.07ms | 0.07ms | -0.01ms | -8.08% |
+| mean | 0.02ms | 0.02ms | +0.00ms | +5.05% |
+| min | 0.01ms | 0.01ms | -0.00ms | -5.22% |
+| max | 0.10ms | 0.11ms | -0.00ms | -3.01% |
+| total | 3.38ms | 3.22ms | +0.16ms | +5.05% |
 
 ### invokeEndpoint
 
@@ -62,24 +62,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.01ms |
+| p50 | 0.00ms |
 | p95 | 0.01ms |
-| p99 | 0.02ms |
+| p99 | 0.01ms |
 | mean | 0.01ms |
-| stdev | 0.01ms |
-| min | 0.01ms |
-| max | 0.07ms |
-| total | 1.73ms |
+| stdev | 0.00ms |
+| min | 0.00ms |
+| max | 0.02ms |
+| total | 1.08ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.00ms | +0.00ms | +57.62% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +36.17% |
-| p99 | 0.02ms | 0.02ms | +0.01ms | +31.10% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +56.00% |
-| min | 0.01ms | 0.00ms | +0.00ms | +59.05% |
-| max | 0.07ms | 0.03ms | +0.04ms | +141.80% |
-| total | 1.73ms | 1.11ms | +0.62ms | +56.00% |
+| p50 | 0.00ms | 0.01ms | -0.00ms | -42.15% |
+| p95 | 0.01ms | 0.01ms | -0.01ms | -41.81% |
+| p99 | 0.01ms | 0.02ms | -0.01ms | -41.44% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -43.21% |
+| min | 0.00ms | 0.01ms | -0.00ms | -43.81% |
+| max | 0.02ms | 0.07ms | -0.05ms | -69.98% |
+| total | 1.08ms | 1.91ms | -0.82ms | -43.21% |
 

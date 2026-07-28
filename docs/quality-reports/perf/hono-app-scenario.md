@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| route_workflow (10 invokeRoute GET+POST mix) | 0.03ms | 100ms | PASS | stable |
-| rpc_client_batch (5 rpc calls) | 0.02ms | 100ms | PASS | stable |
-| route_error_handling (5 throw + catch) | 0.05ms | 100ms | PASS | stable |
+| route_workflow (10 invokeRoute GET+POST mix) | 0.05ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +1226%) 以上の悪化が必要) |
+| rpc_client_batch (5 rpc calls) | 0.02ms | 100ms | PASS | stable (差 0.12ms が下限 0.5ms 未満で判定を保留) |
+| route_error_handling (5 throw + catch) | 0.04ms | 100ms | PASS | stable (差 0.02ms が下限 0.5ms 未満で判定を保留) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| route_workflow (10 invokeRoute GET+POST mix) | 0.13ms | 200ms | PASS |
-| rpc_client_batch (5 rpc calls) | 0.16ms | 200ms | PASS |
-| route_error_handling (5 throw + catch) | 0.19ms | 200ms | PASS |
+| route_workflow (10 invokeRoute GET+POST mix) | 0.11ms | 200ms | PASS |
+| rpc_client_batch (5 rpc calls) | 0.07ms | 200ms | PASS |
+| route_error_handling (5 throw + catch) | 0.17ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| route_workflow (10 invokeRoute GET+POST mix) | 16784 B | -9233 B | 102400 B | yes | PASS |
-| rpc_client_batch (5 rpc calls) | 656 B | 0 B | 102400 B | yes | PASS |
-| route_error_handling (5 throw + catch) | 1512 B | 0 B | 102400 B | yes | PASS |
+| route_workflow (10 invokeRoute GET+POST mix) | 6136 B | 0 B | 102400 B | yes | PASS |
+| rpc_client_batch (5 rpc calls) | -480 B | 0 B | 102400 B | yes | PASS |
+| route_error_handling (5 throw + catch) | 752 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +36,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.02ms |
-| p95 | 0.03ms |
-| p99 | 0.04ms |
+| p50 | 0.03ms |
+| p95 | 0.05ms |
+| p99 | 0.05ms |
 | mean | 0.03ms |
 | stdev | 0.01ms |
 | min | 0.02ms |
-| max | 0.04ms |
-| total | 0.51ms |
+| max | 0.06ms |
+| total | 0.59ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | -0.00ms | -0.28% |
-| p95 | 0.03ms | 0.04ms | -0.00ms | -2.77% |
-| p99 | 0.04ms | 0.04ms | +0.00ms | +2.72% |
-| mean | 0.03ms | 0.03ms | -0.00ms | -0.63% |
-| min | 0.02ms | 0.02ms | -0.00ms | -1.98% |
-| max | 0.04ms | 0.04ms | +0.00ms | +3.90% |
-| total | 0.51ms | 0.51ms | -0.00ms | -0.63% |
+| p50 | 0.03ms | 0.03ms | -0.00ms | -12.98% |
+| p95 | 0.05ms | 0.04ms | +0.01ms | +20.15% |
+| p99 | 0.05ms | 0.05ms | +0.01ms | +18.35% |
+| mean | 0.03ms | 0.03ms | -0.00ms | -5.65% |
+| min | 0.02ms | 0.03ms | -0.01ms | -25.00% |
+| max | 0.06ms | 0.05ms | +0.01ms | +17.96% |
+| total | 0.59ms | 0.63ms | -0.04ms | -5.65% |
 
 ### rpc_client_batch (5 rpc calls)
 
@@ -65,26 +65,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.02ms |
+| p50 | 0.01ms |
 | p95 | 0.02ms |
 | p99 | 0.02ms |
-| mean | 0.02ms |
+| mean | 0.01ms |
 | stdev | 0.00ms |
-| min | 0.02ms |
+| min | 0.01ms |
 | max | 0.02ms |
-| total | 0.37ms |
+| total | 0.30ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.01ms | +0.00ms | +20.08% |
-| p95 | 0.02ms | 0.02ms | +0.00ms | +22.57% |
-| p99 | 0.02ms | 0.02ms | +0.00ms | +16.40% |
-| mean | 0.02ms | 0.02ms | +0.00ms | +22.26% |
-| min | 0.02ms | 0.01ms | +0.00ms | +24.63% |
-| max | 0.02ms | 0.02ms | +0.00ms | +15.06% |
-| total | 0.37ms | 0.30ms | +0.07ms | +22.26% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -2.10% |
+| p95 | 0.02ms | 0.13ms | -0.12ms | -86.40% |
+| p99 | 0.02ms | 0.16ms | -0.14ms | -86.91% |
+| mean | 0.01ms | 0.03ms | -0.02ms | -54.52% |
+| min | 0.01ms | 0.01ms | -0.00ms | -12.43% |
+| max | 0.02ms | 0.17ms | -0.15ms | -87.01% |
+| total | 0.30ms | 0.66ms | -0.36ms | -54.52% |
 
 ### route_error_handling (5 throw + catch)
 
@@ -95,23 +95,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.04ms |
-| p95 | 0.05ms |
-| p99 | 0.05ms |
+| p95 | 0.04ms |
+| p99 | 0.04ms |
 | mean | 0.04ms |
 | stdev | 0.00ms |
-| min | 0.04ms |
-| max | 0.05ms |
-| total | 0.87ms |
+| min | 0.03ms |
+| max | 0.04ms |
+| total | 0.73ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.04ms | 0.04ms | +0.00ms | +12.32% |
-| p95 | 0.05ms | 0.04ms | +0.00ms | +2.58% |
-| p99 | 0.05ms | 0.05ms | -0.00ms | -6.95% |
-| mean | 0.04ms | 0.04ms | +0.00ms | +9.61% |
-| min | 0.04ms | 0.04ms | +0.00ms | +9.71% |
-| max | 0.05ms | 0.05ms | -0.00ms | -9.06% |
-| total | 0.87ms | 0.79ms | +0.08ms | +9.61% |
+| p50 | 0.04ms | 0.04ms | -0.00ms | -4.94% |
+| p95 | 0.04ms | 0.05ms | -0.02ms | -28.69% |
+| p99 | 0.04ms | 0.10ms | -0.06ms | -60.07% |
+| mean | 0.04ms | 0.04ms | -0.01ms | -14.73% |
+| min | 0.03ms | 0.04ms | -0.00ms | -6.25% |
+| max | 0.04ms | 0.11ms | -0.07ms | -64.00% |
+| total | 0.73ms | 0.86ms | -0.13ms | -14.73% |
 

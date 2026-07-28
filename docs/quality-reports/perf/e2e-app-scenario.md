@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| rest_workflow (POST create + GET read + DELETE cycle x3) | 3.52ms | 300ms | PASS | stable |
-| concurrent_read_batch (5 GET via Promise.all) | 0.69ms | 300ms | PASS | stable |
-| server_error_handling (5 GET /fail 500 responses) | 0.84ms | 300ms | PASS | stable |
+| rest_workflow (POST create + GET read + DELETE cycle x3) | 6.09ms | 300ms | PASS | stable |
+| concurrent_read_batch (5 GET via Promise.all) | 0.89ms | 300ms | PASS | stable |
+| server_error_handling (5 GET /fail 500 responses) | 1.17ms | 300ms | PASS | stable |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| rest_workflow (POST create + GET read + DELETE cycle x3) | 7.75ms | 600ms | PASS |
-| concurrent_read_batch (5 GET via Promise.all) | 1.35ms | 600ms | PASS |
-| server_error_handling (5 GET /fail 500 responses) | 3.59ms | 600ms | PASS |
+| rest_workflow (POST create + GET read + DELETE cycle x3) | 7.74ms | 600ms | PASS |
+| concurrent_read_batch (5 GET via Promise.all) | 1.81ms | 600ms | PASS |
+| server_error_handling (5 GET /fail 500 responses) | 3.48ms | 600ms | PASS |
 
 ## Memory retention (30 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| rest_workflow (POST create + GET read + DELETE cycle x3) | 2864 B | -52649 B | 102400 B | yes | PASS |
-| concurrent_read_batch (5 GET via Promise.all) | -21264 B | 0 B | 102400 B | yes | PASS |
-| server_error_handling (5 GET /fail 500 responses) | -6096 B | 11094 B | 102400 B | yes | PASS |
+| rest_workflow (POST create + GET read + DELETE cycle x3) | 48512 B | 10665 B | 102400 B | yes | PASS |
+| concurrent_read_batch (5 GET via Promise.all) | -5200 B | 0 B | 102400 B | yes | PASS |
+| server_error_handling (5 GET /fail 500 responses) | -760 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +36,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 3 |
-| p50 | 1.97ms |
-| p95 | 3.52ms |
-| p99 | 3.80ms |
-| mean | 2.22ms |
-| stdev | 0.79ms |
-| min | 1.15ms |
-| max | 3.88ms |
-| total | 66.74ms |
+| p50 | 2.32ms |
+| p95 | 6.09ms |
+| p99 | 6.91ms |
+| mean | 2.75ms |
+| stdev | 1.36ms |
+| min | 1.32ms |
+| max | 6.94ms |
+| total | 82.61ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 1.97ms | 2.13ms | -0.16ms | -7.58% |
-| p95 | 3.52ms | 3.12ms | +0.40ms | +12.91% |
-| p99 | 3.80ms | 3.56ms | +0.23ms | +6.53% |
-| mean | 2.22ms | 2.13ms | +0.09ms | +4.38% |
-| min | 1.15ms | 1.22ms | -0.06ms | -5.13% |
-| max | 3.88ms | 3.67ms | +0.21ms | +5.66% |
-| total | 66.74ms | 63.94ms | +2.80ms | +4.38% |
+| p50 | 2.32ms | 1.25ms | +1.07ms | +85.32% |
+| p95 | 6.09ms | 5.23ms | +0.86ms | +16.46% |
+| p99 | 6.91ms | 9.95ms | -3.05ms | -30.60% |
+| mean | 2.75ms | 1.94ms | +0.82ms | +42.08% |
+| min | 1.32ms | 0.61ms | +0.71ms | +117.33% |
+| max | 6.94ms | 13.94ms | -7.00ms | -50.18% |
+| total | 82.61ms | 387.61ms | -305.00ms | -78.69% |
 
 ### concurrent_read_batch (5 GET via Promise.all)
 
@@ -65,26 +65,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 3 |
-| p50 | 0.42ms |
-| p95 | 0.69ms |
-| p99 | 0.81ms |
-| mean | 0.46ms |
-| stdev | 0.11ms |
+| p50 | 0.39ms |
+| p95 | 0.89ms |
+| p99 | 1.45ms |
+| mean | 0.49ms |
+| stdev | 0.27ms |
 | min | 0.35ms |
-| max | 0.84ms |
-| total | 13.83ms |
+| max | 1.64ms |
+| total | 14.80ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.42ms | 0.45ms | -0.02ms | -5.16% |
-| p95 | 0.69ms | 0.67ms | +0.03ms | +3.94% |
-| p99 | 0.81ms | 0.70ms | +0.11ms | +15.52% |
-| mean | 0.46ms | 0.48ms | -0.02ms | -3.77% |
-| min | 0.35ms | 0.35ms | -0.00ms | -0.44% |
-| max | 0.84ms | 0.72ms | +0.12ms | +17.28% |
-| total | 13.83ms | 14.38ms | -0.54ms | -3.77% |
+| p50 | 0.39ms | 0.39ms | -0.00ms | -0.86% |
+| p95 | 0.89ms | 0.98ms | -0.10ms | -9.82% |
+| p99 | 1.45ms | 3.08ms | -1.62ms | -52.76% |
+| mean | 0.49ms | 0.51ms | -0.02ms | -4.03% |
+| min | 0.35ms | 0.32ms | +0.03ms | +8.96% |
+| max | 1.64ms | 3.40ms | -1.76ms | -51.65% |
+| total | 14.80ms | 102.83ms | -88.03ms | -85.60% |
 
 ### server_error_handling (5 GET /fail 500 responses)
 
@@ -94,24 +94,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 3 |
-| p50 | 0.52ms |
-| p95 | 0.84ms |
-| p99 | 0.86ms |
-| mean | 0.56ms |
-| stdev | 0.16ms |
-| min | 0.37ms |
-| max | 0.86ms |
-| total | 16.67ms |
+| p50 | 0.66ms |
+| p95 | 1.17ms |
+| p99 | 1.22ms |
+| mean | 0.67ms |
+| stdev | 0.27ms |
+| min | 0.35ms |
+| max | 1.23ms |
+| total | 20.16ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.52ms | 0.38ms | +0.14ms | +35.31% |
-| p95 | 0.84ms | 0.69ms | +0.15ms | +22.05% |
-| p99 | 0.86ms | 0.81ms | +0.05ms | +5.63% |
-| mean | 0.56ms | 0.44ms | +0.12ms | +27.25% |
-| min | 0.37ms | 0.35ms | +0.02ms | +5.79% |
-| max | 0.86ms | 0.85ms | +0.01ms | +0.95% |
-| total | 16.67ms | 13.10ms | +3.57ms | +27.25% |
+| p50 | 0.66ms | 0.55ms | +0.11ms | +20.86% |
+| p95 | 1.17ms | 1.00ms | +0.17ms | +17.11% |
+| p99 | 1.22ms | 1.71ms | -0.48ms | -28.28% |
+| mean | 0.67ms | 0.60ms | +0.07ms | +11.85% |
+| min | 0.35ms | 0.35ms | +0.00ms | +1.01% |
+| max | 1.23ms | 2.20ms | -0.97ms | -44.19% |
+| total | 20.16ms | 120.18ms | -100.02ms | -83.22% |
 

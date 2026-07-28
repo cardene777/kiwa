@@ -6,9 +6,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| dispatchRailsRequest | 0.00ms | 5ms | PASS | stable |
-| dispatchGenericRequest | 0.00ms | 5ms | PASS | stable |
-| renderERB | 0.00ms | 5ms | PASS | stable |
+| dispatchRailsRequest | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +19950%) 以上の悪化が必要) |
+| dispatchGenericRequest | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +74733%) 以上の悪化が必要) |
+| renderERB | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +64691%) 以上の悪化が必要) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -22,9 +22,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| dispatchRailsRequest | -2688 B | 0 B | 102400 B | yes | PASS |
-| dispatchGenericRequest | -528 B | 0 B | 102400 B | yes | PASS |
-| renderERB | -2296 B | 0 B | 102400 B | yes | PASS |
+| dispatchRailsRequest | 95608 B | 0 B | 102400 B | yes | PASS |
+| dispatchGenericRequest | 536 B | 0 B | 102400 B | yes | PASS |
+| renderERB | -2608 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -42,20 +42,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.15ms |
+| max | 0.02ms |
+| total | 0.17ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +4.28% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +3.72% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -17.49% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -1.71% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +4.97% |
-| total | 0.15ms | 0.15ms | -0.00ms | -1.71% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -33.28% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -19.87% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -0.42% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -10.33% |
+| min | 0.00ms | 0.00ms | -0.00ms | -18.12% |
+| max | 0.02ms | 0.01ms | +0.01ms | +53.98% |
+| total | 0.17ms | 0.19ms | -0.02ms | -10.33% |
 
 ### dispatchGenericRequest
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.11ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +7.72% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +18.16% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +8.27% |
-| min | 0.00ms | 0.00ms | -0.00ms | -9.86% |
-| max | 0.01ms | 0.00ms | +0.01ms | +197.90% |
-| total | 0.11ms | 0.10ms | +0.01ms | +8.27% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -15.34% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +24.50% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -3.09% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -3.92% |
+| min | 0.00ms | 0.00ms | -0.00ms | -18.12% |
+| max | 0.01ms | 0.01ms | +0.00ms | +83.75% |
+| total | 0.12ms | 0.12ms | -0.00ms | -3.92% |
 
 ### renderERB
 
@@ -96,22 +96,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.00ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.11ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -1.31% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +6.59% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -0.60% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | -0.00ms | -5.03% |
-| total | 0.11ms | 0.11ms | -0.00ms | -0.60% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -16.60% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -12.62% |
+| p99 | 0.01ms | 0.02ms | -0.01ms | -54.18% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -59.59% |
+| min | 0.00ms | 0.00ms | -0.00ms | -18.12% |
+| max | 0.01ms | 0.12ms | -0.10ms | -90.04% |
+| total | 0.12ms | 0.30ms | -0.18ms | -59.59% |
 

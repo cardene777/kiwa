@@ -6,9 +6,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| createStore | 0.00ms | 5ms | PASS | stable |
-| dispatch | 0.00ms | 5ms | PASS | stable |
-| selectState | 0.00ms | 5ms | PASS | stable |
+| createStore | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +23083%) 以上の悪化が必要) |
+| dispatch | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +70210%) 以上の悪化が必要) |
+| selectState | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +149209%) 以上の悪化が必要) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -22,9 +22,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| createStore | 248552 B | 0 B | 102400 B | yes | PASS |
-| dispatch | -400 B | 0 B | 102400 B | yes | PASS |
-| selectState | -10112 B | 0 B | 102400 B | yes | PASS |
+| createStore | -4048 B | 0 B | 102400 B | yes | PASS |
+| dispatch | -15472 B | 0 B | 102400 B | yes | PASS |
+| selectState | 616 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -43,19 +43,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.11ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +12.28% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -17.36% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +10.01% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +3.66% |
-| min | 0.00ms | 0.00ms | +0.00ms | +33.20% |
-| max | 0.01ms | 0.01ms | -0.00ms | -15.38% |
-| total | 0.11ms | 0.11ms | +0.00ms | +3.66% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -11.20% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -55.48% |
+| p99 | 0.00ms | 0.01ms | -0.00ms | -49.64% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -22.10% |
+| min | 0.00ms | 0.00ms | +0.00ms | +16.40% |
+| max | 0.01ms | 0.01ms | -0.00ms | -11.53% |
+| total | 0.10ms | 0.13ms | -0.03ms | -22.10% |
 
 ### dispatch
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.14ms |
+| total | 0.13ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +112.05% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +7.50% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +17.60% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +51.75% |
-| total | 0.14ms | 0.12ms | +0.02ms | +17.60% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -8.40% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +48.66% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +23.81% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +6.95% |
+| min | 0.00ms | 0.00ms | -0.00ms | -12.61% |
+| max | 0.01ms | 0.01ms | +0.00ms | +27.64% |
+| total | 0.13ms | 0.12ms | +0.01ms | +6.95% |
 
 ### selectState
 
@@ -107,11 +107,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +129.72% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +14.23% |
-| min | 0.00ms | 0.00ms | +0.00ms | +25.30% |
-| max | 0.01ms | 0.01ms | +0.00ms | +64.52% |
-| total | 0.06ms | 0.06ms | +0.01ms | +14.23% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -16.80% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -24.78% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +61.57% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -4.69% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | -0.00ms | -11.39% |
+| total | 0.06ms | 0.06ms | -0.00ms | -4.69% |
 

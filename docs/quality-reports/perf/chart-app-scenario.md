@@ -6,19 +6,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| dashboard_render_workflow (10 chart across 4 kinds x 4 providers) | 0.07ms | 100ms | PASS | stable |
-| axis_recompute_batch (5 dataset で computeAxis) | 0.04ms | 100ms | PASS | stable |
-| animation_frame_burst (5 series x 10 frames) | 0.08ms | 100ms | PASS | stable |
-| drilldown_batch (5 hit + 5 miss) | 0.03ms | 100ms | PASS | stable |
-| export_batch (3 SVG + 3 PNG) | 0.03ms | 100ms | PASS | stable |
+| dashboard_render_workflow (10 chart across 4 kinds x 4 providers) | 0.07ms | 100ms | PASS | stable (差 0.15ms が下限 0.5ms 未満で判定を保留) |
+| axis_recompute_batch (5 dataset で computeAxis) | 0.03ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +1503%) 以上の悪化が必要) |
+| animation_frame_burst (5 series x 10 frames) | 0.06ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +835%) 以上の悪化が必要) |
+| drilldown_batch (5 hit + 5 miss) | 0.02ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +1074%) 以上の悪化が必要) |
+| export_batch (3 SVG + 3 PNG) | 0.02ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +1956%) 以上の悪化が必要) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| dashboard_render_workflow (10 chart across 4 kinds x 4 providers) | 0.19ms | 200ms | PASS |
-| axis_recompute_batch (5 dataset で computeAxis) | 0.09ms | 200ms | PASS |
-| animation_frame_burst (5 series x 10 frames) | 0.15ms | 200ms | PASS |
+| dashboard_render_workflow (10 chart across 4 kinds x 4 providers) | 1.00ms | 200ms | PASS |
+| axis_recompute_batch (5 dataset で computeAxis) | 0.10ms | 200ms | PASS |
+| animation_frame_burst (5 series x 10 frames) | 0.18ms | 200ms | PASS |
 | drilldown_batch (5 hit + 5 miss) | 0.04ms | 200ms | PASS |
 | export_batch (3 SVG + 3 PNG) | 0.05ms | 200ms | PASS |
 
@@ -26,11 +26,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| dashboard_render_workflow (10 chart across 4 kinds x 4 providers) | 10832 B | -15801 B | 102400 B | yes | PASS |
-| axis_recompute_batch (5 dataset で computeAxis) | 5688 B | 0 B | 102400 B | yes | PASS |
-| animation_frame_burst (5 series x 10 frames) | -112 B | 0 B | 102400 B | yes | PASS |
-| drilldown_batch (5 hit + 5 miss) | 8392 B | 0 B | 102400 B | yes | PASS |
-| export_batch (3 SVG + 3 PNG) | 1800 B | -40960 B | 102400 B | yes | PASS |
+| dashboard_render_workflow (10 chart across 4 kinds x 4 providers) | 208 B | 0 B | 102400 B | yes | PASS |
+| axis_recompute_batch (5 dataset で computeAxis) | -704 B | 0 B | 102400 B | yes | PASS |
+| animation_frame_burst (5 series x 10 frames) | 616 B | 0 B | 102400 B | yes | PASS |
+| drilldown_batch (5 hit + 5 miss) | 2384 B | 0 B | 102400 B | yes | PASS |
+| export_batch (3 SVG + 3 PNG) | 1528 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -44,24 +44,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 3 |
 | p50 | 0.06ms |
 | p95 | 0.07ms |
-| p99 | 0.13ms |
+| p99 | 0.07ms |
 | mean | 0.06ms |
-| stdev | 0.02ms |
+| stdev | 0.01ms |
 | min | 0.05ms |
-| max | 0.14ms |
-| total | 1.21ms |
+| max | 0.07ms |
+| total | 1.14ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.06ms | 0.06ms | +0.00ms | +3.36% |
-| p95 | 0.07ms | 0.07ms | +0.00ms | +0.94% |
-| p99 | 0.13ms | 0.07ms | +0.05ms | +70.62% |
-| mean | 0.06ms | 0.06ms | +0.00ms | +7.90% |
-| min | 0.05ms | 0.04ms | +0.00ms | +2.87% |
-| max | 0.14ms | 0.07ms | +0.06ms | +87.37% |
-| total | 1.21ms | 1.12ms | +0.09ms | +7.90% |
+| p50 | 0.06ms | 0.07ms | -0.02ms | -23.32% |
+| p95 | 0.07ms | 0.22ms | -0.15ms | -69.38% |
+| p99 | 0.07ms | 0.23ms | -0.16ms | -69.00% |
+| mean | 0.06ms | 0.10ms | -0.05ms | -44.85% |
+| min | 0.05ms | 0.06ms | -0.01ms | -21.20% |
+| max | 0.07ms | 0.24ms | -0.16ms | -68.91% |
+| total | 1.14ms | 2.06ms | -0.92ms | -44.85% |
 
 ### axis_recompute_batch (5 dataset で computeAxis)
 
@@ -72,25 +72,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.02ms |
-| p95 | 0.04ms |
-| p99 | 0.10ms |
-| mean | 0.03ms |
-| stdev | 0.02ms |
+| p95 | 0.03ms |
+| p99 | 0.04ms |
+| mean | 0.02ms |
+| stdev | 0.01ms |
 | min | 0.02ms |
-| max | 0.12ms |
-| total | 0.58ms |
+| max | 0.04ms |
+| total | 0.47ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | +0.00ms | +6.64% |
-| p95 | 0.04ms | 0.03ms | +0.01ms | +28.36% |
-| p99 | 0.10ms | 0.03ms | +0.07ms | +230.43% |
-| mean | 0.03ms | 0.02ms | +0.01ms | +30.06% |
-| min | 0.02ms | 0.02ms | +0.00ms | +10.82% |
-| max | 0.12ms | 0.03ms | +0.09ms | +278.73% |
-| total | 0.58ms | 0.44ms | +0.13ms | +30.06% |
+| p50 | 0.02ms | 0.02ms | +0.00ms | +3.08% |
+| p95 | 0.03ms | 0.03ms | -0.00ms | -2.20% |
+| p99 | 0.04ms | 0.03ms | +0.00ms | +7.91% |
+| mean | 0.02ms | 0.02ms | -0.00ms | -0.70% |
+| min | 0.02ms | 0.02ms | -0.00ms | -1.94% |
+| max | 0.04ms | 0.03ms | +0.00ms | +10.37% |
+| total | 0.47ms | 0.47ms | -0.00ms | -0.70% |
 
 ### animation_frame_burst (5 series x 10 frames)
 
@@ -100,26 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.05ms |
-| p95 | 0.08ms |
-| p99 | 0.09ms |
-| mean | 0.05ms |
+| p50 | 0.04ms |
+| p95 | 0.06ms |
+| p99 | 0.06ms |
+| mean | 0.04ms |
 | stdev | 0.01ms |
-| min | 0.04ms |
-| max | 0.09ms |
-| total | 1.06ms |
+| min | 0.03ms |
+| max | 0.06ms |
+| total | 0.82ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.05ms | 0.04ms | +0.01ms | +32.39% |
-| p95 | 0.08ms | 0.06ms | +0.02ms | +41.19% |
-| p99 | 0.09ms | 0.06ms | +0.03ms | +44.99% |
-| mean | 0.05ms | 0.04ms | +0.01ms | +29.16% |
-| min | 0.04ms | 0.03ms | +0.01ms | +23.80% |
-| max | 0.09ms | 0.06ms | +0.03ms | +45.87% |
-| total | 1.06ms | 0.82ms | +0.24ms | +29.16% |
+| p50 | 0.04ms | 0.05ms | -0.01ms | -16.90% |
+| p95 | 0.06ms | 0.06ms | -0.00ms | -3.46% |
+| p99 | 0.06ms | 0.07ms | -0.01ms | -16.63% |
+| mean | 0.04ms | 0.05ms | -0.01ms | -16.82% |
+| min | 0.03ms | 0.03ms | -0.00ms | -2.46% |
+| max | 0.06ms | 0.08ms | -0.01ms | -19.24% |
+| total | 0.82ms | 0.99ms | -0.17ms | -16.82% |
 
 ### drilldown_batch (5 hit + 5 miss)
 
@@ -129,26 +129,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.02ms |
-| p95 | 0.03ms |
+| p50 | 0.01ms |
+| p95 | 0.02ms |
 | p99 | 0.03ms |
 | mean | 0.02ms |
 | stdev | 0.00ms |
 | min | 0.01ms |
 | max | 0.03ms |
-| total | 0.37ms |
+| total | 0.30ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | -0.00ms | -20.02% |
-| p95 | 0.03ms | 0.02ms | +0.00ms | +9.16% |
-| p99 | 0.03ms | 0.03ms | +0.00ms | +15.11% |
-| mean | 0.02ms | 0.02ms | -0.00ms | -9.63% |
-| min | 0.01ms | 0.02ms | -0.01ms | -42.33% |
-| max | 0.03ms | 0.03ms | +0.00ms | +16.35% |
-| total | 0.37ms | 0.41ms | -0.04ms | -9.63% |
+| p50 | 0.01ms | 0.01ms | +0.01ms | +62.07% |
+| p95 | 0.02ms | 0.05ms | -0.02ms | -51.58% |
+| p99 | 0.03ms | 0.18ms | -0.15ms | -84.81% |
+| mean | 0.02ms | 0.03ms | -0.01ms | -41.62% |
+| min | 0.01ms | 0.01ms | -0.00ms | -16.35% |
+| max | 0.03ms | 0.22ms | -0.19ms | -86.60% |
+| total | 0.30ms | 0.51ms | -0.21ms | -41.62% |
 
 ### export_batch (3 SVG + 3 PNG)
 
@@ -158,24 +158,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.02ms |
-| p95 | 0.03ms |
+| p50 | 0.01ms |
+| p95 | 0.02ms |
 | p99 | 0.03ms |
 | mean | 0.02ms |
 | stdev | 0.00ms |
 | min | 0.01ms |
 | max | 0.03ms |
-| total | 0.37ms |
+| total | 0.32ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | +0.00ms | +9.71% |
-| p95 | 0.03ms | 0.02ms | +0.00ms | +4.36% |
-| p99 | 0.03ms | 0.03ms | -0.00ms | -5.28% |
-| mean | 0.02ms | 0.02ms | +0.00ms | +11.52% |
-| min | 0.01ms | 0.01ms | +0.00ms | +35.17% |
-| max | 0.03ms | 0.03ms | -0.00ms | -7.35% |
-| total | 0.37ms | 0.33ms | +0.04ms | +11.52% |
+| p50 | 0.01ms | 0.02ms | -0.00ms | -25.55% |
+| p95 | 0.02ms | 0.03ms | -0.00ms | -4.27% |
+| p99 | 0.03ms | 0.03ms | +0.00ms | +5.09% |
+| mean | 0.02ms | 0.02ms | -0.00ms | -15.76% |
+| min | 0.01ms | 0.02ms | -0.00ms | -24.34% |
+| max | 0.03ms | 0.03ms | +0.00ms | +7.41% |
+| total | 0.32ms | 0.38ms | -0.06ms | -15.76% |
 

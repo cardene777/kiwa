@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| audit_workflow (3 fixture runAxe cycle) | 24.27ms | 1200ms | PASS | stable |
-| violation_report_batch (2 dirty runAxe + reportViolations) | 15.63ms | 900ms | PASS | stable |
-| audit_error_handling (3 invalid-context throw + catch) | 12.72ms | 100ms | PASS | stable |
+| audit_workflow (3 fixture runAxe cycle) | 39.03ms | 1200ms | PASS | stable — gate 対象外 (jsdom + axe-core の実行時間が実行ごとに 2 倍以上動く (#1718)) |
+| violation_report_batch (2 dirty runAxe + reportViolations) | 29.48ms | 900ms | PASS | improved — gate 対象外 (jsdom + axe-core の実行時間が実行ごとに 2 倍以上動く (#1718)) |
+| audit_error_handling (3 invalid-context throw + catch) | 34.92ms | 100ms | PASS | stable — gate 対象外 (jsdom + axe-core の実行時間が実行ごとに 2 倍以上動く (#1718)) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| audit_workflow (3 fixture runAxe cycle) | 81.42ms | 2400ms | PASS |
-| violation_report_batch (2 dirty runAxe + reportViolations) | 62.99ms | 1800ms | PASS |
-| audit_error_handling (3 invalid-context throw + catch) | 49.87ms | 200ms | PASS |
+| audit_workflow (3 fixture runAxe cycle) | 137.11ms | 2400ms | PASS |
+| violation_report_batch (2 dirty runAxe + reportViolations) | 110.06ms | 1800ms | PASS |
+| audit_error_handling (3 invalid-context throw + catch) | 123.12ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| audit_workflow (3 fixture runAxe cycle) | -301064 B | 0 B | 102400 B | yes | PASS |
-| violation_report_batch (2 dirty runAxe + reportViolations) | 12432 B | 0 B | 102400 B | yes | PASS |
-| audit_error_handling (3 invalid-context throw + catch) | 171248 B | 0 B | 102400 B | yes | PASS |
+| audit_workflow (3 fixture runAxe cycle) | -316600 B | 0 B | 102400 B | yes | PASS |
+| violation_report_batch (2 dirty runAxe + reportViolations) | -16880 B | 0 B | 102400 B | yes | PASS |
+| audit_error_handling (3 invalid-context throw + catch) | -138728 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +36,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 20.14ms |
-| p95 | 24.27ms |
-| p99 | 28.48ms |
-| mean | 20.89ms |
-| stdev | 2.60ms |
-| min | 18.13ms |
-| max | 29.53ms |
-| total | 417.79ms |
+| p50 | 29.42ms |
+| p95 | 39.03ms |
+| p99 | 44.08ms |
+| mean | 30.39ms |
+| stdev | 5.44ms |
+| min | 24.66ms |
+| max | 45.34ms |
+| total | 607.83ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 20.14ms | 20.76ms | -0.62ms | -2.98% |
-| p95 | 24.27ms | 22.67ms | +1.60ms | +7.06% |
-| p99 | 28.48ms | 22.93ms | +5.55ms | +24.21% |
-| mean | 20.89ms | 20.84ms | +0.05ms | +0.25% |
-| min | 18.13ms | 18.30ms | -0.16ms | -0.89% |
-| max | 29.53ms | 23.00ms | +6.54ms | +28.43% |
-| total | 417.79ms | 416.73ms | +1.06ms | +0.25% |
+| p50 | 29.42ms | 25.28ms | +4.15ms | +16.41% |
+| p95 | 39.03ms | 39.77ms | -0.74ms | -1.86% |
+| p99 | 44.08ms | 58.55ms | -14.48ms | -24.72% |
+| mean | 30.39ms | 28.34ms | +2.06ms | +7.25% |
+| min | 24.66ms | 18.12ms | +6.55ms | +36.14% |
+| max | 45.34ms | 224.01ms | -178.67ms | -79.76% |
+| total | 607.83ms | 3542.03ms | -2934.20ms | -82.84% |
 
 ### violation_report_batch (2 dirty runAxe + reportViolations)
 
@@ -65,26 +65,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 14.25ms |
-| p95 | 15.63ms |
-| p99 | 18.27ms |
-| mean | 14.38ms |
-| stdev | 1.25ms |
-| min | 13.16ms |
-| max | 18.93ms |
-| total | 287.69ms |
+| p50 | 23.03ms |
+| p95 | 29.48ms |
+| p99 | 29.75ms |
+| mean | 23.38ms |
+| stdev | 3.08ms |
+| min | 18.85ms |
+| max | 29.82ms |
+| total | 467.54ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 14.25ms | 14.72ms | -0.48ms | -3.23% |
-| p95 | 15.63ms | 15.81ms | -0.17ms | -1.11% |
-| p99 | 18.27ms | 16.18ms | +2.09ms | +12.90% |
-| mean | 14.38ms | 14.81ms | -0.42ms | -2.86% |
-| min | 13.16ms | 13.84ms | -0.68ms | -4.91% |
-| max | 18.93ms | 16.28ms | +2.65ms | +16.30% |
-| total | 287.69ms | 296.16ms | -8.47ms | -2.86% |
+| p50 | 23.03ms | 27.39ms | -4.36ms | -15.92% |
+| p95 | 29.48ms | 65.73ms | -36.25ms | -55.15% |
+| p99 | 29.75ms | 217.12ms | -187.37ms | -86.30% |
+| mean | 23.38ms | 36.08ms | -12.71ms | -35.21% |
+| min | 18.85ms | 17.17ms | +1.68ms | +9.79% |
+| max | 29.82ms | 256.64ms | -226.83ms | -88.38% |
+| total | 467.54ms | 4510.27ms | -4042.73ms | -89.63% |
 
 ### audit_error_handling (3 invalid-context throw + catch)
 
@@ -94,24 +94,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 11.78ms |
-| p95 | 12.72ms |
-| p99 | 13.09ms |
-| mean | 11.79ms |
-| stdev | 0.72ms |
-| min | 10.30ms |
-| max | 13.18ms |
-| total | 235.79ms |
+| p50 | 27.04ms |
+| p95 | 34.92ms |
+| p99 | 36.11ms |
+| mean | 26.41ms |
+| stdev | 5.81ms |
+| min | 16.41ms |
+| max | 36.40ms |
+| total | 528.16ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 11.78ms | 12.44ms | -0.67ms | -5.35% |
-| p95 | 12.72ms | 13.00ms | -0.28ms | -2.14% |
-| p99 | 13.09ms | 13.32ms | -0.23ms | -1.73% |
-| mean | 11.79ms | 12.19ms | -0.40ms | -3.27% |
-| min | 10.30ms | 10.22ms | +0.08ms | +0.81% |
-| max | 13.18ms | 13.40ms | -0.22ms | -1.63% |
-| total | 235.79ms | 243.77ms | -7.98ms | -3.27% |
+| p50 | 27.04ms | 18.33ms | +8.71ms | +47.52% |
+| p95 | 34.92ms | 34.05ms | +0.87ms | +2.55% |
+| p99 | 36.11ms | 54.85ms | -18.74ms | -34.17% |
+| mean | 26.41ms | 20.66ms | +5.75ms | +27.80% |
+| min | 16.41ms | 11.31ms | +5.10ms | +45.07% |
+| max | 36.40ms | 88.83ms | -52.42ms | -59.02% |
+| total | 528.16ms | 2582.86ms | -2054.70ms | -79.55% |
 

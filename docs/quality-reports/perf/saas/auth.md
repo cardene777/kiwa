@@ -6,16 +6,16 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| nextAuthProviderLookup | 0.00ms | 5ms | PASS | stable |
-| luciaSessionIdGenerate | 0.00ms | 5ms | PASS | stable |
-| betterAuthProviderLookup | 0.00ms | 5ms | PASS | stable |
-| clerkUsersCreateAccessor | 0.00ms | 5ms | PASS | stable |
-| auth0RulesActionsAccessor | 0.00ms | 5ms | PASS | stable |
-| supabaseAuthEnvAccessor | 0.00ms | 5ms | PASS | stable |
-| webAuthnAuthenticatorList | 0.00ms | 5ms | PASS | stable |
-| passkeyListAuthenticators | 0.00ms | 5ms | PASS | stable |
-| oauth21CreatePkceChallenge | 0.01ms | 10ms | PASS | stable |
-| oidcDiscoveryFetch | 0.00ms | 5ms | PASS | stable |
+| nextAuthProviderLookup | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +41247%) 以上の悪化が必要) |
+| luciaSessionIdGenerate | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +240385%) 以上の悪化が必要) |
+| betterAuthProviderLookup | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +240327%) 以上の悪化が必要) |
+| clerkUsersCreateAccessor | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +299401%) 以上の悪化が必要) |
+| auth0RulesActionsAccessor | 0.00ms | 5ms | PASS | stable (差 0.00ms が下限 0.5ms 未満で判定を保留) |
+| supabaseAuthEnvAccessor | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +239234%) 以上の悪化が必要) |
+| webAuthnAuthenticatorList | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +240327%) 以上の悪化が必要) |
+| passkeyListAuthenticators | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +147885%) 以上の悪化が必要) |
+| oauth21CreatePkceChallenge | 0.01ms | 10ms | PASS | stable (検知には +0.5ms (baseline 比 +3259%) 以上の悪化が必要) |
+| oidcDiscoveryFetch | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +133333%) 以上の悪化が必要) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -25,27 +25,27 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | luciaSessionIdGenerate | 0.01ms | 10ms | PASS |
 | betterAuthProviderLookup | 0.01ms | 10ms | PASS |
 | clerkUsersCreateAccessor | 0.00ms | 10ms | PASS |
-| auth0RulesActionsAccessor | 0.00ms | 10ms | PASS |
+| auth0RulesActionsAccessor | 0.01ms | 10ms | PASS |
 | supabaseAuthEnvAccessor | 0.00ms | 10ms | PASS |
 | webAuthnAuthenticatorList | 0.00ms | 10ms | PASS |
 | passkeyListAuthenticators | 0.00ms | 10ms | PASS |
-| oauth21CreatePkceChallenge | 0.06ms | 20ms | PASS |
+| oauth21CreatePkceChallenge | 0.10ms | 20ms | PASS |
 | oidcDiscoveryFetch | 0.00ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| nextAuthProviderLookup | -31656 B | 0 B | 102400 B | yes | PASS |
-| luciaSessionIdGenerate | -544 B | 0 B | 102400 B | yes | PASS |
-| betterAuthProviderLookup | 816 B | 0 B | 102400 B | yes | PASS |
-| clerkUsersCreateAccessor | 912 B | 0 B | 102400 B | yes | PASS |
-| auth0RulesActionsAccessor | 1144 B | 0 B | 102400 B | yes | PASS |
-| supabaseAuthEnvAccessor | 1528 B | 0 B | 102400 B | yes | PASS |
-| webAuthnAuthenticatorList | 312 B | 0 B | 102400 B | yes | PASS |
-| passkeyListAuthenticators | 1232 B | 0 B | 102400 B | yes | PASS |
-| oauth21CreatePkceChallenge | -20760 B | 0 B | 102400 B | yes | PASS |
-| oidcDiscoveryFetch | 216 B | 0 B | 102400 B | yes | PASS |
+| nextAuthProviderLookup | 192464 B | 0 B | 102400 B | yes | PASS |
+| luciaSessionIdGenerate | -15448 B | 0 B | 102400 B | yes | PASS |
+| betterAuthProviderLookup | 712 B | 0 B | 102400 B | yes | PASS |
+| clerkUsersCreateAccessor | 712 B | 0 B | 102400 B | yes | PASS |
+| auth0RulesActionsAccessor | -544 B | 0 B | 102400 B | yes | PASS |
+| supabaseAuthEnvAccessor | 1328 B | 0 B | 102400 B | yes | PASS |
+| webAuthnAuthenticatorList | -1280 B | 0 B | 102400 B | yes | PASS |
+| passkeyListAuthenticators | 16 B | 0 B | 102400 B | yes | PASS |
+| oauth21CreatePkceChallenge | -20496 B | 0 B | 102400 B | yes | PASS |
+| oidcDiscoveryFetch | 16 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -70,13 +70,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +16.87% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +23.29% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +11.66% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -19.71% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -13.36% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -37.67% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -54.87% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +6.40% |
-| total | 0.06ms | 0.05ms | +0.01ms | +11.66% |
+| max | 0.00ms | 0.07ms | -0.06ms | -93.95% |
+| total | 0.06ms | 0.13ms | -0.07ms | -54.87% |
 
 ### luciaSessionIdGenerate
 
@@ -100,12 +100,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | -0.00ms | -24.70% |
-| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -7.52% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -4.06% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -19.71% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +26.85% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -2.88% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | -0.00ms | -0.14% |
-| total | 0.03ms | 0.03ms | -0.00ms | -4.06% |
+| max | 0.00ms | 0.00ms | +0.00ms | +11.72% |
+| total | 0.03ms | 0.03ms | -0.00ms | -2.88% |
 
 ### betterAuthProviderLookup
 
@@ -128,13 +128,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -25.15% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +23.63% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +64.29% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +0.61% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -18.75% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +53.57% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +1.28% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +12.42% |
-| total | 0.04ms | 0.04ms | +0.00ms | +0.61% |
+| max | 0.01ms | 0.01ms | +0.00ms | +4.12% |
+| total | 0.04ms | 0.04ms | +0.00ms | +1.28% |
 
 ### clerkUsersCreateAccessor
 
@@ -157,13 +157,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -24.70% |
 | p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +23.28% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +8.48% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -22.76% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -2.97% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +30.48% |
-| total | 0.03ms | 0.03ms | +0.00ms | +8.48% |
+| max | 0.00ms | 0.00ms | -0.00ms | -2.80% |
+| total | 0.03ms | 0.03ms | -0.00ms | -2.97% |
 
 ### auth0RulesActionsAccessor
 
@@ -179,20 +179,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.05ms |
+| max | 0.00ms |
+| total | 0.08ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -0.60% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -20.10% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +152.13% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +26.11% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.00ms | +0.01ms | +791.63% |
-| total | 0.05ms | 0.04ms | +0.01ms | +26.11% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +124.55% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +119.14% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +144.52% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +130.87% |
+| min | 0.00ms | 0.00ms | +0.00ms | +133.60% |
+| max | 0.00ms | 0.00ms | +0.00ms | +125.56% |
+| total | 0.08ms | 0.04ms | +0.05ms | +130.87% |
 
 ### supabaseAuthEnvAccessor
 
@@ -215,13 +215,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -18.73% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +123.79% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +18.73% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -24.70% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -20.10% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +116.71% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +8.88% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +345.14% |
-| total | 0.04ms | 0.03ms | +0.01ms | +18.73% |
+| max | 0.00ms | 0.00ms | +0.00ms | +636.19% |
+| total | 0.04ms | 0.03ms | +0.00ms | +8.88% |
 
 ### webAuthnAuthenticatorList
 
@@ -245,12 +245,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | -0.00ms | -24.70% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -19.71% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -6.34% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -0.13% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -19.73% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +0.42% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -6.81% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +99.91% |
-| total | 0.03ms | 0.03ms | -0.00ms | -0.13% |
+| max | 0.00ms | 0.00ms | -0.00ms | -20.74% |
+| total | 0.03ms | 0.04ms | -0.00ms | -6.81% |
 
 ### passkeyListAuthenticators
 
@@ -273,13 +273,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -0.81% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +62.09% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +12.59% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.00ms | +0.00ms | +117.34% |
-| total | 0.05ms | 0.05ms | +0.01ms | +12.59% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -0.48% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -37.58% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -44.08% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -43.10% |
+| min | 0.00ms | 0.00ms | -0.00ms | -20.19% |
+| max | 0.01ms | 0.02ms | -0.01ms | -61.94% |
+| total | 0.05ms | 0.10ms | -0.04ms | -43.10% |
 
 ### oauth21CreatePkceChallenge
 
@@ -291,24 +291,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.01ms |
-| p99 | 0.01ms |
+| p99 | 0.02ms |
 | mean | 0.01ms |
-| stdev | 0.00ms |
+| stdev | 0.01ms |
 | min | 0.00ms |
-| max | 0.03ms |
-| total | 1.03ms |
+| max | 0.14ms |
+| total | 1.28ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +2.06% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -3.55% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +0.85% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +0.26% |
-| min | 0.00ms | 0.00ms | +0.00ms | +0.03% |
-| max | 0.03ms | 0.02ms | +0.00ms | +15.44% |
-| total | 1.03ms | 1.03ms | +0.00ms | +0.26% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -6.02% |
+| p95 | 0.01ms | 0.02ms | -0.00ms | -7.73% |
+| p99 | 0.02ms | 0.03ms | -0.01ms | -27.43% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -3.21% |
+| min | 0.00ms | 0.00ms | -0.00ms | -9.92% |
+| max | 0.14ms | 0.06ms | +0.09ms | +146.94% |
+| total | 1.28ms | 1.32ms | -0.04ms | -3.21% |
 
 ### oidcDiscoveryFetch
 
@@ -332,10 +332,10 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | -0.00ms | -14.38% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +12.28% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +23.17% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -3.09% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -10.93% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -5.48% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -7.63% |
 | min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | -0.00ms | -3.90% |
-| total | 0.06ms | 0.06ms | -0.00ms | -3.09% |
+| max | 0.00ms | 0.00ms | -0.00ms | -27.08% |
+| total | 0.06ms | 0.07ms | -0.01ms | -7.63% |
 

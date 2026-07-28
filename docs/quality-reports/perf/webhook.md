@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| verifyIncoming | 0.01ms | 5ms | PASS | stable |
-| verifyWebhookSignature | 0.00ms | 5ms | PASS | stable |
-| parseWebhookPayload | 0.00ms | 5ms | PASS | stable |
+| verifyIncoming | 0.02ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +2000%) 以上の悪化が必要) |
+| verifyWebhookSignature | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +18443%) 以上の悪化が必要) |
+| parseWebhookPayload | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +78945%) 以上の悪化が必要) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| verifyIncoming | 0.07ms | 10ms | PASS |
-| verifyWebhookSignature | 0.02ms | 10ms | PASS |
+| verifyIncoming | 0.05ms | 10ms | PASS |
+| verifyWebhookSignature | 0.03ms | 10ms | PASS |
 | parseWebhookPayload | 0.01ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| verifyIncoming | 45344 B | 0 B | 102400 B | yes | PASS |
-| verifyWebhookSignature | -18568 B | 0 B | 102400 B | yes | PASS |
-| parseWebhookPayload | 912 B | 0 B | 102400 B | yes | PASS |
+| verifyIncoming | 46720 B | 0 B | 102400 B | yes | PASS |
+| verifyWebhookSignature | -17472 B | 0 B | 102400 B | yes | PASS |
+| parseWebhookPayload | 616 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -37,25 +37,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 200 |
 | warmup | 5 |
 | p50 | 0.00ms |
-| p95 | 0.01ms |
-| p99 | 0.02ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
+| p95 | 0.02ms |
+| p99 | 0.06ms |
+| mean | 0.01ms |
+| stdev | 0.01ms |
 | min | 0.00ms |
-| max | 0.02ms |
-| total | 0.85ms |
+| max | 0.08ms |
+| total | 1.27ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -22.01% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -16.68% |
-| p99 | 0.02ms | 0.02ms | -0.00ms | -17.00% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -13.27% |
-| min | 0.00ms | 0.00ms | -0.00ms | -5.21% |
-| max | 0.02ms | 0.02ms | -0.00ms | -5.23% |
-| total | 0.85ms | 0.98ms | -0.13ms | -13.27% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -3.61% |
+| p95 | 0.02ms | 0.03ms | -0.01ms | -36.16% |
+| p99 | 0.06ms | 0.05ms | +0.01ms | +13.73% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -3.89% |
+| min | 0.00ms | 0.00ms | -0.00ms | -9.34% |
+| max | 0.08ms | 0.08ms | -0.00ms | -4.14% |
+| total | 1.27ms | 1.33ms | -0.05ms | -3.89% |
 
 ### verifyWebhookSignature
 
@@ -78,13 +78,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -7.81% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -3.09% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -10.20% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -9.96% |
-| min | 0.00ms | 0.00ms | -0.00ms | -6.25% |
-| max | 0.01ms | 0.02ms | -0.00ms | -27.12% |
-| total | 0.43ms | 0.48ms | -0.05ms | -9.96% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -6.12% |
+| p95 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +69.36% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -2.24% |
+| min | 0.00ms | 0.00ms | -0.00ms | -4.38% |
+| max | 0.01ms | 0.01ms | +0.00ms | +28.90% |
+| total | 0.43ms | 0.44ms | -0.01ms | -2.24% |
 
 ### parseWebhookPayload
 
@@ -107,11 +107,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -11.20% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -16.53% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -17.37% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -3.57% |
-| min | 0.00ms | 0.00ms | -0.00ms | -12.61% |
-| max | 0.01ms | 0.01ms | +0.00ms | +30.60% |
-| total | 0.09ms | 0.09ms | -0.00ms | -3.57% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -0.30% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -12.93% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +46.39% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +14.27% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.00ms | +0.01ms | +226.55% |
+| total | 0.09ms | 0.08ms | +0.01ms | +14.27% |
 

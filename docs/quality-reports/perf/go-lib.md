@@ -6,28 +6,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| invokeGinHandler | 0.00ms | 5ms | PASS | stable |
-| invokeEchoHandler | 0.00ms | 5ms | PASS | stable |
-| invokeFiberHandler | 0.00ms | 5ms | PASS | stable |
-| captureChiRoute | 0.00ms | 5ms | PASS | stable |
+| invokeGinHandler | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +33103%) 以上の悪化が必要) |
+| invokeEchoHandler | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +73465%) 以上の悪化が必要) |
+| invokeFiberHandler | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +69195%) 以上の悪化が必要) |
+| captureChiRoute | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +14575%) 以上の悪化が必要) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| invokeGinHandler | 0.02ms | 10ms | PASS |
+| invokeGinHandler | 0.01ms | 10ms | PASS |
 | invokeEchoHandler | 0.01ms | 10ms | PASS |
-| invokeFiberHandler | 0.01ms | 10ms | PASS |
+| invokeFiberHandler | 0.02ms | 10ms | PASS |
 | captureChiRoute | 0.02ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeGinHandler | -8840 B | 0 B | 102400 B | yes | PASS |
-| invokeEchoHandler | 160 B | 0 B | 102400 B | yes | PASS |
-| invokeFiberHandler | -5040 B | 0 B | 102400 B | yes | PASS |
-| captureChiRoute | 1032 B | 0 B | 102400 B | yes | PASS |
+| invokeGinHandler | 344376 B | 0 B | 102400 B | yes | PASS |
+| invokeEchoHandler | 185496 B | 0 B | 102400 B | yes | PASS |
+| invokeFiberHandler | -744 B | 0 B | 102400 B | yes | PASS |
+| captureChiRoute | -5256 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -46,19 +46,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.15ms |
+| total | 0.16ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -60.58% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -34.84% |
-| p99 | 0.01ms | 0.01ms | -0.01ms | -58.67% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -51.15% |
-| min | 0.00ms | 0.00ms | -0.00ms | -9.86% |
-| max | 0.01ms | 0.04ms | -0.03ms | -70.31% |
-| total | 0.15ms | 0.31ms | -0.16ms | -51.15% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -0.17% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +2.50% |
+| p99 | 0.01ms | 0.01ms | -0.01ms | -61.24% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -27.37% |
+| min | 0.00ms | 0.00ms | -0.00ms | -7.58% |
+| max | 0.01ms | 0.03ms | -0.02ms | -54.63% |
+| total | 0.16ms | 0.23ms | -0.06ms | -27.37% |
 
 ### invokeEchoHandler
 
@@ -72,22 +72,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.00ms |
 | p99 | 0.00ms |
 | mean | 0.00ms |
-| stdev | 0.01ms |
+| stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.10ms |
-| total | 0.22ms |
+| max | 0.02ms |
+| total | 0.14ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -26.56% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +31.21% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -5.52% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +47.31% |
-| min | 0.00ms | 0.00ms | -0.00ms | -23.11% |
-| max | 0.10ms | 0.01ms | +0.09ms | +1093.13% |
-| total | 0.22ms | 0.15ms | +0.07ms | +47.31% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -6.33% |
+| p99 | 0.00ms | 0.01ms | -0.01ms | -64.85% |
+| mean | 0.00ms | 0.01ms | -0.01ms | -93.57% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 1.88ms | -1.86ms | -98.83% |
+| total | 0.14ms | 2.23ms | -2.09ms | -93.57% |
 
 ### invokeFiberHandler
 
@@ -104,19 +104,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.13ms |
+| total | 0.14ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -7.36% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +2.61% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +0.53% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -11.79% |
-| min | 0.00ms | 0.00ms | -0.00ms | -7.58% |
-| max | 0.01ms | 0.01ms | -0.00ms | -9.64% |
-| total | 0.13ms | 0.15ms | -0.02ms | -11.79% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -0.18% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +26.77% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +19.21% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -0.32% |
+| min | 0.00ms | 0.00ms | -0.00ms | -0.22% |
+| max | 0.01ms | 0.01ms | +0.00ms | +7.58% |
+| total | 0.14ms | 0.14ms | -0.00ms | -0.32% |
 
 ### captureChiRoute
 
@@ -133,17 +133,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.26ms |
+| total | 0.21ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +4.92% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -23.39% |
-| p99 | 0.01ms | 0.02ms | -0.01ms | -53.78% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -20.39% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.02ms | -0.01ms | -47.93% |
-| total | 0.26ms | 0.33ms | -0.07ms | -20.39% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -13.74% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -54.81% |
+| p99 | 0.01ms | 0.15ms | -0.15ms | -95.39% |
+| mean | 0.00ms | 0.01ms | -0.01ms | -90.48% |
+| min | 0.00ms | 0.00ms | -0.00ms | -15.68% |
+| max | 0.01ms | 1.56ms | -1.54ms | -99.22% |
+| total | 0.21ms | 2.17ms | -1.97ms | -90.48% |
 

@@ -6,15 +6,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| csp_build_burst (50 buildCspHeader) | 0.10ms | 30ms | PASS | stable |
-| security_headers_validate_loop (20 build + validate) | 0.04ms | 50ms | PASS | stable |
-| production_hardening_flow (csp + security headers combined) | 0.00ms | 30ms | PASS | stable |
+| csp_build_burst (50 buildCspHeader) | 0.15ms | 30ms | PASS | stable (検知には +0.5ms (baseline 比 +188%) 以上の悪化が必要) |
+| security_headers_validate_loop (20 build + validate) | 0.03ms | 50ms | PASS | stable (検知には +0.5ms (baseline 比 +4476%) 以上の悪化が必要) |
+| production_hardening_flow (csp + security headers combined) | 0.01ms | 30ms | PASS | stable (検知には +0.5ms (baseline 比 +6447%) 以上の悪化が必要) |
 
 ## Concurrent p95 (concurrency = 4, 8 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| csp_build_burst (50 buildCspHeader) | 0.38ms | 60ms | PASS |
+| csp_build_burst (50 buildCspHeader) | 0.46ms | 60ms | PASS |
 | security_headers_validate_loop (20 build + validate) | 0.02ms | 100ms | PASS |
 | production_hardening_flow (csp + security headers combined) | 0.01ms | 60ms | PASS |
 
@@ -22,9 +22,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| csp_build_burst (50 buildCspHeader) | -6632 B | 0 B | 102400 B | yes | PASS |
-| security_headers_validate_loop (20 build + validate) | 1224 B | 0 B | 102400 B | yes | PASS |
-| production_hardening_flow (csp + security headers combined) | -14840 B | 0 B | 102400 B | yes | PASS |
+| csp_build_burst (50 buildCspHeader) | -10216 B | 0 B | 102400 B | yes | PASS |
+| security_headers_validate_loop (20 build + validate) | 3096 B | 0 B | 102400 B | yes | PASS |
+| production_hardening_flow (csp + security headers combined) | 696 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +36,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p50 | 0.06ms |
-| p95 | 0.10ms |
-| p99 | 0.20ms |
-| mean | 0.07ms |
-| stdev | 0.04ms |
-| min | 0.04ms |
-| max | 0.24ms |
-| total | 2.02ms |
+| p50 | 0.07ms |
+| p95 | 0.15ms |
+| p99 | 0.46ms |
+| mean | 0.10ms |
+| stdev | 0.10ms |
+| min | 0.06ms |
+| max | 0.59ms |
+| total | 2.95ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.06ms | 0.05ms | +0.00ms | +0.88% |
-| p95 | 0.10ms | 0.09ms | +0.00ms | +0.49% |
-| p99 | 0.20ms | 0.21ms | -0.01ms | -3.65% |
-| mean | 0.07ms | 0.07ms | +0.00ms | +0.00% |
-| min | 0.04ms | 0.04ms | -0.00ms | -2.13% |
-| max | 0.24ms | 0.25ms | -0.01ms | -3.96% |
-| total | 2.02ms | 2.02ms | +0.00ms | +0.00% |
+| p50 | 0.07ms | 0.06ms | +0.01ms | +20.63% |
+| p95 | 0.15ms | 0.27ms | -0.12ms | -44.28% |
+| p99 | 0.46ms | 0.34ms | +0.13ms | +38.36% |
+| mean | 0.10ms | 0.11ms | -0.02ms | -14.43% |
+| min | 0.06ms | 0.04ms | +0.01ms | +32.58% |
+| max | 0.59ms | 0.35ms | +0.24ms | +67.08% |
+| total | 2.95ms | 3.44ms | -0.50ms | -14.43% |
 
 ### security_headers_validate_loop (20 build + validate)
 
@@ -66,25 +66,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 30 |
 | warmup | 5 |
 | p50 | 0.01ms |
-| p95 | 0.04ms |
-| p99 | 0.08ms |
+| p95 | 0.03ms |
+| p99 | 0.09ms |
 | mean | 0.01ms |
 | stdev | 0.02ms |
-| min | 0.01ms |
-| max | 0.09ms |
-| total | 0.34ms |
+| min | 0.00ms |
+| max | 0.11ms |
+| total | 0.36ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +7.22% |
-| p95 | 0.04ms | 0.01ms | +0.02ms | +166.34% |
-| p99 | 0.08ms | 0.02ms | +0.05ms | +224.95% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +49.15% |
-| min | 0.01ms | 0.00ms | +0.00ms | +35.67% |
-| max | 0.09ms | 0.03ms | +0.06ms | +211.26% |
-| total | 0.34ms | 0.23ms | +0.11ms | +49.15% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +0.91% |
+| p95 | 0.03ms | 0.01ms | +0.02ms | +148.92% |
+| p99 | 0.09ms | 0.02ms | +0.07ms | +312.49% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +51.65% |
+| min | 0.00ms | 0.01ms | -0.00ms | -31.05% |
+| max | 0.11ms | 0.03ms | +0.08ms | +336.63% |
+| total | 0.36ms | 0.24ms | +0.12ms | +51.65% |
 
 ### production_hardening_flow (csp + security headers combined)
 
@@ -95,23 +95,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 30 |
 | warmup | 5 |
 | p50 | 0.00ms |
-| p95 | 0.00ms |
+| p95 | 0.01ms |
 | p99 | 0.01ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.06ms |
+| total | 0.09ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -12.10% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +23.34% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +22.84% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -1.82% |
-| min | 0.00ms | 0.00ms | -0.00ms | -5.04% |
-| max | 0.01ms | 0.00ms | +0.00ms | +23.71% |
-| total | 0.06ms | 0.06ms | -0.00ms | -1.82% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -49.04% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -29.69% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -29.27% |
+| mean | 0.00ms | 0.01ms | -0.00ms | -44.32% |
+| min | 0.00ms | 0.00ms | -0.00ms | -59.01% |
+| max | 0.01ms | 0.01ms | -0.00ms | -30.79% |
+| total | 0.09ms | 0.15ms | -0.07ms | -44.32% |
 

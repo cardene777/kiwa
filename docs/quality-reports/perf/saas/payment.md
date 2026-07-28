@@ -6,43 +6,43 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| stripeSignWebhook | 0.01ms | 10ms | PASS | stable |
-| stripeVerifyWebhook | 0.01ms | 10ms | PASS | stable |
-| paddleSignWebhook | 0.00ms | 10ms | PASS | stable |
-| paddleVerifyWebhook | 0.00ms | 10ms | PASS | stable |
-| lemonSqueezySignWebhook | 0.00ms | 10ms | PASS | stable |
-| lemonSqueezyVerifyWebhook | 0.00ms | 10ms | PASS | stable |
-| dunningStart | 0.00ms | 5ms | PASS | stable |
-| retryStart | 0.00ms | 5ms | PASS | stable |
-| retryBackoffMs | 0.00ms | 5ms | PASS | stable |
+| stripeSignWebhook | 0.01ms | 10ms | PASS | stable (検知には +0.5ms (baseline 比 +6648%) 以上の悪化が必要) |
+| stripeVerifyWebhook | 0.00ms | 10ms | PASS | stable (検知には +0.5ms (baseline 比 +7885%) 以上の悪化が必要) |
+| paddleSignWebhook | 0.00ms | 10ms | PASS | stable (検知には +0.5ms (baseline 比 +13581%) 以上の悪化が必要) |
+| paddleVerifyWebhook | 0.00ms | 10ms | PASS | stable (検知には +0.5ms (baseline 比 +12493%) 以上の悪化が必要) |
+| lemonSqueezySignWebhook | 0.00ms | 10ms | PASS | stable (検知には +0.5ms (baseline 比 +14797%) 以上の悪化が必要) |
+| lemonSqueezyVerifyWebhook | 0.00ms | 10ms | PASS | stable (検知には +0.5ms (baseline 比 +12889%) 以上の悪化が必要) |
+| dunningStart | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +47461%) 以上の悪化が必要) |
+| retryStart | 0.00ms | 5ms | PASS | stable (差 0.01ms が下限 0.5ms 未満で判定を保留) |
+| retryBackoffMs | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +85763%) 以上の悪化が必要) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
 | stripeSignWebhook | 0.04ms | 20ms | PASS |
-| stripeVerifyWebhook | 0.04ms | 20ms | PASS |
+| stripeVerifyWebhook | 0.05ms | 20ms | PASS |
 | paddleSignWebhook | 0.04ms | 20ms | PASS |
 | paddleVerifyWebhook | 0.04ms | 20ms | PASS |
 | lemonSqueezySignWebhook | 0.03ms | 20ms | PASS |
 | lemonSqueezyVerifyWebhook | 0.04ms | 20ms | PASS |
 | dunningStart | 0.00ms | 10ms | PASS |
-| retryStart | 0.03ms | 10ms | PASS |
+| retryStart | 0.04ms | 10ms | PASS |
 | retryBackoffMs | 0.01ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| stripeSignWebhook | -35880 B | 0 B | 102400 B | yes | PASS |
-| stripeVerifyWebhook | -21776 B | 0 B | 102400 B | yes | PASS |
-| paddleSignWebhook | 1328 B | 0 B | 102400 B | yes | PASS |
-| paddleVerifyWebhook | 784 B | 0 B | 102400 B | yes | PASS |
-| lemonSqueezySignWebhook | 5664 B | 0 B | 102400 B | yes | PASS |
-| lemonSqueezyVerifyWebhook | 1304 B | 0 B | 102400 B | yes | PASS |
-| dunningStart | 232 B | 0 B | 102400 B | yes | PASS |
-| retryStart | 664 B | 0 B | 102400 B | yes | PASS |
-| retryBackoffMs | -138888 B | 0 B | 102400 B | yes | PASS |
+| stripeSignWebhook | -13824 B | 0 B | 102400 B | yes | PASS |
+| stripeVerifyWebhook | -21608 B | 0 B | 102400 B | yes | PASS |
+| paddleSignWebhook | 2184 B | 0 B | 102400 B | yes | PASS |
+| paddleVerifyWebhook | 1192 B | 0 B | 102400 B | yes | PASS |
+| lemonSqueezySignWebhook | 6904 B | 0 B | 102400 B | yes | PASS |
+| lemonSqueezyVerifyWebhook | 10104 B | 0 B | 102400 B | yes | PASS |
+| dunningStart | 32 B | 0 B | 102400 B | yes | PASS |
+| retryStart | 16 B | 0 B | 102400 B | yes | PASS |
+| retryBackoffMs | 6952 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -56,24 +56,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.01ms |
-| p99 | 0.02ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.03ms |
-| total | 0.64ms |
+| total | 0.56ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +2.63% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -10.48% |
-| p99 | 0.02ms | 0.02ms | +0.00ms | +18.35% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +0.90% |
-| min | 0.00ms | 0.00ms | +0.00ms | +0.05% |
-| max | 0.03ms | 0.03ms | +0.00ms | +3.86% |
-| total | 0.64ms | 0.63ms | +0.01ms | +0.90% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -14.29% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -29.03% |
+| p99 | 0.01ms | 0.02ms | -0.01ms | -31.42% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -20.97% |
+| min | 0.00ms | 0.00ms | -0.00ms | -10.53% |
+| max | 0.03ms | 0.03ms | -0.00ms | -8.49% |
+| total | 0.56ms | 0.71ms | -0.15ms | -20.97% |
 
 ### stripeVerifyWebhook
 
@@ -84,25 +84,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | iterations | 200 |
 | warmup | 5 |
 | p50 | 0.00ms |
-| p95 | 0.01ms |
+| p95 | 0.00ms |
 | p99 | 0.01ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.03ms |
-| total | 0.71ms |
+| max | 0.01ms |
+| total | 0.61ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +5.95% |
-| p95 | 0.01ms | 0.00ms | +0.00ms | +36.58% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +52.19% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +16.17% |
-| min | 0.00ms | 0.00ms | +0.00ms | +1.57% |
-| max | 0.03ms | 0.01ms | +0.02ms | +229.15% |
-| total | 0.71ms | 0.61ms | +0.10ms | +16.17% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -5.63% |
+| p95 | 0.00ms | 0.01ms | -0.00ms | -29.08% |
+| p99 | 0.01ms | 0.01ms | -0.01ms | -40.72% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -14.09% |
+| min | 0.00ms | 0.00ms | -0.00ms | -4.55% |
+| max | 0.01ms | 0.03ms | -0.02ms | -58.65% |
+| total | 0.61ms | 0.71ms | -0.10ms | -14.09% |
 
 ### paddleSignWebhook
 
@@ -119,19 +119,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.02ms |
-| total | 0.66ms |
+| total | 0.67ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -1.43% |
-| p95 | 0.00ms | 0.01ms | -0.00ms | -48.96% |
-| p99 | 0.01ms | 0.02ms | -0.01ms | -37.31% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -22.36% |
-| min | 0.00ms | 0.00ms | +0.00ms | +0.04% |
-| max | 0.02ms | 0.12ms | -0.10ms | -80.86% |
-| total | 0.66ms | 0.84ms | -0.19ms | -22.36% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +4.17% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -1.48% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +24.27% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +3.44% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.02ms | 0.01ms | +0.00ms | +16.72% |
+| total | 0.67ms | 0.65ms | +0.02ms | +3.44% |
 
 ### paddleVerifyWebhook
 
@@ -148,19 +148,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.65ms |
+| total | 0.63ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -1.37% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +27.98% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +28.55% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +1.21% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | -0.00ms | -36.01% |
-| total | 0.65ms | 0.64ms | +0.01ms | +1.21% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -6.57% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -6.09% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -0.76% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -6.14% |
+| min | 0.00ms | 0.00ms | -0.00ms | -4.23% |
+| max | 0.01ms | 0.01ms | -0.00ms | -0.93% |
+| total | 0.63ms | 0.67ms | -0.04ms | -6.14% |
 
 ### lemonSqueezySignWebhook
 
@@ -177,19 +177,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.51ms |
+| total | 0.50ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +1.83% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -14.01% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +8.90% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +1.15% |
-| min | 0.00ms | 0.00ms | +0.00ms | +3.83% |
-| max | 0.01ms | 0.01ms | +0.00ms | +23.22% |
-| total | 0.51ms | 0.51ms | +0.01ms | +1.15% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -11.34% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -17.31% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -5.28% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -12.58% |
+| min | 0.00ms | 0.00ms | -0.00ms | -10.34% |
+| max | 0.01ms | 0.01ms | +0.00ms | +0.33% |
+| total | 0.50ms | 0.58ms | -0.07ms | -12.58% |
 
 ### lemonSqueezyVerifyWebhook
 
@@ -206,19 +206,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.66ms |
+| total | 0.60ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +2.84% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +14.79% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +20.50% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +6.81% |
-| min | 0.00ms | 0.00ms | +0.00ms | +3.01% |
-| max | 0.01ms | 0.01ms | +0.00ms | +17.91% |
-| total | 0.66ms | 0.62ms | +0.04ms | +6.81% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -8.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -8.69% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +9.96% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -6.94% |
+| min | 0.00ms | 0.00ms | -0.00ms | -5.73% |
+| max | 0.01ms | 0.01ms | +0.00ms | +18.83% |
+| total | 0.60ms | 0.65ms | -0.04ms | -6.94% |
 
 ### dunningStart
 
@@ -241,13 +241,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -0.34% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +12.28% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +46.22% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +9.41% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -14.38% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -68.30% |
+| p99 | 0.00ms | 0.01ms | -0.00ms | -59.61% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -73.69% |
 | min | 0.00ms | 0.00ms | -0.00ms | -16.80% |
-| max | 0.01ms | 0.01ms | +0.00ms | +54.83% |
-| total | 0.08ms | 0.07ms | +0.01ms | +9.41% |
+| max | 0.01ms | 0.15ms | -0.14ms | -93.93% |
+| total | 0.08ms | 0.29ms | -0.21ms | -73.69% |
 
 ### retryStart
 
@@ -264,19 +264,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.49ms |
+| total | 0.46ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -5.56% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +26.88% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +53.27% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +0.49% |
-| min | 0.00ms | 0.00ms | -0.00ms | -4.11% |
-| max | 0.01ms | 0.01ms | -0.00ms | -7.12% |
-| total | 0.49ms | 0.48ms | +0.00ms | +0.49% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -12.25% |
+| p95 | 0.00ms | 0.01ms | -0.01ms | -68.20% |
+| p99 | 0.01ms | 0.03ms | -0.02ms | -70.59% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -37.43% |
+| min | 0.00ms | 0.00ms | -0.00ms | -11.32% |
+| max | 0.01ms | 0.07ms | -0.05ms | -77.93% |
+| total | 0.46ms | 0.74ms | -0.28ms | -37.43% |
 
 ### retryBackoffMs
 
@@ -299,11 +299,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -19.71% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +16.40% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +7.60% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -2.22% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | -0.00ms | -17.05% |
-| total | 0.05ms | 0.05ms | -0.00ms | -2.22% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -54.59% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -50.08% |
+| p99 | 0.00ms | 0.01ms | -0.00ms | -65.98% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -68.86% |
+| min | 0.00ms | 0.00ms | -0.00ms | -60.10% |
+| max | 0.01ms | 0.05ms | -0.04ms | -79.64% |
+| total | 0.05ms | 0.18ms | -0.12ms | -68.86% |
 

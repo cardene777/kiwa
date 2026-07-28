@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| query_workflow (10 client.query with variables) | 0.04ms | 100ms | PASS | stable |
-| mutation_batch (5 createUser mutations) | 0.02ms | 100ms | PASS | stable |
-| subscription_error_handling (5 subscribe + close + invalid) | 0.03ms | 100ms | PASS | stable |
+| query_workflow (10 client.query with variables) | 0.04ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +1083%) 以上の悪化が必要) |
+| mutation_batch (5 createUser mutations) | 0.02ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +3042%) 以上の悪化が必要) |
+| subscription_error_handling (5 subscribe + close + invalid) | 0.03ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +1793%) 以上の悪化が必要) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| query_workflow (10 client.query with variables) | 0.14ms | 200ms | PASS |
+| query_workflow (10 client.query with variables) | 0.13ms | 200ms | PASS |
 | mutation_batch (5 createUser mutations) | 0.06ms | 200ms | PASS |
-| subscription_error_handling (5 subscribe + close + invalid) | 0.13ms | 200ms | PASS |
+| subscription_error_handling (5 subscribe + close + invalid) | 0.10ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| query_workflow (10 client.query with variables) | 48648 B | 0 B | 102400 B | yes | PASS |
-| mutation_batch (5 createUser mutations) | 45896 B | 0 B | 102400 B | yes | PASS |
-| subscription_error_handling (5 subscribe + close + invalid) | 1160 B | 0 B | 102400 B | yes | PASS |
+| query_workflow (10 client.query with variables) | 55616 B | 0 B | 102400 B | yes | PASS |
+| mutation_batch (5 createUser mutations) | 36928 B | 0 B | 102400 B | yes | PASS |
+| subscription_error_handling (5 subscribe + close + invalid) | -2080 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -43,19 +43,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.01ms |
 | min | 0.03ms |
 | max | 0.05ms |
-| total | 0.66ms |
+| total | 0.63ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.03ms | 0.04ms | -0.01ms | -15.62% |
-| p95 | 0.04ms | 0.05ms | -0.01ms | -16.12% |
-| p99 | 0.05ms | 0.05ms | -0.01ms | -16.33% |
-| mean | 0.03ms | 0.04ms | -0.01ms | -15.81% |
-| min | 0.03ms | 0.03ms | -0.01ms | -15.40% |
-| max | 0.05ms | 0.06ms | -0.01ms | -16.38% |
-| total | 0.66ms | 0.78ms | -0.12ms | -15.81% |
+| p50 | 0.03ms | 0.03ms | -0.00ms | -7.55% |
+| p95 | 0.04ms | 0.05ms | -0.00ms | -6.37% |
+| p99 | 0.05ms | 0.05ms | -0.00ms | -2.99% |
+| mean | 0.03ms | 0.03ms | -0.00ms | -6.96% |
+| min | 0.03ms | 0.03ms | -0.00ms | -10.65% |
+| max | 0.05ms | 0.05ms | -0.00ms | -2.18% |
+| total | 0.63ms | 0.68ms | -0.05ms | -6.96% |
 
 ### mutation_batch (5 createUser mutations)
 
@@ -65,26 +65,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.02ms |
+| p50 | 0.01ms |
 | p95 | 0.02ms |
-| p99 | 0.02ms |
+| p99 | 0.03ms |
 | mean | 0.02ms |
 | stdev | 0.00ms |
 | min | 0.01ms |
-| max | 0.02ms |
-| total | 0.33ms |
+| max | 0.03ms |
+| total | 0.30ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.01ms | +0.00ms | +12.08% |
-| p95 | 0.02ms | 0.02ms | +0.00ms | +21.46% |
-| p99 | 0.02ms | 0.02ms | +0.00ms | +21.63% |
-| mean | 0.02ms | 0.01ms | +0.00ms | +13.36% |
-| min | 0.01ms | 0.01ms | +0.00ms | +0.93% |
-| max | 0.02ms | 0.02ms | +0.00ms | +21.67% |
-| total | 0.33ms | 0.29ms | +0.04ms | +13.36% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +17.17% |
+| p95 | 0.02ms | 0.02ms | +0.00ms | +11.02% |
+| p99 | 0.03ms | 0.02ms | +0.01ms | +54.29% |
+| mean | 0.02ms | 0.01ms | +0.00ms | +14.59% |
+| min | 0.01ms | 0.01ms | -0.00ms | -2.13% |
+| max | 0.03ms | 0.02ms | +0.01ms | +64.85% |
+| total | 0.30ms | 0.26ms | +0.04ms | +14.59% |
 
 ### subscription_error_handling (5 subscribe + close + invalid)
 
@@ -97,21 +97,21 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p50 | 0.02ms |
 | p95 | 0.03ms |
 | p99 | 0.03ms |
-| mean | 0.03ms |
+| mean | 0.02ms |
 | stdev | 0.00ms |
 | min | 0.02ms |
-| max | 0.04ms |
-| total | 0.51ms |
+| max | 0.03ms |
+| total | 0.45ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | +0.00ms | +2.60% |
-| p95 | 0.03ms | 0.03ms | -0.00ms | -12.26% |
-| p99 | 0.03ms | 0.03ms | +0.00ms | +0.81% |
-| mean | 0.03ms | 0.02ms | +0.00ms | +2.17% |
-| min | 0.02ms | 0.02ms | -0.00ms | -1.69% |
-| max | 0.04ms | 0.03ms | +0.00ms | +3.78% |
-| total | 0.51ms | 0.49ms | +0.01ms | +2.17% |
+| p50 | 0.02ms | 0.02ms | -0.00ms | -2.91% |
+| p95 | 0.03ms | 0.03ms | -0.00ms | -9.33% |
+| p99 | 0.03ms | 0.03ms | +0.00ms | +7.41% |
+| mean | 0.02ms | 0.02ms | -0.00ms | -2.72% |
+| min | 0.02ms | 0.02ms | -0.00ms | -4.86% |
+| max | 0.03ms | 0.03ms | +0.00ms | +11.33% |
+| total | 0.45ms | 0.46ms | -0.01ms | -2.72% |
 

@@ -6,8 +6,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| eventEmitterEmit | 0.00ms | 5ms | PASS | stable |
-| anvilKeyLookup | 0.00ms | 5ms | PASS | stable |
+| eventEmitterEmit | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +109170%) 以上の悪化が必要) |
+| anvilKeyLookup | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +200000%) 以上の悪化が必要) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -20,8 +20,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| eventEmitterEmit | -44920 B | 0 B | 102400 B | yes | PASS |
-| anvilKeyLookup | -5552 B | 0 B | 102400 B | yes | PASS |
+| eventEmitterEmit | 230928 B | 0 B | 102400 B | yes | PASS |
+| anvilKeyLookup | -43152 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -46,13 +46,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -12.31% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -8.39% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -22.05% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -17.25% |
-| min | 0.00ms | 0.00ms | -0.00ms | -14.09% |
-| max | 0.00ms | 0.01ms | -0.00ms | -36.43% |
-| total | 0.07ms | 0.08ms | -0.01ms | -17.25% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -0.34% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -17.21% |
+| p99 | 0.00ms | 0.00ms | -0.00ms | -1.58% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -6.62% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.00ms | 0.01ms | -0.00ms | -44.51% |
+| total | 0.07ms | 0.08ms | -0.00ms | -6.62% |
 
 ### anvilKeyLookup
 
@@ -75,11 +75,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -19.71% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -28.42% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +0.32% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -18.03% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +40.26% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +39.23% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +5.42% |
 | min | 0.00ms | 0.00ms | -0.00ms | -24.70% |
-| max | 0.00ms | 0.00ms | -0.00ms | -25.00% |
-| total | 0.04ms | 0.05ms | -0.01ms | -18.03% |
+| max | 0.00ms | 0.00ms | -0.00ms | -48.79% |
+| total | 0.04ms | 0.04ms | +0.00ms | +5.42% |
 
