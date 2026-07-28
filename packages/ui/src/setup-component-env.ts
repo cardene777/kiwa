@@ -46,6 +46,14 @@ async function loadUserEvent(): Promise<UserEventModule> {
 export async function setupComponentEnv(opts: SetupComponentEnvOptions): Promise<UiTestEnv> {
   const tl = await loadTestingLibrary();
 
+  // interaction mode で要る依存は描画より前に解決する。
+  //
+  // 後ろに置くと、依存が無い環境では container を document へ挿し、render まで
+  // 済ませてから例外になる。呼び出し側は env を受け取れないので stop() を呼べず、
+  // 失敗するたびに container が残る。依存の有無は描画の結果に左右されないので、
+  // 副作用の前に確かめる方が片付けの経路も要らない。
+  const ue = opts.mode === 'interaction' ? await loadUserEvent() : undefined;
+
   // render が例外を投げると呼び出し側は env を受け取れず、stop() を呼ぶ術がない。
   // container は既に document へ挿入されているため、片付けないと描画に失敗する
   // たびに残骸が積み上がる。
@@ -68,8 +76,8 @@ export async function setupComponentEnv(opts: SetupComponentEnvOptions): Promise
   }
 
   if (opts.mode === 'interaction') {
-    const ue = await loadUserEvent();
-    const user = ue.default.setup(opts.userEventOptions);
+    // 上で解決済み。mode が interaction ならここでは必ず入っている。
+    const user = ue!.default.setup(opts.userEventOptions);
     const env: InteractionTestEnvUi = {
       mode: 'live',
       kind: 'interaction',
