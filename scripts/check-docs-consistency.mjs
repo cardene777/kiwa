@@ -14,6 +14,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DocsSyncError, resolveReadPath } from './docs-sync-safety.mjs';
+import { definitionKeys } from '../docs/.vitepress/library-sidebar.mjs';
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const packagesRoot = join(repositoryRoot, 'packages');
@@ -36,18 +37,9 @@ function loadDefinition() {
     if (error instanceof DocsSyncError) throw error;
     throw new DocsSyncError(`${label}: cannot read the definition: ${error.message}`);
   }
-  // 正本として揃っているべき key。この検査 script が使わないもの (sidebar だけが読む
-  // `documentKinds` と `standaloneCategory`) も含める。欠けたまま build へ進むと、
-  // 見出しや link が消えた状態で公開されるため、読んだ時点で止める。
-  const required = [
-    'libraryCategories',
-    'exemptDocuments',
-    'standaloneCategory',
-    'documentKinds',
-    'requiredPages',
-    'packageScope',
-  ];
-  for (const key of required) {
+  // 揃っているべき key の一覧は sidebar 側と共有する。この検査 script が使わないもの
+  // (sidebar だけが読む `documentKinds` と `standaloneCategory`) も含まれる。
+  for (const key of definitionKeys) {
     if (parsed[key] === undefined) throw new DocsSyncError(`${label}: ${key} is missing.`);
   }
   return parsed;

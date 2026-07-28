@@ -6,65 +6,10 @@ import { defineConfig } from 'vitepress';
 // データだけの JSON にしてあるのは、読む側が評価を伴わずに済ませるため。
 // 検査 script は repo の内側にあることを確かめてから読み込んで parse する。
 import definition from '../libraries.json' with { type: 'json' };
+// 組み立ては共有 module に置く。test も同じ関数を呼ぶので、書き直した側がずれる余地がない。
+import { buildLibrarySidebar } from './library-sidebar.mjs';
 
-const { documentKinds, exemptDocuments, libraryCategories, packageScope, standaloneCategory } =
-  definition;
-
-type LibraryCategory = {
-  text: string;
-  slug: string;
-  packages: string[];
-};
-
-const libraryPageItems = (slug: string, packageName: string) =>
-  documentKinds.map(({ slug: kind, text }) => ({
-    text,
-    link: `/libraries/${slug}/${packageName}/${kind}`,
-  }));
-
-/** 別枠で扱う文書のうち、指定した分類に置くもの。 */
-const exemptItemsIn = (category: string) =>
-  exemptDocuments
-    .filter((document) => document.category === category)
-    .map(({ name, label }) => ({
-      text: label,
-      collapsed: true,
-      items: libraryPageItems(category, name),
-    }));
-
-const categorySidebarItem = ({ text, slug, packages }: LibraryCategory) => ({
-  text,
-  collapsed: false,
-  items: [
-    { text: 'カテゴリ概要', link: `/libraries/${slug}/` },
-    ...exemptItemsIn(slug),
-    ...packages.map((packageName) => ({
-      text: `${packageScope}/${packageName}`,
-      collapsed: true,
-      items: libraryPageItems(slug, packageName),
-    })),
-  ],
-});
-
-const nativeLanguageSidebarItem = {
-  text: standaloneCategory.text,
-  collapsed: false,
-  items: [
-    { text: 'カテゴリ概要', link: `/libraries/${standaloneCategory.slug}/` },
-    ...exemptItemsIn(standaloneCategory.slug),
-  ],
-};
-
-const librarySidebar = [
-  {
-    text: 'ライブラリ',
-    items: [
-      { text: '全体像', link: '/libraries/' },
-      ...libraryCategories.map(categorySidebarItem),
-      nativeLanguageSidebarItem,
-    ],
-  },
-];
+const librarySidebar = buildLibrarySidebar(definition);
 
 const englishFoundationSidebar = [
   {
