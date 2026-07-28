@@ -11,6 +11,62 @@ import { buildLibrarySidebar } from './library-sidebar.mjs';
 
 const librarySidebar = buildLibrarySidebar(definition);
 
+// 検索の索引から本文を落とす場所。ページの題名だけ残す。
+//
+// 検索の主対象は API と使い方で、リリース告知の下書きや過去の測定値ではない。
+// 索引は検索を開いた時に全体を読み込むため、載せるものを絞る。
+const SEARCH_EXCLUDED = [
+  // X 投稿の下書きと GitHub Discussions の文面。sidebar からも nav からも辿れない。
+  'announcements/',
+  // 版ごとの測定値のスナップショット。入口の 1 ページだけが nav にある。
+  'quality-reports/',
+  // 英語で書かれた旧ページ群。sidebar の見出しでアーカイブと明示していて、nav には無い。
+  // 日本語の索引に英語の全文を載せる必然性が低い。
+  'tutorials/',
+  'concepts/',
+  'migrations/',
+];
+
+/**
+ * 検索の索引から、生成した API 契約を丸ごと落とす。
+ *
+ * 管理ブロックには公開名ごとの型宣言とエラー診断の表が入り、公開名は `####` の見出しになる。
+ * 索引は見出しごとに 1 件を作るので、リファレンス 71 ページで 4,799 件に達する。
+ * 索引の大きさは件数で決まる (転置索引と保存 field が件数に比例する) ため、
+ * 本文だけ落としても件数は減らない。
+ *
+ * 主要な API は管理ブロックの外に手書きの見出しがあり、そちらは索引に残る。
+ * ページ自体もリファレンスの見出しで引ける。
+ */
+function stripGeneratedApi(source: string) {
+  const start = '<!-- kiwa-public-api:start -->';
+  const end = '<!-- kiwa-public-api:end -->';
+  const from = source.indexOf(start);
+  if (from === -1) return source;
+  const to = source.indexOf(end, from);
+  if (to === -1) return source;
+
+  return `${source.slice(0, from)}${source.slice(to + end.length)}`;
+}
+
+/**
+ * 索引に入れる markdown。
+ *
+ * 除外する場所は先頭の見出し 1 行だけ残す。索引はページごとではなく見出しごとに
+ * 1 件を作るので、見出しを全部残すと件数が減らず、索引の大きさも下がらない。
+ * 1 行残すことで、ページ自体はその題名で引ける。
+ */
+function searchSource(source: string, relativePath: string) {
+  // 生成した API 契約のページ。宣言元ごとに分けてあり、中身は型宣言そのもの。
+  // 索引は見出しごとに 1 件を作るので、公開名の数だけ件数が積み上がる。
+  const isGeneratedApiPage = /^libraries\/[^/]+\/[^/]+\/api\//.test(relativePath);
+  if (isGeneratedApiPage || SEARCH_EXCLUDED.some((prefix) => relativePath.startsWith(prefix))) {
+    const title = source.split('\n').find((line) => /^#\s/.test(line));
+    return title ?? '';
+  }
+  return stripGeneratedApi(source);
+}
+
 const englishFoundationSidebar = [
   {
     text: 'Libraries',
@@ -830,6 +886,14 @@ export default defineConfig({
         detailedView: true,
         translations: {
           button: { buttonText: 'kiwa を検索' },
+        },
+        // 索引に入れる前に本文を落とす。何をどこまで落とすかは searchSource が決める。
+        async _render(src, env, md) {
+          const html = md.render(searchSource(src, env.relativePath ?? ''), env);
+          // 独自の描画を渡すと、frontmatter による除外は自分で見る必要がある。
+          // frontmatter は描画を通した後に env へ入るので、判定は描画の後に置く。
+          if (env.frontmatter?.search === false) return '';
+          return html;
         },
       },
     },

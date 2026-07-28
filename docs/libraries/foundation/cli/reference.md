@@ -82,9 +82,9 @@ JavaScript から同じ計画を扱う場合は `runInit`、`runSpecToTest`、`r
 
 ## API 契約
 
-この section は [公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/index.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
+[公開 entry point](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/index.ts) から同期しています。宣言元ごとにページを分けています。
 
-
-
+| 宣言元 | 値 | 型 |
+| --- | --- | --- |
 
 <!-- kiwa-public-api:end -->

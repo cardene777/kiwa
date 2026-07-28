@@ -8,8 +8,8 @@
 // 宣言として成立しないものが並ぶ。emitter を通せば ambient declaration として
 // 正しい形が得られる。
 
-import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync } from 'node:fs';
+import { basename, dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
@@ -401,13 +401,110 @@ function group(title, contracts) {
   return `### ${title}\n\n${contracts.map(contractEntry).join('\n\n')}`;
 }
 
-function section(library, contracts, diagnostics) {
+/**
+ * 契約を宣言元の file ごとにまとめる。
+ *
+ * `src/foo.ts` は `foo`、`src/semantics/bnpl.ts` は `semantics-bnpl` を単位にする。
+ * 最初の階層でまとめると、`semantics/` のように多数の file を持つ directory が
+ * 1 ページに集まり、分割しても 500KB を超えたままになる。
+ *
+ * 宣言元が分からないもの (再公開だけの名前) は `index` に寄せる。
+ */
+function groupBySource(library, contracts) {
+  const prefix = `packages/${library}/src/`;
+  const groups = new Map();
+  for (const contract of contracts) {
+    const path = contract.source?.path;
+    let unit = 'index';
+    if (typeof path === 'string' && path.startsWith(prefix)) {
+      // directory の区切りは file 名に使えないので繋ぐ。`.ts` は落とす。
+      unit = path.slice(prefix.length).replace(/\.tsx?$/, '').replaceAll('/', '-');
+    }
+    if (!groups.has(unit)) {
+      // link に使う実 path も一緒に持つ。単位名は区切りを `-` に潰しているので、
+      // そこから元の path を復元しようとすると `fx-cross-border.ts` のような
+      // 名前を取り違える。
+      const sourcePath = typeof path === 'string' && path.startsWith(prefix)
+        ? path.slice(prefix.length)
+        : 'index.ts';
+      groups.set(unit, { sourcePath, contracts: [] });
+    }
+    groups.get(unit).contracts.push(contract);
+  }
+  return [...groups]
+    .map(([unit, group]) => [unit, group.contracts, group.sourcePath])
+    .sort(([a], [b]) => a.localeCompare(b, 'en'));
+}
+
+/**
+ * 目次に載らなくなった分割ページ。
+ *
+ * 宣言元の file が消えると、そこから作ったページだけが残る。目次から辿れないまま
+ * 公開され続けるので、生成のたびに拾って消す。
+ */
+function staleUnitPages(apiDirectory, pages) {
+  if (!existsSync(apiDirectory)) return [];
+  const expected = new Set(pages.map((page) => basename(page.path)));
+  return readdirSync(apiDirectory)
+    .filter((file) => file.endsWith('.md') && !expected.has(file))
+    .map((file) => join(apiDirectory, file));
+}
+
+/** 1 つの宣言元のページ本体。 */
+function unitPage(library, unit, contracts, sourcePath) {
   const values = contracts.filter((contract) => contract.kind === 'value');
   const types = contracts.filter((contract) => contract.kind === 'type');
-  // library は directory 名から来る。encode しないと、名前に `)` や改行を含む
-  // checkout で link を閉じて後続を本文として描画させられる。
+  const source = `https://github.com/cardene777/kiwa/blob/main/packages/${linkPath(library)}/src/${linkPath(sourcePath)}`;
+  return [
+    '---',
+    // `@` で始まる値は YAML の予約文字なので quote する。
+    `title: ${JSON.stringify(`${scope}/${library} ${unit} の API 契約`)}`,
+    '---',
+    '',
+    `# ${inlineCode(`${scope}/${library}`)} ${inlineCode(unit)} の API 契約`,
+    '',
+    `[ソース](${source}) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。`,
+    '',
+    `[リファレンスの目次へ戻る](./)`,
+    '',
+    group('値', values),
+    '',
+    group('型', types),
+    '',
+  ].join('\n');
+}
+
+/**
+ * リファレンス本体に入れる目次。
+ *
+ * 契約そのものは宣言元ごとのページへ分ける。1 ページに全部並べると、公開名が
+ * 200 を超えるライブラリで構文ハイライトの span が 14,000 を上回り、
+ * そのページを開いた時に読み込む量が 1MB に達する。
+ */
+function section(library, contracts, diagnostics) {
+  const units = groupBySource(library, contracts);
   const source = `https://github.com/cardene777/kiwa/blob/main/packages/${linkPath(library)}/src/index.ts`;
-  return `${start}\n${diagnostics ? `${diagnostics}\n\n` : ''}## API 契約\n\nこの section は [公開 entry point](${source}) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。\n\n${group('値', values)}\n\n${group('型', types)}\n${end}`;
+  const rows = units.map(([unit, list, sourcePath]) => {
+    const values = list.filter((contract) => contract.kind === 'value').length;
+    const types = list.filter((contract) => contract.kind === 'type').length;
+    // 見せるのは実際の path。単位名は file 名に使うための形でしかない。
+    return `| [${escapeMarkdownText(sourcePath)}](./api/${linkPath(unit)}) | ${values} | ${types} |`;
+  });
+  return [
+    start,
+    diagnostics ? `${diagnostics}\n` : '',
+    '## API 契約',
+    '',
+    `[公開 entry point](${source}) から同期しています。宣言元ごとにページを分けています。`,
+    '',
+    '| 宣言元 | 値 | 型 |',
+    '| --- | --- | --- |',
+    ...rows,
+    '',
+    end,
+  ]
+    .filter((line, index, all) => !(line === '' && all[index - 1] === ''))
+    .join('\n');
 }
 
 /**
@@ -508,6 +605,8 @@ function main() {
   const plans = [];
   // 検査だけの実行で、commit された内容と生成結果が食い違った library。
   const stale = [];
+  // 宣言元が消えて不要になった分割ページ。
+  const obsolete = [];
   for (const target of targets) {
     const label = `${target.library} reference.md`;
     const contracts = contractsFrom(program, emitted, target.library, target.entry);
@@ -516,16 +615,44 @@ function main() {
     // symlink を追うので、checkout に link を 1 本置くだけで repo の外を読み書きできる。
     const content = readFileSync(resolveReadPath(target.reference, repositoryRoot, label), 'utf8');
     const updated = replace(content, section(target.library, contracts, diagnostics), label);
+
+    // 宣言元ごとのページ。目次から辿る先で、reference.md と同じ directory の api/ に置く。
+    const apiDirectory = join(dirname(target.reference), 'api');
+    const units = groupBySource(target.library, contracts);
+    const unitPages = units.map(([unit, list, sourcePath]) => ({
+      path: join(apiDirectory, `${unit}.md`),
+      label: `${target.library} api/${unit}.md`,
+      content: unitPage(target.library, unit, list, sourcePath),
+    }));
+
     if (!write) {
       if (content !== updated) stale.push(target.library);
+      // 分割ページが欠けている、または中身が古い場合も差分として扱う。
+      for (const page of unitPages) {
+        const current = existsSync(page.path) ? readFileSync(page.path, 'utf8') : null;
+        if (current !== page.content) stale.push(`${target.library} (${basename(page.path)})`);
+      }
+      // 目次に無いページが残っていたら報告する。宣言元が消えた時に取り残される。
+      for (const path of staleUnitPages(apiDirectory, unitPages)) {
+        stale.push(`${target.library} (${basename(path)} は不要)`);
+      }
       continue;
     }
+
+    // 書き込み先の検証もここで済ませる。write loop に残すと、後ろの target が
+    // repo の外を指す link だった時に先行 target だけ更新された状態で止まる。
     plans.push({
-      // 書き込み先の検証もここで済ませる。write loop に残すと、後ろの target が
-      // repo の外を指す link だった時に先行 target だけ更新された状態で止まる。
       target: prepareWritePath(target.reference, repositoryRoot, label),
       content: updated,
     });
+    if (!existsSync(apiDirectory)) mkdirSync(apiDirectory, { recursive: true });
+    for (const page of unitPages) {
+      plans.push({
+        target: prepareWritePath(page.path, repositoryRoot, page.label),
+        content: page.content,
+      });
+    }
+    obsolete.push(...staleUnitPages(apiDirectory, unitPages));
   }
 
   if (!write) {
@@ -543,6 +670,10 @@ function main() {
   // 第 2 段 = 全件の検証を通ってから書く。
   for (const plan of plans) {
     writeFileAtomic(plan.target, plan.content);
+  }
+  // 目次に載らなくなったページは、書き込みが全部通ってから消す。
+  for (const path of obsolete) {
+    rmSync(resolveReadPath(path, repositoryRoot, `stale ${basename(path)}`), { force: true });
   }
   console.log(`Synchronized detailed API contracts for ${plans.length} library references.`);
 }
