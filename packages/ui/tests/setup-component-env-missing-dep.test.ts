@@ -89,10 +89,14 @@ describe('setupComponentEnv (missing peer dep)', () => {
     expect(tl.unmount).toHaveBeenCalledTimes(1);
 
     // interaction mode だけが loadUserEvent を通り、導入手順つき error になる
+    const before = document.body.childElementCount;
     const interaction = fresh.setupComponentEnv(interactionOpts);
     await expect(interaction).rejects.toThrow(/@testing-library\/user-event/);
     await expect(interaction).rejects.toThrow(/pnpm add -D/);
-    // render 自体は成功しているので mock render は毎回呼ばれている
-    expect(tl.render).toHaveBeenCalledTimes(2);
+
+    // 依存の解決は描画より前に行う。後ろに置くと container を document へ挿した
+    // 状態で例外になり、呼び出し側は env を受け取れないので片付けられない。
+    expect(document.body.childElementCount, '失敗した分の container を残さない').toBe(before);
+    expect(tl.render, '描画に入る前に落とす').toHaveBeenCalledTimes(1);
   });
 });
