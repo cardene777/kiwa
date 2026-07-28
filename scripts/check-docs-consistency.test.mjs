@@ -21,29 +21,26 @@ import { fileURLToPath } from 'node:url';
 
 const scriptsDirectory = dirname(fileURLToPath(import.meta.url));
 
-/** config.mts の分類定義。検査 script が読む形だけを再現する。 */
-function configSource(categories) {
-  const entries = categories
-    .map(
-      (category) =>
-        `  {\n    text: '${category.text}',\n    slug: '${category.slug}',\n` +
-        `    packages: [${category.packages.map((name) => `'${name}'`).join(', ')}],\n  },`,
-    )
-    .join('\n');
+/** 共有の分類定義 (docs/taxonomy.mjs)。検査 script が読む形を再現する。 */
+function taxonomySource(categories, exempt) {
+  const stringify = (value) => JSON.stringify(value, null, 2);
   return [
-    "import { defineConfig } from 'vitepress';",
+    `export const libraryCategories = ${stringify(categories)};`,
     '',
-    'type LibraryCategory = {',
-    '  text: string;',
-    '  slug: string;',
-    '  packages: string[];',
-    '};',
+    `export const exemptDocuments = ${stringify(exempt)};`,
     '',
-    'const libraryCategories: LibraryCategory[] = [',
-    entries,
-    '];',
+    `export const standaloneCategory = ${stringify({ slug: 'native-languages', text: 'ネイティブ言語' })};`,
     '',
-    'export default defineConfig({});',
+    `export const documentKinds = ${stringify([
+      { slug: '', text: '概要' },
+      { slug: 'quickstart', text: 'はじめる' },
+      { slug: 'how-to', text: '使い方' },
+      { slug: 'reference', text: 'リファレンス' },
+    ])};`,
+    '',
+    `export const requiredPages = ${stringify(['index.md', 'quickstart.md', 'how-to.md', 'reference.md'])};`,
+    '',
+    "export const packageScope = '@kiwa-lab';",
     '',
   ].join('\n');
 }
@@ -56,10 +53,10 @@ const EXEMPT_LAYOUT = [
   { name: 'rust', category: 'native-languages' },
 ];
 
-/** 特例文書を fixture に置く。`skip` に挙げた名前は置かない。 */
+/** 特例文書を fixture に置く。`skip` に挙げた `分類/名前` は置かない。 */
 function writeExemptDocuments(root, skip = new Set()) {
   for (const { name, category } of EXEMPT_LAYOUT) {
-    if (skip.has(name)) continue;
+    if (skip.has(`${category}/${name}`)) continue;
     const directory = join(root, 'docs', 'libraries', category, name);
     mkdirSync(directory, { recursive: true });
     for (const page of ['index.md', 'quickstart.md', 'how-to.md', 'reference.md']) {
@@ -129,15 +126,22 @@ function withFixture(layout, body) {
     }
     const categories = [...byCategory].map(([slug, packages]) => ({ text: slug, slug, packages }));
 
-    const configDirectory = join(root, 'docs', '.vitepress');
-    mkdirSync(configDirectory, { recursive: true });
-    writeFileSync(join(configDirectory, 'config.mts'), configSource(categories));
+    // 定義から外すのは、layout が同じ分類の同じ名前を持つ場合だけ。名前だけで判定すると
+    // `languages/python` を layout に置いた時に `native-languages/python` まで消える。
+    const overridden = new Set(
+      layout.map((item) => `${item.category ?? 'foundation'}/${item.name}`),
+    );
+    const exempt = EXEMPT_LAYOUT.filter(
+      (entry) => !overridden.has(`${entry.category}/${entry.name}`),
+    ).map(({ name, category }) => ({ name, category, sidebarText: name }));
+    mkdirSync(join(root, 'docs'), { recursive: true });
+    writeFileSync(join(root, 'docs', 'taxonomy.mjs'), taxonomySource(categories, exempt));
 
     // packages/ が空だと readdirSync が落ちる。全 entry が manifest なしの構成でも動くよう作る。
     mkdirSync(join(root, 'packages'), { recursive: true });
 
-    // layout が同名を持つ場合は、そちらの置き方を優先する。
-    writeExemptDocuments(root, new Set(layout.map((entry) => entry.name)));
+    // layout が同じ分類の同じ名前を持つ場合は、そちらの置き方を優先する。
+    writeExemptDocuments(root, overridden);
 
     return body({ root });
   } finally {
@@ -330,14 +334,21 @@ test('a library with documents in two categories fails and names both', () => {
 
 // sidebar の定義側で同じ package を 2 つの分類に置いた場合も、上書きした側だけが
 // 残って余分な定義を見逃す。
-test('a package listed under two categories in the sidebar fails', () => {
+test('a package listed under two categories in the definition fails', () => {
   withFixture([{ name: 'core' }], ({ root }) => {
-    const configPath = join(root, 'docs', '.vitepress', 'config.mts');
-    const source = readFileSync(configPath, 'utf8').replace(
-      "    packages: ['core'],\n  },",
-      "    packages: ['core'],\n  },\n  {\n    text: 'services',\n    slug: 'services',\n    packages: ['core'],\n  },",
+    const taxonomyPath = join(root, 'docs', 'taxonomy.mjs');
+    const source = readFileSync(taxonomyPath, 'utf8');
+    const categories = JSON.parse(
+      source.match(/export const libraryCategories = ([\s\S]*?);\n/)[1],
     );
-    writeFileSync(configPath, source);
+    categories.push({ text: 'services', slug: 'services', packages: ['core'] });
+    writeFileSync(
+      taxonomyPath,
+      source.replace(
+        /export const libraryCategories = [\s\S]*?;\n/,
+        `export const libraryCategories = ${JSON.stringify(categories, null, 2)};\n`,
+      ),
+    );
     const result = runCheck(root);
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /listed under both foundation and services/);
@@ -347,38 +358,64 @@ test('a package listed under two categories in the sidebar fails', () => {
 // 特例の文書は package を持たないが置き場所は決まっている。移動しても通ると、
 // 分類ごとに固定 link を書く sidebar と食い違う。
 test('an exempt document that moved to another category fails', () => {
-  withFixture([{ name: 'core' }, { name: 'kiwa', manifest: false, sidebarEntry: false, category: 'services' }], ({ root }) => {
+  withFixture([{ name: 'core' }], ({ root }) => {
+    // 定義は foundation を期待しているのに、文書だけ services へ移した状態を作る。
+    const from = join(root, 'docs', 'libraries', 'foundation', 'kiwa');
+    const to = join(root, 'docs', 'libraries', 'services', 'kiwa');
+    mkdirSync(to, { recursive: true });
+    for (const page of ['index.md', 'quickstart.md', 'how-to.md', 'reference.md']) {
+      writeFileSync(join(to, page), `# ${page}\n`);
+    }
+    rmSync(from, { recursive: true, force: true });
+
     const result = runCheck(root);
     assert.notEqual(result.status, 0);
+    // 期待する場所に無いことと、移した先で package を持たないことの両方が出る。
     assert.match(result.stderr, /foundation\/kiwa/);
     assert.match(result.stderr, /is missing/);
+    assert.match(result.stderr, /has no package/);
   });
 });
 
-// 値の中の記号で壊れない読み方であること。文字列を置換して JSON にする実装では
-// `text: 'AI: リアルタイム'` のような値で壊れていた。
+// 分類の呼び名に記号が入っても壊れないこと。以前は config を文字列置換で読んでいたため、
+// `text: 'AI: リアルタイム'` のような値で壊れていた。import する形にして制約が消えた。
 test('a category label containing a colon is read correctly', () => {
   withFixture([{ name: 'core' }], ({ root }) => {
-    const configPath = join(root, 'docs', '.vitepress', 'config.mts');
-    const source = readFileSync(configPath, 'utf8').replace(
-      "text: 'foundation'",
-      "text: 'AI: realtime'",
-    );
-    writeFileSync(configPath, source);
+    const taxonomyPath = join(root, 'docs', 'taxonomy.mjs');
+    const source = readFileSync(taxonomyPath, 'utf8').replace('"foundation"', '"AI: realtime"');
+    writeFileSync(taxonomyPath, source);
     const result = runCheck(root);
+    // 呼び名を変えただけで slug は変わらないので、対応検査は通る。
     assert.equal(result.status, 0, result.stderr);
   });
 });
 
-// 定義の形が変わった時に黙って空集合として通ると、検査そのものが無力になる。
-test('a config without the expected definition fails instead of passing silently', () => {
-  withFixture([{ name: 'core' }], ({ root }) => {
-    writeFileSync(
-      join(root, 'docs', '.vitepress', 'config.mts'),
-      "import { defineConfig } from 'vitepress';\nexport default defineConfig({});\n",
-    );
+// 共有定義に載っているのに実 directory が無い場合。定義だけ足して文書を書き忘れた状態で、
+// sidebar は link を出すが遷移先が無い。
+test('a package in the definition without a directory fails', () => {
+  withFixture([{ name: 'core' }, { name: 'ghost', document: false }], ({ root }) => {
     const result = runCheck(root);
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /could not find the libraryCategories array/);
+    assert.match(result.stderr, /ghost/);
+    assert.match(result.stderr, /no library document/);
+  });
+});
+
+// 実 directory があるのに共有定義に無い場合。文書は存在するが sidebar から辿れない。
+test('a directory without an entry in the definition fails', () => {
+  withFixture([{ name: 'core' }, { name: 'orphan', sidebarEntry: false }], ({ root }) => {
+    const result = runCheck(root);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /orphan/);
+    assert.match(result.stderr, /missing from libraryCategories/);
+  });
+});
+
+// 共有定義そのものが読めない状態で、黙って空集合として通らないこと。
+test('an unreadable definition fails instead of passing silently', () => {
+  withFixture([{ name: 'core' }], ({ root }) => {
+    writeFileSync(join(root, 'docs', 'taxonomy.mjs'), 'export const libraryCategories = [\n');
+    const result = runCheck(root);
+    assert.notEqual(result.status, 0);
   });
 });

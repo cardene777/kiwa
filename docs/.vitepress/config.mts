@@ -1,69 +1,45 @@
 import { defineConfig } from 'vitepress';
 
+// 分類・文書種別の呼び方・別枠で扱う文書は docs/taxonomy.mjs が正本。
+// 整合検査 (scripts/check-docs-consistency.mjs) も同じ file を読む。
+import {
+  documentKinds,
+  exemptDocuments,
+  libraryCategories,
+  packageScope,
+  standaloneCategory,
+} from '../taxonomy.mjs';
+
 type LibraryCategory = {
   text: string;
   slug: string;
   packages: string[];
 };
 
-const libraryCategories: LibraryCategory[] = [
-  {
-    text: '基盤',
-    slug: 'foundation',
-    packages: [
-      'core', 'dapp', 'e2e', 'api', 'ui', 'cli', 'cli-test', 'component',
-      'data', 'design-check', 'kaname', 'lean', 'skill-test', 'desktop', 'mobile',
-    ],
-  },
-  {
-    text: 'アプリUI',
-    slug: 'application',
-    packages: ['form', 'state', 'query', 'chart', 'date', 'i18n', 'react-native', 'expo', 'macos-app'],
-  },
-  {
-    text: 'Webフレームワーク',
-    slug: 'frameworks',
-    packages: ['astro', 'edge', 'fresh', 'hono', 'nextjs', 'nuxt', 'qwikcity', 'remix', 'solidjs', 'solidstart', 'sveltekit'],
-  },
-  {
-    text: 'サービス',
-    slug: 'services',
-    packages: ['auth', 'cache', 'crypto', 'email', 'feature-flag', 'graphql', 'grpc', 'migration', 'notification', 'orm', 'payment', 'queue', 'trpc', 'upload', 'webhook', 'websocket', 'workflow'],
-  },
-  {
-    text: 'AIとリアルタイム',
-    slug: 'ai-realtime',
-    packages: ['agent', 'ai-llm', 'mcp', 'observability', 'realtime', 'search', 'streaming', 'vector', 'visual'],
-  },
-  {
-    text: '品質とセキュリティ',
-    slug: 'quality',
-    packages: ['a11y', 'perf-harness', 'quality-metrics', 'release-invariants', 'security', 'security-devsecops'],
-  },
-  {
-    text: '言語アダプター',
-    slug: 'languages',
-    packages: ['go-lib', 'python', 'ruby', 'rust-lib'],
-  },
-];
+const libraryPageItems = (slug: string, packageName: string) =>
+  documentKinds.map(({ slug: kind, text }) => ({
+    text,
+    link: `/libraries/${slug}/${packageName}/${kind}`,
+  }));
 
-const libraryPageItems = (slug: string, packageName: string) => [
-  { text: '概要', link: `/libraries/${slug}/${packageName}/` },
-  { text: 'はじめる', link: `/libraries/${slug}/${packageName}/quickstart` },
-  { text: '使い方', link: `/libraries/${slug}/${packageName}/how-to` },
-  { text: 'リファレンス', link: `/libraries/${slug}/${packageName}/reference` },
-];
+/** 別枠で扱う文書のうち、指定した分類に置くもの。 */
+const exemptItemsIn = (category: string) =>
+  exemptDocuments
+    .filter((document) => document.category === category)
+    .map(({ name, sidebarText }) => ({
+      text: sidebarText,
+      collapsed: true,
+      items: libraryPageItems(category, name),
+    }));
 
 const categorySidebarItem = ({ text, slug, packages }: LibraryCategory) => ({
   text,
   collapsed: false,
   items: [
     { text: 'カテゴリ概要', link: `/libraries/${slug}/` },
-    ...(slug === 'foundation'
-      ? [{ text: 'kiwa 全体', collapsed: true, items: libraryPageItems(slug, 'kiwa') }]
-      : []),
+    ...exemptItemsIn(slug),
     ...packages.map((packageName) => ({
-      text: `@kiwa-lab/${packageName}`,
+      text: `${packageScope}/${packageName}`,
       collapsed: true,
       items: libraryPageItems(slug, packageName),
     })),
@@ -71,13 +47,11 @@ const categorySidebarItem = ({ text, slug, packages }: LibraryCategory) => ({
 });
 
 const nativeLanguageSidebarItem = {
-  text: 'ネイティブ言語',
+  text: standaloneCategory.text,
   collapsed: false,
   items: [
-    { text: 'カテゴリ概要', link: '/libraries/native-languages/' },
-    { text: 'kiwa-test-go', collapsed: true, items: libraryPageItems('native-languages', 'go') },
-    { text: 'kiwa-test-py', collapsed: true, items: libraryPageItems('native-languages', 'python') },
-    { text: 'kiwa-test-rs', collapsed: true, items: libraryPageItems('native-languages', 'rust') },
+    { text: 'カテゴリ概要', link: `/libraries/${standaloneCategory.slug}/` },
+    ...exemptItemsIn(standaloneCategory.slug),
   ],
 };
 
@@ -169,7 +143,7 @@ export default defineConfig({
     sidebar: {
       '/tutorials/': [
         {
-          text: 'Getting started',
+          text: 'チュートリアル (アーカイブ・英語)',
           items: [
             { text: 'Overview', link: '/tutorials/' },
             {
@@ -639,7 +613,7 @@ export default defineConfig({
       ],
       '/concepts/': [
         {
-          text: 'Concepts',
+          text: '設計概念 (アーカイブ・英語)',
           items: [
             { text: 'Multi-provider mock pattern (統一 interface で複数 provider を mock する)', link: '/concepts/multi-provider-mock' },
             { text: 'Lib composition pattern (26 lib を組合わせて real app test を書く)', link: '/concepts/lib-composition' },
@@ -720,7 +694,7 @@ export default defineConfig({
       ],
       '/migrations/': [
         {
-          text: 'Migration guides',
+          text: '移行ガイド (アーカイブ・英語)',
           items: [
             { text: 'Overview', link: '/migrations/' },
             { text: 'v1.9 → v1.10', link: '/migrations/v1.9-to-v1.10' },

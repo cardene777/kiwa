@@ -12,47 +12,39 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
 
 import { DocsSyncError, resolveReadPath } from './docs-sync-safety.mjs';
+import {
+  exemptDocuments,
+  libraryCategories,
+  packageScope,
+  requiredPages,
+  standaloneCategory,
+} from '../docs/taxonomy.mjs';
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const packagesRoot = join(repositoryRoot, 'packages');
 const librariesRoot = join(repositoryRoot, 'docs', 'libraries');
-const configPath = join(repositoryRoot, 'docs', '.vitepress', 'config.mts');
 
-// standalone な native project の置き場。TypeScript の package を持たないので
-// package との対応は取らないが、文書そのものの有無と置き場所は検査する。
-const STANDALONE_CATEGORY = 'native-languages';
-
-// 通常の対応検査から外す文書。値は期待する置き場所。
+// 別枠で扱う文書の置き場所。`分類/名前` を key にする。
 //
-// 「package を持たない」ことだけを許可すると、置き場所が変わっても検査を通る。
-// config.mts は分類ごとに固定の link を書くため、移動すれば link が切れる。
-// 期待する分類まで持たせて、存在と置き場所の両方を確かめる。
-//
-// 名前だけを key にすると `languages/python` (TypeScript の adapter) と
-// `native-languages/python` (standalone な native project) が衝突する。
-// 別物なので分類と組にして区別する。
-const EXEMPT_DOCUMENTS = new Map([
-  // 全体をまとめて説明する入口。sidebar では別名の entry として扱われる。
-  ['foundation/kiwa', 'foundation'],
-  // standalone な native project。同名の adapter package とは別物。
-  [`${STANDALONE_CATEGORY}/go`, STANDALONE_CATEGORY],
-  [`${STANDALONE_CATEGORY}/python`, STANDALONE_CATEGORY],
-  [`${STANDALONE_CATEGORY}/rust`, STANDALONE_CATEGORY],
-]);
+// 名前だけを key にすると `languages/python` (TypeScript のアダプター) と
+// `native-languages/python` (単独の native プロジェクト) が衝突する。別物なので
+// 分類と組にして区別する。
+const EXEMPT_DOCUMENTS = new Map(
+  exemptDocuments.map((document) => [`${document.category}/${document.name}`, document.category]),
+);
 
-/** 特例かどうか。分類と名前の組で見る。 */
+/** 別枠で扱う文書かどうか。分類と名前の組で見る。 */
 function isExempt(category, name) {
   return EXEMPT_DOCUMENTS.has(`${category}/${name}`);
 }
 
+const STANDALONE_CATEGORY = standaloneCategory.slug;
 // ライブラリ文書が持つべきページ。1 つでも欠けると生成 script が対象から外すため、
 // directory の存在だけでは「文書がある」と判断できない。
-const REQUIRED_PAGES = ['index.md', 'quickstart.md', 'how-to.md', 'reference.md'];
-
-const scope = '@kiwa-lab';
+const REQUIRED_PAGES = requiredPages;
+const scope = packageScope;
 
 /** 正本。各 package の manifest の name が対象 scope のものを集める。 */
 function sourcePackages(problems) {
@@ -121,94 +113,28 @@ function libraryDocuments(problems) {
 }
 
 /**
- * sidebar の分類定義。`config.mts` の `libraryCategories` を読む。
+ * 分類の定義。共有の正本 (docs/taxonomy.mjs) を読む。
  *
- * 文字列を置換して JSON にすると、値の中の記号で壊れる。`text: 'AI: リアルタイム'` の
- * ような値や、既に quote された key がその例になる。TypeScript の parser に構文を
- * 解かせて、必要な literal だけを取り出す。config を import して実行はしない。
+ * 以前は sidebar の config を構文解析して配列を取り出していた。定義の書き方を変えると
+ * 検査だけが壊れる関係だったので、両方が同じ file を import する形にした。
+ *
+ * 同じ package が複数の分類に載ると、Map へ入れるだけでは上書きした側しか残らない。
+ * 重複は別に集めて報告する。
  */
 function sidebarCategories() {
-  const label = 'docs/.vitepress/config.mts';
-  const source = readFileSync(resolveReadPath(configPath, repositoryRoot, label), 'utf8');
-  const parsed = ts.createSourceFile(label, source, ts.ScriptTarget.ES2022, true);
-
-  let literal = null;
-  const visit = (node) => {
-    if (
-      ts.isVariableDeclaration(node) &&
-      ts.isIdentifier(node.name) &&
-      node.name.text === 'libraryCategories' &&
-      node.initializer &&
-      ts.isArrayLiteralExpression(node.initializer)
-    ) {
-      literal = node.initializer;
-      return;
-    }
-    ts.forEachChild(node, visit);
-  };
-  visit(parsed);
-
-  if (!literal) {
-    throw new DocsSyncError(
-      `${label}: could not find the libraryCategories array literal. ` +
-        `Update scripts/check-docs-consistency.mjs when the shape of the definition changes.`,
-    );
-  }
-
   const slugs = new Map();
   const duplicated = [];
-  for (const element of literal.elements) {
-    if (!ts.isObjectLiteralExpression(element)) {
-      throw new DocsSyncError(`${label}: libraryCategories contains a non-literal entry.`);
-    }
-    const slug = stringProperty(element, 'slug', label);
-    for (const name of stringArrayProperty(element, 'packages', label)) {
+  for (const category of libraryCategories) {
+    for (const name of category.packages) {
       const seen = slugs.get(name);
-      // 同じ package を 2 つの分類に置くと、上書きした側だけが残って余分な定義を
-      // 見逃す。両方の分類を挙げて報告する。
-      if (seen !== undefined) duplicated.push(`${name}: listed under both ${seen} and ${slug}`);
-      else slugs.set(name, slug);
+      if (seen !== undefined) {
+        duplicated.push(`${name}: listed under both ${seen} and ${category.slug}`);
+      } else {
+        slugs.set(name, category.slug);
+      }
     }
   }
   return { slugs, duplicated };
-}
-
-/** object literal の文字列 property を取り出す。 */
-function stringProperty(object, key, label) {
-  for (const property of object.properties) {
-    if (!ts.isPropertyAssignment(property)) continue;
-    if (propertyName(property) !== key) continue;
-    if (!ts.isStringLiteralLike(property.initializer)) {
-      throw new DocsSyncError(`${label}: ${key} is not a string literal.`);
-    }
-    return property.initializer.text;
-  }
-  throw new DocsSyncError(`${label}: a libraryCategories entry has no ${key}.`);
-}
-
-/** object literal の文字列配列 property を取り出す。 */
-function stringArrayProperty(object, key, label) {
-  for (const property of object.properties) {
-    if (!ts.isPropertyAssignment(property)) continue;
-    if (propertyName(property) !== key) continue;
-    if (!ts.isArrayLiteralExpression(property.initializer)) {
-      throw new DocsSyncError(`${label}: ${key} is not an array literal.`);
-    }
-    return property.initializer.elements.map((element) => {
-      if (!ts.isStringLiteralLike(element)) {
-        throw new DocsSyncError(`${label}: ${key} contains a non-string entry.`);
-      }
-      return element.text;
-    });
-  }
-  throw new DocsSyncError(`${label}: a libraryCategories entry has no ${key}.`);
-}
-
-/** property 名。identifier でも quote 済みの文字列でも同じ形で返す。 */
-function propertyName(property) {
-  if (ts.isIdentifier(property.name)) return property.name.text;
-  if (ts.isStringLiteralLike(property.name)) return property.name.text;
-  return null;
 }
 
 /**
@@ -248,7 +174,7 @@ function main() {
       problems.push(`${name}: no library document under docs/libraries/<category>/${name}/`);
     }
     if (!sidebar.has(name)) {
-      problems.push(`${name}: missing from libraryCategories in docs/.vitepress/config.mts`);
+      problems.push(`${name}: missing from libraryCategories in docs/taxonomy.mjs`);
     }
     if (!tests.has(name)) {
       problems.push(`${name}: no packages/${name}/tests/docs-library-${name}.test.ts`);
@@ -270,7 +196,7 @@ function main() {
 
   for (const [name, slug] of sidebar) {
     if (!packages.has(name)) {
-      problems.push(`${name}: listed in libraryCategories but has no package under packages/`);
+      problems.push(`${name}: listed in docs/taxonomy.mjs but has no package under packages/`);
       continue;
     }
     const actual = documents.get(name);

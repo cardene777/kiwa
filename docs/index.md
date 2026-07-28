@@ -24,13 +24,13 @@ features:
   - title: 最初のテストを書く
     details: dApp の接続、署名、transaction を最小の E2E で確認します。
     link: /libraries/foundation/dapp/quickstart
-    linkText: Quickstart
+    linkText: はじめる
   - title: API を調べる
     details: 型、関数、生成済みリファレンスを確認します。
     link: /api/
-    linkText: API Reference
+    linkText: API リファレンス
 ---
 
 ## kiwa とは
 
-kiwa は、アプリケーションの境界を検証する OSS テストライブラリ群です。テスト対象に近いライブラリを一つ選び、Overview、Quickstart、Guide、Reference の順に読めます。
+kiwa は、アプリケーションの境界を検証する OSS テストライブラリ群です。テスト対象に近いライブラリを一つ選び、概要、はじめる、使い方、リファレンスの順に読めます。
