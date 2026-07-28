@@ -125,8 +125,12 @@ export interface RegressionResult {
    */
   suppressedByFloor: boolean;
   /**
-   * baseline の p95 自体が絶対下限を下回る場合 true。 この op はどれだけ
-   * 悪化しても下限に阻まれて regressed にならないため、 回帰判定は働いていない。
+   * baseline の p95 自体が絶対下限を下回る場合 true。
+   *
+   * 相対閾値を何倍超えても、 差が絶対下限に届くまでは stable のままになる。
+   * 例 baseline 0.03ms では +0.5ms (baseline 比 +1667%) でようやく判定対象。
+   * 検知が不可能という意味ではなく、 検知に要する悪化が相対では極端に
+   * 大きくなるという意味。
    */
   belowDetectionFloor: boolean;
 }

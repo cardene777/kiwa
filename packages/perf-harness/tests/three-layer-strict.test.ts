@@ -336,6 +336,41 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     expect(slowed.outcomes[0]!.regressionVerdict).toBe('regressed');
     expect(slowed.outcomes[0]!.serialGatePassed).toBe(true);
     expect(slowed.allPassed).toBe(false);
+
+    // 感度の補足は「まだ検知に至っていない」 行の説明なので、検知できた行には
+    // 付けない。付けると report 上で「regressed」 と「検知には … が必要」 が
+    // 同じ行に並び、判定と矛盾して読める (#1708)。
+    expect(slowed.outcomes[0]!.regressionNote).toBeUndefined();
+    const report = readFileSync(join(tmpDir, 'r2.md'), 'utf8');
+    expect(report).toMatch(/\| regressed \|/);
+    expect(report).not.toMatch(/検知には/);
+  });
+
+  it('感度の補足は判定できない行にだけ付く (#1708)', async () => {
+    const tmpDir = tempDir();
+    const baselinePath = join(tmpDir, 'baseline.json');
+    const settings = { serialIterations: 30, concurrency: 3, memoryIterations: 30 };
+    const op = { name: 'tiny', fn: () => {}, serialP95CapMs: 10_000 };
+
+    // 何もしない関数は p95 が下限 0.5ms を大きく下回る。
+    await runPerf3LayerStrict({
+      moduleName: 'floor-note',
+      ops: [op],
+      reportPath: join(tmpDir, 'r1.md'),
+      baselinePath,
+      ...settings,
+    });
+    const second = await runPerf3LayerStrict({
+      moduleName: 'floor-note',
+      ops: [op],
+      reportPath: join(tmpDir, 'r2.md'),
+      baselinePath,
+      ...settings,
+    });
+
+    expect(second.outcomes[0]!.regressionVerdict).not.toBe('regressed');
+    expect(second.outcomes[0]!.regressionNote).toMatch(/検知には \+0\.5ms/);
+    expect(readFileSync(join(tmpDir, 'r2.md'), 'utf8')).toMatch(/検知には \+0\.5ms/);
   });
 
   it('drops ops that are no longer measured only when pruning is requested', async () => {

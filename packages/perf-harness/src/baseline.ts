@@ -108,11 +108,13 @@ export function resolveBaselineRoot(start: string): string {
  * - 版 1 = workspace も vitest の file も並列で測っていた頃 (この field 自体が無い)
  * - 版 2 = workspace を `--workspace-concurrency=1`、 vitest を
  *   `fileParallelism: false` にして 1 件ずつ測る (#1708)
+ * - 版 3 = 判定対象になり得る op の標本数を増やした (#1708)。 15-30 標本では
+ *   p95 が実質最大値になり、 実装を変えずに測り直すだけで 100% 以上動いていた
  *
  * 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は
  * 測り方ではないので上げない。
  */
-export const MEASUREMENT_PREMISE = 2;
+export const MEASUREMENT_PREMISE = 3;
 
 /** 現行環境の env metadata を取得する。 git 未 install / 非 repo 環境では gitSha は "unknown"。 */
 export function captureEnv(): BaselineEnv {

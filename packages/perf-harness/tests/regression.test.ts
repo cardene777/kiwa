@@ -136,14 +136,24 @@ describe('detectRegression (bootstrap CI on p95)', () => {
     expect(result.suppressedByFloor).toBe(false);
   });
 
-  it('T-PH-R-015 baseline が下限未満の op は退行を検知できないと分かる (#1708)', () => {
+  it('T-PH-R-015 baseline が下限未満の op は感度が落ちていると分かる (#1708)', () => {
     // baseline 0.03ms では +0.5ms = +1667% でようやく判定対象になる。
-    // 実質どんな悪化も regressed にならないため、その旨を呼出側へ返す。
     const baseline = makeResult('reply', [0.03, 0.03, 0.03, 0.03, 0.03, 0.03]);
     const current = makeResult('reply', [0.03, 0.03, 0.03, 0.03, 0.03, 0.03]);
     const result = detectRegression({ current, baseline });
 
     expect(result.belowDetectionFloor).toBe(true);
+  });
+
+  it('T-PH-R-017 baseline が下限未満でも下限を超える悪化は検知する (#1708)', () => {
+    // 感度が落ちることと検知できないことは違う。0.29ms → 3.24ms は
+    // 差が 2.95ms なので下限を超え、regressed と判定されなければならない。
+    const baseline = makeResult('reply', [0.29, 0.29, 0.29, 0.29, 0.29, 0.29]);
+    const current = makeResult('reply', [3.24, 3.24, 3.24, 3.24, 3.24, 3.24]);
+    const result = detectRegression({ current, baseline });
+
+    expect(result.belowDetectionFloor).toBe(true);
+    expect(result.verdict).toBe('regressed');
   });
 
   it('T-PH-R-016 baseline が下限以上の op は検知不能扱いにしない (#1708)', () => {

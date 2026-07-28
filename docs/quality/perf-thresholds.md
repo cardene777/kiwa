@@ -113,7 +113,9 @@ The report no longer papers over this. The regression column distinguishes three
 |---|---|
 | measured, no meaningful change | `stable` |
 | relative rule fired, absolute delta below the floor | `stable (差 …ms が下限 0.5ms 未満で判定を保留)` |
-| baseline itself is under the floor, so nothing is detectable | `stable (baseline …ms < 下限 0.5ms のため退行を検知できない)` |
+| baseline is under the floor, so detection needs an outsized change | `stable (検知には +0.5ms (baseline 比 +…%) 以上の悪化が必要)` |
+
+The third case says what it would take, not that detection is impossible — a sub-millisecond op that slows by more than 0.5 ms is still reported as regressed. The note is therefore only attached to rows that did *not* reach a verdict; a `regressed` row carries no sensitivity note, because pairing the two reads as a contradiction.
 
 Making sub-millisecond ops genuinely gateable needs a different statistic (trimmed mean or median) or a higher-resolution clock. That is a change to the measurement method, not to a threshold, and is tracked separately.
 

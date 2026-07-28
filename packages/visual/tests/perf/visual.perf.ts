@@ -55,8 +55,8 @@ describe(MODULE, () => {
         reportPath: REPORT_PATH,
         // PNG decode + pixelmatch は CPU-heavy。 iteration 少なめ + concurrency
         // 落とし で run time を優先する (issue 記載 10-30 iteration に沿う)。
-        serialIterations: 30,
-        serialWarmup: 3,
+        serialIterations: 74,
+        serialWarmup: 7,
         concurrency: 4,
         iterationsPerWorker: 8,
         memoryIterations: 30,

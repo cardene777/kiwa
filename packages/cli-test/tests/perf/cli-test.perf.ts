@@ -28,8 +28,8 @@ describe(MODULE, () => {
         requireGc: true,
         reportPath: REPORT_PATH,
         // File I/O is 10x slower than pure code so we relax iteration counts.
-        serialIterations: 100,
-        serialWarmup: 3,
+        serialIterations: 176,
+        serialWarmup: 18,
         concurrency: 4,
         iterationsPerWorker: 25,
         memoryIterations: 100,

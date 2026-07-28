@@ -356,6 +356,10 @@ function buildRegressionNote(
   currentP95: number,
   baselineP95: number,
 ): { regressionNote?: string } {
+  // 検知できた実績がある行に感度の補足を足すと、判定と矛盾して読める。
+  // 補足は「まだ検知に至っていない」 行にだけ付ける。
+  if (regression.verdict === 'regressed' || regression.verdict === 'improved') return {};
+
   if (regression.suppressedByFloor) {
     const deltaMs = Math.abs(currentP95 - baselineP95);
     return {
@@ -363,8 +367,14 @@ function buildRegressionNote(
     };
   }
   if (regression.belowDetectionFloor) {
+    // baseline が下限より小さい op は、相対閾値をどれだけ超えても差が下限に
+    // 届かない限り stable のままになる。 何をもって退行と扱われるのかを書く。
+    const requiredPct = baselineP95 === 0 ? Infinity : (regression.floorMs / baselineP95) * 100;
+    const requirement = Number.isFinite(requiredPct)
+      ? `baseline 比 +${requiredPct.toFixed(0)}%`
+      : 'baseline が 0ms のため相対では表せない';
     return {
-      regressionNote: `baseline ${baselineP95.toFixed(2)}ms < 下限 ${regression.floorMs}ms のため退行を検知できない`,
+      regressionNote: `検知には +${regression.floorMs}ms (${requirement}) 以上の悪化が必要`,
     };
   }
   return {};
