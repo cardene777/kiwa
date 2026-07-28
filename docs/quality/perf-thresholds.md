@@ -67,6 +67,16 @@ This doc pins **every** perf threshold in kiwa to one of three grounded rational
 | `@kiwa-lab/e2e` | `fetchOverLoopback` | 20 ms | node http server dispatch + fetch-handler adapter over loopback (no network) |
 | `@kiwa-lab/cli` | `runSpecToTest` | 20 ms | md read + parseSpec + template render + file write |
 
+## Measurement isolation — the suite runs one package at a time
+
+Root `package.json > scripts.test:perf` runs the workspace pass with `--workspace-concurrency=1`. It must never use `--parallel`.
+
+`--parallel` means "no concurrency limit", so the root script used to start the perf suites of every workspace package that has a `test:perf` script at once — 177 packages (63 under `packages/`, 114 under `examples/`), not the 63 the name suggests. Every measurement then competes for the same cores, and p95 moves with the load of whatever else happened to be running rather than with the code under test. That is the reason the same commit produced different verdicts on consecutive runs, and it makes every downstream mechanism in this file dishonest: the 20 % regression rule compares against a baseline recorded under a different amount of contention, and the concurrent-load target below stops measuring the mock's own shared state.
+
+Dropping `--parallel` alone is not enough. Without it pnpm still defaults to one worker per CPU core, so the numeric limit is written explicitly.
+
+The trade-off is wall-clock time: a serial pass takes roughly 20-40 minutes instead of a few minutes. That is accepted deliberately — the suite exists to produce comparable numbers, not to finish quickly. `tests/release-smoke/tests/perf-serial-execution.test.ts` fails the release smoke suite if the flag comes back.
+
 ## Regression detection defaults
 
 Threshold: **20 % p95 delta** vs stored baseline (`.perf-baseline/{module}.json`), with Welch t-test for significance (t > 2 ⇒ significant).
@@ -94,7 +104,7 @@ export ANTHROPIC_API_KEY=sk-ant-... OPENAI_API_KEY=sk-... \
   SUPABASE_URL=https://... SUPABASE_ANON_KEY=... \
   ABLY_API_KEY=... SOCKETIO_URL=https://... \
   RAG_VECTOR_STORE_URL=https://... RAG_VECTOR_STORE_API_KEY=...
-pnpm -r --parallel run test:perf --if-present
+pnpm -r --workspace-concurrency=1 run test:perf --if-present
 ```
 
 Live iteration count defaults to 10 (vs 200 for mock) — live calls cost money and are slow, so a full pass fits in a coffee break. Concurrency defaults to 3 to avoid rate-limiting.
