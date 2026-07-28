@@ -2,7 +2,7 @@
 
 `@kiwa-lab/crypto` は JWT、RSA、AES、hash、HMAC、X.509、KDF、Ed25519、X25519 を扱うコードをテストするための Node.js crypto wrapper です。暗号方式そのものを実装するためではなく、アプリケーションが署名、復号、token verification の結果を安全に扱うことを確認します。
 
-![署名したデータを検証して有効または拒否を判定する流れ](/images/kiwa-docs/services/crypto-overview.png)
+<img src="/images/kiwa-docs/services/crypto-overview.webp" alt="署名したデータを検証して有効または拒否を判定する流れ" width="1747" height="900" loading="lazy" decoding="async">
 
 ## 対象にする境界
 

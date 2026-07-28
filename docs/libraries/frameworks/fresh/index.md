@@ -2,7 +2,7 @@
 
 `@kiwa-lab/fresh` は、Deno Fresh の route、Island、Head が持つアプリケーション側の契約を、virtual tree と synthetic context で検証する test adapter です。Deno runtime や file-system router を起動しなくても、request を受けた handler がどの response と page data を返すか、Island の placeholder がどの component に対応するか、複数の Head fragment がどのように一つになるかを確認できます。
 
-![Fresh の route と Island と Head を観測する構造](/images/kiwa-docs/frameworks/fresh-overview.png)
+<img src="/images/kiwa-docs/frameworks/fresh-overview.webp" alt="Fresh の route と Island と Head を観測する構造" width="1200" height="675" loading="lazy" decoding="async">
 
 ## route の HTTP と page data を同時に確認する
 

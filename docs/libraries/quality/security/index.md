@@ -2,7 +2,7 @@
 
 `@kiwa-lab/security` は、アプリケーションの security policy を外部基盤なしで検証する test harness です。CSP、authorization、rate limit、WAF、secret scan、SBOM、security header の判断を、入力と verdict が明確な test にします。reverse proxy や browser を起動する前に、どの request を許可し、どの request を拒否し、どの warning を運用へ渡すかを固定したいときに使います。
 
-![request へ CSP と認可と rate limit と WAF を適用して verdict を返す流れ](/images/kiwa-docs/quality/security-overview.png)
+<img src="/images/kiwa-docs/quality/security-overview.webp" alt="request へ CSP と認可と rate limit と WAF を適用して verdict を返す流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 ## 制御を一つの pass 判定に混ぜない
 

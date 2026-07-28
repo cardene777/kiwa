@@ -2,7 +2,7 @@
 
 `@kiwa-lab/i18n` は、翻訳 lookup、fallback、補間、複数形、数値と日付の locale 表示をテストする in-memory harness です。next-intl、vue-i18n、react-i18next、Lingui を provider 名で表し、メッセージと locale の契約を UI なしで検証します。
 
-![現在 locale の翻訳を探し、fallback と補間を適用する流れ](/images/kiwa-docs/application/i18n-overview.png)
+<img src="/images/kiwa-docs/application/i18n-overview.webp" alt="現在 locale の翻訳を探し、fallback と補間を適用する流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 検証する流れ
 

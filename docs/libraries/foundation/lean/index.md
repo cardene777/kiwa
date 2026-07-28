@@ -4,7 +4,7 @@
 
 このライブラリが扱うのは状態機械です。状態とイベントを列挙し、各組み合わせを遷移先または拒否として記述します。生成された Lean ソースには全ての組み合わせが個別の分岐として現れ、catch-all 分岐は置かれません。行を落とせば Lean の網羅性検査が失敗するため、表の書き漏れを通常のユニットテストより早く見つけられます。
 
-![状態遷移を Lean で検証する流れ](/images/kiwa-docs/foundation/lean-overview.png)
+<img src="/images/kiwa-docs/foundation/lean-overview.webp" alt="状態遷移を Lean で検証する流れ" width="1200" height="658" loading="lazy" decoding="async">
 
 ## このライブラリが確かめること
 

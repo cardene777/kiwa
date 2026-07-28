@@ -2,7 +2,7 @@
 
 `@kiwa-lab/perf-harness` は、同じ非同期 operation を複数回測定し、baseline と比較して性能回帰を判断する library です。単発の経過時間で合否を決める代わりに、warmup 後の sample、percentile、外れ値、測定環境を記録します。変更によって p95 やメモリ差分が悪化していないかを、review 可能な証拠として残すために使います。
 
-![操作を測定して同じ環境のbaselineと比較し性能gateを評価する流れ](/images/kiwa-docs/quality/perf-harness-overview.png)
+<img src="/images/kiwa-docs/quality/perf-harness-overview.webp" alt="操作を測定して同じ環境のbaselineと比較し性能gateを評価する流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 ## 何を測定する library か
 

@@ -2,7 +2,7 @@
 
 `@kiwa-lab/api` は、HTTP handler を Vitest から起動し、request と response の contract を確認する adapter です。Fetch 形式の handler と Node の request response handler を local HTTP server で動かせます。MSW と組み合わせると、client が受け取る固定 response だけを test する mock mode と、local handler 内の外部 HTTP call だけを置き換える hybrid mode を選べます。
 
-![HTTP handlerから応答確認までの流れ](/images/kiwa-docs/foundation/api-overview.png)
+<img src="/images/kiwa-docs/foundation/api-overview.webp" alt="HTTP handlerから応答確認までの流れ" width="1200" height="600" loading="lazy" decoding="async">
 
 ## 何を検証する library か
 

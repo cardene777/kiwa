@@ -2,7 +2,7 @@
 
 `kiwa-test-rs` は、Rust の `cargo test` に deterministic な fixture、HTTP mock server、in-process web framework adapter を加える crate です。unit test の状態を `KiwaEnv` に閉じ込め、scope を抜けた時点で `Drop` に cleanup を任せます。HTTP を含む test では、実 service に接続せず、test が起動した一時 server または router を対象に request と response を検証します。
 
-![Rust の in process router 検証](/images/kiwa-docs/native-languages/rust-overview.png)
+<img src="/images/kiwa-docs/native-languages/rust-overview.webp" alt="Rust の in process router 検証" width="1200" height="658" loading="lazy" decoding="async">
 
 fixture だけを使う場合は feature を外して軽く導入できます。HTTP client の送信 contract まで検証する場合は default の `integration` feature を使い、Axum、actix-web、tower-http、contract tooling は必要な feature だけを選びます。feature を有効にしていない module は export されないため、依存を増やさずに unit test から始められます。
 

@@ -2,7 +2,7 @@
 
 `@kiwa-lab/macos-app` は、SwiftUI または AppKit のビュー木、操作、アクセシビリティ、通知を検証するハーネスです。Xcode や XCTest を起動せず、メモリ上の native app 環境を扱います。
 
-![Macアプリ環境で操作と通知を観測する流れ](/images/kiwa-docs/application/macos-app-overview.png)
+<img src="/images/kiwa-docs/application/macos-app-overview.webp" alt="Macアプリ環境で操作と通知を観測する流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 検証する流れ
 

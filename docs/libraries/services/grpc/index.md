@@ -2,7 +2,7 @@
 
 `@kiwa-lab/grpc` は、unary、server stream、client stream、bidi RPC の handler を process 内で呼び、request、metadata、status を test する harness です。grpc-js、nice-grpc、Twirp、Connect の provider 名を記録できますが、HTTP2 listener、TLS、protobuf serialization は起動しません。
 
-![サービス定義からunaryまたはstream RPCを呼びstatusを確認する流れ](/images/kiwa-docs/services/grpc-overview.png)
+<img src="/images/kiwa-docs/services/grpc-overview.webp" alt="サービス定義からunaryまたはstream RPCを呼びstatusを確認する流れ" width="1774" height="887" loading="lazy" decoding="async">
 
 ## RPC handler の結果と失敗を確認する
 

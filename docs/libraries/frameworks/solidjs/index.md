@@ -2,7 +2,7 @@
 
 `@kiwa-lab/solidjs` は、Signal、Effect、Resource、Solid route、Suspense、error boundary の契約を、Solid runtime を起動せずに検証する adapter です。画面を操作する代わりに、signal を読んだ effect、loader が返した data、route が送る redirect、resource の状態を直接 assertion します。
 
-![SolidJSのリアクティブ状態と非同期結果の関係](/images/kiwa-docs/frameworks/solidjs-overview.png)
+<img src="/images/kiwa-docs/frameworks/solidjs-overview.webp" alt="SolidJSのリアクティブ状態と非同期結果の関係" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 検証できること
 

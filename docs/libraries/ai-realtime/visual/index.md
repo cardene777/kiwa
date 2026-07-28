@@ -2,7 +2,7 @@
 
 `@kiwa-lab/visual` は2つの PNG buffer を decode し、pixelmatch で画素差を数えるテスト用ライブラリです。比較結果には差分画素数、全画素に対する比率、合否、任意の差分 PNG が含まれます。
 
-![baselineとactualのPNGを比較してpassまたはdiff buffer付きfailを返す流れ](/images/kiwa-docs/ai-realtime/visual-overview.png)
+<img src="/images/kiwa-docs/ai-realtime/visual-overview.webp" alt="baselineとactualのPNGを比較してpassまたはdiff buffer付きfailを返す流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 ## 何を検証できるか
 

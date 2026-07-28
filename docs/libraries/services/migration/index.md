@@ -2,7 +2,7 @@
 
 `@kiwa-lab/migration` は、migration の適用履歴、rollback、schema 差分をプロセス内で検証する test harness です。Prisma、Drizzle、Kysely、Knex を provider 名で表しますが、実データベースへ SQL を送る library ではありません。
 
-![migrationを適用し履歴とrollbackを確認する流れ](/images/kiwa-docs/services/migration-overview.png)
+<img src="/images/kiwa-docs/services/migration-overview.webp" alt="migrationを適用し履歴とrollbackを確認する流れ" width="1717" height="916" loading="lazy" decoding="async">
 
 ## 適用順と rollback の契約を確認する
 

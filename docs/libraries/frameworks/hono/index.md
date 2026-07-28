@@ -2,7 +2,7 @@
 
 `@kiwa-lab/hono` は、Hono application の route、middleware、hc 形式の RPC、Cloudflare Workers binding を memory 上で実行する test adapter です。network の listen や Workers runtime を起動せず、request がどの route に届き、middleware がどの順序で通り、どの response が返るかを検証できます。route の境界を速く確認したい test と、実 deploy でしか分からない挙動を分けるための library です。
 
-![Hono の route と Workers binding を実行する流れ](/images/kiwa-docs/frameworks/hono-overview.png)
+<img src="/images/kiwa-docs/frameworks/hono-overview.webp" alt="Hono の route と Workers binding を実行する流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 ## request から response までを追跡する
 

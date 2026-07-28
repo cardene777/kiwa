@@ -2,7 +2,7 @@
 
 `@kiwa-lab/notification` は、push、SMS、アプリ内通知を一つのテスト用 client で扱うライブラリです。FCM、APNs、Twilio、AWS SNS の provider 名と送信結果を保ったまま、単一チャネルと複数チャネルの送信を確認できます。
 
-![通知をチャネルごとに投入し、送信結果と配信イベントを記録する流れ](/images/kiwa-docs/services/notification-overview.png)
+<img src="/images/kiwa-docs/services/notification-overview.webp" alt="通知をチャネルごとに投入し、送信結果と配信イベントを記録する流れ" width="1774" height="887" loading="lazy" decoding="async">
 
 ## 対象にする契約
 

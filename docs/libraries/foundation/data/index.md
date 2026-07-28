@@ -2,7 +2,7 @@
 
 `@kiwa-lab/data` は、queue delivery と定期実行の判断を外部 infrastructure なしで検証する test adapter です。in-memory FIFO queue と手で進められる fake clock を提供し、worker が message を ack する、retry する、DLQ へ移すというアプリの分岐を同じ test process で再現します。
 
-![キュー配送を確認する流れ](/images/kiwa-docs/foundation/data-overview.png)
+<img src="/images/kiwa-docs/foundation/data-overview.webp" alt="キュー配送を確認する流れ" width="1200" height="658" loading="lazy" decoding="async">
 
 queue へ送られた message は、登録済み consumer が受け取ります。consumer が `ack()` すれば entry は完了し、`nack()` するか何も選ばなければ receive count を増やして再配送します。回数が `maxReceiveCount` に達した entry は DLQ へ移ります。`dedupKey` は queue に残っている間だけ同じ仕事の重複投入を一件にまとめ、ack または DLQ 移動で解放されます。
 

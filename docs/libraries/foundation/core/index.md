@@ -2,7 +2,7 @@
 
 `@kiwa-lab/core` は、kiwa の adapter が同じ仕様を読み、同じ test resource の lifecycle を扱うための基盤 package です。HTTP、UI、dApp の test を直接実行するものではありません。仕様 Markdown を `SpecDoc` と `SpecCase` に変換する `parseSpec` と、起動コストの高い resource を借りて返す `createPool` を提供します。
 
-![仕様解析と資源プールの流れ](/images/kiwa-docs/foundation/core-overview.png)
+<img src="/images/kiwa-docs/foundation/core-overview.webp" alt="仕様解析と資源プールの流れ" width="1200" height="658" loading="lazy" decoding="async">
 
 ## 仕様を test の入力へ変換する
 

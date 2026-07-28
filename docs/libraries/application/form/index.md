@@ -2,7 +2,7 @@
 
 `@kiwa-lab/form` は、フォームの入力規則と送信フローを UI framework なしで検証する in-memory harness です。React Hook Form、Zod、Formik、Conform を provider 名で選び、field の登録、値、validation error、送信履歴を同じ API で扱えます。
 
-![field を登録し、入力を検証して送信結果を記録する流れ](/images/kiwa-docs/application/form-overview.png)
+<img src="/images/kiwa-docs/application/form-overview.webp" alt="field を登録し、入力を検証して送信結果を記録する流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 検証する流れ
 

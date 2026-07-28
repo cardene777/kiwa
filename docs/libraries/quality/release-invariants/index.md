@@ -2,7 +2,7 @@
 
 `@kiwa-lab/release-invariants` は、monorepo の release script が守るべき文字列ベースの契約を test する library です。publishable package が build、publish、mutation gate のすべてに含まれること、script に許可しない `--provenance` が入っていないことを、publish を始める前に確認します。release workflow の一部を静かに取りこぼす変更を CI で止める用途です。
 
-![release script と provenance と coverage を検査して summary または violations を返す流れ](/images/kiwa-docs/quality/release-invariants-overview.png)
+<img src="/images/kiwa-docs/quality/release-invariants-overview.webp" alt="release script と provenance と coverage を検査して summary または violations を返す流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 ## package ごとの release 経路を照合する
 

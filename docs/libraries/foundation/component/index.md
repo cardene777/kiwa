@@ -2,7 +2,7 @@
 
 `@kiwa-lab/component` は、component story を入力として、引数の解決、ユーザー操作、簡易 a11y 検査、visual baseline の判断を一つの in-memory harness で test する library です。Storybook、Playwright Component Testing、Chromatic に似た作業を同じ story 定義から切り出せますが、それらの実行環境を起動する wrapper ではありません。
 
-![Story を複数の検証へつなぐ流れ](/images/kiwa-docs/foundation/component-overview.png)
+<img src="/images/kiwa-docs/foundation/component-overview.webp" alt="Story を複数の検証へつなぐ流れ" width="1200" height="658" loading="lazy" decoding="async">
 
 ## 何を確かめる library か
 

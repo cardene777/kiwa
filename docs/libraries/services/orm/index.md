@@ -4,7 +4,7 @@
 
 ## 実行経路
 
-![mockまたはliveのORM環境でqueryを確認して停止する流れ](/images/kiwa-docs/services/orm-overview.png)
+<img src="/images/kiwa-docs/services/orm-overview.webp" alt="mockまたはliveのORM環境でqueryを確認して停止する流れ" width="1774" height="887" loading="lazy" decoding="async">
 
 mock mode は SQLite を使い、live mode は Docker 上の database container を使います。mode、ORM、dialect は discriminated union なので、`env.mode`、`env.orm`、`env.dialect` で絞り込んで client を使います。
 

@@ -2,7 +2,7 @@
 
 `@kiwa-lab/kaname` は、受け入れ条件を formal、runtime、human の三つの検証層に分類し、formal 用と runtime 用の Markdown 文字列へ分ける TypeScript toolkit です。状態遷移や数学的な契約を formal、実行時の振る舞いを runtime、人が確認する UX や承認を human として、一つの item に一つの検証責任を割り当てます。
 
-![仕様項目を検証先へ分ける流れ](/images/kiwa-docs/foundation/kaname-overview.png)
+<img src="/images/kiwa-docs/foundation/kaname-overview.webp" alt="仕様項目を検証先へ分ける流れ" width="1200" height="658" loading="lazy" decoding="async">
 
 `classify` は item ID、本文、layer、`verifyBy` を調べ、重複 ID、空の本文、未知の layer、空の検証先、formal と runtime が同じ artifact を参照する状態を report します。`splitSpec` は input を変えず、formal item だけを含む `specFormal` と、runtime と human item を含む `specRuntime` を文字列として返します。file の書込み、directory 作成、git への追加、test や Lean の実行は行いません。
 

@@ -2,7 +2,7 @@
 
 `@kiwa-lab/solidstart` は、SolidStart の server function と API route を process を起動せず直接呼ぶ test adapter です。route handler に渡す Request、params、locals を組み立て、返された Response と redirect を assertion できるため、route の入力検証や response contract を短い unit test として固定できます。
 
-![SolidStartのserver functionとAPI routeを直接実行する流れ](/images/kiwa-docs/frameworks/solidstart-overview.png)
+<img src="/images/kiwa-docs/frameworks/solidstart-overview.webp" alt="SolidStartのserver functionとAPI routeを直接実行する流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 何を検証する library か
 

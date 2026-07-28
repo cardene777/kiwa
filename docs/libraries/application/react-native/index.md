@@ -2,7 +2,7 @@
 
 `@kiwa-lab/react-native` は、端末 API をまとめた `RNTestEnv` を作り、React Native の画面遷移や保存処理を検証するハーネスです。AsyncStorage、Navigation、Linking、Platform、Dimensions を一つの環境で扱います。
 
-![Deep Linkで画面遷移と保存値を確認する流れ](/images/kiwa-docs/application/react-native-overview.png)
+<img src="/images/kiwa-docs/application/react-native-overview.webp" alt="Deep Linkで画面遷移と保存値を確認する流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 検証する流れ
 

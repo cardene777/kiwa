@@ -2,7 +2,7 @@
 
 `@kiwa-lab/chart` は、chart spec から生成する軽量な SVG 風 tree を検証する in-memory harness です。Recharts、Chart.js、D3、Visx を provider 名で表し、系列、軸、凡例、tooltip、drill-down を DOM や canvas なしで確かめられます。
 
-![chart spec から描画 tree、軸、凡例、tooltip を作る流れ](/images/kiwa-docs/application/chart-overview.png)
+<img src="/images/kiwa-docs/application/chart-overview.webp" alt="chart spec から描画 tree、軸、凡例、tooltip を作る流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 検証する流れ
 

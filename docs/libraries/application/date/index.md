@@ -2,7 +2,7 @@
 
 `@kiwa-lab/date` は、日付演算、書式化、parse、固定 offset の timezone 変換をテストする in-memory harness です。date-fns、dayjs、Luxon、Temporal を provider 名で表し、同じ関数呼び出しで結果を比較できます。
 
-![UTC の日時を演算し、表示用の timezone へ変換する流れ](/images/kiwa-docs/application/date-overview.png)
+<img src="/images/kiwa-docs/application/date-overview.webp" alt="UTC の日時を演算し、表示用の timezone へ変換する流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 検証する流れ
 

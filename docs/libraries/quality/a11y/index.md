@@ -2,7 +2,7 @@
 
 `@kiwa-lab/a11y` は、axe-core の検査結果を Vitest と browser test で同じ形式に扱う adapter です。DOM を axe で検査した結果から、release を止める impact を選び、jsdom、Playwright、SSR hydration の三つの層を一つの report にまとめられます。
 
-![DOMまたはbrowser pageへaxeを実行してthresholdでpassかblockを決める流れ](/images/kiwa-docs/quality/a11y-overview.png)
+<img src="/images/kiwa-docs/quality/a11y-overview.webp" alt="DOMまたはbrowser pageへaxeを実行してthresholdでpassかblockを決める流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 ## 何を検証する library か
 

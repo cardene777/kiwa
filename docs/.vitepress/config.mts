@@ -8,8 +8,134 @@ import { defineConfig } from 'vitepress';
 import definition from '../libraries.json' with { type: 'json' };
 // 組み立ては共有 module に置く。test も同じ関数を呼ぶので、書き直した側がずれる余地がない。
 import { buildLibrarySidebar } from './library-sidebar.mjs';
+// 生成物かどうかの判定は削除経路と共有する。片方だけ判定が変わると、
+// 消される file と索引から外れる file がずれる。
+import { isGeneratedApiPageSource } from '../../scripts/docs-api-pages.mjs';
 
 const librarySidebar = buildLibrarySidebar(definition);
+
+// 検索の索引から本文を落とす場所。ページの題名だけ残す。
+//
+// 検索の主対象は API と使い方で、リリース告知の下書きや過去の測定値ではない。
+// 索引は検索を開いた時に全体を読み込むため、載せるものを絞る。
+const SEARCH_EXCLUDED = [
+  // X 投稿の下書きと GitHub Discussions の文面。sidebar からも nav からも辿れない。
+  'announcements/',
+  // 版ごとの測定値のスナップショット。入口の 1 ページだけが nav にある。
+  'quality-reports/',
+  // 英語で書かれた旧ページ群。sidebar の見出しでアーカイブと明示していて、nav には無い。
+  // 日本語の索引に英語の全文を載せる必然性が低い。
+  'tutorials/',
+  'concepts/',
+  'migrations/',
+];
+
+/**
+ * 検索の索引から、生成した API 契約を丸ごと落とす。
+ *
+ * 管理ブロックには公開名ごとの型宣言とエラー診断の表が入り、公開名は `####` の見出しになる。
+ * 索引は見出しごとに 1 件を作るので、リファレンス 71 ページで 4,799 件に達する。
+ * 索引の大きさは件数で決まる (転置索引と保存 field が件数に比例する) ため、
+ * 本文だけ落としても件数は減らない。
+ *
+ * 主要な API は管理ブロックの外に手書きの見出しがあり、そちらは索引に残る。
+ * ページ自体もリファレンスの見出しで引ける。
+ */
+function stripGeneratedApi(source: string) {
+  const start = '<!-- kiwa-public-api:start -->';
+  const end = '<!-- kiwa-public-api:end -->';
+  // 目印は行として置かれる。生成した型宣言の中に同じ文字列があっても拾わないよう、
+  // code block の外にある行だけを見る。
+  const lines = source.split('\n');
+  let fence: string | null = null;
+  let from = -1;
+  let to = -1;
+  let offset = 0;
+  const offsets: number[] = [];
+  for (const line of lines) {
+    offsets.push(offset);
+    offset += line.length + 1;
+  }
+  for (const [index, line] of lines.entries()) {
+    // 開く fence は run の後ろに言語名を置ける。閉じる fence は置けないので、
+    // run の後ろが空白だけであることまで見る。見ないと `~~~text` を閉じと誤認する。
+    const opened = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    if (opened) {
+      const [, run, rest] = opened;
+      if (fence === null) {
+        // backtick で開く fence の言語名に backtick は置けない。
+        if (run[0] === '`' && rest.includes('`')) continue;
+        fence = run;
+      } else if (run[0] === fence[0] && run.length >= fence.length && rest.trim() === '') {
+        fence = null;
+      }
+      continue;
+    }
+    if (fence !== null) continue;
+    // 目印は独立した行として置かれる。説明文や inline code で触れただけの行を
+    // 境界と見なすと、その間にある本文が索引から落ちる。
+    const trimmed = line.trim();
+    if (from === -1 && trimmed === start) from = offsets[index] + line.indexOf(start);
+    else if (from !== -1 && to === -1 && trimmed === end) to = offsets[index] + line.indexOf(end);
+  }
+  if (from === -1 || to === -1) return source;
+
+  return `${source.slice(0, from)}${source.slice(to + end.length)}`;
+}
+
+/**
+ * 索引に入れる markdown。
+ *
+ * 除外する場所は先頭の見出し 1 行だけ残す。索引はページごとではなく見出しごとに
+ * 1 件を作るので、見出しを全部残すと件数が減らず、索引の大きさも下がらない。
+ * 1 行残すことで、ページ自体はその題名で引ける。
+ */
+function searchSource(source: string, relativePath: string) {
+  // 生成した API 契約のページ。宣言元ごとに分けてあり、中身は型宣言そのもの。
+  // 索引は見出しごとに 1 件を作るので、公開名の数だけ件数が積み上がる。
+  //
+  // 場所ではなく中身の印で判定する。同じ directory に人が置いたページがあれば、
+  // そちらは本文ごと索引に載せる。削除経路と同じ判定を使う。
+  if (isGeneratedApiPageSource(source) || isExcludedFromSearch(relativePath)) {
+    return pageTitle(source, relativePath);
+  }
+  return stripGeneratedApi(source);
+}
+
+/**
+ * 索引から本文を落とす場所か。
+ *
+ * 英語の旧ページ群は locale ごとの写しも同じ扱いにする。`concepts/` を外して
+ * `en/concepts/` を残すと、外した理由 (日本語の索引に英語の全文を載せない) と食い違う。
+ */
+function isExcludedFromSearch(relativePath: string) {
+  return SEARCH_EXCLUDED.some(
+    (prefix) => relativePath.startsWith(prefix) || relativePath.startsWith(`en/${prefix}`),
+  );
+}
+
+/** frontmatter で検索から外すと指定しているか。縮約する前の source を見る。 */
+function excludedByFrontmatter(source: string) {
+  const frontmatter = source.match(/^---\n([\s\S]*?)\n---/);
+  return /^search:\s*false\s*$/m.test(frontmatter?.[1] ?? '');
+}
+
+/**
+ * ページを索引に載せるための題名。
+ *
+ * 見出しがあればそれを使う。無ければ frontmatter の題名から作る。
+ * どちらも無いページを空にすると索引から完全に消えて、名前でも辿れなくなる。
+ * その場合は path を題名にする。
+ */
+function pageTitle(source: string, relativePath: string) {
+  const heading = source.split('\n').find((line) => /^#\s/.test(line));
+  if (heading) return heading;
+  const frontmatter = source.match(/^---\n([\s\S]*?)\n---/);
+  const title = frontmatter?.[1].match(/^title:\s*(.+)$/m)?.[1]?.trim();
+  if (title) return `# ${title.replace(/^["']|["']$/g, '')}`;
+  // 見出しも題名も無いページ。空にすると索引から完全に消えるので、path から作る。
+  return `# ${relativePath.replace(/\.md$/, '')}`;
+}
 
 const englishFoundationSidebar = [
   {
@@ -830,6 +956,16 @@ export default defineConfig({
         detailedView: true,
         translations: {
           button: { buttonText: 'kiwa を検索' },
+        },
+        // 索引に入れる前に本文を落とす。何をどこまで落とすかは searchSource が決める。
+        async _render(src, env, md) {
+          // 独自の描画を渡すと、frontmatter による除外は自分で見る必要がある。
+          // 本文を落とすと frontmatter も一緒に消えるので、縮約する前の source から読む。
+          if (excludedByFrontmatter(src)) return '';
+          const html = md.render(searchSource(src, env.relativePath ?? ''), env);
+          // 縮約しなかったページは env にも入るので、そちらでも見ておく。
+          if (env.frontmatter?.search === false) return '';
+          return html;
         },
       },
     },

@@ -2,7 +2,7 @@
 
 `@kiwa-lab/security-devsecops` は、CI におけるセキュリティ監査の orchestration と report の扱いを test する harness です。SAST、SCA、secret scan、IaC scan、DAST、container security を axis として選び、preset が選んだ順に adapter を実行して一つの report に集めます。Semgrep、Trivy、Gitleaks、tfsec、OWASP ZAP、Grype を起動したり、target file を解析したりはしません。
 
-![presetとtargetからsecurity axesをadapterで実行してreportへ集約する流れ](/images/kiwa-docs/quality/security-devsecops-overview.png)
+<img src="/images/kiwa-docs/quality/security-devsecops-overview.webp" alt="presetとtargetからsecurity axesをadapterで実行してreportへ集約する流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 `audit-all` と `threat-model` は六 axis、`supply-chain` は SCA と container security、`specialty` は SAST、secret scan、DAST を選びます。orchestrator は選んだ axis を順に実行します。一つの adapter が throw すると後続 axis は実行されず report も返りません。そのため CI では completed axis の数だけでなく、呼び出し自体が reject しなかったことと、各 axis の結果を確認します。
 

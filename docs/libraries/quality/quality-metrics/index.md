@@ -2,7 +2,7 @@
 
 `@kiwa-lab/quality-metrics` は、coverage、test count、fidelity、performance、mutation、accessibility の測定値を `QualityReport` に集約し、release gate を評価する library です。測定器そのものではありません。Vitest、mutation runner、a11y scanner、performance job が出した値を呼び出し側で正規化し、この library で出荷基準と照合します。
 
-![テストと mutation の指標から report と tier を組み立て passed か blockers を返す流れ](/images/kiwa-docs/quality/quality-metrics-overview.png)
+<img src="/images/kiwa-docs/quality/quality-metrics-overview.webp" alt="テストと mutation の指標から report と tier を組み立て passed か blockers を返す流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 ## 数値を release の判断に変える
 

@@ -4,7 +4,7 @@
 
 ## 検証する流れ
 
-![Vitestの実行結果と仕様IDからflaky履歴とcoverageをdashboardへ集約する流れ](/images/kiwa-docs/ai-realtime/observability-overview.png)
+<img src="/images/kiwa-docs/ai-realtime/observability-overview.webp" alt="Vitestの実行結果と仕様IDからflaky履歴とcoverageをdashboardへ集約する流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 実行履歴と仕様カバレッジを別々に集め、dashboard で同じ test ID に結び付けます。Vitest 形式の結果を履歴へ変換すると、成功と失敗が混在する test を flaky として検出できます。仕様 Markdown にある ID と test code にある ID を比較すると、仕様だけに残った項目と test だけに残った項目を分けて確認できます。
 

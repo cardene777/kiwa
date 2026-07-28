@@ -2,7 +2,7 @@
 
 `@kiwa-lab/trpc` は、tRPC 形式の router、procedure、middleware を同じ process で実行し、アプリケーションが守る input、context、戻り値、失敗を test する harness です。実 tRPC server、HTTP transport、Zod parser、subscription transport は起動しません。
 
-![routerのmiddlewareを通ったprocedureがデータまたは拒否を返す流れ](/images/kiwa-docs/services/trpc-overview.png)
+<img src="/images/kiwa-docs/services/trpc-overview.webp" alt="routerのmiddlewareを通ったprocedureがデータまたは拒否を返す流れ" width="1923" height="818" loading="lazy" decoding="async">
 
 ## procedure の境界を直接 test する
 

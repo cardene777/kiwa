@@ -2,7 +2,7 @@
 
 `@kiwa-lab/go-lib` は、gin、echo、fiber、chi の request-response contract を TypeScript の test process から観察する mock harness です。Go の binary や実 framework を起動するものではありません。Go 風 handler に最小の context を渡し、入力から読み取った parameter、status、body、header、abort、handler error を assertion できる形で返します。
 
-![Goフレームワークのhandlerを同じrequestで観測する構造](/images/kiwa-docs/languages/go-lib-overview.png)
+<img src="/images/kiwa-docs/languages/go-lib-overview.webp" alt="Goフレームワークのhandlerを同じrequestで観測する構造" width="1200" height="675" loading="lazy" decoding="async">
 
 gin、echo、fiber は individual handler を直接実行します。gin では `Param` と `Query` が未指定なら `undefined` になり、echo と fiber では空文字になります。echo と fiber が `Error` を返した場合は test が throw する代わりに `handlerError` に記録します。gin の `abort()` は `aborted` を記録しますが、後続 handler を自動停止する router ではありません。
 

@@ -2,7 +2,7 @@
 
 `@kiwa-lab/graphql` は、schema metadata と resolver の組み合わせをプロセス内で実行し、query、mutation、subscription の結果を test する harness です。Apollo Server、GraphQL Yoga、urql、Relay の provider 名を扱いますが、HTTP server や WebSocket transport を起動する library ではありません。`typeDefs` は server に保持されますが、この package は schema validation や型検査を行いません。
 
-![スキーマとresolverからqueryを実行してデータまたはエラーを返す流れ](/images/kiwa-docs/services/graphql-overview.png)
+<img src="/images/kiwa-docs/services/graphql-overview.webp" alt="スキーマとresolverからqueryを実行してデータまたはエラーを返す流れ" width="1774" height="887" loading="lazy" decoding="async">
 
 ## resolver の契約を data と errors で確認する
 

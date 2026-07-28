@@ -171,9 +171,15 @@ export function prepareWritePath(path, root, label) {
   if (stats && !stats.isFile()) {
     throw new DocsSyncError(`${label}: ${target} is not a regular file.`);
   }
-  // 検証した時点の親 directory の実体を控える。検証と書き込みの間に別の
-  // directory へ差し替えられたら、書き込み側がこれと突き合わせて気付ける。
-  writeTargetIdentity.set(target, directoryIdentity(directory, label));
+  // 検証した時点の実体を控える。検証と書き込みの間に差し替えられたら、
+  // 書き込み側がこれと突き合わせて気付ける。
+  //
+  // 親 directory だけでなく対象 file 自体も見る。親が同じまま中身を別の file へ
+  // 差し替えられると、親の照合では気付けない。
+  writeTargetIdentity.set(target, {
+    directory: directoryIdentity(directory, label),
+    file: stats ? `${stats.dev}:${stats.ino}` : null,
+  });
   return target;
 }
 
@@ -215,7 +221,15 @@ export function writeFileAtomic(target, content) {
   const directory = dirname(target);
   const label = `atomic write to ${basename(target)}`;
   // 検証を通っていない path は、書き込み直前の実体を基準にするしかない。
-  const before = writeTargetIdentity.get(target) ?? directoryIdentity(directory, label);
+  const verified = writeTargetIdentity.get(target);
+  const before = verified?.directory ?? directoryIdentity(directory, label);
+  // 検証時に file があったなら、それが同じものであることも確かめる。
+  if (verified?.file) {
+    const current = lstatSync(target, { throwIfNoEntry: false });
+    if (current && `${current.dev}:${current.ino}` !== verified.file) {
+      throw new DocsSyncError(`${label}: ${target} was replaced after it was checked.`);
+    }
+  }
   const temporary = join(
     directory,
     `.${basename(target)}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`,

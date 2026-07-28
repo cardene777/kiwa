@@ -2,7 +2,7 @@
 
 `@kiwa-lab/cache` は Redis、Memcached、KeyDB を使うコードの TTL、失効、Pub Sub、counter、複数 node の振る舞いをテストするアダプターです。高速な in-memory または stub と、実コンテナを使う testcontainers を同じ操作面で切り替えます。
 
-![インメモリまたはコンテナで作ったキャッシュ環境のTTL確認と停止](/images/kiwa-docs/services/cache-overview.png)
+<img src="/images/kiwa-docs/services/cache-overview.webp" alt="インメモリまたはコンテナで作ったキャッシュ環境のTTL確認と停止" width="1774" height="887" loading="lazy" decoding="async">
 
 ## 対象にする境界
 

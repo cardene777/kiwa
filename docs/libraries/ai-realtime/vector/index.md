@@ -4,7 +4,7 @@
 
 ## 検証する流れ
 
-![vectorをnamespaceへupsertし検索結果をrankingして次元不一致は拒否する流れ](/images/kiwa-docs/ai-realtime/vector-overview.png)
+<img src="/images/kiwa-docs/ai-realtime/vector-overview.webp" alt="vectorをnamespaceへupsertし検索結果をrankingして次元不一致は拒否する流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 `dimension` は record の `upsert` 時に検証されます。Pinecone、Weaviate、Qdrant、pgvector 形状の client で record を追加、取得、削除し、cosine、euclidean、dot のいずれかで近傍検索します。metric は ranking の assertion と同じ値を指定してください。cosine と dot は大きい score が先頭になり、euclidean は小さい距離が先頭になります。
 
