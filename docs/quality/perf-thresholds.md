@@ -119,15 +119,30 @@ The third case says what it would take, not that detection is impossible — a s
 
 Making sub-millisecond ops genuinely gateable needs a different statistic (trimmed mean or median) or a higher-resolution clock. That is a change to the measurement method, not to a threshold, and is tracked separately.
 
-### Ops whose run-to-run spread exceeds the threshold
+### The regression verdict is reported but not gated
 
-Regression detection compares two separate runs, so it only works when an op's own run-to-run spread is smaller than the 20 % threshold. Some ops are not: measured four times with no code change, `@kiwa-lab/cli-test`'s `readFile` moved 243 % at p50 and 974 % at p95, and `@kiwa-lab/cli`'s `spec_to_test_batch` moved 62 % at p50 even at 200 samples. Anything that hits the filesystem, spawns a child process, or drives jsdom lands in this category on a developer machine.
+Regression detection compares two separate runs, so it only works when an op's own run-to-run spread is smaller than the 20 % threshold. On the machines this suite runs on, almost nothing qualifies.
 
-Those ops carry `regressionGateWaived: '<reason>'`. The verdict is still computed and still printed — the row reads `regressed — gate 対象外 (reason)` — but it does not fail the suite. The serial and concurrent caps still apply, because a cap is decided inside a single run and does not depend on run-to-run spread.
+Measured four times with no code change:
 
-Two alternatives were rejected. Relaxing the relative threshold to 50 % hides real regressions on ops with large measured values. Raising the per-op `minDeltaMs` to the observed spread produces a floor of +12 ms on a 1.4 ms op, which nominally keeps the gate on while guaranteeing it never fires — and unlike a waiver, nothing in the report says so.
+| op | p50 spread | p95 spread |
+|---|---|---|
+| `@kiwa-lab/cli-test` `readFile` | 243 % | 974 % |
+| `@kiwa-lab/cli-test` `writeFile` | 200 % | 313 % |
+| `@kiwa-lab/cli` `init_workflow` (200 samples) | 41 % | 143 % |
+| `@kiwa-lab/cli` `spec_to_test_batch` (200 samples) | 62 % | 514 % |
 
-Adding a waiver requires measured evidence in the reason string and an entry in the tracking issue. Do not add one because a run happened to fail.
+Sample count is not the cause. Raising `serialIterations` from 15-30 to 60-200 across the fourteen affected files changed which packages failed rather than how many, and at the higher counts it exposed ops whose cost grows with iteration count — `a11y`'s `audit_workflow` went from 23 ms to 216 ms, breaching a cap it had passed. That change was reverted.
+
+So `runPerf3Layer` computes the verdict, writes it into the report, and leaves it out of `allPassed` unless the caller passes `regressionGate: true`. Keeping a verdict in the gate while it flips on unchanged code is worse than not gating: a real regression becomes indistinguishable from the noise around it.
+
+The caps (serial, concurrent, memory) are still gated. A cap is decided inside a single run and does not depend on run-to-run spread — that is how the `vector` breach in this suite was found.
+
+Two alternatives were rejected. Relaxing the relative threshold to 50 % hides real regressions on ops with large measured values, and would not be enough anyway (the spreads above reach 974 %). Raising the per-op `minDeltaMs` to the observed spread produces a floor of +12 ms on a 1.4 ms op, which nominally keeps the gate on while guaranteeing it never fires — and unlike an explicit opt-out, nothing in the report says so.
+
+`regressionGateWaived: '<reason>'` marks the ops already known to exceed the threshold, so the list survives until the gate can be switched back on. Adding one requires measured evidence in the reason string. Do not add one because a run happened to fail.
+
+Restoring the gate means making the verdict reproducible — a different statistic or a quieter measurement environment. Until then `regressionGate` stays false by default.
 
 ## Real-API measurement mode
 

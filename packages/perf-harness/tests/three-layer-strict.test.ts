@@ -330,6 +330,8 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       ],
       reportPath: join(tmpDir, 'r2.md'),
       baselinePath,
+      // 回帰判定を gate に載せるかは呼出側が決める (#1708 で既定を false にした)。
+      regressionGate: true,
       ...settings,
     });
 
@@ -344,6 +346,43 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     const report = readFileSync(join(tmpDir, 'r2.md'), 'utf8');
     expect(report).toMatch(/\| regressed \|/);
     expect(report).not.toMatch(/検知には/);
+  });
+
+  it('回帰判定は既定では gate に載らない (#1708)', async () => {
+    const tmpDir = tempDir();
+    const baselinePath = join(tmpDir, 'default.json');
+    const settings = { serialIterations: 30, concurrency: 3, memoryIterations: 30 };
+
+    await runPerf3LayerStrict({
+      moduleName: 'regression-default',
+      ops: [{ name: 'op', fn: () => {}, serialP95CapMs: 10_000 }],
+      reportPath: join(tmpDir, 'd1.md'),
+      baselinePath,
+      ...settings,
+    });
+    const slowed = await runPerf3LayerStrict({
+      moduleName: 'regression-default',
+      ops: [
+        {
+          name: 'op',
+          fn: () => {
+            const until = performance.now() + 1;
+            while (performance.now() < until) {
+              /* burn */
+            }
+          },
+          serialP95CapMs: 10_000,
+        },
+      ],
+      reportPath: join(tmpDir, 'd2.md'),
+      baselinePath,
+      ...settings,
+    });
+
+    // 判定と根拠は残す。gate に載せるかどうかだけを呼出側が決める。
+    expect(slowed.outcomes[0]!.regressionVerdict, '判定は出す').toBe('regressed');
+    expect(slowed.allPassed, '既定では gate を落とさない').toBe(true);
+    expect(readFileSync(join(tmpDir, 'd2.md'), 'utf8')).toMatch(/\| regressed \|/);
   });
 
   it('理由を書いた op だけ回帰判定を gate から外す (#1708)', async () => {
@@ -375,6 +414,7 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       ops: [slow],
       reportPath: join(tmpDir, 'g2.md'),
       baselinePath: gatedBaseline,
+      regressionGate: true,
       ...settings,
     });
     expect(gated.allPassed).toBe(false);
@@ -386,6 +426,7 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       ops: [{ ...fast, regressionGateWaived: '実行ごとの振れ幅が閾値を超える' }],
       reportPath: join(tmpDir, 'w1.md'),
       baselinePath: waivedBaseline,
+      regressionGate: true,
       ...settings,
     });
     const waived = await runPerf3LayerStrict({
@@ -393,6 +434,7 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       ops: [{ ...slow, regressionGateWaived: '実行ごとの振れ幅が閾値を超える' }],
       reportPath: join(tmpDir, 'w2.md'),
       baselinePath: waivedBaseline,
+      regressionGate: true,
       ...settings,
     });
     expect(waived.outcomes[0]!.regressionVerdict, '判定は残す').toBe('regressed');

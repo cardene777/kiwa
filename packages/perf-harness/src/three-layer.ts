@@ -126,6 +126,23 @@ export interface RunPerf3LayerInput {
    */
   memoryWarmup?: number;
   /**
+   * 回帰判定を `allPassed` に反映するか (default false)。
+   *
+   * 回帰判定は別々の実行で測った値を比べるため、 op の実行ごとの振れ幅が
+   * 閾値 20% を下回っていて初めて成立する。 #1708 の実測では kiwa の測定環境で
+   * それを満たす op がほとんど無く、 実装を変えずに 2 回測るだけで
+   * 落ちる package が入れ替わった。 標本数を 15-30 から 60-200 へ増やしても
+   * 改善せず、 p95 でも p50 でも mean でも収まらない。
+   *
+   * その状態で gate に載せると、 本当の退行が起きた時に揺らぎと区別できない。
+   * 判定と根拠は report に出したまま、 gate から外す。
+   * 上限 (serial / concurrent / memory) の判定は 1 回の実行の中で完結するので
+   * 従来どおり反映する。
+   *
+   * 測定手法を作り直して振れ幅が閾値を下回ったら、 既定を true に戻す (#1718)。
+   */
+  regressionGate?: boolean;
+  /**
    * Path (relative to reportPath's directory tree) that the report references
    * as the threshold SSOT. Default: '../../quality/perf-thresholds'.
    */
@@ -354,9 +371,11 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 閾値内でも有意な回帰は gate を落とす (docs/quality/perf-thresholds.md
   // § Regression detection defaults)。cap だけを見ると、20% 超の悪化が
   // 上限に収まっている限り素通りしてしまう。
+  const regressionGate = input.regressionGate ?? false;
   const allPassed = outcomes.every((outcome, index) => {
     const waiver = input.ops[index]?.regressionGateWaived?.trim();
-    const regressionGated = waiver === undefined || waiver.length === 0;
+    const regressionGated =
+      regressionGate && (waiver === undefined || waiver.length === 0);
     return (
       outcome.serialGatePassed &&
       outcome.concurrentGatePassed &&
