@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   DocsSyncError,
-  linkUrl,
+  linkPath,
   prepareWritePath,
   replaceManagedBlock,
   resolveReadPath,
@@ -58,10 +58,9 @@ function siteLibraries() {
 function linksFor(entry, fromDirectory) {
   // path 片は directory 名から来るので、link destination を途中で閉じる文字は
   // encode してから埋める。
-  const sourceDirectory = linkUrl(`${relative(fromDirectory, entry.docsPath) || '.'}/`);
-  const publicBase = linkUrl(
-    `https://cardene777.github.io/kiwa/libraries/${entry.category}/${entry.directory}/`,
-  );
+  const sourceDirectory = linkPath(`${relative(fromDirectory, entry.docsPath) || '.'}/`);
+  const publicBase =
+    `https://cardene777.github.io/kiwa/libraries/${linkPath(entry.category)}/${linkPath(entry.directory)}/`;
   return [
     `- [概要](${publicBase})`,
     `- [はじめる](${publicBase}quickstart)`,

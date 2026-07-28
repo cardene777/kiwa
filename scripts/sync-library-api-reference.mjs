@@ -19,7 +19,7 @@ import {
   escapeMarkdownText,
   inlineCode,
   insideRoot,
-  linkUrl,
+  linkPath,
   neutralizeLeadingFence,
   prepareWritePath,
   replaceManagedBlock,
@@ -42,7 +42,8 @@ function repoRelativePosix(path) {
 }
 
 function sourceUrl(path, line) {
-  return linkUrl(`https://github.com/cardene777/kiwa/blob/main/${repoRelativePosix(path)}#L${line}`);
+  // path 片だけを encode する。行番号の `#L` は URL の構造なので残す。
+  return `https://github.com/cardene777/kiwa/blob/main/${linkPath(repoRelativePosix(path))}#L${line}`;
 }
 
 function sourceLine(sourceFile, node) {
@@ -382,7 +383,9 @@ function group(title, contracts) {
 function section(library, contracts, diagnostics) {
   const values = contracts.filter((contract) => contract.kind === 'value');
   const types = contracts.filter((contract) => contract.kind === 'type');
-  const source = `https://github.com/cardene777/kiwa/blob/main/packages/${library}/src/index.ts`;
+  // library は directory 名から来る。encode しないと、名前に `)` や改行を含む
+  // checkout で link を閉じて後続を本文として描画させられる。
+  const source = `https://github.com/cardene777/kiwa/blob/main/packages/${linkPath(library)}/src/index.ts`;
   return `${start}\n${diagnostics ? `${diagnostics}\n\n` : ''}## API 契約\n\nこの section は [公開 entry point](${source}) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。\n\n${group('値', values)}\n\n${group('型', types)}\n${end}`;
 }
 

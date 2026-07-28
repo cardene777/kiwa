@@ -37,22 +37,69 @@ export function countOccurrences(haystack, needle) {
 }
 
 /**
+ * fenced code block の外にある行だけを、絶対 offset 付きで返す。
+ *
+ * 生成する code block には公開宣言のソーステキストが入る。宣言が管理 marker と
+ * 同じ文字列を literal として持つと、file 全体を数える実装では 1 回目の生成で
+ * block の中へ marker が保存され、2 回目の生成が「marker が 2 個ある」と判定して
+ * 止まる。細工した checkout も競合する process も要らず、公開 API にその文字列を
+ * 書くだけで冪等性が壊れる。marker は fence の外だけで数える。
+ */
+function linesOutsideFences(content) {
+  const lines = [];
+  let offset = 0;
+  let fence = null;
+  for (const line of content.split('\n')) {
+    const opened = line.match(/^ {0,3}(`{3,}|~{3,})/);
+    if (opened) {
+      const run = opened[1];
+      // 開いている fence と同じ記号で、同じ長さ以上なら閉じる。
+      if (fence === null) fence = run;
+      else if (run[0] === fence[0] && run.length >= fence.length) fence = null;
+    } else if (fence === null) {
+      lines.push({ line, offset });
+    }
+    offset += line.length + 1;
+  }
+  return lines;
+}
+
+/** fence の外に現れる needle の絶対 offset を順に返す。 */
+function offsetsOutsideFences(content, needle) {
+  const found = [];
+  for (const { line, offset } of linesOutsideFences(content)) {
+    let from = 0;
+    for (;;) {
+      const at = line.indexOf(needle, from);
+      if (at === -1) break;
+      found.push(offset + at);
+      from = at + needle.length;
+    }
+  }
+  return found;
+}
+
+/**
  * 管理ブロックの span を返す。marker が 1 つずつ正しい順序で並んでいれば
  * { start, end } を、どちらの marker も無ければ null を返す。それ以外は
  * DocsSyncError を投げ、壊れた file への書き込みを止める。
+ *
+ * 数えるのは fenced code block の外に現れる marker だけ。block の中の marker は
+ * 生成した宣言のソーステキストの一部であって、管理ブロックの境界ではない。
  */
 export function findManagedBlock(content, { startMarker, endMarker, label }) {
-  const starts = countOccurrences(content, startMarker);
-  const ends = countOccurrences(content, endMarker);
-  if (starts === 0 && ends === 0) return null;
-  if (starts !== 1 || ends !== 1) {
+  const startOffsets = offsetsOutsideFences(content, startMarker);
+  const endOffsets = offsetsOutsideFences(content, endMarker);
+  if (startOffsets.length === 0 && endOffsets.length === 0) return null;
+  if (startOffsets.length !== 1 || endOffsets.length !== 1) {
     throw new DocsSyncError(
-      `${label}: found ${starts} start marker and ${ends} end marker; expected either none ` +
-        `or exactly one of each. Repair the managed block by hand before generating again.`,
+      `${label}: found ${startOffsets.length} start marker and ${endOffsets.length} end marker; ` +
+        `expected either none or exactly one of each. ` +
+        `Repair the managed block by hand before generating again.`,
     );
   }
-  const start = content.indexOf(startMarker);
-  const end = content.indexOf(endMarker);
+  const [start] = startOffsets;
+  const [end] = endOffsets;
   if (end < start + startMarker.length) {
     throw new DocsSyncError(`${label}: the end marker appears before the start marker.`);
   }
@@ -124,8 +171,19 @@ export function prepareWritePath(path, root, label) {
   if (stats && !stats.isFile()) {
     throw new DocsSyncError(`${label}: ${target} is not a regular file.`);
   }
+  // 検証した時点の親 directory の実体を控える。検証と書き込みの間に別の
+  // directory へ差し替えられたら、書き込み側がこれと突き合わせて気付ける。
+  writeTargetIdentity.set(target, directoryIdentity(directory, label));
   return target;
 }
+
+/**
+ * 検証済みの書き込み先と、その時点の親 directory の実体の対応。
+ *
+ * 検証を第 1 段に集めて書き込みを第 2 段へ回した結果、両者の間隔が広がった。
+ * 検証時の実体をここに残し、書き込み直前に突き合わせる。
+ */
+const writeTargetIdentity = new Map();
 
 /** directory の同一性。名前ではなく実体で比べるために dev と inode を見る。 */
 function directoryIdentity(path, label) {
@@ -141,8 +199,12 @@ function directoryIdentity(path, label) {
  * 半分だけ書かれた file が次の実行で documentation として読み戻されない。
  *
  * 一時 file は `wx` で作る。link を張られていても作成の時点で失敗するので、
- * 書き込みが link の先へ抜けない。加えて親 directory の実体を操作の前後で
- * 見比べ、途中で別の directory へ差し替えられていたら書き込みを無効にする。
+ * 書き込みが link の先へ抜けない。加えて親 directory の実体を見比べ、途中で別の
+ * directory へ差し替えられていたら書き込みを無効にする。
+ *
+ * 比べる基準は `prepareWritePath` が検証した時点の実体にする。書き込み直前の値を
+ * 基準にすると、検証から書き込みまでの間に差し替えられた directory をそのまま
+ * 基準として受け入れてしまう。検証を第 1 段へ集めた分だけこの間隔は広い。
  *
  * これで窓は狭まるが閉じ切ってはいない。path を渡す API は「解決してから開く」
  * ので、解決と open の間は原理的に残る。閉じるには directory の file descriptor を
@@ -152,7 +214,8 @@ function directoryIdentity(path, label) {
 export function writeFileAtomic(target, content) {
   const directory = dirname(target);
   const label = `atomic write to ${basename(target)}`;
-  const before = directoryIdentity(directory, label);
+  // 検証を通っていない path は、書き込み直前の実体を基準にするしかない。
+  const before = writeTargetIdentity.get(target) ?? directoryIdentity(directory, label);
   const temporary = join(
     directory,
     `.${basename(target)}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`,
@@ -264,9 +327,47 @@ const URL_ESCAPES = new Map([
   ['"', '%22'],
 ]);
 
-/** Markdown link の destination に置ける形へ写す。 */
+/**
+ * 組み立て済みの URL を Markdown link の destination に置ける形へ写す。
+ *
+ * `#` と `?` と `/` は URL の構造として意味を持つので触らない。構造を持たない
+ * 部品 (path 片) を埋める場合は linkPath を使う。
+ */
 export function linkUrl(url) {
   let encoded = '';
   for (const character of url) encoded += URL_ESCAPES.get(character) ?? character;
+  return encoded;
+}
+
+// path 片に現れると URL の構造を変える文字。`/` は区切りとして残す。
+//
+// 改行と復帰と tab は行そのものを終わらせるので、後続の文字列が本文として描画される。
+// backslash は Markdown の escape 記号、`#` は fragment の開始、`?` は query の開始、
+// `%` は percent encode 自体の開始で、いずれも destination の意味を変える。
+const PATH_ESCAPES = new Map([
+  ...URL_ESCAPES,
+  ['\n', '%0A'],
+  ['\r', '%0D'],
+  ['\t', '%09'],
+  ['\\', '%5C'],
+  ['#', '%23'],
+  ['?', '%3F'],
+  ['%', '%25'],
+  ['[', '%5B'],
+  [']', '%5D'],
+]);
+
+/**
+ * URL の path 部分に埋める片を写す。
+ *
+ * 片は directory 名と file 名から来る。`#` を含む名前は fragment の始まりに見え、
+ * 改行を含む名前は link を途中で終わらせて後続を本文として描画させる。区切りの `/`
+ * だけ残して、それ以外の構造文字を percent encode する。
+ */
+export function linkPath(path) {
+  let encoded = '';
+  for (const character of path) {
+    encoded += character === '/' ? '/' : PATH_ESCAPES.get(character) ?? character;
+  }
   return encoded;
 }

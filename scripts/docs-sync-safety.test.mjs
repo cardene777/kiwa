@@ -27,6 +27,7 @@ import {
   findManagedBlock,
   inlineCode,
   insideRoot,
+  linkPath,
   neutralizeLeadingFence,
   linkUrl,
   prepareWritePath,
@@ -97,6 +98,53 @@ test('findManagedBlock refuses a file that has only the start marker', () => {
 test('findManagedBlock refuses duplicated markers', () => {
   const content = `${START}\nstray\n${END}\n\nhand written\n\n${START}\nreal\n${END}\n`;
   assert.throws(() => block(content), /2 start marker.*2 end marker/s);
+});
+
+// The generated block carries the source text of public declarations. A
+// declaration that happens to contain the marker as a string literal used to be
+// counted as a second marker, so the first run wrote the file and every later
+// run refused it. No crafted checkout is needed to hit this, only an API whose
+// declaration mentions the marker.
+test('findManagedBlock ignores a marker that sits inside a code fence', () => {
+  const content = [
+    'head',
+    START,
+    'body',
+    '```ts',
+    `declare const template: "${START}";`,
+    '```',
+    END,
+    'tail',
+  ].join('\n');
+  const found = block(content);
+  assert.equal(content.slice(found.start, found.start + START.length), START);
+  assert.equal(content.slice(found.end - END.length, found.end), END);
+  // The span covers the fence, so replacing it also replaces the declaration.
+  assert.equal(content.slice(found.start, found.end).includes('declare const template'), true);
+});
+
+test('generating twice stays idempotent when a declaration mentions the marker', () => {
+  const first = [
+    'head',
+    START,
+    '```ts',
+    `declare const a: "${START}";`,
+    '```',
+    END,
+  ].join('\n');
+  const replaced = replaceManagedBlock(first, {
+    startMarker: START,
+    endMarker: END,
+    block: `${START}\nnew\n${END}`,
+    insert: () => assert.fail('the block was there; nothing should be inserted'),
+    label: 'reference.md',
+  });
+  assert.equal(replaced, `head\n${START}\nnew\n${END}`);
+});
+
+test('findManagedBlock still counts markers outside a closed fence', () => {
+  const content = ['```ts', 'const a = 1;', '```', START, 'body', END, START].join('\n');
+  assert.throws(() => block(content), /2 start marker and 1 end marker/);
 });
 
 test('findManagedBlock refuses markers that appear in the wrong order', () => {
@@ -423,6 +471,33 @@ test('neutralizeLeadingFence leaves inline code alone', () => {
   assert.equal(neutralizeLeadingFence('use `foo` here'), 'use `foo` here');
   assert.equal(neutralizeLeadingFence('`foo` at the start'), '`foo` at the start');
   assert.equal(neutralizeLeadingFence('a ``` in the middle'), 'a ``` in the middle');
+});
+
+// Path segments come from directory and file names. A name that carries a
+// newline ends the link and puts whatever follows into the page body; one that
+// carries a hash or a question mark repoints the link.
+test('linkPath encodes what would end the link or repoint it', () => {
+  assert.equal(linkPath('packages/a b/src'), 'packages/a%20b/src');
+  assert.equal(linkPath('packages/a\nb'), 'packages/a%0Ab');
+  assert.equal(linkPath('packages/a\r\nb'), 'packages/a%0D%0Ab');
+  assert.equal(linkPath('packages/a\tb'), 'packages/a%09b');
+  assert.equal(linkPath('packages/a#b'), 'packages/a%23b');
+  assert.equal(linkPath('packages/a?b'), 'packages/a%3Fb');
+  assert.equal(linkPath('packages/a%b'), 'packages/a%25b');
+  assert.equal(linkPath('packages/a\\b'), 'packages/a%5Cb');
+  assert.equal(linkPath('packages/a(b)c'), 'packages/a%28b%29c');
+});
+
+test('linkPath keeps the separator so the path still resolves', () => {
+  assert.equal(linkPath('packages/core/src/index.ts'), 'packages/core/src/index.ts');
+});
+
+// A name that closes the link and opens an interpolation is the shape that puts
+// an executable expression into the page.
+test('linkPath defuses a directory name that closes the link', () => {
+  const encoded = linkPath(')\n\n{{ 1 + 1 }}');
+  assert.equal(encoded.includes(')'), false);
+  assert.equal(encoded.includes('\n'), false);
 });
 
 test('linkUrl encodes the characters that would end the link early', () => {
