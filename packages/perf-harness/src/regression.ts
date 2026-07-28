@@ -39,6 +39,10 @@ export function detectRegression(input: RegressionInput): RegressionResult {
   // 相対比だけで判定すると値が小さい op ほど厳しくなる。0.03ms → 0.04ms は
   // サンプルが安定していれば「有意な 33% 悪化」になるが実害はない。
   // 差の絶対量が下限に満たないものは揺らぎとして扱う。
+  //
+  // 下限を baseline 比例に下げる案は #1708 で実測により否定した。実装を変えずに
+  // 4 回測ると sub-ms の op は p95 が 50-1100% 動き、絶対量では 0.03-0.22ms に
+  // 収まる。比例下限にするとこの揺らぎがそのまま regressed に変わる。
   const meaningfulDelta = Math.abs(currentP95 - baselineP95) >= minDeltaMs;
 
   let verdict: RegressionResult['verdict'] = 'stable';
@@ -48,12 +52,23 @@ export function detectRegression(input: RegressionInput): RegressionResult {
     verdict = 'improved';
   }
 
+  // 下限が判定を抑えた場合と、そもそも変化が無い場合を呼出側で区別できるようにする。
+  // 両方を stable として返すだけだと、検知できていない状態が安定と読める。
+  const suppressedByFloor = significant && !meaningfulDelta && Math.abs(deltaPct) >= threshold;
+
+  // baseline が下限より小さい op は、閾値を何倍超えても差が下限に届かない。
+  // 例 baseline 0.03ms では +0.5ms = +1667% でようやく判定対象になる。
+  const belowDetectionFloor = baselineP95 < minDeltaMs;
+
   return {
     regressed: verdict === 'regressed',
     deltaPct,
     ci,
     significant,
     verdict,
+    floorMs: minDeltaMs,
+    suppressedByFloor,
+    belowDetectionFloor,
   };
 }
 

@@ -30,7 +30,7 @@ import {
 } from './baseline.js';
 import { evaluatePerfGate } from './gate.js';
 import { emitPerfReport } from './report.js';
-import type { MeasureResult } from './types.js';
+import type { MeasureResult, RegressionResult } from './types.js';
 
 export interface PerfOpSpec {
   name: string;
@@ -123,6 +123,12 @@ export interface OpOutcome {
   concurrentGatePassed: boolean;
   memoryGatePassed: boolean;
   regressionVerdict: 'stable' | 'improved' | 'regressed' | 'n/a (baseline seeded)';
+  /**
+   * verdict だけでは伝わらない判定の状態。 stable の理由が「変化が無い」 なのか
+   * 「差が絶対下限に届かず判定できない」 なのかを report 読者に見せるために持つ。
+   * 補足が要らない場合は undefined。
+   */
+  regressionNote?: string;
 }
 
 export interface RunPerf3LayerResult {
@@ -241,6 +247,9 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       concurrentGatePassed: concurrentGate.verdict.passed,
       memoryGatePassed,
       regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
+      ...(regression === null || priorSerial === undefined
+        ? {}
+        : buildRegressionNote(regression, serial.p95, priorSerial.p95)),
     });
   }
 
@@ -318,6 +327,32 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   return { outcomes, allPassed, baselineSeeded };
 }
 
+/**
+ * 判定の状態を report 用の 1 行に言い換える。
+ *
+ * verdict が同じ `stable` でも「変化が無い」 と「差が絶対下限に届かず判定できない」
+ * は別物で、後者を黙って stable と書くと検知できていないことが伝わらない。
+ * 判定そのものは `detectRegression` が持ち、ここでは持ち込まない。
+ */
+function buildRegressionNote(
+  regression: RegressionResult,
+  currentP95: number,
+  baselineP95: number,
+): { regressionNote?: string } {
+  if (regression.suppressedByFloor) {
+    const deltaMs = Math.abs(currentP95 - baselineP95);
+    return {
+      regressionNote: `差 ${deltaMs.toFixed(2)}ms が下限 ${regression.floorMs}ms 未満で判定を保留`,
+    };
+  }
+  if (regression.belowDetectionFloor) {
+    return {
+      regressionNote: `baseline ${baselineP95.toFixed(2)}ms < 下限 ${regression.floorMs}ms のため退行を検知できない`,
+    };
+  }
+  return {};
+}
+
 interface WriteReportInput {
   reportPath: string;
   moduleName: string;
@@ -345,7 +380,7 @@ function writeReport(input: WriteReportInput): void {
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
     lines.push(
-      `| ${op.name} | ${out.serial.p95.toFixed(2)}ms | ${op.serialP95CapMs}ms | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${out.regressionVerdict} |`,
+      `| ${op.name} | ${out.serial.p95.toFixed(2)}ms | ${op.serialP95CapMs}ms | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${out.regressionNote ? `${out.regressionVerdict} (${out.regressionNote})` : out.regressionVerdict} |`,
     );
   });
 

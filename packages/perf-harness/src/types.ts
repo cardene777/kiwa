@@ -115,6 +115,20 @@ export interface RegressionResult {
   /** CI が 0 を含まないかつ delta > threshold なら true。 */
   significant: boolean;
   verdict: 'improved' | 'stable' | 'regressed';
+  /** 判定に使った絶対下限 (ms)。 */
+  floorMs: number;
+  /**
+   * 相対閾値を超えた有意な差だったが、 絶対下限に満たないため stable に落とした場合 true。
+   *
+   * 「変化が無い」 と「差が下限未満で判定できない」 は同じ stable でも意味が違う。
+   * 区別しないと、 検知できていない状態が安定していると読めてしまう。
+   */
+  suppressedByFloor: boolean;
+  /**
+   * baseline の p95 自体が絶対下限を下回る場合 true。 この op はどれだけ
+   * 悪化しても下限に阻まれて regressed にならないため、 回帰判定は働いていない。
+   */
+  belowDetectionFloor: boolean;
 }
 
 /** Baseline に記録する環境メタデータ。 machine mismatch 検出用。 */
@@ -134,6 +148,15 @@ export interface BaselineEnv {
    * baseline とは比較せず作り直す。 v1 baseline には無いので optional。
    */
   gcExposed?: boolean;
+  /**
+   * 測定の取り方そのものの版。 機械も Node も同じなのに測り方を変えた場合、
+   * 保存済みの値は比較対象として使えない。 その切り替えを 1 箇所で表す。
+   *
+   * 版が違う baseline とは比較せず、 測定が成立している次の実行で作り直す。
+   * 記録の無い baseline (この field 導入より前のもの) も同じ扱いにする。
+   * 値の意味は `MEASUREMENT_PREMISE` (baseline.ts) が持つ。
+   */
+  measurementPremise?: number;
   /** ISO8601 UTC。 */
   savedAt: string;
 }

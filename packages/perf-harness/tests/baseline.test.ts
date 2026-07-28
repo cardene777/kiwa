@@ -3,9 +3,13 @@ import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  MEASUREMENT_PREMISE,
   buildMeasureResult,
+  captureEnv,
+  isComparableEnv,
   loadBaseline,
   saveBaseline,
+  saveBaselineEnvelope,
 } from '../src/index.js';
 
 describe('baseline persistence', () => {
@@ -115,5 +119,49 @@ describe('baseline persistence', () => {
     writeFileSync(file, '{not-json', 'utf8');
 
     await expect(loadBaseline(file)).rejects.toThrow();
+  });
+});
+
+describe('measurement premise gating (#1708)', () => {
+  it('T-PH-B-004 保存した baseline には測り方の版が入る', () => {
+    expect(captureEnv().measurementPremise).toBe(MEASUREMENT_PREMISE);
+  });
+
+  it('T-PH-B-005 版が記録されていない baseline とは比較しない', () => {
+    const current = captureEnv();
+    const { measurementPremise: _dropped, ...withoutPremise } = current;
+
+    // 並列実行の負荷を含んだ頃の値。機械も Node も同じでも比較対象にならない。
+    expect(isComparableEnv(withoutPremise, current)).toBe(false);
+  });
+
+  it('T-PH-B-006 版が違う baseline とは比較しない', () => {
+    const current = captureEnv();
+    const older = { ...current, measurementPremise: MEASUREMENT_PREMISE - 1 };
+
+    expect(isComparableEnv(older, current)).toBe(false);
+  });
+
+  it('T-PH-B-007 版が同じで他の前提も揃っていれば比較する', () => {
+    const current = captureEnv();
+
+    // savedAt と gitSha は測定値の意味を変えないため一致を要求しない。
+    const sameMachine = { ...current, gitSha: 'deadbee', savedAt: '2020-01-01T00:00:00.000Z' };
+    expect(isComparableEnv(sameMachine, current)).toBe(true);
+  });
+
+  it('T-PH-B-008 版の差は envMismatch として読み出せる', async () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
+    const file = path.join(dir, 'older-premise.json');
+    const result = buildMeasureResult('reply', 3, 1, [1, 2, 3]);
+    await saveBaselineEnvelope(file, {
+      schema: 1,
+      env: { ...captureEnv(), measurementPremise: MEASUREMENT_PREMISE - 1 },
+      results: { reply: result },
+    });
+
+    const loaded = await loadBaseline(file);
+
+    expect(loaded?.envMismatch.map((entry) => entry.field)).toContain('measurementPremise');
   });
 });

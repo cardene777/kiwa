@@ -72,6 +72,20 @@ export function defaultBaselinePath(moduleName: string): string {
   return `${process.cwd()}/.perf-baseline/${moduleName}.json`;
 }
 
+/**
+ * 測定の取り方の版。 機械も Node も同じでも測り方が変われば、 保存済みの値は
+ * 比較対象にならない。 そのとき baseline を手で消して回るのではなく、 ここを
+ * 1 上げて「前提が違う」 と宣言し、 測定が成立している次の実行で作り直させる。
+ *
+ * - 版 1 = workspace も vitest の file も並列で測っていた頃 (この field 自体が無い)
+ * - 版 2 = workspace を `--workspace-concurrency=1`、 vitest を
+ *   `fileParallelism: false` にして 1 件ずつ測る (#1708)
+ *
+ * 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は
+ * 測り方ではないので上げない。
+ */
+export const MEASUREMENT_PREMISE = 2;
+
 /** 現行環境の env metadata を取得する。 git 未 install / 非 repo 環境では gitSha は "unknown"。 */
 export function captureEnv(): BaselineEnv {
   return {
@@ -82,6 +96,7 @@ export function captureEnv(): BaselineEnv {
     cpuCount: cpus().length,
     gitSha: captureGitSha(),
     gcExposed: typeof (globalThis as { gc?: () => void }).gc === 'function',
+    measurementPremise: MEASUREMENT_PREMISE,
     savedAt: new Date().toISOString(),
   };
 }
@@ -97,7 +112,11 @@ export function isComparableEnv(baseline: BaselineEnv, current: BaselineEnv): bo
   // GC の有無が記録されていない baseline は、どちらの条件で測ったか判別できない。
   // 不明なまま比較すると、実装が変わっていなくても回帰と判定され得る。
   if (baseline.gcExposed === undefined) return false;
+  // 測り方の版も同じ理由で必須にする。 記録が無いものは版 1 以前で、
+  // 並列実行の負荷を含んだ値のため現在の測定とは比較できない。
+  if (baseline.measurementPremise === undefined) return false;
   return (
+    baseline.measurementPremise === current.measurementPremise &&
     baseline.gcExposed === current.gcExposed &&
     baseline.nodeVersion === current.nodeVersion &&
     baseline.platform === current.platform &&
@@ -130,6 +149,7 @@ function diffEnv(baseline: BaselineEnv, current: BaselineEnv): BaselineLoadResul
     'cpuCount',
     'gitSha',
     'gcExposed',
+    'measurementPremise',
   ];
   const mismatch: BaselineLoadResult['envMismatch'] = [];
   for (const field of fields) {
