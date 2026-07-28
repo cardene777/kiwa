@@ -34,6 +34,9 @@ const packagesRoot = join(repositoryRoot, 'packages');
 const scope = '@kiwa-lab';
 const start = '<!-- kiwa-public-api:start -->';
 const end = '<!-- kiwa-public-api:end -->';
+// 既定は検査のみ。無条件に上書きすると、commit 漏れが手元の build で修復されて
+// repo の内容と公開される内容が静かに分岐する。書き込みは明示した時だけ行う。
+const write = process.argv.includes('--write');
 
 function repoRelativePosix(path) {
   // Windows の separator は 1 文字。2 文字を探していたので、生成される link が
@@ -485,6 +488,8 @@ function main() {
   // 第 1 段 = 全 target を読んで検証し、書く内容を組み立てるだけ。
   // 最後の target が壊れていた時に先行 target だけ更新された生成物が残るのを避ける。
   const plans = [];
+  // 検査だけの実行で、commit された内容と生成結果が食い違った library。
+  const stale = [];
   for (const target of targets) {
     const label = `${target.library} reference.md`;
     const contracts = contractsFrom(program, emitted, target.library, target.entry);
@@ -492,12 +497,29 @@ function main() {
     // 読み書きとも canonical path で許可 root の内側を確かめる。どちらの API も
     // symlink を追うので、checkout に link を 1 本置くだけで repo の外を読み書きできる。
     const content = readFileSync(resolveReadPath(target.reference, repositoryRoot, label), 'utf8');
+    const updated = replace(content, section(target.library, contracts, diagnostics), label);
+    if (!write) {
+      if (content !== updated) stale.push(target.library);
+      continue;
+    }
     plans.push({
       // 書き込み先の検証もここで済ませる。write loop に残すと、後ろの target が
       // repo の外を指す link だった時に先行 target だけ更新された状態で止まる。
       target: prepareWritePath(target.reference, repositoryRoot, label),
-      content: replace(content, section(target.library, contracts, diagnostics), label),
+      content: updated,
     });
+  }
+
+  if (!write) {
+    if (stale.length > 0) {
+      console.error('Generated API references are out of date:');
+      for (const library of stale.sort()) console.error(`  ${library}`);
+      console.error('Run `pnpm docs:api-reference:write` and commit the result.');
+      process.exitCode = 1;
+      return;
+    }
+    console.log(`Detailed API contracts are up to date for ${targets.length} library references.`);
+    return;
   }
 
   // 第 2 段 = 全件の検証を通ってから書く。
