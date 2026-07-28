@@ -34,6 +34,9 @@ const packagesRoot = join(repositoryRoot, 'packages');
 const scope = '@kiwa-lab';
 const start = '<!-- kiwa-public-api:start -->';
 const end = '<!-- kiwa-public-api:end -->';
+// 既定は検査のみ。無条件に上書きすると、commit 漏れが手元の build で修復されて
+// repo の内容と公開される内容が静かに分岐する。書き込みは明示した時だけ行う。
+const write = process.argv.includes('--write');
 
 function repoRelativePosix(path) {
   // Windows の separator は 1 文字。2 文字を探していたので、生成される link が
@@ -64,19 +67,37 @@ function sourceDeclaration(symbol, library) {
   return symbol.declarations?.find((declaration) => isProjectSource(declaration.getSourceFile().fileName, library));
 }
 
-// 対象となるライブラリ (docs 側の reference.md と packages 側の entry point が
-// 揃っているもの) を列挙する。
+/**
+ * 対象となるライブラリを列挙する。
+ *
+ * package がある library で `reference.md` が欠けていたら止める。以前は黙って
+ * 対象から外していたので、`reference.md` を消しても生成が成功していた。
+ * 文書リンクの検査も 4 ページ揃っていない library を外し、VitePress は
+ * 死んだリンクを許すため、消えたことに気付ける層がどこにも無かった。
+ */
 function collectTargets() {
   const targets = [];
+  const missing = [];
   for (const category of readdirSync(librariesRoot, { withFileTypes: true })) {
     if (!category.isDirectory() || category.name === 'native-languages') continue;
     for (const library of readdirSync(join(librariesRoot, category.name), { withFileTypes: true })) {
       if (!library.isDirectory()) continue;
       const entry = join(packagesRoot, library.name, 'src', 'index.ts');
       const reference = join(librariesRoot, category.name, library.name, 'reference.md');
-      if (!existsSync(entry) || !existsSync(reference)) continue;
+      // package を持たない文書 (全体をまとめる入口) は対象外。
+      if (!existsSync(entry)) continue;
+      if (!existsSync(reference)) {
+        missing.push(`docs/libraries/${category.name}/${library.name}/reference.md`);
+        continue;
+      }
       targets.push({ library: library.name, entry, reference });
     }
+  }
+  if (missing.length > 0) {
+    throw new DocsSyncError(
+      `${missing.length} package(s) have no reference.md to write into:\n` +
+        missing.map((path) => `  ${path}`).join('\n'),
+    );
   }
   return targets;
 }
@@ -404,26 +425,6 @@ function replace(content, replacement, label) {
   });
 }
 
-const targets = collectTargets();
-if (targets.length === 0) {
-  console.error('No library reference targets found.');
-  process.exit(1);
-}
-
-const { program, emitted } = buildProgram(targets.map((target) => target.entry));
-
-// module 解決に失敗したまま書き込むと、型が unknown へ劣化した契約が公開される。
-// 生成前に落とす。
-const unresolved = ts
-  .getPreEmitDiagnostics(program)
-  .filter((diagnostic) => diagnostic.code === 2307)
-  .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, ' '));
-if (unresolved.length > 0) {
-  console.error('Module resolution failed; refusing to write degraded API contracts.');
-  for (const message of [...new Set(unresolved)].slice(0, 10)) console.error(`  ${message}`);
-  process.exit(1);
-}
-
 /**
  * 依存の型定義を置いてよい場所。実体で持つ。
  *
@@ -453,7 +454,7 @@ function dependencyStoreRoots() {
  * 実体を取ってから行う。名乗りの path に `/node_modules/` を含めるだけで検証を
  * 迂回できてしまうため、文字列一致で先に除外してはいけない。
  */
-function assertProgramInsideRepository() {
+function assertProgramInsideRepository(program) {
   const dependencyRoots = dependencyStoreRoots();
   const outside = [];
   for (const sourceFile of program.getSourceFiles()) {
@@ -480,11 +481,33 @@ function assertProgramInsideRepository() {
 }
 
 function main() {
-  assertProgramInsideRepository();
+  const targets = collectTargets();
+  if (targets.length === 0) {
+    throw new DocsSyncError('No library reference targets found.');
+  }
+
+  const { program, emitted } = buildProgram(targets.map((target) => target.entry));
+
+  // module 解決に失敗したまま書き込むと、型が unknown へ劣化した契約が公開される。
+  // 生成前に落とす。
+  const unresolved = ts
+    .getPreEmitDiagnostics(program)
+    .filter((diagnostic) => diagnostic.code === 2307)
+    .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, ' '));
+  if (unresolved.length > 0) {
+    throw new DocsSyncError(
+      'Module resolution failed; refusing to write degraded API contracts.\n' +
+        [...new Set(unresolved)].slice(0, 10).map((message) => `  ${message}`).join('\n'),
+    );
+  }
+
+  assertProgramInsideRepository(program);
 
   // 第 1 段 = 全 target を読んで検証し、書く内容を組み立てるだけ。
   // 最後の target が壊れていた時に先行 target だけ更新された生成物が残るのを避ける。
   const plans = [];
+  // 検査だけの実行で、commit された内容と生成結果が食い違った library。
+  const stale = [];
   for (const target of targets) {
     const label = `${target.library} reference.md`;
     const contracts = contractsFrom(program, emitted, target.library, target.entry);
@@ -492,12 +515,29 @@ function main() {
     // 読み書きとも canonical path で許可 root の内側を確かめる。どちらの API も
     // symlink を追うので、checkout に link を 1 本置くだけで repo の外を読み書きできる。
     const content = readFileSync(resolveReadPath(target.reference, repositoryRoot, label), 'utf8');
+    const updated = replace(content, section(target.library, contracts, diagnostics), label);
+    if (!write) {
+      if (content !== updated) stale.push(target.library);
+      continue;
+    }
     plans.push({
       // 書き込み先の検証もここで済ませる。write loop に残すと、後ろの target が
       // repo の外を指す link だった時に先行 target だけ更新された状態で止まる。
       target: prepareWritePath(target.reference, repositoryRoot, label),
-      content: replace(content, section(target.library, contracts, diagnostics), label),
+      content: updated,
     });
+  }
+
+  if (!write) {
+    if (stale.length > 0) {
+      console.error('Generated API references are out of date:');
+      for (const library of stale.sort()) console.error(`  ${library}`);
+      console.error('Run `pnpm docs:api-reference:write` and commit the result.');
+      process.exitCode = 1;
+      return;
+    }
+    console.log(`Detailed API contracts are up to date for ${targets.length} library references.`);
+    return;
   }
 
   // 第 2 段 = 全件の検証を通ってから書く。
