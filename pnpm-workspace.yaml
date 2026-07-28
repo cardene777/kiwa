@@ -5,3 +5,20 @@ packages:
   - "tests/fixtures/*"
   - "tests/release-smoke"
   - "promo"
+
+# 公開直後の版を取り込まない待機期間 (分)。
+# 侵害された package の多くは公開から数日以内に発見されて registry から削除される。
+# その間に取り込まないことで、削除される前の版を掴む窓を塞ぐ。
+# 値は .github/dependabot.yml の cooldown (7 日) と揃えている。
+minimumReleaseAge: 10080
+
+# postinstall を走らせる package を明示したものだけに限る。
+# 列挙外の package の install script は実行しない。
+# better-sqlite3 は native binding の build に postinstall が要る。
+onlyBuiltDependencies:
+  - better-sqlite3
+
+# 名指ししていない間接依存が git repository や直接 tarball から入るのを禁じる。
+# 直接依存 (この repo の package.json が名指ししたもの) は対象外。
+# pnpm 11 では既定値になる。
+blockExoticSubdeps: true
