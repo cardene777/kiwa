@@ -112,8 +112,34 @@ export function takeFlagValue(argv: string[], flag: string): string | undefined 
   return undefined;
 }
 
+/**
+ * option の値を除いた positional だけを返す。
+ *
+ * 「`--` で始まらない最初の token」 を positional とみなすと、
+ * `anvil seed --out state.mjs` の `state.mjs` を拾ってしまう。 script path として
+ * 渡されるので、 その名前の file が実在すれば入力不備のつもりで実行してしまう。
+ * 値を取る option を知った上で読み飛ばす。
+ */
+function positionalArgs(argv: string[], valueFlags: readonly string[]): string[] {
+  const positionals: string[] = [];
+  for (let i = 0; i < argv.length; i += 1) {
+    const token = argv[i];
+    if (token === undefined) continue;
+    if (token.startsWith('--')) {
+      // `--flag=value` は 1 token で完結するので読み飛ばしは要らない。
+      if (token.includes('=')) continue;
+      if (valueFlags.includes(token)) i += 1;
+      continue;
+    }
+    positionals.push(token);
+  }
+  return positionals;
+}
+
+const ANVIL_SEED_VALUE_FLAGS = ['--out', '--chain-id', '--port'] as const;
+
 async function anvilSeedCommand(argv: string[], deps: RunCliDeps): Promise<number> {
-  const scriptPath = argv.find((a) => !a.startsWith('--'));
+  const scriptPath = positionalArgs(argv, ANVIL_SEED_VALUE_FLAGS)[0];
   if (!scriptPath) {
     deps.stderr('ERR kiwa anvil seed: script path is required\n');
     return 2;
@@ -148,7 +174,22 @@ async function runWatchCommand(argv: string[], deps: RunCliDeps): Promise<number
   }
   const layers: RunWatchLayer[] = [];
   for (let i = 0; i < argv.length; i += 1) {
-    if (argv[i] === '--layer') {
+    const token = argv[i];
+    if (token === undefined) continue;
+
+    // `--layer=api` の形も受ける。 他の command と `takeFlagValue` は両形式を
+    // 扱うので、 ここだけ空白区切りしか見ないと同じ指定が黙って無視される。
+    if (token.startsWith('--layer=')) {
+      const value = token.slice('--layer='.length);
+      if (value.length === 0) {
+        deps.stderr('ERR kiwa run --watch: --layer requires a value\n');
+        return 2;
+      }
+      layers.push(value as RunWatchLayer);
+      continue;
+    }
+
+    if (token === '--layer') {
       const value = argv[i + 1];
       if (!value || value.startsWith('--')) {
         deps.stderr('ERR kiwa run --watch: --layer requires a value\n');
@@ -177,7 +218,23 @@ async function runWatchCommand(argv: string[], deps: RunCliDeps): Promise<number
       result.children.map(
         (child) =>
           new Promise<number>((resolveFn) => {
-            child.on('exit', (code) => resolveFn(code ?? 0));
+            // signal で落ちた watcher は `code` が null で `signal` に名前が入る。
+            // null を 0 に丸めると、SIGSEGV で死んだ watcher が成功になり、
+            // 呼び出し側は異常終了を検知できない。
+            child.on('exit', (code, signal) => {
+              if (code !== null && code !== undefined) {
+                resolveFn(code);
+                return;
+              }
+              deps.stderr(`ERR run --watch: watcher terminated by ${signal ?? 'unknown signal'}\n`);
+              resolveFn(1);
+            });
+            // spawn 自体が失敗すると `exit` は来ない。 購読していないと
+            // uncaught error になり、 この promise も解決されないまま残る。
+            child.on('error', (error) => {
+              deps.stderr(`ERR run --watch failed: ${(error as Error).message}\n`);
+              resolveFn(1);
+            });
           }),
       ),
     );

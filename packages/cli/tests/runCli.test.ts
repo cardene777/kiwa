@@ -35,10 +35,19 @@ function makeProject(): string {
 }
 
 /** 指定 exit code を非同期に 1 度だけ発火する child process の代役。 */
-function fakeChild(code: number | null): ChildProcess {
+function fakeChild(code: number | null, signal: NodeJS.Signals | null = null): ChildProcess {
   const child = new EventEmitter();
   setImmediate(() => {
-    child.emit('exit', code);
+    child.emit('exit', code, signal);
+  });
+  return child as unknown as ChildProcess;
+}
+
+/** spawn 自体が失敗した child。 `exit` は来ず `error` だけが飛ぶ。 */
+function failingChild(message: string): ChildProcess {
+  const child = new EventEmitter();
+  setImmediate(() => {
+    child.emit('error', new Error(message));
   });
   return child as unknown as ChildProcess;
 }
@@ -431,14 +440,46 @@ describe('runCli run --watch', () => {
     await expect(runCli(['run', '--watch'], h.deps)).resolves.toBe(3);
   });
 
-  it('T-CLI-056 treats a signal-killed watcher (null exit code) as 0', async () => {
+  it('T-CLI-056 signal で落ちた watcher は成功にしない', async () => {
+    // code が null で signal に名前が入る形。0 に丸めると SIGSEGV で死んだ
+    // watcher が成功になり、呼び出し側は異常終了を検知できない。
     const dir = makeProject();
     const h = harness({
       cwd: () => dir,
       runWatch,
-      spawnFn: () => fakeChild(null),
+      spawnFn: () => fakeChild(null, 'SIGSEGV'),
     });
-    await expect(runCli(['run', '--watch', '--layer', 'unit'], h.deps)).resolves.toBe(0);
+    await expect(runCli(['run', '--watch', '--layer', 'unit'], h.deps)).resolves.toBe(1);
+    expect(h.err()).toContain('terminated by SIGSEGV');
+  });
+
+  it('T-CLI-058 spawn に失敗した watcher を error 経由で拾う', async () => {
+    // `error` を購読していないと uncaught になり、exit を待つ promise も残る。
+    const dir = makeProject();
+    const h = harness({
+      cwd: () => dir,
+      runWatch,
+      spawnFn: () => failingChild('spawn pnpm ENOENT'),
+    });
+    await expect(runCli(['run', '--watch', '--layer', 'unit'], h.deps)).resolves.toBe(1);
+    expect(h.err()).toContain('spawn pnpm ENOENT');
+  });
+
+  it('T-CLI-059 --layer=value の形も layer 指定として扱う', async () => {
+    // 他の command と takeFlagValue は両形式を扱う。ここだけ空白区切りしか
+    // 見ないと、同じ指定が黙って無視されて既定の 3 layer が起動する。
+    const dir = makeProject();
+    const h = harness({ cwd: () => dir, runWatch });
+    await expect(runCli(['run', '--watch', '--layer=api', '--dry-run'], h.deps)).resolves.toBe(0);
+    expect(h.out()).toBe('watch[api]: pnpm exec vitest --watch --dir tests/integration\n');
+  });
+
+  it('T-CLI-060b option の値を script path と取り違えない', async () => {
+    // `--out state.mjs` の値を positional とみなすと、その名前の file が
+    // 実在した場合に入力不備のつもりで実行してしまう。
+    const h = harness();
+    await expect(runCli(['anvil', 'seed', '--out', 'state.mjs'], h.deps)).resolves.toBe(2);
+    expect(h.err()).toBe('ERR kiwa anvil seed: script path is required\n');
   });
 
   it('T-CLI-057 an unknown layer exits 1 as "ERR run --watch failed"', async () => {
