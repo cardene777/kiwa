@@ -752,7 +752,7 @@ export declare function detectXidWraparound(session: MvccAdvancedSession, input:
 
 公開 entry point から解決しています。
 
-`dispatchEvent` を `dispatchTransactionEvent` として公開しています。
+<code v-pre>dispatchEvent</code> を <code v-pre>dispatchTransactionEvent</code> として公開しています。
 
 ```ts
 export {

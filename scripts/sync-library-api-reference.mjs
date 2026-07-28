@@ -224,9 +224,11 @@ function displayContract(checker, exported, symbol, library, emitted) {
     const statement = reExportStatement(exported);
     if (statement) {
       // namespace 公開は名前が付け替わったわけではないので注記しない。
+      // 元の名前も公開名も宣言から来る。backtick で囲んだだけでは Vue の補間が
+      // 式として実行されるので、公開名の見出しと同じく `<code v-pre>` に入れる。
       const note =
         aliased && !namespaceExport
-          ? `\`${symbol.getName()}\` を \`${name}\` として公開しています。`
+          ? `${inlineCode(symbol.getName())} を ${inlineCode(name)} として公開しています。`
           : null;
       return { code: statement, source: null, note };
     }
@@ -407,18 +409,38 @@ if (unresolved.length > 0) {
 }
 
 /**
+ * 依存の型定義を置いてよい場所。実体で持つ。
+ *
+ * `node_modules` が repo の外の store を指す構成があるため、repo の内側判定だけでは
+ * 正当な依存まで弾いてしまう。許可するのはここで列挙した root の内側だけにする。
+ */
+function dependencyStoreRoots() {
+  const roots = [];
+  for (const candidate of [join(repositoryRoot, 'node_modules')]) {
+    try {
+      roots.push(realpathSync(candidate));
+    } catch {
+      // 無ければ許可対象も無い。
+    }
+  }
+  return roots;
+}
+
+/**
  * TypeScript が実際に読んだ source が repo の内側に収まっているかを確かめる。
  *
  * entry point の path を検証しても、そこから辿る import graph は TypeScript が自分で
  * 読む。checkout に外を指す link を置くか `../../` で外へ出る import を書けば、repo の
  * 外にある宣言と JSDoc が生成物へ流れ込む。書き込む前に program 全体を見て止める。
  *
- * node_modules は型定義の取得元として正当なので対象から外す。
+ * 依存の型定義は repo の外にある store を指すので対象から外す。ただし除外の判定は
+ * 実体を取ってから行う。名乗りの path に `/node_modules/` を含めるだけで検証を
+ * 迂回できてしまうため、文字列一致で先に除外してはいけない。
  */
 function assertProgramInsideRepository() {
+  const dependencyRoots = dependencyStoreRoots();
   const outside = [];
   for (const sourceFile of program.getSourceFiles()) {
-    if (sourceFile.isDeclarationFile && sourceFile.fileName.includes('/node_modules/')) continue;
     let real;
     try {
       real = realpathSync(sourceFile.fileName);
@@ -427,7 +449,12 @@ function assertProgramInsideRepository() {
       outside.push(sourceFile.fileName);
       continue;
     }
-    if (!insideRoot(repositoryRoot, real)) outside.push(`${sourceFile.fileName} -> ${real}`);
+    if (insideRoot(repositoryRoot, real)) continue;
+    // 実体が許可した dependency store の内側なら、宣言 file に限って通す。
+    if (sourceFile.isDeclarationFile && dependencyRoots.some((root) => insideRoot(root, real))) {
+      continue;
+    }
+    outside.push(`${sourceFile.fileName} -> ${real}`);
   }
   if (outside.length === 0) return;
   throw new DocsSyncError(
@@ -450,15 +477,16 @@ function main() {
     // symlink を追うので、checkout に link を 1 本置くだけで repo の外を読み書きできる。
     const content = readFileSync(resolveReadPath(target.reference, repositoryRoot, label), 'utf8');
     plans.push({
-      path: target.reference,
-      label,
+      // 書き込み先の検証もここで済ませる。write loop に残すと、後ろの target が
+      // repo の外を指す link だった時に先行 target だけ更新された状態で止まる。
+      target: prepareWritePath(target.reference, repositoryRoot, label),
       content: replace(content, section(target.library, contracts, diagnostics), label),
     });
   }
 
   // 第 2 段 = 全件の検証を通ってから書く。
   for (const plan of plans) {
-    writeFileAtomic(prepareWritePath(plan.path, repositoryRoot, plan.label), plan.content);
+    writeFileAtomic(plan.target, plan.content);
   }
   console.log(`Synchronized detailed API contracts for ${plans.length} library references.`);
 }

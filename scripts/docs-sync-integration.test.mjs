@@ -177,6 +177,39 @@ test('a broken package later in the run leaves the earlier ones untouched', () =
   );
 });
 
+// 壊れた目印だけでなく、書き込み先の検証も第 1 段で行う。write loop に残すと
+// 後ろの package が link だった時に先行 package だけ更新された状態で止まる。
+test('a symlinked target later in the run leaves the earlier ones untouched', () => {
+  withFixture(
+    ({ root, packages }) => {
+      const outsideDirectory = realpathSync(mkdtempSync(join(tmpdir(), 'docs-sync-outside-')));
+      try {
+        const healthy = packages['aaa-first'];
+        const broken = packages['zzz-last'];
+        const healthyBefore = `# @kiwa-lab/aaa-first\n\n${HAND_WRITTEN}`;
+        writeFileSync(healthy.readmePath, healthyBefore);
+
+        const outside = join(outsideDirectory, 'victim.md');
+        writeFileSync(outside, 'original');
+        symlinkSync(outside, broken.readmePath);
+
+        const result = runSync(root);
+        assert.notEqual(result.status, 0);
+        assert.match(result.stderr, /symlink|outside/);
+        assert.equal(readFileSync(outside, 'utf8'), 'original', 'the file outside is intact');
+        assert.equal(
+          readFileSync(healthy.readmePath, 'utf8'),
+          healthyBefore,
+          'the healthy package was not written',
+        );
+      } finally {
+        rmSync(outsideDirectory, { recursive: true, force: true });
+      }
+    },
+    ['aaa-first', 'zzz-last'],
+  );
+});
+
 // 細工された checkout。writeFileSync は link を追うので、guard が無ければ
 // 生成 script は repo の外の file を書き換える。
 test('a README that is a symlink out of the repository is refused', () => {

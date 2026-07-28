@@ -162,16 +162,24 @@ function main() {
     );
 
     if (readme !== updatedReadme) {
-      if (write) plans.push({ path: readmePath, label: readmeLabel, content: updatedReadme });
-      else errors.push(`README link is out of date: ${entry.packageName}`);
+      if (write) {
+        // 書き込み先の検証もここで済ませる。write loop に残すと、後ろの package が
+        // repo の外を指す link だった時に先行 package だけ更新された状態で止まる。
+        plans.push({
+          target: prepareWritePath(readmePath, repositoryRoot, readmeLabel),
+          content: updatedReadme,
+        });
+      } else {
+        errors.push(`README link is out of date: ${entry.packageName}`);
+      }
     }
     if (docsReadme !== updatedDocsReadme) {
       if (write) {
+        // prepareWritePath は親 directory の実体を確かめるので、先に作る。
+        if (!existsSync(docsDirectory)) mkdirSync(docsDirectory, { recursive: true });
         plans.push({
-          path: docsReadmePath,
-          label: docsReadmeLabel,
+          target: prepareWritePath(docsReadmePath, repositoryRoot, docsReadmeLabel),
           content: updatedDocsReadme,
-          directory: docsDirectory,
         });
       } else {
         errors.push(`docs README link is out of date: ${entry.packageName}`);
@@ -181,11 +189,7 @@ function main() {
 
   // 第 2 段 = 全件の検証を通ってから書く。
   for (const plan of plans) {
-    // prepareWritePath は親 directory の実体を確かめるので、先に作る。
-    if (plan.directory && !existsSync(plan.directory)) {
-      mkdirSync(plan.directory, { recursive: true });
-    }
-    writeFileAtomic(prepareWritePath(plan.path, repositoryRoot, plan.label), plan.content);
+    writeFileAtomic(plan.target, plan.content);
   }
 
   if (errors.length > 0) {

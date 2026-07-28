@@ -99,7 +99,7 @@ export declare function applyOptimisticUpdate<TForm extends Record<string, unkno
 
 公開 entry point から解決しています。
 
-`applyOptimisticUpdate` を `applyReactActionOptimistic` として公開しています。
+<code v-pre>applyOptimisticUpdate</code> を <code v-pre>applyReactActionOptimistic</code> として公開しています。
 
 ```ts
 export {

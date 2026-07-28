@@ -280,7 +280,7 @@ export interface RateLimitOptions {
 
 公開 entry point から解決しています。
 
-`RetryOptions` を `ResilienceRetryOptions` として公開しています。
+<code v-pre>RetryOptions</code> を <code v-pre>ResilienceRetryOptions</code> として公開しています。
 
 ```ts
 export {

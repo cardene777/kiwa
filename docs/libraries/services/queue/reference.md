@@ -275,7 +275,7 @@ export declare function createWranglerCloudflareQueuesEnv(opts: SetupCloudflareQ
 
 公開 entry point から解決しています。
 
-`dispatchEvent` を `dispatchJobEvent` として公開しています。
+<code v-pre>dispatchEvent</code> を <code v-pre>dispatchJobEvent</code> として公開しています。
 
 ```ts
 export {

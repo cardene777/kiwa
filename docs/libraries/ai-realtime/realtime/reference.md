@@ -259,7 +259,7 @@ export declare function dispatchEvent(input: {
 
 公開 entry point から解決しています。
 
-`initialMetrics` を `initialSemanticsMetrics` として公開しています。
+<code v-pre>initialMetrics</code> を <code v-pre>initialSemanticsMetrics</code> として公開しています。
 
 helper — default metrics。
 
@@ -2088,7 +2088,7 @@ export interface WebRtcIceMock extends SemanticsMock {
 
 公開 entry point から解決しています。
 
-`MediaStream` を `WebRtcMediaStream` として公開しています。
+<code v-pre>MediaStream</code> を <code v-pre>WebRtcMediaStream</code> として公開しています。
 
 ```ts
 export {

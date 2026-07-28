@@ -425,7 +425,7 @@ export declare function __resetWebAuthnCounters(): void;
 
 公開 entry point から解決しています。
 
-`backupCredential` を `backupPasskeyCredential` として公開しています。
+<code v-pre>backupCredential</code> を <code v-pre>backupPasskeyCredential</code> として公開しています。
 
 Push a credential blob into a sync fabric. Bumps the credential's sync epoch (real fabrics use this to detect concurrent updates across devices) and appends the vendor to `syncedFabrics` if it is not already present. Returns the updated credential — callers should replace their in-memory copy with the return value so subsequent backup / restore see the new epoch. Throws when the credential is not backup-eligible. Non-discoverable credentials minted on a bare U2F-style security key cannot participate in the fabric — the FIDO Alliance Passkey Provider spec requires the credential live on a device that can round-trip the private key material through the vendor's E2EE blob.
 
@@ -448,7 +448,7 @@ export {
 
 公開 entry point から解決しています。
 
-`base64UrlDecode` を `base64UrlDecodeWebAuthn` として公開しています。
+<code v-pre>base64UrlDecode</code> を <code v-pre>base64UrlDecodeWebAuthn</code> として公開しています。
 
 ```ts
 export {
@@ -469,7 +469,7 @@ export {
 
 公開 entry point から解決しています。
 
-`base64UrlEncode` を `base64UrlEncodeWebAuthn` として公開しています。
+<code v-pre>base64UrlEncode</code> を <code v-pre>base64UrlEncodeWebAuthn</code> として公開しています。
 
 ```ts
 export {
@@ -514,7 +514,7 @@ export declare function buildProviderRegistry(kinds: ProviderKind[]): Record<Pro
 
 公開 entry point から解決しています。
 
-`buildOtpAuthUri` を `buildSupabaseOtpAuthUri` として公開しています。
+<code v-pre>buildOtpAuthUri</code> を <code v-pre>buildSupabaseOtpAuthUri</code> として公開しています。
 
 Build the standard `otpauth://` URI clients scan into an authenticator app.
 
@@ -536,7 +536,7 @@ export {
 
 公開 entry point から解決しています。
 
-`computeJkt` を `computeDpopJkt` として公開しています。
+<code v-pre>computeJkt</code> を <code v-pre>computeDpopJkt</code> として公開しています。
 
 Compute the JWK thumbprint (RFC 7638) for a DPoP JWK. Sender-constrained access tokens embed this thumbprint as `cnf.jkt` — the mock keeps the canonical member ordering (`crv`, `kty`, `x`, `y`) so identical JWKs always produce identical thumbprints.
 
@@ -603,7 +603,7 @@ export declare function createBetterAuthGoogleProviderMock(): BetterAuthProvider
 
 公開 entry point から解決しています。
 
-`createSessionFor` を `createBetterAuthSessionFor` として公開しています。
+<code v-pre>createSessionFor</code> を <code v-pre>createBetterAuthSessionFor</code> として公開しています。
 
 ```ts
 export {
@@ -749,7 +749,7 @@ export declare function createMockDpopJwk(): DpopJwk;
 
 公開 entry point から解決しています。
 
-`createEntityStatement` を `createOidcEntityStatement` として公開しています。
+<code v-pre>createEntityStatement</code> を <code v-pre>createOidcEntityStatement</code> として公開しています。
 
 Build a plain entity statement for tests. Sets sensible defaults for `iat` / `exp` so tests only override the fields they care about.
 
@@ -777,7 +777,7 @@ export {
 
 公開 entry point から解決しています。
 
-`createTrustAnchor` を `createOidcTrustAnchor` として公開しています。
+<code v-pre>createTrustAnchor</code> を <code v-pre>createOidcTrustAnchor</code> として公開しています。
 
 Build a plain trust-anchor fixture for tests. Wraps the manual object construction so tests import a single helper.
 
@@ -882,7 +882,7 @@ export declare function deriveCodeChallenge(verifier: string, method?: PkceChall
 
 公開 entry point から解決しています。
 
-`deriveMockAddress` を `deriveSupabaseMockAddress` として公開しています。
+<code v-pre>deriveMockAddress</code> を <code v-pre>deriveSupabaseMockAddress</code> として公開しています。
 
 Derive a deterministic pseudo-Ethereum address from a private key. Real addresses come from keccak256(pubkey)[-20:]; the mock uses a deterministic HMAC → 20 bytes → 0x-prefixed hex string. Good enough for tests that need uniqueness + a consistent address per key.
 
@@ -934,7 +934,7 @@ export declare function establishWebSocketTunnel(qr: CaBLEQRCodePayload, handsha
 
 公開 entry point から解決しています。
 
-`findFabricHolding` を `findPasskeyFabricHolding` として公開しています。
+<code v-pre>findFabricHolding</code> を <code v-pre>findPasskeyFabricHolding</code> として公開しています。
 
 Locate every vendor that holds a given credential across a list of fabrics. Convenience helper used by `restoreCredential` in the env when the caller did not name a specific vendor.
 
@@ -967,7 +967,7 @@ export declare function generateAuth0SigningSecret(): string;
 
 公開 entry point から解決しています。
 
-`generateSessionId` を `generateBetterAuthSessionId` として公開しています。
+<code v-pre>generateSessionId</code> を <code v-pre>generateBetterAuthSessionId</code> として公開しています。
 
 ```ts
 export {
@@ -983,7 +983,7 @@ export {
 
 公開 entry point から解決しています。
 
-`generateSessionToken` を `generateBetterAuthSessionToken` として公開しています。
+<code v-pre>generateSessionToken</code> を <code v-pre>generateBetterAuthSessionToken</code> として公開しています。
 
 ```ts
 export {
@@ -1009,7 +1009,7 @@ export declare function generateCaBLEQRCode(options: CaBLESessionOptions): CaBLE
 
 公開 entry point から解決しています。
 
-`generateSigningSecret` を `generateClerkSigningSecret` として公開しています。
+<code v-pre>generateSigningSecret</code> を <code v-pre>generateClerkSigningSecret</code> として公開しています。
 
 Generate a random secret for signing. Called once per {@link setupClerkEnv } invocation so each env has its own signing key.
 
@@ -1043,7 +1043,7 @@ export declare function generateSessionId(): string;
 
 公開 entry point から解決しています。
 
-`generateBackupCodes` を `generateSupabaseBackupCodes` として公開しています。
+<code v-pre>generateBackupCodes</code> を <code v-pre>generateSupabaseBackupCodes</code> として公開しています。
 
 Generate a set of one-time backup codes. Each code is 10 hex characters, matching a common Supabase-adjacent pattern.
 
@@ -1085,7 +1085,7 @@ export declare function generateSupabaseSigningSecret(): string;
 
 公開 entry point から解決しています。
 
-`generateSiweNonce` を `generateSupabaseSiweNonce` として公開しています。
+<code v-pre>generateSiweNonce</code> を <code v-pre>generateSupabaseSiweNonce</code> として公開しています。
 
 EIP-4361 (Sign-In with Ethereum) helpers. Real SIWE relies on secp256k1 message signing + ecrecover to derive the address from a signature — the mock replaces the signature primitive with an HMAC over the canonical message + address, which is enough to model happy-path + tamper-detection behaviors without pulling in a full crypto library.
 
@@ -1107,7 +1107,7 @@ export {
 
 公開 entry point から解決しています。
 
-`generateTotpCode` を `generateSupabaseTotpCode` として公開しています。
+<code v-pre>generateTotpCode</code> を <code v-pre>generateSupabaseTotpCode</code> として公開しています。
 
 Generate the TOTP code for the given moment. `nowSeconds` is exposed so tests can advance time deterministically.
 
@@ -1129,7 +1129,7 @@ export {
 
 公開 entry point から解決しています。
 
-`generateTotpSecret` を `generateSupabaseTotpSecret` として公開しています。
+<code v-pre>generateTotpSecret</code> を <code v-pre>generateSupabaseTotpSecret</code> として公開しています。
 
 ```ts
 export {
@@ -1165,7 +1165,7 @@ export declare function generateTotpSecret(): string;
 
 公開 entry point から解決しています。
 
-`hashPassword` を `hashBetterAuthPassword` として公開しています。
+<code v-pre>hashPassword</code> を <code v-pre>hashBetterAuthPassword</code> として公開しています。
 
 ```ts
 export {
@@ -1188,7 +1188,7 @@ export declare function hashPassword(password: string): Promise<string>;
 
 公開 entry point から解決しています。
 
-`invalidateSessionsForUser` を `invalidateBetterAuthSessionsForUser` として公開しています。
+<code v-pre>invalidateSessionsForUser</code> を <code v-pre>invalidateBetterAuthSessionsForUser</code> として公開しています。
 
 ```ts
 export {
@@ -1312,7 +1312,7 @@ export declare function performSignatureRoundtrip(tunnel: CaBLEWebSocketTunnel, 
 
 公開 entry point から解決しています。
 
-`requireFabric` を `requirePasskeyFabric` として公開しています。
+<code v-pre>requireFabric</code> を <code v-pre>requirePasskeyFabric</code> として公開しています。
 
 Guarded lookup for a fabric by vendor. Throws when the vendor is not registered — the alternative (silent `undefined`) would let a caller silently drop backups on the floor.
 
@@ -1335,7 +1335,7 @@ export {
 
 公開 entry point から解決しています。
 
-`resolveTrustChain` を `resolveOidcTrustChain` として公開しています。
+<code v-pre>resolveTrustChain</code> を <code v-pre>resolveOidcTrustChain</code> として公開しています。
 
 Resolve a trust chain per OpenID Federation 1.0 §7. The chain walks from the leaf entity (typically the RP or a subordinate OP) through zero-or-more intermediates up to a trust anchor. Chain-walk rules (matches OIDF §7.2): - Every statement in the chain must have `iss` equal to the previous step's subject (the anchor is a virtual step past the last statement's iss). - Every statement must have `exp &gt; now`. - The final statement's `iss` must equal the trust anchor's entity_id. The mock does not verify JWS signatures on the statements — the point is to prove the chain-walk logic. Callers wanting to test signature verification build the statements with dedicated fixtures.
 
@@ -1363,7 +1363,7 @@ export {
 
 公開 entry point から解決しています。
 
-`restoreCredential` を `restorePasskeyCredential` として公開しています。
+<code v-pre>restoreCredential</code> を <code v-pre>restorePasskeyCredential</code> として公開しています。
 
 Pull a credential blob out of a sync fabric. Returns `null` when the fabric does not hold the credential — the caller decides whether to treat that as a hard error (no such passkey) or a soft one (fabric not yet synced). The returned credential is a fresh copy — restoring twice will produce two independent snapshots and the caller is responsible for merging them on the device side.
 
@@ -1418,7 +1418,7 @@ export * as semantics from './semantics/index.js';
 
 公開 entry point から解決しています。
 
-`serializeSiweMessage` を `serializeSupabaseSiweMessage` として公開しています。
+<code v-pre>serializeSiweMessage</code> を <code v-pre>serializeSupabaseSiweMessage</code> として公開しています。
 
 Build the canonical EIP-4361 message string. Consumers can hash + sign this verbatim with a real client library, and the mock will verify it back.
 
@@ -1584,7 +1584,7 @@ export declare function signSupabaseAccessToken(claims: SupabaseAccessTokenClaim
 
 公開 entry point から解決しています。
 
-`syncCredentials` を `syncPasskeyCredentials` として公開しています。
+<code v-pre>syncCredentials</code> を <code v-pre>syncPasskeyCredentials</code> として公開しています。
 
 Copy every backup-eligible credential owned by `userId` from `source` into `target` via the shared fabric. Mirrors the "sign in on a new device" ceremony — the new device is the target, the fabric is the shared vendor, and every credential is backed up on the source side then restored on the target side. Returns the list of credentials that landed on the target. Skips credentials owned by other users (per-user isolation) and non-backup- eligible credentials (bare security key credentials cannot ride the fabric).
 
@@ -1617,7 +1617,7 @@ export declare function upsertUserFromProfile(database: AuthDatabaseAdapter, pro
 
 公開 entry point から解決しています。
 
-`validateSessionByToken` を `validateBetterAuthSessionByToken` として公開しています。
+<code v-pre>validateSessionByToken</code> を <code v-pre>validateBetterAuthSessionByToken</code> として公開しています。
 
 ```ts
 export {
@@ -1672,7 +1672,7 @@ export declare function verifyAuth0IdToken(token: string, secret: string, expect
 
 公開 entry point から解決しています。
 
-`verifyPassword` を `verifyBetterAuthPassword` として公開しています。
+<code v-pre>verifyPassword</code> を <code v-pre>verifyBetterAuthPassword</code> として公開しています。
 
 ```ts
 export {
@@ -1735,7 +1735,7 @@ export declare function verifySupabaseAccessToken(token: string, secret: string)
 
 公開 entry point から解決しています。
 
-`verifyTotpCode` を `verifySupabaseTotpCode` として公開しています。
+<code v-pre>verifyTotpCode</code> を <code v-pre>verifySupabaseTotpCode</code> として公開しています。
 
 ```ts
 export {
@@ -1763,7 +1763,7 @@ export declare function verifyTotpCode(secret: string, code: string, nowMs?: num
 
 公開 entry point から解決しています。
 
-`clientDataHash` を `webAuthnClientDataHash` として公開しています。
+<code v-pre>clientDataHash</code> を <code v-pre>webAuthnClientDataHash</code> として公開しています。
 
 SHA-256-like deterministic digest for clientDataJSON. WebAuthn L3 §7.1 uses SHA-256; the mock uses fnv-1a widened to 32 bytes for a deterministic short digest that fits the same byte width as SHA-256.
 
@@ -1786,7 +1786,7 @@ export {
 
 公開 entry point から解決しています。
 
-`credentialAssertion` を `webAuthnCredentialAssertion` として公開しています。
+<code v-pre>credentialAssertion</code> を <code v-pre>webAuthnCredentialAssertion</code> として公開しています。
 
 Simulate `navigator.credentials.get({ publicKey })`. Produces an `AuthenticatorAssertionResponse` shaped like WebAuthn L3 §5.2.2. Enforces the RP-facing checks that a real RP library performs on the response — clientData.type must be `webauthn.get`, challenge must match, user verification bit must be set when requested, and signCount must increase monotonically (§7.2 step 21). `credentialOwnership` maps `credentialId -&gt; authenticatorId` so the mock routes each assertion through the authenticator that actually holds the credential. Real WebAuthn enforces this at the client-side discovery step (§5.5) — the mock mirrors it so a bug that assumes credentials float between authenticators surfaces at test time.
 
@@ -1809,7 +1809,7 @@ export {
 
 公開 entry point から解決しています。
 
-`credentialCreation` を `webAuthnCredentialCreation` として公開しています。
+<code v-pre>credentialCreation</code> を <code v-pre>webAuthnCredentialCreation</code> として公開しています。
 
 Simulate `navigator.credentials.create({ publicKey })`. Produces an `AuthenticatorAttestationResponse` shaped like WebAuthn L3 §5.2.1 and writes the resulting credential into the authenticator's in-memory store. Called from `WebAuthnTestEnv.credentialCreation` — the env passes the authenticator selected by the caller (or its default).
 
@@ -1832,7 +1832,7 @@ export {
 
 公開 entry point から解決しています。
 
-`mockSignature` を `webAuthnMockSignature` として公開しています。
+<code v-pre>mockSignature</code> を <code v-pre>webAuthnMockSignature</code> として公開しています。
 
 Deterministic mock signature over `(publicKey || authenticatorData || clientDataJSONHash)`. Real WebAuthn signatures are ES256 / RS256 / EdDSA over that concatenation (WebAuthn L3 §6.5.4). The mock uses a fnv-1a hash for stability across runs so fixture comparisons stay deterministic.
 
@@ -1855,7 +1855,7 @@ export {
 
 公開 entry point から解決しています。
 
-`normalizeChallenge` を `webAuthnNormalizeChallenge` として公開しています。
+<code v-pre>normalizeChallenge</code> を <code v-pre>webAuthnNormalizeChallenge</code> として公開しています。
 
 Normalize a challenge or credential.id that a caller may hand in as either `string` (base64url or plain UTF-8) or `Uint8Array`.
 
@@ -3843,7 +3843,7 @@ export interface OAuth21TestEnv extends TestEnvBase<'mock'> {
 
 公開 entry point から解決しています。
 
-`EntityStatement` を `OidcEntityStatement` として公開しています。
+<code v-pre>EntityStatement</code> を <code v-pre>OidcEntityStatement</code> として公開しています。
 
 Entity Statement per OpenID Federation 1.0 §3.1. The mock represents it as a plain object (skipping the JWS signature) with the subject / issuer pair that the chain walker follows. Real deployments would serialize this as a JWT signed by the issuer's JWKS.
 
@@ -4452,7 +4452,7 @@ export interface SamlIdentityProvider {
 
 公開 entry point から解決しています。
 
-`AxisStep` を `SemanticsAxisStep` として公開しています。
+<code v-pre>AxisStep</code> を <code v-pre>SemanticsAxisStep</code> として公開しています。
 
 ```ts
 export type {
@@ -4467,7 +4467,7 @@ export type {
 
 公開 entry point から解決しています。
 
-`NeutralEventName` を `SemanticsNeutralEventName` として公開しています。
+<code v-pre>NeutralEventName</code> を <code v-pre>SemanticsNeutralEventName</code> として公開しています。
 
 Platform-neutral event names emitted by the axis helpers. Browsers expose different string ids for the same semantic — the {@link platformEventName} map handles the translation. Tests can assert on the neutral name via `step.neutralEvent` or on the browser dialect via `step.platformEvent`.
 

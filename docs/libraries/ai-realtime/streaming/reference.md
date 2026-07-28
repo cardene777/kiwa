@@ -308,7 +308,7 @@ export declare function createTransactionalProducer(config: TransactionalProduce
 
 公開 entry point から解決しています。
 
-`dispatchEvent` を `dispatchPipelineEvent` として公開しています。
+<code v-pre>dispatchEvent</code> を <code v-pre>dispatchPipelineEvent</code> として公開しています。
 
 ```ts
 export {
@@ -963,7 +963,7 @@ export interface ExactlyOnceConfig {
 
 公開 entry point から解決しています。
 
-`IsolationLevel` を `ExactlyOnceIsolationLevel` として公開しています。
+<code v-pre>IsolationLevel</code> を <code v-pre>ExactlyOnceIsolationLevel</code> として公開しています。
 
 ```ts
 export {
@@ -1001,7 +1001,7 @@ export interface ExactlyOnceSemantics<TValue = unknown> {
 
 公開 entry point から解決しています。
 
-`TxnState` を `ExactlyOnceTxnState` として公開しています。
+<code v-pre>TxnState</code> を <code v-pre>ExactlyOnceTxnState</code> として公開しています。
 
 ```ts
 export {

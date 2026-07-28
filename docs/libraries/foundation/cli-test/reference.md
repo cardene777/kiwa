@@ -57,7 +57,7 @@ state は `spawning`、`running`、`signaled`、`exited`、`cleaned` です。in
 
 公開 entry point から解決しています。
 
-`dispatchEvent` を `dispatchCliEvent` として公開しています。
+<code v-pre>dispatchEvent</code> を <code v-pre>dispatchCliEvent</code> として公開しています。
 
 ```ts
 export {

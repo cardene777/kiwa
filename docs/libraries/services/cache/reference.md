@@ -138,7 +138,7 @@ export declare function createTestcontainersMemcachedEnv(opts: SetupMemcachedEnv
 
 公開 entry point から解決しています。
 
-`dispatchEvent` を `dispatchCacheEvent` として公開しています。
+<code v-pre>dispatchEvent</code> を <code v-pre>dispatchCacheEvent</code> として公開しています。
 
 ```ts
 export {

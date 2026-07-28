@@ -1124,7 +1124,7 @@ export type {
 
 公開 entry point から解決しています。
 
-`Lease` を `SpecLease` として公開しています。
+<code v-pre>Lease</code> を <code v-pre>SpecLease</code> として公開しています。
 
 ```ts
 export type {
@@ -1142,7 +1142,7 @@ export type {
 
 公開 entry point から解決しています。
 
-`Pool` を `SpecPool` として公開しています。
+<code v-pre>Pool</code> を <code v-pre>SpecPool</code> として公開しています。
 
 ```ts
 export type {
