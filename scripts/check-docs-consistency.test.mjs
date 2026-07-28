@@ -78,12 +78,6 @@ function withFixture(layout, body) {
     for (const file of ['docs-sync-safety.mjs', 'check-docs-consistency.mjs']) {
       copyFileSync(join(scriptsDirectory, file), join(root, 'scripts', file));
     }
-    // 検査 script は正本の key 一覧を sidebar 側と共有している。
-    mkdirSync(join(root, 'docs', '.vitepress'), { recursive: true });
-    copyFileSync(
-      join(scriptsDirectory, '..', 'docs', '.vitepress', 'library-sidebar.mjs'),
-      join(root, 'docs', '.vitepress', 'library-sidebar.mjs'),
-    );
     const sidebar = [];
     for (const entry of layout) {
       const { name, category = 'foundation', manifest = true, document = true } = entry;

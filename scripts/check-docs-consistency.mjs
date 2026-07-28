@@ -14,11 +14,19 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DocsSyncError, resolveReadPath } from './docs-sync-safety.mjs';
-import { definitionKeys } from '../docs/.vitepress/library-sidebar.mjs';
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const packagesRoot = join(repositoryRoot, 'packages');
 const librariesRoot = join(repositoryRoot, 'docs', 'libraries');
+
+const DEFINITION_KEYS = [
+  'libraryCategories',
+  'exemptDocuments',
+  'standaloneCategory',
+  'documentKinds',
+  'requiredPages',
+  'packageScope',
+];
 
 /**
  * 分類の正本を読む。
@@ -37,9 +45,14 @@ function loadDefinition() {
     if (error instanceof DocsSyncError) throw error;
     throw new DocsSyncError(`${label}: cannot read the definition: ${error.message}`);
   }
-  // 揃っているべき key の一覧は sidebar 側と共有する。この検査 script が使わないもの
-  // (sidebar だけが読む `documentKinds` と `standaloneCategory`) も含まれる。
-  for (const key of definitionKeys) {
+  // 正本として揃っているべき key。この検査 script が使わないもの (sidebar だけが読む
+  // `documentKinds` と `standaloneCategory`) も含める。欠けたまま build へ進むと
+  // 見出しや link が消えた状態で公開されるため、読んだ時点で止める。
+  //
+  // sidebar 側と共有せず、ここに置く。共有すると checker に code を実行する import が
+  // 増え、正本を JSON にして評価を避けた意図と食い違う。一覧を隣に置いても、
+  // key を足す側に更新を強制する仕組みにはならない。
+  for (const key of DEFINITION_KEYS) {
     if (parsed[key] === undefined) throw new DocsSyncError(`${label}: ${key} is missing.`);
   }
   return parsed;

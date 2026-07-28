@@ -8,22 +8,6 @@
 // 定義は引数で受け取る。読み込みの経路は呼ぶ側で決める
 // (config は import、検査 script は guard を通した読み込み)。
 
-/**
- * 正本が持つべき key。
- *
- * 「読む側が使う key」を基準にすると、sidebar だけが読む key が漏れる。
- * 欠けたまま build へ進むと見出しや link が消えた状態で公開されるので、
- * 正本として揃うべきものを 1 箇所に列挙する。
- */
-export const definitionKeys = [
-  'libraryCategories',
-  'exemptDocuments',
-  'standaloneCategory',
-  'documentKinds',
-  'requiredPages',
-  'packageScope',
-];
-
 /** 1 つのライブラリの 4 ページ。`documentKinds` の並びがそのまま出る。 */
 function pageItems(documentKinds, slug, name) {
   return documentKinds.map(({ slug: kind, text }) => ({
