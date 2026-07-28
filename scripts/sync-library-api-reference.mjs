@@ -27,15 +27,20 @@ import {
   tableCodeCell,
   writeFileAtomic,
 } from './docs-sync-safety.mjs';
+import {
+  deleteVerifiedPage,
+  generatedApiPageMarker,
+  prepareDeletePath,
+  staleApiPages,
+} from './docs-api-pages.mjs';
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const librariesRoot = join(repositoryRoot, 'docs', 'libraries');
 const packagesRoot = join(repositoryRoot, 'packages');
 const scope = '@kiwa-lab';
 const start = '<!-- kiwa-public-api:start -->';
-// 分割ページが生成物であることの印。人が置いた file と区別して、消してよいものだけを消す。
-// 索引の除外判定もこの印を見る。
-const generatedMarker = '<!-- kiwa-generated-api-page -->';
+// 分割ページが生成物であることの印。判定と削除の実装は docs-api-pages.mjs にある。
+const generatedMarker = generatedApiPageMarker;
 const end = '<!-- kiwa-public-api:end -->';
 // 既定は検査のみ。無条件に上書きすると、commit 漏れが手元の build で修復されて
 // repo の内容と公開される内容が静かに分岐する。書き込みは明示した時だけ行う。
@@ -453,76 +458,6 @@ function groupBySource(library, contracts) {
     .sort(([a], [b]) => a.localeCompare(b, 'en'));
 }
 
-/**
- * 目次に載らなくなった分割ページ。
- *
- * 宣言元の file が消えると、そこから作ったページだけが残る。目次から辿れないまま
- * 公開され続けるので、生成のたびに拾って消す。
- *
- * 消すのは生成物の印を持つ file だけにする。印が無ければ人が置いたものとして扱い、
- * 名前が衝突していれば止める。黙って消すと、手で書いた説明が次の生成で失われる。
- */
-function staleUnitPages(apiDirectory, pages, problems) {
-  if (!existsSync(apiDirectory)) return [];
-  const expected = new Set(pages.map((page) => basename(page.path)));
-  const stale = [];
-  for (const file of readdirSync(apiDirectory)) {
-    if (!file.endsWith('.md')) continue;
-    const path = join(apiDirectory, file);
-    // 生成物かどうかは中身の印で決める。名前や場所では決めない。
-    let generated = false;
-    try {
-      generated = readFileSync(path, 'utf8').includes(generatedMarker);
-    } catch {
-      generated = false;
-    }
-    if (expected.has(file)) {
-      // 今回も作る名前なのに印が無い = 人が置いた file と衝突している。
-      if (!generated) {
-        problems.push(`${path} は生成物の印を持たないため上書きしない (名前が衝突している)`);
-      }
-      continue;
-    }
-    if (generated) stale.push(path);
-  }
-  return stale;
-}
-
-/**
- * 削除してよい path を確かめる。
- *
- * `resolveReadPath` は実体まで辿って返す。読む時は「repo の外を読まない」保証になるが、
- * 削除に使うと link ではなくその先の file を消してしまう。書き込み側と同じく、
- * 対象そのものが link でないことを確かめる。
- */
-function prepareDeletePath(path, root, label) {
-  const directory = canonicalDirectory(dirname(path), label);
-  if (!insideRoot(root, directory)) {
-    throw new DocsSyncError(
-      `${label}: the directory of ${path} resolves to ${directory}, which is outside ${root}.`,
-    );
-  }
-  const target = join(directory, basename(path));
-  const stats = lstatSync(target, { throwIfNoEntry: false });
-  if (!stats) return null;
-  if (stats.isSymbolicLink()) {
-    throw new DocsSyncError(`${label}: ${target} is a symlink; refusing to delete through it.`);
-  }
-  if (!stats.isFile()) {
-    throw new DocsSyncError(`${label}: ${target} is not a regular file.`);
-  }
-  return target;
-}
-
-/** directory の実体。辿れない場合は判断できないので止める。 */
-function canonicalDirectory(path, label) {
-  try {
-    return realpathSync(path);
-  } catch (error) {
-    throw new DocsSyncError(`${label}: cannot resolve ${path}: ${error.message}`);
-  }
-}
-
 /** 1 つの宣言元のページ本体。 */
 function unitPage(library, unit, contracts, sourcePath) {
   const values = contracts.filter((contract) => contract.kind === 'value');
@@ -710,7 +645,7 @@ function main() {
         if (current !== page.content) stale.push(`${target.library} (${basename(page.path)})`);
       }
       // 目次に無いページが残っていたら報告する。宣言元が消えた時に取り残される。
-      for (const path of staleUnitPages(apiDirectory, unitPages, problems)) {
+      for (const path of staleApiPages(apiDirectory, unitPages.map((page) => basename(page.path)), problems)) {
         stale.push(`${target.library} (${basename(path)} は不要)`);
       }
       continue;
@@ -730,7 +665,8 @@ function main() {
       });
     }
     // 削除先の検証も第 1 段で済ませる。後段で落ちると、生成物だけ書き換わった状態で止まる。
-    for (const path of staleUnitPages(apiDirectory, unitPages, problems)) {
+    const expectedNames = unitPages.map((page) => basename(page.path));
+    for (const path of staleApiPages(apiDirectory, expectedNames, problems)) {
       const verified = prepareDeletePath(path, repositoryRoot, `stale ${basename(path)}`);
       if (verified) obsolete.push(verified);
     }
@@ -760,9 +696,9 @@ function main() {
     writeFileAtomic(plan.target, plan.content);
   }
   // 目次に載らなくなったページは、書き込みが全部通ってから消す。
-  // path は第 1 段で検証済み。ここでは解決し直さない (解決すると link の先を消す)。
-  for (const path of obsolete) {
-    rmSync(path, { force: true });
+  // 消す直前に親 directory の実体を見直す (検証と削除の間に差し替えられていないか)。
+  for (const verified of obsolete) {
+    deleteVerifiedPage(verified, (path) => rmSync(path, { force: true }));
   }
   console.log(`Synchronized detailed API contracts for ${plans.length} library references.`);
 }

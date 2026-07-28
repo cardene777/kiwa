@@ -54,11 +54,18 @@ function stripGeneratedApi(source: string) {
     offset += line.length + 1;
   }
   for (const [index, line] of lines.entries()) {
-    const opened = line.match(/^ {0,3}(`{3,}|~{3,})/);
+    // 開く fence は run の後ろに言語名を置ける。閉じる fence は置けないので、
+    // run の後ろが空白だけであることまで見る。見ないと `~~~text` を閉じと誤認する。
+    const opened = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
     if (opened) {
-      const run = opened[1];
-      if (fence === null) fence = run;
-      else if (run[0] === fence[0] && run.length >= fence.length) fence = null;
+      const [, run, rest] = opened;
+      if (fence === null) {
+        // backtick で開く fence の言語名に backtick は置けない。
+        if (run[0] === '`' && rest.includes('`')) continue;
+        fence = run;
+      } else if (run[0] === fence[0] && run.length >= fence.length && rest.trim() === '') {
+        fence = null;
+      }
       continue;
     }
     if (fence !== null) continue;
