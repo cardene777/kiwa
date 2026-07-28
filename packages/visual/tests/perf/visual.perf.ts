@@ -68,6 +68,7 @@ describe(MODULE, () => {
             // 前後残る。 SSOT default 100KB では低すぎるため 8MB 上限に上げる
             // (実測 ~5MB × 1.6 マージン)。
             name: 'comparePngBuffersIdentical',
+            regressionGateWaived: 'PNG の復号と比較が実行ごとに大きく動く (#1718)',
             serialP95CapMs: 50,
             memoryArrayBuffersCapBytes: 8 * 1024 * 1024,
             fn: async () => {
@@ -81,6 +82,7 @@ describe(MODULE, () => {
             // 実測では大量 buffer 開放で negative delta になるが、 GC 挙動で
             // 逆に increase するケースも許容するため 16MB 上限。
             name: 'comparePngBuffersFullDiff',
+            regressionGateWaived: 'PNG の復号と比較が実行ごとに大きく動く (#1718)',
             serialP95CapMs: 200,
             memoryArrayBuffersCapBytes: 16 * 1024 * 1024,
             fn: async () => {

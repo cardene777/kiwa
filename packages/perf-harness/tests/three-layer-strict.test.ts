@@ -346,6 +346,154 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     expect(report).not.toMatch(/検知には/);
   });
 
+  it('理由を書いた op だけ回帰判定を gate から外す (#1708)', async () => {
+    const tmpDir = tempDir();
+    const settings = { serialIterations: 30, concurrency: 3, memoryIterations: 30 };
+    const fast = { name: 'op', fn: () => {}, serialP95CapMs: 10_000 };
+    const slow = {
+      name: 'op',
+      fn: () => {
+        const until = performance.now() + 1;
+        while (performance.now() < until) {
+          /* burn */
+        }
+      },
+      serialP95CapMs: 10_000,
+    };
+
+    // gate 対象のまま = 従来どおり落ちる。
+    const gatedBaseline = join(tmpDir, 'gated.json');
+    await runPerf3LayerStrict({
+      moduleName: 'regression-waiver-off',
+      ops: [fast],
+      reportPath: join(tmpDir, 'g1.md'),
+      baselinePath: gatedBaseline,
+      ...settings,
+    });
+    const gated = await runPerf3LayerStrict({
+      moduleName: 'regression-waiver-off',
+      ops: [slow],
+      reportPath: join(tmpDir, 'g2.md'),
+      baselinePath: gatedBaseline,
+      ...settings,
+    });
+    expect(gated.allPassed).toBe(false);
+
+    // 理由つきで外すと gate は落ちないが、判定そのものは残る。
+    const waivedBaseline = join(tmpDir, 'waived.json');
+    await runPerf3LayerStrict({
+      moduleName: 'regression-waiver-on',
+      ops: [{ ...fast, regressionGateWaived: '実行ごとの振れ幅が閾値を超える' }],
+      reportPath: join(tmpDir, 'w1.md'),
+      baselinePath: waivedBaseline,
+      ...settings,
+    });
+    const waived = await runPerf3LayerStrict({
+      moduleName: 'regression-waiver-on',
+      ops: [{ ...slow, regressionGateWaived: '実行ごとの振れ幅が閾値を超える' }],
+      reportPath: join(tmpDir, 'w2.md'),
+      baselinePath: waivedBaseline,
+      ...settings,
+    });
+    expect(waived.outcomes[0]!.regressionVerdict, '判定は残す').toBe('regressed');
+    expect(waived.allPassed, 'gate は落ちない').toBe(true);
+
+    const report = readFileSync(join(tmpDir, 'w2.md'), 'utf8');
+    expect(report).toMatch(/regressed — gate 対象外 \(実行ごとの振れ幅が閾値を超える\)/);
+  });
+
+  it('回帰の除外は上限の判定には効かない (#1708)', async () => {
+    const tmpDir = tempDir();
+    // 上限は 1 回の実行の中で完結する判定なので、実行間の振れ幅とは無関係。
+    const result = await runPerf3LayerStrict({
+      moduleName: 'regression-waiver-cap',
+      ops: [
+        {
+          name: 'over-cap',
+          fn: () => {
+            const until = performance.now() + 2;
+            while (performance.now() < until) {
+              /* burn */
+            }
+          },
+          serialP95CapMs: 0.1,
+          regressionGateWaived: '実行ごとの振れ幅が閾値を超える',
+        },
+      ],
+      reportPath: join(tmpDir, 'cap.md'),
+      baselinePath: join(tmpDir, 'cap.json'),
+      serialIterations: 10,
+      concurrency: 2,
+      memoryIterations: 10,
+    });
+
+    expect(result.outcomes[0]!.serialGatePassed).toBe(false);
+    expect(result.allPassed).toBe(false);
+  });
+
+  it('理由を書いた op だけ memory 軸の判定を外す (#1708)', async () => {
+    const tmpDir = tempDir();
+    const settings = { serialIterations: 10, concurrency: 2, memoryIterations: 20 };
+    // 反復ごとに Buffer を保持する。arrayBuffers の増分が上限を超える。
+    const retained: Buffer[] = [];
+    const leaky = {
+      fn: () => {
+        retained.push(Buffer.alloc(20 * 1024));
+      },
+      serialP95CapMs: 10_000,
+    };
+
+    const gated = await runPerf3LayerStrict({
+      moduleName: 'memory-waiver-off',
+      ops: [{ name: 'leak', ...leaky }],
+      reportPath: join(tmpDir, 'gated.md'),
+      baselinePath: join(tmpDir, 'gated.json'),
+      ...settings,
+    });
+    expect(gated.outcomes[0]!.memoryGatePassed, '既定では上限で落ちる').toBe(false);
+    expect(readFileSync(join(tmpDir, 'gated.md'), 'utf8')).toMatch(/\| FAIL \|/);
+
+    const waived = await runPerf3LayerStrict({
+      moduleName: 'memory-waiver-on',
+      ops: [{ name: 'leak', ...leaky, memoryGateWaived: '測れていない理由' }],
+      reportPath: join(tmpDir, 'waived.md'),
+      baselinePath: join(tmpDir, 'waived.json'),
+      ...settings,
+    });
+    expect(waived.outcomes[0]!.memoryGatePassed, '理由を書けば gate は落ちない').toBe(true);
+
+    // 上限を上げて通した状態と区別できるように、PASS ではなく理由つきで書く。
+    const report = readFileSync(join(tmpDir, 'waived.md'), 'utf8');
+    expect(report).toMatch(/WAIVED \(測れていない理由\)/);
+    expect(report).not.toMatch(/\| PASS \|\n?$/);
+  });
+
+  it('空文字の理由では memory 軸を外さない (#1708)', async () => {
+    const tmpDir = tempDir();
+    const retained: Buffer[] = [];
+    const result = await runPerf3LayerStrict({
+      moduleName: 'memory-waiver-blank',
+      ops: [
+        {
+          name: 'leak',
+          fn: () => {
+            retained.push(Buffer.alloc(20 * 1024));
+          },
+          serialP95CapMs: 10_000,
+          // 理由を書かずに外せると、記録の無い除外が増える。
+          memoryGateWaived: '   ',
+        },
+      ],
+      reportPath: join(tmpDir, 'blank.md'),
+      baselinePath: join(tmpDir, 'blank.json'),
+      serialIterations: 10,
+      concurrency: 2,
+      memoryIterations: 20,
+    });
+
+    expect(result.outcomes[0]!.memoryGatePassed).toBe(false);
+  });
+
   it('感度の補足は判定できない行にだけ付く (#1708)', async () => {
     const tmpDir = tempDir();
     const baselinePath = join(tmpDir, 'baseline.json');

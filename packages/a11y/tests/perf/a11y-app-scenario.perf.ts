@@ -74,6 +74,7 @@ describe('a11y app scenario perf (real workload)', () => {
       ops: [
         {
           name: 'audit_workflow (3 fixture runAxe cycle)',
+          regressionGateWaived: 'jsdom + axe-core の実行時間が実行ごとに 2 倍以上動く (#1718)',
           fn: () =>
             serializeAxe(async () => {
               for (const markup of fixtures) {
@@ -89,6 +90,7 @@ describe('a11y app scenario perf (real workload)', () => {
         },
         {
           name: 'violation_report_batch (2 dirty runAxe + reportViolations)',
+          regressionGateWaived: 'jsdom + axe-core の実行時間が実行ごとに 2 倍以上動く (#1718)',
           fn: () =>
             serializeAxe(async () => {
               for (let i = 0; i < 2; i++) {
@@ -105,6 +107,7 @@ describe('a11y app scenario perf (real workload)', () => {
         },
         {
           name: 'audit_error_handling (3 invalid-context throw + catch)',
+          regressionGateWaived: 'jsdom + axe-core の実行時間が実行ごとに 2 倍以上動く (#1718)',
           fn: () =>
             serializeAxe(async () => {
               for (let i = 0; i < 3; i++) {

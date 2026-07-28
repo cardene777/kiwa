@@ -21,6 +21,7 @@ describe('cli-test app scenario perf (real workload)', () => {
       ops: [
         {
           name: 'file_scaffold_workflow (setup + 20 writeFile + listFiles)',
+          regressionGateWaived: 'fs syscall の揺らぎが実行ごとに p50 で 200% 超動く (#1718)',
           fn: async () => {
             const env = await setupCliEnv();
             for (let i = 0; i < 20; i++) await env.writeFile(`f-${i}.txt`, `c-${i}`);
@@ -28,9 +29,16 @@ describe('cli-test app scenario perf (real workload)', () => {
             await env.stop();
           },
           serialP95CapMs: 500,
+          // 1 反復で 20 回 file を書くため、 Node の Buffer pool の伸びが
+          // そのまま arrayBuffers の増分になる。 実行ごとに 118-199KB と動き、
+          // 同じ実装でも上限 100KB を跨ぐ。 隣の 2 op も +49KB と -19KB を
+          // 行き来しており、 振れ幅が上限と同規模で判定が成立しない。
+          // 軸そのものの作り直しは #1719 で扱う。
+          memoryGateWaived: 'fs の Buffer pool の伸びを拾うため実装の保持量を表さない (#1719)',
         },
         {
           name: 'batch_cli_run (5x echo test)',
+          regressionGateWaived: '子 process の起動時間が実行ごとに大きく動く (#1718)',
           fn: async () => {
             const env = await setupCliEnv();
             for (let i = 0; i < 5; i++) {
@@ -43,6 +51,7 @@ describe('cli-test app scenario perf (real workload)', () => {
         },
         {
           name: 'setup_cleanup_cycle (5 sequential setup+stop)',
+          regressionGateWaived: 'fs syscall の揺らぎが実行ごとに p50 で 200% 超動く (#1718)',
           fn: async () => {
             for (let i = 0; i < 5; i++) {
               const env = await setupCliEnv();

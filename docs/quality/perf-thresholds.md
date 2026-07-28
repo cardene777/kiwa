@@ -119,6 +119,16 @@ The third case says what it would take, not that detection is impossible — a s
 
 Making sub-millisecond ops genuinely gateable needs a different statistic (trimmed mean or median) or a higher-resolution clock. That is a change to the measurement method, not to a threshold, and is tracked separately.
 
+### Ops whose run-to-run spread exceeds the threshold
+
+Regression detection compares two separate runs, so it only works when an op's own run-to-run spread is smaller than the 20 % threshold. Some ops are not: measured four times with no code change, `@kiwa-lab/cli-test`'s `readFile` moved 243 % at p50 and 974 % at p95, and `@kiwa-lab/cli`'s `spec_to_test_batch` moved 62 % at p50 even at 200 samples. Anything that hits the filesystem, spawns a child process, or drives jsdom lands in this category on a developer machine.
+
+Those ops carry `regressionGateWaived: '<reason>'`. The verdict is still computed and still printed — the row reads `regressed — gate 対象外 (reason)` — but it does not fail the suite. The serial and concurrent caps still apply, because a cap is decided inside a single run and does not depend on run-to-run spread.
+
+Two alternatives were rejected. Relaxing the relative threshold to 50 % hides real regressions on ops with large measured values. Raising the per-op `minDeltaMs` to the observed spread produces a floor of +12 ms on a 1.4 ms op, which nominally keeps the gate on while guaranteeing it never fires — and unlike a waiver, nothing in the report says so.
+
+Adding a waiver requires measured evidence in the reason string and an entry in the tracking issue. Do not add one because a run happened to fail.
+
 ## Real-API measurement mode
 
 Live-mode perf tests coexist with mock perf tests under `tests/perf/`. The `*.live.perf.ts` files use `runPerf3LayerLive` from `@kiwa-lab/perf-harness` and declare their required env vars via the `requiredEnv` option. Missing env vars trigger the skip path — the run still emits a report, but with `LIVE_ENV_MISSING` markers instead of gate results. This keeps CI-less environments honest: an empty report row is attributed to missing credentials, not silent success.
@@ -158,6 +168,10 @@ Every mock target has a serial baseline (concurrency = 1) and a concurrent stres
 ## Memory delta target
 
 Every mock op is checked for retained-heap growth. Threshold: **< 100 KB retained across 200 iterations** (i.e. < 500 bytes / call on average). Anything higher signals an unbounded internal Map / array / listener list.
+
+The measured window is preceded by a warmup (a tenth of the iteration count, minimum 3). Without it the first call's one-off allocations land in the delta and get divided by the iteration count as if they recurred. Node grows its Buffer pool in 8 KB steps, so an fs-touching op showed 24 KB of "retention" over 15 iterations that dropped to 0 B once the pool had settled.
+
+The `arrayBuffers` axis is not trustworthy for fs-heavy ops even with the warmup. Measured repeatedly with no code change, one such op reported 118-199 KB against a 100 KB cap while its two neighbours swung between +49 KB and -19 KB. The spread is the same size as the cap, so the verdict is decided by allocator behaviour rather than by the library. Those ops carry `memoryGateWaived: '<reason>'`, which prints `WAIVED (reason)` instead of `PASS` so the row cannot be mistaken for a measurement that passed. Rebuilding the axis is tracked separately.
 
 ## Change control
 
