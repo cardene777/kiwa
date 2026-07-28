@@ -7,14 +7,19 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import {
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
+const {
   documentKinds,
   exemptDocuments,
   libraryCategories,
   packageScope,
   requiredPages,
   standaloneCategory,
-} from '../docs/libraries.mjs';
+} = JSON.parse(readFileSync(join(repositoryRoot, 'docs', 'libraries.json'), 'utf8'));
 
 test('every category has a slug, a label and at least one package', () => {
   for (const category of libraryCategories) {
@@ -58,12 +63,14 @@ test('exempt documents are identified by category and name', () => {
   assert.deepEqual([...new Set(paths)], paths, 'an exempt document appears twice');
 });
 
-test('every exempt document carries a category and a sidebar label', () => {
+test('every exempt document carries a name, a category and a label', () => {
   for (const document of exemptDocuments) {
     assert.equal(typeof document.name, 'string', 'name');
+    assert.notEqual(document.name, '', 'name is empty');
     assert.equal(typeof document.category, 'string', `${document.name}: category`);
-    assert.equal(typeof document.sidebarText, 'string', `${document.name}: sidebarText`);
-    assert.notEqual(document.sidebarText, '', `${document.name}: sidebarText is empty`);
+    assert.notEqual(document.category, '', `${document.name}: category is empty`);
+    assert.equal(typeof document.label, 'string', `${document.name}: label`);
+    assert.notEqual(document.label, '', `${document.name}: label is empty`);
   }
 });
 
@@ -93,6 +100,24 @@ test('no exempt document collides with a package in the same category', () => {
       false,
       `${document.name}: is both a package and an exempt document under ${document.category}`,
     );
+  }
+});
+
+// sidebar の見出しにそのまま出る。空だと分類名の無い塊が公開される。
+test('the standalone category has a slug and a label', () => {
+  assert.equal(typeof standaloneCategory.slug, 'string');
+  assert.notEqual(standaloneCategory.slug, '');
+  assert.equal(typeof standaloneCategory.text, 'string');
+  assert.notEqual(standaloneCategory.text, '');
+});
+
+// package 名は URL と directory 名になる。空や非文字列だと link が壊れる。
+test('every package name is a non-empty string', () => {
+  for (const category of libraryCategories) {
+    for (const name of category.packages) {
+      assert.equal(typeof name, 'string', `${category.slug}: a package name is not a string`);
+      assert.notEqual(name, '', `${category.slug}: a package name is empty`);
+    }
   }
 });
 

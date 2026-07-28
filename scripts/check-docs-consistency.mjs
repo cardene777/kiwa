@@ -14,40 +14,52 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DocsSyncError, resolveReadPath } from './docs-sync-safety.mjs';
-import {
-  exemptDocuments,
-  libraryCategories,
-  packageScope,
-  requiredPages,
-  standaloneCategory,
-} from '../docs/libraries.mjs';
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const packagesRoot = join(repositoryRoot, 'packages');
 const librariesRoot = join(repositoryRoot, 'docs', 'libraries');
 
-// 別枠で扱う文書の置き場所。`分類/名前` を key にする。
-//
-// 名前だけを key にすると `languages/python` (TypeScript のアダプター) と
-// `native-languages/python` (単独の native プロジェクト) が衝突する。別物なので
-// 分類と組にして区別する。
-const EXEMPT_DOCUMENTS = new Map(
-  exemptDocuments.map((document) => [`${document.category}/${document.name}`, document.category]),
-);
-
-/** 別枠で扱う文書かどうか。分類と名前の組で見る。 */
-function isExempt(category, name) {
-  return EXEMPT_DOCUMENTS.has(`${category}/${name}`);
+/**
+ * 分類の正本を読む。
+ *
+ * import ではなく読み込んで parse する。import は評価を伴うので、正本が repo の外を
+ * 指す link に差し替えられていたり、副作用を持つ module に化けていたりしても、
+ * 実行してから気付くことになる。他の読み込みと同じ guard を通す。
+ */
+function loadDefinition() {
+  const label = 'docs/libraries.json';
+  const path = join(repositoryRoot, 'docs', 'libraries.json');
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(resolveReadPath(path, repositoryRoot, label), 'utf8'));
+  } catch (error) {
+    if (error instanceof DocsSyncError) throw error;
+    throw new DocsSyncError(`${label}: cannot read the definition: ${error.message}`);
+  }
+  for (const key of ['libraryCategories', 'exemptDocuments', 'standaloneCategory', 'requiredPages', 'packageScope']) {
+    if (parsed[key] === undefined) throw new DocsSyncError(`${label}: ${key} is missing.`);
+  }
+  return parsed;
 }
 
-const STANDALONE_CATEGORY = standaloneCategory.slug;
-// ライブラリ文書が持つべきページ。1 つでも欠けると生成 script が対象から外すため、
-// directory の存在だけでは「文書がある」と判断できない。
-const REQUIRED_PAGES = requiredPages;
-const scope = packageScope;
+/**
+ * 別枠で扱う文書の置き場所。`分類/名前` を key にする。
+ *
+ * 名前だけを key にすると `languages/python` (TypeScript のアダプター) と
+ * `native-languages/python` (単独の native プロジェクト) が衝突する。別物なので
+ * 分類と組にして区別する。
+ */
+function exemptPaths(definition) {
+  return new Map(
+    definition.exemptDocuments.map((document) => [
+      `${document.category}/${document.name}`,
+      document.category,
+    ]),
+  );
+}
 
 /** 正本。各 package の manifest の name が対象 scope のものを集める。 */
-function sourcePackages(problems) {
+function sourcePackages(problems, scope) {
   const names = new Set();
   for (const entry of readdirSync(packagesRoot, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
@@ -80,15 +92,17 @@ function sourcePackages(problems) {
  * 同じ名前の文書が複数の分類に置かれた場合も報告する。Map へ入れるだけだと
  * 最後の 1 件が残り、余分な文書があっても最後の分類さえ合っていれば通る。
  */
-function libraryDocuments(problems) {
-  // 特例は分類ごと別物として扱うので、通常の対応検査に載せる分だけを集める。
+function libraryDocuments(problems, definition) {
+  const exemptDocumentPaths = exemptPaths(definition);
+  const requiredPages = definition.requiredPages;
+  // 別枠の文書は分類ごと別物として扱うので、通常の対応検査に載せる分だけを集める。
   const documents = new Map();
   const exempt = new Set();
   for (const category of readdirSync(librariesRoot, { withFileTypes: true })) {
     if (!category.isDirectory()) continue;
     for (const library of readdirSync(join(librariesRoot, category.name), { withFileTypes: true })) {
       if (!library.isDirectory()) continue;
-      const missing = REQUIRED_PAGES.filter(
+      const missing = requiredPages.filter(
         (page) => !existsSync(join(librariesRoot, category.name, library.name, page)),
       );
       if (missing.length > 0) {
@@ -97,7 +111,7 @@ function libraryDocuments(problems) {
             `${missing.join(', ')}`,
         );
       }
-      if (isExempt(category.name, library.name)) {
+      if (exemptDocumentPaths.has(`${category.name}/${library.name}`)) {
         exempt.add(`${category.name}/${library.name}`);
         continue;
       }
@@ -113,18 +127,15 @@ function libraryDocuments(problems) {
 }
 
 /**
- * 分類の定義。共有の正本 (docs/libraries.mjs) を読む。
- *
- * 以前は sidebar の config を構文解析して配列を取り出していた。定義の書き方を変えると
- * 検査だけが壊れる関係だったので、両方が同じ file を import する形にした。
+ * 分類ごとの package 一覧を、package 名から分類を引ける形にする。
  *
  * 同じ package が複数の分類に載ると、Map へ入れるだけでは上書きした側しか残らない。
  * 重複は別に集めて報告する。
  */
-function sidebarCategories() {
+function sidebarCategories(definition) {
   const slugs = new Map();
   const duplicated = [];
-  for (const category of libraryCategories) {
+  for (const category of definition.libraryCategories) {
     for (const name of category.packages) {
       const seen = slugs.get(name);
       if (seen !== undefined) {
@@ -162,10 +173,11 @@ function documentedPackages() {
 }
 
 function main() {
+  const definition = loadDefinition();
   const problems = [];
-  const packages = sourcePackages(problems);
-  const { documents, exempt } = libraryDocuments(problems);
-  const { slugs: sidebar, duplicated } = sidebarCategories();
+  const packages = sourcePackages(problems, definition.packageScope);
+  const { documents, exempt } = libraryDocuments(problems, definition);
+  const { slugs: sidebar, duplicated } = sidebarCategories(definition);
   problems.push(...duplicated);
   const tests = documentedPackages();
 
@@ -174,7 +186,7 @@ function main() {
       problems.push(`${name}: no library document under docs/libraries/<category>/${name}/`);
     }
     if (!sidebar.has(name)) {
-      problems.push(`${name}: missing from libraryCategories in docs/libraries.mjs`);
+      problems.push(`${name}: missing from libraryCategories in docs/libraries.json`);
     }
     if (!tests.has(name)) {
       problems.push(`${name}: no packages/${name}/tests/docs-library-${name}.test.ts`);
@@ -183,7 +195,7 @@ function main() {
 
   // 特例の文書は package を持たないが、置き場所は決まっている。移動しても検査を
   // 通ると、分類ごとに固定 link を書く sidebar と食い違う。
-  for (const path of EXEMPT_DOCUMENTS.keys()) {
+  for (const path of exemptPaths(definition).keys()) {
     if (!exempt.has(path)) problems.push(`${path}: docs/libraries/${path}/ is missing`);
   }
 

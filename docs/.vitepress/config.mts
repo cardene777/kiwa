@@ -1,14 +1,14 @@
 import { defineConfig } from 'vitepress';
 
-// 分類・文書種別の呼び方・別枠で扱う文書は docs/libraries.mjs が正本。
+// 分類・文書種別の呼び方・別枠で扱う文書は docs/libraries.json が正本。
 // 整合検査 (scripts/check-docs-consistency.mjs) も同じ file を読む。
-import {
-  documentKinds,
-  exemptDocuments,
-  libraryCategories,
-  packageScope,
-  standaloneCategory,
-} from '../libraries.mjs';
+//
+// データだけの JSON にしてあるのは、読む側が評価を伴わずに済ませるため。
+// 検査 script は repo の内側にあることを確かめてから読み込んで parse する。
+import definition from '../libraries.json' with { type: 'json' };
+
+const { documentKinds, exemptDocuments, libraryCategories, packageScope, standaloneCategory } =
+  definition;
 
 type LibraryCategory = {
   text: string;

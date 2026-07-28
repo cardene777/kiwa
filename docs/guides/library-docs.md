@@ -30,13 +30,20 @@ file 名と URL は英語のまま変えません。読者が見る言葉と、�
 | `how-to.md` | `/libraries/<分類>/<名前>/how-to` | 使い方 |
 | `reference.md` | `/libraries/<分類>/<名前>/reference` | リファレンス |
 
-呼び方の正本は `docs/libraries.mjs` の `documentKinds` です。
-sidebar はここから呼び方を読むので、表の右列を変えるとサイト全体に反映されます。
+呼び方の正本は `docs/libraries.json` の `documentKinds` です。
+これを変えるとライブラリの sidebar に反映されます。
+
+反映されるのは sidebar だけです。
+上の表と入口ページ (`docs/index.md`) の本文は markdown に直接書いてあるので、
+呼び方を変えるときは 3 箇所をまとめて直します。
 本文で文書種別に言及するときも、同じ言葉を使います。
 
 分類・分類ごとの package 一覧・別枠で扱う文書も同じ file が正本です。
 sidebar (`docs/.vitepress/config.mts`) と整合検査 (`scripts/check-docs-consistency.mjs`) の
 両方がここを読むため、片方だけがずれることはありません。
+
+正本をデータだけの JSON にしてあるのは、読む側が評価せずに済ませるためです。
+検査 script は repo の内側にあることを確かめてから読み込みます。
 
 ## 本文の基準
 

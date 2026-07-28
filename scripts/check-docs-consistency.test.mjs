@@ -12,7 +12,6 @@ import {
   readFileSync,
   realpathSync,
   rmSync,
-  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -21,28 +20,25 @@ import { fileURLToPath } from 'node:url';
 
 const scriptsDirectory = dirname(fileURLToPath(import.meta.url));
 
-/** 共有の分類定義 (docs/libraries.mjs)。検査 script が読む形を再現する。 */
-function taxonomySource(categories, exempt) {
-  const stringify = (value) => JSON.stringify(value, null, 2);
-  return [
-    `export const libraryCategories = ${stringify(categories)};`,
-    '',
-    `export const exemptDocuments = ${stringify(exempt)};`,
-    '',
-    `export const standaloneCategory = ${stringify({ slug: 'native-languages', text: 'ネイティブ言語' })};`,
-    '',
-    `export const documentKinds = ${stringify([
-      { slug: '', text: '概要' },
-      { slug: 'quickstart', text: 'はじめる' },
-      { slug: 'how-to', text: '使い方' },
-      { slug: 'reference', text: 'リファレンス' },
-    ])};`,
-    '',
-    `export const requiredPages = ${stringify(['index.md', 'quickstart.md', 'how-to.md', 'reference.md'])};`,
-    '',
-    "export const packageScope = '@kiwa-lab';",
-    '',
-  ].join('\n');
+/** 共有の分類定義 (docs/libraries.json)。検査 script が読む形を再現する。 */
+function definitionSource(categories, exempt) {
+  return `${JSON.stringify(
+    {
+      libraryCategories: categories,
+      exemptDocuments: exempt,
+      standaloneCategory: { slug: 'native-languages', text: 'ネイティブ言語' },
+      documentKinds: [
+        { slug: '', text: '概要' },
+        { slug: 'quickstart', text: 'はじめる' },
+        { slug: 'how-to', text: '使い方' },
+        { slug: 'reference', text: 'リファレンス' },
+      ],
+      requiredPages: ['index.md', 'quickstart.md', 'how-to.md', 'reference.md'],
+      packageScope: '@kiwa-lab',
+    },
+    null,
+    2,
+  )}\n`;
 }
 
 // 検査 script が存在を要求する特例文書。package を持たないが置き場所は決まっている。
@@ -82,10 +78,6 @@ function withFixture(layout, body) {
     for (const file of ['docs-sync-safety.mjs', 'check-docs-consistency.mjs']) {
       copyFileSync(join(scriptsDirectory, file), join(root, 'scripts', file));
     }
-    // 検査 script は TypeScript の parser を使う。fixture から解決できるよう、
-    // repo の node_modules へ link を張る。
-    symlinkSync(join(scriptsDirectory, '..', 'node_modules'), join(root, 'node_modules'));
-
     const sidebar = [];
     for (const entry of layout) {
       const { name, category = 'foundation', manifest = true, document = true } = entry;
@@ -133,9 +125,9 @@ function withFixture(layout, body) {
     );
     const exempt = EXEMPT_LAYOUT.filter(
       (entry) => !overridden.has(`${entry.category}/${entry.name}`),
-    ).map(({ name, category }) => ({ name, category, sidebarText: name }));
+    ).map(({ name, category }) => ({ name, category, label: name }));
     mkdirSync(join(root, 'docs'), { recursive: true });
-    writeFileSync(join(root, 'docs', 'libraries.mjs'), taxonomySource(categories, exempt));
+    writeFileSync(join(root, 'docs', 'libraries.json'), definitionSource(categories, exempt));
 
     // packages/ が空だと readdirSync が落ちる。全 entry が manifest なしの構成でも動くよう作る。
     mkdirSync(join(root, 'packages'), { recursive: true });
@@ -336,19 +328,10 @@ test('a library with documents in two categories fails and names both', () => {
 // 残って余分な定義を見逃す。
 test('a package listed under two categories in the definition fails', () => {
   withFixture([{ name: 'core' }], ({ root }) => {
-    const taxonomyPath = join(root, 'docs', 'libraries.mjs');
-    const source = readFileSync(taxonomyPath, 'utf8');
-    const categories = JSON.parse(
-      source.match(/export const libraryCategories = ([\s\S]*?);\n/)[1],
-    );
-    categories.push({ text: 'services', slug: 'services', packages: ['core'] });
-    writeFileSync(
-      taxonomyPath,
-      source.replace(
-        /export const libraryCategories = [\s\S]*?;\n/,
-        `export const libraryCategories = ${JSON.stringify(categories, null, 2)};\n`,
-      ),
-    );
+    const definitionPath = join(root, 'docs', 'libraries.json');
+    const definition = JSON.parse(readFileSync(definitionPath, 'utf8'));
+    definition.libraryCategories.push({ text: 'services', slug: 'services', packages: ['core'] });
+    writeFileSync(definitionPath, `${JSON.stringify(definition, null, 2)}\n`);
     const result = runCheck(root);
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /listed under both foundation and services/);
@@ -381,9 +364,10 @@ test('an exempt document that moved to another category fails', () => {
 // `text: 'AI: リアルタイム'` のような値で壊れていた。import する形にして制約が消えた。
 test('a category label containing a colon is read correctly', () => {
   withFixture([{ name: 'core' }], ({ root }) => {
-    const taxonomyPath = join(root, 'docs', 'libraries.mjs');
-    const source = readFileSync(taxonomyPath, 'utf8').replace('"foundation"', '"AI: realtime"');
-    writeFileSync(taxonomyPath, source);
+    const definitionPath = join(root, 'docs', 'libraries.json');
+    const definition = JSON.parse(readFileSync(definitionPath, 'utf8'));
+    definition.libraryCategories[0].text = 'AI: realtime';
+    writeFileSync(definitionPath, `${JSON.stringify(definition, null, 2)}\n`);
     const result = runCheck(root);
     // 呼び名を変えただけで slug は変わらないので、対応検査は通る。
     assert.equal(result.status, 0, result.stderr);
@@ -414,7 +398,7 @@ test('a directory without an entry in the definition fails', () => {
 // 共有定義そのものが読めない状態で、黙って空集合として通らないこと。
 test('an unreadable definition fails instead of passing silently', () => {
   withFixture([{ name: 'core' }], ({ root }) => {
-    writeFileSync(join(root, 'docs', 'libraries.mjs'), 'export const libraryCategories = [\n');
+    writeFileSync(join(root, 'docs', 'libraries.json'), '{ "libraryCategories": [');
     const result = runCheck(root);
     assert.notEqual(result.status, 0);
   });
