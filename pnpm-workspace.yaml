@@ -9,8 +9,15 @@ packages:
 # 公開直後の版を取り込まない待機期間 (分)。
 # 侵害された package の多くは公開から数日以内に発見されて registry から削除される。
 # その間に取り込まないことで、削除される前の版を掴む窓を塞ぐ。
-# 値は .github/dependabot.yml の cooldown (7 日) と揃えている。
-minimumReleaseAge: 10080
+#
+# 3 日にしているのは実測から。 7 日 (dependabot の cooldown と同値) にすると、
+# 依存の更新のたびに無関係な package が弾かれて install が進まなくなる。
+# 実際 2 回続けて別々の package (postcss / @opentelemetry/core) で止まった。
+# 過去の npm 侵害事例は公開から数時間〜2 日で発見されており、3 日でその窓は覆える。
+#
+# dependabot 側の cooldown は自動 PR を出す間隔の話で、こちらは install 時の
+# 解決を止める設定。役割が違うので値が揃っている必要はない。
+minimumReleaseAge: 4320
 
 # postinstall を走らせる package を明示したものだけに限る。
 # 列挙外の package の install script は実行しない。
