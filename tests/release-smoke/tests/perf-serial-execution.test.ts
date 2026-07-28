@@ -41,10 +41,36 @@ function readJson<T>(rel: string): T {
   return JSON.parse(readFileSync(resolve(REPO_ROOT, rel), 'utf-8')) as T;
 }
 
+// 3 層測定 (serial + concurrent + memory) が終わり切るまでの猶予。 これを下回る
+// 設定は、 遅い package で測定を打ち切って判定そのものを消してしまう。
+const MIN_PERF_TIMEOUT_MS = 60_000;
+
 interface WorkspacePerfScript {
   /** repo 相対の package dir (失敗時に該当箇所を指すため) */
   dir: string;
   script: string;
+}
+
+interface PerfConfigFile {
+  /** repo 相対の config path (失敗時に該当箇所を指すため) */
+  file: string;
+  source: string;
+}
+
+function collectPerfConfigs(): PerfConfigFile[] {
+  const found: PerfConfigFile[] = [];
+  for (const parent of WORKSPACE_PARENTS) {
+    const parentDir = resolve(REPO_ROOT, parent);
+    if (!existsSync(parentDir)) continue;
+    for (const entry of readdirSync(parentDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const rel = join(parent, entry.name, 'vitest.perf.config.ts');
+      const absolute = resolve(REPO_ROOT, rel);
+      if (!existsSync(absolute)) continue;
+      found.push({ file: rel, source: readFileSync(absolute, 'utf-8') });
+    }
+  }
+  return found;
 }
 
 function collectWorkspacePerfScripts(): WorkspacePerfScript[] {
@@ -95,6 +121,37 @@ describe('perf suite runs one package at a time', () => {
     expect(
       offenders.map((entry) => `${entry.dir}: ${entry.script}`),
       'a package-level --parallel re-creates the contention the root script avoids',
+    ).toEqual([]);
+  });
+
+  it('every perf config disables vitest file parallelism', () => {
+    const offenders = collectPerfConfigs()
+      .filter(({ source }) => !/fileParallelism:\s*false/.test(source))
+      .map(({ file }) => file);
+
+    expect(
+      offenders,
+      'vitest runs test files in parallel by default, so perf files inside one package still contend',
+    ).toEqual([]);
+  });
+
+  it('every perf config sets a timeout long enough to finish a measurement', () => {
+    const offenders: string[] = [];
+    for (const { file, source } of collectPerfConfigs()) {
+      const declared = /testTimeout:\s*([0-9_]+)/.exec(source);
+      if (declared === null) {
+        offenders.push(`${file}: no testTimeout (vitest defaults to 5s)`);
+        continue;
+      }
+      const timeout = Number(declared[1]?.replace(/_/g, ''));
+      if (!Number.isFinite(timeout) || timeout < MIN_PERF_TIMEOUT_MS) {
+        offenders.push(`${file}: testTimeout=${declared[1]}`);
+      }
+    }
+
+    expect(
+      offenders,
+      'a measurement cut short by the framework produces no verdict at all, which reads as a failure rather than as missing data',
     ).toEqual([]);
   });
 
