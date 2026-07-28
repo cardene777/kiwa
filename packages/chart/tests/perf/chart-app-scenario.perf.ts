@@ -104,6 +104,6 @@ describe('chart app scenario perf v2.1 (real workload)', () => {
         },
       ],
     });
-    expect(result).toBeDefined();
+    expect(result.allPassed).toBe(true);
   });
 });

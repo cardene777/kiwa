@@ -90,6 +90,6 @@ describe('cli app scenario perf (real workload)', () => {
     });
 
     rmSync(specDir, { recursive: true, force: true });
-    expect(result).toBeDefined();
+    expect(result.allPassed).toBe(true);
   });
 });

@@ -120,7 +120,7 @@ describe('migration app scenario perf v2.1 (real workload)', () => {
         },
       ],
     });
-    expect(result).toBeDefined();
+    expect(result.allPassed).toBe(true);
     const client = createMigrationClient({ provider: 'kysely' });
     runUp(client, MIGRATIONS[0]!);
     expect(client.applied.length).toBe(1);

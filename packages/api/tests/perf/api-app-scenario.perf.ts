@@ -60,6 +60,6 @@ describe('api app scenario perf (real workload)', () => {
         },
       ],
     });
-    expect(result).toBeDefined();
+    expect(result.allPassed).toBe(true);
   });
 });
