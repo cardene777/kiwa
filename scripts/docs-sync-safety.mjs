@@ -191,6 +191,15 @@ export function fenceFor(code) {
   return '`'.repeat(Math.max(3, longest + 1));
 }
 
+/**
+ * fenced code block。開き fence を中身より長く取るので、閉じ fence を含む宣言でも
+ * block が途中で閉じない。末尾の改行は呼び出し側が足す。
+ */
+export function codeBlock(code, language = '') {
+  const fence = fenceFor(code);
+  return `${fence}${language}\n${code}\n${fence}`;
+}
+
 // link の丸括弧は destination を途中で閉じる。空白と山括弧も同じく destination を
 // 壊すので、percent encode して link の中に閉じ込める。
 const URL_ESCAPES = new Map([

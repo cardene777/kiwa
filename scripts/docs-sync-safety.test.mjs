@@ -19,6 +19,7 @@ import { join } from 'node:path';
 
 import {
   DocsSyncError,
+  codeBlock,
   countOccurrences,
   escapeMarkdownText,
   fenceFor,
@@ -340,6 +341,26 @@ test('fenceFor outruns the longest backtick run in the code', () => {
   assert.equal(fenceFor('const a = "```";'), '````');
   assert.equal(fenceFor('const a = "````````";'), '`````````');
   assert.equal(fenceFor('const a = "`" + "``";'), '```', 'runs are counted, not backticks');
+});
+
+// The generated reference embeds declarations copied out of .d.ts. A declaration
+// that contains a closing fence used to end the block early, so every later
+// declaration on the page was rendered as prose.
+test('codeBlock encloses a declaration that contains a closing fence', () => {
+  const code = 'declare const sql: "```";';
+  const rendered = codeBlock(code, 'ts');
+  assert.equal(rendered, '````ts\ndeclare const sql: "```";\n````');
+  // The block opens and closes with the same run, and that run appears nowhere
+  // in the code, so the fence cannot be closed from inside.
+  const [opening] = rendered.split('\n');
+  const fence = opening.slice(0, opening.length - 'ts'.length);
+  assert.equal(rendered.endsWith(`\n${fence}`), true);
+  assert.equal(code.includes(fence), false);
+});
+
+test('codeBlock uses three backticks for ordinary code and keeps the language tag', () => {
+  assert.equal(codeBlock('declare const a: number;', 'ts'), '```ts\ndeclare const a: number;\n```');
+  assert.equal(codeBlock('plain'), '```\nplain\n```');
 });
 
 test('linkUrl encodes the characters that would end the link early', () => {

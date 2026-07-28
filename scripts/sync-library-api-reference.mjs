@@ -15,7 +15,7 @@ import ts from 'typescript';
 
 import {
   DocsSyncError,
-  fenceFor,
+  codeBlock,
   linkUrl,
   prepareWritePath,
   replaceManagedBlock,
@@ -326,9 +326,8 @@ function contractEntry(contract) {
   const note = contract.note ? `\n\n${contract.note}` : '';
   const description = contract.description ? `\n\n${contract.description}` : '';
   // 固定長の fence は、閉じ fence を含む文字列 literal を持つ宣言で block を途中で
-  // 閉じ、以降の宣言を本文として描画させる。中身より 1 つ長い fence で開く。
-  const fence = fenceFor(contract.code);
-  return `#### \`${contract.name}\`\n\n${source}${note}${description}\n\n${fence}ts\n${contract.code}\n${fence}`;
+  // 閉じ、以降の宣言を本文として描画させる。codeBlock は中身より長い fence で開く。
+  return `#### \`${contract.name}\`\n\n${source}${note}${description}\n\n${codeBlock(contract.code, 'ts')}`;
 }
 
 function group(title, contracts) {
