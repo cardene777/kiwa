@@ -95,12 +95,17 @@ export interface RunPerf3LayerInput {
    */
   thresholdDocLink?: string;
   /**
-   * 今回測っていない op を baseline から削除する (default false)。
+   * 今回測っていない op を baseline から削除する。
    *
    * op 名を別処理へ付け替えたときに無関係な過去値と比較しないための掃除だが、
    * 常に有効だと絞り込み実行で op が一度欠けるだけで過去値が消える。
    * 次の完全実行では再 seed されて直前の退行を見逃すので、suite 全体を
    * 回す呼出だけが明示的に有効化する。
+   *
+   * 明示しない場合は環境変数 `KIWA_PERF_PRUNE_STALE=1` の有無で決まる。
+   * kiwa の root `test:perf` はこれを立てる = 全 package を絞り込みなしで
+   * 回す唯一の経路で、 そこでだけ掃除が働く。 個別 package の実行や
+   * `-t` での絞り込みでは立たないため、 過去値を巻き添えにしない。
    */
   pruneStaleBaselineOps?: boolean;
   /**
@@ -257,7 +262,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 既存 op の値は保持しないと比較対象が毎回入れ替わって回帰を検出できない。
   const priorResults = priorBaseline ?? {};
   const currentKeys = new Set(Object.keys(combinedForBaseline));
-  const retained = input.pruneStaleBaselineOps
+  const retained = pruneStaleOps(input)
     ? Object.fromEntries(Object.entries(priorResults).filter(([key]) => currentKeys.has(key)))
     : priorResults;
   const unseededOps = Object.fromEntries(
@@ -325,6 +330,18 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   });
 
   return { outcomes, allPassed, baselineSeeded };
+}
+
+/**
+ * 今回測っていない op を baseline から落とすかを決める。
+ *
+ * 呼出が明示していればそれに従い、 していなければ suite 全体を回す経路が
+ * 立てる環境変数を見る。 絞り込み実行でこの変数が立つことはないため、
+ * 「今回の op 一覧が完全である」 という前提が成り立つ場合だけ掃除が働く。
+ */
+export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boolean {
+  if (input.pruneStaleBaselineOps !== undefined) return input.pruneStaleBaselineOps;
+  return process.env['KIWA_PERF_PRUNE_STALE'] === '1';
 }
 
 /**

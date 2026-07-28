@@ -87,6 +87,36 @@ Threshold: **20 % p95 delta** vs stored baseline (`.perf-baseline/{module}.json`
 - baselines are discarded and reseeded when the measurement premise changes (Node version, platform, CPU, or whether `--expose-gc` was available). Comparing across those boundaries reports regressions that no code change caused. The first valid run under the new premise reseeds; comparison resumes from the run after that. A run that is not itself valid — `requireGc: true` with no GC available, or one that fails a hard cap — leaves the stored baseline untouched, so a broken environment cannot become the new reference.
 - to intentionally accept the new baseline (e.g. after a deliberate optimisation regression), delete `.perf-baseline/{module}.json` and rerun
 
+### Where baselines live
+
+All baselines sit in `.perf-baseline/` **at the repo root**, and they are tracked in git.
+
+The path used to be derived from `process.cwd()`, so the same module wrote to `packages/{name}/.perf-baseline/` when invoked through `pnpm --filter`, and to `<root>/.perf-baseline/` when invoked from the repo root. Each invocation only ever read one of the two, decided there was no baseline, and reseeded — so a comparison never happened. The path is now anchored to the nearest ancestor holding `pnpm-workspace.yaml` or `.git`. A standalone consumer of the package outside a repo still falls back to the working directory.
+
+They are tracked because an untracked baseline means the first run on any checkout has nothing to compare against. "Whoever measures first cannot detect a regression" is not a property worth keeping.
+
+### When measurements stop being comparable
+
+`BaselineEnv.measurementPremise` records the version of *how* the measurement is taken, separate from the machine it ran on. A baseline recorded under a different version is not compared against; the next run that is itself valid reseeds it. Version 2 is the serial regime described above — values recorded under the older parallel regime carry the load of ~177 concurrent suites and mean something different.
+
+Bump it only when the same implementation would measure differently. Threshold and verdict changes are not measurement changes.
+
+### What the absolute floor hides
+
+The 0.5 ms `minDeltaMs` floor is load-bearing, and it also has a cost worth stating plainly: an op whose baseline p95 is under 0.5 ms can never be reported as regressed, because no realistic slowdown produces a large enough absolute delta. `cache`'s three ops sit at 0.02-0.06 ms, so they would need a 1000 %+ change to register.
+
+Lowering the floor proportionally to the baseline was tried and rejected on measurement evidence. Re-running an unchanged implementation four times moves sub-millisecond p95 by 50-1100 %, in absolute terms 0.03-0.22 ms. A proportional floor turns that jitter into a regression verdict on every run. Raising `serialIterations` from 30 to 200 widened the spread rather than narrowing it — p95 is an upper order statistic, so more samples means more chances to catch a scheduler or GC outlier.
+
+The report no longer papers over this. The regression column distinguishes three cases that used to render identically as `stable`:
+
+| what happened | how it renders |
+|---|---|
+| measured, no meaningful change | `stable` |
+| relative rule fired, absolute delta below the floor | `stable (差 …ms が下限 0.5ms 未満で判定を保留)` |
+| baseline itself is under the floor, so nothing is detectable | `stable (baseline …ms < 下限 0.5ms のため退行を検知できない)` |
+
+Making sub-millisecond ops genuinely gateable needs a different statistic (trimmed mean or median) or a higher-resolution clock. That is a change to the measurement method, not to a threshold, and is tracked separately.
+
 ## Real-API measurement mode
 
 Live-mode perf tests coexist with mock perf tests under `tests/perf/`. The `*.live.perf.ts` files use `runPerf3LayerLive` from `@kiwa-lab/perf-harness` and declare their required env vars via the `requiredEnv` option. Missing env vars trigger the skip path — the run still emits a report, but with `LIVE_ENV_MISSING` markers instead of gate results. This keeps CI-less environments honest: an empty report row is attributed to missing credentials, not silent success.

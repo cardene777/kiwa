@@ -1,8 +1,9 @@
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { hostname, arch, platform as osPlatform, cpus } from 'node:os';
-import { dirname } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import type {
   BaselineEnv,
   BaselineEnvelope,
@@ -68,8 +69,35 @@ export async function saveBaselineEnvelope(
   }
 }
 
+/**
+ * baseline の既定の置き場を決める。
+ *
+ * `process.cwd()` をそのまま使うと、 同じ module の baseline が起動場所ごとに
+ * 別 file に分かれる。 kiwa では `pnpm --filter <pkg> test:perf` (cwd = package) と
+ * repo root からの起動が混在し、 `<root>/.perf-baseline/` と
+ * `packages/<name>/.perf-baseline/` の 2 箇所に同じ module の値が溜まっていた。
+ * 片方だけを読む実行は毎回「baseline が無い」 と判断して作り直すため、
+ * 回帰判定がいつまでも成立しない。
+ *
+ * workspace の目印 (`pnpm-workspace.yaml` / `.git`) を cwd から上に辿って
+ * 見つかった場所を基準にする。 目印が無い単体 package からの利用では
+ * 従来どおり cwd を使うので、 repo の外の呼出には影響しない。
+ */
 export function defaultBaselinePath(moduleName: string): string {
-  return `${process.cwd()}/.perf-baseline/${moduleName}.json`;
+  return `${resolveBaselineRoot(process.cwd())}/.perf-baseline/${moduleName}.json`;
+}
+
+/** workspace の目印を cwd から上に辿る。 見つからなければ起点をそのまま返す。 */
+export function resolveBaselineRoot(start: string): string {
+  let current = resolve(start);
+  while (true) {
+    for (const marker of ['pnpm-workspace.yaml', '.git']) {
+      if (existsSync(join(current, marker))) return current;
+    }
+    const parent = dirname(current);
+    if (parent === current) return resolve(start);
+    current = parent;
+  }
 }
 
 /**

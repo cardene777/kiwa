@@ -1,4 +1,4 @@
-import { mkdtempSync, readdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -8,6 +8,7 @@ import {
   captureEnv,
   isComparableEnv,
   loadBaseline,
+  resolveBaselineRoot,
   saveBaseline,
   saveBaselineEnvelope,
 } from '../src/index.js';
@@ -119,6 +120,41 @@ describe('baseline persistence', () => {
     writeFileSync(file, '{not-json', 'utf8');
 
     await expect(loadBaseline(file)).rejects.toThrow();
+  });
+});
+
+describe('baseline root resolution (#1708)', () => {
+  it('T-PH-B-009 workspace の目印まで上に辿った場所を基準にする', () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-root-'));
+    const root = path.join(dir, 'repo');
+    const nested = path.join(root, 'packages', 'thing');
+    mkdirSync(nested, { recursive: true });
+    writeFileSync(path.join(root, 'pnpm-workspace.yaml'), 'packages:\n  - "packages/*"\n', 'utf8');
+
+    // package から起動しても repo root から起動しても同じ場所を指す。
+    expect(resolveBaselineRoot(nested)).toBe(root);
+    expect(resolveBaselineRoot(root)).toBe(root);
+  });
+
+  it('T-PH-B-010 .git だけがある repo でも基準にできる', () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-root-'));
+    const root = path.join(dir, 'repo');
+    const nested = path.join(root, 'src', 'deep');
+    mkdirSync(nested, { recursive: true });
+    mkdirSync(path.join(root, '.git'), { recursive: true });
+
+    expect(resolveBaselineRoot(nested)).toBe(root);
+  });
+
+  it('T-PH-B-011 目印が無い場所では起点をそのまま使う', () => {
+    // repo の外から使う単体 package の呼出を壊さない。
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-root-'));
+    const standalone = path.join(dir, 'standalone');
+    mkdirSync(standalone, { recursive: true });
+
+    // tmp の上流に目印が無いことが前提。 見つかった場合はその場所を返すので
+    // 「起点かそれより上」 のいずれかであることだけを確かめる。
+    expect(standalone.startsWith(resolveBaselineRoot(standalone))).toBe(true);
   });
 });
 

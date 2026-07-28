@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import { join } from 'node:path';
-import { runPerf3LayerStrict } from '../src/index.js';
+import { pruneStaleOps, runPerf3LayerStrict } from '../src/index.js';
 
 describe('runPerf3LayerStrict — v0.3 strict variant', () => {
   // 固定 directory を共有すると、各 case 末尾の削除が別 case の書込みと重なり、
@@ -381,6 +381,37 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     };
     expect(pruned.results['retired.serial']).toBeUndefined();
     expect(pruned.results['current.serial']).toBeDefined();
+  });
+
+  describe('pruneStaleOps — 掃除を有効にする経路 (#1708)', () => {
+    const original = process.env['KIWA_PERF_PRUNE_STALE'];
+    afterEach(() => {
+      if (original === undefined) delete process.env['KIWA_PERF_PRUNE_STALE'];
+      else process.env['KIWA_PERF_PRUNE_STALE'] = original;
+    });
+
+    it('呼出が明示していれば環境変数より優先する', () => {
+      process.env['KIWA_PERF_PRUNE_STALE'] = '1';
+      expect(pruneStaleOps({ pruneStaleBaselineOps: false })).toBe(false);
+
+      delete process.env['KIWA_PERF_PRUNE_STALE'];
+      expect(pruneStaleOps({ pruneStaleBaselineOps: true })).toBe(true);
+    });
+
+    it('suite 全体を回す経路が立てる環境変数で有効になる', () => {
+      process.env['KIWA_PERF_PRUNE_STALE'] = '1';
+      expect(pruneStaleOps({})).toBe(true);
+    });
+
+    it('絞り込み実行では有効にならない', () => {
+      // 個別 package の実行や -t 付き実行では変数が立たない。
+      delete process.env['KIWA_PERF_PRUNE_STALE'];
+      expect(pruneStaleOps({})).toBe(false);
+
+      // 1 以外の値を「有効」 と解釈すると、 無関係な値が掃除を起こす。
+      process.env['KIWA_PERF_PRUNE_STALE'] = '0';
+      expect(pruneStaleOps({})).toBe(false);
+    });
   });
 
   it('strict + regression detection works together', async () => {
